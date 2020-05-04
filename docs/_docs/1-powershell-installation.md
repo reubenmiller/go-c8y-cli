@@ -33,7 +33,7 @@ Try it out in a Cloud Shell!
     Import-Module PSc8y
     ```
 
-1. Now go to the [Getting started](https://reubenmiller.github.io/go-c8y/docs/2-getting-started-powershell/) section for instructions how to use it
+1. Now go to the [Getting started](https://reubenmiller.github.io/go-c8y-cli/docs/2-getting-started-powershell/) section for instructions how to use it
 
 #### PowerShell 7 and newer
 
@@ -59,7 +59,7 @@ Once powershell is installed, then `PSc8y` can be installed using:
     Import-Module PSc8y
     ```
 
-1. Now go to the [Getting started](https://reubenmiller.github.io/go-c8y/docs/2-getting-started-powershell/) section for instructions how to use it
+1. Now go to the [Getting started](https://reubenmiller.github.io/go-c8y-cli/docs/2-getting-started-powershell/) section for instructions how to use it
 
 ### MacOS
 
@@ -85,7 +85,7 @@ Once powershell is installed, then `PSc8y` can be installed using:
     Import-Module PSc8y
     ```
 
-1. Now go to the [Getting started](https://reubenmiller.github.io/go-c8y/docs/2-getting-started-powershell/) section for instructions how to use it
+1. Now go to the [Getting started](https://reubenmiller.github.io/go-c8y-cli/docs/2-getting-started-powershell/) section for instructions how to use it
 
 ### Linux
 
@@ -111,7 +111,7 @@ Once powershell is installed, then `PSc8y` can be installed using:
     Import-Module PSc8y
     ```
 
-1. Now go to the [Getting started](https://reubenmiller.github.io/go-c8y/docs/2-getting-started-powershell/) section for instructions how to use it
+1. Now go to the [Getting started](https://reubenmiller.github.io/go-c8y-cli/docs/2-getting-started-powershell/) section for instructions how to use it
 
 
 ## Updating PSc8y
