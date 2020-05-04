@@ -22,6 +22,10 @@ Write-Host "Building the c8y binary"
 $c8yBinary = Resolve-Path "$PSScriptRoot/../../cmd/c8y/main.go"
 
 $Version = & git describe --tags
+if (!$Version) {
+    $Version = "0.0.0"
+    Write-Warning "No tag found, so using default version number: $Version"
+}
 $Branch = & git rev-parse --abbrev-ref HEAD
 $LDFlags = "-ldflags=`"-s -w -X github.com/reubenmiller/go-c8y-cli/pkg/cmd.buildVersion=$Version -X github.com/reubenmiller/go-c8y-cli/pkg/cmd.buildBranch=$Branch`""
 
