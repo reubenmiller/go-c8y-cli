@@ -42,7 +42,7 @@ check-integration-variables:
 	@exit 0
 
 
-test: _go_test
+test: test_powershell
 
 lint: metalint
 
@@ -77,7 +77,7 @@ release:
 		exit 1; \
 	fi
 
-	@if [ ! -f docs/releases/go-c8y/$(PATCH).rst ]; then \
+	@if [ ! -f docs/releases/go-c8y-cli/$(PATCH).rst ]; then \
 		echo "to release the $(version) version you should create a release notes for version $(PATCH) first."; \
 		exit 1; \
 	fi
