@@ -1,0 +1,67 @@
+# Site wide configuration
+
+title: Cumulocity REST CLI Tool
+locale: en_US
+production_url: https://reubenmiller.github.io/go-c8y
+baseurl: https://reubenmiller.github.io/go-c8y
+show_full_navigation: true
+# logo: # filename of a logo image that has been placed into your images directory
+
+owner:
+  name: Reuben Miller
+  avatar: bio-photo.jpg
+  bio: "Cumulocity REST cli tool documentation."
+  email: reuben.d.miller@gmail.com
+  # Do not include the @ symbol in your Twitter username
+  github: reubenmiller
+
+theme: jekyll-theme-cayman
+google_analytics: UA-155263011-1
+
+kramdown:
+  input: GFM
+  coderay_wrap: false
+
+exclude:
+  - Gemfile
+  - Gemfile.lock
+  - README.md
+  - LICENCE
+
+plugins:
+  - jekyll-sitemap
+  - jekyll-seo-tag
+  - jekyll-feed
+
+collections:
+  docs:
+    permalink: "/:collection/:path/"
+    output: true
+
+defaults:
+  -
+    scope:
+      path: ""
+    values:
+      layout: default
+  -
+    scope:
+      path: ""
+      type: "docs"
+    values:
+      seo:
+        type: Article
+      _comments:
+        category: Group navigation links with this field
+        order: Used to sort links in the navigation
+      _options:
+        content:
+          width: 800
+          height: 2000
+  -
+    scope:
+      path: ""
+      type: "posts"
+    values:
+      _comments:
+        type: Marks the impact of this release
