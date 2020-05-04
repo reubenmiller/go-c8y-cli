@@ -1,0 +1,495 @@
+
+---
+
+information:
+  name: users
+  description: Cumulocity users
+  descriptionLong: 'REST endpoint to interact with Cumulocity users'
+  link: https://cumulocity.com/guides/reference/users/#user
+
+endpoints:
+  - name: getUserCurrent
+    description: Get user
+    method: GET
+    path: /user/currentUser
+    accept: 'application/vnd.com.nsn.cumulocity.currentUser+json'
+    alias:
+        go: getCurrentUser
+        powershell: Get-CurrentUser
+    examples:
+      powershell:
+        - description: Get the current user
+          command: Get-CurrentUser
+      go:
+        - description: Get the current user
+          command: c8y users getCurrentUser
+
+  - name: updateUserCurrent
+    description: Update the current user
+    method: PUT
+    path: /user/currentUser
+    accept: 'application/vnd.com.nsn.cumulocity.currentUser+json'
+    alias:
+        go: updateCurrentUser
+        powershell: Update-CurrentUser
+    examples:
+        powershell:
+          - description: Update the current user's lastname
+            command: Update-CurrentUser -LastName "Smith"
+        go:
+          - description: Update the current user's lastname
+            command: c8y users updateCurrentUser --lastName "Smith"
+    body:
+      - name: firstName
+        type: string
+        required: false
+        description: User first name
+
+      - name: lastName
+        type: string
+        required: false
+        description: User last name
+
+      - name: phone
+        type: string
+        required: false
+        description: "User phone number. Format: '+[country code][number]', has to be a valid MSISDN"
+
+      - name: email
+        type: string
+        required: false
+        description: User email address
+
+      - name: enabled
+        type: string
+        required: false
+        validationSet: ["true", "false"]
+        description: User activation status (true/false)
+
+      - name: password
+        type: string
+        required: false
+        description: 'User password. Min: 6, max: 32 characters. Only Latin1 chars allowed'
+
+
+  # Inventory Roles
+  - name: getCurrentUserInventoryRoleCollection
+    description: Get the current users inventory roles
+    method: GET
+    path: /user/inventoryroles
+    accept: 'application/vnd.com.nsn.cumulocity.inventoryrolecollection+json'
+    collectionType: 'application/vnd.com.nsn.cumulocity.inventoryrole+json'
+    collectionProperty: 'roles'
+    alias:
+        go: listInventoryRoles
+        powershell: Get-CurrentUserInventoryRoleCollection
+    examples:
+      powershell:
+        - description: Get the current users inventory roles
+          command: Get-CurrentUserInventoryRoleCollection
+      go:
+        - description: Get the current user
+          command: c8y currentUser listInventoryRoles
+
+  - name: getCurrentUserInventoryRole
+    description: Get a specific inventory role of the current user
+    method: GET
+    path: /user/inventoryroles/{id}
+    accept: 'application/vnd.com.nsn.cumulocity.inventoryrole+json'
+    alias:
+        go: getCurrentUserInventoryRole
+        powershell: Get-CurrentUserInventoryRole
+    examples:
+      powershell:
+        - description: Get an inventory role of the current user (using pipeline)
+          command: Get-CurrentUserInventoryRoleCollection -PageSize 1 | Get-CurrentUserInventoryRole
+      go:
+        - description: Get an inventory role of the current user
+          command: c8y users getCurrentUserInventoryRole --id 12345
+    pathParameters:
+      - name: id
+        type: integer
+        required: true
+        pipeline: true
+        description: 'Role id. Note: lookup by name is not yet supported'
+
+  # Users
+  - name: getUserCollection
+    method: GET
+    description: Get a collection of users based on filter parameters
+    descriptionLong: Get a collection of users based on filter parameters
+    path: /user/{tenant}/users
+    accept: 'application/vnd.com.nsn.cumulocity.userCollection+json'
+    collectionType: application/vnd.com.nsn.cumulocity.user+json
+    collectionProperty: users
+    alias:
+        go: list
+        powershell: Get-UserCollection
+    examples:
+      powershell:
+        - description: Get a list of users
+          command: Get-UserCollection
+      go:
+        - description: Get a list of users
+          command: c8y users list
+
+    pathParameters:
+      - name: tenant
+        type: tenant
+        description: Tenant
+
+    queryParameters:
+      - name: username
+        type: string
+        description: prefix or full username
+
+      - name: groups
+        type: string
+        description: numeric group identifiers separated by commas; result will contain only users which belong to at least one of specified groups
+
+      - name: owner
+        type: string
+        description: exact username
+
+      - name: onlyDevices
+        type: boolean
+        description: If set to 'true', result will contain only users created during bootstrap process (starting with 'device_'). If flag is absent (or false) the result will not contain 'device_' users.
+
+      - name: withSubusersCount
+        type: boolean
+        description: if set to 'true', then each of returned users will contain additional field 'subusersCount' - number of direct subusers (users with corresponding 'owner').
+
+      - name: withApps
+        type: boolean
+        description: Include applications related to the user
+
+      - name: withGroups
+        type: boolean
+        description: Include group information
+
+      - name: withRoles
+        type: boolean
+        description: Include role information
+
+
+  - name: newUser
+    description: Create a new user within the collection
+    method: POST
+    path: user/{tenant}/users
+    accept: application/vnd.com.nsn.cumulocity.user+json
+    alias:
+        go: create
+        powershell: New-User
+    examples:
+      powershell:
+        - description: Create a user
+          beforeEach:
+            - $Username = "testuser_" + [guid]::NewGuid().Guid.Substring(1,10)
+            - $NewPassword = [guid]::NewGuid().Guid.Substring(1,10)
+          command: New-user -Username "$Username" -Password "$NewPassword"
+          afterEach:
+            - Get-UserByName -Name "$Username" | Remove-User
+      go:
+        - description: Create a user
+          command: c8y users create --userName "testuser1" --password "a0)8k2kld9lm,!"
+    pathParameters:
+      - name: tenant
+        type: tenant
+        description: Tenant
+    body:
+      - name: userName
+        type: string
+        required: true
+        description: 'User name, unique for a given domain. Max: 1000 characters'
+
+      - name: firstName
+        type: string
+        required: false
+        description: User first name
+
+      - name: lastName
+        type: string
+        required: false
+        description: User last name
+
+      - name: phone
+        type: string
+        required: false
+        description: "User phone number. Format: '+[country code][number]', has to be a valid MSISDN"
+
+      - name: email
+        type: string
+        required: false
+        description: User email address
+
+      # TODO: Only set value if it has changed!
+      - name: enabled
+        type: boolean
+        required: false
+        description: User activation status (true/false)
+
+      - name: password
+        type: string
+        required: false
+        description: 'User password. Min: 6, max: 32 characters. Only Latin1 chars allowed'
+
+      # TODO: Only set value if it has changed!
+      - name: sendPasswordResetEmail
+        type: boolean
+        required: false
+        validationSet: ["true", "false"]
+        description: User activation status (true/false)
+
+      - name: customProperties
+        type: json_custom
+        required: false
+        description: 'Custom properties to be added to the user'
+
+
+  - name: getUser
+    description: Get user
+    method: GET
+    path: user/{tenant}/users/{id}
+    accept: 'application/vnd.com.nsn.cumulocity.user+json'
+    alias:
+        go: get
+        powershell: Get-User
+    examples:
+      powershell:
+        - description: Get a user
+          beforeEach:
+            - $User = PSc8y\New-TestUser
+          command: Get-User -Id $User.id
+          afterEach:
+            - Remove-User -Id $User.id
+      go:
+        - description: Get a user
+          command: c8y users get --id "myuser"
+    pathParameters:
+      - name: id
+        type: '[]user'
+        required: true
+        pipeline: true
+        description: User id
+
+      - name: tenant
+        type: tenant
+        required: false
+        description: Tenant
+
+  - name: getUserByName
+    description: Get user by username
+    method: GET
+    path: user/{tenant}/userByName/{name}
+    accept: 'application/vnd.com.nsn.cumulocity.user+json'
+    alias:
+        go: getUserByName
+        powershell: Get-UserByName
+    examples:
+      powershell:
+        - description: Get a user by name
+          beforeEach:
+            - $User = PSc8y\New-TestUser
+          command: Get-UserByName -Name $User.userName
+          afterEach:
+            - Remove-User -Id $User.id
+      go:
+        - description: Get a user by name
+          command: c8y users getUserByName --name "myuser"
+    pathParameters:
+      - name: tenant
+        type: tenant
+        required: false
+        description: Tenant
+
+      - name: name
+        type: string
+        required: true
+        description: Username
+
+  - name: deleteUser
+    description: Delete user
+    method: DELETE
+    path: user/{tenant}/users/{id}
+    accept: ''
+    alias:
+        go: delete
+        powershell: Remove-User
+    examples:
+      powershell:
+        - description: Delete a user
+          beforeEach:
+            - $User = PSc8y\New-TestUser
+          command: Remove-User -Id $User.id
+      go:
+        - description: Delete a user
+          command: c8y users delete --id "myuser"
+    pathParameters:
+      - name: tenant
+        type: tenant
+        required: false
+        description: Tenant
+
+      - name: id
+        type: string
+        required: true
+        pipeline: true
+        description: User id
+
+  - name: updateUser
+    description: Update user
+    method: PUT
+    path: user/{tenant}/users/{id}
+    accept: 'application/vnd.com.nsn.cumulocity.user+json'
+    alias:
+        go: update
+        powershell: Update-User
+    examples:
+      powershell:
+        - description: Update a user
+          beforeEach:
+            - $User = PSc8y\New-TestUser
+          command: Update-User -Id $User.id -FirstName "Simon"
+          afterEach:
+            - PSc8y\Remove-User -Id $User.id
+      go:
+        - description: Update a user
+          command: c8y users update --id "myuser" --firstName "Simon"
+    pathParameters:
+      - name: id
+        type: '[]user'
+        required: true
+        pipeline: true
+        description: User id
+
+      - name: tenant
+        type: tenant
+        required: false
+        description: Tenant
+    body:
+      - name: firstName
+        type: string
+        required: false
+        description: User first name
+
+      - name: lastName
+        type: string
+        required: false
+        description: User last name
+
+      - name: phone
+        type: string
+        required: false
+        description: "User phone number. Format: '+[country code][number]', has to be a valid MSISDN"
+
+      - name: email
+        type: string
+        required: false
+        description: User email address
+
+      # TODO: Only set value if it has changed!
+      - name: enabled
+        type: boolean
+        required: false
+        description: User activation status (true/false)
+
+      - name: password
+        type: string
+        required: false
+        description: 'User password. Min: 6, max: 32 characters. Only Latin1 chars allowed'
+
+      # TODO: Only set value if it has changed!
+      - name: sendPasswordResetEmail
+        type: boolean
+        required: false
+        validationSet: ["true", "false"]
+        description: User activation status (true/false)
+
+      - name: customProperties
+        type: json_custom
+        required: false
+        description: 'Custom properties to be added to the user'
+
+  - name: resetUserPassword
+    description: Reset a user' password
+    descriptionLong: The password can be reset either by issuing a password reset email (default), or be specifying a new password.
+    method: PUT
+    path: user/{tenant}/users/{id}
+    accept: 'application/vnd.com.nsn.cumulocity.user+json'
+    alias:
+        go: resetUserPassword
+        powershell: Reset-UserPassword
+    examples:
+      powershell:
+        - description: Resets a user's password by sending a reset email to the user
+          beforeEach:
+            - $User = PSc8y\New-TestUser
+          command: Reset-UserPassword -Id $User.id -WhatIf 2>&1
+          afterEach:
+            - PSc8y\Remove-User -Id $User.id
+
+        - description: Resets a user's password by generating a new password
+          beforeEach:
+            - $User = PSc8y\New-TestUser
+          command: Reset-UserPassword -Id $User.id -NewPassword (New-RandomPassword)
+          afterEach:
+            - PSc8y\Remove-User -Id $User.id
+      go:
+        - description: Update a user
+          command: c8y users resetUserPassword --id "myuser"
+    pathParameters:
+      - name: id
+        type: '[]user'
+        required: true
+        pipeline: true
+        description: User id
+
+      - name: tenant
+        type: tenant
+        required: false
+        description: Tenant
+    bodyTemplate:
+      type: jsonnet
+      applyLast: true
+      template: >
+        addIfEmptyString(base, "password", {sendPasswordResetEmail: true})
+    body:
+      - name: newPassword
+        type: string
+        property: password
+        required: false
+        description: 'New user password. Min: 6, max: 32 characters. Only Latin1 chars allowed'
+
+  #
+  # Groups References
+  # https://cumulocity.com/guides/reference/users/#group-reference-collection
+  #
+  - name: getUserMembershipCollection
+    description: Get information about all groups that a user is a member of
+    method: GET
+    path: /user/{tenant}/users/{id}/groups
+    accept: 'application/vnd.com.nsn.cumulocity.groupReferenceCollection+json'
+    collectionType: application/vnd.com.nsn.cumulocity.groupReference+json
+    collectionProperty: references.#.group
+    alias:
+        go: listUserMembership
+        powershell: Get-UserMembershipCollection
+    examples:
+      powershell:
+        - description: Get a list of groups that a user belongs to
+          beforeEach:
+            - $User = PSc8y\Get-CurrentUser
+          command: Get-UserMembershipCollection -Id $User.id
+      go:
+        - description: Get a list of groups that a user belongs to
+          command: c8y users listUserMembership --id "myuser"
+    pathParameters:
+      - name: id
+        type: '[]user'
+        required: true
+        pipeline: true
+        description: User
+
+      - name: tenant
+        type: tenant
+        description: Tenant

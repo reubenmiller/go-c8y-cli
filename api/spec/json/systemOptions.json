@@ -1,0 +1,77 @@
+{
+  "information": {
+    "name": "systemOptions",
+    "description": "Cumulocity systemOptions",
+    "descriptionLong": "REST endpoint to interact with Cumulocity systemOptions",
+    "link": "https://cumulocity.com/guides/reference/tenants/#system-options"
+  },
+  "endpoints": [
+    {
+      "name": "getSystemOptionCollection",
+      "description": "Get collection of system options",
+      "descriptionLong": "This endpoint provides a set of read-only properties pre-defined in platform configuration. The response format is exactly the same as for OptionCollection.",
+      "method": "GET",
+      "path": "/tenant/system/options",
+      "accept": "application/vnd.com.nsn.cumulocity.optionCollection+json",
+      "collectionType": "application/vnd.com.nsn.cumulocity.option+json",
+      "collectionProperty": "options",
+      "alias": {
+        "go": "list",
+        "powershell": "Get-SystemOptionCollection"
+      },
+      "examples": {
+        "powershell": [
+          {
+            "description": "Get a list of system options",
+            "command": "Get-SystemOptionCollection"
+          }
+        ],
+        "go": [
+          {
+            "description": "Get a list of system options",
+            "command": "c8y systemOptions list"
+          }
+        ]
+      }
+    },
+    {
+      "name": "getSystemOption",
+      "description": "Get system option",
+      "method": "GET",
+      "path": "/tenant/system/options/{category}/{key}",
+      "accept": "application/vnd.com.nsn.cumulocity.option+json",
+      "alias": {
+        "go": "get",
+        "powershell": "Get-SystemOption"
+      },
+      "examples": {
+        "powershell": [
+          {
+            "description": "Get system option value",
+            "command": "Get-SystemOption -Category \"system\" -Key \"version\""
+          }
+        ],
+        "go": [
+          {
+            "description": "Get a list of system options",
+            "command": "c8y systemOptions get --category \"system\" --key \"version\""
+          }
+        ]
+      },
+      "pathParameters": [
+        {
+          "name": "category",
+          "type": "string",
+          "required": true,
+          "description": "System Option category"
+        },
+        {
+          "name": "key",
+          "type": "string",
+          "required": true,
+          "description": "System Option key"
+        }
+      ]
+    }
+  ]
+}

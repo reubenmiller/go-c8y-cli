@@ -1,0 +1,105 @@
+. $PSScriptRoot/imports.ps1
+
+Describe -Name "New-HostedApplication" {
+    Context "developer environment 1" {
+        BeforeEach {
+            $WebAppSource = "$PSScriptRoot/TestData/hosted-application/simple-helloworld"
+            $AppName = New-RandomString -Prefix "My App"
+            $VerboseFile = New-TemporaryFile
+        }
+
+        It "Create web application (without uploading binary) and use custom settings" {
+            $ContextPath = ($AppName -replace " ", "").ToLower()
+
+            $application = PSc8y\New-HostedApplication `
+                -Name $AppName `
+                -ResourcesUrl "/subPath" `
+                -Availability "MARKET" `
+                -ContextPath $ContextPath `
+                -Verbose 2> $VerboseFile
+
+            $LASTEXITCODE | Should -Be 0
+            $application | Should -Not -BeNullOrEmpty
+
+            $application.name | Should -BeExactly $AppName
+            $application.contextPath | Should -BeExactly $ContextPath
+            $application.resourcesUrl | Should -BeExactly "/subPath"
+            $application.activeVersionId | Should -BeNullOrEmpty
+
+            $BodyInVerbose = Get-JSONFromResponse (Get-Content $VerboseFile -Raw)
+            $BodyInVerbose.availability | Should -BeExactly "MARKET"
+
+            $Binaries = Get-ApplicationBinaryCollection -Id $application.id -PageSize 100
+            $Binaries | Should -BeNullOrEmpty
+        }
+
+        AfterEach {
+            PSc8y\Get-Application -Id $AppName | PSc8y\Remove-Application
+
+            Remove-Item $VerboseFile
+        }
+
+    }
+
+    Context "developer environment 2" {
+        $WebAppSource = "$PSScriptRoot/TestData/hosted-application/simple-helloworld"
+        $AppName = New-RandomString -Prefix "app"
+
+        It -Skip "Create a new web application from a folder" {
+            $application = PSc8y\New-HostedApplication -File $WebAppSource -Name $AppName
+            $LASTEXITCODE | Should -Be 0
+            $application | Should -Not -BeNullOrEmpty
+            $application.name | Should -BeExactly $AppName
+            $application.contextPath | Should -BeExactly $AppName
+            $application.resourcesUrl | Should -BeExactly "/"
+            $application.activeVersionId | Should -MatchExactly "^\d+$"
+
+            $webResponse = Invoke-ClientRequest -Uri "apps/$AppName"
+            $LASTEXITCODE | Should -BeExactly 0
+            $webResponse | Out-String | Should -BeLike "*Hi there. This is a test web application*"
+        }
+
+        PSc8y\Remove-Application -Id $AppName
+    }
+
+    Context "existing application" {
+        $WebAppSource = "$PSScriptRoot/TestData/hosted-application/simple-helloworld"
+        $AppName = New-RandomString -Prefix "app"
+        $application = PSc8y\New-HostedApplication -File $WebAppSource -Name $AppName
+
+        It -Skip "Update an existing web application from a folder" {
+            $application | Should -Not -BeNullOrEmpty
+            $application.name | Should -BeExactly $AppName
+            $application.contextPath | Should -BeExactly $AppName
+            $application.resourcesUrl | Should -BeExactly "/"
+            $application.activeVersionId | Should -MatchExactly "^\d+$"
+
+            $applicationAfterUpdate = PSc8y\New-HostedApplication -File $WebAppSource -Name $AppName
+            $LASTEXITCODE | Should -BeExactly 0
+            $applicationAfterUpdate.activeVersionId | Should -MatchExactly "^\d+$"
+            $applicationAfterUpdate.activeVersionId | Should -Not -BeExactly $application.activeVersionId
+
+            $webResponse = Invoke-ClientRequest -Uri "apps/$AppName"
+            $webResponse | Out-String | Should -BeLike "*Hi there. This is a test web application*"
+        }
+
+        It -Skip "Uploads new applicaiton but does not activate it" {
+            $application = Get-Application -Id $AppName
+            $application | Should -Not -BeNullOrEmpty
+            $application.name | Should -BeExactly $AppName
+            $application.contextPath | Should -BeExactly $AppName
+            $application.resourcesUrl | Should -BeExactly "/"
+            $application.activeVersionId | Should -MatchExactly "^\d+$"
+
+            $applicationAfterUpdate = PSc8y\New-HostedApplication -File $WebAppSource -Name $AppName -SkipActivation
+            $LASTEXITCODE | Should -BeExactly 0
+            $applicationAfterUpdate.activeVersionId | Should -MatchExactly "^\d+$"
+            $applicationAfterUpdate.activeVersionId | Should -BeExactly $application.activeVersionId
+
+            $webResponse = Invoke-ClientRequest -Uri "apps/$AppName"
+            $webResponse | Out-String | Should -BeLike "*Hi there. This is a test web application*"
+        }
+
+        PSc8y\Remove-Application -Id $AppName
+    }
+}

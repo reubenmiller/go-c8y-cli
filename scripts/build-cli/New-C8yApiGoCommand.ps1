@@ -1,0 +1,724 @@
+﻿Function New-C8yApiGoCommand {
+    [cmdletbinding()]
+    Param(
+        [Parameter(
+            Position = 0,
+            ValueFromPipeline = $true,
+            ValueFromPipelineByPropertyName = $true,
+            Mandatory = $true
+        )]
+        [object[]] $Specification,
+
+        [string] $OutputDir = "./"
+    )
+
+    $Name = $Specification.name
+	$NameCamel = $Name[0].ToString().ToUpperInvariant() + $Name.Substring(1)
+	$File = Join-Path -Path $OutputDir -ChildPath ("{0}Cmd.go" -f $Name)
+
+
+    #
+    # Meta information
+    #
+    $Use = $Specification.alias.go
+    $Description = $Specification.description
+    $DescriptionLong = $Specification.descriptionLong
+    $Examples = foreach ($iExample in $Specification.examples.go) {
+        if ($iExample.command) {
+            $ExampleText = "`$ {0}`n{1}" -f $iExample.command, $iExample.description
+        } else {
+            $ExampleText = $iExample
+        }
+        $ExampleText
+    }
+
+    #
+    # Arguments
+    #
+    $ArgumentSources = New-Object System.Collections.ArrayList
+
+    # Path parameters
+    if ($Specification.pathParameters) {
+        $null = $ArgumentSources.AddRange(([array]$Specification.pathParameters))
+    }
+
+    # Query parameters
+    if ($Specification.queryParameters) {
+        $null = $ArgumentSources.AddRange(([array]$Specification.queryParameters))
+    }
+
+    # Body parameters
+    if ($Specification.body) {
+        $null = $ArgumentSources.AddRange(([array]$Specification.body))
+    }
+
+    # Header parameters
+    if ($Specification.headerParameters) {
+        $null = $ArgumentSources.AddRange(([array]$Specification.headerParameters))
+    }
+
+    # Additional parameters used to control a function
+    if ($Specification.options) {
+        $null = $ArgumentSources.AddRange(([array]$Specification.options))
+    }
+
+    $CommandArgs = foreach ($iArg in (Remove-SkippedParameters $ArgumentSources)) {
+        $ArgParams = @{
+            Name = $iArg.name
+            Type = $iArg.type
+            OptionName = $iArg.alias
+            Description = $iArg.description
+            Default = $iArg.default
+            Required = $iArg.required
+        }
+        Get-C8yGoArgs @ArgParams
+    }
+
+    $RESTPath = $Specification.path
+    $RESTMethod = $Specification.method
+
+    #
+    # Body
+    #
+    $RESTBodyBuilder = New-Object System.Text.StringBuilder
+    $RESTFormDataBuilder = New-Object System.Text.StringBuilder
+    if ($Specification.body) {
+        $null = $RESTBodyBuilder.AppendLine('body.SetMap(getDataFlag(cmd))')
+
+        foreach ($iArg in (Remove-SkippedParameters $Specification.body)) {
+            $code = New-C8yApiGoGetValueFromFlag -Parameters $iArg -SetterType "body"
+            if ($code) {
+                $null = $RESTBodyBuilder.AppendLine($code)
+            } else {
+                Write-Warning ("No setter found for [{0}]" -f $iArg.name)
+            }
+        }
+
+        #
+        # Apply a body template to the data
+        #
+        if ($Specification.bodyTemplate) {
+            switch ($Specification.bodyTemplate.type) {
+                "jsonnet" {
+                    # ApplyLast: true == apply template to the existing json (potentially overriding values)
+                    #            false == Use template as base json, and the existing json will take precendence
+                    $Reverse = "true"
+                    if ($Specification.bodyTemplate.applyLast -eq "true") {
+                        $Reverse = "false"
+                    }
+                    $null = $RESTBodyBuilder.AppendLine("body.MergeJsonnet(```n{0}``, {1})" -f @(
+                        $Specification.bodyTemplate.template,
+                        $Reverse
+                    ))
+                }
+                default {
+                    Write-Warning ("Unsupported templating type [{0}]" -f $Specification.bodyTemplate.type)
+                }
+            }
+        }
+    }
+
+    #
+    # Path Parameters
+    #
+    $RESTPathBuilder = New-Object System.Text.StringBuilder
+    foreach ($Properties in (Remove-SkippedParameters $Specification.pathParameters)) {
+        $code = New-C8yApiGoGetValueFromFlag -Parameters $Properties -SetterType "path"
+        if ($code) {
+            $null = $RESTPathBuilder.AppendLine($code)
+        }
+    }
+
+    #
+    # Query parameters
+    #
+    $RESTQueryBuilder = New-Object System.Text.StringBuilder
+    $null = $RESTQueryBuilder.AppendLine('query := url.Values{}')
+    if ($Specification.queryParameters) {
+        foreach ($Properties in (Remove-SkippedParameters $Specification.queryParameters)) {
+            $code = New-C8yApiGoGetValueFromFlag -Parameters $Properties -SetterType "query"
+            if ($code) {
+                $null = $RESTQueryBuilder.AppendLine($code)
+            }
+        }
+    }
+
+    #
+    # Headers
+    #
+    $RestHeaderBuilder = New-Object System.Text.StringBuilder
+    if ($Specification.headerParameters) {
+        foreach ($iArg in (Remove-SkippedParameters $Specification.headerParameters)) {
+            $code = New-C8yApiGoGetValueFromFlag -Parameters $iArg -SetterType "header"
+            if ($code) {
+                $null = $RestHeaderBuilder.AppendLine($code)
+            }
+        }
+    }
+
+    #
+    # TODO: Check if this option can be removed
+    # Options
+    #
+    $RESTOptionsBuilder = New-Object System.Text.StringBuilder
+    if ($Specification.options) {
+        $null = $RESTOptionsBuilder.AppendLine('body.SetMap(getDataFlag(cmd))')
+
+        foreach ($iArg in $Specification.options) {
+            $code = New-C8yApiGoGetValueFromFlag -Parameters $iArg -SetterType "body"
+            if ($code) {
+                $null = $RESTOptionsBuilder.AppendLine($code)
+            }
+        }
+    }
+
+    #
+    # Add common options
+    #
+    $null = $RESTQueryBuilder.AppendLine(@"
+    if cmd.Flags().Changed("pageSize") {
+        if v, err := cmd.Flags().GetInt("pageSize"); err == nil && v > 0 {
+            query.Add("pageSize", fmt.Sprintf("%d", v))
+        }
+    }
+
+    if cmd.Flags().Changed("withTotalPages") {
+        if v, err := cmd.Flags().GetBool("withTotalPages"); err == nil && v {
+            query.Add("withTotalPages", "true")
+        }
+    }
+"@)
+    #
+    # Encode query parameters to a string
+    #
+    $null = $RESTQueryBuilder.AppendLine(@"
+    queryValue, err := url.QueryUnescape(query.Encode())
+
+    if err != nil {
+        return newSystemError("Invalid query parameter")
+    }
+"@)
+
+
+    #
+    # Template
+    #
+    $Template = @"
+// Code generated from specification version 1.0.0: DO NOT EDIT
+package cmd
+
+import (
+    "context"
+    "fmt"
+    "io"
+    "net/url"
+    "net/http"
+    "time"
+
+    "github.com/fatih/color"
+    "github.com/reubenmiller/go-c8y/pkg/c8y"
+    "github.com/reubenmiller/go-c8y-cli/pkg/encoding"
+    "github.com/reubenmiller/go-c8y-cli/pkg/jsonUtilities"
+    "github.com/reubenmiller/go-c8y-cli/pkg/mapbuilder"
+    "github.com/spf13/cobra"
+    "github.com/tidwall/pretty"
+)
+
+type ${Name}Cmd struct {
+    *baseCmd
+}
+
+func new${NameCamel}Cmd() *${Name}Cmd {
+	ccmd := &${Name}Cmd{}
+
+	cmd := &cobra.Command{
+		Use:   "$Use",
+		Short: "$Description",
+		Long:  ``$DescriptionLong``,
+        Example: ``
+$($Examples -join "`n`n")
+		``,
+		RunE: ccmd.${Name},
+    }
+
+    cmd.SilenceUsage = true
+
+    $($CommandArgs.SetFlag -join "`n	")
+
+    // Required flags
+    $($CommandArgs.Required -join "`n	")
+
+	ccmd.baseCmd = newBaseCmd(cmd)
+
+	return ccmd
+}
+
+func (n *${Name}Cmd) ${Name}(cmd *cobra.Command, args []string) error {
+
+    // query parameters
+    queryValue := url.QueryEscape("")
+    $RESTQueryBuilder
+
+    // headers
+    headers := http.Header{}
+    $RestHeaderBuilder
+
+    // form data
+    formData := make(map[string]io.Reader)
+    $RESTFormDataBuilder
+
+    // body
+    body := mapbuilder.NewMapBuilder()
+    $RESTBodyBuilder
+
+    // path parameters
+    pathParameters := make(map[string]string)
+    $RESTPathBuilder
+    path := replacePathParameters("${RESTPath}", pathParameters)
+
+    // filter and selectors
+    filters := getFilterFlag(cmd, "filter")
+
+    req := c8y.RequestOptions{
+        Method:       "${RESTMethod}",
+        Path:         path,
+        Query:        queryValue,
+        Body:         body.GetMap(),
+        FormData:     formData,
+        Header:       headers,
+        IgnoreAccept: false,
+        DryRun:       globalFlagDryRun,
+    }
+
+    // Common outputfile option
+    outputfile := `"`"
+    if v, err := getOutputFileFlag(cmd, `"outputFile`"); err == nil {
+        outputfile = v
+    } else {
+        return err
+    }
+
+    return n.do${NameCamel}(req, outputfile, filters)
+}
+
+func (n *${Name}Cmd) do${NameCamel}(req c8y.RequestOptions, outputfile string, filters *JSONFilters) error {
+    ctx, cancel := context.WithTimeout(context.Background(), time.Duration(globalFlagTimeout)*time.Millisecond)
+    defer cancel()
+    start := time.Now()
+    resp, err := client.SendRequest(
+		ctx,
+        req,
+    )
+
+    Logger.Infof("Response time: %dms", int64(time.Since(start)/time.Millisecond))
+
+    if ctx.Err() != nil {
+		Logger.Criticalf("request timed out after %d", globalFlagTimeout)
+	}
+
+    if resp != nil {
+        Logger.Infof("Response header: %v", resp.Header)
+    }
+
+    // write response to file instead of to stdout
+	if resp != nil && err == nil && outputfile != `"`" {
+		fullFilePath, err := saveResponseToFile(resp, outputfile)
+
+		if err != nil {
+			return newSystemError("write to file failed", err)
+		}
+
+		fmt.Printf("%s", fullFilePath)
+		return nil
+    }
+
+    if resp != nil && err == nil && resp.Header.Get("Content-Type") == "application/octet-stream" && resp.JSONData != nil {
+        if encoding.IsUTF16(*resp.JSONData) {
+            if utf8, err := encoding.DecodeUTF16([]byte(*resp.JSONData)); err == nil {
+                fmt.Printf("%s", utf8)
+            } else {
+                fmt.Printf("%s", *resp.JSONData)
+            }
+        } else {
+            fmt.Printf("%s", *resp.JSONData)
+        }
+        return nil
+	}
+
+    if err != nil {
+        color.Set(color.FgRed, color.Bold)
+    }
+
+    if resp != nil && resp.JSONData != nil {
+        // estimate size based on utf8 encoding. 1 char is 1 byte
+	    Logger.Printf("Response Length: %0.1fKB", float64(len(*resp.JSONData)*1)/1024)
+
+        var responseText []byte
+        isJSONResponse := jsonUtilities.IsValidJSON([]byte(*resp.JSONData))
+
+        if isJSONResponse && filters != nil && !globalFlagRaw {
+			responseText = filters.Apply(*resp.JSONData, "$($Specification.collectionProperty)")
+		} else {
+			responseText = []byte(*resp.JSONData)
+		}
+
+        if globalFlagPrettyPrint && isJSONResponse {
+            fmt.Printf("%s", pretty.Pretty(responseText))
+        } else {
+            fmt.Printf("%s", responseText)
+        }
+    }
+
+    color.Unset()
+
+	if err != nil {
+		return newSystemError("command failed", err)
+	}
+	return nil
+}
+"@
+
+    # Must not include BOM!
+	$Utf8NoBomEncoding = New-Object System.Text.UTF8Encoding $False
+	[System.IO.File]::WriteAllLines($File, $Template, $Utf8NoBomEncoding)
+
+	# Auto format code
+	& gofmt -w $File
+}
+
+Function Remove-SkippedParameters {
+<#
+.SYNOPSIS
+Remove skipped parameters. These are parameter which should not be used when generating code.
+#>
+    [cmdletbinding()]
+    Param(
+        [Parameter(
+            Mandatory = $true,
+            Position = 0
+        )]
+        [AllowEmptyCollection()]
+        [AllowNull()]
+        [object[]] $CommandParameters
+    )
+
+    $CommandParameters | Where-Object {
+        if ($_.skip -eq $true) {
+            Write-Verbose ("Skipping parameter [{0}] as it is marked as skip" -f $_.name)
+        }
+        $_.skip -ne $true
+    }
+}
+
+Function Get-C8yGoArgs {
+    [cmdletbinding()]
+    Param(
+        [Parameter(
+            Mandatory = $true,
+            Position = 0
+        )]
+        [string] $Name,
+
+        [Parameter(
+            Mandatory = $true,
+            Position = 1
+        )]
+        [string] $Type,
+
+        [string] $Required,
+
+        [string] $OptionName,
+
+        [string] $Description,
+
+        [string] $Default
+    )
+
+    if ($Required -match "true|yes") {
+        $Description = "${Description} (required)"
+    }
+
+    $Entry = switch ($Type) {
+        "id" {
+            # TODO: refactor addIdFlag to accept a property name
+            if ($Name -eq "id") {
+                @{
+                    SetFlag = "addIDFlag(cmd)"
+                }
+            } else {
+                $SetFlag = if ($UseOption) {
+                    'cmd.Flags().StringP("{0}", "{1}", "{2}", "{3}")' -f $Name, $OptionName, $Default, $Description
+                } else {
+                    'cmd.Flags().String("{0}", "{1}", "{2}")' -f $Name, $Default, $Description
+                }
+                @{
+                    SetFlag = $SetFlag
+                }
+            }
+        }
+
+        "json" {
+            @{
+                SetFlag = "addDataFlag(cmd)"
+            }
+        }
+
+        #
+        # Usage: Accept json, but assign it to a nested property
+        #
+        "json_custom" {
+            $SetFlag = if ($UseOption) {
+                'cmd.Flags().StringP("{0}", "{1}", "{2}", "{3}")' -f $Name, $OptionName, $Default, $Description
+            } else {
+                'cmd.Flags().String("{0}", "{1}", "{2}")' -f $Name, $Default, $Description
+            }
+            @{
+                SetFlag = $SetFlag
+            }
+        }
+
+        { @("datefrom", "dateto", "datetime") -contains $_ } {
+            $SetFlag = if ($UseOption) {
+                'cmd.Flags().StringP("{0}", "{1}", "{2}", "{3}")' -f $Name, $OptionName, $Default, $Description
+            } else {
+                'cmd.Flags().String("{0}", "{1}", "{2}")' -f $Name, $Default, $Description
+            }
+            @{
+                SetFlag = $SetFlag
+            }
+        }
+
+        "source" {
+            $SetFlag = if ($UseOption) {
+                'cmd.Flags().StringP("{0}", "{1}", "{2}", "{3}")' -f $Name, $OptionName, $Default, $Description
+            } else {
+                'cmd.Flags().String("{0}", "{1}", "{2}")' -f $Name, $Default, $Description
+            }
+            @{
+                SetFlag = $SetFlag
+            }
+        }
+
+        "directory" {
+            $SetFlag = if ($UseOption) {
+                'cmd.Flags().StringP("{0}", "{1}", "{2}", "{3}")' -f $Name, $OptionName, $Default, $Description
+            } else {
+                'cmd.Flags().String("{0}", "{1}", "{2}")' -f $Name, $Default, $Description
+            }
+            @{
+                SetFlag = $SetFlag
+            }
+        }
+
+        "[]string" {
+            $SetFlag = if ($UseOption) {
+                "cmd.Flags().StringSlice(`"${Name}`", `"${OptionName}`", []string{`"${Default}`"}, `"${Description}`")"
+            } else {
+                "cmd.Flags().StringSlice(`"${Name}`", []string{`"${Default}`"}, `"${Description}`")"
+            }
+            @{
+                SetFlag = $SetFlag
+            }
+        }
+
+        "[]device" {
+            $SetFlag = if ($UseOption) {
+                "cmd.Flags().StringSliceP(`"${Name}`", []string{`"${Default}`"}, `"${OptionName}`", `"${Description}`")"
+            } else {
+                "cmd.Flags().StringSlice(`"${Name}`", []string{`"${Default}`"}, `"${Description}`")"
+            }
+
+            @{
+                SetFlag = $SetFlag
+            }
+        }
+
+        "[]agent" {
+            $SetFlag = if ($UseOption) {
+                "cmd.Flags().StringSliceP(`"${Name}`", []string{`"${Default}`"}, `"${OptionName}`", `"${Description}`")"
+            } else {
+                "cmd.Flags().StringSlice(`"${Name}`", []string{`"${Default}`"}, `"${Description}`")"
+            }
+
+            @{
+                SetFlag = $SetFlag
+            }
+        }
+
+        "[]devicegroup" {
+            $SetFlag = if ($UseOption) {
+                "cmd.Flags().StringSliceP(`"${Name}`", []string{`"${Default}`"}, `"${OptionName}`", `"${Description}`")"
+            } else {
+                "cmd.Flags().StringSlice(`"${Name}`", []string{`"${Default}`"}, `"${Description}`")"
+            }
+
+            @{
+                SetFlag = $SetFlag
+            }
+        }
+
+        "[]roleself" {
+            $SetFlag = if ($UseOption) {
+                "cmd.Flags().StringSliceP(`"${Name}`", []string{`"${Default}`"}, `"${OptionName}`", `"${Description}`")"
+            } else {
+                "cmd.Flags().StringSlice(`"${Name}`", []string{`"${Default}`"}, `"${Description}`")"
+            }
+
+            @{
+                SetFlag = $SetFlag
+            }
+        }
+
+        "[]role" {
+            $SetFlag = if ($UseOption) {
+                "cmd.Flags().StringSliceP(`"${Name}`", []string{`"${Default}`"}, `"${OptionName}`", `"${Description}`")"
+            } else {
+                "cmd.Flags().StringSlice(`"${Name}`", []string{`"${Default}`"}, `"${Description}`")"
+            }
+
+            @{
+                SetFlag = $SetFlag
+            }
+        }
+
+        "[]usergroup" {
+            $SetFlag = if ($UseOption) {
+                "cmd.Flags().StringSliceP(`"${Name}`", []string{`"${Default}`"}, `"${OptionName}`", `"${Description}`")"
+            } else {
+                "cmd.Flags().StringSlice(`"${Name}`", []string{`"${Default}`"}, `"${Description}`")"
+            }
+
+            @{
+                SetFlag = $SetFlag
+            }
+        }
+
+        "application" {
+            $SetFlag = if ($UseOption) {
+                'cmd.Flags().StringP("{0}", "{1}", "{2}", "{3}")' -f $Name, $OptionName, $Default, $Description
+            } else {
+                'cmd.Flags().String("{0}", "{1}", "{2}")' -f $Name, $Default, $Description
+            }
+            @{
+                SetFlag = $SetFlag
+            }
+        }
+
+        "microservice" {
+            $SetFlag = if ($UseOption) {
+                'cmd.Flags().StringP("{0}", "{1}", "{2}", "{3}")' -f $Name, $OptionName, $Default, $Description
+            } else {
+                'cmd.Flags().String("{0}", "{1}", "{2}")' -f $Name, $Default, $Description
+            }
+            @{
+                SetFlag = $SetFlag
+            }
+        }
+
+        "string" {
+            $SetFlag = if ($UseOption) {
+                'cmd.Flags().StringP("{0}", "{1}", "{2}", "{3}")' -f $Name, $OptionName, $Default, $Description
+            } else {
+                'cmd.Flags().String("{0}", "{1}", "{2}")' -f $Name, $Default, $Description
+            }
+
+            @{
+                SetFlag = $SetFlag
+            }
+        }
+
+        "integer" {
+            try {
+                $DefaultInt = [convert]::ToInt64($Default)
+            } catch {
+                $DefaultInt = 0
+            }
+
+            $SetFlag = if ($UseOption) {
+                'cmd.Flags().IntP("{0}", "{1}", {2}, "{3}")' -f $Name, $OptionName, $DefaultInt, $Description
+            } else {
+                'cmd.Flags().Int("{0}", {1}, "{2}")' -f $Name, $DefaultInt, $Description
+            }
+
+            @{
+                SetFlag = $SetFlag
+            }
+        }
+
+        "tenant" {
+            $SetFlag = if ($UseOption) {
+                'cmd.Flags().StringP("{0}", "{1}", "{2}", "{3}")' -f $Name, $OptionName, $Default, $Description
+            } else {
+                'cmd.Flags().String("{0}", "{1}", "{2}")' -f $Name, $Default, $Description
+            }
+
+            @{
+                SetFlag = $SetFlag
+            }
+        }
+
+        "file" {
+            $SetFlag = if ($UseOption) {
+                'cmd.Flags().StringP("{0}", "{1}", "{2}", "{3}")' -f $Name, $OptionName, $Default, $Description
+            } else {
+                'cmd.Flags().String("{0}", "{1}", "{2}")' -f $Name, $Default, $Description
+            }
+
+            @{
+                SetFlag = $SetFlag
+            }
+        }
+
+        "boolean" {
+            if (!$Default) {
+                $Default = "false"
+            }
+            $SetFlag = if ($UseOption) {
+                'cmd.Flags().BoolP("{0}", "{1}", {2}, "{3}")' -f $Name, $OptionName, $Default, $Description
+            } else {
+                'cmd.Flags().Bool("{0}", {1}, "{2}")' -f $Name, $Default, $Description
+            }
+
+            @{
+                SetFlag = $SetFlag
+            }
+        }
+
+        "[]user" {
+            $SetFlag = if ($UseOption) {
+                "cmd.Flags().StringSliceP(`"${Name}`", []string{`"${Default}`"}, `"${OptionName}`", `"${Description}`")"
+            } else {
+                "cmd.Flags().StringSlice(`"${Name}`", []string{`"${Default}`"}, `"${Description}`")"
+            }
+
+            @{
+                SetFlag = $SetFlag
+            }
+        }
+
+        "[]userself" {
+            $SetFlag = if ($UseOption) {
+                "cmd.Flags().StringSliceP(`"${Name}`", []string{`"${Default}`"}, `"${OptionName}`", `"${Description}`")"
+            } else {
+                "cmd.Flags().StringSlice(`"${Name}`", []string{`"${Default}`"}, `"${Description}`")"
+            }
+
+            @{
+                SetFlag = $SetFlag
+            }
+        }
+
+        default {
+            Write-Warning "Unknown flag type [$_]"
+        }
+    }
+
+    # Set required flag
+    if ($Required -match "true|yes") {
+        $Entry | Add-Member -MemberType NoteProperty -Name "Required" -Value "cmd.MarkFlagRequired(`"${Name}`")"
+        # $Entry.Required = "cmd.MarkFlagRequired(`"${Name}`")"
+    }
+
+    $Entry
+}
+

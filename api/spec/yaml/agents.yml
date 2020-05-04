@@ -1,0 +1,181 @@
+---
+information:
+  name: agents
+  description: Cumulocity agents
+  descriptionLong: 'REST endpoint to interact with Cumulocity agents'
+  link: https://cumulocity.com/guides/reference/inventory/
+
+endpoints:
+  # Agent
+  - name: getAgent
+    description: 'Get agent'
+    method: GET
+    path: inventory/managedObjects/{id}
+    accept: application/vnd.com.nsn.cumulocity.customAgent+json
+    alias:
+        go: get
+        powershell: Get-Agent
+    examples:
+      powershell:
+        - description: Get agent by id
+          beforeEach:
+            - $agent = PSc8y\New-TestAgent
+          command: Get-Agent -Id $agent.id
+          afterEach:
+            - Remove-ManagedObject -Id $agent.id
+
+        - description: Get agent by name
+          beforeEach:
+            - $agent = PSc8y\New-TestAgent
+          command: Get-Agent -Id $agent.name
+          afterEach:
+            - Remove-ManagedObject -Id $agent.id
+
+      go:
+        - description: Get agent by id
+          command: c8y agents get --id 12345
+
+    pathParameters:
+      - name: id
+        type: '[]agent'
+        pipeline: true
+        required: true
+        description: Agent ID
+
+  - name: updateAgent
+    description: 'Update agent'
+    method: PUT
+    path: inventory/managedObjects/{id}
+    accept: application/vnd.com.nsn.cumulocity.customAgent+json
+    alias:
+        go: update
+        powershell: Update-Agent
+    examples:
+      powershell:
+        - description: Update agent by id
+          beforeEach:
+            - $agent = PSc8y\New-TestAgent
+          command: Update-Agent -Id $agent.id -NewName "MyNewName"
+          afterEach:
+            - Remove-ManagedObject -Id $agent.id
+
+        - description: Update agent by name
+          beforeEach:
+            - $agent = PSc8y\New-TestAgent
+          command: Update-Agent -Id $agent.name -NewName "MyNewName"
+          afterEach:
+            - Remove-ManagedObject -Id $agent.id
+
+        - description: Update agent custom properties
+          beforeEach:
+            - $agent = PSc8y\New-TestAgent
+          command: Update-Agent -Id $agent.name -Data @{ "myValue" = @{ value1 = $true } }
+          afterEach:
+            - Remove-ManagedObject -Id $agent.id
+
+      go:
+        - description: Update agent by id
+          command: c8y agents update --id 12345
+
+    pathParameters:
+      - name: id
+        type: '[]agent'
+        pipeline: true
+        required: true
+        description: Agent ID
+
+    body:
+      - name: newName
+        type: 'string'
+        property: name
+        required: false
+        description: Agent name
+
+      - name: data
+        type: json
+        description: Additional properties of the inventory.
+
+  - name: deleteAgent
+    description: 'Delete agent'
+    method: DELETE
+    path: inventory/managedObjects/{id}
+    accept: ''
+    alias:
+        go: delete
+        powershell: Remove-Agent
+    examples:
+      powershell:
+        - description: Remove agent by id
+          beforeEach:
+            - $agent = PSc8y\New-TestAgent
+          command: Remove-Agent -Id $agent.id
+
+        - description: Remove agent by name
+          beforeEach:
+            - $agent = PSc8y\New-TestAgent
+          command: Remove-Agent -Id $agent.name
+
+      go:
+        - description: Get agent by id
+          command: c8y agents delete --id 12345
+
+    pathParameters:
+      - name: id
+        type: '[]agent'
+        pipeline: true
+        required: true
+        description: Agent ID
+
+  - name: createAgent
+    description: 'Create agent'
+    method: POST
+    path: inventory/managedObjects
+    accept: application/vnd.com.nsn.cumulocity.customAgent+json
+    alias:
+        go: create
+        powershell: New-Agent
+    examples:
+      powershell:
+        - description: Create agent
+          beforeEach:
+            - $AgentName = PSc8y\New-RandomString -Prefix "myAgent"
+          command: New-Agent -Name $AgentName
+          afterEach:
+            - Remove-Agent -Id $AgentName
+
+        - description: Create agent with custom properties
+          beforeEach:
+            - $AgentName = PSc8y\New-RandomString -Prefix "myAgent"
+          command: New-Agent -Name $AgentName -Data @{ myValue = @{ value1 = $true } }
+          afterEach:
+            - Remove-Agent -Id $AgentName
+
+      go:
+        - description: Create agent
+          command: c8y agents create --name myAgent
+
+        - description: Create agent with custom properties
+          command: c8y agents create --name myAgent --data "custom_value1=1234"
+
+    bodyTemplate:
+      type: jsonnet
+      applyLast: true
+      template: >
+        {
+          c8y_IsDevice: {},
+          com_cumulocity_model_Agent: {},
+        }
+
+    body:
+      - name: name
+        type: string
+        required: true
+        description: Agent name
+
+      - name: type
+        description: Agent type
+        type: string
+
+      - name: data
+        type: json
+        description: Custom agent properties.

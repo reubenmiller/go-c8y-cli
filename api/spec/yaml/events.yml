@@ -1,0 +1,427 @@
+
+---
+information:
+  name: events
+  description: Cumulocity events
+  descriptionLong: 'REST endpoint to interact with Cumulocity events'
+  link: https://cumulocity.com/guides/reference/events/
+
+endpoints:
+  - name: getEventCollection
+    method: GET
+    description: Get a collection of events based on filter parameters
+    descriptionLong: Get a collection of events based on filter parameters
+    examples:
+      powershell:
+        - description: Get events with type 'my_CustomType' that were created in the last 10 days
+          beforeEach:
+            - $Device = New-TestDevice
+            - $Event = PSc8y\New-Event -Device $Device.id -Type "my_CustomType2" -Time "-9d" -Text "Test event"
+          command: Get-EventCollection -Type "my_CustomType2" -DateFrom "-10d"
+          afterEach:
+            - PSc8y\Remove-ManagedObject -Id $Device.id
+
+        - description: Get events from a device
+          beforeEach:
+            - $Device = New-TestDevice
+            - $Event = PSc8y\New-Event -Device $Device.id -Type "my_CustomType2" -Time "-9d" -Text "Test event"
+          command: Get-EventCollection -Device $Device.id
+          afterEach:
+            - PSc8y\Remove-ManagedObject -Id $Device.id
+
+        - description: Get events from a device (using pipeline)
+          beforeEach:
+            - $Device = New-TestDevice
+            - $Event = PSc8y\New-Event -Device $Device.id -Type "my_CustomType2" -Time "-9d" -Text "Test event"
+          command: Get-DeviceCollection -Name $Device.name | Get-EventCollection
+          afterEach:
+            - PSc8y\Remove-ManagedObject -Id $Device.id
+
+      go:
+        - description: Get events with type 'my_CustomType' that were created in the last 10 days
+          command: c8y events list --type my_CustomType --dateFrom "-10d"
+
+        - description: Get events from a device
+          command: c8y events list --device mydevice
+    path: event/events
+    accept: application/vnd.com.nsn.cumulocity.eventCollection+json
+    collectionType: application/vnd.com.nsn.cumulocity.event+json
+    collectionProperty: events
+    alias:
+        go: list
+        powershell: Get-EventCollection
+
+    queryParameters:
+      - name: device
+        type: '[]device'
+        pipeline: true
+        property: source
+        description: Device ID
+
+      - name: type
+        type: string
+        description: Event type.
+
+      - name: fragmentType
+        type: string
+        description: Fragment name from event.
+
+      - name: dateFrom
+        type: datetime
+        description: Start date or date and time of event occurrence.
+
+      - name: dateTo
+        type: datetime
+        description: End date or date and time of event occurrence.
+
+      - name: revert
+        type: boolean
+        description: Return the newest instead of the oldest events. Must be used with dateFrom and dateTo parameters
+
+  - name: deleteEventCollection
+    description: 'Delete a collection of events'
+    descriptionLong: 'Delete a collection of events by using a filter'
+    method: DELETE
+    path: event/events
+    accept: ''
+    examples:
+      powershell:
+        - description: Remove events with type 'my_CustomType' that were created in the last 10 days
+          command: Remove-EventCollection -Type my_CustomType -DateFrom "-10d"
+
+        - description: Remove events from a device
+          command: Remove-EventCollection -Device "{{ randomdevice }}"
+
+      go:
+        - description: Remove events with type 'my_CustomType' that were created in the last 10 days
+          command: c8y events deleteCollection --type my_CustomType --dateFrom "-10d"
+
+        - description: Remove events from a device
+          command: c8y events deleteCollection --device mydevice
+    alias:
+        go: deleteCollection
+        powershell: Remove-EventCollection
+    queryParameters:
+      - name: device
+        type: '[]device'
+        property: source
+        description: Device ID
+
+      - name: type
+        type: string
+        description: Event type.
+
+      - name: fragmentType
+        type: string
+        description: Fragment name from event.
+
+      - name: dateFrom
+        type: datetime
+        description: Start date or date and time of event occurrence.
+
+      - name: dateTo
+        type: datetime
+        description: End date or date and time of event occurrence.
+
+      - name: revert
+        type: boolean
+        description: Return the newest instead of the oldest events. Must be used with dateFrom and dateTo parameters
+
+  - name: getEvent
+    description: 'Get event/s'
+    descriptionLong: 'Get an event by id'
+    method: GET
+    path: event/events/{id}
+    accept: application/vnd.com.nsn.cumulocity.event+json
+    examples:
+      powershell:
+        - description: Get event
+          command: Get-Event -Id {{ NewEvent }}
+
+      go:
+        - description: Get event
+          command: c8y events get --id 12345
+    alias:
+        go: get
+        powershell: Get-Event
+    pathParameters:
+      - name: id
+        type: string
+        required: true
+        description: Event id
+
+  - name: newEvent
+    method: POST
+    path: event/events
+    accept: application/vnd.com.nsn.cumulocity.event+json
+    description: Create event
+    descriptionLong: Create event
+    examples:
+      powershell:
+        - description: Create a new event for a device
+          beforeEach:
+            - $device = New-TestDevice
+          command: New-Event -Device $device.id -Type c8y_TestAlarm -Text "Test event"
+          afterEach:
+            - Remove-ManagedObject -Id $device.id
+
+        - description: Create a new event for a device (using pipeline)
+          beforeEach:
+            - $device = New-TestDevice
+          command: Get-Device -Id $device.id | PSc8y\New-Event -Type c8y_TestAlarm -Time "-0s" -Text "Test event"
+          afterEach:
+            - Remove-ManagedObject -Id $device.id
+
+      go:
+        - description: Create a new event for a device
+          command: c8y events create --device mydevice --type c8y_TestAlarm --time "-0s" --text "Test alarm" --severity MAJOR
+    alias:
+        go: create
+        powershell: New-Event
+    body:
+      - name: device
+        type: '[]device'
+        required: true
+        pipeline: true
+        property: source.id
+        description: The ManagedObject which is the source of this event.
+
+      - name: time
+        type: datetime
+        required: false
+        default: "0s"
+        description: Time of the event.
+
+      - name: type
+        type: string
+        required: true
+        description: Identifies the type of this event.
+
+      - name: text
+        type: string
+        required: true
+        description: Text description of the event.
+
+      - name: data
+        type: json
+        description: Additional properties of the event.
+
+  - name: updateEvent
+    method: PUT
+    path: event/events/{id}
+    accept: application/vnd.com.nsn.cumulocity.event+json
+    description: 'Update an event'
+    descriptionLong: 'Update an event'
+    examples:
+      powershell:
+        - description: Update the text field of an existing event
+          beforeEach:
+            - $Device = New-TestDevice
+            - $Event = New-TestEvent -Device $Device.id
+          command: Update-Event -Id $Event.id -Text "example text 1"
+          afterEach:
+            - Remove-ManagedObject -Id $Device.id
+
+        - description: Update custom properties of an existing event
+          beforeEach:
+            - $Device = New-TestDevice
+            - $Event = New-TestEvent -Device $Device.id
+          command: Update-Event -Id $Event.id -Data @{ my_event = @{ active = $true } }
+          afterEach:
+            - Remove-ManagedObject -Id $Device.id
+
+        - description: Update custom properties of an existing event (using pipeline)
+          beforeEach:
+            - $Device = New-TestDevice
+            - $Event = New-TestEvent -Device $Device.id
+          command: Get-Event -Id $Event.id | Update-Event -Data @{ my_event = @{ active = $true } }
+          afterEach:
+            - Remove-ManagedObject -Id $Device.id
+
+      go:
+        - description: Update the text field of an existing event
+          command: c8y events update --id 12345 --text "example text 1"
+
+        - description: Update custom properties of an existing event
+          command: 'c8y events update --id 12345 --data "{\"my_event\":{\"active\": true }}"'
+    alias:
+        go: update
+        powershell: Update-Event
+    pathParameters:
+      - name: id
+        type: string
+        required: true
+        pipeline: true
+        description: Event id
+    body:
+      - name: text
+        type: string
+        required: false
+        description: Text description of the event.
+
+      - name: data
+        type: json
+        description: Additional properties of the event.
+
+  - name: deleteEvent
+    description: 'Delete event/s'
+    descriptionLong: 'Delete an event by id'
+    examples:
+      powershell:
+        - description: Delete an event
+          command: Remove-Event -Id {{ NewEvent }}
+
+      go:
+        - description: Delete an event
+          command: c8y events delete --id 12345
+    method: DELETE
+    path: event/events/{id}
+    accept: ''
+    alias:
+        go: delete
+        powershell: Remove-Event
+    pathParameters:
+      - name: id
+        type: string
+        required: true
+        pipeline: true
+        description: Event id
+
+  #
+  # binaries
+  #
+  - name: getEventBinary
+    description: 'Get event binary'
+    method: GET
+    path: event/events/{id}/binaries
+    accept: '*/*'
+    alias:
+        go: downloadBinary
+        powershell: Get-EventBinary
+    examples:
+      powershell:
+        - description: Download a binary related to an event
+          beforeEach:
+            - $Device = New-TestDevice
+            - $Event = New-TestEvent -Device $Device.id
+            - $TestFile = New-TestFile
+            - New-EventBinary -Id $Event.id -File $TestFile
+            - Remove-Item $TestFile
+          command: Get-EventBinary -Id $Event.id -OutputFile ./eventbinary.txt
+          afterEach:
+            - Remove-Item "./eventbinary.txt"
+            - Remove-ManagedObject -Id $Device.id
+
+      go:
+        - description: Download a binary related to an event
+          command: c8y events downloadBinary --id 12345 --outputFile ./eventbinary.txt
+    pathParameters:
+      - name: id
+        type: string
+        required: true
+        pipeline: true
+        description: Event id
+
+  - name: newEventBinary
+    description: 'New event binary'
+    method: POST
+    path: event/events/{id}/binaries
+    accept: application/vnd.com.nsn.cumulocity.event+json
+    alias:
+        go: createBinary
+        powershell: New-EventBinary
+    examples:
+      powershell:
+        - description: Add a binary to an event
+          beforeEach:
+            - $Device = New-TestDevice
+            - $Event = New-TestEvent -Device $Device.id
+            - $TestFile = New-TestFile
+          command: New-EventBinary -Id $Event.id -File $TestFile
+          afterEach:
+            - Remove-Item $TestFile
+            - Remove-ManagedObject -Id $Device.id
+
+      go:
+        - description: Add a binary to an event
+          command: c8y events createBinary --id 12345 --file ./myfile.log
+    pathParameters:
+      - name: id
+        type: string
+        required: true
+        pipeline: true
+        description: Event id
+
+    body:
+      - name: file
+        type: file
+        required: true
+        description: File to be uploaded as a binary
+
+  - name: updateEventBinary
+    description: 'Update event binary'
+    method: PUT
+    path: event/events/{id}/binaries
+    accept: application/vnd.com.nsn.cumulocity.event+json
+    alias:
+        go: updateBinary
+        powershell: Update-EventBinary
+    examples:
+      powershell:
+        - description: Update a binary related to an event
+          beforeEach:
+            - $Device = New-TestDevice
+            - $Event = New-TestEvent -Device $Device.id
+            - $TestFile = New-TestFile
+          command: Update-EventBinary -Id $Event.id -File $TestFile
+          afterEach:
+            - Remove-Item $TestFile
+            - Remove-ManagedObject -Id $Device.id
+
+      go:
+        - description: Update a binary related to an event
+          command: c8y events updateBinary --id 12345 --file ./myfile.log
+
+    pathParameters:
+      - name: id
+        type: string
+        required: true
+        pipeline: true
+        description: Event id
+
+    body:
+      - name: file
+        type: file
+        required: true
+        description: File to be uploaded as a binary
+
+  - name: deleteEventBinary
+    description: 'Delete event binary'
+    method: DELETE
+    path: event/events/{id}/binaries
+    accept: ''
+    alias:
+        go: deleteBinary
+        powershell: Remove-EventBinary
+    examples:
+      powershell:
+        - description: Delete an binary attached to an event
+          beforeEach:
+            - $Device = New-TestDevice
+            - $Event = New-TestEvent -Device $Device.id
+            - $TestFile = New-TestFile
+            - New-EventBinary -Id $Event.id -File $TestFile
+          command: Remove-EventBinary -Id $Event.id
+          afterEach:
+            - Remove-Item $TestFile
+            - Remove-ManagedObject -Id $Device.id
+
+      go:
+        - description: Delete an binary attached to an event
+          command: c8y events deleteBinary --id 12345
+    pathParameters:
+      - name: id
+        type: string
+        required: true
+        pipeline: true
+        description: Event id

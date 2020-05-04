@@ -1,0 +1,364 @@
+{
+  "information": {
+    "name": "userRoles",
+    "description": "Cumulocity user roles",
+    "descriptionLong": "REST endpoint to interact with Cumulocity user roles",
+    "link": "https://cumulocity.com/guides/reference/users/#group-reference-collection"
+  },
+  "endpoints": [
+    {
+      "name": "getRoleCollection",
+      "description": "Get collection of user roles",
+      "method": "GET",
+      "path": "/user/roles",
+      "accept": "application/vnd.com.nsn.cumulocity.roleCollection+json",
+      "collectionType": "application/vnd.com.nsn.cumulocity.role+json",
+      "collectionProperty": "roles",
+      "alias": {
+        "go": "list",
+        "powershell": "Get-RoleCollection"
+      },
+      "examples": {
+        "powershell": [
+          {
+            "description": "Get a list of roles",
+            "command": "Get-RoleCollection -PageSize 100"
+          }
+        ],
+        "go": [
+          {
+            "description": "Get a list of roles",
+            "command": "c8y userRoles list --pageSize 100"
+          }
+        ]
+      }
+    },
+    {
+      "name": "addRoleToUser",
+      "description": "Add role to a user",
+      "method": "POST",
+      "path": "/user/{tenant}/users/{user}/roles",
+      "accept": "application/vnd.com.nsn.cumulocity.roleReference+json",
+      "alias": {
+        "go": "addRoleTouser",
+        "powershell": "Add-RoleToUser"
+      },
+      "examples": {
+        "powershell": [
+          {
+            "description": "Add a role (ROLE_ALARM_READ) to a user",
+            "beforeEach": [
+              "$User = PSc8y\\New-TestUser -Name \"customUser_\""
+            ],
+            "command": "Add-RoleToUser -User $User.id -Role \"ROLE_ALARM_READ\"",
+            "afterEach": [
+              "PSc8y\\Remove-User -Id $User.id"
+            ]
+          },
+          {
+            "description": "Add a role to a user using wildcards",
+            "beforeEach": [
+              "$User = PSc8y\\New-TestUser -Name \"customUser_\""
+            ],
+            "command": "Add-RoleToUser -User \"customUser_*\" -Role \"*ALARM_*\"",
+            "afterEach": [
+              "PSc8y\\Remove-User -Id $User.id"
+            ]
+          },
+          {
+            "description": "Add a role to a user using wildcards (using pipeline)",
+            "beforeEach": [
+              "$User = PSc8y\\New-TestUser -Name \"customUser_\""
+            ],
+            "command": "Get-RoleCollection -PageSize 100 | Where-Object Name -like \"*ALARM*\" | Add-RoleToUser -User \"customUser_*\"",
+            "afterEach": [
+              "PSc8y\\Remove-User -Id $User.id"
+            ]
+          }
+        ],
+        "go": [
+          {
+            "description": "Add a role (ROLE_ALARM_READ) to a user",
+            "command": "c8y userRoles addRoleTouser --user \"myuser\" --role \"ROLE_ALARM_READ\""
+          }
+        ]
+      },
+      "pathParameters": [
+        {
+          "name": "tenant",
+          "type": "tenant",
+          "description": "Tenant"
+        },
+        {
+          "name": "user",
+          "type": "[]user",
+          "required": true,
+          "description": "User prefix or full username"
+        }
+      ],
+      "body": [
+        {
+          "name": "role",
+          "type": "[]roleself",
+          "pipeline": true,
+          "property": "role.self",
+          "description": "User role id"
+        }
+      ]
+    },
+    {
+      "name": "deleteRoleFromUser",
+      "description": "Unassign/Remove role from a user",
+      "method": "DELETE",
+      "path": "/user/{tenant}/users/{user}/roles/{role}",
+      "alias": {
+        "go": "deleteRoleFromUser",
+        "powershell": "Remove-RoleFromUser"
+      },
+      "examples": {
+        "powershell": [
+          {
+            "description": "Remove a role from the given user",
+            "beforeEach": [
+              "$User = PSc8y\\New-TestUser",
+              "Add-RoleToUser -User $User.id -Role \"ROLE_MEASUREMENT_READ\""
+            ],
+            "command": "Remove-RoleFromUser -User $User.id -Role \"ROLE_MEASUREMENT_READ\"",
+            "afterEach": [
+              "PSc8y\\Remove-User -Id $User.id"
+            ]
+          }
+        ],
+        "go": [
+          {
+            "description": "Remove a role from the given user",
+            "command": "c8y userRoles deleteRoleFromUser --user \"myuser\" --role \"ROLE_MEASUREMENT_READ\""
+          }
+        ]
+      },
+      "pathParameters": [
+        {
+          "name": "user",
+          "type": "[]user",
+          "required": true,
+          "description": "User"
+        },
+        {
+          "name": "role",
+          "type": "[]role",
+          "required": true,
+          "description": "Role name"
+        },
+        {
+          "name": "tenant",
+          "type": "tenant",
+          "description": "Tenant"
+        }
+      ]
+    },
+    {
+      "name": "addRoleToGroup",
+      "description": "Add role to a group",
+      "method": "POST",
+      "path": "/user/{tenant}/groups/{group}/roles",
+      "accept": "application/vnd.com.nsn.cumulocity.roleReference+json",
+      "alias": {
+        "go": "addRoleToGroup",
+        "powershell": "Add-RoleToGroup"
+      },
+      "examples": {
+        "powershell": [
+          {
+            "description": "Add a role to a group using wildcards",
+            "beforeEach": [
+              "$Group = New-TestGroup -Name \"customGroup1\""
+            ],
+            "command": "Add-RoleToGroup -Group \"customGroup1*\" -Role \"*ALARM_*\"",
+            "afterEach": [
+              "PSc8y\\Remove-Group -Id $Group.id"
+            ]
+          },
+          {
+            "description": "Add a role to a group using wildcards (using pipeline)",
+            "beforeEach": [
+              "$Group = New-TestGroup -Name \"customGroup1\""
+            ],
+            "command": "Get-RoleCollection -PageSize 100 | Where-Object Name -like \"*ALARM*\" | Add-RoleToGroup -Group \"customGroup1*\"",
+            "afterEach": [
+              "PSc8y\\Remove-Group -Id $Group.id"
+            ]
+          }
+        ],
+        "go": [
+          {
+            "description": "Add a role to the admin group",
+            "command": "c8y userRoles addRoleToGroup --group \"customGroup1*\" --role \"*ALARM*\""
+          }
+        ]
+      },
+      "pathParameters": [
+        {
+          "name": "tenant",
+          "type": "tenant",
+          "description": "Tenant"
+        },
+        {
+          "name": "group",
+          "type": "[]usergroup",
+          "required": true,
+          "description": "Group ID"
+        }
+      ],
+      "body": [
+        {
+          "name": "role",
+          "type": "[]roleself",
+          "pipeline": true,
+          "required": true,
+          "property": "role.self",
+          "description": "User role id"
+        }
+      ]
+    },
+    {
+      "name": "deleteRoleFromGroup",
+      "description": "Unassign/Remove role from a group",
+      "method": "DELETE",
+      "path": "/user/{tenant}/groups/{group}/roles/{role}",
+      "alias": {
+        "go": "deleteRoleFromGroup",
+        "powershell": "Remove-RoleFromGroup"
+      },
+      "examples": {
+        "powershell": [
+          {
+            "description": "Remove a role from the given user group",
+            "beforeEach": [
+              "$UserGroup = PSc8y\\New-TestGroup",
+              "Add-RoleToGroup -Group $UserGroup.id -Role \"ROLE_MEASUREMENT_READ\""
+            ],
+            "command": "Remove-RoleFromGroup -Group $UserGroup.id -Role \"ROLE_MEASUREMENT_READ\"",
+            "afterEach": [
+              "PSc8y\\Remove-Group -Id $UserGroup.id"
+            ]
+          }
+        ],
+        "go": [
+          {
+            "description": "Remove a role from the given user",
+            "command": "c8y userRoles deleteRoleFromGroup --group \"myuser\" --role \"ROLE_MEASUREMENT_READ\""
+          }
+        ]
+      },
+      "pathParameters": [
+        {
+          "name": "group",
+          "type": "[]usergroup",
+          "required": true,
+          "description": "Group id"
+        },
+        {
+          "name": "role",
+          "type": "[]role",
+          "required": true,
+          "description": "Role name, e.g. ROLE_TENANT_MANAGEMENT_ADMIN"
+        },
+        {
+          "name": "tenant",
+          "type": "tenant",
+          "description": "Tenant"
+        }
+      ]
+    },
+    {
+      "name": "getRoleReferenceCollectionFromUser",
+      "description": "Get collection of user role references from a user",
+      "method": "GET",
+      "path": "/user/{tenant}/users/{user}/roles",
+      "accept": "application/vnd.com.nsn.cumulocity.roleReferenceCollection+json",
+      "collectionType": "application/vnd.com.nsn.cumulocity.roleReference+json",
+      "collectionProperty": "references",
+      "alias": {
+        "go": "getRoleReferenceCollectionFromUser",
+        "powershell": "Get-RoleReferenceCollectionFromUser"
+      },
+      "examples": {
+        "powershell": [
+          {
+            "description": "Get a list of role references for a user",
+            "beforeEach": [
+              "$User = New-TestUser",
+              "Add-RoleToUser -User $User.id -Role \"ROLE_ALARM_READ\""
+            ],
+            "command": "Get-RoleReferenceCollectionFromUser -User $User.id",
+            "afterEach": [
+              "Remove-User -Id $User.id"
+            ]
+          }
+        ],
+        "go": [
+          {
+            "description": "Get a list of role references for a user",
+            "command": "c8y userRoles getRoleReferenceCollectionFromUser --user \"myuser\""
+          }
+        ]
+      },
+      "pathParameters": [
+        {
+          "name": "tenant",
+          "type": "tenant",
+          "description": "Tenant"
+        },
+        {
+          "name": "user",
+          "type": "[]user",
+          "required": true,
+          "description": "User"
+        }
+      ]
+    },
+    {
+      "name": "getRoleReferenceCollectionFromGroup",
+      "description": "Get collection of user role references from a group",
+      "method": "GET",
+      "path": "/user/{tenant}/groups/{group}/roles",
+      "accept": "application/vnd.com.nsn.cumulocity.roleReferenceCollection+json",
+      "collectionType": "application/vnd.com.nsn.cumulocity.roleReference+json",
+      "collectionProperty": "references",
+      "alias": {
+        "go": "getRoleReferenceCollectionFromGroup",
+        "powershell": "Get-RoleReferenceCollectionFromGroup"
+      },
+      "examples": {
+        "powershell": [
+          {
+            "description": "Get a list of role references for a user group",
+            "beforeEach": [
+              "$Group = Get-GroupByName -Name \"business\""
+            ],
+            "command": "Get-RoleReferenceCollectionFromGroup -Group $Group.id"
+          }
+        ],
+        "go": [
+          {
+            "description": "Get a list of role references for a user group",
+            "command": "c8y userRoles getRoleReferenceCollectionFromGroup --group \"12345\""
+          }
+        ]
+      },
+      "pathParameters": [
+        {
+          "name": "tenant",
+          "type": "tenant",
+          "description": "Tenant"
+        },
+        {
+          "name": "group",
+          "type": "[]usergroup",
+          "required": true,
+          "description": "Group id"
+        }
+      ]
+    }
+  ]
+}

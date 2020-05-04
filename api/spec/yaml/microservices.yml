@@ -1,0 +1,361 @@
+
+---
+
+information:
+  name: microservices
+  description: Cumulocity microservices
+  descriptionLong: 'REST endpoint to interact with Cumulocity microservices'
+  link: https://cumulocity.com/guides/reference/applications/
+
+endpoints:
+  - name: getMicroserviceCollection
+    description: 'Get collection of microservices'
+    method: GET
+    path: /application/applications
+    accept: application/vnd.com.nsn.cumulocity.applicationCollection+json
+    collectionType: application/vnd.com.nsn.cumulocity.application+json
+    collectionProperty: applications
+    alias:
+        go: list
+        powershell: Get-MicroserviceCollection
+    examples:
+      powershell:
+        - description: Get microservices
+          command: Get-MicroserviceCollection -PageSize 100
+
+      go:
+        - description: Get microservices
+          command: c8y microservices list --pageSize 100
+    queryParameters:
+      - name: type
+        type: string
+        default: MICROSERVICE
+        validationSet: [MICROSERVICE]
+        static: true
+        description: Application type
+
+  - name: newMicroservice
+    skip: true
+    description: 'New microservice'
+    method: POST
+    path: /application/applications
+    accept: application/vnd.com.nsn.cumulocity.application+json
+    alias:
+        go: create
+        powershell: New-Microservice
+    examples:
+      powershell:
+        - description: Create new hosted application
+          command: New-Microservice -Name "myapp" -Type HOSTED -Key "myapp-key" -ContextPath "myapp"
+          afterEach:
+            - Remove-Microservice -Id "myapp"
+      go:
+        - description: Create new hosted application
+          command: c8y microservices create --name myapp --type HOSTED --key "myapp-key" --contextPath "myapp"
+    body:
+      - name: data
+        type: json
+        description: data
+
+      - name: name
+        type: string
+        required: true
+        description: Name of microservice
+
+      # TODO: Change to optional switch. When not set, then set to the value of name with a "-key" postfix
+      - name: key
+        type: string
+        required: true
+        description: 	Shared secret of microservice
+
+      - name: type
+        type: string
+        static: true
+        default: MICROSERVICE
+        validationSet: [MICROSERVICE]
+        description: Type of microservice. Possible values are MICROSERVICE
+
+      - name: availability
+        type: string
+        validationSet: [MARKET, PRIVATE]
+        required: false
+        description: 'Access level for other tenants. Possible values are : MARKET, PRIVATE (default)'
+
+      # Default to using the app name as the context path
+      - name: contextPath
+        type: string
+        required: false
+        description: contextPath of the hosted microservice.
+
+      - name: resourcesUrl
+        type: string
+        required: false
+        description: URL to application base directory hosted on an external server. Required when application type is HOSTED
+
+  - name: getMicroservice
+    description: 'Get microservice'
+    method: GET
+    path: /application/applications/{id}
+    accept: application/vnd.com.nsn.cumulocity.application+json
+    alias:
+        go: get
+        powershell: Get-Microservice
+    examples:
+      powershell:
+        - description: Get an microservice by id
+          beforeEach:
+            - $App = New-TestMicroservice -SkipUpload -SkipSubscription
+          command: Get-Microservice -Id $App.id
+          skipTest: true
+          afterEach:
+            - Remove-Microservice -Id $App.id
+
+        - description: Get an microservice by name
+          beforeEach:
+            - $App = New-TestMicroservice -SkipUpload -SkipSubscription
+          command: Get-Microservice -Id $App.name
+          skipTest: true
+          afterEach:
+            - Remove-Microservice -Id $App.id
+      go:
+        - description: Get an application
+          command: c8y microservices get --id 12345
+    pathParameters:
+      - name: id
+        type: microservice
+        pipeline: true
+        required: true
+        description: Microservice id
+
+  - name: deleteMicroservice
+    description: 'Delete microservice'
+    descriptionLong: 'Info: The application can only be removed when its availability is PRIVATE or in other case when it has no subscriptions.'
+    method: DELETE
+    path: /application/applications/{id}
+    alias:
+        go: delete
+        powershell: Remove-Microservice
+    examples:
+      powershell:
+        - description: Delete a microservice by id
+          beforeEach:
+            - $App = New-TestMicroservice -SkipUpload -SkipSubscription
+          command: Remove-Microservice -Id $App.id
+          skipTest: true
+
+        - description: Delete a microservice by name
+          beforeEach:
+            - $App = New-TestMicroservice -SkipUpload -SkipSubscription
+          command: Remove-Microservice -Id $App.name
+          skipTest: true
+      go:
+        - description: Delete an microservice by id
+          command: c8y microservices delete --id 12345
+
+        - description: Delete a microservice by name
+          command: c8y microservices delete --id my-temp-app
+
+    pathParameters:
+      - name: id
+        type: microservice
+        pipeline: true
+        required: true
+        description: Microservice id
+
+  - name: updateMicroservice
+    description: 'Update microservice meta information'
+    method: PUT
+    path: /application/applications/{id}
+    accept: application/vnd.com.nsn.cumulocity.application+json
+    alias:
+        go: update
+        powershell: Update-Microservice
+    examples:
+      powershell:
+        - description: Update microservice availability to MARKET
+          beforeEach:
+            - $App = New-TestMicroservice -SkipUpload -SkipSubscription
+          command: Update-Microservice -Id $App.id -Availability "MARKET"
+          skipTest: true
+          afterEach:
+            - Remove-Microservice -Id $App.id
+      go:
+        - description: Update microservice availability to MARKET
+          command: c8y microservices update --id "helloworld-app" --availability MARKET
+    pathParameters:
+      - name: id
+        type: microservice
+        pipeline: true
+        required: true
+        description: Microservice id
+
+    body:
+      - name: data
+        type: json
+        description: data
+
+      - name: key
+        type: string
+        required: false
+        description: 	Shared secret of microservice
+
+      - name: availability
+        type: string
+        validationSet: [MARKET, PRIVATE]
+        required: false
+        description: 'Access level for other tenants. Possible values are : MARKET, PRIVATE (default)'
+
+      - name: contextPath
+        type: string
+        required: false
+        description: contextPath of the hosted application
+
+      - name: resourcesUrl
+        type: string
+        required: false
+        description: URL to microservice base directory hosted on an external server
+
+  - name: newMicroserviceBinary
+    description: 'New application binary'
+    description: >
+      For the applications of type 'MICROSERVICE' to be available for Cumulocity platform users, a binary zip file must be uploaded.
+
+      For the microservice application, the zip file must consist of
+        * cumulocity.json - file describing the deployment
+        * image.tar - executable docker image
+
+      For the web application, the zip file must include index.html in the root directory.
+
+    method: POST
+    path: /application/applications/{id}/binaries
+    accept: application/vnd.com.nsn.cumulocity.managedObject+json
+    alias:
+        go: createBinary
+        powershell: New-MicroserviceBinary
+    examples:
+      powershell:
+        - description: Upload microservice binary
+          skipTest: true
+          beforeEach:
+            - $App = New-TestMicroservice -SkipUpload -SkipSubscription
+            - $MicroserviceZip = "$PSScriptRoot/TestData/microservice/helloworld.zip"
+          command: New-MicroserviceBinary -Id $App.id -File $MicroserviceZip
+          afterEach:
+            - Remove-Microservice -Id $App.id
+      go:
+        - description: Upload microservice binary
+          command: c8y microservices createBinary --id 12345 --file ./helloworld.zip
+    pathParameters:
+      - name: id
+        type: microservice
+        pipeline: true
+        required: true
+        description: Microservice id
+    body:
+      - name: file
+        type: file
+        required: true
+        description: File to be uploaded as a binary
+
+  - name: getMicroserviceBootstrapUser
+    description: 'Get microservice bootstrap user'
+    method: GET
+    path: /application/applications/{id}/bootstrapUser
+    accept: application/vnd.com.nsn.cumulocity.bootstrapuser+json
+    alias:
+        go: getBootstrapUser
+        powershell: Get-MicroserviceBootstrapUser
+    examples:
+      powershell:
+        - description: Get application bootstrap user
+          beforeEach:
+            - $App = New-TestMicroservice -SkipUpload -SkipSubscription
+          command: Get-MicroserviceBootstrapUser -Id $App.name
+          skipTest: true
+          afterEach:
+            - Remove-Microservice -Id $App.id
+
+      go:
+        - description: Get application bootstrap user by app id
+          command: c8y microservices getBootstrapUser --id 12345
+
+        - description: Get application bootstrap user by app name
+          command: c8y microservices getBootstrapUser --id myapp
+    pathParameters:
+      - name: id
+        type: microservice
+        pipeline: true
+        required: true
+        description: Microservice id
+
+  - name: enableMicroservice
+    description: 'Enable microservice'
+    method: POST
+    path: /tenant/tenants/{tenant}/applications
+    accept: application/vnd.com.nsn.cumulocity.applicationReference+json
+    alias:
+        go: enable
+        powershell: Enable-Microservice
+    examples:
+      powershell:
+        - description: Enable (subscribe) to a microservice
+          beforeEach:
+            - $App = New-TestMicroservice -SkipUpload -SkipSubscription
+          command: Enable-Microservice -Id $App.id
+          skipTest: true
+          afterEach:
+            - Remove-Microservice -Id $App.id
+
+      go:
+        - description: Enable (subscribe) to a microservice
+          command: c8y microservices enable --id 12345
+
+        - description: Enable (subscribe) to a microservice
+          command: c8y microservices enable --id myapp
+    pathParameters:
+      - name: tenant
+        type: tenant
+        required: false
+        description: Tenant id
+    body:
+      - name: id
+        type: microservice
+        property: application.id
+        pipeline: true
+        required: true
+        description: Microservice id
+
+  - name: disableMicroservice
+    description: 'Disable microservice'
+    method: DELETE
+    path: /tenant/tenants/{tenant}/applications/{id}
+    alias:
+        go: disable
+        powershell: Disable-Microservice
+    examples:
+      powershell:
+        - description: Disable (unsubscribe) to a microservice
+          beforeEach:
+            - $App = New-TestMicroservice -SkipUpload
+          skipTest: true
+          command: Disable-Microservice -Id $App.id
+          afterEach:
+            - Remove-Microservice -Id $App.id
+
+      go:
+        - description: Disable (unsubscribe) to a microservice
+          command: c8y microservices disable --id 12345
+
+        - description: Disable (unsubscribe) to a microservice
+          command: c8y microservices disable --id myapp
+    pathParameters:
+      - name: id
+        type: microservice
+        pipeline: true
+        required: true
+        description: Microservice id
+
+      - name: tenant
+        type: tenant
+        required: false
+        description: Tenant id

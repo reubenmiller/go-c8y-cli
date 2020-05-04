@@ -1,0 +1,90 @@
+---
+
+information:
+  name: databroker
+  description: Cumulocity databroker
+  descriptionLong: 'REST endpoint to interact with Cumulocity databroker'
+  link: https://cumulocity.com/guides/users-guide/enterprise-tenant/#data-broker
+
+endpoints:
+  - name: getDataBrokerConnectorCollection
+    description: 'Get collection of data broker connectors'
+    method: GET
+    path: /databroker/connectors
+    accept: application/vnd.com.nsn.cumulocity.databrokerConnectorCollection+json
+    collectionType: application/vnd.com.nsn.cumulocity.databrokerConnector+json
+    collectionProperty: connectors
+    alias:
+        go: list
+        powershell: Get-DataBrokerConnectorCollection
+    examples:
+      powershell:
+        - description: Get a list of data broker connectors
+          skipTest: true
+          command: Get-DataBrokerConnectorCollection
+
+      go:
+        - description: Get a list of data broker connectors
+          command: c8y databroker list
+
+  - name: getDataBroker
+    description: 'Get data broker connector'
+    method: GET
+    path: /databroker/connectors/{id}
+    accept: application/vnd.com.nsn.cumulocity.databrokerConnector+json
+    alias:
+        go: get
+        powershell: Get-DataBrokerConnector
+    examples:
+      powershell:
+        - description: Get a data broker connector
+          skipTest: true
+          command: Get-DataBrokerConnector -Id $DataBroker.id
+
+      go:
+        - description: Get a data broker connector
+          command: c8y databroker get --id 12345
+
+    pathParameters:
+      - name: id
+        type: string
+        required: true
+        pipeline: true
+        description: Data broker connector id
+
+  - name: updateDataBroker
+    description: 'Update data broker connector'
+    method: PUT
+    path: /databroker/connectors/{id}
+    accept: application/vnd.com.nsn.cumulocity.databrokerConnector+json
+    alias:
+        go: update
+        powershell: Update-DataBrokerConnector
+    examples:
+      powershell:
+        - description: Change the status of a specific data broker connector by given connector id
+          skipTest: true
+          command: Update-DataBroker -Id 12345 -Status SUSPENDED
+
+      go:
+        - description: Change the status of a specific data broker connector by given connector id
+          command: c8y databroker update --id 12345 --status SUSPENDED
+
+    pathParameters:
+      - name: id
+        type: string
+        required: true
+        pipeline: true
+        description: Data broker connector id
+
+    body:
+      - name: status
+        type: string
+        validationSet: [SUSPENDED]
+        required: true
+        description: DataBroker status [SUSPENDED].
+
+      - name: data
+        type: json
+        required: false
+        description: Data

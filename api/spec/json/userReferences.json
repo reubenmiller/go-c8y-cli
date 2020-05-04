@@ -1,0 +1,165 @@
+{
+  "information": {
+    "name": "userReferences",
+    "description": "Cumulocity user references",
+    "descriptionLong": "REST endpoint to interact with Cumulocity user references",
+    "link": "https://cumulocity.com/guides/reference/users/#user-reference-collection"
+  },
+  "endpoints": [
+    {
+      "name": "addUserToGroup",
+      "description": "Get user",
+      "method": "POST",
+      "path": "/user/{tenant}/groups/{group}/users",
+      "accept": "application/vnd.com.nsn.cumulocity.userReference+json",
+      "alias": {
+        "go": "addUserToGroup",
+        "powershell": "Add-UserToGroup"
+      },
+      "examples": {
+        "powershell": [
+          {
+            "description": "Add a user to a user group",
+            "beforeEach": [
+              "$User = New-TestUser",
+              "$Group = Get-GroupByName -Name \"business\""
+            ],
+            "command": "Add-UserToGroup -Group $Group.id -User $User.id",
+            "afterEach": [
+              "Remove-User -Id $User.id"
+            ]
+          }
+        ],
+        "go": [
+          {
+            "description": "List the users within a user group",
+            "command": "c8y userReferences addUserToGroup --group 1 --user myuser"
+          }
+        ]
+      },
+      "pathParameters": [
+        {
+          "name": "group",
+          "type": "[]usergroup",
+          "required": true,
+          "description": "Group ID"
+        },
+        {
+          "name": "tenant",
+          "type": "tenant",
+          "description": "Tenant"
+        }
+      ],
+      "body": [
+        {
+          "name": "user",
+          "type": "[]userself",
+          "pipeline": true,
+          "required": true,
+          "property": "user.self",
+          "description": "User id"
+        }
+      ]
+    },
+    {
+      "name": "deleteUserFromGroup",
+      "description": "Delete a user from a group",
+      "method": "DELETE",
+      "path": "/user/{tenant}/groups/{group}/users/{user}",
+      "accept": "",
+      "alias": {
+        "go": "deleteUserFromGroup",
+        "powershell": "Remove-UserFromGroup"
+      },
+      "examples": {
+        "powershell": [
+          {
+            "description": "Add a user to a user group",
+            "beforeEach": [
+              "$User = New-TestUser",
+              "$Group = Get-GroupByName -Name \"business\"",
+              "Add-UserToGroup -Group $Group.id -User $User.id"
+            ],
+            "command": "Remove-UserFromGroup -Group $Group.id -User $User.id",
+            "afterEach": [
+              "Remove-User -Id $User.id"
+            ]
+          }
+        ],
+        "go": [
+          {
+            "description": "List the users within a user group",
+            "command": "c8y userReferences deleteUserFromGroup --group 1 --user myuser"
+          }
+        ]
+      },
+      "pathParameters": [
+        {
+          "name": "group",
+          "type": "[]usergroup",
+          "required": true,
+          "description": "Group ID"
+        },
+        {
+          "name": "user",
+          "type": "[]user",
+          "required": true,
+          "description": "User id/username"
+        },
+        {
+          "name": "tenant",
+          "type": "tenant",
+          "description": "Tenant"
+        }
+      ]
+    },
+    {
+      "name": "getUsersInGroup",
+      "description": "Get all users in a group",
+      "method": "GET",
+      "path": "/user/{tenant}/groups/{id}/users",
+      "accept": "application/vnd.com.nsn.cumulocity.userReferenceCollection+json",
+      "collectionType": "application/vnd.com.nsn.cumulocity.user+json",
+      "collectionProperty": "references.#.user",
+      "alias": {
+        "go": "listGroupMembership",
+        "powershell": "Get-GroupMembershipCollection"
+      },
+      "examples": {
+        "powershell": [
+          {
+            "description": "List the users within a user group",
+            "beforeEach": [
+              "$Group = Get-GroupByName -Name \"business\""
+            ],
+            "command": "Get-GroupMembershipCollection -Id $Group.id"
+          },
+          {
+            "description": "List the users within a user group (using pipeline)",
+            "command": "Get-GroupByName -Name \"business\" | Get-GroupMembershipCollection"
+          }
+        ],
+        "go": [
+          {
+            "description": "List the users within a user group",
+            "command": "c8y userReferences listGroupMembership --group 1"
+          }
+        ]
+      },
+      "pathParameters": [
+        {
+          "name": "id",
+          "type": "[]usergroup",
+          "required": true,
+          "pipeline": true,
+          "description": "Group ID"
+        },
+        {
+          "name": "tenant",
+          "type": "tenant",
+          "description": "Tenant"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,247 @@
+
+---
+information:
+  name: operations
+  description: Cumulocity operations
+  descriptionLong: 'REST endpoint to interact with Cumulocity operations'
+  link: https://cumulocity.com/guides/reference/device-control/
+
+endpoints:
+  - name: getOperationCollection
+    method: GET
+    description: Get a collection of operations based on filter parameters
+    descriptionLong: Get a collection of operations based on filter parameters
+    path: devicecontrol/operations
+    accept: application/vnd.com.nsn.cumulocity.operationCollection+json
+    collectionType: application/vnd.com.nsn.cumulocity.operation+json
+    collectionProperty: operations
+    alias:
+        go: list
+        powershell: Get-OperationCollection
+    examples:
+      powershell:
+        - description: Get a list of pending operations
+          command: Get-OperationCollection -Status PENDING
+
+        - description: Get a list of pending operations for a given agent and all of its child devices
+          beforeEach:
+            - $Agent = New-TestAgent
+            - $Operation1 = PSc8y\New-TestOperation -Device $Agent.id
+          command: Get-OperationCollection -Agent $Agent.id -Status PENDING
+          afterEach:
+            - Remove-ManagedObject -id $Agent.id
+
+        - description: Get a list of pending operations for a device
+          beforeEach:
+            - $Agent = New-TestAgent
+            - $Device = New-TestDevice
+            - New-ChildDeviceReference -Device $Agent.id -NewChild $Device.id
+            - $Operation2 = PSc8y\New-TestOperation -Device $Device.id
+          command: Get-OperationCollection -Device $Device.id -Status PENDING
+          afterEach:
+            - Remove-ManagedObject -id $Device.id
+            - Remove-ManagedObject -id $Agent.id
+
+        - description: Get operations from a device (using pipeline)
+          beforeEach:
+            - $Agent2 = New-TestAgent
+            - $Operation3 = PSc8y\New-TestOperation -Device $Agent2.id
+          command: Get-DeviceCollection -Name $Agent2.name | Get-OperationCollection
+          afterEach:
+            - PSc8y\Remove-ManagedObject -Id $Agent2.id
+
+      go:
+        - description: Get a list of pending operations
+          command: c8y operations list --status PENDING
+
+        - description: Get a list of pending operations for a given agent and all of its child devices
+          command: c8y operations list --agent myagent --status PENDING
+
+        - description: Get a list of pending operations for a device
+          command: c8y operations list --device mydevice --status PENDING
+    queryParameters:
+      - name: agent
+        type: '[]device'
+        property: agentId
+        description: Agent ID
+        pipeline: false
+
+      - name: device
+        type: '[]device'
+        property: deviceId
+        description: Device ID
+        pipeline: true
+
+      - name: dateFrom
+        type: datetime
+        description: Start date or date and time of operation.
+
+      - name: dateTo
+        type: datetime
+        description: End date or date and time of operation.
+
+      - name: status
+        type: string
+        description: Operation status, can be one of SUCCESSFUL, FAILED, EXECUTING or PENDING.
+        validationSet: [PENDING, EXECUTING, SUCCESSFUL, FAILED]
+
+  - name: getOperation
+    description: 'Get operation/s'
+    method: GET
+    examples:
+      powershell:
+        - description: Get operation by id
+          command: Get-Operation -Id {{ NewOperation }}
+
+      go:
+        - description: Get operation by id
+          command: c8y operations get --id 12345
+
+    path: devicecontrol/operations/{id}
+    accept: application/vnd.com.nsn.cumulocity.operation+json
+    alias:
+        go: get
+        powershell: Get-Operation
+    pathParameters:
+      - name: id
+        type: string
+        required: true
+        pipeline: true
+        description: Operation id
+
+  - name: newOperation
+    method: POST
+    path: devicecontrol/operations
+    accept: application/vnd.com.nsn.cumulocity.operation+json
+    description: 'Create a new operation'
+    descriptionLong: 'Create a new operation'
+    examples:
+      powershell:
+        - description: Create operation for a device
+          beforeEach:
+            - $device = New-TestAgent
+          command: 'New-Operation -Device $device.id -Description "Restart device" -Data @{ c8y_Restart = @{} }'
+          afterEach:
+            - Remove-ManagedObject -Id $device.id
+
+        - description: Create operation for a device (using pipeline)
+          beforeEach:
+            - $device = New-TestAgent
+          command: 'Get-Device $device.id | New-Operation -Description "Restart device" -Data @{ c8y_Restart = @{} }'
+          afterEach:
+            - Remove-ManagedObject -Id $device.id
+
+      go:
+        - description: Create operation for a device
+          command: c8y operations create --device mydevice --data "{c8y_Restart:{}}"
+    alias:
+        go: create
+        powershell: New-Operation
+    body:
+      - name: device
+        type: '[]device'
+        property: deviceId
+        required: true
+        pipeline: true
+        description: Identifies the target device on which this operation should be performed.
+
+      - name: description
+        type: string
+        required: false
+        description: Text description of the operation.
+
+      - name: data
+        type: json
+        description: Additional properties describing the operation which will be performed on the device.
+
+
+  - name: updateOperation
+    description: Update operation
+    descriptionLong: Update operation
+    examples:
+      powershell:
+        - description: Update an operation
+          command: Update-Operation -Id {{ NewOperation }} -Status EXECUTING
+
+        - description: Update multiple operations
+          beforeEach:
+            - $Agent = PSc8y\New-TestAgent
+            - $Operation1 = PSc8y\New-TestOperation -Device $Agent.id
+            - $Operation2 = PSc8y\New-TestOperation -Device $Agent.id
+          command: Get-OperationCollection -Device $Agent.id -Status PENDING | Update-Operation -Status FAILED -FailureReason "manually cancelled"
+          afterEach:
+            - PSc8y\Remove-ManagedObject -Id $Agent.id
+
+      go:
+        - description: Update an operation
+          command: c8y operations update --id 12345 --status EXECUTING
+    method: PUT
+    path: devicecontrol/operations/{id}
+    accept: application/vnd.com.nsn.cumulocity.operation+json
+    alias:
+        go: update
+        powershell: Update-Operation
+    body:
+      - name: status
+        type: string
+        required: true
+        description: Operation status, can be one of SUCCESSFUL, FAILED, EXECUTING or PENDING.
+        validationSet: [PENDING, EXECUTING, SUCCESSFUL, FAILED]
+
+      - name: failureReason
+        type: string
+        required: false
+        description: Reason for the failure. Use when setting status to FAILED
+
+      - name: data
+        type: json
+        description: Additional properties describing the operation which will be performed on the device.
+
+    pathParameters:
+      - name: id
+        type: string
+        description: Operation id
+        pipeline: true
+        required: true
+
+  - name: deleteOperationCollection
+    description: 'Delete a collection of operations'
+    examples:
+      powershell:
+        - description: Remove all pending operations for a given device
+          command: Remove-OperationCollection -Device "{{ randomdevice }}" -Status PENDING
+
+      go:
+        - description: Remove all pending operations for a given device
+          command: c8y operations deleteCollection --device mydevice --status PENDING
+    method: DELETE
+    path: devicecontrol/operations
+    accept: ''
+    alias:
+        go: deleteCollection
+        powershell: Remove-OperationCollection
+    queryParameters:
+      - name: agent
+        type: '[]device'
+        property: agentId
+        description: Agent ID
+
+      - name: device
+        type: '[]device'
+        property: deviceId
+        description: Device ID
+        pipeline: true
+
+      - name: dateFrom
+        type: datetime
+        description: Start date or date and time of operation.
+
+      - name: dateTo
+        type: datetime
+        description: End date or date and time of operation.
+
+      - name: status
+        type: string
+        description: Operation status, can be one of SUCCESSFUL, FAILED, EXECUTING or PENDING.
+        validationSet: [PENDING, EXECUTING, SUCCESSFUL, FAILED]
+

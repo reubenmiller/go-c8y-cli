@@ -1,0 +1,22 @@
+﻿Function Get-ClientBinary {
+<#
+.SYNOPSIS
+Get the full path to the Cumulocity Binary which is compatible with the current Operating system
+
+.EXAMPLE
+Get-ClientBinary
+
+Returns the fullname of the path to the Cumulocity binary
+#>
+    [cmdletbinding()]
+    [OutputType([String])]
+    Param()
+
+    if ($IsLinux) {
+        Resolve-Path "$script:Dependencies/c8y.linux"
+    } elseif ($IsMacOS) {
+        Resolve-Path "$script:Dependencies/c8y.macos"
+    } else {
+        Resolve-Path "$script:Dependencies/c8y.windows.exe"
+    }
+}

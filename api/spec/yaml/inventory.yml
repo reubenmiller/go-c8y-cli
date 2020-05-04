@@ -1,0 +1,277 @@
+
+---
+information:
+  name: inventory
+  description: Cumulocity managed objects
+  descriptionLong: 'REST endpoint to interact with Cumulocity managed objects'
+  link: https://cumulocity.com/guides/reference/inventory/
+
+endpoints:
+  - name: getManagedObjectCollection
+    method: GET
+    description: Get a collection of managedObjects based on filter parameters
+    descriptionLong: Get a collection of managedObjects based on filter parameters
+    path: inventory/managedObjects
+    accept: application/vnd.com.nsn.cumulocity.managedObjectCollection+json
+    collectionType: application/vnd.com.nsn.cumulocity.managedObject+json
+    collectionProperty: managedObjects
+    alias:
+        go: list
+        powershell: Get-ManagedObjectCollection
+    examples:
+      powershell:
+        - description: Get a list of managed objects
+          command: Get-ManagedObjectCollection
+
+        - description: Get a list of managed objects by looking up their names
+          beforeEach:
+            - $Device1 = New-TestDevice
+            - $Device2 = New-TestDevice
+          command: Get-ManagedObjectCollection -Device $Device1.name, $Device2.name
+          afterEach:
+            - Remove-ManagedObject -Id $Device1.id
+            - Remove-ManagedObject -Id $Device2.id
+
+      go:
+        - description: Get a list of managed objects
+          command: c8y inventory list
+    queryParameters:
+      # TODO: format the ids to a comma separated list
+      - name: device
+        type: '[]device'
+        property: ids
+        description: List of ids.
+
+      - name: type
+        type: string
+        description: ManagedObject type.
+
+      - name: fragmentType
+        type: string
+        description: ManagedObject fragment type.
+
+      - name: text
+        type: string
+        description: managed objects containing a text value starting with the given text (placeholder {text}). Text value is any alphanumeric string starting with a latin letter (A-Z or a-z).
+
+      - name: withParents
+        type: boolean
+        description: include a flat list of all parents and grandparents of the given object
+
+      - name: skipChildrenNames
+        type: boolean
+        description: Don't include the child devices names in the resonse. This can improve the api's response because the names don't need to be retrieved
+
+  - name: queryManagedObjectCollection
+    method: GET
+    skip: true
+    description: Get a collection of managedObjects based on Cumulocity query language
+    descriptionLong: Get a collection of managedObjects based on Cumulocity query language
+    path: inventory/managedObjects
+    accept: application/vnd.com.nsn.cumulocity.managedObjectCollection+json
+    collectionType: application/vnd.com.nsn.cumulocity.managedObject+json
+    collectionProperty: managedObjects
+    alias:
+        go: find
+        powershell: Find-ManagedObjectCollection
+    examples:
+      powershell:
+        - description: Find all devices with their names starting with 'roomUpperFloor_'
+          beforeEach:
+            - $Device = New-TestDevice -Name "roomUpperFloor_"
+          command: Find-ManagedObjectCollection -Query "name eq 'roomUpperFloor_*'"
+          afterEach:
+            - Remove-ManagedObject -Id $Device.id
+
+      go:
+        - description: Get a list of managed objects
+          command: c8y inventory find --query "name eq 'roomUpperFloor_*'"
+
+    queryParameters:
+      - name: query
+        type: string
+        required: true
+        description: ManagedObject query.
+
+      - name: withParents
+        type: boolean
+        description: include a flat list of all parents and grandparents of the given object
+
+  - name: newManagedObject
+    method: POST
+    path: inventory/managedObjects
+    accept: application/vnd.com.nsn.cumulocity.inventory+json
+    description: 'Create a new inventory'
+    descriptionLong: 'Create a new inventory'
+    alias:
+        go: create
+        powershell: New-ManagedObject
+    examples:
+      powershell:
+        - description: Create a managed object
+          beforeEach:
+            - $type = New-RandomString -Prefix "customType_"
+          command: New-ManagedObject -Name "testMO" -Type $type -Data @{ custom_data = @{ value = 1 } }
+          afterEach:
+            - Get-ManagedObjectCollection -Type $type | Remove-ManagedObject
+
+      go:
+        - description: Create a managed object
+          command: c8y inventory create --name "testMO" --type "custom_type"
+    body:
+      - name: name
+        type: string
+        required: false
+        description: name
+
+      - name: type
+        type: string
+        required: false
+        description: type
+
+      - name: data
+        type: json
+        description: Additional properties of the inventory.
+
+  - name: getManagedObject
+    description: 'Get managed objects/s'
+    descriptionLong: Get a managed object by id
+    method: GET
+    path: inventory/managedObjects/{id}
+    accept: application/vnd.com.nsn.cumulocity.inventory+json
+    alias:
+        go: get
+        powershell: Get-ManagedObject
+    examples:
+      powershell:
+        - description: Get a managed object
+          beforeEach:
+            - $mo = PSc8y\New-ManagedObject -Name "testMO"
+          command: Get-ManagedObject -Id $mo.id
+          afterEach:
+            - Remove-ManagedObject -Id $mo.id
+
+        - description: Get a managed object (using pipeline)
+          beforeEach:
+            - $mo = PSc8y\New-ManagedObject -Name "testMO"
+          command: Get-ManagedObject -Id $mo.id | Get-ManagedObject
+          afterEach:
+            - Remove-ManagedObject -Id $mo.id
+
+        - description: Get a managed object with parent references
+          beforeEach:
+            - $mo = PSc8y\New-ManagedObject -Name "testMO"
+          command: Get-ManagedObject -Id $mo.id -WithParents
+          afterEach:
+            - Remove-ManagedObject -Id $mo.id
+
+      go:
+        - description: Get a managed object
+          command: c8y inventory get --id 12345
+
+        - description: Get a managed object with parent references
+          command: c8y inventory get --id 12345 --withParents
+
+    pathParameters:
+      - name: id
+        type: string
+        pipeline: true
+        required: true
+        description: ManagedObject id
+
+    queryParameters:
+      - name: withParents
+        type: boolean
+        description: include a flat list of all parents and grandparents of the given object
+
+  - name: updateManagedObject
+    method: PUT
+    path: inventory/managedObjects/{id}
+    accept: application/vnd.com.nsn.cumulocity.inventory+json
+    description: Update inventory
+    descriptionLong: Update a managed object by id
+    alias:
+        go: update
+        powershell: Update-ManagedObject
+    examples:
+      powershell:
+        - description: Update a managed object
+          beforeEach:
+            - $mo = PSc8y\New-ManagedObject -Name "testMO"
+          command: Update-ManagedObject -Id $mo.id -Data @{ com_my_props = @{ value = 1 } }
+          afterEach:
+            - Remove-ManagedObject -Id $mo.id
+
+        - description: Update a managed object (using pipeline)
+          beforeEach:
+            - $mo = PSc8y\New-ManagedObject -Name "testMO"
+          command: Get-ManagedObject -Id $mo.id | Update-ManagedObject -Data @{ com_my_props = @{ value = 1 } }
+          afterEach:
+            - Remove-ManagedObject -Id $mo.id
+
+      go:
+        - description: Update a managed object
+          command: 'c8y inventory update --id 12345 --newName "my_custom_name" --data "{\"com_my_props\":{}\"value\":1}"'
+    body:
+      - name: newName
+        property: name
+        type: string
+        required: false
+        description: name
+
+      - name: data
+        type: json
+        description: Additional properties of the inventory.
+
+    pathParameters:
+      - name: id
+        type: string
+        pipeline: true
+        description: ManagedObject id
+        required: true
+
+  - name: deleteManagedObject
+    description: 'Delete inventory/s'
+    descriptionLong: Delete a managed object by id
+    method: DELETE
+    path: inventory/managedObjects/{id}
+    accept: ''
+    alias:
+        go: delete
+        powershell: Remove-ManagedObject
+    examples:
+      powershell:
+        - description: Delete a managed object
+          beforeEach:
+            - $mo = PSc8y\New-ManagedObject -Name "testMO"
+          command: Remove-ManagedObject -Id $mo.id
+
+        - description: Delete a managed object (using pipeline)
+          beforeEach:
+            - $mo = PSc8y\New-ManagedObject -Name "testMO"
+          command: Get-ManagedObject -Id $mo.id | Remove-ManagedObject
+
+        - description: Delete a managed object and all child devices
+          beforeEach:
+            - $Device = PSc8y\New-TestDevice
+            - $ChildDevice = PSc8y\New-TestDevice
+            - PSc8y\New-ChildDeviceReference -Device $Device.id -NewChild $ChildDevice.id
+          command: Get-ManagedObject -Id $Device.id | Remove-ManagedObject -Cascade
+
+      go:
+        - description: Delete a managed object
+          command: c8y inventory delete --id 12345
+
+        - description: Delete a managed object
+          command: c8y inventory delete --id 12345 --cascade
+    pathParameters:
+      - name: id
+        type: string
+        pipeline: true
+        required: true
+        description: ManagedObject id
+
+    queryParameters:
+      - name: cascade
+        type: boolean
+        description: Remove all child devices and child assets will be deleted recursively. By default, the delete operation is propagated to the subgroups only if the deleted object is a group

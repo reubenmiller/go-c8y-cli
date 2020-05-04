@@ -1,0 +1,203 @@
+
+---
+
+information:
+  name: retentionRules
+  description: Cumulocity retentionRules
+  descriptionLong: 'REST endpoint to interact with Cumulocity retentionRules'
+  link: https://cumulocity.com/guides/reference/retention-rules/#retention-rules
+
+endpoints:
+  - name: getRetentionRuleCollection
+    description: 'Get collection of retention rules'
+    method: GET
+    path: /retention/retentions
+    accept: application/vnd.com.nsn.cumulocity.retentionRuleCollection+json
+    collectionType: application/vnd.com.nsn.cumulocity.retentionRule+json
+    collectionProperty: retentionRules
+    alias:
+        go: list
+        powershell: Get-RetentionRuleCollection
+    examples:
+      powershell:
+        - description: Get a list of retention rules
+          command: Get-RetentionRuleCollection
+
+      go:
+        - description: Get a list of retention rules
+          command: c8y retentionRules list
+
+  - name: newRetentionRule
+    description: 'New retention rule'
+    method: POST
+    path: /retention/retentions
+    accept: application/vnd.com.nsn.cumulocity.retentionRule+json
+    alias:
+        go: create
+        powershell: New-RetentionRule
+    examples:
+      powershell:
+        - description: Create a retention rule to delete all alarms after 180 days
+          command: New-RetentionRule -DataType ALARM -MaximumAge 180
+
+      go:
+        - description: Create a retention rule
+          command: c8y retentionRules create --dataType ALARM --maximumAge 180
+    body:
+      - name: dataType
+        type: string
+        validationSet: [ALARM, AUDIT, EVENT, MEASUREMENT, OPERATION, '*']
+        required: true
+        description: RetentionRule will be applied to this type of documents, possible values [ALARM, AUDIT, EVENT, MEASUREMENT, OPERATION, *].
+
+      - name: fragmentType
+        type: string
+        required: false
+        description: RetentionRule will be applied to documents with fragmentType.
+
+      - name: type
+        type: string
+        required: false
+        description: RetentionRule will be applied to documents with type.
+
+      - name: source
+        type: string
+        required: false
+        description: RetentionRule will be applied to documents with source.
+
+      - name: maximumAge
+        type: integer
+        required: true
+        description: Maximum age of document in days.
+
+      - name: editable
+        type: boolean
+        required: false
+        description: Whether the rule is editable. Can be updated only by management tenant.
+
+  - name: getRetentionRule
+    description: 'Get retention rule'
+    method: GET
+    path: /retention/retentions/{id}
+    accept: application/vnd.com.nsn.cumulocity.retentionRule+json
+    alias:
+        go: get
+        powershell: Get-RetentionRule
+    examples:
+      powershell:
+        - description: Get a retention rule
+          beforeEach:
+            - $RetentionRule = New-RetentionRule -DataType ALARM -MaximumAge 365
+          command: Get-RetentionRule -Id $RetentionRule.id
+          afterEach:
+            - Remove-RetentionRule -Id $RetentionRule.id
+
+      go:
+        - description: Get a retention rule
+          command: c8y retentionRules get --id 12345
+    pathParameters:
+      - name: id
+        type: string
+        required: true
+        pipeline: true
+        description: Retention rule id
+
+  - name: deleteRetentionRule
+    description: 'Delete retention rule'
+    method: DELETE
+    path: /retention/retentions/{id}
+    alias:
+        go: delete
+        powershell: Remove-RetentionRule
+    examples:
+      powershell:
+        - description: Delete a retention rule
+          beforeEach:
+            - $RetentionRule = New-RetentionRule -DataType ALARM -MaximumAge 200
+          command: Remove-RetentionRule -Id $RetentionRule.id
+
+        - description: Delete a retention rule (using pipeline)
+          beforeEach:
+            - $RetentionRule = New-RetentionRule -DataType ALARM -MaximumAge 200
+          command: Get-RetentionRule -Id $RetentionRule.id | Remove-RetentionRule
+
+      go:
+        - description: Delete a retention rule
+          command: c8y retentionRules delete --id 12345
+    pathParameters:
+      - name: id
+        type: string
+        required: true
+        pipeline: true
+        description: Retention rule id
+
+  - name: updateRetentionRule
+    description: 'Update retention rule'
+    method: PUT
+    path: /retention/retentions/{id}
+    accept: application/vnd.com.nsn.cumulocity.retentionRule+json
+    alias:
+        go: update
+        powershell: Update-RetentionRule
+    examples:
+      powershell:
+        - description: Update a retention rule
+          beforeEach:
+            - $RetentionRule = New-RetentionRule -DataType ALARM -MaximumAge 365
+          command: Update-RetentionRule -Id $RetentionRule.id -DataType MEASUREMENT -FragmentType "custom_FragmentType"
+          afterEach:
+            - Remove-RetentionRule -Id $RetentionRule.id
+
+        - description: Update a retention rule (using pipeline)
+          beforeEach:
+            - $RetentionRule = New-RetentionRule -DataType ALARM -MaximumAge 365
+          command: Get-RetentionRule -Id $RetentionRule.id | Update-RetentionRule -DataType MEASUREMENT -FragmentType "custom_FragmentType"
+          afterEach:
+            - Remove-RetentionRule -Id $RetentionRule.id
+
+      go:
+        - description: Update a retention rule
+          command: c8y retentionRules get --id 12345
+    pathParameters:
+      - name: id
+        type: string
+        required: true
+        pipeline: true
+        description: Retention rule id
+
+    body:
+      - name: dataType
+        type: string
+        validationSet: [ALARM, AUDIT, EVENT, MEASUREMENT, OPERATION, '*']
+        required: true
+        description: RetentionRule will be applied to this type of documents, possible values [ALARM, AUDIT, EVENT, MEASUREMENT, OPERATION, *].
+
+      - name: fragmentType
+        type: string
+        required: false
+        description: RetentionRule will be applied to documents with fragmentType.
+
+      - name: type
+        type: string
+        required: false
+        description: RetentionRule will be applied to documents with type.
+
+      - name: source
+        type: string
+        required: false
+        description: RetentionRule will be applied to documents with source.
+
+      - name: maximumAge
+        type: integer
+        required: false
+        description: Maximum age of document in days.
+
+      - name: editable
+        type: boolean
+        required: false
+        description: Whether the rule is editable. Can be updated only by management tenant.
+
+      - name: data
+        type: json
+        required: false
+        description: Data

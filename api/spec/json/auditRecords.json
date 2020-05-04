@@ -1,0 +1,306 @@
+{
+  "information": {
+    "name": "auditRecords",
+    "description": "Cumulocity auditRecords",
+    "descriptionLong": "REST endpoint to interact with Cumulocity auditRecords",
+    "link": "https://cumulocity.com/guides/reference/auditing/#audit-api"
+  },
+  "endpoints": [
+    {
+      "name": "newAudit",
+      "description": "Create a new audit record",
+      "descriptionLong": "Create a new audit record for a given action",
+      "method": "POST",
+      "path": "/audit/auditRecords",
+      "accept": "application/vnd.com.nsn.cumulocity.auditRecord+json",
+      "alias": {
+        "go": "create",
+        "powershell": "New-AuditRecord"
+      },
+      "examples": {
+        "powershell": [
+          {
+            "description": "Create an audit record for a custom managed object update",
+            "beforeEach": [
+              "$Device = New-TestDevice"
+            ],
+            "command": "New-AuditRecord -Type \"ManagedObject\" -Time \"0s\" -Text \"Managed Object updated: my_Prop: value\" -Source $Device.id -Activity \"Managed Object updated\" -Severity \"information\"",
+            "afterEach": [
+              "Remove-ManagedObject -Id $Device.id"
+            ]
+          }
+        ],
+        "go": [
+          {
+            "description": "Create an audit record for a custom managed object update",
+            "command": "c8y auditRecords create --type \"ManagedObject\" --time \"0s\" --text \"Managed Object updated: my_Prop: value\" --source $Device.id --activity \"Managed Object updated\" --severity \"information\""
+          }
+        ]
+      },
+      "body": [
+        {
+          "name": "type",
+          "type": "string",
+          "required": true,
+          "description": "Identifies the type of this audit record."
+        },
+        {
+          "name": "time",
+          "type": "datetime",
+          "required": false,
+          "default": "0s",
+          "description": "Time of the audit record."
+        },
+        {
+          "name": "text",
+          "type": "string",
+          "required": true,
+          "description": "Text description of the audit record."
+        },
+        {
+          "name": "source",
+          "type": "string",
+          "property": "source.id",
+          "required": true,
+          "description": "An optional ManagedObject that the audit record originated from"
+        },
+        {
+          "name": "activity",
+          "type": "string",
+          "required": true,
+          "description": "The activity that was carried out."
+        },
+        {
+          "name": "severity",
+          "type": "string",
+          "required": true,
+          "validationSet": [
+            "critical",
+            "major",
+            "minor",
+            "warning",
+            "information"
+          ],
+          "description": "The severity of action: critical, major, minor, warning or information."
+        },
+        {
+          "name": "user",
+          "type": "string",
+          "required": false,
+          "description": "The user responsible for the audited action."
+        },
+        {
+          "name": "application",
+          "type": "string",
+          "required": false,
+          "description": "The application used to carry out the audited action."
+        },
+        {
+          "name": "data",
+          "type": "json",
+          "required": false,
+          "description": "Additional properties of the audit record."
+        }
+      ]
+    },
+    {
+      "name": "getAuditRecordCollection",
+      "description": "Get collection of (user) audits",
+      "method": "GET",
+      "path": "/audit/auditRecords",
+      "accept": "application/vnd.com.nsn.cumulocity.auditRecordCollection+json",
+      "collectionType": "application/vnd.com.nsn.cumulocity.auditRecord+json",
+      "collectionProperty": "auditRecords",
+      "alias": {
+        "go": "list",
+        "powershell": "Get-AuditRecordCollection"
+      },
+      "examples": {
+        "powershell": [
+          {
+            "description": "Get a list of audit records",
+            "beforeEach": [
+              "$Device1 = New-TestDevice"
+            ],
+            "command": "Get-AuditRecordCollection -PageSize 100",
+            "afterEach": [
+              "Remove-ManagedObject -Id $Device1.id"
+            ]
+          },
+          {
+            "description": "Get a list of audit records related to a managed object",
+            "beforeEach": [
+              "$Device2 = New-TestDevice",
+              "Remove-ManagedObject -Id $Device2.id"
+            ],
+            "command": "Get-AuditRecordCollection -Source $Device2.id"
+          },
+          {
+            "description": "Get a list of audit records related to an operation",
+            "beforeEach": [
+              "$Device3 = New-TestAgent",
+              "$Operation = New-TestOperation -Device $Device3",
+              "Update-Operation -Id $Operation.id -Status \"EXECUTING\"",
+              "Update-Operation -Id $Operation.id -Status \"SUCCESSFUL\""
+            ],
+            "command": "Get-Operation -Id $Operation.id | Get-AuditRecordCollection",
+            "afterEach": [
+              "Remove-ManagedObject -Id $Device3.id"
+            ]
+          }
+        ],
+        "go": [
+          {
+            "description": "Get a list of audit records",
+            "command": "c8y auditRecords list --pageSize 100"
+          }
+        ]
+      },
+      "queryParameters": [
+        {
+          "name": "source",
+          "type": "id",
+          "pipeline": true,
+          "required": false,
+          "description": "Source Id or object containing an .id property of the element that should be detected. i.e. AlarmID, or Operation ID. Note: Only one source can be provided"
+        },
+        {
+          "name": "type",
+          "type": "string",
+          "description": "Type"
+        },
+        {
+          "name": "user",
+          "type": "string",
+          "description": "Username"
+        },
+        {
+          "name": "application",
+          "type": "string",
+          "description": "Application"
+        },
+        {
+          "name": "dateFrom",
+          "type": "datetime",
+          "description": "Start date or date and time of audit record occurrence."
+        },
+        {
+          "name": "dateTo",
+          "type": "datetime",
+          "description": "End date or date and time of audit record occurrence."
+        },
+        {
+          "name": "revert",
+          "type": "boolean",
+          "description": "Return the newest instead of the oldest audit records. Must be used with dateFrom and dateTo parameters"
+        }
+      ]
+    },
+    {
+      "name": "getAuditRecord",
+      "description": "Get an audit record",
+      "method": "GET",
+      "path": "/audit/auditRecords/{id}",
+      "accept": "application/vnd.com.nsn.cumulocity.auditRecord+json",
+      "alias": {
+        "go": "get",
+        "powershell": "Get-AuditRecord"
+      },
+      "examples": {
+        "powershell": [
+          {
+            "description": "Get an audit record by id",
+            "beforeEach": [
+              "$Device = New-TestDevice",
+              "$Record = New-AuditRecord -Type \"ManagedObject\" -Time \"0s\" -Text \"Managed Object updated: my_Prop: value\" -Source $Device.id -Activity \"Managed Object updated\" -Severity \"information\""
+            ],
+            "command": "Get-AuditRecord -Id $Record.id",
+            "afterEach": [
+              "Remove-ManagedObject -Id $Device.id"
+            ]
+          }
+        ],
+        "go": [
+          {
+            "description": "Get an audit record by id",
+            "command": "c8y auditRecords get --id 12345"
+          }
+        ]
+      },
+      "pathParameters": [
+        {
+          "name": "id",
+          "type": "string",
+          "required": true,
+          "pipeline": true,
+          "description": "Audit id"
+        }
+      ]
+    },
+    {
+      "name": "deleteAuditRecordCollection",
+      "description": "Delete a collection of audit records",
+      "descriptionLong": "Important: This method has been deprecated and will be removed completely with the July 2020 release (10.6.6). With Cumulocity IoT >= 10.6.6 the deletion of audit logs will no longer be permitted. All DELETE requests to the audit API will return the error 405 Method not allowed. Note that retention rules still apply to audit logs and will delete audit log records older than the specified retention time.",
+      "method": "DELETE",
+      "path": "/audit/auditRecords",
+      "deprecated": true,
+      "alias": {
+        "go": "deleteCollection",
+        "powershell": "Remove-AuditRecordCollection"
+      },
+      "examples": {
+        "powershell": [
+          {
+            "description": "Delete audit records from a device",
+            "beforeEach": [
+              "$Device = New-TestDevice",
+              "$Record = New-AuditRecord -Type \"ManagedObject\" -Time \"0s\" -Text \"Managed Object updated: my_Prop: value\" -Source $Device.id -Activity \"Managed Object updated\" -Severity \"information\""
+            ],
+            "command": "Remove-AuditRecordCollection -Source $Device.id",
+            "afterEach": [
+              "Remove-ManagedObject -Id $Device.id"
+            ]
+          }
+        ],
+        "go": [
+          {
+            "description": "Delete audit records from a device",
+            "command": "c8y auditRecords deleteCollection --source 12345"
+          }
+        ]
+      },
+      "queryParameters": [
+        {
+          "name": "source",
+          "type": "string",
+          "description": "Source Id or object containing an .id property of the element that should be detected. i.e. AlarmID, or Operation ID. Note: Only one source can be provided"
+        },
+        {
+          "name": "type",
+          "type": "string",
+          "description": "Type"
+        },
+        {
+          "name": "user",
+          "type": "string",
+          "description": "Username"
+        },
+        {
+          "name": "application",
+          "type": "string",
+          "description": "Application"
+        },
+        {
+          "name": "dateFrom",
+          "type": "datetime",
+          "description": "Start date or date and time of audit record occurrence."
+        },
+        {
+          "name": "dateTo",
+          "type": "datetime",
+          "description": "End date or date and time of audit record occurrence."
+        }
+      ]
+    }
+  ]
+}

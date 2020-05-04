@@ -1,0 +1,498 @@
+{
+  "information": {
+    "name": "applications",
+    "description": "Cumulocity applications",
+    "descriptionLong": "REST endpoint to interact with Cumulocity applications",
+    "link": "https://cumulocity.com/guides/reference/applications/"
+  },
+  "endpoints": [
+    {
+      "name": "getApplicationCollection",
+      "description": "Get a collection of applications",
+      "descriptionLong": "Get a collection of applications by a given filter",
+      "method": "GET",
+      "path": "/application/applications",
+      "accept": "application/vnd.com.nsn.cumulocity.applicationCollection+json",
+      "collectionType": "application/vnd.com.nsn.cumulocity.application+json",
+      "collectionProperty": "applications",
+      "alias": {
+        "go": "list",
+        "powershell": "Get-ApplicationCollection"
+      },
+      "examples": {
+        "powershell": [
+          {
+            "description": "Get applications",
+            "command": "Get-ApplicationCollection -PageSize 100"
+          }
+        ],
+        "go": [
+          {
+            "description": "Get applications",
+            "command": "c8y applications list --pageSize 100"
+          }
+        ]
+      },
+      "queryParameters": [
+        {
+          "name": "type",
+          "type": "string",
+          "validationSet": [
+            "APAMA_CEP_RULE",
+            "EXTERNAL",
+            "HOSTED",
+            "MICROSERVICE"
+          ],
+          "description": "Application type"
+        }
+      ]
+    },
+    {
+      "name": "newApplication",
+      "description": "Create a new application",
+      "descriptionLong": "Create a new application using explicit settings",
+      "method": "POST",
+      "path": "/application/applications",
+      "accept": "application/vnd.com.nsn.cumulocity.application+json",
+      "alias": {
+        "go": "create",
+        "powershell": "New-Application"
+      },
+      "examples": {
+        "powershell": [
+          {
+            "description": "Create new hosted application",
+            "command": "New-Application -Name myapp -Type HOSTED -Key \"myapp-key\" -ContextPath \"myapp\"",
+            "afterEach": [
+              "Remove-Application -Id \"myapp\""
+            ]
+          }
+        ],
+        "go": [
+          {
+            "description": "Create new hosted application",
+            "command": "c8y applications create --name myapp --type HOSTED --key \"myapp-key\" --contextPath \"myapp\""
+          }
+        ]
+      },
+      "body": [
+        {
+          "name": "data",
+          "type": "json",
+          "description": "data"
+        },
+        {
+          "name": "name",
+          "type": "string",
+          "required": true,
+          "description": "Name of application"
+        },
+        {
+          "name": "key",
+          "type": "string",
+          "required": true,
+          "description": "Shared secret of application"
+        },
+        {
+          "name": "type",
+          "type": "string",
+          "validationSet": [
+            "EXTERNAL",
+            "HOSTED",
+            "MICROSERVICE"
+          ],
+          "required": true,
+          "description": "Type of application. Possible values are EXTERNAL, HOSTED, MICROSERVICE"
+        },
+        {
+          "name": "availability",
+          "type": "string",
+          "validationSet": [
+            "MARKET",
+            "PRIVATE"
+          ],
+          "required": false,
+          "description": "Access level for other tenants. Possible values are : MARKET, PRIVATE (default)"
+        },
+        {
+          "name": "contextPath",
+          "type": "string",
+          "required": false,
+          "description": "contextPath of the hosted application. Required when application type is HOSTED"
+        },
+        {
+          "name": "resourcesUrl",
+          "type": "string",
+          "required": false,
+          "description": "URL to application base directory hosted on an external server. Required when application type is HOSTED"
+        },
+        {
+          "name": "resourcesUsername",
+          "type": "string",
+          "required": false,
+          "description": "authorization username to access resourcesUrl"
+        },
+        {
+          "name": "resourcesPassword",
+          "type": "string",
+          "required": false,
+          "description": "authorization password to access resourcesUrl"
+        },
+        {
+          "name": "externalUrl",
+          "type": "string",
+          "required": false,
+          "description": "URL to the external application. Required when application type is EXTERNAL"
+        }
+      ]
+    },
+    {
+      "name": "copyApplication",
+      "description": "Copy application",
+      "descriptionLong": "A POST request to the 'clone' resource creates a new application based on an already existing one.\nThe properties are copied to the newly created application. For name, key and context path a 'clone' prefix is added in order to be unique.\nIf the target application is hosted and has an active version, the new application will have the active version with the same content.\nThe response contains a representation of the newly created application.\nRequired role ROLE_APPLICATION_MANAGMENT_ADMIN\n",
+      "method": "POST",
+      "path": "/application/applications/{id}/clone",
+      "accept": "application/vnd.com.nsn.cumulocity.application+json",
+      "alias": {
+        "go": "copy",
+        "powershell": "Copy-Application"
+      },
+      "examples": {
+        "powershell": [
+          {
+            "description": "Copy an existing application",
+            "beforeEach": [
+              "New-Application -Name my-example-app -Type HOSTED -Key \"my-example-app-key\" -ContextPath \"my-example-app\""
+            ],
+            "command": "Copy-Application -Id \"my-example-app\"",
+            "afterEach": [
+              "Remove-Application -Id \"my-example-app\"",
+              "Remove-Application -Id \"clonemy-example-app\""
+            ]
+          }
+        ],
+        "go": [
+          {
+            "description": "Copy an existing application",
+            "command": "c8y applications copy --id my-example-app"
+          }
+        ]
+      },
+      "pathParameters": [
+        {
+          "name": "id",
+          "type": "application",
+          "pipeline": true,
+          "required": true,
+          "description": "Application id"
+        }
+      ]
+    },
+    {
+      "name": "getApplication",
+      "description": "Get an application",
+      "descriptionLong": "Get an application by its id",
+      "method": "GET",
+      "path": "/application/applications/{id}",
+      "accept": "application/vnd.com.nsn.cumulocity.application+json",
+      "alias": {
+        "go": "get",
+        "powershell": "Get-Application"
+      },
+      "examples": {
+        "powershell": [
+          {
+            "description": "Get an application by id",
+            "beforeEach": [
+              "$App = New-Application -Name my-simple-app -Type HOSTED -Key \"my-simple-app-key\" -ContextPath \"my-simple-app\""
+            ],
+            "command": "Get-Application -Id $App.id",
+            "afterEach": [
+              "Remove-Application -Id \"my-simple-app\""
+            ]
+          },
+          {
+            "description": "Get an application by name",
+            "beforeEach": [
+              "New-Application -Name my-simple-app -Type HOSTED -Key \"my-simple-app-key\" -ContextPath \"my-simple-app\""
+            ],
+            "command": "Get-Application -Id \"my-simple-app\"",
+            "afterEach": [
+              "Remove-Application -Id \"my-simple-app\""
+            ]
+          }
+        ],
+        "go": [
+          {
+            "description": "Get an application",
+            "command": "c8y applications get --id 12345"
+          }
+        ]
+      },
+      "pathParameters": [
+        {
+          "name": "id",
+          "type": "application",
+          "pipeline": true,
+          "required": true,
+          "description": "Application id"
+        }
+      ]
+    },
+    {
+      "name": "deleteApplication",
+      "description": "Delete application",
+      "descriptionLong": "Info: The application can only be removed when its availability is PRIVATE or in other case when it has no subscriptions.",
+      "method": "DELETE",
+      "path": "/application/applications/{id}",
+      "alias": {
+        "go": "delete",
+        "powershell": "Remove-Application"
+      },
+      "examples": {
+        "powershell": [
+          {
+            "description": "Delete an application by id",
+            "beforeEach": [
+              "$App = New-Application -Name my-temp-app -Type HOSTED -Key \"my-temp-app-key\" -ContextPath \"my-temp-app\""
+            ],
+            "command": "Remove-Application -Id $App.id"
+          },
+          {
+            "description": "Delete an application by name",
+            "beforeEach": [
+              "New-Application -Name my-temp-app -Type HOSTED -Key \"my-temp-app-key\" -ContextPath \"my-temp-app\""
+            ],
+            "command": "Remove-Application -Id \"my-temp-app\""
+          }
+        ],
+        "go": [
+          {
+            "description": "Delete an application by id",
+            "command": "c8y applications delete --id 12345"
+          },
+          {
+            "description": "Delete an application by name",
+            "command": "c8y applications delete --id my-temp-app"
+          }
+        ]
+      },
+      "pathParameters": [
+        {
+          "name": "id",
+          "type": "application",
+          "pipeline": true,
+          "required": true,
+          "description": "Application id"
+        }
+      ]
+    },
+    {
+      "name": "updateApplication",
+      "description": "Update application meta information",
+      "descriptionLong": "Update an application by its id",
+      "method": "PUT",
+      "path": "/application/applications/{id}",
+      "accept": "application/vnd.com.nsn.cumulocity.application+json",
+      "alias": {
+        "go": "update",
+        "powershell": "Update-Application"
+      },
+      "examples": {
+        "powershell": [
+          {
+            "description": "Update application availability to MARKET",
+            "beforeEach": [
+              "$App = New-Application -Name \"helloworld-app\" -Type HOSTED -Key \"helloworld-app-key\" -ContextPath \"helloworld-app\""
+            ],
+            "command": "Update-Application -Id \"helloworld-app\" -Availability \"MARKET\"",
+            "afterEach": [
+              "Remove-Application -Id $App.id"
+            ]
+          }
+        ],
+        "go": [
+          {
+            "description": "Update application availability to MARKET",
+            "command": "c8y applications update --id \"helloworld-app\" --availability MARKET"
+          }
+        ]
+      },
+      "pathParameters": [
+        {
+          "name": "id",
+          "type": "application",
+          "pipeline": true,
+          "required": true,
+          "description": "Application id"
+        }
+      ],
+      "body": [
+        {
+          "name": "data",
+          "type": "json",
+          "description": "data"
+        },
+        {
+          "name": "name",
+          "type": "string",
+          "required": false,
+          "description": "Name of application"
+        },
+        {
+          "name": "key",
+          "type": "string",
+          "required": false,
+          "description": "Shared secret of application"
+        },
+        {
+          "name": "availability",
+          "type": "string",
+          "validationSet": [
+            "MARKET",
+            "PRIVATE"
+          ],
+          "required": false,
+          "description": "Access level for other tenants. Possible values are : MARKET, PRIVATE (default)"
+        },
+        {
+          "name": "contextPath",
+          "type": "string",
+          "required": false,
+          "description": "contextPath of the hosted application"
+        },
+        {
+          "name": "resourcesUrl",
+          "type": "string",
+          "required": false,
+          "description": "URL to application base directory hosted on an external server"
+        },
+        {
+          "name": "resourcesUsername",
+          "type": "string",
+          "required": false,
+          "description": "authorization username to access resourcesUrl"
+        },
+        {
+          "name": "resourcesPassword",
+          "type": "string",
+          "required": false,
+          "description": "authorization password to access resourcesUrl"
+        },
+        {
+          "name": "externalUrl",
+          "type": "string",
+          "required": false,
+          "description": "URL to the external application"
+        }
+      ]
+    },
+    {
+      "name": "newApplicationBinary",
+      "description": "New application binary",
+      "descriptionLong": "For the applications of type 'microservice' and 'web application' to be available for Cumulocity platform users, a binary zip file must be uploaded.\nFor the microservice application, the zip file must consist of  * cumulocity.json - file describing the deployment\n  * image.tar - executable docker image\n\nFor the web application, the zip file must include index.html in the root directory.\n",
+      "method": "POST",
+      "path": "/application/applications/{id}/binaries",
+      "accept": "application/vnd.com.nsn.cumulocity.managedObject+json",
+      "alias": {
+        "go": "createBinary",
+        "powershell": "New-ApplicationBinary"
+      },
+      "examples": {
+        "powershell": [
+          {
+            "description": "Upload application microservice binary",
+            "beforeEach": [
+              "$AppName = New-RandomString -Prefix \"testapp_\"",
+              "$App = New-Application -Name $AppName -Type HOSTED -Key \"${AppName}-key\" -ContextPath $AppName",
+              "$MicroserviceZip = \"$PSScriptRoot/TestData/microservice/helloworld.zip\""
+            ],
+            "command": "New-ApplicationBinary -Id $App.id -File $MicroserviceZip",
+            "skipTest": true,
+            "afterEach": [
+              "Remove-Application -Id $App.id"
+            ]
+          }
+        ],
+        "go": [
+          {
+            "description": "Upload application microservice binary",
+            "command": "c8y applications createBinary --id 12345 --file ./helloworld.zip"
+          }
+        ]
+      },
+      "pathParameters": [
+        {
+          "name": "id",
+          "type": "application",
+          "pipeline": true,
+          "required": true,
+          "description": "Application id"
+        }
+      ],
+      "body": [
+        {
+          "name": "file",
+          "type": "file",
+          "required": true,
+          "description": "File to be uploaded as a binary"
+        }
+      ]
+    },
+    {
+      "name": "getApplicationBinaryCollection",
+      "description": "Get application binaries",
+      "descriptionLong": "A list of all binaries related to the given application will be returned\n",
+      "method": "GET",
+      "path": "/application/applications/{id}/binaries",
+      "accept": "application/vnd.com.nsn.cumulocity.customAttachmentCollection+json",
+      "collectionType": "application/vnd.com.nsn.cumulocity.customBinaryAttachment+json",
+      "collectionProperty": "attachments",
+      "alias": {
+        "go": "listApplicationBinaries",
+        "powershell": "Get-ApplicationBinaryCollection"
+      },
+      "examples": {
+        "powershell": [
+          {
+            "description": "List all of the binaries related to a Hosted (web) application",
+            "beforeEach": [
+              "$app = New-TestHostedApplication"
+            ],
+            "command": "Get-ApplicationBinaryCollection -Id $App.id",
+            "skipTest": true,
+            "afterEach": [
+              "Remove-Application -Id $app.id"
+            ]
+          },
+          {
+            "description": "List all of the binaries related to a Hosted (web) application (using pipeline)",
+            "beforeEach": [
+              "$app = New-TestHostedApplication"
+            ],
+            "command": "Get-Application $App.id | Get-ApplicationBinaryCollection",
+            "skipTest": true,
+            "afterEach": [
+              "Remove-Application -Id $app.id"
+            ]
+          }
+        ],
+        "go": [
+          {
+            "description": "List all of the binaries related to a Hosted (web) application",
+            "command": "c8y applications listApplicationBinaries --id 12345"
+          }
+        ]
+      },
+      "pathParameters": [
+        {
+          "name": "id",
+          "type": "application",
+          "pipeline": true,
+          "required": true,
+          "description": "Application id"
+        }
+      ]
+    }
+  ]
+}

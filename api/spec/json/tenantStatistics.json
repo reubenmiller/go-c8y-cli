@@ -1,0 +1,178 @@
+{
+  "information": {
+    "name": "tenantStatistics",
+    "description": "Cumulocity tenant statistics",
+    "descriptionLong": "REST endpoint to interact with Cumulocity tenant statistics",
+    "link": "https://cumulocity.com/guides/reference/tenants/#tenant-usage-statistics"
+  },
+  "endpoints": [
+    {
+      "name": "getTenantUsageStatisticsCollection",
+      "description": "Get collection of tenant usage statistics",
+      "method": "GET",
+      "path": "/tenant/statistics",
+      "accept": "application/vnd.com.nsn.cumulocity.tenantUsageStatisticsCollection+json",
+      "collectionType": "application/vnd.com.nsn.cumulocity.tenantUsageStatisticsSummary+json",
+      "collectionProperty": "usageStatistics",
+      "alias": {
+        "go": "list",
+        "powershell": "Get-TenantStatisticsCollection"
+      },
+      "examples": {
+        "powershell": [
+          {
+            "description": "Get tenant statistics collection",
+            "command": "Get-TenantStatisticsCollection"
+          },
+          {
+            "description": "Get tenant statistics collection for the last 30 days",
+            "command": "Get-TenantStatisticsCollection -DateFrom \"-30d\" -PageSize 30"
+          },
+          {
+            "description": "Get tenant statistics collection for the last 10 days, only return until the last 9 days",
+            "command": "Get-TenantStatisticsCollection -DateFrom \"-10d\" -DateTo \"-9d\""
+          }
+        ],
+        "go": [
+          {
+            "description": "Get tenant statistics collection",
+            "command": "c8y tenantStatistics list"
+          },
+          {
+            "description": "Get tenant statistics collection for the last 30 days",
+            "command": "c8y tenantStatistics list --dateFrom \"-30d\" --pageSize 30"
+          },
+          {
+            "description": "Get tenant statistics collection for the last 10 days, only return until the last 9 days",
+            "command": "c8y tenantStatistics list --dateFrom \"-10d\" --pageSize 30 --dateTo \"-9d\""
+          }
+        ]
+      },
+      "queryParameters": [
+        {
+          "name": "dateFrom",
+          "type": "datetime",
+          "description": "Start date or date and time of the statistics."
+        },
+        {
+          "name": "dateTo",
+          "type": "datetime",
+          "description": "End date or date and time of the statistics."
+        }
+      ]
+    },
+    {
+      "name": "getAllTenantUsageStatisticsSummaryCollection",
+      "description": "Get collection of tenant usage statistics summary",
+      "method": "GET",
+      "path": "/tenant/statistics/allTenantsSummary",
+      "accept": "application/json",
+      "permissions": [
+        "managementTenant"
+      ],
+      "alias": {
+        "go": "listSummaryAllTenants",
+        "powershell": "Get-AllTenantUsageSummaryStatistics"
+      },
+      "examples": {
+        "powershell": [
+          {
+            "description": "Get tenant summary statistics for all tenants",
+            "command": "Get-AllTenantUsageSummaryStatistics",
+            "skipTest": true
+          },
+          {
+            "description": "Get tenant summary statistics collection for the last 30 days",
+            "command": "Get-AllTenantUsageSummaryStatistics -DateFrom \"-30d\"",
+            "skipTest": true
+          },
+          {
+            "description": "Get tenant summary statistics collection for the last 10 days, only return until the last 9 days",
+            "command": "Get-AllTenantUsageSummaryStatistics -DateFrom \"-10d\" -DateTo \"-9d\"",
+            "skipTest": true
+          }
+        ],
+        "go": [
+          {
+            "description": "Get tenant summary statistics for all tenants",
+            "command": "c8y tenantStatistics listSummaryAllTenants"
+          },
+          {
+            "description": "Get tenant summary statistics collection for the last 30 days",
+            "command": "c8y tenantStatistics listSummaryAllTenants --dateFrom \"-30d\""
+          },
+          {
+            "description": "Get tenant summary statistics collection for the last 10 days, only return until the last 9 days",
+            "command": "c8y tenantStatistics listSummaryAllTenants --dateFrom \"-10d\" --dateTo \"-9d\""
+          }
+        ]
+      },
+      "queryParameters": [
+        {
+          "name": "dateFrom",
+          "type": "datetime",
+          "description": "Start date or date and time of the statistics."
+        },
+        {
+          "name": "dateTo",
+          "type": "datetime",
+          "description": "End date or date and time of the statistics."
+        }
+      ]
+    },
+    {
+      "name": "getTenantUsageStatisticsSummaryCollection",
+      "description": "Get collection of tenant usage statistics summary",
+      "descriptionLong": "Get summary of requests and database usage from the start of this month until now",
+      "method": "GET",
+      "path": "/tenant/statistics/summary",
+      "accept": "application/vnd.com.nsn.cumulocity.tenantUsageStatisticsSummary+json",
+      "alias": {
+        "go": "listSummaryForTenant",
+        "powershell": "Get-TenantUsageSummaryStatistics"
+      },
+      "examples": {
+        "powershell": [
+          {
+            "description": "Get tenant summary statistics for the current tenant",
+            "command": "Get-TenantUsageSummaryStatistics"
+          },
+          {
+            "description": "Get tenant summary statistics collection for the last 30 days",
+            "command": "Get-TenantUsageSummaryStatistics -DateFrom \"-30d\""
+          },
+          {
+            "description": "Get tenant summary statistics collection for the last 10 days, only return until the last 9 days",
+            "command": "Get-TenantUsageSummaryStatistics -DateFrom \"-10d\" -DateTo \"-9d\""
+          }
+        ],
+        "go": [
+          {
+            "description": "Get tenant summary statistics for the current tenant",
+            "command": "c8y tenantStatistics listSummaryForTenant"
+          },
+          {
+            "description": "Get tenant summary statistics collection for the last 30 days",
+            "command": "c8y tenantStatistics listSummaryForTenant --dateFrom \"-30d\""
+          },
+          {
+            "description": "Get tenant summary statistics collection for the last 10 days, only return until the last 9 days",
+            "command": "c8y tenantStatistics listSummaryForTenant --dateFrom \"-10d\" --dateTo \"-9d\""
+          }
+        ]
+      },
+      "queryParameters": [
+        {
+          "name": "dateFrom",
+          "type": "datetime",
+          "description": "Start date or date and time of the statistics."
+        },
+        {
+          "name": "dateTo",
+          "type": "datetime",
+          "description": "End date or date and time of the statistics."
+        }
+      ]
+    }
+  ]
+}

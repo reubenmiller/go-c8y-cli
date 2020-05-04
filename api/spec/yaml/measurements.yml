@@ -1,0 +1,361 @@
+
+---
+information:
+  name: measurements
+  description: Cumulocity measurements
+  descriptionLong: 'REST endpoint to interact with Cumulocity measurements'
+  link: https://cumulocity.com/guides/reference/measurements/
+
+endpoints:
+  - name: getMeasurementCollection
+    method: GET
+    description: Get a collection of measurements based on filter parameters
+    descriptionLong: Get a collection of measurements based on filter parameters
+    path: measurement/measurements
+    accept: application/vnd.com.nsn.cumulocity.measurementCollection+json
+    collectionType: application/vnd.com.nsn.cumulocity.measurement+json
+    collectionProperty: measurements
+    alias:
+        go: list
+        powershell: Get-MeasurementCollection
+    examples:
+      powershell:
+        - description: Get a list of measurements
+          command: Get-MeasurementCollection
+
+        - description: Get a list of measurements for a particular device
+          beforeEach:
+            - $Device = PSc8y\New-TestDevice
+            - $Measurement = New-TestMeasurement -Device $Device.id -Type "TempReading"
+
+          command: Get-MeasurementCollection -Device $Device.id -Type "TempReading"
+          afterEach:
+            - PSc8y\Remove-ManagedObject -Id $Device.id
+
+        - description: Get measurements from a device (using pipeline)
+          beforeEach:
+            - $Device = PSc8y\New-TestDevice
+            - $Measurement = New-TestMeasurement -Device $Device.id -Type "TempReading"
+          command: Get-DeviceCollection -Name $Device.name | Get-MeasurementCollection
+          afterEach:
+            - PSc8y\Remove-ManagedObject -Id $Device.id
+
+      go:
+        - description: Get a list of measurements
+          command: c8y measurements list
+    headerParameters:
+      - name: csv
+        type: boolean
+        description: Results will be displayed in csv format
+        property: Accept
+        value: text/csv
+
+      - name: excel
+        type: boolean
+        description: Results will be displayed in Excel format
+        property: Accept
+        value: application/vnd.ms-excel
+
+      - name: unit
+        type: string
+        description: Every measurement fragment which contains 'unit' property will be transformed to use required system of units.
+        property: X-Cumulocity-System-Of-Units
+        validationSet: [imperial, metric]
+
+    queryParameters:
+      - name: device
+        type: '[]device'
+        property: source
+        pipeline: true
+        description: Device ID
+
+      - name: type
+        type: string
+        description: Measurement type.
+
+      - name: valueFragmentType
+        type: string
+        description: value fragment type
+
+      - name: valueFragmentSeries
+        type: string
+        description: value fragment series
+
+      - name: fragmentType
+        type: string
+        deprecated: true
+        description: Fragment name from measurement (deprecated).
+
+      - name: dateFrom
+        type: datetime
+        description: Start date or date and time of measurement occurrence.
+
+      - name: dateTo
+        type: datetime
+        description: End date or date and time of measurement occurrence.
+
+      - name: revert
+        type: boolean
+        description: Return the newest instead of the oldest measurements. Must be used with dateFrom and dateTo parameters
+
+  - name: getMeasurementLatestCollection
+    method: GET
+    description: Get the latest measurement of a specific device
+    descriptionLong: Get the latest measurement of a specific device
+    path: measurement/measurements/one
+    accept: application/vnd.com.nsn.cumulocity.measurementCollection+json
+    collectionType: application/vnd.com.nsn.cumulocity.measurement+json
+    collectionProperty: measurements
+    skip: true  # This might be a new feature. Need to find out which version it is included in
+    alias:
+        go: listLatest
+        powershell: Get-MeasurementLatestCollection
+    examples:
+      powershell:
+        - description: Get a list of the latest measurements for a device
+          command: Get-MeasurementLatestCollection
+
+      go:
+        - description: Get a list of the latest measurements for a device
+          command: c8y measurements listLatest
+
+    headerParameters:
+      - name: csv
+        type: boolean
+        description: Results will be displayed in csv format
+        property: Accept
+        value: text/csv
+
+      - name: excel
+        type: boolean
+        description: Results will be displayed in Excel format
+        property: Accept
+        value: application/vnd.ms-excel
+
+      - name: unit
+        type: string
+        description: Every measurement fragment which contains 'unit' property will be transformed to use required system of units.
+        property: X-Cumulocity-System-Of-Units
+        validationSet: [imperial, metric]
+
+    queryParameters:
+      - name: device
+        type: '[]device'
+        property: source
+        pipeline: true
+        description: Device ID
+
+
+  - name: getMeasurementSeries
+    method: GET
+    description: Get a collection of measurements based on filter parameters
+    descriptionLong: Get a collection of measurements based on filter parameters
+    path: measurement/measurements/series
+    accept: 'application/json'
+    alias:
+        go: getSeries
+        powershell: Get-MeasurementSeries
+    examples:
+      powershell:
+        - description: Get a list of measurements for a particular device
+          beforeEach:
+            - $Device = PSc8y\New-TestDevice
+            - $Measurement = New-TestMeasurement -Device $Device.id -Type "TempReading" -ValueFragmentType "c8y_Temperature" -ValueFragmentSeries "T"
+
+          command: Get-MeasurementSeries -Device $Device.id -Series "c8y_Temperature.T" -DateFrom "1970-01-01" -DateTo "0s"
+          afterEach:
+            - PSc8y\Remove-ManagedObject -Id $Device.id
+
+        - description: Get measurement series c8y_Temperature.T on a device
+          beforeEach:
+            - $Measurement2 = New-TestMeasurement -Type "TempReading" -ValueFragmentType "c8y_Temperature" -ValueFragmentSeries "T"
+          command: Get-MeasurementSeries -Device $Measurement2.source.id -Series "c8y_Temperature.T" -DateFrom "1970-01-01" -DateTo "0s"
+          afterEach:
+            - PSc8y\Remove-ManagedObject -Id $Measurement2.source.id
+
+        - description: Get measurement series from a device (using pipeline)
+          beforeEach:
+            - $Device = PSc8y\New-TestDevice
+            - $Measurement2 = New-TestMeasurement -Type "TempReading" -ValueFragmentType "c8y_Temperature" -ValueFragmentSeries "T"
+          command: Get-DeviceCollection -Name $Device.name | Get-MeasurementSeries -Series "c8y_Temperature.T"
+          afterEach:
+            - PSc8y\Remove-ManagedObject -Id $Device.id
+
+      go:
+        - description: Get a list of series [nx_WEA_29_Delta.MDL10FG001] and [nx_WEA_29_Delta.ST9] for device 12345
+          command: c8y measurements getSeries -source 12345 --series nx_WEA_29_Delta.MDL10FG001 --series nx_WEA_29_Delta.ST9 --dateFrom "-10min" --dateTo "0s"
+    queryParameters:
+      - name: device
+        type: '[]device'
+        property: source
+        pipeline: true
+        description: Device ID
+
+      - name: series
+        type: "[]string"
+        description: measurement type and series name, e.g. c8y_AccelerationMeasurement.acceleration
+
+      - name: aggregationType
+        type: string
+        description: Fragment name from measurement.
+        validationSet: [DAILY, HOURLY, MINUTELY]
+
+      - name: dateFrom
+        type: datetime
+        default: "-7d"
+        required: false
+        description: Start date or date and time of measurement occurrence. Defaults to last 7 days
+
+      - name: dateTo
+        type: datetime
+        required: false
+        default: "0s"
+        description: End date or date and time of measurement occurrence. Defaults to the current time
+
+  - name: getMeasurement
+    description: 'Get measurement/s'
+    descriptionLong: Get measurements by their ids
+    method: GET
+    path: measurement/measurements/{id}
+    accept: application/vnd.com.nsn.cumulocity.measurement+json
+    alias:
+        go: get
+        powershell: Get-Measurement
+    examples:
+      powershell:
+        - description: Get measurement
+          beforeEach:
+            - $Measurement = New-TestMeasurement
+          command: Get-Measurement -Id $Measurement.id
+          afterEach:
+            - PSc8y\Remove-ManagedObject -Id $Measurement.source.id
+
+      go:
+        - description: Get measurement
+          command: c8y measurements get --id 12345
+    pathParameters:
+      - name: id
+        type: string
+        required: true
+        pipeline: true
+        description: Measurement id
+
+  - name: newMeasurement
+    method: POST
+    path: measurement/measurements
+    accept: application/vnd.com.nsn.cumulocity.measurement+json
+    description: 'Create a new measurement'
+    descriptionLong: 'Create a new measurement'
+    alias:
+        go: create
+        powershell: New-Measurement
+    examples:
+      powershell:
+        - description: Create measurement
+          command: New-Measurement -Device {{ randomdevice }} -Time "0s" -Type "myType" -Data @{ c8y_Winding = @{ temperature = @{ value = 1.2345; unit = "°C" } } }
+
+      go:
+        - description: Create measurement
+          command: 'c8y measurements create --id 12345 --time "0s" --type "myType" --data "{\"c8y_Winding\":{ \"temperature\":{\"value\": 1.2345,\"unit\":\"°C\"}}}"'
+    body:
+      - name: device
+        type: '[]device'
+        pipeline: true
+        required: true
+        property: source.id
+        description: The ManagedObject which is the source of this measurement.
+
+      - name: time
+        type: datetime
+        required: true
+        description: Time of the measurement.
+
+      - name: type
+        type: string
+        required: true
+        description: The most specific type of this entire measurement.
+
+      - name: data
+        type: json
+        description: List of measurement fragments.
+
+  - name: deleteMeasurement
+    description: 'Delete measurement/s'
+    descriptionLong: Delete individual measurements
+    method: DELETE
+    path: measurement/measurements/{id}
+    accept: ''
+    alias:
+        go: delete
+        powershell: Remove-Measurement
+    examples:
+      powershell:
+        - description: Delete measurement
+          beforeEach:
+            - $Measurement = New-TestMeasurement
+          command: Remove-Measurement -id $Measurement.id
+          afterEach:
+            - PSc8y\Remove-ManagedObject -Id $Measurement.source.id
+
+      go:
+        - description: Delete measurement
+          command: c8y measurements delete --id 12345
+    pathParameters:
+      - name: id
+        type: string
+        required: true
+        pipeline: true
+        description: Measurement id
+
+  - name: deleteMeasurementCollection
+    description: 'Delete a collection of measurements'
+    descriptionLong: Delete measurements using a filter
+    method: DELETE
+    path: measurement/measurements
+    accept: ''
+    alias:
+        go: deleteCollection
+        powershell: Remove-MeasurementCollection
+    examples:
+      powershell:
+        - description: Delete measurement collection for a device
+          beforeEach:
+            - $Measurement = New-TestMeasurement
+          command: Remove-MeasurementCollection -Device $Measurement.source.id
+          afterEach:
+            - PSc8y\Remove-ManagedObject -Id $Measurement.source.id
+
+      go:
+        - description: Delete measurement collection for a device
+          command: c8y measurements deleteCollection --device $Measurement.source.id
+    queryParameters:
+      - name: device
+        type: '[]device'
+        property: source
+        pipeline: true
+        description: Device ID
+
+      - name: type
+        type: string
+        description: Measurement type.
+
+      - name: valueFragmentType
+        type: string
+        description: value fragment type
+
+      - name: valueFragmentSeries
+        type: string
+        description: value fragment series
+
+      - name: fragmentType
+        type: string
+        deprecated: true
+        description: Fragment name from measurement (deprecated).
+
+      - name: dateFrom
+        type: datetime
+        description: Start date or date and time of measurement occurrence.
+
+      - name: dateTo
+        type: datetime
+        description: End date or date and time of measurement occurrence.

@@ -1,0 +1,596 @@
+{
+  "information": {
+    "name": "alarms",
+    "description": "Cumulocity alarms",
+    "descriptionLong": "REST endpoint to interact with Cumulocity alarms",
+    "link": "https://cumulocity.com/guides/reference/alarms/"
+  },
+  "endpoints": [
+    {
+      "name": "getAlarmCollection",
+      "method": "GET",
+      "description": "Get a collection of alarms based on filter parameters",
+      "descriptionLong": "Get a collection of alarms based on filter parameters",
+      "examples": {
+        "powershell": [
+          {
+            "description": "Get alarms with the severity set to MAJOR",
+            "command": "Get-AlarmCollection -Severity MAJOR -PageSize 100"
+          },
+          {
+            "description": "Get active alarms which occurred in the last 10 minutes",
+            "beforeEach": [
+              "$Device = New-TestDevice",
+              "$Alarm = PSc8y\\New-Alarm -Device $Device.id -Type c8y_TestAlarm -Time \"-0s\" -Text \"Test alarm\" -Severity MAJOR"
+            ],
+            "command": "Get-AlarmCollection -DateFrom \"-10m\" -Status ACTIVE",
+            "afterEach": [
+              "PSc8y\\Remove-ManagedObject -Id $Device.id"
+            ]
+          },
+          {
+            "description": "Get active alarms from a device (using pipeline)",
+            "beforeEach": [
+              "$Device = New-TestDevice",
+              "$Alarm = PSc8y\\New-Alarm -Device $Device.id -Type c8y_TestAlarm -Time \"-0s\" -Text \"Test alarm\" -Severity MAJOR"
+            ],
+            "command": "Get-DeviceCollection -Name $Device.name | Get-AlarmCollection -Status ACTIVE",
+            "afterEach": [
+              "PSc8y\\Remove-ManagedObject -Id $Device.id"
+            ]
+          }
+        ],
+        "go": [
+          {
+            "description": "Get alarms with the severity set to MAJOR",
+            "command": "c8y alarms list --severity MAJOR --pageSize 100"
+          },
+          {
+            "description": "Get collection of active alarms which occurred in the last 10 minutes",
+            "command": "c8y alarms list --dateFrom \"-10m\" --status ACTIVE"
+          }
+        ]
+      },
+      "path": "alarm/alarms",
+      "accept": "application/vnd.com.nsn.cumulocity.alarmCollection+json",
+      "collectionType": "application/vnd.com.nsn.cumulocity.alarm+json",
+      "collectionProperty": "alarms",
+      "alias": {
+        "go": "list",
+        "powershell": "Get-AlarmCollection"
+      },
+      "queryParameters": [
+        {
+          "name": "device",
+          "type": "[]device",
+          "pipeline": true,
+          "property": "source",
+          "description": "Source device id."
+        },
+        {
+          "name": "dateFrom",
+          "type": "datetime",
+          "description": "Start date or date and time of alarm occurrence."
+        },
+        {
+          "name": "dateTo",
+          "type": "datetime",
+          "description": "End date or date and time of alarm occurrence."
+        },
+        {
+          "name": "type",
+          "type": "string",
+          "description": "Alarm type."
+        },
+        {
+          "name": "fragmentType",
+          "type": "string",
+          "description": "Alarm fragment type."
+        },
+        {
+          "name": "status",
+          "type": "string",
+          "description": "Comma separated alarm statuses, for example ACTIVE,CLEARED.",
+          "validationSet": [
+            "ACTIVE",
+            "ACKNOWLEDGED",
+            "CLEARED"
+          ]
+        },
+        {
+          "name": "severity",
+          "type": "string",
+          "description": "Alarm severity, for example CRITICAL, MAJOR, MINOR or WARNING.",
+          "validationSet": [
+            "CRITICAL",
+            "MAJOR",
+            "MINOR",
+            "WARNING"
+          ]
+        },
+        {
+          "name": "resolved",
+          "type": "boolean",
+          "description": "When set to true only resolved alarms will be removed (the one with status CLEARED), false means alarms with status ACTIVE or ACKNOWLEDGED."
+        },
+        {
+          "name": "withAssets",
+          "type": "boolean",
+          "description": "Include assets"
+        },
+        {
+          "name": "withDevices",
+          "type": "boolean",
+          "description": "Include devices"
+        }
+      ]
+    },
+    {
+      "name": "newAlarm",
+      "method": "POST",
+      "path": "alarm/alarms",
+      "accept": "application/vnd.com.nsn.cumulocity.alarm+json",
+      "description": "Create a new alarm",
+      "descriptionLong": "Create a new alarm",
+      "examples": {
+        "powershell": [
+          {
+            "description": "Create a new alarm for device",
+            "beforeEach": [
+              "$device = PSc8y\\New-TestDevice"
+            ],
+            "command": "New-Alarm -Device $device.id -Type c8y_TestAlarm -Time \"-0s\" -Text \"Test alarm\" -Severity MAJOR",
+            "afterEach": [
+              "PSc8y\\Remove-ManagedObject -Id $device.id"
+            ]
+          },
+          {
+            "description": "Create a new alarm for device (using pipeline)",
+            "beforeEach": [
+              "$device = PSc8y\\New-TestDevice"
+            ],
+            "command": "Get-Device -Id $device.id | PSc8y\\New-Alarm -Type c8y_TestAlarm -Time \"-0s\" -Text \"Test alarm\" -Severity MAJOR",
+            "afterEach": [
+              "PSc8y\\Remove-ManagedObject -Id $device.id"
+            ]
+          }
+        ],
+        "go": [
+          {
+            "description": "Create a new alarm for device",
+            "command": "c8y alarms create --device mydevice --type c8y_TestAlarm --time \"-0s\" --text \"Test alarm\" --severity MAJOR"
+          }
+        ]
+      },
+      "alias": {
+        "go": "create",
+        "powershell": "New-Alarm"
+      },
+      "body": [
+        {
+          "name": "device",
+          "type": "[]device",
+          "required": true,
+          "pipeline": true,
+          "property": "source.id",
+          "description": "The ManagedObject that the alarm originated from"
+        },
+        {
+          "name": "type",
+          "type": "string",
+          "required": true,
+          "description": "Identifies the type of this alarm, e.g. 'com_cumulocity_events_TamperEvent'."
+        },
+        {
+          "name": "time",
+          "type": "datetime",
+          "required": false,
+          "default": "0s",
+          "description": "Time of the alarm."
+        },
+        {
+          "name": "text",
+          "type": "string",
+          "required": true,
+          "description": "Text description of the alarm."
+        },
+        {
+          "name": "severity",
+          "type": "string",
+          "required": true,
+          "description": "The severity of the alarm: CRITICAL, MAJOR, MINOR or WARNING. Must be upper-case.",
+          "validationSet": [
+            "CRITICAL",
+            "MAJOR",
+            "MINOR",
+            "WARNING"
+          ]
+        },
+        {
+          "name": "status",
+          "type": "string",
+          "description": "The status of the alarm: ACTIVE, ACKNOWLEDGED or CLEARED. If status was not appeared, new alarm will have status ACTIVE. Must be upper-case.",
+          "validationSet": [
+            "ACTIVE",
+            "ACKNOWLEDGED",
+            "CLEARED"
+          ]
+        },
+        {
+          "name": "data",
+          "type": "json",
+          "description": "Additional properties of the alarm."
+        }
+      ]
+    },
+    {
+      "name": "updateAlarmCollection",
+      "method": "PUT",
+      "path": "alarm/alarms",
+      "description": "Update a collection of alarms. Currently only the status of alarms can be changed",
+      "descriptionLong": "Update the status of a collection of alarms by using a filter",
+      "examples": {
+        "powershell": [
+          {
+            "description": "Update the status of all active alarms on a device to ACKNOWLEDGED",
+            "command": "Update-AlarmCollection -Device $Device.id -Status ACTIVE -NewStatus ACKNOWLEDGED",
+            "beforeEach": [
+              "$Device = PSc8y\\New-TestDevice",
+              "$Alarm = PSc8y\\New-Alarm -Device $Device.id -Type c8y_TestAlarm -Time \"-0s\" -Text \"Test alarm\" -Severity MAJOR"
+            ],
+            "afterEach": [
+              "PSc8y\\Remove-ManagedObject -Id $Device.id"
+            ]
+          },
+          {
+            "description": "Update the status of all active alarms on a device to ACKNOWLEDGED (using pipeline)",
+            "command": "Get-Device -Id $Device.id | PSc8y\\Update-AlarmCollection -Status ACTIVE -NewStatus ACKNOWLEDGED",
+            "beforeEach": [
+              "$Device = PSc8y\\New-TestDevice",
+              "$Alarm = PSc8y\\New-Alarm -Device $Device.id -Type c8y_TestAlarm -Time \"-0s\" -Text \"Test alarm\" -Severity MAJOR"
+            ],
+            "afterEach": [
+              "PSc8y\\Remove-ManagedObject -Id $Device.id"
+            ]
+          }
+        ],
+        "go": [
+          {
+            "description": "Update the status of all active alarms on a device to ACKNOWLEDGED",
+            "command": "c8y alarms updateCollection --device mydevice --status ACTIVE --newStatus ACKNOWLEDGED"
+          }
+        ]
+      },
+      "accept": "",
+      "collectionType": "",
+      "statusCodes": {
+        "200": "if the process has completed, all alarms have been updated",
+        "202": "if process continues in background"
+      },
+      "collectionProperty": "alarms",
+      "alias": {
+        "go": "updateCollection",
+        "powershell": "Update-AlarmCollection"
+      },
+      "body": [
+        {
+          "name": "newStatus",
+          "type": "string",
+          "description": "New status to be applied to all of the matching alarms",
+          "required": true,
+          "property": "status",
+          "validationSet": [
+            "ACTIVE",
+            "ACKNOWLEDGED",
+            "CLEARED"
+          ]
+        }
+      ],
+      "queryParameters": [
+        {
+          "name": "device",
+          "type": "[]device",
+          "property": "source",
+          "pipeline": true,
+          "description": "The ManagedObject that the alarm originated from"
+        },
+        {
+          "name": "status",
+          "type": "string",
+          "description": "The status of the alarm: ACTIVE, ACKNOWLEDGED or CLEARED. If status was not appeared, new alarm will have status ACTIVE. Must be upper-case.",
+          "validationSet": [
+            "ACTIVE",
+            "ACKNOWLEDGED",
+            "CLEARED"
+          ]
+        },
+        {
+          "name": "severity",
+          "type": "string",
+          "description": "The severity of the alarm: CRITICAL, MAJOR, MINOR or WARNING. Must be upper-case.",
+          "validationSet": [
+            "CRITICAL",
+            "MAJOR",
+            "MINOR",
+            "WARNING"
+          ]
+        },
+        {
+          "name": "resolved",
+          "type": "boolean",
+          "description": "When set to true only resolved alarms will be removed (the one with status CLEARED), false means alarms with status ACTIVE or ACKNOWLEDGED."
+        },
+        {
+          "name": "dateFrom",
+          "type": "datetime",
+          "description": "Start date or date and time of alarm occurrence."
+        },
+        {
+          "name": "dateTo",
+          "type": "datetime",
+          "description": "End date or date and time of alarm occurrence."
+        }
+      ]
+    },
+    {
+      "name": "getAlarm",
+      "description": "Get alarm/s",
+      "descriptionLong": "Get an alarm by its id",
+      "method": "GET",
+      "path": "alarm/alarms/{id}",
+      "accept": "application/vnd.com.nsn.cumulocity.alarm+json",
+      "examples": {
+        "powershell": [
+          {
+            "description": "Get alarm",
+            "command": "Get-Alarm -Id {{ NewAlarm }}"
+          }
+        ],
+        "go": [
+          {
+            "description": "Get alarm",
+            "command": "c8y alarms get --id 12345"
+          }
+        ]
+      },
+      "alias": {
+        "go": "get",
+        "powershell": "Get-Alarm"
+      },
+      "pathParameters": [
+        {
+          "name": "id",
+          "type": "string",
+          "pipeline": true,
+          "required": true,
+          "description": "Alarm id"
+        }
+      ]
+    },
+    {
+      "name": "updateAlarm",
+      "description": "Update an alarm",
+      "descriptionLong": "Update an alarm by its id",
+      "examples": {
+        "powershell": [
+          {
+            "description": "Acknowledge an existing alarm",
+            "beforeEach": [
+              "$Device = New-TestDevice",
+              "$Alarm = New-TestAlarm -Device $Device.id"
+            ],
+            "command": "Update-Alarm -Id $Alarm.id -Status ACKNOWLEDGED",
+            "afterEach": [
+              "Remove-ManagedObject -Id $Device.id"
+            ]
+          },
+          {
+            "description": "Acknowledge an existing alarm (using pipeline)",
+            "beforeEach": [
+              "$Device = New-TestDevice",
+              "$Alarm = New-TestAlarm -Device $Device.id"
+            ],
+            "command": "Get-Alarm -Id $Alarm.id | PSc8y\\Update-Alarm -Status ACKNOWLEDGED",
+            "afterEach": [
+              "Remove-ManagedObject -Id $Device.id"
+            ]
+          },
+          {
+            "description": "Update severity of an existing alarm to CRITICAL",
+            "beforeEach": [
+              "$Device = New-TestDevice",
+              "$Alarm = New-TestAlarm -Device $Device.id"
+            ],
+            "command": "Update-Alarm -Id $Alarm.id -Severity CRITICAL",
+            "afterEach": [
+              "Remove-ManagedObject -Id $Device.id"
+            ]
+          }
+        ],
+        "go": [
+          {
+            "description": "Acknowledge an existing alarm",
+            "command": "c8y alarms update --id 12345 --status ACKNOWLEDGED"
+          },
+          {
+            "description": "Update severity of an existing alarm to CRITICAL",
+            "command": "c8y alarms update --id 12345 --severity CRITICAL"
+          }
+        ]
+      },
+      "method": "PUT",
+      "path": "alarm/alarms/{id}",
+      "accept": "application/vnd.com.nsn.cumulocity.alarm+json",
+      "alias": {
+        "go": "update",
+        "powershell": "Update-Alarm"
+      },
+      "body": [
+        {
+          "name": "status",
+          "type": "string",
+          "required": false,
+          "description": "Comma separated alarm statuses, for example ACTIVE,CLEARED.",
+          "validationSet": [
+            "ACTIVE",
+            "ACKNOWLEDGED",
+            "CLEARED"
+          ]
+        },
+        {
+          "name": "severity",
+          "type": "string",
+          "required": false,
+          "description": "Alarm severity, for example CRITICAL, MAJOR, MINOR or WARNING.",
+          "validationSet": [
+            "CRITICAL",
+            "MAJOR",
+            "MINOR",
+            "WARNING"
+          ]
+        },
+        {
+          "name": "text",
+          "type": "string",
+          "required": false,
+          "description": "Text description of the alarm."
+        },
+        {
+          "name": "data",
+          "type": "json",
+          "description": "Additional properties of the alarm."
+        }
+      ],
+      "pathParameters": [
+        {
+          "name": "id",
+          "type": "string",
+          "pipeline": true,
+          "description": "Alarm id",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "deleteAlarmCollection",
+      "description": "Delete a collection of alarms",
+      "descriptionLong": "Delete a collection of alarms by a given filter",
+      "examples": {
+        "powershell": [
+          {
+            "description": "Remove alarms on the device with the severity set to MAJOR",
+            "beforeEach": [
+              "$device = New-TestDevice"
+            ],
+            "command": "Remove-AlarmCollection -Device \"{{ randomdevice }}\" -Severity MAJOR",
+            "afterEach": [
+              "Remove-ManagedObject -Id $device.id"
+            ]
+          },
+          {
+            "description": "Remove alarms on the device which are active and created in the last 10 minutes",
+            "beforeEach": [
+              "$device = New-TestDevice"
+            ],
+            "command": "Remove-AlarmCollection -Device $device.id -DateFrom \"-10m\" -Status ACTIVE",
+            "afterEach": [
+              "Remove-ManagedObject -Id $device.id"
+            ]
+          },
+          {
+            "description": "Remove alarms on the device which are active and created in the last 10 minutes (using pipeline)",
+            "beforeEach": [
+              "$device = New-TestDevice"
+            ],
+            "command": "Get-Device -Id $device.id | PSc8y\\Remove-AlarmCollection -DateFrom \"-10m\" -Status ACTIVE",
+            "afterEach": [
+              "Remove-ManagedObject -Id $device.id"
+            ]
+          }
+        ],
+        "go": [
+          {
+            "description": "Remove alarms on the device with the severity set to MAJOR",
+            "command": "c8y alarms deleteCollection --device mydevice --severity MAJOR"
+          },
+          {
+            "description": "Remove alarms on the device which are active and created in the last 10 minutes",
+            "command": "c8y alarms deleteCollection --device mydevice --dateFrom \"-10m\" --status ACTIVE"
+          }
+        ]
+      },
+      "method": "DELETE",
+      "path": "alarm/alarms",
+      "accept": "",
+      "alias": {
+        "go": "deleteCollection",
+        "powershell": "Remove-AlarmCollection"
+      },
+      "queryParameters": [
+        {
+          "name": "device",
+          "type": "[]device",
+          "property": "source",
+          "pipeline": true,
+          "description": "Source device id."
+        },
+        {
+          "name": "dateFrom",
+          "type": "datetime",
+          "description": "Start date or date and time of alarm occurrence."
+        },
+        {
+          "name": "dateTo",
+          "type": "datetime",
+          "description": "End date or date and time of alarm occurrence."
+        },
+        {
+          "name": "type",
+          "type": "string",
+          "description": "Alarm type."
+        },
+        {
+          "name": "fragmentType",
+          "type": "string",
+          "description": "Alarm fragment type."
+        },
+        {
+          "name": "status",
+          "type": "string",
+          "description": "Comma separated alarm statuses, for example ACTIVE,CLEARED.",
+          "validationSet": [
+            "ACTIVE",
+            "ACKNOWLEDGED",
+            "CLEARED"
+          ]
+        },
+        {
+          "name": "severity",
+          "type": "string",
+          "description": "Alarm severity, for example CRITICAL, MAJOR, MINOR or WARNING.",
+          "validationSet": [
+            "CRITICAL",
+            "MAJOR",
+            "MINOR",
+            "WARNING"
+          ]
+        },
+        {
+          "name": "resolved",
+          "type": "boolean",
+          "description": "When set to true only resolved alarms will be removed (the one with status CLEARED), false means alarms with status ACTIVE or ACKNOWLEDGED."
+        },
+        {
+          "name": "withSourceAssets",
+          "type": "boolean",
+          "description": "When set to true also alarms for related source assets will be removed. When this parameter is provided also source must be defined."
+        },
+        {
+          "name": "withSourceDevices",
+          "type": "boolean",
+          "description": "When set to true also alarms for related source devices will be removed. When this parameter is provided also source must be defined."
+        }
+      ]
+    }
+  ]
+}

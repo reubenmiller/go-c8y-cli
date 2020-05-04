@@ -1,0 +1,512 @@
+---
+information:
+  name: devices
+  description: Cumulocity devices
+  descriptionLong: 'REST endpoint to interact with Cumulocity devices'
+  link: https://cumulocity.com/guides/reference/inventory/
+
+endpoints:
+  # Device
+  - name: getDevice
+    description: 'Get device'
+    method: GET
+    path: inventory/managedObjects/{id}
+    accept: application/vnd.com.nsn.cumulocity.customDevice+json
+    alias:
+        go: get
+        powershell: Get-Device
+    examples:
+      powershell:
+        - description: Get device by id
+          beforeEach:
+            - $device = PSc8y\New-TestDevice
+          command: Get-Device -Id $device.id
+          afterEach:
+            - Remove-ManagedObject -Id $device.id
+
+        - description: Get device by name
+          beforeEach:
+            - $device = PSc8y\New-TestDevice
+          command: Get-Device -Id $device.name
+          afterEach:
+            - Remove-ManagedObject -Id $device.id
+
+      go:
+        - description: Get device by id
+          command: c8y devices get --id 12345
+
+    pathParameters:
+      - name: id
+        type: '[]device'
+        pipeline: true
+        required: true
+        description: Device ID
+
+  - name: updateDevice
+    description: 'Update device'
+    method: PUT
+    path: inventory/managedObjects/{id}
+    accept: application/vnd.com.nsn.cumulocity.customDevice+json
+    alias:
+        go: update
+        powershell: Update-Device
+    examples:
+      powershell:
+        - description: Update device by id
+          beforeEach:
+            - $device = PSc8y\New-TestDevice
+          command: Update-Device -Id $device.id -NewName "MyNewName"
+          afterEach:
+            - Remove-ManagedObject -Id $device.id
+
+        - description: Update device by name
+          beforeEach:
+            - $device = PSc8y\New-TestDevice
+          command: Update-Device -Id $device.name -NewName "MyNewName"
+          afterEach:
+            - Remove-ManagedObject -Id $device.id
+
+        - description: Update device custom properties
+          beforeEach:
+            - $device = PSc8y\New-TestDevice
+          command: Update-Device -Id $device.name -Data @{ "myValue" = @{ value1 = $true } }
+          afterEach:
+            - Remove-ManagedObject -Id $device.id
+
+      go:
+        - description: Update device by id
+          command: c8y devices update --id 12345
+
+    pathParameters:
+      - name: id
+        type: '[]device'
+        pipeline: true
+        required: true
+        description: Device ID
+
+    body:
+      - name: newName
+        type: 'string'
+        property: name
+        required: false
+        description: Device name
+
+      - name: data
+        type: json
+        description: Additional properties of the inventory.
+
+  - name: deleteDevice
+    description: 'Delete device'
+    method: DELETE
+    path: inventory/managedObjects/{id}
+    accept: ''
+    alias:
+        go: delete
+        powershell: Remove-Device
+    examples:
+      powershell:
+        - description: Remove device by id
+          beforeEach:
+            - $device = PSc8y\New-TestDevice
+          command: Remove-Device -Id $device.id
+
+        - description: Remove device by name
+          beforeEach:
+            - $device = PSc8y\New-TestDevice
+          command: Remove-Device -Id $device.name
+
+      go:
+        - description: Get device by id
+          command: c8y devices delete --id 12345
+
+    pathParameters:
+      - name: id
+        type: '[]device'
+        pipeline: true
+        required: true
+        description: Device ID
+
+  - name: createDevice
+    description: 'Create device'
+    method: POST
+    path: inventory/managedObjects
+    accept: application/vnd.com.nsn.cumulocity.customDevice+json
+    alias:
+        go: create
+        powershell: New-Device
+    examples:
+      powershell:
+        - description: Create device
+          beforeEach:
+            - $DeviceName = PSc8y\New-RandomString -Prefix "myDevice"
+          command: New-Device -Name $DeviceName
+          afterEach:
+            - Remove-Device -Id $DeviceName
+
+        - description: Create device with custom properties
+          beforeEach:
+            - $DeviceName = PSc8y\New-RandomString -Prefix "myDevice"
+          command: New-Device -Name $DeviceName -Data @{ myValue = @{ value1 = $true } }
+          afterEach:
+            - Remove-Device -Id $DeviceName
+
+      go:
+        - description: Create device
+          command: c8y devices create --name myDevice
+
+        - description: Create device with custom properties
+          command: c8y devices create --name myDevice --data "custom_value1=1234"
+
+    bodyTemplate:
+      type: jsonnet
+      applyLast: true
+      template: >
+        {
+          c8y_IsDevice: {},
+        }
+
+    body:
+      - name: name
+        type: '[]string'
+        required: true
+        pipeline: true
+        description: Device name
+
+      - name: type
+        description: Device type
+        type: string
+
+      - name: data
+        type: json
+        description: Custom device properties.
+
+
+  - name: getSupportedMeasurements
+    description: 'Get supported measurements/s of a device'
+    method: GET
+    path: inventory/managedObjects/{device}/supportedMeasurements
+    accept: application/vnd.com.nsn.cumulocity.inventory+json
+    collectionProperty: c8y_SupportedMeasurements
+    alias:
+        go: getSupportedMeasurements
+        powershell: Get-SupportedMeasurements
+    examples:
+      powershell:
+        - description: Get the supported measurements of a device by name
+          beforeEach:
+            - $device = PSc8y\New-TestDevice
+            - $Measurement = PSc8y\New-TestMeasurement -Device $device.id
+          command: Get-SupportedMeasurements -Device $device.id
+          afterEach:
+            - Remove-ManagedObject -Id $device.id
+
+        - description: Get the supported measurements of a device (using pipeline)
+          beforeEach:
+            - $device = PSc8y\New-TestDevice
+            - $Measurement = PSc8y\New-TestMeasurement -Device $device.id
+          command: Get-SupportedMeasurements -Device $device.id
+          afterEach:
+            - Remove-ManagedObject -Id $device.id
+
+      go:
+        - description: Get the supported measurements of a device by name
+          command: c8y inventory getSupportedMeasurements --device 12345
+
+    pathParameters:
+      - name: device
+        type: '[]device'
+        pipeline: true
+        required: true
+        description: Device ID
+
+  - name: getSupportedSeries
+    description: 'Get supported measurement series/s of a device'
+    method: GET
+    path: inventory/managedObjects/{device}/supportedSeries
+    accept: application/vnd.com.nsn.cumulocity.inventory+json
+    collectionProperty: c8y_SupportedSeries
+    alias:
+        go: getSupportedSeries
+        powershell: Get-SupportedSeries
+    examples:
+      powershell:
+        - description: Get the supported measurement series of a device by name
+          beforeEach:
+            - $device = PSc8y\New-TestDevice
+            - $Measurement = PSc8y\New-TestMeasurement -Device $device.id
+          command: Get-SupportedSeries -Device $device.id
+          afterEach:
+            - Remove-ManagedObject -Id $device.id
+
+        - description: Get the supported measurement series of a device (using pipeline)
+          beforeEach:
+            - $device = PSc8y\New-TestDevice
+            - $Measurement = PSc8y\New-TestMeasurement -Device $device.id
+          command: Get-SupportedSeries -Device $device.id
+          afterEach:
+            - Remove-ManagedObject -Id $device.id
+
+      go:
+        - description: Get the supported measurement series of a device by name
+          command: c8y inventory getSupportedSeries --device 12345
+
+    pathParameters:
+      - name: device
+        type: '[]device'
+        pipeline: true
+        required: true
+        description: Device ID
+
+  - name: getSupportedOperations
+    description: 'Get supported operations of a device'
+    method: GET
+    path: inventory/managedObjects/{device}
+    accept: application/vnd.com.nsn.cumulocity.inventory+json
+    collectionProperty: c8y_SupportedOperations
+    alias:
+        go: getSupportedOperations
+        powershell: Get-SupportedOperations
+    examples:
+      powershell:
+        - description: Get the supported operations of a device by name
+          beforeEach:
+            - $device = PSc8y\New-TestDevice
+            - $device = PSc8y\Update-ManagedObject -Id $device.id -Data @{ c8y_SupportedOperations = @( "c8y_Restart", "c8y_SoftwareList", "c8y_Firmware" ) }
+          command: Get-SupportedOperations -Device $device.id
+          afterEach:
+            - Remove-ManagedObject -Id $device.id
+
+        - description: Get the supported operations of a device (using pipeline)
+          beforeEach:
+            - $device = PSc8y\New-TestDevice
+            - $device = PSc8y\Update-ManagedObject -Id $device.id -Data @{ c8y_SupportedOperations = @( "c8y_Restart", "c8y_SoftwareList", "c8y_Firmware" ) }
+          command: Get-SupportedOperations -Device $device.id
+          afterEach:
+            - Remove-ManagedObject -Id $device.id
+
+      go:
+        - description: Get the supported operations of a device by name
+          command: c8y inventory getSupportedOperations --device 12345
+
+    pathParameters:
+      - name: device
+        type: '[]device'
+        pipeline: true
+        required: true
+        description: Device ID
+
+  - name: setDeviceRequiredAvailability
+    description: 'Set the required availability of a device'
+    descriptionLong: "Devices that have not sent any message in the response interval are considered unavailable. Response interval can have value between -32768 and 32767 and any values out of range will be shrink to range borders. Such devices are marked as unavailable (see below) and an unavailability alarm is raised. Devices with a response interval of zero minutes are considered to be under maintenance. No alarm is raised while a device is under maintenance. Devices that do not contain 'c8y_RequiredAvailability' are not monitored."
+    method: PUT
+    path: inventory/managedObjects/{device}
+    accept: application/vnd.com.nsn.cumulocity.inventory+json
+    alias:
+        go: setRequiredAvailability
+        powershell: Set-DeviceRequiredAvailability
+    examples:
+      powershell:
+        - description: Set the required availability of a device by name to 10 minutes
+          beforeEach:
+            - $device = PSc8y\New-TestDevice
+          command: Set-DeviceRequiredAvailability -Device $device.id -Interval 10
+          afterEach:
+            - Remove-ManagedObject -Id $device.id
+
+        - description: Set the required availability of a device (using pipeline)
+          beforeEach:
+            - $device = PSc8y\New-TestDevice
+          command: Get-ManagedObject -Id $device.id | PSc8y\Set-DeviceRequiredAvailability -Interval 10
+          afterEach:
+            - Remove-ManagedObject -Id $device.id
+
+      go:
+        - description: Set the required availability of a device by name to 10 minutes
+          command: c8y inventory setRequiredAvailability --device 12345 --interval 10
+
+    pathParameters:
+      - name: device
+        type: '[]device'
+        pipeline: true
+        required: true
+        description: Device ID
+    body:
+      - name: interval
+        type: integer
+        required: true
+        property: c8y_RequiredAvailability.responseInterval
+        description: Interval in minutes
+
+  # Device groups
+  - name: getDeviceGroup
+    description: 'Get device group'
+    method: GET
+    path: inventory/managedObjects/{id}
+    accept: application/vnd.com.nsn.cumulocity.customDeviceGroup+json
+    alias:
+        go: getGroup
+        powershell: Get-DeviceGroup
+    examples:
+      powershell:
+        - description: Get device group by id
+          beforeEach:
+            - $group = PSc8y\New-TestDeviceGroup
+          command: Get-DeviceGroup -Id $group.id
+          afterEach:
+            - Remove-ManagedObject -Id $group.id
+
+        - description: Get device group by name
+          beforeEach:
+            - $group = PSc8y\New-TestDeviceGroup
+          command: Get-DeviceGroup -Id $group.name
+          afterEach:
+            - Remove-ManagedObject -Id $group.id
+
+      go:
+        - description: Get device group by id
+          command: c8y devices getGroup --id 12345
+
+    pathParameters:
+      - name: id
+        type: '[]deviceGroup'
+        pipeline: true
+        required: true
+        description: Device group ID
+
+  - name: updateDeviceGroup
+    description: 'Update device group'
+    method: PUT
+    path: inventory/managedObjects/{id}
+    accept: application/vnd.com.nsn.cumulocity.customDeviceGroup+json
+    alias:
+        go: updateGroup
+        powershell: Update-DeviceGroup
+    examples:
+      powershell:
+        - description: Update device group by id
+          beforeEach:
+            - $group = PSc8y\New-TestDeviceGroup
+          command: Update-DeviceGroup -Id $group.id -Name "MyNewName"
+          afterEach:
+            - Remove-ManagedObject -Id $group.id
+
+        - description: Update device group by name
+          beforeEach:
+            - $group = PSc8y\New-TestDeviceGroup
+          command: Update-DeviceGroup -Id $group.name -Name "MyNewName"
+          afterEach:
+            - Remove-ManagedObject -Id $group.id
+
+        - description: Update device group custom properties
+          beforeEach:
+            - $group = PSc8y\New-TestDeviceGroup
+          command: Update-DeviceGroup -Id $group.name -Data @{ "myValue" = @{ value1 = $true } }
+          afterEach:
+            - Remove-ManagedObject -Id $group.id
+
+      go:
+        - description: Update device group by id
+          command: c8y devices updateGroup --id 12345
+
+    pathParameters:
+      - name: id
+        type: '[]deviceGroup'
+        pipeline: true
+        required: true
+        description: Device group ID
+
+    body:
+      - name: name
+        type: 'string'
+        required: false
+        description: Device group name
+
+      - name: data
+        type: json
+        description: Additional properties of the inventory.
+
+  - name: deleteDeviceGroup
+    description: 'Delete device group'
+    method: DELETE
+    path: inventory/managedObjects/{id}
+    accept: ''
+    alias:
+        go: deleteGroup
+        powershell: Remove-DeviceGroup
+    examples:
+      powershell:
+        - description: Remove device group by id
+          beforeEach:
+            - $group = PSc8y\New-TestDeviceGroup
+          command: Remove-DeviceGroup -Id $group.id
+
+        - description: Remove device group by name
+          beforeEach:
+            - $group = PSc8y\New-TestDeviceGroup
+          command: Remove-DeviceGroup -Id $group.name
+
+      go:
+        - description: Get device group by id
+          command: c8y devices deleteGroup --id 12345
+
+    pathParameters:
+      - name: id
+        type: '[]deviceGroup'
+        pipeline: true
+        required: true
+        description: Device group ID
+
+  - name: createDeviceGroup
+    description: 'Create device group'
+    method: POST
+    path: inventory/managedObjects
+    accept: application/vnd.com.nsn.cumulocity.customDeviceGroup+json
+    alias:
+        go: createGroup
+        powershell: New-DeviceGroup
+    examples:
+      powershell:
+        - description: Create device group
+          beforeEach:
+            - $GroupName = PSc8y\New-RandomString -Prefix "mygroup"
+          command: New-DeviceGroup -Name $GroupName
+          afterEach:
+            - Remove-DeviceGroup -Id $GroupName
+
+        - description: Create device group with custom properties
+          beforeEach:
+            - $GroupName = PSc8y\New-RandomString -Prefix "mygroup"
+          command: New-DeviceGroup -Name $GroupName -Data @{ "myValue" = @{ value1 = $true } }
+          afterEach:
+            - Remove-DeviceGroup -Id $GroupName
+
+      go:
+        - description: Create device group
+          command: c8y devices createGroup --name mygroup
+
+        - description: Create device group with custom properties
+          command: c8y devices createGroup --name mygroup --data "custom_value1=1234"
+
+    bodyTemplate:
+      type: jsonnet
+      applyLast: false
+      template: >
+        {
+          type: "c8y_DeviceGroup",
+          c8y_IsDeviceGroup: {},
+        }
+
+    body:
+      - name: name
+        type: 'string'
+        required: true
+        description: Device group name
+
+      - name: type
+        description: Device group type (c8y_DeviceGroup (root folder) or c8y_DeviceSubGroup (sub folder)). Defaults to c8y_DeviceGroup
+        type: string
+        validationSet: [c8y_DeviceGroup, c8y_DeviceSubGroup]
+
+      - name: data
+        type: json
+        description: Custom group properties.
