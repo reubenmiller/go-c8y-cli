@@ -9,7 +9,7 @@ GOMOD=$(GOCMD) mod
 
 .PHONY: all check-path test race docs install tsurud
 
-all: check-path test
+all: check-path build test
 
 # Check that given variables are set and all have non-empty values,
 # die with an error otherwise.
@@ -115,6 +115,7 @@ view-trace:
 profile:
 	GO111MODULE=on $(GOCMD) test -bench=Div_SSA -cpuprofile=cpu.pb.gz github.com/reubenmiller/go-c8y-cli/pkg/cmd
 
+build: update_spec build_cli build_powershell
 
 build_cli:
 	pwsh -File scripts/build-cli/build.ps1;
