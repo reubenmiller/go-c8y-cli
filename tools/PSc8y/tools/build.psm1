@@ -93,13 +93,21 @@ function Remove-ModuleManifestFunctions ($Path) {
 function Publish-ModuleArtifacts {
 
     if (Test-Path -Path $ArtifactRoot) {
-        Remove-Item -Path $ArtifactRoot -Recurse -Force
+        # Note: Remove-item fails in DevContainer for some unknown reason,
+        # so fallback to default
+        try {
+            Remove-Item -LiteralPath $ArtifactRoot -Recurse -Force -ErrorAction Stop
+        } catch {
+            Write-Warning "Failed to remove folder using Remove-Item, using rm instead"
+            rm -Rf "$ArtifactRoot"
+        }
     }
 
+    Write-Verbose "Creating directory [$ArtifactRoot]"
     New-Item -Path $ArtifactRoot -ItemType Directory | Out-Null
 
     # Copy the module into the dist folder
-    Copy-Item -Path "$ModuleRoot\Dependencies" -Filter "c8y*" -Destination "$ArtifactRoot\$ModuleName\Dependencies" -Recurse
+    Copy-Item -Path "$ModuleRoot\Dependencies\" -Filter "c8y*" -Destination "$ArtifactRoot\$ModuleName\Dependencies" -Recurse
     Copy-Item -Path "$ModuleRoot\format-data" -Destination "$ArtifactRoot\$ModuleName\" -Recurse
     Copy-Item -Path "$ModuleRoot\$ModuleName.psd1" -Destination "$ArtifactRoot\$ModuleName\" -Recurse
 
