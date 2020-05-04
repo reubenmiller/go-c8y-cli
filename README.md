@@ -1,6 +1,8 @@
 # go-c8y-cli
 
-[![Build status](https://ci.appveyor.com/api/projects/status/noc3scu0nfdjdt92/branch/master?svg=true)](https://ci.appveyor.com/project/reubenmiller/go-c8y-cli/branch/master)
+[![Build status](https://ci.appveyor.com/api/projects/status/noc3scu0nfdjdt92?svg=true)](https://ci.appveyor.com/project/reubenmiller/go-c8y-cli)
+
+
 
 Unofficial Cumulocity REST Command Line Interface for both PowerShell and *nix (standalone binary).
 
