@@ -2,8 +2,8 @@
 
 title: Cumulocity REST CLI Tool
 locale: en_US
-production_url: https://reubenmiller.github.io/go-c8y
-baseurl: https://reubenmiller.github.io/go-c8y
+production_url: https://reubenmiller.github.io/go-c8y-cli
+baseurl: https://reubenmiller.github.io/go-c8y-cli
 show_full_navigation: true
 # logo: # filename of a logo image that has been placed into your images directory
 

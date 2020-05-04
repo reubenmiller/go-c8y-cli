@@ -331,7 +331,7 @@ PrivateData = @{
         # LicenseUri = ''
 
         # A URL to the main website for this project.
-        ProjectUri = 'https://reubenmiller.github.io/go-c8y'
+        ProjectUri = 'https://reubenmiller.github.io/go-c8y-cli'
 
         # A URL to an icon representing this module.
         # IconUri = ''
