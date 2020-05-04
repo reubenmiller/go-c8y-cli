@@ -41,7 +41,7 @@ collections:
 defaults:
   -
     scope:
-      path: ""
+      path: "/index"
     values:
       layout: default
   -
