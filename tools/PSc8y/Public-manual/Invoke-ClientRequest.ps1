@@ -17,6 +17,11 @@ Get a list of alarms with page size of 100
 Invoke-ClientRequest -Uri "/alarm/alarms?pageSize=100"
 
 Get a list of alarms with page size of 100
+
+.EXAMPLE
+Invoke-ClientRequest -Uri "/inventory/managedObjects" -Method "post" -Data "name=test" -Headers @{ Accept = "application/json"}
+
+Create a new managed object but add a custom accept header value
 #>
     [cmdletbinding(
         SupportsShouldProcess = $true,
@@ -36,6 +41,9 @@ Get a list of alarms with page size of 100
 
         # Request body
         [object] $Data,
+
+        # Add custom headers to the rest request
+        [hashtable] $Headers,
 
         # Input file to be uploaded as FormData
         [string] $InFile,
@@ -119,6 +127,12 @@ Get a list of alarms with page size of 100
             $null = $c8yargs.AddRange(@("--data", (ConvertTo-JsonArgument $Data)))
         }
 
+    }
+
+    if ($null -ne $Headers) {
+        foreach ($key in $Headers.Keys) {
+            $null = $c8yargs.AddRange(@("-H=`"{0}: {1}`"" -f $key, $Headers[$key]))
+        }
     }
 
     if ($HostName) {

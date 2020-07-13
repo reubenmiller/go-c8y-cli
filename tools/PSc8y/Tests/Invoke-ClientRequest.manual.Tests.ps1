@@ -148,4 +148,27 @@ Describe -Name "Invoke-ClientRequest" {
         }
     }
 
+    It "Send request with custom headers" {
+        $Response = Invoke-ClientRequest `
+            -Uri "/inventory/managedObjects" `
+            -Method "post" `
+            -Headers @{
+                MyHeader = "SomeValue"
+                2 = 1
+            } ``
+            -Data @{
+                name = "manual_object_002"
+                c8y_CustomObject = @{
+                    prop1 = $false
+                }
+            } `
+            -Whatif 2>&1
+
+        $LASTEXITCODE | Should -Be 0
+        $Response | Should -Not -BeNullOrEmpty
+
+        ($Response -join "`n") | Should -BeLike "*MyHeader: SomeValue*"
+        ($Response -join "`n") | Should -BeLike "*2: 1*"
+    }
+
 }
