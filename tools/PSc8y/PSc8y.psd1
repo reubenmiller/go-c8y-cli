@@ -12,7 +12,7 @@
 RootModule = './PSc8y.psm1'
 
 # Version number of this module.
-ModuleVersion = '1.1.1'
+ModuleVersion = '1.2.0'
 
 # Supported PSEditions
 CompatiblePSEditions = @(
@@ -63,7 +63,8 @@ FormatsToProcess = @(
     'format-data/alarms.ps1xml',
     'format-data/applicationReferences.ps1xml',
     'format-data/applications.ps1xml',
-    'format-data/auditRecords.ps1xml',
+	'format-data/auditRecords.ps1xml',
+	'format-data/bulkOperations.ps1xml',
     'format-data/deviceCredentials.ps1xml',
     'format-data/deviceGroups.ps1xml',
     'format-data/devices.ps1xml',
@@ -111,6 +112,8 @@ FunctionsToExport = @(
 	'Get-AuditRecordCollection',
 	'Get-Binary',
 	'Get-BinaryCollection',
+	'Get-BulkOperation',
+	'Get-BulkOperationCollection',
 	'Get-ChildAssetCollection',
 	'Get-ChildAssetReference',
 	'Get-ChildDeviceCollection',
@@ -174,6 +177,7 @@ FunctionsToExport = @(
 	'New-ApplicationBinary',
 	'New-AuditRecord',
 	'New-Binary',
+	'New-BulkOperation',
 	'New-ChildAssetReference',
 	'New-ChildDeviceReference',
 	'New-Device',
@@ -196,6 +200,7 @@ FunctionsToExport = @(
 	'Remove-Application',
 	'Remove-AuditRecordCollection',
 	'Remove-Binary',
+	'Remove-BulkOperation',
 	'Remove-ChildAssetReference',
 	'Remove-ChildDeviceReference',
 	'Remove-Device',
@@ -226,6 +231,7 @@ FunctionsToExport = @(
 	'Update-AlarmCollection',
 	'Update-Application',
 	'Update-Binary',
+	'Update-BulkOperation',
 	'Update-CurrentApplication',
 	'Update-CurrentUser',
 	'Update-DataBrokerConnector',
@@ -295,7 +301,6 @@ FunctionsToExport = @(
 	'Set-Session',
 	'Test-Json',
 	'Unregister-Alias',
-	'Update-Microservice',
 	'Wait-Operation',
 	'Watch-Alarm',
 	'Watch-Event',
