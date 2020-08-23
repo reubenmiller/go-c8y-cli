@@ -11,7 +11,8 @@
 	"settings": { 
 		"terminal.integrated.shell.linux": "/bin/bash",
 		"go.gopath": "/go",
-		"go.inferGopath": true,
+		"go.goroot": "/usr/local/go",
+		// "go.inferGopath": true,
 		"go.useLanguageServer": true,
 
 		// Yaml code completion
@@ -23,7 +24,7 @@
 
 	// Add the IDs of extensions you want installed when the container is created in the array below.
 	"extensions": [
-		"ms-vscode.go",
+		"golang.go",
 		"ms-vscode.powershell",
 		"redhat.vscode-yaml"
 	],
