@@ -190,6 +190,7 @@
         {
           "name": "tenant",
           "type": "tenant",
+          "position": 99,
           "description": "Tenant"
         }
       ],
@@ -271,7 +272,8 @@
         {
           "name": "tenant",
           "type": "tenant",
-          "description": "Tenant"
+          "description": "Tenant",
+          "position": 99
         }
       ],
       "body": [
@@ -377,6 +379,7 @@
           "name": "tenant",
           "type": "tenant",
           "required": false,
+          "position": 99,
           "description": "Tenant"
         }
       ]
@@ -416,7 +419,8 @@
           "name": "tenant",
           "type": "tenant",
           "required": false,
-          "description": "Tenant"
+          "description": "Tenant",
+          "position": 99
         },
         {
           "name": "name",
@@ -458,6 +462,7 @@
           "name": "tenant",
           "type": "tenant",
           "required": false,
+          "position": 99,
           "description": "Tenant"
         },
         {
@@ -511,6 +516,7 @@
           "name": "tenant",
           "type": "tenant",
           "required": false,
+          "position": 99,
           "description": "Tenant"
         }
       ],
@@ -622,7 +628,8 @@
           "name": "tenant",
           "type": "tenant",
           "required": false,
-          "description": "Tenant"
+          "description": "Tenant",
+          "position": 99
         }
       ],
       "bodyTemplate": {
@@ -680,7 +687,8 @@
         {
           "name": "tenant",
           "type": "tenant",
-          "description": "Tenant"
+          "description": "Tenant",
+          "position": 99
         }
       ]
     }

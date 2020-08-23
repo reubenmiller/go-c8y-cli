@@ -136,6 +136,7 @@ endpoints:
     pathParameters:
       - name: tenant
         type: tenant
+        position: 99
         description: Tenant
 
     queryParameters:
@@ -196,6 +197,7 @@ endpoints:
       - name: tenant
         type: tenant
         description: Tenant
+        position: 99
     body:
       - name: userName
         type: string
@@ -275,6 +277,7 @@ endpoints:
       - name: tenant
         type: tenant
         required: false
+        position: 99
         description: Tenant
 
   - name: getUserByName
@@ -301,6 +304,7 @@ endpoints:
         type: tenant
         required: false
         description: Tenant
+        position: 99
 
       - name: name
         type: string
@@ -328,6 +332,7 @@ endpoints:
       - name: tenant
         type: tenant
         required: false
+        position: 99
         description: Tenant
 
       - name: id
@@ -365,6 +370,7 @@ endpoints:
       - name: tenant
         type: tenant
         required: false
+        position: 99
         description: Tenant
     body:
       - name: firstName
@@ -448,6 +454,7 @@ endpoints:
         type: tenant
         required: false
         description: Tenant
+        position: 99
     bodyTemplate:
       type: jsonnet
       applyLast: true
@@ -493,3 +500,4 @@ endpoints:
       - name: tenant
         type: tenant
         description: Tenant
+        position: 99

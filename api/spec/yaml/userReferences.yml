@@ -36,6 +36,7 @@ endpoints:
 
       - name: tenant
         type: tenant
+        position: 99
         description: Tenant
 
     body:
@@ -81,6 +82,7 @@ endpoints:
 
       - name: tenant
         type: tenant
+        position: 99
         description: Tenant
 
   - name: getUsersInGroup
@@ -114,4 +116,5 @@ endpoints:
 
       - name: tenant
         type: tenant
+        position: 99
         description: Tenant

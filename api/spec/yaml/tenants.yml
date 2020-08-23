@@ -228,6 +228,7 @@ endpoints:
       - name: tenant
         type: tenant
         required: false
+        position: 99
         description: Tenant id. Defaults to current tenant (based on credentials)
     body:
       - name: application
@@ -256,6 +257,7 @@ endpoints:
       - name: tenant
         type: tenant
         required: false
+        position: 99
         description: Tenant id. Defaults to current tenant (based on credentials)
 
       - name: application

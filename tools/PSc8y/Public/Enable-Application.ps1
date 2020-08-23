@@ -17,17 +17,17 @@ Enable an application of a tenant
     [Alias()]
     [OutputType([object])]
     Param(
-        # Tenant id. Defaults to current tenant (based on credentials)
-        [Parameter()]
-        [object]
-        $Tenant,
-
         # Application id (required)
         [Parameter(Mandatory = $true,
                    ValueFromPipeline=$true,
                    ValueFromPipelineByPropertyName=$true)]
         [object[]]
         $Application,
+
+        # Tenant id. Defaults to current tenant (based on credentials)
+        [Parameter()]
+        [object]
+        $Tenant,
 
         # Include raw response including pagination information
         [Parameter()]

@@ -31,15 +31,15 @@ Resets a user's password by generating a new password
         [object[]]
         $Id,
 
-        # Tenant
-        [Parameter()]
-        [object]
-        $Tenant,
-
         # New user password. Min: 6, max: 32 characters. Only Latin1 chars allowed
         [Parameter()]
         [string]
         $NewPassword,
+
+        # Tenant
+        [Parameter()]
+        [object]
+        $Tenant,
 
         # Include raw response including pagination information
         [Parameter()]
@@ -74,11 +74,11 @@ Resets a user's password by generating a new password
 
     Begin {
         $Parameters = @{}
-        if ($PSBoundParameters.ContainsKey("Tenant")) {
-            $Parameters["tenant"] = $Tenant
-        }
         if ($PSBoundParameters.ContainsKey("NewPassword")) {
             $Parameters["newPassword"] = $NewPassword
+        }
+        if ($PSBoundParameters.ContainsKey("Tenant")) {
+            $Parameters["tenant"] = $Tenant
         }
         if ($PSBoundParameters.ContainsKey("OutputFile")) {
             $Parameters["outputFile"] = $OutputFile

@@ -20,11 +20,6 @@ Get a list of users
     [Alias()]
     [OutputType([object])]
     Param(
-        # Tenant
-        [Parameter()]
-        [object]
-        $Tenant,
-
         # prefix or full username
         [Parameter()]
         [string]
@@ -64,6 +59,11 @@ Get a list of users
         [Parameter()]
         [switch]
         $WithRoles,
+
+        # Tenant
+        [Parameter()]
+        [object]
+        $Tenant,
 
         # Maximum number of results
         [Parameter()]
@@ -106,9 +106,6 @@ Get a list of users
 
     Begin {
         $Parameters = @{}
-        if ($PSBoundParameters.ContainsKey("Tenant")) {
-            $Parameters["tenant"] = $Tenant
-        }
         if ($PSBoundParameters.ContainsKey("Username")) {
             $Parameters["username"] = $Username
         }
@@ -132,6 +129,9 @@ Get a list of users
         }
         if ($PSBoundParameters.ContainsKey("WithRoles")) {
             $Parameters["withRoles"] = $WithRoles
+        }
+        if ($PSBoundParameters.ContainsKey("Tenant")) {
+            $Parameters["tenant"] = $Tenant
         }
         if ($PSBoundParameters.ContainsKey("PageSize")) {
             $Parameters["pageSize"] = $PageSize

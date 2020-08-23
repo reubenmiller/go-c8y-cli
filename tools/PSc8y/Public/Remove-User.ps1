@@ -17,17 +17,17 @@ Delete a user
     [Alias()]
     [OutputType([object])]
     Param(
-        # Tenant
-        [Parameter()]
-        [object]
-        $Tenant,
-
         # User id (required)
         [Parameter(Mandatory = $true,
                    ValueFromPipeline=$true,
                    ValueFromPipelineByPropertyName=$true)]
         [string]
         $Id,
+
+        # Tenant
+        [Parameter()]
+        [object]
+        $Tenant,
 
         # Include raw response including pagination information
         [Parameter()]

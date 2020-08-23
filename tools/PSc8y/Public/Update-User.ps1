@@ -24,11 +24,6 @@ Update a user
         [object[]]
         $Id,
 
-        # Tenant
-        [Parameter()]
-        [object]
-        $Tenant,
-
         # User first name
         [Parameter()]
         [string]
@@ -70,6 +65,11 @@ Update a user
         [object]
         $CustomProperties,
 
+        # Tenant
+        [Parameter()]
+        [object]
+        $Tenant,
+
         # Include raw response including pagination information
         [Parameter()]
         [switch]
@@ -103,9 +103,6 @@ Update a user
 
     Begin {
         $Parameters = @{}
-        if ($PSBoundParameters.ContainsKey("Tenant")) {
-            $Parameters["tenant"] = $Tenant
-        }
         if ($PSBoundParameters.ContainsKey("FirstName")) {
             $Parameters["firstName"] = $FirstName
         }
@@ -129,6 +126,9 @@ Update a user
         }
         if ($PSBoundParameters.ContainsKey("CustomProperties")) {
             $Parameters["customProperties"] = ConvertTo-JsonArgument $CustomProperties
+        }
+        if ($PSBoundParameters.ContainsKey("Tenant")) {
+            $Parameters["tenant"] = $Tenant
         }
         if ($PSBoundParameters.ContainsKey("OutputFile")) {
             $Parameters["outputFile"] = $OutputFile

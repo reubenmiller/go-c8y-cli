@@ -21,11 +21,6 @@ Update a user group (using pipeline)
     [Alias()]
     [OutputType([object])]
     Param(
-        # Tenant
-        [Parameter()]
-        [object]
-        $Tenant,
-
         # Group id (required)
         [Parameter(Mandatory = $true,
                    ValueFromPipeline=$true,
@@ -37,6 +32,11 @@ Update a user group (using pipeline)
         [Parameter()]
         [string]
         $Name,
+
+        # Tenant
+        [Parameter()]
+        [object]
+        $Tenant,
 
         # Include raw response including pagination information
         [Parameter()]
@@ -71,11 +71,11 @@ Update a user group (using pipeline)
 
     Begin {
         $Parameters = @{}
-        if ($PSBoundParameters.ContainsKey("Tenant")) {
-            $Parameters["tenant"] = $Tenant
-        }
         if ($PSBoundParameters.ContainsKey("Name")) {
             $Parameters["name"] = $Name
+        }
+        if ($PSBoundParameters.ContainsKey("Tenant")) {
+            $Parameters["tenant"] = $Tenant
         }
         if ($PSBoundParameters.ContainsKey("OutputFile")) {
             $Parameters["outputFile"] = $OutputFile

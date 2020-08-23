@@ -17,16 +17,16 @@ Get a user group
     [Alias()]
     [OutputType([object])]
     Param(
-        # Tenant
-        [Parameter()]
-        [object]
-        $Tenant,
-
         # Group id
         [Parameter(ValueFromPipeline=$true,
                    ValueFromPipelineByPropertyName=$true)]
         [object[]]
         $Id,
+
+        # Tenant
+        [Parameter()]
+        [object]
+        $Tenant,
 
         # Include raw response including pagination information
         [Parameter()]

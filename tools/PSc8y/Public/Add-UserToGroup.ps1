@@ -22,17 +22,17 @@ Add a user to a user group
         [object[]]
         $Group,
 
-        # Tenant
-        [Parameter()]
-        [object]
-        $Tenant,
-
         # User id (required)
         [Parameter(Mandatory = $true,
                    ValueFromPipeline=$true,
                    ValueFromPipelineByPropertyName=$true)]
         [object[]]
         $User,
+
+        # Tenant
+        [Parameter()]
+        [object]
+        $Tenant,
 
         # Include raw response including pagination information
         [Parameter()]

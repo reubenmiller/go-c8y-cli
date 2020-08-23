@@ -17,11 +17,6 @@ Create a user
     [Alias()]
     [OutputType([object])]
     Param(
-        # Tenant
-        [Parameter()]
-        [object]
-        $Tenant,
-
         # User name, unique for a given domain. Max: 1000 characters (required)
         [Parameter(Mandatory = $true)]
         [string]
@@ -68,6 +63,11 @@ Create a user
         [object]
         $CustomProperties,
 
+        # Tenant
+        [Parameter()]
+        [object]
+        $Tenant,
+
         # Include raw response including pagination information
         [Parameter()]
         [switch]
@@ -101,9 +101,6 @@ Create a user
 
     Begin {
         $Parameters = @{}
-        if ($PSBoundParameters.ContainsKey("Tenant")) {
-            $Parameters["tenant"] = $Tenant
-        }
         if ($PSBoundParameters.ContainsKey("UserName")) {
             $Parameters["userName"] = $UserName
         }
@@ -130,6 +127,9 @@ Create a user
         }
         if ($PSBoundParameters.ContainsKey("CustomProperties")) {
             $Parameters["customProperties"] = ConvertTo-JsonArgument $CustomProperties
+        }
+        if ($PSBoundParameters.ContainsKey("Tenant")) {
+            $Parameters["tenant"] = $Tenant
         }
         if ($PSBoundParameters.ContainsKey("OutputFile")) {
             $Parameters["outputFile"] = $OutputFile
