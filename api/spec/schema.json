@@ -21,6 +21,32 @@
       "type": "string",
       "description": "Parameter name. It should start with a lower case character, and only include characters [a-zA-Z]",
       "pattern": "^[a-z][a-zA-Z]+$"
+    },
+    "cliArgumentType": {
+      "type": "string",
+      "description": "CLI Argument type",
+      "enum": [
+        "application",
+        "boolean",
+        "integer",
+        "id",
+        "file",
+        "datetime",
+        "json",
+        "json_custom",
+        "microservice",
+        "string",
+        "tenant",
+        "[]agent",
+        "[]string",
+        "[]device",
+        "[]devicegroup",
+        "[]usergroup",
+        "[]userself",
+        "[]roleself",
+        "[]role",
+        "[]user"
+      ]
     }
   },
   "properties": {
@@ -201,12 +227,7 @@
                   "description": "Name of the argument to be used in the cli"
                 },
                 "type": {
-                  "type": "string",
-                  "description": "Variable type",
-                  "enum": [
-                    "boolean",
-                    "string"
-                  ]
+                  "$ref": "#/definitions/cliArgumentType"
                 },
                 "description": {
                   "type": "string"
@@ -241,7 +262,7 @@
                   "$ref": "#/definitions/argumentName"
                 },
                 "type": {
-                  "type": "string"
+                  "$ref": "#/definitions/cliArgumentType"
                 },
                 "property": {
                   "type": "string"
@@ -283,7 +304,7 @@
                   "$ref": "#/definitions/argumentName"
                 },
                 "type": {
-                  "type": "string"
+                  "$ref": "#/definitions/cliArgumentType"
                 },
                 "property": {
                   "type": "string"
@@ -349,7 +370,7 @@
                   "$ref": "#/definitions/argumentName"
                 },
                 "type": {
-                  "type": "string"
+                  "$ref": "#/definitions/cliArgumentType"
                 },
                 "property": {
                   "type": "string"
