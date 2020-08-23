@@ -55,6 +55,7 @@ endpoints:
       - name: tenant
         type: tenant
         description: Tenant
+        position: 99
 
     body:
       - name: name
@@ -85,6 +86,7 @@ endpoints:
       - name: tenant
         type: tenant
         description: Tenant
+        position: 99
 
       - name: id
         type: '[]usergroup'
@@ -115,6 +117,7 @@ endpoints:
       - name: tenant
         type: tenant
         description: Tenant
+        position: 99
 
       - name: name
         type: string
@@ -146,6 +149,7 @@ endpoints:
       - name: tenant
         type: tenant
         description: Tenant
+        position: 99
 
       - name: id
         type: '[]usergroup'
@@ -182,6 +186,7 @@ endpoints:
       - name: tenant
         type: tenant
         description: Tenant
+        position: 99
 
       - name: id
         type: '[]usergroup'
