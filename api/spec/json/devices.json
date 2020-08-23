@@ -505,7 +505,7 @@
       "pathParameters": [
         {
           "name": "id",
-          "type": "[]deviceGroup",
+          "type": "[]devicegroup",
           "pipeline": true,
           "required": true,
           "description": "Device group ID"
@@ -565,7 +565,7 @@
       "pathParameters": [
         {
           "name": "id",
-          "type": "[]deviceGroup",
+          "type": "[]devicegroup",
           "pipeline": true,
           "required": true,
           "description": "Device group ID"
@@ -622,7 +622,7 @@
       "pathParameters": [
         {
           "name": "id",
-          "type": "[]deviceGroup",
+          "type": "[]devicegroup",
           "pipeline": true,
           "required": true,
           "description": "Device group ID"
