@@ -137,6 +137,18 @@
     $IteratorVariable = ""
     $PipelineTemplateFormat = ""
 
+    # Sort argument sources by position (if specified)
+    $ArgumentSources = $ArgumentSources | ForEach-Object {
+        if ($null -eq $_.position) {
+            # Assign default value
+            $_ | Add-Member -MemberType NoteProperty -Name position -Value 20
+        }
+        $_
+    }
+
+    # (stable) sort argument sources by position to control the expected order on cli
+    $ArgumentSources = $ArgumentSources | Sort-Object -Property position -Stable
+
     foreach ($iArg in $ArgumentSources) {
         $ReadFromPipeline = $iArg.pipeline -or $iArg.name -eq "id" -or $iArg.alias -eq "id"
         $ArgParams = @{
