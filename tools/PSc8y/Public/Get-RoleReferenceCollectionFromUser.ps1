@@ -17,15 +17,15 @@ Get a list of role references for a user
     [Alias()]
     [OutputType([object])]
     Param(
-        # Tenant
-        [Parameter()]
-        [object]
-        $Tenant,
-
         # User (required)
         [Parameter(Mandatory = $true)]
         [object[]]
         $User,
+
+        # Tenant
+        [Parameter()]
+        [object]
+        $Tenant,
 
         # Maximum number of results
         [Parameter()]
@@ -68,11 +68,11 @@ Get a list of role references for a user
 
     Begin {
         $Parameters = @{}
-        if ($PSBoundParameters.ContainsKey("Tenant")) {
-            $Parameters["tenant"] = $Tenant
-        }
         if ($PSBoundParameters.ContainsKey("User")) {
             $Parameters["user"] = $User
+        }
+        if ($PSBoundParameters.ContainsKey("Tenant")) {
+            $Parameters["tenant"] = $Tenant
         }
         if ($PSBoundParameters.ContainsKey("PageSize")) {
             $Parameters["pageSize"] = $PageSize

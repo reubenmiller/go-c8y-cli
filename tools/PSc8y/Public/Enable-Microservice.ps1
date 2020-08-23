@@ -17,17 +17,17 @@ Enable (subscribe) to a microservice
     [Alias()]
     [OutputType([object])]
     Param(
-        # Tenant id
-        [Parameter()]
-        [object]
-        $Tenant,
-
         # Microservice id (required)
         [Parameter(Mandatory = $true,
                    ValueFromPipeline=$true,
                    ValueFromPipelineByPropertyName=$true)]
         [object[]]
         $Id,
+
+        # Tenant id
+        [Parameter()]
+        [object]
+        $Tenant,
 
         # Include raw response including pagination information
         [Parameter()]
