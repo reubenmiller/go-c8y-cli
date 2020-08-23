@@ -1,0 +1,174 @@
+
+---
+information:
+  name: bulkOperations
+  description: Cumulocity bulk operations
+  descriptionLong: 'REST endpoint to interact with Cumulocity bulk operations'
+  link: https://cumulocity.com/guides/reference/device-control/#bulk-operation-collection
+
+endpoints:
+  - name: getBulkOperationCollection
+    method: GET
+    description: Get a collection of bulk operations
+    descriptionLong: Get a collection of bulk operations
+    path: devicecontrol/bulkoperations
+    accept: application/vnd.com.nsn.cumulocity.bulkOperationCollection+json
+    collectionType: application/vnd.com.nsn.cumulocity.bulkoperation+json
+    collectionProperty: bulkOperations
+    alias:
+        go: list
+        powershell: Get-BulkOperationCollection
+    examples:
+      powershell:
+        - description: Get a list of bulk operations
+          command: Get-BulkOperationCollection
+
+      go:
+        - description: Get a list of bulk operations
+          command: c8y bulkOperations list
+
+    queryParameters:
+      - name: withDeleted
+        type: boolean
+        description: Include CANCELLED bulk operations
+
+  - name: getBulkOperation
+    description: 'Get bulk operation/s'
+    method: GET
+    examples:
+      powershell:
+        - description: Get bulk operation by id
+          command: Get-BulkOperation -Id {{ NewOperation }}
+
+      go:
+        - description: Get bulk operation by id
+          command: c8y bulkOperations get --id 12345
+
+    path: devicecontrol/bulkoperations/{id}
+    accept: application/vnd.com.nsn.cumulocity.bulkoperation+json
+    alias:
+        go: get
+        powershell: Get-BulkOperation
+    pathParameters:
+      - name: id
+        type: string
+        required: true
+        pipeline: true
+        description: Bulk Operation id
+
+  - name: deleteBulkOperation
+    description: 'Remove bulk operation/s'
+    method: DELETE
+    # Currently an issue with this api???
+    skip: true
+    examples:
+      powershell:
+        - description: Remove bulk operation by id
+          command: Remove-BulkOperation -Id {{ NewOperation }}
+
+      go:
+        - description: Remove bulk operation by id
+          command: c8y bulkOperations delete --id 12345
+
+    path: devicecontrol/bulkoperations/{id}
+    alias:
+        go: delete
+        powershell: Remove-BulkOperation
+    pathParameters:
+      - name: id
+        type: string
+        required: true
+        pipeline: true
+        description: Bulk Operation id
+
+  - name: newBulkOperation
+    method: POST
+    path: devicecontrol/bulkoperations
+    accept: application/vnd.com.nsn.cumulocity.bulkoperation+json
+    description: 'Create a new bulk operation'
+    descriptionLong: 'Create a new bulk operation'
+    examples:
+      powershell:
+        - description: Create bulk operation for a group
+          beforeEach:
+            - $group = New-TestAgent
+          command: 'New-BulkOperation -Group $group.id -StartDate "10s" -CreationRampSec 15 -Operation @{ c8y_Restart = @{} }'
+          afterEach:
+            - Remove-ManagedObject -Id $group.id
+
+        - description: Create bulk operation for a group (using pipeline)
+          beforeEach:
+            - $group = New-TestAgent
+          command: 'Get-DeviceGroup $group.id | New-BulkOperation -StartDate "10s" -CreationRampSec 15 -Operation @{ c8y_Restart = @{} }'
+          afterEach:
+            - Remove-ManagedObject -Id $group.id
+
+      go:
+        - description: Create operation for a device
+          command: c8y operations create --device mydevice --data "{c8y_Restart:{}}"
+    alias:
+        go: create
+        powershell: New-BulkOperation
+    body:
+      - name: group
+        type: '[]devicegroup'
+        property: groupId
+        required: true
+        pipeline: true
+        description: Identifies the target group on which this operation should be performed.
+
+      - name: startDate
+        type: datetime
+        required: false
+        description: Time when operations should be created.
+
+      - name: creationRampSec
+        property: creationRamp
+        type: integer
+        required: false
+        description: Delay between every operation creation.
+
+      - name: operation
+        property: operationPrototype
+        type: json_custom
+        required: false
+        description: Delay between every operation creation.
+
+      - name: data
+        type: json
+        description: Additional properties describing the bulk operation which will be performed on the device group.
+
+
+  - name: updateBulkOperation
+    description: Update bulk operation
+    descriptionLong: Update bulk operation
+    examples:
+      powershell:
+        - description: Update bulk operation
+          command: Update-BulkOperation -Id {{ NewOperation }} -CreationRamp 15
+      go:
+        - description: Update an bulk operation
+          command: c8y bulkOperations update --id 12345 --creationRamp 15
+    method: PUT
+    path: devicecontrol/bulkoperations/{id}
+    accept: application/vnd.com.nsn.cumulocity.bulkoperation+json
+    alias:
+        go: update
+        powershell: Update-BulkOperation
+    body:
+      - name: creationRampSec
+        property: creationRamp
+        type: integer
+        required: false
+        description: Delay between every operation creation.
+
+      - name: data
+        type: json
+        description: Additional properties to update on the bulk operation.
+
+    pathParameters:
+      - name: id
+        type: string
+        description: Bulk Operation id
+        pipeline: true
+        required: true
