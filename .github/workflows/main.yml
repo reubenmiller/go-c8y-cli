@@ -1,9 +1,5 @@
-# This is a basic workflow to help you get started with Actions
-
 name: CI
 
-# Controls when the action will run. Triggers the workflow on push or pull request
-# events but only for the master branch
 on:
   push:
     branches: [ master ]
@@ -15,7 +11,7 @@ on:
   pull_request:
     branches: [ master ]
 
-# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+
 jobs:
 
   build:
@@ -50,9 +46,7 @@ jobs:
       matrix:
         os: [macos-latest, windows-latest, ubuntu-18.04]
 
-    # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
-    # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
     - uses: actions/checkout@v2
 
     # Download already built cli binaries
@@ -70,14 +64,29 @@ jobs:
       run: make test_powershell
       shell: bash
 
-    - name: Publish Test Results
-      uses: EnricoMi/publish-unit-test-result-action@v1.1
-      if: always()
+    - uses: actions/upload-artifact@v2
       with:
-        check_name: Test Results
-        github_token: ${{ secrets.GITHUB_TOKEN }}
-        files: report.xml
-        log_level: DEBUG
+        name: test-results
+        path: report.xml
+
+
+  publish-test-results:
+    runs-on: ubuntu-18.04
+    needs: [test]
+    steps:
+      - name: Get test results
+        uses: actions/download-artifact@v2
+        with:
+          name: test-results
+
+      - name: Publish results
+        uses: EnricoMi/publish-unit-test-result-action@v1.1
+        if: always()
+        with:
+          check_name: Test Results
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          files: report.xml
+          log_level: DEBUG
 
 
   build-and-publish-latest:
