@@ -19,29 +19,21 @@ on:
 jobs:
 
   build:
-    runs-on: ${{ matrix.os }}
+    runs-on: ubuntu-18.04
 
-    strategy:
-      matrix:
-        os: [macos-latest, windows-latest, ubuntu-18.04]
-
-    # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
-    # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
     - uses: actions/checkout@v2
 
-    # Runs a single command using the runners shell
     - name: Build cli
       run: make build
       shell: bash
 
-    # Upload build artifacts  
     - uses: actions/upload-artifact@v2
       with:
-        name: cli artifacts
+        name: c8y-cli-binaries
         path: tools/PSc8y/Dependencies/c8y*
 
-  
+
   test:
     runs-on: ${{ matrix.os }}
     env:
@@ -62,11 +54,17 @@ jobs:
     # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
     - uses: actions/checkout@v2
 
+    # Download already built cli binaries
+    - name: Download math result for job 1
+      uses: actions/download-artifact@v2
+      with:
+        name: c8y-cli-binaries
+
     # Runs a single command using the runners shell
     - name: Test powershell module
       run: make test_powershell
       shell: bash
-    
+
     - name: Publish Test Results
       uses: EnricoMi/publish-unit-test-result-action@v1.1
       if: always()
@@ -76,13 +74,14 @@ jobs:
         files: report.xml
         log_level: DEBUG
 
+
   build-and-publish-latest:
     runs-on: ubuntu-latest
     #if: github.ref == 'refs/heads/master' # Running this job only for master branch
 
     steps:
     - uses: actions/checkout@v2 # Checking out the repo
-  
+
     - name: Build docker images
       run: make build_docker
 
@@ -92,14 +91,14 @@ jobs:
         github-token: ${{ secrets.GITHUB_TOKEN }}
         image-name: c8ycli-pwsh
         # extract-git-tag: true
-    
+
     - name: Publish c8ycli zsh docker image
       uses: VaultVulp/gp-docker-action@1.0.1
       with:
         github-token: ${{ secrets.GITHUB_TOKEN }}
         image-name: c8ycli-zsh
         # extract-git-tag: true
-    
+
     - name: Publish c8ycli bash docker image
       uses: VaultVulp/gp-docker-action@1.0.1
       with:
@@ -107,13 +106,19 @@ jobs:
         image-name: c8ycli-bash
         # extract-git-tag: true
 
+
   publish-nuget:
     runs-on: ubuntu-18.04
     env:
       API_KEY: ${{ secrets.api_key }}
       nuget_apikey: ${{ secrets.nuget_apikey }}
     steps:
-    - uses: actions/checkout@v2 # Checking out the repo
+    - uses: actions/checkout@v2
+
+    - name: Download math result for job 1
+      uses: actions/download-artifact@v2
+      with:
+        name: c8y-cli-binaries
 
     - name: Publish Powershell Module (PSc8y)
       run: make publish
