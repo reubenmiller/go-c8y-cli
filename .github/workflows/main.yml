@@ -68,6 +68,7 @@ jobs:
   publish-test-results:
     runs-on: ubuntu-18.04
     needs: [test]
+    if: "false"
     steps:
       - name: Get test results
         uses: actions/download-artifact@v2
@@ -86,6 +87,7 @@ jobs:
 
   build-and-publish-latest:
     runs-on: ubuntu-latest
+    if: "false"
     #if: github.ref == 'refs/heads/master' # Running this job only for master branch
 
     steps:
@@ -122,7 +124,7 @@ jobs:
     runs-on: ubuntu-18.04
     needs: [test]
     env:
-      nuget_apikey: ${{ secrets.NUGET_API_KEY }}
+      NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
     steps:
     - uses: actions/checkout@v2
 
