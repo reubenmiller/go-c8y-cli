@@ -36,6 +36,7 @@ jobs:
 
   test:
     runs-on: ${{ matrix.os }}
+    needs: [build]
     env:
       C8Y_HOST: ${{ secrets.C8Y_HOST }}
       C8Y_TENANT: ${{ secrets.C8Y_TENANT }}
@@ -109,8 +110,8 @@ jobs:
 
   publish-nuget:
     runs-on: ubuntu-18.04
+    needs: [test]
     env:
-      API_KEY: ${{ secrets.api_key }}
       nuget_apikey: ${{ secrets.nuget_apikey }}
     steps:
     - uses: actions/checkout@v2
