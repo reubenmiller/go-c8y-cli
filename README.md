@@ -1,6 +1,6 @@
 # go-c8y-cli
 
-[![Build status](https://ci.appveyor.com/api/projects/status/noc3scu0nfdjdt92?svg=true)](https://ci.appveyor.com/project/reubenmiller/go-c8y-cli)
+![build](https://github.com/reubenmiller/go-c8y-cli/workflows/build/badge.svg)
 
 
 

@@ -1,4 +1,4 @@
-name: CI
+name: build
 
 on:
   push:
@@ -49,18 +49,12 @@ jobs:
     steps:
     - uses: actions/checkout@v2
 
-    # Download already built cli binaries
-    # - name: Download cli artifacts
-    #   uses: actions/download-artifact@v2
-    #   with:
-    #     name: c8y-cli-binaries
-
     - name: Build powershell module
       run: make build_powershell
       shell: bash
 
-    # Runs a single command using the runners shell
     - name: Test powershell module
+      if: ${{ false }}
       run: make test_powershell
       shell: bash
 
@@ -128,14 +122,12 @@ jobs:
     runs-on: ubuntu-18.04
     needs: [test]
     env:
-      nuget_apikey: ${{ secrets.nuget_apikey }}
+      nuget_apikey: ${{ secrets.NUGET_API_KEY }}
     steps:
     - uses: actions/checkout@v2
 
-    - name: Download cli artifacts
-      uses: actions/download-artifact@v2
-      with:
-        name: c8y-cli-binaries
+    - name: Build Powershell Module
+      run: make build_powershell
 
     - name: Publish Powershell Module (PSc8y)
       run: make publish
