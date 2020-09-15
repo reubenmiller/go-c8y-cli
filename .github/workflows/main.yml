@@ -130,6 +130,11 @@ jobs:
 
     - name: Build Powershell Module
       run: make build_powershell
+    
+    - uses: actions/upload-artifact@v2
+      with:
+        name: PSc8y
+        path: tools/PSc8y/dist/PSc8y.zip
 
     - name: Publish Powershell Module (PSc8y)
       run: make publish
