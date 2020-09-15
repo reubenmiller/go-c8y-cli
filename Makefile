@@ -130,10 +130,10 @@ build_powershell:
 	pwsh -File scripts/build-powershell/build.ps1;
 
 test_powershell:
-	pwsh -File tools/PSc8y/tests.ps1 -NonInteractive
+	pwsh -NonInteractive -File tools/PSc8y/tests.ps1
 
 test_ci_powershell:
-	pwsh -File scripts/build-powershell/test.ci.ps1 -NonInteractive
+	pwsh -NonInteractive -File scripts/build-powershell/test.ci.ps1
 
 publish:
 	pwsh -File ./scripts/build-powershell/publish.ps1

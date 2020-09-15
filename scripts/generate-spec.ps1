@@ -3,8 +3,9 @@ Param()
 
 # Convert the yaml specs to json
 if (!(Get-Command yaml2json -ErrorAction SilentlyContinue)) {
-    Write-Error "Missing yaml2json. Please install it using 'npm install -g yamljs'"
-    return
+    Write-Warning "Missing yamljs. Trying to install yamljs now"
+
+    npm install -g yamljs
 }
 
 Write-Host "Converting yaml specs to json" -ForegroundColor Gray

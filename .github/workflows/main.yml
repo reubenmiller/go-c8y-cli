@@ -69,7 +69,7 @@ jobs:
 
   build-and-publish-latest:
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/master' # Running this job only for master branch
+    #if: github.ref == 'refs/heads/master' # Running this job only for master branch
 
     steps:
     - uses: actions/checkout@v2 # Checking out the repo
@@ -95,5 +95,7 @@ jobs:
       API_KEY: ${{ secrets.api_key }}
       nuget_apikey: ${{ secrets.nuget_apikey }}
     steps:
-    - name: Publish docker
+    - uses: actions/checkout@v2 # Checking out the repo
+
+    - name: Publish Powershell Module (PSc8y)
       run: make publish
