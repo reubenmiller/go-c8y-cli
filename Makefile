@@ -139,6 +139,6 @@ publish:
 	pwsh -File ./scripts/build-powershell/publish.ps1
 
 build_docker:
-	docker build . --file ./docker/zsh.dockerfile --tag c8ycli-zsh
-	docker build . --file ./docker/bash.dockerfile --tag c8ycli-bash
-	docker build . --file ./docker/pwsh.dockerfile --tag c8ycli-pwsh
+	docker build . --file ./docker/zsh.dockerfile --tag $(TAG_PREFIX)c8ycli-zsh
+	docker build . --file ./docker/bash.dockerfile --tag $(TAG_PREFIX)c8ycli-bash
+	docker build . --file ./docker/pwsh.dockerfile --tag $(TAG_PREFIX)c8ycli-pwsh
