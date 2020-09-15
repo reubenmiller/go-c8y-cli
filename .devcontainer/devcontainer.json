@@ -28,6 +28,11 @@
 		"ms-vscode.powershell",
 		"redhat.vscode-yaml"
 	],
+
+	// Uncomment to use the Docker CLI from inside the container. See https://aka.ms/vscode-remote/samples/docker-in-docker.
+	"mounts": [
+		"source=/var/run/docker.sock,target=/var/run/docker.sock,type=bind"
+	],
 	
 	// Uncomment the next line to run commands after the container is created.
 	// "postCreateCommand": "go version",

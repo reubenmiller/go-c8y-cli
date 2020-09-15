@@ -134,3 +134,11 @@ test_powershell:
 
 test_ci_powershell:
 	pwsh -File scripts/build-powershell/test.ci.ps1 -NonInteractive
+
+publish:
+	pwsh -File ./scripts/build-powershell/publish.ps1
+
+build_docker:
+	docker build . --file ./docker/zsh.dockerfile --tag c8ycli-zsh
+	docker build . --file ./docker/bash.dockerfile --tag c8ycli-bash
+	docker build . --file ./docker/pwsh.dockerfile --tag c8ycli-pwsh
