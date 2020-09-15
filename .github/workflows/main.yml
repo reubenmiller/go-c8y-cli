@@ -65,6 +65,7 @@ jobs:
       shell: bash
 
     - uses: actions/upload-artifact@v2
+      if: always()
       with:
         name: test-results
         path: report.xml
@@ -98,7 +99,7 @@ jobs:
 
     - name: Build docker images
       run: |
-        TAG_PREFIX="docker.pkg.github.com/${GITHUB_REPOSITORY}/"
+        TAG_PREFIX="ghcr.io/${GITHUB_REPOSITORY}/"
         make TAG_PREFIX=$TAG_PREFIX build_docker
 
     - name: Publish c8ycli pwsh docker image
