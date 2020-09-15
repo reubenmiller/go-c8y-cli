@@ -35,9 +35,23 @@ jobs:
       run: make build
       shell: bash
 
+    # Upload build artifacts  
+    - uses: actions/upload-artifact@v2
+      with:
+        name: cli artifacts
+        path: tools/PSc8y/Dependencies/c8y*
+
   
   test:
     runs-on: ${{ matrix.os }}
+    env:
+      C8Y_HOST: ${{ secrets.C8Y_HOST }}
+      C8Y_TENANT: ${{ secrets.C8Y_TENANT }}
+      C8Y_USER: ${{ secrets.C8Y_USER }}
+      C8Y_PASSWORD: ${{ secrets.C8Y_PASSWORD }}
+
+      # Max timeout for each request (in milliseconds)
+      C8Y_TIMEOUT: 30000
 
     strategy:
       matrix:
@@ -53,11 +67,33 @@ jobs:
       run: make test_powershell
       shell: bash
 
-  publish_docker:
+  build-and-publish-latest:
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/master' # Running this job only for master branch
+
+    steps:
+    - uses: actions/checkout@v2 # Checking out the repo
+  
+    - name: Build docker images
+      run: make build_docker
+
+    - name: Build and Publish latest Docker image
+      uses: VaultVulp/gp-docker-action@1.0.1
+      with:
+        github-token: ${{ secrets.GITHUB_TOKEN }} # Provide GITHUB_TOKEN to login into the GitHub Packages
+        image-name: my-cool-service # Provide only Docker image name, tag will be automatically set to latest
+    
+    - name: Build and Publish latest Docker image
+      uses: VaultVulp/gp-docker-action@1.0.1
+      with:
+        github-token: ${{ secrets.GITHUB_TOKEN }} # Provide GITHUB_TOKEN to login into the GitHub Packages
+        image-name: my-cool-service # Provide only Docker image name, tag will be automatically set to latest
+
+  publish-nuget:
     runs-on: ubuntu-18.04
+    env:
+      API_KEY: ${{ secrets.api_key }}
+      nuget_apikey: ${{ secrets.nuget_apikey }}
     steps:
     - name: Publish docker
-      with:
-          API_KEY: ${{ secrets.api_key }}
-          nuget_apikey: ${{ secrets.nuget_apikey }}
-      run: make publish-docker
+      run: make publish
