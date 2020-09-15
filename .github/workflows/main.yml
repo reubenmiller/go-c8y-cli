@@ -66,6 +66,15 @@ jobs:
     - name: Test powershell module
       run: make test_powershell
       shell: bash
+    
+    - name: Publish Test Results
+      uses: EnricoMi/publish-unit-test-result-action@v1.1
+      if: always()
+      with:
+        check_name: Test Results
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        files: report.xml
+        log_level: DEBUG
 
   build-and-publish-latest:
     runs-on: ubuntu-latest
@@ -77,17 +86,26 @@ jobs:
     - name: Build docker images
       run: make build_docker
 
-    - name: Build and Publish latest Docker image
+    - name: Publish c8ycli pwsh docker image
       uses: VaultVulp/gp-docker-action@1.0.1
       with:
-        github-token: ${{ secrets.GITHUB_TOKEN }} # Provide GITHUB_TOKEN to login into the GitHub Packages
-        image-name: my-cool-service # Provide only Docker image name, tag will be automatically set to latest
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+        image-name: c8ycli-pwsh
+        # extract-git-tag: true
     
-    - name: Build and Publish latest Docker image
+    - name: Publish c8ycli zsh docker image
       uses: VaultVulp/gp-docker-action@1.0.1
       with:
-        github-token: ${{ secrets.GITHUB_TOKEN }} # Provide GITHUB_TOKEN to login into the GitHub Packages
-        image-name: my-cool-service # Provide only Docker image name, tag will be automatically set to latest
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+        image-name: c8ycli-zsh
+        # extract-git-tag: true
+    
+    - name: Publish c8ycli bash docker image
+      uses: VaultVulp/gp-docker-action@1.0.1
+      with:
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+        image-name: c8ycli-bash
+        # extract-git-tag: true
 
   publish-nuget:
     runs-on: ubuntu-18.04
