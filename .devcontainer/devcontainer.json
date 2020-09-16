@@ -26,7 +26,8 @@
 	"extensions": [
 		"golang.go",
 		"ms-vscode.powershell",
-		"redhat.vscode-yaml"
+		"redhat.vscode-yaml",
+		"eamodio.gitlens"
 	],
 
 	// Uncomment to use the Docker CLI from inside the container. See https://aka.ms/vscode-remote/samples/docker-in-docker.
