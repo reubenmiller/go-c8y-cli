@@ -11,10 +11,21 @@ if (!(Get-Module "Pester")) {
 }
 
 if ($Coverage) {
-    $output = Invoke-Pester -Script $PSScriptRoot/Tests -CodeCoverage $PSScriptRoot/Public/* -CodeCoverageOutputFile "$PSScriptRoot/PSc8y.coverage.xml" -PassThru
+    $output = Invoke-Pester `
+        -Script $PSScriptRoot/Tests `
+        -CodeCoverage $PSScriptRoot/Public/* `
+        -CodeCoverageOutputFile "$PSScriptRoot/PSc8y.coverage.xml" `
+        -PassThru
 } else {
-    Invoke-Pester -Script $PSScriptRoot/Tests -OutputFile "report.xml"
+    $output = Invoke-Pester `
+        -PassThru `
+        -Script $PSScriptRoot/Tests `
+        -OutputFile "report.xml"
 }
 
-
 $global:ConfirmPreference = $OldConfirmPreference
+    
+$code = $output.FailedCount
+Write-Host "Failed Count: $code"
+
+exit $code

@@ -46,7 +46,7 @@ try {
 	## Publish module to PowerShell Gallery
 	$publishParams = @{
 		Path        = $ArtifactFolder
-		NuGetApiKey = $env:nuget_apikey
+		NuGetApiKey = $env:NUGET_API_KEY
 		Verbose = $true
 	}
 	Publish-Module @publishParams
