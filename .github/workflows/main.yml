@@ -11,7 +11,6 @@ on:
   pull_request:
     branches: [ master ]
 
-
 jobs:
 
   build:
@@ -26,9 +25,18 @@ jobs:
 
     - uses: actions/upload-artifact@v2
       with:
-        name: c8y-cli-binaries
-        path: tools/PSc8y/Dependencies/c8y*
+        name: c8y.windows.amd64
+        path: tools/PSc8y/Dependencies/c8y.windows*
 
+    - uses: actions/upload-artifact@v2
+      with:
+        name: c8y.linux.amd64
+        path: tools/PSc8y/Dependencies/c8y.linux*
+
+    - uses: actions/upload-artifact@v2
+      with:
+        name: c8y.macos.amd64
+        path: tools/PSc8y/Dependencies/c8y.macos*
 
   test:
     runs-on: ${{ matrix.os }}
@@ -62,13 +70,12 @@ jobs:
       if: always()
       with:
         name: test-results
-        path: report.xml
-
+        path: report.${{ matrix.os }}.xml
 
   publish-test-results:
     runs-on: ubuntu-18.04
     needs: [test]
-    if: "false"
+    if: ${{ false }}
     steps:
       - name: Get test results
         uses: actions/download-artifact@v2
@@ -83,58 +90,3 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           files: report.xml
           log_level: DEBUG
-
-
-  build-and-publish-latest:
-    runs-on: ubuntu-latest
-    if: "false"
-    #if: github.ref == 'refs/heads/master' # Running this job only for master branch
-
-    steps:
-    - uses: actions/checkout@v2 # Checking out the repo
-
-    - name: Build docker images
-      run: |
-        TAG_PREFIX="ghcr.io/${GITHUB_REPOSITORY}/"
-        make TAG_PREFIX=$TAG_PREFIX build_docker
-
-    - name: Publish c8ycli pwsh docker image
-      uses: VaultVulp/gp-docker-action@1.0.1
-      with:
-        github-token: ${{ secrets.GITHUB_TOKEN }}
-        image-name: c8ycli-pwsh
-        # extract-git-tag: true
-
-    - name: Publish c8ycli zsh docker image
-      uses: VaultVulp/gp-docker-action@1.0.1
-      with:
-        github-token: ${{ secrets.GITHUB_TOKEN }}
-        image-name: c8ycli-zsh
-        # extract-git-tag: true
-
-    - name: Publish c8ycli bash docker image
-      uses: VaultVulp/gp-docker-action@1.0.1
-      with:
-        github-token: ${{ secrets.GITHUB_TOKEN }}
-        image-name: c8ycli-bash
-        # extract-git-tag: true
-
-
-  publish-nuget:
-    runs-on: ubuntu-18.04
-    needs: [test]
-    env:
-      NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
-    steps:
-    - uses: actions/checkout@v2
-
-    - name: Build Powershell Module
-      run: make build_powershell
-    
-    - uses: actions/upload-artifact@v2
-      with:
-        name: PSc8y
-        path: tools/PSc8y/dist/PSc8y.zip
-
-    - name: Publish Powershell Module (PSc8y)
-      run: make publish
