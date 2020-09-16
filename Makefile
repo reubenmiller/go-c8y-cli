@@ -41,6 +41,11 @@ check-integration-variables:
 	$(call check_defined, C8Y_PASSWORD, Cumulocity password)
 	@exit 0
 
+gh_pages_update:	## Update github pages dependencies
+	cd docs && bundle update
+
+gh_pages:			## Run github pages locally
+	cd docs && bundle exec jekyll server --baseurl ""
 
 test: test_powershell
 

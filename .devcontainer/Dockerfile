@@ -30,6 +30,10 @@ RUN wget https://packages.microsoft.com/config/debian/10/packages-microsoft-prod
     # Verify git, process tools, lsb-release (common in install instructions for CLIs) installed
     && apt-get -y install git openssh-client less iproute2 procps lsb-release gnupg \
     #
+    # Github pages tooling
+    && apt-get -y install ruby-full build-essential zlib1g-dev \
+    && gem install jekyll bundler \
+    #
     # Extra tooling
     && apt-get -y install make powershell nodejs \
     && npm install -g yamljs \
