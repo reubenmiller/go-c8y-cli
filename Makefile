@@ -132,9 +132,6 @@ build_powershell:
 test_powershell:
 	pwsh -NonInteractive -File tools/PSc8y/tests.ps1
 
-test_ci_powershell:
-	pwsh -NonInteractive -File scripts/build-powershell/test.ci.ps1
-
 publish:
 	pwsh -File ./scripts/build-powershell/publish.ps1
 
