@@ -133,7 +133,7 @@
       "path": "inventory/managedObjects",
       "accept": "application/vnd.com.nsn.cumulocity.inventory+json",
       "description": "Create a new inventory",
-      "descriptionLong": "Create a new inventory",
+      "descriptionLong": "Create a new inventory managed object",
       "alias": {
         "go": "create",
         "powershell": "New-ManagedObject"

@@ -118,6 +118,7 @@
     {
       "name": "getOperation",
       "description": "Get operation/s",
+      "descriptionLong": "Get an operation by id",
       "method": "GET",
       "examples": {
         "powershell": [
@@ -155,7 +156,7 @@
       "path": "devicecontrol/operations",
       "accept": "application/vnd.com.nsn.cumulocity.operation+json",
       "description": "Create a new operation",
-      "descriptionLong": "Create a new operation",
+      "descriptionLong": "Create a new operation for an agent or device",
       "examples": {
         "powershell": [
           {
@@ -215,7 +216,7 @@
     {
       "name": "updateOperation",
       "description": "Update operation",
-      "descriptionLong": "Update operation",
+      "descriptionLong": "Update an operation. This is commonly used to change an operation's status. For example the operation can be set to FAILED along with a failure reason.\n",
       "examples": {
         "powershell": [
           {
@@ -287,6 +288,7 @@
     {
       "name": "deleteOperationCollection",
       "description": "Delete a collection of operations",
+      "descriptionLong": "Delete a collection of operations using a set of filter criteria. Be careful when deleting operations. Where possible update operations to FAILED (with a failure reason) instead of deleting them as it is easier to track.\n",
       "examples": {
         "powershell": [
           {

@@ -9,6 +9,7 @@
     {
       "name": "getRetentionRuleCollection",
       "description": "Get collection of retention rules",
+      "descriptionLong": "Get a collection of retention rules configured in the current tenant\n",
       "method": "GET",
       "path": "/retention/retentions",
       "accept": "application/vnd.com.nsn.cumulocity.retentionRuleCollection+json",
@@ -36,6 +37,7 @@
     {
       "name": "newRetentionRule",
       "description": "New retention rule",
+      "descriptionLong": "Create a new retention rule to managed when data is deleted in the tenant\n",
       "method": "POST",
       "path": "/retention/retentions",
       "accept": "application/vnd.com.nsn.cumulocity.retentionRule+json",
@@ -107,6 +109,7 @@
     {
       "name": "getRetentionRule",
       "description": "Get retention rule",
+      "descriptionLong": "Get an existing retention by id\n",
       "method": "GET",
       "path": "/retention/retentions/{id}",
       "accept": "application/vnd.com.nsn.cumulocity.retentionRule+json",
@@ -147,6 +150,7 @@
     {
       "name": "deleteRetentionRule",
       "description": "Delete retention rule",
+      "descriptionLong": "Delete an existing retention rule\n",
       "method": "DELETE",
       "path": "/retention/retentions/{id}",
       "alias": {
@@ -190,6 +194,7 @@
     {
       "name": "updateRetentionRule",
       "description": "Update retention rule",
+      "descriptionLong": "Update an existing retentule rule, i.e. change maximum number of days or the data type.\n",
       "method": "PUT",
       "path": "/retention/retentions/{id}",
       "accept": "application/vnd.com.nsn.cumulocity.retentionRule+json",

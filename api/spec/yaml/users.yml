@@ -10,6 +10,7 @@ information:
 endpoints:
   - name: getUserCurrent
     description: Get user
+    descriptionLong: Get the user representation associated with the current credentials used by the request
     method: GET
     path: /user/currentUser
     accept: 'application/vnd.com.nsn.cumulocity.currentUser+json'
@@ -26,6 +27,8 @@ endpoints:
 
   - name: updateUserCurrent
     description: Update the current user
+    descriptionLong: |
+        Update properties or settings of your user such as first/last name, email or password
     method: PUT
     path: /user/currentUser
     accept: 'application/vnd.com.nsn.cumulocity.currentUser+json'
@@ -75,6 +78,7 @@ endpoints:
   # Inventory Roles
   - name: getCurrentUserInventoryRoleCollection
     description: Get the current users inventory roles
+    descriptionLong: Get a list of inventory roles currently assigned to the user
     method: GET
     path: /user/inventoryroles
     accept: 'application/vnd.com.nsn.cumulocity.inventoryrolecollection+json'
@@ -175,6 +179,7 @@ endpoints:
 
   - name: newUser
     description: Create a new user within the collection
+    descriptionLong: This command can be used to grant a new user to the tenant
     method: POST
     path: user/{tenant}/users
     accept: application/vnd.com.nsn.cumulocity.user+json
@@ -250,6 +255,7 @@ endpoints:
 
   - name: getUser
     description: Get user
+    descriptionLong: Get information about a user
     method: GET
     path: user/{tenant}/users/{id}
     accept: 'application/vnd.com.nsn.cumulocity.user+json'
@@ -282,6 +288,7 @@ endpoints:
 
   - name: getUserByName
     description: Get user by username
+    descriptionLong: Get the user details by referencing their username instead of id
     method: GET
     path: user/{tenant}/userByName/{name}
     accept: 'application/vnd.com.nsn.cumulocity.user+json'
@@ -313,6 +320,9 @@ endpoints:
 
   - name: deleteUser
     description: Delete user
+    descriptionLong: |
+      Delete a user from the a tenant. This will remove the user completely from the tenant and can not be reversed.
+      Alternatively a user can be disabled via updating the users properties instead of deleting the user.
     method: DELETE
     path: user/{tenant}/users/{id}
     accept: ''
@@ -343,6 +353,7 @@ endpoints:
 
   - name: updateUser
     description: Update user
+    descriptionLong: Update properties, reset password or enable/disable for a user in a tenant
     method: PUT
     path: user/{tenant}/users/{id}
     accept: 'application/vnd.com.nsn.cumulocity.user+json'
@@ -417,7 +428,7 @@ endpoints:
         description: 'Custom properties to be added to the user'
 
   - name: resetUserPassword
-    description: Reset a user' password
+    description: Reset a user's password
     descriptionLong: The password can be reset either by issuing a password reset email (default), or be specifying a new password.
     method: PUT
     path: user/{tenant}/users/{id}

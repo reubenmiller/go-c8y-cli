@@ -155,7 +155,7 @@ endpoints:
     path: event/events
     accept: application/vnd.com.nsn.cumulocity.event+json
     description: Create event
-    descriptionLong: Create event
+    descriptionLong: Create a new event for a device
     examples:
       powershell:
         - description: Create a new event for a device
@@ -292,6 +292,7 @@ endpoints:
   #
   - name: getEventBinary
     description: 'Get event binary'
+    descriptionLong: Get the binary associated with an event
     method: GET
     path: event/events/{id}/binaries
     accept: '*/*'
@@ -324,6 +325,7 @@ endpoints:
 
   - name: newEventBinary
     description: 'New event binary'
+    descriptionLong: Upload a new binary file to an event
     method: POST
     path: event/events/{id}/binaries
     accept: application/vnd.com.nsn.cumulocity.event+json
@@ -360,6 +362,8 @@ endpoints:
 
   - name: updateEventBinary
     description: 'Update event binary'
+    descriptionLong: >
+      Update an existing event binary
     method: PUT
     path: event/events/{id}/binaries
     accept: application/vnd.com.nsn.cumulocity.event+json
@@ -397,6 +401,8 @@ endpoints:
 
   - name: deleteEventBinary
     description: 'Delete event binary'
+    descriptionLong: >
+      Delete a binary which has been attached to an event
     method: DELETE
     path: event/events/{id}/binaries
     accept: ''

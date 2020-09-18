@@ -10,7 +10,9 @@ information:
 endpoints:
   - name: getCurrentApplication
     description: 'Get current application'
-    descriptionLong: 'Required authentication with bootstrap user'
+    descriptionLong: >
+      Getting the current application only works when using bootstrap credentials from
+      an application (not user credentials)
     method: GET
     path: /application/currentApplication
     accept: application/vnd.com.nsn.cumulocity.application+json
@@ -57,7 +59,7 @@ endpoints:
       - name: key
         type: string
         required: false
-        description: 	Shared secret of application
+        description: Shared secret of application
 
       - name: availability
         type: string

@@ -95,7 +95,7 @@ endpoints:
     path: alarm/alarms
     accept: application/vnd.com.nsn.cumulocity.alarm+json
     description: 'Create a new alarm'
-    descriptionLong: 'Create a new alarm'
+    descriptionLong: Create a new alarm on a device or agent.
     examples:
       powershell:
         - description: Create a new alarm for device
@@ -253,6 +253,9 @@ endpoints:
         description: Alarm id
 
   - name: updateAlarm
+    method: PUT
+    path: alarm/alarms/{id}
+    accept: application/vnd.com.nsn.cumulocity.alarm+json
     description: Update an alarm
     descriptionLong: Update an alarm by its id
     examples:
@@ -287,10 +290,6 @@ endpoints:
 
         - description: Update severity of an existing alarm to CRITICAL
           command: c8y alarms update --id 12345 --severity CRITICAL
-    method: PUT
-    path: alarm/alarms/{id}
-    accept: application/vnd.com.nsn.cumulocity.alarm+json
-    description: Update alarm
     alias:
         go: update
         powershell: Update-Alarm
