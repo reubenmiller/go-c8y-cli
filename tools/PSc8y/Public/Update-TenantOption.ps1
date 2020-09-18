@@ -6,6 +6,7 @@ Update tenant option
 
 .EXAMPLE
 PS> Update-TenantOption -Category "c8y_cli_tests" -Key "option4" -Value "0"
+
 Update a tenant option
 
 
@@ -32,22 +33,22 @@ Update a tenant option
         [string]
         $Value,
 
-        # Include raw response including pagination information
+        # Show the full (raw) response from Cumulocity including pagination information
         [Parameter()]
         [switch]
         $Raw,
 
-        # Outputfile
+        # Write the response to file
         [Parameter()]
         [string]
         $OutputFile,
 
-        # NoProxy
+        # Ignore any proxy settings when running the cmdlet
         [Parameter()]
         [switch]
         $NoProxy,
 
-        # Session path
+        # Specifiy alternative Cumulocity session to use when running the cmdlet
         [Parameter()]
         [string]
         $Session,

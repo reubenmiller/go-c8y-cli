@@ -28,7 +28,8 @@ func newNewRetentionRuleCmd() *newRetentionRuleCmd {
 	cmd := &cobra.Command{
 		Use:   "create",
 		Short: "New retention rule",
-		Long:  ``,
+		Long: `Create a new retention rule to managed when data is deleted in the tenant
+`,
 		Example: `
 $ c8y retentionRules create --dataType ALARM --maximumAge 180
 Create a retention rule

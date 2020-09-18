@@ -2,6 +2,9 @@ Function ConvertFrom-Base64ToUtf8 {
     <#
   .SYNOPSIS
     Convert a base64 encoded string to UTF8
+  
+  .DESCRIPTION
+    Convert a base64 encoded string to UTF8
 
   .NOTES
     If the the string has spaces in it, then only the last part of the string (with no spaces in it) will be used. This makes it easier when trying decode the basic auth string

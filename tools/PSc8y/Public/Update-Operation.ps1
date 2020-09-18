@@ -5,14 +5,17 @@ Function Update-Operation {
 Update operation
 
 .DESCRIPTION
-Update operation
+Update an operation. This is commonly used to change an operation's status. For example the operation can be set to FAILED along with a failure reason.
+
 
 .EXAMPLE
 PS> Update-Operation -Id {{ NewOperation }} -Status EXECUTING
+
 Update an operation
 
 .EXAMPLE
 PS> Get-OperationCollection -Device $Agent.id -Status PENDING | Update-Operation -Status FAILED -FailureReason "manually cancelled"
+
 Update multiple operations
 
 
@@ -47,22 +50,22 @@ Update multiple operations
         [object]
         $Data,
 
-        # Include raw response including pagination information
+        # Show the full (raw) response from Cumulocity including pagination information
         [Parameter()]
         [switch]
         $Raw,
 
-        # Outputfile
+        # Write the response to file
         [Parameter()]
         [string]
         $OutputFile,
 
-        # NoProxy
+        # Ignore any proxy settings when running the cmdlet
         [Parameter()]
         [switch]
         $NoProxy,
 
-        # Session path
+        # Specifiy alternative Cumulocity session to use when running the cmdlet
         [Parameter()]
         [string]
         $Session,

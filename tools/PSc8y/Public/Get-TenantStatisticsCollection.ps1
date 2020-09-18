@@ -6,14 +6,17 @@ Get collection of tenant usage statistics
 
 .EXAMPLE
 PS> Get-TenantStatisticsCollection
+
 Get tenant statistics collection
 
 .EXAMPLE
 PS> Get-TenantStatisticsCollection -DateFrom "-30d" -PageSize 30
+
 Get tenant statistics collection for the last 30 days
 
 .EXAMPLE
 PS> Get-TenantStatisticsCollection -DateFrom "-10d" -DateTo "-9d"
+
 Get tenant statistics collection for the last 10 days, only return until the last 9 days
 
 
@@ -48,22 +51,22 @@ Get tenant statistics collection for the last 10 days, only return until the las
         [switch]
         $WithTotalPages,
 
-        # Include raw response including pagination information
+        # Show the full (raw) response from Cumulocity including pagination information
         [Parameter()]
         [switch]
         $Raw,
 
-        # Outputfile
+        # Write the response to file
         [Parameter()]
         [string]
         $OutputFile,
 
-        # NoProxy
+        # Ignore any proxy settings when running the cmdlet
         [Parameter()]
         [switch]
         $NoProxy,
 
-        # Session path
+        # Specifiy alternative Cumulocity session to use when running the cmdlet
         [Parameter()]
         [string]
         $Session,

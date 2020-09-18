@@ -4,12 +4,17 @@ Function Add-RoleToGroup {
 .SYNOPSIS
 Add role to a group
 
+.DESCRIPTION
+Assign a role to a user group
+
 .EXAMPLE
 PS> Add-RoleToGroup -Group "customGroup1*" -Role "*ALARM_*"
+
 Add a role to a group using wildcards
 
 .EXAMPLE
 PS> Get-RoleCollection -PageSize 100 | Where-Object Name -like "*ALARM*" | Add-RoleToGroup -Group "customGroup1*"
+
 Add a role to a group using wildcards (using pipeline)
 
 
@@ -38,22 +43,22 @@ Add a role to a group using wildcards (using pipeline)
         [object]
         $Tenant,
 
-        # Include raw response including pagination information
+        # Show the full (raw) response from Cumulocity including pagination information
         [Parameter()]
         [switch]
         $Raw,
 
-        # Outputfile
+        # Write the response to file
         [Parameter()]
         [string]
         $OutputFile,
 
-        # NoProxy
+        # Ignore any proxy settings when running the cmdlet
         [Parameter()]
         [switch]
         $NoProxy,
 
-        # Session path
+        # Specifiy alternative Cumulocity session to use when running the cmdlet
         [Parameter()]
         [string]
         $Session,

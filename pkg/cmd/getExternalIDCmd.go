@@ -28,7 +28,8 @@ func newGetExternalIDCmd() *getExternalIDCmd {
 	cmd := &cobra.Command{
 		Use:   "get",
 		Short: "Get external id",
-		Long:  ``,
+		Long: `Get an external identity object. An external identify will include the reference to a single device managed object
+`,
 		Example: `
 $ c8y identity get --type test --name myserialnumber
 Get external identity

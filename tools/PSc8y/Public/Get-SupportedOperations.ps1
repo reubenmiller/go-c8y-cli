@@ -4,12 +4,18 @@ Function Get-SupportedOperations {
 .SYNOPSIS
 Get supported operations of a device
 
+.DESCRIPTION
+Returns a list of supported operations (fragments) for a device. The supported fragments list is returned from the c8y_SupportedOperations fragment of the device managed object.
+
+
 .EXAMPLE
 PS> Get-SupportedOperations -Device $device.id
+
 Get the supported operations of a device by name
 
 .EXAMPLE
 PS> Get-SupportedOperations -Device $device.id
+
 Get the supported operations of a device (using pipeline)
 
 
@@ -28,22 +34,22 @@ Get the supported operations of a device (using pipeline)
         [object[]]
         $Device,
 
-        # Include raw response including pagination information
+        # Show the full (raw) response from Cumulocity including pagination information
         [Parameter()]
         [switch]
         $Raw,
 
-        # Outputfile
+        # Write the response to file
         [Parameter()]
         [string]
         $OutputFile,
 
-        # NoProxy
+        # Ignore any proxy settings when running the cmdlet
         [Parameter()]
         [switch]
         $NoProxy,
 
-        # Session path
+        # Specifiy alternative Cumulocity session to use when running the cmdlet
         [Parameter()]
         [string]
         $Session,

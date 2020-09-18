@@ -3,6 +3,9 @@
 .SYNOPSIS
 Clear the active Cumulocity Session
 
+.DESCRIPTION
+Clear the active Cumulocity Session
+
 .EXAMPLE
 Clear-Session
 

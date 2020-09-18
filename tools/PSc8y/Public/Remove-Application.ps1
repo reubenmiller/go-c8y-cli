@@ -5,14 +5,16 @@ Function Remove-Application {
 Delete application
 
 .DESCRIPTION
-Info: The application can only be removed when its availability is PRIVATE or in other case when it has no subscriptions.
+The application can only be removed when its availability is PRIVATE or in other case when it has no subscriptions.
 
 .EXAMPLE
 PS> Remove-Application -Id $App.id
+
 Delete an application by id
 
 .EXAMPLE
 PS> Remove-Application -Id "my-temp-app"
+
 Delete an application by name
 
 
@@ -31,22 +33,22 @@ Delete an application by name
         [object[]]
         $Id,
 
-        # Include raw response including pagination information
+        # Show the full (raw) response from Cumulocity including pagination information
         [Parameter()]
         [switch]
         $Raw,
 
-        # Outputfile
+        # Write the response to file
         [Parameter()]
         [string]
         $OutputFile,
 
-        # NoProxy
+        # Ignore any proxy settings when running the cmdlet
         [Parameter()]
         [switch]
         $NoProxy,
 
-        # Session path
+        # Specifiy alternative Cumulocity session to use when running the cmdlet
         [Parameter()]
         [string]
         $Session,

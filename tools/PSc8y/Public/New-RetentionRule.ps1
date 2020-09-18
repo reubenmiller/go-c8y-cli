@@ -4,8 +4,13 @@ Function New-RetentionRule {
 .SYNOPSIS
 New retention rule
 
+.DESCRIPTION
+Create a new retention rule to managed when data is deleted in the tenant
+
+
 .EXAMPLE
 PS> New-RetentionRule -DataType ALARM -MaximumAge 180
+
 Create a retention rule to delete all alarms after 180 days
 
 
@@ -48,22 +53,22 @@ Create a retention rule to delete all alarms after 180 days
         [switch]
         $Editable,
 
-        # Include raw response including pagination information
+        # Show the full (raw) response from Cumulocity including pagination information
         [Parameter()]
         [switch]
         $Raw,
 
-        # Outputfile
+        # Write the response to file
         [Parameter()]
         [string]
         $OutputFile,
 
-        # NoProxy
+        # Ignore any proxy settings when running the cmdlet
         [Parameter()]
         [switch]
         $NoProxy,
 
-        # Session path
+        # Specifiy alternative Cumulocity session to use when running the cmdlet
         [Parameter()]
         [string]
         $Session,

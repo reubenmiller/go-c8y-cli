@@ -28,7 +28,7 @@ func newGetSystemOptionCmd() *getSystemOptionCmd {
 	cmd := &cobra.Command{
 		Use:   "get",
 		Short: "Get system option",
-		Long:  ``,
+		Long:  `Get a system option by category and key`,
 		Example: `
 $ c8y systemOptions get --category "system" --key "version"
 Get a list of system options

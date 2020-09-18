@@ -28,7 +28,9 @@ func newDeleteUserCmd() *deleteUserCmd {
 	cmd := &cobra.Command{
 		Use:   "delete",
 		Short: "Delete user",
-		Long:  ``,
+		Long: `Delete a user from the a tenant. This will remove the user completely from the tenant and can not be reversed.
+Alternatively a user can be disabled via updating the users properties instead of deleting the user.
+`,
 		Example: `
 $ c8y users delete --id "myuser"
 Delete a user

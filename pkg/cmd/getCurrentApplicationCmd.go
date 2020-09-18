@@ -28,7 +28,8 @@ func newGetCurrentApplicationCmd() *getCurrentApplicationCmd {
 	cmd := &cobra.Command{
 		Use:   "get",
 		Short: "Get current application",
-		Long:  `Required authentication with bootstrap user`,
+		Long: `Getting the current application only works when using bootstrap credentials from an application (not user credentials)
+`,
 		Example: `
 $ c8y currentApplication get
 Get the current application (requires using application credentials)

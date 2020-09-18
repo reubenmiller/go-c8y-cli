@@ -4,8 +4,13 @@ Function Remove-EventBinary {
 .SYNOPSIS
 Delete event binary
 
+.DESCRIPTION
+Delete a binary which has been attached to an event
+
+
 .EXAMPLE
 PS> Remove-EventBinary -Id $Event.id
+
 Delete an binary attached to an event
 
 
@@ -24,22 +29,22 @@ Delete an binary attached to an event
         [string]
         $Id,
 
-        # Include raw response including pagination information
+        # Show the full (raw) response from Cumulocity including pagination information
         [Parameter()]
         [switch]
         $Raw,
 
-        # Outputfile
+        # Write the response to file
         [Parameter()]
         [string]
         $OutputFile,
 
-        # NoProxy
+        # Ignore any proxy settings when running the cmdlet
         [Parameter()]
         [switch]
         $NoProxy,
 
-        # Session path
+        # Specifiy alternative Cumulocity session to use when running the cmdlet
         [Parameter()]
         [string]
         $Session,

@@ -2,14 +2,21 @@
 Function New-Agent {
 <#
 .SYNOPSIS
-Create agent
+Create an agent
+
+.DESCRIPTION
+Create an agent managed object. An agent is a special device managed object with both the
+c8y_IsDevice and com_cumulocity_model_Agent fragments.
+
 
 .EXAMPLE
 PS> New-Agent -Name $AgentName
+
 Create agent
 
 .EXAMPLE
 PS> New-Agent -Name $AgentName -Data @{ myValue = @{ value1 = $true } }
+
 Create agent with custom properties
 
 
@@ -36,22 +43,22 @@ Create agent with custom properties
         [object]
         $Data,
 
-        # Include raw response including pagination information
+        # Show the full (raw) response from Cumulocity including pagination information
         [Parameter()]
         [switch]
         $Raw,
 
-        # Outputfile
+        # Write the response to file
         [Parameter()]
         [string]
         $OutputFile,
 
-        # NoProxy
+        # Ignore any proxy settings when running the cmdlet
         [Parameter()]
         [switch]
         $NoProxy,
 
-        # Session path
+        # Specifiy alternative Cumulocity session to use when running the cmdlet
         [Parameter()]
         [string]
         $Session,

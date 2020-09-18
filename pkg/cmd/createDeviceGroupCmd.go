@@ -28,7 +28,8 @@ func newCreateDeviceGroupCmd() *createDeviceGroupCmd {
 	cmd := &cobra.Command{
 		Use:   "createGroup",
 		Short: "Create device group",
-		Long:  ``,
+		Long: `Create a new device group to logically group one or more devices
+`,
 		Example: `
 $ c8y devices createGroup --name mygroup
 Create device group

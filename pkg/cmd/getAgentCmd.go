@@ -28,7 +28,7 @@ func newGetAgentCmd() *getAgentCmd {
 	cmd := &cobra.Command{
 		Use:   "get",
 		Short: "Get agent",
-		Long:  ``,
+		Long:  `Get an agent's managed object representation`,
 		Example: `
 $ c8y agents get --id 12345
 Get agent by id

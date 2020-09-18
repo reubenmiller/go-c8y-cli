@@ -9,14 +9,17 @@ Get a collection of measurements based on filter parameters
 
 .EXAMPLE
 PS> Get-MeasurementSeries -Device $Device.id -Series "c8y_Temperature.T" -DateFrom "1970-01-01" -DateTo "0s"
+
 Get a list of measurements for a particular device
 
 .EXAMPLE
 PS> Get-MeasurementSeries -Device $Measurement2.source.id -Series "c8y_Temperature.T" -DateFrom "1970-01-01" -DateTo "0s"
+
 Get measurement series c8y_Temperature.T on a device
 
 .EXAMPLE
 PS> Get-DeviceCollection -Name $Device.name | Get-MeasurementSeries -Series "c8y_Temperature.T"
+
 Get measurement series from a device (using pipeline)
 
 
@@ -55,22 +58,22 @@ Get measurement series from a device (using pipeline)
         [string]
         $DateTo,
 
-        # Include raw response including pagination information
+        # Show the full (raw) response from Cumulocity including pagination information
         [Parameter()]
         [switch]
         $Raw,
 
-        # Outputfile
+        # Write the response to file
         [Parameter()]
         [string]
         $OutputFile,
 
-        # NoProxy
+        # Ignore any proxy settings when running the cmdlet
         [Parameter()]
         [switch]
         $NoProxy,
 
-        # Session path
+        # Specifiy alternative Cumulocity session to use when running the cmdlet
         [Parameter()]
         [string]
         $Session,

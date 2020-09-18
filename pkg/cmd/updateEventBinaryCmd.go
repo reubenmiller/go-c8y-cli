@@ -28,7 +28,8 @@ func newUpdateEventBinaryCmd() *updateEventBinaryCmd {
 	cmd := &cobra.Command{
 		Use:   "updateBinary",
 		Short: "Update event binary",
-		Long:  ``,
+		Long: `Update an existing event binary
+`,
 		Example: `
 $ c8y events updateBinary --id 12345 --file ./myfile.log
 Update a binary related to an event

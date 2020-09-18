@@ -27,8 +27,10 @@ func newCreateAgentCmd() *createAgentCmd {
 
 	cmd := &cobra.Command{
 		Use:   "create",
-		Short: "Create agent",
-		Long:  ``,
+		Short: "Create an agent",
+		Long: `Create an agent managed object. An agent is a special device managed object with both the
+c8y_IsDevice and com_cumulocity_model_Agent fragments.
+`,
 		Example: `
 $ c8y agents create --name myAgent
 Create agent

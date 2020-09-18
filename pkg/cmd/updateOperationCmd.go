@@ -28,7 +28,8 @@ func newUpdateOperationCmd() *updateOperationCmd {
 	cmd := &cobra.Command{
 		Use:   "update",
 		Short: "Update operation",
-		Long:  `Update operation`,
+		Long: `Update an operation. This is commonly used to change an operation's status. For example the operation can be set to FAILED along with a failure reason.
+`,
 		Example: `
 $ c8y operations update --id 12345 --status EXECUTING
 Update an operation

@@ -6,6 +6,7 @@ Disable application on tenant
 
 .EXAMPLE
 PS> Disable-Application -Tenant mycompany -Application myMicroservice
+
 Disable an application of a tenant
 
 
@@ -29,22 +30,22 @@ Disable an application of a tenant
         [object]
         $Tenant,
 
-        # Include raw response including pagination information
+        # Show the full (raw) response from Cumulocity including pagination information
         [Parameter()]
         [switch]
         $Raw,
 
-        # Outputfile
+        # Write the response to file
         [Parameter()]
         [string]
         $OutputFile,
 
-        # NoProxy
+        # Ignore any proxy settings when running the cmdlet
         [Parameter()]
         [switch]
         $NoProxy,
 
-        # Session path
+        # Specifiy alternative Cumulocity session to use when running the cmdlet
         [Parameter()]
         [string]
         $Session,

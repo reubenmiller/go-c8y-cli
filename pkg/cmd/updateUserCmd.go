@@ -28,7 +28,7 @@ func newUpdateUserCmd() *updateUserCmd {
 	cmd := &cobra.Command{
 		Use:   "update",
 		Short: "Update user",
-		Long:  ``,
+		Long:  `Update properties, reset password or enable/disable for a user in a tenant`,
 		Example: `
 $ c8y users update --id "myuser" --firstName "Simon"
 Update a user

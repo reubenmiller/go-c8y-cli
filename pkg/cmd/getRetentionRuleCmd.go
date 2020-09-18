@@ -28,7 +28,8 @@ func newGetRetentionRuleCmd() *getRetentionRuleCmd {
 	cmd := &cobra.Command{
 		Use:   "get",
 		Short: "Get retention rule",
-		Long:  ``,
+		Long: `Get an existing retention by id
+`,
 		Example: `
 $ c8y retentionRules get --id 12345
 Get a retention rule

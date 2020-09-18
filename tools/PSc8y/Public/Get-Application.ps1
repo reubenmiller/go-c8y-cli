@@ -5,14 +5,16 @@ Function Get-Application {
 Get an application
 
 .DESCRIPTION
-Get an application by its id
+Get an application by its id or name
 
 .EXAMPLE
 PS> Get-Application -Id $App.id
+
 Get an application by id
 
 .EXAMPLE
 PS> Get-Application -Id "my-simple-app"
+
 Get an application by name
 
 
@@ -31,22 +33,22 @@ Get an application by name
         [object[]]
         $Id,
 
-        # Include raw response including pagination information
+        # Show the full (raw) response from Cumulocity including pagination information
         [Parameter()]
         [switch]
         $Raw,
 
-        # Outputfile
+        # Write the response to file
         [Parameter()]
         [string]
         $OutputFile,
 
-        # NoProxy
+        # Ignore any proxy settings when running the cmdlet
         [Parameter()]
         [switch]
         $NoProxy,
 
-        # Session path
+        # Specifiy alternative Cumulocity session to use when running the cmdlet
         [Parameter()]
         [string]
         $Session,
