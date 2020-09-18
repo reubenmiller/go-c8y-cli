@@ -47,6 +47,9 @@ gh_pages_update:	## Update github pages dependencies
 gh_pages:			## Run github pages locally
 	cd docs && bundle exec jekyll server --baseurl ""
 
+docs-powershell: update_spec build_powershell		## Update the powershell docs
+	pwsh -File ./scripts/build-powershell/build-docs.ps1 -Recreate
+
 test: test_powershell
 
 lint: metalint

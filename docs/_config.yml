@@ -37,6 +37,10 @@ collections:
   docs:
     permalink: "/:collection/:path/"
     output: true
+  
+  pwsh:
+    permalink: "/:collection/:path/"
+    output: true
 
 defaults:
   -
@@ -58,6 +62,22 @@ defaults:
         content:
           width: 800
           height: 2000
+
+  -
+    scope:
+      path: ""
+      type: "pwsh"
+    values:
+      seo:
+        type: Article
+      _comments:
+        category: Group navigation links with this field
+        order: Used to sort links in the navigation
+      _options:
+        content:
+          width: 800
+          height: 2000
+
   -
     scope:
       path: ""

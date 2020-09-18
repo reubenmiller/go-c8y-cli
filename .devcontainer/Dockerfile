@@ -102,6 +102,9 @@ RUN wget https://packages.microsoft.com/config/debian/10/packages-microsoft-prod
     && apt-get clean -y \
     && rm -rf /var/lib/apt/lists/* /tmp/gotools
 
+# Install powershell dependencies
+RUN pwsh -Command "Install-Module -Name platyPS -Scope CurrentUser -Force"
+
 # Update this to "on" or "off" as appropriate
 ENV GO111MODULE=auto
 
