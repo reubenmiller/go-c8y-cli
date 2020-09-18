@@ -13,7 +13,7 @@ title: Bash
 
     **Note**
 
-    You will need to change the "1.1.0" version if a newer version is released. You can browser the available versions by looking at the [PSc8y release page](https://www.powershellgallery.com/packages/PSc8y), then just change the "1.1.0" to one of the listed versions.
+    You will need to change the `1.1.0` version if a newer version is released. You can browser the available versions by looking at the [PSc8y release page](https://www.powershellgallery.com/packages/PSc8y), then just change the `1.1.0` to one of the listed versions.
 
     The go c8y cli tool is used internally by the PowerShell PSc8y module, that is why it can also be downloaded from the PowerShell Gallery website (even though you don't have PowerShell)
 
