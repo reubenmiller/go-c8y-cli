@@ -34,7 +34,7 @@ Get-AgentCollection
 ```
 
 ## DESCRIPTION
-{{ Fill in the Description }}
+Get a collection of agent in the current tenant
 
 ## EXAMPLES
 

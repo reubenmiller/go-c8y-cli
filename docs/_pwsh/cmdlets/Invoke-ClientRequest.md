@@ -24,19 +24,61 @@ Invoke-ClientRequest
 	[-Headers <Hashtable>]
 	[-InFile <String>]
 	[-QueryParameters <Hashtable>]
+	[-ContentType <String>]
+	[-Accept <String>]
+	[-IgnoreAcceptHeader]
 	[-TimeoutSec <Double>]
 	[-Pretty]
 	[-Raw]
 	[-OutputFile <String>]
 	[-NoProxy]
 	[-Session <String>]
+	[-UseEnvironment]
 	[-WhatIf]
 	[-Confirm]
 	[<CommonParameters>]
 ```
 
 ## DESCRIPTION
-{{ Fill in the Description }}
+Send a custom rest request to Cumulocity using all of the options found on other command lets.
+This is useful if you are extending PSc8y and want to send custom microservice requests, or
+send requests which are not yet provided in the PSc8y module.
+
+Example:
+
+The following function sends a POST request to predefined microservice endpoint.
+It accepts an input Body argument which will be used in the request.
+
+The response is also converted from raw json (string) to Powershell objects so that advanced
+filtering can be done on the response (i.e.
+using `Where-Object`)
+
+```powershell
+Function Invoke-MyMicroserviceEndpoint {
+    [cmdletbinding(
+        SupportsShouldProcess = $true
+    )]
+    Param(
+        [hashtable] $Body
+    )
+
+    $options = @{
+        Method = "POST"
+        Uri = "/service/mymicroservice"
+        Data = $Body
+
+        # Add these to support -WhatIf and -Verbose parameters
+        WhatIfPreference = $WhatIfPreference `
+        VerbosePreference = $VerbosePreference
+    }
+
+    # Send request
+    $response = Invoke-ClientRequest @options
+    
+    # Convert response from json to Powershell objects
+    ConvertFrom-Json $response -Depth 100
+}
+```
 
 ## EXAMPLES
 
@@ -63,7 +105,7 @@ Get a list of alarms with page size of 100
 
 ### EXAMPLE 4
 ```
-Invoke-ClientRequest -Uri "/inventory/managedObjects" -Method "post" -Data "name=test" -Headers @{ Accept = "application/json"}
+Invoke-ClientRequest -Uri "/inventory/managedObjects" -Method "post" -Data "name=test" -Headers @{ Custom-Value = "myValue"}
 ```
 
 Create a new managed object but add a custom accept header value
@@ -179,6 +221,51 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
+### -ContentType
+(Body) Content Type
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -Accept
+Accept header
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -IgnoreAcceptHeader
+Ignore the accept header
+
+```yaml
+Type: SwitchParameter
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: False
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
 ### -TimeoutSec
 Timeout in seconds
 
@@ -265,6 +352,21 @@ Aliases:
 Required: False
 Position: Named
 Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -UseEnvironment
+Allow loading Cumulocity session setting from environment variables
+
+```yaml
+Type: SwitchParameter
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: False
 Accept pipeline input: False
 Accept wildcard characters: False
 ```

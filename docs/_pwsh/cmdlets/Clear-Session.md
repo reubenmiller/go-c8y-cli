@@ -21,7 +21,7 @@ Clear-Session
 ```
 
 ## DESCRIPTION
-{{ Fill in the Description }}
+Clear the active Cumulocity Session
 
 ## EXAMPLES
 

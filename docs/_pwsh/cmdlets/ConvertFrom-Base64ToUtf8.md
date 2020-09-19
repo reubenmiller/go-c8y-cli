@@ -22,7 +22,7 @@ ConvertFrom-Base64ToUtf8
 ```
 
 ## DESCRIPTION
-{{ Fill in the Description }}
+Convert a base64 encoded string to UTF8
 
 ## EXAMPLES
 
