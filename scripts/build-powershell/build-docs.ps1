@@ -51,30 +51,14 @@ Function Get-Category {
     }
 }
 
-if (!(Test-Path $OutputFolder)) {
-    New-Item -Path $OutputFolder -ItemType Directory -Force
+Function Invoke-FixMarkdownFormatting {
+    [cmdletbinding()]
+    Param(
+        [string] $File
+    )
 
-    # -ModulePagePath ""
-    [array] $commands = Get-Command -Module $ModuleName
-    foreach ($command in $commands) {
-        # $category = $command.Name -ireplace "\w+\-([A-Z][a-z0-9]+).*", "`$1"
-        New-MarkdownHelp -Command $command.Name -OutputFolder $OutputFolder -Metadata @{
-            'layout' = 'powershell'
-            'category' = Get-Category $command.Name | Select-Object -First 1
-            'title' = $command.Name
-        }
-    }
-    
-} else {
-    Update-MarkdownHelp $OutputFolder
-}
-
-# Format Syntax
-$Files = Get-ChildItem $OutputFolder -Filter "*.md"
-
-foreach ($iFile in $Files) {
     $script:inSection = $false
-    $OutputText = (Get-Content $iFile) | ForEach-Object {
+    $OutputText = (Get-Content $File) | ForEach-Object {
         if ($script:inSection -and ($_ -match "^## ")) {
             $script:inSection = $false
         }
@@ -93,6 +77,29 @@ foreach ($iFile in $Files) {
             $_
         }
     }
+    # Fix any markdown escaping 
+    $OutputText = $OutputText -replace '\\([`\[\]])', "`$1"
+    $OutputText | Out-File $File
 
-    $OutputText | Out-File $iFile
+}
+
+if (!(Test-Path $OutputFolder)) {
+    New-Item -Path $OutputFolder -ItemType Directory -Force
+
+    # -ModulePagePath ""
+    [array] $commands = Get-Command -Module $ModuleName
+    foreach ($command in $commands) {
+        # $category = $command.Name -ireplace "\w+\-([A-Z][a-z0-9]+).*", "`$1"
+        New-MarkdownHelp -Command $command.Name -OutputFolder $OutputFolder -Metadata @{
+            'layout' = 'powershell'
+            'category' = Get-Category $command.Name | Select-Object -First 1
+            'title' = $command.Name
+        }
+
+        # Fix/customize markdown formatting
+        Invoke-FixMarkdownFormatting -File "$OutputFolder/$($command.Name).md"
+    }
+    
+} else {
+    Update-MarkdownHelp $OutputFolder
 }

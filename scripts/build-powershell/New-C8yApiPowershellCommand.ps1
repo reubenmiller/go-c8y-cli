@@ -78,6 +78,9 @@
     #
     $Synopsis = $Specification.description
     $DescriptionLong = $Specification.descriptionLong
+    if (!$DescriptionLong) {
+        $DescriptionLong = $Synopsis
+    }
     $DocumentationLink = $Specification.link
     $Examples = foreach ($iExample in $Specification.examples.powershell) {
         if ($iExample.command) {
