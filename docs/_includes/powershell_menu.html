@@ -5,14 +5,16 @@
         </li>
     </ul>
     <ul>
-        {% assign grouped = site.pwsh | group_by: 'category' %}
+        {% assign grouped = site.pwsh | sort: 'category' | group_by: 'category' %}
         {% for group in grouped %}
             <li class="nav-item top-level {% if group.name == page.category %}current{% endif %}">
                 {% assign items = group.items | sort: 'name' %}
                 <a href="{{ site.baseurl }}{{ items.first.url }}">{{ group.name }}</a>
                 <ul>
                     {% for item in items %}
-                        <li class="nav-item {% if item.url == page.url %}current{% endif %}"><a href="{{ site.baseurl }}{{ item.url }}">{{ item.title }}</a></li>
+                        <li class="nav-item {% if item.url == page.url %}current{% endif %}" title="{{ item.title }}">
+                            <a href="{{ site.baseurl }}{{ item.url }}">{{ item.title }}</a>
+                        </li>
                     {% endfor %}
                 </ul>
             </li>
