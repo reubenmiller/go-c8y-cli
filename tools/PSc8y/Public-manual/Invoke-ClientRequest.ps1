@@ -73,11 +73,9 @@ Create a new managed object but add a custom accept header value
             Position = 0)]
         [string] $Uri,
 
-        # HostName to use which overrides the given host
-        [string] $HostName,
-
         # Rest Method. Defaults to GET
-        [Microsoft.PowerShell.Commands.WebRequestMethod] $Method,
+        [ValidateSet("GET", "POST", "DELETE", "PUT", "HEAD")]
+        [Microsoft.PowerShell.Commands.WebRequestMethod] $Method = 'GET',
 
         # Request body
         [object] $Data,
@@ -130,6 +128,9 @@ Create a new managed object but add a custom accept header value
         [Parameter()]
         [string]
         $Session,
+
+        # HostName to use which overrides the given host
+        [string] $HostName,
 
         # Allow loading Cumulocity session setting from environment variables
         [Parameter()]
@@ -190,11 +191,11 @@ Create a new managed object but add a custom accept header value
         }
     }
 
-    if ($null -ne $ContentType) {
+    if (-not [string]::IsNullOrEmpty($ContentType)) {
         $null = $c8yargs.AddRange(@("--contentType", $ContentType))
     }
 
-    if ($null -ne $Accept) {
+    if (-not [string]::IsNullOrEmpty($Accept)) {
         $null = $c8yargs.AddRange(@("--accept", $Accept))
     }
 

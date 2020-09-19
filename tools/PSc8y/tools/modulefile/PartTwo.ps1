@@ -94,7 +94,7 @@ $commandsWithSessionParameter = @( $Manifest.ExportedFunctions.Keys ) `
             throw "Could not find function '$Name'"
         }
     } `
-    | Where-Object { $_.Parameters.ContainsKey("Session") }
+    | Where-Object { $null -ne $_.Parameters -and $_.Parameters.ContainsKey("Session") }
 
 try {
     if (Get-Command -Name Register-ArgumentCompleter -ErrorAction SilentlyContinue) {

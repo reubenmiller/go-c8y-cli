@@ -18,7 +18,6 @@ Send a rest request using the c8y
 ```
 Invoke-ClientRequest
 	[-Uri] <String>
-	[-HostName <String>]
 	[-Method <WebRequestMethod>]
 	[-Data <Object>]
 	[-Headers <Hashtable>]
@@ -33,6 +32,7 @@ Invoke-ClientRequest
 	[-OutputFile <String>]
 	[-NoProxy]
 	[-Session <String>]
+	[-HostName <String>]
 	[-UseEnvironment]
 	[-WhatIf]
 	[-Confirm]
@@ -129,21 +129,6 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -HostName
-HostName to use which overrides the given host
-
-```yaml
-Type: String
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: Named
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
 ### -Method
 Rest Method.
 Defaults to GET
@@ -156,7 +141,7 @@ Accepted values: Default, Get, Head, Post, Put, Delete, Trace, Options, Merge, P
 
 Required: False
 Position: Named
-Default value: None
+Default value: GET
 Accept pipeline input: False
 Accept wildcard characters: False
 ```
@@ -343,6 +328,21 @@ Accept wildcard characters: False
 
 ### -Session
 Session path
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -HostName
+HostName to use which overrides the given host
 
 ```yaml
 Type: String
