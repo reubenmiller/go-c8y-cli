@@ -37,8 +37,8 @@ only relevant information is shown.
         # data set.
         [string] $ResultProperty,
 
-        # Future Roadmap: Include all result sets
-        # [switch] $IncludeAll,
+        # Future Roadmap: Currently not used: Include all result sets
+        [switch] $IncludeAll,
 
         # Return the raw response rather than Powershell objects
         [switch] $Raw,
@@ -97,9 +97,10 @@ only relevant information is shown.
     }
 
     # Include all pagination results
-    # if ($IncludeAll) {
-    #     $null = $c8yargs.Add("--all")
-    # }
+    if ($IncludeAll) {
+        Write-Warning "IncludeAll operation is currently not implemented"
+        # $null = $c8yargs.Add("--all")
+    }
 
     $null = $c8yargs.Add("--raw")
 
