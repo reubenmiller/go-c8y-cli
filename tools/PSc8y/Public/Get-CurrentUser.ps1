@@ -5,7 +5,7 @@ Function Get-CurrentUser {
 Get user
 
 .DESCRIPTION
-Get user representation associated with the credentials are the current REST request
+Get the user representation associated with the current credentials used by the request
 
 .EXAMPLE
 PS> Get-CurrentUser

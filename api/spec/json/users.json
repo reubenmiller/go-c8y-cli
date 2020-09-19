@@ -9,7 +9,7 @@
     {
       "name": "getUserCurrent",
       "description": "Get user",
-      "descriptionLong": "Get user representation associated with the credentials are the current REST request",
+      "descriptionLong": "Get the user representation associated with the current credentials used by the request",
       "method": "GET",
       "path": "/user/currentUser",
       "accept": "application/vnd.com.nsn.cumulocity.currentUser+json",

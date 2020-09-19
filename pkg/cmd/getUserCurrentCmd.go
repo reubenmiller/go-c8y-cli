@@ -28,7 +28,7 @@ func newGetUserCurrentCmd() *getUserCurrentCmd {
 	cmd := &cobra.Command{
 		Use:   "getCurrentUser",
 		Short: "Get user",
-		Long:  `Get user representation associated with the credentials are the current REST request`,
+		Long:  `Get the user representation associated with the current credentials used by the request`,
 		Example: `
 $ c8y users getCurrentUser
 Get the current user
