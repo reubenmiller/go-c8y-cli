@@ -36,14 +36,15 @@ Function Get-Category {
         "measurement" { "Measurements" }
         "supportedSeries" { "Measurements" }
         "managedObject" { "ManagedObjects" }
-        "binary" { "Binaries" }
+        "-binary" { "Binaries" }
         "retention" { "RetentionRules" }
         "(tenant|system)Option" { "TenantOption" }
         "tenant" { "Tenants" }
         "application" { "Applications" }
         "externalid" { "ExternalIdentity" }
         "microservice" { "Microservices" }
-        "user" { "Users" }
+        "-(test|current)?user" { "Users" }
+        "role" { "Role" }
         "session" { "Sessions" }
         "group" { "User Groups" }
         "-(client|custom)" { "Client Helpers" }
