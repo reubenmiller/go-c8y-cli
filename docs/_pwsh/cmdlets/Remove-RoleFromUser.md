@@ -1,5 +1,5 @@
 ---
-category: Users
+category: Role
 external help file: PSc8y-help.xml
 layout: powershell
 Module Name: PSc8y
