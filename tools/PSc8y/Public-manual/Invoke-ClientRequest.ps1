@@ -3,6 +3,46 @@
 .SYNOPSIS
 Send a rest request using the c8y
 
+.DESCRIPTION
+Send a custom rest request to Cumulocity using all of the options found on other command lets.
+This is useful if you are extending PSc8y and want to send custom microservice requests, or
+send requests which are not yet provided in the PSc8y module.
+
+Example:
+
+The following function sends a POST request to predefined microservice endpoint.
+It accepts an input Body argument which will be used in the request.
+
+The response is also converted from raw json (string) to Powershell objects so that advanced
+filtering can be done on the response (i.e. using `Where-Object`)
+
+```powershell
+Function Invoke-MyMicroserviceEndpoint {
+    [cmdletbinding(
+        SupportsShouldProcess = $true
+    )]
+    Param(
+        [hashtable] $Body
+    )
+
+    $options = @{
+        Method = "POST"
+        Uri = "/service/mymicroservice"
+        Data = $Body
+
+        # Add these to support -WhatIf and -Verbose parameters
+        WhatIfPreference = $WhatIfPreference `
+        VerbosePreference = $VerbosePreference
+    }
+
+    # Send request
+    $response = Invoke-ClientRequest @options
+    
+    # Convert response from json to Powershell objects
+    ConvertFrom-Json $response -Depth 100
+}
+```
+
 .EXAMPLE
 Invoke-ClientRequest -Uri "/inventory/managedObjects" -Method "post" -Data "name=test"
 
@@ -19,7 +59,7 @@ Invoke-ClientRequest -Uri "/alarm/alarms?pageSize=100"
 Get a list of alarms with page size of 100
 
 .EXAMPLE
-Invoke-ClientRequest -Uri "/inventory/managedObjects" -Method "post" -Data "name=test" -Headers @{ Accept = "application/json"}
+Invoke-ClientRequest -Uri "/inventory/managedObjects" -Method "post" -Data "name=test" -Headers @{ Custom-Value = "myValue"}
 
 Create a new managed object but add a custom accept header value
 #>
@@ -51,6 +91,16 @@ Create a new managed object but add a custom accept header value
         # Uri query parameters
         [hashtable] $QueryParameters,
 
+        # (Body) Content Type
+        [string] $ContentType,
+
+        # Accept header
+        [string] $Accept,
+
+        # Ignore the accept header
+        [switch]
+        $IgnoreAcceptHeader,
+
         # Timeout in seconds
         [Parameter()]
         [double]
@@ -79,7 +129,12 @@ Create a new managed object but add a custom accept header value
         # Session path
         [Parameter()]
         [string]
-        $Session
+        $Session,
+
+        # Allow loading Cumulocity session setting from environment variables
+        [Parameter()]
+        [switch]
+        $UseEnvironment
     )
 
     $c8y = Get-ClientBinary
@@ -135,6 +190,18 @@ Create a new managed object but add a custom accept header value
         }
     }
 
+    if ($null -ne $ContentType) {
+        $null = $c8yargs.AddRange(@("--contentType", $ContentType))
+    }
+
+    if ($null -ne $Accept) {
+        $null = $c8yargs.AddRange(@("--accept", $Accept))
+    }
+
+    if ($IgnoreAcceptHeader) {
+        $null = $c8yargs.Add("--ignoreAcceptHeader")
+    }
+
     if ($HostName) {
         $null = $c8yargs.AddRange(@("--host", $HostName))
     }
@@ -159,6 +226,10 @@ Create a new managed object but add a custom accept header value
 
     if ($Session) {
         $null = $c8yargs.AddRange(@("--session", $Session))
+    }
+
+    if ($UseEnvironment) {
+        $null = $c8yargs.Add("--useEnv")
     }
 
     if ($NoProxy) {

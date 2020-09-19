@@ -272,8 +272,6 @@ FunctionsToExport = @(
 	'Install-ClientBinary',
 	'Invoke-ClientCommand',
 	'Invoke-ClientRequest',
-	'Invoke-CustomRestMethod',
-	'Invoke-CustomRestRequest',
 	'New-HostedApplication',
 	'New-Microservice',
 	'New-RandomPassword',

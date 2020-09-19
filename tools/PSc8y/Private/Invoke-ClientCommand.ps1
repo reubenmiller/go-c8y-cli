@@ -1,37 +1,57 @@
 ﻿Function Invoke-ClientCommand {
+<# 
+.SYNOPSIS
+Run a Cumulocity client command using the c8y binary. Only intended for internal usage only
+
+.DESCRIPTION
+The command is a wrapper around the c8y binary which is used to send the rest request to Cumulocity.
+
+The result will also be parsed, and Powershell type information will be added to the result set, so
+only relevant information is shown.
+#>
     [cmdletbinding()]
     Param(
+        # Name of the command
         [Parameter(
             Mandatory = $true
         )]
         [string] $Noun,
 
+        # Command verb, i.e. list, get, delete etc.
         [Parameter(
             Mandatory = $true
         )]
         [string] $Verb,
 
+        # Parameters which should be passed to the c8y binary
+        # The full parameter name should be used (i.e. --header, and not -H)
         [hashtable] $Parameters,
 
         [string] $Type = "c8y.item",
 
+        # Type to be added to the result set. Used to control the view of the 
+        # returned data in Powershell
         [string] $ItemType,
 
+        # Name of the property to return a portion (fragment) of the data instead of the full
+        # data set.
         [string] $ResultProperty,
 
-        [switch] $IncludeAll,
+        # Future Roadmap: Include all result sets
+        # [switch] $IncludeAll,
 
+        # Return the raw response rather than Powershell objects
         [switch] $Raw,
 
-        # Timeout in seconds
+        # TimeoutSec timeout in seconds before a request will be aborted
         [Parameter()]
         [double]
         $TimeoutSec
     )
 
-    $args = New-Object System.Collections.ArrayList
-    $null = $args.Add($Noun)
-    $null = $args.Add($Verb)
+    $c8yargs = New-Object System.Collections.ArrayList
+    $null = $c8yargs.Add($Noun)
+    $null = $c8yargs.Add($Verb)
 
     foreach ($iKey in $Parameters.Keys) {
         $Value = $Parameters[$iKey]
@@ -40,17 +60,17 @@
             if ("$Value" -notmatch "^$") {
                 $key = $iKey[0].ToString().ToLowerInvariant() + $iKey.SubString(1)
                 if ($Value -is [bool] -and $Value) {
-                    $null = $args.AddRange(@("--${key}"))
+                    $null = $c8yargs.AddRange(@("--${key}"))
                 } else {
                     if ($key -eq "data") {
                         # due to cli parsing, data needs to be sent using "="
-                        $null = $args.AddRange(@("--${key}", $Value))
+                        $null = $c8yargs.AddRange(@("--${key}", $Value))
                     } else {
                         if ($Value -match " ") {
-                            # $null = $args.AddRange(@("--${key}", "$Value"))
-                            $null = $args.Add("--${key}=`"$Value`"")
+                            # $null = $c8yargs.AddRange(@("--${key}", "$Value"))
+                            $null = $c8yargs.Add("--${key}=`"$Value`"")
                         } else {
-                            $null = $args.Add("--${key}=$Value")
+                            $null = $c8yargs.Add("--${key}=$Value")
                         }
                     }
                 }
@@ -60,34 +80,34 @@
 
 
 
-    $null = $args.Add("--pretty=false")
+    $null = $c8yargs.Add("--pretty=false")
 
     if ($WhatIfPreference) {
-        $null = $args.Add("--dry")
+        $null = $c8yargs.Add("--dry")
     }
 
     if ($VerbosePreference) {
-        $null = $args.Add("--verbose")
+        $null = $c8yargs.Add("--verbose")
     }
 
     if ($TimeoutSec) {
         # Convert to milliseconds (cast to an integer)
         [int] $TimeoutInMS = $TimeoutSec * 1000
-        $null = $args.AddRange(@("--timeout", $TimeoutInMS))
+        $null = $c8yargs.AddRange(@("--timeout", $TimeoutInMS))
     }
 
     # Include all pagination results
-    if ($IncludeAll) {
-        $null = $args.Add("--all")
-    }
+    # if ($IncludeAll) {
+    #     $null = $c8yargs.Add("--all")
+    # }
 
-    $null = $args.Add("--raw")
+    $null = $c8yargs.Add("--raw")
 
     $c8ycli = Get-ClientBinary
-    Write-Verbose ("$c8ycli {0}" -f $args -join " ")
+    Write-Verbose ("$c8ycli {0}" -f $c8yargs -join " ")
 
     try {
-        $RawResponse = & $c8ycli $args
+        $RawResponse = & $c8ycli $c8yargs
     } catch {
         Write-Warning -Message $_.Exception.Message
         # do nothing, due to remote powershell session issue and $ErrorActionPreference being set to 'Stop'
