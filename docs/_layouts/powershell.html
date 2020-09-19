@@ -16,18 +16,16 @@
 		<link rel="icon" type="image/png" href="{{ site.baseurl }}/images/favicon.png">
 
 		{% if jekyll.environment == 'production' and site.google_analytics != '' %}
-			<script>
-				window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
-				ga('create', '{{ site.google_analytics }}', 'auto');
-				ga('send', 'pageview');
-			</script>
-			<script async src='https://www.google-analytics.com/analytics.js'></script>
+			{% include google.html %}
 		{% endif %}
 
 		<script src="{{ site.baseurl }}/js/navigation.scroll.js"></script>
+		<link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/cookieconsent@3/build/cookieconsent.min.css" />
 	</head>
 
 	<body>
+		{% include cookie-consent.html %}
+
 		{% include header.html %}
 
 		<!-- {% include powershell_current_category.html %} -->
