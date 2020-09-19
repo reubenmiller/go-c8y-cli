@@ -32,7 +32,7 @@ Get-RoleReferenceCollectionFromUser
 ```
 
 ## DESCRIPTION
-{{ Fill in the Description }}
+Get collection of user role references from a user
 
 ## EXAMPLES
 

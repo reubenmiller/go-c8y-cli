@@ -4,13 +4,12 @@
 Expand a list of source ids.
 
 .DESCRIPTION
-1. Look for a source.id property
-2. Look for a deviceId property
-3. Look for a id property
-4. Check if the given is a string or int and is integer like
+Expand the list of input objects and return the source using the following logic:
 
-.PARAMETER InputObject
-List of ids
+    1. Look for a source.id property
+    2. Look for a deviceId property
+    3. Look for a id property
+    4. Check if the given is a string or int and is integer like
 
 .EXAMPLE
 Expand-Source 12345
@@ -22,9 +21,15 @@ Normalize a list of ids
 
 Normalize a list of ids
 
+.EXAMPLE
+Get-OperationCollection -PageSize 1000 | Expand-Source | Select-Object -Unique
+
+Get a unique list of device ids from a list of operations
+
 #>
     [cmdletbinding()]
     Param(
+        # List of objects which can either be operations, alarms, measurements or managed objects
         [Parameter(
             Mandatory=$true,
             ValueFromPipeline=$true,

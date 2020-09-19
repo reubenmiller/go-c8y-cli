@@ -11,7 +11,7 @@ title: Get-ClientBinary
 # Get-ClientBinary
 
 ## SYNOPSIS
-Get the full path to the Cumulocity Binary which is compatible with the current Operating system
+Get the path to the Cumulocity Binary
 
 ## SYNTAX
 
@@ -21,7 +21,7 @@ Get-ClientBinary
 ```
 
 ## DESCRIPTION
-{{ Fill in the Description }}
+Get the full path to the Cumulocity Binary which is compatible with the current Operating system
 
 ## EXAMPLES
 

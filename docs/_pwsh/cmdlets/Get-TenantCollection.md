@@ -30,7 +30,7 @@ Get-TenantCollection
 ```
 
 ## DESCRIPTION
-{{ Fill in the Description }}
+Get collection of tenants
 
 ## EXAMPLES
 

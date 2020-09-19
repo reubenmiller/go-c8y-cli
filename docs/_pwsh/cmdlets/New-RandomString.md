@@ -11,7 +11,7 @@ title: New-RandomString
 # New-RandomString
 
 ## SYNOPSIS
-{{ Fill in the Synopsis }}
+Create a random string
 
 ## SYNTAX
 
@@ -23,21 +23,33 @@ New-RandomString
 ```
 
 ## DESCRIPTION
-{{ Fill in the Description }}
+Helper utility to quickly create a randomized string which can be used
+when adding unique names to devices or another other properties
+
+Note: It should not be used for encryption!
 
 ## EXAMPLES
 
-### Example 1
-```powershell
-PS C:\> {{ Add example code here }}
+### EXAMPLE 1
+```
+New-RandomString -Prefix "hello_"
 ```
 
-{{ Add example description here }}
+Create a random string with the "hello" prefix.
+i.e `hello_jta6fzwvo7`
+
+### EXAMPLE 2
+```
+New-RandomString -Postfix "_device"
+```
+
+Create a random string which ends with "_device", i.e.
+`1qs7mc2o3t_device`
 
 ## PARAMETERS
 
-### -Postfix
-{{ Fill Postfix Description }}
+### -Prefix
+Prefix to be added before the random string
 
 ```yaml
 Type: String
@@ -51,8 +63,8 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -Prefix
-{{ Fill Prefix Description }}
+### -Postfix
+Postfix to be added after the random string
 
 ```yaml
 Type: String
@@ -60,7 +72,7 @@ Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: 0
+Position: 2
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
@@ -71,10 +83,8 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 
 ## INPUTS
 
-### None
 ## OUTPUTS
 
-### System.Object
 ## NOTES
 
 ## RELATED LINKS

@@ -4,6 +4,9 @@ Function Get-TenantOptionCollection {
 .SYNOPSIS
 Get collection of tenant options
 
+.DESCRIPTION
+Get collection of tenant options
+
 .EXAMPLE
 PS> Get-TenantOptionCollection
 

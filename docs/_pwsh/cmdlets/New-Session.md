@@ -11,7 +11,7 @@ title: New-Session
 # New-Session
 
 ## SYNOPSIS
-Get the active Cumulocity Session
+Create a new Cumulocity Session
 
 ## SYNTAX
 
@@ -27,16 +27,17 @@ New-Session
 ```
 
 ## DESCRIPTION
-{{ Fill in the Description }}
+Create a new Cumulocity session which can be used by the cmdlets.
+The new session will be automatically activated.
 
 ## EXAMPLES
 
 ### EXAMPLE 1
 ```
-Get-Session
+New-Session -Name "develop" -Host "https://my-tenant-name.eu-latest.cumulocity.com" -Tenant "t12345"
 ```
 
-Get the current Cumulocity session
+Create a new Cumulocity session
 
 ## PARAMETERS
 
@@ -56,9 +57,8 @@ Accept wildcard characters: False
 ```
 
 ### -Host
-Host the type of this alarm, e.g.
-'com_cumulocity_events_TamperEvent'.
-(required)
+Host url, i.e.
+https://my-tenant-name.eu-latest.cumulocity.com
 
 ```yaml
 Type: String
@@ -73,9 +73,8 @@ Accept wildcard characters: False
 ```
 
 ### -Tenant
-Tenant the type of this alarm, e.g.
-'com_cumulocity_events_TamperEvent'.
-(required)
+Tenant id, i.e.
+t12345
 
 ```yaml
 Type: String

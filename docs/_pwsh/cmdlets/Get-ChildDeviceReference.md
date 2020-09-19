@@ -30,7 +30,7 @@ Get-ChildDeviceReference
 ```
 
 ## DESCRIPTION
-{{ Fill in the Description }}
+Get managed object child device reference
 
 ## EXAMPLES
 

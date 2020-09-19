@@ -32,7 +32,7 @@ Remove-UserFromGroup
 ```
 
 ## DESCRIPTION
-{{ Fill in the Description }}
+Delete a user from a group
 
 ## EXAMPLES
 

@@ -22,7 +22,7 @@ Expand-Id
 ```
 
 ## DESCRIPTION
-{{ Fill in the Description }}
+Expand the list of objects and only return the ids instead of the full objects.
 
 ## EXAMPLES
 

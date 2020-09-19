@@ -31,7 +31,7 @@ Get-TenantOptionForCategory
 ```
 
 ## DESCRIPTION
-{{ Fill in the Description }}
+Get tenant options for category
 
 ## EXAMPLES
 

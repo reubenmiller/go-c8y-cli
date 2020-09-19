@@ -31,7 +31,7 @@ Get-ApplicationReferenceCollection
 ```
 
 ## DESCRIPTION
-{{ Fill in the Description }}
+Get a collection of application references on a tenant
 
 ## EXAMPLES
 

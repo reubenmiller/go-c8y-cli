@@ -11,7 +11,7 @@ title: Expand-Tenant
 # Expand-Tenant
 
 ## SYNOPSIS
-Expand a list of tenants replacing any ids or names with the actual tenant object.
+Expand the tenants by id or name
 
 ## SYNTAX
 
@@ -22,20 +22,20 @@ Expand-Tenant
 ```
 
 ## DESCRIPTION
-{{ Fill in the Description }}
+Expand a list of tenants replacing any ids or names with the actual tenant object.
 
 ## EXAMPLES
 
 ### EXAMPLE 1
 ```
-Expand-C8yTenant "mytenant"
+Expand-Tenant "mytenant"
 ```
 
 Retrieve the tenant objects by name or id
 
 ### EXAMPLE 2
 ```
-Get-C8yTenant *test* | Expand-C8yTenant
+Get-Tenant *test* | Expand-Tenant
 ```
 
 Get all the tenant object (with app in their name).

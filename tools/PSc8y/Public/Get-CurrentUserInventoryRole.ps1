@@ -4,6 +4,9 @@ Function Get-CurrentUserInventoryRole {
 .SYNOPSIS
 Get a specific inventory role of the current user
 
+.DESCRIPTION
+Get a specific inventory role of the current user
+
 .EXAMPLE
 PS> Get-CurrentUserInventoryRoleCollection -PageSize 1 | Get-CurrentUserInventoryRole
 

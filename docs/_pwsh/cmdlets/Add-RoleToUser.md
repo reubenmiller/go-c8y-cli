@@ -32,7 +32,7 @@ Add-RoleToUser
 ```
 
 ## DESCRIPTION
-{{ Fill in the Description }}
+Add role to a user
 
 ## EXAMPLES
 

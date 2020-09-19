@@ -4,6 +4,9 @@ Function Remove-Tenant {
 .SYNOPSIS
 Delete tenant
 
+.DESCRIPTION
+Delete tenant
+
 .EXAMPLE
 PS> Remove-Tenant -Id mycompany
 

@@ -29,7 +29,7 @@ Get-DataBrokerConnector
 ```
 
 ## DESCRIPTION
-{{ Fill in the Description }}
+Get data broker connector
 
 ## EXAMPLES
 

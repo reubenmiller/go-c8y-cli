@@ -31,7 +31,7 @@ Remove-Group
 ```
 
 ## DESCRIPTION
-{{ Fill in the Description }}
+Delete a new group
 
 ## EXAMPLES
 

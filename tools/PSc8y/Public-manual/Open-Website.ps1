@@ -3,17 +3,8 @@ Function Open-Website {
 .SYNOPSIS
 Open a browser to the cumulocity website
 
-.PARAMETER Application
-Application to open
-
-.PARAMETER Device
-Name of the device to open in devicemanagement. Only the first matching device will be used to open the c8y website.
-
-.PARAMETER Page
-Device page to open
-
-.PARAMETER Browser
-Browser to use to open the webpage
+.DESCRIPTION
+Opens the default web browser to the Cumulocity application or directly to a device page in the Device Management application
 
 .EXAMPLE
 Open-Website -Application "cockpit"
@@ -35,6 +26,7 @@ Open the devicemanagement to the device alarm page for myDevice01
     DefaultParameterSetName="Device"
   )]
   Param(
+    # Application to open
     [ValidateSet("cockpit", "administration", "devicemanagement", "fieldbus4")]
     [Parameter(
       ParameterSetName="Application",
@@ -42,6 +34,7 @@ Open the devicemanagement to the device alarm page for myDevice01
     )]
     [string] $Application = "cockpit",
 
+    # Name of the device to open in devicemanagement. Only the first matching device will be used to open the c8y website.
     [Parameter(
       ParameterSetName="Device",
       Position=0,
@@ -50,6 +43,7 @@ Open the devicemanagement to the device alarm page for myDevice01
     )]
     [object[]] $Device,
 
+    # Device page to open
     [Parameter(
       ParameterSetName="Device",
       Position=1
@@ -57,6 +51,7 @@ Open the devicemanagement to the device alarm page for myDevice01
     [ValidateSet("device-info", "measurements", "alarms", "control", "events", "service_monitoring", "identity")]
     [string] $Page = "control",
 
+    # Browser to use to open the webpage
     [ValidateSet("chrome", "firefox", "ie", "edge")]
     [string] $Browser = "chrome"
   )

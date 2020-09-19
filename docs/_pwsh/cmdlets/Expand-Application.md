@@ -22,7 +22,8 @@ Expand-Application
 ```
 
 ## DESCRIPTION
-{{ Fill in the Description }}
+The list of applications will be expanded to include the full application representation by fetching
+the data from Cumulocity.
 
 ## EXAMPLES
 

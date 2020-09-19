@@ -32,7 +32,7 @@ Update-DataBrokerConnector
 ```
 
 ## DESCRIPTION
-{{ Fill in the Description }}
+Update data broker connector
 
 ## EXAMPLES
 
@@ -61,7 +61,7 @@ Accept wildcard characters: False
 ```
 
 ### -Status
-DataBroker status \[SUSPENDED\].
+DataBroker status [SUSPENDED].
 (required)
 
 ```yaml

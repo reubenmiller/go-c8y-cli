@@ -31,7 +31,7 @@ Remove-TenantOption
 ```
 
 ## DESCRIPTION
-{{ Fill in the Description }}
+Delete tenant option
 
 ## EXAMPLES
 

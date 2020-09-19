@@ -4,6 +4,9 @@ Function Get-RoleCollection {
 .SYNOPSIS
 Get collection of user roles
 
+.DESCRIPTION
+Get collection of user roles
+
 .EXAMPLE
 PS> Get-RoleCollection -PageSize 100
 

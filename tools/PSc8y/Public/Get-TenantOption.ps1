@@ -4,6 +4,9 @@ Function Get-TenantOption {
 .SYNOPSIS
 Get tenant option
 
+.DESCRIPTION
+Get tenant option
+
 .EXAMPLE
 PS> Get-TenantOption -Category "c8y_cli_tests" -Key "option2"
 

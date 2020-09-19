@@ -30,7 +30,7 @@ Remove-Tenant
 ```
 
 ## DESCRIPTION
-{{ Fill in the Description }}
+Delete tenant
 
 ## EXAMPLES
 

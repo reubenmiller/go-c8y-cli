@@ -11,7 +11,7 @@ title: New-Microservice
 # New-Microservice
 
 ## SYNOPSIS
-New microservice application
+New microservice
 
 ## SYNTAX
 
@@ -35,14 +35,15 @@ New-Microservice
 ```
 
 ## DESCRIPTION
-{{ Fill in the Description }}
+Create a new microservice.
+The zip file needs to follow the Cumulocity Microservice format.
 
 ## EXAMPLES
 
 ### EXAMPLE 1
 ```
-New-Microservice -Name $App.id -File "myapp.zip"
-Upload application microservice binary
+New-Microservice -Name "myapp" -File "myapp.zip"
+Upload microservice binary
 ```
 
 ## PARAMETERS
@@ -94,7 +95,7 @@ Accept wildcard characters: False
 ```
 
 ### -ContextPath
-contextPath of the hosted application.
+ContextPath of the hosted application.
 Required when application type is HOSTED
 
 ```yaml

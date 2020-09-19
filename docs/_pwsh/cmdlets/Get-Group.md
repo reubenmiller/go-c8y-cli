@@ -30,7 +30,7 @@ Get-Group
 ```
 
 ## DESCRIPTION
-{{ Fill in the Description }}
+Create a new group by id
 
 ## EXAMPLES
 

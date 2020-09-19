@@ -11,7 +11,7 @@ title: Expand-Microservice
 # Expand-Microservice
 
 ## SYNOPSIS
-Expand a list of microservices replacing any ids or names with the actual microservice object.
+Expand a list of microservices objects
 
 ## SYNTAX
 
@@ -22,7 +22,7 @@ Expand-Microservice
 ```
 
 ## DESCRIPTION
-{{ Fill in the Description }}
+Expand a list of microservices replacing any ids or names with the actual microservice object.
 
 ## EXAMPLES
 

@@ -22,21 +22,29 @@ New-TestFile
 ```
 
 ## DESCRIPTION
-{{ Fill in the Description }}
+Create a temporary file with some contents which can be used to uploaded it to Cumulocity
+via the Binary api.
 
 ## EXAMPLES
 
-### Example 1
-```powershell
-PS C:\> {{ Add example code here }}
+### EXAMPLE 1
+```
+New-TestFile
 ```
 
-{{ Add example description here }}
+Create a temp file with pre-defined content
+
+### EXAMPLE 2
+```
+"My custom text info" | New-TestFile
+```
+
+Create a temp file with customized content.
 
 ## PARAMETERS
 
 ### -InputObject
-{{ Fill InputObject Description }}
+Content which should be written to the temporary file
 
 ```yaml
 Type: Object
@@ -57,6 +65,7 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 
 ## OUTPUTS
 
+### System.IO.FileInfo
 ## NOTES
 
 ## RELATED LINKS

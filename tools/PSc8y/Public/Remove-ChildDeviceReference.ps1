@@ -4,6 +4,9 @@ Function Remove-ChildDeviceReference {
 .SYNOPSIS
 Delete child device reference
 
+.DESCRIPTION
+Delete child device reference
+
 .EXAMPLE
 PS> Remove-ChildDeviceReference -Device $Device.id -ChildDevice $ChildDevice.id
 

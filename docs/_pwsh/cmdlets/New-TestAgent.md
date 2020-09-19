@@ -11,7 +11,7 @@ title: New-TestAgent
 # New-TestAgent
 
 ## SYNOPSIS
-{{ Fill in the Synopsis }}
+Create a new test agent representation in Cumulocity
 
 ## SYNTAX
 
@@ -23,21 +23,46 @@ New-TestAgent
 ```
 
 ## DESCRIPTION
-{{ Fill in the Description }}
+Create a new test agent with a randomized name.
+Useful when performing mockups or prototyping.
+
+The agent will have both the `c8y_IsDevice` and `com_cumulocity_model_Agent` fragments set.
 
 ## EXAMPLES
 
-### Example 1
-```powershell
-PS C:\> {{ Add example code here }}
+### EXAMPLE 1
+```
+New-TestAgent
 ```
 
-{{ Add example description here }}
+Create a test agent
+
+### EXAMPLE 2
+```
+1..10 | Foreach-Object { New-TestAgent -Force }
+```
+
+Create 10 test agents all with unique names
 
 ## PARAMETERS
 
+### -Name
+Agent name prefix which is added before the randomized string
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 1
+Default value: Testagent
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
 ### -Force
-{{ Fill Force Description }}
+Don't prompt for confirmation
 
 ```yaml
 Type: SwitchParameter
@@ -46,22 +71,7 @@ Aliases:
 
 Required: False
 Position: Named
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
-### -Name
-{{ Fill Name Description }}
-
-```yaml
-Type: String
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: 0
-Default value: None
+Default value: False
 Accept pipeline input: False
 Accept wildcard characters: False
 ```
@@ -71,10 +81,8 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 
 ## INPUTS
 
-### None
 ## OUTPUTS
 
-### System.Object
 ## NOTES
 
 ## RELATED LINKS

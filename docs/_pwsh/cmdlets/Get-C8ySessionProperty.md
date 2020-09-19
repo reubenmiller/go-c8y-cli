@@ -11,7 +11,7 @@ title: Get-C8ySessionProperty
 # Get-C8ySessionProperty
 
 ## SYNOPSIS
-{{ Fill in the Synopsis }}
+Get a property from the current c8y session
 
 ## SYNTAX
 
@@ -22,21 +22,26 @@ Get-C8ySessionProperty
 ```
 
 ## DESCRIPTION
-{{ Fill in the Description }}
+An interface to read properties from the current c8y session, i.e.
+tenant or host.
+This is mostly used
+internally my other cmdlets in the module to abstract the accessing of such variables in case the environment
+variables change in the future (i.e.
+$env:C8Y_TENANT or $env:C8Y_HOST).
 
 ## EXAMPLES
 
-### Example 1
-```powershell
-PS C:\> {{ Add example code here }}
+### EXAMPLE 1
+```
+Get-C8ySessionProperty tenant
 ```
 
-{{ Add example description here }}
+Get the tenant name of the current c8y cli session
 
 ## PARAMETERS
 
 ### -Name
-{{ Fill Name Description }}
+Property name
 
 ```yaml
 Type: String
@@ -44,7 +49,7 @@ Parameter Sets: (All)
 Aliases:
 
 Required: True
-Position: 0
+Position: 1
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
@@ -55,10 +60,9 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 
 ## INPUTS
 
-### None
 ## OUTPUTS
 
-### System.Object
+### string
 ## NOTES
 
 ## RELATED LINKS

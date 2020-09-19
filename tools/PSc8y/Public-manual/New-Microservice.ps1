@@ -1,12 +1,14 @@
 Function New-Microservice {
 <#
 .SYNOPSIS
-New microservice application
+New microservice
+
+.DESCRIPTION
+Create a new microservice. The zip file needs to follow the Cumulocity Microservice format.
 
 .EXAMPLE
-PS> New-Microservice -Name $App.id -File "myapp.zip"
-Upload application microservice binary
-
+PS> New-Microservice -Name "myapp" -File "myapp.zip"
+Upload microservice binary
 
 #>
     [cmdletbinding(SupportsShouldProcess = $true,
@@ -34,7 +36,7 @@ Upload application microservice binary
         [string]
         $Availability,
 
-        # contextPath of the hosted application. Required when application type is HOSTED
+        # ContextPath of the hosted application. Required when application type is HOSTED
         [Parameter()]
         [string]
         $ContextPath,

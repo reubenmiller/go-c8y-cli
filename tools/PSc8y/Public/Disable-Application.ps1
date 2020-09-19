@@ -4,6 +4,9 @@ Function Disable-Application {
 .SYNOPSIS
 Disable application on tenant
 
+.DESCRIPTION
+Disable application on tenant
+
 .EXAMPLE
 PS> Disable-Application -Tenant mycompany -Application myMicroservice
 

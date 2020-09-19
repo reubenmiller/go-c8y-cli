@@ -28,7 +28,7 @@ Get-TenantVersion
 ```
 
 ## DESCRIPTION
-{{ Fill in the Description }}
+Get tenant platform (backend) version
 
 ## EXAMPLES
 

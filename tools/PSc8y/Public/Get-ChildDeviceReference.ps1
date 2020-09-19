@@ -4,6 +4,9 @@ Function Get-ChildDeviceReference {
 .SYNOPSIS
 Get managed object child device reference
 
+.DESCRIPTION
+Get managed object child device reference
+
 .EXAMPLE
 PS> Get-ChildDeviceReference -Device $Agent.id -Reference $Ref.id
 

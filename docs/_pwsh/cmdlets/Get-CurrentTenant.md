@@ -28,7 +28,7 @@ Get-CurrentTenant
 ```
 
 ## DESCRIPTION
-{{ Fill in the Description }}
+Get current tenant
 
 ## EXAMPLES
 

@@ -30,7 +30,7 @@ Get-GroupByName
 ```
 
 ## DESCRIPTION
-{{ Fill in the Description }}
+Get a group by name
 
 ## EXAMPLES
 

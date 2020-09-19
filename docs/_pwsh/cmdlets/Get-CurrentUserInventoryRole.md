@@ -29,7 +29,7 @@ Get-CurrentUserInventoryRole
 ```
 
 ## DESCRIPTION
-{{ Fill in the Description }}
+Get a specific inventory role of the current user
 
 ## EXAMPLES
 

@@ -30,21 +30,31 @@ New-TestMeasurement
 ```
 
 ## DESCRIPTION
-{{ Fill in the Description }}
+Create a test measurement for a device.
+
+If the device is not provided then a test device will be created automatically
 
 ## EXAMPLES
 
-### Example 1
-```powershell
-PS C:\> {{ Add example code here }}
+### EXAMPLE 1
+```
+New-TestMeasurement
 ```
 
-{{ Add example description here }}
+Create a new test device and then create a measurement on it
+
+### EXAMPLE 2
+```
+New-TestMeasurement -Device "myExistingDevice"
+```
+
+Create a measurement on the existing device "myExistingDevice"
 
 ## PARAMETERS
 
 ### -Device
-{{ Fill Device Description }}
+Device id, name or object.
+If left blank then a randomized device will be created
 
 ```yaml
 Type: Object
@@ -136,7 +146,7 @@ Accept wildcard characters: False
 ```
 
 ### -Force
-{{ Fill Force Description }}
+Don't prompt for confirmation
 
 ```yaml
 Type: SwitchParameter

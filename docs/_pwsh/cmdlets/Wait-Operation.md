@@ -24,7 +24,9 @@ Wait-Operation
 ```
 
 ## DESCRIPTION
-{{ Fill in the Description }}
+Wait for an operation to be completed with support for a timeout.
+Useful when writing scripts
+which should only proceed once the operation has finished executing.
 
 ## EXAMPLES
 

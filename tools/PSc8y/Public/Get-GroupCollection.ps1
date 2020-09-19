@@ -4,6 +4,9 @@ Function Get-GroupCollection {
 .SYNOPSIS
 Get collection of (user) groups
 
+.DESCRIPTION
+Get collection of (user) groups
+
 .EXAMPLE
 PS> Get-GroupCollection
 

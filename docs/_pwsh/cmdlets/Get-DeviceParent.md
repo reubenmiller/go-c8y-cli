@@ -46,7 +46,7 @@ Get-DeviceParent
 ```
 
 ## DESCRIPTION
-{{ Fill in the Description }}
+Get the parent of a device by using the references stored in the device managed object.
 
 ## EXAMPLES
 

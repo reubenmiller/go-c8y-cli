@@ -4,6 +4,9 @@ Function Remove-UserFromGroup {
 .SYNOPSIS
 Delete a user from a group
 
+.DESCRIPTION
+Delete a user from a group
+
 .EXAMPLE
 PS> Remove-UserFromGroup -Group $Group.id -User $User.id
 

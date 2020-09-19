@@ -4,6 +4,9 @@ Function Get-DataBrokerConnectorCollection {
 .SYNOPSIS
 Get collection of data broker connectors
 
+.DESCRIPTION
+Get collection of data broker connectors
+
 .EXAMPLE
 PS> Get-DataBrokerConnectorCollection
 

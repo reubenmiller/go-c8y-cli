@@ -30,7 +30,7 @@ Get-TenantOption
 ```
 
 ## DESCRIPTION
-{{ Fill in the Description }}
+Get tenant option
 
 ## EXAMPLES
 

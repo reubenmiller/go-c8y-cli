@@ -37,7 +37,7 @@ Update-Tenant
 ```
 
 ## DESCRIPTION
-{{ Fill in the Description }}
+Update tenant
 
 ## EXAMPLES
 

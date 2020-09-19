@@ -4,6 +4,9 @@ Function Get-CurrentTenant {
 .SYNOPSIS
 Get current tenant
 
+.DESCRIPTION
+Get current tenant
+
 .EXAMPLE
 PS> Get-CurrentTenant
 

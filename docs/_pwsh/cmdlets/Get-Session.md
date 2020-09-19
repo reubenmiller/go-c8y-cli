@@ -21,7 +21,7 @@ Get-Session
 ```
 
 ## DESCRIPTION
-{{ Fill in the Description }}
+Get the details about the active Cumulocity session which is used by all cmdlets
 
 ## EXAMPLES
 

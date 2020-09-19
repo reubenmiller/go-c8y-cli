@@ -97,7 +97,7 @@ Accept wildcard characters: False
 ```
 
 ### -Availability
-Application will be applied to this type of documents, possible values \[ALARM, AUDIT, EVENT, MEASUREMENT, OPERATION, *\].
+Application will be applied to this type of documents, possible values [ALARM, AUDIT, EVENT, MEASUREMENT, OPERATION, *].
 
 ```yaml
 Type: String

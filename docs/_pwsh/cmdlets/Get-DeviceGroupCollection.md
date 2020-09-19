@@ -35,7 +35,8 @@ Get-DeviceGroupCollection
 ```
 
 ## DESCRIPTION
-{{ Fill in the Description }}
+Get a collection of device groups.
+Device groups are used to arrange devices together.
 
 ## EXAMPLES
 
@@ -147,7 +148,7 @@ Accept wildcard characters: False
 ```
 
 ### -WithParents
-include a flat list of all parents and grandparents of the given object
+Include a flat list of all parents and grandparents of the given object
 
 ```yaml
 Type: SwitchParameter

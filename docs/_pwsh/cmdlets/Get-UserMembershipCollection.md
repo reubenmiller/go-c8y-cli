@@ -32,7 +32,7 @@ Get-UserMembershipCollection
 ```
 
 ## DESCRIPTION
-{{ Fill in the Description }}
+Get information about all groups that a user is a member of
 
 ## EXAMPLES
 

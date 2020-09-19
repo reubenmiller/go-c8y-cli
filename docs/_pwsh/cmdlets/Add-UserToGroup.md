@@ -32,7 +32,7 @@ Add-UserToGroup
 ```
 
 ## DESCRIPTION
-{{ Fill in the Description }}
+Get user
 
 ## EXAMPLES
 

@@ -22,13 +22,15 @@ Expand-Source
 ```
 
 ## DESCRIPTION
-1.
+Expand the list of input objects and return the source using the following logic:
+
+    1.
 Look for a source.id property
-2.
+    2.
 Look for a deviceId property
-3.
+    3.
 Look for a id property
-4.
+    4.
 Check if the given is a string or int and is integer like
 
 ## EXAMPLES
@@ -47,10 +49,17 @@ Normalize a list of ids
 
 Normalize a list of ids
 
+### EXAMPLE 3
+```
+Get-OperationCollection -PageSize 1000 | Expand-Source | Select-Object -Unique
+```
+
+Get a unique list of device ids from a list of operations
+
 ## PARAMETERS
 
 ### -InputObject
-List of ids
+List of objects which can either be operations, alarms, measurements or managed objects
 
 ```yaml
 Type: Object[]

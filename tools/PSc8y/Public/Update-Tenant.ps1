@@ -4,6 +4,9 @@ Function Update-Tenant {
 .SYNOPSIS
 Update tenant
 
+.DESCRIPTION
+Update tenant
+
 .EXAMPLE
 PS> Update-Tenant -Id mycompany -ContactName "John Smith"
 

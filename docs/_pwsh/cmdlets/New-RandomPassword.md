@@ -11,7 +11,7 @@ title: New-RandomPassword
 # New-RandomPassword
 
 ## SYNOPSIS
-Generate pseudo random passwords
+Create pseudo random password
 
 ## SYNTAX
 
@@ -37,7 +37,8 @@ New-RandomPassword
 ```
 
 ## DESCRIPTION
-{{ Fill in the Description }}
+Create a random password which can be used for one-time passwords if the
+the password reset functionilty in Cumulocity is not available.
 
 ## EXAMPLES
 
@@ -183,8 +184,6 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 
 ### [String]
 ## NOTES
-Written by Simon Wåhlin, blog.simonw.se
-I take no responsibility for any issues caused by this script.
 
 ## RELATED LINKS
 

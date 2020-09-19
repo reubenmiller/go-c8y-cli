@@ -23,7 +23,11 @@ Expand-PaginationObject
 ```
 
 ## DESCRIPTION
-{{ Fill in the Description }}
+Iterate through a Cumulocity pagination result set, and keep fetching the results
+until the last page is found.
+
+The cmdlet will only return once the total result set has been fetched, and the
+items will be returned in one array.
 
 ## EXAMPLES
 

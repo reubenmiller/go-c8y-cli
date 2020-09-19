@@ -4,6 +4,9 @@ Function Get-ApplicationReferenceCollection {
 .SYNOPSIS
 Get a collection of application references on a tenant
 
+.DESCRIPTION
+Get a collection of application references on a tenant
+
 .EXAMPLE
 PS> Get-ApplicationReferenceCollection -Tenant mycompany
 

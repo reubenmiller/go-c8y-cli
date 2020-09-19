@@ -32,7 +32,7 @@ Update-Group
 ```
 
 ## DESCRIPTION
-{{ Fill in the Description }}
+Update a new group
 
 ## EXAMPLES
 

@@ -11,7 +11,7 @@ title: ConvertTo-JsonArgument
 # ConvertTo-JsonArgument
 
 ## SYNOPSIS
-{{ Fill in the Synopsis }}
+Convert a powershell hashtable/object to a json escaped string
 
 ## SYNTAX
 
@@ -22,21 +22,29 @@ ConvertTo-JsonArgument
 ```
 
 ## DESCRIPTION
-{{ Fill in the Description }}
+Helper function is used when passing Powershell hashtable or PSCustomObjects to
+the c8y binary.
+Before the c8y cli binary can accept it, it must be converted to json.
+
+The necessary character escaping of literal backslashed `\\` will be done automatically.
 
 ## EXAMPLES
 
-### Example 1
-```powershell
-PS C:\> {{ Add example code here }}
+### EXAMPLE 1
+```
+ConvertTo-JsonArgument @{ myValue = "1" }
 ```
 
-{{ Add example description here }}
+Converts the hashtable to an escaped json string
+
+```json
+{\"myValue\":\"1\"}
+```
 
 ## PARAMETERS
 
 ### -Data
-{{ Fill Data Description }}
+Input object to be converted
 
 ```yaml
 Type: Object
@@ -44,7 +52,7 @@ Parameter Sets: (All)
 Aliases:
 
 Required: True
-Position: 0
+Position: 1
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
@@ -55,10 +63,8 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 
 ## INPUTS
 
-### None
 ## OUTPUTS
 
-### System.Object
 ## NOTES
 
 ## RELATED LINKS

@@ -4,6 +4,9 @@ Function Get-DataBrokerConnector {
 .SYNOPSIS
 Get data broker connector
 
+.DESCRIPTION
+Get data broker connector
+
 .EXAMPLE
 PS> Get-DataBrokerConnector -Id $DataBroker.id
 

@@ -23,16 +23,23 @@ New-TestUser
 ```
 
 ## DESCRIPTION
-{{ Fill in the Description }}
+Create a user with a randomized username
 
 ## EXAMPLES
 
-### Example 1
-```powershell
-PS C:\> {{ Add example code here }}
+### EXAMPLE 1
+```
+New-TestUser
 ```
 
-{{ Add example description here }}
+Create a new test user
+
+### EXAMPLE 2
+```
+New-TestUser -Name "myExistingDevice"
+```
+
+Create a new test user with a custom username prefix
 
 ## PARAMETERS
 
@@ -53,7 +60,7 @@ Accept wildcard characters: False
 ```
 
 ### -Force
-{{ Fill Force Description }}
+Don't prompt for confirmation
 
 ```yaml
 Type: SwitchParameter

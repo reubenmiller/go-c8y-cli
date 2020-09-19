@@ -11,7 +11,7 @@ title: Unregister-Alias
 # Unregister-Alias
 
 ## SYNOPSIS
-Unregister any aliases which were registered by the Register-Alias cmdlet
+Unregister aliases
 
 ## SYNTAX
 
@@ -21,7 +21,7 @@ Unregister-Alias
 ```
 
 ## DESCRIPTION
-{{ Fill in the Description }}
+Unregister any aliases which were registered by the Register-Alias cmdlet
 
 ## EXAMPLES
 

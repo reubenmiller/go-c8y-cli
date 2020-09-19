@@ -4,6 +4,9 @@ Function Add-RoleToUser {
 .SYNOPSIS
 Add role to a user
 
+.DESCRIPTION
+Add role to a user
+
 .EXAMPLE
 PS> Add-RoleToUser -User $User.id -Role "ROLE_ALARM_READ"
 

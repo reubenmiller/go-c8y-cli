@@ -36,7 +36,7 @@ New-HostedApplication
 ```
 
 ## DESCRIPTION
-{{ Fill in the Description }}
+Create a new hosted web application by uploading a zip file which contains a web application
 
 ## EXAMPLES
 
@@ -45,7 +45,7 @@ New-HostedApplication
 New-HostedApplication -Name $App.id -File "myapp.zip"
 ```
 
-Upload application microservice binary
+Upload application zip file containing the web application
 
 ## PARAMETERS
 

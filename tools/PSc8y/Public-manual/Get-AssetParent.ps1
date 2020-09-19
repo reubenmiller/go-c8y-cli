@@ -3,6 +3,10 @@ Function Get-AssetParent {
 .SYNOPSIS
 Get asset parent references for a asset
 
+.DESCRIPTION
+Get the parent of an existing assert by using the references. The cmdlet supports returning
+various forms of the parent references, i.e. immediate parent, parent or the parent, or the
+full parental references.
 
 .EXAMPLE
 Get-AssetParent asset0*
@@ -26,7 +30,7 @@ Returns the root parent. In most cases this will be the agent
         HelpUri='',
         ConfirmImpact = 'None')]
     Param(
-        # asset id, name or object. Wildcards accepted
+        # Asset id, name or object. Wildcards accepted
         [Parameter(
             ValueFromPipeline = $true,
             ValueFromPipelineByPropertyName = $true,

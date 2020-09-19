@@ -30,7 +30,7 @@ Get-DataBrokerConnectorCollection
 ```
 
 ## DESCRIPTION
-{{ Fill in the Description }}
+Get collection of data broker connectors
 
 ## EXAMPLES
 

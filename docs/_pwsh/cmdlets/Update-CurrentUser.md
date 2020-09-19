@@ -80,7 +80,7 @@ Accept wildcard characters: False
 
 ### -Phone
 User phone number.
-Format: '+\[country code\]\[number\]', has to be a valid MSISDN
+Format: '+[country code][number]', has to be a valid MSISDN
 
 ```yaml
 Type: String

@@ -35,7 +35,7 @@ Get-DeviceCollection
 ```
 
 ## DESCRIPTION
-{{ Fill in the Description }}
+Get a collection of devices in Cumulocity by using the inventory API.
 
 ## EXAMPLES
 

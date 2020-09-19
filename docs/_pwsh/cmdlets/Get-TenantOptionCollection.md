@@ -30,7 +30,7 @@ Get-TenantOptionCollection
 ```
 
 ## DESCRIPTION
-{{ Fill in the Description }}
+Get collection of tenant options
 
 ## EXAMPLES
 

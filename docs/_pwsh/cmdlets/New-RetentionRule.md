@@ -49,7 +49,7 @@ Create a retention rule to delete all alarms after 180 days
 ## PARAMETERS
 
 ### -DataType
-RetentionRule will be applied to this type of documents, possible values \[ALARM, AUDIT, EVENT, MEASUREMENT, OPERATION, *\].
+RetentionRule will be applied to this type of documents, possible values [ALARM, AUDIT, EVENT, MEASUREMENT, OPERATION, *].
 (required)
 
 ```yaml

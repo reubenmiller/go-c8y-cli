@@ -37,7 +37,7 @@ New-Tenant
 ```
 
 ## DESCRIPTION
-{{ Fill in the Description }}
+New tenant
 
 ## EXAMPLES
 

@@ -30,7 +30,7 @@ Get-RoleCollection
 ```
 
 ## DESCRIPTION
-{{ Fill in the Description }}
+Get collection of user roles
 
 ## EXAMPLES
 

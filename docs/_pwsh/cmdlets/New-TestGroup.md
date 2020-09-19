@@ -23,16 +23,17 @@ New-TestGroup
 ```
 
 ## DESCRIPTION
-{{ Fill in the Description }}
+Create a new test user group using a random name
 
 ## EXAMPLES
 
-### Example 1
-```powershell
-PS C:\> {{ Add example code here }}
+### EXAMPLE 1
+```
+New-TestGroup -Name mygroup
 ```
 
-{{ Add example description here }}
+Create a new user group with the prefix "mygroup".
+A random postfix will be added to it
 
 ## PARAMETERS
 
@@ -53,7 +54,7 @@ Accept wildcard characters: False
 ```
 
 ### -Force
-{{ Fill Force Description }}
+Don't prompt for confirmation
 
 ```yaml
 Type: SwitchParameter

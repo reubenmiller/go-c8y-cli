@@ -4,6 +4,9 @@ Function New-Group {
 .SYNOPSIS
 Create a new group
 
+.DESCRIPTION
+Create a new group
+
 .EXAMPLE
 PS> New-Group -Name "$GroupName"
 

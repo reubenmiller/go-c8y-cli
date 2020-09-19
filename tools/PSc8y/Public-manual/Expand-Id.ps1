@@ -3,8 +3,8 @@
 .SYNOPSIS
 Expand a list of ids.
 
-.PARAMETER InputObject
-List of ids
+.DESCRIPTION
+Expand the list of objects and only return the ids instead of the full objects.
 
 .EXAMPLE
 Expand-Id 12345
@@ -19,6 +19,7 @@ Normalize a list of ids
 #>
     [cmdletbinding()]
     Param(
+        # List of ids
         [Parameter(
             Mandatory=$true,
             ValueFromPipeline=$true,

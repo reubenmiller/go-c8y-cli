@@ -4,6 +4,9 @@ Function Get-TenantStatisticsCollection {
 .SYNOPSIS
 Get collection of tenant usage statistics
 
+.DESCRIPTION
+Get collection of tenant usage statistics
+
 .EXAMPLE
 PS> Get-TenantStatisticsCollection
 

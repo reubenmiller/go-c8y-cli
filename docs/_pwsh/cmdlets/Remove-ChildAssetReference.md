@@ -32,7 +32,7 @@ Remove-ChildAssetReference
 ```
 
 ## DESCRIPTION
-{{ Fill in the Description }}
+Delete child asset reference
 
 ## EXAMPLES
 

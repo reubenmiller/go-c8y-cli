@@ -32,7 +32,7 @@ Remove-RoleFromUser
 ```
 
 ## DESCRIPTION
-{{ Fill in the Description }}
+Unassign/Remove role from a user
 
 ## EXAMPLES
 

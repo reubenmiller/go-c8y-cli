@@ -4,6 +4,9 @@ Function Get-AllTenantUsageSummaryStatistics {
 .SYNOPSIS
 Get collection of tenant usage statistics summary
 
+.DESCRIPTION
+Get collection of tenant usage statistics summary
+
 .EXAMPLE
 PS> Get-AllTenantUsageSummaryStatistics
 

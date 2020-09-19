@@ -1,6 +1,9 @@
 Function Expand-Microservice {
 <#
 .SYNOPSIS
+Expand a list of microservices objects
+
+.DESCRIPTION
 Expand a list of microservices replacing any ids or names with the actual microservice object.
 
 .NOTES

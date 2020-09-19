@@ -4,6 +4,9 @@ Function Remove-RoleFromUser {
 .SYNOPSIS
 Unassign/Remove role from a user
 
+.DESCRIPTION
+Unassign/Remove role from a user
+
 .EXAMPLE
 PS> Remove-RoleFromUser -User $User.id -Role "ROLE_MEASUREMENT_READ"
 

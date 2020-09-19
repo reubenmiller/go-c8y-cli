@@ -4,6 +4,9 @@ Function Get-RoleReferenceCollectionFromUser {
 .SYNOPSIS
 Get collection of user role references from a user
 
+.DESCRIPTION
+Get collection of user role references from a user
+
 .EXAMPLE
 PS> Get-RoleReferenceCollectionFromUser -User $User.id
 

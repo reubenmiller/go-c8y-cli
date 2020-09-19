@@ -31,7 +31,7 @@ Enable-Application
 ```
 
 ## DESCRIPTION
-{{ Fill in the Description }}
+Enable application on tenant
 
 ## EXAMPLES
 

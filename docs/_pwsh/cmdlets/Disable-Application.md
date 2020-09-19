@@ -31,7 +31,7 @@ Disable-Application
 ```
 
 ## DESCRIPTION
-{{ Fill in the Description }}
+Disable application on tenant
 
 ## EXAMPLES
 

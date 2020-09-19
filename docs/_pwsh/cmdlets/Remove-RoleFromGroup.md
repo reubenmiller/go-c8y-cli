@@ -32,7 +32,7 @@ Remove-RoleFromGroup
 ```
 
 ## DESCRIPTION
-{{ Fill in the Description }}
+Unassign/Remove role from a group
 
 ## EXAMPLES
 

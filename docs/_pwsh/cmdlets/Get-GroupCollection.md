@@ -31,7 +31,7 @@ Get-GroupCollection
 ```
 
 ## DESCRIPTION
-{{ Fill in the Description }}
+Get collection of (user) groups
 
 ## EXAMPLES
 

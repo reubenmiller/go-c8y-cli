@@ -11,7 +11,7 @@ title: Get-ClientBinaryVersion
 # Get-ClientBinaryVersion
 
 ## SYNOPSIS
-{{ Fill in the Synopsis }}
+Get the c8y client binary version
 
 ## SYNTAX
 
@@ -21,16 +21,17 @@ Get-ClientBinaryVersion
 ```
 
 ## DESCRIPTION
-{{ Fill in the Description }}
+The c8y client binary version is the only dependency of the PSc8y module, and hence
+the version number is helpful to determine what functions are available
 
 ## EXAMPLES
 
-### Example 1
-```powershell
-PS C:\> {{ Add example code here }}
+### EXAMPLE 1
+```
+Get-ClientBinaryVersion
 ```
 
-{{ Add example description here }}
+Show the client binary version on the console
 
 ## PARAMETERS
 
@@ -39,10 +40,8 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 
 ## INPUTS
 
-### None
 ## OUTPUTS
 
-### System.Object
 ## NOTES
 
 ## RELATED LINKS

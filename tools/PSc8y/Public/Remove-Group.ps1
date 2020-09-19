@@ -4,6 +4,9 @@ Function Remove-Group {
 .SYNOPSIS
 Delete a new group
 
+.DESCRIPTION
+Delete a new group
+
 .EXAMPLE
 PS> Remove-Group -Id $Group.id
 

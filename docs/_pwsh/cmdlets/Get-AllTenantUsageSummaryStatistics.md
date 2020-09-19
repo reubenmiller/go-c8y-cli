@@ -30,7 +30,7 @@ Get-AllTenantUsageSummaryStatistics
 ```
 
 ## DESCRIPTION
-{{ Fill in the Description }}
+Get collection of tenant usage statistics summary
 
 ## EXAMPLES
 

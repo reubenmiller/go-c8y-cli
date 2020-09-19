@@ -4,6 +4,9 @@ Function Add-UserToGroup {
 .SYNOPSIS
 Get user
 
+.DESCRIPTION
+Get user
+
 .EXAMPLE
 PS> Add-UserToGroup -Group $Group.id -User $User.id
 

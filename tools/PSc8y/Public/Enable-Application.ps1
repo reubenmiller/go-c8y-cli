@@ -4,6 +4,9 @@ Function Enable-Application {
 .SYNOPSIS
 Enable application on tenant
 
+.DESCRIPTION
+Enable application on tenant
+
 .EXAMPLE
 PS> Enable-Application -Tenant mycompany -Application myMicroservice
 

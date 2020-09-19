@@ -31,7 +31,7 @@ Update-TenantOptionBulk
 ```
 
 ## DESCRIPTION
-{{ Fill in the Description }}
+Update multiple tenant options in provided category
 
 ## EXAMPLES
 

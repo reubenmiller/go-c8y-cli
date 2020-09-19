@@ -32,7 +32,7 @@ New-TenantOption
 ```
 
 ## DESCRIPTION
-{{ Fill in the Description }}
+New tenant option
 
 ## EXAMPLES
 

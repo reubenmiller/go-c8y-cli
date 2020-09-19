@@ -31,7 +31,7 @@ Remove-ChildDeviceReference
 ```
 
 ## DESCRIPTION
-{{ Fill in the Description }}
+Delete child device reference
 
 ## EXAMPLES
 

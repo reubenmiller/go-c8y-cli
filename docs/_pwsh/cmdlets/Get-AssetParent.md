@@ -46,7 +46,11 @@ Get-AssetParent
 ```
 
 ## DESCRIPTION
-{{ Fill in the Description }}
+Get the parent of an existing assert by using the references.
+The cmdlet supports returning
+various forms of the parent references, i.e.
+immediate parent, parent or the parent, or the
+full parental references.
 
 ## EXAMPLES
 
@@ -75,7 +79,7 @@ In most cases this will be the agent
 ## PARAMETERS
 
 ### -Asset
-asset id, name or object.
+Asset id, name or object.
 Wildcards accepted
 
 ```yaml

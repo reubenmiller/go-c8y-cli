@@ -11,7 +11,7 @@ title: New-TestDevice
 # New-TestDevice
 
 ## SYNOPSIS
-{{ Fill in the Synopsis }}
+Create a new test device representation in Cumulocity
 
 ## SYNTAX
 
@@ -26,26 +26,89 @@ New-TestDevice
 ```
 
 ## DESCRIPTION
-{{ Fill in the Description }}
+Create a new test device with a randomized name.
+Useful when performing mockups or prototyping.
+
+The agent will have both the `c8y_IsDevice` fragments set.
 
 ## EXAMPLES
 
-### Example 1
-```powershell
-PS C:\> {{ Add example code here }}
+### EXAMPLE 1
+```
+New-TestDevice
 ```
 
-{{ Add example description here }}
+Create a test device
+
+### EXAMPLE 2
+```
+1..10 | Foreach-Object { New-TestDevice -Force }
+```
+
+Create 10 test devices all with unique names
+
+### EXAMPLE 3
+```
+1..10 | Foreach-Object { New-TestDevice -AsAgent -Force }
+```
+
+Create 10 test devices (with agent functionality) all with unique names
 
 ## PARAMETERS
 
+### -Name
+Device name prefix which is added before the randomized string
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 1
+Default value: Testdevice
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
 ### -AsAgent
-{{ Fill AsAgent Description }}
+Add agent fragment to the device
 
 ```yaml
 Type: SwitchParameter
 Parameter Sets: (All)
 Aliases:
+
+Required: False
+Position: Named
+Default value: False
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -Force
+Don't prompt for confirmation
+
+```yaml
+Type: SwitchParameter
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: False
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -WhatIf
+Shows what would happen if the cmdlet runs.
+The cmdlet is not run.
+
+```yaml
+Type: SwitchParameter
+Parameter Sets: (All)
+Aliases: wi
 
 Required: False
 Position: Named
@@ -69,61 +132,13 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -Force
-{{ Fill Force Description }}
-
-```yaml
-Type: SwitchParameter
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: Named
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
-### -Name
-{{ Fill Name Description }}
-
-```yaml
-Type: String
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: 0
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
-### -WhatIf
-Shows what would happen if the cmdlet runs.
-The cmdlet is not run.
-
-```yaml
-Type: SwitchParameter
-Parameter Sets: (All)
-Aliases: wi
-
-Required: False
-Position: Named
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
 ### CommonParameters
 This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable, -InformationAction, -InformationVariable, -OutVariable, -OutBuffer, -PipelineVariable, -Verbose, -WarningAction, and -WarningVariable. For more information, see [about_CommonParameters](http://go.microsoft.com/fwlink/?LinkID=113216).
 
 ## INPUTS
 
-### None
 ## OUTPUTS
 
-### System.Object
 ## NOTES
 
 ## RELATED LINKS

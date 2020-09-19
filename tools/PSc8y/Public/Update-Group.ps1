@@ -4,6 +4,9 @@ Function Update-Group {
 .SYNOPSIS
 Update a new group
 
+.DESCRIPTION
+Update a new group
+
 .EXAMPLE
 PS> Update-Group -Id $Group -Name "customGroup2"
 

@@ -32,7 +32,7 @@ Get-GroupMembershipCollection
 ```
 
 ## DESCRIPTION
-{{ Fill in the Description }}
+Get all users in a group
 
 ## EXAMPLES
 

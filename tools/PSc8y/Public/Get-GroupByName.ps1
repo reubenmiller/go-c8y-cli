@@ -4,6 +4,9 @@ Function Get-GroupByName {
 .SYNOPSIS
 Get a group by name
 
+.DESCRIPTION
+Get a group by name
+
 .EXAMPLE
 PS> Get-GroupByName -Name $Group.name
 

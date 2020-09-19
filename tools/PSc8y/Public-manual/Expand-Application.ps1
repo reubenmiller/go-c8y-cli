@@ -3,6 +3,10 @@
 .SYNOPSIS
 Expand a list of applications replacing any ids or names with the actual application object.
 
+.DESCRIPTION
+The list of applications will be expanded to include the full application representation by fetching
+the data from Cumulocity.
+
 .NOTES
 If the given object is already an application object, then it is added with no additional lookup
 

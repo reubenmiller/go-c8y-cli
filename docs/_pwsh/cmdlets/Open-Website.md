@@ -33,7 +33,7 @@ Open-Website
 ```
 
 ## DESCRIPTION
-{{ Fill in the Description }}
+Opens the default web browser to the Cumulocity application or directly to a device page in the Device Management application
 
 ## EXAMPLES
 

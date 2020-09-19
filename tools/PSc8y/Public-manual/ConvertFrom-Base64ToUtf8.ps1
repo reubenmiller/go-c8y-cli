@@ -1,26 +1,26 @@
 Function ConvertFrom-Base64ToUtf8 {
-    <#
-  .SYNOPSIS
-    Convert a base64 encoded string to UTF8
-  
-  .DESCRIPTION
-    Convert a base64 encoded string to UTF8
+<#
+.SYNOPSIS
+Convert a base64 encoded string to UTF8
 
-  .NOTES
-    If the the string has spaces in it, then only the last part of the string (with no spaces in it) will be used. This makes it easier when trying decode the basic auth string
+.DESCRIPTION
+Convert a base64 encoded string to UTF8
 
-  .PARAMETER InputObject
-    Base64 encoded string
+.NOTES
+If the the string has spaces in it, then only the last part of the string (with no spaces in it) will be used. This makes it easier when trying decode the basic auth string
 
-  .EXAMPLE
-    ConvertFrom-Base64ToUtf8 ZWFzdGVyZWdn
+.PARAMETER InputObject
+Base64 encoded string
 
-    Convert the base64 to utf8
+.EXAMPLE
+ConvertFrom-Base64ToUtf8 ZWFzdGVyZWdn
 
-  .EXAMPLE
-    ConvertFrom-Base64ToUtf8 "Authorization: Basic s7sd81kkzyzldjkzkhejhug3kh"
+Convert the base64 to utf8
 
-    Convert the base64 to utf8
+.EXAMPLE
+ConvertFrom-Base64ToUtf8 "Authorization: Basic s7sd81kkzyzldjkzkhejhug3kh"
+
+Convert the base64 to utf8
 #>
     [CmdletBinding()]
     Param(

@@ -29,7 +29,7 @@ Get-Tenant
 ```
 
 ## DESCRIPTION
-{{ Fill in the Description }}
+Get tenant
 
 ## EXAMPLES
 

@@ -31,7 +31,7 @@ New-Group
 ```
 
 ## DESCRIPTION
-{{ Fill in the Description }}
+Create a new group
 
 ## EXAMPLES
 

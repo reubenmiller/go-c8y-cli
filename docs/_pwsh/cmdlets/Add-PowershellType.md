@@ -33,7 +33,7 @@ This allows a custom type name to be given to powershell objects, so that the vi
 $data | Add-PowershellType -Type "customType1"
 ```
 
-Add a type \`customType1\` to the input object
+Add a type `customType1` to the input object
 
 ## PARAMETERS
 

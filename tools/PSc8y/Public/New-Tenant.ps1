@@ -4,6 +4,9 @@ Function New-Tenant {
 .SYNOPSIS
 New tenant
 
+.DESCRIPTION
+New tenant
+
 .EXAMPLE
 PS> New-Tenant -Company "mycompany" -Domain "mycompany" -AdminName "admin" -Password "mys3curep9d8"
 

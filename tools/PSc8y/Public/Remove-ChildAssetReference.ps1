@@ -4,6 +4,9 @@ Function Remove-ChildAssetReference {
 .SYNOPSIS
 Delete child asset reference
 
+.DESCRIPTION
+Delete child asset reference
+
 .EXAMPLE
 PS> Remove-ChildAssetReference -Asset $Group.id -ChildDevice $ChildDevice.id
 

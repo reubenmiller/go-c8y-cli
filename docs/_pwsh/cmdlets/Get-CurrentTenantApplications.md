@@ -21,7 +21,7 @@ Get-CurrentTenantApplications
 ```
 
 ## DESCRIPTION
-{{ Fill in the Description }}
+Get the list of applications that are subscribed on the current tenant
 
 ## EXAMPLES
 

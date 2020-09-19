@@ -4,6 +4,9 @@ Function Remove-RoleFromGroup {
 .SYNOPSIS
 Unassign/Remove role from a group
 
+.DESCRIPTION
+Unassign/Remove role from a group
+
 .EXAMPLE
 PS> Remove-RoleFromGroup -Group $UserGroup.id -Role "ROLE_MEASUREMENT_READ"
 

@@ -11,7 +11,7 @@ title: Install-ClientBinary
 # Install-ClientBinary
 
 ## SYNOPSIS
-Install the Cumulocity cli binary (c8y) so it is accessible from everywhere in consoles (assuming /usr/local/bin is in the $PATH variable)
+Install the Cumulocity cli binary (c8y)
 
 ## SYNTAX
 
@@ -22,7 +22,7 @@ Install-ClientBinary
 ```
 
 ## DESCRIPTION
-{{ Fill in the Description }}
+Install the Cumulocity cli binary (c8y) so it is accessible from everywhere in consoles (assuming /usr/local/bin is in the $PATH variable)
 
 ## EXAMPLES
 
@@ -44,7 +44,8 @@ Install the Cumulocity binary to /usr/bin
 ## PARAMETERS
 
 ### -InstallPath
-{{ Fill InstallPath Description }}
+Cumulocity installation path where the c8y binaries will be installed.
+Defaults to $env:C8Y_INSTALL_PATH
 
 ```yaml
 Type: String

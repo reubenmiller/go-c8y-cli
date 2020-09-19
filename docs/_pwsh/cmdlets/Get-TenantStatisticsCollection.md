@@ -32,7 +32,7 @@ Get-TenantStatisticsCollection
 ```
 
 ## DESCRIPTION
-{{ Fill in the Description }}
+Get collection of tenant usage statistics
 
 ## EXAMPLES
 

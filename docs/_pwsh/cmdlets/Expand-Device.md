@@ -22,7 +22,8 @@ Expand-Device
 ```
 
 ## DESCRIPTION
-{{ Fill in the Description }}
+The list of devices will be expanded to include the full device representation by fetching
+the data from Cumulocity.
 
 ## EXAMPLES
 

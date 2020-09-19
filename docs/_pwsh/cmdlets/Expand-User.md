@@ -11,7 +11,7 @@ title: Expand-User
 # Expand-User
 
 ## SYNOPSIS
-Expand a list of users replacing any ids or names with the actual user object.
+Expand a list of users
 
 ## SYNTAX
 
@@ -22,7 +22,7 @@ Expand-User
 ```
 
 ## DESCRIPTION
-{{ Fill in the Description }}
+Expand a list of users replacing any ids or names with the actual user object.
 
 ## EXAMPLES
 

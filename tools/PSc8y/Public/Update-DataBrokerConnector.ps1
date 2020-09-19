@@ -4,6 +4,9 @@ Function Update-DataBrokerConnector {
 .SYNOPSIS
 Update data broker connector
 
+.DESCRIPTION
+Update data broker connector
+
 .EXAMPLE
 PS> Update-DataBroker -Id 12345 -Status SUSPENDED
 

@@ -11,7 +11,7 @@ title: Get-SessionCollection
 # Get-SessionCollection
 
 ## SYNOPSIS
-Get a collection of Cumulocity Sessions found in the home folder under .cumulocity
+Get a collection of Cumulocity Sessions
 
 ## SYNTAX
 
@@ -21,7 +21,7 @@ Get-SessionCollection
 ```
 
 ## DESCRIPTION
-{{ Fill in the Description }}
+Get a collection of Cumulocity Sessions found in the home folder under .cumulocity
 
 ## EXAMPLES
 

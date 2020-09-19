@@ -22,7 +22,9 @@ Test-Json
 ```
 
 ## DESCRIPTION
-{{ Fill in the Description }}
+Test the given input to check if it is most likely valid json.
+The cmdlet uses
+a quick json sanity check rather than trying to parse the json to save time.
 
 ## EXAMPLES
 

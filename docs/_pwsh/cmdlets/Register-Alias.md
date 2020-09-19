@@ -21,7 +21,9 @@ Register-Alias
 ```
 
 ## DESCRIPTION
-{{ Fill in the Description }}
+Registers the aliases for quicker access to the PSc8y cmdlets.
+
+Additional aliases can be created by using the in-built Powershell `New-Alias` cmdlet.
 
 ## EXAMPLES
 

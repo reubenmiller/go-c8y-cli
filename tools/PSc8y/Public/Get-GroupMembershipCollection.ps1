@@ -4,6 +4,9 @@ Function Get-GroupMembershipCollection {
 .SYNOPSIS
 Get all users in a group
 
+.DESCRIPTION
+Get all users in a group
+
 .EXAMPLE
 PS> Get-GroupMembershipCollection -Id $Group.id
 

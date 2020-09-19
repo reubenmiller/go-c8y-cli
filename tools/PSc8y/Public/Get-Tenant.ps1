@@ -4,6 +4,9 @@ Function Get-Tenant {
 .SYNOPSIS
 Get tenant
 
+.DESCRIPTION
+Get tenant
+
 .EXAMPLE
 PS> Get-Tenant -Id mycompany
 

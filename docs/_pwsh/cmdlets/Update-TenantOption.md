@@ -32,7 +32,7 @@ Update-TenantOption
 ```
 
 ## DESCRIPTION
-{{ Fill in the Description }}
+Update tenant option
 
 ## EXAMPLES
 

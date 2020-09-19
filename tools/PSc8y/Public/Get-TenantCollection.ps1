@@ -4,6 +4,9 @@ Function Get-TenantCollection {
 .SYNOPSIS
 Get collection of tenants
 
+.DESCRIPTION
+Get collection of tenants
+
 .EXAMPLE
 PS> Get-TenantCollection
 
