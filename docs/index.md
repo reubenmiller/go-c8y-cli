@@ -1,5 +1,5 @@
 ---
-layout: entry
+layout: default
 title: Documentation
 ---
 
