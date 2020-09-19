@@ -1,5 +1,9 @@
 <div>
-    <a class="nav-item top-level">Powershell Docs</a>
+    <ul>
+        <li class="nav-item top-level">
+            <a>Powershell Docs</a>
+        </li>
+    </ul>
     <ul>
         {% assign grouped = site.pwsh | group_by: 'category' %}
         {% for group in grouped %}
