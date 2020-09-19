@@ -2,7 +2,13 @@
 
 ## Unreleased
 
+## Released
+
+### v1.2.0
+
 **PSc8y (PowerShell)**
+
+* Added Powershell documentation to [online docs](https://reubenmiller.github.io/go-c8y-cli/pwsh/cmdlets/Get-Agent/)
 
 * Removed conflicting cmdlets to make it more obvious which one is correct to use
     * Deleted `Invoke-CustomRestMethod`. Use `Invoke-ClientRequest` instead.
