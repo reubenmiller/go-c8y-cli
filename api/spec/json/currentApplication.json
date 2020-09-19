@@ -9,7 +9,7 @@
     {
       "name": "getCurrentApplication",
       "description": "Get current application",
-      "descriptionLong": "Required authentication with bootstrap user",
+      "descriptionLong": "Getting the current application only works when using bootstrap credentials from an application (not user credentials)\n",
       "method": "GET",
       "path": "/application/currentApplication",
       "accept": "application/vnd.com.nsn.cumulocity.application+json",

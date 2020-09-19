@@ -42,6 +42,9 @@ endpoints:
 
   - name: getExternalID
     description: Get external id
+    descriptionLong: >
+      Get an external identity object. An external identify will include the reference
+      to a single device managed object
     method: GET
     path: /identity/externalIds/{type}/{name}
     accept: application/vnd.com.nsn.cumulocity.externalId+json
@@ -74,6 +77,7 @@ endpoints:
 
   - name: deleteExternalID
     description: Delete external id
+    descriptionLong: Delete an existing external id. This does not delete the device managed object
     method: DELETE
     path: /identity/externalIds/{type}/{name}
     accept: ''

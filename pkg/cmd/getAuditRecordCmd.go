@@ -28,7 +28,7 @@ func newGetAuditRecordCmd() *getAuditRecordCmd {
 	cmd := &cobra.Command{
 		Use:   "get",
 		Short: "Get an audit record",
-		Long:  ``,
+		Long:  `Get an audit record by id`,
 		Example: `
 $ c8y auditRecords get --id 12345
 Get an audit record by id

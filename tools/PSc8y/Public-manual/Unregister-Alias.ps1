@@ -1,6 +1,9 @@
 Function Unregister-Alias {
 <#
 .SYNOPSIS
+Unregister aliases
+
+.DESCRIPTION
 Unregister any aliases which were registered by the Register-Alias cmdlet
 
 .EXAMPLE

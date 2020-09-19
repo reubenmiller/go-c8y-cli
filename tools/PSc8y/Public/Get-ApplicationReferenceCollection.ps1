@@ -4,8 +4,12 @@ Function Get-ApplicationReferenceCollection {
 .SYNOPSIS
 Get a collection of application references on a tenant
 
+.DESCRIPTION
+Get a collection of application references on a tenant
+
 .EXAMPLE
 PS> Get-ApplicationReferenceCollection -Tenant mycompany
+
 Get a list of referenced applications on a given tenant (from management tenant)
 
 
@@ -36,22 +40,22 @@ Get a list of referenced applications on a given tenant (from management tenant)
         [switch]
         $WithTotalPages,
 
-        # Include raw response including pagination information
+        # Show the full (raw) response from Cumulocity including pagination information
         [Parameter()]
         [switch]
         $Raw,
 
-        # Outputfile
+        # Write the response to file
         [Parameter()]
         [string]
         $OutputFile,
 
-        # NoProxy
+        # Ignore any proxy settings when running the cmdlet
         [Parameter()]
         [switch]
         $NoProxy,
 
-        # Session path
+        # Specifiy alternative Cumulocity session to use when running the cmdlet
         [Parameter()]
         [string]
         $Session,

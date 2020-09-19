@@ -1,17 +1,24 @@
 Function Expand-PaginationObject {
 <#
-  .SYNOPSIS
-    Expand a Cumulocity pagination result
+.SYNOPSIS
+Expand a Cumulocity pagination result
 
-  .EXAMPLE
-    Invoke-ClientRequest -Uri "/inventory/managedObjects" -QueryParameters @{ pageSize = 2000 } -Raw | ConvertFrom-Json | Expand-PaginationObject
+.DESCRIPTION
+Iterate through a Cumulocity pagination result set, and keep fetching the results
+until the last page is found.
 
-    Get all managed objects in the platform (rest requests will be done in chunks of 2000)
+The cmdlet will only return once the total result set has been fetched, and the
+items will be returned in one array.
 
-  .EXAMPLE
-    $data = Get-MeasurementCollection -Device testDevice -Raw -PageSize 2000 | Expand-PaginationObject
+.EXAMPLE
+Invoke-ClientRequest -Uri "/inventory/managedObjects" -QueryParameters @{ pageSize = 2000 } -Raw | ConvertFrom-Json | Expand-PaginationObject
 
-    Get a measurement collection, then retrieve all the measurements by iterating through the pagination object
+Get all managed objects in the platform (rest requests will be done in chunks of 2000)
+
+.EXAMPLE
+$data = Get-MeasurementCollection -Device testDevice -Raw -PageSize 2000 | Expand-PaginationObject
+
+Get a measurement collection, then retrieve all the measurements by iterating through the pagination object
 
 #>
   [cmdletbinding()]

@@ -28,7 +28,8 @@ func newDeleteEventBinaryCmd() *deleteEventBinaryCmd {
 	cmd := &cobra.Command{
 		Use:   "deleteBinary",
 		Short: "Delete event binary",
-		Long:  ``,
+		Long: `Delete a binary which has been attached to an event
+`,
 		Example: `
 $ c8y events deleteBinary --id 12345
 Delete an binary attached to an event

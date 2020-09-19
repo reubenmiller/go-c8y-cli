@@ -9,6 +9,7 @@ endpoints:
   # Device
   - name: getDevice
     description: 'Get device'
+    descriptionLong: Get a device by name or id.
     method: GET
     path: inventory/managedObjects/{id}
     accept: application/vnd.com.nsn.cumulocity.customDevice+json
@@ -44,6 +45,7 @@ endpoints:
 
   - name: updateDevice
     description: 'Update device'
+    descriptionLong: Update properties of an existing device
     method: PUT
     path: inventory/managedObjects/{id}
     accept: application/vnd.com.nsn.cumulocity.customDevice+json
@@ -97,6 +99,9 @@ endpoints:
 
   - name: deleteDevice
     description: 'Delete device'
+    descriptionLong: >
+      Delete an existing device by id or name. Deleting the object will remove all of its
+      data (i.e. alarms, events, operations and measurements)
     method: DELETE
     path: inventory/managedObjects/{id}
     accept: ''
@@ -125,9 +130,18 @@ endpoints:
         pipeline: true
         required: true
         description: Device ID
+        position: 10
+
+    queryParameters:
+      - name: cascade
+        type: boolean
+        description: Remove all child devices and child assets will be deleted recursively. By default, the delete operation is propagated to the subgroups only if the deleted object is a group
+        position: 20
 
   - name: createDevice
-    description: 'Create device'
+    description: 'Create a device'
+    descriptionLong: >
+      Create a device (managed object) with the special c8y_IsDevice fragment.
     method: POST
     path: inventory/managedObjects
     accept: application/vnd.com.nsn.cumulocity.customDevice+json
@@ -180,9 +194,10 @@ endpoints:
         type: json
         description: Custom device properties.
 
-
   - name: getSupportedMeasurements
     description: 'Get supported measurements/s of a device'
+    descriptionLong: >
+      Returns a list of fragments (valueFragmentTypes) related to the device
     method: GET
     path: inventory/managedObjects/{device}/supportedMeasurements
     accept: application/vnd.com.nsn.cumulocity.inventory+json
@@ -221,6 +236,8 @@ endpoints:
 
   - name: getSupportedSeries
     description: 'Get supported measurement series/s of a device'
+    descriptionLong: >
+      Returns a list of supported measurement series
     method: GET
     path: inventory/managedObjects/{device}/supportedSeries
     accept: application/vnd.com.nsn.cumulocity.inventory+json
@@ -259,6 +276,9 @@ endpoints:
 
   - name: getSupportedOperations
     description: 'Get supported operations of a device'
+    descriptionLong: >
+      Returns a list of supported operations (fragments) for a device. The supported fragments list
+      is returned from the c8y_SupportedOperations fragment of the device managed object.
     method: GET
     path: inventory/managedObjects/{device}
     accept: application/vnd.com.nsn.cumulocity.inventory+json
@@ -340,6 +360,8 @@ endpoints:
   # Device groups
   - name: getDeviceGroup
     description: 'Get device group'
+    descriptionLong: >
+      Get a device group by id or name
     method: GET
     path: inventory/managedObjects/{id}
     accept: application/vnd.com.nsn.cumulocity.customDeviceGroup+json
@@ -375,6 +397,8 @@ endpoints:
 
   - name: updateDeviceGroup
     description: 'Update device group'
+    descriptionLong: >
+      Update properties of an existing device group, for example name or any other custom properties.
     method: PUT
     path: inventory/managedObjects/{id}
     accept: application/vnd.com.nsn.cumulocity.customDeviceGroup+json
@@ -427,6 +451,8 @@ endpoints:
 
   - name: deleteDeviceGroup
     description: 'Delete device group'
+    descriptionLong: >
+      Delete an existing device group, and optional
     method: DELETE
     path: inventory/managedObjects/{id}
     accept: ''
@@ -455,9 +481,18 @@ endpoints:
         pipeline: true
         required: true
         description: Device group ID
+        position: 10
+
+    queryParameters:
+      - name: cascade
+        type: boolean
+        description: Remove all child devices and child assets will be deleted recursively. By default, the delete operation is propagated to the subgroups only if the deleted object is a group
+        position: 20
 
   - name: createDeviceGroup
     description: 'Create device group'
+    descriptionLong: >
+      Create a new device group to logically group one or more devices
     method: POST
     path: inventory/managedObjects
     accept: application/vnd.com.nsn.cumulocity.customDeviceGroup+json

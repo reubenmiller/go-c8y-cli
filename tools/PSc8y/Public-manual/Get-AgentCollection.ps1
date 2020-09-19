@@ -3,6 +3,9 @@ Function Get-AgentCollection {
 .SYNOPSIS
 Get a collection of agents
 
+.DESCRIPTION
+Get a collection of agent in the current tenant
+
 .EXAMPLE
 Get-AgentCollection -Name *sensor*
 

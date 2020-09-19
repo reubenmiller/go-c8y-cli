@@ -9,10 +9,12 @@ Update the status of a collection of alarms by using a filter
 
 .EXAMPLE
 PS> Update-AlarmCollection -Device $Device.id -Status ACTIVE -NewStatus ACKNOWLEDGED
+
 Update the status of all active alarms on a device to ACKNOWLEDGED
 
 .EXAMPLE
 PS> Get-Device -Id $Device.id | PSc8y\Update-AlarmCollection -Status ACTIVE -NewStatus ACKNOWLEDGED
+
 Update the status of all active alarms on a device to ACKNOWLEDGED (using pipeline)
 
 
@@ -63,22 +65,22 @@ Update the status of all active alarms on a device to ACKNOWLEDGED (using pipeli
         [string]
         $NewStatus,
 
-        # Include raw response including pagination information
+        # Show the full (raw) response from Cumulocity including pagination information
         [Parameter()]
         [switch]
         $Raw,
 
-        # Outputfile
+        # Write the response to file
         [Parameter()]
         [string]
         $OutputFile,
 
-        # NoProxy
+        # Ignore any proxy settings when running the cmdlet
         [Parameter()]
         [switch]
         $NoProxy,
 
-        # Session path
+        # Specifiy alternative Cumulocity session to use when running the cmdlet
         [Parameter()]
         [string]
         $Session,

@@ -4,12 +4,18 @@ Function Remove-Device {
 .SYNOPSIS
 Delete device
 
+.DESCRIPTION
+Delete an existing device by id or name. Deleting the object will remove all of its data (i.e. alarms, events, operations and measurements)
+
+
 .EXAMPLE
 PS> Remove-Device -Id $device.id
+
 Remove device by id
 
 .EXAMPLE
 PS> Remove-Device -Id $device.name
+
 Remove device by name
 
 
@@ -28,22 +34,27 @@ Remove device by name
         [object[]]
         $Id,
 
-        # Include raw response including pagination information
+        # Remove all child devices and child assets will be deleted recursively. By default, the delete operation is propagated to the subgroups only if the deleted object is a group
+        [Parameter()]
+        [switch]
+        $Cascade,
+
+        # Show the full (raw) response from Cumulocity including pagination information
         [Parameter()]
         [switch]
         $Raw,
 
-        # Outputfile
+        # Write the response to file
         [Parameter()]
         [string]
         $OutputFile,
 
-        # NoProxy
+        # Ignore any proxy settings when running the cmdlet
         [Parameter()]
         [switch]
         $NoProxy,
 
-        # Session path
+        # Specifiy alternative Cumulocity session to use when running the cmdlet
         [Parameter()]
         [string]
         $Session,
@@ -61,6 +72,9 @@ Remove device by name
 
     Begin {
         $Parameters = @{}
+        if ($PSBoundParameters.ContainsKey("Cascade")) {
+            $Parameters["cascade"] = $Cascade
+        }
         if ($PSBoundParameters.ContainsKey("OutputFile")) {
             $Parameters["outputFile"] = $OutputFile
         }

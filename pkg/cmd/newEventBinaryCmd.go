@@ -28,7 +28,7 @@ func newNewEventBinaryCmd() *newEventBinaryCmd {
 	cmd := &cobra.Command{
 		Use:   "createBinary",
 		Short: "New event binary",
-		Long:  ``,
+		Long:  `Upload a new binary file to an event`,
 		Example: `
 $ c8y events createBinary --id 12345 --file ./myfile.log
 Add a binary to an event

@@ -28,7 +28,7 @@ func newGetEventBinaryCmd() *getEventBinaryCmd {
 	cmd := &cobra.Command{
 		Use:   "downloadBinary",
 		Short: "Get event binary",
-		Long:  ``,
+		Long:  `Get the binary associated with an event`,
 		Example: `
 $ c8y events downloadBinary --id 12345 --outputFile ./eventbinary.txt
 Download a binary related to an event

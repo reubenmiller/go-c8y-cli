@@ -4,16 +4,23 @@ Function Update-DeviceGroup {
 .SYNOPSIS
 Update device group
 
+.DESCRIPTION
+Update properties of an existing device group, for example name or any other custom properties.
+
+
 .EXAMPLE
 PS> Update-DeviceGroup -Id $group.id -Name "MyNewName"
+
 Update device group by id
 
 .EXAMPLE
 PS> Update-DeviceGroup -Id $group.name -Name "MyNewName"
+
 Update device group by name
 
 .EXAMPLE
 PS> Update-DeviceGroup -Id $group.name -Data @{ "myValue" = @{ value1 = $true } }
+
 Update device group custom properties
 
 
@@ -42,22 +49,22 @@ Update device group custom properties
         [object]
         $Data,
 
-        # Include raw response including pagination information
+        # Show the full (raw) response from Cumulocity including pagination information
         [Parameter()]
         [switch]
         $Raw,
 
-        # Outputfile
+        # Write the response to file
         [Parameter()]
         [string]
         $OutputFile,
 
-        # NoProxy
+        # Ignore any proxy settings when running the cmdlet
         [Parameter()]
         [switch]
         $NoProxy,
 
-        # Session path
+        # Specifiy alternative Cumulocity session to use when running the cmdlet
         [Parameter()]
         [string]
         $Session,

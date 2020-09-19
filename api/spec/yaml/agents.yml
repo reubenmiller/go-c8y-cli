@@ -9,6 +9,7 @@ endpoints:
   # Agent
   - name: getAgent
     description: 'Get agent'
+    descriptionLong: Get an agent's managed object representation
     method: GET
     path: inventory/managedObjects/{id}
     accept: application/vnd.com.nsn.cumulocity.customAgent+json
@@ -44,6 +45,7 @@ endpoints:
 
   - name: updateAgent
     description: 'Update agent'
+    descriptionLong: Update properties of an agent
     method: PUT
     path: inventory/managedObjects/{id}
     accept: application/vnd.com.nsn.cumulocity.customAgent+json
@@ -97,6 +99,9 @@ endpoints:
 
   - name: deleteAgent
     description: 'Delete agent'
+    descriptionLong: |
+      Delete an agent from the platform. This will delete all data associated to the agent
+      (i.e. alarms, events, operations and measurements)
     method: DELETE
     path: inventory/managedObjects/{id}
     accept: ''
@@ -127,7 +132,10 @@ endpoints:
         description: Agent ID
 
   - name: createAgent
-    description: 'Create agent'
+    description: 'Create an agent'
+    descriptionLong: |
+      Create an agent managed object. An agent is a special device managed object with both the
+      c8y_IsDevice and com_cumulocity_model_Agent fragments.
     method: POST
     path: inventory/managedObjects
     accept: application/vnd.com.nsn.cumulocity.customAgent+json

@@ -28,7 +28,8 @@ func newDeleteOperationCollectionCmd() *deleteOperationCollectionCmd {
 	cmd := &cobra.Command{
 		Use:   "deleteCollection",
 		Short: "Delete a collection of operations",
-		Long:  ``,
+		Long: `Delete a collection of operations using a set of filter criteria. Be careful when deleting operations. Where possible update operations to FAILED (with a failure reason) instead of deleting them as it is easier to track.
+`,
 		Example: `
 $ c8y operations deleteCollection --device mydevice --status PENDING
 Remove all pending operations for a given device

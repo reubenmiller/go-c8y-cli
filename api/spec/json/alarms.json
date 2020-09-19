@@ -131,7 +131,7 @@
       "path": "alarm/alarms",
       "accept": "application/vnd.com.nsn.cumulocity.alarm+json",
       "description": "Create a new alarm",
-      "descriptionLong": "Create a new alarm",
+      "descriptionLong": "Create a new alarm on a device or agent.",
       "examples": {
         "powershell": [
           {
@@ -369,6 +369,9 @@
     },
     {
       "name": "updateAlarm",
+      "method": "PUT",
+      "path": "alarm/alarms/{id}",
+      "accept": "application/vnd.com.nsn.cumulocity.alarm+json",
       "description": "Update an alarm",
       "descriptionLong": "Update an alarm by its id",
       "examples": {
@@ -418,9 +421,6 @@
           }
         ]
       },
-      "method": "PUT",
-      "path": "alarm/alarms/{id}",
-      "accept": "application/vnd.com.nsn.cumulocity.alarm+json",
       "alias": {
         "go": "update",
         "powershell": "Update-Alarm"

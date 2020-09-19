@@ -1,6 +1,9 @@
 Function Install-ClientBinary {
-    <# 
+<# 
 .SYNOPSIS
+Install the Cumulocity cli binary (c8y)
+
+.DESCRIPTION
 Install the Cumulocity cli binary (c8y) so it is accessible from everywhere in consoles (assuming /usr/local/bin is in the $PATH variable)
 
 .EXAMPLE
@@ -17,6 +20,7 @@ Install the Cumulocity binary to /usr/bin
 #>
     [cmdletbinding()]
     Param(
+        # Cumulocity installation path where the c8y binaries will be installed. Defaults to $env:C8Y_INSTALL_PATH
         [Parameter(
             Position = 0
         )]

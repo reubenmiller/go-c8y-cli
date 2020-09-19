@@ -2,14 +2,20 @@
 Function New-Device {
 <#
 .SYNOPSIS
-Create device
+Create a device
+
+.DESCRIPTION
+Create a device (managed object) with the special c8y_IsDevice fragment.
+
 
 .EXAMPLE
 PS> New-Device -Name $DeviceName
+
 Create device
 
 .EXAMPLE
 PS> New-Device -Name $DeviceName -Data @{ myValue = @{ value1 = $true } }
+
 Create device with custom properties
 
 
@@ -38,22 +44,22 @@ Create device with custom properties
         [object]
         $Data,
 
-        # Include raw response including pagination information
+        # Show the full (raw) response from Cumulocity including pagination information
         [Parameter()]
         [switch]
         $Raw,
 
-        # Outputfile
+        # Write the response to file
         [Parameter()]
         [string]
         $OutputFile,
 
-        # NoProxy
+        # Ignore any proxy settings when running the cmdlet
         [Parameter()]
         [switch]
         $NoProxy,
 
-        # Session path
+        # Specifiy alternative Cumulocity session to use when running the cmdlet
         [Parameter()]
         [string]
         $Session,

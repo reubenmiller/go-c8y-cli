@@ -4,16 +4,22 @@ Function Get-AllTenantUsageSummaryStatistics {
 .SYNOPSIS
 Get collection of tenant usage statistics summary
 
+.DESCRIPTION
+Get collection of tenant usage statistics summary
+
 .EXAMPLE
 PS> Get-AllTenantUsageSummaryStatistics
+
 Get tenant summary statistics for all tenants
 
 .EXAMPLE
 PS> Get-AllTenantUsageSummaryStatistics -DateFrom "-30d"
+
 Get tenant summary statistics collection for the last 30 days
 
 .EXAMPLE
 PS> Get-AllTenantUsageSummaryStatistics -DateFrom "-10d" -DateTo "-9d"
+
 Get tenant summary statistics collection for the last 10 days, only return until the last 9 days
 
 
@@ -35,22 +41,22 @@ Get tenant summary statistics collection for the last 10 days, only return until
         [string]
         $DateTo,
 
-        # Include raw response including pagination information
+        # Show the full (raw) response from Cumulocity including pagination information
         [Parameter()]
         [switch]
         $Raw,
 
-        # Outputfile
+        # Write the response to file
         [Parameter()]
         [string]
         $OutputFile,
 
-        # NoProxy
+        # Ignore any proxy settings when running the cmdlet
         [Parameter()]
         [switch]
         $NoProxy,
 
-        # Session path
+        # Specifiy alternative Cumulocity session to use when running the cmdlet
         [Parameter()]
         [string]
         $Session,

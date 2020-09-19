@@ -9,14 +9,17 @@ Get a collection of events based on filter parameters
 
 .EXAMPLE
 PS> Get-EventCollection -Type "my_CustomType2" -DateFrom "-10d"
+
 Get events with type 'my_CustomType' that were created in the last 10 days
 
 .EXAMPLE
 PS> Get-EventCollection -Device $Device.id
+
 Get events from a device
 
 .EXAMPLE
 PS> Get-DeviceCollection -Name $Device.name | Get-EventCollection
+
 Get events from a device (using pipeline)
 
 
@@ -72,22 +75,22 @@ Get events from a device (using pipeline)
         [switch]
         $WithTotalPages,
 
-        # Include raw response including pagination information
+        # Show the full (raw) response from Cumulocity including pagination information
         [Parameter()]
         [switch]
         $Raw,
 
-        # Outputfile
+        # Write the response to file
         [Parameter()]
         [string]
         $OutputFile,
 
-        # NoProxy
+        # Ignore any proxy settings when running the cmdlet
         [Parameter()]
         [switch]
         $NoProxy,
 
-        # Session path
+        # Specifiy alternative Cumulocity session to use when running the cmdlet
         [Parameter()]
         [string]
         $Session,

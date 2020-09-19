@@ -191,7 +191,7 @@
     {
       "name": "getApplication",
       "description": "Get an application",
-      "descriptionLong": "Get an application by its id",
+      "descriptionLong": "Get an application by its id or name",
       "method": "GET",
       "path": "/application/applications/{id}",
       "accept": "application/vnd.com.nsn.cumulocity.application+json",
@@ -242,7 +242,7 @@
     {
       "name": "deleteApplication",
       "description": "Delete application",
-      "descriptionLong": "Info: The application can only be removed when its availability is PRIVATE or in other case when it has no subscriptions.",
+      "descriptionLong": "The application can only be removed when its availability is PRIVATE or in other case when it has no subscriptions.",
       "method": "DELETE",
       "path": "/application/applications/{id}",
       "alias": {
@@ -390,7 +390,7 @@
     {
       "name": "newApplicationBinary",
       "description": "New application binary",
-      "descriptionLong": "For the applications of type 'microservice' and 'web application' to be available for Cumulocity platform users, a binary zip file must be uploaded.\nFor the microservice application, the zip file must consist of  * cumulocity.json - file describing the deployment\n  * image.tar - executable docker image\n\nFor the web application, the zip file must include index.html in the root directory.\n",
+      "descriptionLong": "For the applications of type microservice and web application to be available for Cumulocity platform users, a binary zip file must be uploaded.\nFor the microservice application, the zip file must consist of    * cumulocity.json - file describing the deployment\n    * image.tar - executable docker image\n\nFor the web application, the zip file must include index.html in the root directory.\n",
       "method": "POST",
       "path": "/application/applications/{id}/binaries",
       "accept": "application/vnd.com.nsn.cumulocity.managedObject+json",

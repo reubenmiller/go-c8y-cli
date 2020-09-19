@@ -2,12 +2,28 @@
 <#
 .SYNOPSIS
 Create a new test measurement
+
+.DESCRIPTION
+Create a test measurement for a device.
+
+If the device is not provided then a test device will be created automatically
+
+.EXAMPLE
+New-TestMeasurement
+
+Create a new test device and then create a measurement on it
+
+.EXAMPLE
+New-TestMeasurement -Device "myExistingDevice"
+
+Create a measurement on the existing device "myExistingDevice"
 #>
     [cmdletbinding(
         SupportsShouldProcess = $true,
         ConfirmImpact = "None"
     )]
     Param(
+        # Device id, name or object. If left blank then a randomized device will be created
         [object] $Device,
 
         # Value fragment type
@@ -25,6 +41,7 @@ Create a new test measurement
         # Unit. i.e. °C, m/s
         [string] $Unit = "°C",
 
+        # Don't prompt for confirmation
         [switch] $Force
     )
 

@@ -4,8 +4,12 @@ Function Add-UserToGroup {
 .SYNOPSIS
 Get user
 
+.DESCRIPTION
+Get user
+
 .EXAMPLE
 PS> Add-UserToGroup -Group $Group.id -User $User.id
+
 Add a user to a user group
 
 
@@ -34,22 +38,22 @@ Add a user to a user group
         [object]
         $Tenant,
 
-        # Include raw response including pagination information
+        # Show the full (raw) response from Cumulocity including pagination information
         [Parameter()]
         [switch]
         $Raw,
 
-        # Outputfile
+        # Write the response to file
         [Parameter()]
         [string]
         $OutputFile,
 
-        # NoProxy
+        # Ignore any proxy settings when running the cmdlet
         [Parameter()]
         [switch]
         $NoProxy,
 
-        # Session path
+        # Specifiy alternative Cumulocity session to use when running the cmdlet
         [Parameter()]
         [string]
         $Session,

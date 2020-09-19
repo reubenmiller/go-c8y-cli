@@ -4,8 +4,12 @@ Function Get-ChildAssetReference {
 .SYNOPSIS
 Get managed object child asset reference
 
+.DESCRIPTION
+Get managed object child asset reference
+
 .EXAMPLE
 PS> Get-ChildAssetReference -Asset $Agent.id -Reference $Ref.id
+
 Get an existing child asset reference
 
 
@@ -29,22 +33,22 @@ Get an existing child asset reference
         [object[]]
         $Reference,
 
-        # Include raw response including pagination information
+        # Show the full (raw) response from Cumulocity including pagination information
         [Parameter()]
         [switch]
         $Raw,
 
-        # Outputfile
+        # Write the response to file
         [Parameter()]
         [string]
         $OutputFile,
 
-        # NoProxy
+        # Ignore any proxy settings when running the cmdlet
         [Parameter()]
         [switch]
         $NoProxy,
 
-        # Session path
+        # Specifiy alternative Cumulocity session to use when running the cmdlet
         [Parameter()]
         [string]
         $Session,

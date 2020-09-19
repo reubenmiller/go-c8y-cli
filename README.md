@@ -66,3 +66,25 @@ See the [documenation website](https://reubenmiller.github.io/go-c8y-cli/) for i
 
     ./output/c8y.linux
     ```
+
+### Building documentation
+
+1. Build the go and powershell code
+
+    ```sh
+    make build
+    ```
+
+2. Build the powershell markdown documentation
+
+    ```sh
+    make docs-powershell
+    ```
+
+3. Start a webserver to preview the documentation locally
+
+    ```sh
+    make gh_pages
+    ```
+
+4. View the documentation in the [brower](http:/localhost:4000)

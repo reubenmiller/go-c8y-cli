@@ -2,17 +2,19 @@
 Function Reset-UserPassword {
 <#
 .SYNOPSIS
-Reset a user' password
+Reset a user's password
 
 .DESCRIPTION
 The password can be reset either by issuing a password reset email (default), or be specifying a new password.
 
 .EXAMPLE
 PS> Reset-UserPassword -Id $User.id -WhatIf 2>&1
+
 Resets a user's password by sending a reset email to the user
 
 .EXAMPLE
 PS> Reset-UserPassword -Id $User.id -NewPassword (New-RandomPassword)
+
 Resets a user's password by generating a new password
 
 
@@ -41,22 +43,22 @@ Resets a user's password by generating a new password
         [object]
         $Tenant,
 
-        # Include raw response including pagination information
+        # Show the full (raw) response from Cumulocity including pagination information
         [Parameter()]
         [switch]
         $Raw,
 
-        # Outputfile
+        # Write the response to file
         [Parameter()]
         [string]
         $OutputFile,
 
-        # NoProxy
+        # Ignore any proxy settings when running the cmdlet
         [Parameter()]
         [switch]
         $NoProxy,
 
-        # Session path
+        # Specifiy alternative Cumulocity session to use when running the cmdlet
         [Parameter()]
         [string]
         $Session,

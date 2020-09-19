@@ -82,6 +82,10 @@ endpoints:
 
   - name: getAuditRecordCollection
     description: Get collection of (user) audits
+    descriptionLong: >
+      Audit records contain information about modifications to other Cumulocity entities. For example the audit
+      records contain each operation state transition, so they can be used to check when an operation transitioned from
+      PENDING -> EXECUTING -> SUCCESSFUL.
     method: GET
     path: /audit/auditRecords
     accept: application/vnd.com.nsn.cumulocity.auditRecordCollection+json
@@ -152,6 +156,7 @@ endpoints:
 
   - name: getAuditRecord
     description: Get an audit record
+    descriptionLong: Get an audit record by id
     method: GET
     path: /audit/auditRecords/{id}
     accept: application/vnd.com.nsn.cumulocity.auditRecord+json

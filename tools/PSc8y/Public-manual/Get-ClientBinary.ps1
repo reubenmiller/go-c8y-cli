@@ -1,6 +1,9 @@
 ﻿Function Get-ClientBinary {
 <#
 .SYNOPSIS
+Get the path to the Cumulocity Binary
+
+.DESCRIPTION
 Get the full path to the Cumulocity Binary which is compatible with the current Operating system
 
 .EXAMPLE

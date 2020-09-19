@@ -1,13 +1,13 @@
 ﻿Function Expand-User {
 <#
 .SYNOPSIS
+Expand a list of users
+
+.DESCRIPTION
 Expand a list of users replacing any ids or names with the actual user object.
 
 .NOTES
 If the given object is already an user object, then it is added with no additional lookup
-
-.PARAMETER InputObject
-List of ids, names or user objects
 
 .EXAMPLE
 Expand-User "myuser"
@@ -19,10 +19,10 @@ Get-UserCollection *test* | Expand-User
 
 Get all the user object (with app in their name). Note the Expand cmdlet won't do much here except for returning the input objects.
 
-
 #>
     [cmdletbinding()]
     Param(
+        # List of ids, names or user objects
         [Parameter(
             Mandatory=$true,
             ValueFromPipeline=$true,

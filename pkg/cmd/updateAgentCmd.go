@@ -28,7 +28,7 @@ func newUpdateAgentCmd() *updateAgentCmd {
 	cmd := &cobra.Command{
 		Use:   "update",
 		Short: "Update agent",
-		Long:  ``,
+		Long:  `Update properties of an agent`,
 		Example: `
 $ c8y agents update --id 12345
 Update agent by id

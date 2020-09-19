@@ -3,6 +3,10 @@ Function Wait-Operation {
 .SYNOPSIS
 Wait for an operation to be completed (i.e. either in the SUCCESS or FAILED status)
 
+.DESCRIPTION
+Wait for an operation to be completed with support for a timeout. Useful when writing scripts
+which should only proceed once the operation has finished executing.
+
 .PARAMETER Id
 Operation id or object to wait for
 

@@ -23,6 +23,12 @@ $space: 20px;
 $mobile-break: 700px;
 $full-width-break: $nav-width + ($space * 4) + $content-max-width;
 
+.nav-fixed {
+    position: fixed;
+    overflow: scroll;
+    height: 100%;
+}
+
 @import "mixins";
 @import "normalize";
 @import "pygments";

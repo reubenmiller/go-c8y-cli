@@ -1,7 +1,11 @@
 Function New-RandomPassword {
-    <#
-.Synopsis
-Generate pseudo random passwords
+<#
+.SYNOPSIS
+Create pseudo random password
+
+.DESCRIPTION
+Create a random password which can be used for one-time passwords if the
+the password reset functionilty in Cumulocity is not available.
 
 .EXAMPLE
 New-RandomPassword
@@ -37,9 +41,6 @@ the string specified with the parameter FirstChar
 .OUTPUTS
 [String]
 
-.NOTES
-Written by Simon Wåhlin, blog.simonw.se
-I take no responsibility for any issues caused by this script.
 
 .FUNCTIONALITY
 Generates random passwords

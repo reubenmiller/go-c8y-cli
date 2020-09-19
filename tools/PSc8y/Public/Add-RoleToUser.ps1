@@ -4,16 +4,22 @@ Function Add-RoleToUser {
 .SYNOPSIS
 Add role to a user
 
+.DESCRIPTION
+Add role to a user
+
 .EXAMPLE
 PS> Add-RoleToUser -User $User.id -Role "ROLE_ALARM_READ"
+
 Add a role (ROLE_ALARM_READ) to a user
 
 .EXAMPLE
 PS> Add-RoleToUser -User "customUser_*" -Role "*ALARM_*"
+
 Add a role to a user using wildcards
 
 .EXAMPLE
 PS> Get-RoleCollection -PageSize 100 | Where-Object Name -like "*ALARM*" | Add-RoleToUser -User "customUser_*"
+
 Add a role to a user using wildcards (using pipeline)
 
 
@@ -41,22 +47,22 @@ Add a role to a user using wildcards (using pipeline)
         [object]
         $Tenant,
 
-        # Include raw response including pagination information
+        # Show the full (raw) response from Cumulocity including pagination information
         [Parameter()]
         [switch]
         $Raw,
 
-        # Outputfile
+        # Write the response to file
         [Parameter()]
         [string]
         $OutputFile,
 
-        # NoProxy
+        # Ignore any proxy settings when running the cmdlet
         [Parameter()]
         [switch]
         $NoProxy,
 
-        # Session path
+        # Specifiy alternative Cumulocity session to use when running the cmdlet
         [Parameter()]
         [string]
         $Session,

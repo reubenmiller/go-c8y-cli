@@ -9,14 +9,17 @@ Get a managed object by id
 
 .EXAMPLE
 PS> Get-ManagedObject -Id $mo.id
+
 Get a managed object
 
 .EXAMPLE
 PS> Get-ManagedObject -Id $mo.id | Get-ManagedObject
+
 Get a managed object (using pipeline)
 
 .EXAMPLE
 PS> Get-ManagedObject -Id $mo.id -WithParents
+
 Get a managed object with parent references
 
 
@@ -40,22 +43,22 @@ Get a managed object with parent references
         [switch]
         $WithParents,
 
-        # Include raw response including pagination information
+        # Show the full (raw) response from Cumulocity including pagination information
         [Parameter()]
         [switch]
         $Raw,
 
-        # Outputfile
+        # Write the response to file
         [Parameter()]
         [string]
         $OutputFile,
 
-        # NoProxy
+        # Ignore any proxy settings when running the cmdlet
         [Parameter()]
         [switch]
         $NoProxy,
 
-        # Session path
+        # Specifiy alternative Cumulocity session to use when running the cmdlet
         [Parameter()]
         [string]
         $Session,

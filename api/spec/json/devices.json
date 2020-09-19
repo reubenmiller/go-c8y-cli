@@ -9,6 +9,7 @@
     {
       "name": "getDevice",
       "description": "Get device",
+      "descriptionLong": "Get a device by name or id.",
       "method": "GET",
       "path": "inventory/managedObjects/{id}",
       "accept": "application/vnd.com.nsn.cumulocity.customDevice+json",
@@ -59,6 +60,7 @@
     {
       "name": "updateDevice",
       "description": "Update device",
+      "descriptionLong": "Update properties of an existing device",
       "method": "PUT",
       "path": "inventory/managedObjects/{id}",
       "accept": "application/vnd.com.nsn.cumulocity.customDevice+json",
@@ -133,6 +135,7 @@
     {
       "name": "deleteDevice",
       "description": "Delete device",
+      "descriptionLong": "Delete an existing device by id or name. Deleting the object will remove all of its data (i.e. alarms, events, operations and measurements)\n",
       "method": "DELETE",
       "path": "inventory/managedObjects/{id}",
       "accept": "",
@@ -170,13 +173,23 @@
           "type": "[]device",
           "pipeline": true,
           "required": true,
-          "description": "Device ID"
+          "description": "Device ID",
+          "position": 10
+        }
+      ],
+      "queryParameters": [
+        {
+          "name": "cascade",
+          "type": "boolean",
+          "description": "Remove all child devices and child assets will be deleted recursively. By default, the delete operation is propagated to the subgroups only if the deleted object is a group",
+          "position": 20
         }
       ]
     },
     {
       "name": "createDevice",
-      "description": "Create device",
+      "description": "Create a device",
+      "descriptionLong": "Create a device (managed object) with the special c8y_IsDevice fragment.\n",
       "method": "POST",
       "path": "inventory/managedObjects",
       "accept": "application/vnd.com.nsn.cumulocity.customDevice+json",
@@ -246,6 +259,7 @@
     {
       "name": "getSupportedMeasurements",
       "description": "Get supported measurements/s of a device",
+      "descriptionLong": "Returns a list of fragments (valueFragmentTypes) related to the device\n",
       "method": "GET",
       "path": "inventory/managedObjects/{device}/supportedMeasurements",
       "accept": "application/vnd.com.nsn.cumulocity.inventory+json",
@@ -299,6 +313,7 @@
     {
       "name": "getSupportedSeries",
       "description": "Get supported measurement series/s of a device",
+      "descriptionLong": "Returns a list of supported measurement series\n",
       "method": "GET",
       "path": "inventory/managedObjects/{device}/supportedSeries",
       "accept": "application/vnd.com.nsn.cumulocity.inventory+json",
@@ -352,6 +367,7 @@
     {
       "name": "getSupportedOperations",
       "description": "Get supported operations of a device",
+      "descriptionLong": "Returns a list of supported operations (fragments) for a device. The supported fragments list is returned from the c8y_SupportedOperations fragment of the device managed object.\n",
       "method": "GET",
       "path": "inventory/managedObjects/{device}",
       "accept": "application/vnd.com.nsn.cumulocity.inventory+json",
@@ -465,6 +481,7 @@
     {
       "name": "getDeviceGroup",
       "description": "Get device group",
+      "descriptionLong": "Get a device group by id or name\n",
       "method": "GET",
       "path": "inventory/managedObjects/{id}",
       "accept": "application/vnd.com.nsn.cumulocity.customDeviceGroup+json",
@@ -515,6 +532,7 @@
     {
       "name": "updateDeviceGroup",
       "description": "Update device group",
+      "descriptionLong": "Update properties of an existing device group, for example name or any other custom properties.\n",
       "method": "PUT",
       "path": "inventory/managedObjects/{id}",
       "accept": "application/vnd.com.nsn.cumulocity.customDeviceGroup+json",
@@ -588,6 +606,7 @@
     {
       "name": "deleteDeviceGroup",
       "description": "Delete device group",
+      "descriptionLong": "Delete an existing device group, and optional\n",
       "method": "DELETE",
       "path": "inventory/managedObjects/{id}",
       "accept": "",
@@ -625,13 +644,23 @@
           "type": "[]devicegroup",
           "pipeline": true,
           "required": true,
-          "description": "Device group ID"
+          "description": "Device group ID",
+          "position": 10
+        }
+      ],
+      "queryParameters": [
+        {
+          "name": "cascade",
+          "type": "boolean",
+          "description": "Remove all child devices and child assets will be deleted recursively. By default, the delete operation is propagated to the subgroups only if the deleted object is a group",
+          "position": 20
         }
       ]
     },
     {
       "name": "createDeviceGroup",
       "description": "Create device group",
+      "descriptionLong": "Create a new device group to logically group one or more devices\n",
       "method": "POST",
       "path": "inventory/managedObjects",
       "accept": "application/vnd.com.nsn.cumulocity.customDeviceGroup+json",

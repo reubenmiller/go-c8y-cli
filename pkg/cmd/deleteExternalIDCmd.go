@@ -28,7 +28,7 @@ func newDeleteExternalIDCmd() *deleteExternalIDCmd {
 	cmd := &cobra.Command{
 		Use:   "delete",
 		Short: "Delete external id",
-		Long:  ``,
+		Long:  `Delete an existing external id. This does not delete the device managed object`,
 		Example: `
 $ c8y identity delete --type test --name myserialnumber
 Delete external identity

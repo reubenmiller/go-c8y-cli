@@ -3,6 +3,9 @@
 .SYNOPSIS
 Get the active Cumulocity Session
 
+.DESCRIPTION
+Get the details about the active Cumulocity session which is used by all cmdlets
+
 .EXAMPLE
 Get-Session
 

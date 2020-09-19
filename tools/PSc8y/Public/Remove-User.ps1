@@ -4,8 +4,14 @@ Function Remove-User {
 .SYNOPSIS
 Delete user
 
+.DESCRIPTION
+Delete a user from the a tenant. This will remove the user completely from the tenant and can not be reversed.
+Alternatively a user can be disabled via updating the users properties instead of deleting the user.
+
+
 .EXAMPLE
 PS> Remove-User -Id $User.id
+
 Delete a user
 
 
@@ -29,22 +35,22 @@ Delete a user
         [object]
         $Tenant,
 
-        # Include raw response including pagination information
+        # Show the full (raw) response from Cumulocity including pagination information
         [Parameter()]
         [switch]
         $Raw,
 
-        # Outputfile
+        # Write the response to file
         [Parameter()]
         [string]
         $OutputFile,
 
-        # NoProxy
+        # Ignore any proxy settings when running the cmdlet
         [Parameter()]
         [switch]
         $NoProxy,
 
-        # Session path
+        # Specifiy alternative Cumulocity session to use when running the cmdlet
         [Parameter()]
         [string]
         $Session,

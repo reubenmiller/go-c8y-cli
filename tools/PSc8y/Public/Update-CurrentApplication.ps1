@@ -9,6 +9,7 @@ Required authentication with bootstrap user
 
 .EXAMPLE
 PS> Update-CurrentApplication -Data @{ mycustomProp = @{ value1 = 1}}
+
 Update custom properties of the current application (requires using application credentials)
 
 
@@ -66,22 +67,22 @@ Update custom properties of the current application (requires using application 
         [string]
         $ExternalUrl,
 
-        # Include raw response including pagination information
+        # Show the full (raw) response from Cumulocity including pagination information
         [Parameter()]
         [switch]
         $Raw,
 
-        # Outputfile
+        # Write the response to file
         [Parameter()]
         [string]
         $OutputFile,
 
-        # NoProxy
+        # Ignore any proxy settings when running the cmdlet
         [Parameter()]
         [switch]
         $NoProxy,
 
-        # Session path
+        # Specifiy alternative Cumulocity session to use when running the cmdlet
         [Parameter()]
         [string]
         $Session,
