@@ -1,10 +1,10 @@
 ---
 layout: powershell
-category: Tutorials
-title: Extending cmdlets
+category: Tutorials - Powershell
+title: Extend cmdlets
 ---
 
-# Powershell
+# Extending cmdlets using scripts and Functions
 
 ---
 
@@ -110,14 +110,16 @@ Cancelling the operation actually just means that the operation should be set to
 
 Like any task it is helpful to break it down into smaller parts.
 1. Get the operation which are in EXECUTING
-2. Update 
+2. Set the operations returned from step 1 to FAILED
 
 #### Used cmdlets
 
-* `Expand-Device` - Normalize the accessing of device by allowing accessing by id, name or objects
+* `Expand-Device` - Normalize processing of devices by allowing accessing by id, name or objects
 * `Get-OperationCollection` - Get a list of operations 
 * `Update-Operation` - Change the operation status to `FAILED`
 
+
+### Script (Advanced Function)
 
 **Invoke-CancelOperations.ps1**
 
@@ -163,7 +165,7 @@ Cancel operations which are currently in EXECUTING status
 
 ### Usage
 
-Because the above example is written as an advanced function, it needs to be imported before it can be used. The file can be imported using the command `. ./Invoke-CancelOperations.ps1`. It is pure convention that the function name is the same as the file name. One `.ps1` file can contain many advanced functions, however it is recommended to store only one per file. This layout will make it easier to convert them to a PowerShell module in the future.
+Because the above example is written as an advanced function, it needs to be imported before it can be used. The file can be imported using the command `. ./Invoke-CancelOperations.ps1`. It is pure convention that the function name is the same as the file name. A `.ps1` file can contain many advanced functions, however it is recommended to only store one per file. This layout will make it easier to convert them to a PowerShell module in the future.
 
 ```powershell
 # Import (dot sourcing) your script
@@ -205,11 +207,3 @@ In order to make the importing of custom powershell extensible, you can add some
     ```
 
 4. Start a new Powershell profile. You should see some console messages showing which files were imported. If you don't see anything, then you probably have not added any `.ps1` scripts in the correct folder.
-
-
----
-# Useful links
-
-### Approved Verbs for PowerShell Commands
-
-https://docs.microsoft.com/en-us/powershell/scripting/developer/cmdlet/approved-verbs-for-windows-powershell-commands?view=powershell-7
