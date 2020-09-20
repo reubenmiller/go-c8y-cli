@@ -67,6 +67,16 @@ body {
 	}
 }
 
+.nav-fixed {
+	position: fixed;
+	overflow: scroll;
+	height: unset;
+
+	@media (min-width: $mobile-break) {
+		height: 100%;
+	}
+}
+
 .main {
 	margin-top: $space + $nav-header-height;
 
