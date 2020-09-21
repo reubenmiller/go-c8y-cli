@@ -12,6 +12,11 @@
       "title": "Is Required",
       "description": "The parameter is required/mandatory and needs input from the user/pipeline in order to correctly use the command"
     },
+    "defaultValue": {
+      "type": "string",
+      "title": "Default value",
+      "description": "Default value to use"
+    },
     "skip-test": {
       "type": "boolean",
       "title": "Skip (ignore) test",
@@ -398,6 +403,9 @@
                 },
                 "required": {
                   "$ref": "#/definitions/requiredParameter"
+                },
+                "default": {
+                  "$ref": "#/definitions/defaultValue"
                 },
                 "position": {
                   "$ref": "#/definitions/argumentPosition"
