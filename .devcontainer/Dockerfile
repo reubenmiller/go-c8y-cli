@@ -28,7 +28,11 @@ RUN wget https://packages.microsoft.com/config/debian/10/packages-microsoft-prod
     && apt-get -y install --no-install-recommends apt-utils dialog 2>&1 \
     #
     # Verify git, process tools, lsb-release (common in install instructions for CLIs) installed
-    && apt-get -y install git openssh-client less iproute2 procps lsb-release \
+    && apt-get -y install git openssh-client less iproute2 procps lsb-release gnupg \
+    #
+    # Github pages tooling
+    && apt-get -y install ruby-full build-essential zlib1g-dev \
+    && gem install jekyll bundler \
     #
     # Extra tooling
     && apt-get -y install make powershell nodejs \
@@ -82,10 +86,24 @@ RUN wget https://packages.microsoft.com/config/debian/10/packages-microsoft-prod
     && echo $USERNAME ALL=\(root\) NOPASSWD:ALL > /etc/sudoers.d/$USERNAME \
     && chmod 0440 /etc/sudoers.d/$USERNAME \
     #
+    # Install Docker CE cli
+    && apt-get install -y apt-transport-https ca-certificates curl gnupg-agent software-properties-common lsb-release \
+    && curl -fsSL https://download.docker.com/linux/$(lsb_release -is | tr '[:upper:]' '[:lower:]')/gpg | apt-key add - 2>/dev/null \
+    && add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/$(lsb_release -is | tr '[:upper:]' '[:lower:]') $(lsb_release -cs) stable" \
+    && apt-get update \
+    && apt-get install -y docker-ce-cli \
+    #
+    # Install Docker Compose
+    && curl -sSL "https://github.com/docker/compose/releases/download/1.24.0/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose \
+    && chmod +x /usr/local/bin/docker-compose \
+    #
     # Clean up
     && apt-get autoremove -y \
     && apt-get clean -y \
     && rm -rf /var/lib/apt/lists/* /tmp/gotools
+
+# Install powershell dependencies
+RUN pwsh -Command "Install-Module -Name platyPS -Scope CurrentUser -Force"
 
 # Update this to "on" or "off" as appropriate
 ENV GO111MODULE=auto

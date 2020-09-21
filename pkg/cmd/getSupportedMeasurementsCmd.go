@@ -28,7 +28,8 @@ func newGetSupportedMeasurementsCmd() *getSupportedMeasurementsCmd {
 	cmd := &cobra.Command{
 		Use:   "getSupportedMeasurements",
 		Short: "Get supported measurements/s of a device",
-		Long:  ``,
+		Long: `Returns a list of fragments (valueFragmentTypes) related to the device
+`,
 		Example: `
 $ c8y inventory getSupportedMeasurements --device 12345
 Get the supported measurements of a device by name

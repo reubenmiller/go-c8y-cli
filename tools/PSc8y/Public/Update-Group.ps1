@@ -4,12 +4,17 @@ Function Update-Group {
 .SYNOPSIS
 Update a new group
 
+.DESCRIPTION
+Update a new group
+
 .EXAMPLE
 PS> Update-Group -Id $Group -Name "customGroup2"
+
 Update a user group
 
 .EXAMPLE
 PS> Get-GroupByName -Name $Group.name | Update-Group -Name "customGroup2"
+
 Update a user group (using pipeline)
 
 
@@ -21,11 +26,6 @@ Update a user group (using pipeline)
     [Alias()]
     [OutputType([object])]
     Param(
-        # Tenant
-        [Parameter()]
-        [object]
-        $Tenant,
-
         # Group id (required)
         [Parameter(Mandatory = $true,
                    ValueFromPipeline=$true,
@@ -38,22 +38,27 @@ Update a user group (using pipeline)
         [string]
         $Name,
 
-        # Include raw response including pagination information
+        # Tenant
+        [Parameter()]
+        [object]
+        $Tenant,
+
+        # Show the full (raw) response from Cumulocity including pagination information
         [Parameter()]
         [switch]
         $Raw,
 
-        # Outputfile
+        # Write the response to file
         [Parameter()]
         [string]
         $OutputFile,
 
-        # NoProxy
+        # Ignore any proxy settings when running the cmdlet
         [Parameter()]
         [switch]
         $NoProxy,
 
-        # Session path
+        # Specifiy alternative Cumulocity session to use when running the cmdlet
         [Parameter()]
         [string]
         $Session,
@@ -71,11 +76,11 @@ Update a user group (using pipeline)
 
     Begin {
         $Parameters = @{}
-        if ($PSBoundParameters.ContainsKey("Tenant")) {
-            $Parameters["tenant"] = $Tenant
-        }
         if ($PSBoundParameters.ContainsKey("Name")) {
             $Parameters["name"] = $Name
+        }
+        if ($PSBoundParameters.ContainsKey("Tenant")) {
+            $Parameters["tenant"] = $Tenant
         }
         if ($PSBoundParameters.ContainsKey("OutputFile")) {
             $Parameters["outputFile"] = $OutputFile

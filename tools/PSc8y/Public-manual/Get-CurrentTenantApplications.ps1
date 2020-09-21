@@ -3,6 +3,9 @@
 .SYNOPSIS
 Get the list of applications that are subscribed on the current tenant
 
+.DESCRIPTION
+Get the list of applications that are subscribed on the current tenant
+
 .EXAMPLE
 Get-CurrentTenantApplications
 

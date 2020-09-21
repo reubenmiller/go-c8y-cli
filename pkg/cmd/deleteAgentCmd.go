@@ -28,7 +28,9 @@ func newDeleteAgentCmd() *deleteAgentCmd {
 	cmd := &cobra.Command{
 		Use:   "delete",
 		Short: "Delete agent",
-		Long:  ``,
+		Long: `Delete an agent from the platform. This will delete all data associated to the agent
+(i.e. alarms, events, operations and measurements)
+`,
 		Example: `
 $ c8y agents delete --id 12345
 Get agent by id

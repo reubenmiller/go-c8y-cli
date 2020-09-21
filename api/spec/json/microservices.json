@@ -9,6 +9,7 @@
     {
       "name": "getMicroserviceCollection",
       "description": "Get collection of microservices",
+      "descriptionLong": "Get a collection of microservices in the current tenant\n",
       "method": "GET",
       "path": "/application/applications",
       "accept": "application/vnd.com.nsn.cumulocity.applicationCollection+json",
@@ -128,6 +129,7 @@
     {
       "name": "getMicroservice",
       "description": "Get microservice",
+      "descriptionLong": "Get an existing microservice by id or name",
       "method": "GET",
       "path": "/application/applications/{id}",
       "accept": "application/vnd.com.nsn.cumulocity.application+json",
@@ -230,6 +232,7 @@
     {
       "name": "updateMicroservice",
       "description": "Update microservice meta information",
+      "descriptionLong": "Update microservice properties such as availability, context path etc.\n",
       "method": "PUT",
       "path": "/application/applications/{id}",
       "accept": "application/vnd.com.nsn.cumulocity.application+json",
@@ -305,7 +308,8 @@
     },
     {
       "name": "newMicroserviceBinary",
-      "description": "New application binary",
+      "description": "Create/upload a new microservice binary",
+      "descriptionLong": "For the applications of type 'MICROSERVICE' to be available for Cumulocity platform users, a binary zip file must be uploaded.\nFor the microservice application, the zip file must consist of    * cumulocity.json - file describing the deployment\n    * image.tar - executable docker image\n\nFor the web application, the zip file must include index.html in the root directory.\n",
       "method": "POST",
       "path": "/application/applications/{id}/binaries",
       "accept": "application/vnd.com.nsn.cumulocity.managedObject+json",
@@ -356,6 +360,7 @@
     {
       "name": "getMicroserviceBootstrapUser",
       "description": "Get microservice bootstrap user",
+      "descriptionLong": "Get the bootstrap user associated to a microservice. The bootstrap user is required when running a microservice locally (i.e. during development)\n",
       "method": "GET",
       "path": "/application/applications/{id}/bootstrapUser",
       "accept": "application/vnd.com.nsn.cumulocity.bootstrapuser+json",
@@ -400,7 +405,8 @@
     },
     {
       "name": "enableMicroservice",
-      "description": "Enable microservice",
+      "description": "Enable/subscribe a microservice",
+      "descriptionLong": "Enabling (subscribing) a microservice will activate the application in the tenant\n",
       "method": "POST",
       "path": "/tenant/tenants/{tenant}/applications",
       "accept": "application/vnd.com.nsn.cumulocity.applicationReference+json",
@@ -438,6 +444,7 @@
           "name": "tenant",
           "type": "tenant",
           "required": false,
+          "position": 99,
           "description": "Tenant id"
         }
       ],
@@ -454,7 +461,8 @@
     },
     {
       "name": "disableMicroservice",
-      "description": "Disable microservice",
+      "description": "Disable (unsubscribe) a microservice",
+      "descriptionLong": "Disable (unsubscribe) a microservice from the current tenant\n",
       "method": "DELETE",
       "path": "/tenant/tenants/{tenant}/applications/{id}",
       "alias": {
@@ -498,6 +506,7 @@
           "name": "tenant",
           "type": "tenant",
           "required": false,
+          "position": 99,
           "description": "Tenant id"
         }
       ]

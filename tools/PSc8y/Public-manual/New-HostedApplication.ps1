@@ -3,10 +3,13 @@ Function New-HostedApplication {
 .SYNOPSIS
 New hosted (web) application
 
+.DESCRIPTION
+Create a new hosted web application by uploading a zip file which contains a web application
+
 .EXAMPLE
 New-HostedApplication -Name $App.id -File "myapp.zip"
 
-Upload application microservice binary
+Upload application zip file containing the web application
 
 #>
     [cmdletbinding(SupportsShouldProcess = $true,

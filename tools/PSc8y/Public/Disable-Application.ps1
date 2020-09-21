@@ -4,8 +4,12 @@ Function Disable-Application {
 .SYNOPSIS
 Disable application on tenant
 
+.DESCRIPTION
+Disable application on tenant
+
 .EXAMPLE
 PS> Disable-Application -Tenant mycompany -Application myMicroservice
+
 Disable an application of a tenant
 
 
@@ -17,11 +21,6 @@ Disable an application of a tenant
     [Alias()]
     [OutputType([object])]
     Param(
-        # Tenant id. Defaults to current tenant (based on credentials)
-        [Parameter()]
-        [object]
-        $Tenant,
-
         # Application id (required)
         [Parameter(Mandatory = $true,
                    ValueFromPipeline=$true,
@@ -29,22 +28,27 @@ Disable an application of a tenant
         [object[]]
         $Application,
 
-        # Include raw response including pagination information
+        # Tenant id. Defaults to current tenant (based on credentials)
+        [Parameter()]
+        [object]
+        $Tenant,
+
+        # Show the full (raw) response from Cumulocity including pagination information
         [Parameter()]
         [switch]
         $Raw,
 
-        # Outputfile
+        # Write the response to file
         [Parameter()]
         [string]
         $OutputFile,
 
-        # NoProxy
+        # Ignore any proxy settings when running the cmdlet
         [Parameter()]
         [switch]
         $NoProxy,
 
-        # Session path
+        # Specifiy alternative Cumulocity session to use when running the cmdlet
         [Parameter()]
         [string]
         $Session,

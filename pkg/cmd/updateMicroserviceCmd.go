@@ -28,7 +28,8 @@ func newUpdateMicroserviceCmd() *updateMicroserviceCmd {
 	cmd := &cobra.Command{
 		Use:   "update",
 		Short: "Update microservice meta information",
-		Long:  ``,
+		Long: `Update microservice properties such as availability, context path etc.
+`,
 		Example: `
 $ c8y microservices update --id "helloworld-app" --availability MARKET
 Update microservice availability to MARKET

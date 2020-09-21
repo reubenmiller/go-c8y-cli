@@ -9,14 +9,17 @@ Delete a managed object by id
 
 .EXAMPLE
 PS> Remove-ManagedObject -Id $mo.id
+
 Delete a managed object
 
 .EXAMPLE
 PS> Get-ManagedObject -Id $mo.id | Remove-ManagedObject
+
 Delete a managed object (using pipeline)
 
 .EXAMPLE
 PS> Get-ManagedObject -Id $Device.id | Remove-ManagedObject -Cascade
+
 Delete a managed object and all child devices
 
 
@@ -40,22 +43,22 @@ Delete a managed object and all child devices
         [switch]
         $Cascade,
 
-        # Include raw response including pagination information
+        # Show the full (raw) response from Cumulocity including pagination information
         [Parameter()]
         [switch]
         $Raw,
 
-        # Outputfile
+        # Write the response to file
         [Parameter()]
         [string]
         $OutputFile,
 
-        # NoProxy
+        # Ignore any proxy settings when running the cmdlet
         [Parameter()]
         [switch]
         $NoProxy,
 
-        # Session path
+        # Specifiy alternative Cumulocity session to use when running the cmdlet
         [Parameter()]
         [string]
         $Session,

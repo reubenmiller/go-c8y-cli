@@ -4,8 +4,12 @@ Function Get-TenantOptionForCategory {
 .SYNOPSIS
 Get tenant options for category
 
+.DESCRIPTION
+Get tenant options for category
+
 .EXAMPLE
 PS> Get-TenantOptionForCategory -Category "c8y_cli_tests"
+
 Get a list of options for a category
 
 
@@ -35,22 +39,22 @@ Get a list of options for a category
         [switch]
         $WithTotalPages,
 
-        # Include raw response including pagination information
+        # Show the full (raw) response from Cumulocity including pagination information
         [Parameter()]
         [switch]
         $Raw,
 
-        # Outputfile
+        # Write the response to file
         [Parameter()]
         [string]
         $OutputFile,
 
-        # NoProxy
+        # Ignore any proxy settings when running the cmdlet
         [Parameter()]
         [switch]
         $NoProxy,
 
-        # Session path
+        # Specifiy alternative Cumulocity session to use when running the cmdlet
         [Parameter()]
         [string]
         $Session,

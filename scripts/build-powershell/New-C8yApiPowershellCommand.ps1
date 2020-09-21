@@ -78,10 +78,13 @@
     #
     $Synopsis = $Specification.description
     $DescriptionLong = $Specification.descriptionLong
+    if (!$DescriptionLong) {
+        $DescriptionLong = $Synopsis
+    }
     $DocumentationLink = $Specification.link
     $Examples = foreach ($iExample in $Specification.examples.powershell) {
         if ($iExample.command) {
-            $ExampleText = "`PS> {0}`n{1}" -f $iExample.command, $iExample.description
+            $ExampleText = "`PS> {0}`n`n{1}" -f $iExample.command, $iExample.description
         } else {
             $ExampleText = $iExample
         }
@@ -136,6 +139,18 @@
     $IteratorType = ""
     $IteratorVariable = ""
     $PipelineTemplateFormat = ""
+
+    # Sort argument sources by position (if specified)
+    $ArgumentSources = $ArgumentSources | ForEach-Object {
+        if ($null -eq $_.position) {
+            # Assign default value
+            $_ | Add-Member -MemberType NoteProperty -Name position -Value 20
+        }
+        $_
+    }
+
+    # (stable) sort argument sources by position to control the expected order on cli
+    $ArgumentSources = $ArgumentSources | Sort-Object -Property position -Stable
 
     foreach ($iArg in $ArgumentSources) {
         $ReadFromPipeline = $iArg.pipeline -or $iArg.name -eq "id" -or $iArg.alias -eq "id"
@@ -261,14 +276,14 @@
     }
 
     $RawParam = New-Object System.Text.StringBuilder
-    $null = $RawParam.AppendLine('        # Include raw response including pagination information')
+    $null = $RawParam.AppendLine('        # Show the full (raw) response from Cumulocity including pagination information')
     $null = $RawParam.AppendLine('        [Parameter()]')
     $null = $RawParam.AppendLine('        [switch]')
     $null = $RawParam.Append('        $Raw')
     $null = $CmdletParameters.Add($RawParam)
 
     $OutputFileParam = New-Object System.Text.StringBuilder
-    $null = $OutputFileParam.AppendLine('        # Outputfile')
+    $null = $OutputFileParam.AppendLine('        # Write the response to file')
     $null = $OutputFileParam.AppendLine('        [Parameter()]')
     $null = $OutputFileParam.AppendLine('        [string]')
     $null = $OutputFileParam.Append('        $OutputFile')
@@ -280,7 +295,7 @@
 
     # No Proxy
     $NoProxyParam = New-Object System.Text.StringBuilder
-    $null = $NoProxyParam.AppendLine('        # NoProxy')
+    $null = $NoProxyParam.AppendLine('        # Ignore any proxy settings when running the cmdlet')
     $null = $NoProxyParam.AppendLine('        [Parameter()]')
     $null = $NoProxyParam.AppendLine('        [switch]')
     $null = $NoProxyParam.Append('        $NoProxy')
@@ -292,7 +307,7 @@
 
 
     $SessionParam = New-Object System.Text.StringBuilder
-    $null = $SessionParam.AppendLine('        # Session path')
+    $null = $SessionParam.AppendLine('        # Specifiy alternative Cumulocity session to use when running the cmdlet')
     $null = $SessionParam.AppendLine('        [Parameter()]')
     $null = $SessionParam.AppendLine('        [string]')
     $null = $SessionParam.Append('        $Session')

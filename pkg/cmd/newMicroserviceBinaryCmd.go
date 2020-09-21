@@ -27,8 +27,13 @@ func newNewMicroserviceBinaryCmd() *newMicroserviceBinaryCmd {
 
 	cmd := &cobra.Command{
 		Use:   "createBinary",
-		Short: "New application binary",
-		Long:  ``,
+		Short: "Create/upload a new microservice binary",
+		Long: `For the applications of type 'MICROSERVICE' to be available for Cumulocity platform users, a binary zip file must be uploaded.
+For the microservice application, the zip file must consist of    * cumulocity.json - file describing the deployment
+    * image.tar - executable docker image
+
+For the web application, the zip file must include index.html in the root directory.
+`,
 		Example: `
 $ c8y microservices createBinary --id 12345 --file ./helloworld.zip
 Upload microservice binary

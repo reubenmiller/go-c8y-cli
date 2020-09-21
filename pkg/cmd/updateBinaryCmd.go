@@ -28,7 +28,8 @@ func newUpdateBinaryCmd() *updateBinaryCmd {
 	cmd := &cobra.Command{
 		Use:   "update",
 		Short: "Update inventory binary",
-		Long:  ``,
+		Long: `Update an existing binary
+`,
 		Example: `
 $ c8y binaries update --id 12345 --file ./output.log
 Update an existing binary file

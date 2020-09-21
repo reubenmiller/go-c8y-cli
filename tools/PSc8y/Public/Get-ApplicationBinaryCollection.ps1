@@ -10,10 +10,12 @@ A list of all binaries related to the given application will be returned
 
 .EXAMPLE
 PS> Get-ApplicationBinaryCollection -Id $App.id
+
 List all of the binaries related to a Hosted (web) application
 
 .EXAMPLE
 PS> Get-Application $App.id | Get-ApplicationBinaryCollection
+
 List all of the binaries related to a Hosted (web) application (using pipeline)
 
 
@@ -45,22 +47,22 @@ List all of the binaries related to a Hosted (web) application (using pipeline)
         [switch]
         $WithTotalPages,
 
-        # Include raw response including pagination information
+        # Show the full (raw) response from Cumulocity including pagination information
         [Parameter()]
         [switch]
         $Raw,
 
-        # Outputfile
+        # Write the response to file
         [Parameter()]
         [string]
         $OutputFile,
 
-        # NoProxy
+        # Ignore any proxy settings when running the cmdlet
         [Parameter()]
         [switch]
         $NoProxy,
 
-        # Session path
+        # Specifiy alternative Cumulocity session to use when running the cmdlet
         [Parameter()]
         [string]
         $Session,

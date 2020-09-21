@@ -27,8 +27,8 @@ func newDeleteBinaryCmd() *deleteBinaryCmd {
 
 	cmd := &cobra.Command{
 		Use:   "deleteBinary",
-		Short: "Delete event binary",
-		Long:  ``,
+		Short: "Delete binary",
+		Long:  `Delete a binary from the tenant. This delete operation can not be undone.`,
 		Example: `
 $ c8y binaries delete --id 12345
 Delete a binary

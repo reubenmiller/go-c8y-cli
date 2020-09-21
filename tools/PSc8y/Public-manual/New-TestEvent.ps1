@@ -2,17 +2,35 @@
 <#
 .SYNOPSIS
 Create a new test event
+
+.DESCRIPTION
+Create a test event for a device.
+
+If the device is not provided then a test device will be created automatically
+
+.EXAMPLE
+New-TestEvent
+
+Create a new test device and then create an event on it
+
+.EXAMPLE
+New-TestEvent -Device "myExistingDevice"
+
+Create an event on the existing device "myExistingDevice"
 #>
     [cmdletbinding()]
     Param(
+        # Device id, name or object. If left blank then a randomized device will be created
         [Parameter(
             Mandatory = $false,
             Position = 0
         )]
         [object] $Device,
 
+        # Add a dummy file to the event
         [switch] $WithBinary,
 
+        # Don't prompt for confirmation
         [switch] $Force
     )
 
@@ -22,7 +40,7 @@ Create a new test event
         $iDevice = PSc8y\New-TestDevice -Force:$Force
     }
 
-    $Event = PSc8y\New-Event `
+    $c8yEvent = PSc8y\New-Event `
         -Device $iDevice.id `
         -Time "1970-01-01" `
         -Type "c8y_ci_TestEvent" `
@@ -33,12 +51,12 @@ Create a new test event
         $tempfile = New-TemporaryFile
         "Cumulocity test content" | Out-File -LiteralPath $tempfile
         $null = PSc8y\New-EventBinary `
-            -Id $Event.id `
+            -Id $c8yEvent.id `
             -File $tempfile `
             -Force:$Force
 
         Remove-Item $tempfile
     }
 
-    $Event
+    $c8yEvent
 }

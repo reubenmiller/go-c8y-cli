@@ -28,7 +28,7 @@ func newUpdateDeviceCmd() *updateDeviceCmd {
 	cmd := &cobra.Command{
 		Use:   "update",
 		Short: "Update device",
-		Long:  ``,
+		Long:  `Update properties of an existing device`,
 		Example: `
 $ c8y devices update --id 12345
 Update device by id

@@ -2,6 +2,19 @@
 <#
 .SYNOPSIS
 Create a new test user
+
+.DESCRIPTION
+Create a user with a randomized username
+
+.EXAMPLE
+New-TestUser
+
+Create a new test user
+
+.EXAMPLE
+New-TestUser -Name "myExistingDevice"
+
+Create a new test user with a custom username prefix
 #>
     [cmdletbinding()]
     Param(
@@ -12,6 +25,7 @@ Create a new test user
         )]
         [string] $Name = "testuser",
 
+        # Don't prompt for confirmation
         [switch] $Force
     )
 

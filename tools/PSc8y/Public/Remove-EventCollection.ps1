@@ -9,10 +9,12 @@ Delete a collection of events by using a filter
 
 .EXAMPLE
 PS> Remove-EventCollection -Type my_CustomType -DateFrom "-10d"
+
 Remove events with type 'my_CustomType' that were created in the last 10 days
 
 .EXAMPLE
 PS> Remove-EventCollection -Device "{{ randomdevice }}"
+
 Remove events from a device
 
 
@@ -54,22 +56,22 @@ Remove events from a device
         [switch]
         $Revert,
 
-        # Include raw response including pagination information
+        # Show the full (raw) response from Cumulocity including pagination information
         [Parameter()]
         [switch]
         $Raw,
 
-        # Outputfile
+        # Write the response to file
         [Parameter()]
         [string]
         $OutputFile,
 
-        # NoProxy
+        # Ignore any proxy settings when running the cmdlet
         [Parameter()]
         [switch]
         $NoProxy,
 
-        # Session path
+        # Specifiy alternative Cumulocity session to use when running the cmdlet
         [Parameter()]
         [string]
         $Session,

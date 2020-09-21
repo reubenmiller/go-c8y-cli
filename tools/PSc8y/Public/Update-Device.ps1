@@ -4,16 +4,22 @@ Function Update-Device {
 .SYNOPSIS
 Update device
 
+.DESCRIPTION
+Update properties of an existing device
+
 .EXAMPLE
 PS> Update-Device -Id $device.id -NewName "MyNewName"
+
 Update device by id
 
 .EXAMPLE
 PS> Update-Device -Id $device.name -NewName "MyNewName"
+
 Update device by name
 
 .EXAMPLE
 PS> Update-Device -Id $device.name -Data @{ "myValue" = @{ value1 = $true } }
+
 Update device custom properties
 
 
@@ -42,22 +48,22 @@ Update device custom properties
         [object]
         $Data,
 
-        # Include raw response including pagination information
+        # Show the full (raw) response from Cumulocity including pagination information
         [Parameter()]
         [switch]
         $Raw,
 
-        # Outputfile
+        # Write the response to file
         [Parameter()]
         [string]
         $OutputFile,
 
-        # NoProxy
+        # Ignore any proxy settings when running the cmdlet
         [Parameter()]
         [switch]
         $NoProxy,
 
-        # Session path
+        # Specifiy alternative Cumulocity session to use when running the cmdlet
         [Parameter()]
         [string]
         $Session,

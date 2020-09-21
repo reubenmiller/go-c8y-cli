@@ -4,8 +4,12 @@ Function Get-RoleReferenceCollectionFromUser {
 .SYNOPSIS
 Get collection of user role references from a user
 
+.DESCRIPTION
+Get collection of user role references from a user
+
 .EXAMPLE
 PS> Get-RoleReferenceCollectionFromUser -User $User.id
+
 Get a list of role references for a user
 
 
@@ -17,15 +21,15 @@ Get a list of role references for a user
     [Alias()]
     [OutputType([object])]
     Param(
-        # Tenant
-        [Parameter()]
-        [object]
-        $Tenant,
-
         # User (required)
         [Parameter(Mandatory = $true)]
         [object[]]
         $User,
+
+        # Tenant
+        [Parameter()]
+        [object]
+        $Tenant,
 
         # Maximum number of results
         [Parameter()]
@@ -40,22 +44,22 @@ Get a list of role references for a user
         [switch]
         $WithTotalPages,
 
-        # Include raw response including pagination information
+        # Show the full (raw) response from Cumulocity including pagination information
         [Parameter()]
         [switch]
         $Raw,
 
-        # Outputfile
+        # Write the response to file
         [Parameter()]
         [string]
         $OutputFile,
 
-        # NoProxy
+        # Ignore any proxy settings when running the cmdlet
         [Parameter()]
         [switch]
         $NoProxy,
 
-        # Session path
+        # Specifiy alternative Cumulocity session to use when running the cmdlet
         [Parameter()]
         [string]
         $Session,
@@ -68,11 +72,11 @@ Get a list of role references for a user
 
     Begin {
         $Parameters = @{}
-        if ($PSBoundParameters.ContainsKey("Tenant")) {
-            $Parameters["tenant"] = $Tenant
-        }
         if ($PSBoundParameters.ContainsKey("User")) {
             $Parameters["user"] = $User
+        }
+        if ($PSBoundParameters.ContainsKey("Tenant")) {
+            $Parameters["tenant"] = $Tenant
         }
         if ($PSBoundParameters.ContainsKey("PageSize")) {
             $Parameters["pageSize"] = $PageSize

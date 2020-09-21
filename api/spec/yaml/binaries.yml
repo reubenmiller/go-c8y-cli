@@ -10,6 +10,8 @@ information:
 endpoints:
   - name: getBinaryCollection
     description: 'Get collection of inventory binaries'
+    descriptionLong: >
+      Get a list of inventory binaries. The results include the meta information about binary and not the binary itself.
     method: GET
     path: /inventory/binaries
     accept: application/vnd.com.nsn.cumulocity.managedObjectCollection+json
@@ -34,6 +36,10 @@ endpoints:
 
   - name: download
     description: 'Get binary'
+    descriptionLong: >
+      Download a binary stored in Cumulocity and display it on the console. For non text based binaries
+      or if the output should be saved to file, the output parameter should be used to write the file directly to a local
+      file.
     method: GET
     path: /inventory/binaries/{id}
     accept: '*/*'
@@ -76,6 +82,7 @@ endpoints:
 
   - name: newBinary
     description: 'New inventory binary'
+    descriptionLong: Upload a new binary to Cumulocity
     method: POST
     path: /inventory/binaries
     accept: application/vnd.com.nsn.cumulocity.managedObject+json
@@ -105,6 +112,8 @@ endpoints:
 
   - name: updateBinary
     description: 'Update inventory binary'
+    descriptionLong: >
+      Update an existing binary
     method: PUT
     path: /inventory/binaries/{id}
     accept: application/vnd.com.nsn.cumulocity.managedObject+json
@@ -142,7 +151,8 @@ endpoints:
         description: File to be uploaded as a binary
 
   - name: deleteBinary
-    description: 'Delete event binary'
+    description: 'Delete binary'
+    descriptionLong: Delete a binary from the tenant. This delete operation can not be undone.
     method: DELETE
     path: /inventory/binaries/{id}
     alias:

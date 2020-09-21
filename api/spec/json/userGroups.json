@@ -74,7 +74,8 @@
         {
           "name": "tenant",
           "type": "tenant",
-          "description": "Tenant"
+          "description": "Tenant",
+          "position": 99
         }
       ],
       "body": [
@@ -119,7 +120,8 @@
         {
           "name": "tenant",
           "type": "tenant",
-          "description": "Tenant"
+          "description": "Tenant",
+          "position": 99
         },
         {
           "name": "id",
@@ -163,7 +165,8 @@
         {
           "name": "tenant",
           "type": "tenant",
-          "description": "Tenant"
+          "description": "Tenant",
+          "position": 99
         },
         {
           "name": "name",
@@ -209,7 +212,8 @@
         {
           "name": "tenant",
           "type": "tenant",
-          "description": "Tenant"
+          "description": "Tenant",
+          "position": 99
         },
         {
           "name": "id",
@@ -263,7 +267,8 @@
         {
           "name": "tenant",
           "type": "tenant",
-          "description": "Tenant"
+          "description": "Tenant",
+          "position": 99
         },
         {
           "name": "id",

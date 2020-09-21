@@ -1,0 +1,97 @@
+name: build
+
+on:
+  push:
+    branches: [ master ]
+    paths-ignore:
+      - docs/*
+      - '**/*.md'
+      - test/*.go
+
+  pull_request:
+    branches: [ master ]
+
+jobs:
+
+  build:
+    runs-on: ubuntu-18.04
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Build cli
+      run: make build
+      shell: bash
+
+    - uses: actions/upload-artifact@v2
+      with:
+        name: c8y.windows.amd64
+        path: tools/PSc8y/Dependencies/c8y.windows*
+
+    - uses: actions/upload-artifact@v2
+      with:
+        name: c8y.linux.amd64
+        path: tools/PSc8y/Dependencies/c8y.linux*
+
+    - uses: actions/upload-artifact@v2
+      with:
+        name: c8y.macos.amd64
+        path: tools/PSc8y/Dependencies/c8y.macos*
+
+    - uses: actions/upload-artifact@v2
+      with:
+        name: PSc8y Module
+        path: tools/PSc8y/dist/PSc8y.zip
+
+  test:
+    runs-on: ${{ matrix.os }}
+    needs: [build]
+    env:
+      C8Y_HOST: ${{ secrets.C8Y_HOST }}
+      C8Y_TENANT: ${{ secrets.C8Y_TENANT }}
+      C8Y_USER: ${{ secrets.C8Y_USER }}
+      C8Y_PASSWORD: ${{ secrets.C8Y_PASSWORD }}
+
+      # Max timeout for each request (in milliseconds)
+      C8Y_TIMEOUT: 30000
+
+    strategy:
+      matrix:
+        os: [macos-latest, windows-latest, ubuntu-18.04]
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Build powershell module
+      run: make build_powershell
+      shell: bash
+
+    - name: Test powershell module
+      if: ${{ false }}
+      run: make test_powershell
+      shell: bash
+
+    - uses: actions/upload-artifact@v2
+      if: always()
+      with:
+        name: test-results
+        path: report.${{ matrix.os }}.xml
+
+  publish-test-results:
+    runs-on: ubuntu-18.04
+    needs: [test]
+    if: ${{ false }}
+    steps:
+      - name: Get test results
+        uses: actions/download-artifact@v2
+        with:
+          name: test-results
+
+      - name: Publish results
+        uses: EnricoMi/publish-unit-test-result-action@v1.1
+        if: always()
+        with:
+          check_name: Test Results
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          files: report.xml
+          log_level: DEBUG

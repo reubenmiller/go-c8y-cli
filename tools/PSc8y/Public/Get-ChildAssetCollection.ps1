@@ -9,10 +9,12 @@ Get a collection of managedObjects child references
 
 .EXAMPLE
 PS> Get-ChildAssetCollection -Group $Group.id
+
 Get a list of the child assets of an existing device
 
 .EXAMPLE
 PS> Get-ChildAssetCollection -Group $Group.id
+
 Get a list of the child assets of an existing group
 
 
@@ -47,22 +49,22 @@ Get a list of the child assets of an existing group
         [switch]
         $WithTotalPages,
 
-        # Include raw response including pagination information
+        # Show the full (raw) response from Cumulocity including pagination information
         [Parameter()]
         [switch]
         $Raw,
 
-        # Outputfile
+        # Write the response to file
         [Parameter()]
         [string]
         $OutputFile,
 
-        # NoProxy
+        # Ignore any proxy settings when running the cmdlet
         [Parameter()]
         [switch]
         $NoProxy,
 
-        # Session path
+        # Specifiy alternative Cumulocity session to use when running the cmdlet
         [Parameter()]
         [string]
         $Session,

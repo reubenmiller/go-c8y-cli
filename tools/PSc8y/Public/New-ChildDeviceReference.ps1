@@ -9,10 +9,12 @@ Create a child device reference
 
 .EXAMPLE
 PS> New-ChildDeviceReference -Device $Device.id -NewChild $ChildDevice.id
+
 Assign a device as a child device to an existing device
 
 .EXAMPLE
 PS> Get-ManagedObject -Id $ChildDevice.id | New-ChildDeviceReference -Device $Device.id
+
 Assign a device as a child device to an existing device (using pipeline)
 
 
@@ -36,22 +38,22 @@ Assign a device as a child device to an existing device (using pipeline)
         [object[]]
         $NewChild,
 
-        # Include raw response including pagination information
+        # Show the full (raw) response from Cumulocity including pagination information
         [Parameter()]
         [switch]
         $Raw,
 
-        # Outputfile
+        # Write the response to file
         [Parameter()]
         [string]
         $OutputFile,
 
-        # NoProxy
+        # Ignore any proxy settings when running the cmdlet
         [Parameter()]
         [switch]
         $NoProxy,
 
-        # Session path
+        # Specifiy alternative Cumulocity session to use when running the cmdlet
         [Parameter()]
         [string]
         $Session,

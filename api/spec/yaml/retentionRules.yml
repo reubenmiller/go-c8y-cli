@@ -10,6 +10,8 @@ information:
 endpoints:
   - name: getRetentionRuleCollection
     description: 'Get collection of retention rules'
+    descriptionLong: >
+      Get a collection of retention rules configured in the current tenant
     method: GET
     path: /retention/retentions
     accept: application/vnd.com.nsn.cumulocity.retentionRuleCollection+json
@@ -29,6 +31,8 @@ endpoints:
 
   - name: newRetentionRule
     description: 'New retention rule'
+    descriptionLong: >
+      Create a new retention rule to managed when data is deleted in the tenant
     method: POST
     path: /retention/retentions
     accept: application/vnd.com.nsn.cumulocity.retentionRule+json
@@ -77,6 +81,8 @@ endpoints:
 
   - name: getRetentionRule
     description: 'Get retention rule'
+    descriptionLong: >
+      Get an existing retention by id
     method: GET
     path: /retention/retentions/{id}
     accept: application/vnd.com.nsn.cumulocity.retentionRule+json
@@ -104,6 +110,8 @@ endpoints:
 
   - name: deleteRetentionRule
     description: 'Delete retention rule'
+    descriptionLong: >
+      Delete an existing retention rule
     method: DELETE
     path: /retention/retentions/{id}
     alias:
@@ -133,6 +141,8 @@ endpoints:
 
   - name: updateRetentionRule
     description: 'Update retention rule'
+    descriptionLong: >
+      Update an existing retentule rule, i.e. change maximum number of days or the data type.
     method: PUT
     path: /retention/retentions/{id}
     accept: application/vnd.com.nsn.cumulocity.retentionRule+json

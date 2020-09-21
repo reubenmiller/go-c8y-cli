@@ -4,8 +4,13 @@ Function Update-CurrentUser {
 .SYNOPSIS
 Update the current user
 
+.DESCRIPTION
+Update properties or settings of your user such as first/last name, email or password
+
+
 .EXAMPLE
 PS> Update-CurrentUser -LastName "Smith"
+
 Update the current user's lastname
 
 
@@ -48,22 +53,22 @@ Update the current user's lastname
         [string]
         $Password,
 
-        # Include raw response including pagination information
+        # Show the full (raw) response from Cumulocity including pagination information
         [Parameter()]
         [switch]
         $Raw,
 
-        # Outputfile
+        # Write the response to file
         [Parameter()]
         [string]
         $OutputFile,
 
-        # NoProxy
+        # Ignore any proxy settings when running the cmdlet
         [Parameter()]
         [switch]
         $NoProxy,
 
-        # Session path
+        # Specifiy alternative Cumulocity session to use when running the cmdlet
         [Parameter()]
         [string]
         $Session,

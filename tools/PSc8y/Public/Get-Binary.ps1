@@ -4,12 +4,18 @@ Function Get-Binary {
 .SYNOPSIS
 Get binary
 
+.DESCRIPTION
+Download a binary stored in Cumulocity and display it on the console. For non text based binaries or if the output should be saved to file, the output parameter should be used to write the file directly to a local file.
+
+
 .EXAMPLE
 PS> Get-Binary -Id $Binary.id
+
 Get a binary and display the contents on the console
 
 .EXAMPLE
 PS> Get-Binary -Id $Binary.id -OutputFile ./download-binary1.txt
+
 Get a binary and save it to a file
 
 
@@ -28,22 +34,22 @@ Get a binary and save it to a file
         [string]
         $Id,
 
-        # Include raw response including pagination information
+        # Show the full (raw) response from Cumulocity including pagination information
         [Parameter()]
         [switch]
         $Raw,
 
-        # Outputfile
+        # Write the response to file
         [Parameter()]
         [string]
         $OutputFile,
 
-        # NoProxy
+        # Ignore any proxy settings when running the cmdlet
         [Parameter()]
         [switch]
         $NoProxy,
 
-        # Session path
+        # Specifiy alternative Cumulocity session to use when running the cmdlet
         [Parameter()]
         [string]
         $Session,

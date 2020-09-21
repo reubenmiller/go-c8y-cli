@@ -47,6 +47,7 @@
         {
           "name": "tenant",
           "type": "tenant",
+          "position": 99,
           "description": "Tenant"
         }
       ],
@@ -109,6 +110,7 @@
         {
           "name": "tenant",
           "type": "tenant",
+          "position": 99,
           "description": "Tenant"
         }
       ]
@@ -157,6 +159,7 @@
         {
           "name": "tenant",
           "type": "tenant",
+          "position": 99,
           "description": "Tenant"
         }
       ]

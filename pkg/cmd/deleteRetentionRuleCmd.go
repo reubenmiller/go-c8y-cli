@@ -28,7 +28,8 @@ func newDeleteRetentionRuleCmd() *deleteRetentionRuleCmd {
 	cmd := &cobra.Command{
 		Use:   "delete",
 		Short: "Delete retention rule",
-		Long:  ``,
+		Long: `Delete an existing retention rule
+`,
 		Example: `
 $ c8y retentionRules delete --id 12345
 Delete a retention rule

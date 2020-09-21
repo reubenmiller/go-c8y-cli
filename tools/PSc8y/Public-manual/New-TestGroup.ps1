@@ -2,6 +2,14 @@
 <#
 .SYNOPSIS
 Create a test user group
+
+.DESCRIPTION
+Create a new test user group using a random name
+
+.EXAMPLE
+New-TestGroup -Name mygroup
+
+Create a new user group with the prefix "mygroup". A random postfix will be added to it
 #>
     [cmdletbinding()]
     Param(
@@ -12,6 +20,7 @@ Create a test user group
         )]
         [string] $Name = "testgroup",
 
+        # Don't prompt for confirmation
         [switch] $Force
     )
 

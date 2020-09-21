@@ -9,14 +9,17 @@ Update an event
 
 .EXAMPLE
 PS> Update-Event -Id $Event.id -Text "example text 1"
+
 Update the text field of an existing event
 
 .EXAMPLE
 PS> Update-Event -Id $Event.id -Data @{ my_event = @{ active = $true } }
+
 Update custom properties of an existing event
 
 .EXAMPLE
 PS> Get-Event -Id $Event.id | Update-Event -Data @{ my_event = @{ active = $true } }
+
 Update custom properties of an existing event (using pipeline)
 
 
@@ -45,22 +48,22 @@ Update custom properties of an existing event (using pipeline)
         [object]
         $Data,
 
-        # Include raw response including pagination information
+        # Show the full (raw) response from Cumulocity including pagination information
         [Parameter()]
         [switch]
         $Raw,
 
-        # Outputfile
+        # Write the response to file
         [Parameter()]
         [string]
         $OutputFile,
 
-        # NoProxy
+        # Ignore any proxy settings when running the cmdlet
         [Parameter()]
         [switch]
         $NoProxy,
 
-        # Session path
+        # Specifiy alternative Cumulocity session to use when running the cmdlet
         [Parameter()]
         [string]
         $Session,

@@ -27,8 +27,9 @@ func newEnableMicroserviceCmd() *enableMicroserviceCmd {
 
 	cmd := &cobra.Command{
 		Use:   "enable",
-		Short: "Enable microservice",
-		Long:  ``,
+		Short: "Enable/subscribe a microservice",
+		Long: `Enabling (subscribing) a microservice will activate the application in the tenant
+`,
 		Example: `
 $ c8y microservices enable --id 12345
 Enable (subscribe) to a microservice

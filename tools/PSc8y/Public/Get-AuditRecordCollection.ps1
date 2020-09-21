@@ -4,16 +4,23 @@ Function Get-AuditRecordCollection {
 .SYNOPSIS
 Get collection of (user) audits
 
+.DESCRIPTION
+Audit records contain information about modifications to other Cumulocity entities. For example the audit records contain each operation state transition, so they can be used to check when an operation transitioned from PENDING -> EXECUTING -> SUCCESSFUL.
+
+
 .EXAMPLE
 PS> Get-AuditRecordCollection -PageSize 100
+
 Get a list of audit records
 
 .EXAMPLE
 PS> Get-AuditRecordCollection -Source $Device2.id
+
 Get a list of audit records related to a managed object
 
 .EXAMPLE
 PS> Get-Operation -Id $Operation.id | Get-AuditRecordCollection
+
 Get a list of audit records related to an operation
 
 
@@ -74,22 +81,22 @@ Get a list of audit records related to an operation
         [switch]
         $WithTotalPages,
 
-        # Include raw response including pagination information
+        # Show the full (raw) response from Cumulocity including pagination information
         [Parameter()]
         [switch]
         $Raw,
 
-        # Outputfile
+        # Write the response to file
         [Parameter()]
         [string]
         $OutputFile,
 
-        # NoProxy
+        # Ignore any proxy settings when running the cmdlet
         [Parameter()]
         [switch]
         $NoProxy,
 
-        # Session path
+        # Specifiy alternative Cumulocity session to use when running the cmdlet
         [Parameter()]
         [string]
         $Session,

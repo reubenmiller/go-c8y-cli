@@ -41,6 +41,14 @@ check-integration-variables:
 	$(call check_defined, C8Y_PASSWORD, Cumulocity password)
 	@exit 0
 
+gh_pages_update:	## Update github pages dependencies
+	cd docs && bundle update
+
+gh_pages:			## Run github pages locally
+	cd docs && bundle exec jekyll server --baseurl ""
+
+docs-powershell: update_spec build_powershell		## Update the powershell docs
+	pwsh -File ./scripts/build-powershell/build-docs.ps1 -Recreate
 
 test: test_powershell
 
@@ -130,7 +138,12 @@ build_powershell:
 	pwsh -File scripts/build-powershell/build.ps1;
 
 test_powershell:
-	pwsh -File tools/PSc8y/tests.ps1 -NonInteractive
+	pwsh -NonInteractive -File tools/PSc8y/tests.ps1
 
-test_ci_powershell:
-	pwsh -File scripts/build-powershell/test.ci.ps1 -NonInteractive
+publish:
+	pwsh -File ./scripts/build-powershell/publish.ps1
+
+build_docker:
+	docker build . --file ./docker/zsh.dockerfile --tag $(TAG_PREFIX)c8ycli-zsh
+	docker build . --file ./docker/bash.dockerfile --tag $(TAG_PREFIX)c8ycli-bash
+	docker build . --file ./docker/pwsh.dockerfile --tag $(TAG_PREFIX)c8ycli-pwsh

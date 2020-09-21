@@ -4,8 +4,12 @@ Function Get-CurrentUser {
 .SYNOPSIS
 Get user
 
+.DESCRIPTION
+Get the user representation associated with the current credentials used by the request
+
 .EXAMPLE
 PS> Get-CurrentUser
+
 Get the current user
 
 
@@ -17,22 +21,22 @@ Get the current user
     [Alias()]
     [OutputType([object])]
     Param(
-        # Include raw response including pagination information
+        # Show the full (raw) response from Cumulocity including pagination information
         [Parameter()]
         [switch]
         $Raw,
 
-        # Outputfile
+        # Write the response to file
         [Parameter()]
         [string]
         $OutputFile,
 
-        # NoProxy
+        # Ignore any proxy settings when running the cmdlet
         [Parameter()]
         [switch]
         $NoProxy,
 
-        # Session path
+        # Specifiy alternative Cumulocity session to use when running the cmdlet
         [Parameter()]
         [string]
         $Session,

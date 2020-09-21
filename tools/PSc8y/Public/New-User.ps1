@@ -4,8 +4,12 @@ Function New-User {
 .SYNOPSIS
 Create a new user within the collection
 
+.DESCRIPTION
+This command can be used to grant a new user to the tenant
+
 .EXAMPLE
 PS> New-user -Username "$Username" -Password "$NewPassword"
+
 Create a user
 
 
@@ -17,11 +21,6 @@ Create a user
     [Alias()]
     [OutputType([object])]
     Param(
-        # Tenant
-        [Parameter()]
-        [object]
-        $Tenant,
-
         # User name, unique for a given domain. Max: 1000 characters (required)
         [Parameter(Mandatory = $true)]
         [string]
@@ -68,22 +67,27 @@ Create a user
         [object]
         $CustomProperties,
 
-        # Include raw response including pagination information
+        # Tenant
+        [Parameter()]
+        [object]
+        $Tenant,
+
+        # Show the full (raw) response from Cumulocity including pagination information
         [Parameter()]
         [switch]
         $Raw,
 
-        # Outputfile
+        # Write the response to file
         [Parameter()]
         [string]
         $OutputFile,
 
-        # NoProxy
+        # Ignore any proxy settings when running the cmdlet
         [Parameter()]
         [switch]
         $NoProxy,
 
-        # Session path
+        # Specifiy alternative Cumulocity session to use when running the cmdlet
         [Parameter()]
         [string]
         $Session,
@@ -101,9 +105,6 @@ Create a user
 
     Begin {
         $Parameters = @{}
-        if ($PSBoundParameters.ContainsKey("Tenant")) {
-            $Parameters["tenant"] = $Tenant
-        }
         if ($PSBoundParameters.ContainsKey("UserName")) {
             $Parameters["userName"] = $UserName
         }
@@ -130,6 +131,9 @@ Create a user
         }
         if ($PSBoundParameters.ContainsKey("CustomProperties")) {
             $Parameters["customProperties"] = ConvertTo-JsonArgument $CustomProperties
+        }
+        if ($PSBoundParameters.ContainsKey("Tenant")) {
+            $Parameters["tenant"] = $Tenant
         }
         if ($PSBoundParameters.ContainsKey("OutputFile")) {
             $Parameters["outputFile"] = $OutputFile

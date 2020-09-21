@@ -47,6 +47,12 @@
         "[]role",
         "[]user"
       ]
+    },
+    "argumentPosition": {
+      "type": "integer",
+      "description": "Argument position / order",
+      "minimum": 0,
+      "maximum": 99
     }
   },
   "properties": {
@@ -241,6 +247,9 @@
                 "required": {
                   "$ref": "#/definitions/requiredParameter"
                 },
+                "position": {
+                  "$ref": "#/definitions/argumentPosition"
+                },
                 "skip": {
                   "$ref": "#/definitions/skipParameter"
                 }
@@ -275,6 +284,9 @@
                 },
                 "required": {
                   "$ref": "#/definitions/requiredParameter"
+                },
+                "position": {
+                  "$ref": "#/definitions/argumentPosition"
                 },
                 "validationSet": {
                   "type": "array",
@@ -317,6 +329,9 @@
                 },
                 "required": {
                   "$ref": "#/definitions/requiredParameter"
+                },
+                "position": {
+                  "$ref": "#/definitions/argumentPosition"
                 },
                 "validationSet": {
                   "type": "array",
@@ -383,6 +398,9 @@
                 },
                 "required": {
                   "$ref": "#/definitions/requiredParameter"
+                },
+                "position": {
+                  "$ref": "#/definitions/argumentPosition"
                 },
                 "validationSet": {
                   "type": "array",

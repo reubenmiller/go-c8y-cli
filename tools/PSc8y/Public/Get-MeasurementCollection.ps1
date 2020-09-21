@@ -9,14 +9,17 @@ Get a collection of measurements based on filter parameters
 
 .EXAMPLE
 PS> Get-MeasurementCollection
+
 Get a list of measurements
 
 .EXAMPLE
 PS> Get-MeasurementCollection -Device $Device.id -Type "TempReading"
+
 Get a list of measurements for a particular device
 
 .EXAMPLE
 PS> Get-DeviceCollection -Name $Device.name | Get-MeasurementCollection
+
 Get measurements from a device (using pipeline)
 
 
@@ -98,22 +101,22 @@ Get measurements from a device (using pipeline)
         [switch]
         $WithTotalPages,
 
-        # Include raw response including pagination information
+        # Show the full (raw) response from Cumulocity including pagination information
         [Parameter()]
         [switch]
         $Raw,
 
-        # Outputfile
+        # Write the response to file
         [Parameter()]
         [string]
         $OutputFile,
 
-        # NoProxy
+        # Ignore any proxy settings when running the cmdlet
         [Parameter()]
         [switch]
         $NoProxy,
 
-        # Session path
+        # Specifiy alternative Cumulocity session to use when running the cmdlet
         [Parameter()]
         [string]
         $Session,

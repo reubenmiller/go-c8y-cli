@@ -9,14 +9,17 @@ Delete a collection of alarms by a given filter
 
 .EXAMPLE
 PS> Remove-AlarmCollection -Device "{{ randomdevice }}" -Severity MAJOR
+
 Remove alarms on the device with the severity set to MAJOR
 
 .EXAMPLE
 PS> Remove-AlarmCollection -Device $device.id -DateFrom "-10m" -Status ACTIVE
+
 Remove alarms on the device which are active and created in the last 10 minutes
 
 .EXAMPLE
 PS> Get-Device -Id $device.id | PSc8y\Remove-AlarmCollection -DateFrom "-10m" -Status ACTIVE
+
 Remove alarms on the device which are active and created in the last 10 minutes (using pipeline)
 
 
@@ -81,22 +84,22 @@ Remove alarms on the device which are active and created in the last 10 minutes 
         [switch]
         $WithSourceDevices,
 
-        # Include raw response including pagination information
+        # Show the full (raw) response from Cumulocity including pagination information
         [Parameter()]
         [switch]
         $Raw,
 
-        # Outputfile
+        # Write the response to file
         [Parameter()]
         [string]
         $OutputFile,
 
-        # NoProxy
+        # Ignore any proxy settings when running the cmdlet
         [Parameter()]
         [switch]
         $NoProxy,
 
-        # Session path
+        # Specifiy alternative Cumulocity session to use when running the cmdlet
         [Parameter()]
         [string]
         $Session,

@@ -4,8 +4,12 @@ Function Get-SystemOption {
 .SYNOPSIS
 Get system option
 
+.DESCRIPTION
+Get a system option by category and key
+
 .EXAMPLE
 PS> Get-SystemOption -Category "system" -Key "version"
+
 Get system option value
 
 
@@ -27,22 +31,22 @@ Get system option value
         [string]
         $Key,
 
-        # Include raw response including pagination information
+        # Show the full (raw) response from Cumulocity including pagination information
         [Parameter()]
         [switch]
         $Raw,
 
-        # Outputfile
+        # Write the response to file
         [Parameter()]
         [string]
         $OutputFile,
 
-        # NoProxy
+        # Ignore any proxy settings when running the cmdlet
         [Parameter()]
         [switch]
         $NoProxy,
 
-        # Session path
+        # Specifiy alternative Cumulocity session to use when running the cmdlet
         [Parameter()]
         [string]
         $Session,

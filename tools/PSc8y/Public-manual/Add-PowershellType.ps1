@@ -9,7 +9,13 @@ This allows a custom type name to be given to powershell objects, so that the vi
 .EXAMPLE
 $data | Add-PowershellType -Type "customType1"
 
-.OUTPUTS Object[]
+Add a type `customType1` to the input object
+
+.INPUTS
+Object[]
+
+.OUTPUTS
+Object[]
 #>
   [cmdletbinding()]
   Param(

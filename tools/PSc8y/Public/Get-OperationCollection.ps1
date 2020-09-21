@@ -9,18 +9,22 @@ Get a collection of operations based on filter parameters
 
 .EXAMPLE
 PS> Get-OperationCollection -Status PENDING
+
 Get a list of pending operations
 
 .EXAMPLE
 PS> Get-OperationCollection -Agent $Agent.id -Status PENDING
+
 Get a list of pending operations for a given agent and all of its child devices
 
 .EXAMPLE
 PS> Get-OperationCollection -Device $Device.id -Status PENDING
+
 Get a list of pending operations for a device
 
 .EXAMPLE
 PS> Get-DeviceCollection -Name $Agent2.name | Get-OperationCollection
+
 Get operations from a device (using pipeline)
 
 
@@ -72,22 +76,22 @@ Get operations from a device (using pipeline)
         [switch]
         $WithTotalPages,
 
-        # Include raw response including pagination information
+        # Show the full (raw) response from Cumulocity including pagination information
         [Parameter()]
         [switch]
         $Raw,
 
-        # Outputfile
+        # Write the response to file
         [Parameter()]
         [string]
         $OutputFile,
 
-        # NoProxy
+        # Ignore any proxy settings when running the cmdlet
         [Parameter()]
         [switch]
         $NoProxy,
 
-        # Session path
+        # Specifiy alternative Cumulocity session to use when running the cmdlet
         [Parameter()]
         [string]
         $Session,

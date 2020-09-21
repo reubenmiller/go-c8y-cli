@@ -9,6 +9,7 @@ Get a collection of users based on filter parameters
 
 .EXAMPLE
 PS> Get-UserCollection
+
 Get a list of users
 
 
@@ -20,11 +21,6 @@ Get a list of users
     [Alias()]
     [OutputType([object])]
     Param(
-        # Tenant
-        [Parameter()]
-        [object]
-        $Tenant,
-
         # prefix or full username
         [Parameter()]
         [string]
@@ -65,6 +61,11 @@ Get a list of users
         [switch]
         $WithRoles,
 
+        # Tenant
+        [Parameter()]
+        [object]
+        $Tenant,
+
         # Maximum number of results
         [Parameter()]
         [AllowNull()]
@@ -78,22 +79,22 @@ Get a list of users
         [switch]
         $WithTotalPages,
 
-        # Include raw response including pagination information
+        # Show the full (raw) response from Cumulocity including pagination information
         [Parameter()]
         [switch]
         $Raw,
 
-        # Outputfile
+        # Write the response to file
         [Parameter()]
         [string]
         $OutputFile,
 
-        # NoProxy
+        # Ignore any proxy settings when running the cmdlet
         [Parameter()]
         [switch]
         $NoProxy,
 
-        # Session path
+        # Specifiy alternative Cumulocity session to use when running the cmdlet
         [Parameter()]
         [string]
         $Session,
@@ -106,9 +107,6 @@ Get a list of users
 
     Begin {
         $Parameters = @{}
-        if ($PSBoundParameters.ContainsKey("Tenant")) {
-            $Parameters["tenant"] = $Tenant
-        }
         if ($PSBoundParameters.ContainsKey("Username")) {
             $Parameters["username"] = $Username
         }
@@ -132,6 +130,9 @@ Get a list of users
         }
         if ($PSBoundParameters.ContainsKey("WithRoles")) {
             $Parameters["withRoles"] = $WithRoles
+        }
+        if ($PSBoundParameters.ContainsKey("Tenant")) {
+            $Parameters["tenant"] = $Tenant
         }
         if ($PSBoundParameters.ContainsKey("PageSize")) {
             $Parameters["pageSize"] = $PageSize

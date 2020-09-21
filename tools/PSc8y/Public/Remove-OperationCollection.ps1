@@ -4,8 +4,13 @@ Function Remove-OperationCollection {
 .SYNOPSIS
 Delete a collection of operations
 
+.DESCRIPTION
+Delete a collection of operations using a set of filter criteria. Be careful when deleting operations. Where possible update operations to FAILED (with a failure reason) instead of deleting them as it is easier to track.
+
+
 .EXAMPLE
 PS> Remove-OperationCollection -Device "{{ randomdevice }}" -Status PENDING
+
 Remove all pending operations for a given device
 
 
@@ -44,22 +49,22 @@ Remove all pending operations for a given device
         [string]
         $Status,
 
-        # Include raw response including pagination information
+        # Show the full (raw) response from Cumulocity including pagination information
         [Parameter()]
         [switch]
         $Raw,
 
-        # Outputfile
+        # Write the response to file
         [Parameter()]
         [string]
         $OutputFile,
 
-        # NoProxy
+        # Ignore any proxy settings when running the cmdlet
         [Parameter()]
         [switch]
         $NoProxy,
 
-        # Session path
+        # Specifiy alternative Cumulocity session to use when running the cmdlet
         [Parameter()]
         [string]
         $Session,

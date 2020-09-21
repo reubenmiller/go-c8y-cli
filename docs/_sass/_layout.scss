@@ -67,6 +67,16 @@ body {
 	}
 }
 
+.nav-fixed {
+	position: fixed;
+	overflow: scroll;
+	height: unset;
+
+	@media (min-width: $mobile-break) {
+		height: 100%;
+	}
+}
+
 .main {
 	margin-top: $space + $nav-header-height;
 
@@ -248,12 +258,20 @@ nav > ul {
 		font-size: 1.4rem;
 		padding: $space / 2 0 $space / 2 $space * 2;
 		display: block;
+
+		text-overflow: ellipsis;
+		overflow: hidden;
+		white-space: nowrap;
 	}
 
 	&.current > a,
 	> a:active,
 	> a:hover {
 		color: #111;
+		font-weight: bold;
+		text-overflow: ellipsis;
+		overflow: hidden;
+		white-space: nowrap;
 	}
 
 	&.top-level > a {

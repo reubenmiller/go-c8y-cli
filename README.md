@@ -1,6 +1,6 @@
 # go-c8y-cli
 
-[![Build status](https://ci.appveyor.com/api/projects/status/noc3scu0nfdjdt92?svg=true)](https://ci.appveyor.com/project/reubenmiller/go-c8y-cli)
+![build](https://github.com/reubenmiller/go-c8y-cli/workflows/build/badge.svg)
 
 
 
@@ -17,7 +17,7 @@ Compatible with
 ### PowerShell Module [(PSc8y)](https://www.powershellgallery.com/packages/PSc8y)
 
 ```powershell
-Install-Module PSc8y -AllowClobber -AllowPrerelease
+Install-Module PSc8y -AllowClobber -AllowPrerelease -Scope CurrentUser
 Import-Module PSc8y
 ```
 
@@ -66,3 +66,25 @@ See the [documenation website](https://reubenmiller.github.io/go-c8y-cli/) for i
 
     ./output/c8y.linux
     ```
+
+### Building documentation
+
+1. Build the go and powershell code
+
+    ```sh
+    make build
+    ```
+
+2. Build the powershell markdown documentation
+
+    ```sh
+    make docs-powershell
+    ```
+
+3. Start a webserver to preview the documentation locally
+
+    ```sh
+    make gh_pages
+    ```
+
+4. View the documentation in the [brower](http:/localhost:4000)

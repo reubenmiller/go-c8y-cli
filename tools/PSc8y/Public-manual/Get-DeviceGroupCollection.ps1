@@ -3,6 +3,9 @@ Function Get-DeviceGroupCollection {
 .SYNOPSIS
 Get a collection of device groups
 
+.DESCRIPTION
+Get a collection of device groups. Device groups are used to arrange devices together.
+
 .EXAMPLE
 Get-DeviceGroupCollection -Name *Room*
 
@@ -51,7 +54,7 @@ Get a list of devices groups which have been created more recently than 2020-01-
         [switch]
         $ExcludeRootGroup,
 
-        # include a flat list of all parents and grandparents of the given object
+        # Include a flat list of all parents and grandparents of the given object
         [Parameter()]
         [switch]
         $WithParents,

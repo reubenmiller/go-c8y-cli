@@ -4,8 +4,13 @@ Function Update-EventBinary {
 .SYNOPSIS
 Update event binary
 
+.DESCRIPTION
+Update an existing event binary
+
+
 .EXAMPLE
 PS> Update-EventBinary -Id $Event.id -File $TestFile
+
 Update a binary related to an event
 
 
@@ -29,22 +34,22 @@ Update a binary related to an event
         [string]
         $File,
 
-        # Include raw response including pagination information
+        # Show the full (raw) response from Cumulocity including pagination information
         [Parameter()]
         [switch]
         $Raw,
 
-        # Outputfile
+        # Write the response to file
         [Parameter()]
         [string]
         $OutputFile,
 
-        # NoProxy
+        # Ignore any proxy settings when running the cmdlet
         [Parameter()]
         [switch]
         $NoProxy,
 
-        # Session path
+        # Specifiy alternative Cumulocity session to use when running the cmdlet
         [Parameter()]
         [string]
         $Session,

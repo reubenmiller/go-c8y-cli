@@ -4,8 +4,12 @@ Function Update-User {
 .SYNOPSIS
 Update user
 
+.DESCRIPTION
+Update properties, reset password or enable/disable for a user in a tenant
+
 .EXAMPLE
 PS> Update-User -Id $User.id -FirstName "Simon"
+
 Update a user
 
 
@@ -23,11 +27,6 @@ Update a user
                    ValueFromPipelineByPropertyName=$true)]
         [object[]]
         $Id,
-
-        # Tenant
-        [Parameter()]
-        [object]
-        $Tenant,
 
         # User first name
         [Parameter()]
@@ -70,22 +69,27 @@ Update a user
         [object]
         $CustomProperties,
 
-        # Include raw response including pagination information
+        # Tenant
+        [Parameter()]
+        [object]
+        $Tenant,
+
+        # Show the full (raw) response from Cumulocity including pagination information
         [Parameter()]
         [switch]
         $Raw,
 
-        # Outputfile
+        # Write the response to file
         [Parameter()]
         [string]
         $OutputFile,
 
-        # NoProxy
+        # Ignore any proxy settings when running the cmdlet
         [Parameter()]
         [switch]
         $NoProxy,
 
-        # Session path
+        # Specifiy alternative Cumulocity session to use when running the cmdlet
         [Parameter()]
         [string]
         $Session,
@@ -103,9 +107,6 @@ Update a user
 
     Begin {
         $Parameters = @{}
-        if ($PSBoundParameters.ContainsKey("Tenant")) {
-            $Parameters["tenant"] = $Tenant
-        }
         if ($PSBoundParameters.ContainsKey("FirstName")) {
             $Parameters["firstName"] = $FirstName
         }
@@ -129,6 +130,9 @@ Update a user
         }
         if ($PSBoundParameters.ContainsKey("CustomProperties")) {
             $Parameters["customProperties"] = ConvertTo-JsonArgument $CustomProperties
+        }
+        if ($PSBoundParameters.ContainsKey("Tenant")) {
+            $Parameters["tenant"] = $Tenant
         }
         if ($PSBoundParameters.ContainsKey("OutputFile")) {
             $Parameters["outputFile"] = $OutputFile

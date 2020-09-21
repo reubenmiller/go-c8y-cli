@@ -28,7 +28,8 @@ func newDeleteDeviceCmd() *deleteDeviceCmd {
 	cmd := &cobra.Command{
 		Use:   "delete",
 		Short: "Delete device",
-		Long:  ``,
+		Long: `Delete an existing device by id or name. Deleting the object will remove all of its data (i.e. alarms, events, operations and measurements)
+`,
 		Example: `
 $ c8y devices delete --id 12345
 Get device by id
@@ -39,6 +40,7 @@ Get device by id
 	cmd.SilenceUsage = true
 
 	cmd.Flags().StringSlice("id", []string{""}, "Device ID (required)")
+	cmd.Flags().Bool("cascade", false, "Remove all child devices and child assets will be deleted recursively. By default, the delete operation is propagated to the subgroups only if the deleted object is a group")
 
 	// Required flags
 	cmd.MarkFlagRequired("id")
@@ -53,6 +55,13 @@ func (n *deleteDeviceCmd) deleteDevice(cmd *cobra.Command, args []string) error 
 	// query parameters
 	queryValue := url.QueryEscape("")
 	query := url.Values{}
+	if cmd.Flags().Changed("cascade") {
+		if v, err := cmd.Flags().GetBool("cascade"); err == nil {
+			query.Add("cascade", fmt.Sprintf("%v", v))
+		} else {
+			return newUserError("Flag does not exist")
+		}
+	}
 	if cmd.Flags().Changed("pageSize") {
 		if v, err := cmd.Flags().GetInt("pageSize"); err == nil && v > 0 {
 			query.Add("pageSize", fmt.Sprintf("%d", v))

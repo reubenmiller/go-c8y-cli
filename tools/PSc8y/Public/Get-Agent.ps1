@@ -4,12 +4,17 @@ Function Get-Agent {
 .SYNOPSIS
 Get agent
 
+.DESCRIPTION
+Get an agent's managed object representation
+
 .EXAMPLE
 PS> Get-Agent -Id $agent.id
+
 Get agent by id
 
 .EXAMPLE
 PS> Get-Agent -Id $agent.name
+
 Get agent by name
 
 
@@ -28,22 +33,22 @@ Get agent by name
         [object[]]
         $Id,
 
-        # Include raw response including pagination information
+        # Show the full (raw) response from Cumulocity including pagination information
         [Parameter()]
         [switch]
         $Raw,
 
-        # Outputfile
+        # Write the response to file
         [Parameter()]
         [string]
         $OutputFile,
 
-        # NoProxy
+        # Ignore any proxy settings when running the cmdlet
         [Parameter()]
         [switch]
         $NoProxy,
 
-        # Session path
+        # Specifiy alternative Cumulocity session to use when running the cmdlet
         [Parameter()]
         [string]
         $Session,

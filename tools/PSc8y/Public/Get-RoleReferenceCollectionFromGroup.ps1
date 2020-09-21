@@ -4,8 +4,12 @@ Function Get-RoleReferenceCollectionFromGroup {
 .SYNOPSIS
 Get collection of user role references from a group
 
+.DESCRIPTION
+Get collection of user role references from a group
+
 .EXAMPLE
 PS> Get-RoleReferenceCollectionFromGroup -Group $Group.id
+
 Get a list of role references for a user group
 
 
@@ -17,15 +21,15 @@ Get a list of role references for a user group
     [Alias()]
     [OutputType([object])]
     Param(
-        # Tenant
-        [Parameter()]
-        [object]
-        $Tenant,
-
         # Group id (required)
         [Parameter(Mandatory = $true)]
         [object[]]
         $Group,
+
+        # Tenant
+        [Parameter()]
+        [object]
+        $Tenant,
 
         # Maximum number of results
         [Parameter()]
@@ -40,22 +44,22 @@ Get a list of role references for a user group
         [switch]
         $WithTotalPages,
 
-        # Include raw response including pagination information
+        # Show the full (raw) response from Cumulocity including pagination information
         [Parameter()]
         [switch]
         $Raw,
 
-        # Outputfile
+        # Write the response to file
         [Parameter()]
         [string]
         $OutputFile,
 
-        # NoProxy
+        # Ignore any proxy settings when running the cmdlet
         [Parameter()]
         [switch]
         $NoProxy,
 
-        # Session path
+        # Specifiy alternative Cumulocity session to use when running the cmdlet
         [Parameter()]
         [string]
         $Session,
@@ -68,11 +72,11 @@ Get a list of role references for a user group
 
     Begin {
         $Parameters = @{}
-        if ($PSBoundParameters.ContainsKey("Tenant")) {
-            $Parameters["tenant"] = $Tenant
-        }
         if ($PSBoundParameters.ContainsKey("Group")) {
             $Parameters["group"] = PSc8y\Expand-Id $Group
+        }
+        if ($PSBoundParameters.ContainsKey("Tenant")) {
+            $Parameters["tenant"] = $Tenant
         }
         if ($PSBoundParameters.ContainsKey("PageSize")) {
             $Parameters["pageSize"] = $PageSize

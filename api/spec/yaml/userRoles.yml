@@ -62,6 +62,7 @@ endpoints:
     pathParameters:
       - name: tenant
         type: tenant
+        position: 99
         description: Tenant
 
       - name: user
@@ -108,10 +109,12 @@ endpoints:
 
       - name: tenant
         type: tenant
+        position: 99
         description: Tenant
 
   - name: addRoleToGroup
     description: Add role to a group
+    descriptionLong: Assign a role to a user group
     method: POST
     path: /user/{tenant}/groups/{group}/roles
     accept: application/vnd.com.nsn.cumulocity.roleReference+json
@@ -140,6 +143,7 @@ endpoints:
     pathParameters:
       - name: tenant
         type: tenant
+        position: 99
         description: Tenant
 
       - name: group
@@ -187,6 +191,7 @@ endpoints:
 
       - name: tenant
         type: tenant
+        position: 99
         description: Tenant
 
 
@@ -215,6 +220,7 @@ endpoints:
     pathParameters:
       - name: tenant
         type: tenant
+        position: 99
         description: Tenant
 
       - name: user
@@ -244,6 +250,7 @@ endpoints:
     pathParameters:
       - name: tenant
         type: tenant
+        position: 99
         description: Tenant
 
       - name: group

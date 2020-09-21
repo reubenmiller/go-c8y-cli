@@ -9,10 +9,12 @@ Devices that have not sent any message in the response interval are considered u
 
 .EXAMPLE
 PS> Set-DeviceRequiredAvailability -Device $device.id -Interval 10
+
 Set the required availability of a device by name to 10 minutes
 
 .EXAMPLE
 PS> Get-ManagedObject -Id $device.id | PSc8y\Set-DeviceRequiredAvailability -Interval 10
+
 Set the required availability of a device (using pipeline)
 
 
@@ -36,22 +38,22 @@ Set the required availability of a device (using pipeline)
         [long]
         $Interval,
 
-        # Include raw response including pagination information
+        # Show the full (raw) response from Cumulocity including pagination information
         [Parameter()]
         [switch]
         $Raw,
 
-        # Outputfile
+        # Write the response to file
         [Parameter()]
         [string]
         $OutputFile,
 
-        # NoProxy
+        # Ignore any proxy settings when running the cmdlet
         [Parameter()]
         [switch]
         $NoProxy,
 
-        # Session path
+        # Specifiy alternative Cumulocity session to use when running the cmdlet
         [Parameter()]
         [string]
         $Session,

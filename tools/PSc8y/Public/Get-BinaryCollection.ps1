@@ -4,8 +4,13 @@ Function Get-BinaryCollection {
 .SYNOPSIS
 Get collection of inventory binaries
 
+.DESCRIPTION
+Get a list of inventory binaries. The results include the meta information about binary and not the binary itself.
+
+
 .EXAMPLE
 PS> Get-BinaryCollection -PageSize 100
+
 Get a list of binaries
 
 
@@ -30,22 +35,22 @@ Get a list of binaries
         [switch]
         $WithTotalPages,
 
-        # Include raw response including pagination information
+        # Show the full (raw) response from Cumulocity including pagination information
         [Parameter()]
         [switch]
         $Raw,
 
-        # Outputfile
+        # Write the response to file
         [Parameter()]
         [string]
         $OutputFile,
 
-        # NoProxy
+        # Ignore any proxy settings when running the cmdlet
         [Parameter()]
         [switch]
         $NoProxy,
 
-        # Session path
+        # Specifiy alternative Cumulocity session to use when running the cmdlet
         [Parameter()]
         [string]
         $Session,

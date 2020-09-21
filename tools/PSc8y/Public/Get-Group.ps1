@@ -4,8 +4,12 @@ Function Get-Group {
 .SYNOPSIS
 Create a new group by id
 
+.DESCRIPTION
+Create a new group by id
+
 .EXAMPLE
 PS> Get-Group -Id $Group.id
+
 Get a user group
 
 
@@ -17,33 +21,33 @@ Get a user group
     [Alias()]
     [OutputType([object])]
     Param(
-        # Tenant
-        [Parameter()]
-        [object]
-        $Tenant,
-
         # Group id
         [Parameter(ValueFromPipeline=$true,
                    ValueFromPipelineByPropertyName=$true)]
         [object[]]
         $Id,
 
-        # Include raw response including pagination information
+        # Tenant
+        [Parameter()]
+        [object]
+        $Tenant,
+
+        # Show the full (raw) response from Cumulocity including pagination information
         [Parameter()]
         [switch]
         $Raw,
 
-        # Outputfile
+        # Write the response to file
         [Parameter()]
         [string]
         $OutputFile,
 
-        # NoProxy
+        # Ignore any proxy settings when running the cmdlet
         [Parameter()]
         [switch]
         $NoProxy,
 
-        # Session path
+        # Specifiy alternative Cumulocity session to use when running the cmdlet
         [Parameter()]
         [string]
         $Session,

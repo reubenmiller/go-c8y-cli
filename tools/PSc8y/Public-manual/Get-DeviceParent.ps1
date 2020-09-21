@@ -3,6 +3,9 @@ Function Get-DeviceParent {
 .SYNOPSIS
 Get device parent references for a device
 
+.DESCRIPTION
+Get the parent of a device by using the references stored in the device managed object.
+
 .EXAMPLE
 Get-DeviceParent device0*
 

@@ -1,6 +1,9 @@
 ﻿Function Get-SessionCollection {
 <#
 .SYNOPSIS
+Get a collection of Cumulocity Sessions
+
+.DESCRIPTION
 Get a collection of Cumulocity Sessions found in the home folder under .cumulocity
 
 .EXAMPLE

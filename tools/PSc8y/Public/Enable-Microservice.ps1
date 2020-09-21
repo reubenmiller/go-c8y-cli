@@ -2,10 +2,15 @@
 Function Enable-Microservice {
 <#
 .SYNOPSIS
-Enable microservice
+Enable/subscribe a microservice
+
+.DESCRIPTION
+Enabling (subscribing) a microservice will activate the application in the tenant
+
 
 .EXAMPLE
 PS> Enable-Microservice -Id $App.id
+
 Enable (subscribe) to a microservice
 
 
@@ -17,11 +22,6 @@ Enable (subscribe) to a microservice
     [Alias()]
     [OutputType([object])]
     Param(
-        # Tenant id
-        [Parameter()]
-        [object]
-        $Tenant,
-
         # Microservice id (required)
         [Parameter(Mandatory = $true,
                    ValueFromPipeline=$true,
@@ -29,22 +29,27 @@ Enable (subscribe) to a microservice
         [object[]]
         $Id,
 
-        # Include raw response including pagination information
+        # Tenant id
+        [Parameter()]
+        [object]
+        $Tenant,
+
+        # Show the full (raw) response from Cumulocity including pagination information
         [Parameter()]
         [switch]
         $Raw,
 
-        # Outputfile
+        # Write the response to file
         [Parameter()]
         [string]
         $OutputFile,
 
-        # NoProxy
+        # Ignore any proxy settings when running the cmdlet
         [Parameter()]
         [switch]
         $NoProxy,
 
-        # Session path
+        # Specifiy alternative Cumulocity session to use when running the cmdlet
         [Parameter()]
         [string]
         $Session,

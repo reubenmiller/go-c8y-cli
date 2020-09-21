@@ -28,7 +28,8 @@ func newUpdateDeviceGroupCmd() *updateDeviceGroupCmd {
 	cmd := &cobra.Command{
 		Use:   "updateGroup",
 		Short: "Update device group",
-		Long:  ``,
+		Long: `Update properties of an existing device group, for example name or any other custom properties.
+`,
 		Example: `
 $ c8y devices updateGroup --id 12345
 Update device group by id

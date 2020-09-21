@@ -28,7 +28,7 @@ func newGetOperationCmd() *getOperationCmd {
 	cmd := &cobra.Command{
 		Use:   "get",
 		Short: "Get operation/s",
-		Long:  ``,
+		Long:  `Get an operation by id`,
 		Example: `
 $ c8y operations get --id 12345
 Get operation by id

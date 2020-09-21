@@ -28,7 +28,8 @@ func newGetSupportedSeriesCmd() *getSupportedSeriesCmd {
 	cmd := &cobra.Command{
 		Use:   "getSupportedSeries",
 		Short: "Get supported measurement series/s of a device",
-		Long:  ``,
+		Long: `Returns a list of supported measurement series
+`,
 		Example: `
 $ c8y inventory getSupportedSeries --device 12345
 Get the supported measurement series of a device by name

@@ -28,7 +28,7 @@ func newGetUserCmd() *getUserCmd {
 	cmd := &cobra.Command{
 		Use:   "get",
 		Short: "Get user",
-		Long:  ``,
+		Long:  `Get information about a user`,
 		Example: `
 $ c8y users get --id "myuser"
 Get a user
