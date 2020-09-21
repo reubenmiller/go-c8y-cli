@@ -51,7 +51,7 @@ endpoints:
         powershell: Get-BulkOperation
     pathParameters:
       - name: id
-        type: string
+        type: integer
         required: true
         pipeline: true
         description: Bulk Operation id
@@ -76,7 +76,7 @@ endpoints:
         powershell: Remove-BulkOperation
     pathParameters:
       - name: id
-        type: string
+        type: integer
         required: true
         pipeline: true
         description: Bulk Operation id
@@ -120,19 +120,20 @@ endpoints:
       - name: startDate
         type: datetime
         required: false
+        default: "10s"
         description: Time when operations should be created.
 
       - name: creationRampSec
         property: creationRamp
         type: integer
-        required: false
+        required: true
         description: Delay between every operation creation.
 
       - name: operation
         property: operationPrototype
         type: json_custom
-        required: false
-        description: Delay between every operation creation.
+        required: true
+        description: Operation prototype to send to each device in the group
 
       - name: data
         type: json
@@ -168,7 +169,7 @@ endpoints:
 
     pathParameters:
       - name: id
-        type: string
+        type: integer
         description: Bulk Operation id
         pipeline: true
         required: true
