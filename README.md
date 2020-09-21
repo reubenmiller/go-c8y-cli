@@ -17,7 +17,7 @@ Compatible with
 ### PowerShell Module [(PSc8y)](https://www.powershellgallery.com/packages/PSc8y)
 
 ```powershell
-Install-Module PSc8y -AllowClobber -AllowPrerelease
+Install-Module PSc8y -AllowClobber -AllowPrerelease -Scope CurrentUser
 Import-Module PSc8y
 ```
 
