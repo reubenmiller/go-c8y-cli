@@ -39,13 +39,15 @@ Create operation for a device
 	cmd.SilenceUsage = true
 
 	cmd.Flags().StringSlice("group", []string{""}, "Identifies the target group on which this operation should be performed. (required)")
-	cmd.Flags().String("startDate", "", "Time when operations should be created.")
-	cmd.Flags().Int("creationRampSec", 0, "Delay between every operation creation.")
-	cmd.Flags().String("operation", "", "Delay between every operation creation.")
+	cmd.Flags().String("startDate", "10s", "Time when operations should be created.")
+	cmd.Flags().Int("creationRampSec", 0, "Delay between every operation creation. (required)")
+	cmd.Flags().String("operation", "", "Operation prototype to send to each device in the group (required)")
 	addDataFlag(cmd)
 
 	// Required flags
 	cmd.MarkFlagRequired("group")
+	cmd.MarkFlagRequired("creationRampSec")
+	cmd.MarkFlagRequired("operation")
 
 	ccmd.baseCmd = newBaseCmd(cmd)
 

@@ -9,10 +9,12 @@ Create a new bulk operation
 
 .EXAMPLE
 PS> New-BulkOperation -Group $group.id -StartDate "10s" -CreationRampSec 15 -Operation @{ c8y_Restart = @{} }
+
 Create bulk operation for a group
 
 .EXAMPLE
 PS> Get-DeviceGroup $group.id | New-BulkOperation -StartDate "10s" -CreationRampSec 15 -Operation @{ c8y_Restart = @{} }
+
 Create bulk operation for a group (using pipeline)
 
 
@@ -36,13 +38,13 @@ Create bulk operation for a group (using pipeline)
         [string]
         $StartDate,
 
-        # Delay between every operation creation.
-        [Parameter()]
+        # Delay between every operation creation. (required)
+        [Parameter(Mandatory = $true)]
         [long]
         $CreationRampSec,
 
-        # Delay between every operation creation.
-        [Parameter()]
+        # Operation prototype to send to each device in the group (required)
+        [Parameter(Mandatory = $true)]
         [object]
         $Operation,
 
@@ -51,22 +53,22 @@ Create bulk operation for a group (using pipeline)
         [object]
         $Data,
 
-        # Include raw response including pagination information
+        # Show the full (raw) response from Cumulocity including pagination information
         [Parameter()]
         [switch]
         $Raw,
 
-        # Outputfile
+        # Write the response to file
         [Parameter()]
         [string]
         $OutputFile,
 
-        # NoProxy
+        # Ignore any proxy settings when running the cmdlet
         [Parameter()]
         [switch]
         $NoProxy,
 
-        # Session path
+        # Specifiy alternative Cumulocity session to use when running the cmdlet
         [Parameter()]
         [string]
         $Session,
