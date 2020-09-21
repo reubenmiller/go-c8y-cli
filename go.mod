@@ -6,7 +6,7 @@ require (
 	github.com/google/go-jsonnet v0.14.0
 	github.com/gorilla/websocket v1.4.0
 	github.com/howeyc/gopass v0.0.0-20190910152052-7cb4b85ec19c
-	github.com/karrick/tparse/v2 v2.7.1
+	github.com/karrick/tparse/v2 v2.8.2
 	github.com/manifoldco/promptui v0.3.2
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/op/go-logging v0.0.0-20160315200505-970db520ece7
