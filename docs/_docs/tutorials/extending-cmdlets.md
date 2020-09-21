@@ -129,7 +129,10 @@ Function Invoke-CancelOperations {
 .SYNOPSIS
 Cancel operations which are currently in EXECUTING status
 #>
-    [cmdletbinding()]
+    [cmdletbinding(
+        SupportsShouldProcess = $true,
+        ConfirmImpact = "High"
+    )]
     Param(
         # Device
         [Parameter(
@@ -152,11 +155,17 @@ Cancel operations which are currently in EXECUTING status
                 -Status EXECUTING
             
             if ($operations.Count -gt 0) {
-                Update-Operation `
+                $operations | Update-Operation `
                     -Status FAILED `
                     -FailureReason "Manually cancelled" `
                     -Force:$Force `
-                    -Verbose:$VerbosePreference
+                    -Verbose:$VerbosePreference `
+                    -WhatIf:$WhatIfPreference
+            } else {
+                Write-Warning ("Device [{0} ({1})] does not have any operations in [$Status] status" -f @(
+                    $iDevice.name,
+                    $iDevice.id
+                ))
             }
         }
     }
