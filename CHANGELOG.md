@@ -4,6 +4,10 @@
 
 * Updating tparse library when parsing relative dates. Using a relative date/timestamp of "30" no longer causes a panic.
 
+* Removed unsupported query parameters from Remove-MeasurementCollection
+    * `valueFragmentType`
+    * `valueFragmentSeries`
+
 ## Released
 
 ### v1.2.0
