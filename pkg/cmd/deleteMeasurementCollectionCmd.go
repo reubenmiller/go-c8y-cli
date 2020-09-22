@@ -40,8 +40,6 @@ Delete measurement collection for a device
 
 	cmd.Flags().StringSlice("device", []string{""}, "Device ID")
 	cmd.Flags().String("type", "", "Measurement type.")
-	cmd.Flags().String("valueFragmentType", "", "value fragment type")
-	cmd.Flags().String("valueFragmentSeries", "", "value fragment series")
 	cmd.Flags().String("fragmentType", "", "Fragment name from measurement (deprecated).")
 	cmd.Flags().String("dateFrom", "", "Start date or date and time of measurement occurrence.")
 	cmd.Flags().String("dateTo", "", "End date or date and time of measurement occurrence.")
@@ -81,20 +79,6 @@ func (n *deleteMeasurementCollectionCmd) deleteMeasurementCollection(cmd *cobra.
 		}
 	} else {
 		return newUserError(fmt.Sprintf("Flag [%s] does not exist. %s", "type", err))
-	}
-	if v, err := cmd.Flags().GetString("valueFragmentType"); err == nil {
-		if v != "" {
-			query.Add("valueFragmentType", url.QueryEscape(v))
-		}
-	} else {
-		return newUserError(fmt.Sprintf("Flag [%s] does not exist. %s", "valueFragmentType", err))
-	}
-	if v, err := cmd.Flags().GetString("valueFragmentSeries"); err == nil {
-		if v != "" {
-			query.Add("valueFragmentSeries", url.QueryEscape(v))
-		}
-	} else {
-		return newUserError(fmt.Sprintf("Flag [%s] does not exist. %s", "valueFragmentSeries", err))
 	}
 	if v, err := cmd.Flags().GetString("fragmentType"); err == nil {
 		if v != "" {

@@ -464,11 +464,13 @@
         },
         {
           "name": "valueFragmentType",
+          "skip": true,
           "type": "string",
           "description": "value fragment type"
         },
         {
           "name": "valueFragmentSeries",
+          "skip": true,
           "type": "string",
           "description": "value fragment series"
         },

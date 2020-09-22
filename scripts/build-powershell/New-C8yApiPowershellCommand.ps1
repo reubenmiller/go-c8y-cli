@@ -150,7 +150,9 @@
     }
 
     # (stable) sort argument sources by position to control the expected order on cli
-    $ArgumentSources = $ArgumentSources | Sort-Object -Property position -Stable
+    [array] $ArgumentSources = $ArgumentSources |
+        Sort-Object -Property position -Stable |
+        Where-Object { -Not $_.skip }
 
     foreach ($iArg in $ArgumentSources) {
         $ReadFromPipeline = $iArg.pipeline -or $iArg.name -eq "id" -or $iArg.alias -eq "id"
