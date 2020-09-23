@@ -11,9 +11,9 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/reubenmiller/go-c8y-cli/pkg/jsonUtilities"
 	"github.com/reubenmiller/go-c8y-cli/pkg/zipUtilities"
+	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
 	"github.com/tidwall/pretty"
 )
@@ -169,7 +169,7 @@ func (n *newMicroserviceCmd) doProcedure(cmd *cobra.Command, args []string) erro
 
 			if err != nil {
 				// handle error
-				n.cmd.PrintErrf("failed to uploaded file. %s", err)
+				n.cmd.PrintErrf("failed to upload file. %s", err)
 			}
 		}
 	} else {
