@@ -62,7 +62,7 @@ endpoints:
       - name: name
         type: string
         required: true
-        description: Name of microservice
+        description: Name of microservice (or id if the microservice already exists)
 
       # TODO: Change to optional switch. When not set, then set to the value of name with a "-key" postfix
       - name: key
