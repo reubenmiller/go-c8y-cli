@@ -66,7 +66,7 @@
         <View>
             <Name>Default</Name>
             <ViewSelectedBy>
-                <TypeName>application/vnd.com.nsn.cumulocity.userCollection+json</TypeName>
+                <TypeName>application/vnd.com.nsn.cumulocity.applicationCollection+json</TypeName>
             </ViewSelectedBy>
             <GroupBy>
                 <PropertyName>self</PropertyName>
@@ -104,7 +104,7 @@
                                 <scriptblock>$_.statistics.totalPages</scriptblock>
                             </TableColumnItem>
                             <TableColumnItem>
-                                <PropertyName>users</PropertyName>
+                                <PropertyName>applications</PropertyName>
                             </TableColumnItem>
                         </TableColumnItems>
                     </TableRowEntry>
