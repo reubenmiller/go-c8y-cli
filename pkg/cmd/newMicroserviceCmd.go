@@ -48,9 +48,9 @@ Create new microservice
 	cmd.SilenceUsage = true
 
 	addDataFlag(cmd)
-	cmd.Flags().StringVar(&ccmd.file, "file", "", "Microservice file to be uploaded (required)")
-	cmd.Flags().StringVar(&ccmd.name, "name", "", "Name of application (required)")
-	cmd.Flags().StringVar(&ccmd.key, "key", "", "Shared secret of application (required)")
+	cmd.Flags().StringVar(&ccmd.file, "file", "", "Microservice file to be uploaded (or Cumulocity.json) file")
+	cmd.Flags().StringVar(&ccmd.name, "name", "", "Name of application")
+	cmd.Flags().StringVar(&ccmd.key, "key", "", "Shared secret of application")
 	cmd.Flags().StringVar(&ccmd.availability, "availability", "", "Access level for other tenants. Possible values are : MARKET, PRIVATE (default)")
 	cmd.Flags().StringVar(&ccmd.contextPath, "contextPath", "", "contextPath of the hosted application. Required when application type is HOSTED")
 	cmd.Flags().StringVar(&ccmd.resourceURL, "resourcesUrl", "", "URL to application base directory hosted on an external server. Required when application type is HOSTED")
@@ -109,10 +109,28 @@ func (n *newMicroserviceCmd) getApplicationDetails() *c8y.Application {
 func (n *newMicroserviceCmd) doProcedure(cmd *cobra.Command, args []string) error {
 	var application *c8y.Application
 	var applicationID string
+	var applicationName string
 	var err error
 
-	if cmd.Flags().Lookup("name") != nil {
-		_, idValue, _ := getMicroserviceSlice(cmd, args, "name")
+	applicationDetails := n.getApplicationDetails()
+
+	if applicationDetails != nil {
+		applicationName = applicationDetails.Name
+	}
+
+	if applicationName == "" {
+		return newUserError("Could not detect application name for the given input")
+	}
+
+	if applicationName != "" {
+
+		refs, err := findMicroservices([]string{applicationName}, true)
+
+		if err != nil {
+			return newUserError(err)
+		}
+
+		idValue, _ := getFetchedResultsAsString(refs)
 
 		/* if err != nil {
 			return newUserError("no matching microservices found", idInputValues, err)
@@ -128,7 +146,6 @@ func (n *newMicroserviceCmd) doProcedure(cmd *cobra.Command, args []string) erro
 				}
 			}
 		}
-
 	}
 
 	if err != nil {
@@ -138,7 +155,7 @@ func (n *newMicroserviceCmd) doProcedure(cmd *cobra.Command, args []string) erro
 	if applicationID == "" {
 		// Create the application
 		Logger.Info("Creating new application")
-		application, _, err = client.Application.Create(context.Background(), n.getApplicationDetails())
+		application, _, err = client.Application.Create(context.Background(), applicationDetails)
 
 		if err != nil {
 			return fmt.Errorf("failed to create microservice. %s", err)
@@ -216,8 +233,6 @@ func (n *newMicroserviceCmd) doProcedure(cmd *cobra.Command, args []string) erro
 			})
 		}
 	}
-
-	// TODO: check if already subscribed
 
 	// App subscription
 	if !n.skipSubscription {

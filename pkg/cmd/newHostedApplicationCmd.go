@@ -217,7 +217,7 @@ func (n *newHostedApplicationCmd) doProcedure(cmd *cobra.Command, args []string)
 			context.Background(),
 			applicationID,
 			&c8y.Application{
-				ActiveVersionId: applicationBinaryID,
+				ActiveVersionID: applicationBinaryID,
 			},
 		)
 
