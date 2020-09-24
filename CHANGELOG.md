@@ -8,6 +8,11 @@
     * `valueFragmentType`
     * `valueFragmentSeries`
 
+* Removed deprecated commands
+    `Remove-AuditRecordCollection`
+
+* Updated Pester module to v5
+
 ## Released
 
 ### v1.2.0

@@ -7,6 +7,10 @@ BUILD_DIR = build
 C8Y_PKGS = $$(go list ./... | grep -v /vendor/)
 GOMOD=$(GOCMD) mod
 
+ENV_FILE ?= c8y.env
+-include $(ENV_FILE)
+export $(shell sed 's/=.*//' $(ENV_FILE) 2>/dev/null)
+
 .PHONY: all check-path test race docs install tsurud
 
 all: check-path build test
@@ -138,7 +142,9 @@ build_powershell:
 	pwsh -File scripts/build-powershell/build.ps1;
 
 test_powershell:
-	pwsh -NonInteractive -File tools/PSc8y/tests.ps1
+	pwsh -NonInteractive -File tools/PSc8y/test.parallel.ps1
+	# pwsh -NonInteractive -File tools/PSc8y/tests.ps1
+
 
 publish:
 	pwsh -File ./scripts/build-powershell/publish.ps1
