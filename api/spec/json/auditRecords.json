@@ -246,6 +246,7 @@
       "method": "DELETE",
       "path": "/audit/auditRecords",
       "deprecated": true,
+      "skip": true,
       "alias": {
         "go": "deleteCollection",
         "powershell": "Remove-AuditRecordCollection"
