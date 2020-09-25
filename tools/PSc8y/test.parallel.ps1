@@ -18,7 +18,7 @@ if (!(Test-Path -Path "./reports" )){ $null = New-Item -ItemType directory -Path
 # . "$PSScriptRoot/tools/Invoke-Parallel.ps1"
 
 $Tests = Get-ChildItem "./Tests" -Filter "*.tests.ps*" |
-    Where-Object { $_.Name -match "Group" }
+    Where-Object { $_.Name -match ".*" }
 
 $ThrottleLimit = 5
 
@@ -49,6 +49,8 @@ $results = $Tests | ForEach-Object -ThrottleLimit:$ThrottleLimit -Parallel {
         #     Tag = ""
         # }
     }
+
+    . ./Tests/imports.ps1
 
     $result = Invoke-Pester -Configuration:$PesterConfig
     
