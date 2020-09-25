@@ -8,11 +8,20 @@ Describe -Name "New-Microservice" {
         }
 
         It "Creates a new microservice using the name from the zip file" {
+            # Create copy of example microservice zip file
+            $Name = New-RandomString -Prefix "testms-"
+            $CustomZip = Copy-Item $MicroserviceZip -Destination "${Name}.zip" -PassThru
+
             # Remove microservice (if exists)
-            $Name = (Get-Item $MicroserviceZip).BaseName
             Get-Microservice -Id $Name | Remove-Microservice
 
-            $App = New-Microservice -File $MicroserviceZip
+            $App = New-Microservice -File $CustomZip
+
+            # Remove temp file
+            if ($CustomZip) {
+                Remove-Item $CustomZip -Force
+            }
+
             $LASTEXITCODE | Should -Be 0
             $App | Should -Not -BeNullOrEmpty
             $App.name | Should -BeExactly $Name

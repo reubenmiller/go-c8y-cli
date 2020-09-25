@@ -24,10 +24,14 @@ PS> New-Microservice -Name "myapp" -File "myapp.zip"
 Upload microservice binary with a custom name. Note: If the microservice already exists in the platform
 
 .EXAMPLE
-PS> New-Microservice -Name "myapp" -SkipUpload
+PS> New-Microservice -Name "myapp" -File "./cumulocity.json" -SkipUpload
 
-Create microservice (if it does not already exists). It will not upload the myapp.zip, but the microservice placeholder will
-be created so that bootstrap microservice credentials are created, and can be retrieved using `Get-MicroserviceBootstrapUser` cmdlet.
+Create a microservice placeholder named "myapp" for use for local development of a microservice.
+
+The `-File` parameter is provided with the microserivce's manifest file `cumulocity.json` to set the correct required roles of the bootstrap
+user which will be automatically created by Cumulocity.
+
+The microservice's bootstrap credentials can be retrieved using `Get-MicroserviceBootstrapUser` cmdlet.
 
 This example is usefuly for local development only, when you want to run the microservice locally (not hosted in Cumulocity).
 
