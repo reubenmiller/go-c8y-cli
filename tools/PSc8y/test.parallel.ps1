@@ -20,7 +20,7 @@ if (!(Test-Path -Path "./reports" )){ $null = New-Item -ItemType directory -Path
 $Tests = Get-ChildItem "./Tests" -Filter "*.tests.ps*" |
     Where-Object { $_.Name -match ".*" }
 
-$ThrottleLimit = 5
+$ThrottleLimit = 10
 
 $TestStartTime = Get-Date
 
