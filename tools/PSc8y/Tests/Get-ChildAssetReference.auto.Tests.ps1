@@ -4,7 +4,7 @@ Describe -Name "Get-ChildAssetReference" {
     BeforeEach {
         $Agent = New-TestDevice -AsAgent
         $Device = New-TestDevice
-        $Ref = New-ChildAssetReference -Group $Agent.id -NewChildDevice $Device.id
+        $Ref = Add-AssetToGroup -Group $Agent.id -NewChildDevice $Device.id
 
     }
 

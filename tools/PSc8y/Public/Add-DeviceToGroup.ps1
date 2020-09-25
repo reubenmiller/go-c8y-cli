@@ -1,16 +1,23 @@
 ﻿# Code generated from specification version 1.0.0: DO NOT EDIT
-Function New-ChildAssetReference {
+Function Add-DeviceToGroup {
 <#
 .SYNOPSIS
-Create a child asset (device or devicegroup) reference
+Add a device to an existing group
 
 .DESCRIPTION
-Create a child asset (device or devicegroup) reference
+Assigns a device to a group. The device will be a childAsset of the group
 
 .EXAMPLE
-PS> New-ChildAssetReference -Group $Group1.id -NewChildGroup $Group2.id
+PS> Add-DeviceToGroup -Group $Group.id -NewChildDevice $Device.id
 
-Create group heirachy (parent group -> child group)
+Add a device to a group
+
+.EXAMPLE
+PS> Get-Device $Device1.name, $Device2.name | Add-DeviceToGroup -Group $Group.id
+
+Add multiple devices to a group. Alternatively `Get-DeviceCollection` can be used
+to filter for a collection of devices and assign the results to a single group.
+
 
 
 #>
@@ -21,22 +28,17 @@ Create group heirachy (parent group -> child group)
     [Alias()]
     [OutputType([object])]
     Param(
-        # Group id (required)
+        # Group (required)
+        [Parameter(Mandatory = $true)]
+        [object[]]
+        $Group,
+
+        # New device to be added to the group as an child asset (required)
         [Parameter(Mandatory = $true,
                    ValueFromPipeline=$true,
                    ValueFromPipelineByPropertyName=$true)]
         [object[]]
-        $Group,
-
-        # new child device asset
-        [Parameter()]
-        [object[]]
         $NewChildDevice,
-
-        # new child device group asset
-        [Parameter()]
-        [object[]]
-        $NewChildGroup,
 
         # Show the full (raw) response from Cumulocity including pagination information
         [Parameter()]
@@ -71,11 +73,8 @@ Create group heirachy (parent group -> child group)
 
     Begin {
         $Parameters = @{}
-        if ($PSBoundParameters.ContainsKey("NewChildDevice")) {
-            $Parameters["newChildDevice"] = $NewChildDevice
-        }
-        if ($PSBoundParameters.ContainsKey("NewChildGroup")) {
-            $Parameters["newChildGroup"] = $NewChildGroup
+        if ($PSBoundParameters.ContainsKey("Group")) {
+            $Parameters["group"] = $Group
         }
         if ($PSBoundParameters.ContainsKey("OutputFile")) {
             $Parameters["outputFile"] = $OutputFile
@@ -93,9 +92,9 @@ Create group heirachy (parent group -> child group)
     }
 
     Process {
-        foreach ($item in (PSc8y\Expand-Id $Group)) {
+        foreach ($item in (PSc8y\Expand-Device $NewChildDevice)) {
             if ($item) {
-                $Parameters["group"] = if ($item.id) { $item.id } else { $item }
+                $Parameters["newChildDevice"] = if ($item.id) { $item.id } else { $item }
             }
 
             if (!$Force -and
@@ -109,7 +108,7 @@ Create group heirachy (parent group -> child group)
 
             Invoke-ClientCommand `
                 -Noun "inventoryReferences" `
-                -Verb "createChildAsset" `
+                -Verb "assignDeviceToGroup" `
                 -Parameters $Parameters `
                 -Type "application/vnd.com.nsn.cumulocity.managedObjectReference+json" `
                 -ItemType "application/vnd.com.nsn.cumulocity.managedObject+json" `

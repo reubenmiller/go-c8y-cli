@@ -10,46 +10,50 @@ import (
 	"time"
 
 	"github.com/fatih/color"
-	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/reubenmiller/go-c8y-cli/pkg/encoding"
 	"github.com/reubenmiller/go-c8y-cli/pkg/jsonUtilities"
 	"github.com/reubenmiller/go-c8y-cli/pkg/mapbuilder"
+	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
 	"github.com/tidwall/pretty"
 )
 
-type getGroupReferenceCollectionCmd struct {
+type addGroupToGroupCmd struct {
 	*baseCmd
 }
 
-func newGetGroupReferenceCollectionCmd() *getGroupReferenceCollectionCmd {
-	ccmd := &getGroupReferenceCollectionCmd{}
+func newAddGroupToGroupCmd() *addGroupToGroupCmd {
+	ccmd := &addGroupToGroupCmd{}
 
 	cmd := &cobra.Command{
-		Use:   "getUserMembership",
-		Short: "Get information about all groups that a user is a member of",
-		Long:  ``,
+		Use:   "assignGroupToGroup",
+		Short: "Add a device group to an existing group",
+		Long:  `Assigns a group to a group. The group will be a childAsset of the group`,
 		Example: `
-$ c8y userGroups getUserMembership --user "myuser"
-Get a list of groups that a user belongs to
+$ c8y inventoryReferences assignGroupToGroup --group 12345 --newChildGroup 43234
+Add a group to a group
+
+$ c8y inventoryReferences assignGroupToGroup --group 12345 --newChildGroup 43234, 99292, 12222
+Add multiple groups to a group
 		`,
-		RunE: ccmd.getGroupReferenceCollection,
+		RunE: ccmd.addGroupToGroup,
 	}
 
 	cmd.SilenceUsage = true
 
-	cmd.Flags().String("tenant", "", "Tenant")
-	cmd.Flags().StringSlice("user", []string{""}, "User (required)")
+	cmd.Flags().StringSlice("group", []string{""}, "Group (required)")
+	cmd.Flags().StringSlice("newChildGroup", []string{""}, "New child group to be added to the group as an child asset (required)")
 
 	// Required flags
-	cmd.MarkFlagRequired("user")
+	cmd.MarkFlagRequired("group")
+	cmd.MarkFlagRequired("newChildGroup")
 
 	ccmd.baseCmd = newBaseCmd(cmd)
 
 	return ccmd
 }
 
-func (n *getGroupReferenceCollectionCmd) getGroupReferenceCollection(cmd *cobra.Command, args []string) error {
+func (n *addGroupToGroupCmd) addGroupToGroup(cmd *cobra.Command, args []string) error {
 
 	// query parameters
 	queryValue := url.QueryEscape("")
@@ -79,37 +83,52 @@ func (n *getGroupReferenceCollectionCmd) getGroupReferenceCollection(cmd *cobra.
 
 	// body
 	body := mapbuilder.NewMapBuilder()
-
-	// path parameters
-	pathParameters := make(map[string]string)
-	if v := getTenantWithDefaultFlag(cmd, "tenant", client.TenantName); v != "" {
-		pathParameters["tenant"] = v
-	}
-	if cmd.Flags().Changed("user") {
-		userInputValues, userValue, err := getFormattedUserSlice(cmd, args, "user")
+	body.SetMap(getDataFlag(cmd))
+	if cmd.Flags().Changed("newChildGroup") {
+		newChildGroupInputValues, newChildGroupValue, err := getFormattedDeviceGroupSlice(cmd, args, "newChildGroup")
 
 		if err != nil {
-			return newUserError("no matching users found", userInputValues, err)
+			return newUserError("no matching device groups found", newChildGroupInputValues, err)
 		}
 
-		if len(userValue) == 0 {
-			return newUserError("no matching users found", userInputValues)
+		if len(newChildGroupValue) == 0 {
+			return newUserError("no matching device groups found", newChildGroupInputValues)
 		}
 
-		for _, item := range userValue {
+		for _, item := range newChildGroupValue {
 			if item != "" {
-				pathParameters["user"] = newIDValue(item).GetID()
+				body.Set("managedObject.id", newIDValue(item).GetID())
 			}
 		}
 	}
 
-	path := replacePathParameters("/user/{tenant}/users/{user}/groups", pathParameters)
+	// path parameters
+	pathParameters := make(map[string]string)
+	if cmd.Flags().Changed("group") {
+		groupInputValues, groupValue, err := getFormattedDeviceGroupSlice(cmd, args, "group")
+
+		if err != nil {
+			return newUserError("no matching device groups found", groupInputValues, err)
+		}
+
+		if len(groupValue) == 0 {
+			return newUserError("no matching device groups found", groupInputValues)
+		}
+
+		for _, item := range groupValue {
+			if item != "" {
+				pathParameters["id"] = newIDValue(item).GetID()
+			}
+		}
+	}
+
+	path := replacePathParameters("inventory/managedObjects/{id}/childAssets", pathParameters)
 
 	// filter and selectors
 	filters := getFilterFlag(cmd, "filter")
 
 	req := c8y.RequestOptions{
-		Method:       "GET",
+		Method:       "POST",
 		Path:         path,
 		Query:        queryValue,
 		Body:         body.GetMap(),
@@ -127,10 +146,10 @@ func (n *getGroupReferenceCollectionCmd) getGroupReferenceCollection(cmd *cobra.
 		return err
 	}
 
-	return n.doGetGroupReferenceCollection(req, outputfile, filters)
+	return n.doAddGroupToGroup(req, outputfile, filters)
 }
 
-func (n *getGroupReferenceCollectionCmd) doGetGroupReferenceCollection(req c8y.RequestOptions, outputfile string, filters *JSONFilters) error {
+func (n *addGroupToGroupCmd) doAddGroupToGroup(req c8y.RequestOptions, outputfile string, filters *JSONFilters) error {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(globalFlagTimeout)*time.Millisecond)
 	defer cancel()
 	start := time.Now()
@@ -186,7 +205,7 @@ func (n *getGroupReferenceCollectionCmd) doGetGroupReferenceCollection(req c8y.R
 		isJSONResponse := jsonUtilities.IsValidJSON([]byte(*resp.JSONData))
 
 		if isJSONResponse && filters != nil && !globalFlagRaw {
-			responseText = filters.Apply(*resp.JSONData, "references.group")
+			responseText = filters.Apply(*resp.JSONData, "managedObject")
 		} else {
 			responseText = []byte(*resp.JSONData)
 		}

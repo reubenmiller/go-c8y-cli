@@ -12,7 +12,7 @@ title: Inventory
 $Group = New-ManagedObject -Name "Reuben" -Data @{ c8y_IsDeviceGroup = @{} }
 $Device = New-ManagedObject -Name "Device01" -Data @{ c8y_IsDevice = @{} }
 
-New-ChildAssetReference -Group $Group -NewChildDevice $Device
+Add-DeviceToGroup -Group $Group -NewChildDevice $Device
 ```
 
 ## Update

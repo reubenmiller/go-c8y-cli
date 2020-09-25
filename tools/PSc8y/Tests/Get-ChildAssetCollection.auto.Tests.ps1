@@ -4,10 +4,10 @@ Describe -Name "Get-ChildAssetCollection" {
     BeforeEach {
         $Device = PSc8y\New-TestDevice
         $ChildDevice = PSc8y\New-TestDevice
-        PSc8y\New-ChildAssetReference -Group $Device.id -NewChildDevice $ChildDevice.id
+        PSc8y\Add-AssetToGroup -Group $Device.id -NewChildDevice $ChildDevice.id
         $Group = PSc8y\New-TestDeviceGroup
         $ChildGroup = PSc8y\New-TestDeviceGroup
-        PSc8y\New-ChildAssetReference -Group $Group.id -NewChildGroup $ChildGroup.id
+        PSc8y\Add-AssetToGroup -Group $Group.id -NewChildGroup $ChildGroup.id
 
     }
 

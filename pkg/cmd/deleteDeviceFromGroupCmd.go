@@ -18,31 +18,31 @@ import (
 	"github.com/tidwall/pretty"
 )
 
-type deleteManagedObjectChildDeviceReferenceCmd struct {
+type deleteDeviceFromGroupCmd struct {
 	*baseCmd
 }
 
-func newDeleteManagedObjectChildDeviceReferenceCmd() *deleteManagedObjectChildDeviceReferenceCmd {
-	ccmd := &deleteManagedObjectChildDeviceReferenceCmd{}
+func newDeleteDeviceFromGroupCmd() *deleteDeviceFromGroupCmd {
+	ccmd := &deleteDeviceFromGroupCmd{}
 
 	cmd := &cobra.Command{
-		Use:   "unassignChildDevice",
-		Short: "Delete child device reference",
-		Long:  ``,
+		Use:   "unassignDeviceFromGroup",
+		Short: "Delete child asset reference",
+		Long:  `Unassign a device from a group`,
 		Example: `
-$ c8y inventoryReferences unassignChildDevice --device 12345 --childDevice 22553
+$ c8y inventoryReferences unassignDeviceFromGroup --group 12345 --childDevice 22553
 Unassign a child device from its parent device
 		`,
-		RunE: ccmd.deleteManagedObjectChildDeviceReference,
+		RunE: ccmd.deleteDeviceFromGroup,
 	}
 
 	cmd.SilenceUsage = true
 
-	cmd.Flags().StringSlice("device", []string{""}, "ManagedObject id (required)")
-	cmd.Flags().StringSlice("childDevice", []string{""}, "Child device reference (required)")
+	cmd.Flags().StringSlice("group", []string{""}, "Asset id (required)")
+	cmd.Flags().StringSlice("childDevice", []string{""}, "Child device (required)")
 
 	// Required flags
-	cmd.MarkFlagRequired("device")
+	cmd.MarkFlagRequired("group")
 	cmd.MarkFlagRequired("childDevice")
 
 	ccmd.baseCmd = newBaseCmd(cmd)
@@ -50,7 +50,7 @@ Unassign a child device from its parent device
 	return ccmd
 }
 
-func (n *deleteManagedObjectChildDeviceReferenceCmd) deleteManagedObjectChildDeviceReference(cmd *cobra.Command, args []string) error {
+func (n *deleteDeviceFromGroupCmd) deleteDeviceFromGroup(cmd *cobra.Command, args []string) error {
 
 	// query parameters
 	queryValue := url.QueryEscape("")
@@ -83,20 +83,20 @@ func (n *deleteManagedObjectChildDeviceReferenceCmd) deleteManagedObjectChildDev
 
 	// path parameters
 	pathParameters := make(map[string]string)
-	if cmd.Flags().Changed("device") {
-		deviceInputValues, deviceValue, err := getFormattedDeviceSlice(cmd, args, "device")
+	if cmd.Flags().Changed("group") {
+		groupInputValues, groupValue, err := getFormattedDeviceGroupSlice(cmd, args, "group")
 
 		if err != nil {
-			return newUserError("no matching devices found", deviceInputValues, err)
+			return newUserError("no matching device groups found", groupInputValues, err)
 		}
 
-		if len(deviceValue) == 0 {
-			return newUserError("no matching devices found", deviceInputValues)
+		if len(groupValue) == 0 {
+			return newUserError("no matching device groups found", groupInputValues)
 		}
 
-		for _, item := range deviceValue {
+		for _, item := range groupValue {
 			if item != "" {
-				pathParameters["device"] = newIDValue(item).GetID()
+				pathParameters["group"] = newIDValue(item).GetID()
 			}
 		}
 	}
@@ -113,12 +113,12 @@ func (n *deleteManagedObjectChildDeviceReferenceCmd) deleteManagedObjectChildDev
 
 		for _, item := range childDeviceValue {
 			if item != "" {
-				pathParameters["childDevice"] = newIDValue(item).GetID()
+				pathParameters["reference"] = newIDValue(item).GetID()
 			}
 		}
 	}
 
-	path := replacePathParameters("inventory/managedObjects/{device}/childDevices/{childDevice}", pathParameters)
+	path := replacePathParameters("inventory/managedObjects/{group}/childAssets/{reference}", pathParameters)
 
 	// filter and selectors
 	filters := getFilterFlag(cmd, "filter")
@@ -142,10 +142,10 @@ func (n *deleteManagedObjectChildDeviceReferenceCmd) deleteManagedObjectChildDev
 		return err
 	}
 
-	return n.doDeleteManagedObjectChildDeviceReference(req, outputfile, filters)
+	return n.doDeleteDeviceFromGroup(req, outputfile, filters)
 }
 
-func (n *deleteManagedObjectChildDeviceReferenceCmd) doDeleteManagedObjectChildDeviceReference(req c8y.RequestOptions, outputfile string, filters *JSONFilters) error {
+func (n *deleteDeviceFromGroupCmd) doDeleteDeviceFromGroup(req c8y.RequestOptions, outputfile string, filters *JSONFilters) error {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(globalFlagTimeout)*time.Millisecond)
 	defer cancel()
 	start := time.Now()

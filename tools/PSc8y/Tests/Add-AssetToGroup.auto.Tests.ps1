@@ -1,6 +1,6 @@
 ﻿. $PSScriptRoot/imports.ps1
 
-Describe -Name "New-ChildAssetReference" {
+Describe -Name "Add-AssetToGroup" {
     BeforeEach {
         $Group1 = PSc8y\New-TestDeviceGroup
         $Group2 = PSc8y\New-TestDeviceGroup
@@ -8,7 +8,7 @@ Describe -Name "New-ChildAssetReference" {
     }
 
     It "Create group heirachy (parent group -> child group)" {
-        $Response = PSc8y\New-ChildAssetReference -Group $Group1.id -NewChildGroup $Group2.id
+        $Response = PSc8y\Add-AssetToGroup -Group $Group1.id -NewChildGroup $Group2.id
         $LASTEXITCODE | Should -Be 0
         $Response | Should -Not -BeNullOrEmpty
     }

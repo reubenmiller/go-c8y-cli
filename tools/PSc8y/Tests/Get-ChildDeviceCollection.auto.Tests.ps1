@@ -4,7 +4,7 @@ Describe -Name "Get-ChildDeviceCollection" {
     BeforeEach {
         $Device = PSc8y\New-TestDevice
         $ChildDevice = PSc8y\New-TestDevice
-        PSc8y\New-ChildDeviceReference -Device $Device.id -NewChild $ChildDevice.id
+        PSc8y\Add-ChildDeviceToDevice -Device $Device.id -NewChild $ChildDevice.id
 
     }
 

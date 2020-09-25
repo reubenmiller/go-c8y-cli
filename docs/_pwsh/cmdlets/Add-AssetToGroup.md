@@ -5,18 +5,18 @@ layout: powershell
 Module Name: PSc8y
 online version:
 schema: 2.0.0
-title: New-ChildAssetReference
+title: Add-AssetToGroup
 ---
 
-# New-ChildAssetReference
+# Add-AssetToGroup
 
 ## SYNOPSIS
-Create a child asset (device or devicegroup) reference
+Add a group or device as an asset to an existing group
 
 ## SYNTAX
 
 ```
-New-ChildAssetReference
+Add-AssetToGroup
 	[-Group] <Object[]>
 	[[-NewChildDevice] <Object[]>]
 	[[-NewChildGroup] <Object[]>]
@@ -32,13 +32,13 @@ New-ChildAssetReference
 ```
 
 ## DESCRIPTION
-Create a child asset (device or devicegroup) reference
+Assigns a group or device to an existing group and marks them as assets
 
 ## EXAMPLES
 
 ### EXAMPLE 1
 ```
-New-ChildAssetReference -Group $Group1.id -NewChildGroup $Group2.id
+Add-AssetToGroup -Group $Group1.id -NewChildGroup $Group2.id
 ```
 
 Create group heirachy (parent group -\> child group)
@@ -46,7 +46,7 @@ Create group heirachy (parent group -\> child group)
 ## PARAMETERS
 
 ### -Group
-Group id (required)
+Group (required)
 
 ```yaml
 Type: Object[]
@@ -61,7 +61,7 @@ Accept wildcard characters: False
 ```
 
 ### -NewChildDevice
-new child device asset
+New child device to be added to the group as an asset
 
 ```yaml
 Type: Object[]
@@ -76,7 +76,7 @@ Accept wildcard characters: False
 ```
 
 ### -NewChildGroup
-new child device group asset
+New child device group to be added to the group as an asset
 
 ```yaml
 Type: Object[]

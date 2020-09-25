@@ -1,14 +1,14 @@
 ﻿# Code generated from specification version 1.0.0: DO NOT EDIT
-Function Remove-ChildAssetReference {
+Function Remove-AssetFromGroup {
 <#
 .SYNOPSIS
 Delete child asset reference
 
 .DESCRIPTION
-Delete child asset reference
+Unassign an asset (device or group) from a group
 
 .EXAMPLE
-PS> Remove-ChildAssetReference -Asset $Group.id -ChildDevice $ChildDevice.id
+PS> Remove-AssetFromGroup -Group $Group.id -ChildDevice $ChildDevice.id
 
 Unassign a child device from its parent asset
 
@@ -26,7 +26,7 @@ Unassign a child device from its parent asset
                    ValueFromPipeline=$true,
                    ValueFromPipelineByPropertyName=$true)]
         [object[]]
-        $Asset,
+        $Group,
 
         # Child device
         [Parameter()]
@@ -93,9 +93,9 @@ Unassign a child device from its parent asset
     }
 
     Process {
-        foreach ($item in (PSc8y\Expand-Device $Asset)) {
+        foreach ($item in (PSc8y\Expand-Device $Group)) {
             if ($item) {
-                $Parameters["asset"] = if ($item.id) { $item.id } else { $item }
+                $Parameters["group"] = if ($item.id) { $item.id } else { $item }
             }
 
             if (!$Force -and
@@ -109,7 +109,7 @@ Unassign a child device from its parent asset
 
             Invoke-ClientCommand `
                 -Noun "inventoryReferences" `
-                -Verb "deleteChildAsset" `
+                -Verb "unassignAssetFromGroup" `
                 -Parameters $Parameters `
                 -Type "" `
                 -ItemType "" `

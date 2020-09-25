@@ -26,11 +26,11 @@ func newDeleteManagedObjectChildAssetReferenceCmd() *deleteManagedObjectChildAss
 	ccmd := &deleteManagedObjectChildAssetReferenceCmd{}
 
 	cmd := &cobra.Command{
-		Use:   "deleteChildAsset",
+		Use:   "unassignAssetFromGroup",
 		Short: "Delete child asset reference",
 		Long:  ``,
 		Example: `
-$ c8y inventoryReferences deleteChildDevice --device 12345 --childDevice 22553
+$ c8y inventoryReferences unassignAssetFromGroup --group 12345 --childDevice 22553
 Unassign a child device from its parent device
 		`,
 		RunE: ccmd.deleteManagedObjectChildAssetReference,
@@ -38,12 +38,12 @@ Unassign a child device from its parent device
 
 	cmd.SilenceUsage = true
 
-	cmd.Flags().StringSlice("asset", []string{""}, "Asset id (required)")
+	cmd.Flags().StringSlice("group", []string{""}, "Asset id (required)")
 	cmd.Flags().StringSlice("childDevice", []string{""}, "Child device")
 	cmd.Flags().StringSlice("childGroup", []string{""}, "Child device group")
 
 	// Required flags
-	cmd.MarkFlagRequired("asset")
+	cmd.MarkFlagRequired("group")
 
 	ccmd.baseCmd = newBaseCmd(cmd)
 
@@ -83,20 +83,20 @@ func (n *deleteManagedObjectChildAssetReferenceCmd) deleteManagedObjectChildAsse
 
 	// path parameters
 	pathParameters := make(map[string]string)
-	if cmd.Flags().Changed("asset") {
-		assetInputValues, assetValue, err := getFormattedDeviceSlice(cmd, args, "asset")
+	if cmd.Flags().Changed("group") {
+		groupInputValues, groupValue, err := getFormattedDeviceGroupSlice(cmd, args, "group")
 
 		if err != nil {
-			return newUserError("no matching devices found", assetInputValues, err)
+			return newUserError("no matching device groups found", groupInputValues, err)
 		}
 
-		if len(assetValue) == 0 {
-			return newUserError("no matching devices found", assetInputValues)
+		if len(groupValue) == 0 {
+			return newUserError("no matching device groups found", groupInputValues)
 		}
 
-		for _, item := range assetValue {
+		for _, item := range groupValue {
 			if item != "" {
-				pathParameters["asset"] = newIDValue(item).GetID()
+				pathParameters["group"] = newIDValue(item).GetID()
 			}
 		}
 	}
@@ -135,7 +135,7 @@ func (n *deleteManagedObjectChildAssetReferenceCmd) deleteManagedObjectChildAsse
 		}
 	}
 
-	path := replacePathParameters("inventory/managedObjects/{asset}/childAssets/{reference}", pathParameters)
+	path := replacePathParameters("inventory/managedObjects/{group}/childAssets/{reference}", pathParameters)
 
 	// filter and selectors
 	filters := getFilterFlag(cmd, "filter")
