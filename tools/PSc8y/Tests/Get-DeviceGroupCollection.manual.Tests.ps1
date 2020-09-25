@@ -2,9 +2,11 @@
 
 Describe -Name "Get-DeviceGroupCollection" {
     Context "Device groups with spaces in their names" {
-        $RandomPart = New-RandomString
-        $Group01 = New-TestDeviceGroup -Name "My Custom Group $RandomPart" -Type Group
-        $Group02 = New-TestDeviceGroup -Name "My Custom Group $RandomPart" -Type SubGroup
+        BeforeAll {
+            $RandomPart = New-RandomString
+            $Group01 = New-TestDeviceGroup -Name "My Custom Group $RandomPart" -Type Group
+            $Group02 = New-TestDeviceGroup -Name "My Custom Group $RandomPart" -Type SubGroup
+        }
 
         It "Find device groups by name" {
             $Response = PSc8y\Get-DeviceGroupCollection -Name "*My Custom Group ${RandomPart}*" -PageSize 5
@@ -32,7 +34,9 @@ Describe -Name "Get-DeviceGroupCollection" {
             $Response[0].name | Should -BeExactly $Group01.name
         }
 
-        $null = Remove-ManagedObject -Id $Group01.id -ErrorAction SilentlyContinue 2>&1
-        $null = Remove-ManagedObject -Id $Group02.id -ErrorAction SilentlyContinue 2>&1
+        AfterAll {
+            $null = Remove-ManagedObject -Id $Group01.id -ErrorAction SilentlyContinue 2>&1
+            $null = Remove-ManagedObject -Id $Group02.id -ErrorAction SilentlyContinue 2>&1
+        }
     }
 }

@@ -2,7 +2,9 @@
 
 Describe -Name "Update-Group" {
     Context "Existing groups" {
-        $Group1 = New-TestGroup -Name "tempGroup1"
+        BeforeEach {
+            $Group1 = New-TestGroup -Name "tempGroup1"
+        }
 
         It "Get a group (using pipeline)" {
             $NewName = New-RandomString -Prefix "updateGroupName1"
@@ -13,6 +15,8 @@ Describe -Name "Update-Group" {
             $Response.name | Should -BeExactly $NewName
         }
 
-        $null = Remove-Group -Id $Group1.id
+        AfterEach {
+            $null = Remove-Group -Id $Group1.id
+        }
     }
 }
