@@ -2,7 +2,14 @@
 
 ## Unreleased
 
-* Updating tparse library when parsing relative dates. Using a relative date/timestamp of "30" no longer causes a panic.
+
+## Released
+
+### v1.3.0
+
+**PSc8y (PowerShell)**
+
+* Using a relative date/timestamp of "30" no longer causes a panic when using `DateFrom` and `DateTo` parameters
 
 * Removed unsupported query parameters from Remove-MeasurementCollection
     * `valueFragmentType`
@@ -11,17 +18,14 @@
 * Removed deprecated commands
     `Remove-AuditRecordCollection`
 
+* Fixed `New-Microservice` cmdlet and updated the examples. Resolves #14
+
+**Build Improvements**
+
 * Updated Pester module to v5
-
-* Fixed `New-Microservice` cmdlet
-
 * Updated `go-c8y` dependency to 0.8.0
-
 * Enabled ci test runner
-
 * Added parallel powershell tests execution to reduce test execution times
-
-## Released
 
 ### v1.2.0
 

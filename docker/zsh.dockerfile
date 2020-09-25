@@ -4,7 +4,7 @@ RUN apk update \
     && apk add curl unzip zsh git \
     && adduser -S c8yuser
 
-RUN curl -L https://www.powershellgallery.com/api/v2/package/PSc8y/1.2.0 -o c8y.zip \
+RUN curl -L https://www.powershellgallery.com/api/v2/package/PSc8y/1.3.0 -o c8y.zip \
     && unzip -p c8y.zip Dependencies/c8y.linux > /usr/bin/c8y \
     && chmod +x /usr/bin/c8y \
     && rm c8y.zip
