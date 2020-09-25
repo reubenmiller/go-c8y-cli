@@ -19,6 +19,10 @@ $env:C8Y_USE_ENVIRONMENT = "on"
 $PSDefaultParameterValues = @{
 	"*:Confirm" = $false;
 	"*:Force" = $true;
+
+	# required when using PowershellCore on linux
+	# otherwise it will generate errors "You do not have sufficient access rights to perform this operation or the item is hidden, system, or read only."
+	"Remove-Item:Force" = $true;
 }
 
 $TenantInfo = Get-CurrentTenant
