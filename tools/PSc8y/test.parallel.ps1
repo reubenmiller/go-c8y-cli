@@ -12,7 +12,9 @@ $originalLocaltion = Get-Location
 Set-Location $PSScriptRoot
 
 # Create the artifacts folder if not present
-if (!(Test-Path -Path "./reports" )){ $null = New-Item -ItemType directory -Path "./reports"}
+if (!(Test-Path -Path "./reports" )) {
+    $null = New-Item -ItemType directory -Path "./reports"
+}
 
 # Dot source the invoke-parallel script
 # . "$PSScriptRoot/tools/Invoke-Parallel.ps1"
@@ -32,22 +34,23 @@ $results = $Tests | ForEach-Object -ThrottleLimit:$ThrottleLimit -Parallel {
 
     Write-Host ("Starting file: {0}" -f $_.Name) -ForegroundColor Gray
 
+    $ReportOutput = "./reports/Report_$($_.BaseName)_Pester.xml"
+
     $PesterConfig = [PesterConfiguration]@{
         Run = @{
             Path = $_.FullName
-            Exit = $true
+            Exit = $false
             PassThru = $true
         }
         Output = @{
             Verbosity = "Diagnostic"
         }
         TestResult = @{
-            OutputFile = "./reports/Test-$($_.Name)_Pester.xml"
+            Enabled = $true
+            TestSuiteName = $_.Name
+            OutputPath = $ReportOutput
             OutputFormat = "NUnitXml"
         }
-        # Filter = @{
-        #     Tag = ""
-        # }
     }
 
     . ./Tests/imports.ps1
@@ -55,11 +58,9 @@ $results = $Tests | ForEach-Object -ThrottleLimit:$ThrottleLimit -Parallel {
     $result = Invoke-Pester -Configuration:$PesterConfig
     
     if ($result.FailedCount -gt 0) {
-        Rename-item "./reports/Test-$($_.Name)_Pester.xml" -NewName "Failed.Test-$($_.Name)_Pester.xml" -Force
+        Rename-item $ReportOutput -NewName "Failed_$($_.BaseName)_Pester.xml" -Force
         Write-Host ("Failed test: " -f $_.Name) -ForegroundColor Red
     }
-    
-    $result
 
     Write-Host ("Finished file: {0} - Failed count {1}" -f $_.Name, $result.FailedCount) -ForegroundColor Gray
 }
