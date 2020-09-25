@@ -35,7 +35,7 @@ endpoints:
           beforeEach:
             - $Agent = New-TestAgent
             - $Device = New-TestDevice
-            - New-ChildDeviceReference -Device $Agent.id -NewChild $Device.id
+            - Add-ChildDeviceToDevice -Device $Agent.id -NewChild $Device.id
             - $Operation2 = PSc8y\New-TestOperation -Device $Device.id
           command: Get-OperationCollection -Device $Device.id -Status PENDING
           afterEach:
