@@ -13,6 +13,14 @@
 
 * Updated Pester module to v5
 
+* Fixed `New-Microservice` cmdlet
+
+* Updated `go-c8y` dependency to 0.8.0
+
+* Enabled ci test runner
+
+* Added parallel powershell tests execution to reduce test execution times
+
 ## Released
 
 ### v1.2.0
