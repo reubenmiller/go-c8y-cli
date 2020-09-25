@@ -194,7 +194,6 @@ FunctionsToExport = @(
 	'Remove-Agent',
 	'Remove-AlarmCollection',
 	'Remove-Application',
-	'Remove-AuditRecordCollection',
 	'Remove-Binary',
 	'Remove-ChildAssetReference',
 	'Remove-ChildDeviceReference',

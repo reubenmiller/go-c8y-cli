@@ -2,9 +2,11 @@
 
 Describe -Name "Get-AgentCollection" {
     Context "Agents with spaces in their names" {
-        $RandomPart = New-RandomString
-        $Agent01 = New-TestAgent -Name "My Custom Agent $RandomPart"
-        $Agent02 = New-TestAgent -Name "My Custom Agent $RandomPart"
+        BeforeAll {
+            $RandomPart = New-RandomString
+            $Agent01 = New-TestAgent -Name "My Custom Agent $RandomPart"
+            $Agent02 = New-TestAgent -Name "My Custom Agent $RandomPart"
+        }
 
         It "Find devices by name" {
             $Response = PSc8y\Get-AgentCollection -Name "*My Custom Agent ${RandomPart}*" -PageSize 5
@@ -14,7 +16,9 @@ Describe -Name "Get-AgentCollection" {
             $Response.Count | Should -BeExactly 2
         }
 
-        $null = Remove-ManagedObject -Id $Agent01.id -ErrorAction SilentlyContinue 2>&1
-        $null = Remove-ManagedObject -Id $Agent02.id -ErrorAction SilentlyContinue 2>&1
+        AfterAll {
+            $null = Remove-ManagedObject -Id $Agent01.id -ErrorAction SilentlyContinue 2>&1
+            $null = Remove-ManagedObject -Id $Agent02.id -ErrorAction SilentlyContinue 2>&1
+        }
     }
 }

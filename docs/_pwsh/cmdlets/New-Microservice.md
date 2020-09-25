@@ -35,16 +35,47 @@ New-Microservice
 ```
 
 ## DESCRIPTION
-Create a new microservice.
+Create a new microservice or upload a new microservice binary to an already running microservice.
+By default the microservice will
+also be subscribed to/enabled.
+
 The zip file needs to follow the Cumulocity Microservice format.
+
+This cmdlet has several operations
 
 ## EXAMPLES
 
 ### EXAMPLE 1
 ```
-New-Microservice -Name "myapp" -File "myapp.zip"
-Upload microservice binary
+New-Microservice -File "myapp.zip"
 ```
+
+Upload microservice binary.
+The name of the microservice will be named after the zip file name (without the extension)
+
+If the microservice already exists, then the only the microservice binary will be updated.
+
+### EXAMPLE 2
+```
+New-Microservice -Name "myapp" -File "myapp.zip"
+```
+
+Upload microservice binary with a custom name.
+Note: If the microservice already exists in the platform
+
+### EXAMPLE 3
+```
+New-Microservice -Name "myapp" -File "./cumulocity.json" -SkipUpload
+```
+
+Create a microservice placeholder named "myapp" for use for local development of a microservice.
+
+The `-File` parameter is provided with the microserivce's manifest file `cumulocity.json` to set the correct required roles of the bootstrap
+user which will be automatically created by Cumulocity.
+
+The microservice's bootstrap credentials can be retrieved using `Get-MicroserviceBootstrapUser` cmdlet.
+
+This example is usefuly for local development only, when you want to run the microservice locally (not hosted in Cumulocity).
 
 ## PARAMETERS
 
@@ -64,7 +95,8 @@ Accept wildcard characters: False
 ```
 
 ### -Name
-File to be uploaded as a binary (required)
+Name of the microservice.
+An id is also accepted however the name have been previously uploaded.
 
 ```yaml
 Type: String
@@ -127,7 +159,9 @@ Accept wildcard characters: False
 ```
 
 ### -SkipUpload
-Skip the uploading of the application binary
+Skip the uploading of the microservice binary.
+This is helpful if you want to run the microservice locally
+and you only need the microservice place holder in order to create microservice bootstrap credentials.
 
 ```yaml
 Type: SwitchParameter
@@ -142,7 +176,7 @@ Accept wildcard characters: False
 ```
 
 ### -SkipSubscription
-Don't subscribe to the application after it has been created and uploaded
+Don't subscribe to the microservice after it has been created and uploaded
 
 ```yaml
 Type: SwitchParameter

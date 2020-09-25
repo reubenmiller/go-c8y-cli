@@ -18,9 +18,9 @@ PS> Get-TenantStatisticsCollection -DateFrom "-30d" -PageSize 30
 Get tenant statistics collection for the last 30 days
 
 .EXAMPLE
-PS> Get-TenantStatisticsCollection -DateFrom "-10d" -DateTo "-9d"
+PS> Get-TenantStatisticsCollection -DateFrom "-3d" -DateTo "-2d"
 
-Get tenant statistics collection for the last 10 days, only return until the last 9 days
+Get tenant statistics collection for the day before yesterday
 
 
 #>

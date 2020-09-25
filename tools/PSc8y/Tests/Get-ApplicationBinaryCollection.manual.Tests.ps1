@@ -1,8 +1,10 @@
-. $PSScriptRoot/imports.ps1
+#. $PSScriptRoot/imports.ps1
 
 Describe -Name "Get-ApplicationBinaryCollection" {
     Context "existing web application" {
-        $application = New-TestHostedApplication
+        BeforeAll {
+            $application = New-TestHostedApplication
+        }
 
         It -Skip "Gets a list of binaries for a given application" {
             $application.id | Should -Not -BeNullOrEmpty
@@ -15,8 +17,10 @@ Describe -Name "Get-ApplicationBinaryCollection" {
             $application.activeVersionId | Should -BeExactly $response[0].id
         }
 
-        if ($application) {
-            PSc8y\Remove-Application -Id $application.id
+        AfterAll {
+            if ($application) {
+                PSc8y\Remove-Application -Id $application.id
+            }
         }
     }
 }

@@ -2,8 +2,10 @@
 
 Describe -Name "Get-Group" {
     Context "Existing groups" {
-        $Group1 = New-TestGroup -Name "tempGroup1"
-        $Group2 = New-TestGroup -Name "tempGroup1"
+        BeforeEach {
+            $Group1 = New-TestGroup -Name "tempGroup1"
+            $Group2 = New-TestGroup -Name "tempGroup1"
+        }
 
         It "Get a group (using pipeline)" {
             $Response = $Group1, $Group2 | PSc8y\Get-Group
@@ -14,7 +16,9 @@ Describe -Name "Get-Group" {
             $Response[1].id | Should -BeExactly $Group2.id
         }
 
-        $null = Remove-Group -Id $Group1.id
-        $null = Remove-Group -Id $Group2.id
+        AfterEach {
+            $null = Remove-Group -Id $Group1.id
+            $null = Remove-Group -Id $Group2.id
+        }
     }
 }

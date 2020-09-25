@@ -5,12 +5,12 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"os"
 	"path/filepath"
 	"regexp"
-	"os"
 
-	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/reubenmiller/go-c8y-cli/pkg/zipUtilities"
+	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
 	"github.com/tidwall/pretty"
 )
@@ -18,14 +18,14 @@ import (
 type newHostedApplicationCmd struct {
 	*baseCmd
 
-	file             string
-	name             string
-	key              string
-	availability     string
-	contextPath      string
-	resourcesURL      string
+	file           string
+	name           string
+	key            string
+	availability   string
+	contextPath    string
+	resourcesURL   string
 	skipActivation bool
-	skipUpload       bool
+	skipUpload     bool
 }
 
 func newNewHostedApplicationCmd() *newHostedApplicationCmd {
@@ -109,7 +109,7 @@ func (n *newHostedApplicationCmd) packageWebApplication(src string) (string, err
 		return "", fmt.Errorf("failed to create temp folder. %w", err)
 	}
 
-	dstZip := filepath.Join(dir, filepath.Base(src) + ".zip")
+	dstZip := filepath.Join(dir, filepath.Base(src)+".zip")
 	// zip folder
 	if err := zipUtilities.ZipDirectoryContents(src, dstZip); err != nil {
 		return "", fmt.Errorf("failed to zip source. %w", err)
@@ -121,7 +121,7 @@ func (n *newHostedApplicationCmd) packageWebApplication(src string) (string, err
 // packageAppIfRequired normalizes the handling of the given app. If src is a zip file, then nothing is done.
 // If the src is a folder, then the folder contents are zipped and the path to the zip file are returned.
 func (n *newHostedApplicationCmd) packageAppIfRequired(src string) (zipFile string, err error) {
-	f, err := os.Stat(src);
+	f, err := os.Stat(src)
 
 	if err != nil {
 		return
@@ -199,7 +199,7 @@ func (n *newHostedApplicationCmd) doProcedure(cmd *cobra.Command, args []string)
 
 		if err != nil {
 			// handle error
-			n.cmd.PrintErrf("failed to uploaded file. %s", err)
+			n.cmd.PrintErrf("failed to upload file. %s", err)
 		} else {
 			applicationBinaryID = resp.JSON.Get("id").String()
 		}
@@ -217,7 +217,7 @@ func (n *newHostedApplicationCmd) doProcedure(cmd *cobra.Command, args []string)
 			context.Background(),
 			applicationID,
 			&c8y.Application{
-				ActiveVersionId: applicationBinaryID,
+				ActiveVersionID: applicationBinaryID,
 			},
 		)
 

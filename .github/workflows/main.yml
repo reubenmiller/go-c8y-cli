@@ -63,19 +63,19 @@ jobs:
     - uses: actions/checkout@v2
 
     - name: Build powershell module
-      run: make build_powershell
+      run: make build
       shell: bash
 
     - name: Test powershell module
-      if: ${{ false }}
-      run: make test_powershell
+      if: ${{ true }}
+      run: make test
       shell: bash
 
     - uses: actions/upload-artifact@v2
       if: always()
       with:
-        name: test-results
-        path: report.${{ matrix.os }}.xml
+        name: test-results-${{ matrix.os }}
+        path: tools/PSc8y/reports/*.xml
 
   publish-test-results:
     runs-on: ubuntu-18.04

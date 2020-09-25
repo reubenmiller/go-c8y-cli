@@ -155,7 +155,7 @@ Describe -Name "Invoke-ClientRequest" {
             -Headers @{
                 MyHeader = "SomeValue"
                 2 = 1
-            } ``
+            } `
             -Data @{
                 name = "manual_object_002"
                 c8y_CustomObject = @{

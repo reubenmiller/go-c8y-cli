@@ -34,9 +34,10 @@
                 <TypeName>application/vnd.com.nsn.cumulocity.application+json</TypeName>
             </ViewSelectedBy>
             <TableControl>
+                <AutoSize />
                 <TableHeaders>
                     <TableColumnHeader>
-                        <Width>5</Width>
+                        <Width>15</Width>
                     </TableColumnHeader>
                     <TableColumnHeader>
                         <Width>25</Width>

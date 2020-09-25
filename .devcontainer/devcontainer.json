@@ -20,12 +20,13 @@
 		"yaml.schemas": {
 			"./api/spec/schema.json": "api/spec/yaml/*.yml",
 		},
+		"powershell.pester.useLegacyCodeLens": false
 	},
 
 	// Add the IDs of extensions you want installed when the container is created in the array below.
 	"extensions": [
 		"golang.go",
-		"ms-vscode.powershell",
+		"ms-vscode.powershell-preview",
 		"redhat.vscode-yaml",
 		"eamodio.gitlens"
 	],

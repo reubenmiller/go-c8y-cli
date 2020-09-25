@@ -2,8 +2,9 @@
 
 Describe -Name "Update-User" {
     Context "existing user" {
-
-        $User = PSc8y\New-TestUser
+        BeforeAll {
+            $User = PSc8y\New-TestUser
+        }
 
         It "Update custom properties for a user" {
             $Response = PSc8y\Update-User -Id $User.id -CustomProperties @{
@@ -57,6 +58,8 @@ Describe -Name "Update-User" {
             $Response.customProperties.language | Should -BeExactly "de"
         }
 
-        Remove-User -Id $User.id
+        AfterAll {
+            Remove-User -Id $User.id
+        }
     }
 }
