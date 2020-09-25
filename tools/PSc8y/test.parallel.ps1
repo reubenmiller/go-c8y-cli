@@ -1,5 +1,11 @@
 [cmdletbinding()]
-Param()
+Param(
+    # Filter (regex) to use when filtering the test file names
+    [string] $TestFileFilter = ".+",
+
+    # Throttle number of concurrent tests (grouped by test file)
+    [int] $ThrottleLimit = 10
+)
 $OldConfirmPreference = $global:ConfirmPreference
 $global:ConfirmPreference = "None"
 
@@ -20,9 +26,7 @@ if (!(Test-Path -Path "./reports" )) {
 # . "$PSScriptRoot/tools/Invoke-Parallel.ps1"
 
 $Tests = Get-ChildItem "./Tests" -Filter "*.tests.ps*" |
-    Where-Object { $_.Name -match ".*" }
-
-$ThrottleLimit = 10
+    Where-Object { $_.Name -match "$TestFileFilter" }
 
 $TestStartTime = Get-Date
 
@@ -58,9 +62,11 @@ $results = $Tests | ForEach-Object -ThrottleLimit:$ThrottleLimit -Parallel {
     $result = Invoke-Pester -Configuration:$PesterConfig
     
     if ($result.FailedCount -gt 0) {
-        Rename-item $ReportOutput -NewName "Failed_$($_.BaseName)_Pester.xml" -Force
+        $null = Rename-item $ReportOutput -NewName "Failed_$($_.BaseName)_Pester.xml" -Force -ErrorAction SilentlyContinue
         Write-Host ("Failed test: " -f $_.Name) -ForegroundColor Red
     }
+
+    $result
 
     Write-Host ("Finished file: {0} - Failed count {1}" -f $_.Name, $result.FailedCount) -ForegroundColor Gray
 }
