@@ -2,14 +2,14 @@ name: build
 
 on:
   push:
-    branches: [ master ]
+    branches: [ master, develop ]
     paths-ignore:
       - docs/*
       - '**/*.md'
       - test/*.go
 
   pull_request:
-    branches: [ master ]
+    branches: [ master, develop ]
 
 jobs:
 
