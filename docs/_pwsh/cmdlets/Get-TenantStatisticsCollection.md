@@ -52,10 +52,10 @@ Get tenant statistics collection for the last 30 days
 
 ### EXAMPLE 3
 ```
-Get-TenantStatisticsCollection -DateFrom "-10d" -DateTo "-9d"
+Get-TenantStatisticsCollection -DateFrom "-3d" -DateTo "-2d"
 ```
 
-Get tenant statistics collection for the last 10 days, only return until the last 9 days
+Get tenant statistics collection for the day before yesterday
 
 ## PARAMETERS
 

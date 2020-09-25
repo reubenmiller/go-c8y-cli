@@ -2,7 +2,7 @@
 Remove-Module PSc8y -ErrorAction SilentlyContinue
 
 Write-Verbose "PSScriptRoot: $PSSScriptRoot";
-Import-Module Pester -MinimumVersion "4.0.0" -MaximumVersion "4.100.0"
+#Import-Module Pester -MinimumVersion "5.0.0" -MaximumVersion "5.100.0"
 Import-Module "$PSScriptRoot/../dist/PSc8y/PSc8y.psd1" -Prefix "" -Force
 
 # Import local functions which are only used in tests
@@ -19,6 +19,10 @@ $env:C8Y_USE_ENVIRONMENT = "on"
 $PSDefaultParameterValues = @{
 	"*:Confirm" = $false;
 	"*:Force" = $true;
+
+	# required when using PowershellCore on linux
+	# otherwise it will generate errors "You do not have sufficient access rights to perform this operation or the item is hidden, system, or read only."
+	"Remove-Item:Force" = $true;
 }
 
 $TenantInfo = Get-CurrentTenant

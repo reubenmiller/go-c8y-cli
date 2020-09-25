@@ -29,8 +29,8 @@
             "command": "Get-TenantStatisticsCollection -DateFrom \"-30d\" -PageSize 30"
           },
           {
-            "description": "Get tenant statistics collection for the last 10 days, only return until the last 9 days",
-            "command": "Get-TenantStatisticsCollection -DateFrom \"-10d\" -DateTo \"-9d\""
+            "description": "Get tenant statistics collection for the day before yesterday",
+            "command": "Get-TenantStatisticsCollection -DateFrom \"-3d\" -DateTo \"-2d\""
           }
         ],
         "go": [
@@ -43,8 +43,8 @@
             "command": "c8y tenantStatistics list --dateFrom \"-30d\" --pageSize 30"
           },
           {
-            "description": "Get tenant statistics collection for the last 10 days, only return until the last 9 days",
-            "command": "c8y tenantStatistics list --dateFrom \"-10d\" --pageSize 30 --dateTo \"-9d\""
+            "description": "Get tenant statistics collection for the day before yesterday",
+            "command": "c8y tenantStatistics list --dateFrom \"-3d\" --dateTo \"-2d\""
           }
         ]
       },

@@ -17,8 +17,8 @@ Describe -Name "Get-TenantStatisticsCollection" {
         $Response | Should -Not -BeNullOrEmpty
     }
 
-    It "Get tenant statistics collection for the last 10 days, only return until the last 9 days" {
-        $Response = PSc8y\Get-TenantStatisticsCollection -DateFrom "-10d" -DateTo "-9d"
+    It "Get tenant statistics collection for the day before yesterday" {
+        $Response = PSc8y\Get-TenantStatisticsCollection -DateFrom "-3d" -DateTo "-2d"
         $LASTEXITCODE | Should -Be 0
         $Response | Should -Not -BeNullOrEmpty
     }
