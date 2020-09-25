@@ -13,6 +13,8 @@ import (
 
 type listSessionCmd struct {
 	*baseCmd
+
+	sessionFilter string
 }
 
 func newListSessionCmd() *listSessionCmd {
@@ -30,16 +32,32 @@ func newListSessionCmd() *listSessionCmd {
 
 	cmd.SilenceUsage = true
 
-	cmd.Flags().String("host", "", "Host. .e.g. test.cumulocity.com. (required)")
-	cmd.Flags().String("tenant", "", "Tenant. (required)")
-	cmd.Flags().String("username", "", "Username (without tenant). (required)")
-	cmd.Flags().String("password", "", "Password. (required)")
-	cmd.Flags().String("description", "", "Description about the session")
-	cmd.Flags().String("name", "", "Name of the session")
+	cmd.Flags().StringVar(&ccmd.sessionFilter, "filter", "", "Filter to be applied to the list of sessions even before the values can be selected")
 
 	ccmd.baseCmd = newBaseCmd(cmd)
 
 	return ccmd
+}
+
+func matchSession(session CumulocitySession, input string) bool {
+	name := strings.ToLower(fmt.Sprintf("#%02d %s %s %s %s",
+		session.Index,
+		filepath.Base(session.Path),
+		session.Host,
+		session.Tenant,
+		session.Username,
+	))
+	input = strings.ToLower(input)
+
+	searchTerms := strings.Split(input, " ")
+
+	match := true
+	for _, term := range searchTerms {
+		if !strings.Contains(name, term) {
+			match = false
+		}
+	}
+	return match || input == ""
 }
 
 func (n *listSessionCmd) listSession(cmd *cobra.Command, args []string) error {
@@ -117,27 +135,28 @@ func (n *listSessionCmd) listSession(cmd *cobra.Command, args []string) error {
 `,
 	}
 
-	searcher := func(input string, index int) bool {
-		session := config.Sessions[index]
+	filteredSessions := make([]CumulocitySession, 0)
+	sessionIndex := 1
+	for _, session := range config.Sessions {
+		if matchSession(session, n.sessionFilter) {
+			session.Index = sessionIndex
+			filteredSessions = append(filteredSessions, session)
+			sessionIndex++
+		}
+	}
 
-		name := strings.ToLower(fmt.Sprintf("#%02d %s %s %s %s",
-			session.Index,
-			filepath.Base(session.Path),
-			session.Host,
-			session.Tenant,
-			session.Username,
-		))
-		input = strings.Replace(strings.ToLower(input), " ", "", -1)
-		return strings.Contains(name, input)
+	searcher := func(input string, index int) bool {
+		session := filteredSessions[index]
+		return matchSession(session, input)
 	}
 
 	prompt := promptui.Select{
-		Stdout:            cmd.OutOrStderr(),
+		Stdout:            os.Stderr,
 		HideSelected:      false,
 		IsVimMode:         false,
 		StartInSearchMode: false,
 		Label:             "Select a Cumulocity Session",
-		Items:             config.Sessions,
+		Items:             filteredSessions,
 		Templates:         templates,
 		Size:              10,
 		Searcher:          searcher,
