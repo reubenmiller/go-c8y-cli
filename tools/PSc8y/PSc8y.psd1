@@ -90,6 +90,10 @@ FormatsToProcess = @(
 
 # Functions to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no functions to export.
 FunctionsToExport = @(
+	'Add-AssetToGroup',
+	'Add-ChildDeviceToDevice',
+	'Add-ChildGroupToGroup',
+	'Add-DeviceToGroup',
 	'Add-RoleToGroup',
 	'Add-RoleToUser',
 	'Add-UserToGroup',
@@ -174,8 +178,6 @@ FunctionsToExport = @(
 	'New-ApplicationBinary',
 	'New-AuditRecord',
 	'New-Binary',
-	'New-ChildAssetReference',
-	'New-ChildDeviceReference',
 	'New-Device',
 	'New-DeviceGroup',
 	'New-Event',
@@ -194,10 +196,11 @@ FunctionsToExport = @(
 	'Remove-Agent',
 	'Remove-AlarmCollection',
 	'Remove-Application',
+	'Remove-AssetFromGroup',
 	'Remove-Binary',
-	'Remove-ChildAssetReference',
-	'Remove-ChildDeviceReference',
+	'Remove-ChildDeviceFromDevice',
 	'Remove-Device',
+	'Remove-DeviceFromGroup',
 	'Remove-DeviceGroup',
 	'Remove-DeviceRequest',
 	'Remove-Event',

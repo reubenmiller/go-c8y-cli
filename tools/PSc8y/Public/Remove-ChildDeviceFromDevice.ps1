@@ -1,21 +1,16 @@
 ﻿# Code generated from specification version 1.0.0: DO NOT EDIT
-Function New-ChildDeviceReference {
+Function Remove-ChildDeviceFromDevice {
 <#
 .SYNOPSIS
-Create a child device reference
+Delete child device reference
 
 .DESCRIPTION
-Create a child device reference
+Delete child device reference
 
 .EXAMPLE
-PS> New-ChildDeviceReference -Device $Device.id -NewChild $ChildDevice.id
+PS> Remove-ChildDeviceFromDevice -Device $Device.id -ChildDevice $ChildDevice.id
 
-Assign a device as a child device to an existing device
-
-.EXAMPLE
-PS> Get-ManagedObject -Id $ChildDevice.id | New-ChildDeviceReference -Device $Device.id
-
-Assign a device as a child device to an existing device (using pipeline)
+Unassign a child device from its parent device
 
 
 #>
@@ -27,16 +22,16 @@ Assign a device as a child device to an existing device (using pipeline)
     [OutputType([object])]
     Param(
         # ManagedObject id (required)
-        [Parameter(Mandatory = $true)]
-        [object[]]
-        $Device,
-
-        # new child device (required)
         [Parameter(Mandatory = $true,
                    ValueFromPipeline=$true,
                    ValueFromPipelineByPropertyName=$true)]
         [object[]]
-        $NewChild,
+        $Device,
+
+        # Child device reference (required)
+        [Parameter(Mandatory = $true)]
+        [object[]]
+        $ChildDevice,
 
         # Show the full (raw) response from Cumulocity including pagination information
         [Parameter()]
@@ -71,8 +66,8 @@ Assign a device as a child device to an existing device (using pipeline)
 
     Begin {
         $Parameters = @{}
-        if ($PSBoundParameters.ContainsKey("Device")) {
-            $Parameters["device"] = $Device
+        if ($PSBoundParameters.ContainsKey("ChildDevice")) {
+            $Parameters["childDevice"] = $ChildDevice
         }
         if ($PSBoundParameters.ContainsKey("OutputFile")) {
             $Parameters["outputFile"] = $OutputFile
@@ -90,9 +85,9 @@ Assign a device as a child device to an existing device (using pipeline)
     }
 
     Process {
-        foreach ($item in (PSc8y\Expand-Device $NewChild)) {
+        foreach ($item in (PSc8y\Expand-Device $Device)) {
             if ($item) {
-                $Parameters["newChild"] = if ($item.id) { $item.id } else { $item }
+                $Parameters["device"] = if ($item.id) { $item.id } else { $item }
             }
 
             if (!$Force -and
@@ -106,11 +101,11 @@ Assign a device as a child device to an existing device (using pipeline)
 
             Invoke-ClientCommand `
                 -Noun "inventoryReferences" `
-                -Verb "createChildDevice" `
+                -Verb "unassignChildDevice" `
                 -Parameters $Parameters `
-                -Type "application/vnd.com.nsn.cumulocity.managedObjectReference+json" `
-                -ItemType "application/vnd.com.nsn.cumulocity.managedObject+json" `
-                -ResultProperty "managedObject" `
+                -Type "" `
+                -ItemType "" `
+                -ResultProperty "" `
                 -Raw:$Raw
         }
     }

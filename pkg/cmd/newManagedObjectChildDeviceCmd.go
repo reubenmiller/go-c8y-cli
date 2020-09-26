@@ -26,11 +26,11 @@ func newNewManagedObjectChildDeviceCmd() *newManagedObjectChildDeviceCmd {
 	ccmd := &newManagedObjectChildDeviceCmd{}
 
 	cmd := &cobra.Command{
-		Use:   "createChildDevice",
+		Use:   "assignChildDevice",
 		Short: "Create a child device reference",
 		Long:  `Create a child device reference`,
 		Example: `
-$ c8y inventoryReferences createChildDevice --device 12345 --newChild 44235
+$ c8y inventoryReferences assignChildDevice --device 12345 --newChild 44235
 Assign a device as a child device to an existing device
 		`,
 		RunE: ccmd.newManagedObjectChildDevice,
@@ -38,8 +38,8 @@ Assign a device as a child device to an existing device
 
 	cmd.SilenceUsage = true
 
-	cmd.Flags().StringSlice("device", []string{""}, "ManagedObject id (required)")
-	cmd.Flags().StringSlice("newChild", []string{""}, "new child device (required)")
+	cmd.Flags().StringSlice("device", []string{""}, "Device. (required)")
+	cmd.Flags().StringSlice("newChild", []string{""}, "New child device (required)")
 
 	// Required flags
 	cmd.MarkFlagRequired("device")

@@ -5,10 +5,10 @@ layout: powershell
 Module Name: PSc8y
 online version:
 schema: 2.0.0
-title: Remove-ChildDeviceReference
+title: Remove-ChildDeviceFromDevice
 ---
 
-# Remove-ChildDeviceReference
+# Remove-ChildDeviceFromDevice
 
 ## SYNOPSIS
 Delete child device reference
@@ -16,7 +16,7 @@ Delete child device reference
 ## SYNTAX
 
 ```
-Remove-ChildDeviceReference
+Remove-ChildDeviceFromDevice
 	[-Device] <Object[]>
 	[-ChildDevice] <Object[]>
 	[-Raw]
@@ -37,7 +37,7 @@ Delete child device reference
 
 ### EXAMPLE 1
 ```
-Remove-ChildDeviceReference -Device $Device.id -ChildDevice $ChildDevice.id
+Remove-ChildDeviceFromDevice -Device $Device.id -ChildDevice $ChildDevice.id
 ```
 
 Unassign a child device from its parent device

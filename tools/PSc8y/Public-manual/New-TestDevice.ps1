@@ -26,7 +26,7 @@ Create 10 test devices (with agent functionality) all with unique names
 #>
     [cmdletbinding(
         SupportsShouldProcess = $true,
-        ConfirmImpact = "None"
+        ConfirmImpact = "High"
     )]
     Param(
         # Device name prefix which is added before the randomized string

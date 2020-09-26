@@ -1,14 +1,14 @@
 ---
-category: Assets
+category: Devices
 external help file: PSc8y-help.xml
 layout: powershell
 Module Name: PSc8y
 online version:
 schema: 2.0.0
-title: Remove-ChildAssetReference
+title: Remove-DeviceFromGroup
 ---
 
-# Remove-ChildAssetReference
+# Remove-DeviceFromGroup
 
 ## SYNOPSIS
 Delete child asset reference
@@ -16,10 +16,9 @@ Delete child asset reference
 ## SYNTAX
 
 ```
-Remove-ChildAssetReference
-	[-Asset] <Object[]>
-	[[-ChildDevice] <Object[]>]
-	[[-ChildGroup] <Object[]>]
+Remove-DeviceFromGroup
+	[-Group] <Object[]>
+	[-ChildDevice] <Object[]>
 	[-Raw]
 	[[-OutputFile] <String>]
 	[-NoProxy]
@@ -32,20 +31,20 @@ Remove-ChildAssetReference
 ```
 
 ## DESCRIPTION
-Delete child asset reference
+Unassign a device from a group
 
 ## EXAMPLES
 
 ### EXAMPLE 1
 ```
-Remove-ChildAssetReference -Asset $Group.id -ChildDevice $ChildDevice.id
+Remove-DeviceFromGroup -Group $Group.id -ChildDevice $ChildDevice.id
 ```
 
 Unassign a child device from its parent asset
 
 ## PARAMETERS
 
-### -Asset
+### -Group
 Asset id (required)
 
 ```yaml
@@ -61,30 +60,15 @@ Accept wildcard characters: False
 ```
 
 ### -ChildDevice
-Child device
+Child device (required)
 
 ```yaml
 Type: Object[]
 Parameter Sets: (All)
 Aliases:
 
-Required: False
+Required: True
 Position: 2
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
-### -ChildGroup
-Child device group
-
-```yaml
-Type: Object[]
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: 3
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
@@ -114,7 +98,7 @@ Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: 4
+Position: 3
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
@@ -144,7 +128,7 @@ Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: 5
+Position: 4
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
@@ -159,7 +143,7 @@ Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: 6
+Position: 5
 Default value: 0
 Accept pipeline input: False
 Accept wildcard characters: False

@@ -27,8 +27,8 @@ func newNewManagedObjectChildAssetCmd() *newManagedObjectChildAssetCmd {
 
 	cmd := &cobra.Command{
 		Use:   "createChildAsset",
-		Short: "Create a child asset (device or devicegroup) reference",
-		Long:  `Create a child asset (device or devicegroup) reference`,
+		Short: "Add a group or device as an asset to an existing group",
+		Long:  `Assigns a group or device to an existing group and marks them as assets`,
 		Example: `
 $ c8y inventoryReferences createChildAsset --group 12345 --newChildGroup 43234
 Create group heirachy (parent group -> child group)
@@ -38,9 +38,9 @@ Create group heirachy (parent group -> child group)
 
 	cmd.SilenceUsage = true
 
-	cmd.Flags().StringSlice("group", []string{""}, "Group id (required)")
-	cmd.Flags().StringSlice("newChildDevice", []string{""}, "new child device asset")
-	cmd.Flags().StringSlice("newChildGroup", []string{""}, "new child device group asset")
+	cmd.Flags().StringSlice("group", []string{""}, "Group (required)")
+	cmd.Flags().StringSlice("newChildDevice", []string{""}, "New child device to be added to the group as an asset")
+	cmd.Flags().StringSlice("newChildGroup", []string{""}, "New child device group to be added to the group as an asset")
 
 	// Required flags
 	cmd.MarkFlagRequired("group")

@@ -1,15 +1,15 @@
 ﻿. $PSScriptRoot/imports.ps1
 
-Describe -Name "Remove-ChildAssetReference" {
+Describe -Name "Remove-AssetFromGroup" {
     BeforeEach {
         $Group = PSc8y\New-TestDeviceGroup
         $ChildDevice = PSc8y\New-TestDevice
-        PSc8y\New-ChildAssetReference -Group $Group.id -NewChildDevice $ChildDevice.id
+        PSc8y\Add-AssetToGroup -Group $Group.id -NewChildDevice $ChildDevice.id
 
     }
 
     It "Unassign a child device from its parent asset" {
-        $Response = PSc8y\Remove-ChildAssetReference -Asset $Group.id -ChildDevice $ChildDevice.id
+        $Response = PSc8y\Remove-AssetFromGroup -Group $Group.id -ChildDevice $ChildDevice.id
         $LASTEXITCODE | Should -Be 0
     }
 

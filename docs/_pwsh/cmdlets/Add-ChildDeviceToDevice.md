@@ -5,10 +5,10 @@ layout: powershell
 Module Name: PSc8y
 online version:
 schema: 2.0.0
-title: New-ChildDeviceReference
+title: Add-ChildDeviceToDevice
 ---
 
-# New-ChildDeviceReference
+# Add-ChildDeviceToDevice
 
 ## SYNOPSIS
 Create a child device reference
@@ -16,7 +16,7 @@ Create a child device reference
 ## SYNTAX
 
 ```
-New-ChildDeviceReference
+Add-ChildDeviceToDevice
 	[-Device] <Object[]>
 	[-NewChild] <Object[]>
 	[-Raw]
@@ -37,14 +37,14 @@ Create a child device reference
 
 ### EXAMPLE 1
 ```
-New-ChildDeviceReference -Device $Device.id -NewChild $ChildDevice.id
+Add-ChildDeviceToDevice -Device $Device.id -NewChild $ChildDevice.id
 ```
 
 Assign a device as a child device to an existing device
 
 ### EXAMPLE 2
 ```
-Get-ManagedObject -Id $ChildDevice.id | New-ChildDeviceReference -Device $Device.id
+Get-ManagedObject -Id $ChildDevice.id | Add-ChildDeviceToDevice -Device $Device.id
 ```
 
 Assign a device as a child device to an existing device (using pipeline)
@@ -52,7 +52,8 @@ Assign a device as a child device to an existing device (using pipeline)
 ## PARAMETERS
 
 ### -Device
-ManagedObject id (required)
+Device.
+(required)
 
 ```yaml
 Type: Object[]
@@ -67,7 +68,7 @@ Accept wildcard characters: False
 ```
 
 ### -NewChild
-new child device (required)
+New child device (required)
 
 ```yaml
 Type: Object[]

@@ -18,87 +18,43 @@ import (
 	"github.com/tidwall/pretty"
 )
 
-type deleteAuditRecordCollectionCmd struct {
+type deleteAssetFromGroupCmd struct {
 	*baseCmd
 }
 
-func newDeleteAuditRecordCollectionCmd() *deleteAuditRecordCollectionCmd {
-	ccmd := &deleteAuditRecordCollectionCmd{}
+func newDeleteAssetFromGroupCmd() *deleteAssetFromGroupCmd {
+	ccmd := &deleteAssetFromGroupCmd{}
 
 	cmd := &cobra.Command{
-		Use:   "deleteCollection",
-		Short: "Delete a collection of audit records",
-		Long:  `Important: This method has been deprecated and will be removed completely with the July 2020 release (10.6.6). With Cumulocity IoT >= 10.6.6 the deletion of audit logs will no longer be permitted. All DELETE requests to the audit API will return the error 405 Method not allowed. Note that retention rules still apply to audit logs and will delete audit log records older than the specified retention time.`,
+		Use:   "unassignAssetFromGroup",
+		Short: "Delete child asset reference",
+		Long:  `Unassign an asset (device or group) from a group`,
 		Example: `
-$ c8y auditRecords deleteCollection --source 12345
-Delete audit records from a device
+$ c8y inventoryReferences unassignAssetFromGroup --device 12345 --childDevice 22553
+Unassign a child device from its parent device
 		`,
-		RunE: ccmd.deleteAuditRecordCollection,
+		RunE: ccmd.deleteAssetFromGroup,
 	}
 
 	cmd.SilenceUsage = true
 
-	cmd.Flags().String("source", "", "Source Id or object containing an .id property of the element that should be detected. i.e. AlarmID, or Operation ID. Note: Only one source can be provided")
-	cmd.Flags().String("type", "", "Type")
-	cmd.Flags().String("user", "", "Username")
-	cmd.Flags().String("application", "", "Application")
-	cmd.Flags().String("dateFrom", "", "Start date or date and time of audit record occurrence.")
-	cmd.Flags().String("dateTo", "", "End date or date and time of audit record occurrence.")
+	cmd.Flags().StringSlice("group", []string{""}, "Asset id (required)")
+	cmd.Flags().StringSlice("childDevice", []string{""}, "Child device")
+	cmd.Flags().StringSlice("childGroup", []string{""}, "Child device group")
 
 	// Required flags
+	cmd.MarkFlagRequired("group")
 
 	ccmd.baseCmd = newBaseCmd(cmd)
 
 	return ccmd
 }
 
-func (n *deleteAuditRecordCollectionCmd) deleteAuditRecordCollection(cmd *cobra.Command, args []string) error {
+func (n *deleteAssetFromGroupCmd) deleteAssetFromGroup(cmd *cobra.Command, args []string) error {
 
 	// query parameters
 	queryValue := url.QueryEscape("")
 	query := url.Values{}
-	if v, err := cmd.Flags().GetString("source"); err == nil {
-		if v != "" {
-			query.Add("source", url.QueryEscape(v))
-		}
-	} else {
-		return newUserError(fmt.Sprintf("Flag [%s] does not exist. %s", "source", err))
-	}
-	if v, err := cmd.Flags().GetString("type"); err == nil {
-		if v != "" {
-			query.Add("type", url.QueryEscape(v))
-		}
-	} else {
-		return newUserError(fmt.Sprintf("Flag [%s] does not exist. %s", "type", err))
-	}
-	if v, err := cmd.Flags().GetString("user"); err == nil {
-		if v != "" {
-			query.Add("user", url.QueryEscape(v))
-		}
-	} else {
-		return newUserError(fmt.Sprintf("Flag [%s] does not exist. %s", "user", err))
-	}
-	if v, err := cmd.Flags().GetString("application"); err == nil {
-		if v != "" {
-			query.Add("application", url.QueryEscape(v))
-		}
-	} else {
-		return newUserError(fmt.Sprintf("Flag [%s] does not exist. %s", "application", err))
-	}
-	if flagVal, err := cmd.Flags().GetString("dateFrom"); err == nil && flagVal != "" {
-		if v, err := tryGetTimestampFlag(cmd, "dateFrom"); err == nil && v != "" {
-			query.Add("dateFrom", v)
-		} else {
-			return newUserError("invalid date format", err)
-		}
-	}
-	if flagVal, err := cmd.Flags().GetString("dateTo"); err == nil && flagVal != "" {
-		if v, err := tryGetTimestampFlag(cmd, "dateTo"); err == nil && v != "" {
-			query.Add("dateTo", v)
-		} else {
-			return newUserError("invalid date format", err)
-		}
-	}
 	if cmd.Flags().Changed("pageSize") {
 		if v, err := cmd.Flags().GetInt("pageSize"); err == nil && v > 0 {
 			query.Add("pageSize", fmt.Sprintf("%d", v))
@@ -127,8 +83,59 @@ func (n *deleteAuditRecordCollectionCmd) deleteAuditRecordCollection(cmd *cobra.
 
 	// path parameters
 	pathParameters := make(map[string]string)
+	if cmd.Flags().Changed("group") {
+		groupInputValues, groupValue, err := getFormattedDeviceSlice(cmd, args, "group")
 
-	path := replacePathParameters("/audit/auditRecords", pathParameters)
+		if err != nil {
+			return newUserError("no matching devices found", groupInputValues, err)
+		}
+
+		if len(groupValue) == 0 {
+			return newUserError("no matching devices found", groupInputValues)
+		}
+
+		for _, item := range groupValue {
+			if item != "" {
+				pathParameters["group"] = newIDValue(item).GetID()
+			}
+		}
+	}
+	if cmd.Flags().Changed("childDevice") {
+		childDeviceInputValues, childDeviceValue, err := getFormattedDeviceSlice(cmd, args, "childDevice")
+
+		if err != nil {
+			return newUserError("no matching devices found", childDeviceInputValues, err)
+		}
+
+		if len(childDeviceValue) == 0 {
+			return newUserError("no matching devices found", childDeviceInputValues)
+		}
+
+		for _, item := range childDeviceValue {
+			if item != "" {
+				pathParameters["reference"] = newIDValue(item).GetID()
+			}
+		}
+	}
+	if cmd.Flags().Changed("childGroup") {
+		childGroupInputValues, childGroupValue, err := getFormattedDeviceGroupSlice(cmd, args, "childGroup")
+
+		if err != nil {
+			return newUserError("no matching device groups found", childGroupInputValues, err)
+		}
+
+		if len(childGroupValue) == 0 {
+			return newUserError("no matching device groups found", childGroupInputValues)
+		}
+
+		for _, item := range childGroupValue {
+			if item != "" {
+				pathParameters["reference"] = newIDValue(item).GetID()
+			}
+		}
+	}
+
+	path := replacePathParameters("inventory/managedObjects/{group}/childAssets/{reference}", pathParameters)
 
 	// filter and selectors
 	filters := getFilterFlag(cmd, "filter")
@@ -152,10 +159,10 @@ func (n *deleteAuditRecordCollectionCmd) deleteAuditRecordCollection(cmd *cobra.
 		return err
 	}
 
-	return n.doDeleteAuditRecordCollection(req, outputfile, filters)
+	return n.doDeleteAssetFromGroup(req, outputfile, filters)
 }
 
-func (n *deleteAuditRecordCollectionCmd) doDeleteAuditRecordCollection(req c8y.RequestOptions, outputfile string, filters *JSONFilters) error {
+func (n *deleteAssetFromGroupCmd) doDeleteAssetFromGroup(req c8y.RequestOptions, outputfile string, filters *JSONFilters) error {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(globalFlagTimeout)*time.Millisecond)
 	defer cancel()
 	start := time.Now()

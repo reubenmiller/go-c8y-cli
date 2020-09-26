@@ -10,48 +10,50 @@ import (
 	"time"
 
 	"github.com/fatih/color"
-	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/reubenmiller/go-c8y-cli/pkg/encoding"
 	"github.com/reubenmiller/go-c8y-cli/pkg/jsonUtilities"
 	"github.com/reubenmiller/go-c8y-cli/pkg/mapbuilder"
+	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
 	"github.com/tidwall/pretty"
 )
 
-type getApplicationBootstrapUserCmd struct {
+type addDeviceToGroupCmd struct {
 	*baseCmd
 }
 
-func newGetApplicationBootstrapUserCmd() *getApplicationBootstrapUserCmd {
-	ccmd := &getApplicationBootstrapUserCmd{}
+func newAddDeviceToGroupCmd() *addDeviceToGroupCmd {
+	ccmd := &addDeviceToGroupCmd{}
 
 	cmd := &cobra.Command{
-		Use:   "getBootstrapUser",
-		Short: "Get application bootstrap user",
-		Long:  ``,
+		Use:   "assignDeviceToGroup",
+		Short: "Add a device to an existing group",
+		Long:  `Assigns a device to a group. The device will be a childAsset of the group`,
 		Example: `
-$ c8y applications getBootstrapUser --application 12345
-Get application bootstrap user by app id
+$ c8y inventoryReferences assignDeviceToGroup --group 12345 --newChildDevice 43234
+Add a device to a group
 
-$ c8y applications getBootstrapUser --application myapp
-Get application bootstrap user by app name
+$ c8y inventoryReferences assignDeviceToGroup --group 12345 --newChildDevice 43234, 99292, 12222
+Add multiple devices to a group
 		`,
-		RunE: ccmd.getApplicationBootstrapUser,
+		RunE: ccmd.addDeviceToGroup,
 	}
 
 	cmd.SilenceUsage = true
 
-	cmd.Flags().String("application", "", "Application id (required)")
+	cmd.Flags().StringSlice("group", []string{""}, "Group (required)")
+	cmd.Flags().StringSlice("newChildDevice", []string{""}, "New device to be added to the group as an child asset (required)")
 
 	// Required flags
-	cmd.MarkFlagRequired("application")
+	cmd.MarkFlagRequired("group")
+	cmd.MarkFlagRequired("newChildDevice")
 
 	ccmd.baseCmd = newBaseCmd(cmd)
 
 	return ccmd
 }
 
-func (n *getApplicationBootstrapUserCmd) getApplicationBootstrapUser(cmd *cobra.Command, args []string) error {
+func (n *addDeviceToGroupCmd) addDeviceToGroup(cmd *cobra.Command, args []string) error {
 
 	// query parameters
 	queryValue := url.QueryEscape("")
@@ -81,34 +83,52 @@ func (n *getApplicationBootstrapUserCmd) getApplicationBootstrapUser(cmd *cobra.
 
 	// body
 	body := mapbuilder.NewMapBuilder()
-
-	// path parameters
-	pathParameters := make(map[string]string)
-	if cmd.Flags().Changed("application") {
-		applicationInputValues, applicationValue, err := getApplicationSlice(cmd, args, "application")
+	body.SetMap(getDataFlag(cmd))
+	if cmd.Flags().Changed("newChildDevice") {
+		newChildDeviceInputValues, newChildDeviceValue, err := getFormattedDeviceSlice(cmd, args, "newChildDevice")
 
 		if err != nil {
-			return newUserError("no matching applications found", applicationInputValues, err)
+			return newUserError("no matching devices found", newChildDeviceInputValues, err)
 		}
 
-		if len(applicationValue) == 0 {
-			return newUserError("no matching applications found", applicationInputValues)
+		if len(newChildDeviceValue) == 0 {
+			return newUserError("no matching devices found", newChildDeviceInputValues)
 		}
 
-		for _, item := range applicationValue {
+		for _, item := range newChildDeviceValue {
 			if item != "" {
-				pathParameters["application"] = newIDValue(item).GetID()
+				body.Set("managedObject.id", newIDValue(item).GetID())
 			}
 		}
 	}
 
-	path := replacePathParameters("/application/applications/{application}/bootstrapUser", pathParameters)
+	// path parameters
+	pathParameters := make(map[string]string)
+	if cmd.Flags().Changed("group") {
+		groupInputValues, groupValue, err := getFormattedDeviceGroupSlice(cmd, args, "group")
+
+		if err != nil {
+			return newUserError("no matching device groups found", groupInputValues, err)
+		}
+
+		if len(groupValue) == 0 {
+			return newUserError("no matching device groups found", groupInputValues)
+		}
+
+		for _, item := range groupValue {
+			if item != "" {
+				pathParameters["id"] = newIDValue(item).GetID()
+			}
+		}
+	}
+
+	path := replacePathParameters("inventory/managedObjects/{id}/childAssets", pathParameters)
 
 	// filter and selectors
 	filters := getFilterFlag(cmd, "filter")
 
 	req := c8y.RequestOptions{
-		Method:       "GET",
+		Method:       "POST",
 		Path:         path,
 		Query:        queryValue,
 		Body:         body.GetMap(),
@@ -126,10 +146,10 @@ func (n *getApplicationBootstrapUserCmd) getApplicationBootstrapUser(cmd *cobra.
 		return err
 	}
 
-	return n.doGetApplicationBootstrapUser(req, outputfile, filters)
+	return n.doAddDeviceToGroup(req, outputfile, filters)
 }
 
-func (n *getApplicationBootstrapUserCmd) doGetApplicationBootstrapUser(req c8y.RequestOptions, outputfile string, filters *JSONFilters) error {
+func (n *addDeviceToGroupCmd) doAddDeviceToGroup(req c8y.RequestOptions, outputfile string, filters *JSONFilters) error {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(globalFlagTimeout)*time.Millisecond)
 	defer cancel()
 	start := time.Now()
@@ -185,7 +205,7 @@ func (n *getApplicationBootstrapUserCmd) doGetApplicationBootstrapUser(req c8y.R
 		isJSONResponse := jsonUtilities.IsValidJSON([]byte(*resp.JSONData))
 
 		if isJSONResponse && filters != nil && !globalFlagRaw {
-			responseText = filters.Apply(*resp.JSONData, "")
+			responseText = filters.Apply(*resp.JSONData, "managedObject")
 		} else {
 			responseText = []byte(*resp.JSONData)
 		}

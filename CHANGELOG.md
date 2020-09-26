@@ -2,6 +2,22 @@
 
 ## Unreleased
 
+**Renamed cmdlets**
+
+* `New-ChildAssetReference` to `Add-AssetToGroup`
+* `Remove-ChildAssetReference` to `Remove-AssetFromGroup`
+* `New-ChildDeviceReference` to `Add-ChildDeviceToDevice`
+* `Remove-ChildDeviceReference` to `Remove-ChildDeviceFromDevice`
+
+**New cmdlets**
+
+* `Add-DeviceToGroup`
+* `Add-ChildGroupToGroup`
+* `Remove-DeviceFromGroup`
+
+**Misc.**
+
+* `New-TestDevice` has changed to require confirmation before creating the device
 
 ## Released
 

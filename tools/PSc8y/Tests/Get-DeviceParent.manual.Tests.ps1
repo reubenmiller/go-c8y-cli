@@ -8,8 +8,8 @@ Describe -Name "Get-DeviceParent" {
             $ChildDevice02 = PSc8y\New-TestDevice -Name "child02"
             
             # Add child relationships: Agent -> ChildDevice01 -> ChildDevice02
-            New-ChildDeviceReference -Device $Agent.id -NewChild $ChildDevice01.id
-            New-ChildDeviceReference -Device $ChildDevice01.id -NewChild $ChildDevice02.id
+            Add-ChildDeviceToDevice -Device $Agent.id -NewChild $ChildDevice01.id
+            Add-ChildDeviceToDevice -Device $ChildDevice01.id -NewChild $ChildDevice02.id
         }
 
         It "Should return nothing if the device has no parent" {
