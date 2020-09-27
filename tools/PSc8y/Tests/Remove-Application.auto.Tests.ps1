@@ -2,7 +2,7 @@
 
 Describe -Name "Remove-Application" {
     BeforeEach {
-        $App = New-Application -Name my-temp-app -Type HOSTED -Key "my-temp-app-key" -ContextPath "my-temp-app"
+        $App = New-TestHostedApplication
 
     }
 
@@ -12,7 +12,7 @@ Describe -Name "Remove-Application" {
     }
 
     It "Delete an application by name" {
-        $Response = PSc8y\Remove-Application -Id "my-temp-app"
+        $Response = PSc8y\Remove-Application -Id $App.name
         $LASTEXITCODE | Should -Be 0
     }
 

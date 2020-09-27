@@ -8,9 +8,9 @@ Create a new application
 Create a new application using explicit settings
 
 .EXAMPLE
-PS> New-Application -Name myapp -Type HOSTED -Key "myapp-key" -ContextPath "myapp"
+PS> New-Application -Name $AppName -Key "${AppName}-key" -ContextPath $AppName -Type HOSTED
 
-Create new hosted application
+Create a new hosted application
 
 
 #>

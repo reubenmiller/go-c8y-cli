@@ -2,8 +2,8 @@
 
 Describe -Name "New-ApplicationBinary" {
     BeforeEach {
-        $AppName = New-RandomString -Prefix "testapp_"
-        $App = New-Application -Name $AppName -Type HOSTED -Key "${AppName}-key" -ContextPath $AppName
+        $AppName = New-RandomString -Prefix "testms_"
+        $App = New-Microservice -Name $AppName -Type MICROSERVICE -SkipUpload
         $MicroserviceZip = "$PSScriptRoot/TestData/microservice/helloworld.zip"
 
     }

@@ -31,7 +31,7 @@ func newNewApplicationCmd() *newApplicationCmd {
 		Long:  `Create a new application using explicit settings`,
 		Example: `
 $ c8y applications create --name myapp --type HOSTED --key "myapp-key" --contextPath "myapp"
-Create new hosted application
+Create a new hosted application
 		`,
 		RunE: ccmd.newApplication,
 	}

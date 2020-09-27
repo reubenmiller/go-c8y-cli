@@ -45,12 +45,14 @@ endpoints:
         powershell: New-Application
     examples:
       powershell:
-        - description: Create new hosted application
-          command: New-Application -Name myapp -Type HOSTED -Key "myapp-key" -ContextPath "myapp"
+        - description: Create a new hosted application
+          beforeEach:
+              - $AppName = New-RandomString -Prefix "testapp_"
+          command: New-Application -Name $AppName -Key "${AppName}-key" -ContextPath $AppName -Type HOSTED
           afterEach:
-            - Remove-Application -Id "myapp"
+            - Remove-Application -Id $AppName
       go:
-        - description: Create new hosted application
+        - description: Create a new hosted application
           command: c8y applications create --name myapp --type HOSTED --key "myapp-key" --contextPath "myapp"
     body:
       - name: data
@@ -128,11 +130,11 @@ endpoints:
       powershell:
         - description: Copy an existing application
           beforeEach:
-            - New-Application -Name my-example-app -Type HOSTED -Key "my-example-app-key" -ContextPath "my-example-app"
-          command: Copy-Application -Id "my-example-app"
+            - $App = New-TestHostedApplication
+          command: Copy-Application -Id $$App.id
           afterEach:
-            - Remove-Application -Id "my-example-app"
-            - Remove-Application -Id "clonemy-example-app"
+            - Remove-Application -Id $App.id
+            - Remove-Application -Id "clone$($App.name)"
       go:
         - description: Copy an existing application
           command: c8y applications copy --id my-example-app
@@ -156,17 +158,17 @@ endpoints:
       powershell:
         - description: Get an application by id
           beforeEach:
-            - $App = New-Application -Name my-simple-app -Type HOSTED -Key "my-simple-app-key" -ContextPath "my-simple-app"
+            - $App = New-TestHostedApplication
           command: Get-Application -Id $App.id
           afterEach:
-            - Remove-Application -Id "my-simple-app"
+            - Remove-Application -Id $App.id
 
         - description: Get an application by name
           beforeEach:
-            - New-Application -Name my-simple-app -Type HOSTED -Key "my-simple-app-key" -ContextPath "my-simple-app"
-          command: Get-Application -Id "my-simple-app"
+            - $App = New-TestHostedApplication
+          command: Get-Application -Id $App.name
           afterEach:
-            - Remove-Application -Id "my-simple-app"
+            - Remove-Application -Id $App.id
       go:
         - description: Get an application
           command: c8y applications get --id 12345
@@ -189,13 +191,13 @@ endpoints:
       powershell:
         - description: Delete an application by id
           beforeEach:
-            - $App = New-Application -Name my-temp-app -Type HOSTED -Key "my-temp-app-key" -ContextPath "my-temp-app"
+            - $App = New-TestHostedApplication
           command: Remove-Application -Id $App.id
 
         - description: Delete an application by name
           beforeEach:
-            - New-Application -Name my-temp-app -Type HOSTED -Key "my-temp-app-key" -ContextPath "my-temp-app"
-          command: Remove-Application -Id "my-temp-app"
+            - $App = New-TestHostedApplication
+          command: Remove-Application -Id $App.name
       go:
         - description: Delete an application by id
           command: c8y applications delete --id 12345
@@ -222,8 +224,8 @@ endpoints:
       powershell:
         - description: Update application availability to MARKET
           beforeEach:
-            - $App = New-Application -Name "helloworld-app" -Type HOSTED -Key "helloworld-app-key" -ContextPath "helloworld-app"
-          command: Update-Application -Id "helloworld-app" -Availability "MARKET"
+            - $App = New-TestHostedApplication
+          command: Update-Application -Id $App.name -Availability "MARKET"
           afterEach:
             - Remove-Application -Id $App.id
       go:
@@ -303,8 +305,8 @@ endpoints:
       powershell:
         - description: Upload application microservice binary
           beforeEach:
-            - $AppName = New-RandomString -Prefix "testapp_"
-            - $App = New-Application -Name $AppName -Type HOSTED -Key "${AppName}-key" -ContextPath $AppName
+            - $AppName = New-RandomString -Prefix "testms_"
+            - $App = New-Microservice -Name $AppName -Type MICROSERVICE -SkipUpload
             - $MicroserviceZip = "$PSScriptRoot/TestData/microservice/helloworld.zip"
           command: New-ApplicationBinary -Id $App.id -File $MicroserviceZip
           skipTest: true

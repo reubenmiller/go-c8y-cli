@@ -8,7 +8,7 @@ Update application meta information
 Update an application by its id
 
 .EXAMPLE
-PS> Update-Application -Id "helloworld-app" -Availability "MARKET"
+PS> Update-Application -Id $App.name -Availability "MARKET"
 
 Update application availability to MARKET
 

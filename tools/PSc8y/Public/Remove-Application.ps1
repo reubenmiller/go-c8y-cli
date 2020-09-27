@@ -13,7 +13,7 @@ PS> Remove-Application -Id $App.id
 Delete an application by id
 
 .EXAMPLE
-PS> Remove-Application -Id "my-temp-app"
+PS> Remove-Application -Id $App.name
 
 Delete an application by name
 
