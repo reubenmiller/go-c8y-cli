@@ -3,6 +3,7 @@
 Describe -Name "Watch-Alarm" {
     BeforeEach {
         $Device = New-TestDevice
+        Start-Sleep -Seconds 2
 
         # Create background task which creates alarms
         $importpath = (Resolve-Path "$PSScriptRoot/imports.ps1").ProviderPath
@@ -13,11 +14,12 @@ Describe -Name "Watch-Alarm" {
         )
         $Job = Start-Job -Name "watch-alarm-data" -Debug -ArgumentList $JobArgs -ScriptBlock {
             . $args[0]
+            Start-Sleep -Seconds 2
             $env:C8Y_SESSION = $args[1]
             $DeviceID = $args[2]
             @(1..10) | ForEach-Object {
                 New-TestAlarm -Device $DeviceID -Force
-                Start-Sleep -Milliseconds 500
+                Start-Sleep -Milliseconds 1000
             }
         }
     }

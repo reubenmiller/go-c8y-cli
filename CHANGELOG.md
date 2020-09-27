@@ -15,11 +15,31 @@
 * `Add-ChildGroupToGroup`
 * `Remove-DeviceFromGroup`
 
+**c8y**
+
+* Removed duplicate command `c8y devices find` as query functionality is provided by `c8y devices list --query "name eq 'test*'"`
+* Removed unreferenced commands
+* Added common options and array items processing to the following commands
+    * `c8y agents list`
+    * `c8y devices list`
+    * `c8y devices listDeviceGroups`
+
+* Added common options to (i.e. --outputFile, --pretty)
+    * `c8y micrservices create`
+    * `c8y micrservices createHostedApplication`
+
+**c8y session list**
+    * Renamed `--filter` to `--sessionFilter` to avoid conflict with the global `--filter` option
+
 **Misc.**
 
 * `New-TestDevice` has changed to require confirmation before creating the device
 
 * Fixed `Get-Measurement` alias `m` in PSc8y
+
+**Build**
+
+* Improved reliability of realtime api tests
 
 ## Released
 

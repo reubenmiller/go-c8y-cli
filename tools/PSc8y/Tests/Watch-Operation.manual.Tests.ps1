@@ -3,6 +3,7 @@
 Describe -Name "Watch-Operation" {
     BeforeEach {
         $Device = New-TestAgent
+        Start-Sleep -Seconds 2
 
         # Create background task which creates operations
         $importpath = (Resolve-Path "$PSScriptRoot/imports.ps1").ProviderPath
@@ -13,11 +14,12 @@ Describe -Name "Watch-Operation" {
         )
         $Job = Start-Job -Name "watch-operation-data" -Debug -ArgumentList $JobArgs -ScriptBlock {
             . $args[0]
+            Start-Sleep -Seconds 2
             $env:C8Y_SESSION = $args[1]
             $DeviceID = $args[2]
             @(1..10) | ForEach-Object {
                 New-TestOperation -Device $DeviceID -Force
-                Start-Sleep -Milliseconds 500
+                Start-Sleep -Milliseconds 1000
             }
         }
     }
