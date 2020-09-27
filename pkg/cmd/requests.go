@@ -10,6 +10,7 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/pkg/jsonUtilities"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
+	"github.com/tidwall/gjson"
 	"github.com/tidwall/pretty"
 )
 
@@ -105,8 +106,13 @@ func processResponse(resp *c8y.Response, respError error, commonOptions CommonCo
 		var responseText []byte
 		isJSONResponse := jsonUtilities.IsValidJSON([]byte(*resp.JSONData))
 
+		dataProperty := commonOptions.ResultProperty
+		if dataProperty == "" {
+			dataProperty = guessDataProperty(resp)
+		}
+
 		if isJSONResponse && commonOptions.Filters != nil && !globalFlagRaw {
-			responseText = commonOptions.Filters.Apply(*resp.JSONData, commonOptions.ResultProperty)
+			responseText = commonOptions.Filters.Apply(*resp.JSONData, dataProperty)
 		} else {
 			responseText = []byte(*resp.JSONData)
 		}
@@ -124,4 +130,23 @@ func processResponse(resp *c8y.Response, respError error, commonOptions CommonCo
 		return newSystemError("command failed", respError)
 	}
 	return nil
+}
+
+func guessDataProperty(resp *c8y.Response) string {
+	property := ""
+	if v := resp.JSON.Get("id"); !v.Exists() {
+		// Find the property which is an array
+		resp.JSON.ForEach(func(key, value gjson.Result) bool {
+			if value.IsArray() {
+				property = key.String()
+				return false
+			}
+			return true
+		})
+	}
+
+	if property != "" {
+		Logger.Debugf("Data property: %s", property)
+	}
+	return property
 }
