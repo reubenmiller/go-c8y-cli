@@ -18,9 +18,10 @@
 		// Yaml code completion
 		"yaml.completion": true,
 		"yaml.schemas": {
-			"./api/spec/schema.json": "api/spec/yaml/*.yml",
+			"./api/spec/schema.json": "api/spec/yaml/*.yml"
 		},
-		"powershell.pester.useLegacyCodeLens": false
+		"powershell.pester.useLegacyCodeLens": false,
+		"extensions.ignoreRecommendations": true
 	},
 
 	// Add the IDs of extensions you want installed when the container is created in the array below.
@@ -37,7 +38,7 @@
 	],
 	
 	// Uncomment the next line to run commands after the container is created.
-	// "postCreateCommand": "go version",
+	"postCreateCommand": "make install_c8y",
 
 	// Comment out the next line to run as root
 	"remoteUser": "vscode"

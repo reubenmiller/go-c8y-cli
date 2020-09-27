@@ -145,6 +145,17 @@ test_powershell:
 	pwsh -NonInteractive -File tools/PSc8y/test.parallel.ps1
 	# pwsh -NonInteractive -File tools/PSc8y/tests.ps1
 
+test_bash:
+	./tools/bash/tests/test.sh
+
+install_c8y: build			## Install c8y in dev environment
+	@if [ ! -f /usr/local/bin/c8y ]; then \
+		sudo ln -s "$$(pwd)/tools/PSc8y/Dependencies/c8y.linux" /usr/local/bin/c8y; \
+	fi
+	@cp ./tools/bash/c8y.profile.sh ~/
+	@echo "source ~/c8y.profile.sh"  >> ~/.bashrc
+
+	@echo Installed c8y successfully
 
 publish:
 	pwsh -File ./scripts/build-powershell/publish.ps1

@@ -13,8 +13,8 @@ RUN curl -L https://www.powershellgallery.com/api/v2/package/PSc8y/1.3.0 -o c8y.
 
 USER c8yuser
 
-RUN echo "source /usr/share/bash-completion/bash_completion" >> ~/.bashrc \
-    && c8y completion bash >> ~/.bashrc
+RUN curl -L https://raw.githubusercontent.com/reubenmiller/go-c8y-cli/master/tools/c8y.profile.sh -o ~/c8y.profile.sh \
+    && echo "source ~/c8y.profile.sh" >> ~/.bashrc
 
 VOLUME [ "/home/c8yuser/.cumulocity" ]
 

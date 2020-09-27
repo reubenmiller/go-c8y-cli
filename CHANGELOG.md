@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+#### PSc8y (PowerShell)
+
 **Renamed cmdlets**
 
 * `New-ChildAssetReference` to `Add-AssetToGroup`
@@ -15,10 +17,10 @@
 * `Add-ChildGroupToGroup`
 * `Remove-DeviceFromGroup`
 
-**c8y**
+#### c8y (binary)
 
 * Removed duplicate command `c8y devices find` as query functionality is provided by `c8y devices list --query "name eq 'test*'"`
-* Removed unreferenced commands
+
 * Added common options and array items processing to the following commands
     * `c8y agents list`
     * `c8y devices list`
@@ -28,8 +30,13 @@
     * `c8y micrservices create`
     * `c8y micrservices createHostedApplication`
 
+* Added bash profile script to add support for aliases
+* Added guide to creating custom bash aliases
+* Removed unreferenced commands
+
 **c8y session list**
-    * Renamed `--filter` to `--sessionFilter` to avoid conflict with the global `--filter` option
+
+* Renamed `--filter` to `--sessionFilter` to avoid conflict with the global `--filter` option
 
 **Misc.**
 
