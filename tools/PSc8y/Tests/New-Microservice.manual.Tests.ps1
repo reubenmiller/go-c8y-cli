@@ -49,6 +49,7 @@ Describe -Name "New-Microservice" {
             Get-Microservice -Id $AppName | Remove-Microservice
 
             $ManifestFile = New-TemporaryFile
+            $ManifestFile = $ManifestFile | Rename-Item -NewName { $_.name + ".json" } -PassThru
 
             Out-File -FilePath $ManifestFile -InputObject @"
 {
@@ -95,6 +96,21 @@ Describe -Name "New-Microservice" {
             # Check manifest
             $App = Get-Microservice -Id $AppName
             $App.manifest.requiredRoles | Should -BeExactly @()
+        }
+
+        It "Trying creating microservice with invalid manifest json" {
+            Get-Microservice -Id $AppName | Remove-Microservice
+
+            $ManifestFile = New-TemporaryFile
+
+            Out-File -FilePath $ManifestFile -InputObject @"
+Invalid json example
+"@
+
+            $App = New-Microservice -Name $AppName -File $ManifestFile -SkipUpload -ErrorVariable ErrorResponse
+            $LASTEXITCODE | Should -Not -Be 0
+            $ErrorResponse | Select-Object -Last 1 | Should -BeLike "*invalid manifest*"
+            $App | Should -BeNullOrEmpty
         }
 
         It "Creates a new microservice but does not subscribe to it automatically" {

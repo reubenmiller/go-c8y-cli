@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -12,7 +11,6 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/pkg/zipUtilities"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
-	"github.com/tidwall/pretty"
 )
 
 type newHostedApplicationCmd struct {
@@ -37,6 +35,7 @@ func newNewHostedApplicationCmd() *newHostedApplicationCmd {
 		Long:  ``,
 		Example: `
 $ c8y applications createHostedApplication --file ./myapp.zip
+
 Create new hosted application from a given zip file
 		`,
 		RunE: ccmd.doProcedure,
@@ -144,6 +143,7 @@ func (n *newHostedApplicationCmd) packageAppIfRequired(src string) (zipFile stri
 
 func (n *newHostedApplicationCmd) doProcedure(cmd *cobra.Command, args []string) error {
 	var application *c8y.Application
+	var response *c8y.Response
 	var applicationID string
 	var err error
 
@@ -166,19 +166,19 @@ func (n *newHostedApplicationCmd) doProcedure(cmd *cobra.Command, args []string)
 	if applicationID == "" {
 		// Create the application
 		Logger.Info("Creating new application")
-		application, _, err = client.Application.Create(context.Background(), appDetails)
+		application, response, err = client.Application.Create(context.Background(), appDetails)
 
 		if err != nil {
-			return fmt.Errorf("failed to create microservice. %s", err)
+			return fmt.Errorf("Failed to create microservice. %s", err)
 		}
 		applicationID = application.ID
 	} else {
 		// Get existing application
 		Logger.Infof("Getting existing application. id=%s", applicationID)
-		application, _, err = client.Application.GetApplication(context.Background(), applicationID)
+		application, response, err = client.Application.GetApplication(context.Background(), applicationID)
 
 		if err != nil {
-			return fmt.Errorf("failed to get microservice. %s", err)
+			return fmt.Errorf("Failed to get microservice. %s", err)
 		}
 	}
 
@@ -231,25 +231,13 @@ func (n *newHostedApplicationCmd) doProcedure(cmd *cobra.Command, args []string)
 
 		// use the updated application json
 		application = app
+		response = resp
 	}
 
-	if v, err := json.Marshal(application); err == nil {
-		filters := getFilterFlag(cmd, "filter")
-
-		var responseText []byte
-
-		if filters != nil && !globalFlagRaw {
-			responseText = filters.Apply(string(v), "")
-		} else {
-			responseText = v
-		}
-
-		if globalFlagPrettyPrint {
-			fmt.Printf("%s", pretty.Pretty(responseText))
-		} else {
-			fmt.Printf("%s", responseText)
-		}
+	commonOptions, err := getCommonOptions(cmd)
+	if err != nil {
+		return err
 	}
 
-	return nil
+	return processResponse(response, err, commonOptions)
 }

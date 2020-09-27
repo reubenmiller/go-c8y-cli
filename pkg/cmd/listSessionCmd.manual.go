@@ -32,7 +32,7 @@ func newListSessionCmd() *listSessionCmd {
 
 	cmd.SilenceUsage = true
 
-	cmd.Flags().StringVar(&ccmd.sessionFilter, "filter", "", "Filter to be applied to the list of sessions even before the values can be selected")
+	cmd.Flags().StringVar(&ccmd.sessionFilter, "sessionFilter", "", "Filter to be applied to the list of sessions even before the values can be selected")
 
 	ccmd.baseCmd = newBaseCmd(cmd)
 

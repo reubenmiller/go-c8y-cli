@@ -1,15 +1,15 @@
 package cmd
 
 import (
-	"context"
 	"fmt"
+	"io"
+	"net/http"
 	"net/url"
 	"strings"
 
-	"github.com/fatih/color"
+	"github.com/reubenmiller/go-c8y-cli/pkg/mapbuilder"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
-	"github.com/tidwall/pretty"
 )
 
 type getAgentCollectionCmd struct {
@@ -116,45 +116,37 @@ func (n *getAgentCollectionCmd) getAgentCollection(cmd *cobra.Command, args []st
 		return newSystemError("Invalid query parameter")
 	}
 
+	// headers
+	headers := http.Header{}
+
+	// form data
+	formData := make(map[string]io.Reader)
+
 	// body
-	var body map[string]interface{}
+	body := mapbuilder.NewMapBuilder()
 
 	// path parameters
 	pathParameters := make(map[string]string)
 
 	path := replacePathParameters("inventory/managedObjects", pathParameters)
 
-	return n.doGetAgentCollection("GET", path, queryValue, body)
-}
+	req := c8y.RequestOptions{
+		Method:       "GET",
+		Path:         path,
+		Query:        queryValue,
+		Body:         body.GetMap(),
+		FormData:     formData,
+		Header:       headers,
+		IgnoreAccept: false,
+		DryRun:       globalFlagDryRun,
+	}
 
-func (n *getAgentCollectionCmd) doGetAgentCollection(method string, path string, query string, body map[string]interface{}) error {
-	resp, err := client.SendRequest(
-		context.Background(),
-		c8y.RequestOptions{
-			Method:       method,
-			Path:         path,
-			Query:        query,
-			Body:         body,
-			IgnoreAccept: false,
-			DryRun:       globalFlagDryRun,
-		})
-
+	commonOptions, err := getCommonOptions(cmd)
 	if err != nil {
-		color.Set(color.FgRed, color.Bold)
+		return err
 	}
 
-	if resp != nil && resp.JSONData != nil {
-		if globalFlagPrettyPrint {
-			fmt.Printf("%s\n", pretty.Pretty([]byte(*resp.JSONData)))
-		} else {
-			fmt.Printf("%s\n", *resp.JSONData)
-		}
-	}
+	commonOptions.ResultProperty = "managedObjects"
 
-	color.Unset()
-
-	if err != nil {
-		return newSystemError("command failed", err)
-	}
-	return nil
+	return processRequestAndResponse([]c8y.RequestOptions{req}, commonOptions)
 }

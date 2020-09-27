@@ -74,7 +74,7 @@ String
 
                 if ($Filter -gt 0) {
                     $SearchTerms = $Filter -join " "
-                    $null = $c8yargs.AddRange(@("--filter", "$SearchTerms"))
+                    $null = $c8yargs.AddRange(@("--sessionFilter", "$SearchTerms"))
                 }
 
                 if ($UseEnvironment) {

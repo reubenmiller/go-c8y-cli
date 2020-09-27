@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"io/ioutil"
@@ -15,7 +14,6 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/pkg/zipUtilities"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
-	"github.com/tidwall/pretty"
 )
 
 type newMicroserviceCmd struct {
@@ -108,6 +106,7 @@ func (n *newMicroserviceCmd) getApplicationDetails() *c8y.Application {
 
 func (n *newMicroserviceCmd) doProcedure(cmd *cobra.Command, args []string) error {
 	var application *c8y.Application
+	var response *c8y.Response
 	var applicationID string
 	var applicationName string
 	var err error
@@ -155,7 +154,7 @@ func (n *newMicroserviceCmd) doProcedure(cmd *cobra.Command, args []string) erro
 	if applicationID == "" {
 		// Create the application
 		Logger.Info("Creating new application")
-		application, _, err = client.Application.Create(context.Background(), applicationDetails)
+		application, response, err = client.Application.Create(context.Background(), applicationDetails)
 
 		if err != nil {
 			return fmt.Errorf("failed to create microservice. %s", err)
@@ -163,7 +162,7 @@ func (n *newMicroserviceCmd) doProcedure(cmd *cobra.Command, args []string) erro
 	} else {
 		// Get existing application
 		Logger.Infof("Getting existing application. id=%s", applicationID)
-		application, _, err = client.Application.GetApplication(context.Background(), applicationID)
+		application, response, err = client.Application.GetApplication(context.Background(), applicationID)
 
 		if err != nil {
 			return fmt.Errorf("failed to get microservice. %s", err)
@@ -213,11 +212,11 @@ func (n *newMicroserviceCmd) doProcedure(cmd *cobra.Command, args []string) erro
 			}
 		}
 
-		if v, err := jsonUtilities.DecodeJSONFile(manifestFile); err != nil {
-			// todo: handle error
-			Logger.Warningf("failed to decode manifest file. file=%s, err=%s", manifestFile, err)
-		} else {
+		if v, err := jsonUtilities.DecodeJSONFile(manifestFile); err == nil {
 			manifestContents = v
+		} else {
+			Logger.Warningf("failed to decode manifest file. file=%s, err=%s", manifestFile, err)
+			return newUserError(fmt.Sprintf("invalid manifest file. Only json files are accepted. %s", err))
 		}
 
 		if values, ok := manifestContents["requiredRoles"].([]string); ok {
@@ -227,7 +226,7 @@ func (n *newMicroserviceCmd) doProcedure(cmd *cobra.Command, args []string) erro
 		// Read the Cumulocity.json file, and upload
 		Logger.Infof("updating application details [id=%s], requiredRoles=%s", application.ID, strings.Join(requiredRoles, ","))
 		if !globalFlagDryRun {
-			client.Application.Update(context.Background(), application.ID, &c8y.Application{
+			_, response, err = client.Application.Update(context.Background(), application.ID, &c8y.Application{
 				RequiredRoles: requiredRoles,
 				// manifest: manifestContents,
 			})
@@ -244,31 +243,18 @@ func (n *newMicroserviceCmd) doProcedure(cmd *cobra.Command, args []string) erro
 				if resp != nil && resp.StatusCode == 409 {
 					Logger.Infof("microservice is already enabled")
 				} else {
-					return fmt.Errorf("failed to subscribe to application. %s", err)
+					return fmt.Errorf("Failed to subscribe to application. %s", err)
 				}
 			}
 		}
 	}
 
-	if v, err := json.Marshal(application); err == nil {
-		filters := getFilterFlag(cmd, "filter")
-
-		var responseText []byte
-
-		if filters != nil && !globalFlagRaw {
-			responseText = filters.Apply(string(v), "")
-		} else {
-			responseText = v
-		}
-
-		if globalFlagPrettyPrint {
-			fmt.Printf("%s", pretty.Pretty(responseText))
-		} else {
-			fmt.Printf("%s", responseText)
-		}
+	commonOptions, err := getCommonOptions(cmd)
+	if err != nil {
+		return err
 	}
 
-	return nil
+	return processResponse(response, err, commonOptions)
 }
 
 // GetManifestFile extracts the Cumulocity microservice manifest file from a given zip file

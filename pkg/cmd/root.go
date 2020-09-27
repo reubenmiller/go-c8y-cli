@@ -10,8 +10,8 @@ import (
 	"time"
 
 	"github.com/gorilla/websocket"
-	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/reubenmiller/go-c8y-cli/pkg/logger"
+	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -136,7 +136,6 @@ func Execute() {
 
 	// devices commands
 	devices := newDevicesRootCmd().getCommand()
-	devices.AddCommand(newQueryDeviceCmd().getCommand())
 	devices.AddCommand(newGetDeviceCollectionCmd().getCommand())
 	devices.AddCommand(newGetDeviceGroupCollectionCmd().getCommand())
 	rootCmd.AddCommand(devices)
