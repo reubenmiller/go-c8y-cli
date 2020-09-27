@@ -33,7 +33,7 @@ Below is a list of the aliases:
 | fmo | Find-ManagedObjectCollection |
 | fromjson | ConvertFrom-Json |
 | json | ConvertTo-Json |
-| m | Get-Measurements |
+| m | Get-Measurement |
 | measurements | Get-MeasurementCollection |
 | mo | Get-ManagedObject |
 | op | Get-Operation |

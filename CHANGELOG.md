@@ -19,6 +19,8 @@
 
 * `New-TestDevice` has changed to require confirmation before creating the device
 
+* Fixed `Get-Measurement` alias `m` in PSc8y
+
 ## Released
 
 ### v1.3.0
