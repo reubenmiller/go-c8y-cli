@@ -42,9 +42,11 @@ endpoints:
     examples:
       powershell:
         - description: Create a tenant option
-          command: New-TenantOption -Category "c8y_cli_tests" -Key "option1" -Value "1"
+          beforeEach:
+              - $option1 = New-RandomString -Prefix "option1"
+          command: New-TenantOption -Category "c8y_cli_tests" -Key "$option1" -Value "1"
           afterEach:
-            - Remove-TenantOption -Category "c8y_cli_tests" -Key "option1"
+            - Remove-TenantOption -Category "c8y_cli_tests" -Key "$option1"
 
       go:
         - description: Create a tenant option
@@ -78,10 +80,11 @@ endpoints:
       powershell:
         - description: Get a tenant option
           beforeEach:
-            - New-TenantOption -Category "c8y_cli_tests" -Key "option2" -Value "2"
-          command: Get-TenantOption -Category "c8y_cli_tests" -Key "option2"
+            - $option2 = New-RandomString -Prefix "option2"
+            - New-TenantOption -Category "c8y_cli_tests" -Key "$option2" -Value "2"
+          command: Get-TenantOption -Category "c8y_cli_tests" -Key "$option2"
           afterEach:
-            - Remove-TenantOption -Category "c8y_cli_tests" -Key "option2"
+            - Remove-TenantOption -Category "c8y_cli_tests" -Key "$option2"
 
       go:
         - description: Get a tenant option
@@ -108,8 +111,9 @@ endpoints:
       powershell:
         - description: Delete a tenant option
           beforeEach:
-            - New-TenantOption -Category "c8y_cli_tests" -Key "option3" -Value "3"
-          command: Remove-TenantOption -Category "c8y_cli_tests" -Key "option3"
+            - $option3 = New-RandomString -Prefix "option3"
+            - New-TenantOption -Category "c8y_cli_tests" -Key "$option3" -Value "3"
+          command: Remove-TenantOption -Category "c8y_cli_tests" -Key "$option3"
 
       go:
         - description: Get a tenant option
@@ -137,10 +141,11 @@ endpoints:
       powershell:
         - description: Update a tenant option
           beforeEach:
-            - New-TenantOption -Category "c8y_cli_tests" -Key "option4" -Value "4"
-          command: Update-TenantOption -Category "c8y_cli_tests" -Key "option4" -Value "0"
+            - $option4 = New-RandomString -Prefix "option4"
+            - New-TenantOption -Category "c8y_cli_tests" -Key "$option4" -Value "4"
+          command: Update-TenantOption -Category "c8y_cli_tests" -Key "$option4" -Value "0"
           afterEach:
-            - Remove-TenantOption -Category "c8y_cli_tests" -Key "option4"
+            - Remove-TenantOption -Category "c8y_cli_tests" -Key "$option4"
 
       go:
         - description: Update a tenant option
@@ -174,12 +179,14 @@ endpoints:
       powershell:
         - description: Update multiple tenant options
           beforeEach:
-            - New-TenantOption -Category "c8y_cli_tests" -Key "option5" -Value "5"
-            - New-TenantOption -Category "c8y_cli_tests" -Key "option6" -Value "6"
-          command: Update-TenantOptionBulk -Category "c8y_cli_tests" -Data @{ option5 = 0; option6 = 1 }
+            - $option5 = New-RandomString -Prefix "option5"
+            - $option6 = New-RandomString -Prefix "option6"
+            - New-TenantOption -Category "c8y_cli_tests" -Key "$option5" -Value "5"
+            - New-TenantOption -Category "c8y_cli_tests" -Key "$option6" -Value "6"
+          command: Update-TenantOptionBulk -Category "c8y_cli_tests" -Data @{ $option5 = 0; $option6 = 1 }
           afterEach:
-            - Remove-TenantOption -Category "c8y_cli_tests" -Key "option5"
-            - Remove-TenantOption -Category "c8y_cli_tests" -Key "option6"
+            - Remove-TenantOption -Category "c8y_cli_tests" -Key "$option5"
+            - Remove-TenantOption -Category "c8y_cli_tests" -Key "$option6"
 
       go:
         - description: Update multiple tenant options
@@ -208,10 +215,11 @@ endpoints:
       powershell:
         - description: Get a list of options for a category
           beforeEach:
-            - New-TenantOption -Category "c8y_cli_tests" -Key "option7" -Value "7"
+            - $option7 = New-RandomString -Prefix "option7"
+            - New-TenantOption -Category "c8y_cli_tests" -Key "$option7" -Value "7"
           command: Get-TenantOptionForCategory -Category "c8y_cli_tests"
           afterEach:
-            - Remove-TenantOption -Category "c8y_cli_tests" -Key "option7"
+            - Remove-TenantOption -Category "c8y_cli_tests" -Key "$option7"
 
       go:
         - description: Get a list of options for a category
@@ -238,11 +246,12 @@ endpoints:
       powershell:
         - description: Update editable property for an existing tenant option
           beforeEach:
-            - New-TenantOption -Category "c8y_cli_tests" -Key "option8" -Value "8"
-          command: Update-TenantOptionEditable -Category "c8y_cli_tests" -Key "option8" -Editable "true"
+            - $option8 = New-RandomString -Prefix "option8"
+            - New-TenantOption -Category "c8y_cli_tests" -Key "$option8" -Value "8"
+          command: Update-TenantOptionEditable -Category "c8y_cli_tests" -Key "$option8" -Editable "true"
           skipTest: true
           afterEach:
-            - Remove-TenantOption -Category "c8y_cli_tests" -Key "option8"
+            - Remove-TenantOption -Category "c8y_cli_tests" -Key "$option8"
 
       go:
         - description: Update editable property for an existing tenant option

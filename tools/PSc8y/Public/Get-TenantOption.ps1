@@ -8,7 +8,7 @@ Get tenant option
 Get tenant option
 
 .EXAMPLE
-PS> Get-TenantOption -Category "c8y_cli_tests" -Key "option2"
+PS> Get-TenantOption -Category "c8y_cli_tests" -Key "$option2"
 
 Get a tenant option
 
