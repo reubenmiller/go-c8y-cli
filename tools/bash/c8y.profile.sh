@@ -14,7 +14,14 @@ fi
 source /usr/share/bash-completion/bash_completion
 source ~/.bash_completion.d/complete_alias
 
-source <(c8y completion bash)
+if [[ "$(echo $0 | grep -c bash)" -gt 0 ]]; then
+    source <(c8y completion bash)    
+elif [[ "$(echo $0 | grep -c zsh)" -gt 0 ]]; then
+    # load zsh completions
+    mkdir ~/.oh-my-zsh/completions
+    c8y completion zsh >> ~/.oh-my-zsh/completions/_c8y
+fi
+
 
 ########################################################################
 # c8y helpers
