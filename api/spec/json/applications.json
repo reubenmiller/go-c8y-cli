@@ -167,7 +167,7 @@
             "beforeEach": [
               "$App = New-TestHostedApplication"
             ],
-            "command": "Copy-Application -Id $$App.id",
+            "command": "Copy-Application -Id $App.id",
             "afterEach": [
               "Remove-Application -Id $App.id",
               "Remove-Application -Id \"clone$($App.name)\""

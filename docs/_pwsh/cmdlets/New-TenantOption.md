@@ -38,7 +38,7 @@ New tenant option
 
 ### EXAMPLE 1
 ```
-New-TenantOption -Category "c8y_cli_tests" -Key "option1" -Value "1"
+New-TenantOption -Category "c8y_cli_tests" -Key "$option1" -Value "1"
 ```
 
 Create a tenant option

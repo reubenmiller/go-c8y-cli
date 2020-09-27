@@ -45,7 +45,7 @@ Update an application by its id
 
 ### EXAMPLE 1
 ```
-Update-Application -Id "helloworld-app" -Availability "MARKET"
+Update-Application -Id $App.name -Availability "MARKET"
 ```
 
 Update application availability to MARKET

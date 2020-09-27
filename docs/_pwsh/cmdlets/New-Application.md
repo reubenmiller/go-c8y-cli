@@ -45,10 +45,10 @@ Create a new application using explicit settings
 
 ### EXAMPLE 1
 ```
-New-Application -Name myapp -Type HOSTED -Key "myapp-key" -ContextPath "myapp"
+New-Application -Name $AppName -Key "${AppName}-key" -ContextPath $AppName -Type HOSTED
 ```
 
-Create new hosted application
+Create a new hosted application
 
 ## PARAMETERS
 

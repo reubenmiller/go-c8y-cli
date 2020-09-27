@@ -37,7 +37,7 @@ Update multiple tenant options in provided category
 
 ### EXAMPLE 1
 ```
-Update-TenantOptionBulk -Category "c8y_cli_tests" -Data @{ option5 = 0; option6 = 1 }
+Update-TenantOptionBulk -Category "c8y_cli_tests" -Data @{ $option5 = 0; $option6 = 1 }
 ```
 
 Update multiple tenant options

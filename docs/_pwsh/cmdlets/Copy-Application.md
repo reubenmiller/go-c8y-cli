@@ -41,7 +41,7 @@ Required role ROLE_APPLICATION_MANAGMENT_ADMIN
 
 ### EXAMPLE 1
 ```
-Copy-Application -Id "my-example-app"
+Copy-Application -Id $App.id
 ```
 
 Copy an existing application

@@ -38,7 +38,7 @@ Required role:: ROLE_OPTION_MANAGEMENT_ADMIN, Required tenant management Example
 
 ### EXAMPLE 1
 ```
-Update-TenantOptionEditable -Category "c8y_cli_tests" -Key "option8" -Editable "true"
+Update-TenantOptionEditable -Category "c8y_cli_tests" -Key "$option8" -Editable "true"
 ```
 
 Update editable property for an existing tenant option

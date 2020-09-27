@@ -38,14 +38,14 @@ Assign a role to a user group
 
 ### EXAMPLE 1
 ```
-Add-RoleToGroup -Group "customGroup1*" -Role "*ALARM_*"
+Add-RoleToGroup -Group "${NamePattern}*" -Role "*ALARM_*"
 ```
 
 Add a role to a group using wildcards
 
 ### EXAMPLE 2
 ```
-Get-RoleCollection -PageSize 100 | Where-Object Name -like "*ALARM*" | Add-RoleToGroup -Group "customGroup1*"
+Get-RoleCollection -PageSize 100 | Where-Object Name -like "*ALARM*" | Add-RoleToGroup -Group "${NamePattern}*"
 ```
 
 Add a role to a group using wildcards (using pipeline)

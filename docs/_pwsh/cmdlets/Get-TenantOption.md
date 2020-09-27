@@ -36,7 +36,7 @@ Get tenant option
 
 ### EXAMPLE 1
 ```
-Get-TenantOption -Category "c8y_cli_tests" -Key "option2"
+Get-TenantOption -Category "c8y_cli_tests" -Key "$option2"
 ```
 
 Get a tenant option

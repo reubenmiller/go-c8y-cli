@@ -38,7 +38,7 @@ Update tenant option
 
 ### EXAMPLE 1
 ```
-Update-TenantOption -Category "c8y_cli_tests" -Key "option4" -Value "0"
+Update-TenantOption -Category "c8y_cli_tests" -Key "$option4" -Value "0"
 ```
 
 Update a tenant option
