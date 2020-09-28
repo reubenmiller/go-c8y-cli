@@ -27,6 +27,7 @@ jobs:
 
   publish-docker-latest:
     runs-on: ubuntu-latest
+    needs: [publish-nuget]
     if: "true"
     env:
       CR_PAT: ${{ secrets.CR_PAT }}
