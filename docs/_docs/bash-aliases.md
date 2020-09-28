@@ -1,11 +1,13 @@
 ---
 layout: default
-category: Installation
+category: Installation - bash/zsh
 order: 200
-title: Creating bash aliases
+title: Creating aliases
 ---
 
-## Install bash profile and dependencies
+### Bash
+
+#### Install bash profile and dependencies
 
 The following steps can be used to add custom c8y aliases to save in typing out the full command.
 
@@ -32,33 +34,41 @@ The following steps can be used to add custom c8y aliases to save in typing out 
 2. Download the c8y helper script
 
     ```sh
-    curl -L https://raw.githubusercontent.com/reubenmiller/go-c8y-cli/master/tools/c8y.profile.sh -o ~/c8y.profile.sh
+    curl -L -o ~/c8y.profile.sh \
+        https://raw.githubusercontent.com/reubenmiller/go-c8y-cli/master/tools/c8y.profile.sh
     ```
 
-3. Add the following line to your bach profile
+3. Add the following line to your bash profile `~/.bashrc`
 
     ```sh
     source ~/c8y.profile.sh
     ```
 
-    Or view the command line
+    Or using the command line
 
     ```sh
     echo "source ~/c8y.profile.sh" >> ~/.bashrc
     ```
 
-4. Start a new bash console (or load your bash profile again)
+4. Reload your bash profile again
 
     ```sh
-    bash
+    source ~/.bashrc
     ```
 
-    Try the 
+    Test that the completion works with c8y
+
     ```sh
     c8y <tab-tab>
     ```
 
-## Creating custom bash aliases
+    Then, check if it works with aliases
+
+    ```sh
+    devices --<tab-tab>
+    ```
+
+#### Creating custom bash aliases
 
 1. Add a new alias definition to the `~/c8y.profile.sh`
 
@@ -74,4 +84,34 @@ The following steps can be used to add custom c8y aliases to save in typing out 
 
     ```sh
     my_devices
+    ```
+
+---
+
+### Zsh
+
+#### Create a custom operation to get all FAILED operations
+
+1. Open your zsh profile `~/.zshrc` and add a custom alias
+
+    ```sh
+    alias failedops="c8y operations list --status FAILED"
+    ```
+
+2. Save the changes to your zsh profile
+
+3. Reload the profile
+
+    ```sh
+    source ~/.zshrc
+    ```
+
+4. Try out your new alias
+
+    ```sh
+    failedops
+    ```
+
+    ```sh
+    failedops --agent "test*"
     ```

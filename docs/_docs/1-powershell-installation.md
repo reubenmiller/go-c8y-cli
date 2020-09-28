@@ -1,8 +1,8 @@
 ---
 layout: default
-category: Installation
+category: Installation - PowerShell
 order: 200
-title: PowerShell
+title: Installation
 ---
 
 Try it out in a Cloud Shell!
@@ -24,7 +24,7 @@ Try it out in a Cloud Shell!
 1. Install `PSc8y` module from [PSGallery](https://www.powershellgallery.com/packages/PSc8y)
 
     ```powershell
-    Install-Module PSc8y -Repository PSGallery -AllowPrerelease -AllowClobber
+    Install-Module PSc8y -Repository PSGallery -AllowClobber -Scope CurrentUser
     ```
 
 1. Import the module
@@ -50,7 +50,7 @@ Once powershell is installed, then `PSc8y` can be installed using:
 1. Install `PSc8y` module from [PSGallery](https://www.powershellgallery.com/packages/PSc8y)
 
     ```powershell
-    Install-Module PSc8y -Repository PSGallery -AllowPrerelease -AllowClobber
+    Install-Module PSc8y -Repository PSGallery -AllowClobber -Scope CurrentUser
     ```
 
 1. Import the module
@@ -76,7 +76,7 @@ Once powershell is installed, then `PSc8y` can be installed using:
 1. Install `PSc8y` module from [PSGallery](https://www.powershellgallery.com/packages/PSc8y)
 
     ```powershell
-    Install-Module PSc8y -Repository PSGallery -AllowPrerelease -AllowClobber
+    Install-Module PSc8y -Repository PSGallery -AllowClobber -Scope CurrentUser
     ```
 
 1. Import the module
@@ -102,7 +102,7 @@ Once powershell is installed, then `PSc8y` can be installed using:
 1. Install `PSc8y` module from [PSGallery](https://www.powershellgallery.com/packages/PSc8y)
 
     ```powershell
-    Install-Module PSc8y -Repository PSGallery -AllowPrerelease -AllowClobber
+    Install-Module PSc8y -Repository PSGallery -AllowClobber -Scope CurrentUser
     ```
 
 1. Import the module
@@ -121,7 +121,7 @@ Once the `PSc8y` PowerShell module has been installed, then it can be updated fr
 1. Update to the latest version
 
     ```powershell
-    Update-Module PSc8y -AllowPrerelease
+    Update-Module PSc8y
     ```
 
 1. Import the updated module
