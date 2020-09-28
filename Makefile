@@ -7,6 +7,9 @@ BUILD_DIR = build
 C8Y_PKGS = $$(go list ./... | grep -v /vendor/)
 GOMOD=$(GOCMD) mod
 
+# Set VERSION from git describe
+$(eval VERSION := $(shell git describe | sed "s/^v\?\([0-9]\{1,\}\.[0-9]\{1,\}\.[0-9]\{1,\}\).*/\1/"))
+
 ENV_FILE ?= c8y.env
 -include $(ENV_FILE)
 export $(shell sed 's/=.*//' $(ENV_FILE) 2>/dev/null)
@@ -44,6 +47,9 @@ check-integration-variables:
 	$(call check_defined, C8Y_USER, Cumulocity username)
 	$(call check_defined, C8Y_PASSWORD, Cumulocity password)
 	@exit 0
+
+gh_pages_install:	## Install github pages dependencies for viewing docs locally
+	cd docs && bundle install
 
 gh_pages_update:	## Update github pages dependencies
 	cd docs && bundle update
@@ -160,7 +166,46 @@ install_c8y: build			## Install c8y in dev environment
 publish:
 	pwsh -File ./scripts/build-powershell/publish.ps1
 
-build_docker:
-	docker build . --file ./docker/zsh.dockerfile --tag $(TAG_PREFIX)c8ycli-zsh
-	docker build . --file ./docker/bash.dockerfile --tag $(TAG_PREFIX)c8ycli-bash
-	docker build . --file ./docker/pwsh.dockerfile --tag $(TAG_PREFIX)c8ycli-pwsh
+build-docker:
+	@cp tools/PSc8y/Dependencies/c8y.linux ./docker/c8y.linux
+	@cp tools/bash/c8y.plugin.zsh ./docker/c8y.plugin.zsh
+	@cp tools/bash/c8y.profile.sh ./docker/c8y.profile.sh
+
+	@sudo docker build ./docker --file ./docker/zsh.dockerfile $(DOCKER_BUILD_ARGS) --build-arg C8Y_VERSION=$(VERSION) --tag $(TAG_PREFIX)c8y-zsh
+	@sudo docker build ./docker --file ./docker/bash.dockerfile $(DOCKER_BUILD_ARGS) --build-arg C8Y_VERSION=$(VERSION) --tag $(TAG_PREFIX)c8y-bash
+	@sudo docker build ./docker --file ./docker/pwsh.dockerfile $(DOCKER_BUILD_ARGS) --tag $(TAG_PREFIX)c8y-pwsh
+
+	@rm ./docker/c8y.linux
+	@rm ./docker/c8y.plugin.zsh
+	@rm ./docker/c8y.profile.sh
+
+publish-docker: build-docker		## Publish docker c8y cli images
+	@chmod +x ./scripts/publish-docker.sh
+	@sudo CR_PAT=$(CR_PAT) VERSION=$(VERSION) ./scripts/publish-docker.sh
+
+run-docker-bash:
+	sudo docker run -it --rm \
+		-e C8Y_USE_ENVIRONMENT=true \
+		-e C8Y_HOST=$$C8Y_HOST \
+		-e C8Y_TENANT=$$C8Y_TENANT \
+		-e C8Y_USER=$$C8Y_USER \
+		-e C8Y_PASSWORD=$$C8Y_PASSWORD \
+		c8y-bash
+
+run-docker-zsh:
+	sudo docker run -it --rm \
+		-e C8Y_USE_ENVIRONMENT=true \
+		-e C8Y_HOST=$$C8Y_HOST \
+		-e C8Y_TENANT=$$C8Y_TENANT \
+		-e C8Y_USER=$$C8Y_USER \
+		-e C8Y_PASSWORD=$$C8Y_PASSWORD \
+		c8y-zsh
+
+run-docker-pwsh:
+	sudo docker run -it --rm \
+		-e C8Y_USE_ENVIRONMENT=true \
+		-e C8Y_HOST=$$C8Y_HOST \
+		-e C8Y_TENANT=$$C8Y_TENANT \
+		-e C8Y_USER=$$C8Y_USER \
+		-e C8Y_PASSWORD=$$C8Y_PASSWORD \
+		c8y-pwsh

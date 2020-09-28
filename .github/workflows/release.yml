@@ -27,33 +27,12 @@ jobs:
 
   publish-docker-latest:
     runs-on: ubuntu-latest
-    if: "false"
+    if: "true"
+    env:
+      CR_PAT: ${{ secrets.CR_PAT }}
 
     steps:
     - uses: actions/checkout@v2 # Checking out the repo
 
-    - name: Build docker images
-      run: |
-        TAG_PREFIX="ghcr.io/${GITHUB_REPOSITORY}/"
-        make TAG_PREFIX=$TAG_PREFIX build_docker
-
-    - name: Publish c8ycli pwsh docker image
-      uses: VaultVulp/gp-docker-action@1.0.1
-      with:
-        github-token: ${{ secrets.GITHUB_TOKEN }}
-        image-name: c8ycli-pwsh
-        # extract-git-tag: true
-
-    - name: Publish c8ycli zsh docker image
-      uses: VaultVulp/gp-docker-action@1.0.1
-      with:
-        github-token: ${{ secrets.GITHUB_TOKEN }}
-        image-name: c8ycli-zsh
-        # extract-git-tag: true
-
-    - name: Publish c8ycli bash docker image
-      uses: VaultVulp/gp-docker-action@1.0.1
-      with:
-        github-token: ${{ secrets.GITHUB_TOKEN }}
-        image-name: c8ycli-bash
-        # extract-git-tag: true
+    - name: publish docker images
+      run: make publish-docker

@@ -1,7 +1,8 @@
 FROM mcr.microsoft.com/powershell
 
-RUN pwsh -c "Install-Module PSc8y -Repository PSGallery -AllowPrerelease -AllowClobber -Force"
+ENV C8Y_SESSION_HOME=/sessions
+VOLUME [ "/sessions" ]
 
-VOLUME [ "/root/.cumulocity" ]
+RUN pwsh -c "Install-Module PSc8y -Repository PSGallery -AllowClobber -Force"
 
 ENTRYPOINT [ "pwsh", "-NoExit", "-c", "Import-Module PSc8y" ]

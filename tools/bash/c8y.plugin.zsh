@@ -1,22 +1,7 @@
-#!/bin/bash
+#!/bin/zsh
 
-if [[ ! -d ~/.bash_completion.d ]]; then
-    mkdir -p ~/.bash_completion.d
-fi
-
-if [ ! -f ~/.bash_completion.d/complete_alias ]; then
-    echo "Installing bash completion for aliases"
-    curl https://raw.githubusercontent.com/cykerway/complete-alias/master/complete_alias \
-            > ~/.bash_completion.d/complete_alias
-fi
-
-# Enable completion for aliases
-[ -f /usr/share/bash-completion/bash_completion ] && source /usr/share/bash-completion/bash_completion
-[ -f ~/.bash_completion.d/complete_alias ] && source ~/.bash_completion.d/complete_alias
-
-if [[ $(command -v c8y) ]]; then
-    source <(c8y completion bash)
-fi
+#mkdir -p "$ZSH/completions"
+#c8y completion zsh > ~/.oh-my-zsh/completions/_c8y
 
 ########################################################################
 # c8y helpers
@@ -49,6 +34,7 @@ set-session () {
         export C8Y_PASSWORD=$( echo $session_info | jq -r ".password" )
     fi
 }
+
 
 # ----------
 # c8y-update
@@ -123,6 +109,17 @@ c8y-update () {
         echo -e "${green}c8y is already up to date: $(current_version)${normal}"
         return 0
     fi
+    
+    # update completions
+    [ ! -d ~/.oh-my-zsh/completions ] && mkdir -p ~/.oh-my-zsh/completions
+
+    if [ $(command -v c8y) ]; then
+        echo -n "updating completions..."
+        c8y completion zsh > $ZSH/completions/_c8y
+        echo -e "${green}ok${normal}"
+    fi
+
+    echo -e "${green}Updated c8y completions. \n\n${bold}Please load your zsh profile again using 'source ~/.zshrc'${normal}"
 
     # show new version to user
     c8y version
@@ -134,59 +131,45 @@ c8y-update () {
 
 # alarms
 alias alarms=c8y\ alarms\ list
-complete -F _complete_alias alarms
 
 # apps
 alias apps=c8y\ applications\ list
-complete -F _complete_alias apps
 
 # devices
 alias devices=c8y\ devices\ list
-complete -F _complete_alias devices
 
 # events
 alias events=c8y\ events\ list
-complete -F _complete_alias events
 
 # fmo
 alias fmo=c8y\ inventory\ find\ --query
-complete -F _complete_alias fmo
 
 # measurements
 alias measurements=c8y\ measurements\ list
-complete -F _complete_alias measurements
 
 # operations
 alias ops=c8y\ operations\ list
-complete -F _complete_alias ops
 
 # series
 alias series=c8y\ measurements\ getSeries
-complete -F _complete_alias series
 
 #
 # Single item getters
 #
 # alarm
 alias alarm=c8y\ alarms\ get\ --id
-complete -F _complete_alias alarm
 
 # app
 alias app=c8y\ applications\ get\ --id
-complete -F _complete_alias app
 
 # event
 alias event=c8y\ events\ get\ --id
-complete -F _complete_alias event
 
 # m
 alias m=c8y\ measurements\ get\ --id
-complete -F _complete_alias m
 
 # mo
 alias mo=c8y\ inventory\ get\ --id
-complete -F _complete_alias mo
 
 # op
 alias op=c8y\ operations\ get\ --id
-complete -F _complete_alias op

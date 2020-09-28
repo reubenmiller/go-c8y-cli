@@ -1,21 +1,25 @@
 FROM alpine:3.11
 
+ARG C8Y_VERSION=1.3.0
+
 RUN apk update \
-    && apk add curl unzip bash bash-completion \
-    && adduser -S c8yuser
-
-WORKDIR /home/c8yuser
-
-RUN curl -L https://www.powershellgallery.com/api/v2/package/PSc8y/1.3.0 -o c8y.zip \
-    && unzip -p c8y.zip Dependencies/c8y.linux > /usr/bin/c8y \
-    && chmod +x /usr/bin/c8y \
-    && rm c8y.zip
+    && apk add curl unzip bash bash-completion vim jq \
+    && adduser -S c8yuser \
+    && mkdir -p /sessions \
+    && chown c8yuser /sessions
 
 USER c8yuser
+WORKDIR /home/c8yuser
 
-RUN curl -L https://raw.githubusercontent.com/reubenmiller/go-c8y-cli/master/tools/c8y.profile.sh -o ~/c8y.profile.sh \
-    && echo "source ~/c8y.profile.sh" >> ~/.bashrc
+COPY ./c8y.linux /home/c8yuser/bin/c8y
+COPY ./c8y.profile.sh /home/c8yuser/
 
-VOLUME [ "/home/c8yuser/.cumulocity" ]
+ENV PATH=${PATH}:/home/c8yuser/bin
+ENV C8Y_SESSION_HOME=/sessions
+
+RUN echo "source /home/c8yuser/c8y.profile.sh" >> /home/c8yuser/.bashrc \
+    && bash -c "source ~/c8y.profile.sh; c8y version"
+
+VOLUME [ "/sessions" ]
 
 ENTRYPOINT [ "/bin/bash" ]
