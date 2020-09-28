@@ -42,8 +42,10 @@ Describe -Name "New-HostedApplication" {
     }
 
     Context "developer environment 2" {
-        $WebAppSource = "$PSScriptRoot/TestData/hosted-application/simple-helloworld"
-        $AppName = New-RandomString -Prefix "app"
+        BeforeEach {
+            $WebAppSource = "$PSScriptRoot/TestData/hosted-application/simple-helloworld"
+            $AppName = New-RandomString -Prefix "app"
+        }
 
         It -Skip "Create a new web application from a folder" {
             $application = PSc8y\New-HostedApplication -File $WebAppSource -Name $AppName
@@ -59,13 +61,17 @@ Describe -Name "New-HostedApplication" {
             $webResponse | Out-String | Should -BeLike "*Hi there. This is a test web application*"
         }
 
-        PSc8y\Remove-Application -Id $AppName
+        AfterEach {
+            PSc8y\Remove-Application -Id $AppName
+        }
     }
 
     Context "existing application" {
-        $WebAppSource = "$PSScriptRoot/TestData/hosted-application/simple-helloworld"
-        $AppName = New-RandomString -Prefix "app"
-        $application = PSc8y\New-HostedApplication -File $WebAppSource -Name $AppName
+        BeforeEach {
+            $WebAppSource = "$PSScriptRoot/TestData/hosted-application/simple-helloworld"
+            $AppName = New-RandomString -Prefix "app"
+            $application = PSc8y\New-HostedApplication -File $WebAppSource -Name $AppName
+        }
 
         It -Skip "Update an existing web application from a folder" {
             $application | Should -Not -BeNullOrEmpty
@@ -100,6 +106,8 @@ Describe -Name "New-HostedApplication" {
             $webResponse | Out-String | Should -BeLike "*Hi there. This is a test web application*"
         }
 
-        PSc8y\Remove-Application -Id $AppName
+        AfterEach {
+            PSc8y\Remove-Application -Id $AppName
+        }
     }
 }
