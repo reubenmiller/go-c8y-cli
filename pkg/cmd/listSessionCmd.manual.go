@@ -25,7 +25,13 @@ func newListSessionCmd() *listSessionCmd {
 		Short: "Get a Cumulocity session",
 		Long:  `Get a Cumulocity session`,
 		Example: `
+			Example 1: Show an interactive list of all available sessions
 
+			#> c8y sessions list
+
+			Example 2: Select a session and filter the selection of session by the name "customer"
+
+			#> export C8Y_SESSION=$( c8y sessions list --sessionFilter "customer" )
 		`,
 		RunE: ccmd.listSession,
 	}
