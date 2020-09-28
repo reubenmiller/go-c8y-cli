@@ -23,7 +23,8 @@ pre {
 
 	code, tt {
 		font-size: inherit;
-		white-space: pre-wrap;
+		word-break: normal;
+		white-space: pre;
 		background: transparent;
 		border: none;
 		padding: 0
