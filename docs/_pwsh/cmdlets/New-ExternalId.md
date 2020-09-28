@@ -38,7 +38,7 @@ Create a new external id
 
 ### EXAMPLE 1
 ```
-New-ExternalId -Device {{ randomdevice }} -Type "my_SerialNumber" -Name "myserialnumber"
+New-ExternalId -Device {{ randomdevice }} -Type "$my_SerialNumber" -Name "myserialnumber"
 ```
 
 Get external identity
