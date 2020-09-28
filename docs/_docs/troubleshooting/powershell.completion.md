@@ -15,4 +15,16 @@ Set-PSReadlineKeyHandler -Key Tab -Function MenuComplete
 Set-PSReadlineKeyHandler -Key UpArrow -Function HistorySearchBackward
 
 Set-PSReadlineKeyHandler -Key DownArrow -Function HistorySearchForward
+
+Set-PSReadLineOption -HistorySearchCursorMovesToEnd
 ```
+
+**Note**
+
+You can add custom auto completion settings your PowerShell profile by adding them
+
+```powershell
+$PROFILE
+```
+
+For all of the `PSReadLine` options, view the [online documentation](https://docs.microsoft.com/en-us/powershell/module/PSReadline/Set-PSReadlineOption?view=powershell-7&viewFallbackFrom=powershell-5.0)
