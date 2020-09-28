@@ -57,7 +57,7 @@ To make the installation and future updates easier, a script is provided in the 
     **Install a specific version**
 
     ```sh
-    c8y-update v1.3.0
+    c8y-update v1.4.0
     ```
 
     The list of versions is available from the [github release page](https://github.com/reubenmiller/go-c8y-cli/releases)
@@ -183,7 +183,7 @@ However if you don't install the `c8y.profile.sh` script or the zsh `c8y` plugin
 
     ```plaintext
     Cumulocity command line tool
-    v1.3.0 -- HEAD
+    v1.4.0 -- HEAD
     ```
 
 1. Add completions to your profile:
