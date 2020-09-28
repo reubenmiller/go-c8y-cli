@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+## Released
+
+### v1.4.0
+
 #### PSc8y (PowerShell)
 
 **Renamed cmdlets**
@@ -42,20 +46,24 @@
 * `c8y session list` Renamed `--filter` to `--sessionFilter` to avoid conflict with the global `--filter` option
 
 
+#### Docker
 
+* Added docker images to make it easier to try out c8y
 
-**Docs**
+    * ghcr.io/reubenmiller/c8y-bash
+    * ghcr.io/reubenmiller/c8y-zsh
+    * ghcr.io/reubenmiller/c8y-pwsh
+
+#### Docs
 
 * Fixed line wrapping within code blocks. Now horizontal scrollbars are show to preserve the line spacing.
 * Added github project link
 
-**Build**
+#### Build
 
 * Improved reliability of realtime api tests
 * c8y (golang) binaries are now statically linked (using `CGO_ENABLED=0`) to make them more portable
 * Added docker images for pwsh, bash and zsh with c8y already configured
-
-## Released
 
 ### v1.3.0
 
