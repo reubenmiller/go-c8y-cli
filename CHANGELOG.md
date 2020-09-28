@@ -17,6 +17,11 @@
 * `Add-ChildGroupToGroup`
 * `Remove-DeviceFromGroup`
 
+**Changes**
+
+* `New-TestDevice` has changed to require confirmation before creating the device
+* Fixed `Get-Measurement` alias `m` in PSc8y
+
 #### c8y (binary)
 
 * Removed duplicate command `c8y devices find` as query functionality is provided by `c8y devices list --query "name eq 'test*'"`
@@ -34,19 +39,21 @@
 * Added guide to creating custom bash aliases
 * Removed unreferenced commands
 
-**c8y session list**
+* `c8y session list` Renamed `--filter` to `--sessionFilter` to avoid conflict with the global `--filter` option
 
-* Renamed `--filter` to `--sessionFilter` to avoid conflict with the global `--filter` option
 
-**Misc.**
 
-* `New-TestDevice` has changed to require confirmation before creating the device
 
-* Fixed `Get-Measurement` alias `m` in PSc8y
+**Docs**
+
+* Fixed line wrapping within code blocks. Now horizontal scrollbars are show to preserve the line spacing.
+* Added github project link
 
 **Build**
 
 * Improved reliability of realtime api tests
+* c8y (golang) binaries are now statically linked (using `CGO_ENABLED=0`) to make them more portable
+* Added docker images for pwsh, bash and zsh with c8y already configured
 
 ## Released
 
