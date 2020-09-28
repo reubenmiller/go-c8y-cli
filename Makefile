@@ -179,7 +179,7 @@ build-docker:
 	@rm ./docker/c8y.plugin.zsh
 	@rm ./docker/c8y.profile.sh
 
-publish-docker: build-docker		## Publish docker c8y cli images
+publish-docker: build build-docker		## Publish docker c8y cli images
 	@chmod +x ./scripts/publish-docker.sh
 	@sudo CR_PAT=$(CR_PAT) VERSION=$(VERSION) ./scripts/publish-docker.sh
 

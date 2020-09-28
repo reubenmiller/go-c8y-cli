@@ -30,9 +30,9 @@ login_ghcr
 
 publish_ghcr_docker c8y-bash $VERSION
 publish_ghcr_docker c8y-zsh $VERSION
-publish_ghcr_docker c8y-bash $VERSION
+publish_ghcr_docker c8y-pwsh $VERSION
 
 # also use latest tag
 publish_ghcr_docker c8y-bash latest
 publish_ghcr_docker c8y-zsh latest
-publish_ghcr_docker c8y-bash latest
+publish_ghcr_docker c8y-pwsh latest
