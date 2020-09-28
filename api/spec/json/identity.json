@@ -160,7 +160,10 @@
         "powershell": [
           {
             "description": "Get external identity",
-            "command": "New-ExternalId -Device {{ randomdevice }} -Type \"my_SerialNumber\" -Name \"myserialnumber\""
+            "beforeEach": [
+              "$my_SerialNumber = New-RandomString -Prefix \"my_SerialNumber\""
+            ],
+            "command": "New-ExternalId -Device {{ randomdevice }} -Type \"$my_SerialNumber\" -Name \"myserialnumber\""
           }
         ],
         "go": [
