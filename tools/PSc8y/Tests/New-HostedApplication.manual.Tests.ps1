@@ -4,7 +4,7 @@ Describe -Name "New-HostedApplication" {
     Context "developer environment 1" {
         BeforeEach {
             $WebAppSource = "$PSScriptRoot/TestData/hosted-application/simple-helloworld"
-            $AppName = New-RandomString -Prefix "MyApp"
+            $AppName = New-RandomString -Prefix "My App"
             $VerboseFile = New-TemporaryFile
         }
 

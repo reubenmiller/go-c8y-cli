@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+* Fixed parsing of search names with space in their names leading to incorrect application being selected. Closes #22
+
 ## Released
 
 ### v1.4.1
