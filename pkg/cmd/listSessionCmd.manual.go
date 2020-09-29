@@ -182,8 +182,8 @@ func (n *listSessionCmd) listSession(cmd *cobra.Command, args []string) error {
 		return nil
 	}
 
-	if idx >= 0 && idx < len(config.Sessions) {
-		fmt.Printf("%s", config.Sessions[idx].Path)
+	if idx >= 0 && idx < len(filteredSessions) {
+		fmt.Printf("%s", filteredSessions[idx].Path)
 	} else {
 		fmt.Println("")
 	}
