@@ -4,6 +4,12 @@
 
 ## Released
 
+### v1.4.1
+
+#### Bug fixes
+
+* `set-session`: Fixed bug when setting a session when using the pre-filter which resulted in the wrong session being activated
+
 ### v1.4.0
 
 #### PSc8y (PowerShell)
