@@ -5,7 +5,7 @@ Describe -Name "Wait-Operation" {
         $TestOperation = PSc8y\New-TestOperation
     }
 
-    It "Wait for operation using invalid operaiton (fail fast)" {
+    It "Wait for operation using invalid operation (fail fast)" {
         $StartTime = Get-Date
         $Response = "asdf8229d" | PSc8y\Wait-Operation -TimeoutSec 10 -WarningVariable "warning" -ErrorAction SilentlyContinue
 
