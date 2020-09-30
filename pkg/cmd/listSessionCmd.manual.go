@@ -46,10 +46,14 @@ func newListSessionCmd() *listSessionCmd {
 }
 
 func matchSession(session CumulocitySession, input string) bool {
+	// strip url scheme
+	uri := strings.ReplaceAll(session.Host, "https://", "")
+	uri = strings.ReplaceAll(uri, "http://", "")
+
 	name := strings.ToLower(fmt.Sprintf("#%02d %s %s %s %s",
 		session.Index,
 		filepath.Base(session.Path),
-		session.Host,
+		uri,
 		session.Tenant,
 		session.Username,
 	))

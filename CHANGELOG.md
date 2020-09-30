@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+* `set-session`: Search now ignores `https://` or `http://` in the url field, as this information is mostly not important when searching for a template. However the full url will still be visible for the user.
+
 ## Released
 
 ### v1.4.1
