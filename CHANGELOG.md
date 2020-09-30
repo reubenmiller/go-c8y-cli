@@ -2,6 +2,17 @@
 
 ## Unreleased
 
+* `Get-TenantOptionForCategory`: Removed table view for the tenant option collection output which was causing view problems. Closes #24
+
+    ```powershell
+    Get-TenantOptionForCategory -Category application -Verbose
+
+    # outputs
+    default.application
+    -------------------
+    1
+    ```
+
 * `set-session`: Search now ignores `https://` or `http://` in the url field, as this information is mostly not important when searching for a template. However the full url will still be visible for the user.
 
 * Fixed parsing of search names with space in their names leading to incorrect application being selected. Closes #22
