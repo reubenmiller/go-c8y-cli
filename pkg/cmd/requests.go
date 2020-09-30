@@ -94,7 +94,7 @@ func processRequestAndResponse(requests []c8y.RequestOptions, commonOptions Comm
 		Logger.Criticalf("request timed out after %d", globalFlagTimeout)
 	}
 
-	if commonOptions.IncludeAll {
+	if commonOptions.IncludeAll || commonOptions.TotalPages > 0 {
 		if allResults, err := fetchAllResults(req, resp, commonOptions); allResults != nil {
 			if err != nil {
 				Logger.Errorf("Max page sizes reached. %v", err)
@@ -128,7 +128,9 @@ func fetchAllResults(req c8y.RequestOptions, resp *c8y.Response, commonOptions C
 
 	// start from 1, as the first request has already been sent
 	currentPage := int64(1)
-	totalPages := int64(10)
+
+	// Set default total pages (when not set)
+	totalPages := int64(100)
 
 	if commonOptions.TotalPages > 0 {
 		totalPages = commonOptions.TotalPages
