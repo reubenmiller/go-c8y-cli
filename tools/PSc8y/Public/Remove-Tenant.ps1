@@ -95,6 +95,8 @@ Delete a tenant by name (from the mangement tenant)
             -ItemType "" `
             -ResultProperty "" `
             -Raw:$Raw `
+            -CurrentPage:$CurrentPage `
+            -TotalPages:$TotalPages `
             -IncludeAll:$IncludeAll
     }
 

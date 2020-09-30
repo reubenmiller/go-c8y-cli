@@ -127,6 +127,8 @@ Delete measurement collection for a device
             -ItemType "" `
             -ResultProperty "" `
             -Raw:$Raw `
+            -CurrentPage:$CurrentPage `
+            -TotalPages:$TotalPages `
             -IncludeAll:$IncludeAll
     }
 

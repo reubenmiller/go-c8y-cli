@@ -121,6 +121,8 @@ Add a role to a user using wildcards (using pipeline)
             -ItemType "" `
             -ResultProperty "" `
             -Raw:$Raw `
+            -CurrentPage:$CurrentPage `
+            -TotalPages:$TotalPages `
             -IncludeAll:$IncludeAll
     }
 

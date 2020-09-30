@@ -98,6 +98,8 @@ Get a user group
             -ItemType "" `
             -ResultProperty "" `
             -Raw:$Raw `
+            -CurrentPage:$CurrentPage `
+            -TotalPages:$TotalPages `
             -IncludeAll:$IncludeAll
     }
 

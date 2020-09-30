@@ -90,6 +90,8 @@ Get a tenant by name (from the management tenant)
             -ItemType "" `
             -ResultProperty "" `
             -Raw:$Raw `
+            -CurrentPage:$CurrentPage `
+            -TotalPages:$TotalPages `
             -IncludeAll:$IncludeAll
     }
 
