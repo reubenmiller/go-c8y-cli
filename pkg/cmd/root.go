@@ -52,6 +52,9 @@ var rootCmd = &cobra.Command{
 var (
 	client                    *c8y.Client
 	globalFlagPageSize        int
+	globalFlagCurrentPage     int64
+	globalFlagTotalPages      int64
+	globalFlagIncludeAll      bool
 	globalFlagVerbose         bool
 	globalFlagWithTotalPages  bool
 	globalFlagPrettyPrint     bool
@@ -75,6 +78,9 @@ func Execute() {
 	// Global flags
 	rootCmd.PersistentFlags().BoolVarP(&globalFlagVerbose, "verbose", "v", false, "Verbose logging")
 	rootCmd.PersistentFlags().IntVar(&globalFlagPageSize, "pageSize", 5, "Maximum results per page")
+	rootCmd.PersistentFlags().Int64Var(&globalFlagCurrentPage, "currentPage", 0, "Current page size which should be returned")
+	rootCmd.PersistentFlags().Int64Var(&globalFlagTotalPages, "totalPages", 0, "Total number of pages to get. Only relavent when used with includeAll")
+	rootCmd.PersistentFlags().BoolVar(&globalFlagIncludeAll, "includeAll", false, "Include all results by iterating through each page")
 	rootCmd.PersistentFlags().BoolVar(&globalFlagWithTotalPages, "withTotalPages", false, "Include all results")
 	rootCmd.PersistentFlags().BoolVar(&globalFlagPrettyPrint, "pretty", true, "Pretty print the json responses")
 	rootCmd.PersistentFlags().BoolVar(&globalFlagDryRun, "dry", false, "Dry run. Don't send any data to the server")

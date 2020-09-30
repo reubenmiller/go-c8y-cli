@@ -3,6 +3,7 @@ package cmd
 import (
 	"context"
 	"fmt"
+	"net/url"
 	"time"
 
 	"github.com/fatih/color"
@@ -20,6 +21,16 @@ type CommonCommandOptions struct {
 	OutputFile     string
 	Filters        *JSONFilters
 	ResultProperty string
+	IncludeAll     bool
+	CurrentPage    int64
+	TotalPages     int64
+}
+
+// AddQueryParameters adds the common query parameters to the given query values
+func (options CommonCommandOptions) AddQueryParameters(query *url.Values) {
+	if options.CurrentPage > 0 {
+		query.Add("currentPage", fmt.Sprintf("%d", options.CurrentPage))
+	}
 }
 
 func getCommonOptions(cmd *cobra.Command) (CommonCommandOptions, error) {
@@ -33,7 +44,28 @@ func getCommonOptions(cmd *cobra.Command) (CommonCommandOptions, error) {
 	// Filters and selectors
 	options.Filters = getFilterFlag(cmd, "filter")
 
+	options.IncludeAll = getIncludeAllFlag(cmd, "includeAll")
+
+	options.CurrentPage = globalFlagCurrentPage
+	options.TotalPages = globalFlagTotalPages
+	// options.CurrentPage = getCurrentPageFlag(cmd, "currentPage")
+	// options.MaximumPage = getCurrentPageFlag(cmd, "maximumPage")
+
 	return options, nil
+}
+
+func getIncludeAllFlag(cmd *cobra.Command, flagName string) (includeAll bool) {
+	if v, flagErr := cmd.Flags().GetBool(flagName); flagErr == nil {
+		includeAll = v
+	}
+	return
+}
+
+func getCurrentPageFlag(cmd *cobra.Command, flagName string) (currentPage int64) {
+	if v, flagErr := cmd.Flags().GetInt64(flagName); flagErr == nil {
+		currentPage = v
+	}
+	return
 }
 
 func processRequestAndResponse(requests []c8y.RequestOptions, commonOptions CommonCommandOptions) error {
@@ -62,10 +94,145 @@ func processRequestAndResponse(requests []c8y.RequestOptions, commonOptions Comm
 		Logger.Criticalf("request timed out after %d", globalFlagTimeout)
 	}
 
+	if commonOptions.IncludeAll {
+		if allResults, err := fetchAllResults(req, resp, commonOptions); allResults != nil {
+			if err != nil {
+				Logger.Errorf("Max page sizes reached. %v", err)
+			}
+			for _, response := range allResults {
+				_ = response
+				//fmt.Printf("%s", *response.JSONData)
+			}
+			return nil
+		}
+		return err
+	}
+
 	return processResponse(resp, err, commonOptions)
 }
 
+func fetchAllResults(req c8y.RequestOptions, resp *c8y.Response, commonOptions CommonCommandOptions) ([]*c8y.Response, error) {
+
+	if resp == nil {
+		return nil, fmt.Errorf("Response is empty")
+	}
+
+	results := make([]*c8y.Response, 1)
+	results[0] = resp
+
+	if resp.JSONData != nil {
+		fmt.Printf("%s\n", *resp.JSONData)
+	}
+
+	var err error
+
+	// start from 1, as the first request has already been sent
+	currentPage := int64(1)
+	totalPages := int64(10)
+
+	if commonOptions.TotalPages > 0 {
+		totalPages = commonOptions.TotalPages
+	}
+
+	var nextURI string
+
+	// base selection on first response
+	dataProperty := guessDataProperty(resp)
+	if dataProperty != "" {
+		commonOptions.ResultProperty = dataProperty
+	}
+
+	// check if data is already fetched
+
+	for {
+
+		if resp == nil {
+			break
+		}
+		if v := resp.JSON.Get("next"); v.Exists() && v.String() != "" {
+			nextURI = v.String()
+		} else {
+			break
+		}
+
+		currentPage++
+
+		baseURL, _ := url.Parse(nextURI)
+
+		Logger.Infof("Fetching next page: %s?%s", baseURL.Path, baseURL.RawQuery)
+		// decodedValue, _ := url.QueryUnescape(baseURL.RawQuery)
+
+		curReq := c8y.RequestOptions{
+			Method: "GET",
+			// Host:   baseURL.Host,
+			Path:   baseURL.Path,
+			Query:  baseURL.RawQuery,
+			Header: req.Header.Clone(),
+		}
+		ctx, cancel := context.WithTimeout(context.Background(), time.Duration(globalFlagTimeout)*time.Millisecond)
+		defer cancel()
+		// start := time.Now()
+		resp, err = client.SendRequest(
+			ctx,
+			curReq,
+		)
+
+		// save result
+		if resp != nil {
+			Logger.Infof("Adding results to list. len_before=%d", len(results))
+
+			combineData([]*c8y.Response{resp}, commonOptions)
+
+			if resp.JSONData != nil {
+				fmt.Printf("%s\n", *resp.JSONData)
+			}
+			results = append(results, resp)
+			Logger.Infof("Results: len_after=%d", len(results))
+		} else {
+			break
+		}
+
+		if currentPage >= totalPages {
+			err = fmt.Errorf("Max pagination reached. max pages=%d", totalPages)
+			break
+		}
+
+		time.Sleep(1000 * time.Microsecond)
+	}
+
+	Logger.Infof("Returning all results. len=%d", len(results))
+	return results, err
+
+}
+
+func combineData(results []*c8y.Response, commonOptions CommonCommandOptions) {
+	for _, resp := range results {
+		var responseText []byte
+		isJSONResponse := jsonUtilities.IsValidJSON([]byte(*resp.JSONData))
+
+		dataProperty := commonOptions.ResultProperty
+		if dataProperty == "" {
+			dataProperty = guessDataProperty(resp)
+		}
+
+		if isJSONResponse && commonOptions.Filters != nil && !globalFlagRaw {
+			responseText = commonOptions.Filters.Apply(*resp.JSONData, dataProperty)
+		} else {
+			responseText = []byte(*resp.JSONData)
+		}
+
+		if globalFlagPrettyPrint && isJSONResponse {
+			_ = responseText
+			//fmt.Printf("%s", pretty.Pretty(responseText))
+		} else {
+			//fmt.Printf("%s", responseText)
+		}
+	}
+
+}
+
 func processResponse(resp *c8y.Response, respError error, commonOptions CommonCommandOptions) error {
+	// Check if pagination shou
 	if resp != nil {
 		Logger.Infof("Response header: %v", resp.Header)
 	}

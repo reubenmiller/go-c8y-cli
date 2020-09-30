@@ -40,6 +40,12 @@ only relevant information is shown.
         # Future Roadmap: Currently not used: Include all result sets
         [switch] $IncludeAll,
 
+        # Future Roadmap: Current page to return
+        [int] $CurrentPage,
+
+        # Total number of pages to retrieve (only used with -IncludeAll)
+        [int] $TotalPages,
+
         # Return the raw response rather than Powershell objects
         [switch] $Raw,
 
@@ -96,10 +102,18 @@ only relevant information is shown.
         $null = $c8yargs.AddRange(@("--timeout", $TimeoutInMS))
     }
 
+    if ($CurrentPage) {
+        $null = $c8yargs.AddRange(@("--currentPage", $CurrentPage))
+    }
+
+    if ($TotalPages) {
+        $null = $c8yargs.AddRange(@("--totalPages", $TotalPages))
+    }
+
     # Include all pagination results
     if ($IncludeAll) {
-        Write-Warning "IncludeAll operation is currently not implemented"
-        # $null = $c8yargs.Add("--all")
+        # Write-Warning "IncludeAll operation is currently not implemented"
+        $null = $c8yargs.Add("--includeAll")
     }
 
     $null = $c8yargs.Add("--raw")
@@ -187,15 +201,23 @@ only relevant information is shown.
         ))
     }
 
-    <#
-    if ($NestedData) {
-        $null = Add-Member -InputObject $NestedData -MemberType NoteProperty -Name "PSStatistics" -Value @{
+    
+    if ($NestedData -and $response.statistics) {
+        #$NestedData | Add-Member -MemberType NoteProperty -Name "PSc8yResult" -Value $_data
+        # Add information to each element in the array
+
+        $StatsAsJson = ConvertTo-Json @{
+            next = $response.next
             pageSize = $response.statistics.pageSize
             totalPages = $response.statistics.totalPages
             currentPage = $response.statistics.currentPage
-        }
+        } -Compress
+
+        $NewScriptBlock = [scriptblock]::Create("ConvertFrom-Json '$StatsAsJson'")
+
+        $null = $NestedData | Add-Member -Name "PSc8yRequestSource" -MemberType "ScriptMethod" -Value $NewScriptBlock
     }
-    #>
+   
 
     # Save last value for easier recall on command line
     $global:_rawdata = $response
@@ -210,6 +232,6 @@ only relevant information is shown.
         ($null -eq $NestedData -and $null -eq $NestedData.Count)) {
         $response
     } else {
-        $NestedData
+        Write-Output $NestedData
     }
 }

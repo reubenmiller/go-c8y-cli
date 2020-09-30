@@ -262,6 +262,22 @@
         $null = $WithTotalPagesParam.Append('        $WithTotalPages')
         $null = $CmdletParameters.Add($WithTotalPagesParam)
 
+        # CurrentPage
+        $CurrentPageParam = New-Object System.Text.StringBuilder
+        $null = $CurrentPageParam.AppendLine('        # Get a specific page result')
+        $null = $CurrentPageParam.AppendLine('        [Parameter()]')
+        $null = $CurrentPageParam.AppendLine('        [int]')
+        $null = $CurrentPageParam.Append('        $CurrentPage')
+        $null = $CmdletParameters.Add($CurrentPageParam)
+
+        # TotalPages: maximum number of pages to retreive when retrieving all pages
+        $TotalPagesParam = New-Object System.Text.StringBuilder
+        $null = $TotalPagesParam.AppendLine('        # Maximum number of pages to retrieve when using -IncludeAll')
+        $null = $TotalPagesParam.AppendLine('        [Parameter()]')
+        $null = $TotalPagesParam.AppendLine('        [int]')
+        $null = $TotalPagesParam.Append('        $TotalPages')
+        $null = $CmdletParameters.Add($TotalPagesParam)
+
         $null = $BeginParameterBuilder.AppendLine("        if (`$PSBoundParameters.ContainsKey(`"WithTotalPages`") -and `$WithTotalPages) {")
         $null = $BeginParameterBuilder.AppendLine("            `$Parameters[`"withTotalPages`"] = `$WithTotalPages")
         $null = $BeginParameterBuilder.AppendLine("        }")
@@ -269,12 +285,12 @@
         #
         # Include option to expand pagination results
         # TODO: implement pagination results expansion in go
-        # $IncludeAllParam = New-Object System.Text.StringBuilder
-        # $null = $IncludeAllParam.AppendLine('        # Include all results')
-        # $null = $IncludeAllParam.AppendLine('        [Parameter()]')
-        # $null = $IncludeAllParam.AppendLine('        [switch]')
-        # $null = $IncludeAllParam.Append('        $IncludeAll')
-        # $null = $CmdletParameters.Add($IncludeAllParam)
+        $IncludeAllParam = New-Object System.Text.StringBuilder
+        $null = $IncludeAllParam.AppendLine('        # Include all results')
+        $null = $IncludeAllParam.AppendLine('        [Parameter()]')
+        $null = $IncludeAllParam.AppendLine('        [switch]')
+        $null = $IncludeAllParam.Append('        $IncludeAll')
+        $null = $CmdletParameters.Add($IncludeAllParam)
     }
 
     $RawParam = New-Object System.Text.StringBuilder
@@ -545,6 +561,8 @@ $SetParameters
             -ItemType "$ResultItemType" ``
             -ResultProperty "$ResultSelectProperty" ``
             -Raw:`$Raw ``
+            -CurrentPage:`$CurrentPage ``
+            -TotalPages:`$TotalPages ``
             -IncludeAll:`$IncludeAll
 "@
         # Return the appropriate process block
