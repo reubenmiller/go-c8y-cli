@@ -130,9 +130,15 @@ only relevant information is shown.
         if ($UseAutoPaging) {
             # Note: To enable the streaming of output result in the pipeline,
             # the value must be sent back as is
-            Invoke-BinaryProcess $c8ycli -RedirectOutput -ArgumentList $c8yargs |
-                Select-Object |
-                Add-PowershellType $ItemType
+            if ($Raw) {
+                $null = $c8yargs.Add("--raw")
+                Invoke-BinaryProcess $c8ycli -RedirectOutput -ArgumentList $c8yargs |
+                    Select-Object
+            } else {
+                Invoke-BinaryProcess $c8ycli -RedirectOutput -ArgumentList $c8yargs |
+                    Select-Object |
+                    Add-PowershellType $ItemType
+            }
             return
         } else {
             $RawResponse = & $c8ycli $c8yargs
