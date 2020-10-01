@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"bytes"
 	"context"
 	"fmt"
 	"net/url"
@@ -22,14 +23,32 @@ type CommonCommandOptions struct {
 	Filters        *JSONFilters
 	ResultProperty string
 	IncludeAll     bool
+	WithTotalPages bool
+	PageSize       int
 	CurrentPage    int64
 	TotalPages     int64
 }
 
 // AddQueryParameters adds the common query parameters to the given query values
 func (options CommonCommandOptions) AddQueryParameters(query *url.Values) {
+	if query == nil {
+		return
+	}
+
 	if options.CurrentPage > 0 {
 		query.Add("currentPage", fmt.Sprintf("%d", options.CurrentPage))
+	}
+
+	if options.PageSize > 0 {
+		if query.Get("pageSize") != "" {
+			query.Set("pageSize", fmt.Sprintf("%d", options.PageSize))
+		} else {
+			query.Add("pageSize", fmt.Sprintf("%d", options.PageSize))
+		}
+	}
+
+	if options.WithTotalPages {
+		query.Add("withTotalPages", "true")
 	}
 }
 
@@ -44,7 +63,24 @@ func getCommonOptions(cmd *cobra.Command) (CommonCommandOptions, error) {
 	// Filters and selectors
 	options.Filters = getFilterFlag(cmd, "filter")
 
+	if cmd.Flags().Changed("pageSize") || globalUseNonDefaultPageSize {
+		if globalFlagPageSize > 0 {
+			options.PageSize = globalFlagPageSize
+		}
+	}
+
+	if cmd.Flags().Changed("withTotalPages") {
+		if v, err := cmd.Flags().GetBool("withTotalPages"); err == nil && v {
+			options.WithTotalPages = true
+		}
+	}
+
 	options.IncludeAll = getIncludeAllFlag(cmd, "includeAll")
+
+	if options.IncludeAll {
+		options.PageSize = globalFlagIncludeAllPageSize
+		Logger.Debugf("Setting pageSize to maximum value to limit number of requests. value=%d", options.PageSize)
+	}
 
 	options.CurrentPage = globalFlagCurrentPage
 	options.TotalPages = globalFlagTotalPages
@@ -95,33 +131,35 @@ func processRequestAndResponse(requests []c8y.RequestOptions, commonOptions Comm
 	}
 
 	if commonOptions.IncludeAll || commonOptions.TotalPages > 0 {
-		if allResults, err := fetchAllResults(req, resp, commonOptions); allResults != nil {
-			if err != nil {
-				Logger.Errorf("Max page sizes reached. %v", err)
-			}
-			for _, response := range allResults {
-				_ = response
-				//fmt.Printf("%s", *response.JSONData)
-			}
-			return nil
+		if err := fetchAllResults(req, resp, commonOptions); err != nil {
+			return err
 		}
-		return err
+		return nil
 	}
 
-	return processResponse(resp, err, commonOptions)
+	_, err = processResponse(resp, err, commonOptions)
+	return err
 }
 
-func fetchAllResults(req c8y.RequestOptions, resp *c8y.Response, commonOptions CommonCommandOptions) ([]*c8y.Response, error) {
+func fetchAllResults(req c8y.RequestOptions, resp *c8y.Response, commonOptions CommonCommandOptions) error {
 
 	if resp == nil {
-		return nil, fmt.Errorf("Response is empty")
+		return fmt.Errorf("Response is empty")
+	}
+
+	var totalItems int
+
+	totalItems, processErr := processResponse(resp, nil, commonOptions)
+
+	if processErr != nil {
+		return newSystemError("Failed to parse response", processErr)
 	}
 
 	results := make([]*c8y.Response, 1)
 	results[0] = resp
 
 	if resp.JSONData != nil {
-		fmt.Printf("%s\n", *resp.JSONData)
+		// fmt.Printf("%s\n", *resp.JSONData)
 	}
 
 	var err error
@@ -148,7 +186,7 @@ func fetchAllResults(req c8y.RequestOptions, resp *c8y.Response, commonOptions C
 
 	for {
 
-		if resp == nil {
+		if resp == nil || totalItems == 0 {
 			break
 		}
 		if v := resp.JSON.Get("next"); v.Exists() && v.String() != "" {
@@ -162,11 +200,9 @@ func fetchAllResults(req c8y.RequestOptions, resp *c8y.Response, commonOptions C
 		baseURL, _ := url.Parse(nextURI)
 
 		Logger.Infof("Fetching next page: %s?%s", baseURL.Path, baseURL.RawQuery)
-		// decodedValue, _ := url.QueryUnescape(baseURL.RawQuery)
 
 		curReq := c8y.RequestOptions{
 			Method: "GET",
-			// Host:   baseURL.Host,
 			Path:   baseURL.Path,
 			Query:  baseURL.RawQuery,
 			Header: req.Header.Clone(),
@@ -181,59 +217,28 @@ func fetchAllResults(req c8y.RequestOptions, resp *c8y.Response, commonOptions C
 
 		// save result
 		if resp != nil {
-			Logger.Infof("Adding results to list. len_before=%d", len(results))
 
-			combineData([]*c8y.Response{resp}, commonOptions)
+			totalItems, processErr = processResponse(resp, err, commonOptions)
 
-			if resp.JSONData != nil {
-				fmt.Printf("%s\n", *resp.JSONData)
+			if processErr != nil {
+				return newSystemError("Failed to parse response")
 			}
-			results = append(results, resp)
-			Logger.Infof("Results: len_after=%d", len(results))
 		} else {
 			break
 		}
 
 		if currentPage >= totalPages {
-			err = fmt.Errorf("Max pagination reached. max pages=%d", totalPages)
+			Logger.Infof("Max pagination reached. max pages=%d", totalPages)
 			break
 		}
 
-		time.Sleep(1000 * time.Microsecond)
+		time.Sleep(1000 * time.Millisecond)
 	}
 
-	Logger.Infof("Returning all results. len=%d", len(results))
-	return results, err
-
+	return err
 }
 
-func combineData(results []*c8y.Response, commonOptions CommonCommandOptions) {
-	for _, resp := range results {
-		var responseText []byte
-		isJSONResponse := jsonUtilities.IsValidJSON([]byte(*resp.JSONData))
-
-		dataProperty := commonOptions.ResultProperty
-		if dataProperty == "" {
-			dataProperty = guessDataProperty(resp)
-		}
-
-		if isJSONResponse && commonOptions.Filters != nil && !globalFlagRaw {
-			responseText = commonOptions.Filters.Apply(*resp.JSONData, dataProperty)
-		} else {
-			responseText = []byte(*resp.JSONData)
-		}
-
-		if globalFlagPrettyPrint && isJSONResponse {
-			_ = responseText
-			//fmt.Printf("%s", pretty.Pretty(responseText))
-		} else {
-			//fmt.Printf("%s", responseText)
-		}
-	}
-
-}
-
-func processResponse(resp *c8y.Response, respError error, commonOptions CommonCommandOptions) error {
+func processResponse(resp *c8y.Response, respError error, commonOptions CommonCommandOptions) (int, error) {
 	// Check if pagination shou
 	if resp != nil {
 		Logger.Infof("Response header: %v", resp.Header)
@@ -241,14 +246,14 @@ func processResponse(resp *c8y.Response, respError error, commonOptions CommonCo
 
 	// write response to file instead of to stdout
 	if resp != nil && respError == nil && commonOptions.OutputFile != "" {
-		fullFilePath, err := saveResponseToFile(resp, commonOptions.OutputFile)
+		fullFilePath, err := saveResponseToFile(resp, commonOptions.OutputFile, true)
 
 		if err != nil {
-			return newSystemError("write to file failed", err)
+			return 0, newSystemError("write to file failed", err)
 		}
 
-		fmt.Printf("%s", fullFilePath)
-		return nil
+		fmt.Printf("%s\n", fullFilePath)
+		return 0, nil
 	}
 
 	if resp != nil && respError == nil && resp.Header.Get("Content-Type") == "application/octet-stream" && resp.JSONData != nil {
@@ -256,17 +261,19 @@ func processResponse(resp *c8y.Response, respError error, commonOptions CommonCo
 			if utf8, err := encoding.DecodeUTF16([]byte(*resp.JSONData)); err == nil {
 				fmt.Printf("%s", utf8)
 			} else {
-				fmt.Printf("%s", *resp.JSONData)
+				fmt.Printf("%s\n", *resp.JSONData)
 			}
 		} else {
-			fmt.Printf("%s", *resp.JSONData)
+			fmt.Printf("%s\n", *resp.JSONData)
 		}
-		return nil
+		return 0, nil
 	}
 
 	if respError != nil {
 		color.Set(color.FgRed, color.Bold)
 	}
+
+	unfilteredSize := 0
 
 	if resp != nil && resp.JSONData != nil {
 		// estimate size based on utf8 encoding. 1 char is 1 byte
@@ -275,13 +282,30 @@ func processResponse(resp *c8y.Response, respError error, commonOptions CommonCo
 		var responseText []byte
 		isJSONResponse := jsonUtilities.IsValidJSON([]byte(*resp.JSONData))
 
-		dataProperty := commonOptions.ResultProperty
-		if dataProperty == "" {
-			dataProperty = guessDataProperty(resp)
+		dataProperty := ""
+		showRaw := globalFlagRaw || globalFlagWithTotalPages
+
+		if !showRaw {
+			dataProperty = commonOptions.ResultProperty
+
+			if dataProperty == "" {
+				dataProperty = guessDataProperty(resp)
+			}
 		}
 
-		if isJSONResponse && commonOptions.Filters != nil && !globalFlagRaw {
+		if v := resp.JSON.Get(dataProperty); v.Exists() && v.IsArray() {
+			unfilteredSize = len(v.Array())
+		}
+
+		if isJSONResponse && commonOptions.Filters != nil {
 			responseText = commonOptions.Filters.Apply(*resp.JSONData, dataProperty)
+
+			emptyArray := []byte("[]\n")
+
+			if len(responseText) == len(emptyArray) && bytes.Compare(responseText, emptyArray) == 0 {
+				Logger.Info("No matching results found. Empty response will be ommitted")
+				responseText = []byte{}
+			}
 		} else {
 			responseText = []byte(*resp.JSONData)
 		}
@@ -296,9 +320,9 @@ func processResponse(resp *c8y.Response, respError error, commonOptions CommonCo
 	color.Unset()
 
 	if respError != nil {
-		return newSystemError("command failed", respError)
+		return unfilteredSize, newSystemError("command failed", respError)
 	}
-	return nil
+	return unfilteredSize, nil
 }
 
 func guessDataProperty(resp *c8y.Response) string {

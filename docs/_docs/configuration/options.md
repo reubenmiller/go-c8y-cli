@@ -68,3 +68,13 @@ export PSC8Y_INSTALL_ON_IMPORT=on
 ### C8Y_INSTALL_PATH (PowerShell only)
 
 On MacOS and Linux, the install path where the c8y binary will be installed.
+
+### C8Y_DEFAULT_PAGESIZE
+
+Default pageSize to use for all collection related api calls. Though when using IncludeAll parameter, this value will be ignored, and the `C8Y_INCLUDE_ALL_PAGESIZE` environment variable will be used.
+
+### C8Y_INCLUDE_ALL_PAGESIZE
+
+PageSize to use when retrieving using the -includeAll parameter.
+
+

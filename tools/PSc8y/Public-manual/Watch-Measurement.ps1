@@ -85,15 +85,14 @@ Watch all measurements for a device
             continue
         }
 
-        Invoke-ClientCommand `
-            -Noun "measurements" `
-            -Verb "subscribe" `
-            -Parameters $Parameters `
-            -Type "application/json" `
-            -ItemType "" `
-            -ResultProperty "" `
-            -Raw:$Raw `
-            -IncludeAll:$IncludeAll
+        $c8yargs = New-Object System.Collections.ArrayList
+        $null = $c8yargs.AddRange(@("measurements", "subscribe"))
+        $Parameters.Keys | ForEach-Object {
+            $null = $c8yargs.AddRange(@("$_", $Parameters[$_]))
+        }
+
+        Invoke-BinaryProcess (Get-ClientBinary) -RedirectOutput -ArgumentList $c8yargs |
+            Add-PowershellType "application/json"
     }
 
     End {}

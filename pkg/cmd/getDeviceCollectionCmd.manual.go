@@ -113,18 +113,6 @@ func (n *getDeviceCollectionCmd) getDeviceCollection(cmd *cobra.Command, args []
 		}
 	}
 
-	if cmd.Flags().Changed("pageSize") {
-		if v, err := cmd.Flags().GetInt("pageSize"); err == nil && v > 0 {
-			query.Add("pageSize", fmt.Sprintf("%d", v))
-		}
-	}
-
-	if cmd.Flags().Changed("withTotalPages") {
-		if v, err := cmd.Flags().GetBool("withTotalPages"); err == nil && v {
-			query.Add("withTotalPages", "true")
-		}
-	}
-
 	queryValue, err = url.QueryUnescape(query.Encode())
 
 	if err != nil {

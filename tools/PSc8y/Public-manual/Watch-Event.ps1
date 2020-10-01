@@ -85,15 +85,16 @@ Watch all events for a device
             continue
         }
 
-        Invoke-ClientCommand `
-            -Noun "events" `
-            -Verb "subscribe" `
-            -Parameters $Parameters `
-            -Type "application/json" `
-            -ItemType "" `
-            -ResultProperty "" `
-            -Raw:$Raw `
-            -IncludeAll:$IncludeAll
+        $c8y = Get-ClientBinary
+
+        $c8yargs = New-Object System.Collections.ArrayList
+        $null = $c8yargs.AddRange(@("events", "subscribe"))
+        $Parameters.Keys | ForEach-Object {
+            $null = $c8yargs.AddRange(@("$_", $Parameters[$_]))
+        }
+
+        Invoke-BinaryProcess $c8y -RedirectOutput -ArgumentList $c8yargs |
+            Add-PowershellType "application/json"
     }
 
     End {}

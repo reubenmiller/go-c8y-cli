@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"os"
 	"regexp"
+	"strconv"
 	"strings"
 	"time"
 
@@ -50,24 +51,36 @@ var rootCmd = &cobra.Command{
 }
 
 var (
-	client                    *c8y.Client
-	globalFlagPageSize        int
-	globalFlagCurrentPage     int64
-	globalFlagTotalPages      int64
-	globalFlagIncludeAll      bool
-	globalFlagVerbose         bool
-	globalFlagWithTotalPages  bool
-	globalFlagPrettyPrint     bool
-	globalFlagDryRun          bool
-	globalFlagSessionFile     string
-	globalFlagOutputFile      string
-	globalFlagUseEnv          bool
-	globalFlagRaw             bool
-	globalFlagProxy           string
-	globalFlagNoProxy         bool
-	globalFlagTimeout         uint
-	globalFlagUseTenantPrefix bool
+	client                       *c8y.Client
+	globalFlagPageSize           int
+	globalFlagIncludeAllPageSize int
+	globalFlagCurrentPage        int64
+	globalFlagTotalPages         int64
+	globalFlagIncludeAll         bool
+	globalFlagVerbose            bool
+	globalFlagWithTotalPages     bool
+	globalFlagPrettyPrint        bool
+	globalFlagDryRun             bool
+	globalFlagSessionFile        string
+	globalFlagOutputFile         string
+	globalFlagUseEnv             bool
+	globalFlagRaw                bool
+	globalFlagProxy              string
+	globalFlagNoProxy            bool
+	globalFlagTimeout            uint
+	globalFlagUseTenantPrefix    bool
+	globalUseNonDefaultPageSize  bool
 )
+
+func GetEnvInt(name string, defaultValue int) (value int) {
+	value = defaultValue
+	if v := os.Getenv(name); v != "" {
+		if val, err := strconv.ParseInt(v, 10, 32); err == nil {
+			value = int(val)
+		}
+	}
+	return
+}
 
 func Execute() {
 	// config file
@@ -75,9 +88,23 @@ func Execute() {
 
 	rootCmd.PersistentFlags().StringVar(&globalFlagSessionFile, "session", "", "Session configuration")
 
+	defaultPageSize := 5
+	if v := os.Getenv("C8Y_DEFAULT_PAGESIZE"); v != "" {
+		if val, err := strconv.ParseInt(v, 10, 32); err == nil {
+			if int(val) != defaultPageSize {
+				defaultPageSize = int(val)
+				globalUseNonDefaultPageSize = true
+			}
+		} else {
+			Logger.Warningf("Invalid default page size. %s", err)
+		}
+	}
+
+	globalFlagIncludeAllPageSize = GetEnvInt("C8Y_INCLUDE_ALL_PAGESIZE", 2000)
+
 	// Global flags
 	rootCmd.PersistentFlags().BoolVarP(&globalFlagVerbose, "verbose", "v", false, "Verbose logging")
-	rootCmd.PersistentFlags().IntVar(&globalFlagPageSize, "pageSize", 5, "Maximum results per page")
+	rootCmd.PersistentFlags().IntVar(&globalFlagPageSize, "pageSize", defaultPageSize, "Maximum results per page")
 	rootCmd.PersistentFlags().Int64Var(&globalFlagCurrentPage, "currentPage", 0, "Current page size which should be returned")
 	rootCmd.PersistentFlags().Int64Var(&globalFlagTotalPages, "totalPages", 0, "Total number of pages to get")
 	rootCmd.PersistentFlags().BoolVar(&globalFlagIncludeAll, "includeAll", false, "Include all results by iterating through each page")

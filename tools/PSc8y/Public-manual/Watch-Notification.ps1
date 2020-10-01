@@ -83,15 +83,14 @@ Watch all measurements for 90 seconds
             continue
         }
 
-        Invoke-ClientCommand `
-            -Noun "realtime" `
-            -Verb "subscribe" `
-            -Parameters $Parameters `
-            -Type "application/json" `
-            -ItemType "" `
-            -ResultProperty "" `
-            -Raw:$Raw `
-            -IncludeAll:$IncludeAll
+        $c8yargs = New-Object System.Collections.ArrayList
+        $null = $c8yargs.AddRange(@("realtime", "subscribe"))
+        $Parameters.Keys | ForEach-Object {
+            $null = $c8yargs.AddRange(@("$_", $Parameters[$_]))
+        }
+
+        Invoke-BinaryProcess (Get-ClientBinary) -RedirectOutput -ArgumentList $c8yargs |
+            Add-PowershellType "application/json"
     }
 
     End {}

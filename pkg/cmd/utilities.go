@@ -206,8 +206,16 @@ func getTempFilepath(name string, outputDir string) (string, error) {
 // @filename	filename
 // @directory	output directory. If empty, then a temp directory will be used
 // if filename
-func saveResponseToFile(resp *c8y.Response, filename string) (string, error) {
-	out, err := os.Create(filename)
+func saveResponseToFile(resp *c8y.Response, filename string, append bool) (string, error) {
+
+	var out *os.File
+	var err error
+	if append {
+		out, err = os.OpenFile(filename, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	} else {
+		out, err = os.Create(filename)
+	}
+
 	if err != nil {
 		return "", fmt.Errorf("Could not create file. %s", err)
 	}
