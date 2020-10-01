@@ -105,15 +105,9 @@ func (n *getMeasurementSeriesCmd) getMeasurementSeries(cmd *cobra.Command, args 
 		}
 	}
 	commonOptions.AddQueryParameters(&query)
-	if cmd.Flags().Changed("pageSize") {
+	if cmd.Flags().Changed("pageSize") || globalUseNonDefaultPageSize {
 		if v, err := cmd.Flags().GetInt("pageSize"); err == nil && v > 0 {
 			query.Add("pageSize", fmt.Sprintf("%d", v))
-		}
-	}
-
-	if cmd.Flags().Changed("withTotalPages") {
-		if v, err := cmd.Flags().GetBool("withTotalPages"); err == nil && v {
-			query.Add("withTotalPages", "true")
 		}
 	}
 	queryValue, err = url.QueryUnescape(query.Encode())
