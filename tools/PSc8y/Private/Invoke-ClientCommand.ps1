@@ -116,13 +116,27 @@ only relevant information is shown.
         $null = $c8yargs.Add("--includeAll")
     }
 
-    $null = $c8yargs.Add("--raw")
+    $UseAutoPaging = $IncludeAll -or $TotalPages -gt 0
+
+    # Don't use the raw response, let go do everything
+    if (-Not $UseAutoPaging) {
+        $null = $c8yargs.Add("--raw")
+    }
 
     $c8ycli = Get-ClientBinary
     Write-Verbose ("$c8ycli {0}" -f $c8yargs -join " ")
 
     try {
-        $RawResponse = & $c8ycli $c8yargs
+        if ($UseAutoPaging) {
+            # Note: To enable the streaming of output result in the pipeline,
+            # the value must be sent back as is
+            Invoke-BinaryProcess $c8ycli -RedirectOutput -ArgumentList $c8yargs |
+                Select-Object |
+                Add-PowershellType $ItemType
+            return
+        } else {
+            $RawResponse = & $c8ycli $c8yargs
+        }
     } catch {
         Write-Warning -Message $_.Exception.Message
         # do nothing, due to remote powershell session issue and $ErrorActionPreference being set to 'Stop'
