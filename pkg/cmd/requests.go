@@ -232,7 +232,7 @@ func fetchAllResults(req c8y.RequestOptions, resp *c8y.Response, commonOptions C
 			break
 		}
 
-		time.Sleep(1000 * time.Millisecond)
+		// time.Sleep(1000 * time.Millisecond)
 	}
 
 	return err
@@ -285,19 +285,20 @@ func processResponse(resp *c8y.Response, respError error, commonOptions CommonCo
 		dataProperty := ""
 		showRaw := globalFlagRaw || globalFlagWithTotalPages
 
-		if !showRaw {
-			dataProperty = commonOptions.ResultProperty
-
-			if dataProperty == "" {
-				dataProperty = guessDataProperty(resp)
-			}
+		dataProperty = commonOptions.ResultProperty
+		if dataProperty == "" {
+			dataProperty = guessDataProperty(resp)
 		}
 
 		if v := resp.JSON.Get(dataProperty); v.Exists() && v.IsArray() {
 			unfilteredSize = len(v.Array())
+			Logger.Infof("Unfiltered array size. len=%d", unfilteredSize)
 		}
 
 		if isJSONResponse && commonOptions.Filters != nil {
+			if showRaw {
+				dataProperty = ""
+			}
 			responseText = commonOptions.Filters.Apply(*resp.JSONData, dataProperty)
 
 			emptyArray := []byte("[]\n")
@@ -311,9 +312,9 @@ func processResponse(resp *c8y.Response, respError error, commonOptions CommonCo
 		}
 
 		if globalFlagPrettyPrint && isJSONResponse {
-			fmt.Printf("%s", pretty.Pretty(responseText))
+			fmt.Printf("%s\n", pretty.Pretty(responseText))
 		} else {
-			fmt.Printf("%s", responseText)
+			fmt.Printf("%s\n", responseText)
 		}
 	}
 
