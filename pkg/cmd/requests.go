@@ -169,7 +169,7 @@ func fetchAllResults(req c8y.RequestOptions, resp *c8y.Response, commonOptions C
 	currentPage := int64(1)
 
 	// Set default total pages (when not set)
-	totalPages := int64(100)
+	totalPages := int64(1000)
 
 	if commonOptions.TotalPages > 0 {
 		totalPages = commonOptions.TotalPages
@@ -229,7 +229,7 @@ func fetchAllResults(req c8y.RequestOptions, resp *c8y.Response, commonOptions C
 		}
 
 		// Check if total results is less than the pagesize, as this saves one request
-		if totalItems < globalFlagPageSize {
+		if totalItems < commonOptions.PageSize {
 			Logger.Info("Found last page")
 			break
 		}
