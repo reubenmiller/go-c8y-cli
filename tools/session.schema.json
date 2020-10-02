@@ -1,0 +1,32 @@
+{
+    "$schema": "http://json-schema.org/schema",
+    "type": "object",
+    "definitions": {
+        "pagingProperty": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 2000
+        }
+    },
+    "properties":{
+        "settings": {
+            "type": "object",
+            "description": "c8y cli settings",
+            "properties": {
+                "settings.default.pageSize": {
+                    "description": "Default paging size for collection related REST requests",
+                    "$ref": "pagingProperty"
+                },
+                "settings.includeAll.pageSize": {
+                    "description": "Default paging size to use when using the includeAll option, which fetches all results from Cumulocity",
+                    "$ref": "pagingProperty"
+                },
+                "settings.includeAll.delayMS": {
+                    "description": "Delay in millieconds between fetching the next result when using the includeAll option. If value is 0 or less, then it will be ignored",
+                    "type": "integer",
+                    "minimum": 0
+                }
+            }
+        }
+    }
+}

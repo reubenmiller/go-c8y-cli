@@ -40,11 +40,26 @@ Describe -Name "Watch-NotificationChannels" {
 
     It "Watch all notifications for a time period" {
         $StartTime = Get-Date
-        [array] $Response = PSc8y\Watch-NotificationChannels -Device $Device.id -DurationSec 15
+
+        $FirstUpdate = $null
+        $LastUpdate = $null
+
+        [array] $Response = PSc8y\Watch-NotificationChannels -Device $Device.id -DurationSec 15  | ForEach-Object {
+            $now = Get-Date
+            if ($null -eq $FirstUpdate) {
+                $FirstUpdate = $now
+            }
+            $LastUpdate = $now
+            $_
+        }
+
         $LASTEXITCODE | Should -Be 0
         $Response.Count | Should -BeGreaterOrEqual 0
         $Duration = (Get-Date) - $StartTime
         $Duration.TotalSeconds | Should -BeGreaterOrEqual 15
+
+        $LastUpdate - $FirstUpdate |
+            Should -BeGreaterThan 2 -Because "Values should be sent to pipeline as soon as they arrive"
     }
 
     It "Watch a device for a number of notifications" {

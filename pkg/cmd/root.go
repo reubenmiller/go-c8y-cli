@@ -6,7 +6,6 @@ import (
 	"net/http"
 	"os"
 	"regexp"
-	"strconv"
 	"strings"
 	"time"
 
@@ -17,6 +16,7 @@ import (
 	"github.com/spf13/viper"
 )
 
+// Logger is used to record the log messages which should be visible to the user when using the verbose flag
 var Logger *logger.Logger
 
 // Build data
@@ -57,6 +57,7 @@ var (
 	globalFlagCurrentPage        int64
 	globalFlagTotalPages         int64
 	globalFlagIncludeAll         bool
+	globalFlagIncludeAllDelayMS  int64
 	globalFlagVerbose            bool
 	globalFlagWithTotalPages     bool
 	globalFlagPrettyPrint        bool
@@ -72,15 +73,19 @@ var (
 	globalUseNonDefaultPageSize  bool
 )
 
-func GetEnvInt(name string, defaultValue int) (value int) {
-	value = defaultValue
-	if v := os.Getenv(name); v != "" {
-		if val, err := strconv.ParseInt(v, 10, 32); err == nil {
-			value = int(val)
-		}
-	}
-	return
-}
+// CumulocityDefaultPageSize is the default page size used by Cumulocity
+const CumulocityDefaultPageSize int = 5
+
+const (
+	// SettingsIncludeAllPageSize property name used to control the default page size when using includeAll parameter
+	SettingsIncludeAllPageSize string = "settings.includeAll.pageSize"
+
+	// SettingsIncludeAllDelayMS property name used to control the delay between fetching the next page
+	SettingsIncludeAllDelayMS string = "settings.includeAll.delayMS"
+
+	// SettingsDefaultPageSize property name used to control the default page size
+	SettingsDefaultPageSize string = "settings.default.pageSize"
+)
 
 func Execute() {
 	// config file
@@ -88,23 +93,9 @@ func Execute() {
 
 	rootCmd.PersistentFlags().StringVar(&globalFlagSessionFile, "session", "", "Session configuration")
 
-	defaultPageSize := 5
-	if v := os.Getenv("C8Y_DEFAULT_PAGESIZE"); v != "" {
-		if val, err := strconv.ParseInt(v, 10, 32); err == nil {
-			if int(val) != defaultPageSize {
-				defaultPageSize = int(val)
-				globalUseNonDefaultPageSize = true
-			}
-		} else {
-			Logger.Warningf("Invalid default page size. %s", err)
-		}
-	}
-
-	globalFlagIncludeAllPageSize = GetEnvInt("C8Y_INCLUDE_ALL_PAGESIZE", 2000)
-
 	// Global flags
 	rootCmd.PersistentFlags().BoolVarP(&globalFlagVerbose, "verbose", "v", false, "Verbose logging")
-	rootCmd.PersistentFlags().IntVar(&globalFlagPageSize, "pageSize", defaultPageSize, "Maximum results per page")
+	rootCmd.PersistentFlags().IntVar(&globalFlagPageSize, "pageSize", 5, "Maximum results per page")
 	rootCmd.PersistentFlags().Int64Var(&globalFlagCurrentPage, "currentPage", 0, "Current page size which should be returned")
 	rootCmd.PersistentFlags().Int64Var(&globalFlagTotalPages, "totalPages", 0, "Total number of pages to get")
 	rootCmd.PersistentFlags().BoolVar(&globalFlagIncludeAll, "includeAll", false, "Include all results by iterating through each page")
@@ -122,6 +113,9 @@ func Execute() {
 	rootCmd.PersistentFlags().StringSlice("select", nil, "select")
 	rootCmd.PersistentFlags().String("format", "", "format")
 	rootCmd.PersistentFlags().UintVarP(&globalFlagTimeout, "timeout", "t", 10*60*1000, "Timeout in milliseconds")
+
+	// Map settings to flags, allowing the user to set the own default settings
+	viper.BindPFlag(SettingsDefaultPageSize, rootCmd.PersistentFlags().Lookup("pageSize"))
 
 	// TODO: Make flags case-insensitive
 	// rootCmd.PersistentFlags().SetNormalizeFunc(flagNormalizeFunc)
@@ -258,10 +252,11 @@ func initConfig() {
 		globalFlagUseEnv = true
 	}
 
+	loadConfiguration()
+
 	// only parse env variables if no explict config file is given
 	if globalFlagUseEnv {
 		Logger.Println("C8Y_USE_ENVIRONMENT is set. Environment variables can be used to override config settings")
-		viper.SetEnvPrefix("c8y")
 		viper.AutomaticEnv()
 	}
 
@@ -360,6 +355,9 @@ func initConfig() {
 
 	Logger.Printf("Use tenant prefix: %v", client.UseTenantInUsername)
 
+	// read additional configuration
+	readConfiguration()
+
 	// Add the realtime client
 	client.Realtime = c8y.NewRealtimeClient(
 		client.BaseURL.String(),
@@ -368,6 +366,35 @@ func initConfig() {
 		client.Username,
 		client.Password,
 	)
+}
+
+func loadConfiguration() error {
+
+	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
+	viper.SetEnvPrefix("c8y")
+	bindEnv(SettingsIncludeAllPageSize, 2000)
+	bindEnv(SettingsDefaultPageSize, CumulocityDefaultPageSize)
+	bindEnv(SettingsIncludeAllDelayMS, 0)
+
+	return nil
+}
+
+func readConfiguration() error {
+
+	globalFlagIncludeAllPageSize = viper.GetInt(SettingsIncludeAllPageSize)
+	globalFlagPageSize = viper.GetInt(SettingsDefaultPageSize)
+	globalFlagIncludeAllDelayMS = viper.GetInt64(SettingsIncludeAllDelayMS)
+
+	Logger.Infof("%s: %d", SettingsDefaultPageSize, globalFlagPageSize)
+	Logger.Infof("%s: %d", SettingsIncludeAllPageSize, globalFlagIncludeAllPageSize)
+	Logger.Infof("%s: %d", SettingsIncludeAllDelayMS, globalFlagIncludeAllDelayMS)
+
+	return nil
+}
+
+func bindEnv(name string, defaultValue interface{}) {
+	viper.BindEnv(name)
+	viper.SetDefault(name, defaultValue)
 }
 
 func newWebsocketDialer(ignoreProxySettings bool) *websocket.Dialer {

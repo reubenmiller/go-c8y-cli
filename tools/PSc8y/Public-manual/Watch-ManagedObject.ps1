@@ -85,14 +85,11 @@ Watch all managedObjects for a device
             continue
         }
 
-        $c8yargs = New-Object System.Collections.ArrayList
-        $null = $c8yargs.AddRange(@("inventory", "subscribe"))
-        $Parameters.Keys | ForEach-Object {
-            $null = $c8yargs.AddRange(@("$_", $Parameters[$_]))
-        }
-
-        Invoke-BinaryProcess (Get-ClientBinary) -RedirectOutput -ArgumentList $c8yargs |
-            Add-PowershellType "application/json"
+        Invoke-ClientCommand `
+            -Noun "inventory" `
+            -Verb "subscribe" `
+            -Parameters $Parameters `
+            -Type "application/json"
     }
 
     End {}

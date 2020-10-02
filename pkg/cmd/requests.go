@@ -63,10 +63,8 @@ func getCommonOptions(cmd *cobra.Command) (CommonCommandOptions, error) {
 	// Filters and selectors
 	options.Filters = getFilterFlag(cmd, "filter")
 
-	if cmd.Flags().Changed("pageSize") || globalUseNonDefaultPageSize {
-		if globalFlagPageSize > 0 {
-			options.PageSize = globalFlagPageSize
-		}
+	if globalFlagPageSize > 0 && globalFlagPageSize != CumulocityDefaultPageSize {
+		options.PageSize = globalFlagPageSize
 	}
 
 	if cmd.Flags().Changed("withTotalPages") {
@@ -144,6 +142,9 @@ func processRequestAndResponse(requests []c8y.RequestOptions, commonOptions Comm
 func fetchAllResults(req c8y.RequestOptions, resp *c8y.Response, commonOptions CommonCommandOptions) error {
 
 	if resp == nil {
+		if req.DryRun {
+			return nil
+		}
 		return fmt.Errorf("Response is empty")
 	}
 
@@ -227,12 +228,21 @@ func fetchAllResults(req c8y.RequestOptions, resp *c8y.Response, commonOptions C
 			break
 		}
 
+		// Check if total results is less than the pagesize, as this saves one request
+		if totalItems < globalFlagPageSize {
+			Logger.Info("Found last page")
+			break
+		}
+
 		if currentPage >= totalPages {
 			Logger.Infof("Max pagination reached. max pages=%d", totalPages)
 			break
 		}
 
-		// time.Sleep(1000 * time.Millisecond)
+		if globalFlagIncludeAllDelayMS > 0 {
+			Logger.Infof("Pausing %d ms before next request.", globalFlagIncludeAllDelayMS)
+			time.Sleep(time.Duration(globalFlagIncludeAllDelayMS) * time.Millisecond)
+		}
 	}
 
 	return err

@@ -28,11 +28,26 @@ Describe -Name "Watch-ManagedObject" {
 
     It "Watch managedObjects for a time period" {
         $StartTime = Get-Date
-        [array] $Response = PSc8y\Watch-ManagedObject -Device $Device.id -DurationSec 10
+
+        $FirstUpdate = $null
+        $LastUpdate = $null
+
+        [array] $Response = PSc8y\Watch-ManagedObject -Device $Device.id -DurationSec 10 | ForEach-Object {
+            $now = Get-Date
+            if ($null -eq $FirstUpdate) {
+                $FirstUpdate = $now
+            }
+            $LastUpdate = $now
+            $_
+        }
+
         $LASTEXITCODE | Should -Be 0
         $Response.Count | Should -BeGreaterOrEqual 0
         $Duration = (Get-Date) - $StartTime
         $Duration.TotalSeconds | Should -BeGreaterOrEqual 10
+
+        $LastUpdate - $FirstUpdate |
+            Should -BeGreaterThan 2 -Because "Values should be sent to pipeline as soon as they arrive"
     }
 
     It "Watch managedObjects for a number of managedObjects" {

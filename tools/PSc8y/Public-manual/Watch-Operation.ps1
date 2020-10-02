@@ -85,14 +85,11 @@ Watch all operations for a device
             continue
         }
 
-        $c8yargs = New-Object System.Collections.ArrayList
-        $null = $c8yargs.AddRange(@("operations", "subscribe"))
-        $Parameters.Keys | ForEach-Object {
-            $null = $c8yargs.AddRange(@("$_", $Parameters[$_]))
-        }
-
-        Invoke-BinaryProcess (Get-ClientBinary) -RedirectOutput -ArgumentList $c8yargs |
-            Add-PowershellType "application/json"
+        Invoke-ClientCommand `
+            -Noun "operations" `
+            -Verb "subscribe" `
+            -Parameters $Parameters `
+            -Type "application/json"
     }
 
     End {}

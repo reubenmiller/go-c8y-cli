@@ -116,10 +116,10 @@ only relevant information is shown.
         $null = $c8yargs.Add("--includeAll")
     }
 
-    $UseAutoPaging = $IncludeAll -or $TotalPages -gt 0
+    $UsePipelineStreaming = ($IncludeAll -or $TotalPages -gt 0) -or $Verb -eq "subscribe"
 
     # Don't use the raw response, let go do everything
-    if (-Not $UseAutoPaging) {
+    if (-Not $UsePipelineStreaming) {
         $null = $c8yargs.Add("--raw")
     }
 
@@ -127,7 +127,7 @@ only relevant information is shown.
     Write-Verbose ("$c8ycli {0}" -f $c8yargs -join " ")
 
     try {
-        if ($UseAutoPaging) {
+        if ($UsePipelineStreaming) {
             # Note: To enable the streaming of output result in the pipeline,
             # the value must be sent back as is
             if ($Raw) {
@@ -178,8 +178,12 @@ only relevant information is shown.
                 # $RawResponse = $RawResponse -replace [regex]::Unescape($env:C8Y_PASSWORD), "{password}"
             }
         }
-        $response = $RawResponse | ConvertFrom-Json
-        $isJSON = $true
+
+        $response = ""
+        if ($null -ne $RawResponse) {
+            $response = $RawResponse | ConvertFrom-Json
+            $isJSON = $true
+        }
     } catch {
         # ignore json errors, because sometimes the response is not json...so we want
         # to return it anyways

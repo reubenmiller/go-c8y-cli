@@ -2,6 +2,31 @@
 
 ## Unreleased
 
+* `Watch-*`: Support for piping results as soon as they are received rather than waiting for the duration expire before passing the results back. This enables more complex scenarios, and adhoc event processing tasks
+
+    **Examples**
+
+    Update each alarm which comes in with the serverity CRITICAL. `Update-Alarm` will be run as soon as a result is received, and not just after the 60 second duration of `Watch-Alarm`. 
+
+    ```powershell
+    Watch-Alarm -Device 12345 -DurationSec 60 | Update-Alarm -Severity CRITICAL -Force
+    ```
+
+    **Complex example**
+
+    Subscribe to realtime alarm notification for a device, and update the alarm severity to CRITICAL if the alarm is active and was first created more than 1 day ago.
+
+    ```powershell
+    Watch-Alarm -Device 12345 -DurationSec 600 | Foreach-object {
+        $alarm = $_
+        $daysOld = ($alarm.time - $alarm.creationTime).TotalDays
+
+        if ($alarm.status -eq "ACTIVE" -and $daysOld -gt 1) {
+            $alarm | Update-Alarm -Severity CRITICAL -Force
+        }
+    }
+    ```
+
 * `Get-TenantOptionForCategory`: Removed table view for the tenant option collection output which was causing view problems. Closes #24
 
     ```powershell

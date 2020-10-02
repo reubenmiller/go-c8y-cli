@@ -20,7 +20,7 @@ PS > Invoke-BinaryProcess binaryProcess.exe -RedirectOutput -ArgumentList "-Emit
        Invoke-BinaryProcess binaryProcess.exe -RedirectInput -ArgumentList "-Consume"
 
 #>
-
+    [cmdletbinding()]
     param(
         ## The name of the process to invoke
         [string] $ProcessName,
@@ -56,6 +56,7 @@ PS > Invoke-BinaryProcess binaryProcess.exe -RedirectOutput -ArgumentList "-Emit
     ## just treat it as strings.
     $processStartInfo.RedirectStandardOutput = $true
     $processStartInfo.RedirectStandardInput = $true
+    $processStartInfo.RedirectStandardError = $true
 
     $process = [System.Diagnostics.Process]::Start($processStartInfo)
 
@@ -82,8 +83,15 @@ PS > Invoke-BinaryProcess binaryProcess.exe -RedirectOutput -ArgumentList "-Emit
             if ($AsText) {
                 $line
             } else {
-                ConvertFrom-Json -Depth 100 -InputObject $line
+                if ($null -ne $line) {
+                    ConvertFrom-Json -Depth 100 -InputObject $line
+                }
             }
+        }
+
+        while (!$process.StandardError.EndOfStream) {
+            $line = $process.StandardError.ReadLine()
+            Write-Verbose $line
         }
 
         # $byteRead = -1

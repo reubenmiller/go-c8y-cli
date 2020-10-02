@@ -8,7 +8,19 @@ Watch realtime alarms
 
 .EXAMPLE
 PS> Watch-Alarm -Device 12345
+
 Watch all alarms for a device
+
+.EXAMPLE
+Watch-Alarm -Device 12345 -DurationSec 600 | Foreach-object {
+    $alarm = $_
+    $daysOld = ($alarm.time - $alarm.creationTime).TotalDays
+    if ($alarm.status -eq "ACTIVE" -and $daysOld -gt 1) {
+        $alarm | Update-Alarm -Severity CRITICAL -Force
+    }}
+
+Subscribe to realtime alarm notifications for a device, and update the alarm severity to CRITICAL
+if the alarm is active and was first created more than 1 day ago.
 
 #>
     [cmdletbinding(SupportsShouldProcess = $true,
@@ -67,6 +79,9 @@ Watch all alarms for a device
         if ($PSBoundParameters.ContainsKey("Session")) {
             $Parameters["session"] = $Session
         }
+        if ($PSBoundParameters.ContainsKey("Session")) {
+            $Parameters["dryRun"] = $Session
+        }
 
     }
 
@@ -84,17 +99,12 @@ Watch all alarms for a device
             )) {
             continue
         }
-
-        $c8y = Get-ClientBinary
-
-        $c8yargs = New-Object System.Collections.ArrayList
-        $null = $c8yargs.AddRange(@("alarms", "subscribe"))
-        $Parameters.Keys | ForEach-Object {
-            $null = $c8yargs.AddRange(@("$_", $Parameters[$_]))
-        }
-
-        Invoke-BinaryProcess $c8y -RedirectOutput -ArgumentList $c8yargs |
-            Add-PowershellType "application/json"
+        
+        Invoke-ClientCommand `
+            -Noun "alarms" `
+            -Verb "subscribe" `
+            -Parameters $Parameters `
+            -Type "application/json"
     }
 
     End {}

@@ -177,13 +177,13 @@
     #
     # Add common options
     #
-    $null = $RESTQueryBuilder.AppendLine(@"
-    if cmd.Flags().Changed("pageSize") || globalUseNonDefaultPageSize {
-        if v, err := cmd.Flags().GetInt("pageSize"); err == nil && v > 0 {
-            query.Add("pageSize", fmt.Sprintf("%d", v))
-        }
-    }
-"@)
+#     $null = $RESTQueryBuilder.AppendLine(@"
+#     if cmd.Flags().Changed("pageSize") {
+#         if v, err := cmd.Flags().GetInt("pageSize"); err == nil && v > 0 {
+#             query.Add("pageSize", fmt.Sprintf("%d", v))
+#         }
+#     }
+# "@)
     #
     # Encode query parameters to a string
     #
@@ -247,7 +247,7 @@ func (n *${Name}Cmd) ${Name}(cmd *cobra.Command, args []string) error {
 
     commonOptions, err := getCommonOptions(cmd)
 	if err != nil {
-		return err
+        return newUserError(fmt.Sprintf("Failed to get common options. err=%s", err))
 	}
 
     // query parameters
