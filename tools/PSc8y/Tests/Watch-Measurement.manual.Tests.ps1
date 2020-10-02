@@ -44,7 +44,7 @@ Describe -Name "Watch-Measurement" {
         $Duration = (Get-Date) - $StartTime
         $Duration.TotalSeconds | Should -BeGreaterOrEqual 10
 
-        $LastUpdate - $FirstUpdate |
+        ($LastUpdate - $FirstUpdate).TotalSeconds |
             Should -BeGreaterThan 2 -Because "Values should be sent to pipeline as soon as they arrive"
     }
 

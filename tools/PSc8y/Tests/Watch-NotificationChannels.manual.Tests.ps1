@@ -58,7 +58,7 @@ Describe -Name "Watch-NotificationChannels" {
         $Duration = (Get-Date) - $StartTime
         $Duration.TotalSeconds | Should -BeGreaterOrEqual 15
 
-        $LastUpdate - $FirstUpdate |
+        ($LastUpdate - $FirstUpdate).TotalSeconds |
             Should -BeGreaterThan 2 -Because "Values should be sent to pipeline as soon as they arrive"
     }
 
