@@ -132,7 +132,10 @@ List the users within a user group (using pipeline)
                 -Type "application/vnd.com.nsn.cumulocity.userReferenceCollection+json" `
                 -ItemType "application/vnd.com.nsn.cumulocity.user+json" `
                 -ResultProperty "references.user" `
-                -Raw:$Raw
+                -Raw:$Raw `
+                -CurrentPage:$CurrentPage `
+                -TotalPages:$TotalPages `
+                -IncludeAll:$IncludeAll
         }
     }
 

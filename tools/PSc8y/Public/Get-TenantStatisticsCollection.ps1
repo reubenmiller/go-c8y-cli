@@ -135,7 +135,10 @@ Get tenant statistics collection for the day before yesterday
                 -Type "application/vnd.com.nsn.cumulocity.tenantUsageStatisticsCollection+json" `
                 -ItemType "application/vnd.com.nsn.cumulocity.tenantUsageStatisticsSummary+json" `
                 -ResultProperty "usageStatistics" `
-                -Raw:$Raw
+                -Raw:$Raw `
+                -CurrentPage:$CurrentPage `
+                -TotalPages:$TotalPages `
+                -IncludeAll:$IncludeAll
         }
     }
 

@@ -52,6 +52,7 @@ func (n *getGroupByNameCmd) getGroupByName(cmd *cobra.Command, args []string) er
 	// query parameters
 	queryValue := url.QueryEscape("")
 	query := url.Values{}
+	commonOptions.AddQueryParameters(&query)
 	queryValue, err = url.QueryUnescape(query.Encode())
 
 	if err != nil {

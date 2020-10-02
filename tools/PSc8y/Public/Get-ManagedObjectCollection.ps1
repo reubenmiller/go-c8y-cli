@@ -162,7 +162,10 @@ Get a list of managed objects by looking up their names
                 -Type "application/vnd.com.nsn.cumulocity.managedObjectCollection+json" `
                 -ItemType "application/vnd.com.nsn.cumulocity.managedObject+json" `
                 -ResultProperty "managedObjects" `
-                -Raw:$Raw
+                -Raw:$Raw `
+                -CurrentPage:$CurrentPage `
+                -TotalPages:$TotalPages `
+                -IncludeAll:$IncludeAll
         }
     }
 

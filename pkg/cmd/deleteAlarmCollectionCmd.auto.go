@@ -143,7 +143,6 @@ func (n *deleteAlarmCollectionCmd) deleteAlarmCollection(cmd *cobra.Command, arg
 			return newUserError("Flag does not exist")
 		}
 	}
-	commonOptions.AddQueryParameters(&query)
 	queryValue, err = url.QueryUnescape(query.Encode())
 
 	if err != nil {

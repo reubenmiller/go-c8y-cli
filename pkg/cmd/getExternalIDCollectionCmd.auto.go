@@ -52,6 +52,7 @@ func (n *getExternalIDCollectionCmd) getExternalIDCollection(cmd *cobra.Command,
 	// query parameters
 	queryValue := url.QueryEscape("")
 	query := url.Values{}
+	commonOptions.AddQueryParameters(&query)
 	queryValue, err = url.QueryUnescape(query.Encode())
 
 	if err != nil {

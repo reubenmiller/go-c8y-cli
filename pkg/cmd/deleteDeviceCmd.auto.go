@@ -61,7 +61,6 @@ func (n *deleteDeviceCmd) deleteDevice(cmd *cobra.Command, args []string) error 
 			return newUserError("Flag does not exist")
 		}
 	}
-	commonOptions.AddQueryParameters(&query)
 	queryValue, err = url.QueryUnescape(query.Encode())
 
 	if err != nil {

@@ -117,7 +117,10 @@ Get a list of user groups for the current tenant
                 -Type "application/vnd.com.nsn.cumulocity.groupCollection+json" `
                 -ItemType "application/vnd.com.nsn.cumulocity.group+json" `
                 -ResultProperty "groups" `
-                -Raw:$Raw
+                -Raw:$Raw `
+                -CurrentPage:$CurrentPage `
+                -TotalPages:$TotalPages `
+                -IncludeAll:$IncludeAll
         }
     }
 

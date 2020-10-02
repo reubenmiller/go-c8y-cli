@@ -109,7 +109,10 @@ Get a list of tenants
                 -Type "application/vnd.com.nsn.cumulocity.tenantCollection+json" `
                 -ItemType "application/vnd.com.nsn.cumulocity.tenant+json" `
                 -ResultProperty "tenants" `
-                -Raw:$Raw
+                -Raw:$Raw `
+                -CurrentPage:$CurrentPage `
+                -TotalPages:$TotalPages `
+                -IncludeAll:$IncludeAll
         }
     }
 

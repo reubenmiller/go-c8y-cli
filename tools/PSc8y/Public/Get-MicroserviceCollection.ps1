@@ -119,7 +119,10 @@ Get microservices
                 -Type "application/vnd.com.nsn.cumulocity.applicationCollection+json" `
                 -ItemType "application/vnd.com.nsn.cumulocity.application+json" `
                 -ResultProperty "applications" `
-                -Raw:$Raw
+                -Raw:$Raw `
+                -CurrentPage:$CurrentPage `
+                -TotalPages:$TotalPages `
+                -IncludeAll:$IncludeAll
         }
     }
 

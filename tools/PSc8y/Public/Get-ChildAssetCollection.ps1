@@ -130,7 +130,10 @@ Get a list of the child assets of an existing group
                 -Type "application/vnd.com.nsn.cumulocity.managedObjectReferenceCollection+json" `
                 -ItemType "application/vnd.com.nsn.cumulocity.managedObject+json" `
                 -ResultProperty "references.managedObject" `
-                -Raw:$Raw
+                -Raw:$Raw `
+                -CurrentPage:$CurrentPage `
+                -TotalPages:$TotalPages `
+                -IncludeAll:$IncludeAll
         }
     }
 

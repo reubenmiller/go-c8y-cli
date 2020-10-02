@@ -63,7 +63,6 @@ func (n *deleteManagedObjectCmd) deleteManagedObject(cmd *cobra.Command, args []
 			return newUserError("Flag does not exist")
 		}
 	}
-	commonOptions.AddQueryParameters(&query)
 	queryValue, err = url.QueryUnescape(query.Encode())
 
 	if err != nil {

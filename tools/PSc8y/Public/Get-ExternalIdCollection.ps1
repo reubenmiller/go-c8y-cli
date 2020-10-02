@@ -119,7 +119,10 @@ Get a list of external ids
                 -Type "application/vnd.com.nsn.cumulocity.externalIdCollection+json" `
                 -ItemType "application/vnd.com.nsn.cumulocity.externalId+json" `
                 -ResultProperty "externalIds" `
-                -Raw:$Raw
+                -Raw:$Raw `
+                -CurrentPage:$CurrentPage `
+                -TotalPages:$TotalPages `
+                -IncludeAll:$IncludeAll
         }
     }
 

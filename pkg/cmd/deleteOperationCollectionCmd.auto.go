@@ -111,7 +111,6 @@ func (n *deleteOperationCollectionCmd) deleteOperationCollection(cmd *cobra.Comm
 	} else {
 		return newUserError(fmt.Sprintf("Flag [%s] does not exist. %s", "status", err))
 	}
-	commonOptions.AddQueryParameters(&query)
 	queryValue, err = url.QueryUnescape(query.Encode())
 
 	if err != nil {

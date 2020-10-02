@@ -109,7 +109,10 @@ Get a list of roles
                 -Type "application/vnd.com.nsn.cumulocity.roleCollection+json" `
                 -ItemType "application/vnd.com.nsn.cumulocity.role+json" `
                 -ResultProperty "roles" `
-                -Raw:$Raw
+                -Raw:$Raw `
+                -CurrentPage:$CurrentPage `
+                -TotalPages:$TotalPages `
+                -IncludeAll:$IncludeAll
         }
     }
 

@@ -127,7 +127,10 @@ Get a list of groups that a user belongs to
                 -Type "application/vnd.com.nsn.cumulocity.groupReferenceCollection+json" `
                 -ItemType "application/vnd.com.nsn.cumulocity.groupReference+json" `
                 -ResultProperty "references.group" `
-                -Raw:$Raw
+                -Raw:$Raw `
+                -CurrentPage:$CurrentPage `
+                -TotalPages:$TotalPages `
+                -IncludeAll:$IncludeAll
         }
     }
 

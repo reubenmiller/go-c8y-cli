@@ -125,7 +125,10 @@ List all of the binaries related to a Hosted (web) application (using pipeline)
                 -Type "application/vnd.com.nsn.cumulocity.customAttachmentCollection+json" `
                 -ItemType "application/vnd.com.nsn.cumulocity.customBinaryAttachment+json" `
                 -ResultProperty "attachments" `
-                -Raw:$Raw
+                -Raw:$Raw `
+                -CurrentPage:$CurrentPage `
+                -TotalPages:$TotalPages `
+                -IncludeAll:$IncludeAll
         }
     }
 

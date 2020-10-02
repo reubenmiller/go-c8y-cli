@@ -109,7 +109,10 @@ Get the current users inventory roles
                 -Type "application/vnd.com.nsn.cumulocity.inventoryrolecollection+json" `
                 -ItemType "application/vnd.com.nsn.cumulocity.inventoryrole+json" `
                 -ResultProperty "roles" `
-                -Raw:$Raw
+                -Raw:$Raw `
+                -CurrentPage:$CurrentPage `
+                -TotalPages:$TotalPages `
+                -IncludeAll:$IncludeAll
         }
     }
 

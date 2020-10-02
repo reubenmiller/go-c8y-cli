@@ -100,7 +100,6 @@ func (n *deleteMeasurementCollectionCmd) deleteMeasurementCollection(cmd *cobra.
 			return newUserError("invalid date format", err)
 		}
 	}
-	commonOptions.AddQueryParameters(&query)
 	queryValue, err = url.QueryUnescape(query.Encode())
 
 	if err != nil {

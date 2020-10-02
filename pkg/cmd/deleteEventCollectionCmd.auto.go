@@ -111,7 +111,6 @@ func (n *deleteEventCollectionCmd) deleteEventCollection(cmd *cobra.Command, arg
 			return newUserError("Flag does not exist")
 		}
 	}
-	commonOptions.AddQueryParameters(&query)
 	queryValue, err = url.QueryUnescape(query.Encode())
 
 	if err != nil {

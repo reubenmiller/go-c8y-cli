@@ -51,6 +51,7 @@ func (n *getTenantCmd) getTenant(cmd *cobra.Command, args []string) error {
 	// query parameters
 	queryValue := url.QueryEscape("")
 	query := url.Values{}
+	commonOptions.AddQueryParameters(&query)
 	queryValue, err = url.QueryUnescape(query.Encode())
 
 	if err != nil {

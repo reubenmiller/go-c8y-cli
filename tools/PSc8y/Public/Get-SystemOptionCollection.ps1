@@ -109,7 +109,10 @@ Get a list of system options
                 -Type "application/vnd.com.nsn.cumulocity.optionCollection+json" `
                 -ItemType "application/vnd.com.nsn.cumulocity.option+json" `
                 -ResultProperty "options" `
-                -Raw:$Raw
+                -Raw:$Raw `
+                -CurrentPage:$CurrentPage `
+                -TotalPages:$TotalPages `
+                -IncludeAll:$IncludeAll
         }
     }
 

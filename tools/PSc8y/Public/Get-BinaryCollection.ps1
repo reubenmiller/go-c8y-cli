@@ -110,7 +110,10 @@ Get a list of binaries
                 -Type "application/vnd.com.nsn.cumulocity.managedObjectCollection+json" `
                 -ItemType "application/vnd.com.nsn.cumulocity.managedObject+json" `
                 -ResultProperty "managedObjects" `
-                -Raw:$Raw
+                -Raw:$Raw `
+                -CurrentPage:$CurrentPage `
+                -TotalPages:$TotalPages `
+                -IncludeAll:$IncludeAll
         }
     }
 

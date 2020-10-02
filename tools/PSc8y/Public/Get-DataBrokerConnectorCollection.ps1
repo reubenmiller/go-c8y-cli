@@ -109,7 +109,10 @@ Get a list of data broker connectors
                 -Type "application/vnd.com.nsn.cumulocity.databrokerConnectorCollection+json" `
                 -ItemType "application/vnd.com.nsn.cumulocity.databrokerConnector+json" `
                 -ResultProperty "connectors" `
-                -Raw:$Raw
+                -Raw:$Raw `
+                -CurrentPage:$CurrentPage `
+                -TotalPages:$TotalPages `
+                -IncludeAll:$IncludeAll
         }
     }
 

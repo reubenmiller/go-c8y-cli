@@ -110,7 +110,10 @@ Get a list of retention rules
                 -Type "application/vnd.com.nsn.cumulocity.retentionRuleCollection+json" `
                 -ItemType "application/vnd.com.nsn.cumulocity.retentionRule+json" `
                 -ResultProperty "retentionRules" `
-                -Raw:$Raw
+                -Raw:$Raw `
+                -CurrentPage:$CurrentPage `
+                -TotalPages:$TotalPages `
+                -IncludeAll:$IncludeAll
         }
     }
 

@@ -117,7 +117,10 @@ Get a list of options for a category
                 -Type "application/vnd.com.nsn.cumulocity.optionCollection+json" `
                 -ItemType "" `
                 -ResultProperty "" `
-                -Raw:$Raw
+                -Raw:$Raw `
+                -CurrentPage:$CurrentPage `
+                -TotalPages:$TotalPages `
+                -IncludeAll:$IncludeAll
         }
     }
 

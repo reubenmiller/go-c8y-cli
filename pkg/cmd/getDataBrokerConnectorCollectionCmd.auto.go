@@ -49,6 +49,7 @@ func (n *getDataBrokerConnectorCollectionCmd) getDataBrokerConnectorCollection(c
 	// query parameters
 	queryValue := url.QueryEscape("")
 	query := url.Values{}
+	commonOptions.AddQueryParameters(&query)
 	queryValue, err = url.QueryUnescape(query.Encode())
 
 	if err != nil {

@@ -109,7 +109,10 @@ Get a list of new device requests
                 -Type "application/vnd.com.nsn.cumulocity.newDeviceRequestCollection+json" `
                 -ItemType "application/vnd.com.nsn.cumulocity.newDeviceRequest+json" `
                 -ResultProperty "newDeviceRequests" `
-                -Raw:$Raw
+                -Raw:$Raw `
+                -CurrentPage:$CurrentPage `
+                -TotalPages:$TotalPages `
+                -IncludeAll:$IncludeAll
         }
     }
 

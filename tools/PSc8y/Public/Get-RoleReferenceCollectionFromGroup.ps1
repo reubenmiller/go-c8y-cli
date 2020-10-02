@@ -125,7 +125,10 @@ Get a list of role references for a user group
                 -Type "application/vnd.com.nsn.cumulocity.roleReferenceCollection+json" `
                 -ItemType "application/vnd.com.nsn.cumulocity.roleReference+json" `
                 -ResultProperty "references" `
-                -Raw:$Raw
+                -Raw:$Raw `
+                -CurrentPage:$CurrentPage `
+                -TotalPages:$TotalPages `
+                -IncludeAll:$IncludeAll
         }
     }
 

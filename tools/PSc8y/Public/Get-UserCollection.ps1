@@ -181,7 +181,10 @@ Get a list of users
                 -Type "application/vnd.com.nsn.cumulocity.userCollection+json" `
                 -ItemType "application/vnd.com.nsn.cumulocity.user+json" `
                 -ResultProperty "users" `
-                -Raw:$Raw
+                -Raw:$Raw `
+                -CurrentPage:$CurrentPage `
+                -TotalPages:$TotalPages `
+                -IncludeAll:$IncludeAll
         }
     }
 

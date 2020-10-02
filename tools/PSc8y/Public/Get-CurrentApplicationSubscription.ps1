@@ -109,7 +109,10 @@ List the current application users/subscriptions
                 -Type "application/vnd.com.nsn.cumulocity.applicationUserCollection+json" `
                 -ItemType "" `
                 -ResultProperty "" `
-                -Raw:$Raw
+                -Raw:$Raw `
+                -CurrentPage:$CurrentPage `
+                -TotalPages:$TotalPages `
+                -IncludeAll:$IncludeAll
         }
     }
 

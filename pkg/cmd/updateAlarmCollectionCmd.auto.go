@@ -110,7 +110,6 @@ func (n *updateAlarmCollectionCmd) updateAlarmCollection(cmd *cobra.Command, arg
 			return newUserError("invalid date format", err)
 		}
 	}
-	commonOptions.AddQueryParameters(&query)
 	queryValue, err = url.QueryUnescape(query.Encode())
 
 	if err != nil {
