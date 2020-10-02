@@ -48,6 +48,21 @@ Find all devices with their names starting with 'roomUpperFloor_'
         [switch]
         $WithTotalPages,
 
+        # Get a specific page result
+        [Parameter()]
+        [int]
+        $CurrentPage,
+
+        # Maximum number of pages to retrieve when using -IncludeAll
+        [Parameter()]
+        [int]
+        $TotalPages,
+
+        # Include all results
+        [Parameter()]
+        [switch]
+        $IncludeAll,
+
         # Include raw response including pagination information
         [Parameter()]
         [switch]
@@ -126,6 +141,8 @@ Find all devices with their names starting with 'roomUpperFloor_'
                 -ItemType "application/vnd.com.nsn.cumulocity.managedObject+json" `
                 -ResultProperty "managedObjects" `
                 -Raw:$Raw `
+                -CurrentPage:$CurrentPage `
+                -TotalPages:$TotalPages `
                 -IncludeAll:$IncludeAll
         }
     }

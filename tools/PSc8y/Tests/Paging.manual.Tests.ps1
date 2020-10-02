@@ -19,7 +19,7 @@ Describe -Name "Get-Pagination" {
         $cliOutputFile = New-TemporaryFile
     }
 
-    It "Get all of the alarms using IncludeAll" {
+    It "Get all of the alarms using IncludeAll and custom include all page size" {
         $env:C8Y_SETTINGS_INCLUDEALL_PAGESIZE = "10"
 
         $Response = PSc8y\Get-AlarmCollection `
@@ -29,6 +29,7 @@ Describe -Name "Get-Pagination" {
 
         $LASTEXITCODE | Should -Be 0
         $Response | Should -Not -BeNullOrEmpty
+        $Response | Should -HaveCount 20
 
         $VerboseOutput = Get-Content $cliOutputFile
 
@@ -36,6 +37,74 @@ Describe -Name "Get-Pagination" {
 
         # 2 because the first result does not have the "fetching next page"
         ($VerboseOutput -match "Fetching next page").Count | Should -BeExactly 2
+    }
+
+    It "Get all of the alarms using IncludeAll and uneven custom include size" {
+        $env:C8Y_SETTINGS_INCLUDEALL_PAGESIZE = "12"
+
+        $Response = PSc8y\Get-AlarmCollection `
+            -Device $Device.id `
+            -IncludeAll `
+            -Verbose 4> $cliOutputFile
+
+        $LASTEXITCODE | Should -Be 0
+        $Response | Should -Not -BeNullOrEmpty
+        $Response | Should -HaveCount 20
+
+        $VerboseOutput = Get-Content $cliOutputFile
+
+        ($VerboseOutput -match "settings.includeAll.pageSize") | Should -BeLike "*settings.includeAll.pageSize: 12"
+
+        # 1 because only one extra fetch should be required
+        # as the first has 12 results, and the second result set has less than the requested
+        # page size, so it should not try to fetch another page
+        ($VerboseOutput -match "Fetching next page").Count | Should -BeExactly 1
+    }
+
+    It "Using include All with WhatIf" {
+        $env:C8Y_SETTINGS_INCLUDEALL_PAGESIZE = ""
+
+        $Response = PSc8y\Get-DeviceCollection `
+            -IncludeAll `
+            -WhatIf `
+            -Verbose 4> $cliOutputFile
+
+        $LASTEXITCODE | Should -Be 0
+        $Response | Should -BeNullOrEmpty
+
+        $VerboseOutput = Get-Content $cliOutputFile
+
+        ($VerboseOutput -match "settings.includeAll.pageSize") | Should -BeLike "*settings.includeAll.pageSize: 2000"
+    }
+
+    It "Set default pagesize using environment setting" {
+        $env:C8Y_SETTINGS_DEFAULT_PAGESIZE = "10"
+
+        $Response = PSc8y\Get-AlarmCollection `
+            -Device $Device.id `
+            -Verbose 4> $cliOutputFile
+
+        $LASTEXITCODE | Should -Be 0
+        $Response | Should -Not -BeNullOrEmpty
+
+        $Response | Should -HaveCount 10
+
+        # $VerboseOutput = Get-Content $cliOutputFile
+        # ($VerboseOutput -match "settings.default.pageSize") | Should -BeLike "*settings.default.pageSize: 10"
+    }
+
+    It "All collection commands support paging parameters" {
+        $cmdlets = Get-Command -Module PSc8y -Name "Get-*Collection*" |
+            Where-Object { $_.Name -notmatch "Session" }
+
+        foreach ($icmdlet in $cmdlets) {
+            $icmdlet | Should -HaveParameter "CurrentPage"
+            $icmdlet | Should -HaveParameter "TotalPages"
+            $icmdlet | Should -HaveParameter "IncludeAll"
+            $icmdlet | Should -HaveParameter "PageSize"
+            $icmdlet | Should -HaveParameter "WithTotalPages"
+            $icmdlet | Should -HaveParameter "Raw"
+        }
     }
 
     AfterEach {

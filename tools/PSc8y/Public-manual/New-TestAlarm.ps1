@@ -18,7 +18,10 @@ New-TestAlarm -Device "myExistingDevice"
 
 Create an alarm on the existing device "myExistingDevice"
 #>
-    [cmdletbinding()]
+    [cmdletbinding(
+        SupportsShouldProcess = $true,
+        ConfirmImpact = "High"
+    )]
     Param(
         # Device id, name or object. If left blank then a randomized device will be created
         [Parameter(
@@ -37,11 +40,18 @@ Create an alarm on the existing device "myExistingDevice"
         $iDevice = PSc8y\New-TestDevice -Force:$Force
     }
 
-    PSc8y\New-Alarm `
-        -Device $iDevice.id `
-        -Time "1970-01-01" `
-        -Type "c8y_ci_TestAlarm" `
-        -Severity MAJOR `
-        -Text "Test CI Alarm" `
-        -Force:$Force
+    # Fake device (if whatif prevented it from being created)
+    if ($WhatIfPreference -and $null -eq $iDevice) {
+        $iDevice = @{ id = "12345" }
+    }
+
+    if ($iDevice.id) {
+        PSc8y\New-Alarm `
+            -Device $iDevice.id `
+            -Time "1970-01-01" `
+            -Type "c8y_ci_TestAlarm" `
+            -Severity MAJOR `
+            -Text "Test CI Alarm" `
+            -Force:$Force
+    }
 }

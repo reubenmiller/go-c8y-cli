@@ -19,7 +19,10 @@ Create a test agent
 Create 10 test agents all with unique names
 
 #>
-    [cmdletbinding()]
+    [cmdletbinding(
+        SupportsShouldProcess = $true,
+        ConfirmImpact = "High"
+    )]
     Param(
         # Agent name prefix which is added before the randomized string
         [Parameter(
