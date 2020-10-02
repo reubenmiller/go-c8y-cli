@@ -94,8 +94,14 @@ Describe -Name "Get-Pagination" {
     }
 
     It "All collection commands support paging parameters" {
+        $ExcludeCmdlets = @(
+            "Get-SessionCollection",
+            "Get-CurrentTenantApplicationCollection"
+        )
         $cmdlets = Get-Command -Module PSc8y -Name "Get-*Collection*" |
-            Where-Object { $_.Name -notmatch "Session" }
+            Where-Object {
+                $ExcludeCmdlets -notcontains $_.Name
+            }
 
         foreach ($icmdlet in $cmdlets) {
             $icmdlet | Should -HaveParameter "CurrentPage"

@@ -84,6 +84,11 @@ Upload application zip file containing the web application
         [string]
         $Session,
 
+        # TimeoutSec timeout in seconds before a request will be aborted
+        [Parameter()]
+        [double]
+        $TimeoutSec,
+
         # Don't prompt for confirmation
         [Parameter()]
         [switch]
@@ -130,6 +135,9 @@ Upload application zip file containing the web application
         }
         if ($PSBoundParameters.ContainsKey("Session")) {
             $Parameters["session"] = $Session
+        }
+        if ($PSBoundParameters.ContainsKey("TimeoutSec")) {
+            $Parameters["timeout"] = $TimeoutSec * 1000
         }
 
     }

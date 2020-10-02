@@ -3,9 +3,21 @@
 Describe -Name "Common parameters" {
 
     It "All commands support common c8y parameters" {
-        $cmdlets = Get-Command -Module PSc8y -Name "*" | Where-Object {
-            $_.Name -notmatch "Session"
-        }
+        $ExcludeCmdlets = @(
+            "Get-ClientBinary",
+            "Get-ClientBinaryVersion",
+            "Get-CurrentTenantApplicationCollection",
+            "Install-ClientBinary",
+            "Invoke-BinaryProcess"
+        )
+
+        $cmdlets = Get-Command -Module PSc8y -Name "*" |
+            Where-Object {
+                $_.Name -match "Alarm|Event|Binary|Application|User|Group|Role|Tenant|Microservice"
+            } |
+            Where-Object {
+                $_.Name -notmatch "Expand-|Watch-|-Test" -and $ExcludeCmdlets -notcontains $_.Name
+            }
 
         foreach ($icmdlet in $cmdlets) {
             $icmdlet | Should -HaveParameter "OutputFile"

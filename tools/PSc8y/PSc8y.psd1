@@ -265,7 +265,7 @@ FunctionsToExport = @(
 	'Get-C8ySessionProperty',
 	'Get-ClientBinary',
 	'Get-ClientBinaryVersion',
-	'Get-CurrentTenantApplications',
+	'Get-CurrentTenantApplicationCollection',
 	'Get-DeviceBootstrapCredential',
 	'Get-DeviceCollection',
 	'Get-DeviceGroupCollection',
@@ -302,7 +302,7 @@ FunctionsToExport = @(
 	'Watch-ManagedObject',
 	'Watch-Measurement',
 	'Watch-Notification',
-	'Watch-NotificationChannels',
+	'Watch-NotificationChannel',
 	'Watch-Operation')
 # VariablesToExport = '*'
 
