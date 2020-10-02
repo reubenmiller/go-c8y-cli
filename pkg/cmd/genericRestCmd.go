@@ -24,13 +24,13 @@ func newGetGenericRestCmd() *getGenericRestCmd {
 		Short: "Send generic REST request",
 		Long:  `Send generic REST request`,
 		Example: `
-			Get a list of managed objects
-			c8y rest GET /alarm/alarms
+Get a list of managed objects
+c8y rest GET /alarm/alarms
 
-			c8y rest GET "/alarm/alarms?pageSize=10&status=ACTIVE"
+c8y rest GET "/alarm/alarms?pageSize=10&status=ACTIVE"
 
-			// Create a new alarm
-			c8y rest POST "alarm/alarms" --data "text=one,severity=MAJOR,type=test_Type,time=2019-01-01,source={'id': '12345'}"
+// Create a new alarm
+c8y rest POST "alarm/alarms" --data "text=one,severity=MAJOR,type=test_Type,time=2019-01-01,source={'id': '12345'}"
 		`,
 		RunE: ccmd.getGenericRest,
 	}
@@ -131,10 +131,10 @@ func (n *getGenericRestCmd) getGenericRest(cmd *cobra.Command, args []string) er
 		if cmd.Flags().Changed("file") {
 			getFileFlag(cmd, "file", req.FormData)
 		}
-
-		// Hide usage for system errors
-		cmd.SilenceUsage = true
 	}
+
+	// Hide usage for system errors
+	cmd.SilenceUsage = true
 
 	return processRequestAndResponse([]c8y.RequestOptions{req}, commonOptions)
 }
