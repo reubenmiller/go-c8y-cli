@@ -26,24 +26,15 @@ Describe -Name "Watch-Alarm" {
 
     It "Watch alarms for a time period" {
         $StartTime = Get-Date
-
-        $FirstUpdate = $null
-        $LastUpdate = $null
-
         [array] $Response = PSc8y\Watch-Alarm -Device $Device.id -DurationSec 10 | ForEach-Object {
-            $now = Get-Date
-            if ($null -eq $FirstUpdate) {
-                $FirstUpdate = $now
-            }
-            $LastUpdate = $now
-            $_
+            $_ | Add-Member -MemberType NoteProperty -Name "PSc8yTimestamp" -Value (Get-Date) -PassThru
         }
         $LASTEXITCODE | Should -Be 0
-        $Response.Count | Should -BeGreaterOrEqual 0
+        $Response.Count | Should -BeGreaterOrEqual 2
         $Duration = (Get-Date) - $StartTime
         $Duration.TotalSeconds | Should -BeGreaterOrEqual 10
 
-        ($LastUpdate - $FirstUpdate).TotalSeconds |
+        ($Response[-1].PSc8yTimestamp - $Response[0].PSc8yTimestamp).TotalSeconds |
             Should -BeGreaterThan 2 -Because "Values should be sent to pipeline as soon as they arrive"
     }
 
