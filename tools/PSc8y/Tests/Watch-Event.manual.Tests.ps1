@@ -26,7 +26,7 @@ Describe -Name "Watch-Event" {
 
     It "Watch events for a time period" {
         $StartTime = Get-Date
-        [array] $Response = PSc8y\Watch-Event -Device $Device.id -DurationSec 10 | ForEach-Object {
+        [array] $Response = PSc8y\Watch-Event -Device $Device.id -DurationSec 20 | ForEach-Object {
             $_ | Add-Member -MemberType NoteProperty -Name "PSc8yTimestamp" -Value (Get-Date) -PassThru
         }
 

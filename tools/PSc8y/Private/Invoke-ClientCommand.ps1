@@ -116,7 +116,7 @@ only relevant information is shown.
         $null = $c8yargs.Add("--includeAll")
     }
 
-    $UsePipelineStreaming = ($IncludeAll -or $TotalPages -gt 0) -or $Verb -eq "subscribe"
+    $UsePipelineStreaming = ($IncludeAll -or $TotalPages -gt 0) -or $Verb -match "subscribe|subscribeAll"
 
     # Don't use the raw response, let go do everything
     if (-Not $UsePipelineStreaming) {
