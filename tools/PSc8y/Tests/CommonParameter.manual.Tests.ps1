@@ -51,7 +51,7 @@ Describe -Name "Common parameters" {
     }
 
     It "All commands support Verbose" {
-        $cmdlets = Get-Command -Module PSc8y -Name "*"
+        $cmdlets = Get-Command -Module PSc8y -Name "*" -CommandType Function
 
         foreach ($icmdlet in $cmdlets) {
             $icmdlet | Should -HaveParameter "Verbose"
