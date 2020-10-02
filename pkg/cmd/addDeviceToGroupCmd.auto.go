@@ -51,17 +51,12 @@ func (n *addDeviceToGroupCmd) addDeviceToGroup(cmd *cobra.Command, args []string
 
 	commonOptions, err := getCommonOptions(cmd)
 	if err != nil {
-		return err
+		return newUserError(fmt.Sprintf("Failed to get common options. err=%s", err))
 	}
 
 	// query parameters
 	queryValue := url.QueryEscape("")
 	query := url.Values{}
-	if cmd.Flags().Changed("pageSize") || globalUseNonDefaultPageSize {
-		if v, err := cmd.Flags().GetInt("pageSize"); err == nil && v > 0 {
-			query.Add("pageSize", fmt.Sprintf("%d", v))
-		}
-	}
 	queryValue, err = url.QueryUnescape(query.Encode())
 
 	if err != nil {

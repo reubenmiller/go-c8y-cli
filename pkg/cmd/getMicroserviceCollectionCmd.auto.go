@@ -46,7 +46,7 @@ func (n *getMicroserviceCollectionCmd) getMicroserviceCollection(cmd *cobra.Comm
 
 	commonOptions, err := getCommonOptions(cmd)
 	if err != nil {
-		return err
+		return newUserError(fmt.Sprintf("Failed to get common options. err=%s", err))
 	}
 
 	// query parameters
@@ -60,11 +60,6 @@ func (n *getMicroserviceCollectionCmd) getMicroserviceCollection(cmd *cobra.Comm
 		return newUserError(fmt.Sprintf("Flag [%s] does not exist. %s", "type", err))
 	}
 	commonOptions.AddQueryParameters(&query)
-	if cmd.Flags().Changed("pageSize") || globalUseNonDefaultPageSize {
-		if v, err := cmd.Flags().GetInt("pageSize"); err == nil && v > 0 {
-			query.Add("pageSize", fmt.Sprintf("%d", v))
-		}
-	}
 	queryValue, err = url.QueryUnescape(query.Encode())
 
 	if err != nil {

@@ -50,7 +50,7 @@ func (n *deleteManagedObjectCmd) deleteManagedObject(cmd *cobra.Command, args []
 
 	commonOptions, err := getCommonOptions(cmd)
 	if err != nil {
-		return err
+		return newUserError(fmt.Sprintf("Failed to get common options. err=%s", err))
 	}
 
 	// query parameters
@@ -64,11 +64,6 @@ func (n *deleteManagedObjectCmd) deleteManagedObject(cmd *cobra.Command, args []
 		}
 	}
 	commonOptions.AddQueryParameters(&query)
-	if cmd.Flags().Changed("pageSize") || globalUseNonDefaultPageSize {
-		if v, err := cmd.Flags().GetInt("pageSize"); err == nil && v > 0 {
-			query.Add("pageSize", fmt.Sprintf("%d", v))
-		}
-	}
 	queryValue, err = url.QueryUnescape(query.Encode())
 
 	if err != nil {
