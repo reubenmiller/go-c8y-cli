@@ -141,7 +141,8 @@
                 $null = $RESTQueryBuilder.AppendLine($code)
             }
         }
-
+    }
+    if ($Specification.method -match "GET") {
         $null = $RESTQueryBuilder.AppendLine("commonOptions.AddQueryParameters(&query)")
     }
 

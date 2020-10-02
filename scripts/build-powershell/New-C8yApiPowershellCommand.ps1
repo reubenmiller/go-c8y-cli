@@ -141,7 +141,7 @@
     $PipelineTemplateFormat = ""
 
     # Sort argument sources by position (if specified)
-    $ArgumentSources = $ArgumentSources | ForEach-Object {
+    [array] $ArgumentSources = $ArgumentSources | ForEach-Object {
         if ($null -eq $_.position) {
             # Assign default value
             $_ | Add-Member -MemberType NoteProperty -Name position -Value 20
@@ -528,6 +528,16 @@ Function New-Body2 {
 "@
     }
 
+    $AdditionalArgs = ""
+    if ($ResultType -match "Collection") {
+        $AdditionalArgs = @"
+ ``
+                -CurrentPage:`$CurrentPage ``
+                -TotalPages:`$TotalPages ``
+                -IncludeAll:`$IncludeAll
+"@.TrimEnd()
+    }
+
     $Template1 = @"
         foreach (`$item in $ExpandFunction) {
 $SetParameters
@@ -539,7 +549,7 @@ $ConfirmationStatement
                 -Type "$ResultType" ``
                 -ItemType "$ResultItemType" ``
                 -ResultProperty "$ResultSelectProperty" ``
-                -Raw:`$Raw
+                -Raw:`$Raw${AdditionalArgs}
         }
 "@
         $Template2 = @"
