@@ -1,4 +1,4 @@
-﻿Function Watch-NotificationChannels {
+﻿Function Watch-NotificationChannel {
 <#
 .SYNOPSIS
 Watch realtime device notifications
@@ -7,7 +7,7 @@ Watch realtime device notifications
 Watch realtime device notifications
 
 .EXAMPLE
-PS> Function Watch-NotificationChannels -Device 12345 -DurationSec 90
+PS> Function Watch-NotificationChannel -Device 12345 -DurationSec 90
 Watch all types of notifications for a device for 90 seconds
 
 #>

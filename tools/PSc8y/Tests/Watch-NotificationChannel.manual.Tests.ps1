@@ -1,6 +1,6 @@
 ﻿. $PSScriptRoot/imports.ps1
 
-Describe -Name "Watch-NotificationChannels" {
+Describe -Name "Watch-NotificationChannel" {
     BeforeEach {
         $Device = New-TestAgent
         Start-Sleep -Seconds 2
@@ -41,7 +41,7 @@ Describe -Name "Watch-NotificationChannels" {
     It "Watch all notifications for a time period" {
         $StartTime = Get-Date
 
-        [array] $Response = PSc8y\Watch-NotificationChannels -Device $Device.id -DurationSec 20 | ForEach-Object {
+        [array] $Response = PSc8y\Watch-NotificationChannel -Device $Device.id -DurationSec 20 | ForEach-Object {
             $_ | Add-Member -MemberType NoteProperty -Name "PSc8yTimestamp" -Value (Get-Date) -PassThru
         }
 
@@ -55,13 +55,13 @@ Describe -Name "Watch-NotificationChannels" {
     }
 
     It "Watch a device for a number of notifications" {
-        $Response = PSc8y\Watch-NotificationChannels -Device $Device.id -Count 2
+        $Response = PSc8y\Watch-NotificationChannel -Device $Device.id -Count 2
         $LASTEXITCODE | Should -Be 0
         $Response | Should -HaveCount 2
     }
 
     It "Watch notifications for all devices and stop after receiving x messages" {
-        $Response = PSc8y\Watch-NotificationChannels -Count 2
+        $Response = PSc8y\Watch-NotificationChannel -Count 2
         $LASTEXITCODE | Should -Be 0
         $Response | Should -HaveCount 2
     }
