@@ -321,10 +321,15 @@ func processResponse(resp *c8y.Response, respError error, commonOptions CommonCo
 			responseText = []byte(*resp.JSONData)
 		}
 
+		outputEnding := ""
+		if len(responseText) > 0 {
+			outputEnding = "\n"
+		}
+
 		if globalFlagPrettyPrint && isJSONResponse {
-			fmt.Printf("%s\n", pretty.Pretty(bytes.TrimSpace(responseText)))
+			fmt.Printf("%s%s", pretty.Pretty(bytes.TrimSpace(responseText)), outputEnding)
 		} else {
-			fmt.Printf("%s\n", bytes.TrimSpace(responseText))
+			fmt.Printf("%s%s", bytes.TrimSpace(responseText), outputEnding)
 		}
 	}
 
