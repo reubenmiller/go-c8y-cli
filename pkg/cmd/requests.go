@@ -271,10 +271,10 @@ func processResponse(resp *c8y.Response, respError error, commonOptions CommonCo
 			if utf8, err := encoding.DecodeUTF16([]byte(*resp.JSONData)); err == nil {
 				fmt.Printf("%s", utf8)
 			} else {
-				fmt.Printf("%s\n", *resp.JSONData)
+				fmt.Printf("%s", *resp.JSONData)
 			}
 		} else {
-			fmt.Printf("%s\n", *resp.JSONData)
+			fmt.Printf("%s", *resp.JSONData)
 		}
 		return 0, nil
 	}
@@ -322,9 +322,9 @@ func processResponse(resp *c8y.Response, respError error, commonOptions CommonCo
 		}
 
 		if globalFlagPrettyPrint && isJSONResponse {
-			fmt.Printf("%s\n", pretty.Pretty(responseText))
+			fmt.Printf("%s\n", pretty.Pretty(bytes.TrimSpace(responseText)))
 		} else {
-			fmt.Printf("%s\n", responseText)
+			fmt.Printf("%s\n", bytes.TrimSpace(responseText))
 		}
 	}
 
