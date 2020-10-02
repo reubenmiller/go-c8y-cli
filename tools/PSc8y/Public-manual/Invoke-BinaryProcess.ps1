@@ -103,4 +103,9 @@ PS > Invoke-BinaryProcess binaryProcess.exe -RedirectOutput -ArgumentList "-Emit
     else {
         $process.StandardOutput.ReadToEnd()
     }
+
+    Write-Verbose ("Exit code: {0}" -f $process.ExitCode)
+    if ($process.ExitCode -ne 0) {
+        Write-Error ("c8y returned a non-zero exit code. code={0}" -f $process.ExitCode)
+    }
 }

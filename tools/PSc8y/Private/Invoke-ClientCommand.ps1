@@ -126,8 +126,14 @@ only relevant information is shown.
     $c8ycli = Get-ClientBinary
     Write-Verbose ("$c8ycli {0}" -f $c8yargs -join " ")
 
+    $ExitCode = $null
     try {
         if ($UsePipelineStreaming) {
+
+            $LastSaveWarning = "NOTE: This PSc8y automatic variable is not supported when using -IncludeAll or -TotalPages"
+            $global:_rawdata = $LastSaveWarning
+            $global:_data = $LastSaveWarning
+            
             # Note: To enable the streaming of output result in the pipeline,
             # the value must be sent back as is
             if ($Raw) {
@@ -141,7 +147,22 @@ only relevant information is shown.
             }
             return
         } else {
-            $RawResponse = & $c8ycli $c8yargs
+            $processOptions = @{
+                ProcessName = $c8ycli
+                RedirectOutput = $true
+                AsText = $true
+                ArgumentList = $c8yargs
+                ErrorVariable = "ProcErrors"
+            }
+            $ExitCode = -1
+            $RawResponse = Invoke-BinaryProcess @processOptions
+
+            if ($ProcErrors.Count -ne 0) {
+                Write-Warning "$ProcErrors"
+                $ExitCode = 1
+            } else {
+                $ExitCode = 0
+            }
         }
     } catch {
         Write-Warning -Message $_.Exception.Message
@@ -149,7 +170,9 @@ only relevant information is shown.
         # https://github.com/PowerShell/PowerShell/issues/4002
     }
 
-    $ExitCode = $LASTEXITCODE
+    if ($null -eq $ExitCode) {
+        $ExitCode = $LASTEXITCODE
+    }
     if ($ExitCode -ne 0) {
 
         try {
