@@ -1,4 +1,4 @@
-Function ConvertFrom-Base64ToUtf8 {
+Function ConvertFrom-Base64String {
 <#
 .SYNOPSIS
 Convert a base64 encoded string to UTF8
@@ -13,12 +13,12 @@ If the the string has spaces in it, then only the last part of the string (with 
 Base64 encoded string
 
 .EXAMPLE
-ConvertFrom-Base64ToUtf8 ZWFzdGVyZWdn
+ConvertFrom-Base64String ZWFzdGVyZWdn
 
 Convert the base64 to utf8
 
 .EXAMPLE
-ConvertFrom-Base64ToUtf8 "Authorization: Basic s7sd81kkzyzldjkzkhejhug3kh"
+ConvertFrom-Base64String "Authorization: Basic s7sd81kkzyzldjkzkhejhug3kh"
 
 Convert the base64 to utf8
 #>
