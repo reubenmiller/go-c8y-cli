@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+**PSc8y**
+
+* Renamed `ConvertFrom-Base64ToUtf8` to `ConvertFrom-Base64String`
+* Added `ConvertTo-Base64String`
+* Renamed `Get-CurrentTenantApplications` to `Get-CurrentTenantApplicationCollection`
+* Renamed `Watch-NotificationChannels` to `Watch-NotificationChannel`
+
 * `Watch-*`: Support for piping results as soon as they are received rather than waiting for the duration expire before passing the results back. This enables more complex scenarios, and adhoc event processing tasks
 
     **Examples**
