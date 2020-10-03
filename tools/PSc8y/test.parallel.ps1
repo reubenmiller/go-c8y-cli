@@ -3,6 +3,9 @@ Param(
     # Filter (regex) to use when filtering the test file names
     [string] $TestFileFilter = ".+",
 
+    # Filter out test file names to exclude from the test runner
+    [string] $TestFileExclude = "Set-Session",
+
     # Throttle number of concurrent tests (grouped by test file)
     [int] $ThrottleLimit = 10
 )
@@ -27,6 +30,13 @@ if (!(Test-Path -Path "./reports" )) {
 
 $Tests = Get-ChildItem "./Tests" -Filter "*.tests.ps*" |
     Where-Object { $_.Name -match "$TestFileFilter" } | 
+    Where-Object {
+        if ($TestFileExclude) {
+            $_.Name -notmatch "$TestFileExclude"
+        } else {
+            $true
+        }
+    } |
     Foreach-Object {
         @{
             File = $_

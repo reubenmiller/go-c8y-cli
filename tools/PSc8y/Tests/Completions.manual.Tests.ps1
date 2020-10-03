@@ -1,6 +1,6 @@
 . $PSScriptRoot/imports.ps1
 
-Describe -Name "Create-Completions" {
+Describe -Tag "Session" -Name "Create-Completions" {
 
     BeforeEach {
         $originalSetting = $env:C8Y_SESSION

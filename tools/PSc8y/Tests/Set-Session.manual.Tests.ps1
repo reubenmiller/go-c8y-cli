@@ -1,6 +1,6 @@
 . $PSScriptRoot/imports.ps1 -ErrorAction SilentlyContinue -SkipSessionTest
 
-Describe -Name "Set-Session" {
+Describe -Tag "Session" -Name "Set-Session" {
     BeforeAll {
         . "$PSScriptRoot/New-TemporaryDirectory.ps1"
         $sessionHomeBackup = $env:C8Y_SESSION_HOME
