@@ -17,6 +17,7 @@ Describe -Name "Set-Session" {
         # session
         $env:C8Y_SESSION = "$tmpdir/my-session.json"
         $Session = @{
+            "host" = "https://example.com"
             "settings.default.pageSize" = 44
         }
         $Session | ConvertTo-Json | Out-File $env:C8Y_SESSION
@@ -25,6 +26,7 @@ Describe -Name "Set-Session" {
         $resp = & $c8y devices list --verbose --dry --session "my-session" 2>&1
         $LASTEXITCODE | Should -BeExactly 0
 
+        $resp -like "*https://example.com/inventory/managedObjects*" | Should -HaveCount 1
         $resp -like "*settings.default.pageSize: 44" | Should -HaveCount 1
     }
 

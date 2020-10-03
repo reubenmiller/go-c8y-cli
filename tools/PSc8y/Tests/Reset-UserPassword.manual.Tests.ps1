@@ -6,7 +6,7 @@ Describe -Name "Reset-UserPassword" {
     }
 
     It "Resets a user's password by sending a reset email to the user" {
-        $Response = PSc8y\Reset-UserPassword -Id $User.id -WhatIf 2>&1 | Out-String
+        $Response = PSc8y\Reset-UserPassword -Id $User.id -WhatIf 6>&1 | Out-String
         $LASTEXITCODE | Should -Be 0
 
         $Body = Get-JSONFromResponse $Response
