@@ -124,7 +124,9 @@ func parseShorthandJSONStructure(value string, data map[string]interface{}) erro
 
 	valuePairs := strings.Split(value, "=")
 
-	Logger.Debugf("Input: %s", value)
+	if len(value) > 0 {
+		Logger.Debugf("Input: %s", value)
+	}
 
 	outputValues := []string{}
 	for _, item := range valuePairs {

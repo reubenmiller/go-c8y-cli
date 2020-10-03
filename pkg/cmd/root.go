@@ -1,8 +1,10 @@
 package cmd
 
 import (
+	"bytes"
 	"crypto/tls"
 	"fmt"
+	"io/ioutil"
 	"net/http"
 	"os"
 	"regexp"
@@ -45,9 +47,10 @@ func newBaseCmd(cmd *cobra.Command) *baseCmd {
 }
 
 var rootCmd = &cobra.Command{
-	Use:   "c8y",
-	Short: "Cumulocity command line interface",
-	Long:  `A command line interface to interact with Cumulocity REST API. Ideal for quick prototyping, exploring the REST API and for Platform maintainers/power users`,
+	Use:     "c8y",
+	Short:   "Cumulocity command line interface",
+	Long:    `A command line interface to interact with Cumulocity REST API. Ideal for quick prototyping, exploring the REST API and for Platform maintainers/power users`,
+	PreRunE: checkSessionExists,
 }
 
 var (
@@ -63,6 +66,7 @@ var (
 	globalFlagPrettyPrint        bool
 	globalFlagDryRun             bool
 	globalFlagSessionFile        string
+	globalFlagConfigFile         string
 	globalFlagOutputFile         string
 	globalFlagUseEnv             bool
 	globalFlagRaw                bool
@@ -85,7 +89,41 @@ const (
 
 	// SettingsDefaultPageSize property name used to control the default page size
 	SettingsDefaultPageSize string = "settings.default.pageSize"
+
+	// SettingsConfigPath configuration path
+	SettingsConfigPath string = "settings.path"
 )
+
+// SettingsGlobalName name of the settings file (without extension)
+const SettingsGlobalName = "settings"
+
+func checkSessionExists(cmd *cobra.Command, args []string) error {
+	Logger.Infof("c8y pre-checks: %s", args)
+	localCmds := []string{
+		"completion",
+		"session",
+		"version",
+	}
+
+	if len(args) == 0 {
+		return nil
+	}
+
+	for i := range localCmds {
+		if localCmds[i] == args[0] || localCmds[i] == args[1] {
+			return nil
+		}
+	}
+
+	if client == nil {
+		return newSystemError("Client failed to load")
+	}
+	if client.BaseURL == nil || client.BaseURL.Host == "" {
+
+		return newUserError("A c8y session has not been loaded. Please create or activate a session and try again")
+	}
+	return nil
+}
 
 func Execute() {
 	// config file
@@ -116,6 +154,7 @@ func Execute() {
 
 	// Map settings to flags, allowing the user to set the own default settings
 	viper.BindPFlag(SettingsDefaultPageSize, rootCmd.PersistentFlags().Lookup("pageSize"))
+	// viper.BindPFlag(SettingsConfigPath, rootCmd.PersistentFlags().Lookup("config"))
 
 	// TODO: Make flags case-insensitive
 	// rootCmd.PersistentFlags().SetNormalizeFunc(flagNormalizeFunc)
@@ -232,6 +271,61 @@ func Execute() {
 	}
 }
 
+func MergeConfig(path string) error {
+
+	if _, err := os.Stat(path); err != nil {
+		return err
+	}
+
+	configBytes, err := ioutil.ReadFile(path)
+	if err != nil {
+		return err
+	}
+
+	err = viper.MergeConfig(bytes.NewBuffer(configBytes))
+	if err != nil {
+		Logger.Warningf("Could not merge c8y perferences. %s", err)
+	} else {
+		// Logger.Infof("Loaded file: %s", path)
+	}
+	return err
+}
+
+// ReadConfigFiles reads multiple configuration files to load the c8y session and other settings
+func ReadConfigFiles(v *viper.Viper) (path string, err error) {
+	// load preferences
+	home := getSessionHomeDir()
+	v.AddConfigPath(".")
+	v.AddConfigPath(home)
+
+	// Load preferences (in same folder as preferences)
+	v.SetConfigName(SettingsGlobalName)
+	v.MergeInConfig()
+
+	if _, err := os.Stat(globalFlagSessionFile); err == nil {
+		// Use config file from the flag.
+		if err := MergeConfig(globalFlagSessionFile); err != nil {
+			Logger.Warningf("Could not merge file. %s, err=%s", globalFlagSessionFile, err)
+		} else {
+			path = globalFlagSessionFile
+		}
+		// viper.SetConfigFile(globalFlagSessionFile)
+	} else {
+
+		if globalFlagSessionFile != "" {
+			v.SetConfigName(globalFlagSessionFile)
+			err = v.MergeInConfig()
+			if err == nil {
+				path = v.ConfigFileUsed()
+			}
+		} else {
+			v.SetConfigName("session")
+		}
+	}
+
+	return path, err
+}
+
 func initConfig() {
 	// Set logging
 	if globalFlagVerbose || globalFlagDryRun {
@@ -286,41 +380,29 @@ func initConfig() {
 			os.Setenv("https_proxy", globalFlagProxy)
 
 		} else {
-			Logger.Debugf(
-				"Using existing env variables. HTTP_PROXY [%s], http_proxy [%s], HTTPS_PROXY [%s], https_proxy [%s], NO_PROXY [%s], no_proxy [%s]",
-				os.Getenv("HTTP_PROXY"),
-				os.Getenv("http_proxy"),
-				os.Getenv("HTTPS_PROXY"),
-				os.Getenv("https_proxy"),
-				os.Getenv("NO_PROXY"),
-				os.Getenv("no_proxy"),
-			)
-		}
-	}
+			proxyVars := []string{"HTTP_PROXY", "http_proxy", "HTTPS_PROXY", "https_proxy", "NO_PROXY", "no_proxy"}
 
-	if _, err := os.Stat(globalFlagSessionFile); err == nil {
-		// Use config file from the flag.
-		viper.SetConfigFile(globalFlagSessionFile)
-	} else {
-		home := getSessionHomeDir()
+			var proxySettings strings.Builder
 
-		// Search config in home directory with name ".cumulocity" (without extension).
-		viper.AddConfigPath(".")
+			for _, name := range proxyVars {
+				if v := os.Getenv(name); v != "" {
+					proxySettings.WriteString(fmt.Sprintf("%s [%s]", name, v))
+				}
+			}
+			if proxySettings.Len() > 0 {
+				Logger.Debugf("Using existing env variables. %s", proxySettings)
+			}
 
-		viper.AddConfigPath(home)
-
-		if globalFlagSessionFile != "" {
-			viper.SetConfigName(globalFlagSessionFile)
-		} else {
-			viper.SetConfigName("session")
 		}
 	}
 
 	httpClient := newHTTPClient(globalFlagNoProxy)
 
 	// Try reading session from file
-	if err := viper.ReadInConfig(); err == nil {
-		Logger.Println("Using config file:", hideSensitiveInformationIfActive(viper.ConfigFileUsed()))
+	configFilePath, readErr := ReadConfigFiles(viper.GetViper())
+	if readErr == nil {
+		// viper.ConfigFileUsed()
+		Logger.Println("Using config file:", hideSensitiveInformationIfActive(configFilePath))
 		client = c8y.NewClient(
 			httpClient,
 			formatHost(viper.GetString("host")),
@@ -330,7 +412,7 @@ func initConfig() {
 			true,
 		)
 	} else {
-		Logger.Printf("Error reading config file. %s", err)
+		Logger.Printf("Error reading config file. %s", readErr)
 		// Fallback to reading session from environment variables
 		client = c8y.NewClientFromEnvironment(httpClient, true)
 	}
@@ -353,7 +435,7 @@ func initConfig() {
 		client.UseTenantInUsername = viper.GetBool("useTenantPrefix")
 	}
 
-	Logger.Printf("Use tenant prefix: %v", client.UseTenantInUsername)
+	// Logger.Printf("Use tenant prefix: %v", client.UseTenantInUsername)
 
 	// read additional configuration
 	readConfiguration()

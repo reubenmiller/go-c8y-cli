@@ -20,7 +20,9 @@ PS > Invoke-BinaryProcess binaryProcess.exe -RedirectOutput -ArgumentList "-Emit
        Invoke-BinaryProcess binaryProcess.exe -RedirectInput -ArgumentList "-Consume"
 
 #>
-    [cmdletbinding()]
+    [cmdletbinding(
+        SupportsShouldProcess = $true
+    )]
     param(
         ## The name of the process to invoke
         [string] $ProcessName,

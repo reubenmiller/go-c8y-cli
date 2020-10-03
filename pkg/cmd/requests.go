@@ -122,7 +122,9 @@ func processRequestAndResponse(requests []c8y.RequestOptions, commonOptions Comm
 		req,
 	)
 
-	Logger.Infof("Response time: %dms", int64(time.Since(start)/time.Millisecond))
+	if !req.DryRun {
+		Logger.Infof("Response time: %dms", int64(time.Since(start)/time.Millisecond))
+	}
 
 	if ctx.Err() != nil {
 		Logger.Criticalf("request timed out after %d", globalFlagTimeout)

@@ -153,6 +153,7 @@ only relevant information is shown.
                 AsText = $true
                 ArgumentList = $c8yargs
                 ErrorVariable = "ProcErrors"
+                Verbose = $WhatIfPreference -or $VerbosePreference
             }
             $ExitCode = -1
             $RawResponse = Invoke-BinaryProcess @processOptions
