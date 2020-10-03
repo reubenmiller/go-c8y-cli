@@ -4,7 +4,7 @@ Param(
     [string] $TestFileFilter = ".+",
 
     # Filter out test file names to exclude from the test runner
-    [string] $TestFileExclude = "Set-Session",
+    [string] $TestFileExclude = "",
 
     # Throttle number of concurrent tests (grouped by test file)
     [int] $ThrottleLimit = 10
