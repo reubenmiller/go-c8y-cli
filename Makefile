@@ -60,7 +60,7 @@ gh_pages:			## Run github pages locally
 docs-powershell: build		## Update the powershell docs
 	pwsh -File ./scripts/build-powershell/build-docs.ps1 -Recreate
 
-test: test_powershell
+test: test_powershell test_powershell_sessions
 
 lint: metalint
 
@@ -148,8 +148,11 @@ build_powershell:
 	pwsh -File scripts/build-powershell/build.ps1;
 
 test_powershell:
-	pwsh -NonInteractive -File tools/PSc8y/test.parallel.ps1
+	pwsh -NonInteractive -File tools/PSc8y/test.parallel.ps1 -TestFileExclude "Set-Session"
 	# pwsh -NonInteractive -File tools/PSc8y/tests.ps1
+
+test_powershell_sessions:		## Run tests which interfere with the session variable
+	pwsh -NonInteractive -File tools/PSc8y/test.parallel.ps1 -TestFileFilter "Set-Session"
 
 test_bash:
 	./tools/bash/tests/test.sh
