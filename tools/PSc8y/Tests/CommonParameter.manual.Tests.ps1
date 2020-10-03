@@ -57,4 +57,13 @@ Describe -Name "Common parameters" {
             $icmdlet | Should -HaveParameter "Verbose"
         }
     }
+
+    It "Using -WhatIf should show output on the console" {
+        $response = PSc8y\New-Device `
+            -Name "testme" `
+            -Whatif 4>&1
+        $LASTEXITCODE | Should -Be 0
+        $Response | Should -Not -BeNullOrEmpty
+        ($Response -join "`n") | Should -BeLike "*/inventory/managedObject*"
+    }
 }
