@@ -103,7 +103,7 @@ func checkSessionExists(cmd *cobra.Command, args []string) error {
 		parent = cmd.Parent().Use
 	}
 
-	Logger.Printf("c8y pre-checks: %s, %s, %s", args, parent, cmd.CalledAs())
+	// Logger.Printf("c8y pre-checks: %s, %s, %s", args, parent, cmd.CalledAs())
 
 	localCmds := []string{
 		"completion",
@@ -116,8 +116,6 @@ func checkSessionExists(cmd *cobra.Command, args []string) error {
 			return nil
 		}
 	}
-
-	Logger.Debugf("settings: %v", viper.AllSettings())
 
 	if client == nil {
 		return newSystemError("Client failed to load")

@@ -37,6 +37,9 @@ PS > Invoke-BinaryProcess binaryProcess.exe -RedirectOutput -ArgumentList "-Emit
         [Alias("Output")]
         [switch] $RedirectOutput,
 
+        # Redirect stderr
+        [switch] $RedirectStdError,
+
         [switch]
         $AsText,
 
@@ -91,11 +94,6 @@ PS > Invoke-BinaryProcess binaryProcess.exe -RedirectOutput -ArgumentList "-Emit
             }
         }
 
-        while (!$process.StandardError.EndOfStream) {
-            $line = $process.StandardError.ReadLine()
-            Write-Verbose $line
-        }
-
         # $byteRead = -1
         # do {
         #     $byteRead = $process.StandardOutput.BaseStream.ReadByte()
@@ -104,6 +102,29 @@ PS > Invoke-BinaryProcess binaryProcess.exe -RedirectOutput -ArgumentList "-Emit
     }
     else {
         $process.StandardOutput.ReadToEnd()
+    }
+
+    if ($RedirectStdError) {
+        $year = Get-Date -Format "yyyy"
+        while (!$process.StandardError.EndOfStream) {
+            $line = $process.StandardError.ReadLine()
+
+            if ($line.Contains("What If")) {
+                # remove the timestapm (if present)
+                $line = $line -replace ".*(What if:)", '$1'
+                Write-Host $line -ForegroundColor "Green"
+            }
+            elseif ($line.StartsWith("Error")) {
+                Write-Verbose $line
+            }
+            elseif (!$line.StartsWith($year)) {
+                Write-Host $line -ForegroundColor "Green"
+            }
+            else {
+                # Normal verbose message
+                Write-Verbose $line
+            }
+        }
     }
 
     Write-Verbose ("Exit code: {0}" -f $process.ExitCode)

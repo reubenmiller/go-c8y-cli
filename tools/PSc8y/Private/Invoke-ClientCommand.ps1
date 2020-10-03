@@ -133,15 +133,27 @@ only relevant information is shown.
             $LastSaveWarning = "NOTE: This PSc8y automatic variable is not supported when using -IncludeAll or -TotalPages"
             $global:_rawdata = $LastSaveWarning
             $global:_data = $LastSaveWarning
+
+
+            $processOptions = @{
+                ProcessName = $c8ycli
+                RedirectOutput = $true
+                RedirectStdErr = $Verb -notmatch "subscribe|subscribeAll"
+                AsText = $false
+                ArgumentList = $c8yargs
+                # ErrorVariable = "ProcErrors"
+                # Verbose = $VerbosePreference
+                # ErrorAction = "SilentlyContinue"
+            }
             
             # Note: To enable the streaming of output result in the pipeline,
             # the value must be sent back as is
             if ($Raw) {
                 $null = $c8yargs.Add("--raw")
-                Invoke-BinaryProcess $c8ycli -RedirectOutput -ArgumentList $c8yargs |
+                Invoke-BinaryProcess @processOptions |
                     Select-Object
             } else {
-                Invoke-BinaryProcess $c8ycli -RedirectOutput -ArgumentList $c8yargs |
+                Invoke-BinaryProcess @processOptions |
                     Select-Object |
                     Add-PowershellType $ItemType
             }
@@ -150,10 +162,12 @@ only relevant information is shown.
             $processOptions = @{
                 ProcessName = $c8ycli
                 RedirectOutput = $true
+                RedirectStdErr = $true
                 AsText = $true
                 ArgumentList = $c8yargs
                 ErrorVariable = "ProcErrors"
-                Verbose = $WhatIfPreference -or $VerbosePreference
+                Verbose = $VerbosePreference
+                ErrorAction = "SilentlyContinue"
             }
             $ExitCode = -1
             $RawResponse = Invoke-BinaryProcess @processOptions
