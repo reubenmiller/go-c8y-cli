@@ -159,6 +159,8 @@ only relevant information is shown.
             }
             return
         } else {
+            # Keep comparison with old call style. Will be deleted in the future
+            # $RawResponse = & $c8ycli $c8yargs
             $processOptions = @{
                 ProcessName = $c8ycli
                 RedirectOutput = $true

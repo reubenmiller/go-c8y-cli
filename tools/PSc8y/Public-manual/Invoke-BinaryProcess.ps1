@@ -61,7 +61,10 @@ PS > Invoke-BinaryProcess binaryProcess.exe -RedirectOutput -ArgumentList "-Emit
     ## just treat it as strings.
     $processStartInfo.RedirectStandardOutput = $true
     $processStartInfo.RedirectStandardInput = $true
-    $processStartInfo.RedirectStandardError = $true
+
+    if ($RedirectStdError) {
+        $processStartInfo.RedirectStandardError = $true
+    }
 
     $process = [System.Diagnostics.Process]::Start($processStartInfo)
 
@@ -127,8 +130,11 @@ PS > Invoke-BinaryProcess binaryProcess.exe -RedirectOutput -ArgumentList "-Emit
         }
     }
 
-    Write-Verbose ("Exit code: {0}" -f $process.ExitCode)
+    # Must wait for exit before returning!
+    $process.WaitForExit()
+
     # Set exit code so it is propagated
+    Write-Verbose ("Exit code: {0}" -f $process.ExitCode)
     $global:LASTEXITCODE = $process.ExitCode
     $global:C8Y_EXITCODE = $process.ExitCode
     if ($process.ExitCode -ne 0) {
