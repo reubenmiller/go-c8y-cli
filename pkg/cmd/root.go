@@ -1,10 +1,8 @@
 package cmd
 
 import (
-	"bytes"
 	"crypto/tls"
 	"fmt"
-	"io/ioutil"
 	"net/http"
 	"os"
 	"regexp"
@@ -47,10 +45,11 @@ func newBaseCmd(cmd *cobra.Command) *baseCmd {
 }
 
 var rootCmd = &cobra.Command{
-	Use:     "c8y",
-	Short:   "Cumulocity command line interface",
-	Long:    `A command line interface to interact with Cumulocity REST API. Ideal for quick prototyping, exploring the REST API and for Platform maintainers/power users`,
-	PreRunE: checkSessionExists,
+	Use:   "c8y",
+	Short: "Cumulocity command line interface",
+	Long:  `A command line interface to interact with Cumulocity REST API. Ideal for quick prototyping, exploring the REST API and for Platform maintainers/power users`,
+	// PreRunE: checkSessionExists,
+	PersistentPreRunE: checkSessionExists,
 }
 
 var (
@@ -98,28 +97,32 @@ const (
 const SettingsGlobalName = "settings"
 
 func checkSessionExists(cmd *cobra.Command, args []string) error {
-	Logger.Infof("c8y pre-checks: %s", args)
+
+	parent := cmd.Use
+	if cmd.HasParent() && cmd.Parent().Use != "c8y" {
+		parent = cmd.Parent().Use
+	}
+
+	Logger.Printf("c8y pre-checks: %s, %s, %s", args, parent, cmd.CalledAs())
+
 	localCmds := []string{
 		"completion",
-		"session",
+		"sessions",
 		"version",
 	}
 
-	if len(args) == 0 {
-		return nil
-	}
-
 	for i := range localCmds {
-		if localCmds[i] == args[0] || localCmds[i] == args[1] {
+		if localCmds[i] == parent {
 			return nil
 		}
 	}
+
+	Logger.Debugf("settings: %v", viper.AllSettings())
 
 	if client == nil {
 		return newSystemError("Client failed to load")
 	}
 	if client.BaseURL == nil || client.BaseURL.Host == "" {
-
 		return newUserError("A c8y session has not been loaded. Please create or activate a session and try again")
 	}
 	return nil
@@ -271,57 +274,47 @@ func Execute() {
 	}
 }
 
-func MergeConfig(path string) error {
-
-	if _, err := os.Stat(path); err != nil {
-		return err
-	}
-
-	configBytes, err := ioutil.ReadFile(path)
-	if err != nil {
-		return err
-	}
-
-	err = viper.MergeConfig(bytes.NewBuffer(configBytes))
-	if err != nil {
-		Logger.Warningf("Could not merge c8y perferences. %s", err)
-	} else {
-		// Logger.Infof("Loaded file: %s", path)
-	}
-	return err
-}
-
 // ReadConfigFiles reads multiple configuration files to load the c8y session and other settings
+//
+// The session files are
+// 1. load settings (from C8Y_SESSION_HOME path)
+// 2. load session file (by path)
+// 3. load session file (by name)
 func ReadConfigFiles(v *viper.Viper) (path string, err error) {
-	// load preferences
 	home := getSessionHomeDir()
 	v.AddConfigPath(".")
 	v.AddConfigPath(home)
 
-	// Load preferences (in same folder as preferences)
+	// Load (non-session) preferences
 	v.SetConfigName(SettingsGlobalName)
-	v.MergeInConfig()
 
-	if _, err := os.Stat(globalFlagSessionFile); err == nil {
-		// Use config file from the flag.
-		if err := MergeConfig(globalFlagSessionFile); err != nil {
-			Logger.Warningf("Could not merge file. %s, err=%s", globalFlagSessionFile, err)
-		} else {
-			path = globalFlagSessionFile
-		}
-		// viper.SetConfigFile(globalFlagSessionFile)
-	} else {
-
-		if globalFlagSessionFile != "" {
-			v.SetConfigName(globalFlagSessionFile)
-			err = v.MergeInConfig()
-			if err == nil {
-				path = v.ConfigFileUsed()
-			}
-		} else {
-			v.SetConfigName("session")
-		}
+	if err := v.ReadInConfig(); err == nil {
+		path = v.ConfigFileUsed()
+		Logger.Debugf("Loaded settings: %s", hideSensitiveInformationIfActive(path))
 	}
+
+	// Load session
+	if _, err := os.Stat(globalFlagSessionFile); err == nil {
+		// Load config by file path
+		v.SetConfigFile(globalFlagSessionFile)
+	} else {
+		// Load config by name
+		sessionName := "session"
+		if globalFlagSessionFile != "" {
+			sessionName = globalFlagSessionFile
+		}
+
+		v.SetConfigName(sessionName)
+	}
+
+	err = v.MergeInConfig()
+	path = v.ConfigFileUsed()
+
+	if err != nil {
+		Logger.Debugf("Failed to merge config. %s", err)
+	}
+
+	Logger.Infof("Loaded session: %s", hideSensitiveInformationIfActive(path))
 
 	return path, err
 }
@@ -338,7 +331,9 @@ func initConfig() {
 
 	if globalFlagSessionFile == "" && os.Getenv("C8Y_SESSION") != "" {
 		globalFlagSessionFile = os.Getenv("C8Y_SESSION")
-		Logger.Printf("Using session environment variable: %s\n", hideSensitiveInformationIfActive(globalFlagSessionFile))
+		if globalFlagSessionFile != "" {
+			Logger.Printf("Using session environment variable: %s\n", hideSensitiveInformationIfActive(globalFlagSessionFile))
+		}
 	}
 
 	// global session flag has precendence over use environment
@@ -386,11 +381,11 @@ func initConfig() {
 
 			for _, name := range proxyVars {
 				if v := os.Getenv(name); v != "" {
-					proxySettings.WriteString(fmt.Sprintf("%s [%s]", name, v))
+					proxySettings.WriteString(fmt.Sprintf(" %s [%s]", name, v))
 				}
 			}
 			if proxySettings.Len() > 0 {
-				Logger.Debugf("Using existing env variables. %s", proxySettings)
+				Logger.Debugf("Using existing env variables.%s", proxySettings)
 			}
 
 		}
@@ -399,10 +394,8 @@ func initConfig() {
 	httpClient := newHTTPClient(globalFlagNoProxy)
 
 	// Try reading session from file
-	configFilePath, readErr := ReadConfigFiles(viper.GetViper())
+	_, readErr := ReadConfigFiles(viper.GetViper())
 	if readErr == nil {
-		// viper.ConfigFileUsed()
-		Logger.Println("Using config file:", hideSensitiveInformationIfActive(configFilePath))
 		client = c8y.NewClient(
 			httpClient,
 			formatHost(viper.GetString("host")),
