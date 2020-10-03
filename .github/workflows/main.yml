@@ -71,6 +71,7 @@ jobs:
       if: ${{ true }}
       run: make test
       shell: bash
+      timeout-minutes: 30
 
     - uses: actions/upload-artifact@v2
       if: always()
