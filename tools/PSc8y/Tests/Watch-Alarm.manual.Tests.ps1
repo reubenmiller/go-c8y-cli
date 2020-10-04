@@ -26,7 +26,7 @@ Describe -Name "Watch-Alarm" {
 
     It "Watch alarms for a time period" {
         $StartTime = Get-Date
-        [array] $Response = PSc8y\Watch-Alarm -Device $Device.id -DurationSec 20 | ForEach-Object {
+        [array] $Response = PSc8y\Watch-Alarm -Device $Device.id -DurationSec 60 | ForEach-Object {
             $_ | Add-Member -MemberType NoteProperty -Name "PSc8yTimestamp" -Value (Get-Date) -PassThru
         }
         $LASTEXITCODE | Should -Be 0
