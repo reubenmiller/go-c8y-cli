@@ -95,10 +95,8 @@ jobs:
           path: test-results-${{ matrix.os }}
 
       - name: Publish results
-        uses: EnricoMi/publish-unit-test-result-action@v1.1
+        uses: MirrorNG/nunit-reporter@v1.0.9
         if: always()
         with:
-          check_name: Test Results
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          files: test-results-${{ matrix.os }}/*.xml
-          log_level: DEBUG
+          access-token: ${{ secrets.GITHUB_TOKEN }}
+          path: test-results-${{ matrix.os }}/*.xml
