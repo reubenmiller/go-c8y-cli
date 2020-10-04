@@ -1,76 +1,64 @@
 ---
-category: Applications
+category: Misc.
 external help file: PSc8y-help.xml
 layout: powershell
 Module Name: PSc8y
 online version:
 schema: 2.0.0
-title: Get-ApplicationBinaryCollection
+title: Watch-NotificationChannel
 ---
 
-# Get-ApplicationBinaryCollection
+# Watch-NotificationChannel
 
 ## SYNOPSIS
-Get application binaries
+Watch realtime device notifications
 
 ## SYNTAX
 
 ```
-Get-ApplicationBinaryCollection
-	[-Id] <Object[]>
-	[[-PageSize] <Int32>]
-	[-WithTotalPages]
-	[[-CurrentPage] <Int32>]
-	[[-TotalPages] <Int32>]
-	[-IncludeAll]
-	[-Raw]
+Watch-NotificationChannel
+	[[-Device] <Object[]>]
+	[[-DurationSec] <Int32>]
+	[[-Count] <String>]
 	[[-OutputFile] <String>]
 	[-NoProxy]
 	[[-Session] <String>]
-	[[-TimeoutSec] <Double>]
 	[-WhatIf]
 	[-Confirm]
 	[<CommonParameters>]
 ```
 
 ## DESCRIPTION
-A list of all binaries related to the given application will be returned
+Watch realtime device notifications
 
 ## EXAMPLES
 
 ### EXAMPLE 1
 ```
-Get-ApplicationBinaryCollection -Id $App.id
+Function Watch-NotificationChannel -Device 12345 -DurationSec 90
+Watch all types of notifications for a device for 90 seconds
 ```
-
-List all of the binaries related to a Hosted (web) application
-
-### EXAMPLE 2
-```
-Get-Application $App.id | Get-ApplicationBinaryCollection
-```
-
-List all of the binaries related to a Hosted (web) application (using pipeline)
 
 ## PARAMETERS
 
-### -Id
-Application id (required)
+### -Device
+Device ID
 
 ```yaml
 Type: Object[]
 Parameter Sets: (All)
 Aliases:
 
-Required: True
+Required: False
 Position: 1
 Default value: None
 Accept pipeline input: True (ByPropertyName, ByValue)
 Accept wildcard characters: False
 ```
 
-### -PageSize
-Maximum number of results
+### -DurationSec
+Start date or date and time of notification occurrence.
+(required)
 
 ```yaml
 Type: Int32
@@ -84,83 +72,8 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -WithTotalPages
-Include total pages statistic
-
-```yaml
-Type: SwitchParameter
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: Named
-Default value: False
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
-### -CurrentPage
-Get a specific page result
-
-```yaml
-Type: Int32
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: 3
-Default value: 0
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
-### -TotalPages
-Maximum number of pages to retrieve when using -IncludeAll
-
-```yaml
-Type: Int32
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: 4
-Default value: 0
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
-### -IncludeAll
-Include all results
-
-```yaml
-Type: SwitchParameter
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: Named
-Default value: False
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
-### -Raw
-Show the full (raw) response from Cumulocity including pagination information
-
-```yaml
-Type: SwitchParameter
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: Named
-Default value: False
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
-### -OutputFile
-Write the response to file
+### -Count
+End date or date and time of notification occurrence.
 
 ```yaml
 Type: String
@@ -168,14 +81,29 @@ Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: 5
+Position: 3
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -OutputFile
+Outputfile
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 4
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
 ### -NoProxy
-Ignore any proxy settings when running the cmdlet
+NoProxy
 
 ```yaml
 Type: SwitchParameter
@@ -190,7 +118,7 @@ Accept wildcard characters: False
 ```
 
 ### -Session
-Specifiy alternative Cumulocity session to use when running the cmdlet
+Session path
 
 ```yaml
 Type: String
@@ -198,23 +126,8 @@ Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: 6
+Position: 5
 Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
-### -TimeoutSec
-TimeoutSec timeout in seconds before a request will be aborted
-
-```yaml
-Type: Double
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: 7
-Default value: 0
 Accept pipeline input: False
 Accept wildcard characters: False
 ```

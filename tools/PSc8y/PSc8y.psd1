@@ -273,7 +273,6 @@ FunctionsToExport = @(
 	'Get-Session',
 	'Get-SessionCollection',
 	'Install-ClientBinary',
-	'Invoke-BinaryProcess',
 	'Invoke-ClientRequest',
 	'New-HostedApplication',
 	'New-Microservice',

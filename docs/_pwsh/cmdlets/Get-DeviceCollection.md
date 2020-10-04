@@ -26,9 +26,14 @@ Get-DeviceCollection
 	[-WithParents]
 	[[-PageSize] <Int32>]
 	[-WithTotalPages]
+	[[-CurrentPage] <Int32>]
+	[[-TotalPages] <Int32>]
 	[-IncludeAll]
 	[-Raw]
+	[[-OutputFile] <String>]
+	[-NoProxy]
 	[[-Session] <String>]
+	[[-TimeoutSec] <Double>]
 	[-WhatIf]
 	[-Confirm]
 	[<CommonParameters>]
@@ -198,6 +203,36 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
+### -CurrentPage
+Get a specific page result
+
+```yaml
+Type: Int32
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 7
+Default value: 0
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -TotalPages
+Maximum number of pages to retrieve when using -IncludeAll
+
+```yaml
+Type: Int32
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 8
+Default value: 0
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
 ### -IncludeAll
 Include all results
 
@@ -228,8 +263,8 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -Session
-Session path
+### -OutputFile
+Write the response to file
 
 ```yaml
 Type: String
@@ -237,8 +272,53 @@ Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: 7
+Position: 9
 Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -NoProxy
+Ignore any proxy settings when running the cmdlet
+
+```yaml
+Type: SwitchParameter
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: False
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -Session
+Specifiy alternative Cumulocity session to use when running the cmdlet
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 10
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -TimeoutSec
+TimeoutSec timeout in seconds before a request will be aborted
+
+```yaml
+Type: Double
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 11
+Default value: 0
 Accept pipeline input: False
 Accept wildcard characters: False
 ```

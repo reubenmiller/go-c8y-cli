@@ -36,7 +36,7 @@ Delete a new device requests
 
 ### EXAMPLE 1
 ```
-Remove-DeviceRequest -Id "91019192078"
+Remove-DeviceRequest -Id "$serial_91019192078"
 ```
 
 Delete a new device request
