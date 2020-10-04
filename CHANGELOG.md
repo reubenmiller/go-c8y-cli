@@ -2,6 +2,56 @@
 
 ## Unreleased
 
+#### New Features (PSc8y and c8y)
+
+* Added extend paging support and includeAll
+    * `includeAll` - Fetch all results. The cli tool will iterate through each of the results and pass them through as they come in
+    * `currentPage` - Current page / result set to return
+    * `totalPages` - Fetch the given number of pages
+
+    See the [paging docs](https://reubenmiller.github.io/go-c8y-cli/docs/concepts/paging/) for more details and examples.
+
+#### PSc8y (PowerShell)
+
+#### Minor changes
+
+* Renamed `ConvertFrom-Base64ToUtf8` to `ConvertFrom-Base64String`
+
+* Added `ConvertTo-Base64String`
+
+* Renamed `Get-CurrentTenantApplications` to `Get-CurrentTenantApplicationCollection`
+
+* Renamed `Watch-NotificationChannels` to `Watch-NotificationChannel`
+
+* `Watch-*` cmdlets now support piping results as soon as they are received rather than waiting for the duration expire before passing the results back. This enables more complex scenarios, and adhoc event processing tasks
+
+    **Examples**
+
+    Update each alarm which comes in with the serverity CRITICAL. `Update-Alarm` will be run as soon as a result is received, and not just after the 60 second duration of `Watch-Alarm`. 
+
+    ```powershell
+    Watch-Alarm -Device 12345 -DurationSec 60 | Update-Alarm -Severity CRITICAL -Force
+    ```
+
+    **Complex example**
+
+    Subscribe to realtime alarm notification for a device, and update the alarm severity to CRITICAL if the alarm is active and was first created more than 1 day ago.
+
+    ```powershell
+    Watch-Alarm -Device 12345 -DurationSec 600 | Foreach-object {
+        $alarm = $_
+        $daysOld = ($alarm.time - $alarm.creationTime).TotalDays
+
+        if ($alarm.status -eq "ACTIVE" -and $daysOld -gt 1) {
+            $alarm | Update-Alarm -Severity CRITICAL -Force
+        }
+    }
+    ```
+
+* `set-session`: Search now ignores `https://` or `http://` in the url field, as this information is mostly not important when searching for a template. However the full url will still be visible for the user.
+
+#### Bug fixes
+
 * `Get-TenantOptionForCategory`: Removed table view for the tenant option collection output which was causing view problems. Closes #24
 
     ```powershell
@@ -12,8 +62,6 @@
     -------------------
     1
     ```
-
-* `set-session`: Search now ignores `https://` or `http://` in the url field, as this information is mostly not important when searching for a template. However the full url will still be visible for the user.
 
 * Fixed parsing of search names with space in their names leading to incorrect application being selected. Closes #22
 

@@ -9,7 +9,8 @@ Describe -Name "Wait-Operation" {
         $StartTime = Get-Date
         $Response = "asdf8229d" | PSc8y\Wait-Operation -TimeoutSec 10 -WarningVariable "warning" -ErrorAction SilentlyContinue
 
-        $warning | Should -Match "Could not find operation"
+        $Response | Should -BeNullOrEmpty
+        ($warning -join "`n") | Should -Match "Could not find operation"
         $Duration = (Get-Date) - $StartTime
         $Duration.TotalSeconds | Should -BeLessThan 5
     }

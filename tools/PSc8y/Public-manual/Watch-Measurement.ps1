@@ -89,11 +89,7 @@ Watch all measurements for a device
             -Noun "measurements" `
             -Verb "subscribe" `
             -Parameters $Parameters `
-            -Type "application/json" `
-            -ItemType "" `
-            -ResultProperty "" `
-            -Raw:$Raw `
-            -IncludeAll:$IncludeAll
+            -Type "application/json"
     }
 
     End {}

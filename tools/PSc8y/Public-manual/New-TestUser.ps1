@@ -16,7 +16,10 @@ New-TestUser -Name "myExistingDevice"
 
 Create a new test user with a custom username prefix
 #>
-    [cmdletbinding()]
+    [cmdletbinding(
+        SupportsShouldProcess = $true,
+        ConfirmImpact = "High"
+    )]
     Param(
         # Name of the username. A random postfix will be added to it to make it unique
         [Parameter(

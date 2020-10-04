@@ -72,6 +72,16 @@ Get a list of devices groups which have been created more recently than 2020-01-
         [switch]
         $WithTotalPages,
 
+        # Get a specific page result
+        [Parameter()]
+        [int]
+        $CurrentPage,
+
+        # Maximum number of pages to retrieve when using -IncludeAll
+        [Parameter()]
+        [int]
+        $TotalPages,
+
         # Include all results
         [Parameter()]
         [switch]
@@ -82,10 +92,25 @@ Get a list of devices groups which have been created more recently than 2020-01-
         [switch]
         $Raw,
 
-        # Session path
+        # Write the response to file
         [Parameter()]
         [string]
-        $Session
+        $OutputFile,
+
+        # Ignore any proxy settings when running the cmdlet
+        [Parameter()]
+        [switch]
+        $NoProxy,
+
+        # Specifiy alternative Cumulocity session to use when running the cmdlet
+        [Parameter()]
+        [string]
+        $Session,
+
+        # TimeoutSec timeout in seconds before a request will be aborted
+        [Parameter()]
+        [double]
+        $TimeoutSec
     )
 
     Begin {
@@ -117,8 +142,17 @@ Get a list of devices groups which have been created more recently than 2020-01-
         if ($PSBoundParameters.ContainsKey("WithTotalPages") -and $WithTotalPages) {
             $Parameters["withTotalPages"] = $WithTotalPages
         }
+        if ($PSBoundParameters.ContainsKey("OutputFile")) {
+            $Parameters["outputFile"] = $OutputFile
+        }
+        if ($PSBoundParameters.ContainsKey("NoProxy")) {
+            $Parameters["noProxy"] = $NoProxy
+        }
         if ($PSBoundParameters.ContainsKey("Session")) {
             $Parameters["session"] = $Session
+        }
+        if ($PSBoundParameters.ContainsKey("TimeoutSec")) {
+            $Parameters["timeout"] = $TimeoutSec * 1000
         }
 
     }
@@ -141,6 +175,8 @@ Get a list of devices groups which have been created more recently than 2020-01-
             -ItemType "application/vnd.com.nsn.cumulocity.customDeviceGroup+json" `
             -ResultProperty "managedObjects" `
             -Raw:$Raw `
+            -CurrentPage:$CurrentPage `
+            -TotalPages:$TotalPages `
             -IncludeAll:$IncludeAll
     }
 

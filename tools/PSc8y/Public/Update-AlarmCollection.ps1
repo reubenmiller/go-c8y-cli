@@ -151,6 +151,8 @@ Update the status of all active alarms on a device to ACKNOWLEDGED (using pipeli
             -ItemType "" `
             -ResultProperty "alarms" `
             -Raw:$Raw `
+            -CurrentPage:$CurrentPage `
+            -TotalPages:$TotalPages `
             -IncludeAll:$IncludeAll
     }
 

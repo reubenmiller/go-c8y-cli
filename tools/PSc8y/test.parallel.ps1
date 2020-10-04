@@ -3,6 +3,9 @@ Param(
     # Filter (regex) to use when filtering the test file names
     [string] $TestFileFilter = ".+",
 
+    # Filter out test file names to exclude from the test runner
+    [string] $TestFileExclude = "",
+
     # Throttle number of concurrent tests (grouped by test file)
     [int] $ThrottleLimit = 10
 )
@@ -26,23 +29,37 @@ if (!(Test-Path -Path "./reports" )) {
 # . "$PSScriptRoot/tools/Invoke-Parallel.ps1"
 
 $Tests = Get-ChildItem "./Tests" -Filter "*.tests.ps*" |
-    Where-Object { $_.Name -match "$TestFileFilter" }
+    Where-Object { $_.Name -match "$TestFileFilter" } | 
+    Where-Object {
+        if ($TestFileExclude) {
+            $_.Name -notmatch "$TestFileExclude"
+        } else {
+            $true
+        }
+    } |
+    Foreach-Object {
+        @{
+            File = $_
+        }
+    }
 
 $TestStartTime = Get-Date
 
 # $results = $Tests | Invoke-Parallel -Throttle 5 -ScriptBlock {
 $results = $Tests | ForEach-Object -ThrottleLimit:$ThrottleLimit -Parallel {
-    Write-Host "Invoking Pester for: $_.Name"
+    $TestItem = $_
+    $TestFile = $TestItem.File
+    Write-Host "Invoking Pester for: $TestFile.Name"
 
     $ConfirmPreference = "None"
 
-    Write-Host ("Starting file: {0}" -f $_.Name) -ForegroundColor Gray
+    Write-Host ("Starting file: {0}" -f $TestFile.Name) -ForegroundColor Gray
 
-    $ReportOutput = "./reports/Report_$($_.BaseName)_Pester.xml"
+    $ReportOutput = "./reports/Report_$($TestFile.BaseName)_Pester.xml"
 
     $PesterConfig = [PesterConfiguration]@{
         Run = @{
-            Path = $_.FullName
+            Path = $TestFile.FullName
             Exit = $false
             PassThru = $true
         }
@@ -51,7 +68,7 @@ $results = $Tests | ForEach-Object -ThrottleLimit:$ThrottleLimit -Parallel {
         }
         TestResult = @{
             Enabled = $true
-            TestSuiteName = $_.Name
+            TestSuiteName = $TestFile.Name
             OutputPath = $ReportOutput
             OutputFormat = "NUnitXml"
         }
@@ -62,13 +79,13 @@ $results = $Tests | ForEach-Object -ThrottleLimit:$ThrottleLimit -Parallel {
     $result = Invoke-Pester -Configuration:$PesterConfig
     
     if ($result.FailedCount -gt 0) {
-        $null = Rename-item $ReportOutput -NewName "Failed_$($_.BaseName)_Pester.xml" -Force -ErrorAction SilentlyContinue
-        Write-Host ("Failed test: " -f $_.Name) -ForegroundColor Red
+        $null = Rename-item $ReportOutput -NewName "Failed_$($TestFile.BaseName)_Pester.xml" -Force -ErrorAction SilentlyContinue
+        Write-Host ("Failed test: " -f $TestFile.Name) -ForegroundColor Red
     }
 
     $result
 
-    Write-Host ("Finished file: {0} - Failed count {1}" -f $_.Name, $result.FailedCount) -ForegroundColor Gray
+    Write-Host ("Finished file: {0} - Failed count {1}" -f $TestFile.Name, $result.FailedCount) -ForegroundColor Gray
 }
 
 $TotalDuration = (Get-Date) - $TestStartTime

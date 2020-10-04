@@ -9,8 +9,8 @@ import (
 	"time"
 
 	"github.com/fatih/color"
-	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/reubenmiller/go-c8y-cli/pkg/jsonUtilities"
+	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
 )
 
@@ -51,7 +51,7 @@ func subscribe(channelPattern string, timeoutSec int64, maxMessages int64, cmd *
 			data := jsonUtilities.UnescapeJSON(msg.Payload.Data)
 
 			// show data on console
-			cmd.Printf("%s\n", data)
+			// cmd.Printf("%s\n", data)
 
 			// return data from cli
 			fmt.Printf("%s\n", data)

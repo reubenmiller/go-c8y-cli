@@ -15,6 +15,9 @@ Describe -Name "Remove-Group" {
             $LASTEXITCODE | Should -Be 0
             $Response | Should -BeNullOrEmpty
 
+            # wait for deletion
+            Start-Sleep -Seconds 5
+
             [array] $GroupsAfterDeletion = PSc8y\Get-GroupCollection -PageSize 2000 `
                 | Where-Object { $_.name -like "tempGroup1*" }
 

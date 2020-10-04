@@ -1,14 +1,26 @@
 Function New-TestMicroservice {
-    [cmdletbinding()]
+<# 
+.SYNOPSIS
+Create a new test microservice
+#>
+    [cmdletbinding(
+        SupportsShouldProcess = $true,
+        ConfirmImpact = "High"
+    )]
     Param(
+        # Name of the microservice
         [string] $Name,
 
+        # Microservice zip file to upload to Cumulocity
         [string] $File = "$PSScriptRoot/../Tests/TestData/microservice/helloworld.zip",
         
+        # Skip the uploading of the microservice binary and only create the microservice placeholder
         [switch] $SkipUpload,
         
+        # Skip the subscription for the microservice
         [switch] $SkipSubscription,
 
+        # Don't prompt for confirmation
         [switch] $Force
     )
 

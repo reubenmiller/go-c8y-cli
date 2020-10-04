@@ -18,7 +18,10 @@ New-TestOperation -Device "myExistingDevice"
 
 Create an operation on the existing device "myExistingDevice"
 #>
-    [cmdletbinding()]
+    [cmdletbinding(
+        SupportsShouldProcess = $true,
+        ConfirmImpact = "High"
+    )]
     Param(
         # Device id, name or object. If left blank then a randomized device will be created
         [Parameter(
@@ -36,6 +39,11 @@ Create an operation on the existing device "myExistingDevice"
     }
     else {
         $iAgent = PSc8y\New-TestAgent -Force:$Force
+    }
+
+    # Fake device (if whatif prevented it from being created)
+    if ($WhatIfPreference -and $null -eq $iAgent) {
+        $iAgent = @{ id = "12345" }
     }
 
     PSc8y\New-Operation `

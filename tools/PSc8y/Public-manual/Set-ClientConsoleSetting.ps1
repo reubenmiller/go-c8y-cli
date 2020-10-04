@@ -19,7 +19,10 @@ Hide any sensitive session information on the console. Settings like (tenant, us
         [switch] $HideSensitive,
 
         # Show sensitive information (excepts clear-text passwords)
-        [switch] $ShowSensitive
+        [switch] $ShowSensitive,
+
+        # Set the default paging size to use in collection queries
+        [int] $DefaultPageSize
     )
 
     if ($ShowSensitive) {
@@ -30,5 +33,13 @@ Hide any sensitive session information on the console. Settings like (tenant, us
     if ($HideSensitive) {
         Write-Host "Sensitive session information will be hidden" -ForegroundColor Gray
         $env:C8Y_LOGGER_HIDE_SENSITIVE = $true
+    }
+
+    if ($PSBoundParameters.ContainsKey("DefaultPageSize")) {
+        if ($DefaultPageSize -gt 0) {
+            $env:C8Y_DEFAULT_PAGESIZE = "$DefaultPageSize"
+        } else {
+            $env:C8Y_DEFAULT_PAGESIZE = ""
+        }
     }
 }

@@ -16,6 +16,12 @@ Describe -Name "Get-DeviceCollection" {
             $Response.Count | Should -BeExactly 2
         }
 
+        It "Returns all devices using includeAll with WhatIf" {
+            $Response = PSc8y\Get-DeviceCollection -Verbose -IncludeAll -WhatIf
+            $LASTEXITCODE | Should -Be 0
+            $Response | Should -BeNullOrEmpty
+        }
+
         AfterAll {
             $null = Remove-ManagedObject -Id $Device01.id -ErrorAction SilentlyContinue 2>&1
             $null = Remove-ManagedObject -Id $Device02.id -ErrorAction SilentlyContinue 2>&1

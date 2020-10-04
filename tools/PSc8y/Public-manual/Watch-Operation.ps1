@@ -89,11 +89,7 @@ Watch all operations for a device
             -Noun "operations" `
             -Verb "subscribe" `
             -Parameters $Parameters `
-            -Type "application/json" `
-            -ItemType "" `
-            -ResultProperty "" `
-            -Raw:$Raw `
-            -IncludeAll:$IncludeAll
+            -Type "application/json"
     }
 
     End {}

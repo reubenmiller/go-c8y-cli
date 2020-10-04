@@ -16,6 +16,7 @@ import (
 	"github.com/spf13/viper"
 )
 
+// Logger is used to record the log messages which should be visible to the user when using the verbose flag
 var Logger *logger.Logger
 
 // Build data
@@ -47,24 +48,83 @@ var rootCmd = &cobra.Command{
 	Use:   "c8y",
 	Short: "Cumulocity command line interface",
 	Long:  `A command line interface to interact with Cumulocity REST API. Ideal for quick prototyping, exploring the REST API and for Platform maintainers/power users`,
+	// PreRunE: checkSessionExists,
+	PersistentPreRunE: checkSessionExists,
 }
 
 var (
-	client                    *c8y.Client
-	globalFlagPageSize        int
-	globalFlagVerbose         bool
-	globalFlagWithTotalPages  bool
-	globalFlagPrettyPrint     bool
-	globalFlagDryRun          bool
-	globalFlagSessionFile     string
-	globalFlagOutputFile      string
-	globalFlagUseEnv          bool
-	globalFlagRaw             bool
-	globalFlagProxy           string
-	globalFlagNoProxy         bool
-	globalFlagTimeout         uint
-	globalFlagUseTenantPrefix bool
+	client                       *c8y.Client
+	globalFlagPageSize           int
+	globalFlagIncludeAllPageSize int
+	globalFlagCurrentPage        int64
+	globalFlagTotalPages         int64
+	globalFlagIncludeAll         bool
+	globalFlagIncludeAllDelayMS  int64
+	globalFlagVerbose            bool
+	globalFlagWithTotalPages     bool
+	globalFlagPrettyPrint        bool
+	globalFlagDryRun             bool
+	globalFlagSessionFile        string
+	globalFlagConfigFile         string
+	globalFlagOutputFile         string
+	globalFlagUseEnv             bool
+	globalFlagRaw                bool
+	globalFlagProxy              string
+	globalFlagNoProxy            bool
+	globalFlagTimeout            uint
+	globalFlagUseTenantPrefix    bool
+	globalUseNonDefaultPageSize  bool
 )
+
+// CumulocityDefaultPageSize is the default page size used by Cumulocity
+const CumulocityDefaultPageSize int = 5
+
+const (
+	// SettingsIncludeAllPageSize property name used to control the default page size when using includeAll parameter
+	SettingsIncludeAllPageSize string = "settings.includeAll.pageSize"
+
+	// SettingsIncludeAllDelayMS property name used to control the delay between fetching the next page
+	SettingsIncludeAllDelayMS string = "settings.includeAll.delayMS"
+
+	// SettingsDefaultPageSize property name used to control the default page size
+	SettingsDefaultPageSize string = "settings.default.pageSize"
+
+	// SettingsConfigPath configuration path
+	SettingsConfigPath string = "settings.path"
+)
+
+// SettingsGlobalName name of the settings file (without extension)
+const SettingsGlobalName = "settings"
+
+func checkSessionExists(cmd *cobra.Command, args []string) error {
+
+	parent := cmd.Use
+	if cmd.HasParent() && cmd.Parent().Use != "c8y" {
+		parent = cmd.Parent().Use
+	}
+
+	// Logger.Printf("c8y pre-checks: %s, %s, %s", args, parent, cmd.CalledAs())
+
+	localCmds := []string{
+		"completion",
+		"sessions",
+		"version",
+	}
+
+	for i := range localCmds {
+		if localCmds[i] == parent {
+			return nil
+		}
+	}
+
+	if client == nil {
+		return newSystemError("Client failed to load")
+	}
+	if client.BaseURL == nil || client.BaseURL.Host == "" {
+		return newUserError("A c8y session has not been loaded. Please create or activate a session and try again")
+	}
+	return nil
+}
 
 func Execute() {
 	// config file
@@ -75,6 +135,9 @@ func Execute() {
 	// Global flags
 	rootCmd.PersistentFlags().BoolVarP(&globalFlagVerbose, "verbose", "v", false, "Verbose logging")
 	rootCmd.PersistentFlags().IntVar(&globalFlagPageSize, "pageSize", 5, "Maximum results per page")
+	rootCmd.PersistentFlags().Int64Var(&globalFlagCurrentPage, "currentPage", 0, "Current page size which should be returned")
+	rootCmd.PersistentFlags().Int64Var(&globalFlagTotalPages, "totalPages", 0, "Total number of pages to get")
+	rootCmd.PersistentFlags().BoolVar(&globalFlagIncludeAll, "includeAll", false, "Include all results by iterating through each page")
 	rootCmd.PersistentFlags().BoolVar(&globalFlagWithTotalPages, "withTotalPages", false, "Include all results")
 	rootCmd.PersistentFlags().BoolVar(&globalFlagPrettyPrint, "pretty", true, "Pretty print the json responses")
 	rootCmd.PersistentFlags().BoolVar(&globalFlagDryRun, "dry", false, "Dry run. Don't send any data to the server")
@@ -89,6 +152,10 @@ func Execute() {
 	rootCmd.PersistentFlags().StringSlice("select", nil, "select")
 	rootCmd.PersistentFlags().String("format", "", "format")
 	rootCmd.PersistentFlags().UintVarP(&globalFlagTimeout, "timeout", "t", 10*60*1000, "Timeout in milliseconds")
+
+	// Map settings to flags, allowing the user to set the own default settings
+	viper.BindPFlag(SettingsDefaultPageSize, rootCmd.PersistentFlags().Lookup("pageSize"))
+	// viper.BindPFlag(SettingsConfigPath, rootCmd.PersistentFlags().Lookup("config"))
 
 	// TODO: Make flags case-insensitive
 	// rootCmd.PersistentFlags().SetNormalizeFunc(flagNormalizeFunc)
@@ -205,6 +272,51 @@ func Execute() {
 	}
 }
 
+// ReadConfigFiles reads multiple configuration files to load the c8y session and other settings
+//
+// The session files are
+// 1. load settings (from C8Y_SESSION_HOME path)
+// 2. load session file (by path)
+// 3. load session file (by name)
+func ReadConfigFiles(v *viper.Viper) (path string, err error) {
+	home := getSessionHomeDir()
+	v.AddConfigPath(".")
+	v.AddConfigPath(home)
+
+	// Load (non-session) preferences
+	v.SetConfigName(SettingsGlobalName)
+
+	if err := v.ReadInConfig(); err == nil {
+		path = v.ConfigFileUsed()
+		Logger.Debugf("Loaded settings: %s", hideSensitiveInformationIfActive(path))
+	}
+
+	// Load session
+	if _, err := os.Stat(globalFlagSessionFile); err == nil {
+		// Load config by file path
+		v.SetConfigFile(globalFlagSessionFile)
+	} else {
+		// Load config by name
+		sessionName := "session"
+		if globalFlagSessionFile != "" {
+			sessionName = globalFlagSessionFile
+		}
+
+		v.SetConfigName(sessionName)
+	}
+
+	err = v.MergeInConfig()
+	path = v.ConfigFileUsed()
+
+	if err != nil {
+		Logger.Debugf("Failed to merge config. %s", err)
+	}
+
+	Logger.Infof("Loaded session: %s", hideSensitiveInformationIfActive(path))
+
+	return path, err
+}
+
 func initConfig() {
 	// Set logging
 	if globalFlagVerbose || globalFlagDryRun {
@@ -217,7 +329,9 @@ func initConfig() {
 
 	if globalFlagSessionFile == "" && os.Getenv("C8Y_SESSION") != "" {
 		globalFlagSessionFile = os.Getenv("C8Y_SESSION")
-		Logger.Printf("Using session environment variable: %s\n", hideSensitiveInformationIfActive(globalFlagSessionFile))
+		if globalFlagSessionFile != "" {
+			Logger.Printf("Using session environment variable: %s\n", hideSensitiveInformationIfActive(globalFlagSessionFile))
+		}
 	}
 
 	// global session flag has precendence over use environment
@@ -225,10 +339,11 @@ func initConfig() {
 		globalFlagUseEnv = true
 	}
 
+	loadConfiguration()
+
 	// only parse env variables if no explict config file is given
 	if globalFlagUseEnv {
 		Logger.Println("C8Y_USE_ENVIRONMENT is set. Environment variables can be used to override config settings")
-		viper.SetEnvPrefix("c8y")
 		viper.AutomaticEnv()
 	}
 
@@ -258,41 +373,27 @@ func initConfig() {
 			os.Setenv("https_proxy", globalFlagProxy)
 
 		} else {
-			Logger.Debugf(
-				"Using existing env variables. HTTP_PROXY [%s], http_proxy [%s], HTTPS_PROXY [%s], https_proxy [%s], NO_PROXY [%s], no_proxy [%s]",
-				os.Getenv("HTTP_PROXY"),
-				os.Getenv("http_proxy"),
-				os.Getenv("HTTPS_PROXY"),
-				os.Getenv("https_proxy"),
-				os.Getenv("NO_PROXY"),
-				os.Getenv("no_proxy"),
-			)
-		}
-	}
+			proxyVars := []string{"HTTP_PROXY", "http_proxy", "HTTPS_PROXY", "https_proxy", "NO_PROXY", "no_proxy"}
 
-	if _, err := os.Stat(globalFlagSessionFile); err == nil {
-		// Use config file from the flag.
-		viper.SetConfigFile(globalFlagSessionFile)
-	} else {
-		home := getSessionHomeDir()
+			var proxySettings strings.Builder
 
-		// Search config in home directory with name ".cumulocity" (without extension).
-		viper.AddConfigPath(".")
+			for _, name := range proxyVars {
+				if v := os.Getenv(name); v != "" {
+					proxySettings.WriteString(fmt.Sprintf(" %s [%s]", name, v))
+				}
+			}
+			if proxySettings.Len() > 0 {
+				Logger.Debugf("Using existing env variables.%s", proxySettings)
+			}
 
-		viper.AddConfigPath(home)
-
-		if globalFlagSessionFile != "" {
-			viper.SetConfigName(globalFlagSessionFile)
-		} else {
-			viper.SetConfigName("session")
 		}
 	}
 
 	httpClient := newHTTPClient(globalFlagNoProxy)
 
 	// Try reading session from file
-	if err := viper.ReadInConfig(); err == nil {
-		Logger.Println("Using config file:", hideSensitiveInformationIfActive(viper.ConfigFileUsed()))
+	_, readErr := ReadConfigFiles(viper.GetViper())
+	if readErr == nil {
 		client = c8y.NewClient(
 			httpClient,
 			formatHost(viper.GetString("host")),
@@ -302,7 +403,7 @@ func initConfig() {
 			true,
 		)
 	} else {
-		Logger.Printf("Error reading config file. %s", err)
+		Logger.Printf("Error reading config file. %s", readErr)
 		// Fallback to reading session from environment variables
 		client = c8y.NewClientFromEnvironment(httpClient, true)
 	}
@@ -325,7 +426,10 @@ func initConfig() {
 		client.UseTenantInUsername = viper.GetBool("useTenantPrefix")
 	}
 
-	Logger.Printf("Use tenant prefix: %v", client.UseTenantInUsername)
+	// Logger.Printf("Use tenant prefix: %v", client.UseTenantInUsername)
+
+	// read additional configuration
+	readConfiguration()
 
 	// Add the realtime client
 	client.Realtime = c8y.NewRealtimeClient(
@@ -335,6 +439,35 @@ func initConfig() {
 		client.Username,
 		client.Password,
 	)
+}
+
+func loadConfiguration() error {
+
+	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
+	viper.SetEnvPrefix("c8y")
+	bindEnv(SettingsIncludeAllPageSize, 2000)
+	bindEnv(SettingsDefaultPageSize, CumulocityDefaultPageSize)
+	bindEnv(SettingsIncludeAllDelayMS, 0)
+
+	return nil
+}
+
+func readConfiguration() error {
+
+	globalFlagIncludeAllPageSize = viper.GetInt(SettingsIncludeAllPageSize)
+	globalFlagPageSize = viper.GetInt(SettingsDefaultPageSize)
+	globalFlagIncludeAllDelayMS = viper.GetInt64(SettingsIncludeAllDelayMS)
+
+	Logger.Infof("%s: %d", SettingsDefaultPageSize, globalFlagPageSize)
+	Logger.Infof("%s: %d", SettingsIncludeAllPageSize, globalFlagIncludeAllPageSize)
+	Logger.Infof("%s: %d", SettingsIncludeAllDelayMS, globalFlagIncludeAllDelayMS)
+
+	return nil
+}
+
+func bindEnv(name string, defaultValue interface{}) {
+	viper.BindEnv(name)
+	viper.SetDefault(name, defaultValue)
 }
 
 func newWebsocketDialer(ignoreProxySettings bool) *websocket.Dialer {

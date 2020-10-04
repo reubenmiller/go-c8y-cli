@@ -62,7 +62,8 @@ $script:Aliases = @{
     tojson = "ConvertTo-Json"
     fromjson = "ConvertFrom-Json"
     rest = "Invoke-ClientRequest"
-    base64ToUtf8 = "ConvertFrom-Base64ToUtf8"
+    base64ToUtf8 = "ConvertFrom-Base64String"
+    utf8Tobase64 = "ConvertTo-Base64String"
 
     # session
     session = "Get-Session"

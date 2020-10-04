@@ -254,7 +254,8 @@ func (n *newMicroserviceCmd) doProcedure(cmd *cobra.Command, args []string) erro
 		return err
 	}
 
-	return processResponse(response, err, commonOptions)
+	_, err = processResponse(response, err, commonOptions)
+	return err
 }
 
 // GetManifestFile extracts the Cumulocity microservice manifest file from a given zip file

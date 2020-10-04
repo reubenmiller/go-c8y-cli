@@ -21,6 +21,10 @@ Create a temp file with customized content.
 System.IO.FileInfo
 
 #>
+    [cmdletbinding(
+        SupportsShouldProcess = $true,
+        ConfirmImpact = "Low"
+    )]
     Param(
         # Content which should be written to the temporary file
         [Parameter(
@@ -29,8 +33,18 @@ System.IO.FileInfo
             Position = 0
         )]
         [object]
-        $InputObject = "example message"
+        $InputObject = "example message",
+
+        # Don't prompt for confirmation
+        [switch]
+        $Force
     )
+
+    if (!$Force -and
+        !$WhatIfPreference -and
+        !$PSCmdlet.ShouldProcess("Create a temporary file")) {
+        return
+    }
 
     $TempFile = New-TemporaryFile
     $InputObject | Out-File -LiteralPath $TempFile.FullName -Encoding utf8
