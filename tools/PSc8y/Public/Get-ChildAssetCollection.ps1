@@ -49,6 +49,21 @@ Get a list of the child assets of an existing group
         [switch]
         $WithTotalPages,
 
+        # Get a specific page result
+        [Parameter()]
+        [int]
+        $CurrentPage,
+
+        # Maximum number of pages to retrieve when using -IncludeAll
+        [Parameter()]
+        [int]
+        $TotalPages,
+
+        # Include all results
+        [Parameter()]
+        [switch]
+        $IncludeAll,
+
         # Show the full (raw) response from Cumulocity including pagination information
         [Parameter()]
         [switch]
@@ -115,7 +130,10 @@ Get a list of the child assets of an existing group
                 -Type "application/vnd.com.nsn.cumulocity.managedObjectReferenceCollection+json" `
                 -ItemType "application/vnd.com.nsn.cumulocity.managedObject+json" `
                 -ResultProperty "references.managedObject" `
-                -Raw:$Raw
+                -Raw:$Raw `
+                -CurrentPage:$CurrentPage `
+                -TotalPages:$TotalPages `
+                -IncludeAll:$IncludeAll
         }
     }
 

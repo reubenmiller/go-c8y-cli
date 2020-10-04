@@ -5,11 +5,12 @@ Describe -Name "Wait-Operation" {
         $TestOperation = PSc8y\New-TestOperation
     }
 
-    It "Wait for operation using invalid operaiton (fail fast)" {
+    It "Wait for operation using invalid operation (fail fast)" {
         $StartTime = Get-Date
         $Response = "asdf8229d" | PSc8y\Wait-Operation -TimeoutSec 10 -WarningVariable "warning" -ErrorAction SilentlyContinue
 
-        $warning | Should -Match "Could not find operation"
+        $Response | Should -BeNullOrEmpty
+        ($warning -join "`n") | Should -Match "Could not find operation"
         $Duration = (Get-Date) - $StartTime
         $Duration.TotalSeconds | Should -BeLessThan 5
     }

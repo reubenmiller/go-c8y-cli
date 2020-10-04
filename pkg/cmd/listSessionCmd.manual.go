@@ -91,6 +91,12 @@ func (n *listSessionCmd) listSession(cmd *cobra.Command, args []string) error {
 			fmt.Printf("skipping a dir without errors: %+v \n", info.Name())
 			return filepath.SkipDir
 		}
+
+		// skip settings file
+		if strings.HasPrefix(info.Name(), SettingsGlobalName+".") {
+			return nil
+		}
+
 		// cmd.Printf("visited file or dir: %q\n", path)
 		files = append(files, path)
 

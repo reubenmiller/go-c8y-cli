@@ -19,6 +19,7 @@ Set console settings to be used by the cli tool
 Set-ClientConsoleSetting
 	[-HideSensitive]
 	[-ShowSensitive]
+	[[-DefaultPageSize] <Int32>]
 	[<CommonParameters>]
 ```
 
@@ -65,6 +66,21 @@ Aliases:
 Required: False
 Position: Named
 Default value: False
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -DefaultPageSize
+Set the default paging size to use in collection queries
+
+```yaml
+Type: Int32
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 1
+Default value: 0
 Accept pipeline input: False
 Accept wildcard characters: False
 ```

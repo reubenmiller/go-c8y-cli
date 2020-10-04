@@ -247,7 +247,8 @@ FunctionsToExport = @(
 	'Update-User',
 	'Add-PowershellType',
 	'Clear-Session',
-	'ConvertFrom-Base64ToUtf8',
+	'ConvertFrom-Base64String',
+	'ConvertTo-Base64String',
 	'ConvertTo-JsonArgument',
 	'Expand-Application',
 	'Expand-Device',
@@ -264,7 +265,7 @@ FunctionsToExport = @(
 	'Get-C8ySessionProperty',
 	'Get-ClientBinary',
 	'Get-ClientBinaryVersion',
-	'Get-CurrentTenantApplications',
+	'Get-CurrentTenantApplicationCollection',
 	'Get-DeviceBootstrapCredential',
 	'Get-DeviceCollection',
 	'Get-DeviceGroupCollection',
@@ -300,7 +301,7 @@ FunctionsToExport = @(
 	'Watch-ManagedObject',
 	'Watch-Measurement',
 	'Watch-Notification',
-	'Watch-NotificationChannels',
+	'Watch-NotificationChannel',
 	'Watch-Operation')
 # VariablesToExport = '*'
 

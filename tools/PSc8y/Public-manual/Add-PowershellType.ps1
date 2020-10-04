@@ -28,6 +28,8 @@ Object[]
     $InputObject,
 
     # Type name to assign to the input objects
+    [AllowNull()]
+    [AllowEmptyString()]
     [Parameter(
       Mandatory = $true,
       Position = 1)]
@@ -37,7 +39,9 @@ Object[]
 
   Process {
     foreach ($InObject in $InputObject) {
-      [void]$InObject.PSObject.TypeNames.Insert(0, $Type)
+      if (-Not [string]::IsNullOrWhiteSpace($Type)) {
+        [void]$InObject.PSObject.TypeNames.Insert(0, $Type)
+      }
       $InObject
     }
   }

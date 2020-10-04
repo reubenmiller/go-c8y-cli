@@ -28,6 +28,7 @@ New-Microservice
 	[[-OutputFile] <String>]
 	[-NoProxy]
 	[[-Session] <String>]
+	[[-TimeoutSec] <Double>]
 	[-Force]
 	[-WhatIf]
 	[-Confirm]
@@ -246,6 +247,21 @@ Aliases:
 Required: False
 Position: 7
 Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -TimeoutSec
+TimeoutSec timeout in seconds before a request will be aborted
+
+```yaml
+Type: Double
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 8
+Default value: 0
 Accept pipeline input: False
 Accept wildcard characters: False
 ```

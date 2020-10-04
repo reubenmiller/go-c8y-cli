@@ -40,6 +40,21 @@ Get a list of referenced applications on a given tenant (from management tenant)
         [switch]
         $WithTotalPages,
 
+        # Get a specific page result
+        [Parameter()]
+        [int]
+        $CurrentPage,
+
+        # Maximum number of pages to retrieve when using -IncludeAll
+        [Parameter()]
+        [int]
+        $TotalPages,
+
+        # Include all results
+        [Parameter()]
+        [switch]
+        $IncludeAll,
+
         # Show the full (raw) response from Cumulocity including pagination information
         [Parameter()]
         [switch]
@@ -109,6 +124,8 @@ Get a list of referenced applications on a given tenant (from management tenant)
             -ItemType "application/vnd.com.nsn.cumulocity.applicationReference+json" `
             -ResultProperty "references" `
             -Raw:$Raw `
+            -CurrentPage:$CurrentPage `
+            -TotalPages:$TotalPages `
             -IncludeAll:$IncludeAll
     }
 

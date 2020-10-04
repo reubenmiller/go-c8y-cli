@@ -36,8 +36,22 @@ Watch realtime alarms
 ### EXAMPLE 1
 ```
 Watch-Alarm -Device 12345
-Watch all alarms for a device
 ```
+
+Watch all alarms for a device
+
+### EXAMPLE 2
+```
+Watch-Alarm -Device 12345 -DurationSec 600 | Foreach-object {
+    $alarm = $_
+    $daysOld = ($alarm.time - $alarm.creationTime).TotalDays
+    if ($alarm.status -eq "ACTIVE" -and $daysOld -gt 1) {
+        $alarm | Update-Alarm -Severity CRITICAL -Force
+    }}
+```
+
+Subscribe to realtime alarm notifications for a device, and update the alarm severity to CRITICAL
+if the alarm is active and was first created more than 1 day ago.
 
 ## PARAMETERS
 

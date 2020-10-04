@@ -18,7 +18,10 @@ New-TestEvent -Device "myExistingDevice"
 
 Create an event on the existing device "myExistingDevice"
 #>
-    [cmdletbinding()]
+    [cmdletbinding(
+        SupportsShouldProcess = $true,
+        ConfirmImpact = "High"
+    )]
     Param(
         # Device id, name or object. If left blank then a randomized device will be created
         [Parameter(
@@ -40,6 +43,11 @@ Create an event on the existing device "myExistingDevice"
         $iDevice = PSc8y\New-TestDevice -Force:$Force
     }
 
+    # Fake device (if whatif prevented it from being created)
+    if ($WhatIfPreference -and $null -eq $iDevice) {
+        $iDevice = @{ id = "12345" }
+    }
+
     $c8yEvent = PSc8y\New-Event `
         -Device $iDevice.id `
         -Time "1970-01-01" `
@@ -48,6 +56,10 @@ Create an event on the existing device "myExistingDevice"
         -Force:$Force
 
     if ($WithBinary) {
+        if ($WhatIfPreference -and $null -eq $iDevice) {
+            $c8yEvent = @{ id = "12345" }
+        }
+
         $tempfile = New-TemporaryFile
         "Cumulocity test content" | Out-File -LiteralPath $tempfile
         $null = PSc8y\New-EventBinary `

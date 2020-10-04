@@ -239,5 +239,6 @@ func (n *newHostedApplicationCmd) doProcedure(cmd *cobra.Command, args []string)
 		return err
 	}
 
-	return processResponse(response, err, commonOptions)
+	_, err = processResponse(response, err, commonOptions)
+	return err
 }

@@ -76,6 +76,21 @@ Get operations from a device (using pipeline)
         [switch]
         $WithTotalPages,
 
+        # Get a specific page result
+        [Parameter()]
+        [int]
+        $CurrentPage,
+
+        # Maximum number of pages to retrieve when using -IncludeAll
+        [Parameter()]
+        [int]
+        $TotalPages,
+
+        # Include all results
+        [Parameter()]
+        [switch]
+        $IncludeAll,
+
         # Show the full (raw) response from Cumulocity including pagination information
         [Parameter()]
         [switch]
@@ -157,6 +172,8 @@ Get operations from a device (using pipeline)
             -ItemType "application/vnd.com.nsn.cumulocity.operation+json" `
             -ResultProperty "operations" `
             -Raw:$Raw `
+            -CurrentPage:$CurrentPage `
+            -TotalPages:$TotalPages `
             -IncludeAll:$IncludeAll
     }
 

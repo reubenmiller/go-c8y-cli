@@ -18,8 +18,10 @@ jobs:
 
     - uses: actions/upload-artifact@v2
       with:
-        name: PSc8y
-        path: tools/PSc8y/dist/PSc8y.zip
+        name: ReleaseArtifacts
+        path: |
+          tools/PSc8y/dist/PSc8y.zip
+          tools/PSc8y/Dependencies/*
 
     - name: Publish Powershell Module (PSc8y)
       run: make publish

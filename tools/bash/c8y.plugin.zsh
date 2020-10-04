@@ -20,6 +20,13 @@ set-session () {
         args="--sessionFilter \"$@\""
     fi
     echo "c8y sessions list $args"
+    resp=$( c8y sessions list $args)
+
+    if [ $? -ne 0 ]; then
+        echo "Set session aborted"
+        return
+    fi
+
     export C8Y_SESSION=$( c8y sessions list $args)
 
     # Export session as individual settings

@@ -7,8 +7,9 @@ Function Get-SessionHomePath {
     if ($env:C8Y_SESSION_HOME) {
         $HomePath = $env:C8Y_SESSION_HOME
     }
-    elseif ($env:HOME) {
-        $HomePath = Join-Path $env:HOME -ChildPath $c8yFolderName
+    elseif ($HOME) {
+        # Use PS Automatic Variable
+        $HomePath = Join-Path $HOME -ChildPath $c8yFolderName
     }
     else {
         # Check if on windows (PS 5.1)

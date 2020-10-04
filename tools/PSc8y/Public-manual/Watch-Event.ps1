@@ -89,11 +89,7 @@ Watch all events for a device
             -Noun "events" `
             -Verb "subscribe" `
             -Parameters $Parameters `
-            -Type "application/json" `
-            -ItemType "" `
-            -ResultProperty "" `
-            -Raw:$Raw `
-            -IncludeAll:$IncludeAll
+            -Type "application/json"
     }
 
     End {}

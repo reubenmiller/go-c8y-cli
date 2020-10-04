@@ -87,11 +87,7 @@ Watch all measurements for 90 seconds
             -Noun "realtime" `
             -Verb "subscribe" `
             -Parameters $Parameters `
-            -Type "application/json" `
-            -ItemType "" `
-            -ResultProperty "" `
-            -Raw:$Raw `
-            -IncludeAll:$IncludeAll
+            -Type "application/json"
     }
 
     End {}
