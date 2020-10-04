@@ -19,12 +19,12 @@ Describe -Tag "Session" -Name "Set-Session" {
 
     It "Loads a session from a folder by name" {
         # session
-        $env:C8Y_SESSION = "$tmpdir/my-session.json"
+        $env:C8Y_SESSION = ""
         $Session = @{
             "host" = "https://example.com"
             "settings.default.pageSize" = 44
         }
-        $Session | ConvertTo-Json | Out-File $env:C8Y_SESSION
+        $Session | ConvertTo-Json | Out-File "$tmpdir/my-session.json"
 
         $c8y = Get-ClientBinary
         $resp = & $c8y devices list --verbose --dry --session "my-session" 2>&1
@@ -107,7 +107,7 @@ settings.includeAll.pagesize: 202
     }
 
     AfterEach {
-        Remove-Item $tmpdir -Force -Recurse
+        Remove-Item $tmpdir -Force -Recurse -ErrorAction SilentlyContinue
     }
 
     AfterAll {
