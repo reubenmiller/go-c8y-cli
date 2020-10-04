@@ -78,6 +78,15 @@ jobs:
       with:
         name: test-results-${{ matrix.os }}
         path: tools/PSc8y/reports/*.xml
+    
+    - name: Publish results
+        uses: EnricoMi/publish-unit-test-result-action@v1.1
+        if: always()
+        with:
+          check_name: Test Results
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          files: tools/PSc8y/reports/*.xml
+          log_level: DEBUG
 
   publish-test-results:
     runs-on: ubuntu-18.04
