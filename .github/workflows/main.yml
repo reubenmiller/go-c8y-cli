@@ -78,25 +78,21 @@ jobs:
       with:
         name: test-results-${{ matrix.os }}
         path: tools/PSc8y/reports/*.xml
-    
-    - name: Publish results
-      uses: EnricoMi/publish-unit-test-result-action@v1.1
-      if: always()
-      with:
-        check_name: Test Results
-        github_token: ${{ secrets.GITHUB_TOKEN }}
-        files: tools/PSc8y/reports/*.xml
-        log_level: DEBUG
 
   publish-test-results:
     runs-on: ubuntu-18.04
     needs: [test]
-    if: ${{ false }}
+    if: always()
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-latest, windows-latest, ubuntu-18.04]
     steps:
       - name: Get test results
         uses: actions/download-artifact@v2
         with:
-          name: test-results
+          name: test-results-${{ matrix.os }}
+          path: test-results-${{ matrix.os }}
 
       - name: Publish results
         uses: EnricoMi/publish-unit-test-result-action@v1.1
@@ -104,5 +100,5 @@ jobs:
         with:
           check_name: Test Results
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          files: report.xml
+          files: test-results-${{ matrix.os }}/*.xml
           log_level: DEBUG
