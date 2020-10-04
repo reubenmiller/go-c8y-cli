@@ -3,7 +3,7 @@
 Describe -Name "Watch-ManagedObject" {
     BeforeEach {
         $Device = New-TestDevice
-        Start-Sleep -Seconds 2
+        Start-Sleep -Seconds 5
 
         # Create background task which creates managedObjects
         $importpath = (Resolve-Path "$PSScriptRoot/imports.ps1").ProviderPath
@@ -17,7 +17,7 @@ Describe -Name "Watch-ManagedObject" {
             Start-Sleep -Seconds 2
             $env:C8Y_SESSION = $args[1]
             $DeviceID = $args[2]
-            @(1..10) | ForEach-Object {
+            @(1..60) | ForEach-Object {
                 Update-ManagedObject -Id $DeviceID -Data @{
                     c8y_Counter = $_
                 } -Force

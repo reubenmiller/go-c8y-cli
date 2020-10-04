@@ -3,7 +3,7 @@
 Describe -Name "Watch-NotificationChannel" {
     BeforeEach {
         $Device = New-TestAgent
-        Start-Sleep -Seconds 2
+        Start-Sleep -Seconds 5
 
         # Create background task which creates measurements
         $importpath = (Resolve-Path "$PSScriptRoot/imports.ps1").ProviderPath
@@ -19,7 +19,7 @@ Describe -Name "Watch-NotificationChannel" {
             Start-Sleep -Seconds 2
             $env:C8Y_SESSION = $args[1]
             $DeviceID = $args[2]
-            @(1..10) | ForEach-Object {
+            @(1..60) | ForEach-Object {
                 New-TestMeasurement -Device $DeviceID -Force
                 Start-Sleep -Milliseconds 1000
             }
@@ -31,7 +31,7 @@ Describe -Name "Watch-NotificationChannel" {
             Start-Sleep -Seconds 2
             $env:C8Y_SESSION = $args[1]
             $DeviceID = $args[2]
-            @(1..10) | ForEach-Object {
+            @(1..60) | ForEach-Object {
                 New-TestOperation -Device $DeviceID -Force
                 Start-Sleep -Milliseconds 1000
             }
