@@ -82,7 +82,8 @@ jobs:
   publish-test-results:
     runs-on: ubuntu-18.04
     needs: [test]
-    if: always()
+    # Disabled as pester does not support junit reports (only nunit)
+    if: always() && false
     strategy:
       fail-fast: false
       matrix:
@@ -95,8 +96,10 @@ jobs:
           path: test-results-${{ matrix.os }}
 
       - name: Publish results
-        uses: MirrorNG/nunit-reporter@v1.0.9
+        uses: EnricoMi/publish-unit-test-result-action@v1.1
         if: always()
         with:
-          access-token: ${{ secrets.GITHUB_TOKEN }}
-          path: test-results-${{ matrix.os }}/*.xml
+          check_name: Test Results
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          files: test-results-${{ matrix.os }}/*.xml
+          log_level: DEBUG
