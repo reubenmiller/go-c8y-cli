@@ -30,12 +30,11 @@ fi
 #   set-session
 #
 set-session () {
-    args=""
     if [ $# -gt 0 ]; then
-        args="--sessionFilter \"$@\""
+        resp=$( c8y sessions list --sessionFilter "$1 $2 $3 $4 $5" )
+    else
+        resp=$( c8y sessions list )
     fi
-    echo "c8y sessions list $args"
-    resp=$( c8y sessions list $args)
 
     if [ $? -ne 0 ]; then
         echo "Set session aborted"

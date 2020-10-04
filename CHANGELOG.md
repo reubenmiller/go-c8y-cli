@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+#### Bugfixes
+
+* Fixed bug when using `set-session "my filter"` in bash and zsh profiles which resulted in an "unknown flag" error
+
 ## Released
 
 ### v1.5.0

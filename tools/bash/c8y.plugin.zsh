@@ -15,19 +15,18 @@
 #   set-session
 #
 set-session () {
-    args=""
     if [ $# -gt 0 ]; then
-        args="--sessionFilter \"$@\""
+        resp=$( c8y sessions list --sessionFilter "$1 $2 $3 $4 $5" )
+    else
+        resp=$( c8y sessions list )
     fi
-    echo "c8y sessions list $args"
-    resp=$( c8y sessions list $args)
 
     if [ $? -ne 0 ]; then
         echo "Set session aborted"
         return
     fi
 
-    export C8Y_SESSION=$( c8y sessions list $args)
+    export C8Y_SESSION=$resp
 
     # Export session as individual settings
     # to support other 3rd party applicatsion (i.e. java c8y sdk apps)
