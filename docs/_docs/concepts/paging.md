@@ -59,54 +59,28 @@ This has the advantages that all of the results do not need to be kept in memory
 
 **Example: Add a fragment to each device**
 
-```powershell
-Get-DeviceCollection -Name "My*" -IncludeAll | ForEach-CumulocityPage {
-    foreach ($item in $_) {
-        Write-Host ("Adding fragment to device: {0} ({1})" -f $item.name, $item.id)
+The following shows how ot add a fragment `myNewFragment` to each devices where the name starts with "My".
 
-        Update-ManagedObject -Id $item.id -Data @{
+```powershell
+Get-DeviceCollection -Name "My*" -IncludeAll |
+    Update-ManagedObject -Data @{
             myNewFragment = @{
                 # add timestamp (in ISO8601 format)
                 fragmentCreationTime = Format-Date
             }
         }
-    }
-}
 ```
 
 **Notes**
 
 * An `foreach` loop is need in the `ForEach-CumulocityPage` because the PowerShell iterator object `$_` will be an array of managed objects.
 
-### Alternative interface???
-
-I'm not 100% sure if this is actually possible, if so it would definitely only be a powershell thing.
-
-The idea would be using pwsh pipelines, the execution order would be something like:
-
-1. Get the first page, pass it to Update-ManagedObject immediately
-2. `Expand-CumulocityPage` would get the next page, then pass it to Update-ManagedObject
-
-So you can do it in batches...but again, need to check if this is actually possible.
-
-```powershell
-Get-DeviceCollection -Name "My*" -PageSize 2000 |
-    Expand-CumulocityPage |
-    Update-ManagedObject @{
-        myNewFragment = @{
-            # add timestamp (in ISO8601 format)
-            fragmentCreationTime = Format-Date
-        }
-    }
-```
 
 ### Setting a default pageSize
 
-```sh
-$PSDefaultParameterValues = @{"*:PageSize" = 2000};
-```
+The default pageSize can be controlled via the `settings.json` or in your session file. See [configuration options](https://reubenmiller.github.io/go-c8y-cli/docs/configuration/options/) for details.
 
-#### Notes / Warnings
+### Notes / Warnings
 
 * Retrieving all results will use more memory!!!
 * When retrieving all results, it is recommended to use the maximum pages size rather than the default 5, otherwise you will have to send a lot of requests to get all of the results that you want

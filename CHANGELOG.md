@@ -2,14 +2,28 @@
 
 ## Unreleased
 
-**PSc8y**
+#### New Features (PSc8y and c8y)
+
+* Added extend paging support and includeAll
+    * `includeAll` - Fetch all results. The cli tool will iterate through each of the results and pass them through as they come in
+    * `currentPage` - Current page / result set to return
+    * `totalPages` - Fetch the given number of pages
+
+    See the [paging docs](https://reubenmiller.github.io/go-c8y-cli/docs/concepts/paging/) for more details and examples.
+
+#### PSc8y (PowerShell)
+
+#### Minor changes
 
 * Renamed `ConvertFrom-Base64ToUtf8` to `ConvertFrom-Base64String`
+
 * Added `ConvertTo-Base64String`
+
 * Renamed `Get-CurrentTenantApplications` to `Get-CurrentTenantApplicationCollection`
+
 * Renamed `Watch-NotificationChannels` to `Watch-NotificationChannel`
 
-* `Watch-*`: Support for piping results as soon as they are received rather than waiting for the duration expire before passing the results back. This enables more complex scenarios, and adhoc event processing tasks
+* `Watch-*` cmdlets now support piping results as soon as they are received rather than waiting for the duration expire before passing the results back. This enables more complex scenarios, and adhoc event processing tasks
 
     **Examples**
 
@@ -34,6 +48,10 @@
     }
     ```
 
+* `set-session`: Search now ignores `https://` or `http://` in the url field, as this information is mostly not important when searching for a template. However the full url will still be visible for the user.
+
+#### Bug fixes
+
 * `Get-TenantOptionForCategory`: Removed table view for the tenant option collection output which was causing view problems. Closes #24
 
     ```powershell
@@ -44,8 +62,6 @@
     -------------------
     1
     ```
-
-* `set-session`: Search now ignores `https://` or `http://` in the url field, as this information is mostly not important when searching for a template. However the full url will still be visible for the user.
 
 * Fixed parsing of search names with space in their names leading to incorrect application being selected. Closes #22
 
