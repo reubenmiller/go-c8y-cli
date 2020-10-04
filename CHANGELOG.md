@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+## Released
+
+### v1.5.0
+
 #### New Features (PSc8y and c8y)
 
 * Added extend paging support and includeAll
@@ -64,8 +68,6 @@
     ```
 
 * Fixed parsing of search names with space in their names leading to incorrect application being selected. Closes #22
-
-## Released
 
 ### v1.4.1
 

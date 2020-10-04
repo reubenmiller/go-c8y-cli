@@ -145,12 +145,12 @@ If you have already activated a c8y session on a command console, you can re-use
 
 You have to execute a docker pull if you want to re-check if there is a newer image available (i.e. also tagged with latest). 
 
-You can also specify the version that you want to try out by replacing `latest` with the version number, i.e. `1.4.1`.
+You can also specify the version that you want to try out by replacing `latest` with the version number, i.e. `1.5.0`.
 
 ```sh
 # update to the latest image
 docker pull ghcr.io/reubenmiller/c8y-zsh:latest
 
 # use a known version
-docker pull ghcr.io/reubenmiller/c8y-zsh:1.4.1
+docker pull ghcr.io/reubenmiller/c8y-zsh:1.5.0
 ```
