@@ -9,11 +9,13 @@ Describe -Tag "Session" -Name "Set-Session" {
         $sessionBackupTenant = $env:C8Y_TENANT
         $sessionBackupUser = $env:C8Y_USER
         $sessionBackupPassword = $env:C8Y_PASSWORD
+        $sessionBackupUseEnv = $env:C8Y_USE_ENVIRONMENT
     }
 
     BeforeEach {
         $tmpdir = New-TemporaryDirectory
         $env:C8Y_SESSION_HOME = $tmpdir
+        $env:C8Y_USE_ENVIRONMENT = ""
         $settingsFile = "$tmpdir/settings.json"
     }
 
@@ -118,5 +120,6 @@ settings.includeAll.pagesize: 202
         $env:C8Y_TENANT = $sessionBackupTenant
         $env:C8Y_USER = $sessionBackupUser
         $env:C8Y_PASSWORD = $sessionBackupPassword
+        $env:C8Y_USE_ENVIRONMENT = $sessionBackupUseEnv
     }
 }
