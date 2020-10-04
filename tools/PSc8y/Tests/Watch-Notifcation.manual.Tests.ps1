@@ -13,9 +13,9 @@ Describe -Name "Watch-Notifcation" {
             $Device.id
         )
         $Job = Start-Job -Name "watch-notifications-measurements-data" -Debug -ArgumentList $JobArgs -ScriptBlock {
+            $env:C8Y_SESSION = $args[1]
             . $args[0]
             Start-Sleep -Seconds 2
-            $env:C8Y_SESSION = $args[1]
             $DeviceID = $args[2]
             @(1..60) | ForEach-Object {
                 New-TestMeasurement -Device $DeviceID -Force

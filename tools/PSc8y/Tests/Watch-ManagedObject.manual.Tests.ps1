@@ -13,9 +13,9 @@ Describe -Name "Watch-ManagedObject" {
             $Device.id
         )
         $Job = Start-Job -Name "watch-managedObject-data" -Debug -ArgumentList $JobArgs -ScriptBlock {
+            $env:C8Y_SESSION = $args[1]
             . $args[0]
             Start-Sleep -Seconds 2
-            $env:C8Y_SESSION = $args[1]
             $DeviceID = $args[2]
             @(1..60) | ForEach-Object {
                 Update-ManagedObject -Id $DeviceID -Data @{

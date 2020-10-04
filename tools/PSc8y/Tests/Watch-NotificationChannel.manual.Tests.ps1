@@ -15,9 +15,9 @@ Describe -Name "Watch-NotificationChannel" {
 
         # Create measurements
         $Job = Start-Job -Name "watch-measurements-data" -Debug -ArgumentList $JobArgs -ScriptBlock {
+            $env:C8Y_SESSION = $args[1]
             . $args[0]
             Start-Sleep -Seconds 2
-            $env:C8Y_SESSION = $args[1]
             $DeviceID = $args[2]
             @(1..60) | ForEach-Object {
                 New-TestMeasurement -Device $DeviceID -Force
@@ -27,9 +27,9 @@ Describe -Name "Watch-NotificationChannel" {
 
         # Create operations
         $Job2 = Start-Job -Name "watch-operation-data" -Debug -ArgumentList $JobArgs -ScriptBlock {
+            $env:C8Y_SESSION = $args[1]
             . $args[0]
             Start-Sleep -Seconds 2
-            $env:C8Y_SESSION = $args[1]
             $DeviceID = $args[2]
             @(1..60) | ForEach-Object {
                 New-TestOperation -Device $DeviceID -Force
