@@ -48,6 +48,7 @@ jobs:
   test:
     runs-on: ${{ matrix.os }}
     needs: [build]
+    if: ${{ false }}
     env:
       C8Y_HOST: ${{ secrets.C8Y_HOST }}
       C8Y_TENANT: ${{ secrets.C8Y_TENANT }}
