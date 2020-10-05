@@ -5,6 +5,9 @@ Describe -Name "New-Microservice" {
         BeforeAll {
             $AppName = New-RandomString -Prefix "testms-"
             $MicroserviceZip = "$PSScriptRoot/TestData/microservice/helloworld.zip"
+
+            # keep list of app ids to delete after tests
+            $AppList = New-Object System.Collections.ArrayList
         }
 
         It "Creates a new microservice using the name from the zip file" {
@@ -16,6 +19,8 @@ Describe -Name "New-Microservice" {
             Get-Microservice -Id $Name | Remove-Microservice
 
             $App = New-Microservice -File $CustomZip
+
+            $AppList.Add($App.id)
 
             # Remove temp file
             if ($CustomZip) {
@@ -30,6 +35,8 @@ Describe -Name "New-Microservice" {
         It "Creates a new microservice from a zip file with a custom name" {
             # Note: Cumulocity trial tenant does not support microservice hosting, so the binary can't be uploaded withouth a 403 error
             $App = New-Microservice -Name $AppName -File $MicroserviceZip
+            $AppList.Add($App.id)
+
             $LASTEXITCODE | Should -Be 0
             $App | Should -Not -BeNullOrEmpty
             $App.name | Should -BeExactly $AppName
@@ -40,6 +47,8 @@ Describe -Name "New-Microservice" {
             $AppBeforeUpdate | Should -Not -BeNullOrEmpty
 
             $App = New-Microservice -Name $AppName -File $MicroserviceZip
+            $AppList.Add($App.id)
+
             $LASTEXITCODE | Should -Be 0
             $App | Should -Not -BeNullOrEmpty
             $App.id | Should -BeExactly $AppBeforeUpdate.id
@@ -83,6 +92,8 @@ Describe -Name "New-Microservice" {
 "@
 
             $App = New-Microservice -Name $AppName -File $ManifestFile -SkipUpload
+            $AppList.Add($App.id)
+
             $LASTEXITCODE | Should -Be 0
             $App | Should -Not -BeNullOrEmpty
             $App.id | Should -MatchExactly '^\d+$'
@@ -108,6 +119,8 @@ Invalid json example
 "@
 
             $App = New-Microservice -Name $AppName -File $ManifestFile -SkipUpload -ErrorVariable ErrorResponse
+            $AppList.Add($App.id)
+
             $LASTEXITCODE | Should -Not -Be 0
             $ErrorResponse | Select-Object -Last 1 | Should -BeLike "*invalid manifest*"
             $App | Should -BeNullOrEmpty
@@ -117,6 +130,8 @@ Invalid json example
             Get-Microservice -Id $AppName | Remove-Microservice
 
             $App = New-Microservice -Name $AppName -File $MicroserviceZip -SkipSubscription
+            $AppList.Add($App.id)
+
             $LASTEXITCODE | Should -Be 0
             $App | Should -Not -BeNullOrEmpty
             $App.name | Should -BeExactly $AppName
@@ -127,7 +142,10 @@ Invalid json example
         }
 
         AfterAll {
-            Remove-Microservice -Id $AppName -ErrorAction SilentlyContinue
+            # Cleanup all microservices (if they still exist)
+            $AppList |
+                Select-Object -Unique |
+                Remove-Microservice -ErrorAction SilentlyContinue -WarningAction SilentlyContinue
         }
     }
 }
