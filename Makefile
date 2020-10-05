@@ -8,7 +8,7 @@ C8Y_PKGS = $$(go list ./... | grep -v /vendor/)
 GOMOD=$(GOCMD) mod
 
 # Set VERSION from git describe
-$(eval VERSION := $(shell git describe | sed "s/^v\?\([0-9]\{1,\}\.[0-9]\{1,\}\.[0-9]\{1,\}\).*/\1/"))
+VERSION := $(shell git describe | sed "s/^v\?\.\([0-9]\{1,\}\.[0-9]\{1,\}\.[0-9]\{1,\}\).*/\1/")
 
 ENV_FILE ?= c8y.env
 -include $(ENV_FILE)
@@ -17,6 +17,9 @@ export $(shell sed 's/=.*//' $(ENV_FILE) 2>/dev/null)
 .PHONY: all check-path test race docs install tsurud
 
 all: check-path build test
+
+show-version:		## Show current version
+	@echo "VERSION: $(VERSION)"
 
 # Check that given variables are set and all have non-empty values,
 # die with an error otherwise.
@@ -182,7 +185,7 @@ build-docker:
 	@rm ./docker/c8y.plugin.zsh
 	@rm ./docker/c8y.profile.sh
 
-publish-docker: build build-docker		## Publish docker c8y cli images
+publish-docker: show-version build build-docker		## Publish docker c8y cli images
 	@chmod +x ./scripts/publish-docker.sh
 	@sudo CR_PAT=$(CR_PAT) VERSION=$(VERSION) ./scripts/publish-docker.sh
 
