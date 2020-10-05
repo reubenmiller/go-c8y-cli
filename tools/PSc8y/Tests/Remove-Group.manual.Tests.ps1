@@ -3,13 +3,14 @@
 Describe -Name "Remove-Group" {
     Context "Existing groups" {
         BeforeAll {
-            $Group1 = New-TestGroup -Name "tempGroup1"
-            $Group2 = New-TestGroup -Name "tempGroup1"
+            $Prefix = New-RandomString -Prefix "tempGroup1_"
+            $Group1 = New-TestGroup -Name $Prefix
+            $Group2 = New-TestGroup -Name $Prefix
         }
 
         It "Delete a multiple user groups (using pipeline)" {
             $Response = PSc8y\Get-GroupCollection -PageSize 2000 `
-                | Where-Object { $_.name -like "tempGroup1*" } `
+                | Where-Object { $_.name -like "${Prefix}*" } `
                 | Remove-Group
 
             $LASTEXITCODE | Should -Be 0
@@ -19,7 +20,7 @@ Describe -Name "Remove-Group" {
             Start-Sleep -Seconds 5
 
             [array] $GroupsAfterDeletion = PSc8y\Get-GroupCollection -PageSize 2000 `
-                | Where-Object { $_.name -like "tempGroup1*" }
+                | Where-Object { $_.name -like "${Prefix}*" }
 
             $GroupsAfterDeletion.Count | Should -BeExactly 0
         }
