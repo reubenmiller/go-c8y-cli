@@ -155,7 +155,7 @@ test_powershell:
 	# pwsh -NonInteractive -File tools/PSc8y/tests.ps1
 
 test_powershell_sessions:		## Run tests which interfere with the session variable
-	pwsh -NonInteractive -File tools/PSc8y/test.parallel.ps1 -TestFileFilter "Set-Session|Get-SessionHomePath"
+	pwsh -NonInteractive -File tools/PSc8y/test.parallel.ps1 -ThrottleLimit 1 -TestFileFilter "Set-Session|Get-SessionHomePath"
 
 test_bash:
 	./tools/bash/tests/test.sh
