@@ -3,6 +3,8 @@ name: build
 on:
   push:
     branches: [ master, develop ]
+    tags-ignore:
+      - 'v*'
     paths-ignore:
       - docs/*
       - '**/*.md'
