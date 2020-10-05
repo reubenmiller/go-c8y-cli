@@ -9,6 +9,8 @@ the c8y binary. Before the c8y cli binary can accept it, it must be converted to
 
 The necessary character escaping of literal backslashed `\` will be done automatically.
 
+If Data parameter is a file path then it is returned as is.
+
 .EXAMPLE
 ConvertTo-JsonArgument @{ myValue = "1" }
 
@@ -29,8 +31,18 @@ Converts the hashtable to an escaped json string
     )
 
     if ($Data -is [string]) {
+        if ($Data -and (Test-Path $Data)) {
+            # Return path as is (and let c8y binary handle it)
+            return $Data
+        }
         # If string, then validate if json was provided
-        $DataObj = (ConvertFrom-Json $Data)
+        
+        try {
+            $DataObj = (ConvertFrom-Json $Data -ErrorAction Stop)
+        } catch {
+            # Return as is (and let c8y binary handle it)
+            return $Data
+        }
     } else {
         $DataObj = $Data
     }

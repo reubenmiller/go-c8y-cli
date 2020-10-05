@@ -2,6 +2,36 @@
 
 ## Unreleased
 
+* The `Data` parameter now supports a json file path to make it easier to upload complex json structures.
+
+    **Example: Create a new managed object from a json file**
+
+    *./myfile.json*
+
+    ```json
+    {
+        "name": "server-01",
+        "type": "linux",
+        "c8y_SoftwareList": [
+            { "name": "app1", "version": "1.0.0", "url": ""},
+            { "name": "app2", "version": "9", "url": ""},
+            { "name": "app3 test", "version": "1.1.1", "url": ""}
+        ]
+    }
+    ```
+
+    Powershell
+
+    ```powershell
+    New-ManagedObject -Data ./myfile.json
+    ```
+
+    Bash / zsh
+
+    ```sh
+    c8y inventory create --data ./myfile.json
+    ```
+
 ## Released
 
 ### v1.5.2

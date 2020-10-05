@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"mime"
 	"os"
 	"path/filepath"
@@ -48,9 +49,25 @@ func addDataFlag(cmd *cobra.Command) {
 
 func getDataFlag(cmd *cobra.Command) map[string]interface{} {
 	if value, err := cmd.Flags().GetString(FlagDataName); err == nil {
-		return MustParseJSON(value)
+		return MustParseJSON(getContents(value))
 	}
 	return make(map[string]interface{})
+}
+
+// getContents checks whether the given string is a file reference if so it returns the contents, otherwise it returns the
+// input value as is
+func getContents(content string) string {
+	if _, err := os.Stat(content); err != nil {
+		// not a file
+		return content
+	}
+
+	fileContent, err := ioutil.ReadFile(content)
+	if err != nil {
+		return content
+	}
+	// file contents
+	return string(fileContent)
 }
 
 func getTenantWithDefaultFlag(cmd *cobra.Command, flagName string, defaultTenant string) string {

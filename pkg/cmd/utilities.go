@@ -36,6 +36,7 @@ func MustParseJSON(value string) map[string]interface{} {
 }
 
 func isJSONString(value string) bool {
+	value = strings.TrimSpace(value)
 	return strings.HasPrefix(value, "{") && strings.HasSuffix(value, "}")
 }
 
