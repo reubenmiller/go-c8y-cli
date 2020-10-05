@@ -4,6 +4,12 @@
 
 ## Released
 
+### v1.5.2
+
+#### Bugfixes
+
+* Fixed tagging bug which results in the docker images not being tagged with the version number (only the "latest" images were being published)
+
 ### v1.5.1
 
 #### Bugfixes
