@@ -103,6 +103,9 @@ func (n *newMeasurementCmd) newMeasurement(cmd *cobra.Command, args []string) er
 	} else {
 		return newUserError(fmt.Sprintf("Flag [%s] does not exist. %s", "type", err))
 	}
+	if err := setDataTemplateFromFlags(cmd, body); err != nil {
+		return newUserError("Template error. ", err)
+	}
 
 	// path parameters
 	pathParameters := make(map[string]string)

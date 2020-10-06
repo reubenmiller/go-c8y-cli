@@ -79,6 +79,9 @@ func (n *updateTenantOptionEditableCmd) updateTenantOptionEditable(cmd *cobra.Co
 	} else {
 		return newUserError(fmt.Sprintf("Flag [%s] does not exist. %s", "editable", err))
 	}
+	if err := setDataTemplateFromFlags(cmd, body); err != nil {
+		return newUserError("Template error. ", err)
+	}
 
 	// path parameters
 	pathParameters := make(map[string]string)

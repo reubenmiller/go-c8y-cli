@@ -15,11 +15,11 @@ const (
 	Separator = "."
 )
 
-func evaluateJsonnet(base string, snippets ...string) (string, error) {
+func evaluateJsonnet(base string, imports string, snippets ...string) (string, error) {
 	// Create a JSonnet VM
 	vm := jsonnet.MakeVM()
 
-	var jsonnetImport string
+	jsonnetImport := imports
 
 	jsonnetImport += `
 local addIfMissing(obj, srcProp, mixin) = if !std.objectHas(obj, srcProp) then mixin else {};
@@ -75,7 +75,7 @@ func NewMapBuilderWithInit(body map[string]interface{}) *MapBuilder {
 // NewMapBuilderFromJsonnetSnippet returns a new mapper builder from a jsonnet snippet
 // See https://jsonnet.org/learning/tutorial.html for details on how to create a snippet
 func NewMapBuilderFromJsonnetSnippet(snippet string) (*MapBuilder, error) {
-	jsonStr, err := evaluateJsonnet(snippet)
+	jsonStr, err := evaluateJsonnet(snippet, "")
 
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse snippet. %w", err)
@@ -96,6 +96,18 @@ func NewMapBuilderFromJSON(data string) (*MapBuilder, error) {
 // MapBuilder creates body builder
 type MapBuilder struct {
 	body map[string]interface{}
+
+	templateVariables map[string]interface{}
+	template          string
+}
+
+func (b *MapBuilder) SetTemplate(template string) *MapBuilder {
+	b.template = template
+	return b
+}
+
+func (b *MapBuilder) ApplyTemplate(reverse bool) error {
+	return b.MergeJsonnet(b.template, reverse)
 }
 
 // MergeJsonnet merges the existing body data with a given jsonnet snippet.
@@ -108,11 +120,16 @@ func (b *MapBuilder) MergeJsonnet(snippet string, reverse bool) error {
 		return fmt.Errorf("failed to marshal existing map data to json. %w", err)
 	}
 
+	imports, err := b.GetTemplateVariablesJsonnet()
+	if err != nil {
+		return err
+	}
+
 	var mergedJSON string
 	if reverse {
-		mergedJSON, err = evaluateJsonnet(snippet, string(existingJSON))
+		mergedJSON, err = evaluateJsonnet(snippet, imports, string(existingJSON))
 	} else {
-		mergedJSON, err = evaluateJsonnet(string(existingJSON), snippet)
+		mergedJSON, err = evaluateJsonnet(string(existingJSON), imports, snippet)
 	}
 
 	if err != nil {
@@ -126,6 +143,24 @@ func (b *MapBuilder) MergeJsonnet(snippet string, reverse bool) error {
 	b.body = body
 
 	return nil
+}
+
+func (b *MapBuilder) SetTemplateVariables(variables map[string]interface{}) {
+	b.templateVariables = variables
+}
+
+func (b *MapBuilder) GetTemplateVariablesJsonnet() (string, error) {
+	if b.templateVariables == nil {
+		// template variables have not been defined (not an error)
+		return "", nil
+	}
+
+	jsonStr, err := json.Marshal(b.templateVariables)
+
+	if err != nil {
+		return "", err
+	}
+	return fmt.Sprintf("local vars = %s;\n", jsonStr), nil
 }
 
 // SetMap sets a new map to the body. This will remove any existing values in the body

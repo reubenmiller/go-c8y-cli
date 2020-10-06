@@ -103,6 +103,9 @@ func (n *newManagedObjectChildAssetCmd) newManagedObjectChildAsset(cmd *cobra.Co
 			}
 		}
 	}
+	if err := setDataTemplateFromFlags(cmd, body); err != nil {
+		return newUserError("Template error. ", err)
+	}
 
 	// path parameters
 	pathParameters := make(map[string]string)

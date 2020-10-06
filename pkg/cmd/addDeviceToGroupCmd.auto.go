@@ -89,6 +89,9 @@ func (n *addDeviceToGroupCmd) addDeviceToGroup(cmd *cobra.Command, args []string
 			}
 		}
 	}
+	if err := setDataTemplateFromFlags(cmd, body); err != nil {
+		return newUserError("Template error. ", err)
+	}
 
 	// path parameters
 	pathParameters := make(map[string]string)

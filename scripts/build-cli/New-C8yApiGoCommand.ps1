@@ -116,6 +116,17 @@
                 }
             }
         }
+
+        #
+        # Add support for user defined templates to control body
+        #
+        $BodyUserTemplateCode = @"
+        if err := setDataTemplateFromFlags(cmd, body); err != nil {
+            return newUserError("Template error. ", err)
+        }
+"@.TrimStart()
+        $null = $RESTBodyBuilder.AppendLine($BodyUserTemplateCode)
+        
     }
 
     #

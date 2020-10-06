@@ -75,6 +75,9 @@ func (n *newMicroserviceBinaryCmd) newMicroserviceBinary(cmd *cobra.Command, arg
 	body := mapbuilder.NewMapBuilder()
 	body.SetMap(getDataFlag(cmd))
 	getFileFlag(cmd, "file", formData)
+	if err := setDataTemplateFromFlags(cmd, body); err != nil {
+		return newUserError("Template error. ", err)
+	}
 
 	// path parameters
 	pathParameters := make(map[string]string)

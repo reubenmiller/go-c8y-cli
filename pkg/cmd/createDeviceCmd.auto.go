@@ -95,6 +95,9 @@ func (n *createDeviceCmd) createDevice(cmd *cobra.Command, args []string) error 
 {  c8y_IsDevice: {},
 }
 `, false)
+	if err := setDataTemplateFromFlags(cmd, body); err != nil {
+		return newUserError("Template error. ", err)
+	}
 
 	// path parameters
 	pathParameters := make(map[string]string)

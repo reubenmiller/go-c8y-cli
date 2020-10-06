@@ -11,6 +11,7 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/reubenmiller/go-c8y-cli/pkg/mapbuilder"
 	"github.com/spf13/cobra"
 )
 
@@ -49,9 +50,23 @@ func addDataFlag(cmd *cobra.Command) {
 
 func getDataFlag(cmd *cobra.Command) map[string]interface{} {
 	if value, err := cmd.Flags().GetString(FlagDataName); err == nil {
-		return MustParseJSON(getContents(value))
+		return RemoveCumulocityProperties(MustParseJSON(getContents(value)), true)
 	}
 	return make(map[string]interface{})
+}
+
+func setDataTemplateFromFlags(cmd *cobra.Command, body *mapbuilder.MapBuilder) error {
+
+	if value, err := cmd.Flags().GetString(FlagDataTemplateVariablesName); err == nil {
+		body.SetTemplateVariables(MustParseJSON(getContents(value)))
+	}
+
+	if value, err := cmd.Flags().GetString(FlagDataTemplateName); err == nil {
+		body.SetTemplate(value)
+		body.ApplyTemplate(false)
+	}
+
+	return nil
 }
 
 // getContents checks whether the given string is a file reference if so it returns the contents, otherwise it returns the
