@@ -160,7 +160,9 @@ func (b *MapBuilder) GetTemplateVariablesJsonnet() (string, error) {
 	if err != nil {
 		return "", err
 	}
-	return fmt.Sprintf("local vars = %s;\n", jsonStr), nil
+
+	varsHelper := `local var(prop, defaultValue="") = if std.objectHas(vars, prop) then vars[prop] else defaultValue;`
+	return fmt.Sprintf("local vars = %s;\n%s\n", jsonStr, varsHelper), nil
 }
 
 // SetMap sets a new map to the body. This will remove any existing values in the body

@@ -46,6 +46,10 @@ func addApplicationFlag(cmd *cobra.Command) {
 
 func addDataFlag(cmd *cobra.Command) {
 	cmd.Flags().StringP(FlagDataName, "d", "", "json")
+
+	// support templating
+	cmd.Flags().String(FlagDataTemplateName, "", "Body template")
+	cmd.Flags().String(FlagDataTemplateVariablesName, "", "Body template variables")
 }
 
 func getDataFlag(cmd *cobra.Command) map[string]interface{} {
@@ -58,12 +62,22 @@ func getDataFlag(cmd *cobra.Command) map[string]interface{} {
 func setDataTemplateFromFlags(cmd *cobra.Command, body *mapbuilder.MapBuilder) error {
 
 	if value, err := cmd.Flags().GetString(FlagDataTemplateVariablesName); err == nil {
-		body.SetTemplateVariables(MustParseJSON(getContents(value)))
+		content := getContents(value)
+		MustParseJSON(content)
+		Logger.Infof("Template variables: %s\n", content)
+		body.SetTemplateVariables(MustParseJSON(content))
 	}
 
 	if value, err := cmd.Flags().GetString(FlagDataTemplateName); err == nil {
-		body.SetTemplate(value)
+		contents := getContents(value)
+		Logger.Infof("Template: %s\n", contents)
+		tempVars, err := body.GetTemplateVariablesJsonnet()
+		Logger.Infof("Template: %s\n", tempVars)
+		body.SetTemplate(contents)
 		body.ApplyTemplate(false)
+
+		output, err := body.MarshalJSON()
+		Logger.Infof("Body after applying template\n: %s\nerr: %s\n", output, err)
 	}
 
 	return nil
@@ -114,6 +128,9 @@ func getFileFlag(cmd *cobra.Command, flagName string, formData map[string]io.Rea
 	if formData == nil {
 		formData = make(map[string]io.Reader)
 	}
+
+	// Get custom properties which should be added to the binary
+	getFormDataObjectFlag(cmd, FlagDataName, formData)
 
 	if filename, err := cmd.Flags().GetString(flagName); err == nil {
 		r, err := os.Open(filename)

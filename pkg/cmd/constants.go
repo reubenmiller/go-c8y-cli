@@ -2,6 +2,6 @@ package cmd
 
 const (
 	FlagDataName                  = "data"
-	FlagDataTemplateName          = "dataTemplate"
+	FlagDataTemplateName          = "template"
 	FlagDataTemplateVariablesName = "templateVars"
 )
