@@ -3,7 +3,6 @@ package cmd
 import (
 	"bytes"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -11,6 +10,7 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/pkg/errors"
 	"github.com/reubenmiller/go-c8y-cli/pkg/mapbuilder"
 	"github.com/spf13/cobra"
 )
@@ -70,14 +70,10 @@ func setDataTemplateFromFlags(cmd *cobra.Command, body *mapbuilder.MapBuilder) e
 
 	if value, err := cmd.Flags().GetString(FlagDataTemplateName); err == nil {
 		contents := getContents(value)
-		Logger.Infof("Template: %s\n", contents)
-		tempVars, err := body.GetTemplateVariablesJsonnet()
-		Logger.Infof("Template: %s\n", tempVars)
 		body.SetTemplate(contents)
-		body.ApplyTemplate(false)
-
-		output, err := body.MarshalJSON()
-		Logger.Infof("Body after applying template\n: %s\nerr: %s\n", output, err)
+		if err := body.ApplyTemplate(false); err != nil {
+			return errors.Wrap(err, "Template error")
+		}
 	}
 
 	return nil

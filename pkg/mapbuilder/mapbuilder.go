@@ -5,8 +5,10 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"math/rand"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/google/go-jsonnet"
 )
@@ -59,6 +61,12 @@ local isMandatory(o, prop) = {
 
 	// evaluate the jsonnet
 	out, err := vm.EvaluateSnippet("file", jsonnetImport)
+
+	if err != nil {
+		// Include full template (with injected variables/functions) otherwise the error
+		// will report line numbers that the user does not know about
+		err = fmt.Errorf("Could not create json from template.\nTemplate:\n%s\nError: %s", jsonnetImport, err)
+	}
 	return out, err
 }
 
@@ -162,7 +170,11 @@ func (b *MapBuilder) GetTemplateVariablesJsonnet() (string, error) {
 	}
 
 	varsHelper := `local var(prop, defaultValue="") = if std.objectHas(vars, prop) then vars[prop] else defaultValue;`
-	return fmt.Sprintf("local vars = %s;\n%s\n", jsonStr, varsHelper), nil
+
+	// Seed random otherwise it will not change with execution
+	rand.Seed(time.Now().UTC().UnixNano())
+	randomHelper := fmt.Sprintf(`local rand = { bool: %t, int: %d, int2: %d, float: %f, float2: %f, float3: %f, float4: %f };`, rand.Float32() > 0.5, rand.Intn(100), rand.Intn(100), rand.Float32(), rand.Float32(), rand.Float32(), rand.Float32())
+	return fmt.Sprintf("local vars = %s;\n%s\n%s\n", jsonStr, varsHelper, randomHelper), nil
 }
 
 // SetMap sets a new map to the body. This will remove any existing values in the body
