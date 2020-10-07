@@ -12,6 +12,11 @@ PS> New-Binary -File $File
 
 Upload a log file
 
+.EXAMPLE
+PS> New-Binary -File $File -Data @{ c8y_Global = @{}; type = "c8y_upload" }
+
+Upload a config file and make it globally accessible for all users
+
 
 #>
     [cmdletbinding(SupportsShouldProcess = $true,
@@ -25,6 +30,11 @@ Upload a log file
         [Parameter(Mandatory = $true)]
         [string]
         $File,
+
+        # Additional properties to be added to the binary.
+        [Parameter()]
+        [object]
+        $Data,
 
         # Show the full (raw) response from Cumulocity including pagination information
         [Parameter()]
@@ -61,6 +71,9 @@ Upload a log file
         $Parameters = @{}
         if ($PSBoundParameters.ContainsKey("File")) {
             $Parameters["file"] = $File
+        }
+        if ($PSBoundParameters.ContainsKey("Data")) {
+            $Parameters["data"] = ConvertTo-JsonArgument $Data
         }
         if ($PSBoundParameters.ContainsKey("OutputFile")) {
             $Parameters["outputFile"] = $OutputFile

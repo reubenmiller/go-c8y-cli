@@ -35,6 +35,25 @@ func MustParseJSON(value string) map[string]interface{} {
 	return data
 }
 
+// ParseJSON parses a string and returns the map structure. It will parse json and shorthand json.
+func ParseJSON(value string, data map[string]interface{}) error {
+	if data == nil {
+		return errors.Errorf("data is nil. Can parse json into an empty map")
+	}
+
+	if isJSONString(value) {
+		if err := parseJSONStructure(value, data); err != nil {
+			return errors.Wrap(err, "Invalid JSON")
+		}
+		return nil
+	}
+
+	if err := parseShorthandJSONStructure(value, data); err != nil {
+		return errors.Wrap(err, "Invalid shorthand JSON")
+	}
+	return nil
+}
+
 func isJSONString(value string) bool {
 	value = strings.TrimSpace(value)
 	return strings.HasPrefix(value, "{") && strings.HasSuffix(value, "}")

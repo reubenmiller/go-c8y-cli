@@ -13,6 +13,12 @@ Describe -Name "New-Binary" {
         $Response | Should -Not -BeNullOrEmpty
     }
 
+    It "Upload a config file and make it globally accessible for all users" {
+        $Response = PSc8y\New-Binary -File $File -Data @{ c8y_Global = @{}; type = "c8y_upload" }
+        $LASTEXITCODE | Should -Be 0
+        $Response | Should -Not -BeNullOrEmpty
+    }
+
 
     AfterEach {
         Remove-Item $File

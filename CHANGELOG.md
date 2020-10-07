@@ -2,6 +2,21 @@
 
 ## Unreleased
 
+* Added support for setting additional properties when uploading a binary file
+
+    **PowerShell**
+
+    ```powershell
+    New-Binary -File "myfile.json" -Data @{ c8y_Global = @{}; type = "c8y_upload" }
+    ```
+
+    **Bash/zsh**
+
+    ```sh
+    c8y binaries create --file "myfile.json" --data "c8y_Global={},type=c8y_upload"
+    ```
+
+
 * The `Data` parameter now supports a json file path to make it easier to upload complex json structures.
 
     **Example: Create a new managed object from a json file**
