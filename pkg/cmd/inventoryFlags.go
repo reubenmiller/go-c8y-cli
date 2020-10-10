@@ -65,9 +65,12 @@ func getDataFlag(cmd *cobra.Command) map[string]interface{} {
 
 func setDataTemplateFromFlags(cmd *cobra.Command, body *mapbuilder.MapBuilder) error {
 
+	if !cmd.Flags().Changed(FlagDataTemplateName) {
+		return nil
+	}
+
 	if value, err := cmd.Flags().GetString(FlagDataTemplateVariablesName); err == nil {
 		content := getContents(value)
-		MustParseJSON(content)
 		Logger.Infof("Template variables: %s\n", content)
 		body.SetTemplateVariables(MustParseJSON(content))
 	}
