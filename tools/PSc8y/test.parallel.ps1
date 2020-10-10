@@ -55,7 +55,7 @@ $results = $Tests | ForEach-Object -ThrottleLimit:$ThrottleLimit -Parallel {
 
     Write-Host ("Starting file: {0}" -f $TestFile.Name) -ForegroundColor Gray
 
-    $ReportOutput = "./reports/Report_$($TestFile.BaseName)_Pester.xml"
+    $ReportOutput = Join-Path (Resolve-Path ".") -ChildPath "reports/Report_$($TestFile.BaseName)_Pester.xml"
 
     $PesterConfig = [PesterConfiguration]@{
         Run = @{
