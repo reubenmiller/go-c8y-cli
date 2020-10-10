@@ -108,6 +108,7 @@ func checkSessionExists(cmd *cobra.Command, args []string) error {
 	localCmds := []string{
 		"completion",
 		"sessions",
+		"template",
 		"version",
 	}
 
@@ -168,6 +169,9 @@ func Execute() {
 
 	// generic commands
 	rootCmd.AddCommand(newGetGenericRestCmd().getCommand())
+
+	// template commands
+	rootCmd.AddCommand(newTemplateRootCmd().getCommand())
 
 	// Auto generated commands
 

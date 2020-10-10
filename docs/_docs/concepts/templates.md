@@ -199,3 +199,63 @@ The following output shows the body that will be uploaded to Cumulocity when cre
    "value": "test"
 }
 ```
+
+### Template development
+
+To help with the development of templates, there is a command which evaluates a template and prints the output to the console.
+
+**Bash/zsh**
+
+```sh
+c8y template execute --template ./mytemplate.jsonnet
+```
+
+**PowerShell**
+
+```powershell
+Invoke-Template -Template ./template.jsonnet
+```
+
+#### Input data (PowerShell)
+
+`Invoke-Template` also supports piping of input data which can be referenced 
+
+```powershell
+$Template = @"
+{
+    type: base.name + '_' + rand.int,
+    value: 1 + 2,
+}
+"@
+
+$InputData = @(
+    @{ name = "device1" },
+    @{ name = "device2" }
+)
+$templateOutput = $InputData |
+    Invoke-Template -Template $Template -Compress
+```
+
+**Output**
+
+```json
+{"name":"device1","type":"device1_70","value":3}
+{"name":"device2","type":"device2_25","value":3}
+```
+
+Or the output can be piped to `ConvertFrom-Json`:
+
+```powershell
+$templateOutput = $InputData | Invoke-Template -Template $Template -Compress | ConvertFrom-Json
+```
+
+```sh
+name  type     value
+----  ----     -----
+name  name_97      3
+name2 name2_54     3
+```
+
+**Note**
+
+When piping the output to `ConvertFrom-Json`, the `-Compress` option needs to be used otherwise it will return an error due to invalid JSON. This is because the output is a stream of json text and not a json array of results.

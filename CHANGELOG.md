@@ -48,6 +48,20 @@
     }
     ```
 
+    To help with the development of templates, there is a command which evaluates a template and prints the output to the console.
+
+    **Bash/zsh**
+
+    ```sh
+    c8y template execute --template ./mytemplate.jsonnet
+    ```
+
+    **PowerShell**
+
+    ```powershell
+    Invoke-Template -Template ./template.jsonnet
+    ```
+
 * Added support for setting additional properties when uploading a binary file
 
     **PowerShell**
