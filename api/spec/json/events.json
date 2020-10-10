@@ -257,18 +257,18 @@
           "type": "datetime",
           "required": false,
           "default": "0s",
-          "description": "Time of the event."
+          "description": "Time of the event. Defaults to current timestamp."
         },
         {
           "name": "type",
           "type": "string",
-          "required": true,
+          "required": false,
           "description": "Identifies the type of this event."
         },
         {
           "name": "text",
           "type": "string",
-          "required": true,
+          "required": false,
           "description": "Text description of the event."
         },
         {
@@ -276,6 +276,11 @@
           "type": "json",
           "description": "Additional properties of the event."
         }
+      ],
+      "bodyRequiredKeys": [
+        "type",
+        "text",
+        "time"
       ]
     },
     {

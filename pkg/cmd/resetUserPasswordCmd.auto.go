@@ -76,11 +76,17 @@ func (n *resetUserPasswordCmd) resetUserPassword(cmd *cobra.Command, args []stri
 	} else {
 		return newUserError(fmt.Sprintf("Flag [%s] does not exist. %s", "newPassword", err))
 	}
-	body.MergeJsonnet(`
+	bodyErr := body.MergeJsonnet(`
 addIfEmptyString(base, "password", {sendPasswordResetEmail: true})
 `, false)
+	if bodyErr != nil {
+		return newSystemError("Template error. ", bodyErr)
+	}
 	if err := setDataTemplateFromFlags(cmd, body); err != nil {
 		return newUserError("Template error. ", err)
+	}
+	if err := body.Validate(); err != nil {
+		return newUserError("Body validation error. ", err)
 	}
 
 	// path parameters

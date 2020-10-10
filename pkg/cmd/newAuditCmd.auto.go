@@ -33,7 +33,7 @@ Create an audit record for a custom managed object update
 	cmd.SilenceUsage = true
 
 	cmd.Flags().String("type", "", "Identifies the type of this audit record. (required)")
-	cmd.Flags().String("time", "0s", "Time of the audit record.")
+	cmd.Flags().String("time", "0s", "Time of the audit record. Defaults to current timestamp.")
 	cmd.Flags().String("text", "", "Text description of the audit record. (required)")
 	cmd.Flags().String("source", "", "An optional ManagedObject that the audit record originated from (required)")
 	cmd.Flags().String("activity", "", "The activity that was carried out. (required)")
@@ -137,6 +137,9 @@ func (n *newAuditCmd) newAudit(cmd *cobra.Command, args []string) error {
 	}
 	if err := setDataTemplateFromFlags(cmd, body); err != nil {
 		return newUserError("Template error. ", err)
+	}
+	if err := body.Validate(); err != nil {
+		return newUserError("Body validation error. ", err)
 	}
 
 	// path parameters

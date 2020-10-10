@@ -64,6 +64,16 @@ Upload application zip file containing the web application
         [switch]
         $SkipActivation,
 
+        # Template (jsonnet) file to use to create the request body.
+        [Parameter()]
+        [string]
+        $Template,
+
+        # Variables to be used when evaluating the Template. Accepts json or json shorthand, i.e. "name=peter"
+        [Parameter()]
+        [string]
+        $TemplateVars,
+
         # Include raw response including pagination information
         [Parameter()]
         [switch]
@@ -126,6 +136,12 @@ Upload application zip file containing the web application
         }
         if ($PSBoundParameters.ContainsKey("SkipUpload")) {
             $Parameters["skipUpload"] = $SkipUpload.ToString().ToLower()
+        }
+        if ($PSBoundParameters.ContainsKey("Template") -and $Template) {
+            $Parameters["template"] = $Template
+        }
+        if ($PSBoundParameters.ContainsKey("TemplateVars") -and $TemplateVars) {
+            $Parameters["templateVars"] = $TemplateVars
         }
         if ($PSBoundParameters.ContainsKey("OutputFile")) {
             $Parameters["outputFile"] = $OutputFile

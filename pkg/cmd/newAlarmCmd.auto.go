@@ -33,18 +33,15 @@ Create a new alarm for device
 	cmd.SilenceUsage = true
 
 	cmd.Flags().StringSlice("device", []string{""}, "The ManagedObject that the alarm originated from (required)")
-	cmd.Flags().String("type", "", "Identifies the type of this alarm, e.g. 'com_cumulocity_events_TamperEvent'. (required)")
-	cmd.Flags().String("time", "0s", "Time of the alarm.")
-	cmd.Flags().String("text", "", "Text description of the alarm. (required)")
-	cmd.Flags().String("severity", "", "The severity of the alarm: CRITICAL, MAJOR, MINOR or WARNING. Must be upper-case. (required)")
+	cmd.Flags().String("type", "", "Identifies the type of this alarm, e.g. 'com_cumulocity_events_TamperEvent'.")
+	cmd.Flags().String("time", "0s", "Time of the alarm. Defaults to current timestamp.")
+	cmd.Flags().String("text", "", "Text description of the alarm.")
+	cmd.Flags().String("severity", "", "The severity of the alarm: CRITICAL, MAJOR, MINOR or WARNING. Must be upper-case.")
 	cmd.Flags().String("status", "", "The status of the alarm: ACTIVE, ACKNOWLEDGED or CLEARED. If status was not appeared, new alarm will have status ACTIVE. Must be upper-case.")
 	addDataFlag(cmd)
 
 	// Required flags
 	cmd.MarkFlagRequired("device")
-	cmd.MarkFlagRequired("type")
-	cmd.MarkFlagRequired("text")
-	cmd.MarkFlagRequired("severity")
 
 	ccmd.baseCmd = newBaseCmd(cmd)
 
@@ -130,6 +127,10 @@ func (n *newAlarmCmd) newAlarm(cmd *cobra.Command, args []string) error {
 	}
 	if err := setDataTemplateFromFlags(cmd, body); err != nil {
 		return newUserError("Template error. ", err)
+	}
+	body.SetRequiredKeys("type", "text", "time", "severity")
+	if err := body.Validate(); err != nil {
+		return newUserError("Body validation error. ", err)
 	}
 
 	// path parameters

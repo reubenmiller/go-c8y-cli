@@ -87,13 +87,19 @@ func (n *createDeviceGroupCmd) createDeviceGroup(cmd *cobra.Command, args []stri
 	} else {
 		return newUserError(fmt.Sprintf("Flag [%s] does not exist. %s", "type", err))
 	}
-	body.MergeJsonnet(`
+	bodyErr := body.MergeJsonnet(`
 {  type: "c8y_DeviceGroup",
   c8y_IsDeviceGroup: {},
 }
 `, true)
+	if bodyErr != nil {
+		return newSystemError("Template error. ", bodyErr)
+	}
 	if err := setDataTemplateFromFlags(cmd, body); err != nil {
 		return newUserError("Template error. ", err)
+	}
+	if err := body.Validate(); err != nil {
+		return newUserError("Body validation error. ", err)
 	}
 
 	// path parameters

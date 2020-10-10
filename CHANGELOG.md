@@ -2,6 +2,52 @@
 
 ## Unreleased
 
+* Added support for templates and template variables for all POST and PUT commands. See the [templates concept documentation](https://reubenmiller.github.io/go-c8y-cli/docs/concepts/templates/) for full details.
+
+    `jsonnet` templates can be used to create json data
+
+    *File: custom.device.jsonnet*
+
+    ```jsonnet
+    {
+        name: "my device",
+        type: vars("type", "defaultType"),
+        cpuThreshold: rand.int,
+        c8y_IsDevice: {},
+    }
+    ```
+
+    **Usage: Bash/zsh**
+
+    ```sh
+    c8y inventory create \
+        --template ./examples/templates/device.jsonnet \
+        --templateVars "type=myCustomType1" \
+        --dry
+    ```
+
+    **Usage: PowerShell**
+
+    ```sh
+    New-ManagedObject `
+        -Template ./examples/templates/measurement.jsonnet `
+        -TemplateVars "type=myCustomType1" `
+        -WhatIf
+    ```
+
+    **Output**
+
+    These command would produce the following body which would be sent to Cumulocity.
+
+    ```json
+    {
+        "name": "my device",
+        "type": "myCustomType1",
+        "c8y_IsDevice": {},
+        "cpuThreshold": 88,
+    }
+    ```
+
 * Added support for setting additional properties when uploading a binary file
 
     **PowerShell**
@@ -46,6 +92,25 @@
     ```sh
     c8y inventory create --data ./myfile.json
     ```
+
+#### PSc8y (PowerShell)
+
+* Fixed logic when removing username information from the current session path when using the hide sensitive information option. Affects MacOS and Linux
+
+* Added Pipeline support to following cmdlets
+    * New-TestAlarm
+    * New-TestEvent
+    * New-TestMeasurement (Confirm impact now set to High)
+    * New-TestOperation
+    * New-TestUser
+    * New-TestGroup
+    * New-TestDevice
+    * New-TestAgent
+    * New-ExternalID
+
+* `New-Microservice`
+    * Added `-Key` parameter to allow the user to set a custom value
+    * Changed the default value of the `key` property from `{name}-microservice-key` to `{name}` so it matched the default name used by the Cumulocity Java SDK for microservices
 
 ## Released
 

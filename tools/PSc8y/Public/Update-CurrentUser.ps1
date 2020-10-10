@@ -53,6 +53,16 @@ Update the current user's lastname
         [string]
         $Password,
 
+        # Template (jsonnet) file to use to create the request body.
+        [Parameter()]
+        [string]
+        $Template,
+
+        # Variables to be used when evaluating the Template. Accepts a file path, json or json shorthand, i.e. "name=peter"
+        [Parameter()]
+        [string]
+        $TemplateVars,
+
         # Show the full (raw) response from Cumulocity including pagination information
         [Parameter()]
         [switch]
@@ -103,6 +113,12 @@ Update the current user's lastname
         }
         if ($PSBoundParameters.ContainsKey("Password")) {
             $Parameters["password"] = $Password
+        }
+        if ($PSBoundParameters.ContainsKey("Template") -and $Template) {
+            $Parameters["template"] = $Template
+        }
+        if ($PSBoundParameters.ContainsKey("TemplateVars") -and $TemplateVars) {
+            $Parameters["templateVars"] = $TemplateVars
         }
         if ($PSBoundParameters.ContainsKey("OutputFile")) {
             $Parameters["outputFile"] = $OutputFile

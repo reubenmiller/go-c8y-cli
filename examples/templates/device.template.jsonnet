@@ -5,18 +5,11 @@ local newSoftware(i) = {
     url: "",
 };
 
-// Settings: Default values:
-local defaults = {
-    name: "test",
-    type: "defaultType",
-    softwareCount: 2,
-} + vars;
-
 // Output: Device Managed Object
 {
     name: "name1",
-    value: defaults.name,
-    type: defaults.type,
-    ["c8y_" + defaults.type]: {},
-    c8y_SoftwareList: [ newSoftware(i) for i in std.range(1, defaults.softwareCount)],
+    value: var("name", "defaultName"),
+    type: var("type"),
+    ["c8y_" + var("type")]: {},
+    c8y_SoftwareList: [ mylib.newSoftware(i) for i in std.range(1, var("softwareCount", 1))],
 }

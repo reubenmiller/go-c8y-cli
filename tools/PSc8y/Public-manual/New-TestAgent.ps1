@@ -27,23 +27,39 @@ Create 10 test agents all with unique names
         # Agent name prefix which is added before the randomized string
         [Parameter(
             Mandatory = $false,
+            ValueFromPipeline = $true,
+            ValueFromPipelineByPropertyName = $true,
             Position = 0
         )]
         [string] $Name = "testagent",
 
+        # Template (jsonnet) file to use to create the request body.
+        [Parameter()]
+        [string]
+        $Template,
+
+        # Variables to be used when evaluating the Template. Accepts json or json shorthand, i.e. "name=peter"
+        [Parameter()]
+        [string]
+        $TemplateVars,
+
         # Don't prompt for confirmation
         [switch] $Force
     )
-    $Data = @{
-        c8y_IsDevice = @{}
-        com_cumulocity_model_Agent = @{}
+    Process {
+        $Data = @{
+            c8y_IsDevice = @{}
+            com_cumulocity_model_Agent = @{}
+        }
+
+        $AgentName = New-RandomString -Prefix "${Name}_"
+        $TestAgent = PSc8y\New-ManagedObject `
+            -Name $AgentName `
+            -Data $Data `
+            -Template:$Template `
+            -TemplateVars:$TemplateVars `
+            -Force:$Force
+
+        $TestAgent
     }
-
-    $AgentName = New-RandomString -Prefix "${Name}_"
-    $TestAgent = PSc8y\New-ManagedObject `
-        -Name $AgentName `
-        -Data $Data `
-        -Force:$Force
-
-    $TestAgent
 }

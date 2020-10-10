@@ -18,7 +18,7 @@ Describe -Name "New-Microservice" {
             # Remove microservice (if exists)
             Get-Microservice -Id $Name | Remove-Microservice
 
-            $App = New-Microservice -File $CustomZip
+            $App = New-Microservice -File $CustomZip -Key $Name
 
             $AppList.Add($App.id)
 
@@ -30,6 +30,7 @@ Describe -Name "New-Microservice" {
             $LASTEXITCODE | Should -Be 0
             $App | Should -Not -BeNullOrEmpty
             $App.name | Should -BeExactly $Name
+            $App.key | Should -BeExactly $Name
         }
 
         It "Creates a new microservice from a zip file with a custom name" {
@@ -40,6 +41,7 @@ Describe -Name "New-Microservice" {
             $LASTEXITCODE | Should -Be 0
             $App | Should -Not -BeNullOrEmpty
             $App.name | Should -BeExactly $AppName
+            $App.key | Should -BeExactly $AppName
         }
 
         It "Update existing (enabled) microservice" {

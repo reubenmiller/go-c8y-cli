@@ -52,6 +52,10 @@ func addDataFlag(cmd *cobra.Command) {
 	cmd.Flags().String(FlagDataTemplateVariablesName, "", "Body template variables")
 }
 
+func addDataFlagWithoutTemplates(cmd *cobra.Command) {
+	cmd.Flags().StringP(FlagDataName, "d", "", "json")
+}
+
 func getDataFlag(cmd *cobra.Command) map[string]interface{} {
 	if value, err := cmd.Flags().GetString(FlagDataName); err == nil {
 		return RemoveCumulocityProperties(MustParseJSON(getContents(value)), true)

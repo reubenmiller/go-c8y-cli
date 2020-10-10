@@ -24,6 +24,8 @@ Create 10 test device groups all with unique names
         # Device group name prefix which is added before the randomized string
         [Parameter(
             Mandatory = $false,
+            ValueFromPipeline = $true,
+            ValueFromPipelineByPropertyName = $true,
             Position = 0
         )]
         [string] $Name = "testgroup",
@@ -32,27 +34,42 @@ Create 10 test device groups all with unique names
         [ValidateSet("Group", "SubGroup")]
         [string] $Type = "Group",
 
+        # Template (jsonnet) file to use to create the request body.
+        [Parameter()]
+        [string]
+        $Template,
+
+        # Variables to be used when evaluating the Template. Accepts json or json shorthand, i.e. "name=peter"
+        [Parameter()]
+        [string]
+        $TemplateVars,
+
         # Don't prompt for confirmation
         [switch] $Force
     )
-    $Data = @{
-        c8y_IsDeviceGroup = @{ }
-    }
 
-    switch ($Type) {
-        "SubGroup" {
-            $Data.type = "c8y_DeviceSubGroup"
-            break;
+    Process {
+        $Data = @{
+            c8y_IsDeviceGroup = @{ }
         }
-        default {
-            $Data.type = "c8y_DeviceGroup"
-            break;
-        }
-    }
 
-    $GroupName = New-RandomString -Prefix "${Name}_"
-    PSc8y\New-ManagedObject `
-        -Name $GroupName `
-        -Data $Data `
-        -Force:$Force
+        switch ($Type) {
+            "SubGroup" {
+                $Data.type = "c8y_DeviceSubGroup"
+                break;
+            }
+            default {
+                $Data.type = "c8y_DeviceGroup"
+                break;
+            }
+        }
+
+        $GroupName = New-RandomString -Prefix "${Name}_"
+        PSc8y\New-ManagedObject `
+            -Name $GroupName `
+            -Data $Data `
+            -Template:$Template `
+            -TemplateVars:$TemplateVars `
+            -Force:$Force
+    }
 }

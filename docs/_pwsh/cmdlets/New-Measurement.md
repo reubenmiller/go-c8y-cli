@@ -18,9 +18,11 @@ Create a new measurement
 ```
 New-Measurement
 	[-Device] <Object[]>
-	[-Time] <String>
-	[-Type] <String>
+	[[-Time] <String>]
+	[[-Type] <String>]
 	[[-Data] <Object>]
+	[[-Template] <String>]
+	[[-TemplateVars] <String>]
 	[-Raw]
 	[[-OutputFile] <String>]
 	[-NoProxy]
@@ -64,14 +66,14 @@ Accept wildcard characters: False
 
 ### -Time
 Time of the measurement.
-(required)
+Defaults to current timestamp.
 
 ```yaml
 Type: String
 Parameter Sets: (All)
 Aliases:
 
-Required: True
+Required: False
 Position: 2
 Default value: None
 Accept pipeline input: False
@@ -80,14 +82,13 @@ Accept wildcard characters: False
 
 ### -Type
 The most specific type of this entire measurement.
-(required)
 
 ```yaml
 Type: String
 Parameter Sets: (All)
 Aliases:
 
-Required: True
+Required: False
 Position: 3
 Default value: None
 Accept pipeline input: False
@@ -104,6 +105,38 @@ Aliases:
 
 Required: False
 Position: 4
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -Template
+Template (jsonnet) file to use to create the request body.
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 5
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -TemplateVars
+Variables to be used when evaluating the Template.
+Accepts a file path, json or json shorthand, i.e.
+"name=peter"
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 6
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
@@ -133,7 +166,7 @@ Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: 5
+Position: 7
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
@@ -163,7 +196,7 @@ Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: 6
+Position: 8
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
@@ -178,7 +211,7 @@ Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: 7
+Position: 9
 Default value: 0
 Accept pipeline input: False
 Accept wildcard characters: False

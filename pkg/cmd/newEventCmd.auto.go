@@ -33,15 +33,13 @@ Create a new event for a device
 	cmd.SilenceUsage = true
 
 	cmd.Flags().StringSlice("device", []string{""}, "The ManagedObject which is the source of this event. (required)")
-	cmd.Flags().String("time", "0s", "Time of the event.")
-	cmd.Flags().String("type", "", "Identifies the type of this event. (required)")
-	cmd.Flags().String("text", "", "Text description of the event. (required)")
+	cmd.Flags().String("time", "0s", "Time of the event. Defaults to current timestamp.")
+	cmd.Flags().String("type", "", "Identifies the type of this event.")
+	cmd.Flags().String("text", "", "Text description of the event.")
 	addDataFlag(cmd)
 
 	// Required flags
 	cmd.MarkFlagRequired("device")
-	cmd.MarkFlagRequired("type")
-	cmd.MarkFlagRequired("text")
 
 	ccmd.baseCmd = newBaseCmd(cmd)
 
@@ -113,6 +111,10 @@ func (n *newEventCmd) newEvent(cmd *cobra.Command, args []string) error {
 	}
 	if err := setDataTemplateFromFlags(cmd, body); err != nil {
 		return newUserError("Template error. ", err)
+	}
+	body.SetRequiredKeys("type", "text", "time")
+	if err := body.Validate(); err != nil {
+		return newUserError("Body validation error. ", err)
 	}
 
 	// path parameters

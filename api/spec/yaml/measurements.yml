@@ -267,17 +267,22 @@ endpoints:
 
       - name: time
         type: datetime
-        required: true
-        description: Time of the measurement.
+        required: false
+        default: "0s"
+        description: Time of the measurement. Defaults to current timestamp.
 
       - name: type
         type: string
-        required: true
+        required: false
         description: The most specific type of this entire measurement.
 
       - name: data
         type: json
         description: List of measurement fragments.
+
+    bodyRequiredKeys:
+      - "type"
+      - "time"
 
   - name: deleteMeasurement
     description: 'Delete measurement/s'

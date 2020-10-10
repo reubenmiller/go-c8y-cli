@@ -27,6 +27,8 @@ New-Application
 	[[-ResourcesUsername] <String>]
 	[[-ResourcesPassword] <String>]
 	[[-ExternalUrl] <String>]
+	[[-Template] <String>]
+	[[-TemplateVars] <String>]
 	[-Raw]
 	[[-OutputFile] <String>]
 	[-NoProxy]
@@ -207,6 +209,38 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
+### -Template
+Template (jsonnet) file to use to create the request body.
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 11
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -TemplateVars
+Variables to be used when evaluating the Template.
+Accepts a file path, json or json shorthand, i.e.
+"name=peter"
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 12
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
 ### -Raw
 Show the full (raw) response from Cumulocity including pagination information
 
@@ -231,7 +265,7 @@ Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: 11
+Position: 13
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
@@ -261,7 +295,7 @@ Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: 12
+Position: 14
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
@@ -276,7 +310,7 @@ Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: 13
+Position: 15
 Default value: 0
 Accept pipeline input: False
 Accept wildcard characters: False

@@ -55,7 +55,9 @@ local isMandatory(o, prop) = {
 
 	jsonnetImport += "\nfinal"
 
-	if strings.ToLower(os.Getenv("C8Y_JSONNET_DEBUG")) == "true" {
+	debugJsonnet := strings.ToLower(os.Getenv("C8Y_JSONNET_DEBUG")) == "true"
+
+	if debugJsonnet {
 		log.Printf("jsonnet snippet: %s\n", jsonnetImport)
 	}
 
@@ -63,9 +65,14 @@ local isMandatory(o, prop) = {
 	out, err := vm.EvaluateSnippet("file", jsonnetImport)
 
 	if err != nil {
-		// Include full template (with injected variables/functions) otherwise the error
-		// will report line numbers that the user does not know about
-		err = fmt.Errorf("Could not create json from template.\nTemplate:\n%s\nError: %s", jsonnetImport, err)
+
+		if debugJsonnet {
+			// Include full template (with injected variables/functions) otherwise the error
+			// will report line numbers that the user does not know about
+			log.Printf("jsonnet error: %s\n", err)
+		}
+
+		err = fmt.Errorf("Could not create json from template. Error: %s", err)
 	}
 	return out, err
 }
@@ -106,7 +113,9 @@ type MapBuilder struct {
 	body map[string]interface{}
 
 	templateVariables map[string]interface{}
+	requiredKeys      []string
 	template          string
+	validateTemplate  string
 }
 
 func (b *MapBuilder) SetTemplate(template string) *MapBuilder {
@@ -196,6 +205,46 @@ func (b MapBuilder) Get(key string) interface{} {
 func (b MapBuilder) GetString(key string) (string, bool) {
 	val, ok := b.body[key].(string)
 	return val, ok
+}
+
+func (b *MapBuilder) SetRequiredKeys(keys ...string) {
+	b.requiredKeys = keys
+}
+
+// SetValidationTemplate sets the validation template to be applied. The template accepts a jsonnet string
+func (b *MapBuilder) SetValidationTemplate(template string) {
+	b.validateTemplate = template
+}
+
+func (b MapBuilder) validateRequiredKeys() error {
+	missingKeys := make([]string, 0)
+	for _, key := range b.requiredKeys {
+		if _, ok := b.body[key]; !ok {
+			missingKeys = append(missingKeys, key)
+		}
+	}
+
+	if len(missingKeys) > 0 {
+		return fmt.Errorf("Missing required properties: %s", strings.Join(missingKeys, ", "))
+	}
+	return nil
+}
+
+// Validate checks the body if it is valid and contains all of the required keys
+func (b MapBuilder) Validate() error {
+	if len(b.requiredKeys) > 0 {
+		if err := b.validateRequiredKeys(); err != nil {
+			return err
+		}
+	}
+
+	if b.validateTemplate != "" {
+		if err := b.MergeJsonnet(b.validateTemplate, false); err != nil {
+			return fmt.Errorf("Validate error. %s", err)
+		}
+	}
+
+	return nil
 }
 
 // MarshalJSON returns the body as json

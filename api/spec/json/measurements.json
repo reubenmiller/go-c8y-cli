@@ -361,13 +361,14 @@
         {
           "name": "time",
           "type": "datetime",
-          "required": true,
-          "description": "Time of the measurement."
+          "required": false,
+          "default": "0s",
+          "description": "Time of the measurement. Defaults to current timestamp."
         },
         {
           "name": "type",
           "type": "string",
-          "required": true,
+          "required": false,
           "description": "The most specific type of this entire measurement."
         },
         {
@@ -375,6 +376,10 @@
           "type": "json",
           "description": "List of measurement fragments."
         }
+      ],
+      "bodyRequiredKeys": [
+        "type",
+        "time"
       ]
     },
     {

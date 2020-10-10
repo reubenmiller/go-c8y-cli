@@ -20,6 +20,16 @@ Create a new test microservice
         # Skip the subscription for the microservice
         [switch] $SkipSubscription,
 
+        # Template (jsonnet) file to use to create the request body.
+        [Parameter()]
+        [string]
+        $Template,
+
+        # Variables to be used when evaluating the Template. Accepts json or json shorthand, i.e. "name=peter"
+        [Parameter()]
+        [string]
+        $TemplateVars,
+
         # Don't prompt for confirmation
         [switch] $Force
     )
@@ -33,6 +43,8 @@ Create a new test microservice
         File = $File
         SkipUpload = $SkipUpload
         SkipSubscription = $SkipSubscription
+        Template = $Template
+        TemplateVars = $TemplateVars
         Force = $Force
     }
 

@@ -4,17 +4,24 @@ category: Concepts
 title: Templating
 ---
 
-### Data Templates
+### Background
 
+Creating data via the command line can be time consuming especially if there are are lot of required input parameters. To make things easier, the c8y cli tool supports data templates when creating or updating Cumulocity objects (i.e. measurements, managed objects, events, alarms etc.). The data templates allow the user to specify a file containing the template instead of having to provide all of the inputs manually on the command line.
 
-### Exercise
+The data templates are implemented using the data template lanaguage `jsonnet` (pronounced "jay sonnet"). This is an unofficial Google product which can be used to create json structures in a simple yet powerful way. `jsonnet` looks a lot like json however it is not so strict with the syntax, and you can also use variables, expresions, functions, inside a template. All of these features give the user a lot of flexibility to be able to create custom data structures quickly and efficiently.
 
-Assume that you want to simulate create some mock some measurements in Cumulocity to assist with prototyping. Let's say that you are building a weather application and you want to create a measurement which has two different series.
+Data templates are supported for all commands which create new data or edit existing data in Cumulocity.
 
-    * `c8y_Weather.temperature`
-    * `c8y_Weather.barometricPressure`
+Please read the examples to understand the usage of such templates, and checkout the [jsonnet documentation](https://jsonnet.org/) for more about the language and a live editor to experiment with its features.
 
-You can create a simple jsonnet template file.
+### Example
+
+Let's assume that you want to simulate create some mock measurements in Cumulocity to assist with prototyping. Say that you are building a weather application and you want to create a measurement which has two different series.
+
+* `c8y_Weather.temperature`
+* `c8y_Weather.barometricPressure`
+
+You can create a jsonnet template file with the following contents:
 
 ```jsonnet
 {
@@ -31,13 +38,13 @@ You can create a simple jsonnet template file.
 }
 ```
 
-The template should mostly look familar to you as jsonnet uses a json-like structure. The interesting parts which might not be 100% clear are the two references to variables; `rand.int` and `rand.float`.
+The template should mostly look familar to you as jsonnet uses a json-like structure. Some notable differences are that the properties do not required quotes and you are allowed to have trailing commas on fields. In addition the property values (and fields) can be defined as an expression rather than static values.
 
-`rand` is an object which is injected by the c8y cli tool, which has a few properties which contain randomized data. `rand.int` returns a random integer between 0 and 10, and a `rand.float` returns a 32 bit float between 0 and 1.
+The example also uses some internally defined variables which are provided by the c8y cli tool: `rand.int` and `rand.float`.
 
-The random values can be used to build up mock measurement, and you can control the range by using simple muliplication, divition and addition:
+`rand` is an object which is injected by the c8y cli tool, which has a few properties which contain randomized data. For example, `rand.int` returns a random integer between 0 and 100, and a `rand.float` returns a 32 bit float between 0 and 1.
 
-For example if you wanted to use a value that ranges between -50 and 50, then you have subtract 50:
+The random values can be used to build up mock measurement, and you can control the values by using them in an expression. For example, if you wanted to use a value that ranges between -50 and 50, then you have subtract 50:
 
 ```jsonnet
 {
@@ -54,44 +61,60 @@ And if that is still not enough, you can use an if/else statement where it uses 
 }
 ```
 
-#### Template Variables (TODO)
+### Template Variables
 
-Variables can also be injected into your script, and the values can be passed at runtime, 
+Variables can also be injected into your template at runtime. These variables can then be referenced from inside your jsonnet template.
 
-**input.vars.json**
+For example if we want to generate a device managed object from a template, however you would like to change the type at runtime (via the command line).
 
+Firstly when creating your jsonnet template, you can reference any template variables using the `vars()` function, where it accepts the name of the template variable and an optional default value (in case the variable is not provided by the user)
+
+The following is an example of such a template:
+
+```jsonnet
 {
-    "type": "myCustom1",
-    "softwareCount": 2
+    name: "my device",
+    type: vars("type", "defaultType"),
+    c8y_IsDevice: {},
 }
+```
 
+The template can then be used when creating a managed object, and the `type` variable can be injected by using the `templateVars` parameter.
 
-
-### Usage with cli
-
-Once you have created a template you use it by passing the path to the template to the `template` parameter:
+**Bash/zsh**
 
 ```sh
-c8y measurements create \
-    --device 12345 \
-    --time "0s" \
-    --type "c8y_Measurement" \
-    --dry \
-    --template ./examples/templates/measurement.jsonnet
+c8y inventory create \
+    --template ./examples/templates/device.jsonnet \
+    --templateVars "type=myCustomType1" \
+    --dry
 ```
 
-```powershell
-New-Measurement `
-    -Device 12345 `
-    -Time "0s" `
-    -Type "c8y_Measurement" `
-    -WhatIf `
-    -Template ./examples/templates/measurement.jsonnet
+**PowerShell**
+
+```sh
+New-ManagedObject `
+    -Template ./examples/templates/measurement.jsonnet `
+    -TemplateVars "type=myCustomType1" `
+    -WhatIf
 ```
 
-### Available (automatic) variables
+**Output**
 
-Below shows all of the variables which are available for use in the jsonnet template files. There are multi
+These command would produce the following body which would be sent to Cumulocity.
+
+```json
+{
+    "name": "my device",
+    "type": "myCustomType1",
+    "c8y_IsDevice": {}
+}
+```
+
+
+### Available (automatic) variables in templates
+
+Below shows all of the variables which are available for use in jsonnet template files. There are multi randomized values which are injected into the template at runtime. These variables are added by the c8y cli tool iteself, and are not part of the standard jsonnet library.
 
 | Variable | Description |
 |-------|---------|
@@ -103,16 +126,18 @@ Below shows all of the variables which are available for use in the jsonnet temp
 | rand.float3 | Random float32 between 0 and 1 |
 | rand.float4 | Random float32 between 0 and 1 |
 
+**Note**
 
-More information about jsonnet and it's synatax can be found [here](https://jsonnet.org/)
+The random values are assigned as variables and not functions. This means if you reference `rand.int` twice in the template, it will have the same value.
 
+Additional information about jsonnet and it's synatax can be found [here](https://jsonnet.org/)
 
 
 ### Complex Example
 
-Add a complex device managed object where the number of installed software applications in the c8y_SoftwareList fragment can be set via a variable
+Add a complex device managed object where the number of installed software applications in the `c8y_SoftwareList` fragment can be set via the command line.
 
-*device.template.jsonnet*
+*File: device.template.jsonnet*
 
 ```jsonnet
 // Helper: Create software entry
@@ -122,26 +147,55 @@ local newSoftware(i) = {
     url: "",
 };
 
-// Settings: Default values:
-local defaults = {
-    name: "test",
-    type: "defaultType",
-    softwareCount: 2,
-} + vars;
-
 // Output: Device Managed Object
 {
     name: "name1",
-    value: defaults.name,
-    type: defaults.type,
-    ["c8y_" + defaults.type]: {},
-    c8y_SoftwareList: [ newSoftware(i) for i in std.range(1, defaults.softwareCount)],
+    value: var("name", "defaultName"),
+    type: var("type"),
+    ["c8y_" + var("type")]: {},
+    c8y_SoftwareList: [ newSoftware(i) for i in std.range(1, var("softwareCount", 1))],
 }
 ```
 
 **Bash/zsh**
 
 ```sh
-c8y inventory create --dry --template ./examples/templates/device.template.jsonnet --templateVars "softwareCount=2"
+c8y inventory create \
+    --dry \
+    --template ./examples/templates/device.template.jsonnet \
+    --templateVars "softwareCount=2"
 ```
 
+**PowerShell**
+
+```sh
+New-ManagedObject `
+    -Whatif `
+    -Template ./examples/templates/device.template.jsonnet `
+    -TemplateVars "softwareCount=2"
+```
+
+**Output**
+
+The following output shows the body that will be uploaded to Cumulocity when creating the managed object.
+
+```json
+{
+   "c8y_SoftwareList": [
+     {
+       "name": "app1",
+       "url": "",
+       "version": "1.0.1"
+     },
+     {
+       "name": "app2",
+       "url": "",
+       "version": "1.0.2"
+     }
+   ],
+   "c8y_defaultType": {},
+   "name": "name1",
+   "type": "defaultType",
+   "value": "test"
+}
+```

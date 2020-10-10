@@ -122,9 +122,9 @@ func (n *getGenericRestCmd) getGenericRest(cmd *cobra.Command, args []string) er
 	if method == "PUT" || method == "POST" {
 		req.Body = getDataFlag(cmd)
 
-		if !cmd.Flags().Changed(FlagDataName) && !cmd.Flags().Changed("file") {
-			return newUserError("Missing required arguments. Either --data or --file are required")
-		}
+		//if !cmd.Flags().Changed(FlagDataName) && !cmd.Flags().Changed("file") {
+		//	return newUserError("Missing required arguments. Either --data or --file are required")
+		//}
 
 		// get file info
 		req.FormData = make(map[string]io.Reader)

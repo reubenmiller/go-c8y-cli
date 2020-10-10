@@ -293,6 +293,37 @@
         $null = $CmdletParameters.Add($IncludeAllParam)
     }
 
+    # Template parameters (only for PUT)
+    if ($Specification.Method -match "PUT|POST") {
+        #
+        # Template
+        #
+        $TemplateParam = New-Object System.Text.StringBuilder
+        $null = $TemplateParam.AppendLine('        # Template (jsonnet) file to use to create the request body.')
+        $null = $TemplateParam.AppendLine('        [Parameter()]')
+        $null = $TemplateParam.AppendLine('        [string]')
+        $null = $TemplateParam.Append('        $Template')
+        $null = $CmdletParameters.Add($TemplateParam)
+
+        $null = $BeginParameterBuilder.AppendLine("        if (`$PSBoundParameters.ContainsKey(`"Template`") -and `$Template) {")
+        $null = $BeginParameterBuilder.AppendLine("            `$Parameters[`"template`"] = `$Template")
+        $null = $BeginParameterBuilder.AppendLine("        }")
+
+        #
+        # Template Variables
+        #
+        $TemplateVarsParam = New-Object System.Text.StringBuilder
+        $null = $TemplateVarsParam.AppendLine('        # Variables to be used when evaluating the Template. Accepts a file path, json or json shorthand, i.e. "name=peter"')
+        $null = $TemplateVarsParam.AppendLine('        [Parameter()]')
+        $null = $TemplateVarsParam.AppendLine('        [string]')
+        $null = $TemplateVarsParam.Append('        $TemplateVars')
+        $null = $CmdletParameters.Add($TemplateVarsParam)
+
+        $null = $BeginParameterBuilder.AppendLine("        if (`$PSBoundParameters.ContainsKey(`"TemplateVars`") -and `$TemplateVars) {")
+        $null = $BeginParameterBuilder.AppendLine("            `$Parameters[`"templateVars`"] = `$TemplateVars")
+        $null = $BeginParameterBuilder.AppendLine("        }")
+    }
+
     $RawParam = New-Object System.Text.StringBuilder
     $null = $RawParam.AppendLine('        # Show the full (raw) response from Cumulocity including pagination information')
     $null = $RawParam.AppendLine('        [Parameter()]')

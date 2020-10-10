@@ -25,6 +25,8 @@ New-HostedApplication
 	[[-Availability] <String>]
 	[-SkipUpload]
 	[-SkipActivation]
+	[[-Template] <String>]
+	[[-TemplateVars] <String>]
 	[-Raw]
 	[[-OutputFile] <String>]
 	[-NoProxy]
@@ -176,6 +178,38 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
+### -Template
+Template (jsonnet) file to use to create the request body.
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 7
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -TemplateVars
+Variables to be used when evaluating the Template.
+Accepts json or json shorthand, i.e.
+"name=peter"
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 8
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
 ### -Raw
 Include raw response including pagination information
 
@@ -200,7 +234,7 @@ Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: 7
+Position: 9
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
@@ -230,7 +264,7 @@ Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: 8
+Position: 10
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
@@ -245,7 +279,7 @@ Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: 9
+Position: 11
 Default value: 0
 Accept pipeline input: False
 Accept wildcard characters: False

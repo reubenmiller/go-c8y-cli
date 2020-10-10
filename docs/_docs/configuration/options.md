@@ -81,6 +81,7 @@ The following is a list of available environment variables which control how c8y
 | C8Y_SESSION_HOME | Path where the session files and settings are located. Defaults to `~/.cumulocity` if it is not set. |
 | C8Y_USE_ENVIRONMENT | When set to `on`, the Cumulocity session settings will be loaded from environment variables. This will override the `C8Y_SESSION` variable. Useful when using in a CI/CD pipeline. |
 | C8Y_LOGGER_HIDE_SENSITIVE | Control whether sensitive session information is logged to the console or not. |
+| C8Y_JSONNET_DEBUG | Display debugging information for jsonnet templates (if used) |
 
 
 ### Environment variable details and examples   
