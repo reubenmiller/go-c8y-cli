@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+**Breaking Changes**
+
+* Added support for disabling create/update/delete command individually to prevent accidental data loss. See the [session concept documentation](https://reubenmiller.github.io/go-c8y-cli/docs/concepts/sessions/) for full details.
+    * create/update/delete command are disabled by default! They must be enabled otherwise the commands will return an error. Commands can be enabled/disabled from the session properties
+    * commands can be temporarily enabled/disabled in the session via environment variables without persisting them in the session settings
+    * CI mode which enables all commands via one environment variable
+
+**Features**
+
 * Added command to read the current configuration settings as json
 
     **PowerShell**
