@@ -32,7 +32,7 @@ set-session () {
     # to support other 3rd party applicatsion (i.e. java c8y sdk apps)
     # which will read these variables
     session_info=$( cat "$C8Y_SESSION" )
-    if command -v jq; then
+    if [[ $(command -v jq) ]]; then
         export C8Y_HOST=$( echo $session_info | jq -r ".host" )
         export C8Y_TENANT=$( echo $session_info | jq -r ".tenant" )
         export C8Y_USER=$( echo $session_info | jq -r ".username" )
