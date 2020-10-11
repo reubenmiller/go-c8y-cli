@@ -26,8 +26,9 @@ func newGetMeasurementCollectionCmd() *getMeasurementCollectionCmd {
 		Example: `
 $ c8y measurements list
 Get a list of measurements
-		`,
-		RunE: ccmd.getMeasurementCollection,
+        `,
+		PreRunE: nil,
+		RunE:    ccmd.getMeasurementCollection,
 	}
 
 	cmd.SilenceUsage = true

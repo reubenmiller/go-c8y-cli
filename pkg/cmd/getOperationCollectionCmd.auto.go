@@ -32,8 +32,9 @@ Get a list of pending operations for a given agent and all of its child devices
 
 $ c8y operations list --device mydevice --status PENDING
 Get a list of pending operations for a device
-		`,
-		RunE: ccmd.getOperationCollection,
+        `,
+		PreRunE: nil,
+		RunE:    ccmd.getOperationCollection,
 	}
 
 	cmd.SilenceUsage = true

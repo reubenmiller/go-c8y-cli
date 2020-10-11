@@ -26,8 +26,9 @@ func newDeleteExternalIDCmd() *deleteExternalIDCmd {
 		Example: `
 $ c8y identity delete --type test --name myserialnumber
 Delete external identity
-		`,
-		RunE: ccmd.deleteExternalID,
+        `,
+		PreRunE: validateDeleteMode,
+		RunE:    ccmd.deleteExternalID,
 	}
 
 	cmd.SilenceUsage = true

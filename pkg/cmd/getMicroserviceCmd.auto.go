@@ -26,8 +26,9 @@ func newGetMicroserviceCmd() *getMicroserviceCmd {
 		Example: `
 $ c8y microservices get --id 12345
 Get an application
-		`,
-		RunE: ccmd.getMicroservice,
+        `,
+		PreRunE: nil,
+		RunE:    ccmd.getMicroservice,
 	}
 
 	cmd.SilenceUsage = true

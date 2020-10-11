@@ -26,8 +26,9 @@ func newGetMeasurementCmd() *getMeasurementCmd {
 		Example: `
 $ c8y measurements get --id 12345
 Get measurement
-		`,
-		RunE: ccmd.getMeasurement,
+        `,
+		PreRunE: nil,
+		RunE:    ccmd.getMeasurement,
 	}
 
 	cmd.SilenceUsage = true

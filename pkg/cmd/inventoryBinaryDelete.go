@@ -22,7 +22,8 @@ func newDeleteBinaryManagedObjectCmd() *deleteBinaryManagedObjectCmd {
 			Delete a binary managed object
 			c8y inventory binary download --id 12345
 		`,
-		RunE: ccmd.deleteBinaryManagedObject,
+		PreRunE: validateDeleteMode,
+		RunE:    ccmd.deleteBinaryManagedObject,
 	}
 
 	// Flags

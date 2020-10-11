@@ -27,8 +27,9 @@ func newGetCurrentApplicationCmd() *getCurrentApplicationCmd {
 		Example: `
 $ c8y currentApplication get
 Get the current application (requires using application credentials)
-		`,
-		RunE: ccmd.getCurrentApplication,
+        `,
+		PreRunE: nil,
+		RunE:    ccmd.getCurrentApplication,
 	}
 
 	cmd.SilenceUsage = true

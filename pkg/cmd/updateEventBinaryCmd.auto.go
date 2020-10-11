@@ -27,8 +27,9 @@ func newUpdateEventBinaryCmd() *updateEventBinaryCmd {
 		Example: `
 $ c8y events updateBinary --id 12345 --file ./myfile.log
 Update a binary related to an event
-		`,
-		RunE: ccmd.updateEventBinary,
+        `,
+		PreRunE: validateUpdateMode,
+		RunE:    ccmd.updateEventBinary,
 	}
 
 	cmd.SilenceUsage = true

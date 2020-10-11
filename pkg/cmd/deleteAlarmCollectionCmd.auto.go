@@ -29,8 +29,9 @@ Remove alarms on the device with the severity set to MAJOR
 
 $ c8y alarms deleteCollection --device mydevice --dateFrom "-10m" --status ACTIVE
 Remove alarms on the device which are active and created in the last 10 minutes
-		`,
-		RunE: ccmd.deleteAlarmCollection,
+        `,
+		PreRunE: validateDeleteMode,
+		RunE:    ccmd.deleteAlarmCollection,
 	}
 
 	cmd.SilenceUsage = true

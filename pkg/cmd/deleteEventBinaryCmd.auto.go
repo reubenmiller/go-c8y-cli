@@ -27,8 +27,9 @@ func newDeleteEventBinaryCmd() *deleteEventBinaryCmd {
 		Example: `
 $ c8y events deleteBinary --id 12345
 Delete an binary attached to an event
-		`,
-		RunE: ccmd.deleteEventBinary,
+        `,
+		PreRunE: validateDeleteMode,
+		RunE:    ccmd.deleteEventBinary,
 	}
 
 	cmd.SilenceUsage = true

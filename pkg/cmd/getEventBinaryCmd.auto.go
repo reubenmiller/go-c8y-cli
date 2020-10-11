@@ -26,8 +26,9 @@ func newGetEventBinaryCmd() *getEventBinaryCmd {
 		Example: `
 $ c8y events downloadBinary --id 12345 --outputFile ./eventbinary.txt
 Download a binary related to an event
-		`,
-		RunE: ccmd.getEventBinary,
+        `,
+		PreRunE: nil,
+		RunE:    ccmd.getEventBinary,
 	}
 
 	cmd.SilenceUsage = true

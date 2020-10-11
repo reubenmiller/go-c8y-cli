@@ -29,8 +29,9 @@ Delete an microservice by id
 
 $ c8y microservices delete --id my-temp-app
 Delete a microservice by name
-		`,
-		RunE: ccmd.deleteMicroservice,
+        `,
+		PreRunE: validateDeleteMode,
+		RunE:    ccmd.deleteMicroservice,
 	}
 
 	cmd.SilenceUsage = true

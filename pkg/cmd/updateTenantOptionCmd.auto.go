@@ -26,8 +26,9 @@ func newUpdateTenantOptionCmd() *updateTenantOptionCmd {
 		Example: `
 $ c8y tenantOptions update --category "c8y_cli_tests" --key "option4" --value "0"
 Update a tenant option
-		`,
-		RunE: ccmd.updateTenantOption,
+        `,
+		PreRunE: validateUpdateMode,
+		RunE:    ccmd.updateTenantOption,
 	}
 
 	cmd.SilenceUsage = true

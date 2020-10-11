@@ -46,6 +46,11 @@ func (n *listSettingsCmd) listSettings(cmd *cobra.Command, args []string) error 
 	settings[SettingsIncludeAllPageSize] = globalFlagIncludeAllPageSize
 	settings[SettingsIncludeAllDelayMS] = globalFlagIncludeAllDelayMS
 
+	settings[SettingsModeEnableCreate] = globalModeEnableCreate
+	settings[SettingsModeEnableUpdate] = globalModeEnableUpdate
+	settings[SettingsModeEnableDelete] = globalModeEnableDelete
+	settings[SettingsModeCI] = globalCIMode
+
 	responseText, err := json.Marshal(settings)
 
 	if err != nil {

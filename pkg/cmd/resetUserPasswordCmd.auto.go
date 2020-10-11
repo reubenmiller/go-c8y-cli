@@ -26,8 +26,9 @@ func newResetUserPasswordCmd() *resetUserPasswordCmd {
 		Example: `
 $ c8y users resetUserPassword --id "myuser"
 Update a user
-		`,
-		RunE: ccmd.resetUserPassword,
+        `,
+		PreRunE: validateUpdateMode,
+		RunE:    ccmd.resetUserPassword,
 	}
 
 	cmd.SilenceUsage = true

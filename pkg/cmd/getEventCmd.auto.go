@@ -26,8 +26,9 @@ func newGetEventCmd() *getEventCmd {
 		Example: `
 $ c8y events get --id 12345
 Get event
-		`,
-		RunE: ccmd.getEvent,
+        `,
+		PreRunE: nil,
+		RunE:    ccmd.getEvent,
 	}
 
 	cmd.SilenceUsage = true

@@ -30,8 +30,9 @@ Enable (subscribe) to a microservice
 
 $ c8y microservices enable --id myapp
 Enable (subscribe) to a microservice
-		`,
-		RunE: ccmd.enableMicroservice,
+        `,
+		PreRunE: validateCreateMode,
+		RunE:    ccmd.enableMicroservice,
 	}
 
 	cmd.SilenceUsage = true

@@ -27,8 +27,9 @@ func newGetSupportedMeasurementsCmd() *getSupportedMeasurementsCmd {
 		Example: `
 $ c8y inventory getSupportedMeasurements --device 12345
 Get the supported measurements of a device by name
-		`,
-		RunE: ccmd.getSupportedMeasurements,
+        `,
+		PreRunE: nil,
+		RunE:    ccmd.getSupportedMeasurements,
 	}
 
 	cmd.SilenceUsage = true

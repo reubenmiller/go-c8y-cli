@@ -26,8 +26,9 @@ func newGetTenantCmd() *getTenantCmd {
 		Example: `
 $ c8y tenants get --id "mycompany"
 Get a tenant by name (from the management tenant)
-		`,
-		RunE: ccmd.getTenant,
+        `,
+		PreRunE: nil,
+		RunE:    ccmd.getTenant,
 	}
 
 	cmd.SilenceUsage = true

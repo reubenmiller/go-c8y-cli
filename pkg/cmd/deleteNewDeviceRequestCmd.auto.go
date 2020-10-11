@@ -26,8 +26,9 @@ func newDeleteNewDeviceRequestCmd() *deleteNewDeviceRequestCmd {
 		Example: `
 $ c8y devices deleteNewDeviceRequest --id "91019192078"
 Delete a new device request
-		`,
-		RunE: ccmd.deleteNewDeviceRequest,
+        `,
+		PreRunE: validateDeleteMode,
+		RunE:    ccmd.deleteNewDeviceRequest,
 	}
 
 	cmd.SilenceUsage = true

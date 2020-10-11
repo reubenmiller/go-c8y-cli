@@ -27,8 +27,9 @@ func newGetAuditRecordCollectionCmd() *getAuditRecordCollectionCmd {
 		Example: `
 $ c8y auditRecords list --pageSize 100
 Get a list of audit records
-		`,
-		RunE: ccmd.getAuditRecordCollection,
+        `,
+		PreRunE: nil,
+		RunE:    ccmd.getAuditRecordCollection,
 	}
 
 	cmd.SilenceUsage = true

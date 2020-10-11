@@ -26,8 +26,9 @@ func newDeleteBinaryCmd() *deleteBinaryCmd {
 		Example: `
 $ c8y binaries delete --id 12345
 Delete a binary
-		`,
-		RunE: ccmd.deleteBinary,
+        `,
+		PreRunE: validateDeleteMode,
+		RunE:    ccmd.deleteBinary,
 	}
 
 	cmd.SilenceUsage = true

@@ -26,8 +26,9 @@ func newUpdateTenantCmd() *updateTenantCmd {
 		Example: `
 $ c8y tenants update --id "mycompany" --contactName "John Smith"
 Update a tenant by name (from the mangement tenant)
-		`,
-		RunE: ccmd.updateTenant,
+        `,
+		PreRunE: validateUpdateMode,
+		RunE:    ccmd.updateTenant,
 	}
 
 	cmd.SilenceUsage = true

@@ -32,8 +32,9 @@ Get tenant summary statistics collection for the last 30 days
 
 $ c8y tenantStatistics listSummaryAllTenants --dateFrom "-10d" --dateTo "-9d"
 Get tenant summary statistics collection for the last 10 days, only return until the last 9 days
-		`,
-		RunE: ccmd.getAllTenantUsageStatisticsSummaryCollection,
+        `,
+		PreRunE: nil,
+		RunE:    ccmd.getAllTenantUsageStatisticsSummaryCollection,
 	}
 
 	cmd.SilenceUsage = true

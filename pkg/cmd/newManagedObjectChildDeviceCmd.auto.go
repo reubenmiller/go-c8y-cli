@@ -26,8 +26,9 @@ func newNewManagedObjectChildDeviceCmd() *newManagedObjectChildDeviceCmd {
 		Example: `
 $ c8y inventoryReferences assignChildDevice --device 12345 --newChild 44235
 Assign a device as a child device to an existing device
-		`,
-		RunE: ccmd.newManagedObjectChildDevice,
+        `,
+		PreRunE: validateCreateMode,
+		RunE:    ccmd.newManagedObjectChildDevice,
 	}
 
 	cmd.SilenceUsage = true

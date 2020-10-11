@@ -26,8 +26,9 @@ func newNewExternalIDCmd() *newExternalIDCmd {
 		Example: `
 $ c8y identity create --device 1234 --type test --name myserialnumber
 Create external identity
-		`,
-		RunE: ccmd.newExternalID,
+        `,
+		PreRunE: validateCreateMode,
+		RunE:    ccmd.newExternalID,
 	}
 
 	cmd.SilenceUsage = true

@@ -29,8 +29,9 @@ Add a device to a group
 
 $ c8y inventoryReferences assignDeviceToGroup --group 12345 --newChildDevice 43234, 99292, 12222
 Add multiple devices to a group
-		`,
-		RunE: ccmd.addDeviceToGroup,
+        `,
+		PreRunE: validateCreateMode,
+		RunE:    ccmd.addDeviceToGroup,
 	}
 
 	cmd.SilenceUsage = true

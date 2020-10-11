@@ -26,8 +26,9 @@ func newNewApplicationCmd() *newApplicationCmd {
 		Example: `
 $ c8y applications create --name myapp --type HOSTED --key "myapp-key" --contextPath "myapp"
 Create a new hosted application
-		`,
-		RunE: ccmd.newApplication,
+        `,
+		PreRunE: validateCreateMode,
+		RunE:    ccmd.newApplication,
 	}
 
 	cmd.SilenceUsage = true

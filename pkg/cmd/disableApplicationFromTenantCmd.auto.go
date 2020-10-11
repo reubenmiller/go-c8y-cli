@@ -26,8 +26,9 @@ func newDisableApplicationFromTenantCmd() *disableApplicationFromTenantCmd {
 		Example: `
 $ c8y tenants disableApplication --tenant "mycompany" --application "myMicroservice"
 Disable an application of a tenant by name
-		`,
-		RunE: ccmd.disableApplicationFromTenant,
+        `,
+		PreRunE: validateDeleteMode,
+		RunE:    ccmd.disableApplicationFromTenant,
 	}
 
 	cmd.SilenceUsage = true

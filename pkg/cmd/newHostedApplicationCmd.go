@@ -38,7 +38,8 @@ $ c8y applications createHostedApplication --file ./myapp.zip
 
 Create new hosted application from a given zip file
 		`,
-		RunE: ccmd.doProcedure,
+		PreRunE: validateCreateMode,
+		RunE:    ccmd.doProcedure,
 	}
 
 	cmd.SilenceUsage = true

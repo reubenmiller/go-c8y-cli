@@ -27,8 +27,9 @@ func newGetRetentionRuleCollectionCmd() *getRetentionRuleCollectionCmd {
 		Example: `
 $ c8y retentionRules list
 Get a list of retention rules
-		`,
-		RunE: ccmd.getRetentionRuleCollection,
+        `,
+		PreRunE: nil,
+		RunE:    ccmd.getRetentionRuleCollection,
 	}
 
 	cmd.SilenceUsage = true

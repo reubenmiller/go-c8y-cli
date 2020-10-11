@@ -26,8 +26,9 @@ func newGetManagedObjectChildAssetCollectionCmd() *getManagedObjectChildAssetCol
 		Example: `
 $ c8y inventoryReferences listChildAssets --device 12345
 Get a list of the child devices of an existing device
-		`,
-		RunE: ccmd.getManagedObjectChildAssetCollection,
+        `,
+		PreRunE: nil,
+		RunE:    ccmd.getManagedObjectChildAssetCollection,
 	}
 
 	cmd.SilenceUsage = true

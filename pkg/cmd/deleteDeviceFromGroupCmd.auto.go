@@ -26,8 +26,9 @@ func newDeleteDeviceFromGroupCmd() *deleteDeviceFromGroupCmd {
 		Example: `
 $ c8y inventoryReferences unassignDeviceFromGroup --group 12345 --childDevice 22553
 Unassign a child device from its parent device
-		`,
-		RunE: ccmd.deleteDeviceFromGroup,
+        `,
+		PreRunE: validateDeleteMode,
+		RunE:    ccmd.deleteDeviceFromGroup,
 	}
 
 	cmd.SilenceUsage = true

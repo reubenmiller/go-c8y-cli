@@ -27,8 +27,9 @@ func newUpdateTenantOptionEditableCmd() *updateTenantOptionEditableCmd {
 		Example: `
 $ c8y tenantOptions updateEdit --category "c8y_cli_tests" --key "option8" --editable "true"
 Update editable property for an existing tenant option
-		`,
-		RunE: ccmd.updateTenantOptionEditable,
+        `,
+		PreRunE: validateUpdateMode,
+		RunE:    ccmd.updateTenantOptionEditable,
 	}
 
 	cmd.SilenceUsage = true

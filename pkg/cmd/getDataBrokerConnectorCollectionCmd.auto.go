@@ -26,8 +26,9 @@ func newGetDataBrokerConnectorCollectionCmd() *getDataBrokerConnectorCollectionC
 		Example: `
 $ c8y databroker list
 Get a list of data broker connectors
-		`,
-		RunE: ccmd.getDataBrokerConnectorCollection,
+        `,
+		PreRunE: nil,
+		RunE:    ccmd.getDataBrokerConnectorCollection,
 	}
 
 	cmd.SilenceUsage = true

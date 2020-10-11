@@ -27,8 +27,9 @@ func newDeleteOperationCollectionCmd() *deleteOperationCollectionCmd {
 		Example: `
 $ c8y operations deleteCollection --device mydevice --status PENDING
 Remove all pending operations for a given device
-		`,
-		RunE: ccmd.deleteOperationCollection,
+        `,
+		PreRunE: validateDeleteMode,
+		RunE:    ccmd.deleteOperationCollection,
 	}
 
 	cmd.SilenceUsage = true

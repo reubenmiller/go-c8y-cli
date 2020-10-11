@@ -27,8 +27,9 @@ func newDeleteDeviceCmd() *deleteDeviceCmd {
 		Example: `
 $ c8y devices delete --id 12345
 Get device by id
-		`,
-		RunE: ccmd.deleteDevice,
+        `,
+		PreRunE: validateDeleteMode,
+		RunE:    ccmd.deleteDevice,
 	}
 
 	cmd.SilenceUsage = true

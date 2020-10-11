@@ -26,8 +26,9 @@ func newGetManagedObjectChildAssetReferenceCmd() *getManagedObjectChildAssetRefe
 		Example: `
 $ c8y inventoryReferences getChildAsset --asset 12345 --reference 12345
 Get an existing child asset reference
-		`,
-		RunE: ccmd.getManagedObjectChildAssetReference,
+        `,
+		PreRunE: nil,
+		RunE:    ccmd.getManagedObjectChildAssetReference,
 	}
 
 	cmd.SilenceUsage = true

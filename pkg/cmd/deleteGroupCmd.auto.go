@@ -26,8 +26,9 @@ func newDeleteGroupCmd() *deleteGroupCmd {
 		Example: `
 $ c8y userGroups delete --id 12345
 Delete a user group
-		`,
-		RunE: ccmd.deleteGroup,
+        `,
+		PreRunE: validateDeleteMode,
+		RunE:    ccmd.deleteGroup,
 	}
 
 	cmd.SilenceUsage = true

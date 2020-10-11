@@ -29,8 +29,9 @@ Delete a managed object
 
 $ c8y inventory delete --id 12345 --cascade
 Delete a managed object
-		`,
-		RunE: ccmd.deleteManagedObject,
+        `,
+		PreRunE: validateDeleteMode,
+		RunE:    ccmd.deleteManagedObject,
 	}
 
 	cmd.SilenceUsage = true

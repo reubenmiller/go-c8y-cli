@@ -30,8 +30,9 @@ Create device group
 
 $ c8y devices createGroup --name mygroup --data "custom_value1=1234"
 Create device group with custom properties
-		`,
-		RunE: ccmd.createDeviceGroup,
+        `,
+		PreRunE: validateCreateMode,
+		RunE:    ccmd.createDeviceGroup,
 	}
 
 	cmd.SilenceUsage = true

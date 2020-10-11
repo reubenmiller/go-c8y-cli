@@ -27,8 +27,9 @@ func newGetExternalIDCmd() *getExternalIDCmd {
 		Example: `
 $ c8y identity get --type test --name myserialnumber
 Get external identity
-		`,
-		RunE: ccmd.getExternalID,
+        `,
+		PreRunE: nil,
+		RunE:    ccmd.getExternalID,
 	}
 
 	cmd.SilenceUsage = true

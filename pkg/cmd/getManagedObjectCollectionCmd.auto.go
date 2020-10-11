@@ -26,8 +26,9 @@ func newGetManagedObjectCollectionCmd() *getManagedObjectCollectionCmd {
 		Example: `
 $ c8y inventory list
 Get a list of managed objects
-		`,
-		RunE: ccmd.getManagedObjectCollection,
+        `,
+		PreRunE: nil,
+		RunE:    ccmd.getManagedObjectCollection,
 	}
 
 	cmd.SilenceUsage = true

@@ -32,8 +32,9 @@ Get tenant statistics collection for the last 30 days
 
 $ c8y tenantStatistics list --dateFrom "-3d" --dateTo "-2d"
 Get tenant statistics collection for the day before yesterday
-		`,
-		RunE: ccmd.getTenantUsageStatisticsCollection,
+        `,
+		PreRunE: nil,
+		RunE:    ccmd.getTenantUsageStatisticsCollection,
 	}
 
 	cmd.SilenceUsage = true

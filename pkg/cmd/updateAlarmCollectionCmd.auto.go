@@ -26,8 +26,9 @@ func newUpdateAlarmCollectionCmd() *updateAlarmCollectionCmd {
 		Example: `
 $ c8y alarms updateCollection --device mydevice --status ACTIVE --newStatus ACKNOWLEDGED
 Update the status of all active alarms on a device to ACKNOWLEDGED
-		`,
-		RunE: ccmd.updateAlarmCollection,
+        `,
+		PreRunE: validateUpdateMode,
+		RunE:    ccmd.updateAlarmCollection,
 	}
 
 	cmd.SilenceUsage = true

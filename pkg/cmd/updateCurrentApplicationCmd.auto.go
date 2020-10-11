@@ -26,8 +26,9 @@ func newUpdateCurrentApplicationCmd() *updateCurrentApplicationCmd {
 		Example: `
 $ c8y currentApplication update --data "mycustomProp=1"
 Update custom properties of the current application (requires using application credentials)
-		`,
-		RunE: ccmd.updateCurrentApplication,
+        `,
+		PreRunE: validateUpdateMode,
+		RunE:    ccmd.updateCurrentApplication,
 	}
 
 	cmd.SilenceUsage = true

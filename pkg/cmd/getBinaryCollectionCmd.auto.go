@@ -27,8 +27,9 @@ func newGetBinaryCollectionCmd() *getBinaryCollectionCmd {
 		Example: `
 $ c8y binaries list --pageSize 100
 Get a list of binaries
-		`,
-		RunE: ccmd.getBinaryCollection,
+        `,
+		PreRunE: nil,
+		RunE:    ccmd.getBinaryCollection,
 	}
 
 	cmd.SilenceUsage = true

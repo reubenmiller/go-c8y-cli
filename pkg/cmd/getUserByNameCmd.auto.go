@@ -26,8 +26,9 @@ func newGetUserByNameCmd() *getUserByNameCmd {
 		Example: `
 $ c8y users getUserByName --name "myuser"
 Get a user by name
-		`,
-		RunE: ccmd.getUserByName,
+        `,
+		PreRunE: nil,
+		RunE:    ccmd.getUserByName,
 	}
 
 	cmd.SilenceUsage = true

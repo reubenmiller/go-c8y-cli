@@ -26,8 +26,9 @@ func newNewEventCmd() *newEventCmd {
 		Example: `
 $ c8y events create --device mydevice --type c8y_TestAlarm --time "-0s" --text "Test alarm" --severity MAJOR
 Create a new event for a device
-		`,
-		RunE: ccmd.newEvent,
+        `,
+		PreRunE: validateCreateMode,
+		RunE:    ccmd.newEvent,
 	}
 
 	cmd.SilenceUsage = true

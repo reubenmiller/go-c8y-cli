@@ -27,8 +27,9 @@ func newDeleteRetentionRuleCmd() *deleteRetentionRuleCmd {
 		Example: `
 $ c8y retentionRules delete --id 12345
 Delete a retention rule
-		`,
-		RunE: ccmd.deleteRetentionRule,
+        `,
+		PreRunE: validateDeleteMode,
+		RunE:    ccmd.deleteRetentionRule,
 	}
 
 	cmd.SilenceUsage = true

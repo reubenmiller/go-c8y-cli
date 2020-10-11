@@ -28,8 +28,9 @@ func newDeleteAgentCmd() *deleteAgentCmd {
 		Example: `
 $ c8y agents delete --id 12345
 Get agent by id
-		`,
-		RunE: ccmd.deleteAgent,
+        `,
+		PreRunE: validateDeleteMode,
+		RunE:    ccmd.deleteAgent,
 	}
 
 	cmd.SilenceUsage = true

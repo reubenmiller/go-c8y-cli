@@ -26,8 +26,9 @@ func newDeleteTenantCmd() *deleteTenantCmd {
 		Example: `
 $ c8y tenants delete --id "mycompany"
 Delete a tenant by name (from the mangement tenant)
-		`,
-		RunE: ccmd.deleteTenant,
+        `,
+		PreRunE: validateDeleteMode,
+		RunE:    ccmd.deleteTenant,
 	}
 
 	cmd.SilenceUsage = true

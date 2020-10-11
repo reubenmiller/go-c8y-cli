@@ -26,8 +26,9 @@ func newGetNewDeviceRequestCollectionCmd() *getNewDeviceRequestCollectionCmd {
 		Example: `
 $ c8y devices listNewDeviceRequests
 Get a list of new device requests
-		`,
-		RunE: ccmd.getNewDeviceRequestCollection,
+        `,
+		PreRunE: nil,
+		RunE:    ccmd.getNewDeviceRequestCollection,
 	}
 
 	cmd.SilenceUsage = true

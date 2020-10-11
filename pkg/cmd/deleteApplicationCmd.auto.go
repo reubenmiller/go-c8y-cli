@@ -29,8 +29,9 @@ Delete an application by id
 
 $ c8y applications delete --id my-temp-app
 Delete an application by name
-		`,
-		RunE: ccmd.deleteApplication,
+        `,
+		PreRunE: validateDeleteMode,
+		RunE:    ccmd.deleteApplication,
 	}
 
 	cmd.SilenceUsage = true

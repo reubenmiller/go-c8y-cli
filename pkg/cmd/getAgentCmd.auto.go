@@ -26,8 +26,9 @@ func newGetAgentCmd() *getAgentCmd {
 		Example: `
 $ c8y agents get --id 12345
 Get agent by id
-		`,
-		RunE: ccmd.getAgent,
+        `,
+		PreRunE: nil,
+		RunE:    ccmd.getAgent,
 	}
 
 	cmd.SilenceUsage = true

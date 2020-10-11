@@ -26,8 +26,9 @@ func newUpdateAgentCmd() *updateAgentCmd {
 		Example: `
 $ c8y agents update --id 12345
 Update agent by id
-		`,
-		RunE: ccmd.updateAgent,
+        `,
+		PreRunE: validateUpdateMode,
+		RunE:    ccmd.updateAgent,
 	}
 
 	cmd.SilenceUsage = true

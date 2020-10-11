@@ -26,8 +26,9 @@ func newNewUserCmd() *newUserCmd {
 		Example: `
 $ c8y users create --userName "testuser1" --password "a0)8k2kld9lm,!"
 Create a user
-		`,
-		RunE: ccmd.newUser,
+        `,
+		PreRunE: validateCreateMode,
+		RunE:    ccmd.newUser,
 	}
 
 	cmd.SilenceUsage = true

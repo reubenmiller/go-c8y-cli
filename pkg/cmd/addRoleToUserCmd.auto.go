@@ -26,8 +26,9 @@ func newAddRoleToUserCmd() *addRoleToUserCmd {
 		Example: `
 $ c8y userRoles addRoleTouser --user "myuser" --role "ROLE_ALARM_READ"
 Add a role (ROLE_ALARM_READ) to a user
-		`,
-		RunE: ccmd.addRoleToUser,
+        `,
+		PreRunE: validateCreateMode,
+		RunE:    ccmd.addRoleToUser,
 	}
 
 	cmd.SilenceUsage = true

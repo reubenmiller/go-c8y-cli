@@ -26,8 +26,9 @@ func newGetGroupCmd() *getGroupCmd {
 		Example: `
 $ c8y userGroups get --id 12345
 Get a user group
-		`,
-		RunE: ccmd.getGroup,
+        `,
+		PreRunE: nil,
+		RunE:    ccmd.getGroup,
 	}
 
 	cmd.SilenceUsage = true

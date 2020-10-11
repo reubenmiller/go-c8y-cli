@@ -26,8 +26,9 @@ func newUpdateDeviceCmd() *updateDeviceCmd {
 		Example: `
 $ c8y devices update --id 12345
 Update device by id
-		`,
-		RunE: ccmd.updateDevice,
+        `,
+		PreRunE: validateUpdateMode,
+		RunE:    ccmd.updateDevice,
 	}
 
 	cmd.SilenceUsage = true

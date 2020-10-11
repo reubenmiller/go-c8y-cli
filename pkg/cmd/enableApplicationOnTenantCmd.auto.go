@@ -26,8 +26,9 @@ func newEnableApplicationOnTenantCmd() *enableApplicationOnTenantCmd {
 		Example: `
 $ c8y tenants enableApplication --tenant "mycompany" --application "myMicroservice"
 Enable an application of a tenant by name
-		`,
-		RunE: ccmd.enableApplicationOnTenant,
+        `,
+		PreRunE: validateCreateMode,
+		RunE:    ccmd.enableApplicationOnTenant,
 	}
 
 	cmd.SilenceUsage = true

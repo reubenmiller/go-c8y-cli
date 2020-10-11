@@ -26,8 +26,9 @@ func newGetManagedObjectChildDeviceReferenceCmd() *getManagedObjectChildDeviceRe
 		Example: `
 $ c8y inventoryReferences getChildDevice --device 12345 --reference 12345
 Get an existing child device reference
-		`,
-		RunE: ccmd.getManagedObjectChildDeviceReference,
+        `,
+		PreRunE: nil,
+		RunE:    ccmd.getManagedObjectChildDeviceReference,
 	}
 
 	cmd.SilenceUsage = true

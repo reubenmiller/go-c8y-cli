@@ -26,8 +26,9 @@ func newGetApplicationCollectionCmd() *getApplicationCollectionCmd {
 		Example: `
 $ c8y applications list --pageSize 100
 Get applications
-		`,
-		RunE: ccmd.getApplicationCollection,
+        `,
+		PreRunE: nil,
+		RunE:    ccmd.getApplicationCollection,
 	}
 
 	cmd.SilenceUsage = true

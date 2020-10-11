@@ -27,8 +27,9 @@ func newGetDeviceGroupCmd() *getDeviceGroupCmd {
 		Example: `
 $ c8y devices getGroup --id 12345
 Get device group by id
-		`,
-		RunE: ccmd.getDeviceGroup,
+        `,
+		PreRunE: nil,
+		RunE:    ccmd.getDeviceGroup,
 	}
 
 	cmd.SilenceUsage = true

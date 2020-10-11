@@ -26,8 +26,9 @@ func newGetTenantOptionCmd() *getTenantOptionCmd {
 		Example: `
 $ c8y tenantOptions get --category "c8y_cli_tests" --key "option2"
 Get a tenant option
-		`,
-		RunE: ccmd.getTenantOption,
+        `,
+		PreRunE: nil,
+		RunE:    ccmd.getTenantOption,
 	}
 
 	cmd.SilenceUsage = true

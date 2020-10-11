@@ -26,8 +26,9 @@ func newGetUserCollectionCmd() *getUserCollectionCmd {
 		Example: `
 $ c8y users list
 Get a list of users
-		`,
-		RunE: ccmd.getUserCollection,
+        `,
+		PreRunE: nil,
+		RunE:    ccmd.getUserCollection,
 	}
 
 	cmd.SilenceUsage = true

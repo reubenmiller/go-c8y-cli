@@ -27,8 +27,9 @@ func newGetMicroserviceCollectionCmd() *getMicroserviceCollectionCmd {
 		Example: `
 $ c8y microservices list --pageSize 100
 Get microservices
-		`,
-		RunE: ccmd.getMicroserviceCollection,
+        `,
+		PreRunE: nil,
+		RunE:    ccmd.getMicroserviceCollection,
 	}
 
 	cmd.SilenceUsage = true

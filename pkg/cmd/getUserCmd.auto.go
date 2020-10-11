@@ -26,8 +26,9 @@ func newGetUserCmd() *getUserCmd {
 		Example: `
 $ c8y users get --id "myuser"
 Get a user
-		`,
-		RunE: ccmd.getUser,
+        `,
+		PreRunE: nil,
+		RunE:    ccmd.getUser,
 	}
 
 	cmd.SilenceUsage = true

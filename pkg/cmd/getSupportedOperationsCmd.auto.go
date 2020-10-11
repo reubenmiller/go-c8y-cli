@@ -27,8 +27,9 @@ func newGetSupportedOperationsCmd() *getSupportedOperationsCmd {
 		Example: `
 $ c8y inventory getSupportedOperations --device 12345
 Get the supported operations of a device by name
-		`,
-		RunE: ccmd.getSupportedOperations,
+        `,
+		PreRunE: nil,
+		RunE:    ccmd.getSupportedOperations,
 	}
 
 	cmd.SilenceUsage = true
