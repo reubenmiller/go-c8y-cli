@@ -26,8 +26,9 @@ func newDeleteManagedObjectChildAssetReferenceCmd() *deleteManagedObjectChildAss
 		Example: `
 $ c8y inventoryReferences unassignAssetFromGroup --group 12345 --childDevice 22553
 Unassign a child device from its parent device
-		`,
-		RunE: ccmd.deleteManagedObjectChildAssetReference,
+        `,
+		PreRunE: validateDeleteMode,
+		RunE:    ccmd.deleteManagedObjectChildAssetReference,
 	}
 
 	cmd.SilenceUsage = true

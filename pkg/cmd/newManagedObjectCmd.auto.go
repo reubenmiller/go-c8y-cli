@@ -26,8 +26,9 @@ func newNewManagedObjectCmd() *newManagedObjectCmd {
 		Example: `
 $ c8y inventory create --name "testMO" --type "custom_type"
 Create a managed object
-		`,
-		RunE: ccmd.newManagedObject,
+        `,
+		PreRunE: validateCreateMode,
+		RunE:    ccmd.newManagedObject,
 	}
 
 	cmd.SilenceUsage = true

@@ -27,8 +27,9 @@ func newUpdateOperationCmd() *updateOperationCmd {
 		Example: `
 $ c8y operations update --id 12345 --status EXECUTING
 Update an operation
-		`,
-		RunE: ccmd.updateOperation,
+        `,
+		PreRunE: validateUpdateMode,
+		RunE:    ccmd.updateOperation,
 	}
 
 	cmd.SilenceUsage = true

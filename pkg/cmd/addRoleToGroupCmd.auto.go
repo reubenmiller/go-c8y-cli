@@ -26,8 +26,9 @@ func newAddRoleToGroupCmd() *addRoleToGroupCmd {
 		Example: `
 $ c8y userRoles addRoleToGroup --group "customGroup1*" --role "*ALARM*"
 Add a role to the admin group
-		`,
-		RunE: ccmd.addRoleToGroup,
+        `,
+		PreRunE: validateCreateMode,
+		RunE:    ccmd.addRoleToGroup,
 	}
 
 	cmd.SilenceUsage = true

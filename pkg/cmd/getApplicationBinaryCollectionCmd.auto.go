@@ -27,8 +27,9 @@ func newGetApplicationBinaryCollectionCmd() *getApplicationBinaryCollectionCmd {
 		Example: `
 $ c8y applications listApplicationBinaries --id 12345
 List all of the binaries related to a Hosted (web) application
-		`,
-		RunE: ccmd.getApplicationBinaryCollection,
+        `,
+		PreRunE: nil,
+		RunE:    ccmd.getApplicationBinaryCollection,
 	}
 
 	cmd.SilenceUsage = true

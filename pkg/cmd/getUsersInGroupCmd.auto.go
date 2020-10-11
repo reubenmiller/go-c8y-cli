@@ -26,8 +26,9 @@ func newGetUsersInGroupCmd() *getUsersInGroupCmd {
 		Example: `
 $ c8y userReferences listGroupMembership --group 1
 List the users within a user group
-		`,
-		RunE: ccmd.getUsersInGroup,
+        `,
+		PreRunE: nil,
+		RunE:    ccmd.getUsersInGroup,
 	}
 
 	cmd.SilenceUsage = true

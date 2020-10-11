@@ -26,8 +26,9 @@ func newGetOperationCmd() *getOperationCmd {
 		Example: `
 $ c8y operations get --id 12345
 Get operation by id
-		`,
-		RunE: ccmd.getOperation,
+        `,
+		PreRunE: nil,
+		RunE:    ccmd.getOperation,
 	}
 
 	cmd.SilenceUsage = true

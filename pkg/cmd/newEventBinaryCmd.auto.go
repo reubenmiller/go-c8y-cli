@@ -26,8 +26,9 @@ func newNewEventBinaryCmd() *newEventBinaryCmd {
 		Example: `
 $ c8y events createBinary --id 12345 --file ./myfile.log
 Add a binary to an event
-		`,
-		RunE: ccmd.newEventBinary,
+        `,
+		PreRunE: validateCreateMode,
+		RunE:    ccmd.newEventBinary,
 	}
 
 	cmd.SilenceUsage = true

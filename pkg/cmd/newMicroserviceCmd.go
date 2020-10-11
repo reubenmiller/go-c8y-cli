@@ -40,7 +40,8 @@ func newNewMicroserviceCmd() *newMicroserviceCmd {
 $ c8y microservices create --file ./myapp.zip
 Create new microservice
 		`,
-		RunE: ccmd.doProcedure,
+		PreRunE: validateCreateMode,
+		RunE:    ccmd.doProcedure,
 	}
 
 	cmd.SilenceUsage = true

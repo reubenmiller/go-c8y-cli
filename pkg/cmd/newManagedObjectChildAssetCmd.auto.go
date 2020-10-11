@@ -26,8 +26,9 @@ func newNewManagedObjectChildAssetCmd() *newManagedObjectChildAssetCmd {
 		Example: `
 $ c8y inventoryReferences createChildAsset --group 12345 --newChildGroup 43234
 Create group heirachy (parent group -> child group)
-		`,
-		RunE: ccmd.newManagedObjectChildAsset,
+        `,
+		PreRunE: validateCreateMode,
+		RunE:    ccmd.newManagedObjectChildAsset,
 	}
 
 	cmd.SilenceUsage = true

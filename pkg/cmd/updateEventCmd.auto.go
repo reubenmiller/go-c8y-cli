@@ -29,8 +29,9 @@ Update the text field of an existing event
 
 $ c8y events update --id 12345 --data "{\"my_event\":{\"active\": true }}"
 Update custom properties of an existing event
-		`,
-		RunE: ccmd.updateEvent,
+        `,
+		PreRunE: validateUpdateMode,
+		RunE:    ccmd.updateEvent,
 	}
 
 	cmd.SilenceUsage = true

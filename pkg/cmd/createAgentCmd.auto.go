@@ -31,8 +31,9 @@ Create agent
 
 $ c8y agents create --name myAgent --data "custom_value1=1234"
 Create agent with custom properties
-		`,
-		RunE: ccmd.createAgent,
+        `,
+		PreRunE: validateCreateMode,
+		RunE:    ccmd.createAgent,
 	}
 
 	cmd.SilenceUsage = true

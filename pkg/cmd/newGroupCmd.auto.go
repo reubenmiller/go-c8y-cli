@@ -26,8 +26,9 @@ func newNewGroupCmd() *newGroupCmd {
 		Example: `
 $ c8y userGroups create --name customGroup1
 Create a user group
-		`,
-		RunE: ccmd.newGroup,
+        `,
+		PreRunE: validateCreateMode,
+		RunE:    ccmd.newGroup,
 	}
 
 	cmd.SilenceUsage = true

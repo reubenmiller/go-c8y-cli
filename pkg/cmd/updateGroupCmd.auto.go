@@ -26,8 +26,9 @@ func newUpdateGroupCmd() *updateGroupCmd {
 		Example: `
 $ c8y userGroups update --id 12345 --name "customGroup2"
 Update a user group
-		`,
-		RunE: ccmd.updateGroup,
+        `,
+		PreRunE: validateUpdateMode,
+		RunE:    ccmd.updateGroup,
 	}
 
 	cmd.SilenceUsage = true

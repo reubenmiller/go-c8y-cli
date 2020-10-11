@@ -26,8 +26,9 @@ func newGetApplicationCmd() *getApplicationCmd {
 		Example: `
 $ c8y applications get --id 12345
 Get an application
-		`,
-		RunE: ccmd.getApplication,
+        `,
+		PreRunE: nil,
+		RunE:    ccmd.getApplication,
 	}
 
 	cmd.SilenceUsage = true

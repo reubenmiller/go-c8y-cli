@@ -27,8 +27,9 @@ func newNewRetentionRuleCmd() *newRetentionRuleCmd {
 		Example: `
 $ c8y retentionRules create --dataType ALARM --maximumAge 180
 Create a retention rule
-		`,
-		RunE: ccmd.newRetentionRule,
+        `,
+		PreRunE: validateCreateMode,
+		RunE:    ccmd.newRetentionRule,
 	}
 
 	cmd.SilenceUsage = true

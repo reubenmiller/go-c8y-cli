@@ -26,8 +26,9 @@ func newGetAlarmCmd() *getAlarmCmd {
 		Example: `
 $ c8y alarms get --id 12345
 Get alarm
-		`,
-		RunE: ccmd.getAlarm,
+        `,
+		PreRunE: nil,
+		RunE:    ccmd.getAlarm,
 	}
 
 	cmd.SilenceUsage = true

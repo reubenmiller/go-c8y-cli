@@ -30,8 +30,9 @@ Create device
 
 $ c8y devices create --name myDevice --data "custom_value1=1234"
 Create device with custom properties
-		`,
-		RunE: ccmd.createDevice,
+        `,
+		PreRunE: validateCreateMode,
+		RunE:    ccmd.createDevice,
 	}
 
 	cmd.SilenceUsage = true

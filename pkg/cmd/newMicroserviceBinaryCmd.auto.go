@@ -31,8 +31,9 @@ For the web application, the zip file must include index.html in the root direct
 		Example: `
 $ c8y microservices createBinary --id 12345 --file ./helloworld.zip
 Upload microservice binary
-		`,
-		RunE: ccmd.newMicroserviceBinary,
+        `,
+		PreRunE: validateCreateMode,
+		RunE:    ccmd.newMicroserviceBinary,
 	}
 
 	cmd.SilenceUsage = true

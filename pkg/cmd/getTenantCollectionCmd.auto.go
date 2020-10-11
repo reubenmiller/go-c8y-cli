@@ -26,8 +26,9 @@ func newGetTenantCollectionCmd() *getTenantCollectionCmd {
 		Example: `
 $ c8y tenants list
 Get a list of tenants
-		`,
-		RunE: ccmd.getTenantCollection,
+        `,
+		PreRunE: nil,
+		RunE:    ccmd.getTenantCollection,
 	}
 
 	cmd.SilenceUsage = true

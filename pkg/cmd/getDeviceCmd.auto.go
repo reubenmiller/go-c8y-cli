@@ -26,8 +26,9 @@ func newGetDeviceCmd() *getDeviceCmd {
 		Example: `
 $ c8y devices get --id 12345
 Get device by id
-		`,
-		RunE: ccmd.getDevice,
+        `,
+		PreRunE: nil,
+		RunE:    ccmd.getDevice,
 	}
 
 	cmd.SilenceUsage = true

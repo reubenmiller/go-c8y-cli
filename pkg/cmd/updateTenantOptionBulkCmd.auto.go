@@ -26,8 +26,9 @@ func newUpdateTenantOptionBulkCmd() *updateTenantOptionBulkCmd {
 		Example: `
 $ c8y tenantOptions updateBulk --category "c8y_cli_tests" --data "{\"option5\":0,\"option6\":1"}"
 Update multiple tenant options
-		`,
-		RunE: ccmd.updateTenantOptionBulk,
+        `,
+		PreRunE: validateUpdateMode,
+		RunE:    ccmd.updateTenantOptionBulk,
 	}
 
 	cmd.SilenceUsage = true

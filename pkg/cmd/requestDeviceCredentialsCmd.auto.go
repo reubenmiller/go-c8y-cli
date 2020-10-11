@@ -26,8 +26,9 @@ func newRequestDeviceCredentialsCmd() *requestDeviceCredentialsCmd {
 		Example: `
 $ c8y devices requestDeviceCredentials --id "device-AD76-matrixer"
 Request credentials for a new device
-		`,
-		RunE: ccmd.requestDeviceCredentials,
+        `,
+		PreRunE: validateCreateMode,
+		RunE:    ccmd.requestDeviceCredentials,
 	}
 
 	cmd.SilenceUsage = true

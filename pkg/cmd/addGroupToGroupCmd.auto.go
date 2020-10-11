@@ -29,8 +29,9 @@ Add a group to a group
 
 $ c8y inventoryReferences assignGroupToGroup --group 12345 --newChildGroup 43234, 99292, 12222
 Add multiple groups to a group
-		`,
-		RunE: ccmd.addGroupToGroup,
+        `,
+		PreRunE: validateCreateMode,
+		RunE:    ccmd.addGroupToGroup,
 	}
 
 	cmd.SilenceUsage = true

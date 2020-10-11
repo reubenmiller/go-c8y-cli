@@ -27,8 +27,9 @@ func newUpdateMicroserviceCmd() *updateMicroserviceCmd {
 		Example: `
 $ c8y microservices update --id "helloworld-app" --availability MARKET
 Update microservice availability to MARKET
-		`,
-		RunE: ccmd.updateMicroservice,
+        `,
+		PreRunE: validateUpdateMode,
+		RunE:    ccmd.updateMicroservice,
 	}
 
 	cmd.SilenceUsage = true

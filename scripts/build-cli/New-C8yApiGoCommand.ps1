@@ -243,6 +243,15 @@
     }
 "@)
 
+    #
+    # Pre run validation (disable some commands without switch flags)
+    #
+    $PreRunFunction = switch ($Specification.method) {
+        "POST" { "validateCreateMode" }
+        "PUT" { "validateUpdateMode" }
+        "DELETE" { "validateDeleteMode" }
+        default { "nil" }
+    }
 
     #
     # Template
@@ -275,7 +284,8 @@ func new${NameCamel}Cmd() *${Name}Cmd {
 		Long:  ``$DescriptionLong``,
         Example: ``
 $($Examples -join "`n`n")
-		``,
+        ``,
+        PreRunE: $PreRunFunction,
 		RunE: ccmd.${Name},
     }
 

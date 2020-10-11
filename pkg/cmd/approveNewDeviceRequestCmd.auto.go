@@ -26,8 +26,9 @@ func newApproveNewDeviceRequestCmd() *approveNewDeviceRequestCmd {
 		Example: `
 $ c8y devices approveDeviceRequest --id "1234010101s01ldk208"
 Approve a new device request
-		`,
-		RunE: ccmd.approveNewDeviceRequest,
+        `,
+		PreRunE: validateUpdateMode,
+		RunE:    ccmd.approveNewDeviceRequest,
 	}
 
 	cmd.SilenceUsage = true

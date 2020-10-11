@@ -26,8 +26,9 @@ func newDeleteTenantOptionCmd() *deleteTenantOptionCmd {
 		Example: `
 $ c8y tenantOptions delete --category "c8y_cli_tests" --key "option3"
 Get a tenant option
-		`,
-		RunE: ccmd.deleteTenantOption,
+        `,
+		PreRunE: validateDeleteMode,
+		RunE:    ccmd.deleteTenantOption,
 	}
 
 	cmd.SilenceUsage = true

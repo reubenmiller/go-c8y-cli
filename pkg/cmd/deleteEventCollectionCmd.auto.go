@@ -29,8 +29,9 @@ Remove events with type 'my_CustomType' that were created in the last 10 days
 
 $ c8y events deleteCollection --device mydevice
 Remove events from a device
-		`,
-		RunE: ccmd.deleteEventCollection,
+        `,
+		PreRunE: validateDeleteMode,
+		RunE:    ccmd.deleteEventCollection,
 	}
 
 	cmd.SilenceUsage = true

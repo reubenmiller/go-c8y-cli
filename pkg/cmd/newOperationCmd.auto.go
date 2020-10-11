@@ -26,8 +26,9 @@ func newNewOperationCmd() *newOperationCmd {
 		Example: `
 $ c8y operations create --device mydevice --data "{c8y_Restart:{}}"
 Create operation for a device
-		`,
-		RunE: ccmd.newOperation,
+        `,
+		PreRunE: validateCreateMode,
+		RunE:    ccmd.newOperation,
 	}
 
 	cmd.SilenceUsage = true

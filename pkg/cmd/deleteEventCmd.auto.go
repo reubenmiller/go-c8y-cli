@@ -26,8 +26,9 @@ func newDeleteEventCmd() *deleteEventCmd {
 		Example: `
 $ c8y events delete --id 12345
 Delete an event
-		`,
-		RunE: ccmd.deleteEvent,
+        `,
+		PreRunE: validateDeleteMode,
+		RunE:    ccmd.deleteEvent,
 	}
 
 	cmd.SilenceUsage = true

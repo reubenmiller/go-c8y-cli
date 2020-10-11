@@ -27,8 +27,9 @@ func newUpdateRetentionRuleCmd() *updateRetentionRuleCmd {
 		Example: `
 $ c8y retentionRules get --id 12345
 Update a retention rule
-		`,
-		RunE: ccmd.updateRetentionRule,
+        `,
+		PreRunE: validateUpdateMode,
+		RunE:    ccmd.updateRetentionRule,
 	}
 
 	cmd.SilenceUsage = true

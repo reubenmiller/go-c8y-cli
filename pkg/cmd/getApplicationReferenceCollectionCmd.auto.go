@@ -26,8 +26,9 @@ func newGetApplicationReferenceCollectionCmd() *getApplicationReferenceCollectio
 		Example: `
 $ c8y tenants listReferences --tenant "mycompany"
 Get a list of referenced applications on a given tenant (from management tenant)
-		`,
-		RunE: ccmd.getApplicationReferenceCollection,
+        `,
+		PreRunE: nil,
+		RunE:    ccmd.getApplicationReferenceCollection,
 	}
 
 	cmd.SilenceUsage = true

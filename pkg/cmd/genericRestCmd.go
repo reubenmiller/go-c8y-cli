@@ -96,6 +96,22 @@ func (n *getGenericRestCmd) getGenericRest(cmd *cobra.Command, args []string) er
 		return newUserError("Invalid method. Only GET, PUT, POST and DELETE are accepted")
 	}
 
+	if method == "PUT" {
+		if err := validateUpdateMode(cmd, args); err != nil {
+			return err
+		}
+	}
+	if method == "POST" {
+		if err := validateCreateMode(cmd, args); err != nil {
+			return err
+		}
+	}
+	if method == "DELETE" {
+		if err := validateDeleteMode(cmd, args); err != nil {
+			return err
+		}
+	}
+
 	baseURL, _ := url.Parse(uri)
 
 	var host string

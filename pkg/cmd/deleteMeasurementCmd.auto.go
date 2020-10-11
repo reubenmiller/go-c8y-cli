@@ -26,8 +26,9 @@ func newDeleteMeasurementCmd() *deleteMeasurementCmd {
 		Example: `
 $ c8y measurements delete --id 12345
 Delete measurement
-		`,
-		RunE: ccmd.deleteMeasurement,
+        `,
+		PreRunE: validateDeleteMode,
+		RunE:    ccmd.deleteMeasurement,
 	}
 
 	cmd.SilenceUsage = true

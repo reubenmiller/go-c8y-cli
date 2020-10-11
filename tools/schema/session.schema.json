@@ -59,6 +59,22 @@
                 "template.path": {
                     "description": "Path / Folder where the templates are located. If the user gives a template name (without path), then a matching filename will be search for in this folder",
                     "type": "string"
+                },
+                "mode.enableCreate": {
+                    "description": "Enable/disable create commands",
+                    "type": "boolean"
+                },
+                "mode.enableUpdate": {
+                    "description": "Enable/disable update commands",
+                    "type": "boolean"
+                },
+                "mode.enableDelete": {
+                    "description": "Enable/disable delete commands",
+                    "type": "boolean"
+                },
+                "ci": {
+                    "description": "Enable CI/CD mode where all commands are enabled (create/update/delete)",
+                    "type": "boolean"
                 }
             }
         }

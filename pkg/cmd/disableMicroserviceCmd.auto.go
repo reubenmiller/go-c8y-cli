@@ -30,8 +30,9 @@ Disable (unsubscribe) to a microservice
 
 $ c8y microservices disable --id myapp
 Disable (unsubscribe) to a microservice
-		`,
-		RunE: ccmd.disableMicroservice,
+        `,
+		PreRunE: validateDeleteMode,
+		RunE:    ccmd.disableMicroservice,
 	}
 
 	cmd.SilenceUsage = true

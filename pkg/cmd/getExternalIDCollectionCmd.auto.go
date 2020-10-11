@@ -26,8 +26,9 @@ func newGetExternalIDCollectionCmd() *getExternalIDCollectionCmd {
 		Example: `
 $ c8y identity list
 Get a list of external ids
-		`,
-		RunE: ccmd.getExternalIDCollection,
+        `,
+		PreRunE: nil,
+		RunE:    ccmd.getExternalIDCollection,
 	}
 
 	cmd.SilenceUsage = true

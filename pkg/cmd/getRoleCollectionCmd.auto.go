@@ -26,8 +26,9 @@ func newGetRoleCollectionCmd() *getRoleCollectionCmd {
 		Example: `
 $ c8y userRoles list --pageSize 100
 Get a list of roles
-		`,
-		RunE: ccmd.getRoleCollection,
+        `,
+		PreRunE: nil,
+		RunE:    ccmd.getRoleCollection,
 	}
 
 	cmd.SilenceUsage = true

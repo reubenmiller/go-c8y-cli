@@ -17,6 +17,11 @@ None
 
     $Session = Get-Session
 
+    # reset any enabled side-effect commands
+    $env:C8Y_SETTINGS_MODE_ENABLECREATE = ""
+    $env:C8Y_SETTINGS_MODE_ENABLEUPDATE = ""
+    $env:C8Y_SETTINGS_MODE_ENABLEDELETE = ""
+
     if ($null -eq $Session)
     {
         Write-Verbose "Clearing the Cumulocity environment variables"

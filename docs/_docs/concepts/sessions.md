@@ -106,7 +106,6 @@ All of the values in the sessions file, can also be overridden using environment
 | useTenantPrefix | C8Y_USETENANTPREFIX |
 
 
-
 ### Continuous Integration usage (environment variables)
 
 Alternatively, the Cumulocity session can be controlled purely by environment variables.
@@ -119,6 +118,7 @@ Then the Cumulocity settings can be set by the following environment variables.
 * C8Y_TENANT (example "myTenant")
 * C8Y_USER
 * C8Y_PASSWORD
+* C8Y_SETTINGS_CI
 
 
 ### Switching sessions for a single command
@@ -137,4 +137,92 @@ c8y devices list --session myother.tenant
 
 ```powershell
 Get-DeviceCollection -Session myother.tenant
+```
+
+### Protection against accidental data loss
+
+The c8y cli tool provides a large number of commands which can be potentially destructive if used incorrectly. Therefore all commands which create, update and/or delete data are disabled by default, to protect against accidental usage.
+
+The commands can be enabled per session or in global settings, however explicitily enabling it per session is the perferred method.
+
+Ideally for production sessions, the settings should be left disabled to protect yourself against accidental data loss, especially if you have a large number of tenants, and are constantly switching between them.
+
+The following shows how the functions can be controlled via session settings:
+
+*File: mysession.json*
+
+```json
+{
+  "settings": {
+    "mode.enableCreate": false,
+    "mode.enableUpdate": false,
+    "mode.enableDelete": false
+  }
+}
+```
+
+#### Enabling create/update/delete command temporarily
+
+When the commands are disabled in the session settings, they can be temporarily activated on the console by using the following command:
+
+**PowerShell**
+
+```powershell
+Set-ClientConsoleSetting -EnableCreateCommands -EnableUpdateCommands -EnableDeleteCommands
+```
+
+**Bash/zsh**
+
+```sh
+export C8Y_SETTINGS_MODE_ENABLECREATE=true
+export C8Y_SETTINGS_MODE_ENABLEUPDATE=true
+export C8Y_SETTINGS_MODE_ENABLEDELETE=true
+```
+
+The commands will remain enabled until the next time you call `set-session`.
+
+Afterwards you can disable them again using:
+
+**PowerShell**
+
+```powershell
+Set-ClientConsoleSetting -DisableCommands
+```
+
+**Bash/zsh**
+
+```sh
+unset C8Y_SETTINGS_MODE_ENABLECREATE
+unset C8Y_SETTINGS_MODE_ENABLEUPDATE
+unset C8Y_SETTINGS_MODE_ENABLEDELETE
+```
+
+#### CI/CD
+
+When used in a CI/CD environment, all commands (create/update/delete) can be enabled by setting the `settings.ci` property to `true`.
+
+The setting can also be set via an environment variable:
+
+**Bash/zsh**
+
+```sh
+export C8Y_SETTINGS_CI=true
+```
+
+**PowerShell**
+
+```sh
+$env:C8Y_SETTINGS_CI=true
+```
+
+Or alternatively, using setting it via the session file:
+
+*File: mysession.json*
+
+```json
+{
+  "settings": {
+    "ci": true
+  }
+}
 ```

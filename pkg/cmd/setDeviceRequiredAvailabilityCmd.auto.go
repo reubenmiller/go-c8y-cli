@@ -26,8 +26,9 @@ func newSetDeviceRequiredAvailabilityCmd() *setDeviceRequiredAvailabilityCmd {
 		Example: `
 $ c8y inventory setRequiredAvailability --device 12345 --interval 10
 Set the required availability of a device by name to 10 minutes
-		`,
-		RunE: ccmd.setDeviceRequiredAvailability,
+        `,
+		PreRunE: validateUpdateMode,
+		RunE:    ccmd.setDeviceRequiredAvailability,
 	}
 
 	cmd.SilenceUsage = true

@@ -26,8 +26,9 @@ func newDeleteMeasurementCollectionCmd() *deleteMeasurementCollectionCmd {
 		Example: `
 $ c8y measurements deleteCollection --device $Measurement.source.id
 Delete measurement collection for a device
-		`,
-		RunE: ccmd.deleteMeasurementCollection,
+        `,
+		PreRunE: validateDeleteMode,
+		RunE:    ccmd.deleteMeasurementCollection,
 	}
 
 	cmd.SilenceUsage = true

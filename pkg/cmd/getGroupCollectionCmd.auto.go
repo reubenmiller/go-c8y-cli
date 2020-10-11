@@ -26,8 +26,9 @@ func newGetGroupCollectionCmd() *getGroupCollectionCmd {
 		Example: `
 $ c8y userGroups list
 Get a list of user groups for the current tenant
-		`,
-		RunE: ccmd.getGroupCollection,
+        `,
+		PreRunE: nil,
+		RunE:    ccmd.getGroupCollection,
 	}
 
 	cmd.SilenceUsage = true

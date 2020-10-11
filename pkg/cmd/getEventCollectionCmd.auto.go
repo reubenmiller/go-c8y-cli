@@ -29,8 +29,9 @@ Get events with type 'my_CustomType' that were created in the last 10 days
 
 $ c8y events list --device mydevice
 Get events from a device
-		`,
-		RunE: ccmd.getEventCollection,
+        `,
+		PreRunE: nil,
+		RunE:    ccmd.getEventCollection,
 	}
 
 	cmd.SilenceUsage = true

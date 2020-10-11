@@ -29,8 +29,9 @@ Get a managed object
 
 $ c8y inventory get --id 12345 --withParents
 Get a managed object with parent references
-		`,
-		RunE: ccmd.getManagedObject,
+        `,
+		PreRunE: nil,
+		RunE:    ccmd.getManagedObject,
 	}
 
 	cmd.SilenceUsage = true

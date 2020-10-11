@@ -26,8 +26,9 @@ func newGetTenantOptionCollectionCmd() *getTenantOptionCollectionCmd {
 		Example: `
 $ c8y tenantOptions list
 Get a list of tenant options
-		`,
-		RunE: ccmd.getTenantOptionCollection,
+        `,
+		PreRunE: nil,
+		RunE:    ccmd.getTenantOptionCollection,
 	}
 
 	cmd.SilenceUsage = true

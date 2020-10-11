@@ -26,8 +26,9 @@ func newGetCurrentApplicationUserCollectionCmd() *getCurrentApplicationUserColle
 		Example: `
 $ c8y currentApplication listSubscriptions
 List the current application users/subscriptions
-		`,
-		RunE: ccmd.getCurrentApplicationUserCollection,
+        `,
+		PreRunE: nil,
+		RunE:    ccmd.getCurrentApplicationUserCollection,
 	}
 
 	cmd.SilenceUsage = true

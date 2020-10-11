@@ -27,8 +27,9 @@ func newDeleteDeviceGroupCmd() *deleteDeviceGroupCmd {
 		Example: `
 $ c8y devices deleteGroup --id 12345
 Get device group by id
-		`,
-		RunE: ccmd.deleteDeviceGroup,
+        `,
+		PreRunE: validateDeleteMode,
+		RunE:    ccmd.deleteDeviceGroup,
 	}
 
 	cmd.SilenceUsage = true

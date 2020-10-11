@@ -26,8 +26,9 @@ func newDeleteUserFromGroupCmd() *deleteUserFromGroupCmd {
 		Example: `
 $ c8y userReferences deleteUserFromGroup --group 1 --user myuser
 List the users within a user group
-		`,
-		RunE: ccmd.deleteUserFromGroup,
+        `,
+		PreRunE: validateDeleteMode,
+		RunE:    ccmd.deleteUserFromGroup,
 	}
 
 	cmd.SilenceUsage = true

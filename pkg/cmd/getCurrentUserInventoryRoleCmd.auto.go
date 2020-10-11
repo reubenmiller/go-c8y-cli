@@ -26,8 +26,9 @@ func newGetCurrentUserInventoryRoleCmd() *getCurrentUserInventoryRoleCmd {
 		Example: `
 $ c8y users getCurrentUserInventoryRole --id 12345
 Get an inventory role of the current user
-		`,
-		RunE: ccmd.getCurrentUserInventoryRole,
+        `,
+		PreRunE: nil,
+		RunE:    ccmd.getCurrentUserInventoryRole,
 	}
 
 	cmd.SilenceUsage = true

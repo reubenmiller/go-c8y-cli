@@ -28,8 +28,9 @@ Alternatively a user can be disabled via updating the users properties instead o
 		Example: `
 $ c8y users delete --id "myuser"
 Delete a user
-		`,
-		RunE: ccmd.deleteUser,
+        `,
+		PreRunE: validateDeleteMode,
+		RunE:    ccmd.deleteUser,
 	}
 
 	cmd.SilenceUsage = true

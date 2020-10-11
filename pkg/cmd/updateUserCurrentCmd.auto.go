@@ -27,8 +27,9 @@ func newUpdateUserCurrentCmd() *updateUserCurrentCmd {
 		Example: `
 $ c8y users updateCurrentUser --lastName "Smith"
 Update the current user's lastname
-		`,
-		RunE: ccmd.updateUserCurrent,
+        `,
+		PreRunE: validateUpdateMode,
+		RunE:    ccmd.updateUserCurrent,
 	}
 
 	cmd.SilenceUsage = true

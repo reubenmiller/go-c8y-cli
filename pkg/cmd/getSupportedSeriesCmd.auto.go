@@ -27,8 +27,9 @@ func newGetSupportedSeriesCmd() *getSupportedSeriesCmd {
 		Example: `
 $ c8y inventory getSupportedSeries --device 12345
 Get the supported measurement series of a device by name
-		`,
-		RunE: ccmd.getSupportedSeries,
+        `,
+		PreRunE: nil,
+		RunE:    ccmd.getSupportedSeries,
 	}
 
 	cmd.SilenceUsage = true

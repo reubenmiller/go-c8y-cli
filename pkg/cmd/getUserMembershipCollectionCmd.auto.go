@@ -26,8 +26,9 @@ func newGetUserMembershipCollectionCmd() *getUserMembershipCollectionCmd {
 		Example: `
 $ c8y users listUserMembership --id "myuser"
 Get a list of groups that a user belongs to
-		`,
-		RunE: ccmd.getUserMembershipCollection,
+        `,
+		PreRunE: nil,
+		RunE:    ccmd.getUserMembershipCollection,
 	}
 
 	cmd.SilenceUsage = true

@@ -31,8 +31,9 @@ Required role ROLE_APPLICATION_MANAGMENT_ADMIN
 		Example: `
 $ c8y applications copy --id my-example-app
 Copy an existing application
-		`,
-		RunE: ccmd.copyApplication,
+        `,
+		PreRunE: validateCreateMode,
+		RunE:    ccmd.copyApplication,
 	}
 
 	cmd.SilenceUsage = true

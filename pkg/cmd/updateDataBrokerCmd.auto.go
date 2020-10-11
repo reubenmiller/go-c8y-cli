@@ -26,8 +26,9 @@ func newUpdateDataBrokerCmd() *updateDataBrokerCmd {
 		Example: `
 $ c8y databroker update --id 12345 --status SUSPENDED
 Change the status of a specific data broker connector by given connector id
-		`,
-		RunE: ccmd.updateDataBroker,
+        `,
+		PreRunE: validateUpdateMode,
+		RunE:    ccmd.updateDataBroker,
 	}
 
 	cmd.SilenceUsage = true

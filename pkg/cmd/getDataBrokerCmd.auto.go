@@ -26,8 +26,9 @@ func newGetDataBrokerCmd() *getDataBrokerCmd {
 		Example: `
 $ c8y databroker get --id 12345
 Get a data broker connector
-		`,
-		RunE: ccmd.getDataBroker,
+        `,
+		PreRunE: nil,
+		RunE:    ccmd.getDataBroker,
 	}
 
 	cmd.SilenceUsage = true

@@ -26,8 +26,9 @@ func newGetSystemOptionCollectionCmd() *getSystemOptionCollectionCmd {
 		Example: `
 $ c8y systemOptions list
 Get a list of system options
-		`,
-		RunE: ccmd.getSystemOptionCollection,
+        `,
+		PreRunE: nil,
+		RunE:    ccmd.getSystemOptionCollection,
 	}
 
 	cmd.SilenceUsage = true

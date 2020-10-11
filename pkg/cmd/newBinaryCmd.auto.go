@@ -29,8 +29,9 @@ Upload a log file
 
 $ c8y binaries create --file "myConfig.json" --data "c8y_Global={},type=c8y_upload"
 Upload a config file and make it globally accessible for all users
-		`,
-		RunE: ccmd.newBinary,
+        `,
+		PreRunE: validateCreateMode,
+		RunE:    ccmd.newBinary,
 	}
 
 	cmd.SilenceUsage = true

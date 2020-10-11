@@ -27,8 +27,9 @@ func newUpdateBinaryCmd() *updateBinaryCmd {
 		Example: `
 $ c8y binaries update --id 12345 --file ./output.log
 Update an existing binary file
-		`,
-		RunE: ccmd.updateBinary,
+        `,
+		PreRunE: validateUpdateMode,
+		RunE:    ccmd.updateBinary,
 	}
 
 	cmd.SilenceUsage = true

@@ -29,8 +29,9 @@ Acknowledge an existing alarm
 
 $ c8y alarms update --id 12345 --severity CRITICAL
 Update severity of an existing alarm to CRITICAL
-		`,
-		RunE: ccmd.updateAlarm,
+        `,
+		PreRunE: validateUpdateMode,
+		RunE:    ccmd.updateAlarm,
 	}
 
 	cmd.SilenceUsage = true

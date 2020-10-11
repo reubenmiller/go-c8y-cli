@@ -26,8 +26,9 @@ func newUpdateApplicationCmd() *updateApplicationCmd {
 		Example: `
 $ c8y applications update --id "helloworld-app" --availability MARKET
 Update application availability to MARKET
-		`,
-		RunE: ccmd.updateApplication,
+        `,
+		PreRunE: validateUpdateMode,
+		RunE:    ccmd.updateApplication,
 	}
 
 	cmd.SilenceUsage = true

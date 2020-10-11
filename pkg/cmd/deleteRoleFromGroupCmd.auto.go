@@ -26,8 +26,9 @@ func newDeleteRoleFromGroupCmd() *deleteRoleFromGroupCmd {
 		Example: `
 $ c8y userRoles deleteRoleFromGroup --group "myuser" --role "ROLE_MEASUREMENT_READ"
 Remove a role from the given user
-		`,
-		RunE: ccmd.deleteRoleFromGroup,
+        `,
+		PreRunE: validateDeleteMode,
+		RunE:    ccmd.deleteRoleFromGroup,
 	}
 
 	cmd.SilenceUsage = true

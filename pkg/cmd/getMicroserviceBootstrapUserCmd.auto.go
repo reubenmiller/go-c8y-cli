@@ -30,8 +30,9 @@ Get application bootstrap user by app id
 
 $ c8y microservices getBootstrapUser --id myapp
 Get application bootstrap user by app name
-		`,
-		RunE: ccmd.getMicroserviceBootstrapUser,
+        `,
+		PreRunE: nil,
+		RunE:    ccmd.getMicroserviceBootstrapUser,
 	}
 
 	cmd.SilenceUsage = true

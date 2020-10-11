@@ -26,8 +26,9 @@ func newGetTenantVersionCmd() *getTenantVersionCmd {
 		Example: `
 $ c8y tenants getVersion
 Set the required availability of a device by name to 10 minutes
-		`,
-		RunE: ccmd.getTenantVersion,
+        `,
+		PreRunE: nil,
+		RunE:    ccmd.getTenantVersion,
 	}
 
 	cmd.SilenceUsage = true

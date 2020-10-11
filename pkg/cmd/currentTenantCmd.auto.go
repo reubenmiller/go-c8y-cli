@@ -26,8 +26,9 @@ func newCurrentTenantCmd() *currentTenantCmd {
 		Example: `
 $ c8y tenants getCurrentTenant
 Get the current tenant (based on your current credentials)
-		`,
-		RunE: ccmd.currentTenant,
+        `,
+		PreRunE: nil,
+		RunE:    ccmd.currentTenant,
 	}
 
 	cmd.SilenceUsage = true

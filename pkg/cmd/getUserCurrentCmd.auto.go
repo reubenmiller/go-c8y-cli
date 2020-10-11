@@ -26,8 +26,9 @@ func newGetUserCurrentCmd() *getUserCurrentCmd {
 		Example: `
 $ c8y users getCurrentUser
 Get the current user
-		`,
-		RunE: ccmd.getUserCurrent,
+        `,
+		PreRunE: nil,
+		RunE:    ccmd.getUserCurrent,
 	}
 
 	cmd.SilenceUsage = true

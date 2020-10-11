@@ -26,8 +26,9 @@ func newGetAuditRecordCmd() *getAuditRecordCmd {
 		Example: `
 $ c8y auditRecords get --id 12345
 Get an audit record by id
-		`,
-		RunE: ccmd.getAuditRecord,
+        `,
+		PreRunE: nil,
+		RunE:    ccmd.getAuditRecord,
 	}
 
 	cmd.SilenceUsage = true

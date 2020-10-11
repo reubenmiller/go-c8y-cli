@@ -26,8 +26,9 @@ func newAddUserToGroupCmd() *addUserToGroupCmd {
 		Example: `
 $ c8y userReferences addUserToGroup --group 1 --user myuser
 List the users within a user group
-		`,
-		RunE: ccmd.addUserToGroup,
+        `,
+		PreRunE: validateCreateMode,
+		RunE:    ccmd.addUserToGroup,
 	}
 
 	cmd.SilenceUsage = true

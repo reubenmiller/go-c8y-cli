@@ -26,8 +26,9 @@ func newNewAuditCmd() *newAuditCmd {
 		Example: `
 $ c8y auditRecords create --type "ManagedObject" --time "0s" --text "Managed Object updated: my_Prop: value" --source $Device.id --activity "Managed Object updated" --severity "information"
 Create an audit record for a custom managed object update
-		`,
-		RunE: ccmd.newAudit,
+        `,
+		PreRunE: validateCreateMode,
+		RunE:    ccmd.newAudit,
 	}
 
 	cmd.SilenceUsage = true
