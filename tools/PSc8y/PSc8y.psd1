@@ -265,6 +265,7 @@ FunctionsToExport = @(
 	'Get-C8ySessionProperty',
 	'Get-ClientBinary',
 	'Get-ClientBinaryVersion',
+	'Get-ClientSetting',
 	'Get-CurrentTenantApplicationCollection',
 	'Get-DeviceBootstrapCredential',
 	'Get-DeviceCollection',

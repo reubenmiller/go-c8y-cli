@@ -2,6 +2,20 @@
 
 ## Unreleased
 
+* Added command to read the current configuration settings as json
+
+    **PowerShell**
+
+    ```powershell
+    Get-ClientSetting
+    ```
+
+    **Bash/zsh**
+
+    ```sh
+    c8y settings list
+    ```
+
 * Added support for templates and template variables for all POST and PUT commands. See the [templates concept documentation](https://reubenmiller.github.io/go-c8y-cli/docs/concepts/templates/) for full details.
 
     `jsonnet` templates can be used to create json data

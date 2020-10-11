@@ -133,6 +133,40 @@ The random values are assigned as variables and not functions. This means if you
 Additional information about jsonnet and it's synatax can be found [here](https://jsonnet.org/)
 
 
+### Template settings
+
+Template (jsonnet) files can be stored in a folder and this folder can be added to the `settings.template.path` settings within the global or session configuration.
+
+```json
+{
+    "settings": {
+        "template.path": "/workspaces/go-c8y-cli/.cumulocity/templates"
+    }
+}
+```
+
+The template path will be used when looking up template filenames if the user does not specify a relative or full path to it.
+
+i.e.
+
+```sh
+c8y template execute --template event.jsonnet
+```
+
+c8y will look for a file called "event.jsonnet" inside the `template.path` folder.
+
+PSc8y also supports argument completion for template files if the path is set.
+
+```powershell
+PS /workspaces/go-c8y-cli> Invoke-Template -Template <tab>
+
+alarm.jsonnet                 device.template.jsonnet       event.jsonnet                 measurement.advanced.jsonnet
+```
+
+**Note**
+
+Argument completion for template filenames is not yet supporte for bash or zsh.
+
 ### Complex Example
 
 Add a complex device managed object where the number of installed software applications in the `c8y_SoftwareList` fragment can be set via the command line.

@@ -26,6 +26,7 @@ The following table lists the available settings, the environment variable equiv
 | default.pageSize | `C8Y_SETTINGS_DEFAULT_PAGESIZE` | Default page size |
 | includeAll.pageSize | `C8Y_SETTINGS_INCLUDEALL_PAGESIZE` | Default page size when using the includeAll parameter |
 | includeAll.delayMS | `C8Y_SETTINGS_INCLUDEALL_DELAYMS` | Delay between fetching the next page when using the includeAll parameter |
+| template.path | `C8Y_SETTINGS_TEMPLATE_PATH` | Path / Folder where the templates are located. If the user gives a template name (without path), then a matching filename will be search for in this folder |
 
 ### Example: Set global defaults to use in each c8y session
 

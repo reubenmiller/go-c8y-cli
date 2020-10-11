@@ -3,9 +3,6 @@
 
 ## current todo
 
-[x] Use default values for time (i.e. createNewMeasurement --time "0s")
-[ ] Add tab completion for template files?
-
 ## Bugs
 
 * Subscription tests are flakey
@@ -72,7 +69,10 @@
 * [x] Get microservice, delete microservice, update microservice? get credentials?
 * [x] Handle proxy/no proxy support for realtime notifications (websockets)
 
-* [ ] Allow file upload to include additional "type" property
+* [x] Allow file upload to include additional "type" property
+* [x] Add tab completion for template files?
+* [x] Add automatic path resolver in golang to find the template by just the file name
+* [x] Use default values for time (i.e. createNewMeasurement --time "0s")
 * [ ] Microservice aliases using my-app://health
 
 
@@ -159,11 +159,10 @@ Manual commands
 * [ ] Add/Remove child devices
 * [ ] users (add, skip send email, or static password)
 * [ ] managed objects
-* [ ] aliases
-* [ ] custom requests
-* [ ] Extending modules
+* [x] aliases
+* [x] custom requests
+* [x] Extending modules
 * [ ] notifications
-* [ ]
 
 # Future
 

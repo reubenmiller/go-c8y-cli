@@ -74,6 +74,7 @@ var (
 	globalFlagTimeout            uint
 	globalFlagUseTenantPrefix    bool
 	globalUseNonDefaultPageSize  bool
+	globalFlagTemplatePath       string
 )
 
 // CumulocityDefaultPageSize is the default page size used by Cumulocity
@@ -91,6 +92,9 @@ const (
 
 	// SettingsConfigPath configuration path
 	SettingsConfigPath string = "settings.path"
+
+	// SettingsTemplatePath template path where the template files are located
+	SettingsTemplatePath string = "settings.template.path"
 )
 
 // SettingsGlobalName name of the settings file (without extension)
@@ -172,6 +176,9 @@ func Execute() {
 
 	// template commands
 	rootCmd.AddCommand(newTemplateRootCmd().getCommand())
+
+	// settings commands
+	rootCmd.AddCommand(newSettingsRootCmd().getCommand())
 
 	// Auto generated commands
 
@@ -452,6 +459,7 @@ func loadConfiguration() error {
 	bindEnv(SettingsIncludeAllPageSize, 2000)
 	bindEnv(SettingsDefaultPageSize, CumulocityDefaultPageSize)
 	bindEnv(SettingsIncludeAllDelayMS, 0)
+	bindEnv(SettingsTemplatePath, "")
 
 	return nil
 }
@@ -461,10 +469,12 @@ func readConfiguration() error {
 	globalFlagIncludeAllPageSize = viper.GetInt(SettingsIncludeAllPageSize)
 	globalFlagPageSize = viper.GetInt(SettingsDefaultPageSize)
 	globalFlagIncludeAllDelayMS = viper.GetInt64(SettingsIncludeAllDelayMS)
+	globalFlagTemplatePath = viper.GetString(SettingsTemplatePath)
 
 	Logger.Infof("%s: %d", SettingsDefaultPageSize, globalFlagPageSize)
 	Logger.Infof("%s: %d", SettingsIncludeAllPageSize, globalFlagIncludeAllPageSize)
 	Logger.Infof("%s: %d", SettingsIncludeAllDelayMS, globalFlagIncludeAllDelayMS)
+	Logger.Infof("%s: %s", SettingsTemplatePath, globalFlagTemplatePath)
 
 	return nil
 }
