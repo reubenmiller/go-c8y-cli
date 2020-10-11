@@ -11,6 +11,9 @@ The zip file needs to follow the Cumulocity Microservice format.
 
 This cmdlet has several operations
 
+.NOTES
+This cmdlet does not support template variables
+
 .EXAMPLE
 PS> New-Microservice -File "myapp.zip"
 
@@ -54,6 +57,11 @@ This example is usefuly for local development only, when you want to run the mic
         [Parameter(Mandatory = $false)]
         [string]
         $Name,
+
+        # Shared secret of application. Defaults to application name if not provided.
+        [Parameter()]
+        [string]
+        $Key,
 
         # Access level for other tenants.  Possible values are : MARKET, PRIVATE (default)
         [Parameter()]
@@ -117,6 +125,9 @@ This example is usefuly for local development only, when you want to run the mic
         $Parameters = @{}
         if ($PSBoundParameters.ContainsKey("Name")) {
             $Parameters["name"] = $Name
+        }
+        if ($PSBoundParameters.ContainsKey("Key")) {
+            $Parameters["key"] = $Key
         }
         if ($PSBoundParameters.ContainsKey("Availability")) {
             $Parameters["availability"] = $Availability

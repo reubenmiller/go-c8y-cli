@@ -178,7 +178,7 @@
         {
           "name": "type",
           "type": "string",
-          "required": true,
+          "required": false,
           "description": "Identifies the type of this alarm, e.g. 'com_cumulocity_events_TamperEvent'."
         },
         {
@@ -186,18 +186,18 @@
           "type": "datetime",
           "required": false,
           "default": "0s",
-          "description": "Time of the alarm."
+          "description": "Time of the alarm. Defaults to current timestamp."
         },
         {
           "name": "text",
           "type": "string",
-          "required": true,
+          "required": false,
           "description": "Text description of the alarm."
         },
         {
           "name": "severity",
           "type": "string",
-          "required": true,
+          "required": false,
           "description": "The severity of the alarm: CRITICAL, MAJOR, MINOR or WARNING. Must be upper-case.",
           "validationSet": [
             "CRITICAL",
@@ -221,6 +221,12 @@
           "type": "json",
           "description": "Additional properties of the alarm."
         }
+      ],
+      "bodyRequiredKeys": [
+        "type",
+        "text",
+        "time",
+        "severity"
       ]
     },
     {

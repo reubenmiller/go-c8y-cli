@@ -26,6 +26,9 @@ func newNewBinaryCmd() *newBinaryCmd {
 		Example: `
 $ c8y binaries create --file ./output.log
 Upload a log file
+
+$ c8y binaries create --file "myConfig.json" --data "c8y_Global={},type=c8y_upload"
+Upload a config file and make it globally accessible for all users
 		`,
 		RunE: ccmd.newBinary,
 	}
@@ -33,6 +36,7 @@ Upload a log file
 	cmd.SilenceUsage = true
 
 	cmd.Flags().String("file", "", "File to be uploaded as a binary (required)")
+	addDataFlag(cmd)
 
 	// Required flags
 	cmd.MarkFlagRequired("file")
@@ -68,6 +72,12 @@ func (n *newBinaryCmd) newBinary(cmd *cobra.Command, args []string) error {
 	body := mapbuilder.NewMapBuilder()
 	body.SetMap(getDataFlag(cmd))
 	getFileFlag(cmd, "file", formData)
+	if err := setDataTemplateFromFlags(cmd, body); err != nil {
+		return newUserError("Template error. ", err)
+	}
+	if err := body.Validate(); err != nil {
+		return newUserError("Body validation error. ", err)
+	}
 
 	// path parameters
 	pathParameters := make(map[string]string)

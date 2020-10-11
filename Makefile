@@ -6,6 +6,7 @@ GOCMD=go
 BUILD_DIR = build
 C8Y_PKGS = $$(go list ./... | grep -v /vendor/)
 GOMOD=$(GOCMD) mod
+TEST_THROTTLE_LIMIT=10
 
 # Set VERSION from git describe
 VERSION := $(shell git describe | sed "s/^v\?\.\([0-9]\{1,\}\.[0-9]\{1,\}\.[0-9]\{1,\}\).*/\1/")
@@ -151,7 +152,7 @@ build_powershell:
 	pwsh -File scripts/build-powershell/build.ps1;
 
 test_powershell:
-	pwsh -NonInteractive -File tools/PSc8y/test.parallel.ps1 -TestFileExclude "Set-Session|Get-SessionHomePath"
+	pwsh -NonInteractive -File tools/PSc8y/test.parallel.ps1 -ThrottleLimit $(TEST_THROTTLE_LIMIT) -TestFileExclude "Set-Session|Get-SessionHomePath"
 	# pwsh -NonInteractive -File tools/PSc8y/tests.ps1
 
 test_powershell_sessions:		## Run tests which interfere with the session variable

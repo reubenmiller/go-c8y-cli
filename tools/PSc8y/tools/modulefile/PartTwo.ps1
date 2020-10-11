@@ -78,7 +78,7 @@ $Manifest = Test-ModuleManifest -Path $PSScriptRoot\PSc8y.psd1
 
 $ModulePrefix = $Manifest.Prefix
 
-$commandsWithSessionParameter = @( $Manifest.ExportedFunctions.Keys ) `
+$ModuleCommands = @( $Manifest.ExportedFunctions.Keys ) `
     | ForEach-Object {
         # Note: Different PowerShell version handle internal function names 
         # slightly differenty (some with prefix sometimes without), so we always
@@ -94,8 +94,11 @@ $commandsWithSessionParameter = @( $Manifest.ExportedFunctions.Keys ) `
         } else {
             throw "Could not find function '$Name'"
         }
-    } `
-    | Where-Object { $null -ne $_.Parameters -and $_.Parameters.ContainsKey("Session") }
+    }
+
+$commandsWithSessionParameter = $ModuleCommands | Where-Object {
+    $null -ne $_.Parameters -and $_.Parameters.ContainsKey("Session")
+}
 
 try {
     if (Get-Command -Name Register-ArgumentCompleter -ErrorAction SilentlyContinue) {
@@ -107,6 +110,39 @@ try {
             Get-ChildItem -Path $C8ySessionHome -Filter "$wordToComplete*.json" -ErrorAction SilentlyContinue -WarningAction SilentlyContinue | ForEach-Object {
                 [System.Management.Automation.CompletionResult]::new($_.BaseName, $_.BaseName, 'ParameterValue', $_.BaseName)
             }
+        }
+    }
+}
+catch {
+    # All this functionality is optional, so suppress errors
+    Write-Debug -Message "Error registering argument completer: $_"
+}
+
+#
+# Template completion
+#
+$commandsWithTemplateParameter = $ModuleCommands | Where-Object {
+    $null -ne $_.Parameters -and $_.Parameters.ContainsKey("Template")
+}
+
+try {
+    if (Get-Command -Name Register-ArgumentCompleter -ErrorAction SilentlyContinue) {
+
+        Register-ArgumentCompleter -CommandName $commandsWithTemplateParameter -ParameterName Template -ScriptBlock {
+            param ($commandName, $parameterName, $wordToComplete)
+
+            $settings = Get-ClientSetting
+            $c8yTemplateHome = $settings."settings.template.path"
+            if (!$c8yTemplateHome) {
+                return
+            }
+
+            Get-ChildItem -Path $c8yTemplateHome -Recurse -Filter "$wordToComplete*" -ErrorAction SilentlyContinue -WarningAction SilentlyContinue |
+                ForEach-Object {
+                    if ($_.Extension -match "(jsonnet)$") {
+                        [System.Management.Automation.CompletionResult]::new($_.Name, $_.Name, 'ParameterValue', $_.Name)
+                    }
+                }
         }
     }
 }

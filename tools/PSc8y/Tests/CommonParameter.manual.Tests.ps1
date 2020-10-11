@@ -50,6 +50,55 @@ Describe -Name "Common parameters" {
         }
     }
 
+    It "All new and update commands support templates" {
+        $ExcludeCmdlets = @(
+            "Add-PowershellType",
+            "New-RandomPassword",
+            "New-RandomString",
+            "New-Session",
+            "Register-Alias",
+            "Set-Session",
+            "Set-ClientConsoleSetting",
+            "New-TestFile",
+            "New-Microservice"
+        )
+
+        $cmdlets = Get-Command -Module PSc8y -Name "*" | Where-Object {
+            $_.Name -match "^(Add|Update|Set|Reset|Register|New|Enable|Approve)"
+        } | Where-Object {
+            $ExcludeCmdlets -notcontains $_.name
+        }
+
+        foreach ($icmdlet in $cmdlets) {
+            $icmdlet | Should -HaveParameter "Template"
+            $icmdlet | Should -HaveParameter "TemplateVars"
+        }
+    }
+
+    It "All commands with a Device parameter supports pipeline input" {
+        $ExcludeCmdlets = @(
+            "Add-ChildDeviceToDevice",
+            "Get-ChildAssetCollection",
+            "Get-ManagedObjectCollection",
+            "Remove-AlarmCollection",
+            "Remove-EventCollection",
+            "Remove-OperationCollection"
+        )
+        $cmdlets = Get-Command -Module PSc8y -Name "*" -CommandType Function |
+            Where-Object {
+                $ExcludeCmdlets -notcontains $_.name
+            } |
+            Where-Object {
+                $_.Parameters.Device
+            }
+
+        foreach ($icmdlet in $cmdlets) {
+            $icmdlet.Parameters.Device.Attributes.ValueFromPipeline | Should -BeExactly $true -Because "$($icmdlet.Name) should support device pipes"
+            $icmdlet.Parameters.Device.Attributes.ValueFromPipelineByPropertyName | Should -BeExactly $true -Because "$($icmdlet.Name) should support device pipes"
+        }
+    }
+    
+
     It "All commands support Verbose" {
         $cmdlets = Get-Command -Module PSc8y -Name "*" -CommandType Function
 

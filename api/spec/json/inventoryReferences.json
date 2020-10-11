@@ -124,6 +124,7 @@
         {
           "name": "group",
           "type": "[]devicegroup",
+          "pipeline": true,
           "property": "id",
           "description": "Group."
         }

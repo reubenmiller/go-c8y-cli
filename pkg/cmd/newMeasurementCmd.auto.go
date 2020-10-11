@@ -33,14 +33,12 @@ Create measurement
 	cmd.SilenceUsage = true
 
 	cmd.Flags().StringSlice("device", []string{""}, "The ManagedObject which is the source of this measurement. (required)")
-	cmd.Flags().String("time", "", "Time of the measurement. (required)")
-	cmd.Flags().String("type", "", "The most specific type of this entire measurement. (required)")
+	cmd.Flags().String("time", "0s", "Time of the measurement. Defaults to current timestamp.")
+	cmd.Flags().String("type", "", "The most specific type of this entire measurement.")
 	addDataFlag(cmd)
 
 	// Required flags
 	cmd.MarkFlagRequired("device")
-	cmd.MarkFlagRequired("time")
-	cmd.MarkFlagRequired("type")
 
 	ccmd.baseCmd = newBaseCmd(cmd)
 
@@ -102,6 +100,13 @@ func (n *newMeasurementCmd) newMeasurement(cmd *cobra.Command, args []string) er
 		}
 	} else {
 		return newUserError(fmt.Sprintf("Flag [%s] does not exist. %s", "type", err))
+	}
+	if err := setDataTemplateFromFlags(cmd, body); err != nil {
+		return newUserError("Template error. ", err)
+	}
+	body.SetRequiredKeys("type", "time")
+	if err := body.Validate(); err != nil {
+		return newUserError("Body validation error. ", err)
 	}
 
 	// path parameters

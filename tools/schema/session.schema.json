@@ -55,6 +55,10 @@
                     "description": "Delay in milliseconds between fetching the next result when using the includeAll option. If value is 0 or less, then it will be ignored",
                     "type": "integer",
                     "minimum": 0
+                },
+                "template.path": {
+                    "description": "Path / Folder where the templates are located. If the user gives a template name (without path), then a matching filename will be search for in this folder",
+                    "type": "string"
                 }
             }
         }

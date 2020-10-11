@@ -26,6 +26,8 @@ New-AuditRecord
 	[[-User] <String>]
 	[[-Application] <String>]
 	[[-Data] <Object>]
+	[[-Template] <String>]
+	[[-TemplateVars] <String>]
 	[-Raw]
 	[[-OutputFile] <String>]
 	[-NoProxy]
@@ -69,6 +71,7 @@ Accept wildcard characters: False
 
 ### -Time
 Time of the audit record.
+Defaults to current timestamp.
 
 ```yaml
 Type: String
@@ -190,6 +193,38 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
+### -Template
+Template (jsonnet) file to use to create the request body.
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 10
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -TemplateVars
+Variables to be used when evaluating the Template.
+Accepts a file path, json or json shorthand, i.e.
+"name=peter"
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 11
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
 ### -Raw
 Show the full (raw) response from Cumulocity including pagination information
 
@@ -214,7 +249,7 @@ Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: 10
+Position: 12
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
@@ -244,7 +279,7 @@ Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: 11
+Position: 13
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
@@ -259,7 +294,7 @@ Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: 12
+Position: 14
 Default value: 0
 Accept pipeline input: False
 Accept wildcard characters: False

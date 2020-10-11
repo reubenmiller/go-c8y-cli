@@ -106,16 +106,63 @@
                     if ($Specification.bodyTemplate.applyLast -eq "true") {
                         $Reverse = "false"
                     }
-                    $null = $RESTBodyBuilder.AppendLine("body.MergeJsonnet(```n{0}``, {1})" -f @(
+                    $null = $RESTBodyBuilder.AppendLine("bodyErr := body.MergeJsonnet(```n{0}``, {1})" -f @(
                         $Specification.bodyTemplate.template,
                         $Reverse
                     ))
+
+                    $BodyErrCheck = @"
+        if bodyErr != nil {
+            return newSystemError("Template error. ", bodyErr)
+        }
+"@.TrimStart()
+                    $null = $RESTBodyBuilder.AppendLine($BodyErrCheck)
                 }
                 default {
                     Write-Warning ("Unsupported templating type [{0}]" -f $Specification.bodyTemplate.type)
                 }
             }
         }
+
+        #
+        # Add support for user defined templates to control body
+        #
+        $BodyUserTemplateCode = @"
+        if err := setDataTemplateFromFlags(cmd, body); err != nil {
+            return newUserError("Template error. ", err)
+        }
+"@.TrimStart()
+        $null = $RESTBodyBuilder.AppendLine($BodyUserTemplateCode)
+
+        
+        if ($Specification.bodyValidation) {
+            switch ($Specification.bodyValidation.type) {
+                "jsonnet" {
+                    $null = $RESTBodyBuilder.AppendLine("body.SetValidateTemplate(```n{0}``)" -f $Specification.bodyValidation.template)
+                }
+                default {
+                    Write-Warning ("Unsupported body validation template type [{0}]" -f $Specification.bodyValidation.type)
+                }
+            }
+        }
+
+        if ($Specification.bodyRequiredKeys) {
+            $literalValues = ($Specification.bodyRequiredKeys | Foreach-Object {
+                '"{0}"' -f $_
+            }) -join ", "
+            $null = $RESTBodyBuilder.AppendLine("body.SetRequiredKeys({0})" -f $literalValues)
+        }
+
+        #
+        # Validate body
+        #
+        $BodyValidateionCode = @"
+        if err := body.Validate(); err != nil {
+            return newUserError("Body validation error. ", err)
+        }
+"@.TrimStart()
+        $null = $RESTBodyBuilder.AppendLine($BodyValidateionCode)
+        
     }
 
     #

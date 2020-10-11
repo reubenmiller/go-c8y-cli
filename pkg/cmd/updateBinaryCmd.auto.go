@@ -71,6 +71,12 @@ func (n *updateBinaryCmd) updateBinary(cmd *cobra.Command, args []string) error 
 	body := mapbuilder.NewMapBuilder()
 	body.SetMap(getDataFlag(cmd))
 	getFileFlag(cmd, "file", formData)
+	if err := setDataTemplateFromFlags(cmd, body); err != nil {
+		return newUserError("Template error. ", err)
+	}
+	if err := body.Validate(); err != nil {
+		return newUserError("Body validation error. ", err)
+	}
 
 	// path parameters
 	pathParameters := make(map[string]string)

@@ -5,8 +5,10 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"math/rand"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/google/go-jsonnet"
 )
@@ -15,11 +17,11 @@ const (
 	Separator = "."
 )
 
-func evaluateJsonnet(base string, snippets ...string) (string, error) {
+func evaluateJsonnet(base string, imports string, snippets ...string) (string, error) {
 	// Create a JSonnet VM
 	vm := jsonnet.MakeVM()
 
-	var jsonnetImport string
+	jsonnetImport := imports
 
 	jsonnetImport += `
 local addIfMissing(obj, srcProp, mixin) = if !std.objectHas(obj, srcProp) then mixin else {};
@@ -53,12 +55,25 @@ local isMandatory(o, prop) = {
 
 	jsonnetImport += "\nfinal"
 
-	if strings.ToLower(os.Getenv("C8Y_JSONNET_DEBUG")) == "true" {
+	debugJsonnet := strings.ToLower(os.Getenv("C8Y_JSONNET_DEBUG")) == "true"
+
+	if debugJsonnet {
 		log.Printf("jsonnet snippet: %s\n", jsonnetImport)
 	}
 
 	// evaluate the jsonnet
 	out, err := vm.EvaluateSnippet("file", jsonnetImport)
+
+	if err != nil {
+
+		if debugJsonnet {
+			// Include full template (with injected variables/functions) otherwise the error
+			// will report line numbers that the user does not know about
+			log.Printf("jsonnet error: %s\n", err)
+		}
+
+		err = fmt.Errorf("Could not create json from template. Error: %s", err)
+	}
 	return out, err
 }
 
@@ -75,7 +90,7 @@ func NewMapBuilderWithInit(body map[string]interface{}) *MapBuilder {
 // NewMapBuilderFromJsonnetSnippet returns a new mapper builder from a jsonnet snippet
 // See https://jsonnet.org/learning/tutorial.html for details on how to create a snippet
 func NewMapBuilderFromJsonnetSnippet(snippet string) (*MapBuilder, error) {
-	jsonStr, err := evaluateJsonnet(snippet)
+	jsonStr, err := evaluateJsonnet(snippet, "")
 
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse snippet. %w", err)
@@ -96,6 +111,20 @@ func NewMapBuilderFromJSON(data string) (*MapBuilder, error) {
 // MapBuilder creates body builder
 type MapBuilder struct {
 	body map[string]interface{}
+
+	templateVariables map[string]interface{}
+	requiredKeys      []string
+	template          string
+	validateTemplate  string
+}
+
+func (b *MapBuilder) SetTemplate(template string) *MapBuilder {
+	b.template = template
+	return b
+}
+
+func (b *MapBuilder) ApplyTemplate(reverse bool) error {
+	return b.MergeJsonnet(b.template, reverse)
 }
 
 // MergeJsonnet merges the existing body data with a given jsonnet snippet.
@@ -108,11 +137,16 @@ func (b *MapBuilder) MergeJsonnet(snippet string, reverse bool) error {
 		return fmt.Errorf("failed to marshal existing map data to json. %w", err)
 	}
 
+	imports, err := b.GetTemplateVariablesJsonnet()
+	if err != nil {
+		return err
+	}
+
 	var mergedJSON string
 	if reverse {
-		mergedJSON, err = evaluateJsonnet(snippet, string(existingJSON))
+		mergedJSON, err = evaluateJsonnet(snippet, imports, string(existingJSON))
 	} else {
-		mergedJSON, err = evaluateJsonnet(string(existingJSON), snippet)
+		mergedJSON, err = evaluateJsonnet(string(existingJSON), imports, snippet)
 	}
 
 	if err != nil {
@@ -126,6 +160,30 @@ func (b *MapBuilder) MergeJsonnet(snippet string, reverse bool) error {
 	b.body = body
 
 	return nil
+}
+
+func (b *MapBuilder) SetTemplateVariables(variables map[string]interface{}) {
+	b.templateVariables = variables
+}
+
+func (b *MapBuilder) GetTemplateVariablesJsonnet() (string, error) {
+	if b.templateVariables == nil {
+		// template variables have not been defined (not an error)
+		return "", nil
+	}
+
+	jsonStr, err := json.Marshal(b.templateVariables)
+
+	if err != nil {
+		return "", err
+	}
+
+	varsHelper := `local var(prop, defaultValue="") = if std.objectHas(vars, prop) then vars[prop] else defaultValue;`
+
+	// Seed random otherwise it will not change with execution
+	rand.Seed(time.Now().UTC().UnixNano())
+	randomHelper := fmt.Sprintf(`local rand = { bool: %t, int: %d, int2: %d, float: %f, float2: %f, float3: %f, float4: %f };`, rand.Float32() > 0.5, rand.Intn(100), rand.Intn(100), rand.Float32(), rand.Float32(), rand.Float32(), rand.Float32())
+	return fmt.Sprintf("\nlocal vars = %s;\n%s\n%s\n", jsonStr, varsHelper, randomHelper), nil
 }
 
 // SetMap sets a new map to the body. This will remove any existing values in the body
@@ -147,6 +205,46 @@ func (b MapBuilder) Get(key string) interface{} {
 func (b MapBuilder) GetString(key string) (string, bool) {
 	val, ok := b.body[key].(string)
 	return val, ok
+}
+
+func (b *MapBuilder) SetRequiredKeys(keys ...string) {
+	b.requiredKeys = keys
+}
+
+// SetValidationTemplate sets the validation template to be applied. The template accepts a jsonnet string
+func (b *MapBuilder) SetValidationTemplate(template string) {
+	b.validateTemplate = template
+}
+
+func (b MapBuilder) validateRequiredKeys() error {
+	missingKeys := make([]string, 0)
+	for _, key := range b.requiredKeys {
+		if _, ok := b.body[key]; !ok {
+			missingKeys = append(missingKeys, key)
+		}
+	}
+
+	if len(missingKeys) > 0 {
+		return fmt.Errorf("Missing required properties: %s", strings.Join(missingKeys, ", "))
+	}
+	return nil
+}
+
+// Validate checks the body if it is valid and contains all of the required keys
+func (b MapBuilder) Validate() error {
+	if len(b.requiredKeys) > 0 {
+		if err := b.validateRequiredKeys(); err != nil {
+			return err
+		}
+	}
+
+	if b.validateTemplate != "" {
+		if err := b.MergeJsonnet(b.validateTemplate, false); err != nil {
+			return fmt.Errorf("Validate error. %s", err)
+		}
+	}
+
+	return nil
 }
 
 // MarshalJSON returns the body as json

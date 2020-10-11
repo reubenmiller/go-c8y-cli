@@ -86,6 +86,12 @@ func (n *updateOperationCmd) updateOperation(cmd *cobra.Command, args []string) 
 	} else {
 		return newUserError(fmt.Sprintf("Flag [%s] does not exist. %s", "failureReason", err))
 	}
+	if err := setDataTemplateFromFlags(cmd, body); err != nil {
+		return newUserError("Template error. ", err)
+	}
+	if err := body.Validate(); err != nil {
+		return newUserError("Body validation error. ", err)
+	}
 
 	// path parameters
 	pathParameters := make(map[string]string)

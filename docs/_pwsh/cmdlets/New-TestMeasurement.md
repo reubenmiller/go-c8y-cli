@@ -18,11 +18,13 @@ Create a new test measurement
 ```
 New-TestMeasurement
 	[[-Device] <Object>]
-	[[-ValueFragmentType] <String>]
-	[[-ValueFragmentSeries] <String>]
-	[[-Type] <String>]
-	[[-Value] <Double>]
-	[[-Unit] <String>]
+	[-ValueFragmentType <String>]
+	[-ValueFragmentSeries <String>]
+	[-Type <String>]
+	[-Value <Double>]
+	[-Unit <String>]
+	[-Template <String>]
+	[-TemplateVars <String>]
 	[-Force]
 	[-WhatIf]
 	[-Confirm]
@@ -64,7 +66,7 @@ Aliases:
 Required: False
 Position: 1
 Default value: None
-Accept pipeline input: False
+Accept pipeline input: True (ByPropertyName, ByValue)
 Accept wildcard characters: False
 ```
 
@@ -77,7 +79,7 @@ Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: 2
+Position: Named
 Default value: C8y_Temperature
 Accept pipeline input: False
 Accept wildcard characters: False
@@ -92,7 +94,7 @@ Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: 3
+Position: Named
 Default value: T
 Accept pipeline input: False
 Accept wildcard characters: False
@@ -107,7 +109,7 @@ Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: 4
+Position: Named
 Default value: C8yTemperatureReading
 Accept pipeline input: False
 Accept wildcard characters: False
@@ -122,7 +124,7 @@ Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: 5
+Position: Named
 Default value: 1.2345
 Accept pipeline input: False
 Accept wildcard characters: False
@@ -139,8 +141,40 @@ Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: 6
+Position: Named
 Default value: °C
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -Template
+Template (jsonnet) file to use to create the request body.
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -TemplateVars
+Variables to be used when evaluating the Template.
+Accepts json or json shorthand, i.e.
+"name=peter"
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
 ```

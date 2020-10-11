@@ -45,7 +45,7 @@ Create new microservice
 
 	cmd.SilenceUsage = true
 
-	addDataFlag(cmd)
+	addDataFlagWithoutTemplates(cmd)
 	cmd.Flags().StringVar(&ccmd.file, "file", "", "Microservice file to be uploaded (or Cumulocity.json) file")
 	cmd.Flags().StringVar(&ccmd.name, "name", "", "Name of application")
 	cmd.Flags().StringVar(&ccmd.key, "key", "", "Shared secret of application")
@@ -81,7 +81,7 @@ func (n *newMicroserviceCmd) getApplicationDetails() *c8y.Application {
 		app.Name = n.name
 	}
 
-	app.Key = app.Name + "-microservice-key"
+	app.Key = app.Name
 	if n.key != "" {
 		app.Key = n.key
 	}

@@ -50,6 +50,16 @@ Update multiple operations
         [object]
         $Data,
 
+        # Template (jsonnet) file to use to create the request body.
+        [Parameter()]
+        [string]
+        $Template,
+
+        # Variables to be used when evaluating the Template. Accepts a file path, json or json shorthand, i.e. "name=peter"
+        [Parameter()]
+        [string]
+        $TemplateVars,
+
         # Show the full (raw) response from Cumulocity including pagination information
         [Parameter()]
         [switch]
@@ -91,6 +101,12 @@ Update multiple operations
         }
         if ($PSBoundParameters.ContainsKey("Data")) {
             $Parameters["data"] = ConvertTo-JsonArgument $Data
+        }
+        if ($PSBoundParameters.ContainsKey("Template") -and $Template) {
+            $Parameters["template"] = $Template
+        }
+        if ($PSBoundParameters.ContainsKey("TemplateVars") -and $TemplateVars) {
+            $Parameters["templateVars"] = $TemplateVars
         }
         if ($PSBoundParameters.ContainsKey("OutputFile")) {
             $Parameters["outputFile"] = $OutputFile

@@ -19,6 +19,8 @@ New application binary
 New-ApplicationBinary
 	[-Id] <Object[]>
 	[-File] <String>
+	[[-Template] <String>]
+	[[-TemplateVars] <String>]
 	[-Raw]
 	[[-OutputFile] <String>]
 	[-NoProxy]
@@ -78,6 +80,38 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
+### -Template
+Template (jsonnet) file to use to create the request body.
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 3
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -TemplateVars
+Variables to be used when evaluating the Template.
+Accepts a file path, json or json shorthand, i.e.
+"name=peter"
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 4
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
 ### -Raw
 Show the full (raw) response from Cumulocity including pagination information
 
@@ -102,7 +136,7 @@ Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: 3
+Position: 5
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
@@ -132,7 +166,7 @@ Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: 4
+Position: 6
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
@@ -147,7 +181,7 @@ Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: 5
+Position: 7
 Default value: 0
 Accept pipeline input: False
 Accept wildcard characters: False

@@ -43,6 +43,16 @@ Add a role to a group using wildcards (using pipeline)
         [object]
         $Tenant,
 
+        # Template (jsonnet) file to use to create the request body.
+        [Parameter()]
+        [string]
+        $Template,
+
+        # Variables to be used when evaluating the Template. Accepts a file path, json or json shorthand, i.e. "name=peter"
+        [Parameter()]
+        [string]
+        $TemplateVars,
+
         # Show the full (raw) response from Cumulocity including pagination information
         [Parameter()]
         [switch]
@@ -81,6 +91,12 @@ Add a role to a group using wildcards (using pipeline)
         }
         if ($PSBoundParameters.ContainsKey("Tenant")) {
             $Parameters["tenant"] = $Tenant
+        }
+        if ($PSBoundParameters.ContainsKey("Template") -and $Template) {
+            $Parameters["template"] = $Template
+        }
+        if ($PSBoundParameters.ContainsKey("TemplateVars") -and $TemplateVars) {
+            $Parameters["templateVars"] = $TemplateVars
         }
         if ($PSBoundParameters.ContainsKey("OutputFile")) {
             $Parameters["outputFile"] = $OutputFile

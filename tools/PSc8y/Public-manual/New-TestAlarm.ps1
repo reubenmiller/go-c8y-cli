@@ -32,6 +32,16 @@ Create an alarm on the existing device "myExistingDevice"
         )]
         [object] $Device,
 
+        # Template (jsonnet) file to use to create the request body.
+        [Parameter()]
+        [string]
+        $Template,
+
+        # Variables to be used when evaluating the Template. Accepts json or json shorthand, i.e. "name=peter"
+        [Parameter()]
+        [string]
+        $TemplateVars,
+
         # Don't prompt for confirmation
         [switch] $Force
     )
@@ -55,6 +65,8 @@ Create an alarm on the existing device "myExistingDevice"
                 -Type "c8y_ci_TestAlarm" `
                 -Severity MAJOR `
                 -Text "Test CI Alarm" `
+                -Template:$Template `
+                -TemplateVars:$TemplateVars `
                 -Force:$Force
         }
     }

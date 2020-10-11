@@ -32,7 +32,8 @@ Get a list of the child assets of an existing group
         $Device,
 
         # Group.
-        [Parameter()]
+        [Parameter(ValueFromPipeline=$true,
+                   ValueFromPipelineByPropertyName=$true)]
         [object[]]
         $Group,
 
@@ -95,9 +96,6 @@ Get a list of the child assets of an existing group
         if ($PSBoundParameters.ContainsKey("Device")) {
             $Parameters["device"] = $Device
         }
-        if ($PSBoundParameters.ContainsKey("Group")) {
-            $Parameters["group"] = $Group
-        }
         if ($PSBoundParameters.ContainsKey("PageSize")) {
             $Parameters["pageSize"] = $PageSize
         }
@@ -120,21 +118,28 @@ Get a list of the child assets of an existing group
     }
 
     Process {
-        foreach ($item in @("")) {
+        $Parameters["group"] = PSc8y\Expand-Id $Group
 
-
-            Invoke-ClientCommand `
-                -Noun "inventoryReferences" `
-                -Verb "listChildAssets" `
-                -Parameters $Parameters `
-                -Type "application/vnd.com.nsn.cumulocity.managedObjectReferenceCollection+json" `
-                -ItemType "application/vnd.com.nsn.cumulocity.managedObject+json" `
-                -ResultProperty "references.managedObject" `
-                -Raw:$Raw `
-                -CurrentPage:$CurrentPage `
-                -TotalPages:$TotalPages `
-                -IncludeAll:$IncludeAll
+        if (!$Force -and
+            !$WhatIfPreference -and
+            !$PSCmdlet.ShouldProcess(
+                (PSc8y\Get-C8ySessionProperty -Name "tenant"),
+                (Format-ConfirmationMessage -Name $PSCmdlet.MyInvocation.InvocationName -InputObject $item)
+            )) {
+            continue
         }
+
+        Invoke-ClientCommand `
+            -Noun "inventoryReferences" `
+            -Verb "listChildAssets" `
+            -Parameters $Parameters `
+            -Type "application/vnd.com.nsn.cumulocity.managedObjectReferenceCollection+json" `
+            -ItemType "application/vnd.com.nsn.cumulocity.managedObject+json" `
+            -ResultProperty "references.managedObject" `
+            -Raw:$Raw `
+            -CurrentPage:$CurrentPage `
+            -TotalPages:$TotalPages `
+            -IncludeAll:$IncludeAll
     }
 
     End {}

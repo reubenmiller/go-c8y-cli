@@ -19,6 +19,7 @@ New microservice
 New-Microservice
 	[-File] <String>
 	[[-Name] <String>]
+	[[-Key] <String>]
 	[[-Availability] <String>]
 	[[-ContextPath] <String>]
 	[[-ResourcesUrl] <String>]
@@ -111,6 +112,22 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
+### -Key
+Shared secret of application.
+Defaults to application name if not provided.
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 3
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
 ### -Availability
 Access level for other tenants. 
 Possible values are : MARKET, PRIVATE (default)
@@ -121,7 +138,7 @@ Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: 3
+Position: 4
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
@@ -137,7 +154,7 @@ Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: 4
+Position: 5
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
@@ -153,7 +170,7 @@ Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: 5
+Position: 6
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
@@ -215,7 +232,7 @@ Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: 6
+Position: 7
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
@@ -245,7 +262,7 @@ Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: 7
+Position: 8
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
@@ -260,7 +277,7 @@ Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: 8
+Position: 9
 Default value: 0
 Accept pipeline input: False
 Accept wildcard characters: False
@@ -321,5 +338,6 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 
 ### System.Object
 ## NOTES
+This cmdlet does not support template variables
 
 ## RELATED LINKS

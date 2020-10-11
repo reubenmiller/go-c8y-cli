@@ -84,9 +84,6 @@ String
             }
         }
 
-        # Format path
-        $Path = Resolve-Path $Path -ErrorAction SilentlyContinue
-
         if (!$Path -or !(Test-Path $Path)) {
             Write-Warning "Invalid path"
             return

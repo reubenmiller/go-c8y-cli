@@ -18,12 +18,14 @@ Create a new alarm
 ```
 New-Alarm
 	[-Device] <Object[]>
-	[-Type] <String>
+	[[-Type] <String>]
 	[[-Time] <String>]
-	[-Text] <String>
-	[-Severity] <String>
+	[[-Text] <String>]
+	[[-Severity] <String>]
 	[[-Status] <String>]
 	[[-Data] <Object>]
+	[[-Template] <String>]
+	[[-TemplateVars] <String>]
 	[-Raw]
 	[[-OutputFile] <String>]
 	[-NoProxy]
@@ -74,14 +76,13 @@ Accept wildcard characters: False
 ### -Type
 Identifies the type of this alarm, e.g.
 'com_cumulocity_events_TamperEvent'.
-(required)
 
 ```yaml
 Type: String
 Parameter Sets: (All)
 Aliases:
 
-Required: True
+Required: False
 Position: 2
 Default value: None
 Accept pipeline input: False
@@ -90,6 +91,7 @@ Accept wildcard characters: False
 
 ### -Time
 Time of the alarm.
+Defaults to current timestamp.
 
 ```yaml
 Type: String
@@ -105,14 +107,13 @@ Accept wildcard characters: False
 
 ### -Text
 Text description of the alarm.
-(required)
 
 ```yaml
 Type: String
 Parameter Sets: (All)
 Aliases:
 
-Required: True
+Required: False
 Position: 4
 Default value: None
 Accept pipeline input: False
@@ -122,14 +123,13 @@ Accept wildcard characters: False
 ### -Severity
 The severity of the alarm: CRITICAL, MAJOR, MINOR or WARNING.
 Must be upper-case.
-(required)
 
 ```yaml
 Type: String
 Parameter Sets: (All)
 Aliases:
 
-Required: True
+Required: False
 Position: 5
 Default value: None
 Accept pipeline input: False
@@ -168,6 +168,38 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
+### -Template
+Template (jsonnet) file to use to create the request body.
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 8
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -TemplateVars
+Variables to be used when evaluating the Template.
+Accepts a file path, json or json shorthand, i.e.
+"name=peter"
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 9
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
 ### -Raw
 Show the full (raw) response from Cumulocity including pagination information
 
@@ -192,7 +224,7 @@ Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: 8
+Position: 10
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
@@ -222,7 +254,7 @@ Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: 9
+Position: 11
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
@@ -237,7 +269,7 @@ Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: 10
+Position: 12
 Default value: 0
 Accept pipeline input: False
 Accept wildcard characters: False

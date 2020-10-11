@@ -45,7 +45,17 @@ Get all the device object (with app in their name). Note the Expand cmdlet won't
                 $iDevice
             } else {
                 if ($iDevice -match "^\d+$") {
-                    Get-ManagedObject -Id $iDevice
+                    
+                    if ($WhatIfPreference) {
+                        # Fake the reponse of the managed object
+                        [PSCustomObject]@{
+                            id = $iDevice
+                            # Dummy value
+                            name = "name of $iDevice"
+                        }
+                    } else {
+                        Get-ManagedObject -Id $iDevice -WhatIf:$false
+                    }
                 } else {
                     Get-DeviceCollection -Name $iDevice -WhatIf:$false
                 }

@@ -28,6 +28,8 @@ Before the c8y cli binary can accept it, it must be converted to json.
 
 The necessary character escaping of literal backslashed `\\` will be done automatically.
 
+If Data parameter is a file path then it is returned as is.
+
 ## EXAMPLES
 
 ### EXAMPLE 1
