@@ -75,6 +75,11 @@ var (
 	globalFlagUseTenantPrefix    bool
 	globalUseNonDefaultPageSize  bool
 	globalFlagTemplatePath       string
+
+	globalModeEnableCreate bool
+	globalModeEnableUpdate bool
+	globalModeEnableDelete bool
+	globalCIMode           bool
 )
 
 // CumulocityDefaultPageSize is the default page size used by Cumulocity
@@ -95,6 +100,18 @@ const (
 
 	// SettingsTemplatePath template path where the template files are located
 	SettingsTemplatePath string = "settings.template.path"
+
+	// SettingsModeEnableCreate enables create (post) commands
+	SettingsModeEnableCreate string = "settings.mode.enableCreate"
+
+	// SettingsModeEnableUpdate enables update commands
+	SettingsModeEnableUpdate string = "settings.mode.enableUpdate"
+
+	// SettingsModeEnableDelete enables delete commands
+	SettingsModeEnableDelete string = "settings.mode.enableDelete"
+
+	// SettingsModeCI enable continuous integration mode (this will enable all commands)
+	SettingsModeCI string = "settings.ci"
 )
 
 // SettingsGlobalName name of the settings file (without extension)
@@ -460,6 +477,10 @@ func loadConfiguration() error {
 	bindEnv(SettingsDefaultPageSize, CumulocityDefaultPageSize)
 	bindEnv(SettingsIncludeAllDelayMS, 0)
 	bindEnv(SettingsTemplatePath, "")
+	bindEnv(SettingsModeEnableCreate, false)
+	bindEnv(SettingsModeEnableUpdate, false)
+	bindEnv(SettingsModeEnableDelete, false)
+	bindEnv(SettingsModeCI, false)
 
 	return nil
 }
@@ -471,10 +492,18 @@ func readConfiguration() error {
 	globalFlagIncludeAllDelayMS = viper.GetInt64(SettingsIncludeAllDelayMS)
 	globalFlagTemplatePath = viper.GetString(SettingsTemplatePath)
 
+	globalModeEnableCreate = viper.GetBool(SettingsModeEnableCreate)
+	globalModeEnableUpdate = viper.GetBool(SettingsModeEnableUpdate)
+	globalModeEnableDelete = viper.GetBool(SettingsModeEnableDelete)
+
+	globalCIMode = viper.GetBool(SettingsModeCI)
+
 	Logger.Infof("%s: %d", SettingsDefaultPageSize, globalFlagPageSize)
 	Logger.Infof("%s: %d", SettingsIncludeAllPageSize, globalFlagIncludeAllPageSize)
 	Logger.Infof("%s: %d", SettingsIncludeAllDelayMS, globalFlagIncludeAllDelayMS)
 	Logger.Infof("%s: %s", SettingsTemplatePath, globalFlagTemplatePath)
+	Logger.Infof("%s: %b", SettingsModeEnableUpdate, globalModeEnableUpdate)
+	Logger.Infof("%s: %b", SettingsModeEnableDelete, globalModeEnableDelete)
 
 	return nil
 }
