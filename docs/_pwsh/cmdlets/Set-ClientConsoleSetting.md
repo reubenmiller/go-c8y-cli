@@ -19,6 +19,10 @@ Set console settings to be used by the cli tool
 Set-ClientConsoleSetting
 	[-HideSensitive]
 	[-ShowSensitive]
+	[-EnableCreateCommands]
+	[-EnableUpdateCommands]
+	[-EnableDeleteCommands]
+	[-DisableCommands]
 	[[-DefaultPageSize] <Int32>]
 	[<CommonParameters>]
 ```
@@ -37,6 +41,13 @@ Set-ClientConsoleSetting -HideSensitive
 
 Hide any sensitive session information on the console.
 Settings like (tenant, username, password, base64 credentials)
+
+### EXAMPLE 2
+```
+Set-ClientConsoleSetting -EnableCreateCommands -EnableUpdateCommands
+```
+
+Enable all create and update commands until the session is changed
 
 ## PARAMETERS
 
@@ -57,6 +68,66 @@ Accept wildcard characters: False
 
 ### -ShowSensitive
 Show sensitive information (excepts clear-text passwords)
+
+```yaml
+Type: SwitchParameter
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: False
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -EnableCreateCommands
+Enable create commands
+
+```yaml
+Type: SwitchParameter
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: False
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -EnableUpdateCommands
+Enable update commands
+
+```yaml
+Type: SwitchParameter
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: False
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -EnableDeleteCommands
+Enable delete commands
+
+```yaml
+Type: SwitchParameter
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: False
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -DisableCommands
+Disable all create/update/delete commands
 
 ```yaml
 Type: SwitchParameter
