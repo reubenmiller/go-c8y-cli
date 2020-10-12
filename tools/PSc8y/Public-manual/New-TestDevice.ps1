@@ -67,7 +67,7 @@ Create 10 test devices (with agent functionality) all with unique names
             -Data $Data `
             -Template:$Template `
             -TemplateVars:$TemplateVars `
-            -Force
+            -Force:$Force
 
         $TestDevice
     }
