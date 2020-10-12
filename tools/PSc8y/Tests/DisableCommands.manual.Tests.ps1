@@ -1,6 +1,10 @@
 . $PSScriptRoot/imports.ps1
 
 Describe -Name "Disable create/update/delete commands" {
+    BeforeAll {
+        $ciSetting = $env:C8Y_SETTINGS_CI
+    }
+
     BeforeEach {
         $env:C8Y_SETTINGS_CI = ""
         $env:C8Y_SETTINGS_MODE_ENABLECREATE = ""
@@ -63,6 +67,12 @@ Describe -Name "Disable create/update/delete commands" {
             if ($item) {
                 PSc8y\Remove-ManagedObject -Id $item
             }
+        }
+    }
+
+    AfterAll {
+        if ($ciSetting) {
+            $env:C8Y_SETTINGS_CI = $ciSetting
         }
     }
 }
