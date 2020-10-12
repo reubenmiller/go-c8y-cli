@@ -11,6 +11,20 @@
 
 **Features**
 
+* Custom rest requests no longer required the `Data` or `File` parameter for `POST` or `PUT` requests. If neither is provided, then the request is sent without a body
+
+    **PowerShell**
+
+    ```powershell
+    Invoke-ClientRequest -Uri "/service/exampleMS/myendpoint" -Method "POST"
+    ```
+
+    **Bash/zsh**
+
+    ```sh
+    c8y rest POST /service/exampleMS/myendpoint
+    ```
+
 * Added command to read the current configuration settings as json
 
     **PowerShell**

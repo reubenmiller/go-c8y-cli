@@ -129,10 +129,13 @@ func resolvePaths(sourceDir string, pattern string, extension string, ignoreDir 
 }
 
 func getDataFlag(cmd *cobra.Command) map[string]interface{} {
+	if !cmd.Flags().Changed(FlagDataName) {
+		return nil
+	}
 	if value, err := cmd.Flags().GetString(FlagDataName); err == nil {
 		return RemoveCumulocityProperties(MustParseJSON(getContents(value)), true)
 	}
-	return make(map[string]interface{})
+	return nil
 }
 
 func setDataTemplateFromFlags(cmd *cobra.Command, body *mapbuilder.MapBuilder) error {

@@ -131,10 +131,14 @@ func (b *MapBuilder) ApplyTemplate(reverse bool) error {
 // When reverse is false, then the snippet will be applied to the existing data,
 // when reverse is true, then the given snippet will be the base, and the existing data will be applied to the new snippet.
 func (b *MapBuilder) MergeJsonnet(snippet string, reverse bool) error {
-	existingJSON, err := b.MarshalJSON()
+	var err error
+	existingJSON := []byte("{}")
 
-	if err != nil {
-		return fmt.Errorf("failed to marshal existing map data to json. %w", err)
+	if b.body != nil {
+		existingJSON, err = b.MarshalJSON()
+		if err != nil {
+			return fmt.Errorf("failed to marshal existing map data to json. %w", err)
+		}
 	}
 
 	imports, err := b.GetTemplateVariablesJsonnet()
