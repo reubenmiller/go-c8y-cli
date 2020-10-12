@@ -77,9 +77,8 @@
     },
     {
       "name": "deleteBulkOperation",
-      "description": "Remove bulk operation/s",
+      "description": "Remove bulk operation/s. Only bulk operations that are in ACTIVE or IN_PROGRESS can be deleted",
       "method": "DELETE",
-      "skip": true,
       "examples": {
         "powershell": [
           {
@@ -169,7 +168,7 @@
         {
           "name": "creationRampSec",
           "property": "creationRamp",
-          "type": "integer",
+          "type": "float",
           "required": true,
           "description": "Delay between every operation creation."
         },
@@ -185,12 +184,18 @@
           "type": "json",
           "description": "Additional properties describing the bulk operation which will be performed on the device group."
         }
+      ],
+      "bodyRequiredKeys": [
+        "groupId",
+        "startDate",
+        "creationRamp",
+        "operationPrototype"
       ]
     },
     {
       "name": "updateBulkOperation",
       "description": "Update bulk operation",
-      "descriptionLong": "Update bulk operation",
+      "descriptionLong": "Update bulk operation. Making update on a started bulk operation cancels it and creates/schedules a new one.",
       "examples": {
         "powershell": [
           {
@@ -216,8 +221,8 @@
         {
           "name": "creationRampSec",
           "property": "creationRamp",
-          "type": "integer",
-          "required": false,
+          "type": "float",
+          "required": true,
           "description": "Delay between every operation creation."
         },
         {

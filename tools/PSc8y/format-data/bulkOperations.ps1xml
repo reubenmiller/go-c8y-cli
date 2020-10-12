@@ -51,10 +51,13 @@
                         <Width>20</Width>
                     </TableColumnHeader>
                     <TableColumnHeader>
+                        <Width>15</Width>
+                    </TableColumnHeader>
+                    <TableColumnHeader>
                         <Width>70</Width>
                     </TableColumnHeader>
                     <TableColumnHeader>
-                        <Width>50</Width>
+                        <Width>100</Width>
                     </TableColumnHeader>
                 </TableHeaders>
                 <TableRowEntries>
@@ -75,6 +78,9 @@
                             </TableColumnItem>
                             <TableColumnItem>
                                 <PropertyName>creationRamp</PropertyName>
+                            </TableColumnItem>
+                            <TableColumnItem>
+                                <PropertyName>generalStatus</PropertyName>
                             </TableColumnItem>
                             <TableColumnItem>
                                 <PropertyName>progress</PropertyName>

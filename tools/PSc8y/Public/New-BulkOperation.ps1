@@ -40,7 +40,7 @@ Create bulk operation for a group (using pipeline)
 
         # Delay between every operation creation. (required)
         [Parameter(Mandatory = $true)]
-        [long]
+        [float]
         $CreationRampSec,
 
         # Operation prototype to send to each device in the group (required)

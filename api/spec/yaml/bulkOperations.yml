@@ -57,10 +57,8 @@ endpoints:
         description: Bulk Operation id
 
   - name: deleteBulkOperation
-    description: 'Remove bulk operation/s'
+    description: 'Remove bulk operation/s. Only bulk operations that are in ACTIVE or IN_PROGRESS can be deleted'
     method: DELETE
-    # Currently an issue with this api???
-    skip: true
     examples:
       powershell:
         - description: Remove bulk operation by id
@@ -125,7 +123,7 @@ endpoints:
 
       - name: creationRampSec
         property: creationRamp
-        type: integer
+        type: float
         required: true
         description: Delay between every operation creation.
 
@@ -138,11 +136,16 @@ endpoints:
       - name: data
         type: json
         description: Additional properties describing the bulk operation which will be performed on the device group.
-
+      
+    bodyRequiredKeys:
+      - groupId
+      - startDate
+      - creationRamp
+      - operationPrototype
 
   - name: updateBulkOperation
     description: Update bulk operation
-    descriptionLong: Update bulk operation
+    descriptionLong: Update bulk operation. Making update on a started bulk operation cancels it and creates/schedules a new one.
     examples:
       powershell:
         - description: Update bulk operation
@@ -159,8 +162,8 @@ endpoints:
     body:
       - name: creationRampSec
         property: creationRamp
-        type: integer
-        required: false
+        type: float
+        required: true
         description: Delay between every operation creation.
 
       - name: data

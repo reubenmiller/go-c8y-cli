@@ -12,41 +12,38 @@ import (
 	"github.com/spf13/cobra"
 )
 
-type updateBulkOperationCmd struct {
+type deleteBulkOperationCmd struct {
 	*baseCmd
 }
 
-func newUpdateBulkOperationCmd() *updateBulkOperationCmd {
-	ccmd := &updateBulkOperationCmd{}
+func newDeleteBulkOperationCmd() *deleteBulkOperationCmd {
+	ccmd := &deleteBulkOperationCmd{}
 
 	cmd := &cobra.Command{
-		Use:   "update",
-		Short: "Update bulk operation",
-		Long:  `Update bulk operation. Making update on a started bulk operation cancels it and creates/schedules a new one.`,
+		Use:   "delete",
+		Short: "Remove bulk operation/s. Only bulk operations that are in ACTIVE or IN_PROGRESS can be deleted",
+		Long:  ``,
 		Example: `
-$ c8y bulkOperations update --id 12345 --creationRamp 15
-Update an bulk operation
+$ c8y bulkOperations delete --id 12345
+Remove bulk operation by id
         `,
-		PreRunE: validateUpdateMode,
-		RunE:    ccmd.updateBulkOperation,
+		PreRunE: validateDeleteMode,
+		RunE:    ccmd.deleteBulkOperation,
 	}
 
 	cmd.SilenceUsage = true
 
 	cmd.Flags().Int("id", 0, "Bulk Operation id (required)")
-	cmd.Flags().Float32("creationRampSec", 0, "Delay between every operation creation. (required)")
-	addDataFlag(cmd)
 
 	// Required flags
 	cmd.MarkFlagRequired("id")
-	cmd.MarkFlagRequired("creationRampSec")
 
 	ccmd.baseCmd = newBaseCmd(cmd)
 
 	return ccmd
 }
 
-func (n *updateBulkOperationCmd) updateBulkOperation(cmd *cobra.Command, args []string) error {
+func (n *deleteBulkOperationCmd) deleteBulkOperation(cmd *cobra.Command, args []string) error {
 
 	commonOptions, err := getCommonOptions(cmd)
 	if err != nil {
@@ -70,18 +67,6 @@ func (n *updateBulkOperationCmd) updateBulkOperation(cmd *cobra.Command, args []
 
 	// body
 	body := mapbuilder.NewMapBuilder()
-	body.SetMap(getDataFlag(cmd))
-	if v, err := cmd.Flags().GetFloat32("creationRampSec"); err == nil {
-		body.Set("creationRamp", v)
-	} else {
-		return newUserError(fmt.Sprintf("Flag [%s] does not exist. %s", "creationRampSec", err))
-	}
-	if err := setDataTemplateFromFlags(cmd, body); err != nil {
-		return newUserError("Template error. ", err)
-	}
-	if err := body.Validate(); err != nil {
-		return newUserError("Body validation error. ", err)
-	}
 
 	// path parameters
 	pathParameters := make(map[string]string)
@@ -94,7 +79,7 @@ func (n *updateBulkOperationCmd) updateBulkOperation(cmd *cobra.Command, args []
 	path := replacePathParameters("devicecontrol/bulkoperations/{id}", pathParameters)
 
 	req := c8y.RequestOptions{
-		Method:       "PUT",
+		Method:       "DELETE",
 		Path:         path,
 		Query:        queryValue,
 		Body:         body.GetMap(),

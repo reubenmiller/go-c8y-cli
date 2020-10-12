@@ -36,6 +36,7 @@
         "integer",
         "id",
         "file",
+        "float",
         "datetime",
         "json",
         "json_custom",

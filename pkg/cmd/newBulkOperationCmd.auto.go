@@ -35,7 +35,7 @@ Create operation for a device
 
 	cmd.Flags().StringSlice("group", []string{""}, "Identifies the target group on which this operation should be performed. (required)")
 	cmd.Flags().String("startDate", "10s", "Time when operations should be created.")
-	cmd.Flags().Int("creationRampSec", 0, "Delay between every operation creation. (required)")
+	cmd.Flags().Float32("creationRampSec", 0, "Delay between every operation creation. (required)")
 	cmd.Flags().String("operation", "", "Operation prototype to send to each device in the group (required)")
 	addDataFlag(cmd)
 
@@ -98,7 +98,7 @@ func (n *newBulkOperationCmd) newBulkOperation(cmd *cobra.Command, args []string
 			return newUserError("invalid date format", err)
 		}
 	}
-	if v, err := cmd.Flags().GetInt("creationRampSec"); err == nil {
+	if v, err := cmd.Flags().GetFloat32("creationRampSec"); err == nil {
 		body.Set("creationRamp", v)
 	} else {
 		return newUserError(fmt.Sprintf("Flag [%s] does not exist. %s", "creationRampSec", err))
@@ -113,6 +113,7 @@ func (n *newBulkOperationCmd) newBulkOperation(cmd *cobra.Command, args []string
 	if err := setDataTemplateFromFlags(cmd, body); err != nil {
 		return newUserError("Template error. ", err)
 	}
+	body.SetRequiredKeys("groupId", "startDate", "creationRamp", "operationPrototype")
 	if err := body.Validate(); err != nil {
 		return newUserError("Body validation error. ", err)
 	}

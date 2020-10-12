@@ -5,7 +5,7 @@ Function Update-BulkOperation {
 Update bulk operation
 
 .DESCRIPTION
-Update bulk operation
+Update bulk operation. Making update on a started bulk operation cancels it and creates/schedules a new one.
 
 .EXAMPLE
 PS> Update-BulkOperation -Id {{ NewOperation }} -CreationRamp 15
@@ -28,9 +28,9 @@ Update bulk operation
         [long]
         $Id,
 
-        # Delay between every operation creation.
-        [Parameter()]
-        [long]
+        # Delay between every operation creation. (required)
+        [Parameter(Mandatory = $true)]
+        [float]
         $CreationRampSec,
 
         # Additional properties to update on the bulk operation.

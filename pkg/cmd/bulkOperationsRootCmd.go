@@ -20,6 +20,7 @@ func newBulkOperationsRootCmd() *bulkOperationsCmd {
 	// Subcommands
 	cmd.AddCommand(newGetBulkOperationCollectionCmd().getCommand())
 	cmd.AddCommand(newGetBulkOperationCmd().getCommand())
+	cmd.AddCommand(newDeleteBulkOperationCmd().getCommand())
 	cmd.AddCommand(newNewBulkOperationCmd().getCommand())
 	cmd.AddCommand(newUpdateBulkOperationCmd().getCommand())
 
