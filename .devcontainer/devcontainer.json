@@ -18,7 +18,8 @@
 		// Yaml code completion
 		"yaml.completion": true,
 		"yaml.schemas": {
-			"./api/spec/schema.json": "api/spec/yaml/*.yml"
+			"./api/spec/schema.json": "api/spec/yaml/*.yml",
+			"./tools/schema/session.schema.json": ".cumulocity/*.y*ml"
 		},
 		"powershell.pester.useLegacyCodeLens": false,
 		"extensions.ignoreRecommendations": true
