@@ -65,5 +65,5 @@ func (n *subscribeRealtimeAllCmd) subscribeAllRealtime(cmd *cobra.Command, args 
 		c8y.RealtimeOperations(device),
 	}
 
-	return subscribeMultiple(patterns, n.flagDurationSec, n.flagCount, cmd)
+	return subscribeMultiple(patterns, n.flagDurationSec, n.flagCount, false, cmd)
 }
