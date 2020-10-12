@@ -23,6 +23,9 @@ Set-Location $PSScriptRoot
 # Create the artifacts folder if not present
 if (!(Test-Path -Path "./reports" )) {
     $null = New-Item -ItemType directory -Path "./reports"
+} else {
+    # Remove existing reports
+    Remove-Item "./reports/*xml"
 }
 
 # Dot source the invoke-parallel script
