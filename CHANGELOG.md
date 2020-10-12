@@ -2,14 +2,20 @@
 
 ## Unreleased
 
-**Breaking Changes**
+No unreleased features
+
+## Released
+
+### v1.6.0
+
+#### Breaking Changes
 
 * Added support for disabling create/update/delete command individually to prevent accidental data loss. See the [session concept documentation](https://reubenmiller.github.io/go-c8y-cli/docs/concepts/sessions/) for full details.
     * create/update/delete command are disabled by default! They must be enabled otherwise the commands will return an error. Commands can be enabled/disabled from the session properties
     * commands can be temporarily enabled/disabled in the session via environment variables without persisting them in the session settings
     * CI mode which enables all commands via one environment variable
 
-**Features**
+#### Features (PSc8y and c8y)
 
 * Custom rest requests no longer required the `Data` or `File` parameter for `POST` or `PUT` requests. If neither is provided, then the request is sent without a body
 
@@ -144,7 +150,7 @@
     c8y inventory create --data ./myfile.json
     ```
 
-#### PSc8y (PowerShell)
+#### PSc8y (PowerShell) minor improvements / fixes
 
 * Fixed logic when removing username information from the current session path when using the hide sensitive information option. Affects MacOS and Linux
 
@@ -162,8 +168,6 @@
 * `New-Microservice`
     * Added `-Key` parameter to allow the user to set a custom value
     * Changed the default value of the `key` property from `{name}-microservice-key` to `{name}` so it matched the default name used by the Cumulocity Java SDK for microservices
-
-## Released
 
 ### v1.5.2
 
