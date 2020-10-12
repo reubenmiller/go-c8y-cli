@@ -8,12 +8,12 @@ Add role to a group
 Assign a role to a user group
 
 .EXAMPLE
-PS> Add-RoleToGroup -Group "customGroup1*" -Role "*ALARM_*"
+PS> Add-RoleToGroup -Group "${NamePattern}*" -Role "*ALARM_*"
 
 Add a role to a group using wildcards
 
 .EXAMPLE
-PS> Get-RoleCollection -PageSize 100 | Where-Object Name -like "*ALARM*" | Add-RoleToGroup -Group "customGroup1*"
+PS> Get-RoleCollection -PageSize 100 | Where-Object Name -like "*ALARM*" | Add-RoleToGroup -Group "${NamePattern}*"
 
 Add a role to a group using wildcards (using pipeline)
 
@@ -42,6 +42,16 @@ Add a role to a group using wildcards (using pipeline)
         [Parameter()]
         [object]
         $Tenant,
+
+        # Template (jsonnet) file to use to create the request body.
+        [Parameter()]
+        [string]
+        $Template,
+
+        # Variables to be used when evaluating the Template. Accepts a file path, json or json shorthand, i.e. "name=peter"
+        [Parameter()]
+        [string]
+        $TemplateVars,
 
         # Show the full (raw) response from Cumulocity including pagination information
         [Parameter()]
@@ -81,6 +91,12 @@ Add a role to a group using wildcards (using pipeline)
         }
         if ($PSBoundParameters.ContainsKey("Tenant")) {
             $Parameters["tenant"] = $Tenant
+        }
+        if ($PSBoundParameters.ContainsKey("Template") -and $Template) {
+            $Parameters["template"] = $Template
+        }
+        if ($PSBoundParameters.ContainsKey("TemplateVars") -and $TemplateVars) {
+            $Parameters["templateVars"] = $TemplateVars
         }
         if ($PSBoundParameters.ContainsKey("OutputFile")) {
             $Parameters["outputFile"] = $OutputFile

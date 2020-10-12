@@ -84,7 +84,7 @@
           "name": "name",
           "type": "string",
           "required": true,
-          "description": "Name of microservice"
+          "description": "Name of microservice (or id if the microservice already exists)"
         },
         {
           "name": "key",

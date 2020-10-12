@@ -33,18 +33,18 @@ Create a new event for a device (using pipeline)
         [object[]]
         $Device,
 
-        # Time of the event.
+        # Time of the event. Defaults to current timestamp.
         [Parameter()]
         [string]
         $Time,
 
-        # Identifies the type of this event. (required)
-        [Parameter(Mandatory = $true)]
+        # Identifies the type of this event.
+        [Parameter()]
         [string]
         $Type,
 
-        # Text description of the event. (required)
-        [Parameter(Mandatory = $true)]
+        # Text description of the event.
+        [Parameter()]
         [string]
         $Text,
 
@@ -52,6 +52,16 @@ Create a new event for a device (using pipeline)
         [Parameter()]
         [object]
         $Data,
+
+        # Template (jsonnet) file to use to create the request body.
+        [Parameter()]
+        [string]
+        $Template,
+
+        # Variables to be used when evaluating the Template. Accepts a file path, json or json shorthand, i.e. "name=peter"
+        [Parameter()]
+        [string]
+        $TemplateVars,
 
         # Show the full (raw) response from Cumulocity including pagination information
         [Parameter()]
@@ -97,6 +107,12 @@ Create a new event for a device (using pipeline)
         }
         if ($PSBoundParameters.ContainsKey("Data")) {
             $Parameters["data"] = ConvertTo-JsonArgument $Data
+        }
+        if ($PSBoundParameters.ContainsKey("Template") -and $Template) {
+            $Parameters["template"] = $Template
+        }
+        if ($PSBoundParameters.ContainsKey("TemplateVars") -and $TemplateVars) {
+            $Parameters["templateVars"] = $TemplateVars
         }
         if ($PSBoundParameters.ContainsKey("OutputFile")) {
             $Parameters["outputFile"] = $OutputFile

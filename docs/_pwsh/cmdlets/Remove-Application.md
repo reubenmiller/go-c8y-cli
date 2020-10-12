@@ -43,7 +43,7 @@ Delete an application by id
 
 ### EXAMPLE 2
 ```
-Remove-Application -Id "my-temp-app"
+Remove-Application -Id $App.name
 ```
 
 Delete an application by name

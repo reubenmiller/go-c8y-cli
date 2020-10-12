@@ -2,7 +2,9 @@
 
 Describe -Name "Encoding" {
     Context "Test device" {
-        $TestDevice = PSc8y\New-TestAgent
+        BeforeAll {
+            $TestDevice = PSc8y\New-TestAgent
+        }
 
         It "Create alarm with extended character set" {
             $Text = "Test Alarm äöüßáàæåāø¡µ~∫√ç≈≈¥å∂ƒ©ªº∆@œæ•πø⁄¨Ω†∑«¡¶¢[[]|{}≠¿"

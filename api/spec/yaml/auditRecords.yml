@@ -39,7 +39,7 @@ endpoints:
         type: datetime
         required: false
         default: "0s"
-        description: Time of the audit record.
+        description: Time of the audit record. Defaults to current timestamp.
 
       - name: text
         type: string
@@ -190,6 +190,7 @@ endpoints:
     method: DELETE
     path: /audit/auditRecords
     deprecated: true
+    skip: true
     alias:
         go: deleteCollection
         powershell: Remove-AuditRecordCollection

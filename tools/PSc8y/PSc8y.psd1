@@ -12,7 +12,7 @@
 RootModule = './PSc8y.psm1'
 
 # Version number of this module.
-ModuleVersion = '1.2.0'
+ModuleVersion = '1.6.0'
 
 # Supported PSEditions
 CompatiblePSEditions = @(
@@ -90,6 +90,10 @@ FormatsToProcess = @(
 
 # Functions to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no functions to export.
 FunctionsToExport = @(
+	'Add-AssetToGroup',
+	'Add-ChildDeviceToDevice',
+	'Add-ChildGroupToGroup',
+	'Add-DeviceToGroup',
 	'Add-RoleToGroup',
 	'Add-RoleToUser',
 	'Add-UserToGroup',
@@ -197,12 +201,14 @@ FunctionsToExport = @(
 	'Remove-Agent',
 	'Remove-AlarmCollection',
 	'Remove-Application',
-	'Remove-AuditRecordCollection',
+	'Remove-AssetFromGroup',
 	'Remove-Binary',
 	'Remove-BulkOperation',
 	'Remove-ChildAssetReference',
 	'Remove-ChildDeviceReference',
+	'Remove-ChildDeviceFromDevice',
 	'Remove-Device',
+	'Remove-DeviceFromGroup',
 	'Remove-DeviceGroup',
 	'Remove-DeviceRequest',
 	'Remove-Event',
@@ -250,7 +256,8 @@ FunctionsToExport = @(
 	'Update-User',
 	'Add-PowershellType',
 	'Clear-Session',
-	'ConvertFrom-Base64ToUtf8',
+	'ConvertFrom-Base64String',
+	'ConvertTo-Base64String',
 	'ConvertTo-JsonArgument',
 	'Expand-Application',
 	'Expand-Device',
@@ -267,7 +274,8 @@ FunctionsToExport = @(
 	'Get-C8ySessionProperty',
 	'Get-ClientBinary',
 	'Get-ClientBinaryVersion',
-	'Get-CurrentTenantApplications',
+	'Get-ClientSetting',
+	'Get-CurrentTenantApplicationCollection',
 	'Get-DeviceBootstrapCredential',
 	'Get-DeviceCollection',
 	'Get-DeviceGroupCollection',
@@ -276,6 +284,7 @@ FunctionsToExport = @(
 	'Get-SessionCollection',
 	'Install-ClientBinary',
 	'Invoke-ClientRequest',
+	'Invoke-Template',
 	'New-HostedApplication',
 	'New-Microservice',
 	'New-RandomPassword',
@@ -304,7 +313,7 @@ FunctionsToExport = @(
 	'Watch-ManagedObject',
 	'Watch-Measurement',
 	'Watch-Notification',
-	'Watch-NotificationChannels',
+	'Watch-NotificationChannel',
 	'Watch-Operation')
 # VariablesToExport = '*'
 

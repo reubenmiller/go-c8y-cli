@@ -2,12 +2,12 @@
 
 Describe -Name "Update-Application" {
     BeforeEach {
-        $App = New-Application -Name "helloworld-app" -Type HOSTED -Key "helloworld-app-key" -ContextPath "helloworld-app"
+        $App = New-TestHostedApplication
 
     }
 
     It "Update application availability to MARKET" {
-        $Response = PSc8y\Update-Application -Id "helloworld-app" -Availability "MARKET"
+        $Response = PSc8y\Update-Application -Id $App.name -Availability "MARKET"
         $LASTEXITCODE | Should -Be 0
         $Response | Should -Not -BeNullOrEmpty
     }

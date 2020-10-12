@@ -155,7 +155,7 @@ Describe -Name "Invoke-ClientRequest" {
             -Headers @{
                 MyHeader = "SomeValue"
                 2 = 1
-            } ``
+            } `
             -Data @{
                 name = "manual_object_002"
                 c8y_CustomObject = @{
@@ -171,4 +171,14 @@ Describe -Name "Invoke-ClientRequest" {
         ($Response -join "`n") | Should -BeLike "*2: 1*"
     }
 
+    It "Sends a request without a body" {
+        $Response = Invoke-ClientRequest `
+            -Uri "/inventory/managedObjects" `
+            -Method "post" `
+            -Whatif 2>&1
+
+        $LASTEXITCODE | Should -Be 0
+        $Response | Should -Not -BeNullOrEmpty
+        $Response -match "Body:" | Should -HaveCount 0
+    }
 }

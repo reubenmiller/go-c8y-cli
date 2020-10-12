@@ -159,8 +159,26 @@
       "examples": {
         "powershell": [
           {
-            "description": "Get external identity",
-            "command": "New-ExternalId -Device {{ randomdevice }} -Type \"my_SerialNumber\" -Name \"myserialnumber\""
+            "description": "Create external identity",
+            "beforeEach": [
+              "$my_SerialNumber = New-RandomString -Prefix \"my_SerialNumber\"",
+              "$Device = New-TestDevice"
+            ],
+            "command": "New-ExternalId -Device $Device.id -Type \"$my_SerialNumber\" -Name \"myserialnumber\"",
+            "afterEach": [
+              "PSc8y\\Remove-ManagedObject -Id $Device.id"
+            ]
+          },
+          {
+            "description": "Create external identity (using pipeline)",
+            "beforeEach": [
+              "$my_SerialNumber = New-RandomString -Prefix \"my_SerialNumber\"",
+              "$Device = New-TestDevice"
+            ],
+            "command": "Get-Device $Device.id | New-ExternalId -Type \"$my_SerialNumber\" -Name \"myserialnumber\"",
+            "afterEach": [
+              "PSc8y\\Remove-ManagedObject -Id $Device.id"
+            ]
           }
         ],
         "go": [
@@ -175,6 +193,7 @@
           "name": "device",
           "type": "[]device",
           "required": true,
+          "pipeline": true,
           "description": "The ManagedObject linked to the external ID."
         }
       ],

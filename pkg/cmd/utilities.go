@@ -35,7 +35,27 @@ func MustParseJSON(value string) map[string]interface{} {
 	return data
 }
 
+// ParseJSON parses a string and returns the map structure. It will parse json and shorthand json.
+func ParseJSON(value string, data map[string]interface{}) error {
+	if data == nil {
+		return errors.Errorf("data is nil. Can parse json into an empty map")
+	}
+
+	if isJSONString(value) {
+		if err := parseJSONStructure(value, data); err != nil {
+			return errors.Wrap(err, "Invalid JSON")
+		}
+		return nil
+	}
+
+	if err := parseShorthandJSONStructure(value, data); err != nil {
+		return errors.Wrap(err, "Invalid shorthand JSON")
+	}
+	return nil
+}
+
 func isJSONString(value string) bool {
+	value = strings.TrimSpace(value)
 	return strings.HasPrefix(value, "{") && strings.HasSuffix(value, "}")
 }
 
@@ -124,7 +144,9 @@ func parseShorthandJSONStructure(value string, data map[string]interface{}) erro
 
 	valuePairs := strings.Split(value, "=")
 
-	Logger.Debugf("Input: %s", value)
+	if len(value) > 0 {
+		Logger.Debugf("Input: %s", value)
+	}
 
 	outputValues := []string{}
 	for _, item := range valuePairs {
@@ -206,8 +228,16 @@ func getTempFilepath(name string, outputDir string) (string, error) {
 // @filename	filename
 // @directory	output directory. If empty, then a temp directory will be used
 // if filename
-func saveResponseToFile(resp *c8y.Response, filename string) (string, error) {
-	out, err := os.Create(filename)
+func saveResponseToFile(resp *c8y.Response, filename string, append bool) (string, error) {
+
+	var out *os.File
+	var err error
+	if append {
+		out, err = os.OpenFile(filename, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	} else {
+		out, err = os.Create(filename)
+	}
+
 	if err != nil {
 		return "", fmt.Errorf("Could not create file. %s", err)
 	}

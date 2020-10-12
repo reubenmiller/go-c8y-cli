@@ -9,8 +9,8 @@ import (
 	"time"
 
 	"github.com/fatih/color"
-	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/reubenmiller/go-c8y-cli/pkg/jsonUtilities"
+	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
 )
 
@@ -51,7 +51,7 @@ func subscribe(channelPattern string, timeoutSec int64, maxMessages int64, cmd *
 			data := jsonUtilities.UnescapeJSON(msg.Payload.Data)
 
 			// show data on console
-			cmd.Printf("%s\n", data)
+			// cmd.Printf("%s\n", data)
 
 			// return data from cli
 			fmt.Printf("%s\n", data)
@@ -70,7 +70,7 @@ func subscribe(channelPattern string, timeoutSec int64, maxMessages int64, cmd *
 	}
 }
 
-func subscribeMultiple(channelPatterns []string, timeoutSec int64, maxMessages int64, cmd *cobra.Command) error {
+func subscribeMultiple(channelPatterns []string, timeoutSec int64, maxMessages int64, useColorOutput bool, cmd *cobra.Command) error {
 
 	if err := client.Realtime.Connect(); err != nil {
 		Logger.Errorf("Could not connect to /cep/realtime. %s", err)
@@ -107,28 +107,30 @@ func subscribeMultiple(channelPatterns []string, timeoutSec int64, maxMessages i
 
 			data := jsonUtilities.UnescapeJSON(msg.Payload.Data)
 
-			// set color based on channel
-			channelInfo := strings.Split(msg.Channel, "/")
-			// var colorPrint func(string, ...interface{}) string
+			if useColorOutput {
 
-			colorPrint := color.GreenString
-			if len(channelInfo) > 1 {
-				switch channelInfo[1] {
-				case "measurements":
-					colorPrint = color.GreenString
-				case "events":
-					colorPrint = color.HiYellowString
-				case "operations":
-					colorPrint = color.MagentaString
-				case "alarms":
-					colorPrint = color.RedString
-				default:
-					colorPrint = color.GreenString
+				// set color based on channel
+				channelInfo := strings.Split(msg.Channel, "/")
+
+				colorPrint := color.GreenString
+				if len(channelInfo) > 1 {
+					switch channelInfo[1] {
+					case "measurements":
+						colorPrint = color.GreenString
+					case "events":
+						colorPrint = color.HiYellowString
+					case "operations":
+						colorPrint = color.MagentaString
+					case "alarms":
+						colorPrint = color.RedString
+					default:
+						colorPrint = color.GreenString
+					}
 				}
-			}
 
-			// show data on console
-			cmd.Printf("%s%s\n", colorPrint("[%s]: ", msg.Channel), data)
+				// show data on console
+				cmd.Printf("%s%s\n", colorPrint("[%s]: ", msg.Channel), data)
+			}
 
 			// return data from cli
 			fmt.Printf("%s\n", data)

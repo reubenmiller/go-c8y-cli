@@ -99,7 +99,7 @@ func lookupEntity(fetch entityFetcher, values []string, getID bool) ([]entityRef
 
 func parseAndSanitizeIDs(values []string) (ids []string, names []string) {
 	for _, value := range values {
-		parts := strings.Split(strings.ReplaceAll(value, " ", ","), ",")
+		parts := strings.Split(strings.ReplaceAll(value, ", ", ","), ",")
 
 		for _, part := range parts {
 			// Only add uint looking values

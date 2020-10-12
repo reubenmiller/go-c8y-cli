@@ -1,15 +1,15 @@
 package cmd
 
 import (
-	"context"
 	"fmt"
+	"io"
+	"net/http"
 	"net/url"
 	"strings"
 
-	"github.com/fatih/color"
+	"github.com/reubenmiller/go-c8y-cli/pkg/mapbuilder"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
-	"github.com/tidwall/pretty"
 )
 
 type getDeviceGroupCollectionCmd struct {
@@ -52,6 +52,14 @@ func (n *getDeviceGroupCollectionCmd) getDeviceGroupCollection(cmd *cobra.Comman
 	// query parameters
 	queryValue := url.QueryEscape("")
 	query := url.Values{}
+
+	commonOptions, err := getCommonOptions(cmd)
+	if err != nil {
+		return err
+	}
+
+	commonOptions.ResultProperty = "managedObjects"
+	commonOptions.AddQueryParameters(&query)
 
 	var c8yQueryParts = make([]string, 0)
 
@@ -105,63 +113,36 @@ func (n *getDeviceGroupCollectionCmd) getDeviceGroupCollection(cmd *cobra.Comman
 		}
 	}
 
-	if cmd.Flags().Changed("pageSize") {
-		if v, err := cmd.Flags().GetInt("pageSize"); err == nil && v > 0 {
-			query.Add("pageSize", fmt.Sprintf("%d", v))
-		}
-	}
-
-	if cmd.Flags().Changed("withTotalPages") {
-		if v, err := cmd.Flags().GetBool("withTotalPages"); err == nil && v {
-			query.Add("withTotalPages", "true")
-		}
-	}
-
-	queryValue, err := url.QueryUnescape(query.Encode())
+	queryValue, err = url.QueryUnescape(query.Encode())
 
 	if err != nil {
 		return newSystemError("Invalid query parameter")
 	}
 
+	// headers
+	headers := http.Header{}
+
+	// form data
+	formData := make(map[string]io.Reader)
+
 	// body
-	var body map[string]interface{}
+	body := mapbuilder.NewMapBuilder()
 
 	// path parameters
 	pathParameters := make(map[string]string)
 
 	path := replacePathParameters("inventory/managedObjects", pathParameters)
 
-	return n.doGetDeviceGroupCollection("GET", path, queryValue, body)
-}
-
-func (n *getDeviceGroupCollectionCmd) doGetDeviceGroupCollection(method string, path string, query string, body map[string]interface{}) error {
-	resp, err := client.SendRequest(
-		context.Background(),
-		c8y.RequestOptions{
-			Method:       method,
-			Path:         path,
-			Query:        query,
-			Body:         body,
-			IgnoreAccept: false,
-			DryRun:       globalFlagDryRun,
-		})
-
-	if err != nil {
-		color.Set(color.FgRed, color.Bold)
+	req := c8y.RequestOptions{
+		Method:       "GET",
+		Path:         path,
+		Query:        queryValue,
+		Body:         body.GetMap(),
+		FormData:     formData,
+		Header:       headers,
+		IgnoreAccept: false,
+		DryRun:       globalFlagDryRun,
 	}
 
-	if resp != nil && resp.JSONData != nil {
-		if globalFlagPrettyPrint {
-			fmt.Printf("%s\n", pretty.Pretty([]byte(*resp.JSONData)))
-		} else {
-			fmt.Printf("%s\n", *resp.JSONData)
-		}
-	}
-
-	color.Unset()
-
-	if err != nil {
-		return newSystemError("command failed", err)
-	}
-	return nil
+	return processRequestAndResponse([]c8y.RequestOptions{req}, commonOptions)
 }

@@ -8,9 +8,9 @@ Create a new application
 Create a new application using explicit settings
 
 .EXAMPLE
-PS> New-Application -Name myapp -Type HOSTED -Key "myapp-key" -ContextPath "myapp"
+PS> New-Application -Name $AppName -Key "${AppName}-key" -ContextPath $AppName -Type HOSTED
 
-Create new hosted application
+Create a new hosted application
 
 
 #>
@@ -72,6 +72,16 @@ Create new hosted application
         [Parameter()]
         [string]
         $ExternalUrl,
+
+        # Template (jsonnet) file to use to create the request body.
+        [Parameter()]
+        [string]
+        $Template,
+
+        # Variables to be used when evaluating the Template. Accepts a file path, json or json shorthand, i.e. "name=peter"
+        [Parameter()]
+        [string]
+        $TemplateVars,
 
         # Show the full (raw) response from Cumulocity including pagination information
         [Parameter()]
@@ -135,6 +145,12 @@ Create new hosted application
         }
         if ($PSBoundParameters.ContainsKey("ExternalUrl")) {
             $Parameters["externalUrl"] = $ExternalUrl
+        }
+        if ($PSBoundParameters.ContainsKey("Template") -and $Template) {
+            $Parameters["template"] = $Template
+        }
+        if ($PSBoundParameters.ContainsKey("TemplateVars") -and $TemplateVars) {
+            $Parameters["templateVars"] = $TemplateVars
         }
         if ($PSBoundParameters.ContainsKey("OutputFile")) {
             $Parameters["outputFile"] = $OutputFile

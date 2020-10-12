@@ -2,7 +2,8 @@
 
 Describe -Name "Get-TenantOptionForCategory" {
     BeforeEach {
-        New-TenantOption -Category "c8y_cli_tests" -Key "option7" -Value "7"
+        $option7 = New-RandomString -Prefix "option7"
+        New-TenantOption -Category "c8y_cli_tests" -Key "$option7" -Value "7"
 
     }
 
@@ -14,7 +15,7 @@ Describe -Name "Get-TenantOptionForCategory" {
 
 
     AfterEach {
-        Remove-TenantOption -Category "c8y_cli_tests" -Key "option7"
+        Remove-TenantOption -Category "c8y_cli_tests" -Key "$option7"
 
     }
 }

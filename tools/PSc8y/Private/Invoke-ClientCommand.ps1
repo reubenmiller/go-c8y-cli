@@ -40,6 +40,12 @@ only relevant information is shown.
         # Future Roadmap: Currently not used: Include all result sets
         [switch] $IncludeAll,
 
+        # Future Roadmap: Current page to return
+        [int] $CurrentPage,
+
+        # Total number of pages to retrieve (only used with -IncludeAll)
+        [int] $TotalPages,
+
         # Return the raw response rather than Powershell objects
         [switch] $Raw,
 
@@ -96,26 +102,94 @@ only relevant information is shown.
         $null = $c8yargs.AddRange(@("--timeout", $TimeoutInMS))
     }
 
-    # Include all pagination results
-    if ($IncludeAll) {
-        Write-Warning "IncludeAll operation is currently not implemented"
-        # $null = $c8yargs.Add("--all")
+    if ($CurrentPage) {
+        $null = $c8yargs.AddRange(@("--currentPage", $CurrentPage))
     }
 
-    $null = $c8yargs.Add("--raw")
+    if ($TotalPages) {
+        $null = $c8yargs.AddRange(@("--totalPages", $TotalPages))
+    }
+
+    # Include all pagination results
+    if ($IncludeAll) {
+        # Write-Warning "IncludeAll operation is currently not implemented"
+        $null = $c8yargs.Add("--includeAll")
+    }
+
+    $UsePipelineStreaming = ($IncludeAll -or $TotalPages -gt 0) -or $Verb -match "subscribe|subscribeAll"
+
+    # Don't use the raw response, let go do everything
+    if (-Not $UsePipelineStreaming) {
+        $null = $c8yargs.Add("--raw")
+    }
 
     $c8ycli = Get-ClientBinary
     Write-Verbose ("$c8ycli {0}" -f $c8yargs -join " ")
 
+    $ExitCode = $null
     try {
-        $RawResponse = & $c8ycli $c8yargs
+        if ($UsePipelineStreaming) {
+
+            $LastSaveWarning = "NOTE: This PSc8y automatic variable is not supported when using -IncludeAll or -TotalPages"
+            $global:_rawdata = $LastSaveWarning
+            $global:_data = $LastSaveWarning
+
+
+            $processOptions = @{
+                ProcessName = $c8ycli
+                RedirectOutput = $true
+                RedirectStdErr = $Verb -notmatch "subscribe|subscribeAll"
+                AsText = $false
+                ArgumentList = $c8yargs
+                # ErrorVariable = "ProcErrors"
+                # Verbose = $VerbosePreference
+                # ErrorAction = "SilentlyContinue"
+            }
+            
+            # Note: To enable the streaming of output result in the pipeline,
+            # the value must be sent back as is
+            if ($Raw) {
+                $null = $c8yargs.Add("--raw")
+                Invoke-BinaryProcess @processOptions |
+                    Select-Object
+            } else {
+                Invoke-BinaryProcess @processOptions |
+                    Select-Object |
+                    Add-PowershellType $ItemType
+            }
+            return
+        } else {
+            # Keep comparison with old call style. Will be deleted in the future
+            # $RawResponse = & $c8ycli $c8yargs
+            $processOptions = @{
+                ProcessName = $c8ycli
+                RedirectOutput = $true
+                RedirectStdErr = $true
+                AsText = $true
+                ArgumentList = $c8yargs
+                ErrorVariable = "ProcErrors"
+                Verbose = $VerbosePreference
+                ErrorAction = "SilentlyContinue"
+            }
+            $ExitCode = -1
+            $RawResponse = Invoke-BinaryProcess @processOptions
+
+            if ($ProcErrors.Count -ne 0) {
+                Write-Warning "$ProcErrors"
+                $ExitCode = 1
+            } else {
+                $ExitCode = 0
+            }
+        }
     } catch {
         Write-Warning -Message $_.Exception.Message
         # do nothing, due to remote powershell session issue and $ErrorActionPreference being set to 'Stop'
         # https://github.com/PowerShell/PowerShell/issues/4002
     }
 
-    $ExitCode = $LASTEXITCODE
+    if ($null -eq $ExitCode) {
+        $ExitCode = $LASTEXITCODE
+    }
     if ($ExitCode -ne 0) {
 
         try {
@@ -144,8 +218,12 @@ only relevant information is shown.
                 # $RawResponse = $RawResponse -replace [regex]::Unescape($env:C8Y_PASSWORD), "{password}"
             }
         }
-        $response = $RawResponse | ConvertFrom-Json
-        $isJSON = $true
+
+        $response = ""
+        if ($null -ne $RawResponse) {
+            $response = $RawResponse | ConvertFrom-Json
+            $isJSON = $true
+        }
     } catch {
         # ignore json errors, because sometimes the response is not json...so we want
         # to return it anyways
@@ -187,15 +265,23 @@ only relevant information is shown.
         ))
     }
 
-    <#
-    if ($NestedData) {
-        $null = Add-Member -InputObject $NestedData -MemberType NoteProperty -Name "PSStatistics" -Value @{
+    
+    if ($NestedData -and $response.statistics) {
+        #$NestedData | Add-Member -MemberType NoteProperty -Name "PSc8yResult" -Value $_data
+        # Add information to each element in the array
+
+        $StatsAsJson = ConvertTo-Json @{
+            next = $response.next
             pageSize = $response.statistics.pageSize
             totalPages = $response.statistics.totalPages
             currentPage = $response.statistics.currentPage
-        }
+        } -Compress
+
+        $NewScriptBlock = [scriptblock]::Create("ConvertFrom-Json '$StatsAsJson'")
+
+        $null = $NestedData | Add-Member -Name "PSc8yRequestSource" -MemberType "ScriptMethod" -Value $NewScriptBlock
     }
-    #>
+   
 
     # Save last value for easier recall on command line
     $global:_rawdata = $response
@@ -210,6 +296,6 @@ only relevant information is shown.
         ($null -eq $NestedData -and $null -eq $NestedData.Count)) {
         $response
     } else {
-        $NestedData
+        Write-Output $NestedData
     }
 }

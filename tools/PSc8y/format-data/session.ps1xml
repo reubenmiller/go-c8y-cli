@@ -33,7 +33,17 @@
                             <CustomItem>
                                 <Text>path: </Text>
                                 <ExpressionBinding>
-                                    <ScriptBlock>$_.path -replace "$env:USERNAME", "******"</ScriptBlock>
+                                    <ScriptBlock>
+                                        $sanitziedPath = $_.path
+                                        if ($HOME) {
+                                            $sanitziedPath = $sanitziedPath -replace "$HOME", "******"
+                                        }
+
+                                        if ($Env:USERNAME) {
+                                            $sanitziedPath = $sanitziedPath -replace "$env:USERNAME", "******"
+                                        }
+                                        $sanitziedPath
+                                    </ScriptBlock>
                                 </ExpressionBinding>
                                 <NewLine/>
                             </CustomItem>

@@ -126,14 +126,16 @@ endpoints:
         - description: Add a role to a group using wildcards
           beforeEach:
             - $Group = New-TestGroup -Name "customGroup1"
-          command: Add-RoleToGroup -Group "customGroup1*" -Role "*ALARM_*"
+            - $NamePattern = $Group.name.Substring(0, $Group.name.length - 2)
+          command: Add-RoleToGroup -Group "${NamePattern}*" -Role "*ALARM_*"
           afterEach:
             - PSc8y\Remove-Group -Id $Group.id
 
         - description: Add a role to a group using wildcards (using pipeline)
           beforeEach:
             - $Group = New-TestGroup -Name "customGroup1"
-          command: Get-RoleCollection -PageSize 100 | Where-Object Name -like "*ALARM*" | Add-RoleToGroup -Group "customGroup1*"
+            - $NamePattern = $Group.name.Substring(0, $Group.name.length - 2)
+          command: Get-RoleCollection -PageSize 100 | Where-Object Name -like "*ALARM*" | Add-RoleToGroup -Group "${NamePattern}*"
           afterEach:
             - PSc8y\Remove-Group -Id $Group.id
 

@@ -42,7 +42,7 @@ Get an application by id
 
 ### EXAMPLE 2
 ```
-Get-Application -Id "my-simple-app"
+Get-Application -Id $App.name
 ```
 
 Get an application by name

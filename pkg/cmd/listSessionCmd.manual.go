@@ -13,6 +13,8 @@ import (
 
 type listSessionCmd struct {
 	*baseCmd
+
+	sessionFilter string
 }
 
 func newListSessionCmd() *listSessionCmd {
@@ -23,23 +25,49 @@ func newListSessionCmd() *listSessionCmd {
 		Short: "Get a Cumulocity session",
 		Long:  `Get a Cumulocity session`,
 		Example: `
+			Example 1: Show an interactive list of all available sessions
 
+			#> c8y sessions list
+
+			Example 2: Select a session and filter the selection of session by the name "customer"
+
+			#> export C8Y_SESSION=$( c8y sessions list --sessionFilter "customer" )
 		`,
 		RunE: ccmd.listSession,
 	}
 
 	cmd.SilenceUsage = true
 
-	cmd.Flags().String("host", "", "Host. .e.g. test.cumulocity.com. (required)")
-	cmd.Flags().String("tenant", "", "Tenant. (required)")
-	cmd.Flags().String("username", "", "Username (without tenant). (required)")
-	cmd.Flags().String("password", "", "Password. (required)")
-	cmd.Flags().String("description", "", "Description about the session")
-	cmd.Flags().String("name", "", "Name of the session")
+	cmd.Flags().StringVar(&ccmd.sessionFilter, "sessionFilter", "", "Filter to be applied to the list of sessions even before the values can be selected")
 
 	ccmd.baseCmd = newBaseCmd(cmd)
 
 	return ccmd
+}
+
+func matchSession(session CumulocitySession, input string) bool {
+	// strip url scheme
+	uri := strings.ReplaceAll(session.Host, "https://", "")
+	uri = strings.ReplaceAll(uri, "http://", "")
+
+	name := strings.ToLower(fmt.Sprintf("#%02d %s %s %s %s",
+		session.Index,
+		filepath.Base(session.Path),
+		uri,
+		session.Tenant,
+		session.Username,
+	))
+	input = strings.ToLower(input)
+
+	searchTerms := strings.Split(input, " ")
+
+	match := true
+	for _, term := range searchTerms {
+		if !strings.Contains(name, term) {
+			match = false
+		}
+	}
+	return match || input == ""
 }
 
 func (n *listSessionCmd) listSession(cmd *cobra.Command, args []string) error {
@@ -63,6 +91,12 @@ func (n *listSessionCmd) listSession(cmd *cobra.Command, args []string) error {
 			fmt.Printf("skipping a dir without errors: %+v \n", info.Name())
 			return filepath.SkipDir
 		}
+
+		// skip settings file
+		if strings.HasPrefix(info.Name(), SettingsGlobalName+".") {
+			return nil
+		}
+
 		// cmd.Printf("visited file or dir: %q\n", path)
 		files = append(files, path)
 
@@ -117,27 +151,28 @@ func (n *listSessionCmd) listSession(cmd *cobra.Command, args []string) error {
 `,
 	}
 
-	searcher := func(input string, index int) bool {
-		session := config.Sessions[index]
+	filteredSessions := make([]CumulocitySession, 0)
+	sessionIndex := 1
+	for _, session := range config.Sessions {
+		if matchSession(session, n.sessionFilter) {
+			session.Index = sessionIndex
+			filteredSessions = append(filteredSessions, session)
+			sessionIndex++
+		}
+	}
 
-		name := strings.ToLower(fmt.Sprintf("#%02d %s %s %s %s",
-			session.Index,
-			filepath.Base(session.Path),
-			session.Host,
-			session.Tenant,
-			session.Username,
-		))
-		input = strings.Replace(strings.ToLower(input), " ", "", -1)
-		return strings.Contains(name, input)
+	searcher := func(input string, index int) bool {
+		session := filteredSessions[index]
+		return matchSession(session, input)
 	}
 
 	prompt := promptui.Select{
-		Stdout:            cmd.OutOrStderr(),
+		Stdout:            os.Stderr,
 		HideSelected:      false,
 		IsVimMode:         false,
 		StartInSearchMode: false,
 		Label:             "Select a Cumulocity Session",
-		Items:             config.Sessions,
+		Items:             filteredSessions,
 		Templates:         templates,
 		Size:              10,
 		Searcher:          searcher,
@@ -157,8 +192,8 @@ func (n *listSessionCmd) listSession(cmd *cobra.Command, args []string) error {
 		return nil
 	}
 
-	if idx >= 0 && idx < len(config.Sessions) {
-		fmt.Printf("%s", config.Sessions[idx].Path)
+	if idx >= 0 && idx < len(filteredSessions) {
+		fmt.Printf("%s", filteredSessions[idx].Path)
 	} else {
 		fmt.Println("")
 	}

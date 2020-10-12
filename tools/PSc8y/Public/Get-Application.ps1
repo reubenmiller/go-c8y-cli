@@ -13,7 +13,7 @@ PS> Get-Application -Id $App.id
 Get an application by id
 
 .EXAMPLE
-PS> Get-Application -Id "my-simple-app"
+PS> Get-Application -Id $App.name
 
 Get an application by name
 

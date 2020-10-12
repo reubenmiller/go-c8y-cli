@@ -18,9 +18,9 @@ PS> Get-TenantStatisticsCollection -DateFrom "-30d" -PageSize 30
 Get tenant statistics collection for the last 30 days
 
 .EXAMPLE
-PS> Get-TenantStatisticsCollection -DateFrom "-10d" -DateTo "-9d"
+PS> Get-TenantStatisticsCollection -DateFrom "-3d" -DateTo "-2d"
 
-Get tenant statistics collection for the last 10 days, only return until the last 9 days
+Get tenant statistics collection for the day before yesterday
 
 
 #>
@@ -53,6 +53,21 @@ Get tenant statistics collection for the last 10 days, only return until the las
         [Parameter()]
         [switch]
         $WithTotalPages,
+
+        # Get a specific page result
+        [Parameter()]
+        [int]
+        $CurrentPage,
+
+        # Maximum number of pages to retrieve when using -IncludeAll
+        [Parameter()]
+        [int]
+        $TotalPages,
+
+        # Include all results
+        [Parameter()]
+        [switch]
+        $IncludeAll,
 
         # Show the full (raw) response from Cumulocity including pagination information
         [Parameter()]
@@ -120,7 +135,10 @@ Get tenant statistics collection for the last 10 days, only return until the las
                 -Type "application/vnd.com.nsn.cumulocity.tenantUsageStatisticsCollection+json" `
                 -ItemType "application/vnd.com.nsn.cumulocity.tenantUsageStatisticsSummary+json" `
                 -ResultProperty "usageStatistics" `
-                -Raw:$Raw
+                -Raw:$Raw `
+                -CurrentPage:$CurrentPage `
+                -TotalPages:$TotalPages `
+                -IncludeAll:$IncludeAll
         }
     }
 

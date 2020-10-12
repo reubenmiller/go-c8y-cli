@@ -20,10 +20,16 @@ Create a measurement on the existing device "myExistingDevice"
 #>
     [cmdletbinding(
         SupportsShouldProcess = $true,
-        ConfirmImpact = "None"
+        ConfirmImpact = "High"
     )]
     Param(
         # Device id, name or object. If left blank then a randomized device will be created
+        [Parameter(
+            Mandatory = $false,
+            ValueFromPipeline = $true,
+            ValueFromPipelineByPropertyName = $true,
+            Position = 0
+        )]
         [object] $Device,
 
         # Value fragment type
@@ -41,27 +47,41 @@ Create a measurement on the existing device "myExistingDevice"
         # Unit. i.e. °C, m/s
         [string] $Unit = "°C",
 
+        # Template (jsonnet) file to use to create the request body.
+        [Parameter()]
+        [string]
+        $Template,
+
+        # Variables to be used when evaluating the Template. Accepts json or json shorthand, i.e. "name=peter"
+        [Parameter()]
+        [string]
+        $TemplateVars,
+
         # Don't prompt for confirmation
         [switch] $Force
     )
 
-    if ($null -eq $Device) {
-        $iDevice = PSc8y\New-TestDevice -WhatIf:$false -Force:$Force
-    } else {
-        $iDevice = PSc8y\Expand-Device $Device
-    }
+    Process {
+        if ($null -eq $Device) {
+            $iDevice = PSc8y\New-TestDevice -WhatIf:$false -Force:$Force
+        } else {
+            $iDevice = PSc8y\Expand-Device $Device
+        }
 
-    PSc8y\New-Measurement `
-        -Device $iDevice.id `
-        -Time "1970-01-01" `
-        -Type $Type `
-        -Data @{
-            $ValueFragmentType = @{
-                $ValueFragmentSeries = @{
-                    value = $Value
-                    unit = $Unit
+        PSc8y\New-Measurement `
+            -Device $iDevice.id `
+            -Time "1970-01-01" `
+            -Type $Type `
+            -Data @{
+                $ValueFragmentType = @{
+                    $ValueFragmentSeries = @{
+                        value = $Value
+                        unit = $Unit
+                    }
                 }
-            }
-        } `
-        -Force:$Force
+            } `
+            -Template:$Template `
+            -TemplateVars:$TemplateVars `
+            -Force:$Force
+    }
 }

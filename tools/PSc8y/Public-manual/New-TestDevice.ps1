@@ -26,12 +26,14 @@ Create 10 test devices (with agent functionality) all with unique names
 #>
     [cmdletbinding(
         SupportsShouldProcess = $true,
-        ConfirmImpact = "None"
+        ConfirmImpact = "High"
     )]
     Param(
         # Device name prefix which is added before the randomized string
         [Parameter(
             Mandatory = $false,
+            ValueFromPipeline = $true,
+            ValueFromPipelineByPropertyName = $true,
             Position = 0
         )]
         [string] $Name = "testdevice",
@@ -39,20 +41,34 @@ Create 10 test devices (with agent functionality) all with unique names
         # Add agent fragment to the device
         [switch] $AsAgent,
 
+        # Template (jsonnet) file to use to create the request body.
+        [Parameter()]
+        [string]
+        $Template,
+
+        # Variables to be used when evaluating the Template. Accepts json or json shorthand, i.e. "name=peter"
+        [Parameter()]
+        [string]
+        $TemplateVars,
+
         # Don't prompt for confirmation
         [switch] $Force
     )
-    $Data = @{
-        c8y_IsDevice = @{}
-    }
-    if ($AsAgent) {
-        $Data.com_cumulocity_model_Agent = @{}
-    }
-    $DeviceName = New-RandomString -Prefix "${Name}_"
-    $TestDevice = PSc8y\New-ManagedObject `
-        -Name $DeviceName `
-        -Data $Data `
-        -Force
+    Process {
+        $Data = @{
+            c8y_IsDevice = @{}
+        }
+        if ($AsAgent) {
+            $Data.com_cumulocity_model_Agent = @{}
+        }
+        $DeviceName = New-RandomString -Prefix "${Name}_"
+        $TestDevice = PSc8y\New-ManagedObject `
+            -Name $DeviceName `
+            -Data $Data `
+            -Template:$Template `
+            -TemplateVars:$TemplateVars `
+            -Force:$Force
 
-    $TestDevice
+        $TestDevice
+    }
 }

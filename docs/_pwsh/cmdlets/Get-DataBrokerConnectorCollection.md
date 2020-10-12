@@ -19,6 +19,9 @@ Get collection of data broker connectors
 Get-DataBrokerConnectorCollection
 	[[-PageSize] <Int32>]
 	[-WithTotalPages]
+	[[-CurrentPage] <Int32>]
+	[[-TotalPages] <Int32>]
+	[-IncludeAll]
 	[-Raw]
 	[[-OutputFile] <String>]
 	[-NoProxy]
@@ -73,6 +76,51 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
+### -CurrentPage
+Get a specific page result
+
+```yaml
+Type: Int32
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 2
+Default value: 0
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -TotalPages
+Maximum number of pages to retrieve when using -IncludeAll
+
+```yaml
+Type: Int32
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 3
+Default value: 0
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -IncludeAll
+Include all results
+
+```yaml
+Type: SwitchParameter
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: False
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
 ### -Raw
 Show the full (raw) response from Cumulocity including pagination information
 
@@ -97,7 +145,7 @@ Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: 2
+Position: 4
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
@@ -127,7 +175,7 @@ Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: 3
+Position: 5
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
@@ -142,7 +190,7 @@ Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: 4
+Position: 6
 Default value: 0
 Accept pipeline input: False
 Accept wildcard characters: False

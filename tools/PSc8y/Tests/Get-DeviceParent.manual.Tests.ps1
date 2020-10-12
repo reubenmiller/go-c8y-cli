@@ -2,13 +2,15 @@
 
 Describe -Name "Get-DeviceParent" {
     Context "Test agent/devices" {
-        $Agent = PSc8y\New-TestAgent -Name "agent"
-        $ChildDevice01 = PSc8y\New-TestDevice -Name "child01"
-        $ChildDevice02 = PSc8y\New-TestDevice -Name "child02"
-
-        # Add child relationships: Agent -> ChildDevice01 -> ChildDevice02
-        New-ChildDeviceReference -Device $Agent.id -NewChild $ChildDevice01.id
-        New-ChildDeviceReference -Device $ChildDevice01.id -NewChild $ChildDevice02.id
+        BeforeAll {
+            $Agent = PSc8y\New-TestAgent -Name "agent"
+            $ChildDevice01 = PSc8y\New-TestDevice -Name "child01"
+            $ChildDevice02 = PSc8y\New-TestDevice -Name "child02"
+            
+            # Add child relationships: Agent -> ChildDevice01 -> ChildDevice02
+            Add-ChildDeviceToDevice -Device $Agent.id -NewChild $ChildDevice01.id
+            Add-ChildDeviceToDevice -Device $ChildDevice01.id -NewChild $ChildDevice02.id
+        }
 
         It "Should return nothing if the device has no parent" {
             $Response = PSc8y\Get-DeviceParent `
@@ -74,10 +76,12 @@ Describe -Name "Get-DeviceParent" {
             $Response.id | Should -BeExactly @($Agent.id, $ChildDevice01.id)
         }
 
-        # Cleanup
-        @($Agent, $ChildDevice01, $ChildDevice02) | ForEach-Object {
-            if ($_.id) {
-                PSc8y\Remove-ManagedObject -Id $_.id
+        AfterAll {
+            # Cleanup
+            @($Agent, $ChildDevice01, $ChildDevice02) | ForEach-Object {
+                if ($_.id) {
+                    PSc8y\Remove-ManagedObject -Id $_.id
+                }
             }
         }
     }

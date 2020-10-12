@@ -20,6 +20,8 @@ New-ExternalId
 	[-Device] <Object[]>
 	[-Type] <String>
 	[-Name] <String>
+	[[-Template] <String>]
+	[[-TemplateVars] <String>]
 	[-Raw]
 	[[-OutputFile] <String>]
 	[-NoProxy]
@@ -38,10 +40,17 @@ Create a new external id
 
 ### EXAMPLE 1
 ```
-New-ExternalId -Device {{ randomdevice }} -Type "my_SerialNumber" -Name "myserialnumber"
+New-ExternalId -Device $Device.id -Type "$my_SerialNumber" -Name "myserialnumber"
 ```
 
-Get external identity
+Create external identity
+
+### EXAMPLE 2
+```
+Get-Device $Device.id | New-ExternalId -Type "$my_SerialNumber" -Name "myserialnumber"
+```
+
+Create external identity (using pipeline)
 
 ## PARAMETERS
 
@@ -57,7 +66,7 @@ Aliases:
 Required: True
 Position: 1
 Default value: None
-Accept pipeline input: False
+Accept pipeline input: True (ByPropertyName, ByValue)
 Accept wildcard characters: False
 ```
 
@@ -94,6 +103,38 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
+### -Template
+Template (jsonnet) file to use to create the request body.
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 4
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -TemplateVars
+Variables to be used when evaluating the Template.
+Accepts a file path, json or json shorthand, i.e.
+"name=peter"
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 5
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
 ### -Raw
 Show the full (raw) response from Cumulocity including pagination information
 
@@ -118,7 +159,7 @@ Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: 4
+Position: 6
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
@@ -148,7 +189,7 @@ Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: 5
+Position: 7
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
@@ -163,7 +204,7 @@ Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: 6
+Position: 8
 Default value: 0
 Accept pipeline input: False
 Accept wildcard characters: False

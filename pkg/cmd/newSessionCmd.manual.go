@@ -94,7 +94,12 @@ func newNewSessionCmd() *newSessionCmd {
 		Short: "Create a new Cumulocity session credentials",
 		Long:  `Create a new Cumulocity session credentials`,
 		Example: `
-
+		c8y sessions create \
+			--host "https://mytenant.eu-latest.cumulocity.com" \
+			--tenant "myTenant" \
+			--username "myUser@me.com"
+		
+		// Create a new session and prompt for the password
 		`,
 		RunE: ccmd.newSession,
 	}
@@ -104,7 +109,7 @@ func newNewSessionCmd() *newSessionCmd {
 	cmd.Flags().String("host", "", "Host. .e.g. test.cumulocity.com. (required)")
 	cmd.Flags().String("tenant", "", "Tenant. (required)")
 	cmd.Flags().String("username", "", "Username (without tenant). (required)")
-	cmd.Flags().String("password", "", "Password. (required)")
+	cmd.Flags().String("password", "", "Password. If left blank then you will be prompted for the password")
 	cmd.Flags().String("description", "", "Description about the session")
 	cmd.Flags().String("name", "", "Name of the session")
 	cmd.Flags().String("microserviceAliases", "", "Name of the session")

@@ -4,11 +4,39 @@ Function New-Microservice {
 New microservice
 
 .DESCRIPTION
-Create a new microservice. The zip file needs to follow the Cumulocity Microservice format.
+Create a new microservice or upload a new microservice binary to an already running microservice. By default the microservice will
+also be subscribed to/enabled.
+
+The zip file needs to follow the Cumulocity Microservice format.
+
+This cmdlet has several operations
+
+.NOTES
+This cmdlet does not support template variables
+
+.EXAMPLE
+PS> New-Microservice -File "myapp.zip"
+
+Upload microservice binary. The name of the microservice will be named after the zip file name (without the extension)
+
+If the microservice already exists, then the only the microservice binary will be updated.
 
 .EXAMPLE
 PS> New-Microservice -Name "myapp" -File "myapp.zip"
-Upload microservice binary
+
+Upload microservice binary with a custom name. Note: If the microservice already exists in the platform
+
+.EXAMPLE
+PS> New-Microservice -Name "myapp" -File "./cumulocity.json" -SkipUpload
+
+Create a microservice placeholder named "myapp" for use for local development of a microservice.
+
+The `-File` parameter is provided with the microserivce's manifest file `cumulocity.json` to set the correct required roles of the bootstrap
+user which will be automatically created by Cumulocity.
+
+The microservice's bootstrap credentials can be retrieved using `Get-MicroserviceBootstrapUser` cmdlet.
+
+This example is usefuly for local development only, when you want to run the microservice locally (not hosted in Cumulocity).
 
 #>
     [cmdletbinding(SupportsShouldProcess = $true,
@@ -25,10 +53,15 @@ Upload microservice binary
         [string]
         $File,
 
-        # File to be uploaded as a binary (required)
+        # Name of the microservice. An id is also accepted however the name have been previously uploaded.
         [Parameter(Mandatory = $false)]
         [string]
         $Name,
+
+        # Shared secret of application. Defaults to application name if not provided.
+        [Parameter()]
+        [string]
+        $Key,
 
         # Access level for other tenants.  Possible values are : MARKET, PRIVATE (default)
         [Parameter()]
@@ -46,12 +79,13 @@ Upload microservice binary
         [string]
         $ResourcesUrl,
 
-        # Skip the uploading of the application binary
+        # Skip the uploading of the microservice binary. This is helpful if you want to run the microservice locally
+        # and you only need the microservice place holder in order to create microservice bootstrap credentials.
         [Parameter()]
         [switch]
         $SkipUpload,
 
-        # Don't subscribe to the application after it has been created and uploaded
+        # Don't subscribe to the microservice after it has been created and uploaded
         [Parameter()]
         [switch]
         $SkipSubscription,
@@ -76,6 +110,11 @@ Upload microservice binary
         [string]
         $Session,
 
+        # TimeoutSec timeout in seconds before a request will be aborted
+        [Parameter()]
+        [double]
+        $TimeoutSec,
+
         # Don't prompt for confirmation
         [Parameter()]
         [switch]
@@ -86,6 +125,9 @@ Upload microservice binary
         $Parameters = @{}
         if ($PSBoundParameters.ContainsKey("Name")) {
             $Parameters["name"] = $Name
+        }
+        if ($PSBoundParameters.ContainsKey("Key")) {
+            $Parameters["key"] = $Key
         }
         if ($PSBoundParameters.ContainsKey("Availability")) {
             $Parameters["availability"] = $Availability
@@ -110,6 +152,9 @@ Upload microservice binary
         }
         if ($PSBoundParameters.ContainsKey("Session")) {
             $Parameters["session"] = $Session
+        }
+        if ($PSBoundParameters.ContainsKey("TimeoutSec")) {
+            $Parameters["timeout"] = $TimeoutSec * 1000
         }
 
     }

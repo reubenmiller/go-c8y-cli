@@ -58,6 +58,8 @@ if ($All -or $IsLinux) {
     Write-Host "Building the c8y binary [Linux]"
     # $env:GOARCH = "amd64"
     $env:GOOS = "linux"
+    $env:CGO_ENABLED = "0"
+    
     $OutputPath = Join-Path -Path $OutputDir -ChildPath "${name}.linux"
     & go build $LDFlags -o "$OutputPath" "$c8yBinary"
 

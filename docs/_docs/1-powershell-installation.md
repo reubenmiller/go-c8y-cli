@@ -1,8 +1,8 @@
 ---
 layout: default
-category: Installation
+category: Installation - PowerShell
 order: 200
-title: PowerShell
+title: Installation
 ---
 
 Try it out in a Cloud Shell!
@@ -14,26 +14,6 @@ Try it out in a Cloud Shell!
 ## Installing PSc8y
 
 ### Windows
-
-#### PowerShell 5
-
-1. Install the [PowerShell Prerequisites](../1-powershell-prerequisites) required when running PowerShell 5.
-
-1. Open a powershell console (i.e. powershell.exe)
-
-1. Install `PSc8y` module from [PSGallery](https://www.powershellgallery.com/packages/PSc8y)
-
-    ```powershell
-    Install-Module PSc8y -Repository PSGallery -AllowPrerelease -AllowClobber
-    ```
-
-1. Import the module
-
-    ```powershell
-    Import-Module PSc8y
-    ```
-
-1. Now go to the [Getting started](https://reubenmiller.github.io/go-c8y-cli/docs/2-getting-started-powershell/) section for instructions how to use it
 
 #### PowerShell 7 and newer
 
@@ -50,7 +30,31 @@ Once powershell is installed, then `PSc8y` can be installed using:
 1. Install `PSc8y` module from [PSGallery](https://www.powershellgallery.com/packages/PSc8y)
 
     ```powershell
-    Install-Module PSc8y -Repository PSGallery -AllowPrerelease -AllowClobber
+    Install-Module PSc8y -Repository PSGallery -AllowClobber -Scope CurrentUser
+    ```
+
+1. Import the module
+
+    ```powershell
+    Import-Module PSc8y
+    ```
+
+1. Now go to the [Getting started](https://reubenmiller.github.io/go-c8y-cli/docs/2-getting-started-powershell/) section for instructions how to use it
+
+#### PowerShell 5 (not recommended)
+
+**Warning**
+
+It is highly recommended to use PowerShell 7 rather than PowerShell 5. PowerShel 7 can be installed along side existing PowerShell installations, and Microsoft have already stopped developing features on 5.x. In addition PowerShell 7 is cross platform, so you can use the same scripts across Windows, MacOS and Linux.
+
+1. Install the [PowerShell Prerequisites](../1-powershell-prerequisites) required when running PowerShell 5.
+
+1. Open a powershell console (i.e. powershell.exe)
+
+1. Install `PSc8y` module from [PSGallery](https://www.powershellgallery.com/packages/PSc8y)
+
+    ```powershell
+    Install-Module PSc8y -Repository PSGallery -AllowClobber -Scope CurrentUser
     ```
 
 1. Import the module
@@ -76,7 +80,7 @@ Once powershell is installed, then `PSc8y` can be installed using:
 1. Install `PSc8y` module from [PSGallery](https://www.powershellgallery.com/packages/PSc8y)
 
     ```powershell
-    Install-Module PSc8y -Repository PSGallery -AllowPrerelease -AllowClobber
+    Install-Module PSc8y -Repository PSGallery -AllowClobber -Scope CurrentUser
     ```
 
 1. Import the module
@@ -102,7 +106,7 @@ Once powershell is installed, then `PSc8y` can be installed using:
 1. Install `PSc8y` module from [PSGallery](https://www.powershellgallery.com/packages/PSc8y)
 
     ```powershell
-    Install-Module PSc8y -Repository PSGallery -AllowPrerelease -AllowClobber
+    Install-Module PSc8y -Repository PSGallery -AllowClobber -Scope CurrentUser
     ```
 
 1. Import the module
@@ -121,7 +125,7 @@ Once the `PSc8y` PowerShell module has been installed, then it can be updated fr
 1. Update to the latest version
 
     ```powershell
-    Update-Module PSc8y -AllowPrerelease
+    Update-Module PSc8y
     ```
 
 1. Import the updated module

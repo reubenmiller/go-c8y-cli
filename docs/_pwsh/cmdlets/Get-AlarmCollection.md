@@ -29,6 +29,9 @@ Get-AlarmCollection
 	[-WithDevices]
 	[[-PageSize] <Int32>]
 	[-WithTotalPages]
+	[[-CurrentPage] <Int32>]
+	[[-TotalPages] <Int32>]
+	[-IncludeAll]
 	[-Raw]
 	[[-OutputFile] <String>]
 	[-NoProxy]
@@ -247,6 +250,51 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
+### -CurrentPage
+Get a specific page result
+
+```yaml
+Type: Int32
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 9
+Default value: 0
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -TotalPages
+Maximum number of pages to retrieve when using -IncludeAll
+
+```yaml
+Type: Int32
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 10
+Default value: 0
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -IncludeAll
+Include all results
+
+```yaml
+Type: SwitchParameter
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: False
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
 ### -Raw
 Show the full (raw) response from Cumulocity including pagination information
 
@@ -271,7 +319,7 @@ Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: 9
+Position: 11
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
@@ -301,7 +349,7 @@ Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: 10
+Position: 12
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
@@ -316,7 +364,7 @@ Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: 11
+Position: 13
 Default value: 0
 Accept pipeline input: False
 Accept wildcard characters: False

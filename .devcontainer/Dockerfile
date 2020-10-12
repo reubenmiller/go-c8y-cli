@@ -97,16 +97,26 @@ RUN wget https://packages.microsoft.com/config/debian/10/packages-microsoft-prod
     && curl -sSL "https://github.com/docker/compose/releases/download/1.24.0/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose \
     && chmod +x /usr/local/bin/docker-compose \
     #
+    # Install bash tools
+    # https://github.com/bats-core/bats-core
+    && npm install -g bats \
+    && apt-get install -y jq bash-completion \
+    #
     # Clean up
     && apt-get autoremove -y \
     && apt-get clean -y \
     && rm -rf /var/lib/apt/lists/* /tmp/gotools
 
 # Install powershell dependencies
-RUN pwsh -Command "Install-Module -Name platyPS -Scope CurrentUser -Force"
+USER $USERNAME
+RUN pwsh -Command "Install-Module -Name platyPS -Scope CurrentUser -Force" \
+    && pwsh -Command "Install-Module -Name Pester -Scope CurrentUser -MinimumVersion '5.0.0' -Force"
 
 # Update this to "on" or "off" as appropriate
 ENV GO111MODULE=auto
+
+# Change default location of cumulocity profiles
+ENV C8Y_SESSION_HOME=/workspaces/go-c8y-cli/.cumulocity
 
 # Switch back to dialog for any ad-hoc use of apt-get
 ENV DEBIAN_FRONTEND=dialog

@@ -33,7 +33,7 @@ Below is a list of the aliases:
 | fmo | Find-ManagedObjectCollection |
 | fromjson | ConvertFrom-Json |
 | json | ConvertTo-Json |
-| m | Get-Measurements |
+| m | Get-Measurement |
 | measurements | Get-MeasurementCollection |
 | mo | Get-ManagedObject |
 | op | Get-Operation |
@@ -63,3 +63,26 @@ Function Get-MyApplications {
 ## Usage
 Get-MyApplications
 ```
+
+---
+
+### Bash / zsh
+
+The following aliases are defined for both bash and zsh in the `c8y.profile.sh` (for bash) and `c8y.plugin.zsh` (for zsh, oh-my-zsh).
+
+| Alias | Command |
+|-------|---------|
+| alarm | `c8y alarms get --id` |
+| alarms | `c8y alarms list` |
+| app | `c8y applications get --id` |
+| apps | `c8y applications list` |
+| devices | `c8y devices list` |
+| event | `c8y events get --id` |
+| events | `c8y events list` |
+| fmo | `c8y inventory find --query` |
+| m | `c8y measurements get --id` |
+| measurements | `c8y measurements list` |
+| mo | `c8y inventory get --id` |
+| op | `c8y operations get --id` |
+| ops | `c8y operations list` |
+| series | `c8y measurements getSeries` |

@@ -99,16 +99,32 @@ endpoints:
           afterEach:
             - Remove-Item $File
             - Find-ManagedObjectCollection -Query "has(c8y_IsBinary) and (name eq '$FileName')" | Remove-Binary
+        
+        - description: Upload a config file and make it globally accessible for all users
+          beforeEach:
+            - $File = New-TestFile
+            - $FileName = (Get-Item $File).Name
+          command: New-Binary -File $File -Data @{ c8y_Global = @{}; type = "c8y_upload" }
+          afterEach:
+            - Remove-Item $File
+            - Find-ManagedObjectCollection -Query "has(c8y_IsBinary) and (name eq '$FileName')" | Remove-Binary
 
       go:
         - description: Upload a log file
           command: c8y binaries create --file ./output.log
+        
+        - description: Upload a config file and make it globally accessible for all users
+          command: c8y binaries create --file "myConfig.json" --data "c8y_Global={},type=c8y_upload"
 
     body:
       - name: file
         type: file
         required: true
         description: File to be uploaded as a binary
+      
+      - name: data
+        type: json
+        description: Additional properties to be added to the binary.
 
   - name: updateBinary
     description: 'Update inventory binary'

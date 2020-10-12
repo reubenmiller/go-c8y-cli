@@ -34,6 +34,21 @@ Get the current users inventory roles
         [switch]
         $WithTotalPages,
 
+        # Get a specific page result
+        [Parameter()]
+        [int]
+        $CurrentPage,
+
+        # Maximum number of pages to retrieve when using -IncludeAll
+        [Parameter()]
+        [int]
+        $TotalPages,
+
+        # Include all results
+        [Parameter()]
+        [switch]
+        $IncludeAll,
+
         # Show the full (raw) response from Cumulocity including pagination information
         [Parameter()]
         [switch]
@@ -94,7 +109,10 @@ Get the current users inventory roles
                 -Type "application/vnd.com.nsn.cumulocity.inventoryrolecollection+json" `
                 -ItemType "application/vnd.com.nsn.cumulocity.inventoryrole+json" `
                 -ResultProperty "roles" `
-                -Raw:$Raw
+                -Raw:$Raw `
+                -CurrentPage:$CurrentPage `
+                -TotalPages:$TotalPages `
+                -IncludeAll:$IncludeAll
         }
     }
 

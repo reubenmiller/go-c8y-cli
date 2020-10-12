@@ -32,16 +32,6 @@ Delete measurement collection for a device
         [string]
         $Type,
 
-        # value fragment type
-        [Parameter()]
-        [string]
-        $ValueFragmentType,
-
-        # value fragment series
-        [Parameter()]
-        [string]
-        $ValueFragmentSeries,
-
         # Fragment name from measurement (deprecated).
         [Parameter()]
         [string]
@@ -93,12 +83,6 @@ Delete measurement collection for a device
         if ($PSBoundParameters.ContainsKey("Type")) {
             $Parameters["type"] = $Type
         }
-        if ($PSBoundParameters.ContainsKey("ValueFragmentType")) {
-            $Parameters["valueFragmentType"] = $ValueFragmentType
-        }
-        if ($PSBoundParameters.ContainsKey("ValueFragmentSeries")) {
-            $Parameters["valueFragmentSeries"] = $ValueFragmentSeries
-        }
         if ($PSBoundParameters.ContainsKey("FragmentType")) {
             $Parameters["fragmentType"] = $FragmentType
         }
@@ -143,6 +127,8 @@ Delete measurement collection for a device
             -ItemType "" `
             -ResultProperty "" `
             -Raw:$Raw `
+            -CurrentPage:$CurrentPage `
+            -TotalPages:$TotalPages `
             -IncludeAll:$IncludeAll
     }
 

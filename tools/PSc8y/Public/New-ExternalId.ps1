@@ -8,9 +8,14 @@ Create a new external id
 Create a new external id
 
 .EXAMPLE
-PS> New-ExternalId -Device {{ randomdevice }} -Type "my_SerialNumber" -Name "myserialnumber"
+PS> New-ExternalId -Device $Device.id -Type "$my_SerialNumber" -Name "myserialnumber"
 
-Get external identity
+Create external identity
+
+.EXAMPLE
+PS> Get-Device $Device.id | New-ExternalId -Type "$my_SerialNumber" -Name "myserialnumber"
+
+Create external identity (using pipeline)
 
 
 #>
@@ -22,7 +27,9 @@ Get external identity
     [OutputType([object])]
     Param(
         # The ManagedObject linked to the external ID. (required)
-        [Parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true,
+                   ValueFromPipeline=$true,
+                   ValueFromPipelineByPropertyName=$true)]
         [object[]]
         $Device,
 
@@ -35,6 +42,16 @@ Get external identity
         [Parameter(Mandatory = $true)]
         [string]
         $Name,
+
+        # Template (jsonnet) file to use to create the request body.
+        [Parameter()]
+        [string]
+        $Template,
+
+        # Variables to be used when evaluating the Template. Accepts a file path, json or json shorthand, i.e. "name=peter"
+        [Parameter()]
+        [string]
+        $TemplateVars,
 
         # Show the full (raw) response from Cumulocity including pagination information
         [Parameter()]
@@ -69,14 +86,17 @@ Get external identity
 
     Begin {
         $Parameters = @{}
-        if ($PSBoundParameters.ContainsKey("Device")) {
-            $Parameters["device"] = $Device
-        }
         if ($PSBoundParameters.ContainsKey("Type")) {
             $Parameters["type"] = $Type
         }
         if ($PSBoundParameters.ContainsKey("Name")) {
             $Parameters["name"] = $Name
+        }
+        if ($PSBoundParameters.ContainsKey("Template") -and $Template) {
+            $Parameters["template"] = $Template
+        }
+        if ($PSBoundParameters.ContainsKey("TemplateVars") -and $TemplateVars) {
+            $Parameters["templateVars"] = $TemplateVars
         }
         if ($PSBoundParameters.ContainsKey("OutputFile")) {
             $Parameters["outputFile"] = $OutputFile
@@ -94,7 +114,10 @@ Get external identity
     }
 
     Process {
-        foreach ($item in @("")) {
+        foreach ($item in (PSc8y\Expand-Device $Device)) {
+            if ($item) {
+                $Parameters["device"] = if ($item.id) { $item.id } else { $item }
+            }
 
             if (!$Force -and
                 !$WhatIfPreference -and

@@ -8,7 +8,7 @@ Delete a new device requests
 Delete a new device requests
 
 .EXAMPLE
-PS> Remove-DeviceRequest -Id "91019192078"
+PS> Remove-DeviceRequest -Id "$serial_91019192078"
 
 Delete a new device request
 

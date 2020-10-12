@@ -2,13 +2,16 @@
 
 Describe -Name "Get-AssetParent" {
     Context "Test agent/devices" {
-        $RootGroup = New-TestDeviceGroup -Name "rootgroup"
-        $SubGroup01 = New-TestDeviceGroup -Name "group01" -Type SubGroup
-        $SubGroup02 = New-TestDeviceGroup -Name "group02" -Type SubGroup
+        BeforeAll {
 
-        # Add child relationships: rootgroup -> group01 -> group02
-        New-ChildAssetReference -Group $RootGroup.id -NewChildGroup $SubGroup01.id
-        New-ChildAssetReference -Group $SubGroup01.id -NewChildGroup $SubGroup02.id
+            $RootGroup = New-TestDeviceGroup -Name "rootgroup"
+            $SubGroup01 = New-TestDeviceGroup -Name "group01" -Type SubGroup
+            $SubGroup02 = New-TestDeviceGroup -Name "group02" -Type SubGroup
+            
+            # Add child relationships: rootgroup -> group01 -> group02
+            Add-AssetToGroup -Group $RootGroup.id -NewChildGroup $SubGroup01.id
+            Add-AssetToGroup -Group $SubGroup01.id -NewChildGroup $SubGroup02.id
+        }
 
         It "Should return nothing if the asset has no parent" {
             $Response = PSc8y\Get-AssetParent `
@@ -56,10 +59,12 @@ Describe -Name "Get-AssetParent" {
             $Response.id | Should -BeExactly @($RootGroup.id, $SubGroup01.id)
         }
 
-        # Cleanup: Delete in reverse order because sub assets are deleted by default
-        @($SubGroup02, $SubGroup01, $RootGroup) | ForEach-Object {
-            if ($_.id) {
-                PSc8y\Remove-ManagedObject -Id $_.id
+        AfterAll {
+            # Cleanup: Delete in reverse order because sub assets are deleted by default
+            @($SubGroup02, $SubGroup01, $RootGroup) | ForEach-Object {
+                if ($_.id) {
+                    PSc8y\Remove-ManagedObject -Id $_.id
+                }
             }
         }
     }

@@ -25,6 +25,9 @@ Get-ManagedObjectCollection
 	[-SkipChildrenNames]
 	[[-PageSize] <Int32>]
 	[-WithTotalPages]
+	[[-CurrentPage] <Int32>]
+	[[-TotalPages] <Int32>]
+	[-IncludeAll]
 	[-Raw]
 	[[-OutputFile] <String>]
 	[-NoProxy]
@@ -178,6 +181,51 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
+### -CurrentPage
+Get a specific page result
+
+```yaml
+Type: Int32
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 6
+Default value: 0
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -TotalPages
+Maximum number of pages to retrieve when using -IncludeAll
+
+```yaml
+Type: Int32
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 7
+Default value: 0
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -IncludeAll
+Include all results
+
+```yaml
+Type: SwitchParameter
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: False
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
 ### -Raw
 Show the full (raw) response from Cumulocity including pagination information
 
@@ -202,7 +250,7 @@ Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: 6
+Position: 8
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
@@ -232,7 +280,7 @@ Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: 7
+Position: 9
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
@@ -247,7 +295,7 @@ Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: 8
+Position: 10
 Default value: 0
 Accept pipeline input: False
 Accept wildcard characters: False

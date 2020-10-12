@@ -19,6 +19,7 @@ New microservice
 New-Microservice
 	[-File] <String>
 	[[-Name] <String>]
+	[[-Key] <String>]
 	[[-Availability] <String>]
 	[[-ContextPath] <String>]
 	[[-ResourcesUrl] <String>]
@@ -28,6 +29,7 @@ New-Microservice
 	[[-OutputFile] <String>]
 	[-NoProxy]
 	[[-Session] <String>]
+	[[-TimeoutSec] <Double>]
 	[-Force]
 	[-WhatIf]
 	[-Confirm]
@@ -35,16 +37,47 @@ New-Microservice
 ```
 
 ## DESCRIPTION
-Create a new microservice.
+Create a new microservice or upload a new microservice binary to an already running microservice.
+By default the microservice will
+also be subscribed to/enabled.
+
 The zip file needs to follow the Cumulocity Microservice format.
+
+This cmdlet has several operations
 
 ## EXAMPLES
 
 ### EXAMPLE 1
 ```
-New-Microservice -Name "myapp" -File "myapp.zip"
-Upload microservice binary
+New-Microservice -File "myapp.zip"
 ```
+
+Upload microservice binary.
+The name of the microservice will be named after the zip file name (without the extension)
+
+If the microservice already exists, then the only the microservice binary will be updated.
+
+### EXAMPLE 2
+```
+New-Microservice -Name "myapp" -File "myapp.zip"
+```
+
+Upload microservice binary with a custom name.
+Note: If the microservice already exists in the platform
+
+### EXAMPLE 3
+```
+New-Microservice -Name "myapp" -File "./cumulocity.json" -SkipUpload
+```
+
+Create a microservice placeholder named "myapp" for use for local development of a microservice.
+
+The `-File` parameter is provided with the microserivce's manifest file `cumulocity.json` to set the correct required roles of the bootstrap
+user which will be automatically created by Cumulocity.
+
+The microservice's bootstrap credentials can be retrieved using `Get-MicroserviceBootstrapUser` cmdlet.
+
+This example is usefuly for local development only, when you want to run the microservice locally (not hosted in Cumulocity).
 
 ## PARAMETERS
 
@@ -64,7 +97,8 @@ Accept wildcard characters: False
 ```
 
 ### -Name
-File to be uploaded as a binary (required)
+Name of the microservice.
+An id is also accepted however the name have been previously uploaded.
 
 ```yaml
 Type: String
@@ -73,6 +107,22 @@ Aliases:
 
 Required: False
 Position: 2
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -Key
+Shared secret of application.
+Defaults to application name if not provided.
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 3
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
@@ -88,7 +138,7 @@ Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: 3
+Position: 4
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
@@ -104,7 +154,7 @@ Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: 4
+Position: 5
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
@@ -120,14 +170,16 @@ Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: 5
+Position: 6
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
 ### -SkipUpload
-Skip the uploading of the application binary
+Skip the uploading of the microservice binary.
+This is helpful if you want to run the microservice locally
+and you only need the microservice place holder in order to create microservice bootstrap credentials.
 
 ```yaml
 Type: SwitchParameter
@@ -142,7 +194,7 @@ Accept wildcard characters: False
 ```
 
 ### -SkipSubscription
-Don't subscribe to the application after it has been created and uploaded
+Don't subscribe to the microservice after it has been created and uploaded
 
 ```yaml
 Type: SwitchParameter
@@ -180,7 +232,7 @@ Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: 6
+Position: 7
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
@@ -210,8 +262,23 @@ Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: 7
+Position: 8
 Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -TimeoutSec
+TimeoutSec timeout in seconds before a request will be aborted
+
+```yaml
+Type: Double
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 9
+Default value: 0
 Accept pipeline input: False
 Accept wildcard characters: False
 ```
@@ -271,5 +338,6 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 
 ### System.Object
 ## NOTES
+This cmdlet does not support template variables
 
 ## RELATED LINKS

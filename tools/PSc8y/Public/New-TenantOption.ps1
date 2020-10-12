@@ -8,7 +8,7 @@ New tenant option
 New tenant option
 
 .EXAMPLE
-PS> New-TenantOption -Category "c8y_cli_tests" -Key "option1" -Value "1"
+PS> New-TenantOption -Category "c8y_cli_tests" -Key "$option1" -Value "1"
 
 Create a tenant option
 
@@ -35,6 +35,16 @@ Create a tenant option
         [Parameter(Mandatory = $true)]
         [string]
         $Value,
+
+        # Template (jsonnet) file to use to create the request body.
+        [Parameter()]
+        [string]
+        $Template,
+
+        # Variables to be used when evaluating the Template. Accepts a file path, json or json shorthand, i.e. "name=peter"
+        [Parameter()]
+        [string]
+        $TemplateVars,
 
         # Show the full (raw) response from Cumulocity including pagination information
         [Parameter()]
@@ -77,6 +87,12 @@ Create a tenant option
         }
         if ($PSBoundParameters.ContainsKey("Value")) {
             $Parameters["value"] = $Value
+        }
+        if ($PSBoundParameters.ContainsKey("Template") -and $Template) {
+            $Parameters["template"] = $Template
+        }
+        if ($PSBoundParameters.ContainsKey("TemplateVars") -and $TemplateVars) {
+            $Parameters["templateVars"] = $TemplateVars
         }
         if ($PSBoundParameters.ContainsKey("OutputFile")) {
             $Parameters["outputFile"] = $OutputFile

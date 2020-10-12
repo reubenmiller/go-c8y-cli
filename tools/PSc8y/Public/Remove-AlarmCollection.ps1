@@ -179,6 +179,8 @@ Remove alarms on the device which are active and created in the last 10 minutes 
             -ItemType "" `
             -ResultProperty "" `
             -Raw:$Raw `
+            -CurrentPage:$CurrentPage `
+            -TotalPages:$TotalPages `
             -IncludeAll:$IncludeAll
     }
 

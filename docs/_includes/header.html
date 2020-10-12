@@ -13,6 +13,9 @@
     <nav {% if site.show_full_navigation %}class="full-navigation"{% endif %}>
         <ul>
             <li class="nav-item top-level {% if page.url == '/' %}current{% endif %}">
+                <a href="https://github.com/reubenmiller/go-c8y-cli">Github</a>
+            </li>
+            <li class="nav-item top-level {% if page.url == '/' %}current{% endif %}">
                 {% assign home = site.html_pages | where: 'url', '/' | first %}
                 <a href="{{ site.baseurl }}/">{{ home.title }}</a>
             </li>

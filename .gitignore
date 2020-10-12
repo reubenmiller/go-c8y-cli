@@ -7,6 +7,7 @@ test/microservice_test/application.properties
 test/c8y_test/application.properties
 test/c8y_test/debug.test
 test/c8y_test/application.setup.properties
+.cumulocity/
 c8y.env
 c8y~
 tools/PSc8y/c8y
@@ -24,6 +25,8 @@ trace.out
 pkg/powershell/PSC8y.coverage.xml
 .DS_Store
 tools/PSc8y/report
+tools/PSc8y/reports/
+tools/PSc8y/reports
 tools/PSc8y/TestResults.xml
 tools/PSc8y/Dependencies/c8y.linux
 tools/PSc8y/Dependencies/c8y.macos

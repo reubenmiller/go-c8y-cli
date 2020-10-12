@@ -37,7 +37,7 @@ Delete tenant option
 
 ### EXAMPLE 1
 ```
-Remove-TenantOption -Category "c8y_cli_tests" -Key "option3"
+Remove-TenantOption -Category "c8y_cli_tests" -Key "$option3"
 ```
 
 Delete a tenant option

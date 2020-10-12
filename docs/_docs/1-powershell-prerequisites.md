@@ -1,8 +1,8 @@
 ---
 layout: default
-category: Installation
+category: Installation - PowerShell
 order: 199
-title: PowerShell Prerequisites
+title: Prerequisites
 ---
 
 
@@ -21,7 +21,7 @@ The instructions slightly differ depending on which operating system you are usi
     $PSVersionTable.PSVersion.Major
     ```
 
-    If you have an older version of PowerShell then please update it, or install [PowerShell 6 (Core)](https://github.com/PowerShell/PowerShell/releases) as it can run along side PowerShell 5. A portable zip version is also available.
+    If you have an older version of PowerShell then please update it, or install [PowerShell 7 (Core)](https://github.com/PowerShell/PowerShell/releases) as it can run along side PowerShell 5. A portable zip version is also available.
 
 1. Install Latest version from PowerShell Gallery and the PowerShellGet Module
 
@@ -52,25 +52,25 @@ The instructions slightly differ depending on which operating system you are usi
 
 ##### MacOS and Linux
 
-    1. Install the newest version of PowerShellGet
+1. Install the newest version of PowerShellGet
 
     ```sh
     Install-Module –Name PowerShellGet –Force;
     ```
 
-    1. Close the powershell session. Unfortunately you need to reload the console for this step.
+1. Close the powershell session. Unfortunately you need to reload the console for this step.
 
     ```sh
     exit
     ```
 
-    1. Open up a powershell console again
+1. Open up a powershell console again
 
     ```sh
     pwsh
     ```
 
-    Then import PowerShellGet
+1. Import PowerShellGet
 
     ```sh
     Import-Module PowerShellGet

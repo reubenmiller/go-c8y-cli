@@ -33,23 +33,23 @@ Create a new alarm for device (using pipeline)
         [object[]]
         $Device,
 
-        # Identifies the type of this alarm, e.g. 'com_cumulocity_events_TamperEvent'. (required)
-        [Parameter(Mandatory = $true)]
+        # Identifies the type of this alarm, e.g. 'com_cumulocity_events_TamperEvent'.
+        [Parameter()]
         [string]
         $Type,
 
-        # Time of the alarm.
+        # Time of the alarm. Defaults to current timestamp.
         [Parameter()]
         [string]
         $Time,
 
-        # Text description of the alarm. (required)
-        [Parameter(Mandatory = $true)]
+        # Text description of the alarm.
+        [Parameter()]
         [string]
         $Text,
 
-        # The severity of the alarm: CRITICAL, MAJOR, MINOR or WARNING. Must be upper-case. (required)
-        [Parameter(Mandatory = $true)]
+        # The severity of the alarm: CRITICAL, MAJOR, MINOR or WARNING. Must be upper-case.
+        [Parameter()]
         [ValidateSet('CRITICAL','MAJOR','MINOR','WARNING')]
         [string]
         $Severity,
@@ -64,6 +64,16 @@ Create a new alarm for device (using pipeline)
         [Parameter()]
         [object]
         $Data,
+
+        # Template (jsonnet) file to use to create the request body.
+        [Parameter()]
+        [string]
+        $Template,
+
+        # Variables to be used when evaluating the Template. Accepts a file path, json or json shorthand, i.e. "name=peter"
+        [Parameter()]
+        [string]
+        $TemplateVars,
 
         # Show the full (raw) response from Cumulocity including pagination information
         [Parameter()]
@@ -115,6 +125,12 @@ Create a new alarm for device (using pipeline)
         }
         if ($PSBoundParameters.ContainsKey("Data")) {
             $Parameters["data"] = ConvertTo-JsonArgument $Data
+        }
+        if ($PSBoundParameters.ContainsKey("Template") -and $Template) {
+            $Parameters["template"] = $Template
+        }
+        if ($PSBoundParameters.ContainsKey("TemplateVars") -and $TemplateVars) {
+            $Parameters["templateVars"] = $TemplateVars
         }
         if ($PSBoundParameters.ContainsKey("OutputFile")) {
             $Parameters["outputFile"] = $OutputFile

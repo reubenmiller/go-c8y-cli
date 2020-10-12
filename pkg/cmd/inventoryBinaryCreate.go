@@ -30,7 +30,8 @@ func newNewBinaryManagedObjectCmd() *newBinaryManagedObjectCmd {
 		c8y inventory binary upload --file ./test.zip --data "name=test,type=application/json"
 
 		`,
-		RunE: ccmd.newBinaryManagedObject,
+		PreRunE: validateCreateMode,
+		RunE:    ccmd.newBinaryManagedObject,
 	}
 
 	cmd.Flags().StringArrayVarP(&ccmd.files, inventoryFlagFile, "f", []string{}, "input file to upload as a binary managed object")

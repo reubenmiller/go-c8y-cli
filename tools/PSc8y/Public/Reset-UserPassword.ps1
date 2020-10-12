@@ -8,7 +8,7 @@ Reset a user's password
 The password can be reset either by issuing a password reset email (default), or be specifying a new password.
 
 .EXAMPLE
-PS> Reset-UserPassword -Id $User.id -WhatIf 2>&1
+PS> Reset-UserPassword -Id $User.id -WhatIf 6>&1
 
 Resets a user's password by sending a reset email to the user
 
@@ -42,6 +42,16 @@ Resets a user's password by generating a new password
         [Parameter()]
         [object]
         $Tenant,
+
+        # Template (jsonnet) file to use to create the request body.
+        [Parameter()]
+        [string]
+        $Template,
+
+        # Variables to be used when evaluating the Template. Accepts a file path, json or json shorthand, i.e. "name=peter"
+        [Parameter()]
+        [string]
+        $TemplateVars,
 
         # Show the full (raw) response from Cumulocity including pagination information
         [Parameter()]
@@ -81,6 +91,12 @@ Resets a user's password by generating a new password
         }
         if ($PSBoundParameters.ContainsKey("Tenant")) {
             $Parameters["tenant"] = $Tenant
+        }
+        if ($PSBoundParameters.ContainsKey("Template") -and $Template) {
+            $Parameters["template"] = $Template
+        }
+        if ($PSBoundParameters.ContainsKey("TemplateVars") -and $TemplateVars) {
+            $Parameters["templateVars"] = $TemplateVars
         }
         if ($PSBoundParameters.ContainsKey("OutputFile")) {
             $Parameters["outputFile"] = $OutputFile

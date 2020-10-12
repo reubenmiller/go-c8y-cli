@@ -2,14 +2,16 @@ name: build
 
 on:
   push:
-    branches: [ master ]
+    branches: [ master, develop ]
+    tags-ignore:
+      - 'v*'
     paths-ignore:
       - docs/*
       - '**/*.md'
       - test/*.go
 
   pull_request:
-    branches: [ master ]
+    branches: [ master, develop ]
 
 jobs:
 
@@ -46,6 +48,7 @@ jobs:
   test:
     runs-on: ${{ matrix.os }}
     needs: [build]
+    if: ${{ false }}
     env:
       C8Y_HOST: ${{ secrets.C8Y_HOST }}
       C8Y_TENANT: ${{ secrets.C8Y_TENANT }}
@@ -56,6 +59,7 @@ jobs:
       C8Y_TIMEOUT: 30000
 
     strategy:
+      fail-fast: false
       matrix:
         os: [macos-latest, windows-latest, ubuntu-18.04]
 
@@ -63,29 +67,36 @@ jobs:
     - uses: actions/checkout@v2
 
     - name: Build powershell module
-      run: make build_powershell
+      run: make build
       shell: bash
 
     - name: Test powershell module
-      if: ${{ false }}
-      run: make test_powershell
+      if: ${{ true }}
+      run: make test
       shell: bash
+      timeout-minutes: 30
 
     - uses: actions/upload-artifact@v2
       if: always()
       with:
-        name: test-results
-        path: report.${{ matrix.os }}.xml
+        name: test-results-${{ matrix.os }}
+        path: tools/PSc8y/reports/*.xml
 
   publish-test-results:
     runs-on: ubuntu-18.04
     needs: [test]
-    if: ${{ false }}
+    # Disabled as pester does not support junit reports (only nunit)
+    if: always() && false
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-latest, windows-latest, ubuntu-18.04]
     steps:
       - name: Get test results
         uses: actions/download-artifact@v2
         with:
-          name: test-results
+          name: test-results-${{ matrix.os }}
+          path: test-results-${{ matrix.os }}
 
       - name: Publish results
         uses: EnricoMi/publish-unit-test-result-action@v1.1
@@ -93,5 +104,5 @@ jobs:
         with:
           check_name: Test Results
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          files: report.xml
+          files: test-results-${{ matrix.os }}/*.xml
           log_level: DEBUG

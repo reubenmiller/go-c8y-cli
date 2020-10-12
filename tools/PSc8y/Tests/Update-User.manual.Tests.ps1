@@ -2,8 +2,9 @@
 
 Describe -Name "Update-User" {
     Context "existing user" {
-
-        $User = PSc8y\New-TestUser
+        BeforeAll {
+            $User = PSc8y\New-TestUser
+        }
 
         It "Update custom properties for a user" {
             $Response = PSc8y\Update-User -Id $User.id -CustomProperties @{
@@ -25,7 +26,7 @@ Describe -Name "Update-User" {
         }
 
         It "Shows the request to be sent when disabling an existing user sends a boolean" {
-            $Response = PSc8y\Update-User -Id $User.id -Enabled:$false -WhatIf 2>&1 | Out-String
+            $Response = PSc8y\Update-User -Id $User.id -Enabled:$false -WhatIf 6>&1 | Out-String
             $LASTEXITCODE | Should -Be 0
             $Response | Should -Not -BeNullOrEmpty
             $Response | Should -Match '"enabled": false'
@@ -57,6 +58,8 @@ Describe -Name "Update-User" {
             $Response.customProperties.language | Should -BeExactly "de"
         }
 
-        Remove-User -Id $User.id
+        AfterAll {
+            Remove-User -Id $User.id
+        }
     }
 }

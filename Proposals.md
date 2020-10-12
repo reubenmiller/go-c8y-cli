@@ -3,8 +3,6 @@
 
 ## current todo
 
-* [ ] Add device commands. New-Device, Update-Device, Remove-Device, Get-DeviceCollection (already exists)
-
 ## Bugs
 
 * Subscription tests are flakey
@@ -71,7 +69,10 @@
 * [x] Get microservice, delete microservice, update microservice? get credentials?
 * [x] Handle proxy/no proxy support for realtime notifications (websockets)
 
-* [ ] Allow file upload to include additional "type" property
+* [x] Allow file upload to include additional "type" property
+* [x] Add tab completion for template files?
+* [x] Add automatic path resolver in golang to find the template by just the file name
+* [x] Use default values for time (i.e. createNewMeasurement --time "0s")
 * [ ] Microservice aliases using my-app://health
 
 
@@ -124,6 +125,7 @@ Manual commands
 * [x] Figure how to best package the c8y binary file/s with the powershell module
 * [x] Adding encoding tests
 * [x] Add aliases for all the commands, i.e. Get-ApplicationCollection -> apps, Get-DeviceCollection -> devices
+* [x] Add device commands. New-Device, Update-Device, Remove-Device, Get-DeviceCollection (already exists)
 
 * [ ] Client side filtering of results for those that don't support server side filters
   * [ ] Application
@@ -133,8 +135,8 @@ Manual commands
 ## Packaging
 
 * [x] Package c8y binary with the powershell app
-* [ ] Publish c8y binaries to github
-* [ ] Publish powershell module to PSGallery
+* [x] Publish c8y binaries to github
+* [x] Publish powershell module to PSGallery
 
 * Installation problem with Windows 10. Requires PowerShellGet minimum version 2.2.3! Which is not installed by default on Windows 10 PS 5.1
     Maybe add recommendation that powershell 6 (core) should be used, also with an updated PowerShellGet
@@ -148,8 +150,8 @@ Manual commands
 ## Docs
 
 * [x] Write github pages with a tutorial
-* [ ] General concepts
-    * [ ] Dates
+* [x] General concepts
+    * [x] Dates
     * [x] Lookups
 * [x] Setup
     * [x] Install binary
@@ -157,17 +159,16 @@ Manual commands
 * [ ] Add/Remove child devices
 * [ ] users (add, skip send email, or static password)
 * [ ] managed objects
-* [ ] aliases
-* [ ] custom requests
-* [ ] Extending modules
+* [x] aliases
+* [x] custom requests
+* [x] Extending modules
 * [ ] notifications
-* [ ]
 
 # Future
 
 ### Phase 2
 
-* [ ] Implement --all switch for collections to iterate through all results (max results)
+* [x] Implement --all switch for collections to iterate through all results (max results)
 * [ ] Make options case insensitive
 * [ ] Look over devices where []device type is used (parallel tasks?) Probably need a new template
 

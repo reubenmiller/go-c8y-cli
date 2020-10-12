@@ -64,6 +64,16 @@ Upload application zip file containing the web application
         [switch]
         $SkipActivation,
 
+        # Template (jsonnet) file to use to create the request body.
+        [Parameter()]
+        [string]
+        $Template,
+
+        # Variables to be used when evaluating the Template. Accepts json or json shorthand, i.e. "name=peter"
+        [Parameter()]
+        [string]
+        $TemplateVars,
+
         # Include raw response including pagination information
         [Parameter()]
         [switch]
@@ -83,6 +93,11 @@ Upload application zip file containing the web application
         [Parameter()]
         [string]
         $Session,
+
+        # TimeoutSec timeout in seconds before a request will be aborted
+        [Parameter()]
+        [double]
+        $TimeoutSec,
 
         # Don't prompt for confirmation
         [Parameter()]
@@ -122,6 +137,12 @@ Upload application zip file containing the web application
         if ($PSBoundParameters.ContainsKey("SkipUpload")) {
             $Parameters["skipUpload"] = $SkipUpload.ToString().ToLower()
         }
+        if ($PSBoundParameters.ContainsKey("Template") -and $Template) {
+            $Parameters["template"] = $Template
+        }
+        if ($PSBoundParameters.ContainsKey("TemplateVars") -and $TemplateVars) {
+            $Parameters["templateVars"] = $TemplateVars
+        }
         if ($PSBoundParameters.ContainsKey("OutputFile")) {
             $Parameters["outputFile"] = $OutputFile
         }
@@ -130,6 +151,9 @@ Upload application zip file containing the web application
         }
         if ($PSBoundParameters.ContainsKey("Session")) {
             $Parameters["session"] = $Session
+        }
+        if ($PSBoundParameters.ContainsKey("TimeoutSec")) {
+            $Parameters["timeout"] = $TimeoutSec * 1000
         }
 
     }
