@@ -502,8 +502,9 @@ func readConfiguration() error {
 	Logger.Infof("%s: %d", SettingsIncludeAllPageSize, globalFlagIncludeAllPageSize)
 	Logger.Infof("%s: %d", SettingsIncludeAllDelayMS, globalFlagIncludeAllDelayMS)
 	Logger.Infof("%s: %s", SettingsTemplatePath, globalFlagTemplatePath)
-	Logger.Infof("%s: %b", SettingsModeEnableUpdate, globalModeEnableUpdate)
-	Logger.Infof("%s: %b", SettingsModeEnableDelete, globalModeEnableDelete)
+	Logger.Infof("%s: %t", SettingsModeEnableCreate, globalModeEnableCreate)
+	Logger.Infof("%s: %t", SettingsModeEnableUpdate, globalModeEnableUpdate)
+	Logger.Infof("%s: %t", SettingsModeEnableDelete, globalModeEnableDelete)
 
 	return nil
 }
