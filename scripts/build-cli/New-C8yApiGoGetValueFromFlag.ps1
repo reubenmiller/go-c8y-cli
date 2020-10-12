@@ -37,6 +37,7 @@
         "application" = @{}
         "boolean" = @{}
         "datetime" = @{}
+        "float" = @{}
         "file" = @{}
         "id" = @{}
         "integer" = @{}
@@ -439,6 +440,18 @@
     $Definitions."integer" = @"
     if v, err := cmd.Flags().GetInt("${prop}"); err == nil {
         $($Setters.integer.$SetterType)
+    } else {
+        return newUserError(fmt.Sprintf("Flag [%s] does not exist. %s", "${prop}", err))
+    }
+"@
+
+    # float
+    $Setters."float"."query" = "query.Add(`"${queryParam}`", v)"
+    $Setters."float"."path" = "pathParameters[`"${queryParam}`"] = fmt.Sprintf(`"%d`", v)"
+    $Setters."float"."body" = "body.Set(`"${queryParam}`", v)"
+    $Definitions."float" = @"
+    if v, err := cmd.Flags().GetFloat32("${prop}"); err == nil {
+        $($Setters.float.$SetterType)
     } else {
         return newUserError(fmt.Sprintf("Flag [%s] does not exist. %s", "${prop}", err))
     }

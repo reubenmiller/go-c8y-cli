@@ -612,6 +612,24 @@ Function Get-C8yGoArgs {
             }
         }
 
+        "float" {
+            try {
+                $DefaultFloat = [convert]::ToDecimal($Default)
+            } catch {
+                $DefaultFloat = 0
+            }
+
+            $SetFlag = if ($UseOption) {
+                'cmd.Flags().Float32P("{0}", "{1}", {2}, "{3}")' -f $Name, $OptionName, $DefaultFloat, $Description
+            } else {
+                'cmd.Flags().Float32("{0}", {1}, "{2}")' -f $Name, $DefaultFloat, $Description
+            }
+
+            @{
+                SetFlag = $SetFlag
+            }
+        }
+
         "tenant" {
             $SetFlag = if ($UseOption) {
                 'cmd.Flags().StringP("{0}", "{1}", "{2}", "{3}")' -f $Name, $OptionName, $Default, $Description
