@@ -37,5 +37,8 @@ jobs:
     steps:
     - uses: actions/checkout@v2 # Checking out the repo
 
+    - name: Set VERSION env
+      run: echo ::set-env name=VERSION::${GITHUB_REF#refs/*/v}
+
     - name: publish docker images
-      run: make publish-docker
+      run: make VERSION=${VERSION} publish-docker

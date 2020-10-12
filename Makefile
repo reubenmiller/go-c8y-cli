@@ -9,7 +9,7 @@ GOMOD=$(GOCMD) mod
 TEST_THROTTLE_LIMIT=10
 
 # Set VERSION from git describe
-VERSION := $(shell git describe | sed "s/^v\?\.\([0-9]\{1,\}\.[0-9]\{1,\}\.[0-9]\{1,\}\).*/\1/")
+VERSION := $(shell git describe | sed "s/^v\?\([0-9]\{1,\}\.[0-9]\{1,\}\.[0-9]\{1,\}\).*/\1/")
 
 ENV_FILE ?= c8y.env
 -include $(ENV_FILE)
