@@ -15,11 +15,17 @@ Try it out in a Cloud Shell!
 
 ### Windows
 
-#### PowerShell 5
+#### PowerShell 7 and newer
 
-1. Install the [PowerShell Prerequisites](../1-powershell-prerequisites) required when running PowerShell 5.
+Powershell 7 is not installed on Windows by default, however it can be installed using the following [instructions](https://docs.microsoft.com/en-us/powershell/scripting/install/installing-powershell-core-on-windows?view=powershell-7).
 
-1. Open a powershell console (i.e. powershell.exe)
+Once powershell is installed, then `PSc8y` can be installed using:
+
+1. Open a PowerShell (pwsh) console (i.e. pwsh.exe)
+
+    ```sh
+    pwsh.exe
+    ```
 
 1. Install `PSc8y` module from [PSGallery](https://www.powershellgallery.com/packages/PSc8y)
 
@@ -35,17 +41,15 @@ Try it out in a Cloud Shell!
 
 1. Now go to the [Getting started](https://reubenmiller.github.io/go-c8y-cli/docs/2-getting-started-powershell/) section for instructions how to use it
 
-#### PowerShell 7 and newer
+#### PowerShell 5 (not recommended)
 
-Powershell 7 is not installed on Windows by default, however it can be installed using the following [instructions](https://docs.microsoft.com/en-us/powershell/scripting/install/installing-powershell-core-on-windows?view=powershell-7).
+**Warning**
 
-Once powershell is installed, then `PSc8y` can be installed using:
+It is highly recommended to use PowerShell 7 rather than PowerShell 5. PowerShel 7 can be installed along side existing PowerShell installations, and Microsoft have already stopped developing features on 5.x. In addition PowerShell 7 is cross platform, so you can use the same scripts across Windows, MacOS and Linux.
 
-1. Open a PowerShell (pwsh) console (i.e. pwsh.exe)
+1. Install the [PowerShell Prerequisites](../1-powershell-prerequisites) required when running PowerShell 5.
 
-    ```sh
-    pwsh.exe
-    ```
+1. Open a powershell console (i.e. powershell.exe)
 
 1. Install `PSc8y` module from [PSGallery](https://www.powershellgallery.com/packages/PSc8y)
 
