@@ -20,7 +20,7 @@ To make the installation and future updates easier, a script is provided in the 
 1. Download the c8y profile helper script
 
     ```sh
-    curl -L https://raw.githubusercontent.com/reubenmiller/go-c8y-cli/develop/tools/bash/c8y.profile.sh -o ~/c8y.profile.sh
+    curl -L https://raw.githubusercontent.com/reubenmiller/go-c8y-cli/master/tools/bash/c8y.profile.sh -o ~/c8y.profile.sh
 
     # make the script executable
     chmod +x ~/c8y.profile.sh
@@ -80,7 +80,7 @@ Similar to `c8y.profile.sh` for bash, there is a pre-configured zsh plugin `c8y.
 
     ```sh
     curl -L https://raw.githubusercontent.com/reubenmiller/go-c8y-cli/master/tools/bash/c8y.plugin.zsh -o ~/.oh-my-zsh/custom/plugins/c8y/c8y.plugin.zsh
-
+    chmod +x ~/.oh-my-zsh/custom/plugins/c8y/c8y.plugin.zsh
     ```
 
 3. Add the `c8y` to your plugin list in `~/.zshrc`
@@ -128,34 +128,22 @@ However if you don't install the `c8y.profile.sh` script or the zsh `c8y` plugin
 
 1. Download the latest version
 
-    ```sh
-    curl -L https://github.com/reubenmiller/go-c8y-cli/releases/download/latest/c8y.windows.exe -o c8y
-    ```
-
-    **Note**
-
-    You will need to change the `1.1.0` version if a newer version is released. You can browser the available versions by looking at the [PSc8y release page](https://www.powershellgallery.com/packages/PSc8y), then just change the `1.1.0` to one of the listed versions.
-
-    The go c8y cli tool is used internally by the PowerShell PSc8y module, that is why it can also be downloaded from the PowerShell Gallery website (even though you don't have PowerShell)
-
-1. Extract the c8y binary (relevant to your OS) from within downloaded zip file
-
     **Linux**
 
     ```sh
-    curl -L https://github.com/reubenmiller/go-c8y-cli/releases/download/latest/c8y.linux -o ./c8y
+    curl -L https://github.com/reubenmiller/go-c8y-cli/releases/latest/download/c8y.linux -o ./c8y
     ```
 
     **MacOS**
 
     ```sh
-    curl -L https://github.com/reubenmiller/go-c8y-cli/releases/download/latest/c8y.macos -o ./c8y
+    curl -L https://github.com/reubenmiller/go-c8y-cli/releases/latest/download/c8y.macos -o ./c8y
     ```
 
     **Windows**
 
     ```sh
-    curl -L https://github.com/reubenmiller/go-c8y-cli/releases/download/latest/c8y.windows.exe -o ./c8y
+    curl -L https://github.com/reubenmiller/go-c8y-cli/releases/latest/download/c8y.windows.exe -o ./c8y
     ```
 
 

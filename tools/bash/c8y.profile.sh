@@ -107,7 +107,11 @@ c8y-update () {
     echo -n "downloading ($BINARY_NAME)..."
 
     c8ytmp=./.c8y.tmp
-    curl -L --silent https://github.com/reubenmiller/go-c8y-cli/releases/download/$VERSION/$BINARY_NAME -o $c8ytmp
+    if [[ "$VERSION" = "latest" ]]; then
+        curl -L --silent https://github.com/reubenmiller/go-c8y-cli/releases/latest/download/$BINARY_NAME -o $c8ytmp
+    else
+        curl -L --silent https://github.com/reubenmiller/go-c8y-cli/releases/download/$VERSION/$BINARY_NAME -o $c8ytmp
+    fi
     chmod +x $c8ytmp
 
     new_version=$($c8ytmp version 2>/dev/null | tail -1)
