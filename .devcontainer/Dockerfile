@@ -107,6 +107,14 @@ RUN wget https://packages.microsoft.com/config/debian/10/packages-microsoft-prod
     && apt-get clean -y \
     && rm -rf /var/lib/apt/lists/* /tmp/gotools
 
+#
+# Install password manager/s
+#
+RUN curl -L "https://vault.bitwarden.com/download/?app=cli&platform=linux" -o /tmp/bw.zip \
+    && unzip /tmp/bw.zip -d /usr/local/bin/ \
+    && chmod a+x /usr/local/bin/bw \
+    && rm /tmp/bw.zip
+
 # Install powershell dependencies
 USER $USERNAME
 RUN pwsh -Command "Install-Module -Name platyPS -Scope CurrentUser -Force" \

@@ -23,13 +23,13 @@ fi
 ########################################################################
 
 # -----------
-# executeTemplateCmd
+# set-session
 # -----------
 # Description: Switch Cumulocity session interactively
 # Usage:
-#   executeTemplateCmd
+#   set-session
 #
-executeTemplateCmd () {
+set-session () {
     if [ $# -gt 0 ]; then
         resp=$( c8y sessions list --sessionFilter "$1 $2 $3 $4 $5" )
     else
@@ -52,7 +52,17 @@ executeTemplateCmd () {
         export C8Y_TENANT=$( echo $session_info | jq -r ".tenant" )
         export C8Y_USER=$( echo $session_info | jq -r ".username" )
         export C8Y_USERNAME=$( echo $session_info | jq -r ".username" )
-        export C8Y_PASSWORD=$( echo $session_info | jq -r ".password" )
+
+        password=$( echo $session_info | jq -r ".password" )
+
+        if [[ "$password" = "" ]]; then
+            passwordHash=$( echo $session_info | jq -r ".passwordHash" )
+            password=$( c8y session decryptPassword --password "$passwordHash" )
+        fi
+        export C8Y_PASSWORD=$password
+
+        # login / test session credentials
+        c8y sessions login
     fi
 
     # reset any enabled side-effect commands

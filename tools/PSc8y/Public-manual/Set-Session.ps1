@@ -81,6 +81,11 @@ String
                     $null = $c8yargs.Add("--useEnv")
                 }
                 $Path = & $Binary $c8yargs
+
+                if ($LASTEXITCODE -ne 0) {
+                    Write-Warning "User cancelled set-session. Current session was not changed"
+                    return
+                }
             }
         }
 
@@ -94,6 +99,9 @@ String
 
         # Update environment variables
         Set-EnvironmentVariablesFromSession
+
+        # Get OAuth2 and test client authentication
+        Invoke-ClientLogin
 
         Get-Session
     }

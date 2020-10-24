@@ -37,7 +37,17 @@ set-session () {
         export C8Y_TENANT=$( echo $session_info | jq -r ".tenant" )
         export C8Y_USER=$( echo $session_info | jq -r ".username" )
         export C8Y_USERNAME=$( echo $session_info | jq -r ".username" )
-        export C8Y_PASSWORD=$( echo $session_info | jq -r ".password" )
+        
+        password=$( echo $session_info | jq -r ".password" )
+
+        if [[ "$password" = "" ]]; then
+            passwordHash=$( echo $session_info | jq -r ".passwordHash" )
+            password=$( c8y session decryptPassword --password "$passwordHash" )
+        fi
+        export C8Y_PASSWORD=$password
+
+        # login / test session credentials
+        c8y sessions login
     fi
 
     # reset any enabled side-effect commands

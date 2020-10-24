@@ -226,3 +226,62 @@ Or alternatively, using setting it via the session file:
   }
 }
 ```
+
+### Storing passwords in the Cumulocity session
+
+Session passwords can be stored encrypted by providing a secret passphrase. The passphrase should be something that is sufficiently complex and stored unencrypted on disk.
+
+The password can be be installed encrypted by setting the 
+
+
+```sh
+export C8Y_SESSION_PASSPHRASE=mysecret
+```
+
+```json
+{
+    "$schema": "https://raw.githubusercontent.com/reubenmiller/go-c8y-cli/master/tools/schema/session.schema.json",
+    "host": "https://example.cumulocity.com",
+    "tenant": "t12345",
+    "username": "myuser@iot.user.com",
+    "passwordHash": "65cd99f96f9fe681be286d6e573061053afac353faeb5b1220352ab57456f3ee852fa9078ead3846c982caad6c4dfd3be6fd0a9aba",
+    "description": "",
+    "settings": {
+        "mode.enableUpdate": true
+    }
+}
+```
+
+#### Updating passwords
+
+Passwords can still be set as plain text in the session files, however the next time that you switch to the session using `set-session`, the `password` field will be encrypted and stored under `passwordHash`.
+
+
+## Login sequence
+
+
+1. IUser calls set-session
+
+2. Get the login options
+
+3. Set the tenant id (from the login options response)
+
+4. Select the preferred login method (BASIC / Oauth2) - In session file?
+
+5. Send request (if response includes tfa error), then prompt for code from the user
+
+6. Send login request
+
+7. Store cookies (encrypted) in session file?
+
+    Or store it in the following variable?
+
+    ```
+    C8Y_TOKEN_USERNAME_ ${LOGIN_OPTION_ID}
+    ```
+
+
+##
+* Allow users to add their own headers from the session file?
+* 
+

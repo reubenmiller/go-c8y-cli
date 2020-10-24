@@ -10,6 +10,8 @@ import (
 	"time"
 
 	"github.com/gorilla/websocket"
+	"github.com/reubenmiller/go-c8y-cli/pkg/config"
+	"github.com/reubenmiller/go-c8y-cli/pkg/encrypt"
 	"github.com/reubenmiller/go-c8y-cli/pkg/logger"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
@@ -54,6 +56,7 @@ var rootCmd = &cobra.Command{
 
 var (
 	client                       *c8y.Client
+	cliConfig                    *config.CliConfiguration
 	globalFlagPageSize           int
 	globalFlagIncludeAllPageSize int
 	globalFlagCurrentPage        int64
@@ -119,9 +122,9 @@ const SettingsGlobalName = "settings"
 
 func checkSessionExists(cmd *cobra.Command, args []string) error {
 
-	parent := cmd.Use
+	cmdStr := cmd.Use
 	if cmd.HasParent() && cmd.Parent().Use != "c8y" {
-		parent = cmd.Parent().Use
+		cmdStr = cmd.Parent().Use + " " + cmdStr
 	}
 
 	// Logger.Printf("c8y pre-checks: %s, %s, %s", args, parent, cmd.CalledAs())
@@ -131,10 +134,12 @@ func checkSessionExists(cmd *cobra.Command, args []string) error {
 		"sessions",
 		"template",
 		"version",
+		"tenants getID",
+		"tenants getId",
 	}
 
 	for i := range localCmds {
-		if localCmds[i] == parent {
+		if strings.HasPrefix(cmdStr, localCmds[i]) {
 			return nil
 		}
 	}
@@ -148,6 +153,7 @@ func checkSessionExists(cmd *cobra.Command, args []string) error {
 	return nil
 }
 
+// Execute runs the root command and initializes the configuration manager and c8y client
 func Execute() {
 	// config file
 	cobra.OnInitialize(initConfig)
@@ -367,6 +373,7 @@ func initConfig() {
 		globalFlagUseEnv = true
 	}
 
+	cliConfig = config.NewCliConfiguration(viper.GetViper())
 	loadConfiguration()
 
 	// only parse env variables if no explict config file is given
@@ -427,7 +434,7 @@ func initConfig() {
 			formatHost(viper.GetString("host")),
 			viper.GetString("tenant"),
 			viper.GetString("username"),
-			viper.GetString("password"),
+			decryptPassword(viper.GetViper()),
 			true,
 		)
 	} else {
@@ -435,6 +442,9 @@ func initConfig() {
 		// Fallback to reading session from environment variables
 		client = c8y.NewClientFromEnvironment(httpClient, true)
 	}
+
+	// load authentication
+	loadAuthentication(cliConfig, client)
 
 	//
 	// Timeout setting preference
@@ -469,6 +479,19 @@ func initConfig() {
 	)
 }
 
+func decryptPassword(v *viper.Viper) string {
+	password := viper.GetString("password")
+	if password != "" {
+		return password
+	}
+	passwordHash := viper.GetString("passwordHash")
+	password, err := encrypt.DecryptHex(passwordHash, os.Getenv("C8Y_SESSION_PASSPHRASE"))
+	if err != nil {
+		return ""
+	}
+	return password
+}
+
 func loadConfiguration() error {
 
 	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
@@ -481,6 +504,21 @@ func loadConfiguration() error {
 	bindEnv(SettingsModeEnableUpdate, false)
 	bindEnv(SettingsModeEnableDelete, false)
 	bindEnv(SettingsModeCI, false)
+
+	return nil
+}
+
+func loadAuthentication(v *config.CliConfiguration, c *c8y.Client) error {
+	cookies := v.GetCookies()
+
+	if len(cookies) > 0 {
+		// for _, cookie := range cookies {
+		// 	if strings.ToLower(cookie.Name) == "" {
+		// 	}
+		// }
+		c.SetCookies(v.GetCookies())
+		c.AuthorizationMethod = c8y.AuthMethodOAuth2Internal
+	}
 
 	return nil
 }

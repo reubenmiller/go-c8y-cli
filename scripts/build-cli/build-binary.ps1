@@ -7,6 +7,9 @@ Param(
 
     [switch] $CompressOnly,
 
+    # Build for ARM architectures
+    [switch] $ARM,
+
     # Build binaries for all
     [switch] $All
 )
@@ -51,6 +54,23 @@ if ($All -or $IsMacOS) {
 
     if ($CompressOnly -and (Test-Path $OutputPath)) {
         Remove-Item $OutputPath
+    }
+}
+
+if ($All -or $ARM) {
+    Write-Host "Building the c8y binary [linux (arm)]"
+    $env:GOARCH = "arm"
+    $env:GOARM = "5"
+    $env:GOOS = "linux"
+    $env:CGO_ENABLED = "0"
+
+    $OutputPath = Join-Path -Path $OutputDir -ChildPath "${name}.arm"
+
+    & go build $LDFlags -o "$OutputPath" "$c8yBinary"
+
+    if ($LASTEXITCODE -ne 0) {
+        Write-Error "Failed to build project"
+        return
     }
 }
 

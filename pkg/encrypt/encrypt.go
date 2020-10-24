@@ -21,8 +21,20 @@ func EncryptString(data string, passphrase string) string {
 	return string(Encrypt([]byte(data), passphrase))
 }
 
-func DecryptString(data string, passphrase string) string {
-	return string(Decrypt([]byte(data), passphrase))
+func DecryptString(data string, passphrase string) (string, error) {
+	v, err := Decrypt([]byte(data), passphrase)
+	if err != nil {
+		return "", err
+	}
+	return string(v), nil
+}
+
+func DecryptHex(data string, passphrase string) (string, error) {
+	hexVal, err := hex.DecodeString(data)
+	if err != nil {
+		return "", err
+	}
+	return DecryptString(string(hexVal), passphrase)
 }
 
 func Encrypt(data []byte, passphrase string) []byte {
@@ -39,23 +51,23 @@ func Encrypt(data []byte, passphrase string) []byte {
 	return ciphertext
 }
 
-func Decrypt(data []byte, passphrase string) []byte {
+func Decrypt(data []byte, passphrase string) ([]byte, error) {
 	key := []byte(createHash(passphrase))
 	block, err := aes.NewCipher(key)
 	if err != nil {
-		panic(err.Error())
+		return nil, err
 	}
 	gcm, err := cipher.NewGCM(block)
 	if err != nil {
-		panic(err.Error())
+		return nil, err
 	}
 	nonceSize := gcm.NonceSize()
 	nonce, ciphertext := data[:nonceSize], data[nonceSize:]
 	plaintext, err := gcm.Open(nil, nonce, ciphertext, nil)
 	if err != nil {
-		panic(err.Error())
+		return nil, err
 	}
-	return plaintext
+	return plaintext, nil
 }
 
 func EncryptFile(filename string, data []byte, passphrase string) {
@@ -64,7 +76,7 @@ func EncryptFile(filename string, data []byte, passphrase string) {
 	f.Write(Encrypt(data, passphrase))
 }
 
-func DecryptFile(filename string, passphrase string) []byte {
+func DecryptFile(filename string, passphrase string) ([]byte, error) {
 	data, _ := ioutil.ReadFile(filename)
 	return Decrypt(data, passphrase)
 }

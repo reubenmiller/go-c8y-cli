@@ -3,10 +3,14 @@ package cmd
 import (
 	"fmt"
 
+	"github.com/howeyc/gopass"
+	"github.com/reubenmiller/go-c8y-cli/pkg/encrypt"
 	"github.com/spf13/cobra"
 )
 
 type encryptPasswordCmd struct {
+	passphrase string
+
 	*baseCmd
 }
 
@@ -26,6 +30,7 @@ func newEncryptPasswordCmd() *encryptPasswordCmd {
 	cmd.SilenceUsage = true
 
 	cmd.Flags().String("password", "", "Password. (required)")
+	cmd.Flags().StringVar(&ccmd.passphrase, "passphrase", "", "Passphrase use for encoding your files")
 
 	// Required flags
 	cmd.MarkFlagRequired("password")
@@ -37,13 +42,21 @@ func newEncryptPasswordCmd() *encryptPasswordCmd {
 
 func (n *encryptPasswordCmd) encryptPassword(cmd *cobra.Command, args []string) error {
 
-	session := &CumulocitySession{}
-	if v, err := cmd.Flags().GetString("password"); err == nil && v != "" {
-		session.SetPassword(v)
+	if n.passphrase == "" {
+		cmd.Printf("Enter password 🔒: [input is hidden] ")
+		inputPassphrase, err := gopass.GetPasswd() // Silent
+		if err != nil {
+			return err
+		}
+		n.passphrase = string(inputPassphrase)
 	}
 
-	fmt.Printf("%0x", session.Password)
+	session := &CumulocitySession{}
+	if v, err := cmd.Flags().GetString("password"); err == nil && v != "" {
+		session.SetPassword(encrypt.EncryptString(v, n.passphrase))
+	}
+
+	fmt.Printf("Password: %0x\n", session.Password)
 
 	return nil
-	// return newUserError(fmt.Sprintf("Flag [%s] does not exist. %s", "device", err))
 }

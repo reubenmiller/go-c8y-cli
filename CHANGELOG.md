@@ -4,6 +4,9 @@
 
 No unreleased features
 
+* `New-User` added support for template and templateVars parameters
+* Dry/WhatIf headers are shown in a sorted alphabetically by header name
+
 ## Released
 
 ### v1.6.0

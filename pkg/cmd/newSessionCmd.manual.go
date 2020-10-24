@@ -5,6 +5,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"net/http"
+	"os"
 	"path"
 	"path/filepath"
 	"strings"
@@ -12,13 +14,20 @@ import (
 	"github.com/fatih/color"
 	"github.com/howeyc/gopass"
 	"github.com/pkg/errors"
+	"github.com/reubenmiller/go-c8y-cli/pkg/encrypt"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 	"github.com/tidwall/pretty"
 )
 
 type CumulocitySessions struct {
 	Sessions []CumulocitySession `json:"sessions"`
+}
+
+type Authentication struct {
+	AuthType string         `json:"authType"`
+	Cookies  []*http.Cookie `json:"cookies,omitempty"`
 }
 
 // CumulocitySession contains all settings required to communicate with a Cumulocity service
@@ -28,14 +37,47 @@ type CumulocitySession struct {
 	Tenant          string `json:"tenant"`
 	Username        string `json:"username"`
 	Password        string `json:"password"`
+	PasswordHash    string `json:"passwordHash"`
 	Description     string `json:"description"`
 	UseTenantPrefix bool   `json:"useTenantPrefix"`
+
+	Authentication `json:"cookies,omitempty"`
 
 	MicroserviceAliases map[string]string `json:"microserviceAliases"`
 
 	Index int    `json:"-"`
 	Path  string `json:"-"`
 	Name  string `json:"-"`
+}
+
+type LoginInformation struct {
+	Cookies  []string `json:"cookies"`
+	TenantId string   `json:"tenantId"`
+}
+
+func WriteAuth(v *viper.Viper) error {
+	// configFile := v.ConfigFileUsed()
+	cookieValues := make([]string, 0)
+
+	for _, cookie := range client.Cookies {
+		// cookieValues = append(cookieValues, fmt.Sprintf("%s=%s", cookie.Name, cookie.Value))
+		cookieValues = append(cookieValues, fmt.Sprintf("%s", cookie.Raw))
+	}
+
+	loginData := &LoginInformation{
+		Cookies:  cookieValues,
+		TenantId: client.TenantName,
+	}
+
+	b, err := json.Marshal(loginData)
+	if err != nil {
+		return err
+	}
+
+	fmt.Printf("%s\n", b)
+
+	v.Set("authentication.cookies", cookieValues)
+	return v.WriteConfig()
 }
 
 func NewCumulocitySessionFromFile(filePath string) (*CumulocitySession, error) {
@@ -57,9 +99,13 @@ func NewCumulocitySessionFromFile(filePath string) (*CumulocitySession, error) {
 	return session, nil
 }
 
+func (s CumulocitySession) GetSessionPassphrase() string {
+	return os.Getenv("C8Y_SESSION_PASSPHRASE")
+}
+
 func (s *CumulocitySession) SetPassword(password string) {
 	s.Password = password
-	// s.Password = encrypt.EncryptString(password, "fixed-token")
+	s.PasswordHash = encrypt.EncryptString(password, s.GetSessionPassphrase())
 }
 
 func (s *CumulocitySession) SetHost(host string) {
@@ -78,8 +124,16 @@ func (s CumulocitySession) GetHost() string {
 }
 
 func (s CumulocitySession) GetPassword() string {
-	return s.Password
-	// return encrypt.DecryptString(s.password, "fixed-token")
+	if s.Password != "" {
+		return s.Password
+	}
+	if s.PasswordHash != "" {
+		pass, err := encrypt.DecryptString(s.Password, s.GetSessionPassphrase())
+		if err == nil {
+			return pass
+		}
+	}
+	return ""
 }
 
 type newSessionCmd struct {

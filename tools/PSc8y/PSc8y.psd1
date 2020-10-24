@@ -274,6 +274,7 @@ FunctionsToExport = @(
 	'Get-Session',
 	'Get-SessionCollection',
 	'Install-ClientBinary',
+	'Invoke-ClientLogin',
 	'Invoke-ClientRequest',
 	'Invoke-Template',
 	'New-HostedApplication',
