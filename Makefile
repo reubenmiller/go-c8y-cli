@@ -142,6 +142,9 @@ build: update_spec build_cli build_powershell
 build_cli:
 	pwsh -File scripts/build-cli/build.ps1;
 
+build_cli_fast:
+	pwsh -File ./scripts/build-cli/build-binary.ps1 -OutputDir ./tools/PSc8y/dist/PSc8y/Dependencies -Target "linux:amd64"
+
 #
 # Powershell Module
 #

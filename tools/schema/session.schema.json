@@ -29,6 +29,29 @@
             "description": "Cumulocity password",
             "type": "string"
         },
+        "credential": {
+            "title": "Credential settings",
+            "description": "Cumulocity username, without tenant prefix!",
+            "type": "object",
+            "properties": {
+                "cookies": {
+                    "description": "List of cookies which should be added to each outgoing request",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "loginType": {
+                    "type": "string",
+                    "description": "Login option type",
+                    "enum": [
+                        "BASIC",
+                        "OAUTH2_INTERNAL",
+                        "NONE"
+                    ]
+                }
+            }
+        },
         "description": {
             "title": "Session description",
             "description": "Session description used to provide additional context when selecting a session. It is not used in any requests",

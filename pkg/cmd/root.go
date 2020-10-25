@@ -329,6 +329,7 @@ func ReadConfigFiles(v *viper.Viper) (path string, err error) {
 	if _, err := os.Stat(globalFlagSessionFile); err == nil {
 		// Load config by file path
 		v.SetConfigFile(globalFlagSessionFile)
+		cliConfig.ReadConfig(globalFlagSessionFile)
 	} else {
 		// Load config by name
 		sessionName := "session"
@@ -373,7 +374,7 @@ func initConfig() {
 		globalFlagUseEnv = true
 	}
 
-	cliConfig = config.NewCliConfiguration(viper.GetViper())
+	cliConfig = config.NewCliConfiguration(viper.GetViper(), os.Getenv("C8Y_SESSION_PASSPHRASE"))
 	loadConfiguration()
 
 	// only parse env variables if no explict config file is given
@@ -434,7 +435,8 @@ func initConfig() {
 			formatHost(viper.GetString("host")),
 			viper.GetString("tenant"),
 			viper.GetString("username"),
-			decryptPassword(viper.GetViper()),
+			cliConfig.GetEncryptedString("password"),
+			// decryptPassword(viper.GetViper()),
 			true,
 		)
 	} else {

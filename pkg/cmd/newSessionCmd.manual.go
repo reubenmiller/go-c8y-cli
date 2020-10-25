@@ -56,28 +56,8 @@ type LoginInformation struct {
 }
 
 func WriteAuth(v *viper.Viper) error {
-	// configFile := v.ConfigFileUsed()
-	cookieValues := make([]string, 0)
-
-	for _, cookie := range client.Cookies {
-		// cookieValues = append(cookieValues, fmt.Sprintf("%s=%s", cookie.Name, cookie.Value))
-		cookieValues = append(cookieValues, fmt.Sprintf("%s", cookie.Raw))
-	}
-
-	loginData := &LoginInformation{
-		Cookies:  cookieValues,
-		TenantId: client.TenantName,
-	}
-
-	b, err := json.Marshal(loginData)
-	if err != nil {
-		return err
-	}
-
-	fmt.Printf("%s\n", b)
-
-	v.Set("authentication.cookies", cookieValues)
-	return v.WriteConfig()
+	cliConfig.SetAuthorizationCookies(client.Cookies)
+	return cliConfig.WritePersistentConfig()
 }
 
 func NewCumulocitySessionFromFile(filePath string) (*CumulocitySession, error) {

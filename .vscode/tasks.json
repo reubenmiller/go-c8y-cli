@@ -11,6 +11,15 @@
                 "kind": "build",
                 "isDefault": true
             }
+        },
+        {
+            "label": "Build (fast)",
+            "type": "shell",
+            "command": "make build_cli_fast",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
         }
     ]
 }

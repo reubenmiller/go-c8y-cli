@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/manifoldco/promptui"
+	"github.com/mdp/qrterminal/v3"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -49,12 +50,11 @@ Log into the current session
 }
 
 func (n *sessionLoginCmd) bindEnv() {
-	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
-	bindEnv("passphrase", "")
+	// viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
+	// bindEnv("passphrase", "")
 }
 
 func (n *sessionLoginCmd) login(cmd *cobra.Command, args []string) error {
-
 	if n.TFACode == "" {
 		// read tfa code from env variable (if present)
 		if tfaCode := os.Getenv("C8Y_TFA_CODE"); tfaCode != "" {
@@ -91,9 +91,12 @@ func (n *sessionLoginCmd) login(cmd *cobra.Command, args []string) error {
 
 	var currentTenant *c8y.CurrentTenant
 
+	accessOK := false
+
 	// 1. check existing cookies
 	if len(client.Cookies) > 0 {
-		tenant, resp, err := client.Tenant.GetCurrentTenant(context.Background())
+		// tenant, resp, err := client.Tenant.GetCurrentTenant(context.Background())
+		_, resp, err := client.User.GetCurrentUser(context.Background())
 
 		if resp != nil && resp.StatusCode == http.StatusUnauthorized {
 			if v, ok := err.(*c8y.ErrorResponse); ok {
@@ -102,17 +105,23 @@ func (n *sessionLoginCmd) login(cmd *cobra.Command, args []string) error {
 				WriteAuth(viper.GetViper())
 			}
 		} else {
-			currentTenant = tenant
+			accessOK = true
 		}
 	}
 
 	// 2. check if TFA is required
-	if currentTenant == nil {
+	if !accessOK {
 		tenant, resp, err := client.Tenant.GetCurrentTenant(context.Background())
 
 		if resp != nil && resp.StatusCode == http.StatusUnauthorized {
 			if v, ok := err.(*c8y.ErrorResponse); ok {
-				if strings.Contains(v.Message, "TFA TOTP code required") {
+
+				if strings.Contains(v.Message, "TFA TOTP setup required") {
+					if err := n.setupTFA(); err != nil {
+						return err
+					}
+					requiresTFA = true
+				} else if strings.Contains(v.Message, "TFA TOTP code required") {
 					Logger.Debug("TFA code is required. server response: %s", v.Message)
 					requiresTFA = true
 				}
@@ -163,7 +172,7 @@ func (n *sessionLoginCmd) login(cmd *cobra.Command, args []string) error {
 				ctx, cancel := context.WithTimeout(context.Background(), time.Duration(globalFlagTimeout)*time.Millisecond)
 				defer cancel()
 
-				Logger.Debug("Logging in using interal OAuth2")
+				Logger.Debugf("Logging in using %s", c8y.AuthMethodOAuth2Internal)
 				if err := client.LoginUsingOAuth2(ctx, option.InitRequest); err != nil {
 					Logger.Errorf("OAuth2 failed. %s", err)
 					continue
@@ -187,10 +196,95 @@ func (n *sessionLoginCmd) login(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("could not get current tenant info")
 	}
 
-	viper.Set("tenant", currentTenant.Name)
+	cliConfig.Persistent.Set("tenant", currentTenant.Name)
 	Logger.Infof("Tenant: %s", currentTenant.Name)
 
 	Logger.Infof("login2 cookies. %v", client.Cookies)
 
 	return WriteAuth(viper.GetViper())
+}
+
+func (n *sessionLoginCmd) setupTFA() error {
+
+	// Request TFA secret
+	backupAuthMethod := client.AuthorizationMethod
+	client.AuthorizationMethod = c8y.AuthMethodBasic
+	resp, err := client.SendRequest(
+		context.Background(),
+		c8y.RequestOptions{
+			Method: http.MethodPost,
+			Path:   "/user/currentUser/totpSecret",
+			DryRun: globalFlagDryRun,
+		})
+
+	if err != nil {
+		Logger.Infof("Could not get tot")
+		return err
+	}
+
+	// Display TOTP secret
+	if v := resp.JSON.Get("rawSecret"); v.Exists() {
+		totpURL := fmt.Sprintf("otpauth://totp/%s?secret=%s&issuer=%s", client.Username, v.String(), client.BaseURL.Host)
+		qrterminal.GenerateWithConfig(totpURL, qrterminal.Config{
+			Level:     qrterminal.M,
+			Writer:    n.cmd.ErrOrStderr(),
+			BlackChar: qrterminal.BLACK,
+			WhiteChar: qrterminal.WHITE,
+			QuietZone: 1,
+		})
+
+		n.cmd.Printf("\nTOTP Secret: %s\n\n", v.String())
+	}
+
+	// Verify TOTP by checking a code
+	tfaCodePrompt := promptui.Prompt{
+		Stdin:    os.Stdin,
+		Stdout:   os.Stderr,
+		Label:    "Enter Two-Factor code",
+		Validate: n.verifyTFASetupCode,
+	}
+
+	if _, err := tfaCodePrompt.Run(); err != nil {
+		return err
+	}
+
+	// Activate totp
+	resp, err = client.SendRequest(
+		context.Background(),
+		c8y.RequestOptions{
+			Method: http.MethodPost,
+			Path:   "/user/currentUser/totpSecret/activity",
+			Body:   map[string]interface{}{"isActive": true},
+		},
+	)
+
+	if err != nil {
+		return fmt.Errorf("Failed to activate TFA (TOTP): %w", err)
+	}
+
+	time.Sleep(1000 * time.Millisecond)
+
+	client.AuthorizationMethod = backupAuthMethod
+	return nil
+}
+
+func (n sessionLoginCmd) verifyTFASetupCode(input string) error {
+	if len(strings.ReplaceAll(input, " ", "")) < 6 {
+		return fmt.Errorf("Non-zero input")
+	}
+
+	_, err := client.SendRequest(
+		context.Background(),
+		c8y.RequestOptions{
+			Method: http.MethodPost,
+			Path:   "/user/currentUser/totpSecret/verify",
+			Body:   map[string]interface{}{"code": input},
+		},
+	)
+
+	if err != nil {
+		return err
+	}
+	n.TFACode = input
+	return nil
 }
