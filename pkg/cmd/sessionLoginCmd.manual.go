@@ -3,6 +3,7 @@ package cmd
 import (
 	"context"
 	"fmt"
+	"io"
 	"net/http"
 	"os"
 	"sort"
@@ -24,6 +25,266 @@ type sessionLoginCmd struct {
 	*baseCmd
 }
 
+type SessionHandler interface {
+	Init()
+	Login() error
+	Verify() error
+}
+
+type LoginState int
+
+func (l LoginState) String() string {
+	return [...]string{"Unknown", "Authorized", "NotAuthorized", "TFASetup", "TFAConfirm", "Verify", "Abort"}[l]
+}
+
+const (
+	LoginStateUnknown LoginState = iota
+	LoginStateAuth
+	LoginStateNoAuth
+	LoginStateTFASetup
+	LoginStateTFAConfirm
+	LoginStateVerify
+	LoginStateAbort
+)
+
+type loginHandler struct {
+	TFACodeRequired bool
+	Authorized      bool
+	Err             error
+	TFACode         string
+	Cookies         []*http.Cookie
+	C8Yclient       *c8y.Client
+	LoginOptions    *c8y.TenantLoginOptions
+	state           chan LoginState
+	Attempts        int
+	Writer          io.Writer
+}
+
+func NewLoginHandler(c *c8y.Client, w io.Writer) *loginHandler {
+	h := &loginHandler{
+		C8Yclient: c,
+		Writer:    w,
+	}
+	h.state = make(chan LoginState, 1)
+	return h
+}
+
+func (lh *loginHandler) do(op func() error) {
+	// if lh.Err != nil {
+	// 	return
+	// }
+	lh.Err = op()
+}
+
+func (lh *loginHandler) Clear() {
+	lh.TFACode = ""
+	lh.Authorized = false
+	lh.C8Yclient.SetCookies([]*http.Cookie{})
+	WriteAuth(viper.GetViper())
+	lh.Err = nil
+}
+
+func (lh *loginHandler) Run() error {
+	lh.Init()
+	lh.state <- LoginStateUnknown
+
+	for {
+		c := <-lh.state
+
+		Logger.Infof("Current State: %s\n", c.String())
+
+		if c == LoginStateUnknown || c == LoginStateVerify {
+			lh.Verify()
+		} else if c == LoginStateTFAConfirm {
+			lh.Login()
+		} else if c == LoginStateNoAuth {
+			lh.Clear()
+
+			// login
+			lh.Login()
+
+		} else if c == LoginStateTFASetup {
+			if err := lh.setupTFA(); err != nil {
+				return fmt.Errorf("TFA Setup failed")
+			}
+			lh.state <- LoginStateTFAConfirm
+		} else if c == LoginStateAbort {
+			break
+		} else if c == LoginStateAuth {
+			break
+		}
+
+		time.Sleep(500 * time.Millisecond)
+	}
+
+	return lh.Err
+}
+
+func (lh *loginHandler) sortLoginOptions() {
+	if lh.LoginOptions == nil {
+		return
+	}
+
+	optionOrder := map[string]int{
+		c8y.AuthMethodBasic:          2,
+		c8y.AuthMethodOAuth2Internal: 1,
+	}
+
+	// sort login options
+	sort.SliceStable(lh.LoginOptions.LoginOptions[:], func(i, j int) bool {
+		iWeight := 100
+		jWeight := 200
+
+		if v, ok := optionOrder[lh.LoginOptions.LoginOptions[i].Type]; ok {
+			iWeight = v
+		}
+
+		if v, ok := optionOrder[lh.LoginOptions.LoginOptions[j].Type]; ok {
+			jWeight = v
+		}
+		return iWeight < jWeight
+	})
+}
+
+func (lh *loginHandler) Init() {
+	lh.do(func() error {
+		loginOptions, _, err := client.Tenant.GetLoginOptions(context.Background())
+		lh.LoginOptions = loginOptions
+		lh.sortLoginOptions()
+		return err
+	})
+}
+
+func (lh *loginHandler) Login() {
+	lh.do(func() error {
+		if lh.LoginOptions == nil && len(lh.LoginOptions.LoginOptions) == 0 {
+			lh.state <- LoginStateAbort
+			return fmt.Errorf("No login options")
+		}
+
+		if lh.Authorized {
+			lh.state <- LoginStateAuth
+			return nil
+		}
+
+		for _, option := range lh.LoginOptions.LoginOptions {
+			switch option.Type {
+			case c8y.AuthMethodOAuth2Internal:
+
+				if lh.TFACodeRequired && option.TFAStrategy == "TOTP" {
+					if lh.TFACode == "" {
+						prompt := promptui.Prompt{
+							Stdin:   os.Stdin,
+							Stdout:  os.Stderr,
+							Default: lh.TFACode,
+							Label:   "Enter Two-Factor code",
+							Validate: func(input string) error {
+								if len(strings.ReplaceAll(input, " ", "")) < 6 {
+									return fmt.Errorf("Non-zero input")
+								}
+
+								ctx, cancel := context.WithTimeout(context.Background(), time.Duration(globalFlagTimeout)*time.Millisecond)
+								defer cancel()
+
+								lh.C8Yclient.TFACode = input
+
+								if err := lh.C8Yclient.LoginUsingOAuth2(ctx, option.InitRequest); err != nil {
+									Logger.Errorf("OAuth2 failed. %s", err)
+									return err
+								}
+								lh.TFACode = input
+								lh.Authorized = true
+								return nil
+							},
+						}
+
+						if v, err := prompt.Run(); err == nil {
+							lh.TFACode = v
+						} else {
+							lh.state <- LoginStateAbort
+							lh.Err = fmt.Errorf("User cancelled login")
+							return nil
+						}
+					}
+					lh.C8Yclient.TFACode = lh.TFACode
+				}
+
+				if !lh.Authorized {
+					ctx, cancel := context.WithTimeout(context.Background(), time.Duration(globalFlagTimeout)*time.Millisecond)
+					defer cancel()
+
+					Logger.Debugf("Logging in using %s", c8y.AuthMethodOAuth2Internal)
+					if err := client.LoginUsingOAuth2(ctx, option.InitRequest); err != nil {
+						lh.Attempts++
+
+						if v, ok := err.(*c8y.ErrorResponse); ok {
+							Logger.Errorf("OAuth2 failed. %s", v.Message)
+						} else {
+							Logger.Errorf("OAuth2 failed. %s", err)
+						}
+
+						if strings.Contains(err.Error(), "There was a change in authentication strategy for your tenant or user account") {
+							lh.state <- LoginStateNoAuth
+							return nil
+						}
+
+						if lh.Attempts > 2 {
+							lh.Err = fmt.Errorf("Max log attempts reached: %w", err)
+							lh.state <- LoginStateAbort
+							return nil
+						}
+
+						// trigger unknown to recheck if TFA is required or not
+						lh.Clear()
+						lh.state <- LoginStateUnknown
+						return nil
+					}
+					lh.Authorized = true
+					lh.state <- LoginStateAuth
+					WriteAuth(viper.GetViper())
+					return nil
+				}
+				WriteAuth(viper.GetViper())
+				lh.state <- LoginStateVerify
+
+			case c8y.AuthMethodBasic:
+				// do nothing
+			}
+			break
+		}
+		return nil
+	})
+}
+
+func (lh *loginHandler) Verify() {
+	lh.do(func() error {
+		_, resp, err := client.User.GetCurrentUser(context.Background())
+
+		if resp != nil && resp.StatusCode == http.StatusUnauthorized {
+
+			if v, ok := err.(*c8y.ErrorResponse); ok {
+
+				if strings.Contains(v.Message, "TFA TOTP setup required") {
+					lh.TFACodeRequired = true
+					lh.state <- LoginStateTFASetup
+				} else if strings.Contains(v.Message, "TFA TOTP code required") {
+					Logger.Debug("TFA code is required. server response: %s", v.Message)
+					lh.TFACodeRequired = true
+					lh.state <- LoginStateNoAuth
+				} else {
+					lh.state <- LoginStateNoAuth
+				}
+				return nil
+			}
+
+			lh.state <- LoginStateNoAuth
+		} else {
+			lh.state <- LoginStateAuth
+		}
+		return err
+	})
+}
+
 func newSessionLoginCmd() *sessionLoginCmd {
 	ccmd := &sessionLoginCmd{}
 
@@ -36,7 +297,7 @@ c8y session login
 
 Log into the current session
 		`,
-		RunE: ccmd.login,
+		RunE: ccmd.initSession,
 	}
 
 	cmd.SilenceUsage = true
@@ -54,162 +315,17 @@ func (n *sessionLoginCmd) bindEnv() {
 	// bindEnv("passphrase", "")
 }
 
-func (n *sessionLoginCmd) login(cmd *cobra.Command, args []string) error {
-	if n.TFACode == "" {
-		// read tfa code from env variable (if present)
-		if tfaCode := os.Getenv("C8Y_TFA_CODE"); tfaCode != "" {
-			n.TFACode = tfaCode
-		}
-	}
-
-	loginOptions, _, err := client.Tenant.GetLoginOptions(context.Background())
-
-	if err != nil {
-		return fmt.Errorf("could not get login options: %w", err)
-	}
-
-	requiresTFA := false
-	optionOrder := map[string]int{
-		c8y.AuthMethodBasic:          2,
-		c8y.AuthMethodOAuth2Internal: 1,
-	}
-
-	// sort login options
-	sort.SliceStable(loginOptions.LoginOptions[:], func(i, j int) bool {
-		iWeight := 100
-		jWeight := 200
-
-		if v, ok := optionOrder[loginOptions.LoginOptions[i].Type]; ok {
-			iWeight = v
-		}
-
-		if v, ok := optionOrder[loginOptions.LoginOptions[j].Type]; ok {
-			jWeight = v
-		}
-		return iWeight < jWeight
-	})
-
-	var currentTenant *c8y.CurrentTenant
-
-	accessOK := false
-
-	// 1. check existing cookies
-	if len(client.Cookies) > 0 {
-		// tenant, resp, err := client.Tenant.GetCurrentTenant(context.Background())
-		_, resp, err := client.User.GetCurrentUser(context.Background())
-
-		if resp != nil && resp.StatusCode == http.StatusUnauthorized {
-			if v, ok := err.(*c8y.ErrorResponse); ok {
-				Logger.Debug("Token is invalid, clearing cookies. err=%s", v.Message)
-				client.SetCookies([]*http.Cookie{})
-				WriteAuth(viper.GetViper())
-			}
-		} else {
-			accessOK = true
-		}
-	}
-
-	// 2. check if TFA is required
-	if !accessOK {
-		tenant, resp, err := client.Tenant.GetCurrentTenant(context.Background())
-
-		if resp != nil && resp.StatusCode == http.StatusUnauthorized {
-			if v, ok := err.(*c8y.ErrorResponse); ok {
-
-				if strings.Contains(v.Message, "TFA TOTP setup required") {
-					if err := n.setupTFA(); err != nil {
-						return err
-					}
-					requiresTFA = true
-				} else if strings.Contains(v.Message, "TFA TOTP code required") {
-					Logger.Debug("TFA code is required. server response: %s", v.Message)
-					requiresTFA = true
-				}
-			}
-		} else {
-			currentTenant = tenant
-		}
-	}
-
-	// iterate through login options
-	for _, option := range loginOptions.LoginOptions {
-		switch option.Type {
-		case c8y.AuthMethodOAuth2Internal:
-
-			if requiresTFA && option.TFAStrategy == "TOTP" {
-				if n.TFACode == "" {
-					prompt := promptui.Prompt{
-						Stdin:  os.Stdin,
-						Stdout: os.Stderr,
-						Label:  "Enter Two-Factor code",
-						Validate: func(input string) error {
-							if len(strings.ReplaceAll(input, " ", "")) < 6 {
-								return fmt.Errorf("Non-zero input")
-							}
-
-							client.TFACode = input
-
-							ctx, cancel := context.WithTimeout(context.Background(), time.Duration(globalFlagTimeout)*time.Millisecond)
-							defer cancel()
-
-							if err := client.LoginUsingOAuth2(ctx, option.InitRequest); err != nil {
-								Logger.Errorf("OAuth2 failed. %s", err)
-								return err
-							}
-							n.LoginOK = true
-							return nil
-						},
-					}
-
-					if v, err := prompt.Run(); err == nil {
-						n.TFACode = v
-					}
-				}
-				client.TFACode = n.TFACode
-			}
-
-			if !n.LoginOK {
-				ctx, cancel := context.WithTimeout(context.Background(), time.Duration(globalFlagTimeout)*time.Millisecond)
-				defer cancel()
-
-				Logger.Debugf("Logging in using %s", c8y.AuthMethodOAuth2Internal)
-				if err := client.LoginUsingOAuth2(ctx, option.InitRequest); err != nil {
-					Logger.Errorf("OAuth2 failed. %s", err)
-					continue
-				}
-			}
-
-		case c8y.AuthMethodBasic:
-			// do nothing
-		}
-
-		// Verify credentials
-		currentTenant, _, err = client.Tenant.GetCurrentTenant(context.Background())
-		if err != nil {
-			Logger.Infof("Could not get current tenant info. %s", err)
-			continue
-		}
-		break
-	}
-
-	if currentTenant == nil || currentTenant.Name == "" {
-		return fmt.Errorf("could not get current tenant info")
-	}
-
-	cliConfig.Persistent.Set("tenant", currentTenant.Name)
-	Logger.Infof("Tenant: %s", currentTenant.Name)
-
-	Logger.Infof("login2 cookies. %v", client.Cookies)
-
-	return WriteAuth(viper.GetViper())
+func (n *sessionLoginCmd) initSession(cmd *cobra.Command, args []string) error {
+	handler := NewLoginHandler(client, cmd.ErrOrStderr())
+	return handler.Run()
 }
 
-func (n *sessionLoginCmd) setupTFA() error {
+func (lh *loginHandler) setupTFA() error {
 
 	// Request TFA secret
-	backupAuthMethod := client.AuthorizationMethod
+	backupAuthMethod := lh.C8Yclient.AuthorizationMethod
 	client.AuthorizationMethod = c8y.AuthMethodBasic
-	resp, err := client.SendRequest(
+	resp, err := lh.C8Yclient.SendRequest(
 		context.Background(),
 		c8y.RequestOptions{
 			Method: http.MethodPost,
@@ -227,13 +343,14 @@ func (n *sessionLoginCmd) setupTFA() error {
 		totpURL := fmt.Sprintf("otpauth://totp/%s?secret=%s&issuer=%s", client.Username, v.String(), client.BaseURL.Host)
 		qrterminal.GenerateWithConfig(totpURL, qrterminal.Config{
 			Level:     qrterminal.M,
-			Writer:    n.cmd.ErrOrStderr(),
+			Writer:    lh.Writer,
 			BlackChar: qrterminal.BLACK,
 			WhiteChar: qrterminal.WHITE,
 			QuietZone: 1,
 		})
 
-		n.cmd.Printf("\nTOTP Secret: %s\n\n", v.String())
+		fmt.Printf("\nTOTP Secret: %s\n\n", v.String())
+		// n.cmd.Printf("\nTOTP Secret: %s\n\n", v.String())
 	}
 
 	// Verify TOTP by checking a code
@@ -241,7 +358,7 @@ func (n *sessionLoginCmd) setupTFA() error {
 		Stdin:    os.Stdin,
 		Stdout:   os.Stderr,
 		Label:    "Enter Two-Factor code",
-		Validate: n.verifyTFASetupCode,
+		Validate: lh.verifyTFASetupCode,
 	}
 
 	if _, err := tfaCodePrompt.Run(); err != nil {
@@ -268,12 +385,12 @@ func (n *sessionLoginCmd) setupTFA() error {
 	return nil
 }
 
-func (n sessionLoginCmd) verifyTFASetupCode(input string) error {
+func (lh *loginHandler) verifyTFASetupCode(input string) error {
 	if len(strings.ReplaceAll(input, " ", "")) < 6 {
 		return fmt.Errorf("Non-zero input")
 	}
 
-	_, err := client.SendRequest(
+	_, err := lh.C8Yclient.SendRequest(
 		context.Background(),
 		c8y.RequestOptions{
 			Method: http.MethodPost,
@@ -285,6 +402,6 @@ func (n sessionLoginCmd) verifyTFASetupCode(input string) error {
 	if err != nil {
 		return err
 	}
-	n.TFACode = input
+	lh.TFACode = input
 	return nil
 }
