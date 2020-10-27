@@ -101,7 +101,7 @@ String
         Set-EnvironmentVariablesFromSession
 
         # Get OAuth2 and test client authentication
-        $resp = Invoke-ClientLogin 2>&1
+        $null = Invoke-ClientLogin
 
         if ($LASTEXITCODE -ne 0) {
             Write-Error "$resp"
