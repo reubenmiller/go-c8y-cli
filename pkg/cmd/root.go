@@ -479,6 +479,17 @@ func initConfig() {
 		client.Username,
 		client.Password,
 	)
+
+	// Set realtime authorization
+	if client.AuthorizationMethod == c8y.AuthMethodOAuth2Internal {
+		client.Realtime.SetXSRFToken(client.GetXSRFToken())
+
+		if len(client.Cookies) > 0 {
+			if err := client.Realtime.SetCookies(client.Cookies); err != nil {
+				Logger.Errorf("Failed to set websocket cookie jar. %s", err)
+			}
+		}
+	}
 }
 
 func decryptPassword(v *viper.Viper) string {
@@ -514,11 +525,7 @@ func loadAuthentication(v *config.CliConfiguration, c *c8y.Client) error {
 	cookies := v.GetCookies()
 
 	if len(cookies) > 0 {
-		// for _, cookie := range cookies {
-		// 	if strings.ToLower(cookie.Name) == "" {
-		// 	}
-		// }
-		c.SetCookies(v.GetCookies())
+		c.SetCookies(cookies)
 		c.AuthorizationMethod = c8y.AuthMethodOAuth2Internal
 	}
 
