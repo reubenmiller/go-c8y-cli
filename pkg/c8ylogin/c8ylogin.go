@@ -20,7 +20,7 @@ import (
 type LoginState int
 
 func (l LoginState) String() string {
-	return [...]string{"Unknown", "Authorized", "NotAuthorized", "TFASetup", "TFAConfirm", "Verify", "Abort"}[l]
+	return [...]string{"Unknown", "Authorized", "NotAuthorized", "TFASetup", "TFAConfirm", "Verify", "Abort", "PromptForPassword"}[l]
 }
 
 const (
@@ -44,6 +44,9 @@ const (
 
 	// LoginStateAbort abort the login flow
 	LoginStateAbort
+
+	// LoginStatePromptPassword prompt for the password
+	LoginStatePromptPassword
 )
 
 var (
@@ -56,6 +59,7 @@ var (
 type LoginHandler struct {
 	TFACodeRequired bool
 	Authorized      bool
+	Interactive     bool
 	Err             error
 	TFACode         string
 	Cookies         []*http.Cookie
@@ -72,10 +76,11 @@ type LoginHandler struct {
 // NewLoginHandler creates a new login handler to process the full Cumulocity login process for different login types, i.e. OAUTH_INTERNAL, BASIC etc.
 func NewLoginHandler(c *c8y.Client, w io.Writer, onSave func()) *LoginHandler {
 	h := &LoginHandler{
-		C8Yclient: c,
-		Writer:    w,
-		onSave:    onSave,
-		Logger:    logger.NewDummyLogger("c8ylogin"),
+		C8Yclient:   c,
+		Interactive: true,
+		Writer:      w,
+		onSave:      onSave,
+		Logger:      logger.NewDummyLogger("c8ylogin"),
 	}
 	h.state = make(chan LoginState, 1)
 	return h
@@ -130,6 +135,10 @@ func (lh *LoginHandler) Run() error {
 			// login
 			lh.login()
 
+		} else if c == LoginStatePromptPassword {
+			if err := lh.promptForPassword(); err != nil {
+				return err
+			}
 		} else if c == LoginStateTFASetup {
 			if err := lh.setupTFA(); err != nil {
 				return fmt.Errorf("TFA Setup failed")
@@ -182,6 +191,30 @@ func (lh *LoginHandler) init() {
 	})
 }
 
+func (lh *LoginHandler) promptForPassword() error {
+	validate := func(input string) error {
+		if input == "" {
+			return fmt.Errorf("Empty password")
+		}
+		return nil
+	}
+	prompt := promptui.Prompt{
+		Stdin:    os.Stdin,
+		Stdout:   os.Stderr,
+		Default:  "",
+		Mask:     '*',
+		Label:    "Enter c8y password 🔒",
+		Validate: validate,
+	}
+	pass, err := prompt.Run()
+
+	if err != nil {
+		return err
+	}
+	lh.C8Yclient.Password = pass
+	lh.state <- LoginStateVerify
+	return nil
+}
 func (lh *LoginHandler) login() {
 	lh.do(func() error {
 		if lh.LoginOptions == nil && len(lh.LoginOptions.LoginOptions) == 0 {
@@ -283,6 +316,10 @@ func (lh *LoginHandler) login() {
 	})
 }
 
+func (lh *LoginHandler) errorContains(message, pattern string) bool {
+	return strings.Contains(message, pattern)
+}
+
 func (lh *LoginHandler) verify() {
 	lh.do(func() error {
 		_, resp, err := lh.C8Yclient.User.GetCurrentUser(context.Background())
@@ -291,13 +328,24 @@ func (lh *LoginHandler) verify() {
 
 			if v, ok := err.(*c8y.ErrorResponse); ok {
 
-				if strings.Contains(v.Message, "TFA TOTP setup required") {
+				if lh.errorContains(v.Message, "TFA TOTP setup required") {
 					lh.TFACodeRequired = true
 					lh.state <- LoginStateTFASetup
-				} else if strings.Contains(v.Message, "TFA TOTP code required") {
+				} else if lh.errorContains(v.Message, "TFA TOTP code required") {
 					lh.Logger.Debug("TFA code is required. server response: %s", v.Message)
 					lh.TFACodeRequired = true
 					lh.state <- LoginStateNoAuth
+				} else if lh.errorContains(v.Message, "Bad credentials") {
+					lh.Logger.Infof("Bad creds using auth method: %s", lh.C8Yclient.AuthorizationMethod)
+					if lh.C8Yclient.AuthorizationMethod != c8y.AuthMethodOAuth2Internal {
+						if lh.Interactive {
+							lh.state <- LoginStatePromptPassword
+						} else {
+							lh.state <- LoginStateAbort
+						}
+					} else {
+						lh.state <- LoginStateNoAuth
+					}
 				} else {
 					lh.state <- LoginStateNoAuth
 				}

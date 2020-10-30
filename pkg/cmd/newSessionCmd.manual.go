@@ -14,7 +14,6 @@ import (
 	"github.com/fatih/color"
 	"github.com/howeyc/gopass"
 	"github.com/pkg/errors"
-	"github.com/reubenmiller/go-c8y-cli/pkg/encrypt"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -37,7 +36,6 @@ type CumulocitySession struct {
 	Tenant          string `json:"tenant"`
 	Username        string `json:"username"`
 	Password        string `json:"password"`
-	PasswordHash    string `json:"passwordHash"`
 	Description     string `json:"description"`
 	UseTenantPrefix bool   `json:"useTenantPrefix"`
 
@@ -57,6 +55,7 @@ type LoginInformation struct {
 
 func WriteAuth(v *viper.Viper) error {
 	cliConfig.SetAuthorizationCookies(client.Cookies)
+	cliConfig.SetPassword(client.Password)
 	return cliConfig.WritePersistentConfig()
 }
 
@@ -85,7 +84,6 @@ func (s CumulocitySession) GetSessionPassphrase() string {
 
 func (s *CumulocitySession) SetPassword(password string) {
 	s.Password = password
-	s.PasswordHash = encrypt.EncryptString(password, s.GetSessionPassphrase())
 }
 
 func (s *CumulocitySession) SetHost(host string) {
@@ -104,16 +102,14 @@ func (s CumulocitySession) GetHost() string {
 }
 
 func (s CumulocitySession) GetPassword() string {
-	if s.Password != "" {
-		return s.Password
+	pass, err := SecureDataAccessor.TryDecryptString(s.Password, s.GetSessionPassphrase())
+
+	if err != nil {
+		Logger.Errorf("Could not decrypt password. %s", err)
+		return ""
 	}
-	if s.PasswordHash != "" {
-		pass, err := encrypt.DecryptString(s.Password, s.GetSessionPassphrase())
-		if err == nil {
-			return pass
-		}
-	}
-	return ""
+
+	return pass
 }
 
 type newSessionCmd struct {

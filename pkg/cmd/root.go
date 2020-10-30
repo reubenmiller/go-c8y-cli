@@ -21,6 +21,9 @@ import (
 // Logger is used to record the log messages which should be visible to the user when using the verbose flag
 var Logger *logger.Logger
 
+// SecureDataAccessor reads and writes encrypted data
+var SecureDataAccessor *encrypt.SecureData
+
 // Build data
 // These variables should be set using the -ldflags "-X github.com/reubenmiller/go-c8y-cli/pkg/cmd.version=1.0.0" when running go build
 var buildVersion string
@@ -32,6 +35,7 @@ const (
 
 func init() {
 	Logger = logger.NewDummyLogger(module)
+	SecureDataAccessor = encrypt.NewSecureData("{encrypted}")
 }
 
 type baseCmd struct {
@@ -374,7 +378,7 @@ func initConfig() {
 		globalFlagUseEnv = true
 	}
 
-	cliConfig = config.NewCliConfiguration(viper.GetViper(), os.Getenv("C8Y_SESSION_PASSPHRASE"))
+	cliConfig = config.NewCliConfiguration(viper.GetViper(), SecureDataAccessor, getSessionHomeDir(), os.Getenv("C8Y_SESSION_PASSPHRASE"))
 	loadConfiguration()
 
 	// only parse env variables if no explict config file is given
@@ -436,7 +440,6 @@ func initConfig() {
 			viper.GetString("tenant"),
 			viper.GetString("username"),
 			cliConfig.GetEncryptedString("password"),
-			// decryptPassword(viper.GetViper()),
 			true,
 		)
 	} else {
@@ -490,19 +493,6 @@ func initConfig() {
 			}
 		}
 	}
-}
-
-func decryptPassword(v *viper.Viper) string {
-	password := viper.GetString("password")
-	if password != "" {
-		return password
-	}
-	passwordHash := viper.GetString("passwordHash")
-	password, err := encrypt.DecryptHex(passwordHash, os.Getenv("C8Y_SESSION_PASSPHRASE"))
-	if err != nil {
-		return ""
-	}
-	return password
 }
 
 func loadConfiguration() error {

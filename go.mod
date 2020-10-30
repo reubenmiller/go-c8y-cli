@@ -21,6 +21,7 @@ require (
 	github.com/thedevsaddam/gojsonq v2.3.0+incompatible
 	github.com/tidwall/gjson v1.6.1
 	github.com/tidwall/pretty v1.0.2
+	golang.org/x/crypto v0.0.0-20201016220609-9e8e0b390897
 )
 
 go 1.13
