@@ -378,7 +378,7 @@ func initConfig() {
 		globalFlagUseEnv = true
 	}
 
-	cliConfig = config.NewCliConfiguration(viper.GetViper(), SecureDataAccessor, getSessionHomeDir(), os.Getenv("C8Y_SESSION_PASSPHRASE"))
+	cliConfig = config.NewCliConfiguration(viper.GetViper(), SecureDataAccessor, getSessionHomeDir(), os.Getenv("C8Y_PASSPHRASE"))
 	loadConfiguration()
 
 	// only parse env variables if no explict config file is given

@@ -295,6 +295,7 @@ FunctionsToExport = @(
 	'Open-Website',
 	'Register-Alias',
 	'Set-ClientConsoleSetting',
+	'Set-ClientPassphrase',
 	'Set-Session',
 	'Test-Json',
 	'Unregister-Alias',

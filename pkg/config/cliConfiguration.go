@@ -72,13 +72,27 @@ func (c *CliConfiguration) ReadConfig(file string) error {
 	return c.Persistent.ReadInConfig()
 }
 
-func (c *CliConfiguration) CheckEncryption() error {
-	_, err := c.prompter.EncryptionPassphrase(c.SecretText)
-	return err
+func (c *CliConfiguration) CheckEncryption(encryptedText ...string) (string, error) {
+	secretText := c.SecretText
+	if len(encryptedText) > 0 {
+		secretText = encryptedText[0]
+	}
+	c.Logger.Infof("SecretText: %s", secretText)
+	pass, err := c.prompter.EncryptionPassphrase(secretText, c.Passphrase)
+	c.Passphrase = pass
+	return pass, err
 }
 
 func (c *CliConfiguration) ReadKeyFile() error {
 
+	// read from env variable
+	if v := os.Getenv("C8Y_PASSPHRASE_TEXT"); v != "" {
+		c.Logger.Debugf("Using env variable 'C8Y_PASSPHRASE_TEXT' as example encryption text")
+		c.SecretText = v
+		return nil
+	}
+
+	// read from file
 	if contents, err := ioutil.ReadFile(c.KeyFile); err == nil {
 		c.SecretText = string(contents)
 		return nil
@@ -228,7 +242,20 @@ func (c *CliConfiguration) SetPassword(p string) {
 	c.Persistent.Set("password", p)
 }
 
+func (c *CliConfiguration) SetTenant(value string) {
+	c.Persistent.Set("tenant", value)
+}
+
 // IsCIMode return true if the cli is running in CI mode
 func (c *CliConfiguration) IsCIMode() bool {
 	return c.viper.GetBool("settings.ci")
+}
+
+// GetString returns a string from the configuration
+func (c *CliConfiguration) GetString(key string) string {
+	return c.viper.GetString(key)
+}
+
+func (c *CliConfiguration) GetDefaultUsername() string {
+	return c.viper.GetString("settings.default.username")
 }

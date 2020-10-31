@@ -74,6 +74,10 @@
                     "description": "Default paging size to use when using the includeAll option, which fetches all results from Cumulocity",
                     "$ref": "#/definitions/pagingProperty"
                 },
+                "default.username": {
+                    "description": "Default username to use when creating a new c8y session",
+                    "type": "string"
+                },
                 "includeAll.delayMS": {
                     "description": "Delay in milliseconds between fetching the next result when using the includeAll option. If value is 0 or less, then it will be ignored",
                     "type": "integer",

@@ -41,7 +41,12 @@ None
     $Env:C8Y_BASEURL = $Session.host;
     $Env:C8Y_HOST = $Session.host;
 
-    $Env:C8Y_TENANT = $Session.tenant;
+    if ($Session.tenant) {
+        $Env:C8Y_TENANT = $Session.tenant;
+    } else {
+        $CurrentTenant = Get-CurrentTenant
+        $Env:C8Y_TENANT = $CurrentTenant.name
+    }
 
     $Env:C8Y_USER = $Session.username;
     $Env:C8Y_USERNAME = $Session.username;

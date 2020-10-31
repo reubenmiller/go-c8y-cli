@@ -73,7 +73,7 @@ func NewPrompt(l *logger.Logger) *Prompt {
 
 // EncryptionPassphrase prompt for the encryption passphrase, and test the
 // passphrase against the encrypted content to see if it is valid
-func (p *Prompt) EncryptionPassphrase(encryptedData string) (string, error) {
+func (p *Prompt) EncryptionPassphrase(encryptedData string, initPassphrase string) (string, error) {
 	var err error
 	secure := encrypt.NewSecureData("{encrypted}")
 
@@ -82,23 +82,29 @@ func (p *Prompt) EncryptionPassphrase(encryptedData string) (string, error) {
 		return err
 	}
 	prompt := promptui.Prompt{
-		Stdin:   os.Stdin,
-		Stdout:  os.Stderr,
-		Default: "",
-		Mask:    '*',
-		Label:   "Enter passphrase 🔒",
+		Stdin:       os.Stdin,
+		Stdout:      os.Stderr,
+		Default:     "",
+		Mask:        '*',
+		HideEntered: true,
+		Label:       "Enter passphrase 🔒",
 		Templates: &promptui.PromptTemplates{
 			Valid: "{{ . | bold }}: ",
 		},
 	}
 	promptWrapper := NewPromptWithPostValidate(&prompt, validate)
+
+	// check if init passphrase is ok without prompting the user
+	if err := validate(initPassphrase); err == nil {
+		return initPassphrase, nil
+	}
 	return promptWrapper.Run()
 }
 
 // Password prompts the user for a password without confirmation
-func (p *Prompt) Password(passwordType string) (string, error) {
-	if passwordType == "" {
-		passwordType = "c8y"
+func (p *Prompt) Password(label string) (string, error) {
+	if label == "" {
+		label = "Enter password"
 	}
 	validate := func(input string) error {
 		if input == "" {
@@ -107,12 +113,13 @@ func (p *Prompt) Password(passwordType string) (string, error) {
 		return nil
 	}
 	prompt := promptui.Prompt{
-		Stdin:    os.Stdin,
-		Stdout:   os.Stderr,
-		Default:  "",
-		Mask:     '*',
-		Label:    fmt.Sprintf("Enter %s password 🔒", passwordType),
-		Validate: validate,
+		Stdin:       os.Stdin,
+		Stdout:      os.Stderr,
+		Default:     "",
+		Mask:        '*',
+		HideEntered: true,
+		Label:       fmt.Sprintf("%s %s", label, "🔒"),
+		Validate:    validate,
 	}
 	return prompt.Run()
 }
@@ -121,13 +128,13 @@ func (p *Prompt) Password(passwordType string) (string, error) {
 // the user to type it in again
 func (p *Prompt) PasswordWithConfirm(passwordType string) (string, error) {
 
-	pass, err := p.Password(passwordType)
+	pass, err := p.Password(fmt.Sprintf("Enter %s password", passwordType))
 
 	if err != nil {
 		return "", err
 	}
 
-	passConfirm, err := p.Password(passwordType)
+	passConfirm, err := p.Password(fmt.Sprintf("Confirm %s password", passwordType))
 
 	if err != nil {
 		return "", err
@@ -137,4 +144,26 @@ func (p *Prompt) PasswordWithConfirm(passwordType string) (string, error) {
 		return "", ErrorPasswordMismatch
 	}
 	return pass, nil
+}
+
+// Username prompts for a username on the console
+func (p *Prompt) Username(label string, defaultValue string) (string, error) {
+	if label == "" {
+		label = "Enter username/email"
+	}
+	validate := func(input string) error {
+		if input == "" {
+			return fmt.Errorf("Empty username")
+		}
+		return nil
+	}
+	prompt := promptui.Prompt{
+		Stdin:       os.Stdin,
+		Stdout:      os.Stderr,
+		Default:     defaultValue,
+		HideEntered: true,
+		Label:       label,
+		Validate:    validate,
+	}
+	return prompt.Run()
 }

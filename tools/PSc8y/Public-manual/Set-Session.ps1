@@ -97,6 +97,9 @@ String
         Write-Verbose "Setting new session: $Path"
         $env:C8Y_SESSION = Resolve-Path $Path
 
+        # Check encryption
+        Set-ClientPassphrase
+
         # Update environment variables
         Set-EnvironmentVariablesFromSession
 

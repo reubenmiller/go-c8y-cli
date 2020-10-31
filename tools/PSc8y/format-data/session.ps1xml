@@ -80,10 +80,6 @@
                             <ListItem>
                                 <PropertyName>username</PropertyName>
                             </ListItem>
-                            <ListItem>
-                                <Label>password</Label>
-                                <ScriptBlock>$_.password -replace ".", "*"</ScriptBlock>
-                            </ListItem>
                         </ListItems>
                     </ListEntry>
                 </ListEntries>
@@ -121,12 +117,6 @@
                                 <Label>username</Label>
                                 <ScriptBlock>
                                     "***************"
-                                </ScriptBlock>
-                            </ListItem>
-                            <ListItem>
-                                <Label>password</Label>
-                                <ScriptBlock>
-                                    "************************"
                                 </ScriptBlock>
                             </ListItem>
                         </ListItems>
@@ -179,7 +169,7 @@
                                 <PropertyName>username</PropertyName>
                             </TableColumnItem>
                             <TableColumnItem>
-                                <ScriptBlock>$_.password -replace ".", "*"</ScriptBlock>
+                                <ScriptBlock>"******************************"</ScriptBlock>
                             </TableColumnItem>
                             <TableColumnItem>
                                 <PropertyName>description</PropertyName>

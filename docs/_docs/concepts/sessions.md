@@ -16,12 +16,10 @@ A user can add any number of session that that want. They are then free to switc
 
 ```bash
 c8y sessions create \
-    --host "https://mytenant.eu-latest.cumulocity.com" \
-    --tenant "mytenant" \
-    --username "https://mytenant.eu-latest.cumulocity.com"
+    --host "mytenant.eu-latest.cumulocity.com"
 ```
 
-You will be prompted for the password if the `--password` argument is not used.
+You will be prompted for the username and password.
 
 ##### Powershell
 
@@ -35,8 +33,18 @@ A helper is provided to set the session interactively by providing the user a li
 
 ##### Bash
 
+Assuming that you have already loaded the `c8y.profile.sh` helper.
+
 ```sh
-export C8Y_SESSION=$( c8y sessions list )
+set-session
+```
+
+##### zsh
+
+Assuming that you have already loaded the `c8y.plugin.zsh` plugin.
+
+```sh
+set-session
 ```
 
 ##### Powershell
@@ -229,22 +237,39 @@ Or alternatively, using setting it via the session file:
 
 ### Storing passwords in the Cumulocity session
 
-Session passwords can be stored encrypted by providing a secret passphrase. The passphrase should be something that is sufficiently complex and stored unencrypted on disk.
+Encryption is used to stored sensitive session information such as passwords and authorization cookies. The user will be prompted for the passphrase if one is not already set, when activating a session.
 
-The password can be be installed encrypted by setting the 
+The passphrase should be something that is sufficiently complex and should not be stored on disk.
 
+When the user sets the passphrase, a key file will be created within the Cumulocity session home folder, `.key`. This file will be used as a reference when comparing your passphrase to keep the passphrase constant across different sessions.
 
-```sh
-export C8Y_SESSION_PASSPHRASE=mysecret
+### Loss of passphrase (encryption key)
+
+If you forget your passphrase then all of the encrypted passwords will be unuseble.
+
+In such an event, then you need to remove the `.key` file within the Cumulocity session folder, and you will be prompted to re-enter your password when the session is re-activated using `set-session`.
+
+**PowerShell**
+
+```Powershell
+Remove-Item ~/.cumulocity/.key
 ```
+
+**Bash/zsh**
+```sh
+rm ~/.cumulocity/.key
+```
+
+## Manually settings password via the file
+
 
 ```json
 {
     "$schema": "https://raw.githubusercontent.com/reubenmiller/go-c8y-cli/master/tools/schema/session.schema.json",
     "host": "https://example.cumulocity.com",
     "tenant": "t12345",
-    "username": "myuser@iot.user.com",
-    "passwordHash": "65cd99f96f9fe681be286d6e573061053afac353faeb5b1220352ab57456f3ee852fa9078ead3846c982caad6c4dfd3be6fd0a9aba",
+    "username": "myuser@iot-user.com",
+    "password": "{encrypted}65cd99f96f9fe681be286d6e573061053afac353faeb5b1220352ab57456f3ee852fa9078ead3846c982caad6c4dfd3be6fd0a9aba",
     "description": "",
     "settings": {
         "mode.enableUpdate": true
@@ -254,34 +279,4 @@ export C8Y_SESSION_PASSPHRASE=mysecret
 
 #### Updating passwords
 
-Passwords can still be set as plain text in the session files, however the next time that you switch to the session using `set-session`, the `password` field will be encrypted and stored under `passwordHash`.
-
-
-## Login sequence
-
-
-1. IUser calls set-session
-
-2. Get the login options
-
-3. Set the tenant id (from the login options response)
-
-4. Select the preferred login method (BASIC / Oauth2) - In session file?
-
-5. Send request (if response includes tfa error), then prompt for code from the user
-
-6. Send login request
-
-7. Store cookies (encrypted) in session file?
-
-    Or store it in the following variable?
-
-    ```
-    C8Y_TOKEN_USERNAME_ ${LOGIN_OPTION_ID}
-    ```
-
-
-##
-* Allow users to add their own headers from the session file?
-* 
-
+Passwords can still be set as plain text in the session files, however the next time that you switch to the session using `set-session`, the `password` field will be encrypted. An field is marked as encrypted by starting with text `{encrypted}` followed by the encrypted string.

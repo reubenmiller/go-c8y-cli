@@ -153,6 +153,9 @@ func (s *SecureData) Encrypt(data []byte, passphrase string) ([]byte, error) {
 // Decrypt decrypt the data. The data should be stored with a 32 byte salt which is append at the end of the data
 func (s *SecureData) Decrypt(data []byte, passphrase string) ([]byte, error) {
 	// Get salt from encrypted data
+	if data == nil || len(data) <= 33 {
+		return nil, fmt.Errorf("encrypted data is in an unexpected format")
+	}
 	salt, data := data[len(data)-32:], data[:len(data)-32]
 	key, _, err := DeriveKey([]byte(passphrase), salt)
 	if err != nil {
@@ -168,6 +171,9 @@ func (s *SecureData) Decrypt(data []byte, passphrase string) ([]byte, error) {
 		return nil, err
 	}
 	nonceSize := gcm.NonceSize()
+	if len(data) < nonceSize {
+		return nil, fmt.Errorf("encrypted data is in an unexpected format")
+	}
 	nonce, ciphertext := data[:nonceSize], data[nonceSize:]
 	plaintext, err := gcm.Open(nil, nonce, ciphertext, nil)
 	if err != nil {
@@ -189,6 +195,9 @@ func (s *SecureData) EncryptFile(filename string, data []byte, passphrase string
 }
 
 func (s *SecureData) DecryptFile(filename string, passphrase string) ([]byte, error) {
-	data, _ := ioutil.ReadFile(filename)
+	data, err := ioutil.ReadFile(filename)
+	if err != nil {
+		return nil, err
+	}
 	return s.Decrypt(data, passphrase)
 }

@@ -187,8 +187,19 @@ func (lh *LoginHandler) init() {
 		loginOptions, _, err := lh.C8Yclient.Tenant.GetLoginOptions(context.Background())
 		lh.LoginOptions = loginOptions
 		lh.sortLoginOptions()
+
+		if len(lh.LoginOptions.LoginOptions) > 0 {
+			lh.C8Yclient.AuthorizationMethod = lh.LoginOptions.LoginOptions[0].Type
+
+			// Setting preferred login method
+			lh.Logger.Debugf("Preferred login method. type=%s", lh.C8Yclient.AuthorizationMethod)
+		}
 		return err
 	})
+}
+
+func emptyPointer(ignored []rune) []rune {
+	return []rune("")
 }
 
 func (lh *LoginHandler) promptForPassword() error {
@@ -198,13 +209,33 @@ func (lh *LoginHandler) promptForPassword() error {
 		}
 		return nil
 	}
+
+	reason := ""
+	label := "Enter c8y password"
+
+	// Provide additional information to user what happened
+	// invalid encryption key? or missing password
+	if lh.C8Yclient.Password == "" {
+		reason = "password is empty"
+	} else {
+		reason = "password is invalid"
+		label = "Re-enter c8y password"
+	}
+
 	prompt := promptui.Prompt{
-		Stdin:    os.Stdin,
-		Stdout:   os.Stderr,
-		Default:  "",
-		Mask:     '*',
-		Label:    "Enter c8y password 🔒",
-		Validate: validate,
+		Stdin:       os.Stdin,
+		Stdout:      os.Stderr,
+		Default:     "",
+		Mask:        ' ',
+		HideEntered: true,
+		Pointer:     emptyPointer,
+		Label:       fmt.Sprintf("%s 🔒", label),
+		Validate:    validate,
+		Templates:   &promptui.PromptTemplates{},
+	}
+	if reason != "" {
+		prompt.Templates.Invalid = fmt.Sprintf("{{ \"✗ (%s)\" | red | faint }} {{ . | bold }}: {{ \"[input is hidden]\" | faint }}", reason)
+		prompt.Templates.Valid = fmt.Sprintf("{{ \"✗ (%s)\" | red | faint }} {{ . | bold }}: {{ \"[input is hidden]\" | faint }}", reason)
 	}
 	pass, err := prompt.Run()
 
@@ -234,10 +265,11 @@ func (lh *LoginHandler) login() {
 				if lh.TFACodeRequired && option.TFAStrategy == "TOTP" {
 					if lh.TFACode == "" {
 						prompt := promptui.Prompt{
-							Stdin:   os.Stdin,
-							Stdout:  os.Stderr,
-							Default: lh.TFACode,
-							Label:   "Enter Two-Factor code",
+							Stdin:       os.Stdin,
+							Stdout:      os.Stderr,
+							Default:     lh.TFACode,
+							HideEntered: true,
+							Label:       "Enter Two-Factor code",
 							Validate: func(input string) error {
 								if len(strings.ReplaceAll(input, " ", "")) < 6 {
 									return fmt.Errorf("Missing TFA code")
@@ -322,7 +354,8 @@ func (lh *LoginHandler) errorContains(message, pattern string) bool {
 
 func (lh *LoginHandler) verify() {
 	lh.do(func() error {
-		_, resp, err := lh.C8Yclient.User.GetCurrentUser(context.Background())
+		// _, resp, err := lh.C8Yclient.User.GetCurrentUser(context.Background())
+		tenant, resp, err := lh.C8Yclient.Tenant.GetCurrentTenant(context.Background())
 
 		if resp != nil && resp.StatusCode == http.StatusUnauthorized {
 
@@ -355,6 +388,8 @@ func (lh *LoginHandler) verify() {
 			lh.state <- LoginStateNoAuth
 		} else {
 			lh.state <- LoginStateAuth
+			lh.Logger.Infof("Detected tenant: %s", tenant.Name)
+			lh.C8Yclient.TenantName = tenant.Name
 		}
 		return err
 	})
@@ -413,10 +448,11 @@ func (lh *LoginHandler) setupTFA() error {
 
 	// Verify TOTP by checking a code
 	tfaCodePrompt := promptui.Prompt{
-		Stdin:    os.Stdin,
-		Stdout:   os.Stderr,
-		Label:    "Enter Two-Factor code",
-		Validate: lh.verifyTFASetupCode,
+		Stdin:       os.Stdin,
+		Stdout:      os.Stderr,
+		HideEntered: true,
+		Label:       "Enter Two-Factor code",
+		Validate:    lh.verifyTFASetupCode,
 	}
 
 	if _, err := tfaCodePrompt.Run(); err != nil {

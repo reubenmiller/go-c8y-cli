@@ -43,6 +43,14 @@ set-session () {
 
     export C8Y_SESSION=$resp
 
+    # Check encryption passphrase
+    $passphraseCheck=$( c8y sessions checkPassphrase --json )
+
+    if [ $? -ne 0 ]; then
+        echo "Encryption check failed"
+        exit 2
+    fi
+
     # Export session as individual settings
     # to support other 3rd party applicatsion (i.e. java c8y sdk apps)
     # which will read these variables
@@ -53,11 +61,12 @@ set-session () {
         export C8Y_USER=$( echo $session_info | jq -r ".username" )
         export C8Y_USERNAME=$( echo $session_info | jq -r ".username" )
 
-        password=$( echo $session_info | jq -r ".password" )
+        export C8Y_PASSPHRASE=$( echo $passphraseCheck | jq -r ".passphrase" )
+        export C8Y_PASSPHRASE_TEXT=$( echo $passphraseCheck | jq -r ".secretText" )
 
-        if [[ "$password" = "" ]]; then
-            passwordHash=$( echo $session_info | jq -r ".passwordHash" )
-            password=$( c8y session decryptPassword --password "$passwordHash" )
+        password=$( echo $session_info | jq -r ".password" )
+        if [[ "$password" != "" ]]; then
+            password=$( c8y sessions decryptText --text "$password" )
         fi
         export C8Y_PASSWORD=$password
 

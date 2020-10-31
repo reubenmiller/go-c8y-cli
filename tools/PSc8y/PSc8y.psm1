@@ -60,6 +60,9 @@ if ($ExistingSession) {
     Write-Host "${ConsoleMessage}`n"
 }
 
+# Setup encryption (if not already set)
+Set-ClientPassphrase
+
 $script:Aliases = @{
     # collections
     alarms = "Get-AlarmCollection"
