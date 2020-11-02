@@ -4,8 +4,37 @@
 
 No unreleased features
 
+## TODO
+
+* Add CI / env support. Save credentials to a temp file?
+* Add cmdlet to encrypt/decrypt
+
+## Done
+
+* `Test-ClientPassphrase` cmdlet to check if passphrase is missing or not. Cmdlet is called automatically when importing the module or calling `set-session`
 * `New-User` added support for template and templateVars parameters
 * Dry/WhatIf headers are shown in a sorted alphabetically by header name
+* Adding Two-Factor-Authentication support
+    * TOTP (only)
+* Added OAUTH_INTERNAL support
+* Encrypting sensitive session information
+
+    ```json
+    {
+        "authentication": {
+            "0": "{encrypted}abefabefabefabefabefabefabefabefabefabef",
+            "1": "{encrypted}abefabefabefabefabefabefabefabefabefabef",
+        },
+        "password": "{encrypted}abefabefabefabefabefabefabefabefabefabef"
+    }
+    ```
+* Added encrypt/decrypt commands
+
+    ```sh
+    $encryptedText=$( c8y sessions encryptText --text "Hello World" )
+
+    c8y sessions decryptText --text "$encryptedText"
+    ```
 
 ## Released
 
