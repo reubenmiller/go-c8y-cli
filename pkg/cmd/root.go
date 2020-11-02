@@ -326,7 +326,7 @@ func ReadConfigFiles(v *viper.Viper) (path string, err error) {
 
 	if err := v.ReadInConfig(); err == nil {
 		path = v.ConfigFileUsed()
-		Logger.Debugf("Loaded settings: %s", hideSensitiveInformationIfActive(path))
+		Logger.Infof("Loaded settings: %s", hideSensitiveInformationIfActive(path))
 	}
 
 	// Load session
