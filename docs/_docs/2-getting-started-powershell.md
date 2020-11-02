@@ -4,7 +4,7 @@ category: Getting started
 title: Powershell
 ---
 
-1. `PSc8y` should already be installed. If not, then following the [install guide](/docs/1-powershell-installation/)
+1. `PSc8y` should already be installed. If not, then following the [install guide](https://reubenmiller.github.io/go-c8y-cli/docs/1-powershell-installation/)
 
 1. Import the PSc8y module into your Powershell console
 

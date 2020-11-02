@@ -36,6 +36,8 @@ No unreleased features
     c8y sessions decryptText --text "$encryptedText"
     ```
 
+* Fixed broken doc link
+
 ## Released
 
 ### v1.6.0
