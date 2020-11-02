@@ -23,6 +23,26 @@ fi
 ########################################################################
 
 # -----------
+# test-c8ypassphrase
+# -----------
+# Description: Set the encryption passphrase interactively
+# Usage:
+#   test-c8ypassphrase
+#
+test-c8ypassphrase () {
+    passphraseCheck=$( c8y sessions checkPassphrase --json )
+    if [ $? -ne 0 ]; then
+        echo "Encryption check failed"
+        exit 2
+    fi
+
+    if [[ $(command -v jq) ]]; then
+        export C8Y_PASSPHRASE=$( echo $passphraseCheck | jq -r ".passphrase" )
+        export C8Y_PASSPHRASE_TEXT=$( echo $passphraseCheck | jq -r ".secretText" )
+    fi
+}
+
+# -----------
 # set-session
 # -----------
 # Description: Switch Cumulocity session interactively
@@ -44,7 +64,7 @@ set-session () {
     export C8Y_SESSION=$resp
 
     # Check encryption passphrase
-    $passphraseCheck=$( c8y sessions checkPassphrase --json )
+    passphraseCheck=$( c8y sessions checkPassphrase --json )
 
     if [ $? -ne 0 ]; then
         echo "Encryption check failed"
@@ -224,3 +244,8 @@ complete -F _complete_alias mo
 # op
 alias op=c8y\ operations\ get\ --id
 complete -F _complete_alias op
+
+# init passphrase (if not already set)
+if [ -t 0 ]; then
+    test-c8ypassphrase
+fi

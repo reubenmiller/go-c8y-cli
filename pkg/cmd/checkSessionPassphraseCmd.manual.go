@@ -6,6 +6,7 @@ import (
 	"os"
 	"strings"
 
+	"github.com/manifoldco/promptui"
 	"github.com/reubenmiller/go-c8y-cli/pkg/prompt"
 	"github.com/spf13/cobra"
 )
@@ -30,7 +31,7 @@ func newCheckSessionPassphraseCmd() *checkSessionPassphraseCmd {
 		Long:  `Check session passphrase`,
 		Example: `
 		`,
-		RunE: ccmd.checkSession2,
+		RunE: ccmd.checkSession,
 	}
 
 	cmd.Flags().BoolVar(&ccmd.OutputJSON, "json", false, "Output passphrase in json")
@@ -46,7 +47,7 @@ func (n *checkSessionPassphraseCmd) savePassword(pass string) error {
 	return cliConfig.WritePersistentConfig()
 }
 
-func (n *checkSessionPassphraseCmd) checkSession2(cmd *cobra.Command, args []string) error {
+func (n *checkSessionPassphraseCmd) checkSession(cmd *cobra.Command, args []string) error {
 	if err := cliConfig.ReadKeyFile(); err != nil {
 		return err
 	}
@@ -69,6 +70,8 @@ func (n *checkSessionPassphraseCmd) checkSession2(cmd *cobra.Command, args []str
 	} else {
 		n.showEnvironmentVariableUsage()
 	}
+	green := promptui.Styler(promptui.FGGreen)
+	n.cmd.ErrOrStderr().Write([]byte(green("Passphrase OK\n")))
 	Logger.Info("Passphrase accepted")
 	return nil
 }

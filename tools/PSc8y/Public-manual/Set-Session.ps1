@@ -98,7 +98,7 @@ String
         $env:C8Y_SESSION = Resolve-Path $Path
 
         # Check encryption
-        Set-ClientPassphrase
+        Test-ClientPassphrase
 
         # Update environment variables
         Set-EnvironmentVariablesFromSession

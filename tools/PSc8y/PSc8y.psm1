@@ -61,7 +61,7 @@ if ($ExistingSession) {
 }
 
 # Setup encryption (if not already set)
-Set-ClientPassphrase
+Test-ClientPassphrase
 
 $script:Aliases = @{
     # collections

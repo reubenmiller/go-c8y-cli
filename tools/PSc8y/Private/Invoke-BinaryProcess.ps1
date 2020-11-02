@@ -113,7 +113,7 @@ PS > Invoke-BinaryProcess binaryProcess.exe -RedirectOutput -ArgumentList "-Emit
             $line = $process.StandardError.ReadLine()
 
             if ($line.Contains("What If")) {
-                # remove the timestapm (if present)
+                # remove the timestamp (if present)
                 $line = $line -replace ".*(What if:)", '$1'
                 Write-Host $line -ForegroundColor "Green"
             }

@@ -170,7 +170,7 @@ func (n *newSessionCmd) promptArgs(cmd *cobra.Command, args []string) error {
 	}
 
 	if !cmd.Flags().Changed("password") {
-		password, err := prompter.Password("Enter c8y password")
+		password, err := prompter.Password("Enter c8y password", "")
 		if err != nil {
 			return err
 		}

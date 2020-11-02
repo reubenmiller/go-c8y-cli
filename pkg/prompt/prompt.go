@@ -3,6 +3,7 @@ package prompt
 import (
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/manifoldco/promptui"
 	"github.com/reubenmiller/go-c8y-cli/pkg/encrypt"
@@ -12,6 +13,7 @@ import (
 var (
 	// ErrorPasswordMismatch error when the passwords entered by a user do not match
 	ErrorPasswordMismatch = fmt.Errorf("passwords do not match")
+	ErrorUserCancelled    = fmt.Errorf("user cancelled input")
 )
 
 // NewPromptWithPostValidate create a new prompt with a lazy validation function which is only
@@ -31,16 +33,26 @@ type PromptWithPostValidate struct {
 	PostValidate func(string) error
 }
 
+func (p *PromptWithPostValidate) IsUserCancelled(err error) bool {
+	return err != nil && strings.HasSuffix(err.Error(), "^C")
+}
+
 // Run prompts the user for input
 func (p *PromptWithPostValidate) Run() (string, error) {
 	var err error
 	var input string
 	p.Attempts = 1
 	for {
+		p.prompt.Templates.Prompt = "test me "
 		if p.Attempts > 1 {
 			p.prompt.Templates.Valid = fmt.Sprintf("{{ \"(Attempt %d of %d)\" | red }} {{ . | bold }}: ", p.Attempts, p.MaxAttempts)
 		}
 		input, err = p.prompt.Run()
+
+		if p.IsUserCancelled(err) {
+			err = ErrorUserCancelled
+			break
+		}
 		err = p.PostValidate(input)
 		if err == nil || p.Attempts >= p.MaxAttempts {
 			break
@@ -73,7 +85,7 @@ func NewPrompt(l *logger.Logger) *Prompt {
 
 // EncryptionPassphrase prompt for the encryption passphrase, and test the
 // passphrase against the encrypted content to see if it is valid
-func (p *Prompt) EncryptionPassphrase(encryptedData string, initPassphrase string) (string, error) {
+func (p *Prompt) EncryptionPassphrase(encryptedData string, initPassphrase string, message string) (string, error) {
 	var err error
 	secure := encrypt.NewSecureData("{encrypted}")
 
@@ -87,7 +99,7 @@ func (p *Prompt) EncryptionPassphrase(encryptedData string, initPassphrase strin
 		Default:     "",
 		Mask:        '*',
 		HideEntered: true,
-		Label:       "Enter passphrase 🔒",
+		Label:       "Session is encrypted, enter passphrase 🔒",
 		Templates: &promptui.PromptTemplates{
 			Valid: "{{ . | bold }}: ",
 		},
@@ -98,11 +110,19 @@ func (p *Prompt) EncryptionPassphrase(encryptedData string, initPassphrase strin
 	if err := validate(initPassphrase); err == nil {
 		return initPassphrase, nil
 	}
+	if message != "" {
+		p.ShowMessage(message)
+	}
 	return promptWrapper.Run()
 }
 
+func (p *Prompt) ShowMessage(m string) {
+	faint := promptui.Styler(promptui.FGFaint)
+	os.Stderr.WriteString(faint(m + "\n"))
+}
+
 // Password prompts the user for a password without confirmation
-func (p *Prompt) Password(label string) (string, error) {
+func (p *Prompt) Password(label string, message string) (string, error) {
 	if label == "" {
 		label = "Enter password"
 	}
@@ -116,25 +136,27 @@ func (p *Prompt) Password(label string) (string, error) {
 		Stdin:       os.Stdin,
 		Stdout:      os.Stderr,
 		Default:     "",
-		Mask:        '*',
+		Mask:        ' ',
 		HideEntered: true,
 		Label:       fmt.Sprintf("%s %s", label, "🔒"),
 		Validate:    validate,
+	}
+	if message != "" {
+		p.ShowMessage(message)
 	}
 	return prompt.Run()
 }
 
 // PasswordWithConfirm prompts the user for a password and confirms it by getting
 // the user to type it in again
-func (p *Prompt) PasswordWithConfirm(passwordType string) (string, error) {
-
-	pass, err := p.Password(fmt.Sprintf("Enter %s password", passwordType))
+func (p *Prompt) PasswordWithConfirm(label string, message string) (string, error) {
+	pass, err := p.Password(fmt.Sprintf("Enter %s", label), message)
 
 	if err != nil {
 		return "", err
 	}
 
-	passConfirm, err := p.Password(fmt.Sprintf("Confirm %s password", passwordType))
+	passConfirm, err := p.Password(fmt.Sprintf("Confirm %s", label), "")
 
 	if err != nil {
 		return "", err

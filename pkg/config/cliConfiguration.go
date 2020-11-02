@@ -78,9 +78,25 @@ func (c *CliConfiguration) CheckEncryption(encryptedText ...string) (string, err
 		secretText = encryptedText[0]
 	}
 	c.Logger.Infof("SecretText: %s", secretText)
-	pass, err := c.prompter.EncryptionPassphrase(secretText, c.Passphrase)
+	pass, err := c.prompter.EncryptionPassphrase(secretText, c.Passphrase, "")
 	c.Passphrase = pass
 	return pass, err
+}
+
+func (c *CliConfiguration) CreateKeyFile(keyText string) error {
+	if _, err := os.Stat(c.KeyFile); os.IsExist(err) {
+		c.Logger.Infof("Key file already exists. file=%s", c.KeyFile)
+		return nil
+	}
+	key, err := os.Create(c.KeyFile)
+	if err != nil {
+		return err
+	}
+
+	if _, err := key.WriteString(keyText); err != nil {
+		return err
+	}
+	return nil
 }
 
 func (c *CliConfiguration) ReadKeyFile() error {
@@ -89,6 +105,7 @@ func (c *CliConfiguration) ReadKeyFile() error {
 	if v := os.Getenv("C8Y_PASSPHRASE_TEXT"); v != "" {
 		c.Logger.Debugf("Using env variable 'C8Y_PASSPHRASE_TEXT' as example encryption text")
 		c.SecretText = v
+		c.CreateKeyFile(v)
 		return nil
 	}
 
@@ -99,7 +116,7 @@ func (c *CliConfiguration) ReadKeyFile() error {
 	}
 
 	// init key file
-	passphrase, err := c.prompter.PasswordWithConfirm("encryption")
+	passphrase, err := c.prompter.PasswordWithConfirm("new encryption passphrase", "Creating a encryption key for sessions")
 
 	if err != nil {
 		return err
@@ -113,13 +130,8 @@ func (c *CliConfiguration) ReadKeyFile() error {
 		return err
 	}
 
-	key, err := os.Create(c.KeyFile)
-	if err != nil {
+	if err := c.CreateKeyFile(keyText); err != nil {
 		return err
-	}
-
-	if _, err := key.WriteString(keyText); err != nil {
-		return nil
 	}
 
 	c.SecretText = keyText
