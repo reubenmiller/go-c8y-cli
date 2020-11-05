@@ -31,7 +31,7 @@ func NewSecureData(prefix string) *SecureData {
 
 // DeriveKey creates a secure key from a given password. It also accepts a salt which is used to increase the security of the key to prevent Rainbow tables attacks.
 // If the salt is nil, then a secure salt will be generated using scrypt.
-func DeriveKey(password, salt []byte) ([]byte, []byte, error) {
+func (s *SecureData) DeriveKey(password, salt []byte) ([]byte, []byte, error) {
 	if salt == nil {
 		salt = make([]byte, 32)
 		if _, err := rand.Read(salt); err != nil {
@@ -126,7 +126,7 @@ func (s *SecureData) DecryptHex(data string, passphrase string) (string, error) 
 // Encrypt encryptes the data with a passphrase. Salt is used on the passphrase and stored in the last 32 bytes of the data (appended unencrypted)
 // Example: asdfadsfasdfasdfasdf<salt>
 func (s *SecureData) Encrypt(data []byte, passphrase string) ([]byte, error) {
-	key, salt, err := DeriveKey([]byte(passphrase), nil)
+	key, salt, err := s.DeriveKey([]byte(passphrase), nil)
 	if err != nil {
 		return nil, err
 	}
@@ -157,7 +157,7 @@ func (s *SecureData) Decrypt(data []byte, passphrase string) ([]byte, error) {
 		return nil, fmt.Errorf("encrypted data is in an unexpected format")
 	}
 	salt, data := data[len(data)-32:], data[:len(data)-32]
-	key, _, err := DeriveKey([]byte(passphrase), salt)
+	key, _, err := s.DeriveKey([]byte(passphrase), salt)
 	if err != nil {
 		return nil, err
 	}
