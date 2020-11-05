@@ -48,7 +48,7 @@ $name = "c8y"
 
 if ($All -or $Target.Contains("darwin:amd64")) {
     Write-Host "Building the c8y binary [MacOS]"
-    # $env:GOARCH = "amd64"
+    $env:GOARCH = "amd64"
     $env:GOOS = "darwin"
     $OutputPath = Join-Path -Path $OutputDir -ChildPath "${name}.macos"
     & go build $LDFlags -o "$OutputPath" "$c8yBinary"
@@ -88,7 +88,7 @@ if ($All -or $Target.Contains("linux:arm")) {
 
 if ($All -or $Target.Contains("linux:amd64")) {
     Write-Host "Building the c8y binary [Linux]"
-    # $env:GOARCH = "amd64"
+    $env:GOARCH = "amd64"
     $env:GOOS = "linux"
     $env:CGO_ENABLED = "0"
     
@@ -114,7 +114,7 @@ if ($All -or $Target.Contains("linux:amd64")) {
 # windows
 if ($All -or $Target.Contains("windows:amd64")) {
     Write-Host "Building the c8y binary [Windows]"
-    # $env:GOARCH = "amd64"
+    $env:GOARCH = "amd64"
     $env:GOOS = "windows"
     $OutputPath = Join-Path -Path $OutputDir -ChildPath "${name}.windows.exe"
     & go build $LDFlags -o "$OutputPath" "$c8yBinary"
