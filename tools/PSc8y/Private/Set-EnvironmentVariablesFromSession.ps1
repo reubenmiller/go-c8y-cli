@@ -32,6 +32,11 @@ None
         $Env:C8Y_USER = ""
         $Env:C8Y_USERNAME = ""
         $Env:C8Y_PASSWORD = ""
+        $Env:C8Y_CREDENTIAL_COOKIES_0 = ""
+        $Env:C8Y_CREDENTIAL_COOKIES_1 = ""
+        $Env:C8Y_CREDENTIAL_COOKIES_2 = ""
+        $Env:C8Y_CREDENTIAL_COOKIES_3 = ""
+        $Env:C8Y_CREDENTIAL_COOKIES_4 = ""
         return
     }
 
@@ -50,6 +55,5 @@ None
 
     $Env:C8Y_USER = $Session.username;
     $Env:C8Y_USERNAME = $Session.username;
-
     $Env:C8Y_PASSWORD = $Session.password;
 }

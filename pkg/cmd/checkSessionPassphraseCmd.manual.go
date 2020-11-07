@@ -56,12 +56,11 @@ func (n *checkSessionPassphraseCmd) checkSession(cmd *cobra.Command, args []stri
 	if err != nil {
 		return err
 	}
+	cliConfig.Passphrase = passphrase
 
 	if n.OutputJSON {
-		output := map[string]string{
-			"passphrase": passphrase,
-			"secretText": cliConfig.SecretText,
-		}
+		cliConfig.Logger = Logger
+		output := cliConfig.GetEnvironmentVariables()
 		b, err := json.Marshal(output)
 		if err != nil {
 			return err

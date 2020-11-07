@@ -115,7 +115,7 @@ To configure your bash shell to load completions for each session add to your ba
 . <(bitbucket completion)
 `,
 		Run: func(cmd *cobra.Command, args []string) {
-			newPowershellCompletionHelper(rootCmd).GenPowerShellCompletion(os.Stdout)
+			newPowershellCompletionHelper(&rootCmd.Command).GenPowerShellCompletion(os.Stdout)
 		},
 	}
 

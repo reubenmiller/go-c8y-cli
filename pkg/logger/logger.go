@@ -7,7 +7,7 @@ import (
 )
 
 var format = logging.MustStringFormatter(
-	`%{color}%{time:2006-01-02T15:04:05.000 MST} %{level:.5s} %{color:reset} %{message}`,
+	`%{color}%{time:2006-01-02T15:04:05.000000 MST} %{level:.5s} %{color:reset} %{message}`,
 )
 
 type NopBackend struct {

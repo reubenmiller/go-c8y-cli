@@ -263,6 +263,7 @@ func (lh *LoginHandler) login() {
 			case c8y.AuthMethodOAuth2Internal:
 
 				if lh.TFACodeRequired && option.TFAStrategy == "TOTP" {
+					os.Stderr.WriteString(fmt.Sprintf("Session details:\nHost=%s, username=%s\n", lh.C8Yclient.BaseURL.Host, lh.C8Yclient.Username))
 					if lh.TFACode == "" {
 						prompt := promptui.Prompt{
 							Stdin:       os.Stdin,

@@ -77,10 +77,19 @@ func (c *CliConfiguration) CheckEncryption(encryptedText ...string) (string, err
 	if len(encryptedText) > 0 {
 		secretText = encryptedText[0]
 	}
-	c.Logger.Infof("SecretText: %s", secretText)
+	// c.Logger.Infof("SecretText: %s", secretText)
 	pass, err := c.prompter.EncryptionPassphrase(secretText, c.Passphrase, "")
 	c.Passphrase = pass
 	return pass, err
+}
+
+func (c *CliConfiguration) BindAuthorization() error {
+	c.viper.BindEnv("username")
+	c.viper.BindEnv("tenant")
+	c.viper.BindEnv("password")
+	c.viper.BindEnv("credential.cookies.0")
+	c.viper.BindEnv("credential.cookies.1")
+	return nil
 }
 
 func (c *CliConfiguration) CreateKeyFile(keyText string) error {
@@ -103,7 +112,7 @@ func (c *CliConfiguration) ReadKeyFile() error {
 
 	// read from env variable
 	if v := os.Getenv("C8Y_PASSPHRASE_TEXT"); v != "" {
-		c.Logger.Debugf("Using env variable 'C8Y_PASSPHRASE_TEXT' as example encryption text")
+		c.Logger.Infof("Using env variable 'C8Y_PASSPHRASE_TEXT' as example encryption text")
 		c.SecretText = v
 		c.CreateKeyFile(v)
 		return nil
@@ -138,44 +147,78 @@ func (c *CliConfiguration) ReadKeyFile() error {
 	return nil
 }
 
+func (c CliConfiguration) GetEnvironmentVariables() map[string]interface{} {
+	output := map[string]interface{}{
+		"C8Y_PASSPHRASE":      c.Passphrase,
+		"C8Y_PASSPHRASE_TEXT": c.SecretText,
+		"C8Y_PASSWORD":        c.MustGetPassword(),
+	}
+
+	// add decrypted cookies
+	for i, cookie := range c.GetCookies() {
+		output[c.GetEnvKey(fmt.Sprintf("credential.cookies.%d", i))] = fmt.Sprintf("%s=%s", cookie.Name, cookie.Value)
+	}
+
+	return output
+}
+
+// GetEnvKey returns the environment key value associated
+func (c CliConfiguration) GetEnvKey(key string) string {
+	return "C8Y_" + strings.ToUpper(strings.ReplaceAll(key, ".", "_"))
+}
+
 // GetCookies gets the cookies stored in the configuration
 func (c CliConfiguration) GetCookies() []*http.Cookie {
 	cookies := make([]*http.Cookie, 0)
+	for i := 0; i < 5; i++ {
+		cookieValue := c.viper.GetString(fmt.Sprintf("credential.cookies.%d", i))
 
-	for _, cookieValue := range c.viper.GetStringMapString("credential.cookies") {
+		if cookieValue == "" {
+			break
+		}
 
-		if v, err := c.SecureData.TryDecryptString(cookieValue, c.Passphrase); err == nil {
+		if v, err := c.DecryptString(cookieValue); err == nil {
 			cookieValue = v
 		} else {
 			c.Logger.Warningf("Could not decrypt cookie. %s", err)
 			continue
 		}
 
-		parts := strings.SplitN(cookieValue, "=", 2)
-		if len(parts) != 2 {
-			continue
+		cookie := newCookie(cookieValue)
+		if cookies != nil {
+			cookies = append(cookies, cookie)
 		}
+	}
+	return cookies
+}
 
-		valueParts := strings.SplitN(strings.TrimSpace(parts[1]), ";", 2)
-
-		if len(valueParts) == 0 {
-			continue
-		}
-
-		cookie := &http.Cookie{
-			Name:  parts[0],
-			Value: valueParts[0],
-			Raw:   cookieValue,
-		}
-		cookies = append(cookies, cookie)
+func newCookie(raw string) *http.Cookie {
+	parts := strings.SplitN(raw, "=", 2)
+	if len(parts) != 2 {
+		return nil
 	}
 
-	return cookies
+	valueParts := strings.SplitN(strings.TrimSpace(parts[1]), ";", 2)
+
+	if len(valueParts) == 0 {
+		return nil
+	}
+
+	return &http.Cookie{
+		Name:  parts[0],
+		Value: valueParts[0],
+		Raw:   raw,
+	}
+}
+
+func (c CliConfiguration) Debug() {
+	c.viper.Debug()
 }
 
 // DecryptString returns the decrypted string if the string is encrypted
 func (c *CliConfiguration) DecryptString(value string) (string, error) {
-	return c.SecureData.TryDecryptString(value, c.Passphrase)
+	value, err := c.SecureData.TryDecryptString(value, c.Passphrase)
+	return value, err
 }
 
 // GetEncryptedString returns string value of a potentially encrypted field in the configuration
@@ -243,11 +286,21 @@ func (c *CliConfiguration) SetAuthorizationCookies(cookies []*http.Cookie) {
 func (c *CliConfiguration) GetPassword() (string, error) {
 	value := c.viper.GetString("password")
 
-	decryptedValue, err := c.SecureData.TryDecryptString(value, c.Passphrase)
+	decryptedValue, err := c.DecryptString(value)
 	if err != nil {
 		return value, err
 	}
 	return decryptedValue, nil
+}
+
+func (c *CliConfiguration) MustGetPassword() string {
+	value := c.viper.GetString("password")
+
+	decryptedValue, err := c.DecryptString(value)
+	if err != nil {
+		return value
+	}
+	return decryptedValue
 }
 
 func (c *CliConfiguration) SetPassword(p string) {

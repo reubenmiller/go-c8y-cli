@@ -36,6 +36,7 @@ const (
 func init() {
 	Logger = logger.NewDummyLogger(module)
 	SecureDataAccessor = encrypt.NewSecureData("{encrypted}")
+	rootCmd = newC8yCmd()
 }
 
 type baseCmd struct {
@@ -50,13 +51,102 @@ func newBaseCmd(cmd *cobra.Command) *baseCmd {
 	return &baseCmd{cmd: cmd}
 }
 
-var rootCmd = &cobra.Command{
-	Use:   "c8y",
-	Short: "Cumulocity command line interface",
-	Long:  `A command line interface to interact with Cumulocity REST API. Ideal for quick prototyping, exploring the REST API and for Platform maintainers/power users`,
-	// PreRunE: checkSessionExists,
-	PersistentPreRunE: checkSessionExists,
+type c8yCmd struct {
+	cobra.Command
+	client *c8y.Client
+	Logger *logger.Logger
+	useEnv bool
 }
+
+func (c *c8yCmd) createCumulocityClient() {
+	c.Logger.Info("Creating c8y client")
+	httpClient := newHTTPClient(globalFlagNoProxy)
+
+	// Only bind when not setting the session
+	if c.useEnv {
+		cliConfig.BindAuthorization()
+	}
+
+	// Try reading session from file
+	_, readErr := ReadConfigFiles(viper.GetViper())
+	if readErr == nil {
+		client = c8y.NewClient(
+			httpClient,
+			formatHost(viper.GetString("host")),
+			viper.GetString("tenant"),
+			viper.GetString("username"),
+			// viper.GetString("password"),
+			cliConfig.MustGetPassword(),
+			true,
+		)
+	} else {
+		Logger.Printf("Error reading config file. %s", readErr)
+		// Fallback to reading session from environment variables
+		client = c8y.NewClientFromEnvironment(httpClient, true)
+	}
+
+	// load authentication
+	loadAuthentication(cliConfig, client)
+
+	//
+	// Timeout setting preference
+	// 1. User provideds --timeout argument
+	// 2. "timeout" is set in the session.json file (and value is greater than 0)
+	// 3. C8Y_TIMEOUT is set and greater than 0
+	if !rootCmd.Flags().Changed("timeout") {
+		timeout := viper.GetUint("timeout")
+		if timeout > 0 {
+			globalFlagTimeout = timeout
+			Logger.Debugf("timeout: %v", timeout)
+		}
+	}
+
+	// Should we use the tenant in the name or not
+	if viper.IsSet("useTenantPrefix") {
+		client.UseTenantInUsername = viper.GetBool("useTenantPrefix")
+	}
+
+	// Logger.Printf("Use tenant prefix: %v", client.UseTenantInUsername)
+
+	// read additional configuration
+	readConfiguration()
+
+	// Add the realtime client
+	client.Realtime = c8y.NewRealtimeClient(
+		client.BaseURL.String(),
+		newWebsocketDialer(globalFlagNoProxy),
+		client.TenantName,
+		client.Username,
+		client.Password,
+	)
+
+	// Set realtime authorization
+	if client.AuthorizationMethod == c8y.AuthMethodOAuth2Internal {
+		client.Realtime.SetXSRFToken(client.GetXSRFToken())
+
+		if len(client.Cookies) > 0 {
+			if err := client.Realtime.SetCookies(client.Cookies); err != nil {
+				Logger.Errorf("Failed to set websocket cookie jar. %s", err)
+			}
+		}
+	}
+}
+
+func newC8yCmd() *c8yCmd {
+	command := &c8yCmd{
+		Logger: Logger,
+	}
+	command.Command = cobra.Command{
+
+		Use:               "c8y",
+		Short:             "Cumulocity command line interface",
+		Long:              `A command line interface to interact with Cumulocity REST API. Ideal for quick prototyping, exploring the REST API and for Platform maintainers/power users`,
+		PersistentPreRunE: command.checkSessionExists,
+	}
+	return command
+}
+
+var rootCmd *c8yCmd
 
 var (
 	client                       *c8y.Client
@@ -124,14 +214,35 @@ const (
 // SettingsGlobalName name of the settings file (without extension)
 const SettingsGlobalName = "settings"
 
-func checkSessionExists(cmd *cobra.Command, args []string) error {
+func (c *c8yCmd) checkCommandError(err error) {
+	errorText := fmt.Sprintf("%s", err)
+	if strings.Contains(errorText, "403") || strings.Contains(errorText, "401") {
+		c.Logger.Error("Authentication failed. Try to log in again, or check the password")
+	} else {
+		fmt.Println(err)
+	}
+}
+
+func (c c8yCmd) showLoginUsage() {
+	if globalFlagSessionFile != "" {
+		fmt.Printf("c8y sessions login")
+	} else {
+		fmt.Printf("export C8Y_SESSION=$(c8y sessions list)")
+	}
+}
+
+func (c *c8yCmd) checkSessionExists(cmd *cobra.Command, args []string) error {
 
 	cmdStr := cmd.Use
 	if cmd.HasParent() && cmd.Parent().Use != "c8y" {
 		cmdStr = cmd.Parent().Use + " " + cmdStr
 	}
+	c.Logger.Infof("command str: %s", cmdStr)
 
-	// Logger.Printf("c8y pre-checks: %s, %s, %s", args, parent, cmd.CalledAs())
+	if globalFlagSessionFile == "" || !(strings.HasPrefix(cmdStr, "sessions list") || strings.HasPrefix(cmdStr, "sessions checkPassphrase")) {
+		c.useEnv = true
+	}
+	c.createCumulocityClient()
 
 	localCmds := []string{
 		"completion",
@@ -154,6 +265,7 @@ func checkSessionExists(cmd *cobra.Command, args []string) error {
 	if client.BaseURL == nil || client.BaseURL.Host == "" {
 		return newUserError("A c8y session has not been loaded. Please create or activate a session and try again")
 	}
+
 	return nil
 }
 
@@ -305,8 +417,8 @@ func Execute() {
 	rootCmd.AddCommand(newUserRolesRootCmd().getCommand())
 
 	if err := rootCmd.Execute(); err != nil {
-		fmt.Println(err)
-		os.Exit(1)
+		rootCmd.checkCommandError(err)
+		os.Exit(2)
 	}
 }
 
@@ -365,6 +477,7 @@ func initConfig() {
 		Logger = logger.NewDummyLogger(module)
 		c8y.SilenceLogger()
 	}
+	rootCmd.Logger = Logger
 
 	if globalFlagSessionFile == "" && os.Getenv("C8Y_SESSION") != "" {
 		globalFlagSessionFile = os.Getenv("C8Y_SESSION")
@@ -379,6 +492,7 @@ func initConfig() {
 	}
 
 	cliConfig = config.NewCliConfiguration(viper.GetViper(), SecureDataAccessor, getSessionHomeDir(), os.Getenv("C8Y_PASSPHRASE"))
+	cliConfig.SetLogger(Logger)
 	loadConfiguration()
 
 	// only parse env variables if no explict config file is given
@@ -428,77 +542,13 @@ func initConfig() {
 
 		}
 	}
-
-	httpClient := newHTTPClient(globalFlagNoProxy)
-
-	// Try reading session from file
-	_, readErr := ReadConfigFiles(viper.GetViper())
-	if readErr == nil {
-		client = c8y.NewClient(
-			httpClient,
-			formatHost(viper.GetString("host")),
-			viper.GetString("tenant"),
-			viper.GetString("username"),
-			cliConfig.GetEncryptedString("password"),
-			true,
-		)
-	} else {
-		Logger.Printf("Error reading config file. %s", readErr)
-		// Fallback to reading session from environment variables
-		client = c8y.NewClientFromEnvironment(httpClient, true)
-	}
-
-	// load authentication
-	loadAuthentication(cliConfig, client)
-
-	//
-	// Timeout setting preference
-	// 1. User provideds --timeout argument
-	// 2. "timeout" is set in the session.json file (and value is greater than 0)
-	// 3. C8Y_TIMEOUT is set and greater than 0
-	if !rootCmd.Flags().Changed("timeout") {
-		timeout := viper.GetUint("timeout")
-		if timeout > 0 {
-			globalFlagTimeout = timeout
-			Logger.Debugf("timeout: %v", timeout)
-		}
-	}
-
-	// Should we use the tenant in the name or not
-	if viper.IsSet("useTenantPrefix") {
-		client.UseTenantInUsername = viper.GetBool("useTenantPrefix")
-	}
-
-	// Logger.Printf("Use tenant prefix: %v", client.UseTenantInUsername)
-
-	// read additional configuration
-	readConfiguration()
-
-	// Add the realtime client
-	client.Realtime = c8y.NewRealtimeClient(
-		client.BaseURL.String(),
-		newWebsocketDialer(globalFlagNoProxy),
-		client.TenantName,
-		client.Username,
-		client.Password,
-	)
-
-	// Set realtime authorization
-	if client.AuthorizationMethod == c8y.AuthMethodOAuth2Internal {
-		client.Realtime.SetXSRFToken(client.GetXSRFToken())
-
-		if len(client.Cookies) > 0 {
-			if err := client.Realtime.SetCookies(client.Cookies); err != nil {
-				Logger.Errorf("Failed to set websocket cookie jar. %s", err)
-			}
-		}
-	}
 }
 
 func loadConfiguration() error {
-
+	Logger.Info("Loading configuration")
 	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
 	viper.SetEnvPrefix("c8y")
+	//viper.AutomaticEnv()
 	bindEnv(SettingsIncludeAllPageSize, 2000)
 	bindEnv(SettingsDefaultPageSize, CumulocityDefaultPageSize)
 	bindEnv(SettingsIncludeAllDelayMS, 0)

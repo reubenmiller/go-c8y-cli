@@ -40,7 +40,10 @@ Set the passphrase if it is not already set
         $encryptionInfo = $passphraseCheck | ConvertFrom-Json
 
         # Save passphrase to env variable
-        $env:C8Y_PASSPHRASE = $encryptionInfo.passphrase
-        $env:C8Y_PASSPHRASE_TEXT = $encryptionInfo.secretText
+        $env:C8Y_PASSWORD = $encryptionInfo.C8Y_PASSWORD
+        $env:C8Y_PASSPHRASE = $encryptionInfo.C8Y_PASSPHRASE
+        $env:C8Y_PASSPHRASE_TEXT = $encryptionInfo.C8Y_PASSPHRASE_TEXT
+        $env:C8Y_CREDENTIAL_COOKIES_0 = $encryptionInfo.C8Y_CREDENTIAL_COOKIES_0
+        $env:C8Y_CREDENTIAL_COOKIES_1 = $encryptionInfo.C8Y_CREDENTIAL_COOKIES_1
     }
 }
