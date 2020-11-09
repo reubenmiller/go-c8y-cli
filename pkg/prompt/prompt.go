@@ -1,13 +1,16 @@
 package prompt
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/manifoldco/promptui"
 	"github.com/reubenmiller/go-c8y-cli/pkg/encrypt"
 	"github.com/reubenmiller/go-c8y-cli/pkg/logger"
+	"github.com/reubenmiller/go-c8y/pkg/c8y"
 )
 
 var (
@@ -187,5 +190,39 @@ func (p *Prompt) Username(label string, defaultValue string) (string, error) {
 		Label:       label,
 		Validate:    validate,
 	}
+	return prompt.Run()
+}
+
+func (p *Prompt) TOTPCode(host, username string, client *c8y.Client) (string, error) {
+	os.Stderr.WriteString(fmt.Sprintf("Session details:\nHost=%s, username=%s\n", lh.C8Yclient.BaseURL.Host, lh.C8Yclient.Username))
+
+	validateTOTP := func(input string) error {
+		if len(strings.ReplaceAll(input, " ", "")) < 6 {
+			return fmt.Errorf("Missing TFA code")
+		}
+
+		ctx, cancel := context.WithTimeout(context.Background(), time.Duration(Timeout)*time.Millisecond)
+		defer cancel()
+
+		lh.C8Yclient.TFACode = input
+
+		if err := lh.C8Yclient.LoginUsingOAuth2(ctx, option.InitRequest); err != nil {
+			lh.Logger.Errorf("OAuth2 failed. %s", err)
+			return err
+		}
+		lh.TFACode = input
+		lh.Authorized = true
+		return nil
+	}
+
+	prompt := promptui.Prompt{
+		Stdin:       os.Stdin,
+		Stdout:      os.Stderr,
+		Default:     lh.TFACode,
+		HideEntered: true,
+		Label:       "Enter Two-Factor code",
+		Validate:    validateTOTP,
+	}
+
 	return prompt.Run()
 }

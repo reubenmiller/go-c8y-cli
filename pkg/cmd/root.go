@@ -64,26 +64,24 @@ func (c *c8yCmd) createCumulocityClient() {
 
 	// Only bind when not setting the session
 	if c.useEnv {
+		c.Logger.Debug("Binding authorization environment variables")
 		cliConfig.BindAuthorization()
 	}
 
 	// Try reading session from file
-	_, readErr := ReadConfigFiles(viper.GetViper())
-	if readErr == nil {
-		client = c8y.NewClient(
-			httpClient,
-			formatHost(viper.GetString("host")),
-			viper.GetString("tenant"),
-			viper.GetString("username"),
-			// viper.GetString("password"),
-			cliConfig.MustGetPassword(),
-			true,
-		)
-	} else {
+	if _, readErr := ReadConfigFiles(viper.GetViper()); readErr != nil {
 		Logger.Printf("Error reading config file. %s", readErr)
 		// Fallback to reading session from environment variables
-		client = c8y.NewClientFromEnvironment(httpClient, true)
+		// client = c8y.NewClientFromEnvironment(httpClient, true)
 	}
+	client = c8y.NewClient(
+		httpClient,
+		formatHost(cliConfig.GetHost()),
+		cliConfig.GetTenant(),
+		cliConfig.GetUsername(),
+		cliConfig.MustGetPassword(),
+		true,
+	)
 
 	// load authentication
 	loadAuthentication(cliConfig, client)
@@ -418,7 +416,7 @@ func Execute() {
 
 	if err := rootCmd.Execute(); err != nil {
 		rootCmd.checkCommandError(err)
-		os.Exit(2)
+		os.Exit(1)
 	}
 }
 
@@ -644,7 +642,7 @@ func newHTTPClient(ignoreProxySettings bool) *http.Client {
 
 func hideSensitiveInformationIfActive(message string) string {
 
-	if strings.ToLower(os.Getenv(c8y.EnvVarLoggerHideSensitive)) != "true" {
+	if !strings.EqualFold(os.Getenv(c8y.EnvVarLoggerHideSensitive), "true") {
 		return message
 	}
 

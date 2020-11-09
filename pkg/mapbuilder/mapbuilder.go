@@ -56,7 +56,7 @@ local isMandatory(o, prop) = {
 
 	jsonnetImport += "\nfinal"
 
-	debugJsonnet := strings.ToLower(os.Getenv("C8Y_JSONNET_DEBUG")) == "true"
+	debugJsonnet := strings.EqualFold(os.Getenv("C8Y_JSONNET_DEBUG"), "true")
 
 	if debugJsonnet {
 		log.Printf("jsonnet snippet: %s\n", jsonnetImport)

@@ -119,7 +119,7 @@ func (n *listSessionCmd) listSession(cmd *cobra.Command, args []string) error {
 	funcMap := promptui.FuncMap
 
 	funcMap["hide"] = func(v interface{}) string {
-		if strings.ToLower(os.Getenv(c8y.EnvVarLoggerHideSensitive)) != "true" {
+		if !strings.EqualFold(os.Getenv(c8y.EnvVarLoggerHideSensitive), "true") {
 			return fmt.Sprintf("%v", v)
 		}
 		return "*****"
@@ -127,7 +127,7 @@ func (n *listSessionCmd) listSession(cmd *cobra.Command, args []string) error {
 
 	funcMap["hideUser"] = func(v interface{}) string {
 		msg := fmt.Sprintf("%v", v)
-		if strings.ToLower(os.Getenv(c8y.EnvVarLoggerHideSensitive)) != "true" {
+		if !strings.EqualFold(os.Getenv(c8y.EnvVarLoggerHideSensitive), "true") {
 			return msg
 		}
 		if os.Getenv("USERNAME") != "" {

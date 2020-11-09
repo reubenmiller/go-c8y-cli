@@ -117,7 +117,7 @@ func UnzipFile(src string, dest string, names []string) ([]string, error) {
 		if len(names) > 0 {
 			found := true
 			for _, iName := range names {
-				if strings.ToLower(iName) == strings.ToLower(f.Name) {
+				if strings.EqualFold(iName, f.Name) {
 					found = false
 					break
 				}
