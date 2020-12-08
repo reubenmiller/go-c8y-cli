@@ -181,4 +181,23 @@ Describe -Name "Invoke-ClientRequest" {
         $Response | Should -Not -BeNullOrEmpty
         $Response -match "Body:" | Should -HaveCount 0
     }
+
+    It "Sends a request using templates" {
+        $template = New-TemporaryFile
+        @"
+{
+    c8y_CustomFragment: {
+        "test": true
+    }
+}
+"@ |Out-File $template
+        $Response = Invoke-ClientRequest `
+            -Uri "/inventory/managedObjects" `
+            -Method "post" `
+            -Template $template `
+            -Whatif 2>&1
+
+        $LASTEXITCODE | Should -Be 0
+        $Response | Should -Not -BeNullOrEmpty
+    }
 }

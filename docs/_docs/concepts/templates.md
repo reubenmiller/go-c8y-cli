@@ -67,14 +67,14 @@ Variables can also be injected into your template at runtime. These variables ca
 
 For example if we want to generate a device managed object from a template, however you would like to change the type at runtime (via the command line).
 
-Firstly when creating your jsonnet template, you can reference any template variables using the `vars()` function, where it accepts the name of the template variable and an optional default value (in case the variable is not provided by the user)
+Firstly when creating your jsonnet template, you can reference any template variables using the `var()` function, where it accepts the name of the template variable and an optional default value (in case the variable is not provided by the user)
 
 The following is an example of such a template:
 
 ```jsonnet
 {
     name: "my device",
-    type: vars("type", "defaultType"),
+    type: var("type", "defaultType"),
     c8y_IsDevice: {},
 }
 ```

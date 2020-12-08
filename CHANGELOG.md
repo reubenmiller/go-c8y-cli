@@ -11,6 +11,7 @@ No unreleased features
 
 ## Done
 
+* `Invoke-ClientRequest`: Added support for `-Template` and `-TemplateVars` parameters
 * Removed `-Depth` from internal `ConvertFrom-Json` calls so that the PSc8y is compatible with PowerShell 5.1
 * Fixed shallow json conversion bug when using using internal calls to `ConvertFrom-Json` and `ConvertTo-Json`. Max depth of 100 is used on supported PowerShell versions
 
