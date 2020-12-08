@@ -193,32 +193,35 @@ func (p *Prompt) Username(label string, defaultValue string) (string, error) {
 	return prompt.Run()
 }
 
-func (p *Prompt) TOTPCode(host, username string, client *c8y.Client) (string, error) {
-	os.Stderr.WriteString(fmt.Sprintf("Session details:\nHost=%s, username=%s\n", lh.C8Yclient.BaseURL.Host, lh.C8Yclient.Username))
+// TOTPCode prompts for a TOTP code and validates using the given Cumulocity client
+func (p *Prompt) TOTPCode(host, username string, code string, client *c8y.Client, initRequest string) (string, error) {
+	os.Stderr.WriteString(fmt.Sprintf("Session details:\nHost=%s, username=%s\n", host, username))
 
 	validateTOTP := func(input string) error {
 		if len(strings.ReplaceAll(input, " ", "")) < 6 {
 			return fmt.Errorf("Missing TFA code")
 		}
 
-		ctx, cancel := context.WithTimeout(context.Background(), time.Duration(Timeout)*time.Millisecond)
+		ctx, cancel := context.WithTimeout(context.Background(), time.Duration(15000)*time.Millisecond)
 		defer cancel()
 
-		lh.C8Yclient.TFACode = input
+		code = input
 
-		if err := lh.C8Yclient.LoginUsingOAuth2(ctx, option.InitRequest); err != nil {
-			lh.Logger.Errorf("OAuth2 failed. %s", err)
+		if err := client.LoginUsingOAuth2(ctx, initRequest); err != nil {
+			p.Logger.Errorf("OAuth2 failed. %s", err)
 			return err
 		}
-		lh.TFACode = input
-		lh.Authorized = true
 		return nil
+	}
+
+	if err := validateTOTP(code); err == nil {
+		return code, nil
 	}
 
 	prompt := promptui.Prompt{
 		Stdin:       os.Stdin,
 		Stdout:      os.Stderr,
-		Default:     lh.TFACode,
+		Default:     code,
 		HideEntered: true,
 		Label:       "Enter Two-Factor code",
 		Validate:    validateTOTP,
