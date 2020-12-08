@@ -57,7 +57,13 @@ String
         [string[]] $Filter,
 
         # Allow loading Cumulocity session setting from environment variables
-        [switch] $UseEnvironment
+        [switch] $UseEnvironment,
+
+        # Reload the current session. If no session is already loaded, then an warning will be returned.
+        [Parameter(
+            ParameterSetName = "ByReloadExisting"
+        )]
+        [switch] $Reload
     )
 
     Process {
@@ -65,6 +71,15 @@ String
         switch ($PSCmdlet.ParameterSetName) {
             "ByFile" {
                 $Path = $File
+            }
+
+            "ByReloadExisting" {
+                $ExistingSession = Get-Session
+                if ($null -eq $ExistingSession) {
+                    Write-Error "No session is loaded. Please call it again without the -Reload"
+                    return
+                }
+                $Path = $ExistingSession.path
             }
 
             default {

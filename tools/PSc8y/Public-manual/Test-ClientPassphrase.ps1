@@ -49,5 +49,8 @@ Set the passphrase if it is not already set
         $env:C8Y_PASSPHRASE_TEXT = $encryptionInfo.C8Y_PASSPHRASE_TEXT
         $env:C8Y_CREDENTIAL_COOKIES_0 = $encryptionInfo.C8Y_CREDENTIAL_COOKIES_0
         $env:C8Y_CREDENTIAL_COOKIES_1 = $encryptionInfo.C8Y_CREDENTIAL_COOKIES_1
+        $env:C8Y_CREDENTIAL_COOKIES_2 = $encryptionInfo.C8Y_CREDENTIAL_COOKIES_2
+        $env:C8Y_CREDENTIAL_COOKIES_3 = $encryptionInfo.C8Y_CREDENTIAL_COOKIES_3
+        $env:C8Y_CREDENTIAL_COOKIES_4 = $encryptionInfo.C8Y_CREDENTIAL_COOKIES_4
     }
 }

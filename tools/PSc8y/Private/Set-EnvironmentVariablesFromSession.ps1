@@ -55,5 +55,9 @@ None
 
     $Env:C8Y_USER = $Session.username;
     $Env:C8Y_USERNAME = $Session.username;
-    $Env:C8Y_PASSWORD = $Session.password;
+
+    # Don't set the password as it should have already been set in Test-ClientPassphrase
+    if ([string]::IsNullOrEmpty($Env:C8Y_PASSWORD)) {
+        $Env:C8Y_PASSWORD = $Session.password;
+    }
 }
