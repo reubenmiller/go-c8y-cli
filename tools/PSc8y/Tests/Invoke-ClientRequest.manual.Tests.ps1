@@ -187,17 +187,18 @@ Describe -Name "Invoke-ClientRequest" {
         @"
 {
     c8y_CustomFragment: {
-        "test": true
+        test: true
     }
 }
 "@ |Out-File $template
         $Response = Invoke-ClientRequest `
             -Uri "/inventory/managedObjects" `
             -Method "post" `
-            -Template $template `
-            -Whatif 2>&1
+            -Template $template
 
         $LASTEXITCODE | Should -Be 0
         $Response | Should -Not -BeNullOrEmpty
+        $Result = $Response | ConvertFrom-Json
+        $Result.c8y_CustomFragment.test | Should -BeExactly $true
     }
 }
