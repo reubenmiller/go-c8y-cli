@@ -249,7 +249,6 @@ func (c CliConfiguration) Debug() {
 
 // DecryptString returns the decrypted string if the string is encrypted
 func (c *CliConfiguration) DecryptString(value string) (string, error) {
-	c.Logger.Debugf("Decrypting data. %s", value)
 	if c.SecureData.IsEncrypted(value) > 0 {
 		c.Logger.Debugf("Decrypting data. %s", value)
 	}
