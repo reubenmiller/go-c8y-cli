@@ -193,7 +193,11 @@ only relevant information is shown.
     if ($ExitCode -ne 0) {
 
         try {
-            $errormessage = $RawResponse | Select-Object -First 1 | ConvertFrom-Json
+            if ($PSVersionTable.PSVersion.Major -gt 5) {
+                $errormessage = $RawResponse | Select-Object -First 1 | ConvertFrom-Json -Depth 100
+            } else {
+                $errormessage = $RawResponse | Select-Object -First 1 | ConvertFrom-Json
+            }
             Write-Error ("{0}: {1}" -f @(
                 $errormessage.error,
                 $errormessage.message
@@ -275,7 +279,7 @@ only relevant information is shown.
             pageSize = $response.statistics.pageSize
             totalPages = $response.statistics.totalPages
             currentPage = $response.statistics.currentPage
-        } -Compress
+        } -Compress -Depth 100
 
         $NewScriptBlock = [scriptblock]::Create("ConvertFrom-Json '$StatsAsJson'")
 

@@ -92,7 +92,11 @@ PS > Invoke-BinaryProcess binaryProcess.exe -RedirectOutput -ArgumentList "-Emit
                 $line
             } else {
                 if ($null -ne $line) {
-                    ConvertFrom-Json -Depth 100 -InputObject $line
+                    if ($PSVersionTable.PSVersion.Major -le 5) {
+                        ConvertFrom-Json -InputObject $line
+                    } else {
+                        ConvertFrom-Json -Depth 100 -InputObject $line
+                    }
                 }
             }
         }

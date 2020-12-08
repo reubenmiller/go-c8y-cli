@@ -20,7 +20,7 @@
                 $Parameters[$Name] = $true
             }
         } elseif ($iParam.Value -is [hashtable]) {
-            $Parameters[$Name] = "{0}" -f ((ConvertTo-Json $iParam.Value -Compress) -replace '"', '\"')
+            $Parameters[$Name] = "{0}" -f ((ConvertTo-Json $iParam.Value -Depth 100 -Compress) -replace '"', '\"')
         } elseif ($iParam.Value -is [datetime]) {
             $Parameters[$Name] = Format-Date $iParam.Value
         } else {

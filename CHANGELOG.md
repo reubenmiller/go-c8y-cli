@@ -11,6 +11,9 @@ No unreleased features
 
 ## Done
 
+* Removed `-Depth` from internal `ConvertFrom-Json` calls so that the PSc8y is compatible with PowerShell 5.1
+* Fixed shallow json conversion bug when using using internal calls to `ConvertFrom-Json` and `ConvertTo-Json`. Max depth of 100 is used on supported PowerShell versions
+
 * `Test-ClientPassphrase` cmdlet to check if passphrase is missing or not. Cmdlet is called automatically when importing the module or calling `set-session`
 * `New-User` added support for template and templateVars parameters
 * Dry/WhatIf headers are shown in a sorted alphabetically by header name
@@ -88,7 +91,7 @@ No unreleased features
     ```jsonnet
     {
         name: "my device",
-        type: vars("type", "defaultType"),
+        type: var("type", "defaultType"),
         cpuThreshold: rand.int,
         c8y_IsDevice: {},
     }
