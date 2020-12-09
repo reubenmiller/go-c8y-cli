@@ -75,5 +75,8 @@ func DecodeJSONFile(filename string) (map[string]interface{}, error) {
 	if err != nil {
 		return nil, fmt.Errorf("%w", ErrJSONDecode)
 	}
+	if contents == nil {
+		return nil, fmt.Errorf("%w", ErrJSONDecode)
+	}
 	return contents, nil
 }
