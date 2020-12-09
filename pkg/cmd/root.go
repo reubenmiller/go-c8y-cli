@@ -64,7 +64,7 @@ func (c *c8yCmd) createCumulocityClient() {
 
 	// Only bind when not setting the session
 	if c.useEnv {
-		c.Logger.Debug("Binding authorization environment variables")
+		c.Logger.Info("Binding authorization environment variables")
 		cliConfig.BindAuthorization()
 	}
 
