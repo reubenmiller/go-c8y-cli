@@ -63,6 +63,10 @@ func NewCumulocitySessionFromFile(filePath string) (*CumulocitySession, error) {
 		return nil, err
 	}
 
+	if session == nil {
+		return nil, fmt.Errorf("Session marshalling failed")
+	}
+
 	session.Path = filePath
 
 	basename := filepath.Base(filePath)

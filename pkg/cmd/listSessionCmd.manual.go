@@ -97,7 +97,7 @@ func (n *listSessionCmd) listSession(cmd *cobra.Command, args []string) error {
 			return nil
 		}
 
-		// cmd.Printf("visited file or dir: %q\n", path)
+		Logger.Infof("Walking folder/file: %s", path)
 		files = append(files, path)
 
 		if session, err := NewCumulocitySessionFromFile(path); err == nil {
