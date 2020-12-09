@@ -33,7 +33,7 @@ test-c8ypassphrase () {
     passphraseCheck=$( c8y sessions checkPassphrase --json )
     if [ $? -ne 0 ]; then
         echo "Encryption check failed"
-        exit 2
+        (exit 2)
     fi
 
     if [[ $(command -v jq) ]]; then
@@ -68,7 +68,7 @@ set-session () {
 
     if [ $? -ne 0 ]; then
         echo "Encryption check failed"
-        exit 2
+        (exit 2)
     fi
 
     # Export session as individual settings
