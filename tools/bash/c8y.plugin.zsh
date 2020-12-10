@@ -19,11 +19,12 @@ test-c8ypassphrase () {
     if [ $? -ne 0 ]; then
         echo "Encryption check failed"
         (exit 2)
+        return
     fi
 
     if [[ $(command -v jq) ]]; then
-        export C8Y_PASSPHRASE=$( echo $passphraseCheck | jq -r ".passphrase" )
-        export C8Y_PASSPHRASE_TEXT=$( echo $passphraseCheck | jq -r ".secretText" )
+        export C8Y_PASSPHRASE=$( echo $passphraseCheck | jq -r ".C8Y_PASSPHRASE | select (.!=null)" )
+        export C8Y_PASSPHRASE_TEXT=$( echo $passphraseCheck | jq -r ".C8Y_PASSPHRASE_TEXT | select (.!=null)" )
     fi
 }
 
@@ -54,6 +55,7 @@ set-session () {
     if [ $? -ne 0 ]; then
         echo "Encryption check failed"
         (exit 2)
+        return
     fi
 
     # Export session as individual settings
@@ -61,19 +63,14 @@ set-session () {
     # which will read these variables
     session_info=$( cat "$C8Y_SESSION" )
     if [[ $(command -v jq) ]]; then
-        export C8Y_HOST=$( echo $session_info | jq -r ".host" )
-        export C8Y_TENANT=$( echo $session_info | jq -r ".tenant" )
-        export C8Y_USER=$( echo $session_info | jq -r ".username" )
-        export C8Y_USERNAME=$( echo $session_info | jq -r ".username" )
+        export C8Y_HOST=$( echo $session_info | jq -r ".host | select (.!=null)" )
+        export C8Y_TENANT=$( echo $session_info | jq -r ".tenant | select (.!=null)" )
+        export C8Y_USER=$( echo $session_info | jq -r ".username | select (.!=null)" )
+        export C8Y_USERNAME=$( echo $session_info | jq -r ".username | select (.!=null)" )
 
-        export C8Y_PASSPHRASE=$( echo $passphraseCheck | jq -r ".passphrase" )
-        export C8Y_PASSPHRASE_TEXT=$( echo $passphraseCheck | jq -r ".secretText" )
-
-        password=$( echo $session_info | jq -r ".password" )
-        if [[ "$password" != "" ]]; then
-            password=$( c8y sessions decryptText --text "$password" )
-        fi
-        export C8Y_PASSWORD=$password
+        export C8Y_PASSPHRASE=$( echo $passphraseCheck | jq -r ".C8Y_PASSPHRASE | select (.!=null)" )
+        export C8Y_PASSPHRASE_TEXT=$( echo $passphraseCheck | jq -r ".C8Y_PASSPHRASE_TEXT | select (.!=null)" )
+        export C8Y_PASSWORD=$( echo $passphraseCheck | jq -r ".C8Y_PASSWORD | select (.!=null)" )
 
         # login / test session credentials
         c8y sessions login
