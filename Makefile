@@ -14,6 +14,7 @@ VERSION := $(shell git describe | sed "s/^v\?\([0-9]\{1,\}\.[0-9]\{1,\}\.[0-9]\{
 ENV_FILE ?= c8y.env
 -include $(ENV_FILE)
 export $(shell sed 's/=.*//' $(ENV_FILE) 2>/dev/null)
+export C8Y_SETTINGS_CI=true
 
 .PHONY: all check-path test race docs install tsurud
 
