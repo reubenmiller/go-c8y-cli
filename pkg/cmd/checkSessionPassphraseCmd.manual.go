@@ -56,6 +56,9 @@ func (n *checkSessionPassphraseCmd) checkSession(cmd *cobra.Command, args []stri
 	if err != nil {
 		return err
 	}
+	if passphrase == "" || passphrase == "null" {
+		return fmt.Errorf("passphrase can not be empty")
+	}
 	cliConfig.Passphrase = passphrase
 
 	if n.OutputJSON {

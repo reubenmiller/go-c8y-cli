@@ -93,8 +93,11 @@ func (p *Prompt) EncryptionPassphrase(encryptedData string, initPassphrase strin
 	secure := encrypt.NewSecureData("{encrypted}")
 
 	validate := func(input string) error {
-		_, err = secure.DecryptString(encryptedData, input)
-		return err
+		if secure.IsEncrypted(encryptedData) != 0 {
+			_, err = secure.DecryptString(encryptedData, input)
+			return err
+		}
+		return nil
 	}
 	prompt := promptui.Prompt{
 		Stdin:       os.Stdin,

@@ -1,6 +1,7 @@
 package encrypt
 
 import (
+	"bytes"
 	"crypto/aes"
 	"crypto/cipher"
 	"crypto/rand"
@@ -89,6 +90,24 @@ func (s *SecureData) FromHexString(data string) ([]byte, error) {
 func (s *SecureData) IsEncrypted(data string) int {
 	if len(s.Prefix) > 0 {
 		if strings.HasPrefix(data, string(s.Prefix)) {
+			return 1
+		}
+		return 0
+	}
+
+	return -1
+}
+
+// IsEncryptedBytes returns if the given data is encrypted or not.
+// The data is encrypted if it starts with the encryption marker. If an empty string
+// is used as the encryption prefix, then the it can not be reliably checked if the data
+// is enrypted or not.
+// 1 - data is encrypted
+// 0 - data is not encrypted
+// -1 - data encryption is unknown (could be encrypted or not)
+func (s *SecureData) IsEncryptedBytes(data []byte) int {
+	if len(s.Prefix) > 0 {
+		if bytes.HasPrefix(data, s.Prefix) {
 			return 1
 		}
 		return 0

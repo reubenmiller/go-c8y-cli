@@ -79,7 +79,8 @@ func (c *CliConfiguration) CheckEncryption(encryptedText ...string) (string, err
 	if len(encryptedText) > 0 {
 		secretText = encryptedText[0]
 	}
-	// c.Logger.Infof("SecretText: %s", secretText)
+
+	c.Logger.Infof("Checking encryption passphrase against secret text: %s", secretText)
 	pass, err := c.prompter.EncryptionPassphrase(secretText, c.Passphrase, "")
 	c.Passphrase = pass
 	return pass, err
@@ -111,7 +112,13 @@ func (c *CliConfiguration) GetUsername() string {
 
 // GetTenant returns the Cumulocity tenant id
 func (c *CliConfiguration) GetTenant() string {
-	return c.viper.GetString("tenant")
+	// check for an empty or "null" tenant name as jq outputs null if
+	// a json property is not found, so the user might accidentally provide
+	// null without knowing it
+	if v := c.viper.GetString("tenant"); v != "" && v != "null" {
+		return v
+	}
+	return ""
 }
 
 // GetHost returns the Cumulocity host URL
@@ -143,7 +150,7 @@ func (c *CliConfiguration) CreateKeyFile(keyText string) error {
 func (c *CliConfiguration) ReadKeyFile() error {
 
 	// read from env variable
-	if v := os.Getenv("C8Y_PASSPHRASE_TEXT"); v != "" {
+	if v := os.Getenv("C8Y_PASSPHRASE_TEXT"); v != "" && c.SecureData.IsEncrypted(v) == 1 {
 		c.Logger.Infof("Using env variable 'C8Y_PASSPHRASE_TEXT' as example encryption text")
 		c.SecretText = v
 		c.CreateKeyFile(v)
@@ -151,9 +158,14 @@ func (c *CliConfiguration) ReadKeyFile() error {
 	}
 
 	// read from file
-	if contents, err := ioutil.ReadFile(c.KeyFile); err == nil {
-		c.SecretText = string(contents)
-		return nil
+	contents, err := ioutil.ReadFile(c.KeyFile)
+
+	if err == nil {
+		if c.SecureData.IsEncryptedBytes(contents) == 1 {
+			c.SecretText = string(contents)
+			return nil
+		}
+		c.Logger.Warningf("Key file is invalid or contains unencrypted information")
 	}
 
 	// init key file
