@@ -145,10 +145,6 @@
                         <Width>40</Width>
                     </TableColumnHeader>
                     <TableColumnHeader>
-                        <Label>password</Label>
-                        <Width>40</Width>
-                    </TableColumnHeader>
-                    <TableColumnHeader>
                         <Width>50</Width>
                     </TableColumnHeader>
                 </TableHeaders>
@@ -167,9 +163,6 @@
                             </TableColumnItem>
                             <TableColumnItem>
                                 <PropertyName>username</PropertyName>
-                            </TableColumnItem>
-                            <TableColumnItem>
-                                <ScriptBlock>"******************************"</ScriptBlock>
                             </TableColumnItem>
                             <TableColumnItem>
                                 <PropertyName>description</PropertyName>
