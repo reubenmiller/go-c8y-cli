@@ -106,9 +106,6 @@ func NewMapBuilderFromJSON(data string) (*MapBuilder, error) {
 	if err := json.Unmarshal([]byte(data), &body); err != nil {
 		return nil, err
 	}
-	if body == nil {
-		return nil, fmt.Errorf("failed to parse json string")
-	}
 	return NewMapBuilderWithInit(body), nil
 }
 
@@ -163,9 +160,6 @@ func (b *MapBuilder) MergeJsonnet(snippet string, reverse bool) error {
 
 	body := make(map[string]interface{})
 	if err := json.Unmarshal([]byte(mergedJSON), &body); err != nil {
-		return fmt.Errorf("failed to decode json. %w", err)
-	}
-	if body == nil {
 		return fmt.Errorf("failed to decode json. %w", err)
 	}
 	b.body = body
