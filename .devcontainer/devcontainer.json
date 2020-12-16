@@ -38,8 +38,8 @@
 		"source=/var/run/docker.sock,target=/var/run/docker.sock,type=bind"
 	],
 	
-	// Uncomment the next line to run commands after the container is created.
-	// "postCreateCommand": "",
+	// Install powershell module dependencies for tests etc.
+	"postCreateCommand": "make install_powershell_deps",
 
 	// Comment out the next line to run as root
 	"remoteUser": "vscode"
