@@ -7,6 +7,7 @@ BUILD_DIR = build
 C8Y_PKGS = $$(go list ./... | grep -v /vendor/)
 GOMOD=$(GOCMD) mod
 TEST_THROTTLE_LIMIT=10
+TEST_FILE_FILTER = .+
 
 # Set VERSION from git describe
 VERSION := $(shell git describe | sed "s/^v\?\([0-9]\{1,\}\.[0-9]\{1,\}\.[0-9]\{1,\}\).*/\1/")
@@ -62,6 +63,10 @@ gh_pages_update:	## Update github pages dependencies
 gh_pages:			## Run github pages locally
 	cd docs && bundle exec jekyll server --baseurl ""
 
+init_setup: install_c8y
+	pwsh -File ./scripts/build-powershell/install.ps1
+
+install_powershell_deps:
 docs-powershell: build		## Update the powershell docs
 	pwsh -File ./scripts/build-powershell/build-docs.ps1 -Recreate
 
@@ -156,11 +161,10 @@ build_powershell:
 	pwsh -File scripts/build-powershell/build.ps1;
 
 test_powershell:
-	pwsh -NonInteractive -File tools/PSc8y/test.parallel.ps1 -ThrottleLimit $(TEST_THROTTLE_LIMIT) -TestFileExclude "Set-Session|Get-SessionHomePath"
-	# pwsh -NonInteractive -File tools/PSc8y/tests.ps1
+	pwsh -NonInteractive -File tools/PSc8y/test.parallel.ps1 -ThrottleLimit $(TEST_THROTTLE_LIMIT) -TestFileFilter "$(TEST_FILE_FILTER)" -TestFileExclude "Set-Session|Get-SessionHomePath|Login|DisableCommands"
 
 test_powershell_sessions:		## Run tests which interfere with the session variable
-	pwsh -NonInteractive -File tools/PSc8y/test.parallel.ps1 -ThrottleLimit 1 -TestFileFilter "Set-Session|Get-SessionHomePath"
+	pwsh -NonInteractive -File tools/PSc8y/test.parallel.ps1 -ThrottleLimit 1 -TestFileFilter "Set-Session|Get-SessionHomePath|Login|DisableCommands"
 
 test_bash:
 	./tools/bash/tests/test.sh
