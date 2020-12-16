@@ -147,7 +147,10 @@ func (n *getGenericRestCmd) getGenericRest(cmd *cobra.Command, args []string) er
 			return newUserError("Template error. ", err)
 		}
 
-		req.Body = body.GetMap()
+		if bodyContents := body.GetMap(); bodyContents != nil {
+			Logger.Infof("Body is nil")
+			req.Body = bodyContents
+		}
 
 		// get file info
 		if cmd.Flags().Changed("file") {
