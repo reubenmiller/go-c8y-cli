@@ -180,7 +180,7 @@ Create a new managed object but add a custom accept header value
 
     $null = $c8yargs.Add($Uri)
 
-    if ($null -ne $Data) {
+    if ($null -ne $Data -and ![string]::IsNullOrEmpty($Data)) {
         if ($Data -is [string]) {
             if (Test-Json -InputObject $Data -WarningAction SilentlyContinue) {
                 $null = $c8yargs.AddRange(@("--data", (ConvertTo-JsonArgument $Data)))

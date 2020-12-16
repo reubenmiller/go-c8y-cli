@@ -165,7 +165,7 @@ func (c *CliConfiguration) ReadKeyFile() error {
 			c.SecretText = string(contents)
 			return nil
 		}
-		c.Logger.Warningf("Key file is invalid or contains unencrypted information")
+		c.Logger.Warningf("Key file is invalid or contains decrypted information")
 	}
 
 	// init key file
@@ -281,7 +281,7 @@ func (c *CliConfiguration) GetEncryptedString(key string) string {
 	return decryptedValue
 }
 
-// SetEncryptedString encryptes and sets a value in the configuration
+// SetEncryptedString encrypts and sets a value in the configuration. If the give value is empty, then the value will be read from the configuration file
 func (c *CliConfiguration) SetEncryptedString(key, value string) error {
 	if value == "" {
 		value = c.Persistent.GetString(key)
@@ -338,6 +338,11 @@ func (c *CliConfiguration) GetPassword() (string, error) {
 		return value, err
 	}
 	return decryptedValue, nil
+}
+
+// GetPasswordRaw return ture if the password is encrypted
+func (c *CliConfiguration) IsPasswordEncrypted() bool {
+	return c.SecureData.IsEncrypted(c.viper.GetString("password")) == 1
 }
 
 func (c *CliConfiguration) MustGetPassword() string {

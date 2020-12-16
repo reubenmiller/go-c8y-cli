@@ -159,7 +159,7 @@ func (s *SecureData) DecryptHex(data string, passphrase string) (string, error) 
 	return s.DecryptString(string(hexVal), passphrase)
 }
 
-// Encrypt encryptes the data with a passphrase. Salt is used on the passphrase and stored in the last 32 bytes of the data (appended unencrypted)
+// Encrypt encrypts the data with a passphrase. Salt is used on the passphrase and stored in the last 32 bytes of the data (appended decrypted)
 // Example: asdfadsfasdfasdfasdf<salt>
 func (s *SecureData) Encrypt(data []byte, passphrase string) ([]byte, error) {
 	key, salt, err := s.DeriveKey([]byte(passphrase), nil)

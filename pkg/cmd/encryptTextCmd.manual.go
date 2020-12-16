@@ -64,13 +64,17 @@ func (n *encryptTextCmd) encryptText(cmd *cobra.Command, args []string) error {
 	encryptedPassword := ""
 	if v, err := cmd.Flags().GetString("text"); err == nil && v != "" {
 
-		data, err := SecureDataAccessor.EncryptString(v, n.passphrase)
+		if SecureDataAccessor.IsEncrypted(v) != 1 {
+			data, err := SecureDataAccessor.EncryptString(v, n.passphrase)
 
-		if err != nil {
-			return err
+			if err != nil {
+				return err
+			}
+			encryptedPassword = data
+		} else {
+			Logger.Info("Text is already encrypted")
+			encryptedPassword = v
 		}
-
-		encryptedPassword = data
 	}
 
 	if n.raw {

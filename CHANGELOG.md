@@ -11,6 +11,13 @@ No unreleased features
 
 ## Done
 
+* Added `New-ServiceUser` and `Get-ServiceUser` to create and get a service user that can be used for automation purposes
+
+    ```powershell
+    New-ServiceUser -Name "myapp1" -Roles "ROLE_INVENTORY_READ" -Tenants "t12345"
+
+    Get-Serviceuser -Name "myapp1"
+    ```
 * Fixed target tenant confirmation when using the `-Session` parameter on PUT/POST commands
 * `Invoke-ClientRequest`: Added support for `-Template` and `-TemplateVars` parameters
 * Removed `-Depth` from internal `ConvertFrom-Json` calls so that the PSc8y is compatible with PowerShell 5.1

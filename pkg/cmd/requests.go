@@ -102,6 +102,10 @@ func getCurrentPageFlag(cmd *cobra.Command, flagName string) (currentPage int64)
 	return
 }
 
+func getTimeoutContext() (context.Context, context.CancelFunc) {
+	return context.WithTimeout(context.Background(), time.Duration(globalFlagTimeout)*time.Millisecond)
+}
+
 func processRequestAndResponse(requests []c8y.RequestOptions, commonOptions CommonCommandOptions) error {
 
 	if len(requests) > 1 {
@@ -114,7 +118,7 @@ func processRequestAndResponse(requests []c8y.RequestOptions, commonOptions Comm
 
 	req := requests[0]
 
-	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(globalFlagTimeout)*time.Millisecond)
+	ctx, cancel := getTimeoutContext()
 	defer cancel()
 	start := time.Now()
 	resp, err := client.SendRequest(
@@ -251,7 +255,6 @@ func fetchAllResults(req c8y.RequestOptions, resp *c8y.Response, commonOptions C
 }
 
 func processResponse(resp *c8y.Response, respError error, commonOptions CommonCommandOptions) (int, error) {
-	// Check if pagination shou
 	if resp != nil {
 		Logger.Infof("Response header: %v", resp.Header)
 	}
@@ -345,9 +348,12 @@ func processResponse(resp *c8y.Response, respError error, commonOptions CommonCo
 
 func guessDataProperty(resp *c8y.Response) string {
 	property := ""
+	totalKeys := 0
+
 	if v := resp.JSON.Get("id"); !v.Exists() {
 		// Find the property which is an array
 		resp.JSON.ForEach(func(key, value gjson.Result) bool {
+			totalKeys++
 			if value.IsArray() {
 				property = key.String()
 				return false
@@ -356,7 +362,13 @@ func guessDataProperty(resp *c8y.Response) string {
 		})
 	}
 
-	if property != "" {
+	// if total keys is a high number, than it is most likely not an array of data
+	// i.e. for the /tenant/statistics
+	if property != "" && totalKeys > 10 {
+		return ""
+	}
+
+	if property != "" && totalKeys < 10 {
 		Logger.Debugf("Data property: %s", property)
 	}
 	return property

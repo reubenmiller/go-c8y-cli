@@ -30,7 +30,7 @@ Describe -Tag "Session" -Name "Login and Session Tests" {
         $LASTEXITCODE | Should -BeExactly 0
     }
 
-    It "Logs in with TFA (TOTP) and OAUTH_INTERNAL enabled" {
+    It -Skip "Logs in with TFA (TOTP) and OAUTH_INTERNAL enabled" {
 
     }
 
@@ -41,22 +41,21 @@ Describe -Tag "Session" -Name "Login and Session Tests" {
         $env:C8Y_PASSWORD = $EnvBackupHash["C8Y_PASSWORD"]
         $env:C8Y_PASSPHRASE = $EnvBackupHash["C8Y_PASSPHRASE"]
 
-        $resp = & $c8y devices list --pretty=false
+        $resp = & $c8y devices list --pretty=false --raw
         $LASTEXITCODE | Should -BeExactly 0
         $results = $resp | ConvertFrom-Json
         $results | Should -Not -BeNullOrEmpty
 
-        # Removing passphrase should cause an error
-        $env:C8Y_PASSPHRASE = "wrong password"
+        $env:C8Y_PASSWORD = "wrong password"
         $resp = & $c8y devices list --pretty=false
         $LASTEXITCODE | Should -Not -BeExactly 0
     }
 
-    It "Uses encryption to store passwords and authorization cookies" {
+    It -Skip "Uses encryption to store passwords and authorization cookies" {
 
     }
 
-    It "Prompt for c8y password again if the passphrase has been lost" {
+    It -Skip "Prompt for c8y password again if the passphrase has been lost" {
         
     }
 
@@ -66,7 +65,7 @@ Describe -Tag "Session" -Name "Login and Session Tests" {
         $env:C8Y_PASSWORD = $EnvBackupHash["C8Y_PASSWORD"]
         $env:C8Y_PASSPHRASE = $EnvBackupHash["C8Y_PASSPHRASE"]
 
-        $resp = & $c8y devices list --pretty=false
+        $resp = & $c8y devices list --pretty=false --raw
         $LASTEXITCODE | Should -BeExactly 0
         $results = $resp | ConvertFrom-Json
         $results | Should -Not -BeNullOrEmpty
@@ -78,6 +77,10 @@ Describe -Tag "Session" -Name "Login and Session Tests" {
         $env:C8Y_SESSION = $SessionFile
 
         $passwordText = & $c8y sessions decryptText --text $SessionBackup.password --passphrase $env:C8Y_PASSPHRASE
+        $LASTEXITCODE | Should -BeExactly 0
+
+        $passwordText | Should -Not -Match "^{encrypted}.+$"
+
         $SessionBefore = @{
             host = $SessionBackup.host
             username = $SessionBackup.username
@@ -90,19 +93,32 @@ Describe -Tag "Session" -Name "Login and Session Tests" {
         $LASTEXITCODE | Should -BeExactly 0
         
         $SessionAfterLogin = Get-Content $SessionFile | ConvertFrom-Json
-        $SessionAfterLogin.tenant | Should -Match "t\d+"
         $SessionAfterLogin.password | Should -Match "^{encrypted}.+$"
         $SessionAfterLogin.host | Should -BeExactly $SessionBefore.host
+        $SessionAfterLogin.tenant | Should -Match "^t\d+$"
         $SessionAfterLogin.username | Should -BeExactly $SessionBefore.username
         $SessionAfterLogin.password | Should -Not -Be $passwordText
         $SessionAfterLogin.credential | Should -Not -BeNullOrEmpty
-        $SessionAfterLogin.credential.cookies.0 | Should -Match "^{encrypted}.+$"
-        $SessionAfterLogin.credential.cookies.1 | Should -Match "^{encrypted}.+$"
+
+        # Only if OAUTH2 is being used
+        if ($SessionAfterLogin.credential.cookies.0) {
+            $SessionAfterLogin.credential.cookies.0 | Should -Match "^{encrypted}.+$"
+        }
+
+        if ($SessionAfterLogin.credential.cookies.1) {
+            $SessionAfterLogin.credential.cookies.1 | Should -Match "^{encrypted}.+$"
+        }
+
         $SessionAfterLogin.'$schema' | Should -Match "^https://.+"
+
+        # Tenant is optional
+        if ($SessionAfterLogin.tenant) {
+            $SessionAfterLogin.tenant | Should -Match "t\d+"
+        }
 
     }
 
-    It "Switches between two login types OAUTH and BASIC_AUTH" {
+    It -Skip "Switches between two login types OAUTH and BASIC_AUTH" {
 
     }
 

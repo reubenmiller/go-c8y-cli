@@ -93,7 +93,9 @@ String
                 }
 
                 if ($UseEnvironment) {
-                    $null = $c8yargs.Add("--useEnv")
+                    $null = $c8yargs.Add("--useEnv=true")
+                } else {
+                    $null = $c8yargs.Add("--useEnv=false")
                 }
                 $Path = & $Binary $c8yargs
 

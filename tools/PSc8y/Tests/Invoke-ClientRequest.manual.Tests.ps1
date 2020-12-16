@@ -74,6 +74,7 @@ Describe -Name "Invoke-ClientRequest" {
 
         ($Response -join "`n") | Should -BeLikeExactly '*"name": "test"*' -Because "Pretty print should have a space after the ':'"
 
+        $obj = $Response | ConvertFrom-Json
         if ($obj.id) {
             Remove-ManagedObject -Id $obj.id
         }
@@ -179,7 +180,20 @@ Describe -Name "Invoke-ClientRequest" {
 
         $LASTEXITCODE | Should -Be 0
         $Response | Should -Not -BeNullOrEmpty
-        $Response -match "Body:" | Should -HaveCount 0
+        $Response -match "Body:\s+\(empty\)" | Should -HaveCount 1
+    }
+
+    It "Sends a request with an empty hashtable" {
+        $Response = Invoke-ClientRequest `
+            -Uri "/inventory/managedObjects" `
+            -Method "post" `
+            -Data @{} `
+            -Whatif 2>&1 | Out-String
+
+        $LASTEXITCODE | Should -Be 0
+        $Response | Should -Not -BeNullOrEmpty
+
+        $Response -match "(?ms)Body:\s*(\{.*\})" | Should -Be $true
     }
 
     It "Sends a request using templates" {
@@ -200,5 +214,34 @@ Describe -Name "Invoke-ClientRequest" {
         $Response | Should -Not -BeNullOrEmpty
         $Result = $Response | ConvertFrom-Json
         $Result.c8y_CustomFragment.test | Should -BeExactly $true
+        $Result.id | Remove-ManagedObject
+    }
+
+    It "Sends a request using deep nested object" {
+        $data = @{
+            root = @{
+                level1 = @{
+                    level2 = @{
+                        level3 = @{
+                            level4 = @{
+                                level5 = @{
+                                    value = 1
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        $Response = Invoke-ClientRequest `
+            -Uri "/inventory/managedObjects" `
+            -Method "post" `
+            -Data $data
+
+        $LASTEXITCODE | Should -Be 0
+        $Response | Should -Not -BeNullOrEmpty
+        $Result = $Response | ConvertFrom-Json -Depth 100
+        $Result.root.level1.level2.level3.level4.level5.value | Should -BeExactly 1
+        $Result.id | Remove-ManagedObject
     }
 }

@@ -385,6 +385,8 @@ func Execute() {
 	// microservices commands
 	microservices := newMicroservicesRootCmd().getCommand()
 	microservices.AddCommand(newNewMicroserviceCmd().getCommand())
+	microservices.AddCommand(newNewServiceUserCmd().getCommand())
+	microservices.AddCommand(newGetServiceUserCmd().getCommand())
 	rootCmd.AddCommand(microservices)
 
 	// retentionRules commands
@@ -485,8 +487,10 @@ func initConfig() {
 	}
 
 	// global session flag has precendence over use environment
-	if globalFlagSessionFile != "" && os.Getenv("C8Y_USE_ENVIRONMENT") != "" {
-		globalFlagUseEnv = true
+	if !rootCmd.Flags().Changed("useEnv") {
+		if globalFlagSessionFile == "" && os.Getenv("C8Y_USE_ENVIRONMENT") != "" {
+			globalFlagUseEnv = true
+		}
 	}
 
 	cliConfig = config.NewCliConfiguration(viper.GetViper(), SecureDataAccessor, getSessionHomeDir(), os.Getenv("C8Y_PASSPHRASE"))
