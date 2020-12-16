@@ -220,8 +220,14 @@ func (n *newMicroserviceCmd) doProcedure(cmd *cobra.Command, args []string) erro
 			return newUserError(fmt.Sprintf("invalid manifest file. Only json files are accepted. %s", err))
 		}
 
-		if values, ok := manifestContents["requiredRoles"].([]string); ok {
-			requiredRoles = append(requiredRoles, values...)
+		if roles, ok := manifestContents["requiredRoles"].([]interface{}); ok {
+			for _, val := range roles {
+				if role, typeOk := val.(string); typeOk {
+					requiredRoles = append(requiredRoles, role)
+				}
+			}
+		} else {
+			Logger.Warningf("Failed to read requiredRoles. contents=%v, type=%T", manifestContents, roles)
 		}
 
 		// Read the Cumulocity.json file, and upload
