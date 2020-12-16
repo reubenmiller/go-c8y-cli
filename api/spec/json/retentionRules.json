@@ -49,7 +49,10 @@
         "powershell": [
           {
             "description": "Create a retention rule to delete all alarms after 180 days",
-            "command": "New-RetentionRule -DataType ALARM -MaximumAge 180"
+            "command": "New-RetentionRule -DataType ALARM -MaximumAge 180",
+            "afterEach": [
+              "Get-RetentionRuleCollection -PageSize 100 | Select-Object -Last 1 | Remove-RetentionRule"
+            ]
           }
         ],
         "go": [

@@ -99,11 +99,21 @@ endpoints:
       powershell:
         - description: List the users within a user group
           beforeEach:
+            - $User = New-TestUser
             - $Group = Get-GroupByName -Name "business"
+            - Add-UserToGroup -Group $Group.id -User $User.id
           command: Get-GroupMembershipCollection -Id $Group.id
+          afterEach:
+            - Remove-User -Id $User.id
 
         - description: List the users within a user group (using pipeline)
+          beforeEach:
+            - $User = New-TestUser
+            - $Group = Get-GroupByName -Name "business"
+            - Add-UserToGroup -Group $Group.id -User $User.id
           command: Get-GroupByName -Name "business" | Get-GroupMembershipCollection
+          afterEach:
+            - Remove-User -Id $User.id
       go:
         - description: List the users within a user group
           command: c8y userReferences listGroupMembership --group 1
