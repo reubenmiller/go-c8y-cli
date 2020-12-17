@@ -7,36 +7,42 @@ Create a new Cumulocity Session
 Create a new Cumulocity session which can be used by the cmdlets. The new session will be automatically activated.
 
 .EXAMPLE
-New-Session -Name "develop" -Host "https://my-tenant-name.eu-latest.cumulocity.com" -Tenant "t12345"
+New-Session -Name "develop" -Host "my-tenant-name.eu-latest.cumulocity.com"
 
-Create a new Cumulocity session
+Create a new Cumulocity session called develop
+
+.EXAMPLE
+New-Session -Host "my-tenant-name.eu-latest.cumulocity.com"
+
+Create a new Cumulocity session. It will prompt for the username and password.
 
 .OUTPUTS
 None
 #>
     [CmdletBinding()]
     Param(
-        # Name of the Cumulocity session
-        [Parameter(Mandatory = $true)]
-        [string]
-        $Name,
-    
         # Host url, i.e. https://my-tenant-name.eu-latest.cumulocity.com
         [Parameter(Mandatory = $true)]
         [string]
         $Host,
     
         # Tenant id, i.e. t12345
-        [Parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $false)]
         [string]
         $Tenant,
     
-        # Credential
-        [Parameter(Mandatory = $false, ParameterSetName = 'manual')]
-        [ValidateNotNull()]
-        [System.Management.Automation.PSCredential]
-        [System.Management.Automation.Credential()]
-        $Credential = [System.Management.Automation.PSCredential]::Empty,
+        # Username
+        [Parameter()]
+        $Username,
+
+        # Password
+        [Parameter()]
+        $Password,
+
+        # Name of the Cumulocity session
+        [Parameter(Mandatory = $false)]
+        [string]
+        $Name,
     
         # Description
         [Parameter(Mandatory = $false)]
@@ -51,19 +57,17 @@ None
     
     $Binary = Get-ClientBinary
     
-    if (!$Credential -or ($Credential -eq [System.Management.Automation.PSCredential]::Empty)) {
-        $Credential = Get-Credential -Message "Enter the API credentials for the $Tenant C8Y Tenant    (leave-out the the tenant prefix)" -ErrorAction SilentlyContinue
-    }
-    
-    if (!$Credential.UserName -or
-        !$Credential.GetNetworkCredential().Password) {
-        Write-Warning "Credentials are required to create a Cumulocity session"
-        return
-    }
-    
     $c8yargs = New-object System.Collections.ArrayList
     
     $null = $c8yargs.AddRange(@("sessions", "create"))
+
+    if ($Username) {
+        $null = $c8yargs.AddRange(@("--username", $Username))
+    }
+
+    if ($Password) {
+        $null = $c8yargs.AddRange(@("--password", $Password))
+    }
     
     if ($Name) {
         $null = $c8yargs.AddRange(@("--name", $Name))
@@ -74,11 +78,11 @@ None
     if ($Tenant) {
         $null = $c8yargs.AddRange(@("--tenant", $Tenant))
     }
-    if ($Credential.GetNetworkCredential().Username) {
-        $null = $c8yargs.AddRange(@("--username", $Credential.GetNetworkCredential().Username))
+    if ($Username) {
+        $null = $c8yargs.AddRange(@("--username", $Username))
     }
-    if ($Credential.GetNetworkCredential().Password) {
-        $null = $c8yargs.AddRange(@("--password", $Credential.GetNetworkCredential().Password))
+    if ($Password) {
+        $null = $c8yargs.AddRange(@("--password", $Password))
     }
     if ($Description) {
         $null = $c8yargs.AddRange(@("--description", $Description))
@@ -91,4 +95,7 @@ None
     $Path = & $Binary $c8yargs
     
     Set-Session -File $Path
+
+    # Test the login
+    Invoke-ClientLogin
 }

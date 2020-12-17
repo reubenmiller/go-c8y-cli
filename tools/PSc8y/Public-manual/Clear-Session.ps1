@@ -18,4 +18,5 @@ None
     Param()
     Write-Verbose "Clearing cumulocity session"
     $env:C8Y_SESSION = ""
+    Set-EnvironmentVariablesFromSession -WarningAction SilentlyContinue
 }

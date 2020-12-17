@@ -12,5 +12,12 @@ Function Get-JSONFromResponse {
     if ($Response -match "(?ms)Body:\s*(\{.*\})") {
         $BodyText = $Matches[1]
     }
-    ConvertFrom-Json -InputObject $BodyText
+
+    $JSONArgs = @{
+        InputObject = $BodyText
+    }
+    if ($PSVersionTable.PSVersion.Major -gt 5) {
+        $JSONArgs.Depth = 100
+    }
+    ConvertFrom-Json @JSONArgs
 }

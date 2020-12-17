@@ -15,6 +15,8 @@ Describe -Name "New-Binary" {
         $Response.id | Should -MatchExactly "^\d+$"
         $Response.type | Should -BeExactly "c8y_upload"
         $Response.c8y_Global | Should -BeTrue
+
+        PSc8y\Remove-ManagedObject -Id $Response.id
     }
 
     It "Upload a log file with custom properties but let file type be detected" {
@@ -25,6 +27,7 @@ Describe -Name "New-Binary" {
         $Response.id | Should -MatchExactly "^\d+$"
         $Response.type | Should -BeExactly "application/octet-stream"
         $Response.c8y_Global | Should -BeTrue
+        PSc8y\Remove-ManagedObject -Id $Response.id
     }
 
 

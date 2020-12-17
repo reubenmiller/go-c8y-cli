@@ -22,6 +22,8 @@ Describe -Tag "Session" -Name "Set-Session" {
     It "Loads a session from a folder by name" {
         # session
         $env:C8Y_SESSION = ""
+        Clear-Session
+
         $Session = @{
             "host" = "https://example.com"
             "settings.default.pageSize" = 44
@@ -38,6 +40,7 @@ Describe -Tag "Session" -Name "Set-Session" {
 
     It "Loads a common preferences from the session folder automatically" {
         $env:C8Y_SESSION = ""
+        Clear-Session
         $Settings = @{
             "settings.includeAll.pageSize" = 123
         }

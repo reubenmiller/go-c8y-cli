@@ -30,6 +30,7 @@
           },
           {
             "description": "Get tenant statistics collection for the day before yesterday",
+            "skipTest": true,
             "command": "Get-TenantStatisticsCollection -DateFrom \"-3d\" -DateTo \"-2d\""
           }
         ],

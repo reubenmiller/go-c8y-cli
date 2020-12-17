@@ -32,6 +32,11 @@ None
         $Env:C8Y_USER = ""
         $Env:C8Y_USERNAME = ""
         $Env:C8Y_PASSWORD = ""
+        $Env:C8Y_CREDENTIAL_COOKIES_0 = ""
+        $Env:C8Y_CREDENTIAL_COOKIES_1 = ""
+        $Env:C8Y_CREDENTIAL_COOKIES_2 = ""
+        $Env:C8Y_CREDENTIAL_COOKIES_3 = ""
+        $Env:C8Y_CREDENTIAL_COOKIES_4 = ""
         return
     }
 
@@ -41,10 +46,18 @@ None
     $Env:C8Y_BASEURL = $Session.host;
     $Env:C8Y_HOST = $Session.host;
 
-    $Env:C8Y_TENANT = $Session.tenant;
+    if ($Session.tenant) {
+        $Env:C8Y_TENANT = $Session.tenant;
+    } else {
+        $CurrentTenant = Get-CurrentTenant
+        $Env:C8Y_TENANT = $CurrentTenant.name
+    }
 
     $Env:C8Y_USER = $Session.username;
     $Env:C8Y_USERNAME = $Session.username;
 
-    $Env:C8Y_PASSWORD = $Session.password;
+    # Don't set the password as it should have already been set in Test-ClientPassphrase
+    if ([string]::IsNullOrEmpty($Env:C8Y_PASSWORD)) {
+        $Env:C8Y_PASSWORD = $Session.password;
+    }
 }

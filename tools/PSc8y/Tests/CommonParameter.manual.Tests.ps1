@@ -60,11 +60,12 @@ Describe -Name "Common parameters" {
             "Set-Session",
             "Set-ClientConsoleSetting",
             "New-TestFile",
-            "New-Microservice"
+            "New-Microservice",
+            "New-ServiceUser"
         )
 
         $cmdlets = Get-Command -Module PSc8y -Name "*" | Where-Object {
-            $_.Name -match "^(Add|Update|Set|Reset|Register|New|Enable|Approve)"
+            $_.Name -match "^(Add|Update|Set|Reset|Register|New|Enable|Approve|Invoke-ClientRequest)"
         } | Where-Object {
             $ExcludeCmdlets -notcontains $_.name
         }

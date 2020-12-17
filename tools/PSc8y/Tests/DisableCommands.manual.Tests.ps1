@@ -2,14 +2,19 @@
 
 Describe -Name "Disable create/update/delete commands" {
     BeforeAll {
-        $ciSetting = $env:C8Y_SETTINGS_CI
+        $backupEnvSettings = @{
+            C8Y_SETTINGS_CI = $env:C8Y_SETTINGS_CI
+            C8Y_SETTINGS_MODE_ENABLECREATE = $env:C8Y_SETTINGS_MODE_ENABLECREATE
+            C8Y_SETTINGS_MODE_ENABLEUPDATE = $env:C8Y_SETTINGS_MODE_ENABLEUPDATE
+            C8Y_SETTINGS_MODE_ENABLEDELETE = $env:C8Y_SETTINGS_MODE_ENABLEDELETE
+        }
     }
 
     BeforeEach {
-        $env:C8Y_SETTINGS_CI = ""
-        $env:C8Y_SETTINGS_MODE_ENABLECREATE = ""
-        $env:C8Y_SETTINGS_MODE_ENABLEUPDATE = ""
-        $env:C8Y_SETTINGS_MODE_ENABLEDELETE = ""
+        $env:C8Y_SETTINGS_CI = "false"
+        $env:C8Y_SETTINGS_MODE_ENABLECREATE = "false"
+        $env:C8Y_SETTINGS_MODE_ENABLEUPDATE = "false"
+        $env:C8Y_SETTINGS_MODE_ENABLEDELETE = "false"
 
         $items = New-Object System.Collections.ArrayList
     }
@@ -71,8 +76,12 @@ Describe -Name "Disable create/update/delete commands" {
     }
 
     AfterAll {
-        if ($ciSetting) {
-            $env:C8Y_SETTINGS_CI = $ciSetting
+        if ($backupEnvSettings) {
+            foreach ($name in $backupEnvSettings.Keys) {
+                if ($null -ne $name) {
+                    [environment]::SetEnvironmentVariable($name, $backupEnvSettings[$name], "process")
+                }
+            }
         }
     }
 }

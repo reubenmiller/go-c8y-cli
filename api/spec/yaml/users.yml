@@ -206,7 +206,7 @@ endpoints:
     body:
       - name: userName
         type: string
-        required: true
+        required: false
         description: 'User name, unique for a given domain. Max: 1000 characters'
 
       - name: firstName
@@ -252,6 +252,11 @@ endpoints:
         required: false
         description: 'Custom properties to be added to the user'
 
+    bodyTemplateOptions:
+      enabled: true
+
+    bodyRequiredKeys:
+      - "userName"
 
   - name: getUser
     description: Get user

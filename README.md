@@ -88,3 +88,35 @@ See the [documenation website](https://reubenmiller.github.io/go-c8y-cli/) for i
     ```
 
 4. View the documentation in the [brower](http:/localhost:4000)
+
+
+## Tests
+
+### Pre-requisites
+
+1. Build the latest version
+
+    ```sh
+    make build
+    ```
+
+1. Import the bash profile
+
+    ```sh
+    source tools/bash/c8y.profile.sh
+    ```
+
+1. Set the c8y session that you want to use for the tests
+
+    ```sh
+    set-session
+    ```
+
+### Run all tests
+
+```sh
+make test_powershell
+```
+
+#### Running a test on a single
+make TEST_FILE_FILTER=ClientRequest test_powershell

@@ -15,7 +15,7 @@ Describe -Name "Get-AssetParent" {
 
         It "Should return nothing if the asset has no parent" {
             $Response = PSc8y\Get-AssetParent `
-                -Asset $RootFolder.id
+                -Asset $RootGroup.id
             $LASTEXITCODE | Should -Be 0
             $Response | Should -BeNullOrEmpty
         }

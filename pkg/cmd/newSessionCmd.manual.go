@@ -1,24 +1,29 @@
 package cmd
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"net/http"
+	"net/url"
+	"os"
 	"path"
 	"path/filepath"
 	"strings"
 
-	"github.com/fatih/color"
-	"github.com/howeyc/gopass"
 	"github.com/pkg/errors"
-	"github.com/reubenmiller/go-c8y/pkg/c8y"
+	"github.com/reubenmiller/go-c8y-cli/pkg/prompt"
 	"github.com/spf13/cobra"
-	"github.com/tidwall/pretty"
+	"github.com/spf13/viper"
 )
 
 type CumulocitySessions struct {
 	Sessions []CumulocitySession `json:"sessions"`
+}
+
+type Authentication struct {
+	AuthType string         `json:"authType,omitempty"`
+	Cookies  []*http.Cookie `json:"cookies,omitempty"`
 }
 
 // CumulocitySession contains all settings required to communicate with a Cumulocity service
@@ -31,11 +36,20 @@ type CumulocitySession struct {
 	Description     string `json:"description"`
 	UseTenantPrefix bool   `json:"useTenantPrefix"`
 
-	MicroserviceAliases map[string]string `json:"microserviceAliases"`
+	// Authentication `json:"authentication,omitempty"`
+
+	MicroserviceAliases map[string]string `json:"microserviceAliases,omitempty"`
 
 	Index int    `json:"-"`
 	Path  string `json:"-"`
 	Name  string `json:"-"`
+}
+
+func WriteAuth(v *viper.Viper) error {
+	cliConfig.SetAuthorizationCookies(client.Cookies)
+	cliConfig.SetPassword(client.Password)
+	cliConfig.SetTenant(client.TenantName)
+	return cliConfig.WritePersistentConfig()
 }
 
 func NewCumulocitySessionFromFile(filePath string) (*CumulocitySession, error) {
@@ -49,6 +63,10 @@ func NewCumulocitySessionFromFile(filePath string) (*CumulocitySession, error) {
 		return nil, err
 	}
 
+	if session == nil {
+		return nil, fmt.Errorf("Session marshalling failed")
+	}
+
 	session.Path = filePath
 
 	basename := filepath.Base(filePath)
@@ -57,9 +75,12 @@ func NewCumulocitySessionFromFile(filePath string) (*CumulocitySession, error) {
 	return session, nil
 }
 
+func (s CumulocitySession) GetSessionPassphrase() string {
+	return os.Getenv("C8Y_PASSPHRASE")
+}
+
 func (s *CumulocitySession) SetPassword(password string) {
 	s.Password = password
-	// s.Password = encrypt.EncryptString(password, "fixed-token")
 }
 
 func (s *CumulocitySession) SetHost(host string) {
@@ -78,11 +99,25 @@ func (s CumulocitySession) GetHost() string {
 }
 
 func (s CumulocitySession) GetPassword() string {
-	return s.Password
-	// return encrypt.DecryptString(s.password, "fixed-token")
+	pass, err := SecureDataAccessor.TryDecryptString(s.Password, s.GetSessionPassphrase())
+
+	if err != nil {
+		Logger.Errorf("Could not decrypt password. %s", err)
+		return ""
+	}
+
+	return pass
 }
 
 type newSessionCmd struct {
+	host           string
+	username       string
+	password       string
+	description    string
+	name           string
+	tenant         string
+	noTenantPrefix bool
+
 	*baseCmd
 }
 
@@ -96,29 +131,29 @@ func newNewSessionCmd() *newSessionCmd {
 		Example: `
 		c8y sessions create \
 			--host "https://mytenant.eu-latest.cumulocity.com" \
-			--tenant "myTenant" \
 			--username "myUser@me.com"
 		
 		// Create a new session and prompt for the password
 		`,
-		RunE: ccmd.newSession,
+		PersistentPreRunE: ccmd.promptArgs,
+		RunE:              ccmd.newSession,
 	}
 
 	cmd.SilenceUsage = true
 
-	cmd.Flags().String("host", "", "Host. .e.g. test.cumulocity.com. (required)")
-	cmd.Flags().String("tenant", "", "Tenant. (required)")
-	cmd.Flags().String("username", "", "Username (without tenant). (required)")
-	cmd.Flags().String("password", "", "Password. If left blank then you will be prompted for the password")
-	cmd.Flags().String("description", "", "Description about the session")
-	cmd.Flags().String("name", "", "Name of the session")
-	cmd.Flags().String("microserviceAliases", "", "Name of the session")
-	cmd.Flags().Bool("noTenantPrefix", false, "Don't use tenant name as a prefix to the user name when using Basic Authentication. Defaults to false")
+	cmd.Flags().StringVar(&ccmd.host, "host", "", "Host. .e.g. test.cumulocity.com. (required)")
+	cmd.Flags().StringVar(&ccmd.username, "username", "", "Username (without tenant). (required)")
+	cmd.Flags().StringVar(&ccmd.password, "password", "", "Password. If left blank then you will be prompted for the password")
+	cmd.Flags().StringVar(&ccmd.tenant, "tenant", "", "Tenant ID")
+	cmd.Flags().StringVar(&ccmd.description, "description", "", "Description about the session")
+	cmd.Flags().StringVar(&ccmd.name, "name", "", "Name of the session")
+	// cmd.Flags().String("microserviceAliases", "", "Name of the session")
+	cmd.Flags().BoolVar(&ccmd.noTenantPrefix, "noTenantPrefix", false, "Don't use tenant name as a prefix to the user name when using Basic Authentication. Defaults to false")
 
 	// Required flags
 	cmd.MarkFlagRequired("host")
-	cmd.MarkFlagRequired("tenant")
-	cmd.MarkFlagRequired("username")
+	// cmd.MarkFlagRequired("tenant")
+	// cmd.MarkFlagRequired("username")
 	// cmd.MarkFlagRequired("password")
 
 	ccmd.baseCmd = newBaseCmd(cmd)
@@ -126,40 +161,49 @@ func newNewSessionCmd() *newSessionCmd {
 	return ccmd
 }
 
+func (n *newSessionCmd) promptArgs(cmd *cobra.Command, args []string) error {
+	prompter := prompt.NewPrompt(Logger)
+
+	if !cmd.Flags().Changed("username") {
+		v, err := prompter.Username("Enter username", cliConfig.GetDefaultUsername())
+
+		if err != nil {
+			return err
+		}
+		n.username = v
+	}
+
+	if !cmd.Flags().Changed("password") {
+		password, err := prompter.Password("Enter c8y password", "")
+		if err != nil {
+			return err
+		}
+		n.password = password
+	}
+
+	return nil
+}
+
 func (n *newSessionCmd) newSession(cmd *cobra.Command, args []string) error {
 
-	session := &CumulocitySession{}
+	session := &CumulocitySession{
+		Host:            n.host,
+		Tenant:          n.tenant,
+		Username:        n.username,
+		Description:     n.description,
+		UseTenantPrefix: !n.noTenantPrefix,
+	}
 	session.MicroserviceAliases = make(map[string]string)
 
-	if v, err := cmd.Flags().GetString("host"); err == nil && v != "" {
-		session.SetHost(v)
-	}
-	if v, err := cmd.Flags().GetString("tenant"); err == nil && v != "" {
-		session.Tenant = v
-	}
-
-	if cmd.Flags().Changed("password") {
-		if v, err := cmd.Flags().GetString("password"); err == nil && v != "" {
-			session.SetPassword(v)
-		}
-	} else {
-		cmd.Printf("Enter password: ")
-		password, _ := gopass.GetPasswd() // Silent
-		session.SetPassword(string(password))
-	}
-	if v, err := cmd.Flags().GetString("username"); err == nil && v != "" {
-		session.Username = v
-	}
-	if v, err := cmd.Flags().GetString("description"); err == nil && v != "" {
-		session.Description = v
-	}
-
-	if v, err := cmd.Flags().GetBool("noTenantPrefix"); err == nil {
-		session.UseTenantPrefix = !v
-	}
+	session.SetPassword(n.password)
 
 	// session name (default to host and username)
-	sessionName := session.Tenant + "-" + session.Username
+	hostname := "c8y"
+	if u, err := url.Parse(session.GetHost()); err == nil {
+		hostname = u.Host
+	}
+
+	sessionName := hostname + "-" + session.Username
 	if v, err := cmd.Flags().GetString("name"); err == nil && v != "" {
 		sessionName = v
 	}
@@ -172,42 +216,6 @@ func (n *newSessionCmd) newSession(cmd *cobra.Command, args []string) error {
 	}
 
 	fmt.Println(path.Join(outputDir, outputFile))
-	// if str, err := json.Marshal(session); err == nil {
-	// 	fmt.Printf("%s\n", str)
-	// }
-
-	return nil
-}
-
-func (n *newSessionCmd) doNewSession(method string, path string, query string, body map[string]interface{}) error {
-	resp, err := client.SendRequest(
-		context.Background(),
-		c8y.RequestOptions{
-			Method:       method,
-			Path:         path,
-			Query:        query,
-			Body:         body,
-			IgnoreAccept: false,
-			DryRun:       globalFlagDryRun,
-		})
-
-	if err != nil {
-		color.Set(color.FgRed, color.Bold)
-	}
-
-	if resp != nil && resp.JSONData != nil {
-		if globalFlagPrettyPrint {
-			fmt.Printf("%s\n", pretty.Pretty([]byte(*resp.JSONData)))
-		} else {
-			fmt.Printf("%s\n", *resp.JSONData)
-		}
-	}
-
-	color.Unset()
-
-	if err != nil {
-		return newSystemError("command failed", err)
-	}
 	return nil
 }
 

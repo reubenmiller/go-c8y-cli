@@ -77,7 +77,7 @@ Describe -Name "New-ManagedObject" {
     }
 
     AfterEach {
-        Get-ManagedObjectCollection -Type $type | Select-Object | Remove-ManagedObject
+        Get-ManagedObjectCollection -Type $type -PageSize 100 | Select-Object | Remove-ManagedObject
 
     }
 }

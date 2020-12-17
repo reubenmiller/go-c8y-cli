@@ -28,7 +28,12 @@ None
         return
     }
 
-    $data = Get-Content -LiteralPath $Path | ConvertFrom-Json
+    $JSONArgs = @{}
+    if ($PSVersionTable.PSVersion.Major -gt 5) {
+        $JSONArgs.Depth = 100
+    }
+
+    $data = Get-Content -LiteralPath $Path | ConvertFrom-Json @JSONArgs
     $data | Add-Member -MemberType NoteProperty -Name "path" -Value $Path -ErrorAction SilentlyContinue
     $data.path = (Resolve-Path $Path).ProviderPath
 

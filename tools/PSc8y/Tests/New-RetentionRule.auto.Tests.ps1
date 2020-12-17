@@ -13,6 +13,7 @@ Describe -Name "New-RetentionRule" {
 
 
     AfterEach {
+        Get-RetentionRuleCollection -PageSize 100 | Select-Object -Last 1 | Remove-RetentionRule
 
     }
 }

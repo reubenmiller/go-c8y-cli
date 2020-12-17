@@ -8,6 +8,27 @@
 ########################################################################
 
 # -----------
+# test-c8ypassphrase
+# -----------
+# Description: Set the encryption passphrase interactively
+# Usage:
+#   test-c8ypassphrase
+#
+test-c8ypassphrase () {
+    passphraseCheck=$( c8y sessions checkPassphrase --json )
+    if [ $? -ne 0 ]; then
+        echo "Encryption check failed"
+        (exit 2)
+        return
+    fi
+
+    if [[ $(command -v jq) ]]; then
+        export C8Y_PASSPHRASE=$( echo $passphraseCheck | jq -r ".C8Y_PASSPHRASE | select (.!=null)" )
+        export C8Y_PASSPHRASE_TEXT=$( echo $passphraseCheck | jq -r ".C8Y_PASSPHRASE_TEXT | select (.!=null)" )
+    fi
+}
+
+# -----------
 # set-session
 # -----------
 # Description: Switch Cumulocity session interactively
@@ -28,16 +49,31 @@ set-session () {
 
     export C8Y_SESSION=$resp
 
+    # Check encryption passphrase
+    passphraseCheck=$( c8y sessions checkPassphrase --json )
+
+    if [ $? -ne 0 ]; then
+        echo "Encryption check failed"
+        (exit 2)
+        return
+    fi
+
     # Export session as individual settings
     # to support other 3rd party applicatsion (i.e. java c8y sdk apps)
     # which will read these variables
     session_info=$( cat "$C8Y_SESSION" )
     if [[ $(command -v jq) ]]; then
-        export C8Y_HOST=$( echo $session_info | jq -r ".host" )
-        export C8Y_TENANT=$( echo $session_info | jq -r ".tenant" )
-        export C8Y_USER=$( echo $session_info | jq -r ".username" )
-        export C8Y_USERNAME=$( echo $session_info | jq -r ".username" )
-        export C8Y_PASSWORD=$( echo $session_info | jq -r ".password" )
+        export C8Y_HOST=$( echo $session_info | jq -r ".host | select (.!=null)" )
+        export C8Y_TENANT=$( echo $session_info | jq -r ".tenant | select (.!=null)" )
+        export C8Y_USER=$( echo $session_info | jq -r ".username | select (.!=null)" )
+        export C8Y_USERNAME=$( echo $session_info | jq -r ".username | select (.!=null)" )
+
+        export C8Y_PASSPHRASE=$( echo $passphraseCheck | jq -r ".C8Y_PASSPHRASE | select (.!=null)" )
+        export C8Y_PASSPHRASE_TEXT=$( echo $passphraseCheck | jq -r ".C8Y_PASSPHRASE_TEXT | select (.!=null)" )
+        export C8Y_PASSWORD=$( echo $passphraseCheck | jq -r ".C8Y_PASSWORD | select (.!=null)" )
+
+        # login / test session credentials
+        c8y sessions login
     fi
 
     # reset any enabled side-effect commands
@@ -93,7 +129,11 @@ c8y-update () {
     echo -n "downloading ($BINARY_NAME)..."
 
     c8ytmp=./.c8y.tmp
-    curl -L --silent https://github.com/reubenmiller/go-c8y-cli/releases/download/$VERSION/$BINARY_NAME -o $c8ytmp
+    if [[ "$VERSION" = "latest" ]]; then
+        curl -L --silent https://github.com/reubenmiller/go-c8y-cli/releases/latest/download/$BINARY_NAME -o $c8ytmp
+    else
+        curl -L --silent https://github.com/reubenmiller/go-c8y-cli/releases/download/$VERSION/$BINARY_NAME -o $c8ytmp
+    fi
     chmod +x $c8ytmp
 
     new_version=$($c8ytmp version 2>/dev/null | tail -1)
@@ -184,3 +224,8 @@ alias mo=c8y\ inventory\ get\ --id
 
 # op
 alias op=c8y\ operations\ get\ --id
+
+# init passphrase (if not already set)
+if [ -t 0 ]; then
+    test-c8ypassphrase
+fi

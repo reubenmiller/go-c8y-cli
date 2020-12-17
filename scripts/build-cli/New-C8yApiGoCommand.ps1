@@ -95,6 +95,15 @@
         }
 
         #
+        # Activate seperate body templating (if not included in -Data parameter)
+        #
+        if ($Specification.bodyTemplateOptions.enabled -eq $true) {
+            $CommandArgs += @{
+                SetFlag = "addTemplateFlag(cmd)"
+            }
+        }
+
+        #
         # Apply a body template to the data
         #
         if ($Specification.bodyTemplate) {
@@ -163,6 +172,14 @@
 "@.TrimStart()
         $null = $RESTBodyBuilder.AppendLine($BodyValidateionCode)
         
+    }
+
+    #
+    # Host
+    #
+    $RESTHost = ""
+    if ($null -ne $Specification.host) {
+        $RESTHost = "`nHost:         replacePathParameters(`"$($Specification.host)`", pathParameters),"
     }
 
     #
@@ -329,7 +346,7 @@ func (n *${Name}Cmd) ${Name}(cmd *cobra.Command, args []string) error {
     $RESTPathBuilder
     path := replacePathParameters("${RESTPath}", pathParameters)
 
-    req := c8y.RequestOptions{
+    req := c8y.RequestOptions{$RESTHost
         Method:       "${RESTMethod}",
         Path:         path,
         Query:        queryValue,

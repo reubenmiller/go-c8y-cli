@@ -21,8 +21,8 @@ Create a user
     [Alias()]
     [OutputType([object])]
     Param(
-        # User name, unique for a given domain. Max: 1000 characters (required)
-        [Parameter(Mandatory = $true)]
+        # User name, unique for a given domain. Max: 1000 characters
+        [Parameter()]
         [string]
         $UserName,
 

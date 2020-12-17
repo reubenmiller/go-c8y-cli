@@ -82,7 +82,7 @@ func filterJSON(jsonValue string, property string, filters JSONFilters, selector
 	}
 
 	if v.IsObject() {
-		Logger.Debug("Converting json object to array")
+		Logger.Info("Converting json object to array")
 		jq = gojsonq.New().FromString("[" + v.String() + "]")
 		convertBackFromArray = true
 	} else {

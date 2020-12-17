@@ -3,7 +3,7 @@ category: Misc.
 external help file: PSc8y-help.xml
 layout: powershell
 Module Name: PSc8y
-online version:
+online version: https://go.microsoft.com/fwlink/?LinkID=2096609
 schema: 2.0.0
 title: Test-Json
 ---
@@ -65,3 +65,6 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 ## NOTES
 
 ## RELATED LINKS
+
+[https://go.microsoft.com/fwlink/?LinkID=2096609](https://go.microsoft.com/fwlink/?LinkID=2096609)
+

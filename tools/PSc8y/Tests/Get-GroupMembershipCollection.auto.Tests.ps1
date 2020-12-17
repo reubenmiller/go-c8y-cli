@@ -2,7 +2,9 @@
 
 Describe -Name "Get-GroupMembershipCollection" {
     BeforeEach {
+        $User = New-TestUser
         $Group = Get-GroupByName -Name "business"
+        Add-UserToGroup -Group $Group.id -User $User.id
 
     }
 
@@ -20,6 +22,7 @@ Describe -Name "Get-GroupMembershipCollection" {
 
 
     AfterEach {
+        Remove-User -Id $User.id
 
     }
 }
