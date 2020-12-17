@@ -37,8 +37,8 @@ try {
 
 	[array] $c8ybinaries = Get-ChildItem -Path $DependenciesDir -Filter "*c8y*"
 
-	if ($c8ybinaries.Count -ne 3) {
-		Write-Error "Failed to find all 3 c8y binaries"
+	if ($c8ybinaries.Count -lt 4) {
+		Write-Error "Failed to find all 4 c8y binaries"
 		Exit 1
 	}
 
