@@ -20,6 +20,8 @@ Invoke-ClientRequest
 	[-Uri] <String>
 	[-Method <WebRequestMethod>]
 	[-Data <Object>]
+	[-Template <String>]
+	[-TemplateVars <String>]
 	[-Headers <Hashtable>]
 	[-InFile <String>]
 	[-QueryParameters <Hashtable>]
@@ -76,7 +78,7 @@ Function Invoke-MyMicroserviceEndpoint {
     $response = Invoke-ClientRequest @options
     
     # Convert response from json to Powershell objects
-    ConvertFrom-Json $response -Depth 100
+    ConvertFrom-Json $response
 }
 ```
 
@@ -151,6 +153,38 @@ Request body
 
 ```yaml
 Type: Object
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -Template
+Template (jsonnet) file to use to create the request body.
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -TemplateVars
+Variables to be used when evaluating the Template.
+Accepts a file path, json or json shorthand, i.e.
+"name=peter"
+
+```yaml
+Type: String
 Parameter Sets: (All)
 Aliases:
 

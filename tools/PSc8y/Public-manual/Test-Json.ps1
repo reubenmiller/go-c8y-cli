@@ -38,7 +38,14 @@ Returns true if the input data is valid json
 
         $IsValid = $false
         try {
-            $null = ConvertFrom-Json -InputObject $InputObject -ErrorAction Stop
+            $JSONArgs = @{
+                InputObject = $InputObject
+                ErrorAction = "Stop"
+            }
+            if ($PSVersionTable.PSVersion.Major -gt 5) {
+                $JSONArgs.Depth = 100
+            }
+            $null = ConvertFrom-Json @JSONArgs
             $IsValid = $true
         } catch {
             Write-Information "Invalid json: $_"

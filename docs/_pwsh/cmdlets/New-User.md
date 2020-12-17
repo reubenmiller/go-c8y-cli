@@ -17,7 +17,7 @@ Create a new user within the collection
 
 ```
 New-User
-	[-UserName] <String>
+	[[-UserName] <String>]
 	[[-FirstName] <String>]
 	[[-LastName] <String>]
 	[[-Phone] <String>]
@@ -56,14 +56,14 @@ Create a user
 
 ### -UserName
 User name, unique for a given domain.
-Max: 1000 characters (required)
+Max: 1000 characters
 
 ```yaml
 Type: String
 Parameter Sets: (All)
 Aliases:
 
-Required: True
+Required: False
 Position: 1
 Default value: None
 Accept pipeline input: False

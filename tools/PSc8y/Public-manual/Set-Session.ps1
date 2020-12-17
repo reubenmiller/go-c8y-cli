@@ -57,7 +57,13 @@ String
         [string[]] $Filter,
 
         # Allow loading Cumulocity session setting from environment variables
-        [switch] $UseEnvironment
+        [switch] $UseEnvironment,
+
+        # Reload the current session. If no session is already loaded, then an warning will be returned.
+        [Parameter(
+            ParameterSetName = "ByReloadExisting"
+        )]
+        [switch] $Reload
     )
 
     Process {
@@ -65,6 +71,15 @@ String
         switch ($PSCmdlet.ParameterSetName) {
             "ByFile" {
                 $Path = $File
+            }
+
+            "ByReloadExisting" {
+                $ExistingSession = Get-Session
+                if ($null -eq $ExistingSession) {
+                    Write-Error "No session is loaded. Please call it again without the -Reload"
+                    return
+                }
+                $Path = $ExistingSession.path
             }
 
             default {
@@ -78,9 +93,16 @@ String
                 }
 
                 if ($UseEnvironment) {
-                    $null = $c8yargs.Add("--useEnv")
+                    $null = $c8yargs.Add("--useEnv=true")
+                } else {
+                    $null = $c8yargs.Add("--useEnv=false")
                 }
                 $Path = & $Binary $c8yargs
+
+                if ($LASTEXITCODE -ne 0) {
+                    Write-Warning "User cancelled set-session. Current session was not changed"
+                    return
+                }
             }
         }
 
@@ -92,8 +114,19 @@ String
         Write-Verbose "Setting new session: $Path"
         $env:C8Y_SESSION = Resolve-Path $Path
 
+        # Check encryption
+        Test-ClientPassphrase
+
         # Update environment variables
         Set-EnvironmentVariablesFromSession
+
+        # Get OAuth2 and test client authentication
+        $null = Invoke-ClientLogin
+
+        if ($LASTEXITCODE -ne 0) {
+            Write-Error "$resp"
+            return
+        }
 
         Get-Session
     }

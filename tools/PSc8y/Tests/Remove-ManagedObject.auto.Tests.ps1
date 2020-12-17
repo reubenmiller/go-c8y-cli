@@ -26,6 +26,9 @@ Describe -Name "Remove-ManagedObject" {
 
 
     AfterEach {
+        Remove-ManagedObject -Id $mo.id -ErrorAction SilentlyContinue
+        Remove-ManagedObject -Id $Device.id -ErrorAction SilentlyContinue
+        Remove-ManagedObject -Id $ChildDevice.id -ErrorAction SilentlyContinue
 
     }
 }

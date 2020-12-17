@@ -17,11 +17,12 @@ Create a new Cumulocity Session
 
 ```
 New-Session
-	-Name <String>
-	-Host <String>
-	-Tenant <String>
-	[-Credential <PSCredential>]
-	[-Description <String>]
+	[-Host] <String>
+	[[-Tenant] <String>]
+	[[-Username] <Object>]
+	[[-Password] <Object>]
+	[[-Name] <String>]
+	[[-Description] <String>]
 	[-NoTenantPrefix]
 	[<CommonParameters>]
 ```
@@ -34,27 +35,20 @@ The new session will be automatically activated.
 
 ### EXAMPLE 1
 ```
-New-Session -Name "develop" -Host "https://my-tenant-name.eu-latest.cumulocity.com" -Tenant "t12345"
+New-Session -Name "develop" -Host "my-tenant-name.eu-latest.cumulocity.com"
 ```
 
-Create a new Cumulocity session
+Create a new Cumulocity session called develop
+
+### EXAMPLE 2
+```
+New-Session -Host "my-tenant-name.eu-latest.cumulocity.com"
+```
+
+Create a new Cumulocity session.
+It will prompt for the username and password.
 
 ## PARAMETERS
-
-### -Name
-Name of the Cumulocity session
-
-```yaml
-Type: String
-Parameter Sets: (All)
-Aliases:
-
-Required: True
-Position: Named
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
 
 ### -Host
 Host url, i.e.
@@ -66,7 +60,7 @@ Parameter Sets: (All)
 Aliases:
 
 Required: True
-Position: Named
+Position: 1
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
@@ -81,24 +75,54 @@ Type: String
 Parameter Sets: (All)
 Aliases:
 
-Required: True
-Position: Named
+Required: False
+Position: 2
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -Credential
-Credential
+### -Username
+Username
 
 ```yaml
-Type: PSCredential
+Type: Object
 Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: Named
-Default value: [System.Management.Automation.PSCredential]::Empty
+Position: 3
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -Password
+Password
+
+```yaml
+Type: Object
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 4
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -Name
+Name of the Cumulocity session
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 5
+Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
 ```
@@ -112,7 +136,7 @@ Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: Named
+Position: 6
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False

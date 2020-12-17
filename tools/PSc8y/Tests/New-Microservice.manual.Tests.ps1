@@ -73,7 +73,9 @@ Describe -Name "New-Microservice" {
         "support": "support@new-company.com"
     },
     "isolation": "PER_TENANT",
-    "requiredRoles": [],
+    "requiredRoles": [
+        "ROLE_INVENTORY_READ"
+    ],
     "livenessProbe": {
         "httpGet": {
             "path": "/health"
@@ -108,7 +110,7 @@ Describe -Name "New-Microservice" {
 
             # Check manifest
             $App = Get-Microservice -Id $AppName
-            $App.manifest.requiredRoles | Should -BeExactly @()
+            $App.requiredRoles | Should -BeExactly @("ROLE_INVENTORY_READ")
         }
 
         It "Trying creating microservice with invalid manifest json" {

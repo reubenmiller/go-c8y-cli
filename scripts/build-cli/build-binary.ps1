@@ -7,9 +7,24 @@ Param(
 
     [switch] $CompressOnly,
 
+    # Build targets
+    [ValidateSet("linux:amd64", "windows:amd64", "darwin:amd64", "linux:arm")]
+    [string[]] $Target,
+
     # Build binaries for all
     [switch] $All
 )
+
+if ($null -eq $Target) {
+    $Target = @()
+    if ($IsLinux) {
+        $Target += "linux:amd64"
+    } elseif ($IsMacOS) {
+        $Target += "darwin:amd64"
+    } else {
+        $Target += "windows:amd64"
+    }
+}
 
 # Create output folder if it does not exist
 if (!(Test-Path $OutputDir -PathType Container)) {
@@ -31,9 +46,9 @@ $LDFlags = "-ldflags=`"-s -w -X github.com/reubenmiller/go-c8y-cli/pkg/cmd.build
 
 $name = "c8y"
 
-if ($All -or $IsMacOS) {
+if ($All -or $Target.Contains("darwin:amd64")) {
     Write-Host "Building the c8y binary [MacOS]"
-    # $env:GOARCH = "amd64"
+    $env:GOARCH = "amd64"
     $env:GOOS = "darwin"
     $OutputPath = Join-Path -Path $OutputDir -ChildPath "${name}.macos"
     & go build $LDFlags -o "$OutputPath" "$c8yBinary"
@@ -54,9 +69,26 @@ if ($All -or $IsMacOS) {
     }
 }
 
-if ($All -or $IsLinux) {
+if ($All -or $Target.Contains("linux:arm")) {
+    Write-Host "Building the c8y binary [linux (arm)]"
+    $env:GOARCH = "arm"
+    $env:GOARM = "5"
+    $env:GOOS = "linux"
+    $env:CGO_ENABLED = "0"
+
+    $OutputPath = Join-Path -Path $OutputDir -ChildPath "${name}.arm"
+
+    & go build $LDFlags -o "$OutputPath" "$c8yBinary"
+
+    if ($LASTEXITCODE -ne 0) {
+        Write-Error "Failed to build project"
+        return
+    }
+}
+
+if ($All -or $Target.Contains("linux:amd64")) {
     Write-Host "Building the c8y binary [Linux]"
-    # $env:GOARCH = "amd64"
+    $env:GOARCH = "amd64"
     $env:GOOS = "linux"
     $env:CGO_ENABLED = "0"
     
@@ -80,9 +112,9 @@ if ($All -or $IsLinux) {
 }
 
 # windows
-if ($All -or !($IsMacOS -or $IsLinux)) {
+if ($All -or $Target.Contains("windows:amd64")) {
     Write-Host "Building the c8y binary [Windows]"
-    # $env:GOARCH = "amd64"
+    $env:GOARCH = "amd64"
     $env:GOOS = "windows"
     $OutputPath = Join-Path -Path $OutputDir -ChildPath "${name}.windows.exe"
     & go build $LDFlags -o "$OutputPath" "$c8yBinary"

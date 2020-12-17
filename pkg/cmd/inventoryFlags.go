@@ -50,12 +50,16 @@ func addDataFlag(cmd *cobra.Command) {
 	cmd.Flags().StringP(FlagDataName, "d", "", "json")
 
 	// support templating
-	cmd.Flags().String(FlagDataTemplateName, "", "Body template")
-	cmd.Flags().String(FlagDataTemplateVariablesName, "", "Body template variables")
+	addTemplateFlag(cmd)
 }
 
 func addDataFlagWithoutTemplates(cmd *cobra.Command) {
 	cmd.Flags().StringP(FlagDataName, "d", "", "json")
+}
+
+func addTemplateFlag(cmd *cobra.Command) {
+	cmd.Flags().String(FlagDataTemplateName, "", "Body template")
+	cmd.Flags().String(FlagDataTemplateVariablesName, "", "Body template variables")
 }
 
 // resolveTemplatePath resolves a template path

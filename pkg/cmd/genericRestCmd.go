@@ -6,6 +6,7 @@ import (
 	"net/url"
 	"strings"
 
+	"github.com/reubenmiller/go-c8y-cli/pkg/mapbuilder"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
 )
@@ -136,11 +137,20 @@ func (n *getGenericRestCmd) getGenericRest(cmd *cobra.Command, args []string) er
 	}
 
 	if method == "PUT" || method == "POST" {
-		req.Body = getDataFlag(cmd)
+		body := mapbuilder.NewMapBuilder()
+		body.SetMap(getDataFlag(cmd))
 
 		//if !cmd.Flags().Changed(FlagDataName) && !cmd.Flags().Changed("file") {
 		//	return newUserError("Missing required arguments. Either --data or --file are required")
 		//}
+		if err := setDataTemplateFromFlags(cmd, body); err != nil {
+			return newUserError("Template error. ", err)
+		}
+
+		if bodyContents := body.GetMap(); bodyContents != nil {
+			Logger.Infof("Body is nil")
+			req.Body = bodyContents
+		}
 
 		// get file info
 		if cmd.Flags().Changed("file") {

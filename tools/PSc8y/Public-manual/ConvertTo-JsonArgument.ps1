@@ -38,7 +38,14 @@ Converts the hashtable to an escaped json string
         # If string, then validate if json was provided
         
         try {
-            $DataObj = (ConvertFrom-Json $Data -ErrorAction Stop)
+            $JSONArgs = @{
+                InputObject = $Data
+                ErrorAction = "Stop"
+            }
+            if ($PSVersionTable.PSVersion.Major -gt 5) {
+                $JSONArgs.Depth = 100
+            }
+            $DataObj = (ConvertFrom-Json @JSONArgs)
         } catch {
             # Return as is (and let c8y binary handle it)
             return $Data
@@ -48,7 +55,7 @@ Converts the hashtable to an escaped json string
     }
 
     # Note: replace \" with the unicode character to prevent intepretation errors on the command line
-    $jsonRaw = (ConvertTo-Json $DataObj -Compress) -replace '\\"', '\u0022'
+    $jsonRaw = (ConvertTo-Json $DataObj -Compress -Depth 100) -replace '\\"', '\u0022'
     $strArg = "{0}" -f ($jsonRaw -replace '(?<!\\)"', '\"')
 
     # Replace space with unicode char, as space can have console parsing problems

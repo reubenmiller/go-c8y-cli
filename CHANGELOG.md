@@ -2,7 +2,46 @@
 
 ## Unreleased
 
-No unreleased features
+* `New-Microservice` requiredRoles are now set when passing the cumulocity.json manifest file to the `-File` parameter
+* Added `New-ServiceUser` and `Get-ServiceUser` to create and get a service user that can be used for automation purposes
+
+    ```powershell
+    New-ServiceUser -Name "myapp1" -Roles "ROLE_INVENTORY_READ" -Tenants "t12345"
+
+    Get-Serviceuser -Name "myapp1"
+    ```
+* Fixed target tenant confirmation when using the `-Session` parameter on PUT/POST commands
+* `Invoke-ClientRequest`: Added support for `-Template` and `-TemplateVars` parameters
+* Removed `-Depth` from internal `ConvertFrom-Json` calls so that the PSc8y is compatible with PowerShell 5.1
+* Fixed shallow json conversion bug when using using internal calls to `ConvertFrom-Json` and `ConvertTo-Json`. Max depth of 100 is used on supported PowerShell versions
+* `Test-ClientPassphrase` cmdlet to check if passphrase is missing or not. Cmdlet is called automatically when importing the module or calling `set-session`
+* `New-User` added support for template and templateVars parameters
+* Dry/WhatIf headers are shown in a sorted alphabetically by header name
+* Adding Two-Factor-Authentication support
+    * TOTP (only)
+* Added OAUTH_INTERNAL support
+* Encrypting sensitive session information
+
+    ```json
+    {
+        "credential": {
+            "cookies": {
+                "0": "{encrypted}abefabefabefabefabefabefabefabefabefabef",
+                "1": "{encrypted}abefabefabefabefabefabefabefabefabefabef",
+            }
+        },
+        "password": "{encrypted}abefabefabefabefabefabefabefabefabefabef"
+    }
+    ```
+* Added encrypt/decrypt commands
+
+    ```sh
+    $encryptedText=$( c8y sessions encryptText --text "Hello World" )
+
+    c8y sessions decryptText --text "$encryptedText"
+    ```
+
+* Fixed broken doc link
 
 ## Released
 
@@ -54,7 +93,7 @@ No unreleased features
     ```jsonnet
     {
         name: "my device",
-        type: vars("type", "defaultType"),
+        type: var("type", "defaultType"),
         cpuThreshold: rand.int,
         c8y_IsDevice: {},
     }

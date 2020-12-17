@@ -80,10 +80,6 @@
                             <ListItem>
                                 <PropertyName>username</PropertyName>
                             </ListItem>
-                            <ListItem>
-                                <Label>password</Label>
-                                <ScriptBlock>$_.password -replace ".", "*"</ScriptBlock>
-                            </ListItem>
                         </ListItems>
                     </ListEntry>
                 </ListEntries>
@@ -123,12 +119,6 @@
                                     "***************"
                                 </ScriptBlock>
                             </ListItem>
-                            <ListItem>
-                                <Label>password</Label>
-                                <ScriptBlock>
-                                    "************************"
-                                </ScriptBlock>
-                            </ListItem>
                         </ListItems>
                     </ListEntry>
                 </ListEntries>
@@ -155,10 +145,6 @@
                         <Width>40</Width>
                     </TableColumnHeader>
                     <TableColumnHeader>
-                        <Label>password</Label>
-                        <Width>40</Width>
-                    </TableColumnHeader>
-                    <TableColumnHeader>
                         <Width>50</Width>
                     </TableColumnHeader>
                 </TableHeaders>
@@ -177,9 +163,6 @@
                             </TableColumnItem>
                             <TableColumnItem>
                                 <PropertyName>username</PropertyName>
-                            </TableColumnItem>
-                            <TableColumnItem>
-                                <ScriptBlock>$_.password -replace ".", "*"</ScriptBlock>
                             </TableColumnItem>
                             <TableColumnItem>
                                 <PropertyName>description</PropertyName>

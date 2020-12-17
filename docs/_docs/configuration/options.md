@@ -115,6 +115,7 @@ When set to `on`, the Cumulocity session settings will be loaded from the follow
 * C8Y_TENANT (example "myTenant")
 * C8Y_USER
 * C8Y_PASSWORD
+* C8Y_TFA_CODE
 
 `C8Y_USE_ENVIRONMENT` will override the `C8Y_SESSION` environment variable settings.
 

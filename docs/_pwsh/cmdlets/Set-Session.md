@@ -31,6 +31,14 @@ Set-Session
 	[<CommonParameters>]
 ```
 
+### ByReloadExisting
+```
+Set-Session
+	[-UseEnvironment]
+	[-Reload]
+	[<CommonParameters>]
+```
+
 ## DESCRIPTION
 By default the user will be prompted to select from Cumulocity sessions found in their home folder under .cumulocity
 
@@ -110,6 +118,22 @@ Allow loading Cumulocity session setting from environment variables
 ```yaml
 Type: SwitchParameter
 Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: False
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -Reload
+Reload the current session.
+If no session is already loaded, then an warning will be returned.
+
+```yaml
+Type: SwitchParameter
+Parameter Sets: ByReloadExisting
 Aliases:
 
 Required: False

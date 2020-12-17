@@ -39,7 +39,7 @@ Function Invoke-MyMicroserviceEndpoint {
     $response = Invoke-ClientRequest @options
     
     # Convert response from json to Powershell objects
-    ConvertFrom-Json $response -Depth 100
+    ConvertFrom-Json $response
 }
 ```
 
@@ -79,6 +79,16 @@ Create a new managed object but add a custom accept header value
 
         # Request body
         [object] $Data,
+
+        # Template (jsonnet) file to use to create the request body.
+        [Parameter()]
+        [string]
+        $Template,
+
+        # Variables to be used when evaluating the Template. Accepts a file path, json or json shorthand, i.e. "name=peter"
+        [Parameter()]
+        [string]
+        $TemplateVars,
 
         # Add custom headers to the rest request
         [hashtable] $Headers,
@@ -170,7 +180,7 @@ Create a new managed object but add a custom accept header value
 
     $null = $c8yargs.Add($Uri)
 
-    if ($null -ne $Data) {
+    if ($null -ne $Data -and ![string]::IsNullOrEmpty($Data)) {
         if ($Data -is [string]) {
             if (Test-Json -InputObject $Data -WarningAction SilentlyContinue) {
                 $null = $c8yargs.AddRange(@("--data", (ConvertTo-JsonArgument $Data)))
@@ -183,6 +193,14 @@ Create a new managed object but add a custom accept header value
             $null = $c8yargs.AddRange(@("--data", (ConvertTo-JsonArgument $Data)))
         }
 
+    }
+
+    if (-not [string]::IsNullOrEmpty($Template)) {
+        $null = $c8yargs.AddRange(@("--template", $Template))
+    }
+
+    if (-not [string]::IsNullOrEmpty($TemplateVars)) {
+        $null = $c8yargs.AddRange(@("--templateVars", $TemplateVars))
     }
 
     if ($null -ne $Headers) {

@@ -132,13 +132,26 @@
           {
             "description": "List the users within a user group",
             "beforeEach": [
-              "$Group = Get-GroupByName -Name \"business\""
+              "$User = New-TestUser",
+              "$Group = Get-GroupByName -Name \"business\"",
+              "Add-UserToGroup -Group $Group.id -User $User.id"
             ],
-            "command": "Get-GroupMembershipCollection -Id $Group.id"
+            "command": "Get-GroupMembershipCollection -Id $Group.id",
+            "afterEach": [
+              "Remove-User -Id $User.id"
+            ]
           },
           {
             "description": "List the users within a user group (using pipeline)",
-            "command": "Get-GroupByName -Name \"business\" | Get-GroupMembershipCollection"
+            "beforeEach": [
+              "$User = New-TestUser",
+              "$Group = Get-GroupByName -Name \"business\"",
+              "Add-UserToGroup -Group $Group.id -User $User.id"
+            ],
+            "command": "Get-GroupByName -Name \"business\" | Get-GroupMembershipCollection",
+            "afterEach": [
+              "Remove-User -Id $User.id"
+            ]
           }
         ],
         "go": [
