@@ -8,6 +8,16 @@
 TARGET_OWNER=${TARGET_OWNER:-"reubenmiller"}
 CR_PAT=${CR_PAT:-""}
 
+# Get version
+if [[ -z $VERSION ]]; then
+    VERSION=$( git describe )
+fi
+# strip git reference prefix
+VERSION=${VERSION#refs/*/}
+VERSION=${VERSION#v}
+
+echo "Version: $VERSION"
+exit 1
 login_ghcr () {
     echo $CR_PAT | docker login ghcr.io -u USERNAME --password-stdin
 
