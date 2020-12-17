@@ -235,13 +235,26 @@ Or alternatively, using setting it via the session file:
 }
 ```
 
-### Storing passwords in the Cumulocity session
+### Beta feature (new in v1.7.0): Using encryption in Cumulocity session files
 
-Encryption is used to stored sensitive session information such as passwords and authorization cookies. The user will be prompted for the passphrase if one is not already set, when activating a session.
+Encrypted password and cookies fields can be actived by adding the following fragment into the session file or your global `settings.json` file.
 
+```json
+{
+  "settings": {
+    "encryption": {
+      "enabled": true
+    }
+  }
+}
+```
+
+When enabled the "password", and "authorization.cookies" fields will be encrypted using a passphrase chosen by the user.
 The passphrase should be something that is sufficiently complex and should not be stored on disk.
 
 When the user sets the passphrase, a key file will be created within the Cumulocity session home folder, `.key`. This file will be used as a reference when comparing your passphrase to keep the passphrase constant across different sessions.
+
+The user will be prompted for the passphrase if one is not already set, when activating a session.
 
 ### Loss of passphrase (encryption key)
 
