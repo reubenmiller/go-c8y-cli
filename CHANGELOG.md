@@ -24,9 +24,11 @@
 
     ```json
     {
-        "authentication": {
-            "0": "{encrypted}abefabefabefabefabefabefabefabefabefabef",
-            "1": "{encrypted}abefabefabefabefabefabefabefabefabefabef",
+        "credential": {
+            "cookies": {
+                "0": "{encrypted}abefabefabefabefabefabefabefabefabefabef",
+                "1": "{encrypted}abefabefabefabefabefabefabefabefabefabef",
+            }
         },
         "password": "{encrypted}abefabefabefabefabefabefabefabefabefabef"
     }
