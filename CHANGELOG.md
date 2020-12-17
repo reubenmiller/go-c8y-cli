@@ -6,6 +6,9 @@ No unreleased features
 
 ## Released
 
+### v1.7.1
+
+* Fixed publishing bug on docker images
 ### v1.7.0
 
 * `New-Microservice` requiredRoles are now set when passing the cumulocity.json manifest file to the `-File` parameter
