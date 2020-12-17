@@ -1,54 +1,68 @@
 ---
-category: Misc.
+category: Client Helpers
 external help file: PSc8y-help.xml
 layout: powershell
 Module Name: PSc8y
-online version: https://go.microsoft.com/fwlink/?LinkID=2096609
+online version:
 schema: 2.0.0
-title: Test-Json
+title: Invoke-ClientLogin
 ---
 
-# Test-Json
+# Invoke-ClientLogin
 
 ## SYNOPSIS
-Test if the input object is a valid json string
+{{ Fill in the Synopsis }}
 
 ## SYNTAX
 
 ```
-Test-Json
-	[-InputObject] <Object>
+Invoke-ClientLogin
+	[[-TFACode] <String>]
+	[-Clear]
 	[<CommonParameters>]
 ```
 
 ## DESCRIPTION
-Test the given input to check if it is most likely valid json.
-The cmdlet uses
-a quick json sanity check rather than trying to parse the json to save time.
+{{ Fill in the Description }}
 
 ## EXAMPLES
 
-### EXAMPLE 1
-```
-Test-Json '{ "name": "tester" }'
+### Example 1
+```powershell
+PS C:\> {{ Add example code here }}
 ```
 
-Returns true if the input data is valid json
+{{ Add example description here }}
 
 ## PARAMETERS
 
-### -InputObject
-Input data
+### -Clear
+{{ Fill Clear Description }}
 
 ```yaml
-Type: Object
+Type: SwitchParameter
 Parameter Sets: (All)
 Aliases:
 
-Required: True
-Position: 1
+Required: False
+Position: Named
 Default value: None
-Accept pipeline input: True (ByValue)
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -TFACode
+{{ Fill TFACode Description }}
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 0
+Default value: None
+Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
@@ -57,14 +71,10 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 
 ## INPUTS
 
-### System.String
+### None
 ## OUTPUTS
 
-### System.Boolean
 ### System.Object
 ## NOTES
 
 ## RELATED LINKS
-
-[https://go.microsoft.com/fwlink/?LinkID=2096609](https://go.microsoft.com/fwlink/?LinkID=2096609)
-
