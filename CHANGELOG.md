@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+No unreleased features
+
+## Released
+
+### v1.7.0
+
 * `New-Microservice` requiredRoles are now set when passing the cumulocity.json manifest file to the `-File` parameter
 * Added `New-ServiceUser` and `Get-ServiceUser` to create and get a service user that can be used for automation purposes
 
@@ -42,8 +48,6 @@
     ```
 
 * Fixed broken doc link
-
-## Released
 
 ### v1.6.0
 
