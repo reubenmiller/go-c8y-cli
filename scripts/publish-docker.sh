@@ -17,7 +17,7 @@ VERSION=${VERSION#refs/*/}
 VERSION=${VERSION#v}
 
 echo "Version: $VERSION"
-exit 1
+
 login_ghcr () {
     echo $CR_PAT | docker login ghcr.io -u USERNAME --password-stdin
 
