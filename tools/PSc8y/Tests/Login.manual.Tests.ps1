@@ -72,7 +72,7 @@ Describe -Tag "Session" -Name "Login and Session Tests" {
     }
 
     It "Saves tenant name in the session file" {
-        $env:C8Y_PASSPHRASE = $EnvBackupHash["C8Y_PASSPHRASE"]
+        $env:C8Y_PASSPHRASE = "TestPassword"
         $SessionFile = Join-Path -Path $tmpdir -ChildPath "session.json"
         $env:C8Y_SESSION = $SessionFile
 
@@ -85,6 +85,11 @@ Describe -Tag "Session" -Name "Login and Session Tests" {
             host = $SessionBackup.host
             username = $SessionBackup.username
             password = $passwordText
+            settings = @{
+                encryption = @{
+                    enabled = $true
+                }
+            }
         }
         $SessionBefore | ConvertTo-Json | Out-File $SessionFile
 
@@ -115,7 +120,7 @@ Describe -Tag "Session" -Name "Login and Session Tests" {
         if ($SessionAfterLogin.tenant) {
             $SessionAfterLogin.tenant | Should -Match "t\d+"
         }
-
+        $env:C8Y_PASSPHRASE = ""
     }
 
     It -Skip "Switches between two login types OAUTH and BASIC_AUTH" {

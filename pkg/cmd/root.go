@@ -205,6 +205,9 @@ const (
 	// SettingsModeEnableDelete enables delete commands
 	SettingsModeEnableDelete string = "settings.mode.enableDelete"
 
+	// SettingsEncryptionEnabled enables encryption when storing sensitive session data
+	SettingsEncryptionEnabled string = "settings.encryption.enabled"
+
 	// SettingsModeCI enable continuous integration mode (this will enable all commands)
 	SettingsModeCI string = "settings.ci"
 )
@@ -558,6 +561,7 @@ func loadConfiguration() error {
 	bindEnv(SettingsModeEnableCreate, false)
 	bindEnv(SettingsModeEnableUpdate, false)
 	bindEnv(SettingsModeEnableDelete, false)
+	bindEnv(SettingsEncryptionEnabled, false)
 	bindEnv(SettingsModeCI, false)
 
 	return nil

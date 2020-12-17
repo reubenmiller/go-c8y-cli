@@ -48,18 +48,23 @@ func (n *checkSessionPassphraseCmd) savePassword(pass string) error {
 }
 
 func (n *checkSessionPassphraseCmd) checkSession(cmd *cobra.Command, args []string) error {
-	if err := cliConfig.ReadKeyFile(); err != nil {
-		return err
-	}
+	// only create the key if the encryption is enabled
+	encryptionEnabled := cliConfig.IsEncryptionEnabled()
+	if encryptionEnabled {
+		if err := cliConfig.ReadKeyFile(); err != nil {
+			return err
+		}
 
-	passphrase, err := cliConfig.CheckEncryption()
-	if err != nil {
-		return err
+		// check if encryption is used on the current session
+		passphrase, err := cliConfig.CheckEncryption()
+		if err != nil {
+			return err
+		}
+		if passphrase == "" || passphrase == "null" {
+			return fmt.Errorf("passphrase can not be empty")
+		}
+		cliConfig.Passphrase = passphrase
 	}
-	if passphrase == "" || passphrase == "null" {
-		return fmt.Errorf("passphrase can not be empty")
-	}
-	cliConfig.Passphrase = passphrase
 
 	if n.OutputJSON {
 		cliConfig.Logger = Logger
@@ -72,9 +77,13 @@ func (n *checkSessionPassphraseCmd) checkSession(cmd *cobra.Command, args []stri
 	} else {
 		n.showEnvironmentVariableUsage()
 	}
-	green := promptui.Styler(promptui.FGGreen)
-	n.cmd.ErrOrStderr().Write([]byte(green("Passphrase OK\n")))
-	Logger.Info("Passphrase accepted")
+
+	if encryptionEnabled {
+		green := promptui.Styler(promptui.FGGreen)
+		n.cmd.ErrOrStderr().Write([]byte(green("Passphrase OK\n")))
+		Logger.Info("Passphrase accepted")
+	}
+
 	return nil
 }
 

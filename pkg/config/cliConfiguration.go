@@ -287,13 +287,17 @@ func (c *CliConfiguration) SetEncryptedString(key, value string) error {
 		value = c.Persistent.GetString(key)
 	}
 
-	encryptedValue, err := c.SecureData.TryEncryptString(value, c.Passphrase)
+	var err error
+	password := value
+	if c.IsEncryptionEnabled() {
+		password, err = c.SecureData.TryEncryptString(value, c.Passphrase)
 
-	if err != nil {
-		return err
+		if err != nil {
+			return err
+		}
 	}
 
-	c.Persistent.Set(key, encryptedValue)
+	c.Persistent.Set(key, password)
 	return nil
 }
 
@@ -315,16 +319,21 @@ func (c *CliConfiguration) SetAuthorizationCookies(cookies []*http.Cookie) {
 	cookieValues := make([]string, 0)
 
 	encryptedCookies := make(map[string]string)
+	var err error
 
 	for i, cookie := range cookies {
 		cookieValues = append(cookieValues, fmt.Sprintf("%s", cookie.Raw))
 		c.Persistent.Set(fmt.Sprintf("credential.cookies.%d", i), "cookie")
 
-		encryptedValue, err := c.SecureData.EncryptString(cookie.Raw, c.Passphrase)
-		if err != nil {
-			continue
+		cookieData := cookie.Raw
+		if c.IsEncryptionEnabled() {
+			cookieData, err = c.SecureData.EncryptString(cookie.Raw, c.Passphrase)
+			if err != nil {
+				continue
+			}
 		}
-		encryptedCookies[fmt.Sprintf("%d", i)] = encryptedValue
+
+		encryptedCookies[fmt.Sprintf("%d", i)] = cookieData
 	}
 	c.Persistent.Set("credential.cookies", encryptedCookies)
 }
@@ -364,6 +373,11 @@ func (c *CliConfiguration) SetTenant(value string) {
 // IsCIMode return true if the cli is running in CI mode
 func (c *CliConfiguration) IsCIMode() bool {
 	return c.viper.GetBool("settings.ci")
+}
+
+// IsEncryptionEnabled indicates if session encryption is enabled or not
+func (c *CliConfiguration) IsEncryptionEnabled() bool {
+	return c.viper.GetBool("settings.encryption.enabled")
 }
 
 // GetString returns a string from the configuration

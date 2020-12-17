@@ -49,6 +49,7 @@ func (n *listSettingsCmd) listSettings(cmd *cobra.Command, args []string) error 
 	settings[SettingsModeEnableCreate] = globalModeEnableCreate
 	settings[SettingsModeEnableUpdate] = globalModeEnableUpdate
 	settings[SettingsModeEnableDelete] = globalModeEnableDelete
+	settings[SettingsEncryptionEnabled] = cliConfig.IsEncryptionEnabled()
 	settings[SettingsModeCI] = globalCIMode
 
 	responseText, err := json.Marshal(settings)
