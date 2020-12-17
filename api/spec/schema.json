@@ -382,6 +382,17 @@
               "type": "string"
             }
           },
+          "bodyTemplateOptions": {
+            "type": "object",
+            "description": "Body Templating options",
+            "properties": {
+              "enabled": {
+                "type": "boolean",
+                "default": true,
+                "description": "Body templating is supported"
+              }
+            }
+          },
           "bodyValidation": {
             "type": "object",
             "description": "Use a template when validating the json body",

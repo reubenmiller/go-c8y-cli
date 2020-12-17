@@ -245,11 +245,15 @@ endpoints:
           beforeEach:
             - $mo = PSc8y\New-ManagedObject -Name "testMO"
           command: Remove-ManagedObject -Id $mo.id
+          afterEach:
+            - Remove-ManagedObject -Id $mo.id -ErrorAction SilentlyContinue
 
         - description: Delete a managed object (using pipeline)
           beforeEach:
             - $mo = PSc8y\New-ManagedObject -Name "testMO"
           command: Get-ManagedObject -Id $mo.id | Remove-ManagedObject
+          afterEach:
+            - Remove-ManagedObject -Id $mo.id -ErrorAction SilentlyContinue
 
         - description: Delete a managed object and all child devices
           beforeEach:
@@ -257,6 +261,9 @@ endpoints:
             - $ChildDevice = PSc8y\New-TestDevice
             - PSc8y\Add-ChildDeviceToDevice -Device $Device.id -NewChild $ChildDevice.id
           command: Get-ManagedObject -Id $Device.id | Remove-ManagedObject -Cascade
+          afterEach:
+            - Remove-ManagedObject -Id $Device.id -ErrorAction SilentlyContinue
+            - Remove-ManagedObject -Id $ChildDevice.id -ErrorAction SilentlyContinue
 
       go:
         - description: Delete a managed object

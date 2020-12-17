@@ -34,7 +34,7 @@ Create a user
 	cmd.SilenceUsage = true
 
 	cmd.Flags().String("tenant", "", "Tenant")
-	cmd.Flags().String("userName", "", "User name, unique for a given domain. Max: 1000 characters (required)")
+	cmd.Flags().String("userName", "", "User name, unique for a given domain. Max: 1000 characters")
 	cmd.Flags().String("firstName", "", "User first name")
 	cmd.Flags().String("lastName", "", "User last name")
 	cmd.Flags().String("phone", "", "User phone number. Format: '+[country code][number]', has to be a valid MSISDN")
@@ -43,9 +43,9 @@ Create a user
 	cmd.Flags().String("password", "", "User password. Min: 6, max: 32 characters. Only Latin1 chars allowed")
 	cmd.Flags().Bool("sendPasswordResetEmail", false, "User activation status (true/false)")
 	cmd.Flags().String("customProperties", "", "Custom properties to be added to the user")
+	addTemplateFlag(cmd)
 
 	// Required flags
-	cmd.MarkFlagRequired("userName")
 
 	ccmd.baseCmd = newBaseCmd(cmd)
 
@@ -143,6 +143,7 @@ func (n *newUserCmd) newUser(cmd *cobra.Command, args []string) error {
 	if err := setDataTemplateFromFlags(cmd, body); err != nil {
 		return newUserError("Template error. ", err)
 	}
+	body.SetRequiredKeys("userName")
 	if err := body.Validate(); err != nil {
 		return newUserError("Body validation error. ", err)
 	}

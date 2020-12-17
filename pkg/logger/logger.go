@@ -1,7 +1,13 @@
 package logger
 
 import (
+	"os"
+
 	"github.com/op/go-logging"
+)
+
+var format = logging.MustStringFormatter(
+	`%{color}%{time:2006-01-02T15:04:05.000000 MST} %{level:.5s} %{color:reset} %{message}`,
 )
 
 type NopBackend struct {
@@ -42,6 +48,9 @@ func NewDummyLogger(name string) *Logger {
 }
 
 func NewLogger(name string) *Logger {
+	backend := logging.NewLogBackend(os.Stderr, "", 0)
+	backendFormatter := logging.NewBackendFormatter(backend, format)
+	logging.SetBackend(backendFormatter)
 	gologger := logging.MustGetLogger(name)
 	return &Logger{
 		Logger: gologger,

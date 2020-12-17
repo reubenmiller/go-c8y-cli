@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/google/go-jsonnet"
+	"github.com/sethvargo/go-password/password"
 )
 
 const (
@@ -55,7 +56,7 @@ local isMandatory(o, prop) = {
 
 	jsonnetImport += "\nfinal"
 
-	debugJsonnet := strings.ToLower(os.Getenv("C8Y_JSONNET_DEBUG")) == "true"
+	debugJsonnet := strings.EqualFold(os.Getenv("C8Y_JSONNET_DEBUG"), "true")
 
 	if debugJsonnet {
 		log.Printf("jsonnet snippet: %s\n", jsonnetImport)
@@ -170,6 +171,22 @@ func (b *MapBuilder) SetTemplateVariables(variables map[string]interface{}) {
 	b.templateVariables = variables
 }
 
+func generatePassword() string {
+	passwordGen, err := password.NewGenerator(&password.GeneratorInput{
+		Symbols: "!@#%^()[]*+-_;,.",
+	})
+
+	if err != nil {
+		return ""
+	}
+
+	if res, err := passwordGen.Generate(32, 2, 2, false, false); err == nil {
+		return res
+	}
+
+	return ""
+}
+
 func (b *MapBuilder) GetTemplateVariablesJsonnet() (string, error) {
 	if b.templateVariables == nil {
 		// template variables have not been defined (not an error)
@@ -186,7 +203,16 @@ func (b *MapBuilder) GetTemplateVariablesJsonnet() (string, error) {
 
 	// Seed random otherwise it will not change with execution
 	rand.Seed(time.Now().UTC().UnixNano())
-	randomHelper := fmt.Sprintf(`local rand = { bool: %t, int: %d, int2: %d, float: %f, float2: %f, float3: %f, float4: %f };`, rand.Float32() > 0.5, rand.Intn(100), rand.Intn(100), rand.Float32(), rand.Float32(), rand.Float32(), rand.Float32())
+	randomHelper := fmt.Sprintf(`local rand = { bool: %t, int: %d, int2: %d, float: %f, float2: %f, float3: %f, float4: %f, password: "%s" };`,
+		rand.Float32() > 0.5,
+		rand.Intn(100),
+		rand.Intn(100),
+		rand.Float32(),
+		rand.Float32(),
+		rand.Float32(),
+		rand.Float32(),
+		generatePassword(),
+	)
 	return fmt.Sprintf("\nlocal vars = %s;\n%s\n%s\n", jsonStr, varsHelper, randomHelper), nil
 }
 

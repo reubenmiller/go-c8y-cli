@@ -22,5 +22,9 @@ Function Get-ClientSetting {
         return
     }
 
-    $settings | ConvertFrom-JSON
+    $JSONArgs = @{}
+    if ($PSVersionTable.PSVersion.Major -gt 5) {
+        $JSONArgs.Depth = 100
+    }
+    $settings | ConvertFrom-JSON @JSONArgs
 }

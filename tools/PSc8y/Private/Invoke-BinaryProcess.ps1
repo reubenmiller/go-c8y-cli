@@ -92,7 +92,11 @@ PS > Invoke-BinaryProcess binaryProcess.exe -RedirectOutput -ArgumentList "-Emit
                 $line
             } else {
                 if ($null -ne $line) {
-                    ConvertFrom-Json -Depth 100 -InputObject $line
+                    if ($PSVersionTable.PSVersion.Major -le 5) {
+                        ConvertFrom-Json -InputObject $line
+                    } else {
+                        ConvertFrom-Json -Depth 100 -InputObject $line
+                    }
                 }
             }
         }
@@ -113,7 +117,7 @@ PS > Invoke-BinaryProcess binaryProcess.exe -RedirectOutput -ArgumentList "-Emit
             $line = $process.StandardError.ReadLine()
 
             if ($line.Contains("What If")) {
-                # remove the timestapm (if present)
+                # remove the timestamp (if present)
                 $line = $line -replace ".*(What if:)", '$1'
                 Write-Host $line -ForegroundColor "Green"
             }

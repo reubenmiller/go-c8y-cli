@@ -90,8 +90,10 @@ Describe -Name "Encoding" {
             $ResponseJSON | Should -BeLike '*"unit":"°"*'
         }
 
-        if ($TestDevice.id) {
-            PSc8y\Remove-ManagedObject -Id $TestDevice.id
+        AfterAll {
+            if ($TestDevice.id) {
+                PSc8y\Remove-ManagedObject -Id $TestDevice.id
+            }
         }
     }
 }
