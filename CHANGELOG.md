@@ -6,6 +6,10 @@ No unreleased features
 
 ## Released
 
+### v1.7.3
+
+* Fixed publishing bug on docker images
+
 ### v1.7.2
 
 * Fixed publishing bug on docker images

@@ -30,10 +30,10 @@ login_ghcr () {
 publish_ghcr_docker () {
     SOURCE_IMAGE_NAME=$1
     TARGET_IMAGE_NAME=$1
-    VERSION=${2:-latest}
+    tag=${2:-latest}
 
-    docker tag ${SOURCE_IMAGE_NAME}:${VERSION} ghcr.io/${TARGET_OWNER}/${TARGET_IMAGE_NAME}:${VERSION}
-    docker push ghcr.io/${TARGET_OWNER}/${TARGET_IMAGE_NAME}:${VERSION}
+    docker tag ${SOURCE_IMAGE_NAME} ghcr.io/${TARGET_OWNER}/${TARGET_IMAGE_NAME}:${tag}
+    docker push ghcr.io/${TARGET_OWNER}/${TARGET_IMAGE_NAME}:${tag}
 }
 
 login_ghcr
