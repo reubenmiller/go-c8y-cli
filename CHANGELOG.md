@@ -4,6 +4,9 @@
 
 No unreleased features
 
+* Get-Session uses a new c8y session get to retrieve information about the current session
+* Fixed bug when using the `-Session` on PUT and POST commands
+
 ## Released
 
 ### v1.7.3
