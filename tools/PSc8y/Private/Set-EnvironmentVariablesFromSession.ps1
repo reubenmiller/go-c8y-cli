@@ -15,7 +15,7 @@ None
     [cmdletbinding()]
     Param()
 
-    $Session = Get-Session
+    $Session = Get-Session -ErrorAction SilentlyContinue
 
     # reset any enabled side-effect commands
     $env:C8Y_SETTINGS_MODE_ENABLECREATE = ""
