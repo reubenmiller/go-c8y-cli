@@ -2,7 +2,7 @@
 
 Describe -Name "Expand-Device" {
     BeforeAll {
-        $Device = PSc8y\New-TestDevice
+        $Device = PSc8y\New-TestAgent
     }
 
     It "Expand device (with object)" {
@@ -37,6 +37,18 @@ Describe -Name "Expand-Device" {
 
     It "Expand device from Get-DeviceCollection" {
         $Result = Get-DeviceCollection $Device.name | PSc8y\Expand-Device
+        $Result.id | Should -BeExactly $Device.id
+    }
+
+    It "Expand device from operation" {
+        $operation = PSc8y\New-TestOperation -Device $Device.id
+        $Result = $operation | PSc8y\Expand-Device
+        $Result.id | Should -BeExactly $Device.id
+    }
+
+    It "Expand device from operation" {
+        $measurement = PSc8y\New-TestMeasurement -Device $Device.id
+        $Result = $measurement | PSc8y\Expand-Device
         $Result.id | Should -BeExactly $Device.id
     }
 
