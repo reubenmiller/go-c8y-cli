@@ -251,7 +251,7 @@
         $null = $CmdletParameters.Add($ProcessingModeParam)
 
         $null = $BeginParameterBuilder.AppendLine('        if ($PSBoundParameters.ContainsKey("ProcessingMode")) {')
-        $null = $BeginParameterBuilder.AppendLine('            $Parameters["ProcessingMode"] = $ProcessingMode')
+        $null = $BeginParameterBuilder.AppendLine('            $Parameters["processingMode"] = $ProcessingMode')
         $null = $BeginParameterBuilder.AppendLine('        }')
     }
 
