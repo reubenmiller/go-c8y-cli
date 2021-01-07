@@ -237,6 +237,25 @@
     }
 
     #
+    # Processing Mode
+    #
+    if ($Specification.method -match "DELETE|PUT|POST") {
+        $ProcessingModeParam = New-Object System.Text.StringBuilder
+        $null = $ProcessingModeParam.AppendLine('        # Cumulocity processing mode')
+        $null = $ProcessingModeParam.AppendLine('        [Parameter()]')
+        $null = $ProcessingModeParam.AppendLine('        [AllowNull()]')
+        $null = $ProcessingModeParam.AppendLine('        [AllowEmptyString()]')
+        $null = $ProcessingModeParam.AppendLine('        [ValidateSet("PERSISTENT", "QUIESCENT", "TRANSIENT", "CEP")]')
+        $null = $ProcessingModeParam.AppendLine('        [string]')
+        $null = $ProcessingModeParam.Append('        $ProcessingMode')
+        $null = $CmdletParameters.Add($ProcessingModeParam)
+
+        $null = $BeginParameterBuilder.AppendLine('        if ($PSBoundParameters.ContainsKey("ProcessingMode")) {')
+        $null = $BeginParameterBuilder.AppendLine('            $Parameters["ProcessingMode"] = $ProcessingMode')
+        $null = $BeginParameterBuilder.AppendLine('        }')
+    }
+
+    #
     # Add common parameters
     #
     if ($ResultType -match "collection") {

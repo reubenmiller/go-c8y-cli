@@ -62,6 +62,10 @@ func addTemplateFlag(cmd *cobra.Command) {
 	cmd.Flags().String(FlagDataTemplateVariablesName, "", "Body template variables")
 }
 
+func addProcessingModeFlag(cmd *cobra.Command) {
+	cmd.Flags().String(FlagProcessingModeName, "", "Processing mode")
+}
+
 // resolveTemplatePath resolves a template path
 func resolveTemplatePath(name string) (string, error) {
 	return matchFilePath(globalFlagTemplatePath, name, ".jsonnet", "ignore")
@@ -204,7 +208,7 @@ func getFormDataObjectFlag(cmd *cobra.Command, flagName string, data map[string]
 	return nil
 }
 
-func getFileFlag(cmd *cobra.Command, flagName string, formData map[string]io.Reader) error {
+func getFileFlag(cmd *cobra.Command, flagName string, includeMeta bool, formData map[string]io.Reader) error {
 	if formData == nil {
 		formData = make(map[string]io.Reader)
 	}
@@ -238,12 +242,13 @@ func getFileFlag(cmd *cobra.Command, flagName string, formData map[string]io.Rea
 			objectInfo["type"] = mimeType
 		}
 
-		if v, err := json.Marshal(objectInfo); err == nil {
-			formData["object"] = bytes.NewReader(v)
-		} else {
-			return errors.New("failed to create object form-data property")
+		if includeMeta {
+			if v, err := json.Marshal(objectInfo); err == nil {
+				formData["object"] = bytes.NewReader(v)
+			} else {
+				return errors.New("failed to create object form-data property")
+			}
 		}
-
 	}
 	return nil
 }

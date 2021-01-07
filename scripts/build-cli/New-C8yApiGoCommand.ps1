@@ -1,4 +1,4 @@
-﻿Function New-C8yApiGoCommand {
+Function New-C8yApiGoCommand {
     [cmdletbinding()]
     Param(
         [Parameter(
@@ -62,7 +62,8 @@
         $null = $ArgumentSources.AddRange(([array]$Specification.options))
     }
 
-    $CommandArgs = foreach ($iArg in (Remove-SkippedParameters $ArgumentSources)) {
+    $CommandArgs = New-Object System.Collections.ArrayList
+    foreach ($iArg in (Remove-SkippedParameters $ArgumentSources)) {
         $ArgParams = @{
             Name = $iArg.name
             Type = $iArg.type
@@ -71,7 +72,15 @@
             Default = $iArg.default
             Required = $iArg.required
         }
-        Get-C8yGoArgs @ArgParams
+        $arg = Get-C8yGoArgs @ArgParams
+        $null = $CommandArgs.Add($arg)
+    }
+
+    # Add common parameters
+    if ($Specification.method -match "DELETE|PUT|POST") {
+        $null = $CommandArgs.Add(@{
+            SetFlag = 'addProcessingModeFlag(cmd)'
+        })
     }
 
     $RESTPath = $Specification.path
@@ -221,6 +230,17 @@
                 $null = $RestHeaderBuilder.AppendLine($code)
             }
         }
+    }
+
+    # Processing Mode
+    if ($Specification.method -match "DELETE|PUT|POST") {
+        $null = $RestHeaderBuilder.AppendLine(@"
+     if cmd.Flags().Changed("processingMode") {
+         if v, err := cmd.Flags().GetString("processingMode"); err == nil && v != "" {
+             headers.Add("X-Cumulocity-Processing-Mode", v)
+         }
+     }
+"@)
     }
 
     #
