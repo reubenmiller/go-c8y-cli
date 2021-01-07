@@ -38,6 +38,14 @@ Assign a device as a child device to an existing device (using pipeline)
         [object[]]
         $NewChild,
 
+        # Cumulocity processing mode
+        [Parameter()]
+        [AllowNull()]
+        [AllowEmptyString()]
+        [ValidateSet("PERSISTENT", "QUIESCENT", "TRANSIENT", "CEP")]
+        [string]
+        $ProcessingMode,
+
         # Template (jsonnet) file to use to create the request body.
         [Parameter()]
         [string]
@@ -83,6 +91,9 @@ Assign a device as a child device to an existing device (using pipeline)
         $Parameters = @{}
         if ($PSBoundParameters.ContainsKey("Device")) {
             $Parameters["device"] = $Device
+        }
+        if ($PSBoundParameters.ContainsKey("ProcessingMode")) {
+            $Parameters["processingMode"] = $ProcessingMode
         }
         if ($PSBoundParameters.ContainsKey("Template") -and $Template) {
             $Parameters["template"] = $Template

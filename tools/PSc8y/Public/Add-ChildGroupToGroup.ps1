@@ -40,6 +40,14 @@ to filter for a collection of devices and assign the results to a single group.
         [object[]]
         $NewChildGroup,
 
+        # Cumulocity processing mode
+        [Parameter()]
+        [AllowNull()]
+        [AllowEmptyString()]
+        [ValidateSet("PERSISTENT", "QUIESCENT", "TRANSIENT", "CEP")]
+        [string]
+        $ProcessingMode,
+
         # Template (jsonnet) file to use to create the request body.
         [Parameter()]
         [string]
@@ -85,6 +93,9 @@ to filter for a collection of devices and assign the results to a single group.
         $Parameters = @{}
         if ($PSBoundParameters.ContainsKey("Group")) {
             $Parameters["group"] = $Group
+        }
+        if ($PSBoundParameters.ContainsKey("ProcessingMode")) {
+            $Parameters["processingMode"] = $ProcessingMode
         }
         if ($PSBoundParameters.ContainsKey("Template") -and $Template) {
             $Parameters["template"] = $Template

@@ -42,6 +42,7 @@ Remove events from a device
 	cmd.Flags().String("dateFrom", "", "Start date or date and time of event occurrence.")
 	cmd.Flags().String("dateTo", "", "End date or date and time of event occurrence.")
 	cmd.Flags().Bool("revert", false, "Return the newest instead of the oldest events. Must be used with dateFrom and dateTo parameters")
+	addProcessingModeFlag(cmd)
 
 	// Required flags
 
@@ -120,6 +121,11 @@ func (n *deleteEventCollectionCmd) deleteEventCollection(cmd *cobra.Command, arg
 
 	// headers
 	headers := http.Header{}
+	if cmd.Flags().Changed("processingMode") {
+		if v, err := cmd.Flags().GetString("processingMode"); err == nil && v != "" {
+			headers.Add("X-Cumulocity-Processing-Mode", v)
+		}
+	}
 
 	// form data
 	formData := make(map[string]io.Reader)

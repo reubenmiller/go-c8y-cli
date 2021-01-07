@@ -34,6 +34,7 @@ Delete a tenant by name (from the mangement tenant)
 	cmd.SilenceUsage = true
 
 	cmd.Flags().String("id", "", "Tenant id")
+	addProcessingModeFlag(cmd)
 
 	// Required flags
 
@@ -60,6 +61,11 @@ func (n *deleteTenantCmd) deleteTenant(cmd *cobra.Command, args []string) error 
 
 	// headers
 	headers := http.Header{}
+	if cmd.Flags().Changed("processingMode") {
+		if v, err := cmd.Flags().GetString("processingMode"); err == nil && v != "" {
+			headers.Add("X-Cumulocity-Processing-Mode", v)
+		}
+	}
 
 	// form data
 	formData := make(map[string]io.Reader)

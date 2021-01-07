@@ -39,6 +39,7 @@ Update custom properties of an existing event
 	cmd.Flags().String("id", "", "Event id (required)")
 	cmd.Flags().String("text", "", "Text description of the event.")
 	addDataFlag(cmd)
+	addProcessingModeFlag(cmd)
 
 	// Required flags
 	cmd.MarkFlagRequired("id")
@@ -66,6 +67,11 @@ func (n *updateEventCmd) updateEvent(cmd *cobra.Command, args []string) error {
 
 	// headers
 	headers := http.Header{}
+	if cmd.Flags().Changed("processingMode") {
+		if v, err := cmd.Flags().GetString("processingMode"); err == nil && v != "" {
+			headers.Add("X-Cumulocity-Processing-Mode", v)
+		}
+	}
 
 	// form data
 	formData := make(map[string]io.Reader)

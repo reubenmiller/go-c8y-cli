@@ -35,6 +35,7 @@ Create a user group
 
 	cmd.Flags().String("tenant", "", "Tenant")
 	cmd.Flags().String("name", "", "Group name")
+	addProcessingModeFlag(cmd)
 
 	// Required flags
 
@@ -61,6 +62,11 @@ func (n *newGroupCmd) newGroup(cmd *cobra.Command, args []string) error {
 
 	// headers
 	headers := http.Header{}
+	if cmd.Flags().Changed("processingMode") {
+		if v, err := cmd.Flags().GetString("processingMode"); err == nil && v != "" {
+			headers.Add("X-Cumulocity-Processing-Mode", v)
+		}
+	}
 
 	// form data
 	formData := make(map[string]io.Reader)

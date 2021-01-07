@@ -36,6 +36,7 @@ Update a user
 	cmd.Flags().StringSlice("id", []string{""}, "User id (required)")
 	cmd.Flags().String("tenant", "", "Tenant")
 	cmd.Flags().String("newPassword", "", "New user password. Min: 6, max: 32 characters. Only Latin1 chars allowed")
+	addProcessingModeFlag(cmd)
 
 	// Required flags
 	cmd.MarkFlagRequired("id")
@@ -63,6 +64,11 @@ func (n *resetUserPasswordCmd) resetUserPassword(cmd *cobra.Command, args []stri
 
 	// headers
 	headers := http.Header{}
+	if cmd.Flags().Changed("processingMode") {
+		if v, err := cmd.Flags().GetString("processingMode"); err == nil && v != "" {
+			headers.Add("X-Cumulocity-Processing-Mode", v)
+		}
+	}
 
 	// form data
 	formData := make(map[string]io.Reader)

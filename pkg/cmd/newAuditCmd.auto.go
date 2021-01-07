@@ -42,6 +42,7 @@ Create an audit record for a custom managed object update
 	cmd.Flags().String("user", "", "The user responsible for the audited action.")
 	cmd.Flags().String("application", "", "The application used to carry out the audited action.")
 	addDataFlag(cmd)
+	addProcessingModeFlag(cmd)
 
 	// Required flags
 	cmd.MarkFlagRequired("type")
@@ -73,6 +74,11 @@ func (n *newAuditCmd) newAudit(cmd *cobra.Command, args []string) error {
 
 	// headers
 	headers := http.Header{}
+	if cmd.Flags().Changed("processingMode") {
+		if v, err := cmd.Flags().GetString("processingMode"); err == nil && v != "" {
+			headers.Add("X-Cumulocity-Processing-Mode", v)
+		}
+	}
 
 	// form data
 	formData := make(map[string]io.Reader)

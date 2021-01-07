@@ -84,6 +84,14 @@ Remove alarms on the device which are active and created in the last 10 minutes 
         [switch]
         $WithSourceDevices,
 
+        # Cumulocity processing mode
+        [Parameter()]
+        [AllowNull()]
+        [AllowEmptyString()]
+        [ValidateSet("PERSISTENT", "QUIESCENT", "TRANSIENT", "CEP")]
+        [string]
+        $ProcessingMode,
+
         # Show the full (raw) response from Cumulocity including pagination information
         [Parameter()]
         [switch]
@@ -143,6 +151,9 @@ Remove alarms on the device which are active and created in the last 10 minutes 
         }
         if ($PSBoundParameters.ContainsKey("WithSourceDevices")) {
             $Parameters["withSourceDevices"] = $WithSourceDevices
+        }
+        if ($PSBoundParameters.ContainsKey("ProcessingMode")) {
+            $Parameters["processingMode"] = $ProcessingMode
         }
         if ($PSBoundParameters.ContainsKey("OutputFile")) {
             $Parameters["outputFile"] = $OutputFile

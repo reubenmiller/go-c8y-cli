@@ -36,6 +36,7 @@ List the users within a user group
 	cmd.Flags().StringSlice("group", []string{""}, "Group ID (required)")
 	cmd.Flags().String("tenant", "", "Tenant")
 	cmd.Flags().StringSlice("user", []string{""}, "User id (required)")
+	addProcessingModeFlag(cmd)
 
 	// Required flags
 	cmd.MarkFlagRequired("group")
@@ -64,6 +65,11 @@ func (n *addUserToGroupCmd) addUserToGroup(cmd *cobra.Command, args []string) er
 
 	// headers
 	headers := http.Header{}
+	if cmd.Flags().Changed("processingMode") {
+		if v, err := cmd.Flags().GetString("processingMode"); err == nil && v != "" {
+			headers.Add("X-Cumulocity-Processing-Mode", v)
+		}
+	}
 
 	// form data
 	formData := make(map[string]io.Reader)

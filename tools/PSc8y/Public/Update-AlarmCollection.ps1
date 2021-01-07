@@ -65,6 +65,14 @@ Update the status of all active alarms on a device to ACKNOWLEDGED (using pipeli
         [string]
         $NewStatus,
 
+        # Cumulocity processing mode
+        [Parameter()]
+        [AllowNull()]
+        [AllowEmptyString()]
+        [ValidateSet("PERSISTENT", "QUIESCENT", "TRANSIENT", "CEP")]
+        [string]
+        $ProcessingMode,
+
         # Template (jsonnet) file to use to create the request body.
         [Parameter()]
         [string]
@@ -125,6 +133,9 @@ Update the status of all active alarms on a device to ACKNOWLEDGED (using pipeli
         }
         if ($PSBoundParameters.ContainsKey("NewStatus")) {
             $Parameters["newStatus"] = $NewStatus
+        }
+        if ($PSBoundParameters.ContainsKey("ProcessingMode")) {
+            $Parameters["processingMode"] = $ProcessingMode
         }
         if ($PSBoundParameters.ContainsKey("Template") -and $Template) {
             $Parameters["template"] = $Template

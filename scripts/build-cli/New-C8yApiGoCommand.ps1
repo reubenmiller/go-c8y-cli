@@ -1,4 +1,4 @@
-Function New-C8yApiGoCommand {
+﻿Function New-C8yApiGoCommand {
     [cmdletbinding()]
     Param(
         [Parameter(
@@ -662,6 +662,18 @@ Function Get-C8yGoArgs {
         }
 
         "file" {
+            $SetFlag = if ($UseOption) {
+                'cmd.Flags().StringP("{0}", "{1}", "{2}", "{3}")' -f $Name, $OptionName, $Default, $Description
+            } else {
+                'cmd.Flags().String("{0}", "{1}", "{2}")' -f $Name, $Default, $Description
+            }
+
+            @{
+                SetFlag = $SetFlag
+            }
+        }
+
+        "attachment" {
             $SetFlag = if ($UseOption) {
                 'cmd.Flags().StringP("{0}", "{1}", "{2}", "{3}")' -f $Name, $OptionName, $Default, $Description
             } else {

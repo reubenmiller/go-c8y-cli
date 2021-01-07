@@ -36,6 +36,7 @@ Update a user group
 	cmd.Flags().String("tenant", "", "Tenant")
 	cmd.Flags().StringSlice("id", []string{""}, "Group id (required)")
 	cmd.Flags().String("name", "", "name")
+	addProcessingModeFlag(cmd)
 
 	// Required flags
 	cmd.MarkFlagRequired("id")
@@ -63,6 +64,11 @@ func (n *updateGroupCmd) updateGroup(cmd *cobra.Command, args []string) error {
 
 	// headers
 	headers := http.Header{}
+	if cmd.Flags().Changed("processingMode") {
+		if v, err := cmd.Flags().GetString("processingMode"); err == nil && v != "" {
+			headers.Add("X-Cumulocity-Processing-Mode", v)
+		}
+	}
 
 	// form data
 	formData := make(map[string]io.Reader)

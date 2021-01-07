@@ -7,6 +7,14 @@ No unreleased features
 * Get-Session uses a new c8y session get to retrieve information about the current session
 * Fixed bug when using the `-Session` on PUT and POST commands
 * Expand-Device supports piping of alarms, events, measurements and operations
+* Added `-ProcessingMode` parameter to all commands that use DELETE, PUT and POST requests.
+
+    ```powershell
+    New-ManagedObject -Name myobject -ProcessingMode TRANSIENT
+    New-ManagedObject -Name myobject -ProcessingMode QUIESCENT
+    New-ManagedObject -Name myobject -ProcessingMode PERSISTENT
+    New-ManagedObject -Name myobject -ProcessingMode CEP
+    ```
 
 ## Released
 

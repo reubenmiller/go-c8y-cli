@@ -33,6 +33,14 @@ Create 10 test agents all with unique names
         )]
         [string] $Name = "testagent",
 
+        # Cumulocity processing mode
+        [Parameter()]
+        [AllowNull()]
+        [AllowEmptyString()]
+        [ValidateSet("PERSISTENT", "QUIESCENT", "TRANSIENT", "CEP")]
+        [string]
+        $ProcessingMode,
+
         # Template (jsonnet) file to use to create the request body.
         [Parameter()]
         [string]
@@ -56,6 +64,7 @@ Create 10 test agents all with unique names
         $TestAgent = PSc8y\New-ManagedObject `
             -Name $AgentName `
             -Data $Data `
+            -ProcessingMode:$ProcessingMode `
             -Template:$Template `
             -TemplateVars:$TemplateVars `
             -Force:$Force

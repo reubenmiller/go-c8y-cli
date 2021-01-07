@@ -35,6 +35,14 @@ Create an event on the existing device "myExistingDevice"
         # Add a dummy file to the event
         [switch] $WithBinary,
 
+        # Cumulocity processing mode
+        [Parameter()]
+        [AllowNull()]
+        [AllowEmptyString()]
+        [ValidateSet("PERSISTENT", "QUIESCENT", "TRANSIENT", "CEP")]
+        [string]
+        $ProcessingMode,
+
         # Template (jsonnet) file to use to create the request body.
         [Parameter()]
         [string]
@@ -67,6 +75,7 @@ Create an event on the existing device "myExistingDevice"
             -Time "1970-01-01" `
             -Type "c8y_ci_TestEvent" `
             -Text "Test CI Event" `
+            -ProcessingMode:$ProcessingMode `
             -Template:$Template `
             -TemplateVars:$TemplateVars `
             -Force:$Force

@@ -35,6 +35,7 @@ Add a binary to an event
 
 	cmd.Flags().String("id", "", "Event id (required)")
 	cmd.Flags().String("file", "", "File to be uploaded as a binary (required)")
+	addProcessingModeFlag(cmd)
 
 	// Required flags
 	cmd.MarkFlagRequired("id")
@@ -63,6 +64,11 @@ func (n *newEventBinaryCmd) newEventBinary(cmd *cobra.Command, args []string) er
 
 	// headers
 	headers := http.Header{}
+	if cmd.Flags().Changed("processingMode") {
+		if v, err := cmd.Flags().GetString("processingMode"); err == nil && v != "" {
+			headers.Add("X-Cumulocity-Processing-Mode", v)
+		}
+	}
 
 	// form data
 	formData := make(map[string]io.Reader)
@@ -70,7 +76,7 @@ func (n *newEventBinaryCmd) newEventBinary(cmd *cobra.Command, args []string) er
 	// body
 	body := mapbuilder.NewMapBuilder()
 	body.SetMap(getDataFlag(cmd))
-	getFileFlag(cmd, "file", formData)
+	getFileFlag(cmd, "file", false, formData)
 	if err := setDataTemplateFromFlags(cmd, body); err != nil {
 		return newUserError("Template error. ", err)
 	}

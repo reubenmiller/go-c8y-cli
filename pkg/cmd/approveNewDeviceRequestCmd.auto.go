@@ -35,6 +35,7 @@ Approve a new device request
 
 	cmd.Flags().String("id", "", "Device identifier (required)")
 	cmd.Flags().String("status", "ACCEPTED", "Status of registration")
+	addProcessingModeFlag(cmd)
 
 	// Required flags
 	cmd.MarkFlagRequired("id")
@@ -62,6 +63,11 @@ func (n *approveNewDeviceRequestCmd) approveNewDeviceRequest(cmd *cobra.Command,
 
 	// headers
 	headers := http.Header{}
+	if cmd.Flags().Changed("processingMode") {
+		if v, err := cmd.Flags().GetString("processingMode"); err == nil && v != "" {
+			headers.Add("X-Cumulocity-Processing-Mode", v)
+		}
+	}
 
 	// form data
 	formData := make(map[string]io.Reader)

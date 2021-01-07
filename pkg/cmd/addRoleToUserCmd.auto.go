@@ -36,6 +36,7 @@ Add a role (ROLE_ALARM_READ) to a user
 	cmd.Flags().String("tenant", "", "Tenant")
 	cmd.Flags().StringSlice("user", []string{""}, "User prefix or full username (required)")
 	cmd.Flags().StringSlice("role", []string{""}, "User role id")
+	addProcessingModeFlag(cmd)
 
 	// Required flags
 	cmd.MarkFlagRequired("user")
@@ -63,6 +64,11 @@ func (n *addRoleToUserCmd) addRoleToUser(cmd *cobra.Command, args []string) erro
 
 	// headers
 	headers := http.Header{}
+	if cmd.Flags().Changed("processingMode") {
+		if v, err := cmd.Flags().GetString("processingMode"); err == nil && v != "" {
+			headers.Add("X-Cumulocity-Processing-Mode", v)
+		}
+	}
 
 	// form data
 	formData := make(map[string]io.Reader)

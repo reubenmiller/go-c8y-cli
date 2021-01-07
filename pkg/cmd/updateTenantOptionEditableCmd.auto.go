@@ -37,6 +37,7 @@ Update editable property for an existing tenant option
 	cmd.Flags().String("category", "", "Tenant Option category (required)")
 	cmd.Flags().String("key", "", "Tenant Option key (required)")
 	cmd.Flags().String("editable", "", "Whether the tenant option should be editable or not (required)")
+	addProcessingModeFlag(cmd)
 
 	// Required flags
 	cmd.MarkFlagRequired("category")
@@ -66,6 +67,11 @@ func (n *updateTenantOptionEditableCmd) updateTenantOptionEditable(cmd *cobra.Co
 
 	// headers
 	headers := http.Header{}
+	if cmd.Flags().Changed("processingMode") {
+		if v, err := cmd.Flags().GetString("processingMode"); err == nil && v != "" {
+			headers.Add("X-Cumulocity-Processing-Mode", v)
+		}
+	}
 
 	// form data
 	formData := make(map[string]io.Reader)

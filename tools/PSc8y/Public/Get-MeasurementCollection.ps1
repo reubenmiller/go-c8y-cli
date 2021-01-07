@@ -72,12 +72,12 @@ Get measurements from a device (using pipeline)
         [switch]
         $Revert,
 
-        # Results will be displayed in csv format
+        # Results will be displayed in csv format. Note: -IncludeAll, is not supported when using using this parameter
         [Parameter()]
         [switch]
         $Csv,
 
-        # Results will be displayed in Excel format
+        # Results will be displayed in Excel format Note: -IncludeAll, is not supported when using using this parameter
         [Parameter()]
         [switch]
         $Excel,

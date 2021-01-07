@@ -34,6 +34,14 @@ Create 10 test device groups all with unique names
         [ValidateSet("Group", "SubGroup")]
         [string] $Type = "Group",
 
+        # Cumulocity processing mode
+        [Parameter()]
+        [AllowNull()]
+        [AllowEmptyString()]
+        [ValidateSet("PERSISTENT", "QUIESCENT", "TRANSIENT", "CEP")]
+        [string]
+        $ProcessingMode,
+
         # Template (jsonnet) file to use to create the request body.
         [Parameter()]
         [string]
@@ -68,6 +76,7 @@ Create 10 test device groups all with unique names
         PSc8y\New-ManagedObject `
             -Name $GroupName `
             -Data $Data `
+            -ProcessingMode:$ProcessingMode `
             -Template:$Template `
             -TemplateVars:$TemplateVars `
             -Force:$Force

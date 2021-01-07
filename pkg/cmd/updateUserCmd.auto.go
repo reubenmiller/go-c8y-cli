@@ -43,6 +43,7 @@ Update a user
 	cmd.Flags().String("password", "", "User password. Min: 6, max: 32 characters. Only Latin1 chars allowed")
 	cmd.Flags().Bool("sendPasswordResetEmail", false, "User activation status (true/false)")
 	cmd.Flags().String("customProperties", "", "Custom properties to be added to the user")
+	addProcessingModeFlag(cmd)
 
 	// Required flags
 	cmd.MarkFlagRequired("id")
@@ -70,6 +71,11 @@ func (n *updateUserCmd) updateUser(cmd *cobra.Command, args []string) error {
 
 	// headers
 	headers := http.Header{}
+	if cmd.Flags().Changed("processingMode") {
+		if v, err := cmd.Flags().GetString("processingMode"); err == nil && v != "" {
+			headers.Add("X-Cumulocity-Processing-Mode", v)
+		}
+	}
 
 	// form data
 	formData := make(map[string]io.Reader)

@@ -38,6 +38,14 @@ Create group heirachy (parent group -> child group)
         [object[]]
         $NewChildGroup,
 
+        # Cumulocity processing mode
+        [Parameter()]
+        [AllowNull()]
+        [AllowEmptyString()]
+        [ValidateSet("PERSISTENT", "QUIESCENT", "TRANSIENT", "CEP")]
+        [string]
+        $ProcessingMode,
+
         # Template (jsonnet) file to use to create the request body.
         [Parameter()]
         [string]
@@ -86,6 +94,9 @@ Create group heirachy (parent group -> child group)
         }
         if ($PSBoundParameters.ContainsKey("NewChildGroup")) {
             $Parameters["newChildGroup"] = $NewChildGroup
+        }
+        if ($PSBoundParameters.ContainsKey("ProcessingMode")) {
+            $Parameters["processingMode"] = $ProcessingMode
         }
         if ($PSBoundParameters.ContainsKey("Template") -and $Template) {
             $Parameters["template"] = $Template

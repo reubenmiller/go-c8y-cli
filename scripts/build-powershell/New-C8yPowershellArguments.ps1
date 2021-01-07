@@ -66,6 +66,7 @@
         "dateto" { "string" }
         "directory" { "string" }
         "file" { "string" }
+        "attachment" { "string" }
         "id" { "object" }
         "integer" { "long" }
         "json" { "object" }

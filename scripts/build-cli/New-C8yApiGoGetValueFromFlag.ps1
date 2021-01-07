@@ -38,6 +38,7 @@
         "boolean" = @{}
         "datetime" = @{}
         "file" = @{}
+        "attachment" = @{}
         "id" = @{}
         "integer" = @{}
         "json_custom" = @{}
@@ -48,12 +49,20 @@
         "tenant" = @{}
     }
 
-    # file (used in multipart/form-data uploads). It rights to the formData object instead of the body
+    # file (used in multipart/form-data uploads). It writes to the formData object instead of the body
     $Setters."file"."query" = "query.Add(`"${queryParam}`", `"true`")"
     $Setters."file"."path" = "pathParameters[`"${queryParam}`"] = `"true`""
-    $Setters."file"."body" = "getFileFlag(cmd, `"${prop}`", formData)"
+    $Setters."file"."body" = "getFileFlag(cmd, `"${prop}`", true, formData)"
     $Definitions."file" = @"
     $($Setters."file".$SetterType)
+"@
+
+    # attachment (used in multipart/form-data uploads), without extra details
+    $Setters."attachment"."query" = "query.Add(`"${queryParam}`", `"true`")"
+    $Setters."attachment"."path" = "pathParameters[`"${queryParam}`"] = `"true`""
+    $Setters."attachment"."body" = "getFileFlag(cmd, `"${prop}`", false, formData)"
+    $Definitions."attachment" = @"
+    $($Setters."attachment".$SetterType)
 "@
 
     # Boolean

@@ -36,6 +36,7 @@ Update a binary related to an event
 
 	cmd.Flags().String("id", "", "Event id (required)")
 	cmd.Flags().String("file", "", "File to be uploaded as a binary (required)")
+	addProcessingModeFlag(cmd)
 
 	// Required flags
 	cmd.MarkFlagRequired("id")
@@ -64,6 +65,11 @@ func (n *updateEventBinaryCmd) updateEventBinary(cmd *cobra.Command, args []stri
 
 	// headers
 	headers := http.Header{}
+	if cmd.Flags().Changed("processingMode") {
+		if v, err := cmd.Flags().GetString("processingMode"); err == nil && v != "" {
+			headers.Add("X-Cumulocity-Processing-Mode", v)
+		}
+	}
 
 	// form data
 	formData := make(map[string]io.Reader)
