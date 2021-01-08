@@ -75,18 +75,21 @@ The following is an example of such a template:
 {
     name: "my device",
     type: var("type", "defaultType"),
+    var("fragment"): {},
     c8y_IsDevice: {},
 }
 ```
 
-The template can then be used when creating a managed object, and the `type` variable can be injected by using the `templateVars` parameter.
+The template can then be used when creating a managed object, and the `type` and `fragment` variables can be injected by using the `templateVars` parameter.
+
+Note: Multiple template variables can be provided, by using a comma separated list.
 
 **Bash/zsh**
 
 ```sh
 c8y inventory create \
     --template ./examples/templates/device.jsonnet \
-    --templateVars "type=myCustomType1" \
+    --templateVars "type=myCustomType1,fragment=myCustomObject" \
     --dry
 ```
 
@@ -95,7 +98,7 @@ c8y inventory create \
 ```sh
 New-ManagedObject `
     -Template ./examples/templates/measurement.jsonnet `
-    -TemplateVars "type=myCustomType1" `
+    -TemplateVars "type=myCustomType1,fragment=myCustomObject" `
     -WhatIf
 ```
 
@@ -107,6 +110,7 @@ These command would produce the following body which would be sent to Cumulocity
 {
     "name": "my device",
     "type": "myCustomType1",
+    "myCustomObject": {},
     "c8y_IsDevice": {}
 }
 ```
