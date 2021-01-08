@@ -15,6 +15,7 @@ No unreleased features
     New-ManagedObject -Name myobject -ProcessingMode PERSISTENT
     New-ManagedObject -Name myobject -ProcessingMode CEP
     ```
+* `Set-session` automatically selects a session if only one matching session is found rather than prompting the user for the selection
 
 ## Released
 

@@ -178,7 +178,17 @@ func (n *listSessionCmd) listSession(cmd *cobra.Command, args []string) error {
 		Searcher:          searcher,
 	}
 
-	idx, result, err := prompt.Run()
+	var idx int
+	var result string
+
+	if len(filteredSessions) == 1 {
+		Logger.Info("Only 1 session found. Selecting it automatically")
+		idx = 0
+		result = filteredSessions[0].Path
+		err = nil
+	} else {
+		idx, result, err = prompt.Run()
+	}
 
 	if err != nil {
 		fmt.Printf("Prompt failed %v\n", err)
