@@ -4,6 +4,10 @@
 
 No unreleased features
 
+## Released
+
+### v1.8.0
+
 * `Get-Session` uses a new c8y session get to retrieve information about the current session
 * Fixed bug when using the `-Session` on PUT and POST commands which resulted in an error being displayed eventhough the request would be successful
 * `Expand-Device` supports piping of alarms, events, measurements and operations
@@ -60,8 +64,6 @@ No unreleased features
     Invoke-UserLogout
     ```
 * Fixed binary upload bugs with both `New-EventBinary` and `Update-EventBinary` which resulted in multipart form data being included in the binary information
-
-## Released
 
 ### v1.7.3
 
