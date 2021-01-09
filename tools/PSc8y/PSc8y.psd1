@@ -172,6 +172,7 @@ FunctionsToExport = @(
 	'Get-UserByName',
 	'Get-UserCollection',
 	'Get-UserMembershipCollection',
+	'Invoke-UserLogout',
 	'New-Agent',
 	'New-Alarm',
 	'New-Application',
