@@ -59,6 +59,7 @@ No unreleased features
     ```powershell
     Invoke-UserLogout
     ```
+* Fixed binary upload bugs with both `New-EventBinary` and `Update-EventBinary` which resulted in multipart form data being included in the binary information
 
 ## Released
 
