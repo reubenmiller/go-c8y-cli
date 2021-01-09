@@ -46,19 +46,19 @@ No unreleased features
 
     }
     ```
-    * Added logout user command to invalidate current user token
+* Added logout user command to invalidate current user token
 
-        **Bash/zsh**
+    **Bash/zsh**
 
-        ```sh
-        c8y users logout
-        ```
+    ```sh
+    c8y users logout
+    ```
 
-        **PowerShell**
+    **PowerShell**
 
-        ```powershell
-        Invoke-UserLogout
-        ```
+    ```powershell
+    Invoke-UserLogout
+    ```
 
 ## Released
 
