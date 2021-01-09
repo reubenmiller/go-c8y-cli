@@ -31,6 +31,8 @@ New-Session
 
 A helper is provided to set the session interactively by providing the user a list of configured sessions. The user will be prompted to select one of the listed sessions.
 
+Note: On MacOS, you need to hold "option"+Arrow keys to navigate the list of sessions. Otherwise the VIM style "j" (down) and "k" (up) keys can be also used for navigation
+
 ##### Bash
 
 Assuming that you have already loaded the `c8y.profile.sh` helper.
