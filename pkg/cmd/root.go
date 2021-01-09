@@ -458,7 +458,9 @@ func ReadConfigFiles(v *viper.Viper) (path string, err error) {
 			sessionName = globalFlagSessionFile
 		}
 
-		v.SetConfigName(sessionName)
+		if sessionName != "" {
+			v.SetConfigName(sessionName)
+		}
 	}
 
 	err = v.MergeInConfig()
