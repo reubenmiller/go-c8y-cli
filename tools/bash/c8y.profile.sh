@@ -62,6 +62,9 @@ set-session () {
         return
     fi
 
+    # clear session before settings new one as stale env variables can cause problems
+    clear-session
+
     export C8Y_SESSION=$resp
 
     # Check encryption passphrase

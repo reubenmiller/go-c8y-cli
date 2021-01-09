@@ -114,6 +114,9 @@ String
             return
         }
 
+        # Clear session before seting the new one
+        PSc8y\Clear-Session
+
         Write-Verbose "Setting new session: $Path"
         $env:C8Y_SESSION = Resolve-Path $Path
 
