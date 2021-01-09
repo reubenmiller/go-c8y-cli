@@ -4,9 +4,9 @@
 
 No unreleased features
 
-* Get-Session uses a new c8y session get to retrieve information about the current session
-* Fixed bug when using the `-Session` on PUT and POST commands
-* Expand-Device supports piping of alarms, events, measurements and operations
+* `Get-Session` uses a new c8y session get to retrieve information about the current session
+* Fixed bug when using the `-Session` on PUT and POST commands which resulted in an error being displayed eventhough the request would be successful
+* `Expand-Device` supports piping of alarms, events, measurements and operations
 * Added `-ProcessingMode` parameter to all commands that use DELETE, PUT and POST requests.
 
     ```powershell
