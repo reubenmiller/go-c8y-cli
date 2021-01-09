@@ -24,6 +24,7 @@ func RemoveCumulocityProperties(data map[string]interface{}, removeID bool) map[
 	if removeID {
 		delete(data, "id")
 		delete(data, "owner")
+		delete(data, "source")
 	}
 	return data
 }

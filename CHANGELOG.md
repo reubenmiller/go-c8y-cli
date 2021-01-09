@@ -16,6 +16,36 @@ No unreleased features
     New-ManagedObject -Name myobject -ProcessingMode CEP
     ```
 * `Set-session` automatically selects a session if only one matching session is found rather than prompting the user for the selection
+* `source` fragment is removed when being passed via file to the `Data` parameter in all create and update commands
+    ```json
+    // myevent.json
+    {
+        "source": {
+            "id": "99999",
+            "self": "https:/..../event/events/99999"
+        },
+        "type": "myExample1",
+
+    }
+    ```
+
+    When executing the following command:
+    ```powershell
+    PSc8y\New-Event -Device 12345 -Data myevent.json
+    ```
+
+    The `source` id fragment will be replaced entirely by the new source as specified by the `Device` parameter
+
+    ```json
+    // myevent.json
+    {
+        "source": {
+            "id": "12345",
+        },
+        "type": "myExample1",
+
+    }
+    ```
 
 ## Released
 
