@@ -208,6 +208,12 @@ func getFormDataObjectFlag(cmd *cobra.Command, flagName string, data map[string]
 	return nil
 }
 
+func getFileContentsFlag(cmd *cobra.Command, flagName string, body *mapbuilder.MapBuilder) {
+	if value, err := cmd.Flags().GetString(flagName); err == nil {
+		body.SetFile(value)
+	}
+}
+
 func getFileFlag(cmd *cobra.Command, flagName string, includeMeta bool, formData map[string]io.Reader) error {
 	if formData == nil {
 		formData = make(map[string]io.Reader)

@@ -77,7 +77,7 @@ func (n *updateBinaryCmd) updateBinary(cmd *cobra.Command, args []string) error 
 	// body
 	body := mapbuilder.NewMapBuilder()
 	body.SetMap(getDataFlag(cmd))
-	getFileFlag(cmd, "file", formData)
+	getFileFlag(cmd, "file", true, formData)
 	if err := setDataTemplateFromFlags(cmd, body); err != nil {
 		return newUserError("Template error. ", err)
 	}

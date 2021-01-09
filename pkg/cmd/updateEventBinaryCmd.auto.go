@@ -76,14 +76,7 @@ func (n *updateEventBinaryCmd) updateEventBinary(cmd *cobra.Command, args []stri
 
 	// body
 	body := mapbuilder.NewMapBuilder()
-	body.SetMap(getDataFlag(cmd))
-	getFileFlag(cmd, "file", formData)
-	if err := setDataTemplateFromFlags(cmd, body); err != nil {
-		return newUserError("Template error. ", err)
-	}
-	if err := body.Validate(); err != nil {
-		return newUserError("Body validation error. ", err)
-	}
+	getFileContentsFlag(cmd, "file", body)
 
 	// path parameters
 	pathParameters := make(map[string]string)
@@ -101,7 +94,7 @@ func (n *updateEventBinaryCmd) updateEventBinary(cmd *cobra.Command, args []stri
 		Method:       "PUT",
 		Path:         path,
 		Query:        queryValue,
-		Body:         body.GetMap(),
+		Body:         body.GetFileContents(),
 		FormData:     formData,
 		Header:       headers,
 		IgnoreAccept: false,

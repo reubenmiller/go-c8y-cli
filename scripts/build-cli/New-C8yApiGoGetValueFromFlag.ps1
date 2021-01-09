@@ -38,6 +38,7 @@
         "boolean" = @{}
         "datetime" = @{}
         "file" = @{}
+        "fileContents" = @{}
         "attachment" = @{}
         "id" = @{}
         "integer" = @{}
@@ -55,6 +56,12 @@
     $Setters."file"."body" = "getFileFlag(cmd, `"${prop}`", true, formData)"
     $Definitions."file" = @"
     $($Setters."file".$SetterType)
+"@
+
+    # fileContents. File contents will be added to body
+    $Setters."fileContents"."body" = "getFileContentsFlag(cmd, `"${prop}`", body)"
+    $Definitions."fileContents" = @"
+    $($Setters."fileContents".$SetterType)
 "@
 
     # attachment (used in multipart/form-data uploads), without extra details

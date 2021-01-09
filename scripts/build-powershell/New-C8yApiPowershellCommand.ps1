@@ -245,7 +245,7 @@
         $null = $ProcessingModeParam.AppendLine('        [Parameter()]')
         $null = $ProcessingModeParam.AppendLine('        [AllowNull()]')
         $null = $ProcessingModeParam.AppendLine('        [AllowEmptyString()]')
-        $null = $ProcessingModeParam.AppendLine('        [ValidateSet("PERSISTENT", "QUIESCENT", "TRANSIENT", "CEP")]')
+        $null = $ProcessingModeParam.AppendLine('        [ValidateSet("PERSISTENT", "QUIESCENT", "TRANSIENT", "CEP", "")]')
         $null = $ProcessingModeParam.AppendLine('        [string]')
         $null = $ProcessingModeParam.Append('        $ProcessingMode')
         $null = $CmdletParameters.Add($ProcessingModeParam)
