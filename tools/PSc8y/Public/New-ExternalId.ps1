@@ -47,7 +47,7 @@ Create external identity (using pipeline)
         [Parameter()]
         [AllowNull()]
         [AllowEmptyString()]
-        [ValidateSet("PERSISTENT", "QUIESCENT", "TRANSIENT", "CEP")]
+        [ValidateSet("PERSISTENT", "QUIESCENT", "TRANSIENT", "CEP", "")]
         [string]
         $ProcessingMode,
 

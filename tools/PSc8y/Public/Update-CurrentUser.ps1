@@ -57,7 +57,7 @@ Update the current user's lastname
         [Parameter()]
         [AllowNull()]
         [AllowEmptyString()]
-        [ValidateSet("PERSISTENT", "QUIESCENT", "TRANSIENT", "CEP")]
+        [ValidateSet("PERSISTENT", "QUIESCENT", "TRANSIENT", "CEP", "")]
         [string]
         $ProcessingMode,
 

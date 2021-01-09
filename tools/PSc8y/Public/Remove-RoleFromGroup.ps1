@@ -40,7 +40,7 @@ Remove a role from the given user group
         [Parameter()]
         [AllowNull()]
         [AllowEmptyString()]
-        [ValidateSet("PERSISTENT", "QUIESCENT", "TRANSIENT", "CEP")]
+        [ValidateSet("PERSISTENT", "QUIESCENT", "TRANSIENT", "CEP", "")]
         [string]
         $ProcessingMode,
 

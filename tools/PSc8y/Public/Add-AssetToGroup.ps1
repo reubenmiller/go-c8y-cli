@@ -42,7 +42,7 @@ Create group heirachy (parent group -> child group)
         [Parameter()]
         [AllowNull()]
         [AllowEmptyString()]
-        [ValidateSet("PERSISTENT", "QUIESCENT", "TRANSIENT", "CEP")]
+        [ValidateSet("PERSISTENT", "QUIESCENT", "TRANSIENT", "CEP", "")]
         [string]
         $ProcessingMode,
 

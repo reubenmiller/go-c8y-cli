@@ -57,7 +57,7 @@ Create a retention rule to delete all alarms after 180 days
         [Parameter()]
         [AllowNull()]
         [AllowEmptyString()]
-        [ValidateSet("PERSISTENT", "QUIESCENT", "TRANSIENT", "CEP")]
+        [ValidateSet("PERSISTENT", "QUIESCENT", "TRANSIENT", "CEP", "")]
         [string]
         $ProcessingMode,
 

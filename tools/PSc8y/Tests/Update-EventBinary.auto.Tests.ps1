@@ -3,7 +3,7 @@
 Describe -Name "Update-EventBinary" {
     BeforeEach {
         $Device = New-TestDevice
-        $Event = New-TestEvent -Device $Device.id
+        $Event = New-TestEvent -Device $Device.id -WithBinary
         $TestFile = New-TestFile
 
     }
