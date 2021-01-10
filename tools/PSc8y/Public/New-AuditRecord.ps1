@@ -67,6 +67,14 @@ Create an audit record for a custom managed object update
         [object]
         $Data,
 
+        # Cumulocity processing mode
+        [Parameter()]
+        [AllowNull()]
+        [AllowEmptyString()]
+        [ValidateSet("PERSISTENT", "QUIESCENT", "TRANSIENT", "CEP", "")]
+        [string]
+        $ProcessingMode,
+
         # Template (jsonnet) file to use to create the request body.
         [Parameter()]
         [string]
@@ -136,6 +144,9 @@ Create an audit record for a custom managed object update
         }
         if ($PSBoundParameters.ContainsKey("Data")) {
             $Parameters["data"] = ConvertTo-JsonArgument $Data
+        }
+        if ($PSBoundParameters.ContainsKey("ProcessingMode")) {
+            $Parameters["processingMode"] = $ProcessingMode
         }
         if ($PSBoundParameters.ContainsKey("Template") -and $Template) {
             $Parameters["template"] = $Template

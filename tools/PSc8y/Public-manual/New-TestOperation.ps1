@@ -32,6 +32,14 @@ Create an operation on the existing device "myExistingDevice"
         )]
         [object] $Device,
 
+        # Cumulocity processing mode
+        [Parameter()]
+        [AllowNull()]
+        [AllowEmptyString()]
+        [ValidateSet("PERSISTENT", "QUIESCENT", "TRANSIENT", "CEP")]
+        [string]
+        $ProcessingMode,
+
         # Template (jsonnet) file to use to create the request body.
         [Parameter()]
         [string]
@@ -67,6 +75,7 @@ Create an operation on the existing device "myExistingDevice"
                     parameters = @{ }
                 }
             } `
+            -ProcessingMode:$ProcessingMode `
             -Template:$Template `
             -TemplateVars:$TemplateVars `
             -Force:$Force

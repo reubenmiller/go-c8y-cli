@@ -39,6 +39,14 @@ Remove device group by name
         [switch]
         $Cascade,
 
+        # Cumulocity processing mode
+        [Parameter()]
+        [AllowNull()]
+        [AllowEmptyString()]
+        [ValidateSet("PERSISTENT", "QUIESCENT", "TRANSIENT", "CEP", "")]
+        [string]
+        $ProcessingMode,
+
         # Show the full (raw) response from Cumulocity including pagination information
         [Parameter()]
         [switch]
@@ -74,6 +82,9 @@ Remove device group by name
         $Parameters = @{}
         if ($PSBoundParameters.ContainsKey("Cascade")) {
             $Parameters["cascade"] = $Cascade
+        }
+        if ($PSBoundParameters.ContainsKey("ProcessingMode")) {
+            $Parameters["processingMode"] = $ProcessingMode
         }
         if ($PSBoundParameters.ContainsKey("OutputFile")) {
             $Parameters["outputFile"] = $OutputFile

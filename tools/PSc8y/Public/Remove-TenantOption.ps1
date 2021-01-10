@@ -31,6 +31,14 @@ Delete a tenant option
         [string]
         $Key,
 
+        # Cumulocity processing mode
+        [Parameter()]
+        [AllowNull()]
+        [AllowEmptyString()]
+        [ValidateSet("PERSISTENT", "QUIESCENT", "TRANSIENT", "CEP", "")]
+        [string]
+        $ProcessingMode,
+
         # Show the full (raw) response from Cumulocity including pagination information
         [Parameter()]
         [switch]
@@ -69,6 +77,9 @@ Delete a tenant option
         }
         if ($PSBoundParameters.ContainsKey("Key")) {
             $Parameters["key"] = $Key
+        }
+        if ($PSBoundParameters.ContainsKey("ProcessingMode")) {
+            $Parameters["processingMode"] = $ProcessingMode
         }
         if ($PSBoundParameters.ContainsKey("OutputFile")) {
             $Parameters["outputFile"] = $OutputFile

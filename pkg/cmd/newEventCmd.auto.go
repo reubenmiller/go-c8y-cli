@@ -38,6 +38,7 @@ Create a new event for a device
 	cmd.Flags().String("type", "", "Identifies the type of this event.")
 	cmd.Flags().String("text", "", "Text description of the event.")
 	addDataFlag(cmd)
+	addProcessingModeFlag(cmd)
 
 	// Required flags
 	cmd.MarkFlagRequired("device")
@@ -65,6 +66,11 @@ func (n *newEventCmd) newEvent(cmd *cobra.Command, args []string) error {
 
 	// headers
 	headers := http.Header{}
+	if cmd.Flags().Changed("processingMode") {
+		if v, err := cmd.Flags().GetString("processingMode"); err == nil && v != "" {
+			headers.Add("X-Cumulocity-Processing-Mode", v)
+		}
+	}
 
 	// form data
 	formData := make(map[string]io.Reader)

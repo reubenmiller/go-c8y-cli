@@ -36,6 +36,7 @@ Change the status of a specific data broker connector by given connector id
 	cmd.Flags().String("id", "", "Data broker connector id (required)")
 	cmd.Flags().String("status", "", "DataBroker status [SUSPENDED]. (required)")
 	addDataFlag(cmd)
+	addProcessingModeFlag(cmd)
 
 	// Required flags
 	cmd.MarkFlagRequired("id")
@@ -64,6 +65,11 @@ func (n *updateDataBrokerCmd) updateDataBroker(cmd *cobra.Command, args []string
 
 	// headers
 	headers := http.Header{}
+	if cmd.Flags().Changed("processingMode") {
+		if v, err := cmd.Flags().GetString("processingMode"); err == nil && v != "" {
+			headers.Add("X-Cumulocity-Processing-Mode", v)
+		}
+	}
 
 	// form data
 	formData := make(map[string]io.Reader)

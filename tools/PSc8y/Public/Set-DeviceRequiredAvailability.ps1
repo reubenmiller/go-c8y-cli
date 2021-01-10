@@ -38,6 +38,14 @@ Set the required availability of a device (using pipeline)
         [long]
         $Interval,
 
+        # Cumulocity processing mode
+        [Parameter()]
+        [AllowNull()]
+        [AllowEmptyString()]
+        [ValidateSet("PERSISTENT", "QUIESCENT", "TRANSIENT", "CEP", "")]
+        [string]
+        $ProcessingMode,
+
         # Template (jsonnet) file to use to create the request body.
         [Parameter()]
         [string]
@@ -83,6 +91,9 @@ Set the required availability of a device (using pipeline)
         $Parameters = @{}
         if ($PSBoundParameters.ContainsKey("Interval")) {
             $Parameters["interval"] = $Interval
+        }
+        if ($PSBoundParameters.ContainsKey("ProcessingMode")) {
+            $Parameters["processingMode"] = $ProcessingMode
         }
         if ($PSBoundParameters.ContainsKey("Template") -and $Template) {
             $Parameters["template"] = $Template

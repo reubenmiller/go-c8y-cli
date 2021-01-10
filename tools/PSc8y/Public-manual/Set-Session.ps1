@@ -17,6 +17,9 @@ terms will be includes in the results. The search is applied to the following fi
 * tenant
 * username
 
+.NOTES
+On MacOS, you need to hold "control"+Arrow keys to navigate the list of sessions. Otherwise the VIM style "j" (down) and "k" (up) keys can be also used for navigation
+
 .EXAMPLE
 Set-Session
 
@@ -110,6 +113,9 @@ String
             Write-Warning "Invalid path"
             return
         }
+
+        # Clear session before seting the new one
+        PSc8y\Clear-Session
 
         Write-Verbose "Setting new session: $Path"
         $env:C8Y_SESSION = Resolve-Path $Path

@@ -6,6 +6,10 @@
             "type": "integer",
             "minimum": 1,
             "maximum": 2000
+        },
+        "cookieProperty": {
+            "type": "string",
+            "description": "Cookies value in the form of key=value"
         }
     },
     "properties":{
@@ -35,8 +39,28 @@
             "type": "object",
             "properties": {
                 "cookies": {
-                    "description": "List of cookies which should be added to each outgoing request",
-                    "type": "array",
+                    "description": "Cookies which should be added to each outgoing request. Cookies are ordered sorted by their index/key",
+                    "type": "object",
+                    "properties": {
+                        "0": {
+                            "$ref": "#/definitions/cookieProperty"
+                        },
+                        "1": {
+                            "$ref": "#/definitions/cookieProperty"
+                        },
+                        "2": {
+                            "$ref": "#/definitions/cookieProperty"
+                        },
+                        "3": {
+                            "$ref": "#/definitions/cookieProperty"
+                        },
+                        "4": {
+                            "$ref": "#/definitions/cookieProperty"
+                        },
+                        "5": {
+                            "$ref": "#/definitions/cookieProperty"
+                        }
+                    },
                     "items": {
                         "type": "string"
                     }

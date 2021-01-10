@@ -70,6 +70,14 @@ Update a retention rule (using pipeline)
         [object]
         $Data,
 
+        # Cumulocity processing mode
+        [Parameter()]
+        [AllowNull()]
+        [AllowEmptyString()]
+        [ValidateSet("PERSISTENT", "QUIESCENT", "TRANSIENT", "CEP", "")]
+        [string]
+        $ProcessingMode,
+
         # Template (jsonnet) file to use to create the request body.
         [Parameter()]
         [string]
@@ -133,6 +141,9 @@ Update a retention rule (using pipeline)
         }
         if ($PSBoundParameters.ContainsKey("Data")) {
             $Parameters["data"] = ConvertTo-JsonArgument $Data
+        }
+        if ($PSBoundParameters.ContainsKey("ProcessingMode")) {
+            $Parameters["processingMode"] = $ProcessingMode
         }
         if ($PSBoundParameters.ContainsKey("Template") -and $Template) {
             $Parameters["template"] = $Template

@@ -40,6 +40,7 @@ Update the current user's lastname
 	cmd.Flags().String("email", "", "User email address")
 	cmd.Flags().String("enabled", "", "User activation status (true/false)")
 	cmd.Flags().String("password", "", "User password. Min: 6, max: 32 characters. Only Latin1 chars allowed")
+	addProcessingModeFlag(cmd)
 
 	// Required flags
 
@@ -66,6 +67,11 @@ func (n *updateUserCurrentCmd) updateUserCurrent(cmd *cobra.Command, args []stri
 
 	// headers
 	headers := http.Header{}
+	if cmd.Flags().Changed("processingMode") {
+		if v, err := cmd.Flags().GetString("processingMode"); err == nil && v != "" {
+			headers.Add("X-Cumulocity-Processing-Mode", v)
+		}
+	}
 
 	// form data
 	formData := make(map[string]io.Reader)

@@ -36,6 +36,7 @@ Create a tenant option
 	cmd.Flags().String("category", "", "Category of option (required)")
 	cmd.Flags().String("key", "", "Key of option (required)")
 	cmd.Flags().String("value", "", "Value of option (required)")
+	addProcessingModeFlag(cmd)
 
 	// Required flags
 	cmd.MarkFlagRequired("category")
@@ -65,6 +66,11 @@ func (n *newTenantOptionCmd) newTenantOption(cmd *cobra.Command, args []string) 
 
 	// headers
 	headers := http.Header{}
+	if cmd.Flags().Changed("processingMode") {
+		if v, err := cmd.Flags().GetString("processingMode"); err == nil && v != "" {
+			headers.Add("X-Cumulocity-Processing-Mode", v)
+		}
+	}
 
 	// form data
 	formData := make(map[string]io.Reader)

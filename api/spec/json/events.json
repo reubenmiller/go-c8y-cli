@@ -491,7 +491,7 @@
       "body": [
         {
           "name": "file",
-          "type": "file",
+          "type": "attachment",
           "required": true,
           "description": "File to be uploaded as a binary"
         }
@@ -514,7 +514,7 @@
             "description": "Update a binary related to an event",
             "beforeEach": [
               "$Device = New-TestDevice",
-              "$Event = New-TestEvent -Device $Device.id",
+              "$Event = New-TestEvent -Device $Device.id -WithBinary",
               "$TestFile = New-TestFile"
             ],
             "command": "Update-EventBinary -Id $Event.id -File $TestFile",
@@ -540,10 +540,16 @@
           "description": "Event id"
         }
       ],
+      "bodyTemplate": {
+        "type": "none"
+      },
+      "bodyContent": {
+        "type": "binary"
+      },
       "body": [
         {
           "name": "file",
-          "type": "file",
+          "type": "fileContents",
           "required": true,
           "description": "File to be uploaded as a binary"
         }

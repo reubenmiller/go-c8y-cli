@@ -36,6 +36,7 @@ Remove a role from the given user
 	cmd.Flags().StringSlice("group", []string{""}, "Group id (required)")
 	cmd.Flags().StringSlice("role", []string{""}, "Role name, e.g. ROLE_TENANT_MANAGEMENT_ADMIN (required)")
 	cmd.Flags().String("tenant", "", "Tenant")
+	addProcessingModeFlag(cmd)
 
 	// Required flags
 	cmd.MarkFlagRequired("group")
@@ -64,6 +65,11 @@ func (n *deleteRoleFromGroupCmd) deleteRoleFromGroup(cmd *cobra.Command, args []
 
 	// headers
 	headers := http.Header{}
+	if cmd.Flags().Changed("processingMode") {
+		if v, err := cmd.Flags().GetString("processingMode"); err == nil && v != "" {
+			headers.Add("X-Cumulocity-Processing-Mode", v)
+		}
+	}
 
 	// form data
 	formData := make(map[string]io.Reader)

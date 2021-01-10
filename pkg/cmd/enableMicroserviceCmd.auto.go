@@ -39,6 +39,7 @@ Enable (subscribe) to a microservice
 
 	cmd.Flags().String("tenant", "", "Tenant id")
 	cmd.Flags().String("id", "", "Microservice id (required)")
+	addProcessingModeFlag(cmd)
 
 	// Required flags
 	cmd.MarkFlagRequired("id")
@@ -66,6 +67,11 @@ func (n *enableMicroserviceCmd) enableMicroservice(cmd *cobra.Command, args []st
 
 	// headers
 	headers := http.Header{}
+	if cmd.Flags().Changed("processingMode") {
+		if v, err := cmd.Flags().GetString("processingMode"); err == nil && v != "" {
+			headers.Add("X-Cumulocity-Processing-Mode", v)
+		}
+	}
 
 	// form data
 	formData := make(map[string]io.Reader)

@@ -35,6 +35,7 @@ Unassign a child device from its parent device
 
 	cmd.Flags().StringSlice("device", []string{""}, "ManagedObject id (required)")
 	cmd.Flags().StringSlice("childDevice", []string{""}, "Child device reference (required)")
+	addProcessingModeFlag(cmd)
 
 	// Required flags
 	cmd.MarkFlagRequired("device")
@@ -63,6 +64,11 @@ func (n *deleteManagedObjectChildDeviceReferenceCmd) deleteManagedObjectChildDev
 
 	// headers
 	headers := http.Header{}
+	if cmd.Flags().Changed("processingMode") {
+		if v, err := cmd.Flags().GetString("processingMode"); err == nil && v != "" {
+			headers.Add("X-Cumulocity-Processing-Mode", v)
+		}
+	}
 
 	// form data
 	formData := make(map[string]io.Reader)

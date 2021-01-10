@@ -33,6 +33,14 @@ Add a binary to an event
         [string]
         $File,
 
+        # Cumulocity processing mode
+        [Parameter()]
+        [AllowNull()]
+        [AllowEmptyString()]
+        [ValidateSet("PERSISTENT", "QUIESCENT", "TRANSIENT", "CEP", "")]
+        [string]
+        $ProcessingMode,
+
         # Template (jsonnet) file to use to create the request body.
         [Parameter()]
         [string]
@@ -78,6 +86,9 @@ Add a binary to an event
         $Parameters = @{}
         if ($PSBoundParameters.ContainsKey("File")) {
             $Parameters["file"] = $File
+        }
+        if ($PSBoundParameters.ContainsKey("ProcessingMode")) {
+            $Parameters["processingMode"] = $ProcessingMode
         }
         if ($PSBoundParameters.ContainsKey("Template") -and $Template) {
             $Parameters["template"] = $Template

@@ -155,7 +155,7 @@ func (n *getGenericRestCmd) getGenericRest(cmd *cobra.Command, args []string) er
 		// get file info
 		if cmd.Flags().Changed("file") {
 			req.FormData = make(map[string]io.Reader)
-			getFileFlag(cmd, "file", req.FormData)
+			getFileFlag(cmd, "file", true, req.FormData)
 		}
 	}
 

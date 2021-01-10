@@ -53,6 +53,14 @@ Update the current user's lastname
         [string]
         $Password,
 
+        # Cumulocity processing mode
+        [Parameter()]
+        [AllowNull()]
+        [AllowEmptyString()]
+        [ValidateSet("PERSISTENT", "QUIESCENT", "TRANSIENT", "CEP", "")]
+        [string]
+        $ProcessingMode,
+
         # Template (jsonnet) file to use to create the request body.
         [Parameter()]
         [string]
@@ -113,6 +121,9 @@ Update the current user's lastname
         }
         if ($PSBoundParameters.ContainsKey("Password")) {
             $Parameters["password"] = $Password
+        }
+        if ($PSBoundParameters.ContainsKey("ProcessingMode")) {
+            $Parameters["processingMode"] = $ProcessingMode
         }
         if ($PSBoundParameters.ContainsKey("Template") -and $Template) {
             $Parameters["template"] = $Template

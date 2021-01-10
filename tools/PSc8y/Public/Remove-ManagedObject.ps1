@@ -43,6 +43,14 @@ Delete a managed object and all child devices
         [switch]
         $Cascade,
 
+        # Cumulocity processing mode
+        [Parameter()]
+        [AllowNull()]
+        [AllowEmptyString()]
+        [ValidateSet("PERSISTENT", "QUIESCENT", "TRANSIENT", "CEP", "")]
+        [string]
+        $ProcessingMode,
+
         # Show the full (raw) response from Cumulocity including pagination information
         [Parameter()]
         [switch]
@@ -78,6 +86,9 @@ Delete a managed object and all child devices
         $Parameters = @{}
         if ($PSBoundParameters.ContainsKey("Cascade")) {
             $Parameters["cascade"] = $Cascade
+        }
+        if ($PSBoundParameters.ContainsKey("ProcessingMode")) {
+            $Parameters["processingMode"] = $ProcessingMode
         }
         if ($PSBoundParameters.ContainsKey("OutputFile")) {
             $Parameters["outputFile"] = $OutputFile

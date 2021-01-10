@@ -59,14 +59,14 @@
         {
           "name": "csv",
           "type": "boolean",
-          "description": "Results will be displayed in csv format",
+          "description": "Results will be displayed in csv format. Note: -IncludeAll, is not supported when using using this parameter",
           "property": "Accept",
           "value": "text/csv"
         },
         {
           "name": "excel",
           "type": "boolean",
-          "description": "Results will be displayed in Excel format",
+          "description": "Results will be displayed in Excel format Note: -IncludeAll, is not supported when using using this parameter",
           "property": "Accept",
           "value": "application/vnd.ms-excel"
         },

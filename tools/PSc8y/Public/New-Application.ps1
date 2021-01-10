@@ -73,6 +73,14 @@ Create a new hosted application
         [string]
         $ExternalUrl,
 
+        # Cumulocity processing mode
+        [Parameter()]
+        [AllowNull()]
+        [AllowEmptyString()]
+        [ValidateSet("PERSISTENT", "QUIESCENT", "TRANSIENT", "CEP", "")]
+        [string]
+        $ProcessingMode,
+
         # Template (jsonnet) file to use to create the request body.
         [Parameter()]
         [string]
@@ -145,6 +153,9 @@ Create a new hosted application
         }
         if ($PSBoundParameters.ContainsKey("ExternalUrl")) {
             $Parameters["externalUrl"] = $ExternalUrl
+        }
+        if ($PSBoundParameters.ContainsKey("ProcessingMode")) {
+            $Parameters["processingMode"] = $ProcessingMode
         }
         if ($PSBoundParameters.ContainsKey("Template") -and $Template) {
             $Parameters["template"] = $Template

@@ -76,6 +76,13 @@ Describe -Name "New-ManagedObject" {
         $Response | Should -BeNullOrEmpty
     }
 
+    It "Managed object allow setting the processing mode" {
+        foreach ($mode in @("PERSISTENT", "QUIESCENT", "TRANSIENT", "CEP")) {
+            $WhatIfMessage = $($null = PSc8y\New-ManagedObject -Data @{} -ProcessingMode $mode -WhatIf) 6>&1
+            $WhatIfMessage -match "X-Cumulocity-Processing-Mode:\s+$mode" | Should -HaveCount 1
+        }
+    }
+
     AfterEach {
         Get-ManagedObjectCollection -Type $type -PageSize 100 | Select-Object | Remove-ManagedObject
 

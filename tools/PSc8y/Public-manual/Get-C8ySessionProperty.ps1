@@ -27,17 +27,13 @@ string
         [string] $Name
     )
 
-    $Values = @{
+    $Values = [PSCustomObject]@{
         host = $env:C8Y_HOST
         tenant = $env:C8Y_TENANT
     }
 
     # Is calling cmdlet using the session variable?
-    $SessionFile = (Get-PSCallStack).InvocationInfo.BoundParameters.Session
-
-    if ($SessionFile) {
-        $Values = Get-Content -LiteralPath $SessionFile | ConvertFrom-Json
-    }
-
-    $Values[$Name]
+    $Session = (Get-PSCallStack).InvocationInfo.BoundParameters.Session
+    $Values = Get-Session -Session:$Session
+    $Values | Select-Object -ExpandProperty $Name
 }

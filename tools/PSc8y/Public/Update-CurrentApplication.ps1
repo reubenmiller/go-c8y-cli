@@ -67,6 +67,14 @@ Update custom properties of the current application (requires using application 
         [string]
         $ExternalUrl,
 
+        # Cumulocity processing mode
+        [Parameter()]
+        [AllowNull()]
+        [AllowEmptyString()]
+        [ValidateSet("PERSISTENT", "QUIESCENT", "TRANSIENT", "CEP", "")]
+        [string]
+        $ProcessingMode,
+
         # Template (jsonnet) file to use to create the request body.
         [Parameter()]
         [string]
@@ -136,6 +144,9 @@ Update custom properties of the current application (requires using application 
         }
         if ($PSBoundParameters.ContainsKey("ExternalUrl")) {
             $Parameters["externalUrl"] = $ExternalUrl
+        }
+        if ($PSBoundParameters.ContainsKey("ProcessingMode")) {
+            $Parameters["processingMode"] = $ProcessingMode
         }
         if ($PSBoundParameters.ContainsKey("Template") -and $Template) {
             $Parameters["template"] = $Template

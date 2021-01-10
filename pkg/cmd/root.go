@@ -69,10 +69,12 @@ func (c *c8yCmd) createCumulocityClient() {
 	}
 
 	// Try reading session from file
-	if _, readErr := ReadConfigFiles(viper.GetViper()); readErr != nil {
+	if sessionFilePath, readErr := ReadConfigFiles(viper.GetViper()); readErr != nil {
 		Logger.Printf("Error reading config file. %s", readErr)
 		// Fallback to reading session from environment variables
 		// client = c8y.NewClientFromEnvironment(httpClient, true)
+	} else {
+		cliConfig.SetSessionFilePath(sessionFilePath)
 	}
 	client = c8y.NewClient(
 		httpClient,
@@ -456,7 +458,9 @@ func ReadConfigFiles(v *viper.Viper) (path string, err error) {
 			sessionName = globalFlagSessionFile
 		}
 
-		v.SetConfigName(sessionName)
+		if sessionName != "" {
+			v.SetConfigName(sessionName)
+		}
 	}
 
 	err = v.MergeInConfig()

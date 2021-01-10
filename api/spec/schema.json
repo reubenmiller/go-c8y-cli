@@ -31,6 +31,8 @@
         "integer",
         "id",
         "file",
+        "fileContents",
+        "attachment",
         "datetime",
         "json",
         "json_custom",
@@ -351,6 +353,19 @@
               ]
             }
           },
+          "bodyContent": {
+            "type": "object",
+            "description": "Description of body content",
+            "properties": {
+              "type": {
+                "type": "string",
+                "description": "Body content type. Only used to identify binary contents",
+                "enum": [
+                  "binary"
+                ]
+              }
+            }
+          },
           "bodyTemplate": {
             "type": "object",
             "description": "Use a template when constructing the body of the http request. This can be used to force values, have defaults, or perform custom logic (depending on the template engine). At the moment on jsonnet is supported",
@@ -358,7 +373,7 @@
               "type": {
                 "type": "string",
                 "description": "Templating engine. Current only supports jsonnet",
-                "enum": ["jsonnet"]
+                "enum": ["jsonnet", "none"]
               },
               "applyLast": {
                 "type": "boolean",
@@ -370,9 +385,7 @@
               }
             },
             "required": [
-              "type",
-              "applyLast",
-              "template"
+              "type"
             ]
           },
           "bodyRequiredKeys": {

@@ -41,8 +41,8 @@ Get a list of measurements
 	cmd.Flags().String("dateFrom", "", "Start date or date and time of measurement occurrence.")
 	cmd.Flags().String("dateTo", "", "End date or date and time of measurement occurrence.")
 	cmd.Flags().Bool("revert", false, "Return the newest instead of the oldest measurements. Must be used with dateFrom and dateTo parameters")
-	cmd.Flags().Bool("csv", false, "Results will be displayed in csv format")
-	cmd.Flags().Bool("excel", false, "Results will be displayed in Excel format")
+	cmd.Flags().Bool("csv", false, "Results will be displayed in csv format. Note: -IncludeAll, is not supported when using using this parameter")
+	cmd.Flags().Bool("excel", false, "Results will be displayed in Excel format Note: -IncludeAll, is not supported when using using this parameter")
 	cmd.Flags().String("unit", "", "Every measurement fragment which contains 'unit' property will be transformed to use required system of units.")
 
 	// Required flags

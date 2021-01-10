@@ -42,6 +42,7 @@ Update custom properties of the current application (requires using application 
 	cmd.Flags().String("resourcesUsername", "", "authorization username to access resourcesUrl")
 	cmd.Flags().String("resourcesPassword", "", "authorization password to access resourcesUrl")
 	cmd.Flags().String("externalUrl", "", "URL to the external application")
+	addProcessingModeFlag(cmd)
 
 	// Required flags
 
@@ -68,6 +69,11 @@ func (n *updateCurrentApplicationCmd) updateCurrentApplication(cmd *cobra.Comman
 
 	// headers
 	headers := http.Header{}
+	if cmd.Flags().Changed("processingMode") {
+		if v, err := cmd.Flags().GetString("processingMode"); err == nil && v != "" {
+			headers.Add("X-Cumulocity-Processing-Mode", v)
+		}
+	}
 
 	// form data
 	formData := make(map[string]io.Reader)

@@ -35,6 +35,7 @@ Delete an binary attached to an event
 	cmd.SilenceUsage = true
 
 	cmd.Flags().String("id", "", "Event id (required)")
+	addProcessingModeFlag(cmd)
 
 	// Required flags
 	cmd.MarkFlagRequired("id")
@@ -62,6 +63,11 @@ func (n *deleteEventBinaryCmd) deleteEventBinary(cmd *cobra.Command, args []stri
 
 	// headers
 	headers := http.Header{}
+	if cmd.Flags().Changed("processingMode") {
+		if v, err := cmd.Flags().GetString("processingMode"); err == nil && v != "" {
+			headers.Add("X-Cumulocity-Processing-Mode", v)
+		}
+	}
 
 	// form data
 	formData := make(map[string]io.Reader)

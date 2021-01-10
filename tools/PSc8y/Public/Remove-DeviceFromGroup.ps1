@@ -33,6 +33,14 @@ Unassign a child device from its parent asset
         [object[]]
         $ChildDevice,
 
+        # Cumulocity processing mode
+        [Parameter()]
+        [AllowNull()]
+        [AllowEmptyString()]
+        [ValidateSet("PERSISTENT", "QUIESCENT", "TRANSIENT", "CEP", "")]
+        [string]
+        $ProcessingMode,
+
         # Show the full (raw) response from Cumulocity including pagination information
         [Parameter()]
         [switch]
@@ -68,6 +76,9 @@ Unassign a child device from its parent asset
         $Parameters = @{}
         if ($PSBoundParameters.ContainsKey("ChildDevice")) {
             $Parameters["childDevice"] = $ChildDevice
+        }
+        if ($PSBoundParameters.ContainsKey("ProcessingMode")) {
+            $Parameters["processingMode"] = $ProcessingMode
         }
         if ($PSBoundParameters.ContainsKey("OutputFile")) {
             $Parameters["outputFile"] = $OutputFile

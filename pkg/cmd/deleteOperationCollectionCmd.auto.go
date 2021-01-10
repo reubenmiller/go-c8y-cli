@@ -39,6 +39,7 @@ Remove all pending operations for a given device
 	cmd.Flags().String("dateFrom", "", "Start date or date and time of operation.")
 	cmd.Flags().String("dateTo", "", "End date or date and time of operation.")
 	cmd.Flags().String("status", "", "Operation status, can be one of SUCCESSFUL, FAILED, EXECUTING or PENDING.")
+	addProcessingModeFlag(cmd)
 
 	// Required flags
 
@@ -120,6 +121,11 @@ func (n *deleteOperationCollectionCmd) deleteOperationCollection(cmd *cobra.Comm
 
 	// headers
 	headers := http.Header{}
+	if cmd.Flags().Changed("processingMode") {
+		if v, err := cmd.Flags().GetString("processingMode"); err == nil && v != "" {
+			headers.Add("X-Cumulocity-Processing-Mode", v)
+		}
+	}
 
 	// form data
 	formData := make(map[string]io.Reader)

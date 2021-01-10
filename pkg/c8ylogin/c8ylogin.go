@@ -350,7 +350,7 @@ func (lh *LoginHandler) login() {
 }
 
 func (lh *LoginHandler) errorContains(message, pattern string) bool {
-	return strings.Contains(message, pattern)
+	return strings.Contains(strings.ToLower(message), strings.ToLower(pattern))
 }
 
 func (lh *LoginHandler) verify() {
@@ -361,6 +361,7 @@ func (lh *LoginHandler) verify() {
 		if resp != nil && resp.StatusCode == http.StatusUnauthorized {
 
 			if v, ok := err.(*c8y.ErrorResponse); ok {
+				lh.Logger.Warning("error message from server. %s", v.Message)
 
 				if lh.errorContains(v.Message, "TFA TOTP setup required") {
 					lh.TFACodeRequired = true
@@ -369,6 +370,12 @@ func (lh *LoginHandler) verify() {
 					lh.Logger.Debug("TFA code is required. server response: %s", v.Message)
 					lh.TFACodeRequired = true
 					lh.state <- LoginStateNoAuth
+				} else if lh.errorContains(v.Message, "User has been logged out") {
+					// TODO: Invalidate the cookies
+					lh.Logger.Warning("User had been logged out. Clearing cookies and trying again")
+					lh.state <- LoginStateNoAuth
+					lh.C8Yclient.SetCookies([]*http.Cookie{})
+					lh.onSave()
 				} else if lh.errorContains(v.Message, "Bad credentials") {
 					lh.Logger.Infof("Bad creds using auth method: %s", lh.C8Yclient.AuthorizationMethod)
 					if lh.C8Yclient.AuthorizationMethod != c8y.AuthMethodOAuth2Internal {

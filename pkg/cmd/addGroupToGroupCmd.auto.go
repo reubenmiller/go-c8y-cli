@@ -38,6 +38,7 @@ Add multiple groups to a group
 
 	cmd.Flags().StringSlice("group", []string{""}, "Group (required)")
 	cmd.Flags().StringSlice("newChildGroup", []string{""}, "New child group to be added to the group as an child asset (required)")
+	addProcessingModeFlag(cmd)
 
 	// Required flags
 	cmd.MarkFlagRequired("group")
@@ -66,6 +67,11 @@ func (n *addGroupToGroupCmd) addGroupToGroup(cmd *cobra.Command, args []string) 
 
 	// headers
 	headers := http.Header{}
+	if cmd.Flags().Changed("processingMode") {
+		if v, err := cmd.Flags().GetString("processingMode"); err == nil && v != "" {
+			headers.Add("X-Cumulocity-Processing-Mode", v)
+		}
+	}
 
 	// form data
 	formData := make(map[string]io.Reader)

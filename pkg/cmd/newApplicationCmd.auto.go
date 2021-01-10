@@ -43,6 +43,7 @@ Create a new hosted application
 	cmd.Flags().String("resourcesUsername", "", "authorization username to access resourcesUrl")
 	cmd.Flags().String("resourcesPassword", "", "authorization password to access resourcesUrl")
 	cmd.Flags().String("externalUrl", "", "URL to the external application. Required when application type is EXTERNAL")
+	addProcessingModeFlag(cmd)
 
 	// Required flags
 	cmd.MarkFlagRequired("name")
@@ -72,6 +73,11 @@ func (n *newApplicationCmd) newApplication(cmd *cobra.Command, args []string) er
 
 	// headers
 	headers := http.Header{}
+	if cmd.Flags().Changed("processingMode") {
+		if v, err := cmd.Flags().GetString("processingMode"); err == nil && v != "" {
+			headers.Add("X-Cumulocity-Processing-Mode", v)
+		}
+	}
 
 	// form data
 	formData := make(map[string]io.Reader)

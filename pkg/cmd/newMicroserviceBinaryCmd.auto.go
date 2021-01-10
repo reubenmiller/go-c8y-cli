@@ -40,6 +40,7 @@ Upload microservice binary
 
 	cmd.Flags().String("id", "", "Microservice id (required)")
 	cmd.Flags().String("file", "", "File to be uploaded as a binary (required)")
+	addProcessingModeFlag(cmd)
 
 	// Required flags
 	cmd.MarkFlagRequired("id")
@@ -68,6 +69,11 @@ func (n *newMicroserviceBinaryCmd) newMicroserviceBinary(cmd *cobra.Command, arg
 
 	// headers
 	headers := http.Header{}
+	if cmd.Flags().Changed("processingMode") {
+		if v, err := cmd.Flags().GetString("processingMode"); err == nil && v != "" {
+			headers.Add("X-Cumulocity-Processing-Mode", v)
+		}
+	}
 
 	// form data
 	formData := make(map[string]io.Reader)
@@ -75,7 +81,7 @@ func (n *newMicroserviceBinaryCmd) newMicroserviceBinary(cmd *cobra.Command, arg
 	// body
 	body := mapbuilder.NewMapBuilder()
 	body.SetMap(getDataFlag(cmd))
-	getFileFlag(cmd, "file", formData)
+	getFileFlag(cmd, "file", true, formData)
 	if err := setDataTemplateFromFlags(cmd, body); err != nil {
 		return newUserError("Template error. ", err)
 	}

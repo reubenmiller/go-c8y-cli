@@ -16,6 +16,11 @@ Function Invoke-Template {
     
     Execute a jsonnet template
 
+    .EXAMPLE
+    PS> Invoke-Template -Template ./template.jsonnet -TemplateVars "name=input,type=mytype"
+    
+    Execute a jsonnet template which has multiple template variables (using a comma separated string)
+
     .OUTPUTS
     String
     
