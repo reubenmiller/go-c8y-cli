@@ -4,7 +4,14 @@
 
 No unreleased features
 
+
+
 ### Minor improvements
+
+* "owner" is field is not left untouched in the -Data parameter allowing the user to change it if required.
+    ```powershell
+    Update-ManagedObject -Id 12345 -Data @{owner="myuser"}
+    ```
 
 * Cumulocity API error messages are prefixed with "Server error." to make it more clear that the error is due to an API call and not the client.
 
