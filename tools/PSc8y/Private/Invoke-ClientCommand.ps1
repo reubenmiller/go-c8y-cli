@@ -198,10 +198,24 @@ only relevant information is shown.
             } else {
                 $errormessage = $RawResponse | Select-Object -First 1 | ConvertFrom-Json
             }
-            Write-Error ("{0}: {1}" -f @(
-                $errormessage.error,
-                $errormessage.message
-            ))
+            
+            if ($errormessage.error) {
+                $errorText = if ($errormessage.message) {
+                    "Server error. {0}: {1}" -f @(
+                        $errormessage.error,
+                        $errormessage.message
+                    )    
+                } else {
+                    "Server error. {0}" -f @(
+                        $errormessage.error
+                    )
+                }
+            } else {
+                $errorText = $errormessage
+            }
+            
+            Write-Error $errorText
+            
         } catch {
             Write-Error "c8y command failed. $RawResponse"
         }

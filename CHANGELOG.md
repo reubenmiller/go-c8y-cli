@@ -4,6 +4,31 @@
 
 No unreleased features
 
+### Minor improvements
+
+* Cumulocity API error messages are prefixed with "Server error." to make it more clear that the error is due to an API call and not the client.
+
+    ```powershell
+    PS /workspaces/go-c8y-cli> Get-AuditRecord 12345                        
+
+    WARNING: c8y returned a non-zero exit code. code=1
+    Write-Error: /workspaces/go-c8y-cli/tools/PSc8y/dist/PSc8y/PSc8y.psm1:3657:13
+    Line |
+    3657 |              Invoke-ClientCommand `
+        |              ~~~~~~~~~~~~~~~~~~~~~~
+        | Server error. general/internalError
+
+    PS /workspaces/go-c8y-cli> Get-Alarm 12345                              
+
+
+    WARNING: c8y returned a non-zero exit code. code=1
+    Write-Error: /workspaces/go-c8y-cli/tools/PSc8y/dist/PSc8y/PSc8y.psm1:2742:13
+    Line |
+    2742 |              Invoke-ClientCommand `
+        |              ~~~~~~~~~~~~~~~~~~~~~~
+        | Server error. alarm/Not Found: Finding alarm from database failed : No alarm for gid '12345'!
+    ```
+
 ## Released
 
 ### v1.8.0
