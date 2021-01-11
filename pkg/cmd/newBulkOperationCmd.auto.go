@@ -38,6 +38,7 @@ Create operation for a device
 	cmd.Flags().Float32("creationRampSec", 0, "Delay between every operation creation. (required)")
 	cmd.Flags().String("operation", "", "Operation prototype to send to each device in the group (required)")
 	addDataFlag(cmd)
+	addProcessingModeFlag(cmd)
 
 	// Required flags
 	cmd.MarkFlagRequired("group")
@@ -67,6 +68,11 @@ func (n *newBulkOperationCmd) newBulkOperation(cmd *cobra.Command, args []string
 
 	// headers
 	headers := http.Header{}
+	if cmd.Flags().Changed("processingMode") {
+		if v, err := cmd.Flags().GetString("processingMode"); err == nil && v != "" {
+			headers.Add("X-Cumulocity-Processing-Mode", v)
+		}
+	}
 
 	// form data
 	formData := make(map[string]io.Reader)

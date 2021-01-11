@@ -36,6 +36,7 @@ Update an bulk operation
 	cmd.Flags().Int("id", 0, "Bulk Operation id (required)")
 	cmd.Flags().Float32("creationRampSec", 0, "Delay between every operation creation. (required)")
 	addDataFlag(cmd)
+	addProcessingModeFlag(cmd)
 
 	// Required flags
 	cmd.MarkFlagRequired("id")
@@ -64,6 +65,11 @@ func (n *updateBulkOperationCmd) updateBulkOperation(cmd *cobra.Command, args []
 
 	// headers
 	headers := http.Header{}
+	if cmd.Flags().Changed("processingMode") {
+		if v, err := cmd.Flags().GetString("processingMode"); err == nil && v != "" {
+			headers.Add("X-Cumulocity-Processing-Mode", v)
+		}
+	}
 
 	// form data
 	formData := make(map[string]io.Reader)

@@ -34,6 +34,7 @@ Remove bulk operation by id
 	cmd.SilenceUsage = true
 
 	cmd.Flags().Int("id", 0, "Bulk Operation id (required)")
+	addProcessingModeFlag(cmd)
 
 	// Required flags
 	cmd.MarkFlagRequired("id")
@@ -61,6 +62,11 @@ func (n *deleteBulkOperationCmd) deleteBulkOperation(cmd *cobra.Command, args []
 
 	// headers
 	headers := http.Header{}
+	if cmd.Flags().Changed("processingMode") {
+		if v, err := cmd.Flags().GetString("processingMode"); err == nil && v != "" {
+			headers.Add("X-Cumulocity-Processing-Mode", v)
+		}
+	}
 
 	// form data
 	formData := make(map[string]io.Reader)
