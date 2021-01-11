@@ -89,6 +89,9 @@ No unreleased features
     ```powershell
     $env:C8Y_DISABLE_INHERITANCE = $true
     ```
+* pwsh docker image improvements
+    * Enabled pwsh tab completion by default
+    * Added `vim` text editor
 
 ## Released
 
