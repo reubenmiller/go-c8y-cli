@@ -38,6 +38,7 @@ Delete measurement collection for a device
 	cmd.Flags().String("fragmentType", "", "Fragment name from measurement (deprecated).")
 	cmd.Flags().String("dateFrom", "", "Start date or date and time of measurement occurrence.")
 	cmd.Flags().String("dateTo", "", "End date or date and time of measurement occurrence.")
+	addProcessingModeFlag(cmd)
 
 	// Required flags
 
@@ -109,6 +110,11 @@ func (n *deleteMeasurementCollectionCmd) deleteMeasurementCollection(cmd *cobra.
 
 	// headers
 	headers := http.Header{}
+	if cmd.Flags().Changed("processingMode") {
+		if v, err := cmd.Flags().GetString("processingMode"); err == nil && v != "" {
+			headers.Add("X-Cumulocity-Processing-Mode", v)
+		}
+	}
 
 	// form data
 	formData := make(map[string]io.Reader)

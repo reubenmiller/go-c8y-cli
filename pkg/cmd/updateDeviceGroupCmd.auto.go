@@ -37,6 +37,7 @@ Update device group by id
 	cmd.Flags().StringSlice("id", []string{""}, "Device group ID (required)")
 	cmd.Flags().String("name", "", "Device group name")
 	addDataFlag(cmd)
+	addProcessingModeFlag(cmd)
 
 	// Required flags
 	cmd.MarkFlagRequired("id")
@@ -64,6 +65,11 @@ func (n *updateDeviceGroupCmd) updateDeviceGroup(cmd *cobra.Command, args []stri
 
 	// headers
 	headers := http.Header{}
+	if cmd.Flags().Changed("processingMode") {
+		if v, err := cmd.Flags().GetString("processingMode"); err == nil && v != "" {
+			headers.Add("X-Cumulocity-Processing-Mode", v)
+		}
+	}
 
 	// form data
 	formData := make(map[string]io.Reader)

@@ -41,6 +41,7 @@ Update severity of an existing alarm to CRITICAL
 	cmd.Flags().String("severity", "", "Alarm severity, for example CRITICAL, MAJOR, MINOR or WARNING.")
 	cmd.Flags().String("text", "", "Text description of the alarm.")
 	addDataFlag(cmd)
+	addProcessingModeFlag(cmd)
 
 	// Required flags
 	cmd.MarkFlagRequired("id")
@@ -68,6 +69,11 @@ func (n *updateAlarmCmd) updateAlarm(cmd *cobra.Command, args []string) error {
 
 	// headers
 	headers := http.Header{}
+	if cmd.Flags().Changed("processingMode") {
+		if v, err := cmd.Flags().GetString("processingMode"); err == nil && v != "" {
+			headers.Add("X-Cumulocity-Processing-Mode", v)
+		}
+	}
 
 	// form data
 	formData := make(map[string]io.Reader)

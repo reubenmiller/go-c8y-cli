@@ -39,6 +39,7 @@ Disable (unsubscribe) to a microservice
 
 	cmd.Flags().String("id", "", "Microservice id (required)")
 	cmd.Flags().String("tenant", "", "Tenant id")
+	addProcessingModeFlag(cmd)
 
 	// Required flags
 	cmd.MarkFlagRequired("id")
@@ -66,6 +67,11 @@ func (n *disableMicroserviceCmd) disableMicroservice(cmd *cobra.Command, args []
 
 	// headers
 	headers := http.Header{}
+	if cmd.Flags().Changed("processingMode") {
+		if v, err := cmd.Flags().GetString("processingMode"); err == nil && v != "" {
+			headers.Add("X-Cumulocity-Processing-Mode", v)
+		}
+	}
 
 	// form data
 	formData := make(map[string]io.Reader)

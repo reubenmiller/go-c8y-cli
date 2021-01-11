@@ -62,6 +62,9 @@ set-session () {
         return
     fi
 
+    # clear session before settings new one as stale env variables can cause problems
+    clear-session
+
     export C8Y_SESSION=$resp
 
     # Check encryption passphrase
@@ -92,6 +95,25 @@ set-session () {
     fi
 
     # reset any enabled side-effect commands
+    unset C8Y_SETTINGS_MODE_ENABLECREATE
+    unset C8Y_SETTINGS_MODE_ENABLEUPDATE
+    unset C8Y_SETTINGS_MODE_ENABLEDELETE
+}
+
+# -----------
+# clear-session
+# -----------
+# Description: Clear all cumulocity session variables
+# Usage:
+#   clear-session
+#
+clear-session () {
+    unset C8Y_HOST
+    unset C8Y_TENANT
+    unset C8Y_USER
+    unset C8Y_USERNAME
+    unset C8Y_PASSWORD
+    unset C8Y_SESSION
     unset C8Y_SETTINGS_MODE_ENABLECREATE
     unset C8Y_SETTINGS_MODE_ENABLEUPDATE
     unset C8Y_SETTINGS_MODE_ENABLEDELETE

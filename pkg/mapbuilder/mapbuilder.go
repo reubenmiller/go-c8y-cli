@@ -112,6 +112,7 @@ func NewMapBuilderFromJSON(data string) (*MapBuilder, error) {
 // MapBuilder creates body builder
 type MapBuilder struct {
 	body map[string]interface{}
+	file string
 
 	templateVariables map[string]interface{}
 	requiredKeys      []string
@@ -221,9 +222,30 @@ func (b *MapBuilder) SetMap(body map[string]interface{}) {
 	b.body = body
 }
 
+// SetFile sets the body to the contents of the file path
+func (b *MapBuilder) SetFile(path string) {
+	b.file = path
+}
+
 // GetMap returns the body as a map[string]interface{}
 func (b MapBuilder) GetMap() map[string]interface{} {
 	return b.body
+}
+
+func (b MapBuilder) GetFileContents() *os.File {
+	file, err := os.Open(b.file)
+	if err != nil {
+		log.Printf("failed to open file. %s", err)
+		return nil
+	}
+	return file
+}
+
+func (b MapBuilder) GetBody() (interface{}, error) {
+	if b.file != "" {
+		return os.Open(b.file)
+	}
+	return b.GetMap(), nil
 }
 
 // GetMap returns the body as a map[string]interface{}

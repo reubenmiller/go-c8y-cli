@@ -705,6 +705,32 @@
           "position": 99
         }
       ]
+    },
+    {
+      "name": "logout",
+      "description": "Log out the current user",
+      "descriptionLong": "Logout the current user. This will invalidate the token associated with the user when using OAUTH_INTERNAL",
+      "method": "POST",
+      "path": "/user/logout",
+      "accept": "",
+      "alias": {
+        "go": "logout",
+        "powershell": "Invoke-UserLogout"
+      },
+      "examples": {
+        "powershell": [
+          {
+            "description": "Log out the current user",
+            "command": "Invoke-UserLogout"
+          }
+        ],
+        "go": [
+          {
+            "description": "Log out the current user",
+            "command": "c8y users logout"
+          }
+        ]
+      }
     }
   ]
 }

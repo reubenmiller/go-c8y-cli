@@ -62,7 +62,8 @@
         $null = $ArgumentSources.AddRange(([array]$Specification.options))
     }
 
-    $CommandArgs = foreach ($iArg in (Remove-SkippedParameters $ArgumentSources)) {
+    $CommandArgs = New-Object System.Collections.ArrayList
+    foreach ($iArg in (Remove-SkippedParameters $ArgumentSources)) {
         $ArgParams = @{
             Name = $iArg.name
             Type = $iArg.type
@@ -71,7 +72,15 @@
             Default = $iArg.default
             Required = $iArg.required
         }
-        Get-C8yGoArgs @ArgParams
+        $arg = Get-C8yGoArgs @ArgParams
+        $null = $CommandArgs.Add($arg)
+    }
+
+    # Add common parameters
+    if ($Specification.method -match "DELETE|PUT|POST") {
+        $null = $CommandArgs.Add(@{
+            SetFlag = 'addProcessingModeFlag(cmd)'
+        })
     }
 
     $RESTPath = $Specification.path
@@ -82,8 +91,14 @@
     #
     $RESTBodyBuilder = New-Object System.Text.StringBuilder
     $RESTFormDataBuilder = New-Object System.Text.StringBuilder
+    $GetBodyContents = "body.GetMap()"
+    
     if ($Specification.body) {
-        $null = $RESTBodyBuilder.AppendLine('body.SetMap(getDataFlag(cmd))')
+        if ($Specification.bodyContent.type -ne 'binary') {
+            $null = $RESTBodyBuilder.AppendLine('body.SetMap(getDataFlag(cmd))')
+        } else {
+            $GetBodyContents = "body.GetFileContents()"
+        }
 
         foreach ($iArg in (Remove-SkippedParameters $Specification.body)) {
             $code = New-C8yApiGoGetValueFromFlag -Parameters $iArg -SetterType "body"
@@ -127,6 +142,9 @@
 "@.TrimStart()
                     $null = $RESTBodyBuilder.AppendLine($BodyErrCheck)
                 }
+                "none" {
+                    # Do nothing
+                }
                 default {
                     Write-Warning ("Unsupported templating type [{0}]" -f $Specification.bodyTemplate.type)
                 }
@@ -136,13 +154,14 @@
         #
         # Add support for user defined templates to control body
         #
-        $BodyUserTemplateCode = @"
+        if ($Specification.bodyTemplate.type -ne "none") {
+            $BodyUserTemplateCode = @"
         if err := setDataTemplateFromFlags(cmd, body); err != nil {
             return newUserError("Template error. ", err)
         }
 "@.TrimStart()
-        $null = $RESTBodyBuilder.AppendLine($BodyUserTemplateCode)
-
+            $null = $RESTBodyBuilder.AppendLine($BodyUserTemplateCode)
+        }
         
         if ($Specification.bodyValidation) {
             switch ($Specification.bodyValidation.type) {
@@ -165,12 +184,14 @@
         #
         # Validate body
         #
-        $BodyValidateionCode = @"
+        if ($Specification.bodyContent.type -ne 'binary') {
+            $BodyValidateionCode = @"
         if err := body.Validate(); err != nil {
             return newUserError("Body validation error. ", err)
         }
 "@.TrimStart()
-        $null = $RESTBodyBuilder.AppendLine($BodyValidateionCode)
+            $null = $RESTBodyBuilder.AppendLine($BodyValidateionCode)
+        }
         
     }
 
@@ -221,6 +242,17 @@
                 $null = $RestHeaderBuilder.AppendLine($code)
             }
         }
+    }
+
+    # Processing Mode
+    if ($Specification.method -match "DELETE|PUT|POST") {
+        $null = $RestHeaderBuilder.AppendLine(@"
+     if cmd.Flags().Changed("processingMode") {
+         if v, err := cmd.Flags().GetString("processingMode"); err == nil && v != "" {
+             headers.Add("X-Cumulocity-Processing-Mode", v)
+         }
+     }
+"@)
     }
 
     #
@@ -350,7 +382,7 @@ func (n *${Name}Cmd) ${Name}(cmd *cobra.Command, args []string) error {
         Method:       "${RESTMethod}",
         Path:         path,
         Query:        queryValue,
-        Body:         body.GetMap(),
+        Body:         $GetBodyContents,
         FormData:     formData,
         Header:       headers,
         IgnoreAccept: false,
@@ -660,6 +692,30 @@ Function Get-C8yGoArgs {
         }
 
         "file" {
+            $SetFlag = if ($UseOption) {
+                'cmd.Flags().StringP("{0}", "{1}", "{2}", "{3}")' -f $Name, $OptionName, $Default, $Description
+            } else {
+                'cmd.Flags().String("{0}", "{1}", "{2}")' -f $Name, $Default, $Description
+            }
+
+            @{
+                SetFlag = $SetFlag
+            }
+        }
+
+        "attachment" {
+            $SetFlag = if ($UseOption) {
+                'cmd.Flags().StringP("{0}", "{1}", "{2}", "{3}")' -f $Name, $OptionName, $Default, $Description
+            } else {
+                'cmd.Flags().String("{0}", "{1}", "{2}")' -f $Name, $Default, $Description
+            }
+
+            @{
+                SetFlag = $SetFlag
+            }
+        }
+
+        "fileContents" {
             $SetFlag = if ($UseOption) {
                 'cmd.Flags().StringP("{0}", "{1}", "{2}", "{3}")' -f $Name, $OptionName, $Default, $Description
             } else {

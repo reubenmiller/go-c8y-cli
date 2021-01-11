@@ -34,6 +34,7 @@ Delete measurement
 	cmd.SilenceUsage = true
 
 	cmd.Flags().String("id", "", "Measurement id (required)")
+	addProcessingModeFlag(cmd)
 
 	// Required flags
 	cmd.MarkFlagRequired("id")
@@ -61,6 +62,11 @@ func (n *deleteMeasurementCmd) deleteMeasurement(cmd *cobra.Command, args []stri
 
 	// headers
 	headers := http.Header{}
+	if cmd.Flags().Changed("processingMode") {
+		if v, err := cmd.Flags().GetString("processingMode"); err == nil && v != "" {
+			headers.Add("X-Cumulocity-Processing-Mode", v)
+		}
+	}
 
 	// form data
 	formData := make(map[string]io.Reader)

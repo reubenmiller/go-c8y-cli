@@ -43,6 +43,14 @@ Create a test device group with 10 newly created devices
         [int]
         $TotalDevices = 0,
 
+        # Cumulocity processing mode
+        [Parameter()]
+        [AllowNull()]
+        [AllowEmptyString()]
+        [ValidateSet("PERSISTENT", "QUIESCENT", "TRANSIENT", "CEP")]
+        [string]
+        $ProcessingMode,
+
         # Template (jsonnet) file to use to create the request body.
         [Parameter()]
         [string]
@@ -77,6 +85,9 @@ Create a test device group with 10 newly created devices
         $Group = PSc8y\New-ManagedObject `
             -Name $GroupName `
             -Data $Data `
+            -ProcessingMode:$ProcessingMode `
+            -Template:$Template `
+            -TemplateVars:$TemplateVars `
             -Force:$Force
         
         if ($TotalDevices -gt 0) {

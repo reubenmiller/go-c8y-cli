@@ -35,6 +35,7 @@ Delete a retention rule
 	cmd.SilenceUsage = true
 
 	cmd.Flags().String("id", "", "Retention rule id (required)")
+	addProcessingModeFlag(cmd)
 
 	// Required flags
 	cmd.MarkFlagRequired("id")
@@ -62,6 +63,11 @@ func (n *deleteRetentionRuleCmd) deleteRetentionRule(cmd *cobra.Command, args []
 
 	// headers
 	headers := http.Header{}
+	if cmd.Flags().Changed("processingMode") {
+		if v, err := cmd.Flags().GetString("processingMode"); err == nil && v != "" {
+			headers.Add("X-Cumulocity-Processing-Mode", v)
+		}
+	}
 
 	// form data
 	formData := make(map[string]io.Reader)

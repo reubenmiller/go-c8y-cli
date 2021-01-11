@@ -12,7 +12,7 @@
 RootModule = './PSc8y.psm1'
 
 # Version number of this module.
-ModuleVersion = '1.6.0'
+ModuleVersion = '1.8.0'
 
 # Supported PSEditions
 CompatiblePSEditions = @(
@@ -175,6 +175,7 @@ FunctionsToExport = @(
 	'Get-UserByName',
 	'Get-UserCollection',
 	'Get-UserMembershipCollection',
+	'Invoke-UserLogout',
 	'New-Agent',
 	'New-Alarm',
 	'New-Application',

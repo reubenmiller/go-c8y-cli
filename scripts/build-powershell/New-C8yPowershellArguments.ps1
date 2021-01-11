@@ -67,6 +67,8 @@
         "directory" { "string" }
         "file" { "string" }
         "float" { "float" }
+        "fileContents" { "string" }
+        "attachment" { "string" }
         "id" { "object" }
         "integer" { "long" }
         "json" { "object" }

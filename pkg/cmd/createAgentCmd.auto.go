@@ -41,6 +41,7 @@ Create agent with custom properties
 	cmd.Flags().String("name", "", "Agent name (required)")
 	cmd.Flags().String("type", "", "Agent type")
 	addDataFlag(cmd)
+	addProcessingModeFlag(cmd)
 
 	// Required flags
 	cmd.MarkFlagRequired("name")
@@ -68,6 +69,11 @@ func (n *createAgentCmd) createAgent(cmd *cobra.Command, args []string) error {
 
 	// headers
 	headers := http.Header{}
+	if cmd.Flags().Changed("processingMode") {
+		if v, err := cmd.Flags().GetString("processingMode"); err == nil && v != "" {
+			headers.Add("X-Cumulocity-Processing-Mode", v)
+		}
+	}
 
 	// form data
 	formData := make(map[string]io.Reader)

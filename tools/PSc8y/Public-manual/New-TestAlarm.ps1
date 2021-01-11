@@ -32,6 +32,14 @@ Create an alarm on the existing device "myExistingDevice"
         )]
         [object] $Device,
 
+        # Cumulocity processing mode
+        [Parameter()]
+        [AllowNull()]
+        [AllowEmptyString()]
+        [ValidateSet("PERSISTENT", "QUIESCENT", "TRANSIENT", "CEP")]
+        [string]
+        $ProcessingMode,
+
         # Template (jsonnet) file to use to create the request body.
         [Parameter()]
         [string]
@@ -65,6 +73,7 @@ Create an alarm on the existing device "myExistingDevice"
                 -Type "c8y_ci_TestAlarm" `
                 -Severity MAJOR `
                 -Text "Test CI Alarm" `
+                -ProcessingMode:$ProcessingMode `
                 -Template:$Template `
                 -TemplateVars:$TemplateVars `
                 -Force:$Force

@@ -36,6 +36,7 @@ Update a binary related to an event
 
 	cmd.Flags().String("id", "", "Event id (required)")
 	cmd.Flags().String("file", "", "File to be uploaded as a binary (required)")
+	addProcessingModeFlag(cmd)
 
 	// Required flags
 	cmd.MarkFlagRequired("id")
@@ -64,20 +65,18 @@ func (n *updateEventBinaryCmd) updateEventBinary(cmd *cobra.Command, args []stri
 
 	// headers
 	headers := http.Header{}
+	if cmd.Flags().Changed("processingMode") {
+		if v, err := cmd.Flags().GetString("processingMode"); err == nil && v != "" {
+			headers.Add("X-Cumulocity-Processing-Mode", v)
+		}
+	}
 
 	// form data
 	formData := make(map[string]io.Reader)
 
 	// body
 	body := mapbuilder.NewMapBuilder()
-	body.SetMap(getDataFlag(cmd))
-	getFileFlag(cmd, "file", formData)
-	if err := setDataTemplateFromFlags(cmd, body); err != nil {
-		return newUserError("Template error. ", err)
-	}
-	if err := body.Validate(); err != nil {
-		return newUserError("Body validation error. ", err)
-	}
+	getFileContentsFlag(cmd, "file", body)
 
 	// path parameters
 	pathParameters := make(map[string]string)
@@ -95,7 +94,7 @@ func (n *updateEventBinaryCmd) updateEventBinary(cmd *cobra.Command, args []stri
 		Method:       "PUT",
 		Path:         path,
 		Query:        queryValue,
-		Body:         body.GetMap(),
+		Body:         body.GetFileContents(),
 		FormData:     formData,
 		Header:       headers,
 		IgnoreAccept: false,

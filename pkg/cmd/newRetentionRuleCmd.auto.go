@@ -40,6 +40,7 @@ Create a retention rule
 	cmd.Flags().String("source", "", "RetentionRule will be applied to documents with source.")
 	cmd.Flags().Int("maximumAge", 0, "Maximum age of document in days. (required)")
 	cmd.Flags().Bool("editable", false, "Whether the rule is editable. Can be updated only by management tenant.")
+	addProcessingModeFlag(cmd)
 
 	// Required flags
 	cmd.MarkFlagRequired("dataType")
@@ -68,6 +69,11 @@ func (n *newRetentionRuleCmd) newRetentionRule(cmd *cobra.Command, args []string
 
 	// headers
 	headers := http.Header{}
+	if cmd.Flags().Changed("processingMode") {
+		if v, err := cmd.Flags().GetString("processingMode"); err == nil && v != "" {
+			headers.Add("X-Cumulocity-Processing-Mode", v)
+		}
+	}
 
 	// form data
 	formData := make(map[string]io.Reader)

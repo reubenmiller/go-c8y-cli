@@ -34,6 +34,7 @@ Request credentials for a new device
 	cmd.SilenceUsage = true
 
 	cmd.Flags().String("id", "", "Device identifier. Max: 1000 characters. E.g. IMEI (required)")
+	addProcessingModeFlag(cmd)
 
 	// Required flags
 	cmd.MarkFlagRequired("id")
@@ -61,6 +62,11 @@ func (n *requestDeviceCredentialsCmd) requestDeviceCredentials(cmd *cobra.Comman
 
 	// headers
 	headers := http.Header{}
+	if cmd.Flags().Changed("processingMode") {
+		if v, err := cmd.Flags().GetString("processingMode"); err == nil && v != "" {
+			headers.Add("X-Cumulocity-Processing-Mode", v)
+		}
+	}
 
 	// form data
 	formData := make(map[string]io.Reader)

@@ -35,6 +35,7 @@ Unassign a child device from its parent device
 
 	cmd.Flags().StringSlice("group", []string{""}, "Asset id (required)")
 	cmd.Flags().StringSlice("childDevice", []string{""}, "Child device (required)")
+	addProcessingModeFlag(cmd)
 
 	// Required flags
 	cmd.MarkFlagRequired("group")
@@ -63,6 +64,11 @@ func (n *deleteDeviceFromGroupCmd) deleteDeviceFromGroup(cmd *cobra.Command, arg
 
 	// headers
 	headers := http.Header{}
+	if cmd.Flags().Changed("processingMode") {
+		if v, err := cmd.Flags().GetString("processingMode"); err == nil && v != "" {
+			headers.Add("X-Cumulocity-Processing-Mode", v)
+		}
+	}
 
 	// form data
 	formData := make(map[string]io.Reader)

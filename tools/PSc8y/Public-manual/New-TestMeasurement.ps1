@@ -47,6 +47,14 @@ Create a measurement on the existing device "myExistingDevice"
         # Unit. i.e. °C, m/s
         [string] $Unit = "°C",
 
+        # Cumulocity processing mode
+        [Parameter()]
+        [AllowNull()]
+        [AllowEmptyString()]
+        [ValidateSet("PERSISTENT", "QUIESCENT", "TRANSIENT", "CEP")]
+        [string]
+        $ProcessingMode,
+
         # Template (jsonnet) file to use to create the request body.
         [Parameter()]
         [string]
@@ -80,6 +88,7 @@ Create a measurement on the existing device "myExistingDevice"
                     }
                 }
             } `
+            -ProcessingMode:$ProcessingMode `
             -Template:$Template `
             -TemplateVars:$TemplateVars `
             -Force:$Force

@@ -39,6 +39,14 @@ Remove device group by name
         [switch]
         $Cascade,
 
+        # Cumulocity processing mode
+        [Parameter()]
+        [AllowNull()]
+        [AllowEmptyString()]
+        [ValidateSet("PERSISTENT", "QUIESCENT", "TRANSIENT", "CEP", "")]
+        [string]
+        $ProcessingMode,
+
         # Show the full (raw) response from Cumulocity including pagination information
         [Parameter()]
         [switch]
@@ -75,6 +83,9 @@ Remove device group by name
         if ($PSBoundParameters.ContainsKey("Cascade")) {
             $Parameters["cascade"] = $Cascade
         }
+        if ($PSBoundParameters.ContainsKey("ProcessingMode")) {
+            $Parameters["processingMode"] = $ProcessingMode
+        }
         if ($PSBoundParameters.ContainsKey("OutputFile")) {
             $Parameters["outputFile"] = $OutputFile
         }
@@ -88,6 +99,23 @@ Remove device group by name
             $Parameters["timeout"] = $TimeoutSec * 1000
         }
 
+        if ($env:C8Y_DISABLE_INHERITANCE -ne $true) {
+            # Inherit preference automatic variables
+            if (!$WhatIfPreference.IsPresent) {
+                $WhatIfPreference = $PSCmdlet.SessionState.PSVariable.get("WhatIfPreference").Value
+            }
+        
+            # Inherit custom parameters
+            $Stack = Get-PSCallStack | Select-Object -Skip 1 -First 1
+            $InheritVariables = @(@{Source="Force"; Target="Force"}, @{Source="WhatIf"; Target="WhatIfPreference"})
+            foreach ($iVariable in $InheritVariables) {
+                if (-Not $PSBoundParameters.ContainsKey($iVariable.Source)) {
+                    if ($null -ne $Stack -and $Stack.InvocationInfo.BoundParameters.ContainsKey($iVariable.Source)) {
+                        Set-Variable -Name $iVariable.Target -Value $Stack.InvocationInfo.BoundParameters[$iVariable.Source] -WhatIf:$false
+                    }
+                }
+            }
+        }
     }
 
     Process {

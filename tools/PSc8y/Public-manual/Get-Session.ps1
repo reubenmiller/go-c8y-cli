@@ -15,16 +15,25 @@ Get the current Cumulocity session
 None
 #>
     [CmdletBinding()]
-    Param()
-    $Path = $env:C8Y_SESSION
+    Param(
+        # Specifiy alternative Cumulocity session to use when running the cmdlet
+        [Parameter()]
+        [string]
+        $Session
+    )
 
-    if (!$Path) {
-        Write-Warning "No active session is set"
-        return
+    $c8yBinary = Get-ClientBinary
+    $c8yArgs = New-Object System.Collections.ArrayList
+    $null = $c8yArgs.AddRange(@("sessions", "get", "--pretty=false"))
+
+    if ($Session) {
+        $null = $c8yArgs.AddRange(@("--session", $Session))
     }
+    
+    $sessionResponse = & $c8yBinary $c8yArgs 2>$null
 
-    if (!(Test-Path $Path)) {
-        Write-Error "Session file does not exist"
+    if ($LASTEXITCODE -ne 0) {
+        Write-Error "Failed to get session details. reason: $sessionResponse"
         return
     }
 
@@ -33,9 +42,7 @@ None
         $JSONArgs.Depth = 100
     }
 
-    $data = Get-Content -LiteralPath $Path | ConvertFrom-Json @JSONArgs
-    $data | Add-Member -MemberType NoteProperty -Name "path" -Value $Path -ErrorAction SilentlyContinue
-    $data.path = (Resolve-Path $Path).ProviderPath
+    $data = $sessionResponse | ConvertFrom-Json @JSONArgs
 
     if ($env:C8Y_LOGGER_HIDE_SENSITIVE -eq "true") {
         $data | Add-PowershellType "cumulocity/session-hide-sensitive"

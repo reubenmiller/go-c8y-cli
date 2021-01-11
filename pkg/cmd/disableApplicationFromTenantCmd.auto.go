@@ -35,6 +35,7 @@ Disable an application of a tenant by name
 
 	cmd.Flags().String("tenant", "", "Tenant id. Defaults to current tenant (based on credentials)")
 	cmd.Flags().String("application", "", "Application id (required)")
+	addProcessingModeFlag(cmd)
 
 	// Required flags
 	cmd.MarkFlagRequired("application")
@@ -62,6 +63,11 @@ func (n *disableApplicationFromTenantCmd) disableApplicationFromTenant(cmd *cobr
 
 	// headers
 	headers := http.Header{}
+	if cmd.Flags().Changed("processingMode") {
+		if v, err := cmd.Flags().GetString("processingMode"); err == nil && v != "" {
+			headers.Add("X-Cumulocity-Processing-Mode", v)
+		}
+	}
 
 	// form data
 	formData := make(map[string]io.Reader)

@@ -25,6 +25,14 @@ Create a new user group with the prefix "mygroup". A random postfix will be adde
         )]
         [string] $Name = "testgroup",
 
+        # Cumulocity processing mode
+        [Parameter()]
+        [AllowNull()]
+        [AllowEmptyString()]
+        [ValidateSet("PERSISTENT", "QUIESCENT", "TRANSIENT", "CEP")]
+        [string]
+        $ProcessingMode,
+
         # Template (jsonnet) file to use to create the request body.
         [Parameter()]
         [string]
@@ -43,6 +51,7 @@ Create a new user group with the prefix "mygroup". A random postfix will be adde
         $GroupName = New-RandomString -Prefix "${Name}_"
         $TestGroup = PSc8y\New-Group `
             -Name $GroupName `
+            -ProcessingMode:$ProcessingMode `
             -Template:$Template `
             -TemplateVars:$TemplateVars `
             -Force:$Force

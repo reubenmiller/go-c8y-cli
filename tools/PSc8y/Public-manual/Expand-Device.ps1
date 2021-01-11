@@ -41,7 +41,19 @@ Get all the device object (with app in their name). Note the Expand cmdlet won't
     Process {
         [array] $AllDevices = foreach ($iDevice in $InputObject)
         {
-            if ($iDevice.id) {
+            if ($iDevice.deviceId) {
+                # operation
+                [PSCustomObject]@{
+                    id = $iDevice.deviceId
+                    name = $iDevice.deviceName
+                }
+            } elseif ($iDevice.source.id) {
+                # alarms/events/measurements etc.
+                [PSCustomObject]@{
+                    id = $iDevice.source.id
+                    name = $iDevice.source.name
+                }
+            } elseif ($iDevice.id) {
                 $iDevice
             } else {
                 if ($iDevice -match "^\d+$") {

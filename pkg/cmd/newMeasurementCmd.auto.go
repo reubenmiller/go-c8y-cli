@@ -37,6 +37,7 @@ Create measurement
 	cmd.Flags().String("time", "0s", "Time of the measurement. Defaults to current timestamp.")
 	cmd.Flags().String("type", "", "The most specific type of this entire measurement.")
 	addDataFlag(cmd)
+	addProcessingModeFlag(cmd)
 
 	// Required flags
 	cmd.MarkFlagRequired("device")
@@ -64,6 +65,11 @@ func (n *newMeasurementCmd) newMeasurement(cmd *cobra.Command, args []string) er
 
 	// headers
 	headers := http.Header{}
+	if cmd.Flags().Changed("processingMode") {
+		if v, err := cmd.Flags().GetString("processingMode"); err == nil && v != "" {
+			headers.Add("X-Cumulocity-Processing-Mode", v)
+		}
+	}
 
 	// form data
 	formData := make(map[string]io.Reader)

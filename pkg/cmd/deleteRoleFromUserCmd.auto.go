@@ -36,6 +36,7 @@ Remove a role from the given user
 	cmd.Flags().StringSlice("user", []string{""}, "User (required)")
 	cmd.Flags().StringSlice("role", []string{""}, "Role name (required)")
 	cmd.Flags().String("tenant", "", "Tenant")
+	addProcessingModeFlag(cmd)
 
 	// Required flags
 	cmd.MarkFlagRequired("user")
@@ -64,6 +65,11 @@ func (n *deleteRoleFromUserCmd) deleteRoleFromUser(cmd *cobra.Command, args []st
 
 	// headers
 	headers := http.Header{}
+	if cmd.Flags().Changed("processingMode") {
+		if v, err := cmd.Flags().GetString("processingMode"); err == nil && v != "" {
+			headers.Add("X-Cumulocity-Processing-Mode", v)
+		}
+	}
 
 	// form data
 	formData := make(map[string]io.Reader)

@@ -38,6 +38,7 @@ Upload a config file and make it globally accessible for all users
 
 	cmd.Flags().String("file", "", "File to be uploaded as a binary (required)")
 	addDataFlag(cmd)
+	addProcessingModeFlag(cmd)
 
 	// Required flags
 	cmd.MarkFlagRequired("file")
@@ -65,6 +66,11 @@ func (n *newBinaryCmd) newBinary(cmd *cobra.Command, args []string) error {
 
 	// headers
 	headers := http.Header{}
+	if cmd.Flags().Changed("processingMode") {
+		if v, err := cmd.Flags().GetString("processingMode"); err == nil && v != "" {
+			headers.Add("X-Cumulocity-Processing-Mode", v)
+		}
+	}
 
 	// form data
 	formData := make(map[string]io.Reader)
@@ -72,7 +78,7 @@ func (n *newBinaryCmd) newBinary(cmd *cobra.Command, args []string) error {
 	// body
 	body := mapbuilder.NewMapBuilder()
 	body.SetMap(getDataFlag(cmd))
-	getFileFlag(cmd, "file", formData)
+	getFileFlag(cmd, "file", true, formData)
 	if err := setDataTemplateFromFlags(cmd, body); err != nil {
 		return newUserError("Template error. ", err)
 	}

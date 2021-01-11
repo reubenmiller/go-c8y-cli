@@ -40,6 +40,7 @@ Update microservice availability to MARKET
 	cmd.Flags().String("availability", "", "Access level for other tenants. Possible values are : MARKET, PRIVATE (default)")
 	cmd.Flags().String("contextPath", "", "contextPath of the hosted application")
 	cmd.Flags().String("resourcesUrl", "", "URL to microservice base directory hosted on an external server")
+	addProcessingModeFlag(cmd)
 
 	// Required flags
 	cmd.MarkFlagRequired("id")
@@ -67,6 +68,11 @@ func (n *updateMicroserviceCmd) updateMicroservice(cmd *cobra.Command, args []st
 
 	// headers
 	headers := http.Header{}
+	if cmd.Flags().Changed("processingMode") {
+		if v, err := cmd.Flags().GetString("processingMode"); err == nil && v != "" {
+			headers.Add("X-Cumulocity-Processing-Mode", v)
+		}
+	}
 
 	// form data
 	formData := make(map[string]io.Reader)

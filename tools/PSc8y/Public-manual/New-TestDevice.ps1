@@ -41,6 +41,14 @@ Create 10 test devices (with agent functionality) all with unique names
         # Add agent fragment to the device
         [switch] $AsAgent,
 
+        # Cumulocity processing mode
+        [Parameter()]
+        [AllowNull()]
+        [AllowEmptyString()]
+        [ValidateSet("PERSISTENT", "QUIESCENT", "TRANSIENT", "CEP")]
+        [string]
+        $ProcessingMode,
+
         # Template (jsonnet) file to use to create the request body.
         [Parameter()]
         [string]
@@ -65,6 +73,7 @@ Create 10 test devices (with agent functionality) all with unique names
         $TestDevice = PSc8y\New-ManagedObject `
             -Name $DeviceName `
             -Data $Data `
+            -ProcessingMode:$ProcessingMode `
             -Template:$Template `
             -TemplateVars:$TemplateVars `
             -Force:$Force

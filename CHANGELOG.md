@@ -2,6 +2,168 @@
 
 ## Unreleased
 
+No unreleased features
+
+
+
+### Minor improvements
+
+* "owner" is field is not left untouched in the -Data parameter allowing the user to change it if required.
+    ```powershell
+    Update-ManagedObject -Id 12345 -Data @{owner="myuser"}
+    ```
+
+* Cumulocity API error messages are prefixed with "Server error." to make it more clear that the error is due to an API call and not the client.
+
+    ```powershell
+    PS /workspaces/go-c8y-cli> Get-AuditRecord 12345                        
+
+    WARNING: c8y returned a non-zero exit code. code=1
+    Write-Error: /workspaces/go-c8y-cli/tools/PSc8y/dist/PSc8y/PSc8y.psm1:3657:13
+    Line |
+    3657 |              Invoke-ClientCommand `
+        |              ~~~~~~~~~~~~~~~~~~~~~~
+        | Server error. general/internalError
+
+    PS /workspaces/go-c8y-cli> Get-Alarm 12345                              
+
+
+    WARNING: c8y returned a non-zero exit code. code=1
+    Write-Error: /workspaces/go-c8y-cli/tools/PSc8y/dist/PSc8y/PSc8y.psm1:2742:13
+    Line |
+    2742 |              Invoke-ClientCommand `
+        |              ~~~~~~~~~~~~~~~~~~~~~~
+        | Server error. alarm/Not Found: Finding alarm from database failed : No alarm for gid '12345'!
+    ```
+
+* PSc8y command automatically detect the `-WhatIf` and `-Force` parameters from any parent commands. This reduces the amount of boilerplate code.
+
+    **Example: Custom command to send a restart operation**
+
+    ```powershell
+    Function New-MyCustomRestartOperation {
+        [cmdletbinding(
+            SupportsShouldProcess = $true,
+            ConfirmImpact = "High"
+        )]
+        Param(
+            [Parameter(
+                Mandatory = $true,
+                Position = 0
+            )]
+            [object[]] $Device,
+
+            [switch] $Force
+        )
+
+        Process {
+            foreach ($iDevice in (Expand-Device $Device)) {
+                New-Operation `
+                    -Device $iDevice `
+                    -Description "Restart device" `
+                    -Data @{ c8y_Restart = @{}}
+            }
+        }
+    }
+    ```
+
+    Normally when using `New-Operation` within your command, you need to pass the `WhatIf` and `Force` parameter values like so:
+    
+    ```powershell
+    New-Operation `
+        -Device $iDevice `
+        -Data @{ c8y_Restart = @{}} `
+        -WhatIf:$WhatIfPreference `
+        -Force:$Force
+    ```
+
+    However now all PSc8y commands will automatically inherit these values.
+
+    ```powershell
+    New-MyCustomOperation -Device 12345 -WhatIf
+    New-MyCustomOperation -Device 12345 -Force
+    ```
+
+    The variable inheritance can be disabled by setting the following environment variable
+
+    ```powershell
+    $env:C8Y_DISABLE_INHERITANCE = $true
+    ```
+
+## Released
+
+### v1.8.0
+
+* `Get-Session` uses a new c8y session get to retrieve information about the current session
+* Fixed bug when using the `-Session` on PUT and POST commands which resulted in an error being displayed eventhough the request would be successful
+* `Expand-Device` supports piping of alarms, events, measurements and operations
+* Added `-ProcessingMode` parameter to all commands that use DELETE, PUT and POST requests.
+
+    ```powershell
+    New-ManagedObject -Name myobject -ProcessingMode TRANSIENT
+    New-ManagedObject -Name myobject -ProcessingMode QUIESCENT
+    New-ManagedObject -Name myobject -ProcessingMode PERSISTENT
+    New-ManagedObject -Name myobject -ProcessingMode CEP
+    ```
+* `Set-session` automatically selects a session if only one matching session is found rather than prompting the user for the selection
+* `source` fragment is removed when being passed via file to the `Data` parameter in all create and update commands
+    ```json
+    // myevent.json
+    {
+        "source": {
+            "id": "99999",
+            "self": "https:/..../event/events/99999"
+        },
+        "type": "myExample1",
+
+    }
+    ```
+
+    When executing the following command:
+    ```powershell
+    PSc8y\New-Event -Device 12345 -Data myevent.json
+    ```
+
+    The `source` id fragment will be replaced entirely by the new source as specified by the `Device` parameter
+
+    ```json
+    // myevent.json
+    {
+        "source": {
+            "id": "12345",
+        },
+        "type": "myExample1",
+
+    }
+    ```
+* Added logout user command to invalidate current user token
+
+    **Bash/zsh**
+
+    ```sh
+    c8y users logout
+    ```
+
+    **PowerShell**
+
+    ```powershell
+    Invoke-UserLogout
+    ```
+* Fixed binary upload bugs with both `New-EventBinary` and `Update-EventBinary` which resulted in multipart form data being included in the binary information
+
+### v1.7.3
+
+* Fixed publishing bug on docker images
+
+### v1.7.2
+
+* Fixed publishing bug on docker images
+
+### v1.7.1
+
+* Fixed publishing bug on docker images
+### v1.7.0
+
 * `New-Microservice` requiredRoles are now set when passing the cumulocity.json manifest file to the `-File` parameter
 * Added `New-ServiceUser` and `Get-ServiceUser` to create and get a service user that can be used for automation purposes
 
@@ -42,8 +204,6 @@
     ```
 
 * Fixed broken doc link
-
-## Released
 
 ### v1.6.0
 

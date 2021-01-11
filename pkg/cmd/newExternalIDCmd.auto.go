@@ -36,6 +36,7 @@ Create external identity
 	cmd.Flags().StringSlice("device", []string{""}, "The ManagedObject linked to the external ID. (required)")
 	cmd.Flags().String("type", "", "The type of the external identifier as string, e.g. 'com_cumulocity_model_idtype_SerialNumber'. (required)")
 	cmd.Flags().String("name", "", "The identifier used in the external system that Cumulocity interfaces with. (required)")
+	addProcessingModeFlag(cmd)
 
 	// Required flags
 	cmd.MarkFlagRequired("device")
@@ -65,6 +66,11 @@ func (n *newExternalIDCmd) newExternalID(cmd *cobra.Command, args []string) erro
 
 	// headers
 	headers := http.Header{}
+	if cmd.Flags().Changed("processingMode") {
+		if v, err := cmd.Flags().GetString("processingMode"); err == nil && v != "" {
+			headers.Add("X-Cumulocity-Processing-Mode", v)
+		}
+	}
 
 	// form data
 	formData := make(map[string]io.Reader)

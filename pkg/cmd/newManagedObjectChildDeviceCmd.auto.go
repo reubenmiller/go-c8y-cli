@@ -35,6 +35,7 @@ Assign a device as a child device to an existing device
 
 	cmd.Flags().StringSlice("device", []string{""}, "Device. (required)")
 	cmd.Flags().StringSlice("newChild", []string{""}, "New child device (required)")
+	addProcessingModeFlag(cmd)
 
 	// Required flags
 	cmd.MarkFlagRequired("device")
@@ -63,6 +64,11 @@ func (n *newManagedObjectChildDeviceCmd) newManagedObjectChildDevice(cmd *cobra.
 
 	// headers
 	headers := http.Header{}
+	if cmd.Flags().Changed("processingMode") {
+		if v, err := cmd.Flags().GetString("processingMode"); err == nil && v != "" {
+			headers.Add("X-Cumulocity-Processing-Mode", v)
+		}
+	}
 
 	// form data
 	formData := make(map[string]io.Reader)

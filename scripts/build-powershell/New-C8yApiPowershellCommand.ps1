@@ -237,6 +237,25 @@
     }
 
     #
+    # Processing Mode
+    #
+    if ($Specification.method -match "DELETE|PUT|POST") {
+        $ProcessingModeParam = New-Object System.Text.StringBuilder
+        $null = $ProcessingModeParam.AppendLine('        # Cumulocity processing mode')
+        $null = $ProcessingModeParam.AppendLine('        [Parameter()]')
+        $null = $ProcessingModeParam.AppendLine('        [AllowNull()]')
+        $null = $ProcessingModeParam.AppendLine('        [AllowEmptyString()]')
+        $null = $ProcessingModeParam.AppendLine('        [ValidateSet("PERSISTENT", "QUIESCENT", "TRANSIENT", "CEP", "")]')
+        $null = $ProcessingModeParam.AppendLine('        [string]')
+        $null = $ProcessingModeParam.Append('        $ProcessingMode')
+        $null = $CmdletParameters.Add($ProcessingModeParam)
+
+        $null = $BeginParameterBuilder.AppendLine('        if ($PSBoundParameters.ContainsKey("ProcessingMode")) {')
+        $null = $BeginParameterBuilder.AppendLine('            $Parameters["processingMode"] = $ProcessingMode')
+        $null = $BeginParameterBuilder.AppendLine('        }')
+    }
+
+    #
     # Add common parameters
     #
     if ($ResultType -match "collection") {
@@ -510,6 +529,23 @@ $($CmdletParameters -join ",`n`n")
 
     Begin {
 $($BeginParameterBuilder -join "`n")
+        if (`$env:C8Y_DISABLE_INHERITANCE -ne `$true) {
+            # Inherit preference automatic variables
+            if (!`$WhatIfPreference.IsPresent) {
+                `$WhatIfPreference = `$PSCmdlet.SessionState.PSVariable.get("WhatIfPreference").Value
+            }
+        
+            # Inherit custom parameters
+            `$Stack = Get-PSCallStack | Select-Object -Skip 1 -First 1
+            `$InheritVariables = @(@{Source="Force"; Target="Force"}, @{Source="WhatIf"; Target="WhatIfPreference"})
+            foreach (`$iVariable in `$InheritVariables) {
+                if (-Not `$PSBoundParameters.ContainsKey(`$iVariable.Source)) {
+                    if (`$null -ne `$Stack -and `$Stack.InvocationInfo.BoundParameters.ContainsKey(`$iVariable.Source)) {
+                        Set-Variable -Name `$iVariable.Target -Value `$Stack.InvocationInfo.BoundParameters[`$iVariable.Source] -WhatIf:`$false
+                    }
+                }
+            }
+        }
     }
 
     Process {

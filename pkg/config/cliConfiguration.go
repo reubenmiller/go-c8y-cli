@@ -30,6 +30,9 @@ type CliConfiguration struct {
 	// Persistent settings (stored to file)
 	Persistent *viper.Viper
 
+	// Session file path
+	path string
+
 	// SecureData accessor to encrypt/decrypt data
 	SecureData *encrypt.SecureData
 
@@ -108,6 +111,26 @@ func (c *CliConfiguration) GetUsername() string {
 		return v
 	}
 	return os.Getenv("C8Y_USER")
+}
+
+// SetSessionFilePath sets the session's file path
+func (c *CliConfiguration) SetSessionFilePath(v string) {
+	c.path = v
+}
+
+// GetSessionFilePath returns the session file path
+func (c *CliConfiguration) GetSessionFilePath() string {
+	return c.path
+}
+
+// GetName returns the name of the current session
+func (c *CliConfiguration) GetName() string {
+	return c.viper.GetString("name")
+}
+
+// GetDescription returns the name description of the current session
+func (c *CliConfiguration) GetDescription() string {
+	return c.viper.GetString("name")
 }
 
 // GetTenant returns the Cumulocity tenant id
