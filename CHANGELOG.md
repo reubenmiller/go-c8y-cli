@@ -36,6 +36,60 @@ No unreleased features
         | Server error. alarm/Not Found: Finding alarm from database failed : No alarm for gid '12345'!
     ```
 
+* PSc8y command automatically detect the `-WhatIf` and `-Force` parameters from any parent commands. This reduces the amount of boilerplate code.
+
+    **Example: Custom command to send a restart operation**
+
+    ```powershell
+    Function New-MyCustomRestartOperation {
+        [cmdletbinding(
+            SupportsShouldProcess = $true,
+            ConfirmImpact = "High"
+        )]
+        Param(
+            [Parameter(
+                Mandatory = $true,
+                Position = 0
+            )]
+            [object[]] $Device,
+
+            [switch] $Force
+        )
+
+        Process {
+            foreach ($iDevice in (Expand-Device $Device)) {
+                New-Operation `
+                    -Device $iDevice `
+                    -Description "Restart device" `
+                    -Data @{ c8y_Restart = @{}}
+            }
+        }
+    }
+    ```
+
+    Normally when using `New-Operation` within your command, you need to pass the `WhatIf` and `Force` parameter values like so:
+    
+    ```powershell
+    New-Operation `
+        -Device $iDevice `
+        -Data @{ c8y_Restart = @{}} `
+        -WhatIf:$WhatIfPreference `
+        -Force:$Force
+    ```
+
+    However now all PSc8y commands will automatically inherit these values.
+
+    ```powershell
+    New-MyCustomOperation -Device 12345 -WhatIf
+    New-MyCustomOperation -Device 12345 -Force
+    ```
+
+    The variable inheritance can be disabled by setting the following environment variable
+
+    ```powershell
+    $env:C8Y_DISABLE_INHERITANCE = $true
+    ```
+
 ## Released
 
 ### v1.8.0
