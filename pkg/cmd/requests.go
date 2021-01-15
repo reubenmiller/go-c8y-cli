@@ -5,6 +5,8 @@ import (
 	"context"
 	"fmt"
 	"net/url"
+	"regexp"
+	"strings"
 	"time"
 
 	"github.com/fatih/color"
@@ -118,6 +120,16 @@ func processRequestAndResponse(requests []c8y.RequestOptions, commonOptions Comm
 
 	req := requests[0]
 
+	// Modify request if special mode is being used
+	if commonOptions.IncludeAll || commonOptions.TotalPages > 0 {
+		if strings.Contains(req.Path, "inventory/managedObjects") {
+			tempURL, _ := url.Parse("https://dummy.com?" + req.Query.(string))
+			tempURL = optimizeManagedObjectsURL(tempURL, "0")
+			req.Query = tempURL.RawQuery
+			Logger.Infof("Optimizing inventory query. %v", req.Query)
+		}
+	}
+
 	ctx, cancel := getTimeoutContext()
 	defer cancel()
 	start := time.Now()
@@ -135,8 +147,16 @@ func processRequestAndResponse(requests []c8y.RequestOptions, commonOptions Comm
 	}
 
 	if commonOptions.IncludeAll || commonOptions.TotalPages > 0 {
-		if err := fetchAllResults(req, resp, commonOptions); err != nil {
-			return err
+		if strings.Contains(req.Path, "inventory/managedObjects") {
+			// TODO: Optimize implementation for inventory managed object queries to use the following
+			Logger.Info("Using inventory optimized query")
+			if err := fetchAllInventoryQueryResults(req, resp, commonOptions); err != nil {
+				return err
+			}
+		} else {
+			if err := fetchAllResults(req, resp, commonOptions); err != nil {
+				return err
+			}
 		}
 		return nil
 	}
@@ -206,7 +226,7 @@ func fetchAllResults(req c8y.RequestOptions, resp *c8y.Response, commonOptions C
 
 		baseURL, _ := url.Parse(nextURI)
 
-		Logger.Infof("Fetching next page: %s?%s", baseURL.Path, baseURL.RawQuery)
+		Logger.Infof("Fetching next page (%d): %s?%s", currentPage, baseURL.Path, baseURL.RawQuery)
 
 		curReq := c8y.RequestOptions{
 			Method: "GET",
@@ -252,6 +272,163 @@ func fetchAllResults(req c8y.RequestOptions, resp *c8y.Response, commonOptions C
 	}
 
 	return err
+}
+
+func fetchAllInventoryQueryResults(req c8y.RequestOptions, resp *c8y.Response, commonOptions CommonCommandOptions) error {
+
+	if resp == nil {
+		if req.DryRun {
+			return nil
+		}
+		return fmt.Errorf("Response is empty")
+	}
+
+	var totalItems int
+
+	totalItems, processErr := processResponse(resp, nil, commonOptions)
+
+	if processErr != nil {
+		return newSystemError("Failed to parse response", processErr)
+	}
+
+	results := make([]*c8y.Response, 1)
+	results[0] = resp
+
+	if resp.JSONData != nil {
+		// fmt.Printf("%s\n", *resp.JSONData)
+	}
+
+	var err error
+
+	// start from 1, as the first request has already been sent
+	currentPage := int64(1)
+
+	// Set default total pages (when not set)
+	totalPages := int64(1000)
+
+	if commonOptions.TotalPages > 0 {
+		totalPages = commonOptions.TotalPages
+	}
+
+	originalURI := ""
+	lastID := "0"
+
+	if v := resp.JSON.Get("self"); v.Exists() && v.String() != "" {
+		originalURI = v.String()
+	}
+
+	// base selection on first response
+	dataProperty := guessDataProperty(resp)
+	if dataProperty != "" {
+		commonOptions.ResultProperty = dataProperty
+	}
+
+	// check if data is already fetched
+	for {
+
+		if resp == nil || totalItems == 0 {
+			break
+		}
+
+		// get last id of the result set
+		if v := resp.JSON.Get(dataProperty); v.Exists() && v.IsArray() {
+			items := v.Array()
+			if len(items) > 0 {
+				lastID = items[len(items)-1].Get("id").String()
+			}
+		} else {
+			break
+		}
+
+		currentPage++
+
+		baseURL, _ := url.Parse(originalURI)
+		baseURL = optimizeManagedObjectsURL(baseURL, lastID)
+
+		Logger.Infof("Fetching next page (%d): %s?%s", currentPage, baseURL.Path, baseURL.RawQuery)
+
+		curReq := c8y.RequestOptions{
+			Method: "GET",
+			Path:   baseURL.Path,
+			Query:  baseURL.RawQuery,
+			Header: req.Header.Clone(),
+		}
+		ctx, cancel := context.WithTimeout(context.Background(), time.Duration(globalFlagTimeout)*time.Millisecond)
+		defer cancel()
+		// start := time.Now()
+		resp, err = client.SendRequest(
+			ctx,
+			curReq,
+		)
+
+		// save result
+		if resp != nil {
+
+			totalItems, processErr = processResponse(resp, err, commonOptions)
+
+			if processErr != nil {
+				return newSystemError("Failed to parse response")
+			}
+		} else {
+			break
+		}
+
+		// Check if total results is less than the pagesize, as this saves one request
+		if totalItems < commonOptions.PageSize {
+			Logger.Info("Found last page")
+			break
+		}
+
+		if currentPage >= totalPages {
+			Logger.Infof("Max pagination reached. max pages=%d", totalPages)
+			break
+		}
+
+		if globalFlagIncludeAllDelayMS > 0 {
+			Logger.Infof("Pausing %d ms before next request.", globalFlagIncludeAllDelayMS)
+			time.Sleep(time.Duration(globalFlagIncludeAllDelayMS) * time.Millisecond)
+		}
+	}
+
+	return err
+}
+
+func optimizeManagedObjectsURL(u *url.URL, lastID string) *url.URL {
+	q := u.Query()
+	queryName := ""
+	var moQuery string
+	queryNames := []string{"q", "query"}
+
+	for _, name := range queryNames {
+		if v := q.Get(name); v != "" {
+			queryName = name
+			moQuery = v
+		}
+	}
+
+	if queryName == "" {
+		return u
+	}
+
+	if lastID == "" {
+		lastID = "0"
+	}
+
+	if moQuery != "" {
+		queryPattern := regexp.MustCompile(`^\$filter=(.+?)\s*(\$orderby=(.+?))?$`)
+		matches := queryPattern.FindStringSubmatch(moQuery)
+
+		if len(matches) >= 3 {
+			if strings.HasPrefix(matches[1], "(") && strings.HasSuffix(matches[1], ")") {
+				moQuery = fmt.Sprintf("$filter=(_id gt '%s' and %s) $orderby=_id asc", lastID, matches[1])
+			} else {
+				moQuery = fmt.Sprintf("$filter=(_id gt '%s' and (%s)) $orderby=_id asc", lastID, matches[1])
+			}
+		}
+		q.Set(queryName, moQuery)
+	}
+	u.RawQuery = q.Encode()
+	return u
 }
 
 func processResponse(resp *c8y.Response, respError error, commonOptions CommonCommandOptions) (int, error) {
