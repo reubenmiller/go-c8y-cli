@@ -93,6 +93,22 @@ No unreleased features
     * Enabled pwsh tab completion by default
     * Added `vim` text editor
 
+* Get-DeviceCollection supports `OrderBy` parameter to sort
+    
+    **Example: Get a list of devices sorting by name in descending order**
+
+    **PowerShell**
+
+    ```powershell
+    Get-DeviceCollection -OrderBy "name desc"
+    ```
+
+    **Bash/zsh**
+    
+    ```sh
+    c8y devices list --orderBy "name desc"
+    ```
+
 ## Released
 
 ### v1.8.0

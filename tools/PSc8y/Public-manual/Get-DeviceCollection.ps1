@@ -1,4 +1,4 @@
-﻿Function Get-DeviceCollection {
+Function Get-DeviceCollection {
 <#
 .SYNOPSIS
 Get a collection of devices
@@ -53,6 +53,11 @@ Get a list of devices which have been updated more recently than 2020-01-01
         [Parameter(Mandatory = $false)]
         [string]
         $Query,
+
+        # Order results by a specific field. i.e. "name", "_id desc" or "creationTime.date asc".
+        [Parameter(Mandatory = $false)]
+        [string]
+        $OrderBy,
 
         # Only include agents.
         [Parameter()]
@@ -134,6 +139,9 @@ Get a list of devices which have been updated more recently than 2020-01-01
         }
         if ($PSBoundParameters.ContainsKey("Query")) {
             $Parameters["query"] = $Query
+        }
+        if ($PSBoundParameters.ContainsKey("OrderBy")) {
+            $Parameters["orderBy"] = $OrderBy
         }
         if ($PSBoundParameters.ContainsKey("Agents")) {
             $Parameters["agents"] = $Agents
