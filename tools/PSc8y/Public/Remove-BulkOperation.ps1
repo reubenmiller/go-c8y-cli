@@ -25,7 +25,7 @@ Remove bulk operation by id
         [Parameter(Mandatory = $true,
                    ValueFromPipeline=$true,
                    ValueFromPipelineByPropertyName=$true)]
-        [string]
+        [long]
         $Id,
 
         # Cumulocity processing mode

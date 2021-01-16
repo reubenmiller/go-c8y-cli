@@ -33,7 +33,7 @@ Remove bulk operation by id
 
 	cmd.SilenceUsage = true
 
-	cmd.Flags().String("id", "", "Bulk Operation id (required)")
+	cmd.Flags().Int("id", 0, "Bulk Operation id (required)")
 	addProcessingModeFlag(cmd)
 
 	// Required flags
@@ -76,10 +76,8 @@ func (n *deleteBulkOperationCmd) deleteBulkOperation(cmd *cobra.Command, args []
 
 	// path parameters
 	pathParameters := make(map[string]string)
-	if v, err := cmd.Flags().GetString("id"); err == nil {
-		if v != "" {
-			pathParameters["id"] = v
-		}
+	if v, err := cmd.Flags().GetInt("id"); err == nil {
+		pathParameters["id"] = fmt.Sprintf("%d", v)
 	} else {
 		return newUserError(fmt.Sprintf("Flag [%s] does not exist. %s", "id", err))
 	}

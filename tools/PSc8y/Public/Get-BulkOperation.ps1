@@ -25,7 +25,7 @@ Get bulk operation by id
         [Parameter(Mandatory = $true,
                    ValueFromPipeline=$true,
                    ValueFromPipelineByPropertyName=$true)]
-        [string]
+        [long]
         $Id,
 
         # Show the full (raw) response from Cumulocity including pagination information

@@ -25,7 +25,7 @@ Update bulk operation wait period between the creation of each operation to 1.5 
         [Parameter(Mandatory = $true,
                    ValueFromPipeline=$true,
                    ValueFromPipelineByPropertyName=$true)]
-        [string]
+        [long]
         $Id,
 
         # Delay between every operation creation. (required)
