@@ -168,7 +168,7 @@ only relevant information is shown.
                 AsText = $true
                 ArgumentList = $c8yargs
                 ErrorVariable = "ProcErrors"
-                Verbose = $VerbosePreference
+                Verbose = $VerbosePreference -and ($VerbosePreference -ne "SilentlyContinue")
                 ErrorAction = "SilentlyContinue"
             }
             $ExitCode = -1

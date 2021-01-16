@@ -16,6 +16,24 @@ Describe -Name "Get-DeviceCollection" {
             $Response.Count | Should -BeExactly 2
         }
 
+        It "Find devices by name and sort by creation time (descending)" {
+            $Response = PSc8y\Get-DeviceCollection -Name "*My Custom Device ${RandomPart}*" -OrderBy "creationTime desc" -PageSize 5
+            $LASTEXITCODE | Should -Be 0
+            $Response | Should -Not -BeNullOrEmpty
+            $Response.Count | Should -BeExactly 2
+            $Response[0].id | Should -BeExactly $Device02.id
+            $Response[1].id | Should -BeExactly $Device01.id
+        }
+
+        It "Find devices by name and sort by creation time (ascending)" {
+            $Response = PSc8y\Get-DeviceCollection -Name "*My Custom Device ${RandomPart}*" -OrderBy "creationTime asc" -PageSize 5
+            $LASTEXITCODE | Should -Be 0
+            $Response | Should -Not -BeNullOrEmpty
+            $Response.Count | Should -BeExactly 2
+            $Response[0].id | Should -BeExactly $Device01.id
+            $Response[1].id | Should -BeExactly $Device02.id
+        }
+
         It "Returns all devices using includeAll with WhatIf" {
             $Response = PSc8y\Get-DeviceCollection -Verbose -IncludeAll -WhatIf
             $LASTEXITCODE | Should -Be 0

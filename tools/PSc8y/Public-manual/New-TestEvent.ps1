@@ -32,6 +32,11 @@ Create an event on the existing device "myExistingDevice"
         )]
         [object] $Device,
 
+        # Time
+        [Parameter()]
+        [string]
+        $Time = "0s",
+
         # Add a dummy file to the event
         [switch] $WithBinary,
 
@@ -72,7 +77,7 @@ Create an event on the existing device "myExistingDevice"
         
         $c8yEvent = PSc8y\New-Event `
             -Device $iDevice.id `
-            -Time "1970-01-01" `
+            -Time:$Time `
             -Type "c8y_ci_TestEvent" `
             -Text "Test CI Event" `
             -ProcessingMode:$ProcessingMode `

@@ -85,6 +85,11 @@ endpoints:
         description: Operation status, can be one of SUCCESSFUL, FAILED, EXECUTING or PENDING.
         validationSet: [PENDING, EXECUTING, SUCCESSFUL, FAILED]
 
+      # Use string type, as an integer will default to 0 when not present in powershell
+      - name: bulkOperationId
+        type: string
+        description: Bulk operation id. Only retrieve operations related to the given bulk operation.
+
   - name: getOperation
     description: 'Get operation/s'
     descriptionLong: Get an operation by id

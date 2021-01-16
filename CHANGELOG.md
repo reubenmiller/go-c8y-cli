@@ -4,11 +4,31 @@
 
 No unreleased features
 
+### New features
 
+* Added bulk operations commands
+
+    **PowerShell**
+
+    * `Get-BulkOperationCollection`
+    * `Get-BulkOperation`
+    * `New-BulkOperation`
+    * `Update-BulkOperation`
+    * `Remove-BulkOperation`
+    
+    **Bash/zsh**
+
+    * `c8y bulkOperations list`
+    * `c8y bulkOperations create`
+    * `c8y bulkOperations get`
+    * `c8y bulkOperations update`
+    * `c8y bulkOperations delete`
+
+* `Get-OperationCollection` supports `bulkOperationId` parameter to return operations related to a specific bulk operation id
 
 ### Minor improvements
 
-* "owner" is field is not left untouched in the -Data parameter allowing the user to change it if required.
+* "owner" is field is left untouched in the -Data parameter allowing the user to change it if required.
     ```powershell
     Update-ManagedObject -Id 12345 -Data @{owner="myuser"}
     ```
@@ -92,6 +112,27 @@ No unreleased features
 * pwsh docker image improvements
     * Enabled pwsh tab completion by default
     * Added `vim` text editor
+
+* Get-DeviceCollection supports `OrderBy` parameter to sort
+    
+    **Example: Get a list of devices sorting by name in descending order**
+
+    **PowerShell**
+
+    ```powershell
+    Get-DeviceCollection -OrderBy "name desc"
+    ```
+
+    **Bash/zsh**
+    
+    ```sh
+    c8y devices list --orderBy "name desc"
+    ```
+
+* Test cmdlets supports the `-Time` parameter to be able to control the timestamp of created entity. By default it will use "0s" (i.e. now). 
+    * `New-TestAlarm`
+    * `New-TestEvent`
+    * `New-TestMeasurement`
 
 ## Released
 

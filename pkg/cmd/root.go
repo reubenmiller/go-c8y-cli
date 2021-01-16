@@ -345,6 +345,9 @@ func Execute() {
 	// binaries commands
 	rootCmd.AddCommand(newBinariesRootCmd().getCommand())
 
+	// bulkOperations commands
+    rootCmd.AddCommand(newBulkOperationsRootCmd().getCommand())
+
 	// currentApplication commands
 	rootCmd.AddCommand(newCurrentApplicationRootCmd().getCommand())
 

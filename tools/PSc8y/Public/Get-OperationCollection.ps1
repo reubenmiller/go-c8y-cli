@@ -63,6 +63,11 @@ Get operations from a device (using pipeline)
         [string]
         $Status,
 
+        # Bulk operation id. Only retrieve operations related to the given bulk operation.
+        [Parameter()]
+        [string]
+        $BulkOperationId,
+
         # Maximum number of results
         [Parameter()]
         [AllowNull()]
@@ -131,6 +136,9 @@ Get operations from a device (using pipeline)
         if ($PSBoundParameters.ContainsKey("Status")) {
             $Parameters["status"] = $Status
         }
+        if ($PSBoundParameters.ContainsKey("BulkOperationId")) {
+            $Parameters["bulkOperationId"] = $BulkOperationId
+        }
         if ($PSBoundParameters.ContainsKey("PageSize")) {
             $Parameters["pageSize"] = $PageSize
         }
@@ -151,21 +159,8 @@ Get operations from a device (using pipeline)
         }
 
         if ($env:C8Y_DISABLE_INHERITANCE -ne $true) {
-            # Inherit preference automatic variables
-            if (!$WhatIfPreference.IsPresent) {
-                $WhatIfPreference = $PSCmdlet.SessionState.PSVariable.get("WhatIfPreference").Value
-            }
-        
-            # Inherit custom parameters
-            $Stack = Get-PSCallStack | Select-Object -Skip 1 -First 1
-            $InheritVariables = @(@{Source="Force"; Target="Force"}, @{Source="WhatIf"; Target="WhatIfPreference"})
-            foreach ($iVariable in $InheritVariables) {
-                if (-Not $PSBoundParameters.ContainsKey($iVariable.Source)) {
-                    if ($null -ne $Stack -and $Stack.InvocationInfo.BoundParameters.ContainsKey($iVariable.Source)) {
-                        Set-Variable -Name $iVariable.Target -Value $Stack.InvocationInfo.BoundParameters[$iVariable.Source] -WhatIf:$false
-                    }
-                }
-            }
+            # Inherit preference variables
+            Use-CallerPreference -Cmdlet $PSCmdlet -SessionState $ExecutionContext.SessionState
         }
     }
 

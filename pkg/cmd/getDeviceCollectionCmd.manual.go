@@ -39,6 +39,7 @@ func newGetDeviceCollectionCmd() *getDeviceCollectionCmd {
 	cmd.Flags().String("fragmentType", "", "Device fragment type.")
 	cmd.Flags().String("owner", "", "Device owner.")
 	cmd.Flags().String("query", "", "Additional query filter")
+	cmd.Flags().String("orderBy", "name", "Order by. e.g. _id asc or name asc or creationTime.date desc")
 	cmd.Flags().Bool("withParents", false, "include a flat list of all parents and grandparents of the given object")
 
 	// Required flags
@@ -104,7 +105,15 @@ func (n *getDeviceCollectionCmd) getDeviceCollection(cmd *cobra.Command, args []
 	// Compile query
 	// replace all spaces with "+" due to url encoding
 	filter := url.QueryEscape(strings.Join(c8yQueryParts, " and "))
-	orderBy := url.QueryEscape("name")
+	orderBy := "name"
+
+	if v, err := cmd.Flags().GetString("orderBy"); err == nil {
+		if v != "" {
+			orderBy = url.QueryEscape(v)
+		}
+	}
+
+	// q will automatically add a fragmentType=c8y_IsDevice to the query
 	query.Add("query", fmt.Sprintf("$filter=%s+$orderby=%s", filter, orderBy))
 
 	if v, err := cmd.Flags().GetBool("withParents"); err == nil {

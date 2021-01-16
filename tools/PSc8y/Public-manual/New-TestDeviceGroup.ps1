@@ -15,6 +15,11 @@ Create a test device group
 1..10 | Foreach-Object { New-TestDeviceGroup -Force }
 
 Create 10 test device groups all with unique names
+
+.EXAMPLE
+New-TestDeviceGroup -TotalDevices 10
+
+Create a test device group with 10 newly created devices
 #>
     [cmdletbinding(
         SupportsShouldProcess = $true,
@@ -33,6 +38,10 @@ Create 10 test device groups all with unique names
         # Group type. Only device groups of type `Group` are visible as root folders in the UI
         [ValidateSet("Group", "SubGroup")]
         [string] $Type = "Group",
+
+        # Number of devices to create and assign to the group
+        [int]
+        $TotalDevices = 0,
 
         # Cumulocity processing mode
         [Parameter()]
@@ -73,12 +82,21 @@ Create 10 test device groups all with unique names
         }
 
         $GroupName = New-RandomString -Prefix "${Name}_"
-        PSc8y\New-ManagedObject `
+        $Group = PSc8y\New-ManagedObject `
             -Name $GroupName `
             -Data $Data `
             -ProcessingMode:$ProcessingMode `
             -Template:$Template `
             -TemplateVars:$TemplateVars `
             -Force:$Force
+        
+        if ($TotalDevices -gt 0) {
+            for ($i = 0; $i -lt $TotalDevices; $i++) {
+                $iDevice = PSc8y\New-TestAgent -Force
+                $null = PSc8y\Add-AssetToGroup -Group $Group.id -NewChildDevice $iDevice.id -Force
+            }
+        }
+
+        Write-Output $Group
     }
 }
