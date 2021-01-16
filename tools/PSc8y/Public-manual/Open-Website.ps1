@@ -6,6 +6,10 @@ Open a browser to the cumulocity website
 .DESCRIPTION
 Opens the default web browser to the Cumulocity application or directly to a device page in the Device Management application
 
+.NOTES
+When running on Linux, it relies on xdg-open. If it is not found, then only the URL will be printed to the console.
+The user can then try to open the URL by clicking on the link if they are using a modern terminal which supports url links.
+
 .EXAMPLE
 Open-Website -Application "cockpit"
 
