@@ -63,18 +63,21 @@ Open the devicemanagement to the device alarm page for myDevice01
       }
 
       "Device" {
-        $DeviceInfo = Expand-Device $Device | Select-Object -First 1
-
-        if (!$DeviceInfo) {
-          Write-Error "Could not find a matching devices to [$Device]"
-          return;
+        if ($null -eq $Device) {
+          $Url = "/apps/devicemanagement/index.html"
+        } else {
+          $DeviceInfo = Expand-Device $Device | Select-Object -First 1
+          
+          if (!$DeviceInfo) {
+            Write-Error "Could not find a matching devices to [$Device]"
+            return;
+          }
+          $Url = "/apps/devicemanagement/index.html#/device/{0}/{1}" -f @($DeviceInfo.id, $Page)
         }
-        $Url = "/apps/devicemanagement/index.html#/device/{0}/{1}" -f @($DeviceInfo.id, $Page)
         break;
       }
     }
 
-    # todo: add expand uri function to c8y binary
     $Url = (Get-C8ySessionProperty -Name "host") + $Url
 
     # Print a link to the console, so the user can click on it
