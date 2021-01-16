@@ -129,6 +129,11 @@ No unreleased features
     c8y devices list --orderBy "name desc"
     ```
 
+* Test cmdlets supports the `-Time` parameter to be able to control the timestamp of created entity. By default it will use "0s" (i.e. now). 
+    * `New-TestAlarm`
+    * `New-TestEvent`
+    * `New-TestMeasurement`
+
 ## Released
 
 ### v1.8.0
