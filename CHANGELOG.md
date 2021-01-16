@@ -6,18 +6,29 @@ No unreleased features
 
 ### New features
 
-* Support for bulk operations API
-    * New-BulkOperation
-    * Get-BulkOperation
-    * Get-BulkOperationCollection
-    * Update-BulkOperation
-    * Remove-BulkOperation
+* Added bulk operations commands
 
-* Get-OperationCollection supports `bulkOperationId` parameter to return operations related to a specific bulk operation id
+    **PowerShell**
+
+    * `Get-BulkOperationCollection`
+    * `Get-BulkOperation`
+    * `New-BulkOperation`
+    * `Update-BulkOperation`
+    * `Remove-BulkOperation`
+    
+    **Bash/zsh**
+
+    * `c8y bulkOperations list`
+    * `c8y bulkOperations create`
+    * `c8y bulkOperations get`
+    * `c8y bulkOperations update`
+    * `c8y bulkOperations delete`
+
+* `Get-OperationCollection` supports `bulkOperationId` parameter to return operations related to a specific bulk operation id
 
 ### Minor improvements
 
-* "owner" is field is not left untouched in the -Data parameter allowing the user to change it if required.
+* "owner" is field is left untouched in the -Data parameter allowing the user to change it if required.
     ```powershell
     Update-ManagedObject -Id 12345 -Data @{owner="myuser"}
     ```
