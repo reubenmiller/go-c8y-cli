@@ -44,7 +44,7 @@ Get a list of pending operations for a device
 	cmd.Flags().String("dateFrom", "", "Start date or date and time of operation.")
 	cmd.Flags().String("dateTo", "", "End date or date and time of operation.")
 	cmd.Flags().String("status", "", "Operation status, can be one of SUCCESSFUL, FAILED, EXECUTING or PENDING.")
-	cmd.Flags().Int("bulkOperationId", 0, "Bulk operation id. Only retrieve operations related to the given bulk operation.")
+	cmd.Flags().String("bulkOperationId", "", "Bulk operation id. Only retrieve operations related to the given bulk operation.")
 
 	// Required flags
 
@@ -118,8 +118,10 @@ func (n *getOperationCollectionCmd) getOperationCollection(cmd *cobra.Command, a
 	} else {
 		return newUserError(fmt.Sprintf("Flag [%s] does not exist. %s", "status", err))
 	}
-	if v, err := cmd.Flags().GetInt("bulkOperationId"); err == nil {
-		query.Add("bulkOperationId", fmt.Sprintf("%d", v))
+	if v, err := cmd.Flags().GetString("bulkOperationId"); err == nil {
+		if v != "" {
+			query.Add("bulkOperationId", url.QueryEscape(v))
+		}
 	} else {
 		return newUserError(fmt.Sprintf("Flag [%s] does not exist. %s", "bulkOperationId", err))
 	}

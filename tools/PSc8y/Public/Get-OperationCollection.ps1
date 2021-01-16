@@ -65,7 +65,7 @@ Get operations from a device (using pipeline)
 
         # Bulk operation id. Only retrieve operations related to the given bulk operation.
         [Parameter()]
-        [long]
+        [string]
         $BulkOperationId,
 
         # Maximum number of results

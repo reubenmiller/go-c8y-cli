@@ -115,7 +115,7 @@
         },
         {
           "name": "bulkOperationId",
-          "type": "integer",
+          "type": "string",
           "description": "Bulk operation id. Only retrieve operations related to the given bulk operation."
         }
       ]
