@@ -8,7 +8,7 @@ Remove bulk operation/s. Only bulk operations that are in ACTIVE or IN_PROGRESS 
 Remove bulk operation/s. Only bulk operations that are in ACTIVE or IN_PROGRESS can be deleted
 
 .EXAMPLE
-PS> Remove-BulkOperation -Id {{ NewOperation }}
+PS> Remove-BulkOperation -Id $BulkOp.id
 
 Remove bulk operation by id
 
@@ -25,7 +25,7 @@ Remove bulk operation by id
         [Parameter(Mandatory = $true,
                    ValueFromPipeline=$true,
                    ValueFromPipelineByPropertyName=$true)]
-        [long]
+        [string]
         $Id,
 
         # Cumulocity processing mode

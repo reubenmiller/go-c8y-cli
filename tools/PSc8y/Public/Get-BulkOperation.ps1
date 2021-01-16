@@ -8,7 +8,7 @@ Get bulk operation/s
 Get bulk operation/s
 
 .EXAMPLE
-PS> Get-BulkOperation -Id {{ NewOperation }}
+PS> Get-BulkOperation -Id $BulkOp.id
 
 Get bulk operation by id
 
@@ -25,7 +25,7 @@ Get bulk operation by id
         [Parameter(Mandatory = $true,
                    ValueFromPipeline=$true,
                    ValueFromPipelineByPropertyName=$true)]
-        [long]
+        [string]
         $Id,
 
         # Show the full (raw) response from Cumulocity including pagination information

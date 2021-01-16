@@ -2,20 +2,19 @@
 
 Describe -Name "Remove-BulkOperation" {
     BeforeEach {
-        $TestOperation = PSc8y\New-TestOperation
+        $Group = New-TestDeviceGroup -TotalDevices 2
+        $BulkOp = New-BulkOperation -Group $Group.id -CreationRampSec 10 -Operation @{c8y_Restart=@{}}
 
     }
 
     It "Remove bulk operation by id" {
-        $Response = PSc8y\Remove-BulkOperation -Id $TestOperation.id
+        $Response = PSc8y\Remove-BulkOperation -Id $BulkOp.id
         $LASTEXITCODE | Should -Be 0
     }
 
 
     AfterEach {
-        if ($TestOperation.deviceId) {
-            PSc8y\Remove-ManagedObject -Id $TestOperation.deviceId -ErrorAction SilentlyContinue
-        }
+        Remove-DeviceGroup -Id $Group.id -Cascade
 
     }
 }

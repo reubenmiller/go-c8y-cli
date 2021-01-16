@@ -8,12 +8,12 @@ Create a new bulk operation
 Create a new bulk operation
 
 .EXAMPLE
-PS> New-BulkOperation -Group $group.id -StartDate "10s" -CreationRampSec 15 -Operation @{ c8y_Restart = @{} }
+PS> New-BulkOperation -Group $Group.id -StartDate "60s" -CreationRampSec 15 -Operation @{ c8y_Restart = @{} }
 
 Create bulk operation for a group
 
 .EXAMPLE
-PS> Get-DeviceGroup $group.id | New-BulkOperation -StartDate "10s" -CreationRampSec 15 -Operation @{ c8y_Restart = @{} }
+PS> Get-DeviceGroup $Group.id | New-BulkOperation -StartDate "10s" -CreationRampSec 15 -Operation @{ c8y_Restart = @{} }
 
 Create bulk operation for a group (using pipeline)
 
@@ -33,7 +33,7 @@ Create bulk operation for a group (using pipeline)
         [object[]]
         $Group,
 
-        # Time when operations should be created.
+        # Time when operations should be created. Defaults to 300s
         [Parameter()]
         [string]
         $StartDate,

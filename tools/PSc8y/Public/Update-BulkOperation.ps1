@@ -8,9 +8,9 @@ Update bulk operation
 Update bulk operation. Making update on a started bulk operation cancels it and creates/schedules a new one.
 
 .EXAMPLE
-PS> Update-BulkOperation -Id {{ NewOperation }} -CreationRamp 15
+PS> Update-BulkOperation -Id $BulkOp.id -CreationRamp 1.5
 
-Update bulk operation
+Update bulk operation wait period between the creation of each operation to 1.5 seconds
 
 
 #>
@@ -25,7 +25,7 @@ Update bulk operation
         [Parameter(Mandatory = $true,
                    ValueFromPipeline=$true,
                    ValueFromPipelineByPropertyName=$true)]
-        [long]
+        [string]
         $Id,
 
         # Delay between every operation creation. (required)

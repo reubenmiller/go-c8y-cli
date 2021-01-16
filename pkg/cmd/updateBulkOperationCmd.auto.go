@@ -33,7 +33,7 @@ Update an bulk operation
 
 	cmd.SilenceUsage = true
 
-	cmd.Flags().Int("id", 0, "Bulk Operation id (required)")
+	cmd.Flags().String("id", "", "Bulk Operation id (required)")
 	cmd.Flags().Float32("creationRampSec", 0, "Delay between every operation creation. (required)")
 	addDataFlag(cmd)
 	addProcessingModeFlag(cmd)
@@ -91,8 +91,10 @@ func (n *updateBulkOperationCmd) updateBulkOperation(cmd *cobra.Command, args []
 
 	// path parameters
 	pathParameters := make(map[string]string)
-	if v, err := cmd.Flags().GetInt("id"); err == nil {
-		pathParameters["id"] = fmt.Sprintf("%d", v)
+	if v, err := cmd.Flags().GetString("id"); err == nil {
+		if v != "" {
+			pathParameters["id"] = v
+		}
 	} else {
 		return newUserError(fmt.Sprintf("Flag [%s] does not exist. %s", "id", err))
 	}

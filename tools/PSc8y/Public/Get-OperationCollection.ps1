@@ -63,6 +63,11 @@ Get operations from a device (using pipeline)
         [string]
         $Status,
 
+        # Bulk operation id. Only retrieve operations related to the given bulk operation.
+        [Parameter()]
+        [long]
+        $BulkOperationId,
+
         # Maximum number of results
         [Parameter()]
         [AllowNull()]
@@ -130,6 +135,9 @@ Get operations from a device (using pipeline)
         }
         if ($PSBoundParameters.ContainsKey("Status")) {
             $Parameters["status"] = $Status
+        }
+        if ($PSBoundParameters.ContainsKey("BulkOperationId")) {
+            $Parameters["bulkOperationId"] = $BulkOperationId
         }
         if ($PSBoundParameters.ContainsKey("PageSize")) {
             $Parameters["pageSize"] = $PageSize
