@@ -450,7 +450,7 @@
 "@
 
     # integer
-    $Setters."integer"."query" = "query.Add(`"${queryParam}`", v)"
+    $Setters."integer"."query" = "query.Add(`"${queryParam}`", fmt.Sprintf(`"%d`", v))"
     $Setters."integer"."path" = "pathParameters[`"${queryParam}`"] = fmt.Sprintf(`"%d`", v)"
     $Setters."integer"."body" = "body.Set(`"${queryParam}`", v)"
     $Definitions."integer" = @"
