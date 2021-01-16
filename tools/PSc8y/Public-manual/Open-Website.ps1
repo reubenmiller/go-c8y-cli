@@ -80,6 +80,10 @@ Open the devicemanagement to the device alarm page for myDevice01
 
     $Url = (Get-C8ySessionProperty -Name "host") + $Url
 
+    if ($Url -notmatch "https?://") {
+      $Url = "https://$Url"
+    }
+
     # Print a link to the console, so the user can click on it
     Write-Host "Open page: $Url" -ForegroundColor Gray
 
@@ -93,7 +97,17 @@ Open the devicemanagement to the device alarm page for myDevice01
         $null = Start-Process "microsoft-edge:$Url" -PassThru -ErrorAction SilentlyContinue
       }
       Default {
-        $null = Start-Process $Browser $Url -PassThru
+        if ($IsMacOS) {
+          $null = Start-Process "open" $Url -PassThru
+        } elseif ($IsLinux) {
+          if (Get-Command "xdg-open" -ErrorAction SilentlyContinue) {
+            $null = Start-Process "xdg-open" $Url -PassThru
+          } else {
+            Write-Warning "xdg-open is not present on your system. Try clicking on the URL to open it in a browser (if supported by your console)"
+          }
+        } else {
+          $null = Start-Process $Browser $Url -PassThru
+        }
       }
     }
   }
