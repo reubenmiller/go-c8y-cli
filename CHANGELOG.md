@@ -4,7 +4,16 @@
 
 No unreleased features
 
+### New features
 
+* Support for bulk operations API
+    * New-BulkOperation
+    * Get-BulkOperation
+    * Get-BulkOperationCollection
+    * Update-BulkOperation
+    * Remove-BulkOperation
+
+* Get-OperationCollection supports `bulkOperationId` parameter to return operations related to a specific bulk operation id
 
 ### Minor improvements
 

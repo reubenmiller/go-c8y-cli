@@ -21,7 +21,13 @@ endpoints:
     examples:
       powershell:
         - description: Get a list of bulk operations
+          beforeEach:
+            - "$Group = New-TestDeviceGroup -TotalDevices 2"
+            - "$BulkOp = New-BulkOperation -Group $Group.id -CreationRampSec 10 -Operation @{c8y_Restart=@{}}"
           command: Get-BulkOperationCollection
+          afterEach:
+            - "Get-BulkOperationCollection | Remove-BulkOperation"
+            - "Remove-DeviceGroup -Id $Group.id -Cascade"
 
       go:
         - description: Get a list of bulk operations
@@ -38,7 +44,13 @@ endpoints:
     examples:
       powershell:
         - description: Get bulk operation by id
-          command: Get-BulkOperation -Id {{ NewOperation }}
+          beforeEach:
+            - "$Group = New-TestDeviceGroup -TotalDevices 2"
+            - "$BulkOp = New-BulkOperation -Group $Group.id -CreationRampSec 10 -Operation @{c8y_Restart=@{}}"
+          command: Get-BulkOperation -Id $BulkOp.id
+          afterEach:
+            - "Get-BulkOperationCollection | Remove-BulkOperation"
+            - "Remove-DeviceGroup -Id $Group.id -Cascade"
 
       go:
         - description: Get bulk operation by id
@@ -51,7 +63,7 @@ endpoints:
         powershell: Get-BulkOperation
     pathParameters:
       - name: id
-        type: integer
+        type: string
         required: true
         pipeline: true
         description: Bulk Operation id
@@ -62,7 +74,12 @@ endpoints:
     examples:
       powershell:
         - description: Remove bulk operation by id
-          command: Remove-BulkOperation -Id {{ NewOperation }}
+          beforeEach:
+            - "$Group = New-TestDeviceGroup -TotalDevices 2"
+            - "$BulkOp = New-BulkOperation -Group $Group.id -CreationRampSec 10 -Operation @{c8y_Restart=@{}}"
+          command: Remove-BulkOperation -Id $BulkOp.id
+          afterEach:
+            - "Remove-DeviceGroup -Id $Group.id -Cascade"
 
       go:
         - description: Remove bulk operation by id
@@ -74,7 +91,7 @@ endpoints:
         powershell: Remove-BulkOperation
     pathParameters:
       - name: id
-        type: integer
+        type: string
         required: true
         pipeline: true
         description: Bulk Operation id
@@ -89,17 +106,19 @@ endpoints:
       powershell:
         - description: Create bulk operation for a group
           beforeEach:
-            - $group = New-TestAgent
-          command: 'New-BulkOperation -Group $group.id -StartDate "10s" -CreationRampSec 15 -Operation @{ c8y_Restart = @{} }'
+            - "$Group = New-TestDeviceGroup -TotalDevices 2"
+          command: 'New-BulkOperation -Group $Group.id -StartDate "60s" -CreationRampSec 15 -Operation @{ c8y_Restart = @{} }'
           afterEach:
-            - Remove-ManagedObject -Id $group.id
+            - "Get-BulkOperationCollection | Remove-BulkOperation"
+            - "Remove-DeviceGroup -Id $Group.id -Cascade"
 
         - description: Create bulk operation for a group (using pipeline)
           beforeEach:
-            - $group = New-TestAgent
-          command: 'Get-DeviceGroup $group.id | New-BulkOperation -StartDate "10s" -CreationRampSec 15 -Operation @{ c8y_Restart = @{} }'
+            - "$Group = New-TestDeviceGroup -TotalDevices 2"
+          command: 'Get-DeviceGroup $Group.id | New-BulkOperation -StartDate "10s" -CreationRampSec 15 -Operation @{ c8y_Restart = @{} }'
           afterEach:
-            - Remove-ManagedObject -Id $group.id
+            - "Get-BulkOperationCollection | Remove-BulkOperation"
+            - "Remove-DeviceGroup -Id $Group.id -Cascade"
 
       go:
         - description: Create operation for a device
@@ -118,8 +137,8 @@ endpoints:
       - name: startDate
         type: datetime
         required: false
-        default: "10s"
-        description: Time when operations should be created.
+        default: "300s"
+        description: Time when operations should be created. Defaults to 300s
 
       - name: creationRampSec
         property: creationRamp
@@ -148,8 +167,14 @@ endpoints:
     descriptionLong: Update bulk operation. Making update on a started bulk operation cancels it and creates/schedules a new one.
     examples:
       powershell:
-        - description: Update bulk operation
-          command: Update-BulkOperation -Id {{ NewOperation }} -CreationRamp 15
+        - description: Update bulk operation wait period between the creation of each operation to 1.5 seconds
+          beforeEach:
+            - "$Group = New-TestDeviceGroup -TotalDevices 2"
+            - "$BulkOp = New-BulkOperation -Group $Group.id -CreationRampSec 10 -Operation @{c8y_Restart=@{}}"
+          command: Update-BulkOperation -Id $BulkOp.id -CreationRamp 1.5
+          afterEach:
+            - "Get-BulkOperationCollection | Remove-BulkOperation"
+            - "Remove-DeviceGroup -Id $Group.id -Cascade"
       go:
         - description: Update an bulk operation
           command: c8y bulkOperations update --id 12345 --creationRamp 15
@@ -172,7 +197,7 @@ endpoints:
 
     pathParameters:
       - name: id
-        type: integer
+        type: string
         description: Bulk Operation id
         pipeline: true
         required: true

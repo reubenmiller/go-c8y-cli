@@ -85,6 +85,10 @@ endpoints:
         description: Operation status, can be one of SUCCESSFUL, FAILED, EXECUTING or PENDING.
         validationSet: [PENDING, EXECUTING, SUCCESSFUL, FAILED]
 
+      - name: bulkOperationId
+        type: integer
+        description: Bulk operation id. Only retrieve operations related to the given bulk operation.
+
   - name: getOperation
     description: 'Get operation/s'
     descriptionLong: Get an operation by id

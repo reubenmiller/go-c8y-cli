@@ -112,6 +112,11 @@
             "SUCCESSFUL",
             "FAILED"
           ]
+        },
+        {
+          "name": "bulkOperationId",
+          "type": "integer",
+          "description": "Bulk operation id. Only retrieve operations related to the given bulk operation."
         }
       ]
     },
