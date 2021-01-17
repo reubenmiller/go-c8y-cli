@@ -32,8 +32,10 @@ string
         tenant = $env:C8Y_TENANT
     }
 
-    # Is calling cmdlet using the session variable?
-    $Session = (Get-PSCallStack).InvocationInfo.BoundParameters.Session
-    $Values = Get-Session -Session:$Session
+    $Session = (Get-PSCallStack).InvocationInfo.BoundParameters.Session | Select-Object -First 1
+
+    if ($Session) {
+        $Values = Get-Session -Session:$Session
+    }
     $Values | Select-Object -ExpandProperty $Name
 }

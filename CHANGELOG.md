@@ -6,6 +6,12 @@ No unreleased features
 
 ## Released
 
+### v1.9.1
+
+#### Bug fixes
+
+* `Get-C8ySessionProperty` selects first matching Session parameter in the call stack if multiple matches are found
+
 ### v1.9.0
 
 ### New features
