@@ -26,6 +26,44 @@ No unreleased features
 
 * `Get-OperationCollection` supports `bulkOperationId` parameter to return operations related to a specific bulk operation id
 
+* Added helpers function to make creating custom functions easier and which behave like native `PSc8y` cmdlets.
+    * `Get-ClientCommonParameters` - Get common PSc8y parameters so they can be added to external using PowerShell's `DynamicParam` block
+    * `Add-ClientResponseType` - Add a type to a list of devices if the `-Raw` parameter is not being used
+
+    **Example**
+
+    The following function get a list of software items stored as managed objects in Cumulocity.
+
+    The cmdlet only needs to define one parameter $Name for the custom logic. The following parameters are inherited via the `Get-ClientCommonParameters` call in the DynamicParam block
+    * Pagination parameters: PageSize, WithTotalPages, TotalPages, CurrentPage, IncludeAll
+    * Pagination parameters: Session
+    * General parameters: TimeoutSec, Raw, OutputFile
+
+    ```powershell
+    Function Get-SoftwareCollection {
+        [cmdletbinding(
+            SupportsShouldProcess = $true,
+            ConfirmImpact = "None"
+        )]
+        Param(
+            # Software name
+            [string]
+            $Name = "*"
+        )
+        # Inherit common parameters from PSc8y module
+        DynamicParam { PSc8y\Get-ClientCommonParameters -Type "Collection" }
+
+        Process {
+            $Query = "type eq 'c8y_Software' and name eq '{0}'" -f $Name
+            $null = $PSBoundParameters.Remove("Name")
+
+            Find-ManagedObjectCollection -Query $Query @PSBoundParameters `
+                | Select-Object `
+                | Add-ClientResponseType -Type "application/vnd.com.nsn.cumulocity.customSoftware+json"
+        }
+    }
+    ```
+
 ### Minor improvements
 
 * "owner" is field is left untouched in the -Data parameter allowing the user to change it if required.
