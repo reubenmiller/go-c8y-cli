@@ -134,7 +134,10 @@ No unreleased features
     * `New-TestEvent`
     * `New-TestMeasurement`
 
-* `Get-SessionHomePath` Added public PowerShell cmdlet to retrieve the path where the session are stored 
+* `Get-SessionHomePath` Added public PowerShell cmdlet to retrieve the path where the session are stored
+
+* New cmdlet `Register-ClientArgumentCompleter` to enable other modules to add argument completion to PSc8y parameters like `Session` and `Template`
+    * Note: `-Force` needs to be used if your command uses Dynamic Parameters
 
 ## Released
 

@@ -96,54 +96,9 @@ $ModuleCommands = @( $Manifest.ExportedFunctions.Keys ) `
         }
     }
 
-$commandsWithSessionParameter = $ModuleCommands | Where-Object {
-    $null -ne $_.Parameters -and $_.Parameters.ContainsKey("Session")
-}
-
 try {
     if (Get-Command -Name Register-ArgumentCompleter -ErrorAction SilentlyContinue) {
-
-        Register-ArgumentCompleter -CommandName $commandsWithSessionParameter -ParameterName Session -ScriptBlock {
-            param ($commandName, $parameterName, $wordToComplete)
-
-            $C8ySessionHome = Get-SessionHomePath
-            Get-ChildItem -Path $C8ySessionHome -Filter "$wordToComplete*.json" -ErrorAction SilentlyContinue -WarningAction SilentlyContinue | ForEach-Object {
-                [System.Management.Automation.CompletionResult]::new($_.BaseName, $_.BaseName, 'ParameterValue', $_.BaseName)
-            }
-        }
-    }
-}
-catch {
-    # All this functionality is optional, so suppress errors
-    Write-Debug -Message "Error registering argument completer: $_"
-}
-
-#
-# Template completion
-#
-$commandsWithTemplateParameter = $ModuleCommands | Where-Object {
-    $null -ne $_.Parameters -and $_.Parameters.ContainsKey("Template")
-}
-
-try {
-    if (Get-Command -Name Register-ArgumentCompleter -ErrorAction SilentlyContinue) {
-
-        Register-ArgumentCompleter -CommandName $commandsWithTemplateParameter -ParameterName Template -ScriptBlock {
-            param ($commandName, $parameterName, $wordToComplete)
-
-            $settings = Get-ClientSetting
-            $c8yTemplateHome = $settings."settings.template.path"
-            if (!$c8yTemplateHome) {
-                return
-            }
-
-            Get-ChildItem -Path $c8yTemplateHome -Recurse -Filter "$wordToComplete*" -ErrorAction SilentlyContinue -WarningAction SilentlyContinue |
-                ForEach-Object {
-                    if ($_.Extension -match "(jsonnet)$") {
-                        [System.Management.Automation.CompletionResult]::new($_.Name, $_.Name, 'ParameterValue', $_.Name)
-                    }
-                }
-        }
+        $ModuleCommands | Register-ClientArgumentCompleter
     }
 }
 catch {

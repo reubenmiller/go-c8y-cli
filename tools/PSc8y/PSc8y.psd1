@@ -304,6 +304,7 @@ FunctionsToExport = @(
 	'New-TestUser',
 	'Open-Website',
 	'Register-Alias',
+	'Register-ClientArgumentCompleter',
 	'Set-ClientConsoleSetting',
 	'Set-Session',
 	'Test-ClientPassphrase',
