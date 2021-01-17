@@ -30,10 +30,12 @@ Describe -Name "Common parameters" {
     It "All side-effect commands support WhatIf" {
         $ExcludeCmdlets = @(
             "Add-PowershellType",
+            "Add-ClientResponseType",
             "New-RandomPassword",
             "New-RandomString",
             "New-Session",
             "Register-Alias",
+            "Register-ClientArgumentCompleter",
             "Set-Session",
             "Set-ClientConsoleSetting"
         )
@@ -53,10 +55,12 @@ Describe -Name "Common parameters" {
     It "All new and update commands support templates" {
         $ExcludeCmdlets = @(
             "Add-PowershellType",
+            "Add-ClientResponseType",
             "New-RandomPassword",
             "New-RandomString",
             "New-Session",
             "Register-Alias",
+            "Register-ClientArgumentCompleter",
             "Set-Session",
             "Set-ClientConsoleSetting",
             "New-TestFile",
