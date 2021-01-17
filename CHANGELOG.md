@@ -134,6 +134,8 @@ No unreleased features
     * `New-TestEvent`
     * `New-TestMeasurement`
 
+* `Get-SessionHomePath` Added public PowerShell cmdlet to retrieve the path where the session are stored 
+
 ## Released
 
 ### v1.8.0
