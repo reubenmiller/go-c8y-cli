@@ -4,6 +4,10 @@
 
 No unreleased features
 
+## Released
+
+### v1.9.0
+
 ### New features
 
 * Added bulk operations commands
@@ -176,8 +180,6 @@ No unreleased features
 
 * New cmdlet `Register-ClientArgumentCompleter` to enable other modules to add argument completion to PSc8y parameters like `Session` and `Template`
     * Note: `-Force` needs to be used if your command uses Dynamic Parameters
-
-## Released
 
 ### v1.8.0
 
