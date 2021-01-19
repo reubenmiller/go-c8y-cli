@@ -4,6 +4,10 @@
 
 No unreleased features
 
+## Released
+
+### v1.10.0
+
 ### Breaking Changes
 
 * `Expand-Device` no longer fetches the device managed object when given the id when being called from a function that does not makes use of a "Force" parameter. If you would like the old functionality, then add the new "-Fetch" parameter when calling `Expand-Device`.
@@ -125,8 +129,6 @@ No unreleased features
 ## Bug fixes
 
 * `Set-Session` no longer causes the terminal bell/chime when using backspace or arrow keys.
-
-## Released
 
 ### v1.9.1
 

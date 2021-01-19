@@ -12,7 +12,7 @@
 RootModule = './PSc8y.psm1'
 
 # Version number of this module.
-ModuleVersion = '1.9.1'
+ModuleVersion = '1.10.0'
 
 # Supported PSEditions
 CompatiblePSEditions = @(
@@ -31,7 +31,7 @@ Author = 'Reuben Miller'
 CompanyName = ''
 
 # Copyright statement for this module
-Copyright = '(c) 2020. All rights reserved.'
+Copyright = '(c) 2021. All rights reserved.'
 
 # Description of the functionality provided by this module
 Description = 'Cumulocity REST API'
