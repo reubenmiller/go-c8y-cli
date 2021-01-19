@@ -100,7 +100,7 @@ func getApplicationSlice(cmd *cobra.Command, args []string, name string) ([]stri
 
 	// values = ParseValues(append(values, args...))
 
-	formattedValues, err := lookupEntity(f, values, true)
+	formattedValues, err := lookupEntity(f, values, false)
 
 	if err != nil {
 		Logger.Errorf("Failed to fetch entities. %s", err)

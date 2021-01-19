@@ -42,6 +42,13 @@ Expand applications that match a name of "*" and have a type of "MICROSERVICE"
         [object[]] $InputObject
     )
 
+    Begin {
+        if ($env:C8Y_DISABLE_INHERITANCE -ne $true) {
+            # Inherit preference variables
+            Use-CallerPreference -Cmdlet $PSCmdlet -SessionState $ExecutionContext.SessionState
+        }
+    }
+
     Process {
         [array] $AllApplications = foreach ($iApp in $InputObject)
         {

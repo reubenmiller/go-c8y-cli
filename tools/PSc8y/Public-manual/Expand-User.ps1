@@ -31,6 +31,13 @@ Get all the user object (with app in their name). Note the Expand cmdlet won't d
         [object[]] $InputObject
     )
 
+    Begin {
+        if ($env:C8Y_DISABLE_INHERITANCE -ne $true) {
+            # Inherit preference variables
+            Use-CallerPreference -Cmdlet $PSCmdlet -SessionState $ExecutionContext.SessionState
+        }
+    }
+
     Process {
         [array] $AllUsers = foreach ($iUser in $InputObject)
         {
