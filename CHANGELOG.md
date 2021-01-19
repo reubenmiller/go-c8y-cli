@@ -122,6 +122,10 @@ No unreleased features
 
 * Reduced number of API calls within PSc8y and c8y binary by skipping lookups when an ID is given by the user. Previously PSc8y and c8y were sending two API calls to the server in order to normalize the request by retrieving additional information and potentiall shown to the user. Since this is currently not used, it has been removed.
 
+## Bug fixes
+
+* `Set-Session` no longer causes the terminal bell/chime when using backspace or arrow keys.
+
 ## Released
 
 ### v1.9.1
