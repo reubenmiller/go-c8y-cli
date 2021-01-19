@@ -18,6 +18,8 @@ Create a new test alarm
 ```
 New-TestAlarm
 	[[-Device] <Object>]
+	[-Time <String>]
+	[-ProcessingMode <String>]
 	[-Template <String>]
 	[-TemplateVars <String>]
 	[-Force]
@@ -62,6 +64,36 @@ Required: False
 Position: 1
 Default value: None
 Accept pipeline input: True (ByPropertyName, ByValue)
+Accept wildcard characters: False
+```
+
+### -Time
+Time
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: 0s
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -ProcessingMode
+Cumulocity processing mode
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
 Accept wildcard characters: False
 ```
 

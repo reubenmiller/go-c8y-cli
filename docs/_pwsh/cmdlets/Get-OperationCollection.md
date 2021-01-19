@@ -22,6 +22,7 @@ Get-OperationCollection
 	[[-DateFrom] <String>]
 	[[-DateTo] <String>]
 	[[-Status] <String>]
+	[[-BulkOperationId] <String>]
 	[[-PageSize] <Int32>]
 	[-WithTotalPages]
 	[[-CurrentPage] <Int32>]
@@ -147,6 +148,22 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
+### -BulkOperationId
+Bulk operation id.
+Only retrieve operations related to the given bulk operation.
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 6
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
 ### -PageSize
 Maximum number of results
 
@@ -156,7 +173,7 @@ Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: 6
+Position: 7
 Default value: 0
 Accept pipeline input: False
 Accept wildcard characters: False
@@ -186,7 +203,7 @@ Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: 7
+Position: 8
 Default value: 0
 Accept pipeline input: False
 Accept wildcard characters: False
@@ -201,7 +218,7 @@ Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: 8
+Position: 9
 Default value: 0
 Accept pipeline input: False
 Accept wildcard characters: False
@@ -246,7 +263,7 @@ Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: 9
+Position: 10
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
@@ -276,7 +293,7 @@ Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: 10
+Position: 11
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
@@ -291,7 +308,7 @@ Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: 11
+Position: 12
 Default value: 0
 Accept pipeline input: False
 Accept wildcard characters: False
