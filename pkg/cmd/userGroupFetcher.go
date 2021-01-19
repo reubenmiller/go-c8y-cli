@@ -5,8 +5,8 @@ import (
 	"fmt"
 
 	"github.com/pkg/errors"
-	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/reubenmiller/go-c8y-cli/pkg/matcher"
+	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
 )
 
@@ -92,7 +92,7 @@ func getFormattedGroupSlice(cmd *cobra.Command, args []string, name string) ([]s
 
 	values = ParseValues(append(values, args...))
 
-	formattedValues, err := lookupEntity(f, values, true)
+	formattedValues, err := lookupEntity(f, values, false)
 
 	if err != nil {
 		Logger.Warningf("Failed to fetch entities. %s", err)

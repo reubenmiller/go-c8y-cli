@@ -33,6 +33,13 @@ Get all the microservice object (with app in their name). Note the Expand cmdlet
         [object[]] $InputObject
     )
 
+    Begin {
+        if ($env:C8Y_DISABLE_INHERITANCE -ne $true) {
+            # Inherit preference variables
+            Use-CallerPreference -Cmdlet $PSCmdlet -SessionState $ExecutionContext.SessionState
+        }
+    }
+
     Process {
         [array] $AllMicroservices = foreach ($iApp in $InputObject)
         {

@@ -4,6 +4,108 @@
 
 No unreleased features
 
+### Breaking Changes
+
+* `Expand-Device` no longer fetches the device managed object when given the id when being called from a function that does not makes use of a "Force" parameter. If you would like the old functionality, then add the new "-Fetch" parameter when calling `Expand-Device`.
+
+    By default if Expand-Device is called from an interactive function, then the managed object will be looked up in order to provide helpful information to the user in the confirmation prompt. Additionally users writing modules, can force fetching of the device when given an id by using the new `-Fetch` parameter.
+
+    The change enable a significant reduction in API calls as shown below in the following examples:
+
+    **Comparison of total API calls per command to previous PSc8y version**
+
+    Previous version: PSc8y=1.9.1
+
+    The following examples show how many api calls are made to Cumulocity.
+
+    ```sh
+    # API calls: 1 x GET    (previously 3 x GET!)
+    Get-Device 1234
+
+    # API calls: 2 x GET    (previously 5 x GET!)
+    Get-Device 1234 | Get-Device
+
+    # API calls: 1 x GET and 1 x PUT    (prevously 4 x GET and 1 x PUT)
+    Get-Device 1234 | Update-Device
+
+    # API calls: 1 x POST   (prevously 3 x GET and 1 x POST)
+    Add-DeviceToGroup -Group 11111 -NewChildDevice 222222 -ProcessingMode QUIESCENT -Force
+    ```
+
+    **Expand-Device Usage**
+    Expand-Device was created in order to normalize the input of devices given by the user. Since PSc8y accepts devices either by id, name, object or piped objects, it can make it difficult to handle each of the input types in each function.
+
+    ```powershell
+    # file: my-script.ps1
+    Param(
+        [Parameter(
+            Mandatory = $true,
+            Position = 0,
+            ValueFromPipeline = $true,
+            ValueFromPipelineByPropertyName = $true
+        )]
+        [object[]] $Device = ""
+    )
+
+    foreach ($iDevice in (PSc8y\Expand-Device $Device)) {
+        Write-Host ("Dummy api call with device id: /inventory/managedObject/{0}" -f $iDevice.id)
+    }
+    ```
+
+    By writing it like this the user can call the function in the following ways with the same code.
+
+    ```powershell
+    # Pass array item
+    ./my-script.ps1 -Device 12345
+
+    # array of items mixing ids with names
+    ./my-script.ps1 -Device "myDevicename", 1234
+
+    # using pipelines from other PSc8y cmdlets
+    Get-DeviceCollection | ./my-script.ps1
+
+    # By hashtable with id property (using positional argument)
+    ./my-script.ps1 @{id="12345"}, @{id="6789"}
+    ```
+
+    Now let's say that you wanted to add some logic which required the full device managed object from the server, and not just the id and name fields. This can be achieved by adding the `-Fetch` parameter to the `Expand-Device` cmdlet call.
+
+    The differences in the output can be shown in the small example
+
+    ```powershell
+    # This will not fetch the device (as the device already exists)
+    PS> 1234 | Expand-Device
+
+    id   name
+    ---- ----
+    1234 [id=1234]
+    ```
+
+    Agent but using `-Fetch`.
+
+    ```powershell
+    # Using -Fetch will return the whole device managed object from Cumulocity (1 x GET request)
+    PS> 1234 | Expand-Device -Fetch
+
+    additionParents : @{references=System.Object[]; self=https://example.cumulocity.com/inventory/managedObjects/1234/additionParents}
+    assetParents    : @{references=System.Object[]; self=https://example.cumulocity.com/inventory/managedObjects/1234/assetParents}
+    c8y_IsDevice    : 
+    childAdditions  : @{references=System.Object[]; self=https://example.cumulocity.com/inventory/managedObjects/1234/childAdditions}
+    childAssets     : @{references=System.Object[]; self=https://example.cumulocity.com/inventory/managedObjects/1234/childAssets}
+    childDevices    : @{references=System.Object[]; self=https://example.cumulocity.com/inventory/managedObjects/1234/childDevices}
+    creationTime    : 1/19/2021 7:49:33 PM
+    deviceParents   : @{references=System.Object[]; self=https://example.cumulocity.com/inventory/managedObjects/1234/deviceParents}
+    id              : 1234
+    lastUpdated     : 1/19/2021 8:52:29 PM
+    name            : mynewname
+    owner           : user@example.com
+    self            : https://example.cumulocity.com/inventory/managedObjects/3882
+    ```
+
+## Performance improvements
+
+* Reduced number of API calls within PSc8y and c8y binary by skipping lookups when an ID is given by the user. Previously PSc8y and c8y were sending two API calls to the server in order to normalize the request by retrieving additional information and potentiall shown to the user. Since this is currently not used, it has been removed.
+
 ## Released
 
 ### v1.9.1
