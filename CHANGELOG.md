@@ -102,6 +102,22 @@ No unreleased features
     self            : https://example.cumulocity.com/inventory/managedObjects/3882
     ```
 
+## New Features
+
+* Added commands to manage managed object child additions
+
+    **PowerShell**
+
+    * `Get-ChildAdditionCollection`
+    * `New-ChildAddition`
+    * `Remove-ChildAddition`
+
+    **Bash/zsh**
+
+    * `c8y inventoryReferences listChildAdditions`
+    * `c8y inventoryReferences createChildAddition`
+    * `c8y inventoryReferences deleteChildAddition`
+
 ## Performance improvements
 
 * Reduced number of API calls within PSc8y and c8y binary by skipping lookups when an ID is given by the user. Previously PSc8y and c8y were sending two API calls to the server in order to normalize the request by retrieving additional information and potentiall shown to the user. Since this is currently not used, it has been removed.
