@@ -167,7 +167,7 @@ func (n *listSessionCmd) listSession(cmd *cobra.Command, args []string) error {
 	}
 
 	prompt := promptui.Select{
-		Stdout:            os.Stderr,
+		Stdout:            &bellSkipper{}, // Workaround to pervent the terminal bell on MacOS
 		HideSelected:      false,
 		IsVimMode:         false,
 		StartInSearchMode: false,
