@@ -13,42 +13,13 @@ The instructions slightly differ depending on which operating system you are usi
 
 ##### Windows
 
-1. Start an PowerShell Console as Administrator
+**PowerShell 7**
 
-1. Check that you have a recent version of PowerShell (version 5.0 or higher)
+Following the instructions to install [PowerShell 7 (Core)](https://github.com/PowerShell/PowerShell/releases).
 
-    ```sh
-    $PSVersionTable.PSVersion.Major
-    ```
+**PowerShell 5**
 
-    If you have an older version of PowerShell then please update it, or install [PowerShell 7 (Core)](https://github.com/PowerShell/PowerShell/releases) as it can run along side PowerShell 5. A portable zip version is also available.
-
-1. Install Latest version from PowerShell Gallery and the PowerShellGet Module
-
-    To get the latest version from PowerShell Gallery, you should first install the latest Nuget provider. You will need to run PowerShell as an Administrator for all  the following commands
-
-    ```sh
-    Set-ExecutionPolicy RemoteSigned -Force;
-
-    Install-PackageProvider Nuget –Force;
-    Install-Module –Name PowerShellGet –Force;
-
-    Exit
-    ```
-
-    If the `Install-Module` command fails, then try the command gain adding the `-AllowClobber` option.
-
-
-    Note:
-
-    In the future the library can be updated by using a single command
-
-    ```sh
-    Update-Module -Name PowerShellGet
-    Exit
-    ```
-
-    If there are any errors then please read the original [blog](https://www.thomasmaurer.ch/2019/02/update-powershellget-and-packagemanagement/) where these instructions were copied from
+Powershell 5 is no longer officially supported. Users should install PowerShell 7 (aka pwsh) as it provides a lot of benefits and is also supported on multiple platforms (linux, MacOS and Windows).
 
 ##### MacOS and Linux
 
