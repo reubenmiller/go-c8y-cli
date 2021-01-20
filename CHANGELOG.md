@@ -15,7 +15,7 @@ No unreleased features
     ```powershell
     Remove-ApplicationBinary -Application 12345 -BinaryId 9876
 
-    # Or remove all application binaries for an application
+    # Or remove all application binaries (except the active one) for an application
     Get-ApplicationBinaryCollection -Id 12345 | Remove-ApplicationBinary -Application 12345
     ```
 
