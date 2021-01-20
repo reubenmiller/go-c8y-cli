@@ -221,9 +221,9 @@
         $null = $CurrentParam.AppendLine("        # {0}" -f ($item.Description))
         $null = $CurrentParam.AppendLine("        [Parameter({0})]" -f ($item.Definition -join ",`n                   "))
 
-        # if ($iArg.alias) {
-        #     $null = $CurrentParam.AppendLine("        [Alias(`"{0}`")]" -f $iArg.alias)
-        # }
+        if ($iArg.alias) {
+            $null = $CurrentParam.AppendLine("        [Alias(`"{0}`")]" -f $iArg.alias)
+        }
 
         # Validate set
         if ($null -ne $iArg.validationSet) {

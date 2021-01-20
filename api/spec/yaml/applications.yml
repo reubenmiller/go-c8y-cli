@@ -365,3 +365,51 @@ endpoints:
         pipeline: true
         required: true
         description: Application id
+
+  - name: deleteApplicationBinary
+    skip: false
+    description: 'Remove application binary'
+    descriptionLong: >
+      Remove an application binaries related to the given application
+
+      The active version can not be deleted and the server will throw an error if you try.
+    method: DELETE
+    path: /application/applications/{application}/binaries/{binaryId}
+    alias:
+        go: deleteApplicationBinary
+        powershell: Remove-ApplicationBinary
+    examples:
+      powershell:
+          # TODO: Create a test function to update an application binary
+        - description: Remove an application binary related to a Hosted (web) application
+          beforeEach:
+            - $app = New-TestHostedApplication
+            - New-ApplicationBinary -Id $app -File 
+            - $appBinary = Get-ApplicationBinaryCollection -Id $App.id
+          command: Remove-ApplicationBinary -Application $app.id -BinaryId $appBinary.id
+          skipTest: true
+          afterEach:
+            - Remove-Application -Id $app.id
+        - description: Remove all application binaries (except for the active one) for an application (using pipeline)
+          beforeEach:
+            - $app = New-TestHostedApplication
+          command: Get-ApplicationBinaryCollection -Id $app.id | Remove-ApplicationBinary -Application $app.id
+          skipTest: true
+          afterEach:
+            - Remove-Application -Id $app.id
+      go:
+        - description: Remove an application binary related to a Hosted (web) application
+          command: c8y applications deleteApplicationBinary --application 12345 --binaryId 9876
+    pathParameters:
+      - name: application
+        type: application
+        pipeline: false
+        required: true
+        description: Application id
+      
+      - name: binaryId
+        alias: id
+        type: '[]string'
+        pipeline: true
+        required: true
+        description: Application binary id

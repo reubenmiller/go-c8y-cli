@@ -4,6 +4,27 @@
 
 No unreleased features
 
+## New features
+
+* Added `Remove-ApplicationBinary` command
+
+    **Example: Remove all application binaries related to an application**
+
+    **PowerShell**
+
+    ```powershell
+    Remove-ApplicationBinary -Application 12345 -BinaryId 9876
+
+    # Or remove all application binaries for an application
+    Get-ApplicationBinaryCollection -Id 12345 | Remove-ApplicationBinary -Application 12345
+    ```
+
+    **Bash/zsh**
+
+    ```sh
+    c8y applications deleteApplicationBinary --application 12345 --binaryId 9876
+    ```
+
 ## Released
 
 ### v1.10.0
