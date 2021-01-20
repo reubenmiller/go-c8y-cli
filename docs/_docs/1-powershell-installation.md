@@ -27,6 +27,16 @@ Once powershell is installed, then `PSc8y` can be installed using:
     pwsh.exe
     ```
 
+    **Note for Windows**
+
+    If you get an error regarding the `Execution policy` when installing or importing PSc8y, then you will have to start a new powershell conc
+
+    ```sh
+    pwsh -ExecutionPolicy bypass
+    ```
+    
+    More information on PowerShell's execution policy can be found on the [Microsoft website](https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_execution_policies)
+
 1. Install `PSc8y` module from [PSGallery](https://www.powershellgallery.com/packages/PSc8y)
 
     ```powershell
@@ -41,29 +51,11 @@ Once powershell is installed, then `PSc8y` can be installed using:
 
 1. Now go to the [Getting started](https://reubenmiller.github.io/go-c8y-cli/docs/2-getting-started-powershell/) section for instructions how to use it
 
-#### PowerShell 5 (not recommended)
+#### PowerShell 5
 
-**Warning**
+Powershell 5 is no longer officially supported. Users should install PowerShell 7 (aka pwsh) as it provides a lot of benefits and is also supported on multiple platforms (linux, MacOS and Windows).
 
-It is highly recommended to use PowerShell 7 rather than PowerShell 5. PowerShel 7 can be installed along side existing PowerShell installations, and Microsoft have already stopped developing features on 5.x. In addition PowerShell 7 is cross platform, so you can use the same scripts across Windows, MacOS and Linux.
-
-1. Install the [PowerShell Prerequisites](../1-powershell-prerequisites) required when running PowerShell 5.
-
-1. Open a powershell console (i.e. powershell.exe)
-
-1. Install `PSc8y` module from [PSGallery](https://www.powershellgallery.com/packages/PSc8y)
-
-    ```powershell
-    Install-Module PSc8y -Repository PSGallery -AllowClobber -Scope CurrentUser
-    ```
-
-1. Import the module
-
-    ```powershell
-    Import-Module PSc8y
-    ```
-
-1. Now go to the [Getting started](https://reubenmiller.github.io/go-c8y-cli/docs/2-getting-started-powershell/) section for instructions how to use it
+Following the instructions to install [PowerShell 7 (Core)](https://github.com/PowerShell/PowerShell/releases).
 
 ### MacOS
 
