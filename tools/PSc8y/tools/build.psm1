@@ -12,6 +12,7 @@ $script:PublicFunctions = @( Get-ChildItem -Path $ModuleRoot\Public\*.ps1 -Error
 )
 $script:PrivateFunctions = @( Get-ChildItem -Path $ModuleRoot\Private\*.ps1 -ErrorAction SilentlyContinue )
 
+$script:EnumDefinitions = @( Get-ChildItem -Path "$ModuleRoot\Enums\*.ps1" -ErrorAction SilentlyContinue )
 
 function New-ModulePSMFile {
     $moduleFile = New-Item -Path $ArtifactRoot\$ModuleName\$ModuleName.psm1 -ItemType File -Force
@@ -27,6 +28,11 @@ function New-ModulePSMFile {
     # Add a region and write out the public functions
     "#region Public Functions" | Out-File -FilePath $moduleFile -Append
     Get-Content $PublicFunctions | Out-String | Out-File -FilePath $moduleFile -Append
+    "#endregion`n" | Out-File -FilePath $moduleFile -Append
+
+    # Add a region for Enums
+    "#region Enums" | Out-File -FilePath $moduleFile -Append
+    Get-Content $EnumDefinitions | Out-String | Out-File -FilePath $moduleFile -Append
     "#endregion`n" | Out-File -FilePath $moduleFile -Append
 
     # Build a string to export only /public/psmexports functions from the PSModule.psm1 file.
