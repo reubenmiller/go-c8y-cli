@@ -48,6 +48,14 @@ Describe -Name "Disable create/update/delete commands" {
         $LASTEXITCODE | Should -Be 0
     }
 
+    It "Show an error to the user if the action is not allowed" {
+        # updates should not work
+        $response = PSc8y\New-Device -Name "My New Name" -WhatIf -ErrorVariable c8yError
+        $LASTEXITCODE | Should -Not -Be 0
+        $response | Should -BeNullOrEmpty
+        $c8yError[-1] | Should -Match "create mode is disabled"
+    }
+
     It "Enables delete commands" {
         Set-ClientConsoleSetting -EnableCreateCommands
 
