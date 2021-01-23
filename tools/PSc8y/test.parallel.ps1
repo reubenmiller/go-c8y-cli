@@ -52,7 +52,6 @@ $TestStartTime = Get-Date
 $results = $Tests | ForEach-Object -ThrottleLimit:$ThrottleLimit -Parallel {
     $TestItem = $_
     $TestFile = $TestItem.File
-    Write-Host "Invoking Pester for: $TestFile.Name"
 
     $ConfirmPreference = "None"
 
