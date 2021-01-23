@@ -9,7 +9,7 @@
 @{
 
 # Script module or binary module file associated with this manifest.
-RootModule = '.\PSc8y.psm1'
+RootModule = 'PSc8y.psm1'
 
 # Version number of this module.
 ModuleVersion = '1.10.0'
