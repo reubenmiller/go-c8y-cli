@@ -218,11 +218,28 @@ const (
 const SettingsGlobalName = "settings"
 
 func (c *c8yCmd) checkCommandError(err error) {
-	errorText := fmt.Sprintf("%s", err)
-	if strings.Contains(errorText, "403") || strings.Contains(errorText, "401") {
-		c.Logger.Error("Authentication failed. Try to log in again, or check the password")
+
+	if cErr, ok := err.(commandError); ok {
+		if cErr.statusCode == 403 || cErr.statusCode == 401 {
+			c.Logger.Error(fmt.Sprintf("Authentication failed (statusCode=%d). Try to run set-session again, or check the password", cErr.statusCode))
+		}
+
+		// format errors as json messages
+		// only log users errors
+		if !cErr.isSilent() {
+			message := ""
+			if cErr.statusCode != 0 {
+				message = fmt.Sprintf(`{"error":"commandError","message":"%s","statusCode":%d}`, err, cErr.statusCode)
+			} else {
+				message = fmt.Sprintf(`{"error":"commandError","message":"%s"}`, err)
+			}
+			rootCmd.PrintErrln(strings.ReplaceAll(message, "\n", ""))
+		}
 	} else {
-		fmt.Println(err)
+		// unexpected error
+		c.Logger.Errorf("%s", err)
+		message := fmt.Sprintf(`{"error":"commandError","message":"%s"}`, err)
+		rootCmd.PrintErrln(strings.ReplaceAll(message, "\n", ""))
 	}
 }
 
@@ -266,7 +283,7 @@ func (c *c8yCmd) checkSessionExists(cmd *cobra.Command, args []string) error {
 		return newSystemError("Client failed to load")
 	}
 	if client.BaseURL == nil || client.BaseURL.Host == "" {
-		return newUserError("A c8y session has not been loaded. Please create or activate a session and try again")
+		return newUserErrorWithExitCode(102, "A c8y session has not been loaded. Please create or activate a session and try again")
 	}
 
 	return nil
@@ -346,7 +363,7 @@ func Execute() {
 	rootCmd.AddCommand(newBinariesRootCmd().getCommand())
 
 	// bulkOperations commands
-    rootCmd.AddCommand(newBulkOperationsRootCmd().getCommand())
+	rootCmd.AddCommand(newBulkOperationsRootCmd().getCommand())
 
 	// currentApplication commands
 	rootCmd.AddCommand(newCurrentApplicationRootCmd().getCommand())
@@ -424,9 +441,16 @@ func Execute() {
 	// userRoles commands
 	rootCmd.AddCommand(newUserRolesRootCmd().getCommand())
 
+	// Handle errors (not in cobra libary)
+	rootCmd.SilenceErrors = true
+
 	if err := rootCmd.Execute(); err != nil {
 		rootCmd.checkCommandError(err)
-		os.Exit(1)
+
+		if cErr, ok := err.(commandError); ok {
+			os.Exit(cErr.exitCode)
+		}
+		os.Exit(100)
 	}
 }
 

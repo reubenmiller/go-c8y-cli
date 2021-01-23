@@ -217,7 +217,7 @@ func (n *newMicroserviceCmd) doProcedure(cmd *cobra.Command, args []string) erro
 			manifestContents = v
 		} else {
 			Logger.Warningf("failed to decode manifest file. file=%s, err=%s", manifestFile, err)
-			return newUserError(fmt.Sprintf("invalid manifest file. Only json files are accepted. %s", err))
+			return newUserError(fmt.Sprintf("invalid manifest file. Only json files are accepted. %s", strings.TrimSpace(err.Error())))
 		}
 
 		if roles, ok := manifestContents["requiredRoles"].([]interface{}); ok {

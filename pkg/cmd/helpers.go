@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/pkg/errors"
+	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
 )
 
@@ -22,24 +23,87 @@ type cmder interface {
 
 // commandError is an error used to signal different error situations in command handling.
 type commandError struct {
-	s         string
-	userError bool
+	s           string
+	userError   bool
+	serverError bool
+	silent      bool
+	exitCode    int
+	statusCode  int
 }
 
 func (c commandError) Error() string {
-	return c.s
+	details := ""
+	if c.statusCode > 0 {
+		details = fmt.Sprintf(" ::statusCode=%d", c.statusCode)
+	}
+	return c.s + details
 }
 
 func (c commandError) isUserError() bool {
 	return c.userError
 }
 
+func (c commandError) isServerError() bool {
+	return c.serverError
+}
+
+func (c commandError) isSilent() bool {
+	return c.silent
+}
+
 func newUserError(a ...interface{}) commandError {
-	return commandError{s: fmt.Sprintln(a...), userError: true}
+	return commandError{s: fmt.Sprintln(a...), userError: true, exitCode: 101}
+}
+
+func newUserErrorWithExitCode(exitCode int, a ...interface{}) commandError {
+	return commandError{s: fmt.Sprintln(a...), userError: true, exitCode: exitCode}
 }
 
 func newSystemError(a ...interface{}) commandError {
-	return commandError{s: fmt.Sprintln(a...), userError: false}
+	return commandError{s: fmt.Sprintln(a...), userError: false, exitCode: 100}
+}
+
+var httpStatusCodeToExitCode = map[int]int{
+	400: 40,
+	401: 1,
+	403: 3,
+	404: 4,
+	405: 5,
+	409: 9,
+	413: 13,
+	422: 22,
+	429: 29,
+	500: 50,
+	501: 51,
+	502: 52,
+	503: 53,
+	504: 54,
+	505: 55,
+	506: 56,
+	507: 57,
+	508: 58,
+}
+
+func newServerError(r *c8y.Response, err error) commandError {
+	message := ""
+	exitCode := 99
+	statusCode := 0
+	if r != nil {
+		if r.Response != nil {
+			statusCode = r.Response.StatusCode
+			if v, ok := httpStatusCodeToExitCode[statusCode]; ok {
+				exitCode = v
+			}
+		}
+	}
+	return commandError{
+		s:           message,
+		userError:   false,
+		serverError: true,
+		silent:      true,
+		exitCode:    exitCode,
+		statusCode:  statusCode,
+	}
 }
 
 func newSystemErrorF(format string, a ...interface{}) commandError {
@@ -57,6 +121,22 @@ func isUserError(err error) bool {
 	}
 
 	return userErrorRegexp.MatchString(err.Error())
+}
+
+func isServerError(err error) bool {
+	if cErr, ok := err.(commandError); ok && cErr.isServerError() {
+		return true
+	}
+
+	return false
+}
+
+func isSilentError(err error) bool {
+	if cErr, ok := err.(commandError); ok && cErr.isSilent() {
+		return true
+	}
+
+	return false
 }
 
 func newErrorSummary(message string, errorsCh <-chan error) error {
