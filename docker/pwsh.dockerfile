@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/powershell
+FROM mcr.microsoft.com/powershell:7.1.1-ubuntu-18.04
 
 RUN apt-get update \
     && apt-get install -y vim \

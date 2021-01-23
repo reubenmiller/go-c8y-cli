@@ -4,6 +4,10 @@
 
 No unreleased features
 
+### Major Changes
+
+* Updated PowerShell version from 7.0 to 7.1.1 inside docker image `c8y-pwsh`. This fixed a bug when using `Foreach-Object -Parallel` which would re-import modules instead of re-using it within each runspace.
+
 ## Released
 
 ### v1.10.0
