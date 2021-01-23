@@ -74,7 +74,15 @@ Register-Alias
 
 #region tab completion
 # allow -Session params to be tab-completed
-$Manifest = Test-ModuleManifest -Path $PSScriptRoot\PSc8y.psd1
+
+if (Get-Command -Name "Import-PowerShellDataFile" -ErrorAction SilentlyContinue) {
+    # Note: Test-ModuleManifest sometimes throws an error:
+    # "collection was modified; enumeration operation may not execute"
+    # Import-PowerShellDataFile seems to be more reliable
+    $Manifest = Import-PowerShellDataFile -Path $PSScriptRoot\PSc8y.psd1
+} else {
+    $Manifest = Test-ModuleManifest -Path $PSScriptRoot\PSc8y.psd1
+}
 
 $ModulePrefix = $Manifest.Prefix
 
