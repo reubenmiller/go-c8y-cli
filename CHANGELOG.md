@@ -8,6 +8,11 @@ No unreleased features
 
 * Updated PowerShell version from 7.0 to 7.1.1 inside docker image `c8y-pwsh`. This fixed a bug when using `Foreach-Object -Parallel` which would re-import modules instead of re-using it within each runspace.
 
+### Bug fixes
+
+* `New-Device` fixed bug which prevent the command from creating the managed object
+    * `Name` is no longer mandatory and it does not accepted piped input
+
 ## Released
 
 ### v1.10.0
