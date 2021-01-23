@@ -11,12 +11,14 @@ Describe -Name "Update-EventBinary" {
         $ExpectedText1 = "my test file`nsecond line"
         $ExpectedText1 | Out-File $TestFile
         PSc8y\New-EventBinary -Id $Event.id -File $TestFile
+        Start-Sleep -Seconds 1
         $BinaryContents = (PSc8y\Get-EventBinary -Id $Event.id) -join "`n"
         $BinaryContents | Should -BeExactly $ExpectedText1
 
         $ExpectedText2 = "adjusted text äöüß"
         $ExpectedText2 | Out-File $TestFile
         $BinaryContents = PSc8y\Update-EventBinary -Id $Event.id -File $TestFile
+        Start-Sleep -Seconds 1
         $BinaryContents = (PSc8y\Get-EventBinary -Id $Event.id) -join "`n"
         $BinaryContents | Should -BeExactly $ExpectedText2
     }
