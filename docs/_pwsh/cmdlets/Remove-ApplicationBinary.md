@@ -1,28 +1,25 @@
 ---
-category: Devices
+category: Applications
 external help file: PSc8y-help.xml
 layout: powershell
 Module Name: PSc8y
 online version:
 schema: 2.0.0
-title: New-Device
+title: Remove-ApplicationBinary
 ---
 
-# New-Device
+# Remove-ApplicationBinary
 
 ## SYNOPSIS
-Create a device
+Remove application binary
 
 ## SYNTAX
 
 ```
-New-Device
-	[[-Name] <String>]
-	[[-Type] <String>]
-	[[-Data] <Object>]
+Remove-ApplicationBinary
+	[-Application] <Object[]>
+	[-BinaryId] <String[]>
 	[[-ProcessingMode] <String>]
-	[[-Template] <String>]
-	[[-TemplateVars] <String>]
 	[-Raw]
 	[[-OutputFile] <String>]
 	[-NoProxy]
@@ -35,68 +32,54 @@ New-Device
 ```
 
 ## DESCRIPTION
-Create a device (managed object) with the special c8y_IsDevice fragment.
+Remove an application binaries related to the given application
+The active version can not be deleted and the server will throw an error if you try.
 
 ## EXAMPLES
 
 ### EXAMPLE 1
 ```
-New-Device -Name $DeviceName
+Remove-ApplicationBinary -Application $app.id -BinaryId $appBinary.id
 ```
 
-Create device
+Remove an application binary related to a Hosted (web) application
 
 ### EXAMPLE 2
 ```
-New-Device -Name $DeviceName -Data @{ myValue = @{ value1 = $true } }
+Get-ApplicationBinaryCollection -Id $app.id | Remove-ApplicationBinary -Application $app.id
 ```
 
-Create device with custom properties
+Remove all application binaries (except for the active one) for an application (using pipeline)
 
 ## PARAMETERS
 
-### -Name
-Device name
+### -Application
+Application id (required)
 
 ```yaml
-Type: String
+Type: Object[]
 Parameter Sets: (All)
 Aliases:
 
-Required: False
+Required: True
 Position: 1
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -Type
-Device type
+### -BinaryId
+Application binary id (required)
 
 ```yaml
-Type: String
+Type: String[]
 Parameter Sets: (All)
-Aliases:
+Aliases: id
 
-Required: False
+Required: True
 Position: 2
 Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
-### -Data
-Custom device properties.
-
-```yaml
-Type: Object
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: 3
-Default value: None
-Accept pipeline input: False
+Accept pipeline input: True (ByPropertyName, ByValue)
 Accept wildcard characters: False
 ```
 
@@ -109,39 +92,7 @@ Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: 4
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
-### -Template
-Template (jsonnet) file to use to create the request body.
-
-```yaml
-Type: String
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: 5
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
-### -TemplateVars
-Variables to be used when evaluating the Template.
-Accepts a file path, json or json shorthand, i.e.
-"name=peter"
-
-```yaml
-Type: String
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: 6
+Position: 3
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
@@ -171,7 +122,7 @@ Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: 7
+Position: 4
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
@@ -201,7 +152,7 @@ Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: 8
+Position: 5
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
@@ -216,7 +167,7 @@ Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: 9
+Position: 6
 Default value: 0
 Accept pipeline input: False
 Accept wildcard characters: False

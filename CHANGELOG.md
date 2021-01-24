@@ -18,6 +18,25 @@ No unreleased features
     * 22 => 422 (Unprocessable entity / invalid request)
     * 50 => 500 (Internal server error)
 
+* Added `Remove-ApplicationBinary` command
+
+    **Example: Remove all application binaries related to an application**
+
+    **PowerShell**
+
+    ```powershell
+    Remove-ApplicationBinary -Application 12345 -BinaryId 9876
+
+    # Or remove all application binaries (except the active one) for an application
+    Get-ApplicationBinaryCollection -Id 12345 | Remove-ApplicationBinary -Application 12345
+    ```
+
+    **Bash/zsh**
+
+    ```sh
+    c8y applications deleteApplicationBinary --application 12345 --binaryId 9876
+    ```
+
 ### New Features (PSc8y)
 
 * Added support for saving meta information about the requests to the in-built PowerShell InformationVariable common parameter

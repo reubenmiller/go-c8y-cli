@@ -204,6 +204,7 @@ FunctionsToExport = @(
 	'Remove-Agent',
 	'Remove-AlarmCollection',
 	'Remove-Application',
+	'Remove-ApplicationBinary',
 	'Remove-AssetFromGroup',
 	'Remove-Binary',
 	'Remove-BulkOperation',
