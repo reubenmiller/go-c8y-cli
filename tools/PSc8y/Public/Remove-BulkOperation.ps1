@@ -8,7 +8,7 @@ Remove bulk operation/s. Only bulk operations that are in ACTIVE or IN_PROGRESS 
 Remove bulk operation/s. Only bulk operations that are in ACTIVE or IN_PROGRESS can be deleted
 
 .EXAMPLE
-PS> Remove-BulkOperation -Id {{ NewOperation }}
+PS> Remove-BulkOperation -Id $BulkOp.id
 
 Remove bulk operation by id
 
@@ -86,21 +86,8 @@ Remove bulk operation by id
         }
 
         if ($env:C8Y_DISABLE_INHERITANCE -ne $true) {
-            # Inherit preference automatic variables
-            if (!$WhatIfPreference.IsPresent) {
-                $WhatIfPreference = $PSCmdlet.SessionState.PSVariable.get("WhatIfPreference").Value
-            }
-        
-            # Inherit custom parameters
-            $Stack = Get-PSCallStack | Select-Object -Skip 1 -First 1
-            $InheritVariables = @(@{Source="Force"; Target="Force"}, @{Source="WhatIf"; Target="WhatIfPreference"})
-            foreach ($iVariable in $InheritVariables) {
-                if (-Not $PSBoundParameters.ContainsKey($iVariable.Source)) {
-                    if ($null -ne $Stack -and $Stack.InvocationInfo.BoundParameters.ContainsKey($iVariable.Source)) {
-                        Set-Variable -Name $iVariable.Target -Value $Stack.InvocationInfo.BoundParameters[$iVariable.Source] -WhatIf:$false
-                    }
-                }
-            }
+            # Inherit preference variables
+            Use-CallerPreference -Cmdlet $PSCmdlet -SessionState $ExecutionContext.SessionState
         }
     }
 

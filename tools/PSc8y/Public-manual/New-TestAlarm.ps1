@@ -32,6 +32,11 @@ Create an alarm on the existing device "myExistingDevice"
         )]
         [object] $Device,
 
+        # Time
+        [Parameter()]
+        [string]
+        $Time = "0s",
+
         # Cumulocity processing mode
         [Parameter()]
         [AllowNull()]
@@ -69,7 +74,7 @@ Create an alarm on the existing device "myExistingDevice"
         if ($iDevice.id) {
             PSc8y\New-Alarm `
                 -Device $iDevice.id `
-                -Time "1970-01-01" `
+                -Time:$Time `
                 -Type "c8y_ci_TestAlarm" `
                 -Severity MAJOR `
                 -Text "Test CI Alarm" `

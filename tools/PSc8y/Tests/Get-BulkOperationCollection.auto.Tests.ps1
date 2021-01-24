@@ -2,6 +2,8 @@
 
 Describe -Name "Get-BulkOperationCollection" {
     BeforeEach {
+        $Group = New-TestDeviceGroup -TotalDevices 2
+        $BulkOp = New-BulkOperation -Group $Group.id -CreationRampSec 10 -Operation @{c8y_Restart=@{}}
 
     }
 
@@ -13,6 +15,8 @@ Describe -Name "Get-BulkOperationCollection" {
 
 
     AfterEach {
+        Get-BulkOperationCollection | Remove-BulkOperation
+        Remove-DeviceGroup -Id $Group.id -Cascade
 
     }
 }

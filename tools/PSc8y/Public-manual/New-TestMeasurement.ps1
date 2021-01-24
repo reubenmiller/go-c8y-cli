@@ -41,6 +41,11 @@ Create a measurement on the existing device "myExistingDevice"
         # Type
         [string] $Type = "C8yTemperatureReading",
 
+        # Time
+        [Parameter()]
+        [string]
+        $Time = "0s",
+
         # Value
         [Double] $Value = 1.2345,
 
@@ -78,7 +83,7 @@ Create a measurement on the existing device "myExistingDevice"
 
         PSc8y\New-Measurement `
             -Device $iDevice.id `
-            -Time "1970-01-01" `
+            -Time:$Time `
             -Type $Type `
             -Data @{
                 $ValueFragmentType = @{

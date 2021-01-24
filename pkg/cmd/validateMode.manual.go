@@ -7,7 +7,7 @@ import (
 )
 
 func getValidationError(mode string, setting string) error {
-	return fmt.Errorf("%s mode is disabled. %s commands are disabled unless \"%s\" is set to 'true' in your session settings", mode, mode, setting)
+	return fmt.Errorf("%s mode is disabled. %s commands are disabled unless '%s' is set to 'true' in your session settings", mode, mode, setting)
 }
 
 func validateCreateMode(cmd *cobra.Command, args []string) error {

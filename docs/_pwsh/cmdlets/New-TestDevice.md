@@ -19,6 +19,7 @@ Create a new test device representation in Cumulocity
 New-TestDevice
 	[[-Name] <String>]
 	[-AsAgent]
+	[-ProcessingMode <String>]
 	[-Template <String>]
 	[-TemplateVars <String>]
 	[-Force]
@@ -84,6 +85,21 @@ Aliases:
 Required: False
 Position: Named
 Default value: False
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -ProcessingMode
+Cumulocity processing mode
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
 ```

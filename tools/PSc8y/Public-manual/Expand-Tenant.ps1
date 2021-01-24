@@ -31,6 +31,13 @@ Get all the tenant object (with app in their name). Note the Expand cmdlet won't
         [object[]] $InputObject
     )
 
+    Begin {
+        if ($env:C8Y_DISABLE_INHERITANCE -ne $true) {
+            # Inherit preference variables
+            Use-CallerPreference -Cmdlet $PSCmdlet -SessionState $ExecutionContext.SessionState
+        }
+    }
+
     Process {
         [array] $AllTenants = foreach ($iTenant in $InputObject)
         {

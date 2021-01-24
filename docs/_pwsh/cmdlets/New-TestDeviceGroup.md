@@ -19,6 +19,8 @@ Create a new test device group
 New-TestDeviceGroup
 	[[-Name] <String>]
 	[-Type <String>]
+	[-TotalDevices <Int32>]
+	[-ProcessingMode <String>]
 	[-Template <String>]
 	[-TemplateVars <String>]
 	[-Force]
@@ -46,6 +48,13 @@ Create a test device group
 ```
 
 Create 10 test device groups all with unique names
+
+### EXAMPLE 3
+```
+New-TestDeviceGroup -TotalDevices 10
+```
+
+Create a test device group with 10 newly created devices
 
 ## PARAMETERS
 
@@ -76,6 +85,36 @@ Aliases:
 Required: False
 Position: Named
 Default value: Group
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -TotalDevices
+Number of devices to create and assign to the group
+
+```yaml
+Type: Int32
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: 0
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -ProcessingMode
+Cumulocity processing mode
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
 ```

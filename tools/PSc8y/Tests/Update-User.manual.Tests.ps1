@@ -26,10 +26,12 @@ Describe -Name "Update-User" {
         }
 
         It "Shows the request to be sent when disabling an existing user sends a boolean" {
-            $Response = PSc8y\Update-User -Id $User.id -Enabled:$false -WhatIf 6>&1 | Out-String
+            PSc8y\Update-User -Id $User.id -Enabled:$false -InformationVariable requestInfo -WhatIf
+
             $LASTEXITCODE | Should -Be 0
-            $Response | Should -Not -BeNullOrEmpty
-            $Response | Should -Match '"enabled": false'
+            $requestInfo = $requestInfo | Out-String
+            $requestInfo | Should -Not -BeNullOrEmpty
+            $requestInfo | Should -Match '"enabled": false'
         }
 
         It "Disable an existing user" {

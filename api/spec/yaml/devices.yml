@@ -181,9 +181,9 @@ endpoints:
 
     body:
       - name: name
-        type: '[]string'
-        required: true
-        pipeline: true
+        type: 'string'
+        required: false
+        pipeline: false
         description: Device name
 
       - name: type

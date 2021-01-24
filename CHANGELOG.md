@@ -4,11 +4,317 @@
 
 No unreleased features
 
+## Released
 
+### v1.11.0
+
+#### New Features
+
+* Exit codes are not set to the HTTP exit codes for commands which send a REST request. The https status codes are mapped to exit codes between 0 - 128 to ensure compatibility to different operating systems and applications.
+    
+    The full error codes can be found on the new [error handling](https://reubenmiller.github.io/go-c8y-cli/docs/concepts/error-handling/) concept page. However a few include:
+
+    * 0 => 0 (REST request was ok)
+    * 1 => 401 (Unauthorized)
+    * 3 => 403 (Forbidden)
+    * 4 => 404 (Not found)
+    * 9 => 409 (Conflict/duplicate)
+    * 22 => 422 (Unprocessable entity / invalid request)
+    * 50 => 500 (Internal server error)
+
+* Added `Remove-ApplicationBinary` command
+
+    **Example: Remove all application binaries related to an application**
+
+    **PowerShell**
+
+    ```powershell
+    Remove-ApplicationBinary -Application 12345 -BinaryId 9876
+
+    # Or remove all application binaries (except the active one) for an application
+    Get-ApplicationBinaryCollection -Id 12345 | Remove-ApplicationBinary -Application 12345
+    ```
+
+    **Bash/zsh**
+
+    ```sh
+    c8y applications deleteApplicationBinary --application 12345 --binaryId 9876
+    ```
+
+#### New Features (PSc8y)
+
+* Added support for saving meta information about the requests to the in-built PowerShell InformationVariable common parameter
+
+    [Documentation - Request metrics](https://reubenmiller.github.io/go-c8y-cli/docs/concepts/powershell-request-metrics/):
+
+    **Example: Save request to a variable without sending the request**
+
+    ```powershell
+    New-Device -Name my-test -WhatIf -InformationVariable requestInfo -InformationAction SilentlyContinue
+    $requestInfo
+    ```
+
+    *Output*
+
+    ```powershell
+    What If: Sending [POST] request to [https://example123.my-c8y.com/inventory/managedObjects]
+
+    Headers:
+    Accept: application/json
+    Authorization: Basic asdfasfd........
+    Content-Type: application/json
+    User-Agent: go-client
+    X-Application: go-client
+
+    Body:
+    {
+    "c8y_IsDevice": {},
+    "name": "my-test"
+    }
+    ```
+
+    **Example: Get the response time of a request**
+
+    ```powershell
+    New-Device -Name my-test -InformationVariable requestInfo -InformationAction SilentlyContinue
+    Write-Host ("Response took {0}" -f $requestInfo.MessageData.responseTime)
+    ```
+
+    *Output*
+
+    ```
+    Response took 172ms
+    ```
+
+* Support for ErrorVariable common variable to save error output to a variable
+
+    **Example: Save error output to a variable**
+
+    ```powershell
+    Get-ManagedObject -Id 0 -ErrorVariable "c8yError" -ErrorAction SilentlyContinue
+
+    if ($LASTEXITCODE -ne 0) {
+        $MainError = $c8yError[-1]
+        Write-Error "Something went wrong. details=$MainError"
+    }
+    ```
+
+
+* Importing PSc8y will enforce Unicode (UTF-8) encoding on the console if the console is not already using UTF-8 (mostly affecting Windows as it does not use UTF-8 by default unlike MacOS and Linux)
+    * User will be informed how to add the setting to the PowerShell profile
+    * Enforcement of UTF-8 encoding can be disabled by setting
+
+        ```powershell
+        $env:C8Y_DISABLE_ENFORCE_ENCODING = $true
+        ```
+#### Minor Changes
+
+* Updated PowerShell version from 7.0 to 7.1.1 inside docker image `c8y-pwsh`. This fixed a bug when using `Foreach-Object -Parallel` which would re-import modules instead of re-using it within each runspace.
+* PSc8y will enforce PowerShell encoding to UTF8 to prevent encoding issues when sending data to the c8y go binary. The console encoding will be changed when importing `PSc8y`. UTF8 is the only text encoding supported. This mainly effects Windows, as MacOS and Linux use UTF8 encoding on the console by default.
+* Added a global `--noColor` to the c8y binary to remove console colours from the log messages to make it easier to parse entries. By default PowerShell uses this option when calling the c8y binary as PowerShell handling the coloured log output itself.
+
+#### Bug fixes
+
+* `New-Device` fixed bug which prevent the command from creating the managed object
+    * `Name` is no longer mandatory and it does not accepted piped input
+* Changed the processing of standard output and error from the c8y binary to prevent read deadlocks when being called from PowerShell module PSc8y. #39
+
+
+### v1.10.0
+
+#### Breaking Changes
+
+* `Expand-Device` no longer fetches the device managed object when given the id when being called from a function that does not makes use of a "Force" parameter. If you would like the old functionality, then add the new "-Fetch" parameter when calling `Expand-Device`.
+
+    By default if Expand-Device is called from an interactive function, then the managed object will be looked up in order to provide helpful information to the user in the confirmation prompt. Additionally users writing modules, can force fetching of the device when given an id by using the new `-Fetch` parameter.
+
+    The change enable a significant reduction in API calls as shown below in the following examples:
+
+    **Comparison of total API calls per command to previous PSc8y version**
+
+    Previous version: PSc8y=1.9.1
+
+    The following examples show how many api calls are made to Cumulocity.
+
+    ```sh
+    # API calls: 1 x GET    (previously 3 x GET!)
+    Get-Device 1234
+
+    # API calls: 2 x GET    (previously 5 x GET!)
+    Get-Device 1234 | Get-Device
+
+    # API calls: 1 x GET and 1 x PUT    (prevously 4 x GET and 1 x PUT)
+    Get-Device 1234 | Update-Device
+
+    # API calls: 1 x POST   (prevously 3 x GET and 1 x POST)
+    Add-DeviceToGroup -Group 11111 -NewChildDevice 222222 -ProcessingMode QUIESCENT -Force
+    ```
+
+    **Expand-Device Usage**
+    Expand-Device was created in order to normalize the input of devices given by the user. Since PSc8y accepts devices either by id, name, object or piped objects, it can make it difficult to handle each of the input types in each function.
+
+    ```powershell
+    # file: my-script.ps1
+    Param(
+        [Parameter(
+            Mandatory = $true,
+            Position = 0,
+            ValueFromPipeline = $true,
+            ValueFromPipelineByPropertyName = $true
+        )]
+        [object[]] $Device = ""
+    )
+
+    foreach ($iDevice in (PSc8y\Expand-Device $Device)) {
+        Write-Host ("Dummy api call with device id: /inventory/managedObject/{0}" -f $iDevice.id)
+    }
+    ```
+
+    By writing it like this the user can call the function in the following ways with the same code.
+
+    ```powershell
+    # Pass array item
+    ./my-script.ps1 -Device 12345
+
+    # array of items mixing ids with names
+    ./my-script.ps1 -Device "myDevicename", 1234
+
+    # using pipelines from other PSc8y cmdlets
+    Get-DeviceCollection | ./my-script.ps1
+
+    # By hashtable with id property (using positional argument)
+    ./my-script.ps1 @{id="12345"}, @{id="6789"}
+    ```
+
+    Now let's say that you wanted to add some logic which required the full device managed object from the server, and not just the id and name fields. This can be achieved by adding the `-Fetch` parameter to the `Expand-Device` cmdlet call.
+
+    The differences in the output can be shown in the small example
+
+    ```powershell
+    # This will not fetch the device (as the device already exists)
+    PS> 1234 | Expand-Device
+
+    id   name
+    ---- ----
+    1234 [id=1234]
+    ```
+
+    Agent but using `-Fetch`.
+
+    ```powershell
+    # Using -Fetch will return the whole device managed object from Cumulocity (1 x GET request)
+    PS> 1234 | Expand-Device -Fetch
+
+    additionParents : @{references=System.Object[]; self=https://example.cumulocity.com/inventory/managedObjects/1234/additionParents}
+    assetParents    : @{references=System.Object[]; self=https://example.cumulocity.com/inventory/managedObjects/1234/assetParents}
+    c8y_IsDevice    : 
+    childAdditions  : @{references=System.Object[]; self=https://example.cumulocity.com/inventory/managedObjects/1234/childAdditions}
+    childAssets     : @{references=System.Object[]; self=https://example.cumulocity.com/inventory/managedObjects/1234/childAssets}
+    childDevices    : @{references=System.Object[]; self=https://example.cumulocity.com/inventory/managedObjects/1234/childDevices}
+    creationTime    : 1/19/2021 7:49:33 PM
+    deviceParents   : @{references=System.Object[]; self=https://example.cumulocity.com/inventory/managedObjects/1234/deviceParents}
+    id              : 1234
+    lastUpdated     : 1/19/2021 8:52:29 PM
+    name            : mynewname
+    owner           : user@example.com
+    self            : https://example.cumulocity.com/inventory/managedObjects/3882
+    ```
+
+#### New Features
+
+* Added commands to manage managed object child additions
+
+    **PowerShell**
+
+    * `Get-ChildAdditionCollection`
+    * `New-ChildAddition`
+    * `Remove-ChildAddition`
+
+    **Bash/zsh**
+
+    * `c8y inventoryReferences listChildAdditions`
+    * `c8y inventoryReferences createChildAddition`
+    * `c8y inventoryReferences deleteChildAddition`
+
+#### Performance improvements
+
+* Reduced number of API calls within PSc8y and c8y binary by skipping lookups when an ID is given by the user. Previously PSc8y and c8y were sending two API calls to the server in order to normalize the request by retrieving additional information and potentiall shown to the user. Since this is currently not used, it has been removed.
+
+#### Bug fixes
+
+* `Set-Session` no longer causes the terminal bell/chime when using backspace or arrow keys.
+
+### v1.9.1
+
+#### Bug fixes
+
+* `Get-C8ySessionProperty` selects first matching Session parameter in the call stack if multiple matches are found
+
+### v1.9.0
+
+### New features
+
+* Added bulk operations commands
+
+    **PowerShell**
+
+    * `Get-BulkOperationCollection`
+    * `Get-BulkOperation`
+    * `New-BulkOperation`
+    * `Update-BulkOperation`
+    * `Remove-BulkOperation`
+    
+    **Bash/zsh**
+
+    * `c8y bulkOperations list`
+    * `c8y bulkOperations create`
+    * `c8y bulkOperations get`
+    * `c8y bulkOperations update`
+    * `c8y bulkOperations delete`
+
+* `Get-OperationCollection` supports `bulkOperationId` parameter to return operations related to a specific bulk operation id
+
+* Added helpers function to make creating custom functions easier and which behave like native `PSc8y` cmdlets.
+    * `Get-ClientCommonParameters` - Get common PSc8y parameters so they can be added to external using PowerShell's `DynamicParam` block
+    * `Add-ClientResponseType` - Add a type to a list of devices if the `-Raw` parameter is not being used
+
+    **Example**
+
+    The following function get a list of software items stored as managed objects in Cumulocity.
+
+    The cmdlet only needs to define one parameter $Name for the custom logic. The following parameters are inherited via the `Get-ClientCommonParameters` call in the DynamicParam block
+    * Pagination parameters: PageSize, WithTotalPages, TotalPages, CurrentPage, IncludeAll
+    * Pagination parameters: Session
+    * General parameters: TimeoutSec, Raw, OutputFile
+
+    ```powershell
+    Function Get-SoftwareCollection {
+        [cmdletbinding(
+            SupportsShouldProcess = $true,
+            ConfirmImpact = "None"
+        )]
+        Param(
+            # Software name
+            [string]
+            $Name = "*"
+        )
+        # Inherit common parameters from PSc8y module
+        DynamicParam { PSc8y\Get-ClientCommonParameters -Type "Collection" }
+
+        Process {
+            $Query = "type eq 'c8y_Software' and name eq '{0}'" -f $Name
+            $null = $PSBoundParameters.Remove("Name")
+
+            Find-ManagedObjectCollection -Query $Query @PSBoundParameters `
+                | Select-Object `
+                | Add-ClientResponseType -Type "application/vnd.com.nsn.cumulocity.customSoftware+json"
+        }
+    }
+    ```
 
 ### Minor improvements
 
-* "owner" is field is not left untouched in the -Data parameter allowing the user to change it if required.
+* "owner" is field is left untouched in the -Data parameter allowing the user to change it if required.
     ```powershell
     Update-ManagedObject -Id 12345 -Data @{owner="myuser"}
     ```
@@ -109,7 +415,15 @@ No unreleased features
     c8y devices list --orderBy "name desc"
     ```
 
-## Released
+* Test cmdlets supports the `-Time` parameter to be able to control the timestamp of created entity. By default it will use "0s" (i.e. now). 
+    * `New-TestAlarm`
+    * `New-TestEvent`
+    * `New-TestMeasurement`
+
+* `Get-SessionHomePath` Added public PowerShell cmdlet to retrieve the path where the session are stored
+
+* New cmdlet `Register-ClientArgumentCompleter` to enable other modules to add argument completion to PSc8y parameters like `Session` and `Template`
+    * Note: `-Force` needs to be used if your command uses Dynamic Parameters
 
 ### v1.8.0
 

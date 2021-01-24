@@ -152,5 +152,7 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 
 ### String
 ## NOTES
+On MacOS, you need to hold "control"+Arrow keys to navigate the list of sessions.
+Otherwise the VIM style "j" (down) and "k" (up) keys can be also used for navigation
 
 ## RELATED LINKS

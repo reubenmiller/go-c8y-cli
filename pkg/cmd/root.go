@@ -161,6 +161,7 @@ var (
 	globalFlagWithTotalPages     bool
 	globalFlagPrettyPrint        bool
 	globalFlagDryRun             bool
+	globalFlagNoColor            bool
 	globalFlagSessionFile        string
 	globalFlagConfigFile         string
 	globalFlagOutputFile         string
@@ -218,11 +219,28 @@ const (
 const SettingsGlobalName = "settings"
 
 func (c *c8yCmd) checkCommandError(err error) {
-	errorText := fmt.Sprintf("%s", err)
-	if strings.Contains(errorText, "403") || strings.Contains(errorText, "401") {
-		c.Logger.Error("Authentication failed. Try to log in again, or check the password")
+
+	if cErr, ok := err.(commandError); ok {
+		if cErr.statusCode == 403 || cErr.statusCode == 401 {
+			c.Logger.Error(fmt.Sprintf("Authentication failed (statusCode=%d). Try to run set-session again, or check the password", cErr.statusCode))
+		}
+
+		// format errors as json messages
+		// only log users errors
+		if !cErr.isSilent() {
+			message := ""
+			if cErr.statusCode != 0 {
+				message = fmt.Sprintf(`{"error":"commandError","message":"%s","statusCode":%d}`, err, cErr.statusCode)
+			} else {
+				message = fmt.Sprintf(`{"error":"commandError","message":"%s"}`, err)
+			}
+			rootCmd.PrintErrln(strings.ReplaceAll(message, "\n", ""))
+		}
 	} else {
-		fmt.Println(err)
+		// unexpected error
+		c.Logger.Errorf("%s", err)
+		message := fmt.Sprintf(`{"error":"commandError","message":"%s"}`, err)
+		rootCmd.PrintErrln(strings.ReplaceAll(message, "\n", ""))
 	}
 }
 
@@ -266,7 +284,7 @@ func (c *c8yCmd) checkSessionExists(cmd *cobra.Command, args []string) error {
 		return newSystemError("Client failed to load")
 	}
 	if client.BaseURL == nil || client.BaseURL.Host == "" {
-		return newUserError("A c8y session has not been loaded. Please create or activate a session and try again")
+		return newUserErrorWithExitCode(102, "A c8y session has not been loaded. Please create or activate a session and try again")
 	}
 
 	return nil
@@ -288,6 +306,7 @@ func Execute() {
 	rootCmd.PersistentFlags().BoolVar(&globalFlagWithTotalPages, "withTotalPages", false, "Include all results")
 	rootCmd.PersistentFlags().BoolVar(&globalFlagPrettyPrint, "pretty", true, "Pretty print the json responses")
 	rootCmd.PersistentFlags().BoolVar(&globalFlagDryRun, "dry", false, "Dry run. Don't send any data to the server")
+	rootCmd.PersistentFlags().BoolVar(&globalFlagNoColor, "noColor", false, "Don't use colors when displaying log entries on the console")
 	rootCmd.PersistentFlags().BoolVar(&globalFlagUseEnv, "useEnv", false, "Allow loading Cumulocity session setting from environment variables")
 	rootCmd.PersistentFlags().BoolVar(&globalFlagRaw, "raw", false, "Raw values")
 	rootCmd.PersistentFlags().StringVar(&globalFlagProxy, "proxy", "", "Proxy setting, i.e. http://10.0.0.1:8080")
@@ -346,7 +365,7 @@ func Execute() {
 	rootCmd.AddCommand(newBinariesRootCmd().getCommand())
 
 	// bulkOperations commands
-    rootCmd.AddCommand(newBulkOperationsRootCmd().getCommand())
+	rootCmd.AddCommand(newBulkOperationsRootCmd().getCommand())
 
 	// currentApplication commands
 	rootCmd.AddCommand(newCurrentApplicationRootCmd().getCommand())
@@ -424,9 +443,16 @@ func Execute() {
 	// userRoles commands
 	rootCmd.AddCommand(newUserRolesRootCmd().getCommand())
 
+	// Handle errors (not in cobra libary)
+	rootCmd.SilenceErrors = true
+
 	if err := rootCmd.Execute(); err != nil {
 		rootCmd.checkCommandError(err)
-		os.Exit(1)
+
+		if cErr, ok := err.(commandError); ok {
+			os.Exit(cErr.exitCode)
+		}
+		os.Exit(100)
 	}
 }
 
@@ -481,7 +507,7 @@ func ReadConfigFiles(v *viper.Viper) (path string, err error) {
 func initConfig() {
 	// Set logging
 	if globalFlagVerbose || globalFlagDryRun {
-		Logger = logger.NewLogger(module)
+		Logger = logger.NewLogger(module, !globalFlagNoColor)
 	} else {
 		// Disable log messages
 		Logger = logger.NewDummyLogger(module)

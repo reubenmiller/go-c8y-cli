@@ -221,9 +221,9 @@
         $null = $CurrentParam.AppendLine("        # {0}" -f ($item.Description))
         $null = $CurrentParam.AppendLine("        [Parameter({0})]" -f ($item.Definition -join ",`n                   "))
 
-        # if ($iArg.alias) {
-        #     $null = $CurrentParam.AppendLine("        [Alias(`"{0}`")]" -f $iArg.alias)
-        # }
+        if ($iArg.alias) {
+            $null = $CurrentParam.AppendLine("        [Alias(`"{0}`")]" -f $iArg.alias)
+        }
 
         # Validate set
         if ($null -ne $iArg.validationSet) {
@@ -530,21 +530,8 @@ $($CmdletParameters -join ",`n`n")
     Begin {
 $($BeginParameterBuilder -join "`n")
         if (`$env:C8Y_DISABLE_INHERITANCE -ne `$true) {
-            # Inherit preference automatic variables
-            if (!`$WhatIfPreference.IsPresent) {
-                `$WhatIfPreference = `$PSCmdlet.SessionState.PSVariable.get("WhatIfPreference").Value
-            }
-        
-            # Inherit custom parameters
-            `$Stack = Get-PSCallStack | Select-Object -Skip 1 -First 1
-            `$InheritVariables = @(@{Source="Force"; Target="Force"}, @{Source="WhatIf"; Target="WhatIfPreference"})
-            foreach (`$iVariable in `$InheritVariables) {
-                if (-Not `$PSBoundParameters.ContainsKey(`$iVariable.Source)) {
-                    if (`$null -ne `$Stack -and `$Stack.InvocationInfo.BoundParameters.ContainsKey(`$iVariable.Source)) {
-                        Set-Variable -Name `$iVariable.Target -Value `$Stack.InvocationInfo.BoundParameters[`$iVariable.Source] -WhatIf:`$false
-                    }
-                }
-            }
+            # Inherit preference variables
+            Use-CallerPreference -Cmdlet `$PSCmdlet -SessionState `$ExecutionContext.SessionState
         }
     }
 

@@ -21,8 +21,10 @@ New-TestMeasurement
 	[-ValueFragmentType <String>]
 	[-ValueFragmentSeries <String>]
 	[-Type <String>]
+	[-Time <String>]
 	[-Value <Double>]
 	[-Unit <String>]
+	[-ProcessingMode <String>]
 	[-Template <String>]
 	[-TemplateVars <String>]
 	[-Force]
@@ -115,6 +117,21 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
+### -Time
+Time
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: 0s
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
 ### -Value
 Value
 
@@ -143,6 +160,21 @@ Aliases:
 Required: False
 Position: Named
 Default value: °C
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -ProcessingMode
+Cumulocity processing mode
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
 ```

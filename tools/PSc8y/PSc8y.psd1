@@ -9,10 +9,10 @@
 @{
 
 # Script module or binary module file associated with this manifest.
-RootModule = './PSc8y.psm1'
+RootModule = 'PSc8y.psm1'
 
 # Version number of this module.
-ModuleVersion = '1.8.0'
+ModuleVersion = '1.11.0'
 
 # Supported PSEditions
 CompatiblePSEditions = @(
@@ -31,7 +31,7 @@ Author = 'Reuben Miller'
 CompanyName = ''
 
 # Copyright statement for this module
-Copyright = '(c) 2020. All rights reserved.'
+Copyright = '(c) 2021. All rights reserved.'
 
 # Description of the functionality provided by this module
 Description = 'Cumulocity REST API'
@@ -92,6 +92,7 @@ FormatsToProcess = @(
 # Functions to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no functions to export.
 FunctionsToExport = @(
 	'Add-AssetToGroup',
+	'Add-ChildAddition',
 	'Add-ChildDeviceToDevice',
 	'Add-ChildGroupToGroup',
 	'Add-DeviceToGroup',
@@ -118,10 +119,12 @@ FunctionsToExport = @(
 	'Get-BinaryCollection',
 	'Get-BulkOperation',
 	'Get-BulkOperationCollection',
+	'Get-ChildAdditionCollection',
 	'Get-ChildAssetCollection',
 	'Get-ChildAssetReference',
 	'Get-ChildDeviceCollection',
 	'Get-ChildDeviceReference',
+	'Get-ClientCommonParameters',
 	'Get-CurrentApplication',
 	'Get-CurrentApplicationSubscription',
 	'Get-CurrentTenant',
@@ -201,9 +204,11 @@ FunctionsToExport = @(
 	'Remove-Agent',
 	'Remove-AlarmCollection',
 	'Remove-Application',
+	'Remove-ApplicationBinary',
 	'Remove-AssetFromGroup',
 	'Remove-Binary',
 	'Remove-BulkOperation',
+	'Remove-ChildAddition',
 	'Remove-ChildDeviceFromDevice',
 	'Remove-Device',
 	'Remove-DeviceFromGroup',
@@ -252,6 +257,7 @@ FunctionsToExport = @(
 	'Update-TenantOptionBulk',
 	'Update-TenantOptionEditable',
 	'Update-User',
+	'Add-ClientResponseType',
 	'Add-PowershellType',
 	'Clear-Session',
 	'ConvertFrom-Base64String',
@@ -281,6 +287,7 @@ FunctionsToExport = @(
 	'Get-ServiceUser',
 	'Get-Session',
 	'Get-SessionCollection',
+	'Get-SessionHomePath',
 	'Install-ClientBinary',
 	'Invoke-ClientLogin',
 	'Invoke-ClientRequest',
@@ -304,6 +311,7 @@ FunctionsToExport = @(
 	'New-TestUser',
 	'Open-Website',
 	'Register-Alias',
+	'Register-ClientArgumentCompleter',
 	'Set-ClientConsoleSetting',
 	'Set-Session',
 	'Test-ClientPassphrase',

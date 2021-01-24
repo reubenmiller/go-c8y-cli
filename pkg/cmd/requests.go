@@ -518,7 +518,7 @@ func processResponse(resp *c8y.Response, respError error, commonOptions CommonCo
 	color.Unset()
 
 	if respError != nil {
-		return unfilteredSize, newSystemError("command failed", respError)
+		return unfilteredSize, newServerError(resp, respError)
 	}
 	return unfilteredSize, nil
 }

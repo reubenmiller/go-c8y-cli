@@ -30,6 +30,9 @@ func newInventoryReferencesRootCmd() *inventoryReferencesCmd {
 	cmd.AddCommand(newDeleteManagedObjectChildAssetReferenceCmd().getCommand())
 	cmd.AddCommand(newDeleteDeviceFromGroupCmd().getCommand())
 	cmd.AddCommand(newDeleteAssetFromGroupCmd().getCommand())
+	cmd.AddCommand(newGetManagedObjectChildAdditionCollectionCmd().getCommand())
+	cmd.AddCommand(newAddManagedObjectChildAdditionCmd().getCommand())
+	cmd.AddCommand(newDeleteChildAdditionCmd().getCommand())
 
 	ccmd.baseCmd = newBaseCmd(cmd)
 

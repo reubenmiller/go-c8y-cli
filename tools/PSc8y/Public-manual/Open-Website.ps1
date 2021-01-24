@@ -6,6 +6,10 @@ Open a browser to the cumulocity website
 .DESCRIPTION
 Opens the default web browser to the Cumulocity application or directly to a device page in the Device Management application
 
+.NOTES
+When running on Linux, it relies on xdg-open. If it is not found, then only the URL will be printed to the console.
+The user can then try to open the URL by clicking on the link if they are using a modern terminal which supports url links.
+
 .EXAMPLE
 Open-Website -Application "cockpit"
 
@@ -63,19 +67,26 @@ Open the devicemanagement to the device alarm page for myDevice01
       }
 
       "Device" {
-        $DeviceInfo = Expand-Device $Device | Select-Object -First 1
-
-        if (!$DeviceInfo) {
-          Write-Error "Could not find a matching devices to [$Device]"
-          return;
+        if ($null -eq $Device) {
+          $Url = "/apps/devicemanagement/index.html"
+        } else {
+          $DeviceInfo = Expand-Device $Device | Select-Object -First 1
+          
+          if (!$DeviceInfo) {
+            Write-Error "Could not find a matching devices to [$Device]"
+            return;
+          }
+          $Url = "/apps/devicemanagement/index.html#/device/{0}/{1}" -f @($DeviceInfo.id, $Page)
         }
-        $Url = "/apps/devicemanagement/index.html#/device/{0}/{1}" -f @($DeviceInfo.id, $Page)
         break;
       }
     }
 
-    # todo: add expand uri function to c8y binary
     $Url = (Get-C8ySessionProperty -Name "host") + $Url
+
+    if ($Url -notmatch "https?://") {
+      $Url = "https://$Url"
+    }
 
     # Print a link to the console, so the user can click on it
     Write-Host "Open page: $Url" -ForegroundColor Gray
@@ -90,7 +101,17 @@ Open the devicemanagement to the device alarm page for myDevice01
         $null = Start-Process "microsoft-edge:$Url" -PassThru -ErrorAction SilentlyContinue
       }
       Default {
-        $null = Start-Process $Browser $Url -PassThru
+        if ($IsMacOS) {
+          $null = Start-Process "open" $Url -PassThru
+        } elseif ($IsLinux) {
+          if (Get-Command "xdg-open" -ErrorAction SilentlyContinue) {
+            $null = Start-Process "xdg-open" $Url -PassThru
+          } else {
+            Write-Warning "xdg-open is not present on your system. Try clicking on the URL to open it in a browser (if supported by your console)"
+          }
+        } else {
+          $null = Start-Process $Browser $Url -PassThru
+        }
       }
     }
   }

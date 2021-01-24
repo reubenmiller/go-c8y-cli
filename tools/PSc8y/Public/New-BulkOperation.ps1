@@ -8,12 +8,12 @@ Create a new bulk operation
 Create a new bulk operation
 
 .EXAMPLE
-PS> New-BulkOperation -Group $group.id -StartDate "10s" -CreationRampSec 15 -Operation @{ c8y_Restart = @{} }
+PS> New-BulkOperation -Group $Group.id -StartDate "60s" -CreationRampSec 15 -Operation @{ c8y_Restart = @{} }
 
 Create bulk operation for a group
 
 .EXAMPLE
-PS> Get-DeviceGroup $group.id | New-BulkOperation -StartDate "10s" -CreationRampSec 15 -Operation @{ c8y_Restart = @{} }
+PS> Get-DeviceGroup $Group.id | New-BulkOperation -StartDate "10s" -CreationRampSec 15 -Operation @{ c8y_Restart = @{} }
 
 Create bulk operation for a group (using pipeline)
 
@@ -33,7 +33,7 @@ Create bulk operation for a group (using pipeline)
         [object[]]
         $Group,
 
-        # Time when operations should be created.
+        # Time when operations should be created. Defaults to 300s
         [Parameter()]
         [string]
         $StartDate,
@@ -139,21 +139,8 @@ Create bulk operation for a group (using pipeline)
         }
 
         if ($env:C8Y_DISABLE_INHERITANCE -ne $true) {
-            # Inherit preference automatic variables
-            if (!$WhatIfPreference.IsPresent) {
-                $WhatIfPreference = $PSCmdlet.SessionState.PSVariable.get("WhatIfPreference").Value
-            }
-        
-            # Inherit custom parameters
-            $Stack = Get-PSCallStack | Select-Object -Skip 1 -First 1
-            $InheritVariables = @(@{Source="Force"; Target="Force"}, @{Source="WhatIf"; Target="WhatIfPreference"})
-            foreach ($iVariable in $InheritVariables) {
-                if (-Not $PSBoundParameters.ContainsKey($iVariable.Source)) {
-                    if ($null -ne $Stack -and $Stack.InvocationInfo.BoundParameters.ContainsKey($iVariable.Source)) {
-                        Set-Variable -Name $iVariable.Target -Value $Stack.InvocationInfo.BoundParameters[$iVariable.Source] -WhatIf:$false
-                    }
-                }
-            }
+            # Inherit preference variables
+            Use-CallerPreference -Cmdlet $PSCmdlet -SessionState $ExecutionContext.SessionState
         }
     }
 

@@ -129,5 +129,8 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 ## OUTPUTS
 
 ## NOTES
+When running on Linux, it relies on xdg-open.
+If it is not found, then only the URL will be printed to the console.
+The user can then try to open the URL by clicking on the link if they are using a modern terminal which supports url links.
 
 ## RELATED LINKS
