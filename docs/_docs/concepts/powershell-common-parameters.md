@@ -78,6 +78,48 @@ Body:
 2020/05/01 10:54:16 Response time: 2ms
 ```
 
+### InformationVariable
+
+Write information about the request and/or response. Useful if you want to process or store the information for some other 3rd party tools.
+
+**Example: Store the request to variable without sending the request**
+
+```powershell
+New-Device -Name my-test -WhatIf -InformationVariable requestInfo -InformationAction SilentlyContinue
+$requestInfo
+```
+
+*Output*
+
+```powershell
+What If: Sending [POST] request to [https://example123.my-c8y.com/inventory/managedObjects]
+
+Headers:
+Accept: application/json
+Authorization: Basic asdfasfd........
+Content-Type: application/json
+User-Agent: go-client
+X-Application: go-client
+
+Body:
+{
+  "c8y_IsDevice": {},
+  "name": "my-test"
+}
+```
+
+**Example: Get the request time**
+
+```powershell
+New-Device -Name my-test -InformationVariable requestInfo -InformationAction SilentlyContinue
+Write-Host ("Response took {0}" -f $requestInfo.MessageData.responseTime)
+```
+
+*Output*
+
+```
+Response took 172ms
+```
 
 ### PageSize
 
