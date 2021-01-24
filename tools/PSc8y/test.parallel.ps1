@@ -1,4 +1,4 @@
-[cmdletbinding()]
+﻿[cmdletbinding()]
 Param(
     # Filter (regex) to use when filtering the test file names
     [string] $TestFileFilter = ".+",
@@ -9,6 +9,21 @@ Param(
     # Throttle number of concurrent tests (grouped by test file)
     [int] $ThrottleLimit = 10
 )
+
+# Change console encoding
+$ConsoleEncodingBackup = $null
+$CurrentEncodingName = [Console]::Out.Encoding.EncodingName
+$RequiredEncodingName = [System.Text.Encoding]::UTF8.EncodingName
+
+if ($CurrentEncodingName -ne $RequiredEncodingName) {
+    Write-Host ("Current console encoding is not correct. Changing from [{0}] to [{1}]" -f @(
+        $CurrentEncodingName,
+        $RequiredEncodingName
+    ))
+    $ConsoleEncodingBackup = [Console]::Out
+    [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+}
+
 $OldConfirmPreference = $global:ConfirmPreference
 $global:ConfirmPreference = "None"
 
@@ -126,5 +141,10 @@ Write-Host ("failed={0}, skipped={1}, total={2}, duration={3} s" -f @(
 )) -ForegroundColor:$colour
 
 Set-Location $originalLocaltion.Path
+
+if ($null -ne $ConsoleEncodingBackup) {
+    Write-Verbose "Restoring original console encoding"
+    [Console]::OutputEncoding = $ConsoleEncodingBackup.Encoding
+}
 
 exit $code
