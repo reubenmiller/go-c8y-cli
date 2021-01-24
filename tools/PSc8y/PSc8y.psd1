@@ -300,7 +300,6 @@ FunctionsToExport = @(
 	'New-Session',
 	'New-TestAgent',
 	'New-TestAlarm',
-	'New-TestBulkOperation',
 	'New-TestDevice',
 	'New-TestDeviceGroup',
 	'New-TestEvent',
