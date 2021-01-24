@@ -18,7 +18,7 @@ function New-ModulePSMFile {
     $moduleFile = New-Item -Path $ArtifactRoot\$ModuleName\$ModuleName.psm1 -ItemType File -Force
 
     # Add the first part of the distributed .psm1 file from template.
-    Get-Content -Path "$ModuleRoot\tools\modulefile\PartOne.ps1" | Out-File -FilePath $moduleFile -Append
+    Get-Content -Path "$ModuleRoot\tools\modulefile\PartOne.ps1" | Out-File -FilePath $moduleFile -Append -Encoding utf8BOM
 
     # Add a region and write out the private functions.
     "`n#region Private Functions" | Out-File -FilePath $moduleFile -Append

@@ -8,6 +8,10 @@ No unreleased features
 
 * Updated PowerShell version from 7.0 to 7.1.1 inside docker image `c8y-pwsh`. This fixed a bug when using `Foreach-Object -Parallel` which would re-import modules instead of re-using it within each runspace.
 
+### Minor Changes
+
+* PSc8y will enforce PowerShell encoding to UTF8 to prevent encoding issues when sending data to the c8y go binary. The console encoding will be changed when importing `PSc8y`. UTF8 is the only text encoding supported. This mainly effects Windows, as MacOS and Linux use UTF8 encoding on the console by default.
+
 ### Bug fixes
 
 * `New-Device` fixed bug which prevent the command from creating the managed object
