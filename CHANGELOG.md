@@ -4,7 +4,11 @@
 
 No unreleased features
 
-### New Features
+## Released
+
+### v1.11.0
+
+#### New Features
 
 * Exit codes are not set to the HTTP exit codes for commands which send a REST request. The https status codes are mapped to exit codes between 0 - 128 to ensure compatibility to different operating systems and applications.
     
@@ -37,7 +41,7 @@ No unreleased features
     c8y applications deleteApplicationBinary --application 12345 --binaryId 9876
     ```
 
-### New Features (PSc8y)
+#### New Features (PSc8y)
 
 * Added support for saving meta information about the requests to the in-built PowerShell InformationVariable common parameter
 
@@ -95,23 +99,30 @@ No unreleased features
     }
     ```
 
-### Minor Changes
+
+* Importing PSc8y will enforce Unicode (UTF-8) encoding on the console if the console is not already using UTF-8 (mostly affecting Windows as it does not use UTF-8 by default unlike MacOS and Linux)
+    * User will be informed how to add the setting to the PowerShell profile
+    * Enforcement of UTF-8 encoding can be disabled by setting
+
+        ```powershell
+        $env:C8Y_DISABLE_ENFORCE_ENCODING = $true
+        ```
+#### Minor Changes
 
 * Updated PowerShell version from 7.0 to 7.1.1 inside docker image `c8y-pwsh`. This fixed a bug when using `Foreach-Object -Parallel` which would re-import modules instead of re-using it within each runspace.
 * PSc8y will enforce PowerShell encoding to UTF8 to prevent encoding issues when sending data to the c8y go binary. The console encoding will be changed when importing `PSc8y`. UTF8 is the only text encoding supported. This mainly effects Windows, as MacOS and Linux use UTF8 encoding on the console by default.
 * Added a global `--noColor` to the c8y binary to remove console colours from the log messages to make it easier to parse entries. By default PowerShell uses this option when calling the c8y binary as PowerShell handling the coloured log output itself.
 
-### Bug fixes
+#### Bug fixes
 
 * `New-Device` fixed bug which prevent the command from creating the managed object
     * `Name` is no longer mandatory and it does not accepted piped input
 * Changed the processing of standard output and error from the c8y binary to prevent read deadlocks when being called from PowerShell module PSc8y. #39
 
-## Released
 
 ### v1.10.0
 
-### Breaking Changes
+#### Breaking Changes
 
 * `Expand-Device` no longer fetches the device managed object when given the id when being called from a function that does not makes use of a "Force" parameter. If you would like the old functionality, then add the new "-Fetch" parameter when calling `Expand-Device`.
 
@@ -209,7 +220,7 @@ No unreleased features
     self            : https://example.cumulocity.com/inventory/managedObjects/3882
     ```
 
-## New Features
+#### New Features
 
 * Added commands to manage managed object child additions
 
@@ -225,11 +236,11 @@ No unreleased features
     * `c8y inventoryReferences createChildAddition`
     * `c8y inventoryReferences deleteChildAddition`
 
-## Performance improvements
+#### Performance improvements
 
 * Reduced number of API calls within PSc8y and c8y binary by skipping lookups when an ID is given by the user. Previously PSc8y and c8y were sending two API calls to the server in order to normalize the request by retrieving additional information and potentiall shown to the user. Since this is currently not used, it has been removed.
 
-## Bug fixes
+#### Bug fixes
 
 * `Set-Session` no longer causes the terminal bell/chime when using backspace or arrow keys.
 
