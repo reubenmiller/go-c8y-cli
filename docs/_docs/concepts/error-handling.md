@@ -25,21 +25,20 @@ The HTTP status code have been mapped to exit codes. To ensure compatibility wit
 
 Note: Only HTTP status codes between 400 and 599 are mapped to exit codes. HTTP status 200 and 201 are classed as ok, and therefore will return an exit code of 0.
 
-|Exit code|Status code|Description|
-|---|-|--|
-|1|401|StatusUnauthorized401|
-|3|403|StatusForbidden403|
-|4|404|StatusNotFound404|
-|5|405|StatusMethodNotAllowed405|
-|9|409|StatusConflict409|
-|13|413|StatusExecutionTimeout413|
-|22|422|StatusInvalidData422|
-|29|429|StatusTooManyRequests429|
-|40|400|StatusBadRequest400|Bad request|
-|50|500|StatusInternalServerError500|
-|51|501|StatusNotImplemented501|
-|52|502|StatusBadGateway502|
-|53|503|StatusServiceUnavailable503|
+|Exit code|Status code|Description|description|
+|---|--|--|--|
+|1|401|StatusUnauthorized401|Authentication has failed, or credentials were required but not provided.|
+|3|403|Forbidden|You are not authorized to access the API.|
+|4|404|Not Found|Resource not found at given location.|
+|5|405|Method Not Allowed|The employed HTTP method cannot be used on this resource (e.g., using "POST" on a read-only resource).|
+|9|409|Update Conflict or Duplicate|The entity already exists in the data source. or the entity already exists in the data source.|
+|13|413|Execution Timeout|Query had been running too long and was timed out.|
+|22|422|Invalid Data|General error with entity data format.|
+|29|429|Too Many Requests|If the request rate limit per second is exceeded, the requests are delayed and kept in queue until the queue number limit is exceeded in which case the request is terminated with an error.|
+|40|400|Bad Request|The request could not be understood by the server due to malformed syntax. The client SHOULD NOT repeat the request without modifications.|
+|50|500|Internal Server Error|An internal error in the software system has occurred and the request could not be processed.|
+|52|502|Bad Gateway|The server, while acting as a gateway or proxy, received an invalid response from the upstream server|
+|53|503|Service Unavailable|The service is currently not available. This may be caused by an overloaded instance or it is down for maintenance. Please try it again in a few minutes.|
 
 ### Handling errors (Bash/zsh)
 
@@ -125,7 +124,7 @@ Note: The `$null` is on the left side of the "not equal" operator (-ne), because
 Now let's say that you didn't want to just check if the command was successful, but you wanted to check what kind of error occured (i.e. server error or a command/client error). To achieve this, all you have to do is check the last item in the `c8yError` array like so:
 
 ```powershell
-$managedObject = Get-ManagedObject -Id 0 -ErrorVariable c8yError
+$managedObject = Get-ManagedObject -Id 0 -ErrorVariable "c8yError"
 
 if ($null -ne $managedObject) {
   #
@@ -153,7 +152,7 @@ Now the example above will now display two errors to the user. The first one is 
 If you want to hide the original error, you can add the in-built PowerShell variable `-ErrorAction SilentlyContinue` to the `Get-ManagedObject` call:
 
 ```powershell
-$managedObject = Get-ManagedObject -Id 0 -ErrorVariable c8yError -ErrorAction SilentlyContinue
+$managedObject = Get-ManagedObject -Id 0 -ErrorVariable "c8yError" -ErrorAction "SilentlyContinue"
 ```
 
 The `c8yError` also has additional information for a detailed anaylsis of what went wrong. It stores the full verbose output of the c8y binary, so it can be helpful to look through it for additional clues to what went wrong.
@@ -183,8 +182,8 @@ $null = New-ExternalId `
   -Device $Device `
   -Type "mySerial" `
   -Name $SerialNumber `
-  -ErrorAction SilentlyContinue `
-  -ErrorVariable c8yError
+  -ErrorAction "SilentlyContinue" `
+  -ErrorVariable "c8yError"
 
 # Save the code for better re-use (in case something else updates it unexpectedly)
 $Code = $LASTEXITCODE
