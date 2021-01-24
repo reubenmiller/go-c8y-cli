@@ -20,7 +20,7 @@ No unreleased features
 
 ### New Features (PSc8y)
 
-* **PSc8y:** Added support for saving meta information about the requests to the in-built PowerShell InformationVariable common parameter
+* Added support for saving meta information about the requests to the in-built PowerShell InformationVariable common parameter
 
     [Documentation - Request metrics](https://reubenmiller.github.io/go-c8y-cli/docs/concepts/powershell-request-metrics/):
 
@@ -63,7 +63,7 @@ No unreleased features
     Response took 172ms
     ```
 
-* **PSc8y:** Support for ErrorVariable common variable to save error output to a variable
+* Support for ErrorVariable common variable to save error output to a variable
 
     **Example: Save error output to a variable**
 
