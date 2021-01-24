@@ -53,7 +53,7 @@ Enable all create and update commands until the session is changed
     }
 
     if ($DisableCommands) {
-        Write-Host "Disableing create/update/delete commands" -ForegroundColor Gray
+        Write-Host "Disabling create/update/delete commands" -ForegroundColor Gray
         $env:C8Y_SETTINGS_MODE_ENABLECREATE = ""
         $env:C8Y_SETTINGS_MODE_ENABLEUPDATE = ""
         $env:C8Y_SETTINGS_MODE_ENABLEDELETE = ""

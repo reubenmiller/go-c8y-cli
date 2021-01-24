@@ -16,10 +16,10 @@ Returns the fullname of the path to the Cumulocity binary
     Param()
 
     if ($IsLinux) {
-        Resolve-Path "$script:Dependencies/c8y.linux"
+        Resolve-Path (Join-Path $script:Dependencies "c8y.linux")
     } elseif ($IsMacOS) {
-        Resolve-Path "$script:Dependencies/c8y.macos"
+        Resolve-Path (Join-Path $script:Dependencies "c8y.macos")
     } else {
-        Resolve-Path "$script:Dependencies/c8y.windows.exe"
+        Resolve-Path (Join-Path $script:Dependencies "c8y.windows.exe")
     }
 }

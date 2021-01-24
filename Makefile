@@ -161,10 +161,10 @@ build_powershell:
 	pwsh -File scripts/build-powershell/build.ps1;
 
 test_powershell:
-	pwsh -NonInteractive -File tools/PSc8y/test.parallel.ps1 -ThrottleLimit $(TEST_THROTTLE_LIMIT) -TestFileFilter "$(TEST_FILE_FILTER)" -TestFileExclude "Set-Session|Get-SessionHomePath|Login|DisableCommands"
+	pwsh -ExecutionPolicy bypass -NonInteractive -File tools/PSc8y/test.parallel.ps1 -ThrottleLimit $(TEST_THROTTLE_LIMIT) -TestFileFilter "$(TEST_FILE_FILTER)" -TestFileExclude "Set-Session|Get-SessionHomePath|Login|DisableCommands|BulkOperation"
 
 test_powershell_sessions:		## Run tests which interfere with the session variable
-	pwsh -NonInteractive -File tools/PSc8y/test.parallel.ps1 -ThrottleLimit 1 -TestFileFilter "Set-Session|Get-SessionHomePath|Login|DisableCommands"
+	pwsh -ExecutionPolicy bypass -NonInteractive -File tools/PSc8y/test.parallel.ps1 -ThrottleLimit 1 -TestFileFilter "Set-Session|Get-SessionHomePath|Login|DisableCommands|BulkOperation"
 
 test_bash:
 	./tools/bash/tests/test.sh

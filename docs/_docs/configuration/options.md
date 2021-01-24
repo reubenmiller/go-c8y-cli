@@ -87,6 +87,7 @@ The following is a list of available environment variables which control how c8y
 | C8Y_USE_ENVIRONMENT | When set to `on`, the Cumulocity session settings will be loaded from environment variables. This will override the `C8Y_SESSION` variable. Useful when using in a CI/CD pipeline. |
 | C8Y_LOGGER_HIDE_SENSITIVE | Control whether sensitive session information is logged to the console or not. |
 | C8Y_JSONNET_DEBUG | Display debugging information for jsonnet templates (if used) |
+| C8Y_DISABLE_ENFORCE_ENCODING | (PowerShell only) Disable enforcement of UTF8 encoding on the console. If UTF8 encoding is disabled it will cause encoding problems if non-ascii characters are used! |
 
 
 ### Environment variable details and examples   

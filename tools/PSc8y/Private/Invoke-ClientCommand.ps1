@@ -92,9 +92,11 @@ only relevant information is shown.
         $null = $c8yargs.Add("--dry")
     }
 
-    if ($VerbosePreference) {
-        $null = $c8yargs.Add("--verbose")
-    }
+    # Always use verbose as information is extracted from it
+    $null = $c8yargs.Add("--verbose")
+
+    # Don't use colours as it can interfere with log parsing
+    $null = $c8yargs.Add("--noColor")
 
     if ($TimeoutSec) {
         # Convert to milliseconds (cast to an integer)
@@ -116,6 +118,8 @@ only relevant information is shown.
         $null = $c8yargs.Add("--includeAll")
     }
 
+    # Only use streaming when results come in batches, and powershell needs the results before
+    # the go binary is finished (i.e. realtime and paged results)
     $UsePipelineStreaming = ($IncludeAll -or $TotalPages -gt 0) -or $Verb -match "subscribe|subscribeAll"
 
     # Don't use the raw response, let go do everything
@@ -127,59 +131,51 @@ only relevant information is shown.
     Write-Verbose ("$c8ycli {0}" -f $c8yargs -join " ")
 
     $ExitCode = $null
+    $ErrorOutput = @()
     try {
         if ($UsePipelineStreaming) {
-
+            Write-Verbose "Streaming c8y binary output"
             $LastSaveWarning = "NOTE: This PSc8y automatic variable is not supported when using -IncludeAll or -TotalPages"
             $global:_rawdata = $LastSaveWarning
             $global:_data = $LastSaveWarning
 
 
-            $processOptions = @{
-                ProcessName = $c8ycli
-                RedirectOutput = $true
-                RedirectStdErr = $Verb -notmatch "subscribe|subscribeAll"
-                AsText = $false
-                ArgumentList = $c8yargs
-                # ErrorVariable = "ProcErrors"
-                # Verbose = $VerbosePreference
-                # ErrorAction = "SilentlyContinue"
+            $JSONOptions = @{}
+            if ($PSVersionTable.PSVersion.Major -gt 5) {
+                $JSONOptions.Depth = 100
             }
             
             # Note: To enable the streaming of output result in the pipeline,
             # the value must be sent back as is
             if ($Raw) {
                 $null = $c8yargs.Add("--raw")
-                Invoke-BinaryProcess @processOptions |
-                    Select-Object
-            } else {
-                Invoke-BinaryProcess @processOptions |
-                    Select-Object |
-                    Add-PowershellType $ItemType
             }
+            & $c8ycli $c8yargs 2>&1 | Write-ClientMessage -PassThru | ForEach-Object {
+                $line = "$_"
+                
+                # JSON should be returned on output stream
+                if (-not $Raw -and ($line.StartsWith("[") -or $line.StartsWith("{"))) {
+                    try {
+                        ConvertFrom-Json -InputObject $line @JSONOptions |
+                            Select-Object |
+                            Add-PowershellType $ItemType
+                    } catch {
+                        Write-Warning "Could not decode json text. $_"
+                        $line
+                    }
+                } else {
+                    # Return data as is
+                    $line
+                }
+            }
+            $ExitCode = $LASTEXITCODE
             return
         } else {
-            # Keep comparison with old call style. Will be deleted in the future
-            # $RawResponse = & $c8ycli $c8yargs
-            $processOptions = @{
-                ProcessName = $c8ycli
-                RedirectOutput = $true
-                RedirectStdErr = $true
-                AsText = $true
-                ArgumentList = $c8yargs
-                ErrorVariable = "ProcErrors"
-                Verbose = $VerbosePreference -and ($VerbosePreference -ne "SilentlyContinue")
-                ErrorAction = "SilentlyContinue"
-            }
-            $ExitCode = -1
-            $RawResponse = Invoke-BinaryProcess @processOptions
-
-            if ($ProcErrors.Count -ne 0) {
-                Write-Warning "$ProcErrors"
-                $ExitCode = 1
-            } else {
-                $ExitCode = 0
-            }
+            # Don't stream stdout/stderr, just call external binary and redirect messages for mapping
+            # into powershell streams
+            [array] $VerboseMessages = $( $RawResponse = & $c8ycli $c8yargs ) 2>&1
+            $ErrorOutput = Write-ClientMessage $VerboseMessages -PassThru
+            $ExitCode = $LASTEXITCODE
         }
     } catch {
         Write-Warning -Message $_.Exception.Message
@@ -189,26 +185,35 @@ only relevant information is shown.
 
     if ($null -eq $ExitCode) {
         $ExitCode = $LASTEXITCODE
+        $global:C8Y_EXITCODE = $ExitCode
     }
     if ($ExitCode -ne 0) {
 
         try {
-            if ($PSVersionTable.PSVersion.Major -gt 5) {
-                $errormessage = $RawResponse | Select-Object -First 1 | ConvertFrom-Json -Depth 100
+            if ($RawResponse) {
+                if ($PSVersionTable.PSVersion.Major -gt 5) {
+                    $errormessage = $RawResponse | Out-String | ConvertFrom-Json -Depth 100 -ErrorAction SilentlyContinue
+                } else {
+                    $errormessage = $RawResponse | Out-String | ConvertFrom-Json -ErrorAction SilentlyContinue
+                }
             } else {
-                $errormessage = $RawResponse | Select-Object -First 1 | ConvertFrom-Json
+                if ($ErrorOutput -is [string] -and $ErrorOutput.startsWith("{")) {
+                    $errormessage = $ErrorOutput | ConvertFrom-Json
+                } else {
+                    $errormessage = $ErrorOutput
+                }
             }
             
             if ($errormessage.error) {
-                $errorText = if ($errormessage.message) {
-                    "Server error. {0}: {1}" -f @(
-                        $errormessage.error,
-                        $errormessage.message
-                    )    
-                } else {
-                    "Server error. {0}" -f @(
-                        $errormessage.error
-                    )
+                
+                $errorText = switch ($errormessage.error) {
+                    "commandError" {
+                        @($errormessage.error, $errormessage.message).Where({$_ -ne ""}) -join ": "
+                    }
+                    default {
+                        # server error
+                        @("serverError", $errormessage.error, $errormessage.message).Where({$_ -ne ""}) -join ": "
+                    }
                 }
             } else {
                 $errorText = $errormessage
@@ -217,7 +222,7 @@ only relevant information is shown.
             Write-Error $errorText
             
         } catch {
-            Write-Error "c8y command failed. $RawResponse"
+            Write-Error "$RawResponse"
         }
         return
     }

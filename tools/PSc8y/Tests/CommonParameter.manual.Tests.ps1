@@ -7,8 +7,7 @@ Describe -Name "Common parameters" {
             "Get-ClientBinary",
             "Get-ClientBinaryVersion",
             "Get-CurrentTenantApplicationCollection",
-            "Install-ClientBinary",
-            "Invoke-BinaryProcess"
+            "Install-ClientBinary"
         )
 
         $cmdlets = Get-Command -Module PSc8y -Name "*" |
@@ -113,11 +112,11 @@ Describe -Name "Common parameters" {
     }
 
     It "Using -WhatIf should show output on the console" {
-        $response = PSc8y\New-Device `
+        PSc8y\New-Device `
             -Name "testme" `
-            -Whatif 6>&1
+            -WhatIf -InformationVariable responseInfo
         $LASTEXITCODE | Should -Be 0
-        $Response | Should -Not -BeNullOrEmpty
-        ($Response -join "`n") | Should -BeLike "*/inventory/managedObject*"
+        $responseInfo | Should -Not -BeNullOrEmpty
+        $responseInfo | Out-String | Should -BeLike "*/inventory/managedObject*"
     }
 }

@@ -6,10 +6,10 @@ Describe -Name "Reset-UserPassword" {
     }
 
     It "Resets a user's password by sending a reset email to the user" {
-        $Response = PSc8y\Reset-UserPassword -Id $User.id -WhatIf 6>&1 | Out-String
+        PSc8y\Reset-UserPassword -Id $User.id -WhatIf -InformationVariable Request
         $LASTEXITCODE | Should -Be 0
 
-        $Body = Get-JSONFromResponse $Response
+        $Body = Get-JSONFromResponse ($Request | Out-String)
 
         $Body.sendPasswordResetEmail | Should -BeExactly $true
         $Body.password | Should -BeNullOrEmpty
@@ -17,10 +17,10 @@ Describe -Name "Reset-UserPassword" {
 
     It "Resets a user's password by setting a manual password" {
         $pass = New-RandomPassword
-        $Response = PSc8y\Reset-UserPassword -Id $User.id -NewPassword $pass -WhatIf 6>&1 | Out-String
+        PSc8y\Reset-UserPassword -Id $User.id -NewPassword $pass -WhatIf -InformationVariable Request
         $LASTEXITCODE | Should -Be 0
 
-        $Body = Get-JSONFromResponse $Response
+        $Body = Get-JSONFromResponse ($Request | Out-String)
 
         $Body.password | Should -BeExactly $pass
         $Body.sendPasswordResetEmail | Should -BeNullOrEmpty
