@@ -32,6 +32,14 @@ Function Write-ClientMessage {
             # Extra data about the request
             if (!$WhatIfPreference) {
                 switch -Regex ($line) {
+                    "Sending request: " {
+                        $value = $line -split "Sending request: " | Select-Object -Last 1
+                        $CommandInfo["request"] = $value
+                    }
+                    "Headers: " {
+                        $value = $line -split "Headers: " | Select-Object -Last 1
+                        $CommandInfo["requestHeader"] = $value
+                    }
                     "Response time: " {
                         $value = $line -split "Response time: " | Select-Object -Last 1
                         $CommandInfo["responseTime"] = $value
@@ -68,6 +76,8 @@ Function Write-ClientMessage {
                 $panic = New-Object System.Collections.ArrayList
             }
 
+            # Allow for lines starting with color info, i.e. "[36m"
+            # if (-Not $line[0..14].Contains($date)) {
             if (-Not $line.StartsWith($date)) {
                 if ($WhatIfPreference -and (-Not $line.Contains('"error":"commandError"'))) {
                     Write-InformationColored -MessageData $line -ForegroundColor Green -ShowHost

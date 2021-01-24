@@ -11,9 +11,9 @@ Describe -Name "Error handling" {
         $response = Get-ManagedObject -Id 0 -ErrorVariable c8yError
         $response | Should -BeNullOrEmpty
         $LASTEXITCODE | Should -Not -Be 0
-        $c8yError | Should -HaveCount 1
         $c8yError | Should -Not -BeNullOrEmpty
-        "$c8yError" | Should -Match "^serverError:.+Not Found"
+        $c8yError.Count | Should -BeGreaterOrEqual 10
+        $c8yError | Select-Object -Last 1 | Should -Match "^serverError:.+Not Found"
     }
 
     It "Redirects errors to response" {
@@ -30,8 +30,8 @@ Describe -Name "Error handling" {
         $LASTEXITCODE | Should -Not -Be 0
 
         # Variable can also
-        $c8yError | Should -HaveCount 1
-        $c8yError[0] | Should -BeExactly $response
+        $c8yError.Count | Should -BeGreaterOrEqual 10
+        $c8yError | Select-Object -Last 1 | Should -BeExactly $response
     }
 
     It "sets the exit code based on the HTTP status code" {
@@ -40,8 +40,8 @@ Describe -Name "Error handling" {
         $response | Should -BeExactly $null
 
         # Variable can also
-        $c8yError | Should -HaveCount 1
-        "$c8yError" | Should -Match "Not Found"
+        $c8yError.Count | Should -BeGreaterOrEqual 10
+        $c8yError[-1] | Should -Match "Not Found"
     }
 
     It "custom client requests do not pipe response to error variable" {
@@ -55,22 +55,24 @@ Describe -Name "Error handling" {
         $LASTEXITCODE | Should -BeExactly 22 -Because "Exit code 22 = Status Code 422 invalid format"
         $response.error | Should -Match "validationError"
 
-        # error variable is not set for Invoke-ClientRequest
-        $c8yError | Should -BeNullOrEmpty
+        $c8yError | Should -Not -BeNullOrEmpty
     }
 
     It "produces verbose output" {
         $VerboseMessages = $( $null = Get-ManagedObjectCollection -Verbose ) 4>&1
         @($VerboseMessages -like "*Sending request*") | Should -HaveCount 1
-
     }
 
-    It "saves request information to the InformationVariable" {
-        $null = Get-ManagedObjectCollection -Verbose -InformationVariable responseInfo
+    It "saves request information to the InformationVariable (hiding verbose messages)" {
+        $null = Get-ManagedObjectCollection -InformationVariable responseInfo
 
         $responseInfo | Should -Not -BeNullOrEmpty
+        $responseInfo.MessageData.request | Should -Not -BeNullOrEmpty
+        $responseInfo.MessageData.requestHeader | Should -Not -BeNullOrEmpty
+        $responseInfo.MessageData.responseHeader | Should -Not -BeNullOrEmpty
         $responseInfo.MessageData.responseTime | Should -Match "^\d+ms$"
         $responseInfo.MessageData.statusCode | Should -Match "^\d+$"
+        $responseInfo.MessageData.responseLength | Should -Not -BeNullOrEmpty
     }
 
     It "saves whatif information to a variable" {
@@ -121,7 +123,7 @@ InModuleScope PSc8y {
             $response | Should -BeNullOrEmpty
             $LASTEXITCODE | Should -Not -Be 0
             $c8yError | Should -HaveCount 2
-            "" + $c8yError[-1] | Should -Match '^commandError: unknown flag: --invalidParameter'
+            $c8yError[-1] | Should -Match '^commandError: unknown flag: --invalidParameter'
         }
     }
 }

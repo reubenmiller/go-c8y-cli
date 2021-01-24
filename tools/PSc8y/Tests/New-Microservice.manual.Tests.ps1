@@ -129,7 +129,7 @@ Invalid json example
             $App | Should -BeNullOrEmpty
 
             $LASTEXITCODE | Should -Not -Be 0
-            $ErrorResponse | Should -HaveCount 2 -Because "internally the binary will throw its own error"
+            $ErrorResponse.Count | Should -BeGreaterOrEqual 10 -Because "internally verbose messages will also be logged to the ERROR output"
             $ErrorResponse | Select-Object -Last 1 | Should -BeLike "*invalid manifest*"
         }
 

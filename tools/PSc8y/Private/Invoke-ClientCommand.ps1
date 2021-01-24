@@ -92,9 +92,11 @@ only relevant information is shown.
         $null = $c8yargs.Add("--dry")
     }
 
-    if ($VerbosePreference) {
-        $null = $c8yargs.Add("--verbose")
-    }
+    # Always use verbose as information is extracted from it
+    $null = $c8yargs.Add("--verbose")
+
+    # Don't use colours as it can interfere with log parsing
+    $null = $c8yargs.Add("--noColor")
 
     if ($TimeoutSec) {
         # Convert to milliseconds (cast to an integer)
