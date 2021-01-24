@@ -5,11 +5,14 @@ Param(
 	[switch] $SkipSessionTest
 )
 
-Remove-Module PSc8y -ErrorAction SilentlyContinue
+if (Get-Module PSc8y) {
+	Remove-Module PSc8y -Force
+}
 
-Write-Verbose "PSScriptRoot: $PSSScriptRoot";
+Write-Verbose "PSScriptRoot: $PSScriptRoot";
 #Import-Module Pester -MinimumVersion "5.0.0" -MaximumVersion "5.100.0"
-Import-Module "$PSScriptRoot/../dist/PSc8y/PSc8y.psd1" -Prefix "" -Force
+$modulepath = Resolve-Path "$PSScriptRoot/../dist/PSc8y/PSc8y.psd1"
+Import-Module $modulepath -Prefix "" -Force
 
 # Import local functions which are only used in tests
 . "$PSScriptRoot/../Public-manual/New-TestHostedApplication.ps1"

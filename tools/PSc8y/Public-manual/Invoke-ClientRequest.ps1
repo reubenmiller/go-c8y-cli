@@ -257,9 +257,11 @@ Create a new managed object but add a custom accept header value
 
     $null = $c8yargs.Add("--pretty={0}" -f $Pretty.ToString().ToLower())
 
-    if ($VerbosePreference) {
-        $null = $c8yargs.Add("--verbose")
-    }
+    # Always use verbose messages so the output can be parsed by PowerShell
+    $null = $c8yargs.Add("--verbose")
+
+    # Don't use colours as it can interfere with log parsing
+    $null = $c8yargs.Add("--noColor")
 
     if ($WhatIfPreference) {
         $null = $c8yargs.Add("--dry")
@@ -267,5 +269,6 @@ Create a new managed object but add a custom accept header value
 
     Write-Verbose ("{0} {1}" -f $c8y, ($c8yargs -join " "))
 
-    & $c8y $c8yargs
+    $output = & $c8y $c8yargs 2>&1
+    Write-ClientMessage $output -PassThru
 }

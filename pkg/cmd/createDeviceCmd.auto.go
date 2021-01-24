@@ -37,13 +37,12 @@ Create device with custom properties
 
 	cmd.SilenceUsage = true
 
-	cmd.Flags().StringSlice("name", []string{""}, "Device name (required)")
+	cmd.Flags().String("name", "", "Device name")
 	cmd.Flags().String("type", "", "Device type")
 	addDataFlag(cmd)
 	addProcessingModeFlag(cmd)
 
 	// Required flags
-	cmd.MarkFlagRequired("name")
 
 	ccmd.baseCmd = newBaseCmd(cmd)
 
@@ -80,16 +79,12 @@ func (n *createDeviceCmd) createDevice(cmd *cobra.Command, args []string) error 
 	// body
 	body := mapbuilder.NewMapBuilder()
 	body.SetMap(getDataFlag(cmd))
-	if items, err := cmd.Flags().GetStringSlice("name"); err == nil {
-		if len(items) > 0 {
-			for _, v := range items {
-				if v != "" {
-					body.Set("name", v)
-				}
-			}
+	if v, err := cmd.Flags().GetString("name"); err == nil {
+		if v != "" {
+			body.Set("name", v)
 		}
 	} else {
-		return newUserError("Flag does not exist")
+		return newUserError(fmt.Sprintf("Flag [%s] does not exist. %s", "name", err))
 	}
 	if v, err := cmd.Flags().GetString("type"); err == nil {
 		if v != "" {

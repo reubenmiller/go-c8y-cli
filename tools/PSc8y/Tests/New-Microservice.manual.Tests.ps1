@@ -123,11 +123,14 @@ Invalid json example
 "@
 
             $App = New-Microservice -Name $AppName -File $ManifestFile -SkipUpload -ErrorVariable ErrorResponse
-            $AppList.Add($App.id)
+            if ($App.id) {
+                $AppList.Add($App.id)
+            }
+            $App | Should -BeNullOrEmpty
 
             $LASTEXITCODE | Should -Not -Be 0
+            $ErrorResponse.Count | Should -BeGreaterOrEqual 10 -Because "internally verbose messages will also be logged to the ERROR output"
             $ErrorResponse | Select-Object -Last 1 | Should -BeLike "*invalid manifest*"
-            $App | Should -BeNullOrEmpty
         }
 
         It "Creates a new microservice but does not subscribe to it automatically" {

@@ -34,6 +34,25 @@ if ($ExistingSession) {
     Write-Host "${ConsoleMessage}`n"
 }
 
+# Enforce UTF8 encoding
+$CurrentEncodingName = [Console]::Out.Encoding.EncodingName
+$RequiredEncodingName = [System.Text.Encoding]::UTF8.EncodingName
+
+if ($CurrentEncodingName -ne $RequiredEncodingName) {
+    if (-not $env:C8Y_DISABLE_ENFORCE_ENCODING) {
+        Write-Warning ("Current console encoding is not correct. Changing from [{0}] to [{1}]" -f @(
+            $CurrentEncodingName,
+            $RequiredEncodingName
+        ))
+        if ($PROFILE) {
+            Write-Warning "You can get rid of this message by adding '[Console]::OutputEncoding = [System.Text.Encoding]::UTF8' to your PowerShell profile ($PROFILE)"
+        }
+        [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+    } else {
+        Write-Verbose "User chose to use non-utf8 encoding (via setting C8Y_DISABLE_ENFORCE_ENCODING env variable). Current console encoding is [$CurrentEncodingName] but PSc8y wants [$RequiredEncodingName]"
+    }
+}
+
 $script:Aliases = @{
     # collections
     alarms = "Get-AlarmCollection"
@@ -74,7 +93,15 @@ Register-Alias
 
 #region tab completion
 # allow -Session params to be tab-completed
-$Manifest = Test-ModuleManifest -Path $PSScriptRoot\PSc8y.psd1
+
+if (Get-Command -Name "Import-PowerShellDataFile" -ErrorAction SilentlyContinue) {
+    # Note: Test-ModuleManifest sometimes throws an error:
+    # "collection was modified; enumeration operation may not execute"
+    # Import-PowerShellDataFile seems to be more reliable
+    $Manifest = Import-PowerShellDataFile -Path $PSScriptRoot\PSc8y.psd1
+} else {
+    $Manifest = Test-ModuleManifest -Path $PSScriptRoot\PSc8y.psd1
+}
 
 $ModulePrefix = $Manifest.Prefix
 

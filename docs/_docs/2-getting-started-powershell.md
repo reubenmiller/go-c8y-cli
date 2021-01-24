@@ -12,6 +12,16 @@ title: Powershell
     Import-Module PSc8y
     ```
 
+    **Note for Windows**
+
+    If you get an error regarding the `Execution policy` when installing or importing PSc8y, then you will have to start a new powershell conc
+
+    ```sh
+    pwsh -ExecutionPolicy bypass
+    ```
+    
+    More information on PowerShell's execution policy can be found on the [Microsoft website](https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_execution_policies)
+
 1. Create a new session (containing your Cumulocity credentials, host and tenant)
 
     ```sh

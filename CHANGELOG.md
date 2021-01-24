@@ -4,7 +4,19 @@
 
 No unreleased features
 
-## New features
+### New Features
+
+* Exit codes are not set to the HTTP exit codes for commands which send a REST request. The https status codes are mapped to exit codes between 0 - 128 to ensure compatibility to different operating systems and applications.
+    
+    The full error codes can be found on the new [error handling](https://reubenmiller.github.io/go-c8y-cli/docs/concepts/error-handling/) concept page. However a few include:
+
+    * 0 => 0 (REST request was ok)
+    * 1 => 401 (Unauthorized)
+    * 3 => 403 (Forbidden)
+    * 4 => 404 (Not found)
+    * 9 => 409 (Conflict/duplicate)
+    * 22 => 422 (Unprocessable entity / invalid request)
+    * 50 => 500 (Internal server error)
 
 * Added `Remove-ApplicationBinary` command
 
@@ -24,6 +36,76 @@ No unreleased features
     ```sh
     c8y applications deleteApplicationBinary --application 12345 --binaryId 9876
     ```
+
+### New Features (PSc8y)
+
+* Added support for saving meta information about the requests to the in-built PowerShell InformationVariable common parameter
+
+    [Documentation - Request metrics](https://reubenmiller.github.io/go-c8y-cli/docs/concepts/powershell-request-metrics/):
+
+    **Example: Save request to a variable without sending the request**
+
+    ```powershell
+    New-Device -Name my-test -WhatIf -InformationVariable requestInfo -InformationAction SilentlyContinue
+    $requestInfo
+    ```
+
+    *Output*
+
+    ```powershell
+    What If: Sending [POST] request to [https://example123.my-c8y.com/inventory/managedObjects]
+
+    Headers:
+    Accept: application/json
+    Authorization: Basic asdfasfd........
+    Content-Type: application/json
+    User-Agent: go-client
+    X-Application: go-client
+
+    Body:
+    {
+    "c8y_IsDevice": {},
+    "name": "my-test"
+    }
+    ```
+
+    **Example: Get the response time of a request**
+
+    ```powershell
+    New-Device -Name my-test -InformationVariable requestInfo -InformationAction SilentlyContinue
+    Write-Host ("Response took {0}" -f $requestInfo.MessageData.responseTime)
+    ```
+
+    *Output*
+
+    ```
+    Response took 172ms
+    ```
+
+* Support for ErrorVariable common variable to save error output to a variable
+
+    **Example: Save error output to a variable**
+
+    ```powershell
+    Get-ManagedObject -Id 0 -ErrorVariable "c8yError" -ErrorAction SilentlyContinue
+
+    if ($LASTEXITCODE -ne 0) {
+        $MainError = $c8yError[-1]
+        Write-Error "Something went wrong. details=$MainError"
+    }
+    ```
+
+### Minor Changes
+
+* Updated PowerShell version from 7.0 to 7.1.1 inside docker image `c8y-pwsh`. This fixed a bug when using `Foreach-Object -Parallel` which would re-import modules instead of re-using it within each runspace.
+* PSc8y will enforce PowerShell encoding to UTF8 to prevent encoding issues when sending data to the c8y go binary. The console encoding will be changed when importing `PSc8y`. UTF8 is the only text encoding supported. This mainly effects Windows, as MacOS and Linux use UTF8 encoding on the console by default.
+* Added a global `--noColor` to the c8y binary to remove console colours from the log messages to make it easier to parse entries. By default PowerShell uses this option when calling the c8y binary as PowerShell handling the coloured log output itself.
+
+### Bug fixes
+
+* `New-Device` fixed bug which prevent the command from creating the managed object
+    * `Name` is no longer mandatory and it does not accepted piped input
+* Changed the processing of standard output and error from the c8y binary to prevent read deadlocks when being called from PowerShell module PSc8y. #39
 
 ## Released
 

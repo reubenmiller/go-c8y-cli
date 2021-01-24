@@ -27,11 +27,9 @@ Create device with custom properties
     [Alias()]
     [OutputType([object])]
     Param(
-        # Device name (required)
-        [Parameter(Mandatory = $true,
-                   ValueFromPipeline=$true,
-                   ValueFromPipelineByPropertyName=$true)]
-        [string[]]
+        # Device name
+        [Parameter()]
+        [string]
         $Name,
 
         # Device type
@@ -95,6 +93,9 @@ Create device with custom properties
 
     Begin {
         $Parameters = @{}
+        if ($PSBoundParameters.ContainsKey("Name")) {
+            $Parameters["name"] = $Name
+        }
         if ($PSBoundParameters.ContainsKey("Type")) {
             $Parameters["type"] = $Type
         }
@@ -130,10 +131,7 @@ Create device with custom properties
     }
 
     Process {
-        foreach ($item in (PSc8y\Expand-Id $Name)) {
-            if ($item) {
-                $Parameters["name"] = if ($item.id) { $item.id } else { $item }
-            }
+        foreach ($item in @("")) {
 
             if (!$Force -and
                 !$WhatIfPreference -and
