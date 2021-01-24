@@ -70,7 +70,7 @@ Function Write-ClientMessage {
 
             if (-Not $line.StartsWith($date)) {
                 if ($WhatIfPreference -and (-Not $line.Contains('"error":"commandError"'))) {
-                    Write-InformationColored -MessageData $line -ForegroundColor Green
+                    Write-InformationColored -MessageData $line -ForegroundColor Green -ShowHost
                 } else {
                     if ($detectedPanic) {
                         $null = $panic.Add($line)

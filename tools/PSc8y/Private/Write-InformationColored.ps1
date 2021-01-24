@@ -45,16 +45,12 @@ Function Write-InformationColored {
         NoNewline       = $NoNewline.IsPresent
     }
 
-    if ($ForegroundColor) {
-
-    }
-
     $options = @{
         MessageData = $msg
         Tags = $Tags
     }
 
-    if ($DisplayHost) {
+    if ($ShowHost) {
         $options["InformationAction"] = "Continue"
     }
 

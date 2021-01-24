@@ -84,6 +84,16 @@ Describe -Name "Error handling" {
         $requestInfo -match "Body:" | Should -HaveCount 1
     }
 
+    It "redirects whatif information standard output" {
+        $requestInfo = New-ManagedObject -Name "My Name" -WhatIf 6>&1
+
+        $requestInfo | Should -Not -BeNullOrEmpty
+        $requestInfo -match "What If" | Should -HaveCount 1
+        $requestInfo -match "Sending \[POST\] request to" | Should -HaveCount 1
+        $requestInfo -match "Headers:" | Should -HaveCount 1
+        $requestInfo -match "Body:" | Should -HaveCount 1
+    }
+
     AfterAll {
         # Cleanup all managed objects
         if ($ids.Count -gt 0) {
