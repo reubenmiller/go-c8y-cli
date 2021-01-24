@@ -161,6 +161,7 @@ var (
 	globalFlagWithTotalPages     bool
 	globalFlagPrettyPrint        bool
 	globalFlagDryRun             bool
+	globalFlagNoColor            bool
 	globalFlagSessionFile        string
 	globalFlagConfigFile         string
 	globalFlagOutputFile         string
@@ -305,6 +306,7 @@ func Execute() {
 	rootCmd.PersistentFlags().BoolVar(&globalFlagWithTotalPages, "withTotalPages", false, "Include all results")
 	rootCmd.PersistentFlags().BoolVar(&globalFlagPrettyPrint, "pretty", true, "Pretty print the json responses")
 	rootCmd.PersistentFlags().BoolVar(&globalFlagDryRun, "dry", false, "Dry run. Don't send any data to the server")
+	rootCmd.PersistentFlags().BoolVar(&globalFlagNoColor, "noColor", false, "Don't use colors when displaying log entries on the console")
 	rootCmd.PersistentFlags().BoolVar(&globalFlagUseEnv, "useEnv", false, "Allow loading Cumulocity session setting from environment variables")
 	rootCmd.PersistentFlags().BoolVar(&globalFlagRaw, "raw", false, "Raw values")
 	rootCmd.PersistentFlags().StringVar(&globalFlagProxy, "proxy", "", "Proxy setting, i.e. http://10.0.0.1:8080")
@@ -505,7 +507,7 @@ func ReadConfigFiles(v *viper.Viper) (path string, err error) {
 func initConfig() {
 	// Set logging
 	if globalFlagVerbose || globalFlagDryRun {
-		Logger = logger.NewLogger(module)
+		Logger = logger.NewLogger(module, !globalFlagNoColor)
 	} else {
 		// Disable log messages
 		Logger = logger.NewDummyLogger(module)
