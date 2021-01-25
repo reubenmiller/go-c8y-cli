@@ -37,11 +37,7 @@ Set the passphrase if it is not already set
             return
         }
 
-        $JSONArgs = @{}
-        if ($PSVersionTable.PSVersion.Major -gt 5) {
-            $JSONArgs.Depth = 100
-        }
-        $encryptionInfo = $passphraseCheck | ConvertFrom-Json @JSONArgs
+        $encryptionInfo = $passphraseCheck | ConvertFrom-Json
 
         # Save passphrase to env variable
         $env:C8Y_PASSWORD = $encryptionInfo.C8Y_PASSWORD

@@ -116,11 +116,7 @@ Get a measurement collection, then retrieve all the measurements by iterating th
       while (!$Done) {
         Write-Verbose "Requesting next item: (iteration $Iteration)"
 
-        $JSONArgs = @{}
-        if ($PSVersionTable.PSVersion.Major -gt 5) {
-          $JSONArgs.Depth = 100
-        }
-        $Result = Invoke-ClientRequest -Method Get -Uri $Result.next -Raw | ConvertFrom-Json @JSONArgs
+        $Result = Invoke-ClientRequest -Method Get -Uri $Result.next -Raw | ConvertFrom-Json
 
         # Detect the type of c8y object
         $Prop = Get-ResultProperty -InputObject $Result

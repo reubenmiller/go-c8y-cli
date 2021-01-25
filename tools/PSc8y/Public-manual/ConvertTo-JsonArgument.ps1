@@ -42,9 +42,6 @@ Converts the hashtable to an escaped json string
                 InputObject = $Data
                 ErrorAction = "Stop"
             }
-            if ($PSVersionTable.PSVersion.Major -gt 5) {
-                $JSONArgs.Depth = 100
-            }
             $DataObj = (ConvertFrom-Json @JSONArgs)
         } catch {
             # Return as is (and let c8y binary handle it)

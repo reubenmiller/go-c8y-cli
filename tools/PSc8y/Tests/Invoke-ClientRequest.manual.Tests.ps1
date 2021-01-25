@@ -250,7 +250,7 @@ Describe -Name "Invoke-ClientRequest" {
 
         $LASTEXITCODE | Should -Be 0
         $Response | Should -Not -BeNullOrEmpty
-        $Result = $Response | ConvertFrom-Json -Depth 100
+        $Result = $Response | ConvertFrom-Json
         $Result.root.level1.level2.level3.level4.level5.value | Should -BeExactly 1
         $Result.id | Remove-ManagedObject
     }

@@ -16,8 +16,5 @@ Function Get-JSONFromResponse {
     $JSONArgs = @{
         InputObject = $BodyText
     }
-    if ($PSVersionTable.PSVersion.Major -gt 5) {
-        $JSONArgs.Depth = 100
-    }
     ConvertFrom-Json @JSONArgs
 }

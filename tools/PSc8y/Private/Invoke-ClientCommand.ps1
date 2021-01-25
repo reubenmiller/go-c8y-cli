@@ -139,24 +139,19 @@ only relevant information is shown.
             $global:_rawdata = $LastSaveWarning
             $global:_data = $LastSaveWarning
 
-
-            $JSONOptions = @{}
-            if ($PSVersionTable.PSVersion.Major -gt 5) {
-                $JSONOptions.Depth = 100
-            }
             
             # Note: To enable the streaming of output result in the pipeline,
             # the value must be sent back as is
             if ($Raw) {
                 $null = $c8yargs.Add("--raw")
             }
-            & $c8ycli $c8yargs 2>&1 | Write-ClientMessage -PassThru | ForEach-Object {
+            & $c8ycli $c8yargs 2>&1 | Write-ClientMessage -PassThru | ForEach-Object -Process {
                 $line = "$_"
                 
                 # JSON should be returned on output stream
                 if (-not $Raw -and ($line.StartsWith("[") -or $line.StartsWith("{"))) {
                     try {
-                        ConvertFrom-Json -InputObject $line @JSONOptions |
+                        ConvertFrom-Json -InputObject $line |
                             Select-Object |
                             Add-PowershellType $ItemType
                     } catch {
@@ -167,6 +162,8 @@ only relevant information is shown.
                     # Return data as is
                     $line
                 }
+            } -End {
+                Write-Host "Finished processing stream: code=$LASTEXITCODE"
             }
             $ExitCode = $LASTEXITCODE
             return
@@ -191,11 +188,7 @@ only relevant information is shown.
 
         try {
             if ($RawResponse) {
-                if ($PSVersionTable.PSVersion.Major -gt 5) {
-                    $errormessage = $RawResponse | Out-String | ConvertFrom-Json -Depth 100 -ErrorAction SilentlyContinue
-                } else {
-                    $errormessage = $RawResponse | Out-String | ConvertFrom-Json -ErrorAction SilentlyContinue
-                }
+                $errormessage = $RawResponse | Out-String | ConvertFrom-Json -ErrorAction SilentlyContinue
             } else {
                 if ($ErrorOutput -is [string] -and $ErrorOutput.startsWith("{")) {
                     $errormessage = $ErrorOutput | ConvertFrom-Json

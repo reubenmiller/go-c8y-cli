@@ -37,12 +37,7 @@ None
         return
     }
 
-    $JSONArgs = @{}
-    if ($PSVersionTable.PSVersion.Major -gt 5) {
-        $JSONArgs.Depth = 100
-    }
-
-    $data = $sessionResponse | ConvertFrom-Json @JSONArgs
+    $data = $sessionResponse | ConvertFrom-Json
 
     if ($env:C8Y_LOGGER_HIDE_SENSITIVE -eq "true") {
         $data | Add-PowershellType "cumulocity/session-hide-sensitive"
