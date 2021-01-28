@@ -77,8 +77,8 @@ $script:Aliases = @{
     childassets = "Get-ChildAssetCollection"
 
     # utilities
-    json = "ConvertTo-Json"
-    tojson = "ConvertTo-Json"
+    json = "ConvertTo-NestedJson"
+    tojson = "ConvertTo-NestedJson"
     fromjson = "ConvertFrom-Json"
     rest = "Invoke-ClientRequest"
     base64ToUtf8 = "ConvertFrom-Base64String"

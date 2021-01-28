@@ -263,6 +263,7 @@ FunctionsToExport = @(
 	'ConvertFrom-Base64String',
 	'ConvertTo-Base64String',
 	'ConvertTo-JsonArgument',
+	'ConvertTo-NestedJson',
 	'Expand-Application',
 	'Expand-Device',
 	'Expand-Id',
