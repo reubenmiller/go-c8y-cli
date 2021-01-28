@@ -153,6 +153,7 @@ var (
 	cliConfig                    *config.CliConfiguration
 	globalFlagPageSize           int
 	globalFlagIncludeAllPageSize int
+	globalFlagBatchMaxWorkers    int
 	globalFlagCurrentPage        int64
 	globalFlagTotalPages         int64
 	globalFlagIncludeAll         bool
@@ -177,6 +178,7 @@ var (
 	globalModeEnableCreate bool
 	globalModeEnableUpdate bool
 	globalModeEnableDelete bool
+	globalModeEnableBatch  bool
 	globalCIMode           bool
 )
 
@@ -193,6 +195,9 @@ const (
 	// SettingsDefaultPageSize property name used to control the default page size
 	SettingsDefaultPageSize string = "settings.default.pageSize"
 
+	// SettingsDefaultBatchMaxWorkers property name used to control the hard limit on the maximum workers used in batch operations
+	SettingsDefaultBatchMaxWorkers string = "settings.default.batchMaximumWorkers"
+
 	// SettingsConfigPath configuration path
 	SettingsConfigPath string = "settings.path"
 
@@ -201,6 +206,9 @@ const (
 
 	// SettingsModeEnableCreate enables create (post) commands
 	SettingsModeEnableCreate string = "settings.mode.enableCreate"
+
+	// SettingsModeEnableBatch enables batch commands
+	SettingsModeEnableBatch string = "settings.mode.enableBatch"
 
 	// SettingsModeEnableUpdate enables update commands
 	SettingsModeEnableUpdate string = "settings.mode.enableUpdate"
@@ -360,6 +368,9 @@ func Execute() {
 
 	// auditRecords commands
 	rootCmd.AddCommand(newAuditRecordsRootCmd().getCommand())
+
+	// batch commands
+	rootCmd.AddCommand(newBatchRootCmd().getCommand())
 
 	// binaries commands
 	rootCmd.AddCommand(newBinariesRootCmd().getCommand())
@@ -589,6 +600,7 @@ func loadConfiguration() error {
 	//viper.AutomaticEnv()
 	bindEnv(SettingsIncludeAllPageSize, 2000)
 	bindEnv(SettingsDefaultPageSize, CumulocityDefaultPageSize)
+	bindEnv(SettingsDefaultBatchMaxWorkers, 5)
 	bindEnv(SettingsIncludeAllDelayMS, 0)
 	bindEnv(SettingsTemplatePath, "")
 	bindEnv(SettingsModeEnableCreate, false)
@@ -615,9 +627,11 @@ func readConfiguration() error {
 
 	globalFlagIncludeAllPageSize = viper.GetInt(SettingsIncludeAllPageSize)
 	globalFlagPageSize = viper.GetInt(SettingsDefaultPageSize)
+	globalFlagBatchMaxWorkers = viper.GetInt(SettingsDefaultBatchMaxWorkers)
 	globalFlagIncludeAllDelayMS = viper.GetInt64(SettingsIncludeAllDelayMS)
 	globalFlagTemplatePath = viper.GetString(SettingsTemplatePath)
 
+	globalModeEnableBatch = viper.GetBool(SettingsModeEnableBatch)
 	globalModeEnableCreate = viper.GetBool(SettingsModeEnableCreate)
 	globalModeEnableUpdate = viper.GetBool(SettingsModeEnableUpdate)
 	globalModeEnableDelete = viper.GetBool(SettingsModeEnableDelete)
@@ -631,6 +645,7 @@ func readConfiguration() error {
 	Logger.Infof("%s: %t", SettingsModeEnableCreate, globalModeEnableCreate)
 	Logger.Infof("%s: %t", SettingsModeEnableUpdate, globalModeEnableUpdate)
 	Logger.Infof("%s: %t", SettingsModeEnableDelete, globalModeEnableDelete)
+	Logger.Infof("%s: %t", SettingsModeEnableBatch, globalModeEnableBatch)
 
 	return nil
 }

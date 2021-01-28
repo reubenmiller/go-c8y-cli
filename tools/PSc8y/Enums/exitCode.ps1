@@ -17,4 +17,6 @@ Enum c8yExitCode {
     SystemError = 100
     UserError = 101
     NoSessionLoaded = 102
+    BatchAbortedWithErrors = 103
+    BatchCompletedWithErrors = 104
 }

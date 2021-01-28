@@ -8,6 +8,7 @@ test/c8y_test/application.properties
 test/c8y_test/debug.test
 test/c8y_test/application.setup.properties
 .cumulocity/
+temp-example/
 c8y.env
 c8y~
 tools/PSc8y/c8y

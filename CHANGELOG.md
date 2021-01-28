@@ -4,6 +4,38 @@
 
 No unreleased features
 
+* Added Expand-DeviceGroup cmdlet
+* Adding following template variables
+    * rand.index
+    * time.now
+    * time.nowNano
+
+* TODO: Create custom ConvertFrom-Json
+    * Replace ConvertFrom-Json -Depth calls in code as the default is already high enough (1024). This simpifies the code as the check for powershell version can be ignored
+* TODO: Create custom ConvertTo-Json where depth is set to 10 by default
+    * add options to strip out cumulocity noise (i.e. additionParents etc.)
+* TODO: Make -InformationVariable or at least ErrorVariable work when using IncludeAll
+* TODO: Optimized inventory queries when using the `includeAll` parameter
+    ```sh
+    $filter=_id gt '{lastId}' $orderby=_id asc
+    ```
+* TODO: Optimized other api queries by date
+    ```sh
+    $filter=creationTime.date gt '{lastDate}' $orderby=creationTime.date asc
+    ```
+
+### PSc8y improvements
+
+* The `Data` parameter now accepts a path object (System.IO.FileSystemInfo). Previously the user would have to use the .Name or .FullName of the object.
+
+    **Example**
+
+    ```powershell
+    $file = New-TemporaryFile
+    '{"name": "myName in a file"}' | Out-File $file
+    New-ManagedObject -Data $file
+    ```
+
 ## Released
 
 ### v1.11.0

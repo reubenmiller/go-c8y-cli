@@ -111,8 +111,9 @@ func NewMapBuilderFromJSON(data string) (*MapBuilder, error) {
 
 // MapBuilder creates body builder
 type MapBuilder struct {
-	body map[string]interface{}
-	file string
+	body          map[string]interface{}
+	file          string
+	TemplateIndex string
 
 	templateVariables map[string]interface{}
 	requiredKeys      []string
@@ -204,7 +205,14 @@ func (b *MapBuilder) GetTemplateVariablesJsonnet() (string, error) {
 
 	// Seed random otherwise it will not change with execution
 	rand.Seed(time.Now().UTC().UnixNano())
-	randomHelper := fmt.Sprintf(`local rand = { bool: %t, int: %d, int2: %d, float: %f, float2: %f, float3: %f, float4: %f, password: "%s" };`,
+
+	index := "1"
+	if b.TemplateIndex != "" {
+		index = b.TemplateIndex
+	}
+
+	randomHelper := fmt.Sprintf(`local rand = { index: %s, bool: %t, int: %d, int2: %d, float: %f, float2: %f, float3: %f, float4: %f, password: "%s" };`,
+		index,
 		rand.Float32() > 0.5,
 		rand.Intn(100),
 		rand.Intn(100),
@@ -214,7 +222,11 @@ func (b *MapBuilder) GetTemplateVariablesJsonnet() (string, error) {
 		rand.Float32(),
 		generatePassword(),
 	)
-	return fmt.Sprintf("\nlocal vars = %s;\n%s\n%s\n", jsonStr, varsHelper, randomHelper), nil
+	timeHelper := fmt.Sprintf(`local time = {now: "%s", nowNano: "%s"};`,
+		time.Now().Format(time.RFC3339),
+		time.Now().Format(time.RFC3339Nano),
+	)
+	return fmt.Sprintf("\nlocal vars = %s;\n%s\n%s\n%s\n", jsonStr, varsHelper, randomHelper, timeHelper), nil
 }
 
 // SetMap sets a new map to the body. This will remove any existing values in the body

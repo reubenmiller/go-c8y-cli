@@ -18,6 +18,8 @@ The following exit codes are general codes which relate to the usage of c8y comm
 |100|System Error|Unexpected error when processing a command. i.e. can not write to a file, parsing error etc.|
 |101|User Error|User/command error such as invalid arguments|
 |102|No session loaded|The user has not selected a Cumulocity session yet|
+|103|BatchAbortedWithErrors|The batched job was aborted due to too many errors|
+|104|BatchCompletedWithErrors|The batched job completed but has 1 or more errors|
 
 #### Exit code to HTTP status code errors
 
