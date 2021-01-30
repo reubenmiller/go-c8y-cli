@@ -3,6 +3,8 @@ package cmd
 import (
 	"fmt"
 
+	"github.com/reubenmiller/go-c8y-cli/pkg/annotation"
+	"github.com/reubenmiller/go-c8y-cli/pkg/mapbuilder"
 	"github.com/spf13/cobra"
 )
 
@@ -22,7 +24,10 @@ func newBatchAddDeviceToGroupCmd() *batchAddDeviceToGroupCmd {
 		Example: `
 $ c8y batch addChildDevices --group 1234 --childList mylist.csv
 Add list of children to a group
-        `,
+		`,
+		Annotations: map[string]string{
+			annotation.FlagValueFromPipeline: "inputFile",
+		},
 		PreRunE: validateBatchCreateMode,
 		RunE:    ccmd.runE,
 	}
@@ -43,5 +48,18 @@ Add list of children to a group
 
 func (n *batchAddDeviceToGroupCmd) runE(cmd *cobra.Command, args []string) error {
 	path := fmt.Sprintf("inventory/managedObjects/%s/childAssets", n.group)
-	return runTemplateOnList(cmd, "POST", path, `{"managedObject":{"id":"{id}"}}`)
+	body := mapbuilder.NewMapBuilder()
+
+	// idIter, err := FlagGetStringIterator(cmd, "inputFile")
+	idIter, err := NewFlagFileContents(cmd, "inputFile")
+	if err != nil {
+		return err
+	}
+	if err := body.Set("managedObject.id", idIter); err != nil {
+		return err
+	}
+
+	// NewFlagPipeEnabledStringSlice(cmd, "inputFile")
+	requestIter := NewBatchFixedPathRequestIterator(cmd, "POST", path, body)
+	return runTemplateOnList(cmd, requestIter)
 }

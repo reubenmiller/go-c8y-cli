@@ -33,16 +33,20 @@ func tryGetTimestampFlag(cmd *cobra.Command, name string) (string, error) {
 		return "", errors.Wrap(err, "could not read flag")
 	}
 
+	return tryGetTimestamp(val)
+}
+
+func tryGetTimestamp(value string) (string, error) {
 	// Try parsing relative timestamp
-	if ts, err := parseDurationRelativeToNow(val); err == nil {
+	if ts, err := parseDurationRelativeToNow(value); err == nil {
 		return formatC8yTimestamp(*ts), nil
 	}
 
 	// Try parsing timestamp (if valid)
-	if timestamp, err := dateparse.ParseAny(val); err == nil {
+	if timestamp, err := dateparse.ParseAny(value); err == nil {
 		return formatC8yTimestamp(timestamp), nil
 	}
 
 	// Return the date without parsing it, just encode it. If error then cumulocity will return an error
-	return encodeC8yTimestamp(val), nil
+	return encodeC8yTimestamp(value), nil
 }

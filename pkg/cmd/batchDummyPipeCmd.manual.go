@@ -1,75 +1,19 @@
 package cmd
 
 import (
-	"bufio"
+	"encoding/json"
 	"fmt"
 	"io"
-	"os"
-	"sync/atomic"
 
-	"github.com/pkg/errors"
+	"github.com/reubenmiller/go-c8y-cli/pkg/annotation"
+	"github.com/reubenmiller/go-c8y-cli/pkg/iterator"
 	"github.com/spf13/cobra"
 )
-
-type valueGenerator struct {
-	start   int64
-	end     int64
-	step    int64
-	current int64
-}
-
-func newValueGenerator(start, end, step int64) *valueGenerator {
-	return &valueGenerator{
-		start:   start,
-		end:     end,
-		step:    step,
-		current: start - 1,
-	}
-}
-
-func (p *valueGenerator) ReadBytes(delim byte) (line []byte, err error) {
-	nextValue := atomic.AddInt64(&p.current, p.step)
-	if nextValue > p.end {
-		err = io.EOF
-	} else {
-		line = []byte(fmt.Sprintf("%d%c", nextValue, delim))
-	}
-	return line, err
-}
-
-func newPipeReader() (InputIterator, error) {
-	info, err := os.Stdin.Stat()
-	if err != nil {
-		return nil, err
-	}
-
-	// if info.Mode()&os.ModeCharDevice != 0 || info.Size() <= 0 {
-	if info.Mode()&os.ModeCharDevice != 0 {
-		return nil, errors.New("No pipe line input detected")
-	}
-
-	reader := bufio.NewReader(os.Stdin)
-
-	return reader, nil
-}
-
-func newFileReader(path string) (*bufio.Reader, error) {
-	fp, err := os.Open(path)
-	if err != nil {
-		return nil, err
-	}
-	return bufio.NewReader(fp), nil
-}
 
 type batchDummyPipeCmd struct {
 	*baseCmd
 
 	inputFile string
-}
-
-type InputIterator interface {
-	ReadBytes(delim byte) (line []byte, err error)
-	//ReadString(delim byte) (line string, err error)
 }
 
 func newBatchDummyPipeCmd() *batchDummyPipeCmd {
@@ -80,7 +24,7 @@ func newBatchDummyPipeCmd() *batchDummyPipeCmd {
 		Short: "Dummy command to test piped data",
 		Long:  `Dummy command to test piped data`,
 		Annotations: map[string]string{
-			"pipedArg": "inputFile",
+			annotation.FlagValueFromPipeline: "inputFile",
 		},
 		Example: `
 $ ls -l | c8y batch dummy
@@ -104,47 +48,28 @@ Pipe a list of files to c8y
 
 func (n *batchDummyPipeCmd) runE(cmd *cobra.Command, args []string) error {
 
-	var buf InputIterator
-	var err error
-
-	buf, err = newPipeReader()
+	iter, err := FlagGetFileIterator(cmd, "inputFile")
 	if err != nil {
-		Logger.Debug("No pipeline input detected")
-		if cmd.Flags().Changed("inputFile") {
-			fmt.Println("Reading from file")
-			// fill data from file
-			pathValue, err := cmd.Flags().GetString("inputFile")
-			if err != nil {
-				return err
-			}
-			buf, err = newFileReader(pathValue)
-			if err != nil {
-				return err
-			}
-		}
-	} else {
-		fmt.Printf("PIPED Input:\n")
+		return err
 	}
 
-	// buf = newValueGenerator(1, 10, 1)
-
-	// if cmd.Flags().Changed("inputFile") {
-	// 	buf, err = newPipeReader()
-	// 	if err != nil {
-	// 		Logger.Debug("No pipeline input detected")
-	// 	} else {
-	// 		fmt.Printf("PIPED Input:\n")
-	// 	}
-	// }
+	// iter = iterator.NewRangeIterator(1, 100, 1)
 
 	// path := fmt.Sprintf("inventory/managedObjects/%s/childAssets", n.group)
 	// return runTemplateOnList(cmd, "POST", path, `{"managedObject":{"id":"{id}"}}`)
-	return n.processE(cmd, buf)
+	return n.processE(cmd, iter)
 }
 
-func (n *batchDummyPipeCmd) processE(cmd *cobra.Command, input InputIterator) error {
+func (n *batchDummyPipeCmd) processE(cmd *cobra.Command, iter iterator.Iterator) error {
+	data := make(map[string]interface{}, 0)
+	data["test"] = iter
+	if out, err := json.Marshal(data); err == nil {
+		fmt.Printf("Iter to json: %s\n", out)
+	} else {
+		fmt.Printf("json error: %s\n", err)
+	}
 	for {
-		line, err := input.ReadBytes('\n')
+		line, err := iter.GetNext()
 		if err != nil {
 			if err == io.EOF {
 				break
@@ -154,8 +79,62 @@ func (n *batchDummyPipeCmd) processE(cmd *cobra.Command, input InputIterator) er
 		}
 
 		fmt.Printf("line: %s", line)
-
 	}
 	fmt.Println("input finished")
 	return nil
+}
+
+// FlagGetStringIterator returns an iterator from a command flag
+func FlagGetStringIterator(cmd *cobra.Command, name string) (iterator.Iterator, error) {
+	var iter iterator.Iterator
+	var err error
+
+	iter = &iterator.EmptyIterator{}
+
+	if cmd.Flags().Changed(name) {
+		// user is using flags (ignore piped input)
+		Logger.Info("Reading from arguments")
+
+		values, err := cmd.Flags().GetStringSlice(name)
+		if err != nil {
+			return nil, err
+		}
+		iter = iterator.NewSliceIterator(values)
+	} else {
+		// check stdin for data
+		iter, err = iterator.NewPipeIterator()
+		if err != nil && err != iterator.ErrNoPipeInput {
+			return nil, err
+		}
+	}
+	return iter, nil
+}
+
+// FlagGetFileIterator returns an iterator from a command flag
+func FlagGetFileIterator(cmd *cobra.Command, name string) (iterator.Iterator, error) {
+	var iter iterator.Iterator
+	var err error
+
+	iter = &iterator.EmptyIterator{}
+
+	if cmd.Flags().Changed(name) {
+		// user is using flags (ignore piped input)
+		Logger.Info("Reading from file")
+
+		pathValue, err := cmd.Flags().GetString(name)
+		if err != nil {
+			return nil, err
+		}
+		iter, err = iterator.NewFileContentsIterator(pathValue)
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		// check stdin for data
+		iter, err = iterator.NewPipeIterator()
+		if err != nil && err != iterator.ErrNoPipeInput {
+			return nil, err
+		}
+	}
+	return iter, nil
 }

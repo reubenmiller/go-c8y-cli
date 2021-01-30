@@ -2,12 +2,13 @@ package cmd
 
 import (
 	"encoding/csv"
+	"errors"
 	"fmt"
 	"io"
-	"net/http"
 	"os"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/reubenmiller/go-c8y-cli/pkg/mapbuilder"
@@ -23,12 +24,12 @@ type RequestTemplater interface {
 type TemplateGenerator struct {
 	cmd  *cobra.Command
 	Path string
-	Body string
+	Body map[string]interface{}
 
 	GetCustomBody func(string) (map[string]interface{}, error)
 }
 
-func newTemplateGenerator(cmd *cobra.Command, path string, body string) *TemplateGenerator {
+func newTemplateGenerator(cmd *cobra.Command, path string, body map[string]interface{}) *TemplateGenerator {
 	return &TemplateGenerator{
 		cmd:  cmd,
 		Path: path,
@@ -37,43 +38,10 @@ func newTemplateGenerator(cmd *cobra.Command, path string, body string) *Templat
 }
 
 func (n *TemplateGenerator) GetBody(i string) (interface{}, error) {
-	// if n.Body != "" {
-	// 	body, err := n.GetStringBody(i)
-	// 	if err != nil {
-	// 		return "", err
-	// 	}
-	// 	bodyMap := make(map[string]interface{})
-	// 	if err := json.Unmarshal([]byte(body), &bodyMap); err != nil {
-	// 		return "", err
-	// 	}
-	// 	return bodyMap, nil
-	// }
-	return n.GetTemplateBody(i)
-}
-
-func (n *TemplateGenerator) GetStringBody(i string) (string, error) {
-
-	pathParameters := make(map[string]string)
-	pathParameters["id"] = i
-	return replacePathParameters(n.Body, pathParameters), nil
-}
-
-func (n *TemplateGenerator) GetTemplateBody(i string) (map[string]interface{}, error) {
-	// body
 	body := mapbuilder.NewMapBuilder()
 
-	body.TemplateIndex = i
-	body.SetMap(getDataFlag(n.cmd))
-
-	// TODO: merge a fixed body
-	if n.Body != "" {
-		fixedBody, err := n.GetStringBody(i)
-		if err != nil {
-			return nil, err
-		}
-		if err := body.MergeJsonnet(fixedBody, false); err != nil {
-			return nil, err
-		}
+	if n.Body != nil {
+		body.SetMap(n.Body)
 	}
 
 	if err := setDataTemplateFromFlags(n.cmd, body); err != nil {
@@ -82,7 +50,7 @@ func (n *TemplateGenerator) GetTemplateBody(i string) (map[string]interface{}, e
 	if err := body.Validate(); err != nil {
 		return nil, newUserError("Body validation error. ", err)
 	}
-	return body.GetMap(), nil
+	return body, nil
 }
 
 func (n *TemplateGenerator) GetPath(i string) (string, error) {
@@ -127,53 +95,78 @@ func (b *BatchOptions) useInputData() bool {
 	return b.InputData != nil && len(b.InputData) > 0
 }
 
-func (b *BatchOptions) GetJobsTotal() int {
-	if b.InputData != nil && len(b.InputData) > 0 {
-		return len(b.InputData)
-	}
-	return b.NumJobs
-}
-
-func runBatched(templater *TemplateGenerator, req c8y.RequestOptions, commonOptions CommonCommandOptions, batchOptions BatchOptions) error {
+func runBatched(requestIterator *RequestIterator, commonOptions CommonCommandOptions, batchOptions BatchOptions) error {
 	// Two channels - to send them work and to collect their results.
-	totalJobs := batchOptions.GetJobsTotal()
-	totalWorkers := batchOptions.TotalWorkers
+	// buffer size does not really matter, it just needs to be high
+	// enough not to block the workers
 
-	jobs := make(chan batchArgument, totalJobs)
-	results := make(chan error, totalJobs)
+	// TODO: how to detect when request iterator is finished when using the body iterator (total number of requests?)
+	jobs := make(chan batchArgument, 3)
+	results := make(chan error, 100)
+	workers := sync.WaitGroup{}
 
-	// This starts up 3 workers, initially blocked because there are no jobs yet.
-	for w := 1; w <= totalWorkers; w++ {
-		go batchWorker(w, templater, jobs, results)
+	for w := 1; w <= batchOptions.TotalWorkers; w++ {
+		Logger.Infof("Starting worker: %d", w)
+		workers.Add(1)
+		go batchWorker(w, jobs, results, &workers)
 	}
 
-	for {
-		value, err := batchOptions.GetItem()
-		if err != nil {
-			break
+	jobID := int64(0)
+
+	// add jobs async
+	go func() {
+		defer close(jobs)
+		for {
+			jobID++
+			Logger.Infof("Checking job iterator: %d", jobID)
+
+			request, err := requestIterator.GetNext()
+
+			if err != nil {
+				if !errors.Is(err, io.EOF) {
+					Logger.Warningf("request iterator: unexpected error. err=%s", err)
+				}
+				break
+			}
+			Logger.Infof("Adding job: %d", jobID)
+
+			jobs <- batchArgument{
+				id:            jobID,
+				batchOptions:  batchOptions,
+				request:       *request,
+				commonOptions: commonOptions,
+			}
 		}
-		jobs <- batchArgument{
-			id:            value,
-			batchOptions:  batchOptions,
-			request:       req,
-			commonOptions: commonOptions,
-		}
-	}
-	close(jobs)
+
+		Logger.Info("Finished adding jobs")
+	}()
 
 	// collect all the results of the work.
 	totalErrors := make([]error, 0)
 
-	for a := 1; a <= totalJobs; a++ {
-		if err := <-results; err != nil {
+	// close the results when the works are finished, but don't block reading the results
+	go func() {
+		workers.Wait()
+		close(results)
+	}()
+
+	for err := range results {
+		Logger.Infof("Reading job result: %s", err)
+		if err != nil && err != io.EOF {
 			totalErrors = append(totalErrors, err)
 		}
+		// exit early
 		if batchOptions.AbortOnErrorCount != 0 && len(totalErrors) >= batchOptions.AbortOnErrorCount {
+			close(results)
 			return newUserErrorWithExitCode(103, fmt.Sprintf("aborted batch as error count has been exceeded. totalErrors=%d", batchOptions.AbortOnErrorCount))
 		}
 	}
+
 	if total := len(totalErrors); total > 0 {
-		return newUserErrorWithExitCode(104, fmt.Sprintf("batch completed with %d errors", total))
+		if total > 1 {
+			return newUserErrorWithExitCode(104, fmt.Sprintf("batch completed with %d errors", total))
+		}
+		return newUserErrorWithExitCode(104, fmt.Sprintf("batch completed with %d error", total))
 	}
 	return nil
 }
@@ -210,7 +203,7 @@ func getBatchOptions(cmd *cobra.Command) (*BatchOptions, error) {
 }
 
 type batchArgument struct {
-	id            string
+	id            int64
 	request       c8y.RequestOptions
 	commonOptions CommonCommandOptions
 	batchOptions  BatchOptions
@@ -218,42 +211,33 @@ type batchArgument struct {
 
 // These workers will receive work on the `jobs` channel and send the corresponding
 // results on `results`
-func batchWorker(id int, template *TemplateGenerator, jobs <-chan batchArgument, results chan<- error) {
+func batchWorker(id int, jobs <-chan batchArgument, results chan<- error, wg *sync.WaitGroup) {
+
+	defer wg.Done()
 	for job := range jobs {
-		Logger.Infof("worker %d: started job %s", id, job.id)
+		Logger.Infof("worker %d: started job %d", id, job.id)
 		startTime := time.Now().UnixNano()
 
-		currentRequest := job.request
-
-		if body, err := template.GetBody(job.id); err == nil {
-			currentRequest.Body = body
-		} else {
-			Logger.Errorf("error parsing template. %s", err)
-			results <- err
-			continue
-		}
-
-		if path, err := template.GetPath(job.id); err == nil {
-			currentRequest.Path = path
-		}
-
-		err := processRequestAndResponse([]c8y.RequestOptions{currentRequest}, job.commonOptions)
-
+		err := processRequestAndResponse([]c8y.RequestOptions{job.request}, job.commonOptions)
 		elapsedMS := (time.Now().UnixNano() - startTime) / 1000.0 / 1000.0
 
-		Logger.Infof("worker %d: finished job %s in %dms", id, job.id, elapsedMS)
-		if job.batchOptions.Delay > 0 {
+		Logger.Infof("worker %d: finished job %d in %dms", id, job.id, elapsedMS)
+
+		// return result before delay, so errors can be handled before the sleep
+		results <- err
+
+		// Skip delay if end of work
+		if !errors.Is(err, io.EOF) && job.batchOptions.Delay > 0 {
 			Logger.Infof("worker %d: sleeping %dms before fetching next job", id, job.batchOptions.Delay)
 			time.Sleep(time.Duration(job.batchOptions.Delay) * time.Millisecond)
 		}
-		results <- err
 	}
 }
 
 func addBatchFlags(cmd *cobra.Command, acceptInputFile bool) {
 	if acceptInputFile {
 		cmd.Flags().String("inputFile", "", "Input file of ids to add to processed (required)")
-		cmd.MarkFlagRequired("inputFile")
+		// cmd.MarkFlagRequired("inputFile")
 	}
 	cmd.Flags().Int("abortOnErrors", 10, "Abort batch when reaching specified number of errors")
 	cmd.Flags().Int("count", 5, "Total number of objects")
@@ -262,46 +246,19 @@ func addBatchFlags(cmd *cobra.Command, acceptInputFile bool) {
 	cmd.Flags().Int("workers", 2, "Number of workers")
 }
 
-func runTemplateOnList(cmd *cobra.Command, method, path string, body string) error {
+func runTemplateOnList(cmd *cobra.Command, requestIterator *RequestIterator) error {
 
 	commonOptions, err := getCommonOptions(cmd)
 	if err != nil {
 		return newUserError(fmt.Sprintf("Failed to get common options. err=%s", err))
 	}
 
-	// headers
-	headers := http.Header{}
-	if cmd.Flags().Changed("processingMode") {
-		if v, err := cmd.Flags().GetString("processingMode"); err == nil && v != "" {
-			headers.Add("X-Cumulocity-Processing-Mode", v)
-		}
-	}
-
-	req := c8y.RequestOptions{
-		Method:       method,
-		Header:       headers,
-		IgnoreAccept: false,
-		DryRun:       globalFlagDryRun,
-	}
-
-	templator := newTemplateGenerator(cmd, path, body)
 	batchOptions, err := getBatchOptions(cmd)
 	if err != nil {
 		return err
 	}
 
-	if cmd.Flags().Changed("inputFile") {
-
-		if v, err := cmd.Flags().GetString("inputFile"); err == nil && v != "" {
-			items, err := readFile(v)
-			if err != nil {
-				return err
-			}
-			batchOptions.InputData = items
-		}
-	}
-
-	return runBatched(templator, req, commonOptions, *batchOptions)
+	return runBatched(requestIterator, commonOptions, *batchOptions)
 }
 
 func readFile(filepath string) ([]string, error) {

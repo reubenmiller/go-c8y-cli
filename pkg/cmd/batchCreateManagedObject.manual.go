@@ -1,6 +1,8 @@
 package cmd
 
 import (
+	"github.com/reubenmiller/go-c8y-cli/pkg/iterator"
+	"github.com/reubenmiller/go-c8y-cli/pkg/mapbuilder"
 	"github.com/spf13/cobra"
 )
 
@@ -40,5 +42,17 @@ Create a managed object
 }
 
 func (n *batchCreateManagedObjectCmd) runE(cmd *cobra.Command, args []string) error {
-	return runTemplateOnList(cmd, "POST", "inventory/managedObjects", "")
+	// return fmt.Errorf("not implemented")
+	body := mapbuilder.NewMapBuilder()
+	body.SetEmptyMap()
+	setLazyDataTemplateFromFlags(cmd, body)
+	body.Set("time", NewRelativeTimeIterator("0s"))
+	body.TemplateIterator = iterator.NewRangeIterator(1, 5, 1)
+
+	Logger.Info("Batching mo requests")
+	pathIter := iterator.NewRepeatIterator("inventory/managedObjects", 0)
+
+	requestIter := NewBatchPathRequestIterator(
+		cmd, "POST", pathIter, body)
+	return runTemplateOnList(cmd, requestIter)
 }

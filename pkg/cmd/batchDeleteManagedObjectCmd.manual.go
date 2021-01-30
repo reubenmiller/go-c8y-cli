@@ -1,6 +1,8 @@
 package cmd
 
 import (
+	"fmt"
+
 	"github.com/spf13/cobra"
 )
 
@@ -36,5 +38,6 @@ Delete a list of managed objects using 5 workers
 }
 
 func (n *batchDeleteManagedObjectCmd) runE(cmd *cobra.Command, args []string) error {
-	return runTemplateOnList(cmd, "DELETE", "inventory/managedObjects/{id}", "")
+	return fmt.Errorf("not implemented")
+	// return runTemplateOnList(cmd, "DELETE", "inventory/managedObjects/{id}", "")
 }

@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/google/go-jsonnet"
+	"github.com/reubenmiller/go-c8y-cli/pkg/iterator"
 	"github.com/sethvargo/go-password/password"
 )
 
@@ -111,14 +112,16 @@ func NewMapBuilderFromJSON(data string) (*MapBuilder, error) {
 
 // MapBuilder creates body builder
 type MapBuilder struct {
-	body          map[string]interface{}
-	file          string
-	TemplateIndex string
+	body             map[string]interface{}
+	file             string
+	TemplateIterator iterator.Iterator
 
-	templateVariables map[string]interface{}
-	requiredKeys      []string
-	template          string
-	validateTemplate  string
+	templateVariables     map[string]interface{}
+	requiredKeys          []string
+	template              string
+	validateTemplate      string
+	autoApplyTemplate     bool
+	reverseTempateDefault bool
 }
 
 func (b *MapBuilder) SetTemplate(template string) *MapBuilder {
@@ -126,8 +129,23 @@ func (b *MapBuilder) SetTemplate(template string) *MapBuilder {
 	return b
 }
 
-func (b *MapBuilder) ApplyTemplate(reverse bool) error {
-	return b.MergeJsonnet(b.template, reverse)
+func (b *MapBuilder) SetApplyTemplateOnMarshalPreference(value bool) *MapBuilder {
+	b.autoApplyTemplate = value
+	return b
+}
+
+// SetEmptyMap sets the body to an empty map. It will override an existing body
+func (b *MapBuilder) SetEmptyMap() *MapBuilder {
+	b.body = map[string]interface{}{}
+	return b
+}
+
+func (b *MapBuilder) ApplyTemplate(reverse ...bool) error {
+	value := b.reverseTempateDefault
+	if len(reverse) > 0 {
+		value = reverse[0]
+	}
+	return b.MergeJsonnet(b.template, value)
 }
 
 // MergeJsonnet merges the existing body data with a given jsonnet snippet.
@@ -138,7 +156,7 @@ func (b *MapBuilder) MergeJsonnet(snippet string, reverse bool) error {
 	existingJSON := []byte("{}")
 
 	if b.body != nil {
-		existingJSON, err = b.MarshalJSON()
+		existingJSON, err = json.Marshal(b.body)
 		if err != nil {
 			return fmt.Errorf("failed to marshal existing map data to json. %w", err)
 		}
@@ -207,8 +225,13 @@ func (b *MapBuilder) GetTemplateVariablesJsonnet() (string, error) {
 	rand.Seed(time.Now().UTC().UnixNano())
 
 	index := "1"
-	if b.TemplateIndex != "" {
-		index = b.TemplateIndex
+
+	if b.TemplateIterator != nil {
+		nextIndex, err := b.TemplateIterator.GetNext()
+		if err != nil {
+			return "", err
+		}
+		index = string(nextIndex)
 	}
 
 	randomHelper := fmt.Sprintf(`local rand = { index: %s, bool: %t, int: %d, int2: %d, float: %f, float2: %f, float3: %f, float4: %f, password: "%s" };`,
@@ -314,7 +337,14 @@ func (b MapBuilder) Validate() error {
 // MarshalJSON returns the body as json
 func (b MapBuilder) MarshalJSON() ([]byte, error) {
 	if b.body == nil {
+		// should return empty object? or add as option?
+		// return []byte("{}"), nil
 		return nil, errors.New("body is uninitialized")
+	}
+	if b.autoApplyTemplate {
+		if err := b.ApplyTemplate(); err != nil {
+			return nil, err
+		}
 	}
 	return json.Marshal(b.body)
 }

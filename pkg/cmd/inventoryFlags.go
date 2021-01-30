@@ -175,6 +175,34 @@ func setDataTemplateFromFlags(cmd *cobra.Command, body *mapbuilder.MapBuilder) e
 	return nil
 }
 
+// setLazyDataTemplateFromFlags sets template data to the body however it does not execute
+// the template variables
+func setLazyDataTemplateFromFlags(cmd *cobra.Command, body *mapbuilder.MapBuilder) error {
+	body.SetApplyTemplateOnMarshalPreference(true)
+	if !cmd.Flags().Changed(FlagDataTemplateName) {
+		return nil
+	}
+
+	if value, err := cmd.Flags().GetString(FlagDataTemplateVariablesName); err == nil {
+		content := getContents(value)
+		Logger.Infof("Template variables: %s\n", content)
+		body.SetTemplateVariables(MustParseJSON(content))
+	}
+
+	if value, err := cmd.Flags().GetString(FlagDataTemplateName); err == nil {
+
+		if fullFilePath, err := resolveTemplatePath(value); err == nil {
+			Logger.Infof("Template file: %s", fullFilePath)
+			value = fullFilePath
+		}
+
+		contents := getContents(value)
+		body.SetTemplate(contents)
+	}
+
+	return nil
+}
+
 // getContents checks whether the given string is a file reference if so it returns the contents, otherwise it returns the
 // input value as is
 func getContents(content string) string {

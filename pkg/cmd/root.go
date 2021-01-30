@@ -162,6 +162,7 @@ var (
 	globalFlagWithTotalPages     bool
 	globalFlagPrettyPrint        bool
 	globalFlagDryRun             bool
+	globalFlagIgnoreAccept       bool
 	globalFlagNoColor            bool
 	globalFlagSessionFile        string
 	globalFlagConfigFile         string
