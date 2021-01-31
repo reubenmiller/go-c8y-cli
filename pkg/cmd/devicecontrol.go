@@ -28,11 +28,11 @@ func newDeviceControlCmd() *deviceControlCmd {
 	}
 
 	// Subcommands
-	cmd.AddCommand(newGetOperationCmd().getCommand())
-	cmd.AddCommand(newGetOperationCollectionCmd().getCommand())
-	cmd.AddCommand(newNewOperationCmd().getCommand())
-	cmd.AddCommand(newDeleteOperationCollectionCmd().getCommand())
-	cmd.AddCommand(newUpdateOperationCmd().getCommand())
+	cmd.AddCommand(NewGetOperationCmd().getCommand())
+	cmd.AddCommand(NewGetOperationCollectionCmd().getCommand())
+	cmd.AddCommand(NewNewOperationCmd().getCommand())
+	cmd.AddCommand(NewDeleteOperationCollectionCmd().getCommand())
+	cmd.AddCommand(NewUpdateOperationCmd().getCommand())
 
 	ccmd.baseCmd = newBaseCmd(cmd)
 

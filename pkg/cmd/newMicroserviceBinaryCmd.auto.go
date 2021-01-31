@@ -7,18 +7,19 @@ import (
 	"net/http"
 	"net/url"
 
+	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/pkg/mapbuilder"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
 )
 
-type newMicroserviceBinaryCmd struct {
+type NewMicroserviceBinaryCmd struct {
 	*baseCmd
 }
 
-func newNewMicroserviceBinaryCmd() *newMicroserviceBinaryCmd {
-	ccmd := &newMicroserviceBinaryCmd{}
-
+func NewNewMicroserviceBinaryCmd() *NewMicroserviceBinaryCmd {
+	var _ = fmt.Errorf
+	ccmd := &NewMicroserviceBinaryCmd{}
 	cmd := &cobra.Command{
 		Use:   "createBinary",
 		Short: "Create/upload a new microservice binary",
@@ -33,17 +34,21 @@ $ c8y microservices createBinary --id 12345 --file ./helloworld.zip
 Upload microservice binary
         `,
 		PreRunE: validateCreateMode,
-		RunE:    ccmd.newMicroserviceBinary,
+		RunE:    ccmd.RunE,
 	}
 
 	cmd.SilenceUsage = true
 
-	cmd.Flags().String("id", "", "Microservice id (required)")
+	cmd.Flags().String("id", "", "Microservice id (required) (accepts pipeline)")
 	cmd.Flags().String("file", "", "File to be uploaded as a binary (required)")
 	addProcessingModeFlag(cmd)
 
+	flags.WithOptions(
+		cmd,
+		flags.WithPipelineSupport("id"),
+	)
+
 	// Required flags
-	cmd.MarkFlagRequired("id")
 	cmd.MarkFlagRequired("file")
 
 	ccmd.baseCmd = newBaseCmd(cmd)
@@ -51,16 +56,19 @@ Upload microservice binary
 	return ccmd
 }
 
-func (n *newMicroserviceBinaryCmd) newMicroserviceBinary(cmd *cobra.Command, args []string) error {
-
-	commonOptions, err := getCommonOptions(cmd)
-	if err != nil {
-		return newUserError(fmt.Sprintf("Failed to get common options. err=%s", err))
-	}
-
+func (n *NewMicroserviceBinaryCmd) RunE(cmd *cobra.Command, args []string) error {
 	// query parameters
 	queryValue := url.QueryEscape("")
 	query := url.Values{}
+
+	err := flags.WithQueryOptions(
+		cmd,
+		query,
+	)
+	if err != nil {
+		return newUserError(err)
+	}
+
 	queryValue, err = url.QueryUnescape(query.Encode())
 
 	if err != nil {
@@ -79,7 +87,7 @@ func (n *newMicroserviceBinaryCmd) newMicroserviceBinary(cmd *cobra.Command, arg
 	formData := make(map[string]io.Reader)
 
 	// body
-	body := mapbuilder.NewMapBuilder()
+	body := mapbuilder.NewInitializedMapBuilder()
 	body.SetMap(getDataFlag(cmd))
 	getFileFlag(cmd, "file", true, formData)
 	if err := setDataTemplateFromFlags(cmd, body); err != nil {
@@ -91,23 +99,6 @@ func (n *newMicroserviceBinaryCmd) newMicroserviceBinary(cmd *cobra.Command, arg
 
 	// path parameters
 	pathParameters := make(map[string]string)
-	if cmd.Flags().Lookup("id") != nil {
-		idInputValues, idValue, err := getMicroserviceSlice(cmd, args, "id")
-
-		if err != nil {
-			return newUserError("no matching microservices found", idInputValues, err)
-		}
-
-		if len(idValue) == 0 {
-			return newUserError("no matching microservices found", idInputValues)
-		}
-
-		for _, item := range idValue {
-			if item != "" {
-				pathParameters["id"] = newIDValue(item).GetID()
-			}
-		}
-	}
 
 	path := replacePathParameters("/application/applications/{id}/binaries", pathParameters)
 
@@ -122,5 +113,5 @@ func (n *newMicroserviceBinaryCmd) newMicroserviceBinary(cmd *cobra.Command, arg
 		DryRun:       globalFlagDryRun,
 	}
 
-	return processRequestAndResponse([]c8y.RequestOptions{req}, commonOptions)
+	return processRequestAndResponseWithWorkers(cmd, &req, "id")
 }

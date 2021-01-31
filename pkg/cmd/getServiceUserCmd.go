@@ -12,7 +12,7 @@ type getServiceUserCmd struct {
 	*baseCmd
 }
 
-func newGetServiceUserCmd() *getServiceUserCmd {
+func NewGetServiceUserCmd() *getServiceUserCmd {
 	ccmd := &getServiceUserCmd{}
 
 	cmd := &cobra.Command{

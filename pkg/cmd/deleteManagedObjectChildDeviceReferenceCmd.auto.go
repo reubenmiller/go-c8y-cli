@@ -7,18 +7,19 @@ import (
 	"net/http"
 	"net/url"
 
+	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/pkg/mapbuilder"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
 )
 
-type deleteManagedObjectChildDeviceReferenceCmd struct {
+type DeleteManagedObjectChildDeviceReferenceCmd struct {
 	*baseCmd
 }
 
-func newDeleteManagedObjectChildDeviceReferenceCmd() *deleteManagedObjectChildDeviceReferenceCmd {
-	ccmd := &deleteManagedObjectChildDeviceReferenceCmd{}
-
+func NewDeleteManagedObjectChildDeviceReferenceCmd() *DeleteManagedObjectChildDeviceReferenceCmd {
+	var _ = fmt.Errorf
+	ccmd := &DeleteManagedObjectChildDeviceReferenceCmd{}
 	cmd := &cobra.Command{
 		Use:   "unassignChildDevice",
 		Short: "Delete child device reference",
@@ -28,17 +29,21 @@ $ c8y inventoryReferences unassignChildDevice --device 12345 --childDevice 22553
 Unassign a child device from its parent device
         `,
 		PreRunE: validateDeleteMode,
-		RunE:    ccmd.deleteManagedObjectChildDeviceReference,
+		RunE:    ccmd.RunE,
 	}
 
 	cmd.SilenceUsage = true
 
-	cmd.Flags().StringSlice("device", []string{""}, "ManagedObject id (required)")
+	cmd.Flags().StringSlice("device", []string{""}, "ManagedObject id (required) (accepts pipeline)")
 	cmd.Flags().StringSlice("childDevice", []string{""}, "Child device reference (required)")
 	addProcessingModeFlag(cmd)
 
+	flags.WithOptions(
+		cmd,
+		flags.WithPipelineSupport("device"),
+	)
+
 	// Required flags
-	cmd.MarkFlagRequired("device")
 	cmd.MarkFlagRequired("childDevice")
 
 	ccmd.baseCmd = newBaseCmd(cmd)
@@ -46,16 +51,19 @@ Unassign a child device from its parent device
 	return ccmd
 }
 
-func (n *deleteManagedObjectChildDeviceReferenceCmd) deleteManagedObjectChildDeviceReference(cmd *cobra.Command, args []string) error {
-
-	commonOptions, err := getCommonOptions(cmd)
-	if err != nil {
-		return newUserError(fmt.Sprintf("Failed to get common options. err=%s", err))
-	}
-
+func (n *DeleteManagedObjectChildDeviceReferenceCmd) RunE(cmd *cobra.Command, args []string) error {
 	// query parameters
 	queryValue := url.QueryEscape("")
 	query := url.Values{}
+
+	err := flags.WithQueryOptions(
+		cmd,
+		query,
+	)
+	if err != nil {
+		return newUserError(err)
+	}
+
 	queryValue, err = url.QueryUnescape(query.Encode())
 
 	if err != nil {
@@ -74,27 +82,10 @@ func (n *deleteManagedObjectChildDeviceReferenceCmd) deleteManagedObjectChildDev
 	formData := make(map[string]io.Reader)
 
 	// body
-	body := mapbuilder.NewMapBuilder()
+	body := mapbuilder.NewInitializedMapBuilder()
 
 	// path parameters
 	pathParameters := make(map[string]string)
-	if cmd.Flags().Changed("device") {
-		deviceInputValues, deviceValue, err := getFormattedDeviceSlice(cmd, args, "device")
-
-		if err != nil {
-			return newUserError("no matching devices found", deviceInputValues, err)
-		}
-
-		if len(deviceValue) == 0 {
-			return newUserError("no matching devices found", deviceInputValues)
-		}
-
-		for _, item := range deviceValue {
-			if item != "" {
-				pathParameters["device"] = newIDValue(item).GetID()
-			}
-		}
-	}
 	if cmd.Flags().Changed("childDevice") {
 		childDeviceInputValues, childDeviceValue, err := getFormattedDeviceSlice(cmd, args, "childDevice")
 
@@ -126,5 +117,5 @@ func (n *deleteManagedObjectChildDeviceReferenceCmd) deleteManagedObjectChildDev
 		DryRun:       globalFlagDryRun,
 	}
 
-	return processRequestAndResponse([]c8y.RequestOptions{req}, commonOptions)
+	return processRequestAndResponseWithWorkers(cmd, &req, "device")
 }

@@ -7,18 +7,19 @@ import (
 	"net/http"
 	"net/url"
 
+	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/pkg/mapbuilder"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
 )
 
-type newTenantCmd struct {
+type NewTenantCmd struct {
 	*baseCmd
 }
 
-func newNewTenantCmd() *newTenantCmd {
-	ccmd := &newTenantCmd{}
-
+func NewNewTenantCmd() *NewTenantCmd {
+	var _ = fmt.Errorf
+	ccmd := &NewTenantCmd{}
 	cmd := &cobra.Command{
 		Use:   "create",
 		Short: "New tenant",
@@ -28,7 +29,7 @@ $ c8y tenants create --company "mycompany" --domain "mycompany" --adminName "adm
 Create a new tenant (from the management tenant)
         `,
 		PreRunE: validateCreateMode,
-		RunE:    ccmd.newTenant,
+		RunE:    ccmd.RunE,
 	}
 
 	cmd.SilenceUsage = true
@@ -43,6 +44,11 @@ Create a new tenant (from the management tenant)
 	addDataFlag(cmd)
 	addProcessingModeFlag(cmd)
 
+	flags.WithOptions(
+		cmd,
+		flags.WithPipelineSupport(""),
+	)
+
 	// Required flags
 	cmd.MarkFlagRequired("company")
 	cmd.MarkFlagRequired("domain")
@@ -52,16 +58,19 @@ Create a new tenant (from the management tenant)
 	return ccmd
 }
 
-func (n *newTenantCmd) newTenant(cmd *cobra.Command, args []string) error {
-
-	commonOptions, err := getCommonOptions(cmd)
-	if err != nil {
-		return newUserError(fmt.Sprintf("Failed to get common options. err=%s", err))
-	}
-
+func (n *NewTenantCmd) RunE(cmd *cobra.Command, args []string) error {
 	// query parameters
 	queryValue := url.QueryEscape("")
 	query := url.Values{}
+
+	err := flags.WithQueryOptions(
+		cmd,
+		query,
+	)
+	if err != nil {
+		return newUserError(err)
+	}
+
 	queryValue, err = url.QueryUnescape(query.Encode())
 
 	if err != nil {
@@ -80,7 +89,7 @@ func (n *newTenantCmd) newTenant(cmd *cobra.Command, args []string) error {
 	formData := make(map[string]io.Reader)
 
 	// body
-	body := mapbuilder.NewMapBuilder()
+	body := mapbuilder.NewInitializedMapBuilder()
 	body.SetMap(getDataFlag(cmd))
 	if v, err := cmd.Flags().GetString("company"); err == nil {
 		if v != "" {
@@ -154,5 +163,5 @@ func (n *newTenantCmd) newTenant(cmd *cobra.Command, args []string) error {
 		DryRun:       globalFlagDryRun,
 	}
 
-	return processRequestAndResponse([]c8y.RequestOptions{req}, commonOptions)
+	return processRequestAndResponseWithWorkers(cmd, &req, "")
 }

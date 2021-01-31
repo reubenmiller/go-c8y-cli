@@ -7,18 +7,19 @@ import (
 	"net/http"
 	"net/url"
 
+	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/pkg/mapbuilder"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
 )
 
-type deleteEventCollectionCmd struct {
+type DeleteEventCollectionCmd struct {
 	*baseCmd
 }
 
-func newDeleteEventCollectionCmd() *deleteEventCollectionCmd {
-	ccmd := &deleteEventCollectionCmd{}
-
+func NewDeleteEventCollectionCmd() *DeleteEventCollectionCmd {
+	var _ = fmt.Errorf
+	ccmd := &DeleteEventCollectionCmd{}
 	cmd := &cobra.Command{
 		Use:   "deleteCollection",
 		Short: "Delete a collection of events",
@@ -31,7 +32,7 @@ $ c8y events deleteCollection --device mydevice
 Remove events from a device
         `,
 		PreRunE: validateDeleteMode,
-		RunE:    ccmd.deleteEventCollection,
+		RunE:    ccmd.RunE,
 	}
 
 	cmd.SilenceUsage = true
@@ -44,6 +45,11 @@ Remove events from a device
 	cmd.Flags().Bool("revert", false, "Return the newest instead of the oldest events. Must be used with dateFrom and dateTo parameters")
 	addProcessingModeFlag(cmd)
 
+	flags.WithOptions(
+		cmd,
+		flags.WithPipelineSupport(""),
+	)
+
 	// Required flags
 
 	ccmd.baseCmd = newBaseCmd(cmd)
@@ -51,13 +57,7 @@ Remove events from a device
 	return ccmd
 }
 
-func (n *deleteEventCollectionCmd) deleteEventCollection(cmd *cobra.Command, args []string) error {
-
-	commonOptions, err := getCommonOptions(cmd)
-	if err != nil {
-		return newUserError(fmt.Sprintf("Failed to get common options. err=%s", err))
-	}
-
+func (n *DeleteEventCollectionCmd) RunE(cmd *cobra.Command, args []string) error {
 	// query parameters
 	queryValue := url.QueryEscape("")
 	query := url.Values{}
@@ -113,6 +113,15 @@ func (n *deleteEventCollectionCmd) deleteEventCollection(cmd *cobra.Command, arg
 			return newUserError("Flag does not exist")
 		}
 	}
+
+	err := flags.WithQueryOptions(
+		cmd,
+		query,
+	)
+	if err != nil {
+		return newUserError(err)
+	}
+
 	queryValue, err = url.QueryUnescape(query.Encode())
 
 	if err != nil {
@@ -131,7 +140,7 @@ func (n *deleteEventCollectionCmd) deleteEventCollection(cmd *cobra.Command, arg
 	formData := make(map[string]io.Reader)
 
 	// body
-	body := mapbuilder.NewMapBuilder()
+	body := mapbuilder.NewInitializedMapBuilder()
 
 	// path parameters
 	pathParameters := make(map[string]string)
@@ -149,5 +158,5 @@ func (n *deleteEventCollectionCmd) deleteEventCollection(cmd *cobra.Command, arg
 		DryRun:       globalFlagDryRun,
 	}
 
-	return processRequestAndResponse([]c8y.RequestOptions{req}, commonOptions)
+	return processRequestAndResponseWithWorkers(cmd, &req, "")
 }

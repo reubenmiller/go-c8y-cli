@@ -7,18 +7,19 @@ import (
 	"net/http"
 	"net/url"
 
+	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/pkg/mapbuilder"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
 )
 
-type disableApplicationFromTenantCmd struct {
+type DisableApplicationFromTenantCmd struct {
 	*baseCmd
 }
 
-func newDisableApplicationFromTenantCmd() *disableApplicationFromTenantCmd {
-	ccmd := &disableApplicationFromTenantCmd{}
-
+func NewDisableApplicationFromTenantCmd() *DisableApplicationFromTenantCmd {
+	var _ = fmt.Errorf
+	ccmd := &DisableApplicationFromTenantCmd{}
 	cmd := &cobra.Command{
 		Use:   "disableApplication",
 		Short: "Disable application on tenant",
@@ -28,33 +29,40 @@ $ c8y tenants disableApplication --tenant "mycompany" --application "myMicroserv
 Disable an application of a tenant by name
         `,
 		PreRunE: validateDeleteMode,
-		RunE:    ccmd.disableApplicationFromTenant,
+		RunE:    ccmd.RunE,
 	}
 
 	cmd.SilenceUsage = true
 
 	cmd.Flags().String("tenant", "", "Tenant id. Defaults to current tenant (based on credentials)")
-	cmd.Flags().String("application", "", "Application id (required)")
+	cmd.Flags().String("application", "", "Application id (required) (accepts pipeline)")
 	addProcessingModeFlag(cmd)
 
+	flags.WithOptions(
+		cmd,
+		flags.WithPipelineSupport("application"),
+	)
+
 	// Required flags
-	cmd.MarkFlagRequired("application")
 
 	ccmd.baseCmd = newBaseCmd(cmd)
 
 	return ccmd
 }
 
-func (n *disableApplicationFromTenantCmd) disableApplicationFromTenant(cmd *cobra.Command, args []string) error {
-
-	commonOptions, err := getCommonOptions(cmd)
-	if err != nil {
-		return newUserError(fmt.Sprintf("Failed to get common options. err=%s", err))
-	}
-
+func (n *DisableApplicationFromTenantCmd) RunE(cmd *cobra.Command, args []string) error {
 	// query parameters
 	queryValue := url.QueryEscape("")
 	query := url.Values{}
+
+	err := flags.WithQueryOptions(
+		cmd,
+		query,
+	)
+	if err != nil {
+		return newUserError(err)
+	}
+
 	queryValue, err = url.QueryUnescape(query.Encode())
 
 	if err != nil {
@@ -73,29 +81,12 @@ func (n *disableApplicationFromTenantCmd) disableApplicationFromTenant(cmd *cobr
 	formData := make(map[string]io.Reader)
 
 	// body
-	body := mapbuilder.NewMapBuilder()
+	body := mapbuilder.NewInitializedMapBuilder()
 
 	// path parameters
 	pathParameters := make(map[string]string)
 	if v := getTenantWithDefaultFlag(cmd, "tenant", client.TenantName); v != "" {
 		pathParameters["tenant"] = v
-	}
-	if cmd.Flags().Changed("application") {
-		applicationInputValues, applicationValue, err := getApplicationSlice(cmd, args, "application")
-
-		if err != nil {
-			return newUserError("no matching applications found", applicationInputValues, err)
-		}
-
-		if len(applicationValue) == 0 {
-			return newUserError("no matching applications found", applicationInputValues)
-		}
-
-		for _, item := range applicationValue {
-			if item != "" {
-				pathParameters["application"] = newIDValue(item).GetID()
-			}
-		}
 	}
 
 	path := replacePathParameters("/tenant/tenants/{tenant}/applications/{application}", pathParameters)
@@ -111,5 +102,5 @@ func (n *disableApplicationFromTenantCmd) disableApplicationFromTenant(cmd *cobr
 		DryRun:       globalFlagDryRun,
 	}
 
-	return processRequestAndResponse([]c8y.RequestOptions{req}, commonOptions)
+	return processRequestAndResponseWithWorkers(cmd, &req, "application")
 }

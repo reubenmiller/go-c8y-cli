@@ -8,7 +8,7 @@ type sessionsCmd struct {
 	*baseCmd
 }
 
-func newSessionsRootCmd() *sessionsCmd {
+func NewSessionsRootCmd() *sessionsCmd {
 	ccmd := &sessionsCmd{}
 
 	cmd := &cobra.Command{

@@ -7,18 +7,19 @@ import (
 	"net/http"
 	"net/url"
 
+	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/pkg/mapbuilder"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
 )
 
-type updateUserCurrentCmd struct {
+type UpdateUserCurrentCmd struct {
 	*baseCmd
 }
 
-func newUpdateUserCurrentCmd() *updateUserCurrentCmd {
-	ccmd := &updateUserCurrentCmd{}
-
+func NewUpdateUserCurrentCmd() *UpdateUserCurrentCmd {
+	var _ = fmt.Errorf
+	ccmd := &UpdateUserCurrentCmd{}
 	cmd := &cobra.Command{
 		Use:   "updateCurrentUser",
 		Short: "Update the current user",
@@ -29,7 +30,7 @@ $ c8y users updateCurrentUser --lastName "Smith"
 Update the current user's lastname
         `,
 		PreRunE: validateUpdateMode,
-		RunE:    ccmd.updateUserCurrent,
+		RunE:    ccmd.RunE,
 	}
 
 	cmd.SilenceUsage = true
@@ -42,6 +43,11 @@ Update the current user's lastname
 	cmd.Flags().String("password", "", "User password. Min: 6, max: 32 characters. Only Latin1 chars allowed")
 	addProcessingModeFlag(cmd)
 
+	flags.WithOptions(
+		cmd,
+		flags.WithPipelineSupport(""),
+	)
+
 	// Required flags
 
 	ccmd.baseCmd = newBaseCmd(cmd)
@@ -49,16 +55,19 @@ Update the current user's lastname
 	return ccmd
 }
 
-func (n *updateUserCurrentCmd) updateUserCurrent(cmd *cobra.Command, args []string) error {
-
-	commonOptions, err := getCommonOptions(cmd)
-	if err != nil {
-		return newUserError(fmt.Sprintf("Failed to get common options. err=%s", err))
-	}
-
+func (n *UpdateUserCurrentCmd) RunE(cmd *cobra.Command, args []string) error {
 	// query parameters
 	queryValue := url.QueryEscape("")
 	query := url.Values{}
+
+	err := flags.WithQueryOptions(
+		cmd,
+		query,
+	)
+	if err != nil {
+		return newUserError(err)
+	}
+
 	queryValue, err = url.QueryUnescape(query.Encode())
 
 	if err != nil {
@@ -77,7 +86,7 @@ func (n *updateUserCurrentCmd) updateUserCurrent(cmd *cobra.Command, args []stri
 	formData := make(map[string]io.Reader)
 
 	// body
-	body := mapbuilder.NewMapBuilder()
+	body := mapbuilder.NewInitializedMapBuilder()
 	body.SetMap(getDataFlag(cmd))
 	if v, err := cmd.Flags().GetString("firstName"); err == nil {
 		if v != "" {
@@ -144,5 +153,5 @@ func (n *updateUserCurrentCmd) updateUserCurrent(cmd *cobra.Command, args []stri
 		DryRun:       globalFlagDryRun,
 	}
 
-	return processRequestAndResponse([]c8y.RequestOptions{req}, commonOptions)
+	return processRequestAndResponseWithWorkers(cmd, &req, "")
 }

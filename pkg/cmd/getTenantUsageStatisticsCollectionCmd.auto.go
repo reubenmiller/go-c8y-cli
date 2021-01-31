@@ -7,18 +7,19 @@ import (
 	"net/http"
 	"net/url"
 
+	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/pkg/mapbuilder"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
 )
 
-type getTenantUsageStatisticsCollectionCmd struct {
+type GetTenantUsageStatisticsCollectionCmd struct {
 	*baseCmd
 }
 
-func newGetTenantUsageStatisticsCollectionCmd() *getTenantUsageStatisticsCollectionCmd {
-	ccmd := &getTenantUsageStatisticsCollectionCmd{}
-
+func NewGetTenantUsageStatisticsCollectionCmd() *GetTenantUsageStatisticsCollectionCmd {
+	var _ = fmt.Errorf
+	ccmd := &GetTenantUsageStatisticsCollectionCmd{}
 	cmd := &cobra.Command{
 		Use:   "list",
 		Short: "Get collection of tenant usage statistics",
@@ -34,13 +35,18 @@ $ c8y tenantStatistics list --dateFrom "-3d" --dateTo "-2d"
 Get tenant statistics collection for the day before yesterday
         `,
 		PreRunE: nil,
-		RunE:    ccmd.getTenantUsageStatisticsCollection,
+		RunE:    ccmd.RunE,
 	}
 
 	cmd.SilenceUsage = true
 
 	cmd.Flags().String("dateFrom", "", "Start date or date and time of the statistics.")
 	cmd.Flags().String("dateTo", "", "End date or date and time of the statistics.")
+
+	flags.WithOptions(
+		cmd,
+		flags.WithPipelineSupport(""),
+	)
 
 	// Required flags
 
@@ -49,13 +55,7 @@ Get tenant statistics collection for the day before yesterday
 	return ccmd
 }
 
-func (n *getTenantUsageStatisticsCollectionCmd) getTenantUsageStatisticsCollection(cmd *cobra.Command, args []string) error {
-
-	commonOptions, err := getCommonOptions(cmd)
-	if err != nil {
-		return newUserError(fmt.Sprintf("Failed to get common options. err=%s", err))
-	}
-
+func (n *GetTenantUsageStatisticsCollectionCmd) RunE(cmd *cobra.Command, args []string) error {
 	// query parameters
 	queryValue := url.QueryEscape("")
 	query := url.Values{}
@@ -73,7 +73,20 @@ func (n *getTenantUsageStatisticsCollectionCmd) getTenantUsageStatisticsCollecti
 			return newUserError("invalid date format", err)
 		}
 	}
+
+	err := flags.WithQueryOptions(
+		cmd,
+		query,
+	)
+	if err != nil {
+		return newUserError(err)
+	}
+	commonOptions, err := getCommonOptions(cmd)
+	if err != nil {
+		return newUserError(fmt.Sprintf("Failed to get common options. err=%s", err))
+	}
 	commonOptions.AddQueryParameters(&query)
+
 	queryValue, err = url.QueryUnescape(query.Encode())
 
 	if err != nil {
@@ -87,7 +100,7 @@ func (n *getTenantUsageStatisticsCollectionCmd) getTenantUsageStatisticsCollecti
 	formData := make(map[string]io.Reader)
 
 	// body
-	body := mapbuilder.NewMapBuilder()
+	body := mapbuilder.NewInitializedMapBuilder()
 
 	// path parameters
 	pathParameters := make(map[string]string)
@@ -105,5 +118,5 @@ func (n *getTenantUsageStatisticsCollectionCmd) getTenantUsageStatisticsCollecti
 		DryRun:       globalFlagDryRun,
 	}
 
-	return processRequestAndResponse([]c8y.RequestOptions{req}, commonOptions)
+	return processRequestAndResponseWithWorkers(cmd, &req, "")
 }

@@ -7,18 +7,19 @@ import (
 	"net/http"
 	"net/url"
 
+	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/pkg/mapbuilder"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
 )
 
-type resetUserPasswordCmd struct {
+type ResetUserPasswordCmd struct {
 	*baseCmd
 }
 
-func newResetUserPasswordCmd() *resetUserPasswordCmd {
-	ccmd := &resetUserPasswordCmd{}
-
+func NewResetUserPasswordCmd() *ResetUserPasswordCmd {
+	var _ = fmt.Errorf
+	ccmd := &ResetUserPasswordCmd{}
 	cmd := &cobra.Command{
 		Use:   "resetUserPassword",
 		Short: "Reset a user's password",
@@ -28,34 +29,41 @@ $ c8y users resetUserPassword --id "myuser"
 Update a user
         `,
 		PreRunE: validateUpdateMode,
-		RunE:    ccmd.resetUserPassword,
+		RunE:    ccmd.RunE,
 	}
 
 	cmd.SilenceUsage = true
 
-	cmd.Flags().StringSlice("id", []string{""}, "User id (required)")
+	cmd.Flags().StringSlice("id", []string{""}, "User id (required) (accepts pipeline)")
 	cmd.Flags().String("tenant", "", "Tenant")
 	cmd.Flags().String("newPassword", "", "New user password. Min: 6, max: 32 characters. Only Latin1 chars allowed")
 	addProcessingModeFlag(cmd)
 
+	flags.WithOptions(
+		cmd,
+		flags.WithPipelineSupport("id"),
+	)
+
 	// Required flags
-	cmd.MarkFlagRequired("id")
 
 	ccmd.baseCmd = newBaseCmd(cmd)
 
 	return ccmd
 }
 
-func (n *resetUserPasswordCmd) resetUserPassword(cmd *cobra.Command, args []string) error {
-
-	commonOptions, err := getCommonOptions(cmd)
-	if err != nil {
-		return newUserError(fmt.Sprintf("Failed to get common options. err=%s", err))
-	}
-
+func (n *ResetUserPasswordCmd) RunE(cmd *cobra.Command, args []string) error {
 	// query parameters
 	queryValue := url.QueryEscape("")
 	query := url.Values{}
+
+	err := flags.WithQueryOptions(
+		cmd,
+		query,
+	)
+	if err != nil {
+		return newUserError(err)
+	}
+
 	queryValue, err = url.QueryUnescape(query.Encode())
 
 	if err != nil {
@@ -74,7 +82,7 @@ func (n *resetUserPasswordCmd) resetUserPassword(cmd *cobra.Command, args []stri
 	formData := make(map[string]io.Reader)
 
 	// body
-	body := mapbuilder.NewMapBuilder()
+	body := mapbuilder.NewInitializedMapBuilder()
 	body.SetMap(getDataFlag(cmd))
 	if v, err := cmd.Flags().GetString("newPassword"); err == nil {
 		if v != "" {
@@ -98,23 +106,6 @@ addIfEmptyString(base, "password", {sendPasswordResetEmail: true})
 
 	// path parameters
 	pathParameters := make(map[string]string)
-	if cmd.Flags().Changed("id") {
-		idInputValues, idValue, err := getFormattedUserSlice(cmd, args, "id")
-
-		if err != nil {
-			return newUserError("no matching users found", idInputValues, err)
-		}
-
-		if len(idValue) == 0 {
-			return newUserError("no matching users found", idInputValues)
-		}
-
-		for _, item := range idValue {
-			if item != "" {
-				pathParameters["id"] = newIDValue(item).GetID()
-			}
-		}
-	}
 	if v := getTenantWithDefaultFlag(cmd, "tenant", client.TenantName); v != "" {
 		pathParameters["tenant"] = v
 	}
@@ -132,5 +123,5 @@ addIfEmptyString(base, "password", {sendPasswordResetEmail: true})
 		DryRun:       globalFlagDryRun,
 	}
 
-	return processRequestAndResponse([]c8y.RequestOptions{req}, commonOptions)
+	return processRequestAndResponseWithWorkers(cmd, &req, "id")
 }

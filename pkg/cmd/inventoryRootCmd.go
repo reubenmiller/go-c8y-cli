@@ -4,12 +4,12 @@ import (
 	"github.com/spf13/cobra"
 )
 
-type inventoryCmd struct {
+type InventoryCmd struct {
 	*baseCmd
 }
 
-func newInventoryRootCmd() *inventoryCmd {
-	ccmd := &inventoryCmd{}
+func NewInventoryRootCmd() *InventoryCmd {
+	ccmd := &InventoryCmd{}
 
 	cmd := &cobra.Command{
 		Use:   "inventory",
@@ -18,12 +18,11 @@ func newInventoryRootCmd() *inventoryCmd {
 	}
 
 	// Subcommands
-	cmd.AddCommand(newGetManagedObjectCollectionCmd().getCommand())
-	cmd.AddCommand(newNewManagedObjectCmd().getCommand())
-	cmd.AddCommand(newGetManagedObjectCmd().getCommand())
-	cmd.AddCommand(newUpdateManagedObjectCmd().getCommand())
-	cmd.AddCommand(newDeleteManagedObjectCmd().getCommand())
-	cmd.AddCommand(newGetManagedObjectCmdManual().getCommand())
+	cmd.AddCommand(NewGetManagedObjectCollectionCmd().getCommand())
+	cmd.AddCommand(NewNewManagedObjectCmd().getCommand())
+	cmd.AddCommand(NewGetManagedObjectCmd().getCommand())
+	cmd.AddCommand(NewUpdateManagedObjectCmd().getCommand())
+	cmd.AddCommand(NewDeleteManagedObjectCmd().getCommand())
 
 	ccmd.baseCmd = newBaseCmd(cmd)
 

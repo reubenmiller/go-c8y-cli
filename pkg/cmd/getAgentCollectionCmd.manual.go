@@ -16,7 +16,7 @@ type getAgentCollectionCmd struct {
 	*baseCmd
 }
 
-func newGetAgentCollectionCmd() *getAgentCollectionCmd {
+func NewGetAgentCollectionCmd() *getAgentCollectionCmd {
 	ccmd := &getAgentCollectionCmd{}
 
 	cmd := &cobra.Command{

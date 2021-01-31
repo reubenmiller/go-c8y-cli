@@ -4,12 +4,12 @@ import (
 	"github.com/spf13/cobra"
 )
 
-type tenantStatisticsCmd struct {
+type TenantStatisticsCmd struct {
 	*baseCmd
 }
 
-func newTenantStatisticsRootCmd() *tenantStatisticsCmd {
-	ccmd := &tenantStatisticsCmd{}
+func NewTenantStatisticsRootCmd() *TenantStatisticsCmd {
+	ccmd := &TenantStatisticsCmd{}
 
 	cmd := &cobra.Command{
 		Use:   "tenantStatistics",
@@ -18,9 +18,9 @@ func newTenantStatisticsRootCmd() *tenantStatisticsCmd {
 	}
 
 	// Subcommands
-	cmd.AddCommand(newGetTenantUsageStatisticsCollectionCmd().getCommand())
-	cmd.AddCommand(newGetAllTenantUsageStatisticsSummaryCollectionCmd().getCommand())
-	cmd.AddCommand(newGetTenantUsageStatisticsSummaryCollectionCmd().getCommand())
+	cmd.AddCommand(NewGetTenantUsageStatisticsCollectionCmd().getCommand())
+	cmd.AddCommand(NewGetAllTenantUsageStatisticsSummaryCollectionCmd().getCommand())
+	cmd.AddCommand(NewGetTenantUsageStatisticsSummaryCollectionCmd().getCommand())
 
 	ccmd.baseCmd = newBaseCmd(cmd)
 

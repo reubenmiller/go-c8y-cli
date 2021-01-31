@@ -8,7 +8,7 @@ type settingsCmd struct {
 	*baseCmd
 }
 
-func newSettingsRootCmd() *settingsCmd {
+func NewSettingsRootCmd() *settingsCmd {
 	ccmd := &settingsCmd{}
 
 	cmd := &cobra.Command{

@@ -7,18 +7,19 @@ import (
 	"net/http"
 	"net/url"
 
+	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/pkg/mapbuilder"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
 )
 
-type getApplicationCmd struct {
+type GetApplicationCmd struct {
 	*baseCmd
 }
 
-func newGetApplicationCmd() *getApplicationCmd {
-	ccmd := &getApplicationCmd{}
-
+func NewGetApplicationCmd() *GetApplicationCmd {
+	var _ = fmt.Errorf
+	ccmd := &GetApplicationCmd{}
 	cmd := &cobra.Command{
 		Use:   "get",
 		Short: "Get an application",
@@ -28,32 +29,43 @@ $ c8y applications get --id 12345
 Get an application
         `,
 		PreRunE: nil,
-		RunE:    ccmd.getApplication,
+		RunE:    ccmd.RunE,
 	}
 
 	cmd.SilenceUsage = true
 
-	cmd.Flags().String("id", "", "Application id (required)")
+	cmd.Flags().String("id", "", "Application id (required) (accepts pipeline)")
+
+	flags.WithOptions(
+		cmd,
+		flags.WithPipelineSupport("id"),
+	)
 
 	// Required flags
-	cmd.MarkFlagRequired("id")
 
 	ccmd.baseCmd = newBaseCmd(cmd)
 
 	return ccmd
 }
 
-func (n *getApplicationCmd) getApplication(cmd *cobra.Command, args []string) error {
+func (n *GetApplicationCmd) RunE(cmd *cobra.Command, args []string) error {
+	// query parameters
+	queryValue := url.QueryEscape("")
+	query := url.Values{}
 
+	err := flags.WithQueryOptions(
+		cmd,
+		query,
+	)
+	if err != nil {
+		return newUserError(err)
+	}
 	commonOptions, err := getCommonOptions(cmd)
 	if err != nil {
 		return newUserError(fmt.Sprintf("Failed to get common options. err=%s", err))
 	}
-
-	// query parameters
-	queryValue := url.QueryEscape("")
-	query := url.Values{}
 	commonOptions.AddQueryParameters(&query)
+
 	queryValue, err = url.QueryUnescape(query.Encode())
 
 	if err != nil {
@@ -67,27 +79,10 @@ func (n *getApplicationCmd) getApplication(cmd *cobra.Command, args []string) er
 	formData := make(map[string]io.Reader)
 
 	// body
-	body := mapbuilder.NewMapBuilder()
+	body := mapbuilder.NewInitializedMapBuilder()
 
 	// path parameters
 	pathParameters := make(map[string]string)
-	if cmd.Flags().Changed("id") {
-		idInputValues, idValue, err := getApplicationSlice(cmd, args, "id")
-
-		if err != nil {
-			return newUserError("no matching applications found", idInputValues, err)
-		}
-
-		if len(idValue) == 0 {
-			return newUserError("no matching applications found", idInputValues)
-		}
-
-		for _, item := range idValue {
-			if item != "" {
-				pathParameters["id"] = newIDValue(item).GetID()
-			}
-		}
-	}
 
 	path := replacePathParameters("/application/applications/{id}", pathParameters)
 
@@ -102,5 +97,5 @@ func (n *getApplicationCmd) getApplication(cmd *cobra.Command, args []string) er
 		DryRun:       globalFlagDryRun,
 	}
 
-	return processRequestAndResponse([]c8y.RequestOptions{req}, commonOptions)
+	return processRequestAndResponseWithWorkers(cmd, &req, "id")
 }

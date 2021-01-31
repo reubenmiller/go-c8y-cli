@@ -7,18 +7,19 @@ import (
 	"net/http"
 	"net/url"
 
+	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/pkg/mapbuilder"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
 )
 
-type getManagedObjectChildAdditionCollectionCmd struct {
+type GetManagedObjectChildAdditionCollectionCmd struct {
 	*baseCmd
 }
 
-func newGetManagedObjectChildAdditionCollectionCmd() *getManagedObjectChildAdditionCollectionCmd {
-	ccmd := &getManagedObjectChildAdditionCollectionCmd{}
-
+func NewGetManagedObjectChildAdditionCollectionCmd() *GetManagedObjectChildAdditionCollectionCmd {
+	var _ = fmt.Errorf
+	ccmd := &GetManagedObjectChildAdditionCollectionCmd{}
 	cmd := &cobra.Command{
 		Use:   "listChildAdditions",
 		Short: "Get a collection of managedObjects child additions",
@@ -28,32 +29,43 @@ $ c8y inventoryReferences listChildAdditions --id 12345
 Get a list of the child additions of an existing managed object
         `,
 		PreRunE: nil,
-		RunE:    ccmd.getManagedObjectChildAdditionCollection,
+		RunE:    ccmd.RunE,
 	}
 
 	cmd.SilenceUsage = true
 
-	cmd.Flags().String("id", "", "Managed object id. (required)")
+	cmd.Flags().String("id", "", "Managed object id. (required) (accepts pipeline)")
+
+	flags.WithOptions(
+		cmd,
+		flags.WithPipelineSupport("id"),
+	)
 
 	// Required flags
-	cmd.MarkFlagRequired("id")
 
 	ccmd.baseCmd = newBaseCmd(cmd)
 
 	return ccmd
 }
 
-func (n *getManagedObjectChildAdditionCollectionCmd) getManagedObjectChildAdditionCollection(cmd *cobra.Command, args []string) error {
+func (n *GetManagedObjectChildAdditionCollectionCmd) RunE(cmd *cobra.Command, args []string) error {
+	// query parameters
+	queryValue := url.QueryEscape("")
+	query := url.Values{}
 
+	err := flags.WithQueryOptions(
+		cmd,
+		query,
+	)
+	if err != nil {
+		return newUserError(err)
+	}
 	commonOptions, err := getCommonOptions(cmd)
 	if err != nil {
 		return newUserError(fmt.Sprintf("Failed to get common options. err=%s", err))
 	}
-
-	// query parameters
-	queryValue := url.QueryEscape("")
-	query := url.Values{}
 	commonOptions.AddQueryParameters(&query)
+
 	queryValue, err = url.QueryUnescape(query.Encode())
 
 	if err != nil {
@@ -67,17 +79,10 @@ func (n *getManagedObjectChildAdditionCollectionCmd) getManagedObjectChildAdditi
 	formData := make(map[string]io.Reader)
 
 	// body
-	body := mapbuilder.NewMapBuilder()
+	body := mapbuilder.NewInitializedMapBuilder()
 
 	// path parameters
 	pathParameters := make(map[string]string)
-	if v, err := cmd.Flags().GetString("id"); err == nil {
-		if v != "" {
-			pathParameters["id"] = v
-		}
-	} else {
-		return newUserError(fmt.Sprintf("Flag [%s] does not exist. %s", "id", err))
-	}
 
 	path := replacePathParameters("inventory/managedObjects/{id}/childAdditions", pathParameters)
 
@@ -92,5 +97,5 @@ func (n *getManagedObjectChildAdditionCollectionCmd) getManagedObjectChildAdditi
 		DryRun:       globalFlagDryRun,
 	}
 
-	return processRequestAndResponse([]c8y.RequestOptions{req}, commonOptions)
+	return processRequestAndResponseWithWorkers(cmd, &req, "id")
 }

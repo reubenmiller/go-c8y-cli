@@ -7,18 +7,19 @@ import (
 	"net/http"
 	"net/url"
 
+	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/pkg/mapbuilder"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
 )
 
-type addGroupToGroupCmd struct {
+type AddGroupToGroupCmd struct {
 	*baseCmd
 }
 
-func newAddGroupToGroupCmd() *addGroupToGroupCmd {
-	ccmd := &addGroupToGroupCmd{}
-
+func NewAddGroupToGroupCmd() *AddGroupToGroupCmd {
+	var _ = fmt.Errorf
+	ccmd := &AddGroupToGroupCmd{}
 	cmd := &cobra.Command{
 		Use:   "assignGroupToGroup",
 		Short: "Add a device group to an existing group",
@@ -31,34 +32,41 @@ $ c8y inventoryReferences assignGroupToGroup --group 12345 --newChildGroup 43234
 Add multiple groups to a group
         `,
 		PreRunE: validateCreateMode,
-		RunE:    ccmd.addGroupToGroup,
+		RunE:    ccmd.RunE,
 	}
 
 	cmd.SilenceUsage = true
 
 	cmd.Flags().StringSlice("group", []string{""}, "Group (required)")
-	cmd.Flags().StringSlice("newChildGroup", []string{""}, "New child group to be added to the group as an child asset (required)")
+	cmd.Flags().StringSlice("newChildGroup", []string{""}, "New child group to be added to the group as an child asset (required) (accepts pipeline)")
 	addProcessingModeFlag(cmd)
+
+	flags.WithOptions(
+		cmd,
+		flags.WithPipelineSupport("newChildGroup"),
+	)
 
 	// Required flags
 	cmd.MarkFlagRequired("group")
-	cmd.MarkFlagRequired("newChildGroup")
 
 	ccmd.baseCmd = newBaseCmd(cmd)
 
 	return ccmd
 }
 
-func (n *addGroupToGroupCmd) addGroupToGroup(cmd *cobra.Command, args []string) error {
-
-	commonOptions, err := getCommonOptions(cmd)
-	if err != nil {
-		return newUserError(fmt.Sprintf("Failed to get common options. err=%s", err))
-	}
-
+func (n *AddGroupToGroupCmd) RunE(cmd *cobra.Command, args []string) error {
 	// query parameters
 	queryValue := url.QueryEscape("")
 	query := url.Values{}
+
+	err := flags.WithQueryOptions(
+		cmd,
+		query,
+	)
+	if err != nil {
+		return newUserError(err)
+	}
+
 	queryValue, err = url.QueryUnescape(query.Encode())
 
 	if err != nil {
@@ -77,7 +85,7 @@ func (n *addGroupToGroupCmd) addGroupToGroup(cmd *cobra.Command, args []string) 
 	formData := make(map[string]io.Reader)
 
 	// body
-	body := mapbuilder.NewMapBuilder()
+	body := mapbuilder.NewInitializedMapBuilder()
 	body.SetMap(getDataFlag(cmd))
 	if cmd.Flags().Changed("newChildGroup") {
 		newChildGroupInputValues, newChildGroupValue, err := getFormattedDeviceGroupSlice(cmd, args, "newChildGroup")
@@ -136,5 +144,5 @@ func (n *addGroupToGroupCmd) addGroupToGroup(cmd *cobra.Command, args []string) 
 		DryRun:       globalFlagDryRun,
 	}
 
-	return processRequestAndResponse([]c8y.RequestOptions{req}, commonOptions)
+	return processRequestAndResponseWithWorkers(cmd, &req, "newChildGroup")
 }

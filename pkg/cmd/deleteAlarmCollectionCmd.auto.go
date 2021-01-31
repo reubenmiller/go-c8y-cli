@@ -7,18 +7,19 @@ import (
 	"net/http"
 	"net/url"
 
+	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/pkg/mapbuilder"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
 )
 
-type deleteAlarmCollectionCmd struct {
+type DeleteAlarmCollectionCmd struct {
 	*baseCmd
 }
 
-func newDeleteAlarmCollectionCmd() *deleteAlarmCollectionCmd {
-	ccmd := &deleteAlarmCollectionCmd{}
-
+func NewDeleteAlarmCollectionCmd() *DeleteAlarmCollectionCmd {
+	var _ = fmt.Errorf
+	ccmd := &DeleteAlarmCollectionCmd{}
 	cmd := &cobra.Command{
 		Use:   "deleteCollection",
 		Short: "Delete a collection of alarms",
@@ -31,12 +32,12 @@ $ c8y alarms deleteCollection --device mydevice --dateFrom "-10m" --status ACTIV
 Remove alarms on the device which are active and created in the last 10 minutes
         `,
 		PreRunE: validateDeleteMode,
-		RunE:    ccmd.deleteAlarmCollection,
+		RunE:    ccmd.RunE,
 	}
 
 	cmd.SilenceUsage = true
 
-	cmd.Flags().StringSlice("device", []string{""}, "Source device id.")
+	cmd.Flags().StringSlice("device", []string{""}, "Source device id. (accepts pipeline)")
 	cmd.Flags().String("dateFrom", "", "Start date or date and time of alarm occurrence.")
 	cmd.Flags().String("dateTo", "", "End date or date and time of alarm occurrence.")
 	cmd.Flags().String("type", "", "Alarm type.")
@@ -48,6 +49,11 @@ Remove alarms on the device which are active and created in the last 10 minutes
 	cmd.Flags().Bool("withSourceDevices", false, "When set to true also alarms for related source devices will be removed. When this parameter is provided also source must be defined.")
 	addProcessingModeFlag(cmd)
 
+	flags.WithOptions(
+		cmd,
+		flags.WithPipelineSupport("device"),
+	)
+
 	// Required flags
 
 	ccmd.baseCmd = newBaseCmd(cmd)
@@ -55,13 +61,7 @@ Remove alarms on the device which are active and created in the last 10 minutes
 	return ccmd
 }
 
-func (n *deleteAlarmCollectionCmd) deleteAlarmCollection(cmd *cobra.Command, args []string) error {
-
-	commonOptions, err := getCommonOptions(cmd)
-	if err != nil {
-		return newUserError(fmt.Sprintf("Failed to get common options. err=%s", err))
-	}
-
+func (n *DeleteAlarmCollectionCmd) RunE(cmd *cobra.Command, args []string) error {
 	// query parameters
 	queryValue := url.QueryEscape("")
 	query := url.Values{}
@@ -145,6 +145,15 @@ func (n *deleteAlarmCollectionCmd) deleteAlarmCollection(cmd *cobra.Command, arg
 			return newUserError("Flag does not exist")
 		}
 	}
+
+	err := flags.WithQueryOptions(
+		cmd,
+		query,
+	)
+	if err != nil {
+		return newUserError(err)
+	}
+
 	queryValue, err = url.QueryUnescape(query.Encode())
 
 	if err != nil {
@@ -163,7 +172,7 @@ func (n *deleteAlarmCollectionCmd) deleteAlarmCollection(cmd *cobra.Command, arg
 	formData := make(map[string]io.Reader)
 
 	// body
-	body := mapbuilder.NewMapBuilder()
+	body := mapbuilder.NewInitializedMapBuilder()
 
 	// path parameters
 	pathParameters := make(map[string]string)
@@ -181,5 +190,5 @@ func (n *deleteAlarmCollectionCmd) deleteAlarmCollection(cmd *cobra.Command, arg
 		DryRun:       globalFlagDryRun,
 	}
 
-	return processRequestAndResponse([]c8y.RequestOptions{req}, commonOptions)
+	return processRequestAndResponseWithWorkers(cmd, &req, "device")
 }

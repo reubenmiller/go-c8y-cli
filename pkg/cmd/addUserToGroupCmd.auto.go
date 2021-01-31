@@ -7,18 +7,19 @@ import (
 	"net/http"
 	"net/url"
 
+	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/pkg/mapbuilder"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
 )
 
-type addUserToGroupCmd struct {
+type AddUserToGroupCmd struct {
 	*baseCmd
 }
 
-func newAddUserToGroupCmd() *addUserToGroupCmd {
-	ccmd := &addUserToGroupCmd{}
-
+func NewAddUserToGroupCmd() *AddUserToGroupCmd {
+	var _ = fmt.Errorf
+	ccmd := &AddUserToGroupCmd{}
 	cmd := &cobra.Command{
 		Use:   "addUserToGroup",
 		Short: "Get user",
@@ -28,35 +29,42 @@ $ c8y userReferences addUserToGroup --group 1 --user myuser
 List the users within a user group
         `,
 		PreRunE: validateCreateMode,
-		RunE:    ccmd.addUserToGroup,
+		RunE:    ccmd.RunE,
 	}
 
 	cmd.SilenceUsage = true
 
 	cmd.Flags().StringSlice("group", []string{""}, "Group ID (required)")
 	cmd.Flags().String("tenant", "", "Tenant")
-	cmd.Flags().StringSlice("user", []string{""}, "User id (required)")
+	cmd.Flags().StringSlice("user", []string{""}, "User id (required) (accepts pipeline)")
 	addProcessingModeFlag(cmd)
+
+	flags.WithOptions(
+		cmd,
+		flags.WithPipelineSupport("user"),
+	)
 
 	// Required flags
 	cmd.MarkFlagRequired("group")
-	cmd.MarkFlagRequired("user")
 
 	ccmd.baseCmd = newBaseCmd(cmd)
 
 	return ccmd
 }
 
-func (n *addUserToGroupCmd) addUserToGroup(cmd *cobra.Command, args []string) error {
-
-	commonOptions, err := getCommonOptions(cmd)
-	if err != nil {
-		return newUserError(fmt.Sprintf("Failed to get common options. err=%s", err))
-	}
-
+func (n *AddUserToGroupCmd) RunE(cmd *cobra.Command, args []string) error {
 	// query parameters
 	queryValue := url.QueryEscape("")
 	query := url.Values{}
+
+	err := flags.WithQueryOptions(
+		cmd,
+		query,
+	)
+	if err != nil {
+		return newUserError(err)
+	}
+
 	queryValue, err = url.QueryUnescape(query.Encode())
 
 	if err != nil {
@@ -75,7 +83,7 @@ func (n *addUserToGroupCmd) addUserToGroup(cmd *cobra.Command, args []string) er
 	formData := make(map[string]io.Reader)
 
 	// body
-	body := mapbuilder.NewMapBuilder()
+	body := mapbuilder.NewInitializedMapBuilder()
 	body.SetMap(getDataFlag(cmd))
 	if cmd.Flags().Changed("user") {
 		userInputValues, userValue, err := getFormattedUserLinkSlice(cmd, args, "user")
@@ -137,5 +145,5 @@ func (n *addUserToGroupCmd) addUserToGroup(cmd *cobra.Command, args []string) er
 		DryRun:       globalFlagDryRun,
 	}
 
-	return processRequestAndResponse([]c8y.RequestOptions{req}, commonOptions)
+	return processRequestAndResponseWithWorkers(cmd, &req, "user")
 }

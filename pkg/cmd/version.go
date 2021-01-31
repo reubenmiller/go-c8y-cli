@@ -10,7 +10,7 @@ type versionCmd struct {
 	*baseCmd
 }
 
-func newVersionCmd() *versionCmd {
+func NewVersionCmd() *versionCmd {
 	ccmd := &versionCmd{}
 
 	cmd := &cobra.Command{

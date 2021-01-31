@@ -4,12 +4,12 @@ import (
 	"github.com/spf13/cobra"
 )
 
-type microservicesCmd struct {
+type MicroservicesCmd struct {
 	*baseCmd
 }
 
-func newMicroservicesRootCmd() *microservicesCmd {
-	ccmd := &microservicesCmd{}
+func NewMicroservicesRootCmd() *MicroservicesCmd {
+	ccmd := &MicroservicesCmd{}
 
 	cmd := &cobra.Command{
 		Use:   "microservices",
@@ -18,14 +18,14 @@ func newMicroservicesRootCmd() *microservicesCmd {
 	}
 
 	// Subcommands
-	cmd.AddCommand(newGetMicroserviceCollectionCmd().getCommand())
-	cmd.AddCommand(newGetMicroserviceCmd().getCommand())
-	cmd.AddCommand(newDeleteMicroserviceCmd().getCommand())
-	cmd.AddCommand(newUpdateMicroserviceCmd().getCommand())
-	cmd.AddCommand(newNewMicroserviceBinaryCmd().getCommand())
-	cmd.AddCommand(newGetMicroserviceBootstrapUserCmd().getCommand())
-	cmd.AddCommand(newEnableMicroserviceCmd().getCommand())
-	cmd.AddCommand(newDisableMicroserviceCmd().getCommand())
+	cmd.AddCommand(NewGetMicroserviceCollectionCmd().getCommand())
+	cmd.AddCommand(NewGetMicroserviceCmd().getCommand())
+	cmd.AddCommand(NewDeleteMicroserviceCmd().getCommand())
+	cmd.AddCommand(NewUpdateMicroserviceCmd().getCommand())
+	cmd.AddCommand(NewNewMicroserviceBinaryCmd().getCommand())
+	cmd.AddCommand(NewGetMicroserviceBootstrapUserCmd().getCommand())
+	cmd.AddCommand(NewEnableMicroserviceCmd().getCommand())
+	cmd.AddCommand(NewDisableMicroserviceCmd().getCommand())
 
 	ccmd.baseCmd = newBaseCmd(cmd)
 

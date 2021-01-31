@@ -7,18 +7,19 @@ import (
 	"net/http"
 	"net/url"
 
+	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/pkg/mapbuilder"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
 )
 
-type getTenantOptionsForCategoryCmd struct {
+type GetTenantOptionsForCategoryCmd struct {
 	*baseCmd
 }
 
-func newGetTenantOptionsForCategoryCmd() *getTenantOptionsForCategoryCmd {
-	ccmd := &getTenantOptionsForCategoryCmd{}
-
+func NewGetTenantOptionsForCategoryCmd() *GetTenantOptionsForCategoryCmd {
+	var _ = fmt.Errorf
+	ccmd := &GetTenantOptionsForCategoryCmd{}
 	cmd := &cobra.Command{
 		Use:   "getForCategory",
 		Short: "Get tenant options for category",
@@ -28,12 +29,17 @@ $ c8y tenantOptions getForCategory --category "c8y_cli_tests"
 Get a list of options for a category
         `,
 		PreRunE: nil,
-		RunE:    ccmd.getTenantOptionsForCategory,
+		RunE:    ccmd.RunE,
 	}
 
 	cmd.SilenceUsage = true
 
 	cmd.Flags().String("category", "", "Tenant Option category (required)")
+
+	flags.WithOptions(
+		cmd,
+		flags.WithPipelineSupport(""),
+	)
 
 	// Required flags
 	cmd.MarkFlagRequired("category")
@@ -43,17 +49,24 @@ Get a list of options for a category
 	return ccmd
 }
 
-func (n *getTenantOptionsForCategoryCmd) getTenantOptionsForCategory(cmd *cobra.Command, args []string) error {
+func (n *GetTenantOptionsForCategoryCmd) RunE(cmd *cobra.Command, args []string) error {
+	// query parameters
+	queryValue := url.QueryEscape("")
+	query := url.Values{}
 
+	err := flags.WithQueryOptions(
+		cmd,
+		query,
+	)
+	if err != nil {
+		return newUserError(err)
+	}
 	commonOptions, err := getCommonOptions(cmd)
 	if err != nil {
 		return newUserError(fmt.Sprintf("Failed to get common options. err=%s", err))
 	}
-
-	// query parameters
-	queryValue := url.QueryEscape("")
-	query := url.Values{}
 	commonOptions.AddQueryParameters(&query)
+
 	queryValue, err = url.QueryUnescape(query.Encode())
 
 	if err != nil {
@@ -67,7 +80,7 @@ func (n *getTenantOptionsForCategoryCmd) getTenantOptionsForCategory(cmd *cobra.
 	formData := make(map[string]io.Reader)
 
 	// body
-	body := mapbuilder.NewMapBuilder()
+	body := mapbuilder.NewInitializedMapBuilder()
 
 	// path parameters
 	pathParameters := make(map[string]string)
@@ -92,5 +105,5 @@ func (n *getTenantOptionsForCategoryCmd) getTenantOptionsForCategory(cmd *cobra.
 		DryRun:       globalFlagDryRun,
 	}
 
-	return processRequestAndResponse([]c8y.RequestOptions{req}, commonOptions)
+	return processRequestAndResponseWithWorkers(cmd, &req, "")
 }

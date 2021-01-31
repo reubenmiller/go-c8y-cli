@@ -7,18 +7,19 @@ import (
 	"net/http"
 	"net/url"
 
+	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/pkg/mapbuilder"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
 )
 
-type getRoleReferenceCollectionFromGroupCmd struct {
+type GetRoleReferenceCollectionFromGroupCmd struct {
 	*baseCmd
 }
 
-func newGetRoleReferenceCollectionFromGroupCmd() *getRoleReferenceCollectionFromGroupCmd {
-	ccmd := &getRoleReferenceCollectionFromGroupCmd{}
-
+func NewGetRoleReferenceCollectionFromGroupCmd() *GetRoleReferenceCollectionFromGroupCmd {
+	var _ = fmt.Errorf
+	ccmd := &GetRoleReferenceCollectionFromGroupCmd{}
 	cmd := &cobra.Command{
 		Use:   "getRoleReferenceCollectionFromGroup",
 		Short: "Get collection of user role references from a group",
@@ -28,13 +29,18 @@ $ c8y userRoles getRoleReferenceCollectionFromGroup --group "12345"
 Get a list of role references for a user group
         `,
 		PreRunE: nil,
-		RunE:    ccmd.getRoleReferenceCollectionFromGroup,
+		RunE:    ccmd.RunE,
 	}
 
 	cmd.SilenceUsage = true
 
 	cmd.Flags().String("tenant", "", "Tenant")
 	cmd.Flags().StringSlice("group", []string{""}, "Group id (required)")
+
+	flags.WithOptions(
+		cmd,
+		flags.WithPipelineSupport(""),
+	)
 
 	// Required flags
 	cmd.MarkFlagRequired("group")
@@ -44,17 +50,24 @@ Get a list of role references for a user group
 	return ccmd
 }
 
-func (n *getRoleReferenceCollectionFromGroupCmd) getRoleReferenceCollectionFromGroup(cmd *cobra.Command, args []string) error {
+func (n *GetRoleReferenceCollectionFromGroupCmd) RunE(cmd *cobra.Command, args []string) error {
+	// query parameters
+	queryValue := url.QueryEscape("")
+	query := url.Values{}
 
+	err := flags.WithQueryOptions(
+		cmd,
+		query,
+	)
+	if err != nil {
+		return newUserError(err)
+	}
 	commonOptions, err := getCommonOptions(cmd)
 	if err != nil {
 		return newUserError(fmt.Sprintf("Failed to get common options. err=%s", err))
 	}
-
-	// query parameters
-	queryValue := url.QueryEscape("")
-	query := url.Values{}
 	commonOptions.AddQueryParameters(&query)
+
 	queryValue, err = url.QueryUnescape(query.Encode())
 
 	if err != nil {
@@ -68,7 +81,7 @@ func (n *getRoleReferenceCollectionFromGroupCmd) getRoleReferenceCollectionFromG
 	formData := make(map[string]io.Reader)
 
 	// body
-	body := mapbuilder.NewMapBuilder()
+	body := mapbuilder.NewInitializedMapBuilder()
 
 	// path parameters
 	pathParameters := make(map[string]string)
@@ -106,5 +119,5 @@ func (n *getRoleReferenceCollectionFromGroupCmd) getRoleReferenceCollectionFromG
 		DryRun:       globalFlagDryRun,
 	}
 
-	return processRequestAndResponse([]c8y.RequestOptions{req}, commonOptions)
+	return processRequestAndResponseWithWorkers(cmd, &req, "")
 }

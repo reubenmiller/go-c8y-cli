@@ -7,18 +7,19 @@ import (
 	"net/http"
 	"net/url"
 
+	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/pkg/mapbuilder"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
 )
 
-type newManagedObjectCmd struct {
+type NewManagedObjectCmd struct {
 	*baseCmd
 }
 
-func newNewManagedObjectCmd() *newManagedObjectCmd {
-	ccmd := &newManagedObjectCmd{}
-
+func NewNewManagedObjectCmd() *NewManagedObjectCmd {
+	var _ = fmt.Errorf
+	ccmd := &NewManagedObjectCmd{}
 	cmd := &cobra.Command{
 		Use:   "create",
 		Short: "Create a new inventory",
@@ -28,7 +29,7 @@ $ c8y inventory create --name "testMO" --type "custom_type"
 Create a managed object
         `,
 		PreRunE: validateCreateMode,
-		RunE:    ccmd.newManagedObject,
+		RunE:    ccmd.RunE,
 	}
 
 	cmd.SilenceUsage = true
@@ -38,6 +39,11 @@ Create a managed object
 	addDataFlag(cmd)
 	addProcessingModeFlag(cmd)
 
+	flags.WithOptions(
+		cmd,
+		flags.WithPipelineSupport(""),
+	)
+
 	// Required flags
 
 	ccmd.baseCmd = newBaseCmd(cmd)
@@ -45,16 +51,19 @@ Create a managed object
 	return ccmd
 }
 
-func (n *newManagedObjectCmd) newManagedObject(cmd *cobra.Command, args []string) error {
-
-	commonOptions, err := getCommonOptions(cmd)
-	if err != nil {
-		return newUserError(fmt.Sprintf("Failed to get common options. err=%s", err))
-	}
-
+func (n *NewManagedObjectCmd) RunE(cmd *cobra.Command, args []string) error {
 	// query parameters
 	queryValue := url.QueryEscape("")
 	query := url.Values{}
+
+	err := flags.WithQueryOptions(
+		cmd,
+		query,
+	)
+	if err != nil {
+		return newUserError(err)
+	}
+
 	queryValue, err = url.QueryUnescape(query.Encode())
 
 	if err != nil {
@@ -73,7 +82,7 @@ func (n *newManagedObjectCmd) newManagedObject(cmd *cobra.Command, args []string
 	formData := make(map[string]io.Reader)
 
 	// body
-	body := mapbuilder.NewMapBuilder()
+	body := mapbuilder.NewInitializedMapBuilder()
 	body.SetMap(getDataFlag(cmd))
 	if v, err := cmd.Flags().GetString("name"); err == nil {
 		if v != "" {
@@ -112,5 +121,5 @@ func (n *newManagedObjectCmd) newManagedObject(cmd *cobra.Command, args []string
 		DryRun:       globalFlagDryRun,
 	}
 
-	return processRequestAndResponse([]c8y.RequestOptions{req}, commonOptions)
+	return processRequestAndResponseWithWorkers(cmd, &req, "")
 }

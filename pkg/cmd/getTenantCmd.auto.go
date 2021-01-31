@@ -7,18 +7,19 @@ import (
 	"net/http"
 	"net/url"
 
+	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/pkg/mapbuilder"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
 )
 
-type getTenantCmd struct {
+type GetTenantCmd struct {
 	*baseCmd
 }
 
-func newGetTenantCmd() *getTenantCmd {
-	ccmd := &getTenantCmd{}
-
+func NewGetTenantCmd() *GetTenantCmd {
+	var _ = fmt.Errorf
+	ccmd := &GetTenantCmd{}
 	cmd := &cobra.Command{
 		Use:   "get",
 		Short: "Get tenant",
@@ -28,12 +29,17 @@ $ c8y tenants get --id "mycompany"
 Get a tenant by name (from the management tenant)
         `,
 		PreRunE: nil,
-		RunE:    ccmd.getTenant,
+		RunE:    ccmd.RunE,
 	}
 
 	cmd.SilenceUsage = true
 
-	cmd.Flags().String("id", "", "Tenant id")
+	cmd.Flags().String("id", "", "Tenant id (accepts pipeline)")
+
+	flags.WithOptions(
+		cmd,
+		flags.WithPipelineSupport("id"),
+	)
 
 	// Required flags
 
@@ -42,17 +48,24 @@ Get a tenant by name (from the management tenant)
 	return ccmd
 }
 
-func (n *getTenantCmd) getTenant(cmd *cobra.Command, args []string) error {
+func (n *GetTenantCmd) RunE(cmd *cobra.Command, args []string) error {
+	// query parameters
+	queryValue := url.QueryEscape("")
+	query := url.Values{}
 
+	err := flags.WithQueryOptions(
+		cmd,
+		query,
+	)
+	if err != nil {
+		return newUserError(err)
+	}
 	commonOptions, err := getCommonOptions(cmd)
 	if err != nil {
 		return newUserError(fmt.Sprintf("Failed to get common options. err=%s", err))
 	}
-
-	// query parameters
-	queryValue := url.QueryEscape("")
-	query := url.Values{}
 	commonOptions.AddQueryParameters(&query)
+
 	queryValue, err = url.QueryUnescape(query.Encode())
 
 	if err != nil {
@@ -66,13 +79,10 @@ func (n *getTenantCmd) getTenant(cmd *cobra.Command, args []string) error {
 	formData := make(map[string]io.Reader)
 
 	// body
-	body := mapbuilder.NewMapBuilder()
+	body := mapbuilder.NewInitializedMapBuilder()
 
 	// path parameters
 	pathParameters := make(map[string]string)
-	if v := getTenantWithDefaultFlag(cmd, "id", client.TenantName); v != "" {
-		pathParameters["id"] = v
-	}
 
 	path := replacePathParameters("/tenant/tenants/{id}", pathParameters)
 
@@ -87,5 +97,5 @@ func (n *getTenantCmd) getTenant(cmd *cobra.Command, args []string) error {
 		DryRun:       globalFlagDryRun,
 	}
 
-	return processRequestAndResponse([]c8y.RequestOptions{req}, commonOptions)
+	return processRequestAndResponseWithWorkers(cmd, &req, "id")
 }

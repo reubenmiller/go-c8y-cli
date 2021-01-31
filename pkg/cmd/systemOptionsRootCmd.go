@@ -4,12 +4,12 @@ import (
 	"github.com/spf13/cobra"
 )
 
-type systemOptionsCmd struct {
+type SystemOptionsCmd struct {
 	*baseCmd
 }
 
-func newSystemOptionsRootCmd() *systemOptionsCmd {
-	ccmd := &systemOptionsCmd{}
+func NewSystemOptionsRootCmd() *SystemOptionsCmd {
+	ccmd := &SystemOptionsCmd{}
 
 	cmd := &cobra.Command{
 		Use:   "systemOptions",
@@ -18,8 +18,8 @@ func newSystemOptionsRootCmd() *systemOptionsCmd {
 	}
 
 	// Subcommands
-	cmd.AddCommand(newGetSystemOptionCollectionCmd().getCommand())
-	cmd.AddCommand(newGetSystemOptionCmd().getCommand())
+	cmd.AddCommand(NewGetSystemOptionCollectionCmd().getCommand())
+	cmd.AddCommand(NewGetSystemOptionCmd().getCommand())
 
 	ccmd.baseCmd = newBaseCmd(cmd)
 

@@ -7,18 +7,19 @@ import (
 	"net/http"
 	"net/url"
 
+	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/pkg/mapbuilder"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
 )
 
-type deleteMeasurementCollectionCmd struct {
+type DeleteMeasurementCollectionCmd struct {
 	*baseCmd
 }
 
-func newDeleteMeasurementCollectionCmd() *deleteMeasurementCollectionCmd {
-	ccmd := &deleteMeasurementCollectionCmd{}
-
+func NewDeleteMeasurementCollectionCmd() *DeleteMeasurementCollectionCmd {
+	var _ = fmt.Errorf
+	ccmd := &DeleteMeasurementCollectionCmd{}
 	cmd := &cobra.Command{
 		Use:   "deleteCollection",
 		Short: "Delete a collection of measurements",
@@ -28,17 +29,22 @@ $ c8y measurements deleteCollection --device $Measurement.source.id
 Delete measurement collection for a device
         `,
 		PreRunE: validateDeleteMode,
-		RunE:    ccmd.deleteMeasurementCollection,
+		RunE:    ccmd.RunE,
 	}
 
 	cmd.SilenceUsage = true
 
-	cmd.Flags().StringSlice("device", []string{""}, "Device ID")
+	cmd.Flags().StringSlice("device", []string{""}, "Device ID (accepts pipeline)")
 	cmd.Flags().String("type", "", "Measurement type.")
 	cmd.Flags().String("fragmentType", "", "Fragment name from measurement (deprecated).")
 	cmd.Flags().String("dateFrom", "", "Start date or date and time of measurement occurrence.")
 	cmd.Flags().String("dateTo", "", "End date or date and time of measurement occurrence.")
 	addProcessingModeFlag(cmd)
+
+	flags.WithOptions(
+		cmd,
+		flags.WithPipelineSupport("device"),
+	)
 
 	// Required flags
 
@@ -47,13 +53,7 @@ Delete measurement collection for a device
 	return ccmd
 }
 
-func (n *deleteMeasurementCollectionCmd) deleteMeasurementCollection(cmd *cobra.Command, args []string) error {
-
-	commonOptions, err := getCommonOptions(cmd)
-	if err != nil {
-		return newUserError(fmt.Sprintf("Failed to get common options. err=%s", err))
-	}
-
+func (n *DeleteMeasurementCollectionCmd) RunE(cmd *cobra.Command, args []string) error {
 	// query parameters
 	queryValue := url.QueryEscape("")
 	query := url.Values{}
@@ -102,6 +102,15 @@ func (n *deleteMeasurementCollectionCmd) deleteMeasurementCollection(cmd *cobra.
 			return newUserError("invalid date format", err)
 		}
 	}
+
+	err := flags.WithQueryOptions(
+		cmd,
+		query,
+	)
+	if err != nil {
+		return newUserError(err)
+	}
+
 	queryValue, err = url.QueryUnescape(query.Encode())
 
 	if err != nil {
@@ -120,7 +129,7 @@ func (n *deleteMeasurementCollectionCmd) deleteMeasurementCollection(cmd *cobra.
 	formData := make(map[string]io.Reader)
 
 	// body
-	body := mapbuilder.NewMapBuilder()
+	body := mapbuilder.NewInitializedMapBuilder()
 
 	// path parameters
 	pathParameters := make(map[string]string)
@@ -138,5 +147,5 @@ func (n *deleteMeasurementCollectionCmd) deleteMeasurementCollection(cmd *cobra.
 		DryRun:       globalFlagDryRun,
 	}
 
-	return processRequestAndResponse([]c8y.RequestOptions{req}, commonOptions)
+	return processRequestAndResponseWithWorkers(cmd, &req, "device")
 }

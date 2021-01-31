@@ -7,18 +7,19 @@ import (
 	"net/http"
 	"net/url"
 
+	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/pkg/mapbuilder"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
 )
 
-type deleteUserFromGroupCmd struct {
+type DeleteUserFromGroupCmd struct {
 	*baseCmd
 }
 
-func newDeleteUserFromGroupCmd() *deleteUserFromGroupCmd {
-	ccmd := &deleteUserFromGroupCmd{}
-
+func NewDeleteUserFromGroupCmd() *DeleteUserFromGroupCmd {
+	var _ = fmt.Errorf
+	ccmd := &DeleteUserFromGroupCmd{}
 	cmd := &cobra.Command{
 		Use:   "deleteUserFromGroup",
 		Short: "Delete a user from a group",
@@ -28,7 +29,7 @@ $ c8y userReferences deleteUserFromGroup --group 1 --user myuser
 List the users within a user group
         `,
 		PreRunE: validateDeleteMode,
-		RunE:    ccmd.deleteUserFromGroup,
+		RunE:    ccmd.RunE,
 	}
 
 	cmd.SilenceUsage = true
@@ -37,6 +38,11 @@ List the users within a user group
 	cmd.Flags().StringSlice("user", []string{""}, "User id/username (required)")
 	cmd.Flags().String("tenant", "", "Tenant")
 	addProcessingModeFlag(cmd)
+
+	flags.WithOptions(
+		cmd,
+		flags.WithPipelineSupport(""),
+	)
 
 	// Required flags
 	cmd.MarkFlagRequired("group")
@@ -47,16 +53,19 @@ List the users within a user group
 	return ccmd
 }
 
-func (n *deleteUserFromGroupCmd) deleteUserFromGroup(cmd *cobra.Command, args []string) error {
-
-	commonOptions, err := getCommonOptions(cmd)
-	if err != nil {
-		return newUserError(fmt.Sprintf("Failed to get common options. err=%s", err))
-	}
-
+func (n *DeleteUserFromGroupCmd) RunE(cmd *cobra.Command, args []string) error {
 	// query parameters
 	queryValue := url.QueryEscape("")
 	query := url.Values{}
+
+	err := flags.WithQueryOptions(
+		cmd,
+		query,
+	)
+	if err != nil {
+		return newUserError(err)
+	}
+
 	queryValue, err = url.QueryUnescape(query.Encode())
 
 	if err != nil {
@@ -75,7 +84,7 @@ func (n *deleteUserFromGroupCmd) deleteUserFromGroup(cmd *cobra.Command, args []
 	formData := make(map[string]io.Reader)
 
 	// body
-	body := mapbuilder.NewMapBuilder()
+	body := mapbuilder.NewInitializedMapBuilder()
 
 	// path parameters
 	pathParameters := make(map[string]string)
@@ -130,5 +139,5 @@ func (n *deleteUserFromGroupCmd) deleteUserFromGroup(cmd *cobra.Command, args []
 		DryRun:       globalFlagDryRun,
 	}
 
-	return processRequestAndResponse([]c8y.RequestOptions{req}, commonOptions)
+	return processRequestAndResponseWithWorkers(cmd, &req, "")
 }

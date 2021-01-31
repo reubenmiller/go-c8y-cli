@@ -7,18 +7,19 @@ import (
 	"net/http"
 	"net/url"
 
+	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/pkg/mapbuilder"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
 )
 
-type updateCurrentApplicationCmd struct {
+type UpdateCurrentApplicationCmd struct {
 	*baseCmd
 }
 
-func newUpdateCurrentApplicationCmd() *updateCurrentApplicationCmd {
-	ccmd := &updateCurrentApplicationCmd{}
-
+func NewUpdateCurrentApplicationCmd() *UpdateCurrentApplicationCmd {
+	var _ = fmt.Errorf
+	ccmd := &UpdateCurrentApplicationCmd{}
 	cmd := &cobra.Command{
 		Use:   "update",
 		Short: "Update current application",
@@ -28,7 +29,7 @@ $ c8y currentApplication update --data "mycustomProp=1"
 Update custom properties of the current application (requires using application credentials)
         `,
 		PreRunE: validateUpdateMode,
-		RunE:    ccmd.updateCurrentApplication,
+		RunE:    ccmd.RunE,
 	}
 
 	cmd.SilenceUsage = true
@@ -44,6 +45,11 @@ Update custom properties of the current application (requires using application 
 	cmd.Flags().String("externalUrl", "", "URL to the external application")
 	addProcessingModeFlag(cmd)
 
+	flags.WithOptions(
+		cmd,
+		flags.WithPipelineSupport(""),
+	)
+
 	// Required flags
 
 	ccmd.baseCmd = newBaseCmd(cmd)
@@ -51,16 +57,19 @@ Update custom properties of the current application (requires using application 
 	return ccmd
 }
 
-func (n *updateCurrentApplicationCmd) updateCurrentApplication(cmd *cobra.Command, args []string) error {
-
-	commonOptions, err := getCommonOptions(cmd)
-	if err != nil {
-		return newUserError(fmt.Sprintf("Failed to get common options. err=%s", err))
-	}
-
+func (n *UpdateCurrentApplicationCmd) RunE(cmd *cobra.Command, args []string) error {
 	// query parameters
 	queryValue := url.QueryEscape("")
 	query := url.Values{}
+
+	err := flags.WithQueryOptions(
+		cmd,
+		query,
+	)
+	if err != nil {
+		return newUserError(err)
+	}
+
 	queryValue, err = url.QueryUnescape(query.Encode())
 
 	if err != nil {
@@ -79,7 +88,7 @@ func (n *updateCurrentApplicationCmd) updateCurrentApplication(cmd *cobra.Comman
 	formData := make(map[string]io.Reader)
 
 	// body
-	body := mapbuilder.NewMapBuilder()
+	body := mapbuilder.NewInitializedMapBuilder()
 	body.SetMap(getDataFlag(cmd))
 	if v, err := cmd.Flags().GetString("name"); err == nil {
 		if v != "" {
@@ -160,5 +169,5 @@ func (n *updateCurrentApplicationCmd) updateCurrentApplication(cmd *cobra.Comman
 		DryRun:       globalFlagDryRun,
 	}
 
-	return processRequestAndResponse([]c8y.RequestOptions{req}, commonOptions)
+	return processRequestAndResponseWithWorkers(cmd, &req, "")
 }

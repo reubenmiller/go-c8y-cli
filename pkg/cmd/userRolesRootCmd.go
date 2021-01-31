@@ -4,12 +4,12 @@ import (
 	"github.com/spf13/cobra"
 )
 
-type userRolesCmd struct {
+type UserRolesCmd struct {
 	*baseCmd
 }
 
-func newUserRolesRootCmd() *userRolesCmd {
-	ccmd := &userRolesCmd{}
+func NewUserRolesRootCmd() *UserRolesCmd {
+	ccmd := &UserRolesCmd{}
 
 	cmd := &cobra.Command{
 		Use:   "userRoles",
@@ -18,13 +18,13 @@ func newUserRolesRootCmd() *userRolesCmd {
 	}
 
 	// Subcommands
-	cmd.AddCommand(newGetRoleCollectionCmd().getCommand())
-	cmd.AddCommand(newAddRoleToUserCmd().getCommand())
-	cmd.AddCommand(newDeleteRoleFromUserCmd().getCommand())
-	cmd.AddCommand(newAddRoleToGroupCmd().getCommand())
-	cmd.AddCommand(newDeleteRoleFromGroupCmd().getCommand())
-	cmd.AddCommand(newGetRoleReferenceCollectionFromUserCmd().getCommand())
-	cmd.AddCommand(newGetRoleReferenceCollectionFromGroupCmd().getCommand())
+	cmd.AddCommand(NewGetRoleCollectionCmd().getCommand())
+	cmd.AddCommand(NewAddRoleToUserCmd().getCommand())
+	cmd.AddCommand(NewDeleteRoleFromUserCmd().getCommand())
+	cmd.AddCommand(NewAddRoleToGroupCmd().getCommand())
+	cmd.AddCommand(NewDeleteRoleFromGroupCmd().getCommand())
+	cmd.AddCommand(NewGetRoleReferenceCollectionFromUserCmd().getCommand())
+	cmd.AddCommand(NewGetRoleReferenceCollectionFromGroupCmd().getCommand())
 
 	ccmd.baseCmd = newBaseCmd(cmd)
 

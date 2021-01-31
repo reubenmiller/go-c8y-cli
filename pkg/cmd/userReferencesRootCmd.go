@@ -4,12 +4,12 @@ import (
 	"github.com/spf13/cobra"
 )
 
-type userReferencesCmd struct {
+type UserReferencesCmd struct {
 	*baseCmd
 }
 
-func newUserReferencesRootCmd() *userReferencesCmd {
-	ccmd := &userReferencesCmd{}
+func NewUserReferencesRootCmd() *UserReferencesCmd {
+	ccmd := &UserReferencesCmd{}
 
 	cmd := &cobra.Command{
 		Use:   "userReferences",
@@ -18,9 +18,9 @@ func newUserReferencesRootCmd() *userReferencesCmd {
 	}
 
 	// Subcommands
-	cmd.AddCommand(newAddUserToGroupCmd().getCommand())
-	cmd.AddCommand(newDeleteUserFromGroupCmd().getCommand())
-	cmd.AddCommand(newGetUsersInGroupCmd().getCommand())
+	cmd.AddCommand(NewAddUserToGroupCmd().getCommand())
+	cmd.AddCommand(NewDeleteUserFromGroupCmd().getCommand())
+	cmd.AddCommand(NewGetUsersInGroupCmd().getCommand())
 
 	ccmd.baseCmd = newBaseCmd(cmd)
 

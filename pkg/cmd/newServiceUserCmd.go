@@ -18,7 +18,7 @@ type newServiceUserCmd struct {
 	roles       []string
 }
 
-func newNewServiceUserCmd() *newServiceUserCmd {
+func NewNewServiceUserCmd() *newServiceUserCmd {
 	ccmd := &newServiceUserCmd{}
 
 	cmd := &cobra.Command{

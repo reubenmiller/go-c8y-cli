@@ -4,12 +4,12 @@ import (
 	"github.com/spf13/cobra"
 )
 
-type tenantOptionsCmd struct {
+type TenantOptionsCmd struct {
 	*baseCmd
 }
 
-func newTenantOptionsRootCmd() *tenantOptionsCmd {
-	ccmd := &tenantOptionsCmd{}
+func NewTenantOptionsRootCmd() *TenantOptionsCmd {
+	ccmd := &TenantOptionsCmd{}
 
 	cmd := &cobra.Command{
 		Use:   "tenantOptions",
@@ -22,14 +22,14 @@ Any option of any tenant can be defined as "non-editable" by "management" tenant
 	}
 
 	// Subcommands
-	cmd.AddCommand(newGetTenantOptionCollectionCmd().getCommand())
-	cmd.AddCommand(newNewTenantOptionCmd().getCommand())
-	cmd.AddCommand(newGetTenantOptionCmd().getCommand())
-	cmd.AddCommand(newDeleteTenantOptionCmd().getCommand())
-	cmd.AddCommand(newUpdateTenantOptionCmd().getCommand())
-	cmd.AddCommand(newUpdateTenantOptionBulkCmd().getCommand())
-	cmd.AddCommand(newGetTenantOptionsForCategoryCmd().getCommand())
-	cmd.AddCommand(newUpdateTenantOptionEditableCmd().getCommand())
+	cmd.AddCommand(NewGetTenantOptionCollectionCmd().getCommand())
+	cmd.AddCommand(NewNewTenantOptionCmd().getCommand())
+	cmd.AddCommand(NewGetTenantOptionCmd().getCommand())
+	cmd.AddCommand(NewDeleteTenantOptionCmd().getCommand())
+	cmd.AddCommand(NewUpdateTenantOptionCmd().getCommand())
+	cmd.AddCommand(NewUpdateTenantOptionBulkCmd().getCommand())
+	cmd.AddCommand(NewGetTenantOptionsForCategoryCmd().getCommand())
+	cmd.AddCommand(NewUpdateTenantOptionEditableCmd().getCommand())
 
 	ccmd.baseCmd = newBaseCmd(cmd)
 

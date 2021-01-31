@@ -4,12 +4,12 @@ import (
 	"github.com/spf13/cobra"
 )
 
-type retentionRulesCmd struct {
+type RetentionRulesCmd struct {
 	*baseCmd
 }
 
-func newRetentionRulesRootCmd() *retentionRulesCmd {
-	ccmd := &retentionRulesCmd{}
+func NewRetentionRulesRootCmd() *RetentionRulesCmd {
+	ccmd := &RetentionRulesCmd{}
 
 	cmd := &cobra.Command{
 		Use:   "retentionRules",
@@ -18,11 +18,11 @@ func newRetentionRulesRootCmd() *retentionRulesCmd {
 	}
 
 	// Subcommands
-	cmd.AddCommand(newGetRetentionRuleCollectionCmd().getCommand())
-	cmd.AddCommand(newNewRetentionRuleCmd().getCommand())
-	cmd.AddCommand(newGetRetentionRuleCmd().getCommand())
-	cmd.AddCommand(newDeleteRetentionRuleCmd().getCommand())
-	cmd.AddCommand(newUpdateRetentionRuleCmd().getCommand())
+	cmd.AddCommand(NewGetRetentionRuleCollectionCmd().getCommand())
+	cmd.AddCommand(NewNewRetentionRuleCmd().getCommand())
+	cmd.AddCommand(NewGetRetentionRuleCmd().getCommand())
+	cmd.AddCommand(NewDeleteRetentionRuleCmd().getCommand())
+	cmd.AddCommand(NewUpdateRetentionRuleCmd().getCommand())
 
 	ccmd.baseCmd = newBaseCmd(cmd)
 

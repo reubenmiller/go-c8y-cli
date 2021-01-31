@@ -7,18 +7,19 @@ import (
 	"net/http"
 	"net/url"
 
+	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/pkg/mapbuilder"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
 )
 
-type newApplicationBinaryCmd struct {
+type NewApplicationBinaryCmd struct {
 	*baseCmd
 }
 
-func newNewApplicationBinaryCmd() *newApplicationBinaryCmd {
-	ccmd := &newApplicationBinaryCmd{}
-
+func NewNewApplicationBinaryCmd() *NewApplicationBinaryCmd {
+	var _ = fmt.Errorf
+	ccmd := &NewApplicationBinaryCmd{}
 	cmd := &cobra.Command{
 		Use:   "createBinary",
 		Short: "New application binary",
@@ -33,17 +34,21 @@ $ c8y applications createBinary --id 12345 --file ./helloworld.zip
 Upload application microservice binary
         `,
 		PreRunE: validateCreateMode,
-		RunE:    ccmd.newApplicationBinary,
+		RunE:    ccmd.RunE,
 	}
 
 	cmd.SilenceUsage = true
 
-	cmd.Flags().String("id", "", "Application id (required)")
+	cmd.Flags().String("id", "", "Application id (required) (accepts pipeline)")
 	cmd.Flags().String("file", "", "File to be uploaded as a binary (required)")
 	addProcessingModeFlag(cmd)
 
+	flags.WithOptions(
+		cmd,
+		flags.WithPipelineSupport("id"),
+	)
+
 	// Required flags
-	cmd.MarkFlagRequired("id")
 	cmd.MarkFlagRequired("file")
 
 	ccmd.baseCmd = newBaseCmd(cmd)
@@ -51,16 +56,19 @@ Upload application microservice binary
 	return ccmd
 }
 
-func (n *newApplicationBinaryCmd) newApplicationBinary(cmd *cobra.Command, args []string) error {
-
-	commonOptions, err := getCommonOptions(cmd)
-	if err != nil {
-		return newUserError(fmt.Sprintf("Failed to get common options. err=%s", err))
-	}
-
+func (n *NewApplicationBinaryCmd) RunE(cmd *cobra.Command, args []string) error {
 	// query parameters
 	queryValue := url.QueryEscape("")
 	query := url.Values{}
+
+	err := flags.WithQueryOptions(
+		cmd,
+		query,
+	)
+	if err != nil {
+		return newUserError(err)
+	}
+
 	queryValue, err = url.QueryUnescape(query.Encode())
 
 	if err != nil {
@@ -79,7 +87,7 @@ func (n *newApplicationBinaryCmd) newApplicationBinary(cmd *cobra.Command, args 
 	formData := make(map[string]io.Reader)
 
 	// body
-	body := mapbuilder.NewMapBuilder()
+	body := mapbuilder.NewInitializedMapBuilder()
 	body.SetMap(getDataFlag(cmd))
 	getFileFlag(cmd, "file", true, formData)
 	if err := setDataTemplateFromFlags(cmd, body); err != nil {
@@ -91,23 +99,6 @@ func (n *newApplicationBinaryCmd) newApplicationBinary(cmd *cobra.Command, args 
 
 	// path parameters
 	pathParameters := make(map[string]string)
-	if cmd.Flags().Changed("id") {
-		idInputValues, idValue, err := getApplicationSlice(cmd, args, "id")
-
-		if err != nil {
-			return newUserError("no matching applications found", idInputValues, err)
-		}
-
-		if len(idValue) == 0 {
-			return newUserError("no matching applications found", idInputValues)
-		}
-
-		for _, item := range idValue {
-			if item != "" {
-				pathParameters["id"] = newIDValue(item).GetID()
-			}
-		}
-	}
 
 	path := replacePathParameters("/application/applications/{id}/binaries", pathParameters)
 
@@ -122,5 +113,5 @@ func (n *newApplicationBinaryCmd) newApplicationBinary(cmd *cobra.Command, args 
 		DryRun:       globalFlagDryRun,
 	}
 
-	return processRequestAndResponse([]c8y.RequestOptions{req}, commonOptions)
+	return processRequestAndResponseWithWorkers(cmd, &req, "id")
 }

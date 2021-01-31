@@ -7,18 +7,19 @@ import (
 	"net/http"
 	"net/url"
 
+	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/pkg/mapbuilder"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
 )
 
-type getMeasurementCollectionCmd struct {
+type GetMeasurementCollectionCmd struct {
 	*baseCmd
 }
 
-func newGetMeasurementCollectionCmd() *getMeasurementCollectionCmd {
-	ccmd := &getMeasurementCollectionCmd{}
-
+func NewGetMeasurementCollectionCmd() *GetMeasurementCollectionCmd {
+	var _ = fmt.Errorf
+	ccmd := &GetMeasurementCollectionCmd{}
 	cmd := &cobra.Command{
 		Use:   "list",
 		Short: "Get a collection of measurements based on filter parameters",
@@ -28,12 +29,12 @@ $ c8y measurements list
 Get a list of measurements
         `,
 		PreRunE: nil,
-		RunE:    ccmd.getMeasurementCollection,
+		RunE:    ccmd.RunE,
 	}
 
 	cmd.SilenceUsage = true
 
-	cmd.Flags().StringSlice("device", []string{""}, "Device ID")
+	cmd.Flags().StringSlice("device", []string{""}, "Device ID (accepts pipeline)")
 	cmd.Flags().String("type", "", "Measurement type.")
 	cmd.Flags().String("valueFragmentType", "", "value fragment type")
 	cmd.Flags().String("valueFragmentSeries", "", "value fragment series")
@@ -45,6 +46,11 @@ Get a list of measurements
 	cmd.Flags().Bool("excel", false, "Results will be displayed in Excel format Note: -IncludeAll, is not supported when using using this parameter")
 	cmd.Flags().String("unit", "", "Every measurement fragment which contains 'unit' property will be transformed to use required system of units.")
 
+	flags.WithOptions(
+		cmd,
+		flags.WithPipelineSupport("device"),
+	)
+
 	// Required flags
 
 	ccmd.baseCmd = newBaseCmd(cmd)
@@ -52,13 +58,7 @@ Get a list of measurements
 	return ccmd
 }
 
-func (n *getMeasurementCollectionCmd) getMeasurementCollection(cmd *cobra.Command, args []string) error {
-
-	commonOptions, err := getCommonOptions(cmd)
-	if err != nil {
-		return newUserError(fmt.Sprintf("Failed to get common options. err=%s", err))
-	}
-
+func (n *GetMeasurementCollectionCmd) RunE(cmd *cobra.Command, args []string) error {
 	// query parameters
 	queryValue := url.QueryEscape("")
 	query := url.Values{}
@@ -128,7 +128,20 @@ func (n *getMeasurementCollectionCmd) getMeasurementCollection(cmd *cobra.Comman
 			return newUserError("Flag does not exist")
 		}
 	}
+
+	err := flags.WithQueryOptions(
+		cmd,
+		query,
+	)
+	if err != nil {
+		return newUserError(err)
+	}
+	commonOptions, err := getCommonOptions(cmd)
+	if err != nil {
+		return newUserError(fmt.Sprintf("Failed to get common options. err=%s", err))
+	}
 	commonOptions.AddQueryParameters(&query)
+
 	queryValue, err = url.QueryUnescape(query.Encode())
 
 	if err != nil {
@@ -163,7 +176,7 @@ func (n *getMeasurementCollectionCmd) getMeasurementCollection(cmd *cobra.Comman
 	formData := make(map[string]io.Reader)
 
 	// body
-	body := mapbuilder.NewMapBuilder()
+	body := mapbuilder.NewInitializedMapBuilder()
 
 	// path parameters
 	pathParameters := make(map[string]string)
@@ -181,5 +194,5 @@ func (n *getMeasurementCollectionCmd) getMeasurementCollection(cmd *cobra.Comman
 		DryRun:       globalFlagDryRun,
 	}
 
-	return processRequestAndResponse([]c8y.RequestOptions{req}, commonOptions)
+	return processRequestAndResponseWithWorkers(cmd, &req, "device")
 }

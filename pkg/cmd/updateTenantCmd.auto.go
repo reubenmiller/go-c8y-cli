@@ -7,18 +7,19 @@ import (
 	"net/http"
 	"net/url"
 
+	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/pkg/mapbuilder"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
 )
 
-type updateTenantCmd struct {
+type UpdateTenantCmd struct {
 	*baseCmd
 }
 
-func newUpdateTenantCmd() *updateTenantCmd {
-	ccmd := &updateTenantCmd{}
-
+func NewUpdateTenantCmd() *UpdateTenantCmd {
+	var _ = fmt.Errorf
+	ccmd := &UpdateTenantCmd{}
 	cmd := &cobra.Command{
 		Use:   "update",
 		Short: "Update tenant",
@@ -28,12 +29,12 @@ $ c8y tenants update --id "mycompany" --contactName "John Smith"
 Update a tenant by name (from the mangement tenant)
         `,
 		PreRunE: validateUpdateMode,
-		RunE:    ccmd.updateTenant,
+		RunE:    ccmd.RunE,
 	}
 
 	cmd.SilenceUsage = true
 
-	cmd.Flags().String("id", "", "Tenant id")
+	cmd.Flags().String("id", "", "Tenant id (accepts pipeline)")
 	cmd.Flags().String("company", "", "Company name. Maximum 256 characters")
 	cmd.Flags().String("domain", "", "Domain name to be used for the tenant. Maximum 256 characters (required)")
 	cmd.Flags().String("adminName", "", "Username of the tenant administrator")
@@ -43,6 +44,11 @@ Update a tenant by name (from the mangement tenant)
 	addDataFlag(cmd)
 	addProcessingModeFlag(cmd)
 
+	flags.WithOptions(
+		cmd,
+		flags.WithPipelineSupport("id"),
+	)
+
 	// Required flags
 	cmd.MarkFlagRequired("domain")
 
@@ -51,16 +57,19 @@ Update a tenant by name (from the mangement tenant)
 	return ccmd
 }
 
-func (n *updateTenantCmd) updateTenant(cmd *cobra.Command, args []string) error {
-
-	commonOptions, err := getCommonOptions(cmd)
-	if err != nil {
-		return newUserError(fmt.Sprintf("Failed to get common options. err=%s", err))
-	}
-
+func (n *UpdateTenantCmd) RunE(cmd *cobra.Command, args []string) error {
 	// query parameters
 	queryValue := url.QueryEscape("")
 	query := url.Values{}
+
+	err := flags.WithQueryOptions(
+		cmd,
+		query,
+	)
+	if err != nil {
+		return newUserError(err)
+	}
+
 	queryValue, err = url.QueryUnescape(query.Encode())
 
 	if err != nil {
@@ -79,7 +88,7 @@ func (n *updateTenantCmd) updateTenant(cmd *cobra.Command, args []string) error 
 	formData := make(map[string]io.Reader)
 
 	// body
-	body := mapbuilder.NewMapBuilder()
+	body := mapbuilder.NewInitializedMapBuilder()
 	body.SetMap(getDataFlag(cmd))
 	if v, err := cmd.Flags().GetString("company"); err == nil {
 		if v != "" {
@@ -132,9 +141,6 @@ func (n *updateTenantCmd) updateTenant(cmd *cobra.Command, args []string) error 
 
 	// path parameters
 	pathParameters := make(map[string]string)
-	if v := getTenantWithDefaultFlag(cmd, "id", client.TenantName); v != "" {
-		pathParameters["id"] = v
-	}
 
 	path := replacePathParameters("/tenant/tenants/{id}", pathParameters)
 
@@ -149,5 +155,5 @@ func (n *updateTenantCmd) updateTenant(cmd *cobra.Command, args []string) error 
 		DryRun:       globalFlagDryRun,
 	}
 
-	return processRequestAndResponse([]c8y.RequestOptions{req}, commonOptions)
+	return processRequestAndResponseWithWorkers(cmd, &req, "id")
 }

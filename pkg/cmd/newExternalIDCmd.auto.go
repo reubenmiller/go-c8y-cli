@@ -7,18 +7,19 @@ import (
 	"net/http"
 	"net/url"
 
+	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/pkg/mapbuilder"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
 )
 
-type newExternalIDCmd struct {
+type NewExternalIDCmd struct {
 	*baseCmd
 }
 
-func newNewExternalIDCmd() *newExternalIDCmd {
-	ccmd := &newExternalIDCmd{}
-
+func NewNewExternalIDCmd() *NewExternalIDCmd {
+	var _ = fmt.Errorf
+	ccmd := &NewExternalIDCmd{}
 	cmd := &cobra.Command{
 		Use:   "create",
 		Short: "Create a new external id",
@@ -28,18 +29,22 @@ $ c8y identity create --device 1234 --type test --name myserialnumber
 Create external identity
         `,
 		PreRunE: validateCreateMode,
-		RunE:    ccmd.newExternalID,
+		RunE:    ccmd.RunE,
 	}
 
 	cmd.SilenceUsage = true
 
-	cmd.Flags().StringSlice("device", []string{""}, "The ManagedObject linked to the external ID. (required)")
+	cmd.Flags().StringSlice("device", []string{""}, "The ManagedObject linked to the external ID. (required) (accepts pipeline)")
 	cmd.Flags().String("type", "", "The type of the external identifier as string, e.g. 'com_cumulocity_model_idtype_SerialNumber'. (required)")
 	cmd.Flags().String("name", "", "The identifier used in the external system that Cumulocity interfaces with. (required)")
 	addProcessingModeFlag(cmd)
 
+	flags.WithOptions(
+		cmd,
+		flags.WithPipelineSupport("device"),
+	)
+
 	// Required flags
-	cmd.MarkFlagRequired("device")
 	cmd.MarkFlagRequired("type")
 	cmd.MarkFlagRequired("name")
 
@@ -48,16 +53,19 @@ Create external identity
 	return ccmd
 }
 
-func (n *newExternalIDCmd) newExternalID(cmd *cobra.Command, args []string) error {
-
-	commonOptions, err := getCommonOptions(cmd)
-	if err != nil {
-		return newUserError(fmt.Sprintf("Failed to get common options. err=%s", err))
-	}
-
+func (n *NewExternalIDCmd) RunE(cmd *cobra.Command, args []string) error {
 	// query parameters
 	queryValue := url.QueryEscape("")
 	query := url.Values{}
+
+	err := flags.WithQueryOptions(
+		cmd,
+		query,
+	)
+	if err != nil {
+		return newUserError(err)
+	}
+
 	queryValue, err = url.QueryUnescape(query.Encode())
 
 	if err != nil {
@@ -76,7 +84,7 @@ func (n *newExternalIDCmd) newExternalID(cmd *cobra.Command, args []string) erro
 	formData := make(map[string]io.Reader)
 
 	// body
-	body := mapbuilder.NewMapBuilder()
+	body := mapbuilder.NewInitializedMapBuilder()
 	body.SetMap(getDataFlag(cmd))
 	if v, err := cmd.Flags().GetString("type"); err == nil {
 		if v != "" {
@@ -101,23 +109,6 @@ func (n *newExternalIDCmd) newExternalID(cmd *cobra.Command, args []string) erro
 
 	// path parameters
 	pathParameters := make(map[string]string)
-	if cmd.Flags().Changed("device") {
-		deviceInputValues, deviceValue, err := getFormattedDeviceSlice(cmd, args, "device")
-
-		if err != nil {
-			return newUserError("no matching devices found", deviceInputValues, err)
-		}
-
-		if len(deviceValue) == 0 {
-			return newUserError("no matching devices found", deviceInputValues)
-		}
-
-		for _, item := range deviceValue {
-			if item != "" {
-				pathParameters["device"] = newIDValue(item).GetID()
-			}
-		}
-	}
 
 	path := replacePathParameters("identity/globalIds/{device}/externalIds", pathParameters)
 
@@ -132,5 +123,5 @@ func (n *newExternalIDCmd) newExternalID(cmd *cobra.Command, args []string) erro
 		DryRun:       globalFlagDryRun,
 	}
 
-	return processRequestAndResponse([]c8y.RequestOptions{req}, commonOptions)
+	return processRequestAndResponseWithWorkers(cmd, &req, "device")
 }

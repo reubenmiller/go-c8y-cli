@@ -4,12 +4,12 @@ import (
 	"github.com/spf13/cobra"
 )
 
-type devicesCmd struct {
+type DevicesCmd struct {
 	*baseCmd
 }
 
-func newDevicesRootCmd() *devicesCmd {
-	ccmd := &devicesCmd{}
+func NewDevicesRootCmd() *DevicesCmd {
+	ccmd := &DevicesCmd{}
 
 	cmd := &cobra.Command{
 		Use:   "devices",
@@ -18,18 +18,18 @@ func newDevicesRootCmd() *devicesCmd {
 	}
 
 	// Subcommands
-	cmd.AddCommand(newGetDeviceCmd().getCommand())
-	cmd.AddCommand(newUpdateDeviceCmd().getCommand())
-	cmd.AddCommand(newDeleteDeviceCmd().getCommand())
-	cmd.AddCommand(newCreateDeviceCmd().getCommand())
-	cmd.AddCommand(newGetSupportedMeasurementsCmd().getCommand())
-	cmd.AddCommand(newGetSupportedSeriesCmd().getCommand())
-	cmd.AddCommand(newGetSupportedOperationsCmd().getCommand())
-	cmd.AddCommand(newSetDeviceRequiredAvailabilityCmd().getCommand())
-	cmd.AddCommand(newGetDeviceGroupCmd().getCommand())
-	cmd.AddCommand(newUpdateDeviceGroupCmd().getCommand())
-	cmd.AddCommand(newDeleteDeviceGroupCmd().getCommand())
-	cmd.AddCommand(newCreateDeviceGroupCmd().getCommand())
+	cmd.AddCommand(NewGetDeviceCmd().getCommand())
+	cmd.AddCommand(NewUpdateDeviceCmd().getCommand())
+	cmd.AddCommand(NewDeleteDeviceCmd().getCommand())
+	cmd.AddCommand(NewCreateDeviceCmd().getCommand())
+	cmd.AddCommand(NewGetSupportedMeasurementsCmd().getCommand())
+	cmd.AddCommand(NewGetSupportedSeriesCmd().getCommand())
+	cmd.AddCommand(NewGetSupportedOperationsCmd().getCommand())
+	cmd.AddCommand(NewSetDeviceRequiredAvailabilityCmd().getCommand())
+	cmd.AddCommand(NewGetDeviceGroupCmd().getCommand())
+	cmd.AddCommand(NewUpdateDeviceGroupCmd().getCommand())
+	cmd.AddCommand(NewDeleteDeviceGroupCmd().getCommand())
+	cmd.AddCommand(NewCreateDeviceGroupCmd().getCommand())
 
 	ccmd.baseCmd = newBaseCmd(cmd)
 

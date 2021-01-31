@@ -7,18 +7,19 @@ import (
 	"net/http"
 	"net/url"
 
+	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/pkg/mapbuilder"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
 )
 
-type getBinaryCollectionCmd struct {
+type GetBinaryCollectionCmd struct {
 	*baseCmd
 }
 
-func newGetBinaryCollectionCmd() *getBinaryCollectionCmd {
-	ccmd := &getBinaryCollectionCmd{}
-
+func NewGetBinaryCollectionCmd() *GetBinaryCollectionCmd {
+	var _ = fmt.Errorf
+	ccmd := &GetBinaryCollectionCmd{}
 	cmd := &cobra.Command{
 		Use:   "list",
 		Short: "Get collection of inventory binaries",
@@ -29,10 +30,15 @@ $ c8y binaries list --pageSize 100
 Get a list of binaries
         `,
 		PreRunE: nil,
-		RunE:    ccmd.getBinaryCollection,
+		RunE:    ccmd.RunE,
 	}
 
 	cmd.SilenceUsage = true
+
+	flags.WithOptions(
+		cmd,
+		flags.WithPipelineSupport(""),
+	)
 
 	// Required flags
 
@@ -41,17 +47,24 @@ Get a list of binaries
 	return ccmd
 }
 
-func (n *getBinaryCollectionCmd) getBinaryCollection(cmd *cobra.Command, args []string) error {
+func (n *GetBinaryCollectionCmd) RunE(cmd *cobra.Command, args []string) error {
+	// query parameters
+	queryValue := url.QueryEscape("")
+	query := url.Values{}
 
+	err := flags.WithQueryOptions(
+		cmd,
+		query,
+	)
+	if err != nil {
+		return newUserError(err)
+	}
 	commonOptions, err := getCommonOptions(cmd)
 	if err != nil {
 		return newUserError(fmt.Sprintf("Failed to get common options. err=%s", err))
 	}
-
-	// query parameters
-	queryValue := url.QueryEscape("")
-	query := url.Values{}
 	commonOptions.AddQueryParameters(&query)
+
 	queryValue, err = url.QueryUnescape(query.Encode())
 
 	if err != nil {
@@ -65,7 +78,7 @@ func (n *getBinaryCollectionCmd) getBinaryCollection(cmd *cobra.Command, args []
 	formData := make(map[string]io.Reader)
 
 	// body
-	body := mapbuilder.NewMapBuilder()
+	body := mapbuilder.NewInitializedMapBuilder()
 
 	// path parameters
 	pathParameters := make(map[string]string)
@@ -83,5 +96,5 @@ func (n *getBinaryCollectionCmd) getBinaryCollection(cmd *cobra.Command, args []
 		DryRun:       globalFlagDryRun,
 	}
 
-	return processRequestAndResponse([]c8y.RequestOptions{req}, commonOptions)
+	return processRequestAndResponseWithWorkers(cmd, &req, "")
 }

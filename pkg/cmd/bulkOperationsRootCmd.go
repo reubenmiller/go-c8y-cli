@@ -4,12 +4,12 @@ import (
 	"github.com/spf13/cobra"
 )
 
-type bulkOperationsCmd struct {
+type BulkOperationsCmd struct {
 	*baseCmd
 }
 
-func newBulkOperationsRootCmd() *bulkOperationsCmd {
-	ccmd := &bulkOperationsCmd{}
+func NewBulkOperationsRootCmd() *BulkOperationsCmd {
+	ccmd := &BulkOperationsCmd{}
 
 	cmd := &cobra.Command{
 		Use:   "bulkOperations",
@@ -18,11 +18,11 @@ func newBulkOperationsRootCmd() *bulkOperationsCmd {
 	}
 
 	// Subcommands
-	cmd.AddCommand(newGetBulkOperationCollectionCmd().getCommand())
-	cmd.AddCommand(newGetBulkOperationCmd().getCommand())
-	cmd.AddCommand(newDeleteBulkOperationCmd().getCommand())
-	cmd.AddCommand(newNewBulkOperationCmd().getCommand())
-	cmd.AddCommand(newUpdateBulkOperationCmd().getCommand())
+	cmd.AddCommand(NewGetBulkOperationCollectionCmd().getCommand())
+	cmd.AddCommand(NewGetBulkOperationCmd().getCommand())
+	cmd.AddCommand(NewDeleteBulkOperationCmd().getCommand())
+	cmd.AddCommand(NewNewBulkOperationCmd().getCommand())
+	cmd.AddCommand(NewUpdateBulkOperationCmd().getCommand())
 
 	ccmd.baseCmd = newBaseCmd(cmd)
 

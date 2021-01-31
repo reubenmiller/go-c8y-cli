@@ -7,18 +7,19 @@ import (
 	"net/http"
 	"net/url"
 
+	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/pkg/mapbuilder"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
 )
 
-type deleteExternalIDCmd struct {
+type DeleteExternalIDCmd struct {
 	*baseCmd
 }
 
-func newDeleteExternalIDCmd() *deleteExternalIDCmd {
-	ccmd := &deleteExternalIDCmd{}
-
+func NewDeleteExternalIDCmd() *DeleteExternalIDCmd {
+	var _ = fmt.Errorf
+	ccmd := &DeleteExternalIDCmd{}
 	cmd := &cobra.Command{
 		Use:   "delete",
 		Short: "Delete external id",
@@ -28,7 +29,7 @@ $ c8y identity delete --type test --name myserialnumber
 Delete external identity
         `,
 		PreRunE: validateDeleteMode,
-		RunE:    ccmd.deleteExternalID,
+		RunE:    ccmd.RunE,
 	}
 
 	cmd.SilenceUsage = true
@@ -36,6 +37,11 @@ Delete external identity
 	cmd.Flags().String("type", "", "External identity type (required)")
 	cmd.Flags().String("name", "", "External identity id/name (required)")
 	addProcessingModeFlag(cmd)
+
+	flags.WithOptions(
+		cmd,
+		flags.WithPipelineSupport(""),
+	)
 
 	// Required flags
 	cmd.MarkFlagRequired("type")
@@ -46,16 +52,19 @@ Delete external identity
 	return ccmd
 }
 
-func (n *deleteExternalIDCmd) deleteExternalID(cmd *cobra.Command, args []string) error {
-
-	commonOptions, err := getCommonOptions(cmd)
-	if err != nil {
-		return newUserError(fmt.Sprintf("Failed to get common options. err=%s", err))
-	}
-
+func (n *DeleteExternalIDCmd) RunE(cmd *cobra.Command, args []string) error {
 	// query parameters
 	queryValue := url.QueryEscape("")
 	query := url.Values{}
+
+	err := flags.WithQueryOptions(
+		cmd,
+		query,
+	)
+	if err != nil {
+		return newUserError(err)
+	}
+
 	queryValue, err = url.QueryUnescape(query.Encode())
 
 	if err != nil {
@@ -74,7 +83,7 @@ func (n *deleteExternalIDCmd) deleteExternalID(cmd *cobra.Command, args []string
 	formData := make(map[string]io.Reader)
 
 	// body
-	body := mapbuilder.NewMapBuilder()
+	body := mapbuilder.NewInitializedMapBuilder()
 
 	// path parameters
 	pathParameters := make(map[string]string)
@@ -106,5 +115,5 @@ func (n *deleteExternalIDCmd) deleteExternalID(cmd *cobra.Command, args []string
 		DryRun:       globalFlagDryRun,
 	}
 
-	return processRequestAndResponse([]c8y.RequestOptions{req}, commonOptions)
+	return processRequestAndResponseWithWorkers(cmd, &req, "")
 }

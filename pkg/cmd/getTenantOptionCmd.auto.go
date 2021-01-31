@@ -7,18 +7,19 @@ import (
 	"net/http"
 	"net/url"
 
+	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/pkg/mapbuilder"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
 )
 
-type getTenantOptionCmd struct {
+type GetTenantOptionCmd struct {
 	*baseCmd
 }
 
-func newGetTenantOptionCmd() *getTenantOptionCmd {
-	ccmd := &getTenantOptionCmd{}
-
+func NewGetTenantOptionCmd() *GetTenantOptionCmd {
+	var _ = fmt.Errorf
+	ccmd := &GetTenantOptionCmd{}
 	cmd := &cobra.Command{
 		Use:   "get",
 		Short: "Get tenant option",
@@ -28,13 +29,18 @@ $ c8y tenantOptions get --category "c8y_cli_tests" --key "option2"
 Get a tenant option
         `,
 		PreRunE: nil,
-		RunE:    ccmd.getTenantOption,
+		RunE:    ccmd.RunE,
 	}
 
 	cmd.SilenceUsage = true
 
 	cmd.Flags().String("category", "", "Tenant Option category (required)")
 	cmd.Flags().String("key", "", "Tenant Option key (required)")
+
+	flags.WithOptions(
+		cmd,
+		flags.WithPipelineSupport(""),
+	)
 
 	// Required flags
 	cmd.MarkFlagRequired("category")
@@ -45,17 +51,24 @@ Get a tenant option
 	return ccmd
 }
 
-func (n *getTenantOptionCmd) getTenantOption(cmd *cobra.Command, args []string) error {
+func (n *GetTenantOptionCmd) RunE(cmd *cobra.Command, args []string) error {
+	// query parameters
+	queryValue := url.QueryEscape("")
+	query := url.Values{}
 
+	err := flags.WithQueryOptions(
+		cmd,
+		query,
+	)
+	if err != nil {
+		return newUserError(err)
+	}
 	commonOptions, err := getCommonOptions(cmd)
 	if err != nil {
 		return newUserError(fmt.Sprintf("Failed to get common options. err=%s", err))
 	}
-
-	// query parameters
-	queryValue := url.QueryEscape("")
-	query := url.Values{}
 	commonOptions.AddQueryParameters(&query)
+
 	queryValue, err = url.QueryUnescape(query.Encode())
 
 	if err != nil {
@@ -69,7 +82,7 @@ func (n *getTenantOptionCmd) getTenantOption(cmd *cobra.Command, args []string) 
 	formData := make(map[string]io.Reader)
 
 	// body
-	body := mapbuilder.NewMapBuilder()
+	body := mapbuilder.NewInitializedMapBuilder()
 
 	// path parameters
 	pathParameters := make(map[string]string)
@@ -101,5 +114,5 @@ func (n *getTenantOptionCmd) getTenantOption(cmd *cobra.Command, args []string) 
 		DryRun:       globalFlagDryRun,
 	}
 
-	return processRequestAndResponse([]c8y.RequestOptions{req}, commonOptions)
+	return processRequestAndResponseWithWorkers(cmd, &req, "")
 }

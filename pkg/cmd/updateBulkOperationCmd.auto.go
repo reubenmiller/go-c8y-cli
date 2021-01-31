@@ -7,18 +7,19 @@ import (
 	"net/http"
 	"net/url"
 
+	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/pkg/mapbuilder"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
 )
 
-type updateBulkOperationCmd struct {
+type UpdateBulkOperationCmd struct {
 	*baseCmd
 }
 
-func newUpdateBulkOperationCmd() *updateBulkOperationCmd {
-	ccmd := &updateBulkOperationCmd{}
-
+func NewUpdateBulkOperationCmd() *UpdateBulkOperationCmd {
+	var _ = fmt.Errorf
+	ccmd := &UpdateBulkOperationCmd{}
 	cmd := &cobra.Command{
 		Use:   "update",
 		Short: "Update bulk operation",
@@ -28,18 +29,22 @@ $ c8y bulkOperations update --id 12345 --creationRamp 15
 Update an bulk operation
         `,
 		PreRunE: validateUpdateMode,
-		RunE:    ccmd.updateBulkOperation,
+		RunE:    ccmd.RunE,
 	}
 
 	cmd.SilenceUsage = true
 
-	cmd.Flags().Int("id", 0, "Bulk Operation id (required)")
+	cmd.Flags().Int("id", 0, "Bulk Operation id (required) (accepts pipeline)")
 	cmd.Flags().Float32("creationRampSec", 0, "Delay between every operation creation. (required)")
 	addDataFlag(cmd)
 	addProcessingModeFlag(cmd)
 
+	flags.WithOptions(
+		cmd,
+		flags.WithPipelineSupport("id"),
+	)
+
 	// Required flags
-	cmd.MarkFlagRequired("id")
 	cmd.MarkFlagRequired("creationRampSec")
 
 	ccmd.baseCmd = newBaseCmd(cmd)
@@ -47,16 +52,19 @@ Update an bulk operation
 	return ccmd
 }
 
-func (n *updateBulkOperationCmd) updateBulkOperation(cmd *cobra.Command, args []string) error {
-
-	commonOptions, err := getCommonOptions(cmd)
-	if err != nil {
-		return newUserError(fmt.Sprintf("Failed to get common options. err=%s", err))
-	}
-
+func (n *UpdateBulkOperationCmd) RunE(cmd *cobra.Command, args []string) error {
 	// query parameters
 	queryValue := url.QueryEscape("")
 	query := url.Values{}
+
+	err := flags.WithQueryOptions(
+		cmd,
+		query,
+	)
+	if err != nil {
+		return newUserError(err)
+	}
+
 	queryValue, err = url.QueryUnescape(query.Encode())
 
 	if err != nil {
@@ -75,7 +83,7 @@ func (n *updateBulkOperationCmd) updateBulkOperation(cmd *cobra.Command, args []
 	formData := make(map[string]io.Reader)
 
 	// body
-	body := mapbuilder.NewMapBuilder()
+	body := mapbuilder.NewInitializedMapBuilder()
 	body.SetMap(getDataFlag(cmd))
 	if v, err := cmd.Flags().GetFloat32("creationRampSec"); err == nil {
 		body.Set("creationRamp", v)
@@ -91,11 +99,6 @@ func (n *updateBulkOperationCmd) updateBulkOperation(cmd *cobra.Command, args []
 
 	// path parameters
 	pathParameters := make(map[string]string)
-	if v, err := cmd.Flags().GetInt("id"); err == nil {
-		pathParameters["id"] = fmt.Sprintf("%d", v)
-	} else {
-		return newUserError(fmt.Sprintf("Flag [%s] does not exist. %s", "id", err))
-	}
 
 	path := replacePathParameters("devicecontrol/bulkoperations/{id}", pathParameters)
 
@@ -110,5 +113,5 @@ func (n *updateBulkOperationCmd) updateBulkOperation(cmd *cobra.Command, args []
 		DryRun:       globalFlagDryRun,
 	}
 
-	return processRequestAndResponse([]c8y.RequestOptions{req}, commonOptions)
+	return processRequestAndResponseWithWorkers(cmd, &req, "id")
 }

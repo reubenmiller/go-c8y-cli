@@ -7,18 +7,19 @@ import (
 	"net/http"
 	"net/url"
 
+	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/pkg/mapbuilder"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
 )
 
-type getAuditRecordCollectionCmd struct {
+type GetAuditRecordCollectionCmd struct {
 	*baseCmd
 }
 
-func newGetAuditRecordCollectionCmd() *getAuditRecordCollectionCmd {
-	ccmd := &getAuditRecordCollectionCmd{}
-
+func NewGetAuditRecordCollectionCmd() *GetAuditRecordCollectionCmd {
+	var _ = fmt.Errorf
+	ccmd := &GetAuditRecordCollectionCmd{}
 	cmd := &cobra.Command{
 		Use:   "list",
 		Short: "Get collection of (user) audits",
@@ -29,18 +30,23 @@ $ c8y auditRecords list --pageSize 100
 Get a list of audit records
         `,
 		PreRunE: nil,
-		RunE:    ccmd.getAuditRecordCollection,
+		RunE:    ccmd.RunE,
 	}
 
 	cmd.SilenceUsage = true
 
-	cmd.Flags().String("source", "", "Source Id or object containing an .id property of the element that should be detected. i.e. AlarmID, or Operation ID. Note: Only one source can be provided")
+	cmd.Flags().String("source", "", "Source Id or object containing an .id property of the element that should be detected. i.e. AlarmID, or Operation ID. Note: Only one source can be provided (accepts pipeline)")
 	cmd.Flags().String("type", "", "Type")
 	cmd.Flags().String("user", "", "Username")
 	cmd.Flags().String("application", "", "Application")
 	cmd.Flags().String("dateFrom", "", "Start date or date and time of audit record occurrence.")
 	cmd.Flags().String("dateTo", "", "End date or date and time of audit record occurrence.")
 	cmd.Flags().Bool("revert", false, "Return the newest instead of the oldest audit records. Must be used with dateFrom and dateTo parameters")
+
+	flags.WithOptions(
+		cmd,
+		flags.WithPipelineSupport("source"),
+	)
 
 	// Required flags
 
@@ -49,13 +55,7 @@ Get a list of audit records
 	return ccmd
 }
 
-func (n *getAuditRecordCollectionCmd) getAuditRecordCollection(cmd *cobra.Command, args []string) error {
-
-	commonOptions, err := getCommonOptions(cmd)
-	if err != nil {
-		return newUserError(fmt.Sprintf("Failed to get common options. err=%s", err))
-	}
-
+func (n *GetAuditRecordCollectionCmd) RunE(cmd *cobra.Command, args []string) error {
 	// query parameters
 	queryValue := url.QueryEscape("")
 	query := url.Values{}
@@ -108,7 +108,20 @@ func (n *getAuditRecordCollectionCmd) getAuditRecordCollection(cmd *cobra.Comman
 			return newUserError("Flag does not exist")
 		}
 	}
+
+	err := flags.WithQueryOptions(
+		cmd,
+		query,
+	)
+	if err != nil {
+		return newUserError(err)
+	}
+	commonOptions, err := getCommonOptions(cmd)
+	if err != nil {
+		return newUserError(fmt.Sprintf("Failed to get common options. err=%s", err))
+	}
 	commonOptions.AddQueryParameters(&query)
+
 	queryValue, err = url.QueryUnescape(query.Encode())
 
 	if err != nil {
@@ -122,7 +135,7 @@ func (n *getAuditRecordCollectionCmd) getAuditRecordCollection(cmd *cobra.Comman
 	formData := make(map[string]io.Reader)
 
 	// body
-	body := mapbuilder.NewMapBuilder()
+	body := mapbuilder.NewInitializedMapBuilder()
 
 	// path parameters
 	pathParameters := make(map[string]string)
@@ -140,5 +153,5 @@ func (n *getAuditRecordCollectionCmd) getAuditRecordCollection(cmd *cobra.Comman
 		DryRun:       globalFlagDryRun,
 	}
 
-	return processRequestAndResponse([]c8y.RequestOptions{req}, commonOptions)
+	return processRequestAndResponseWithWorkers(cmd, &req, "source")
 }

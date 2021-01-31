@@ -7,18 +7,19 @@ import (
 	"net/http"
 	"net/url"
 
+	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/pkg/mapbuilder"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
 )
 
-type deleteManagedObjectChildAssetReferenceCmd struct {
+type DeleteManagedObjectChildAssetReferenceCmd struct {
 	*baseCmd
 }
 
-func newDeleteManagedObjectChildAssetReferenceCmd() *deleteManagedObjectChildAssetReferenceCmd {
-	ccmd := &deleteManagedObjectChildAssetReferenceCmd{}
-
+func NewDeleteManagedObjectChildAssetReferenceCmd() *DeleteManagedObjectChildAssetReferenceCmd {
+	var _ = fmt.Errorf
+	ccmd := &DeleteManagedObjectChildAssetReferenceCmd{}
 	cmd := &cobra.Command{
 		Use:   "unassignAssetFromGroup",
 		Short: "Delete child asset reference",
@@ -28,34 +29,41 @@ $ c8y inventoryReferences unassignAssetFromGroup --group 12345 --childDevice 225
 Unassign a child device from its parent device
         `,
 		PreRunE: validateDeleteMode,
-		RunE:    ccmd.deleteManagedObjectChildAssetReference,
+		RunE:    ccmd.RunE,
 	}
 
 	cmd.SilenceUsage = true
 
-	cmd.Flags().StringSlice("group", []string{""}, "Asset id (required)")
+	cmd.Flags().StringSlice("group", []string{""}, "Asset id (required) (accepts pipeline)")
 	cmd.Flags().StringSlice("childDevice", []string{""}, "Child device")
 	cmd.Flags().StringSlice("childGroup", []string{""}, "Child device group")
 	addProcessingModeFlag(cmd)
 
+	flags.WithOptions(
+		cmd,
+		flags.WithPipelineSupport("group"),
+	)
+
 	// Required flags
-	cmd.MarkFlagRequired("group")
 
 	ccmd.baseCmd = newBaseCmd(cmd)
 
 	return ccmd
 }
 
-func (n *deleteManagedObjectChildAssetReferenceCmd) deleteManagedObjectChildAssetReference(cmd *cobra.Command, args []string) error {
-
-	commonOptions, err := getCommonOptions(cmd)
-	if err != nil {
-		return newUserError(fmt.Sprintf("Failed to get common options. err=%s", err))
-	}
-
+func (n *DeleteManagedObjectChildAssetReferenceCmd) RunE(cmd *cobra.Command, args []string) error {
 	// query parameters
 	queryValue := url.QueryEscape("")
 	query := url.Values{}
+
+	err := flags.WithQueryOptions(
+		cmd,
+		query,
+	)
+	if err != nil {
+		return newUserError(err)
+	}
+
 	queryValue, err = url.QueryUnescape(query.Encode())
 
 	if err != nil {
@@ -74,27 +82,10 @@ func (n *deleteManagedObjectChildAssetReferenceCmd) deleteManagedObjectChildAsse
 	formData := make(map[string]io.Reader)
 
 	// body
-	body := mapbuilder.NewMapBuilder()
+	body := mapbuilder.NewInitializedMapBuilder()
 
 	// path parameters
 	pathParameters := make(map[string]string)
-	if cmd.Flags().Changed("group") {
-		groupInputValues, groupValue, err := getFormattedDeviceGroupSlice(cmd, args, "group")
-
-		if err != nil {
-			return newUserError("no matching device groups found", groupInputValues, err)
-		}
-
-		if len(groupValue) == 0 {
-			return newUserError("no matching device groups found", groupInputValues)
-		}
-
-		for _, item := range groupValue {
-			if item != "" {
-				pathParameters["group"] = newIDValue(item).GetID()
-			}
-		}
-	}
 	if cmd.Flags().Changed("childDevice") {
 		childDeviceInputValues, childDeviceValue, err := getFormattedDeviceSlice(cmd, args, "childDevice")
 
@@ -143,5 +134,5 @@ func (n *deleteManagedObjectChildAssetReferenceCmd) deleteManagedObjectChildAsse
 		DryRun:       globalFlagDryRun,
 	}
 
-	return processRequestAndResponse([]c8y.RequestOptions{req}, commonOptions)
+	return processRequestAndResponseWithWorkers(cmd, &req, "group")
 }

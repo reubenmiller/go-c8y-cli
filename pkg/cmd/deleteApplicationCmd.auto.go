@@ -7,18 +7,19 @@ import (
 	"net/http"
 	"net/url"
 
+	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/pkg/mapbuilder"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
 )
 
-type deleteApplicationCmd struct {
+type DeleteApplicationCmd struct {
 	*baseCmd
 }
 
-func newDeleteApplicationCmd() *deleteApplicationCmd {
-	ccmd := &deleteApplicationCmd{}
-
+func NewDeleteApplicationCmd() *DeleteApplicationCmd {
+	var _ = fmt.Errorf
+	ccmd := &DeleteApplicationCmd{}
 	cmd := &cobra.Command{
 		Use:   "delete",
 		Short: "Delete application",
@@ -31,32 +32,39 @@ $ c8y applications delete --id my-temp-app
 Delete an application by name
         `,
 		PreRunE: validateDeleteMode,
-		RunE:    ccmd.deleteApplication,
+		RunE:    ccmd.RunE,
 	}
 
 	cmd.SilenceUsage = true
 
-	cmd.Flags().String("id", "", "Application id (required)")
+	cmd.Flags().String("id", "", "Application id (required) (accepts pipeline)")
 	addProcessingModeFlag(cmd)
 
+	flags.WithOptions(
+		cmd,
+		flags.WithPipelineSupport("id"),
+	)
+
 	// Required flags
-	cmd.MarkFlagRequired("id")
 
 	ccmd.baseCmd = newBaseCmd(cmd)
 
 	return ccmd
 }
 
-func (n *deleteApplicationCmd) deleteApplication(cmd *cobra.Command, args []string) error {
-
-	commonOptions, err := getCommonOptions(cmd)
-	if err != nil {
-		return newUserError(fmt.Sprintf("Failed to get common options. err=%s", err))
-	}
-
+func (n *DeleteApplicationCmd) RunE(cmd *cobra.Command, args []string) error {
 	// query parameters
 	queryValue := url.QueryEscape("")
 	query := url.Values{}
+
+	err := flags.WithQueryOptions(
+		cmd,
+		query,
+	)
+	if err != nil {
+		return newUserError(err)
+	}
+
 	queryValue, err = url.QueryUnescape(query.Encode())
 
 	if err != nil {
@@ -75,27 +83,10 @@ func (n *deleteApplicationCmd) deleteApplication(cmd *cobra.Command, args []stri
 	formData := make(map[string]io.Reader)
 
 	// body
-	body := mapbuilder.NewMapBuilder()
+	body := mapbuilder.NewInitializedMapBuilder()
 
 	// path parameters
 	pathParameters := make(map[string]string)
-	if cmd.Flags().Changed("id") {
-		idInputValues, idValue, err := getApplicationSlice(cmd, args, "id")
-
-		if err != nil {
-			return newUserError("no matching applications found", idInputValues, err)
-		}
-
-		if len(idValue) == 0 {
-			return newUserError("no matching applications found", idInputValues)
-		}
-
-		for _, item := range idValue {
-			if item != "" {
-				pathParameters["id"] = newIDValue(item).GetID()
-			}
-		}
-	}
 
 	path := replacePathParameters("/application/applications/{id}", pathParameters)
 
@@ -110,5 +101,5 @@ func (n *deleteApplicationCmd) deleteApplication(cmd *cobra.Command, args []stri
 		DryRun:       globalFlagDryRun,
 	}
 
-	return processRequestAndResponse([]c8y.RequestOptions{req}, commonOptions)
+	return processRequestAndResponseWithWorkers(cmd, &req, "id")
 }

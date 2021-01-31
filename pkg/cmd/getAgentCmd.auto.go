@@ -7,18 +7,19 @@ import (
 	"net/http"
 	"net/url"
 
+	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/pkg/mapbuilder"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
 )
 
-type getAgentCmd struct {
+type GetAgentCmd struct {
 	*baseCmd
 }
 
-func newGetAgentCmd() *getAgentCmd {
-	ccmd := &getAgentCmd{}
-
+func NewGetAgentCmd() *GetAgentCmd {
+	var _ = fmt.Errorf
+	ccmd := &GetAgentCmd{}
 	cmd := &cobra.Command{
 		Use:   "get",
 		Short: "Get agent",
@@ -28,32 +29,43 @@ $ c8y agents get --id 12345
 Get agent by id
         `,
 		PreRunE: nil,
-		RunE:    ccmd.getAgent,
+		RunE:    ccmd.RunE,
 	}
 
 	cmd.SilenceUsage = true
 
-	cmd.Flags().StringSlice("id", []string{""}, "Agent ID (required)")
+	cmd.Flags().StringSlice("id", []string{""}, "Agent ID (required) (accepts pipeline)")
+
+	flags.WithOptions(
+		cmd,
+		flags.WithPipelineSupport("id"),
+	)
 
 	// Required flags
-	cmd.MarkFlagRequired("id")
 
 	ccmd.baseCmd = newBaseCmd(cmd)
 
 	return ccmd
 }
 
-func (n *getAgentCmd) getAgent(cmd *cobra.Command, args []string) error {
+func (n *GetAgentCmd) RunE(cmd *cobra.Command, args []string) error {
+	// query parameters
+	queryValue := url.QueryEscape("")
+	query := url.Values{}
 
+	err := flags.WithQueryOptions(
+		cmd,
+		query,
+	)
+	if err != nil {
+		return newUserError(err)
+	}
 	commonOptions, err := getCommonOptions(cmd)
 	if err != nil {
 		return newUserError(fmt.Sprintf("Failed to get common options. err=%s", err))
 	}
-
-	// query parameters
-	queryValue := url.QueryEscape("")
-	query := url.Values{}
 	commonOptions.AddQueryParameters(&query)
+
 	queryValue, err = url.QueryUnescape(query.Encode())
 
 	if err != nil {
@@ -67,27 +79,10 @@ func (n *getAgentCmd) getAgent(cmd *cobra.Command, args []string) error {
 	formData := make(map[string]io.Reader)
 
 	// body
-	body := mapbuilder.NewMapBuilder()
+	body := mapbuilder.NewInitializedMapBuilder()
 
 	// path parameters
 	pathParameters := make(map[string]string)
-	if cmd.Flags().Changed("id") {
-		idInputValues, idValue, err := getFormattedAgentSlice(cmd, args, "id")
-
-		if err != nil {
-			return newUserError("no matching agents found", idInputValues, err)
-		}
-
-		if len(idValue) == 0 {
-			return newUserError("no matching agents found", idInputValues)
-		}
-
-		for _, item := range idValue {
-			if item != "" {
-				pathParameters["id"] = newIDValue(item).GetID()
-			}
-		}
-	}
 
 	path := replacePathParameters("inventory/managedObjects/{id}", pathParameters)
 
@@ -102,5 +97,5 @@ func (n *getAgentCmd) getAgent(cmd *cobra.Command, args []string) error {
 		DryRun:       globalFlagDryRun,
 	}
 
-	return processRequestAndResponse([]c8y.RequestOptions{req}, commonOptions)
+	return processRequestAndResponseWithWorkers(cmd, &req, "id")
 }

@@ -7,18 +7,19 @@ import (
 	"net/http"
 	"net/url"
 
+	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/pkg/mapbuilder"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
 )
 
-type requestDeviceCredentialsCmd struct {
+type RequestDeviceCredentialsCmd struct {
 	*baseCmd
 }
 
-func newRequestDeviceCredentialsCmd() *requestDeviceCredentialsCmd {
-	ccmd := &requestDeviceCredentialsCmd{}
-
+func NewRequestDeviceCredentialsCmd() *RequestDeviceCredentialsCmd {
+	var _ = fmt.Errorf
+	ccmd := &RequestDeviceCredentialsCmd{}
 	cmd := &cobra.Command{
 		Use:   "requestDeviceCredentials",
 		Short: "Request credentials for a new device",
@@ -28,13 +29,18 @@ $ c8y devices requestDeviceCredentials --id "device-AD76-matrixer"
 Request credentials for a new device
         `,
 		PreRunE: validateCreateMode,
-		RunE:    ccmd.requestDeviceCredentials,
+		RunE:    ccmd.RunE,
 	}
 
 	cmd.SilenceUsage = true
 
 	cmd.Flags().String("id", "", "Device identifier. Max: 1000 characters. E.g. IMEI (required)")
 	addProcessingModeFlag(cmd)
+
+	flags.WithOptions(
+		cmd,
+		flags.WithPipelineSupport(""),
+	)
 
 	// Required flags
 	cmd.MarkFlagRequired("id")
@@ -44,16 +50,19 @@ Request credentials for a new device
 	return ccmd
 }
 
-func (n *requestDeviceCredentialsCmd) requestDeviceCredentials(cmd *cobra.Command, args []string) error {
-
-	commonOptions, err := getCommonOptions(cmd)
-	if err != nil {
-		return newUserError(fmt.Sprintf("Failed to get common options. err=%s", err))
-	}
-
+func (n *RequestDeviceCredentialsCmd) RunE(cmd *cobra.Command, args []string) error {
 	// query parameters
 	queryValue := url.QueryEscape("")
 	query := url.Values{}
+
+	err := flags.WithQueryOptions(
+		cmd,
+		query,
+	)
+	if err != nil {
+		return newUserError(err)
+	}
+
 	queryValue, err = url.QueryUnescape(query.Encode())
 
 	if err != nil {
@@ -72,7 +81,7 @@ func (n *requestDeviceCredentialsCmd) requestDeviceCredentials(cmd *cobra.Comman
 	formData := make(map[string]io.Reader)
 
 	// body
-	body := mapbuilder.NewMapBuilder()
+	body := mapbuilder.NewInitializedMapBuilder()
 	body.SetMap(getDataFlag(cmd))
 	if v, err := cmd.Flags().GetString("id"); err == nil {
 		if v != "" {
@@ -104,5 +113,5 @@ func (n *requestDeviceCredentialsCmd) requestDeviceCredentials(cmd *cobra.Comman
 		DryRun:       globalFlagDryRun,
 	}
 
-	return processRequestAndResponse([]c8y.RequestOptions{req}, commonOptions)
+	return processRequestAndResponseWithWorkers(cmd, &req, "")
 }

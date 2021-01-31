@@ -7,18 +7,19 @@ import (
 	"net/http"
 	"net/url"
 
+	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/pkg/mapbuilder"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
 )
 
-type newBulkOperationCmd struct {
+type NewBulkOperationCmd struct {
 	*baseCmd
 }
 
-func newNewBulkOperationCmd() *newBulkOperationCmd {
-	ccmd := &newBulkOperationCmd{}
-
+func NewNewBulkOperationCmd() *NewBulkOperationCmd {
+	var _ = fmt.Errorf
+	ccmd := &NewBulkOperationCmd{}
 	cmd := &cobra.Command{
 		Use:   "create",
 		Short: "Create a new bulk operation",
@@ -28,20 +29,24 @@ $ c8y operations create --device mydevice --data "{c8y_Restart:{}}"
 Create operation for a device
         `,
 		PreRunE: validateCreateMode,
-		RunE:    ccmd.newBulkOperation,
+		RunE:    ccmd.RunE,
 	}
 
 	cmd.SilenceUsage = true
 
-	cmd.Flags().StringSlice("group", []string{""}, "Identifies the target group on which this operation should be performed. (required)")
+	cmd.Flags().StringSlice("group", []string{""}, "Identifies the target group on which this operation should be performed. (required) (accepts pipeline)")
 	cmd.Flags().String("startDate", "300s", "Time when operations should be created. Defaults to 300s")
 	cmd.Flags().Float32("creationRampSec", 0, "Delay between every operation creation. (required)")
 	cmd.Flags().String("operation", "", "Operation prototype to send to each device in the group (required)")
 	addDataFlag(cmd)
 	addProcessingModeFlag(cmd)
 
+	flags.WithOptions(
+		cmd,
+		flags.WithPipelineSupport("group"),
+	)
+
 	// Required flags
-	cmd.MarkFlagRequired("group")
 	cmd.MarkFlagRequired("creationRampSec")
 	cmd.MarkFlagRequired("operation")
 
@@ -50,16 +55,19 @@ Create operation for a device
 	return ccmd
 }
 
-func (n *newBulkOperationCmd) newBulkOperation(cmd *cobra.Command, args []string) error {
-
-	commonOptions, err := getCommonOptions(cmd)
-	if err != nil {
-		return newUserError(fmt.Sprintf("Failed to get common options. err=%s", err))
-	}
-
+func (n *NewBulkOperationCmd) RunE(cmd *cobra.Command, args []string) error {
 	// query parameters
 	queryValue := url.QueryEscape("")
 	query := url.Values{}
+
+	err := flags.WithQueryOptions(
+		cmd,
+		query,
+	)
+	if err != nil {
+		return newUserError(err)
+	}
+
 	queryValue, err = url.QueryUnescape(query.Encode())
 
 	if err != nil {
@@ -78,7 +86,7 @@ func (n *newBulkOperationCmd) newBulkOperation(cmd *cobra.Command, args []string
 	formData := make(map[string]io.Reader)
 
 	// body
-	body := mapbuilder.NewMapBuilder()
+	body := mapbuilder.NewInitializedMapBuilder()
 	body.SetMap(getDataFlag(cmd))
 	if cmd.Flags().Changed("group") {
 		groupInputValues, groupValue, err := getFormattedDeviceGroupSlice(cmd, args, "group")
@@ -140,5 +148,5 @@ func (n *newBulkOperationCmd) newBulkOperation(cmd *cobra.Command, args []string
 		DryRun:       globalFlagDryRun,
 	}
 
-	return processRequestAndResponse([]c8y.RequestOptions{req}, commonOptions)
+	return processRequestAndResponseWithWorkers(cmd, &req, "group")
 }

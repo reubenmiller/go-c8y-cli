@@ -10,7 +10,7 @@ type completionsCmd struct {
 	*baseCmd
 }
 
-func newCompletionsCmd() *completionsCmd {
+func NewCompletionsCmd() *completionsCmd {
 	ccmd := &completionsCmd{}
 
 	cmd := &cobra.Command{

@@ -7,18 +7,19 @@ import (
 	"net/http"
 	"net/url"
 
+	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/pkg/mapbuilder"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
 )
 
-type deleteDeviceCmd struct {
+type DeleteDeviceCmd struct {
 	*baseCmd
 }
 
-func newDeleteDeviceCmd() *deleteDeviceCmd {
-	ccmd := &deleteDeviceCmd{}
-
+func NewDeleteDeviceCmd() *DeleteDeviceCmd {
+	var _ = fmt.Errorf
+	ccmd := &DeleteDeviceCmd{}
 	cmd := &cobra.Command{
 		Use:   "delete",
 		Short: "Delete device",
@@ -29,30 +30,28 @@ $ c8y devices delete --id 12345
 Get device by id
         `,
 		PreRunE: validateDeleteMode,
-		RunE:    ccmd.deleteDevice,
+		RunE:    ccmd.RunE,
 	}
 
 	cmd.SilenceUsage = true
 
-	cmd.Flags().StringSlice("id", []string{""}, "Device ID (required)")
+	cmd.Flags().StringSlice("id", []string{""}, "Device ID (required) (accepts pipeline)")
 	cmd.Flags().Bool("cascade", false, "Remove all child devices and child assets will be deleted recursively. By default, the delete operation is propagated to the subgroups only if the deleted object is a group")
 	addProcessingModeFlag(cmd)
 
+	flags.WithOptions(
+		cmd,
+		flags.WithPipelineSupport("id"),
+	)
+
 	// Required flags
-	cmd.MarkFlagRequired("id")
 
 	ccmd.baseCmd = newBaseCmd(cmd)
 
 	return ccmd
 }
 
-func (n *deleteDeviceCmd) deleteDevice(cmd *cobra.Command, args []string) error {
-
-	commonOptions, err := getCommonOptions(cmd)
-	if err != nil {
-		return newUserError(fmt.Sprintf("Failed to get common options. err=%s", err))
-	}
-
+func (n *DeleteDeviceCmd) RunE(cmd *cobra.Command, args []string) error {
 	// query parameters
 	queryValue := url.QueryEscape("")
 	query := url.Values{}
@@ -63,6 +62,15 @@ func (n *deleteDeviceCmd) deleteDevice(cmd *cobra.Command, args []string) error 
 			return newUserError("Flag does not exist")
 		}
 	}
+
+	err := flags.WithQueryOptions(
+		cmd,
+		query,
+	)
+	if err != nil {
+		return newUserError(err)
+	}
+
 	queryValue, err = url.QueryUnescape(query.Encode())
 
 	if err != nil {
@@ -81,27 +89,10 @@ func (n *deleteDeviceCmd) deleteDevice(cmd *cobra.Command, args []string) error 
 	formData := make(map[string]io.Reader)
 
 	// body
-	body := mapbuilder.NewMapBuilder()
+	body := mapbuilder.NewInitializedMapBuilder()
 
 	// path parameters
 	pathParameters := make(map[string]string)
-	if cmd.Flags().Changed("id") {
-		idInputValues, idValue, err := getFormattedDeviceSlice(cmd, args, "id")
-
-		if err != nil {
-			return newUserError("no matching devices found", idInputValues, err)
-		}
-
-		if len(idValue) == 0 {
-			return newUserError("no matching devices found", idInputValues)
-		}
-
-		for _, item := range idValue {
-			if item != "" {
-				pathParameters["id"] = newIDValue(item).GetID()
-			}
-		}
-	}
 
 	path := replacePathParameters("inventory/managedObjects/{id}", pathParameters)
 
@@ -116,5 +107,5 @@ func (n *deleteDeviceCmd) deleteDevice(cmd *cobra.Command, args []string) error 
 		DryRun:       globalFlagDryRun,
 	}
 
-	return processRequestAndResponse([]c8y.RequestOptions{req}, commonOptions)
+	return processRequestAndResponseWithWorkers(cmd, &req, "id")
 }

@@ -7,18 +7,19 @@ import (
 	"net/http"
 	"net/url"
 
+	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/pkg/mapbuilder"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
 )
 
-type deleteTenantCmd struct {
+type DeleteTenantCmd struct {
 	*baseCmd
 }
 
-func newDeleteTenantCmd() *deleteTenantCmd {
-	ccmd := &deleteTenantCmd{}
-
+func NewDeleteTenantCmd() *DeleteTenantCmd {
+	var _ = fmt.Errorf
+	ccmd := &DeleteTenantCmd{}
 	cmd := &cobra.Command{
 		Use:   "delete",
 		Short: "Delete tenant",
@@ -28,13 +29,18 @@ $ c8y tenants delete --id "mycompany"
 Delete a tenant by name (from the mangement tenant)
         `,
 		PreRunE: validateDeleteMode,
-		RunE:    ccmd.deleteTenant,
+		RunE:    ccmd.RunE,
 	}
 
 	cmd.SilenceUsage = true
 
-	cmd.Flags().String("id", "", "Tenant id")
+	cmd.Flags().String("id", "", "Tenant id (accepts pipeline)")
 	addProcessingModeFlag(cmd)
+
+	flags.WithOptions(
+		cmd,
+		flags.WithPipelineSupport("id"),
+	)
 
 	// Required flags
 
@@ -43,16 +49,19 @@ Delete a tenant by name (from the mangement tenant)
 	return ccmd
 }
 
-func (n *deleteTenantCmd) deleteTenant(cmd *cobra.Command, args []string) error {
-
-	commonOptions, err := getCommonOptions(cmd)
-	if err != nil {
-		return newUserError(fmt.Sprintf("Failed to get common options. err=%s", err))
-	}
-
+func (n *DeleteTenantCmd) RunE(cmd *cobra.Command, args []string) error {
 	// query parameters
 	queryValue := url.QueryEscape("")
 	query := url.Values{}
+
+	err := flags.WithQueryOptions(
+		cmd,
+		query,
+	)
+	if err != nil {
+		return newUserError(err)
+	}
+
 	queryValue, err = url.QueryUnescape(query.Encode())
 
 	if err != nil {
@@ -71,13 +80,10 @@ func (n *deleteTenantCmd) deleteTenant(cmd *cobra.Command, args []string) error 
 	formData := make(map[string]io.Reader)
 
 	// body
-	body := mapbuilder.NewMapBuilder()
+	body := mapbuilder.NewInitializedMapBuilder()
 
 	// path parameters
 	pathParameters := make(map[string]string)
-	if v := getTenantWithDefaultFlag(cmd, "id", client.TenantName); v != "" {
-		pathParameters["id"] = v
-	}
 
 	path := replacePathParameters("/tenant/tenants/{id}", pathParameters)
 
@@ -92,5 +98,5 @@ func (n *deleteTenantCmd) deleteTenant(cmd *cobra.Command, args []string) error 
 		DryRun:       globalFlagDryRun,
 	}
 
-	return processRequestAndResponse([]c8y.RequestOptions{req}, commonOptions)
+	return processRequestAndResponseWithWorkers(cmd, &req, "id")
 }

@@ -4,12 +4,12 @@ import (
 	"github.com/spf13/cobra"
 )
 
-type currentApplicationCmd struct {
+type CurrentApplicationCmd struct {
 	*baseCmd
 }
 
-func newCurrentApplicationRootCmd() *currentApplicationCmd {
-	ccmd := &currentApplicationCmd{}
+func NewCurrentApplicationRootCmd() *CurrentApplicationCmd {
+	ccmd := &CurrentApplicationCmd{}
 
 	cmd := &cobra.Command{
 		Use:   "currentApplication",
@@ -18,9 +18,9 @@ func newCurrentApplicationRootCmd() *currentApplicationCmd {
 	}
 
 	// Subcommands
-	cmd.AddCommand(newGetCurrentApplicationCmd().getCommand())
-	cmd.AddCommand(newUpdateCurrentApplicationCmd().getCommand())
-	cmd.AddCommand(newGetCurrentApplicationUserCollectionCmd().getCommand())
+	cmd.AddCommand(NewGetCurrentApplicationCmd().getCommand())
+	cmd.AddCommand(NewUpdateCurrentApplicationCmd().getCommand())
+	cmd.AddCommand(NewGetCurrentApplicationUserCollectionCmd().getCommand())
 
 	ccmd.baseCmd = newBaseCmd(cmd)
 

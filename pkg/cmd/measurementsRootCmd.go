@@ -4,12 +4,12 @@ import (
 	"github.com/spf13/cobra"
 )
 
-type measurementsCmd struct {
+type MeasurementsCmd struct {
 	*baseCmd
 }
 
-func newMeasurementsRootCmd() *measurementsCmd {
-	ccmd := &measurementsCmd{}
+func NewMeasurementsRootCmd() *MeasurementsCmd {
+	ccmd := &MeasurementsCmd{}
 
 	cmd := &cobra.Command{
 		Use:   "measurements",
@@ -18,12 +18,12 @@ func newMeasurementsRootCmd() *measurementsCmd {
 	}
 
 	// Subcommands
-	cmd.AddCommand(newGetMeasurementCollectionCmd().getCommand())
-	cmd.AddCommand(newGetMeasurementSeriesCmd().getCommand())
-	cmd.AddCommand(newGetMeasurementCmd().getCommand())
-	cmd.AddCommand(newNewMeasurementCmd().getCommand())
-	cmd.AddCommand(newDeleteMeasurementCmd().getCommand())
-	cmd.AddCommand(newDeleteMeasurementCollectionCmd().getCommand())
+	cmd.AddCommand(NewGetMeasurementCollectionCmd().getCommand())
+	cmd.AddCommand(NewGetMeasurementSeriesCmd().getCommand())
+	cmd.AddCommand(NewGetMeasurementCmd().getCommand())
+	cmd.AddCommand(NewNewMeasurementCmd().getCommand())
+	cmd.AddCommand(NewDeleteMeasurementCmd().getCommand())
+	cmd.AddCommand(NewDeleteMeasurementCollectionCmd().getCommand())
 
 	ccmd.baseCmd = newBaseCmd(cmd)
 

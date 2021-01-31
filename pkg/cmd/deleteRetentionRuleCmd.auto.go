@@ -7,18 +7,19 @@ import (
 	"net/http"
 	"net/url"
 
+	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/pkg/mapbuilder"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
 )
 
-type deleteRetentionRuleCmd struct {
+type DeleteRetentionRuleCmd struct {
 	*baseCmd
 }
 
-func newDeleteRetentionRuleCmd() *deleteRetentionRuleCmd {
-	ccmd := &deleteRetentionRuleCmd{}
-
+func NewDeleteRetentionRuleCmd() *DeleteRetentionRuleCmd {
+	var _ = fmt.Errorf
+	ccmd := &DeleteRetentionRuleCmd{}
 	cmd := &cobra.Command{
 		Use:   "delete",
 		Short: "Delete retention rule",
@@ -29,32 +30,39 @@ $ c8y retentionRules delete --id 12345
 Delete a retention rule
         `,
 		PreRunE: validateDeleteMode,
-		RunE:    ccmd.deleteRetentionRule,
+		RunE:    ccmd.RunE,
 	}
 
 	cmd.SilenceUsage = true
 
-	cmd.Flags().String("id", "", "Retention rule id (required)")
+	cmd.Flags().String("id", "", "Retention rule id (required) (accepts pipeline)")
 	addProcessingModeFlag(cmd)
 
+	flags.WithOptions(
+		cmd,
+		flags.WithPipelineSupport("id"),
+	)
+
 	// Required flags
-	cmd.MarkFlagRequired("id")
 
 	ccmd.baseCmd = newBaseCmd(cmd)
 
 	return ccmd
 }
 
-func (n *deleteRetentionRuleCmd) deleteRetentionRule(cmd *cobra.Command, args []string) error {
-
-	commonOptions, err := getCommonOptions(cmd)
-	if err != nil {
-		return newUserError(fmt.Sprintf("Failed to get common options. err=%s", err))
-	}
-
+func (n *DeleteRetentionRuleCmd) RunE(cmd *cobra.Command, args []string) error {
 	// query parameters
 	queryValue := url.QueryEscape("")
 	query := url.Values{}
+
+	err := flags.WithQueryOptions(
+		cmd,
+		query,
+	)
+	if err != nil {
+		return newUserError(err)
+	}
+
 	queryValue, err = url.QueryUnescape(query.Encode())
 
 	if err != nil {
@@ -73,17 +81,10 @@ func (n *deleteRetentionRuleCmd) deleteRetentionRule(cmd *cobra.Command, args []
 	formData := make(map[string]io.Reader)
 
 	// body
-	body := mapbuilder.NewMapBuilder()
+	body := mapbuilder.NewInitializedMapBuilder()
 
 	// path parameters
 	pathParameters := make(map[string]string)
-	if v, err := cmd.Flags().GetString("id"); err == nil {
-		if v != "" {
-			pathParameters["id"] = v
-		}
-	} else {
-		return newUserError(fmt.Sprintf("Flag [%s] does not exist. %s", "id", err))
-	}
 
 	path := replacePathParameters("/retention/retentions/{id}", pathParameters)
 
@@ -98,5 +99,5 @@ func (n *deleteRetentionRuleCmd) deleteRetentionRule(cmd *cobra.Command, args []
 		DryRun:       globalFlagDryRun,
 	}
 
-	return processRequestAndResponse([]c8y.RequestOptions{req}, commonOptions)
+	return processRequestAndResponseWithWorkers(cmd, &req, "id")
 }

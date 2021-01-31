@@ -4,12 +4,12 @@ import (
 	"github.com/spf13/cobra"
 )
 
-type auditRecordsCmd struct {
+type AuditRecordsCmd struct {
 	*baseCmd
 }
 
-func newAuditRecordsRootCmd() *auditRecordsCmd {
-	ccmd := &auditRecordsCmd{}
+func NewAuditRecordsRootCmd() *AuditRecordsCmd {
+	ccmd := &AuditRecordsCmd{}
 
 	cmd := &cobra.Command{
 		Use:   "auditRecords",
@@ -18,9 +18,9 @@ func newAuditRecordsRootCmd() *auditRecordsCmd {
 	}
 
 	// Subcommands
-	cmd.AddCommand(newNewAuditCmd().getCommand())
-	cmd.AddCommand(newGetAuditRecordCollectionCmd().getCommand())
-	cmd.AddCommand(newGetAuditRecordCmd().getCommand())
+	cmd.AddCommand(NewNewAuditCmd().getCommand())
+	cmd.AddCommand(NewGetAuditRecordCollectionCmd().getCommand())
+	cmd.AddCommand(NewGetAuditRecordCmd().getCommand())
 
 	ccmd.baseCmd = newBaseCmd(cmd)
 

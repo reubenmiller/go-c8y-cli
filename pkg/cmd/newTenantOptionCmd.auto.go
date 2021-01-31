@@ -7,18 +7,19 @@ import (
 	"net/http"
 	"net/url"
 
+	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/pkg/mapbuilder"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
 )
 
-type newTenantOptionCmd struct {
+type NewTenantOptionCmd struct {
 	*baseCmd
 }
 
-func newNewTenantOptionCmd() *newTenantOptionCmd {
-	ccmd := &newTenantOptionCmd{}
-
+func NewNewTenantOptionCmd() *NewTenantOptionCmd {
+	var _ = fmt.Errorf
+	ccmd := &NewTenantOptionCmd{}
 	cmd := &cobra.Command{
 		Use:   "create",
 		Short: "New tenant option",
@@ -28,7 +29,7 @@ $ c8y tenantOptions create --category "c8y_cli_tests" --key "option1" --value "1
 Create a tenant option
         `,
 		PreRunE: validateCreateMode,
-		RunE:    ccmd.newTenantOption,
+		RunE:    ccmd.RunE,
 	}
 
 	cmd.SilenceUsage = true
@@ -37,6 +38,11 @@ Create a tenant option
 	cmd.Flags().String("key", "", "Key of option (required)")
 	cmd.Flags().String("value", "", "Value of option (required)")
 	addProcessingModeFlag(cmd)
+
+	flags.WithOptions(
+		cmd,
+		flags.WithPipelineSupport(""),
+	)
 
 	// Required flags
 	cmd.MarkFlagRequired("category")
@@ -48,16 +54,19 @@ Create a tenant option
 	return ccmd
 }
 
-func (n *newTenantOptionCmd) newTenantOption(cmd *cobra.Command, args []string) error {
-
-	commonOptions, err := getCommonOptions(cmd)
-	if err != nil {
-		return newUserError(fmt.Sprintf("Failed to get common options. err=%s", err))
-	}
-
+func (n *NewTenantOptionCmd) RunE(cmd *cobra.Command, args []string) error {
 	// query parameters
 	queryValue := url.QueryEscape("")
 	query := url.Values{}
+
+	err := flags.WithQueryOptions(
+		cmd,
+		query,
+	)
+	if err != nil {
+		return newUserError(err)
+	}
+
 	queryValue, err = url.QueryUnescape(query.Encode())
 
 	if err != nil {
@@ -76,7 +85,7 @@ func (n *newTenantOptionCmd) newTenantOption(cmd *cobra.Command, args []string) 
 	formData := make(map[string]io.Reader)
 
 	// body
-	body := mapbuilder.NewMapBuilder()
+	body := mapbuilder.NewInitializedMapBuilder()
 	body.SetMap(getDataFlag(cmd))
 	if v, err := cmd.Flags().GetString("category"); err == nil {
 		if v != "" {
@@ -122,5 +131,5 @@ func (n *newTenantOptionCmd) newTenantOption(cmd *cobra.Command, args []string) 
 		DryRun:       globalFlagDryRun,
 	}
 
-	return processRequestAndResponse([]c8y.RequestOptions{req}, commonOptions)
+	return processRequestAndResponseWithWorkers(cmd, &req, "")
 }

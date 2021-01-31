@@ -4,12 +4,12 @@ import (
 	"github.com/spf13/cobra"
 )
 
-type agentsCmd struct {
+type AgentsCmd struct {
 	*baseCmd
 }
 
-func newAgentsRootCmd() *agentsCmd {
-	ccmd := &agentsCmd{}
+func NewAgentsRootCmd() *AgentsCmd {
+	ccmd := &AgentsCmd{}
 
 	cmd := &cobra.Command{
 		Use:   "agents",
@@ -18,10 +18,10 @@ func newAgentsRootCmd() *agentsCmd {
 	}
 
 	// Subcommands
-	cmd.AddCommand(newGetAgentCmd().getCommand())
-	cmd.AddCommand(newUpdateAgentCmd().getCommand())
-	cmd.AddCommand(newDeleteAgentCmd().getCommand())
-	cmd.AddCommand(newCreateAgentCmd().getCommand())
+	cmd.AddCommand(NewGetAgentCmd().getCommand())
+	cmd.AddCommand(NewUpdateAgentCmd().getCommand())
+	cmd.AddCommand(NewDeleteAgentCmd().getCommand())
+	cmd.AddCommand(NewCreateAgentCmd().getCommand())
 
 	ccmd.baseCmd = newBaseCmd(cmd)
 

@@ -7,18 +7,19 @@ import (
 	"net/http"
 	"net/url"
 
+	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/pkg/mapbuilder"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
 )
 
-type getTenantOptionCollectionCmd struct {
+type GetTenantOptionCollectionCmd struct {
 	*baseCmd
 }
 
-func newGetTenantOptionCollectionCmd() *getTenantOptionCollectionCmd {
-	ccmd := &getTenantOptionCollectionCmd{}
-
+func NewGetTenantOptionCollectionCmd() *GetTenantOptionCollectionCmd {
+	var _ = fmt.Errorf
+	ccmd := &GetTenantOptionCollectionCmd{}
 	cmd := &cobra.Command{
 		Use:   "list",
 		Short: "Get collection of tenant options",
@@ -28,10 +29,15 @@ $ c8y tenantOptions list
 Get a list of tenant options
         `,
 		PreRunE: nil,
-		RunE:    ccmd.getTenantOptionCollection,
+		RunE:    ccmd.RunE,
 	}
 
 	cmd.SilenceUsage = true
+
+	flags.WithOptions(
+		cmd,
+		flags.WithPipelineSupport(""),
+	)
 
 	// Required flags
 
@@ -40,17 +46,24 @@ Get a list of tenant options
 	return ccmd
 }
 
-func (n *getTenantOptionCollectionCmd) getTenantOptionCollection(cmd *cobra.Command, args []string) error {
+func (n *GetTenantOptionCollectionCmd) RunE(cmd *cobra.Command, args []string) error {
+	// query parameters
+	queryValue := url.QueryEscape("")
+	query := url.Values{}
 
+	err := flags.WithQueryOptions(
+		cmd,
+		query,
+	)
+	if err != nil {
+		return newUserError(err)
+	}
 	commonOptions, err := getCommonOptions(cmd)
 	if err != nil {
 		return newUserError(fmt.Sprintf("Failed to get common options. err=%s", err))
 	}
-
-	// query parameters
-	queryValue := url.QueryEscape("")
-	query := url.Values{}
 	commonOptions.AddQueryParameters(&query)
+
 	queryValue, err = url.QueryUnescape(query.Encode())
 
 	if err != nil {
@@ -64,7 +77,7 @@ func (n *getTenantOptionCollectionCmd) getTenantOptionCollection(cmd *cobra.Comm
 	formData := make(map[string]io.Reader)
 
 	// body
-	body := mapbuilder.NewMapBuilder()
+	body := mapbuilder.NewInitializedMapBuilder()
 
 	// path parameters
 	pathParameters := make(map[string]string)
@@ -82,5 +95,5 @@ func (n *getTenantOptionCollectionCmd) getTenantOptionCollection(cmd *cobra.Comm
 		DryRun:       globalFlagDryRun,
 	}
 
-	return processRequestAndResponse([]c8y.RequestOptions{req}, commonOptions)
+	return processRequestAndResponseWithWorkers(cmd, &req, "")
 }

@@ -7,18 +7,19 @@ import (
 	"net/http"
 	"net/url"
 
+	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/pkg/mapbuilder"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
 )
 
-type addManagedObjectChildAdditionCmd struct {
+type AddManagedObjectChildAdditionCmd struct {
 	*baseCmd
 }
 
-func newAddManagedObjectChildAdditionCmd() *addManagedObjectChildAdditionCmd {
-	ccmd := &addManagedObjectChildAdditionCmd{}
-
+func NewAddManagedObjectChildAdditionCmd() *AddManagedObjectChildAdditionCmd {
+	var _ = fmt.Errorf
+	ccmd := &AddManagedObjectChildAdditionCmd{}
 	cmd := &cobra.Command{
 		Use:   "createChildAddition",
 		Short: "Add a managed object as a child addition to another existing managed object",
@@ -28,17 +29,21 @@ $ c8y inventoryReferences createChildAddition --id 12345 --newChild 6789
 Add a related managed object as a child to an existing managed object
         `,
 		PreRunE: validateCreateMode,
-		RunE:    ccmd.addManagedObjectChildAddition,
+		RunE:    ccmd.RunE,
 	}
 
 	cmd.SilenceUsage = true
 
-	cmd.Flags().String("id", "", "Managed object id where the child addition will be added to (required)")
+	cmd.Flags().String("id", "", "Managed object id where the child addition will be added to (required) (accepts pipeline)")
 	cmd.Flags().StringSlice("newChild", []string{""}, "New managed object that will be added as a child addition (required)")
 	addProcessingModeFlag(cmd)
 
+	flags.WithOptions(
+		cmd,
+		flags.WithPipelineSupport("id"),
+	)
+
 	// Required flags
-	cmd.MarkFlagRequired("id")
 	cmd.MarkFlagRequired("newChild")
 
 	ccmd.baseCmd = newBaseCmd(cmd)
@@ -46,16 +51,19 @@ Add a related managed object as a child to an existing managed object
 	return ccmd
 }
 
-func (n *addManagedObjectChildAdditionCmd) addManagedObjectChildAddition(cmd *cobra.Command, args []string) error {
-
-	commonOptions, err := getCommonOptions(cmd)
-	if err != nil {
-		return newUserError(fmt.Sprintf("Failed to get common options. err=%s", err))
-	}
-
+func (n *AddManagedObjectChildAdditionCmd) RunE(cmd *cobra.Command, args []string) error {
 	// query parameters
 	queryValue := url.QueryEscape("")
 	query := url.Values{}
+
+	err := flags.WithQueryOptions(
+		cmd,
+		query,
+	)
+	if err != nil {
+		return newUserError(err)
+	}
+
 	queryValue, err = url.QueryUnescape(query.Encode())
 
 	if err != nil {
@@ -74,7 +82,7 @@ func (n *addManagedObjectChildAdditionCmd) addManagedObjectChildAddition(cmd *co
 	formData := make(map[string]io.Reader)
 
 	// body
-	body := mapbuilder.NewMapBuilder()
+	body := mapbuilder.NewInitializedMapBuilder()
 	body.SetMap(getDataFlag(cmd))
 	if items, err := cmd.Flags().GetStringSlice("newChild"); err == nil {
 		if len(items) > 0 {
@@ -96,13 +104,6 @@ func (n *addManagedObjectChildAdditionCmd) addManagedObjectChildAddition(cmd *co
 
 	// path parameters
 	pathParameters := make(map[string]string)
-	if v, err := cmd.Flags().GetString("id"); err == nil {
-		if v != "" {
-			pathParameters["id"] = v
-		}
-	} else {
-		return newUserError(fmt.Sprintf("Flag [%s] does not exist. %s", "id", err))
-	}
 
 	path := replacePathParameters("inventory/managedObjects/{id}/childAdditions", pathParameters)
 
@@ -117,5 +118,5 @@ func (n *addManagedObjectChildAdditionCmd) addManagedObjectChildAddition(cmd *co
 		DryRun:       globalFlagDryRun,
 	}
 
-	return processRequestAndResponse([]c8y.RequestOptions{req}, commonOptions)
+	return processRequestAndResponseWithWorkers(cmd, &req, "id")
 }

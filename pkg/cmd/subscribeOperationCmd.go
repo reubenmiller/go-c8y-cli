@@ -14,7 +14,7 @@ type subscribeOperationCmd struct {
 	flagCount       int64
 }
 
-func newSubscribeOperationCmd() *subscribeOperationCmd {
+func NewSubscribeOperationCmd() *subscribeOperationCmd {
 	ccmd := &subscribeOperationCmd{}
 
 	cmd := &cobra.Command{

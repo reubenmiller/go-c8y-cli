@@ -17,7 +17,7 @@ type getGenericRestCmd struct {
 	flagHost string
 }
 
-func newGetGenericRestCmd() *getGenericRestCmd {
+func NewGetGenericRestCmd() *getGenericRestCmd {
 	ccmd := &getGenericRestCmd{}
 
 	cmd := &cobra.Command{

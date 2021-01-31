@@ -7,18 +7,19 @@ import (
 	"net/http"
 	"net/url"
 
+	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/pkg/mapbuilder"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
 )
 
-type addDeviceToGroupCmd struct {
+type AddDeviceToGroupCmd struct {
 	*baseCmd
 }
 
-func newAddDeviceToGroupCmd() *addDeviceToGroupCmd {
-	ccmd := &addDeviceToGroupCmd{}
-
+func NewAddDeviceToGroupCmd() *AddDeviceToGroupCmd {
+	var _ = fmt.Errorf
+	ccmd := &AddDeviceToGroupCmd{}
 	cmd := &cobra.Command{
 		Use:   "assignDeviceToGroup",
 		Short: "Add a device to an existing group",
@@ -31,34 +32,41 @@ $ c8y inventoryReferences assignDeviceToGroup --group 12345 --newChildDevice 432
 Add multiple devices to a group
         `,
 		PreRunE: validateCreateMode,
-		RunE:    ccmd.addDeviceToGroup,
+		RunE:    ccmd.RunE,
 	}
 
 	cmd.SilenceUsage = true
 
 	cmd.Flags().StringSlice("group", []string{""}, "Group (required)")
-	cmd.Flags().StringSlice("newChildDevice", []string{""}, "New device to be added to the group as an child asset (required)")
+	cmd.Flags().StringSlice("newChildDevice", []string{""}, "New device to be added to the group as an child asset (required) (accepts pipeline)")
 	addProcessingModeFlag(cmd)
+
+	flags.WithOptions(
+		cmd,
+		flags.WithPipelineSupport("newChildDevice"),
+	)
 
 	// Required flags
 	cmd.MarkFlagRequired("group")
-	cmd.MarkFlagRequired("newChildDevice")
 
 	ccmd.baseCmd = newBaseCmd(cmd)
 
 	return ccmd
 }
 
-func (n *addDeviceToGroupCmd) addDeviceToGroup(cmd *cobra.Command, args []string) error {
-
-	commonOptions, err := getCommonOptions(cmd)
-	if err != nil {
-		return newUserError(fmt.Sprintf("Failed to get common options. err=%s", err))
-	}
-
+func (n *AddDeviceToGroupCmd) RunE(cmd *cobra.Command, args []string) error {
 	// query parameters
 	queryValue := url.QueryEscape("")
 	query := url.Values{}
+
+	err := flags.WithQueryOptions(
+		cmd,
+		query,
+	)
+	if err != nil {
+		return newUserError(err)
+	}
+
 	queryValue, err = url.QueryUnescape(query.Encode())
 
 	if err != nil {
@@ -77,7 +85,7 @@ func (n *addDeviceToGroupCmd) addDeviceToGroup(cmd *cobra.Command, args []string
 	formData := make(map[string]io.Reader)
 
 	// body
-	body := mapbuilder.NewMapBuilder()
+	body := mapbuilder.NewInitializedMapBuilder()
 	body.SetMap(getDataFlag(cmd))
 	if cmd.Flags().Changed("newChildDevice") {
 		newChildDeviceInputValues, newChildDeviceValue, err := getFormattedDeviceSlice(cmd, args, "newChildDevice")
@@ -136,5 +144,5 @@ func (n *addDeviceToGroupCmd) addDeviceToGroup(cmd *cobra.Command, args []string
 		DryRun:       globalFlagDryRun,
 	}
 
-	return processRequestAndResponse([]c8y.RequestOptions{req}, commonOptions)
+	return processRequestAndResponseWithWorkers(cmd, &req, "newChildDevice")
 }

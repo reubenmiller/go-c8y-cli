@@ -7,18 +7,19 @@ import (
 	"net/http"
 	"net/url"
 
+	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/pkg/mapbuilder"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
 )
 
-type updateBinaryCmd struct {
+type UpdateBinaryCmd struct {
 	*baseCmd
 }
 
-func newUpdateBinaryCmd() *updateBinaryCmd {
-	ccmd := &updateBinaryCmd{}
-
+func NewUpdateBinaryCmd() *UpdateBinaryCmd {
+	var _ = fmt.Errorf
+	ccmd := &UpdateBinaryCmd{}
 	cmd := &cobra.Command{
 		Use:   "update",
 		Short: "Update inventory binary",
@@ -29,17 +30,21 @@ $ c8y binaries update --id 12345 --file ./output.log
 Update an existing binary file
         `,
 		PreRunE: validateUpdateMode,
-		RunE:    ccmd.updateBinary,
+		RunE:    ccmd.RunE,
 	}
 
 	cmd.SilenceUsage = true
 
-	cmd.Flags().String("id", "", "Inventory binary id (required)")
+	cmd.Flags().String("id", "", "Inventory binary id (required) (accepts pipeline)")
 	cmd.Flags().String("file", "", "File to be uploaded as a binary (required)")
 	addProcessingModeFlag(cmd)
 
+	flags.WithOptions(
+		cmd,
+		flags.WithPipelineSupport("id"),
+	)
+
 	// Required flags
-	cmd.MarkFlagRequired("id")
 	cmd.MarkFlagRequired("file")
 
 	ccmd.baseCmd = newBaseCmd(cmd)
@@ -47,16 +52,19 @@ Update an existing binary file
 	return ccmd
 }
 
-func (n *updateBinaryCmd) updateBinary(cmd *cobra.Command, args []string) error {
-
-	commonOptions, err := getCommonOptions(cmd)
-	if err != nil {
-		return newUserError(fmt.Sprintf("Failed to get common options. err=%s", err))
-	}
-
+func (n *UpdateBinaryCmd) RunE(cmd *cobra.Command, args []string) error {
 	// query parameters
 	queryValue := url.QueryEscape("")
 	query := url.Values{}
+
+	err := flags.WithQueryOptions(
+		cmd,
+		query,
+	)
+	if err != nil {
+		return newUserError(err)
+	}
+
 	queryValue, err = url.QueryUnescape(query.Encode())
 
 	if err != nil {
@@ -75,7 +83,7 @@ func (n *updateBinaryCmd) updateBinary(cmd *cobra.Command, args []string) error 
 	formData := make(map[string]io.Reader)
 
 	// body
-	body := mapbuilder.NewMapBuilder()
+	body := mapbuilder.NewInitializedMapBuilder()
 	body.SetMap(getDataFlag(cmd))
 	getFileFlag(cmd, "file", true, formData)
 	if err := setDataTemplateFromFlags(cmd, body); err != nil {
@@ -87,13 +95,6 @@ func (n *updateBinaryCmd) updateBinary(cmd *cobra.Command, args []string) error 
 
 	// path parameters
 	pathParameters := make(map[string]string)
-	if v, err := cmd.Flags().GetString("id"); err == nil {
-		if v != "" {
-			pathParameters["id"] = v
-		}
-	} else {
-		return newUserError(fmt.Sprintf("Flag [%s] does not exist. %s", "id", err))
-	}
 
 	path := replacePathParameters("/inventory/binaries/{id}", pathParameters)
 
@@ -108,5 +109,5 @@ func (n *updateBinaryCmd) updateBinary(cmd *cobra.Command, args []string) error 
 		DryRun:       globalFlagDryRun,
 	}
 
-	return processRequestAndResponse([]c8y.RequestOptions{req}, commonOptions)
+	return processRequestAndResponseWithWorkers(cmd, &req, "id")
 }

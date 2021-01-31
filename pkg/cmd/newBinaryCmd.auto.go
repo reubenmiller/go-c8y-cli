@@ -7,18 +7,19 @@ import (
 	"net/http"
 	"net/url"
 
+	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/pkg/mapbuilder"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
 )
 
-type newBinaryCmd struct {
+type NewBinaryCmd struct {
 	*baseCmd
 }
 
-func newNewBinaryCmd() *newBinaryCmd {
-	ccmd := &newBinaryCmd{}
-
+func NewNewBinaryCmd() *NewBinaryCmd {
+	var _ = fmt.Errorf
+	ccmd := &NewBinaryCmd{}
 	cmd := &cobra.Command{
 		Use:   "create",
 		Short: "New inventory binary",
@@ -31,7 +32,7 @@ $ c8y binaries create --file "myConfig.json" --data "c8y_Global={},type=c8y_uplo
 Upload a config file and make it globally accessible for all users
         `,
 		PreRunE: validateCreateMode,
-		RunE:    ccmd.newBinary,
+		RunE:    ccmd.RunE,
 	}
 
 	cmd.SilenceUsage = true
@@ -39,6 +40,11 @@ Upload a config file and make it globally accessible for all users
 	cmd.Flags().String("file", "", "File to be uploaded as a binary (required)")
 	addDataFlag(cmd)
 	addProcessingModeFlag(cmd)
+
+	flags.WithOptions(
+		cmd,
+		flags.WithPipelineSupport(""),
+	)
 
 	// Required flags
 	cmd.MarkFlagRequired("file")
@@ -48,16 +54,19 @@ Upload a config file and make it globally accessible for all users
 	return ccmd
 }
 
-func (n *newBinaryCmd) newBinary(cmd *cobra.Command, args []string) error {
-
-	commonOptions, err := getCommonOptions(cmd)
-	if err != nil {
-		return newUserError(fmt.Sprintf("Failed to get common options. err=%s", err))
-	}
-
+func (n *NewBinaryCmd) RunE(cmd *cobra.Command, args []string) error {
 	// query parameters
 	queryValue := url.QueryEscape("")
 	query := url.Values{}
+
+	err := flags.WithQueryOptions(
+		cmd,
+		query,
+	)
+	if err != nil {
+		return newUserError(err)
+	}
+
 	queryValue, err = url.QueryUnescape(query.Encode())
 
 	if err != nil {
@@ -76,7 +85,7 @@ func (n *newBinaryCmd) newBinary(cmd *cobra.Command, args []string) error {
 	formData := make(map[string]io.Reader)
 
 	// body
-	body := mapbuilder.NewMapBuilder()
+	body := mapbuilder.NewInitializedMapBuilder()
 	body.SetMap(getDataFlag(cmd))
 	getFileFlag(cmd, "file", true, formData)
 	if err := setDataTemplateFromFlags(cmd, body); err != nil {
@@ -102,5 +111,5 @@ func (n *newBinaryCmd) newBinary(cmd *cobra.Command, args []string) error {
 		DryRun:       globalFlagDryRun,
 	}
 
-	return processRequestAndResponse([]c8y.RequestOptions{req}, commonOptions)
+	return processRequestAndResponseWithWorkers(cmd, &req, "")
 }

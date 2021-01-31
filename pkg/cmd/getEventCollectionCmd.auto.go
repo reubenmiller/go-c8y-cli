@@ -7,18 +7,19 @@ import (
 	"net/http"
 	"net/url"
 
+	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/pkg/mapbuilder"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
 )
 
-type getEventCollectionCmd struct {
+type GetEventCollectionCmd struct {
 	*baseCmd
 }
 
-func newGetEventCollectionCmd() *getEventCollectionCmd {
-	ccmd := &getEventCollectionCmd{}
-
+func NewGetEventCollectionCmd() *GetEventCollectionCmd {
+	var _ = fmt.Errorf
+	ccmd := &GetEventCollectionCmd{}
 	cmd := &cobra.Command{
 		Use:   "list",
 		Short: "Get a collection of events based on filter parameters",
@@ -31,17 +32,22 @@ $ c8y events list --device mydevice
 Get events from a device
         `,
 		PreRunE: nil,
-		RunE:    ccmd.getEventCollection,
+		RunE:    ccmd.RunE,
 	}
 
 	cmd.SilenceUsage = true
 
-	cmd.Flags().StringSlice("device", []string{""}, "Device ID")
+	cmd.Flags().StringSlice("device", []string{""}, "Device ID (accepts pipeline)")
 	cmd.Flags().String("type", "", "Event type.")
 	cmd.Flags().String("fragmentType", "", "Fragment name from event.")
 	cmd.Flags().String("dateFrom", "", "Start date or date and time of event occurrence.")
 	cmd.Flags().String("dateTo", "", "End date or date and time of event occurrence.")
 	cmd.Flags().Bool("revert", false, "Return the newest instead of the oldest events. Must be used with dateFrom and dateTo parameters")
+
+	flags.WithOptions(
+		cmd,
+		flags.WithPipelineSupport("device"),
+	)
 
 	// Required flags
 
@@ -50,13 +56,7 @@ Get events from a device
 	return ccmd
 }
 
-func (n *getEventCollectionCmd) getEventCollection(cmd *cobra.Command, args []string) error {
-
-	commonOptions, err := getCommonOptions(cmd)
-	if err != nil {
-		return newUserError(fmt.Sprintf("Failed to get common options. err=%s", err))
-	}
-
+func (n *GetEventCollectionCmd) RunE(cmd *cobra.Command, args []string) error {
 	// query parameters
 	queryValue := url.QueryEscape("")
 	query := url.Values{}
@@ -112,7 +112,20 @@ func (n *getEventCollectionCmd) getEventCollection(cmd *cobra.Command, args []st
 			return newUserError("Flag does not exist")
 		}
 	}
+
+	err := flags.WithQueryOptions(
+		cmd,
+		query,
+	)
+	if err != nil {
+		return newUserError(err)
+	}
+	commonOptions, err := getCommonOptions(cmd)
+	if err != nil {
+		return newUserError(fmt.Sprintf("Failed to get common options. err=%s", err))
+	}
 	commonOptions.AddQueryParameters(&query)
+
 	queryValue, err = url.QueryUnescape(query.Encode())
 
 	if err != nil {
@@ -126,7 +139,7 @@ func (n *getEventCollectionCmd) getEventCollection(cmd *cobra.Command, args []st
 	formData := make(map[string]io.Reader)
 
 	// body
-	body := mapbuilder.NewMapBuilder()
+	body := mapbuilder.NewInitializedMapBuilder()
 
 	// path parameters
 	pathParameters := make(map[string]string)
@@ -144,5 +157,5 @@ func (n *getEventCollectionCmd) getEventCollection(cmd *cobra.Command, args []st
 		DryRun:       globalFlagDryRun,
 	}
 
-	return processRequestAndResponse([]c8y.RequestOptions{req}, commonOptions)
+	return processRequestAndResponseWithWorkers(cmd, &req, "device")
 }

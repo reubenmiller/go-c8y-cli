@@ -4,12 +4,12 @@ import (
 	"github.com/spf13/cobra"
 )
 
-type usersCmd struct {
+type UsersCmd struct {
 	*baseCmd
 }
 
-func newUsersRootCmd() *usersCmd {
-	ccmd := &usersCmd{}
+func NewUsersRootCmd() *UsersCmd {
+	ccmd := &UsersCmd{}
 
 	cmd := &cobra.Command{
 		Use:   "users",
@@ -18,19 +18,19 @@ func newUsersRootCmd() *usersCmd {
 	}
 
 	// Subcommands
-	cmd.AddCommand(newGetUserCurrentCmd().getCommand())
-	cmd.AddCommand(newUpdateUserCurrentCmd().getCommand())
-	cmd.AddCommand(newGetCurrentUserInventoryRoleCollectionCmd().getCommand())
-	cmd.AddCommand(newGetCurrentUserInventoryRoleCmd().getCommand())
-	cmd.AddCommand(newGetUserCollectionCmd().getCommand())
-	cmd.AddCommand(newNewUserCmd().getCommand())
-	cmd.AddCommand(newGetUserCmd().getCommand())
-	cmd.AddCommand(newGetUserByNameCmd().getCommand())
-	cmd.AddCommand(newDeleteUserCmd().getCommand())
-	cmd.AddCommand(newUpdateUserCmd().getCommand())
-	cmd.AddCommand(newResetUserPasswordCmd().getCommand())
-	cmd.AddCommand(newGetUserMembershipCollectionCmd().getCommand())
-	cmd.AddCommand(newLogoutCmd().getCommand())
+	cmd.AddCommand(NewGetUserCurrentCmd().getCommand())
+	cmd.AddCommand(NewUpdateUserCurrentCmd().getCommand())
+	cmd.AddCommand(NewGetCurrentUserInventoryRoleCollectionCmd().getCommand())
+	cmd.AddCommand(NewGetCurrentUserInventoryRoleCmd().getCommand())
+	cmd.AddCommand(NewGetUserCollectionCmd().getCommand())
+	cmd.AddCommand(NewNewUserCmd().getCommand())
+	cmd.AddCommand(NewGetUserCmd().getCommand())
+	cmd.AddCommand(NewGetUserByNameCmd().getCommand())
+	cmd.AddCommand(NewDeleteUserCmd().getCommand())
+	cmd.AddCommand(NewUpdateUserCmd().getCommand())
+	cmd.AddCommand(NewResetUserPasswordCmd().getCommand())
+	cmd.AddCommand(NewGetUserMembershipCollectionCmd().getCommand())
+	cmd.AddCommand(NewLogoutCmd().getCommand())
 
 	ccmd.baseCmd = newBaseCmd(cmd)
 

@@ -4,12 +4,12 @@ import (
 	"github.com/spf13/cobra"
 )
 
-type operationsCmd struct {
+type OperationsCmd struct {
 	*baseCmd
 }
 
-func newOperationsRootCmd() *operationsCmd {
-	ccmd := &operationsCmd{}
+func NewOperationsRootCmd() *OperationsCmd {
+	ccmd := &OperationsCmd{}
 
 	cmd := &cobra.Command{
 		Use:   "operations",
@@ -18,11 +18,11 @@ func newOperationsRootCmd() *operationsCmd {
 	}
 
 	// Subcommands
-	cmd.AddCommand(newGetOperationCollectionCmd().getCommand())
-	cmd.AddCommand(newGetOperationCmd().getCommand())
-	cmd.AddCommand(newNewOperationCmd().getCommand())
-	cmd.AddCommand(newUpdateOperationCmd().getCommand())
-	cmd.AddCommand(newDeleteOperationCollectionCmd().getCommand())
+	cmd.AddCommand(NewGetOperationCollectionCmd().getCommand())
+	cmd.AddCommand(NewGetOperationCmd().getCommand())
+	cmd.AddCommand(NewNewOperationCmd().getCommand())
+	cmd.AddCommand(NewUpdateOperationCmd().getCommand())
+	cmd.AddCommand(NewDeleteOperationCollectionCmd().getCommand())
 
 	ccmd.baseCmd = newBaseCmd(cmd)
 

@@ -14,7 +14,7 @@ type subscribeAlarmCmd struct {
 	flagCount       int64
 }
 
-func newSubscribeAlarmCmd() *subscribeAlarmCmd {
+func NewSubscribeAlarmCmd() *subscribeAlarmCmd {
 	ccmd := &subscribeAlarmCmd{}
 
 	cmd := &cobra.Command{

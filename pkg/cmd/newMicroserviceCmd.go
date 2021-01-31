@@ -29,7 +29,7 @@ type newMicroserviceCmd struct {
 	skipUpload       bool
 }
 
-func newNewMicroserviceCmd() *newMicroserviceCmd {
+func NewNewMicroserviceCmd() *newMicroserviceCmd {
 	ccmd := &newMicroserviceCmd{}
 
 	cmd := &cobra.Command{

@@ -14,7 +14,7 @@ type subscribeEventCmd struct {
 	flagCount       int64
 }
 
-func newSubscribeEventCmd() *subscribeEventCmd {
+func NewSubscribeEventCmd() *subscribeEventCmd {
 	ccmd := &subscribeEventCmd{}
 
 	cmd := &cobra.Command{

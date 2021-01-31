@@ -7,18 +7,19 @@ import (
 	"net/http"
 	"net/url"
 
+	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/pkg/mapbuilder"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
 )
 
-type enableApplicationOnTenantCmd struct {
+type EnableApplicationOnTenantCmd struct {
 	*baseCmd
 }
 
-func newEnableApplicationOnTenantCmd() *enableApplicationOnTenantCmd {
-	ccmd := &enableApplicationOnTenantCmd{}
-
+func NewEnableApplicationOnTenantCmd() *EnableApplicationOnTenantCmd {
+	var _ = fmt.Errorf
+	ccmd := &EnableApplicationOnTenantCmd{}
 	cmd := &cobra.Command{
 		Use:   "enableApplication",
 		Short: "Enable application on tenant",
@@ -28,33 +29,40 @@ $ c8y tenants enableApplication --tenant "mycompany" --application "myMicroservi
 Enable an application of a tenant by name
         `,
 		PreRunE: validateCreateMode,
-		RunE:    ccmd.enableApplicationOnTenant,
+		RunE:    ccmd.RunE,
 	}
 
 	cmd.SilenceUsage = true
 
 	cmd.Flags().String("tenant", "", "Tenant id. Defaults to current tenant (based on credentials)")
-	cmd.Flags().String("application", "", "Application id (required)")
+	cmd.Flags().String("application", "", "Application id (required) (accepts pipeline)")
 	addProcessingModeFlag(cmd)
 
+	flags.WithOptions(
+		cmd,
+		flags.WithPipelineSupport("application"),
+	)
+
 	// Required flags
-	cmd.MarkFlagRequired("application")
 
 	ccmd.baseCmd = newBaseCmd(cmd)
 
 	return ccmd
 }
 
-func (n *enableApplicationOnTenantCmd) enableApplicationOnTenant(cmd *cobra.Command, args []string) error {
-
-	commonOptions, err := getCommonOptions(cmd)
-	if err != nil {
-		return newUserError(fmt.Sprintf("Failed to get common options. err=%s", err))
-	}
-
+func (n *EnableApplicationOnTenantCmd) RunE(cmd *cobra.Command, args []string) error {
 	// query parameters
 	queryValue := url.QueryEscape("")
 	query := url.Values{}
+
+	err := flags.WithQueryOptions(
+		cmd,
+		query,
+	)
+	if err != nil {
+		return newUserError(err)
+	}
+
 	queryValue, err = url.QueryUnescape(query.Encode())
 
 	if err != nil {
@@ -73,7 +81,7 @@ func (n *enableApplicationOnTenantCmd) enableApplicationOnTenant(cmd *cobra.Comm
 	formData := make(map[string]io.Reader)
 
 	// body
-	body := mapbuilder.NewMapBuilder()
+	body := mapbuilder.NewInitializedMapBuilder()
 	body.SetMap(getDataFlag(cmd))
 	if cmd.Flags().Changed("application") {
 		applicationInputValues, applicationValue, err := getApplicationSlice(cmd, args, "application")
@@ -118,5 +126,5 @@ func (n *enableApplicationOnTenantCmd) enableApplicationOnTenant(cmd *cobra.Comm
 		DryRun:       globalFlagDryRun,
 	}
 
-	return processRequestAndResponse([]c8y.RequestOptions{req}, commonOptions)
+	return processRequestAndResponseWithWorkers(cmd, &req, "application")
 }

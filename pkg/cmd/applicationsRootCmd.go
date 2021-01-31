@@ -4,12 +4,12 @@ import (
 	"github.com/spf13/cobra"
 )
 
-type applicationsCmd struct {
+type ApplicationsCmd struct {
 	*baseCmd
 }
 
-func newApplicationsRootCmd() *applicationsCmd {
-	ccmd := &applicationsCmd{}
+func NewApplicationsRootCmd() *ApplicationsCmd {
+	ccmd := &ApplicationsCmd{}
 
 	cmd := &cobra.Command{
 		Use:   "applications",
@@ -18,15 +18,15 @@ func newApplicationsRootCmd() *applicationsCmd {
 	}
 
 	// Subcommands
-	cmd.AddCommand(newGetApplicationCollectionCmd().getCommand())
-	cmd.AddCommand(newNewApplicationCmd().getCommand())
-	cmd.AddCommand(newCopyApplicationCmd().getCommand())
-	cmd.AddCommand(newGetApplicationCmd().getCommand())
-	cmd.AddCommand(newDeleteApplicationCmd().getCommand())
-	cmd.AddCommand(newUpdateApplicationCmd().getCommand())
-	cmd.AddCommand(newNewApplicationBinaryCmd().getCommand())
-	cmd.AddCommand(newGetApplicationBinaryCollectionCmd().getCommand())
-	cmd.AddCommand(newDeleteApplicationBinaryCmd().getCommand())
+	cmd.AddCommand(NewGetApplicationCollectionCmd().getCommand())
+	cmd.AddCommand(NewNewApplicationCmd().getCommand())
+	cmd.AddCommand(NewCopyApplicationCmd().getCommand())
+	cmd.AddCommand(NewGetApplicationCmd().getCommand())
+	cmd.AddCommand(NewDeleteApplicationCmd().getCommand())
+	cmd.AddCommand(NewUpdateApplicationCmd().getCommand())
+	cmd.AddCommand(NewNewApplicationBinaryCmd().getCommand())
+	cmd.AddCommand(NewGetApplicationBinaryCollectionCmd().getCommand())
+	cmd.AddCommand(NewDeleteApplicationBinaryCmd().getCommand())
 
 	ccmd.baseCmd = newBaseCmd(cmd)
 

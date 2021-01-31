@@ -7,18 +7,19 @@ import (
 	"net/http"
 	"net/url"
 
+	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/pkg/mapbuilder"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
 )
 
-type newOperationCmd struct {
+type NewOperationCmd struct {
 	*baseCmd
 }
 
-func newNewOperationCmd() *newOperationCmd {
-	ccmd := &newOperationCmd{}
-
+func NewNewOperationCmd() *NewOperationCmd {
+	var _ = fmt.Errorf
+	ccmd := &NewOperationCmd{}
 	cmd := &cobra.Command{
 		Use:   "create",
 		Short: "Create a new operation",
@@ -28,34 +29,41 @@ $ c8y operations create --device mydevice --data "{c8y_Restart:{}}"
 Create operation for a device
         `,
 		PreRunE: validateCreateMode,
-		RunE:    ccmd.newOperation,
+		RunE:    ccmd.RunE,
 	}
 
 	cmd.SilenceUsage = true
 
-	cmd.Flags().StringSlice("device", []string{""}, "Identifies the target device on which this operation should be performed. (required)")
+	cmd.Flags().StringSlice("device", []string{""}, "Identifies the target device on which this operation should be performed. (required) (accepts pipeline)")
 	cmd.Flags().String("description", "", "Text description of the operation.")
 	addDataFlag(cmd)
 	addProcessingModeFlag(cmd)
 
+	flags.WithOptions(
+		cmd,
+		flags.WithPipelineSupport("device"),
+	)
+
 	// Required flags
-	cmd.MarkFlagRequired("device")
 
 	ccmd.baseCmd = newBaseCmd(cmd)
 
 	return ccmd
 }
 
-func (n *newOperationCmd) newOperation(cmd *cobra.Command, args []string) error {
-
-	commonOptions, err := getCommonOptions(cmd)
-	if err != nil {
-		return newUserError(fmt.Sprintf("Failed to get common options. err=%s", err))
-	}
-
+func (n *NewOperationCmd) RunE(cmd *cobra.Command, args []string) error {
 	// query parameters
 	queryValue := url.QueryEscape("")
 	query := url.Values{}
+
+	err := flags.WithQueryOptions(
+		cmd,
+		query,
+	)
+	if err != nil {
+		return newUserError(err)
+	}
+
 	queryValue, err = url.QueryUnescape(query.Encode())
 
 	if err != nil {
@@ -74,7 +82,7 @@ func (n *newOperationCmd) newOperation(cmd *cobra.Command, args []string) error 
 	formData := make(map[string]io.Reader)
 
 	// body
-	body := mapbuilder.NewMapBuilder()
+	body := mapbuilder.NewInitializedMapBuilder()
 	body.SetMap(getDataFlag(cmd))
 	if cmd.Flags().Changed("device") {
 		deviceInputValues, deviceValue, err := getFormattedDeviceSlice(cmd, args, "device")
@@ -123,5 +131,5 @@ func (n *newOperationCmd) newOperation(cmd *cobra.Command, args []string) error 
 		DryRun:       globalFlagDryRun,
 	}
 
-	return processRequestAndResponse([]c8y.RequestOptions{req}, commonOptions)
+	return processRequestAndResponseWithWorkers(cmd, &req, "device")
 }

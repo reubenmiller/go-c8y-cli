@@ -8,7 +8,7 @@ type realtimeCmd struct {
 	*baseCmd
 }
 
-func newRealtimeCmd() *realtimeCmd {
+func NewRealtimeCmd() *realtimeCmd {
 	ccmd := &realtimeCmd{}
 
 	cmd := &cobra.Command{

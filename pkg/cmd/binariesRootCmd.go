@@ -4,12 +4,12 @@ import (
 	"github.com/spf13/cobra"
 )
 
-type binariesCmd struct {
+type BinariesCmd struct {
 	*baseCmd
 }
 
-func newBinariesRootCmd() *binariesCmd {
-	ccmd := &binariesCmd{}
+func NewBinariesRootCmd() *BinariesCmd {
+	ccmd := &BinariesCmd{}
 
 	cmd := &cobra.Command{
 		Use:   "binaries",
@@ -18,11 +18,11 @@ func newBinariesRootCmd() *binariesCmd {
 	}
 
 	// Subcommands
-	cmd.AddCommand(newGetBinaryCollectionCmd().getCommand())
-	cmd.AddCommand(newDownloadCmd().getCommand())
-	cmd.AddCommand(newNewBinaryCmd().getCommand())
-	cmd.AddCommand(newUpdateBinaryCmd().getCommand())
-	cmd.AddCommand(newDeleteBinaryCmd().getCommand())
+	cmd.AddCommand(NewGetBinaryCollectionCmd().getCommand())
+	cmd.AddCommand(NewDownloadCmd().getCommand())
+	cmd.AddCommand(NewNewBinaryCmd().getCommand())
+	cmd.AddCommand(NewUpdateBinaryCmd().getCommand())
+	cmd.AddCommand(NewDeleteBinaryCmd().getCommand())
 
 	ccmd.baseCmd = newBaseCmd(cmd)
 

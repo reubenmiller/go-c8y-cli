@@ -4,12 +4,12 @@ import (
 	"github.com/spf13/cobra"
 )
 
-type deviceCredentialsCmd struct {
+type DeviceCredentialsCmd struct {
 	*baseCmd
 }
 
-func newDeviceCredentialsRootCmd() *deviceCredentialsCmd {
-	ccmd := &deviceCredentialsCmd{}
+func NewDeviceCredentialsRootCmd() *DeviceCredentialsCmd {
+	ccmd := &DeviceCredentialsCmd{}
 
 	cmd := &cobra.Command{
 		Use:   "deviceCredentials",
@@ -18,12 +18,12 @@ func newDeviceCredentialsRootCmd() *deviceCredentialsCmd {
 	}
 
 	// Subcommands
-	cmd.AddCommand(newGetNewDeviceRequestCollectionCmd().getCommand())
-	cmd.AddCommand(newGetNewDeviceRequestCmd().getCommand())
-	cmd.AddCommand(newRegisterNewDeviceCmd().getCommand())
-	cmd.AddCommand(newApproveNewDeviceRequestCmd().getCommand())
-	cmd.AddCommand(newDeleteNewDeviceRequestCmd().getCommand())
-	cmd.AddCommand(newRequestDeviceCredentialsCmd().getCommand())
+	cmd.AddCommand(NewGetNewDeviceRequestCollectionCmd().getCommand())
+	cmd.AddCommand(NewGetNewDeviceRequestCmd().getCommand())
+	cmd.AddCommand(NewRegisterNewDeviceCmd().getCommand())
+	cmd.AddCommand(NewApproveNewDeviceRequestCmd().getCommand())
+	cmd.AddCommand(NewDeleteNewDeviceRequestCmd().getCommand())
+	cmd.AddCommand(NewRequestDeviceCredentialsCmd().getCommand())
 
 	ccmd.baseCmd = newBaseCmd(cmd)
 

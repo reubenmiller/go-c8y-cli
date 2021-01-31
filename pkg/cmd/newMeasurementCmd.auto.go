@@ -7,18 +7,19 @@ import (
 	"net/http"
 	"net/url"
 
+	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/pkg/mapbuilder"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
 )
 
-type newMeasurementCmd struct {
+type NewMeasurementCmd struct {
 	*baseCmd
 }
 
-func newNewMeasurementCmd() *newMeasurementCmd {
-	ccmd := &newMeasurementCmd{}
-
+func NewNewMeasurementCmd() *NewMeasurementCmd {
+	var _ = fmt.Errorf
+	ccmd := &NewMeasurementCmd{}
 	cmd := &cobra.Command{
 		Use:   "create",
 		Short: "Create a new measurement",
@@ -28,35 +29,42 @@ $ c8y measurements create --id 12345 --time "0s" --type "myType" --data "{\"c8y_
 Create measurement
         `,
 		PreRunE: validateCreateMode,
-		RunE:    ccmd.newMeasurement,
+		RunE:    ccmd.RunE,
 	}
 
 	cmd.SilenceUsage = true
 
-	cmd.Flags().StringSlice("device", []string{""}, "The ManagedObject which is the source of this measurement. (required)")
+	cmd.Flags().StringSlice("device", []string{""}, "The ManagedObject which is the source of this measurement. (required) (accepts pipeline)")
 	cmd.Flags().String("time", "0s", "Time of the measurement. Defaults to current timestamp.")
 	cmd.Flags().String("type", "", "The most specific type of this entire measurement.")
 	addDataFlag(cmd)
 	addProcessingModeFlag(cmd)
 
+	flags.WithOptions(
+		cmd,
+		flags.WithPipelineSupport("device"),
+	)
+
 	// Required flags
-	cmd.MarkFlagRequired("device")
 
 	ccmd.baseCmd = newBaseCmd(cmd)
 
 	return ccmd
 }
 
-func (n *newMeasurementCmd) newMeasurement(cmd *cobra.Command, args []string) error {
-
-	commonOptions, err := getCommonOptions(cmd)
-	if err != nil {
-		return newUserError(fmt.Sprintf("Failed to get common options. err=%s", err))
-	}
-
+func (n *NewMeasurementCmd) RunE(cmd *cobra.Command, args []string) error {
 	// query parameters
 	queryValue := url.QueryEscape("")
 	query := url.Values{}
+
+	err := flags.WithQueryOptions(
+		cmd,
+		query,
+	)
+	if err != nil {
+		return newUserError(err)
+	}
+
 	queryValue, err = url.QueryUnescape(query.Encode())
 
 	if err != nil {
@@ -75,7 +83,7 @@ func (n *newMeasurementCmd) newMeasurement(cmd *cobra.Command, args []string) er
 	formData := make(map[string]io.Reader)
 
 	// body
-	body := mapbuilder.NewMapBuilder()
+	body := mapbuilder.NewInitializedMapBuilder()
 	body.SetMap(getDataFlag(cmd))
 	if cmd.Flags().Changed("device") {
 		deviceInputValues, deviceValue, err := getFormattedDeviceSlice(cmd, args, "device")
@@ -132,5 +140,5 @@ func (n *newMeasurementCmd) newMeasurement(cmd *cobra.Command, args []string) er
 		DryRun:       globalFlagDryRun,
 	}
 
-	return processRequestAndResponse([]c8y.RequestOptions{req}, commonOptions)
+	return processRequestAndResponseWithWorkers(cmd, &req, "device")
 }

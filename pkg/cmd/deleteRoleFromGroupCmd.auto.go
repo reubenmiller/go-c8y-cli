@@ -7,18 +7,19 @@ import (
 	"net/http"
 	"net/url"
 
+	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/pkg/mapbuilder"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
 )
 
-type deleteRoleFromGroupCmd struct {
+type DeleteRoleFromGroupCmd struct {
 	*baseCmd
 }
 
-func newDeleteRoleFromGroupCmd() *deleteRoleFromGroupCmd {
-	ccmd := &deleteRoleFromGroupCmd{}
-
+func NewDeleteRoleFromGroupCmd() *DeleteRoleFromGroupCmd {
+	var _ = fmt.Errorf
+	ccmd := &DeleteRoleFromGroupCmd{}
 	cmd := &cobra.Command{
 		Use:   "deleteRoleFromGroup",
 		Short: "Unassign/Remove role from a group",
@@ -28,7 +29,7 @@ $ c8y userRoles deleteRoleFromGroup --group "myuser" --role "ROLE_MEASUREMENT_RE
 Remove a role from the given user
         `,
 		PreRunE: validateDeleteMode,
-		RunE:    ccmd.deleteRoleFromGroup,
+		RunE:    ccmd.RunE,
 	}
 
 	cmd.SilenceUsage = true
@@ -37,6 +38,11 @@ Remove a role from the given user
 	cmd.Flags().StringSlice("role", []string{""}, "Role name, e.g. ROLE_TENANT_MANAGEMENT_ADMIN (required)")
 	cmd.Flags().String("tenant", "", "Tenant")
 	addProcessingModeFlag(cmd)
+
+	flags.WithOptions(
+		cmd,
+		flags.WithPipelineSupport(""),
+	)
 
 	// Required flags
 	cmd.MarkFlagRequired("group")
@@ -47,16 +53,19 @@ Remove a role from the given user
 	return ccmd
 }
 
-func (n *deleteRoleFromGroupCmd) deleteRoleFromGroup(cmd *cobra.Command, args []string) error {
-
-	commonOptions, err := getCommonOptions(cmd)
-	if err != nil {
-		return newUserError(fmt.Sprintf("Failed to get common options. err=%s", err))
-	}
-
+func (n *DeleteRoleFromGroupCmd) RunE(cmd *cobra.Command, args []string) error {
 	// query parameters
 	queryValue := url.QueryEscape("")
 	query := url.Values{}
+
+	err := flags.WithQueryOptions(
+		cmd,
+		query,
+	)
+	if err != nil {
+		return newUserError(err)
+	}
+
 	queryValue, err = url.QueryUnescape(query.Encode())
 
 	if err != nil {
@@ -75,7 +84,7 @@ func (n *deleteRoleFromGroupCmd) deleteRoleFromGroup(cmd *cobra.Command, args []
 	formData := make(map[string]io.Reader)
 
 	// body
-	body := mapbuilder.NewMapBuilder()
+	body := mapbuilder.NewInitializedMapBuilder()
 
 	// path parameters
 	pathParameters := make(map[string]string)
@@ -130,5 +139,5 @@ func (n *deleteRoleFromGroupCmd) deleteRoleFromGroup(cmd *cobra.Command, args []
 		DryRun:       globalFlagDryRun,
 	}
 
-	return processRequestAndResponse([]c8y.RequestOptions{req}, commonOptions)
+	return processRequestAndResponseWithWorkers(cmd, &req, "")
 }

@@ -7,18 +7,19 @@ import (
 	"net/http"
 	"net/url"
 
+	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/pkg/mapbuilder"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
 )
 
-type updateUserCmd struct {
+type UpdateUserCmd struct {
 	*baseCmd
 }
 
-func newUpdateUserCmd() *updateUserCmd {
-	ccmd := &updateUserCmd{}
-
+func NewUpdateUserCmd() *UpdateUserCmd {
+	var _ = fmt.Errorf
+	ccmd := &UpdateUserCmd{}
 	cmd := &cobra.Command{
 		Use:   "update",
 		Short: "Update user",
@@ -28,12 +29,12 @@ $ c8y users update --id "myuser" --firstName "Simon"
 Update a user
         `,
 		PreRunE: validateUpdateMode,
-		RunE:    ccmd.updateUser,
+		RunE:    ccmd.RunE,
 	}
 
 	cmd.SilenceUsage = true
 
-	cmd.Flags().StringSlice("id", []string{""}, "User id (required)")
+	cmd.Flags().StringSlice("id", []string{""}, "User id (required) (accepts pipeline)")
 	cmd.Flags().String("tenant", "", "Tenant")
 	cmd.Flags().String("firstName", "", "User first name")
 	cmd.Flags().String("lastName", "", "User last name")
@@ -45,24 +46,31 @@ Update a user
 	cmd.Flags().String("customProperties", "", "Custom properties to be added to the user")
 	addProcessingModeFlag(cmd)
 
+	flags.WithOptions(
+		cmd,
+		flags.WithPipelineSupport("id"),
+	)
+
 	// Required flags
-	cmd.MarkFlagRequired("id")
 
 	ccmd.baseCmd = newBaseCmd(cmd)
 
 	return ccmd
 }
 
-func (n *updateUserCmd) updateUser(cmd *cobra.Command, args []string) error {
-
-	commonOptions, err := getCommonOptions(cmd)
-	if err != nil {
-		return newUserError(fmt.Sprintf("Failed to get common options. err=%s", err))
-	}
-
+func (n *UpdateUserCmd) RunE(cmd *cobra.Command, args []string) error {
 	// query parameters
 	queryValue := url.QueryEscape("")
 	query := url.Values{}
+
+	err := flags.WithQueryOptions(
+		cmd,
+		query,
+	)
+	if err != nil {
+		return newUserError(err)
+	}
+
 	queryValue, err = url.QueryUnescape(query.Encode())
 
 	if err != nil {
@@ -81,7 +89,7 @@ func (n *updateUserCmd) updateUser(cmd *cobra.Command, args []string) error {
 	formData := make(map[string]io.Reader)
 
 	// body
-	body := mapbuilder.NewMapBuilder()
+	body := mapbuilder.NewInitializedMapBuilder()
 	body.SetMap(getDataFlag(cmd))
 	if v, err := cmd.Flags().GetString("firstName"); err == nil {
 		if v != "" {
@@ -148,23 +156,6 @@ func (n *updateUserCmd) updateUser(cmd *cobra.Command, args []string) error {
 
 	// path parameters
 	pathParameters := make(map[string]string)
-	if cmd.Flags().Changed("id") {
-		idInputValues, idValue, err := getFormattedUserSlice(cmd, args, "id")
-
-		if err != nil {
-			return newUserError("no matching users found", idInputValues, err)
-		}
-
-		if len(idValue) == 0 {
-			return newUserError("no matching users found", idInputValues)
-		}
-
-		for _, item := range idValue {
-			if item != "" {
-				pathParameters["id"] = newIDValue(item).GetID()
-			}
-		}
-	}
 	if v := getTenantWithDefaultFlag(cmd, "tenant", client.TenantName); v != "" {
 		pathParameters["tenant"] = v
 	}
@@ -182,5 +173,5 @@ func (n *updateUserCmd) updateUser(cmd *cobra.Command, args []string) error {
 		DryRun:       globalFlagDryRun,
 	}
 
-	return processRequestAndResponse([]c8y.RequestOptions{req}, commonOptions)
+	return processRequestAndResponseWithWorkers(cmd, &req, "id")
 }

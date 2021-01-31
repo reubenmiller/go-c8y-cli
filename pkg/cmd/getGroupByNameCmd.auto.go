@@ -7,18 +7,19 @@ import (
 	"net/http"
 	"net/url"
 
+	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/pkg/mapbuilder"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
 )
 
-type getGroupByNameCmd struct {
+type GetGroupByNameCmd struct {
 	*baseCmd
 }
 
-func newGetGroupByNameCmd() *getGroupByNameCmd {
-	ccmd := &getGroupByNameCmd{}
-
+func NewGetGroupByNameCmd() *GetGroupByNameCmd {
+	var _ = fmt.Errorf
+	ccmd := &GetGroupByNameCmd{}
 	cmd := &cobra.Command{
 		Use:   "getByName",
 		Short: "Get a group by name",
@@ -28,13 +29,18 @@ $ c8y userGroups getByName --name customGroup1
 Get user group by its name
         `,
 		PreRunE: nil,
-		RunE:    ccmd.getGroupByName,
+		RunE:    ccmd.RunE,
 	}
 
 	cmd.SilenceUsage = true
 
 	cmd.Flags().String("tenant", "", "Tenant")
 	cmd.Flags().String("name", "", "Group name")
+
+	flags.WithOptions(
+		cmd,
+		flags.WithPipelineSupport(""),
+	)
 
 	// Required flags
 
@@ -43,17 +49,24 @@ Get user group by its name
 	return ccmd
 }
 
-func (n *getGroupByNameCmd) getGroupByName(cmd *cobra.Command, args []string) error {
+func (n *GetGroupByNameCmd) RunE(cmd *cobra.Command, args []string) error {
+	// query parameters
+	queryValue := url.QueryEscape("")
+	query := url.Values{}
 
+	err := flags.WithQueryOptions(
+		cmd,
+		query,
+	)
+	if err != nil {
+		return newUserError(err)
+	}
 	commonOptions, err := getCommonOptions(cmd)
 	if err != nil {
 		return newUserError(fmt.Sprintf("Failed to get common options. err=%s", err))
 	}
-
-	// query parameters
-	queryValue := url.QueryEscape("")
-	query := url.Values{}
 	commonOptions.AddQueryParameters(&query)
+
 	queryValue, err = url.QueryUnescape(query.Encode())
 
 	if err != nil {
@@ -67,7 +80,7 @@ func (n *getGroupByNameCmd) getGroupByName(cmd *cobra.Command, args []string) er
 	formData := make(map[string]io.Reader)
 
 	// body
-	body := mapbuilder.NewMapBuilder()
+	body := mapbuilder.NewInitializedMapBuilder()
 
 	// path parameters
 	pathParameters := make(map[string]string)
@@ -95,5 +108,5 @@ func (n *getGroupByNameCmd) getGroupByName(cmd *cobra.Command, args []string) er
 		DryRun:       globalFlagDryRun,
 	}
 
-	return processRequestAndResponse([]c8y.RequestOptions{req}, commonOptions)
+	return processRequestAndResponseWithWorkers(cmd, &req, "")
 }

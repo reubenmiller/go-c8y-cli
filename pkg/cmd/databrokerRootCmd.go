@@ -4,12 +4,12 @@ import (
 	"github.com/spf13/cobra"
 )
 
-type databrokerCmd struct {
+type DatabrokerCmd struct {
 	*baseCmd
 }
 
-func newDatabrokerRootCmd() *databrokerCmd {
-	ccmd := &databrokerCmd{}
+func NewDatabrokerRootCmd() *DatabrokerCmd {
+	ccmd := &DatabrokerCmd{}
 
 	cmd := &cobra.Command{
 		Use:   "databroker",
@@ -18,9 +18,9 @@ func newDatabrokerRootCmd() *databrokerCmd {
 	}
 
 	// Subcommands
-	cmd.AddCommand(newGetDataBrokerConnectorCollectionCmd().getCommand())
-	cmd.AddCommand(newGetDataBrokerCmd().getCommand())
-	cmd.AddCommand(newUpdateDataBrokerCmd().getCommand())
+	cmd.AddCommand(NewGetDataBrokerConnectorCollectionCmd().getCommand())
+	cmd.AddCommand(NewGetDataBrokerCmd().getCommand())
+	cmd.AddCommand(NewUpdateDataBrokerCmd().getCommand())
 
 	ccmd.baseCmd = newBaseCmd(cmd)
 

@@ -7,18 +7,19 @@ import (
 	"net/http"
 	"net/url"
 
+	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/pkg/mapbuilder"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
 )
 
-type updateMicroserviceCmd struct {
+type UpdateMicroserviceCmd struct {
 	*baseCmd
 }
 
-func newUpdateMicroserviceCmd() *updateMicroserviceCmd {
-	ccmd := &updateMicroserviceCmd{}
-
+func NewUpdateMicroserviceCmd() *UpdateMicroserviceCmd {
+	var _ = fmt.Errorf
+	ccmd := &UpdateMicroserviceCmd{}
 	cmd := &cobra.Command{
 		Use:   "update",
 		Short: "Update microservice meta information",
@@ -29,12 +30,12 @@ $ c8y microservices update --id "helloworld-app" --availability MARKET
 Update microservice availability to MARKET
         `,
 		PreRunE: validateUpdateMode,
-		RunE:    ccmd.updateMicroservice,
+		RunE:    ccmd.RunE,
 	}
 
 	cmd.SilenceUsage = true
 
-	cmd.Flags().String("id", "", "Microservice id (required)")
+	cmd.Flags().String("id", "", "Microservice id (required) (accepts pipeline)")
 	addDataFlag(cmd)
 	cmd.Flags().String("key", "", "Shared secret of microservice")
 	cmd.Flags().String("availability", "", "Access level for other tenants. Possible values are : MARKET, PRIVATE (default)")
@@ -42,24 +43,31 @@ Update microservice availability to MARKET
 	cmd.Flags().String("resourcesUrl", "", "URL to microservice base directory hosted on an external server")
 	addProcessingModeFlag(cmd)
 
+	flags.WithOptions(
+		cmd,
+		flags.WithPipelineSupport("id"),
+	)
+
 	// Required flags
-	cmd.MarkFlagRequired("id")
 
 	ccmd.baseCmd = newBaseCmd(cmd)
 
 	return ccmd
 }
 
-func (n *updateMicroserviceCmd) updateMicroservice(cmd *cobra.Command, args []string) error {
-
-	commonOptions, err := getCommonOptions(cmd)
-	if err != nil {
-		return newUserError(fmt.Sprintf("Failed to get common options. err=%s", err))
-	}
-
+func (n *UpdateMicroserviceCmd) RunE(cmd *cobra.Command, args []string) error {
 	// query parameters
 	queryValue := url.QueryEscape("")
 	query := url.Values{}
+
+	err := flags.WithQueryOptions(
+		cmd,
+		query,
+	)
+	if err != nil {
+		return newUserError(err)
+	}
+
 	queryValue, err = url.QueryUnescape(query.Encode())
 
 	if err != nil {
@@ -78,7 +86,7 @@ func (n *updateMicroserviceCmd) updateMicroservice(cmd *cobra.Command, args []st
 	formData := make(map[string]io.Reader)
 
 	// body
-	body := mapbuilder.NewMapBuilder()
+	body := mapbuilder.NewInitializedMapBuilder()
 	body.SetMap(getDataFlag(cmd))
 	if v, err := cmd.Flags().GetString("key"); err == nil {
 		if v != "" {
@@ -117,23 +125,6 @@ func (n *updateMicroserviceCmd) updateMicroservice(cmd *cobra.Command, args []st
 
 	// path parameters
 	pathParameters := make(map[string]string)
-	if cmd.Flags().Lookup("id") != nil {
-		idInputValues, idValue, err := getMicroserviceSlice(cmd, args, "id")
-
-		if err != nil {
-			return newUserError("no matching microservices found", idInputValues, err)
-		}
-
-		if len(idValue) == 0 {
-			return newUserError("no matching microservices found", idInputValues)
-		}
-
-		for _, item := range idValue {
-			if item != "" {
-				pathParameters["id"] = newIDValue(item).GetID()
-			}
-		}
-	}
 
 	path := replacePathParameters("/application/applications/{id}", pathParameters)
 
@@ -148,5 +139,5 @@ func (n *updateMicroserviceCmd) updateMicroservice(cmd *cobra.Command, args []st
 		DryRun:       globalFlagDryRun,
 	}
 
-	return processRequestAndResponse([]c8y.RequestOptions{req}, commonOptions)
+	return processRequestAndResponseWithWorkers(cmd, &req, "id")
 }

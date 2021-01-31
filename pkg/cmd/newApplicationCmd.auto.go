@@ -7,18 +7,19 @@ import (
 	"net/http"
 	"net/url"
 
+	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/pkg/mapbuilder"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
 )
 
-type newApplicationCmd struct {
+type NewApplicationCmd struct {
 	*baseCmd
 }
 
-func newNewApplicationCmd() *newApplicationCmd {
-	ccmd := &newApplicationCmd{}
-
+func NewNewApplicationCmd() *NewApplicationCmd {
+	var _ = fmt.Errorf
+	ccmd := &NewApplicationCmd{}
 	cmd := &cobra.Command{
 		Use:   "create",
 		Short: "Create a new application",
@@ -28,7 +29,7 @@ $ c8y applications create --name myapp --type HOSTED --key "myapp-key" --context
 Create a new hosted application
         `,
 		PreRunE: validateCreateMode,
-		RunE:    ccmd.newApplication,
+		RunE:    ccmd.RunE,
 	}
 
 	cmd.SilenceUsage = true
@@ -45,6 +46,11 @@ Create a new hosted application
 	cmd.Flags().String("externalUrl", "", "URL to the external application. Required when application type is EXTERNAL")
 	addProcessingModeFlag(cmd)
 
+	flags.WithOptions(
+		cmd,
+		flags.WithPipelineSupport(""),
+	)
+
 	// Required flags
 	cmd.MarkFlagRequired("name")
 	cmd.MarkFlagRequired("key")
@@ -55,16 +61,19 @@ Create a new hosted application
 	return ccmd
 }
 
-func (n *newApplicationCmd) newApplication(cmd *cobra.Command, args []string) error {
-
-	commonOptions, err := getCommonOptions(cmd)
-	if err != nil {
-		return newUserError(fmt.Sprintf("Failed to get common options. err=%s", err))
-	}
-
+func (n *NewApplicationCmd) RunE(cmd *cobra.Command, args []string) error {
 	// query parameters
 	queryValue := url.QueryEscape("")
 	query := url.Values{}
+
+	err := flags.WithQueryOptions(
+		cmd,
+		query,
+	)
+	if err != nil {
+		return newUserError(err)
+	}
+
 	queryValue, err = url.QueryUnescape(query.Encode())
 
 	if err != nil {
@@ -83,7 +92,7 @@ func (n *newApplicationCmd) newApplication(cmd *cobra.Command, args []string) er
 	formData := make(map[string]io.Reader)
 
 	// body
-	body := mapbuilder.NewMapBuilder()
+	body := mapbuilder.NewInitializedMapBuilder()
 	body.SetMap(getDataFlag(cmd))
 	if v, err := cmd.Flags().GetString("name"); err == nil {
 		if v != "" {
@@ -171,5 +180,5 @@ func (n *newApplicationCmd) newApplication(cmd *cobra.Command, args []string) er
 		DryRun:       globalFlagDryRun,
 	}
 
-	return processRequestAndResponse([]c8y.RequestOptions{req}, commonOptions)
+	return processRequestAndResponseWithWorkers(cmd, &req, "")
 }

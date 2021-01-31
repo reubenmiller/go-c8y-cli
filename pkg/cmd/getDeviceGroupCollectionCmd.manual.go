@@ -16,7 +16,7 @@ type getDeviceGroupCollectionCmd struct {
 	*baseCmd
 }
 
-func newGetDeviceGroupCollectionCmd() *getDeviceGroupCollectionCmd {
+func NewGetDeviceGroupCollectionCmd() *getDeviceGroupCollectionCmd {
 	ccmd := &getDeviceGroupCollectionCmd{}
 
 	cmd := &cobra.Command{

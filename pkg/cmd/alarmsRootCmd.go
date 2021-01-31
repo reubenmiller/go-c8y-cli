@@ -4,12 +4,12 @@ import (
 	"github.com/spf13/cobra"
 )
 
-type alarmsCmd struct {
+type AlarmsCmd struct {
 	*baseCmd
 }
 
-func newAlarmsRootCmd() *alarmsCmd {
-	ccmd := &alarmsCmd{}
+func NewAlarmsRootCmd() *AlarmsCmd {
+	ccmd := &AlarmsCmd{}
 
 	cmd := &cobra.Command{
 		Use:   "alarms",
@@ -18,12 +18,12 @@ func newAlarmsRootCmd() *alarmsCmd {
 	}
 
 	// Subcommands
-	cmd.AddCommand(newGetAlarmCollectionCmd().getCommand())
-	cmd.AddCommand(newNewAlarmCmd().getCommand())
-	cmd.AddCommand(newUpdateAlarmCollectionCmd().getCommand())
-	cmd.AddCommand(newGetAlarmCmd().getCommand())
-	cmd.AddCommand(newUpdateAlarmCmd().getCommand())
-	cmd.AddCommand(newDeleteAlarmCollectionCmd().getCommand())
+	cmd.AddCommand(NewGetAlarmCollectionCmd().getCommand())
+	cmd.AddCommand(NewNewAlarmCmd().getCommand())
+	cmd.AddCommand(NewUpdateAlarmCollectionCmd().getCommand())
+	cmd.AddCommand(NewGetAlarmCmd().getCommand())
+	cmd.AddCommand(NewUpdateAlarmCmd().getCommand())
+	cmd.AddCommand(NewDeleteAlarmCollectionCmd().getCommand())
 
 	ccmd.baseCmd = newBaseCmd(cmd)
 

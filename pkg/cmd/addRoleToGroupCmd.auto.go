@@ -7,18 +7,19 @@ import (
 	"net/http"
 	"net/url"
 
+	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/pkg/mapbuilder"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
 )
 
-type addRoleToGroupCmd struct {
+type AddRoleToGroupCmd struct {
 	*baseCmd
 }
 
-func newAddRoleToGroupCmd() *addRoleToGroupCmd {
-	ccmd := &addRoleToGroupCmd{}
-
+func NewAddRoleToGroupCmd() *AddRoleToGroupCmd {
+	var _ = fmt.Errorf
+	ccmd := &AddRoleToGroupCmd{}
 	cmd := &cobra.Command{
 		Use:   "addRoleToGroup",
 		Short: "Add role to a group",
@@ -28,35 +29,42 @@ $ c8y userRoles addRoleToGroup --group "customGroup1*" --role "*ALARM*"
 Add a role to the admin group
         `,
 		PreRunE: validateCreateMode,
-		RunE:    ccmd.addRoleToGroup,
+		RunE:    ccmd.RunE,
 	}
 
 	cmd.SilenceUsage = true
 
 	cmd.Flags().String("tenant", "", "Tenant")
 	cmd.Flags().StringSlice("group", []string{""}, "Group ID (required)")
-	cmd.Flags().StringSlice("role", []string{""}, "User role id (required)")
+	cmd.Flags().StringSlice("role", []string{""}, "User role id (required) (accepts pipeline)")
 	addProcessingModeFlag(cmd)
+
+	flags.WithOptions(
+		cmd,
+		flags.WithPipelineSupport("role"),
+	)
 
 	// Required flags
 	cmd.MarkFlagRequired("group")
-	cmd.MarkFlagRequired("role")
 
 	ccmd.baseCmd = newBaseCmd(cmd)
 
 	return ccmd
 }
 
-func (n *addRoleToGroupCmd) addRoleToGroup(cmd *cobra.Command, args []string) error {
-
-	commonOptions, err := getCommonOptions(cmd)
-	if err != nil {
-		return newUserError(fmt.Sprintf("Failed to get common options. err=%s", err))
-	}
-
+func (n *AddRoleToGroupCmd) RunE(cmd *cobra.Command, args []string) error {
 	// query parameters
 	queryValue := url.QueryEscape("")
 	query := url.Values{}
+
+	err := flags.WithQueryOptions(
+		cmd,
+		query,
+	)
+	if err != nil {
+		return newUserError(err)
+	}
+
 	queryValue, err = url.QueryUnescape(query.Encode())
 
 	if err != nil {
@@ -75,7 +83,7 @@ func (n *addRoleToGroupCmd) addRoleToGroup(cmd *cobra.Command, args []string) er
 	formData := make(map[string]io.Reader)
 
 	// body
-	body := mapbuilder.NewMapBuilder()
+	body := mapbuilder.NewInitializedMapBuilder()
 	body.SetMap(getDataFlag(cmd))
 	if cmd.Flags().Changed("role") {
 		roleInputValues, roleValue, err := getFormattedRoleSelfSlice(cmd, args, "role")
@@ -137,5 +145,5 @@ func (n *addRoleToGroupCmd) addRoleToGroup(cmd *cobra.Command, args []string) er
 		DryRun:       globalFlagDryRun,
 	}
 
-	return processRequestAndResponse([]c8y.RequestOptions{req}, commonOptions)
+	return processRequestAndResponseWithWorkers(cmd, &req, "role")
 }

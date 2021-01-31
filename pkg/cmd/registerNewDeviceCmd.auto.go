@@ -7,18 +7,19 @@ import (
 	"net/http"
 	"net/url"
 
+	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/pkg/mapbuilder"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
 )
 
-type registerNewDeviceCmd struct {
+type RegisterNewDeviceCmd struct {
 	*baseCmd
 }
 
-func newRegisterNewDeviceCmd() *registerNewDeviceCmd {
-	ccmd := &registerNewDeviceCmd{}
-
+func NewRegisterNewDeviceCmd() *RegisterNewDeviceCmd {
+	var _ = fmt.Errorf
+	ccmd := &RegisterNewDeviceCmd{}
 	cmd := &cobra.Command{
 		Use:   "registerNewDevice",
 		Short: "Register a new device (request)",
@@ -28,13 +29,18 @@ $ c8y devices registerNewDevice --id "ASDF098SD1J10912UD92JDLCNCU8"
 Register a new device request
         `,
 		PreRunE: validateCreateMode,
-		RunE:    ccmd.registerNewDevice,
+		RunE:    ccmd.RunE,
 	}
 
 	cmd.SilenceUsage = true
 
 	cmd.Flags().String("id", "", "Device identifier. Max: 1000 characters. E.g. IMEI (required)")
 	addProcessingModeFlag(cmd)
+
+	flags.WithOptions(
+		cmd,
+		flags.WithPipelineSupport(""),
+	)
 
 	// Required flags
 	cmd.MarkFlagRequired("id")
@@ -44,16 +50,19 @@ Register a new device request
 	return ccmd
 }
 
-func (n *registerNewDeviceCmd) registerNewDevice(cmd *cobra.Command, args []string) error {
-
-	commonOptions, err := getCommonOptions(cmd)
-	if err != nil {
-		return newUserError(fmt.Sprintf("Failed to get common options. err=%s", err))
-	}
-
+func (n *RegisterNewDeviceCmd) RunE(cmd *cobra.Command, args []string) error {
 	// query parameters
 	queryValue := url.QueryEscape("")
 	query := url.Values{}
+
+	err := flags.WithQueryOptions(
+		cmd,
+		query,
+	)
+	if err != nil {
+		return newUserError(err)
+	}
+
 	queryValue, err = url.QueryUnescape(query.Encode())
 
 	if err != nil {
@@ -72,7 +81,7 @@ func (n *registerNewDeviceCmd) registerNewDevice(cmd *cobra.Command, args []stri
 	formData := make(map[string]io.Reader)
 
 	// body
-	body := mapbuilder.NewMapBuilder()
+	body := mapbuilder.NewInitializedMapBuilder()
 	body.SetMap(getDataFlag(cmd))
 	if v, err := cmd.Flags().GetString("id"); err == nil {
 		if v != "" {
@@ -104,5 +113,5 @@ func (n *registerNewDeviceCmd) registerNewDevice(cmd *cobra.Command, args []stri
 		DryRun:       globalFlagDryRun,
 	}
 
-	return processRequestAndResponse([]c8y.RequestOptions{req}, commonOptions)
+	return processRequestAndResponseWithWorkers(cmd, &req, "")
 }

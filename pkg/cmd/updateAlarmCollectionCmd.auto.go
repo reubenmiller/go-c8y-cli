@@ -7,18 +7,19 @@ import (
 	"net/http"
 	"net/url"
 
+	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/pkg/mapbuilder"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
 )
 
-type updateAlarmCollectionCmd struct {
+type UpdateAlarmCollectionCmd struct {
 	*baseCmd
 }
 
-func newUpdateAlarmCollectionCmd() *updateAlarmCollectionCmd {
-	ccmd := &updateAlarmCollectionCmd{}
-
+func NewUpdateAlarmCollectionCmd() *UpdateAlarmCollectionCmd {
+	var _ = fmt.Errorf
+	ccmd := &UpdateAlarmCollectionCmd{}
 	cmd := &cobra.Command{
 		Use:   "updateCollection",
 		Short: "Update a collection of alarms. Currently only the status of alarms can be changed",
@@ -28,12 +29,12 @@ $ c8y alarms updateCollection --device mydevice --status ACTIVE --newStatus ACKN
 Update the status of all active alarms on a device to ACKNOWLEDGED
         `,
 		PreRunE: validateUpdateMode,
-		RunE:    ccmd.updateAlarmCollection,
+		RunE:    ccmd.RunE,
 	}
 
 	cmd.SilenceUsage = true
 
-	cmd.Flags().StringSlice("device", []string{""}, "The ManagedObject that the alarm originated from")
+	cmd.Flags().StringSlice("device", []string{""}, "The ManagedObject that the alarm originated from (accepts pipeline)")
 	cmd.Flags().String("status", "", "The status of the alarm: ACTIVE, ACKNOWLEDGED or CLEARED. If status was not appeared, new alarm will have status ACTIVE. Must be upper-case.")
 	cmd.Flags().String("severity", "", "The severity of the alarm: CRITICAL, MAJOR, MINOR or WARNING. Must be upper-case.")
 	cmd.Flags().Bool("resolved", false, "When set to true only resolved alarms will be removed (the one with status CLEARED), false means alarms with status ACTIVE or ACKNOWLEDGED.")
@@ -41,6 +42,11 @@ Update the status of all active alarms on a device to ACKNOWLEDGED
 	cmd.Flags().String("dateTo", "", "End date or date and time of alarm occurrence.")
 	cmd.Flags().String("newStatus", "", "New status to be applied to all of the matching alarms (required)")
 	addProcessingModeFlag(cmd)
+
+	flags.WithOptions(
+		cmd,
+		flags.WithPipelineSupport("device"),
+	)
 
 	// Required flags
 	cmd.MarkFlagRequired("newStatus")
@@ -50,13 +56,7 @@ Update the status of all active alarms on a device to ACKNOWLEDGED
 	return ccmd
 }
 
-func (n *updateAlarmCollectionCmd) updateAlarmCollection(cmd *cobra.Command, args []string) error {
-
-	commonOptions, err := getCommonOptions(cmd)
-	if err != nil {
-		return newUserError(fmt.Sprintf("Failed to get common options. err=%s", err))
-	}
-
+func (n *UpdateAlarmCollectionCmd) RunE(cmd *cobra.Command, args []string) error {
 	// query parameters
 	queryValue := url.QueryEscape("")
 	query := url.Values{}
@@ -112,6 +112,15 @@ func (n *updateAlarmCollectionCmd) updateAlarmCollection(cmd *cobra.Command, arg
 			return newUserError("invalid date format", err)
 		}
 	}
+
+	err := flags.WithQueryOptions(
+		cmd,
+		query,
+	)
+	if err != nil {
+		return newUserError(err)
+	}
+
 	queryValue, err = url.QueryUnescape(query.Encode())
 
 	if err != nil {
@@ -130,7 +139,7 @@ func (n *updateAlarmCollectionCmd) updateAlarmCollection(cmd *cobra.Command, arg
 	formData := make(map[string]io.Reader)
 
 	// body
-	body := mapbuilder.NewMapBuilder()
+	body := mapbuilder.NewInitializedMapBuilder()
 	body.SetMap(getDataFlag(cmd))
 	if v, err := cmd.Flags().GetString("newStatus"); err == nil {
 		if v != "" {
@@ -162,5 +171,5 @@ func (n *updateAlarmCollectionCmd) updateAlarmCollection(cmd *cobra.Command, arg
 		DryRun:       globalFlagDryRun,
 	}
 
-	return processRequestAndResponse([]c8y.RequestOptions{req}, commonOptions)
+	return processRequestAndResponseWithWorkers(cmd, &req, "device")
 }

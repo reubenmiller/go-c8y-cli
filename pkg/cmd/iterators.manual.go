@@ -176,13 +176,21 @@ func NewFlagFileContents(cmd *cobra.Command, name string) (iterator.Iterator, er
 
 // NewFlagPipeEnabledStringSlice creates an iterator from a command argument
 // or from the pipeline
+// It will automatically try to get the value from a String or a StringSlice flag
 func NewFlagPipeEnabledStringSlice(cmd *cobra.Command, name string) (iterator.Iterator, error) {
 	supportsPipeline := flags.HasValueFromPipeline(cmd, name)
 	if cmd.Flags().Changed(name) {
+
 		paths, err := cmd.Flags().GetStringSlice(name)
 
 		if err != nil {
-			return nil, err
+			// fallback to string
+			path, err := cmd.Flags().GetString(name)
+
+			if err != nil {
+				return nil, err
+			}
+			paths = append(paths, path)
 		}
 		if len(paths) > 0 {
 

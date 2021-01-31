@@ -7,18 +7,19 @@ import (
 	"net/http"
 	"net/url"
 
+	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/pkg/mapbuilder"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
 )
 
-type newAuditCmd struct {
+type NewAuditCmd struct {
 	*baseCmd
 }
 
-func newNewAuditCmd() *newAuditCmd {
-	ccmd := &newAuditCmd{}
-
+func NewNewAuditCmd() *NewAuditCmd {
+	var _ = fmt.Errorf
+	ccmd := &NewAuditCmd{}
 	cmd := &cobra.Command{
 		Use:   "create",
 		Short: "Create a new audit record",
@@ -28,7 +29,7 @@ $ c8y auditRecords create --type "ManagedObject" --time "0s" --text "Managed Obj
 Create an audit record for a custom managed object update
         `,
 		PreRunE: validateCreateMode,
-		RunE:    ccmd.newAudit,
+		RunE:    ccmd.RunE,
 	}
 
 	cmd.SilenceUsage = true
@@ -44,6 +45,11 @@ Create an audit record for a custom managed object update
 	addDataFlag(cmd)
 	addProcessingModeFlag(cmd)
 
+	flags.WithOptions(
+		cmd,
+		flags.WithPipelineSupport(""),
+	)
+
 	// Required flags
 	cmd.MarkFlagRequired("type")
 	cmd.MarkFlagRequired("text")
@@ -56,16 +62,19 @@ Create an audit record for a custom managed object update
 	return ccmd
 }
 
-func (n *newAuditCmd) newAudit(cmd *cobra.Command, args []string) error {
-
-	commonOptions, err := getCommonOptions(cmd)
-	if err != nil {
-		return newUserError(fmt.Sprintf("Failed to get common options. err=%s", err))
-	}
-
+func (n *NewAuditCmd) RunE(cmd *cobra.Command, args []string) error {
 	// query parameters
 	queryValue := url.QueryEscape("")
 	query := url.Values{}
+
+	err := flags.WithQueryOptions(
+		cmd,
+		query,
+	)
+	if err != nil {
+		return newUserError(err)
+	}
+
 	queryValue, err = url.QueryUnescape(query.Encode())
 
 	if err != nil {
@@ -84,7 +93,7 @@ func (n *newAuditCmd) newAudit(cmd *cobra.Command, args []string) error {
 	formData := make(map[string]io.Reader)
 
 	// body
-	body := mapbuilder.NewMapBuilder()
+	body := mapbuilder.NewInitializedMapBuilder()
 	body.SetMap(getDataFlag(cmd))
 	if v, err := cmd.Flags().GetString("type"); err == nil {
 		if v != "" {
@@ -165,5 +174,5 @@ func (n *newAuditCmd) newAudit(cmd *cobra.Command, args []string) error {
 		DryRun:       globalFlagDryRun,
 	}
 
-	return processRequestAndResponse([]c8y.RequestOptions{req}, commonOptions)
+	return processRequestAndResponseWithWorkers(cmd, &req, "")
 }

@@ -7,18 +7,19 @@ import (
 	"net/http"
 	"net/url"
 
+	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/pkg/mapbuilder"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
 )
 
-type getManagedObjectChildAssetCollectionCmd struct {
+type GetManagedObjectChildAssetCollectionCmd struct {
 	*baseCmd
 }
 
-func newGetManagedObjectChildAssetCollectionCmd() *getManagedObjectChildAssetCollectionCmd {
-	ccmd := &getManagedObjectChildAssetCollectionCmd{}
-
+func NewGetManagedObjectChildAssetCollectionCmd() *GetManagedObjectChildAssetCollectionCmd {
+	var _ = fmt.Errorf
+	ccmd := &GetManagedObjectChildAssetCollectionCmd{}
 	cmd := &cobra.Command{
 		Use:   "listChildAssets",
 		Short: "Get a collection of managedObjects child references",
@@ -28,13 +29,18 @@ $ c8y inventoryReferences listChildAssets --device 12345
 Get a list of the child devices of an existing device
         `,
 		PreRunE: nil,
-		RunE:    ccmd.getManagedObjectChildAssetCollection,
+		RunE:    ccmd.RunE,
 	}
 
 	cmd.SilenceUsage = true
 
 	cmd.Flags().StringSlice("device", []string{""}, "Device.")
-	cmd.Flags().StringSlice("group", []string{""}, "Group.")
+	cmd.Flags().StringSlice("group", []string{""}, "Group. (accepts pipeline)")
+
+	flags.WithOptions(
+		cmd,
+		flags.WithPipelineSupport("group"),
+	)
 
 	// Required flags
 
@@ -43,17 +49,24 @@ Get a list of the child devices of an existing device
 	return ccmd
 }
 
-func (n *getManagedObjectChildAssetCollectionCmd) getManagedObjectChildAssetCollection(cmd *cobra.Command, args []string) error {
+func (n *GetManagedObjectChildAssetCollectionCmd) RunE(cmd *cobra.Command, args []string) error {
+	// query parameters
+	queryValue := url.QueryEscape("")
+	query := url.Values{}
 
+	err := flags.WithQueryOptions(
+		cmd,
+		query,
+	)
+	if err != nil {
+		return newUserError(err)
+	}
 	commonOptions, err := getCommonOptions(cmd)
 	if err != nil {
 		return newUserError(fmt.Sprintf("Failed to get common options. err=%s", err))
 	}
-
-	// query parameters
-	queryValue := url.QueryEscape("")
-	query := url.Values{}
 	commonOptions.AddQueryParameters(&query)
+
 	queryValue, err = url.QueryUnescape(query.Encode())
 
 	if err != nil {
@@ -67,7 +80,7 @@ func (n *getManagedObjectChildAssetCollectionCmd) getManagedObjectChildAssetColl
 	formData := make(map[string]io.Reader)
 
 	// body
-	body := mapbuilder.NewMapBuilder()
+	body := mapbuilder.NewInitializedMapBuilder()
 
 	// path parameters
 	pathParameters := make(map[string]string)
@@ -88,23 +101,6 @@ func (n *getManagedObjectChildAssetCollectionCmd) getManagedObjectChildAssetColl
 			}
 		}
 	}
-	if cmd.Flags().Changed("group") {
-		groupInputValues, groupValue, err := getFormattedDeviceGroupSlice(cmd, args, "group")
-
-		if err != nil {
-			return newUserError("no matching device groups found", groupInputValues, err)
-		}
-
-		if len(groupValue) == 0 {
-			return newUserError("no matching device groups found", groupInputValues)
-		}
-
-		for _, item := range groupValue {
-			if item != "" {
-				pathParameters["id"] = newIDValue(item).GetID()
-			}
-		}
-	}
 
 	path := replacePathParameters("inventory/managedObjects/{id}/childAssets", pathParameters)
 
@@ -119,5 +115,5 @@ func (n *getManagedObjectChildAssetCollectionCmd) getManagedObjectChildAssetColl
 		DryRun:       globalFlagDryRun,
 	}
 
-	return processRequestAndResponse([]c8y.RequestOptions{req}, commonOptions)
+	return processRequestAndResponseWithWorkers(cmd, &req, "group")
 }

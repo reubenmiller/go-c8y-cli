@@ -7,18 +7,19 @@ import (
 	"net/http"
 	"net/url"
 
+	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/pkg/mapbuilder"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
 )
 
-type updateEventBinaryCmd struct {
+type UpdateEventBinaryCmd struct {
 	*baseCmd
 }
 
-func newUpdateEventBinaryCmd() *updateEventBinaryCmd {
-	ccmd := &updateEventBinaryCmd{}
-
+func NewUpdateEventBinaryCmd() *UpdateEventBinaryCmd {
+	var _ = fmt.Errorf
+	ccmd := &UpdateEventBinaryCmd{}
 	cmd := &cobra.Command{
 		Use:   "updateBinary",
 		Short: "Update event binary",
@@ -29,17 +30,21 @@ $ c8y events updateBinary --id 12345 --file ./myfile.log
 Update a binary related to an event
         `,
 		PreRunE: validateUpdateMode,
-		RunE:    ccmd.updateEventBinary,
+		RunE:    ccmd.RunE,
 	}
 
 	cmd.SilenceUsage = true
 
-	cmd.Flags().String("id", "", "Event id (required)")
+	cmd.Flags().String("id", "", "Event id (required) (accepts pipeline)")
 	cmd.Flags().String("file", "", "File to be uploaded as a binary (required)")
 	addProcessingModeFlag(cmd)
 
+	flags.WithOptions(
+		cmd,
+		flags.WithPipelineSupport("id"),
+	)
+
 	// Required flags
-	cmd.MarkFlagRequired("id")
 	cmd.MarkFlagRequired("file")
 
 	ccmd.baseCmd = newBaseCmd(cmd)
@@ -47,16 +52,19 @@ Update a binary related to an event
 	return ccmd
 }
 
-func (n *updateEventBinaryCmd) updateEventBinary(cmd *cobra.Command, args []string) error {
-
-	commonOptions, err := getCommonOptions(cmd)
-	if err != nil {
-		return newUserError(fmt.Sprintf("Failed to get common options. err=%s", err))
-	}
-
+func (n *UpdateEventBinaryCmd) RunE(cmd *cobra.Command, args []string) error {
 	// query parameters
 	queryValue := url.QueryEscape("")
 	query := url.Values{}
+
+	err := flags.WithQueryOptions(
+		cmd,
+		query,
+	)
+	if err != nil {
+		return newUserError(err)
+	}
+
 	queryValue, err = url.QueryUnescape(query.Encode())
 
 	if err != nil {
@@ -75,18 +83,11 @@ func (n *updateEventBinaryCmd) updateEventBinary(cmd *cobra.Command, args []stri
 	formData := make(map[string]io.Reader)
 
 	// body
-	body := mapbuilder.NewMapBuilder()
+	body := mapbuilder.NewInitializedMapBuilder()
 	getFileContentsFlag(cmd, "file", body)
 
 	// path parameters
 	pathParameters := make(map[string]string)
-	if v, err := cmd.Flags().GetString("id"); err == nil {
-		if v != "" {
-			pathParameters["id"] = v
-		}
-	} else {
-		return newUserError(fmt.Sprintf("Flag [%s] does not exist. %s", "id", err))
-	}
 
 	path := replacePathParameters("event/events/{id}/binaries", pathParameters)
 
@@ -101,5 +102,5 @@ func (n *updateEventBinaryCmd) updateEventBinary(cmd *cobra.Command, args []stri
 		DryRun:       globalFlagDryRun,
 	}
 
-	return processRequestAndResponse([]c8y.RequestOptions{req}, commonOptions)
+	return processRequestAndResponseWithWorkers(cmd, &req, "id")
 }

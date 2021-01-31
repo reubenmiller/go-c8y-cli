@@ -7,18 +7,19 @@ import (
 	"net/http"
 	"net/url"
 
+	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/pkg/mapbuilder"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
 )
 
-type deleteDeviceFromGroupCmd struct {
+type DeleteDeviceFromGroupCmd struct {
 	*baseCmd
 }
 
-func newDeleteDeviceFromGroupCmd() *deleteDeviceFromGroupCmd {
-	ccmd := &deleteDeviceFromGroupCmd{}
-
+func NewDeleteDeviceFromGroupCmd() *DeleteDeviceFromGroupCmd {
+	var _ = fmt.Errorf
+	ccmd := &DeleteDeviceFromGroupCmd{}
 	cmd := &cobra.Command{
 		Use:   "unassignDeviceFromGroup",
 		Short: "Delete child asset reference",
@@ -28,17 +29,21 @@ $ c8y inventoryReferences unassignDeviceFromGroup --group 12345 --childDevice 22
 Unassign a child device from its parent device
         `,
 		PreRunE: validateDeleteMode,
-		RunE:    ccmd.deleteDeviceFromGroup,
+		RunE:    ccmd.RunE,
 	}
 
 	cmd.SilenceUsage = true
 
-	cmd.Flags().StringSlice("group", []string{""}, "Asset id (required)")
+	cmd.Flags().StringSlice("group", []string{""}, "Asset id (required) (accepts pipeline)")
 	cmd.Flags().StringSlice("childDevice", []string{""}, "Child device (required)")
 	addProcessingModeFlag(cmd)
 
+	flags.WithOptions(
+		cmd,
+		flags.WithPipelineSupport("group"),
+	)
+
 	// Required flags
-	cmd.MarkFlagRequired("group")
 	cmd.MarkFlagRequired("childDevice")
 
 	ccmd.baseCmd = newBaseCmd(cmd)
@@ -46,16 +51,19 @@ Unassign a child device from its parent device
 	return ccmd
 }
 
-func (n *deleteDeviceFromGroupCmd) deleteDeviceFromGroup(cmd *cobra.Command, args []string) error {
-
-	commonOptions, err := getCommonOptions(cmd)
-	if err != nil {
-		return newUserError(fmt.Sprintf("Failed to get common options. err=%s", err))
-	}
-
+func (n *DeleteDeviceFromGroupCmd) RunE(cmd *cobra.Command, args []string) error {
 	// query parameters
 	queryValue := url.QueryEscape("")
 	query := url.Values{}
+
+	err := flags.WithQueryOptions(
+		cmd,
+		query,
+	)
+	if err != nil {
+		return newUserError(err)
+	}
+
 	queryValue, err = url.QueryUnescape(query.Encode())
 
 	if err != nil {
@@ -74,27 +82,10 @@ func (n *deleteDeviceFromGroupCmd) deleteDeviceFromGroup(cmd *cobra.Command, arg
 	formData := make(map[string]io.Reader)
 
 	// body
-	body := mapbuilder.NewMapBuilder()
+	body := mapbuilder.NewInitializedMapBuilder()
 
 	// path parameters
 	pathParameters := make(map[string]string)
-	if cmd.Flags().Changed("group") {
-		groupInputValues, groupValue, err := getFormattedDeviceGroupSlice(cmd, args, "group")
-
-		if err != nil {
-			return newUserError("no matching device groups found", groupInputValues, err)
-		}
-
-		if len(groupValue) == 0 {
-			return newUserError("no matching device groups found", groupInputValues)
-		}
-
-		for _, item := range groupValue {
-			if item != "" {
-				pathParameters["group"] = newIDValue(item).GetID()
-			}
-		}
-	}
 	if cmd.Flags().Changed("childDevice") {
 		childDeviceInputValues, childDeviceValue, err := getFormattedDeviceSlice(cmd, args, "childDevice")
 
@@ -126,5 +117,5 @@ func (n *deleteDeviceFromGroupCmd) deleteDeviceFromGroup(cmd *cobra.Command, arg
 		DryRun:       globalFlagDryRun,
 	}
 
-	return processRequestAndResponse([]c8y.RequestOptions{req}, commonOptions)
+	return processRequestAndResponseWithWorkers(cmd, &req, "group")
 }

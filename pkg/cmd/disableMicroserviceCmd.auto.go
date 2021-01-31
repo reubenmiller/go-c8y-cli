@@ -7,18 +7,19 @@ import (
 	"net/http"
 	"net/url"
 
+	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/pkg/mapbuilder"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
 )
 
-type disableMicroserviceCmd struct {
+type DisableMicroserviceCmd struct {
 	*baseCmd
 }
 
-func newDisableMicroserviceCmd() *disableMicroserviceCmd {
-	ccmd := &disableMicroserviceCmd{}
-
+func NewDisableMicroserviceCmd() *DisableMicroserviceCmd {
+	var _ = fmt.Errorf
+	ccmd := &DisableMicroserviceCmd{}
 	cmd := &cobra.Command{
 		Use:   "disable",
 		Short: "Disable (unsubscribe) a microservice",
@@ -32,33 +33,40 @@ $ c8y microservices disable --id myapp
 Disable (unsubscribe) to a microservice
         `,
 		PreRunE: validateDeleteMode,
-		RunE:    ccmd.disableMicroservice,
+		RunE:    ccmd.RunE,
 	}
 
 	cmd.SilenceUsage = true
 
-	cmd.Flags().String("id", "", "Microservice id (required)")
+	cmd.Flags().String("id", "", "Microservice id (required) (accepts pipeline)")
 	cmd.Flags().String("tenant", "", "Tenant id")
 	addProcessingModeFlag(cmd)
 
+	flags.WithOptions(
+		cmd,
+		flags.WithPipelineSupport("id"),
+	)
+
 	// Required flags
-	cmd.MarkFlagRequired("id")
 
 	ccmd.baseCmd = newBaseCmd(cmd)
 
 	return ccmd
 }
 
-func (n *disableMicroserviceCmd) disableMicroservice(cmd *cobra.Command, args []string) error {
-
-	commonOptions, err := getCommonOptions(cmd)
-	if err != nil {
-		return newUserError(fmt.Sprintf("Failed to get common options. err=%s", err))
-	}
-
+func (n *DisableMicroserviceCmd) RunE(cmd *cobra.Command, args []string) error {
 	// query parameters
 	queryValue := url.QueryEscape("")
 	query := url.Values{}
+
+	err := flags.WithQueryOptions(
+		cmd,
+		query,
+	)
+	if err != nil {
+		return newUserError(err)
+	}
+
 	queryValue, err = url.QueryUnescape(query.Encode())
 
 	if err != nil {
@@ -77,27 +85,10 @@ func (n *disableMicroserviceCmd) disableMicroservice(cmd *cobra.Command, args []
 	formData := make(map[string]io.Reader)
 
 	// body
-	body := mapbuilder.NewMapBuilder()
+	body := mapbuilder.NewInitializedMapBuilder()
 
 	// path parameters
 	pathParameters := make(map[string]string)
-	if cmd.Flags().Lookup("id") != nil {
-		idInputValues, idValue, err := getMicroserviceSlice(cmd, args, "id")
-
-		if err != nil {
-			return newUserError("no matching microservices found", idInputValues, err)
-		}
-
-		if len(idValue) == 0 {
-			return newUserError("no matching microservices found", idInputValues)
-		}
-
-		for _, item := range idValue {
-			if item != "" {
-				pathParameters["id"] = newIDValue(item).GetID()
-			}
-		}
-	}
 	if v := getTenantWithDefaultFlag(cmd, "tenant", client.TenantName); v != "" {
 		pathParameters["tenant"] = v
 	}
@@ -115,5 +106,5 @@ func (n *disableMicroserviceCmd) disableMicroservice(cmd *cobra.Command, args []
 		DryRun:       globalFlagDryRun,
 	}
 
-	return processRequestAndResponse([]c8y.RequestOptions{req}, commonOptions)
+	return processRequestAndResponseWithWorkers(cmd, &req, "id")
 }

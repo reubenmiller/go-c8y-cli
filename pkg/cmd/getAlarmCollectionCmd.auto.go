@@ -7,18 +7,19 @@ import (
 	"net/http"
 	"net/url"
 
+	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/pkg/mapbuilder"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
 )
 
-type getAlarmCollectionCmd struct {
+type GetAlarmCollectionCmd struct {
 	*baseCmd
 }
 
-func newGetAlarmCollectionCmd() *getAlarmCollectionCmd {
-	ccmd := &getAlarmCollectionCmd{}
-
+func NewGetAlarmCollectionCmd() *GetAlarmCollectionCmd {
+	var _ = fmt.Errorf
+	ccmd := &GetAlarmCollectionCmd{}
 	cmd := &cobra.Command{
 		Use:   "list",
 		Short: "Get a collection of alarms based on filter parameters",
@@ -31,12 +32,12 @@ $ c8y alarms list --dateFrom "-10m" --status ACTIVE
 Get collection of active alarms which occurred in the last 10 minutes
         `,
 		PreRunE: nil,
-		RunE:    ccmd.getAlarmCollection,
+		RunE:    ccmd.RunE,
 	}
 
 	cmd.SilenceUsage = true
 
-	cmd.Flags().StringSlice("device", []string{""}, "Source device id.")
+	cmd.Flags().StringSlice("device", []string{""}, "Source device id. (accepts pipeline)")
 	cmd.Flags().String("dateFrom", "", "Start date or date and time of alarm occurrence.")
 	cmd.Flags().String("dateTo", "", "End date or date and time of alarm occurrence.")
 	cmd.Flags().String("type", "", "Alarm type.")
@@ -47,6 +48,11 @@ Get collection of active alarms which occurred in the last 10 minutes
 	cmd.Flags().Bool("withAssets", false, "Include assets")
 	cmd.Flags().Bool("withDevices", false, "Include devices")
 
+	flags.WithOptions(
+		cmd,
+		flags.WithPipelineSupport("device"),
+	)
+
 	// Required flags
 
 	ccmd.baseCmd = newBaseCmd(cmd)
@@ -54,13 +60,7 @@ Get collection of active alarms which occurred in the last 10 minutes
 	return ccmd
 }
 
-func (n *getAlarmCollectionCmd) getAlarmCollection(cmd *cobra.Command, args []string) error {
-
-	commonOptions, err := getCommonOptions(cmd)
-	if err != nil {
-		return newUserError(fmt.Sprintf("Failed to get common options. err=%s", err))
-	}
-
+func (n *GetAlarmCollectionCmd) RunE(cmd *cobra.Command, args []string) error {
 	// query parameters
 	queryValue := url.QueryEscape("")
 	query := url.Values{}
@@ -144,7 +144,20 @@ func (n *getAlarmCollectionCmd) getAlarmCollection(cmd *cobra.Command, args []st
 			return newUserError("Flag does not exist")
 		}
 	}
+
+	err := flags.WithQueryOptions(
+		cmd,
+		query,
+	)
+	if err != nil {
+		return newUserError(err)
+	}
+	commonOptions, err := getCommonOptions(cmd)
+	if err != nil {
+		return newUserError(fmt.Sprintf("Failed to get common options. err=%s", err))
+	}
 	commonOptions.AddQueryParameters(&query)
+
 	queryValue, err = url.QueryUnescape(query.Encode())
 
 	if err != nil {
@@ -158,7 +171,7 @@ func (n *getAlarmCollectionCmd) getAlarmCollection(cmd *cobra.Command, args []st
 	formData := make(map[string]io.Reader)
 
 	// body
-	body := mapbuilder.NewMapBuilder()
+	body := mapbuilder.NewInitializedMapBuilder()
 
 	// path parameters
 	pathParameters := make(map[string]string)
@@ -176,5 +189,5 @@ func (n *getAlarmCollectionCmd) getAlarmCollection(cmd *cobra.Command, args []st
 		DryRun:       globalFlagDryRun,
 	}
 
-	return processRequestAndResponse([]c8y.RequestOptions{req}, commonOptions)
+	return processRequestAndResponseWithWorkers(cmd, &req, "device")
 }

@@ -4,12 +4,12 @@ import (
 	"github.com/spf13/cobra"
 )
 
-type identityCmd struct {
+type IdentityCmd struct {
 	*baseCmd
 }
 
-func newIdentityRootCmd() *identityCmd {
-	ccmd := &identityCmd{}
+func NewIdentityRootCmd() *IdentityCmd {
+	ccmd := &IdentityCmd{}
 
 	cmd := &cobra.Command{
 		Use:   "identity",
@@ -18,10 +18,10 @@ func newIdentityRootCmd() *identityCmd {
 	}
 
 	// Subcommands
-	cmd.AddCommand(newGetExternalIDCollectionCmd().getCommand())
-	cmd.AddCommand(newGetExternalIDCmd().getCommand())
-	cmd.AddCommand(newDeleteExternalIDCmd().getCommand())
-	cmd.AddCommand(newNewExternalIDCmd().getCommand())
+	cmd.AddCommand(NewGetExternalIDCollectionCmd().getCommand())
+	cmd.AddCommand(NewGetExternalIDCmd().getCommand())
+	cmd.AddCommand(NewDeleteExternalIDCmd().getCommand())
+	cmd.AddCommand(NewNewExternalIDCmd().getCommand())
 
 	ccmd.baseCmd = newBaseCmd(cmd)
 

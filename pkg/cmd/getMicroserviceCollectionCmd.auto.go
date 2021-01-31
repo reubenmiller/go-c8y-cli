@@ -7,18 +7,19 @@ import (
 	"net/http"
 	"net/url"
 
+	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/pkg/mapbuilder"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
 )
 
-type getMicroserviceCollectionCmd struct {
+type GetMicroserviceCollectionCmd struct {
 	*baseCmd
 }
 
-func newGetMicroserviceCollectionCmd() *getMicroserviceCollectionCmd {
-	ccmd := &getMicroserviceCollectionCmd{}
-
+func NewGetMicroserviceCollectionCmd() *GetMicroserviceCollectionCmd {
+	var _ = fmt.Errorf
+	ccmd := &GetMicroserviceCollectionCmd{}
 	cmd := &cobra.Command{
 		Use:   "list",
 		Short: "Get collection of microservices",
@@ -29,12 +30,17 @@ $ c8y microservices list --pageSize 100
 Get microservices
         `,
 		PreRunE: nil,
-		RunE:    ccmd.getMicroserviceCollection,
+		RunE:    ccmd.RunE,
 	}
 
 	cmd.SilenceUsage = true
 
 	cmd.Flags().String("type", "MICROSERVICE", "Application type")
+
+	flags.WithOptions(
+		cmd,
+		flags.WithPipelineSupport(""),
+	)
 
 	// Required flags
 
@@ -43,13 +49,7 @@ Get microservices
 	return ccmd
 }
 
-func (n *getMicroserviceCollectionCmd) getMicroserviceCollection(cmd *cobra.Command, args []string) error {
-
-	commonOptions, err := getCommonOptions(cmd)
-	if err != nil {
-		return newUserError(fmt.Sprintf("Failed to get common options. err=%s", err))
-	}
-
+func (n *GetMicroserviceCollectionCmd) RunE(cmd *cobra.Command, args []string) error {
 	// query parameters
 	queryValue := url.QueryEscape("")
 	query := url.Values{}
@@ -60,7 +60,20 @@ func (n *getMicroserviceCollectionCmd) getMicroserviceCollection(cmd *cobra.Comm
 	} else {
 		return newUserError(fmt.Sprintf("Flag [%s] does not exist. %s", "type", err))
 	}
+
+	err := flags.WithQueryOptions(
+		cmd,
+		query,
+	)
+	if err != nil {
+		return newUserError(err)
+	}
+	commonOptions, err := getCommonOptions(cmd)
+	if err != nil {
+		return newUserError(fmt.Sprintf("Failed to get common options. err=%s", err))
+	}
 	commonOptions.AddQueryParameters(&query)
+
 	queryValue, err = url.QueryUnescape(query.Encode())
 
 	if err != nil {
@@ -74,7 +87,7 @@ func (n *getMicroserviceCollectionCmd) getMicroserviceCollection(cmd *cobra.Comm
 	formData := make(map[string]io.Reader)
 
 	// body
-	body := mapbuilder.NewMapBuilder()
+	body := mapbuilder.NewInitializedMapBuilder()
 
 	// path parameters
 	pathParameters := make(map[string]string)
@@ -92,5 +105,5 @@ func (n *getMicroserviceCollectionCmd) getMicroserviceCollection(cmd *cobra.Comm
 		DryRun:       globalFlagDryRun,
 	}
 
-	return processRequestAndResponse([]c8y.RequestOptions{req}, commonOptions)
+	return processRequestAndResponseWithWorkers(cmd, &req, "")
 }

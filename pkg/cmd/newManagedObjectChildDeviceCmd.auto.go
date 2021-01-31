@@ -7,18 +7,19 @@ import (
 	"net/http"
 	"net/url"
 
+	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/pkg/mapbuilder"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
 )
 
-type newManagedObjectChildDeviceCmd struct {
+type NewManagedObjectChildDeviceCmd struct {
 	*baseCmd
 }
 
-func newNewManagedObjectChildDeviceCmd() *newManagedObjectChildDeviceCmd {
-	ccmd := &newManagedObjectChildDeviceCmd{}
-
+func NewNewManagedObjectChildDeviceCmd() *NewManagedObjectChildDeviceCmd {
+	var _ = fmt.Errorf
+	ccmd := &NewManagedObjectChildDeviceCmd{}
 	cmd := &cobra.Command{
 		Use:   "assignChildDevice",
 		Short: "Create a child device reference",
@@ -28,34 +29,41 @@ $ c8y inventoryReferences assignChildDevice --device 12345 --newChild 44235
 Assign a device as a child device to an existing device
         `,
 		PreRunE: validateCreateMode,
-		RunE:    ccmd.newManagedObjectChildDevice,
+		RunE:    ccmd.RunE,
 	}
 
 	cmd.SilenceUsage = true
 
 	cmd.Flags().StringSlice("device", []string{""}, "Device. (required)")
-	cmd.Flags().StringSlice("newChild", []string{""}, "New child device (required)")
+	cmd.Flags().StringSlice("newChild", []string{""}, "New child device (required) (accepts pipeline)")
 	addProcessingModeFlag(cmd)
+
+	flags.WithOptions(
+		cmd,
+		flags.WithPipelineSupport("newChild"),
+	)
 
 	// Required flags
 	cmd.MarkFlagRequired("device")
-	cmd.MarkFlagRequired("newChild")
 
 	ccmd.baseCmd = newBaseCmd(cmd)
 
 	return ccmd
 }
 
-func (n *newManagedObjectChildDeviceCmd) newManagedObjectChildDevice(cmd *cobra.Command, args []string) error {
-
-	commonOptions, err := getCommonOptions(cmd)
-	if err != nil {
-		return newUserError(fmt.Sprintf("Failed to get common options. err=%s", err))
-	}
-
+func (n *NewManagedObjectChildDeviceCmd) RunE(cmd *cobra.Command, args []string) error {
 	// query parameters
 	queryValue := url.QueryEscape("")
 	query := url.Values{}
+
+	err := flags.WithQueryOptions(
+		cmd,
+		query,
+	)
+	if err != nil {
+		return newUserError(err)
+	}
+
 	queryValue, err = url.QueryUnescape(query.Encode())
 
 	if err != nil {
@@ -74,7 +82,7 @@ func (n *newManagedObjectChildDeviceCmd) newManagedObjectChildDevice(cmd *cobra.
 	formData := make(map[string]io.Reader)
 
 	// body
-	body := mapbuilder.NewMapBuilder()
+	body := mapbuilder.NewInitializedMapBuilder()
 	body.SetMap(getDataFlag(cmd))
 	if cmd.Flags().Changed("newChild") {
 		newChildInputValues, newChildValue, err := getFormattedDeviceSlice(cmd, args, "newChild")
@@ -133,5 +141,5 @@ func (n *newManagedObjectChildDeviceCmd) newManagedObjectChildDevice(cmd *cobra.
 		DryRun:       globalFlagDryRun,
 	}
 
-	return processRequestAndResponse([]c8y.RequestOptions{req}, commonOptions)
+	return processRequestAndResponseWithWorkers(cmd, &req, "newChild")
 }

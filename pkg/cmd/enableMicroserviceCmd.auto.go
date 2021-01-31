@@ -7,18 +7,19 @@ import (
 	"net/http"
 	"net/url"
 
+	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/pkg/mapbuilder"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
 )
 
-type enableMicroserviceCmd struct {
+type EnableMicroserviceCmd struct {
 	*baseCmd
 }
 
-func newEnableMicroserviceCmd() *enableMicroserviceCmd {
-	ccmd := &enableMicroserviceCmd{}
-
+func NewEnableMicroserviceCmd() *EnableMicroserviceCmd {
+	var _ = fmt.Errorf
+	ccmd := &EnableMicroserviceCmd{}
 	cmd := &cobra.Command{
 		Use:   "enable",
 		Short: "Enable/subscribe a microservice",
@@ -32,33 +33,40 @@ $ c8y microservices enable --id myapp
 Enable (subscribe) to a microservice
         `,
 		PreRunE: validateCreateMode,
-		RunE:    ccmd.enableMicroservice,
+		RunE:    ccmd.RunE,
 	}
 
 	cmd.SilenceUsage = true
 
 	cmd.Flags().String("tenant", "", "Tenant id")
-	cmd.Flags().String("id", "", "Microservice id (required)")
+	cmd.Flags().String("id", "", "Microservice id (required) (accepts pipeline)")
 	addProcessingModeFlag(cmd)
 
+	flags.WithOptions(
+		cmd,
+		flags.WithPipelineSupport("id"),
+	)
+
 	// Required flags
-	cmd.MarkFlagRequired("id")
 
 	ccmd.baseCmd = newBaseCmd(cmd)
 
 	return ccmd
 }
 
-func (n *enableMicroserviceCmd) enableMicroservice(cmd *cobra.Command, args []string) error {
-
-	commonOptions, err := getCommonOptions(cmd)
-	if err != nil {
-		return newUserError(fmt.Sprintf("Failed to get common options. err=%s", err))
-	}
-
+func (n *EnableMicroserviceCmd) RunE(cmd *cobra.Command, args []string) error {
 	// query parameters
 	queryValue := url.QueryEscape("")
 	query := url.Values{}
+
+	err := flags.WithQueryOptions(
+		cmd,
+		query,
+	)
+	if err != nil {
+		return newUserError(err)
+	}
+
 	queryValue, err = url.QueryUnescape(query.Encode())
 
 	if err != nil {
@@ -77,7 +85,7 @@ func (n *enableMicroserviceCmd) enableMicroservice(cmd *cobra.Command, args []st
 	formData := make(map[string]io.Reader)
 
 	// body
-	body := mapbuilder.NewMapBuilder()
+	body := mapbuilder.NewInitializedMapBuilder()
 	body.SetMap(getDataFlag(cmd))
 	if cmd.Flags().Lookup("id") != nil {
 		idInputValues, idValue, err := getMicroserviceSlice(cmd, args, "id")
@@ -122,5 +130,5 @@ func (n *enableMicroserviceCmd) enableMicroservice(cmd *cobra.Command, args []st
 		DryRun:       globalFlagDryRun,
 	}
 
-	return processRequestAndResponse([]c8y.RequestOptions{req}, commonOptions)
+	return processRequestAndResponseWithWorkers(cmd, &req, "id")
 }

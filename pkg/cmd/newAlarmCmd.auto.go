@@ -7,18 +7,19 @@ import (
 	"net/http"
 	"net/url"
 
+	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/pkg/mapbuilder"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
 )
 
-type newAlarmCmd struct {
+type NewAlarmCmd struct {
 	*baseCmd
 }
 
-func newNewAlarmCmd() *newAlarmCmd {
-	ccmd := &newAlarmCmd{}
-
+func NewNewAlarmCmd() *NewAlarmCmd {
+	var _ = fmt.Errorf
+	ccmd := &NewAlarmCmd{}
 	cmd := &cobra.Command{
 		Use:   "create",
 		Short: "Create a new alarm",
@@ -28,12 +29,12 @@ $ c8y alarms create --device mydevice --type c8y_TestAlarm --time "-0s" --text "
 Create a new alarm for device
         `,
 		PreRunE: validateCreateMode,
-		RunE:    ccmd.newAlarm,
+		RunE:    ccmd.RunE,
 	}
 
 	cmd.SilenceUsage = true
 
-	cmd.Flags().StringSlice("device", []string{""}, "The ManagedObject that the alarm originated from (required)")
+	cmd.Flags().StringSlice("device", []string{""}, "The ManagedObject that the alarm originated from (required) (accepts pipeline)")
 	cmd.Flags().String("type", "", "Identifies the type of this alarm, e.g. 'com_cumulocity_events_TamperEvent'.")
 	cmd.Flags().String("time", "0s", "Time of the alarm. Defaults to current timestamp.")
 	cmd.Flags().String("text", "", "Text description of the alarm.")
@@ -42,24 +43,31 @@ Create a new alarm for device
 	addDataFlag(cmd)
 	addProcessingModeFlag(cmd)
 
+	flags.WithOptions(
+		cmd,
+		flags.WithPipelineSupport("device"),
+	)
+
 	// Required flags
-	cmd.MarkFlagRequired("device")
 
 	ccmd.baseCmd = newBaseCmd(cmd)
 
 	return ccmd
 }
 
-func (n *newAlarmCmd) newAlarm(cmd *cobra.Command, args []string) error {
-
-	commonOptions, err := getCommonOptions(cmd)
-	if err != nil {
-		return newUserError(fmt.Sprintf("Failed to get common options. err=%s", err))
-	}
-
+func (n *NewAlarmCmd) RunE(cmd *cobra.Command, args []string) error {
 	// query parameters
 	queryValue := url.QueryEscape("")
 	query := url.Values{}
+
+	err := flags.WithQueryOptions(
+		cmd,
+		query,
+	)
+	if err != nil {
+		return newUserError(err)
+	}
+
 	queryValue, err = url.QueryUnescape(query.Encode())
 
 	if err != nil {
@@ -78,7 +86,7 @@ func (n *newAlarmCmd) newAlarm(cmd *cobra.Command, args []string) error {
 	formData := make(map[string]io.Reader)
 
 	// body
-	body := mapbuilder.NewMapBuilder()
+	body := mapbuilder.NewInitializedMapBuilder()
 	body.SetMap(getDataFlag(cmd))
 	if cmd.Flags().Changed("device") {
 		deviceInputValues, deviceValue, err := getFormattedDeviceSlice(cmd, args, "device")
@@ -156,5 +164,5 @@ func (n *newAlarmCmd) newAlarm(cmd *cobra.Command, args []string) error {
 		DryRun:       globalFlagDryRun,
 	}
 
-	return processRequestAndResponse([]c8y.RequestOptions{req}, commonOptions)
+	return processRequestAndResponseWithWorkers(cmd, &req, "device")
 }

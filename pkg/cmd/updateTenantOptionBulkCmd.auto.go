@@ -7,18 +7,19 @@ import (
 	"net/http"
 	"net/url"
 
+	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/pkg/mapbuilder"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
 )
 
-type updateTenantOptionBulkCmd struct {
+type UpdateTenantOptionBulkCmd struct {
 	*baseCmd
 }
 
-func newUpdateTenantOptionBulkCmd() *updateTenantOptionBulkCmd {
-	ccmd := &updateTenantOptionBulkCmd{}
-
+func NewUpdateTenantOptionBulkCmd() *UpdateTenantOptionBulkCmd {
+	var _ = fmt.Errorf
+	ccmd := &UpdateTenantOptionBulkCmd{}
 	cmd := &cobra.Command{
 		Use:   "updateBulk",
 		Short: "Update multiple tenant options in provided category",
@@ -28,7 +29,7 @@ $ c8y tenantOptions updateBulk --category "c8y_cli_tests" --data "{\"option5\":0
 Update multiple tenant options
         `,
 		PreRunE: validateUpdateMode,
-		RunE:    ccmd.updateTenantOptionBulk,
+		RunE:    ccmd.RunE,
 	}
 
 	cmd.SilenceUsage = true
@@ -36,6 +37,11 @@ Update multiple tenant options
 	cmd.Flags().String("category", "", "Tenant Option category (required)")
 	addDataFlag(cmd)
 	addProcessingModeFlag(cmd)
+
+	flags.WithOptions(
+		cmd,
+		flags.WithPipelineSupport(""),
+	)
 
 	// Required flags
 	cmd.MarkFlagRequired("category")
@@ -46,16 +52,19 @@ Update multiple tenant options
 	return ccmd
 }
 
-func (n *updateTenantOptionBulkCmd) updateTenantOptionBulk(cmd *cobra.Command, args []string) error {
-
-	commonOptions, err := getCommonOptions(cmd)
-	if err != nil {
-		return newUserError(fmt.Sprintf("Failed to get common options. err=%s", err))
-	}
-
+func (n *UpdateTenantOptionBulkCmd) RunE(cmd *cobra.Command, args []string) error {
 	// query parameters
 	queryValue := url.QueryEscape("")
 	query := url.Values{}
+
+	err := flags.WithQueryOptions(
+		cmd,
+		query,
+	)
+	if err != nil {
+		return newUserError(err)
+	}
+
 	queryValue, err = url.QueryUnescape(query.Encode())
 
 	if err != nil {
@@ -74,7 +83,7 @@ func (n *updateTenantOptionBulkCmd) updateTenantOptionBulk(cmd *cobra.Command, a
 	formData := make(map[string]io.Reader)
 
 	// body
-	body := mapbuilder.NewMapBuilder()
+	body := mapbuilder.NewInitializedMapBuilder()
 	body.SetMap(getDataFlag(cmd))
 	if err := setDataTemplateFromFlags(cmd, body); err != nil {
 		return newUserError("Template error. ", err)
@@ -106,5 +115,5 @@ func (n *updateTenantOptionBulkCmd) updateTenantOptionBulk(cmd *cobra.Command, a
 		DryRun:       globalFlagDryRun,
 	}
 
-	return processRequestAndResponse([]c8y.RequestOptions{req}, commonOptions)
+	return processRequestAndResponseWithWorkers(cmd, &req, "")
 }

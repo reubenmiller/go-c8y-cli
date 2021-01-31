@@ -7,18 +7,19 @@ import (
 	"net/http"
 	"net/url"
 
+	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/pkg/mapbuilder"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
 )
 
-type addRoleToUserCmd struct {
+type AddRoleToUserCmd struct {
 	*baseCmd
 }
 
-func newAddRoleToUserCmd() *addRoleToUserCmd {
-	ccmd := &addRoleToUserCmd{}
-
+func NewAddRoleToUserCmd() *AddRoleToUserCmd {
+	var _ = fmt.Errorf
+	ccmd := &AddRoleToUserCmd{}
 	cmd := &cobra.Command{
 		Use:   "addRoleTouser",
 		Short: "Add role to a user",
@@ -28,15 +29,20 @@ $ c8y userRoles addRoleTouser --user "myuser" --role "ROLE_ALARM_READ"
 Add a role (ROLE_ALARM_READ) to a user
         `,
 		PreRunE: validateCreateMode,
-		RunE:    ccmd.addRoleToUser,
+		RunE:    ccmd.RunE,
 	}
 
 	cmd.SilenceUsage = true
 
 	cmd.Flags().String("tenant", "", "Tenant")
 	cmd.Flags().StringSlice("user", []string{""}, "User prefix or full username (required)")
-	cmd.Flags().StringSlice("role", []string{""}, "User role id")
+	cmd.Flags().StringSlice("role", []string{""}, "User role id (accepts pipeline)")
 	addProcessingModeFlag(cmd)
+
+	flags.WithOptions(
+		cmd,
+		flags.WithPipelineSupport("role"),
+	)
 
 	// Required flags
 	cmd.MarkFlagRequired("user")
@@ -46,16 +52,19 @@ Add a role (ROLE_ALARM_READ) to a user
 	return ccmd
 }
 
-func (n *addRoleToUserCmd) addRoleToUser(cmd *cobra.Command, args []string) error {
-
-	commonOptions, err := getCommonOptions(cmd)
-	if err != nil {
-		return newUserError(fmt.Sprintf("Failed to get common options. err=%s", err))
-	}
-
+func (n *AddRoleToUserCmd) RunE(cmd *cobra.Command, args []string) error {
 	// query parameters
 	queryValue := url.QueryEscape("")
 	query := url.Values{}
+
+	err := flags.WithQueryOptions(
+		cmd,
+		query,
+	)
+	if err != nil {
+		return newUserError(err)
+	}
+
 	queryValue, err = url.QueryUnescape(query.Encode())
 
 	if err != nil {
@@ -74,7 +83,7 @@ func (n *addRoleToUserCmd) addRoleToUser(cmd *cobra.Command, args []string) erro
 	formData := make(map[string]io.Reader)
 
 	// body
-	body := mapbuilder.NewMapBuilder()
+	body := mapbuilder.NewInitializedMapBuilder()
 	body.SetMap(getDataFlag(cmd))
 	if cmd.Flags().Changed("role") {
 		roleInputValues, roleValue, err := getFormattedRoleSelfSlice(cmd, args, "role")
@@ -136,5 +145,5 @@ func (n *addRoleToUserCmd) addRoleToUser(cmd *cobra.Command, args []string) erro
 		DryRun:       globalFlagDryRun,
 	}
 
-	return processRequestAndResponse([]c8y.RequestOptions{req}, commonOptions)
+	return processRequestAndResponseWithWorkers(cmd, &req, "role")
 }

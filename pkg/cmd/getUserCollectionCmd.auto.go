@@ -7,18 +7,19 @@ import (
 	"net/http"
 	"net/url"
 
+	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/pkg/mapbuilder"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
 )
 
-type getUserCollectionCmd struct {
+type GetUserCollectionCmd struct {
 	*baseCmd
 }
 
-func newGetUserCollectionCmd() *getUserCollectionCmd {
-	ccmd := &getUserCollectionCmd{}
-
+func NewGetUserCollectionCmd() *GetUserCollectionCmd {
+	var _ = fmt.Errorf
+	ccmd := &GetUserCollectionCmd{}
 	cmd := &cobra.Command{
 		Use:   "list",
 		Short: "Get a collection of users based on filter parameters",
@@ -28,7 +29,7 @@ $ c8y users list
 Get a list of users
         `,
 		PreRunE: nil,
-		RunE:    ccmd.getUserCollection,
+		RunE:    ccmd.RunE,
 	}
 
 	cmd.SilenceUsage = true
@@ -43,6 +44,11 @@ Get a list of users
 	cmd.Flags().Bool("withGroups", false, "Include group information")
 	cmd.Flags().Bool("withRoles", false, "Include role information")
 
+	flags.WithOptions(
+		cmd,
+		flags.WithPipelineSupport(""),
+	)
+
 	// Required flags
 
 	ccmd.baseCmd = newBaseCmd(cmd)
@@ -50,13 +56,7 @@ Get a list of users
 	return ccmd
 }
 
-func (n *getUserCollectionCmd) getUserCollection(cmd *cobra.Command, args []string) error {
-
-	commonOptions, err := getCommonOptions(cmd)
-	if err != nil {
-		return newUserError(fmt.Sprintf("Failed to get common options. err=%s", err))
-	}
-
+func (n *GetUserCollectionCmd) RunE(cmd *cobra.Command, args []string) error {
 	// query parameters
 	queryValue := url.QueryEscape("")
 	query := url.Values{}
@@ -116,7 +116,20 @@ func (n *getUserCollectionCmd) getUserCollection(cmd *cobra.Command, args []stri
 			return newUserError("Flag does not exist")
 		}
 	}
+
+	err := flags.WithQueryOptions(
+		cmd,
+		query,
+	)
+	if err != nil {
+		return newUserError(err)
+	}
+	commonOptions, err := getCommonOptions(cmd)
+	if err != nil {
+		return newUserError(fmt.Sprintf("Failed to get common options. err=%s", err))
+	}
 	commonOptions.AddQueryParameters(&query)
+
 	queryValue, err = url.QueryUnescape(query.Encode())
 
 	if err != nil {
@@ -130,7 +143,7 @@ func (n *getUserCollectionCmd) getUserCollection(cmd *cobra.Command, args []stri
 	formData := make(map[string]io.Reader)
 
 	// body
-	body := mapbuilder.NewMapBuilder()
+	body := mapbuilder.NewInitializedMapBuilder()
 
 	// path parameters
 	pathParameters := make(map[string]string)
@@ -151,5 +164,5 @@ func (n *getUserCollectionCmd) getUserCollection(cmd *cobra.Command, args []stri
 		DryRun:       globalFlagDryRun,
 	}
 
-	return processRequestAndResponse([]c8y.RequestOptions{req}, commonOptions)
+	return processRequestAndResponseWithWorkers(cmd, &req, "")
 }

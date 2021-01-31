@@ -7,18 +7,19 @@ import (
 	"net/http"
 	"net/url"
 
+	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/pkg/mapbuilder"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
 )
 
-type updateDeviceCmd struct {
+type UpdateDeviceCmd struct {
 	*baseCmd
 }
 
-func newUpdateDeviceCmd() *updateDeviceCmd {
-	ccmd := &updateDeviceCmd{}
-
+func NewUpdateDeviceCmd() *UpdateDeviceCmd {
+	var _ = fmt.Errorf
+	ccmd := &UpdateDeviceCmd{}
 	cmd := &cobra.Command{
 		Use:   "update",
 		Short: "Update device",
@@ -28,34 +29,41 @@ $ c8y devices update --id 12345
 Update device by id
         `,
 		PreRunE: validateUpdateMode,
-		RunE:    ccmd.updateDevice,
+		RunE:    ccmd.RunE,
 	}
 
 	cmd.SilenceUsage = true
 
-	cmd.Flags().StringSlice("id", []string{""}, "Device ID (required)")
+	cmd.Flags().StringSlice("id", []string{""}, "Device ID (required) (accepts pipeline)")
 	cmd.Flags().String("newName", "", "Device name")
 	addDataFlag(cmd)
 	addProcessingModeFlag(cmd)
 
+	flags.WithOptions(
+		cmd,
+		flags.WithPipelineSupport("id"),
+	)
+
 	// Required flags
-	cmd.MarkFlagRequired("id")
 
 	ccmd.baseCmd = newBaseCmd(cmd)
 
 	return ccmd
 }
 
-func (n *updateDeviceCmd) updateDevice(cmd *cobra.Command, args []string) error {
-
-	commonOptions, err := getCommonOptions(cmd)
-	if err != nil {
-		return newUserError(fmt.Sprintf("Failed to get common options. err=%s", err))
-	}
-
+func (n *UpdateDeviceCmd) RunE(cmd *cobra.Command, args []string) error {
 	// query parameters
 	queryValue := url.QueryEscape("")
 	query := url.Values{}
+
+	err := flags.WithQueryOptions(
+		cmd,
+		query,
+	)
+	if err != nil {
+		return newUserError(err)
+	}
+
 	queryValue, err = url.QueryUnescape(query.Encode())
 
 	if err != nil {
@@ -74,7 +82,7 @@ func (n *updateDeviceCmd) updateDevice(cmd *cobra.Command, args []string) error 
 	formData := make(map[string]io.Reader)
 
 	// body
-	body := mapbuilder.NewMapBuilder()
+	body := mapbuilder.NewInitializedMapBuilder()
 	body.SetMap(getDataFlag(cmd))
 	if v, err := cmd.Flags().GetString("newName"); err == nil {
 		if v != "" {
@@ -92,23 +100,6 @@ func (n *updateDeviceCmd) updateDevice(cmd *cobra.Command, args []string) error 
 
 	// path parameters
 	pathParameters := make(map[string]string)
-	if cmd.Flags().Changed("id") {
-		idInputValues, idValue, err := getFormattedDeviceSlice(cmd, args, "id")
-
-		if err != nil {
-			return newUserError("no matching devices found", idInputValues, err)
-		}
-
-		if len(idValue) == 0 {
-			return newUserError("no matching devices found", idInputValues)
-		}
-
-		for _, item := range idValue {
-			if item != "" {
-				pathParameters["id"] = newIDValue(item).GetID()
-			}
-		}
-	}
 
 	path := replacePathParameters("inventory/managedObjects/{id}", pathParameters)
 
@@ -123,5 +114,5 @@ func (n *updateDeviceCmd) updateDevice(cmd *cobra.Command, args []string) error 
 		DryRun:       globalFlagDryRun,
 	}
 
-	return processRequestAndResponse([]c8y.RequestOptions{req}, commonOptions)
+	return processRequestAndResponseWithWorkers(cmd, &req, "id")
 }

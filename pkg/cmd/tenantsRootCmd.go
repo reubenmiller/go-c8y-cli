@@ -4,12 +4,12 @@ import (
 	"github.com/spf13/cobra"
 )
 
-type tenantsCmd struct {
+type TenantsCmd struct {
 	*baseCmd
 }
 
-func newTenantsRootCmd() *tenantsCmd {
-	ccmd := &tenantsCmd{}
+func NewTenantsRootCmd() *TenantsCmd {
+	ccmd := &TenantsCmd{}
 
 	cmd := &cobra.Command{
 		Use:   "tenants",
@@ -18,16 +18,16 @@ func newTenantsRootCmd() *tenantsCmd {
 	}
 
 	// Subcommands
-	cmd.AddCommand(newGetTenantCollectionCmd().getCommand())
-	cmd.AddCommand(newNewTenantCmd().getCommand())
-	cmd.AddCommand(newGetTenantCmd().getCommand())
-	cmd.AddCommand(newDeleteTenantCmd().getCommand())
-	cmd.AddCommand(newUpdateTenantCmd().getCommand())
-	cmd.AddCommand(newCurrentTenantCmd().getCommand())
-	cmd.AddCommand(newEnableApplicationOnTenantCmd().getCommand())
-	cmd.AddCommand(newDisableApplicationFromTenantCmd().getCommand())
-	cmd.AddCommand(newGetApplicationReferenceCollectionCmd().getCommand())
-	cmd.AddCommand(newGetTenantVersionCmd().getCommand())
+	cmd.AddCommand(NewGetTenantCollectionCmd().getCommand())
+	cmd.AddCommand(NewNewTenantCmd().getCommand())
+	cmd.AddCommand(NewGetTenantCmd().getCommand())
+	cmd.AddCommand(NewDeleteTenantCmd().getCommand())
+	cmd.AddCommand(NewUpdateTenantCmd().getCommand())
+	cmd.AddCommand(NewCurrentTenantCmd().getCommand())
+	cmd.AddCommand(NewEnableApplicationOnTenantCmd().getCommand())
+	cmd.AddCommand(NewDisableApplicationFromTenantCmd().getCommand())
+	cmd.AddCommand(NewGetApplicationReferenceCollectionCmd().getCommand())
+	cmd.AddCommand(NewGetTenantVersionCmd().getCommand())
 
 	ccmd.baseCmd = newBaseCmd(cmd)
 

@@ -8,7 +8,7 @@ type batchCmd struct {
 	*baseCmd
 }
 
-func newBatchRootCmd() *batchCmd {
+func NewBatchRootCmd() *batchCmd {
 	ccmd := &batchCmd{}
 
 	cmd := &cobra.Command{

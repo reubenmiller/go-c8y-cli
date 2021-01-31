@@ -18,14 +18,14 @@ func newCurrentUserRootCmd() *currentUserCmd {
 	}
 
 	// Subcommands
-	cmd.AddCommand(newGetUserCurrentCmd().getCommand())
-	cmd.AddCommand(newUpdateUserCurrentCmd().getCommand())
-	cmd.AddCommand(newGetUserCollectionCmd().getCommand())
-	cmd.AddCommand(newNewUserCmd().getCommand())
-	cmd.AddCommand(newGetUserCmd().getCommand())
-	cmd.AddCommand(newGetUserByNameCmd().getCommand())
-	cmd.AddCommand(newDeleteUserCmd().getCommand())
-	cmd.AddCommand(newUpdateUserCmd().getCommand())
+	cmd.AddCommand(NewGetUserCurrentCmd().getCommand())
+	cmd.AddCommand(NewUpdateUserCurrentCmd().getCommand())
+	cmd.AddCommand(NewGetUserCollectionCmd().getCommand())
+	cmd.AddCommand(NewNewUserCmd().getCommand())
+	cmd.AddCommand(NewGetUserCmd().getCommand())
+	cmd.AddCommand(NewGetUserByNameCmd().getCommand())
+	cmd.AddCommand(NewDeleteUserCmd().getCommand())
+	cmd.AddCommand(NewUpdateUserCmd().getCommand())
 
 	ccmd.baseCmd = newBaseCmd(cmd)
 

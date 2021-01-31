@@ -7,18 +7,19 @@ import (
 	"net/http"
 	"net/url"
 
+	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/pkg/mapbuilder"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
 )
 
-type deleteTenantOptionCmd struct {
+type DeleteTenantOptionCmd struct {
 	*baseCmd
 }
 
-func newDeleteTenantOptionCmd() *deleteTenantOptionCmd {
-	ccmd := &deleteTenantOptionCmd{}
-
+func NewDeleteTenantOptionCmd() *DeleteTenantOptionCmd {
+	var _ = fmt.Errorf
+	ccmd := &DeleteTenantOptionCmd{}
 	cmd := &cobra.Command{
 		Use:   "delete",
 		Short: "Delete tenant option",
@@ -28,7 +29,7 @@ $ c8y tenantOptions delete --category "c8y_cli_tests" --key "option3"
 Get a tenant option
         `,
 		PreRunE: validateDeleteMode,
-		RunE:    ccmd.deleteTenantOption,
+		RunE:    ccmd.RunE,
 	}
 
 	cmd.SilenceUsage = true
@@ -36,6 +37,11 @@ Get a tenant option
 	cmd.Flags().String("category", "", "Tenant Option category (required)")
 	cmd.Flags().String("key", "", "Tenant Option key (required)")
 	addProcessingModeFlag(cmd)
+
+	flags.WithOptions(
+		cmd,
+		flags.WithPipelineSupport(""),
+	)
 
 	// Required flags
 	cmd.MarkFlagRequired("category")
@@ -46,16 +52,19 @@ Get a tenant option
 	return ccmd
 }
 
-func (n *deleteTenantOptionCmd) deleteTenantOption(cmd *cobra.Command, args []string) error {
-
-	commonOptions, err := getCommonOptions(cmd)
-	if err != nil {
-		return newUserError(fmt.Sprintf("Failed to get common options. err=%s", err))
-	}
-
+func (n *DeleteTenantOptionCmd) RunE(cmd *cobra.Command, args []string) error {
 	// query parameters
 	queryValue := url.QueryEscape("")
 	query := url.Values{}
+
+	err := flags.WithQueryOptions(
+		cmd,
+		query,
+	)
+	if err != nil {
+		return newUserError(err)
+	}
+
 	queryValue, err = url.QueryUnescape(query.Encode())
 
 	if err != nil {
@@ -74,7 +83,7 @@ func (n *deleteTenantOptionCmd) deleteTenantOption(cmd *cobra.Command, args []st
 	formData := make(map[string]io.Reader)
 
 	// body
-	body := mapbuilder.NewMapBuilder()
+	body := mapbuilder.NewInitializedMapBuilder()
 
 	// path parameters
 	pathParameters := make(map[string]string)
@@ -106,5 +115,5 @@ func (n *deleteTenantOptionCmd) deleteTenantOption(cmd *cobra.Command, args []st
 		DryRun:       globalFlagDryRun,
 	}
 
-	return processRequestAndResponse([]c8y.RequestOptions{req}, commonOptions)
+	return processRequestAndResponseWithWorkers(cmd, &req, "")
 }

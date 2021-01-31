@@ -7,18 +7,19 @@ import (
 	"net/http"
 	"net/url"
 
+	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/pkg/mapbuilder"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
 )
 
-type updateRetentionRuleCmd struct {
+type UpdateRetentionRuleCmd struct {
 	*baseCmd
 }
 
-func newUpdateRetentionRuleCmd() *updateRetentionRuleCmd {
-	ccmd := &updateRetentionRuleCmd{}
-
+func NewUpdateRetentionRuleCmd() *UpdateRetentionRuleCmd {
+	var _ = fmt.Errorf
+	ccmd := &UpdateRetentionRuleCmd{}
 	cmd := &cobra.Command{
 		Use:   "update",
 		Short: "Update retention rule",
@@ -29,12 +30,12 @@ $ c8y retentionRules get --id 12345
 Update a retention rule
         `,
 		PreRunE: validateUpdateMode,
-		RunE:    ccmd.updateRetentionRule,
+		RunE:    ccmd.RunE,
 	}
 
 	cmd.SilenceUsage = true
 
-	cmd.Flags().String("id", "", "Retention rule id (required)")
+	cmd.Flags().String("id", "", "Retention rule id (required) (accepts pipeline)")
 	cmd.Flags().String("dataType", "", "RetentionRule will be applied to this type of documents, possible values [ALARM, AUDIT, EVENT, MEASUREMENT, OPERATION, *]. (required)")
 	cmd.Flags().String("fragmentType", "", "RetentionRule will be applied to documents with fragmentType.")
 	cmd.Flags().String("type", "", "RetentionRule will be applied to documents with type.")
@@ -44,8 +45,12 @@ Update a retention rule
 	addDataFlag(cmd)
 	addProcessingModeFlag(cmd)
 
+	flags.WithOptions(
+		cmd,
+		flags.WithPipelineSupport("id"),
+	)
+
 	// Required flags
-	cmd.MarkFlagRequired("id")
 	cmd.MarkFlagRequired("dataType")
 
 	ccmd.baseCmd = newBaseCmd(cmd)
@@ -53,16 +58,19 @@ Update a retention rule
 	return ccmd
 }
 
-func (n *updateRetentionRuleCmd) updateRetentionRule(cmd *cobra.Command, args []string) error {
-
-	commonOptions, err := getCommonOptions(cmd)
-	if err != nil {
-		return newUserError(fmt.Sprintf("Failed to get common options. err=%s", err))
-	}
-
+func (n *UpdateRetentionRuleCmd) RunE(cmd *cobra.Command, args []string) error {
 	// query parameters
 	queryValue := url.QueryEscape("")
 	query := url.Values{}
+
+	err := flags.WithQueryOptions(
+		cmd,
+		query,
+	)
+	if err != nil {
+		return newUserError(err)
+	}
+
 	queryValue, err = url.QueryUnescape(query.Encode())
 
 	if err != nil {
@@ -81,7 +89,7 @@ func (n *updateRetentionRuleCmd) updateRetentionRule(cmd *cobra.Command, args []
 	formData := make(map[string]io.Reader)
 
 	// body
-	body := mapbuilder.NewMapBuilder()
+	body := mapbuilder.NewInitializedMapBuilder()
 	body.SetMap(getDataFlag(cmd))
 	if v, err := cmd.Flags().GetString("dataType"); err == nil {
 		if v != "" {
@@ -132,13 +140,6 @@ func (n *updateRetentionRuleCmd) updateRetentionRule(cmd *cobra.Command, args []
 
 	// path parameters
 	pathParameters := make(map[string]string)
-	if v, err := cmd.Flags().GetString("id"); err == nil {
-		if v != "" {
-			pathParameters["id"] = v
-		}
-	} else {
-		return newUserError(fmt.Sprintf("Flag [%s] does not exist. %s", "id", err))
-	}
 
 	path := replacePathParameters("/retention/retentions/{id}", pathParameters)
 
@@ -153,5 +154,5 @@ func (n *updateRetentionRuleCmd) updateRetentionRule(cmd *cobra.Command, args []
 		DryRun:       globalFlagDryRun,
 	}
 
-	return processRequestAndResponse([]c8y.RequestOptions{req}, commonOptions)
+	return processRequestAndResponseWithWorkers(cmd, &req, "id")
 }

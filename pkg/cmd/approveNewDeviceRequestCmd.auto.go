@@ -7,18 +7,19 @@ import (
 	"net/http"
 	"net/url"
 
+	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/pkg/mapbuilder"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
 )
 
-type approveNewDeviceRequestCmd struct {
+type ApproveNewDeviceRequestCmd struct {
 	*baseCmd
 }
 
-func newApproveNewDeviceRequestCmd() *approveNewDeviceRequestCmd {
-	ccmd := &approveNewDeviceRequestCmd{}
-
+func NewApproveNewDeviceRequestCmd() *ApproveNewDeviceRequestCmd {
+	var _ = fmt.Errorf
+	ccmd := &ApproveNewDeviceRequestCmd{}
 	cmd := &cobra.Command{
 		Use:   "approveDeviceRequest",
 		Short: "Approve a new device request",
@@ -28,7 +29,7 @@ $ c8y devices approveDeviceRequest --id "1234010101s01ldk208"
 Approve a new device request
         `,
 		PreRunE: validateUpdateMode,
-		RunE:    ccmd.approveNewDeviceRequest,
+		RunE:    ccmd.RunE,
 	}
 
 	cmd.SilenceUsage = true
@@ -36,6 +37,11 @@ Approve a new device request
 	cmd.Flags().String("id", "", "Device identifier (required)")
 	cmd.Flags().String("status", "ACCEPTED", "Status of registration")
 	addProcessingModeFlag(cmd)
+
+	flags.WithOptions(
+		cmd,
+		flags.WithPipelineSupport(""),
+	)
 
 	// Required flags
 	cmd.MarkFlagRequired("id")
@@ -45,16 +51,19 @@ Approve a new device request
 	return ccmd
 }
 
-func (n *approveNewDeviceRequestCmd) approveNewDeviceRequest(cmd *cobra.Command, args []string) error {
-
-	commonOptions, err := getCommonOptions(cmd)
-	if err != nil {
-		return newUserError(fmt.Sprintf("Failed to get common options. err=%s", err))
-	}
-
+func (n *ApproveNewDeviceRequestCmd) RunE(cmd *cobra.Command, args []string) error {
 	// query parameters
 	queryValue := url.QueryEscape("")
 	query := url.Values{}
+
+	err := flags.WithQueryOptions(
+		cmd,
+		query,
+	)
+	if err != nil {
+		return newUserError(err)
+	}
+
 	queryValue, err = url.QueryUnescape(query.Encode())
 
 	if err != nil {
@@ -73,7 +82,7 @@ func (n *approveNewDeviceRequestCmd) approveNewDeviceRequest(cmd *cobra.Command,
 	formData := make(map[string]io.Reader)
 
 	// body
-	body := mapbuilder.NewMapBuilder()
+	body := mapbuilder.NewInitializedMapBuilder()
 	body.SetMap(getDataFlag(cmd))
 	if v, err := cmd.Flags().GetString("status"); err == nil {
 		if v != "" {
@@ -112,5 +121,5 @@ func (n *approveNewDeviceRequestCmd) approveNewDeviceRequest(cmd *cobra.Command,
 		DryRun:       globalFlagDryRun,
 	}
 
-	return processRequestAndResponse([]c8y.RequestOptions{req}, commonOptions)
+	return processRequestAndResponseWithWorkers(cmd, &req, "")
 }

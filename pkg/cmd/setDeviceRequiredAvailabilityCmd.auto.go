@@ -7,18 +7,19 @@ import (
 	"net/http"
 	"net/url"
 
+	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/pkg/mapbuilder"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
 )
 
-type setDeviceRequiredAvailabilityCmd struct {
+type SetDeviceRequiredAvailabilityCmd struct {
 	*baseCmd
 }
 
-func newSetDeviceRequiredAvailabilityCmd() *setDeviceRequiredAvailabilityCmd {
-	ccmd := &setDeviceRequiredAvailabilityCmd{}
-
+func NewSetDeviceRequiredAvailabilityCmd() *SetDeviceRequiredAvailabilityCmd {
+	var _ = fmt.Errorf
+	ccmd := &SetDeviceRequiredAvailabilityCmd{}
 	cmd := &cobra.Command{
 		Use:   "setRequiredAvailability",
 		Short: "Set the required availability of a device",
@@ -28,17 +29,21 @@ $ c8y inventory setRequiredAvailability --device 12345 --interval 10
 Set the required availability of a device by name to 10 minutes
         `,
 		PreRunE: validateUpdateMode,
-		RunE:    ccmd.setDeviceRequiredAvailability,
+		RunE:    ccmd.RunE,
 	}
 
 	cmd.SilenceUsage = true
 
-	cmd.Flags().StringSlice("device", []string{""}, "Device ID (required)")
+	cmd.Flags().StringSlice("device", []string{""}, "Device ID (required) (accepts pipeline)")
 	cmd.Flags().Int("interval", 0, "Interval in minutes (required)")
 	addProcessingModeFlag(cmd)
 
+	flags.WithOptions(
+		cmd,
+		flags.WithPipelineSupport("device"),
+	)
+
 	// Required flags
-	cmd.MarkFlagRequired("device")
 	cmd.MarkFlagRequired("interval")
 
 	ccmd.baseCmd = newBaseCmd(cmd)
@@ -46,16 +51,19 @@ Set the required availability of a device by name to 10 minutes
 	return ccmd
 }
 
-func (n *setDeviceRequiredAvailabilityCmd) setDeviceRequiredAvailability(cmd *cobra.Command, args []string) error {
-
-	commonOptions, err := getCommonOptions(cmd)
-	if err != nil {
-		return newUserError(fmt.Sprintf("Failed to get common options. err=%s", err))
-	}
-
+func (n *SetDeviceRequiredAvailabilityCmd) RunE(cmd *cobra.Command, args []string) error {
 	// query parameters
 	queryValue := url.QueryEscape("")
 	query := url.Values{}
+
+	err := flags.WithQueryOptions(
+		cmd,
+		query,
+	)
+	if err != nil {
+		return newUserError(err)
+	}
+
 	queryValue, err = url.QueryUnescape(query.Encode())
 
 	if err != nil {
@@ -74,7 +82,7 @@ func (n *setDeviceRequiredAvailabilityCmd) setDeviceRequiredAvailability(cmd *co
 	formData := make(map[string]io.Reader)
 
 	// body
-	body := mapbuilder.NewMapBuilder()
+	body := mapbuilder.NewInitializedMapBuilder()
 	body.SetMap(getDataFlag(cmd))
 	if v, err := cmd.Flags().GetInt("interval"); err == nil {
 		body.Set("c8y_RequiredAvailability.responseInterval", v)
@@ -90,23 +98,6 @@ func (n *setDeviceRequiredAvailabilityCmd) setDeviceRequiredAvailability(cmd *co
 
 	// path parameters
 	pathParameters := make(map[string]string)
-	if cmd.Flags().Changed("device") {
-		deviceInputValues, deviceValue, err := getFormattedDeviceSlice(cmd, args, "device")
-
-		if err != nil {
-			return newUserError("no matching devices found", deviceInputValues, err)
-		}
-
-		if len(deviceValue) == 0 {
-			return newUserError("no matching devices found", deviceInputValues)
-		}
-
-		for _, item := range deviceValue {
-			if item != "" {
-				pathParameters["device"] = newIDValue(item).GetID()
-			}
-		}
-	}
 
 	path := replacePathParameters("inventory/managedObjects/{device}", pathParameters)
 
@@ -121,5 +112,5 @@ func (n *setDeviceRequiredAvailabilityCmd) setDeviceRequiredAvailability(cmd *co
 		DryRun:       globalFlagDryRun,
 	}
 
-	return processRequestAndResponse([]c8y.RequestOptions{req}, commonOptions)
+	return processRequestAndResponseWithWorkers(cmd, &req, "device")
 }

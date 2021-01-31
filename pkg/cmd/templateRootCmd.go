@@ -8,7 +8,7 @@ type templateCmd struct {
 	*baseCmd
 }
 
-func newTemplateRootCmd() *templateCmd {
+func NewTemplateRootCmd() *templateCmd {
 	ccmd := &templateCmd{}
 
 	cmd := &cobra.Command{

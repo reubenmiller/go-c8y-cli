@@ -7,18 +7,19 @@ import (
 	"net/http"
 	"net/url"
 
+	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/pkg/mapbuilder"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
 )
 
-type getCurrentApplicationCmd struct {
+type GetCurrentApplicationCmd struct {
 	*baseCmd
 }
 
-func newGetCurrentApplicationCmd() *getCurrentApplicationCmd {
-	ccmd := &getCurrentApplicationCmd{}
-
+func NewGetCurrentApplicationCmd() *GetCurrentApplicationCmd {
+	var _ = fmt.Errorf
+	ccmd := &GetCurrentApplicationCmd{}
 	cmd := &cobra.Command{
 		Use:   "get",
 		Short: "Get current application",
@@ -29,10 +30,15 @@ $ c8y currentApplication get
 Get the current application (requires using application credentials)
         `,
 		PreRunE: nil,
-		RunE:    ccmd.getCurrentApplication,
+		RunE:    ccmd.RunE,
 	}
 
 	cmd.SilenceUsage = true
+
+	flags.WithOptions(
+		cmd,
+		flags.WithPipelineSupport(""),
+	)
 
 	// Required flags
 
@@ -41,17 +47,24 @@ Get the current application (requires using application credentials)
 	return ccmd
 }
 
-func (n *getCurrentApplicationCmd) getCurrentApplication(cmd *cobra.Command, args []string) error {
+func (n *GetCurrentApplicationCmd) RunE(cmd *cobra.Command, args []string) error {
+	// query parameters
+	queryValue := url.QueryEscape("")
+	query := url.Values{}
 
+	err := flags.WithQueryOptions(
+		cmd,
+		query,
+	)
+	if err != nil {
+		return newUserError(err)
+	}
 	commonOptions, err := getCommonOptions(cmd)
 	if err != nil {
 		return newUserError(fmt.Sprintf("Failed to get common options. err=%s", err))
 	}
-
-	// query parameters
-	queryValue := url.QueryEscape("")
-	query := url.Values{}
 	commonOptions.AddQueryParameters(&query)
+
 	queryValue, err = url.QueryUnescape(query.Encode())
 
 	if err != nil {
@@ -65,7 +78,7 @@ func (n *getCurrentApplicationCmd) getCurrentApplication(cmd *cobra.Command, arg
 	formData := make(map[string]io.Reader)
 
 	// body
-	body := mapbuilder.NewMapBuilder()
+	body := mapbuilder.NewInitializedMapBuilder()
 
 	// path parameters
 	pathParameters := make(map[string]string)
@@ -83,5 +96,5 @@ func (n *getCurrentApplicationCmd) getCurrentApplication(cmd *cobra.Command, arg
 		DryRun:       globalFlagDryRun,
 	}
 
-	return processRequestAndResponse([]c8y.RequestOptions{req}, commonOptions)
+	return processRequestAndResponseWithWorkers(cmd, &req, "")
 }

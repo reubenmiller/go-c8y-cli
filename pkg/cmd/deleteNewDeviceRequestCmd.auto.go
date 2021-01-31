@@ -7,18 +7,19 @@ import (
 	"net/http"
 	"net/url"
 
+	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/pkg/mapbuilder"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
 )
 
-type deleteNewDeviceRequestCmd struct {
+type DeleteNewDeviceRequestCmd struct {
 	*baseCmd
 }
 
-func newDeleteNewDeviceRequestCmd() *deleteNewDeviceRequestCmd {
-	ccmd := &deleteNewDeviceRequestCmd{}
-
+func NewDeleteNewDeviceRequestCmd() *DeleteNewDeviceRequestCmd {
+	var _ = fmt.Errorf
+	ccmd := &DeleteNewDeviceRequestCmd{}
 	cmd := &cobra.Command{
 		Use:   "deleteNewDeviceRequest",
 		Short: "Delete a new device requests",
@@ -28,32 +29,39 @@ $ c8y devices deleteNewDeviceRequest --id "91019192078"
 Delete a new device request
         `,
 		PreRunE: validateDeleteMode,
-		RunE:    ccmd.deleteNewDeviceRequest,
+		RunE:    ccmd.RunE,
 	}
 
 	cmd.SilenceUsage = true
 
-	cmd.Flags().String("id", "", "New Device Request ID (required)")
+	cmd.Flags().String("id", "", "New Device Request ID (required) (accepts pipeline)")
 	addProcessingModeFlag(cmd)
 
+	flags.WithOptions(
+		cmd,
+		flags.WithPipelineSupport("id"),
+	)
+
 	// Required flags
-	cmd.MarkFlagRequired("id")
 
 	ccmd.baseCmd = newBaseCmd(cmd)
 
 	return ccmd
 }
 
-func (n *deleteNewDeviceRequestCmd) deleteNewDeviceRequest(cmd *cobra.Command, args []string) error {
-
-	commonOptions, err := getCommonOptions(cmd)
-	if err != nil {
-		return newUserError(fmt.Sprintf("Failed to get common options. err=%s", err))
-	}
-
+func (n *DeleteNewDeviceRequestCmd) RunE(cmd *cobra.Command, args []string) error {
 	// query parameters
 	queryValue := url.QueryEscape("")
 	query := url.Values{}
+
+	err := flags.WithQueryOptions(
+		cmd,
+		query,
+	)
+	if err != nil {
+		return newUserError(err)
+	}
+
 	queryValue, err = url.QueryUnescape(query.Encode())
 
 	if err != nil {
@@ -72,17 +80,10 @@ func (n *deleteNewDeviceRequestCmd) deleteNewDeviceRequest(cmd *cobra.Command, a
 	formData := make(map[string]io.Reader)
 
 	// body
-	body := mapbuilder.NewMapBuilder()
+	body := mapbuilder.NewInitializedMapBuilder()
 
 	// path parameters
 	pathParameters := make(map[string]string)
-	if v, err := cmd.Flags().GetString("id"); err == nil {
-		if v != "" {
-			pathParameters["id"] = v
-		}
-	} else {
-		return newUserError(fmt.Sprintf("Flag [%s] does not exist. %s", "id", err))
-	}
 
 	path := replacePathParameters("devicecontrol/newDeviceRequests/{id}", pathParameters)
 
@@ -97,5 +98,5 @@ func (n *deleteNewDeviceRequestCmd) deleteNewDeviceRequest(cmd *cobra.Command, a
 		DryRun:       globalFlagDryRun,
 	}
 
-	return processRequestAndResponse([]c8y.RequestOptions{req}, commonOptions)
+	return processRequestAndResponseWithWorkers(cmd, &req, "id")
 }

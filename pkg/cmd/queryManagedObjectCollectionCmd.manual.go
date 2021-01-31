@@ -15,7 +15,7 @@ type queryManagedObjectCollectionCmd struct {
 	*baseCmd
 }
 
-func newQueryManagedObjectCollectionCmd() *queryManagedObjectCollectionCmd {
+func NewQueryManagedObjectCollectionCmd() *queryManagedObjectCollectionCmd {
 	ccmd := &queryManagedObjectCollectionCmd{}
 
 	cmd := &cobra.Command{

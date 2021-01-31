@@ -7,18 +7,19 @@ import (
 	"net/http"
 	"net/url"
 
+	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/pkg/mapbuilder"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
 )
 
-type newRetentionRuleCmd struct {
+type NewRetentionRuleCmd struct {
 	*baseCmd
 }
 
-func newNewRetentionRuleCmd() *newRetentionRuleCmd {
-	ccmd := &newRetentionRuleCmd{}
-
+func NewNewRetentionRuleCmd() *NewRetentionRuleCmd {
+	var _ = fmt.Errorf
+	ccmd := &NewRetentionRuleCmd{}
 	cmd := &cobra.Command{
 		Use:   "create",
 		Short: "New retention rule",
@@ -29,7 +30,7 @@ $ c8y retentionRules create --dataType ALARM --maximumAge 180
 Create a retention rule
         `,
 		PreRunE: validateCreateMode,
-		RunE:    ccmd.newRetentionRule,
+		RunE:    ccmd.RunE,
 	}
 
 	cmd.SilenceUsage = true
@@ -42,6 +43,11 @@ Create a retention rule
 	cmd.Flags().Bool("editable", false, "Whether the rule is editable. Can be updated only by management tenant.")
 	addProcessingModeFlag(cmd)
 
+	flags.WithOptions(
+		cmd,
+		flags.WithPipelineSupport(""),
+	)
+
 	// Required flags
 	cmd.MarkFlagRequired("dataType")
 	cmd.MarkFlagRequired("maximumAge")
@@ -51,16 +57,19 @@ Create a retention rule
 	return ccmd
 }
 
-func (n *newRetentionRuleCmd) newRetentionRule(cmd *cobra.Command, args []string) error {
-
-	commonOptions, err := getCommonOptions(cmd)
-	if err != nil {
-		return newUserError(fmt.Sprintf("Failed to get common options. err=%s", err))
-	}
-
+func (n *NewRetentionRuleCmd) RunE(cmd *cobra.Command, args []string) error {
 	// query parameters
 	queryValue := url.QueryEscape("")
 	query := url.Values{}
+
+	err := flags.WithQueryOptions(
+		cmd,
+		query,
+	)
+	if err != nil {
+		return newUserError(err)
+	}
+
 	queryValue, err = url.QueryUnescape(query.Encode())
 
 	if err != nil {
@@ -79,7 +88,7 @@ func (n *newRetentionRuleCmd) newRetentionRule(cmd *cobra.Command, args []string
 	formData := make(map[string]io.Reader)
 
 	// body
-	body := mapbuilder.NewMapBuilder()
+	body := mapbuilder.NewInitializedMapBuilder()
 	body.SetMap(getDataFlag(cmd))
 	if v, err := cmd.Flags().GetString("dataType"); err == nil {
 		if v != "" {
@@ -144,5 +153,5 @@ func (n *newRetentionRuleCmd) newRetentionRule(cmd *cobra.Command, args []string
 		DryRun:       globalFlagDryRun,
 	}
 
-	return processRequestAndResponse([]c8y.RequestOptions{req}, commonOptions)
+	return processRequestAndResponseWithWorkers(cmd, &req, "")
 }

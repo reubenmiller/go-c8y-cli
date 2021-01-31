@@ -7,18 +7,19 @@ import (
 	"net/http"
 	"net/url"
 
+	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/pkg/mapbuilder"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
 )
 
-type getDataBrokerCmd struct {
+type GetDataBrokerCmd struct {
 	*baseCmd
 }
 
-func newGetDataBrokerCmd() *getDataBrokerCmd {
-	ccmd := &getDataBrokerCmd{}
-
+func NewGetDataBrokerCmd() *GetDataBrokerCmd {
+	var _ = fmt.Errorf
+	ccmd := &GetDataBrokerCmd{}
 	cmd := &cobra.Command{
 		Use:   "get",
 		Short: "Get data broker connector",
@@ -28,32 +29,43 @@ $ c8y databroker get --id 12345
 Get a data broker connector
         `,
 		PreRunE: nil,
-		RunE:    ccmd.getDataBroker,
+		RunE:    ccmd.RunE,
 	}
 
 	cmd.SilenceUsage = true
 
-	cmd.Flags().String("id", "", "Data broker connector id (required)")
+	cmd.Flags().String("id", "", "Data broker connector id (required) (accepts pipeline)")
+
+	flags.WithOptions(
+		cmd,
+		flags.WithPipelineSupport("id"),
+	)
 
 	// Required flags
-	cmd.MarkFlagRequired("id")
 
 	ccmd.baseCmd = newBaseCmd(cmd)
 
 	return ccmd
 }
 
-func (n *getDataBrokerCmd) getDataBroker(cmd *cobra.Command, args []string) error {
+func (n *GetDataBrokerCmd) RunE(cmd *cobra.Command, args []string) error {
+	// query parameters
+	queryValue := url.QueryEscape("")
+	query := url.Values{}
 
+	err := flags.WithQueryOptions(
+		cmd,
+		query,
+	)
+	if err != nil {
+		return newUserError(err)
+	}
 	commonOptions, err := getCommonOptions(cmd)
 	if err != nil {
 		return newUserError(fmt.Sprintf("Failed to get common options. err=%s", err))
 	}
-
-	// query parameters
-	queryValue := url.QueryEscape("")
-	query := url.Values{}
 	commonOptions.AddQueryParameters(&query)
+
 	queryValue, err = url.QueryUnescape(query.Encode())
 
 	if err != nil {
@@ -67,17 +79,10 @@ func (n *getDataBrokerCmd) getDataBroker(cmd *cobra.Command, args []string) erro
 	formData := make(map[string]io.Reader)
 
 	// body
-	body := mapbuilder.NewMapBuilder()
+	body := mapbuilder.NewInitializedMapBuilder()
 
 	// path parameters
 	pathParameters := make(map[string]string)
-	if v, err := cmd.Flags().GetString("id"); err == nil {
-		if v != "" {
-			pathParameters["id"] = v
-		}
-	} else {
-		return newUserError(fmt.Sprintf("Flag [%s] does not exist. %s", "id", err))
-	}
 
 	path := replacePathParameters("/databroker/connectors/{id}", pathParameters)
 
@@ -92,5 +97,5 @@ func (n *getDataBrokerCmd) getDataBroker(cmd *cobra.Command, args []string) erro
 		DryRun:       globalFlagDryRun,
 	}
 
-	return processRequestAndResponse([]c8y.RequestOptions{req}, commonOptions)
+	return processRequestAndResponseWithWorkers(cmd, &req, "id")
 }

@@ -7,18 +7,19 @@ import (
 	"net/http"
 	"net/url"
 
+	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/pkg/mapbuilder"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
 )
 
-type getApplicationCollectionCmd struct {
+type GetApplicationCollectionCmd struct {
 	*baseCmd
 }
 
-func newGetApplicationCollectionCmd() *getApplicationCollectionCmd {
-	ccmd := &getApplicationCollectionCmd{}
-
+func NewGetApplicationCollectionCmd() *GetApplicationCollectionCmd {
+	var _ = fmt.Errorf
+	ccmd := &GetApplicationCollectionCmd{}
 	cmd := &cobra.Command{
 		Use:   "list",
 		Short: "Get a collection of applications",
@@ -28,12 +29,17 @@ $ c8y applications list --pageSize 100
 Get applications
         `,
 		PreRunE: nil,
-		RunE:    ccmd.getApplicationCollection,
+		RunE:    ccmd.RunE,
 	}
 
 	cmd.SilenceUsage = true
 
 	cmd.Flags().String("type", "", "Application type")
+
+	flags.WithOptions(
+		cmd,
+		flags.WithPipelineSupport(""),
+	)
 
 	// Required flags
 
@@ -42,13 +48,7 @@ Get applications
 	return ccmd
 }
 
-func (n *getApplicationCollectionCmd) getApplicationCollection(cmd *cobra.Command, args []string) error {
-
-	commonOptions, err := getCommonOptions(cmd)
-	if err != nil {
-		return newUserError(fmt.Sprintf("Failed to get common options. err=%s", err))
-	}
-
+func (n *GetApplicationCollectionCmd) RunE(cmd *cobra.Command, args []string) error {
 	// query parameters
 	queryValue := url.QueryEscape("")
 	query := url.Values{}
@@ -59,7 +59,20 @@ func (n *getApplicationCollectionCmd) getApplicationCollection(cmd *cobra.Comman
 	} else {
 		return newUserError(fmt.Sprintf("Flag [%s] does not exist. %s", "type", err))
 	}
+
+	err := flags.WithQueryOptions(
+		cmd,
+		query,
+	)
+	if err != nil {
+		return newUserError(err)
+	}
+	commonOptions, err := getCommonOptions(cmd)
+	if err != nil {
+		return newUserError(fmt.Sprintf("Failed to get common options. err=%s", err))
+	}
 	commonOptions.AddQueryParameters(&query)
+
 	queryValue, err = url.QueryUnescape(query.Encode())
 
 	if err != nil {
@@ -73,7 +86,7 @@ func (n *getApplicationCollectionCmd) getApplicationCollection(cmd *cobra.Comman
 	formData := make(map[string]io.Reader)
 
 	// body
-	body := mapbuilder.NewMapBuilder()
+	body := mapbuilder.NewInitializedMapBuilder()
 
 	// path parameters
 	pathParameters := make(map[string]string)
@@ -91,5 +104,5 @@ func (n *getApplicationCollectionCmd) getApplicationCollection(cmd *cobra.Comman
 		DryRun:       globalFlagDryRun,
 	}
 
-	return processRequestAndResponse([]c8y.RequestOptions{req}, commonOptions)
+	return processRequestAndResponseWithWorkers(cmd, &req, "")
 }

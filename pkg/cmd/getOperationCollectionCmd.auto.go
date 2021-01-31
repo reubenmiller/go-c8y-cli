@@ -7,18 +7,19 @@ import (
 	"net/http"
 	"net/url"
 
+	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/pkg/mapbuilder"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
 )
 
-type getOperationCollectionCmd struct {
+type GetOperationCollectionCmd struct {
 	*baseCmd
 }
 
-func newGetOperationCollectionCmd() *getOperationCollectionCmd {
-	ccmd := &getOperationCollectionCmd{}
-
+func NewGetOperationCollectionCmd() *GetOperationCollectionCmd {
+	var _ = fmt.Errorf
+	ccmd := &GetOperationCollectionCmd{}
 	cmd := &cobra.Command{
 		Use:   "list",
 		Short: "Get a collection of operations based on filter parameters",
@@ -34,17 +35,22 @@ $ c8y operations list --device mydevice --status PENDING
 Get a list of pending operations for a device
         `,
 		PreRunE: nil,
-		RunE:    ccmd.getOperationCollection,
+		RunE:    ccmd.RunE,
 	}
 
 	cmd.SilenceUsage = true
 
 	cmd.Flags().StringSlice("agent", []string{""}, "Agent ID")
-	cmd.Flags().StringSlice("device", []string{""}, "Device ID")
+	cmd.Flags().StringSlice("device", []string{""}, "Device ID (accepts pipeline)")
 	cmd.Flags().String("dateFrom", "", "Start date or date and time of operation.")
 	cmd.Flags().String("dateTo", "", "End date or date and time of operation.")
 	cmd.Flags().String("status", "", "Operation status, can be one of SUCCESSFUL, FAILED, EXECUTING or PENDING.")
 	cmd.Flags().String("bulkOperationId", "", "Bulk operation id. Only retrieve operations related to the given bulk operation.")
+
+	flags.WithOptions(
+		cmd,
+		flags.WithPipelineSupport("device"),
+	)
 
 	// Required flags
 
@@ -53,13 +59,7 @@ Get a list of pending operations for a device
 	return ccmd
 }
 
-func (n *getOperationCollectionCmd) getOperationCollection(cmd *cobra.Command, args []string) error {
-
-	commonOptions, err := getCommonOptions(cmd)
-	if err != nil {
-		return newUserError(fmt.Sprintf("Failed to get common options. err=%s", err))
-	}
-
+func (n *GetOperationCollectionCmd) RunE(cmd *cobra.Command, args []string) error {
 	// query parameters
 	queryValue := url.QueryEscape("")
 	query := url.Values{}
@@ -125,7 +125,20 @@ func (n *getOperationCollectionCmd) getOperationCollection(cmd *cobra.Command, a
 	} else {
 		return newUserError(fmt.Sprintf("Flag [%s] does not exist. %s", "bulkOperationId", err))
 	}
+
+	err := flags.WithQueryOptions(
+		cmd,
+		query,
+	)
+	if err != nil {
+		return newUserError(err)
+	}
+	commonOptions, err := getCommonOptions(cmd)
+	if err != nil {
+		return newUserError(fmt.Sprintf("Failed to get common options. err=%s", err))
+	}
 	commonOptions.AddQueryParameters(&query)
+
 	queryValue, err = url.QueryUnescape(query.Encode())
 
 	if err != nil {
@@ -139,7 +152,7 @@ func (n *getOperationCollectionCmd) getOperationCollection(cmd *cobra.Command, a
 	formData := make(map[string]io.Reader)
 
 	// body
-	body := mapbuilder.NewMapBuilder()
+	body := mapbuilder.NewInitializedMapBuilder()
 
 	// path parameters
 	pathParameters := make(map[string]string)
@@ -157,5 +170,5 @@ func (n *getOperationCollectionCmd) getOperationCollection(cmd *cobra.Command, a
 		DryRun:       globalFlagDryRun,
 	}
 
-	return processRequestAndResponse([]c8y.RequestOptions{req}, commonOptions)
+	return processRequestAndResponseWithWorkers(cmd, &req, "device")
 }

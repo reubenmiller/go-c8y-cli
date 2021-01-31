@@ -7,18 +7,19 @@ import (
 	"net/http"
 	"net/url"
 
+	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/pkg/mapbuilder"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
 )
 
-type getGroupCmd struct {
+type GetGroupCmd struct {
 	*baseCmd
 }
 
-func newGetGroupCmd() *getGroupCmd {
-	ccmd := &getGroupCmd{}
-
+func NewGetGroupCmd() *GetGroupCmd {
+	var _ = fmt.Errorf
+	ccmd := &GetGroupCmd{}
 	cmd := &cobra.Command{
 		Use:   "get",
 		Short: "Create a new group by id",
@@ -28,13 +29,18 @@ $ c8y userGroups get --id 12345
 Get a user group
         `,
 		PreRunE: nil,
-		RunE:    ccmd.getGroup,
+		RunE:    ccmd.RunE,
 	}
 
 	cmd.SilenceUsage = true
 
 	cmd.Flags().String("tenant", "", "Tenant")
-	cmd.Flags().StringSlice("id", []string{""}, "Group id")
+	cmd.Flags().StringSlice("id", []string{""}, "Group id (accepts pipeline)")
+
+	flags.WithOptions(
+		cmd,
+		flags.WithPipelineSupport("id"),
+	)
 
 	// Required flags
 
@@ -43,17 +49,24 @@ Get a user group
 	return ccmd
 }
 
-func (n *getGroupCmd) getGroup(cmd *cobra.Command, args []string) error {
+func (n *GetGroupCmd) RunE(cmd *cobra.Command, args []string) error {
+	// query parameters
+	queryValue := url.QueryEscape("")
+	query := url.Values{}
 
+	err := flags.WithQueryOptions(
+		cmd,
+		query,
+	)
+	if err != nil {
+		return newUserError(err)
+	}
 	commonOptions, err := getCommonOptions(cmd)
 	if err != nil {
 		return newUserError(fmt.Sprintf("Failed to get common options. err=%s", err))
 	}
-
-	// query parameters
-	queryValue := url.QueryEscape("")
-	query := url.Values{}
 	commonOptions.AddQueryParameters(&query)
+
 	queryValue, err = url.QueryUnescape(query.Encode())
 
 	if err != nil {
@@ -67,29 +80,12 @@ func (n *getGroupCmd) getGroup(cmd *cobra.Command, args []string) error {
 	formData := make(map[string]io.Reader)
 
 	// body
-	body := mapbuilder.NewMapBuilder()
+	body := mapbuilder.NewInitializedMapBuilder()
 
 	// path parameters
 	pathParameters := make(map[string]string)
 	if v := getTenantWithDefaultFlag(cmd, "tenant", client.TenantName); v != "" {
 		pathParameters["tenant"] = v
-	}
-	if cmd.Flags().Changed("id") {
-		idInputValues, idValue, err := getFormattedGroupSlice(cmd, args, "id")
-
-		if err != nil {
-			return newUserError("no matching user groups found", idInputValues, err)
-		}
-
-		if len(idValue) == 0 {
-			return newUserError("no matching user groups found", idInputValues)
-		}
-
-		for _, item := range idValue {
-			if item != "" {
-				pathParameters["id"] = newIDValue(item).GetID()
-			}
-		}
 	}
 
 	path := replacePathParameters("/user/{tenant}/groups/{id}", pathParameters)
@@ -105,5 +101,5 @@ func (n *getGroupCmd) getGroup(cmd *cobra.Command, args []string) error {
 		DryRun:       globalFlagDryRun,
 	}
 
-	return processRequestAndResponse([]c8y.RequestOptions{req}, commonOptions)
+	return processRequestAndResponseWithWorkers(cmd, &req, "id")
 }

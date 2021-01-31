@@ -7,18 +7,19 @@ import (
 	"net/http"
 	"net/url"
 
+	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/pkg/mapbuilder"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
 )
 
-type getManagedObjectCollectionCmd struct {
+type GetManagedObjectCollectionCmd struct {
 	*baseCmd
 }
 
-func newGetManagedObjectCollectionCmd() *getManagedObjectCollectionCmd {
-	ccmd := &getManagedObjectCollectionCmd{}
-
+func NewGetManagedObjectCollectionCmd() *GetManagedObjectCollectionCmd {
+	var _ = fmt.Errorf
+	ccmd := &GetManagedObjectCollectionCmd{}
 	cmd := &cobra.Command{
 		Use:   "list",
 		Short: "Get a collection of managedObjects based on filter parameters",
@@ -28,7 +29,7 @@ $ c8y inventory list
 Get a list of managed objects
         `,
 		PreRunE: nil,
-		RunE:    ccmd.getManagedObjectCollection,
+		RunE:    ccmd.RunE,
 	}
 
 	cmd.SilenceUsage = true
@@ -40,6 +41,11 @@ Get a list of managed objects
 	cmd.Flags().Bool("withParents", false, "include a flat list of all parents and grandparents of the given object")
 	cmd.Flags().Bool("skipChildrenNames", false, "Don't include the child devices names in the resonse. This can improve the api's response because the names don't need to be retrieved")
 
+	flags.WithOptions(
+		cmd,
+		flags.WithPipelineSupport(""),
+	)
+
 	// Required flags
 
 	ccmd.baseCmd = newBaseCmd(cmd)
@@ -47,13 +53,7 @@ Get a list of managed objects
 	return ccmd
 }
 
-func (n *getManagedObjectCollectionCmd) getManagedObjectCollection(cmd *cobra.Command, args []string) error {
-
-	commonOptions, err := getCommonOptions(cmd)
-	if err != nil {
-		return newUserError(fmt.Sprintf("Failed to get common options. err=%s", err))
-	}
-
+func (n *GetManagedObjectCollectionCmd) RunE(cmd *cobra.Command, args []string) error {
 	// query parameters
 	queryValue := url.QueryEscape("")
 	query := url.Values{}
@@ -109,7 +109,20 @@ func (n *getManagedObjectCollectionCmd) getManagedObjectCollection(cmd *cobra.Co
 			return newUserError("Flag does not exist")
 		}
 	}
+
+	err := flags.WithQueryOptions(
+		cmd,
+		query,
+	)
+	if err != nil {
+		return newUserError(err)
+	}
+	commonOptions, err := getCommonOptions(cmd)
+	if err != nil {
+		return newUserError(fmt.Sprintf("Failed to get common options. err=%s", err))
+	}
 	commonOptions.AddQueryParameters(&query)
+
 	queryValue, err = url.QueryUnescape(query.Encode())
 
 	if err != nil {
@@ -123,7 +136,7 @@ func (n *getManagedObjectCollectionCmd) getManagedObjectCollection(cmd *cobra.Co
 	formData := make(map[string]io.Reader)
 
 	// body
-	body := mapbuilder.NewMapBuilder()
+	body := mapbuilder.NewInitializedMapBuilder()
 
 	// path parameters
 	pathParameters := make(map[string]string)
@@ -141,5 +154,5 @@ func (n *getManagedObjectCollectionCmd) getManagedObjectCollection(cmd *cobra.Co
 		DryRun:       globalFlagDryRun,
 	}
 
-	return processRequestAndResponse([]c8y.RequestOptions{req}, commonOptions)
+	return processRequestAndResponseWithWorkers(cmd, &req, "")
 }

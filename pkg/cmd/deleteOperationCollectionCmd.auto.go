@@ -7,18 +7,19 @@ import (
 	"net/http"
 	"net/url"
 
+	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/pkg/mapbuilder"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
 )
 
-type deleteOperationCollectionCmd struct {
+type DeleteOperationCollectionCmd struct {
 	*baseCmd
 }
 
-func newDeleteOperationCollectionCmd() *deleteOperationCollectionCmd {
-	ccmd := &deleteOperationCollectionCmd{}
-
+func NewDeleteOperationCollectionCmd() *DeleteOperationCollectionCmd {
+	var _ = fmt.Errorf
+	ccmd := &DeleteOperationCollectionCmd{}
 	cmd := &cobra.Command{
 		Use:   "deleteCollection",
 		Short: "Delete a collection of operations",
@@ -29,17 +30,22 @@ $ c8y operations deleteCollection --device mydevice --status PENDING
 Remove all pending operations for a given device
         `,
 		PreRunE: validateDeleteMode,
-		RunE:    ccmd.deleteOperationCollection,
+		RunE:    ccmd.RunE,
 	}
 
 	cmd.SilenceUsage = true
 
 	cmd.Flags().StringSlice("agent", []string{""}, "Agent ID")
-	cmd.Flags().StringSlice("device", []string{""}, "Device ID")
+	cmd.Flags().StringSlice("device", []string{""}, "Device ID (accepts pipeline)")
 	cmd.Flags().String("dateFrom", "", "Start date or date and time of operation.")
 	cmd.Flags().String("dateTo", "", "End date or date and time of operation.")
 	cmd.Flags().String("status", "", "Operation status, can be one of SUCCESSFUL, FAILED, EXECUTING or PENDING.")
 	addProcessingModeFlag(cmd)
+
+	flags.WithOptions(
+		cmd,
+		flags.WithPipelineSupport("device"),
+	)
 
 	// Required flags
 
@@ -48,13 +54,7 @@ Remove all pending operations for a given device
 	return ccmd
 }
 
-func (n *deleteOperationCollectionCmd) deleteOperationCollection(cmd *cobra.Command, args []string) error {
-
-	commonOptions, err := getCommonOptions(cmd)
-	if err != nil {
-		return newUserError(fmt.Sprintf("Failed to get common options. err=%s", err))
-	}
-
+func (n *DeleteOperationCollectionCmd) RunE(cmd *cobra.Command, args []string) error {
 	// query parameters
 	queryValue := url.QueryEscape("")
 	query := url.Values{}
@@ -113,6 +113,15 @@ func (n *deleteOperationCollectionCmd) deleteOperationCollection(cmd *cobra.Comm
 	} else {
 		return newUserError(fmt.Sprintf("Flag [%s] does not exist. %s", "status", err))
 	}
+
+	err := flags.WithQueryOptions(
+		cmd,
+		query,
+	)
+	if err != nil {
+		return newUserError(err)
+	}
+
 	queryValue, err = url.QueryUnescape(query.Encode())
 
 	if err != nil {
@@ -131,7 +140,7 @@ func (n *deleteOperationCollectionCmd) deleteOperationCollection(cmd *cobra.Comm
 	formData := make(map[string]io.Reader)
 
 	// body
-	body := mapbuilder.NewMapBuilder()
+	body := mapbuilder.NewInitializedMapBuilder()
 
 	// path parameters
 	pathParameters := make(map[string]string)
@@ -149,5 +158,5 @@ func (n *deleteOperationCollectionCmd) deleteOperationCollection(cmd *cobra.Comm
 		DryRun:       globalFlagDryRun,
 	}
 
-	return processRequestAndResponse([]c8y.RequestOptions{req}, commonOptions)
+	return processRequestAndResponseWithWorkers(cmd, &req, "device")
 }

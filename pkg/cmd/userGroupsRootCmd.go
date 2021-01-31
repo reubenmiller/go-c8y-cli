@@ -4,12 +4,12 @@ import (
 	"github.com/spf13/cobra"
 )
 
-type userGroupsCmd struct {
+type UserGroupsCmd struct {
 	*baseCmd
 }
 
-func newUserGroupsRootCmd() *userGroupsCmd {
-	ccmd := &userGroupsCmd{}
+func NewUserGroupsRootCmd() *UserGroupsCmd {
+	ccmd := &UserGroupsCmd{}
 
 	cmd := &cobra.Command{
 		Use:   "userGroups",
@@ -18,12 +18,12 @@ func newUserGroupsRootCmd() *userGroupsCmd {
 	}
 
 	// Subcommands
-	cmd.AddCommand(newGetGroupCollectionCmd().getCommand())
-	cmd.AddCommand(newNewGroupCmd().getCommand())
-	cmd.AddCommand(newGetGroupCmd().getCommand())
-	cmd.AddCommand(newGetGroupByNameCmd().getCommand())
-	cmd.AddCommand(newDeleteGroupCmd().getCommand())
-	cmd.AddCommand(newUpdateGroupCmd().getCommand())
+	cmd.AddCommand(NewGetGroupCollectionCmd().getCommand())
+	cmd.AddCommand(NewNewGroupCmd().getCommand())
+	cmd.AddCommand(NewGetGroupCmd().getCommand())
+	cmd.AddCommand(NewGetGroupByNameCmd().getCommand())
+	cmd.AddCommand(NewDeleteGroupCmd().getCommand())
+	cmd.AddCommand(NewUpdateGroupCmd().getCommand())
 
 	ccmd.baseCmd = newBaseCmd(cmd)
 

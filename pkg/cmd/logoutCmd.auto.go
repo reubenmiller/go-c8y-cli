@@ -7,18 +7,19 @@ import (
 	"net/http"
 	"net/url"
 
+	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/pkg/mapbuilder"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
 )
 
-type logoutCmd struct {
+type LogoutCmd struct {
 	*baseCmd
 }
 
-func newLogoutCmd() *logoutCmd {
-	ccmd := &logoutCmd{}
-
+func NewLogoutCmd() *LogoutCmd {
+	var _ = fmt.Errorf
+	ccmd := &LogoutCmd{}
 	cmd := &cobra.Command{
 		Use:   "logout",
 		Short: "Log out the current user",
@@ -28,12 +29,17 @@ $ c8y users logout
 Log out the current user
         `,
 		PreRunE: validateCreateMode,
-		RunE:    ccmd.logout,
+		RunE:    ccmd.RunE,
 	}
 
 	cmd.SilenceUsage = true
 
 	addProcessingModeFlag(cmd)
+
+	flags.WithOptions(
+		cmd,
+		flags.WithPipelineSupport(""),
+	)
 
 	// Required flags
 
@@ -42,16 +48,19 @@ Log out the current user
 	return ccmd
 }
 
-func (n *logoutCmd) logout(cmd *cobra.Command, args []string) error {
-
-	commonOptions, err := getCommonOptions(cmd)
-	if err != nil {
-		return newUserError(fmt.Sprintf("Failed to get common options. err=%s", err))
-	}
-
+func (n *LogoutCmd) RunE(cmd *cobra.Command, args []string) error {
 	// query parameters
 	queryValue := url.QueryEscape("")
 	query := url.Values{}
+
+	err := flags.WithQueryOptions(
+		cmd,
+		query,
+	)
+	if err != nil {
+		return newUserError(err)
+	}
+
 	queryValue, err = url.QueryUnescape(query.Encode())
 
 	if err != nil {
@@ -70,7 +79,7 @@ func (n *logoutCmd) logout(cmd *cobra.Command, args []string) error {
 	formData := make(map[string]io.Reader)
 
 	// body
-	body := mapbuilder.NewMapBuilder()
+	body := mapbuilder.NewInitializedMapBuilder()
 
 	// path parameters
 	pathParameters := make(map[string]string)
@@ -88,5 +97,5 @@ func (n *logoutCmd) logout(cmd *cobra.Command, args []string) error {
 		DryRun:       globalFlagDryRun,
 	}
 
-	return processRequestAndResponse([]c8y.RequestOptions{req}, commonOptions)
+	return processRequestAndResponseWithWorkers(cmd, &req, "")
 }

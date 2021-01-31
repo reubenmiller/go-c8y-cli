@@ -4,12 +4,12 @@ import (
 	"github.com/spf13/cobra"
 )
 
-type inventoryReferencesCmd struct {
+type InventoryReferencesCmd struct {
 	*baseCmd
 }
 
-func newInventoryReferencesRootCmd() *inventoryReferencesCmd {
-	ccmd := &inventoryReferencesCmd{}
+func NewInventoryReferencesRootCmd() *InventoryReferencesCmd {
+	ccmd := &InventoryReferencesCmd{}
 
 	cmd := &cobra.Command{
 		Use:   "inventoryReferences",
@@ -18,21 +18,21 @@ func newInventoryReferencesRootCmd() *inventoryReferencesCmd {
 	}
 
 	// Subcommands
-	cmd.AddCommand(newGetManagedObjectChildDeviceCollectionCmd().getCommand())
-	cmd.AddCommand(newGetManagedObjectChildAssetCollectionCmd().getCommand())
-	cmd.AddCommand(newNewManagedObjectChildDeviceCmd().getCommand())
-	cmd.AddCommand(newAddDeviceToGroupCmd().getCommand())
-	cmd.AddCommand(newAddGroupToGroupCmd().getCommand())
-	cmd.AddCommand(newNewManagedObjectChildAssetCmd().getCommand())
-	cmd.AddCommand(newGetManagedObjectChildDeviceReferenceCmd().getCommand())
-	cmd.AddCommand(newGetManagedObjectChildAssetReferenceCmd().getCommand())
-	cmd.AddCommand(newDeleteManagedObjectChildDeviceReferenceCmd().getCommand())
-	cmd.AddCommand(newDeleteManagedObjectChildAssetReferenceCmd().getCommand())
-	cmd.AddCommand(newDeleteDeviceFromGroupCmd().getCommand())
-	cmd.AddCommand(newDeleteAssetFromGroupCmd().getCommand())
-	cmd.AddCommand(newGetManagedObjectChildAdditionCollectionCmd().getCommand())
-	cmd.AddCommand(newAddManagedObjectChildAdditionCmd().getCommand())
-	cmd.AddCommand(newDeleteChildAdditionCmd().getCommand())
+	cmd.AddCommand(NewGetManagedObjectChildDeviceCollectionCmd().getCommand())
+	cmd.AddCommand(NewGetManagedObjectChildAssetCollectionCmd().getCommand())
+	cmd.AddCommand(NewNewManagedObjectChildDeviceCmd().getCommand())
+	cmd.AddCommand(NewAddDeviceToGroupCmd().getCommand())
+	cmd.AddCommand(NewAddGroupToGroupCmd().getCommand())
+	cmd.AddCommand(NewNewManagedObjectChildAssetCmd().getCommand())
+	cmd.AddCommand(NewGetManagedObjectChildDeviceReferenceCmd().getCommand())
+	cmd.AddCommand(NewGetManagedObjectChildAssetReferenceCmd().getCommand())
+	cmd.AddCommand(NewDeleteManagedObjectChildDeviceReferenceCmd().getCommand())
+	cmd.AddCommand(NewDeleteManagedObjectChildAssetReferenceCmd().getCommand())
+	cmd.AddCommand(NewDeleteDeviceFromGroupCmd().getCommand())
+	cmd.AddCommand(NewDeleteAssetFromGroupCmd().getCommand())
+	cmd.AddCommand(NewGetManagedObjectChildAdditionCollectionCmd().getCommand())
+	cmd.AddCommand(NewAddManagedObjectChildAdditionCmd().getCommand())
+	cmd.AddCommand(NewDeleteChildAdditionCmd().getCommand())
 
 	ccmd.baseCmd = newBaseCmd(cmd)
 

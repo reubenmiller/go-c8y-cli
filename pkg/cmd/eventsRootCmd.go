@@ -4,12 +4,12 @@ import (
 	"github.com/spf13/cobra"
 )
 
-type eventsCmd struct {
+type EventsCmd struct {
 	*baseCmd
 }
 
-func newEventsRootCmd() *eventsCmd {
-	ccmd := &eventsCmd{}
+func NewEventsRootCmd() *EventsCmd {
+	ccmd := &EventsCmd{}
 
 	cmd := &cobra.Command{
 		Use:   "events",
@@ -18,16 +18,16 @@ func newEventsRootCmd() *eventsCmd {
 	}
 
 	// Subcommands
-	cmd.AddCommand(newGetEventCollectionCmd().getCommand())
-	cmd.AddCommand(newDeleteEventCollectionCmd().getCommand())
-	cmd.AddCommand(newGetEventCmd().getCommand())
-	cmd.AddCommand(newNewEventCmd().getCommand())
-	cmd.AddCommand(newUpdateEventCmd().getCommand())
-	cmd.AddCommand(newDeleteEventCmd().getCommand())
-	cmd.AddCommand(newGetEventBinaryCmd().getCommand())
-	cmd.AddCommand(newNewEventBinaryCmd().getCommand())
-	cmd.AddCommand(newUpdateEventBinaryCmd().getCommand())
-	cmd.AddCommand(newDeleteEventBinaryCmd().getCommand())
+	cmd.AddCommand(NewGetEventCollectionCmd().getCommand())
+	cmd.AddCommand(NewDeleteEventCollectionCmd().getCommand())
+	cmd.AddCommand(NewGetEventCmd().getCommand())
+	cmd.AddCommand(NewNewEventCmd().getCommand())
+	cmd.AddCommand(NewUpdateEventCmd().getCommand())
+	cmd.AddCommand(NewDeleteEventCmd().getCommand())
+	cmd.AddCommand(NewGetEventBinaryCmd().getCommand())
+	cmd.AddCommand(NewNewEventBinaryCmd().getCommand())
+	cmd.AddCommand(NewUpdateEventBinaryCmd().getCommand())
+	cmd.AddCommand(NewDeleteEventBinaryCmd().getCommand())
 
 	ccmd.baseCmd = newBaseCmd(cmd)
 

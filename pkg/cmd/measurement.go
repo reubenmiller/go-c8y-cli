@@ -20,11 +20,11 @@ func newMeasurementRootCmd() *measurementCmd {
 	}
 
 	// Subcommands
-	cmd.AddCommand(newGetMeasurementCmd().getCommand())
-	cmd.AddCommand(newGetMeasurementCollectionCmd().getCommand())
-	cmd.AddCommand(newGetMeasurementSeriesCmd().getCommand())
-	cmd.AddCommand(newDeleteMeasurementCmd().getCommand())
-	cmd.AddCommand(newDeleteMeasurementCollectionCmd().getCommand())
+	cmd.AddCommand(NewGetMeasurementCmd().getCommand())
+	cmd.AddCommand(NewGetMeasurementCollectionCmd().getCommand())
+	cmd.AddCommand(NewGetMeasurementSeriesCmd().getCommand())
+	cmd.AddCommand(NewDeleteMeasurementCmd().getCommand())
+	cmd.AddCommand(NewDeleteMeasurementCollectionCmd().getCommand())
 
 	ccmd.baseCmd = newBaseCmd(cmd)
 

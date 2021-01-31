@@ -12,7 +12,7 @@ type subscribeManagedObjectCmd struct {
 	flagCount       int64
 }
 
-func newSubscribeManagedObjectCmd() *subscribeManagedObjectCmd {
+func NewSubscribeManagedObjectCmd() *subscribeManagedObjectCmd {
 	ccmd := &subscribeManagedObjectCmd{}
 
 	cmd := &cobra.Command{

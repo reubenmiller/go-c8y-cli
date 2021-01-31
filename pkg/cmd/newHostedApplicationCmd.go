@@ -26,7 +26,7 @@ type newHostedApplicationCmd struct {
 	skipUpload     bool
 }
 
-func newNewHostedApplicationCmd() *newHostedApplicationCmd {
+func NewNewHostedApplicationCmd() *newHostedApplicationCmd {
 	ccmd := &newHostedApplicationCmd{}
 
 	cmd := &cobra.Command{

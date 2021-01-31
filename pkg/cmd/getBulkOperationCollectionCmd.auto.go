@@ -7,18 +7,19 @@ import (
 	"net/http"
 	"net/url"
 
+	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/pkg/mapbuilder"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
 )
 
-type getBulkOperationCollectionCmd struct {
+type GetBulkOperationCollectionCmd struct {
 	*baseCmd
 }
 
-func newGetBulkOperationCollectionCmd() *getBulkOperationCollectionCmd {
-	ccmd := &getBulkOperationCollectionCmd{}
-
+func NewGetBulkOperationCollectionCmd() *GetBulkOperationCollectionCmd {
+	var _ = fmt.Errorf
+	ccmd := &GetBulkOperationCollectionCmd{}
 	cmd := &cobra.Command{
 		Use:   "list",
 		Short: "Get a collection of bulk operations",
@@ -28,12 +29,17 @@ $ c8y bulkOperations list
 Get a list of bulk operations
         `,
 		PreRunE: nil,
-		RunE:    ccmd.getBulkOperationCollection,
+		RunE:    ccmd.RunE,
 	}
 
 	cmd.SilenceUsage = true
 
 	cmd.Flags().Bool("withDeleted", false, "Include CANCELLED bulk operations")
+
+	flags.WithOptions(
+		cmd,
+		flags.WithPipelineSupport(""),
+	)
 
 	// Required flags
 
@@ -42,13 +48,7 @@ Get a list of bulk operations
 	return ccmd
 }
 
-func (n *getBulkOperationCollectionCmd) getBulkOperationCollection(cmd *cobra.Command, args []string) error {
-
-	commonOptions, err := getCommonOptions(cmd)
-	if err != nil {
-		return newUserError(fmt.Sprintf("Failed to get common options. err=%s", err))
-	}
-
+func (n *GetBulkOperationCollectionCmd) RunE(cmd *cobra.Command, args []string) error {
 	// query parameters
 	queryValue := url.QueryEscape("")
 	query := url.Values{}
@@ -59,7 +59,20 @@ func (n *getBulkOperationCollectionCmd) getBulkOperationCollection(cmd *cobra.Co
 			return newUserError("Flag does not exist")
 		}
 	}
+
+	err := flags.WithQueryOptions(
+		cmd,
+		query,
+	)
+	if err != nil {
+		return newUserError(err)
+	}
+	commonOptions, err := getCommonOptions(cmd)
+	if err != nil {
+		return newUserError(fmt.Sprintf("Failed to get common options. err=%s", err))
+	}
 	commonOptions.AddQueryParameters(&query)
+
 	queryValue, err = url.QueryUnescape(query.Encode())
 
 	if err != nil {
@@ -73,7 +86,7 @@ func (n *getBulkOperationCollectionCmd) getBulkOperationCollection(cmd *cobra.Co
 	formData := make(map[string]io.Reader)
 
 	// body
-	body := mapbuilder.NewMapBuilder()
+	body := mapbuilder.NewInitializedMapBuilder()
 
 	// path parameters
 	pathParameters := make(map[string]string)
@@ -91,5 +104,5 @@ func (n *getBulkOperationCollectionCmd) getBulkOperationCollection(cmd *cobra.Co
 		DryRun:       globalFlagDryRun,
 	}
 
-	return processRequestAndResponse([]c8y.RequestOptions{req}, commonOptions)
+	return processRequestAndResponseWithWorkers(cmd, &req, "")
 }
