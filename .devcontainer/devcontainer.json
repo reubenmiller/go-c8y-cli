@@ -22,7 +22,10 @@
 			"./tools/schema/session.schema.json": ".cumulocity/*.y*ml"
 		},
 		"powershell.pester.useLegacyCodeLens": false,
-		"extensions.ignoreRecommendations": true
+		"extensions.ignoreRecommendations": true,
+		"go.testEnvVars": {
+			"C8Y_SESSION": ""
+		}
 	},
 
 	// Add the IDs of extensions you want installed when the container is created in the array below.

@@ -1,21 +1,19 @@
 package annotation
 
-import (
-	"strings"
+// Annotations is a list of annotations to describe a command
+type Annotations map[string]string
 
-	"github.com/spf13/cobra"
-)
+// Option adds meta information to the Annotation
+type Option func(Annotations) Annotations
 
-// FlagValueFromPipeline is an annotation which indicates if the flag supported piped input or not
-var FlagValueFromPipeline = "valueFromPipeline"
-
-// HasValueFromPipeline checks if the given flag name supported values from pipeline
-// It checks the command for a special annotation
-func HasValueFromPipeline(cmd *cobra.Command, name string) bool {
-	if cmd.Annotations != nil {
-		if pipedArgName, ok := cmd.Annotations[FlagValueFromPipeline]; ok {
-			return strings.EqualFold(pipedArgName, name)
-		}
+// NewAnnotation creaete a new annotation to describe a command and configure it using a list of options
+func NewAnnotation(a Annotations, opts ...Option) Annotations {
+	if a == nil {
+		a = make(Annotations)
 	}
-	return false
+
+	for _, opt := range opts {
+		opt(a)
+	}
+	return a
 }

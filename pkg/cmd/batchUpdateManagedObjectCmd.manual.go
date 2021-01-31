@@ -1,7 +1,7 @@
 package cmd
 
 import (
-	"github.com/reubenmiller/go-c8y-cli/pkg/annotation"
+	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/pkg/iterator"
 	"github.com/reubenmiller/go-c8y-cli/pkg/mapbuilder"
 	"github.com/spf13/cobra"
@@ -27,18 +27,20 @@ Update a list of managed objects
 $ c8y batch updateManagedObjects --inputList mylist.csv --template "update.template.jsonnet" --dry
 Do a dry-run by only showing the requests on console to check that the commands are correct
 		`,
-		Annotations: map[string]string{
-			annotation.FlagValueFromPipeline: "inputFile",
-		},
 		PreRunE: validateBatchDeleteMode,
 		RunE:    ccmd.runE,
 	}
 
 	cmd.SilenceUsage = true
 
-	addBatchFlags(cmd, true)
-	addDataFlag(cmd)
-	addProcessingModeFlag(cmd)
+	flags.WithOptions(
+		cmd,
+		flags.WithBatchOptions(true),
+		flags.WithData(),
+		flags.WithTemplate(),
+		flags.WithProcessingMode(),
+		flags.WithPipelineSupport("inputFile"),
+	)
 
 	ccmd.baseCmd = newBaseCmd(cmd)
 

@@ -1,7 +1,7 @@
 package cmd
 
 import (
-	"github.com/reubenmiller/go-c8y-cli/pkg/annotation"
+	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/pkg/iterator"
 	"github.com/reubenmiller/go-c8y-cli/pkg/mapbuilder"
 	"github.com/spf13/cobra"
@@ -24,9 +24,6 @@ func newBatchCreateMeasurementCmd() *batchCreateMeasurementCmd {
 		Use:   "createMeasurements",
 		Short: "Create a batch of measurements",
 		Long:  `Create a batch of measurements`,
-		Annotations: map[string]string{
-			annotation.FlagValueFromPipeline: "inputFile",
-		},
 		Example: `
 $ c8y batch createMeasurements --inputList mylist.csv --template "measurement.jsonnet"
 Create a measurements for a list of input devices
@@ -36,10 +33,14 @@ Create a measurements for a list of input devices
 	}
 
 	cmd.SilenceUsage = true
-	// cmd.Flags().StringVar(&ccmd.source, "inputFile", "", "Input device list")
-	addBatchFlags(cmd, true)
-	addDataFlag(cmd)
-	addProcessingModeFlag(cmd)
+
+	flags.WithOptions(cmd,
+		flags.WithData(),
+		flags.WithTemplate(),
+		flags.WithProcessingMode(),
+		flags.WithPipelineSupport("inputFile"),
+		flags.WithBatchOptions(true),
+	)
 
 	// Required flags
 	ccmd.baseCmd = newBaseCmd(cmd)

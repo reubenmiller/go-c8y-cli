@@ -11,6 +11,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/reubenmiller/go-c8y-cli/pkg/iterator"
 	"github.com/reubenmiller/go-c8y-cli/pkg/mapbuilder"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
@@ -105,6 +106,10 @@ func runBatched(requestIterator *RequestIterator, commonOptions CommonCommandOpt
 	results := make(chan error, 100)
 	workers := sync.WaitGroup{}
 
+	if batchOptions.TotalWorkers < 1 {
+		batchOptions.TotalWorkers = 1
+	}
+
 	for w := 1; w <= batchOptions.TotalWorkers; w++ {
 		Logger.Infof("Starting worker: %d", w)
 		workers.Add(1)
@@ -174,6 +179,8 @@ func runBatched(requestIterator *RequestIterator, commonOptions CommonCommandOpt
 func getBatchOptions(cmd *cobra.Command) (*BatchOptions, error) {
 	options := &BatchOptions{
 		AbortOnErrorCount: 10,
+		TotalWorkers:      1,
+		Delay:             1000,
 	}
 
 	if v, err := cmd.Flags().GetInt("count"); err == nil {
@@ -239,11 +246,11 @@ func addBatchFlags(cmd *cobra.Command, acceptInputFile bool) {
 		cmd.Flags().String("inputFile", "", "Input file of ids to add to processed (required)")
 		// cmd.MarkFlagRequired("inputFile")
 	}
-	cmd.Flags().Int("abortOnErrors", 10, "Abort batch when reaching specified number of errors")
 	cmd.Flags().Int("count", 5, "Total number of objects")
 	cmd.Flags().Int("startIndex", 1, "Start index value")
-	cmd.Flags().Int("delay", 200, "delay in milliseconds after each request")
-	cmd.Flags().Int("workers", 2, "Number of workers")
+	// cmd.Flags().Int("abortOnErrors", 10, "Abort batch when reaching specified number of errors")
+	// cmd.Flags().Int("delay", 200, "delay in milliseconds after each request")
+	// cmd.Flags().Int("workers", 2, "Number of workers")
 }
 
 func runTemplateOnList(cmd *cobra.Command, requestIterator *RequestIterator) error {
@@ -289,4 +296,36 @@ func readFile(filepath string) ([]string, error) {
 		items = append(items, value)
 	}
 	return items, nil
+}
+
+func processRequestAndResponseWithWorkers(cmd *cobra.Command, r *c8y.RequestOptions, name string) error {
+
+	var pathIter iterator.Iterator
+
+	if name != "" {
+		// create input iterator
+		items, err := NewFlagPipeEnabledStringSlice(cmd, name)
+		if err != nil {
+			return err
+		}
+		pathIter = iterator.NewCompositeStringIterator(items, strings.ReplaceAll(r.Path, "{"+name+"}", "%s"))
+	} else {
+		// fixed path (no iteration)
+		pathIter = iterator.NewRepeatIterator(r.Path, 1)
+	}
+
+	body := make(map[string]interface{})
+	requestIter := NewRequestIterator(*r, pathIter, body)
+
+	// for {
+	// 	next, err := requestIter.GetNext()
+
+	// 	if err == io.EOF {
+	// 		break
+	// 	}
+
+	// 	Logger.Infof("request: %v, %s %s/%s?%s, %v", next.Header, next.Method, next.Host, next.Path, next.Query, next.Body)
+	// 	break
+	// }
+	return runTemplateOnList(cmd, requestIter)
 }

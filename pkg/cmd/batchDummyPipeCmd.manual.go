@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"io"
 
-	"github.com/reubenmiller/go-c8y-cli/pkg/annotation"
+	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/pkg/iterator"
 	"github.com/spf13/cobra"
 )
@@ -23,9 +23,6 @@ func newBatchDummyPipeCmd() *batchDummyPipeCmd {
 		Use:   "dummy",
 		Short: "Dummy command to test piped data",
 		Long:  `Dummy command to test piped data`,
-		Annotations: map[string]string{
-			annotation.FlagValueFromPipeline: "inputFile",
-		},
 		Example: `
 $ ls -l | c8y batch dummy
 Pipe a list of files to c8y
@@ -39,6 +36,10 @@ Pipe a list of files to c8y
 	//addBatchFlags(cmd, true)
 	//addDataFlag(cmd)
 	//addProcessingModeFlag(cmd)
+	flags.WithOptions(
+		cmd,
+		flags.WithPipelineSupport("inputFile"),
+	)
 
 	// Required flags
 	ccmd.baseCmd = newBaseCmd(cmd)

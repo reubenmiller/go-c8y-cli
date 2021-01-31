@@ -149,32 +149,35 @@ func newC8yCmd() *c8yCmd {
 var rootCmd *c8yCmd
 
 var (
-	client                       *c8y.Client
-	cliConfig                    *config.CliConfiguration
-	globalFlagPageSize           int
-	globalFlagIncludeAllPageSize int
-	globalFlagBatchMaxWorkers    int
-	globalFlagCurrentPage        int64
-	globalFlagTotalPages         int64
-	globalFlagIncludeAll         bool
-	globalFlagIncludeAllDelayMS  int64
-	globalFlagVerbose            bool
-	globalFlagWithTotalPages     bool
-	globalFlagPrettyPrint        bool
-	globalFlagDryRun             bool
-	globalFlagIgnoreAccept       bool
-	globalFlagNoColor            bool
-	globalFlagSessionFile        string
-	globalFlagConfigFile         string
-	globalFlagOutputFile         string
-	globalFlagUseEnv             bool
-	globalFlagRaw                bool
-	globalFlagProxy              string
-	globalFlagNoProxy            bool
-	globalFlagTimeout            uint
-	globalFlagUseTenantPrefix    bool
-	globalUseNonDefaultPageSize  bool
-	globalFlagTemplatePath       string
+	client                           *c8y.Client
+	cliConfig                        *config.CliConfiguration
+	globalFlagPageSize               int
+	globalFlagIncludeAllPageSize     int
+	globalFlagBatchMaxWorkers        int
+	globalFlagCurrentPage            int64
+	globalFlagTotalPages             int64
+	globalFlagIncludeAll             bool
+	globalFlagIncludeAllDelayMS      int64
+	globalFlagVerbose                bool
+	globalFlagWithTotalPages         bool
+	globalFlagPrettyPrint            bool
+	globalFlagDryRun                 bool
+	globalFlagIgnoreAccept           bool
+	globalFlagNoColor                bool
+	globalFlagSessionFile            string
+	globalFlagConfigFile             string
+	globalFlagOutputFile             string
+	globalFlagUseEnv                 bool
+	globalFlagRaw                    bool
+	globalFlagProxy                  string
+	globalFlagNoProxy                bool
+	globalFlagTimeout                uint
+	globalFlagUseTenantPrefix        bool
+	globalUseNonDefaultPageSize      bool
+	globalFlagTemplatePath           string
+	globalFlagBatchWorkers           int
+	globalFlagBatchDelayMS           int
+	globalFlagBatchAbortOnErrorCount int
 
 	globalModeEnableCreate bool
 	globalModeEnableUpdate bool
@@ -299,8 +302,8 @@ func (c *c8yCmd) checkSessionExists(cmd *cobra.Command, args []string) error {
 	return nil
 }
 
-// Execute runs the root command and initializes the configuration manager and c8y client
-func Execute() {
+// configureRootCmd initializes the configuration manager and c8y client
+func configureRootCmd() {
 	// config file
 	cobra.OnInitialize(initConfig)
 
@@ -320,6 +323,11 @@ func Execute() {
 	rootCmd.PersistentFlags().BoolVar(&globalFlagRaw, "raw", false, "Raw values")
 	rootCmd.PersistentFlags().StringVar(&globalFlagProxy, "proxy", "", "Proxy setting, i.e. http://10.0.0.1:8080")
 	rootCmd.PersistentFlags().BoolVar(&globalFlagNoProxy, "noProxy", false, "Ignore the proxy settings")
+
+	// Concurrency
+	rootCmd.PersistentFlags().IntVar(&globalFlagBatchWorkers, "workers", 1, "Number of workers")
+	rootCmd.PersistentFlags().IntVar(&globalFlagBatchDelayMS, "delay", 100, "delay in milliseconds after each request")
+	rootCmd.PersistentFlags().IntVar(&globalFlagBatchAbortOnErrorCount, "abortOnErrors", 10, "Abort batch when reaching specified number of errors")
 
 	rootCmd.PersistentFlags().StringVar(&globalFlagOutputFile, "outputFile", "", "Output file")
 
@@ -458,6 +466,15 @@ func Execute() {
 	// Handle errors (not in cobra libary)
 	rootCmd.SilenceErrors = true
 
+}
+
+// Execute runs the root command
+func Execute() {
+	configureRootCmd()
+	executeRootCmd()
+}
+
+func executeRootCmd() {
 	if err := rootCmd.Execute(); err != nil {
 		rootCmd.checkCommandError(err)
 

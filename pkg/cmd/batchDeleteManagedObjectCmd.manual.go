@@ -3,6 +3,7 @@ package cmd
 import (
 	"fmt"
 
+	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
 	"github.com/spf13/cobra"
 )
 
@@ -22,15 +23,19 @@ func newBatchDeleteManagedObjectCmd() *batchDeleteManagedObjectCmd {
 		Example: `
 $ c8y batch deleteManagedObjects --inputList mylist.csv --workers 5
 Delete a list of managed objects using 5 workers
-        `,
+		`,
 		PreRunE: validateBatchDeleteMode,
 		RunE:    ccmd.runE,
 	}
 
 	cmd.SilenceUsage = true
 
-	addBatchFlags(cmd, true)
-	addProcessingModeFlag(cmd)
+	flags.WithOptions(
+		cmd,
+		flags.WithBatchOptions(true),
+		flags.WithProcessingMode(),
+		flags.WithPipelineSupport("inputFile"),
+	)
 
 	ccmd.baseCmd = newBaseCmd(cmd)
 

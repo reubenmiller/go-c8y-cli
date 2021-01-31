@@ -3,7 +3,7 @@ package cmd
 import (
 	"fmt"
 
-	"github.com/reubenmiller/go-c8y-cli/pkg/annotation"
+	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/pkg/mapbuilder"
 	"github.com/spf13/cobra"
 )
@@ -22,21 +22,24 @@ func newBatchAddDeviceToGroupCmd() *batchAddDeviceToGroupCmd {
 		Short: "Create child devices to group",
 		Long:  `Create child devices to group`,
 		Example: `
-$ c8y batch addChildDevices --group 1234 --childList mylist.csv
+$ c8y batch addChildDevices --group 1234 --inputFile mylist.csv
 Add list of children to a group
 		`,
-		Annotations: map[string]string{
-			annotation.FlagValueFromPipeline: "inputFile",
-		},
 		PreRunE: validateBatchCreateMode,
 		RunE:    ccmd.runE,
 	}
 
 	cmd.SilenceUsage = true
 	cmd.Flags().StringVar(&ccmd.group, "group", "", "Group (required)")
-	addBatchFlags(cmd, true)
-	addDataFlag(cmd)
-	addProcessingModeFlag(cmd)
+
+	flags.WithOptions(
+		cmd,
+		flags.WithBatchOptions(true),
+		flags.WithData(),
+		flags.WithTemplate(),
+		flags.WithProcessingMode(),
+		flags.WithPipelineSupport("inputFile"),
+	)
 
 	// Required flags
 	cmd.MarkFlagRequired("group")

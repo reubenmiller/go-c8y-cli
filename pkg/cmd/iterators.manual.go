@@ -1,12 +1,15 @@
 package cmd
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"os"
+	"strings"
 	"sync/atomic"
 
-	"github.com/reubenmiller/go-c8y-cli/pkg/annotation"
+	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/pkg/iterator"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
@@ -82,7 +85,7 @@ func (r *RequestIterator) GetNext() (*c8y.RequestOptions, error) {
 	}
 
 	// apply body iterator
-	if r.Body != nil {
+	if r.Body != nil && (strings.EqualFold(req.Method, "POST") || strings.EqualFold(req.Method, "PUT")) {
 		// iterator body
 		bodyContents, err := json.Marshal(r.Body)
 
@@ -154,7 +157,7 @@ func NewBatchPathRequestIterator(cmd *cobra.Command, method string, path iterato
 }
 
 func NewFlagFileContents(cmd *cobra.Command, name string) (iterator.Iterator, error) {
-	supportsPipeline := annotation.HasValueFromPipeline(cmd, name)
+	supportsPipeline := flags.HasValueFromPipeline(cmd, name)
 	if cmd.Flags().Changed(name) {
 		if path, err := cmd.Flags().GetString(name); err == nil && path != "" {
 
@@ -171,17 +174,34 @@ func NewFlagFileContents(cmd *cobra.Command, name string) (iterator.Iterator, er
 	return nil, fmt.Errorf("no input detected")
 }
 
+// NewFlagPipeEnabledStringSlice creates an iterator from a command argument
+// or from the pipeline
 func NewFlagPipeEnabledStringSlice(cmd *cobra.Command, name string) (iterator.Iterator, error) {
-
+	supportsPipeline := flags.HasValueFromPipeline(cmd, name)
 	if cmd.Flags().Changed(name) {
-		if path, err := cmd.Flags().GetString(name); err == nil && path != "" {
+		paths, err := cmd.Flags().GetStringSlice(name)
 
-			iter, err := iterator.NewFileContentsIterator(path)
-			if err != nil {
-				return nil, err
-			}
-			return iter, nil
+		if err != nil {
+			return nil, err
 		}
+		if len(paths) > 0 {
+
+			// check if file reference
+			if _, err := os.Stat(paths[0]); err == nil {
+				iter, err := iterator.NewFileContentsIterator(paths[0])
+				if err != nil {
+					return nil, err
+				}
+				return iter, nil
+			}
+
+			// return array of results
+			return iterator.NewSliceIterator(paths), nil
+		}
+	} else if supportsPipeline {
+		return iterator.NewPipeIterator(func(line []byte) bool {
+			return !(bytes.HasPrefix(line, []byte("{")) || bytes.HasPrefix(line, []byte("[")))
+		})
 	}
 	return nil, fmt.Errorf("no input detected")
 }

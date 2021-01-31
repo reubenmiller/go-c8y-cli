@@ -83,6 +83,12 @@ func NewMapBuilder() *MapBuilder {
 	return &MapBuilder{}
 }
 
+func NewInitializedMapBuilder() *MapBuilder {
+	builder := NewMapBuilder()
+	builder.SetEmptyMap()
+	return builder
+}
+
 func NewMapBuilderWithInit(body map[string]interface{}) *MapBuilder {
 	return &MapBuilder{
 		body: body,
