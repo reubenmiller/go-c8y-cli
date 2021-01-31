@@ -63,7 +63,11 @@
     }
 
     $CommandArgs = New-Object System.Collections.ArrayList
+    $PipelineVariableName = ""
     foreach ($iArg in (Remove-SkippedParameters $ArgumentSources)) {
+        if ($iArg.pipeline) {
+            $PipelineVariableName = $iArg.Name
+        }
         $ArgParams = @{
             Name = $iArg.name
             Type = $iArg.type
@@ -71,6 +75,7 @@
             Description = $iArg.description
             Default = $iArg.default
             Required = $iArg.required
+            Pipeline = $iArg.pipeline
         }
         $arg = Get-C8yGoArgs @ArgParams
         $null = $CommandArgs.Add($arg)
@@ -208,6 +213,10 @@
     #
     $RESTPathBuilder = New-Object System.Text.StringBuilder
     foreach ($Properties in (Remove-SkippedParameters $Specification.pathParameters)) {
+        if ($Properties.pipeline) {
+            Write-Verbose "Skipping path parameters for pipeline arguments"
+            continue
+        }
         $code = New-C8yApiGoGetValueFromFlag -Parameters $Properties -SetterType "path"
         if ($code) {
             $null = $RESTPathBuilder.AppendLine($code)
@@ -218,7 +227,8 @@
     # Query parameters
     #
     $RESTQueryBuilder = New-Object System.Text.StringBuilder
-    $null = $RESTQueryBuilder.AppendLine('query := url.Values{}')
+    $RESTQueryBuilderWithValues = New-Object System.Text.StringBuilder
+    $RESTQueryBuilderPost = New-Object System.Text.StringBuilder
     if ($Specification.queryParameters) {
         foreach ($Properties in (Remove-SkippedParameters $Specification.queryParameters)) {
             $code = New-C8yApiGoGetValueFromFlag -Parameters $Properties -SetterType "query"
@@ -228,7 +238,14 @@
         }
     }
     if ($Specification.method -match "GET") {
-        $null = $RESTQueryBuilder.AppendLine("commonOptions.AddQueryParameters(&query)")
+        
+        $null = $RESTQueryBuilderPost.AppendLine(@"
+        commonOptions, err := getCommonOptions(cmd)
+        if err != nil {
+            return newUserError(fmt.Sprintf("Failed to get common options. err=%s", err))
+        }
+"@)
+        $null = $RESTQueryBuilderPost.AppendLine("commonOptions.AddQueryParameters(&query)")
     }
 
     #
@@ -271,26 +288,6 @@
         }
     }
 
-    #
-    # Add common options
-    #
-#     $null = $RESTQueryBuilder.AppendLine(@"
-#     if cmd.Flags().Changed("pageSize") {
-#         if v, err := cmd.Flags().GetInt("pageSize"); err == nil && v > 0 {
-#             query.Add("pageSize", fmt.Sprintf("%d", v))
-#         }
-#     }
-# "@)
-    #
-    # Encode query parameters to a string
-    #
-    $null = $RESTQueryBuilder.AppendLine(@"
-    queryValue, err = url.QueryUnescape(query.Encode())
-
-    if err != nil {
-        return newSystemError("Invalid query parameter")
-    }
-"@)
 
     #
     # Pre run validation (disable some commands without switch flags)
@@ -315,18 +312,19 @@ import (
 	"net/http"
 	"net/url"
 
+    "github.com/reubenmiller/go-c8y-cli/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/pkg/mapbuilder"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
 )
 
-type ${Name}Cmd struct {
+type ${NameCamel}Cmd struct {
     *baseCmd
 }
 
-func new${NameCamel}Cmd() *${Name}Cmd {
-	ccmd := &${Name}Cmd{}
-
+func New${NameCamel}Cmd() *${NameCamel}Cmd {
+    var _ = fmt.Errorf
+	ccmd := &${NameCamel}Cmd{}
 	cmd := &cobra.Command{
 		Use:   "$Use",
 		Short: "$Description",
@@ -335,12 +333,17 @@ func new${NameCamel}Cmd() *${Name}Cmd {
 $($Examples -join "`n`n")
         ``,
         PreRunE: $PreRunFunction,
-		RunE: ccmd.${Name},
+		RunE: ccmd.RunE,
     }
 
     cmd.SilenceUsage = true
 
     $($CommandArgs.SetFlag -join "`n	")
+
+    flags.WithOptions(
+		cmd,
+		flags.WithPipelineSupport("$PipelineVariableName"),
+	)
 
     // Required flags
     $($CommandArgs.Required -join "`n	")
@@ -350,16 +353,24 @@ $($Examples -join "`n`n")
 	return ccmd
 }
 
-func (n *${Name}Cmd) ${Name}(cmd *cobra.Command, args []string) error {
-
-    commonOptions, err := getCommonOptions(cmd)
-	if err != nil {
-        return newUserError(fmt.Sprintf("Failed to get common options. err=%s", err))
-	}
-
+func (n *${NameCamel}Cmd) RunE(cmd *cobra.Command, args []string) error {
     // query parameters
     queryValue := url.QueryEscape("")
+    query := url.Values{}
     $RESTQueryBuilder
+    err := flags.WithQueryOptions(
+		cmd,
+		query,$RESTQueryBuilderWithValues
+	)
+    if err != nil {
+		return newUserError(err)
+    }
+    $RESTQueryBuilderPost
+	queryValue, err = url.QueryUnescape(query.Encode())
+
+	if err != nil {
+		return newSystemError("Invalid query parameter")
+	}
 
     // headers
     headers := http.Header{}
@@ -370,7 +381,7 @@ func (n *${Name}Cmd) ${Name}(cmd *cobra.Command, args []string) error {
     $RESTFormDataBuilder
 
     // body
-    body := mapbuilder.NewMapBuilder()
+    body := mapbuilder.NewInitializedMapBuilder()
     $RESTBodyBuilder
 
     // path parameters
@@ -389,7 +400,7 @@ func (n *${Name}Cmd) ${Name}(cmd *cobra.Command, args []string) error {
         DryRun:       globalFlagDryRun,
     }
 
-    return processRequestAndResponse([]c8y.RequestOptions{req}, commonOptions)
+    return processRequestAndResponseWithWorkers(cmd, &req, "$PipelineVariableName")
 }
 
 "@
@@ -447,11 +458,17 @@ Function Get-C8yGoArgs {
 
         [string] $Description,
 
-        [string] $Default
+        [string] $Default,
+
+        [string] $Pipeline
     )
 
     if ($Required -match "true|yes") {
         $Description = "${Description} (required)"
+    }
+
+    if ($Pipeline -match "true|yes") {
+        $Description = "${Description} (accepts pipeline)"
     }
 
     $Entry = switch ($Type) {
@@ -772,7 +789,7 @@ Function Get-C8yGoArgs {
     }
 
     # Set required flag
-    if ($Required -match "true|yes") {
+    if ($Required -match "true|yes" -and $Pipeline -notmatch "true") {
         $Entry | Add-Member -MemberType NoteProperty -Name "Required" -Value "cmd.MarkFlagRequired(`"${Name}`")"
         # $Entry.Required = "cmd.MarkFlagRequired(`"${Name}`")"
     }

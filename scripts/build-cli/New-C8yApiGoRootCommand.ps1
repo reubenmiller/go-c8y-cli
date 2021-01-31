@@ -33,12 +33,12 @@
         $EndpointName = $endpoint.name
         $EndpointNameCamel = $EndpointName[0].ToString().ToUpperInvariant() + $EndpointName.Substring(1)
 
-        $null = $SubcommandsCode.AppendLine("    cmd.AddCommand(new${EndpointNameCamel}Cmd().getCommand())")
+        $null = $SubcommandsCode.AppendLine("    cmd.AddCommand(New${EndpointNameCamel}Cmd().getCommand())")
     }
 
     # Create root import command helper
     $null = $RootImportCode.AppendLine("    // ${Name} commands")
-    $null = $RootImportCode.AppendLine("    rootCmd.AddCommand(new${NameCamel}RootCmd().getCommand())")
+    $null = $RootImportCode.AppendLine("    rootCmd.AddCommand(New${NameCamel}RootCmd().getCommand())")
 
     $Template = @"
 package cmd
@@ -47,12 +47,12 @@ import (
     "github.com/spf13/cobra"
 )
 
-type ${Name}Cmd struct {
+type ${NameCamel}Cmd struct {
     *baseCmd
 }
 
-func new${NameCamel}RootCmd() *${Name}Cmd {
-    ccmd := &${Name}Cmd{}
+func New${NameCamel}RootCmd() *${NameCamel}Cmd {
+    ccmd := &${NameCamel}Cmd{}
 
     cmd := &cobra.Command{
         Use:   "${Name}",
