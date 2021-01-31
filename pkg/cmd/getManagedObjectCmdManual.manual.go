@@ -63,7 +63,9 @@ func (n *getManagedObjectCmdManual) getManagedObject(cmd *cobra.Command, args []
 	// query parameters
 	queryValue := url.QueryEscape("")
 	query := url.Values{}
-	err = flags.WithQueryOptions(cmd, query,
+	err = flags.WithQueryOptions(
+		cmd,
+		query,
 		flags.WithQueryBool("withParents"),
 	)
 	if err != nil {

@@ -54,6 +54,18 @@ func WithQueryString(name ...string) QueryOption {
 	}
 }
 
+func WithCurrentPage() QueryOption {
+	return WithQueryString("currentPage")
+}
+
+func WithPageSize() QueryOption {
+	return WithQueryString("pageSize")
+}
+
+func WithTotalPages() QueryOption {
+	return WithQueryString("withTotalPages")
+}
+
 func getNameMapping(name ...string) (string, string) {
 	var src string
 	var dst string
