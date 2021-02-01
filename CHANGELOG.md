@@ -4,6 +4,7 @@
 
 No unreleased features
 
+* Fixed #43. New-ServiceUser now accepts more than 1 role
 * Added Expand-DeviceGroup cmdlet
 * Adding following template variables
     * rand.index
