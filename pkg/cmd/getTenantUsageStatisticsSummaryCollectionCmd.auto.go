@@ -18,7 +18,6 @@ type GetTenantUsageStatisticsSummaryCollectionCmd struct {
 }
 
 func NewGetTenantUsageStatisticsSummaryCollectionCmd() *GetTenantUsageStatisticsSummaryCollectionCmd {
-	var _ = fmt.Errorf
 	ccmd := &GetTenantUsageStatisticsSummaryCollectionCmd{}
 	cmd := &cobra.Command{
 		Use:   "listSummaryForTenant",

@@ -18,7 +18,6 @@ type GetTenantCollectionCmd struct {
 }
 
 func NewGetTenantCollectionCmd() *GetTenantCollectionCmd {
-	var _ = fmt.Errorf
 	ccmd := &GetTenantCollectionCmd{}
 	cmd := &cobra.Command{
 		Use:   "list",

@@ -2,7 +2,6 @@
 package cmd
 
 import (
-	"fmt"
 	"io"
 	"net/http"
 	"net/url"
@@ -18,7 +17,6 @@ type UpdateEventBinaryCmd struct {
 }
 
 func NewUpdateEventBinaryCmd() *UpdateEventBinaryCmd {
-	var _ = fmt.Errorf
 	ccmd := &UpdateEventBinaryCmd{}
 	cmd := &cobra.Command{
 		Use:   "updateBinary",

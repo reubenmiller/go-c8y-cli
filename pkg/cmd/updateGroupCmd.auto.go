@@ -18,7 +18,6 @@ type UpdateGroupCmd struct {
 }
 
 func NewUpdateGroupCmd() *UpdateGroupCmd {
-	var _ = fmt.Errorf
 	ccmd := &UpdateGroupCmd{}
 	cmd := &cobra.Command{
 		Use:   "update",

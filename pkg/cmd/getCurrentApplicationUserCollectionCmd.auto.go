@@ -18,7 +18,6 @@ type GetCurrentApplicationUserCollectionCmd struct {
 }
 
 func NewGetCurrentApplicationUserCollectionCmd() *GetCurrentApplicationUserCollectionCmd {
-	var _ = fmt.Errorf
 	ccmd := &GetCurrentApplicationUserCollectionCmd{}
 	cmd := &cobra.Command{
 		Use:   "listSubscriptions",

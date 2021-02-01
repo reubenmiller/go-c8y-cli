@@ -18,7 +18,6 @@ type GetTenantOptionCmd struct {
 }
 
 func NewGetTenantOptionCmd() *GetTenantOptionCmd {
-	var _ = fmt.Errorf
 	ccmd := &GetTenantOptionCmd{}
 	cmd := &cobra.Command{
 		Use:   "get",

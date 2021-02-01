@@ -18,7 +18,6 @@ type ApproveNewDeviceRequestCmd struct {
 }
 
 func NewApproveNewDeviceRequestCmd() *ApproveNewDeviceRequestCmd {
-	var _ = fmt.Errorf
 	ccmd := &ApproveNewDeviceRequestCmd{}
 	cmd := &cobra.Command{
 		Use:   "approveDeviceRequest",

@@ -18,7 +18,6 @@ type GetRetentionRuleCmd struct {
 }
 
 func NewGetRetentionRuleCmd() *GetRetentionRuleCmd {
-	var _ = fmt.Errorf
 	ccmd := &GetRetentionRuleCmd{}
 	cmd := &cobra.Command{
 		Use:   "get",

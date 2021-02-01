@@ -18,7 +18,6 @@ type UpdateTenantOptionEditableCmd struct {
 }
 
 func NewUpdateTenantOptionEditableCmd() *UpdateTenantOptionEditableCmd {
-	var _ = fmt.Errorf
 	ccmd := &UpdateTenantOptionEditableCmd{}
 	cmd := &cobra.Command{
 		Use:   "updateEdit",

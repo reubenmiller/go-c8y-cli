@@ -2,7 +2,6 @@
 package cmd
 
 import (
-	"fmt"
 	"io"
 	"net/http"
 	"net/url"
@@ -18,7 +17,6 @@ type AddManagedObjectChildAdditionCmd struct {
 }
 
 func NewAddManagedObjectChildAdditionCmd() *AddManagedObjectChildAdditionCmd {
-	var _ = fmt.Errorf
 	ccmd := &AddManagedObjectChildAdditionCmd{}
 	cmd := &cobra.Command{
 		Use:   "createChildAddition",

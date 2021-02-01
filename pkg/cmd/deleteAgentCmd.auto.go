@@ -2,7 +2,6 @@
 package cmd
 
 import (
-	"fmt"
 	"io"
 	"net/http"
 	"net/url"
@@ -18,7 +17,6 @@ type DeleteAgentCmd struct {
 }
 
 func NewDeleteAgentCmd() *DeleteAgentCmd {
-	var _ = fmt.Errorf
 	ccmd := &DeleteAgentCmd{}
 	cmd := &cobra.Command{
 		Use:   "delete",

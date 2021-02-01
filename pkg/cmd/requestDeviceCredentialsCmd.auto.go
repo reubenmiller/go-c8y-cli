@@ -18,7 +18,6 @@ type RequestDeviceCredentialsCmd struct {
 }
 
 func NewRequestDeviceCredentialsCmd() *RequestDeviceCredentialsCmd {
-	var _ = fmt.Errorf
 	ccmd := &RequestDeviceCredentialsCmd{}
 	cmd := &cobra.Command{
 		Use:   "requestDeviceCredentials",

@@ -18,7 +18,6 @@ type GetUserCurrentCmd struct {
 }
 
 func NewGetUserCurrentCmd() *GetUserCurrentCmd {
-	var _ = fmt.Errorf
 	ccmd := &GetUserCurrentCmd{}
 	cmd := &cobra.Command{
 		Use:   "getCurrentUser",

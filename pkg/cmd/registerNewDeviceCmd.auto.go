@@ -18,7 +18,6 @@ type RegisterNewDeviceCmd struct {
 }
 
 func NewRegisterNewDeviceCmd() *RegisterNewDeviceCmd {
-	var _ = fmt.Errorf
 	ccmd := &RegisterNewDeviceCmd{}
 	cmd := &cobra.Command{
 		Use:   "registerNewDevice",

@@ -18,7 +18,6 @@ type UpdateDataBrokerCmd struct {
 }
 
 func NewUpdateDataBrokerCmd() *UpdateDataBrokerCmd {
-	var _ = fmt.Errorf
 	ccmd := &UpdateDataBrokerCmd{}
 	cmd := &cobra.Command{
 		Use:   "update",

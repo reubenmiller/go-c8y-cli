@@ -18,7 +18,6 @@ type GetSystemOptionCollectionCmd struct {
 }
 
 func NewGetSystemOptionCollectionCmd() *GetSystemOptionCollectionCmd {
-	var _ = fmt.Errorf
 	ccmd := &GetSystemOptionCollectionCmd{}
 	cmd := &cobra.Command{
 		Use:   "list",

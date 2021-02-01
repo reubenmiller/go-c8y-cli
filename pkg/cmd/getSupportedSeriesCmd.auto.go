@@ -18,7 +18,6 @@ type GetSupportedSeriesCmd struct {
 }
 
 func NewGetSupportedSeriesCmd() *GetSupportedSeriesCmd {
-	var _ = fmt.Errorf
 	ccmd := &GetSupportedSeriesCmd{}
 	cmd := &cobra.Command{
 		Use:   "getSupportedSeries",

@@ -18,7 +18,6 @@ type GetUserByNameCmd struct {
 }
 
 func NewGetUserByNameCmd() *GetUserByNameCmd {
-	var _ = fmt.Errorf
 	ccmd := &GetUserByNameCmd{}
 	cmd := &cobra.Command{
 		Use:   "getUserByName",

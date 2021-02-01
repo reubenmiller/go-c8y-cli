@@ -18,7 +18,6 @@ type GetEventCollectionCmd struct {
 }
 
 func NewGetEventCollectionCmd() *GetEventCollectionCmd {
-	var _ = fmt.Errorf
 	ccmd := &GetEventCollectionCmd{}
 	cmd := &cobra.Command{
 		Use:   "list",

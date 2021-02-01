@@ -18,7 +18,6 @@ type NewRetentionRuleCmd struct {
 }
 
 func NewNewRetentionRuleCmd() *NewRetentionRuleCmd {
-	var _ = fmt.Errorf
 	ccmd := &NewRetentionRuleCmd{}
 	cmd := &cobra.Command{
 		Use:   "create",

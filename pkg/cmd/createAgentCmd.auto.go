@@ -18,7 +18,6 @@ type CreateAgentCmd struct {
 }
 
 func NewCreateAgentCmd() *CreateAgentCmd {
-	var _ = fmt.Errorf
 	ccmd := &CreateAgentCmd{}
 	cmd := &cobra.Command{
 		Use:   "create",

@@ -18,7 +18,6 @@ type SetDeviceRequiredAvailabilityCmd struct {
 }
 
 func NewSetDeviceRequiredAvailabilityCmd() *SetDeviceRequiredAvailabilityCmd {
-	var _ = fmt.Errorf
 	ccmd := &SetDeviceRequiredAvailabilityCmd{}
 	cmd := &cobra.Command{
 		Use:   "setRequiredAvailability",

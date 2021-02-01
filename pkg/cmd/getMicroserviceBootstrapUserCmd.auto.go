@@ -18,7 +18,6 @@ type GetMicroserviceBootstrapUserCmd struct {
 }
 
 func NewGetMicroserviceBootstrapUserCmd() *GetMicroserviceBootstrapUserCmd {
-	var _ = fmt.Errorf
 	ccmd := &GetMicroserviceBootstrapUserCmd{}
 	cmd := &cobra.Command{
 		Use:   "getBootstrapUser",

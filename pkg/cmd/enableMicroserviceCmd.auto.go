@@ -2,7 +2,6 @@
 package cmd
 
 import (
-	"fmt"
 	"io"
 	"net/http"
 	"net/url"
@@ -18,7 +17,6 @@ type EnableMicroserviceCmd struct {
 }
 
 func NewEnableMicroserviceCmd() *EnableMicroserviceCmd {
-	var _ = fmt.Errorf
 	ccmd := &EnableMicroserviceCmd{}
 	cmd := &cobra.Command{
 		Use:   "enable",

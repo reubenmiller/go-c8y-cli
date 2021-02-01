@@ -18,7 +18,6 @@ type GetAuditRecordCollectionCmd struct {
 }
 
 func NewGetAuditRecordCollectionCmd() *GetAuditRecordCollectionCmd {
-	var _ = fmt.Errorf
 	ccmd := &GetAuditRecordCollectionCmd{}
 	cmd := &cobra.Command{
 		Use:   "list",

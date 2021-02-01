@@ -18,7 +18,6 @@ type GetManagedObjectChildDeviceCollectionCmd struct {
 }
 
 func NewGetManagedObjectChildDeviceCollectionCmd() *GetManagedObjectChildDeviceCollectionCmd {
-	var _ = fmt.Errorf
 	ccmd := &GetManagedObjectChildDeviceCollectionCmd{}
 	cmd := &cobra.Command{
 		Use:   "listChildDevices",

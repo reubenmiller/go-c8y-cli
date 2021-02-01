@@ -18,7 +18,6 @@ type UpdateTenantOptionCmd struct {
 }
 
 func NewUpdateTenantOptionCmd() *UpdateTenantOptionCmd {
-	var _ = fmt.Errorf
 	ccmd := &UpdateTenantOptionCmd{}
 	cmd := &cobra.Command{
 		Use:   "update",

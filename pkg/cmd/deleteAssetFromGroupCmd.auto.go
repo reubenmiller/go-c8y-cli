@@ -2,7 +2,6 @@
 package cmd
 
 import (
-	"fmt"
 	"io"
 	"net/http"
 	"net/url"
@@ -18,7 +17,6 @@ type DeleteAssetFromGroupCmd struct {
 }
 
 func NewDeleteAssetFromGroupCmd() *DeleteAssetFromGroupCmd {
-	var _ = fmt.Errorf
 	ccmd := &DeleteAssetFromGroupCmd{}
 	cmd := &cobra.Command{
 		Use:   "unassignAssetFromGroup",

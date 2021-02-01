@@ -2,7 +2,6 @@
 package cmd
 
 import (
-	"fmt"
 	"io"
 	"net/http"
 	"net/url"
@@ -18,7 +17,6 @@ type AddUserToGroupCmd struct {
 }
 
 func NewAddUserToGroupCmd() *AddUserToGroupCmd {
-	var _ = fmt.Errorf
 	ccmd := &AddUserToGroupCmd{}
 	cmd := &cobra.Command{
 		Use:   "addUserToGroup",

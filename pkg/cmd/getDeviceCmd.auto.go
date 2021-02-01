@@ -18,7 +18,6 @@ type GetDeviceCmd struct {
 }
 
 func NewGetDeviceCmd() *GetDeviceCmd {
-	var _ = fmt.Errorf
 	ccmd := &GetDeviceCmd{}
 	cmd := &cobra.Command{
 		Use:   "get",

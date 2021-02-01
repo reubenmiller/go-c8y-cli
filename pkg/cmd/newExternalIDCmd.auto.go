@@ -18,7 +18,6 @@ type NewExternalIDCmd struct {
 }
 
 func NewNewExternalIDCmd() *NewExternalIDCmd {
-	var _ = fmt.Errorf
 	ccmd := &NewExternalIDCmd{}
 	cmd := &cobra.Command{
 		Use:   "create",

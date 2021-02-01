@@ -18,7 +18,6 @@ type GetEventBinaryCmd struct {
 }
 
 func NewGetEventBinaryCmd() *GetEventBinaryCmd {
-	var _ = fmt.Errorf
 	ccmd := &GetEventBinaryCmd{}
 	cmd := &cobra.Command{
 		Use:   "downloadBinary",

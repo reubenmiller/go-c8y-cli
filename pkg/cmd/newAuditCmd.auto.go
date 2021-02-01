@@ -18,7 +18,6 @@ type NewAuditCmd struct {
 }
 
 func NewNewAuditCmd() *NewAuditCmd {
-	var _ = fmt.Errorf
 	ccmd := &NewAuditCmd{}
 	cmd := &cobra.Command{
 		Use:   "create",

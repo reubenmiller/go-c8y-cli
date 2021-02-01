@@ -18,7 +18,6 @@ type GetNewDeviceRequestCmd struct {
 }
 
 func NewGetNewDeviceRequestCmd() *GetNewDeviceRequestCmd {
-	var _ = fmt.Errorf
 	ccmd := &GetNewDeviceRequestCmd{}
 	cmd := &cobra.Command{
 		Use:   "getNewDeviceRequest",

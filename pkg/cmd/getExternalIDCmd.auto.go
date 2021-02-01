@@ -18,7 +18,6 @@ type GetExternalIDCmd struct {
 }
 
 func NewGetExternalIDCmd() *GetExternalIDCmd {
-	var _ = fmt.Errorf
 	ccmd := &GetExternalIDCmd{}
 	cmd := &cobra.Command{
 		Use:   "get",

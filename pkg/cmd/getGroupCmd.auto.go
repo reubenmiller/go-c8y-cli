@@ -18,7 +18,6 @@ type GetGroupCmd struct {
 }
 
 func NewGetGroupCmd() *GetGroupCmd {
-	var _ = fmt.Errorf
 	ccmd := &GetGroupCmd{}
 	cmd := &cobra.Command{
 		Use:   "get",

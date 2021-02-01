@@ -18,7 +18,6 @@ type UpdateManagedObjectCmd struct {
 }
 
 func NewUpdateManagedObjectCmd() *UpdateManagedObjectCmd {
-	var _ = fmt.Errorf
 	ccmd := &UpdateManagedObjectCmd{}
 	cmd := &cobra.Command{
 		Use:   "update",

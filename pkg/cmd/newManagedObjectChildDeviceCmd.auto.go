@@ -2,7 +2,6 @@
 package cmd
 
 import (
-	"fmt"
 	"io"
 	"net/http"
 	"net/url"
@@ -18,7 +17,6 @@ type NewManagedObjectChildDeviceCmd struct {
 }
 
 func NewNewManagedObjectChildDeviceCmd() *NewManagedObjectChildDeviceCmd {
-	var _ = fmt.Errorf
 	ccmd := &NewManagedObjectChildDeviceCmd{}
 	cmd := &cobra.Command{
 		Use:   "assignChildDevice",

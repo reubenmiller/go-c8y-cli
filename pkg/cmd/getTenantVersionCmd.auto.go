@@ -18,7 +18,6 @@ type GetTenantVersionCmd struct {
 }
 
 func NewGetTenantVersionCmd() *GetTenantVersionCmd {
-	var _ = fmt.Errorf
 	ccmd := &GetTenantVersionCmd{}
 	cmd := &cobra.Command{
 		Use:   "getVersion",

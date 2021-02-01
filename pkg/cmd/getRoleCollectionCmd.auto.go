@@ -18,7 +18,6 @@ type GetRoleCollectionCmd struct {
 }
 
 func NewGetRoleCollectionCmd() *GetRoleCollectionCmd {
-	var _ = fmt.Errorf
 	ccmd := &GetRoleCollectionCmd{}
 	cmd := &cobra.Command{
 		Use:   "list",

@@ -2,7 +2,6 @@
 package cmd
 
 import (
-	"fmt"
 	"io"
 	"net/http"
 	"net/url"
@@ -18,7 +17,6 @@ type AddDeviceToGroupCmd struct {
 }
 
 func NewAddDeviceToGroupCmd() *AddDeviceToGroupCmd {
-	var _ = fmt.Errorf
 	ccmd := &AddDeviceToGroupCmd{}
 	cmd := &cobra.Command{
 		Use:   "assignDeviceToGroup",

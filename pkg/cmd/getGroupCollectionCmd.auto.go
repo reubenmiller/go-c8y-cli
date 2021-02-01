@@ -18,7 +18,6 @@ type GetGroupCollectionCmd struct {
 }
 
 func NewGetGroupCollectionCmd() *GetGroupCollectionCmd {
-	var _ = fmt.Errorf
 	ccmd := &GetGroupCollectionCmd{}
 	cmd := &cobra.Command{
 		Use:   "list",

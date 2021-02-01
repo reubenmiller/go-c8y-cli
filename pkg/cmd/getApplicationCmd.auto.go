@@ -18,7 +18,6 @@ type GetApplicationCmd struct {
 }
 
 func NewGetApplicationCmd() *GetApplicationCmd {
-	var _ = fmt.Errorf
 	ccmd := &GetApplicationCmd{}
 	cmd := &cobra.Command{
 		Use:   "get",

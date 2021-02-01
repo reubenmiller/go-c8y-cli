@@ -18,7 +18,6 @@ type NewEventCmd struct {
 }
 
 func NewNewEventCmd() *NewEventCmd {
-	var _ = fmt.Errorf
 	ccmd := &NewEventCmd{}
 	cmd := &cobra.Command{
 		Use:   "create",

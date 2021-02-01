@@ -2,7 +2,6 @@
 package cmd
 
 import (
-	"fmt"
 	"io"
 	"net/http"
 	"net/url"
@@ -18,7 +17,6 @@ type DeleteRetentionRuleCmd struct {
 }
 
 func NewDeleteRetentionRuleCmd() *DeleteRetentionRuleCmd {
-	var _ = fmt.Errorf
 	ccmd := &DeleteRetentionRuleCmd{}
 	cmd := &cobra.Command{
 		Use:   "delete",

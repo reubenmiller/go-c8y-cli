@@ -18,7 +18,6 @@ type GetApplicationBinaryCollectionCmd struct {
 }
 
 func NewGetApplicationBinaryCollectionCmd() *GetApplicationBinaryCollectionCmd {
-	var _ = fmt.Errorf
 	ccmd := &GetApplicationBinaryCollectionCmd{}
 	cmd := &cobra.Command{
 		Use:   "listApplicationBinaries",

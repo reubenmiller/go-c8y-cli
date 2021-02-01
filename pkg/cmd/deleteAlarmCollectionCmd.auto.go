@@ -18,7 +18,6 @@ type DeleteAlarmCollectionCmd struct {
 }
 
 func NewDeleteAlarmCollectionCmd() *DeleteAlarmCollectionCmd {
-	var _ = fmt.Errorf
 	ccmd := &DeleteAlarmCollectionCmd{}
 	cmd := &cobra.Command{
 		Use:   "deleteCollection",

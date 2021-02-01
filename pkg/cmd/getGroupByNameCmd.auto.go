@@ -18,7 +18,6 @@ type GetGroupByNameCmd struct {
 }
 
 func NewGetGroupByNameCmd() *GetGroupByNameCmd {
-	var _ = fmt.Errorf
 	ccmd := &GetGroupByNameCmd{}
 	cmd := &cobra.Command{
 		Use:   "getByName",

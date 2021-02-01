@@ -18,7 +18,6 @@ type ResetUserPasswordCmd struct {
 }
 
 func NewResetUserPasswordCmd() *ResetUserPasswordCmd {
-	var _ = fmt.Errorf
 	ccmd := &ResetUserPasswordCmd{}
 	cmd := &cobra.Command{
 		Use:   "resetUserPassword",

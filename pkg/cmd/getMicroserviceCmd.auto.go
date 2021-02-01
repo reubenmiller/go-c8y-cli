@@ -18,7 +18,6 @@ type GetMicroserviceCmd struct {
 }
 
 func NewGetMicroserviceCmd() *GetMicroserviceCmd {
-	var _ = fmt.Errorf
 	ccmd := &GetMicroserviceCmd{}
 	cmd := &cobra.Command{
 		Use:   "get",

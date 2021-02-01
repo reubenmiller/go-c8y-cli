@@ -18,7 +18,6 @@ type DeleteDeviceGroupCmd struct {
 }
 
 func NewDeleteDeviceGroupCmd() *DeleteDeviceGroupCmd {
-	var _ = fmt.Errorf
 	ccmd := &DeleteDeviceGroupCmd{}
 	cmd := &cobra.Command{
 		Use:   "deleteGroup",

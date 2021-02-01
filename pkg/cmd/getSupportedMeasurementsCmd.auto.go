@@ -18,7 +18,6 @@ type GetSupportedMeasurementsCmd struct {
 }
 
 func NewGetSupportedMeasurementsCmd() *GetSupportedMeasurementsCmd {
-	var _ = fmt.Errorf
 	ccmd := &GetSupportedMeasurementsCmd{}
 	cmd := &cobra.Command{
 		Use:   "getSupportedMeasurements",

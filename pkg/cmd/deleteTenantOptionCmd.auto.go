@@ -18,7 +18,6 @@ type DeleteTenantOptionCmd struct {
 }
 
 func NewDeleteTenantOptionCmd() *DeleteTenantOptionCmd {
-	var _ = fmt.Errorf
 	ccmd := &DeleteTenantOptionCmd{}
 	cmd := &cobra.Command{
 		Use:   "delete",

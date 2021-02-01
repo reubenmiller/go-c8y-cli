@@ -18,7 +18,6 @@ type NewApplicationCmd struct {
 }
 
 func NewNewApplicationCmd() *NewApplicationCmd {
-	var _ = fmt.Errorf
 	ccmd := &NewApplicationCmd{}
 	cmd := &cobra.Command{
 		Use:   "create",

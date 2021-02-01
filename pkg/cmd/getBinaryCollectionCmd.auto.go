@@ -18,7 +18,6 @@ type GetBinaryCollectionCmd struct {
 }
 
 func NewGetBinaryCollectionCmd() *GetBinaryCollectionCmd {
-	var _ = fmt.Errorf
 	ccmd := &GetBinaryCollectionCmd{}
 	cmd := &cobra.Command{
 		Use:   "list",

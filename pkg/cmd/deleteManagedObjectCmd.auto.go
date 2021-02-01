@@ -18,7 +18,6 @@ type DeleteManagedObjectCmd struct {
 }
 
 func NewDeleteManagedObjectCmd() *DeleteManagedObjectCmd {
-	var _ = fmt.Errorf
 	ccmd := &DeleteManagedObjectCmd{}
 	cmd := &cobra.Command{
 		Use:   "delete",

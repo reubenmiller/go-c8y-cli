@@ -18,7 +18,6 @@ type GetSupportedOperationsCmd struct {
 }
 
 func NewGetSupportedOperationsCmd() *GetSupportedOperationsCmd {
-	var _ = fmt.Errorf
 	ccmd := &GetSupportedOperationsCmd{}
 	cmd := &cobra.Command{
 		Use:   "getSupportedOperations",

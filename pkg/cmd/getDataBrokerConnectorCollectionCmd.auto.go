@@ -18,7 +18,6 @@ type GetDataBrokerConnectorCollectionCmd struct {
 }
 
 func NewGetDataBrokerConnectorCollectionCmd() *GetDataBrokerConnectorCollectionCmd {
-	var _ = fmt.Errorf
 	ccmd := &GetDataBrokerConnectorCollectionCmd{}
 	cmd := &cobra.Command{
 		Use:   "list",

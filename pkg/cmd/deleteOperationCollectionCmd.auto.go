@@ -18,7 +18,6 @@ type DeleteOperationCollectionCmd struct {
 }
 
 func NewDeleteOperationCollectionCmd() *DeleteOperationCollectionCmd {
-	var _ = fmt.Errorf
 	ccmd := &DeleteOperationCollectionCmd{}
 	cmd := &cobra.Command{
 		Use:   "deleteCollection",

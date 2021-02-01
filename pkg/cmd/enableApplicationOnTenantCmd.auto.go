@@ -2,7 +2,6 @@
 package cmd
 
 import (
-	"fmt"
 	"io"
 	"net/http"
 	"net/url"
@@ -18,7 +17,6 @@ type EnableApplicationOnTenantCmd struct {
 }
 
 func NewEnableApplicationOnTenantCmd() *EnableApplicationOnTenantCmd {
-	var _ = fmt.Errorf
 	ccmd := &EnableApplicationOnTenantCmd{}
 	cmd := &cobra.Command{
 		Use:   "enableApplication",

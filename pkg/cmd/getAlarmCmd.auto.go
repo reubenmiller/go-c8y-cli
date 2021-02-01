@@ -18,7 +18,6 @@ type GetAlarmCmd struct {
 }
 
 func NewGetAlarmCmd() *GetAlarmCmd {
-	var _ = fmt.Errorf
 	ccmd := &GetAlarmCmd{}
 	cmd := &cobra.Command{
 		Use:   "get",

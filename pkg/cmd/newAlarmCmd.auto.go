@@ -18,7 +18,6 @@ type NewAlarmCmd struct {
 }
 
 func NewNewAlarmCmd() *NewAlarmCmd {
-	var _ = fmt.Errorf
 	ccmd := &NewAlarmCmd{}
 	cmd := &cobra.Command{
 		Use:   "create",

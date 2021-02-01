@@ -18,7 +18,6 @@ type GetRoleReferenceCollectionFromUserCmd struct {
 }
 
 func NewGetRoleReferenceCollectionFromUserCmd() *GetRoleReferenceCollectionFromUserCmd {
-	var _ = fmt.Errorf
 	ccmd := &GetRoleReferenceCollectionFromUserCmd{}
 	cmd := &cobra.Command{
 		Use:   "getRoleReferenceCollectionFromUser",

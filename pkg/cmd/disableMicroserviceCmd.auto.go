@@ -2,7 +2,6 @@
 package cmd
 
 import (
-	"fmt"
 	"io"
 	"net/http"
 	"net/url"
@@ -18,7 +17,6 @@ type DisableMicroserviceCmd struct {
 }
 
 func NewDisableMicroserviceCmd() *DisableMicroserviceCmd {
-	var _ = fmt.Errorf
 	ccmd := &DisableMicroserviceCmd{}
 	cmd := &cobra.Command{
 		Use:   "disable",

@@ -2,7 +2,6 @@
 package cmd
 
 import (
-	"fmt"
 	"io"
 	"net/http"
 	"net/url"
@@ -18,7 +17,6 @@ type DeleteNewDeviceRequestCmd struct {
 }
 
 func NewDeleteNewDeviceRequestCmd() *DeleteNewDeviceRequestCmd {
-	var _ = fmt.Errorf
 	ccmd := &DeleteNewDeviceRequestCmd{}
 	cmd := &cobra.Command{
 		Use:   "deleteNewDeviceRequest",

@@ -18,7 +18,6 @@ type UpdateMicroserviceCmd struct {
 }
 
 func NewUpdateMicroserviceCmd() *UpdateMicroserviceCmd {
-	var _ = fmt.Errorf
 	ccmd := &UpdateMicroserviceCmd{}
 	cmd := &cobra.Command{
 		Use:   "update",

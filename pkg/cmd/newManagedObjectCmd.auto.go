@@ -18,7 +18,6 @@ type NewManagedObjectCmd struct {
 }
 
 func NewNewManagedObjectCmd() *NewManagedObjectCmd {
-	var _ = fmt.Errorf
 	ccmd := &NewManagedObjectCmd{}
 	cmd := &cobra.Command{
 		Use:   "create",

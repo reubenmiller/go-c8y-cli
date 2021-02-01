@@ -18,7 +18,6 @@ type UpdateCurrentApplicationCmd struct {
 }
 
 func NewUpdateCurrentApplicationCmd() *UpdateCurrentApplicationCmd {
-	var _ = fmt.Errorf
 	ccmd := &UpdateCurrentApplicationCmd{}
 	cmd := &cobra.Command{
 		Use:   "update",

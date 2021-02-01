@@ -2,7 +2,6 @@
 package cmd
 
 import (
-	"fmt"
 	"io"
 	"net/http"
 	"net/url"
@@ -18,7 +17,6 @@ type CopyApplicationCmd struct {
 }
 
 func NewCopyApplicationCmd() *CopyApplicationCmd {
-	var _ = fmt.Errorf
 	ccmd := &CopyApplicationCmd{}
 	cmd := &cobra.Command{
 		Use:   "copy",

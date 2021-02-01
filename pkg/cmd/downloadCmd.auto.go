@@ -18,7 +18,6 @@ type DownloadCmd struct {
 }
 
 func NewDownloadCmd() *DownloadCmd {
-	var _ = fmt.Errorf
 	ccmd := &DownloadCmd{}
 	cmd := &cobra.Command{
 		Use:   "get",

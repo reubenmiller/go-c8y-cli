@@ -18,7 +18,6 @@ type UpdateRetentionRuleCmd struct {
 }
 
 func NewUpdateRetentionRuleCmd() *UpdateRetentionRuleCmd {
-	var _ = fmt.Errorf
 	ccmd := &UpdateRetentionRuleCmd{}
 	cmd := &cobra.Command{
 		Use:   "update",

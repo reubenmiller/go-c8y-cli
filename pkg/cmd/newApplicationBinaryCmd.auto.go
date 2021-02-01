@@ -2,7 +2,6 @@
 package cmd
 
 import (
-	"fmt"
 	"io"
 	"net/http"
 	"net/url"
@@ -18,7 +17,6 @@ type NewApplicationBinaryCmd struct {
 }
 
 func NewNewApplicationBinaryCmd() *NewApplicationBinaryCmd {
-	var _ = fmt.Errorf
 	ccmd := &NewApplicationBinaryCmd{}
 	cmd := &cobra.Command{
 		Use:   "createBinary",

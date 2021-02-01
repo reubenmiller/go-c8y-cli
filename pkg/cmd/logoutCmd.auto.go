@@ -2,7 +2,6 @@
 package cmd
 
 import (
-	"fmt"
 	"io"
 	"net/http"
 	"net/url"
@@ -18,7 +17,6 @@ type LogoutCmd struct {
 }
 
 func NewLogoutCmd() *LogoutCmd {
-	var _ = fmt.Errorf
 	ccmd := &LogoutCmd{}
 	cmd := &cobra.Command{
 		Use:   "logout",

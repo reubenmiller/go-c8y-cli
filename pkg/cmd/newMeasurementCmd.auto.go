@@ -18,7 +18,6 @@ type NewMeasurementCmd struct {
 }
 
 func NewNewMeasurementCmd() *NewMeasurementCmd {
-	var _ = fmt.Errorf
 	ccmd := &NewMeasurementCmd{}
 	cmd := &cobra.Command{
 		Use:   "create",

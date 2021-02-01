@@ -18,7 +18,6 @@ type GetBulkOperationCmd struct {
 }
 
 func NewGetBulkOperationCmd() *GetBulkOperationCmd {
-	var _ = fmt.Errorf
 	ccmd := &GetBulkOperationCmd{}
 	cmd := &cobra.Command{
 		Use:   "get",

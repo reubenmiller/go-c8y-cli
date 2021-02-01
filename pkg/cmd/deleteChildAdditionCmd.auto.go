@@ -18,7 +18,6 @@ type DeleteChildAdditionCmd struct {
 }
 
 func NewDeleteChildAdditionCmd() *DeleteChildAdditionCmd {
-	var _ = fmt.Errorf
 	ccmd := &DeleteChildAdditionCmd{}
 	cmd := &cobra.Command{
 		Use:   "unassignChildAddition",

@@ -18,7 +18,6 @@ type GetAgentCmd struct {
 }
 
 func NewGetAgentCmd() *GetAgentCmd {
-	var _ = fmt.Errorf
 	ccmd := &GetAgentCmd{}
 	cmd := &cobra.Command{
 		Use:   "get",

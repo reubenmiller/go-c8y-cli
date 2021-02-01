@@ -18,7 +18,6 @@ type CurrentTenantCmd struct {
 }
 
 func NewCurrentTenantCmd() *CurrentTenantCmd {
-	var _ = fmt.Errorf
 	ccmd := &CurrentTenantCmd{}
 	cmd := &cobra.Command{
 		Use:   "getCurrentTenant",

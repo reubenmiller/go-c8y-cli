@@ -18,7 +18,6 @@ type DeleteMeasurementCollectionCmd struct {
 }
 
 func NewDeleteMeasurementCollectionCmd() *DeleteMeasurementCollectionCmd {
-	var _ = fmt.Errorf
 	ccmd := &DeleteMeasurementCollectionCmd{}
 	cmd := &cobra.Command{
 		Use:   "deleteCollection",

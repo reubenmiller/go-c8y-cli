@@ -18,7 +18,6 @@ type GetSystemOptionCmd struct {
 }
 
 func NewGetSystemOptionCmd() *GetSystemOptionCmd {
-	var _ = fmt.Errorf
 	ccmd := &GetSystemOptionCmd{}
 	cmd := &cobra.Command{
 		Use:   "get",

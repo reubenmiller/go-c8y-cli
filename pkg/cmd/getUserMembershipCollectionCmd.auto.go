@@ -18,7 +18,6 @@ type GetUserMembershipCollectionCmd struct {
 }
 
 func NewGetUserMembershipCollectionCmd() *GetUserMembershipCollectionCmd {
-	var _ = fmt.Errorf
 	ccmd := &GetUserMembershipCollectionCmd{}
 	cmd := &cobra.Command{
 		Use:   "listUserMembership",

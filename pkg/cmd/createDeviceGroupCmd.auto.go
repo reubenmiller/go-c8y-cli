@@ -18,7 +18,6 @@ type CreateDeviceGroupCmd struct {
 }
 
 func NewCreateDeviceGroupCmd() *CreateDeviceGroupCmd {
-	var _ = fmt.Errorf
 	ccmd := &CreateDeviceGroupCmd{}
 	cmd := &cobra.Command{
 		Use:   "createGroup",

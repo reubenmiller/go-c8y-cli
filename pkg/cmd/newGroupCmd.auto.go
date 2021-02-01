@@ -18,7 +18,6 @@ type NewGroupCmd struct {
 }
 
 func NewNewGroupCmd() *NewGroupCmd {
-	var _ = fmt.Errorf
 	ccmd := &NewGroupCmd{}
 	cmd := &cobra.Command{
 		Use:   "create",

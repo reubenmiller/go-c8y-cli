@@ -2,7 +2,6 @@
 package cmd
 
 import (
-	"fmt"
 	"io"
 	"net/http"
 	"net/url"
@@ -18,7 +17,6 @@ type AddRoleToUserCmd struct {
 }
 
 func NewAddRoleToUserCmd() *AddRoleToUserCmd {
-	var _ = fmt.Errorf
 	ccmd := &AddRoleToUserCmd{}
 	cmd := &cobra.Command{
 		Use:   "addRoleTouser",

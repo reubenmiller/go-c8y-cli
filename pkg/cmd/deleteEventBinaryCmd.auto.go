@@ -2,7 +2,6 @@
 package cmd
 
 import (
-	"fmt"
 	"io"
 	"net/http"
 	"net/url"
@@ -18,7 +17,6 @@ type DeleteEventBinaryCmd struct {
 }
 
 func NewDeleteEventBinaryCmd() *DeleteEventBinaryCmd {
-	var _ = fmt.Errorf
 	ccmd := &DeleteEventBinaryCmd{}
 	cmd := &cobra.Command{
 		Use:   "deleteBinary",

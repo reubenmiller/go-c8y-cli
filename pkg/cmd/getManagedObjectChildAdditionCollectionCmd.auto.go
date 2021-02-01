@@ -18,7 +18,6 @@ type GetManagedObjectChildAdditionCollectionCmd struct {
 }
 
 func NewGetManagedObjectChildAdditionCollectionCmd() *GetManagedObjectChildAdditionCollectionCmd {
-	var _ = fmt.Errorf
 	ccmd := &GetManagedObjectChildAdditionCollectionCmd{}
 	cmd := &cobra.Command{
 		Use:   "listChildAdditions",

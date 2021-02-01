@@ -18,7 +18,6 @@ type GetMicroserviceCollectionCmd struct {
 }
 
 func NewGetMicroserviceCollectionCmd() *GetMicroserviceCollectionCmd {
-	var _ = fmt.Errorf
 	ccmd := &GetMicroserviceCollectionCmd{}
 	cmd := &cobra.Command{
 		Use:   "list",

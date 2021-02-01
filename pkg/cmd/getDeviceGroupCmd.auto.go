@@ -18,7 +18,6 @@ type GetDeviceGroupCmd struct {
 }
 
 func NewGetDeviceGroupCmd() *GetDeviceGroupCmd {
-	var _ = fmt.Errorf
 	ccmd := &GetDeviceGroupCmd{}
 	cmd := &cobra.Command{
 		Use:   "getGroup",

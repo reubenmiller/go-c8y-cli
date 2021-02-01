@@ -18,7 +18,6 @@ type UpdateAgentCmd struct {
 }
 
 func NewUpdateAgentCmd() *UpdateAgentCmd {
-	var _ = fmt.Errorf
 	ccmd := &UpdateAgentCmd{}
 	cmd := &cobra.Command{
 		Use:   "update",

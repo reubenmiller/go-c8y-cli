@@ -18,7 +18,6 @@ type GetCurrentUserInventoryRoleCollectionCmd struct {
 }
 
 func NewGetCurrentUserInventoryRoleCollectionCmd() *GetCurrentUserInventoryRoleCollectionCmd {
-	var _ = fmt.Errorf
 	ccmd := &GetCurrentUserInventoryRoleCollectionCmd{}
 	cmd := &cobra.Command{
 		Use:   "listInventoryRoles",

@@ -18,7 +18,6 @@ type DeleteExternalIDCmd struct {
 }
 
 func NewDeleteExternalIDCmd() *DeleteExternalIDCmd {
-	var _ = fmt.Errorf
 	ccmd := &DeleteExternalIDCmd{}
 	cmd := &cobra.Command{
 		Use:   "delete",

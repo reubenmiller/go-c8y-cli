@@ -18,7 +18,6 @@ type GetManagedObjectCmd struct {
 }
 
 func NewGetManagedObjectCmd() *GetManagedObjectCmd {
-	var _ = fmt.Errorf
 	ccmd := &GetManagedObjectCmd{}
 	cmd := &cobra.Command{
 		Use:   "get",

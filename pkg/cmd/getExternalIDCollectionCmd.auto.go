@@ -18,7 +18,6 @@ type GetExternalIDCollectionCmd struct {
 }
 
 func NewGetExternalIDCollectionCmd() *GetExternalIDCollectionCmd {
-	var _ = fmt.Errorf
 	ccmd := &GetExternalIDCollectionCmd{}
 	cmd := &cobra.Command{
 		Use:   "list",

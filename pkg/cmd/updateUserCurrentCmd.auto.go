@@ -18,7 +18,6 @@ type UpdateUserCurrentCmd struct {
 }
 
 func NewUpdateUserCurrentCmd() *UpdateUserCurrentCmd {
-	var _ = fmt.Errorf
 	ccmd := &UpdateUserCurrentCmd{}
 	cmd := &cobra.Command{
 		Use:   "updateCurrentUser",

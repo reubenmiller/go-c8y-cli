@@ -2,7 +2,6 @@
 package cmd
 
 import (
-	"fmt"
 	"io"
 	"net/http"
 	"net/url"
@@ -18,7 +17,6 @@ type DeleteRoleFromGroupCmd struct {
 }
 
 func NewDeleteRoleFromGroupCmd() *DeleteRoleFromGroupCmd {
-	var _ = fmt.Errorf
 	ccmd := &DeleteRoleFromGroupCmd{}
 	cmd := &cobra.Command{
 		Use:   "deleteRoleFromGroup",

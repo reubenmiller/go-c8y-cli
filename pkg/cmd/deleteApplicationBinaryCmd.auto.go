@@ -2,7 +2,6 @@
 package cmd
 
 import (
-	"fmt"
 	"io"
 	"net/http"
 	"net/url"
@@ -18,7 +17,6 @@ type DeleteApplicationBinaryCmd struct {
 }
 
 func NewDeleteApplicationBinaryCmd() *DeleteApplicationBinaryCmd {
-	var _ = fmt.Errorf
 	ccmd := &DeleteApplicationBinaryCmd{}
 	cmd := &cobra.Command{
 		Use:   "deleteApplicationBinary",

@@ -18,7 +18,6 @@ type GetDataBrokerCmd struct {
 }
 
 func NewGetDataBrokerCmd() *GetDataBrokerCmd {
-	var _ = fmt.Errorf
 	ccmd := &GetDataBrokerCmd{}
 	cmd := &cobra.Command{
 		Use:   "get",

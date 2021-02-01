@@ -2,7 +2,6 @@
 package cmd
 
 import (
-	"fmt"
 	"io"
 	"net/http"
 	"net/url"
@@ -18,7 +17,6 @@ type DeleteMicroserviceCmd struct {
 }
 
 func NewDeleteMicroserviceCmd() *DeleteMicroserviceCmd {
-	var _ = fmt.Errorf
 	ccmd := &DeleteMicroserviceCmd{}
 	cmd := &cobra.Command{
 		Use:   "delete",

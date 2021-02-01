@@ -2,7 +2,6 @@
 package cmd
 
 import (
-	"fmt"
 	"io"
 	"net/http"
 	"net/url"
@@ -18,7 +17,6 @@ type DeleteMeasurementCmd struct {
 }
 
 func NewDeleteMeasurementCmd() *DeleteMeasurementCmd {
-	var _ = fmt.Errorf
 	ccmd := &DeleteMeasurementCmd{}
 	cmd := &cobra.Command{
 		Use:   "delete",

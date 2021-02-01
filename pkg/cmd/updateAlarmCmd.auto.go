@@ -18,7 +18,6 @@ type UpdateAlarmCmd struct {
 }
 
 func NewUpdateAlarmCmd() *UpdateAlarmCmd {
-	var _ = fmt.Errorf
 	ccmd := &UpdateAlarmCmd{}
 	cmd := &cobra.Command{
 		Use:   "update",

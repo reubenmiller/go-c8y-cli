@@ -18,7 +18,6 @@ type NewUserCmd struct {
 }
 
 func NewNewUserCmd() *NewUserCmd {
-	var _ = fmt.Errorf
 	ccmd := &NewUserCmd{}
 	cmd := &cobra.Command{
 		Use:   "create",

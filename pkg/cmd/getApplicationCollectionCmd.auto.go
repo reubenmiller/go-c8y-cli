@@ -18,7 +18,6 @@ type GetApplicationCollectionCmd struct {
 }
 
 func NewGetApplicationCollectionCmd() *GetApplicationCollectionCmd {
-	var _ = fmt.Errorf
 	ccmd := &GetApplicationCollectionCmd{}
 	cmd := &cobra.Command{
 		Use:   "list",

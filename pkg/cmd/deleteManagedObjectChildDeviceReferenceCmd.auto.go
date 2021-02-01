@@ -2,7 +2,6 @@
 package cmd
 
 import (
-	"fmt"
 	"io"
 	"net/http"
 	"net/url"
@@ -18,7 +17,6 @@ type DeleteManagedObjectChildDeviceReferenceCmd struct {
 }
 
 func NewDeleteManagedObjectChildDeviceReferenceCmd() *DeleteManagedObjectChildDeviceReferenceCmd {
-	var _ = fmt.Errorf
 	ccmd := &DeleteManagedObjectChildDeviceReferenceCmd{}
 	cmd := &cobra.Command{
 		Use:   "unassignChildDevice",

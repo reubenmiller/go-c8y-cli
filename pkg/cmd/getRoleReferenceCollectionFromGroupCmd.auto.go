@@ -18,7 +18,6 @@ type GetRoleReferenceCollectionFromGroupCmd struct {
 }
 
 func NewGetRoleReferenceCollectionFromGroupCmd() *GetRoleReferenceCollectionFromGroupCmd {
-	var _ = fmt.Errorf
 	ccmd := &GetRoleReferenceCollectionFromGroupCmd{}
 	cmd := &cobra.Command{
 		Use:   "getRoleReferenceCollectionFromGroup",

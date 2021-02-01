@@ -18,7 +18,6 @@ type DeleteEventCollectionCmd struct {
 }
 
 func NewDeleteEventCollectionCmd() *DeleteEventCollectionCmd {
-	var _ = fmt.Errorf
 	ccmd := &DeleteEventCollectionCmd{}
 	cmd := &cobra.Command{
 		Use:   "deleteCollection",

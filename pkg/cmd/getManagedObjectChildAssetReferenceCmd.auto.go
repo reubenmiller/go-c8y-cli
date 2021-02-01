@@ -18,7 +18,6 @@ type GetManagedObjectChildAssetReferenceCmd struct {
 }
 
 func NewGetManagedObjectChildAssetReferenceCmd() *GetManagedObjectChildAssetReferenceCmd {
-	var _ = fmt.Errorf
 	ccmd := &GetManagedObjectChildAssetReferenceCmd{}
 	cmd := &cobra.Command{
 		Use:   "getChildAsset",

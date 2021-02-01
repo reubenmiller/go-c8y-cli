@@ -18,7 +18,6 @@ type UpdateBulkOperationCmd struct {
 }
 
 func NewUpdateBulkOperationCmd() *UpdateBulkOperationCmd {
-	var _ = fmt.Errorf
 	ccmd := &UpdateBulkOperationCmd{}
 	cmd := &cobra.Command{
 		Use:   "update",

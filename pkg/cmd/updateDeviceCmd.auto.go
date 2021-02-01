@@ -18,7 +18,6 @@ type UpdateDeviceCmd struct {
 }
 
 func NewUpdateDeviceCmd() *UpdateDeviceCmd {
-	var _ = fmt.Errorf
 	ccmd := &UpdateDeviceCmd{}
 	cmd := &cobra.Command{
 		Use:   "update",

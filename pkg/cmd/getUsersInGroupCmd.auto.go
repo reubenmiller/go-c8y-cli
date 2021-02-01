@@ -18,7 +18,6 @@ type GetUsersInGroupCmd struct {
 }
 
 func NewGetUsersInGroupCmd() *GetUsersInGroupCmd {
-	var _ = fmt.Errorf
 	ccmd := &GetUsersInGroupCmd{}
 	cmd := &cobra.Command{
 		Use:   "listGroupMembership",

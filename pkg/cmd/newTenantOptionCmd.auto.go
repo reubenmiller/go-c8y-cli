@@ -18,7 +18,6 @@ type NewTenantOptionCmd struct {
 }
 
 func NewNewTenantOptionCmd() *NewTenantOptionCmd {
-	var _ = fmt.Errorf
 	ccmd := &NewTenantOptionCmd{}
 	cmd := &cobra.Command{
 		Use:   "create",

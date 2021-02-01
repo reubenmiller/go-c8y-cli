@@ -18,7 +18,6 @@ type NewBulkOperationCmd struct {
 }
 
 func NewNewBulkOperationCmd() *NewBulkOperationCmd {
-	var _ = fmt.Errorf
 	ccmd := &NewBulkOperationCmd{}
 	cmd := &cobra.Command{
 		Use:   "create",

@@ -2,7 +2,6 @@
 package cmd
 
 import (
-	"fmt"
 	"io"
 	"net/http"
 	"net/url"
@@ -18,7 +17,6 @@ type DeleteEventCmd struct {
 }
 
 func NewDeleteEventCmd() *DeleteEventCmd {
-	var _ = fmt.Errorf
 	ccmd := &DeleteEventCmd{}
 	cmd := &cobra.Command{
 		Use:   "delete",
