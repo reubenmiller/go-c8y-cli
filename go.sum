@@ -256,6 +256,8 @@ github.com/prometheus/procfs v0.0.0-20190507164030-5867b95ac084/go.mod h1:TjEm7z
 github.com/prometheus/tsdb v0.7.1/go.mod h1:qhTCs0VvXwvX/y3TZrWD7rabWM+ijKTux40TwIPHuXU=
 github.com/reubenmiller/go-c8y v0.8.1-0.20210116181218-879f88873fec h1:CzyjSuPHYFdom7ZT1++631LgcpVbcd8tcQt3X6iecM0=
 github.com/reubenmiller/go-c8y v0.8.1-0.20210116181218-879f88873fec/go.mod h1:oaX88YHuqulM/ASUVCpHesnlQ71oFwC3xDc4ZnsaXH8=
+github.com/reubenmiller/go-c8y v0.8.1-0.20210201032349-29ff5affe87e h1:WZY8iE1T71Mu/gcBx98rP8J3k44LsVuP06lEm6OH6qY=
+github.com/reubenmiller/go-c8y v0.8.1-0.20210201032349-29ff5affe87e/go.mod h1:oaX88YHuqulM/ASUVCpHesnlQ71oFwC3xDc4ZnsaXH8=
 github.com/rogpeppe/fastuuid v0.0.0-20150106093220-6724a57986af/go.mod h1:XWv6SoW27p1b0cqNHllgS5HIMJraePCO15w5zCzIWYg=
 github.com/rogpeppe/go-internal v1.3.0/go.mod h1:M8bDsm7K2OlrFYOpmOWEs/qY81heoFRclV5y23lUDJ4=
 github.com/russross/blackfriday v1.5.2/go.mod h1:JO/DiYxRf+HjHt06OyowR9PTA263kcR/rfWxYHBV53g=

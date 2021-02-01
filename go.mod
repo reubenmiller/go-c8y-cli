@@ -13,7 +13,7 @@ require (
 	github.com/op/go-logging v0.0.0-20160315200505-970db520ece7
 	github.com/pkg/errors v0.9.1
 	github.com/pquerna/otp v1.3.0
-	github.com/reubenmiller/go-c8y v0.8.1-0.20210116181218-879f88873fec
+	github.com/reubenmiller/go-c8y v0.8.1-0.20210201032349-29ff5affe87e
 	github.com/sethvargo/go-password v0.2.0
 	github.com/spf13/cobra v0.0.5
 	github.com/spf13/pflag v1.0.5
