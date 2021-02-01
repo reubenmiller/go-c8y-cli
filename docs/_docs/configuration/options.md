@@ -134,15 +134,15 @@ $env:C8Y_USE_ENVIRONMENT = "on"
 
 Control whether sensitive session information is logged to the console or not. When set to `true`, then session information such as `tenant`, `username`, `password`, `basic auth header` will be obfuscated. If the setting is not present, then the session information will be shown (except for clear-text passwords).
 
-When using the `PSc8y` PowerShell module, you can change the settings using the `Set-CumulocityConsoleSetting` cmdlet:
+When using the `PSc8y` PowerShell module, you can change the settings using the `Set-ClientConsoleSetting` cmdlet:
 
 **Example**
 
 ```powershell
-Set-CumulocityConsoleSetting -HideSensitive
+Set-ClientConsoleSetting -HideSensitive
 
 # or enable it again by using
-Set-CumulocityConsoleSetting -ShowSensitive
+Set-ClientConsoleSetting -ShowSensitive
 ```
 
 On bash, you can configured it by setting the environment variable:
