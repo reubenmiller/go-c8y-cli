@@ -6,17 +6,18 @@ import (
 	"net/http"
 	"net/url"
 
+	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/pkg/mapbuilder"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
 )
 
-type queryManagedObjectCollectionCmd struct {
+type QueryManagedObjectCollectionCmd struct {
 	*baseCmd
 }
 
-func NewQueryManagedObjectCollectionCmd() *queryManagedObjectCollectionCmd {
-	ccmd := &queryManagedObjectCollectionCmd{}
+func NewQueryManagedObjectCollectionCmd() *QueryManagedObjectCollectionCmd {
+	ccmd := &QueryManagedObjectCollectionCmd{}
 
 	cmd := &cobra.Command{
 		Use:   "find",
@@ -26,7 +27,7 @@ func NewQueryManagedObjectCollectionCmd() *queryManagedObjectCollectionCmd {
 $ c8y inventory find --query "name eq 'roomUpperFloor_*'"
 Get a list of managed objects
 		`,
-		RunE: ccmd.queryManagedObjectCollection,
+		RunE: ccmd.RunE,
 	}
 
 	cmd.SilenceUsage = true
@@ -34,6 +35,11 @@ Get a list of managed objects
 	cmd.Flags().String("query", "", "ManagedObject query. (required)")
 	cmd.Flags().String("orderBy", "", "Order the results by the given parameter. i.e. 'id asc'")
 	cmd.Flags().Bool("withParents", false, "include a flat list of all parents and grandparents of the given object")
+
+	flags.WithOptions(
+		cmd,
+		flags.WithPipelineSupport(""),
+	)
 
 	// Required flags
 	cmd.MarkFlagRequired("query")
@@ -43,7 +49,7 @@ Get a list of managed objects
 	return ccmd
 }
 
-func (n *queryManagedObjectCollectionCmd) queryManagedObjectCollection(cmd *cobra.Command, args []string) error {
+func (n *QueryManagedObjectCollectionCmd) RunE(cmd *cobra.Command, args []string) error {
 
 	// query parameters
 	queryValue := url.QueryEscape("")
@@ -97,7 +103,7 @@ func (n *queryManagedObjectCollectionCmd) queryManagedObjectCollection(cmd *cobr
 	formData := make(map[string]io.Reader)
 
 	// body
-	body := mapbuilder.NewMapBuilder()
+	body := mapbuilder.NewInitializedMapBuilder()
 
 	// path parameters
 	pathParameters := make(map[string]string)
@@ -108,12 +114,12 @@ func (n *queryManagedObjectCollectionCmd) queryManagedObjectCollection(cmd *cobr
 		Method:       "GET",
 		Path:         path,
 		Query:        queryValue,
-		Body:         body.GetMap(),
+		Body:         body,
 		FormData:     formData,
 		Header:       headers,
 		IgnoreAccept: false,
 		DryRun:       globalFlagDryRun,
 	}
 
-	return processRequestAndResponse([]c8y.RequestOptions{req}, commonOptions)
+	return processRequestAndResponseWithWorkers(cmd, &req, "")
 }
