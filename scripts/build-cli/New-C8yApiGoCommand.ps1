@@ -323,7 +323,6 @@ type ${NameCamel}Cmd struct {
 }
 
 func New${NameCamel}Cmd() *${NameCamel}Cmd {
-    var _ = fmt.Errorf
 	ccmd := &${NameCamel}Cmd{}
 	cmd := &cobra.Command{
 		Use:   "$Use",
@@ -409,8 +408,8 @@ func (n *${NameCamel}Cmd) RunE(cmd *cobra.Command, args []string) error {
 	$Utf8NoBomEncoding = New-Object System.Text.UTF8Encoding $False
 	[System.IO.File]::WriteAllLines($File, $Template, $Utf8NoBomEncoding)
 
-	# Auto format code
-	& gofmt -w $File
+	# Auto format code (using goimports as it removes unused imports)
+	& goimports -w $File
 }
 
 Function Remove-SkippedParameters {
