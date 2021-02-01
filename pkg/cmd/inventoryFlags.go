@@ -13,6 +13,7 @@ import (
 	"strings"
 
 	"github.com/pkg/errors"
+	"github.com/reubenmiller/go-c8y-cli/pkg/iterator"
 	"github.com/reubenmiller/go-c8y-cli/pkg/mapbuilder"
 	"github.com/spf13/cobra"
 )
@@ -198,6 +199,11 @@ func setLazyDataTemplateFromFlags(cmd *cobra.Command, body *mapbuilder.MapBuilde
 
 		contents := getContents(value)
 		body.SetTemplate(contents)
+
+		// add a default template iterator that just counts up
+		if body.TemplateIterator == nil {
+			body.TemplateIterator = iterator.NewRangeIterator(1, 100000000, 1)
+		}
 	}
 
 	return nil

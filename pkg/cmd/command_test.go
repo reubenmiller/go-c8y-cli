@@ -73,6 +73,23 @@ func Test_ExecuteCommandWithLargeNumber(t *testing.T) {
 	assert.True(t, out != "")
 }
 
+func Test_ExecuteTemplateIndexCommand(t *testing.T) {
+	cmd := setupTest()
+	b := bytes.NewBufferString("")
+	errBuffer := bytes.NewBufferString("")
+	cmd.SetOut(b)
+	cmd.SetOutput(errBuffer)
+	cmd.SetArgs([]string{"inventory", "update", "--id", "1234,4567", "--template", "/workspaces/go-c8y-cli/temp-example/update.mo.jsonnet", "--dry"})
+	cmdErr := cmd.Execute()
+	assert.True(t, cmdErr != nil)
+
+	outE := readOutput(t, errBuffer)
+	assert.True(t, outE != "")
+
+	out := readOutput(t, b)
+	assert.True(t, out != "")
+}
+
 func readOutput(t *testing.T, b io.Reader) string {
 	out, err := ioutil.ReadAll(b)
 	assert.OK(t, err)
