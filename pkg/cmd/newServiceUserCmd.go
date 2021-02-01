@@ -37,8 +37,8 @@ Create new application service user
 
 	addDataFlagWithoutTemplates(cmd)
 	cmd.Flags().StringVar(&ccmd.name, "name", "", "Name of application")
-	cmd.Flags().StringArrayVar(&ccmd.tenants, "tenants", []string{}, "Tenant to subscribe to. If left blank than the application will not generate the service user")
-	cmd.Flags().StringArrayVar(&ccmd.roles, "roles", []string{}, "Roles which should be assigned to the service user")
+	cmd.Flags().StringSliceVar(&ccmd.tenants, "tenants", []string{}, "Tenant to subscribe to. If left blank than the application will not generate the service user")
+	cmd.Flags().StringSliceVar(&ccmd.roles, "roles", []string{}, "Roles which should be assigned to the service user")
 
 	// Required flags
 	cmd.MarkFlagRequired("name")

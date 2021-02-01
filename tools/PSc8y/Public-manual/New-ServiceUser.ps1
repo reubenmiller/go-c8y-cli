@@ -78,10 +78,10 @@ Function New-ServiceUser {
                 $Parameters["name"] = $Name
             }
             if ($PSBoundParameters.ContainsKey("Roles")) {
-                $Parameters["roles"] = $Roles
+                $Parameters["roles"] = $Roles -join ","
             }
             if ($PSBoundParameters.ContainsKey("Tenants")) {
-                $Parameters["tenants"] = $Tenants
+                $Parameters["tenants"] = $Tenants -join ","
             }
             if ($PSBoundParameters.ContainsKey("OutputFile")) {
                 $Parameters["outputFile"] = $OutputFile
