@@ -1,7 +1,7 @@
 . $PSScriptRoot/imports.ps1
 
 InModuleScope PSc8y {
-    Describe -Name "Update-ManagedObjectCollectionBatch" {
+    Describe -Skip -Name "Update-ManagedObject" {
         BeforeEach {
             $ids = New-Object System.Collections.ArrayList
             $type = New-RandomString -Prefix "customType_"

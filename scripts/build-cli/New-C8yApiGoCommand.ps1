@@ -64,9 +64,11 @@
 
     $CommandArgs = New-Object System.Collections.ArrayList
     $PipelineVariableName = ""
+    $PipelineVariableRequired = "false"
     foreach ($iArg in (Remove-SkippedParameters $ArgumentSources)) {
         if ($iArg.pipeline) {
             $PipelineVariableName = $iArg.Name
+            $PipelineVariableRequired = if ($iArg.Required) {"true"} else {"false"}
         }
         $ArgParams = @{
             Name = $iArg.name
@@ -96,7 +98,7 @@
     #
     $RESTBodyBuilder = New-Object System.Text.StringBuilder
     $RESTFormDataBuilder = New-Object System.Text.StringBuilder
-    $GetBodyContents = "body.GetMap()"
+    $GetBodyContents = "body"
     
     if ($Specification.body) {
         if ($Specification.bodyContent.type -ne 'binary') {
@@ -161,7 +163,7 @@
         #
         if ($Specification.bodyTemplate.type -ne "none") {
             $BodyUserTemplateCode = @"
-        if err := setDataTemplateFromFlags(cmd, body); err != nil {
+        if err := setLazyDataTemplateFromFlags(cmd, body); err != nil {
             return newUserError("Template error. ", err)
         }
 "@.TrimStart()
@@ -399,7 +401,7 @@ func (n *${NameCamel}Cmd) RunE(cmd *cobra.Command, args []string) error {
         DryRun:       globalFlagDryRun,
     }
 
-    return processRequestAndResponseWithWorkers(cmd, &req, "$PipelineVariableName")
+    return processRequestAndResponseWithWorkers(cmd, &req, PipeOption{"$PipelineVariableName", $PipelineVariableRequired})
 }
 
 "@

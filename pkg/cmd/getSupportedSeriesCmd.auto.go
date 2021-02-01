@@ -90,12 +90,12 @@ func (n *GetSupportedSeriesCmd) RunE(cmd *cobra.Command, args []string) error {
 		Method:       "GET",
 		Path:         path,
 		Query:        queryValue,
-		Body:         body.GetMap(),
+		Body:         body,
 		FormData:     formData,
 		Header:       headers,
 		IgnoreAccept: false,
 		DryRun:       globalFlagDryRun,
 	}
 
-	return processRequestAndResponseWithWorkers(cmd, &req, "device")
+	return processRequestAndResponseWithWorkers(cmd, &req, PipeOption{"device", true})
 }

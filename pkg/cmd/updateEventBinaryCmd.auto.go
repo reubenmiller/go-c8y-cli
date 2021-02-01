@@ -100,5 +100,5 @@ func (n *UpdateEventBinaryCmd) RunE(cmd *cobra.Command, args []string) error {
 		DryRun:       globalFlagDryRun,
 	}
 
-	return processRequestAndResponseWithWorkers(cmd, &req, "id")
+	return processRequestAndResponseWithWorkers(cmd, &req, PipeOption{"id", true})
 }

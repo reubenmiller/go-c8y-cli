@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"io"
+	"strings"
 )
 
 // Iterator is a simple interfact where the next value can be returned.
@@ -52,5 +53,9 @@ func (i *CompositeIterator) GetNext() (line []byte, err error) {
 		return line, err
 	}
 
-	return []byte(fmt.Sprintf(i.format, nextValue)), nil
+	if strings.Contains(i.format, "%") {
+		return []byte(fmt.Sprintf(i.format, nextValue)), nil
+	}
+	return []byte(i.format), nil
+
 }

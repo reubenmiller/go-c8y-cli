@@ -107,12 +107,12 @@ func (n *DeleteExternalIDCmd) RunE(cmd *cobra.Command, args []string) error {
 		Method:       "DELETE",
 		Path:         path,
 		Query:        queryValue,
-		Body:         body.GetMap(),
+		Body:         body,
 		FormData:     formData,
 		Header:       headers,
 		IgnoreAccept: false,
 		DryRun:       globalFlagDryRun,
 	}
 
-	return processRequestAndResponseWithWorkers(cmd, &req, "")
+	return processRequestAndResponseWithWorkers(cmd, &req, PipeOption{"", false})
 }

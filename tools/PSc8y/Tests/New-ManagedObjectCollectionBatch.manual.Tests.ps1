@@ -1,7 +1,7 @@
 . $PSScriptRoot/imports.ps1
 
 InModuleScope PSc8y {
-    Describe -Name "New-ManagedObjectCollectionBatch" {
+    Describe -Skip -Name "New-ManagedObjectCollectionBatch" {
         BeforeEach {
             $type = New-RandomString -Prefix "customType_"
         }

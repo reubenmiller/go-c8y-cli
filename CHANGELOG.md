@@ -4,6 +4,15 @@
 
 No unreleased features
 
+* TODO:
+    - Create an iterator for each fetcher
+
+        ```sh
+        c8y devices list --select id,name --pageSize 20 | jq -r ".[].name" | c8y inventory get
+        ```
+    - Iterator over a query parameter via piped input
+        - echo "12345" | c8y operations list --dry
+            -> /inventory/managedObjects?deviceId=12345
 * Fixed #43. New-ServiceUser now accepts more than 1 role
 * Added Expand-DeviceGroup cmdlet
 * Adding following template variables

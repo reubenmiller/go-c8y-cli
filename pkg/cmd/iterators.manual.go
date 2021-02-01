@@ -97,7 +97,9 @@ func (r *RequestIterator) GetNext() (*c8y.RequestOptions, error) {
 		// TODO: Find more efficient way rather than converting to and from json
 		bodyValue := make(map[string]interface{})
 
-		if err := json.Unmarshal(bodyContents, &bodyValue); err != nil {
+		// Note: UnmarshalJSON does not support large numbers by default, so
+		// 		 c8y.DecodeJSONBytes should be used instead!
+		if err := c8y.DecodeJSONBytes(bodyContents, &bodyValue); err != nil {
 			r.setDone()
 			return nil, err
 		}
@@ -177,15 +179,16 @@ func NewFlagFileContents(cmd *cobra.Command, name string) (iterator.Iterator, er
 // NewFlagPipeEnabledStringSlice creates an iterator from a command argument
 // or from the pipeline
 // It will automatically try to get the value from a String or a StringSlice flag
-func NewFlagPipeEnabledStringSlice(cmd *cobra.Command, name string) (iterator.Iterator, error) {
-	supportsPipeline := flags.HasValueFromPipeline(cmd, name)
-	if cmd.Flags().Changed(name) {
+func NewFlagPipeEnabledStringSlice(cmd *cobra.Command, pipeOpt PipeOption) (iterator.Iterator, error) {
+	supportsPipeline := flags.HasValueFromPipeline(cmd, pipeOpt.Name)
 
-		paths, err := cmd.Flags().GetStringSlice(name)
+	if cmd.Flags().Changed(pipeOpt.Name) {
+
+		paths, err := cmd.Flags().GetStringSlice(pipeOpt.Name)
 
 		if err != nil {
 			// fallback to string
-			path, err := cmd.Flags().GetString(name)
+			path, err := cmd.Flags().GetString(pipeOpt.Name)
 
 			if err != nil {
 				return nil, err
@@ -207,9 +210,19 @@ func NewFlagPipeEnabledStringSlice(cmd *cobra.Command, name string) (iterator.It
 			return iterator.NewSliceIterator(paths), nil
 		}
 	} else if supportsPipeline {
-		return iterator.NewPipeIterator(func(line []byte) bool {
+		iter, err := iterator.NewPipeIterator(func(line []byte) bool {
 			return !(bytes.HasPrefix(line, []byte("{")) || bytes.HasPrefix(line, []byte("[")))
 		})
+		if err != nil {
+			if pipeOpt.Required {
+				return iter, err
+			}
+			return iter, nil
+		}
+		return iter, nil
 	}
-	return nil, fmt.Errorf("no input detected")
+	if pipeOpt.Required {
+		return nil, fmt.Errorf("no input detected")
+	}
+	return nil, nil
 }

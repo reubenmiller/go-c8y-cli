@@ -108,12 +108,12 @@ func (n *DeleteManagedObjectChildDeviceReferenceCmd) RunE(cmd *cobra.Command, ar
 		Method:       "DELETE",
 		Path:         path,
 		Query:        queryValue,
-		Body:         body.GetMap(),
+		Body:         body,
 		FormData:     formData,
 		Header:       headers,
 		IgnoreAccept: false,
 		DryRun:       globalFlagDryRun,
 	}
 
-	return processRequestAndResponseWithWorkers(cmd, &req, "device")
+	return processRequestAndResponseWithWorkers(cmd, &req, PipeOption{"device", true})
 }

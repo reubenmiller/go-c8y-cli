@@ -1,7 +1,7 @@
 . $PSScriptRoot/imports.ps1
 
 InModuleScope PSc8y {
-    Describe -Name "Remove-ManagedObjectCollectionBatch" {
+    Describe -Skip -Name "Remove-ManagedObjectCollectionBatch" {
         BeforeEach {
             $ids = New-Object System.Collections.ArrayList
             $inputFile = New-TemporaryFile

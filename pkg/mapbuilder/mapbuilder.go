@@ -2,7 +2,6 @@ package mapbuilder
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 	"log"
 	"math/rand"
@@ -142,7 +141,7 @@ func (b *MapBuilder) SetApplyTemplateOnMarshalPreference(value bool) *MapBuilder
 
 // SetEmptyMap sets the body to an empty map. It will override an existing body
 func (b *MapBuilder) SetEmptyMap() *MapBuilder {
-	b.body = map[string]interface{}{}
+	b.body = make(map[string]interface{})
 	return b
 }
 
@@ -258,8 +257,20 @@ func (b *MapBuilder) GetTemplateVariablesJsonnet() (string, error) {
 	return fmt.Sprintf("\nlocal vars = %s;\n%s\n%s\n%s\n", jsonStr, varsHelper, randomHelper, timeHelper), nil
 }
 
-// SetMap sets a new map to the body. This will remove any existing values in the body
+// SetMap sets a new map to the body (if not nil). This will remove any existing values in the body
 func (b *MapBuilder) SetMap(body map[string]interface{}) {
+	if body != nil {
+		b.body = body
+	}
+}
+
+// ClearMap removed the existing map and sets it to nil.
+func (b *MapBuilder) ClearMap() {
+	b.body = nil
+}
+
+// SetMap sets a new map to the body. This will remove any existing values in the body
+func (b *MapBuilder) ApplyMap(body map[string]interface{}) {
 	b.body = body
 }
 
@@ -344,10 +355,10 @@ func (b MapBuilder) Validate() error {
 func (b MapBuilder) MarshalJSON() ([]byte, error) {
 	if b.body == nil {
 		// should return empty object? or add as option?
-		// return []byte("{}"), nil
-		return nil, errors.New("body is uninitialized")
+		return []byte("{}"), nil
+		// return nil, errors.New("body is uninitialized")
 	}
-	if b.autoApplyTemplate {
+	if b.autoApplyTemplate && b.template != "" {
 		if err := b.ApplyTemplate(); err != nil {
 			return nil, err
 		}

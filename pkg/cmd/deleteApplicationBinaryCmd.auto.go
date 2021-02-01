@@ -110,12 +110,12 @@ func (n *DeleteApplicationBinaryCmd) RunE(cmd *cobra.Command, args []string) err
 		Method:       "DELETE",
 		Path:         path,
 		Query:        queryValue,
-		Body:         body.GetMap(),
+		Body:         body,
 		FormData:     formData,
 		Header:       headers,
 		IgnoreAccept: false,
 		DryRun:       globalFlagDryRun,
 	}
 
-	return processRequestAndResponseWithWorkers(cmd, &req, "binaryId")
+	return processRequestAndResponseWithWorkers(cmd, &req, PipeOption{"binaryId", true})
 }

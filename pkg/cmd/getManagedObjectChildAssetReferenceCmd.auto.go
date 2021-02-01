@@ -108,12 +108,12 @@ func (n *GetManagedObjectChildAssetReferenceCmd) RunE(cmd *cobra.Command, args [
 		Method:       "GET",
 		Path:         path,
 		Query:        queryValue,
-		Body:         body.GetMap(),
+		Body:         body,
 		FormData:     formData,
 		Header:       headers,
 		IgnoreAccept: false,
 		DryRun:       globalFlagDryRun,
 	}
 
-	return processRequestAndResponseWithWorkers(cmd, &req, "asset")
+	return processRequestAndResponseWithWorkers(cmd, &req, PipeOption{"asset", true})
 }

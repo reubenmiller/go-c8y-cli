@@ -163,7 +163,7 @@ only relevant information is shown.
                     $line
                 }
             } -End {
-                Write-Host "Finished processing stream: code=$LASTEXITCODE"
+                Write-Verbose "Finished processing stream: code=$LASTEXITCODE"
             }
             $ExitCode = $LASTEXITCODE
             return

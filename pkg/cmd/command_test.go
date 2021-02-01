@@ -20,7 +20,49 @@ func Test_ExecuteCommand(t *testing.T) {
 	errBuffer := bytes.NewBufferString("")
 	cmd.SetOut(b)
 	cmd.SetOutput(errBuffer)
-	cmd.SetArgs([]string{"inventory", "get2", "--verbose", "--id", "1,2"})
+	// cmd.SetArgs([]string{"inventory", "update", "--id", "1234", "--template", "/workspaces/go-c8y-cli/temp-example/device.update.jsonnet", "--dry"})
+	cmd.SetArgs([]string{"inventory", "create", "--name", "testme", "--dry"})
+	cmdErr := cmd.Execute()
+	assert.True(t, cmdErr != nil)
+
+	outE := readOutput(t, errBuffer)
+	assert.True(t, outE != "")
+
+	out := readOutput(t, b)
+	assert.True(t, out != "")
+}
+
+func Test_ExecuteCollectionCommand(t *testing.T) {
+	cmd := setupTest()
+	b := bytes.NewBufferString("")
+	errBuffer := bytes.NewBufferString("")
+	cmd.SetOut(b)
+	cmd.SetOutput(errBuffer)
+	// cmd.SetArgs([]string{"inventory", "update", "--id", "1234", "--template", "/workspaces/go-c8y-cli/temp-example/device.update.jsonnet", "--dry"})
+	cmd.SetArgs([]string{"operations", "list", "--dry"})
+	cmdErr := cmd.Execute()
+	assert.True(t, cmdErr != nil)
+
+	outE := readOutput(t, errBuffer)
+	assert.True(t, outE != "")
+
+	out := readOutput(t, b)
+	assert.True(t, out != "")
+}
+
+func Test_ExecuteCommandWithLargeNumber(t *testing.T) {
+	cmd := setupTest()
+	b := bytes.NewBufferString("")
+	errBuffer := bytes.NewBufferString("")
+	cmd.SetOut(b)
+	cmd.SetOutput(errBuffer)
+
+	cmd.SetArgs([]string{
+		"inventory", "create",
+		"--name=testMO",
+		"--type=customType_ikpzw0n9ah",
+		"--data",
+		"{\"type\":\"\",\"c8y_Kpi\":{\"max\":1.91010101E+20,\"description\":\"\"}}"})
 	cmdErr := cmd.Execute()
 	assert.True(t, cmdErr != nil)
 

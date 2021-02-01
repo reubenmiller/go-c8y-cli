@@ -84,7 +84,7 @@ func (n *UpdateTenantOptionBulkCmd) RunE(cmd *cobra.Command, args []string) erro
 	// body
 	body := mapbuilder.NewInitializedMapBuilder()
 	body.SetMap(getDataFlag(cmd))
-	if err := setDataTemplateFromFlags(cmd, body); err != nil {
+	if err := setLazyDataTemplateFromFlags(cmd, body); err != nil {
 		return newUserError("Template error. ", err)
 	}
 	if err := body.Validate(); err != nil {
@@ -107,12 +107,12 @@ func (n *UpdateTenantOptionBulkCmd) RunE(cmd *cobra.Command, args []string) erro
 		Method:       "PUT",
 		Path:         path,
 		Query:        queryValue,
-		Body:         body.GetMap(),
+		Body:         body,
 		FormData:     formData,
 		Header:       headers,
 		IgnoreAccept: false,
 		DryRun:       globalFlagDryRun,
 	}
 
-	return processRequestAndResponseWithWorkers(cmd, &req, "")
+	return processRequestAndResponseWithWorkers(cmd, &req, PipeOption{"", false})
 }

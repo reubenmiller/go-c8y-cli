@@ -89,12 +89,12 @@ func (n *GetManagedObjectChildAdditionCollectionCmd) RunE(cmd *cobra.Command, ar
 		Method:       "GET",
 		Path:         path,
 		Query:        queryValue,
-		Body:         body.GetMap(),
+		Body:         body,
 		FormData:     formData,
 		Header:       headers,
 		IgnoreAccept: false,
 		DryRun:       globalFlagDryRun,
 	}
 
-	return processRequestAndResponseWithWorkers(cmd, &req, "id")
+	return processRequestAndResponseWithWorkers(cmd, &req, PipeOption{"id", true})
 }

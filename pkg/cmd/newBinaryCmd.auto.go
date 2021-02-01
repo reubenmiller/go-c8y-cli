@@ -86,7 +86,7 @@ func (n *NewBinaryCmd) RunE(cmd *cobra.Command, args []string) error {
 	body := mapbuilder.NewInitializedMapBuilder()
 	body.SetMap(getDataFlag(cmd))
 	getFileFlag(cmd, "file", true, formData)
-	if err := setDataTemplateFromFlags(cmd, body); err != nil {
+	if err := setLazyDataTemplateFromFlags(cmd, body); err != nil {
 		return newUserError("Template error. ", err)
 	}
 	if err := body.Validate(); err != nil {
@@ -102,12 +102,12 @@ func (n *NewBinaryCmd) RunE(cmd *cobra.Command, args []string) error {
 		Method:       "POST",
 		Path:         path,
 		Query:        queryValue,
-		Body:         body.GetMap(),
+		Body:         body,
 		FormData:     formData,
 		Header:       headers,
 		IgnoreAccept: false,
 		DryRun:       globalFlagDryRun,
 	}
 
-	return processRequestAndResponseWithWorkers(cmd, &req, "")
+	return processRequestAndResponseWithWorkers(cmd, &req, PipeOption{"", false})
 }

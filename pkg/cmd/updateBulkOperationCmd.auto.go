@@ -89,7 +89,7 @@ func (n *UpdateBulkOperationCmd) RunE(cmd *cobra.Command, args []string) error {
 	} else {
 		return newUserError(fmt.Sprintf("Flag [%s] does not exist. %s", "creationRampSec", err))
 	}
-	if err := setDataTemplateFromFlags(cmd, body); err != nil {
+	if err := setLazyDataTemplateFromFlags(cmd, body); err != nil {
 		return newUserError("Template error. ", err)
 	}
 	if err := body.Validate(); err != nil {
@@ -105,12 +105,12 @@ func (n *UpdateBulkOperationCmd) RunE(cmd *cobra.Command, args []string) error {
 		Method:       "PUT",
 		Path:         path,
 		Query:        queryValue,
-		Body:         body.GetMap(),
+		Body:         body,
 		FormData:     formData,
 		Header:       headers,
 		IgnoreAccept: false,
 		DryRun:       globalFlagDryRun,
 	}
 
-	return processRequestAndResponseWithWorkers(cmd, &req, "id")
+	return processRequestAndResponseWithWorkers(cmd, &req, PipeOption{"id", true})
 }

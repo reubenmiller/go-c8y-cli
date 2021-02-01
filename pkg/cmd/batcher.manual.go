@@ -298,17 +298,33 @@ func readFile(filepath string) ([]string, error) {
 	return items, nil
 }
 
-func processRequestAndResponseWithWorkers(cmd *cobra.Command, r *c8y.RequestOptions, name string) error {
+func NewPipeOption(name string, required bool) *PipeOption {
 
+	return &PipeOption{
+		Name:     name,
+		Required: required,
+	}
+}
+
+type PipeOption struct {
+	Name     string
+	Required bool
+}
+
+func processRequestAndResponseWithWorkers(cmd *cobra.Command, r *c8y.RequestOptions, pipeOpt PipeOption) error {
 	var pathIter iterator.Iterator
 
-	if name != "" {
+	if pipeOpt.Name != "" {
 		// create input iterator
-		items, err := NewFlagPipeEnabledStringSlice(cmd, name)
+		items, err := NewFlagPipeEnabledStringSlice(cmd, pipeOpt)
 		if err != nil {
 			return err
 		}
-		pathIter = iterator.NewCompositeStringIterator(items, strings.ReplaceAll(r.Path, "{"+name+"}", "%s"))
+		if items != nil {
+			pathIter = iterator.NewCompositeStringIterator(items, strings.ReplaceAll(r.Path, "{"+pipeOpt.Name+"}", "%s"))
+		} else {
+			pathIter = iterator.NewRepeatIterator(r.Path, 1)
+		}
 	} else {
 		// fixed path (no iteration)
 		pathIter = iterator.NewRepeatIterator(r.Path, 1)
