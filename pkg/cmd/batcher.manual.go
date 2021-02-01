@@ -314,8 +314,7 @@ func processRequestAndResponseWithWorkers(cmd *cobra.Command, r *c8y.RequestOpti
 		pathIter = iterator.NewRepeatIterator(r.Path, 1)
 	}
 
-	body := make(map[string]interface{})
-	requestIter := NewRequestIterator(*r, pathIter, body)
+	requestIter := NewRequestIterator(*r, pathIter, r.Body)
 
 	// for {
 	// 	next, err := requestIter.GetNext()
