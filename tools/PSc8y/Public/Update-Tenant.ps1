@@ -32,8 +32,8 @@ Update a tenant by name (from the mangement tenant)
         [string]
         $Company,
 
-        # Domain name to be used for the tenant. Maximum 256 characters (required)
-        [Parameter(Mandatory = $true)]
+        # Domain name to be used for the tenant. Maximum 256 characters
+        [Parameter()]
         [string]
         $Domain,
 
