@@ -162,7 +162,7 @@ endpoints:
 
       - name: domain
         type: string
-        required: true
+        required: false
         description: Domain name to be used for the tenant. Maximum 256 characters
 
       - name: adminName
