@@ -4,11 +4,13 @@
 
 No unreleased features
 
+## Released
+
+### v1.11.1
+
 #### Bugfixes
 
 * Update-Tenant: `Domain` is no longer a mandatory/required parameter
-
-## Released
 
 ### v1.11.0
 
