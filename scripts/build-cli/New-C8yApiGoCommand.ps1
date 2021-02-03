@@ -97,6 +97,7 @@
     # Body
     #
     $RESTBodyBuilder = New-Object System.Text.StringBuilder
+    $RESTBodyBuilderOptions = New-Object System.Text.StringBuilder
     $RESTFormDataBuilder = New-Object System.Text.StringBuilder
     $GetBodyContents = "body"
     
@@ -110,7 +111,11 @@
         foreach ($iArg in (Remove-SkippedParameters $Specification.body)) {
             $code = New-C8yApiGoGetValueFromFlag -Parameters $iArg -SetterType "body"
             if ($code) {
-                $null = $RESTBodyBuilder.AppendLine($code)
+                if ($code -match "^flags\.") {
+                    $null = $RESTBodyBuilderOptions.AppendLine($code)
+                } else {
+                    $null = $RESTBodyBuilder.AppendLine($code)
+                }
             } else {
                 Write-Warning ("No setter found for [{0}]" -f $iArg.name)
             }
@@ -214,6 +219,7 @@
     # Path Parameters
     #
     $RESTPathBuilder = New-Object System.Text.StringBuilder
+    $RESTPathBuilderOptions = New-Object System.Text.StringBuilder
     foreach ($Properties in (Remove-SkippedParameters $Specification.pathParameters)) {
         if ($Properties.pipeline) {
             Write-Verbose "Skipping path parameters for pipeline arguments"
@@ -221,7 +227,12 @@
         }
         $code = New-C8yApiGoGetValueFromFlag -Parameters $Properties -SetterType "path"
         if ($code) {
-            $null = $RESTPathBuilder.AppendLine($code)
+            if ($code -match "^flags\.") {
+                $null = $RESTPathBuilderOptions.AppendLine($code)
+            }
+            else {
+                $null = $RESTPathBuilder.AppendLine($code)
+            }
         }
     }
 
@@ -235,7 +246,12 @@
         foreach ($Properties in (Remove-SkippedParameters $Specification.queryParameters)) {
             $code = New-C8yApiGoGetValueFromFlag -Parameters $Properties -SetterType "query"
             if ($code) {
-                $null = $RESTQueryBuilder.AppendLine($code)
+                if ($code -match "^flags\.") {
+                    $null = $RESTQueryBuilderWithValues.AppendLine($code)
+                }
+                else {
+                    $null = $RESTQueryBuilder.AppendLine($code)
+                }
             }
         }
     }
@@ -254,11 +270,17 @@
     # Headers
     #
     $RestHeaderBuilder = New-Object System.Text.StringBuilder
+    $RestHeaderBuilderOptions = New-Object System.Text.StringBuilder
     if ($Specification.headerParameters) {
         foreach ($iArg in (Remove-SkippedParameters $Specification.headerParameters)) {
             $code = New-C8yApiGoGetValueFromFlag -Parameters $iArg -SetterType "header"
             if ($code) {
-                $null = $RestHeaderBuilder.AppendLine($code)
+                if ($code -match "^flags\.") {
+                    $null = $RestHeaderBuilderOptions.AppendLine($code)
+                }
+                else {
+                    $null = $RestHeaderBuilder.AppendLine($code)
+                }
             }
         }
     }
@@ -355,13 +377,22 @@ $($Examples -join "`n`n")
 }
 
 func (n *${NameCamel}Cmd) RunE(cmd *cobra.Command, args []string) error {
+    var err error
     // query parameters
     queryValue := url.QueryEscape("")
     query := url.Values{}
     $RESTQueryBuilder
-    err := flags.WithQueryOptions(
+    err = flags.WithQueryParameters(
 		cmd,
-		query,$RESTQueryBuilderWithValues
+        query,
+        $RESTQueryBuilderWithValues
+    )
+    if err != nil {
+		return newUserError(err)
+    }
+    err = flags.WithQueryOptions(
+		cmd,
+		query,
 	)
     if err != nil {
 		return newUserError(err)
@@ -377,16 +408,39 @@ func (n *${NameCamel}Cmd) RunE(cmd *cobra.Command, args []string) error {
     headers := http.Header{}
     $RestHeaderBuilder
 
+    err = flags.WithHeaders(
+		cmd,
+        headers,
+        $RestHeaderBuilderOptions
+    )
+    if err != nil {
+		return newUserError(err)
+    }
+
     // form data
     formData := make(map[string]io.Reader)
     $RESTFormDataBuilder
 
     // body
     body := mapbuilder.NewInitializedMapBuilder()
+    err = flags.WithBody(
+        cmd,
+        body,
+        $RESTBodyBuilderOptions
+    )
+    if err != nil {
+		return newUserError(err)
+    }
+
     $RESTBodyBuilder
 
     // path parameters
     pathParameters := make(map[string]string)
+    err = flags.WithPathParameters(
+        cmd,
+        pathParameters,
+        $RESTPathBuilderOptions
+    )
     $RESTPathBuilder
     path := replacePathParameters("${RESTPath}", pathParameters)
 
