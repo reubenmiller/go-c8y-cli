@@ -2,7 +2,6 @@
 package cmd
 
 import (
-	"fmt"
 	"io"
 	"net/http"
 	"net/url"
@@ -54,11 +53,19 @@ Create a tenant option
 }
 
 func (n *NewTenantOptionCmd) RunE(cmd *cobra.Command, args []string) error {
+	var err error
 	// query parameters
 	queryValue := url.QueryEscape("")
 	query := url.Values{}
 
-	err := flags.WithQueryOptions(
+	err = flags.WithQueryParameters(
+		cmd,
+		query,
+	)
+	if err != nil {
+		return newUserError(err)
+	}
+	err = flags.WithQueryOptions(
 		cmd,
 		query,
 	)
@@ -80,33 +87,31 @@ func (n *NewTenantOptionCmd) RunE(cmd *cobra.Command, args []string) error {
 		}
 	}
 
+	err = flags.WithHeaders(
+		cmd,
+		headers,
+	)
+	if err != nil {
+		return newUserError(err)
+	}
+
 	// form data
 	formData := make(map[string]io.Reader)
 
 	// body
 	body := mapbuilder.NewInitializedMapBuilder()
+	err = flags.WithBody(
+		cmd,
+		body,
+		flags.WithStringValue("category", "category"),
+		flags.WithStringValue("key", "key"),
+		flags.WithStringValue("value", "value"),
+	)
+	if err != nil {
+		return newUserError(err)
+	}
+
 	body.SetMap(getDataFlag(cmd))
-	if v, err := cmd.Flags().GetString("category"); err == nil {
-		if v != "" {
-			body.Set("category", v)
-		}
-	} else {
-		return newUserError(fmt.Sprintf("Flag [%s] does not exist. %s", "category", err))
-	}
-	if v, err := cmd.Flags().GetString("key"); err == nil {
-		if v != "" {
-			body.Set("key", v)
-		}
-	} else {
-		return newUserError(fmt.Sprintf("Flag [%s] does not exist. %s", "key", err))
-	}
-	if v, err := cmd.Flags().GetString("value"); err == nil {
-		if v != "" {
-			body.Set("value", v)
-		}
-	} else {
-		return newUserError(fmt.Sprintf("Flag [%s] does not exist. %s", "value", err))
-	}
 	if err := setLazyDataTemplateFromFlags(cmd, body); err != nil {
 		return newUserError("Template error. ", err)
 	}
@@ -116,6 +121,10 @@ func (n *NewTenantOptionCmd) RunE(cmd *cobra.Command, args []string) error {
 
 	// path parameters
 	pathParameters := make(map[string]string)
+	err = flags.WithPathParameters(
+		cmd,
+		pathParameters,
+	)
 
 	path := replacePathParameters("/tenant/options", pathParameters)
 

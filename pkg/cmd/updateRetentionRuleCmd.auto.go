@@ -2,7 +2,6 @@
 package cmd
 
 import (
-	"fmt"
 	"io"
 	"net/http"
 	"net/url"
@@ -58,11 +57,19 @@ Update a retention rule
 }
 
 func (n *UpdateRetentionRuleCmd) RunE(cmd *cobra.Command, args []string) error {
+	var err error
 	// query parameters
 	queryValue := url.QueryEscape("")
 	query := url.Values{}
 
-	err := flags.WithQueryOptions(
+	err = flags.WithQueryParameters(
+		cmd,
+		query,
+	)
+	if err != nil {
+		return newUserError(err)
+	}
+	err = flags.WithQueryOptions(
 		cmd,
 		query,
 	)
@@ -84,52 +91,34 @@ func (n *UpdateRetentionRuleCmd) RunE(cmd *cobra.Command, args []string) error {
 		}
 	}
 
+	err = flags.WithHeaders(
+		cmd,
+		headers,
+	)
+	if err != nil {
+		return newUserError(err)
+	}
+
 	// form data
 	formData := make(map[string]io.Reader)
 
 	// body
 	body := mapbuilder.NewInitializedMapBuilder()
+	err = flags.WithBody(
+		cmd,
+		body,
+		flags.WithStringValue("dataType", "dataType"),
+		flags.WithStringValue("fragmentType", "fragmentType"),
+		flags.WithStringValue("type", "type"),
+		flags.WithStringValue("source", "source"),
+		flags.WithIntValue("maximumAge", "maximumAge"),
+		flags.WithBoolValue("editable", "editable", ""),
+	)
+	if err != nil {
+		return newUserError(err)
+	}
+
 	body.SetMap(getDataFlag(cmd))
-	if v, err := cmd.Flags().GetString("dataType"); err == nil {
-		if v != "" {
-			body.Set("dataType", v)
-		}
-	} else {
-		return newUserError(fmt.Sprintf("Flag [%s] does not exist. %s", "dataType", err))
-	}
-	if v, err := cmd.Flags().GetString("fragmentType"); err == nil {
-		if v != "" {
-			body.Set("fragmentType", v)
-		}
-	} else {
-		return newUserError(fmt.Sprintf("Flag [%s] does not exist. %s", "fragmentType", err))
-	}
-	if v, err := cmd.Flags().GetString("type"); err == nil {
-		if v != "" {
-			body.Set("type", v)
-		}
-	} else {
-		return newUserError(fmt.Sprintf("Flag [%s] does not exist. %s", "type", err))
-	}
-	if v, err := cmd.Flags().GetString("source"); err == nil {
-		if v != "" {
-			body.Set("source", v)
-		}
-	} else {
-		return newUserError(fmt.Sprintf("Flag [%s] does not exist. %s", "source", err))
-	}
-	if v, err := cmd.Flags().GetInt("maximumAge"); err == nil {
-		body.Set("maximumAge", v)
-	} else {
-		return newUserError(fmt.Sprintf("Flag [%s] does not exist. %s", "maximumAge", err))
-	}
-	if cmd.Flags().Changed("editable") {
-		if v, err := cmd.Flags().GetBool("editable"); err == nil {
-			body.Set("editable", v)
-		} else {
-			return newUserError("Flag does not exist")
-		}
-	}
 	if err := setLazyDataTemplateFromFlags(cmd, body); err != nil {
 		return newUserError("Template error. ", err)
 	}
@@ -139,6 +128,10 @@ func (n *UpdateRetentionRuleCmd) RunE(cmd *cobra.Command, args []string) error {
 
 	// path parameters
 	pathParameters := make(map[string]string)
+	err = flags.WithPathParameters(
+		cmd,
+		pathParameters,
+	)
 
 	path := replacePathParameters("/retention/retentions/{id}", pathParameters)
 

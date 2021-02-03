@@ -2,7 +2,6 @@
 package cmd
 
 import (
-	"fmt"
 	"io"
 	"net/http"
 	"net/url"
@@ -61,6 +60,7 @@ Remove alarms on the device which are active and created in the last 10 minutes
 }
 
 func (n *DeleteAlarmCollectionCmd) RunE(cmd *cobra.Command, args []string) error {
+	var err error
 	// query parameters
 	queryValue := url.QueryEscape("")
 	query := url.Values{}
@@ -81,71 +81,24 @@ func (n *DeleteAlarmCollectionCmd) RunE(cmd *cobra.Command, args []string) error
 			}
 		}
 	}
-	if flagVal, err := cmd.Flags().GetString("dateFrom"); err == nil && flagVal != "" {
-		if v, err := tryGetTimestampFlag(cmd, "dateFrom"); err == nil && v != "" {
-			query.Add("dateFrom", v)
-		} else {
-			return newUserError("invalid date format", err)
-		}
-	}
-	if flagVal, err := cmd.Flags().GetString("dateTo"); err == nil && flagVal != "" {
-		if v, err := tryGetTimestampFlag(cmd, "dateTo"); err == nil && v != "" {
-			query.Add("dateTo", v)
-		} else {
-			return newUserError("invalid date format", err)
-		}
-	}
-	if v, err := cmd.Flags().GetString("type"); err == nil {
-		if v != "" {
-			query.Add("type", url.QueryEscape(v))
-		}
-	} else {
-		return newUserError(fmt.Sprintf("Flag [%s] does not exist. %s", "type", err))
-	}
-	if v, err := cmd.Flags().GetString("fragmentType"); err == nil {
-		if v != "" {
-			query.Add("fragmentType", url.QueryEscape(v))
-		}
-	} else {
-		return newUserError(fmt.Sprintf("Flag [%s] does not exist. %s", "fragmentType", err))
-	}
-	if v, err := cmd.Flags().GetString("status"); err == nil {
-		if v != "" {
-			query.Add("status", url.QueryEscape(v))
-		}
-	} else {
-		return newUserError(fmt.Sprintf("Flag [%s] does not exist. %s", "status", err))
-	}
-	if v, err := cmd.Flags().GetString("severity"); err == nil {
-		if v != "" {
-			query.Add("severity", url.QueryEscape(v))
-		}
-	} else {
-		return newUserError(fmt.Sprintf("Flag [%s] does not exist. %s", "severity", err))
-	}
-	if cmd.Flags().Changed("resolved") {
-		if v, err := cmd.Flags().GetBool("resolved"); err == nil {
-			query.Add("resolved", fmt.Sprintf("%v", v))
-		} else {
-			return newUserError("Flag does not exist")
-		}
-	}
-	if cmd.Flags().Changed("withSourceAssets") {
-		if v, err := cmd.Flags().GetBool("withSourceAssets"); err == nil {
-			query.Add("withSourceAssets", fmt.Sprintf("%v", v))
-		} else {
-			return newUserError("Flag does not exist")
-		}
-	}
-	if cmd.Flags().Changed("withSourceDevices") {
-		if v, err := cmd.Flags().GetBool("withSourceDevices"); err == nil {
-			query.Add("withSourceDevices", fmt.Sprintf("%v", v))
-		} else {
-			return newUserError("Flag does not exist")
-		}
-	}
 
-	err := flags.WithQueryOptions(
+	err = flags.WithQueryParameters(
+		cmd,
+		query,
+		flags.WithRelativeTimestamp("dateFrom", "dateFrom", ""),
+		flags.WithRelativeTimestamp("dateTo", "dateTo", ""),
+		flags.WithStringValue("type", "type"),
+		flags.WithStringValue("fragmentType", "fragmentType"),
+		flags.WithStringValue("status", "status"),
+		flags.WithStringValue("severity", "severity"),
+		flags.WithBoolValue("resolved", "resolved", ""),
+		flags.WithBoolValue("withSourceAssets", "withSourceAssets", ""),
+		flags.WithBoolValue("withSourceDevices", "withSourceDevices", ""),
+	)
+	if err != nil {
+		return newUserError(err)
+	}
+	err = flags.WithQueryOptions(
 		cmd,
 		query,
 	)
@@ -167,14 +120,33 @@ func (n *DeleteAlarmCollectionCmd) RunE(cmd *cobra.Command, args []string) error
 		}
 	}
 
+	err = flags.WithHeaders(
+		cmd,
+		headers,
+	)
+	if err != nil {
+		return newUserError(err)
+	}
+
 	// form data
 	formData := make(map[string]io.Reader)
 
 	// body
 	body := mapbuilder.NewInitializedMapBuilder()
+	err = flags.WithBody(
+		cmd,
+		body,
+	)
+	if err != nil {
+		return newUserError(err)
+	}
 
 	// path parameters
 	pathParameters := make(map[string]string)
+	err = flags.WithPathParameters(
+		cmd,
+		pathParameters,
+	)
 
 	path := replacePathParameters("alarm/alarms", pathParameters)
 

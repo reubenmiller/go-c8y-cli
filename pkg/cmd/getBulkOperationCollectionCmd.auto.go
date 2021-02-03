@@ -48,18 +48,20 @@ Get a list of bulk operations
 }
 
 func (n *GetBulkOperationCollectionCmd) RunE(cmd *cobra.Command, args []string) error {
+	var err error
 	// query parameters
 	queryValue := url.QueryEscape("")
 	query := url.Values{}
-	if cmd.Flags().Changed("withDeleted") {
-		if v, err := cmd.Flags().GetBool("withDeleted"); err == nil {
-			query.Add("withDeleted", fmt.Sprintf("%v", v))
-		} else {
-			return newUserError("Flag does not exist")
-		}
-	}
 
-	err := flags.WithQueryOptions(
+	err = flags.WithQueryParameters(
+		cmd,
+		query,
+		flags.WithBoolValue("withDeleted", "withDeleted", ""),
+	)
+	if err != nil {
+		return newUserError(err)
+	}
+	err = flags.WithQueryOptions(
 		cmd,
 		query,
 	)
@@ -81,14 +83,33 @@ func (n *GetBulkOperationCollectionCmd) RunE(cmd *cobra.Command, args []string) 
 	// headers
 	headers := http.Header{}
 
+	err = flags.WithHeaders(
+		cmd,
+		headers,
+	)
+	if err != nil {
+		return newUserError(err)
+	}
+
 	// form data
 	formData := make(map[string]io.Reader)
 
 	// body
 	body := mapbuilder.NewInitializedMapBuilder()
+	err = flags.WithBody(
+		cmd,
+		body,
+	)
+	if err != nil {
+		return newUserError(err)
+	}
 
 	// path parameters
 	pathParameters := make(map[string]string)
+	err = flags.WithPathParameters(
+		cmd,
+		pathParameters,
+	)
 
 	path := replacePathParameters("devicecontrol/bulkoperations", pathParameters)
 

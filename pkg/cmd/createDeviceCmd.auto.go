@@ -2,7 +2,6 @@
 package cmd
 
 import (
-	"fmt"
 	"io"
 	"net/http"
 	"net/url"
@@ -55,11 +54,19 @@ Create device with custom properties
 }
 
 func (n *CreateDeviceCmd) RunE(cmd *cobra.Command, args []string) error {
+	var err error
 	// query parameters
 	queryValue := url.QueryEscape("")
 	query := url.Values{}
 
-	err := flags.WithQueryOptions(
+	err = flags.WithQueryParameters(
+		cmd,
+		query,
+	)
+	if err != nil {
+		return newUserError(err)
+	}
+	err = flags.WithQueryOptions(
 		cmd,
 		query,
 	)
@@ -81,26 +88,30 @@ func (n *CreateDeviceCmd) RunE(cmd *cobra.Command, args []string) error {
 		}
 	}
 
+	err = flags.WithHeaders(
+		cmd,
+		headers,
+	)
+	if err != nil {
+		return newUserError(err)
+	}
+
 	// form data
 	formData := make(map[string]io.Reader)
 
 	// body
 	body := mapbuilder.NewInitializedMapBuilder()
+	err = flags.WithBody(
+		cmd,
+		body,
+		flags.WithStringValue("name", "name"),
+		flags.WithStringValue("type", "type"),
+	)
+	if err != nil {
+		return newUserError(err)
+	}
+
 	body.SetMap(getDataFlag(cmd))
-	if v, err := cmd.Flags().GetString("name"); err == nil {
-		if v != "" {
-			body.Set("name", v)
-		}
-	} else {
-		return newUserError(fmt.Sprintf("Flag [%s] does not exist. %s", "name", err))
-	}
-	if v, err := cmd.Flags().GetString("type"); err == nil {
-		if v != "" {
-			body.Set("type", v)
-		}
-	} else {
-		return newUserError(fmt.Sprintf("Flag [%s] does not exist. %s", "type", err))
-	}
 	bodyErr := body.MergeJsonnet(`
 {  c8y_IsDevice: {},
 }
@@ -117,6 +128,10 @@ func (n *CreateDeviceCmd) RunE(cmd *cobra.Command, args []string) error {
 
 	// path parameters
 	pathParameters := make(map[string]string)
+	err = flags.WithPathParameters(
+		cmd,
+		pathParameters,
+	)
 
 	path := replacePathParameters("inventory/managedObjects", pathParameters)
 

@@ -52,6 +52,7 @@ Get a list of series [nx_WEA_29_Delta.MDL10FG001] and [nx_WEA_29_Delta.ST9] for 
 }
 
 func (n *GetMeasurementSeriesCmd) RunE(cmd *cobra.Command, args []string) error {
+	var err error
 	// query parameters
 	queryValue := url.QueryEscape("")
 	query := url.Values{}
@@ -83,29 +84,18 @@ func (n *GetMeasurementSeriesCmd) RunE(cmd *cobra.Command, args []string) error 
 	} else {
 		return newUserError("Flag does not exist")
 	}
-	if v, err := cmd.Flags().GetString("aggregationType"); err == nil {
-		if v != "" {
-			query.Add("aggregationType", url.QueryEscape(v))
-		}
-	} else {
-		return newUserError(fmt.Sprintf("Flag [%s] does not exist. %s", "aggregationType", err))
-	}
-	if flagVal, err := cmd.Flags().GetString("dateFrom"); err == nil && flagVal != "" {
-		if v, err := tryGetTimestampFlag(cmd, "dateFrom"); err == nil && v != "" {
-			query.Add("dateFrom", v)
-		} else {
-			return newUserError("invalid date format", err)
-		}
-	}
-	if flagVal, err := cmd.Flags().GetString("dateTo"); err == nil && flagVal != "" {
-		if v, err := tryGetTimestampFlag(cmd, "dateTo"); err == nil && v != "" {
-			query.Add("dateTo", v)
-		} else {
-			return newUserError("invalid date format", err)
-		}
-	}
 
-	err := flags.WithQueryOptions(
+	err = flags.WithQueryParameters(
+		cmd,
+		query,
+		flags.WithStringValue("aggregationType", "aggregationType"),
+		flags.WithRelativeTimestamp("dateFrom", "dateFrom", ""),
+		flags.WithRelativeTimestamp("dateTo", "dateTo", ""),
+	)
+	if err != nil {
+		return newUserError(err)
+	}
+	err = flags.WithQueryOptions(
 		cmd,
 		query,
 	)
@@ -127,14 +117,33 @@ func (n *GetMeasurementSeriesCmd) RunE(cmd *cobra.Command, args []string) error 
 	// headers
 	headers := http.Header{}
 
+	err = flags.WithHeaders(
+		cmd,
+		headers,
+	)
+	if err != nil {
+		return newUserError(err)
+	}
+
 	// form data
 	formData := make(map[string]io.Reader)
 
 	// body
 	body := mapbuilder.NewInitializedMapBuilder()
+	err = flags.WithBody(
+		cmd,
+		body,
+	)
+	if err != nil {
+		return newUserError(err)
+	}
 
 	// path parameters
 	pathParameters := make(map[string]string)
+	err = flags.WithPathParameters(
+		cmd,
+		pathParameters,
+	)
 
 	path := replacePathParameters("measurement/measurements/series", pathParameters)
 

@@ -52,18 +52,20 @@ Get a managed object with parent references
 }
 
 func (n *GetManagedObjectCmd) RunE(cmd *cobra.Command, args []string) error {
+	var err error
 	// query parameters
 	queryValue := url.QueryEscape("")
 	query := url.Values{}
-	if cmd.Flags().Changed("withParents") {
-		if v, err := cmd.Flags().GetBool("withParents"); err == nil {
-			query.Add("withParents", fmt.Sprintf("%v", v))
-		} else {
-			return newUserError("Flag does not exist")
-		}
-	}
 
-	err := flags.WithQueryOptions(
+	err = flags.WithQueryParameters(
+		cmd,
+		query,
+		flags.WithBoolValue("withParents", "withParents", ""),
+	)
+	if err != nil {
+		return newUserError(err)
+	}
+	err = flags.WithQueryOptions(
 		cmd,
 		query,
 	)
@@ -85,14 +87,33 @@ func (n *GetManagedObjectCmd) RunE(cmd *cobra.Command, args []string) error {
 	// headers
 	headers := http.Header{}
 
+	err = flags.WithHeaders(
+		cmd,
+		headers,
+	)
+	if err != nil {
+		return newUserError(err)
+	}
+
 	// form data
 	formData := make(map[string]io.Reader)
 
 	// body
 	body := mapbuilder.NewInitializedMapBuilder()
+	err = flags.WithBody(
+		cmd,
+		body,
+	)
+	if err != nil {
+		return newUserError(err)
+	}
 
 	// path parameters
 	pathParameters := make(map[string]string)
+	err = flags.WithPathParameters(
+		cmd,
+		pathParameters,
+	)
 
 	path := replacePathParameters("inventory/managedObjects/{id}", pathParameters)
 

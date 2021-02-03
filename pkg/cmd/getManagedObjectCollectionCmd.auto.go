@@ -53,6 +53,7 @@ Get a list of managed objects
 }
 
 func (n *GetManagedObjectCollectionCmd) RunE(cmd *cobra.Command, args []string) error {
+	var err error
 	// query parameters
 	queryValue := url.QueryEscape("")
 	query := url.Values{}
@@ -73,43 +74,20 @@ func (n *GetManagedObjectCollectionCmd) RunE(cmd *cobra.Command, args []string) 
 			}
 		}
 	}
-	if v, err := cmd.Flags().GetString("type"); err == nil {
-		if v != "" {
-			query.Add("type", url.QueryEscape(v))
-		}
-	} else {
-		return newUserError(fmt.Sprintf("Flag [%s] does not exist. %s", "type", err))
-	}
-	if v, err := cmd.Flags().GetString("fragmentType"); err == nil {
-		if v != "" {
-			query.Add("fragmentType", url.QueryEscape(v))
-		}
-	} else {
-		return newUserError(fmt.Sprintf("Flag [%s] does not exist. %s", "fragmentType", err))
-	}
-	if v, err := cmd.Flags().GetString("text"); err == nil {
-		if v != "" {
-			query.Add("text", url.QueryEscape(v))
-		}
-	} else {
-		return newUserError(fmt.Sprintf("Flag [%s] does not exist. %s", "text", err))
-	}
-	if cmd.Flags().Changed("withParents") {
-		if v, err := cmd.Flags().GetBool("withParents"); err == nil {
-			query.Add("withParents", fmt.Sprintf("%v", v))
-		} else {
-			return newUserError("Flag does not exist")
-		}
-	}
-	if cmd.Flags().Changed("skipChildrenNames") {
-		if v, err := cmd.Flags().GetBool("skipChildrenNames"); err == nil {
-			query.Add("skipChildrenNames", fmt.Sprintf("%v", v))
-		} else {
-			return newUserError("Flag does not exist")
-		}
-	}
 
-	err := flags.WithQueryOptions(
+	err = flags.WithQueryParameters(
+		cmd,
+		query,
+		flags.WithStringValue("type", "type"),
+		flags.WithStringValue("fragmentType", "fragmentType"),
+		flags.WithStringValue("text", "text"),
+		flags.WithBoolValue("withParents", "withParents", ""),
+		flags.WithBoolValue("skipChildrenNames", "skipChildrenNames", ""),
+	)
+	if err != nil {
+		return newUserError(err)
+	}
+	err = flags.WithQueryOptions(
 		cmd,
 		query,
 	)
@@ -131,14 +109,33 @@ func (n *GetManagedObjectCollectionCmd) RunE(cmd *cobra.Command, args []string) 
 	// headers
 	headers := http.Header{}
 
+	err = flags.WithHeaders(
+		cmd,
+		headers,
+	)
+	if err != nil {
+		return newUserError(err)
+	}
+
 	// form data
 	formData := make(map[string]io.Reader)
 
 	// body
 	body := mapbuilder.NewInitializedMapBuilder()
+	err = flags.WithBody(
+		cmd,
+		body,
+	)
+	if err != nil {
+		return newUserError(err)
+	}
 
 	// path parameters
 	pathParameters := make(map[string]string)
+	err = flags.WithPathParameters(
+		cmd,
+		pathParameters,
+	)
 
 	path := replacePathParameters("inventory/managedObjects", pathParameters)
 

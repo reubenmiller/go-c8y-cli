@@ -2,7 +2,6 @@
 package cmd
 
 import (
-	"fmt"
 	"io"
 	"net/http"
 	"net/url"
@@ -62,11 +61,19 @@ Create an audit record for a custom managed object update
 }
 
 func (n *NewAuditCmd) RunE(cmd *cobra.Command, args []string) error {
+	var err error
 	// query parameters
 	queryValue := url.QueryEscape("")
 	query := url.Values{}
 
-	err := flags.WithQueryOptions(
+	err = flags.WithQueryParameters(
+		cmd,
+		query,
+	)
+	if err != nil {
+		return newUserError(err)
+	}
+	err = flags.WithQueryOptions(
 		cmd,
 		query,
 	)
@@ -88,68 +95,36 @@ func (n *NewAuditCmd) RunE(cmd *cobra.Command, args []string) error {
 		}
 	}
 
+	err = flags.WithHeaders(
+		cmd,
+		headers,
+	)
+	if err != nil {
+		return newUserError(err)
+	}
+
 	// form data
 	formData := make(map[string]io.Reader)
 
 	// body
 	body := mapbuilder.NewInitializedMapBuilder()
+	err = flags.WithBody(
+		cmd,
+		body,
+		flags.WithStringValue("type", "type"),
+		flags.WithRelativeTimestamp("time", "time", ""),
+		flags.WithStringValue("text", "text"),
+		flags.WithStringValue("source", "source.id"),
+		flags.WithStringValue("activity", "activity"),
+		flags.WithStringValue("severity", "severity"),
+		flags.WithStringValue("user", "user"),
+		flags.WithStringValue("application", "application"),
+	)
+	if err != nil {
+		return newUserError(err)
+	}
+
 	body.SetMap(getDataFlag(cmd))
-	if v, err := cmd.Flags().GetString("type"); err == nil {
-		if v != "" {
-			body.Set("type", v)
-		}
-	} else {
-		return newUserError(fmt.Sprintf("Flag [%s] does not exist. %s", "type", err))
-	}
-	if flagVal, err := cmd.Flags().GetString("time"); err == nil && flagVal != "" {
-		if v, err := tryGetTimestampFlag(cmd, "time"); err == nil && v != "" {
-			body.Set("time", decodeC8yTimestamp(v))
-		} else {
-			return newUserError("invalid date format", err)
-		}
-	}
-	if v, err := cmd.Flags().GetString("text"); err == nil {
-		if v != "" {
-			body.Set("text", v)
-		}
-	} else {
-		return newUserError(fmt.Sprintf("Flag [%s] does not exist. %s", "text", err))
-	}
-	if v, err := cmd.Flags().GetString("source"); err == nil {
-		if v != "" {
-			body.Set("source.id", v)
-		}
-	} else {
-		return newUserError(fmt.Sprintf("Flag [%s] does not exist. %s", "source", err))
-	}
-	if v, err := cmd.Flags().GetString("activity"); err == nil {
-		if v != "" {
-			body.Set("activity", v)
-		}
-	} else {
-		return newUserError(fmt.Sprintf("Flag [%s] does not exist. %s", "activity", err))
-	}
-	if v, err := cmd.Flags().GetString("severity"); err == nil {
-		if v != "" {
-			body.Set("severity", v)
-		}
-	} else {
-		return newUserError(fmt.Sprintf("Flag [%s] does not exist. %s", "severity", err))
-	}
-	if v, err := cmd.Flags().GetString("user"); err == nil {
-		if v != "" {
-			body.Set("user", v)
-		}
-	} else {
-		return newUserError(fmt.Sprintf("Flag [%s] does not exist. %s", "user", err))
-	}
-	if v, err := cmd.Flags().GetString("application"); err == nil {
-		if v != "" {
-			body.Set("application", v)
-		}
-	} else {
-		return newUserError(fmt.Sprintf("Flag [%s] does not exist. %s", "application", err))
-	}
 	if err := setLazyDataTemplateFromFlags(cmd, body); err != nil {
 		return newUserError("Template error. ", err)
 	}
@@ -159,6 +134,10 @@ func (n *NewAuditCmd) RunE(cmd *cobra.Command, args []string) error {
 
 	// path parameters
 	pathParameters := make(map[string]string)
+	err = flags.WithPathParameters(
+		cmd,
+		pathParameters,
+	)
 
 	path := replacePathParameters("/audit/auditRecords", pathParameters)
 

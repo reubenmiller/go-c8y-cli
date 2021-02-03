@@ -2,7 +2,6 @@
 package cmd
 
 import (
-	"fmt"
 	"io"
 	"net/http"
 	"net/url"
@@ -51,11 +50,19 @@ Update a user
 }
 
 func (n *ResetUserPasswordCmd) RunE(cmd *cobra.Command, args []string) error {
+	var err error
 	// query parameters
 	queryValue := url.QueryEscape("")
 	query := url.Values{}
 
-	err := flags.WithQueryOptions(
+	err = flags.WithQueryParameters(
+		cmd,
+		query,
+	)
+	if err != nil {
+		return newUserError(err)
+	}
+	err = flags.WithQueryOptions(
 		cmd,
 		query,
 	)
@@ -77,19 +84,29 @@ func (n *ResetUserPasswordCmd) RunE(cmd *cobra.Command, args []string) error {
 		}
 	}
 
+	err = flags.WithHeaders(
+		cmd,
+		headers,
+	)
+	if err != nil {
+		return newUserError(err)
+	}
+
 	// form data
 	formData := make(map[string]io.Reader)
 
 	// body
 	body := mapbuilder.NewInitializedMapBuilder()
-	body.SetMap(getDataFlag(cmd))
-	if v, err := cmd.Flags().GetString("newPassword"); err == nil {
-		if v != "" {
-			body.Set("password", v)
-		}
-	} else {
-		return newUserError(fmt.Sprintf("Flag [%s] does not exist. %s", "newPassword", err))
+	err = flags.WithBody(
+		cmd,
+		body,
+		flags.WithStringValue("newPassword", "password"),
+	)
+	if err != nil {
+		return newUserError(err)
 	}
+
+	body.SetMap(getDataFlag(cmd))
 	bodyErr := body.MergeJsonnet(`
 addIfEmptyString(base, "password", {sendPasswordResetEmail: true})
 `, false)
@@ -105,6 +122,10 @@ addIfEmptyString(base, "password", {sendPasswordResetEmail: true})
 
 	// path parameters
 	pathParameters := make(map[string]string)
+	err = flags.WithPathParameters(
+		cmd,
+		pathParameters,
+	)
 	if v := getTenantWithDefaultFlag(cmd, "tenant", client.TenantName); v != "" {
 		pathParameters["tenant"] = v
 	}

@@ -2,7 +2,6 @@
 package cmd
 
 import (
-	"fmt"
 	"io"
 	"net/http"
 	"net/url"
@@ -56,6 +55,7 @@ Update the status of all active alarms on a device to ACKNOWLEDGED
 }
 
 func (n *UpdateAlarmCollectionCmd) RunE(cmd *cobra.Command, args []string) error {
+	var err error
 	// query parameters
 	queryValue := url.QueryEscape("")
 	query := url.Values{}
@@ -76,43 +76,20 @@ func (n *UpdateAlarmCollectionCmd) RunE(cmd *cobra.Command, args []string) error
 			}
 		}
 	}
-	if v, err := cmd.Flags().GetString("status"); err == nil {
-		if v != "" {
-			query.Add("status", url.QueryEscape(v))
-		}
-	} else {
-		return newUserError(fmt.Sprintf("Flag [%s] does not exist. %s", "status", err))
-	}
-	if v, err := cmd.Flags().GetString("severity"); err == nil {
-		if v != "" {
-			query.Add("severity", url.QueryEscape(v))
-		}
-	} else {
-		return newUserError(fmt.Sprintf("Flag [%s] does not exist. %s", "severity", err))
-	}
-	if cmd.Flags().Changed("resolved") {
-		if v, err := cmd.Flags().GetBool("resolved"); err == nil {
-			query.Add("resolved", fmt.Sprintf("%v", v))
-		} else {
-			return newUserError("Flag does not exist")
-		}
-	}
-	if flagVal, err := cmd.Flags().GetString("dateFrom"); err == nil && flagVal != "" {
-		if v, err := tryGetTimestampFlag(cmd, "dateFrom"); err == nil && v != "" {
-			query.Add("dateFrom", v)
-		} else {
-			return newUserError("invalid date format", err)
-		}
-	}
-	if flagVal, err := cmd.Flags().GetString("dateTo"); err == nil && flagVal != "" {
-		if v, err := tryGetTimestampFlag(cmd, "dateTo"); err == nil && v != "" {
-			query.Add("dateTo", v)
-		} else {
-			return newUserError("invalid date format", err)
-		}
-	}
 
-	err := flags.WithQueryOptions(
+	err = flags.WithQueryParameters(
+		cmd,
+		query,
+		flags.WithStringValue("status", "status"),
+		flags.WithStringValue("severity", "severity"),
+		flags.WithBoolValue("resolved", "resolved", ""),
+		flags.WithRelativeTimestamp("dateFrom", "dateFrom", ""),
+		flags.WithRelativeTimestamp("dateTo", "dateTo", ""),
+	)
+	if err != nil {
+		return newUserError(err)
+	}
+	err = flags.WithQueryOptions(
 		cmd,
 		query,
 	)
@@ -134,19 +111,29 @@ func (n *UpdateAlarmCollectionCmd) RunE(cmd *cobra.Command, args []string) error
 		}
 	}
 
+	err = flags.WithHeaders(
+		cmd,
+		headers,
+	)
+	if err != nil {
+		return newUserError(err)
+	}
+
 	// form data
 	formData := make(map[string]io.Reader)
 
 	// body
 	body := mapbuilder.NewInitializedMapBuilder()
-	body.SetMap(getDataFlag(cmd))
-	if v, err := cmd.Flags().GetString("newStatus"); err == nil {
-		if v != "" {
-			body.Set("status", v)
-		}
-	} else {
-		return newUserError(fmt.Sprintf("Flag [%s] does not exist. %s", "newStatus", err))
+	err = flags.WithBody(
+		cmd,
+		body,
+		flags.WithStringValue("newStatus", "status"),
+	)
+	if err != nil {
+		return newUserError(err)
 	}
+
+	body.SetMap(getDataFlag(cmd))
 	if err := setLazyDataTemplateFromFlags(cmd, body); err != nil {
 		return newUserError("Template error. ", err)
 	}
@@ -156,6 +143,10 @@ func (n *UpdateAlarmCollectionCmd) RunE(cmd *cobra.Command, args []string) error
 
 	// path parameters
 	pathParameters := make(map[string]string)
+	err = flags.WithPathParameters(
+		cmd,
+		pathParameters,
+	)
 
 	path := replacePathParameters("alarm/alarms", pathParameters)
 

@@ -2,7 +2,6 @@
 package cmd
 
 import (
-	"fmt"
 	"io"
 	"net/http"
 	"net/url"
@@ -55,11 +54,19 @@ Update the current user's lastname
 }
 
 func (n *UpdateUserCurrentCmd) RunE(cmd *cobra.Command, args []string) error {
+	var err error
 	// query parameters
 	queryValue := url.QueryEscape("")
 	query := url.Values{}
 
-	err := flags.WithQueryOptions(
+	err = flags.WithQueryParameters(
+		cmd,
+		query,
+	)
+	if err != nil {
+		return newUserError(err)
+	}
+	err = flags.WithQueryOptions(
 		cmd,
 		query,
 	)
@@ -81,54 +88,34 @@ func (n *UpdateUserCurrentCmd) RunE(cmd *cobra.Command, args []string) error {
 		}
 	}
 
+	err = flags.WithHeaders(
+		cmd,
+		headers,
+	)
+	if err != nil {
+		return newUserError(err)
+	}
+
 	// form data
 	formData := make(map[string]io.Reader)
 
 	// body
 	body := mapbuilder.NewInitializedMapBuilder()
+	err = flags.WithBody(
+		cmd,
+		body,
+		flags.WithStringValue("firstName", "firstName"),
+		flags.WithStringValue("lastName", "lastName"),
+		flags.WithStringValue("phone", "phone"),
+		flags.WithStringValue("email", "email"),
+		flags.WithStringValue("enabled", "enabled"),
+		flags.WithStringValue("password", "password"),
+	)
+	if err != nil {
+		return newUserError(err)
+	}
+
 	body.SetMap(getDataFlag(cmd))
-	if v, err := cmd.Flags().GetString("firstName"); err == nil {
-		if v != "" {
-			body.Set("firstName", v)
-		}
-	} else {
-		return newUserError(fmt.Sprintf("Flag [%s] does not exist. %s", "firstName", err))
-	}
-	if v, err := cmd.Flags().GetString("lastName"); err == nil {
-		if v != "" {
-			body.Set("lastName", v)
-		}
-	} else {
-		return newUserError(fmt.Sprintf("Flag [%s] does not exist. %s", "lastName", err))
-	}
-	if v, err := cmd.Flags().GetString("phone"); err == nil {
-		if v != "" {
-			body.Set("phone", v)
-		}
-	} else {
-		return newUserError(fmt.Sprintf("Flag [%s] does not exist. %s", "phone", err))
-	}
-	if v, err := cmd.Flags().GetString("email"); err == nil {
-		if v != "" {
-			body.Set("email", v)
-		}
-	} else {
-		return newUserError(fmt.Sprintf("Flag [%s] does not exist. %s", "email", err))
-	}
-	if v, err := cmd.Flags().GetString("enabled"); err == nil {
-		if v != "" {
-			body.Set("enabled", v)
-		}
-	} else {
-		return newUserError(fmt.Sprintf("Flag [%s] does not exist. %s", "enabled", err))
-	}
-	if v, err := cmd.Flags().GetString("password"); err == nil {
-		if v != "" {
-			body.Set("password", v)
-		}
-	} else {
-		return newUserError(fmt.Sprintf("Flag [%s] does not exist. %s", "password", err))
-	}
 	if err := setLazyDataTemplateFromFlags(cmd, body); err != nil {
 		return newUserError("Template error. ", err)
 	}
@@ -138,6 +125,10 @@ func (n *UpdateUserCurrentCmd) RunE(cmd *cobra.Command, args []string) error {
 
 	// path parameters
 	pathParameters := make(map[string]string)
+	err = flags.WithPathParameters(
+		cmd,
+		pathParameters,
+	)
 
 	path := replacePathParameters("/user/currentUser", pathParameters)
 

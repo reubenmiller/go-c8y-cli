@@ -2,7 +2,6 @@
 package cmd
 
 import (
-	"fmt"
 	"io"
 	"net/http"
 	"net/url"
@@ -57,11 +56,19 @@ Update custom properties of the current application (requires using application 
 }
 
 func (n *UpdateCurrentApplicationCmd) RunE(cmd *cobra.Command, args []string) error {
+	var err error
 	// query parameters
 	queryValue := url.QueryEscape("")
 	query := url.Values{}
 
-	err := flags.WithQueryOptions(
+	err = flags.WithQueryParameters(
+		cmd,
+		query,
+	)
+	if err != nil {
+		return newUserError(err)
+	}
+	err = flags.WithQueryOptions(
 		cmd,
 		query,
 	)
@@ -83,68 +90,36 @@ func (n *UpdateCurrentApplicationCmd) RunE(cmd *cobra.Command, args []string) er
 		}
 	}
 
+	err = flags.WithHeaders(
+		cmd,
+		headers,
+	)
+	if err != nil {
+		return newUserError(err)
+	}
+
 	// form data
 	formData := make(map[string]io.Reader)
 
 	// body
 	body := mapbuilder.NewInitializedMapBuilder()
+	err = flags.WithBody(
+		cmd,
+		body,
+		flags.WithStringValue("name", "name"),
+		flags.WithStringValue("key", "key"),
+		flags.WithStringValue("availability", "availability"),
+		flags.WithStringValue("contextPath", "contextPath"),
+		flags.WithStringValue("resourcesUrl", "resourcesUrl"),
+		flags.WithStringValue("resourcesUsername", "resourcesUsername"),
+		flags.WithStringValue("resourcesPassword", "resourcesPassword"),
+		flags.WithStringValue("externalUrl", "externalUrl"),
+	)
+	if err != nil {
+		return newUserError(err)
+	}
+
 	body.SetMap(getDataFlag(cmd))
-	if v, err := cmd.Flags().GetString("name"); err == nil {
-		if v != "" {
-			body.Set("name", v)
-		}
-	} else {
-		return newUserError(fmt.Sprintf("Flag [%s] does not exist. %s", "name", err))
-	}
-	if v, err := cmd.Flags().GetString("key"); err == nil {
-		if v != "" {
-			body.Set("key", v)
-		}
-	} else {
-		return newUserError(fmt.Sprintf("Flag [%s] does not exist. %s", "key", err))
-	}
-	if v, err := cmd.Flags().GetString("availability"); err == nil {
-		if v != "" {
-			body.Set("availability", v)
-		}
-	} else {
-		return newUserError(fmt.Sprintf("Flag [%s] does not exist. %s", "availability", err))
-	}
-	if v, err := cmd.Flags().GetString("contextPath"); err == nil {
-		if v != "" {
-			body.Set("contextPath", v)
-		}
-	} else {
-		return newUserError(fmt.Sprintf("Flag [%s] does not exist. %s", "contextPath", err))
-	}
-	if v, err := cmd.Flags().GetString("resourcesUrl"); err == nil {
-		if v != "" {
-			body.Set("resourcesUrl", v)
-		}
-	} else {
-		return newUserError(fmt.Sprintf("Flag [%s] does not exist. %s", "resourcesUrl", err))
-	}
-	if v, err := cmd.Flags().GetString("resourcesUsername"); err == nil {
-		if v != "" {
-			body.Set("resourcesUsername", v)
-		}
-	} else {
-		return newUserError(fmt.Sprintf("Flag [%s] does not exist. %s", "resourcesUsername", err))
-	}
-	if v, err := cmd.Flags().GetString("resourcesPassword"); err == nil {
-		if v != "" {
-			body.Set("resourcesPassword", v)
-		}
-	} else {
-		return newUserError(fmt.Sprintf("Flag [%s] does not exist. %s", "resourcesPassword", err))
-	}
-	if v, err := cmd.Flags().GetString("externalUrl"); err == nil {
-		if v != "" {
-			body.Set("externalUrl", v)
-		}
-	} else {
-		return newUserError(fmt.Sprintf("Flag [%s] does not exist. %s", "externalUrl", err))
-	}
 	if err := setLazyDataTemplateFromFlags(cmd, body); err != nil {
 		return newUserError("Template error. ", err)
 	}
@@ -154,6 +129,10 @@ func (n *UpdateCurrentApplicationCmd) RunE(cmd *cobra.Command, args []string) er
 
 	// path parameters
 	pathParameters := make(map[string]string)
+	err = flags.WithPathParameters(
+		cmd,
+		pathParameters,
+	)
 
 	path := replacePathParameters("/application/currentApplication", pathParameters)
 

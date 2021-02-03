@@ -2,7 +2,6 @@
 package cmd
 
 import (
-	"fmt"
 	"io"
 	"net/http"
 	"net/url"
@@ -53,6 +52,7 @@ Delete measurement collection for a device
 }
 
 func (n *DeleteMeasurementCollectionCmd) RunE(cmd *cobra.Command, args []string) error {
+	var err error
 	// query parameters
 	queryValue := url.QueryEscape("")
 	query := url.Values{}
@@ -73,36 +73,19 @@ func (n *DeleteMeasurementCollectionCmd) RunE(cmd *cobra.Command, args []string)
 			}
 		}
 	}
-	if v, err := cmd.Flags().GetString("type"); err == nil {
-		if v != "" {
-			query.Add("type", url.QueryEscape(v))
-		}
-	} else {
-		return newUserError(fmt.Sprintf("Flag [%s] does not exist. %s", "type", err))
-	}
-	if v, err := cmd.Flags().GetString("fragmentType"); err == nil {
-		if v != "" {
-			query.Add("fragmentType", url.QueryEscape(v))
-		}
-	} else {
-		return newUserError(fmt.Sprintf("Flag [%s] does not exist. %s", "fragmentType", err))
-	}
-	if flagVal, err := cmd.Flags().GetString("dateFrom"); err == nil && flagVal != "" {
-		if v, err := tryGetTimestampFlag(cmd, "dateFrom"); err == nil && v != "" {
-			query.Add("dateFrom", v)
-		} else {
-			return newUserError("invalid date format", err)
-		}
-	}
-	if flagVal, err := cmd.Flags().GetString("dateTo"); err == nil && flagVal != "" {
-		if v, err := tryGetTimestampFlag(cmd, "dateTo"); err == nil && v != "" {
-			query.Add("dateTo", v)
-		} else {
-			return newUserError("invalid date format", err)
-		}
-	}
 
-	err := flags.WithQueryOptions(
+	err = flags.WithQueryParameters(
+		cmd,
+		query,
+		flags.WithStringValue("type", "type"),
+		flags.WithStringValue("fragmentType", "fragmentType"),
+		flags.WithRelativeTimestamp("dateFrom", "dateFrom", ""),
+		flags.WithRelativeTimestamp("dateTo", "dateTo", ""),
+	)
+	if err != nil {
+		return newUserError(err)
+	}
+	err = flags.WithQueryOptions(
 		cmd,
 		query,
 	)
@@ -124,14 +107,33 @@ func (n *DeleteMeasurementCollectionCmd) RunE(cmd *cobra.Command, args []string)
 		}
 	}
 
+	err = flags.WithHeaders(
+		cmd,
+		headers,
+	)
+	if err != nil {
+		return newUserError(err)
+	}
+
 	// form data
 	formData := make(map[string]io.Reader)
 
 	// body
 	body := mapbuilder.NewInitializedMapBuilder()
+	err = flags.WithBody(
+		cmd,
+		body,
+	)
+	if err != nil {
+		return newUserError(err)
+	}
 
 	// path parameters
 	pathParameters := make(map[string]string)
+	err = flags.WithPathParameters(
+		cmd,
+		pathParameters,
+	)
 
 	path := replacePathParameters("measurement/measurements", pathParameters)
 

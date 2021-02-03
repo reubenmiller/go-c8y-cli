@@ -50,11 +50,19 @@ Assign a device as a child device to an existing device
 }
 
 func (n *NewManagedObjectChildDeviceCmd) RunE(cmd *cobra.Command, args []string) error {
+	var err error
 	// query parameters
 	queryValue := url.QueryEscape("")
 	query := url.Values{}
 
-	err := flags.WithQueryOptions(
+	err = flags.WithQueryParameters(
+		cmd,
+		query,
+	)
+	if err != nil {
+		return newUserError(err)
+	}
+	err = flags.WithQueryOptions(
 		cmd,
 		query,
 	)
@@ -76,11 +84,27 @@ func (n *NewManagedObjectChildDeviceCmd) RunE(cmd *cobra.Command, args []string)
 		}
 	}
 
+	err = flags.WithHeaders(
+		cmd,
+		headers,
+	)
+	if err != nil {
+		return newUserError(err)
+	}
+
 	// form data
 	formData := make(map[string]io.Reader)
 
 	// body
 	body := mapbuilder.NewInitializedMapBuilder()
+	err = flags.WithBody(
+		cmd,
+		body,
+	)
+	if err != nil {
+		return newUserError(err)
+	}
+
 	body.SetMap(getDataFlag(cmd))
 	if cmd.Flags().Changed("newChild") {
 		newChildInputValues, newChildValue, err := getFormattedDeviceSlice(cmd, args, "newChild")
@@ -108,6 +132,10 @@ func (n *NewManagedObjectChildDeviceCmd) RunE(cmd *cobra.Command, args []string)
 
 	// path parameters
 	pathParameters := make(map[string]string)
+	err = flags.WithPathParameters(
+		cmd,
+		pathParameters,
+	)
 	if cmd.Flags().Changed("device") {
 		deviceInputValues, deviceValue, err := getFormattedDeviceSlice(cmd, args, "device")
 

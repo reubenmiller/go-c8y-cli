@@ -59,6 +59,7 @@ Get a list of pending operations for a device
 }
 
 func (n *GetOperationCollectionCmd) RunE(cmd *cobra.Command, args []string) error {
+	var err error
 	// query parameters
 	queryValue := url.QueryEscape("")
 	query := url.Values{}
@@ -96,36 +97,19 @@ func (n *GetOperationCollectionCmd) RunE(cmd *cobra.Command, args []string) erro
 			}
 		}
 	}
-	if flagVal, err := cmd.Flags().GetString("dateFrom"); err == nil && flagVal != "" {
-		if v, err := tryGetTimestampFlag(cmd, "dateFrom"); err == nil && v != "" {
-			query.Add("dateFrom", v)
-		} else {
-			return newUserError("invalid date format", err)
-		}
-	}
-	if flagVal, err := cmd.Flags().GetString("dateTo"); err == nil && flagVal != "" {
-		if v, err := tryGetTimestampFlag(cmd, "dateTo"); err == nil && v != "" {
-			query.Add("dateTo", v)
-		} else {
-			return newUserError("invalid date format", err)
-		}
-	}
-	if v, err := cmd.Flags().GetString("status"); err == nil {
-		if v != "" {
-			query.Add("status", url.QueryEscape(v))
-		}
-	} else {
-		return newUserError(fmt.Sprintf("Flag [%s] does not exist. %s", "status", err))
-	}
-	if v, err := cmd.Flags().GetString("bulkOperationId"); err == nil {
-		if v != "" {
-			query.Add("bulkOperationId", url.QueryEscape(v))
-		}
-	} else {
-		return newUserError(fmt.Sprintf("Flag [%s] does not exist. %s", "bulkOperationId", err))
-	}
 
-	err := flags.WithQueryOptions(
+	err = flags.WithQueryParameters(
+		cmd,
+		query,
+		flags.WithRelativeTimestamp("dateFrom", "dateFrom", ""),
+		flags.WithRelativeTimestamp("dateTo", "dateTo", ""),
+		flags.WithStringValue("status", "status"),
+		flags.WithStringValue("bulkOperationId", "bulkOperationId"),
+	)
+	if err != nil {
+		return newUserError(err)
+	}
+	err = flags.WithQueryOptions(
 		cmd,
 		query,
 	)
@@ -147,14 +131,33 @@ func (n *GetOperationCollectionCmd) RunE(cmd *cobra.Command, args []string) erro
 	// headers
 	headers := http.Header{}
 
+	err = flags.WithHeaders(
+		cmd,
+		headers,
+	)
+	if err != nil {
+		return newUserError(err)
+	}
+
 	// form data
 	formData := make(map[string]io.Reader)
 
 	// body
 	body := mapbuilder.NewInitializedMapBuilder()
+	err = flags.WithBody(
+		cmd,
+		body,
+	)
+	if err != nil {
+		return newUserError(err)
+	}
 
 	// path parameters
 	pathParameters := make(map[string]string)
+	err = flags.WithPathParameters(
+		cmd,
+		pathParameters,
+	)
 
 	path := replacePathParameters("devicecontrol/operations", pathParameters)
 

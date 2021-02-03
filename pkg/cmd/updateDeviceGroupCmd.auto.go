@@ -2,7 +2,6 @@
 package cmd
 
 import (
-	"fmt"
 	"io"
 	"net/http"
 	"net/url"
@@ -52,11 +51,19 @@ Update device group by id
 }
 
 func (n *UpdateDeviceGroupCmd) RunE(cmd *cobra.Command, args []string) error {
+	var err error
 	// query parameters
 	queryValue := url.QueryEscape("")
 	query := url.Values{}
 
-	err := flags.WithQueryOptions(
+	err = flags.WithQueryParameters(
+		cmd,
+		query,
+	)
+	if err != nil {
+		return newUserError(err)
+	}
+	err = flags.WithQueryOptions(
 		cmd,
 		query,
 	)
@@ -78,19 +85,29 @@ func (n *UpdateDeviceGroupCmd) RunE(cmd *cobra.Command, args []string) error {
 		}
 	}
 
+	err = flags.WithHeaders(
+		cmd,
+		headers,
+	)
+	if err != nil {
+		return newUserError(err)
+	}
+
 	// form data
 	formData := make(map[string]io.Reader)
 
 	// body
 	body := mapbuilder.NewInitializedMapBuilder()
-	body.SetMap(getDataFlag(cmd))
-	if v, err := cmd.Flags().GetString("name"); err == nil {
-		if v != "" {
-			body.Set("name", v)
-		}
-	} else {
-		return newUserError(fmt.Sprintf("Flag [%s] does not exist. %s", "name", err))
+	err = flags.WithBody(
+		cmd,
+		body,
+		flags.WithStringValue("name", "name"),
+	)
+	if err != nil {
+		return newUserError(err)
 	}
+
+	body.SetMap(getDataFlag(cmd))
 	if err := setLazyDataTemplateFromFlags(cmd, body); err != nil {
 		return newUserError("Template error. ", err)
 	}
@@ -100,6 +117,10 @@ func (n *UpdateDeviceGroupCmd) RunE(cmd *cobra.Command, args []string) error {
 
 	// path parameters
 	pathParameters := make(map[string]string)
+	err = flags.WithPathParameters(
+		cmd,
+		pathParameters,
+	)
 
 	path := replacePathParameters("inventory/managedObjects/{id}", pathParameters)
 

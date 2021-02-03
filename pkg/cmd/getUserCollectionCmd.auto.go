@@ -56,67 +56,27 @@ Get a list of users
 }
 
 func (n *GetUserCollectionCmd) RunE(cmd *cobra.Command, args []string) error {
+	var err error
 	// query parameters
 	queryValue := url.QueryEscape("")
 	query := url.Values{}
-	if v, err := cmd.Flags().GetString("username"); err == nil {
-		if v != "" {
-			query.Add("username", url.QueryEscape(v))
-		}
-	} else {
-		return newUserError(fmt.Sprintf("Flag [%s] does not exist. %s", "username", err))
-	}
-	if v, err := cmd.Flags().GetString("groups"); err == nil {
-		if v != "" {
-			query.Add("groups", url.QueryEscape(v))
-		}
-	} else {
-		return newUserError(fmt.Sprintf("Flag [%s] does not exist. %s", "groups", err))
-	}
-	if v, err := cmd.Flags().GetString("owner"); err == nil {
-		if v != "" {
-			query.Add("owner", url.QueryEscape(v))
-		}
-	} else {
-		return newUserError(fmt.Sprintf("Flag [%s] does not exist. %s", "owner", err))
-	}
-	if cmd.Flags().Changed("onlyDevices") {
-		if v, err := cmd.Flags().GetBool("onlyDevices"); err == nil {
-			query.Add("onlyDevices", fmt.Sprintf("%v", v))
-		} else {
-			return newUserError("Flag does not exist")
-		}
-	}
-	if cmd.Flags().Changed("withSubusersCount") {
-		if v, err := cmd.Flags().GetBool("withSubusersCount"); err == nil {
-			query.Add("withSubusersCount", fmt.Sprintf("%v", v))
-		} else {
-			return newUserError("Flag does not exist")
-		}
-	}
-	if cmd.Flags().Changed("withApps") {
-		if v, err := cmd.Flags().GetBool("withApps"); err == nil {
-			query.Add("withApps", fmt.Sprintf("%v", v))
-		} else {
-			return newUserError("Flag does not exist")
-		}
-	}
-	if cmd.Flags().Changed("withGroups") {
-		if v, err := cmd.Flags().GetBool("withGroups"); err == nil {
-			query.Add("withGroups", fmt.Sprintf("%v", v))
-		} else {
-			return newUserError("Flag does not exist")
-		}
-	}
-	if cmd.Flags().Changed("withRoles") {
-		if v, err := cmd.Flags().GetBool("withRoles"); err == nil {
-			query.Add("withRoles", fmt.Sprintf("%v", v))
-		} else {
-			return newUserError("Flag does not exist")
-		}
-	}
 
-	err := flags.WithQueryOptions(
+	err = flags.WithQueryParameters(
+		cmd,
+		query,
+		flags.WithStringValue("username", "username"),
+		flags.WithStringValue("groups", "groups"),
+		flags.WithStringValue("owner", "owner"),
+		flags.WithBoolValue("onlyDevices", "onlyDevices", ""),
+		flags.WithBoolValue("withSubusersCount", "withSubusersCount", ""),
+		flags.WithBoolValue("withApps", "withApps", ""),
+		flags.WithBoolValue("withGroups", "withGroups", ""),
+		flags.WithBoolValue("withRoles", "withRoles", ""),
+	)
+	if err != nil {
+		return newUserError(err)
+	}
+	err = flags.WithQueryOptions(
 		cmd,
 		query,
 	)
@@ -138,14 +98,33 @@ func (n *GetUserCollectionCmd) RunE(cmd *cobra.Command, args []string) error {
 	// headers
 	headers := http.Header{}
 
+	err = flags.WithHeaders(
+		cmd,
+		headers,
+	)
+	if err != nil {
+		return newUserError(err)
+	}
+
 	// form data
 	formData := make(map[string]io.Reader)
 
 	// body
 	body := mapbuilder.NewInitializedMapBuilder()
+	err = flags.WithBody(
+		cmd,
+		body,
+	)
+	if err != nil {
+		return newUserError(err)
+	}
 
 	// path parameters
 	pathParameters := make(map[string]string)
+	err = flags.WithPathParameters(
+		cmd,
+		pathParameters,
+	)
 	if v := getTenantWithDefaultFlag(cmd, "tenant", client.TenantName); v != "" {
 		pathParameters["tenant"] = v
 	}

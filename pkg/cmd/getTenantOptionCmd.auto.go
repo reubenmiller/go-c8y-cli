@@ -51,11 +51,19 @@ Get a tenant option
 }
 
 func (n *GetTenantOptionCmd) RunE(cmd *cobra.Command, args []string) error {
+	var err error
 	// query parameters
 	queryValue := url.QueryEscape("")
 	query := url.Values{}
 
-	err := flags.WithQueryOptions(
+	err = flags.WithQueryParameters(
+		cmd,
+		query,
+	)
+	if err != nil {
+		return newUserError(err)
+	}
+	err = flags.WithQueryOptions(
 		cmd,
 		query,
 	)
@@ -77,28 +85,35 @@ func (n *GetTenantOptionCmd) RunE(cmd *cobra.Command, args []string) error {
 	// headers
 	headers := http.Header{}
 
+	err = flags.WithHeaders(
+		cmd,
+		headers,
+	)
+	if err != nil {
+		return newUserError(err)
+	}
+
 	// form data
 	formData := make(map[string]io.Reader)
 
 	// body
 	body := mapbuilder.NewInitializedMapBuilder()
+	err = flags.WithBody(
+		cmd,
+		body,
+	)
+	if err != nil {
+		return newUserError(err)
+	}
 
 	// path parameters
 	pathParameters := make(map[string]string)
-	if v, err := cmd.Flags().GetString("category"); err == nil {
-		if v != "" {
-			pathParameters["category"] = v
-		}
-	} else {
-		return newUserError(fmt.Sprintf("Flag [%s] does not exist. %s", "category", err))
-	}
-	if v, err := cmd.Flags().GetString("key"); err == nil {
-		if v != "" {
-			pathParameters["key"] = v
-		}
-	} else {
-		return newUserError(fmt.Sprintf("Flag [%s] does not exist. %s", "key", err))
-	}
+	err = flags.WithPathParameters(
+		cmd,
+		pathParameters,
+		flags.WithStringValue("category", "category"),
+		flags.WithStringValue("key", "key"),
+	)
 
 	path := replacePathParameters("/tenant/options/{category}/{key}", pathParameters)
 

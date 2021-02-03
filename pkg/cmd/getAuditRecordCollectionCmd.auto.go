@@ -55,6 +55,7 @@ Get a list of audit records
 }
 
 func (n *GetAuditRecordCollectionCmd) RunE(cmd *cobra.Command, args []string) error {
+	var err error
 	// query parameters
 	queryValue := url.QueryEscape("")
 	query := url.Values{}
@@ -65,50 +66,21 @@ func (n *GetAuditRecordCollectionCmd) RunE(cmd *cobra.Command, args []string) er
 	} else {
 		return newUserError(fmt.Sprintf("Flag [%s] does not exist. %s", "source", err))
 	}
-	if v, err := cmd.Flags().GetString("type"); err == nil {
-		if v != "" {
-			query.Add("type", url.QueryEscape(v))
-		}
-	} else {
-		return newUserError(fmt.Sprintf("Flag [%s] does not exist. %s", "type", err))
-	}
-	if v, err := cmd.Flags().GetString("user"); err == nil {
-		if v != "" {
-			query.Add("user", url.QueryEscape(v))
-		}
-	} else {
-		return newUserError(fmt.Sprintf("Flag [%s] does not exist. %s", "user", err))
-	}
-	if v, err := cmd.Flags().GetString("application"); err == nil {
-		if v != "" {
-			query.Add("application", url.QueryEscape(v))
-		}
-	} else {
-		return newUserError(fmt.Sprintf("Flag [%s] does not exist. %s", "application", err))
-	}
-	if flagVal, err := cmd.Flags().GetString("dateFrom"); err == nil && flagVal != "" {
-		if v, err := tryGetTimestampFlag(cmd, "dateFrom"); err == nil && v != "" {
-			query.Add("dateFrom", v)
-		} else {
-			return newUserError("invalid date format", err)
-		}
-	}
-	if flagVal, err := cmd.Flags().GetString("dateTo"); err == nil && flagVal != "" {
-		if v, err := tryGetTimestampFlag(cmd, "dateTo"); err == nil && v != "" {
-			query.Add("dateTo", v)
-		} else {
-			return newUserError("invalid date format", err)
-		}
-	}
-	if cmd.Flags().Changed("revert") {
-		if v, err := cmd.Flags().GetBool("revert"); err == nil {
-			query.Add("revert", fmt.Sprintf("%v", v))
-		} else {
-			return newUserError("Flag does not exist")
-		}
-	}
 
-	err := flags.WithQueryOptions(
+	err = flags.WithQueryParameters(
+		cmd,
+		query,
+		flags.WithStringValue("type", "type"),
+		flags.WithStringValue("user", "user"),
+		flags.WithStringValue("application", "application"),
+		flags.WithRelativeTimestamp("dateFrom", "dateFrom", ""),
+		flags.WithRelativeTimestamp("dateTo", "dateTo", ""),
+		flags.WithBoolValue("revert", "revert", ""),
+	)
+	if err != nil {
+		return newUserError(err)
+	}
+	err = flags.WithQueryOptions(
 		cmd,
 		query,
 	)
@@ -130,14 +102,33 @@ func (n *GetAuditRecordCollectionCmd) RunE(cmd *cobra.Command, args []string) er
 	// headers
 	headers := http.Header{}
 
+	err = flags.WithHeaders(
+		cmd,
+		headers,
+	)
+	if err != nil {
+		return newUserError(err)
+	}
+
 	// form data
 	formData := make(map[string]io.Reader)
 
 	// body
 	body := mapbuilder.NewInitializedMapBuilder()
+	err = flags.WithBody(
+		cmd,
+		body,
+	)
+	if err != nil {
+		return newUserError(err)
+	}
 
 	// path parameters
 	pathParameters := make(map[string]string)
+	err = flags.WithPathParameters(
+		cmd,
+		pathParameters,
+	)
 
 	path := replacePathParameters("/audit/auditRecords", pathParameters)
 

@@ -51,11 +51,19 @@ Add a role to the admin group
 }
 
 func (n *AddRoleToGroupCmd) RunE(cmd *cobra.Command, args []string) error {
+	var err error
 	// query parameters
 	queryValue := url.QueryEscape("")
 	query := url.Values{}
 
-	err := flags.WithQueryOptions(
+	err = flags.WithQueryParameters(
+		cmd,
+		query,
+	)
+	if err != nil {
+		return newUserError(err)
+	}
+	err = flags.WithQueryOptions(
 		cmd,
 		query,
 	)
@@ -77,11 +85,27 @@ func (n *AddRoleToGroupCmd) RunE(cmd *cobra.Command, args []string) error {
 		}
 	}
 
+	err = flags.WithHeaders(
+		cmd,
+		headers,
+	)
+	if err != nil {
+		return newUserError(err)
+	}
+
 	// form data
 	formData := make(map[string]io.Reader)
 
 	// body
 	body := mapbuilder.NewInitializedMapBuilder()
+	err = flags.WithBody(
+		cmd,
+		body,
+	)
+	if err != nil {
+		return newUserError(err)
+	}
+
 	body.SetMap(getDataFlag(cmd))
 	if cmd.Flags().Changed("role") {
 		roleInputValues, roleValue, err := getFormattedRoleSelfSlice(cmd, args, "role")
@@ -109,6 +133,10 @@ func (n *AddRoleToGroupCmd) RunE(cmd *cobra.Command, args []string) error {
 
 	// path parameters
 	pathParameters := make(map[string]string)
+	err = flags.WithPathParameters(
+		cmd,
+		pathParameters,
+	)
 	if v := getTenantWithDefaultFlag(cmd, "tenant", client.TenantName); v != "" {
 		pathParameters["tenant"] = v
 	}

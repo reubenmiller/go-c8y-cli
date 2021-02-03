@@ -58,6 +58,7 @@ Get a list of measurements
 }
 
 func (n *GetMeasurementCollectionCmd) RunE(cmd *cobra.Command, args []string) error {
+	var err error
 	// query parameters
 	queryValue := url.QueryEscape("")
 	query := url.Values{}
@@ -78,57 +79,22 @@ func (n *GetMeasurementCollectionCmd) RunE(cmd *cobra.Command, args []string) er
 			}
 		}
 	}
-	if v, err := cmd.Flags().GetString("type"); err == nil {
-		if v != "" {
-			query.Add("type", url.QueryEscape(v))
-		}
-	} else {
-		return newUserError(fmt.Sprintf("Flag [%s] does not exist. %s", "type", err))
-	}
-	if v, err := cmd.Flags().GetString("valueFragmentType"); err == nil {
-		if v != "" {
-			query.Add("valueFragmentType", url.QueryEscape(v))
-		}
-	} else {
-		return newUserError(fmt.Sprintf("Flag [%s] does not exist. %s", "valueFragmentType", err))
-	}
-	if v, err := cmd.Flags().GetString("valueFragmentSeries"); err == nil {
-		if v != "" {
-			query.Add("valueFragmentSeries", url.QueryEscape(v))
-		}
-	} else {
-		return newUserError(fmt.Sprintf("Flag [%s] does not exist. %s", "valueFragmentSeries", err))
-	}
-	if v, err := cmd.Flags().GetString("fragmentType"); err == nil {
-		if v != "" {
-			query.Add("fragmentType", url.QueryEscape(v))
-		}
-	} else {
-		return newUserError(fmt.Sprintf("Flag [%s] does not exist. %s", "fragmentType", err))
-	}
-	if flagVal, err := cmd.Flags().GetString("dateFrom"); err == nil && flagVal != "" {
-		if v, err := tryGetTimestampFlag(cmd, "dateFrom"); err == nil && v != "" {
-			query.Add("dateFrom", v)
-		} else {
-			return newUserError("invalid date format", err)
-		}
-	}
-	if flagVal, err := cmd.Flags().GetString("dateTo"); err == nil && flagVal != "" {
-		if v, err := tryGetTimestampFlag(cmd, "dateTo"); err == nil && v != "" {
-			query.Add("dateTo", v)
-		} else {
-			return newUserError("invalid date format", err)
-		}
-	}
-	if cmd.Flags().Changed("revert") {
-		if v, err := cmd.Flags().GetBool("revert"); err == nil {
-			query.Add("revert", fmt.Sprintf("%v", v))
-		} else {
-			return newUserError("Flag does not exist")
-		}
-	}
 
-	err := flags.WithQueryOptions(
+	err = flags.WithQueryParameters(
+		cmd,
+		query,
+		flags.WithStringValue("type", "type"),
+		flags.WithStringValue("valueFragmentType", "valueFragmentType"),
+		flags.WithStringValue("valueFragmentSeries", "valueFragmentSeries"),
+		flags.WithStringValue("fragmentType", "fragmentType"),
+		flags.WithRelativeTimestamp("dateFrom", "dateFrom", ""),
+		flags.WithRelativeTimestamp("dateTo", "dateTo", ""),
+		flags.WithBoolValue("revert", "revert", ""),
+	)
+	if err != nil {
+		return newUserError(err)
+	}
+	err = flags.WithQueryOptions(
 		cmd,
 		query,
 	)
@@ -149,26 +115,16 @@ func (n *GetMeasurementCollectionCmd) RunE(cmd *cobra.Command, args []string) er
 
 	// headers
 	headers := http.Header{}
-	if cmd.Flags().Changed("csv") {
-		if _, err := cmd.Flags().GetBool("csv"); err == nil {
-			headers.Add("Accept", "text/csv")
-		} else {
-			return newUserError("Flag does not exist")
-		}
-	}
-	if cmd.Flags().Changed("excel") {
-		if _, err := cmd.Flags().GetBool("excel"); err == nil {
-			headers.Add("Accept", "application/vnd.ms-excel")
-		} else {
-			return newUserError("Flag does not exist")
-		}
-	}
-	if v, err := cmd.Flags().GetString("unit"); err == nil {
-		if v != "" {
-			headers.Add("X-Cumulocity-System-Of-Units", v)
-		}
-	} else {
-		return newUserError(fmt.Sprintf("Flag [%s] does not exist. %s", "unit", err))
+
+	err = flags.WithHeaders(
+		cmd,
+		headers,
+		flags.WithBoolValue("csv", "Accept", "text/csv"),
+		flags.WithBoolValue("excel", "Accept", "application/vnd.ms-excel"),
+		flags.WithStringValue("unit", "X-Cumulocity-System-Of-Units"),
+	)
+	if err != nil {
+		return newUserError(err)
 	}
 
 	// form data
@@ -176,9 +132,20 @@ func (n *GetMeasurementCollectionCmd) RunE(cmd *cobra.Command, args []string) er
 
 	// body
 	body := mapbuilder.NewInitializedMapBuilder()
+	err = flags.WithBody(
+		cmd,
+		body,
+	)
+	if err != nil {
+		return newUserError(err)
+	}
 
 	// path parameters
 	pathParameters := make(map[string]string)
+	err = flags.WithPathParameters(
+		cmd,
+		pathParameters,
+	)
 
 	path := replacePathParameters("measurement/measurements", pathParameters)
 
