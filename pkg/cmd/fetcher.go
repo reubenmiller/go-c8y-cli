@@ -1,9 +1,13 @@
 package cmd
 
 import (
+	"errors"
 	"fmt"
 	"strconv"
 	"strings"
+
+	"github.com/reubenmiller/go-c8y-cli/pkg/iterator"
+	"github.com/reubenmiller/go-c8y/pkg/c8y"
 )
 
 type entityReference struct {
@@ -139,4 +143,46 @@ func getFetchedResultsAsString(refs []entityReference) (results []string, invali
 		}
 	}
 	return
+}
+
+type EntityIterator struct {
+	Fetcher       entityFetcher
+	Client        *c8y.Client
+	valueIterator iterator.Iterator
+	GetID         bool
+}
+
+// NewReferenceByNameIterator create a new iterator which can look up values by their id or names
+func NewReferenceByNameIterator(fetcher entityFetcher, iterator, c8yClient *c8y.Client, valueIterator iterator.Iterator) *EntityIterator {
+	return &EntityIterator{
+		Fetcher:       fetcher,
+		Client:        c8yClient,
+		valueIterator: valueIterator,
+		GetID:         false,
+	}
+}
+
+var ErrNoMatchesFound = errors.New("referenceByName: no matching items found")
+var ErrMoreThanOneFound = errors.New("referenceByName: more than 1 found")
+
+func (i *EntityIterator) GetNext() (value []byte, err error) {
+
+	value, err = i.valueIterator.GetNext()
+	if err != nil {
+		return
+	}
+	refs, err := lookupEntity(i.Fetcher, []string{string(value)}, i.GetID)
+
+	if err != nil {
+		return
+	}
+
+	if len(refs) == 0 {
+		return nil, ErrNoMatchesFound
+	}
+
+	if len(refs) > 1 {
+		return nil, ErrMoreThanOneFound
+	}
+	return []byte(refs[0].ID), nil
 }
