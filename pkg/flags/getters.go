@@ -29,6 +29,20 @@ func WithQueryParameters(cmd *cobra.Command, query url.Values, opts ...GetOption
 	return
 }
 
+// WithPathParameters returns a path parameter values given from command line arguments
+func WithPathParameters(cmd *cobra.Command, path map[string]string, opts ...GetOption) (err error) {
+	for _, opt := range opts {
+		name, value, err := opt(cmd)
+		if err != nil {
+			return err
+		}
+		if name != "" {
+			path[name] = fmt.Sprintf("%v", value)
+		}
+	}
+	return
+}
+
 // WithHeaders sets header values from command line arguments
 func WithHeaders(cmd *cobra.Command, header http.Header, opts ...GetOption) (err error) {
 	for _, opt := range opts {
@@ -170,6 +184,9 @@ func unpackGetterOptions(defaultFormat string, options ...string) (src string, d
 		src = options[0]
 		dst = options[1]
 		formatter = options[2]
+	}
+	if dst == "" {
+		dst = src
 	}
 	return
 }
