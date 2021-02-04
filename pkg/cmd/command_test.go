@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"io"
 	"io/ioutil"
+	"strings"
 	"testing"
 
 	"github.com/reubenmiller/go-c8y-cli/pkg/assert"
@@ -94,4 +95,22 @@ func readOutput(t *testing.T, b io.Reader) string {
 	out, err := ioutil.ReadAll(b)
 	assert.OK(t, err)
 	return string(out)
+}
+
+func Test_ExecutePathVariableCommand(t *testing.T) {
+	cmd := setupTest()
+	b := bytes.NewBufferString("")
+	errBuffer := bytes.NewBufferString("")
+	cmd.SetOut(b)
+	cmd.SetOutput(errBuffer)
+	cmdArgs := "inventory get --id=12345 --dry"
+	cmd.SetArgs(strings.Split(cmdArgs, " "))
+	cmdErr := cmd.Execute()
+	assert.True(t, cmdErr != nil)
+
+	outE := readOutput(t, errBuffer)
+	assert.True(t, outE != "")
+
+	out := readOutput(t, b)
+	assert.True(t, out != "")
 }
