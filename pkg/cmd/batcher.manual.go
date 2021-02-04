@@ -321,7 +321,17 @@ func processRequestAndResponseWithWorkers(cmd *cobra.Command, r *c8y.RequestOpti
 			return err
 		}
 		if items != nil {
-			pathIter = iterator.NewCompositeStringIterator(items, strings.ReplaceAll(r.Path, "{"+pipeOpt.Name+"}", "%s"))
+			format := r.Path
+
+			if strings.Count(format, "{") == 1 && strings.Count(r.Path, "}") == 1 {
+				// Don't assume the variable name matches the given name.
+				// But if there is only one template variable, then it is safe to assume it is the correct one
+				format = r.Path[0:strings.Index(r.Path, "{")] + "%s" + r.Path[strings.Index(r.Path, "}")+1:]
+			} else {
+				// Only substitute an explicitly the pipeline variable name
+				format = strings.ReplaceAll(r.Path, "{"+pipeOpt.Name+"}", "%s")
+			}
+			pathIter = iterator.NewCompositeStringIterator(items, format)
 		} else {
 			pathIter = iterator.NewRepeatIterator(r.Path, 1)
 		}
