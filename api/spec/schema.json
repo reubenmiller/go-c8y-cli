@@ -366,7 +366,8 @@
                 "type": "string",
                 "description": "Body content type. Only used to identify binary contents",
                 "enum": [
-                  "binary"
+                  "binary",
+                  "formdata"
                 ]
               }
             }

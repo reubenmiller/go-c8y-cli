@@ -116,6 +116,8 @@ endpoints:
         - description: Upload a config file and make it globally accessible for all users
           command: c8y binaries create --file "myConfig.json" --data "c8y_Global={},type=c8y_upload"
 
+    bodyContent:
+      type: formdata
     body:
       - name: file
         type: file

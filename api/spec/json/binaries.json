@@ -149,6 +149,9 @@
           }
         ]
       },
+      "bodyContent": {
+        "type": "formdata"
+      },
       "body": [
         {
           "name": "file",
