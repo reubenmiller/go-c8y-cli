@@ -111,6 +111,7 @@ func (n *NewAuditCmd) RunE(cmd *cobra.Command, args []string) error {
 	err = flags.WithBody(
 		cmd,
 		body,
+		flags.WithDataValue(FlagDataName),
 		flags.WithStringValue("type", "type"),
 		flags.WithRelativeTimestamp("time", "time", ""),
 		flags.WithStringValue("text", "text"),
@@ -124,7 +125,6 @@ func (n *NewAuditCmd) RunE(cmd *cobra.Command, args []string) error {
 		return newUserError(err)
 	}
 
-	body.SetMap(getDataFlag(cmd))
 	if err := setLazyDataTemplateFromFlags(cmd, body); err != nil {
 		return newUserError("Template error. ", err)
 	}

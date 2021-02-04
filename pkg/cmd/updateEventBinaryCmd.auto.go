@@ -101,12 +101,11 @@ func (n *UpdateEventBinaryCmd) RunE(cmd *cobra.Command, args []string) error {
 	err = flags.WithBody(
 		cmd,
 		body,
+		flags.WithFilePath("file", "file", ""),
 	)
 	if err != nil {
 		return newUserError(err)
 	}
-
-	getFileContentsFlag(cmd, "file", body)
 
 	// path parameters
 	pathParameters := make(map[string]string)

@@ -104,13 +104,13 @@ func (n *UpdateTenantOptionEditableCmd) RunE(cmd *cobra.Command, args []string) 
 	err = flags.WithBody(
 		cmd,
 		body,
+		flags.WithDataValue(FlagDataName),
 		flags.WithStringValue("editable", "editable"),
 	)
 	if err != nil {
 		return newUserError(err)
 	}
 
-	body.SetMap(getDataFlag(cmd))
 	if err := setLazyDataTemplateFromFlags(cmd, body); err != nil {
 		return newUserError("Template error. ", err)
 	}

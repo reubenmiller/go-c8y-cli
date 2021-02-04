@@ -103,7 +103,8 @@
     
     if ($Specification.body) {
         if ($Specification.bodyContent.type -ne 'binary') {
-            $null = $RESTBodyBuilder.AppendLine('body.SetMap(getDataFlag(cmd))')
+
+            $null = $RESTBodyBuilderOptions.AppendLine("flags.WithDataValue(FlagDataName),")
         } else {
             $GetBodyContents = "body.GetFileContents()"
         }
@@ -197,12 +198,12 @@
         # Validate body
         #
         if ($Specification.bodyContent.type -ne 'binary') {
-            $BodyValidateionCode = @"
+            $BodyValidationCode = @"
         if err := body.Validate(); err != nil {
             return newUserError("Body validation error. ", err)
         }
 "@.TrimStart()
-            $null = $RESTBodyBuilder.AppendLine($BodyValidateionCode)
+            $null = $RESTBodyBuilder.AppendLine($BodyValidationCode)
         }
         
     }

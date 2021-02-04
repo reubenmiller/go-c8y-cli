@@ -100,13 +100,13 @@ func (n *ApproveNewDeviceRequestCmd) RunE(cmd *cobra.Command, args []string) err
 	err = flags.WithBody(
 		cmd,
 		body,
+		flags.WithDataValue(FlagDataName),
 		flags.WithStringValue("status", "status"),
 	)
 	if err != nil {
 		return newUserError(err)
 	}
 
-	body.SetMap(getDataFlag(cmd))
 	if err := setLazyDataTemplateFromFlags(cmd, body); err != nil {
 		return newUserError("Template error. ", err)
 	}

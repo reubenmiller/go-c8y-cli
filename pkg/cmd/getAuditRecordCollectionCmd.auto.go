@@ -59,17 +59,11 @@ func (n *GetAuditRecordCollectionCmd) RunE(cmd *cobra.Command, args []string) er
 	// query parameters
 	queryValue := url.QueryEscape("")
 	query := url.Values{}
-	if v, err := cmd.Flags().GetString("source"); err == nil {
-		if v != "" {
-			query.Add("source", url.QueryEscape(v))
-		}
-	} else {
-		return newUserError(fmt.Sprintf("Flag [%s] does not exist. %s", "source", err))
-	}
 
 	err = flags.WithQueryParameters(
 		cmd,
 		query,
+		flags.WithStringValue("source", "source"),
 		flags.WithStringValue("type", "type"),
 		flags.WithStringValue("user", "user"),
 		flags.WithStringValue("application", "application"),

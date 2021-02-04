@@ -106,6 +106,7 @@ func (n *UpdateCurrentApplicationCmd) RunE(cmd *cobra.Command, args []string) er
 	err = flags.WithBody(
 		cmd,
 		body,
+		flags.WithDataValue(FlagDataName),
 		flags.WithStringValue("name", "name"),
 		flags.WithStringValue("key", "key"),
 		flags.WithStringValue("availability", "availability"),
@@ -119,7 +120,6 @@ func (n *UpdateCurrentApplicationCmd) RunE(cmd *cobra.Command, args []string) er
 		return newUserError(err)
 	}
 
-	body.SetMap(getDataFlag(cmd))
 	if err := setLazyDataTemplateFromFlags(cmd, body); err != nil {
 		return newUserError("Template error. ", err)
 	}

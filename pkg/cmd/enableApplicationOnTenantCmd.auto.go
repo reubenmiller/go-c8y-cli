@@ -99,12 +99,12 @@ func (n *EnableApplicationOnTenantCmd) RunE(cmd *cobra.Command, args []string) e
 	err = flags.WithBody(
 		cmd,
 		body,
+		flags.WithDataValue(FlagDataName),
 	)
 	if err != nil {
 		return newUserError(err)
 	}
 
-	body.SetMap(getDataFlag(cmd))
 	if cmd.Flags().Changed("application") {
 		applicationInputValues, applicationValue, err := getApplicationSlice(cmd, args, "application")
 

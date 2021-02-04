@@ -1,7 +1,9 @@
-package cmd
+package c8ydata
 
 import (
 	"testing"
+
+	"github.com/reubenmiller/go-c8y-cli/pkg/jsonUtilities"
 )
 
 func Test_RemoveCumulocityPropertiesWithID(t *testing.T) {
@@ -41,7 +43,7 @@ func Test_RemoveCumulocityPropertiesWithID(t *testing.T) {
 		"c8y_IsDevice": {}
 	}
 	`
-	data := RemoveCumulocityProperties(MustParseJSON(jsonStr), true)
+	data := RemoveCumulocityProperties(jsonUtilities.MustParseJSON(jsonStr), true)
 
 	if _, ok := data["id"]; ok {
 		t.Errorf("%s field should not exist. wanted=not-exists, got=exists", "id")
@@ -51,7 +53,7 @@ func Test_RemoveCumulocityPropertiesWithID(t *testing.T) {
 		t.Errorf("%s field should not exist. wanted=not-exists, got=exists", "creationTime")
 	}
 
-	data = RemoveCumulocityProperties(MustParseJSON(jsonStr), false)
+	data = RemoveCumulocityProperties(jsonUtilities.MustParseJSON(jsonStr), false)
 
 	if _, ok := data["id"]; !ok {
 		t.Errorf("%s field should exist. wanted=exists, got=not-exists", "id")

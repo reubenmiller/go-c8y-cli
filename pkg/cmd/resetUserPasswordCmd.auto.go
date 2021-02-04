@@ -100,13 +100,13 @@ func (n *ResetUserPasswordCmd) RunE(cmd *cobra.Command, args []string) error {
 	err = flags.WithBody(
 		cmd,
 		body,
+		flags.WithDataValue(FlagDataName),
 		flags.WithStringValue("newPassword", "password"),
 	)
 	if err != nil {
 		return newUserError(err)
 	}
 
-	body.SetMap(getDataFlag(cmd))
 	bodyErr := body.MergeJsonnet(`
 addIfEmptyString(base, "password", {sendPasswordResetEmail: true})
 `, false)

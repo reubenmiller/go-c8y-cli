@@ -107,6 +107,7 @@ func (n *UpdateRetentionRuleCmd) RunE(cmd *cobra.Command, args []string) error {
 	err = flags.WithBody(
 		cmd,
 		body,
+		flags.WithDataValue(FlagDataName),
 		flags.WithStringValue("dataType", "dataType"),
 		flags.WithStringValue("fragmentType", "fragmentType"),
 		flags.WithStringValue("type", "type"),
@@ -118,7 +119,6 @@ func (n *UpdateRetentionRuleCmd) RunE(cmd *cobra.Command, args []string) error {
 		return newUserError(err)
 	}
 
-	body.SetMap(getDataFlag(cmd))
 	if err := setLazyDataTemplateFromFlags(cmd, body); err != nil {
 		return newUserError("Template error. ", err)
 	}

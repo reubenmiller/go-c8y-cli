@@ -100,12 +100,12 @@ func (n *NewManagedObjectChildAssetCmd) RunE(cmd *cobra.Command, args []string) 
 	err = flags.WithBody(
 		cmd,
 		body,
+		flags.WithDataValue(FlagDataName),
 	)
 	if err != nil {
 		return newUserError(err)
 	}
 
-	body.SetMap(getDataFlag(cmd))
 	if cmd.Flags().Changed("newChildDevice") {
 		newChildDeviceInputValues, newChildDeviceValue, err := getFormattedDeviceSlice(cmd, args, "newChildDevice")
 

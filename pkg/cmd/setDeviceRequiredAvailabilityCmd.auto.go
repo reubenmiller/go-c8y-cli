@@ -100,13 +100,13 @@ func (n *SetDeviceRequiredAvailabilityCmd) RunE(cmd *cobra.Command, args []strin
 	err = flags.WithBody(
 		cmd,
 		body,
+		flags.WithDataValue(FlagDataName),
 		flags.WithIntValue("interval", "c8y_RequiredAvailability.responseInterval"),
 	)
 	if err != nil {
 		return newUserError(err)
 	}
 
-	body.SetMap(getDataFlag(cmd))
 	if err := setLazyDataTemplateFromFlags(cmd, body); err != nil {
 		return newUserError("Template error. ", err)
 	}

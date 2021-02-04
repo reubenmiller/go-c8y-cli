@@ -88,7 +88,7 @@ endpoints:
 
     body:
       - name: newName
-        type: 'string'
+        type: string
         property: name
         required: false
         description: Agent name

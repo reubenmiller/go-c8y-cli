@@ -6,6 +6,8 @@ import (
 	"net/url"
 	"strings"
 
+	"github.com/reubenmiller/go-c8y-cli/pkg/c8ydata"
+	"github.com/reubenmiller/go-c8y-cli/pkg/jsonUtilities"
 	"github.com/reubenmiller/go-c8y-cli/pkg/mapbuilder"
 	"github.com/reubenmiller/go-c8y-cli/pkg/timestamp"
 	"github.com/spf13/cobra"
@@ -72,6 +74,19 @@ func WithBody(cmd *cobra.Command, body *mapbuilder.MapBuilder, opts ...GetOption
 			// only set non-empty values by default
 			if v != "" {
 				err = body.Set(name, value)
+			}
+		case FilePath:
+			if v != "" {
+				body.SetFile(string(v))
+			}
+		case map[string]interface{}:
+			if v != nil {
+				if name != "" {
+					body.Set(name, v)
+
+				} else {
+					body.SetMap(v)
+				}
 			}
 		default:
 			err = body.Set(name, value)
@@ -189,4 +204,48 @@ func unpackGetterOptions(defaultFormat string, options ...string) (src string, d
 		dst = src
 	}
 	return
+}
+
+// FilePath is a string representation of a file path
+type FilePath string
+
+// WithFilePath adds a file path from cli arguments
+func WithFilePath(opts ...string) GetOption {
+	return func(cmd *cobra.Command) (string, interface{}, error) {
+
+		src, dst, _ := unpackGetterOptions("%s", opts...)
+
+		value, err := cmd.Flags().GetString(src)
+		if err != nil {
+			return dst, value, err
+		}
+
+		return dst, FilePath(value), err
+	}
+}
+
+func WithDataValue(opts ...string) GetOption {
+	return func(cmd *cobra.Command) (string, interface{}, error) {
+
+		src, dst, _ := unpackGetterOptions("%s", opts...)
+
+		if !cmd.Flags().Changed(FlagDataName) {
+			return "", "", nil
+		}
+
+		value, err := cmd.Flags().GetString(src)
+		if err != nil {
+			return dst, value, err
+		}
+
+		data := make(map[string]interface{})
+
+		err = jsonUtilities.ParseJSON(resolveContents(value), data)
+		if err != nil {
+			return dst, "", fmt.Errorf("json error: %s parameter does not contain valid json or shorthand json. %w", src, err)
+		}
+
+		c8ydata.RemoveCumulocityProperties(data, true)
+		return dst, data, err
+	}
 }

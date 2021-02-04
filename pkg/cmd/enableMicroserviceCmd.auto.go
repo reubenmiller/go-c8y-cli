@@ -103,12 +103,12 @@ func (n *EnableMicroserviceCmd) RunE(cmd *cobra.Command, args []string) error {
 	err = flags.WithBody(
 		cmd,
 		body,
+		flags.WithDataValue(FlagDataName),
 	)
 	if err != nil {
 		return newUserError(err)
 	}
 
-	body.SetMap(getDataFlag(cmd))
 	if cmd.Flags().Lookup("id") != nil {
 		idInputValues, idValue, err := getMicroserviceSlice(cmd, args, "id")
 

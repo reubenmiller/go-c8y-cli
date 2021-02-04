@@ -2,7 +2,6 @@
 package cmd
 
 import (
-	"fmt"
 	"io"
 	"net/http"
 	"net/url"
@@ -108,6 +107,7 @@ func (n *UpdateUserCmd) RunE(cmd *cobra.Command, args []string) error {
 	err = flags.WithBody(
 		cmd,
 		body,
+		flags.WithDataValue(FlagDataName),
 		flags.WithStringValue("firstName", "firstName"),
 		flags.WithStringValue("lastName", "lastName"),
 		flags.WithStringValue("phone", "phone"),
@@ -115,19 +115,12 @@ func (n *UpdateUserCmd) RunE(cmd *cobra.Command, args []string) error {
 		flags.WithBoolValue("enabled", "enabled", ""),
 		flags.WithStringValue("password", "password"),
 		flags.WithBoolValue("sendPasswordResetEmail", "sendPasswordResetEmail", ""),
+		flags.WithDataValue("customProperties", "customProperties"),
 	)
 	if err != nil {
 		return newUserError(err)
 	}
 
-	body.SetMap(getDataFlag(cmd))
-	if cmd.Flags().Changed("customProperties") {
-		if v, err := cmd.Flags().GetString("customProperties"); err == nil {
-			body.Set("customProperties", MustParseJSON(v))
-		} else {
-			return newUserError(fmt.Sprintf("Flag [%s] does not exist. %s", "customProperties", err))
-		}
-	}
 	if err := setLazyDataTemplateFromFlags(cmd, body); err != nil {
 		return newUserError("Template error. ", err)
 	}

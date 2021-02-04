@@ -41,12 +41,9 @@
         "file" = @{}
         "fileContents" = @{}
         "attachment" = @{}
-        "id" = @{}
         "integer" = @{}
         "json_custom" = @{}
         "microservice" = @{}
-        "outputfile" = @{}
-        "source" = @{}
         "string" = @{}
         "tenant" = @{}
     }
@@ -60,10 +57,7 @@
 "@
 
     # fileContents. File contents will be added to body
-    $Setters."fileContents"."body" = "getFileContentsFlag(cmd, `"${prop}`", body)"
-    $Definitions."fileContents" = @"
-    $($Setters."fileContents".$SetterType)
-"@
+    $Definitions."fileContents" = "flags.WithFilePath(`"${prop}`", `"${queryParam}`", `"$FixedValue`"),"
 
     # attachment (used in multipart/form-data uploads), without extra details
     $Setters."attachment"."query" = "query.Add(`"${queryParam}`", `"true`")"
@@ -74,26 +68,9 @@
 "@
 
     # Boolean
-    $Setters."boolean"."query" = "query.Add(`"${queryParam}`", fmt.Sprintf(`"%v`", v))"
-    $Setters."boolean"."path" = "pathParameters[`"${queryParam}`"] = fmt.Sprintf(`"%v`", v)"
-    $Setters."boolean"."body" = "body.Set(`"${queryParam}`", v)"
     $Definitions."boolean" = "flags.WithBoolValue(`"${prop}`", `"${queryParam}`", `"$FixedValue`"),"
 
-    # source
-    $Setters."source"."query" = "query.Add(`"${queryParam}`", v)"
-    $Setters."source"."path" = "pathParameters[`"${queryParam}`"] = v"
-    $Setters."source"."body" = "body.Set(`"${queryParam}`", v)"
-    $Definitions."source" = @"
-    if v, err := cmd.Flags().GetString("${prop}"); err == nil {
-        $($Setters."source".$SetterType)
-    } else {
-        return newUserError("Flag does not exist")
-    }
-"@
-
-    $Setters."datetime"."query" = "query.Add(`"${queryParam}`", v)"
-    $Setters."datetime"."path" = "pathParameters[`"${queryParam}`"] = v"
-    $Setters."datetime"."body" = "body.Set(`"${queryParam}`", decodeC8yTimestamp(v))"
+    # relative datetime
     $Definitions."datetime" = "flags.WithRelativeTimestamp(`"${prop}`", `"${queryParam}`", `"$FixedValue`"),"
 
     # string array
@@ -365,62 +342,16 @@
 "@
 
     # string
-    $Setters."string"."query" = "query.Add(`"${queryParam}`", url.QueryEscape(v))"
-    $Setters."string"."path" = "pathParameters[`"${queryParam}`"] = v"
-    $Setters."string"."body" = "body.Set(`"${queryParam}`", v)"
-    $Setters."string"."header" = "headers.Add(`"${queryParam}`", v)"
     $Definitions."string" = "flags.WithStringValue(`"${prop}`", `"${queryParam}`"),"
 
-    # outputfile
-    <# $Setters."outputfile"."query" = "query.Add(`"${queryParam}`", url.QueryEscape(v))"
-    $Setters."outputfile"."path" = "pathParameters[`"${queryParam}`"] = v"
-    $Setters."outputfile"."body" = "body.Set(`"${queryParam}`", v)"
-    $Definitions."outputfile" = @"
-    if v, err := getOutputFileFlag; err == nil {
-        $($Setters.outputfile.$SetterType)
-        outputfile = v
-    } else {
-        return err
-    }
-"@ #>
-
-    # id
-    $Setters."id"."query" = "query.Add(`"${queryParam}`", url.QueryEscape(v))"
-    $Setters."id"."path" = "pathParameters[`"${queryParam}`"] = v"
-    $Setters."id"."body" = "body.Set(`"${queryParam}`", v)"
-    $Definitions."id" = @"
-    if v, err := cmd.Flags().GetString("${prop}"); err == nil {
-        if v != "" {
-            $($Setters.id.$SetterType)
-        }
-    } else {
-        return newUserError(fmt.Sprintf("Flag [%s] does not exist. %s", "${prop}", err))
-    }
-"@
-
     # integer
-    $Setters."integer"."query" = "query.Add(`"${queryParam}`", fmt.Sprintf(`"%d`", v))"
-    $Setters."integer"."path" = "pathParameters[`"${queryParam}`"] = fmt.Sprintf(`"%d`", v)"
-    $Setters."integer"."body" = "body.Set(`"${queryParam}`", v)"
     $Definitions."integer" = "flags.WithIntValue(`"${prop}`", `"${queryParam}`"),"
 
     # float
-    $Setters."float"."query" = "query.Add(`"${queryParam}`", v)"
-    $Setters."float"."path" = "pathParameters[`"${queryParam}`"] = fmt.Sprintf(`"%d`", v)"
-    $Setters."float"."body" = "body.Set(`"${queryParam}`", v)"
     $Definitions."float" = "flags.WithFloatValue(`"${prop}`", `"${queryParam}`"),"
 
     # json_custom: Only supported for use with the body
-    $Setters."json_custom"."body" = 'body.Set("{0}", MustParseJSON(v))' -f $queryParam
-    $Definitions."json_custom" = @"
-    if cmd.Flags().Changed("${prop}") {
-        if v, err := cmd.Flags().GetString("${prop}"); err == nil {
-            $($Setters.json_custom.$SetterType)
-        } else {
-            return newUserError(fmt.Sprintf("Flag [%s] does not exist. %s", "${prop}", err))
-        }
-    }
-"@
+    $Definitions."json_custom" = "flags.WithDataValue(`"${prop}`", `"${queryParam}`"),"
 
     # json - don't do anything because it should be manually set
     $Definitions."json" = ""

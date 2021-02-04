@@ -105,6 +105,7 @@ func (n *CreateDeviceGroupCmd) RunE(cmd *cobra.Command, args []string) error {
 	err = flags.WithBody(
 		cmd,
 		body,
+		flags.WithDataValue(FlagDataName),
 		flags.WithStringValue("name", "name"),
 		flags.WithStringValue("type", "type"),
 	)
@@ -112,7 +113,6 @@ func (n *CreateDeviceGroupCmd) RunE(cmd *cobra.Command, args []string) error {
 		return newUserError(err)
 	}
 
-	body.SetMap(getDataFlag(cmd))
 	bodyErr := body.MergeJsonnet(`
 {  type: "c8y_DeviceGroup",
   c8y_IsDeviceGroup: {},

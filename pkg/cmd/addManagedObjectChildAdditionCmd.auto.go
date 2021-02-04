@@ -100,12 +100,12 @@ func (n *AddManagedObjectChildAdditionCmd) RunE(cmd *cobra.Command, args []strin
 	err = flags.WithBody(
 		cmd,
 		body,
+		flags.WithDataValue(FlagDataName),
 	)
 	if err != nil {
 		return newUserError(err)
 	}
 
-	body.SetMap(getDataFlag(cmd))
 	if items, err := cmd.Flags().GetStringSlice("newChild"); err == nil {
 		if len(items) > 0 {
 			for _, v := range items {

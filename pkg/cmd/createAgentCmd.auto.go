@@ -106,6 +106,7 @@ func (n *CreateAgentCmd) RunE(cmd *cobra.Command, args []string) error {
 	err = flags.WithBody(
 		cmd,
 		body,
+		flags.WithDataValue(FlagDataName),
 		flags.WithStringValue("name", "name"),
 		flags.WithStringValue("type", "type"),
 	)
@@ -113,7 +114,6 @@ func (n *CreateAgentCmd) RunE(cmd *cobra.Command, args []string) error {
 		return newUserError(err)
 	}
 
-	body.SetMap(getDataFlag(cmd))
 	bodyErr := body.MergeJsonnet(`
 {  c8y_IsDevice: {},
   com_cumulocity_model_Agent: {},

@@ -101,6 +101,7 @@ func (n *NewMeasurementCmd) RunE(cmd *cobra.Command, args []string) error {
 	err = flags.WithBody(
 		cmd,
 		body,
+		flags.WithDataValue(FlagDataName),
 		flags.WithRelativeTimestamp("time", "time", ""),
 		flags.WithStringValue("type", "type"),
 	)
@@ -108,7 +109,6 @@ func (n *NewMeasurementCmd) RunE(cmd *cobra.Command, args []string) error {
 		return newUserError(err)
 	}
 
-	body.SetMap(getDataFlag(cmd))
 	if cmd.Flags().Changed("device") {
 		deviceInputValues, deviceValue, err := getFormattedDeviceSlice(cmd, args, "device")
 

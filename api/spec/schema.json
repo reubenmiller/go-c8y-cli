@@ -34,7 +34,6 @@
         "application",
         "boolean",
         "integer",
-        "id",
         "file",
         "float",
         "fileContents",

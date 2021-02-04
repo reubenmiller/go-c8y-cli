@@ -2,7 +2,6 @@
 package cmd
 
 import (
-	"fmt"
 	"io"
 	"net/http"
 	"net/url"
@@ -105,14 +104,15 @@ func (n *NewBulkOperationCmd) RunE(cmd *cobra.Command, args []string) error {
 	err = flags.WithBody(
 		cmd,
 		body,
+		flags.WithDataValue(FlagDataName),
 		flags.WithRelativeTimestamp("startDate", "startDate", ""),
 		flags.WithFloatValue("creationRampSec", "creationRamp"),
+		flags.WithDataValue("operation", "operationPrototype"),
 	)
 	if err != nil {
 		return newUserError(err)
 	}
 
-	body.SetMap(getDataFlag(cmd))
 	if cmd.Flags().Changed("group") {
 		groupInputValues, groupValue, err := getFormattedDeviceGroupSlice(cmd, args, "group")
 
@@ -128,13 +128,6 @@ func (n *NewBulkOperationCmd) RunE(cmd *cobra.Command, args []string) error {
 			if item != "" {
 				body.Set("groupId", newIDValue(item).GetID())
 			}
-		}
-	}
-	if cmd.Flags().Changed("operation") {
-		if v, err := cmd.Flags().GetString("operation"); err == nil {
-			body.Set("operationPrototype", MustParseJSON(v))
-		} else {
-			return newUserError(fmt.Sprintf("Flag [%s] does not exist. %s", "operation", err))
 		}
 	}
 	if err := setLazyDataTemplateFromFlags(cmd, body); err != nil {

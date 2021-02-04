@@ -13,7 +13,9 @@ import (
 	"strings"
 
 	"github.com/pkg/errors"
+	"github.com/reubenmiller/go-c8y-cli/pkg/c8ydata"
 	"github.com/reubenmiller/go-c8y-cli/pkg/iterator"
+	"github.com/reubenmiller/go-c8y-cli/pkg/jsonUtilities"
 	"github.com/reubenmiller/go-c8y-cli/pkg/mapbuilder"
 	"github.com/spf13/cobra"
 )
@@ -142,7 +144,7 @@ func getDataFlag(cmd *cobra.Command) map[string]interface{} {
 		return nil
 	}
 	if value, err := cmd.Flags().GetString(FlagDataName); err == nil {
-		return RemoveCumulocityProperties(MustParseJSON(getContents(value)), true)
+		return c8ydata.RemoveCumulocityProperties(jsonUtilities.MustParseJSON(getContents(value)), true)
 	}
 	return nil
 }
@@ -156,7 +158,7 @@ func setDataTemplateFromFlags(cmd *cobra.Command, body *mapbuilder.MapBuilder) e
 	if value, err := cmd.Flags().GetString(FlagDataTemplateVariablesName); err == nil {
 		content := getContents(value)
 		Logger.Infof("Template variables: %s\n", content)
-		body.SetTemplateVariables(MustParseJSON(content))
+		body.SetTemplateVariables(jsonUtilities.MustParseJSON(content))
 	}
 
 	if value, err := cmd.Flags().GetString(FlagDataTemplateName); err == nil {
@@ -187,7 +189,7 @@ func setLazyDataTemplateFromFlags(cmd *cobra.Command, body *mapbuilder.MapBuilde
 	if value, err := cmd.Flags().GetString(FlagDataTemplateVariablesName); err == nil {
 		content := getContents(value)
 		Logger.Infof("Template variables: %s\n", content)
-		body.SetTemplateVariables(MustParseJSON(content))
+		body.SetTemplateVariables(jsonUtilities.MustParseJSON(content))
 	}
 
 	if value, err := cmd.Flags().GetString(FlagDataTemplateName); err == nil {
@@ -237,7 +239,7 @@ func getTenantWithDefaultFlag(cmd *cobra.Command, flagName string, defaultTenant
 
 func getFormDataObjectFlag(cmd *cobra.Command, flagName string, data map[string]interface{}) error {
 	if value, err := cmd.Flags().GetString(flagName); err == nil {
-		return ParseJSON(value, data)
+		return jsonUtilities.ParseJSON(value, data)
 	}
 	return nil
 }
