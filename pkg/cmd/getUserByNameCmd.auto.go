@@ -94,6 +94,13 @@ func (n *GetUserByNameCmd) RunE(cmd *cobra.Command, args []string) error {
 
 	// form data
 	formData := make(map[string]io.Reader)
+	err = flags.WithFormDataOptions(
+		cmd,
+		formData,
+	)
+	if err != nil {
+		return newUserError(err)
+	}
 
 	// body
 	body := mapbuilder.NewInitializedMapBuilder()
@@ -110,11 +117,9 @@ func (n *GetUserByNameCmd) RunE(cmd *cobra.Command, args []string) error {
 	err = flags.WithPathParameters(
 		cmd,
 		pathParameters,
+		flags.WithStringDefaultValue(client.TenantName, "tenant", "tenant"),
 		flags.WithStringValue("name", "name"),
 	)
-	if v := getTenantWithDefaultFlag(cmd, "tenant", client.TenantName); v != "" {
-		pathParameters["tenant"] = v
-	}
 
 	path := replacePathParameters("user/{tenant}/userByName/{name}", pathParameters)
 

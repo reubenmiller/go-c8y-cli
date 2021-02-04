@@ -93,6 +93,13 @@ func (n *GetApplicationBinaryCollectionCmd) RunE(cmd *cobra.Command, args []stri
 
 	// form data
 	formData := make(map[string]io.Reader)
+	err = flags.WithFormDataOptions(
+		cmd,
+		formData,
+	)
+	if err != nil {
+		return newUserError(err)
+	}
 
 	// body
 	body := mapbuilder.NewInitializedMapBuilder()

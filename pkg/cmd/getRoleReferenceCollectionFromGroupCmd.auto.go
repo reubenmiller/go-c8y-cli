@@ -94,6 +94,13 @@ func (n *GetRoleReferenceCollectionFromGroupCmd) RunE(cmd *cobra.Command, args [
 
 	// form data
 	formData := make(map[string]io.Reader)
+	err = flags.WithFormDataOptions(
+		cmd,
+		formData,
+	)
+	if err != nil {
+		return newUserError(err)
+	}
 
 	// body
 	body := mapbuilder.NewInitializedMapBuilder()
@@ -110,10 +117,8 @@ func (n *GetRoleReferenceCollectionFromGroupCmd) RunE(cmd *cobra.Command, args [
 	err = flags.WithPathParameters(
 		cmd,
 		pathParameters,
+		flags.WithStringDefaultValue(client.TenantName, "tenant", "tenant"),
 	)
-	if v := getTenantWithDefaultFlag(cmd, "tenant", client.TenantName); v != "" {
-		pathParameters["tenant"] = v
-	}
 	if cmd.Flags().Changed("group") {
 		groupInputValues, groupValue, err := getFormattedGroupSlice(cmd, args, "group")
 

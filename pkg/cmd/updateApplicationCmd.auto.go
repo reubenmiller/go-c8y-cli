@@ -85,15 +85,11 @@ func (n *UpdateApplicationCmd) RunE(cmd *cobra.Command, args []string) error {
 
 	// headers
 	headers := http.Header{}
-	if cmd.Flags().Changed("processingMode") {
-		if v, err := cmd.Flags().GetString("processingMode"); err == nil && v != "" {
-			headers.Add("X-Cumulocity-Processing-Mode", v)
-		}
-	}
 
 	err = flags.WithHeaders(
 		cmd,
 		headers,
+		flags.WithProcessingModeValue(),
 	)
 	if err != nil {
 		return newUserError(err)
@@ -101,6 +97,13 @@ func (n *UpdateApplicationCmd) RunE(cmd *cobra.Command, args []string) error {
 
 	// form data
 	formData := make(map[string]io.Reader)
+	err = flags.WithFormDataOptions(
+		cmd,
+		formData,
+	)
+	if err != nil {
+		return newUserError(err)
+	}
 
 	// body
 	body := mapbuilder.NewInitializedMapBuilder()

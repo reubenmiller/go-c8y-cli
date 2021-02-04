@@ -77,15 +77,11 @@ func (n *DisableApplicationFromTenantCmd) RunE(cmd *cobra.Command, args []string
 
 	// headers
 	headers := http.Header{}
-	if cmd.Flags().Changed("processingMode") {
-		if v, err := cmd.Flags().GetString("processingMode"); err == nil && v != "" {
-			headers.Add("X-Cumulocity-Processing-Mode", v)
-		}
-	}
 
 	err = flags.WithHeaders(
 		cmd,
 		headers,
+		flags.WithProcessingModeValue(),
 	)
 	if err != nil {
 		return newUserError(err)
@@ -93,6 +89,13 @@ func (n *DisableApplicationFromTenantCmd) RunE(cmd *cobra.Command, args []string
 
 	// form data
 	formData := make(map[string]io.Reader)
+	err = flags.WithFormDataOptions(
+		cmd,
+		formData,
+	)
+	if err != nil {
+		return newUserError(err)
+	}
 
 	// body
 	body := mapbuilder.NewInitializedMapBuilder()
@@ -109,10 +112,8 @@ func (n *DisableApplicationFromTenantCmd) RunE(cmd *cobra.Command, args []string
 	err = flags.WithPathParameters(
 		cmd,
 		pathParameters,
+		flags.WithStringDefaultValue(client.TenantName, "tenant", "tenant"),
 	)
-	if v := getTenantWithDefaultFlag(cmd, "tenant", client.TenantName); v != "" {
-		pathParameters["tenant"] = v
-	}
 
 	path := replacePathParameters("/tenant/tenants/{tenant}/applications/{application}", pathParameters)
 

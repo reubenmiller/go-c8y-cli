@@ -81,15 +81,11 @@ func (n *NewBinaryCmd) RunE(cmd *cobra.Command, args []string) error {
 
 	// headers
 	headers := http.Header{}
-	if cmd.Flags().Changed("processingMode") {
-		if v, err := cmd.Flags().GetString("processingMode"); err == nil && v != "" {
-			headers.Add("X-Cumulocity-Processing-Mode", v)
-		}
-	}
 
 	err = flags.WithHeaders(
 		cmd,
 		headers,
+		flags.WithProcessingModeValue(),
 	)
 	if err != nil {
 		return newUserError(err)
@@ -97,19 +93,25 @@ func (n *NewBinaryCmd) RunE(cmd *cobra.Command, args []string) error {
 
 	// form data
 	formData := make(map[string]io.Reader)
+	err = flags.WithFormDataOptions(
+		cmd,
+		formData,
+		flags.WithFormDataFileAndInfo("file", "data")...,
+	)
+	if err != nil {
+		return newUserError(err)
+	}
 
 	// body
 	body := mapbuilder.NewInitializedMapBuilder()
 	err = flags.WithBody(
 		cmd,
 		body,
-		flags.WithDataValue(FlagDataName),
 	)
 	if err != nil {
 		return newUserError(err)
 	}
 
-	getFileFlag(cmd, "file", true, formData)
 	if err := setLazyDataTemplateFromFlags(cmd, body); err != nil {
 		return newUserError("Template error. ", err)
 	}

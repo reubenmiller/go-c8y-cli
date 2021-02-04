@@ -101,6 +101,13 @@ func (n *GetTenantUsageStatisticsSummaryCollectionCmd) RunE(cmd *cobra.Command, 
 
 	// form data
 	formData := make(map[string]io.Reader)
+	err = flags.WithFormDataOptions(
+		cmd,
+		formData,
+	)
+	if err != nil {
+		return newUserError(err)
+	}
 
 	// body
 	body := mapbuilder.NewInitializedMapBuilder()

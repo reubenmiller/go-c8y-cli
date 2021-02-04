@@ -79,15 +79,11 @@ func (n *AddUserToGroupCmd) RunE(cmd *cobra.Command, args []string) error {
 
 	// headers
 	headers := http.Header{}
-	if cmd.Flags().Changed("processingMode") {
-		if v, err := cmd.Flags().GetString("processingMode"); err == nil && v != "" {
-			headers.Add("X-Cumulocity-Processing-Mode", v)
-		}
-	}
 
 	err = flags.WithHeaders(
 		cmd,
 		headers,
+		flags.WithProcessingModeValue(),
 	)
 	if err != nil {
 		return newUserError(err)
@@ -95,6 +91,13 @@ func (n *AddUserToGroupCmd) RunE(cmd *cobra.Command, args []string) error {
 
 	// form data
 	formData := make(map[string]io.Reader)
+	err = flags.WithFormDataOptions(
+		cmd,
+		formData,
+	)
+	if err != nil {
+		return newUserError(err)
+	}
 
 	// body
 	body := mapbuilder.NewInitializedMapBuilder()
@@ -136,6 +139,7 @@ func (n *AddUserToGroupCmd) RunE(cmd *cobra.Command, args []string) error {
 	err = flags.WithPathParameters(
 		cmd,
 		pathParameters,
+		flags.WithStringDefaultValue(client.TenantName, "tenant", "tenant"),
 	)
 	if cmd.Flags().Changed("group") {
 		groupInputValues, groupValue, err := getFormattedGroupSlice(cmd, args, "group")
@@ -153,9 +157,6 @@ func (n *AddUserToGroupCmd) RunE(cmd *cobra.Command, args []string) error {
 				pathParameters["group"] = newIDValue(item).GetID()
 			}
 		}
-	}
-	if v := getTenantWithDefaultFlag(cmd, "tenant", client.TenantName); v != "" {
-		pathParameters["tenant"] = v
 	}
 
 	path := replacePathParameters("/user/{tenant}/groups/{group}/users", pathParameters)

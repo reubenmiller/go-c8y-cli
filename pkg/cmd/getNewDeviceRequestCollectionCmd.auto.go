@@ -90,6 +90,13 @@ func (n *GetNewDeviceRequestCollectionCmd) RunE(cmd *cobra.Command, args []strin
 
 	// form data
 	formData := make(map[string]io.Reader)
+	err = flags.WithFormDataOptions(
+		cmd,
+		formData,
+	)
+	if err != nil {
+		return newUserError(err)
+	}
 
 	// body
 	body := mapbuilder.NewInitializedMapBuilder()

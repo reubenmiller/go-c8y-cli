@@ -73,21 +73,11 @@ func (n *GetMeasurementSeriesCmd) RunE(cmd *cobra.Command, args []string) error 
 			}
 		}
 	}
-	if items, err := cmd.Flags().GetStringSlice("series"); err == nil {
-		if len(items) > 0 {
-			for _, v := range items {
-				if v != "" {
-					query.Add("series", url.QueryEscape(v))
-				}
-			}
-		}
-	} else {
-		return newUserError("Flag does not exist")
-	}
 
 	err = flags.WithQueryParameters(
 		cmd,
 		query,
+		flags.WithStringSliceValues("series", "series", ""),
 		flags.WithStringValue("aggregationType", "aggregationType"),
 		flags.WithRelativeTimestamp("dateFrom", "dateFrom", ""),
 		flags.WithRelativeTimestamp("dateTo", "dateTo", ""),
@@ -127,6 +117,13 @@ func (n *GetMeasurementSeriesCmd) RunE(cmd *cobra.Command, args []string) error 
 
 	// form data
 	formData := make(map[string]io.Reader)
+	err = flags.WithFormDataOptions(
+		cmd,
+		formData,
+	)
+	if err != nil {
+		return newUserError(err)
+	}
 
 	// body
 	body := mapbuilder.NewInitializedMapBuilder()

@@ -92,6 +92,13 @@ func (n *GetApplicationReferenceCollectionCmd) RunE(cmd *cobra.Command, args []s
 
 	// form data
 	formData := make(map[string]io.Reader)
+	err = flags.WithFormDataOptions(
+		cmd,
+		formData,
+	)
+	if err != nil {
+		return newUserError(err)
+	}
 
 	// body
 	body := mapbuilder.NewInitializedMapBuilder()

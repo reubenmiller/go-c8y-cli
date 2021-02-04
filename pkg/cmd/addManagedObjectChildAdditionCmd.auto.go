@@ -78,15 +78,11 @@ func (n *AddManagedObjectChildAdditionCmd) RunE(cmd *cobra.Command, args []strin
 
 	// headers
 	headers := http.Header{}
-	if cmd.Flags().Changed("processingMode") {
-		if v, err := cmd.Flags().GetString("processingMode"); err == nil && v != "" {
-			headers.Add("X-Cumulocity-Processing-Mode", v)
-		}
-	}
 
 	err = flags.WithHeaders(
 		cmd,
 		headers,
+		flags.WithProcessingModeValue(),
 	)
 	if err != nil {
 		return newUserError(err)
@@ -94,6 +90,13 @@ func (n *AddManagedObjectChildAdditionCmd) RunE(cmd *cobra.Command, args []strin
 
 	// form data
 	formData := make(map[string]io.Reader)
+	err = flags.WithFormDataOptions(
+		cmd,
+		formData,
+	)
+	if err != nil {
+		return newUserError(err)
+	}
 
 	// body
 	body := mapbuilder.NewInitializedMapBuilder()
@@ -101,22 +104,12 @@ func (n *AddManagedObjectChildAdditionCmd) RunE(cmd *cobra.Command, args []strin
 		cmd,
 		body,
 		flags.WithDataValue(FlagDataName),
+		flags.WithStringSliceValues("newChild", "managedObject.id", ""),
 	)
 	if err != nil {
 		return newUserError(err)
 	}
 
-	if items, err := cmd.Flags().GetStringSlice("newChild"); err == nil {
-		if len(items) > 0 {
-			for _, v := range items {
-				if v != "" {
-					body.Set("managedObject.id", v)
-				}
-			}
-		}
-	} else {
-		return newUserError("Flag does not exist")
-	}
 	if err := setLazyDataTemplateFromFlags(cmd, body); err != nil {
 		return newUserError("Template error. ", err)
 	}
