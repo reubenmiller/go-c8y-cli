@@ -49,23 +49,13 @@
     }
 
     # file (used in multipart/form-data uploads). It writes to the formData object instead of the body
-    $Setters."file"."query" = "query.Add(`"${queryParam}`", `"true`")"
-    $Setters."file"."path" = "pathParameters[`"${queryParam}`"] = `"true`""
-    $Setters."file"."body" = "getFileFlag(cmd, `"${prop}`", true, formData)"
-    $Definitions."file" = @"
-    $($Setters."file".$SetterType)
-"@
+    $Definitions."file" = "flags.WithFormDataFileAndInfo(`"${prop}`", `"data`")...,"
 
     # fileContents. File contents will be added to body
     $Definitions."fileContents" = "flags.WithFilePath(`"${prop}`", `"${queryParam}`", `"$FixedValue`"),"
 
     # attachment (used in multipart/form-data uploads), without extra details
-    $Setters."attachment"."query" = "query.Add(`"${queryParam}`", `"true`")"
-    $Setters."attachment"."path" = "pathParameters[`"${queryParam}`"] = `"true`""
-    $Setters."attachment"."body" = "getFileFlag(cmd, `"${prop}`", false, formData)"
-    $Definitions."attachment" = @"
-    $($Setters."attachment".$SetterType)
-"@
+    $Definitions."attachment" = "flags.WithFormDataFile(`"${prop}`", `"data`")...,"
 
     # Boolean
     $Definitions."boolean" = "flags.WithBoolValue(`"${prop}`", `"${queryParam}`", `"$FixedValue`"),"
@@ -73,24 +63,30 @@
     # relative datetime
     $Definitions."datetime" = "flags.WithRelativeTimestamp(`"${prop}`", `"${queryParam}`", `"$FixedValue`"),"
 
-    # string array
-    $Setters."[]string"."query" = "query.Add(`"${queryParam}`", url.QueryEscape(v))"
-    $Setters."[]string"."path" = "pathParameters[`"${queryParam}`"] = v"
-    $Setters."[]string"."body" = "body.Set(`"${queryParam}`", v)"
-    $Definitions."[]string" = @"
-    if items, err := cmd.Flags().GetStringSlice("${prop}"); err == nil {
-        if len(items) > 0 {
-            for _, v := range items {
-                if v != "" {
-                    $($Setters."[]string".$SetterType)
-                }
-            }
-        }
-    } else {
-        return newUserError("Flag does not exist")
-    }
-"@
+    # string array/slice
+    $Definitions."[]string" = "flags.WithStringSliceValues(`"${prop}`", `"${queryParam}`", `"$FixedValue`"),"
+   
+    # string
+    $Definitions."string" = "flags.WithStringValue(`"${prop}`", `"${queryParam}`"),"
 
+    # integer
+    $Definitions."integer" = "flags.WithIntValue(`"${prop}`", `"${queryParam}`"),"
+
+    # float
+    $Definitions."float" = "flags.WithFloatValue(`"${prop}`", `"${queryParam}`"),"
+
+    # json_custom: Only supported for use with the body
+    $Definitions."json_custom" = "flags.WithDataValue(`"${prop}`", `"${queryParam}`"),"
+
+    # json - don't do anything because it should be manually set
+    $Definitions."json" = ""
+
+    # tenant
+    $Definitions."tenant" = "flags.WithStringDefaultValue(client.TenantName, `"${prop}`", `"${queryParam}`"),"
+
+    #
+    # Old style getters
+    #
 
     # application
     $Setters."application"."query" = "query.Add(`"${queryParam}`", url.QueryEscape(newIDValue(item).GetID()))"
@@ -331,30 +327,6 @@
     }
 "@
 
-    # tenant
-    $Setters."tenant"."query" = "query.Add(`"${queryParam}`", url.QueryEscape(v))"
-    $Setters."tenant"."path" = "pathParameters[`"${queryParam}`"] = v"
-    $Setters."tenant"."body" = "body.Set(`"${queryParam}`", v)"
-    $Definitions."tenant" = @"
-    if v := getTenantWithDefaultFlag(cmd, "${prop}", client.TenantName); v != `"`" {
-        $($Setters.tenant.$SetterType)
-    }
-"@
-
-    # string
-    $Definitions."string" = "flags.WithStringValue(`"${prop}`", `"${queryParam}`"),"
-
-    # integer
-    $Definitions."integer" = "flags.WithIntValue(`"${prop}`", `"${queryParam}`"),"
-
-    # float
-    $Definitions."float" = "flags.WithFloatValue(`"${prop}`", `"${queryParam}`"),"
-
-    # json_custom: Only supported for use with the body
-    $Definitions."json_custom" = "flags.WithDataValue(`"${prop}`", `"${queryParam}`"),"
-
-    # json - don't do anything because it should be manually set
-    $Definitions."json" = ""
 
     $MatchingType = $Definitions.Keys -eq $Type
 

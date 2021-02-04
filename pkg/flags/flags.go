@@ -46,6 +46,23 @@ func WithProcessingMode() Option {
 	}
 }
 
+// WithProcessingModeValue adds the processing module value from cli arguments
+func WithProcessingModeValue() GetOption {
+	return func(cmd *cobra.Command) (string, interface{}, error) {
+		dst := "X-Cumulocity-Processing-Mode"
+
+		if !cmd.Flags().Changed("processingMode") {
+			return "", "", nil
+		}
+
+		value, err := cmd.Flags().GetString(FlagProcessingModeName)
+		if err != nil {
+			return dst, value, err
+		}
+		return dst, strings.ToUpper(value), err
+	}
+}
+
 // WithData adds support for data input
 func WithData() Option {
 	return func(cmd *cobra.Command) *cobra.Command {

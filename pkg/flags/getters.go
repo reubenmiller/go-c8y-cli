@@ -128,6 +128,52 @@ func WithStringValue(opts ...string) GetOption {
 	}
 }
 
+// WithStringDefaultValue adds a string value from cli arguments
+func WithStringDefaultValue(defaultValue string, opts ...string) GetOption {
+	return func(cmd *cobra.Command) (string, interface{}, error) {
+
+		src, dst, format := unpackGetterOptions("%s", opts...)
+
+		if !cmd.Flags().Changed(src) {
+			if defaultValue != "" {
+				return dst, defaultValue, nil
+			}
+			return "", defaultValue, nil
+		}
+
+		value, err := cmd.Flags().GetString(src)
+		if err != nil {
+			return dst, value, err
+		}
+		return dst, applyFormatter(format, value), err
+	}
+}
+
+// WithStringSliceValues adds a string slice from cli arguments
+func WithStringSliceValues(opts ...string) GetOption {
+	return func(cmd *cobra.Command) (string, interface{}, error) {
+
+		src, dst, format := unpackGetterOptions("%s", opts...)
+
+		values, err := cmd.Flags().GetStringSlice(src)
+		if err != nil {
+			return dst, values, err
+		}
+
+		nonEmptyValues := make([]string, 0)
+		if len(values) > 0 {
+			for _, value := range values {
+				value = applyFormatter(format, value)
+				if value != "" {
+					nonEmptyValues = append(nonEmptyValues, value)
+				}
+			}
+		}
+
+		return dst, nonEmptyValues, err
+	}
+}
+
 // WithIntValue adds a integer (int) value from cli arguments
 func WithIntValue(opts ...string) GetOption {
 	return func(cmd *cobra.Command) (string, interface{}, error) {

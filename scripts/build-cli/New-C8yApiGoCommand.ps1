@@ -102,20 +102,38 @@
     $GetBodyContents = "body"
     
     if ($Specification.body) {
-        if ($Specification.bodyContent.type -ne 'binary') {
-
-            $null = $RESTBodyBuilderOptions.AppendLine("flags.WithDataValue(FlagDataName),")
-        } else {
-            $GetBodyContents = "body.GetFileContents()"
+        switch ($Specification.bodyContent.type) {
+            "binary" {
+                $GetBodyContents = "body.GetFileContents()"
+                break
+            }
+            "formdata" {
+                $GetBodyContents = "body"
+                break
+            }
+            default {
+                $GetBodyContents = "body"
+                $null = $RESTBodyBuilderOptions.AppendLine("flags.WithDataValue(FlagDataName),")
+            }
         }
 
         foreach ($iArg in (Remove-SkippedParameters $Specification.body)) {
             $code = New-C8yApiGoGetValueFromFlag -Parameters $iArg -SetterType "body"
             if ($code) {
-                if ($code -match "^flags\.") {
-                    $null = $RESTBodyBuilderOptions.AppendLine($code)
-                } else {
-                    $null = $RESTBodyBuilder.AppendLine($code)
+                switch -Regex ($code) {
+                    "^flags\.WithFormData" {
+                        $null = $RESTFormDataBuilder.AppendLine($code)
+                        break
+                    }
+
+                    "^flags\." {
+                        $null = $RESTBodyBuilderOptions.AppendLine($code)
+                        break
+                    }
+
+                    default {
+                        $null = $RESTBodyBuilder.AppendLine($code)
+                    }
                 }
             } else {
                 Write-Warning ("No setter found for [{0}]" -f $iArg.name)
@@ -288,13 +306,7 @@
 
     # Processing Mode
     if ($Specification.method -match "DELETE|PUT|POST") {
-        $null = $RestHeaderBuilder.AppendLine(@"
-     if cmd.Flags().Changed("processingMode") {
-         if v, err := cmd.Flags().GetString("processingMode"); err == nil && v != "" {
-             headers.Add("X-Cumulocity-Processing-Mode", v)
-         }
-     }
-"@)
+        $null = $RestHeaderBuilderOptions.AppendLine("flags.WithProcessingModeValue(),")
     }
 
     #
@@ -420,7 +432,15 @@ func (n *${NameCamel}Cmd) RunE(cmd *cobra.Command, args []string) error {
 
     // form data
     formData := make(map[string]io.Reader)
-    $RESTFormDataBuilder
+    err = flags.WithFormDataOptions(
+		cmd,
+		formData,
+		$RESTFormDataBuilder
+    )
+    if err != nil {
+		return newUserError(err)
+    }
+    
 
     // body
     body := mapbuilder.NewInitializedMapBuilder()

@@ -392,3 +392,29 @@ func (b *MapBuilder) Set(path string, value interface{}) error {
 
 	return nil
 }
+
+// MergeMaps merges a list of maps into the body. If the body does not already exists,
+// then it will be ignored. Only shallow merging is done.
+// Duplicate keys will be overwritten by maps later in the list
+func (b *MapBuilder) MergeMaps(maps ...map[string]interface{}) error {
+	if len(maps) == 0 {
+		return nil
+	}
+
+	if b.body != nil {
+		maps = append([]map[string]interface{}{b.body}, maps...)
+	}
+
+	b.body = mergeMaps(maps...)
+	return nil
+}
+
+func mergeMaps(maps ...map[string]interface{}) map[string]interface{} {
+	result := make(map[string]interface{})
+	for _, m := range maps {
+		for k, v := range m {
+			result[k] = v
+		}
+	}
+	return result
+}
