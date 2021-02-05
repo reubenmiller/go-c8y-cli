@@ -6,8 +6,10 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/pkg/iterator"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
+	"github.com/spf13/cobra"
 )
 
 type entityReference struct {
@@ -174,7 +176,7 @@ func (i *EntityIterator) GetNext() (value []byte, err error) {
 	refs, err := lookupEntity(i.Fetcher, []string{string(value)}, i.GetID)
 
 	if err != nil {
-		return
+		return nil, err
 	}
 
 	if len(refs) == 0 {
@@ -185,4 +187,89 @@ func (i *EntityIterator) GetNext() (value []byte, err error) {
 		return nil, ErrMoreThanOneFound
 	}
 	return []byte(refs[0].ID), nil
+}
+
+// WithReferenceByName adds support for looking up values by name via cli args
+func WithReferenceByName(fetcher entityFetcher, args []string, opts ...string) flags.GetOption {
+	return func(cmd *cobra.Command) (string, interface{}, error) {
+
+		src, dst, _ := flags.UnpackGetterOptions("", opts...)
+
+		values, err := cmd.Flags().GetStringSlice(src)
+		if err != nil {
+			singleValue, err := cmd.Flags().GetString(src)
+			if err != nil {
+				return "", "", err
+			}
+			values = []string{singleValue}
+		}
+
+		values = ParseValues(append(values, args...))
+
+		formattedValues, err := lookupEntity(fetcher, values, false)
+
+		if err != nil {
+			return dst, values, fmt.Errorf("failed to lookup by name. %w", err)
+		}
+
+		results := []string{}
+
+		invalidLookups := []string{}
+		for _, item := range formattedValues {
+			if item.ID != "" {
+				if item.Name != "" {
+					results = append(results, fmt.Sprintf("%s|%s", item.ID, item.Name))
+				} else {
+					results = append(results, item.ID)
+				}
+			} else {
+				if item.Name != "" {
+					invalidLookups = append(invalidLookups, item.Name)
+				}
+			}
+		}
+
+		var errors error
+
+		if len(invalidLookups) > 0 {
+			errors = fmt.Errorf("no results %v", invalidLookups)
+		}
+
+		return dst, results, errors
+	}
+}
+
+// WithReferenceByNameFirstMatch add reference by name matching using a fetcher via cli args. Only the first match will be used
+func WithReferenceByNameFirstMatch(fetcher entityFetcher, args []string, opts ...string) flags.GetOption {
+	return func(cmd *cobra.Command) (string, interface{}, error) {
+		opt := WithReferenceByName(fetcher, args, opts...)
+		name, values, err := opt(cmd)
+
+		switch v := values.(type) {
+		case []string:
+			if len(v) == 0 {
+				return name, nil, fmt.Errorf("reference by name: no matches found")
+			}
+
+			return name, newIDValue(v[0]).GetID(), err
+		default:
+			return "", "", fmt.Errorf("reference by name: invalid name lookup type. only strings are supported")
+		}
+	}
+}
+
+// WithDeviceReferenceByNameFirstMatch add reference by name matching for devices via cli args. Only the first match will be used
+func WithDeviceReferenceByNameFirstMatch(args []string, opts ...string) flags.GetOption {
+	return func(cmd *cobra.Command) (string, interface{}, error) {
+		opt := WithReferenceByNameFirstMatch(newDeviceFetcher(client), args, opts...)
+		return opt(cmd)
+	}
+}
+
+// WithApplicationReferenceByNameFirstMatch add reference by name matching for applications via cli args. Only the first match will be used
+func WithApplicationReferenceByNameFirstMatch(args []string, opts ...string) flags.GetOption {
+	return func(cmd *cobra.Command) (string, interface{}, error) {
+		opt := WithReferenceByNameFirstMatch(newApplicationFetcher(client), args, opts...)
+		return opt(cmd)
+	}
 }

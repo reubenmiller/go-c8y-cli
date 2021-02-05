@@ -71,7 +71,7 @@ func WithFormDataOptions(cmd *cobra.Command, form map[string]io.Reader, opts ...
 func WithFileReader(opts ...string) GetOption {
 
 	return func(cmd *cobra.Command) (string, interface{}, error) {
-		src, dst, _ := unpackGetterOptions("%s", opts...)
+		src, dst, _ := UnpackGetterOptions("%s", opts...)
 
 		if !cmd.Flags().Changed(src) {
 			return "", nil, nil
@@ -92,7 +92,7 @@ func WithFileReader(opts ...string) GetOption {
 func WithFileBaseName(opts ...string) GetOption {
 
 	return func(cmd *cobra.Command) (string, interface{}, error) {
-		src, dst, _ := unpackGetterOptions("%s", opts...)
+		src, dst, _ := UnpackGetterOptions("%s", opts...)
 
 		if !cmd.Flags().Changed(src) {
 			return "", nil, nil
@@ -112,7 +112,7 @@ func WithFileBaseName(opts ...string) GetOption {
 func WithFileMIMEType(opts ...string) GetOption {
 
 	return func(cmd *cobra.Command) (string, interface{}, error) {
-		src, dst, _ := unpackGetterOptions("%s", opts...)
+		src, dst, _ := UnpackGetterOptions("%s", opts...)
 
 		if !cmd.Flags().Changed(src) {
 			return "", nil, nil

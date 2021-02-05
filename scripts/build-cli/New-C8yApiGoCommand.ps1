@@ -113,7 +113,7 @@
             }
             default {
                 $GetBodyContents = "body"
-                $null = $RESTBodyBuilderOptions.AppendLine("flags.WithDataValue(FlagDataName),")
+                $null = $RESTBodyBuilderOptions.AppendLine("flags.WithDataValue(FlagDataName, `"`"),")
             }
         }
 
@@ -126,7 +126,7 @@
                         break
                     }
 
-                    "^flags\." {
+                    "^(flags\.|With)" {
                         $null = $RESTBodyBuilderOptions.AppendLine($code)
                         break
                     }
@@ -246,7 +246,8 @@
         }
         $code = New-C8yApiGoGetValueFromFlag -Parameters $Properties -SetterType "path"
         if ($code) {
-            if ($code -match "^flags\.") {
+            
+            if ($code -match "^(flags\.|With)") {
                 $null = $RESTPathBuilderOptions.AppendLine($code)
             }
             else {
@@ -265,7 +266,7 @@
         foreach ($Properties in (Remove-SkippedParameters $Specification.queryParameters)) {
             $code = New-C8yApiGoGetValueFromFlag -Parameters $Properties -SetterType "query"
             if ($code) {
-                if ($code -match "^flags\.") {
+                if ($code -match "^(flags\.|With)") {
                     $null = $RESTQueryBuilderWithValues.AppendLine($code)
                 }
                 else {
@@ -294,7 +295,7 @@
         foreach ($iArg in (Remove-SkippedParameters $Specification.headerParameters)) {
             $code = New-C8yApiGoGetValueFromFlag -Parameters $iArg -SetterType "header"
             if ($code) {
-                if ($code -match "^flags\.") {
+                if ($code -match "^(flags\.|With)") {
                     $null = $RestHeaderBuilderOptions.AppendLine($code)
                 }
                 else {

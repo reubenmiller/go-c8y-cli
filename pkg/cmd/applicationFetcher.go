@@ -58,7 +58,7 @@ func (f *applicationFetcher) getByName(name string) ([]fetcherResultSet, error) 
 		return nil, errors.Wrap(err, "Could not fetch by id")
 	}
 
-	results := make([]fetcherResultSet, len(col.Applications))
+	results := make([]fetcherResultSet, 0)
 
 	for i, app := range col.Applications {
 		if pattern.MatchString(app.Name) {

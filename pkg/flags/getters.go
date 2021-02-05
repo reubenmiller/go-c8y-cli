@@ -39,7 +39,16 @@ func WithPathParameters(cmd *cobra.Command, path map[string]string, opts ...GetO
 			return err
 		}
 		if name != "" {
-			path[name] = fmt.Sprintf("%v", value)
+			switch v := value.(type) {
+			case []string:
+				path[name] = fmt.Sprintf("%s", strings.Join(v, ","))
+
+			case []int:
+				path[name] = strings.Trim(strings.Join(strings.Fields(fmt.Sprint(v)), ","), "[]")
+
+			default:
+				path[name] = fmt.Sprintf("%v", value)
+			}
 		}
 	}
 	return
@@ -101,7 +110,7 @@ func WithBody(cmd *cobra.Command, body *mapbuilder.MapBuilder, opts ...GetOption
 // WithBoolValue adds a boolean value from cli arguments to a query parameter
 func WithBoolValue(opts ...string) GetOption {
 	return func(cmd *cobra.Command) (string, interface{}, error) {
-		src, dst, format := unpackGetterOptions("", opts...)
+		src, dst, format := UnpackGetterOptions("", opts...)
 		if cmd.Flags().Changed(src) {
 			value, err := cmd.Flags().GetBool(src)
 
@@ -118,7 +127,7 @@ func WithBoolValue(opts ...string) GetOption {
 func WithStringValue(opts ...string) GetOption {
 	return func(cmd *cobra.Command) (string, interface{}, error) {
 
-		src, dst, format := unpackGetterOptions("%s", opts...)
+		src, dst, format := UnpackGetterOptions("%s", opts...)
 
 		value, err := cmd.Flags().GetString(src)
 		if err != nil {
@@ -132,7 +141,7 @@ func WithStringValue(opts ...string) GetOption {
 func WithStringDefaultValue(defaultValue string, opts ...string) GetOption {
 	return func(cmd *cobra.Command) (string, interface{}, error) {
 
-		src, dst, format := unpackGetterOptions("%s", opts...)
+		src, dst, format := UnpackGetterOptions("%s", opts...)
 
 		if !cmd.Flags().Changed(src) {
 			if defaultValue != "" {
@@ -153,7 +162,7 @@ func WithStringDefaultValue(defaultValue string, opts ...string) GetOption {
 func WithStringSliceValues(opts ...string) GetOption {
 	return func(cmd *cobra.Command) (string, interface{}, error) {
 
-		src, dst, format := unpackGetterOptions("%s", opts...)
+		src, dst, format := UnpackGetterOptions("%s", opts...)
 
 		values, err := cmd.Flags().GetStringSlice(src)
 		if err != nil {
@@ -177,7 +186,7 @@ func WithStringSliceValues(opts ...string) GetOption {
 // WithIntValue adds a integer (int) value from cli arguments
 func WithIntValue(opts ...string) GetOption {
 	return func(cmd *cobra.Command) (string, interface{}, error) {
-		src, dst, _ := unpackGetterOptions("", opts...)
+		src, dst, _ := UnpackGetterOptions("", opts...)
 		value, err := cmd.Flags().GetInt(src)
 		return dst, value, err
 	}
@@ -186,7 +195,7 @@ func WithIntValue(opts ...string) GetOption {
 // WithFloatValue adds a float (float32) value from cli arguments
 func WithFloatValue(opts ...string) GetOption {
 	return func(cmd *cobra.Command) (string, interface{}, error) {
-		src, dst, _ := unpackGetterOptions("", opts...)
+		src, dst, _ := UnpackGetterOptions("", opts...)
 		value, err := cmd.Flags().GetFloat32(src)
 		return dst, value, err
 	}
@@ -195,7 +204,7 @@ func WithFloatValue(opts ...string) GetOption {
 // WithRelativeTimestamp adds a timestamp (string) value from cli arguments
 func WithRelativeTimestamp(opts ...string) GetOption {
 	return func(cmd *cobra.Command) (string, interface{}, error) {
-		src, dst, _ := unpackGetterOptions("", opts...)
+		src, dst, _ := UnpackGetterOptions("", opts...)
 		value, err := cmd.Flags().GetString(src)
 
 		if err != nil {
@@ -232,7 +241,7 @@ func applyFormatter(format string, value interface{}) string {
 	return format
 }
 
-func unpackGetterOptions(defaultFormat string, options ...string) (src string, dst string, formatter string) {
+func UnpackGetterOptions(defaultFormat string, options ...string) (src string, dst string, formatter string) {
 	formatter = defaultFormat
 
 	if len(options) == 1 {
@@ -246,9 +255,9 @@ func unpackGetterOptions(defaultFormat string, options ...string) (src string, d
 		dst = options[1]
 		formatter = options[2]
 	}
-	if dst == "" {
-		dst = src
-	}
+	// if dst == "" {
+	// 	dst = src
+	// }
 	return
 }
 
@@ -259,7 +268,7 @@ type FilePath string
 func WithFilePath(opts ...string) GetOption {
 	return func(cmd *cobra.Command) (string, interface{}, error) {
 
-		src, dst, _ := unpackGetterOptions("%s", opts...)
+		src, dst, _ := UnpackGetterOptions("%s", opts...)
 
 		value, err := cmd.Flags().GetString(src)
 		if err != nil {
@@ -273,7 +282,7 @@ func WithFilePath(opts ...string) GetOption {
 func WithDataValue(opts ...string) GetOption {
 	return func(cmd *cobra.Command) (string, interface{}, error) {
 
-		src, dst, _ := unpackGetterOptions("%s", opts...)
+		src, dst, _ := UnpackGetterOptions("%s", opts...)
 
 		if !cmd.Flags().Changed(FlagDataName) {
 			return "", "", nil

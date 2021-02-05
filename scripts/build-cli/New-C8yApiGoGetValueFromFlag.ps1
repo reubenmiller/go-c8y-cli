@@ -89,28 +89,7 @@
     #
 
     # application
-    $Setters."application"."query" = "query.Add(`"${queryParam}`", url.QueryEscape(newIDValue(item).GetID()))"
-    $Setters."application"."path" = "pathParameters[`"${queryParam}`"] = newIDValue(item).GetID()"
-    $Setters."application"."body" = "body.Set(`"${queryParam}`", newIDValue(item).GetID())"
-    $Definitions."application" = @"
-    if cmd.Flags().Changed("${prop}") {
-        ${prop}InputValues, ${prop}Value, err := getApplicationSlice(cmd, args, "${prop}")
-
-        if err != nil {
-            return newUserError("no matching applications found", ${prop}InputValues, err)
-        }
-
-        if len(${prop}Value) == 0 {
-            return newUserError("no matching applications found", ${prop}InputValues)
-        }
-
-        for _, item := range ${prop}Value {
-            if item != "" {
-                $($Setters."application".$SetterType)
-            }
-        }
-    }
-"@
+    $Definitions."application" = "WithApplicationReferenceByNameFirstMatch(args, `"${prop}`", `"${queryParam}`"),"
 
     # microservice
     $Setters."microservice"."query" = "query.Add(`"${queryParam}`", url.QueryEscape(newIDValue(item).GetID()))"
