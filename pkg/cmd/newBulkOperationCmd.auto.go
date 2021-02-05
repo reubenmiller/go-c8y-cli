@@ -107,7 +107,7 @@ func (n *NewBulkOperationCmd) RunE(cmd *cobra.Command, args []string) error {
 	err = flags.WithBody(
 		cmd,
 		body,
-		flags.WithDataValue(FlagDataName),
+		flags.WithDataValue(FlagDataName, ""),
 		flags.WithRelativeTimestamp("startDate", "startDate", ""),
 		flags.WithFloatValue("creationRampSec", "creationRamp"),
 		flags.WithDataValue("operation", "operationPrototype"),

@@ -102,7 +102,7 @@ func (n *RequestDeviceCredentialsCmd) RunE(cmd *cobra.Command, args []string) er
 	err = flags.WithBody(
 		cmd,
 		body,
-		flags.WithDataValue(FlagDataName),
+		flags.WithDataValue(FlagDataName, ""),
 		flags.WithStringValue("id", "id"),
 	)
 	if err != nil {

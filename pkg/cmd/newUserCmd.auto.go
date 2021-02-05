@@ -111,7 +111,7 @@ func (n *NewUserCmd) RunE(cmd *cobra.Command, args []string) error {
 	err = flags.WithBody(
 		cmd,
 		body,
-		flags.WithDataValue(FlagDataName),
+		flags.WithDataValue(FlagDataName, ""),
 		flags.WithStringValue("userName", "userName"),
 		flags.WithStringValue("firstName", "firstName"),
 		flags.WithStringValue("lastName", "lastName"),

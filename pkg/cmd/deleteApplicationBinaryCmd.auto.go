@@ -115,24 +115,8 @@ func (n *DeleteApplicationBinaryCmd) RunE(cmd *cobra.Command, args []string) err
 	err = flags.WithPathParameters(
 		cmd,
 		pathParameters,
+		WithApplicationReferenceByNameFirstMatch(args, "application", "application"),
 	)
-	if cmd.Flags().Changed("application") {
-		applicationInputValues, applicationValue, err := getApplicationSlice(cmd, args, "application")
-
-		if err != nil {
-			return newUserError("no matching applications found", applicationInputValues, err)
-		}
-
-		if len(applicationValue) == 0 {
-			return newUserError("no matching applications found", applicationInputValues)
-		}
-
-		for _, item := range applicationValue {
-			if item != "" {
-				pathParameters["application"] = newIDValue(item).GetID()
-			}
-		}
-	}
 
 	path := replacePathParameters("/application/applications/{application}/binaries/{binaryId}", pathParameters)
 

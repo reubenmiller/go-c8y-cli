@@ -106,7 +106,7 @@ func (n *UpdateEventCmd) RunE(cmd *cobra.Command, args []string) error {
 	err = flags.WithBody(
 		cmd,
 		body,
-		flags.WithDataValue(FlagDataName),
+		flags.WithDataValue(FlagDataName, ""),
 		flags.WithStringValue("text", "text"),
 	)
 	if err != nil {

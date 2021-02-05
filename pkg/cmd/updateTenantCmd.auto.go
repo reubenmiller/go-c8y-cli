@@ -109,7 +109,7 @@ func (n *UpdateTenantCmd) RunE(cmd *cobra.Command, args []string) error {
 	err = flags.WithBody(
 		cmd,
 		body,
-		flags.WithDataValue(FlagDataName),
+		flags.WithDataValue(FlagDataName, ""),
 		flags.WithStringValue("company", "company"),
 		flags.WithStringValue("domain", "domain"),
 		flags.WithStringValue("adminName", "adminName"),

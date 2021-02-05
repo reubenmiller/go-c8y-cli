@@ -107,7 +107,7 @@ func (n *UpdateMicroserviceCmd) RunE(cmd *cobra.Command, args []string) error {
 	err = flags.WithBody(
 		cmd,
 		body,
-		flags.WithDataValue(FlagDataName),
+		flags.WithDataValue(FlagDataName, ""),
 		flags.WithStringValue("key", "key"),
 		flags.WithStringValue("availability", "availability"),
 		flags.WithStringValue("contextPath", "contextPath"),

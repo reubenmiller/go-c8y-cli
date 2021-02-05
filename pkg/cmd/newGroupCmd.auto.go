@@ -102,7 +102,7 @@ func (n *NewGroupCmd) RunE(cmd *cobra.Command, args []string) error {
 	err = flags.WithBody(
 		cmd,
 		body,
-		flags.WithDataValue(FlagDataName),
+		flags.WithDataValue(FlagDataName, ""),
 		flags.WithStringValue("name", "name"),
 	)
 	if err != nil {

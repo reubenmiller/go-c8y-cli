@@ -107,7 +107,7 @@ func (n *NewAlarmCmd) RunE(cmd *cobra.Command, args []string) error {
 	err = flags.WithBody(
 		cmd,
 		body,
-		flags.WithDataValue(FlagDataName),
+		flags.WithDataValue(FlagDataName, ""),
 		flags.WithStringValue("type", "type"),
 		flags.WithRelativeTimestamp("time", "time", ""),
 		flags.WithStringValue("text", "text"),

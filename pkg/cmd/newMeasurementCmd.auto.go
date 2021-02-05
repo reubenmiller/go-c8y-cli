@@ -104,7 +104,7 @@ func (n *NewMeasurementCmd) RunE(cmd *cobra.Command, args []string) error {
 	err = flags.WithBody(
 		cmd,
 		body,
-		flags.WithDataValue(FlagDataName),
+		flags.WithDataValue(FlagDataName, ""),
 		flags.WithRelativeTimestamp("time", "time", ""),
 		flags.WithStringValue("type", "type"),
 	)

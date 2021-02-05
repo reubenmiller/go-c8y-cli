@@ -109,7 +109,7 @@ func (n *UpdateCurrentApplicationCmd) RunE(cmd *cobra.Command, args []string) er
 	err = flags.WithBody(
 		cmd,
 		body,
-		flags.WithDataValue(FlagDataName),
+		flags.WithDataValue(FlagDataName, ""),
 		flags.WithStringValue("name", "name"),
 		flags.WithStringValue("key", "key"),
 		flags.WithStringValue("availability", "availability"),

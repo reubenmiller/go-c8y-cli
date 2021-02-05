@@ -104,7 +104,7 @@ func (n *AddRoleToGroupCmd) RunE(cmd *cobra.Command, args []string) error {
 	err = flags.WithBody(
 		cmd,
 		body,
-		flags.WithDataValue(FlagDataName),
+		flags.WithDataValue(FlagDataName, ""),
 	)
 	if err != nil {
 		return newUserError(err)

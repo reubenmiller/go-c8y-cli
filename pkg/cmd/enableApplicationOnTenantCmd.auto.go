@@ -102,29 +102,13 @@ func (n *EnableApplicationOnTenantCmd) RunE(cmd *cobra.Command, args []string) e
 	err = flags.WithBody(
 		cmd,
 		body,
-		flags.WithDataValue(FlagDataName),
+		flags.WithDataValue(FlagDataName, ""),
+		WithApplicationReferenceByNameFirstMatch(args, "application", "application.id"),
 	)
 	if err != nil {
 		return newUserError(err)
 	}
 
-	if cmd.Flags().Changed("application") {
-		applicationInputValues, applicationValue, err := getApplicationSlice(cmd, args, "application")
-
-		if err != nil {
-			return newUserError("no matching applications found", applicationInputValues, err)
-		}
-
-		if len(applicationValue) == 0 {
-			return newUserError("no matching applications found", applicationInputValues)
-		}
-
-		for _, item := range applicationValue {
-			if item != "" {
-				body.Set("application.id", newIDValue(item).GetID())
-			}
-		}
-	}
 	if err := setLazyDataTemplateFromFlags(cmd, body); err != nil {
 		return newUserError("Template error. ", err)
 	}

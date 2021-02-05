@@ -104,7 +104,7 @@ func (n *UpdateTenantOptionBulkCmd) RunE(cmd *cobra.Command, args []string) erro
 	err = flags.WithBody(
 		cmd,
 		body,
-		flags.WithDataValue(FlagDataName),
+		flags.WithDataValue(FlagDataName, ""),
 	)
 	if err != nil {
 		return newUserError(err)

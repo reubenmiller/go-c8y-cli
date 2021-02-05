@@ -103,7 +103,7 @@ func (n *AddManagedObjectChildAdditionCmd) RunE(cmd *cobra.Command, args []strin
 	err = flags.WithBody(
 		cmd,
 		body,
-		flags.WithDataValue(FlagDataName),
+		flags.WithDataValue(FlagDataName, ""),
 		flags.WithStringSliceValues("newChild", "managedObject.id", ""),
 	)
 	if err != nil {
