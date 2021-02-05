@@ -98,7 +98,7 @@ func (n *UpdateTenantOptionCmd) RunE(cmd *cobra.Command, args []string) error {
 	err = flags.WithBody(
 		cmd,
 		body,
-		flags.WithDataValue(FlagDataName, ""),
+		WithDataValue(),
 		flags.WithStringValue("value", "value"),
 		WithTemplateValue(),
 		WithTemplateVariablesValue(),

@@ -115,3 +115,21 @@ func Test_ExecutePathVariableCommand(t *testing.T) {
 	out := readOutput(t, b)
 	assert.True(t, out != "")
 }
+
+func Test_DataFlag(t *testing.T) {
+	cmd := setupTest()
+	b := bytes.NewBufferString("")
+	errBuffer := bytes.NewBufferString("")
+	cmd.SetOut(b)
+	cmd.SetOutput(errBuffer)
+	cmdArgs := "inventory create --name \"testMo\" --type \"mo_value\" --data value=1 --dry"
+	cmd.SetArgs(strings.Split(cmdArgs, " "))
+	cmdErr := cmd.Execute()
+	assert.True(t, cmdErr != nil)
+
+	outE := readOutput(t, errBuffer)
+	assert.True(t, outE != "")
+
+	out := readOutput(t, b)
+	assert.True(t, out != "")
+}

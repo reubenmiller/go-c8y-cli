@@ -95,7 +95,7 @@ func (n *ApproveNewDeviceRequestCmd) RunE(cmd *cobra.Command, args []string) err
 	err = flags.WithBody(
 		cmd,
 		body,
-		flags.WithDataValue(FlagDataName, ""),
+		WithDataValue(),
 		flags.WithStringValue("status", "status"),
 		WithTemplateValue(),
 		WithTemplateVariablesValue(),

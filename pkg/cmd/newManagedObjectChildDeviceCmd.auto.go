@@ -95,7 +95,7 @@ func (n *NewManagedObjectChildDeviceCmd) RunE(cmd *cobra.Command, args []string)
 	err = flags.WithBody(
 		cmd,
 		body,
-		flags.WithDataValue(FlagDataName, ""),
+		WithDataValue(),
 		WithDeviceByNameFirstMatch(args, "newChild", "managedObject.id"),
 		WithTemplateValue(),
 		WithTemplateVariablesValue(),

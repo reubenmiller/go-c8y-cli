@@ -99,7 +99,7 @@ func (n *UpdateTenantOptionEditableCmd) RunE(cmd *cobra.Command, args []string) 
 	err = flags.WithBody(
 		cmd,
 		body,
-		flags.WithDataValue(FlagDataName, ""),
+		WithDataValue(),
 		flags.WithStringValue("editable", "editable"),
 		WithTemplateValue(),
 		WithTemplateVariablesValue(),

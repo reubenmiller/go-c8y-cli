@@ -99,7 +99,7 @@ func (n *UpdateUserCurrentCmd) RunE(cmd *cobra.Command, args []string) error {
 	err = flags.WithBody(
 		cmd,
 		body,
-		flags.WithDataValue(FlagDataName, ""),
+		WithDataValue(),
 		flags.WithStringValue("firstName", "firstName"),
 		flags.WithStringValue("lastName", "lastName"),
 		flags.WithStringValue("phone", "phone"),

@@ -98,7 +98,7 @@ func (n *AddGroupToGroupCmd) RunE(cmd *cobra.Command, args []string) error {
 	err = flags.WithBody(
 		cmd,
 		body,
-		flags.WithDataValue(FlagDataName, ""),
+		WithDataValue(),
 		WithDeviceGroupByNameFirstMatch(args, "newChildGroup", "managedObject.id"),
 		WithTemplateValue(),
 		WithTemplateVariablesValue(),

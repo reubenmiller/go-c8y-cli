@@ -95,7 +95,7 @@ func (n *UpdateGroupCmd) RunE(cmd *cobra.Command, args []string) error {
 	err = flags.WithBody(
 		cmd,
 		body,
-		flags.WithDataValue(FlagDataName, ""),
+		WithDataValue(),
 		flags.WithStringValue("name", "name"),
 		WithTemplateValue(),
 		WithTemplateVariablesValue(),

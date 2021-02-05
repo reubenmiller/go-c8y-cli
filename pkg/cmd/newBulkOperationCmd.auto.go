@@ -99,7 +99,7 @@ func (n *NewBulkOperationCmd) RunE(cmd *cobra.Command, args []string) error {
 	err = flags.WithBody(
 		cmd,
 		body,
-		flags.WithDataValue(FlagDataName, ""),
+		WithDataValue(),
 		WithDeviceGroupByNameFirstMatch(args, "group", "groupId"),
 		flags.WithRelativeTimestamp("startDate", "startDate", ""),
 		flags.WithFloatValue("creationRampSec", "creationRamp"),

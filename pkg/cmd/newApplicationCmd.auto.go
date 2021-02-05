@@ -105,7 +105,7 @@ func (n *NewApplicationCmd) RunE(cmd *cobra.Command, args []string) error {
 	err = flags.WithBody(
 		cmd,
 		body,
-		flags.WithDataValue(FlagDataName, ""),
+		WithDataValue(),
 		flags.WithStringValue("name", "name"),
 		flags.WithStringValue("key", "key"),
 		flags.WithStringValue("type", "type"),

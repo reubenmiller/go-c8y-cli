@@ -101,7 +101,7 @@ func (n *NewApplicationBinaryCmd) RunE(cmd *cobra.Command, args []string) error 
 	err = flags.WithBody(
 		cmd,
 		body,
-		flags.WithDataValue(FlagDataName, ""),
+		WithDataValue(),
 		WithTemplateValue(),
 		WithTemplateVariablesValue(),
 	)

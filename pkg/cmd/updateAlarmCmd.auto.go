@@ -100,7 +100,7 @@ func (n *UpdateAlarmCmd) RunE(cmd *cobra.Command, args []string) error {
 	err = flags.WithBody(
 		cmd,
 		body,
-		flags.WithDataValue(FlagDataName, ""),
+		WithDataValue(),
 		flags.WithStringValue("status", "status"),
 		flags.WithStringValue("severity", "severity"),
 		flags.WithStringValue("text", "text"),

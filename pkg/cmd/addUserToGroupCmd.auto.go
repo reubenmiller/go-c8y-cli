@@ -96,7 +96,7 @@ func (n *AddUserToGroupCmd) RunE(cmd *cobra.Command, args []string) error {
 	err = flags.WithBody(
 		cmd,
 		body,
-		flags.WithDataValue(FlagDataName, ""),
+		WithDataValue(),
 		WithUserSelfByNameFirstMatch(args, "user", "user.self"),
 		WithTemplateValue(),
 		WithTemplateVariablesValue(),

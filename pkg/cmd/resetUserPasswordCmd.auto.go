@@ -95,7 +95,7 @@ func (n *ResetUserPasswordCmd) RunE(cmd *cobra.Command, args []string) error {
 	err = flags.WithBody(
 		cmd,
 		body,
-		flags.WithDataValue(FlagDataName, ""),
+		WithDataValue(),
 		flags.WithStringValue("newPassword", "password"),
 		flags.WithRequiredTemplateString(`
 addIfEmptyString(base, "password", {sendPasswordResetEmail: true})

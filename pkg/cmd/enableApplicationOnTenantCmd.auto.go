@@ -94,7 +94,7 @@ func (n *EnableApplicationOnTenantCmd) RunE(cmd *cobra.Command, args []string) e
 	err = flags.WithBody(
 		cmd,
 		body,
-		flags.WithDataValue(FlagDataName, ""),
+		WithDataValue(),
 		WithApplicationByNameFirstMatch(args, "application", "application.id"),
 		WithTemplateValue(),
 		WithTemplateVariablesValue(),

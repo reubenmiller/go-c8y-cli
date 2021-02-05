@@ -95,7 +95,7 @@ func (n *SetDeviceRequiredAvailabilityCmd) RunE(cmd *cobra.Command, args []strin
 	err = flags.WithBody(
 		cmd,
 		body,
-		flags.WithDataValue(FlagDataName, ""),
+		WithDataValue(),
 		flags.WithIntValue("interval", "c8y_RequiredAvailability.responseInterval"),
 		WithTemplateValue(),
 		WithTemplateVariablesValue(),

@@ -97,7 +97,7 @@ func (n *NewEventCmd) RunE(cmd *cobra.Command, args []string) error {
 	err = flags.WithBody(
 		cmd,
 		body,
-		flags.WithDataValue(FlagDataName, ""),
+		WithDataValue(),
 		WithDeviceByNameFirstMatch(args, "device", "source.id"),
 		flags.WithRelativeTimestamp("time", "time", ""),
 		flags.WithStringValue("type", "type"),

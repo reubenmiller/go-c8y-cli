@@ -98,7 +98,7 @@ func (n *EnableMicroserviceCmd) RunE(cmd *cobra.Command, args []string) error {
 	err = flags.WithBody(
 		cmd,
 		body,
-		flags.WithDataValue(FlagDataName, ""),
+		WithDataValue(),
 		WithMicroserviceByNameFirstMatch(args, "id", "application.id"),
 		WithTemplateValue(),
 		WithTemplateVariablesValue(),
