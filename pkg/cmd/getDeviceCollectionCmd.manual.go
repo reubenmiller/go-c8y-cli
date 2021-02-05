@@ -95,11 +95,15 @@ func (n *GetDeviceCollectionCmd) RunE(cmd *cobra.Command, args []string) error {
 	// q will automatically add a fragmentType=c8y_IsDevice to the query
 	query.Add("query", fmt.Sprintf("$filter=%s+$orderby=%s", filter, orderBy))
 
-	flags.WithQueryOptions(
+	err = flags.WithQueryParameters(
 		cmd,
 		query,
-		flags.WithQueryBool("withParents"),
+		flags.WithBoolValue("withParents", "withParents"),
 	)
+
+	if err != nil {
+		return nil
+	}
 
 	queryValue, err = url.QueryUnescape(query.Encode())
 

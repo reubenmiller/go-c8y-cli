@@ -65,13 +65,6 @@ func (n *AddDeviceToGroupCmd) RunE(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return newUserError(err)
 	}
-	err = flags.WithQueryOptions(
-		cmd,
-		query,
-	)
-	if err != nil {
-		return newUserError(err)
-	}
 
 	queryValue, err = url.QueryUnescape(query.Encode())
 
@@ -81,7 +74,6 @@ func (n *AddDeviceToGroupCmd) RunE(cmd *cobra.Command, args []string) error {
 
 	// headers
 	headers := http.Header{}
-
 	err = flags.WithHeaders(
 		cmd,
 		headers,
@@ -107,31 +99,14 @@ func (n *AddDeviceToGroupCmd) RunE(cmd *cobra.Command, args []string) error {
 		cmd,
 		body,
 		flags.WithDataValue(FlagDataName, ""),
+		WithDeviceByNameFirstMatch(args, "newChildDevice", "managedObject.id"),
+		WithTemplateValue(),
+		WithTemplateVariablesValue(),
 	)
 	if err != nil {
 		return newUserError(err)
 	}
 
-	if cmd.Flags().Changed("newChildDevice") {
-		newChildDeviceInputValues, newChildDeviceValue, err := getFormattedDeviceSlice(cmd, args, "newChildDevice")
-
-		if err != nil {
-			return newUserError("no matching devices found", newChildDeviceInputValues, err)
-		}
-
-		if len(newChildDeviceValue) == 0 {
-			return newUserError("no matching devices found", newChildDeviceInputValues)
-		}
-
-		for _, item := range newChildDeviceValue {
-			if item != "" {
-				body.Set("managedObject.id", newIDValue(item).GetID())
-			}
-		}
-	}
-	if err := setLazyDataTemplateFromFlags(cmd, body); err != nil {
-		return newUserError("Template error. ", err)
-	}
 	if err := body.Validate(); err != nil {
 		return newUserError("Body validation error. ", err)
 	}
@@ -141,24 +116,8 @@ func (n *AddDeviceToGroupCmd) RunE(cmd *cobra.Command, args []string) error {
 	err = flags.WithPathParameters(
 		cmd,
 		pathParameters,
+		WithDeviceGroupByNameFirstMatch(args, "group", "id"),
 	)
-	if cmd.Flags().Changed("group") {
-		groupInputValues, groupValue, err := getFormattedDeviceGroupSlice(cmd, args, "group")
-
-		if err != nil {
-			return newUserError("no matching device groups found", groupInputValues, err)
-		}
-
-		if len(groupValue) == 0 {
-			return newUserError("no matching device groups found", groupInputValues)
-		}
-
-		for _, item := range groupValue {
-			if item != "" {
-				pathParameters["id"] = newIDValue(item).GetID()
-			}
-		}
-	}
 
 	path := replacePathParameters("inventory/managedObjects/{id}/childAssets", pathParameters)
 

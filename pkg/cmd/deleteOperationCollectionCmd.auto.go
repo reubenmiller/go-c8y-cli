@@ -57,54 +57,15 @@ func (n *DeleteOperationCollectionCmd) RunE(cmd *cobra.Command, args []string) e
 	// query parameters
 	queryValue := url.QueryEscape("")
 	query := url.Values{}
-	if cmd.Flags().Changed("agent") {
-		agentInputValues, agentValue, err := getFormattedDeviceSlice(cmd, args, "agent")
-
-		if err != nil {
-			return newUserError("no matching devices found", agentInputValues, err)
-		}
-
-		if len(agentValue) == 0 {
-			return newUserError("no matching devices found", agentInputValues)
-		}
-
-		for _, item := range agentValue {
-			if item != "" {
-				query.Add("agentId", newIDValue(item).GetID())
-			}
-		}
-	}
-	if cmd.Flags().Changed("device") {
-		deviceInputValues, deviceValue, err := getFormattedDeviceSlice(cmd, args, "device")
-
-		if err != nil {
-			return newUserError("no matching devices found", deviceInputValues, err)
-		}
-
-		if len(deviceValue) == 0 {
-			return newUserError("no matching devices found", deviceInputValues)
-		}
-
-		for _, item := range deviceValue {
-			if item != "" {
-				query.Add("deviceId", newIDValue(item).GetID())
-			}
-		}
-	}
 
 	err = flags.WithQueryParameters(
 		cmd,
 		query,
+		WithDeviceByNameFirstMatch(args, "agent", "agentId"),
+		WithDeviceByNameFirstMatch(args, "device", "deviceId"),
 		flags.WithRelativeTimestamp("dateFrom", "dateFrom", ""),
 		flags.WithRelativeTimestamp("dateTo", "dateTo", ""),
 		flags.WithStringValue("status", "status"),
-	)
-	if err != nil {
-		return newUserError(err)
-	}
-	err = flags.WithQueryOptions(
-		cmd,
-		query,
 	)
 	if err != nil {
 		return newUserError(err)
@@ -118,7 +79,6 @@ func (n *DeleteOperationCollectionCmd) RunE(cmd *cobra.Command, args []string) e
 
 	// headers
 	headers := http.Header{}
-
 	err = flags.WithHeaders(
 		cmd,
 		headers,
@@ -146,6 +106,10 @@ func (n *DeleteOperationCollectionCmd) RunE(cmd *cobra.Command, args []string) e
 	)
 	if err != nil {
 		return newUserError(err)
+	}
+
+	if err := body.Validate(); err != nil {
+		return newUserError("Body validation error. ", err)
 	}
 
 	// path parameters

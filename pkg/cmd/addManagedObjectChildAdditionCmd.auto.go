@@ -62,13 +62,6 @@ func (n *AddManagedObjectChildAdditionCmd) RunE(cmd *cobra.Command, args []strin
 	if err != nil {
 		return newUserError(err)
 	}
-	err = flags.WithQueryOptions(
-		cmd,
-		query,
-	)
-	if err != nil {
-		return newUserError(err)
-	}
 
 	queryValue, err = url.QueryUnescape(query.Encode())
 
@@ -78,7 +71,6 @@ func (n *AddManagedObjectChildAdditionCmd) RunE(cmd *cobra.Command, args []strin
 
 	// headers
 	headers := http.Header{}
-
 	err = flags.WithHeaders(
 		cmd,
 		headers,
@@ -105,14 +97,13 @@ func (n *AddManagedObjectChildAdditionCmd) RunE(cmd *cobra.Command, args []strin
 		body,
 		flags.WithDataValue(FlagDataName, ""),
 		flags.WithStringSliceValues("newChild", "managedObject.id", ""),
+		WithTemplateValue(),
+		WithTemplateVariablesValue(),
 	)
 	if err != nil {
 		return newUserError(err)
 	}
 
-	if err := setLazyDataTemplateFromFlags(cmd, body); err != nil {
-		return newUserError("Template error. ", err)
-	}
 	if err := body.Validate(); err != nil {
 		return newUserError("Body validation error. ", err)
 	}

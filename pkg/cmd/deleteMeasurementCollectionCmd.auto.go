@@ -56,38 +56,15 @@ func (n *DeleteMeasurementCollectionCmd) RunE(cmd *cobra.Command, args []string)
 	// query parameters
 	queryValue := url.QueryEscape("")
 	query := url.Values{}
-	if cmd.Flags().Changed("device") {
-		deviceInputValues, deviceValue, err := getFormattedDeviceSlice(cmd, args, "device")
-
-		if err != nil {
-			return newUserError("no matching devices found", deviceInputValues, err)
-		}
-
-		if len(deviceValue) == 0 {
-			return newUserError("no matching devices found", deviceInputValues)
-		}
-
-		for _, item := range deviceValue {
-			if item != "" {
-				query.Add("source", newIDValue(item).GetID())
-			}
-		}
-	}
 
 	err = flags.WithQueryParameters(
 		cmd,
 		query,
+		WithDeviceByNameFirstMatch(args, "device", "source"),
 		flags.WithStringValue("type", "type"),
 		flags.WithStringValue("fragmentType", "fragmentType"),
 		flags.WithRelativeTimestamp("dateFrom", "dateFrom", ""),
 		flags.WithRelativeTimestamp("dateTo", "dateTo", ""),
-	)
-	if err != nil {
-		return newUserError(err)
-	}
-	err = flags.WithQueryOptions(
-		cmd,
-		query,
 	)
 	if err != nil {
 		return newUserError(err)
@@ -101,7 +78,6 @@ func (n *DeleteMeasurementCollectionCmd) RunE(cmd *cobra.Command, args []string)
 
 	// headers
 	headers := http.Header{}
-
 	err = flags.WithHeaders(
 		cmd,
 		headers,
@@ -129,6 +105,10 @@ func (n *DeleteMeasurementCollectionCmd) RunE(cmd *cobra.Command, args []string)
 	)
 	if err != nil {
 		return newUserError(err)
+	}
+
+	if err := body.Validate(); err != nil {
+		return newUserError("Body validation error. ", err)
 	}
 
 	// path parameters

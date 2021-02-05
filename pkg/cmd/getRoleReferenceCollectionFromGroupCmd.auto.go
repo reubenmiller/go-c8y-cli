@@ -62,13 +62,6 @@ func (n *GetRoleReferenceCollectionFromGroupCmd) RunE(cmd *cobra.Command, args [
 	if err != nil {
 		return newUserError(err)
 	}
-	err = flags.WithQueryOptions(
-		cmd,
-		query,
-	)
-	if err != nil {
-		return newUserError(err)
-	}
 	commonOptions, err := getCommonOptions(cmd)
 	if err != nil {
 		return newUserError(fmt.Sprintf("Failed to get common options. err=%s", err))
@@ -83,7 +76,6 @@ func (n *GetRoleReferenceCollectionFromGroupCmd) RunE(cmd *cobra.Command, args [
 
 	// headers
 	headers := http.Header{}
-
 	err = flags.WithHeaders(
 		cmd,
 		headers,
@@ -112,30 +104,18 @@ func (n *GetRoleReferenceCollectionFromGroupCmd) RunE(cmd *cobra.Command, args [
 		return newUserError(err)
 	}
 
+	if err := body.Validate(); err != nil {
+		return newUserError("Body validation error. ", err)
+	}
+
 	// path parameters
 	pathParameters := make(map[string]string)
 	err = flags.WithPathParameters(
 		cmd,
 		pathParameters,
 		flags.WithStringDefaultValue(client.TenantName, "tenant", "tenant"),
+		WithUserGroupByNameFirstMatch(args, "group", "group"),
 	)
-	if cmd.Flags().Changed("group") {
-		groupInputValues, groupValue, err := getFormattedGroupSlice(cmd, args, "group")
-
-		if err != nil {
-			return newUserError("no matching user groups found", groupInputValues, err)
-		}
-
-		if len(groupValue) == 0 {
-			return newUserError("no matching user groups found", groupInputValues)
-		}
-
-		for _, item := range groupValue {
-			if item != "" {
-				pathParameters["group"] = newIDValue(item).GetID()
-			}
-		}
-	}
 
 	path := replacePathParameters("/user/{tenant}/groups/{group}/roles", pathParameters)
 

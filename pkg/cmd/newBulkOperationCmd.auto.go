@@ -66,13 +66,6 @@ func (n *NewBulkOperationCmd) RunE(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return newUserError(err)
 	}
-	err = flags.WithQueryOptions(
-		cmd,
-		query,
-	)
-	if err != nil {
-		return newUserError(err)
-	}
 
 	queryValue, err = url.QueryUnescape(query.Encode())
 
@@ -82,7 +75,6 @@ func (n *NewBulkOperationCmd) RunE(cmd *cobra.Command, args []string) error {
 
 	// headers
 	headers := http.Header{}
-
 	err = flags.WithHeaders(
 		cmd,
 		headers,
@@ -108,35 +100,18 @@ func (n *NewBulkOperationCmd) RunE(cmd *cobra.Command, args []string) error {
 		cmd,
 		body,
 		flags.WithDataValue(FlagDataName, ""),
+		WithDeviceGroupByNameFirstMatch(args, "group", "groupId"),
 		flags.WithRelativeTimestamp("startDate", "startDate", ""),
 		flags.WithFloatValue("creationRampSec", "creationRamp"),
 		flags.WithDataValue("operation", "operationPrototype"),
+		WithTemplateValue(),
+		WithTemplateVariablesValue(),
+		flags.WithRequiredProperties("groupId", "startDate", "creationRamp", "operationPrototype"),
 	)
 	if err != nil {
 		return newUserError(err)
 	}
 
-	if cmd.Flags().Changed("group") {
-		groupInputValues, groupValue, err := getFormattedDeviceGroupSlice(cmd, args, "group")
-
-		if err != nil {
-			return newUserError("no matching device groups found", groupInputValues, err)
-		}
-
-		if len(groupValue) == 0 {
-			return newUserError("no matching device groups found", groupInputValues)
-		}
-
-		for _, item := range groupValue {
-			if item != "" {
-				body.Set("groupId", newIDValue(item).GetID())
-			}
-		}
-	}
-	if err := setLazyDataTemplateFromFlags(cmd, body); err != nil {
-		return newUserError("Template error. ", err)
-	}
-	body.SetRequiredKeys("groupId", "startDate", "creationRamp", "operationPrototype")
 	if err := body.Validate(); err != nil {
 		return newUserError("Body validation error. ", err)
 	}

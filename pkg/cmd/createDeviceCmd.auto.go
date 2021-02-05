@@ -66,13 +66,6 @@ func (n *CreateDeviceCmd) RunE(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return newUserError(err)
 	}
-	err = flags.WithQueryOptions(
-		cmd,
-		query,
-	)
-	if err != nil {
-		return newUserError(err)
-	}
 
 	queryValue, err = url.QueryUnescape(query.Encode())
 
@@ -82,7 +75,6 @@ func (n *CreateDeviceCmd) RunE(cmd *cobra.Command, args []string) error {
 
 	// headers
 	headers := http.Header{}
-
 	err = flags.WithHeaders(
 		cmd,
 		headers,
@@ -110,21 +102,17 @@ func (n *CreateDeviceCmd) RunE(cmd *cobra.Command, args []string) error {
 		flags.WithDataValue(FlagDataName, ""),
 		flags.WithStringValue("name", "name"),
 		flags.WithStringValue("type", "type"),
+		flags.WithRequiredTemplateString(`
+{  c8y_IsDevice: {},
+}
+`),
+		WithTemplateValue(),
+		WithTemplateVariablesValue(),
 	)
 	if err != nil {
 		return newUserError(err)
 	}
 
-	bodyErr := body.MergeJsonnet(`
-{  c8y_IsDevice: {},
-}
-`, false)
-	if bodyErr != nil {
-		return newSystemError("Template error. ", bodyErr)
-	}
-	if err := setLazyDataTemplateFromFlags(cmd, body); err != nil {
-		return newUserError("Template error. ", err)
-	}
 	if err := body.Validate(); err != nil {
 		return newUserError("Body validation error. ", err)
 	}

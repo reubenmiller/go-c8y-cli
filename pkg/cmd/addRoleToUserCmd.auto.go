@@ -63,13 +63,6 @@ func (n *AddRoleToUserCmd) RunE(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return newUserError(err)
 	}
-	err = flags.WithQueryOptions(
-		cmd,
-		query,
-	)
-	if err != nil {
-		return newUserError(err)
-	}
 
 	queryValue, err = url.QueryUnescape(query.Encode())
 
@@ -79,7 +72,6 @@ func (n *AddRoleToUserCmd) RunE(cmd *cobra.Command, args []string) error {
 
 	// headers
 	headers := http.Header{}
-
 	err = flags.WithHeaders(
 		cmd,
 		headers,
@@ -105,31 +97,14 @@ func (n *AddRoleToUserCmd) RunE(cmd *cobra.Command, args []string) error {
 		cmd,
 		body,
 		flags.WithDataValue(FlagDataName, ""),
+		WithRoleSelfByNameFirstMatch(args, "role", "role.self"),
+		WithTemplateValue(),
+		WithTemplateVariablesValue(),
 	)
 	if err != nil {
 		return newUserError(err)
 	}
 
-	if cmd.Flags().Changed("role") {
-		roleInputValues, roleValue, err := getFormattedRoleSelfSlice(cmd, args, "role")
-
-		if err != nil {
-			return newUserError("no matching roles found", roleInputValues, err)
-		}
-
-		if len(roleValue) == 0 {
-			return newUserError("no matching roles found", roleInputValues)
-		}
-
-		for _, item := range roleValue {
-			if item != "" {
-				body.Set("role.self", newIDValue(item).GetID())
-			}
-		}
-	}
-	if err := setLazyDataTemplateFromFlags(cmd, body); err != nil {
-		return newUserError("Template error. ", err)
-	}
 	if err := body.Validate(); err != nil {
 		return newUserError("Body validation error. ", err)
 	}
@@ -140,24 +115,8 @@ func (n *AddRoleToUserCmd) RunE(cmd *cobra.Command, args []string) error {
 		cmd,
 		pathParameters,
 		flags.WithStringDefaultValue(client.TenantName, "tenant", "tenant"),
+		WithUserByNameFirstMatch(args, "user", "user"),
 	)
-	if cmd.Flags().Changed("user") {
-		userInputValues, userValue, err := getFormattedUserSlice(cmd, args, "user")
-
-		if err != nil {
-			return newUserError("no matching users found", userInputValues, err)
-		}
-
-		if len(userValue) == 0 {
-			return newUserError("no matching users found", userInputValues)
-		}
-
-		for _, item := range userValue {
-			if item != "" {
-				pathParameters["user"] = newIDValue(item).GetID()
-			}
-		}
-	}
 
 	path := replacePathParameters("/user/{tenant}/users/{user}/roles", pathParameters)
 

@@ -62,13 +62,6 @@ func (n *DeleteDeviceFromGroupCmd) RunE(cmd *cobra.Command, args []string) error
 	if err != nil {
 		return newUserError(err)
 	}
-	err = flags.WithQueryOptions(
-		cmd,
-		query,
-	)
-	if err != nil {
-		return newUserError(err)
-	}
 
 	queryValue, err = url.QueryUnescape(query.Encode())
 
@@ -78,7 +71,6 @@ func (n *DeleteDeviceFromGroupCmd) RunE(cmd *cobra.Command, args []string) error
 
 	// headers
 	headers := http.Header{}
-
 	err = flags.WithHeaders(
 		cmd,
 		headers,
@@ -108,29 +100,17 @@ func (n *DeleteDeviceFromGroupCmd) RunE(cmd *cobra.Command, args []string) error
 		return newUserError(err)
 	}
 
+	if err := body.Validate(); err != nil {
+		return newUserError("Body validation error. ", err)
+	}
+
 	// path parameters
 	pathParameters := make(map[string]string)
 	err = flags.WithPathParameters(
 		cmd,
 		pathParameters,
+		WithDeviceByNameFirstMatch(args, "childDevice", "reference"),
 	)
-	if cmd.Flags().Changed("childDevice") {
-		childDeviceInputValues, childDeviceValue, err := getFormattedDeviceSlice(cmd, args, "childDevice")
-
-		if err != nil {
-			return newUserError("no matching devices found", childDeviceInputValues, err)
-		}
-
-		if len(childDeviceValue) == 0 {
-			return newUserError("no matching devices found", childDeviceInputValues)
-		}
-
-		for _, item := range childDeviceValue {
-			if item != "" {
-				pathParameters["reference"] = newIDValue(item).GetID()
-			}
-		}
-	}
 
 	path := replacePathParameters("inventory/managedObjects/{group}/childAssets/{reference}", pathParameters)
 

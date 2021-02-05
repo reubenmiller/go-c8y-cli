@@ -74,13 +74,6 @@ func (n *GetAuditRecordCollectionCmd) RunE(cmd *cobra.Command, args []string) er
 	if err != nil {
 		return newUserError(err)
 	}
-	err = flags.WithQueryOptions(
-		cmd,
-		query,
-	)
-	if err != nil {
-		return newUserError(err)
-	}
 	commonOptions, err := getCommonOptions(cmd)
 	if err != nil {
 		return newUserError(fmt.Sprintf("Failed to get common options. err=%s", err))
@@ -95,7 +88,6 @@ func (n *GetAuditRecordCollectionCmd) RunE(cmd *cobra.Command, args []string) er
 
 	// headers
 	headers := http.Header{}
-
 	err = flags.WithHeaders(
 		cmd,
 		headers,
@@ -122,6 +114,10 @@ func (n *GetAuditRecordCollectionCmd) RunE(cmd *cobra.Command, args []string) er
 	)
 	if err != nil {
 		return newUserError(err)
+	}
+
+	if err := body.Validate(); err != nil {
+		return newUserError("Body validation error. ", err)
 	}
 
 	// path parameters

@@ -61,13 +61,6 @@ func (n *EnableApplicationOnTenantCmd) RunE(cmd *cobra.Command, args []string) e
 	if err != nil {
 		return newUserError(err)
 	}
-	err = flags.WithQueryOptions(
-		cmd,
-		query,
-	)
-	if err != nil {
-		return newUserError(err)
-	}
 
 	queryValue, err = url.QueryUnescape(query.Encode())
 
@@ -77,7 +70,6 @@ func (n *EnableApplicationOnTenantCmd) RunE(cmd *cobra.Command, args []string) e
 
 	// headers
 	headers := http.Header{}
-
 	err = flags.WithHeaders(
 		cmd,
 		headers,
@@ -103,15 +95,14 @@ func (n *EnableApplicationOnTenantCmd) RunE(cmd *cobra.Command, args []string) e
 		cmd,
 		body,
 		flags.WithDataValue(FlagDataName, ""),
-		WithApplicationReferenceByNameFirstMatch(args, "application", "application.id"),
+		WithApplicationByNameFirstMatch(args, "application", "application.id"),
+		WithTemplateValue(),
+		WithTemplateVariablesValue(),
 	)
 	if err != nil {
 		return newUserError(err)
 	}
 
-	if err := setLazyDataTemplateFromFlags(cmd, body); err != nil {
-		return newUserError("Template error. ", err)
-	}
 	if err := body.Validate(); err != nil {
 		return newUserError("Body validation error. ", err)
 	}

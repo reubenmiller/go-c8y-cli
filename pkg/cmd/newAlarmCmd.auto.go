@@ -66,13 +66,6 @@ func (n *NewAlarmCmd) RunE(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return newUserError(err)
 	}
-	err = flags.WithQueryOptions(
-		cmd,
-		query,
-	)
-	if err != nil {
-		return newUserError(err)
-	}
 
 	queryValue, err = url.QueryUnescape(query.Encode())
 
@@ -82,7 +75,6 @@ func (n *NewAlarmCmd) RunE(cmd *cobra.Command, args []string) error {
 
 	// headers
 	headers := http.Header{}
-
 	err = flags.WithHeaders(
 		cmd,
 		headers,
@@ -108,37 +100,20 @@ func (n *NewAlarmCmd) RunE(cmd *cobra.Command, args []string) error {
 		cmd,
 		body,
 		flags.WithDataValue(FlagDataName, ""),
+		WithDeviceByNameFirstMatch(args, "device", "source.id"),
 		flags.WithStringValue("type", "type"),
 		flags.WithRelativeTimestamp("time", "time", ""),
 		flags.WithStringValue("text", "text"),
 		flags.WithStringValue("severity", "severity"),
 		flags.WithStringValue("status", "status"),
+		WithTemplateValue(),
+		WithTemplateVariablesValue(),
+		flags.WithRequiredProperties("type", "text", "time", "severity"),
 	)
 	if err != nil {
 		return newUserError(err)
 	}
 
-	if cmd.Flags().Changed("device") {
-		deviceInputValues, deviceValue, err := getFormattedDeviceSlice(cmd, args, "device")
-
-		if err != nil {
-			return newUserError("no matching devices found", deviceInputValues, err)
-		}
-
-		if len(deviceValue) == 0 {
-			return newUserError("no matching devices found", deviceInputValues)
-		}
-
-		for _, item := range deviceValue {
-			if item != "" {
-				body.Set("source.id", newIDValue(item).GetID())
-			}
-		}
-	}
-	if err := setLazyDataTemplateFromFlags(cmd, body); err != nil {
-		return newUserError("Template error. ", err)
-	}
-	body.SetRequiredKeys("type", "text", "time", "severity")
 	if err := body.Validate(); err != nil {
 		return newUserError("Body validation error. ", err)
 	}

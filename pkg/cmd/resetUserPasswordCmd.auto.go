@@ -62,13 +62,6 @@ func (n *ResetUserPasswordCmd) RunE(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return newUserError(err)
 	}
-	err = flags.WithQueryOptions(
-		cmd,
-		query,
-	)
-	if err != nil {
-		return newUserError(err)
-	}
 
 	queryValue, err = url.QueryUnescape(query.Encode())
 
@@ -78,7 +71,6 @@ func (n *ResetUserPasswordCmd) RunE(cmd *cobra.Command, args []string) error {
 
 	// headers
 	headers := http.Header{}
-
 	err = flags.WithHeaders(
 		cmd,
 		headers,
@@ -105,20 +97,16 @@ func (n *ResetUserPasswordCmd) RunE(cmd *cobra.Command, args []string) error {
 		body,
 		flags.WithDataValue(FlagDataName, ""),
 		flags.WithStringValue("newPassword", "password"),
+		flags.WithRequiredTemplateString(`
+addIfEmptyString(base, "password", {sendPasswordResetEmail: true})
+`),
+		WithTemplateValue(),
+		WithTemplateVariablesValue(),
 	)
 	if err != nil {
 		return newUserError(err)
 	}
 
-	bodyErr := body.MergeJsonnet(`
-addIfEmptyString(base, "password", {sendPasswordResetEmail: true})
-`, false)
-	if bodyErr != nil {
-		return newSystemError("Template error. ", bodyErr)
-	}
-	if err := setLazyDataTemplateFromFlags(cmd, body); err != nil {
-		return newUserError("Template error. ", err)
-	}
 	if err := body.Validate(); err != nil {
 		return newUserError("Body validation error. ", err)
 	}

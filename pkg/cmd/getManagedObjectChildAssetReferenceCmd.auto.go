@@ -62,13 +62,6 @@ func (n *GetManagedObjectChildAssetReferenceCmd) RunE(cmd *cobra.Command, args [
 	if err != nil {
 		return newUserError(err)
 	}
-	err = flags.WithQueryOptions(
-		cmd,
-		query,
-	)
-	if err != nil {
-		return newUserError(err)
-	}
 	commonOptions, err := getCommonOptions(cmd)
 	if err != nil {
 		return newUserError(fmt.Sprintf("Failed to get common options. err=%s", err))
@@ -83,7 +76,6 @@ func (n *GetManagedObjectChildAssetReferenceCmd) RunE(cmd *cobra.Command, args [
 
 	// headers
 	headers := http.Header{}
-
 	err = flags.WithHeaders(
 		cmd,
 		headers,
@@ -112,29 +104,17 @@ func (n *GetManagedObjectChildAssetReferenceCmd) RunE(cmd *cobra.Command, args [
 		return newUserError(err)
 	}
 
+	if err := body.Validate(); err != nil {
+		return newUserError("Body validation error. ", err)
+	}
+
 	// path parameters
 	pathParameters := make(map[string]string)
 	err = flags.WithPathParameters(
 		cmd,
 		pathParameters,
+		WithDeviceByNameFirstMatch(args, "reference", "reference"),
 	)
-	if cmd.Flags().Changed("reference") {
-		referenceInputValues, referenceValue, err := getFormattedDeviceSlice(cmd, args, "reference")
-
-		if err != nil {
-			return newUserError("no matching devices found", referenceInputValues, err)
-		}
-
-		if len(referenceValue) == 0 {
-			return newUserError("no matching devices found", referenceInputValues)
-		}
-
-		for _, item := range referenceValue {
-			if item != "" {
-				pathParameters["reference"] = newIDValue(item).GetID()
-			}
-		}
-	}
 
 	path := replacePathParameters("inventory/managedObjects/{asset}/childAssets/{reference}", pathParameters)
 

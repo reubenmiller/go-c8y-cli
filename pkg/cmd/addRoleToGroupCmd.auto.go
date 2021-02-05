@@ -63,13 +63,6 @@ func (n *AddRoleToGroupCmd) RunE(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return newUserError(err)
 	}
-	err = flags.WithQueryOptions(
-		cmd,
-		query,
-	)
-	if err != nil {
-		return newUserError(err)
-	}
 
 	queryValue, err = url.QueryUnescape(query.Encode())
 
@@ -79,7 +72,6 @@ func (n *AddRoleToGroupCmd) RunE(cmd *cobra.Command, args []string) error {
 
 	// headers
 	headers := http.Header{}
-
 	err = flags.WithHeaders(
 		cmd,
 		headers,
@@ -105,31 +97,14 @@ func (n *AddRoleToGroupCmd) RunE(cmd *cobra.Command, args []string) error {
 		cmd,
 		body,
 		flags.WithDataValue(FlagDataName, ""),
+		WithRoleSelfByNameFirstMatch(args, "role", "role.self"),
+		WithTemplateValue(),
+		WithTemplateVariablesValue(),
 	)
 	if err != nil {
 		return newUserError(err)
 	}
 
-	if cmd.Flags().Changed("role") {
-		roleInputValues, roleValue, err := getFormattedRoleSelfSlice(cmd, args, "role")
-
-		if err != nil {
-			return newUserError("no matching roles found", roleInputValues, err)
-		}
-
-		if len(roleValue) == 0 {
-			return newUserError("no matching roles found", roleInputValues)
-		}
-
-		for _, item := range roleValue {
-			if item != "" {
-				body.Set("role.self", newIDValue(item).GetID())
-			}
-		}
-	}
-	if err := setLazyDataTemplateFromFlags(cmd, body); err != nil {
-		return newUserError("Template error. ", err)
-	}
 	if err := body.Validate(); err != nil {
 		return newUserError("Body validation error. ", err)
 	}
@@ -140,24 +115,8 @@ func (n *AddRoleToGroupCmd) RunE(cmd *cobra.Command, args []string) error {
 		cmd,
 		pathParameters,
 		flags.WithStringDefaultValue(client.TenantName, "tenant", "tenant"),
+		WithUserGroupByNameFirstMatch(args, "group", "group"),
 	)
-	if cmd.Flags().Changed("group") {
-		groupInputValues, groupValue, err := getFormattedGroupSlice(cmd, args, "group")
-
-		if err != nil {
-			return newUserError("no matching user groups found", groupInputValues, err)
-		}
-
-		if len(groupValue) == 0 {
-			return newUserError("no matching user groups found", groupInputValues)
-		}
-
-		for _, item := range groupValue {
-			if item != "" {
-				pathParameters["group"] = newIDValue(item).GetID()
-			}
-		}
-	}
 
 	path := replacePathParameters("/user/{tenant}/groups/{group}/roles", pathParameters)
 

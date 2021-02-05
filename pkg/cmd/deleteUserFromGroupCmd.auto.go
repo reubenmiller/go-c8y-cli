@@ -64,13 +64,6 @@ func (n *DeleteUserFromGroupCmd) RunE(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return newUserError(err)
 	}
-	err = flags.WithQueryOptions(
-		cmd,
-		query,
-	)
-	if err != nil {
-		return newUserError(err)
-	}
 
 	queryValue, err = url.QueryUnescape(query.Encode())
 
@@ -80,7 +73,6 @@ func (n *DeleteUserFromGroupCmd) RunE(cmd *cobra.Command, args []string) error {
 
 	// headers
 	headers := http.Header{}
-
 	err = flags.WithHeaders(
 		cmd,
 		headers,
@@ -110,47 +102,19 @@ func (n *DeleteUserFromGroupCmd) RunE(cmd *cobra.Command, args []string) error {
 		return newUserError(err)
 	}
 
+	if err := body.Validate(); err != nil {
+		return newUserError("Body validation error. ", err)
+	}
+
 	// path parameters
 	pathParameters := make(map[string]string)
 	err = flags.WithPathParameters(
 		cmd,
 		pathParameters,
+		WithUserGroupByNameFirstMatch(args, "group", "group"),
+		WithUserByNameFirstMatch(args, "user", "user"),
 		flags.WithStringDefaultValue(client.TenantName, "tenant", "tenant"),
 	)
-	if cmd.Flags().Changed("group") {
-		groupInputValues, groupValue, err := getFormattedGroupSlice(cmd, args, "group")
-
-		if err != nil {
-			return newUserError("no matching user groups found", groupInputValues, err)
-		}
-
-		if len(groupValue) == 0 {
-			return newUserError("no matching user groups found", groupInputValues)
-		}
-
-		for _, item := range groupValue {
-			if item != "" {
-				pathParameters["group"] = newIDValue(item).GetID()
-			}
-		}
-	}
-	if cmd.Flags().Changed("user") {
-		userInputValues, userValue, err := getFormattedUserSlice(cmd, args, "user")
-
-		if err != nil {
-			return newUserError("no matching users found", userInputValues, err)
-		}
-
-		if len(userValue) == 0 {
-			return newUserError("no matching users found", userInputValues)
-		}
-
-		for _, item := range userValue {
-			if item != "" {
-				pathParameters["user"] = newIDValue(item).GetID()
-			}
-		}
-	}
 
 	path := replacePathParameters("/user/{tenant}/groups/{group}/users/{user}", pathParameters)
 

@@ -62,13 +62,6 @@ func (n *NewManagedObjectChildAssetCmd) RunE(cmd *cobra.Command, args []string) 
 	if err != nil {
 		return newUserError(err)
 	}
-	err = flags.WithQueryOptions(
-		cmd,
-		query,
-	)
-	if err != nil {
-		return newUserError(err)
-	}
 
 	queryValue, err = url.QueryUnescape(query.Encode())
 
@@ -78,7 +71,6 @@ func (n *NewManagedObjectChildAssetCmd) RunE(cmd *cobra.Command, args []string) 
 
 	// headers
 	headers := http.Header{}
-
 	err = flags.WithHeaders(
 		cmd,
 		headers,
@@ -104,48 +96,15 @@ func (n *NewManagedObjectChildAssetCmd) RunE(cmd *cobra.Command, args []string) 
 		cmd,
 		body,
 		flags.WithDataValue(FlagDataName, ""),
+		WithDeviceByNameFirstMatch(args, "newChildDevice", "managedObject.id"),
+		WithDeviceGroupByNameFirstMatch(args, "newChildGroup", "managedObject.id"),
+		WithTemplateValue(),
+		WithTemplateVariablesValue(),
 	)
 	if err != nil {
 		return newUserError(err)
 	}
 
-	if cmd.Flags().Changed("newChildDevice") {
-		newChildDeviceInputValues, newChildDeviceValue, err := getFormattedDeviceSlice(cmd, args, "newChildDevice")
-
-		if err != nil {
-			return newUserError("no matching devices found", newChildDeviceInputValues, err)
-		}
-
-		if len(newChildDeviceValue) == 0 {
-			return newUserError("no matching devices found", newChildDeviceInputValues)
-		}
-
-		for _, item := range newChildDeviceValue {
-			if item != "" {
-				body.Set("managedObject.id", newIDValue(item).GetID())
-			}
-		}
-	}
-	if cmd.Flags().Changed("newChildGroup") {
-		newChildGroupInputValues, newChildGroupValue, err := getFormattedDeviceGroupSlice(cmd, args, "newChildGroup")
-
-		if err != nil {
-			return newUserError("no matching device groups found", newChildGroupInputValues, err)
-		}
-
-		if len(newChildGroupValue) == 0 {
-			return newUserError("no matching device groups found", newChildGroupInputValues)
-		}
-
-		for _, item := range newChildGroupValue {
-			if item != "" {
-				body.Set("managedObject.id", newIDValue(item).GetID())
-			}
-		}
-	}
-	if err := setLazyDataTemplateFromFlags(cmd, body); err != nil {
-		return newUserError("Template error. ", err)
-	}
 	if err := body.Validate(); err != nil {
 		return newUserError("Body validation error. ", err)
 	}

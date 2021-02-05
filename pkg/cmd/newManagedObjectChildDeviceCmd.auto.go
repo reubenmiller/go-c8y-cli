@@ -62,13 +62,6 @@ func (n *NewManagedObjectChildDeviceCmd) RunE(cmd *cobra.Command, args []string)
 	if err != nil {
 		return newUserError(err)
 	}
-	err = flags.WithQueryOptions(
-		cmd,
-		query,
-	)
-	if err != nil {
-		return newUserError(err)
-	}
 
 	queryValue, err = url.QueryUnescape(query.Encode())
 
@@ -78,7 +71,6 @@ func (n *NewManagedObjectChildDeviceCmd) RunE(cmd *cobra.Command, args []string)
 
 	// headers
 	headers := http.Header{}
-
 	err = flags.WithHeaders(
 		cmd,
 		headers,
@@ -104,31 +96,14 @@ func (n *NewManagedObjectChildDeviceCmd) RunE(cmd *cobra.Command, args []string)
 		cmd,
 		body,
 		flags.WithDataValue(FlagDataName, ""),
+		WithDeviceByNameFirstMatch(args, "newChild", "managedObject.id"),
+		WithTemplateValue(),
+		WithTemplateVariablesValue(),
 	)
 	if err != nil {
 		return newUserError(err)
 	}
 
-	if cmd.Flags().Changed("newChild") {
-		newChildInputValues, newChildValue, err := getFormattedDeviceSlice(cmd, args, "newChild")
-
-		if err != nil {
-			return newUserError("no matching devices found", newChildInputValues, err)
-		}
-
-		if len(newChildValue) == 0 {
-			return newUserError("no matching devices found", newChildInputValues)
-		}
-
-		for _, item := range newChildValue {
-			if item != "" {
-				body.Set("managedObject.id", newIDValue(item).GetID())
-			}
-		}
-	}
-	if err := setLazyDataTemplateFromFlags(cmd, body); err != nil {
-		return newUserError("Template error. ", err)
-	}
 	if err := body.Validate(); err != nil {
 		return newUserError("Body validation error. ", err)
 	}
@@ -138,24 +113,8 @@ func (n *NewManagedObjectChildDeviceCmd) RunE(cmd *cobra.Command, args []string)
 	err = flags.WithPathParameters(
 		cmd,
 		pathParameters,
+		WithDeviceByNameFirstMatch(args, "device", "device"),
 	)
-	if cmd.Flags().Changed("device") {
-		deviceInputValues, deviceValue, err := getFormattedDeviceSlice(cmd, args, "device")
-
-		if err != nil {
-			return newUserError("no matching devices found", deviceInputValues, err)
-		}
-
-		if len(deviceValue) == 0 {
-			return newUserError("no matching devices found", deviceInputValues)
-		}
-
-		for _, item := range deviceValue {
-			if item != "" {
-				pathParameters["device"] = newIDValue(item).GetID()
-			}
-		}
-	}
 
 	path := replacePathParameters("inventory/managedObjects/{device}/childDevices", pathParameters)
 

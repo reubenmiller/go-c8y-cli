@@ -62,13 +62,6 @@ func (n *GetRoleReferenceCollectionFromUserCmd) RunE(cmd *cobra.Command, args []
 	if err != nil {
 		return newUserError(err)
 	}
-	err = flags.WithQueryOptions(
-		cmd,
-		query,
-	)
-	if err != nil {
-		return newUserError(err)
-	}
 	commonOptions, err := getCommonOptions(cmd)
 	if err != nil {
 		return newUserError(fmt.Sprintf("Failed to get common options. err=%s", err))
@@ -83,7 +76,6 @@ func (n *GetRoleReferenceCollectionFromUserCmd) RunE(cmd *cobra.Command, args []
 
 	// headers
 	headers := http.Header{}
-
 	err = flags.WithHeaders(
 		cmd,
 		headers,
@@ -112,30 +104,18 @@ func (n *GetRoleReferenceCollectionFromUserCmd) RunE(cmd *cobra.Command, args []
 		return newUserError(err)
 	}
 
+	if err := body.Validate(); err != nil {
+		return newUserError("Body validation error. ", err)
+	}
+
 	// path parameters
 	pathParameters := make(map[string]string)
 	err = flags.WithPathParameters(
 		cmd,
 		pathParameters,
 		flags.WithStringDefaultValue(client.TenantName, "tenant", "tenant"),
+		WithUserByNameFirstMatch(args, "user", "user"),
 	)
-	if cmd.Flags().Changed("user") {
-		userInputValues, userValue, err := getFormattedUserSlice(cmd, args, "user")
-
-		if err != nil {
-			return newUserError("no matching users found", userInputValues, err)
-		}
-
-		if len(userValue) == 0 {
-			return newUserError("no matching users found", userInputValues)
-		}
-
-		for _, item := range userValue {
-			if item != "" {
-				pathParameters["user"] = newIDValue(item).GetID()
-			}
-		}
-	}
 
 	path := replacePathParameters("/user/{tenant}/users/{user}/roles", pathParameters)
 
