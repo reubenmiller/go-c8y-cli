@@ -309,7 +309,7 @@ func WithDataValueAdvanced(stripCumulocityKeys bool, opts ...string) GetOption {
 
 		src, dst, _ := UnpackGetterOptions("%s", opts...)
 
-		if !cmd.Flags().Changed(FlagDataName) {
+		if !cmd.Flags().Changed(src) {
 			return "", "", nil
 		}
 
@@ -333,7 +333,7 @@ func WithDataValueAdvanced(stripCumulocityKeys bool, opts ...string) GetOption {
 }
 
 func WithDataValue(opts ...string) GetOption {
-	return WithDataValueAdvanced(true)
+	return WithDataValueAdvanced(true, opts...)
 }
 
 type DefaultTemplateString string
