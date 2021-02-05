@@ -7,7 +7,6 @@ import (
 
 	"github.com/pkg/errors"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
-	"github.com/spf13/cobra"
 )
 
 type hostedApplicationFetcher struct {
@@ -74,44 +73,6 @@ func (f *hostedApplicationFetcher) getByName(name string) ([]fetcherResultSet, e
 	}
 
 	return results, nil
-}
-
-// getHostedApplicationSlice returns the hosted application id and name
-// returns raw strings, lookuped values, and errors
-func getHostedApplicationSlice(cmd *cobra.Command, args []string, name string) ([]string, []string, error) {
-
-	if !cmd.Flags().Changed(name) {
-		// TODO: Read from os.PIPE
-		pipedInput, err := getPipe()
-		if err != nil {
-			Logger.Debug("No pipeline input detected")
-		} else {
-			Logger.Debugf("PIPED Input: %s\n", pipedInput)
-			return nil, nil, nil
-		}
-	}
-
-	values := make([]string, 0)
-
-	if value, err := cmd.Flags().GetString(name); err != nil {
-		Logger.Error("Flag is missing", err)
-	} else {
-		values = append(values, value)
-	}
-
-	if len(values) == 0 {
-		return nil, nil, fmt.Errorf("Failed to find matching applications")
-	}
-
-	refs, err := findHostedApplications(values, true)
-
-	if err != nil {
-		return nil, nil, err
-	}
-
-	results, _ := getFetchedResultsAsString(refs)
-
-	return values, results, nil
 }
 
 // findHostedApplications returns hosted applications given either an id or search text

@@ -112,7 +112,7 @@
             }
             default {
                 $GetBodyContents = "body"
-                $null = $RESTBodyBuilderOptions.AppendLine("flags.WithDataValue(FlagDataName, `"`"),")
+                $null = $RESTBodyBuilderOptions.AppendLine("WithDataValue(),")
             }
         }
 

@@ -81,6 +81,10 @@ func (t *TemplatePathResolver) Resolve(name string) (string, error) {
 	return matchFilePath(globalFlagTemplatePath, name, ".jsonnet", "ignore")
 }
 
+func WithDataValue() flags.GetOption {
+	return flags.WithDataValue(FlagDataName, "")
+}
+
 func WithTemplateValue() flags.GetOption {
 	resolve := &TemplatePathResolver{}
 	return flags.WithTemplateValue(FlagDataTemplateName, resolve)
