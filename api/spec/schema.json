@@ -412,25 +412,6 @@
               }
             }
           },
-          "bodyValidation": {
-            "type": "object",
-            "description": "Use a template when validating the json body",
-            "properties": {
-              "type": {
-                "type": "string",
-                "description": "Templating engine. Current only supports jsonnet",
-                "enum": ["jsonnet"]
-              },
-              "template": {
-                "type": "string",
-                "description": "Template in the given template engine language"
-              }
-            },
-            "required": [
-              "type",
-              "template"
-            ]
-          },
           "body": {
             "type": "array",
             "minItems": 1,

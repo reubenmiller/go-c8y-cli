@@ -293,6 +293,11 @@ func (b MapBuilder) GetFileContents() *os.File {
 	return file
 }
 
+// HasFile return true if the body is being set from file
+func (b MapBuilder) HasFile() bool {
+	return b.file != ""
+}
+
 func (b MapBuilder) GetBody() (interface{}, error) {
 	if b.file != "" {
 		return os.Open(b.file)
@@ -335,7 +340,11 @@ func (b MapBuilder) validateRequiredKeys() error {
 }
 
 // Validate checks the body if it is valid and contains all of the required keys
+// If the body should be contructed from file, then always return nil
 func (b MapBuilder) Validate() error {
+	if b.HasFile() {
+		return nil
+	}
 	if len(b.requiredKeys) > 0 {
 		if err := b.validateRequiredKeys(); err != nil {
 			return err

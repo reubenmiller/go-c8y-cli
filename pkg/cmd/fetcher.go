@@ -10,6 +10,7 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/pkg/iterator"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
+	"github.com/tidwall/gjson"
 )
 
 type entityReference struct {
@@ -239,6 +240,64 @@ func WithReferenceByName(fetcher entityFetcher, args []string, opts ...string) f
 	}
 }
 
+// WithSelfReferenceByName adds support for looking up values by name via cli args
+func WithSelfReferenceByName(fetcher entityFetcher, args []string, opts ...string) flags.GetOption {
+	return func(cmd *cobra.Command) (string, interface{}, error) {
+
+		src, dst, _ := flags.UnpackGetterOptions("", opts...)
+
+		values, err := cmd.Flags().GetStringSlice(src)
+		if err != nil {
+			singleValue, err := cmd.Flags().GetString(src)
+			if err != nil {
+				return "", "", err
+			}
+			values = []string{singleValue}
+		}
+
+		values = ParseValues(append(values, args...))
+
+		formattedValues, err := lookupEntity(fetcher, values, false)
+
+		if err != nil {
+			return dst, values, fmt.Errorf("failed to lookup by name. %w", err)
+		}
+
+		results := []string{}
+
+		invalidLookups := []string{}
+		for _, item := range formattedValues {
+			var selfLink string
+			// Try to retrieve self link
+			if data, ok := item.Data.Value.(gjson.Result); ok {
+				if value := data.Get("self"); value.Exists() {
+					selfLink = value.Str
+				}
+			}
+
+			if selfLink != "" {
+				if item.Name != "" {
+					results = append(results, fmt.Sprintf("%s|%s", selfLink, item.Name))
+				} else {
+					results = append(results, selfLink)
+				}
+			} else {
+				if item.Name != "" {
+					invalidLookups = append(invalidLookups, item.Name)
+				}
+			}
+		}
+
+		var errors error
+
+		if len(invalidLookups) > 0 {
+			errors = fmt.Errorf("no results %v", invalidLookups)
+		}
+
+		return dst, results, errors
+	}
+}
+
 // WithReferenceByNameFirstMatch add reference by name matching using a fetcher via cli args. Only the first match will be used
 func WithReferenceByNameFirstMatch(fetcher entityFetcher, args []string, opts ...string) flags.GetOption {
 	return func(cmd *cobra.Command) (string, interface{}, error) {
@@ -258,18 +317,101 @@ func WithReferenceByNameFirstMatch(fetcher entityFetcher, args []string, opts ..
 	}
 }
 
-// WithDeviceReferenceByNameFirstMatch add reference by name matching for devices via cli args. Only the first match will be used
-func WithDeviceReferenceByNameFirstMatch(args []string, opts ...string) flags.GetOption {
+// WithSelfReferenceByNameFirstMatch add reference by name matching using a fetcher via cli args. Only the first match will be used
+func WithSelfReferenceByNameFirstMatch(fetcher entityFetcher, args []string, opts ...string) flags.GetOption {
+	return func(cmd *cobra.Command) (string, interface{}, error) {
+		opt := WithSelfReferenceByName(fetcher, args, opts...)
+		name, values, err := opt(cmd)
+
+		switch v := values.(type) {
+		case []string:
+			if len(v) == 0 {
+				return name, nil, fmt.Errorf("reference by name: no matches found")
+			}
+
+			return name, newIDValue(v[0]).GetID(), err
+		default:
+			return "", "", fmt.Errorf("reference by name: invalid name lookup type. only strings are supported")
+		}
+	}
+}
+
+// WithDeviceByNameFirstMatch add reference by name matching for devices via cli args. Only the first match will be used
+func WithDeviceByNameFirstMatch(args []string, opts ...string) flags.GetOption {
 	return func(cmd *cobra.Command) (string, interface{}, error) {
 		opt := WithReferenceByNameFirstMatch(newDeviceFetcher(client), args, opts...)
 		return opt(cmd)
 	}
 }
 
-// WithApplicationReferenceByNameFirstMatch add reference by name matching for applications via cli args. Only the first match will be used
-func WithApplicationReferenceByNameFirstMatch(args []string, opts ...string) flags.GetOption {
+// WithApplicationByNameFirstMatch add reference by name matching for applications via cli args. Only the first match will be used
+func WithApplicationByNameFirstMatch(args []string, opts ...string) flags.GetOption {
 	return func(cmd *cobra.Command) (string, interface{}, error) {
 		opt := WithReferenceByNameFirstMatch(newApplicationFetcher(client), args, opts...)
+		return opt(cmd)
+	}
+}
+
+// WithMicroserviceByNameFirstMatch add reference by name matching for microservices via cli args. Only the first match will be used
+func WithMicroserviceByNameFirstMatch(args []string, opts ...string) flags.GetOption {
+	return func(cmd *cobra.Command) (string, interface{}, error) {
+		opt := WithReferenceByNameFirstMatch(newMicroserviceFetcher(client), args, opts...)
+		return opt(cmd)
+	}
+}
+
+// WithAgentByNameFirstMatch add reference by name matching for agents via cli args. Only the first match will be used
+func WithAgentByNameFirstMatch(args []string, opts ...string) flags.GetOption {
+	return func(cmd *cobra.Command) (string, interface{}, error) {
+		opt := WithReferenceByNameFirstMatch(newAgentFetcher(client), args, opts...)
+		return opt(cmd)
+	}
+}
+
+// WithDeviceGroupByNameFirstMatch add reference by name matching for device groups via cli args. Only the first match will be used
+func WithDeviceGroupByNameFirstMatch(args []string, opts ...string) flags.GetOption {
+	return func(cmd *cobra.Command) (string, interface{}, error) {
+		opt := WithReferenceByNameFirstMatch(newDeviceGroupFetcher(client), args, opts...)
+		return opt(cmd)
+	}
+}
+
+// WithUserByNameFirstMatch add reference by name matching for users via cli args. Only the first match will be used
+func WithUserByNameFirstMatch(args []string, opts ...string) flags.GetOption {
+	return func(cmd *cobra.Command) (string, interface{}, error) {
+		opt := WithReferenceByNameFirstMatch(newUserFetcher(client), args, opts...)
+		return opt(cmd)
+	}
+}
+
+// WithUserSelfByNameFirstMatch add reference by name matching for users' self link via cli args. Only the first match will be used
+func WithUserSelfByNameFirstMatch(args []string, opts ...string) flags.GetOption {
+	return func(cmd *cobra.Command) (string, interface{}, error) {
+		opt := WithSelfReferenceByNameFirstMatch(newUserFetcher(client), args, opts...)
+		return opt(cmd)
+	}
+}
+
+// WithRoleSelfByNameFirstMatch add reference by name matching for roles' self link via cli args. Only the first match will be used
+func WithRoleSelfByNameFirstMatch(args []string, opts ...string) flags.GetOption {
+	return func(cmd *cobra.Command) (string, interface{}, error) {
+		opt := WithSelfReferenceByNameFirstMatch(newRoleFetcher(client), args, opts...)
+		return opt(cmd)
+	}
+}
+
+// WithRoleByNameFirstMatch add reference by name matching for roles via cli args. Only the first match will be used
+func WithRoleByNameFirstMatch(args []string, opts ...string) flags.GetOption {
+	return func(cmd *cobra.Command) (string, interface{}, error) {
+		opt := WithReferenceByNameFirstMatch(newRoleFetcher(client), args, opts...)
+		return opt(cmd)
+	}
+}
+
+// WithUserGroupByNameFirstMatch add reference by name matching for user groups via cli args. Only the first match will be used
+func WithUserGroupByNameFirstMatch(args []string, opts ...string) flags.GetOption {
+	return func(cmd *cobra.Command) (string, interface{}, error) {
+		opt := WithReferenceByNameFirstMatch(newUserGroupFetcher(client), args, opts...)
 		return opt(cmd)
 	}
 }

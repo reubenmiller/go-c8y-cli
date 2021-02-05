@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/reubenmiller/go-c8y-cli/pkg/c8ydata"
+	"github.com/reubenmiller/go-c8y-cli/pkg/iterator"
 	"github.com/reubenmiller/go-c8y-cli/pkg/jsonUtilities"
 	"github.com/reubenmiller/go-c8y-cli/pkg/mapbuilder"
 	"github.com/reubenmiller/go-c8y-cli/pkg/timestamp"
@@ -84,10 +85,33 @@ func WithBody(cmd *cobra.Command, body *mapbuilder.MapBuilder, opts ...GetOption
 			if v != "" {
 				err = body.Set(name, value)
 			}
+
+		case Template:
+			body.SetApplyTemplateOnMarshalPreference(true)
+			body.SetTemplate(string(v))
+			if body.TemplateIterator == nil {
+				body.TemplateIterator = iterator.NewRangeIterator(1, 100000000, 1)
+			}
+
+		case TemplateVariables:
+			body.SetTemplateVariables(v)
+
+		case DefaultTemplateString:
+			// the body will build on this template (it can override it)
+			err = body.MergeJsonnet(string(v), true)
+
+		case RequiredTemplateString:
+			// the template will override values in the body
+			err = body.MergeJsonnet(string(v), false)
+
+		case RequiredKeys:
+			body.SetRequiredKeys(v...)
+
 		case FilePath:
 			if v != "" {
 				body.SetFile(string(v))
 			}
+
 		case map[string]interface{}:
 			if v != nil {
 				if name != "" {
@@ -279,7 +303,8 @@ func WithFilePath(opts ...string) GetOption {
 	}
 }
 
-func WithDataValue(opts ...string) GetOption {
+// WithDataValueAdvanced adds json or shorthand json parsing with additional option to strip the Cumulocity properties from the input
+func WithDataValueAdvanced(stripCumulocityKeys bool, opts ...string) GetOption {
 	return func(cmd *cobra.Command) (string, interface{}, error) {
 
 		src, dst, _ := UnpackGetterOptions("%s", opts...)
@@ -300,7 +325,42 @@ func WithDataValue(opts ...string) GetOption {
 			return dst, "", fmt.Errorf("json error: %s parameter does not contain valid json or shorthand json. %w", src, err)
 		}
 
-		c8ydata.RemoveCumulocityProperties(data, true)
+		if stripCumulocityKeys {
+			c8ydata.RemoveCumulocityProperties(data, true)
+		}
 		return dst, data, err
+	}
+}
+
+func WithDataValue(opts ...string) GetOption {
+	return WithDataValueAdvanced(true)
+}
+
+type DefaultTemplateString string
+type RequiredTemplateString string
+
+func WithTemplateString(value string, applyLast bool) GetOption {
+	return func(cmd *cobra.Command) (string, interface{}, error) {
+		if applyLast {
+			return "", RequiredTemplateString(value), nil
+		}
+		return "", DefaultTemplateString(value), nil
+	}
+}
+
+func WithDefaultTemplateString(value string) GetOption {
+	return WithTemplateString(value, false)
+}
+
+func WithRequiredTemplateString(value string) GetOption {
+	return WithTemplateString(value, true)
+}
+
+type RequiredKeys []string
+
+func WithRequiredProperties(values ...string) GetOption {
+	return func(cmd *cobra.Command) (string, interface{}, error) {
+		return "", RequiredKeys(values), nil
+
 	}
 }

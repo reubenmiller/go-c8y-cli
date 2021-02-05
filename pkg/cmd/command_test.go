@@ -104,7 +104,7 @@ func Test_ExecutePathVariableCommand(t *testing.T) {
 	cmd.SetOut(b)
 	cmd.SetOutput(errBuffer)
 	// cmdArgs := "inventoryReferences assignDeviceToGroup --group=1234 --newChildDevice=testdevice_hqcr0itez3 --dry"
-	cmdArgs := "applications deleteApplicationBinary --application=feature-cep-custom-rules --dry --binaryId=1234"
+	cmdArgs := "users create  --dry --userName testme"
 	cmd.SetArgs(strings.Split(cmdArgs, " "))
 	cmdErr := cmd.Execute()
 	assert.True(t, cmdErr != nil)

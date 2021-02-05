@@ -96,9 +96,8 @@
     #
     # Body
     #
-    $RESTBodyBuilder = New-Object System.Text.StringBuilder
     $RESTBodyBuilderOptions = New-Object System.Text.StringBuilder
-    $RESTFormDataBuilder = New-Object System.Text.StringBuilder
+    $RESTFormDataBuilderOptions = New-Object System.Text.StringBuilder
     $GetBodyContents = "body"
     
     if ($Specification.body) {
@@ -122,7 +121,7 @@
             if ($code) {
                 switch -Regex ($code) {
                     "^flags\.WithFormData" {
-                        $null = $RESTFormDataBuilder.AppendLine($code)
+                        $null = $RESTFormDataBuilderOptions.AppendLine($code)
                         break
                     }
 
@@ -132,7 +131,7 @@
                     }
 
                     default {
-                        $null = $RESTBodyBuilder.AppendLine($code)
+                        Write-Warning "Unknown body code. $code"
                     }
                 }
             } else {
@@ -157,21 +156,17 @@
                 "jsonnet" {
                     # ApplyLast: true == apply template to the existing json (potentially overriding values)
                     #            false == Use template as base json, and the existing json will take precendence
-                    $Reverse = "true"
                     if ($Specification.bodyTemplate.applyLast -eq "true") {
-                        $Reverse = "false"
+                        $null = $RESTBodyBuilderOptions.AppendLine("flags.WithRequiredTemplateString(```n{0}``)," -f @(
+                            $Specification.bodyTemplate.template
+                        ))
+                        
+                    } else {
+                        $null = $RESTBodyBuilderOptions.AppendLine("flags.WithDefaultTemplateString(```n{0}``)," -f @(
+                            $Specification.bodyTemplate.template
+                        ))
                     }
-                    $null = $RESTBodyBuilder.AppendLine("bodyErr := body.MergeJsonnet(```n{0}``, {1})" -f @(
-                        $Specification.bodyTemplate.template,
-                        $Reverse
-                    ))
 
-                    $BodyErrCheck = @"
-        if bodyErr != nil {
-            return newSystemError("Template error. ", bodyErr)
-        }
-"@.TrimStart()
-                    $null = $RESTBodyBuilder.AppendLine($BodyErrCheck)
                 }
                 "none" {
                     # Do nothing
@@ -186,44 +181,16 @@
         # Add support for user defined templates to control body
         #
         if ($Specification.bodyTemplate.type -ne "none") {
-            $BodyUserTemplateCode = @"
-        if err := setLazyDataTemplateFromFlags(cmd, body); err != nil {
-            return newUserError("Template error. ", err)
-        }
-"@.TrimStart()
-            $null = $RESTBodyBuilder.AppendLine($BodyUserTemplateCode)
-        }
-        
-        if ($Specification.bodyValidation) {
-            switch ($Specification.bodyValidation.type) {
-                "jsonnet" {
-                    $null = $RESTBodyBuilder.AppendLine("body.SetValidateTemplate(```n{0}``)" -f $Specification.bodyValidation.template)
-                }
-                default {
-                    Write-Warning ("Unsupported body validation template type [{0}]" -f $Specification.bodyValidation.type)
-                }
-            }
+            $null = $RESTBodyBuilderOptions.AppendLine("WithTemplateValue(),")
+            $null = $RESTBodyBuilderOptions.AppendLine("WithTemplateVariablesValue(),")
         }
 
         if ($Specification.bodyRequiredKeys) {
             $literalValues = ($Specification.bodyRequiredKeys | Foreach-Object {
                 '"{0}"' -f $_
             }) -join ", "
-            $null = $RESTBodyBuilder.AppendLine("body.SetRequiredKeys({0})" -f $literalValues)
+            $null = $RESTBodyBuilderOptions.AppendLine("flags.WithRequiredProperties({0})," -f $literalValues)
         }
-
-        #
-        # Validate body
-        #
-        if ($Specification.bodyContent.type -ne 'binary') {
-            $BodyValidationCode = @"
-        if err := body.Validate(); err != nil {
-            return newUserError("Body validation error. ", err)
-        }
-"@.TrimStart()
-            $null = $RESTBodyBuilder.AppendLine($BodyValidationCode)
-        }
-        
     }
 
     #
@@ -237,7 +204,6 @@
     #
     # Path Parameters
     #
-    $RESTPathBuilder = New-Object System.Text.StringBuilder
     $RESTPathBuilderOptions = New-Object System.Text.StringBuilder
     foreach ($Properties in (Remove-SkippedParameters $Specification.pathParameters)) {
         if ($Properties.pipeline) {
@@ -246,13 +212,7 @@
         }
         $code = New-C8yApiGoGetValueFromFlag -Parameters $Properties -SetterType "path"
         if ($code) {
-            
-            if ($code -match "^(flags\.|With)") {
-                $null = $RESTPathBuilderOptions.AppendLine($code)
-            }
-            else {
-                $null = $RESTPathBuilder.AppendLine($code)
-            }
+            $null = $RESTPathBuilderOptions.AppendLine($code)
         }
     }
 
@@ -266,12 +226,7 @@
         foreach ($Properties in (Remove-SkippedParameters $Specification.queryParameters)) {
             $code = New-C8yApiGoGetValueFromFlag -Parameters $Properties -SetterType "query"
             if ($code) {
-                if ($code -match "^(flags\.|With)") {
-                    $null = $RESTQueryBuilderWithValues.AppendLine($code)
-                }
-                else {
-                    $null = $RESTQueryBuilder.AppendLine($code)
-                }
+                $null = $RESTQueryBuilderWithValues.AppendLine($code)
             }
         }
     }
@@ -289,18 +244,12 @@
     #
     # Headers
     #
-    $RestHeaderBuilder = New-Object System.Text.StringBuilder
     $RestHeaderBuilderOptions = New-Object System.Text.StringBuilder
     if ($Specification.headerParameters) {
         foreach ($iArg in (Remove-SkippedParameters $Specification.headerParameters)) {
             $code = New-C8yApiGoGetValueFromFlag -Parameters $iArg -SetterType "header"
             if ($code) {
-                if ($code -match "^(flags\.|With)") {
-                    $null = $RestHeaderBuilderOptions.AppendLine($code)
-                }
-                else {
-                    $null = $RestHeaderBuilder.AppendLine($code)
-                }
+                $null = $RestHeaderBuilderOptions.AppendLine($code)
             }
         }
     }
@@ -404,13 +353,6 @@ func (n *${NameCamel}Cmd) RunE(cmd *cobra.Command, args []string) error {
     if err != nil {
 		return newUserError(err)
     }
-    err = flags.WithQueryOptions(
-		cmd,
-		query,
-	)
-    if err != nil {
-		return newUserError(err)
-    }
     $RESTQueryBuilderPost
 	queryValue, err = url.QueryUnescape(query.Encode())
 
@@ -420,8 +362,6 @@ func (n *${NameCamel}Cmd) RunE(cmd *cobra.Command, args []string) error {
 
     // headers
     headers := http.Header{}
-    $RestHeaderBuilder
-
     err = flags.WithHeaders(
 		cmd,
         headers,
@@ -436,7 +376,7 @@ func (n *${NameCamel}Cmd) RunE(cmd *cobra.Command, args []string) error {
     err = flags.WithFormDataOptions(
 		cmd,
 		formData,
-		$RESTFormDataBuilder
+		$RESTFormDataBuilderOptions
     )
     if err != nil {
 		return newUserError(err)
@@ -454,7 +394,9 @@ func (n *${NameCamel}Cmd) RunE(cmd *cobra.Command, args []string) error {
 		return newUserError(err)
     }
 
-    $RESTBodyBuilder
+    if err := body.Validate(); err != nil {
+		return newUserError("Body validation error. ", err)
+	}
 
     // path parameters
     pathParameters := make(map[string]string)
@@ -463,7 +405,7 @@ func (n *${NameCamel}Cmd) RunE(cmd *cobra.Command, args []string) error {
         pathParameters,
         $RESTPathBuilderOptions
     )
-    $RESTPathBuilder
+
     path := replacePathParameters("${RESTPath}", pathParameters)
 
     req := c8y.RequestOptions{$RESTHost

@@ -14,6 +14,7 @@ import (
 
 	"github.com/pkg/errors"
 	"github.com/reubenmiller/go-c8y-cli/pkg/c8ydata"
+	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/pkg/iterator"
 	"github.com/reubenmiller/go-c8y-cli/pkg/jsonUtilities"
 	"github.com/reubenmiller/go-c8y-cli/pkg/mapbuilder"
@@ -72,6 +73,21 @@ func addProcessingModeFlag(cmd *cobra.Command) {
 // resolveTemplatePath resolves a template path
 func resolveTemplatePath(name string) (string, error) {
 	return matchFilePath(globalFlagTemplatePath, name, ".jsonnet", "ignore")
+}
+
+type TemplatePathResolver struct{}
+
+func (t *TemplatePathResolver) Resolve(name string) (string, error) {
+	return matchFilePath(globalFlagTemplatePath, name, ".jsonnet", "ignore")
+}
+
+func WithTemplateValue() flags.GetOption {
+	resolve := &TemplatePathResolver{}
+	return flags.WithTemplateValue(FlagDataTemplateName, resolve)
+}
+
+func WithTemplateVariablesValue() flags.GetOption {
+	return flags.WithTemplateVariablesValue(FlagDataTemplateVariablesName)
 }
 
 func matchFilePath(sourceDir string, pattern string, extension, ignoreDir string) (string, error) {
