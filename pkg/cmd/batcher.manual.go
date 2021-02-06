@@ -111,7 +111,7 @@ func runBatched(requestIterator *RequestIterator, commonOptions CommonCommandOpt
 	}
 
 	for w := 1; w <= batchOptions.TotalWorkers; w++ {
-		Logger.Infof("Starting worker: %d", w)
+		Logger.Infof("starting worker: %d", w)
 		workers.Add(1)
 		go batchWorker(w, jobs, results, &workers)
 	}
@@ -123,7 +123,7 @@ func runBatched(requestIterator *RequestIterator, commonOptions CommonCommandOpt
 		defer close(jobs)
 		for {
 			jobID++
-			Logger.Infof("Checking job iterator: %d", jobID)
+			Logger.Infof("checking job iterator: %d", jobID)
 
 			request, err := requestIterator.GetNext()
 
@@ -133,7 +133,7 @@ func runBatched(requestIterator *RequestIterator, commonOptions CommonCommandOpt
 				}
 				break
 			}
-			Logger.Infof("Adding job: %d", jobID)
+			Logger.Infof("adding job: %d", jobID)
 
 			jobs <- batchArgument{
 				id:            jobID,
@@ -143,7 +143,7 @@ func runBatched(requestIterator *RequestIterator, commonOptions CommonCommandOpt
 			}
 		}
 
-		Logger.Info("Finished adding jobs")
+		Logger.Info("finished adding jobs")
 	}()
 
 	// collect all the results of the work.
@@ -156,7 +156,7 @@ func runBatched(requestIterator *RequestIterator, commonOptions CommonCommandOpt
 	}()
 
 	for err := range results {
-		Logger.Infof("Reading job result: %s", err)
+		Logger.Infof("reading job result: %s", err)
 		if err != nil && err != io.EOF {
 			totalErrors = append(totalErrors, err)
 		}
@@ -309,8 +309,10 @@ func NewPipeOption(name string, required bool) *PipeOption {
 }
 
 type PipeOption struct {
-	Name     string
-	Required bool
+	Name              string
+	Required          bool
+	Property          string
+	ResolveByNameType string
 }
 
 func processRequestAndResponseWithWorkers(cmd *cobra.Command, r *c8y.RequestOptions, pipeOpt PipeOption) error {
@@ -343,6 +345,32 @@ func processRequestAndResponseWithWorkers(cmd *cobra.Command, r *c8y.RequestOpti
 	}
 
 	requestIter := NewRequestIterator(*r, pathIter, r.Body)
+
+	if pipeOpt.ResolveByNameType != "" {
+		// Add a resolve by name fetcher
+		var fetcher entityFetcher
+		switch pipeOpt.ResolveByNameType {
+		case "device":
+			fetcher = newDeviceFetcher(client)
+		case "application":
+			fetcher = newApplicationFetcher(client)
+		case "microservice":
+			fetcher = newMicroserviceFetcher(client)
+		case "agent":
+			fetcher = newAgentFetcher(client)
+		case "devicegroup":
+			fetcher = newDeviceGroupFetcher(client)
+		case "user":
+			fetcher = newUserFetcher(client)
+		case "role":
+			fetcher = newRoleFetcher(client)
+		case "usergroup":
+			fetcher = newUserGroupFetcher(client)
+		}
+		if fetcher != nil {
+			requestIter.NameResolver = fetcher
+		}
+	}
 
 	// for {
 	// 	next, err := requestIter.GetNext()

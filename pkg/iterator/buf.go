@@ -15,11 +15,11 @@ type BufioIterator struct {
 }
 
 // GetNext returns the next line in the buffer
-func (i *BufioIterator) GetNext() (line []byte, err error) {
+func (i *BufioIterator) GetNext() (line []byte, input interface{}, err error) {
 	i.mu.Lock()
 	defer i.mu.Unlock()
 	line, err = i.reader.ReadBytes('\n')
-	return bytes.TrimRight(line, "\n"), err
+	return bytes.TrimRight(line, "\n"), line, err
 }
 
 // MarshalJSON return the value in a json compatible value
@@ -42,7 +42,7 @@ type FileContentsIterator struct {
 }
 
 // GetNext returns the next line in the buffer
-func (i *FileContentsIterator) GetNext() (line []byte, err error) {
+func (i *FileContentsIterator) GetNext() (line []byte, input interface{}, err error) {
 	i.mu.Lock()
 	defer i.mu.Unlock()
 	line, err = i.reader.ReadBytes('\n')
@@ -50,7 +50,8 @@ func (i *FileContentsIterator) GetNext() (line []byte, err error) {
 	if err == io.EOF {
 		i.fp.Close()
 	}
-	return bytes.TrimRight(line, "\n"), err
+	value := bytes.TrimRight(line, "\n")
+	return value, value, err
 }
 
 // MarshalJSON return the value in a json compatible value

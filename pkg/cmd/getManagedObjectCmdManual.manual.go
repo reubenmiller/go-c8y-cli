@@ -109,5 +109,5 @@ func (n *getManagedObjectCmdManual) getManagedObject(cmd *cobra.Command, args []
 		DryRun:       globalFlagDryRun,
 	}
 
-	return processRequestAndResponseWithWorkers(cmd, &req, PipeOption{"id", true})
+	return processRequestAndResponseWithWorkers(cmd, &req, PipeOption{})
 }

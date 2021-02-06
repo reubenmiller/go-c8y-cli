@@ -29,18 +29,23 @@ func WithTemplateValue(src string, pathResolver Resolver) GetOption {
 			return "", nil, nil
 		}
 
-		value, err := cmd.Flags().GetString(FlagDataTemplateVariablesName)
+		value, err := cmd.Flags().GetString(src)
 		if err != nil {
 			return "", nil, err
 		}
 
-		fullFilePath, err := pathResolver.Resolve(value)
-		if err != nil {
-			return "", nil, err
-		}
+		// ignore errors, as we will try to read the contents
+		contents, err := pathResolver.Resolve(value)
 
-		content := getContents(fullFilePath)
-		return src, content, nil
+		if err != nil {
+			contents = value
+		}
+		// if err != nil {
+		// 	return "", nil, err
+		// }
+
+		content := getContents(contents)
+		return src, Template(content), nil
 	}
 }
 

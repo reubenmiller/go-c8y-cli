@@ -136,5 +136,5 @@ func (n *GetDeviceCollectionCmd) RunE(cmd *cobra.Command, args []string) error {
 		DryRun:       globalFlagDryRun,
 	}
 
-	return processRequestAndResponseWithWorkers(cmd, &req, PipeOption{"", false})
+	return processRequestAndResponseWithWorkers(cmd, &req, PipeOption{})
 }

@@ -57,6 +57,18 @@ type entityFetcher interface {
 	getByName(string) ([]fetcherResultSet, error)
 }
 
+func lookupIDByName(fetch entityFetcher, name string) ([]entityReference, error) {
+	results, err := lookupEntity(fetch, []string{name}, false)
+
+	filteredResults := make([]entityReference, 0)
+	for _, item := range results {
+		if item.ID != "" {
+			filteredResults = append(filteredResults, item)
+		}
+	}
+	return filteredResults, err
+}
+
 func lookupEntity(fetch entityFetcher, values []string, getID bool) ([]entityReference, error) {
 	ids, names := parseAndSanitizeIDs(values)
 
@@ -170,7 +182,7 @@ var ErrMoreThanOneFound = errors.New("referenceByName: more than 1 found")
 
 func (i *EntityIterator) GetNext() (value []byte, err error) {
 
-	value, err = i.valueIterator.GetNext()
+	value, _, err = i.valueIterator.GetNext()
 	if err != nil {
 		return
 	}
@@ -206,6 +218,10 @@ func WithReferenceByName(fetcher entityFetcher, args []string, opts ...string) f
 		}
 
 		values = ParseValues(append(values, args...))
+
+		if len(values) == 0 {
+			return "", values, nil
+		}
 
 		formattedValues, err := lookupEntity(fetcher, values, false)
 
@@ -303,6 +319,10 @@ func WithReferenceByNameFirstMatch(fetcher entityFetcher, args []string, opts ..
 	return func(cmd *cobra.Command) (string, interface{}, error) {
 		opt := WithReferenceByName(fetcher, args, opts...)
 		name, values, err := opt(cmd)
+
+		if name == "" {
+			return "", "", nil
+		}
 
 		switch v := values.(type) {
 		case []string:

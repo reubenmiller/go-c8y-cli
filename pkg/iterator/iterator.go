@@ -9,7 +9,7 @@ import (
 
 // Iterator is a simple interfact where the next value can be returned.
 type Iterator interface {
-	GetNext() (line []byte, err error)
+	GetNext() (line []byte, input interface{}, err error)
 }
 
 type UntypedIterator interface {
@@ -17,7 +17,7 @@ type UntypedIterator interface {
 }
 
 func toJSON(i Iterator) (line []byte, err error) {
-	v, err := i.GetNext()
+	v, _, err := i.GetNext()
 	if err != nil {
 		if err == io.EOF {
 			return []byte("null"), err
@@ -45,17 +45,25 @@ type CompositeIterator struct {
 }
 
 // GetNext will count through the values and return them one by one
-func (i *CompositeIterator) GetNext() (line []byte, err error) {
+func (i *CompositeIterator) GetNext() (line []byte, input interface{}, err error) {
 
-	nextValue, err := i.iterator.GetNext()
+	nextValue, input, err := i.iterator.GetNext()
 
 	if err != nil {
-		return line, err
+		return line, input, err
 	}
 
 	if strings.Contains(i.format, "%") {
-		return []byte(fmt.Sprintf(i.format, nextValue)), nil
+		return []byte(fmt.Sprintf(i.format, nextValue)), input, nil
+	}
+	return []byte(i.format), input, nil
+
+}
+
+func (i *CompositeIterator) GetValueByInput(input []byte) (line []byte, err error) {
+
+	if strings.Contains(i.format, "%") {
+		return []byte(fmt.Sprintf(i.format, input)), nil
 	}
 	return []byte(i.format), nil
-
 }

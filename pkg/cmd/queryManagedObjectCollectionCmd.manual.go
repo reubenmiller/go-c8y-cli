@@ -121,5 +121,5 @@ func (n *QueryManagedObjectCollectionCmd) RunE(cmd *cobra.Command, args []string
 		DryRun:       globalFlagDryRun,
 	}
 
-	return processRequestAndResponseWithWorkers(cmd, &req, PipeOption{"", false})
+	return processRequestAndResponseWithWorkers(cmd, &req, PipeOption{})
 }

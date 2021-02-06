@@ -25,14 +25,14 @@ func NewRangeIterator(start, end, step int64) *RangeIterator {
 }
 
 // GetNext returns the next value from the range
-func (i *RangeIterator) GetNext() (line []byte, err error) {
+func (i *RangeIterator) GetNext() (line []byte, input interface{}, err error) {
 	nextValue := atomic.AddInt64(&i.current, i.step)
 	if nextValue > int64(i.end) {
 		err = io.EOF
 	} else {
 		line = []byte(fmt.Sprintf("%d", nextValue))
 	}
-	return line, err
+	return line, nextValue, err
 }
 
 // MarshalJSON return the value in a json compatible value

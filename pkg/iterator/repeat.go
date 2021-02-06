@@ -13,14 +13,14 @@ type RepeatIterator struct {
 }
 
 // GetNext will count through the values and return them one by one
-func (i *RepeatIterator) GetNext() (line []byte, err error) {
+func (i *RepeatIterator) GetNext() (line []byte, input interface{}, err error) {
 	nextIndex := atomic.AddInt64(&i.currentIndex, 1)
 	if i.endIndex != 0 && nextIndex > i.endIndex {
 		err = io.EOF
 	} else {
 		line = []byte(i.value)
 	}
-	return line, err
+	return line, line, err
 }
 
 // MarshalJSON return the value in a json compatible value

@@ -13,7 +13,7 @@ type FuncIterator struct {
 }
 
 // GetNext will count through the values and return them one by one
-func (i *FuncIterator) GetNext() (line []byte, err error) {
+func (i *FuncIterator) GetNext() (line []byte, input interface{}, err error) {
 	nextIndex := atomic.AddInt64(&i.currentIndex, 1)
 	var nextValue string
 	if i.endIndex != 0 && nextIndex > i.endIndex {
@@ -22,7 +22,7 @@ func (i *FuncIterator) GetNext() (line []byte, err error) {
 		nextValue, err = i.next(nextIndex)
 		line = []byte(nextValue)
 	}
-	return line, err
+	return line, nextValue, err
 }
 
 // MarshalJSON return the value in a json compatible value

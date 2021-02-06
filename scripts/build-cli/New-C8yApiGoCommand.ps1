@@ -65,10 +65,19 @@
     $CommandArgs = New-Object System.Collections.ArrayList
     $PipelineVariableName = ""
     $PipelineVariableRequired = "false"
+    $PipelineVariableProperty = ""
+    $PipelineVariablePropertyResolveType = ""
     foreach ($iArg in (Remove-SkippedParameters $ArgumentSources)) {
         if ($iArg.pipeline) {
             $PipelineVariableName = $iArg.Name
             $PipelineVariableRequired = if ($iArg.Required) {"true"} else {"false"}
+            $PipelineVariableProperty = $iArg.Property
+            switch -Regex ($iArg.type) {
+                "^(\[\])?application|microservice|agent|device|devicegroup|agent|usergroup|user|role$" {
+                    $PipelineVariablePropertyResolveType = "$($iArg.type)".ToLower() -replace "[\[\]]"
+                    break
+                }
+            }
         }
         $ArgParams = @{
             Name = $iArg.name
@@ -419,7 +428,13 @@ func (n *${NameCamel}Cmd) RunE(cmd *cobra.Command, args []string) error {
         DryRun:       globalFlagDryRun,
     }
 
-    return processRequestAndResponseWithWorkers(cmd, &req, PipeOption{"$PipelineVariableName", $PipelineVariableRequired})
+    pipeOption := PipeOption{
+        Name: "$PipelineVariableName",
+		Property: "$PipelineVariableProperty",
+		Required: $PipelineVariableRequired,
+		ResolveByNameType: "$PipelineVariablePropertyResolveType",
+	}
+    return processRequestAndResponseWithWorkers(cmd, &req, pipeOption)
 }
 
 "@

@@ -12,9 +12,9 @@ func Test_RelativeTimeIterator(t *testing.T) {
 
 	iter := NewRelativeTimeIterator("0s")
 
-	v1, err1 := iter.GetNext()
+	v1, _, err1 := iter.GetNext()
 	time.Sleep(1 * time.Millisecond)
-	v2, err2 := iter.GetNext()
+	v2, _, err2 := iter.GetNext()
 	assert.True(t, string(v1) != string(v2))
 
 	out1, err1 := json.Marshal(iter)

@@ -69,9 +69,10 @@ Describe -Name "New-ManagedObject" {
         $jsonfile = New-TemporaryFile
         '{"name": ' | Out-File $jsonfile
 
-        $Response = PSc8y\New-ManagedObject -Data $jsonfile.FullName
+        $Response = PSc8y\New-ManagedObject -Data $jsonfile.FullName -ErrorVariable ErrorMessages
         Remove-Item $jsonfile -Force
 
+        $ErrorMessages | Should -Not -Match "panic"
         $LASTEXITCODE | Should -Not -BeExactly 0
         $Response | Should -BeNullOrEmpty
     }

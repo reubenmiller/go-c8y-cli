@@ -70,7 +70,7 @@ func (n *batchDummyPipeCmd) processE(cmd *cobra.Command, iter iterator.Iterator)
 		fmt.Printf("json error: %s\n", err)
 	}
 	for {
-		line, err := iter.GetNext()
+		line, _, err := iter.GetNext()
 		if err != nil {
 			if err == io.EOF {
 				break

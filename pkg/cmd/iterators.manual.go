@@ -11,6 +11,7 @@ import (
 
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/pkg/iterator"
+	"github.com/reubenmiller/go-c8y-cli/pkg/jsonUtilities"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
 )
@@ -24,11 +25,12 @@ func NewRelativeTimeIterator(relative string) *iterator.FuncIterator {
 }
 
 func NewRequestIterator(r c8y.RequestOptions, path iterator.Iterator, body interface{}) *RequestIterator {
-	return &RequestIterator{
+	reqIter := &RequestIterator{
 		Request: r,
 		Path:    path,
 		Body:    body,
 	}
+	return reqIter
 }
 
 func NewRequestFixedPathIterator(r c8y.RequestOptions, path string, body interface{}) *RequestIterator {
@@ -40,10 +42,11 @@ func NewRequestFixedPathIterator(r c8y.RequestOptions, path string, body interfa
 }
 
 type RequestIterator struct {
-	Request c8y.RequestOptions
-	Path    iterator.Iterator
-	Body    interface{}
-	done    int32
+	Request      c8y.RequestOptions
+	Path         iterator.Iterator
+	NameResolver entityFetcher
+	Body         interface{}
+	done         int32
 }
 
 func (r *RequestIterator) HasNext() bool {
@@ -75,12 +78,36 @@ func (r *RequestIterator) GetNext() (*c8y.RequestOptions, error) {
 
 	// apply path iterator
 	if r.Path != nil {
-		path, err := r.Path.GetNext()
+		path, input, err := r.Path.GetNext()
 
 		if err != nil {
 			r.setDone()
 			return nil, err
 		}
+
+		if r.NameResolver != nil {
+			if inputB, ok := input.([]byte); ok {
+
+				matches, err := lookupIDByName(r.NameResolver, string(inputB))
+
+				if err != nil {
+					r.setDone()
+					return nil, err
+				}
+				if len(matches) == 0 {
+					r.setDone()
+					return nil, fmt.Errorf("no matching results")
+				}
+				if len(matches) > 0 {
+					if f, ok := r.Path.(*iterator.CompositeIterator); ok {
+						path, err = f.GetValueByInput([]byte(matches[0].ID))
+					} else {
+						path = []byte(matches[0].ID)
+					}
+				}
+			}
+		}
+
 		req.Path = string(path)
 	}
 
@@ -210,8 +237,22 @@ func NewFlagPipeEnabledStringSlice(cmd *cobra.Command, pipeOpt PipeOption) (iter
 			return iterator.NewSliceIterator(paths), nil
 		}
 	} else if supportsPipeline {
-		iter, err := iterator.NewPipeIterator(func(line []byte) bool {
-			return !(bytes.HasPrefix(line, []byte("{")) || bytes.HasPrefix(line, []byte("[")))
+		opt := &iterator.PipeOptions{
+			Property: pipeOpt.Name,
+		}
+		if pipeOpt.Property != "" {
+			opt.Property = pipeOpt.Property
+		}
+		iter, err := iterator.NewJSONPipeIterator(opt, func(line []byte) bool {
+			line = bytes.TrimSpace(line)
+			if !bytes.HasPrefix(line, []byte("{")) && !bytes.HasPrefix(line, []byte("[")) {
+				return true
+			}
+			// only allow json objects
+			isJSONObject := jsonUtilities.IsJSONObject(line)
+			// isJSONArray := jsonUtilities.IsJSONObject(line)
+			return isJSONObject
+			// return !(bytes.HasPrefix(line, []byte("{")) || bytes.HasPrefix(line, []byte("[")))
 		})
 		if err != nil {
 			if pipeOpt.Required {
