@@ -168,10 +168,12 @@ func runBatched(requestIterator *RequestIterator, commonOptions CommonCommandOpt
 	}
 
 	if total := len(totalErrors); total > 0 {
-		if total > 1 {
-			return newUserErrorWithExitCode(104, fmt.Sprintf("batch completed with %d errors", total))
+		if total == 1 {
+			// return only error
+			return totalErrors[0]
 		}
-		return newUserErrorWithExitCode(104, fmt.Sprintf("batch completed with %d error", total))
+		// aggregate error
+		return newUserErrorWithExitCode(104, fmt.Sprintf("batch completed with %d errors", total))
 	}
 	return nil
 }
