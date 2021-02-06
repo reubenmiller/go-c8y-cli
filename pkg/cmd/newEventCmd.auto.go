@@ -134,5 +134,11 @@ func (n *NewEventCmd) RunE(cmd *cobra.Command, args []string) error {
 		DryRun:       globalFlagDryRun,
 	}
 
-	return processRequestAndResponseWithWorkers(cmd, &req, PipeOption{"device", true})
+	pipeOption := PipeOption{
+		Name:              "device",
+		Property:          "source.id",
+		Required:          true,
+		ResolveByNameType: "device",
+	}
+	return processRequestAndResponseWithWorkers(cmd, &req, pipeOption)
 }

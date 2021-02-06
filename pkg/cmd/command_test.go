@@ -133,3 +133,26 @@ func Test_DataFlag(t *testing.T) {
 	out := readOutput(t, b)
 	assert.True(t, out != "")
 }
+
+func ExecuteCmd(cmd *c8yCmd, cmdArgs string) error {
+	cmd.SetArgs(strings.Split(cmdArgs, " "))
+	return cmd.Execute()
+}
+
+func Test_DeviceLookup(t *testing.T) {
+	cmd := setupTest()
+	cmdErr := ExecuteCmd(cmd, "device get --id testdevice_1me4xsy9vd -v")
+	assert.True(t, cmdErr != nil)
+}
+
+func Test_EmptyExpand(t *testing.T) {
+	cmd := setupTest()
+	cmdErr := ExecuteCmd(cmd, "inventory list")
+	assert.True(t, cmdErr != nil)
+}
+
+func Test_DeviceFetcher(t *testing.T) {
+	cmd := setupTest()
+	cmdErr := ExecuteCmd(cmd, "devices update --id=testdevice_1me4xsy9vd --dry")
+	assert.True(t, cmdErr != nil)
+}

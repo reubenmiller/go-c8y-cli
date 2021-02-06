@@ -126,5 +126,11 @@ func (n *GetApplicationReferenceCollectionCmd) RunE(cmd *cobra.Command, args []s
 		DryRun:       globalFlagDryRun,
 	}
 
-	return processRequestAndResponseWithWorkers(cmd, &req, PipeOption{"tenant", false})
+	pipeOption := PipeOption{
+		Name:              "tenant",
+		Property:          "",
+		Required:          false,
+		ResolveByNameType: "",
+	}
+	return processRequestAndResponseWithWorkers(cmd, &req, pipeOption)
 }

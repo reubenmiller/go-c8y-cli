@@ -126,5 +126,11 @@ func (n *GetCurrentUserInventoryRoleCmd) RunE(cmd *cobra.Command, args []string)
 		DryRun:       globalFlagDryRun,
 	}
 
-	return processRequestAndResponseWithWorkers(cmd, &req, PipeOption{"id", true})
+	pipeOption := PipeOption{
+		Name:              "id",
+		Property:          "",
+		Required:          true,
+		ResolveByNameType: "",
+	}
+	return processRequestAndResponseWithWorkers(cmd, &req, pipeOption)
 }

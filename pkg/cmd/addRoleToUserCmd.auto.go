@@ -131,5 +131,11 @@ func (n *AddRoleToUserCmd) RunE(cmd *cobra.Command, args []string) error {
 		DryRun:       globalFlagDryRun,
 	}
 
-	return processRequestAndResponseWithWorkers(cmd, &req, PipeOption{"role", false})
+	pipeOption := PipeOption{
+		Name:              "role",
+		Property:          "role.self",
+		Required:          false,
+		ResolveByNameType: "",
+	}
+	return processRequestAndResponseWithWorkers(cmd, &req, pipeOption)
 }

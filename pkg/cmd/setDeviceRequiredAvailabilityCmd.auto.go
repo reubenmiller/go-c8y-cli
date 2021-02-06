@@ -128,5 +128,11 @@ func (n *SetDeviceRequiredAvailabilityCmd) RunE(cmd *cobra.Command, args []strin
 		DryRun:       globalFlagDryRun,
 	}
 
-	return processRequestAndResponseWithWorkers(cmd, &req, PipeOption{"device", true})
+	pipeOption := PipeOption{
+		Name:              "device",
+		Property:          "",
+		Required:          true,
+		ResolveByNameType: "device",
+	}
+	return processRequestAndResponseWithWorkers(cmd, &req, pipeOption)
 }

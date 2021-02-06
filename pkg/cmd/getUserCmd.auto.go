@@ -128,5 +128,11 @@ func (n *GetUserCmd) RunE(cmd *cobra.Command, args []string) error {
 		DryRun:       globalFlagDryRun,
 	}
 
-	return processRequestAndResponseWithWorkers(cmd, &req, PipeOption{"id", true})
+	pipeOption := PipeOption{
+		Name:              "id",
+		Property:          "",
+		Required:          true,
+		ResolveByNameType: "user",
+	}
+	return processRequestAndResponseWithWorkers(cmd, &req, pipeOption)
 }

@@ -140,5 +140,11 @@ func (n *GetAuditRecordCollectionCmd) RunE(cmd *cobra.Command, args []string) er
 		DryRun:       globalFlagDryRun,
 	}
 
-	return processRequestAndResponseWithWorkers(cmd, &req, PipeOption{"source", false})
+	pipeOption := PipeOption{
+		Name:              "source",
+		Property:          "",
+		Required:          false,
+		ResolveByNameType: "",
+	}
+	return processRequestAndResponseWithWorkers(cmd, &req, pipeOption)
 }

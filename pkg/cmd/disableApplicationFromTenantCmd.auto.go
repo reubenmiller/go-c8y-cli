@@ -124,5 +124,11 @@ func (n *DisableApplicationFromTenantCmd) RunE(cmd *cobra.Command, args []string
 		DryRun:       globalFlagDryRun,
 	}
 
-	return processRequestAndResponseWithWorkers(cmd, &req, PipeOption{"application", true})
+	pipeOption := PipeOption{
+		Name:              "application",
+		Property:          "",
+		Required:          true,
+		ResolveByNameType: "application",
+	}
+	return processRequestAndResponseWithWorkers(cmd, &req, pipeOption)
 }

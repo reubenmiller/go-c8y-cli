@@ -129,5 +129,11 @@ func (n *ApproveNewDeviceRequestCmd) RunE(cmd *cobra.Command, args []string) err
 		DryRun:       globalFlagDryRun,
 	}
 
-	return processRequestAndResponseWithWorkers(cmd, &req, PipeOption{"", false})
+	pipeOption := PipeOption{
+		Name:              "",
+		Property:          "",
+		Required:          false,
+		ResolveByNameType: "",
+	}
+	return processRequestAndResponseWithWorkers(cmd, &req, pipeOption)
 }

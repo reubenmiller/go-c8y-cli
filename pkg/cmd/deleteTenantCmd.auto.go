@@ -122,5 +122,11 @@ func (n *DeleteTenantCmd) RunE(cmd *cobra.Command, args []string) error {
 		DryRun:       globalFlagDryRun,
 	}
 
-	return processRequestAndResponseWithWorkers(cmd, &req, PipeOption{"id", false})
+	pipeOption := PipeOption{
+		Name:              "id",
+		Property:          "",
+		Required:          false,
+		ResolveByNameType: "",
+	}
+	return processRequestAndResponseWithWorkers(cmd, &req, pipeOption)
 }

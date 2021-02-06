@@ -132,5 +132,11 @@ func (n *AddGroupToGroupCmd) RunE(cmd *cobra.Command, args []string) error {
 		DryRun:       globalFlagDryRun,
 	}
 
-	return processRequestAndResponseWithWorkers(cmd, &req, PipeOption{"newChildGroup", true})
+	pipeOption := PipeOption{
+		Name:              "newChildGroup",
+		Property:          "managedObject.id",
+		Required:          true,
+		ResolveByNameType: "devicegroup",
+	}
+	return processRequestAndResponseWithWorkers(cmd, &req, pipeOption)
 }

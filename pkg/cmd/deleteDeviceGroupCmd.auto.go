@@ -125,5 +125,11 @@ func (n *DeleteDeviceGroupCmd) RunE(cmd *cobra.Command, args []string) error {
 		DryRun:       globalFlagDryRun,
 	}
 
-	return processRequestAndResponseWithWorkers(cmd, &req, PipeOption{"id", true})
+	pipeOption := PipeOption{
+		Name:              "id",
+		Property:          "",
+		Required:          true,
+		ResolveByNameType: "devicegroup",
+	}
+	return processRequestAndResponseWithWorkers(cmd, &req, pipeOption)
 }

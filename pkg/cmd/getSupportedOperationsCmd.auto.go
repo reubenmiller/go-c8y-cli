@@ -127,5 +127,11 @@ func (n *GetSupportedOperationsCmd) RunE(cmd *cobra.Command, args []string) erro
 		DryRun:       globalFlagDryRun,
 	}
 
-	return processRequestAndResponseWithWorkers(cmd, &req, PipeOption{"device", true})
+	pipeOption := PipeOption{
+		Name:              "device",
+		Property:          "",
+		Required:          true,
+		ResolveByNameType: "device",
+	}
+	return processRequestAndResponseWithWorkers(cmd, &req, pipeOption)
 }

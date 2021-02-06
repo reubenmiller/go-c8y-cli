@@ -131,5 +131,11 @@ func (n *AddUserToGroupCmd) RunE(cmd *cobra.Command, args []string) error {
 		DryRun:       globalFlagDryRun,
 	}
 
-	return processRequestAndResponseWithWorkers(cmd, &req, PipeOption{"user", true})
+	pipeOption := PipeOption{
+		Name:              "user",
+		Property:          "user.self",
+		Required:          true,
+		ResolveByNameType: "userself",
+	}
+	return processRequestAndResponseWithWorkers(cmd, &req, pipeOption)
 }

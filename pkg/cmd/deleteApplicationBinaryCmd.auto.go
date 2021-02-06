@@ -127,5 +127,11 @@ func (n *DeleteApplicationBinaryCmd) RunE(cmd *cobra.Command, args []string) err
 		DryRun:       globalFlagDryRun,
 	}
 
-	return processRequestAndResponseWithWorkers(cmd, &req, PipeOption{"binaryId", true})
+	pipeOption := PipeOption{
+		Name:              "binaryId",
+		Property:          "",
+		Required:          true,
+		ResolveByNameType: "",
+	}
+	return processRequestAndResponseWithWorkers(cmd, &req, pipeOption)
 }

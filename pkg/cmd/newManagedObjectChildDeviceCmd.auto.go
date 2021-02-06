@@ -129,5 +129,11 @@ func (n *NewManagedObjectChildDeviceCmd) RunE(cmd *cobra.Command, args []string)
 		DryRun:       globalFlagDryRun,
 	}
 
-	return processRequestAndResponseWithWorkers(cmd, &req, PipeOption{"newChild", true})
+	pipeOption := PipeOption{
+		Name:              "newChild",
+		Property:          "managedObject.id",
+		Required:          true,
+		ResolveByNameType: "device",
+	}
+	return processRequestAndResponseWithWorkers(cmd, &req, pipeOption)
 }

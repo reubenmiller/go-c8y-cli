@@ -132,5 +132,11 @@ addIfEmptyString(base, "password", {sendPasswordResetEmail: true})
 		DryRun:       globalFlagDryRun,
 	}
 
-	return processRequestAndResponseWithWorkers(cmd, &req, PipeOption{"id", true})
+	pipeOption := PipeOption{
+		Name:              "id",
+		Property:          "",
+		Required:          true,
+		ResolveByNameType: "user",
+	}
+	return processRequestAndResponseWithWorkers(cmd, &req, pipeOption)
 }

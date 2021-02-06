@@ -128,5 +128,11 @@ func (n *AddManagedObjectChildAdditionCmd) RunE(cmd *cobra.Command, args []strin
 		DryRun:       globalFlagDryRun,
 	}
 
-	return processRequestAndResponseWithWorkers(cmd, &req, PipeOption{"id", true})
+	pipeOption := PipeOption{
+		Name:              "id",
+		Property:          "id",
+		Required:          true,
+		ResolveByNameType: "",
+	}
+	return processRequestAndResponseWithWorkers(cmd, &req, pipeOption)
 }

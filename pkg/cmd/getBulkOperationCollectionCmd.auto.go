@@ -127,5 +127,11 @@ func (n *GetBulkOperationCollectionCmd) RunE(cmd *cobra.Command, args []string) 
 		DryRun:       globalFlagDryRun,
 	}
 
-	return processRequestAndResponseWithWorkers(cmd, &req, PipeOption{"", false})
+	pipeOption := PipeOption{
+		Name:              "",
+		Property:          "",
+		Required:          false,
+		ResolveByNameType: "",
+	}
+	return processRequestAndResponseWithWorkers(cmd, &req, pipeOption)
 }

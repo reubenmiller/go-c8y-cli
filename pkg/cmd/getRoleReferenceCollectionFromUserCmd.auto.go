@@ -130,5 +130,11 @@ func (n *GetRoleReferenceCollectionFromUserCmd) RunE(cmd *cobra.Command, args []
 		DryRun:       globalFlagDryRun,
 	}
 
-	return processRequestAndResponseWithWorkers(cmd, &req, PipeOption{"", false})
+	pipeOption := PipeOption{
+		Name:              "",
+		Property:          "",
+		Required:          false,
+		ResolveByNameType: "",
+	}
+	return processRequestAndResponseWithWorkers(cmd, &req, pipeOption)
 }

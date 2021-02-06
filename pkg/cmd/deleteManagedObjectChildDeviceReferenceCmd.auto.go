@@ -125,5 +125,11 @@ func (n *DeleteManagedObjectChildDeviceReferenceCmd) RunE(cmd *cobra.Command, ar
 		DryRun:       globalFlagDryRun,
 	}
 
-	return processRequestAndResponseWithWorkers(cmd, &req, PipeOption{"device", true})
+	pipeOption := PipeOption{
+		Name:              "device",
+		Property:          "",
+		Required:          true,
+		ResolveByNameType: "device",
+	}
+	return processRequestAndResponseWithWorkers(cmd, &req, pipeOption)
 }

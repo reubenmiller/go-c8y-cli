@@ -124,5 +124,11 @@ func (n *GetNewDeviceRequestCollectionCmd) RunE(cmd *cobra.Command, args []strin
 		DryRun:       globalFlagDryRun,
 	}
 
-	return processRequestAndResponseWithWorkers(cmd, &req, PipeOption{"", false})
+	pipeOption := PipeOption{
+		Name:              "",
+		Property:          "",
+		Required:          false,
+		ResolveByNameType: "",
+	}
+	return processRequestAndResponseWithWorkers(cmd, &req, pipeOption)
 }

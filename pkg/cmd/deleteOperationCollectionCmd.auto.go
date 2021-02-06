@@ -132,5 +132,11 @@ func (n *DeleteOperationCollectionCmd) RunE(cmd *cobra.Command, args []string) e
 		DryRun:       globalFlagDryRun,
 	}
 
-	return processRequestAndResponseWithWorkers(cmd, &req, PipeOption{"device", false})
+	pipeOption := PipeOption{
+		Name:              "device",
+		Property:          "deviceId",
+		Required:          false,
+		ResolveByNameType: "device",
+	}
+	return processRequestAndResponseWithWorkers(cmd, &req, pipeOption)
 }

@@ -127,5 +127,11 @@ func (n *GetApplicationBinaryCollectionCmd) RunE(cmd *cobra.Command, args []stri
 		DryRun:       globalFlagDryRun,
 	}
 
-	return processRequestAndResponseWithWorkers(cmd, &req, PipeOption{"id", true})
+	pipeOption := PipeOption{
+		Name:              "id",
+		Property:          "",
+		Required:          true,
+		ResolveByNameType: "application",
+	}
+	return processRequestAndResponseWithWorkers(cmd, &req, pipeOption)
 }

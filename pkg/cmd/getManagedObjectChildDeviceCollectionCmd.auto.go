@@ -126,5 +126,11 @@ func (n *GetManagedObjectChildDeviceCollectionCmd) RunE(cmd *cobra.Command, args
 		DryRun:       globalFlagDryRun,
 	}
 
-	return processRequestAndResponseWithWorkers(cmd, &req, PipeOption{"device", true})
+	pipeOption := PipeOption{
+		Name:              "device",
+		Property:          "",
+		Required:          true,
+		ResolveByNameType: "device",
+	}
+	return processRequestAndResponseWithWorkers(cmd, &req, pipeOption)
 }

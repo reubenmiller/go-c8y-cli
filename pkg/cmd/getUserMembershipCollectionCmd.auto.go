@@ -128,5 +128,11 @@ func (n *GetUserMembershipCollectionCmd) RunE(cmd *cobra.Command, args []string)
 		DryRun:       globalFlagDryRun,
 	}
 
-	return processRequestAndResponseWithWorkers(cmd, &req, PipeOption{"id", true})
+	pipeOption := PipeOption{
+		Name:              "id",
+		Property:          "",
+		Required:          true,
+		ResolveByNameType: "user",
+	}
+	return processRequestAndResponseWithWorkers(cmd, &req, pipeOption)
 }

@@ -129,5 +129,11 @@ func (n *GetManagedObjectChildAssetReferenceCmd) RunE(cmd *cobra.Command, args [
 		DryRun:       globalFlagDryRun,
 	}
 
-	return processRequestAndResponseWithWorkers(cmd, &req, PipeOption{"asset", true})
+	pipeOption := PipeOption{
+		Name:              "asset",
+		Property:          "",
+		Required:          true,
+		ResolveByNameType: "device",
+	}
+	return processRequestAndResponseWithWorkers(cmd, &req, pipeOption)
 }

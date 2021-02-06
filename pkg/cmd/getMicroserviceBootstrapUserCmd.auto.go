@@ -130,5 +130,11 @@ func (n *GetMicroserviceBootstrapUserCmd) RunE(cmd *cobra.Command, args []string
 		DryRun:       globalFlagDryRun,
 	}
 
-	return processRequestAndResponseWithWorkers(cmd, &req, PipeOption{"id", true})
+	pipeOption := PipeOption{
+		Name:              "id",
+		Property:          "",
+		Required:          true,
+		ResolveByNameType: "microservice",
+	}
+	return processRequestAndResponseWithWorkers(cmd, &req, pipeOption)
 }
