@@ -50,9 +50,7 @@ Get a list of external ids
 func (n *GetExternalIDCollectionCmd) RunE(cmd *cobra.Command, args []string) error {
 	var err error
 	// query parameters
-	queryValue := url.QueryEscape("")
 	query := url.Values{}
-
 	err = flags.WithQueryParameters(
 		cmd,
 		query,
@@ -66,7 +64,7 @@ func (n *GetExternalIDCollectionCmd) RunE(cmd *cobra.Command, args []string) err
 	}
 	commonOptions.AddQueryParameters(&query)
 
-	queryValue, err = url.QueryUnescape(query.Encode())
+	queryValue, err := url.QueryUnescape(query.Encode())
 
 	if err != nil {
 		return newSystemError("Invalid query parameter")
@@ -112,6 +110,9 @@ func (n *GetExternalIDCollectionCmd) RunE(cmd *cobra.Command, args []string) err
 		cmd,
 		pathParameters,
 	)
+	if err != nil {
+		return err
+	}
 
 	path := replacePathParameters("identity/globalIds/{device}/externalIds", pathParameters)
 
@@ -131,6 +132,7 @@ func (n *GetExternalIDCollectionCmd) RunE(cmd *cobra.Command, args []string) err
 		Property:          "",
 		Required:          true,
 		ResolveByNameType: "device",
+		IteratorType:      "path",
 	}
 	return processRequestAndResponseWithWorkers(cmd, &req, pipeOption)
 }

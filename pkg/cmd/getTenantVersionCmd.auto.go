@@ -48,9 +48,7 @@ Set the required availability of a device by name to 10 minutes
 func (n *GetTenantVersionCmd) RunE(cmd *cobra.Command, args []string) error {
 	var err error
 	// query parameters
-	queryValue := url.QueryEscape("")
 	query := url.Values{}
-
 	err = flags.WithQueryParameters(
 		cmd,
 		query,
@@ -64,7 +62,7 @@ func (n *GetTenantVersionCmd) RunE(cmd *cobra.Command, args []string) error {
 	}
 	commonOptions.AddQueryParameters(&query)
 
-	queryValue, err = url.QueryUnescape(query.Encode())
+	queryValue, err := url.QueryUnescape(query.Encode())
 
 	if err != nil {
 		return newSystemError("Invalid query parameter")
@@ -110,6 +108,9 @@ func (n *GetTenantVersionCmd) RunE(cmd *cobra.Command, args []string) error {
 		cmd,
 		pathParameters,
 	)
+	if err != nil {
+		return err
+	}
 
 	path := replacePathParameters("/tenant/system/options/system/version", pathParameters)
 
@@ -129,6 +130,7 @@ func (n *GetTenantVersionCmd) RunE(cmd *cobra.Command, args []string) error {
 		Property:          "",
 		Required:          false,
 		ResolveByNameType: "",
+		IteratorType:      "",
 	}
 	return processRequestAndResponseWithWorkers(cmd, &req, pipeOption)
 }

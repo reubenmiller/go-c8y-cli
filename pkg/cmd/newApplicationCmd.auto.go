@@ -62,9 +62,7 @@ Create a new hosted application
 func (n *NewApplicationCmd) RunE(cmd *cobra.Command, args []string) error {
 	var err error
 	// query parameters
-	queryValue := url.QueryEscape("")
 	query := url.Values{}
-
 	err = flags.WithQueryParameters(
 		cmd,
 		query,
@@ -73,7 +71,7 @@ func (n *NewApplicationCmd) RunE(cmd *cobra.Command, args []string) error {
 		return newUserError(err)
 	}
 
-	queryValue, err = url.QueryUnescape(query.Encode())
+	queryValue, err := url.QueryUnescape(query.Encode())
 
 	if err != nil {
 		return newSystemError("Invalid query parameter")
@@ -132,6 +130,9 @@ func (n *NewApplicationCmd) RunE(cmd *cobra.Command, args []string) error {
 		cmd,
 		pathParameters,
 	)
+	if err != nil {
+		return err
+	}
 
 	path := replacePathParameters("/application/applications", pathParameters)
 
@@ -151,6 +152,7 @@ func (n *NewApplicationCmd) RunE(cmd *cobra.Command, args []string) error {
 		Property:          "",
 		Required:          false,
 		ResolveByNameType: "",
+		IteratorType:      "",
 	}
 	return processRequestAndResponseWithWorkers(cmd, &req, pipeOption)
 }

@@ -56,8 +56,9 @@ func Test_Body(t *testing.T) {
 	cmd.Flags().String("type", "", "String type")
 	cmd.Flags().String("dateFrom", "0s", "Relative date")
 	cmd.Flags().Bool("editable", false, "Boolean type")
+	cmd.Flags().StringSlice("newChild", []string{""}, "dummy child reference")
 
-	cmd.SetArgs([]string{"--editable", "--type", "myType", "--dateFrom", "-1d"})
+	cmd.SetArgs([]string{"--editable", "--type", "myType", "--dateFrom", "-1d", "--newChild", "12345"})
 	cmdErr := cmd.Execute()
 	assert.OK(t, cmdErr)
 
@@ -71,6 +72,7 @@ func Test_Body(t *testing.T) {
 		WithStringValue("type", "typeMapping", "text/%s"),
 		WithRelativeTimestamp("dateFrom"),
 		WithRelativeTimestamp("dateFrom", "dateTo"),
+		WithStringSliceValues("newChild", "managedObject.id", ""),
 	)
 	assert.OK(t, err)
 
@@ -79,6 +81,9 @@ func Test_Body(t *testing.T) {
 	assert.True(t, bodyMap["editable"].(bool) == true)
 	assert.True(t, bodyMap["type"].(string) == "myType")
 	assert.True(t, bodyMap["typeMapping"].(string) == "text/myType")
+	childIds := bodyMap["managedObject"].(map[string]interface{})["id"].([]string)
+	assert.True(t, childIds[0] == "12345")
+	assert.True(t, len(childIds) == 0)
 }
 
 func Test_QueryParameters(t *testing.T) {

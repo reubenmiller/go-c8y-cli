@@ -51,9 +51,7 @@ Delete a retention rule
 func (n *DeleteRetentionRuleCmd) RunE(cmd *cobra.Command, args []string) error {
 	var err error
 	// query parameters
-	queryValue := url.QueryEscape("")
 	query := url.Values{}
-
 	err = flags.WithQueryParameters(
 		cmd,
 		query,
@@ -62,7 +60,7 @@ func (n *DeleteRetentionRuleCmd) RunE(cmd *cobra.Command, args []string) error {
 		return newUserError(err)
 	}
 
-	queryValue, err = url.QueryUnescape(query.Encode())
+	queryValue, err := url.QueryUnescape(query.Encode())
 
 	if err != nil {
 		return newSystemError("Invalid query parameter")
@@ -109,6 +107,9 @@ func (n *DeleteRetentionRuleCmd) RunE(cmd *cobra.Command, args []string) error {
 		cmd,
 		pathParameters,
 	)
+	if err != nil {
+		return err
+	}
 
 	path := replacePathParameters("/retention/retentions/{id}", pathParameters)
 
@@ -128,6 +129,7 @@ func (n *DeleteRetentionRuleCmd) RunE(cmd *cobra.Command, args []string) error {
 		Property:          "",
 		Required:          true,
 		ResolveByNameType: "",
+		IteratorType:      "path",
 	}
 	return processRequestAndResponseWithWorkers(cmd, &req, pipeOption)
 }

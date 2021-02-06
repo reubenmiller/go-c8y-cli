@@ -55,9 +55,7 @@ Add multiple groups to a group
 func (n *AddGroupToGroupCmd) RunE(cmd *cobra.Command, args []string) error {
 	var err error
 	// query parameters
-	queryValue := url.QueryEscape("")
 	query := url.Values{}
-
 	err = flags.WithQueryParameters(
 		cmd,
 		query,
@@ -66,7 +64,7 @@ func (n *AddGroupToGroupCmd) RunE(cmd *cobra.Command, args []string) error {
 		return newUserError(err)
 	}
 
-	queryValue, err = url.QueryUnescape(query.Encode())
+	queryValue, err := url.QueryUnescape(query.Encode())
 
 	if err != nil {
 		return newSystemError("Invalid query parameter")
@@ -118,6 +116,9 @@ func (n *AddGroupToGroupCmd) RunE(cmd *cobra.Command, args []string) error {
 		pathParameters,
 		WithDeviceGroupByNameFirstMatch(args, "group", "id"),
 	)
+	if err != nil {
+		return err
+	}
 
 	path := replacePathParameters("inventory/managedObjects/{id}/childAssets", pathParameters)
 
@@ -137,6 +138,7 @@ func (n *AddGroupToGroupCmd) RunE(cmd *cobra.Command, args []string) error {
 		Property:          "managedObject.id",
 		Required:          true,
 		ResolveByNameType: "devicegroup",
+		IteratorType:      "body",
 	}
 	return processRequestAndResponseWithWorkers(cmd, &req, pipeOption)
 }

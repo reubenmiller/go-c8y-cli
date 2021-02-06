@@ -52,9 +52,7 @@ Update a user
 func (n *ResetUserPasswordCmd) RunE(cmd *cobra.Command, args []string) error {
 	var err error
 	// query parameters
-	queryValue := url.QueryEscape("")
 	query := url.Values{}
-
 	err = flags.WithQueryParameters(
 		cmd,
 		query,
@@ -63,7 +61,7 @@ func (n *ResetUserPasswordCmd) RunE(cmd *cobra.Command, args []string) error {
 		return newUserError(err)
 	}
 
-	queryValue, err = url.QueryUnescape(query.Encode())
+	queryValue, err := url.QueryUnescape(query.Encode())
 
 	if err != nil {
 		return newSystemError("Invalid query parameter")
@@ -118,6 +116,9 @@ addIfEmptyString(base, "password", {sendPasswordResetEmail: true})
 		pathParameters,
 		flags.WithStringDefaultValue(client.TenantName, "tenant", "tenant"),
 	)
+	if err != nil {
+		return err
+	}
 
 	path := replacePathParameters("user/{tenant}/users/{id}", pathParameters)
 
@@ -137,6 +138,7 @@ addIfEmptyString(base, "password", {sendPasswordResetEmail: true})
 		Property:          "",
 		Required:          true,
 		ResolveByNameType: "user",
+		IteratorType:      "path",
 	}
 	return processRequestAndResponseWithWorkers(cmd, &req, pipeOption)
 }

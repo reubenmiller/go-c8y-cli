@@ -52,9 +52,7 @@ Create group heirachy (parent group -> child group)
 func (n *NewManagedObjectChildAssetCmd) RunE(cmd *cobra.Command, args []string) error {
 	var err error
 	// query parameters
-	queryValue := url.QueryEscape("")
 	query := url.Values{}
-
 	err = flags.WithQueryParameters(
 		cmd,
 		query,
@@ -63,7 +61,7 @@ func (n *NewManagedObjectChildAssetCmd) RunE(cmd *cobra.Command, args []string) 
 		return newUserError(err)
 	}
 
-	queryValue, err = url.QueryUnescape(query.Encode())
+	queryValue, err := url.QueryUnescape(query.Encode())
 
 	if err != nil {
 		return newSystemError("Invalid query parameter")
@@ -115,6 +113,9 @@ func (n *NewManagedObjectChildAssetCmd) RunE(cmd *cobra.Command, args []string) 
 		cmd,
 		pathParameters,
 	)
+	if err != nil {
+		return err
+	}
 
 	path := replacePathParameters("inventory/managedObjects/{id}/childAssets", pathParameters)
 
@@ -134,6 +135,7 @@ func (n *NewManagedObjectChildAssetCmd) RunE(cmd *cobra.Command, args []string) 
 		Property:          "id",
 		Required:          true,
 		ResolveByNameType: "devicegroup",
+		IteratorType:      "path",
 	}
 	return processRequestAndResponseWithWorkers(cmd, &req, pipeOption)
 }

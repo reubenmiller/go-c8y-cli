@@ -27,7 +27,7 @@ func (i *FuncIterator) GetNext() (line []byte, input interface{}, err error) {
 
 // MarshalJSON return the value in a json compatible value
 func (i *FuncIterator) MarshalJSON() (line []byte, err error) {
-	return toJSON(i)
+	return MarshalJSON(i)
 }
 
 // NewFuncIterator return an iterator based on the given function

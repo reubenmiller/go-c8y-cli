@@ -134,8 +134,20 @@ func Test_DataFlag(t *testing.T) {
 	assert.True(t, out != "")
 }
 
-func ExecuteCmd(cmd *c8yCmd, cmdArgs string) error {
-	cmd.SetArgs(strings.Split(cmdArgs, " "))
+func splitCmd(line string) []string {
+	return strings.Split(line, " ")
+	// r := regexp.MustCompile(`[^\s"]+|"([^"]*)"`)
+	// return r.FindAllString(line, -1)
+}
+
+func ExecuteCmd(cmd *c8yCmd, cmdArgs interface{}) error {
+	switch v := cmdArgs.(type) {
+	case string:
+		cmd.SetArgs(splitCmd(v))
+
+	case []string:
+		cmd.SetArgs(v)
+	}
 	return cmd.Execute()
 }
 
@@ -155,4 +167,37 @@ func Test_DeviceFetcher(t *testing.T) {
 	cmd := setupTest()
 	cmdErr := ExecuteCmd(cmd, "devices update --id=testdevice_1me4xsy9vd --dry")
 	assert.True(t, cmdErr != nil)
+}
+
+func Test_DeviceFetcherWithCollection(t *testing.T) {
+	cmd := setupTest()
+	cmdErr := ExecuteCmd(cmd, "events list --type value")
+	assert.OK(t, cmdErr)
+}
+
+func Test_BodyValidate(t *testing.T) {
+	cmd := setupTest()
+	cmdErr := ExecuteCmd(cmd, `events create --device 1234 --template={textd:"custom_hello"} --type value --dry`)
+	assert.OK(t, cmdErr)
+}
+
+func Test_InventoryReferences(t *testing.T) {
+	cmd := setupTest()
+	cmdErr := ExecuteCmd(cmd, `inventoryReferences createChildAddition --newChild=87464 --id=87608 --pretty=false --dry`)
+	assert.OK(t, cmdErr)
+}
+
+func Test_ChildInventoryReferences(t *testing.T) {
+	cmd := setupTest()
+	cmdErr := ExecuteCmd(cmd, `inventoryReferences assignDeviceToGroup --group=testdevice_1me4xsy9vd --newChildDevice testdevice_6dyojzxbvf --dry`)
+	assert.OK(t, cmdErr)
+}
+
+func Test_ChildInventoryReferencesWithPipelineInput(t *testing.T) {
+	cmd := setupTest()
+	stdin := bytes.NewBufferString("testdevice_6dyojzxbvf\ntestdevice_7ewmxq0a94\n\n")
+	cmd.SetIn(stdin)
+
+	cmdErr := ExecuteCmd(cmd, `inventoryReferences assignDeviceToGroup --group=testgroup_yup6kr9sjg --dry`)
+	assert.OK(t, cmdErr)
 }

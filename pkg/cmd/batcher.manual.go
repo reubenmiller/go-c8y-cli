@@ -129,7 +129,13 @@ func runBatched(requestIterator *RequestIterator, commonOptions CommonCommandOpt
 
 			if err != nil {
 				if !errors.Is(err, io.EOF) {
-					Logger.Warningf("request iterator: unexpected error. err=%s", err)
+					if parentErr := errors.Unwrap(err); parentErr != nil {
+						Logger.Errorf("request iterator: %s", parentErr)
+						results <- parentErr
+					} else {
+						Logger.Errorf("request iterator: %s", err)
+						results <- err
+					}
 				}
 				break
 			}
@@ -300,50 +306,31 @@ func readFile(filepath string) ([]string, error) {
 	return items, nil
 }
 
-func NewPipeOption(name string, required bool) *PipeOption {
-
-	return &PipeOption{
-		Name:     name,
-		Required: required,
-	}
-}
-
-type PipeOption struct {
-	Name              string
-	Required          bool
-	Property          string
-	ResolveByNameType string
-}
-
 func processRequestAndResponseWithWorkers(cmd *cobra.Command, r *c8y.RequestOptions, pipeOpt PipeOption) error {
+	var err error
 	var pathIter iterator.Iterator
 
-	if pipeOpt.Name != "" {
-		// create input iterator
-		items, err := NewFlagPipeEnabledStringSlice(cmd, pipeOpt)
+	// pathIter = iterator.NewRepeatIterator(r.Path, 1)
+	iterType := IteraterType(pipeOpt.IteratorType)
+
+	if iterType == IteraterTypePath {
+		pathIter, err = NewPathIterator(cmd, r.Path, pipeOpt)
 		if err != nil {
 			return err
 		}
-		if items != nil {
-			format := r.Path
-
-			if strings.Count(format, "{") == 1 && strings.Count(r.Path, "}") == 1 {
-				// Don't assume the variable name matches the given name.
-				// But if there is only one template variable, then it is safe to assume it is the correct one
-				format = r.Path[0:strings.Index(r.Path, "{")] + "%s" + r.Path[strings.Index(r.Path, "}")+1:]
-			} else {
-				// Only substitute an explicitly the pipeline variable name
-				format = strings.ReplaceAll(r.Path, "{"+pipeOpt.Name+"}", "%s")
-			}
-			pathIter = iterator.NewCompositeStringIterator(items, format)
-		} else {
-			pathIter = iterator.NewRepeatIterator(r.Path, 1)
+	} else if iterType == IteraterTypeBody {
+		// body is using iterators, it will control how many can be used
+		maxIterations := int64(0)
+		if !pipeOpt.Required {
+			maxIterations = 1
 		}
+		pathIter = iterator.NewRepeatIterator(r.Path, maxIterations)
 	} else {
-		// fixed path (no iteration)
+		// limit to 1 request (if no iterators are being used)
 		pathIter = iterator.NewRepeatIterator(r.Path, 1)
 	}
 
+	// Note: Body accepts iterator types, so no need for special handling here
 	requestIter := NewRequestIterator(*r, pathIter, r.Body)
 
 	if pipeOpt.ResolveByNameType != "" {
@@ -372,15 +359,5 @@ func processRequestAndResponseWithWorkers(cmd *cobra.Command, r *c8y.RequestOpti
 		}
 	}
 
-	// for {
-	// 	next, err := requestIter.GetNext()
-
-	// 	if err == io.EOF {
-	// 		break
-	// 	}
-
-	// 	Logger.Infof("request: %v, %s %s/%s?%s, %v", next.Header, next.Method, next.Host, next.Path, next.Query, next.Body)
-	// 	break
-	// }
 	return runTemplateOnList(cmd, requestIter)
 }

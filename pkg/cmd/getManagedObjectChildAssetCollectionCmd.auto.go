@@ -51,9 +51,7 @@ Get a list of the child devices of an existing device
 func (n *GetManagedObjectChildAssetCollectionCmd) RunE(cmd *cobra.Command, args []string) error {
 	var err error
 	// query parameters
-	queryValue := url.QueryEscape("")
 	query := url.Values{}
-
 	err = flags.WithQueryParameters(
 		cmd,
 		query,
@@ -67,7 +65,7 @@ func (n *GetManagedObjectChildAssetCollectionCmd) RunE(cmd *cobra.Command, args 
 	}
 	commonOptions.AddQueryParameters(&query)
 
-	queryValue, err = url.QueryUnescape(query.Encode())
+	queryValue, err := url.QueryUnescape(query.Encode())
 
 	if err != nil {
 		return newSystemError("Invalid query parameter")
@@ -114,6 +112,9 @@ func (n *GetManagedObjectChildAssetCollectionCmd) RunE(cmd *cobra.Command, args 
 		pathParameters,
 		WithDeviceByNameFirstMatch(args, "device", "id"),
 	)
+	if err != nil {
+		return err
+	}
 
 	path := replacePathParameters("inventory/managedObjects/{id}/childAssets", pathParameters)
 
@@ -133,6 +134,7 @@ func (n *GetManagedObjectChildAssetCollectionCmd) RunE(cmd *cobra.Command, args 
 		Property:          "id",
 		Required:          false,
 		ResolveByNameType: "devicegroup",
+		IteratorType:      "path",
 	}
 	return processRequestAndResponseWithWorkers(cmd, &req, pipeOption)
 }

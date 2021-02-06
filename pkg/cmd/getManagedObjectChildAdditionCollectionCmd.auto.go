@@ -50,9 +50,7 @@ Get a list of the child additions of an existing managed object
 func (n *GetManagedObjectChildAdditionCollectionCmd) RunE(cmd *cobra.Command, args []string) error {
 	var err error
 	// query parameters
-	queryValue := url.QueryEscape("")
 	query := url.Values{}
-
 	err = flags.WithQueryParameters(
 		cmd,
 		query,
@@ -66,7 +64,7 @@ func (n *GetManagedObjectChildAdditionCollectionCmd) RunE(cmd *cobra.Command, ar
 	}
 	commonOptions.AddQueryParameters(&query)
 
-	queryValue, err = url.QueryUnescape(query.Encode())
+	queryValue, err := url.QueryUnescape(query.Encode())
 
 	if err != nil {
 		return newSystemError("Invalid query parameter")
@@ -112,6 +110,9 @@ func (n *GetManagedObjectChildAdditionCollectionCmd) RunE(cmd *cobra.Command, ar
 		cmd,
 		pathParameters,
 	)
+	if err != nil {
+		return err
+	}
 
 	path := replacePathParameters("inventory/managedObjects/{id}/childAdditions", pathParameters)
 
@@ -131,6 +132,7 @@ func (n *GetManagedObjectChildAdditionCollectionCmd) RunE(cmd *cobra.Command, ar
 		Property:          "",
 		Required:          true,
 		ResolveByNameType: "",
+		IteratorType:      "path",
 	}
 	return processRequestAndResponseWithWorkers(cmd, &req, pipeOption)
 }

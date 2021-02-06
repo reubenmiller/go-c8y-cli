@@ -53,9 +53,7 @@ Get a list of system options
 func (n *GetSystemOptionCmd) RunE(cmd *cobra.Command, args []string) error {
 	var err error
 	// query parameters
-	queryValue := url.QueryEscape("")
 	query := url.Values{}
-
 	err = flags.WithQueryParameters(
 		cmd,
 		query,
@@ -69,7 +67,7 @@ func (n *GetSystemOptionCmd) RunE(cmd *cobra.Command, args []string) error {
 	}
 	commonOptions.AddQueryParameters(&query)
 
-	queryValue, err = url.QueryUnescape(query.Encode())
+	queryValue, err := url.QueryUnescape(query.Encode())
 
 	if err != nil {
 		return newSystemError("Invalid query parameter")
@@ -117,6 +115,9 @@ func (n *GetSystemOptionCmd) RunE(cmd *cobra.Command, args []string) error {
 		flags.WithStringValue("category", "category"),
 		flags.WithStringValue("key", "key"),
 	)
+	if err != nil {
+		return err
+	}
 
 	path := replacePathParameters("/tenant/system/options/{category}/{key}", pathParameters)
 
@@ -136,6 +137,7 @@ func (n *GetSystemOptionCmd) RunE(cmd *cobra.Command, args []string) error {
 		Property:          "",
 		Required:          false,
 		ResolveByNameType: "",
+		IteratorType:      "",
 	}
 	return processRequestAndResponseWithWorkers(cmd, &req, pipeOption)
 }

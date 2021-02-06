@@ -50,9 +50,7 @@ Get applications
 func (n *GetApplicationCollectionCmd) RunE(cmd *cobra.Command, args []string) error {
 	var err error
 	// query parameters
-	queryValue := url.QueryEscape("")
 	query := url.Values{}
-
 	err = flags.WithQueryParameters(
 		cmd,
 		query,
@@ -67,7 +65,7 @@ func (n *GetApplicationCollectionCmd) RunE(cmd *cobra.Command, args []string) er
 	}
 	commonOptions.AddQueryParameters(&query)
 
-	queryValue, err = url.QueryUnescape(query.Encode())
+	queryValue, err := url.QueryUnescape(query.Encode())
 
 	if err != nil {
 		return newSystemError("Invalid query parameter")
@@ -113,6 +111,9 @@ func (n *GetApplicationCollectionCmd) RunE(cmd *cobra.Command, args []string) er
 		cmd,
 		pathParameters,
 	)
+	if err != nil {
+		return err
+	}
 
 	path := replacePathParameters("/application/applications", pathParameters)
 
@@ -132,6 +133,7 @@ func (n *GetApplicationCollectionCmd) RunE(cmd *cobra.Command, args []string) er
 		Property:          "",
 		Required:          false,
 		ResolveByNameType: "",
+		IteratorType:      "",
 	}
 	return processRequestAndResponseWithWorkers(cmd, &req, pipeOption)
 }

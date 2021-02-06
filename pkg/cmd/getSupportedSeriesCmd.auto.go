@@ -51,9 +51,7 @@ Get the supported measurement series of a device by name
 func (n *GetSupportedSeriesCmd) RunE(cmd *cobra.Command, args []string) error {
 	var err error
 	// query parameters
-	queryValue := url.QueryEscape("")
 	query := url.Values{}
-
 	err = flags.WithQueryParameters(
 		cmd,
 		query,
@@ -67,7 +65,7 @@ func (n *GetSupportedSeriesCmd) RunE(cmd *cobra.Command, args []string) error {
 	}
 	commonOptions.AddQueryParameters(&query)
 
-	queryValue, err = url.QueryUnescape(query.Encode())
+	queryValue, err := url.QueryUnescape(query.Encode())
 
 	if err != nil {
 		return newSystemError("Invalid query parameter")
@@ -113,6 +111,9 @@ func (n *GetSupportedSeriesCmd) RunE(cmd *cobra.Command, args []string) error {
 		cmd,
 		pathParameters,
 	)
+	if err != nil {
+		return err
+	}
 
 	path := replacePathParameters("inventory/managedObjects/{device}/supportedSeries", pathParameters)
 
@@ -132,6 +133,7 @@ func (n *GetSupportedSeriesCmd) RunE(cmd *cobra.Command, args []string) error {
 		Property:          "",
 		Required:          true,
 		ResolveByNameType: "device",
+		IteratorType:      "path",
 	}
 	return processRequestAndResponseWithWorkers(cmd, &req, pipeOption)
 }

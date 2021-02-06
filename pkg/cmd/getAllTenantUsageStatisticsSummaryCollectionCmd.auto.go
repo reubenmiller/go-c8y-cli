@@ -57,9 +57,7 @@ Get tenant summary statistics collection for the last 10 days, only return until
 func (n *GetAllTenantUsageStatisticsSummaryCollectionCmd) RunE(cmd *cobra.Command, args []string) error {
 	var err error
 	// query parameters
-	queryValue := url.QueryEscape("")
 	query := url.Values{}
-
 	err = flags.WithQueryParameters(
 		cmd,
 		query,
@@ -75,7 +73,7 @@ func (n *GetAllTenantUsageStatisticsSummaryCollectionCmd) RunE(cmd *cobra.Comman
 	}
 	commonOptions.AddQueryParameters(&query)
 
-	queryValue, err = url.QueryUnescape(query.Encode())
+	queryValue, err := url.QueryUnescape(query.Encode())
 
 	if err != nil {
 		return newSystemError("Invalid query parameter")
@@ -121,6 +119,9 @@ func (n *GetAllTenantUsageStatisticsSummaryCollectionCmd) RunE(cmd *cobra.Comman
 		cmd,
 		pathParameters,
 	)
+	if err != nil {
+		return err
+	}
 
 	path := replacePathParameters("/tenant/statistics/allTenantsSummary", pathParameters)
 
@@ -140,6 +141,7 @@ func (n *GetAllTenantUsageStatisticsSummaryCollectionCmd) RunE(cmd *cobra.Comman
 		Property:          "",
 		Required:          false,
 		ResolveByNameType: "",
+		IteratorType:      "",
 	}
 	return processRequestAndResponseWithWorkers(cmd, &req, pipeOption)
 }

@@ -51,9 +51,7 @@ Disable an application of a tenant by name
 func (n *DisableApplicationFromTenantCmd) RunE(cmd *cobra.Command, args []string) error {
 	var err error
 	// query parameters
-	queryValue := url.QueryEscape("")
 	query := url.Values{}
-
 	err = flags.WithQueryParameters(
 		cmd,
 		query,
@@ -62,7 +60,7 @@ func (n *DisableApplicationFromTenantCmd) RunE(cmd *cobra.Command, args []string
 		return newUserError(err)
 	}
 
-	queryValue, err = url.QueryUnescape(query.Encode())
+	queryValue, err := url.QueryUnescape(query.Encode())
 
 	if err != nil {
 		return newSystemError("Invalid query parameter")
@@ -110,6 +108,9 @@ func (n *DisableApplicationFromTenantCmd) RunE(cmd *cobra.Command, args []string
 		pathParameters,
 		flags.WithStringDefaultValue(client.TenantName, "tenant", "tenant"),
 	)
+	if err != nil {
+		return err
+	}
 
 	path := replacePathParameters("/tenant/tenants/{tenant}/applications/{application}", pathParameters)
 
@@ -129,6 +130,7 @@ func (n *DisableApplicationFromTenantCmd) RunE(cmd *cobra.Command, args []string
 		Property:          "",
 		Required:          true,
 		ResolveByNameType: "application",
+		IteratorType:      "path",
 	}
 	return processRequestAndResponseWithWorkers(cmd, &req, pipeOption)
 }

@@ -53,9 +53,7 @@ Add a role (ROLE_ALARM_READ) to a user
 func (n *AddRoleToUserCmd) RunE(cmd *cobra.Command, args []string) error {
 	var err error
 	// query parameters
-	queryValue := url.QueryEscape("")
 	query := url.Values{}
-
 	err = flags.WithQueryParameters(
 		cmd,
 		query,
@@ -64,7 +62,7 @@ func (n *AddRoleToUserCmd) RunE(cmd *cobra.Command, args []string) error {
 		return newUserError(err)
 	}
 
-	queryValue, err = url.QueryUnescape(query.Encode())
+	queryValue, err := url.QueryUnescape(query.Encode())
 
 	if err != nil {
 		return newSystemError("Invalid query parameter")
@@ -117,6 +115,9 @@ func (n *AddRoleToUserCmd) RunE(cmd *cobra.Command, args []string) error {
 		flags.WithStringDefaultValue(client.TenantName, "tenant", "tenant"),
 		WithUserByNameFirstMatch(args, "user", "user"),
 	)
+	if err != nil {
+		return err
+	}
 
 	path := replacePathParameters("/user/{tenant}/users/{user}/roles", pathParameters)
 
@@ -136,6 +137,7 @@ func (n *AddRoleToUserCmd) RunE(cmd *cobra.Command, args []string) error {
 		Property:          "role.self",
 		Required:          false,
 		ResolveByNameType: "",
+		IteratorType:      "body",
 	}
 	return processRequestAndResponseWithWorkers(cmd, &req, pipeOption)
 }

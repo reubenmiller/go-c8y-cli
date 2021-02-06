@@ -37,5 +37,5 @@ func (i *RangeIterator) GetNext() (line []byte, input interface{}, err error) {
 
 // MarshalJSON return the value in a json compatible value
 func (i *RangeIterator) MarshalJSON() (line []byte, err error) {
-	return toJSON(i)
+	return MarshalJSON(i)
 }

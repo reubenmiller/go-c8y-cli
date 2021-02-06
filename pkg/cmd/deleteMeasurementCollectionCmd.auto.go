@@ -54,9 +54,7 @@ Delete measurement collection for a device
 func (n *DeleteMeasurementCollectionCmd) RunE(cmd *cobra.Command, args []string) error {
 	var err error
 	// query parameters
-	queryValue := url.QueryEscape("")
 	query := url.Values{}
-
 	err = flags.WithQueryParameters(
 		cmd,
 		query,
@@ -70,7 +68,7 @@ func (n *DeleteMeasurementCollectionCmd) RunE(cmd *cobra.Command, args []string)
 		return newUserError(err)
 	}
 
-	queryValue, err = url.QueryUnescape(query.Encode())
+	queryValue, err := url.QueryUnescape(query.Encode())
 
 	if err != nil {
 		return newSystemError("Invalid query parameter")
@@ -117,6 +115,9 @@ func (n *DeleteMeasurementCollectionCmd) RunE(cmd *cobra.Command, args []string)
 		cmd,
 		pathParameters,
 	)
+	if err != nil {
+		return err
+	}
 
 	path := replacePathParameters("measurement/measurements", pathParameters)
 
@@ -136,6 +137,7 @@ func (n *DeleteMeasurementCollectionCmd) RunE(cmd *cobra.Command, args []string)
 		Property:          "source",
 		Required:          false,
 		ResolveByNameType: "device",
+		IteratorType:      "",
 	}
 	return processRequestAndResponseWithWorkers(cmd, &req, pipeOption)
 }

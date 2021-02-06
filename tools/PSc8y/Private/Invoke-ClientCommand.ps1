@@ -163,6 +163,7 @@ only relevant information is shown.
                     $line
                 }
             } -End {
+                Write-Error -Message "test message" -ErrorAction SilentlyContinue
                 Write-Verbose "Finished processing stream: code=$LASTEXITCODE"
             }
             $ExitCode = $LASTEXITCODE

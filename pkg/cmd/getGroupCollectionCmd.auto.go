@@ -50,9 +50,7 @@ Get a list of user groups for the current tenant
 func (n *GetGroupCollectionCmd) RunE(cmd *cobra.Command, args []string) error {
 	var err error
 	// query parameters
-	queryValue := url.QueryEscape("")
 	query := url.Values{}
-
 	err = flags.WithQueryParameters(
 		cmd,
 		query,
@@ -66,7 +64,7 @@ func (n *GetGroupCollectionCmd) RunE(cmd *cobra.Command, args []string) error {
 	}
 	commonOptions.AddQueryParameters(&query)
 
-	queryValue, err = url.QueryUnescape(query.Encode())
+	queryValue, err := url.QueryUnescape(query.Encode())
 
 	if err != nil {
 		return newSystemError("Invalid query parameter")
@@ -113,6 +111,9 @@ func (n *GetGroupCollectionCmd) RunE(cmd *cobra.Command, args []string) error {
 		pathParameters,
 		flags.WithStringDefaultValue(client.TenantName, "tenant", "tenant"),
 	)
+	if err != nil {
+		return err
+	}
 
 	path := replacePathParameters("/user/{tenant}/groups", pathParameters)
 
@@ -132,6 +133,7 @@ func (n *GetGroupCollectionCmd) RunE(cmd *cobra.Command, args []string) error {
 		Property:          "",
 		Required:          false,
 		ResolveByNameType: "",
+		IteratorType:      "",
 	}
 	return processRequestAndResponseWithWorkers(cmd, &req, pipeOption)
 }

@@ -48,9 +48,7 @@ Get a list of data broker connectors
 func (n *GetDataBrokerConnectorCollectionCmd) RunE(cmd *cobra.Command, args []string) error {
 	var err error
 	// query parameters
-	queryValue := url.QueryEscape("")
 	query := url.Values{}
-
 	err = flags.WithQueryParameters(
 		cmd,
 		query,
@@ -64,7 +62,7 @@ func (n *GetDataBrokerConnectorCollectionCmd) RunE(cmd *cobra.Command, args []st
 	}
 	commonOptions.AddQueryParameters(&query)
 
-	queryValue, err = url.QueryUnescape(query.Encode())
+	queryValue, err := url.QueryUnescape(query.Encode())
 
 	if err != nil {
 		return newSystemError("Invalid query parameter")
@@ -110,6 +108,9 @@ func (n *GetDataBrokerConnectorCollectionCmd) RunE(cmd *cobra.Command, args []st
 		cmd,
 		pathParameters,
 	)
+	if err != nil {
+		return err
+	}
 
 	path := replacePathParameters("/databroker/connectors", pathParameters)
 
@@ -129,6 +130,7 @@ func (n *GetDataBrokerConnectorCollectionCmd) RunE(cmd *cobra.Command, args []st
 		Property:          "",
 		Required:          false,
 		ResolveByNameType: "",
+		IteratorType:      "",
 	}
 	return processRequestAndResponseWithWorkers(cmd, &req, pipeOption)
 }

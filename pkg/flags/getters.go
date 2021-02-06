@@ -364,3 +364,18 @@ func WithRequiredProperties(values ...string) GetOption {
 
 	}
 }
+
+type PipelineOptions struct {
+	Name        string
+	Aliases     []string
+	Required    bool
+	Destination string
+}
+
+// WithPipelineIterator adds pipeline support from cli arguments
+func WithPipelineIterator(opts PipelineOptions) GetOption {
+	return func(cmd *cobra.Command) (string, interface{}, error) {
+		iter, err := NewFlagWithPipeIterator(cmd, opts)
+		return opts.Destination, iter, err
+	}
+}

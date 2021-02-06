@@ -52,9 +52,7 @@ Assign a device as a child device to an existing device
 func (n *NewManagedObjectChildDeviceCmd) RunE(cmd *cobra.Command, args []string) error {
 	var err error
 	// query parameters
-	queryValue := url.QueryEscape("")
 	query := url.Values{}
-
 	err = flags.WithQueryParameters(
 		cmd,
 		query,
@@ -63,7 +61,7 @@ func (n *NewManagedObjectChildDeviceCmd) RunE(cmd *cobra.Command, args []string)
 		return newUserError(err)
 	}
 
-	queryValue, err = url.QueryUnescape(query.Encode())
+	queryValue, err := url.QueryUnescape(query.Encode())
 
 	if err != nil {
 		return newSystemError("Invalid query parameter")
@@ -115,6 +113,9 @@ func (n *NewManagedObjectChildDeviceCmd) RunE(cmd *cobra.Command, args []string)
 		pathParameters,
 		WithDeviceByNameFirstMatch(args, "device", "device"),
 	)
+	if err != nil {
+		return err
+	}
 
 	path := replacePathParameters("inventory/managedObjects/{device}/childDevices", pathParameters)
 
@@ -134,6 +135,7 @@ func (n *NewManagedObjectChildDeviceCmd) RunE(cmd *cobra.Command, args []string)
 		Property:          "managedObject.id",
 		Required:          true,
 		ResolveByNameType: "device",
+		IteratorType:      "body",
 	}
 	return processRequestAndResponseWithWorkers(cmd, &req, pipeOption)
 }

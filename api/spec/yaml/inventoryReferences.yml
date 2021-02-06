@@ -602,14 +602,14 @@ endpoints:
       - name: id
         type: string
         property: id
-        pipeline: true
         required: true
         description: Managed object id where the child addition will be added to
         position: 0
     body:
       - name: newChild
-        type: '[]string'
+        type: 'string'
         position: 1
+        pipeline: true
         required: true
         property: 'managedObject.id'
         description: New managed object that will be added as a child addition

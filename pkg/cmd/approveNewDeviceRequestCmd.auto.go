@@ -52,9 +52,7 @@ Approve a new device request
 func (n *ApproveNewDeviceRequestCmd) RunE(cmd *cobra.Command, args []string) error {
 	var err error
 	// query parameters
-	queryValue := url.QueryEscape("")
 	query := url.Values{}
-
 	err = flags.WithQueryParameters(
 		cmd,
 		query,
@@ -63,7 +61,7 @@ func (n *ApproveNewDeviceRequestCmd) RunE(cmd *cobra.Command, args []string) err
 		return newUserError(err)
 	}
 
-	queryValue, err = url.QueryUnescape(query.Encode())
+	queryValue, err := url.QueryUnescape(query.Encode())
 
 	if err != nil {
 		return newSystemError("Invalid query parameter")
@@ -115,6 +113,9 @@ func (n *ApproveNewDeviceRequestCmd) RunE(cmd *cobra.Command, args []string) err
 		pathParameters,
 		flags.WithStringValue("id", "id"),
 	)
+	if err != nil {
+		return err
+	}
 
 	path := replacePathParameters("devicecontrol/newDeviceRequests/{id}", pathParameters)
 
@@ -134,6 +135,7 @@ func (n *ApproveNewDeviceRequestCmd) RunE(cmd *cobra.Command, args []string) err
 		Property:          "",
 		Required:          false,
 		ResolveByNameType: "",
+		IteratorType:      "",
 	}
 	return processRequestAndResponseWithWorkers(cmd, &req, pipeOption)
 }

@@ -55,9 +55,7 @@ Remove all pending operations for a given device
 func (n *DeleteOperationCollectionCmd) RunE(cmd *cobra.Command, args []string) error {
 	var err error
 	// query parameters
-	queryValue := url.QueryEscape("")
 	query := url.Values{}
-
 	err = flags.WithQueryParameters(
 		cmd,
 		query,
@@ -71,7 +69,7 @@ func (n *DeleteOperationCollectionCmd) RunE(cmd *cobra.Command, args []string) e
 		return newUserError(err)
 	}
 
-	queryValue, err = url.QueryUnescape(query.Encode())
+	queryValue, err := url.QueryUnescape(query.Encode())
 
 	if err != nil {
 		return newSystemError("Invalid query parameter")
@@ -118,6 +116,9 @@ func (n *DeleteOperationCollectionCmd) RunE(cmd *cobra.Command, args []string) e
 		cmd,
 		pathParameters,
 	)
+	if err != nil {
+		return err
+	}
 
 	path := replacePathParameters("devicecontrol/operations", pathParameters)
 
@@ -137,6 +138,7 @@ func (n *DeleteOperationCollectionCmd) RunE(cmd *cobra.Command, args []string) e
 		Property:          "deviceId",
 		Required:          false,
 		ResolveByNameType: "device",
+		IteratorType:      "",
 	}
 	return processRequestAndResponseWithWorkers(cmd, &req, pipeOption)
 }

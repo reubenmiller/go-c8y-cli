@@ -54,9 +54,7 @@ Remove an application binary related to a Hosted (web) application
 func (n *DeleteApplicationBinaryCmd) RunE(cmd *cobra.Command, args []string) error {
 	var err error
 	// query parameters
-	queryValue := url.QueryEscape("")
 	query := url.Values{}
-
 	err = flags.WithQueryParameters(
 		cmd,
 		query,
@@ -65,7 +63,7 @@ func (n *DeleteApplicationBinaryCmd) RunE(cmd *cobra.Command, args []string) err
 		return newUserError(err)
 	}
 
-	queryValue, err = url.QueryUnescape(query.Encode())
+	queryValue, err := url.QueryUnescape(query.Encode())
 
 	if err != nil {
 		return newSystemError("Invalid query parameter")
@@ -113,6 +111,9 @@ func (n *DeleteApplicationBinaryCmd) RunE(cmd *cobra.Command, args []string) err
 		pathParameters,
 		WithApplicationByNameFirstMatch(args, "application", "application"),
 	)
+	if err != nil {
+		return err
+	}
 
 	path := replacePathParameters("/application/applications/{application}/binaries/{binaryId}", pathParameters)
 
@@ -132,6 +133,7 @@ func (n *DeleteApplicationBinaryCmd) RunE(cmd *cobra.Command, args []string) err
 		Property:          "",
 		Required:          true,
 		ResolveByNameType: "",
+		IteratorType:      "path",
 	}
 	return processRequestAndResponseWithWorkers(cmd, &req, pipeOption)
 }

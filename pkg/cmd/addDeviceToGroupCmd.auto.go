@@ -55,9 +55,7 @@ Add multiple devices to a group
 func (n *AddDeviceToGroupCmd) RunE(cmd *cobra.Command, args []string) error {
 	var err error
 	// query parameters
-	queryValue := url.QueryEscape("")
 	query := url.Values{}
-
 	err = flags.WithQueryParameters(
 		cmd,
 		query,
@@ -66,7 +64,7 @@ func (n *AddDeviceToGroupCmd) RunE(cmd *cobra.Command, args []string) error {
 		return newUserError(err)
 	}
 
-	queryValue, err = url.QueryUnescape(query.Encode())
+	queryValue, err := url.QueryUnescape(query.Encode())
 
 	if err != nil {
 		return newSystemError("Invalid query parameter")
@@ -99,7 +97,13 @@ func (n *AddDeviceToGroupCmd) RunE(cmd *cobra.Command, args []string) error {
 		cmd,
 		body,
 		WithDataValue(),
-		WithDeviceByNameFirstMatch(args, "newChildDevice", "managedObject.id"),
+		WithReferenceByNamePipeline(newDeviceFetcher(client), flags.PipelineOptions{
+			Name:        "newChildDevice",
+			Aliases:     []string{"id"},
+			Destination: "managedObject.id",
+			Required:    true,
+		}),
+		// WithDeviceByNameFirstMatch(args, "newChildDevice", "managedObject.id"),
 		WithTemplateValue(),
 		WithTemplateVariablesValue(),
 	)
@@ -118,6 +122,9 @@ func (n *AddDeviceToGroupCmd) RunE(cmd *cobra.Command, args []string) error {
 		pathParameters,
 		WithDeviceGroupByNameFirstMatch(args, "group", "id"),
 	)
+	if err != nil {
+		return err
+	}
 
 	path := replacePathParameters("inventory/managedObjects/{id}/childAssets", pathParameters)
 
@@ -137,6 +144,7 @@ func (n *AddDeviceToGroupCmd) RunE(cmd *cobra.Command, args []string) error {
 		Property:          "managedObject.id",
 		Required:          true,
 		ResolveByNameType: "device",
+		IteratorType:      "body",
 	}
 	return processRequestAndResponseWithWorkers(cmd, &req, pipeOption)
 }

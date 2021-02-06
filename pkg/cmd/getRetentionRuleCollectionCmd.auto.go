@@ -49,9 +49,7 @@ Get a list of retention rules
 func (n *GetRetentionRuleCollectionCmd) RunE(cmd *cobra.Command, args []string) error {
 	var err error
 	// query parameters
-	queryValue := url.QueryEscape("")
 	query := url.Values{}
-
 	err = flags.WithQueryParameters(
 		cmd,
 		query,
@@ -65,7 +63,7 @@ func (n *GetRetentionRuleCollectionCmd) RunE(cmd *cobra.Command, args []string) 
 	}
 	commonOptions.AddQueryParameters(&query)
 
-	queryValue, err = url.QueryUnescape(query.Encode())
+	queryValue, err := url.QueryUnescape(query.Encode())
 
 	if err != nil {
 		return newSystemError("Invalid query parameter")
@@ -111,6 +109,9 @@ func (n *GetRetentionRuleCollectionCmd) RunE(cmd *cobra.Command, args []string) 
 		cmd,
 		pathParameters,
 	)
+	if err != nil {
+		return err
+	}
 
 	path := replacePathParameters("/retention/retentions", pathParameters)
 
@@ -130,6 +131,7 @@ func (n *GetRetentionRuleCollectionCmd) RunE(cmd *cobra.Command, args []string) 
 		Property:          "",
 		Required:          false,
 		ResolveByNameType: "",
+		IteratorType:      "",
 	}
 	return processRequestAndResponseWithWorkers(cmd, &req, pipeOption)
 }

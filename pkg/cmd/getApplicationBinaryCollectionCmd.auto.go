@@ -51,9 +51,7 @@ List all of the binaries related to a Hosted (web) application
 func (n *GetApplicationBinaryCollectionCmd) RunE(cmd *cobra.Command, args []string) error {
 	var err error
 	// query parameters
-	queryValue := url.QueryEscape("")
 	query := url.Values{}
-
 	err = flags.WithQueryParameters(
 		cmd,
 		query,
@@ -67,7 +65,7 @@ func (n *GetApplicationBinaryCollectionCmd) RunE(cmd *cobra.Command, args []stri
 	}
 	commonOptions.AddQueryParameters(&query)
 
-	queryValue, err = url.QueryUnescape(query.Encode())
+	queryValue, err := url.QueryUnescape(query.Encode())
 
 	if err != nil {
 		return newSystemError("Invalid query parameter")
@@ -113,6 +111,9 @@ func (n *GetApplicationBinaryCollectionCmd) RunE(cmd *cobra.Command, args []stri
 		cmd,
 		pathParameters,
 	)
+	if err != nil {
+		return err
+	}
 
 	path := replacePathParameters("/application/applications/{id}/binaries", pathParameters)
 
@@ -132,6 +133,7 @@ func (n *GetApplicationBinaryCollectionCmd) RunE(cmd *cobra.Command, args []stri
 		Property:          "",
 		Required:          true,
 		ResolveByNameType: "application",
+		IteratorType:      "path",
 	}
 	return processRequestAndResponseWithWorkers(cmd, &req, pipeOption)
 }

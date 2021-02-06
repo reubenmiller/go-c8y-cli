@@ -51,9 +51,7 @@ Unassign a child addition from its parent managed object
 func (n *DeleteChildAdditionCmd) RunE(cmd *cobra.Command, args []string) error {
 	var err error
 	// query parameters
-	queryValue := url.QueryEscape("")
 	query := url.Values{}
-
 	err = flags.WithQueryParameters(
 		cmd,
 		query,
@@ -62,7 +60,7 @@ func (n *DeleteChildAdditionCmd) RunE(cmd *cobra.Command, args []string) error {
 		return newUserError(err)
 	}
 
-	queryValue, err = url.QueryUnescape(query.Encode())
+	queryValue, err := url.QueryUnescape(query.Encode())
 
 	if err != nil {
 		return newSystemError("Invalid query parameter")
@@ -110,6 +108,9 @@ func (n *DeleteChildAdditionCmd) RunE(cmd *cobra.Command, args []string) error {
 		pathParameters,
 		flags.WithStringValue("childId", "childId"),
 	)
+	if err != nil {
+		return err
+	}
 
 	path := replacePathParameters("inventory/managedObjects/{id}/childAdditions/{childId}", pathParameters)
 
@@ -129,6 +130,7 @@ func (n *DeleteChildAdditionCmd) RunE(cmd *cobra.Command, args []string) error {
 		Property:          "",
 		Required:          true,
 		ResolveByNameType: "",
+		IteratorType:      "path",
 	}
 	return processRequestAndResponseWithWorkers(cmd, &req, pipeOption)
 }

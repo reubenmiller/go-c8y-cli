@@ -168,7 +168,7 @@ type EntityIterator struct {
 }
 
 // NewReferenceByNameIterator create a new iterator which can look up values by their id or names
-func NewReferenceByNameIterator(fetcher entityFetcher, iterator, c8yClient *c8y.Client, valueIterator iterator.Iterator) *EntityIterator {
+func NewReferenceByNameIterator(fetcher entityFetcher, c8yClient *c8y.Client, valueIterator iterator.Iterator) *EntityIterator {
 	return &EntityIterator{
 		Fetcher:       fetcher,
 		Client:        c8yClient,
@@ -180,26 +180,34 @@ func NewReferenceByNameIterator(fetcher entityFetcher, iterator, c8yClient *c8y.
 var ErrNoMatchesFound = errors.New("referenceByName: no matching items found")
 var ErrMoreThanOneFound = errors.New("referenceByName: more than 1 found")
 
-func (i *EntityIterator) GetNext() (value []byte, err error) {
+// MarshalJSON return the value in a json compatible value
+func (i *EntityIterator) MarshalJSON() (line []byte, err error) {
+	return iterator.MarshalJSON(i)
+}
+
+func (i *EntityIterator) GetNext() (value []byte, input interface{}, err error) {
 
 	value, _, err = i.valueIterator.GetNext()
 	if err != nil {
 		return
 	}
-	refs, err := lookupEntity(i.Fetcher, []string{string(value)}, i.GetID)
 
+	refs, err := lookupIDByName(i.Fetcher, string(value))
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	if len(refs) == 0 {
-		return nil, ErrNoMatchesFound
+		return nil, nil, ErrNoMatchesFound
 	}
 
-	if len(refs) > 1 {
-		return nil, ErrMoreThanOneFound
+	data := refs[0].ID
+	if refs[0].Data.Value != nil {
+		if v, ok := refs[0].Data.Value.(gjson.Result); ok {
+			data = v.Raw
+		}
 	}
-	return []byte(refs[0].ID), nil
+	return []byte(refs[0].ID), data, nil
 }
 
 // WithReferenceByName adds support for looking up values by name via cli args
@@ -433,5 +441,20 @@ func WithUserGroupByNameFirstMatch(args []string, opts ...string) flags.GetOptio
 	return func(cmd *cobra.Command) (string, interface{}, error) {
 		opt := WithReferenceByNameFirstMatch(newUserGroupFetcher(client), args, opts...)
 		return opt(cmd)
+	}
+}
+
+// WithReferenceByNamePipeline adds pipeline support from cli arguments
+func WithReferenceByNamePipeline(fetcher entityFetcher, opts flags.PipelineOptions) flags.GetOption {
+	return func(cmd *cobra.Command) (string, interface{}, error) {
+		pipeIter, err := flags.NewFlagWithPipeIterator(cmd, opts)
+
+		if err != nil {
+			return "", nil, err
+		}
+
+		iter := NewReferenceByNameIterator(fetcher, client, pipeIter)
+
+		return opts.Destination, iter, err
 	}
 }

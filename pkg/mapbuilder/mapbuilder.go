@@ -335,7 +335,7 @@ func (b MapBuilder) validateRequiredKeys() error {
 	}
 
 	if len(missingKeys) > 0 {
-		return fmt.Errorf("Missing required properties: %s", strings.Join(missingKeys, ", "))
+		return fmt.Errorf("Body is missing required properties: %s", strings.Join(missingKeys, ", "))
 	}
 	return nil
 }
@@ -372,6 +372,10 @@ func (b MapBuilder) MarshalJSON() ([]byte, error) {
 		if err := b.ApplyTemplate(); err != nil {
 			return nil, err
 		}
+	}
+	// Validate after applying the template
+	if err := b.validateRequiredKeys(); err != nil {
+		return nil, err
 	}
 	return json.Marshal(b.body)
 }

@@ -50,9 +50,7 @@ Get a list of referenced applications on a given tenant (from management tenant)
 func (n *GetApplicationReferenceCollectionCmd) RunE(cmd *cobra.Command, args []string) error {
 	var err error
 	// query parameters
-	queryValue := url.QueryEscape("")
 	query := url.Values{}
-
 	err = flags.WithQueryParameters(
 		cmd,
 		query,
@@ -66,7 +64,7 @@ func (n *GetApplicationReferenceCollectionCmd) RunE(cmd *cobra.Command, args []s
 	}
 	commonOptions.AddQueryParameters(&query)
 
-	queryValue, err = url.QueryUnescape(query.Encode())
+	queryValue, err := url.QueryUnescape(query.Encode())
 
 	if err != nil {
 		return newSystemError("Invalid query parameter")
@@ -112,6 +110,9 @@ func (n *GetApplicationReferenceCollectionCmd) RunE(cmd *cobra.Command, args []s
 		cmd,
 		pathParameters,
 	)
+	if err != nil {
+		return err
+	}
 
 	path := replacePathParameters("/tenant/tenants/{tenant}/applications", pathParameters)
 
@@ -131,6 +132,7 @@ func (n *GetApplicationReferenceCollectionCmd) RunE(cmd *cobra.Command, args []s
 		Property:          "",
 		Required:          false,
 		ResolveByNameType: "",
+		IteratorType:      "path",
 	}
 	return processRequestAndResponseWithWorkers(cmd, &req, pipeOption)
 }

@@ -53,9 +53,7 @@ Delete external identity
 func (n *DeleteExternalIDCmd) RunE(cmd *cobra.Command, args []string) error {
 	var err error
 	// query parameters
-	queryValue := url.QueryEscape("")
 	query := url.Values{}
-
 	err = flags.WithQueryParameters(
 		cmd,
 		query,
@@ -64,7 +62,7 @@ func (n *DeleteExternalIDCmd) RunE(cmd *cobra.Command, args []string) error {
 		return newUserError(err)
 	}
 
-	queryValue, err = url.QueryUnescape(query.Encode())
+	queryValue, err := url.QueryUnescape(query.Encode())
 
 	if err != nil {
 		return newSystemError("Invalid query parameter")
@@ -113,6 +111,9 @@ func (n *DeleteExternalIDCmd) RunE(cmd *cobra.Command, args []string) error {
 		flags.WithStringValue("type", "type"),
 		flags.WithStringValue("name", "name"),
 	)
+	if err != nil {
+		return err
+	}
 
 	path := replacePathParameters("/identity/externalIds/{type}/{name}", pathParameters)
 
@@ -132,6 +133,7 @@ func (n *DeleteExternalIDCmd) RunE(cmd *cobra.Command, args []string) error {
 		Property:          "",
 		Required:          false,
 		ResolveByNameType: "",
+		IteratorType:      "",
 	}
 	return processRequestAndResponseWithWorkers(cmd, &req, pipeOption)
 }

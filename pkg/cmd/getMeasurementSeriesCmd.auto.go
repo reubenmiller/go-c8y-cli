@@ -54,9 +54,7 @@ Get a list of series [nx_WEA_29_Delta.MDL10FG001] and [nx_WEA_29_Delta.ST9] for 
 func (n *GetMeasurementSeriesCmd) RunE(cmd *cobra.Command, args []string) error {
 	var err error
 	// query parameters
-	queryValue := url.QueryEscape("")
 	query := url.Values{}
-
 	err = flags.WithQueryParameters(
 		cmd,
 		query,
@@ -75,7 +73,7 @@ func (n *GetMeasurementSeriesCmd) RunE(cmd *cobra.Command, args []string) error 
 	}
 	commonOptions.AddQueryParameters(&query)
 
-	queryValue, err = url.QueryUnescape(query.Encode())
+	queryValue, err := url.QueryUnescape(query.Encode())
 
 	if err != nil {
 		return newSystemError("Invalid query parameter")
@@ -121,6 +119,9 @@ func (n *GetMeasurementSeriesCmd) RunE(cmd *cobra.Command, args []string) error 
 		cmd,
 		pathParameters,
 	)
+	if err != nil {
+		return err
+	}
 
 	path := replacePathParameters("measurement/measurements/series", pathParameters)
 
@@ -140,6 +141,7 @@ func (n *GetMeasurementSeriesCmd) RunE(cmd *cobra.Command, args []string) error 
 		Property:          "source",
 		Required:          false,
 		ResolveByNameType: "device",
+		IteratorType:      "",
 	}
 	return processRequestAndResponseWithWorkers(cmd, &req, pipeOption)
 }

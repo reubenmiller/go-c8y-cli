@@ -5,13 +5,11 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"os"
 	"strings"
 	"sync/atomic"
 
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/pkg/iterator"
-	"github.com/reubenmiller/go-c8y-cli/pkg/jsonUtilities"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
 )
@@ -88,21 +86,24 @@ func (r *RequestIterator) GetNext() (*c8y.RequestOptions, error) {
 		if r.NameResolver != nil {
 			if inputB, ok := input.([]byte); ok {
 
-				matches, err := lookupIDByName(r.NameResolver, string(inputB))
+				// skip lookup if path is a fixed string
+				if !bytes.Equal(path, inputB) {
+					matches, err := lookupIDByName(r.NameResolver, string(inputB))
 
-				if err != nil {
-					r.setDone()
-					return nil, err
-				}
-				if len(matches) == 0 {
-					r.setDone()
-					return nil, fmt.Errorf("no matching results")
-				}
-				if len(matches) > 0 {
-					if f, ok := r.Path.(*iterator.CompositeIterator); ok {
-						path, err = f.GetValueByInput([]byte(matches[0].ID))
-					} else {
-						path = []byte(matches[0].ID)
+					if err != nil {
+						r.setDone()
+						return nil, err
+					}
+					if len(matches) == 0 {
+						r.setDone()
+						return nil, fmt.Errorf("no matching results")
+					}
+					if len(matches) > 0 {
+						if f, ok := r.Path.(*iterator.CompositeIterator); ok {
+							path, err = f.GetValueByInput([]byte(matches[0].ID))
+						} else {
+							path = []byte(matches[0].ID)
+						}
 					}
 				}
 			}
@@ -113,7 +114,7 @@ func (r *RequestIterator) GetNext() (*c8y.RequestOptions, error) {
 
 	// apply body iterator
 	if r.Body != nil && (strings.EqualFold(req.Method, "POST") || strings.EqualFold(req.Method, "PUT")) {
-		// iterator body
+		// iterator body. Any validation will be run here
 		bodyContents, err := json.Marshal(r.Body)
 
 		if err != nil {
@@ -130,14 +131,6 @@ func (r *RequestIterator) GetNext() (*c8y.RequestOptions, error) {
 			r.setDone()
 			return nil, err
 		}
-
-		// Apply template
-		// if err := setDataTemplateFromFlags(n.cmd, body); err != nil {
-		// 	return nil, newUserError("Template error. ", err)
-		// }
-		// if err := body.Validate(); err != nil {
-		// 	return nil, newUserError("Body validation error. ", err)
-		// }
 
 		req.Body = bodyValue
 	}
@@ -203,67 +196,72 @@ func NewFlagFileContents(cmd *cobra.Command, name string) (iterator.Iterator, er
 	return nil, fmt.Errorf("no input detected")
 }
 
-// NewFlagPipeEnabledStringSlice creates an iterator from a command argument
-// or from the pipeline
-// It will automatically try to get the value from a String or a StringSlice flag
-func NewFlagPipeEnabledStringSlice(cmd *cobra.Command, pipeOpt PipeOption) (iterator.Iterator, error) {
-	supportsPipeline := flags.HasValueFromPipeline(cmd, pipeOpt.Name)
+func NewPipeOption(name string, required bool) *PipeOption {
 
-	if cmd.Flags().Changed(pipeOpt.Name) {
-
-		paths, err := cmd.Flags().GetStringSlice(pipeOpt.Name)
-
-		if err != nil {
-			// fallback to string
-			path, err := cmd.Flags().GetString(pipeOpt.Name)
-
-			if err != nil {
-				return nil, err
-			}
-			paths = append(paths, path)
-		}
-		if len(paths) > 0 {
-
-			// check if file reference
-			if _, err := os.Stat(paths[0]); err == nil {
-				iter, err := iterator.NewFileContentsIterator(paths[0])
-				if err != nil {
-					return nil, err
-				}
-				return iter, nil
-			}
-
-			// return array of results
-			return iterator.NewSliceIterator(paths), nil
-		}
-	} else if supportsPipeline {
-		opt := &iterator.PipeOptions{
-			Property: pipeOpt.Name,
-		}
-		if pipeOpt.Property != "" {
-			opt.Property = pipeOpt.Property
-		}
-		iter, err := iterator.NewJSONPipeIterator(opt, func(line []byte) bool {
-			line = bytes.TrimSpace(line)
-			if !bytes.HasPrefix(line, []byte("{")) && !bytes.HasPrefix(line, []byte("[")) {
-				return true
-			}
-			// only allow json objects
-			isJSONObject := jsonUtilities.IsJSONObject(line)
-			// isJSONArray := jsonUtilities.IsJSONObject(line)
-			return isJSONObject
-			// return !(bytes.HasPrefix(line, []byte("{")) || bytes.HasPrefix(line, []byte("[")))
-		})
-		if err != nil {
-			if pipeOpt.Required {
-				return iter, err
-			}
-			return iter, nil
-		}
-		return iter, nil
+	return &PipeOption{
+		Name:     name,
+		Required: required,
 	}
-	if pipeOpt.Required {
-		return nil, fmt.Errorf("no input detected")
+}
+
+type PipeOption struct {
+	// Name of the flag
+	Name string
+
+	// Required marks the pipeline as required, and will return an error if the data is not found in the pipe or from flags
+	Required bool
+
+	// Properties slice of json paths to look at mapping a value to the iterator
+	Properties []string
+
+	// TODO: Remove this property
+	Property string
+
+	// ResolveByNameType type of resolve by name lookup to use
+	ResolveByNameType string
+
+	// IteratorType sets whether the iterator is
+	IteratorType string
+}
+
+type IteraterType string
+
+const IteraterTypeBody = IteraterType("body")
+const IteraterTypePath = IteraterType("path")
+
+func NewPathIterator(cmd *cobra.Command, path string, pipeOpt PipeOption) (iterator.Iterator, error) {
+	var pathIter iterator.Iterator
+
+	// create input iterator
+	o := flags.PipelineOptions{
+		Name:     pipeOpt.Name,
+		Aliases:  pipeOpt.Properties,
+		Required: pipeOpt.Required,
 	}
-	return nil, nil
+	items, err := flags.NewFlagWithPipeIterator(cmd, o)
+	if err != nil {
+		return nil, err
+	}
+
+	if items != nil {
+		format := path
+		pathVarName := pipeOpt.Name
+
+		if len(pipeOpt.Properties) > 0 {
+			pathVarName = pipeOpt.Properties[0]
+		}
+
+		if strings.Count(format, "{") == 1 && strings.Count(path, "}") == 1 {
+			// Don't assume the variable name matches the given name.
+			// But if there is only one template variable, then it is safe to assume it is the correct one
+			format = path[0:strings.Index(path, "{")] + "%s" + path[strings.Index(path, "}")+1:]
+		} else {
+			// Only substitute an explicitly the pipeline variable name
+			format = strings.ReplaceAll(path, "{"+pathVarName+"}", "%s")
+		}
+		pathIter = iterator.NewCompositeStringIterator(items, format)
+	} else {
+		pathIter = iterator.NewRepeatIterator(path, 1)
+	}
+	return pathIter, nil
 }

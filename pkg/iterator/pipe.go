@@ -22,7 +22,7 @@ type Filter func([]byte) bool
 // PipeOptions additional options on how to interpret the piped data
 type PipeOptions struct {
 	// Property name if the input data is json
-	Property string
+	Properties []string
 }
 
 // PipeIterator is a thread safe iterator to retrieve the input values from piped standard input
@@ -51,14 +51,19 @@ func (i *PipeIterator) GetNext() (line []byte, input interface{}, err error) {
 	}
 
 	// check if json, if so pluck the value from it
-	if i.opts != nil {
-		if i.opts.Property != "" {
-			if jsonUtilities.IsJSONObject(line) {
-				if v := gjson.GetBytes(line, i.opts.Property); v.Exists() {
-					return []byte(v.String()), line, nil
+	if i.opts != nil && jsonUtilities.IsJSONObject(line) {
+		if len(i.opts.Properties) > 0 {
+			// select first property
+			for _, prop := range i.opts.Properties {
+				if prop != "" {
+
+					if v := gjson.GetBytes(line, prop); v.Exists() {
+						return []byte(v.String()), line, nil
+					}
 				}
-				err = io.EOF
 			}
+			// stop iterator if not found
+			err = io.EOF
 		}
 	}
 
@@ -67,7 +72,7 @@ func (i *PipeIterator) GetNext() (line []byte, input interface{}, err error) {
 
 // MarshalJSON return the value in a json compatible value
 func (i *PipeIterator) MarshalJSON() (line []byte, err error) {
-	return toJSON(i)
+	return MarshalJSON(i)
 }
 
 // NewPipeIterator returns a new pipe iterator
@@ -96,18 +101,21 @@ func NewPipeIterator(filter ...Filter) (Iterator, error) {
 }
 
 // NewJSONPipeIterator returns a new pipe iterator
-func NewJSONPipeIterator(pipeOpts *PipeOptions, filter ...Filter) (Iterator, error) {
-	info, err := os.Stdin.Stat()
-	if err != nil {
-		return nil, err
-	}
+func NewJSONPipeIterator(in io.Reader, pipeOpts *PipeOptions, filter ...Filter) (Iterator, error) {
 
-	// if info.Mode()&os.ModeCharDevice != 0 || info.Size() <= 0 {
-	if info.Mode()&os.ModeCharDevice != 0 {
+	// info, err := os.Stdin.Stat()
+	// if err != nil {
+	// 	return nil, err
+	// }
+
+	// if info.Mode()&os.ModeCharDevice != 0 {
+	// 	return nil, ErrNoPipeInput
+	// }
+
+	reader := bufio.NewReader(in)
+	if _, err := reader.Peek(1); err != nil {
 		return nil, ErrNoPipeInput
 	}
-
-	reader := bufio.NewReader(os.Stdin)
 
 	var pipelineFilter Filter
 	if len(filter) > 0 {

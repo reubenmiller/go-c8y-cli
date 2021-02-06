@@ -35,26 +35,32 @@ Function Write-ClientMessage {
                     "Sending request: " {
                         $value = $line -split "Sending request: " | Select-Object -Last 1
                         $CommandInfo["request"] = $value
+                        break
                     }
                     "Headers: " {
                         $value = $line -split "Headers: " | Select-Object -Last 1
                         $CommandInfo["requestHeader"] = $value
+                        break
                     }
                     "Response time: " {
                         $value = $line -split "Response time: " | Select-Object -Last 1
                         $CommandInfo["responseTime"] = $value
+                        break
                     }
                     "Status code:" {
                         $value = $line -split "Status code: " | Select-Object -Last 1
                         $CommandInfo["statusCode"] = $value
+                        break
                     }
                     "Response header:" {
                         $value = $line -split "Response header: " | Select-Object -Last 1
                         $CommandInfo["responseHeader"] = $value
+                        break
                     }
                     "Response Length:" {
                         $value = $line -split "Response Length: " | Select-Object -Last 1
                         $CommandInfo["responseLength"] = $value
+                        break
                     }
                 }
             }
@@ -97,27 +103,33 @@ Function Write-ClientMessage {
                 "What If:" {
                     $line = $line -replace ".*(What if:)", '$1'
                     Write-InformationColored -MessageData "$line" -ForegroundColor Green -ShowHost
+                    break
                 }
 
                 "INFO" {
                     Write-Verbose "$line"
+                    break
                 }
 
                 "DEBUG" {
                     Write-Verbose "$line"
+                    break
                 }
 
                 "WARN" {
                     Write-Warning "$line"
+                    break
                 }
 
                 "ERROR" {
                     Write-Warning "$line"
+                    break
                 }
 
                 "RemoteException" {
                     # write empty string
                     Write-InformationColored -MessageData "" -ForegroundColor Green -ShowHost
+                    break
                 }
 
                 Default {

@@ -52,9 +52,7 @@ Get a list of role references for a user
 func (n *GetRoleReferenceCollectionFromUserCmd) RunE(cmd *cobra.Command, args []string) error {
 	var err error
 	// query parameters
-	queryValue := url.QueryEscape("")
 	query := url.Values{}
-
 	err = flags.WithQueryParameters(
 		cmd,
 		query,
@@ -68,7 +66,7 @@ func (n *GetRoleReferenceCollectionFromUserCmd) RunE(cmd *cobra.Command, args []
 	}
 	commonOptions.AddQueryParameters(&query)
 
-	queryValue, err = url.QueryUnescape(query.Encode())
+	queryValue, err := url.QueryUnescape(query.Encode())
 
 	if err != nil {
 		return newSystemError("Invalid query parameter")
@@ -116,6 +114,9 @@ func (n *GetRoleReferenceCollectionFromUserCmd) RunE(cmd *cobra.Command, args []
 		flags.WithStringDefaultValue(client.TenantName, "tenant", "tenant"),
 		WithUserByNameFirstMatch(args, "user", "user"),
 	)
+	if err != nil {
+		return err
+	}
 
 	path := replacePathParameters("/user/{tenant}/users/{user}/roles", pathParameters)
 
@@ -135,6 +136,7 @@ func (n *GetRoleReferenceCollectionFromUserCmd) RunE(cmd *cobra.Command, args []
 		Property:          "",
 		Required:          false,
 		ResolveByNameType: "",
+		IteratorType:      "",
 	}
 	return processRequestAndResponseWithWorkers(cmd, &req, pipeOption)
 }

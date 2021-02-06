@@ -32,17 +32,17 @@ Add a related managed object as a child to an existing managed object
 
 	cmd.SilenceUsage = true
 
-	cmd.Flags().String("id", "", "Managed object id where the child addition will be added to (required) (accepts pipeline)")
-	cmd.Flags().StringSlice("newChild", []string{""}, "New managed object that will be added as a child addition (required)")
+	cmd.Flags().String("id", "", "Managed object id where the child addition will be added to (required)")
+	cmd.Flags().String("newChild", "", "New managed object that will be added as a child addition (required) (accepts pipeline)")
 	addProcessingModeFlag(cmd)
 
 	flags.WithOptions(
 		cmd,
-		flags.WithPipelineSupport("id"),
+		flags.WithPipelineSupport("newChild"),
 	)
 
 	// Required flags
-	cmd.MarkFlagRequired("newChild")
+	cmd.MarkFlagRequired("id")
 
 	ccmd.baseCmd = newBaseCmd(cmd)
 
@@ -52,9 +52,7 @@ Add a related managed object as a child to an existing managed object
 func (n *AddManagedObjectChildAdditionCmd) RunE(cmd *cobra.Command, args []string) error {
 	var err error
 	// query parameters
-	queryValue := url.QueryEscape("")
 	query := url.Values{}
-
 	err = flags.WithQueryParameters(
 		cmd,
 		query,
@@ -63,7 +61,7 @@ func (n *AddManagedObjectChildAdditionCmd) RunE(cmd *cobra.Command, args []strin
 		return newUserError(err)
 	}
 
-	queryValue, err = url.QueryUnescape(query.Encode())
+	queryValue, err := url.QueryUnescape(query.Encode())
 
 	if err != nil {
 		return newSystemError("Invalid query parameter")
@@ -96,7 +94,7 @@ func (n *AddManagedObjectChildAdditionCmd) RunE(cmd *cobra.Command, args []strin
 		cmd,
 		body,
 		WithDataValue(),
-		flags.WithStringSliceValues("newChild", "managedObject.id", ""),
+		flags.WithStringValue("newChild", "managedObject.id"),
 		WithTemplateValue(),
 		WithTemplateVariablesValue(),
 	)
@@ -113,7 +111,11 @@ func (n *AddManagedObjectChildAdditionCmd) RunE(cmd *cobra.Command, args []strin
 	err = flags.WithPathParameters(
 		cmd,
 		pathParameters,
+		flags.WithStringValue("id", "id"),
 	)
+	if err != nil {
+		return err
+	}
 
 	path := replacePathParameters("inventory/managedObjects/{id}/childAdditions", pathParameters)
 
@@ -129,10 +131,11 @@ func (n *AddManagedObjectChildAdditionCmd) RunE(cmd *cobra.Command, args []strin
 	}
 
 	pipeOption := PipeOption{
-		Name:              "id",
-		Property:          "id",
+		Name:              "newChild",
+		Property:          "managedObject.id",
 		Required:          true,
 		ResolveByNameType: "",
+		IteratorType:      "body",
 	}
 	return processRequestAndResponseWithWorkers(cmd, &req, pipeOption)
 }

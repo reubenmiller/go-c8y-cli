@@ -53,9 +53,7 @@ Get a tenant option
 func (n *DeleteTenantOptionCmd) RunE(cmd *cobra.Command, args []string) error {
 	var err error
 	// query parameters
-	queryValue := url.QueryEscape("")
 	query := url.Values{}
-
 	err = flags.WithQueryParameters(
 		cmd,
 		query,
@@ -64,7 +62,7 @@ func (n *DeleteTenantOptionCmd) RunE(cmd *cobra.Command, args []string) error {
 		return newUserError(err)
 	}
 
-	queryValue, err = url.QueryUnescape(query.Encode())
+	queryValue, err := url.QueryUnescape(query.Encode())
 
 	if err != nil {
 		return newSystemError("Invalid query parameter")
@@ -113,6 +111,9 @@ func (n *DeleteTenantOptionCmd) RunE(cmd *cobra.Command, args []string) error {
 		flags.WithStringValue("category", "category"),
 		flags.WithStringValue("key", "key"),
 	)
+	if err != nil {
+		return err
+	}
 
 	path := replacePathParameters("/tenant/options/{category}/{key}", pathParameters)
 
@@ -132,6 +133,7 @@ func (n *DeleteTenantOptionCmd) RunE(cmd *cobra.Command, args []string) error {
 		Property:          "",
 		Required:          false,
 		ResolveByNameType: "",
+		IteratorType:      "",
 	}
 	return processRequestAndResponseWithWorkers(cmd, &req, pipeOption)
 }

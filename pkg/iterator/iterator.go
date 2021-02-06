@@ -16,7 +16,7 @@ type UntypedIterator interface {
 	GetNext() (out interface{}, err error)
 }
 
-func toJSON(i Iterator) (line []byte, err error) {
+func MarshalJSON(i Iterator) (line []byte, err error) {
 	v, _, err := i.GetNext()
 	if err != nil {
 		if err == io.EOF {

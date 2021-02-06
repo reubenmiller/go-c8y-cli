@@ -54,9 +54,7 @@ Create a new event for a device
 func (n *NewEventCmd) RunE(cmd *cobra.Command, args []string) error {
 	var err error
 	// query parameters
-	queryValue := url.QueryEscape("")
 	query := url.Values{}
-
 	err = flags.WithQueryParameters(
 		cmd,
 		query,
@@ -65,7 +63,7 @@ func (n *NewEventCmd) RunE(cmd *cobra.Command, args []string) error {
 		return newUserError(err)
 	}
 
-	queryValue, err = url.QueryUnescape(query.Encode())
+	queryValue, err := url.QueryUnescape(query.Encode())
 
 	if err != nil {
 		return newSystemError("Invalid query parameter")
@@ -120,6 +118,9 @@ func (n *NewEventCmd) RunE(cmd *cobra.Command, args []string) error {
 		cmd,
 		pathParameters,
 	)
+	if err != nil {
+		return err
+	}
 
 	path := replacePathParameters("event/events", pathParameters)
 
@@ -139,6 +140,7 @@ func (n *NewEventCmd) RunE(cmd *cobra.Command, args []string) error {
 		Property:          "source.id",
 		Required:          true,
 		ResolveByNameType: "device",
+		IteratorType:      "body",
 	}
 	return processRequestAndResponseWithWorkers(cmd, &req, pipeOption)
 }

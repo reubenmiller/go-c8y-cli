@@ -62,7 +62,6 @@ func (n *batchAddDeviceToGroupCmd) runE(cmd *cobra.Command, args []string) error
 		return err
 	}
 
-	// NewFlagPipeEnabledStringSlice(cmd, "inputFile")
 	requestIter := NewBatchFixedPathRequestIterator(cmd, "POST", path, body)
 	return runTemplateOnList(cmd, requestIter)
 }

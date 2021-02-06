@@ -61,9 +61,7 @@ Get a list of pending operations for a device
 func (n *GetOperationCollectionCmd) RunE(cmd *cobra.Command, args []string) error {
 	var err error
 	// query parameters
-	queryValue := url.QueryEscape("")
 	query := url.Values{}
-
 	err = flags.WithQueryParameters(
 		cmd,
 		query,
@@ -83,7 +81,7 @@ func (n *GetOperationCollectionCmd) RunE(cmd *cobra.Command, args []string) erro
 	}
 	commonOptions.AddQueryParameters(&query)
 
-	queryValue, err = url.QueryUnescape(query.Encode())
+	queryValue, err := url.QueryUnescape(query.Encode())
 
 	if err != nil {
 		return newSystemError("Invalid query parameter")
@@ -129,6 +127,9 @@ func (n *GetOperationCollectionCmd) RunE(cmd *cobra.Command, args []string) erro
 		cmd,
 		pathParameters,
 	)
+	if err != nil {
+		return err
+	}
 
 	path := replacePathParameters("devicecontrol/operations", pathParameters)
 
@@ -148,6 +149,7 @@ func (n *GetOperationCollectionCmd) RunE(cmd *cobra.Command, args []string) erro
 		Property:          "deviceId",
 		Required:          false,
 		ResolveByNameType: "device",
+		IteratorType:      "",
 	}
 	return processRequestAndResponseWithWorkers(cmd, &req, pipeOption)
 }

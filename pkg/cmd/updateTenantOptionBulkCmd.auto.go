@@ -53,9 +53,7 @@ Update multiple tenant options
 func (n *UpdateTenantOptionBulkCmd) RunE(cmd *cobra.Command, args []string) error {
 	var err error
 	// query parameters
-	queryValue := url.QueryEscape("")
 	query := url.Values{}
-
 	err = flags.WithQueryParameters(
 		cmd,
 		query,
@@ -64,7 +62,7 @@ func (n *UpdateTenantOptionBulkCmd) RunE(cmd *cobra.Command, args []string) erro
 		return newUserError(err)
 	}
 
-	queryValue, err = url.QueryUnescape(query.Encode())
+	queryValue, err := url.QueryUnescape(query.Encode())
 
 	if err != nil {
 		return newSystemError("Invalid query parameter")
@@ -115,6 +113,9 @@ func (n *UpdateTenantOptionBulkCmd) RunE(cmd *cobra.Command, args []string) erro
 		pathParameters,
 		flags.WithStringValue("category", "category"),
 	)
+	if err != nil {
+		return err
+	}
 
 	path := replacePathParameters("/tenant/options/{category}", pathParameters)
 
@@ -134,6 +135,7 @@ func (n *UpdateTenantOptionBulkCmd) RunE(cmd *cobra.Command, args []string) erro
 		Property:          "",
 		Required:          false,
 		ResolveByNameType: "",
+		IteratorType:      "",
 	}
 	return processRequestAndResponseWithWorkers(cmd, &req, pipeOption)
 }

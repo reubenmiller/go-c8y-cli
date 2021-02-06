@@ -67,6 +67,7 @@
     $PipelineVariableRequired = "false"
     $PipelineVariableProperty = ""
     $PipelineVariablePropertyResolveType = ""
+    $PipelineVariableIteratorType = ""
     foreach ($iArg in (Remove-SkippedParameters $ArgumentSources)) {
         if ($iArg.pipeline) {
             $PipelineVariableName = $iArg.Name
@@ -126,6 +127,9 @@
         }
 
         foreach ($iArg in (Remove-SkippedParameters $Specification.body)) {
+            if ($iArg.pipeline -eq $true) {
+                $PipelineVariableIteratorType = "body"
+            }
             $code = New-C8yApiGoGetValueFromFlag -Parameters $iArg -SetterType "body"
             if ($code) {
                 switch -Regex ($code) {
@@ -217,6 +221,7 @@
     foreach ($Properties in (Remove-SkippedParameters $Specification.pathParameters)) {
         if ($Properties.pipeline) {
             Write-Verbose "Skipping path parameters for pipeline arguments"
+            $PipelineVariableIteratorType = "path"
             continue
         }
         $code = New-C8yApiGoGetValueFromFlag -Parameters $Properties -SetterType "path"
@@ -228,7 +233,6 @@
     #
     # Query parameters
     #
-    $RESTQueryBuilder = New-Object System.Text.StringBuilder
     $RESTQueryBuilderWithValues = New-Object System.Text.StringBuilder
     $RESTQueryBuilderPost = New-Object System.Text.StringBuilder
     if ($Specification.queryParameters) {
@@ -351,9 +355,7 @@ $($Examples -join "`n`n")
 func (n *${NameCamel}Cmd) RunE(cmd *cobra.Command, args []string) error {
     var err error
     // query parameters
-    queryValue := url.QueryEscape("")
     query := url.Values{}
-    $RESTQueryBuilder
     err = flags.WithQueryParameters(
 		cmd,
         query,
@@ -363,7 +365,7 @@ func (n *${NameCamel}Cmd) RunE(cmd *cobra.Command, args []string) error {
 		return newUserError(err)
     }
     $RESTQueryBuilderPost
-	queryValue, err = url.QueryUnescape(query.Encode())
+	queryValue, err := url.QueryUnescape(query.Encode())
 
 	if err != nil {
 		return newSystemError("Invalid query parameter")
@@ -414,6 +416,9 @@ func (n *${NameCamel}Cmd) RunE(cmd *cobra.Command, args []string) error {
         pathParameters,
         $RESTPathBuilderOptions
     )
+    if err != nil {
+        return err
+    }
 
     path := replacePathParameters("${RESTPath}", pathParameters)
 
@@ -432,7 +437,8 @@ func (n *${NameCamel}Cmd) RunE(cmd *cobra.Command, args []string) error {
         Name: "$PipelineVariableName",
 		Property: "$PipelineVariableProperty",
 		Required: $PipelineVariableRequired,
-		ResolveByNameType: "$PipelineVariablePropertyResolveType",
+        ResolveByNameType: "$PipelineVariablePropertyResolveType",
+        IteratorType: "$PipelineVariableIteratorType",
 	}
     return processRequestAndResponseWithWorkers(cmd, &req, pipeOption)
 }

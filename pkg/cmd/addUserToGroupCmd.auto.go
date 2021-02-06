@@ -53,9 +53,7 @@ List the users within a user group
 func (n *AddUserToGroupCmd) RunE(cmd *cobra.Command, args []string) error {
 	var err error
 	// query parameters
-	queryValue := url.QueryEscape("")
 	query := url.Values{}
-
 	err = flags.WithQueryParameters(
 		cmd,
 		query,
@@ -64,7 +62,7 @@ func (n *AddUserToGroupCmd) RunE(cmd *cobra.Command, args []string) error {
 		return newUserError(err)
 	}
 
-	queryValue, err = url.QueryUnescape(query.Encode())
+	queryValue, err := url.QueryUnescape(query.Encode())
 
 	if err != nil {
 		return newSystemError("Invalid query parameter")
@@ -117,6 +115,9 @@ func (n *AddUserToGroupCmd) RunE(cmd *cobra.Command, args []string) error {
 		WithUserGroupByNameFirstMatch(args, "group", "group"),
 		flags.WithStringDefaultValue(client.TenantName, "tenant", "tenant"),
 	)
+	if err != nil {
+		return err
+	}
 
 	path := replacePathParameters("/user/{tenant}/groups/{group}/users", pathParameters)
 
@@ -136,6 +137,7 @@ func (n *AddUserToGroupCmd) RunE(cmd *cobra.Command, args []string) error {
 		Property:          "user.self",
 		Required:          true,
 		ResolveByNameType: "userself",
+		IteratorType:      "body",
 	}
 	return processRequestAndResponseWithWorkers(cmd, &req, pipeOption)
 }

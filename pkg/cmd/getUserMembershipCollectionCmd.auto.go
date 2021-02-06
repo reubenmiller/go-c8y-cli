@@ -51,9 +51,7 @@ Get a list of groups that a user belongs to
 func (n *GetUserMembershipCollectionCmd) RunE(cmd *cobra.Command, args []string) error {
 	var err error
 	// query parameters
-	queryValue := url.QueryEscape("")
 	query := url.Values{}
-
 	err = flags.WithQueryParameters(
 		cmd,
 		query,
@@ -67,7 +65,7 @@ func (n *GetUserMembershipCollectionCmd) RunE(cmd *cobra.Command, args []string)
 	}
 	commonOptions.AddQueryParameters(&query)
 
-	queryValue, err = url.QueryUnescape(query.Encode())
+	queryValue, err := url.QueryUnescape(query.Encode())
 
 	if err != nil {
 		return newSystemError("Invalid query parameter")
@@ -114,6 +112,9 @@ func (n *GetUserMembershipCollectionCmd) RunE(cmd *cobra.Command, args []string)
 		pathParameters,
 		flags.WithStringDefaultValue(client.TenantName, "tenant", "tenant"),
 	)
+	if err != nil {
+		return err
+	}
 
 	path := replacePathParameters("/user/{tenant}/users/{id}/groups", pathParameters)
 
@@ -133,6 +134,7 @@ func (n *GetUserMembershipCollectionCmd) RunE(cmd *cobra.Command, args []string)
 		Property:          "",
 		Required:          true,
 		ResolveByNameType: "user",
+		IteratorType:      "path",
 	}
 	return processRequestAndResponseWithWorkers(cmd, &req, pipeOption)
 }

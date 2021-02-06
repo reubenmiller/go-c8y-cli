@@ -24,7 +24,7 @@ func (i *BufioIterator) GetNext() (line []byte, input interface{}, err error) {
 
 // MarshalJSON return the value in a json compatible value
 func (i *BufioIterator) MarshalJSON() (line []byte, err error) {
-	return toJSON(i)
+	return MarshalJSON(i)
 }
 
 // NewBufioIterator returns a new iterator from a Bufio reader
@@ -56,7 +56,7 @@ func (i *FileContentsIterator) GetNext() (line []byte, input interface{}, err er
 
 // MarshalJSON return the value in a json compatible value
 func (i *FileContentsIterator) MarshalJSON() (line []byte, err error) {
-	return toJSON(i)
+	return MarshalJSON(i)
 }
 
 // NewFileContentsIterator returns a file contents iterator

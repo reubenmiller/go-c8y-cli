@@ -52,9 +52,7 @@ Get an existing child asset reference
 func (n *GetManagedObjectChildAssetReferenceCmd) RunE(cmd *cobra.Command, args []string) error {
 	var err error
 	// query parameters
-	queryValue := url.QueryEscape("")
 	query := url.Values{}
-
 	err = flags.WithQueryParameters(
 		cmd,
 		query,
@@ -68,7 +66,7 @@ func (n *GetManagedObjectChildAssetReferenceCmd) RunE(cmd *cobra.Command, args [
 	}
 	commonOptions.AddQueryParameters(&query)
 
-	queryValue, err = url.QueryUnescape(query.Encode())
+	queryValue, err := url.QueryUnescape(query.Encode())
 
 	if err != nil {
 		return newSystemError("Invalid query parameter")
@@ -115,6 +113,9 @@ func (n *GetManagedObjectChildAssetReferenceCmd) RunE(cmd *cobra.Command, args [
 		pathParameters,
 		WithDeviceByNameFirstMatch(args, "reference", "reference"),
 	)
+	if err != nil {
+		return err
+	}
 
 	path := replacePathParameters("inventory/managedObjects/{asset}/childAssets/{reference}", pathParameters)
 
@@ -134,6 +135,7 @@ func (n *GetManagedObjectChildAssetReferenceCmd) RunE(cmd *cobra.Command, args [
 		Property:          "",
 		Required:          true,
 		ResolveByNameType: "device",
+		IteratorType:      "path",
 	}
 	return processRequestAndResponseWithWorkers(cmd, &req, pipeOption)
 }

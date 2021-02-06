@@ -51,9 +51,7 @@ Get event
 func (n *GetEventCmd) RunE(cmd *cobra.Command, args []string) error {
 	var err error
 	// query parameters
-	queryValue := url.QueryEscape("")
 	query := url.Values{}
-
 	err = flags.WithQueryParameters(
 		cmd,
 		query,
@@ -67,7 +65,7 @@ func (n *GetEventCmd) RunE(cmd *cobra.Command, args []string) error {
 	}
 	commonOptions.AddQueryParameters(&query)
 
-	queryValue, err = url.QueryUnescape(query.Encode())
+	queryValue, err := url.QueryUnescape(query.Encode())
 
 	if err != nil {
 		return newSystemError("Invalid query parameter")
@@ -114,6 +112,9 @@ func (n *GetEventCmd) RunE(cmd *cobra.Command, args []string) error {
 		pathParameters,
 		flags.WithStringValue("id", "id"),
 	)
+	if err != nil {
+		return err
+	}
 
 	path := replacePathParameters("event/events/{id}", pathParameters)
 
@@ -133,6 +134,7 @@ func (n *GetEventCmd) RunE(cmd *cobra.Command, args []string) error {
 		Property:          "",
 		Required:          false,
 		ResolveByNameType: "",
+		IteratorType:      "",
 	}
 	return processRequestAndResponseWithWorkers(cmd, &req, pipeOption)
 }

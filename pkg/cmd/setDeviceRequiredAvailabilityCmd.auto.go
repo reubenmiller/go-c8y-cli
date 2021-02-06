@@ -52,9 +52,7 @@ Set the required availability of a device by name to 10 minutes
 func (n *SetDeviceRequiredAvailabilityCmd) RunE(cmd *cobra.Command, args []string) error {
 	var err error
 	// query parameters
-	queryValue := url.QueryEscape("")
 	query := url.Values{}
-
 	err = flags.WithQueryParameters(
 		cmd,
 		query,
@@ -63,7 +61,7 @@ func (n *SetDeviceRequiredAvailabilityCmd) RunE(cmd *cobra.Command, args []strin
 		return newUserError(err)
 	}
 
-	queryValue, err = url.QueryUnescape(query.Encode())
+	queryValue, err := url.QueryUnescape(query.Encode())
 
 	if err != nil {
 		return newSystemError("Invalid query parameter")
@@ -114,6 +112,9 @@ func (n *SetDeviceRequiredAvailabilityCmd) RunE(cmd *cobra.Command, args []strin
 		cmd,
 		pathParameters,
 	)
+	if err != nil {
+		return err
+	}
 
 	path := replacePathParameters("inventory/managedObjects/{device}", pathParameters)
 
@@ -133,6 +134,7 @@ func (n *SetDeviceRequiredAvailabilityCmd) RunE(cmd *cobra.Command, args []strin
 		Property:          "",
 		Required:          true,
 		ResolveByNameType: "device",
+		IteratorType:      "path",
 	}
 	return processRequestAndResponseWithWorkers(cmd, &req, pipeOption)
 }

@@ -29,8 +29,10 @@ Add a related managed object as a child to an existing managed object
         $Id,
 
         # New managed object that will be added as a child addition (required)
-        [Parameter(Mandatory = $true)]
-        [string[]]
+        [Parameter(Mandatory = $true,
+                   ValueFromPipeline=$true,
+                   ValueFromPipelineByPropertyName=$true)]
+        [string]
         $NewChild,
 
         # Cumulocity processing mode
@@ -84,8 +86,8 @@ Add a related managed object as a child to an existing managed object
 
     Begin {
         $Parameters = @{}
-        if ($PSBoundParameters.ContainsKey("NewChild")) {
-            $Parameters["newChild"] = $NewChild
+        if ($PSBoundParameters.ContainsKey("Id")) {
+            $Parameters["id"] = $Id
         }
         if ($PSBoundParameters.ContainsKey("ProcessingMode")) {
             $Parameters["processingMode"] = $ProcessingMode
@@ -116,9 +118,9 @@ Add a related managed object as a child to an existing managed object
     }
 
     Process {
-        foreach ($item in (PSc8y\Expand-Id $Id)) {
+        foreach ($item in (PSc8y\Expand-Id $NewChild)) {
             if ($item) {
-                $Parameters["id"] = if ($item.id) { $item.id } else { $item }
+                $Parameters["newChild"] = if ($item.id) { $item.id } else { $item }
             }
 
             if (!$Force -and

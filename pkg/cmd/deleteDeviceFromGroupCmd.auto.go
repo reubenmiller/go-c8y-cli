@@ -52,9 +52,7 @@ Unassign a child device from its parent device
 func (n *DeleteDeviceFromGroupCmd) RunE(cmd *cobra.Command, args []string) error {
 	var err error
 	// query parameters
-	queryValue := url.QueryEscape("")
 	query := url.Values{}
-
 	err = flags.WithQueryParameters(
 		cmd,
 		query,
@@ -63,7 +61,7 @@ func (n *DeleteDeviceFromGroupCmd) RunE(cmd *cobra.Command, args []string) error
 		return newUserError(err)
 	}
 
-	queryValue, err = url.QueryUnescape(query.Encode())
+	queryValue, err := url.QueryUnescape(query.Encode())
 
 	if err != nil {
 		return newSystemError("Invalid query parameter")
@@ -111,6 +109,9 @@ func (n *DeleteDeviceFromGroupCmd) RunE(cmd *cobra.Command, args []string) error
 		pathParameters,
 		WithDeviceByNameFirstMatch(args, "childDevice", "reference"),
 	)
+	if err != nil {
+		return err
+	}
 
 	path := replacePathParameters("inventory/managedObjects/{group}/childAssets/{reference}", pathParameters)
 
@@ -130,6 +131,7 @@ func (n *DeleteDeviceFromGroupCmd) RunE(cmd *cobra.Command, args []string) error
 		Property:          "",
 		Required:          true,
 		ResolveByNameType: "devicegroup",
+		IteratorType:      "path",
 	}
 	return processRequestAndResponseWithWorkers(cmd, &req, pipeOption)
 }

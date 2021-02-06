@@ -25,7 +25,7 @@ func (i *RepeatIterator) GetNext() (line []byte, input interface{}, err error) {
 
 // MarshalJSON return the value in a json compatible value
 func (i *RepeatIterator) MarshalJSON() (line []byte, err error) {
-	return toJSON(i)
+	return MarshalJSON(i)
 }
 
 // NewRepeatIterator creates a repeater which returns the same value n times

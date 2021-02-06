@@ -4,7 +4,24 @@
 
 No unreleased features
 
+## Failed Tests
+
+./tools/PSc8y/reports/Failed_Get-DeviceCollection.manual.Tests_Pester.xml
+ => ErrorVariables and InformationVariables are not written to when using IncludeAll
+
+
+./tools/PSc8y/reports/Failed_Update-EventBinary.manual.Tests_Pester.xml
+./tools/PSc8y/reports/Failed_Remove-ChildAddition.auto.Tests_Pester.xml
+./tools/PSc8y/reports/Failed_Get-CurrentUserInventoryRole.auto.Tests_Pester.xml
+./tools/PSc8y/reports/Failed_Get-ChildAdditionCollection.auto.Tests_Pester.xml
+./tools/PSc8y/reports/Failed_Get-MeasurementSeries.auto.Tests_Pester.xml
+
+./tools/PSc8y/reports/Failed_Add-ChildAddition.auto.Tests_Pester.xml
+
+
 * TODO:
+    * When doing batch size of 1, only set the exit code to the last value
+        * or work out a way to transmit the values back in another format (add extra values to the response?)
     - Create an iterator for each fetcher
 
         ```sh

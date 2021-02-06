@@ -48,9 +48,7 @@ List the current application users/subscriptions
 func (n *GetCurrentApplicationUserCollectionCmd) RunE(cmd *cobra.Command, args []string) error {
 	var err error
 	// query parameters
-	queryValue := url.QueryEscape("")
 	query := url.Values{}
-
 	err = flags.WithQueryParameters(
 		cmd,
 		query,
@@ -64,7 +62,7 @@ func (n *GetCurrentApplicationUserCollectionCmd) RunE(cmd *cobra.Command, args [
 	}
 	commonOptions.AddQueryParameters(&query)
 
-	queryValue, err = url.QueryUnescape(query.Encode())
+	queryValue, err := url.QueryUnescape(query.Encode())
 
 	if err != nil {
 		return newSystemError("Invalid query parameter")
@@ -110,6 +108,9 @@ func (n *GetCurrentApplicationUserCollectionCmd) RunE(cmd *cobra.Command, args [
 		cmd,
 		pathParameters,
 	)
+	if err != nil {
+		return err
+	}
 
 	path := replacePathParameters("/application/currentApplication/subscriptions", pathParameters)
 
@@ -129,6 +130,7 @@ func (n *GetCurrentApplicationUserCollectionCmd) RunE(cmd *cobra.Command, args [
 		Property:          "",
 		Required:          false,
 		ResolveByNameType: "",
+		IteratorType:      "",
 	}
 	return processRequestAndResponseWithWorkers(cmd, &req, pipeOption)
 }

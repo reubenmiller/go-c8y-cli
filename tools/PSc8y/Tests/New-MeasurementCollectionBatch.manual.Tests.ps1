@@ -1,7 +1,7 @@
 . $PSScriptRoot/imports.ps1
 
 InModuleScope PSc8y {
-    Describe -Name "New-MeasurementCollectionBatch" {
+    Describe -Skip -Name "New-MeasurementCollectionBatch" {
         BeforeEach {
             $ids = New-Object System.Collections.ArrayList
             $inputFile = New-TemporaryFile
