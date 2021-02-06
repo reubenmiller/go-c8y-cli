@@ -227,25 +227,29 @@ type batchArgument struct {
 // These workers will receive work on the `jobs` channel and send the corresponding
 // results on `results`
 func batchWorker(id int, jobs <-chan batchArgument, results chan<- error, wg *sync.WaitGroup) {
+	var err error
+	onStartup := true
 
 	defer wg.Done()
 	for job := range jobs {
+		if !onStartup {
+			if !errors.Is(err, io.EOF) && job.batchOptions.Delay > 0 {
+				Logger.Infof("worker %d: sleeping %dms before fetching next job", id, job.batchOptions.Delay)
+				time.Sleep(time.Duration(job.batchOptions.Delay) * time.Millisecond)
+			}
+		}
+		onStartup = false
+
 		Logger.Infof("worker %d: started job %d", id, job.id)
 		startTime := time.Now().UnixNano()
 
-		err := processRequestAndResponse([]c8y.RequestOptions{job.request}, job.commonOptions)
+		err = processRequestAndResponse([]c8y.RequestOptions{job.request}, job.commonOptions)
 		elapsedMS := (time.Now().UnixNano() - startTime) / 1000.0 / 1000.0
 
 		Logger.Infof("worker %d: finished job %d in %dms", id, job.id, elapsedMS)
 
 		// return result before delay, so errors can be handled before the sleep
 		results <- err
-
-		// Skip delay if end of work
-		if !errors.Is(err, io.EOF) && job.batchOptions.Delay > 0 {
-			Logger.Infof("worker %d: sleeping %dms before fetching next job", id, job.batchOptions.Delay)
-			time.Sleep(time.Duration(job.batchOptions.Delay) * time.Millisecond)
-		}
 	}
 }
 
