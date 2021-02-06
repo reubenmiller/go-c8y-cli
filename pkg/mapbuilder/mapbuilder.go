@@ -213,15 +213,14 @@ func generatePassword() string {
 }
 
 func (b *MapBuilder) GetTemplateVariablesJsonnet() (string, error) {
-	if b.templateVariables == nil {
-		// template variables have not been defined (not an error)
-		return "", nil
-	}
-
-	jsonStr, err := json.Marshal(b.templateVariables)
-
-	if err != nil {
-		return "", err
+	jsonStr := []byte("{}")
+	// default to empty object (if no custom template variables are provided)
+	if b.templateVariables != nil {
+		v, err := json.Marshal(b.templateVariables)
+		if err != nil {
+			return "", err
+		}
+		jsonStr = v
 	}
 
 	varsHelper := `local var(prop, defaultValue="") = if std.objectHas(vars, prop) then vars[prop] else defaultValue;`
@@ -232,15 +231,14 @@ func (b *MapBuilder) GetTemplateVariablesJsonnet() (string, error) {
 	index := "1"
 
 	if b.TemplateIterator != nil {
-		nextIndex, err := b.TemplateIterator.GetNext()
+		nextIndex, _, err := b.TemplateIterator.GetNext()
 		if err != nil {
 			return "", err
 		}
 		index = string(nextIndex)
 	}
 
-	randomHelper := fmt.Sprintf(`local rand = { index: %s, bool: %t, int: %d, int2: %d, float: %f, float2: %f, float3: %f, float4: %f, password: "%s" };`,
-		index,
+	randomHelper := fmt.Sprintf(`local rand = { bool: %t, int: %d, int2: %d, float: %f, float2: %f, float3: %f, float4: %f, password: "%s" };`,
 		rand.Float32() > 0.5,
 		rand.Intn(100),
 		rand.Intn(100),
@@ -250,11 +248,14 @@ func (b *MapBuilder) GetTemplateVariablesJsonnet() (string, error) {
 		rand.Float32(),
 		generatePassword(),
 	)
+	inputHelper := fmt.Sprintf(`local input = {index: "%s"};`,
+		index,
+	)
 	timeHelper := fmt.Sprintf(`local time = {now: "%s", nowNano: "%s"};`,
 		time.Now().Format(time.RFC3339),
 		time.Now().Format(time.RFC3339Nano),
 	)
-	return fmt.Sprintf("\nlocal vars = %s;\n%s\n%s\n%s\n", jsonStr, varsHelper, randomHelper, timeHelper), nil
+	return fmt.Sprintf("\nlocal vars = %s;\n%s\n%s\n%s\n%s\n", jsonStr, varsHelper, inputHelper, randomHelper, timeHelper), nil
 }
 
 // SetMap sets a new map to the body (if not nil). This will remove any existing values in the body
