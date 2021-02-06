@@ -12,7 +12,7 @@ func EqualMarshalJSON(t *testing.T, got interface{}, want string) {
 	OK(t, err)
 
 	if !bytes.EqualFold(out, []byte(want)) {
-		t.Errorf(`Marshal. wanted=%s, got=%s`, want, got)
+		t.Errorf(`Marshal. wanted=%s, got=%s`, want, out)
 	}
 }
 
