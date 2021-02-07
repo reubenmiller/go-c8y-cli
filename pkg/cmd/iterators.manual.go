@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
 	"strings"
@@ -33,11 +32,10 @@ func NewRequestIterator(r c8y.RequestOptions, path iterator.Iterator, body inter
 
 // RequestIterator iterates through a c8y rest request with given request options and path iterators
 type RequestIterator struct {
-	Request      c8y.RequestOptions
-	Path         iterator.Iterator
-	NameResolver entityFetcher
-	Body         interface{}
-	done         int32
+	Request c8y.RequestOptions
+	Path    iterator.Iterator
+	Body    interface{}
+	done    int32
 }
 
 // HasNext returns true if there the iterator is finished
@@ -71,37 +69,11 @@ func (r *RequestIterator) GetNext() (*c8y.RequestOptions, error) {
 
 	// apply path iterator
 	if r.Path != nil {
-		path, input, err := r.Path.GetNext()
+		path, _, err := r.Path.GetNext()
 
 		if err != nil {
 			r.setDone()
 			return nil, err
-		}
-
-		if r.NameResolver != nil {
-			if inputB, ok := input.([]byte); ok {
-
-				// skip lookup if path is a fixed string
-				if !bytes.Equal(path, inputB) {
-					matches, err := lookupIDByName(r.NameResolver, string(inputB))
-
-					if err != nil {
-						r.setDone()
-						return nil, err
-					}
-					if len(matches) == 0 {
-						r.setDone()
-						return nil, fmt.Errorf("no matching results")
-					}
-					if len(matches) > 0 {
-						if f, ok := r.Path.(*iterator.CompositeIterator); ok {
-							path, err = f.GetValueByInput([]byte(matches[0].ID))
-						} else {
-							path = []byte(matches[0].ID)
-						}
-					}
-				}
-			}
 		}
 
 		req.Path = string(path)

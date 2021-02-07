@@ -202,11 +202,22 @@ func Test_ChildInventoryReferencesWithPipelineInput(t *testing.T) {
 	assert.OK(t, cmdErr)
 }
 
+// Pipe options
+
 func Test_PipingWithoutLookup(t *testing.T) {
 	cmd := setupTest()
 	stdin := bytes.NewBufferString("1234\n222\n")
 	cmd.SetIn(stdin)
 
 	cmdErr := ExecuteCmd(cmd, `inventory get --dry`)
+	assert.OK(t, cmdErr)
+}
+
+func Test_PipingWithLookup(t *testing.T) {
+	cmd := setupTest()
+	stdin := bytes.NewBufferString("testdevice_7ewmxq0a94\ntestdevice_6dyojzxbvf\n")
+	cmd.SetIn(stdin)
+
+	cmdErr := ExecuteCmd(cmd, `devices get --dry`)
 	assert.OK(t, cmdErr)
 }

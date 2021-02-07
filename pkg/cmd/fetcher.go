@@ -216,6 +216,16 @@ func WithReferenceByName(fetcher entityFetcher, args []string, opts ...string) f
 
 		src, dst, _ := flags.UnpackGetterOptions("", opts...)
 
+		if inputIterators != nil && inputIterators.PipeOptions.Name == src {
+			pipeIter, err := flags.NewFlagWithPipeIterator(cmd, inputIterators.PipeOptions)
+
+			if err != nil {
+				return "", nil, err
+			}
+			iter := NewReferenceByNameIterator(fetcher, client, pipeIter)
+			return inputIterators.PipeOptions.Property, iter, nil
+		}
+
 		values, err := cmd.Flags().GetStringSlice(src)
 		if err != nil {
 			singleValue, err := cmd.Flags().GetString(src)
@@ -339,6 +349,9 @@ func WithReferenceByNameFirstMatch(fetcher entityFetcher, args []string, opts ..
 			}
 
 			return name, newIDValue(v[0]).GetID(), err
+		case iterator.Iterator:
+			// value will be evalulated later
+			return name, v, nil
 		default:
 			return "", "", fmt.Errorf("reference by name: invalid name lookup type. only strings are supported")
 		}

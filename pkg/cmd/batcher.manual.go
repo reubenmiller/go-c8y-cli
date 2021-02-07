@@ -110,32 +110,6 @@ func processRequestAndResponseWithWorkers(cmd *cobra.Command, r *c8y.RequestOpti
 	// Note: Body accepts iterator types, so no need for special handling here
 	requestIter := NewRequestIterator(*r, pathIter, r.Body)
 
-	// if pipeOpt.ResolveByNameType != "" {
-	// 	// Add a resolve by name fetcher
-	// 	var fetcher entityFetcher
-	// 	switch pipeOpt.ResolveByNameType {
-	// 	case "device":
-	// 		fetcher = newDeviceFetcher(client)
-	// 	case "application":
-	// 		fetcher = newApplicationFetcher(client)
-	// 	case "microservice":
-	// 		fetcher = newMicroserviceFetcher(client)
-	// 	case "agent":
-	// 		fetcher = newAgentFetcher(client)
-	// 	case "devicegroup":
-	// 		fetcher = newDeviceGroupFetcher(client)
-	// 	case "user":
-	// 		fetcher = newUserFetcher(client)
-	// 	case "role":
-	// 		fetcher = newRoleFetcher(client)
-	// 	case "usergroup":
-	// 		fetcher = newUserGroupFetcher(client)
-	// 	}
-	// 	if fetcher != nil {
-	// 		requestIter.NameResolver = fetcher
-	// 	}
-	// }
-
 	// get common options and batch settings
 	commonOptions, err := getCommonOptions(cmd)
 	if err != nil {

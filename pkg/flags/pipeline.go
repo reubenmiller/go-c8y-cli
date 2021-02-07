@@ -13,9 +13,8 @@ import (
 // NewFlagWithPipeIterator creates an iterator from a command argument
 // or from the pipeline
 // It will automatically try to get the value from a String or a StringSlice flag
-func NewFlagWithPipeIterator(cmd *cobra.Command, pipeOpt *PipelineOptions) (iterator.Iterator, error) {
+func NewFlagWithPipeIterator(cmd *cobra.Command, pipeOpt *PipelineOptions, supportsPipeline bool) (iterator.Iterator, error) {
 	// supportsPipeline := HasValueFromPipeline(cmd, pipeOpt.Name)
-	supportsPipeline := true
 
 	if cmd.Flags().Changed(pipeOpt.Name) {
 
