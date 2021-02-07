@@ -21,6 +21,7 @@ func NewRelativeTimeIterator(relative string) *iterator.FuncIterator {
 	return iterator.NewFuncIterator(next, 0)
 }
 
+// NewRequestIterator returns an iterator that can be used to send multiple requests until the give iterators in the path/body are exhausted
 func NewRequestIterator(r c8y.RequestOptions, path iterator.Iterator, body interface{}) *RequestIterator {
 	reqIter := &RequestIterator{
 		Request: r,
@@ -30,14 +31,7 @@ func NewRequestIterator(r c8y.RequestOptions, path iterator.Iterator, body inter
 	return reqIter
 }
 
-func NewRequestFixedPathIterator(r c8y.RequestOptions, path string, body interface{}) *RequestIterator {
-	return &RequestIterator{
-		Request: r,
-		Path:    iterator.NewRepeatIterator(path, 0),
-		Body:    body,
-	}
-}
-
+// RequestIterator iterates through a c8y rest request with given request options and path iterators
 type RequestIterator struct {
 	Request      c8y.RequestOptions
 	Path         iterator.Iterator
@@ -46,6 +40,7 @@ type RequestIterator struct {
 	done         int32
 }
 
+// HasNext returns true if there the iterator is finished
 func (r *RequestIterator) HasNext() bool {
 	return atomic.LoadInt32(&r.done) > 0
 }
@@ -54,6 +49,7 @@ func (r *RequestIterator) setDone() {
 	atomic.AddInt32(&r.done, 1)
 }
 
+// GetNext return the next request. If error is io.EOF then the iterator is finished
 func (r *RequestIterator) GetNext() (*c8y.RequestOptions, error) {
 
 	// TODO: is shallow copy ok here?
@@ -137,6 +133,7 @@ func (r *RequestIterator) GetNext() (*c8y.RequestOptions, error) {
 	return req, nil
 }
 
+// NewFlagFileContents returns iterator which will interate over the lines in a file
 func NewFlagFileContents(cmd *cobra.Command, name string) (iterator.Iterator, error) {
 	supportsPipeline := flags.HasValueFromPipeline(cmd, name)
 	if cmd.Flags().Changed(name) {
@@ -192,12 +189,12 @@ func NewPathIterator(cmd *cobra.Command, path string, pipeOpt PipeOption) (itera
 	var pathIter iterator.Iterator
 
 	// create input iterator
-	o := flags.PipelineOptions{
+	options := flags.PipelineOptions{
 		Name:     pipeOpt.Name,
 		Aliases:  pipeOpt.Properties,
 		Required: pipeOpt.Required,
 	}
-	items, err := flags.NewFlagWithPipeIterator(cmd, o)
+	items, err := flags.NewFlagWithPipeIterator(cmd, options)
 	if err != nil {
 		return nil, err
 	}
