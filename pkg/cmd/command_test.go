@@ -230,3 +230,12 @@ func Test_PipingWithObjectPipe(t *testing.T) {
 	cmdErr := ExecuteCmd(cmd, `devices get --dry`)
 	assert.OK(t, cmdErr)
 }
+
+func Test_LookupQueryParameterByReference(t *testing.T) {
+	cmd := setupTest()
+	// stdin := bytes.NewBufferString(`{"id": "87551"}` + "\n" + `{"id": "1111"}\n`)
+	// cmd.SetIn(stdin)
+
+	cmdErr := ExecuteCmd(cmd, `operations list --device=testdevice_1me4xsy9vd`)
+	assert.OK(t, cmdErr)
+}

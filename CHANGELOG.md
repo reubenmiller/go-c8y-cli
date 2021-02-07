@@ -20,6 +20,7 @@ No unreleased features
 
 
 * TODO:
+    * TODO: add pipe support for query parameters
     * Piping input, the last item is being ignored! readbytes is return data and io.EOF! Make sure the data is processed even if the end is found (or this may only be an issue in the tests??? - need to verify)
     * When doing batch size of 1, only set the exit code to the last value
         * or work out a way to transmit the values back in another format (add extra values to the response?)

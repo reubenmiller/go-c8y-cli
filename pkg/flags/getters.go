@@ -24,7 +24,19 @@ func WithQueryParameters(cmd *cobra.Command, query url.Values, inputIterators *R
 		if err != nil {
 			return err
 		}
-		queryValue := fmt.Sprintf("%v", value)
+		queryValue := ""
+		switch v := value.(type) {
+		case iterator.Iterator:
+			// TODO: add pipe support for query parameters
+			entity, _, err := v.GetNext()
+			if err != nil {
+				return err
+			}
+			queryValue = fmt.Sprintf("%s", entity)
+		default:
+			queryValue = fmt.Sprintf("%v", v)
+		}
+
 		if name != "" && queryValue != "" {
 			query.Add(name, url.QueryEscape(queryValue))
 		}
