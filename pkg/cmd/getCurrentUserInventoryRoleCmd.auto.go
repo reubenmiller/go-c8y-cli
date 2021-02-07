@@ -37,7 +37,7 @@ Get an inventory role of the current user
 
 	flags.WithOptions(
 		cmd,
-		flags.WithPipelineSupport("id"),
+		flags.WithExtendedPipelineSupport("id", "id", true),
 	)
 
 	// Required flags
@@ -49,11 +49,17 @@ Get an inventory role of the current user
 
 func (n *GetCurrentUserInventoryRoleCmd) RunE(cmd *cobra.Command, args []string) error {
 	var err error
+	inputIterators, err := flags.NewRequestInputIterators(cmd)
+	if err != nil {
+		return err
+	}
+
 	// query parameters
 	query := url.Values{}
 	err = flags.WithQueryParameters(
 		cmd,
 		query,
+		inputIterators,
 	)
 	if err != nil {
 		return newUserError(err)
@@ -75,6 +81,7 @@ func (n *GetCurrentUserInventoryRoleCmd) RunE(cmd *cobra.Command, args []string)
 	err = flags.WithHeaders(
 		cmd,
 		headers,
+		inputIterators,
 	)
 	if err != nil {
 		return newUserError(err)
@@ -85,6 +92,7 @@ func (n *GetCurrentUserInventoryRoleCmd) RunE(cmd *cobra.Command, args []string)
 	err = flags.WithFormDataOptions(
 		cmd,
 		formData,
+		inputIterators,
 	)
 	if err != nil {
 		return newUserError(err)
@@ -95,6 +103,7 @@ func (n *GetCurrentUserInventoryRoleCmd) RunE(cmd *cobra.Command, args []string)
 	err = flags.WithBody(
 		cmd,
 		body,
+		inputIterators,
 	)
 	if err != nil {
 		return newUserError(err)
@@ -105,20 +114,20 @@ func (n *GetCurrentUserInventoryRoleCmd) RunE(cmd *cobra.Command, args []string)
 	}
 
 	// path parameters
-	pathParameters := make(map[string]string)
+	path := flags.NewStringTemplate("/user/inventoryroles/{id}")
 	err = flags.WithPathParameters(
 		cmd,
-		pathParameters,
+		path,
+		inputIterators,
+		flags.WithIntValue("id", "id"),
 	)
 	if err != nil {
 		return err
 	}
 
-	path := replacePathParameters("/user/inventoryroles/{id}", pathParameters)
-
 	req := c8y.RequestOptions{
 		Method:       "GET",
-		Path:         path,
+		Path:         path.GetTemplate(),
 		Query:        queryValue,
 		Body:         body,
 		FormData:     formData,
@@ -127,12 +136,5 @@ func (n *GetCurrentUserInventoryRoleCmd) RunE(cmd *cobra.Command, args []string)
 		DryRun:       globalFlagDryRun,
 	}
 
-	pipeOption := PipeOption{
-		Name:              "id",
-		Property:          "",
-		Required:          true,
-		ResolveByNameType: "",
-		IteratorType:      "path",
-	}
-	return processRequestAndResponseWithWorkers(cmd, &req, pipeOption)
+	return processRequestAndResponseWithWorkers(cmd, &req, inputIterators)
 }

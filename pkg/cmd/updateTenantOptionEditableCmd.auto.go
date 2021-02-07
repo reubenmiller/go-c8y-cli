@@ -40,7 +40,7 @@ Update editable property for an existing tenant option
 
 	flags.WithOptions(
 		cmd,
-		flags.WithPipelineSupport(""),
+		flags.WithExtendedPipelineSupport("", "", false),
 	)
 
 	// Required flags
@@ -55,11 +55,17 @@ Update editable property for an existing tenant option
 
 func (n *UpdateTenantOptionEditableCmd) RunE(cmd *cobra.Command, args []string) error {
 	var err error
+	inputIterators, err := flags.NewRequestInputIterators(cmd)
+	if err != nil {
+		return err
+	}
+
 	// query parameters
 	query := url.Values{}
 	err = flags.WithQueryParameters(
 		cmd,
 		query,
+		inputIterators,
 	)
 	if err != nil {
 		return newUserError(err)
@@ -76,6 +82,7 @@ func (n *UpdateTenantOptionEditableCmd) RunE(cmd *cobra.Command, args []string) 
 	err = flags.WithHeaders(
 		cmd,
 		headers,
+		inputIterators,
 		flags.WithProcessingModeValue(),
 	)
 	if err != nil {
@@ -87,6 +94,7 @@ func (n *UpdateTenantOptionEditableCmd) RunE(cmd *cobra.Command, args []string) 
 	err = flags.WithFormDataOptions(
 		cmd,
 		formData,
+		inputIterators,
 	)
 	if err != nil {
 		return newUserError(err)
@@ -97,6 +105,7 @@ func (n *UpdateTenantOptionEditableCmd) RunE(cmd *cobra.Command, args []string) 
 	err = flags.WithBody(
 		cmd,
 		body,
+		inputIterators,
 		WithDataValue(),
 		flags.WithStringValue("editable", "editable"),
 		WithTemplateValue(),
@@ -111,10 +120,11 @@ func (n *UpdateTenantOptionEditableCmd) RunE(cmd *cobra.Command, args []string) 
 	}
 
 	// path parameters
-	pathParameters := make(map[string]string)
+	path := flags.NewStringTemplate("/tenant/options/{category}/{key}/editable")
 	err = flags.WithPathParameters(
 		cmd,
-		pathParameters,
+		path,
+		inputIterators,
 		flags.WithStringValue("category", "category"),
 		flags.WithStringValue("key", "key"),
 	)
@@ -122,11 +132,9 @@ func (n *UpdateTenantOptionEditableCmd) RunE(cmd *cobra.Command, args []string) 
 		return err
 	}
 
-	path := replacePathParameters("/tenant/options/{category}/{key}/editable", pathParameters)
-
 	req := c8y.RequestOptions{
 		Method:       "PUT",
-		Path:         path,
+		Path:         path.GetTemplate(),
 		Query:        queryValue,
 		Body:         body,
 		FormData:     formData,
@@ -135,12 +143,5 @@ func (n *UpdateTenantOptionEditableCmd) RunE(cmd *cobra.Command, args []string) 
 		DryRun:       globalFlagDryRun,
 	}
 
-	pipeOption := PipeOption{
-		Name:              "",
-		Property:          "",
-		Required:          false,
-		ResolveByNameType: "",
-		IteratorType:      "",
-	}
-	return processRequestAndResponseWithWorkers(cmd, &req, pipeOption)
+	return processRequestAndResponseWithWorkers(cmd, &req, inputIterators)
 }

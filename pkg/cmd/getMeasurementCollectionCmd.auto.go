@@ -47,7 +47,7 @@ Get a list of measurements
 
 	flags.WithOptions(
 		cmd,
-		flags.WithPipelineSupport("device"),
+		flags.WithExtendedPipelineSupport("device", "source", false),
 	)
 
 	// Required flags
@@ -59,11 +59,17 @@ Get a list of measurements
 
 func (n *GetMeasurementCollectionCmd) RunE(cmd *cobra.Command, args []string) error {
 	var err error
+	inputIterators, err := flags.NewRequestInputIterators(cmd)
+	if err != nil {
+		return err
+	}
+
 	// query parameters
 	query := url.Values{}
 	err = flags.WithQueryParameters(
 		cmd,
 		query,
+		inputIterators,
 		WithDeviceByNameFirstMatch(args, "device", "source"),
 		flags.WithStringValue("type", "type"),
 		flags.WithStringValue("valueFragmentType", "valueFragmentType"),
@@ -93,6 +99,7 @@ func (n *GetMeasurementCollectionCmd) RunE(cmd *cobra.Command, args []string) er
 	err = flags.WithHeaders(
 		cmd,
 		headers,
+		inputIterators,
 		flags.WithBoolValue("csv", "Accept", "text/csv"),
 		flags.WithBoolValue("excel", "Accept", "application/vnd.ms-excel"),
 		flags.WithStringValue("unit", "X-Cumulocity-System-Of-Units"),
@@ -106,6 +113,7 @@ func (n *GetMeasurementCollectionCmd) RunE(cmd *cobra.Command, args []string) er
 	err = flags.WithFormDataOptions(
 		cmd,
 		formData,
+		inputIterators,
 	)
 	if err != nil {
 		return newUserError(err)
@@ -116,6 +124,7 @@ func (n *GetMeasurementCollectionCmd) RunE(cmd *cobra.Command, args []string) er
 	err = flags.WithBody(
 		cmd,
 		body,
+		inputIterators,
 	)
 	if err != nil {
 		return newUserError(err)
@@ -126,20 +135,19 @@ func (n *GetMeasurementCollectionCmd) RunE(cmd *cobra.Command, args []string) er
 	}
 
 	// path parameters
-	pathParameters := make(map[string]string)
+	path := flags.NewStringTemplate("measurement/measurements")
 	err = flags.WithPathParameters(
 		cmd,
-		pathParameters,
+		path,
+		inputIterators,
 	)
 	if err != nil {
 		return err
 	}
 
-	path := replacePathParameters("measurement/measurements", pathParameters)
-
 	req := c8y.RequestOptions{
 		Method:       "GET",
-		Path:         path,
+		Path:         path.GetTemplate(),
 		Query:        queryValue,
 		Body:         body,
 		FormData:     formData,
@@ -148,12 +156,5 @@ func (n *GetMeasurementCollectionCmd) RunE(cmd *cobra.Command, args []string) er
 		DryRun:       globalFlagDryRun,
 	}
 
-	pipeOption := PipeOption{
-		Name:              "device",
-		Property:          "source",
-		Required:          false,
-		ResolveByNameType: "device",
-		IteratorType:      "",
-	}
-	return processRequestAndResponseWithWorkers(cmd, &req, pipeOption)
+	return processRequestAndResponseWithWorkers(cmd, &req, inputIterators)
 }

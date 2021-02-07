@@ -38,7 +38,7 @@ Get microservices
 
 	flags.WithOptions(
 		cmd,
-		flags.WithPipelineSupport(""),
+		flags.WithExtendedPipelineSupport("", "", false),
 	)
 
 	// Required flags
@@ -50,11 +50,17 @@ Get microservices
 
 func (n *GetMicroserviceCollectionCmd) RunE(cmd *cobra.Command, args []string) error {
 	var err error
+	inputIterators, err := flags.NewRequestInputIterators(cmd)
+	if err != nil {
+		return err
+	}
+
 	// query parameters
 	query := url.Values{}
 	err = flags.WithQueryParameters(
 		cmd,
 		query,
+		inputIterators,
 		flags.WithStringValue("type", "type"),
 	)
 	if err != nil {
@@ -77,6 +83,7 @@ func (n *GetMicroserviceCollectionCmd) RunE(cmd *cobra.Command, args []string) e
 	err = flags.WithHeaders(
 		cmd,
 		headers,
+		inputIterators,
 	)
 	if err != nil {
 		return newUserError(err)
@@ -87,6 +94,7 @@ func (n *GetMicroserviceCollectionCmd) RunE(cmd *cobra.Command, args []string) e
 	err = flags.WithFormDataOptions(
 		cmd,
 		formData,
+		inputIterators,
 	)
 	if err != nil {
 		return newUserError(err)
@@ -97,6 +105,7 @@ func (n *GetMicroserviceCollectionCmd) RunE(cmd *cobra.Command, args []string) e
 	err = flags.WithBody(
 		cmd,
 		body,
+		inputIterators,
 	)
 	if err != nil {
 		return newUserError(err)
@@ -107,20 +116,19 @@ func (n *GetMicroserviceCollectionCmd) RunE(cmd *cobra.Command, args []string) e
 	}
 
 	// path parameters
-	pathParameters := make(map[string]string)
+	path := flags.NewStringTemplate("/application/applications")
 	err = flags.WithPathParameters(
 		cmd,
-		pathParameters,
+		path,
+		inputIterators,
 	)
 	if err != nil {
 		return err
 	}
 
-	path := replacePathParameters("/application/applications", pathParameters)
-
 	req := c8y.RequestOptions{
 		Method:       "GET",
-		Path:         path,
+		Path:         path.GetTemplate(),
 		Query:        queryValue,
 		Body:         body,
 		FormData:     formData,
@@ -129,12 +137,5 @@ func (n *GetMicroserviceCollectionCmd) RunE(cmd *cobra.Command, args []string) e
 		DryRun:       globalFlagDryRun,
 	}
 
-	pipeOption := PipeOption{
-		Name:              "",
-		Property:          "",
-		Required:          false,
-		ResolveByNameType: "",
-		IteratorType:      "",
-	}
-	return processRequestAndResponseWithWorkers(cmd, &req, pipeOption)
+	return processRequestAndResponseWithWorkers(cmd, &req, inputIterators)
 }

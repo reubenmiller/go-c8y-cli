@@ -50,6 +50,7 @@ Get a list of managed objects
 }
 
 func (n *QueryManagedObjectCollectionCmd) RunE(cmd *cobra.Command, args []string) error {
+	inputIterators := &flags.RequestInputIterators{}
 
 	// query parameters
 	queryValue := url.QueryEscape("")
@@ -106,13 +107,11 @@ func (n *QueryManagedObjectCollectionCmd) RunE(cmd *cobra.Command, args []string
 	body := mapbuilder.NewInitializedMapBuilder()
 
 	// path parameters
-	pathParameters := make(map[string]string)
-
-	path := replacePathParameters("inventory/managedObjects", pathParameters)
+	path := flags.NewStringTemplate("inventory/managedObjects")
 
 	req := c8y.RequestOptions{
 		Method:       "GET",
-		Path:         path,
+		Path:         path.GetTemplate(),
 		Query:        queryValue,
 		Body:         body,
 		FormData:     formData,
@@ -121,5 +120,5 @@ func (n *QueryManagedObjectCollectionCmd) RunE(cmd *cobra.Command, args []string
 		DryRun:       globalFlagDryRun,
 	}
 
-	return processRequestAndResponseWithWorkers(cmd, &req, PipeOption{})
+	return processRequestAndResponseWithWorkers(cmd, &req, inputIterators)
 }

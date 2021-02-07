@@ -38,7 +38,7 @@ Enable an application of a tenant by name
 
 	flags.WithOptions(
 		cmd,
-		flags.WithPipelineSupport("application"),
+		flags.WithExtendedPipelineSupport("application", "application.id", true),
 	)
 
 	// Required flags
@@ -50,11 +50,17 @@ Enable an application of a tenant by name
 
 func (n *EnableApplicationOnTenantCmd) RunE(cmd *cobra.Command, args []string) error {
 	var err error
+	inputIterators, err := flags.NewRequestInputIterators(cmd)
+	if err != nil {
+		return err
+	}
+
 	// query parameters
 	query := url.Values{}
 	err = flags.WithQueryParameters(
 		cmd,
 		query,
+		inputIterators,
 	)
 	if err != nil {
 		return newUserError(err)
@@ -71,6 +77,7 @@ func (n *EnableApplicationOnTenantCmd) RunE(cmd *cobra.Command, args []string) e
 	err = flags.WithHeaders(
 		cmd,
 		headers,
+		inputIterators,
 		flags.WithProcessingModeValue(),
 	)
 	if err != nil {
@@ -82,6 +89,7 @@ func (n *EnableApplicationOnTenantCmd) RunE(cmd *cobra.Command, args []string) e
 	err = flags.WithFormDataOptions(
 		cmd,
 		formData,
+		inputIterators,
 	)
 	if err != nil {
 		return newUserError(err)
@@ -92,6 +100,7 @@ func (n *EnableApplicationOnTenantCmd) RunE(cmd *cobra.Command, args []string) e
 	err = flags.WithBody(
 		cmd,
 		body,
+		inputIterators,
 		WithDataValue(),
 		WithApplicationByNameFirstMatch(args, "application", "application.id"),
 		WithTemplateValue(),
@@ -106,21 +115,20 @@ func (n *EnableApplicationOnTenantCmd) RunE(cmd *cobra.Command, args []string) e
 	}
 
 	// path parameters
-	pathParameters := make(map[string]string)
+	path := flags.NewStringTemplate("/tenant/tenants/{tenant}/applications")
 	err = flags.WithPathParameters(
 		cmd,
-		pathParameters,
+		path,
+		inputIterators,
 		flags.WithStringDefaultValue(client.TenantName, "tenant", "tenant"),
 	)
 	if err != nil {
 		return err
 	}
 
-	path := replacePathParameters("/tenant/tenants/{tenant}/applications", pathParameters)
-
 	req := c8y.RequestOptions{
 		Method:       "POST",
-		Path:         path,
+		Path:         path.GetTemplate(),
 		Query:        queryValue,
 		Body:         body,
 		FormData:     formData,
@@ -129,12 +137,5 @@ func (n *EnableApplicationOnTenantCmd) RunE(cmd *cobra.Command, args []string) e
 		DryRun:       globalFlagDryRun,
 	}
 
-	pipeOption := PipeOption{
-		Name:              "application",
-		Property:          "application.id",
-		Required:          true,
-		ResolveByNameType: "application",
-		IteratorType:      "body",
-	}
-	return processRequestAndResponseWithWorkers(cmd, &req, pipeOption)
+	return processRequestAndResponseWithWorkers(cmd, &req, inputIterators)
 }

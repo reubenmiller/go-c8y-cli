@@ -35,7 +35,7 @@ Get a list of tenant options
 
 	flags.WithOptions(
 		cmd,
-		flags.WithPipelineSupport(""),
+		flags.WithExtendedPipelineSupport("", "", false),
 	)
 
 	// Required flags
@@ -47,11 +47,17 @@ Get a list of tenant options
 
 func (n *GetTenantOptionCollectionCmd) RunE(cmd *cobra.Command, args []string) error {
 	var err error
+	inputIterators, err := flags.NewRequestInputIterators(cmd)
+	if err != nil {
+		return err
+	}
+
 	// query parameters
 	query := url.Values{}
 	err = flags.WithQueryParameters(
 		cmd,
 		query,
+		inputIterators,
 	)
 	if err != nil {
 		return newUserError(err)
@@ -73,6 +79,7 @@ func (n *GetTenantOptionCollectionCmd) RunE(cmd *cobra.Command, args []string) e
 	err = flags.WithHeaders(
 		cmd,
 		headers,
+		inputIterators,
 	)
 	if err != nil {
 		return newUserError(err)
@@ -83,6 +90,7 @@ func (n *GetTenantOptionCollectionCmd) RunE(cmd *cobra.Command, args []string) e
 	err = flags.WithFormDataOptions(
 		cmd,
 		formData,
+		inputIterators,
 	)
 	if err != nil {
 		return newUserError(err)
@@ -93,6 +101,7 @@ func (n *GetTenantOptionCollectionCmd) RunE(cmd *cobra.Command, args []string) e
 	err = flags.WithBody(
 		cmd,
 		body,
+		inputIterators,
 	)
 	if err != nil {
 		return newUserError(err)
@@ -103,20 +112,19 @@ func (n *GetTenantOptionCollectionCmd) RunE(cmd *cobra.Command, args []string) e
 	}
 
 	// path parameters
-	pathParameters := make(map[string]string)
+	path := flags.NewStringTemplate("/tenant/options")
 	err = flags.WithPathParameters(
 		cmd,
-		pathParameters,
+		path,
+		inputIterators,
 	)
 	if err != nil {
 		return err
 	}
 
-	path := replacePathParameters("/tenant/options", pathParameters)
-
 	req := c8y.RequestOptions{
 		Method:       "GET",
-		Path:         path,
+		Path:         path.GetTemplate(),
 		Query:        queryValue,
 		Body:         body,
 		FormData:     formData,
@@ -125,12 +133,5 @@ func (n *GetTenantOptionCollectionCmd) RunE(cmd *cobra.Command, args []string) e
 		DryRun:       globalFlagDryRun,
 	}
 
-	pipeOption := PipeOption{
-		Name:              "",
-		Property:          "",
-		Required:          false,
-		ResolveByNameType: "",
-		IteratorType:      "",
-	}
-	return processRequestAndResponseWithWorkers(cmd, &req, pipeOption)
+	return processRequestAndResponseWithWorkers(cmd, &req, inputIterators)
 }

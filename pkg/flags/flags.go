@@ -1,6 +1,7 @@
 package flags
 
 import (
+	"encoding/json"
 	"strings"
 
 	"github.com/spf13/cobra"
@@ -13,7 +14,8 @@ const (
 	FlagProcessingModeName        = "processingMode"
 )
 const (
-	AnnotationValueFromPipeline = "valueFromPipeline"
+	AnnotationValueFromPipeline     = "valueFromPipeline"
+	AnnotationValueFromPipelineData = "valueFromPipeline.data"
 )
 
 // Option adds flags to a given command
@@ -48,7 +50,7 @@ func WithProcessingMode() Option {
 
 // WithProcessingModeValue adds the processing module value from cli arguments
 func WithProcessingModeValue() GetOption {
-	return func(cmd *cobra.Command) (string, interface{}, error) {
+	return func(cmd *cobra.Command, inputIterators *RequestInputIterators) (string, interface{}, error) {
 		dst := "X-Cumulocity-Processing-Mode"
 
 		if !cmd.Flags().Changed("processingMode") {
@@ -89,6 +91,42 @@ func WithPipelineSupport(name string) Option {
 		cmd.Annotations[AnnotationValueFromPipeline] = name
 		return cmd
 	}
+}
+
+func WithExtendedPipelineSupport(name string, property string, required bool, aliases ...string) Option {
+	return func(cmd *cobra.Command) *cobra.Command {
+		if cmd.Annotations == nil {
+			cmd.Annotations = map[string]string{}
+		}
+		cmd.Annotations[AnnotationValueFromPipeline] = name
+
+		options := &PipelineOptions{
+			Name:     name,
+			Property: property,
+			Required: required,
+			Aliases:  aliases,
+		}
+		if data, err := json.Marshal(options); err == nil {
+			cmd.Annotations[AnnotationValueFromPipelineData] = string(data)
+		}
+
+		return cmd
+	}
+}
+
+// GetPipeOptionsFromAnnotation returns the pipeline options stored in the annotations
+func GetPipeOptionsFromAnnotation(cmd *cobra.Command) (options *PipelineOptions, err error) {
+	options = &PipelineOptions{}
+	if cmd.Annotations == nil {
+		return
+	}
+	if v, ok := cmd.Annotations[AnnotationValueFromPipelineData]; ok {
+		err = json.Unmarshal([]byte(v), options)
+		if err != nil {
+			return
+		}
+	}
+	return
 }
 
 // WithBatchOptions adds support for batch options

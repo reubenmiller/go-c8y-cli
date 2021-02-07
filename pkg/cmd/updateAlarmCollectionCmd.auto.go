@@ -43,7 +43,7 @@ Update the status of all active alarms on a device to ACKNOWLEDGED
 
 	flags.WithOptions(
 		cmd,
-		flags.WithPipelineSupport("device"),
+		flags.WithExtendedPipelineSupport("device", "source", false),
 	)
 
 	// Required flags
@@ -56,11 +56,17 @@ Update the status of all active alarms on a device to ACKNOWLEDGED
 
 func (n *UpdateAlarmCollectionCmd) RunE(cmd *cobra.Command, args []string) error {
 	var err error
+	inputIterators, err := flags.NewRequestInputIterators(cmd)
+	if err != nil {
+		return err
+	}
+
 	// query parameters
 	query := url.Values{}
 	err = flags.WithQueryParameters(
 		cmd,
 		query,
+		inputIterators,
 		WithDeviceByNameFirstMatch(args, "device", "source"),
 		flags.WithStringValue("status", "status"),
 		flags.WithStringValue("severity", "severity"),
@@ -83,6 +89,7 @@ func (n *UpdateAlarmCollectionCmd) RunE(cmd *cobra.Command, args []string) error
 	err = flags.WithHeaders(
 		cmd,
 		headers,
+		inputIterators,
 		flags.WithProcessingModeValue(),
 	)
 	if err != nil {
@@ -94,6 +101,7 @@ func (n *UpdateAlarmCollectionCmd) RunE(cmd *cobra.Command, args []string) error
 	err = flags.WithFormDataOptions(
 		cmd,
 		formData,
+		inputIterators,
 	)
 	if err != nil {
 		return newUserError(err)
@@ -104,6 +112,7 @@ func (n *UpdateAlarmCollectionCmd) RunE(cmd *cobra.Command, args []string) error
 	err = flags.WithBody(
 		cmd,
 		body,
+		inputIterators,
 		WithDataValue(),
 		flags.WithStringValue("newStatus", "status"),
 		WithTemplateValue(),
@@ -118,20 +127,19 @@ func (n *UpdateAlarmCollectionCmd) RunE(cmd *cobra.Command, args []string) error
 	}
 
 	// path parameters
-	pathParameters := make(map[string]string)
+	path := flags.NewStringTemplate("alarm/alarms")
 	err = flags.WithPathParameters(
 		cmd,
-		pathParameters,
+		path,
+		inputIterators,
 	)
 	if err != nil {
 		return err
 	}
 
-	path := replacePathParameters("alarm/alarms", pathParameters)
-
 	req := c8y.RequestOptions{
 		Method:       "PUT",
-		Path:         path,
+		Path:         path.GetTemplate(),
 		Query:        queryValue,
 		Body:         body,
 		FormData:     formData,
@@ -140,12 +148,5 @@ func (n *UpdateAlarmCollectionCmd) RunE(cmd *cobra.Command, args []string) error
 		DryRun:       globalFlagDryRun,
 	}
 
-	pipeOption := PipeOption{
-		Name:              "device",
-		Property:          "source",
-		Required:          false,
-		ResolveByNameType: "device",
-		IteratorType:      "",
-	}
-	return processRequestAndResponseWithWorkers(cmd, &req, pipeOption)
+	return processRequestAndResponseWithWorkers(cmd, &req, inputIterators)
 }

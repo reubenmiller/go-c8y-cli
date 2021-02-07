@@ -44,7 +44,7 @@ Get a list of audit records
 
 	flags.WithOptions(
 		cmd,
-		flags.WithPipelineSupport("source"),
+		flags.WithExtendedPipelineSupport("source", "source", false),
 	)
 
 	// Required flags
@@ -56,11 +56,17 @@ Get a list of audit records
 
 func (n *GetAuditRecordCollectionCmd) RunE(cmd *cobra.Command, args []string) error {
 	var err error
+	inputIterators, err := flags.NewRequestInputIterators(cmd)
+	if err != nil {
+		return err
+	}
+
 	// query parameters
 	query := url.Values{}
 	err = flags.WithQueryParameters(
 		cmd,
 		query,
+		inputIterators,
 		flags.WithStringValue("source", "source"),
 		flags.WithStringValue("type", "type"),
 		flags.WithStringValue("user", "user"),
@@ -89,6 +95,7 @@ func (n *GetAuditRecordCollectionCmd) RunE(cmd *cobra.Command, args []string) er
 	err = flags.WithHeaders(
 		cmd,
 		headers,
+		inputIterators,
 	)
 	if err != nil {
 		return newUserError(err)
@@ -99,6 +106,7 @@ func (n *GetAuditRecordCollectionCmd) RunE(cmd *cobra.Command, args []string) er
 	err = flags.WithFormDataOptions(
 		cmd,
 		formData,
+		inputIterators,
 	)
 	if err != nil {
 		return newUserError(err)
@@ -109,6 +117,7 @@ func (n *GetAuditRecordCollectionCmd) RunE(cmd *cobra.Command, args []string) er
 	err = flags.WithBody(
 		cmd,
 		body,
+		inputIterators,
 	)
 	if err != nil {
 		return newUserError(err)
@@ -119,20 +128,19 @@ func (n *GetAuditRecordCollectionCmd) RunE(cmd *cobra.Command, args []string) er
 	}
 
 	// path parameters
-	pathParameters := make(map[string]string)
+	path := flags.NewStringTemplate("/audit/auditRecords")
 	err = flags.WithPathParameters(
 		cmd,
-		pathParameters,
+		path,
+		inputIterators,
 	)
 	if err != nil {
 		return err
 	}
 
-	path := replacePathParameters("/audit/auditRecords", pathParameters)
-
 	req := c8y.RequestOptions{
 		Method:       "GET",
-		Path:         path,
+		Path:         path.GetTemplate(),
 		Query:        queryValue,
 		Body:         body,
 		FormData:     formData,
@@ -141,12 +149,5 @@ func (n *GetAuditRecordCollectionCmd) RunE(cmd *cobra.Command, args []string) er
 		DryRun:       globalFlagDryRun,
 	}
 
-	pipeOption := PipeOption{
-		Name:              "source",
-		Property:          "",
-		Required:          false,
-		ResolveByNameType: "",
-		IteratorType:      "",
-	}
-	return processRequestAndResponseWithWorkers(cmd, &req, pipeOption)
+	return processRequestAndResponseWithWorkers(cmd, &req, inputIterators)
 }

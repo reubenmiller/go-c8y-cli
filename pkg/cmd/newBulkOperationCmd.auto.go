@@ -41,7 +41,7 @@ Create operation for a device
 
 	flags.WithOptions(
 		cmd,
-		flags.WithPipelineSupport("group"),
+		flags.WithExtendedPipelineSupport("group", "groupId", true),
 	)
 
 	// Required flags
@@ -55,11 +55,17 @@ Create operation for a device
 
 func (n *NewBulkOperationCmd) RunE(cmd *cobra.Command, args []string) error {
 	var err error
+	inputIterators, err := flags.NewRequestInputIterators(cmd)
+	if err != nil {
+		return err
+	}
+
 	// query parameters
 	query := url.Values{}
 	err = flags.WithQueryParameters(
 		cmd,
 		query,
+		inputIterators,
 	)
 	if err != nil {
 		return newUserError(err)
@@ -76,6 +82,7 @@ func (n *NewBulkOperationCmd) RunE(cmd *cobra.Command, args []string) error {
 	err = flags.WithHeaders(
 		cmd,
 		headers,
+		inputIterators,
 		flags.WithProcessingModeValue(),
 	)
 	if err != nil {
@@ -87,6 +94,7 @@ func (n *NewBulkOperationCmd) RunE(cmd *cobra.Command, args []string) error {
 	err = flags.WithFormDataOptions(
 		cmd,
 		formData,
+		inputIterators,
 	)
 	if err != nil {
 		return newUserError(err)
@@ -97,6 +105,7 @@ func (n *NewBulkOperationCmd) RunE(cmd *cobra.Command, args []string) error {
 	err = flags.WithBody(
 		cmd,
 		body,
+		inputIterators,
 		WithDataValue(),
 		WithDeviceGroupByNameFirstMatch(args, "group", "groupId"),
 		flags.WithRelativeTimestamp("startDate", "startDate", ""),
@@ -115,20 +124,19 @@ func (n *NewBulkOperationCmd) RunE(cmd *cobra.Command, args []string) error {
 	}
 
 	// path parameters
-	pathParameters := make(map[string]string)
+	path := flags.NewStringTemplate("devicecontrol/bulkoperations")
 	err = flags.WithPathParameters(
 		cmd,
-		pathParameters,
+		path,
+		inputIterators,
 	)
 	if err != nil {
 		return err
 	}
 
-	path := replacePathParameters("devicecontrol/bulkoperations", pathParameters)
-
 	req := c8y.RequestOptions{
 		Method:       "POST",
-		Path:         path,
+		Path:         path.GetTemplate(),
 		Query:        queryValue,
 		Body:         body,
 		FormData:     formData,
@@ -137,12 +145,5 @@ func (n *NewBulkOperationCmd) RunE(cmd *cobra.Command, args []string) error {
 		DryRun:       globalFlagDryRun,
 	}
 
-	pipeOption := PipeOption{
-		Name:              "group",
-		Property:          "groupId",
-		Required:          true,
-		ResolveByNameType: "devicegroup",
-		IteratorType:      "body",
-	}
-	return processRequestAndResponseWithWorkers(cmd, &req, pipeOption)
+	return processRequestAndResponseWithWorkers(cmd, &req, inputIterators)
 }

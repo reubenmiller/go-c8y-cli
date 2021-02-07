@@ -38,7 +38,7 @@ Get the supported measurements of a device by name
 
 	flags.WithOptions(
 		cmd,
-		flags.WithPipelineSupport("device"),
+		flags.WithExtendedPipelineSupport("device", "device", true),
 	)
 
 	// Required flags
@@ -50,11 +50,17 @@ Get the supported measurements of a device by name
 
 func (n *GetSupportedMeasurementsCmd) RunE(cmd *cobra.Command, args []string) error {
 	var err error
+	inputIterators, err := flags.NewRequestInputIterators(cmd)
+	if err != nil {
+		return err
+	}
+
 	// query parameters
 	query := url.Values{}
 	err = flags.WithQueryParameters(
 		cmd,
 		query,
+		inputIterators,
 	)
 	if err != nil {
 		return newUserError(err)
@@ -76,6 +82,7 @@ func (n *GetSupportedMeasurementsCmd) RunE(cmd *cobra.Command, args []string) er
 	err = flags.WithHeaders(
 		cmd,
 		headers,
+		inputIterators,
 	)
 	if err != nil {
 		return newUserError(err)
@@ -86,6 +93,7 @@ func (n *GetSupportedMeasurementsCmd) RunE(cmd *cobra.Command, args []string) er
 	err = flags.WithFormDataOptions(
 		cmd,
 		formData,
+		inputIterators,
 	)
 	if err != nil {
 		return newUserError(err)
@@ -96,6 +104,7 @@ func (n *GetSupportedMeasurementsCmd) RunE(cmd *cobra.Command, args []string) er
 	err = flags.WithBody(
 		cmd,
 		body,
+		inputIterators,
 	)
 	if err != nil {
 		return newUserError(err)
@@ -106,20 +115,20 @@ func (n *GetSupportedMeasurementsCmd) RunE(cmd *cobra.Command, args []string) er
 	}
 
 	// path parameters
-	pathParameters := make(map[string]string)
+	path := flags.NewStringTemplate("inventory/managedObjects/{device}/supportedMeasurements")
 	err = flags.WithPathParameters(
 		cmd,
-		pathParameters,
+		path,
+		inputIterators,
+		WithDeviceByNameFirstMatch(args, "device", "device"),
 	)
 	if err != nil {
 		return err
 	}
 
-	path := replacePathParameters("inventory/managedObjects/{device}/supportedMeasurements", pathParameters)
-
 	req := c8y.RequestOptions{
 		Method:       "GET",
-		Path:         path,
+		Path:         path.GetTemplate(),
 		Query:        queryValue,
 		Body:         body,
 		FormData:     formData,
@@ -128,12 +137,5 @@ func (n *GetSupportedMeasurementsCmd) RunE(cmd *cobra.Command, args []string) er
 		DryRun:       globalFlagDryRun,
 	}
 
-	pipeOption := PipeOption{
-		Name:              "device",
-		Property:          "",
-		Required:          true,
-		ResolveByNameType: "device",
-		IteratorType:      "path",
-	}
-	return processRequestAndResponseWithWorkers(cmd, &req, pipeOption)
+	return processRequestAndResponseWithWorkers(cmd, &req, inputIterators)
 }

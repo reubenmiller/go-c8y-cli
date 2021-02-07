@@ -38,7 +38,7 @@ Create a user group
 
 	flags.WithOptions(
 		cmd,
-		flags.WithPipelineSupport(""),
+		flags.WithExtendedPipelineSupport("", "", false),
 	)
 
 	// Required flags
@@ -50,11 +50,17 @@ Create a user group
 
 func (n *NewGroupCmd) RunE(cmd *cobra.Command, args []string) error {
 	var err error
+	inputIterators, err := flags.NewRequestInputIterators(cmd)
+	if err != nil {
+		return err
+	}
+
 	// query parameters
 	query := url.Values{}
 	err = flags.WithQueryParameters(
 		cmd,
 		query,
+		inputIterators,
 	)
 	if err != nil {
 		return newUserError(err)
@@ -71,6 +77,7 @@ func (n *NewGroupCmd) RunE(cmd *cobra.Command, args []string) error {
 	err = flags.WithHeaders(
 		cmd,
 		headers,
+		inputIterators,
 		flags.WithProcessingModeValue(),
 	)
 	if err != nil {
@@ -82,6 +89,7 @@ func (n *NewGroupCmd) RunE(cmd *cobra.Command, args []string) error {
 	err = flags.WithFormDataOptions(
 		cmd,
 		formData,
+		inputIterators,
 	)
 	if err != nil {
 		return newUserError(err)
@@ -92,6 +100,7 @@ func (n *NewGroupCmd) RunE(cmd *cobra.Command, args []string) error {
 	err = flags.WithBody(
 		cmd,
 		body,
+		inputIterators,
 		WithDataValue(),
 		flags.WithStringValue("name", "name"),
 		WithTemplateValue(),
@@ -106,21 +115,20 @@ func (n *NewGroupCmd) RunE(cmd *cobra.Command, args []string) error {
 	}
 
 	// path parameters
-	pathParameters := make(map[string]string)
+	path := flags.NewStringTemplate("/user/{tenant}/groups")
 	err = flags.WithPathParameters(
 		cmd,
-		pathParameters,
+		path,
+		inputIterators,
 		flags.WithStringDefaultValue(client.TenantName, "tenant", "tenant"),
 	)
 	if err != nil {
 		return err
 	}
 
-	path := replacePathParameters("/user/{tenant}/groups", pathParameters)
-
 	req := c8y.RequestOptions{
 		Method:       "POST",
-		Path:         path,
+		Path:         path.GetTemplate(),
 		Query:        queryValue,
 		Body:         body,
 		FormData:     formData,
@@ -129,12 +137,5 @@ func (n *NewGroupCmd) RunE(cmd *cobra.Command, args []string) error {
 		DryRun:       globalFlagDryRun,
 	}
 
-	pipeOption := PipeOption{
-		Name:              "",
-		Property:          "",
-		Required:          false,
-		ResolveByNameType: "",
-		IteratorType:      "",
-	}
-	return processRequestAndResponseWithWorkers(cmd, &req, pipeOption)
+	return processRequestAndResponseWithWorkers(cmd, &req, inputIterators)
 }

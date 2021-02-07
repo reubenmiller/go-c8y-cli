@@ -40,7 +40,7 @@ Remove an application binary related to a Hosted (web) application
 
 	flags.WithOptions(
 		cmd,
-		flags.WithPipelineSupport("binaryId"),
+		flags.WithExtendedPipelineSupport("binaryId", "binaryId", true),
 	)
 
 	// Required flags
@@ -53,11 +53,17 @@ Remove an application binary related to a Hosted (web) application
 
 func (n *DeleteApplicationBinaryCmd) RunE(cmd *cobra.Command, args []string) error {
 	var err error
+	inputIterators, err := flags.NewRequestInputIterators(cmd)
+	if err != nil {
+		return err
+	}
+
 	// query parameters
 	query := url.Values{}
 	err = flags.WithQueryParameters(
 		cmd,
 		query,
+		inputIterators,
 	)
 	if err != nil {
 		return newUserError(err)
@@ -74,6 +80,7 @@ func (n *DeleteApplicationBinaryCmd) RunE(cmd *cobra.Command, args []string) err
 	err = flags.WithHeaders(
 		cmd,
 		headers,
+		inputIterators,
 		flags.WithProcessingModeValue(),
 	)
 	if err != nil {
@@ -85,6 +92,7 @@ func (n *DeleteApplicationBinaryCmd) RunE(cmd *cobra.Command, args []string) err
 	err = flags.WithFormDataOptions(
 		cmd,
 		formData,
+		inputIterators,
 	)
 	if err != nil {
 		return newUserError(err)
@@ -95,6 +103,7 @@ func (n *DeleteApplicationBinaryCmd) RunE(cmd *cobra.Command, args []string) err
 	err = flags.WithBody(
 		cmd,
 		body,
+		inputIterators,
 	)
 	if err != nil {
 		return newUserError(err)
@@ -105,21 +114,21 @@ func (n *DeleteApplicationBinaryCmd) RunE(cmd *cobra.Command, args []string) err
 	}
 
 	// path parameters
-	pathParameters := make(map[string]string)
+	path := flags.NewStringTemplate("/application/applications/{application}/binaries/{binaryId}")
 	err = flags.WithPathParameters(
 		cmd,
-		pathParameters,
+		path,
+		inputIterators,
 		WithApplicationByNameFirstMatch(args, "application", "application"),
+		flags.WithStringSliceValues("binaryId", "binaryId", ""),
 	)
 	if err != nil {
 		return err
 	}
 
-	path := replacePathParameters("/application/applications/{application}/binaries/{binaryId}", pathParameters)
-
 	req := c8y.RequestOptions{
 		Method:       "DELETE",
-		Path:         path,
+		Path:         path.GetTemplate(),
 		Query:        queryValue,
 		Body:         body,
 		FormData:     formData,
@@ -128,12 +137,5 @@ func (n *DeleteApplicationBinaryCmd) RunE(cmd *cobra.Command, args []string) err
 		DryRun:       globalFlagDryRun,
 	}
 
-	pipeOption := PipeOption{
-		Name:              "binaryId",
-		Property:          "",
-		Required:          true,
-		ResolveByNameType: "",
-		IteratorType:      "path",
-	}
-	return processRequestAndResponseWithWorkers(cmd, &req, pipeOption)
+	return processRequestAndResponseWithWorkers(cmd, &req, inputIterators)
 }

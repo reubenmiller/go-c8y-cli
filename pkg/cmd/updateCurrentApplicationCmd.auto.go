@@ -45,7 +45,7 @@ Update custom properties of the current application (requires using application 
 
 	flags.WithOptions(
 		cmd,
-		flags.WithPipelineSupport(""),
+		flags.WithExtendedPipelineSupport("", "", false),
 	)
 
 	// Required flags
@@ -57,11 +57,17 @@ Update custom properties of the current application (requires using application 
 
 func (n *UpdateCurrentApplicationCmd) RunE(cmd *cobra.Command, args []string) error {
 	var err error
+	inputIterators, err := flags.NewRequestInputIterators(cmd)
+	if err != nil {
+		return err
+	}
+
 	// query parameters
 	query := url.Values{}
 	err = flags.WithQueryParameters(
 		cmd,
 		query,
+		inputIterators,
 	)
 	if err != nil {
 		return newUserError(err)
@@ -78,6 +84,7 @@ func (n *UpdateCurrentApplicationCmd) RunE(cmd *cobra.Command, args []string) er
 	err = flags.WithHeaders(
 		cmd,
 		headers,
+		inputIterators,
 		flags.WithProcessingModeValue(),
 	)
 	if err != nil {
@@ -89,6 +96,7 @@ func (n *UpdateCurrentApplicationCmd) RunE(cmd *cobra.Command, args []string) er
 	err = flags.WithFormDataOptions(
 		cmd,
 		formData,
+		inputIterators,
 	)
 	if err != nil {
 		return newUserError(err)
@@ -99,6 +107,7 @@ func (n *UpdateCurrentApplicationCmd) RunE(cmd *cobra.Command, args []string) er
 	err = flags.WithBody(
 		cmd,
 		body,
+		inputIterators,
 		WithDataValue(),
 		flags.WithStringValue("name", "name"),
 		flags.WithStringValue("key", "key"),
@@ -120,20 +129,19 @@ func (n *UpdateCurrentApplicationCmd) RunE(cmd *cobra.Command, args []string) er
 	}
 
 	// path parameters
-	pathParameters := make(map[string]string)
+	path := flags.NewStringTemplate("/application/currentApplication")
 	err = flags.WithPathParameters(
 		cmd,
-		pathParameters,
+		path,
+		inputIterators,
 	)
 	if err != nil {
 		return err
 	}
 
-	path := replacePathParameters("/application/currentApplication", pathParameters)
-
 	req := c8y.RequestOptions{
 		Method:       "PUT",
-		Path:         path,
+		Path:         path.GetTemplate(),
 		Query:        queryValue,
 		Body:         body,
 		FormData:     formData,
@@ -142,12 +150,5 @@ func (n *UpdateCurrentApplicationCmd) RunE(cmd *cobra.Command, args []string) er
 		DryRun:       globalFlagDryRun,
 	}
 
-	pipeOption := PipeOption{
-		Name:              "",
-		Property:          "",
-		Required:          false,
-		ResolveByNameType: "",
-		IteratorType:      "",
-	}
-	return processRequestAndResponseWithWorkers(cmd, &req, pipeOption)
+	return processRequestAndResponseWithWorkers(cmd, &req, inputIterators)
 }

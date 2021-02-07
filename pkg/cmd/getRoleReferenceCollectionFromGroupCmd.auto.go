@@ -38,7 +38,7 @@ Get a list of role references for a user group
 
 	flags.WithOptions(
 		cmd,
-		flags.WithPipelineSupport(""),
+		flags.WithExtendedPipelineSupport("", "", false),
 	)
 
 	// Required flags
@@ -51,11 +51,17 @@ Get a list of role references for a user group
 
 func (n *GetRoleReferenceCollectionFromGroupCmd) RunE(cmd *cobra.Command, args []string) error {
 	var err error
+	inputIterators, err := flags.NewRequestInputIterators(cmd)
+	if err != nil {
+		return err
+	}
+
 	// query parameters
 	query := url.Values{}
 	err = flags.WithQueryParameters(
 		cmd,
 		query,
+		inputIterators,
 	)
 	if err != nil {
 		return newUserError(err)
@@ -77,6 +83,7 @@ func (n *GetRoleReferenceCollectionFromGroupCmd) RunE(cmd *cobra.Command, args [
 	err = flags.WithHeaders(
 		cmd,
 		headers,
+		inputIterators,
 	)
 	if err != nil {
 		return newUserError(err)
@@ -87,6 +94,7 @@ func (n *GetRoleReferenceCollectionFromGroupCmd) RunE(cmd *cobra.Command, args [
 	err = flags.WithFormDataOptions(
 		cmd,
 		formData,
+		inputIterators,
 	)
 	if err != nil {
 		return newUserError(err)
@@ -97,6 +105,7 @@ func (n *GetRoleReferenceCollectionFromGroupCmd) RunE(cmd *cobra.Command, args [
 	err = flags.WithBody(
 		cmd,
 		body,
+		inputIterators,
 	)
 	if err != nil {
 		return newUserError(err)
@@ -107,10 +116,11 @@ func (n *GetRoleReferenceCollectionFromGroupCmd) RunE(cmd *cobra.Command, args [
 	}
 
 	// path parameters
-	pathParameters := make(map[string]string)
+	path := flags.NewStringTemplate("/user/{tenant}/groups/{group}/roles")
 	err = flags.WithPathParameters(
 		cmd,
-		pathParameters,
+		path,
+		inputIterators,
 		flags.WithStringDefaultValue(client.TenantName, "tenant", "tenant"),
 		WithUserGroupByNameFirstMatch(args, "group", "group"),
 	)
@@ -118,11 +128,9 @@ func (n *GetRoleReferenceCollectionFromGroupCmd) RunE(cmd *cobra.Command, args [
 		return err
 	}
 
-	path := replacePathParameters("/user/{tenant}/groups/{group}/roles", pathParameters)
-
 	req := c8y.RequestOptions{
 		Method:       "GET",
-		Path:         path,
+		Path:         path.GetTemplate(),
 		Query:        queryValue,
 		Body:         body,
 		FormData:     formData,
@@ -131,12 +139,5 @@ func (n *GetRoleReferenceCollectionFromGroupCmd) RunE(cmd *cobra.Command, args [
 		DryRun:       globalFlagDryRun,
 	}
 
-	pipeOption := PipeOption{
-		Name:              "",
-		Property:          "",
-		Required:          false,
-		ResolveByNameType: "",
-		IteratorType:      "",
-	}
-	return processRequestAndResponseWithWorkers(cmd, &req, pipeOption)
+	return processRequestAndResponseWithWorkers(cmd, &req, inputIterators)
 }

@@ -66,13 +66,13 @@
     $PipelineVariableName = ""
     $PipelineVariableRequired = "false"
     $PipelineVariableProperty = ""
+    $PipelineVariableAliases = ""
     $PipelineVariablePropertyResolveType = ""
-    $PipelineVariableIteratorType = ""
     foreach ($iArg in (Remove-SkippedParameters $ArgumentSources)) {
         if ($iArg.pipeline) {
             $PipelineVariableName = $iArg.Name
             $PipelineVariableRequired = if ($iArg.Required) {"true"} else {"false"}
-            $PipelineVariableProperty = $iArg.Property
+            $PipelineVariableProperty = if ($iArg.Property) { $iArg.Property } else { $iArg.Name }
             switch -Regex ($iArg.type) {
                 "^(\[\])?application|microservice|agent|device|devicegroup|agent|usergroup|user|role$" {
                     $PipelineVariablePropertyResolveType = "$($iArg.type)".ToLower() -replace "[\[\]]"
@@ -219,11 +219,11 @@
     #
     $RESTPathBuilderOptions = New-Object System.Text.StringBuilder
     foreach ($Properties in (Remove-SkippedParameters $Specification.pathParameters)) {
-        if ($Properties.pipeline) {
-            Write-Verbose "Skipping path parameters for pipeline arguments"
-            $PipelineVariableIteratorType = "path"
-            continue
-        }
+        # if ($Properties.pipeline) {
+        #     Write-Verbose "Skipping path parameters for pipeline arguments"
+        #     $PipelineVariableIteratorType = "path"
+        #     continue
+        # }
         $code = New-C8yApiGoGetValueFromFlag -Parameters $Properties -SetterType "path"
         if ($code) {
             $null = $RESTPathBuilderOptions.AppendLine($code)
@@ -341,7 +341,14 @@ $($Examples -join "`n`n")
 
     flags.WithOptions(
 		cmd,
-		flags.WithPipelineSupport("$PipelineVariableName"),
+        $(
+            if ($PipelineVariableAliases) {
+                $aliases = ($PipelineVariableAliases | ForEach-Object { "`"$_`""` }) -join ", "
+                "flags.WithExtendedPipelineSupport(`"$PipelineVariableName`", `"$PipelineVariableProperty`", $PipelineVariableRequired, $aliases),"
+            } else {
+                "flags.WithExtendedPipelineSupport(`"$PipelineVariableName`", `"$PipelineVariableProperty`", $PipelineVariableRequired),"
+            }
+        )
 	)
 
     // Required flags
@@ -354,11 +361,17 @@ $($Examples -join "`n`n")
 
 func (n *${NameCamel}Cmd) RunE(cmd *cobra.Command, args []string) error {
     var err error
+    inputIterators, err := flags.NewRequestInputIterators(cmd)
+    if err != nil {
+        return err
+    }
+
     // query parameters
     query := url.Values{}
     err = flags.WithQueryParameters(
 		cmd,
         query,
+        inputIterators,
         $RESTQueryBuilderWithValues
     )
     if err != nil {
@@ -376,6 +389,7 @@ func (n *${NameCamel}Cmd) RunE(cmd *cobra.Command, args []string) error {
     err = flags.WithHeaders(
 		cmd,
         headers,
+        inputIterators,
         $RestHeaderBuilderOptions
     )
     if err != nil {
@@ -386,7 +400,8 @@ func (n *${NameCamel}Cmd) RunE(cmd *cobra.Command, args []string) error {
     formData := make(map[string]io.Reader)
     err = flags.WithFormDataOptions(
 		cmd,
-		formData,
+        formData,
+        inputIterators,
 		$RESTFormDataBuilderOptions
     )
     if err != nil {
@@ -399,6 +414,7 @@ func (n *${NameCamel}Cmd) RunE(cmd *cobra.Command, args []string) error {
     err = flags.WithBody(
         cmd,
         body,
+        inputIterators,
         $RESTBodyBuilderOptions
     )
     if err != nil {
@@ -410,21 +426,20 @@ func (n *${NameCamel}Cmd) RunE(cmd *cobra.Command, args []string) error {
 	}
 
     // path parameters
-    pathParameters := make(map[string]string)
+    path := flags.NewStringTemplate("${RESTPath}")
     err = flags.WithPathParameters(
         cmd,
-        pathParameters,
+        path,
+        inputIterators,
         $RESTPathBuilderOptions
     )
     if err != nil {
         return err
     }
 
-    path := replacePathParameters("${RESTPath}", pathParameters)
-
     req := c8y.RequestOptions{$RESTHost
         Method:       "${RESTMethod}",
-        Path:         path,
+        Path:         path.GetTemplate(),
         Query:        queryValue,
         Body:         $GetBodyContents,
         FormData:     formData,
@@ -433,14 +448,7 @@ func (n *${NameCamel}Cmd) RunE(cmd *cobra.Command, args []string) error {
         DryRun:       globalFlagDryRun,
     }
 
-    pipeOption := PipeOption{
-        Name: "$PipelineVariableName",
-		Property: "$PipelineVariableProperty",
-		Required: $PipelineVariableRequired,
-        ResolveByNameType: "$PipelineVariablePropertyResolveType",
-        IteratorType: "$PipelineVariableIteratorType",
-	}
-    return processRequestAndResponseWithWorkers(cmd, &req, pipeOption)
+    return processRequestAndResponseWithWorkers(cmd, &req, inputIterators)
 }
 
 "@

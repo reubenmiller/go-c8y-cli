@@ -38,7 +38,7 @@ Approve a new device request
 
 	flags.WithOptions(
 		cmd,
-		flags.WithPipelineSupport(""),
+		flags.WithExtendedPipelineSupport("", "", false),
 	)
 
 	// Required flags
@@ -51,11 +51,17 @@ Approve a new device request
 
 func (n *ApproveNewDeviceRequestCmd) RunE(cmd *cobra.Command, args []string) error {
 	var err error
+	inputIterators, err := flags.NewRequestInputIterators(cmd)
+	if err != nil {
+		return err
+	}
+
 	// query parameters
 	query := url.Values{}
 	err = flags.WithQueryParameters(
 		cmd,
 		query,
+		inputIterators,
 	)
 	if err != nil {
 		return newUserError(err)
@@ -72,6 +78,7 @@ func (n *ApproveNewDeviceRequestCmd) RunE(cmd *cobra.Command, args []string) err
 	err = flags.WithHeaders(
 		cmd,
 		headers,
+		inputIterators,
 		flags.WithProcessingModeValue(),
 	)
 	if err != nil {
@@ -83,6 +90,7 @@ func (n *ApproveNewDeviceRequestCmd) RunE(cmd *cobra.Command, args []string) err
 	err = flags.WithFormDataOptions(
 		cmd,
 		formData,
+		inputIterators,
 	)
 	if err != nil {
 		return newUserError(err)
@@ -93,6 +101,7 @@ func (n *ApproveNewDeviceRequestCmd) RunE(cmd *cobra.Command, args []string) err
 	err = flags.WithBody(
 		cmd,
 		body,
+		inputIterators,
 		WithDataValue(),
 		flags.WithStringValue("status", "status"),
 		WithTemplateValue(),
@@ -107,21 +116,20 @@ func (n *ApproveNewDeviceRequestCmd) RunE(cmd *cobra.Command, args []string) err
 	}
 
 	// path parameters
-	pathParameters := make(map[string]string)
+	path := flags.NewStringTemplate("devicecontrol/newDeviceRequests/{id}")
 	err = flags.WithPathParameters(
 		cmd,
-		pathParameters,
+		path,
+		inputIterators,
 		flags.WithStringValue("id", "id"),
 	)
 	if err != nil {
 		return err
 	}
 
-	path := replacePathParameters("devicecontrol/newDeviceRequests/{id}", pathParameters)
-
 	req := c8y.RequestOptions{
 		Method:       "PUT",
-		Path:         path,
+		Path:         path.GetTemplate(),
 		Query:        queryValue,
 		Body:         body,
 		FormData:     formData,
@@ -130,12 +138,5 @@ func (n *ApproveNewDeviceRequestCmd) RunE(cmd *cobra.Command, args []string) err
 		DryRun:       globalFlagDryRun,
 	}
 
-	pipeOption := PipeOption{
-		Name:              "",
-		Property:          "",
-		Required:          false,
-		ResolveByNameType: "",
-		IteratorType:      "",
-	}
-	return processRequestAndResponseWithWorkers(cmd, &req, pipeOption)
+	return processRequestAndResponseWithWorkers(cmd, &req, inputIterators)
 }

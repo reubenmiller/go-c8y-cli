@@ -44,7 +44,7 @@ Get tenant summary statistics collection for the last 10 days, only return until
 
 	flags.WithOptions(
 		cmd,
-		flags.WithPipelineSupport(""),
+		flags.WithExtendedPipelineSupport("", "", false),
 	)
 
 	// Required flags
@@ -56,11 +56,17 @@ Get tenant summary statistics collection for the last 10 days, only return until
 
 func (n *GetAllTenantUsageStatisticsSummaryCollectionCmd) RunE(cmd *cobra.Command, args []string) error {
 	var err error
+	inputIterators, err := flags.NewRequestInputIterators(cmd)
+	if err != nil {
+		return err
+	}
+
 	// query parameters
 	query := url.Values{}
 	err = flags.WithQueryParameters(
 		cmd,
 		query,
+		inputIterators,
 		flags.WithRelativeTimestamp("dateFrom", "dateFrom", ""),
 		flags.WithRelativeTimestamp("dateTo", "dateTo", ""),
 	)
@@ -84,6 +90,7 @@ func (n *GetAllTenantUsageStatisticsSummaryCollectionCmd) RunE(cmd *cobra.Comman
 	err = flags.WithHeaders(
 		cmd,
 		headers,
+		inputIterators,
 	)
 	if err != nil {
 		return newUserError(err)
@@ -94,6 +101,7 @@ func (n *GetAllTenantUsageStatisticsSummaryCollectionCmd) RunE(cmd *cobra.Comman
 	err = flags.WithFormDataOptions(
 		cmd,
 		formData,
+		inputIterators,
 	)
 	if err != nil {
 		return newUserError(err)
@@ -104,6 +112,7 @@ func (n *GetAllTenantUsageStatisticsSummaryCollectionCmd) RunE(cmd *cobra.Comman
 	err = flags.WithBody(
 		cmd,
 		body,
+		inputIterators,
 	)
 	if err != nil {
 		return newUserError(err)
@@ -114,20 +123,19 @@ func (n *GetAllTenantUsageStatisticsSummaryCollectionCmd) RunE(cmd *cobra.Comman
 	}
 
 	// path parameters
-	pathParameters := make(map[string]string)
+	path := flags.NewStringTemplate("/tenant/statistics/allTenantsSummary")
 	err = flags.WithPathParameters(
 		cmd,
-		pathParameters,
+		path,
+		inputIterators,
 	)
 	if err != nil {
 		return err
 	}
 
-	path := replacePathParameters("/tenant/statistics/allTenantsSummary", pathParameters)
-
 	req := c8y.RequestOptions{
 		Method:       "GET",
-		Path:         path,
+		Path:         path.GetTemplate(),
 		Query:        queryValue,
 		Body:         body,
 		FormData:     formData,
@@ -136,12 +144,5 @@ func (n *GetAllTenantUsageStatisticsSummaryCollectionCmd) RunE(cmd *cobra.Comman
 		DryRun:       globalFlagDryRun,
 	}
 
-	pipeOption := PipeOption{
-		Name:              "",
-		Property:          "",
-		Required:          false,
-		ResolveByNameType: "",
-		IteratorType:      "",
-	}
-	return processRequestAndResponseWithWorkers(cmd, &req, pipeOption)
+	return processRequestAndResponseWithWorkers(cmd, &req, inputIterators)
 }

@@ -55,6 +55,7 @@ func NewGetDeviceCollectionCmd() *GetDeviceCollectionCmd {
 
 func (n *GetDeviceCollectionCmd) RunE(cmd *cobra.Command, args []string) error {
 	// query parameters
+	inputIterators := &flags.RequestInputIterators{}
 	queryValue := url.QueryEscape("")
 	query := url.Values{}
 
@@ -98,6 +99,7 @@ func (n *GetDeviceCollectionCmd) RunE(cmd *cobra.Command, args []string) error {
 	err = flags.WithQueryParameters(
 		cmd,
 		query,
+		inputIterators,
 		flags.WithBoolValue("withParents", "withParents"),
 	)
 
@@ -121,13 +123,11 @@ func (n *GetDeviceCollectionCmd) RunE(cmd *cobra.Command, args []string) error {
 	body := mapbuilder.NewInitializedMapBuilder()
 
 	// path parameters
-	pathParameters := make(map[string]string)
-
-	path := replacePathParameters("inventory/managedObjects", pathParameters)
+	path := flags.NewStringTemplate("inventory/managedObjects")
 
 	req := c8y.RequestOptions{
 		Method:       "GET",
-		Path:         path,
+		Path:         path.GetTemplate(),
 		Query:        queryValue,
 		Body:         body.GetMap(),
 		FormData:     formData,
@@ -136,5 +136,5 @@ func (n *GetDeviceCollectionCmd) RunE(cmd *cobra.Command, args []string) error {
 		DryRun:       globalFlagDryRun,
 	}
 
-	return processRequestAndResponseWithWorkers(cmd, &req, PipeOption{})
+	return processRequestAndResponseWithWorkers(cmd, &req, inputIterators)
 }

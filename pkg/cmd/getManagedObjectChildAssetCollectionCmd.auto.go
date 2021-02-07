@@ -38,7 +38,7 @@ Get a list of the child devices of an existing device
 
 	flags.WithOptions(
 		cmd,
-		flags.WithPipelineSupport("group"),
+		flags.WithExtendedPipelineSupport("group", "id", false),
 	)
 
 	// Required flags
@@ -50,11 +50,17 @@ Get a list of the child devices of an existing device
 
 func (n *GetManagedObjectChildAssetCollectionCmd) RunE(cmd *cobra.Command, args []string) error {
 	var err error
+	inputIterators, err := flags.NewRequestInputIterators(cmd)
+	if err != nil {
+		return err
+	}
+
 	// query parameters
 	query := url.Values{}
 	err = flags.WithQueryParameters(
 		cmd,
 		query,
+		inputIterators,
 	)
 	if err != nil {
 		return newUserError(err)
@@ -76,6 +82,7 @@ func (n *GetManagedObjectChildAssetCollectionCmd) RunE(cmd *cobra.Command, args 
 	err = flags.WithHeaders(
 		cmd,
 		headers,
+		inputIterators,
 	)
 	if err != nil {
 		return newUserError(err)
@@ -86,6 +93,7 @@ func (n *GetManagedObjectChildAssetCollectionCmd) RunE(cmd *cobra.Command, args 
 	err = flags.WithFormDataOptions(
 		cmd,
 		formData,
+		inputIterators,
 	)
 	if err != nil {
 		return newUserError(err)
@@ -96,6 +104,7 @@ func (n *GetManagedObjectChildAssetCollectionCmd) RunE(cmd *cobra.Command, args 
 	err = flags.WithBody(
 		cmd,
 		body,
+		inputIterators,
 	)
 	if err != nil {
 		return newUserError(err)
@@ -106,21 +115,21 @@ func (n *GetManagedObjectChildAssetCollectionCmd) RunE(cmd *cobra.Command, args 
 	}
 
 	// path parameters
-	pathParameters := make(map[string]string)
+	path := flags.NewStringTemplate("inventory/managedObjects/{id}/childAssets")
 	err = flags.WithPathParameters(
 		cmd,
-		pathParameters,
+		path,
+		inputIterators,
 		WithDeviceByNameFirstMatch(args, "device", "id"),
+		WithDeviceGroupByNameFirstMatch(args, "group", "id"),
 	)
 	if err != nil {
 		return err
 	}
 
-	path := replacePathParameters("inventory/managedObjects/{id}/childAssets", pathParameters)
-
 	req := c8y.RequestOptions{
 		Method:       "GET",
-		Path:         path,
+		Path:         path.GetTemplate(),
 		Query:        queryValue,
 		Body:         body,
 		FormData:     formData,
@@ -129,12 +138,5 @@ func (n *GetManagedObjectChildAssetCollectionCmd) RunE(cmd *cobra.Command, args 
 		DryRun:       globalFlagDryRun,
 	}
 
-	pipeOption := PipeOption{
-		Name:              "group",
-		Property:          "id",
-		Required:          false,
-		ResolveByNameType: "devicegroup",
-		IteratorType:      "path",
-	}
-	return processRequestAndResponseWithWorkers(cmd, &req, pipeOption)
+	return processRequestAndResponseWithWorkers(cmd, &req, inputIterators)
 }

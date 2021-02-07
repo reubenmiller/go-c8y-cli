@@ -41,7 +41,7 @@ Get application bootstrap user by app name
 
 	flags.WithOptions(
 		cmd,
-		flags.WithPipelineSupport("id"),
+		flags.WithExtendedPipelineSupport("id", "id", true),
 	)
 
 	// Required flags
@@ -53,11 +53,17 @@ Get application bootstrap user by app name
 
 func (n *GetMicroserviceBootstrapUserCmd) RunE(cmd *cobra.Command, args []string) error {
 	var err error
+	inputIterators, err := flags.NewRequestInputIterators(cmd)
+	if err != nil {
+		return err
+	}
+
 	// query parameters
 	query := url.Values{}
 	err = flags.WithQueryParameters(
 		cmd,
 		query,
+		inputIterators,
 	)
 	if err != nil {
 		return newUserError(err)
@@ -79,6 +85,7 @@ func (n *GetMicroserviceBootstrapUserCmd) RunE(cmd *cobra.Command, args []string
 	err = flags.WithHeaders(
 		cmd,
 		headers,
+		inputIterators,
 	)
 	if err != nil {
 		return newUserError(err)
@@ -89,6 +96,7 @@ func (n *GetMicroserviceBootstrapUserCmd) RunE(cmd *cobra.Command, args []string
 	err = flags.WithFormDataOptions(
 		cmd,
 		formData,
+		inputIterators,
 	)
 	if err != nil {
 		return newUserError(err)
@@ -99,6 +107,7 @@ func (n *GetMicroserviceBootstrapUserCmd) RunE(cmd *cobra.Command, args []string
 	err = flags.WithBody(
 		cmd,
 		body,
+		inputIterators,
 	)
 	if err != nil {
 		return newUserError(err)
@@ -109,20 +118,20 @@ func (n *GetMicroserviceBootstrapUserCmd) RunE(cmd *cobra.Command, args []string
 	}
 
 	// path parameters
-	pathParameters := make(map[string]string)
+	path := flags.NewStringTemplate("/application/applications/{id}/bootstrapUser")
 	err = flags.WithPathParameters(
 		cmd,
-		pathParameters,
+		path,
+		inputIterators,
+		WithMicroserviceByNameFirstMatch(args, "id", "id"),
 	)
 	if err != nil {
 		return err
 	}
 
-	path := replacePathParameters("/application/applications/{id}/bootstrapUser", pathParameters)
-
 	req := c8y.RequestOptions{
 		Method:       "GET",
-		Path:         path,
+		Path:         path.GetTemplate(),
 		Query:        queryValue,
 		Body:         body,
 		FormData:     formData,
@@ -131,12 +140,5 @@ func (n *GetMicroserviceBootstrapUserCmd) RunE(cmd *cobra.Command, args []string
 		DryRun:       globalFlagDryRun,
 	}
 
-	pipeOption := PipeOption{
-		Name:              "id",
-		Property:          "",
-		Required:          true,
-		ResolveByNameType: "microservice",
-		IteratorType:      "path",
-	}
-	return processRequestAndResponseWithWorkers(cmd, &req, pipeOption)
+	return processRequestAndResponseWithWorkers(cmd, &req, inputIterators)
 }

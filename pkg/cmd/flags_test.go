@@ -23,6 +23,7 @@ func buildDummyCommand() *cobra.Command {
 func Test_WithTemplateValue(t *testing.T) {
 	cmd := buildDummyCommand()
 	addDataFlag(cmd)
+	inputIterator, _ := flags.NewRequestInputIterators(cmd)
 
 	cmd.SetArgs([]string{"--template", "{value: input.index}"})
 	cmdErr := cmd.Execute()
@@ -32,6 +33,7 @@ func Test_WithTemplateValue(t *testing.T) {
 	err := flags.WithBody(
 		cmd,
 		body,
+		inputIterator,
 		WithTemplateValue(),
 		WithTemplateVariablesValue(),
 	)

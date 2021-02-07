@@ -53,7 +53,7 @@ Get a managed object with parent references
 }
 
 func (n *getManagedObjectCmdManual) getManagedObject(cmd *cobra.Command, args []string) error {
-
+	inputIterators := &flags.RequestInputIterators{}
 	commonOptions, err := getCommonOptions(cmd)
 	if err != nil {
 		return newUserError(fmt.Sprintf("Failed to get common options. err=%s", err))
@@ -65,6 +65,7 @@ func (n *getManagedObjectCmdManual) getManagedObject(cmd *cobra.Command, args []
 	err = flags.WithQueryParameters(
 		cmd,
 		query,
+		inputIterators,
 		flags.WithBoolValue("withParents", "withParents"),
 	)
 	if err != nil {
@@ -87,20 +88,17 @@ func (n *getManagedObjectCmdManual) getManagedObject(cmd *cobra.Command, args []
 	body := mapbuilder.NewInitializedMapBuilder()
 
 	// path parameters
-	pathParameters := make(map[string]string)
-	// if v, err := cmd.Flags().GetString("id"); err == nil {
-	// 	if v != "" {
-	// 		pathParameters["id"] = v
-	// 	}
-	// } else {
-	// 	return newUserError(fmt.Sprintf("Flag [%s] does not exist. %s", "id", err))
-	// }
-
-	path := replacePathParameters("inventory/managedObjects/{id}", pathParameters)
+	path := flags.NewStringTemplate("inventory/managedObjects/{id}")
+	err = flags.WithPathParameters(
+		cmd,
+		path,
+		inputIterators,
+		flags.WithStringValue("id", "id"),
+	)
 
 	req := c8y.RequestOptions{
 		Method:       "GET",
-		Path:         path,
+		Path:         path.GetTemplate(),
 		Query:        queryValue,
 		Body:         body,
 		FormData:     formData,
@@ -109,5 +107,5 @@ func (n *getManagedObjectCmdManual) getManagedObject(cmd *cobra.Command, args []
 		DryRun:       globalFlagDryRun,
 	}
 
-	return processRequestAndResponseWithWorkers(cmd, &req, PipeOption{})
+	return processRequestAndResponseWithWorkers(cmd, &req, inputIterators)
 }

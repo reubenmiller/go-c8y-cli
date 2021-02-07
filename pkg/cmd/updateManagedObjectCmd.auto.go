@@ -39,7 +39,7 @@ Update a managed object
 
 	flags.WithOptions(
 		cmd,
-		flags.WithPipelineSupport("id"),
+		flags.WithExtendedPipelineSupport("id", "id", true),
 	)
 
 	// Required flags
@@ -51,11 +51,17 @@ Update a managed object
 
 func (n *UpdateManagedObjectCmd) RunE(cmd *cobra.Command, args []string) error {
 	var err error
+	inputIterators, err := flags.NewRequestInputIterators(cmd)
+	if err != nil {
+		return err
+	}
+
 	// query parameters
 	query := url.Values{}
 	err = flags.WithQueryParameters(
 		cmd,
 		query,
+		inputIterators,
 	)
 	if err != nil {
 		return newUserError(err)
@@ -72,6 +78,7 @@ func (n *UpdateManagedObjectCmd) RunE(cmd *cobra.Command, args []string) error {
 	err = flags.WithHeaders(
 		cmd,
 		headers,
+		inputIterators,
 		flags.WithProcessingModeValue(),
 	)
 	if err != nil {
@@ -83,6 +90,7 @@ func (n *UpdateManagedObjectCmd) RunE(cmd *cobra.Command, args []string) error {
 	err = flags.WithFormDataOptions(
 		cmd,
 		formData,
+		inputIterators,
 	)
 	if err != nil {
 		return newUserError(err)
@@ -93,6 +101,7 @@ func (n *UpdateManagedObjectCmd) RunE(cmd *cobra.Command, args []string) error {
 	err = flags.WithBody(
 		cmd,
 		body,
+		inputIterators,
 		WithDataValue(),
 		flags.WithStringValue("newName", "name"),
 		WithTemplateValue(),
@@ -107,20 +116,20 @@ func (n *UpdateManagedObjectCmd) RunE(cmd *cobra.Command, args []string) error {
 	}
 
 	// path parameters
-	pathParameters := make(map[string]string)
+	path := flags.NewStringTemplate("inventory/managedObjects/{id}")
 	err = flags.WithPathParameters(
 		cmd,
-		pathParameters,
+		path,
+		inputIterators,
+		flags.WithStringValue("id", "id"),
 	)
 	if err != nil {
 		return err
 	}
 
-	path := replacePathParameters("inventory/managedObjects/{id}", pathParameters)
-
 	req := c8y.RequestOptions{
 		Method:       "PUT",
-		Path:         path,
+		Path:         path.GetTemplate(),
 		Query:        queryValue,
 		Body:         body,
 		FormData:     formData,
@@ -129,12 +138,5 @@ func (n *UpdateManagedObjectCmd) RunE(cmd *cobra.Command, args []string) error {
 		DryRun:       globalFlagDryRun,
 	}
 
-	pipeOption := PipeOption{
-		Name:              "id",
-		Property:          "",
-		Required:          true,
-		ResolveByNameType: "",
-		IteratorType:      "path",
-	}
-	return processRequestAndResponseWithWorkers(cmd, &req, pipeOption)
+	return processRequestAndResponseWithWorkers(cmd, &req, inputIterators)
 }

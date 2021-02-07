@@ -38,7 +38,7 @@ Set the required availability of a device by name to 10 minutes
 
 	flags.WithOptions(
 		cmd,
-		flags.WithPipelineSupport("device"),
+		flags.WithExtendedPipelineSupport("device", "device", true),
 	)
 
 	// Required flags
@@ -51,11 +51,17 @@ Set the required availability of a device by name to 10 minutes
 
 func (n *SetDeviceRequiredAvailabilityCmd) RunE(cmd *cobra.Command, args []string) error {
 	var err error
+	inputIterators, err := flags.NewRequestInputIterators(cmd)
+	if err != nil {
+		return err
+	}
+
 	// query parameters
 	query := url.Values{}
 	err = flags.WithQueryParameters(
 		cmd,
 		query,
+		inputIterators,
 	)
 	if err != nil {
 		return newUserError(err)
@@ -72,6 +78,7 @@ func (n *SetDeviceRequiredAvailabilityCmd) RunE(cmd *cobra.Command, args []strin
 	err = flags.WithHeaders(
 		cmd,
 		headers,
+		inputIterators,
 		flags.WithProcessingModeValue(),
 	)
 	if err != nil {
@@ -83,6 +90,7 @@ func (n *SetDeviceRequiredAvailabilityCmd) RunE(cmd *cobra.Command, args []strin
 	err = flags.WithFormDataOptions(
 		cmd,
 		formData,
+		inputIterators,
 	)
 	if err != nil {
 		return newUserError(err)
@@ -93,6 +101,7 @@ func (n *SetDeviceRequiredAvailabilityCmd) RunE(cmd *cobra.Command, args []strin
 	err = flags.WithBody(
 		cmd,
 		body,
+		inputIterators,
 		WithDataValue(),
 		flags.WithIntValue("interval", "c8y_RequiredAvailability.responseInterval"),
 		WithTemplateValue(),
@@ -107,20 +116,20 @@ func (n *SetDeviceRequiredAvailabilityCmd) RunE(cmd *cobra.Command, args []strin
 	}
 
 	// path parameters
-	pathParameters := make(map[string]string)
+	path := flags.NewStringTemplate("inventory/managedObjects/{device}")
 	err = flags.WithPathParameters(
 		cmd,
-		pathParameters,
+		path,
+		inputIterators,
+		WithDeviceByNameFirstMatch(args, "device", "device"),
 	)
 	if err != nil {
 		return err
 	}
 
-	path := replacePathParameters("inventory/managedObjects/{device}", pathParameters)
-
 	req := c8y.RequestOptions{
 		Method:       "PUT",
-		Path:         path,
+		Path:         path.GetTemplate(),
 		Query:        queryValue,
 		Body:         body,
 		FormData:     formData,
@@ -129,12 +138,5 @@ func (n *SetDeviceRequiredAvailabilityCmd) RunE(cmd *cobra.Command, args []strin
 		DryRun:       globalFlagDryRun,
 	}
 
-	pipeOption := PipeOption{
-		Name:              "device",
-		Property:          "",
-		Required:          true,
-		ResolveByNameType: "device",
-		IteratorType:      "path",
-	}
-	return processRequestAndResponseWithWorkers(cmd, &req, pipeOption)
+	return processRequestAndResponseWithWorkers(cmd, &req, inputIterators)
 }

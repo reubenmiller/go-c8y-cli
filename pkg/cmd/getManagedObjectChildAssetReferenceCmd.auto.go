@@ -38,7 +38,7 @@ Get an existing child asset reference
 
 	flags.WithOptions(
 		cmd,
-		flags.WithPipelineSupport("asset"),
+		flags.WithExtendedPipelineSupport("asset", "asset", true),
 	)
 
 	// Required flags
@@ -51,11 +51,17 @@ Get an existing child asset reference
 
 func (n *GetManagedObjectChildAssetReferenceCmd) RunE(cmd *cobra.Command, args []string) error {
 	var err error
+	inputIterators, err := flags.NewRequestInputIterators(cmd)
+	if err != nil {
+		return err
+	}
+
 	// query parameters
 	query := url.Values{}
 	err = flags.WithQueryParameters(
 		cmd,
 		query,
+		inputIterators,
 	)
 	if err != nil {
 		return newUserError(err)
@@ -77,6 +83,7 @@ func (n *GetManagedObjectChildAssetReferenceCmd) RunE(cmd *cobra.Command, args [
 	err = flags.WithHeaders(
 		cmd,
 		headers,
+		inputIterators,
 	)
 	if err != nil {
 		return newUserError(err)
@@ -87,6 +94,7 @@ func (n *GetManagedObjectChildAssetReferenceCmd) RunE(cmd *cobra.Command, args [
 	err = flags.WithFormDataOptions(
 		cmd,
 		formData,
+		inputIterators,
 	)
 	if err != nil {
 		return newUserError(err)
@@ -97,6 +105,7 @@ func (n *GetManagedObjectChildAssetReferenceCmd) RunE(cmd *cobra.Command, args [
 	err = flags.WithBody(
 		cmd,
 		body,
+		inputIterators,
 	)
 	if err != nil {
 		return newUserError(err)
@@ -107,21 +116,21 @@ func (n *GetManagedObjectChildAssetReferenceCmd) RunE(cmd *cobra.Command, args [
 	}
 
 	// path parameters
-	pathParameters := make(map[string]string)
+	path := flags.NewStringTemplate("inventory/managedObjects/{asset}/childAssets/{reference}")
 	err = flags.WithPathParameters(
 		cmd,
-		pathParameters,
+		path,
+		inputIterators,
+		WithDeviceByNameFirstMatch(args, "asset", "asset"),
 		WithDeviceByNameFirstMatch(args, "reference", "reference"),
 	)
 	if err != nil {
 		return err
 	}
 
-	path := replacePathParameters("inventory/managedObjects/{asset}/childAssets/{reference}", pathParameters)
-
 	req := c8y.RequestOptions{
 		Method:       "GET",
-		Path:         path,
+		Path:         path.GetTemplate(),
 		Query:        queryValue,
 		Body:         body,
 		FormData:     formData,
@@ -130,12 +139,5 @@ func (n *GetManagedObjectChildAssetReferenceCmd) RunE(cmd *cobra.Command, args [
 		DryRun:       globalFlagDryRun,
 	}
 
-	pipeOption := PipeOption{
-		Name:              "asset",
-		Property:          "",
-		Required:          true,
-		ResolveByNameType: "device",
-		IteratorType:      "path",
-	}
-	return processRequestAndResponseWithWorkers(cmd, &req, pipeOption)
+	return processRequestAndResponseWithWorkers(cmd, &req, inputIterators)
 }

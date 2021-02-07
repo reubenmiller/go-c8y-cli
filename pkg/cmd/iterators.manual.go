@@ -185,16 +185,9 @@ type IteraterType string
 const IteraterTypeBody = IteraterType("body")
 const IteraterTypePath = IteraterType("path")
 
-func NewPathIterator(cmd *cobra.Command, path string, pipeOpt PipeOption) (iterator.Iterator, error) {
+func NewPathIterator(cmd *cobra.Command, path string, pipeOpt *flags.PipelineOptions) (iterator.Iterator, error) {
 	var pathIter iterator.Iterator
-
-	// create input iterator
-	options := flags.PipelineOptions{
-		Name:     pipeOpt.Name,
-		Aliases:  pipeOpt.Properties,
-		Required: pipeOpt.Required,
-	}
-	items, err := flags.NewFlagWithPipeIterator(cmd, options)
+	items, err := flags.NewFlagWithPipeIterator(cmd, pipeOpt)
 	if err != nil {
 		return nil, err
 	}
@@ -203,8 +196,8 @@ func NewPathIterator(cmd *cobra.Command, path string, pipeOpt PipeOption) (itera
 		format := path
 		pathVarName := pipeOpt.Name
 
-		if len(pipeOpt.Properties) > 0 {
-			pathVarName = pipeOpt.Properties[0]
+		if len(pipeOpt.Aliases) > 0 {
+			pathVarName = pipeOpt.Aliases[0]
 		}
 
 		if strings.Count(format, "{") == 1 && strings.Count(path, "}") == 1 {

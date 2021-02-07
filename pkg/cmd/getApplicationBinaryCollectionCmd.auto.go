@@ -38,7 +38,7 @@ List all of the binaries related to a Hosted (web) application
 
 	flags.WithOptions(
 		cmd,
-		flags.WithPipelineSupport("id"),
+		flags.WithExtendedPipelineSupport("id", "id", true),
 	)
 
 	// Required flags
@@ -50,11 +50,17 @@ List all of the binaries related to a Hosted (web) application
 
 func (n *GetApplicationBinaryCollectionCmd) RunE(cmd *cobra.Command, args []string) error {
 	var err error
+	inputIterators, err := flags.NewRequestInputIterators(cmd)
+	if err != nil {
+		return err
+	}
+
 	// query parameters
 	query := url.Values{}
 	err = flags.WithQueryParameters(
 		cmd,
 		query,
+		inputIterators,
 	)
 	if err != nil {
 		return newUserError(err)
@@ -76,6 +82,7 @@ func (n *GetApplicationBinaryCollectionCmd) RunE(cmd *cobra.Command, args []stri
 	err = flags.WithHeaders(
 		cmd,
 		headers,
+		inputIterators,
 	)
 	if err != nil {
 		return newUserError(err)
@@ -86,6 +93,7 @@ func (n *GetApplicationBinaryCollectionCmd) RunE(cmd *cobra.Command, args []stri
 	err = flags.WithFormDataOptions(
 		cmd,
 		formData,
+		inputIterators,
 	)
 	if err != nil {
 		return newUserError(err)
@@ -96,6 +104,7 @@ func (n *GetApplicationBinaryCollectionCmd) RunE(cmd *cobra.Command, args []stri
 	err = flags.WithBody(
 		cmd,
 		body,
+		inputIterators,
 	)
 	if err != nil {
 		return newUserError(err)
@@ -106,20 +115,20 @@ func (n *GetApplicationBinaryCollectionCmd) RunE(cmd *cobra.Command, args []stri
 	}
 
 	// path parameters
-	pathParameters := make(map[string]string)
+	path := flags.NewStringTemplate("/application/applications/{id}/binaries")
 	err = flags.WithPathParameters(
 		cmd,
-		pathParameters,
+		path,
+		inputIterators,
+		WithApplicationByNameFirstMatch(args, "id", "id"),
 	)
 	if err != nil {
 		return err
 	}
 
-	path := replacePathParameters("/application/applications/{id}/binaries", pathParameters)
-
 	req := c8y.RequestOptions{
 		Method:       "GET",
-		Path:         path,
+		Path:         path.GetTemplate(),
 		Query:        queryValue,
 		Body:         body,
 		FormData:     formData,
@@ -128,12 +137,5 @@ func (n *GetApplicationBinaryCollectionCmd) RunE(cmd *cobra.Command, args []stri
 		DryRun:       globalFlagDryRun,
 	}
 
-	pipeOption := PipeOption{
-		Name:              "id",
-		Property:          "",
-		Required:          true,
-		ResolveByNameType: "application",
-		IteratorType:      "path",
-	}
-	return processRequestAndResponseWithWorkers(cmd, &req, pipeOption)
+	return processRequestAndResponseWithWorkers(cmd, &req, inputIterators)
 }

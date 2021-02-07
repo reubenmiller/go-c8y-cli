@@ -37,7 +37,7 @@ Get a list of the child additions of an existing managed object
 
 	flags.WithOptions(
 		cmd,
-		flags.WithPipelineSupport("id"),
+		flags.WithExtendedPipelineSupport("id", "id", true),
 	)
 
 	// Required flags
@@ -49,11 +49,17 @@ Get a list of the child additions of an existing managed object
 
 func (n *GetManagedObjectChildAdditionCollectionCmd) RunE(cmd *cobra.Command, args []string) error {
 	var err error
+	inputIterators, err := flags.NewRequestInputIterators(cmd)
+	if err != nil {
+		return err
+	}
+
 	// query parameters
 	query := url.Values{}
 	err = flags.WithQueryParameters(
 		cmd,
 		query,
+		inputIterators,
 	)
 	if err != nil {
 		return newUserError(err)
@@ -75,6 +81,7 @@ func (n *GetManagedObjectChildAdditionCollectionCmd) RunE(cmd *cobra.Command, ar
 	err = flags.WithHeaders(
 		cmd,
 		headers,
+		inputIterators,
 	)
 	if err != nil {
 		return newUserError(err)
@@ -85,6 +92,7 @@ func (n *GetManagedObjectChildAdditionCollectionCmd) RunE(cmd *cobra.Command, ar
 	err = flags.WithFormDataOptions(
 		cmd,
 		formData,
+		inputIterators,
 	)
 	if err != nil {
 		return newUserError(err)
@@ -95,6 +103,7 @@ func (n *GetManagedObjectChildAdditionCollectionCmd) RunE(cmd *cobra.Command, ar
 	err = flags.WithBody(
 		cmd,
 		body,
+		inputIterators,
 	)
 	if err != nil {
 		return newUserError(err)
@@ -105,20 +114,20 @@ func (n *GetManagedObjectChildAdditionCollectionCmd) RunE(cmd *cobra.Command, ar
 	}
 
 	// path parameters
-	pathParameters := make(map[string]string)
+	path := flags.NewStringTemplate("inventory/managedObjects/{id}/childAdditions")
 	err = flags.WithPathParameters(
 		cmd,
-		pathParameters,
+		path,
+		inputIterators,
+		flags.WithStringValue("id", "id"),
 	)
 	if err != nil {
 		return err
 	}
 
-	path := replacePathParameters("inventory/managedObjects/{id}/childAdditions", pathParameters)
-
 	req := c8y.RequestOptions{
 		Method:       "GET",
-		Path:         path,
+		Path:         path.GetTemplate(),
 		Query:        queryValue,
 		Body:         body,
 		FormData:     formData,
@@ -127,12 +136,5 @@ func (n *GetManagedObjectChildAdditionCollectionCmd) RunE(cmd *cobra.Command, ar
 		DryRun:       globalFlagDryRun,
 	}
 
-	pipeOption := PipeOption{
-		Name:              "id",
-		Property:          "",
-		Required:          true,
-		ResolveByNameType: "",
-		IteratorType:      "path",
-	}
-	return processRequestAndResponseWithWorkers(cmd, &req, pipeOption)
+	return processRequestAndResponseWithWorkers(cmd, &req, inputIterators)
 }

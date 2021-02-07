@@ -21,12 +21,14 @@ type RequestBuilder struct {
 }
 
 func WithRequestOptions(cmd *cobra.Command, args []string, req *c8y.RequestOptions, builderOpts *RequestBuilder) (err error) {
+	inputIterators := &RequestInputIterators{}
 
 	// headers
 	headers := http.Header{}
 	err = WithHeaders(
 		cmd,
 		headers,
+		inputIterators,
 		builderOpts.HeaderOptions...,
 	)
 
@@ -36,10 +38,11 @@ func WithRequestOptions(cmd *cobra.Command, args []string, req *c8y.RequestOptio
 
 	//
 	// path parameters
-	pathParameters := make(map[string]string)
+	pathParameters := NewStringTemplate(req.Path)
 	err = WithPathParameters(
 		cmd,
 		pathParameters,
+		inputIterators,
 		builderOpts.PathOptions...,
 	)
 
@@ -51,6 +54,7 @@ func WithRequestOptions(cmd *cobra.Command, args []string, req *c8y.RequestOptio
 	err = WithQueryParameters(
 		cmd,
 		query,
+		inputIterators,
 		builderOpts.QueryOptions...,
 	)
 	if err != nil {
@@ -69,6 +73,7 @@ func WithRequestOptions(cmd *cobra.Command, args []string, req *c8y.RequestOptio
 	err = WithFormDataOptions(
 		cmd,
 		formData,
+		inputIterators,
 		builderOpts.FormDataOptions...,
 	)
 	if err != nil {
@@ -81,6 +86,7 @@ func WithRequestOptions(cmd *cobra.Command, args []string, req *c8y.RequestOptio
 	err = WithBody(
 		cmd,
 		body,
+		inputIterators,
 		builderOpts.BodyOptions...,
 	)
 	if err != nil {
@@ -95,7 +101,7 @@ func WithRequestOptions(cmd *cobra.Command, args []string, req *c8y.RequestOptio
 
 	// set request values
 	req.Header = headers
-	req.Path = replacePathParameters(req.Path, pathParameters)
+	req.Path = pathParameters.GetTemplate()
 	req.Query = queryValue
 	req.Body = body
 	req.FormData = formData

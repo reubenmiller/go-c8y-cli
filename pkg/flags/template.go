@@ -23,7 +23,7 @@ func WithTemplateOptions(templateName string, variablesName string, pathResolver
 }
 
 func WithTemplateValue(src string, pathResolver Resolver) GetOption {
-	return func(cmd *cobra.Command) (string, interface{}, error) {
+	return func(cmd *cobra.Command, inputIterators *RequestInputIterators) (string, interface{}, error) {
 		if !cmd.Flags().Changed(src) {
 			// ignore
 			return "", nil, nil
@@ -50,10 +50,10 @@ func WithTemplateValue(src string, pathResolver Resolver) GetOption {
 }
 
 func WithTemplateVariablesValue(src string) GetOption {
-	return func(cmd *cobra.Command) (string, interface{}, error) {
+	return func(cmd *cobra.Command, inputIterators *RequestInputIterators) (string, interface{}, error) {
 
 		opt := WithDataValueAdvanced(false, src)
-		dst, value, err := opt(cmd)
+		dst, value, err := opt(cmd, inputIterators)
 
 		if err != nil {
 			return dst, value, err

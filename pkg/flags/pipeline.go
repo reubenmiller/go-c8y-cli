@@ -13,8 +13,9 @@ import (
 // NewFlagWithPipeIterator creates an iterator from a command argument
 // or from the pipeline
 // It will automatically try to get the value from a String or a StringSlice flag
-func NewFlagWithPipeIterator(cmd *cobra.Command, pipeOpt PipelineOptions) (iterator.Iterator, error) {
-	supportsPipeline := HasValueFromPipeline(cmd, pipeOpt.Name)
+func NewFlagWithPipeIterator(cmd *cobra.Command, pipeOpt *PipelineOptions) (iterator.Iterator, error) {
+	// supportsPipeline := HasValueFromPipeline(cmd, pipeOpt.Name)
+	supportsPipeline := true
 
 	if cmd.Flags().Changed(pipeOpt.Name) {
 
@@ -44,15 +45,10 @@ func NewFlagWithPipeIterator(cmd *cobra.Command, pipeOpt PipelineOptions) (itera
 			return iterator.NewSliceIterator(items), nil
 		}
 	} else if supportsPipeline {
-
-		opt := &iterator.PipeOptions{
-			Properties: []string{pipeOpt.Name},
+		iterOpts := &iterator.PipeOptions{
+			Properties: pipeOpt.Aliases,
 		}
-		if len(pipeOpt.Aliases) > 0 {
-			opt.Properties = pipeOpt.Aliases
-		}
-		
-		iter, err := iterator.NewJSONPipeIterator(cmd.InOrStdin(), opt, func(line []byte) bool {
+		iter, err := iterator.NewJSONPipeIterator(cmd.InOrStdin(), iterOpts, func(line []byte) bool {
 			line = bytes.TrimSpace(line)
 			if !bytes.HasPrefix(line, []byte("{")) && !bytes.HasPrefix(line, []byte("[")) {
 				return true

@@ -8,6 +8,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/pkg/iterator"
 	"github.com/reubenmiller/go-c8y-cli/pkg/progressbar"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
@@ -90,58 +91,50 @@ type batchArgument struct {
 	batchOptions  BatchOptions
 }
 
-func processRequestAndResponseWithWorkers(cmd *cobra.Command, r *c8y.RequestOptions, pipeOpt PipeOption) error {
+func processRequestAndResponseWithWorkers(cmd *cobra.Command, r *c8y.RequestOptions, inputIterators *flags.RequestInputIterators) error {
 	var err error
 	var pathIter iterator.Iterator
 
-	// pathIter = iterator.NewRepeatIterator(r.Path, 1)
-	iterType := IteraterType(pipeOpt.IteratorType)
-
-	if iterType == IteraterTypePath {
-		pathIter, err = NewPathIterator(cmd, r.Path, pipeOpt)
-		if err != nil {
-			return err
+	if inputIterators != nil && inputIterators.Total > 0 {
+		if inputIterators.Path != nil {
+			pathIter = inputIterators.Path
 		}
-	} else if iterType == IteraterTypeBody {
-		// body is using iterators, it will control how many can be used
-		maxIterations := int64(0)
-		if !pipeOpt.Required {
-			maxIterations = 1
+		if inputIterators.Body != nil {
+			r.Body = inputIterators.Body
 		}
-		pathIter = iterator.NewRepeatIterator(r.Path, maxIterations)
-	} else {
-		// limit to 1 request (if no iterators are being used)
+	}
+	if pathIter == nil {
 		pathIter = iterator.NewRepeatIterator(r.Path, 1)
 	}
 
 	// Note: Body accepts iterator types, so no need for special handling here
 	requestIter := NewRequestIterator(*r, pathIter, r.Body)
 
-	if pipeOpt.ResolveByNameType != "" {
-		// Add a resolve by name fetcher
-		var fetcher entityFetcher
-		switch pipeOpt.ResolveByNameType {
-		case "device":
-			fetcher = newDeviceFetcher(client)
-		case "application":
-			fetcher = newApplicationFetcher(client)
-		case "microservice":
-			fetcher = newMicroserviceFetcher(client)
-		case "agent":
-			fetcher = newAgentFetcher(client)
-		case "devicegroup":
-			fetcher = newDeviceGroupFetcher(client)
-		case "user":
-			fetcher = newUserFetcher(client)
-		case "role":
-			fetcher = newRoleFetcher(client)
-		case "usergroup":
-			fetcher = newUserGroupFetcher(client)
-		}
-		if fetcher != nil {
-			requestIter.NameResolver = fetcher
-		}
-	}
+	// if pipeOpt.ResolveByNameType != "" {
+	// 	// Add a resolve by name fetcher
+	// 	var fetcher entityFetcher
+	// 	switch pipeOpt.ResolveByNameType {
+	// 	case "device":
+	// 		fetcher = newDeviceFetcher(client)
+	// 	case "application":
+	// 		fetcher = newApplicationFetcher(client)
+	// 	case "microservice":
+	// 		fetcher = newMicroserviceFetcher(client)
+	// 	case "agent":
+	// 		fetcher = newAgentFetcher(client)
+	// 	case "devicegroup":
+	// 		fetcher = newDeviceGroupFetcher(client)
+	// 	case "user":
+	// 		fetcher = newUserFetcher(client)
+	// 	case "role":
+	// 		fetcher = newRoleFetcher(client)
+	// 	case "usergroup":
+	// 		fetcher = newUserGroupFetcher(client)
+	// 	}
+	// 	if fetcher != nil {
+	// 		requestIter.NameResolver = fetcher
+	// 	}
+	// }
 
 	// get common options and batch settings
 	commonOptions, err := getCommonOptions(cmd)

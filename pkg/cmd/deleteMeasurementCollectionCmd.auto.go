@@ -41,7 +41,7 @@ Delete measurement collection for a device
 
 	flags.WithOptions(
 		cmd,
-		flags.WithPipelineSupport("device"),
+		flags.WithExtendedPipelineSupport("device", "source", false),
 	)
 
 	// Required flags
@@ -53,11 +53,17 @@ Delete measurement collection for a device
 
 func (n *DeleteMeasurementCollectionCmd) RunE(cmd *cobra.Command, args []string) error {
 	var err error
+	inputIterators, err := flags.NewRequestInputIterators(cmd)
+	if err != nil {
+		return err
+	}
+
 	// query parameters
 	query := url.Values{}
 	err = flags.WithQueryParameters(
 		cmd,
 		query,
+		inputIterators,
 		WithDeviceByNameFirstMatch(args, "device", "source"),
 		flags.WithStringValue("type", "type"),
 		flags.WithStringValue("fragmentType", "fragmentType"),
@@ -79,6 +85,7 @@ func (n *DeleteMeasurementCollectionCmd) RunE(cmd *cobra.Command, args []string)
 	err = flags.WithHeaders(
 		cmd,
 		headers,
+		inputIterators,
 		flags.WithProcessingModeValue(),
 	)
 	if err != nil {
@@ -90,6 +97,7 @@ func (n *DeleteMeasurementCollectionCmd) RunE(cmd *cobra.Command, args []string)
 	err = flags.WithFormDataOptions(
 		cmd,
 		formData,
+		inputIterators,
 	)
 	if err != nil {
 		return newUserError(err)
@@ -100,6 +108,7 @@ func (n *DeleteMeasurementCollectionCmd) RunE(cmd *cobra.Command, args []string)
 	err = flags.WithBody(
 		cmd,
 		body,
+		inputIterators,
 	)
 	if err != nil {
 		return newUserError(err)
@@ -110,20 +119,19 @@ func (n *DeleteMeasurementCollectionCmd) RunE(cmd *cobra.Command, args []string)
 	}
 
 	// path parameters
-	pathParameters := make(map[string]string)
+	path := flags.NewStringTemplate("measurement/measurements")
 	err = flags.WithPathParameters(
 		cmd,
-		pathParameters,
+		path,
+		inputIterators,
 	)
 	if err != nil {
 		return err
 	}
 
-	path := replacePathParameters("measurement/measurements", pathParameters)
-
 	req := c8y.RequestOptions{
 		Method:       "DELETE",
-		Path:         path,
+		Path:         path.GetTemplate(),
 		Query:        queryValue,
 		Body:         body,
 		FormData:     formData,
@@ -132,12 +140,5 @@ func (n *DeleteMeasurementCollectionCmd) RunE(cmd *cobra.Command, args []string)
 		DryRun:       globalFlagDryRun,
 	}
 
-	pipeOption := PipeOption{
-		Name:              "device",
-		Property:          "source",
-		Required:          false,
-		ResolveByNameType: "device",
-		IteratorType:      "",
-	}
-	return processRequestAndResponseWithWorkers(cmd, &req, pipeOption)
+	return processRequestAndResponseWithWorkers(cmd, &req, inputIterators)
 }

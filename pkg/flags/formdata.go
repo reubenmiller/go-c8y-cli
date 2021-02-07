@@ -18,7 +18,7 @@ var ErrInvalidJSON = errors.New("invalid json")
 var ErrUnsupportedType = errors.New("unsupported type")
 
 // WithFormDataOptions returns a body from given command line arguments
-func WithFormDataOptions(cmd *cobra.Command, form map[string]io.Reader, opts ...GetOption) (err error) {
+func WithFormDataOptions(cmd *cobra.Command, form map[string]io.Reader, inputIterators *RequestInputIterators, opts ...GetOption) (err error) {
 
 	if len(opts) == 0 {
 		return nil
@@ -29,7 +29,7 @@ func WithFormDataOptions(cmd *cobra.Command, form map[string]io.Reader, opts ...
 	objectInfo.SetEmptyMap()
 
 	for _, opt := range opts {
-		name, value, err := opt(cmd)
+		name, value, err := opt(cmd, inputIterators)
 		if err != nil {
 			return err
 		}
@@ -70,7 +70,7 @@ func WithFormDataOptions(cmd *cobra.Command, form map[string]io.Reader, opts ...
 // WithFileReader adds file (as reader) from cli arguments
 func WithFileReader(opts ...string) GetOption {
 
-	return func(cmd *cobra.Command) (string, interface{}, error) {
+	return func(cmd *cobra.Command, inputIterators *RequestInputIterators) (string, interface{}, error) {
 		src, dst, _ := UnpackGetterOptions("%s", opts...)
 
 		if !cmd.Flags().Changed(src) {
@@ -91,7 +91,7 @@ func WithFileReader(opts ...string) GetOption {
 // WithFileBaseName adds the filename basename from cli arguments
 func WithFileBaseName(opts ...string) GetOption {
 
-	return func(cmd *cobra.Command) (string, interface{}, error) {
+	return func(cmd *cobra.Command, inputIterators *RequestInputIterators) (string, interface{}, error) {
 		src, dst, _ := UnpackGetterOptions("%s", opts...)
 
 		if !cmd.Flags().Changed(src) {
@@ -111,7 +111,7 @@ func WithFileBaseName(opts ...string) GetOption {
 // WithFileMIMEType adds the file MIME type from cli arguments
 func WithFileMIMEType(opts ...string) GetOption {
 
-	return func(cmd *cobra.Command) (string, interface{}, error) {
+	return func(cmd *cobra.Command, inputIterators *RequestInputIterators) (string, interface{}, error) {
 		src, dst, _ := UnpackGetterOptions("%s", opts...)
 
 		if !cmd.Flags().Changed(src) {

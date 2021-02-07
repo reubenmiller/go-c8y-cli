@@ -39,7 +39,7 @@ Add a role to the admin group
 
 	flags.WithOptions(
 		cmd,
-		flags.WithPipelineSupport("role"),
+		flags.WithExtendedPipelineSupport("role", "role.self", true),
 	)
 
 	// Required flags
@@ -52,11 +52,17 @@ Add a role to the admin group
 
 func (n *AddRoleToGroupCmd) RunE(cmd *cobra.Command, args []string) error {
 	var err error
+	inputIterators, err := flags.NewRequestInputIterators(cmd)
+	if err != nil {
+		return err
+	}
+
 	// query parameters
 	query := url.Values{}
 	err = flags.WithQueryParameters(
 		cmd,
 		query,
+		inputIterators,
 	)
 	if err != nil {
 		return newUserError(err)
@@ -73,6 +79,7 @@ func (n *AddRoleToGroupCmd) RunE(cmd *cobra.Command, args []string) error {
 	err = flags.WithHeaders(
 		cmd,
 		headers,
+		inputIterators,
 		flags.WithProcessingModeValue(),
 	)
 	if err != nil {
@@ -84,6 +91,7 @@ func (n *AddRoleToGroupCmd) RunE(cmd *cobra.Command, args []string) error {
 	err = flags.WithFormDataOptions(
 		cmd,
 		formData,
+		inputIterators,
 	)
 	if err != nil {
 		return newUserError(err)
@@ -94,6 +102,7 @@ func (n *AddRoleToGroupCmd) RunE(cmd *cobra.Command, args []string) error {
 	err = flags.WithBody(
 		cmd,
 		body,
+		inputIterators,
 		WithDataValue(),
 		WithRoleSelfByNameFirstMatch(args, "role", "role.self"),
 		WithTemplateValue(),
@@ -108,10 +117,11 @@ func (n *AddRoleToGroupCmd) RunE(cmd *cobra.Command, args []string) error {
 	}
 
 	// path parameters
-	pathParameters := make(map[string]string)
+	path := flags.NewStringTemplate("/user/{tenant}/groups/{group}/roles")
 	err = flags.WithPathParameters(
 		cmd,
-		pathParameters,
+		path,
+		inputIterators,
 		flags.WithStringDefaultValue(client.TenantName, "tenant", "tenant"),
 		WithUserGroupByNameFirstMatch(args, "group", "group"),
 	)
@@ -119,11 +129,9 @@ func (n *AddRoleToGroupCmd) RunE(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	path := replacePathParameters("/user/{tenant}/groups/{group}/roles", pathParameters)
-
 	req := c8y.RequestOptions{
 		Method:       "POST",
-		Path:         path,
+		Path:         path.GetTemplate(),
 		Query:        queryValue,
 		Body:         body,
 		FormData:     formData,
@@ -132,12 +140,5 @@ func (n *AddRoleToGroupCmd) RunE(cmd *cobra.Command, args []string) error {
 		DryRun:       globalFlagDryRun,
 	}
 
-	pipeOption := PipeOption{
-		Name:              "role",
-		Property:          "role.self",
-		Required:          true,
-		ResolveByNameType: "",
-		IteratorType:      "body",
-	}
-	return processRequestAndResponseWithWorkers(cmd, &req, pipeOption)
+	return processRequestAndResponseWithWorkers(cmd, &req, inputIterators)
 }

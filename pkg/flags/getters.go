@@ -15,12 +15,12 @@ import (
 )
 
 // GetOption gets the value from a flag and returns the value which can be set accordingly
-type GetOption func(cmd *cobra.Command) (name string, value interface{}, err error)
+type GetOption func(cmd *cobra.Command, inputIterators *RequestInputIterators) (name string, value interface{}, err error)
 
 // WithQueryParameters returns a query parameter values given from command line arguments
-func WithQueryParameters(cmd *cobra.Command, query url.Values, opts ...GetOption) (err error) {
+func WithQueryParameters(cmd *cobra.Command, query url.Values, inputIterators *RequestInputIterators, opts ...GetOption) (err error) {
 	for _, opt := range opts {
-		name, value, err := opt(cmd)
+		name, value, err := opt(cmd, inputIterators)
 		if err != nil {
 			return err
 		}
@@ -33,32 +33,38 @@ func WithQueryParameters(cmd *cobra.Command, query url.Values, opts ...GetOption
 }
 
 // WithPathParameters returns a path parameter values given from command line arguments
-func WithPathParameters(cmd *cobra.Command, path map[string]string, opts ...GetOption) (err error) {
+func WithPathParameters(cmd *cobra.Command, path *StringTemplate, inputIterators *RequestInputIterators, opts ...GetOption) (err error) {
+
 	for _, opt := range opts {
-		name, value, err := opt(cmd)
+		name, value, err := opt(cmd, inputIterators)
 		if err != nil {
 			return err
 		}
 		if name != "" {
 			switch v := value.(type) {
 			case []string:
-				path[name] = fmt.Sprintf("%s", strings.Join(v, ","))
+				path.SetVariable(name, fmt.Sprintf("%s", strings.Join(v, ",")))
 
 			case []int:
-				path[name] = strings.Trim(strings.Join(strings.Fields(fmt.Sprint(v)), ","), "[]")
+				path.SetVariable(name, strings.Trim(strings.Join(strings.Fields(fmt.Sprint(v)), ","), "[]"))
+
+			case iterator.Iterator:
+				path.SetVariable(name, v)
+				inputIterators.Total++
 
 			default:
-				path[name] = fmt.Sprintf("%v", value)
+				path.SetVariable(name, fmt.Sprintf("%v", value))
 			}
 		}
 	}
+	inputIterators.Path = path
 	return
 }
 
 // WithHeaders sets header values from command line arguments
-func WithHeaders(cmd *cobra.Command, header http.Header, opts ...GetOption) (err error) {
+func WithHeaders(cmd *cobra.Command, header http.Header, inputIterators *RequestInputIterators, opts ...GetOption) (err error) {
 	for _, opt := range opts {
-		name, value, err := opt(cmd)
+		name, value, err := opt(cmd, inputIterators)
 		if err != nil {
 			return err
 		}
@@ -71,15 +77,18 @@ func WithHeaders(cmd *cobra.Command, header http.Header, opts ...GetOption) (err
 }
 
 // WithBody returns a body from given command line arguments
-func WithBody(cmd *cobra.Command, body *mapbuilder.MapBuilder, opts ...GetOption) (err error) {
+func WithBody(cmd *cobra.Command, body *mapbuilder.MapBuilder, inputIterators *RequestInputIterators, opts ...GetOption) (err error) {
 
 	for _, opt := range opts {
-		name, value, err := opt(cmd)
+		name, value, err := opt(cmd, inputIterators)
 		if err != nil {
 			return err
 		}
 
 		switch v := value.(type) {
+		case iterator.Iterator:
+			err = body.Set(name, value)
+			inputIterators.Total++
 		case string:
 			// only set non-empty values by default
 			if v != "" {
@@ -128,12 +137,13 @@ func WithBody(cmd *cobra.Command, body *mapbuilder.MapBuilder, opts ...GetOption
 			return err
 		}
 	}
+	inputIterators.Body = body
 	return nil
 }
 
 // WithBoolValue adds a boolean value from cli arguments to a query parameter
 func WithBoolValue(opts ...string) GetOption {
-	return func(cmd *cobra.Command) (string, interface{}, error) {
+	return func(cmd *cobra.Command, inputIterators *RequestInputIterators) (string, interface{}, error) {
 		src, dst, format := UnpackGetterOptions("", opts...)
 		if cmd.Flags().Changed(src) {
 			value, err := cmd.Flags().GetBool(src)
@@ -149,9 +159,15 @@ func WithBoolValue(opts ...string) GetOption {
 
 // WithStringValue adds a string value from cli arguments
 func WithStringValue(opts ...string) GetOption {
-	return func(cmd *cobra.Command) (string, interface{}, error) {
+	return func(cmd *cobra.Command, inputIterators *RequestInputIterators) (string, interface{}, error) {
 
 		src, dst, format := UnpackGetterOptions("%s", opts...)
+
+		if inputIterators != nil {
+			if inputIterators.PipeOptions.Name == src {
+				return WithPipelineIterator(inputIterators.PipeOptions)(cmd, inputIterators)
+			}
+		}
 
 		value, err := cmd.Flags().GetString(src)
 		if err != nil {
@@ -163,7 +179,7 @@ func WithStringValue(opts ...string) GetOption {
 
 // WithStringDefaultValue adds a string value from cli arguments
 func WithStringDefaultValue(defaultValue string, opts ...string) GetOption {
-	return func(cmd *cobra.Command) (string, interface{}, error) {
+	return func(cmd *cobra.Command, inputIterators *RequestInputIterators) (string, interface{}, error) {
 
 		src, dst, format := UnpackGetterOptions("%s", opts...)
 
@@ -184,7 +200,7 @@ func WithStringDefaultValue(defaultValue string, opts ...string) GetOption {
 
 // WithStringSliceValues adds a string slice from cli arguments
 func WithStringSliceValues(opts ...string) GetOption {
-	return func(cmd *cobra.Command) (string, interface{}, error) {
+	return func(cmd *cobra.Command, inputIterators *RequestInputIterators) (string, interface{}, error) {
 
 		src, dst, format := UnpackGetterOptions("%s", opts...)
 
@@ -209,7 +225,7 @@ func WithStringSliceValues(opts ...string) GetOption {
 
 // WithIntValue adds a integer (int) value from cli arguments
 func WithIntValue(opts ...string) GetOption {
-	return func(cmd *cobra.Command) (string, interface{}, error) {
+	return func(cmd *cobra.Command, inputIterators *RequestInputIterators) (string, interface{}, error) {
 		src, dst, _ := UnpackGetterOptions("", opts...)
 		value, err := cmd.Flags().GetInt(src)
 		return dst, value, err
@@ -218,7 +234,7 @@ func WithIntValue(opts ...string) GetOption {
 
 // WithFloatValue adds a float (float32) value from cli arguments
 func WithFloatValue(opts ...string) GetOption {
-	return func(cmd *cobra.Command) (string, interface{}, error) {
+	return func(cmd *cobra.Command, inputIterators *RequestInputIterators) (string, interface{}, error) {
 		src, dst, _ := UnpackGetterOptions("", opts...)
 		value, err := cmd.Flags().GetFloat32(src)
 		return dst, value, err
@@ -227,7 +243,7 @@ func WithFloatValue(opts ...string) GetOption {
 
 // WithRelativeTimestamp adds a timestamp (string) value from cli arguments
 func WithRelativeTimestamp(opts ...string) GetOption {
-	return func(cmd *cobra.Command) (string, interface{}, error) {
+	return func(cmd *cobra.Command, inputIterators *RequestInputIterators) (string, interface{}, error) {
 		src, dst, _ := UnpackGetterOptions("", opts...)
 		value, err := cmd.Flags().GetString(src)
 
@@ -290,7 +306,7 @@ type FilePath string
 
 // WithFilePath adds a file path from cli arguments
 func WithFilePath(opts ...string) GetOption {
-	return func(cmd *cobra.Command) (string, interface{}, error) {
+	return func(cmd *cobra.Command, inputIterators *RequestInputIterators) (string, interface{}, error) {
 
 		src, dst, _ := UnpackGetterOptions("%s", opts...)
 
@@ -305,7 +321,7 @@ func WithFilePath(opts ...string) GetOption {
 
 // WithDataValueAdvanced adds json or shorthand json parsing with additional option to strip the Cumulocity properties from the input
 func WithDataValueAdvanced(stripCumulocityKeys bool, opts ...string) GetOption {
-	return func(cmd *cobra.Command) (string, interface{}, error) {
+	return func(cmd *cobra.Command, inputIterators *RequestInputIterators) (string, interface{}, error) {
 
 		src, dst, _ := UnpackGetterOptions("%s", opts...)
 
@@ -340,7 +356,7 @@ type DefaultTemplateString string
 type RequiredTemplateString string
 
 func WithTemplateString(value string, applyLast bool) GetOption {
-	return func(cmd *cobra.Command) (string, interface{}, error) {
+	return func(cmd *cobra.Command, inputIterators *RequestInputIterators) (string, interface{}, error) {
 		if applyLast {
 			return "", RequiredTemplateString(value), nil
 		}
@@ -359,23 +375,105 @@ func WithRequiredTemplateString(value string) GetOption {
 type RequiredKeys []string
 
 func WithRequiredProperties(values ...string) GetOption {
-	return func(cmd *cobra.Command) (string, interface{}, error) {
+	return func(cmd *cobra.Command, inputIterators *RequestInputIterators) (string, interface{}, error) {
 		return "", RequiredKeys(values), nil
 
 	}
 }
 
 type PipelineOptions struct {
-	Name        string
-	Aliases     []string
-	Required    bool
-	Destination string
+	Name     string   `json:"name"`
+	Required bool     `json:"required"`
+	Property string   `json:"property"`
+	Aliases  []string `json:"aliases"`
 }
 
 // WithPipelineIterator adds pipeline support from cli arguments
-func WithPipelineIterator(opts PipelineOptions) GetOption {
-	return func(cmd *cobra.Command) (string, interface{}, error) {
+func WithPipelineIterator(opts *PipelineOptions) GetOption {
+	return func(cmd *cobra.Command, inputIterators *RequestInputIterators) (string, interface{}, error) {
 		iter, err := NewFlagWithPipeIterator(cmd, opts)
-		return opts.Destination, iter, err
+		return opts.Property, iter, err
+	}
+}
+
+// NewRequestInputIterators returns input iterations with the pipeline options loaded from the annotations
+func NewRequestInputIterators(cmd *cobra.Command) (*RequestInputIterators, error) {
+	pipeOpts, err := GetPipeOptionsFromAnnotation(cmd)
+	inputIter := &RequestInputIterators{
+		PipeOptions: pipeOpts,
+	}
+	return inputIter, err
+}
+
+// RequestInputIterators contains all request input iterators
+type RequestInputIterators struct {
+	Total       int
+	Path        *StringTemplate
+	Body        *mapbuilder.MapBuilder
+	PipeOptions *PipelineOptions
+}
+
+// RequestIteratorTypePath path iterator
+type RequestIteratorTypePath iterator.Iterator
+
+// RequestIteratorTypeBody body iterator
+type RequestIteratorTypeBody iterator.Iterator
+
+// WithIterators adds request iterators from cli args
+func WithIterators(cmd *cobra.Command, inputIterators *RequestInputIterators, opts ...GetOption) (err error) {
+
+	if inputIterators == nil {
+		inputIterators = &RequestInputIterators{}
+	}
+
+	for _, opt := range opts {
+		name, value, err := opt(cmd, inputIterators)
+		if err != nil {
+			return err
+		}
+
+		switch value.(type) {
+		case RequestIteratorTypeBody:
+			if v, ok := value.(iterator.Iterator); ok {
+				inputIterators.Body.Set(name, v)
+				inputIterators.Total++
+			}
+		case RequestIteratorTypePath:
+			if v, ok := value.(iterator.Iterator); ok {
+				inputIterators.Path.SetVariable(name, v)
+				inputIterators.Total++
+			}
+		}
+	}
+	return nil
+}
+
+// WithPathIterator add a body iterator from cli args
+func WithPathIterator(opts *PipelineOptions) GetOption {
+	return func(cmd *cobra.Command, inputIterators *RequestInputIterators) (string, interface{}, error) {
+
+		name, value, err := WithPipelineIterator(opts)(cmd, inputIterators)
+
+		switch v := value.(type) {
+		case iterator.Iterator:
+			return name, RequestIteratorTypePath(v), err
+		default:
+			return name, value, ErrUnsupportedType
+		}
+	}
+}
+
+// WithBodyIterator add a body iterator from cli args
+func WithBodyIterator(opts *PipelineOptions) GetOption {
+	return func(cmd *cobra.Command, inputIterators *RequestInputIterators) (string, interface{}, error) {
+
+		name, value, err := WithPipelineIterator(opts)(cmd, inputIterators)
+
+		switch v := value.(type) {
+		case iterator.Iterator:
+			return name, RequestIteratorTypeBody(v), err
+		default:
+			return name, value, ErrUnsupportedType
+		}
 	}
 }

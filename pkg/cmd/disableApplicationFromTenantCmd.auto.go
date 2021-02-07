@@ -38,7 +38,7 @@ Disable an application of a tenant by name
 
 	flags.WithOptions(
 		cmd,
-		flags.WithPipelineSupport("application"),
+		flags.WithExtendedPipelineSupport("application", "application", true),
 	)
 
 	// Required flags
@@ -50,11 +50,17 @@ Disable an application of a tenant by name
 
 func (n *DisableApplicationFromTenantCmd) RunE(cmd *cobra.Command, args []string) error {
 	var err error
+	inputIterators, err := flags.NewRequestInputIterators(cmd)
+	if err != nil {
+		return err
+	}
+
 	// query parameters
 	query := url.Values{}
 	err = flags.WithQueryParameters(
 		cmd,
 		query,
+		inputIterators,
 	)
 	if err != nil {
 		return newUserError(err)
@@ -71,6 +77,7 @@ func (n *DisableApplicationFromTenantCmd) RunE(cmd *cobra.Command, args []string
 	err = flags.WithHeaders(
 		cmd,
 		headers,
+		inputIterators,
 		flags.WithProcessingModeValue(),
 	)
 	if err != nil {
@@ -82,6 +89,7 @@ func (n *DisableApplicationFromTenantCmd) RunE(cmd *cobra.Command, args []string
 	err = flags.WithFormDataOptions(
 		cmd,
 		formData,
+		inputIterators,
 	)
 	if err != nil {
 		return newUserError(err)
@@ -92,6 +100,7 @@ func (n *DisableApplicationFromTenantCmd) RunE(cmd *cobra.Command, args []string
 	err = flags.WithBody(
 		cmd,
 		body,
+		inputIterators,
 	)
 	if err != nil {
 		return newUserError(err)
@@ -102,21 +111,21 @@ func (n *DisableApplicationFromTenantCmd) RunE(cmd *cobra.Command, args []string
 	}
 
 	// path parameters
-	pathParameters := make(map[string]string)
+	path := flags.NewStringTemplate("/tenant/tenants/{tenant}/applications/{application}")
 	err = flags.WithPathParameters(
 		cmd,
-		pathParameters,
+		path,
+		inputIterators,
 		flags.WithStringDefaultValue(client.TenantName, "tenant", "tenant"),
+		WithApplicationByNameFirstMatch(args, "application", "application"),
 	)
 	if err != nil {
 		return err
 	}
 
-	path := replacePathParameters("/tenant/tenants/{tenant}/applications/{application}", pathParameters)
-
 	req := c8y.RequestOptions{
 		Method:       "DELETE",
-		Path:         path,
+		Path:         path.GetTemplate(),
 		Query:        queryValue,
 		Body:         body,
 		FormData:     formData,
@@ -125,12 +134,5 @@ func (n *DisableApplicationFromTenantCmd) RunE(cmd *cobra.Command, args []string
 		DryRun:       globalFlagDryRun,
 	}
 
-	pipeOption := PipeOption{
-		Name:              "application",
-		Property:          "",
-		Required:          true,
-		ResolveByNameType: "application",
-		IteratorType:      "path",
-	}
-	return processRequestAndResponseWithWorkers(cmd, &req, pipeOption)
+	return processRequestAndResponseWithWorkers(cmd, &req, inputIterators)
 }

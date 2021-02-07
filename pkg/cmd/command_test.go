@@ -201,3 +201,12 @@ func Test_ChildInventoryReferencesWithPipelineInput(t *testing.T) {
 	cmdErr := ExecuteCmd(cmd, `inventoryReferences assignDeviceToGroup --group=testgroup_yup6kr9sjg --dry`)
 	assert.OK(t, cmdErr)
 }
+
+func Test_PipingWithoutLookup(t *testing.T) {
+	cmd := setupTest()
+	stdin := bytes.NewBufferString("1234\n222\n")
+	cmd.SetIn(stdin)
+
+	cmdErr := ExecuteCmd(cmd, `inventory get --dry`)
+	assert.OK(t, cmdErr)
+}

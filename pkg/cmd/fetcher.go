@@ -212,7 +212,7 @@ func (i *EntityIterator) GetNext() (value []byte, input interface{}, err error) 
 
 // WithReferenceByName adds support for looking up values by name via cli args
 func WithReferenceByName(fetcher entityFetcher, args []string, opts ...string) flags.GetOption {
-	return func(cmd *cobra.Command) (string, interface{}, error) {
+	return func(cmd *cobra.Command, inputIterators *flags.RequestInputIterators) (string, interface{}, error) {
 
 		src, dst, _ := flags.UnpackGetterOptions("", opts...)
 
@@ -266,7 +266,7 @@ func WithReferenceByName(fetcher entityFetcher, args []string, opts ...string) f
 
 // WithSelfReferenceByName adds support for looking up values by name via cli args
 func WithSelfReferenceByName(fetcher entityFetcher, args []string, opts ...string) flags.GetOption {
-	return func(cmd *cobra.Command) (string, interface{}, error) {
+	return func(cmd *cobra.Command, inputIterators *flags.RequestInputIterators) (string, interface{}, error) {
 
 		src, dst, _ := flags.UnpackGetterOptions("", opts...)
 
@@ -324,9 +324,9 @@ func WithSelfReferenceByName(fetcher entityFetcher, args []string, opts ...strin
 
 // WithReferenceByNameFirstMatch add reference by name matching using a fetcher via cli args. Only the first match will be used
 func WithReferenceByNameFirstMatch(fetcher entityFetcher, args []string, opts ...string) flags.GetOption {
-	return func(cmd *cobra.Command) (string, interface{}, error) {
+	return func(cmd *cobra.Command, inputIterators *flags.RequestInputIterators) (string, interface{}, error) {
 		opt := WithReferenceByName(fetcher, args, opts...)
-		name, values, err := opt(cmd)
+		name, values, err := opt(cmd, inputIterators)
 
 		if name == "" {
 			return "", "", nil
@@ -347,9 +347,9 @@ func WithReferenceByNameFirstMatch(fetcher entityFetcher, args []string, opts ..
 
 // WithSelfReferenceByNameFirstMatch add reference by name matching using a fetcher via cli args. Only the first match will be used
 func WithSelfReferenceByNameFirstMatch(fetcher entityFetcher, args []string, opts ...string) flags.GetOption {
-	return func(cmd *cobra.Command) (string, interface{}, error) {
+	return func(cmd *cobra.Command, inputIterators *flags.RequestInputIterators) (string, interface{}, error) {
 		opt := WithSelfReferenceByName(fetcher, args, opts...)
-		name, values, err := opt(cmd)
+		name, values, err := opt(cmd, inputIterators)
 
 		switch v := values.(type) {
 		case []string:
@@ -366,87 +366,87 @@ func WithSelfReferenceByNameFirstMatch(fetcher entityFetcher, args []string, opt
 
 // WithDeviceByNameFirstMatch add reference by name matching for devices via cli args. Only the first match will be used
 func WithDeviceByNameFirstMatch(args []string, opts ...string) flags.GetOption {
-	return func(cmd *cobra.Command) (string, interface{}, error) {
+	return func(cmd *cobra.Command, inputIterators *flags.RequestInputIterators) (string, interface{}, error) {
 		opt := WithReferenceByNameFirstMatch(newDeviceFetcher(client), args, opts...)
-		return opt(cmd)
+		return opt(cmd, inputIterators)
 	}
 }
 
 // WithApplicationByNameFirstMatch add reference by name matching for applications via cli args. Only the first match will be used
 func WithApplicationByNameFirstMatch(args []string, opts ...string) flags.GetOption {
-	return func(cmd *cobra.Command) (string, interface{}, error) {
+	return func(cmd *cobra.Command, inputIterators *flags.RequestInputIterators) (string, interface{}, error) {
 		opt := WithReferenceByNameFirstMatch(newApplicationFetcher(client), args, opts...)
-		return opt(cmd)
+		return opt(cmd, inputIterators)
 	}
 }
 
 // WithMicroserviceByNameFirstMatch add reference by name matching for microservices via cli args. Only the first match will be used
 func WithMicroserviceByNameFirstMatch(args []string, opts ...string) flags.GetOption {
-	return func(cmd *cobra.Command) (string, interface{}, error) {
+	return func(cmd *cobra.Command, inputIterators *flags.RequestInputIterators) (string, interface{}, error) {
 		opt := WithReferenceByNameFirstMatch(newMicroserviceFetcher(client), args, opts...)
-		return opt(cmd)
+		return opt(cmd, inputIterators)
 	}
 }
 
 // WithAgentByNameFirstMatch add reference by name matching for agents via cli args. Only the first match will be used
 func WithAgentByNameFirstMatch(args []string, opts ...string) flags.GetOption {
-	return func(cmd *cobra.Command) (string, interface{}, error) {
+	return func(cmd *cobra.Command, inputIterators *flags.RequestInputIterators) (string, interface{}, error) {
 		opt := WithReferenceByNameFirstMatch(newAgentFetcher(client), args, opts...)
-		return opt(cmd)
+		return opt(cmd, inputIterators)
 	}
 }
 
 // WithDeviceGroupByNameFirstMatch add reference by name matching for device groups via cli args. Only the first match will be used
 func WithDeviceGroupByNameFirstMatch(args []string, opts ...string) flags.GetOption {
-	return func(cmd *cobra.Command) (string, interface{}, error) {
+	return func(cmd *cobra.Command, inputIterators *flags.RequestInputIterators) (string, interface{}, error) {
 		opt := WithReferenceByNameFirstMatch(newDeviceGroupFetcher(client), args, opts...)
-		return opt(cmd)
+		return opt(cmd, inputIterators)
 	}
 }
 
 // WithUserByNameFirstMatch add reference by name matching for users via cli args. Only the first match will be used
 func WithUserByNameFirstMatch(args []string, opts ...string) flags.GetOption {
-	return func(cmd *cobra.Command) (string, interface{}, error) {
+	return func(cmd *cobra.Command, inputIterators *flags.RequestInputIterators) (string, interface{}, error) {
 		opt := WithReferenceByNameFirstMatch(newUserFetcher(client), args, opts...)
-		return opt(cmd)
+		return opt(cmd, inputIterators)
 	}
 }
 
 // WithUserSelfByNameFirstMatch add reference by name matching for users' self link via cli args. Only the first match will be used
 func WithUserSelfByNameFirstMatch(args []string, opts ...string) flags.GetOption {
-	return func(cmd *cobra.Command) (string, interface{}, error) {
+	return func(cmd *cobra.Command, inputIterators *flags.RequestInputIterators) (string, interface{}, error) {
 		opt := WithSelfReferenceByNameFirstMatch(newUserFetcher(client), args, opts...)
-		return opt(cmd)
+		return opt(cmd, inputIterators)
 	}
 }
 
 // WithRoleSelfByNameFirstMatch add reference by name matching for roles' self link via cli args. Only the first match will be used
 func WithRoleSelfByNameFirstMatch(args []string, opts ...string) flags.GetOption {
-	return func(cmd *cobra.Command) (string, interface{}, error) {
+	return func(cmd *cobra.Command, inputIterators *flags.RequestInputIterators) (string, interface{}, error) {
 		opt := WithSelfReferenceByNameFirstMatch(newRoleFetcher(client), args, opts...)
-		return opt(cmd)
+		return opt(cmd, inputIterators)
 	}
 }
 
 // WithRoleByNameFirstMatch add reference by name matching for roles via cli args. Only the first match will be used
 func WithRoleByNameFirstMatch(args []string, opts ...string) flags.GetOption {
-	return func(cmd *cobra.Command) (string, interface{}, error) {
+	return func(cmd *cobra.Command, inputIterators *flags.RequestInputIterators) (string, interface{}, error) {
 		opt := WithReferenceByNameFirstMatch(newRoleFetcher(client), args, opts...)
-		return opt(cmd)
+		return opt(cmd, inputIterators)
 	}
 }
 
 // WithUserGroupByNameFirstMatch add reference by name matching for user groups via cli args. Only the first match will be used
 func WithUserGroupByNameFirstMatch(args []string, opts ...string) flags.GetOption {
-	return func(cmd *cobra.Command) (string, interface{}, error) {
+	return func(cmd *cobra.Command, inputIterators *flags.RequestInputIterators) (string, interface{}, error) {
 		opt := WithReferenceByNameFirstMatch(newUserGroupFetcher(client), args, opts...)
-		return opt(cmd)
+		return opt(cmd, inputIterators)
 	}
 }
 
 // WithReferenceByNamePipeline adds pipeline support from cli arguments
-func WithReferenceByNamePipeline(fetcher entityFetcher, opts flags.PipelineOptions) flags.GetOption {
-	return func(cmd *cobra.Command) (string, interface{}, error) {
+func WithReferenceByNamePipeline(fetcher entityFetcher, opts *flags.PipelineOptions) flags.GetOption {
+	return func(cmd *cobra.Command, inputIterators *flags.RequestInputIterators) (string, interface{}, error) {
 		pipeIter, err := flags.NewFlagWithPipeIterator(cmd, opts)
 
 		if err != nil {
@@ -455,6 +455,6 @@ func WithReferenceByNamePipeline(fetcher entityFetcher, opts flags.PipelineOptio
 
 		iter := NewReferenceByNameIterator(fetcher, client, pipeIter)
 
-		return opts.Destination, iter, err
+		return opts.Property, iter, err
 	}
 }

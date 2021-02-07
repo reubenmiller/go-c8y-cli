@@ -39,7 +39,7 @@ Create group heirachy (parent group -> child group)
 
 	flags.WithOptions(
 		cmd,
-		flags.WithPipelineSupport("group"),
+		flags.WithExtendedPipelineSupport("group", "id", true),
 	)
 
 	// Required flags
@@ -51,11 +51,17 @@ Create group heirachy (parent group -> child group)
 
 func (n *NewManagedObjectChildAssetCmd) RunE(cmd *cobra.Command, args []string) error {
 	var err error
+	inputIterators, err := flags.NewRequestInputIterators(cmd)
+	if err != nil {
+		return err
+	}
+
 	// query parameters
 	query := url.Values{}
 	err = flags.WithQueryParameters(
 		cmd,
 		query,
+		inputIterators,
 	)
 	if err != nil {
 		return newUserError(err)
@@ -72,6 +78,7 @@ func (n *NewManagedObjectChildAssetCmd) RunE(cmd *cobra.Command, args []string) 
 	err = flags.WithHeaders(
 		cmd,
 		headers,
+		inputIterators,
 		flags.WithProcessingModeValue(),
 	)
 	if err != nil {
@@ -83,6 +90,7 @@ func (n *NewManagedObjectChildAssetCmd) RunE(cmd *cobra.Command, args []string) 
 	err = flags.WithFormDataOptions(
 		cmd,
 		formData,
+		inputIterators,
 	)
 	if err != nil {
 		return newUserError(err)
@@ -93,6 +101,7 @@ func (n *NewManagedObjectChildAssetCmd) RunE(cmd *cobra.Command, args []string) 
 	err = flags.WithBody(
 		cmd,
 		body,
+		inputIterators,
 		WithDataValue(),
 		WithDeviceByNameFirstMatch(args, "newChildDevice", "managedObject.id"),
 		WithDeviceGroupByNameFirstMatch(args, "newChildGroup", "managedObject.id"),
@@ -108,20 +117,20 @@ func (n *NewManagedObjectChildAssetCmd) RunE(cmd *cobra.Command, args []string) 
 	}
 
 	// path parameters
-	pathParameters := make(map[string]string)
+	path := flags.NewStringTemplate("inventory/managedObjects/{id}/childAssets")
 	err = flags.WithPathParameters(
 		cmd,
-		pathParameters,
+		path,
+		inputIterators,
+		WithDeviceGroupByNameFirstMatch(args, "group", "id"),
 	)
 	if err != nil {
 		return err
 	}
 
-	path := replacePathParameters("inventory/managedObjects/{id}/childAssets", pathParameters)
-
 	req := c8y.RequestOptions{
 		Method:       "POST",
-		Path:         path,
+		Path:         path.GetTemplate(),
 		Query:        queryValue,
 		Body:         body,
 		FormData:     formData,
@@ -130,12 +139,5 @@ func (n *NewManagedObjectChildAssetCmd) RunE(cmd *cobra.Command, args []string) 
 		DryRun:       globalFlagDryRun,
 	}
 
-	pipeOption := PipeOption{
-		Name:              "group",
-		Property:          "id",
-		Required:          true,
-		ResolveByNameType: "devicegroup",
-		IteratorType:      "path",
-	}
-	return processRequestAndResponseWithWorkers(cmd, &req, pipeOption)
+	return processRequestAndResponseWithWorkers(cmd, &req, inputIterators)
 }

@@ -41,7 +41,7 @@ Add multiple groups to a group
 
 	flags.WithOptions(
 		cmd,
-		flags.WithPipelineSupport("newChildGroup"),
+		flags.WithExtendedPipelineSupport("newChildGroup", "managedObject.id", true),
 	)
 
 	// Required flags
@@ -54,11 +54,17 @@ Add multiple groups to a group
 
 func (n *AddGroupToGroupCmd) RunE(cmd *cobra.Command, args []string) error {
 	var err error
+	inputIterators, err := flags.NewRequestInputIterators(cmd)
+	if err != nil {
+		return err
+	}
+
 	// query parameters
 	query := url.Values{}
 	err = flags.WithQueryParameters(
 		cmd,
 		query,
+		inputIterators,
 	)
 	if err != nil {
 		return newUserError(err)
@@ -75,6 +81,7 @@ func (n *AddGroupToGroupCmd) RunE(cmd *cobra.Command, args []string) error {
 	err = flags.WithHeaders(
 		cmd,
 		headers,
+		inputIterators,
 		flags.WithProcessingModeValue(),
 	)
 	if err != nil {
@@ -86,6 +93,7 @@ func (n *AddGroupToGroupCmd) RunE(cmd *cobra.Command, args []string) error {
 	err = flags.WithFormDataOptions(
 		cmd,
 		formData,
+		inputIterators,
 	)
 	if err != nil {
 		return newUserError(err)
@@ -96,6 +104,7 @@ func (n *AddGroupToGroupCmd) RunE(cmd *cobra.Command, args []string) error {
 	err = flags.WithBody(
 		cmd,
 		body,
+		inputIterators,
 		WithDataValue(),
 		WithDeviceGroupByNameFirstMatch(args, "newChildGroup", "managedObject.id"),
 		WithTemplateValue(),
@@ -110,21 +119,20 @@ func (n *AddGroupToGroupCmd) RunE(cmd *cobra.Command, args []string) error {
 	}
 
 	// path parameters
-	pathParameters := make(map[string]string)
+	path := flags.NewStringTemplate("inventory/managedObjects/{id}/childAssets")
 	err = flags.WithPathParameters(
 		cmd,
-		pathParameters,
+		path,
+		inputIterators,
 		WithDeviceGroupByNameFirstMatch(args, "group", "id"),
 	)
 	if err != nil {
 		return err
 	}
 
-	path := replacePathParameters("inventory/managedObjects/{id}/childAssets", pathParameters)
-
 	req := c8y.RequestOptions{
 		Method:       "POST",
-		Path:         path,
+		Path:         path.GetTemplate(),
 		Query:        queryValue,
 		Body:         body,
 		FormData:     formData,
@@ -133,12 +141,5 @@ func (n *AddGroupToGroupCmd) RunE(cmd *cobra.Command, args []string) error {
 		DryRun:       globalFlagDryRun,
 	}
 
-	pipeOption := PipeOption{
-		Name:              "newChildGroup",
-		Property:          "managedObject.id",
-		Required:          true,
-		ResolveByNameType: "devicegroup",
-		IteratorType:      "body",
-	}
-	return processRequestAndResponseWithWorkers(cmd, &req, pipeOption)
+	return processRequestAndResponseWithWorkers(cmd, &req, inputIterators)
 }
