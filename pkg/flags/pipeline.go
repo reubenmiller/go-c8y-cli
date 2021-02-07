@@ -44,8 +44,15 @@ func NewFlagWithPipeIterator(cmd *cobra.Command, pipeOpt *PipelineOptions, suppo
 			return iterator.NewSliceIterator(items), nil
 		}
 	} else if supportsPipeline {
+		sourceProperties := make([]string, 0)
+		if pipeOpt.Property != "" {
+			sourceProperties = append(sourceProperties, pipeOpt.Property)
+		}
+		if len(pipeOpt.Aliases) > 0 {
+			sourceProperties = append(sourceProperties, pipeOpt.Aliases...)
+		}
 		iterOpts := &iterator.PipeOptions{
-			Properties: pipeOpt.Aliases,
+			Properties: sourceProperties,
 		}
 		iter, err := iterator.NewJSONPipeIterator(cmd.InOrStdin(), iterOpts, func(line []byte) bool {
 			line = bytes.TrimSpace(line)

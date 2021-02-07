@@ -74,3 +74,16 @@ func (b *StringTemplate) GetNext() ([]byte, interface{}, error) {
 	output, input, err := b.Execute()
 	return []byte(output), []byte(input), err
 }
+
+func replaceVariable(tmpl string, name string, value string) string {
+	output := tmpl
+	if strings.Count(tmpl, "{") == 1 && strings.Count(tmpl, "}") == 1 {
+		// Don't assume the variable name matches the given name.
+		// But if there is only one template variable, then it is safe to assume it is the correct one
+		output = tmpl[0:strings.Index(tmpl, "{")] + "%s" + tmpl[strings.Index(tmpl, "}")+1:]
+	} else {
+		// Only substitute an explicitly the pipeline variable name
+		output = strings.ReplaceAll(tmpl, "{"+name+"}", "%s")
+	}
+	return output
+}

@@ -391,7 +391,7 @@ type PipelineOptions struct {
 // WithPipelineIterator adds pipeline support from cli arguments
 func WithPipelineIterator(opts *PipelineOptions) GetOption {
 	return func(cmd *cobra.Command, inputIterators *RequestInputIterators) (string, interface{}, error) {
-		iter, err := NewFlagWithPipeIterator(cmd, opts)
+		iter, err := NewFlagWithPipeIterator(cmd, opts, true)
 		return opts.Property, iter, err
 	}
 }
@@ -411,69 +411,4 @@ type RequestInputIterators struct {
 	Path        *StringTemplate
 	Body        *mapbuilder.MapBuilder
 	PipeOptions *PipelineOptions
-}
-
-// RequestIteratorTypePath path iterator
-type RequestIteratorTypePath iterator.Iterator
-
-// RequestIteratorTypeBody body iterator
-type RequestIteratorTypeBody iterator.Iterator
-
-// WithIterators adds request iterators from cli args
-func WithIterators(cmd *cobra.Command, inputIterators *RequestInputIterators, opts ...GetOption) (err error) {
-
-	if inputIterators == nil {
-		inputIterators = &RequestInputIterators{}
-	}
-
-	for _, opt := range opts {
-		name, value, err := opt(cmd, inputIterators)
-		if err != nil {
-			return err
-		}
-
-		switch value.(type) {
-		case RequestIteratorTypeBody:
-			if v, ok := value.(iterator.Iterator); ok {
-				inputIterators.Body.Set(name, v)
-				inputIterators.Total++
-			}
-		case RequestIteratorTypePath:
-			if v, ok := value.(iterator.Iterator); ok {
-				inputIterators.Path.SetVariable(name, v)
-				inputIterators.Total++
-			}
-		}
-	}
-	return nil
-}
-
-// WithPathIterator add a body iterator from cli args
-func WithPathIterator(opts *PipelineOptions) GetOption {
-	return func(cmd *cobra.Command, inputIterators *RequestInputIterators) (string, interface{}, error) {
-
-		name, value, err := WithPipelineIterator(opts)(cmd, inputIterators)
-
-		switch v := value.(type) {
-		case iterator.Iterator:
-			return name, RequestIteratorTypePath(v), err
-		default:
-			return name, value, ErrUnsupportedType
-		}
-	}
-}
-
-// WithBodyIterator add a body iterator from cli args
-func WithBodyIterator(opts *PipelineOptions) GetOption {
-	return func(cmd *cobra.Command, inputIterators *RequestInputIterators) (string, interface{}, error) {
-
-		name, value, err := WithPipelineIterator(opts)(cmd, inputIterators)
-
-		switch v := value.(type) {
-		case iterator.Iterator:
-			return name, RequestIteratorTypeBody(v), err
-		default:
-			return name, value, ErrUnsupportedType
-		}
-	}
 }

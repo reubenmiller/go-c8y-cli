@@ -187,7 +187,7 @@ func (i *EntityIterator) MarshalJSON() (line []byte, err error) {
 
 func (i *EntityIterator) GetNext() (value []byte, input interface{}, err error) {
 
-	value, _, err = i.valueIterator.GetNext()
+	value, rawValue, err := i.valueIterator.GetNext()
 	if err != nil {
 		return
 	}
@@ -206,6 +206,8 @@ func (i *EntityIterator) GetNext() (value []byte, input interface{}, err error) 
 		if v, ok := refs[0].Data.Value.(gjson.Result); ok {
 			data = v.Raw
 		}
+	} else {
+		data = fmt.Sprintf("%s", rawValue)
 	}
 	return []byte(refs[0].ID), data, nil
 }
@@ -217,7 +219,8 @@ func WithReferenceByName(fetcher entityFetcher, args []string, opts ...string) f
 		src, dst, _ := flags.UnpackGetterOptions("", opts...)
 
 		if inputIterators != nil && inputIterators.PipeOptions.Name == src {
-			pipeIter, err := flags.NewFlagWithPipeIterator(cmd, inputIterators.PipeOptions)
+			hasPipeSupport := inputIterators.PipeOptions.Name == src
+			pipeIter, err := flags.NewFlagWithPipeIterator(cmd, inputIterators.PipeOptions, hasPipeSupport)
 
 			if err != nil {
 				return "", nil, err
@@ -460,7 +463,7 @@ func WithUserGroupByNameFirstMatch(args []string, opts ...string) flags.GetOptio
 // WithReferenceByNamePipeline adds pipeline support from cli arguments
 func WithReferenceByNamePipeline(fetcher entityFetcher, opts *flags.PipelineOptions) flags.GetOption {
 	return func(cmd *cobra.Command, inputIterators *flags.RequestInputIterators) (string, interface{}, error) {
-		pipeIter, err := flags.NewFlagWithPipeIterator(cmd, opts)
+		pipeIter, err := flags.NewFlagWithPipeIterator(cmd, opts, true)
 
 		if err != nil {
 			return "", nil, err

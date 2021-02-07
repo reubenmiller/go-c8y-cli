@@ -221,3 +221,12 @@ func Test_PipingWithLookup(t *testing.T) {
 	cmdErr := ExecuteCmd(cmd, `devices get --dry`)
 	assert.OK(t, cmdErr)
 }
+
+func Test_PipingWithObjectPipe(t *testing.T) {
+	cmd := setupTest()
+	stdin := bytes.NewBufferString(`{"id": "87551"}` + "\n" + `{"id": "1111"}\n`)
+	cmd.SetIn(stdin)
+
+	cmdErr := ExecuteCmd(cmd, `devices get --dry`)
+	assert.OK(t, cmdErr)
+}
