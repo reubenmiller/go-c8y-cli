@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"math/rand"
 	"os"
 	"strconv"
 	"strings"
@@ -13,6 +14,7 @@ import (
 
 	"github.com/reubenmiller/go-c8y-cli/pkg/iterator"
 	"github.com/reubenmiller/go-c8y-cli/pkg/mapbuilder"
+	"github.com/reubenmiller/go-c8y-cli/pkg/progressbar"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
 )
@@ -110,10 +112,13 @@ func runBatched(requestIterator *RequestIterator, commonOptions CommonCommandOpt
 		batchOptions.TotalWorkers = 1
 	}
 
+	progbar := progressbar.NewMulitProgressBar(1, batchOptions.TotalWorkers, "requests", globalFlagProgressBar)
+	progbar.Start(float64(batchOptions.Delay * 2 / 1000))
+
 	for w := 1; w <= batchOptions.TotalWorkers; w++ {
 		Logger.Infof("starting worker: %d", w)
 		workers.Add(1)
-		go batchWorker(w, jobs, results, &workers)
+		go batchWorker(w, jobs, results, progbar, &workers)
 	}
 
 	jobID := int64(0)
@@ -158,6 +163,7 @@ func runBatched(requestIterator *RequestIterator, commonOptions CommonCommandOpt
 	// close the results when the works are finished, but don't block reading the results
 	go func() {
 		workers.Wait()
+		progbar.Completed()
 		close(results)
 	}()
 
@@ -226,17 +232,24 @@ type batchArgument struct {
 
 // These workers will receive work on the `jobs` channel and send the corresponding
 // results on `results`
-func batchWorker(id int, jobs <-chan batchArgument, results chan<- error, wg *sync.WaitGroup) {
+func batchWorker(id int, jobs <-chan batchArgument, results chan<- error, prog *progressbar.ProgressBar, wg *sync.WaitGroup) {
 	var err error
 	onStartup := true
 
+	var total int64
+
 	defer wg.Done()
 	for job := range jobs {
+		total++
+		workerStart := prog.StartJob(id, total)
 		if !onStartup {
 			if !errors.Is(err, io.EOF) && job.batchOptions.Delay > 0 {
 				Logger.Infof("worker %d: sleeping %dms before fetching next job", id, job.batchOptions.Delay)
 				time.Sleep(time.Duration(job.batchOptions.Delay) * time.Millisecond)
 			}
+		} else {
+			jitter := rand.Int31n(50)
+			time.Sleep(time.Duration(jitter) * time.Millisecond)
 		}
 		onStartup = false
 
@@ -247,10 +260,12 @@ func batchWorker(id int, jobs <-chan batchArgument, results chan<- error, wg *sy
 		elapsedMS := (time.Now().UnixNano() - startTime) / 1000.0 / 1000.0
 
 		Logger.Infof("worker %d: finished job %d in %dms", id, job.id, elapsedMS)
+		prog.FinishedJob(id, workerStart)
 
 		// return result before delay, so errors can be handled before the sleep
 		results <- err
 	}
+	prog.WorkerCompleted(id)
 }
 
 func addBatchFlags(cmd *cobra.Command, acceptInputFile bool) {

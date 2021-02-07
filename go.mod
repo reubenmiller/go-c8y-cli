@@ -13,7 +13,7 @@ require (
 	github.com/op/go-logging v0.0.0-20160315200505-970db520ece7
 	github.com/pkg/errors v0.9.1
 	github.com/pquerna/otp v1.3.0
-	github.com/reubenmiller/go-c8y v0.8.1-0.20210201032349-29ff5affe87e
+	github.com/reubenmiller/go-c8y v0.8.1-0.20210207134803-ec5b506d6f15
 	github.com/sethvargo/go-password v0.2.0
 	github.com/spf13/cobra v0.0.5
 	github.com/spf13/pflag v1.0.5
@@ -21,6 +21,7 @@ require (
 	github.com/thedevsaddam/gojsonq v2.3.0+incompatible
 	github.com/tidwall/gjson v1.6.7
 	github.com/tidwall/pretty v1.0.2
+	github.com/vbauerster/mpb/v6 v6.0.2
 	golang.org/x/crypto v0.0.0-20201221181555-eec23a3978ad
 )
 

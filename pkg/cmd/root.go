@@ -3,6 +3,7 @@ package cmd
 import (
 	"crypto/tls"
 	"fmt"
+	"math/rand"
 	"net/http"
 	"os"
 	"regexp"
@@ -37,6 +38,8 @@ func init() {
 	Logger = logger.NewDummyLogger(module)
 	SecureDataAccessor = encrypt.NewSecureData("{encrypted}")
 	rootCmd = newC8yCmd()
+	// set seed for random generation
+	rand.Seed(time.Now().UTC().UnixNano())
 }
 
 type baseCmd struct {
@@ -162,6 +165,7 @@ var (
 	globalFlagWithTotalPages         bool
 	globalFlagPrettyPrint            bool
 	globalFlagDryRun                 bool
+	globalFlagProgressBar            bool
 	globalFlagIgnoreAccept           bool
 	globalFlagNoColor                bool
 	globalFlagSessionFile            string
@@ -318,6 +322,7 @@ func configureRootCmd() {
 	rootCmd.PersistentFlags().BoolVar(&globalFlagWithTotalPages, "withTotalPages", false, "Include all results")
 	rootCmd.PersistentFlags().BoolVar(&globalFlagPrettyPrint, "pretty", true, "Pretty print the json responses")
 	rootCmd.PersistentFlags().BoolVar(&globalFlagDryRun, "dry", false, "Dry run. Don't send any data to the server")
+	rootCmd.PersistentFlags().BoolVar(&globalFlagProgressBar, "progress", false, "Show progress bar. This will also disable any other verbose output")
 	rootCmd.PersistentFlags().BoolVar(&globalFlagNoColor, "noColor", false, "Don't use colors when displaying log entries on the console")
 	rootCmd.PersistentFlags().BoolVar(&globalFlagUseEnv, "useEnv", false, "Allow loading Cumulocity session setting from environment variables")
 	rootCmd.PersistentFlags().BoolVar(&globalFlagRaw, "raw", false, "Raw values")
@@ -535,7 +540,12 @@ func ReadConfigFiles(v *viper.Viper) (path string, err error) {
 
 func initConfig() {
 	// Set logging
-	if globalFlagVerbose || globalFlagDryRun {
+	if globalFlagProgressBar {
+		// TODO:
+		// Silence output until progress bar is done
+		Logger = logger.NewDummyLogger(module)
+		c8y.SilenceLogger()
+	} else if globalFlagVerbose || globalFlagDryRun {
 		Logger = logger.NewLogger(module, !globalFlagNoColor)
 	} else {
 		// Disable log messages
