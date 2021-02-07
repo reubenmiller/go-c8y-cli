@@ -84,8 +84,6 @@ func getCommonOptions(cmd *cobra.Command) (CommonCommandOptions, error) {
 
 	options.CurrentPage = globalFlagCurrentPage
 	options.TotalPages = globalFlagTotalPages
-	// options.CurrentPage = getCurrentPageFlag(cmd, "currentPage")
-	// options.MaximumPage = getCurrentPageFlag(cmd, "maximumPage")
 
 	return options, nil
 }

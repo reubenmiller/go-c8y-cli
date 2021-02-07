@@ -383,9 +383,6 @@ func configureRootCmd() {
 	// auditRecords commands
 	rootCmd.AddCommand(NewAuditRecordsRootCmd().getCommand())
 
-	// batch commands
-	rootCmd.AddCommand(NewBatchRootCmd().getCommand())
-
 	// binaries commands
 	rootCmd.AddCommand(NewBinariesRootCmd().getCommand())
 

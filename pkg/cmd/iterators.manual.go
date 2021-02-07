@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"net/http"
 	"strings"
 	"sync/atomic"
 
@@ -136,46 +135,6 @@ func (r *RequestIterator) GetNext() (*c8y.RequestOptions, error) {
 	}
 
 	return req, nil
-}
-
-func NewBatchFixedPathRequestIterator(cmd *cobra.Command, method string, path string, body interface{}) *RequestIterator {
-	// headers
-	headers := http.Header{}
-	if cmd.Flags().Changed("processingMode") {
-		if v, err := cmd.Flags().GetString("processingMode"); err == nil && v != "" {
-			headers.Add("X-Cumulocity-Processing-Mode", v)
-		}
-	}
-
-	req := c8y.RequestOptions{
-		Method:       method,
-		Header:       headers,
-		Body:         body,
-		IgnoreAccept: globalFlagIgnoreAccept,
-		DryRun:       globalFlagDryRun,
-	}
-
-	return NewRequestFixedPathIterator(req, path, body)
-}
-
-func NewBatchPathRequestIterator(cmd *cobra.Command, method string, path iterator.Iterator, body interface{}) *RequestIterator {
-	// headers
-	headers := http.Header{}
-	if cmd.Flags().Changed("processingMode") {
-		if v, err := cmd.Flags().GetString("processingMode"); err == nil && v != "" {
-			headers.Add("X-Cumulocity-Processing-Mode", v)
-		}
-	}
-
-	req := c8y.RequestOptions{
-		Method:       method,
-		Header:       headers,
-		Body:         body,
-		IgnoreAccept: globalFlagIgnoreAccept,
-		DryRun:       globalFlagDryRun,
-	}
-
-	return NewRequestIterator(req, path, body)
 }
 
 func NewFlagFileContents(cmd *cobra.Command, name string) (iterator.Iterator, error) {
