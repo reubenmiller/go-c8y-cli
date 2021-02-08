@@ -117,10 +117,6 @@ func (n *GetTenantUsageStatisticsSummaryCollectionCmd) RunE(cmd *cobra.Command, 
 		return newUserError(err)
 	}
 
-	if err := body.Validate(); err != nil {
-		return newUserError("Body validation error. ", err)
-	}
-
 	// path parameters
 	path := flags.NewStringTemplate("/tenant/statistics/summary")
 	err = flags.WithPathParameters(

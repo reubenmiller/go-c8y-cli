@@ -129,10 +129,6 @@ func (n *GetMeasurementCollectionCmd) RunE(cmd *cobra.Command, args []string) er
 		return newUserError(err)
 	}
 
-	if err := body.Validate(); err != nil {
-		return newUserError("Body validation error. ", err)
-	}
-
 	// path parameters
 	path := flags.NewStringTemplate("measurement/measurements")
 	err = flags.WithPathParameters(

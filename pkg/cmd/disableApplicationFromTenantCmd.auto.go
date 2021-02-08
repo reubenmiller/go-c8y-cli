@@ -105,10 +105,6 @@ func (n *DisableApplicationFromTenantCmd) RunE(cmd *cobra.Command, args []string
 		return newUserError(err)
 	}
 
-	if err := body.Validate(); err != nil {
-		return newUserError("Body validation error. ", err)
-	}
-
 	// path parameters
 	path := flags.NewStringTemplate("/tenant/tenants/{tenant}/applications/{application}")
 	err = flags.WithPathParameters(

@@ -110,10 +110,6 @@ func (n *AddManagedObjectChildAdditionCmd) RunE(cmd *cobra.Command, args []strin
 		return newUserError(err)
 	}
 
-	if err := body.Validate(); err != nil {
-		return newUserError("Body validation error. ", err)
-	}
-
 	// path parameters
 	path := flags.NewStringTemplate("inventory/managedObjects/{id}/childAdditions")
 	err = flags.WithPathParameters(

@@ -109,10 +109,6 @@ func (n *GetTenantOptionsForCategoryCmd) RunE(cmd *cobra.Command, args []string)
 		return newUserError(err)
 	}
 
-	if err := body.Validate(); err != nil {
-		return newUserError("Body validation error. ", err)
-	}
-
 	// path parameters
 	path := flags.NewStringTemplate("/tenant/options/{category}")
 	err = flags.WithPathParameters(

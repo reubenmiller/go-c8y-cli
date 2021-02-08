@@ -109,10 +109,6 @@ func (n *GetUserMembershipCollectionCmd) RunE(cmd *cobra.Command, args []string)
 		return newUserError(err)
 	}
 
-	if err := body.Validate(); err != nil {
-		return newUserError("Body validation error. ", err)
-	}
-
 	// path parameters
 	path := flags.NewStringTemplate("/user/{tenant}/users/{id}/groups")
 	err = flags.WithPathParameters(

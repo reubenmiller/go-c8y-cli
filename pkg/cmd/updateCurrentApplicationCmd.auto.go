@@ -123,10 +123,6 @@ func (n *UpdateCurrentApplicationCmd) RunE(cmd *cobra.Command, args []string) er
 		return newUserError(err)
 	}
 
-	if err := body.Validate(); err != nil {
-		return newUserError("Body validation error. ", err)
-	}
-
 	// path parameters
 	path := flags.NewStringTemplate("/application/currentApplication")
 	err = flags.WithPathParameters(

@@ -125,10 +125,6 @@ func (n *GetOperationCollectionCmd) RunE(cmd *cobra.Command, args []string) erro
 		return newUserError(err)
 	}
 
-	if err := body.Validate(); err != nil {
-		return newUserError("Body validation error. ", err)
-	}
-
 	// path parameters
 	path := flags.NewStringTemplate("devicecontrol/operations")
 	err = flags.WithPathParameters(

@@ -104,10 +104,6 @@ func (n *DeleteNewDeviceRequestCmd) RunE(cmd *cobra.Command, args []string) erro
 		return newUserError(err)
 	}
 
-	if err := body.Validate(); err != nil {
-		return newUserError("Body validation error. ", err)
-	}
-
 	// path parameters
 	path := flags.NewStringTemplate("devicecontrol/newDeviceRequests/{id}")
 	err = flags.WithPathParameters(

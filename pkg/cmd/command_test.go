@@ -179,7 +179,7 @@ func Test_DeviceFetcherWithCollection(t *testing.T) {
 
 func Test_BodyValidate(t *testing.T) {
 	cmd := setupTest()
-	cmdErr := ExecuteCmd(cmd, `events create --device 1234 --template={textd:"custom_hello"} --type value --dry`)
+	cmdErr := ExecuteCmd(cmd, `events create --device 1234 --template={text:"custom_hello"} --type value --dry`)
 	assert.OK(t, cmdErr)
 }
 
@@ -273,5 +273,25 @@ func Test_UpdateEventBinary(t *testing.T) {
 	defer os.Remove(f.Name())
 
 	cmdErr := ExecuteCmd(cmd, fmt.Sprintf("events updateBinary --id 88578 --file %s --dry", f.Name()))
+	assert.OK(t, cmdErr)
+}
+
+func Test_GetCurrentUserInventoryRole(t *testing.T) {
+	cmd := setupTest()
+
+	stdin := bytes.NewBufferString(`1` + "\n")
+	cmd.SetIn(stdin)
+
+	cmdErr := ExecuteCmd(cmd, fmt.Sprintf("users getCurrentUserInventoryRole --id=1 --pretty=false --dry"))
+	assert.OK(t, cmdErr)
+}
+
+func Test_EventListWithoutDeviceIterator(t *testing.T) {
+	cmd := setupTest()
+
+	// stdin := bytes.NewBufferString(`1` + "\n")
+	// cmd.SetIn(stdin)
+
+	cmdErr := ExecuteCmd(cmd, fmt.Sprintf("events list --dateFrom=-10d --type=my_CustomType2"))
 	assert.OK(t, cmdErr)
 }

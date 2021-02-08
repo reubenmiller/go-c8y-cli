@@ -110,10 +110,6 @@ func (n *GetManagedObjectChildAssetReferenceCmd) RunE(cmd *cobra.Command, args [
 		return newUserError(err)
 	}
 
-	if err := body.Validate(); err != nil {
-		return newUserError("Body validation error. ", err)
-	}
-
 	// path parameters
 	path := flags.NewStringTemplate("inventory/managedObjects/{asset}/childAssets/{reference}")
 	err = flags.WithPathParameters(

@@ -1,7 +1,7 @@
 . $PSScriptRoot/imports.ps1
 
 InModuleScope PSc8y {
-    Describe -Name "Add-DeviceCollectionToGroupBatch" {
+    Describe -Skip -Tag "Deprecated" -Name "Add-DeviceCollectionToGroupBatch" {
         BeforeEach {
             $ids = New-Object System.Collections.ArrayList
             $inputFile = New-TemporaryFile

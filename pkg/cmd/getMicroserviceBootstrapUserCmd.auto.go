@@ -112,10 +112,6 @@ func (n *GetMicroserviceBootstrapUserCmd) RunE(cmd *cobra.Command, args []string
 		return newUserError(err)
 	}
 
-	if err := body.Validate(); err != nil {
-		return newUserError("Body validation error. ", err)
-	}
-
 	// path parameters
 	path := flags.NewStringTemplate("/application/applications/{id}/bootstrapUser")
 	err = flags.WithPathParameters(

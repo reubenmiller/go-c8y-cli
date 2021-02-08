@@ -109,10 +109,6 @@ func (n *GetSupportedOperationsCmd) RunE(cmd *cobra.Command, args []string) erro
 		return newUserError(err)
 	}
 
-	if err := body.Validate(); err != nil {
-		return newUserError("Body validation error. ", err)
-	}
-
 	// path parameters
 	path := flags.NewStringTemplate("inventory/managedObjects/{device}")
 	err = flags.WithPathParameters(
