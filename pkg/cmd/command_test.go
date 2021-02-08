@@ -2,8 +2,10 @@ package cmd
 
 import (
 	"bytes"
+	"fmt"
 	"io"
 	"io/ioutil"
+	"os"
 	"strings"
 	"testing"
 
@@ -252,5 +254,24 @@ func Test_PipeDeviceNameToQueryParameter(t *testing.T) {
 	cmd.SetIn(stdin)
 
 	cmdErr := ExecuteCmd(cmd, `operations list --dry`)
+	assert.OK(t, cmdErr)
+}
+
+func Test_UpdateEventBinary(t *testing.T) {
+	cmd := setupTest()
+
+	// setup := c8ytestutils.NewTestSetup()
+	// setup.NewRandomTestDevice()
+
+	stdin := bytes.NewBufferString(`testdevice_7ewmxq0a94` + "\n")
+	cmd.SetIn(stdin)
+
+	f, err := ioutil.TempFile(os.TempDir(), "eventBinary")
+	assert.OK(t, err)
+	f.WriteString("äüß1234dfÖ")
+	f.Close()
+	defer os.Remove(f.Name())
+
+	cmdErr := ExecuteCmd(cmd, fmt.Sprintf("events updateBinary --id 88578 --file %s --dry", f.Name()))
 	assert.OK(t, cmdErr)
 }

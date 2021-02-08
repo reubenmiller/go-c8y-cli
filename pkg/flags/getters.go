@@ -18,6 +18,7 @@ type GetOption func(cmd *cobra.Command, inputIterators *RequestInputIterators) (
 
 // WithQueryParameters returns a query parameter values given from command line arguments
 func WithQueryParameters(cmd *cobra.Command, query *QueryTemplate, inputIterators *RequestInputIterators, opts ...GetOption) (err error) {
+	totalIterators := 0
 	for _, opt := range opts {
 		name, value, err := opt(cmd, inputIterators)
 		if err != nil {
@@ -34,13 +35,15 @@ func WithQueryParameters(cmd *cobra.Command, query *QueryTemplate, inputIterator
 			query.SetVariable(name, v)
 		}
 	}
-	inputIterators.Query = query
+	if totalIterators > 0 {
+		inputIterators.Query = query
+	}
 	return
 }
 
 // WithPathParameters returns a path parameter values given from command line arguments
 func WithPathParameters(cmd *cobra.Command, path *StringTemplate, inputIterators *RequestInputIterators, opts ...GetOption) (err error) {
-
+	totalIterators := 0
 	for _, opt := range opts {
 		name, value, err := opt(cmd, inputIterators)
 		if err != nil {
@@ -56,14 +59,17 @@ func WithPathParameters(cmd *cobra.Command, path *StringTemplate, inputIterators
 
 			case iterator.Iterator:
 				path.SetVariable(name, v)
-				inputIterators.Total++
+				totalIterators++
 
 			default:
 				path.SetVariable(name, fmt.Sprintf("%v", value))
 			}
 		}
 	}
-	inputIterators.Path = path
+	if totalIterators > 0 {
+		inputIterators.Total += totalIterators
+		inputIterators.Path = path
+	}
 	return
 }
 
@@ -84,7 +90,7 @@ func WithHeaders(cmd *cobra.Command, header http.Header, inputIterators *Request
 
 // WithBody returns a body from given command line arguments
 func WithBody(cmd *cobra.Command, body *mapbuilder.MapBuilder, inputIterators *RequestInputIterators, opts ...GetOption) (err error) {
-
+	totalIterators := 0
 	for _, opt := range opts {
 		name, value, err := opt(cmd, inputIterators)
 		if err != nil {
@@ -94,7 +100,7 @@ func WithBody(cmd *cobra.Command, body *mapbuilder.MapBuilder, inputIterators *R
 		switch v := value.(type) {
 		case iterator.Iterator:
 			err = body.Set(name, value)
-			inputIterators.Total++
+			totalIterators++
 		case string:
 			// only set non-empty values by default
 			if v != "" {
@@ -143,7 +149,10 @@ func WithBody(cmd *cobra.Command, body *mapbuilder.MapBuilder, inputIterators *R
 			return err
 		}
 	}
-	inputIterators.Body = body
+	if totalIterators > 0 {
+		inputIterators.Total += totalIterators
+		inputIterators.Body = body
+	}
 	return nil
 }
 

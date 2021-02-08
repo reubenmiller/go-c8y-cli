@@ -117,6 +117,9 @@ func WithExtendedPipelineSupport(name string, property string, required bool, al
 // GetPipeOptionsFromAnnotation returns the pipeline options stored in the annotations
 func GetPipeOptionsFromAnnotation(cmd *cobra.Command) (options *PipelineOptions, err error) {
 	options = &PipelineOptions{}
+	if cmd == nil {
+		return
+	}
 	if cmd.Annotations == nil {
 		return
 	}

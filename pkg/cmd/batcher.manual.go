@@ -106,7 +106,6 @@ func processRequestAndResponseWithWorkers(cmd *cobra.Command, r *c8y.RequestOpti
 	if pathIter == nil {
 		pathIter = iterator.NewRepeatIterator(r.Path, 1)
 	}
-
 	// Note: Body accepts iterator types, so no need for special handling here
 	requestIter := NewRequestIterator(*r, pathIter, inputIterators.Query, r.Body)
 

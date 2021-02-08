@@ -2,9 +2,12 @@ package cmd
 
 import (
 	"encoding/json"
+	"os"
+	"reflect"
 	"strings"
 	"sync/atomic"
 
+	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/pkg/iterator"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 )
@@ -30,11 +33,12 @@ func NewRequestIterator(r c8y.RequestOptions, path iterator.Iterator, query iter
 
 // RequestIterator iterates through a c8y rest request with given request options and path iterators
 type RequestIterator struct {
-	Request c8y.RequestOptions
-	Path    iterator.Iterator
-	Query   iterator.Iterator
-	Body    interface{}
-	done    int32
+	Request        c8y.RequestOptions
+	Path           iterator.Iterator
+	Query          iterator.Iterator
+	InputIterators flags.RequestInputIterators
+	Body           interface{}
+	done           int32
 }
 
 // HasNext returns true if there the iterator is finished
@@ -67,7 +71,7 @@ func (r *RequestIterator) GetNext() (*c8y.RequestOptions, error) {
 	}
 
 	// apply path iterator
-	if r.Path != nil {
+	if r.Path != nil && !reflect.ValueOf(r.Path).IsNil() {
 		path, _, err := r.Path.GetNext()
 
 		if err != nil {
@@ -79,7 +83,8 @@ func (r *RequestIterator) GetNext() (*c8y.RequestOptions, error) {
 	}
 
 	// apply query iterator
-	if r.Query != nil {
+	// note: reflection is needed as a simple nil check does not work for interfaces!
+	if r.Query != nil && !reflect.ValueOf(r.Query).IsNil() {
 		q, _, err := r.Query.GetNext()
 		if err != nil {
 			r.setDone()
@@ -89,27 +94,30 @@ func (r *RequestIterator) GetNext() (*c8y.RequestOptions, error) {
 	}
 
 	// apply body iterator
-	if r.Body != nil && (strings.EqualFold(req.Method, "POST") || strings.EqualFold(req.Method, "PUT")) {
+	if r.Body != nil && !reflect.ValueOf(r.Body).IsNil() && (strings.EqualFold(req.Method, "POST") || strings.EqualFold(req.Method, "PUT")) {
 		// iterator body. Any validation will be run here
-		bodyContents, err := json.Marshal(r.Body)
+		switch v := r.Body.(type) {
+		case *os.File:
+			req.Body = v
+		default:
+			bodyContents, err := json.Marshal(r.Body)
 
-		if err != nil {
-			r.setDone()
-			return nil, err
+			if err != nil {
+				r.setDone()
+				return nil, err
+			}
+
+			// TODO: Find more efficient way rather than converting to and from json
+			bodyValue := make(map[string]interface{})
+
+			// Note: UnmarshalJSON does not support large numbers by default, so
+			// 		 c8y.DecodeJSONBytes should be used instead!
+			if err := c8y.DecodeJSONBytes(bodyContents, &bodyValue); err != nil {
+				r.setDone()
+				return nil, err
+			}
+			req.Body = bodyValue
 		}
-
-		// TODO: Find more efficient way rather than converting to and from json
-		bodyValue := make(map[string]interface{})
-
-		// Note: UnmarshalJSON does not support large numbers by default, so
-		// 		 c8y.DecodeJSONBytes should be used instead!
-		if err := c8y.DecodeJSONBytes(bodyContents, &bodyValue); err != nil {
-			r.setDone()
-			return nil, err
-		}
-
-		req.Body = bodyValue
 	}
-
 	return req, nil
 }

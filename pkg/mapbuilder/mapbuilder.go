@@ -300,7 +300,7 @@ func (b MapBuilder) HasFile() bool {
 }
 
 func (b MapBuilder) GetBody() (interface{}, error) {
-	if b.file != "" {
+	if b.HasFile() {
 		return os.Open(b.file)
 	}
 	return b.GetMap(), nil

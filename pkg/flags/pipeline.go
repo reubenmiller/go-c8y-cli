@@ -14,8 +14,6 @@ import (
 // or from the pipeline
 // It will automatically try to get the value from a String or a StringSlice flag
 func NewFlagWithPipeIterator(cmd *cobra.Command, pipeOpt *PipelineOptions, supportsPipeline bool) (iterator.Iterator, error) {
-	// supportsPipeline := HasValueFromPipeline(cmd, pipeOpt.Name)
-
 	if cmd.Flags().Changed(pipeOpt.Name) {
 
 		items, err := cmd.Flags().GetStringSlice(pipeOpt.Name)
