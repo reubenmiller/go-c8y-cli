@@ -108,7 +108,7 @@ func processRequestAndResponseWithWorkers(cmd *cobra.Command, r *c8y.RequestOpti
 	}
 
 	// Note: Body accepts iterator types, so no need for special handling here
-	requestIter := NewRequestIterator(*r, pathIter, r.Body)
+	requestIter := NewRequestIterator(*r, pathIter, inputIterators.Query, r.Body)
 
 	// get common options and batch settings
 	commonOptions, err := getCommonOptions(cmd)

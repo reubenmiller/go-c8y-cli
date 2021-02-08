@@ -4,7 +4,6 @@ package cmd
 import (
 	"io"
 	"net/http"
-	"net/url"
 
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/pkg/mapbuilder"
@@ -60,7 +59,7 @@ func (n *DeleteOperationCollectionCmd) RunE(cmd *cobra.Command, args []string) e
 	}
 
 	// query parameters
-	query := url.Values{}
+	query := flags.NewQueryTemplate()
 	err = flags.WithQueryParameters(
 		cmd,
 		query,
@@ -75,7 +74,7 @@ func (n *DeleteOperationCollectionCmd) RunE(cmd *cobra.Command, args []string) e
 		return newUserError(err)
 	}
 
-	queryValue, err := url.QueryUnescape(query.Encode())
+	queryValue, err := query.GetQueryUnescape(true)
 
 	if err != nil {
 		return newSystemError("Invalid query parameter")

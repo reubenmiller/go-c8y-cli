@@ -251,7 +251,7 @@
             return newUserError(fmt.Sprintf("Failed to get common options. err=%s", err))
         }
 "@)
-        $null = $RESTQueryBuilderPost.AppendLine("commonOptions.AddQueryParameters(&query)")
+        $null = $RESTQueryBuilderPost.AppendLine("commonOptions.AddQueryParameters(query)")
     }
 
     #
@@ -367,7 +367,7 @@ func (n *${NameCamel}Cmd) RunE(cmd *cobra.Command, args []string) error {
     }
 
     // query parameters
-    query := url.Values{}
+    query := flags.NewQueryTemplate()
     err = flags.WithQueryParameters(
 		cmd,
         query,
@@ -378,7 +378,7 @@ func (n *${NameCamel}Cmd) RunE(cmd *cobra.Command, args []string) error {
 		return newUserError(err)
     }
     $RESTQueryBuilderPost
-	queryValue, err := url.QueryUnescape(query.Encode())
+	queryValue, err := query.GetQueryUnescape(true)
 
 	if err != nil {
 		return newSystemError("Invalid query parameter")

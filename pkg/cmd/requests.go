@@ -11,6 +11,7 @@ import (
 
 	"github.com/fatih/color"
 	"github.com/reubenmiller/go-c8y-cli/pkg/encoding"
+	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/pkg/jsonUtilities"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
@@ -32,25 +33,21 @@ type CommonCommandOptions struct {
 }
 
 // AddQueryParameters adds the common query parameters to the given query values
-func (options CommonCommandOptions) AddQueryParameters(query *url.Values) {
+func (options CommonCommandOptions) AddQueryParameters(query *flags.QueryTemplate) {
 	if query == nil {
 		return
 	}
 
 	if options.CurrentPage > 0 {
-		query.Add("currentPage", fmt.Sprintf("%d", options.CurrentPage))
+		query.SetVariable("currentPage", options.CurrentPage)
 	}
 
 	if options.PageSize > 0 {
-		if query.Get("pageSize") != "" {
-			query.Set("pageSize", fmt.Sprintf("%d", options.PageSize))
-		} else {
-			query.Add("pageSize", fmt.Sprintf("%d", options.PageSize))
-		}
+		query.SetVariable("pageSize", options.PageSize)
 	}
 
 	if options.WithTotalPages {
-		query.Add("withTotalPages", "true")
+		query.SetVariable("withTotalPages", "true")
 	}
 }
 

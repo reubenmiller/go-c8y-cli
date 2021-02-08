@@ -239,3 +239,18 @@ func Test_LookupQueryParameterByReference(t *testing.T) {
 	cmdErr := ExecuteCmd(cmd, `operations list --device=testdevice_1me4xsy9vd`)
 	assert.OK(t, cmdErr)
 }
+
+func Test_PageSizeParameter(t *testing.T) {
+	cmd := setupTest()
+	cmdErr := ExecuteCmd(cmd, `devices list --select id,name --pageSize 10 --verbose`)
+	assert.OK(t, cmdErr)
+}
+
+func Test_PipeDeviceNameToQueryParameter(t *testing.T) {
+	cmd := setupTest()
+	stdin := bytes.NewBufferString(`testdevice_7ewmxq0a94` + "\n")
+	cmd.SetIn(stdin)
+
+	cmdErr := ExecuteCmd(cmd, `operations list --dry`)
+	assert.OK(t, cmdErr)
+}

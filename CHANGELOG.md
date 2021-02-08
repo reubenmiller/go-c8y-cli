@@ -20,7 +20,17 @@ No unreleased features
 
 
 * TODO:
-    * TODO: add pipe support for query parameters
+    * Add pipeline alias lists
+        **Before**
+        ```sh
+        c8y devices list --select id,name | jqiter | jq "{deviceId: .id}" -c | c8y operations list --dry --workers 4
+        ```
+
+        **After**
+        ```sh
+        c8y devices list --select id,name | jqiter | c8y operations list --dry --workers 4
+        ```
+    * Save pipeline context for reuse in templates
     * Piping input, the last item is being ignored! readbytes is return data and io.EOF! Make sure the data is processed even if the end is found (or this may only be an issue in the tests??? - need to verify)
     * When doing batch size of 1, only set the exit code to the last value
         * or work out a way to transmit the values back in another format (add extra values to the response?)

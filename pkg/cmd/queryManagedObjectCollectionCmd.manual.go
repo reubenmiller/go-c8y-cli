@@ -53,8 +53,7 @@ func (n *QueryManagedObjectCollectionCmd) RunE(cmd *cobra.Command, args []string
 	inputIterators := &flags.RequestInputIterators{}
 
 	// query parameters
-	queryValue := url.QueryEscape("")
-	query := url.Values{}
+	query := flags.NewQueryTemplate()
 
 	commonOptions, err := getCommonOptions(cmd)
 	if err != nil {
@@ -62,7 +61,7 @@ func (n *QueryManagedObjectCollectionCmd) RunE(cmd *cobra.Command, args []string
 	}
 
 	commonOptions.ResultProperty = "managedObjects"
-	commonOptions.AddQueryParameters(&query)
+	commonOptions.AddQueryParameters(query)
 
 	orderBy := ""
 	if v, err := cmd.Flags().GetString("orderBy"); err == nil {
@@ -78,20 +77,20 @@ func (n *QueryManagedObjectCollectionCmd) RunE(cmd *cobra.Command, args []string
 				c8yQuery = c8yQuery + fmt.Sprintf("+$orderby=%s", url.QueryEscape(orderBy))
 			}
 
-			query.Add("query", c8yQuery)
+			query.SetVariable("query", c8yQuery)
 		}
 	} else {
 		return newUserError(fmt.Sprintf("Flag [%s] does not exist. %s", "query", err))
 	}
 	if cmd.Flags().Changed("withParents") {
 		if v, err := cmd.Flags().GetBool("withParents"); err == nil {
-			query.Add("withParents", fmt.Sprintf("%v", v))
+			query.SetVariable("withParents", fmt.Sprintf("%v", v))
 		} else {
 			return newUserError("Flag does not exist")
 		}
 	}
 
-	queryValue, err = url.QueryUnescape(query.Encode())
+	queryValue, err := query.GetQueryUnescape(true)
 
 	if err != nil {
 		return newSystemError("Invalid query parameter")

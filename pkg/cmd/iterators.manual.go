@@ -18,10 +18,11 @@ func NewRelativeTimeIterator(relative string) *iterator.FuncIterator {
 }
 
 // NewRequestIterator returns an iterator that can be used to send multiple requests until the give iterators in the path/body are exhausted
-func NewRequestIterator(r c8y.RequestOptions, path iterator.Iterator, body interface{}) *RequestIterator {
+func NewRequestIterator(r c8y.RequestOptions, path iterator.Iterator, query iterator.Iterator, body interface{}) *RequestIterator {
 	reqIter := &RequestIterator{
 		Request: r,
 		Path:    path,
+		Query:   query,
 		Body:    body,
 	}
 	return reqIter
@@ -31,6 +32,7 @@ func NewRequestIterator(r c8y.RequestOptions, path iterator.Iterator, body inter
 type RequestIterator struct {
 	Request c8y.RequestOptions
 	Path    iterator.Iterator
+	Query   iterator.Iterator
 	Body    interface{}
 	done    int32
 }
@@ -74,6 +76,16 @@ func (r *RequestIterator) GetNext() (*c8y.RequestOptions, error) {
 		}
 
 		req.Path = string(path)
+	}
+
+	// apply query iterator
+	if r.Query != nil {
+		q, _, err := r.Query.GetNext()
+		if err != nil {
+			r.setDone()
+			return nil, err
+		}
+		req.Query = string(q)
 	}
 
 	// apply body iterator

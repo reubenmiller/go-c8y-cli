@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"net/url"
 
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/pkg/mapbuilder"
@@ -53,7 +52,7 @@ func (n *GetTenantOptionCollectionCmd) RunE(cmd *cobra.Command, args []string) e
 	}
 
 	// query parameters
-	query := url.Values{}
+	query := flags.NewQueryTemplate()
 	err = flags.WithQueryParameters(
 		cmd,
 		query,
@@ -66,9 +65,9 @@ func (n *GetTenantOptionCollectionCmd) RunE(cmd *cobra.Command, args []string) e
 	if err != nil {
 		return newUserError(fmt.Sprintf("Failed to get common options. err=%s", err))
 	}
-	commonOptions.AddQueryParameters(&query)
+	commonOptions.AddQueryParameters(query)
 
-	queryValue, err := url.QueryUnescape(query.Encode())
+	queryValue, err := query.GetQueryUnescape(true)
 
 	if err != nil {
 		return newSystemError("Invalid query parameter")

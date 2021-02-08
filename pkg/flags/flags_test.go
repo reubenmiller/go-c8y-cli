@@ -98,7 +98,7 @@ func Test_QueryParameters(t *testing.T) {
 	cmdErr := cmd.Execute()
 	assert.OK(t, cmdErr)
 
-	query := url.Values{}
+	query := flags.NewQueryTemplate()
 	err := WithQueryParameters(
 		cmd,
 		query,

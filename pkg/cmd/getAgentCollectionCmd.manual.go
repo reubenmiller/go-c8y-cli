@@ -7,6 +7,7 @@ import (
 	"net/url"
 	"strings"
 
+	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/pkg/mapbuilder"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
@@ -49,8 +50,7 @@ func NewGetAgentCollectionCmd() *getAgentCollectionCmd {
 func (n *getAgentCollectionCmd) getAgentCollection(cmd *cobra.Command, args []string) error {
 
 	// query parameters
-	queryValue := url.QueryEscape("")
-	query := url.Values{}
+	query := flags.NewQueryTemplate()
 
 	commonOptions, err := getCommonOptions(cmd)
 	if err != nil {
@@ -58,7 +58,7 @@ func (n *getAgentCollectionCmd) getAgentCollection(cmd *cobra.Command, args []st
 	}
 
 	commonOptions.ResultProperty = "managedObjects"
-	commonOptions.AddQueryParameters(&query)
+	commonOptions.AddQueryParameters(query)
 
 	var c8yQueryParts = make([]string, 0)
 
@@ -98,15 +98,15 @@ func (n *getAgentCollectionCmd) getAgentCollection(cmd *cobra.Command, args []st
 	// replace all spaces with "+" due to url encoding
 	filter := url.QueryEscape(strings.Join(c8yQueryParts, " and "))
 	orderBy := url.QueryEscape("name")
-	query.Add("query", fmt.Sprintf("$filter=%s+$orderby=%s", filter, orderBy))
+	query.SetVariable("query", fmt.Sprintf("$filter=%s+$orderby=%s", filter, orderBy))
 
 	if v, err := cmd.Flags().GetBool("withParents"); err == nil {
 		if v {
-			query.Add("withParents", "true")
+			query.SetVariable("withParents", "true")
 		}
 	}
 
-	queryValue, err = url.QueryUnescape(query.Encode())
+	queryValue, err := query.GetQueryUnescape(true)
 
 	if err != nil {
 		return newSystemError("Invalid query parameter")

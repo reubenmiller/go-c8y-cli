@@ -49,7 +49,7 @@ func WithRequestOptions(cmd *cobra.Command, args []string, req *c8y.RequestOptio
 	//
 	// query parameters
 	queryValue := url.QueryEscape("")
-	query := url.Values{}
+	query := NewQueryTemplate()
 
 	err = WithQueryParameters(
 		cmd,
@@ -61,7 +61,7 @@ func WithRequestOptions(cmd *cobra.Command, args []string, req *c8y.RequestOptio
 		return err
 	}
 
-	queryValue, err = url.QueryUnescape(query.Encode())
+	queryValue, err = query.GetQueryUnescape(true)
 
 	if err != nil {
 		return err

@@ -56,8 +56,7 @@ func NewGetDeviceCollectionCmd() *GetDeviceCollectionCmd {
 func (n *GetDeviceCollectionCmd) RunE(cmd *cobra.Command, args []string) error {
 	// query parameters
 	inputIterators := &flags.RequestInputIterators{}
-	queryValue := url.QueryEscape("")
-	query := url.Values{}
+	query := flags.NewQueryTemplate()
 
 	commonOptions, err := getCommonOptions(cmd)
 	if err != nil {
@@ -65,7 +64,7 @@ func (n *GetDeviceCollectionCmd) RunE(cmd *cobra.Command, args []string) error {
 	}
 
 	commonOptions.ResultProperty = "managedObjects"
-	commonOptions.AddQueryParameters(&query)
+	commonOptions.AddQueryParameters(query)
 
 	c8yQueryParts, err := flags.WithC8YQueryOptions(
 		cmd,
@@ -94,7 +93,7 @@ func (n *GetDeviceCollectionCmd) RunE(cmd *cobra.Command, args []string) error {
 	}
 
 	// q will automatically add a fragmentType=c8y_IsDevice to the query
-	query.Add("query", fmt.Sprintf("$filter=%s+$orderby=%s", filter, orderBy))
+	query.SetVariable("query", fmt.Sprintf("$filter=%s+$orderby=%s", filter, orderBy))
 
 	err = flags.WithQueryParameters(
 		cmd,
@@ -107,7 +106,7 @@ func (n *GetDeviceCollectionCmd) RunE(cmd *cobra.Command, args []string) error {
 		return nil
 	}
 
-	queryValue, err = url.QueryUnescape(query.Encode())
+	queryValue, err := query.GetQueryUnescape(true)
 
 	if err != nil {
 		return newSystemError("Invalid query parameter")

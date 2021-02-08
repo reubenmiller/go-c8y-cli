@@ -3,7 +3,6 @@ package flags
 import (
 	"fmt"
 	"net/http"
-	"net/url"
 	"strings"
 
 	"github.com/reubenmiller/go-c8y-cli/pkg/c8ydata"
@@ -18,29 +17,24 @@ import (
 type GetOption func(cmd *cobra.Command, inputIterators *RequestInputIterators) (name string, value interface{}, err error)
 
 // WithQueryParameters returns a query parameter values given from command line arguments
-func WithQueryParameters(cmd *cobra.Command, query url.Values, inputIterators *RequestInputIterators, opts ...GetOption) (err error) {
+func WithQueryParameters(cmd *cobra.Command, query *QueryTemplate, inputIterators *RequestInputIterators, opts ...GetOption) (err error) {
 	for _, opt := range opts {
 		name, value, err := opt(cmd, inputIterators)
 		if err != nil {
 			return err
 		}
-		queryValue := ""
+		if name == "" {
+			continue
+		}
 		switch v := value.(type) {
 		case iterator.Iterator:
-			// TODO: add pipe support for query parameters
-			entity, _, err := v.GetNext()
-			if err != nil {
-				return err
-			}
-			queryValue = fmt.Sprintf("%s", entity)
+			query.SetVariable(name, v)
+			inputIterators.Total++
 		default:
-			queryValue = fmt.Sprintf("%v", v)
-		}
-
-		if name != "" && queryValue != "" {
-			query.Add(name, url.QueryEscape(queryValue))
+			query.SetVariable(name, v)
 		}
 	}
+	inputIterators.Query = query
 	return
 }
 
@@ -422,5 +416,6 @@ type RequestInputIterators struct {
 	Total       int
 	Path        *StringTemplate
 	Body        *mapbuilder.MapBuilder
+	Query       *QueryTemplate
 	PipeOptions *PipelineOptions
 }
