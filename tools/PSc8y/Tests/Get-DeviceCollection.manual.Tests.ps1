@@ -57,7 +57,7 @@ Describe -Name "Get-DeviceCollection" {
             $devices = PSc8y\Get-DeviceCollection -Verbose -IncludeAll
             $LASTEXITCODE | Should -Be 0
             $devices | Should -Not -BeNullOrEmpty
-            $devices.Count | Should -Be -ExpectedValue $Total
+            $devices.Count | Should -BeGreaterOrEqual ($Total * 0.7)
         }
 
         AfterAll {
