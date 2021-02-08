@@ -41,7 +41,7 @@ Remove all pending operations for a given device
 
 	flags.WithOptions(
 		cmd,
-		flags.WithExtendedPipelineSupport("device", "deviceId", false),
+		flags.WithExtendedPipelineSupport("device", "deviceId", false, "deviceId", "source.id", "id"),
 	)
 
 	// Required flags

@@ -39,7 +39,7 @@ Create measurement
 
 	flags.WithOptions(
 		cmd,
-		flags.WithExtendedPipelineSupport("device", "source.id", true),
+		flags.WithExtendedPipelineSupport("device", "source.id", true, "deviceId", "source.id", "id"),
 	)
 
 	// Required flags

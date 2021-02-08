@@ -40,7 +40,7 @@ Add multiple devices to a group
 
 	flags.WithOptions(
 		cmd,
-		flags.WithExtendedPipelineSupport("newChildDevice", "managedObject.id", true),
+		flags.WithExtendedPipelineSupport("newChildDevice", "managedObject.id", true, "deviceId", "source.id", "id"),
 	)
 
 	// Required flags

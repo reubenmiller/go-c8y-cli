@@ -67,16 +67,19 @@
     $PipelineVariableRequired = "false"
     $PipelineVariableProperty = ""
     $PipelineVariableAliases = ""
-    $PipelineVariablePropertyResolveType = ""
     foreach ($iArg in (Remove-SkippedParameters $ArgumentSources)) {
         if ($iArg.pipeline) {
             $PipelineVariableName = $iArg.Name
             $PipelineVariableRequired = if ($iArg.Required) {"true"} else {"false"}
             $PipelineVariableProperty = if ($iArg.Property) { $iArg.Property } else { $iArg.Name }
-            switch -Regex ($iArg.type) {
-                "^(\[\])?application|microservice|agent|device|devicegroup|agent|usergroup|user|role$" {
-                    $PipelineVariablePropertyResolveType = "$($iArg.type)".ToLower() -replace "[\[\]]"
-                    break
+            $PipelineVariableAliases = $iArg.pipelineAliases
+            if (!$PipelineVariableAliases) {
+                if ($PipelineVariableName -match "device$") {
+                    $PipelineVariableAliases = @(
+                        "deviceId",
+                        "source.id",
+                        "id"
+                    )
                 }
             }
         }

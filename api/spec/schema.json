@@ -55,6 +55,13 @@
         "[]user"
       ]
     },
+    "pipelineAliases": {
+      "type": "array",
+      "description": "Aliases to use when searching for the piped json data property to bind to. Only the first match will be used",
+      "items": {
+        "type": "string"
+      }
+    },
     "argumentPosition": {
       "type": "integer",
       "description": "Argument position / order",
@@ -286,6 +293,9 @@
                 "pipeline": {
                   "type": "boolean"
                 },
+                "pipelineAliases": {
+                  "$ref": "#/definitions/pipelineAliases"
+                },
                 "description": {
                   "type": "string"
                 },
@@ -330,6 +340,9 @@
                 },
                 "pipeline": {
                   "type": "boolean"
+                },
+                "pipelineAliases": {
+                  "$ref": "#/definitions/pipelineAliases"
                 },
                 "description": {
                   "type": "string"
@@ -429,6 +442,9 @@
                 },
                 "pipeline": {
                   "type": "boolean"
+                },
+                "pipelineAliases": {
+                  "$ref": "#/definitions/pipelineAliases"
                 },
                 "description": {
                   "type": "string"

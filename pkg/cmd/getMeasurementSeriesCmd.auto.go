@@ -40,7 +40,7 @@ Get a list of series [nx_WEA_29_Delta.MDL10FG001] and [nx_WEA_29_Delta.ST9] for 
 
 	flags.WithOptions(
 		cmd,
-		flags.WithExtendedPipelineSupport("device", "source", false),
+		flags.WithExtendedPipelineSupport("device", "source", false, "deviceId", "source.id", "id"),
 	)
 
 	// Required flags

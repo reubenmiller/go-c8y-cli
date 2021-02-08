@@ -37,7 +37,7 @@ Get an existing child device reference
 
 	flags.WithOptions(
 		cmd,
-		flags.WithExtendedPipelineSupport("device", "device", true),
+		flags.WithExtendedPipelineSupport("device", "device", true, "deviceId", "source.id", "id"),
 	)
 
 	// Required flags
