@@ -2,6 +2,7 @@ package flags
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"os"
 
@@ -9,6 +10,18 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/pkg/jsonUtilities"
 	"github.com/spf13/cobra"
 )
+
+var ErrParameterMissing error = errors.New("missing required parameter")
+
+type ParameterError struct {
+	Name string
+
+	Err error
+}
+
+func (e *ParameterError) Error() string {
+	return fmt.Sprintf("Missing required parameter. %s", e.Name)
+}
 
 // NewFlagWithPipeIterator creates an iterator from a command argument
 // or from the pipeline
@@ -26,6 +39,14 @@ func NewFlagWithPipeIterator(cmd *cobra.Command, pipeOpt *PipelineOptions, suppo
 				return nil, err
 			}
 			items = append(items, item)
+		}
+		if len(items) == 0 {
+			if pipeOpt.Required {
+				return nil, &ParameterError{
+					Name: pipeOpt.Name,
+					Err:  ErrParameterMissing,
+				}
+			}
 		}
 		if len(items) > 0 {
 
@@ -65,6 +86,7 @@ func NewFlagWithPipeIterator(cmd *cobra.Command, pipeOpt *PipelineOptions, suppo
 			if pipeOpt.Required {
 				return iter, err
 			}
+			// ignore error as it is not required
 			return iter, nil
 		}
 		return iter, nil

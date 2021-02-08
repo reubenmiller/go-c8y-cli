@@ -3,6 +3,7 @@ package cmd
 import (
 	"errors"
 	"fmt"
+	"io"
 	"strconv"
 	"strings"
 
@@ -161,19 +162,21 @@ func getFetchedResultsAsString(refs []entityReference) (results []string, invali
 }
 
 type EntityIterator struct {
-	Fetcher       entityFetcher
-	Client        *c8y.Client
-	valueIterator iterator.Iterator
-	GetID         bool
+	Fetcher        entityFetcher
+	Client         *c8y.Client
+	valueIterator  iterator.Iterator
+	GetID          bool
+	MinimumMatches int
 }
 
 // NewReferenceByNameIterator create a new iterator which can look up values by their id or names
-func NewReferenceByNameIterator(fetcher entityFetcher, c8yClient *c8y.Client, valueIterator iterator.Iterator) *EntityIterator {
+func NewReferenceByNameIterator(fetcher entityFetcher, c8yClient *c8y.Client, valueIterator iterator.Iterator, minimumMatches int) *EntityIterator {
 	return &EntityIterator{
-		Fetcher:       fetcher,
-		Client:        c8yClient,
-		valueIterator: valueIterator,
-		GetID:         false,
+		Fetcher:        fetcher,
+		Client:         c8yClient,
+		valueIterator:  valueIterator,
+		GetID:          false,
+		MinimumMatches: minimumMatches,
 	}
 }
 
@@ -186,7 +189,9 @@ func (i *EntityIterator) MarshalJSON() (line []byte, err error) {
 }
 
 func (i *EntityIterator) GetNext() (value []byte, input interface{}, err error) {
-
+	if i.valueIterator == nil {
+		return nil, nil, io.EOF
+	}
 	value, rawValue, err := i.valueIterator.GetNext()
 	if err != nil {
 		return
@@ -198,6 +203,13 @@ func (i *EntityIterator) GetNext() (value []byte, input interface{}, err error) 
 	}
 
 	if len(refs) == 0 {
+		if len(refs) < i.MinimumMatches {
+			return nil, nil, ErrNoMatchesFound
+		}
+		return nil, nil, nil
+	}
+
+	if len(refs) < i.MinimumMatches {
 		return nil, nil, ErrNoMatchesFound
 	}
 
@@ -222,10 +234,14 @@ func WithReferenceByName(fetcher entityFetcher, args []string, opts ...string) f
 			hasPipeSupport := inputIterators.PipeOptions.Name == src
 			pipeIter, err := flags.NewFlagWithPipeIterator(cmd, inputIterators.PipeOptions, hasPipeSupport)
 
-			if err != nil {
+			if err != nil || pipeIter == nil {
 				return "", nil, err
 			}
-			iter := NewReferenceByNameIterator(fetcher, client, pipeIter)
+			minMatches := 0
+			if inputIterators.PipeOptions.Required {
+				minMatches = 1
+			}
+			iter := NewReferenceByNameIterator(fetcher, client, pipeIter, minMatches)
 			return inputIterators.PipeOptions.Property, iter, nil
 		}
 
@@ -469,7 +485,11 @@ func WithReferenceByNamePipeline(fetcher entityFetcher, opts *flags.PipelineOpti
 			return "", nil, err
 		}
 
-		iter := NewReferenceByNameIterator(fetcher, client, pipeIter)
+		minMatches := 0
+		if inputIterators.PipeOptions.Required {
+			minMatches = 1
+		}
+		iter := NewReferenceByNameIterator(fetcher, client, pipeIter, minMatches)
 
 		return opts.Property, iter, err
 	}
