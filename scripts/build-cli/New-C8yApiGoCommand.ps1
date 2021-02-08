@@ -424,10 +424,6 @@ func (n *${NameCamel}Cmd) RunE(cmd *cobra.Command, args []string) error {
 		return newUserError(err)
     }
 
-    if err := body.Validate(); err != nil {
-		return newUserError("Body validation error. ", err)
-	}
-
     // path parameters
     path := flags.NewStringTemplate("${RESTPath}")
     err = flags.WithPathParameters(
