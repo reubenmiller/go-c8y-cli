@@ -30,12 +30,13 @@ func WithQueryParameters(cmd *cobra.Command, query *QueryTemplate, inputIterator
 		switch v := value.(type) {
 		case iterator.Iterator:
 			query.SetVariable(name, v)
-			inputIterators.Total++
+			totalIterators++
 		default:
 			query.SetVariable(name, v)
 		}
 	}
 	if totalIterators > 0 {
+		inputIterators.Total += totalIterators
 		inputIterators.Query = query
 	}
 	return
@@ -188,6 +189,10 @@ func WithStringValue(opts ...string) GetOption {
 		if err != nil {
 			return dst, value, err
 		}
+		if value == "" {
+			// dont assign the value anywhere
+			dst = ""
+		}
 		return dst, applyFormatter(format, value), err
 	}
 }
@@ -308,11 +313,10 @@ func UnpackGetterOptions(defaultFormat string, options ...string) (src string, d
 	} else if len(options) >= 3 {
 		src = options[0]
 		dst = options[1]
-		formatter = options[2]
+		if options[2] != "" {
+			formatter = options[2]
+		}
 	}
-	// if dst == "" {
-	// 	dst = src
-	// }
 	return
 }
 

@@ -62,11 +62,16 @@ func (b *QueryTemplate) Execute(ignoreIterators bool) (query url.Values, err err
 				currentValue = string(bValue)
 			}
 
+		case []string:
+			// Add each item individually. Don't handle it like the other types
+			for _, ivalue := range v {
+				if ivalue != "" {
+					query.Add(key, fmt.Sprintf("%s", ivalue))
+				}
+			}
+
 		case string:
 			currentValue = v
-
-		case []string:
-			currentValue = fmt.Sprintf("%s", v)
 
 		default:
 			currentValue = fmt.Sprintf("%v", v)

@@ -30,13 +30,14 @@ func (b *StringTemplate) SetVariable(name string, value interface{}) {
 
 // GetTemplate return the string template
 func (b *StringTemplate) GetTemplate() string {
-	return b.template
+	output, _, _ := b.Execute(true)
+	return output
 }
 
 // Execute replaces all of the path parameters in a given URI with the provided values
 // Example:
 // 	"alarm/alarms/{id}" => "alarm/alarms/1234" if given a parameter map of {"id": "1234"}
-func (b *StringTemplate) Execute(template ...string) (output string, inputTemplate string, err error) {
+func (b *StringTemplate) Execute(ignoreIterators bool, template ...string) (output string, inputTemplate string, err error) {
 	if b.templateVariables == nil {
 		return "", "", io.EOF
 	}
@@ -52,11 +53,13 @@ func (b *StringTemplate) Execute(template ...string) (output string, inputTempla
 		var currentValue string
 		switch v := value.(type) {
 		case iterator.Iterator:
-			nextValue, _, err := v.GetNext()
-			if err != nil {
-				return "", "", err
+			if !ignoreIterators {
+				nextValue, _, err := v.GetNext()
+				if err != nil {
+					return "", "", err
+				}
+				currentValue = string(nextValue)
 			}
-			currentValue = string(nextValue)
 		case string:
 			currentValue = v
 		default:
@@ -70,8 +73,7 @@ func (b *StringTemplate) Execute(template ...string) (output string, inputTempla
 
 // GetNext returns the next template path
 func (b *StringTemplate) GetNext() ([]byte, interface{}, error) {
-
-	output, input, err := b.Execute()
+	output, input, err := b.Execute(false)
 	return []byte(output), []byte(input), err
 }
 
