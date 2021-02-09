@@ -102,7 +102,22 @@ func NewPipeIterator(filter ...Filter) (Iterator, error) {
 
 // NewJSONPipeIterator returns a new pipe iterator
 func NewJSONPipeIterator(in io.Reader, pipeOpts *PipeOptions, filter ...Filter) (Iterator, error) {
+	var input io.Reader
+	switch v := in.(type) {
+	case *os.File:
+		// check if there is input (otherwise calling .Peek(1) will hang)
+		info, err := v.Stat()
+		if err != nil {
+			return nil, err
+		}
 
+		if info.Mode()&os.ModeCharDevice != 0 {
+			return nil, ErrNoPipeInput
+		}
+		input = v
+	case io.Reader:
+		input = v
+	}
 	// info, err := os.Stdin.Stat()
 	// if err != nil {
 	// 	return nil, err
@@ -112,7 +127,7 @@ func NewJSONPipeIterator(in io.Reader, pipeOpts *PipeOptions, filter ...Filter) 
 	// 	return nil, ErrNoPipeInput
 	// }
 
-	reader := bufio.NewReader(in)
+	reader := bufio.NewReader(input)
 	if _, err := reader.Peek(1); err != nil {
 		return nil, ErrNoPipeInput
 	}

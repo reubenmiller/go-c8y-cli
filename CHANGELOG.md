@@ -9,29 +9,13 @@ No unreleased features
 ./tools/PSc8y/reports/Failed_Get-DeviceCollection.manual.Tests_Pester.xml
  => ErrorVariables and InformationVariables are not written to when using IncludeAll
 
-
-./tools/PSc8y/reports/Failed_Update-EventBinary.manual.Tests_Pester.xml
-./tools/PSc8y/reports/Failed_Remove-ChildAddition.auto.Tests_Pester.xml
-./tools/PSc8y/reports/Failed_Get-CurrentUserInventoryRole.auto.Tests_Pester.xml
-./tools/PSc8y/reports/Failed_Get-ChildAdditionCollection.auto.Tests_Pester.xml
-./tools/PSc8y/reports/Failed_Get-MeasurementSeries.auto.Tests_Pester.xml
-
-./tools/PSc8y/reports/Failed_Add-ChildAddition.auto.Tests_Pester.xml
+./tools/PSc8y/reports/Failed_Get-TenantOptionCollection.auto.Tests_Pester.xml
 
 
 * TODO:
     * Save pipeline context for reuse in templates
     * Piping input, the last item is being ignored! readbytes is return data and io.EOF! Make sure the data is processed even if the end is found (or this may only be an issue in the tests??? - need to verify)
-    * When doing batch size of 1, only set the exit code to the last value
-        * or work out a way to transmit the values back in another format (add extra values to the response?)
-    - Create an iterator for each fetcher
-
-        ```sh
-        c8y devices list --select id,name --pageSize 20 | jq -r ".[].name" | c8y inventory get
-        ```
-    - Iterator over a query parameter via piped input
-        - echo "12345" | c8y operations list --dry
-            -> /inventory/managedObjects?deviceId=12345
+    
 * Fixed #43. New-ServiceUser now accepts more than 1 role
 * Added Expand-DeviceGroup cmdlet
 * Adding following template variables
@@ -62,6 +46,8 @@ No unreleased features
         ```sh
         c8y devices list --select id,name | jqiter | c8y operations list --dry --workers 4
         ```
+
+* When doing batch size of 1, only set the exit code to the last value
 
 ### PSc8y improvements
 

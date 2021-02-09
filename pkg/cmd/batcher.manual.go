@@ -98,6 +98,9 @@ func processRequestAndResponseWithWorkers(cmd *cobra.Command, r *c8y.RequestOpti
 	if inputIterators != nil && inputIterators.Total > 0 {
 		if inputIterators.Path != nil {
 			pathIter = inputIterators.Path
+		} else {
+			// use continuous path repeater so that it does not stop the other interators
+			pathIter = iterator.NewRepeatIterator(r.Path, 0)
 		}
 		if inputIterators.Body != nil {
 			r.Body = inputIterators.Body
