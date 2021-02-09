@@ -207,6 +207,7 @@ endpoints:
       - name: userName
         type: string
         required: false
+        pipeline: true
         description: 'User name, unique for a given domain. Max: 1000 characters'
 
       - name: firstName
@@ -321,6 +322,7 @@ endpoints:
       - name: name
         type: string
         required: true
+        pipeline: true
         description: Username
 
   - name: deleteUser

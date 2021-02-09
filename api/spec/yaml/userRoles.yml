@@ -105,6 +105,7 @@ endpoints:
       - name: role
         type: '[]role'
         required: true
+        pipeline: true
         description: Role name
 
       - name: tenant
@@ -189,6 +190,7 @@ endpoints:
       - name: role
         type: '[]role'
         required: true
+        pipeline: true
         description: Role name, e.g. ROLE_TENANT_MANAGEMENT_ADMIN
 
       - name: tenant
@@ -228,6 +230,7 @@ endpoints:
       - name: user
         type: '[]user'
         required: true
+        pipeline: true
         description: User
 
   - name: getRoleReferenceCollectionFromGroup
@@ -258,4 +261,5 @@ endpoints:
       - name: group
         type: '[]usergroup'
         required: true
+        pipeline: true
         description: Group id

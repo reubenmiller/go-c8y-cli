@@ -36,6 +36,7 @@
       "queryParameters": [
         {
           "name": "type",
+          "pipeline": true,
           "type": "string",
           "validationSet": [
             "APAMA_CEP_RULE",

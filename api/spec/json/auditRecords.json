@@ -61,6 +61,10 @@
           "name": "source",
           "type": "string",
           "property": "source.id",
+          "pipeline": true,
+          "pipelineAliases": [
+            "id"
+          ],
           "required": true,
           "description": "An optional ManagedObject that the audit record originated from"
         },

@@ -285,12 +285,12 @@ endpoints:
       - name: group
         type: '[]devicegroup'
         property: id
-        pipeline: true
         required: true
         description: Group
     body:
       - name: newChildDevice
         type: '[]device'
+        pipeline: true
         required: false
         property: 'managedObject.id'
         description: New child device to be added to the group as an asset
@@ -300,6 +300,9 @@ endpoints:
         required: false
         property: 'managedObject.id'
         description: New child device group to be added to the group as an asset
+
+    bodyRequiredKeys:
+      - managedObject
 
   - name: getManagedObjectChildDeviceReference
     description: 'Get managed object child device reference'
@@ -397,13 +400,13 @@ endpoints:
     pathParameters:
       - name: device
         type: '[]device'
-        pipeline: true
         required: true
         description: ManagedObject id
 
       - name: childDevice
         type: '[]device'
         required: true
+        pipeline: true
         description: Child device reference
 
   - name: deleteManagedObjectChildAssetReference
@@ -432,13 +435,13 @@ endpoints:
     pathParameters:
       - name: group
         type: '[]devicegroup'
-        pipeline: true
         required: true
         description: Asset id
 
       - name: childDevice
         type: '[]device'
         property: reference
+        pipeline: true
         required: false
         description: Child device
 
@@ -476,13 +479,13 @@ endpoints:
     pathParameters:
       - name: group
         type: '[]devicegroup'
-        pipeline: true
         required: true
         description: Asset id
 
       - name: childDevice
         type: '[]device'
         property: reference
+        pipeline: true
         required: true
         description: Child device
 
@@ -514,13 +517,13 @@ endpoints:
     pathParameters:
       - name: group
         type: '[]device'
-        pipeline: true
         required: true
         description: Asset id
 
       - name: childDevice
         type: '[]device'
         property: reference
+        pipeline: true
         required: false
         description: Child device
 
@@ -641,11 +644,13 @@ endpoints:
     pathParameters:
       - name: id
         type: 'string'
-        pipeline: true
         required: true
         description: Managed object id
 
       - name: childId
         type: 'string'
-        required: false
+        required: true
+        pipeline: true
+        pipelineAliases:
+          - id
         description: Child managed object id

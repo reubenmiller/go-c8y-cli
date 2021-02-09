@@ -123,6 +123,7 @@ endpoints:
     body:
       - name: name
         type: string
+        pipeline: true
         required: false
         description: name
 

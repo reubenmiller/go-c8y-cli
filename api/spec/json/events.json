@@ -139,6 +139,7 @@
           "name": "device",
           "type": "[]device",
           "property": "source",
+          "pipeline": true,
           "description": "Device ID"
         },
         {
@@ -198,6 +199,7 @@
           "name": "id",
           "type": "string",
           "required": true,
+          "pipeline": true,
           "description": "Event id"
         }
       ]

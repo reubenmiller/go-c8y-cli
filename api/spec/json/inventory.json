@@ -26,12 +26,12 @@
             "command": "Get-ManagedObjectCollection"
           },
           {
-            "description": "Get a list of managed objects by looking up their names",
+            "description": "Get a list of managed objects by id",
             "beforeEach": [
               "$Device1 = New-TestDevice",
               "$Device2 = New-TestDevice"
             ],
-            "command": "Get-ManagedObjectCollection -Device $Device1.name, $Device2.name",
+            "command": "Get-ManagedObjectCollection -Ids $Device1.id, $Device2.id",
             "afterEach": [
               "Remove-ManagedObject -Id $Device1.id",
               "Remove-ManagedObject -Id $Device2.id"
@@ -42,13 +42,17 @@
           {
             "description": "Get a list of managed objects",
             "command": "c8y inventory list"
+          },
+          {
+            "description": "Get a list of managed objects by ids",
+            "command": "c8y inventory list --ids 1111,2222"
           }
         ]
       },
       "queryParameters": [
         {
-          "name": "device",
-          "type": "[]device",
+          "name": "ids",
+          "type": "[]stringcsv",
           "property": "ids",
           "description": "List of ids."
         },
@@ -162,6 +166,7 @@
         {
           "name": "name",
           "type": "string",
+          "pipeline": true,
           "required": false,
           "description": "name"
         },

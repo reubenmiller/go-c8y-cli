@@ -78,6 +78,7 @@ endpoints:
       - name: user
         type: '[]user'
         required: true
+        pipeline: true
         description: User id/username
 
       - name: tenant

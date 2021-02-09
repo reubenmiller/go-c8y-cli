@@ -52,6 +52,7 @@ endpoints:
       - name: domain
         type: string
         required: true
+        pipeline: true
         description: Domain name to be used for the tenant. Maximum 256 characters
 
       - name: adminName

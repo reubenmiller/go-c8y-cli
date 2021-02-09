@@ -82,7 +82,8 @@
         {
           "name": "name",
           "type": "string",
-          "description": "Group name"
+          "description": "Group name",
+          "pipeline": true
         }
       ]
     },
@@ -171,7 +172,8 @@
         {
           "name": "name",
           "type": "string",
-          "description": "Group name"
+          "description": "Group name",
+          "pipeline": true
         }
       ]
     },

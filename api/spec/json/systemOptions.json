@@ -70,6 +70,7 @@
           "name": "key",
           "type": "string",
           "required": true,
+          "pipeline": true,
           "description": "System Option key"
         }
       ]

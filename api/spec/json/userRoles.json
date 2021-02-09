@@ -148,6 +148,7 @@
           "name": "role",
           "type": "[]role",
           "required": true,
+          "pipeline": true,
           "description": "Role name"
         },
         {
@@ -267,6 +268,7 @@
           "name": "role",
           "type": "[]role",
           "required": true,
+          "pipeline": true,
           "description": "Role name, e.g. ROLE_TENANT_MANAGEMENT_ADMIN"
         },
         {
@@ -321,6 +323,7 @@
           "name": "user",
           "type": "[]user",
           "required": true,
+          "pipeline": true,
           "description": "User"
         }
       ]
@@ -365,6 +368,7 @@
           "name": "group",
           "type": "[]usergroup",
           "required": true,
+          "pipeline": true,
           "description": "Group id"
         }
       ]

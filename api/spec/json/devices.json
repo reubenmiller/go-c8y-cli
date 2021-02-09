@@ -712,6 +712,7 @@
           "name": "name",
           "type": "string",
           "required": true,
+          "pipeline": true,
           "description": "Device group name"
         },
         {

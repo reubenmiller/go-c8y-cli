@@ -61,6 +61,7 @@ endpoints:
       - name: name
         type: string
         description: Group name
+        pipeline: true
 
   - name: getGroup
     description: Create a new group by id
@@ -122,6 +123,7 @@ endpoints:
       - name: name
         type: string
         description: Group name
+        pipeline: true
 
   - name: deleteGroup
     description: Delete a new group

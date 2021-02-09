@@ -94,6 +94,7 @@
           "name": "name",
           "type": "string",
           "required": true,
+          "pipeline": true,
           "description": "External identity id/name"
         }
       ]
@@ -141,6 +142,7 @@
           "name": "name",
           "type": "string",
           "required": true,
+          "pipeline": true,
           "description": "External identity id/name"
         }
       ]

@@ -60,6 +60,7 @@ endpoints:
       - name: key
         type: string
         required: true
+        pipeline: true
         description: Key of option
 
       - name: value
@@ -98,6 +99,7 @@ endpoints:
       - name: key
         type: string
         required: true
+        pipeline: true
         description: Tenant Option key
 
   - name: deleteTenantOption
@@ -127,6 +129,7 @@ endpoints:
       - name: key
         type: string
         required: true
+        pipeline: true
         description: Tenant Option key
 
   - name: updateTenantOption
@@ -159,6 +162,7 @@ endpoints:
       - name: key
         type: string
         required: true
+        pipeline: true
         description: Tenant Option key
 
     body:
@@ -195,6 +199,7 @@ endpoints:
       - name: category
         type: string
         required: true
+        pipeline: true
         description: Tenant Option category
 
     body:
@@ -224,10 +229,14 @@ endpoints:
       go:
         - description: Get a list of options for a category
           command: c8y tenantOptions getForCategory --category "c8y_cli_tests"
+        
+        - description: Get a list of options for a category
+          command: echo -e "c8y_cli_tests\ncategory2" | c8y tenantOptions getForCategory
     pathParameters:
       - name: category
         type: string
         required: true
+        pipeline: true
         description: Tenant Option category
 
   - name: updateTenantOptionEditable
@@ -264,6 +273,7 @@ endpoints:
 
       - name: key
         type: string
+        pipeline: true
         required: true
         description: Tenant Option key
 
