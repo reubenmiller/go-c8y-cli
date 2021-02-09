@@ -37,6 +37,11 @@ No unreleased features
     $filter=creationTime.date gt '{lastDate}' $orderby=creationTime.date asc
     ```
 
+### Breaking changes
+
+* `Get-ManagedObjectCollect` renamed `Device` parameter to `Ids` and removed device lookup as the parameter is related to a generic managed object and not a device.
+
+
 ### Bash/zsh improvements
 
 **Pipeline support**
