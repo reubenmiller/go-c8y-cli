@@ -22,6 +22,10 @@ Import-Module $modulepath -Prefix "" -Force
 . "$PSScriptRoot/Get-JSONFromResponse.ps1"
 . "$PSScriptRoot/New-TemporaryDirectory.ps1"
 
+# Add custom assertions
+. "$PSScriptRoot/Assertions/ContainRequest.ps1"
+Add-AssertionOperator -Name "ContainRequest" -Test $Function:ContainRequest -SupportsArrayInput -ErrorAction SilentlyContinue
+
 # Get credentials from the environment
 $env:C8Y_USE_ENVIRONMENT = "on"
 $env:C8Y_SETTINGS_CI = "true"
