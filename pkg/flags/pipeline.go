@@ -64,11 +64,11 @@ func NewFlagWithPipeIterator(cmd *cobra.Command, pipeOpt *PipelineOptions, suppo
 		}
 	} else if supportsPipeline {
 		sourceProperties := make([]string, 0)
-		if pipeOpt.Property != "" {
-			sourceProperties = append(sourceProperties, pipeOpt.Property)
-		}
 		if len(pipeOpt.Aliases) > 0 {
 			sourceProperties = append(sourceProperties, pipeOpt.Aliases...)
+		}
+		if pipeOpt.Property != "" {
+			sourceProperties = append(sourceProperties, pipeOpt.Property)
 		}
 		iterOpts := &iterator.PipeOptions{
 			Properties: sourceProperties,

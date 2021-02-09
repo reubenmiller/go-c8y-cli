@@ -180,6 +180,24 @@ func NewReferenceByNameIterator(fetcher entityFetcher, c8yClient *c8y.Client, va
 	}
 }
 
+type NoMatchesFoundError struct {
+	Name string
+	Err  error
+}
+
+func NewNoMatchesFoundError(name string) *NoMatchesFoundError {
+	return &NoMatchesFoundError{
+		Name: name,
+		Err:  ErrNoMatchesFound,
+	}
+}
+
+func (e *NoMatchesFoundError) Error() string {
+	e.Err = ErrNoMatchesFound
+	return fmt.Sprintf("%s. name=%s", e.Err, e.Name)
+}
+func (e *NoMatchesFoundError) Unwrap() error { return e.Err }
+
 var ErrNoMatchesFound = errors.New("referenceByName: no matching items found")
 var ErrMoreThanOneFound = errors.New("referenceByName: more than 1 found")
 
@@ -197,20 +215,31 @@ func (i *EntityIterator) GetNext() (value []byte, input interface{}, err error) 
 		return
 	}
 
-	refs, err := lookupIDByName(i.Fetcher, string(value))
-	if err != nil {
-		return nil, nil, err
+	refs := []entityReference{}
+
+	if len(value) != 0 {
+		// only lookup if value is not empty
+		refs, err = lookupIDByName(i.Fetcher, string(value))
+		if err != nil {
+			return nil, nil, err
+		}
+
+		// Return an error if no matches are found regardless of minimum
+		// matches, as the user is using lookup by name
+		if len(refs) == 0 {
+			return nil, nil, NewNoMatchesFoundError(string(value))
+		}
 	}
 
 	if len(refs) == 0 {
 		if len(refs) < i.MinimumMatches {
-			return nil, nil, ErrNoMatchesFound
+			return nil, nil, NewNoMatchesFoundError(string(value))
 		}
 		return nil, nil, nil
 	}
 
 	if len(refs) < i.MinimumMatches {
-		return nil, nil, ErrNoMatchesFound
+		return nil, nil, NewNoMatchesFoundError(string(value))
 	}
 
 	data := refs[0].ID

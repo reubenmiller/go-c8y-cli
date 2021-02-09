@@ -46,6 +46,7 @@
         "tenant",
         "[]agent",
         "[]string",
+        "[]stringcsv",
         "[]device",
         "[]devicegroup",
         "[]usergroup",

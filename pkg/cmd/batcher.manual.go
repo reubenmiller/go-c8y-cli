@@ -132,13 +132,12 @@ func runBatched(requestIterator *RequestIterator, commonOptions CommonCommandOpt
 	// enough not to block the workers
 
 	// TODO: how to detect when request iterator is finished when using the body iterator (total number of requests?)
-	jobs := make(chan batchArgument, 3)
-	results := make(chan error, 100)
-	workers := sync.WaitGroup{}
-
 	if batchOptions.TotalWorkers < 1 {
 		batchOptions.TotalWorkers = 1
 	}
+	jobs := make(chan batchArgument, batchOptions.TotalWorkers)
+	results := make(chan error, batchOptions.TotalWorkers)
+	workers := sync.WaitGroup{}
 
 	progbar := progressbar.NewMulitProgressBar(1, batchOptions.TotalWorkers, "requests", globalFlagProgressBar)
 	progbar.Start(float64(batchOptions.Delay * 2 / 1000))
@@ -161,16 +160,21 @@ func runBatched(requestIterator *RequestIterator, commonOptions CommonCommandOpt
 			request, err := requestIterator.GetNext()
 
 			if err != nil {
-				if !errors.Is(err, io.EOF) {
-					if parentErr := errors.Unwrap(err); parentErr != nil {
-						Logger.Errorf("request iterator: %s", parentErr)
-						results <- parentErr
-					} else {
-						Logger.Errorf("request iterator: %s", err)
-						results <- err
-					}
+				if errors.Is(err, io.EOF) {
+					// no more requests
+					break
 				}
-				break
+
+				rootCauseErr := err
+				if errors.Is(err, ErrNoMatchesFound) {
+					rootCauseErr = err
+				} else if parentErr := errors.Unwrap(err); parentErr != nil {
+					rootCauseErr = parentErr
+				}
+				Logger.Warningf("skipping job: %d. %s", jobID, rootCauseErr)
+				results <- err
+				// move to next job
+				continue
 			}
 			Logger.Infof("adding job: %d", jobID)
 

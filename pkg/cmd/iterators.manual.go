@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"encoding/json"
+	"errors"
 	"os"
 	"reflect"
 	"strings"
@@ -75,7 +76,9 @@ func (r *RequestIterator) GetNext() (*c8y.RequestOptions, error) {
 		path, _, err := r.Path.GetNext()
 
 		if err != nil {
-			r.setDone()
+			if !errors.Is(err, ErrNoMatchesFound) {
+				r.setDone()
+			}
 			return nil, err
 		}
 
@@ -87,7 +90,9 @@ func (r *RequestIterator) GetNext() (*c8y.RequestOptions, error) {
 	if r.Query != nil && !reflect.ValueOf(r.Query).IsNil() {
 		q, _, err := r.Query.GetNext()
 		if err != nil {
-			r.setDone()
+			if !errors.Is(err, ErrNoMatchesFound) {
+				r.setDone()
+			}
 			return nil, err
 		}
 		req.Query = string(q)
@@ -103,7 +108,9 @@ func (r *RequestIterator) GetNext() (*c8y.RequestOptions, error) {
 			bodyContents, err := json.Marshal(r.Body)
 
 			if err != nil {
-				r.setDone()
+				if !errors.Is(err, ErrNoMatchesFound) {
+					r.setDone()
+				}
 				return nil, err
 			}
 

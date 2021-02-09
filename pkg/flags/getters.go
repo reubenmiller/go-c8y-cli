@@ -243,6 +243,30 @@ func WithStringSliceValues(opts ...string) GetOption {
 	}
 }
 
+// WithStringSliceCSV adds a string slice as comma separated variables from cli arguments
+func WithStringSliceCSV(opts ...string) GetOption {
+	return func(cmd *cobra.Command, inputIterators *RequestInputIterators) (string, interface{}, error) {
+
+		src, dst, format := UnpackGetterOptions("%s", opts...)
+
+		values, err := cmd.Flags().GetStringSlice(src)
+		if err != nil {
+			return dst, values, err
+		}
+
+		nonEmptyValues := make([]string, 0)
+		if len(values) > 0 {
+			for _, value := range values {
+				value = applyFormatter(format, value)
+				if value != "" {
+					nonEmptyValues = append(nonEmptyValues, value)
+				}
+			}
+		}
+		return dst, strings.Join(nonEmptyValues, ","), err
+	}
+}
+
 // WithIntValue adds a integer (int) value from cli arguments
 func WithIntValue(opts ...string) GetOption {
 	return func(cmd *cobra.Command, inputIterators *RequestInputIterators) (string, interface{}, error) {
