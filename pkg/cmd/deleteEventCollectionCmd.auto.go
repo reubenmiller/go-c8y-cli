@@ -34,7 +34,7 @@ Remove events from a device
 
 	cmd.SilenceUsage = true
 
-	cmd.Flags().StringSlice("device", []string{""}, "Device ID")
+	cmd.Flags().StringSlice("device", []string{""}, "Device ID (accepts pipeline)")
 	cmd.Flags().String("type", "", "Event type.")
 	cmd.Flags().String("fragmentType", "", "Fragment name from event.")
 	cmd.Flags().String("dateFrom", "", "Start date or date and time of event occurrence.")
@@ -44,7 +44,7 @@ Remove events from a device
 
 	flags.WithOptions(
 		cmd,
-		flags.WithExtendedPipelineSupport("", "", false),
+		flags.WithExtendedPipelineSupport("device", "source", false, "deviceId", "source.id", "id"),
 	)
 
 	// Required flags

@@ -27,7 +27,10 @@ Normalize a list of ids
         )]
         [AllowEmptyCollection()]
         [AllowNull()]
-        [object[]] $InputObject
+        [object[]] $InputObject,
+
+        # Exclude all non-id like values
+        [switch] $Strict
     )
 
     Process {
@@ -37,6 +40,12 @@ Normalize a list of ids
             if ($null -ne $iID.id) {
                 $currentID = $iID.id
             }
+
+            if (!$Strict) {
+                $currentID
+                continue
+            }
+
             # Allow for matching integer or strings types, hence the the quotes around the $currentID variable
             if ("$currentID" -match "^[0-9a-z_\-*]+$")
             {

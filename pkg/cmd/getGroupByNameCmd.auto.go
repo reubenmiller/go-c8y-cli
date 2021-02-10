@@ -33,11 +33,11 @@ Get user group by its name
 	cmd.SilenceUsage = true
 
 	cmd.Flags().String("tenant", "", "Tenant")
-	cmd.Flags().String("name", "", "Group name")
+	cmd.Flags().String("name", "", "Group name (accepts pipeline)")
 
 	flags.WithOptions(
 		cmd,
-		flags.WithExtendedPipelineSupport("", "", false),
+		flags.WithExtendedPipelineSupport("name", "name", false),
 	)
 
 	// Required flags

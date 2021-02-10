@@ -31,17 +31,17 @@ Unassign a child device from its parent device
 
 	cmd.SilenceUsage = true
 
-	cmd.Flags().StringSlice("device", []string{""}, "ManagedObject id (required) (accepts pipeline)")
-	cmd.Flags().StringSlice("childDevice", []string{""}, "Child device reference (required)")
+	cmd.Flags().StringSlice("device", []string{""}, "ManagedObject id (required)")
+	cmd.Flags().StringSlice("childDevice", []string{""}, "Child device reference (required) (accepts pipeline)")
 	addProcessingModeFlag(cmd)
 
 	flags.WithOptions(
 		cmd,
-		flags.WithExtendedPipelineSupport("device", "device", true, "deviceId", "source.id", "id"),
+		flags.WithExtendedPipelineSupport("childDevice", "childDevice", true, "deviceId", "source.id", "id"),
 	)
 
 	// Required flags
-	cmd.MarkFlagRequired("childDevice")
+	cmd.MarkFlagRequired("device")
 
 	ccmd.baseCmd = newBaseCmd(cmd)
 

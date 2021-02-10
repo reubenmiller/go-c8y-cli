@@ -55,6 +55,7 @@
         "[]role" { "object[]" }
         "[]roleself" { "object[]" }
         "[]string" { "string[]" }
+        "[]stringcsv" { "string[]" }
         "[]tenant" { "object[]" }
         "[]user" { "object[]" }
         "[]usergroup" { "object[]" }

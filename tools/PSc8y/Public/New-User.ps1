@@ -22,7 +22,8 @@ Create a user
     [OutputType([object])]
     Param(
         # User name, unique for a given domain. Max: 1000 characters
-        [Parameter()]
+        [Parameter(ValueFromPipeline=$true,
+                   ValueFromPipelineByPropertyName=$true)]
         [string]
         $UserName,
 
@@ -123,9 +124,6 @@ Create a user
 
     Begin {
         $Parameters = @{}
-        if ($PSBoundParameters.ContainsKey("UserName")) {
-            $Parameters["userName"] = $UserName
-        }
         if ($PSBoundParameters.ContainsKey("FirstName")) {
             $Parameters["firstName"] = $FirstName
         }
@@ -182,26 +180,28 @@ Create a user
     }
 
     Process {
-        foreach ($item in @("")) {
+        $Parameters["userName"] = PSc8y\Expand-Id $UserName
 
-            if (!$Force -and
-                !$WhatIfPreference -and
-                !$PSCmdlet.ShouldProcess(
-                    (PSc8y\Get-C8ySessionProperty -Name "tenant"),
-                    (Format-ConfirmationMessage -Name $PSCmdlet.MyInvocation.InvocationName -InputObject $item)
-                )) {
-                continue
-            }
-
-            Invoke-ClientCommand `
-                -Noun "users" `
-                -Verb "create" `
-                -Parameters $Parameters `
-                -Type "application/vnd.com.nsn.cumulocity.user+json" `
-                -ItemType "" `
-                -ResultProperty "" `
-                -Raw:$Raw
+        if (!$Force -and
+            !$WhatIfPreference -and
+            !$PSCmdlet.ShouldProcess(
+                (PSc8y\Get-C8ySessionProperty -Name "tenant"),
+                (Format-ConfirmationMessage -Name $PSCmdlet.MyInvocation.InvocationName -InputObject $item)
+            )) {
+            continue
         }
+
+        Invoke-ClientCommand `
+            -Noun "users" `
+            -Verb "create" `
+            -Parameters $Parameters `
+            -Type "application/vnd.com.nsn.cumulocity.user+json" `
+            -ItemType "" `
+            -ResultProperty "" `
+            -Raw:$Raw `
+            -CurrentPage:$CurrentPage `
+            -TotalPages:$TotalPages `
+            -IncludeAll:$IncludeAll
     }
 
     End {}

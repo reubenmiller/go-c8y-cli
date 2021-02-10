@@ -32,11 +32,11 @@ Get applications
 
 	cmd.SilenceUsage = true
 
-	cmd.Flags().String("type", "", "Application type")
+	cmd.Flags().String("type", "", "Application type (accepts pipeline)")
 
 	flags.WithOptions(
 		cmd,
-		flags.WithExtendedPipelineSupport("", "", false),
+		flags.WithExtendedPipelineSupport("type", "type", false),
 	)
 
 	// Required flags

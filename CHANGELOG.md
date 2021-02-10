@@ -13,9 +13,10 @@ No unreleased features
 
 
 * TODO:
+    * Add support for lazy required evaluate when using piped path parameters
     * Save pipeline context for reuse in templates
     * Piping input, the last item is being ignored! readbytes is return data and io.EOF! Make sure the data is processed even if the end is found (or this may only be an issue in the tests??? - need to verify)
-    
+
 * Fixed #43. New-ServiceUser now accepts more than 1 role
 * Added Expand-DeviceGroup cmdlet
 * Adding following template variables
@@ -37,6 +38,15 @@ No unreleased features
     $filter=creationTime.date gt '{lastDate}' $orderby=creationTime.date asc
     ```
 
+### PSc8y
+
+* Added support for passing non-pipeline parameters via the object. The id field will be read from the object. #42
+    ```powershell
+    $Group = New-TestDeviceGroup
+    $Device = New-TestDevice
+    Add-DeviceToGroup -Group $Group -NewChildDevice $Device
+    ```
+
 ### Breaking changes
 
 * `Get-ManagedObjectCollect` renamed `Device` parameter to `Ids` and removed device lookup as the parameter is related to a generic managed object and not a device.
@@ -53,6 +63,7 @@ No unreleased features
         ```
 
 * When doing batch size of 1, only set the exit code to the last value
+* Maximum jobs limit to protect against unexpected updates
 
 ### PSc8y improvements
 

@@ -22,7 +22,8 @@ Get user group by its name
     [OutputType([object])]
     Param(
         # Group name
-        [Parameter()]
+        [Parameter(ValueFromPipeline=$true,
+                   ValueFromPipelineByPropertyName=$true)]
         [string]
         $Name,
 
@@ -59,9 +60,6 @@ Get user group by its name
 
     Begin {
         $Parameters = @{}
-        if ($PSBoundParameters.ContainsKey("Name")) {
-            $Parameters["name"] = $Name
-        }
         if ($PSBoundParameters.ContainsKey("Tenant")) {
             $Parameters["tenant"] = $Tenant
         }
@@ -85,18 +83,28 @@ Get user group by its name
     }
 
     Process {
-        foreach ($item in @("")) {
+        $Parameters["name"] = PSc8y\Expand-Id $Name
 
-
-            Invoke-ClientCommand `
-                -Noun "userGroups" `
-                -Verb "getByName" `
-                -Parameters $Parameters `
-                -Type "application/vnd.com.nsn.cumulocity.group+json" `
-                -ItemType "" `
-                -ResultProperty "" `
-                -Raw:$Raw
+        if (!$Force -and
+            !$WhatIfPreference -and
+            !$PSCmdlet.ShouldProcess(
+                (PSc8y\Get-C8ySessionProperty -Name "tenant"),
+                (Format-ConfirmationMessage -Name $PSCmdlet.MyInvocation.InvocationName -InputObject $item)
+            )) {
+            continue
         }
+
+        Invoke-ClientCommand `
+            -Noun "userGroups" `
+            -Verb "getByName" `
+            -Parameters $Parameters `
+            -Type "application/vnd.com.nsn.cumulocity.group+json" `
+            -ItemType "" `
+            -ResultProperty "" `
+            -Raw:$Raw `
+            -CurrentPage:$CurrentPage `
+            -TotalPages:$TotalPages `
+            -IncludeAll:$IncludeAll
     }
 
     End {}

@@ -90,7 +90,7 @@ Assign a device as a child device to an existing device (using pipeline)
     Begin {
         $Parameters = @{}
         if ($PSBoundParameters.ContainsKey("Device")) {
-            $Parameters["device"] = $Device
+            $Parameters["device"] = PSc8y\Expand-Id $Device
         }
         if ($PSBoundParameters.ContainsKey("ProcessingMode")) {
             $Parameters["processingMode"] = $ProcessingMode

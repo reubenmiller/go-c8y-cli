@@ -32,18 +32,17 @@ Create a tenant option
 	cmd.SilenceUsage = true
 
 	cmd.Flags().String("category", "", "Category of option (required)")
-	cmd.Flags().String("key", "", "Key of option (required)")
+	cmd.Flags().String("key", "", "Key of option (required) (accepts pipeline)")
 	cmd.Flags().String("value", "", "Value of option (required)")
 	addProcessingModeFlag(cmd)
 
 	flags.WithOptions(
 		cmd,
-		flags.WithExtendedPipelineSupport("", "", false),
+		flags.WithExtendedPipelineSupport("key", "key", true),
 	)
 
 	// Required flags
 	cmd.MarkFlagRequired("category")
-	cmd.MarkFlagRequired("key")
 	cmd.MarkFlagRequired("value")
 
 	ccmd.baseCmd = newBaseCmd(cmd)

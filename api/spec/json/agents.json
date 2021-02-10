@@ -231,7 +231,7 @@
         {
           "name": "name",
           "type": "string",
-          "pipeline": true,
+          "pipeline": false,
           "required": true,
           "description": "Agent name"
         },

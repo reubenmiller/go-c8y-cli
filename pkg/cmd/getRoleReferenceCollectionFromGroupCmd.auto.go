@@ -33,15 +33,14 @@ Get a list of role references for a user group
 	cmd.SilenceUsage = true
 
 	cmd.Flags().String("tenant", "", "Tenant")
-	cmd.Flags().StringSlice("group", []string{""}, "Group id (required)")
+	cmd.Flags().StringSlice("group", []string{""}, "Group id (required) (accepts pipeline)")
 
 	flags.WithOptions(
 		cmd,
-		flags.WithExtendedPipelineSupport("", "", false),
+		flags.WithExtendedPipelineSupport("group", "group", true),
 	)
 
 	// Required flags
-	cmd.MarkFlagRequired("group")
 
 	ccmd.baseCmd = newBaseCmd(cmd)
 

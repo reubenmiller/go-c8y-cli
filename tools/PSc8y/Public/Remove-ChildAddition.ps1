@@ -28,8 +28,10 @@ Unassign a child addition from its parent managed object
         [string]
         $Id,
 
-        # Child managed object id
-        [Parameter()]
+        # Child managed object id (required)
+        [Parameter(Mandatory = $true,
+                   ValueFromPipeline=$true,
+                   ValueFromPipelineByPropertyName=$true)]
         [string]
         $ChildId,
 
@@ -74,8 +76,8 @@ Unassign a child addition from its parent managed object
 
     Begin {
         $Parameters = @{}
-        if ($PSBoundParameters.ContainsKey("ChildId")) {
-            $Parameters["childId"] = $ChildId
+        if ($PSBoundParameters.ContainsKey("Id")) {
+            $Parameters["id"] = $Id
         }
         if ($PSBoundParameters.ContainsKey("ProcessingMode")) {
             $Parameters["processingMode"] = $ProcessingMode
@@ -100,9 +102,9 @@ Unassign a child addition from its parent managed object
     }
 
     Process {
-        foreach ($item in (PSc8y\Expand-Id $Id)) {
+        foreach ($item in (PSc8y\Expand-Id $ChildId)) {
             if ($item) {
-                $Parameters["id"] = if ($item.id) { $item.id } else { $item }
+                $Parameters["childId"] = if ($item.id) { $item.id } else { $item }
             }
 
             if (!$Force -and

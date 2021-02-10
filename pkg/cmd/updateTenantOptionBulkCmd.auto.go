@@ -31,17 +31,16 @@ Update multiple tenant options
 
 	cmd.SilenceUsage = true
 
-	cmd.Flags().String("category", "", "Tenant Option category (required)")
+	cmd.Flags().String("category", "", "Tenant Option category (required) (accepts pipeline)")
 	addDataFlag(cmd)
 	addProcessingModeFlag(cmd)
 
 	flags.WithOptions(
 		cmd,
-		flags.WithExtendedPipelineSupport("", "", false),
+		flags.WithExtendedPipelineSupport("category", "category", true),
 	)
 
 	// Required flags
-	cmd.MarkFlagRequired("category")
 	cmd.MarkFlagRequired("data")
 
 	ccmd.baseCmd = newBaseCmd(cmd)

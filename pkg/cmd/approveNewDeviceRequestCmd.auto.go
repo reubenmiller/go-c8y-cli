@@ -31,17 +31,16 @@ Approve a new device request
 
 	cmd.SilenceUsage = true
 
-	cmd.Flags().String("id", "", "Device identifier (required)")
+	cmd.Flags().String("id", "", "Device identifier (required) (accepts pipeline)")
 	cmd.Flags().String("status", "ACCEPTED", "Status of registration")
 	addProcessingModeFlag(cmd)
 
 	flags.WithOptions(
 		cmd,
-		flags.WithExtendedPipelineSupport("", "", false),
+		flags.WithExtendedPipelineSupport("id", "id", true),
 	)
 
 	// Required flags
-	cmd.MarkFlagRequired("id")
 
 	ccmd.baseCmd = newBaseCmd(cmd)
 

@@ -27,7 +27,9 @@ Delete external identity
         $Type,
 
         # External identity id/name (required)
-        [Parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true,
+                   ValueFromPipeline=$true,
+                   ValueFromPipelineByPropertyName=$true)]
         [string]
         $Name,
 
@@ -75,9 +77,6 @@ Delete external identity
         if ($PSBoundParameters.ContainsKey("Type")) {
             $Parameters["type"] = $Type
         }
-        if ($PSBoundParameters.ContainsKey("Name")) {
-            $Parameters["name"] = $Name
-        }
         if ($PSBoundParameters.ContainsKey("ProcessingMode")) {
             $Parameters["processingMode"] = $ProcessingMode
         }
@@ -101,7 +100,10 @@ Delete external identity
     }
 
     Process {
-        foreach ($item in @("")) {
+        foreach ($item in (PSc8y\Expand-Id $Name)) {
+            if ($item) {
+                $Parameters["name"] = if ($item.id) { $item.id } else { $item }
+            }
 
             if (!$Force -and
                 !$WhatIfPreference -and

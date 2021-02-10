@@ -35,7 +35,7 @@ Get a list of audit records related to an operation
         # Source Id or object containing an .id property of the element that should be detected. i.e. AlarmID, or Operation ID. Note: Only one source can be provided
         [Parameter(ValueFromPipeline=$true,
                    ValueFromPipelineByPropertyName=$true)]
-        [string]
+        [object]
         $Source,
 
         # Type

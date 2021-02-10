@@ -32,15 +32,14 @@ Get event
 
 	cmd.SilenceUsage = true
 
-	cmd.Flags().String("id", "", "Event id (required)")
+	cmd.Flags().String("id", "", "Event id (required) (accepts pipeline)")
 
 	flags.WithOptions(
 		cmd,
-		flags.WithExtendedPipelineSupport("", "", false),
+		flags.WithExtendedPipelineSupport("id", "id", true),
 	)
 
 	// Required flags
-	cmd.MarkFlagRequired("id")
 
 	ccmd.baseCmd = newBaseCmd(cmd)
 

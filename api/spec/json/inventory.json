@@ -166,7 +166,7 @@
         {
           "name": "name",
           "type": "string",
-          "pipeline": true,
+          "pipeline": false,
           "required": false,
           "description": "name"
         },

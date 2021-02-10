@@ -61,7 +61,7 @@ Returns the root parent. In most cases this will be the agent
         # Get list of ids
         $Ids = (Expand-Device $Device) | Select-Object -ExpandProperty id
         
-        $Results = foreach ($iDevice in @(Get-ManagedObjectCollection -Device $Ids -WithParents))
+        $Results = foreach ($iDevice in @(Get-ManagedObjectCollection -Ids $Ids -WithParents))
         {
             $Parents = @($iDevice.deviceParents.references.managedObject | Foreach-Object {
                 if ($null -ne $_.id) {

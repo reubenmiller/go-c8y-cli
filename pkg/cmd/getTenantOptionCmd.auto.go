@@ -33,16 +33,15 @@ Get a tenant option
 	cmd.SilenceUsage = true
 
 	cmd.Flags().String("category", "", "Tenant Option category (required)")
-	cmd.Flags().String("key", "", "Tenant Option key (required)")
+	cmd.Flags().String("key", "", "Tenant Option key (required) (accepts pipeline)")
 
 	flags.WithOptions(
 		cmd,
-		flags.WithExtendedPipelineSupport("", "", false),
+		flags.WithExtendedPipelineSupport("key", "key", true),
 	)
 
 	// Required flags
 	cmd.MarkFlagRequired("category")
-	cmd.MarkFlagRequired("key")
 
 	ccmd.baseCmd = newBaseCmd(cmd)
 

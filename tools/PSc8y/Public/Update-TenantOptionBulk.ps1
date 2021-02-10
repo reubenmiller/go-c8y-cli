@@ -22,7 +22,9 @@ Update multiple tenant options
     [OutputType([object])]
     Param(
         # Tenant Option category (required)
-        [Parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true,
+                   ValueFromPipeline=$true,
+                   ValueFromPipelineByPropertyName=$true)]
         [string]
         $Category,
 
@@ -82,9 +84,6 @@ Update multiple tenant options
 
     Begin {
         $Parameters = @{}
-        if ($PSBoundParameters.ContainsKey("Category")) {
-            $Parameters["category"] = $Category
-        }
         if ($PSBoundParameters.ContainsKey("Data")) {
             $Parameters["data"] = ConvertTo-JsonArgument $Data
         }
@@ -117,7 +116,10 @@ Update multiple tenant options
     }
 
     Process {
-        foreach ($item in @("")) {
+        foreach ($item in (PSc8y\Expand-Id $Category)) {
+            if ($item) {
+                $Parameters["category"] = if ($item.id) { $item.id } else { $item }
+            }
 
             if (!$Force -and
                 !$WhatIfPreference -and

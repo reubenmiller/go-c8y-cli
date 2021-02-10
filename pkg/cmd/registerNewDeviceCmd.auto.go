@@ -31,16 +31,15 @@ Register a new device request
 
 	cmd.SilenceUsage = true
 
-	cmd.Flags().String("id", "", "Device identifier. Max: 1000 characters. E.g. IMEI (required)")
+	cmd.Flags().String("id", "", "Device identifier. Max: 1000 characters. E.g. IMEI (required) (accepts pipeline)")
 	addProcessingModeFlag(cmd)
 
 	flags.WithOptions(
 		cmd,
-		flags.WithExtendedPipelineSupport("", "", false),
+		flags.WithExtendedPipelineSupport("id", "id", true),
 	)
 
 	// Required flags
-	cmd.MarkFlagRequired("id")
 
 	ccmd.baseCmd = newBaseCmd(cmd)
 

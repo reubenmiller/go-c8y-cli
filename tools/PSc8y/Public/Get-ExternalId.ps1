@@ -28,7 +28,9 @@ Get external identity
         $Type,
 
         # External identity id/name (required)
-        [Parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true,
+                   ValueFromPipeline=$true,
+                   ValueFromPipelineByPropertyName=$true)]
         [string]
         $Name,
 
@@ -63,9 +65,6 @@ Get external identity
         if ($PSBoundParameters.ContainsKey("Type")) {
             $Parameters["type"] = $Type
         }
-        if ($PSBoundParameters.ContainsKey("Name")) {
-            $Parameters["name"] = $Name
-        }
         if ($PSBoundParameters.ContainsKey("OutputFile")) {
             $Parameters["outputFile"] = $OutputFile
         }
@@ -86,7 +85,10 @@ Get external identity
     }
 
     Process {
-        foreach ($item in @("")) {
+        foreach ($item in (PSc8y\Expand-Id $Name)) {
+            if ($item) {
+                $Parameters["name"] = if ($item.id) { $item.id } else { $item }
+            }
 
 
             Invoke-ClientCommand `

@@ -31,16 +31,17 @@ Unassign a child addition from its parent managed object
 
 	cmd.SilenceUsage = true
 
-	cmd.Flags().String("id", "", "Managed object id (required) (accepts pipeline)")
-	cmd.Flags().String("childId", "", "Child managed object id")
+	cmd.Flags().String("id", "", "Managed object id (required)")
+	cmd.Flags().String("childId", "", "Child managed object id (required) (accepts pipeline)")
 	addProcessingModeFlag(cmd)
 
 	flags.WithOptions(
 		cmd,
-		flags.WithExtendedPipelineSupport("id", "id", true),
+		flags.WithExtendedPipelineSupport("childId", "childId", true, "id"),
 	)
 
 	// Required flags
+	cmd.MarkFlagRequired("id")
 
 	ccmd.baseCmd = newBaseCmd(cmd)
 

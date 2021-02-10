@@ -133,6 +133,37 @@ Describe -Name "c8y pipes" {
         }
     }
 
+    Context "Pipe to optional query parameters" {
+        It "Pipe an ids to a query parameter" {
+            $output = @("1", "2") | c8yb events deleteCollection --dry 2>&1
+            $LASTEXITCODE | Should -Be 0
+            $output | Should -ContainRequest "DELETE /event/events?source=1" -Total 1
+            $output | Should -ContainRequest "DELETE /event/events?source=2" -Total 1
+            $output | Should -ContainRequest "DELETE /event/events" -Total 2
+        }
+
+        It "Pipe an ids to a query parameter" {
+            $output = c8yb events deleteCollection --dry 2>&1
+            $LASTEXITCODE | Should -Be 0
+            $output | Should -ContainRequest "DELETE /event/events?source" -Total 0
+            $output | Should -ContainRequest "DELETE /event/events" -Total 1
+        }
+    }
+
+    Context "Pipe to optional body" {
+        It -Skip -Tag @("Deprecated:UsingBatch") "Pipe an ids to a body parameter" {
+            $output = @("name1", "name2") | c8yb inventory create --dry 2>&1
+            $LASTEXITCODE | Should -Be 0
+            $output | Should -ContainRequest "POST /inventory/managedObjects" -Total 2
+        }
+
+        It "No pipe input to a body parameter" {
+            $output = c8yb inventory create --dry 2>&1
+            $LASTEXITCODE | Should -Be 0
+            $output | Should -ContainRequest "POST /inventory/managedObjects" -Total 1
+        }
+    }
+
     AfterEach {
     }
 }

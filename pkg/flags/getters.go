@@ -27,6 +27,9 @@ func WithQueryParameters(cmd *cobra.Command, query *QueryTemplate, inputIterator
 		if name == "" {
 			continue
 		}
+		if value == nil {
+			continue
+		}
 		switch v := value.(type) {
 		case iterator.Iterator:
 			query.SetVariable(name, v)

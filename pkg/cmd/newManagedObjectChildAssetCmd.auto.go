@@ -31,17 +31,18 @@ Create group heirachy (parent group -> child group)
 
 	cmd.SilenceUsage = true
 
-	cmd.Flags().StringSlice("group", []string{""}, "Group (required) (accepts pipeline)")
-	cmd.Flags().StringSlice("newChildDevice", []string{""}, "New child device to be added to the group as an asset")
+	cmd.Flags().StringSlice("group", []string{""}, "Group (required)")
+	cmd.Flags().StringSlice("newChildDevice", []string{""}, "New child device to be added to the group as an asset (accepts pipeline)")
 	cmd.Flags().StringSlice("newChildGroup", []string{""}, "New child device group to be added to the group as an asset")
 	addProcessingModeFlag(cmd)
 
 	flags.WithOptions(
 		cmd,
-		flags.WithExtendedPipelineSupport("group", "id", true),
+		flags.WithExtendedPipelineSupport("newChildDevice", "managedObject.id", false, "deviceId", "source.id", "id"),
 	)
 
 	// Required flags
+	cmd.MarkFlagRequired("group")
 
 	ccmd.baseCmd = newBaseCmd(cmd)
 
@@ -106,6 +107,7 @@ func (n *NewManagedObjectChildAssetCmd) RunE(cmd *cobra.Command, args []string) 
 		WithDeviceGroupByNameFirstMatch(args, "newChildGroup", "managedObject.id"),
 		WithTemplateValue(),
 		WithTemplateVariablesValue(),
+		flags.WithRequiredProperties("managedObject"),
 	)
 	if err != nil {
 		return newUserError(err)

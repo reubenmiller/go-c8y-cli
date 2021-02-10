@@ -13,6 +13,11 @@ PS> Add-DeviceToGroup -Group $Group.id -NewChildDevice $Device.id
 Add a device to a group
 
 .EXAMPLE
+PS> Add-DeviceToGroup -Group $Group -NewChildDevice $Device
+
+Add a device to a group by passing device and groups instead of an id or name
+
+.EXAMPLE
 PS> Get-Device $Device1.name, $Device2.name | Add-DeviceToGroup -Group $Group.id
 
 Add multiple devices to a group. Alternatively `Get-DeviceCollection` can be used
@@ -92,7 +97,7 @@ to filter for a collection of devices and assign the results to a single group.
     Begin {
         $Parameters = @{}
         if ($PSBoundParameters.ContainsKey("Group")) {
-            $Parameters["group"] = $Group
+            $Parameters["group"] = PSc8y\Expand-Id $Group
         }
         if ($PSBoundParameters.ContainsKey("ProcessingMode")) {
             $Parameters["processingMode"] = $ProcessingMode

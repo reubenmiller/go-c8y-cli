@@ -22,14 +22,13 @@ Create group heirachy (parent group -> child group)
     [OutputType([object])]
     Param(
         # Group (required)
-        [Parameter(Mandatory = $true,
-                   ValueFromPipeline=$true,
-                   ValueFromPipelineByPropertyName=$true)]
+        [Parameter(Mandatory = $true)]
         [object[]]
         $Group,
 
         # New child device to be added to the group as an asset
-        [Parameter()]
+        [Parameter(ValueFromPipeline=$true,
+                   ValueFromPipelineByPropertyName=$true)]
         [object[]]
         $NewChildDevice,
 
@@ -89,11 +88,11 @@ Create group heirachy (parent group -> child group)
 
     Begin {
         $Parameters = @{}
-        if ($PSBoundParameters.ContainsKey("NewChildDevice")) {
-            $Parameters["newChildDevice"] = $NewChildDevice
+        if ($PSBoundParameters.ContainsKey("Group")) {
+            $Parameters["group"] = PSc8y\Expand-Id $Group
         }
         if ($PSBoundParameters.ContainsKey("NewChildGroup")) {
-            $Parameters["newChildGroup"] = $NewChildGroup
+            $Parameters["newChildGroup"] = PSc8y\Expand-Id $NewChildGroup
         }
         if ($PSBoundParameters.ContainsKey("ProcessingMode")) {
             $Parameters["processingMode"] = $ProcessingMode
@@ -124,29 +123,28 @@ Create group heirachy (parent group -> child group)
     }
 
     Process {
-        foreach ($item in (PSc8y\Expand-Id $Group)) {
-            if ($item) {
-                $Parameters["group"] = if ($item.id) { $item.id } else { $item }
-            }
+        $Parameters["newChildDevice"] = PSc8y\Expand-Id $NewChildDevice
 
-            if (!$Force -and
-                !$WhatIfPreference -and
-                !$PSCmdlet.ShouldProcess(
-                    (PSc8y\Get-C8ySessionProperty -Name "tenant"),
-                    (Format-ConfirmationMessage -Name $PSCmdlet.MyInvocation.InvocationName -InputObject $item)
-                )) {
-                continue
-            }
-
-            Invoke-ClientCommand `
-                -Noun "inventoryReferences" `
-                -Verb "createChildAsset" `
-                -Parameters $Parameters `
-                -Type "application/vnd.com.nsn.cumulocity.managedObjectReference+json" `
-                -ItemType "application/vnd.com.nsn.cumulocity.managedObject+json" `
-                -ResultProperty "managedObject" `
-                -Raw:$Raw
+        if (!$Force -and
+            !$WhatIfPreference -and
+            !$PSCmdlet.ShouldProcess(
+                (PSc8y\Get-C8ySessionProperty -Name "tenant"),
+                (Format-ConfirmationMessage -Name $PSCmdlet.MyInvocation.InvocationName -InputObject $item)
+            )) {
+            continue
         }
+
+        Invoke-ClientCommand `
+            -Noun "inventoryReferences" `
+            -Verb "createChildAsset" `
+            -Parameters $Parameters `
+            -Type "application/vnd.com.nsn.cumulocity.managedObjectReference+json" `
+            -ItemType "application/vnd.com.nsn.cumulocity.managedObject+json" `
+            -ResultProperty "managedObject" `
+            -Raw:$Raw `
+            -CurrentPage:$CurrentPage `
+            -TotalPages:$TotalPages `
+            -IncludeAll:$IncludeAll
     }
 
     End {}

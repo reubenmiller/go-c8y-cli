@@ -32,7 +32,7 @@ Create a user
 	cmd.SilenceUsage = true
 
 	cmd.Flags().String("tenant", "", "Tenant")
-	cmd.Flags().String("userName", "", "User name, unique for a given domain. Max: 1000 characters")
+	cmd.Flags().String("userName", "", "User name, unique for a given domain. Max: 1000 characters (accepts pipeline)")
 	cmd.Flags().String("firstName", "", "User first name")
 	cmd.Flags().String("lastName", "", "User last name")
 	cmd.Flags().String("phone", "", "User phone number. Format: '+[country code][number]', has to be a valid MSISDN")
@@ -46,7 +46,7 @@ Create a user
 
 	flags.WithOptions(
 		cmd,
-		flags.WithExtendedPipelineSupport("", "", false),
+		flags.WithExtendedPipelineSupport("userName", "userName", false),
 	)
 
 	// Required flags

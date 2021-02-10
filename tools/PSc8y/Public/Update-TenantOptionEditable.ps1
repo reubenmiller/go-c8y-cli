@@ -28,7 +28,9 @@ Update editable property for an existing tenant option
         $Category,
 
         # Tenant Option key (required)
-        [Parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true,
+                   ValueFromPipeline=$true,
+                   ValueFromPipelineByPropertyName=$true)]
         [string]
         $Key,
 
@@ -92,9 +94,6 @@ Update editable property for an existing tenant option
         if ($PSBoundParameters.ContainsKey("Category")) {
             $Parameters["category"] = $Category
         }
-        if ($PSBoundParameters.ContainsKey("Key")) {
-            $Parameters["key"] = $Key
-        }
         if ($PSBoundParameters.ContainsKey("Editable")) {
             $Parameters["editable"] = $Editable
         }
@@ -127,7 +126,10 @@ Update editable property for an existing tenant option
     }
 
     Process {
-        foreach ($item in @("")) {
+        foreach ($item in (PSc8y\Expand-Id $Key)) {
+            if ($item) {
+                $Parameters["key"] = if ($item.id) { $item.id } else { $item }
+            }
 
             if (!$Force -and
                 !$WhatIfPreference -and

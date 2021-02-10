@@ -96,6 +96,12 @@
         $null = $CommandArgs.Add($arg)
     }
 
+    if (!$PipelineVariableName -and $ArgumentSources.Count -gt 0) {
+        Write-Warning ("Property is missing pipeline support. cmd={0}" -f @(
+            $Specification.name
+        ))
+    }
+
     # Add common parameters
     if ($Specification.method -match "DELETE|PUT|POST") {
         $null = $CommandArgs.Add(@{
@@ -599,6 +605,18 @@ Function Get-C8yGoArgs {
             @{
                 SetFlag = $SetFlag
             }
+        }
+
+        "[]stringcsv" {
+            $SetFlag = if ($UseOption) {
+                "cmd.Flags().StringSlice(`"${Name}`", `"${OptionName}`", []string{`"${Default}`"}, `"${Description}`")"
+            } else {
+                "cmd.Flags().StringSlice(`"${Name}`", []string{`"${Default}`"}, `"${Description}`")"
+            }
+            @{
+                SetFlag = $SetFlag
+            }
+            break
         }
 
         "[]device" {

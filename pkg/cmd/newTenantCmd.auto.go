@@ -32,7 +32,7 @@ Create a new tenant (from the management tenant)
 	cmd.SilenceUsage = true
 
 	cmd.Flags().String("company", "", "Company name. Maximum 256 characters (required)")
-	cmd.Flags().String("domain", "", "Domain name to be used for the tenant. Maximum 256 characters (required)")
+	cmd.Flags().String("domain", "", "Domain name to be used for the tenant. Maximum 256 characters (required) (accepts pipeline)")
 	cmd.Flags().String("adminName", "", "Username of the tenant administrator")
 	cmd.Flags().String("adminPass", "", "Password of the tenant administrator")
 	cmd.Flags().String("contactName", "", "A contact name, for example an administrator, of the tenant")
@@ -43,12 +43,11 @@ Create a new tenant (from the management tenant)
 
 	flags.WithOptions(
 		cmd,
-		flags.WithExtendedPipelineSupport("", "", false),
+		flags.WithExtendedPipelineSupport("domain", "domain", true),
 	)
 
 	// Required flags
 	cmd.MarkFlagRequired("company")
-	cmd.MarkFlagRequired("domain")
 
 	ccmd.baseCmd = newBaseCmd(cmd)
 

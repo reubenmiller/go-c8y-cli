@@ -80,4 +80,19 @@ alias jqtotal='jq -r ".statistics?.totalPages // -1"'
 alias jqlength='jq length'
 
 alias jqiter='jq ".[]" -c'
+
+```
+
+## Other helpers
+
+```
+# usage: repeat 12345 10
+# repeat "12345" 10 times
+repeat () {
+    text=$1
+    n=${2:-1}
+    for ((i=1; i <= $n; i++)); do
+        printf "$text%.0s\n"
+    done
+}
 ```

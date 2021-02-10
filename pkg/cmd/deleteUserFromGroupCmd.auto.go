@@ -32,18 +32,17 @@ List the users within a user group
 	cmd.SilenceUsage = true
 
 	cmd.Flags().StringSlice("group", []string{""}, "Group ID (required)")
-	cmd.Flags().StringSlice("user", []string{""}, "User id/username (required)")
+	cmd.Flags().StringSlice("user", []string{""}, "User id/username (required) (accepts pipeline)")
 	cmd.Flags().String("tenant", "", "Tenant")
 	addProcessingModeFlag(cmd)
 
 	flags.WithOptions(
 		cmd,
-		flags.WithExtendedPipelineSupport("", "", false),
+		flags.WithExtendedPipelineSupport("user", "user", true),
 	)
 
 	// Required flags
 	cmd.MarkFlagRequired("group")
-	cmd.MarkFlagRequired("user")
 
 	ccmd.baseCmd = newBaseCmd(cmd)
 

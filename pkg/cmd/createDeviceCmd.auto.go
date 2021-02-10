@@ -35,7 +35,7 @@ Create device with custom properties
 
 	cmd.SilenceUsage = true
 
-	cmd.Flags().String("name", "", "Device name")
+	cmd.Flags().String("name", "", "Device name (required)")
 	cmd.Flags().String("type", "", "Device type")
 	addDataFlag(cmd)
 	addProcessingModeFlag(cmd)
@@ -46,6 +46,7 @@ Create device with custom properties
 	)
 
 	// Required flags
+	cmd.MarkFlagRequired("name")
 
 	ccmd.baseCmd = newBaseCmd(cmd)
 

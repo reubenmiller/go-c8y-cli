@@ -25,6 +25,9 @@ func NewGetManagedObjectCollectionCmd() *GetManagedObjectCollectionCmd {
 		Example: `
 $ c8y inventory list
 Get a list of managed objects
+
+$ c8y inventory list --ids 1111,2222
+Get a list of managed objects by ids
         `,
 		PreRunE: nil,
 		RunE:    ccmd.RunE,
@@ -32,7 +35,7 @@ Get a list of managed objects
 
 	cmd.SilenceUsage = true
 
-	cmd.Flags().StringSlice("device", []string{""}, "List of ids.")
+	cmd.Flags().StringSlice("ids", []string{""}, "List of ids.")
 	cmd.Flags().String("type", "", "ManagedObject type.")
 	cmd.Flags().String("fragmentType", "", "ManagedObject fragment type.")
 	cmd.Flags().String("text", "", "managed objects containing a text value starting with the given text (placeholder {text}). Text value is any alphanumeric string starting with a latin letter (A-Z or a-z).")
@@ -64,7 +67,7 @@ func (n *GetManagedObjectCollectionCmd) RunE(cmd *cobra.Command, args []string) 
 		cmd,
 		query,
 		inputIterators,
-		WithDeviceByNameFirstMatch(args, "device", "ids"),
+		flags.WithStringSliceCSV("ids", "ids", ""),
 		flags.WithStringValue("type", "type"),
 		flags.WithStringValue("fragmentType", "fragmentType"),
 		flags.WithStringValue("text", "text"),

@@ -41,9 +41,15 @@
 
         # string array/slice
         "[]string" = "flags.WithStringSliceValues(`"${prop}`", `"${queryParam}`", `"$FixedValue`"),"
+
+        # string array/slice as a comma separated string
+        "[]stringcsv" = "flags.WithStringSliceCSV(`"${prop}`", `"${queryParam}`", `"$FixedValue`"),"
     
         # string
         "string" = "flags.WithStringValue(`"${prop}`", `"${queryParam}`"),"
+
+        # source (special value as powershell need to treat this field as an object)
+        "source" = "flags.WithStringValue(`"${prop}`", `"${queryParam}`"),"
 
         # integer
         "integer" = "flags.WithIntValue(`"${prop}`", `"${queryParam}`"),"

@@ -6,6 +6,7 @@ import (
 	"io"
 	"math/rand"
 	"sync"
+	"sync/atomic"
 	"time"
 
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
@@ -157,6 +158,11 @@ func runBatched(requestIterator *RequestIterator, commonOptions CommonCommandOpt
 			jobID++
 			Logger.Infof("checking job iterator: %d", jobID)
 
+			if jobID > globalFlagBatchMaxJobs {
+				Logger.Warningf("maximum jobs reached: limit=%d", globalFlagBatchMaxJobs)
+				break
+			}
+
 			request, err := requestIterator.GetNext()
 
 			if err != nil {
@@ -193,10 +199,14 @@ func runBatched(requestIterator *RequestIterator, commonOptions CommonCommandOpt
 	totalErrors := make([]error, 0)
 
 	// close the results when the works are finished, but don't block reading the results
+	wasCancelled := int32(0)
 	go func() {
 		workers.Wait()
 		progbar.Completed()
-		close(results)
+		// prevent closing channel twice
+		if atomic.LoadInt32(&wasCancelled) == 0 {
+			close(results)
+		}
 	}()
 
 	for err := range results {
@@ -207,17 +217,22 @@ func runBatched(requestIterator *RequestIterator, commonOptions CommonCommandOpt
 		// exit early
 		if batchOptions.AbortOnErrorCount != 0 && len(totalErrors) >= batchOptions.AbortOnErrorCount {
 			close(results)
+			atomic.AddInt32(&wasCancelled, 1)
 			return newUserErrorWithExitCode(103, fmt.Sprintf("aborted batch as error count has been exceeded. totalErrors=%d", batchOptions.AbortOnErrorCount))
 		}
 	}
 
+	maxJobsReached := jobID > globalFlagBatchMaxJobs
 	if total := len(totalErrors); total > 0 {
 		if total == 1 {
 			// return only error
 			return totalErrors[0]
 		}
 		// aggregate error
-		return newUserErrorWithExitCode(104, fmt.Sprintf("batch completed with %d errors", total))
+		return newUserErrorWithExitCode(104, fmt.Sprintf("batch completed with %d errors. job limit exceeded=%v", total, maxJobsReached))
+	}
+	if maxJobsReached {
+		return newUserErrorWithExitCode(105, fmt.Sprintf("batch job limit exceeded. limit=%d", globalFlagBatchMaxJobs))
 	}
 	return nil
 }

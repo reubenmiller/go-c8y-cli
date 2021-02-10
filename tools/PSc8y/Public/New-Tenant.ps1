@@ -27,7 +27,9 @@ Create a new tenant (from the management tenant)
         $Company,
 
         # Domain name to be used for the tenant. Maximum 256 characters (required)
-        [Parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true,
+                   ValueFromPipeline=$true,
+                   ValueFromPipelineByPropertyName=$true)]
         [string]
         $Domain,
 
@@ -115,9 +117,6 @@ Create a new tenant (from the management tenant)
         if ($PSBoundParameters.ContainsKey("Company")) {
             $Parameters["company"] = $Company
         }
-        if ($PSBoundParameters.ContainsKey("Domain")) {
-            $Parameters["domain"] = $Domain
-        }
         if ($PSBoundParameters.ContainsKey("AdminName")) {
             $Parameters["adminName"] = $AdminName
         }
@@ -165,7 +164,10 @@ Create a new tenant (from the management tenant)
     }
 
     Process {
-        foreach ($item in @("")) {
+        foreach ($item in (PSc8y\Expand-Id $Domain)) {
+            if ($item) {
+                $Parameters["domain"] = if ($item.id) { $item.id } else { $item }
+            }
 
             if (!$Force -and
                 !$WhatIfPreference -and

@@ -25,6 +25,9 @@ func NewGetTenantOptionsForCategoryCmd() *GetTenantOptionsForCategoryCmd {
 		Example: `
 $ c8y tenantOptions getForCategory --category "c8y_cli_tests"
 Get a list of options for a category
+
+$ echo -e "c8y_cli_tests\ncategory2" | c8y tenantOptions getForCategory
+Get a list of options for a category
         `,
 		PreRunE: nil,
 		RunE:    ccmd.RunE,
@@ -32,15 +35,14 @@ Get a list of options for a category
 
 	cmd.SilenceUsage = true
 
-	cmd.Flags().String("category", "", "Tenant Option category (required)")
+	cmd.Flags().String("category", "", "Tenant Option category (required) (accepts pipeline)")
 
 	flags.WithOptions(
 		cmd,
-		flags.WithExtendedPipelineSupport("", "", false),
+		flags.WithExtendedPipelineSupport("category", "category", true),
 	)
 
 	// Required flags
-	cmd.MarkFlagRequired("category")
 
 	ccmd.baseCmd = newBaseCmd(cmd)
 

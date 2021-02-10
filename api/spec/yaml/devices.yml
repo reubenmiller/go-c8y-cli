@@ -182,7 +182,7 @@ endpoints:
     body:
       - name: name
         type: 'string'
-        required: false
+        required: true
         pipeline: false
         description: Device name
 
@@ -535,7 +535,7 @@ endpoints:
       - name: name
         type: 'string'
         required: true
-        pipeline: true
+        pipeline: false
         description: Device group name
 
       - name: type

@@ -33,15 +33,14 @@ Get a list of role references for a user
 	cmd.SilenceUsage = true
 
 	cmd.Flags().String("tenant", "", "Tenant")
-	cmd.Flags().StringSlice("user", []string{""}, "User (required)")
+	cmd.Flags().StringSlice("user", []string{""}, "User (required) (accepts pipeline)")
 
 	flags.WithOptions(
 		cmd,
-		flags.WithExtendedPipelineSupport("", "", false),
+		flags.WithExtendedPipelineSupport("user", "user", true),
 	)
 
 	// Required flags
-	cmd.MarkFlagRequired("user")
 
 	ccmd.baseCmd = newBaseCmd(cmd)
 

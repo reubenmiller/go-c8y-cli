@@ -22,7 +22,8 @@ Get applications
     [OutputType([object])]
     Param(
         # Application type
-        [Parameter()]
+        [Parameter(ValueFromPipeline=$true,
+                   ValueFromPipelineByPropertyName=$true)]
         [ValidateSet('APAMA_CEP_RULE','EXTERNAL','HOSTED','MICROSERVICE')]
         [string]
         $Type,
@@ -83,9 +84,6 @@ Get applications
 
     Begin {
         $Parameters = @{}
-        if ($PSBoundParameters.ContainsKey("Type")) {
-            $Parameters["type"] = $Type
-        }
         if ($PSBoundParameters.ContainsKey("PageSize")) {
             $Parameters["pageSize"] = $PageSize
         }
@@ -112,21 +110,28 @@ Get applications
     }
 
     Process {
-        foreach ($item in @("")) {
+        $Parameters["type"] = PSc8y\Expand-Id $Type
 
-
-            Invoke-ClientCommand `
-                -Noun "applications" `
-                -Verb "list" `
-                -Parameters $Parameters `
-                -Type "application/vnd.com.nsn.cumulocity.applicationCollection+json" `
-                -ItemType "application/vnd.com.nsn.cumulocity.application+json" `
-                -ResultProperty "applications" `
-                -Raw:$Raw `
-                -CurrentPage:$CurrentPage `
-                -TotalPages:$TotalPages `
-                -IncludeAll:$IncludeAll
+        if (!$Force -and
+            !$WhatIfPreference -and
+            !$PSCmdlet.ShouldProcess(
+                (PSc8y\Get-C8ySessionProperty -Name "tenant"),
+                (Format-ConfirmationMessage -Name $PSCmdlet.MyInvocation.InvocationName -InputObject $item)
+            )) {
+            continue
         }
+
+        Invoke-ClientCommand `
+            -Noun "applications" `
+            -Verb "list" `
+            -Parameters $Parameters `
+            -Type "application/vnd.com.nsn.cumulocity.applicationCollection+json" `
+            -ItemType "application/vnd.com.nsn.cumulocity.application+json" `
+            -ResultProperty "applications" `
+            -Raw:$Raw `
+            -CurrentPage:$CurrentPage `
+            -TotalPages:$TotalPages `
+            -IncludeAll:$IncludeAll
     }
 
     End {}

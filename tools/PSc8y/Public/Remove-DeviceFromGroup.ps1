@@ -22,14 +22,14 @@ Unassign a child device from its parent asset
     [OutputType([object])]
     Param(
         # Asset id (required)
-        [Parameter(Mandatory = $true,
-                   ValueFromPipeline=$true,
-                   ValueFromPipelineByPropertyName=$true)]
+        [Parameter(Mandatory = $true)]
         [object[]]
         $Group,
 
         # Child device (required)
-        [Parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true,
+                   ValueFromPipeline=$true,
+                   ValueFromPipelineByPropertyName=$true)]
         [object[]]
         $ChildDevice,
 
@@ -74,8 +74,8 @@ Unassign a child device from its parent asset
 
     Begin {
         $Parameters = @{}
-        if ($PSBoundParameters.ContainsKey("ChildDevice")) {
-            $Parameters["childDevice"] = $ChildDevice
+        if ($PSBoundParameters.ContainsKey("Group")) {
+            $Parameters["group"] = PSc8y\Expand-Id $Group
         }
         if ($PSBoundParameters.ContainsKey("ProcessingMode")) {
             $Parameters["processingMode"] = $ProcessingMode
@@ -100,9 +100,9 @@ Unassign a child device from its parent asset
     }
 
     Process {
-        foreach ($item in (PSc8y\Expand-Id $Group)) {
+        foreach ($item in (PSc8y\Expand-Device $ChildDevice)) {
             if ($item) {
-                $Parameters["group"] = if ($item.id) { $item.id } else { $item }
+                $Parameters["childDevice"] = if ($item.id) { $item.id } else { $item }
             }
 
             if (!$Force -and

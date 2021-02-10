@@ -33,18 +33,17 @@ Update editable property for an existing tenant option
 	cmd.SilenceUsage = true
 
 	cmd.Flags().String("category", "", "Tenant Option category (required)")
-	cmd.Flags().String("key", "", "Tenant Option key (required)")
+	cmd.Flags().String("key", "", "Tenant Option key (required) (accepts pipeline)")
 	cmd.Flags().String("editable", "", "Whether the tenant option should be editable or not (required)")
 	addProcessingModeFlag(cmd)
 
 	flags.WithOptions(
 		cmd,
-		flags.WithExtendedPipelineSupport("", "", false),
+		flags.WithExtendedPipelineSupport("key", "key", true),
 	)
 
 	// Required flags
 	cmd.MarkFlagRequired("category")
-	cmd.MarkFlagRequired("key")
 	cmd.MarkFlagRequired("editable")
 
 	ccmd.baseCmd = newBaseCmd(cmd)

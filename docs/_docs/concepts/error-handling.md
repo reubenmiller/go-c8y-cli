@@ -20,6 +20,7 @@ The following exit codes are general codes which relate to the usage of c8y comm
 |102|No session loaded|The user has not selected a Cumulocity session yet|
 |103|BatchAbortedWithErrors|The batched job was aborted due to too many errors|
 |104|BatchCompletedWithErrors|The batched job completed but has 1 or more errors|
+|105|BatchJobLimitExceeded|The batched job was stopped due to exceeding the total of allowed jobs though no other errors occurred|
 
 #### Exit code to HTTP status code errors
 

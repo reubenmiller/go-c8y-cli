@@ -22,7 +22,9 @@ Get a user by name
     [OutputType([object])]
     Param(
         # Username (required)
-        [Parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true,
+                   ValueFromPipeline=$true,
+                   ValueFromPipelineByPropertyName=$true)]
         [string]
         $Name,
 
@@ -59,9 +61,6 @@ Get a user by name
 
     Begin {
         $Parameters = @{}
-        if ($PSBoundParameters.ContainsKey("Name")) {
-            $Parameters["name"] = $Name
-        }
         if ($PSBoundParameters.ContainsKey("Tenant")) {
             $Parameters["tenant"] = $Tenant
         }
@@ -85,7 +84,10 @@ Get a user by name
     }
 
     Process {
-        foreach ($item in @("")) {
+        foreach ($item in (PSc8y\Expand-Id $Name)) {
+            if ($item) {
+                $Parameters["name"] = if ($item.id) { $item.id } else { $item }
+            }
 
 
             Invoke-ClientCommand `

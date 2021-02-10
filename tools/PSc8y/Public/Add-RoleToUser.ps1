@@ -99,7 +99,7 @@ Add a role to a user using wildcards (using pipeline)
     Begin {
         $Parameters = @{}
         if ($PSBoundParameters.ContainsKey("User")) {
-            $Parameters["user"] = $User
+            $Parameters["user"] = PSc8y\Expand-Id $User
         }
         if ($PSBoundParameters.ContainsKey("Tenant")) {
             $Parameters["tenant"] = $Tenant

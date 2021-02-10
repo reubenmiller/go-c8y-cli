@@ -91,7 +91,7 @@ Remove all pending operations for a given device
     Begin {
         $Parameters = @{}
         if ($PSBoundParameters.ContainsKey("Agent")) {
-            $Parameters["agent"] = $Agent
+            $Parameters["agent"] = PSc8y\Expand-Id $Agent
         }
         if ($PSBoundParameters.ContainsKey("DateFrom")) {
             $Parameters["dateFrom"] = $DateFrom

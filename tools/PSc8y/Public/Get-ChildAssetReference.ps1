@@ -62,7 +62,7 @@ Get an existing child asset reference
     Begin {
         $Parameters = @{}
         if ($PSBoundParameters.ContainsKey("Reference")) {
-            $Parameters["reference"] = $Reference
+            $Parameters["reference"] = PSc8y\Expand-Id $Reference
         }
         if ($PSBoundParameters.ContainsKey("OutputFile")) {
             $Parameters["outputFile"] = $OutputFile

@@ -94,7 +94,7 @@ Get a list of the child assets of an existing group
     Begin {
         $Parameters = @{}
         if ($PSBoundParameters.ContainsKey("Device")) {
-            $Parameters["device"] = $Device
+            $Parameters["device"] = PSc8y\Expand-Id $Device
         }
         if ($PSBoundParameters.ContainsKey("PageSize")) {
             $Parameters["pageSize"] = $PageSize

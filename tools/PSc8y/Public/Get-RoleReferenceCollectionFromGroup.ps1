@@ -22,7 +22,9 @@ Get a list of role references for a user group
     [OutputType([object])]
     Param(
         # Group id (required)
-        [Parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true,
+                   ValueFromPipeline=$true,
+                   ValueFromPipelineByPropertyName=$true)]
         [object[]]
         $Group,
 
@@ -87,9 +89,6 @@ Get a list of role references for a user group
 
     Begin {
         $Parameters = @{}
-        if ($PSBoundParameters.ContainsKey("Group")) {
-            $Parameters["group"] = PSc8y\Expand-Id $Group
-        }
         if ($PSBoundParameters.ContainsKey("Tenant")) {
             $Parameters["tenant"] = $Tenant
         }
@@ -119,7 +118,10 @@ Get a list of role references for a user group
     }
 
     Process {
-        foreach ($item in @("")) {
+        foreach ($item in (PSc8y\Expand-Id $Group)) {
+            if ($item) {
+                $Parameters["group"] = if ($item.id) { $item.id } else { $item }
+            }
 
 
             Invoke-ClientCommand `

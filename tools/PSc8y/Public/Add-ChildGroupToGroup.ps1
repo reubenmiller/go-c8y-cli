@@ -92,7 +92,7 @@ to filter for a collection of devices and assign the results to a single group.
     Begin {
         $Parameters = @{}
         if ($PSBoundParameters.ContainsKey("Group")) {
-            $Parameters["group"] = $Group
+            $Parameters["group"] = PSc8y\Expand-Id $Group
         }
         if ($PSBoundParameters.ContainsKey("ProcessingMode")) {
             $Parameters["processingMode"] = $ProcessingMode

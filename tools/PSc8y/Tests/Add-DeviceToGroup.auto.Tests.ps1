@@ -15,6 +15,12 @@ Describe -Name "Add-DeviceToGroup" {
         $Response | Should -Not -BeNullOrEmpty
     }
 
+    It "Add a device to a group by passing device and groups instead of an id or name" {
+        $Response = PSc8y\Add-DeviceToGroup -Group $Group -NewChildDevice $Device
+        $LASTEXITCODE | Should -Be 0
+        $Response | Should -Not -BeNullOrEmpty
+    }
+
     It "Add multiple devices to a group. Alternatively `Get-DeviceCollection` can be used
 to filter for a collection of devices and assign the results to a single group.
 " {

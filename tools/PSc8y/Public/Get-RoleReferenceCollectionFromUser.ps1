@@ -22,7 +22,9 @@ Get a list of role references for a user
     [OutputType([object])]
     Param(
         # User (required)
-        [Parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true,
+                   ValueFromPipeline=$true,
+                   ValueFromPipelineByPropertyName=$true)]
         [object[]]
         $User,
 
@@ -87,9 +89,6 @@ Get a list of role references for a user
 
     Begin {
         $Parameters = @{}
-        if ($PSBoundParameters.ContainsKey("User")) {
-            $Parameters["user"] = $User
-        }
         if ($PSBoundParameters.ContainsKey("Tenant")) {
             $Parameters["tenant"] = $Tenant
         }
@@ -119,7 +118,10 @@ Get a list of role references for a user
     }
 
     Process {
-        foreach ($item in @("")) {
+        foreach ($item in (PSc8y\Expand-User $User)) {
+            if ($item) {
+                $Parameters["user"] = if ($item.id) { $item.id } else { $item }
+            }
 
 
             Invoke-ClientCommand `

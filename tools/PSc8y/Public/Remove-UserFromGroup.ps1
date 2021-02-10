@@ -27,7 +27,9 @@ Add a user to a user group
         $Group,
 
         # User id/username (required)
-        [Parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true,
+                   ValueFromPipeline=$true,
+                   ValueFromPipelineByPropertyName=$true)]
         [object[]]
         $User,
 
@@ -80,9 +82,6 @@ Add a user to a user group
         if ($PSBoundParameters.ContainsKey("Group")) {
             $Parameters["group"] = PSc8y\Expand-Id $Group
         }
-        if ($PSBoundParameters.ContainsKey("User")) {
-            $Parameters["user"] = $User
-        }
         if ($PSBoundParameters.ContainsKey("Tenant")) {
             $Parameters["tenant"] = $Tenant
         }
@@ -109,7 +108,10 @@ Add a user to a user group
     }
 
     Process {
-        foreach ($item in @("")) {
+        foreach ($item in (PSc8y\Expand-User $User)) {
+            if ($item) {
+                $Parameters["user"] = if ($item.id) { $item.id } else { $item }
+            }
 
             if (!$Force -and
                 !$WhatIfPreference -and

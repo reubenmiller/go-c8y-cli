@@ -189,22 +189,32 @@
             $ItemValue = switch ($iArg.Type) {
                 "switch" {
                     $true
+                    break
+                }
+
+                "[]stringcsv" {
+                    "`${0} -join ','" -f $item.Name
+                    break
                 }
 
                 "hashtable" {
                     "ConvertTo-JsonArgument `${0}" -f $item.Name
+                    break
                 }
 
                 "json" {
                     "ConvertTo-JsonArgument `${0}" -f $item.Name
+                    break
                 }
 
                 "json_custom" {
                     "ConvertTo-JsonArgument `${0}" -f $item.Name
+                    break
                 }
 
-                "[]usergroup" {
+                { $_ -match "agent|device|devicegroup|usergroup|role|user" } {
                     "PSc8y\Expand-Id `${0}" -f $item.Name
+                    break
                 }
 
                 default {

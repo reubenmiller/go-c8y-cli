@@ -27,7 +27,9 @@ Remove a role from the given user
         $User,
 
         # Role name (required)
-        [Parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true,
+                   ValueFromPipeline=$true,
+                   ValueFromPipelineByPropertyName=$true)]
         [object[]]
         $Role,
 
@@ -78,10 +80,7 @@ Remove a role from the given user
     Begin {
         $Parameters = @{}
         if ($PSBoundParameters.ContainsKey("User")) {
-            $Parameters["user"] = $User
-        }
-        if ($PSBoundParameters.ContainsKey("Role")) {
-            $Parameters["role"] = $Role
+            $Parameters["user"] = PSc8y\Expand-Id $User
         }
         if ($PSBoundParameters.ContainsKey("Tenant")) {
             $Parameters["tenant"] = $Tenant
@@ -109,7 +108,10 @@ Remove a role from the given user
     }
 
     Process {
-        foreach ($item in @("")) {
+        foreach ($item in (PSc8y\Expand-Id $Role)) {
+            if ($item) {
+                $Parameters["role"] = if ($item.id) { $item.id } else { $item }
+            }
 
             if (!$Force -and
                 !$WhatIfPreference -and

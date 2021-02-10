@@ -168,6 +168,15 @@ endpoints:
             afterEach:
               - PSc8y\Remove-ManagedObject -Id $Device.id
               - PSc8y\Remove-ManagedObject -Id $Group.id
+          
+          - description: Add a device to a group by passing device and groups instead of an id or name
+            beforeEach:
+              - $Device = PSc8y\New-TestDevice
+              - $Group = PSc8y\New-TestDeviceGroup
+            command: Add-DeviceToGroup -Group $Group -NewChildDevice $Device
+            afterEach:
+              - PSc8y\Remove-ManagedObject -Id $Device.id
+              - PSc8y\Remove-ManagedObject -Id $Group.id
 
           - description: |
               Add multiple devices to a group. Alternatively `Get-DeviceCollection` can be used

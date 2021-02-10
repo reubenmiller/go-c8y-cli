@@ -37,7 +37,9 @@ Create an audit record for a custom managed object update
         $Text,
 
         # An optional ManagedObject that the audit record originated from (required)
-        [Parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true,
+                   ValueFromPipeline=$true,
+                   ValueFromPipelineByPropertyName=$true)]
         [string]
         $Source,
 
@@ -127,9 +129,6 @@ Create an audit record for a custom managed object update
         if ($PSBoundParameters.ContainsKey("Text")) {
             $Parameters["text"] = $Text
         }
-        if ($PSBoundParameters.ContainsKey("Source")) {
-            $Parameters["source"] = $Source
-        }
         if ($PSBoundParameters.ContainsKey("Activity")) {
             $Parameters["activity"] = $Activity
         }
@@ -174,7 +173,10 @@ Create an audit record for a custom managed object update
     }
 
     Process {
-        foreach ($item in @("")) {
+        foreach ($item in (PSc8y\Expand-Id $Source)) {
+            if ($item) {
+                $Parameters["source"] = if ($item.id) { $item.id } else { $item }
+            }
 
             if (!$Force -and
                 !$WhatIfPreference -and

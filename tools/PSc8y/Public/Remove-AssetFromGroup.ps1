@@ -22,14 +22,13 @@ Unassign a child device from its parent asset
     [OutputType([object])]
     Param(
         # Asset id (required)
-        [Parameter(Mandatory = $true,
-                   ValueFromPipeline=$true,
-                   ValueFromPipelineByPropertyName=$true)]
+        [Parameter(Mandatory = $true)]
         [object[]]
         $Group,
 
         # Child device
-        [Parameter()]
+        [Parameter(ValueFromPipeline=$true,
+                   ValueFromPipelineByPropertyName=$true)]
         [object[]]
         $ChildDevice,
 
@@ -79,11 +78,11 @@ Unassign a child device from its parent asset
 
     Begin {
         $Parameters = @{}
-        if ($PSBoundParameters.ContainsKey("ChildDevice")) {
-            $Parameters["childDevice"] = $ChildDevice
+        if ($PSBoundParameters.ContainsKey("Group")) {
+            $Parameters["group"] = PSc8y\Expand-Id $Group
         }
         if ($PSBoundParameters.ContainsKey("ChildGroup")) {
-            $Parameters["childGroup"] = $ChildGroup
+            $Parameters["childGroup"] = PSc8y\Expand-Id $ChildGroup
         }
         if ($PSBoundParameters.ContainsKey("ProcessingMode")) {
             $Parameters["processingMode"] = $ProcessingMode
@@ -108,29 +107,28 @@ Unassign a child device from its parent asset
     }
 
     Process {
-        foreach ($item in (PSc8y\Expand-Device $Group)) {
-            if ($item) {
-                $Parameters["group"] = if ($item.id) { $item.id } else { $item }
-            }
+        $Parameters["childDevice"] = PSc8y\Expand-Id $ChildDevice
 
-            if (!$Force -and
-                !$WhatIfPreference -and
-                !$PSCmdlet.ShouldProcess(
-                    (PSc8y\Get-C8ySessionProperty -Name "tenant"),
-                    (Format-ConfirmationMessage -Name $PSCmdlet.MyInvocation.InvocationName -InputObject $item)
-                )) {
-                continue
-            }
-
-            Invoke-ClientCommand `
-                -Noun "inventoryReferences" `
-                -Verb "unassignAssetFromGroup" `
-                -Parameters $Parameters `
-                -Type "" `
-                -ItemType "" `
-                -ResultProperty "" `
-                -Raw:$Raw
+        if (!$Force -and
+            !$WhatIfPreference -and
+            !$PSCmdlet.ShouldProcess(
+                (PSc8y\Get-C8ySessionProperty -Name "tenant"),
+                (Format-ConfirmationMessage -Name $PSCmdlet.MyInvocation.InvocationName -InputObject $item)
+            )) {
+            continue
         }
+
+        Invoke-ClientCommand `
+            -Noun "inventoryReferences" `
+            -Verb "unassignAssetFromGroup" `
+            -Parameters $Parameters `
+            -Type "" `
+            -ItemType "" `
+            -ResultProperty "" `
+            -Raw:$Raw `
+            -CurrentPage:$CurrentPage `
+            -TotalPages:$TotalPages `
+            -IncludeAll:$IncludeAll
     }
 
     End {}

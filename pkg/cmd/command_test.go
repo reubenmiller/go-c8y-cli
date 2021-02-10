@@ -295,3 +295,34 @@ func Test_EventListWithoutDeviceIterator(t *testing.T) {
 	cmdErr := ExecuteCmd(cmd, fmt.Sprintf("events list --dateFrom=-10d --type=my_CustomType2"))
 	assert.OK(t, cmdErr)
 }
+
+func Test_PipeSourceId(t *testing.T) {
+	cmd := setupTest()
+	stdin := bytes.NewBufferString(`{"source":{"id":"1234"}}` + "\n")
+	cmd.SetIn(stdin)
+	cmdErr := ExecuteCmd(cmd, `events list --dry`)
+	assert.OK(t, cmdErr)
+}
+
+func Test_PipingWithLookupNonExistant(t *testing.T) {
+	cmd := setupTest()
+
+	stdin := bytes.NewBufferString("pipeNameDoesNotExist1\npipeNameDoesNotExist2")
+	cmd.SetIn(stdin)
+
+	cmdErr := ExecuteCmd(cmd, fmt.Sprintf("events list --dry"))
+	assert.OK(t, cmdErr)
+}
+
+func Test_NilQueryParameters(t *testing.T) {
+	cmd := setupTest()
+
+	cmdErr := ExecuteCmd(cmd, fmt.Sprintf("auditRecords list --dry"))
+	assert.OK(t, cmdErr)
+}
+
+func Test_NilManagedObject(t *testing.T) {
+	cmd := setupTest()
+	cmdErr := ExecuteCmd(cmd, fmt.Sprintf("inventory create --dry"))
+	assert.OK(t, cmdErr)
+}

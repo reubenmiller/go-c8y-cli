@@ -127,7 +127,7 @@ endpoints:
           command: c8y auditRecords list --pageSize 100
     queryParameters:
       - name: source
-        type: string
+        type: source
         pipeline: true
         required: false
         description: 'Source Id or object containing an .id property of the element that should be detected. i.e. AlarmID, or Operation ID. Note: Only one source can be provided'

@@ -27,8 +27,8 @@ Create device with custom properties
     [Alias()]
     [OutputType([object])]
     Param(
-        # Device name
-        [Parameter()]
+        # Device name (required)
+        [Parameter(Mandatory = $true)]
         [string]
         $Name,
 

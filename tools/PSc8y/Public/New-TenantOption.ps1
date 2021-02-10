@@ -27,7 +27,9 @@ Create a tenant option
         $Category,
 
         # Key of option (required)
-        [Parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true,
+                   ValueFromPipeline=$true,
+                   ValueFromPipelineByPropertyName=$true)]
         [string]
         $Key,
 
@@ -90,9 +92,6 @@ Create a tenant option
         if ($PSBoundParameters.ContainsKey("Category")) {
             $Parameters["category"] = $Category
         }
-        if ($PSBoundParameters.ContainsKey("Key")) {
-            $Parameters["key"] = $Key
-        }
         if ($PSBoundParameters.ContainsKey("Value")) {
             $Parameters["value"] = $Value
         }
@@ -125,7 +124,10 @@ Create a tenant option
     }
 
     Process {
-        foreach ($item in @("")) {
+        foreach ($item in (PSc8y\Expand-Id $Key)) {
+            if ($item) {
+                $Parameters["key"] = if ($item.id) { $item.id } else { $item }
+            }
 
             if (!$Force -and
                 !$WhatIfPreference -and

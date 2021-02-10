@@ -22,7 +22,9 @@ Get a list of options for a category
     [OutputType([object])]
     Param(
         # Tenant Option category (required)
-        [Parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true,
+                   ValueFromPipeline=$true,
+                   ValueFromPipelineByPropertyName=$true)]
         [string]
         $Category,
 
@@ -82,9 +84,6 @@ Get a list of options for a category
 
     Begin {
         $Parameters = @{}
-        if ($PSBoundParameters.ContainsKey("Category")) {
-            $Parameters["category"] = $Category
-        }
         if ($PSBoundParameters.ContainsKey("PageSize")) {
             $Parameters["pageSize"] = $PageSize
         }
@@ -111,7 +110,10 @@ Get a list of options for a category
     }
 
     Process {
-        foreach ($item in @("")) {
+        foreach ($item in (PSc8y\Expand-Id $Category)) {
+            if ($item) {
+                $Parameters["category"] = if ($item.id) { $item.id } else { $item }
+            }
 
 
             Invoke-ClientCommand `

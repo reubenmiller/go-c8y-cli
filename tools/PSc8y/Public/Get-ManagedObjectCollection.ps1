@@ -13,9 +13,9 @@ PS> Get-ManagedObjectCollection
 Get a list of managed objects
 
 .EXAMPLE
-PS> Get-ManagedObjectCollection -Device $Device1.name, $Device2.name
+PS> Get-ManagedObjectCollection -Ids $Device1.id, $Device2.id
 
-Get a list of managed objects by looking up their names
+Get a list of managed objects by id
 
 
 #>
@@ -28,8 +28,8 @@ Get a list of managed objects by looking up their names
     Param(
         # List of ids.
         [Parameter()]
-        [object[]]
-        $Device,
+        [string[]]
+        $Ids,
 
         # ManagedObject type.
         [Parameter()]
@@ -112,8 +112,8 @@ Get a list of managed objects by looking up their names
 
     Begin {
         $Parameters = @{}
-        if ($PSBoundParameters.ContainsKey("Device")) {
-            $Parameters["device"] = $Device
+        if ($PSBoundParameters.ContainsKey("Ids")) {
+            $Parameters["ids"] = $Ids -join ','
         }
         if ($PSBoundParameters.ContainsKey("Type")) {
             $Parameters["type"] = $Type

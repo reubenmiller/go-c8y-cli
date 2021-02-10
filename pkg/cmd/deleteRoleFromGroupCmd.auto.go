@@ -32,18 +32,17 @@ Remove a role from the given user
 	cmd.SilenceUsage = true
 
 	cmd.Flags().StringSlice("group", []string{""}, "Group id (required)")
-	cmd.Flags().StringSlice("role", []string{""}, "Role name, e.g. ROLE_TENANT_MANAGEMENT_ADMIN (required)")
+	cmd.Flags().StringSlice("role", []string{""}, "Role name, e.g. ROLE_TENANT_MANAGEMENT_ADMIN (required) (accepts pipeline)")
 	cmd.Flags().String("tenant", "", "Tenant")
 	addProcessingModeFlag(cmd)
 
 	flags.WithOptions(
 		cmd,
-		flags.WithExtendedPipelineSupport("", "", false),
+		flags.WithExtendedPipelineSupport("role", "role", true),
 	)
 
 	// Required flags
 	cmd.MarkFlagRequired("group")
-	cmd.MarkFlagRequired("role")
 
 	ccmd.baseCmd = newBaseCmd(cmd)
 
