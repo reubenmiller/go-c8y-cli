@@ -112,7 +112,7 @@ func (c *c8yCmd) createCumulocityClient() {
 	// Logger.Printf("Use tenant prefix: %v", client.UseTenantInUsername)
 
 	// read additional configuration
-	readConfiguration()
+	readConfiguration(&rootCmd.Command)
 
 	// Add the realtime client
 	client.Realtime = c8y.NewRealtimeClient(
@@ -157,6 +157,7 @@ var (
 	globalFlagPageSize               int
 	globalFlagIncludeAllPageSize     int
 	globalFlagBatchMaxWorkers        int
+	globalFlagBatchMaxJobs           int64
 	globalFlagCurrentPage            int64
 	globalFlagTotalPages             int64
 	globalFlagIncludeAll             bool
@@ -205,6 +206,9 @@ const (
 
 	// SettingsDefaultBatchMaxWorkers property name used to control the hard limit on the maximum workers used in batch operations
 	SettingsDefaultBatchMaxWorkers string = "settings.default.batchMaximumWorkers"
+
+	// SettingsDefaultBatchMaxJobs maximum number of jobs in one batch
+	SettingsDefaultBatchMaxJobs string = "settings.default.batchMaximumJobs"
 
 	// SettingsConfigPath configuration path
 	SettingsConfigPath string = "settings.path"
@@ -331,7 +335,8 @@ func configureRootCmd() {
 
 	// Concurrency
 	rootCmd.PersistentFlags().IntVar(&globalFlagBatchWorkers, "workers", 1, "Number of workers")
-	rootCmd.PersistentFlags().IntVar(&globalFlagBatchDelayMS, "delay", 100, "delay in milliseconds after each request")
+	rootCmd.PersistentFlags().Int64Var(&globalFlagBatchMaxJobs, "maxJobs", 100, "Maximum number of jobs. 0 = unlimited (use with caution!)")
+	rootCmd.PersistentFlags().IntVar(&globalFlagBatchDelayMS, "delay", 1000, "delay in milliseconds after each request")
 	rootCmd.PersistentFlags().IntVar(&globalFlagBatchAbortOnErrorCount, "abortOnErrors", 10, "Abort batch when reaching specified number of errors")
 
 	rootCmd.PersistentFlags().StringVar(&globalFlagOutputFile, "outputFile", "", "Output file")
@@ -626,6 +631,7 @@ func loadConfiguration() error {
 	bindEnv(SettingsIncludeAllPageSize, 2000)
 	bindEnv(SettingsDefaultPageSize, CumulocityDefaultPageSize)
 	bindEnv(SettingsDefaultBatchMaxWorkers, 5)
+	bindEnv(SettingsDefaultBatchMaxJobs, 100)
 	bindEnv(SettingsIncludeAllDelayMS, 0)
 	bindEnv(SettingsTemplatePath, "")
 	bindEnv(SettingsModeEnableCreate, false)
@@ -648,11 +654,14 @@ func loadAuthentication(v *config.CliConfiguration, c *c8y.Client) error {
 	return nil
 }
 
-func readConfiguration() error {
+func readConfiguration(cmd *cobra.Command) error {
 
 	globalFlagIncludeAllPageSize = viper.GetInt(SettingsIncludeAllPageSize)
 	globalFlagPageSize = viper.GetInt(SettingsDefaultPageSize)
 	globalFlagBatchMaxWorkers = viper.GetInt(SettingsDefaultBatchMaxWorkers)
+	if !cmd.Flags().Changed("maxJobs") {
+		globalFlagBatchMaxJobs = viper.GetInt64(SettingsDefaultBatchMaxJobs)
+	}
 	globalFlagIncludeAllDelayMS = viper.GetInt64(SettingsIncludeAllDelayMS)
 	globalFlagTemplatePath = viper.GetString(SettingsTemplatePath)
 
@@ -671,6 +680,7 @@ func readConfiguration() error {
 	Logger.Infof("%s: %t", SettingsModeEnableUpdate, globalModeEnableUpdate)
 	Logger.Infof("%s: %t", SettingsModeEnableDelete, globalModeEnableDelete)
 	Logger.Infof("%s: %t", SettingsModeEnableBatch, globalModeEnableBatch)
+	Logger.Infof("%s: %d", SettingsDefaultBatchMaxJobs, globalFlagBatchMaxJobs)
 
 	return nil
 }
