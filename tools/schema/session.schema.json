@@ -132,6 +132,26 @@
                         }
                     }
                 },
+                "activityLog": {
+                    "type": "object",
+                    "description": "Activity log stores the commands and meta information about the response in a file so it can be used to keep track of your Cumulocity related activities.",
+                    "properties": {
+                        "enabled": {
+                            "description": "Enable activity log. Activity log is enabled by default",
+                            "type": "boolean",
+                            "default": "true"
+                        },
+                        "path": {
+                            "description": "Output folder where the logs will be stored. Each activity log will include date information to make sorting and removing older logs easier",
+                            "type": "string"
+                        },
+                        "methodFilter": {
+                            "description": "Space delimited values of REST Method types which should be logged",
+                            "type": "string",
+                            "default": "GET PUT POST DELETE"
+                        }
+                    }
+                },
                 "encryption": {
                     "type": "object",
                     "description": "Encryption settings",

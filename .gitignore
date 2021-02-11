@@ -10,6 +10,7 @@ test/c8y_test/application.setup.properties
 .cumulocity/
 temp-example/
 c8y.env
+c8y.activitylog.*.json
 c8y~
 tools/PSc8y/c8y
 main.exe
