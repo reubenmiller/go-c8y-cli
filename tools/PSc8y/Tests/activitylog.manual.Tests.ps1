@@ -19,10 +19,18 @@ Describe -Name "c8y activity log" {
         }
     }
     BeforeEach {
+        $backupEnvSettings = @{
+            $Env:C8Y_SETTINGS_ACTIVITYLOG_PATH = $Env:C8Y_SETTINGS_ACTIVITYLOG_PATH
+            $Env:C8Y_SETTINGS_ACTIVITYLOG_ENABLED = $Env:C8Y_SETTINGS_ACTIVITYLOG_ENABLED
+            $Env:C8Y_SETTINGS_ACTIVITYLOG_METHODFILTER = $Env:C8Y_SETTINGS_ACTIVITYLOG_METHODFILTER
+        }
+
         $TempFile = New-TemporaryFile
         Remove-Item $TempFile
         $ActiveLogDir = New-Item -ItemType Directory -Path $TempFile
         $Env:C8Y_SETTINGS_ACTIVITYLOG_PATH = $ActiveLogDir.FullName
+        $Env:C8Y_SETTINGS_ACTIVITYLOG_ENABLED = "true"
+        $Env:C8Y_SETTINGS_ACTIVITYLOG_METHODFILTER = ""
     }
 
     Context "defaults" {
@@ -68,11 +76,16 @@ Describe -Name "c8y activity log" {
 
 
     AfterEach {
-        $Env:C8Y_SETTINGS_ACTIVITYLOG_PATH = ""
-        $Env:C8Y_SETTINGS_ACTIVITYLOG_ENABLED = ""
-        $Env:C8Y_SETTINGS_ACTIVITYLOG_METHODFILTER = ""
         if ($ActiveLogDir -and (Test-Path $ActiveLogDir)) {
             Remove-Item $ActiveLogDir -Recurse -Force
+        }
+
+        if ($backupEnvSettings) {
+            foreach ($name in $backupEnvSettings.Keys) {
+                if ($null -ne $name) {
+                    [environment]::SetEnvironmentVariable($name, $backupEnvSettings[$name], "process")
+                }
+            }
         }
     }
 }

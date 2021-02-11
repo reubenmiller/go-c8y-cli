@@ -93,6 +93,9 @@ $results = $Tests | ForEach-Object -ThrottleLimit:$ThrottleLimit -Parallel {
 
     . ./Tests/imports.ps1
 
+    # Disable activity logging by default
+    $Env:C8Y_SETTINGS_ACTIVITYLOG_ENABLED = "false"
+
     $result = Invoke-Pester -Configuration:$PesterConfig
     
     if ($result.FailedCount -gt 0) {
