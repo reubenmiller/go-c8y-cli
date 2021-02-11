@@ -326,3 +326,13 @@ func Test_NilManagedObject(t *testing.T) {
 	cmdErr := ExecuteCmd(cmd, fmt.Sprintf("inventory create --dry"))
 	assert.OK(t, cmdErr)
 }
+
+func Test_PipingNamesToCommandExpectingIds(t *testing.T) {
+	cmd := setupTest()
+
+	stdin := bytes.NewBufferString("pipeNameDoesNotExist1\npipeNameDoesNotExist2")
+	cmd.SetIn(stdin)
+
+	cmdErr := ExecuteCmd(cmd, fmt.Sprintf("events get --dry"))
+	assert.OK(t, cmdErr)
+}

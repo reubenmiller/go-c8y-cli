@@ -21,7 +21,7 @@ func NewFlagFileContents(cmd *cobra.Command, name string) (iterator.Iterator, er
 			return iter, nil
 		}
 	} else if supportsPipeline {
-		return iterator.NewPipeIterator()
+		return iterator.NewPipeIterator(cmd.InOrStdin())
 	}
 	return nil, fmt.Errorf("no input detected")
 }

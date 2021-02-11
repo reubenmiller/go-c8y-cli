@@ -72,6 +72,10 @@ func NewFlagWithPipeIterator(cmd *cobra.Command, pipeOpt *PipelineOptions, suppo
 		}
 		iterOpts := &iterator.PipeOptions{
 			Properties: sourceProperties,
+			Validator:  nil,
+		}
+		if pipeOpt.IsID {
+			iterOpts.Validator = ValidateID
 		}
 		iter, err := iterator.NewJSONPipeIterator(cmd.InOrStdin(), iterOpts, func(line []byte) bool {
 			line = bytes.TrimSpace(line)
@@ -95,4 +99,17 @@ func NewFlagWithPipeIterator(cmd *cobra.Command, pipeOpt *PipelineOptions, suppo
 		return nil, fmt.Errorf("no input detected")
 	}
 	return nil, nil
+}
+
+// ErrInvalidIDFormat invalid ID foratm
+var ErrInvalidIDFormat = errors.New("invalid id format")
+
+// ValidateID returns an error if the input value does not match an id
+func ValidateID(v []byte) (err error) {
+	isNotDigit := func(c rune) bool { return c < '0' || c > '9' }
+	value := bytes.TrimSpace(v)
+	if bytes.IndexFunc(value, isNotDigit) > -1 {
+		err = fmt.Errorf("%s. value=%s", ErrInvalidIDFormat, value)
+	}
+	return
 }

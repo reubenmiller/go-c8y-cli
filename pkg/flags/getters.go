@@ -428,10 +428,12 @@ func WithRequiredProperties(values ...string) GetOption {
 }
 
 type PipelineOptions struct {
-	Name     string   `json:"name"`
-	Required bool     `json:"required"`
-	Property string   `json:"property"`
-	Aliases  []string `json:"aliases"`
+	Name      string             `json:"name"`
+	Required  bool               `json:"required"`
+	Property  string             `json:"property"`
+	Aliases   []string           `json:"aliases"`
+	IsID      bool               `json:"isID"`
+	Validator iterator.Validator `json:"-"`
 }
 
 // WithPipelineIterator adds pipeline support from cli arguments

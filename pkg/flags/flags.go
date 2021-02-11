@@ -106,10 +106,15 @@ func WithExtendedPipelineSupport(name string, property string, required bool, al
 			Required: required,
 			Aliases:  aliases,
 		}
-		if data, err := json.Marshal(options); err == nil {
-			cmd.Annotations[AnnotationValueFromPipelineData] = string(data)
+		if required && name == "id" {
+			options.IsID = true
+		}
+		data, err := json.Marshal(options)
+		if err != nil {
+			panic(err)
 		}
 
+		cmd.Annotations[AnnotationValueFromPipelineData] = string(data)
 		return cmd
 	}
 }

@@ -154,6 +154,7 @@ func runBatched(requestIterator *RequestIterator, commonOptions CommonCommandOpt
 	// add jobs async
 	go func() {
 		defer close(jobs)
+		jobInputErrors := int64(0)
 		for {
 			jobID++
 			Logger.Infof("checking job iterator: %d", jobID)
@@ -170,6 +171,7 @@ func runBatched(requestIterator *RequestIterator, commonOptions CommonCommandOpt
 					// no more requests
 					break
 				}
+				jobInputErrors++
 
 				rootCauseErr := err
 				if errors.Is(err, ErrNoMatchesFound) {
@@ -179,6 +181,14 @@ func runBatched(requestIterator *RequestIterator, commonOptions CommonCommandOpt
 				}
 				Logger.Warningf("skipping job: %d. %s", jobID, rootCauseErr)
 				results <- err
+
+				// Note: stop adding jobs if total errors are exceeded
+				// This is necessary as the worker still needs time to process
+				// the current job, so there can be a delay before the results are read.
+				if jobInputErrors >= int64(batchOptions.AbortOnErrorCount) {
+					break
+				}
+
 				// move to next job
 				continue
 			}
@@ -203,8 +213,9 @@ func runBatched(requestIterator *RequestIterator, commonOptions CommonCommandOpt
 	go func() {
 		workers.Wait()
 		progbar.Completed()
+
 		// prevent closing channel twice
-		if atomic.LoadInt32(&wasCancelled) == 0 {
+		if atomic.AddInt32(&wasCancelled, 1) == 1 {
 			close(results)
 		}
 	}()
@@ -216,8 +227,9 @@ func runBatched(requestIterator *RequestIterator, commonOptions CommonCommandOpt
 		}
 		// exit early
 		if batchOptions.AbortOnErrorCount != 0 && len(totalErrors) >= batchOptions.AbortOnErrorCount {
-			close(results)
-			atomic.AddInt32(&wasCancelled, 1)
+			if atomic.AddInt32(&wasCancelled, 1) == 1 {
+				close(results)
+			}
 			return newUserErrorWithExitCode(103, fmt.Sprintf("aborted batch as error count has been exceeded. totalErrors=%d", batchOptions.AbortOnErrorCount))
 		}
 	}
