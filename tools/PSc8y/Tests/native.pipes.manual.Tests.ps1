@@ -52,6 +52,8 @@ Describe -Name "c8y pipes" {
             $LASTEXITCODE | Should -Be 0
             $output | Should -ContainRequest "POST" -Total 2
             $output | Should -ContainRequest "POST /event/events" -Total 2
+            $output -like '*"text": "custom info 1"*' | should -HaveCount 1
+            $output -like '*"text": "custom info 2"*' | should -HaveCount 1
         }
     }
     
