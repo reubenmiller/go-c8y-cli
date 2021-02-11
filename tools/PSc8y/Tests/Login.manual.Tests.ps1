@@ -41,13 +41,13 @@ Describe -Tag "Session" -Name "Login and Session Tests" {
         $env:C8Y_PASSWORD = $EnvBackupHash["C8Y_PASSWORD"]
         $env:C8Y_PASSPHRASE = $EnvBackupHash["C8Y_PASSPHRASE"]
 
-        $resp = & $c8y devices list --pretty=false --raw
+        $resp = & $c8y devices list --raw
         $LASTEXITCODE | Should -BeExactly 0
         $results = $resp | ConvertFrom-Json
         $results | Should -Not -BeNullOrEmpty
 
         $env:C8Y_PASSWORD = "wrong password"
-        $resp = & $c8y devices list --pretty=false
+        $resp = & $c8y devices list
         $LASTEXITCODE | Should -Not -BeExactly 0
     }
 
@@ -65,7 +65,7 @@ Describe -Tag "Session" -Name "Login and Session Tests" {
         $env:C8Y_PASSWORD = $EnvBackupHash["C8Y_PASSWORD"]
         $env:C8Y_PASSPHRASE = $EnvBackupHash["C8Y_PASSPHRASE"]
 
-        $resp = & $c8y devices list --pretty=false --raw
+        $resp = & $c8y devices list --raw
         $LASTEXITCODE | Should -BeExactly 0
         $results = $resp | ConvertFrom-Json
         $results | Should -Not -BeNullOrEmpty

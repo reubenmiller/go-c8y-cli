@@ -24,7 +24,7 @@ None
 
     $c8yBinary = Get-ClientBinary
     $c8yArgs = New-Object System.Collections.ArrayList
-    $null = $c8yArgs.AddRange(@("sessions", "get", "--pretty=false"))
+    $null = $c8yArgs.AddRange(@("sessions", "get"))
 
     if ($Session) {
         $null = $c8yArgs.AddRange(@("--session", $Session))

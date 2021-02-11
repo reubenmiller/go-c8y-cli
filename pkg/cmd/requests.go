@@ -13,10 +13,10 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/pkg/encoding"
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/pkg/jsonUtilities"
+	"github.com/reubenmiller/go-c8y-cli/pkg/jsonformatter"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
 	"github.com/tidwall/gjson"
-	"github.com/tidwall/pretty"
 )
 
 // CommonCommandOptions control the handling of the response which are available for all commands
@@ -508,16 +508,13 @@ func processResponse(resp *c8y.Response, respError error, commonOptions CommonCo
 			responseText = []byte(*resp.JSONData)
 		}
 
-		outputEnding := ""
-		if len(responseText) > 0 {
-			outputEnding = "\n"
-		}
-
-		if globalFlagPrettyPrint && isJSONResponse {
-			fmt.Printf("%s%s", pretty.Pretty(bytes.TrimSpace(responseText)), outputEnding)
-		} else {
-			fmt.Printf("%s%s", bytes.TrimSpace(responseText), outputEnding)
-		}
+		jsonformatter.WithOutputFormatters(
+			responseText,
+			!isJSONResponse,
+			jsonformatter.WithTrimSpace(true),
+			jsonformatter.WithJSONStreamOutput(isJSONResponse, globalFlagStream, globalFlagCompact),
+			jsonformatter.WithSuffix(len(responseText) > 0, "\n"),
+		)
 	}
 
 	color.Unset()

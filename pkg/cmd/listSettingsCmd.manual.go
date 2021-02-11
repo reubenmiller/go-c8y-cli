@@ -58,10 +58,10 @@ func (n *listSettingsCmd) listSettings(cmd *cobra.Command, args []string) error 
 		return newUserError("Settings error. ", err)
 	}
 
-	if globalFlagPrettyPrint {
-		fmt.Printf("%s", pretty.Pretty(bytes.TrimSpace(responseText)))
-	} else {
+	if globalFlagCompact {
 		fmt.Printf("%s\n", bytes.TrimSpace(responseText))
+	} else {
+		fmt.Printf("%s", pretty.Pretty(bytes.TrimSpace(responseText)))
 	}
 	return nil
 }

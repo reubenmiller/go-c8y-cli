@@ -75,10 +75,10 @@ func (n *getSessionCmd) getSession(cmd *cobra.Command, args []string) error {
 
 	outputEnding := "\n"
 
-	if globalFlagPrettyPrint {
-		fmt.Printf("%s%s", pretty.Pretty(bytes.TrimSpace(b)), outputEnding)
-	} else {
+	if globalFlagCompact {
 		fmt.Printf("%s%s", bytes.TrimSpace(b), outputEnding)
+	} else {
+		fmt.Printf("%s%s", pretty.Pretty(bytes.TrimSpace(b)), outputEnding)
 	}
 	return nil
 }

@@ -15,7 +15,7 @@ Function Get-ClientSetting {
     Param()
 
     $c8ybinary = Get-ClientBinary
-    $settings = & $c8ybinary settings list --pretty=false
+    $settings = & $c8ybinary settings list
     
     if ($LASTEXITCODE -ne 0) {
         Write-Error "Client error when getting settings"

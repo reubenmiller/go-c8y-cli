@@ -114,7 +114,12 @@ Create a new managed object but add a custom accept header value
         [double]
         $TimeoutSec,
 
-        # Pretty print json response
+        # Compress the json response (i.e. opposite of pretty print)
+        [Parameter()]
+        [switch]
+        $Compress,
+
+        # Pretty print the json response (i.e. opposite of compress print). Takes precedence over Compress
         [Parameter()]
         [switch]
         $Pretty,
@@ -255,7 +260,14 @@ Create a new managed object but add a custom accept header value
         $null = $c8yargs.Add("--noProxy")
     }
 
-    $null = $c8yargs.Add("--pretty={0}" -f $Pretty.ToString().ToLower())
+
+    if ($PSBoundParameters.ContainsKey("Pretty")) {
+        $null = $c8yargs.Add("--compact={0}" -f (!$Pretty).ToString().ToLower())
+    } elseif ($PSBoundParameters.ContainsKey("Compress")) {
+        if ($Compress) {
+            $null = $c8yargs.Add("--compact={0}" -f $Compress.ToString().ToLower())
+        }
+    }
 
     # Always use verbose messages so the output can be parsed by PowerShell
     $null = $c8yargs.Add("--verbose")

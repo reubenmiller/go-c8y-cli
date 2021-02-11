@@ -84,10 +84,6 @@ only relevant information is shown.
         }
     }
 
-
-
-    $null = $c8yargs.Add("--pretty=false")
-
     if ($WhatIfPreference) {
         $null = $c8yargs.Add("--dry")
     }

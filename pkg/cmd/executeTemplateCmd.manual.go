@@ -71,7 +71,7 @@ func (n *executeTemplateCmd) newTemplate(cmd *cobra.Command, args []string) erro
 		outputEnding = "\n"
 	}
 
-	if globalFlagPrettyPrint && isJSONResponse {
+	if !globalFlagCompact && isJSONResponse {
 		fmt.Printf("%s%s", pretty.Pretty(bytes.TrimSpace(responseText)), outputEnding)
 	} else {
 		fmt.Printf("%s%s", bytes.TrimSpace(responseText), outputEnding)

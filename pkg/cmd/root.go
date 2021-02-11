@@ -156,6 +156,7 @@ var rootCmd *c8yCmd
 var (
 	client                           *c8y.Client
 	cliConfig                        *config.CliConfiguration
+	globalFlagStream                 bool
 	globalFlagPageSize               int
 	globalFlagIncludeAllPageSize     int
 	globalFlagBatchMaxWorkers        int
@@ -166,7 +167,7 @@ var (
 	globalFlagIncludeAllDelayMS      int64
 	globalFlagVerbose                bool
 	globalFlagWithTotalPages         bool
-	globalFlagPrettyPrint            bool
+	globalFlagCompact                bool
 	globalFlagDryRun                 bool
 	globalFlagProgressBar            bool
 	globalFlagIgnoreAccept           bool
@@ -339,6 +340,8 @@ func configureRootCmd() {
 
 	rootCmd.PersistentFlags().StringVar(&globalFlagSessionFile, "session", "", "Session configuration")
 
+	isTerm := isTerminal()
+
 	// Global flags
 	rootCmd.PersistentFlags().BoolVarP(&globalFlagVerbose, "verbose", "v", false, "Verbose logging")
 	rootCmd.PersistentFlags().IntVar(&globalFlagPageSize, "pageSize", 5, "Maximum results per page")
@@ -346,10 +349,12 @@ func configureRootCmd() {
 	rootCmd.PersistentFlags().Int64Var(&globalFlagTotalPages, "totalPages", 0, "Total number of pages to get")
 	rootCmd.PersistentFlags().BoolVar(&globalFlagIncludeAll, "includeAll", false, "Include all results by iterating through each page")
 	rootCmd.PersistentFlags().BoolVar(&globalFlagWithTotalPages, "withTotalPages", false, "Include all results")
-	rootCmd.PersistentFlags().BoolVar(&globalFlagPrettyPrint, "pretty", isTerminal(), "Pretty print the json responses")
+	rootCmd.PersistentFlags().BoolVarP(&globalFlagCompact, "compact", "c", !isTerm, "Compact instead of pretty-printed output. Pretty print is the default if output is the terminal")
+	rootCmd.PersistentFlags().BoolVar(&globalFlagCompact, "compress", !isTerm, "Alias for --compact for users coming from PowerShell")
+	rootCmd.PersistentFlags().BoolVar(&globalFlagStream, "stream", !isTerm, "Stream transforms JSON arrays to single json objects to make them pipeable. Automatically activated when output is not the terminal")
 	rootCmd.PersistentFlags().BoolVar(&globalFlagDryRun, "dry", false, "Dry run. Don't send any data to the server")
 	rootCmd.PersistentFlags().BoolVar(&globalFlagProgressBar, "progress", false, "Show progress bar. This will also disable any other verbose output")
-	rootCmd.PersistentFlags().BoolVar(&globalFlagNoColor, "noColor", false, "Don't use colors when displaying log entries on the console")
+	rootCmd.PersistentFlags().BoolVar(&globalFlagNoColor, "noColor", !isTerm, "Don't use colors when displaying log entries on the console")
 	rootCmd.PersistentFlags().BoolVar(&globalFlagUseEnv, "useEnv", false, "Allow loading Cumulocity session setting from environment variables")
 	rootCmd.PersistentFlags().BoolVar(&globalFlagRaw, "raw", false, "Raw values")
 	rootCmd.PersistentFlags().StringVar(&globalFlagProxy, "proxy", "", "Proxy setting, i.e. http://10.0.0.1:8080")

@@ -1,6 +1,6 @@
 . $PSScriptRoot/imports.ps1
 
-Describe -Name "c8y activity log" {
+Describe -Name "c8y activitylog" {
     BeforeAll {
         Set-Alias -Name c8yb -Value (Get-ClientBinary)
 

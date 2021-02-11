@@ -30,7 +30,7 @@ Subscribe to all measurements for 90 seconds
 	}
 
 	// Flags
-	cmd.Flags().StringVarP(&ccmd.flagChannel, "channel", "c", "", "Channel name i.e. /measurements/12345 or /measurements/*")
+	cmd.Flags().StringVar(&ccmd.flagChannel, "channel", "", "Channel name i.e. /measurements/12345 or /measurements/*")
 	cmd.Flags().Int64Var(&ccmd.flagDurationSec, "duration", 30, "Timeout in seconds")
 	cmd.Flags().Int64Var(&ccmd.flagCount, "count", 0, "Max number of realtime notifications to wait for")
 

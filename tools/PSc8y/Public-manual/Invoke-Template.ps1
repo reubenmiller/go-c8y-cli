@@ -69,9 +69,7 @@ Function Invoke-Template {
             }
 
             if ($Compress) {
-                $null = $c8yArgs.Add("--pretty=false")
-            } else {
-                $null = $c8yArgs.Add("--pretty=true")
+                $null = $c8yArgs.Add("--compact=true")
             }
 
             $c8ybinary = Get-ClientBinary
