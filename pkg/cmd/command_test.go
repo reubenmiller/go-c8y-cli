@@ -336,3 +336,9 @@ func Test_PipingNamesToCommandExpectingIds(t *testing.T) {
 	cmdErr := ExecuteCmd(cmd, fmt.Sprintf("events get --dry"))
 	assert.OK(t, cmdErr)
 }
+
+func Test_NoAccept(t *testing.T) {
+	cmd := setupTest()
+	cmdErr := ExecuteCmd(cmd, fmt.Sprintf("inventory create --name test01 --noAccept"))
+	assert.OK(t, cmdErr)
+}

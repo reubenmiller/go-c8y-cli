@@ -127,7 +127,7 @@ func (n *GetOperationCmd) RunE(cmd *cobra.Command, args []string) error {
 		Body:         body,
 		FormData:     formData,
 		Header:       headers,
-		IgnoreAccept: false,
+		IgnoreAccept: globalFlagIgnoreAccept,
 		DryRun:       globalFlagDryRun,
 	}
 

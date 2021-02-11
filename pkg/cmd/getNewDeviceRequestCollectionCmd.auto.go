@@ -124,7 +124,7 @@ func (n *GetNewDeviceRequestCollectionCmd) RunE(cmd *cobra.Command, args []strin
 		Body:         body,
 		FormData:     formData,
 		Header:       headers,
-		IgnoreAccept: false,
+		IgnoreAccept: globalFlagIgnoreAccept,
 		DryRun:       globalFlagDryRun,
 	}
 

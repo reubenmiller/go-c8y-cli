@@ -128,7 +128,7 @@ func (n *DeleteApplicationBinaryCmd) RunE(cmd *cobra.Command, args []string) err
 		Body:         body,
 		FormData:     formData,
 		Header:       headers,
-		IgnoreAccept: false,
+		IgnoreAccept: globalFlagIgnoreAccept,
 		DryRun:       globalFlagDryRun,
 	}
 

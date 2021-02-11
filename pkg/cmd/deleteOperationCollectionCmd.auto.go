@@ -132,7 +132,7 @@ func (n *DeleteOperationCollectionCmd) RunE(cmd *cobra.Command, args []string) e
 		Body:         body,
 		FormData:     formData,
 		Header:       headers,
-		IgnoreAccept: false,
+		IgnoreAccept: globalFlagIgnoreAccept,
 		DryRun:       globalFlagDryRun,
 	}
 

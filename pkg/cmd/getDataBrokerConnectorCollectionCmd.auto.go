@@ -124,7 +124,7 @@ func (n *GetDataBrokerConnectorCollectionCmd) RunE(cmd *cobra.Command, args []st
 		Body:         body,
 		FormData:     formData,
 		Header:       headers,
-		IgnoreAccept: false,
+		IgnoreAccept: globalFlagIgnoreAccept,
 		DryRun:       globalFlagDryRun,
 	}
 

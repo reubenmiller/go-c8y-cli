@@ -127,7 +127,7 @@ func (n *UpdateEventBinaryCmd) RunE(cmd *cobra.Command, args []string) error {
 		Body:         body.GetFileContents(),
 		FormData:     formData,
 		Header:       headers,
-		IgnoreAccept: false,
+		IgnoreAccept: globalFlagIgnoreAccept,
 		DryRun:       globalFlagDryRun,
 	}
 

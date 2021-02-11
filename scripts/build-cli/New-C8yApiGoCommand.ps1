@@ -449,7 +449,7 @@ func (n *${NameCamel}Cmd) RunE(cmd *cobra.Command, args []string) error {
         Body:         $GetBodyContents,
         FormData:     formData,
         Header:       headers,
-        IgnoreAccept: false,
+        IgnoreAccept: globalFlagIgnoreAccept,
         DryRun:       globalFlagDryRun,
     }
 

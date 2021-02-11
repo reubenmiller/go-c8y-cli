@@ -127,7 +127,7 @@ func (n *GetApplicationReferenceCollectionCmd) RunE(cmd *cobra.Command, args []s
 		Body:         body,
 		FormData:     formData,
 		Header:       headers,
-		IgnoreAccept: false,
+		IgnoreAccept: globalFlagIgnoreAccept,
 		DryRun:       globalFlagDryRun,
 	}
 

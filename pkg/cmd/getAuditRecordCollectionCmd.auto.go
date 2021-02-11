@@ -140,7 +140,7 @@ func (n *GetAuditRecordCollectionCmd) RunE(cmd *cobra.Command, args []string) er
 		Body:         body,
 		FormData:     formData,
 		Header:       headers,
-		IgnoreAccept: false,
+		IgnoreAccept: globalFlagIgnoreAccept,
 		DryRun:       globalFlagDryRun,
 	}
 

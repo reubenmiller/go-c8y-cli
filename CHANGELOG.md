@@ -13,30 +13,29 @@ No unreleased features
 
 
 * TODO:
-    * Add support for lazy required evaluate when using piped path parameters
     * Save pipeline context for reuse in templates
-    * Piping input, the last item is being ignored! readbytes is return data and io.EOF! Make sure the data is processed even if the end is found (or this may only be an issue in the tests??? - need to verify)
+    * csv output for bash (i.e. id,name,value)
+* Added new `--noAccept` global parameter to ignore the Accept header. This usually only affects `PUT` and `POST` requests.
 
 * Fixed #43. New-ServiceUser now accepts more than 1 role
 * Added Expand-DeviceGroup cmdlet
 * Adding following template variables
-    * rand.index
     * time.now
     * time.nowNano
+    * input.index (current iteration when using pipelines)
 
 * TODO: Create custom ConvertFrom-Json
     * Replace ConvertFrom-Json -Depth calls in code as the default is already high enough (1024). This simpifies the code as the check for powershell version can be ignored
-* TODO: Create custom ConvertTo-Json where depth is set to 10 by default
     * add options to strip out cumulocity noise (i.e. additionParents etc.)
 * TODO: Make -InformationVariable or at least ErrorVariable work when using IncludeAll
-* TODO: Optimized inventory queries when using the `includeAll` parameter
+
+* Optimized inventory queries when using the `includeAll` parameter on inventory managed objects
     ```sh
     $filter=_id gt '{lastId}' $orderby=_id asc
     ```
-* TODO: Optimized other api queries by date
-    ```sh
-    $filter=creationTime.date gt '{lastDate}' $orderby=creationTime.date asc
-    ```
+
+
+* New cmdlet `ConvertTo-NestedJson` which is a proxy function of `ConvertTo-Json` where depth is set to 10 by default
 
 ### PSc8y
 
@@ -49,8 +48,11 @@ No unreleased features
 
 ### Breaking changes
 
+* `realtime subscribe`: Remove shorthand `-c` variant of `--channel` as it conflicts with the new `--compress`, `-c` global flag.
 * `Get-ManagedObjectCollect` renamed `Device` parameter to `Ids` and removed device lookup as the parameter is related to a generic managed object and not a device.
-
+* Renamed json output parameters
+    * `--pretty` has been renamed to `--compress` (or `-c`) to be inline with popular json utility jq.
+    * Invoke-ClientRequest has both `-Pretty` and `-Compress` options - renamed `Pretty` to `Compress`
 
 ### New Features
 
@@ -97,14 +99,41 @@ The activity log settings can be set for individual c8y sessions or globally in 
 
 **Pipeline support**
 
-* Added pipeline alias lists
+* Added pipelines to most commands
 
-        ```sh
-        c8y devices list --select id,name | jqiter | c8y operations list --dry --workers 4
-        ```
+    ```sh
+    c8y alarms --device 12345 --status ACTIVE | c8y alarms update --status CLEARED
+    ```
+
+    ```sh
+    c8y devices list | c8y operations list
+    ```
 
 * When doing batch size of 1, only set the exit code to the last value
 * Maximum jobs limit to protect against unexpected updates
+* New global parameters
+    * `--compact` or `-c` compact the json removing any indentation
+    * `--stream` will automatically convert a json array to individual json lines (objects)
+        ```json
+        [
+            { "id": "1"},
+            { "id": "2"}
+        ]
+        ```
+
+        Will be transformed individually stream json objects. Each object will be written to stdout as it is processed.
+
+        ```json
+        { "id": "1"}
+        { "id": "2"}
+        ```
+**Progress bar (alpha)**
+
+* `--progress` bar can be used when performing operations in a pipeline.
+
+    ```
+    cat mylist.txt | c8y inventory get --progress
+    ```
 
 ### PSc8y improvements
 

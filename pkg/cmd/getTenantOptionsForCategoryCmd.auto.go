@@ -130,7 +130,7 @@ func (n *GetTenantOptionsForCategoryCmd) RunE(cmd *cobra.Command, args []string)
 		Body:         body,
 		FormData:     formData,
 		Header:       headers,
-		IgnoreAccept: false,
+		IgnoreAccept: globalFlagIgnoreAccept,
 		DryRun:       globalFlagDryRun,
 	}
 

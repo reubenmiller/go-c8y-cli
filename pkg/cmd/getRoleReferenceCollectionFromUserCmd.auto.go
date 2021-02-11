@@ -129,7 +129,7 @@ func (n *GetRoleReferenceCollectionFromUserCmd) RunE(cmd *cobra.Command, args []
 		Body:         body,
 		FormData:     formData,
 		Header:       headers,
-		IgnoreAccept: false,
+		IgnoreAccept: globalFlagIgnoreAccept,
 		DryRun:       globalFlagDryRun,
 	}
 
