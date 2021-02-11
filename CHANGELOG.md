@@ -118,6 +118,8 @@ The activity log settings can be set for individual c8y sessions or globally in 
     New-ManagedObject -Data $file
     ```
 
+* `Wait-Operation` Fixed warning message format when operation fails. Id was being show in the incorrect position
+
 ## Released
 
 ### v1.11.0

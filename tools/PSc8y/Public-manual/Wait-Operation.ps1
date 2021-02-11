@@ -57,7 +57,7 @@ Wait for the operation id, and timeout after 30 seconds
 
         switch ($op.status) {
             "FAILED" {
-                Write-Warning ("Operation failed [id={1}]. Reason: {0}" -f $op.id, $op.failureReason)
+                Write-Warning ("Operation failed [id={0}]. Reason: {1}" -f $op.id, $op.failureReason)
                 break;
             }
             "SUCCESSFUL" {
