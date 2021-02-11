@@ -134,7 +134,12 @@ func processRequestAndResponse(requests []c8y.RequestOptions, commonOptions Comm
 	)
 
 	if !req.DryRun {
-		Logger.Infof("Response time: %dms", int64(time.Since(start)/time.Millisecond))
+		durationMS := int64(time.Since(start) / time.Millisecond)
+		Logger.Infof("Response time: %dms", durationMS)
+
+		if activityLogger != nil && resp != nil {
+			activityLogger.LogRequest(resp.Response, resp.JSON, durationMS)
+		}
 	}
 
 	if ctx.Err() != nil {
@@ -231,7 +236,7 @@ func fetchAllResults(req c8y.RequestOptions, resp *c8y.Response, commonOptions C
 		}
 		ctx, cancel := context.WithTimeout(context.Background(), time.Duration(globalFlagTimeout)*time.Millisecond)
 		defer cancel()
-		// start := time.Now()
+		start := time.Now()
 		resp, err = client.SendRequest(
 			ctx,
 			curReq,
@@ -239,7 +244,9 @@ func fetchAllResults(req c8y.RequestOptions, resp *c8y.Response, commonOptions C
 
 		// save result
 		if resp != nil {
-
+			durationMS := int64(time.Since(start) / time.Millisecond)
+			Logger.Infof("Response time: %dms", durationMS)
+			activityLogger.LogRequest(resp.Response, resp.JSON, durationMS)
 			totalItems, processErr = processResponse(resp, err, commonOptions)
 
 			if processErr != nil {
@@ -350,7 +357,7 @@ func fetchAllInventoryQueryResults(req c8y.RequestOptions, resp *c8y.Response, c
 		}
 		ctx, cancel := context.WithTimeout(context.Background(), time.Duration(globalFlagTimeout)*time.Millisecond)
 		defer cancel()
-		// start := time.Now()
+		start := time.Now()
 		resp, err = client.SendRequest(
 			ctx,
 			curReq,
@@ -358,6 +365,9 @@ func fetchAllInventoryQueryResults(req c8y.RequestOptions, resp *c8y.Response, c
 
 		// save result
 		if resp != nil {
+			durationMS := int64(time.Since(start) / time.Millisecond)
+			Logger.Infof("Response time: %dms", durationMS)
+			activityLogger.LogRequest(resp.Response, resp.JSON, durationMS)
 
 			totalItems, processErr = processResponse(resp, err, commonOptions)
 

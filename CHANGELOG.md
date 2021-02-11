@@ -52,6 +52,47 @@ No unreleased features
 * `Get-ManagedObjectCollect` renamed `Device` parameter to `Ids` and removed device lookup as the parameter is related to a generic managed object and not a device.
 
 
+### New Features
+
+#### Activity log
+* Records c8y commands (c8y binary arguments only) and HTTP request/response meta information
+* Enable the logs for specific sessions or have a global setting
+* Disable activity log for single commands by using `noLog` parameter
+
+    ```sh
+    c8y devices create --name "myDeviceName" --noLog
+    ```
+
+**Example**
+
+*File: c8y.activitylog.2021.02.11.json*
+
+```json
+{"time":"2021-02-11T07:07:29.7405634Z","ctx":"gOBHCQDe","type":"command","arguments":["devices","create","--name=myDevice01"]}
+{"time":"2021-02-11T07:07:29.9139964Z","ctx":"gOBHCQDe","type":"request","method":"POST","host":"c8y.example.com","path":"/inventory/managedObjects","query":"","accept":"application/json","processingMode":"","statusCode":201,"responseTimeMS":125,"responseSelf":"https://c8y.example.com/inventory/managedObjects/367930"}
+{"time":"2021-02-11T07:08:10.8468454Z","ctx":"gCVnTfZt","type":"command","arguments":["devices","update","--id","367930","--newName","my new device"]}
+{"time":"2021-02-11T07:08:11.0067532Z","ctx":"gCVnTfZt","type":"request","method":"PUT","host":"c8y.example.com","path":"/inventory/managedObjects/367930","query":"","accept":"application/json","processingMode":"","statusCode":200,"responseTimeMS":146,"responseSelf":"https://c8y.example.com/inventory/managedObjects/367930"}
+{"time":"2021-02-11T07:08:26.9742641Z","ctx":"qFRWdUsT","type":"command","arguments":["devices","delete","--id=367930"]}
+{"time":"2021-02-11T07:08:27.1066364Z","ctx":"qFRWdUsT","type":"request","method":"DELETE","host":"c8y.example.com","path":"/inventory/managedObjects/367930","query":"","accept":"application/json","processingMode":"","statusCode":204,"responseTimeMS":122,"responseSelf":""}
+```
+
+**Settings**
+
+The activity log settings can be set for individual c8y sessions or globally in your `settings.json` file.
+
+```json
+{
+    "settings": {
+        "activityLog": {
+            "enabled": true,
+            // defaults to current working directory if not specified
+            "path": "/home/myuser/.c8y-activitylogs/",
+            "methodFilter": "GET PUT POST DELETE"
+        }
+    }
+}
+```
+
 ### Bash/zsh improvements
 
 **Pipeline support**

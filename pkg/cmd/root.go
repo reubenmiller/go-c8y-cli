@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/gorilla/websocket"
+	"github.com/reubenmiller/go-c8y-cli/pkg/activitylogger"
 	"github.com/reubenmiller/go-c8y-cli/pkg/config"
 	"github.com/reubenmiller/go-c8y-cli/pkg/encrypt"
 	"github.com/reubenmiller/go-c8y-cli/pkg/logger"
@@ -21,6 +22,7 @@ import (
 
 // Logger is used to record the log messages which should be visible to the user when using the verbose flag
 var Logger *logger.Logger
+var activityLogger *activitylogger.ActivityLogger
 
 // SecureDataAccessor reads and writes encrypted data
 var SecureDataAccessor *encrypt.SecureData
@@ -176,6 +178,7 @@ var (
 	globalFlagRaw                    bool
 	globalFlagProxy                  string
 	globalFlagNoProxy                bool
+	globalFlagNoLog                  bool
 	globalFlagTimeout                uint
 	globalFlagUseTenantPrefix        bool
 	globalUseNonDefaultPageSize      bool
@@ -233,6 +236,15 @@ const (
 
 	// SettingsModeCI enable continuous integration mode (this will enable all commands)
 	SettingsModeCI string = "settings.ci"
+
+	// SettingsActivityLogPath path where the activity log will be stored
+	SettingsActivityLogPath string = "settings.activitylog.path"
+
+	// SettingsActivityLogEnabled enables/disables the activity log
+	SettingsActivityLogEnabled string = "settings.activitylog.enabled"
+
+	// SettingsActivityLogMethodFilter filters the activity log entries by a space delimited methods, i.e. GET POST PUT
+	SettingsActivityLogMethodFilter string = "settings.activitylog.methodFilter"
 )
 
 // SettingsGlobalName name of the settings file (without extension)
@@ -283,6 +295,9 @@ func (c *c8yCmd) checkSessionExists(cmd *cobra.Command, args []string) error {
 	if globalFlagSessionFile == "" || !(strings.HasPrefix(cmdStr, "sessions list") || strings.HasPrefix(cmdStr, "sessions checkPassphrase") || c.Flags().Changed("session")) {
 		c.useEnv = true
 	}
+
+	activityLogger.LogCommand(cmd, args, cmdStr)
+
 	c.createCumulocityClient()
 
 	localCmds := []string{
@@ -332,6 +347,7 @@ func configureRootCmd() {
 	rootCmd.PersistentFlags().BoolVar(&globalFlagRaw, "raw", false, "Raw values")
 	rootCmd.PersistentFlags().StringVar(&globalFlagProxy, "proxy", "", "Proxy setting, i.e. http://10.0.0.1:8080")
 	rootCmd.PersistentFlags().BoolVar(&globalFlagNoProxy, "noProxy", false, "Ignore the proxy settings")
+	rootCmd.PersistentFlags().BoolVar(&globalFlagNoLog, "noLog", false, "Disables the activity log for the current command")
 
 	// Concurrency
 	rootCmd.PersistentFlags().IntVar(&globalFlagBatchWorkers, "workers", 1, "Number of workers")
@@ -573,6 +589,7 @@ func initConfig() {
 	cliConfig = config.NewCliConfiguration(viper.GetViper(), SecureDataAccessor, getSessionHomeDir(), os.Getenv("C8Y_PASSPHRASE"))
 	cliConfig.SetLogger(Logger)
 	loadConfiguration()
+	configureActivityLog()
 
 	// only parse env variables if no explict config file is given
 	if globalFlagUseEnv {
@@ -640,7 +657,35 @@ func loadConfiguration() error {
 	bindEnv(SettingsEncryptionEnabled, false)
 	bindEnv(SettingsModeCI, false)
 
+	// Activity log settings
+	bindEnv(SettingsActivityLogEnabled, true)
+	bindEnv(SettingsActivityLogPath, "")
+	bindEnv(SettingsActivityLogMethodFilter, "GET PUT POST DELETE")
+
 	return nil
+}
+
+func configureActivityLog() {
+	disabled := !viper.GetBool(SettingsActivityLogEnabled)
+	if globalFlagNoLog {
+		disabled = true
+	}
+	options := activitylogger.Options{
+		Disabled:     disabled,
+		OutputFolder: viper.GetString(SettingsActivityLogPath),
+		Methods:      strings.ToUpper(viper.GetString(SettingsActivityLogMethodFilter)),
+	}
+
+	if l, err := activitylogger.NewActivityLogger(options); err == nil {
+		activityLogger = l
+		if disabled {
+			Logger.Infof("activityLog is disabled", activityLogger.GetPath())
+		} else {
+			Logger.Infof("activityLog path: %s", activityLogger.GetPath())
+		}
+	} else {
+		Logger.Errorf("Failed to load activity logger. %s", err)
+	}
 }
 
 func loadAuthentication(v *config.CliConfiguration, c *c8y.Client) error {
