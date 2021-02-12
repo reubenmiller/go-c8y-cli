@@ -36,6 +36,11 @@ No unreleased features
 
 
 * New cmdlet `ConvertTo-NestedJson` which is a proxy function of `ConvertTo-Json` where depth is set to 10 by default
+* Removed `--format` as `select` and `csv` can be used for the same effect (and more).
+
+    ```
+    id=$( c8y devices list --select id --csv | head -1 )
+    ```
 
 ### PSc8y
 
