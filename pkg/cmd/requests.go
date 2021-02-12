@@ -512,7 +512,7 @@ func processResponse(resp *c8y.Response, respError error, commonOptions CommonCo
 			responseText,
 			!isJSONResponse,
 			jsonformatter.WithTrimSpace(true),
-			jsonformatter.WithJSONStreamOutput(isJSONResponse, globalFlagStream, globalFlagCompact || len(globalFlagFormat) > 0),
+			jsonformatter.WithJSONStreamOutput(isJSONResponse, globalFlagStream, globalFlagCompact || len(globalFlagSelect) > 0),
 			jsonformatter.WithSuffix(len(responseText) > 0, "\n"),
 		)
 	}
