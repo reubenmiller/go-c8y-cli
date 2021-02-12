@@ -39,6 +39,11 @@ No unreleased features
 
 ### PSc8y
 
+
+* [Get-MeasurementCollection / c8y measurements list]
+    * Renamed `csv` parameter to `csvFormat` to avoid conflict with new global csv (client side) parameter
+    * Renamed `excel` parameter to `excelFormat` to be consistent with the renamed `csvFormat` parameter
+
 * Added support for passing non-pipeline parameters via the object. The id field will be read from the object. #42
     ```powershell
     $Group = New-TestDeviceGroup

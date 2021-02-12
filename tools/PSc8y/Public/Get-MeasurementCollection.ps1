@@ -75,12 +75,12 @@ Get measurements from a device (using pipeline)
         # Results will be displayed in csv format. Note: -IncludeAll, is not supported when using using this parameter
         [Parameter()]
         [switch]
-        $Csv,
+        $CsvFormat,
 
         # Results will be displayed in Excel format Note: -IncludeAll, is not supported when using using this parameter
         [Parameter()]
         [switch]
-        $Excel,
+        $ExcelFormat,
 
         # Every measurement fragment which contains 'unit' property will be transformed to use required system of units.
         [Parameter()]
@@ -165,11 +165,11 @@ Get measurements from a device (using pipeline)
         if ($PSBoundParameters.ContainsKey("Revert")) {
             $Parameters["revert"] = $Revert
         }
-        if ($PSBoundParameters.ContainsKey("Csv")) {
-            $Parameters["csv"] = $Csv
+        if ($PSBoundParameters.ContainsKey("CsvFormat")) {
+            $Parameters["csvFormat"] = $CsvFormat
         }
-        if ($PSBoundParameters.ContainsKey("Excel")) {
-            $Parameters["excel"] = $Excel
+        if ($PSBoundParameters.ContainsKey("ExcelFormat")) {
+            $Parameters["excelFormat"] = $ExcelFormat
         }
         if ($PSBoundParameters.ContainsKey("Unit")) {
             $Parameters["unit"] = $Unit

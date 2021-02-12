@@ -44,13 +44,13 @@ endpoints:
         - description: Get a list of measurements
           command: c8y measurements list
     headerParameters:
-      - name: csv
+      - name: csvFormat
         type: boolean
         description: 'Results will be displayed in csv format. Note: -IncludeAll, is not supported when using using this parameter'
         property: Accept
         value: text/csv
 
-      - name: excel
+      - name: excelFormat
         type: boolean
         description: 'Results will be displayed in Excel format Note: -IncludeAll, is not supported when using using this parameter'
         property: Accept
@@ -120,13 +120,13 @@ endpoints:
           command: c8y measurements listLatest
 
     headerParameters:
-      - name: csv
+      - name: csvFormat
         type: boolean
         description: Results will be displayed in csv format
         property: Accept
         value: text/csv
 
-      - name: excel
+      - name: excelFormat
         type: boolean
         description: Results will be displayed in Excel format
         property: Accept
