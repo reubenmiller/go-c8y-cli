@@ -187,6 +187,7 @@ var (
 	globalFlagBatchWorkers           int
 	globalFlagBatchDelayMS           int
 	globalFlagBatchAbortOnErrorCount int
+	globalFlagSelect                 []string
 
 	globalModeEnableCreate bool
 	globalModeEnableUpdate bool
@@ -371,8 +372,8 @@ func configureRootCmd() {
 	rootCmd.PersistentFlags().StringVar(&globalFlagOutputFile, "outputFile", "", "Output file")
 
 	rootCmd.PersistentFlags().StringSlice("filter", nil, "filter")
-	rootCmd.PersistentFlags().StringSlice("select", nil, "select")
-	rootCmd.PersistentFlags().String("format", "", "format")
+	rootCmd.PersistentFlags().StringArrayVar(&globalFlagSelect, "select", nil, "select")
+	rootCmd.PersistentFlags().Bool("csv", false, "csv")
 	rootCmd.PersistentFlags().UintVarP(&globalFlagTimeout, "timeout", "t", 10*60*1000, "Timeout in milliseconds")
 
 	// Map settings to flags, allowing the user to set the own default settings

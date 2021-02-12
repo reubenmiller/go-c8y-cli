@@ -15,11 +15,12 @@ import (
 type JSONFilters struct {
 	Filters   []JSONFilter
 	Selectors []string
-	Pluck     string
+	Pluck     []string
+	AsCSV     bool
 }
 
-func (f JSONFilters) Apply(jsonValue string, property string) []byte {
-	return filterJSON(jsonValue, property, f, f.Selectors, f.Pluck)
+func (f JSONFilters) Apply(jsonValue string, property string, showHeaders bool) []byte {
+	return filterJSON(jsonValue, property, f, f.Selectors, f.Pluck, f.AsCSV, showHeaders)
 }
 
 func (f *JSONFilters) AddSelectors(props ...string) {
@@ -69,7 +70,7 @@ func removeJSONArrayValues(jsonValue []byte) []byte {
 	return []byte("")
 }
 
-func filterJSON(jsonValue string, property string, filters JSONFilters, selectors []string, pluck string) []byte {
+func filterJSON(jsonValue string, property string, filters JSONFilters, selectors []string, pluckValues []string, asCSV bool, showHeaders bool) []byte {
 	var b bytes.Buffer
 
 	var jq *gojsonq.JSONQ
@@ -91,7 +92,9 @@ func filterJSON(jsonValue string, property string, filters JSONFilters, selector
 
 	// Add custom filters
 	jq.Macro("like", matchWithWildcards)
+	jq.Macro("-like", matchWithWildcards)
 	jq.Macro("match", matchWithRegex)
+	jq.Macro("-match", matchWithRegex)
 
 	for _, query := range filters.Filters {
 		Logger.Debugf("filtering data: %s %s %s", query.Property, query.Operation, query.Value)
@@ -103,24 +106,38 @@ func filterJSON(jsonValue string, property string, filters JSONFilters, selector
 	}
 
 	// format values (using gjson)
-	if pluck != "" {
+	if len(pluckValues) > 0 {
 		var bsub bytes.Buffer
 		jq.Writer(&bsub)
 		formattedJSON := gjson.ParseBytes(bsub.Bytes())
 
 		if formattedJSON.IsArray() {
 			outputValues := make([]string, 0)
+
+			if showHeaders {
+				outputValues = append(outputValues, expandHeaderProperties(&formattedJSON, pluckValues))
+			}
+
 			for _, myval := range formattedJSON.Array() {
-				if v := myval.Get(pluck); v.Exists() {
-					outputValues = append(outputValues, v.String())
+				if line := pluckJsonValues(&myval, pluckValues, asCSV); line != "" {
+					outputValues = append(outputValues, line)
 				}
 			}
 			return []byte(strings.Join(outputValues, "\n"))
 		}
-		if v := formattedJSON.Get(pluck); v.Exists() {
-			return []byte(strings.TrimRight(v.String(), "\n"))
+
+		if line := pluckJsonValues(&formattedJSON, pluckValues, asCSV); line != "" {
+			headers := ""
+			if showHeaders {
+				headers = expandHeaderProperties(&formattedJSON, pluckValues)
+			}
+			if headers != "" {
+				headers += "\n"
+			}
+			return []byte(headers + line)
 		}
-		Logger.Debugf("ERROR: gjson path does not exist. %s", pluck)
+
+		Logger.Debugf("ERROR: gjson path does not exist. %v", pluckValues)
 		return []byte("")
 	}
 
@@ -131,6 +148,100 @@ func filterJSON(jsonValue string, property string, filters JSONFilters, selector
 		return removeJSONArrayValues(b.Bytes())
 	}
 	return b.Bytes()
+}
+
+func expandHeaderProperties(item *gjson.Result, properties []string) string {
+	headers := []string{}
+
+	if item.IsArray() {
+		items := item.Array()
+		if len(items) > 0 {
+			item = &items[0]
+		}
+	}
+
+	for _, key := range properties {
+		name, _, err := resolveKeyName(item, key)
+		if err != nil {
+			headers = append(headers, key)
+		} else {
+			headers = append(headers, name)
+		}
+	}
+	return strings.Join(headers, ",")
+}
+
+// func main() {
+// 	item := gjson.Parse(`{
+// 		"details": {
+// 			"someReallyLongName": "RUNNING"
+// 		}
+// 	}
+// 	`)
+// 	realKeyName, value, err := resolveKeyName(item, "det*.some*")
+// 	if err != nil {
+// 		fmt.Printf("%s: %s", realKeyName, value)
+// 	}
+// }
+
+func resolveKeyName(item *gjson.Result, key string) (name string, value interface{}, err error) {
+	if value := item.Get(key); value.Exists() {
+		// Here: How to get t
+		//
+		tokenEnd := strings.LastIndex(item.Raw[:value.Index], "\"")
+		if tokenEnd == -1 {
+			return key, nil, nil
+		}
+		tokenStart := strings.LastIndex(item.Raw[:tokenEnd], "\"")
+
+		if tokenStart == -1 {
+			return key, nil, nil
+		}
+		return item.Raw[tokenStart+1 : tokenEnd], value.Value(), nil
+	}
+	return key, nil, nil
+	// return "", nil, fmt.Errorf("not found. key=%s", key)
+}
+
+func pluckJsonValues(item *gjson.Result, properties []string, asCSV bool) string {
+	if item == nil {
+		return ""
+	}
+	values := []string{}
+
+	// json line output
+	if !asCSV {
+		for _, prop := range properties {
+			if !strings.ContainsAny(prop[:1], "{[") {
+				prop = "{" + strings.Trim(prop, "{}") + "}"
+			}
+			// complexSelector := "{" + strings.Trim(prop, "{}") + "}"
+			if v := item.Get(prop); v.Exists() {
+				values = append(values, v.String())
+			}
+		}
+		// allow output fan out
+		return strings.Join(values, "\n")
+	}
+
+	columns := []string{}
+	for _, prop := range properties {
+		columns = append(columns, strings.Split(prop, ",")...)
+	}
+	// Csv output
+	for _, pluck := range columns {
+		// strip alias in csv, the columns are handled elsewhere name:value
+		if index := strings.Index(pluck, ":"); index != -1 {
+			pluck = pluck[index+1:]
+		}
+		if v := item.Get(pluck); v.Exists() {
+			values = append(values, v.String())
+		} else {
+			// add empty value
+			values = append(values, "")
+		}
+	}
+	return strings.Join(values, ",")
 }
 
 func matchWithWildcards(x, y interface{}) (bool, error) {
@@ -153,34 +264,32 @@ func matchWithRegex(x, y interface{}) (bool, error) {
 	return matcher.MatchWithRegex(xs, pattern)
 }
 
-func addFilterFlag(cmd *cobra.Command, name string) {
-	if name == "" {
-		name = "filter"
-	}
-	cmd.Flags().StringSlice(name, nil, "filter")
-	cmd.Flags().StringSlice("select", nil, "select")
-	cmd.Flags().String("format", "", "format")
-}
-
 func getFilterFlag(cmd *cobra.Command, flagName string) *JSONFilters {
 	filters := newJSONFilters()
 
-	if cmd.Flags().Changed("select") {
-		if props, err := cmd.Flags().GetStringSlice("select"); err == nil {
-			filters.AddSelectors(props...)
+	enableCSV := false
+	if cmd.Flags().Changed("csv") {
+		if value, err := cmd.Flags().GetBool("csv"); err == nil {
+			enableCSV = value
 		}
 	}
 
-	if cmd.Flags().Changed("format") {
-		if prop, err := cmd.Flags().GetString("format"); err == nil {
-			filters.Pluck = prop
+	if cmd.Flags().Changed("select") {
+		if properties, err := cmd.Flags().GetStringArray("select"); err == nil {
+			formattedProperties := []string{}
+
+			for _, prop := range properties {
+				formattedProperties = append(formattedProperties, prop)
+			}
+			filters.AsCSV = enableCSV
+			filters.Pluck = formattedProperties
 		}
 	}
 
 	if cmd.Flags().Changed(flagName) {
 		if rawFilters, err := cmd.Flags().GetStringSlice(flagName); err == nil {
 			for _, item := range rawFilters {
-				sepPattern := regexp.MustCompile("(\\s+(like|match|eq|neq|lt|lte|gt|gte|notIn|in|startsWith|endsWth|contains|len[n]?eq|lengt[e]?|lenlt[e]?)\\s+|(!?=|[<>]=?))")
+				sepPattern := regexp.MustCompile("(\\s+[\\-]?(like|match|eq|neq|lt|lte|gt|gte|notIn|in|startsWith|endsWth|contains|len[n]?eq|lengt[e]?|lenlt[e]?)\\s+|(!?=|[<>]=?))")
 
 				parts := sepPattern.Split(item, 2)
 

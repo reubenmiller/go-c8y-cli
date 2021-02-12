@@ -496,7 +496,7 @@ func processResponse(resp *c8y.Response, respError error, commonOptions CommonCo
 			if showRaw {
 				dataProperty = ""
 			}
-			responseText = commonOptions.Filters.Apply(*resp.JSONData, dataProperty)
+			responseText = commonOptions.Filters.Apply(*resp.JSONData, dataProperty, false)
 
 			emptyArray := []byte("[]\n")
 
@@ -512,7 +512,7 @@ func processResponse(resp *c8y.Response, respError error, commonOptions CommonCo
 			responseText,
 			!isJSONResponse,
 			jsonformatter.WithTrimSpace(true),
-			jsonformatter.WithJSONStreamOutput(isJSONResponse, globalFlagStream, globalFlagCompact),
+			jsonformatter.WithJSONStreamOutput(isJSONResponse, globalFlagStream, globalFlagCompact || len(globalFlagFormat) > 0),
 			jsonformatter.WithSuffix(len(responseText) > 0, "\n"),
 		)
 	}

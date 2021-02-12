@@ -65,6 +65,11 @@ func WithJSONStreamOutput(enabled bool, stream bool, compact bool) ByteFormatter
 			}
 		} else if j.IsObject() {
 			fmt.Printf("%s\n", formatter(input))
+		} else {
+			// No formatter (as it could be non-json)
+			if len(input) != 0 {
+				fmt.Printf("%s\n", input)
+			}
 		}
 		return input
 	})

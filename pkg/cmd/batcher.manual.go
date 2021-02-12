@@ -194,6 +194,12 @@ func runBatched(requestIterator *RequestIterator, commonOptions CommonCommandOpt
 			}
 			Logger.Infof("adding job: %d", jobID)
 
+			if jobID == 1 {
+				if commonOptions.Filters != nil && len(commonOptions.Filters.Pluck) > 0 {
+					// fmt.Printf("%s\n", strings.Join(commonOptions.Filters.Pluck, ","))
+				}
+			}
+
 			jobs <- batchArgument{
 				id:            jobID,
 				batchOptions:  batchOptions,
