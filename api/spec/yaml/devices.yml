@@ -163,6 +163,14 @@ endpoints:
           command: New-Device -Name $DeviceName -Data @{ myValue = @{ value1 = $true } }
           afterEach:
             - Remove-Device -Id $DeviceName
+        
+        - description: Create device using a template
+          beforeEach:
+            - $DeviceName = PSc8y\New-RandomString -Prefix "myDevice"
+          command: |
+            New-Device -Template "{ name: '$DeviceName' }"
+          afterEach:
+            - Remove-Device -Id $DeviceName
 
       go:
         - description: Create device
@@ -182,7 +190,7 @@ endpoints:
     body:
       - name: name
         type: 'string'
-        required: true
+        required: false
         pipeline: false
         description: Device name
 
@@ -193,6 +201,8 @@ endpoints:
       - name: data
         type: json
         description: Custom device properties.
+    bodyRequiredKeys:
+      - name
 
   - name: getSupportedMeasurements
     description: 'Get supported measurements/s of a device'

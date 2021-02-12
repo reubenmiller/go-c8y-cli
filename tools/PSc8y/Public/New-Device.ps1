@@ -18,6 +18,12 @@ PS> New-Device -Name $DeviceName -Data @{ myValue = @{ value1 = $true } }
 
 Create device with custom properties
 
+.EXAMPLE
+PS> New-Device -Template "{ name: '$DeviceName' }"
+
+
+Create device using a template
+
 
 #>
     [cmdletbinding(SupportsShouldProcess = $true,
@@ -27,8 +33,8 @@ Create device with custom properties
     [Alias()]
     [OutputType([object])]
     Param(
-        # Device name (required)
-        [Parameter(Mandatory = $true)]
+        # Device name
+        [Parameter()]
         [string]
         $Name,
 

@@ -218,6 +218,16 @@
             "afterEach": [
               "Remove-Device -Id $DeviceName"
             ]
+          },
+          {
+            "description": "Create device using a template",
+            "beforeEach": [
+              "$DeviceName = PSc8y\\New-RandomString -Prefix \"myDevice\""
+            ],
+            "command": "New-Device -Template \"{ name: '$DeviceName' }\"\n",
+            "afterEach": [
+              "Remove-Device -Id $DeviceName"
+            ]
           }
         ],
         "go": [
@@ -240,7 +250,7 @@
         {
           "name": "name",
           "type": "string",
-          "required": true,
+          "required": false,
           "pipeline": false,
           "description": "Device name"
         },
@@ -254,6 +264,9 @@
           "type": "json",
           "description": "Custom device properties."
         }
+      ],
+      "bodyRequiredKeys": [
+        "name"
       ]
     },
     {

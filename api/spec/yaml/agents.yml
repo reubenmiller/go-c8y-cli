@@ -178,7 +178,7 @@ endpoints:
       - name: name
         type: string
         pipeline: false
-        required: true
+        required: false
         description: Agent name
 
       - name: type
@@ -188,3 +188,5 @@ endpoints:
       - name: data
         type: json
         description: Custom agent properties.
+    bodyRequiredKeys:
+      - name

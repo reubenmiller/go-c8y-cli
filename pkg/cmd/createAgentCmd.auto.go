@@ -36,7 +36,7 @@ Create agent with custom properties
 
 	cmd.SilenceUsage = true
 
-	cmd.Flags().String("name", "", "Agent name (required)")
+	cmd.Flags().String("name", "", "Agent name")
 	cmd.Flags().String("type", "", "Agent type")
 	addDataFlag(cmd)
 	addProcessingModeFlag(cmd)
@@ -47,7 +47,6 @@ Create agent with custom properties
 	)
 
 	// Required flags
-	cmd.MarkFlagRequired("name")
 
 	ccmd.baseCmd = newBaseCmd(cmd)
 
@@ -117,6 +116,7 @@ func (n *CreateAgentCmd) RunE(cmd *cobra.Command, args []string) error {
 `),
 		WithTemplateValue(),
 		WithTemplateVariablesValue(),
+		flags.WithRequiredProperties("name"),
 	)
 	if err != nil {
 		return newUserError(err)

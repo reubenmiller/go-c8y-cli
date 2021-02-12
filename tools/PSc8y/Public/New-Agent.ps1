@@ -28,8 +28,8 @@ Create agent with custom properties
     [Alias()]
     [OutputType([object])]
     Param(
-        # Agent name (required)
-        [Parameter(Mandatory = $true)]
+        # Agent name
+        [Parameter()]
         [string]
         $Name,
 
