@@ -39,6 +39,15 @@ No unreleased features
 
 ### PSc8y
 
+* New alias to the c8y binary. This makes it easier to run the binary directly without the powershell wrapper.
+
+    When using the c8y binary directly, the parameter names are slightly different, and should start with "--" and not the normalized powershell "-".
+
+    ```powershell
+    c8y devices list --pageSize 1
+
+    c8y help
+    ```
 
 * [Get-MeasurementCollection / c8y measurements list]
     * Renamed `csv` parameter to `csvFormat` to avoid conflict with new global csv (client side) parameter

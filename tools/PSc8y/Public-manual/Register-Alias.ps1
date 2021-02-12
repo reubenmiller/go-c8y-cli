@@ -26,4 +26,9 @@ Unregister-Alias
             Set-Alias -Name $Alias -Value $Aliases[$Alias] -Scope "Global"
         }
     }
+
+    # Add alias to c8y binary (only if the user does not already have access to it)
+    if (-Not (Get-Command "c8y" -CommandType Application -ErrorAction SilentlyContinue)) {
+        Set-Alias -Name "c8y" -Value (Get-ClientBinary) -Scope "Global"
+    }
 }
