@@ -13,8 +13,8 @@ func NewRealtimeCmd() *realtimeCmd {
 
 	cmd := &cobra.Command{
 		Use:   "realtime",
-		Short: "Realtime notifications",
-		Long:  `Realtime notifications`,
+		Short: "Cumulocity realtime notifications",
+		Long:  `Cumulocity realtime notifications`,
 	}
 
 	// Subcommands
