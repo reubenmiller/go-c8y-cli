@@ -25,6 +25,9 @@ Import-Module $modulepath -Prefix "" -Force
 # Add custom assertions
 . "$PSScriptRoot/Assertions/ContainRequest.ps1"
 Add-AssertionOperator -Name "ContainRequest" -Test $Function:ContainRequest -SupportsArrayInput -ErrorAction SilentlyContinue
+. "$PSScriptRoot/Assertions/ContainInCollection.ps1"
+Add-AssertionOperator -Name "ContainInCollection" -Test $Function:ContainInCollection -SupportsArrayInput -ErrorAction SilentlyContinue
+
 
 # Get credentials from the environment
 $env:C8Y_USE_ENVIRONMENT = "on"
