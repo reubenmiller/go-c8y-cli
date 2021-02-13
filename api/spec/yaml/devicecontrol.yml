@@ -191,7 +191,7 @@ endpoints:
     body:
       - name: status
         type: string
-        required: true
+        required: false
         description: Operation status, can be one of SUCCESSFUL, FAILED, EXECUTING or PENDING.
         validationSet: [PENDING, EXECUTING, SUCCESSFUL, FAILED]
 
@@ -203,7 +203,8 @@ endpoints:
       - name: data
         type: json
         description: Additional properties describing the operation which will be performed on the device.
-
+    bodyRequiredKeys:
+      - status
     pathParameters:
       - name: id
         type: string
