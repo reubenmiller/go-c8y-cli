@@ -37,7 +37,7 @@ Unassign a child device from its parent device
 
 	flags.WithOptions(
 		cmd,
-		flags.WithExtendedPipelineSupport("childDevice", "reference", true, "deviceId", "source.id", "id"),
+		flags.WithExtendedPipelineSupport("childDevice", "reference", true, "deviceId", "source.id", "managedObject.id", "id"),
 	)
 
 	// Required flags

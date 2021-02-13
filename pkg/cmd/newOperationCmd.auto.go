@@ -38,7 +38,7 @@ Create operation for a device
 
 	flags.WithOptions(
 		cmd,
-		flags.WithExtendedPipelineSupport("device", "deviceId", true, "deviceId", "source.id", "id"),
+		flags.WithExtendedPipelineSupport("device", "deviceId", true, "deviceId", "source.id", "managedObject.id", "id"),
 	)
 
 	// Required flags

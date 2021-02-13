@@ -48,7 +48,7 @@ Remove alarms on the device which are active and created in the last 10 minutes
 
 	flags.WithOptions(
 		cmd,
-		flags.WithExtendedPipelineSupport("device", "source", false, "deviceId", "source.id", "id"),
+		flags.WithExtendedPipelineSupport("device", "source", false, "deviceId", "source.id", "managedObject.id", "id"),
 	)
 
 	// Required flags

@@ -37,7 +37,7 @@ Set the required availability of a device by name to 10 minutes
 
 	flags.WithOptions(
 		cmd,
-		flags.WithExtendedPipelineSupport("device", "device", true, "deviceId", "source.id", "id"),
+		flags.WithExtendedPipelineSupport("device", "device", true, "deviceId", "source.id", "managedObject.id", "id"),
 	)
 
 	// Required flags

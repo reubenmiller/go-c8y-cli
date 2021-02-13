@@ -40,7 +40,7 @@ Create a new event for a device
 
 	flags.WithOptions(
 		cmd,
-		flags.WithExtendedPipelineSupport("device", "source.id", true, "deviceId", "source.id", "id"),
+		flags.WithExtendedPipelineSupport("device", "source.id", true, "deviceId", "source.id", "managedObject.id", "id"),
 	)
 
 	// Required flags

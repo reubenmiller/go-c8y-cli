@@ -34,8 +34,8 @@ Update multiple operations
         [string]
         $Id,
 
-        # Operation status, can be one of SUCCESSFUL, FAILED, EXECUTING or PENDING. (required)
-        [Parameter(Mandatory = $true)]
+        # Operation status, can be one of SUCCESSFUL, FAILED, EXECUTING or PENDING.
+        [Parameter()]
         [ValidateSet('PENDING','EXECUTING','SUCCESSFUL','FAILED')]
         [string]
         $Status,

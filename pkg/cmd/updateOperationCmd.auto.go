@@ -33,7 +33,7 @@ Update an operation
 	cmd.SilenceUsage = true
 
 	cmd.Flags().String("id", "", "Operation id (required) (accepts pipeline)")
-	cmd.Flags().String("status", "", "Operation status, can be one of SUCCESSFUL, FAILED, EXECUTING or PENDING. (required)")
+	cmd.Flags().String("status", "", "Operation status, can be one of SUCCESSFUL, FAILED, EXECUTING or PENDING.")
 	cmd.Flags().String("failureReason", "", "Reason for the failure. Use when setting status to FAILED")
 	addDataFlag(cmd)
 	addProcessingModeFlag(cmd)
@@ -44,7 +44,6 @@ Update an operation
 	)
 
 	// Required flags
-	cmd.MarkFlagRequired("status")
 
 	ccmd.baseCmd = newBaseCmd(cmd)
 
@@ -109,6 +108,7 @@ func (n *UpdateOperationCmd) RunE(cmd *cobra.Command, args []string) error {
 		flags.WithStringValue("failureReason", "failureReason"),
 		WithTemplateValue(),
 		WithTemplateVariablesValue(),
+		flags.WithRequiredProperties("status"),
 	)
 	if err != nil {
 		return newUserError(err)

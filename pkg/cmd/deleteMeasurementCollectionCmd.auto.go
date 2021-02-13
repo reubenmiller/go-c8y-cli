@@ -40,7 +40,7 @@ Delete measurement collection for a device
 
 	flags.WithOptions(
 		cmd,
-		flags.WithExtendedPipelineSupport("device", "source", false, "deviceId", "source.id", "id"),
+		flags.WithExtendedPipelineSupport("device", "source", false, "deviceId", "source.id", "managedObject.id", "id"),
 	)
 
 	// Required flags

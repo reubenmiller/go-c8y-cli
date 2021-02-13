@@ -47,7 +47,7 @@ Get a list of pending operations for a device
 
 	flags.WithOptions(
 		cmd,
-		flags.WithExtendedPipelineSupport("device", "deviceId", false, "deviceId", "source.id", "id"),
+		flags.WithExtendedPipelineSupport("device", "deviceId", false, "deviceId", "source.id", "managedObject.id", "id"),
 	)
 
 	// Required flags
