@@ -17,14 +17,19 @@ Function ContainInCollection {
     )
 
     $ExpectedIDS = $Expected | ForEach-Object {
-        if ($_ -match "^\+$") { $_ } else { $_.id }
+        if ("$_" -match "^\d+$") { $_ } else { $_.id }
     }
     
-    $ActualIDS = $ActualValue | ForEach-Object {
-        if ($_ -match "^\d+$") { $_ } else { $_.id }
+    $ActualIDS = if ("$ActualValue" -match "^\s*\{") {
+        # Detected json input
+        $ActualValue | ConvertFrom-Json -Depth 100 | ForEach-Object { $_.id }
+    } else {
+        $ActualValue | ForEach-Object {
+            if ($_ -match "^\d+$") { $_ } else { $_.id }
+        }
     }
 
-    $compare = Compare-Object -ReferenceObject $ExpectedIDS -DifferenceObject $ActualIDS
+    $compare = Compare-Object -ReferenceObject $ExpectedIDS -DifferenceObject $ActualIDS -ErrorAction SilentlyContinue
     [bool] $Pass = $null -eq $compare
 
     If ( $Negate ) { $Pass = -not($Pass) }
