@@ -136,8 +136,8 @@ func runBatched(requestIterator *RequestIterator, commonOptions CommonCommandOpt
 	if batchOptions.TotalWorkers < 1 {
 		batchOptions.TotalWorkers = 1
 	}
-	jobs := make(chan batchArgument, batchOptions.TotalWorkers)
-	results := make(chan error, batchOptions.TotalWorkers)
+	jobs := make(chan batchArgument, batchOptions.TotalWorkers-1)
+	results := make(chan error, batchOptions.TotalWorkers-1)
 	workers := sync.WaitGroup{}
 
 	progbar := progressbar.NewMulitProgressBar(1, batchOptions.TotalWorkers, "requests", globalFlagProgressBar)
