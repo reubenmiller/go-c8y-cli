@@ -342,3 +342,9 @@ func Test_NoAccept(t *testing.T) {
 	cmdErr := ExecuteCmd(cmd, fmt.Sprintf("inventory create --name test01 --noAccept"))
 	assert.OK(t, cmdErr)
 }
+
+func Test_GetAllDevices(t *testing.T) {
+	cmd := setupTest()
+	cmdErr := ExecuteCmd(cmd, fmt.Sprintf("devices list --includeAll"))
+	assert.OK(t, cmdErr)
+}
