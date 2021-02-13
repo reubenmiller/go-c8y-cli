@@ -39,6 +39,9 @@ Normalize a list of ids
             $currentID = $iID
             if ($null -ne $iID.id) {
                 $currentID = $iID.id
+            } elseif ($null -ne $iID.managedObject.id) {
+                # managed object reference object
+                $currentID = $iID.managedObject.id
             }
 
             if (!$Strict) {
