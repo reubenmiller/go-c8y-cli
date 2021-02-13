@@ -78,6 +78,7 @@
                     $PipelineVariableAliases = @(
                         "deviceId",
                         "source.id",
+                        "managedObject.id",
                         "id"
                     )
                 }
