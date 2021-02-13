@@ -40,6 +40,11 @@ type PipeIterator struct {
 	reader *bufio.Reader
 }
 
+// IsBound return true if the iterator is bound
+func (i *PipeIterator) IsBound() bool {
+	return true
+}
+
 // GetNext returns the next line from the pipeline
 func (i *PipeIterator) GetNext() (line []byte, input interface{}, err error) {
 	i.mu.Lock()

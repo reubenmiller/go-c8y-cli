@@ -33,7 +33,9 @@ func WithQueryParameters(cmd *cobra.Command, query *QueryTemplate, inputIterator
 		switch v := value.(type) {
 		case iterator.Iterator:
 			query.SetVariable(name, v)
-			totalIterators++
+			if v.IsBound() {
+				totalIterators++
+			}
 		default:
 			query.SetVariable(name, v)
 		}
@@ -63,7 +65,9 @@ func WithPathParameters(cmd *cobra.Command, path *StringTemplate, inputIterators
 
 			case iterator.Iterator:
 				path.SetVariable(name, v)
-				totalIterators++
+				if v.IsBound() {
+					totalIterators++
+				}
 
 			default:
 				path.SetVariable(name, fmt.Sprintf("%v", value))
@@ -104,7 +108,9 @@ func WithBody(cmd *cobra.Command, body *mapbuilder.MapBuilder, inputIterators *R
 		switch v := value.(type) {
 		case iterator.Iterator:
 			err = body.Set(name, value)
-			totalIterators++
+			if v.IsBound() {
+				totalIterators++
+			}
 		case string:
 			// only set non-empty values by default
 			if v != "" {
@@ -307,6 +313,9 @@ func WithRelativeTimestamp(opts ...string) GetOption {
 		if value == "" {
 			return "", value, err
 		}
+
+		// mark iterator as unbound, so it will not increment the input iterators
+		return dst, iterator.NewRelativeTimeIterator(value), err
 
 		ts, err := timestamp.TryGetTimestamp(value)
 

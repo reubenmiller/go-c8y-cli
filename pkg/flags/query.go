@@ -99,3 +99,19 @@ func (b *QueryTemplate) GetNext() ([]byte, interface{}, error) {
 
 	return []byte(output), q, err
 }
+
+// IsBound return true if the iterator is bound
+func (b *QueryTemplate) IsBound() bool {
+
+	isbound := true
+	for _, value := range b.templateVariables {
+		switch v := value.(type) {
+		case iterator.Iterator:
+			if !v.IsBound() {
+				isbound = false
+				break
+			}
+		}
+	}
+	return isbound
+}

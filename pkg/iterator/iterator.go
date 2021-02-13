@@ -10,6 +10,9 @@ import (
 // Iterator is a simple interfact where the next value can be returned.
 type Iterator interface {
 	GetNext() (line []byte, input interface{}, err error)
+
+	// IsBound return true if the iterator is bound
+	IsBound() bool
 }
 
 type UntypedIterator interface {
@@ -58,6 +61,11 @@ func (i *CompositeIterator) GetNext() (line []byte, input interface{}, err error
 	}
 	return []byte(i.format), input, nil
 
+}
+
+// IsBound return true if the iterator is bound
+func (i *CompositeIterator) IsBound() bool {
+	return i.iterator.IsBound()
 }
 
 func (i *CompositeIterator) GetValueByInput(input []byte) (line []byte, err error) {

@@ -12,14 +12,14 @@ func Test_repeatIterator(t *testing.T) {
 
 	var v []byte
 	var err error
-	v, err = iter.GetNext()
-	v, err = iter.GetNext()
+	v, _, err = iter.GetNext()
+	v, _, err = iter.GetNext()
 
 	if !bytes.EqualFold(v, []byte("test")) {
 		t.Errorf("Iterator value. wanted=test, got=%s", v)
 	}
 
-	v, err = iter.GetNext()
+	v, _, err = iter.GetNext()
 	if err != io.EOF {
 		t.Errorf("EOF. wanted=io.EOF, got=%s", err)
 	}

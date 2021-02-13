@@ -24,6 +24,11 @@ func NewRangeIterator(start, end, step int64) *RangeIterator {
 	}
 }
 
+// IsBound return true if the iterator is bound
+func (i *RangeIterator) IsBound() bool {
+	return true
+}
+
 // GetNext returns the next value from the range
 func (i *RangeIterator) GetNext() (line []byte, input interface{}, err error) {
 	nextValue := atomic.AddInt64(&i.current, i.step)

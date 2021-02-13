@@ -25,6 +25,11 @@ func (i *FuncIterator) GetNext() (line []byte, input interface{}, err error) {
 	return line, nextValue, err
 }
 
+// IsBound return true if the iterator is bound
+func (i *FuncIterator) IsBound() bool {
+	return i.endIndex > 0
+}
+
 // MarshalJSON return the value in a json compatible value
 func (i *FuncIterator) MarshalJSON() (line []byte, err error) {
 	return MarshalJSON(i)

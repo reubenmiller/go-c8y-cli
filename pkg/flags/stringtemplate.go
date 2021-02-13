@@ -89,3 +89,19 @@ func replaceVariable(tmpl string, name string, value string) string {
 	}
 	return output
 }
+
+// IsBound return true if the iterator is bound
+func (b *StringTemplate) IsBound() bool {
+
+	isbound := true
+	for _, value := range b.templateVariables {
+		switch v := value.(type) {
+		case iterator.Iterator:
+			if !v.IsBound() {
+				isbound = false
+				break
+			}
+		}
+	}
+	return isbound
+}

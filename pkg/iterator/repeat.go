@@ -28,6 +28,11 @@ func (i *RepeatIterator) MarshalJSON() (line []byte, err error) {
 	return MarshalJSON(i)
 }
 
+// IsBound return true if the iterator is bound
+func (i *RepeatIterator) IsBound() bool {
+	return i.endIndex != 0
+}
+
 // NewRepeatIterator creates a repeater which returns the same value n times
 // before returns io.EOF. If n is set to 0, then it will repeat forever
 func NewRepeatIterator(value string, n int64) *RepeatIterator {

@@ -14,3 +14,8 @@ func (i *EmptyIterator) GetNext() (line []byte, input interface{}, err error) {
 func (i *EmptyIterator) MarshalJSON() (line []byte, err error) {
 	return MarshalJSON(i)
 }
+
+// IsBound return true if the iterator is bound
+func (i *EmptyIterator) IsBound() bool {
+	return true
+}

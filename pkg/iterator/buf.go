@@ -27,6 +27,11 @@ func (i *BufioIterator) MarshalJSON() (line []byte, err error) {
 	return MarshalJSON(i)
 }
 
+// IsBound return true if the iterator is bound
+func (i *BufioIterator) IsBound() bool {
+	return true
+}
+
 // NewBufioIterator returns a new iterator from a Bufio reader
 func NewBufioIterator(reader *bufio.Reader) *BufioIterator {
 	return &BufioIterator{
@@ -57,6 +62,11 @@ func (i *FileContentsIterator) GetNext() (line []byte, input interface{}, err er
 // MarshalJSON return the value in a json compatible value
 func (i *FileContentsIterator) MarshalJSON() (line []byte, err error) {
 	return MarshalJSON(i)
+}
+
+// IsBound return true if the iterator is bound
+func (i *FileContentsIterator) IsBound() bool {
+	return true
 }
 
 // NewFileContentsIterator returns a file contents iterator

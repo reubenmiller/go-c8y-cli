@@ -28,6 +28,11 @@ func (i *SliceIterator) MarshalJSON() (line []byte, err error) {
 	return MarshalJSON(i)
 }
 
+// IsBound return true if the iterator is bound
+func (i *SliceIterator) IsBound() bool {
+	return true
+}
+
 // NewSliceIterator creates a repeater which returns the slice items
 // before returns io.EOF
 func NewSliceIterator(values []string) *SliceIterator {

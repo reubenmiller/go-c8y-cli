@@ -206,6 +206,11 @@ func (i *EntityIterator) MarshalJSON() (line []byte, err error) {
 	return iterator.MarshalJSON(i)
 }
 
+// IsBound return true if the iterator is bound
+func (i *EntityIterator) IsBound() bool {
+	return true
+}
+
 func (i *EntityIterator) GetNext() (value []byte, input interface{}, err error) {
 	if i.valueIterator == nil {
 		return nil, nil, io.EOF
