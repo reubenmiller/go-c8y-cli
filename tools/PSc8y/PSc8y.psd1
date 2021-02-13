@@ -262,6 +262,7 @@ FunctionsToExport = @(
 	'Clear-Session',
 	'ConvertFrom-Base64String',
 	'ConvertTo-Base64String',
+	'ConvertTo-ClientPipeline',
 	'ConvertTo-JsonArgument',
 	'ConvertTo-NestedJson',
 	'Expand-Application',
