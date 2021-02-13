@@ -54,8 +54,9 @@ func NewGetDeviceCollectionCmd() *GetDeviceCollectionCmd {
 }
 
 func (n *GetDeviceCollectionCmd) RunE(cmd *cobra.Command, args []string) error {
-	// query parameters
 	inputIterators := &flags.RequestInputIterators{}
+
+	// query parameters
 	query := flags.NewQueryTemplate()
 
 	commonOptions, err := getCommonOptions(cmd)
@@ -68,7 +69,6 @@ func (n *GetDeviceCollectionCmd) RunE(cmd *cobra.Command, args []string) error {
 
 	c8yQueryParts, err := flags.WithC8YQueryOptions(
 		cmd,
-		flags.WithC8YQueryFixedString("(has(c8y_IsDevice) or has(c8y_ModbusDevice))"),
 		flags.WithC8YQueryFormat("name", "(name eq '%s')"),
 		flags.WithC8YQueryFormat("type", "(type eq '%s')"),
 		flags.WithC8YQueryFormat("fragmentType", "has(%s)"),
@@ -93,7 +93,7 @@ func (n *GetDeviceCollectionCmd) RunE(cmd *cobra.Command, args []string) error {
 	}
 
 	// q will automatically add a fragmentType=c8y_IsDevice to the query
-	query.SetVariable("query", fmt.Sprintf("$filter=%s+$orderby=%s", filter, orderBy))
+	query.SetVariable("q", fmt.Sprintf("$filter=%s+$orderby=%s", filter, orderBy))
 
 	err = flags.WithQueryParameters(
 		cmd,
@@ -128,10 +128,10 @@ func (n *GetDeviceCollectionCmd) RunE(cmd *cobra.Command, args []string) error {
 		Method:       "GET",
 		Path:         path.GetTemplate(),
 		Query:        queryValue,
-		Body:         body.GetMap(),
+		Body:         body,
 		FormData:     formData,
 		Header:       headers,
-		IgnoreAccept: false,
+		IgnoreAccept: globalFlagIgnoreAccept,
 		DryRun:       globalFlagDryRun,
 	}
 
