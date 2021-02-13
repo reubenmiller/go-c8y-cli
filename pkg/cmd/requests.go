@@ -424,10 +424,15 @@ func optimizeManagedObjectsURL(u *url.URL, lastID string) *url.URL {
 		matches := queryPattern.FindStringSubmatch(moQuery)
 
 		if len(matches) >= 3 {
+			matches[1] = strings.TrimSpace(matches[1])
 			if strings.HasPrefix(matches[1], "(") && strings.HasSuffix(matches[1], ")") {
 				moQuery = fmt.Sprintf("$filter=(_id gt '%s' and %s) $orderby=_id asc", lastID, matches[1])
 			} else {
-				moQuery = fmt.Sprintf("$filter=(_id gt '%s' and (%s)) $orderby=_id asc", lastID, matches[1])
+				qpart := fmt.Sprintf("_id gt '%s'", lastID)
+				if len(matches[1]) > 0 {
+					qpart += " and (" + matches[1] + ")"
+				}
+				moQuery = fmt.Sprintf("$filter=(%s) $orderby=_id asc", qpart)
 			}
 		}
 		q.Set(queryName, moQuery)
