@@ -2,23 +2,20 @@ package cmd
 
 import (
 	"fmt"
-	"io"
-	"net/http"
 	"net/url"
 	"strings"
 
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
-	"github.com/reubenmiller/go-c8y-cli/pkg/mapbuilder"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
 )
 
-type getAgentCollectionCmd struct {
+type GetAgentCollectionCmd struct {
 	*baseCmd
 }
 
-func NewGetAgentCollectionCmd() *getAgentCollectionCmd {
-	ccmd := &getAgentCollectionCmd{}
+func NewGetAgentCollectionCmd() *GetAgentCollectionCmd {
+	ccmd := &GetAgentCollectionCmd{}
 
 	cmd := &cobra.Command{
 		Use:   "list",
@@ -29,7 +26,7 @@ func NewGetAgentCollectionCmd() *getAgentCollectionCmd {
 
 		Get a collection of agents of type "myType", and their names start with "sensor"
 		`,
-		RunE: ccmd.getAgentCollection,
+		RunE: ccmd.RunE,
 	}
 
 	cmd.SilenceUsage = true
@@ -47,7 +44,12 @@ func NewGetAgentCollectionCmd() *getAgentCollectionCmd {
 	return ccmd
 }
 
-func (n *getAgentCollectionCmd) getAgentCollection(cmd *cobra.Command, args []string) error {
+func (n *GetAgentCollectionCmd) RunE(cmd *cobra.Command, args []string) error {
+	var err error
+	inputIterators, err := flags.NewRequestInputIterators(cmd)
+	if err != nil {
+		return err
+	}
 
 	// query parameters
 	query := flags.NewQueryTemplate()
@@ -60,38 +62,18 @@ func (n *getAgentCollectionCmd) getAgentCollection(cmd *cobra.Command, args []st
 	commonOptions.ResultProperty = "managedObjects"
 	commonOptions.AddQueryParameters(query)
 
-	var c8yQueryParts = make([]string, 0)
+	c8yQueryParts, err := flags.WithC8YQueryOptions(
+		cmd,
+		flags.WithC8YQueryFixedString("(has(com_cumulocity_model_Agent))"),
+		flags.WithC8YQueryFormat("name", "(name eq '%s')"),
+		flags.WithC8YQueryFormat("type", "(type eq '%s')"),
+		flags.WithC8YQueryFormat("fragmentType", "has(%s)"),
+		flags.WithC8YQueryFormat("owner", "(owner eq '%s')"),
+		flags.WithC8YQueryFormat("query", "%s"),
+	)
 
-	c8yQueryParts = append(c8yQueryParts, "(has(com_cumulocity_model_Agent))")
-
-	if v, err := cmd.Flags().GetString("name"); err == nil {
-		if v != "" {
-			c8yQueryParts = append(c8yQueryParts, fmt.Sprintf("(name eq '%s')", v))
-		}
-	}
-
-	if v, err := cmd.Flags().GetString("type"); err == nil {
-		if v != "" {
-			c8yQueryParts = append(c8yQueryParts, fmt.Sprintf("(type eq '%s')", v))
-		}
-	}
-
-	if v, err := cmd.Flags().GetString("fragmentType"); err == nil {
-		if v != "" {
-			c8yQueryParts = append(c8yQueryParts, fmt.Sprintf("has(%s)", v))
-		}
-	}
-
-	if v, err := cmd.Flags().GetString("owner"); err == nil {
-		if v != "" {
-			c8yQueryParts = append(c8yQueryParts, fmt.Sprintf("(owner eq '%s')", v))
-		}
-	}
-
-	if v, err := cmd.Flags().GetString("query"); err == nil {
-		if v != "" {
-			c8yQueryParts = append(c8yQueryParts, v)
-		}
+	if err != nil {
+		return err
 	}
 
 	// Compile query
@@ -100,10 +82,15 @@ func (n *getAgentCollectionCmd) getAgentCollection(cmd *cobra.Command, args []st
 	orderBy := url.QueryEscape("name")
 	query.SetVariable("query", fmt.Sprintf("$filter=%s+$orderby=%s", filter, orderBy))
 
-	if v, err := cmd.Flags().GetBool("withParents"); err == nil {
-		if v {
-			query.SetVariable("withParents", "true")
-		}
+	err = flags.WithQueryParameters(
+		cmd,
+		query,
+		inputIterators,
+		flags.WithBoolValue("withParents", "withParents"),
+	)
+
+	if err != nil {
+		return nil
 	}
 
 	queryValue, err := query.GetQueryUnescape(true)
@@ -112,30 +99,24 @@ func (n *getAgentCollectionCmd) getAgentCollection(cmd *cobra.Command, args []st
 		return newSystemError("Invalid query parameter")
 	}
 
-	// headers
-	headers := http.Header{}
-
-	// form data
-	formData := make(map[string]io.Reader)
-
-	// body
-	body := mapbuilder.NewMapBuilder()
-
 	// path parameters
-	pathParameters := make(map[string]string)
-
-	path := replacePathParameters("inventory/managedObjects", pathParameters)
+	path := flags.NewStringTemplate("inventory/managedObjects")
+	err = flags.WithPathParameters(
+		cmd,
+		path,
+		inputIterators,
+	)
+	if err != nil {
+		return err
+	}
 
 	req := c8y.RequestOptions{
 		Method:       "GET",
-		Path:         path,
+		Path:         path.GetTemplate(),
 		Query:        queryValue,
-		Body:         body.GetMap(),
-		FormData:     formData,
-		Header:       headers,
-		IgnoreAccept: false,
+		IgnoreAccept: globalFlagIgnoreAccept,
 		DryRun:       globalFlagDryRun,
 	}
 
-	return processRequestAndResponse([]c8y.RequestOptions{req}, commonOptions)
+	return processRequestAndResponseWithWorkers(cmd, &req, inputIterators)
 }

@@ -49,6 +49,7 @@ func NewGetDeviceGroupCollectionCmd() *getDeviceGroupCollectionCmd {
 }
 
 func (n *getDeviceGroupCollectionCmd) getDeviceGroupCollection(cmd *cobra.Command, args []string) error {
+	inputIterators := &flags.RequestInputIterators{}
 
 	// query parameters
 	query := flags.NewQueryTemplate()
@@ -61,56 +62,43 @@ func (n *getDeviceGroupCollectionCmd) getDeviceGroupCollection(cmd *cobra.Comman
 	commonOptions.ResultProperty = "managedObjects"
 	commonOptions.AddQueryParameters(query)
 
-	var c8yQueryParts = make([]string, 0)
+	c8yQueryParts, err := flags.WithC8YQueryOptions(
+		cmd,
+		flags.WithC8YQueryFixedString("(has(c8y_IsDeviceGroup))"),
+		flags.WithC8YQueryFormat("name", "(name eq '%s')"),
+		flags.WithC8YQueryFormat("type", "(type eq '%s')"),
+		flags.WithC8YQueryFormat("fragmentType", "has(%s)"),
+		flags.WithC8YQueryFormat("owner", "(owner eq '%s')"),
+		flags.WithC8YQueryBool("excludeRootGroup", "not(type eq 'c8y_DeviceGroup')"),
+		flags.WithC8YQueryFormat("query", "%s"),
+	)
 
-	c8yQueryParts = append(c8yQueryParts, "(has(c8y_IsDeviceGroup))")
-
-	if v, err := cmd.Flags().GetString("name"); err == nil {
-		if v != "" {
-			c8yQueryParts = append(c8yQueryParts, fmt.Sprintf("(name eq '%s')", v))
-		}
-	}
-
-	if v, err := cmd.Flags().GetString("type"); err == nil {
-		if v != "" {
-			c8yQueryParts = append(c8yQueryParts, fmt.Sprintf("(type eq '%s')", v))
-		}
-	}
-
-	if v, err := cmd.Flags().GetString("fragmentType"); err == nil {
-		if v != "" {
-			c8yQueryParts = append(c8yQueryParts, fmt.Sprintf("has(%s)", v))
-		}
-	}
-
-	if v, err := cmd.Flags().GetString("owner"); err == nil {
-		if v != "" {
-			c8yQueryParts = append(c8yQueryParts, fmt.Sprintf("(owner eq '%s')", v))
-		}
-	}
-
-	if v, err := cmd.Flags().GetString("query"); err == nil {
-		if v != "" {
-			c8yQueryParts = append(c8yQueryParts, v)
-		}
-	}
-
-	if v, err := cmd.Flags().GetBool("excludeRootGroup"); err == nil {
-		if v {
-			c8yQueryParts = append(c8yQueryParts, "not(type eq 'c8y_DeviceGroup')")
-		}
+	if err != nil {
+		return err
 	}
 
 	// Compile query
 	// replace all spaces with "+" due to url encoding
 	filter := url.QueryEscape(strings.Join(c8yQueryParts, " and "))
-	orderBy := url.QueryEscape("name")
+	orderBy := "name"
+
+	if v, err := cmd.Flags().GetString("orderBy"); err == nil {
+		if v != "" {
+			orderBy = url.QueryEscape(v)
+		}
+	}
+
 	query.SetVariable("query", fmt.Sprintf("$filter=%s+$orderby=%s", filter, orderBy))
 
-	if v, err := cmd.Flags().GetBool("withParents"); err == nil {
-		if v {
-			query.SetVariable("withParents", "true")
-		}
+	err = flags.WithQueryParameters(
+		cmd,
+		query,
+		inputIterators,
+		flags.WithBoolValue("withParents", "withParents"),
+	)
+
+	if err != nil {
+		return nil
 	}
 
 	queryValue, err := query.GetQueryUnescape(true)
@@ -126,23 +114,21 @@ func (n *getDeviceGroupCollectionCmd) getDeviceGroupCollection(cmd *cobra.Comman
 	formData := make(map[string]io.Reader)
 
 	// body
-	body := mapbuilder.NewMapBuilder()
+	body := mapbuilder.NewInitializedMapBuilder()
 
 	// path parameters
-	pathParameters := make(map[string]string)
-
-	path := replacePathParameters("inventory/managedObjects", pathParameters)
+	path := flags.NewStringTemplate("inventory/managedObjects")
 
 	req := c8y.RequestOptions{
 		Method:       "GET",
-		Path:         path,
+		Path:         path.GetTemplate(),
 		Query:        queryValue,
-		Body:         body.GetMap(),
+		Body:         body,
 		FormData:     formData,
 		Header:       headers,
-		IgnoreAccept: false,
+		IgnoreAccept: globalFlagIgnoreAccept,
 		DryRun:       globalFlagDryRun,
 	}
 
-	return processRequestAndResponse([]c8y.RequestOptions{req}, commonOptions)
+	return processRequestAndResponseWithWorkers(cmd, &req, inputIterators)
 }

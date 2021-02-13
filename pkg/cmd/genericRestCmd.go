@@ -11,14 +11,14 @@ import (
 	"github.com/spf13/cobra"
 )
 
-type getGenericRestCmd struct {
+type GetGenericRestCmd struct {
 	*baseCmd
 
 	flagHost string
 }
 
-func NewGetGenericRestCmd() *getGenericRestCmd {
-	ccmd := &getGenericRestCmd{}
+func NewGetGenericRestCmd() *GetGenericRestCmd {
+	ccmd := &GetGenericRestCmd{}
 
 	cmd := &cobra.Command{
 		Use:   "rest",
@@ -33,7 +33,7 @@ c8y rest GET "/alarm/alarms?pageSize=10&status=ACTIVE"
 // Create a new alarm
 c8y rest POST "alarm/alarms" --data "text=one,severity=MAJOR,type=test_Type,time=2019-01-01,source={'id': '12345'}"
 		`,
-		RunE: ccmd.getGenericRest,
+		RunE: ccmd.RunE,
 	}
 
 	addDataFlag(cmd)
@@ -42,27 +42,19 @@ c8y rest POST "alarm/alarms" --data "text=one,severity=MAJOR,type=test_Type,time
 	cmd.Flags().String("accept", "", "accept (header)")
 	cmd.Flags().String("contentType", "", "content type (header)")
 	cmd.Flags().StringVar(&ccmd.flagHost, "host", "", "host to use for the rest request. If empty, then the session's host will be used")
-	cmd.Flags().Bool("ignoreAcceptHeader", false, "Without the accept header")
 
 	ccmd.baseCmd = newBaseCmd(cmd)
 
 	return ccmd
 }
 
-func (n *getGenericRestCmd) getGenericRest(cmd *cobra.Command, args []string) error {
+func (n *GetGenericRestCmd) RunE(cmd *cobra.Command, args []string) error {
 	method := "get"
 
 	header := http.Header{}
 
-	ignoreAcceptHeader := false
-	if cmd.Flags().Changed("ignoreAcceptHeader") {
-		if v, err := cmd.Flags().GetBool("ignoreAcceptHeader"); err == nil {
-			ignoreAcceptHeader = v
-		}
-	}
-
 	if v, err := cmd.Flags().GetString("accept"); err == nil && v != "" {
-		if !ignoreAcceptHeader {
+		if !globalFlagIgnoreAccept {
 			header.Set("Accept", v)
 		}
 	}
@@ -127,7 +119,7 @@ func (n *getGenericRestCmd) getGenericRest(cmd *cobra.Command, args []string) er
 		Query:        baseURL.RawQuery,
 		Header:       header,
 		DryRun:       globalFlagDryRun,
-		IgnoreAccept: ignoreAcceptHeader,
+		IgnoreAccept: globalFlagIgnoreAccept,
 		ResponseData: nil,
 	}
 
@@ -140,9 +132,6 @@ func (n *getGenericRestCmd) getGenericRest(cmd *cobra.Command, args []string) er
 		body := mapbuilder.NewMapBuilder()
 		body.SetMap(getDataFlag(cmd))
 
-		//if !cmd.Flags().Changed(FlagDataName) && !cmd.Flags().Changed("file") {
-		//	return newUserError("Missing required arguments. Either --data or --file are required")
-		//}
 		if err := setDataTemplateFromFlags(cmd, body); err != nil {
 			return newUserError("Template error. ", err)
 		}

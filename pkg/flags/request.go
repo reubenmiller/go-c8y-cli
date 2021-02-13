@@ -122,7 +122,7 @@ func replacePathParameters(uri string, parameters map[string]string) string {
 /*
 	req := c8y.RequestOptions{
 		Method:       "POST",
-		IgnoreAccept: false,
+		IgnoreAccept: globalFlagIgnoreAccept,
 		DryRun:       globalFlagDryRun,
 	}
 
@@ -158,7 +158,7 @@ func replacePathParameters(uri string, parameters map[string]string) string {
 		$RESTHost
 		Path:         "$RESTPath",
 		Method:       "$RESTMethod",
-		IgnoreAccept: false,
+		IgnoreAccept: globalFlagIgnoreAccept,
 		DryRun:       globalFlagDryRun,
 	}
 
