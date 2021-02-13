@@ -13,14 +13,6 @@ import (
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 )
 
-// NewRelativeTimeIterator returns a relative time iterator which can generate timestamps based on time.Now when the value is retrieved
-func NewRelativeTimeIterator(relative string) *iterator.FuncIterator {
-	next := func(i int64) (string, error) {
-		return tryGetTimestamp(relative)
-	}
-	return iterator.NewFuncIterator(next, 0)
-}
-
 // NewRequestIterator returns an iterator that can be used to send multiple requests until the give iterators in the path/body are exhausted
 func NewRequestIterator(r c8y.RequestOptions, path iterator.Iterator, query iterator.Iterator, body interface{}) *RequestIterator {
 	reqIter := &RequestIterator{
