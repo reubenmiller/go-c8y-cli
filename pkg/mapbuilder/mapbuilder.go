@@ -6,6 +6,7 @@ import (
 	"log"
 	"math/rand"
 	"os"
+	"strconv"
 	"strings"
 	"time"
 
@@ -248,7 +249,12 @@ func (b *MapBuilder) GetTemplateVariablesJsonnet() (string, error) {
 		rand.Float32(),
 		generatePassword(),
 	)
-	inputHelper := fmt.Sprintf(`local input = {index: "%s"};`,
+	indexInt := 1
+	if v, err := strconv.Atoi(index); err == nil {
+		indexInt = v
+	}
+	inputHelper := fmt.Sprintf(`local input = {index: %d, value: "%s"};`,
+		indexInt,
 		index,
 	)
 	timeHelper := fmt.Sprintf(`local time = {now: "%s", nowNano: "%s"};`,
