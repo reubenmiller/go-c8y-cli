@@ -348,3 +348,30 @@ func Test_GetAllDevices(t *testing.T) {
 	cmdErr := ExecuteCmd(cmd, fmt.Sprintf("devices list --includeAll"))
 	assert.OK(t, cmdErr)
 }
+
+func Test_CreateManagedObjectViaPipeline(t *testing.T) {
+	cmd := setupTest()
+
+	stdin := bytes.NewBufferString("1\n2")
+	cmd.SetIn(stdin)
+
+	cmdErr := ExecuteCmd(cmd, fmt.Sprintf("inventory create --dry"))
+	assert.OK(t, cmdErr)
+}
+
+func Test_CreateDeviceViaPipeline(t *testing.T) {
+	cmd := setupTest()
+
+	stdin := bytes.NewBufferString("1\n")
+	cmd.SetIn(stdin)
+
+	cmdErr := ExecuteCmd(cmd, fmt.Sprintf("devices create --template {type:input.index} --dry"))
+	assert.OK(t, cmdErr)
+}
+
+func Test_CreateManagedObjectWithoutInput(t *testing.T) {
+	cmd := setupTest()
+
+	cmdErr := ExecuteCmd(cmd, fmt.Sprintf("inventory create --data name=one --dry"))
+	assert.OK(t, cmdErr)
+}
