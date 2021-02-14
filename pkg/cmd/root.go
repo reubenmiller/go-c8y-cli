@@ -240,13 +240,13 @@ const (
 	SettingsModeCI string = "settings.ci"
 
 	// SettingsActivityLogPath path where the activity log will be stored
-	SettingsActivityLogPath string = "settings.activitylog.path"
+	SettingsActivityLogPath string = "settings.activityLog.path"
 
 	// SettingsActivityLogEnabled enables/disables the activity log
-	SettingsActivityLogEnabled string = "settings.activitylog.enabled"
+	SettingsActivityLogEnabled string = "settings.activityLog.enabled"
 
 	// SettingsActivityLogMethodFilter filters the activity log entries by a space delimited methods, i.e. GET POST PUT
-	SettingsActivityLogMethodFilter string = "settings.activitylog.methodFilter"
+	SettingsActivityLogMethodFilter string = "settings.activityLog.methodFilter"
 )
 
 // SettingsGlobalName name of the settings file (without extension)
@@ -298,9 +298,11 @@ func (c *c8yCmd) checkSessionExists(cmd *cobra.Command, args []string) error {
 		c.useEnv = true
 	}
 
-	activityLogger.LogCommand(cmd, args, cmdStr)
-
 	c.createCumulocityClient()
+
+	// only setup activity log after the global config
+	configureActivityLog()
+	activityLogger.LogCommand(cmd, args, cmdStr)
 
 	localCmds := []string{
 		"completion",
@@ -603,7 +605,6 @@ func initConfig() {
 	cliConfig = config.NewCliConfiguration(viper.GetViper(), SecureDataAccessor, getSessionHomeDir(), os.Getenv("C8Y_PASSPHRASE"))
 	cliConfig.SetLogger(Logger)
 	loadConfiguration()
-	configureActivityLog()
 
 	// only parse env variables if no explict config file is given
 	if globalFlagUseEnv {
