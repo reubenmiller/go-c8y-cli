@@ -31,14 +31,14 @@ Create a managed object
 
 	cmd.SilenceUsage = true
 
-	cmd.Flags().String("name", "", "name")
+	cmd.Flags().String("name", "", "name (accepts pipeline)")
 	cmd.Flags().String("type", "", "type")
 	addDataFlag(cmd)
 	addProcessingModeFlag(cmd)
 
 	flags.WithOptions(
 		cmd,
-		flags.WithExtendedPipelineSupport("", "", false),
+		flags.WithExtendedPipelineSupport("name", "name", false),
 	)
 
 	// Required flags

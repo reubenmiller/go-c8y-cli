@@ -35,14 +35,14 @@ Create device with custom properties
 
 	cmd.SilenceUsage = true
 
-	cmd.Flags().String("name", "", "Device name")
+	cmd.Flags().String("name", "", "Device name (accepts pipeline)")
 	cmd.Flags().String("type", "", "Device type")
 	addDataFlag(cmd)
 	addProcessingModeFlag(cmd)
 
 	flags.WithOptions(
 		cmd,
-		flags.WithExtendedPipelineSupport("", "", false),
+		flags.WithExtendedPipelineSupport("name", "name", false),
 	)
 
 	// Required flags
@@ -109,8 +109,7 @@ func (n *CreateDeviceCmd) RunE(cmd *cobra.Command, args []string) error {
 		flags.WithStringValue("name", "name"),
 		flags.WithStringValue("type", "type"),
 		flags.WithRequiredTemplateString(`
-{  c8y_IsDevice: {},
-}
+{c8y_IsDevice: {}}
 `),
 		WithTemplateValue(),
 		WithTemplateVariablesValue(),

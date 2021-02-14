@@ -35,18 +35,17 @@ Create device group with custom properties
 
 	cmd.SilenceUsage = true
 
-	cmd.Flags().String("name", "", "Device group name (required)")
+	cmd.Flags().String("name", "", "Device group name (accepts pipeline)")
 	cmd.Flags().String("type", "", "Device group type (c8y_DeviceGroup (root folder) or c8y_DeviceSubGroup (sub folder)). Defaults to c8y_DeviceGroup")
 	addDataFlag(cmd)
 	addProcessingModeFlag(cmd)
 
 	flags.WithOptions(
 		cmd,
-		flags.WithExtendedPipelineSupport("", "", false),
+		flags.WithExtendedPipelineSupport("name", "name", false),
 	)
 
 	// Required flags
-	cmd.MarkFlagRequired("name")
 
 	ccmd.baseCmd = newBaseCmd(cmd)
 
@@ -116,6 +115,7 @@ func (n *CreateDeviceGroupCmd) RunE(cmd *cobra.Command, args []string) error {
 `),
 		WithTemplateValue(),
 		WithTemplateVariablesValue(),
+		flags.WithRequiredProperties("name"),
 	)
 	if err != nil {
 		return newUserError(err)

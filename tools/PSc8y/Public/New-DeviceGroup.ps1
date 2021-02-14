@@ -27,8 +27,9 @@ Create device group with custom properties
     [Alias()]
     [OutputType([object])]
     Param(
-        # Device group name (required)
-        [Parameter(Mandatory = $true)]
+        # Device group name
+        [Parameter(ValueFromPipeline=$true,
+                   ValueFromPipelineByPropertyName=$true)]
         [string]
         $Name,
 
@@ -94,9 +95,6 @@ Create device group with custom properties
 
     Begin {
         $Parameters = @{}
-        if ($PSBoundParameters.ContainsKey("Name")) {
-            $Parameters["name"] = $Name
-        }
         if ($PSBoundParameters.ContainsKey("Type")) {
             $Parameters["type"] = $Type
         }
@@ -132,26 +130,28 @@ Create device group with custom properties
     }
 
     Process {
-        foreach ($item in @("")) {
+        $Parameters["name"] = PSc8y\Expand-Id $Name
 
-            if (!$Force -and
-                !$WhatIfPreference -and
-                !$PSCmdlet.ShouldProcess(
-                    (PSc8y\Get-C8ySessionProperty -Name "tenant"),
-                    (Format-ConfirmationMessage -Name $PSCmdlet.MyInvocation.InvocationName -InputObject $item)
-                )) {
-                continue
-            }
-
-            Invoke-ClientCommand `
-                -Noun "devices" `
-                -Verb "createGroup" `
-                -Parameters $Parameters `
-                -Type "application/vnd.com.nsn.cumulocity.customDeviceGroup+json" `
-                -ItemType "" `
-                -ResultProperty "" `
-                -Raw:$Raw
+        if (!$Force -and
+            !$WhatIfPreference -and
+            !$PSCmdlet.ShouldProcess(
+                (PSc8y\Get-C8ySessionProperty -Name "tenant"),
+                (Format-ConfirmationMessage -Name $PSCmdlet.MyInvocation.InvocationName -InputObject $item)
+            )) {
+            continue
         }
+
+        Invoke-ClientCommand `
+            -Noun "devices" `
+            -Verb "createGroup" `
+            -Parameters $Parameters `
+            -Type "application/vnd.com.nsn.cumulocity.customDeviceGroup+json" `
+            -ItemType "" `
+            -ResultProperty "" `
+            -Raw:$Raw `
+            -CurrentPage:$CurrentPage `
+            -TotalPages:$TotalPages `
+            -IncludeAll:$IncludeAll
     }
 
     End {}

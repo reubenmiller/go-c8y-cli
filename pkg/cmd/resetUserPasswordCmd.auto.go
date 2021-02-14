@@ -104,7 +104,7 @@ func (n *ResetUserPasswordCmd) RunE(cmd *cobra.Command, args []string) error {
 		WithDataValue(),
 		flags.WithStringValue("newPassword", "password"),
 		flags.WithRequiredTemplateString(`
-addIfEmptyString(base, "password", {sendPasswordResetEmail: true})
+{sendPasswordResetEmail: !std.objectHas(self, 'password')}
 `),
 		WithTemplateValue(),
 		WithTemplateVariablesValue(),

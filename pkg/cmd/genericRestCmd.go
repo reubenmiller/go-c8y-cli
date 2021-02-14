@@ -6,6 +6,7 @@ import (
 	"net/url"
 	"strings"
 
+	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/pkg/mapbuilder"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
@@ -49,18 +50,26 @@ c8y rest POST "alarm/alarms" --data "text=one,severity=MAJOR,type=test_Type,time
 }
 
 func (n *GetGenericRestCmd) RunE(cmd *cobra.Command, args []string) error {
-	method := "get"
-
-	header := http.Header{}
-
-	if v, err := cmd.Flags().GetString("accept"); err == nil && v != "" {
-		if !globalFlagIgnoreAccept {
-			header.Set("Accept", v)
-		}
+	var err error
+	inputIterators, err := flags.NewRequestInputIterators(cmd)
+	if err != nil {
+		return err
 	}
 
-	if v, err := cmd.Flags().GetString("contentType"); err == nil && v != "" {
-		header.Set("Content-Type", v)
+	method := "get"
+
+	// headers
+	headers := http.Header{}
+	err = flags.WithHeaders(
+		cmd,
+		headers,
+		inputIterators,
+		flags.WithProcessingModeValue(),
+		flags.WithStringValue("accept", "Accept"),
+		flags.WithStringValue("contentType", "Content-Type"),
+	)
+	if err != nil {
+		return newUserError(err)
 	}
 
 	if values, err := cmd.Flags().GetStringSlice("header"); err == nil && len(values) > 0 {
@@ -71,7 +80,7 @@ func (n *GetGenericRestCmd) RunE(cmd *cobra.Command, args []string) error {
 				continue
 			}
 			Logger.Debugf("Setting header: name=%s, value=%s", parts[0], parts[1])
-			header.Add(parts[0], strings.TrimSpace(parts[1]))
+			headers.Add(parts[0], strings.TrimSpace(parts[1]))
 		}
 	}
 
@@ -117,28 +126,29 @@ func (n *GetGenericRestCmd) RunE(cmd *cobra.Command, args []string) error {
 		Host:         host,
 		Path:         baseURL.Path,
 		Query:        baseURL.RawQuery,
-		Header:       header,
+		Header:       headers,
 		DryRun:       globalFlagDryRun,
 		IgnoreAccept: globalFlagIgnoreAccept,
 		ResponseData: nil,
 	}
 
-	commonOptions, err := getCommonOptions(cmd)
-	if err != nil {
-		return err
-	}
-
 	if method == "PUT" || method == "POST" {
-		body := mapbuilder.NewMapBuilder()
-		body.SetMap(getDataFlag(cmd))
+		body := mapbuilder.NewInitializedMapBuilder()
+		err = flags.WithBody(
+			cmd,
+			body,
+			inputIterators,
+			WithDataValue(),
+			WithTemplateValue(),
+			WithTemplateVariablesValue(),
+		)
 
-		if err := setDataTemplateFromFlags(cmd, body); err != nil {
-			return newUserError("Template error. ", err)
+		if err != nil {
+			return newUserError(err)
 		}
 
-		if bodyContents := body.GetMap(); bodyContents != nil {
-			Logger.Infof("Body is nil")
-			req.Body = bodyContents
+		if cmd.Flags().Changed("template") || cmd.Flags().Changed("data") {
+			req.Body = body
 		}
 
 		// get file info
@@ -151,5 +161,5 @@ func (n *GetGenericRestCmd) RunE(cmd *cobra.Command, args []string) error {
 	// Hide usage for system errors
 	cmd.SilenceUsage = true
 
-	return processRequestAndResponse([]c8y.RequestOptions{req}, commonOptions)
+	return processRequestAndResponseWithWorkers(cmd, &req, inputIterators)
 }

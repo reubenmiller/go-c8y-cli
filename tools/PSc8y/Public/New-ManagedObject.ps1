@@ -22,7 +22,8 @@ Create a managed object
     [OutputType([object])]
     Param(
         # name
-        [Parameter()]
+        [Parameter(ValueFromPipeline=$true,
+                   ValueFromPipelineByPropertyName=$true)]
         [string]
         $Name,
 
@@ -87,9 +88,6 @@ Create a managed object
 
     Begin {
         $Parameters = @{}
-        if ($PSBoundParameters.ContainsKey("Name")) {
-            $Parameters["name"] = $Name
-        }
         if ($PSBoundParameters.ContainsKey("Type")) {
             $Parameters["type"] = $Type
         }
@@ -125,26 +123,28 @@ Create a managed object
     }
 
     Process {
-        foreach ($item in @("")) {
+        $Parameters["name"] = PSc8y\Expand-Id $Name
 
-            if (!$Force -and
-                !$WhatIfPreference -and
-                !$PSCmdlet.ShouldProcess(
-                    (PSc8y\Get-C8ySessionProperty -Name "tenant"),
-                    (Format-ConfirmationMessage -Name $PSCmdlet.MyInvocation.InvocationName -InputObject $item)
-                )) {
-                continue
-            }
-
-            Invoke-ClientCommand `
-                -Noun "inventory" `
-                -Verb "create" `
-                -Parameters $Parameters `
-                -Type "application/vnd.com.nsn.cumulocity.inventory+json" `
-                -ItemType "" `
-                -ResultProperty "" `
-                -Raw:$Raw
+        if (!$Force -and
+            !$WhatIfPreference -and
+            !$PSCmdlet.ShouldProcess(
+                (PSc8y\Get-C8ySessionProperty -Name "tenant"),
+                (Format-ConfirmationMessage -Name $PSCmdlet.MyInvocation.InvocationName -InputObject $item)
+            )) {
+            continue
         }
+
+        Invoke-ClientCommand `
+            -Noun "inventory" `
+            -Verb "create" `
+            -Parameters $Parameters `
+            -Type "application/vnd.com.nsn.cumulocity.inventory+json" `
+            -ItemType "" `
+            -ResultProperty "" `
+            -Raw:$Raw `
+            -CurrentPage:$CurrentPage `
+            -TotalPages:$TotalPages `
+            -IncludeAll:$IncludeAll
     }
 
     End {}

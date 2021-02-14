@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 
+	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/pkg/jsonUtilities"
 	"github.com/reubenmiller/go-c8y-cli/pkg/mapbuilder"
 	"github.com/spf13/cobra"
@@ -48,15 +49,25 @@ Verify a jsonnet template and specify input data to be used as the input when ev
 }
 
 func (n *executeTemplateCmd) newTemplate(cmd *cobra.Command, args []string) error {
+	var err error
+	inputIterators, err := flags.NewRequestInputIterators(cmd)
+	if err != nil {
+		return err
+	}
 
 	// body
-	body := mapbuilder.NewMapBuilder()
-	body.SetMap(getDataFlag(cmd))
-	if err := setDataTemplateFromFlags(cmd, body); err != nil {
-		return newUserError("Template error. ", err)
-	}
-	if err := body.Validate(); err != nil {
-		return newUserError("Body validation error. ", err)
+	body := mapbuilder.NewInitializedMapBuilder()
+	err = flags.WithBody(
+		cmd,
+		body,
+		inputIterators,
+		WithDataValue(),
+		WithTemplateValue(),
+		WithTemplateVariablesValue(),
+	)
+
+	if err != nil {
+		return newUserError(err)
 	}
 
 	responseText, err := body.MarshalJSON()
@@ -71,8 +82,12 @@ func (n *executeTemplateCmd) newTemplate(cmd *cobra.Command, args []string) erro
 		outputEnding = "\n"
 	}
 
-	if !globalFlagCompact && isJSONResponse {
-		fmt.Printf("%s%s", pretty.Pretty(bytes.TrimSpace(responseText)), outputEnding)
+	if isJSONResponse {
+		formatter := pretty.Pretty
+		if globalFlagCompact {
+			formatter = pretty.UglyInPlace
+		}
+		fmt.Printf("%s%s", formatter(bytes.TrimSpace(responseText)), outputEnding)
 	} else {
 		fmt.Printf("%s%s", bytes.TrimSpace(responseText), outputEnding)
 	}

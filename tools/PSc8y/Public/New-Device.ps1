@@ -34,7 +34,8 @@ Create device using a template
     [OutputType([object])]
     Param(
         # Device name
-        [Parameter()]
+        [Parameter(ValueFromPipeline=$true,
+                   ValueFromPipelineByPropertyName=$true)]
         [string]
         $Name,
 
@@ -99,9 +100,6 @@ Create device using a template
 
     Begin {
         $Parameters = @{}
-        if ($PSBoundParameters.ContainsKey("Name")) {
-            $Parameters["name"] = $Name
-        }
         if ($PSBoundParameters.ContainsKey("Type")) {
             $Parameters["type"] = $Type
         }
@@ -137,26 +135,28 @@ Create device using a template
     }
 
     Process {
-        foreach ($item in @("")) {
+        $Parameters["name"] = PSc8y\Expand-Id $Name
 
-            if (!$Force -and
-                !$WhatIfPreference -and
-                !$PSCmdlet.ShouldProcess(
-                    (PSc8y\Get-C8ySessionProperty -Name "tenant"),
-                    (Format-ConfirmationMessage -Name $PSCmdlet.MyInvocation.InvocationName -InputObject $item)
-                )) {
-                continue
-            }
-
-            Invoke-ClientCommand `
-                -Noun "devices" `
-                -Verb "create" `
-                -Parameters $Parameters `
-                -Type "application/vnd.com.nsn.cumulocity.customDevice+json" `
-                -ItemType "" `
-                -ResultProperty "" `
-                -Raw:$Raw
+        if (!$Force -and
+            !$WhatIfPreference -and
+            !$PSCmdlet.ShouldProcess(
+                (PSc8y\Get-C8ySessionProperty -Name "tenant"),
+                (Format-ConfirmationMessage -Name $PSCmdlet.MyInvocation.InvocationName -InputObject $item)
+            )) {
+            continue
         }
+
+        Invoke-ClientCommand `
+            -Noun "devices" `
+            -Verb "create" `
+            -Parameters $Parameters `
+            -Type "application/vnd.com.nsn.cumulocity.customDevice+json" `
+            -ItemType "" `
+            -ResultProperty "" `
+            -Raw:$Raw `
+            -CurrentPage:$CurrentPage `
+            -TotalPages:$TotalPages `
+            -IncludeAll:$IncludeAll
     }
 
     End {}

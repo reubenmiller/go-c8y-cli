@@ -15,7 +15,6 @@ import (
 	"github.com/pkg/errors"
 	"github.com/reubenmiller/go-c8y-cli/pkg/c8ydata"
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
-	"github.com/reubenmiller/go-c8y-cli/pkg/iterator"
 	"github.com/reubenmiller/go-c8y-cli/pkg/jsonUtilities"
 	"github.com/reubenmiller/go-c8y-cli/pkg/mapbuilder"
 	"github.com/spf13/cobra"
@@ -166,68 +165,6 @@ func getDataFlag(cmd *cobra.Command) map[string]interface{} {
 	if value, err := cmd.Flags().GetString(FlagDataName); err == nil {
 		return c8ydata.RemoveCumulocityProperties(jsonUtilities.MustParseJSON(getContents(value)), true)
 	}
-	return nil
-}
-
-func setDataTemplateFromFlags(cmd *cobra.Command, body *mapbuilder.MapBuilder) error {
-
-	if !cmd.Flags().Changed(FlagDataTemplateName) {
-		return nil
-	}
-
-	if value, err := cmd.Flags().GetString(FlagDataTemplateVariablesName); err == nil {
-		content := getContents(value)
-		Logger.Infof("Template variables: %s\n", content)
-		body.SetTemplateVariables(jsonUtilities.MustParseJSON(content))
-	}
-
-	if value, err := cmd.Flags().GetString(FlagDataTemplateName); err == nil {
-
-		if fullFilePath, err := resolveTemplatePath(value); err == nil {
-			Logger.Infof("Template file: %s", fullFilePath)
-			value = fullFilePath
-		}
-
-		contents := getContents(value)
-		body.SetTemplate(contents)
-		if err := body.ApplyTemplate(false); err != nil {
-			return errors.Wrap(err, "Template error")
-		}
-	}
-
-	return nil
-}
-
-// setLazyDataTemplateFromFlags sets template data to the body however it does not execute
-// the template variables
-func setLazyDataTemplateFromFlags(cmd *cobra.Command, body *mapbuilder.MapBuilder) error {
-	body.SetApplyTemplateOnMarshalPreference(true)
-	if !cmd.Flags().Changed(FlagDataTemplateName) {
-		return nil
-	}
-
-	if value, err := cmd.Flags().GetString(FlagDataTemplateVariablesName); err == nil {
-		content := getContents(value)
-		Logger.Infof("Template variables: %s\n", content)
-		body.SetTemplateVariables(jsonUtilities.MustParseJSON(content))
-	}
-
-	if value, err := cmd.Flags().GetString(FlagDataTemplateName); err == nil {
-
-		if fullFilePath, err := resolveTemplatePath(value); err == nil {
-			Logger.Infof("Template file: %s", fullFilePath)
-			value = fullFilePath
-		}
-
-		contents := getContents(value)
-		body.SetTemplate(contents)
-
-		// add a default template iterator that just counts up
-		if body.TemplateIterator == nil {
-			body.TemplateIterator = iterator.NewRangeIterator(1, 100000000, 1)
-		}
-	}
-
 	return nil
 }
 
