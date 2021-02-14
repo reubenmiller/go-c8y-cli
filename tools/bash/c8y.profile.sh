@@ -192,7 +192,7 @@ c8y-update () {
         export PATH=${PATH}:$INSTALL_PATH
     fi
 
-    if [ "$current_version" = "$new_version"]; then
+    if [ "$current_version" = "$new_version" ]; then
         echo -e "${green}c8y is already up to date: $(current_version)${normal}"
         return 0
     fi
