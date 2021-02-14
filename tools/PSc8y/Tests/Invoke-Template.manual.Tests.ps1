@@ -43,7 +43,7 @@ Describe -Tag "Template" -Name "Invoke-Template" {
     It "executes a jsonnet template using pipeline input" {
         $Template = @"
 {
-    type: base.name + '_' + rand.int,
+    type: self.name + '_' + rand.int,
     value: 1 + 2,
 }
 "@
@@ -51,7 +51,7 @@ Describe -Tag "Template" -Name "Invoke-Template" {
             @{ name = "name" },
             @{ name = "name2" }
         )
-        $templateOutput = $InputData | Invoke-Template -Template $Template -Compress | ConvertFrom-Json
+        $templateOutput = $InputData | Invoke-Template -Template $Template  -Compress | ConvertFrom-Json
         $LASTEXITCODE | Should -BeExactly 0
 
         $templateOutput | Should -Not -BeNullOrEmpty

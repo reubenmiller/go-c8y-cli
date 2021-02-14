@@ -127,7 +127,7 @@ Describe -Name "c8y pipes" {
             # Create
             $events = $DeviceList `
             | Select-Object -First 1 `
-            | ConvertTo-ClientPipeline -Repeat 5 `
+            | Invoke-ClientIterator -Repeat 5 `
             | c8y events create $c8yargs `
             | ConvertFrom-Json -Depth 100
             $LASTEXITCODE | Should -BeExactly 0
@@ -135,7 +135,7 @@ Describe -Name "c8y pipes" {
 
             # Update
             $output = $events `
-            | ConvertTo-ClientPipeline `
+            | Invoke-ClientIterator `
             | c8y events update --template "{ text: 'event ' + input.index  }" --workers 5 `
             | ConvertFrom-Json -Depth 100
             $LASTEXITCODE | Should -BeExactly 0
@@ -144,7 +144,7 @@ Describe -Name "c8y pipes" {
 
             # Delete
             $output = $events `
-            | ConvertTo-ClientPipeline `
+            | Invoke-ClientIterator `
             | c8y events delete --workers 5 --verbose 2>&1
             $LASTEXITCODE | Should -BeExactly 0
             $output | should -ContainRequest "DELETE /event/events/" -Total $events.Count
@@ -154,7 +154,7 @@ Describe -Name "c8y pipes" {
 
             # Delete collection (iterator over device id)
             $output = $DeviceList `
-            | ConvertTo-ClientPipeline `
+            | Invoke-ClientIterator `
             | c8y events deleteCollection --workers 5 --verbose 2>&1
             $LASTEXITCODE | Should -BeExactly 0
             $output | should -ContainRequest "DELETE /event/events?source=" -Total $DeviceList.Count
@@ -176,7 +176,7 @@ Describe -Name "c8y pipes" {
             # Create
             $alarms = $DeviceList `
             | Select-Object -First 1 -Skip 1 `
-            | ConvertTo-ClientPipeline -Repeat 5 `
+            | Invoke-ClientIterator -Repeat 5 `
             | c8y alarms create $c8yargs `
             | ConvertFrom-Json -Depth 100
             $LASTEXITCODE | Should -BeExactly 0
@@ -184,7 +184,7 @@ Describe -Name "c8y pipes" {
 
             # Update
             $output = $alarms `
-            | ConvertTo-ClientPipeline `
+            | Invoke-ClientIterator `
             | c8y alarms update --template "{ status: 'ACKNOWLEDGED', text: 'alarm ' + input.index  }" --workers 5 `
             | ConvertFrom-Json -Depth 100
             $LASTEXITCODE | Should -BeExactly 0
@@ -195,7 +195,7 @@ Describe -Name "c8y pipes" {
             # Delete alarms for each device
             # Note: delete by id is not support by Cumulocity and will return a 405 status code
             $output = $DeviceList `
-            | ConvertTo-ClientPipeline `
+            | Invoke-ClientIterator `
             | c8y alarms deleteCollection --workers 5 --verbose 2>&1
             $LASTEXITCODE | Should -BeExactly 0
             $output | should -ContainRequest "DELETE /alarm/alarms" -Total $DeviceList.Count
@@ -215,7 +215,7 @@ Describe -Name "c8y pipes" {
             # Create
             $operations = $DeviceList `
             | Select-Object -First 1 -Skip 1 `
-            | ConvertTo-ClientPipeline -Repeat 5 `
+            | Invoke-ClientIterator -Repeat 5 `
             | c8y operations create $c8yargs `
             | ConvertFrom-Json -Depth 100
             $LASTEXITCODE | Should -BeExactly 0
@@ -223,7 +223,7 @@ Describe -Name "c8y pipes" {
 
             # Update
             $output = $operations `
-            | ConvertTo-ClientPipeline `
+            | Invoke-ClientIterator `
             | c8y operations update --template "{ status: 'EXECUTING', description: 'updated operation ' + input.index  }" --workers 5 `
             | ConvertFrom-Json -Depth 100
             $LASTEXITCODE | Should -BeExactly 0
@@ -234,7 +234,7 @@ Describe -Name "c8y pipes" {
             # Delete operations for each device
             # Note: delete by id is not support by Cumulocity and will return a 405 status code
             $output = $DeviceList `
-            | ConvertTo-ClientPipeline `
+            | Invoke-ClientIterator `
             | c8y operations deleteCollection --workers 5 --verbose 2>&1
             $LASTEXITCODE | Should -BeExactly 0
             $output | should -ContainRequest "DELETE /devicecontrol/operations" -Total $DeviceList.Count
@@ -263,7 +263,7 @@ Describe -Name "c8y pipes" {
             # Add devices to a group
             $group = New-TestDeviceGroup
             $output = $devices `
-            | ConvertTo-ClientPipeline `
+            | Invoke-ClientIterator `
             | c8y inventoryReferences assignDeviceToGroup --group $group.id --workers 5 `
             | ConvertFrom-Json -Depth 100
             $LASTEXITCODE | Should -BeExactly 0
@@ -275,7 +275,7 @@ Describe -Name "c8y pipes" {
 
             # Get child assets
             $childAssets = $group `
-            | ConvertTo-ClientPipeline `
+            | Invoke-ClientIterator `
             | c8y inventoryReferences listChildAssets `
             | ConvertFrom-Json -Depth 100
             $LASTEXITCODE | Should -BeExactly 0
@@ -283,7 +283,7 @@ Describe -Name "c8y pipes" {
 
             # Unassign assets from group
             $output = $childAssets `
-            | ConvertTo-ClientPipeline `
+            | Invoke-ClientIterator `
             | c8y inventoryReferences unassignDeviceFromGroup --group $group.id --workers 5 --verbose 2>&1            
             $LASTEXITCODE | Should -BeExactly 0
             $output | Should -ContainRequest "DELETE" -Total $childAssets.Count
@@ -293,7 +293,7 @@ Describe -Name "c8y pipes" {
 
             # $devices = $DeviceList `
             # | Select-Object -First 1 -Skip 1 `
-            # | ConvertTo-ClientPipeline -Repeat 5 `
+            # | Invoke-ClientIterator -Repeat 5 `
             # | c8y devices create $c8yargs `
             # | ConvertFrom-Json -Depth 100
             # $LASTEXITCODE | Should -BeExactly 0
@@ -302,7 +302,7 @@ Describe -Name "c8y pipes" {
 
             # Update
             $output = $devices `
-            | ConvertTo-ClientPipeline `
+            | Invoke-ClientIterator `
             | c8y devices update --template "{ type: 'updated device ' + input.index }" --workers 5 `
             | ConvertFrom-Json -Depth 100
             $LASTEXITCODE | Should -BeExactly 0
@@ -311,13 +311,40 @@ Describe -Name "c8y pipes" {
 
             # Delete
             $output = $devices `
-            | ConvertTo-ClientPipeline `
+            | Invoke-ClientIterator `
             | c8y devices delete --workers 5 --verbose 2>&1
             $LASTEXITCODE | Should -BeExactly 0
             $output | should -ContainRequest "DELETE /inventory/managedObjects/" -Total $devices.Count
             $devices.id | ForEach-Object {
                 $output | should -ContainRequest "DELETE /inventory/managedObjects/$_" -Total 1
             }
+        }
+    }
+
+    Context "managed objects" {
+        It "supports creating many managed objects using multiple workers" {
+            $c8yargs = @(
+                "--delay", "50",
+                "--workers", "5",
+                # "--template", "{type: 'type_' + input.index }"
+                "--template", "{type: std.format('type_%03d', input.index) }"
+            )
+            # Create
+            $devices = @(1..5) | Invoke-ClientIterator "testdevice_" `
+            | c8y devices create $c8yargs --workers 5 --maxJobs 10 `
+            | ConvertFrom-Json -Depth 100
+            $null = $ids.AddRange($devices.id)
+            $LASTEXITCODE | Should -BeExactly 0
+            $devices | Should -HaveCount 5
+            $devices.name -match "testdevice_000[1-5]" | Should -HaveCount $devices.Count
+            $devices.type -match "type_00[1-5]" | Should -HaveCount $devices.Count
+            
+            # Remove devices
+            # $devices `
+            # | Invoke-ClientIterator `
+            # | c8y devices delete --workers 5
+            # $LASTEXITCODE | Should -BeExactly 0
+
         }
     }
 

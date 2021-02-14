@@ -83,7 +83,7 @@ $script:Aliases = @{
     rest = "Invoke-ClientRequest"
     base64ToUtf8 = "ConvertFrom-Base64String"
     utf8Tobase64 = "ConvertTo-Base64String"
-    tonative = "ConvertTo-ClientPipeline"
+    iterate = "Invoke-ClientIterator"
 
     # session
     session = "Get-Session"

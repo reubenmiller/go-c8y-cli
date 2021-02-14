@@ -23,7 +23,7 @@ Describe -Name "Reset-UserPassword" {
         $Body = Get-JSONFromResponse ($Request | Out-String)
 
         $Body.password | Should -BeExactly $pass
-        $Body.sendPasswordResetEmail | Should -BeNullOrEmpty
+        $Body.sendPasswordResetEmail | Should -BeExactly $false
     }
 
 

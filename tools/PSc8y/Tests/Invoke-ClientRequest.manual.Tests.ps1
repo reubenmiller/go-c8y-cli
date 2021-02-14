@@ -215,10 +215,12 @@ Describe -Name "Invoke-ClientRequest" {
     }
 }
 "@ |Out-File $template
-        $Response = Invoke-ClientRequest `
-            -Uri "/inventory/managedObjects" `
-            -Method "post" `
-            -Template $template
+        $options = @{
+            Uri = "/inventory/managedObjects"
+            Method = "post"
+            Template = $template
+        }
+        $Response = Invoke-ClientRequest @options
 
         $LASTEXITCODE | Should -Be 0
         $Response | Should -Not -BeNullOrEmpty
