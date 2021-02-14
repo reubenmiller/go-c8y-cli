@@ -91,7 +91,7 @@ func NewFlagWithPipeIterator(cmd *cobra.Command, pipeOpt *PipelineOptions, suppo
 				return iter, err
 			}
 			// ignore error as it is not required
-			return iter, nil
+			return nil, nil
 		}
 		return iter, nil
 	}

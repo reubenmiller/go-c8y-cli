@@ -118,8 +118,7 @@ func WithBody(cmd *cobra.Command, body *mapbuilder.MapBuilder, inputIterators *R
 			}
 
 		case Template:
-			body.SetApplyTemplateOnMarshalPreference(true)
-			body.SetTemplate(string(v))
+			body.AppendTemplate(string(v))
 			if body.TemplateIterator == nil {
 				body.TemplateIterator = iterator.NewRangeIterator(1, 100000000, 1)
 			}
@@ -129,11 +128,11 @@ func WithBody(cmd *cobra.Command, body *mapbuilder.MapBuilder, inputIterators *R
 
 		case DefaultTemplateString:
 			// the body will build on this template (it can override it)
-			err = body.MergeJsonnet(string(v), true)
+			body.PrependTemplate(string(v))
 
 		case RequiredTemplateString:
 			// the template will override values in the body
-			err = body.MergeJsonnet(string(v), false)
+			body.AppendTemplate(string(v))
 
 		case RequiredKeys:
 			body.SetRequiredKeys(v...)
@@ -153,7 +152,9 @@ func WithBody(cmd *cobra.Command, body *mapbuilder.MapBuilder, inputIterators *R
 				}
 			}
 		default:
-			err = body.Set(name, value)
+			if name != "" {
+				err = body.Set(name, value)
+			}
 		}
 		if err != nil {
 			return err
@@ -449,6 +450,9 @@ type PipelineOptions struct {
 func WithPipelineIterator(opts *PipelineOptions) GetOption {
 	return func(cmd *cobra.Command, inputIterators *RequestInputIterators) (string, interface{}, error) {
 		iter, err := NewFlagWithPipeIterator(cmd, opts, true)
+		if iter == nil {
+			return "", iter, err
+		}
 		return opts.Property, iter, err
 	}
 }

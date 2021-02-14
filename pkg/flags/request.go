@@ -1,7 +1,6 @@
 package flags
 
 import (
-	"fmt"
 	"io"
 	"net/http"
 	"net/url"
@@ -93,12 +92,6 @@ func WithRequestOptions(cmd *cobra.Command, args []string, req *c8y.RequestOptio
 		return err
 	}
 
-	if body != nil {
-		if err := body.Validate(); err != nil {
-			return fmt.Errorf("body validation error. %w", err)
-		}
-	}
-
 	// set request values
 	req.Header = headers
 	req.Path = pathParameters.GetTemplate()
@@ -188,11 +181,6 @@ func replacePathParameters(uri string, parameters map[string]string) string {
 			},
 		},
 	)
-
-	// bodyErr := body.MergeJsonnet(`
-	//	addIfEmptyString(base, "password", {sendPasswordResetEmail: true})
-	//`, false)
-
 
 	if err != nil {
 		return err

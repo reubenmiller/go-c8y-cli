@@ -40,9 +40,6 @@ func WithTemplateValue(src string, pathResolver Resolver) GetOption {
 		if err != nil {
 			contents = value
 		}
-		// if err != nil {
-		// 	return "", nil, err
-		// }
 
 		content := getContents(contents)
 		return src, Template(content), nil
