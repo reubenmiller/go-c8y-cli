@@ -1,8 +1,5 @@
 {
-    userName: if (std.objectHas(base, "userName")) then
-            base.userName
-        else
-            self.email,
-    email: std.asciiLower(base.email),
+    userName: self.email,
+    email: std.asciiLower(var('email', '')),
     password: rand.password,
 }
