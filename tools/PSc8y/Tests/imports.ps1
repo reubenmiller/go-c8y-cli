@@ -21,12 +21,15 @@ Import-Module $modulepath -Prefix "" -Force
 # Import helper functions
 . "$PSScriptRoot/Get-JSONFromResponse.ps1"
 . "$PSScriptRoot/New-TemporaryDirectory.ps1"
+. "$PSScriptRoot/Helpers/Get-RequestBodyCollection.ps1"
 
 # Add custom assertions
 . "$PSScriptRoot/Assertions/ContainRequest.ps1"
 Add-AssertionOperator -Name "ContainRequest" -Test $Function:ContainRequest -SupportsArrayInput -ErrorAction SilentlyContinue
 . "$PSScriptRoot/Assertions/ContainInCollection.ps1"
 Add-AssertionOperator -Name "ContainInCollection" -Test $Function:ContainInCollection -SupportsArrayInput -ErrorAction SilentlyContinue
+. "$PSScriptRoot/Assertions/MatchObject.ps1"
+Add-AssertionOperator -Name "MatchObject" -Test $Function:MatchObject -ErrorAction SilentlyContinue
 
 
 # Get credentials from the environment
