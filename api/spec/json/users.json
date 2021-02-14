@@ -651,7 +651,7 @@
       "bodyTemplate": {
         "type": "jsonnet",
         "applyLast": true,
-        "template": "addIfEmptyString(base, \"password\", {sendPasswordResetEmail: true})\n"
+        "template": "{sendPasswordResetEmail: !std.objectHas(self, 'password')}\n"
       },
       "body": [
         {

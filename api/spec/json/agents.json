@@ -225,7 +225,7 @@
       "bodyTemplate": {
         "type": "jsonnet",
         "applyLast": true,
-        "template": "{  c8y_IsDevice: {},\n  com_cumulocity_model_Agent: {},\n}\n"
+        "template": "{c8y_IsDevice: {}, com_cumulocity_model_Agent: {}}\n"
       },
       "body": [
         {

@@ -182,16 +182,13 @@ endpoints:
     bodyTemplate:
       type: jsonnet
       applyLast: true
-      template: >
-        {
-          c8y_IsDevice: {},
-        }
+      template: "{c8y_IsDevice: {}}"
 
     body:
       - name: name
         type: 'string'
         required: false
-        pipeline: false
+        pipeline: true
         description: Device name
 
       - name: type
@@ -535,17 +532,13 @@ endpoints:
     bodyTemplate:
       type: jsonnet
       applyLast: false
-      template: >
-        {
-          type: "c8y_DeviceGroup",
-          c8y_IsDeviceGroup: {},
-        }
+      template: "{type: 'c8y_DeviceGroup', c8y_IsDeviceGroup: {}}"
 
     body:
       - name: name
         type: 'string'
-        required: true
-        pipeline: false
+        required: false
+        pipeline: true
         description: Device group name
 
       - name: type
@@ -556,3 +549,5 @@ endpoints:
       - name: data
         type: json
         description: Custom group properties.
+    bodyRequiredKeys:
+      - name

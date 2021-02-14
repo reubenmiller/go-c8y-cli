@@ -476,8 +476,7 @@ endpoints:
     bodyTemplate:
       type: jsonnet
       applyLast: true
-      template: >
-        addIfEmptyString(base, "password", {sendPasswordResetEmail: true})
+      template: "{sendPasswordResetEmail: !std.objectHas(self, 'password')}"
     body:
       - name: newPassword
         type: string

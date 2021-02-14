@@ -244,14 +244,14 @@
       "bodyTemplate": {
         "type": "jsonnet",
         "applyLast": true,
-        "template": "{  c8y_IsDevice: {},\n}\n"
+        "template": "{c8y_IsDevice: {}}\n"
       },
       "body": [
         {
           "name": "name",
           "type": "string",
           "required": false,
-          "pipeline": false,
+          "pipeline": true,
           "description": "Device name"
         },
         {
@@ -724,8 +724,8 @@
         {
           "name": "name",
           "type": "string",
-          "required": true,
-          "pipeline": false,
+          "required": false,
+          "pipeline": true,
           "description": "Device group name"
         },
         {
@@ -742,6 +742,9 @@
           "type": "json",
           "description": "Custom group properties."
         }
+      ],
+      "bodyRequiredKeys": [
+        "name"
       ]
     }
   ]
