@@ -37,16 +37,16 @@ func (b *StringTemplate) GetTemplate() string {
 // Execute replaces all of the path parameters in a given URI with the provided values
 // Example:
 // 	"alarm/alarms/{id}" => "alarm/alarms/1234" if given a parameter map of {"id": "1234"}
-func (b *StringTemplate) Execute(ignoreIterators bool, template ...string) (output string, inputTemplate string, err error) {
+func (b *StringTemplate) Execute(ignoreIterators bool, template ...string) (output string, input interface{}, err error) {
 	if b.templateVariables == nil {
 		return "", "", io.EOF
 	}
 
-	inputTemplate = b.template
+	output = b.template
 	if len(template) > 0 {
-		inputTemplate = template[0]
+		output = template[0]
 	}
-	output = inputTemplate
+	input = output
 
 	for key, value := range b.templateVariables {
 
@@ -54,10 +54,12 @@ func (b *StringTemplate) Execute(ignoreIterators bool, template ...string) (outp
 		switch v := value.(type) {
 		case iterator.Iterator:
 			if !ignoreIterators {
-				nextValue, _, err := v.GetNext()
+				nextValue, inputValue, err := v.GetNext()
 				if err != nil {
 					return "", "", err
 				}
+
+				input = inputValue
 				currentValue = string(nextValue)
 			}
 		case string:
@@ -74,7 +76,7 @@ func (b *StringTemplate) Execute(ignoreIterators bool, template ...string) (outp
 // GetNext returns the next template path
 func (b *StringTemplate) GetNext() ([]byte, interface{}, error) {
 	output, input, err := b.Execute(false)
-	return []byte(output), []byte(input), err
+	return []byte(output), input, err
 }
 
 func replaceVariable(tmpl string, name string, value string) string {

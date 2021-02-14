@@ -99,6 +99,7 @@ func WithHeaders(cmd *cobra.Command, header http.Header, inputIterators *Request
 // WithBody returns a body from given command line arguments
 func WithBody(cmd *cobra.Command, body *mapbuilder.MapBuilder, inputIterators *RequestInputIterators, opts ...GetOption) (err error) {
 	totalIterators := 0
+	iteratorSources := []string{}
 	for _, opt := range opts {
 		name, value, err := opt(cmd, inputIterators)
 		if err != nil {
@@ -109,6 +110,7 @@ func WithBody(cmd *cobra.Command, body *mapbuilder.MapBuilder, inputIterators *R
 		case iterator.Iterator:
 			err = body.Set(name, value)
 			if v.IsBound() {
+				iteratorSources = append(iteratorSources, name)
 				totalIterators++
 			}
 		case string:
@@ -163,6 +165,11 @@ func WithBody(cmd *cobra.Command, body *mapbuilder.MapBuilder, inputIterators *R
 	if totalIterators > 0 {
 		inputIterators.Total += totalIterators
 		inputIterators.Body = body
+
+		if len(iteratorSources) > 0 {
+			// TODO: Assign values to input template
+			body.TemplateIteratorNames = iteratorSources
+		}
 	}
 	return nil
 }

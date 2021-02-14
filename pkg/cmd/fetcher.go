@@ -247,13 +247,14 @@ func (i *EntityIterator) GetNext() (value []byte, input interface{}, err error) 
 		return nil, nil, NewNoMatchesFoundError(string(value))
 	}
 
-	data := refs[0].ID
+	var data interface{}
+	data = refs[0].ID
 	if refs[0].Data.Value != nil {
 		if v, ok := refs[0].Data.Value.(gjson.Result); ok {
 			data = v.Raw
 		}
 	} else {
-		data = fmt.Sprintf("%s", rawValue)
+		data = rawValue
 	}
 	return []byte(refs[0].ID), data, nil
 }

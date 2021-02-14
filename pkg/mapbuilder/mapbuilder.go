@@ -9,6 +9,7 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/google/go-jsonnet"
@@ -19,7 +20,8 @@ import (
 
 const (
 	// Separator character which is used when setting the path via a dot notation
-	Separator = "."
+	Separator              = "."
+	timeFormatRFC3339Micro = "2006-01-02T15:04:05.999Z07:00"
 )
 
 func evaluateJsonnet(imports string, snippets ...string) (string, error) {
@@ -119,15 +121,18 @@ func NewMapBuilderFromJSON(data string) (*MapBuilder, error) {
 
 // MapBuilder creates body builder
 type MapBuilder struct {
-	body             map[string]interface{}
-	file             string
-	TemplateIterator iterator.Iterator
+	mu                    sync.Mutex
+	body                  map[string]interface{}
+	file                  string
+	TemplateIterator      iterator.Iterator
+	TemplateIteratorNames []string
 
 	templateVariables     map[string]interface{}
 	requiredKeys          []string
 	autoApplyTemplate     bool
 	templates             []string
 	reverseTempateDefault bool
+	externalInput         []byte
 }
 
 // AppendTemplate appends a templates to be merged in with the body
@@ -157,14 +162,14 @@ func (b *MapBuilder) SetEmptyMap() *MapBuilder {
 // ApplyTemplates merges the existing body data with a given jsonnet snippet.
 // When reverse is false, then the snippet will be applied to the existing data,
 // when reverse is true, then the given snippet will be the base, and the existing data will be applied to the new snippet.
-func (b *MapBuilder) ApplyTemplates(existingJSON []byte, appendTemplates bool) ([]byte, error) {
+func (b *MapBuilder) ApplyTemplates(existingJSON []byte, input []byte, appendTemplates bool) ([]byte, error) {
 	var err error
 	if len(existingJSON) == 0 {
 		existingJSON = []byte("{}")
 	}
 	existingJSON = bytes.TrimSpace(existingJSON)
 
-	imports, err := b.getTemplateVariablesJsonnet()
+	imports, err := b.getTemplateVariablesJsonnet(existingJSON, input)
 	if err != nil {
 		return nil, err
 	}
@@ -210,7 +215,7 @@ func generatePassword() string {
 	return ""
 }
 
-func (b *MapBuilder) getTemplateVariablesJsonnet() (string, error) {
+func (b *MapBuilder) getTemplateVariablesJsonnet(existingJSON []byte, input []byte) (string, error) {
 	jsonStr := []byte("{}")
 	// default to empty object (if no custom template variables are provided)
 	if b.templateVariables != nil {
@@ -226,16 +231,6 @@ func (b *MapBuilder) getTemplateVariablesJsonnet() (string, error) {
 	// Seed random otherwise it will not change with execution
 	rand.Seed(time.Now().UTC().UnixNano())
 
-	index := "1"
-
-	if b.TemplateIterator != nil {
-		nextIndex, _, err := b.TemplateIterator.GetNext()
-		if err != nil {
-			return "", err
-		}
-		index = string(nextIndex)
-	}
-
 	randomHelper := fmt.Sprintf(`local rand = { bool: %t, int: %d, int2: %d, float: %f, float2: %f, float3: %f, float4: %f, password: "%s" };`,
 		rand.Float32() > 0.5,
 		rand.Intn(100),
@@ -246,19 +241,61 @@ func (b *MapBuilder) getTemplateVariablesJsonnet() (string, error) {
 		rand.Float32(),
 		generatePassword(),
 	)
+
+	index := "1"
+
+	if b.TemplateIterator != nil {
+		nextIndex, _, err := b.TemplateIterator.GetNext()
+		if err != nil {
+			return "", err
+		}
+		index = string(nextIndex)
+	}
+
 	indexInt := 1
 	if v, err := strconv.Atoi(index); err == nil {
 		indexInt = v
 	}
-	inputHelper := fmt.Sprintf(`local input = {index: %d, value: "%s"};`,
+
+	localInput := "{}"
+	if len(b.TemplateIteratorNames) > 0 {
+		inputImports := []string{}
+
+		results := gjson.GetManyBytes(existingJSON, b.TemplateIteratorNames...)
+
+		for i, result := range results {
+			if result.Exists() {
+				if result.IsObject() {
+					inputImports = append(inputImports, b.TemplateIteratorNames[i]+": '"+result.String()+"'")
+				} else {
+					inputImports = append(inputImports, "value: '"+result.String()+"'")
+				}
+			}
+		}
+
+		if len(inputImports) > 0 {
+			localInput = fmt.Sprintf("{%s}", strings.Join(inputImports, ","))
+		}
+	}
+
+	// add external input to input.value
+	externalInput := "{}"
+	input = bytes.TrimSpace(input)
+	if len(input) > 0 && bytes.HasPrefix(input, []byte("{")) && bytes.HasSuffix(input, []byte("}")) {
+		externalInput = "{value: " + string(input) + "}"
+	}
+
+	inputHelper := fmt.Sprintf(`local input = {index: %d} + %s + %s;`,
 		indexInt,
-		index,
+		localInput,
+		externalInput,
 	)
+
 	timeHelper := fmt.Sprintf(`local time = {now: "%s", nowNano: "%s"};`,
-		time.Now().Format(time.RFC3339),
+		time.Now().Format(timeFormatRFC3339Micro),
 		time.Now().Format(time.RFC3339Nano),
 	)
-	return fmt.Sprintf("\nlocal vars = %s;\n%s\n%s\n%s\n%s\n", jsonStr, varsHelper, inputHelper, randomHelper, timeHelper), nil
+	return fmt.Sprintf("\nlocal vars = %s;\n%s\n%s\n%s\n%s\n", jsonStr, varsHelper, randomHelper, timeHelper, inputHelper), nil
 }
 
 // SetMap sets a new map to the body (if not nil). This will remove any existing values in the body
@@ -284,12 +321,12 @@ func (b *MapBuilder) SetFile(path string) {
 }
 
 // GetMap returns the body as a map[string]interface{}
-func (b MapBuilder) GetMap() map[string]interface{} {
+func (b *MapBuilder) GetMap() map[string]interface{} {
 	return b.body
 }
 
 // GetFileContents returns the map contents as a file (only if a file is already set)
-func (b MapBuilder) GetFileContents() *os.File {
+func (b *MapBuilder) GetFileContents() *os.File {
 	file, err := os.Open(b.file)
 	if err != nil {
 		log.Printf("failed to open file. %s", err)
@@ -299,12 +336,12 @@ func (b MapBuilder) GetFileContents() *os.File {
 }
 
 // HasFile return true if the body is being set from file
-func (b MapBuilder) HasFile() bool {
+func (b *MapBuilder) HasFile() bool {
 	return b.file != ""
 }
 
 // GetBody returns the body as an interface
-func (b MapBuilder) GetBody() (interface{}, error) {
+func (b *MapBuilder) GetBody() (interface{}, error) {
 	if b.HasFile() {
 		return os.Open(b.file)
 	}
@@ -312,12 +349,12 @@ func (b MapBuilder) GetBody() (interface{}, error) {
 }
 
 // Get returns a value as an interface
-func (b MapBuilder) Get(key string) interface{} {
+func (b *MapBuilder) Get(key string) interface{} {
 	return b.body[key]
 }
 
 // GetString the value as a string
-func (b MapBuilder) GetString(key string) (string, bool) {
+func (b *MapBuilder) GetString(key string) (string, bool) {
 	val, ok := b.body[key].(string)
 	return val, ok
 }
@@ -328,7 +365,7 @@ func (b *MapBuilder) SetRequiredKeys(keys ...string) {
 	b.requiredKeys = keys
 }
 
-func (b MapBuilder) validateRequiredKeys(body map[string]interface{}) error {
+func (b *MapBuilder) validateRequiredKeys(body map[string]interface{}) error {
 	missingKeys := make([]string, 0)
 	if body == nil {
 		body = b.body
@@ -345,7 +382,7 @@ func (b MapBuilder) validateRequiredKeys(body map[string]interface{}) error {
 	return nil
 }
 
-func (b MapBuilder) validateRequiredKeysBytes(body []byte) error {
+func (b *MapBuilder) validateRequiredKeysBytes(body []byte) error {
 	missingKeys := make([]string, 0)
 	results := gjson.GetManyBytes(body, b.requiredKeys...)
 
@@ -361,8 +398,22 @@ func (b MapBuilder) validateRequiredKeysBytes(body []byte) error {
 	return nil
 }
 
+// MarshalJSONWithInput convers the body to json and also injecting additional data into the template input to make
+// it available using the input.value variable in jsonnet
+func (b *MapBuilder) MarshalJSONWithInput(input interface{}) (body []byte, err error) {
+	b.mu.Lock()
+	defer b.mu.Unlock()
+	switch v := input.(type) {
+	case []byte:
+		b.externalInput = v
+	case string:
+		b.externalInput = []byte(v)
+	}
+	return b.MarshalJSON()
+}
+
 // MarshalJSON returns the body as json
-func (b MapBuilder) MarshalJSON() (body []byte, err error) {
+func (b *MapBuilder) MarshalJSON() (body []byte, err error) {
 	if b.body == nil {
 		// should return empty object? or add as option?
 		body = []byte("{}")
@@ -376,7 +427,7 @@ func (b MapBuilder) MarshalJSON() (body []byte, err error) {
 	}
 
 	if b.autoApplyTemplate && len(b.templates) > 0 {
-		body, err = b.ApplyTemplates(body, false)
+		body, err = b.ApplyTemplates(body, b.externalInput, false)
 		if err != nil {
 			return
 		}

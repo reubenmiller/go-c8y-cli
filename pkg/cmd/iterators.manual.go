@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"encoding/json"
 	"errors"
 	"os"
 	"reflect"
@@ -10,6 +9,7 @@ import (
 
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/pkg/iterator"
+	"github.com/reubenmiller/go-c8y-cli/pkg/mapbuilder"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 )
 
@@ -46,7 +46,6 @@ func (r *RequestIterator) setDone() {
 // GetNext return the next request. If error is io.EOF then the iterator is finished
 func (r *RequestIterator) GetNext() (*c8y.RequestOptions, error) {
 
-	// TODO: is shallow copy ok here?
 	req := &c8y.RequestOptions{
 		Host:             r.Request.Host,
 		Method:           r.Request.Method,
@@ -63,9 +62,11 @@ func (r *RequestIterator) GetNext() (*c8y.RequestOptions, error) {
 		DryRun:           globalFlagDryRun,
 	}
 
+	var inputLine interface{}
+
 	// apply path iterator
 	if r.Path != nil && !reflect.ValueOf(r.Path).IsNil() {
-		path, _, err := r.Path.GetNext()
+		path, input, err := r.Path.GetNext()
 
 		if err != nil {
 			if !errors.Is(err, ErrNoMatchesFound) {
@@ -74,21 +75,25 @@ func (r *RequestIterator) GetNext() (*c8y.RequestOptions, error) {
 			return nil, err
 		}
 
+		inputLine = input
 		req.Path = string(path)
 	}
 
 	// apply query iterator
 	// note: reflection is needed as a simple nil check does not work for interfaces!
 	if r.Query != nil && !reflect.ValueOf(r.Query).IsNil() {
-		q, _, err := r.Query.GetNext()
+		q, input, err := r.Query.GetNext()
 		if err != nil {
 			if !errors.Is(err, ErrNoMatchesFound) {
 				r.setDone()
 			}
 			return nil, err
 		}
+		inputLine = input
 		req.Query = string(q)
 	}
+
+	Logger.Debugf("Input line: %s", inputLine)
 
 	// apply body iterator
 	if r.Body != nil && !reflect.ValueOf(r.Body).IsNil() && (strings.EqualFold(req.Method, "POST") || strings.EqualFold(req.Method, "PUT")) {
@@ -96,9 +101,8 @@ func (r *RequestIterator) GetNext() (*c8y.RequestOptions, error) {
 		switch v := r.Body.(type) {
 		case *os.File:
 			req.Body = v
-		default:
-			bodyContents, err := json.Marshal(r.Body)
-
+		case *mapbuilder.MapBuilder:
+			bodyContents, err := v.MarshalJSONWithInput(inputLine)
 			if err != nil {
 				if !errors.Is(err, ErrNoMatchesFound) {
 					r.setDone()
@@ -116,6 +120,8 @@ func (r *RequestIterator) GetNext() (*c8y.RequestOptions, error) {
 				return nil, err
 			}
 			req.Body = bodyValue
+		default:
+			req.Body = v
 		}
 	}
 	return req, nil
