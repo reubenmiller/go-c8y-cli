@@ -18,6 +18,7 @@ import (
 )
 
 const (
+	// Separator character which is used when setting the path via a dot notation
 	Separator = "."
 )
 
@@ -71,6 +72,7 @@ func evaluateJsonnet(imports string, snippets ...string) (string, error) {
 	return out, err
 }
 
+// NewMapBuilder creates a new map builder with the map set to nil
 func NewMapBuilder() *MapBuilder {
 	return &MapBuilder{
 		templates:         []string{},
@@ -78,6 +80,7 @@ func NewMapBuilder() *MapBuilder {
 	}
 }
 
+// NewInitializedMapBuilder creates a new map builder with the map set to an empty map
 func NewInitializedMapBuilder() *MapBuilder {
 	builder := NewMapBuilder()
 	builder.templates = make([]string, 0)
@@ -86,6 +89,7 @@ func NewInitializedMapBuilder() *MapBuilder {
 	return builder
 }
 
+// NewMapBuilderWithInit returns a new map builder seeding the builder with the give map
 func NewMapBuilderWithInit(body map[string]interface{}) *MapBuilder {
 	return &MapBuilder{
 		body: body,
@@ -138,6 +142,7 @@ func (b *MapBuilder) PrependTemplate(template string) *MapBuilder {
 	return b
 }
 
+// SetApplyTemplateOnMarshalPreference sets whether the templates should be applied during marshalling or not.
 func (b *MapBuilder) SetApplyTemplateOnMarshalPreference(value bool) *MapBuilder {
 	b.autoApplyTemplate = value
 	return b
@@ -159,7 +164,7 @@ func (b *MapBuilder) ApplyTemplates(existingJSON []byte, appendTemplates bool) (
 	}
 	existingJSON = bytes.TrimSpace(existingJSON)
 
-	imports, err := b.GetTemplateVariablesJsonnet()
+	imports, err := b.getTemplateVariablesJsonnet()
 	if err != nil {
 		return nil, err
 	}
@@ -184,6 +189,7 @@ func (b *MapBuilder) ApplyTemplates(existingJSON []byte, appendTemplates bool) (
 	return []byte(mergedJSON), nil
 }
 
+// SetTemplateVariables stores the given variables that will be used in the template evaluation
 func (b *MapBuilder) SetTemplateVariables(variables map[string]interface{}) {
 	b.templateVariables = variables
 }
@@ -204,7 +210,7 @@ func generatePassword() string {
 	return ""
 }
 
-func (b *MapBuilder) GetTemplateVariablesJsonnet() (string, error) {
+func (b *MapBuilder) getTemplateVariablesJsonnet() (string, error) {
 	jsonStr := []byte("{}")
 	// default to empty object (if no custom template variables are provided)
 	if b.templateVariables != nil {
@@ -267,7 +273,7 @@ func (b *MapBuilder) ClearMap() {
 	b.body = nil
 }
 
-// SetMap sets a new map to the body. This will remove any existing values in the body
+// ApplyMap sets a new map to the body. This will remove any existing values in the body
 func (b *MapBuilder) ApplyMap(body map[string]interface{}) {
 	b.body = body
 }
@@ -282,6 +288,7 @@ func (b MapBuilder) GetMap() map[string]interface{} {
 	return b.body
 }
 
+// GetFileContents returns the map contents as a file (only if a file is already set)
 func (b MapBuilder) GetFileContents() *os.File {
 	file, err := os.Open(b.file)
 	if err != nil {
@@ -296,6 +303,7 @@ func (b MapBuilder) HasFile() bool {
 	return b.file != ""
 }
 
+// GetBody returns the body as an interface
 func (b MapBuilder) GetBody() (interface{}, error) {
 	if b.HasFile() {
 		return os.Open(b.file)
@@ -303,17 +311,19 @@ func (b MapBuilder) GetBody() (interface{}, error) {
 	return b.GetMap(), nil
 }
 
-// GetMap returns the body as a map[string]interface{}
+// Get returns a value as an interface
 func (b MapBuilder) Get(key string) interface{} {
 	return b.body[key]
 }
 
-// Get the value as a string
+// GetString the value as a string
 func (b MapBuilder) GetString(key string) (string, bool) {
 	val, ok := b.body[key].(string)
 	return val, ok
 }
 
+// SetRequiredKeys stores the list of keys which should be present when marshaling the map to json.
+// Nested paths are accepted via dot notation
 func (b *MapBuilder) SetRequiredKeys(keys ...string) {
 	b.requiredKeys = keys
 }
