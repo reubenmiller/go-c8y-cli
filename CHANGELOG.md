@@ -1,8 +1,34 @@
 # CHANGELOG
 
-## Unreleased
+## Known limition
 
-No unreleased features
+Usage of large numbers (using exponetial notation) in templates can cause the server to respond with a 422 status code. This is due to a current limitation in the jsonnet template library.
+
+As a workaround, use the `data` parameter when working with large numbers (and don't specify a `template` parameter). This will preserve the number format as provided.
+
+**Example**
+
+*datapoint.largeint.json*
+
+```json
+{
+    "c8y_Kpi": {
+        "max": 19.1010101E19,
+        "description": "Counter"
+    }
+}
+```
+
+```sh
+c8y inventory create --data "./datapoint.largeint.json"
+```
+
+## TODO
+
+* TODO:
+  * Rename Group to UserGroup
+  * Save pipeline context for reuse in templates
+  * csv output for bash (i.e. id,name,value)
 
 ## Failed Tests
 
@@ -11,10 +37,10 @@ No unreleased features
 
 ./tools/PSc8y/reports/Failed_Get-TenantOptionCollection.auto.Tests_Pester.xml
 
+## Unreleased
 
-* TODO:
-    * Save pipeline context for reuse in templates
-    * csv output for bash (i.e. id,name,value)
+No unreleased features
+
 * Added new `--noAccept` global parameter to ignore the Accept header. This usually only affects `PUT` and `POST` requests.
 
 * Fixed #43. New-ServiceUser now accepts more than 1 role
@@ -66,6 +92,8 @@ No unreleased features
     ```
 
 ### Breaking changes
+
+* c8y rest `--ignoreAcceptHeader` has been removed as there is a global `--noAccept` header
 
 * `realtime subscribe`: Remove shorthand `-c` variant of `--channel` as it conflicts with the new `--compress`, `-c` global flag.
 * `Get-ManagedObjectCollect` renamed `Device` parameter to `Ids` and removed device lookup as the parameter is related to a generic managed object and not a device.
