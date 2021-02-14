@@ -35,7 +35,7 @@ The following steps can be used to add custom c8y aliases to save in typing out 
 
     ```sh
     curl -L -o ~/c8y.profile.sh \
-        https://raw.githubusercontent.com/reubenmiller/go-c8y-cli/master/tools/c8y.profile.sh
+    https://raw.githubusercontent.com/reubenmiller/go-c8y-cli/master/tools/bash/c8y.profile.sh
     ```
 
 3. Add the following line to your bash profile `~/.bashrc`
