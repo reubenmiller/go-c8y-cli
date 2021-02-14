@@ -5,56 +5,65 @@ layout: powershell
 Module Name: PSc8y
 online version:
 schema: 2.0.0
-title: Get-GroupByName
+title: Remove-UserGroup
 ---
 
-# Get-GroupByName
+# Remove-UserGroup
 
 ## SYNOPSIS
-Get a group by name
+Delete a new group
 
 ## SYNTAX
 
 ```
-Get-GroupByName
-	[[-Name] <String>]
+Remove-UserGroup
+	[-Id] <Object[]>
 	[[-Tenant] <Object>]
+	[[-ProcessingMode] <String>]
 	[-Raw]
 	[[-OutputFile] <String>]
 	[-NoProxy]
 	[[-Session] <String>]
 	[[-TimeoutSec] <Double>]
+	[-Force]
 	[-WhatIf]
 	[-Confirm]
 	[<CommonParameters>]
 ```
 
 ## DESCRIPTION
-Get a group by name
+Delete a new group
 
 ## EXAMPLES
 
 ### EXAMPLE 1
 ```
-Get-GroupByName -Name $Group.name
+Remove-UserGroup -Id $Group.id
 ```
 
-Get user group by its name
+Delete a user group
+
+### EXAMPLE 2
+```
+Get-UserGroupByName -Name $Group.name | Remove-UserGroup
+```
+
+Delete a user group (using pipeline)
 
 ## PARAMETERS
 
-### -Name
-Group name
+### -Id
+Group id (required)
 
 ```yaml
-Type: String
+Type: Object[]
 Parameter Sets: (All)
 Aliases:
 
-Required: False
+Required: True
 Position: 1
 Default value: None
-Accept pipeline input: False
+Accept pipeline input: True (ByPropertyName, ByValue)
 Accept wildcard characters: False
 ```
 
@@ -68,6 +77,21 @@ Aliases:
 
 Required: False
 Position: 2
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -ProcessingMode
+Cumulocity processing mode
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 3
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
@@ -97,7 +121,7 @@ Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: 3
+Position: 4
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
@@ -127,7 +151,7 @@ Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: 4
+Position: 5
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
@@ -142,8 +166,23 @@ Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: 5
+Position: 6
 Default value: 0
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -Force
+Don't prompt for confirmation
+
+```yaml
+Type: SwitchParameter
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: False
 Accept pipeline input: False
 Accept wildcard characters: False
 ```

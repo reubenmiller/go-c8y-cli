@@ -26,8 +26,8 @@ c8y inventory create --data "./datapoint.largeint.json"
 ## TODO
 
 * TODO:
-  * Rename Group to UserGroup
   * Save pipeline context for reuse in templates
+  * Rename Group to UserGroup
   * csv output for bash (i.e. id,name,value)
 
 ## Failed Tests
@@ -92,6 +92,22 @@ No unreleased features
     ```
 
 ### Breaking changes
+
+#### PowerShell
+
+* Renamed all user group related cmdelts from "Group" to "UserGroup"
+    |From|New Name|
+    |-|-|
+    |New-Group|New-UserGroup|
+    |Get-Group|Get-UserGroup|
+    |Get-GroupByName|Get-UserGroupByName|
+    |Get-GroupCollection|Get-UserGroupCollection|
+    |Get-GroupMembershipCollection|Get-UserGroupMembershipCollection|
+    |New-TestGroup|New-TestUserGroup|
+    |Update-Group|Update-UserGroup|
+    |Remove-Group|Remove-UserGroup|
+
+#### Shell
 
 * c8y rest `--ignoreAcceptHeader` has been removed as there is a global `--noAccept` header
 

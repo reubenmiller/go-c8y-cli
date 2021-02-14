@@ -109,8 +109,7 @@ func (n *CreateDeviceCmd) RunE(cmd *cobra.Command, args []string) error {
 		flags.WithStringValue("name", "name"),
 		flags.WithStringValue("type", "type"),
 		flags.WithRequiredTemplateString(`
-{c8y_IsDevice: {}}
-`),
+{c8y_IsDevice: {}}`),
 		WithTemplateValue(),
 		WithTemplateVariablesValue(),
 		flags.WithRequiredProperties("name"),

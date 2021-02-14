@@ -1,19 +1,19 @@
 ﻿# Code generated from specification version 1.0.0: DO NOT EDIT
-Function Remove-Group {
+Function Remove-UserGroup {
 <#
 .SYNOPSIS
-Delete a new group
+Delete a user group
 
 .DESCRIPTION
-Delete a new group
+Delete a user group
 
 .EXAMPLE
-PS> Remove-Group -Id $Group.id
+PS> Remove-UserGroup -Id $Group.id
 
 Delete a user group
 
 .EXAMPLE
-PS> Get-GroupByName -Name $Group.name | Remove-Group
+PS> Get-UserGroupByName -Name $Group.name | Remove-UserGroup
 
 Delete a user group (using pipeline)
 

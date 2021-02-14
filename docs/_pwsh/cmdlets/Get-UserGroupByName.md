@@ -5,25 +5,20 @@ layout: powershell
 Module Name: PSc8y
 online version:
 schema: 2.0.0
-title: Get-GroupMembershipCollection
+title: Get-UserGroupByName
 ---
 
-# Get-GroupMembershipCollection
+# Get-UserGroupByName
 
 ## SYNOPSIS
-Get all users in a group
+Get a group by name
 
 ## SYNTAX
 
 ```
-Get-GroupMembershipCollection
-	[-Id] <Object[]>
+Get-UserGroupByName
+	[[-Name] <String>]
 	[[-Tenant] <Object>]
-	[[-PageSize] <Int32>]
-	[-WithTotalPages]
-	[[-CurrentPage] <Int32>]
-	[[-TotalPages] <Int32>]
-	[-IncludeAll]
 	[-Raw]
 	[[-OutputFile] <String>]
 	[-NoProxy]
@@ -35,38 +30,31 @@ Get-GroupMembershipCollection
 ```
 
 ## DESCRIPTION
-Get all users in a group
+Get a group by name
 
 ## EXAMPLES
 
 ### EXAMPLE 1
 ```
-Get-GroupMembershipCollection -Id $Group.id
+Get-UserGroupByName -Name $Group.name
 ```
 
-List the users within a user group
-
-### EXAMPLE 2
-```
-Get-GroupByName -Name "business" | Get-GroupMembershipCollection
-```
-
-List the users within a user group (using pipeline)
+Get user group by its name
 
 ## PARAMETERS
 
-### -Id
-Group ID (required)
+### -Name
+Group name
 
 ```yaml
-Type: Object[]
+Type: String
 Parameter Sets: (All)
 Aliases:
 
-Required: True
+Required: False
 Position: 1
 Default value: None
-Accept pipeline input: True (ByPropertyName, ByValue)
+Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
@@ -81,81 +69,6 @@ Aliases:
 Required: False
 Position: 2
 Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
-### -PageSize
-Maximum number of results
-
-```yaml
-Type: Int32
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: 3
-Default value: 0
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
-### -WithTotalPages
-Include total pages statistic
-
-```yaml
-Type: SwitchParameter
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: Named
-Default value: False
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
-### -CurrentPage
-Get a specific page result
-
-```yaml
-Type: Int32
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: 4
-Default value: 0
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
-### -TotalPages
-Maximum number of pages to retrieve when using -IncludeAll
-
-```yaml
-Type: Int32
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: 5
-Default value: 0
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
-### -IncludeAll
-Include all results
-
-```yaml
-Type: SwitchParameter
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: Named
-Default value: False
 Accept pipeline input: False
 Accept wildcard characters: False
 ```
@@ -184,7 +97,7 @@ Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: 6
+Position: 3
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
@@ -214,7 +127,7 @@ Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: 7
+Position: 4
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
@@ -229,7 +142,7 @@ Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: 8
+Position: 5
 Default value: 0
 Accept pipeline input: False
 Accept wildcard characters: False

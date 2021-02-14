@@ -8,7 +8,7 @@ information:
   link: https://cumulocity.com/guides/reference/users/#user-reference-collection
 
 endpoints:
-  - name: getGroupCollection
+  - name: getUserGroupCollection
     description: Get collection of (user) groups
     method: GET
     path: /user/{tenant}/groups
@@ -17,11 +17,11 @@ endpoints:
     collectionProperty: groups
     alias:
         go: list
-        powershell: Get-GroupCollection
+        powershell: Get-UserGroupCollection
     examples:
       powershell:
         - description: Get a list of user groups for the current tenant
-          command: Get-GroupCollection
+          command: Get-UserGroupCollection
       go:
         - description: Get a list of user groups for the current tenant
           command: c8y userGroups list
@@ -31,22 +31,22 @@ endpoints:
         description: Tenant
 
 
-  - name: newGroup
+  - name: createUserGroup
     description: Create a new group
     method: POST
     path: /user/{tenant}/groups
     accept: application/vnd.com.nsn.cumulocity.group+json
     alias:
         go: create
-        powershell: New-Group
+        powershell: New-UserGroup
     examples:
       powershell:
         - description: Create a user group
           beforeEach:
             - $GroupName = "testgroup_" + [guid]::NewGuid().Guid.Substring(1,10)
-          command: New-Group -Name "$GroupName"
+          command: New-UserGroup -Name "$GroupName"
           afterEach:
-            - Get-GroupByName -Name "$GroupName" | Remove-Group
+            - Get-UserGroupByName -Name "$GroupName" | Remove-UserGroup
 
       go:
         - description: Create a user group
@@ -63,22 +63,22 @@ endpoints:
         description: Group name
         pipeline: true
 
-  - name: getGroup
+  - name: getUserGroup
     description: Create a new group by id
     method: GET
     path: /user/{tenant}/groups/{id}
     accept: application/vnd.com.nsn.cumulocity.group+json
     alias:
         go: get
-        powershell: Get-Group
+        powershell: Get-UserGroup
     examples:
       powershell:
         - description: Get a user group
           beforeEach:
-            - $Group = New-TestGroup
-          command: Get-Group -Id $Group.id
+            - $Group = New-TestUserGroup
+          command: Get-UserGroup -Id $Group.id
           afterEach:
-            - Remove-Group -Id $Group.id
+            - Remove-UserGroup -Id $Group.id
 
       go:
         - description: Get a user group
@@ -94,22 +94,22 @@ endpoints:
         pipeline: true
         description: Group id
 
-  - name: getGroupByName
+  - name: getUserGroupByName
     description: Get a group by name
     method: GET
     path: /user/{tenant}/groupByName/{name}
     accept: application/vnd.com.nsn.cumulocity.group+json
     alias:
         go: getByName
-        powershell: Get-GroupByName
+        powershell: Get-UserGroupByName
     examples:
       powershell:
         - description: Get user group by its name
           beforeEach:
-            - $Group = New-TestGroup
-          command: Get-GroupByName -Name $Group.name
+            - $Group = New-TestUserGroup
+          command: Get-UserGroupByName -Name $Group.name
           afterEach:
-            - Remove-Group -Id $Group.id
+            - Remove-UserGroup -Id $Group.id
 
       go:
         - description: Get user group by its name
@@ -125,24 +125,24 @@ endpoints:
         description: Group name
         pipeline: true
 
-  - name: deleteGroup
-    description: Delete a new group
+  - name: deleteUserGroup
+    description: Delete a user group
     method: DELETE
     path: /user/{tenant}/groups/{id}
     alias:
         go: delete
-        powershell: Remove-Group
+        powershell: Remove-UserGroup
     examples:
       powershell:
         - description: Delete a user group
           beforeEach:
-            - $Group = New-TestGroup
-          command: Remove-Group -Id $Group.id
+            - $Group = New-TestUserGroup
+          command: Remove-UserGroup -Id $Group.id
 
         - description: Delete a user group (using pipeline)
           beforeEach:
-            - $Group = New-TestGroup
-          command: Get-GroupByName -Name $Group.name | Remove-Group
+            - $Group = New-TestUserGroup
+          command: Get-UserGroupByName -Name $Group.name | Remove-UserGroup
 
       go:
         - description: Delete a user group
@@ -159,28 +159,28 @@ endpoints:
         pipeline: true
         description: Group id
 
-  - name: updateGroup
-    description: Update a new group
+  - name: updateUserGroup
+    description: Update a user group
     method: PUT
     path: /user/{tenant}/groups/{id}
     alias:
         go: update
-        powershell: Update-Group
+        powershell: Update-UserGroup
     examples:
       powershell:
         - description: Update a user group
           beforeEach:
-            - $Group = New-TestGroup
-          command: Update-Group -Id $Group -Name "customGroup2"
+            - $Group = New-TestUserGroup
+          command: Update-UserGroup -Id $Group -Name "customGroup2"
           afterEach:
-            - Remove-Group -Id $Group.id
+            - Remove-UserGroup -Id $Group.id
 
         - description: Update a user group (using pipeline)
           beforeEach:
-            - $Group = New-TestGroup
-          command: Get-GroupByName -Name $Group.name | Update-Group -Name "customGroup2"
+            - $Group = New-TestUserGroup
+          command: Get-UserGroupByName -Name $Group.name | Update-UserGroup -Name "customGroup2"
           afterEach:
-            - Remove-Group -Id $Group.id
+            - Remove-UserGroup -Id $Group.id
       go:
         - description: Update a user group
           command: c8y userGroups update --id 12345 --name "customGroup2"

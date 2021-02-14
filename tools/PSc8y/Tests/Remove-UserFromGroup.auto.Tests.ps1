@@ -3,7 +3,7 @@
 Describe -Name "Remove-UserFromGroup" {
     BeforeEach {
         $User = New-TestUser
-        $Group = Get-GroupByName -Name "business"
+        $Group = Get-UserGroupByName -Name "business"
         Add-UserToGroup -Group $Group.id -User $User.id
 
     }

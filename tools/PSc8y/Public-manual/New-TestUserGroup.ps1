@@ -1,4 +1,4 @@
-﻿Function New-TestGroup {
+﻿Function New-TestUserGroup {
 <#
 .SYNOPSIS
 Create a test user group
@@ -7,7 +7,7 @@ Create a test user group
 Create a new test user group using a random name
 
 .EXAMPLE
-New-TestGroup -Name mygroup
+New-TestUserGroup -Name mygroup
 
 Create a new user group with the prefix "mygroup". A random postfix will be added to it
 #>
@@ -49,7 +49,7 @@ Create a new user group with the prefix "mygroup". A random postfix will be adde
 
     Process {
         $GroupName = New-RandomString -Prefix "${Name}_"
-        $TestGroup = PSc8y\New-Group `
+        $TestGroup = PSc8y\New-UserGroup `
             -Name $GroupName `
             -ProcessingMode:$ProcessingMode `
             -Template:$Template `

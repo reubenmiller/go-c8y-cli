@@ -5,108 +5,76 @@ layout: powershell
 Module Name: PSc8y
 online version:
 schema: 2.0.0
-title: New-TestGroup
+title: Get-UserGroup
 ---
 
-# New-TestGroup
+# Get-UserGroup
 
 ## SYNOPSIS
-Create a test user group
+Create a new group by id
 
 ## SYNTAX
 
 ```
-New-TestGroup
-	[[-Name] <String>]
-	[-ProcessingMode <String>]
-	[-Template <String>]
-	[-TemplateVars <String>]
-	[-Force]
+Get-UserGroup
+	[[-Id] <Object[]>]
+	[[-Tenant] <Object>]
+	[-Raw]
+	[[-OutputFile] <String>]
+	[-NoProxy]
+	[[-Session] <String>]
+	[[-TimeoutSec] <Double>]
 	[-WhatIf]
 	[-Confirm]
 	[<CommonParameters>]
 ```
 
 ## DESCRIPTION
-Create a new test user group using a random name
+Create a new group by id
 
 ## EXAMPLES
 
 ### EXAMPLE 1
 ```
-New-TestGroup -Name mygroup
+Get-UserGroup -Id $Group.id
 ```
 
-Create a new user group with the prefix "mygroup".
-A random postfix will be added to it
+Get a user group
 
 ## PARAMETERS
 
-### -Name
-Name of the user group.
-A random postfix will be added to it to make it unique
+### -Id
+Group id
 
 ```yaml
-Type: String
+Type: Object[]
 Parameter Sets: (All)
 Aliases:
 
 Required: False
 Position: 1
-Default value: Testgroup
+Default value: None
 Accept pipeline input: True (ByPropertyName, ByValue)
 Accept wildcard characters: False
 ```
 
-### -ProcessingMode
-Cumulocity processing mode
+### -Tenant
+Tenant
 
 ```yaml
-Type: String
+Type: Object
 Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: Named
+Position: 2
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -Template
-Template (jsonnet) file to use to create the request body.
-
-```yaml
-Type: String
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: Named
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
-### -TemplateVars
-Variables to be used when evaluating the Template.
-Accepts json or json shorthand, i.e.
-"name=peter"
-
-```yaml
-Type: String
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: Named
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
-### -Force
-Don't prompt for confirmation
+### -Raw
+Show the full (raw) response from Cumulocity including pagination information
 
 ```yaml
 Type: SwitchParameter
@@ -116,6 +84,66 @@ Aliases:
 Required: False
 Position: Named
 Default value: False
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -OutputFile
+Write the response to file
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 3
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -NoProxy
+Ignore any proxy settings when running the cmdlet
+
+```yaml
+Type: SwitchParameter
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: False
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -Session
+Specifiy alternative Cumulocity session to use when running the cmdlet
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 4
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -TimeoutSec
+TimeoutSec timeout in seconds before a request will be aborted
+
+```yaml
+Type: Double
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 5
+Default value: 0
 Accept pipeline input: False
 Accept wildcard characters: False
 ```
@@ -158,6 +186,7 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 
 ## OUTPUTS
 
+### System.Object
 ## NOTES
 
 ## RELATED LINKS

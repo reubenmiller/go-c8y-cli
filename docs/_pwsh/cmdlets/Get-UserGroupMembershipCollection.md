@@ -5,18 +5,19 @@ layout: powershell
 Module Name: PSc8y
 online version:
 schema: 2.0.0
-title: Get-GroupCollection
+title: Get-UserGroupMembershipCollection
 ---
 
-# Get-GroupCollection
+# Get-UserGroupMembershipCollection
 
 ## SYNOPSIS
-Get collection of (user) groups
+Get all users in a group
 
 ## SYNTAX
 
 ```
-Get-GroupCollection
+Get-UserGroupMembershipCollection
+	[-Id] <Object[]>
 	[[-Tenant] <Object>]
 	[[-PageSize] <Int32>]
 	[-WithTotalPages]
@@ -34,18 +35,40 @@ Get-GroupCollection
 ```
 
 ## DESCRIPTION
-Get collection of (user) groups
+Get all users in a group
 
 ## EXAMPLES
 
 ### EXAMPLE 1
 ```
-Get-GroupCollection
+Get-UserGroupMembershipCollection -Id $Group.id
 ```
 
-Get a list of user groups for the current tenant
+List the users within a user group
+
+### EXAMPLE 2
+```
+Get-UserGroupByName -Name "business" | Get-UserGroupMembershipCollection
+```
+
+List the users within a user group (using pipeline)
 
 ## PARAMETERS
+
+### -Id
+Group ID (required)
+
+```yaml
+Type: Object[]
+Parameter Sets: (All)
+Aliases:
+
+Required: True
+Position: 1
+Default value: None
+Accept pipeline input: True (ByPropertyName, ByValue)
+Accept wildcard characters: False
+```
 
 ### -Tenant
 Tenant
@@ -56,7 +79,7 @@ Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: 1
+Position: 2
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
@@ -71,7 +94,7 @@ Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: 2
+Position: 3
 Default value: 0
 Accept pipeline input: False
 Accept wildcard characters: False
@@ -101,7 +124,7 @@ Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: 3
+Position: 4
 Default value: 0
 Accept pipeline input: False
 Accept wildcard characters: False
@@ -116,7 +139,7 @@ Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: 4
+Position: 5
 Default value: 0
 Accept pipeline input: False
 Accept wildcard characters: False
@@ -161,7 +184,7 @@ Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: 5
+Position: 6
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
@@ -191,7 +214,7 @@ Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: 6
+Position: 7
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
@@ -206,7 +229,7 @@ Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: 7
+Position: 8
 Default value: 0
 Accept pipeline input: False
 Accept wildcard characters: False

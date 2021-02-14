@@ -651,7 +651,7 @@
       "bodyTemplate": {
         "type": "jsonnet",
         "applyLast": true,
-        "template": "{sendPasswordResetEmail: !std.objectHas(self, 'password')}\n"
+        "template": "{sendPasswordResetEmail: !std.objectHas(self, 'password')}"
       },
       "body": [
         {

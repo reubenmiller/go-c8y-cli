@@ -22,7 +22,7 @@
             "description": "Add a user to a user group",
             "beforeEach": [
               "$User = New-TestUser",
-              "$Group = Get-GroupByName -Name \"business\""
+              "$Group = Get-UserGroupByName -Name \"business\""
             ],
             "command": "Add-UserToGroup -Group $Group.id -User $User.id",
             "afterEach": [
@@ -78,7 +78,7 @@
             "description": "Add a user to a user group",
             "beforeEach": [
               "$User = New-TestUser",
-              "$Group = Get-GroupByName -Name \"business\"",
+              "$Group = Get-UserGroupByName -Name \"business\"",
               "Add-UserToGroup -Group $Group.id -User $User.id"
             ],
             "command": "Remove-UserFromGroup -Group $Group.id -User $User.id",
@@ -126,7 +126,7 @@
       "collectionProperty": "references.#.user",
       "alias": {
         "go": "listGroupMembership",
-        "powershell": "Get-GroupMembershipCollection"
+        "powershell": "Get-UserGroupMembershipCollection"
       },
       "examples": {
         "powershell": [
@@ -134,10 +134,10 @@
             "description": "List the users within a user group",
             "beforeEach": [
               "$User = New-TestUser",
-              "$Group = Get-GroupByName -Name \"business\"",
+              "$Group = Get-UserGroupByName -Name \"business\"",
               "Add-UserToGroup -Group $Group.id -User $User.id"
             ],
-            "command": "Get-GroupMembershipCollection -Id $Group.id",
+            "command": "Get-UserGroupMembershipCollection -Id $Group.id",
             "afterEach": [
               "Remove-User -Id $User.id"
             ]
@@ -146,10 +146,10 @@
             "description": "List the users within a user group (using pipeline)",
             "beforeEach": [
               "$User = New-TestUser",
-              "$Group = Get-GroupByName -Name \"business\"",
+              "$Group = Get-UserGroupByName -Name \"business\"",
               "Add-UserToGroup -Group $Group.id -User $User.id"
             ],
-            "command": "Get-GroupByName -Name \"business\" | Get-GroupMembershipCollection",
+            "command": "Get-UserGroupByName -Name \"business\" | Get-UserGroupMembershipCollection",
             "afterEach": [
               "Remove-User -Id $User.id"
             ]

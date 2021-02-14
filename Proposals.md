@@ -93,7 +93,7 @@
   * [x] Get-BinaryCollection.ps1
   * [x] Get-EventCollection.ps1
   * [x] Get-ExternalIDCollection.ps1
-  * [x] Get-GroupCollection.ps1
+  * [x] Get-UserGroupCollection.ps1
   * [x] Get-MeasurementCollection.ps1
   * [x] Get-OperationCollection.ps1
   * [x] Get-RetentionRuleCollection.ps1

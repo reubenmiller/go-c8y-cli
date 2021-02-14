@@ -1,14 +1,14 @@
 . $PSScriptRoot/imports.ps1
 
-Describe -Name "Get-Group" {
+Describe -Name "Get-UserGroup" {
     Context "Existing groups" {
         BeforeEach {
-            $Group1 = New-TestGroup -Name "tempGroup1"
-            $Group2 = New-TestGroup -Name "tempGroup1"
+            $Group1 = New-TestUserGroup -Name "tempGroup1"
+            $Group2 = New-TestUserGroup -Name "tempGroup1"
         }
 
         It "Get a group (using pipeline)" {
-            $Response = $Group1, $Group2 | PSc8y\Get-Group
+            $Response = $Group1, $Group2 | PSc8y\Get-UserGroup
 
             $LASTEXITCODE | Should -Be 0
             $Response | Should -HaveCount 2
@@ -17,8 +17,8 @@ Describe -Name "Get-Group" {
         }
 
         AfterEach {
-            $null = Remove-Group -Id $Group1.id
-            $null = Remove-Group -Id $Group2.id
+            $null = Remove-UserGroup -Id $Group1.id
+            $null = Remove-UserGroup -Id $Group2.id
         }
     }
 }

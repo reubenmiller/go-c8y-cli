@@ -5,85 +5,47 @@ layout: powershell
 Module Name: PSc8y
 online version:
 schema: 2.0.0
-title: Update-Group
+title: Get-UserGroupCollection
 ---
 
-# Update-Group
+# Get-UserGroupCollection
 
 ## SYNOPSIS
-Update a new group
+Get collection of (user) groups
 
 ## SYNTAX
 
 ```
-Update-Group
-	[-Id] <Object[]>
-	[[-Name] <String>]
+Get-UserGroupCollection
 	[[-Tenant] <Object>]
-	[[-ProcessingMode] <String>]
-	[[-Template] <String>]
-	[[-TemplateVars] <String>]
+	[[-PageSize] <Int32>]
+	[-WithTotalPages]
+	[[-CurrentPage] <Int32>]
+	[[-TotalPages] <Int32>]
+	[-IncludeAll]
 	[-Raw]
 	[[-OutputFile] <String>]
 	[-NoProxy]
 	[[-Session] <String>]
 	[[-TimeoutSec] <Double>]
-	[-Force]
 	[-WhatIf]
 	[-Confirm]
 	[<CommonParameters>]
 ```
 
 ## DESCRIPTION
-Update a new group
+Get collection of (user) groups
 
 ## EXAMPLES
 
 ### EXAMPLE 1
 ```
-Update-Group -Id $Group -Name "customGroup2"
+Get-UserGroupCollection
 ```
 
-Update a user group
-
-### EXAMPLE 2
-```
-Get-GroupByName -Name $Group.name | Update-Group -Name "customGroup2"
-```
-
-Update a user group (using pipeline)
+Get a list of user groups for the current tenant
 
 ## PARAMETERS
-
-### -Id
-Group id (required)
-
-```yaml
-Type: Object[]
-Parameter Sets: (All)
-Aliases:
-
-Required: True
-Position: 1
-Default value: None
-Accept pipeline input: True (ByPropertyName, ByValue)
-Accept wildcard characters: False
-```
-
-### -Name
-name
-
-```yaml
-Type: String
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: 2
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
 
 ### -Tenant
 Tenant
@@ -94,55 +56,83 @@ Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: 3
+Position: 1
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -ProcessingMode
-Cumulocity processing mode
+### -PageSize
+Maximum number of results
 
 ```yaml
-Type: String
+Type: Int32
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 2
+Default value: 0
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -WithTotalPages
+Include total pages statistic
+
+```yaml
+Type: SwitchParameter
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: False
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -CurrentPage
+Get a specific page result
+
+```yaml
+Type: Int32
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 3
+Default value: 0
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -TotalPages
+Maximum number of pages to retrieve when using -IncludeAll
+
+```yaml
+Type: Int32
 Parameter Sets: (All)
 Aliases:
 
 Required: False
 Position: 4
-Default value: None
+Default value: 0
 Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -Template
-Template (jsonnet) file to use to create the request body.
+### -IncludeAll
+Include all results
 
 ```yaml
-Type: String
+Type: SwitchParameter
 Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: 5
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
-### -TemplateVars
-Variables to be used when evaluating the Template.
-Accepts a file path, json or json shorthand, i.e.
-"name=peter"
-
-```yaml
-Type: String
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: 6
-Default value: None
+Position: Named
+Default value: False
 Accept pipeline input: False
 Accept wildcard characters: False
 ```
@@ -171,7 +161,7 @@ Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: 7
+Position: 5
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
@@ -201,7 +191,7 @@ Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: 8
+Position: 6
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
@@ -216,23 +206,8 @@ Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: 9
+Position: 7
 Default value: 0
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
-### -Force
-Don't prompt for confirmation
-
-```yaml
-Type: SwitchParameter
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: Named
-Default value: False
 Accept pipeline input: False
 Accept wildcard characters: False
 ```

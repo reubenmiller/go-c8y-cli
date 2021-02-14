@@ -1,14 +1,14 @@
 . $PSScriptRoot/imports.ps1
 
-Describe -Name "Update-Group" {
+Describe -Name "Update-UserGroup" {
     Context "Existing groups" {
         BeforeEach {
-            $Group1 = New-TestGroup -Name "tempGroup1"
+            $Group1 = New-TestUserGroup -Name "tempGroup1"
         }
 
         It "Get a group (using pipeline)" {
             $NewName = New-RandomString -Prefix "updateGroupName1"
-            $Response = $Group1 | PSc8y\Update-Group -Name $NewName
+            $Response = $Group1 | PSc8y\Update-UserGroup -Name $NewName
 
             $LASTEXITCODE | Should -Be 0
             $Response | Should -Not -BeNullOrEmpty
@@ -16,7 +16,7 @@ Describe -Name "Update-Group" {
         }
 
         AfterEach {
-            $null = Remove-Group -Id $Group1.id
+            $null = Remove-UserGroup -Id $Group1.id
         }
     }
 }

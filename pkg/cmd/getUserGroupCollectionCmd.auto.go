@@ -2,6 +2,7 @@
 package cmd
 
 import (
+	"fmt"
 	"io"
 	"net/http"
 
@@ -11,34 +12,31 @@ import (
 	"github.com/spf13/cobra"
 )
 
-type ResetUserPasswordCmd struct {
+type GetUserGroupCollectionCmd struct {
 	*baseCmd
 }
 
-func NewResetUserPasswordCmd() *ResetUserPasswordCmd {
-	ccmd := &ResetUserPasswordCmd{}
+func NewGetUserGroupCollectionCmd() *GetUserGroupCollectionCmd {
+	ccmd := &GetUserGroupCollectionCmd{}
 	cmd := &cobra.Command{
-		Use:   "resetUserPassword",
-		Short: "Reset a user's password",
-		Long:  `The password can be reset either by issuing a password reset email (default), or be specifying a new password.`,
+		Use:   "list",
+		Short: "Get collection of (user) groups",
+		Long:  ``,
 		Example: `
-$ c8y users resetUserPassword --id "myuser"
-Update a user
+$ c8y userGroups list
+Get a list of user groups for the current tenant
         `,
-		PreRunE: validateUpdateMode,
+		PreRunE: nil,
 		RunE:    ccmd.RunE,
 	}
 
 	cmd.SilenceUsage = true
 
-	cmd.Flags().StringSlice("id", []string{""}, "User id (required) (accepts pipeline)")
 	cmd.Flags().String("tenant", "", "Tenant")
-	cmd.Flags().String("newPassword", "", "New user password. Min: 6, max: 32 characters. Only Latin1 chars allowed")
-	addProcessingModeFlag(cmd)
 
 	flags.WithOptions(
 		cmd,
-		flags.WithExtendedPipelineSupport("id", "id", true),
+		flags.WithExtendedPipelineSupport("", "", false),
 	)
 
 	// Required flags
@@ -48,7 +46,7 @@ Update a user
 	return ccmd
 }
 
-func (n *ResetUserPasswordCmd) RunE(cmd *cobra.Command, args []string) error {
+func (n *GetUserGroupCollectionCmd) RunE(cmd *cobra.Command, args []string) error {
 	var err error
 	inputIterators, err := flags.NewRequestInputIterators(cmd)
 	if err != nil {
@@ -65,6 +63,11 @@ func (n *ResetUserPasswordCmd) RunE(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return newUserError(err)
 	}
+	commonOptions, err := getCommonOptions(cmd)
+	if err != nil {
+		return newUserError(fmt.Sprintf("Failed to get common options. err=%s", err))
+	}
+	commonOptions.AddQueryParameters(query)
 
 	queryValue, err := query.GetQueryUnescape(true)
 
@@ -78,7 +81,6 @@ func (n *ResetUserPasswordCmd) RunE(cmd *cobra.Command, args []string) error {
 		cmd,
 		headers,
 		inputIterators,
-		flags.WithProcessingModeValue(),
 	)
 	if err != nil {
 		return newUserError(err)
@@ -101,24 +103,17 @@ func (n *ResetUserPasswordCmd) RunE(cmd *cobra.Command, args []string) error {
 		cmd,
 		body,
 		inputIterators,
-		WithDataValue(),
-		flags.WithStringValue("newPassword", "password"),
-		flags.WithRequiredTemplateString(`
-{sendPasswordResetEmail: !std.objectHas(self, 'password')}`),
-		WithTemplateValue(),
-		WithTemplateVariablesValue(),
 	)
 	if err != nil {
 		return newUserError(err)
 	}
 
 	// path parameters
-	path := flags.NewStringTemplate("user/{tenant}/users/{id}")
+	path := flags.NewStringTemplate("/user/{tenant}/groups")
 	err = flags.WithPathParameters(
 		cmd,
 		path,
 		inputIterators,
-		WithUserByNameFirstMatch(args, "id", "id"),
 		flags.WithStringDefaultValue(client.TenantName, "tenant", "tenant"),
 	)
 	if err != nil {
@@ -126,7 +121,7 @@ func (n *ResetUserPasswordCmd) RunE(cmd *cobra.Command, args []string) error {
 	}
 
 	req := c8y.RequestOptions{
-		Method:       "PUT",
+		Method:       "GET",
 		Path:         path.GetTemplate(),
 		Query:        queryValue,
 		Body:         body,

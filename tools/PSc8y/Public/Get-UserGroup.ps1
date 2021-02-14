@@ -1,54 +1,36 @@
 ﻿# Code generated from specification version 1.0.0: DO NOT EDIT
-Function New-Group {
+Function Get-UserGroup {
 <#
 .SYNOPSIS
-Create a new group
+Create a new group by id
 
 .DESCRIPTION
-Create a new group
+Create a new group by id
 
 .EXAMPLE
-PS> New-Group -Name "$GroupName"
+PS> Get-UserGroup -Id $Group.id
 
-Create a user group
+Get a user group
 
 
 #>
     [cmdletbinding(SupportsShouldProcess = $true,
                    PositionalBinding=$true,
                    HelpUri='',
-                   ConfirmImpact = 'High')]
+                   ConfirmImpact = 'None')]
     [Alias()]
     [OutputType([object])]
     Param(
-        # Group name
+        # Group id
         [Parameter(ValueFromPipeline=$true,
                    ValueFromPipelineByPropertyName=$true)]
-        [string]
-        $Name,
+        [object[]]
+        $Id,
 
         # Tenant
         [Parameter()]
         [object]
         $Tenant,
-
-        # Cumulocity processing mode
-        [Parameter()]
-        [AllowNull()]
-        [AllowEmptyString()]
-        [ValidateSet("PERSISTENT", "QUIESCENT", "TRANSIENT", "CEP", "")]
-        [string]
-        $ProcessingMode,
-
-        # Template (jsonnet) file to use to create the request body.
-        [Parameter()]
-        [string]
-        $Template,
-
-        # Variables to be used when evaluating the Template. Accepts a file path, json or json shorthand, i.e. "name=peter"
-        [Parameter()]
-        [string]
-        $TemplateVars,
 
         # Show the full (raw) response from Cumulocity including pagination information
         [Parameter()]
@@ -73,27 +55,13 @@ Create a user group
         # TimeoutSec timeout in seconds before a request will be aborted
         [Parameter()]
         [double]
-        $TimeoutSec,
-
-        # Don't prompt for confirmation
-        [Parameter()]
-        [switch]
-        $Force
+        $TimeoutSec
     )
 
     Begin {
         $Parameters = @{}
         if ($PSBoundParameters.ContainsKey("Tenant")) {
             $Parameters["tenant"] = $Tenant
-        }
-        if ($PSBoundParameters.ContainsKey("ProcessingMode")) {
-            $Parameters["processingMode"] = $ProcessingMode
-        }
-        if ($PSBoundParameters.ContainsKey("Template") -and $Template) {
-            $Parameters["template"] = $Template
-        }
-        if ($PSBoundParameters.ContainsKey("TemplateVars") -and $TemplateVars) {
-            $Parameters["templateVars"] = $TemplateVars
         }
         if ($PSBoundParameters.ContainsKey("OutputFile")) {
             $Parameters["outputFile"] = $OutputFile
@@ -115,7 +83,7 @@ Create a user group
     }
 
     Process {
-        $Parameters["name"] = PSc8y\Expand-Id $Name
+        $Parameters["id"] = PSc8y\Expand-Id $Id
 
         if (!$Force -and
             !$WhatIfPreference -and
@@ -128,7 +96,7 @@ Create a user group
 
         Invoke-ClientCommand `
             -Noun "userGroups" `
-            -Verb "create" `
+            -Verb "get" `
             -Parameters $Parameters `
             -Type "application/vnd.com.nsn.cumulocity.group+json" `
             -ItemType "" `

@@ -18,12 +18,12 @@ func NewUserGroupsRootCmd() *UserGroupsCmd {
 	}
 
 	// Subcommands
-	cmd.AddCommand(NewGetGroupCollectionCmd().getCommand())
-	cmd.AddCommand(NewNewGroupCmd().getCommand())
-	cmd.AddCommand(NewGetGroupCmd().getCommand())
-	cmd.AddCommand(NewGetGroupByNameCmd().getCommand())
-	cmd.AddCommand(NewDeleteGroupCmd().getCommand())
-	cmd.AddCommand(NewUpdateGroupCmd().getCommand())
+	cmd.AddCommand(NewGetUserGroupCollectionCmd().getCommand())
+	cmd.AddCommand(NewCreateUserGroupCmd().getCommand())
+	cmd.AddCommand(NewGetUserGroupCmd().getCommand())
+	cmd.AddCommand(NewGetUserGroupByNameCmd().getCommand())
+	cmd.AddCommand(NewDeleteUserGroupCmd().getCommand())
+	cmd.AddCommand(NewUpdateUserGroupCmd().getCommand())
 
 	ccmd.baseCmd = newBaseCmd(cmd)
 

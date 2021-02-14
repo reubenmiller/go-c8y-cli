@@ -1,65 +1,70 @@
 ﻿# Code generated from specification version 1.0.0: DO NOT EDIT
-Function Update-Group {
+Function Get-UserGroupMembershipCollection {
 <#
 .SYNOPSIS
-Update a new group
+Get all users in a group
 
 .DESCRIPTION
-Update a new group
+Get all users in a group
 
 .EXAMPLE
-PS> Update-Group -Id $Group -Name "customGroup2"
+PS> Get-UserGroupMembershipCollection -Id $Group.id
 
-Update a user group
+List the users within a user group
 
 .EXAMPLE
-PS> Get-GroupByName -Name $Group.name | Update-Group -Name "customGroup2"
+PS> Get-UserGroupByName -Name "business" | Get-UserGroupMembershipCollection
 
-Update a user group (using pipeline)
+List the users within a user group (using pipeline)
 
 
 #>
     [cmdletbinding(SupportsShouldProcess = $true,
                    PositionalBinding=$true,
                    HelpUri='',
-                   ConfirmImpact = 'High')]
+                   ConfirmImpact = 'None')]
     [Alias()]
     [OutputType([object])]
     Param(
-        # Group id (required)
+        # Group ID (required)
         [Parameter(Mandatory = $true,
                    ValueFromPipeline=$true,
                    ValueFromPipelineByPropertyName=$true)]
         [object[]]
         $Id,
 
-        # name
-        [Parameter()]
-        [string]
-        $Name,
-
         # Tenant
         [Parameter()]
         [object]
         $Tenant,
 
-        # Cumulocity processing mode
+        # Maximum number of results
         [Parameter()]
         [AllowNull()]
         [AllowEmptyString()]
-        [ValidateSet("PERSISTENT", "QUIESCENT", "TRANSIENT", "CEP", "")]
-        [string]
-        $ProcessingMode,
+        [ValidateRange(1,2000)]
+        [int]
+        $PageSize,
 
-        # Template (jsonnet) file to use to create the request body.
+        # Include total pages statistic
         [Parameter()]
-        [string]
-        $Template,
+        [switch]
+        $WithTotalPages,
 
-        # Variables to be used when evaluating the Template. Accepts a file path, json or json shorthand, i.e. "name=peter"
+        # Get a specific page result
         [Parameter()]
-        [string]
-        $TemplateVars,
+        [int]
+        $CurrentPage,
+
+        # Maximum number of pages to retrieve when using -IncludeAll
+        [Parameter()]
+        [int]
+        $TotalPages,
+
+        # Include all results
+        [Parameter()]
+        [switch]
+        $IncludeAll,
 
         # Show the full (raw) response from Cumulocity including pagination information
         [Parameter()]
@@ -84,30 +89,19 @@ Update a user group (using pipeline)
         # TimeoutSec timeout in seconds before a request will be aborted
         [Parameter()]
         [double]
-        $TimeoutSec,
-
-        # Don't prompt for confirmation
-        [Parameter()]
-        [switch]
-        $Force
+        $TimeoutSec
     )
 
     Begin {
         $Parameters = @{}
-        if ($PSBoundParameters.ContainsKey("Name")) {
-            $Parameters["name"] = $Name
-        }
         if ($PSBoundParameters.ContainsKey("Tenant")) {
             $Parameters["tenant"] = $Tenant
         }
-        if ($PSBoundParameters.ContainsKey("ProcessingMode")) {
-            $Parameters["processingMode"] = $ProcessingMode
+        if ($PSBoundParameters.ContainsKey("PageSize")) {
+            $Parameters["pageSize"] = $PageSize
         }
-        if ($PSBoundParameters.ContainsKey("Template") -and $Template) {
-            $Parameters["template"] = $Template
-        }
-        if ($PSBoundParameters.ContainsKey("TemplateVars") -and $TemplateVars) {
-            $Parameters["templateVars"] = $TemplateVars
+        if ($PSBoundParameters.ContainsKey("WithTotalPages") -and $WithTotalPages) {
+            $Parameters["withTotalPages"] = $WithTotalPages
         }
         if ($PSBoundParameters.ContainsKey("OutputFile")) {
             $Parameters["outputFile"] = $OutputFile
@@ -134,23 +128,18 @@ Update a user group (using pipeline)
                 $Parameters["id"] = if ($item.id) { $item.id } else { $item }
             }
 
-            if (!$Force -and
-                !$WhatIfPreference -and
-                !$PSCmdlet.ShouldProcess(
-                    (PSc8y\Get-C8ySessionProperty -Name "tenant"),
-                    (Format-ConfirmationMessage -Name $PSCmdlet.MyInvocation.InvocationName -InputObject $item)
-                )) {
-                continue
-            }
 
             Invoke-ClientCommand `
-                -Noun "userGroups" `
-                -Verb "update" `
+                -Noun "userReferences" `
+                -Verb "listGroupMembership" `
                 -Parameters $Parameters `
-                -Type "" `
-                -ItemType "" `
-                -ResultProperty "" `
-                -Raw:$Raw
+                -Type "application/vnd.com.nsn.cumulocity.userReferenceCollection+json" `
+                -ItemType "application/vnd.com.nsn.cumulocity.user+json" `
+                -ResultProperty "references.user" `
+                -Raw:$Raw `
+                -CurrentPage:$CurrentPage `
+                -TotalPages:$TotalPages `
+                -IncludeAll:$IncludeAll
         }
     }
 

@@ -97,7 +97,7 @@ $UserGroupCompleter = {
         $searchFor = $wordToComplete
     }
 
-    Get-GroupCollection -PageSize 100 -WarningAction SilentlyContinue `
+    Get-UserGroupCollection -PageSize 100 -WarningAction SilentlyContinue `
     | Where-Object { $_.id -like "$searchFor*" -or $_.name -like "$searchFor*" } `
     | ForEach-Object {
         $value = $_.name
@@ -295,9 +295,9 @@ Register-ArgumentCompleter -CommandName Update-TenantOptionEditable -ParameterNa
 Register-ArgumentCompleter -CommandName Update-TenantOptionEditable -ParameterName key -ScriptBlock $TenantOptionKeyCompleter
 
 # User Group
-Register-ArgumentCompleter -CommandName Get-Group -ParameterName Id -ScriptBlock $UserGroupCompleter
-Register-ArgumentCompleter -CommandName Update-Group -ParameterName Id -ScriptBlock $UserGroupCompleter
-Register-ArgumentCompleter -CommandName Remove-Group -ParameterName Id -ScriptBlock $UserGroupCompleter
+Register-ArgumentCompleter -CommandName Get-UserGroup -ParameterName Id -ScriptBlock $UserGroupCompleter
+Register-ArgumentCompleter -CommandName Update-UserGroup -ParameterName Id -ScriptBlock $UserGroupCompleter
+Register-ArgumentCompleter -CommandName Remove-UserGroup -ParameterName Id -ScriptBlock $UserGroupCompleter
 
 # Service User (microservice)
 Register-ArgumentCompleter -CommandName New-ServiceUser -ParameterName Roles -ScriptBlock $RoleCompleter
@@ -345,7 +345,7 @@ Register-ArgumentCompleter -CommandName Add-RoleToGroup -ParameterName Role -Scr
 Register-ArgumentCompleter -CommandName Add-RoleToUser -ParameterName User -ScriptBlock $UserCompleter
 Register-ArgumentCompleter -CommandName Add-RoleToUser -ParameterName Role -ScriptBlock $RoleCompleter
 
-Register-ArgumentCompleter -CommandName Get-GroupMembershipCollection -ParameterName Id -ScriptBlock $UserGroupCompleter
+Register-ArgumentCompleter -CommandName Get-UserGroupMembershipCollection -ParameterName Id -ScriptBlock $UserGroupCompleter
 
 $ModuleName = "PSc8y"
 

@@ -1,23 +1,23 @@
 ﻿# Code generated from specification version 1.0.0: DO NOT EDIT
-Function Get-GroupByName {
+Function New-UserGroup {
 <#
 .SYNOPSIS
-Get a group by name
+Create a new group
 
 .DESCRIPTION
-Get a group by name
+Create a new group
 
 .EXAMPLE
-PS> Get-GroupByName -Name $Group.name
+PS> New-UserGroup -Name "$GroupName"
 
-Get user group by its name
+Create a user group
 
 
 #>
     [cmdletbinding(SupportsShouldProcess = $true,
                    PositionalBinding=$true,
                    HelpUri='',
-                   ConfirmImpact = 'None')]
+                   ConfirmImpact = 'High')]
     [Alias()]
     [OutputType([object])]
     Param(
@@ -31,6 +31,24 @@ Get user group by its name
         [Parameter()]
         [object]
         $Tenant,
+
+        # Cumulocity processing mode
+        [Parameter()]
+        [AllowNull()]
+        [AllowEmptyString()]
+        [ValidateSet("PERSISTENT", "QUIESCENT", "TRANSIENT", "CEP", "")]
+        [string]
+        $ProcessingMode,
+
+        # Template (jsonnet) file to use to create the request body.
+        [Parameter()]
+        [string]
+        $Template,
+
+        # Variables to be used when evaluating the Template. Accepts a file path, json or json shorthand, i.e. "name=peter"
+        [Parameter()]
+        [string]
+        $TemplateVars,
 
         # Show the full (raw) response from Cumulocity including pagination information
         [Parameter()]
@@ -55,13 +73,27 @@ Get user group by its name
         # TimeoutSec timeout in seconds before a request will be aborted
         [Parameter()]
         [double]
-        $TimeoutSec
+        $TimeoutSec,
+
+        # Don't prompt for confirmation
+        [Parameter()]
+        [switch]
+        $Force
     )
 
     Begin {
         $Parameters = @{}
         if ($PSBoundParameters.ContainsKey("Tenant")) {
             $Parameters["tenant"] = $Tenant
+        }
+        if ($PSBoundParameters.ContainsKey("ProcessingMode")) {
+            $Parameters["processingMode"] = $ProcessingMode
+        }
+        if ($PSBoundParameters.ContainsKey("Template") -and $Template) {
+            $Parameters["template"] = $Template
+        }
+        if ($PSBoundParameters.ContainsKey("TemplateVars") -and $TemplateVars) {
+            $Parameters["templateVars"] = $TemplateVars
         }
         if ($PSBoundParameters.ContainsKey("OutputFile")) {
             $Parameters["outputFile"] = $OutputFile
@@ -96,7 +128,7 @@ Get user group by its name
 
         Invoke-ClientCommand `
             -Noun "userGroups" `
-            -Verb "getByName" `
+            -Verb "create" `
             -Parameters $Parameters `
             -Type "application/vnd.com.nsn.cumulocity.group+json" `
             -ItemType "" `

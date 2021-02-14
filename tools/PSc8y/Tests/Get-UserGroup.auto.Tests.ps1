@@ -1,20 +1,20 @@
 ﻿. $PSScriptRoot/imports.ps1
 
-Describe -Name "Get-Group" {
+Describe -Name "Get-UserGroup" {
     BeforeEach {
-        $Group = New-TestGroup
+        $Group = New-TestUserGroup
 
     }
 
     It "Get a user group" {
-        $Response = PSc8y\Get-Group -Id $Group.id
+        $Response = PSc8y\Get-UserGroup -Id $Group.id
         $LASTEXITCODE | Should -Be 0
         $Response | Should -Not -BeNullOrEmpty
     }
 
 
     AfterEach {
-        Remove-Group -Id $Group.id
+        Remove-UserGroup -Id $Group.id
 
     }
 }

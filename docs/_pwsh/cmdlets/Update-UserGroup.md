@@ -5,56 +5,83 @@ layout: powershell
 Module Name: PSc8y
 online version:
 schema: 2.0.0
-title: Get-Group
+title: Update-UserGroup
 ---
 
-# Get-Group
+# Update-UserGroup
 
 ## SYNOPSIS
-Create a new group by id
+Update a new group
 
 ## SYNTAX
 
 ```
-Get-Group
-	[[-Id] <Object[]>]
+Update-UserGroup
+	[-Id] <Object[]>
+	[[-Name] <String>]
 	[[-Tenant] <Object>]
+	[[-ProcessingMode] <String>]
+	[[-Template] <String>]
+	[[-TemplateVars] <String>]
 	[-Raw]
 	[[-OutputFile] <String>]
 	[-NoProxy]
 	[[-Session] <String>]
 	[[-TimeoutSec] <Double>]
+	[-Force]
 	[-WhatIf]
 	[-Confirm]
 	[<CommonParameters>]
 ```
 
 ## DESCRIPTION
-Create a new group by id
+Update a new group
 
 ## EXAMPLES
 
 ### EXAMPLE 1
 ```
-Get-Group -Id $Group.id
+Update-UserGroup -Id $Group -Name "customGroup2"
 ```
 
-Get a user group
+Update a user group
+
+### EXAMPLE 2
+```
+Get-UserGroupByName -Name $Group.name | Update-UserGroup -Name "customGroup2"
+```
+
+Update a user group (using pipeline)
 
 ## PARAMETERS
 
 ### -Id
-Group id
+Group id (required)
 
 ```yaml
 Type: Object[]
 Parameter Sets: (All)
 Aliases:
 
-Required: False
+Required: True
 Position: 1
 Default value: None
 Accept pipeline input: True (ByPropertyName, ByValue)
+Accept wildcard characters: False
+```
+
+### -Name
+name
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 2
+Default value: None
+Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
@@ -67,7 +94,54 @@ Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: 2
+Position: 3
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -ProcessingMode
+Cumulocity processing mode
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 4
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -Template
+Template (jsonnet) file to use to create the request body.
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 5
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -TemplateVars
+Variables to be used when evaluating the Template.
+Accepts a file path, json or json shorthand, i.e.
+"name=peter"
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 6
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
@@ -97,7 +171,7 @@ Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: 3
+Position: 7
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
@@ -127,7 +201,7 @@ Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: 4
+Position: 8
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
@@ -142,8 +216,23 @@ Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: 5
+Position: 9
 Default value: 0
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -Force
+Don't prompt for confirmation
+
+```yaml
+Type: SwitchParameter
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: False
 Accept pipeline input: False
 Accept wildcard characters: False
 ```

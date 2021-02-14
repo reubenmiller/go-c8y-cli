@@ -175,23 +175,23 @@
           {
             "description": "Add a role to a group using wildcards",
             "beforeEach": [
-              "$Group = New-TestGroup -Name \"customGroup1\"",
+              "$Group = New-TestUserGroup -Name \"customGroup1\"",
               "$NamePattern = $Group.name.Substring(0, $Group.name.length - 2)"
             ],
             "command": "Add-RoleToGroup -Group \"${NamePattern}*\" -Role \"*ALARM_*\"",
             "afterEach": [
-              "PSc8y\\Remove-Group -Id $Group.id"
+              "PSc8y\\Remove-UserGroup -Id $Group.id"
             ]
           },
           {
             "description": "Add a role to a group using wildcards (using pipeline)",
             "beforeEach": [
-              "$Group = New-TestGroup -Name \"customGroup1\"",
+              "$Group = New-TestUserGroup -Name \"customGroup1\"",
               "$NamePattern = $Group.name.Substring(0, $Group.name.length - 2)"
             ],
             "command": "Get-RoleCollection -PageSize 100 | Where-Object Name -like \"*ALARM*\" | Add-RoleToGroup -Group \"${NamePattern}*\"",
             "afterEach": [
-              "PSc8y\\Remove-Group -Id $Group.id"
+              "PSc8y\\Remove-UserGroup -Id $Group.id"
             ]
           }
         ],
@@ -241,12 +241,12 @@
           {
             "description": "Remove a role from the given user group",
             "beforeEach": [
-              "$UserGroup = PSc8y\\New-TestGroup",
+              "$UserGroup = PSc8y\\New-TestUserGroup",
               "Add-RoleToGroup -Group $UserGroup.id -Role \"ROLE_MEASUREMENT_READ\""
             ],
             "command": "Remove-RoleFromGroup -Group $UserGroup.id -Role \"ROLE_MEASUREMENT_READ\"",
             "afterEach": [
-              "PSc8y\\Remove-Group -Id $UserGroup.id"
+              "PSc8y\\Remove-UserGroup -Id $UserGroup.id"
             ]
           }
         ],
@@ -345,7 +345,7 @@
           {
             "description": "Get a list of role references for a user group",
             "beforeEach": [
-              "$Group = Get-GroupByName -Name \"business\""
+              "$Group = Get-UserGroupByName -Name \"business\""
             ],
             "command": "Get-RoleReferenceCollectionFromGroup -Group $Group.id"
           }

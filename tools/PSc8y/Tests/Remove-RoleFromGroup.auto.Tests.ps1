@@ -2,7 +2,7 @@
 
 Describe -Name "Remove-RoleFromGroup" {
     BeforeEach {
-        $UserGroup = PSc8y\New-TestGroup
+        $UserGroup = PSc8y\New-TestUserGroup
         Add-RoleToGroup -Group $UserGroup.id -Role "ROLE_MEASUREMENT_READ"
 
     }
@@ -14,7 +14,7 @@ Describe -Name "Remove-RoleFromGroup" {
 
 
     AfterEach {
-        PSc8y\Remove-Group -Id $UserGroup.id
+        PSc8y\Remove-UserGroup -Id $UserGroup.id
 
     }
 }

@@ -244,7 +244,7 @@
       "bodyTemplate": {
         "type": "jsonnet",
         "applyLast": true,
-        "template": "{c8y_IsDevice: {}}\n"
+        "template": "{c8y_IsDevice: {}}"
       },
       "body": [
         {
@@ -718,7 +718,7 @@
       "bodyTemplate": {
         "type": "jsonnet",
         "applyLast": false,
-        "template": "{  type: \"c8y_DeviceGroup\",\n  c8y_IsDeviceGroup: {},\n}\n"
+        "template": "{type: 'c8y_DeviceGroup', c8y_IsDeviceGroup: {}}"
       },
       "body": [
         {

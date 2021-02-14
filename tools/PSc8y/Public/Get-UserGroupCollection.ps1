@@ -1,16 +1,16 @@
 ﻿# Code generated from specification version 1.0.0: DO NOT EDIT
-Function Get-Group {
+Function Get-UserGroupCollection {
 <#
 .SYNOPSIS
-Create a new group by id
+Get collection of (user) groups
 
 .DESCRIPTION
-Create a new group by id
+Get collection of (user) groups
 
 .EXAMPLE
-PS> Get-Group -Id $Group.id
+PS> Get-UserGroupCollection
 
-Get a user group
+Get a list of user groups for the current tenant
 
 
 #>
@@ -21,16 +21,38 @@ Get a user group
     [Alias()]
     [OutputType([object])]
     Param(
-        # Group id
-        [Parameter(ValueFromPipeline=$true,
-                   ValueFromPipelineByPropertyName=$true)]
-        [object[]]
-        $Id,
-
         # Tenant
         [Parameter()]
         [object]
         $Tenant,
+
+        # Maximum number of results
+        [Parameter()]
+        [AllowNull()]
+        [AllowEmptyString()]
+        [ValidateRange(1,2000)]
+        [int]
+        $PageSize,
+
+        # Include total pages statistic
+        [Parameter()]
+        [switch]
+        $WithTotalPages,
+
+        # Get a specific page result
+        [Parameter()]
+        [int]
+        $CurrentPage,
+
+        # Maximum number of pages to retrieve when using -IncludeAll
+        [Parameter()]
+        [int]
+        $TotalPages,
+
+        # Include all results
+        [Parameter()]
+        [switch]
+        $IncludeAll,
 
         # Show the full (raw) response from Cumulocity including pagination information
         [Parameter()]
@@ -63,6 +85,12 @@ Get a user group
         if ($PSBoundParameters.ContainsKey("Tenant")) {
             $Parameters["tenant"] = $Tenant
         }
+        if ($PSBoundParameters.ContainsKey("PageSize")) {
+            $Parameters["pageSize"] = $PageSize
+        }
+        if ($PSBoundParameters.ContainsKey("WithTotalPages") -and $WithTotalPages) {
+            $Parameters["withTotalPages"] = $WithTotalPages
+        }
         if ($PSBoundParameters.ContainsKey("OutputFile")) {
             $Parameters["outputFile"] = $OutputFile
         }
@@ -83,28 +111,21 @@ Get a user group
     }
 
     Process {
-        $Parameters["id"] = PSc8y\Expand-Id $Id
+        foreach ($item in @("")) {
 
-        if (!$Force -and
-            !$WhatIfPreference -and
-            !$PSCmdlet.ShouldProcess(
-                (PSc8y\Get-C8ySessionProperty -Name "tenant"),
-                (Format-ConfirmationMessage -Name $PSCmdlet.MyInvocation.InvocationName -InputObject $item)
-            )) {
-            continue
+
+            Invoke-ClientCommand `
+                -Noun "userGroups" `
+                -Verb "list" `
+                -Parameters $Parameters `
+                -Type "application/vnd.com.nsn.cumulocity.groupCollection+json" `
+                -ItemType "application/vnd.com.nsn.cumulocity.group+json" `
+                -ResultProperty "groups" `
+                -Raw:$Raw `
+                -CurrentPage:$CurrentPage `
+                -TotalPages:$TotalPages `
+                -IncludeAll:$IncludeAll
         }
-
-        Invoke-ClientCommand `
-            -Noun "userGroups" `
-            -Verb "get" `
-            -Parameters $Parameters `
-            -Type "application/vnd.com.nsn.cumulocity.group+json" `
-            -ItemType "" `
-            -ResultProperty "" `
-            -Raw:$Raw `
-            -CurrentPage:$CurrentPage `
-            -TotalPages:$TotalPages `
-            -IncludeAll:$IncludeAll
     }
 
     End {}

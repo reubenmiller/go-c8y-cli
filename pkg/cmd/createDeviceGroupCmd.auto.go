@@ -109,10 +109,7 @@ func (n *CreateDeviceGroupCmd) RunE(cmd *cobra.Command, args []string) error {
 		flags.WithStringValue("name", "name"),
 		flags.WithStringValue("type", "type"),
 		flags.WithDefaultTemplateString(`
-{  type: "c8y_DeviceGroup",
-  c8y_IsDeviceGroup: {},
-}
-`),
+{type: 'c8y_DeviceGroup', c8y_IsDeviceGroup: {}}`),
 		WithTemplateValue(),
 		WithTemplateVariablesValue(),
 		flags.WithRequiredProperties("name"),
