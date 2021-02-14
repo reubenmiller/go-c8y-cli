@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"bytes"
 	"crypto/tls"
 	"fmt"
 	"math/rand"
@@ -13,16 +14,21 @@ import (
 	"github.com/gorilla/websocket"
 	"github.com/reubenmiller/go-c8y-cli/pkg/activitylogger"
 	"github.com/reubenmiller/go-c8y-cli/pkg/config"
+	"github.com/reubenmiller/go-c8y-cli/pkg/console"
 	"github.com/reubenmiller/go-c8y-cli/pkg/encrypt"
 	"github.com/reubenmiller/go-c8y-cli/pkg/logger"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"github.com/tidwall/gjson"
 )
 
 // Logger is used to record the log messages which should be visible to the user when using the verbose flag
 var Logger *logger.Logger
 var activityLogger *activitylogger.ActivityLogger
+
+// Console provides a thread safe way to write to the console output
+var Console *console.Console
 
 // SecureDataAccessor reads and writes encrypted data
 var SecureDataAccessor *encrypt.SecureData
@@ -183,6 +189,8 @@ var (
 	globalFlagTimeout                uint
 	globalFlagUseTenantPrefix        bool
 	globalUseNonDefaultPageSize      bool
+	globalCSVOutput                  bool
+	globalCSVOutputHeaders           bool
 	globalFlagTemplatePath           string
 	globalFlagBatchWorkers           int
 	globalFlagBatchDelayMS           int
@@ -336,6 +344,31 @@ func isTerminal() bool {
 	return false
 }
 
+func getOutputHeaders(input []string) (headers []byte) {
+	if !globalCSVOutput || !globalCSVOutputHeaders || len(input) == 0 {
+		return
+	}
+	// TODO: improve detection by parsing more lines to find column names (if more lines are available)
+	inputjson := gjson.Parse(input[0])
+	columns := make([][]byte, 0)
+	for _, v := range globalFlagSelect {
+		for _, column := range strings.Split(v, ",") {
+
+			if i := strings.Index(column, ":"); i > -1 {
+				columns = append(columns, []byte(column[0:i]))
+			} else {
+				name, _, err := resolveKeyName(&inputjson, column)
+
+				if err != nil {
+					name = v
+				}
+				columns = append(columns, []byte(name))
+			}
+		}
+	}
+	return append(bytes.Join(columns, []byte(",")), []byte("\n")...)
+}
+
 // configureRootCmd initializes the configuration manager and c8y client
 func configureRootCmd() {
 	// config file
@@ -344,6 +377,7 @@ func configureRootCmd() {
 	rootCmd.PersistentFlags().StringVar(&globalFlagSessionFile, "session", "", "Session configuration")
 
 	isTerm := isTerminal()
+	Console = console.NewConsole(rootCmd.OutOrStdout(), getOutputHeaders)
 
 	// Global flags
 	rootCmd.PersistentFlags().BoolVarP(&globalFlagVerbose, "verbose", "v", false, "Verbose logging")
@@ -375,7 +409,8 @@ func configureRootCmd() {
 
 	rootCmd.PersistentFlags().StringSlice("filter", nil, "filter")
 	rootCmd.PersistentFlags().StringArrayVar(&globalFlagSelect, "select", nil, "select")
-	rootCmd.PersistentFlags().Bool("csv", false, "csv")
+	rootCmd.PersistentFlags().BoolVar(&globalCSVOutput, "csv", false, "Print output as csv format. comma (,) delimited")
+	rootCmd.PersistentFlags().BoolVar(&globalCSVOutputHeaders, "csvHeader", false, "Include header when in csv output")
 	rootCmd.PersistentFlags().UintVarP(&globalFlagTimeout, "timeout", "t", 10*60*1000, "Timeout in milliseconds")
 
 	// Map settings to flags, allowing the user to set the own default settings

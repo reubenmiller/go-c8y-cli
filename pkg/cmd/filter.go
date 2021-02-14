@@ -119,12 +119,15 @@ func filterJSON(jsonValue string, property string, filters JSONFilters, selector
 			}
 
 			for _, myval := range formattedJSON.Array() {
+				Console.SetHeaderFromInput(myval.String())
 				if line := pluckJsonValues(&myval, pluckValues, asCSV); line != "" {
 					outputValues = append(outputValues, line)
 				}
 			}
 			return []byte(strings.Join(outputValues, "\n"))
 		}
+
+		Console.SetHeaderFromInput(formattedJSON.String())
 
 		if line := pluckJsonValues(&formattedJSON, pluckValues, asCSV); line != "" {
 			headers := ""

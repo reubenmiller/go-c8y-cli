@@ -514,6 +514,7 @@ func processResponse(resp *c8y.Response, respError error, commonOptions CommonCo
 		}
 
 		jsonformatter.WithOutputFormatters(
+			Console,
 			responseText,
 			!isJSONResponse,
 			jsonformatter.WithTrimSpace(true),
