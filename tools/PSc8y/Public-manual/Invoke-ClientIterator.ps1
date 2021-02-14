@@ -49,7 +49,9 @@ device_2-2
 ```
 
 #>
-    [CmdletBinding()]
+    [CmdletBinding(
+        DefaultParameterSetName = "string"
+    )]
     param (
         # Input objects to be piped to native c8y binary
         [Parameter(
@@ -71,7 +73,8 @@ device_2-2
         # "{1}" is the repeat counter from 0..Repeat-1
         # "{2}" is the repeat counter from 1..Repeat
         [Parameter(
-            Position = 0
+            Position = 0,
+            ParameterSetName = "string"
         )]
         [string]
         $Format,
@@ -82,7 +85,14 @@ device_2-2
             Position = 2
         )]
         [int]
-        $Repeat
+        $Repeat,
+
+        # Convert the items to json lines
+        [Parameter(
+            ParameterSetName = "json"
+        )]
+        [switch]
+        $AsJSON
     )
 
     begin {
@@ -96,10 +106,26 @@ device_2-2
     }
 
     process {
-        foreach ($item in (Expand-Id $InputObject)) {
-            for ($i = 0; $i -lt $Repeat; $i++) {
-                Write-Output ($ValueFormatter -f $item, $i, ($i+1))
+        if ($PSCmdlet.ParameterSetName -eq "json") {
+            foreach ($item in ($InputObject)) {
+                
+                $OutputItem = if ($item -is [string] -or $item -is [int]) {
+                    @{id=$item}
+                } else {
+                    $item
+                }
+
+                for ($i = 0; $i -lt $Repeat; $i++) {
+                    Write-Output (ConvertTo-Json $OutputItem -Depth 100 -Compress)
+                }
+            }
+        } else {
+            foreach ($item in (Expand-Id $InputObject)) {
+                for ($i = 0; $i -lt $Repeat; $i++) {
+                    Write-Output ($ValueFormatter -f $item, $i, ($i+1))
+                }
             }
         }
+        
     }
 }
