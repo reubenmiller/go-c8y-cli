@@ -1,6 +1,7 @@
 package mapbuilder
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"log"
@@ -13,54 +14,45 @@ import (
 	"github.com/google/go-jsonnet"
 	"github.com/reubenmiller/go-c8y-cli/pkg/iterator"
 	"github.com/sethvargo/go-password/password"
+	"github.com/tidwall/gjson"
 )
 
 const (
 	Separator = "."
 )
 
-func evaluateJsonnet(base string, imports string, snippets ...string) (string, error) {
+func evaluateJsonnet(imports string, snippets ...string) (string, error) {
 	// Create a JSonnet VM
 	vm := jsonnet.MakeVM()
 
 	jsonnetImport := imports
 
 	jsonnetImport += `
-local addIfMissing(obj, srcProp, mixin) = if !std.objectHas(obj, srcProp) then mixin else {};
-local addIfHas(obj, srcProp, destProp, value) = if std.objectHas(obj, srcProp) then {[destProp]: value} else {};
-
-# Add if property does not exist or is empty.
-# If the property is empty then it will be removed!
-local addIfEmptyString(obj, srcProp, mixin) = if !std.objectHas(obj, srcProp) || obj[srcProp] == "" then mixin + {[srcProp]:: false} else {};
-
-# Assert: throw error if given property is not present
-local isMandatory(o, prop) = {
-	assert std.objectHas(o, prop): prop + " is mandatory",
-};
+// body
 `
 
-	base = strings.TrimSpace(base)
+	// base = strings.TrimSpace(base)
 
-	// Add closing ";" if required
-	if strings.HasSuffix(base, "}") {
-		base = base + ";"
-	}
+	// // Add closing ";" if required
+	// if strings.HasSuffix(base, "}") {
+	// 	base = base + ";"
+	// }
 
-	jsonnetImport += "\nlocal base = " + base
+	// jsonnetImport += "\nlocal base = " + base
 
-	jsonnetImport += "\nlocal final = "
+	// jsonnetImport += "\nlocal final = "
 	if len(snippets) > 0 {
-		jsonnetImport += strings.Join(append([]string{"base"}, snippets...), " + ") + ";"
+		jsonnetImport += strings.Join(snippets, " +\n")
 	} else {
-		jsonnetImport += "base" + ";"
+		jsonnetImport += "{}"
 	}
 
-	jsonnetImport += "\nfinal"
+	// jsonnetImport += "\nfinal"
 
 	debugJsonnet := strings.EqualFold(os.Getenv("C8Y_JSONNET_DEBUG"), "true")
 
 	if debugJsonnet {
-		log.Printf("jsonnet snippet: %s\n", jsonnetImport)
+		log.Printf("jsonnet template: %s\n", jsonnetImport)
 	}
 
 	// evaluate the jsonnet
@@ -80,11 +72,16 @@ local isMandatory(o, prop) = {
 }
 
 func NewMapBuilder() *MapBuilder {
-	return &MapBuilder{}
+	return &MapBuilder{
+		templates:         []string{},
+		autoApplyTemplate: true,
+	}
 }
 
 func NewInitializedMapBuilder() *MapBuilder {
 	builder := NewMapBuilder()
+	builder.templates = make([]string, 0)
+	builder.autoApplyTemplate = true
 	builder.SetEmptyMap()
 	return builder
 }
@@ -98,7 +95,7 @@ func NewMapBuilderWithInit(body map[string]interface{}) *MapBuilder {
 // NewMapBuilderFromJsonnetSnippet returns a new mapper builder from a jsonnet snippet
 // See https://jsonnet.org/learning/tutorial.html for details on how to create a snippet
 func NewMapBuilderFromJsonnetSnippet(snippet string) (*MapBuilder, error) {
-	jsonStr, err := evaluateJsonnet(snippet, "")
+	jsonStr, err := evaluateJsonnet("", snippet)
 
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse snippet. %w", err)
@@ -124,14 +121,20 @@ type MapBuilder struct {
 
 	templateVariables     map[string]interface{}
 	requiredKeys          []string
-	template              string
-	validateTemplate      string
 	autoApplyTemplate     bool
+	templates             []string
 	reverseTempateDefault bool
 }
 
-func (b *MapBuilder) SetTemplate(template string) *MapBuilder {
-	b.template = template
+// AppendTemplate appends a templates to be merged in with the body
+func (b *MapBuilder) AppendTemplate(template string) *MapBuilder {
+	b.templates = append(b.templates, template)
+	return b
+}
+
+// PrependTemplate prepends a templates to be merged in with the body
+func (b *MapBuilder) PrependTemplate(template string) *MapBuilder {
+	b.templates = append([]string{template}, b.templates[:]...)
 	return b
 }
 
@@ -146,51 +149,39 @@ func (b *MapBuilder) SetEmptyMap() *MapBuilder {
 	return b
 }
 
-func (b *MapBuilder) ApplyTemplate(reverse ...bool) error {
-	value := b.reverseTempateDefault
-	if len(reverse) > 0 {
-		value = reverse[0]
-	}
-	return b.MergeJsonnet(b.template, value)
-}
-
-// MergeJsonnet merges the existing body data with a given jsonnet snippet.
+// ApplyTemplates merges the existing body data with a given jsonnet snippet.
 // When reverse is false, then the snippet will be applied to the existing data,
 // when reverse is true, then the given snippet will be the base, and the existing data will be applied to the new snippet.
-func (b *MapBuilder) MergeJsonnet(snippet string, reverse bool) error {
+func (b *MapBuilder) ApplyTemplates(existingJSON []byte, appendTemplates bool) ([]byte, error) {
 	var err error
-	existingJSON := []byte("{}")
-
-	if b.body != nil {
-		existingJSON, err = json.Marshal(b.body)
-		if err != nil {
-			return fmt.Errorf("failed to marshal existing map data to json. %w", err)
-		}
+	if len(existingJSON) == 0 {
+		existingJSON = []byte("{}")
 	}
+	existingJSON = bytes.TrimSpace(existingJSON)
 
 	imports, err := b.GetTemplateVariablesJsonnet()
 	if err != nil {
-		return err
+		return nil, err
+	}
+	templates := []string{}
+	for _, template := range b.templates {
+		templates = append(templates, strings.TrimSpace(template))
+	}
+
+	if appendTemplates {
+		templates = append([]string{string(existingJSON)}, templates...)
+	} else {
+		templates = append(templates, string(existingJSON))
 	}
 
 	var mergedJSON string
-	if reverse {
-		mergedJSON, err = evaluateJsonnet(snippet, imports, string(existingJSON))
-	} else {
-		mergedJSON, err = evaluateJsonnet(string(existingJSON), imports, snippet)
-	}
+	mergedJSON, err = evaluateJsonnet(imports, templates...)
 
 	if err != nil {
-		return fmt.Errorf("failed to merge json. %w", err)
+		return nil, fmt.Errorf("failed to merge json. %w", err)
 	}
 
-	body := make(map[string]interface{})
-	if err := json.Unmarshal([]byte(mergedJSON), &body); err != nil {
-		return fmt.Errorf("failed to decode json. %w", err)
-	}
-	b.body = body
-
-	return nil
+	return []byte(mergedJSON), nil
 }
 
 func (b *MapBuilder) SetTemplateVariables(variables map[string]interface{}) {
@@ -327,15 +318,13 @@ func (b *MapBuilder) SetRequiredKeys(keys ...string) {
 	b.requiredKeys = keys
 }
 
-// SetValidationTemplate sets the validation template to be applied. The template accepts a jsonnet string
-func (b *MapBuilder) SetValidationTemplate(template string) {
-	b.validateTemplate = template
-}
-
-func (b MapBuilder) validateRequiredKeys() error {
+func (b MapBuilder) validateRequiredKeys(body map[string]interface{}) error {
 	missingKeys := make([]string, 0)
+	if body == nil {
+		body = b.body
+	}
 	for _, key := range b.requiredKeys {
-		if _, ok := b.body[key]; !ok {
+		if _, ok := body[key]; !ok {
 			missingKeys = append(missingKeys, key)
 		}
 	}
@@ -346,44 +335,48 @@ func (b MapBuilder) validateRequiredKeys() error {
 	return nil
 }
 
-// Validate checks the body if it is valid and contains all of the required keys
-// If the body should be contructed from file, then always return nil
-func (b MapBuilder) Validate() error {
-	if b.HasFile() {
-		return nil
-	}
-	if len(b.requiredKeys) > 0 {
-		if err := b.validateRequiredKeys(); err != nil {
-			return err
+func (b MapBuilder) validateRequiredKeysBytes(body []byte) error {
+	missingKeys := make([]string, 0)
+	results := gjson.GetManyBytes(body, b.requiredKeys...)
+
+	for i, path := range results {
+		if !path.Exists() {
+			missingKeys = append(missingKeys, b.requiredKeys[i])
 		}
 	}
 
-	if b.validateTemplate != "" {
-		if err := b.MergeJsonnet(b.validateTemplate, false); err != nil {
-			return fmt.Errorf("Validate error. %s", err)
-		}
+	if len(missingKeys) > 0 {
+		return fmt.Errorf("Body is missing required properties: %s", strings.Join(missingKeys, ", "))
 	}
-
 	return nil
 }
 
 // MarshalJSON returns the body as json
-func (b MapBuilder) MarshalJSON() ([]byte, error) {
+func (b MapBuilder) MarshalJSON() (body []byte, err error) {
 	if b.body == nil {
 		// should return empty object? or add as option?
-		return []byte("{}"), nil
-		// return nil, errors.New("body is uninitialized")
+		body = []byte("{}")
+		return
 	}
-	if b.autoApplyTemplate && b.template != "" {
-		if err := b.ApplyTemplate(); err != nil {
-			return nil, err
+
+	// evaluate any iterators
+	body, err = json.Marshal(b.body)
+	if err != nil {
+		return
+	}
+
+	if b.autoApplyTemplate && len(b.templates) > 0 {
+		body, err = b.ApplyTemplates(body, false)
+		if err != nil {
+			return
 		}
 	}
+
 	// Validate after applying the template
-	if err := b.validateRequiredKeys(); err != nil {
+	if err := b.validateRequiredKeysBytes(body); err != nil {
 		return nil, err
 	}
-	return json.Marshal(b.body)
+	return
 }
 
 // Set sets a value to a give dot notation path
