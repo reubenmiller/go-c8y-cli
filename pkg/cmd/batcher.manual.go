@@ -140,7 +140,7 @@ func runBatched(requestIterator *RequestIterator, commonOptions CommonCommandOpt
 	results := make(chan error, batchOptions.TotalWorkers-1)
 	workers := sync.WaitGroup{}
 
-	progbar := progressbar.NewMulitProgressBar(1, batchOptions.TotalWorkers, "requests", globalFlagProgressBar)
+	progbar := progressbar.NewMultiProgressBar(1, batchOptions.TotalWorkers, "requests", globalFlagProgressBar)
 	progbar.Start(float64(batchOptions.Delay * 2 / 1000))
 
 	for w := 1; w <= batchOptions.TotalWorkers; w++ {
@@ -218,7 +218,7 @@ func runBatched(requestIterator *RequestIterator, commonOptions CommonCommandOpt
 	wasCancelled := int32(0)
 	go func() {
 		workers.Wait()
-		progbar.Completed()
+		time.Sleep(200 * time.Microsecond)
 
 		// prevent closing channel twice
 		if atomic.AddInt32(&wasCancelled, 1) == 1 {
@@ -239,6 +239,10 @@ func runBatched(requestIterator *RequestIterator, commonOptions CommonCommandOpt
 			return newUserErrorWithExitCode(103, fmt.Sprintf("aborted batch as error count has been exceeded. totalErrors=%d", batchOptions.AbortOnErrorCount))
 		}
 	}
+	if progbar.IsEnabled() && jobID > 1 {
+		// wait for progress bar to update last increment
+		time.Sleep(progbar.RefreshRate())
+	}
 
 	maxJobsReached := jobID > globalFlagBatchMaxJobs
 	if total := len(totalErrors); total > 0 {
@@ -247,10 +251,10 @@ func runBatched(requestIterator *RequestIterator, commonOptions CommonCommandOpt
 			return totalErrors[0]
 		}
 		// aggregate error
-		return newUserErrorWithExitCode(104, fmt.Sprintf("batch completed with %d errors. job limit exceeded=%v", total, maxJobsReached))
+		return newUserErrorWithExitCode(104, fmt.Sprintf("jobs completed with %d errors. job limit exceeded=%v", total, maxJobsReached))
 	}
 	if maxJobsReached {
-		return newUserErrorWithExitCode(105, fmt.Sprintf("batch job limit exceeded. limit=%d", globalFlagBatchMaxJobs))
+		return newUserErrorWithExitCode(105, fmt.Sprintf("max job limit exceeded. limit=%d", globalFlagBatchMaxJobs))
 	}
 	return nil
 }

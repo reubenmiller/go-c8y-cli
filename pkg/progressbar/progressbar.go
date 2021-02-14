@@ -18,14 +18,16 @@ type ProgressBar struct {
 	total         int
 	enabled       bool
 	overviewTotal int64
+	refreshRate   time.Duration
 }
 
-func NewMulitProgressBar(total, numBars int, name string, enable bool) *ProgressBar {
+func NewMultiProgressBar(total, numBars int, name string, enable bool) *ProgressBar {
 	var p *mpb.Progress
+	refreshRate := 120 * time.Millisecond
 	if enable {
 		p = mpb.New(
 			mpb.ContainerOptional(
-				mpb.WithRefreshRate(120*time.Millisecond), true),
+				mpb.WithRefreshRate(refreshRate), true),
 		)
 	}
 
@@ -34,11 +36,12 @@ func NewMulitProgressBar(total, numBars int, name string, enable bool) *Progress
 	}
 
 	return &ProgressBar{
-		p:        p,
-		NumBars:  numBars,
-		TaskName: name,
-		total:    total,
-		enabled:  enable,
+		p:           p,
+		NumBars:     numBars,
+		TaskName:    name,
+		total:       total,
+		enabled:     enable,
+		refreshRate: refreshRate,
 	}
 }
 
@@ -53,6 +56,11 @@ func NewMulitProgressBar(total, numBars int, name string, enable bool) *Progress
 
 func (p *ProgressBar) IsEnabled() bool {
 	return p.enabled
+}
+
+// RefreshRate returns the configured refresh rate of the progress bar
+func (p *ProgressBar) RefreshRate() time.Duration {
+	return p.refreshRate
 }
 
 func (p *ProgressBar) IncrementOverviewCurrent() {
@@ -110,14 +118,15 @@ func (p *ProgressBar) Start(age float64) {
 		age = 5
 	}
 
-	overviewLabel := "total"
-	overviewBar := p.p.AddSpinner(int64(p.total), mpb.SpinnerOnLeft,
+	overviewLabel := "(started: " + time.Now().Format(time.RFC3339) + ")"
+	overviewBar := p.p.AddSpinner(int64(p.total), mpb.SpinnerOnRight,
 		mpb.PrependDecorators(
+			decor.Name("elapsed", decor.WC{W: len("elapsed") + 1, C: decor.DidentRight}),
 			decor.Elapsed(decor.ET_STYLE_MMSS, decor.WC{W: 8, C: decor.DidentRight}),
 			decor.Name(overviewLabel, decor.WC{W: len(overviewLabel) + 1, C: decor.DidentRight}),
 		),
 		mpb.AppendDecorators(
-			decor.Current(0, "%d", decor.WC{W: 5}),
+			decor.Current(0, "total requests sent:  %d", decor.WC{W: 8}),
 		),
 	)
 
