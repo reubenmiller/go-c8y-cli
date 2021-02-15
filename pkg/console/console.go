@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"io"
 	"sync"
+
+	"github.com/tidwall/pretty"
 )
 
 // Console thread safe way to write to an output
@@ -14,6 +16,8 @@ type Console struct {
 	header      func([]string) []byte
 	samples     []string
 	sampleCount int
+	Colorized   bool
+	Compact     bool
 }
 
 // NewConsole create a new console writter
@@ -52,5 +56,15 @@ func (c *Console) Write(b []byte) (n int, err error) {
 		c.out.Write(c.header(c.samples))
 	}
 	c.count++
+
+	if !c.Compact {
+		b = pretty.Pretty(b)
+		pretty.PrettyOptions(b, &pretty.Options{
+			SortKeys: true,
+		})
+	}
+	if c.Colorized {
+		b = pretty.Color(b, pretty.TerminalStyle)
+	}
 	return c.out.Write(b)
 }
