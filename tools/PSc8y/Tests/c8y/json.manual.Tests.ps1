@@ -27,6 +27,11 @@ Describe -Name "json" {
             $output = c8y applications list --noColor=true --stream=false --compact=false
             $output | Out-String | Should -Not -Match "\x1b\[[0-9;]*m"
         }
+
+        It "does not print in color when csv is being used" {
+            $output = c8y applications get --id cockpit --select id,name --csv --compact=false
+            $output | Out-String | Should -Not -Match "\x1b\[[0-9;]*m"
+        }
     }
 
     Context "compact" {
@@ -79,6 +84,11 @@ Describe -Name "json" {
             $output.Count | Should -BeGreaterThan 5
             ($output | Out-String).Trim() | Should -BeLike "{*}"
             $output | ConvertFrom-Json | Should -Not -BeNullOrEmpty
+        }
+
+        It "Ignores settings when csv is being used" {
+            $output = c8y applications get --id cockpit --select id,name --csv --compact=false
+            $output | Should -MatchExactly "^\d+,cockpit$"
         }
     }
 

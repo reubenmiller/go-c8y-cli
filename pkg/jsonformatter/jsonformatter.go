@@ -44,9 +44,16 @@ func WithTrimSpace(enabled bool) OutputFormatter {
 }
 
 // WithJSONStreamOutput converts json to json lines so it can be processed in the pipe
-func WithJSONStreamOutput(enabled bool, stream bool) OutputFormatter {
+func WithJSONStreamOutput(enabled bool, stream bool, asCSV bool) OutputFormatter {
 	return func(i io.Writer, b []byte) []byte {
 		return WithOptionalFormatter(enabled, func(input []byte) []byte {
+			if asCSV {
+				if len(input) > 0 {
+					fmt.Fprintf(i, "%s\n", input)
+				}
+				return input
+			}
+
 			gjson.ForEachLine(string(input), func(line gjson.Result) bool {
 				if line.IsArray() {
 					if stream {
