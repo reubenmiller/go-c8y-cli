@@ -46,7 +46,7 @@ if (!(Test-Path -Path "./reports" )) {
 # Dot source the invoke-parallel script
 # . "$PSScriptRoot/tools/Invoke-Parallel.ps1"
 
-$Tests = Get-ChildItem "./Tests" -Filter "*.tests.ps*" |
+$Tests = Get-ChildItem "./Tests" -Filter "*.tests.ps*" -Recurse |
     Where-Object { $_.Name -match "$TestFileFilter" } | 
     Where-Object {
         if ($TestFileExclude) {

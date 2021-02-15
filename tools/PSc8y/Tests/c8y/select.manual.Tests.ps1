@@ -1,4 +1,4 @@
-. $PSScriptRoot/imports.ps1
+. $PSScriptRoot/../imports.ps1
 
 Describe -Name "c8y format global parameter" {
     It "returns just the id" {
