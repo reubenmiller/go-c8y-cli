@@ -185,6 +185,10 @@ func (lh *LoginHandler) sortLoginOptions() {
 func (lh *LoginHandler) init() {
 	lh.do(func() error {
 		loginOptions, _, err := lh.C8Yclient.Tenant.GetLoginOptions(context.Background())
+		if err != nil {
+			lh.Logger.Errorf("Failed to get login options. %s", err)
+			return err
+		}
 		lh.LoginOptions = loginOptions
 		lh.sortLoginOptions()
 
