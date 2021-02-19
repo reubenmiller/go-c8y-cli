@@ -2,11 +2,15 @@ package cmd
 
 import (
 	"bytes"
+	"encoding/json"
 	"fmt"
 	"regexp"
 	"strings"
 
+	glob "github.com/obeattie/ohmyglob"
+	"github.com/reubenmiller/go-c8y-cli/pkg/flatten"
 	"github.com/reubenmiller/go-c8y-cli/pkg/matcher"
+	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
 	"github.com/thedevsaddam/gojsonq"
 	"github.com/tidwall/gjson"
@@ -33,6 +37,95 @@ func (f *JSONFilters) Add(property, operation, value string) {
 		Operation: operation,
 		Value:     value,
 	})
+}
+
+func getGlobSubString(pattern, path string) string {
+	if !strings.Contains(pattern, "**") && strings.Contains(pattern, "*") {
+		patternParts := strings.Split(pattern, ".")
+
+		if len(patternParts) > 0 {
+			match := strings.Join(strings.Split(path, ".")[0:len(patternParts)], ".")
+			return match
+		}
+	}
+	return path
+}
+
+// FilterPropertyByWildcard filtery a json string by using globstar (wildcards) on the nested json paths
+func FilterPropertyByWildcard(jsonValue string, prefix string, patterns []string, setAlias bool) (map[string]interface{}, []string, error) {
+	rawMap := make(map[string]interface{})
+	err := c8y.DecodeJSONBytes([]byte(jsonValue), &rawMap)
+	if err != nil {
+		return nil, nil, err
+	}
+	flatMap, err := flatten.Flatten(rawMap, prefix, flatten.DotStyle)
+
+	if err != nil {
+		return nil, nil, err
+	}
+	compiledPatterns := []glob.Glob{}
+	filteredMap := make(map[string]interface{}, 0)
+
+	for _, p := range patterns {
+		// resolve path using wildcards
+		// strip alias reference
+		if idx := strings.Index(p, ":"); idx > -1 {
+			p = p[idx+1:]
+		}
+		p = strings.ToLower(p)
+
+		if p != "" {
+			if cp, err := glob.Compile(p, &glob.Options{
+				Separator:    '.',
+				MatchAtStart: true,
+				MatchAtEnd:   true,
+			}); err == nil {
+				compiledPatterns = append(compiledPatterns, cp)
+			}
+		}
+	}
+
+	resolvedProperties, _ := filterFlatMap(flatMap, filteredMap, compiledPatterns)
+	return filteredMap, resolvedProperties, err
+}
+
+func filterGJSONMap(src string, pattern glob.Glob, setAlias bool) (resolvedProperties []string, err error) {
+	matchingMap := make(map[string]interface{})
+	gjson.Parse(src).ForEach(func(key, value gjson.Result) bool {
+		if pattern.MatchString(strings.ToLower(key.Str)) {
+			keypart := key.Str
+			if !globalFlagFlatten {
+				keypart = getGlobSubString(pattern.String(), keypart)
+			}
+
+			Logger.Infof("static path: %s", keypart)
+			if _, alreadyExists := matchingMap[keypart]; !alreadyExists {
+				if setAlias {
+					// set alias so gjson can give the fields a nicer name
+					resolvedProperties = append(resolvedProperties, keypart+":"+keypart)
+				} else {
+					resolvedProperties = append(resolvedProperties, keypart)
+				}
+			}
+			matchingMap[key.Str] = value.Value()
+		}
+		return true
+	})
+	return
+}
+
+func filterFlatMap(src map[string]interface{}, dst map[string]interface{}, patterns []glob.Glob) ([]string, error) {
+	sortedKeys := []string{}
+
+	for _, pattern := range patterns {
+		for key, value := range src {
+			if pattern.MatchString(strings.ToLower(key)) {
+				dst[key] = value
+				sortedKeys = append(sortedKeys, key)
+			}
+		}
+	}
+	return sortedKeys, nil
 }
 
 func newJSONFilters() *JSONFilters {
@@ -106,7 +199,7 @@ func filterJSON(jsonValue string, property string, filters JSONFilters, selector
 	}
 
 	// format values (using gjson)
-	if len(pluckValues) > 0 {
+	if len(pluckValues) > 0 || globalFlagFlatten {
 		var bsub bytes.Buffer
 		jq.Writer(&bsub)
 		formattedJSON := gjson.ParseBytes(bsub.Bytes())
@@ -119,25 +212,19 @@ func filterJSON(jsonValue string, property string, filters JSONFilters, selector
 			}
 
 			for _, myval := range formattedJSON.Array() {
-				Console.SetHeaderFromInput(myval.String())
-				if line := pluckJsonValues(&myval, pluckValues, asCSV); line != "" {
+
+				if line, keys := pluckJsonValues(&myval, pluckValues, globalFlagFlatten, asCSV); line != "" {
 					outputValues = append(outputValues, line)
+					Console.SetHeaderFromInput(strings.Join(keys, ","))
+
 				}
 			}
 			return []byte(strings.Join(outputValues, "\n"))
 		}
 
-		Console.SetHeaderFromInput(formattedJSON.String())
-
-		if line := pluckJsonValues(&formattedJSON, pluckValues, asCSV); line != "" {
-			headers := ""
-			if showHeaders {
-				headers = expandHeaderProperties(&formattedJSON, pluckValues)
-			}
-			if headers != "" {
-				headers += "\n"
-			}
-			return []byte(headers + line)
+		if line, keys := pluckJsonValues(&formattedJSON, pluckValues, globalFlagFlatten, asCSV); line != "" {
+			Console.SetHeaderFromInput(strings.Join(keys, ","))
+			return []byte(line)
 		}
 
 		Logger.Debugf("ERROR: gjson path does not exist. %v", pluckValues)
@@ -174,19 +261,6 @@ func expandHeaderProperties(item *gjson.Result, properties []string) string {
 	return strings.Join(headers, ",")
 }
 
-// func main() {
-// 	item := gjson.Parse(`{
-// 		"details": {
-// 			"someReallyLongName": "RUNNING"
-// 		}
-// 	}
-// 	`)
-// 	realKeyName, value, err := resolveKeyName(item, "det*.some*")
-// 	if err != nil {
-// 		fmt.Printf("%s: %s", realKeyName, value)
-// 	}
-// }
-
 func resolveKeyName(item *gjson.Result, key string) (name string, value interface{}, err error) {
 	if value := item.Get(key); value.Exists() {
 		// Here: How to get t
@@ -203,48 +277,74 @@ func resolveKeyName(item *gjson.Result, key string) (name string, value interfac
 		return item.Raw[tokenStart+1 : tokenEnd], value.Value(), nil
 	}
 	return key, nil, nil
-	// return "", nil, fmt.Errorf("not found. key=%s", key)
 }
 
-func pluckJsonValues(item *gjson.Result, properties []string, asCSV bool) string {
+func pluckJsonValues(item *gjson.Result, properties []string, flat bool, asCSV bool) (string, []string) {
 	if item == nil {
-		return ""
-	}
-	values := []string{}
-
-	// json line output
-	if !asCSV {
-		for _, prop := range properties {
-			if !strings.ContainsAny(prop[:1], "{[") {
-				prop = "{" + strings.Trim(prop, "{}") + "}"
-			}
-			// complexSelector := "{" + strings.Trim(prop, "{}") + "}"
-			if v := item.Get(prop); v.Exists() {
-				values = append(values, v.String())
-			}
-		}
-		// allow output fan out
-		return strings.Join(values, "\n")
+		return "", nil
 	}
 
-	columns := []string{}
-	for _, prop := range properties {
-		columns = append(columns, strings.Split(prop, ",")...)
+	if len(properties) == 0 {
+		properties = append(properties, "**")
 	}
-	// Csv output
-	for _, pluck := range columns {
-		// strip alias in csv, the columns are handled elsewhere name:value
-		if index := strings.Index(pluck, ":"); index != -1 {
-			pluck = pluck[index+1:]
+
+	// flatten json
+	pathPatterns := make([]string, 0)
+	for _, key := range properties {
+		pathPatterns = append(pathPatterns, strings.Split(key, ",")...)
+	}
+
+	useAliases := false
+	flatMap, flatKeys, err := FilterPropertyByWildcard(item.Raw, "", pathPatterns, useAliases)
+	if err != nil {
+		return "", nil
+	}
+
+	output := bytes.Buffer{}
+
+	// json output
+	var v []byte
+	if flat || asCSV {
+		if asCSV {
+			return convertToCSV(flatMap, flatKeys), flatKeys
 		}
-		if v := item.Get(pluck); v.Exists() {
-			values = append(values, v.String())
-		} else {
-			// add empty value
-			values = append(values, "")
+		v, err = json.Marshal(flatMap)
+	} else {
+		// unflatten
+		v, err = flatten.Unflatten(flatMap)
+	}
+	if err != nil {
+		Logger.Warningf("failed to marshal value. err=%s", err)
+	} else {
+		if v != nil {
+			output.Write(v)
 		}
 	}
-	return strings.Join(values, ",")
+
+	if err != nil {
+		return "", nil
+	}
+
+	return output.String(), flatKeys
+}
+
+func convertToCSV(flatMap map[string]interface{}, keys []string) string {
+	buf := bytes.Buffer{}
+	for _, key := range keys {
+		if value, ok := flatMap[key]; ok {
+			if marshalledValue, err := json.Marshal(value); err != nil {
+				Logger.Warningf("failed to marshal value. value=%v, err=%s", value, err)
+			} else {
+				if !bytes.Contains(marshalledValue, []byte(",")) {
+					buf.Write(bytes.Trim(marshalledValue, "\""))
+				} else {
+					buf.Write(marshalledValue)
+				}
+				buf.WriteByte(',')
+			}
+		}
+	}
+	return strings.TrimRight(buf.String(), ",")
 }
 
 func matchWithWildcards(x, y interface{}) (bool, error) {

@@ -20,7 +20,6 @@ import (
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"github.com/tidwall/gjson"
 )
 
 // Logger is used to record the log messages which should be visible to the user when using the verbose flag
@@ -197,6 +196,7 @@ var (
 	globalFlagBatchWorkers           int
 	globalFlagBatchDelayMS           int
 	globalFlagBatchAbortOnErrorCount int
+	globalFlagFlatten                bool
 	globalFlagSelect                 []string
 
 	globalModeEnableCreate bool
@@ -350,8 +350,11 @@ func getOutputHeaders(input []string) (headers []byte) {
 	if !globalCSVOutput || !globalCSVOutputHeaders || len(input) == 0 {
 		return
 	}
+	if len(input) > 0 {
+		return []byte(input[0] + "\n")
+	}
+
 	// TODO: improve detection by parsing more lines to find column names (if more lines are available)
-	inputjson := gjson.Parse(input[0])
 	columns := make([][]byte, 0)
 	for _, v := range globalFlagSelect {
 		for _, column := range strings.Split(v, ",") {
@@ -359,12 +362,7 @@ func getOutputHeaders(input []string) (headers []byte) {
 			if i := strings.Index(column, ":"); i > -1 {
 				columns = append(columns, []byte(column[0:i]))
 			} else {
-				name, _, err := resolveKeyName(&inputjson, column)
-
-				if err != nil {
-					name = v
-				}
-				columns = append(columns, []byte(name))
+				columns = append(columns, []byte(column))
 			}
 		}
 	}
@@ -409,6 +407,7 @@ func configureRootCmd() {
 
 	rootCmd.PersistentFlags().StringVar(&globalFlagOutputFile, "outputFile", "", "Output file")
 
+	rootCmd.PersistentFlags().BoolVar(&globalFlagFlatten, "flatten", false, "flatten")
 	rootCmd.PersistentFlags().StringSlice("filter", nil, "filter")
 	rootCmd.PersistentFlags().StringArrayVar(&globalFlagSelect, "select", nil, "select")
 	rootCmd.PersistentFlags().BoolVar(&globalCSVOutput, "csv", false, "Print output as csv format. comma (,) delimited")
