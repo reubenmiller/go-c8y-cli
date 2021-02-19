@@ -18,6 +18,7 @@ type Console struct {
 	sampleCount int
 	Colorized   bool
 	Compact     bool
+	IsJSON      bool
 }
 
 // NewConsole create a new console writter
@@ -57,14 +58,20 @@ func (c *Console) Write(b []byte) (n int, err error) {
 	}
 	c.count++
 
-	if !c.Compact {
-		b = pretty.Pretty(b)
-		pretty.PrettyOptions(b, &pretty.Options{
+	if c.IsJSON {
+		b = pretty.PrettyOptions(b, &pretty.Options{
 			SortKeys: true,
+			Width:    80,
+			Prefix:   "",
+			Indent:   "  ",
 		})
+		if c.Compact {
+			b = append(pretty.Ugly(b), '\n')
+		}
+		if c.Colorized {
+			b = pretty.Color(b, pretty.TerminalStyle)
+		}
 	}
-	if c.Colorized {
-		b = pretty.Color(b, pretty.TerminalStyle)
-	}
+
 	return c.out.Write(b)
 }
