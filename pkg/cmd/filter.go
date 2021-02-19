@@ -89,37 +89,13 @@ func FilterPropertyByWildcard(jsonValue string, prefix string, patterns []string
 	return filteredMap, resolvedProperties, err
 }
 
-func filterGJSONMap(src string, pattern glob.Glob, setAlias bool) (resolvedProperties []string, err error) {
-	matchingMap := make(map[string]interface{})
-	gjson.Parse(src).ForEach(func(key, value gjson.Result) bool {
-		if pattern.MatchString(strings.ToLower(key.Str)) {
-			keypart := key.Str
-			if !globalFlagFlatten {
-				keypart = getGlobSubString(pattern.String(), keypart)
-			}
-
-			Logger.Infof("static path: %s", keypart)
-			if _, alreadyExists := matchingMap[keypart]; !alreadyExists {
-				if setAlias {
-					// set alias so gjson can give the fields a nicer name
-					resolvedProperties = append(resolvedProperties, keypart+":"+keypart)
-				} else {
-					resolvedProperties = append(resolvedProperties, keypart)
-				}
-			}
-			matchingMap[key.Str] = value.Value()
-		}
-		return true
-	})
-	return
-}
-
 func filterFlatMap(src map[string]interface{}, dst map[string]interface{}, patterns []glob.Glob) ([]string, error) {
 	sortedKeys := []string{}
 
 	for _, pattern := range patterns {
 		for key, value := range src {
-			if pattern.MatchString(strings.ToLower(key)) {
+			keyl := strings.ToLower(key)
+			if strings.HasPrefix(keyl, pattern.String()+".") || pattern.MatchString(keyl) {
 				dst[key] = value
 				sortedKeys = append(sortedKeys, key)
 			}
