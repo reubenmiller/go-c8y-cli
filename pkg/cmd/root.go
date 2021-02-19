@@ -122,6 +122,7 @@ func (c *c8yCmd) createCumulocityClient() {
 	readConfiguration(&rootCmd.Command)
 	Console.Colorized = !globalFlagNoColor && !globalCSVOutput
 	Console.Compact = globalFlagCompact || globalCSVOutput
+	Console.IsJSON = !globalCSVOutput
 
 	// Add the realtime client
 	client.Realtime = c8y.NewRealtimeClient(
