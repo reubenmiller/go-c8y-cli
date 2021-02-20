@@ -16,59 +16,8 @@ applications list --pageSize 100 --filter "name like co*"
 
 ### Selecting properties
 
-In cases where you don't want all of the properties being returned in the json object, then a list of property names can be given using the `--select` argument.
+The `select` parameter was re-worked in v2.0.0, and information about how to use it has been moved to[shell select parameter](https://reubenmiller.github.io/go-c8y-cli/docs/concepts/Shell-Select Parameter/)
 
-Nested properties are also supported.
+### Formatting data (removed in v2.0.0)
 
-#### Example
-
-##### Only return the "id", "name" and "owner.tenant" properties for each application
-
-```sh
-c8y applications list --pageSize 2 --select "id,name,owner.tenant"
-```
-
-**Response**
-
-```json
-[
-  {
-    "id": "1",
-    "name": "devicemanagement",
-    "tenant": {
-      "id": "management"
-    }
-  },
-  {
-    "id": "10003",
-    "name": "citest1jgrg",
-    "tenant": {
-      "id": "goc8yci01"
-    }
-  }
-]
-```
-
-### Formatting data
-
-If you would only like to return a single value, then you can use the `--format` argument to set the property that you would like to be returned.
-
-This is ideal for getting the ids 
-
-#### Example
-
-##### Get the application id by looking it up by its name
-
-```sh
-c8y applications get --id cockpit --format "id"
-```
-
-**Response**
-
-```plaintext
-7
-```
-
-**Note:**
-
-The formatting argument only supports one value. If the commands returns more than 1 result, then only the first result will be used.
+The `--format` parameter has been removed replaced by combining the use of `--select` and `--csv`. Please read the section on outputing data as csv.

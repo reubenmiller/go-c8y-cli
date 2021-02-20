@@ -221,7 +221,15 @@ Since the output of the c8y cli tool is mainly json, it is highly recommended th
 **Example: Get the id of each devices from a query**
 
 ```sh
-c8y devices list | jq -r ".[].id"
+c8y devices list --select id
+
+# Or csv output using
+c8y devices list --select id --csv --csvHeader
 ```
 
+If you are more familar with the popular `jq` tool, then you can use it to extract information that you need.
+
+```sh
+c8y devices list | jq -r ".id"
+```
 See the [jq website](https://stedolan.github.io/jq/download/) for details how to install it on your operating system.

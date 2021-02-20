@@ -1,10 +1,10 @@
 ---
 layout: default
-category: Examples
-title: Shell - Output
+category: Concepts
+title: Shell-Select Parameter
 ---
 
-### Select properties
+### Select parameter (new in v2.0.0)
 
 The `select` parameter can be used to limit which fragments are returned by the cli tool and to provide a convenient way to modify the output response.
 
@@ -487,4 +487,16 @@ c8y devices list --pageSize 2 --fragmentType company_Example --select id --csv >
 ```sh
 396806
 396735
+```
+
+##### Get the application id by looking it up by its name
+
+```sh
+c8y applications get --id cockpit --select id --csv
+```
+
+**Response**
+
+```plaintext
+7
 ```
