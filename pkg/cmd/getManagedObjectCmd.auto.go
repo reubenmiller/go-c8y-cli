@@ -6,6 +6,7 @@ import (
 	"io"
 	"net/http"
 
+	"github.com/reubenmiller/go-c8y-cli/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/pkg/mapbuilder"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
@@ -37,6 +38,10 @@ Get a managed object with parent references
 
 	cmd.Flags().String("id", "", "ManagedObject id (required) (accepts pipeline)")
 	cmd.Flags().Bool("withParents", false, "include a flat list of all parents and grandparents of the given object")
+
+	completion.WithOptions(
+		cmd,
+	)
 
 	flags.WithOptions(
 		cmd,

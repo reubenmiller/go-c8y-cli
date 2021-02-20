@@ -5,6 +5,7 @@ import (
 	"io"
 	"net/http"
 
+	"github.com/reubenmiller/go-c8y-cli/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/pkg/mapbuilder"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
@@ -39,6 +40,12 @@ Create a new alarm for device
 	cmd.Flags().String("status", "", "The status of the alarm: ACTIVE, ACKNOWLEDGED or CLEARED. If status was not appeared, new alarm will have status ACTIVE. Must be upper-case.")
 	addDataFlag(cmd)
 	addProcessingModeFlag(cmd)
+
+	completion.WithOptions(
+		cmd,
+		completion.WithValidateSet("severity", "CRITICAL", "MAJOR", "MINOR", "WARNING"),
+		completion.WithValidateSet("status", "ACTIVE", "ACKNOWLEDGED", "CLEARED"),
+	)
 
 	flags.WithOptions(
 		cmd,

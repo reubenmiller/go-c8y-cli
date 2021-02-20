@@ -5,6 +5,7 @@ import (
 	"io"
 	"net/http"
 
+	"github.com/reubenmiller/go-c8y-cli/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/pkg/mapbuilder"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
@@ -37,6 +38,10 @@ Add multiple devices to a group
 	cmd.Flags().StringSlice("group", []string{""}, "Group (required)")
 	cmd.Flags().StringSlice("newChildDevice", []string{""}, "New device to be added to the group as an child asset (required) (accepts pipeline)")
 	addProcessingModeFlag(cmd)
+
+	completion.WithOptions(
+		cmd,
+	)
 
 	flags.WithOptions(
 		cmd,

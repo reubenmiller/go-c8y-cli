@@ -5,6 +5,7 @@ import (
 	"io"
 	"net/http"
 
+	"github.com/reubenmiller/go-c8y-cli/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/pkg/mapbuilder"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
@@ -40,6 +41,10 @@ Update a tenant by name (from the mangement tenant)
 	cmd.Flags().String("contactPhone", "", "An international contact phone number")
 	addDataFlag(cmd)
 	addProcessingModeFlag(cmd)
+
+	completion.WithOptions(
+		cmd,
+	)
 
 	flags.WithOptions(
 		cmd,

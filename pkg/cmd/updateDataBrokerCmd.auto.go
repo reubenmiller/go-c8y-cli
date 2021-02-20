@@ -5,6 +5,7 @@ import (
 	"io"
 	"net/http"
 
+	"github.com/reubenmiller/go-c8y-cli/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/pkg/mapbuilder"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
@@ -35,6 +36,11 @@ Change the status of a specific data broker connector by given connector id
 	cmd.Flags().String("status", "", "DataBroker status [SUSPENDED]. (required)")
 	addDataFlag(cmd)
 	addProcessingModeFlag(cmd)
+
+	completion.WithOptions(
+		cmd,
+		completion.WithValidateSet("status", "SUSPENDED"),
+	)
 
 	flags.WithOptions(
 		cmd,

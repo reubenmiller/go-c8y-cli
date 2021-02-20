@@ -5,6 +5,7 @@ import (
 	"io"
 	"net/http"
 
+	"github.com/reubenmiller/go-c8y-cli/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/pkg/mapbuilder"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
@@ -38,6 +39,11 @@ Remove all pending operations for a given device
 	cmd.Flags().String("dateTo", "", "End date or date and time of operation.")
 	cmd.Flags().String("status", "", "Operation status, can be one of SUCCESSFUL, FAILED, EXECUTING or PENDING.")
 	addProcessingModeFlag(cmd)
+
+	completion.WithOptions(
+		cmd,
+		completion.WithValidateSet("status", "PENDING", "EXECUTING", "SUCCESSFUL", "FAILED"),
+	)
 
 	flags.WithOptions(
 		cmd,

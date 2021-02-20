@@ -5,6 +5,7 @@ import (
 	"io"
 	"net/http"
 
+	"github.com/reubenmiller/go-c8y-cli/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/pkg/mapbuilder"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
@@ -35,6 +36,10 @@ Update a tenant option
 	cmd.Flags().String("key", "", "Tenant Option key (required) (accepts pipeline)")
 	cmd.Flags().String("value", "", "New value (required)")
 	addProcessingModeFlag(cmd)
+
+	completion.WithOptions(
+		cmd,
+	)
 
 	flags.WithOptions(
 		cmd,

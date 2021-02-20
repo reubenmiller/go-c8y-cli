@@ -6,6 +6,7 @@ import (
 	"io"
 	"net/http"
 
+	"github.com/reubenmiller/go-c8y-cli/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/pkg/mapbuilder"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
@@ -34,6 +35,10 @@ Get a list of groups that a user belongs to
 
 	cmd.Flags().StringSlice("id", []string{""}, "User (required) (accepts pipeline)")
 	cmd.Flags().String("tenant", "", "Tenant")
+
+	completion.WithOptions(
+		cmd,
+	)
 
 	flags.WithOptions(
 		cmd,

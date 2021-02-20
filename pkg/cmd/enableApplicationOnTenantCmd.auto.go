@@ -5,6 +5,7 @@ import (
 	"io"
 	"net/http"
 
+	"github.com/reubenmiller/go-c8y-cli/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/pkg/mapbuilder"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
@@ -34,6 +35,10 @@ Enable an application of a tenant by name
 	cmd.Flags().String("tenant", "", "Tenant id. Defaults to current tenant (based on credentials)")
 	cmd.Flags().String("application", "", "Application id (required) (accepts pipeline)")
 	addProcessingModeFlag(cmd)
+
+	completion.WithOptions(
+		cmd,
+	)
 
 	flags.WithOptions(
 		cmd,

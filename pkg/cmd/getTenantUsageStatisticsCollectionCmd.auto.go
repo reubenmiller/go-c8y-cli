@@ -6,6 +6,7 @@ import (
 	"io"
 	"net/http"
 
+	"github.com/reubenmiller/go-c8y-cli/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/pkg/mapbuilder"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
@@ -40,6 +41,10 @@ Get tenant statistics collection for the day before yesterday
 
 	cmd.Flags().String("dateFrom", "", "Start date or date and time of the statistics.")
 	cmd.Flags().String("dateTo", "", "End date or date and time of the statistics.")
+
+	completion.WithOptions(
+		cmd,
+	)
 
 	flags.WithOptions(
 		cmd,

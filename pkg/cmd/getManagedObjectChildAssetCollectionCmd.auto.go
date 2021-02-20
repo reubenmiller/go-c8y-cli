@@ -6,6 +6,7 @@ import (
 	"io"
 	"net/http"
 
+	"github.com/reubenmiller/go-c8y-cli/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/pkg/mapbuilder"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
@@ -34,6 +35,10 @@ Get a list of the child devices of an existing device
 
 	cmd.Flags().StringSlice("device", []string{""}, "Device.")
 	cmd.Flags().StringSlice("group", []string{""}, "Group. (accepts pipeline)")
+
+	completion.WithOptions(
+		cmd,
+	)
 
 	flags.WithOptions(
 		cmd,

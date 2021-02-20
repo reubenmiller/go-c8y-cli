@@ -5,6 +5,7 @@ import (
 	"io"
 	"net/http"
 
+	"github.com/reubenmiller/go-c8y-cli/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/pkg/mapbuilder"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
@@ -41,6 +42,11 @@ Create an audit record for a custom managed object update
 	cmd.Flags().String("application", "", "The application used to carry out the audited action.")
 	addDataFlag(cmd)
 	addProcessingModeFlag(cmd)
+
+	completion.WithOptions(
+		cmd,
+		completion.WithValidateSet("severity", "critical", "major", "minor", "warning", "information"),
+	)
 
 	flags.WithOptions(
 		cmd,

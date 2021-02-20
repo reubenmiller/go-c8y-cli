@@ -5,6 +5,7 @@ import (
 	"io"
 	"net/http"
 
+	"github.com/reubenmiller/go-c8y-cli/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/pkg/mapbuilder"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
@@ -42,6 +43,11 @@ Update a user
 	cmd.Flags().Bool("sendPasswordResetEmail", false, "User activation status (true/false)")
 	cmd.Flags().String("customProperties", "", "Custom properties to be added to the user")
 	addProcessingModeFlag(cmd)
+
+	completion.WithOptions(
+		cmd,
+		completion.WithValidateSet("sendPasswordResetEmail", "true", "false"),
+	)
 
 	flags.WithOptions(
 		cmd,

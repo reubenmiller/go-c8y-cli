@@ -5,6 +5,7 @@ import (
 	"io"
 	"net/http"
 
+	"github.com/reubenmiller/go-c8y-cli/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/pkg/mapbuilder"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
@@ -35,6 +36,10 @@ Create group heirachy (parent group -> child group)
 	cmd.Flags().StringSlice("newChildDevice", []string{""}, "New child device to be added to the group as an asset (accepts pipeline)")
 	cmd.Flags().StringSlice("newChildGroup", []string{""}, "New child device group to be added to the group as an asset")
 	addProcessingModeFlag(cmd)
+
+	completion.WithOptions(
+		cmd,
+	)
 
 	flags.WithOptions(
 		cmd,

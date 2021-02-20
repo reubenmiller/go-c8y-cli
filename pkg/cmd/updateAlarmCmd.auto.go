@@ -5,6 +5,7 @@ import (
 	"io"
 	"net/http"
 
+	"github.com/reubenmiller/go-c8y-cli/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/pkg/mapbuilder"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
@@ -40,6 +41,12 @@ Update severity of an existing alarm to CRITICAL
 	cmd.Flags().String("text", "", "Text description of the alarm.")
 	addDataFlag(cmd)
 	addProcessingModeFlag(cmd)
+
+	completion.WithOptions(
+		cmd,
+		completion.WithValidateSet("status", "ACTIVE", "ACKNOWLEDGED", "CLEARED"),
+		completion.WithValidateSet("severity", "CRITICAL", "MAJOR", "MINOR", "WARNING"),
+	)
 
 	flags.WithOptions(
 		cmd,

@@ -6,6 +6,7 @@ import (
 	"io"
 	"net/http"
 
+	"github.com/reubenmiller/go-c8y-cli/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/pkg/mapbuilder"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
@@ -45,6 +46,12 @@ Get collection of active alarms which occurred in the last 10 minutes
 	cmd.Flags().Bool("resolved", false, "When set to true only resolved alarms will be removed (the one with status CLEARED), false means alarms with status ACTIVE or ACKNOWLEDGED.")
 	cmd.Flags().Bool("withAssets", false, "Include assets")
 	cmd.Flags().Bool("withDevices", false, "Include devices")
+
+	completion.WithOptions(
+		cmd,
+		completion.WithValidateSet("status", "ACTIVE", "ACKNOWLEDGED", "CLEARED"),
+		completion.WithValidateSet("severity", "CRITICAL", "MAJOR", "MINOR", "WARNING"),
+	)
 
 	flags.WithOptions(
 		cmd,

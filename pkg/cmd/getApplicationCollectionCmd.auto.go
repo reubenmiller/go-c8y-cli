@@ -6,6 +6,7 @@ import (
 	"io"
 	"net/http"
 
+	"github.com/reubenmiller/go-c8y-cli/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/pkg/mapbuilder"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
@@ -33,6 +34,11 @@ Get applications
 	cmd.SilenceUsage = true
 
 	cmd.Flags().String("type", "", "Application type (accepts pipeline)")
+
+	completion.WithOptions(
+		cmd,
+		completion.WithValidateSet("type", "APAMA_CEP_RULE", "EXTERNAL", "HOSTED", "MICROSERVICE"),
+	)
 
 	flags.WithOptions(
 		cmd,

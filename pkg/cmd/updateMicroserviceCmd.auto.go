@@ -5,6 +5,7 @@ import (
 	"io"
 	"net/http"
 
+	"github.com/reubenmiller/go-c8y-cli/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/pkg/mapbuilder"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
@@ -39,6 +40,11 @@ Update microservice availability to MARKET
 	cmd.Flags().String("contextPath", "", "contextPath of the hosted application")
 	cmd.Flags().String("resourcesUrl", "", "URL to microservice base directory hosted on an external server")
 	addProcessingModeFlag(cmd)
+
+	completion.WithOptions(
+		cmd,
+		completion.WithValidateSet("availability", "MARKET", "PRIVATE"),
+	)
 
 	flags.WithOptions(
 		cmd,

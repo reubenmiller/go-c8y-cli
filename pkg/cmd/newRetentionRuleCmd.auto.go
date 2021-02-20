@@ -5,6 +5,7 @@ import (
 	"io"
 	"net/http"
 
+	"github.com/reubenmiller/go-c8y-cli/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/pkg/mapbuilder"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
@@ -39,6 +40,11 @@ Create a retention rule
 	cmd.Flags().Int("maximumAge", 0, "Maximum age of document in days. (required)")
 	cmd.Flags().Bool("editable", false, "Whether the rule is editable. Can be updated only by management tenant.")
 	addProcessingModeFlag(cmd)
+
+	completion.WithOptions(
+		cmd,
+		completion.WithValidateSet("dataType", "ALARM", "AUDIT", "EVENT", "MEASUREMENT", "OPERATION", "*"),
+	)
 
 	flags.WithOptions(
 		cmd,

@@ -6,6 +6,7 @@ import (
 	"io"
 	"net/http"
 
+	"github.com/reubenmiller/go-c8y-cli/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/pkg/mapbuilder"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
@@ -43,6 +44,11 @@ Get a list of measurements
 	cmd.Flags().Bool("csvFormat", false, "Results will be displayed in csv format. Note: -IncludeAll, is not supported when using using this parameter")
 	cmd.Flags().Bool("excelFormat", false, "Results will be displayed in Excel format Note: -IncludeAll, is not supported when using using this parameter")
 	cmd.Flags().String("unit", "", "Every measurement fragment which contains 'unit' property will be transformed to use required system of units.")
+
+	completion.WithOptions(
+		cmd,
+		completion.WithValidateSet("unit", "imperial", "metric"),
+	)
 
 	flags.WithOptions(
 		cmd,

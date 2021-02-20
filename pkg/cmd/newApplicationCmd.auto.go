@@ -5,6 +5,7 @@ import (
 	"io"
 	"net/http"
 
+	"github.com/reubenmiller/go-c8y-cli/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/pkg/mapbuilder"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
@@ -42,6 +43,12 @@ Create a new hosted application
 	cmd.Flags().String("resourcesPassword", "", "authorization password to access resourcesUrl")
 	cmd.Flags().String("externalUrl", "", "URL to the external application. Required when application type is EXTERNAL")
 	addProcessingModeFlag(cmd)
+
+	completion.WithOptions(
+		cmd,
+		completion.WithValidateSet("type", "EXTERNAL", "HOSTED", "MICROSERVICE"),
+		completion.WithValidateSet("availability", "MARKET", "PRIVATE"),
+	)
 
 	flags.WithOptions(
 		cmd,

@@ -5,6 +5,7 @@ import (
 	"io"
 	"net/http"
 
+	"github.com/reubenmiller/go-c8y-cli/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/pkg/mapbuilder"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
@@ -35,6 +36,10 @@ Create external identity
 	cmd.Flags().String("type", "", "The type of the external identifier as string, e.g. 'com_cumulocity_model_idtype_SerialNumber'. (required)")
 	cmd.Flags().String("name", "", "The identifier used in the external system that Cumulocity interfaces with. (required)")
 	addProcessingModeFlag(cmd)
+
+	completion.WithOptions(
+		cmd,
+	)
 
 	flags.WithOptions(
 		cmd,

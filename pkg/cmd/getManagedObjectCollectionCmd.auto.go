@@ -6,6 +6,7 @@ import (
 	"io"
 	"net/http"
 
+	"github.com/reubenmiller/go-c8y-cli/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/pkg/mapbuilder"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
@@ -41,6 +42,10 @@ Get a list of managed objects by ids
 	cmd.Flags().String("text", "", "managed objects containing a text value starting with the given text (placeholder {text}). Text value is any alphanumeric string starting with a latin letter (A-Z or a-z).")
 	cmd.Flags().Bool("withParents", false, "include a flat list of all parents and grandparents of the given object")
 	cmd.Flags().Bool("skipChildrenNames", false, "Don't include the child devices names in the resonse. This can improve the api's response because the names don't need to be retrieved")
+
+	completion.WithOptions(
+		cmd,
+	)
 
 	flags.WithOptions(
 		cmd,

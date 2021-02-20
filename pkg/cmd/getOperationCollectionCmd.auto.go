@@ -6,6 +6,7 @@ import (
 	"io"
 	"net/http"
 
+	"github.com/reubenmiller/go-c8y-cli/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/pkg/mapbuilder"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
@@ -44,6 +45,11 @@ Get a list of pending operations for a device
 	cmd.Flags().String("dateTo", "", "End date or date and time of operation.")
 	cmd.Flags().String("status", "", "Operation status, can be one of SUCCESSFUL, FAILED, EXECUTING or PENDING.")
 	cmd.Flags().String("bulkOperationId", "", "Bulk operation id. Only retrieve operations related to the given bulk operation.")
+
+	completion.WithOptions(
+		cmd,
+		completion.WithValidateSet("status", "PENDING", "EXECUTING", "SUCCESSFUL", "FAILED"),
+	)
 
 	flags.WithOptions(
 		cmd,

@@ -5,6 +5,7 @@ import (
 	"io"
 	"net/http"
 
+	"github.com/reubenmiller/go-c8y-cli/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/pkg/mapbuilder"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
@@ -34,6 +35,11 @@ Approve a new device request
 	cmd.Flags().String("id", "", "Device identifier (required) (accepts pipeline)")
 	cmd.Flags().String("status", "ACCEPTED", "Status of registration")
 	addProcessingModeFlag(cmd)
+
+	completion.WithOptions(
+		cmd,
+		completion.WithValidateSet("status", "ACCEPTED"),
+	)
 
 	flags.WithOptions(
 		cmd,

@@ -5,6 +5,7 @@ import (
 	"io"
 	"net/http"
 
+	"github.com/reubenmiller/go-c8y-cli/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/pkg/mapbuilder"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
@@ -39,6 +40,13 @@ Update the status of all active alarms on a device to ACKNOWLEDGED
 	cmd.Flags().String("dateTo", "", "End date or date and time of alarm occurrence.")
 	cmd.Flags().String("newStatus", "", "New status to be applied to all of the matching alarms (required)")
 	addProcessingModeFlag(cmd)
+
+	completion.WithOptions(
+		cmd,
+		completion.WithValidateSet("status", "ACTIVE", "ACKNOWLEDGED", "CLEARED"),
+		completion.WithValidateSet("severity", "CRITICAL", "MAJOR", "MINOR", "WARNING"),
+		completion.WithValidateSet("newStatus", "ACTIVE", "ACKNOWLEDGED", "CLEARED"),
+	)
 
 	flags.WithOptions(
 		cmd,

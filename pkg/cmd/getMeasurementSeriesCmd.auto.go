@@ -6,6 +6,7 @@ import (
 	"io"
 	"net/http"
 
+	"github.com/reubenmiller/go-c8y-cli/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/pkg/mapbuilder"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
@@ -37,6 +38,11 @@ Get a list of series [nx_WEA_29_Delta.MDL10FG001] and [nx_WEA_29_Delta.ST9] for 
 	cmd.Flags().String("aggregationType", "", "Fragment name from measurement.")
 	cmd.Flags().String("dateFrom", "-7d", "Start date or date and time of measurement occurrence. Defaults to last 7 days")
 	cmd.Flags().String("dateTo", "0s", "End date or date and time of measurement occurrence. Defaults to the current time")
+
+	completion.WithOptions(
+		cmd,
+		completion.WithValidateSet("aggregationType", "DAILY", "HOURLY", "MINUTELY"),
+	)
 
 	flags.WithOptions(
 		cmd,

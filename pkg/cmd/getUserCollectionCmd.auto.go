@@ -6,6 +6,7 @@ import (
 	"io"
 	"net/http"
 
+	"github.com/reubenmiller/go-c8y-cli/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/pkg/mapbuilder"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
@@ -41,6 +42,10 @@ Get a list of users
 	cmd.Flags().Bool("withApps", false, "Include applications related to the user")
 	cmd.Flags().Bool("withGroups", false, "Include group information")
 	cmd.Flags().Bool("withRoles", false, "Include role information")
+
+	completion.WithOptions(
+		cmd,
+	)
 
 	flags.WithOptions(
 		cmd,

@@ -5,6 +5,7 @@ import (
 	"io"
 	"net/http"
 
+	"github.com/reubenmiller/go-c8y-cli/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/pkg/mapbuilder"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
@@ -42,6 +43,11 @@ Update application availability to MARKET
 	cmd.Flags().String("resourcesPassword", "", "authorization password to access resourcesUrl")
 	cmd.Flags().String("externalUrl", "", "URL to the external application")
 	addProcessingModeFlag(cmd)
+
+	completion.WithOptions(
+		cmd,
+		completion.WithValidateSet("availability", "MARKET", "PRIVATE"),
+	)
 
 	flags.WithOptions(
 		cmd,

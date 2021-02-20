@@ -67,6 +67,7 @@
     $PipelineVariableRequired = "false"
     $PipelineVariableProperty = ""
     $PipelineVariableAliases = ""
+    $CompletionBuilderOptions = New-Object System.Text.StringBuilder
     foreach ($iArg in (Remove-SkippedParameters $ArgumentSources)) {
         if ($iArg.pipeline) {
             $PipelineVariableName = $iArg.Name
@@ -83,6 +84,11 @@
                     )
                 }
             }
+        }
+        if ($iArg.validationSet) {
+            $validateSetOptions = @($iArg.validationSet | ForEach-Object { "`"$_`"" }) -join ","
+            $CompletionBuilderOptions.AppendLine("completion.WithValidateSet(`"$($iarg.Name)`", $validateSetOptions),")
+            
         }
         $ArgParams = @{
             Name = $iArg.name
@@ -322,6 +328,7 @@ import (
 	"net/http"
 	"net/url"
 
+    "github.com/reubenmiller/go-c8y-cli/pkg/completion"
     "github.com/reubenmiller/go-c8y-cli/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/pkg/mapbuilder"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
@@ -348,6 +355,11 @@ $($Examples -join "`n`n")
     cmd.SilenceUsage = true
 
     $($CommandArgs.SetFlag -join "`n	")
+
+    completion.WithOptions(
+		cmd,
+		$CompletionBuilderOptions
+	)
 
     flags.WithOptions(
 		cmd,
