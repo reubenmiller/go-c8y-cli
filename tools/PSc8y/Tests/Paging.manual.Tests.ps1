@@ -2,6 +2,10 @@
 
 Describe -Name "Get-Pagination" {
     BeforeAll {
+        $backupEnvSettings = @{
+            C8Y_SETTINGS_INCLUDEALL_PAGESIZE = $env:C8Y_SETTINGS_INCLUDEALL_PAGESIZE
+            C8Y_SETTINGS_DEFAULT_PAGESIZE = $env:C8Y_SETTINGS_DEFAULT_PAGESIZE
+        }
         $Device = New-TestDevice
         
         $Alarms = @(1..20) | ForEach-Object {
@@ -122,6 +126,12 @@ Describe -Name "Get-Pagination" {
     AfterAll {
         PSc8y\Remove-ManagedObject -Id $Device.id
 
+        if ($backupEnvSettings) {
+            foreach ($name in $backupEnvSettings.Keys) {
+                if ($null -ne $name) {
+                    [environment]::SetEnvironmentVariable($name, $backupEnvSettings[$name], "process")
+                }
+            }
+        }
     }
 }
-
