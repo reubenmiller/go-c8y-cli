@@ -60,8 +60,8 @@ Entering explicit values is not very convienient, especially when some fragments
 
 The following wildcard characters are supported:
 
-* `?` matches a single character not including the path delimiter `.`)
-* `*` matches zero or more characters not including the path delimiter `.`)
+* `?` matches a single character not including the path delimiter `.`
+* `*` matches zero or more characters not including the path delimiter `.`
 * `**` (a.k.a. globstar) matches all characters including the path delimiter `.`
 
 All dot notation paths are case-insensitive, so there are no `c8y_softwarelist` and `c8y_SoftwareList`.
