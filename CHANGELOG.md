@@ -25,10 +25,37 @@ c8y inventory create --data "./datapoint.largeint.json"
 
 ## TODO
 
-* TODO:
-  * Save pipeline context for reuse in templates
-  * Rename Group to UserGroup
-  * csv output for bash (i.e. id,name,value)
+* Check if progress can be written to stderr when using variable assignment (i.e. d=$( seq 100 | c8y devices create --progress --dry --delay 1000 ))
+
+* Add confirmation prompts to c8y binary
+    ```json
+    {
+        "c8y_SoftwareList": [
+            {"name": "test1", "version": "1.0.0"}
+        ],
+        "name": "myname"
+    }
+    ```
+
+
+    ```js
+    name
+    c8y_SoftwareList.0.name
+    c8y_SoftwareList.0.version
+    c8y_SoftwareList.1.name
+    c8y_SoftwareList.1.version
+    ```
+
+
+    ```sh
+    *.*name
+    *.*name
+
+    *.#.*name
+    ```
+
+  * Create activity log cmdlets?
+    * Get recent history, get commands with filter (api, host, method etc.)
 
 ## Failed Tests
 
@@ -41,6 +68,10 @@ c8y inventory create --data "./datapoint.largeint.json"
 
 No unreleased features
 
+* Added colorize and pretty print options to output formatting
+    * pretty print when using streaming (`-c` or `--compress`)
+    * colorize json and json line output (`--noColor` or `-M` (for monochromatic output)). Output is colorized by default when writing to Terminal, but it can be disabled using `--noColor` or `-M`
+* `--select` parameter now supports advanced property selection using dot notation, wildcards (including globstar)
 * Added new `--noAccept` global parameter to ignore the Accept header. This usually only affects `PUT` and `POST` requests.
 
 * Fixed #43. New-ServiceUser now accepts more than 1 role
@@ -190,6 +221,25 @@ The activity log settings can be set for individual c8y sessions or globally in 
         { "id": "1"}
         { "id": "2"}
         ```
+
+**Templates**
+
+* When using piped data the data is stored for use in a template variable `input.value`.
+
+    **Example: Add a fragment based on the type name**
+
+    ```sh
+    seq 1 | c8y devices create --data "type=myvalue" \
+        | c8y devices update --template "{ [input.value.type]: {} }"
+    ```
+
+    **Example: Add a type to devices which have a specific fragment and also mark when it was updated**
+
+    ```sh
+    c8y devices list --query "has(c8y_myCustomType)" \
+        | c8y devices update --template "{ type: 'c8y_Linux', c8y_jobInfo: { job: input.index, lastUpdated: time.now } }"
+    ```
+
 **Progress bar (alpha)**
 
 * `--progress` bar can be used when performing operations in a pipeline.
