@@ -244,7 +244,7 @@ func Test_LookupQueryParameterByReference(t *testing.T) {
 
 func Test_PageSizeParameter(t *testing.T) {
 	cmd := setupTest()
-	cmdErr := ExecuteCmd(cmd, `devices list --select id,name --pageSize 10 --verbose`)
+	cmdErr := ExecuteCmd(cmd, `devices list --select id,name`)
 	assert.OK(t, cmdErr)
 }
 
@@ -372,6 +372,51 @@ func Test_CreateDeviceViaPipeline(t *testing.T) {
 func Test_CreateManagedObjectWithoutInput(t *testing.T) {
 	cmd := setupTest()
 
-	cmdErr := ExecuteCmd(cmd, fmt.Sprintf("inventory create --data name=one --dry"))
+	// cmdErr := ExecuteCmd(cmd, fmt.Sprintf("devices list --select id,nam* --csv --csvHeader"))
+	// cmdErr := ExecuteCmd(cmd, fmt.Sprintf("applications get --id cockpit --select appId:id,tenantId:owner.**.id"))
+	cmdtext := `
+	devices list --type debugvalue --select value:value,VALUE:Value
+	`
+	cmdErr := ExecuteCmd(cmd, strings.TrimSpace(cmdtext))
+	assert.OK(t, cmdErr)
+}
+
+func Test_PipedDataToTemplate(t *testing.T) {
+	cmd := setupTest()
+
+	stdin := bytes.NewBufferString("10\n")
+	cmd.SetIn(stdin)
+
+	cmdErr := ExecuteCmd(cmd, fmt.Sprintf("devices create --template {type:input.index} --dry"))
+	assert.OK(t, cmdErr)
+}
+
+/*
+Using piped input in tempaltes
+*/
+func Test_PipingWithObjectPipeToTemplate(t *testing.T) {
+	cmd := setupTest()
+	stdin := bytes.NewBufferString(`{"id": "87551"}` + "\n" + `{"id": "1111"}` + "\n")
+	cmd.SetIn(stdin)
+
+	cmdErr := ExecuteCmd(cmd, `devices create --dry`)
+	assert.OK(t, cmdErr)
+}
+
+func Test_UpdatePipingWithObjectPipeToTemplate(t *testing.T) {
+	cmd := setupTest()
+	stdin := bytes.NewBufferString(`{"id": "87551"}` + "\n" + `{"id": "1111"}` + "\n")
+	cmd.SetIn(stdin)
+
+	cmdErr := ExecuteCmd(cmd, `devices update --dry`)
+	assert.OK(t, cmdErr)
+}
+
+func Test_PipingWithObjectPipeToTemplateWithIDs(t *testing.T) {
+	cmd := setupTest()
+	stdin := bytes.NewBufferString(`1111` + "\n" + `2222` + "\n")
+	cmd.SetIn(stdin)
+
+	cmdErr := ExecuteCmd(cmd, `devices update --dry`)
 	assert.OK(t, cmdErr)
 }
