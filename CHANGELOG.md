@@ -68,6 +68,12 @@ c8y inventory create --data "./datapoint.largeint.json"
 
 No unreleased features
 
+* Adding short options for various global options
+  * `-p` => `--pageSize`
+  * `-t` => `--withTotalPages`
+  * `-d` => `--dry`
+  * `-r` => `--raw`
+
 * Added colorize and pretty print options to output formatting
     * pretty print when using streaming (`-c` or `--compress`)
     * colorize json and json line output (`--noColor` or `-M` (for monochromatic output)). Output is colorized by default when writing to Terminal, but it can be disabled using `--noColor` or `-M`

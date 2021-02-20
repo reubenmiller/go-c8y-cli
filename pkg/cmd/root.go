@@ -382,20 +382,20 @@ func configureRootCmd() {
 
 	// Global flags
 	rootCmd.PersistentFlags().BoolVarP(&globalFlagVerbose, "verbose", "v", false, "Verbose logging")
-	rootCmd.PersistentFlags().IntVar(&globalFlagPageSize, "pageSize", 5, "Maximum results per page")
+	rootCmd.PersistentFlags().IntVarP(&globalFlagPageSize, "pageSize", "p", 5, "Maximum results per page")
 	rootCmd.PersistentFlags().Int64Var(&globalFlagCurrentPage, "currentPage", 0, "Current page size which should be returned")
 	rootCmd.PersistentFlags().Int64Var(&globalFlagTotalPages, "totalPages", 0, "Total number of pages to get")
 	rootCmd.PersistentFlags().BoolVar(&globalFlagIncludeAll, "includeAll", false, "Include all results by iterating through each page")
-	rootCmd.PersistentFlags().BoolVar(&globalFlagWithTotalPages, "withTotalPages", false, "Include all results")
+	rootCmd.PersistentFlags().BoolVarP(&globalFlagWithTotalPages, "withTotalPages", "t", false, "Include all results")
 	rootCmd.PersistentFlags().BoolVarP(&globalFlagCompact, "compact", "c", !isTerm, "Compact instead of pretty-printed output. Pretty print is the default if output is the terminal")
 	rootCmd.PersistentFlags().BoolVar(&globalFlagCompact, "compress", !isTerm, "Alias for --compact for users coming from PowerShell")
 	rootCmd.PersistentFlags().BoolVar(&globalFlagStream, "stream", true, "Stream transforms JSON arrays to single json objects to make them pipeable. Automatically activated when output is not the terminal")
 	rootCmd.PersistentFlags().BoolVar(&globalFlagIgnoreAccept, "noAccept", false, "Ignore Accept header will remove the Accept header from requests, however PUT and POST requests will only see the effect")
-	rootCmd.PersistentFlags().BoolVar(&globalFlagDryRun, "dry", false, "Dry run. Don't send any data to the server")
+	rootCmd.PersistentFlags().BoolVarP(&globalFlagDryRun, "dry", "d", false, "Dry run. Don't send any data to the server")
 	rootCmd.PersistentFlags().BoolVar(&globalFlagProgressBar, "progress", false, "Show progress bar. This will also disable any other verbose output")
 	rootCmd.PersistentFlags().BoolVarP(&globalFlagNoColor, "noColor", "M", !isTerm, "Don't use colors when displaying log entries on the console")
 	rootCmd.PersistentFlags().BoolVar(&globalFlagUseEnv, "useEnv", false, "Allow loading Cumulocity session setting from environment variables")
-	rootCmd.PersistentFlags().BoolVar(&globalFlagRaw, "raw", false, "Raw values")
+	rootCmd.PersistentFlags().BoolVarP(&globalFlagRaw, "raw", "r", false, "Raw values")
 	rootCmd.PersistentFlags().StringVar(&globalFlagProxy, "proxy", "", "Proxy setting, i.e. http://10.0.0.1:8080")
 	rootCmd.PersistentFlags().BoolVar(&globalFlagNoProxy, "noProxy", false, "Ignore the proxy settings")
 	rootCmd.PersistentFlags().BoolVar(&globalFlagNoLog, "noLog", false, "Disables the activity log for the current command")
@@ -413,7 +413,7 @@ func configureRootCmd() {
 	rootCmd.PersistentFlags().StringArrayVar(&globalFlagSelect, "select", nil, "select")
 	rootCmd.PersistentFlags().BoolVar(&globalCSVOutput, "csv", false, "Print output as csv format. comma (,) delimited")
 	rootCmd.PersistentFlags().BoolVar(&globalCSVOutputHeaders, "csvHeader", false, "Include header when in csv output")
-	rootCmd.PersistentFlags().UintVarP(&globalFlagTimeout, "timeout", "t", 10*60*1000, "Timeout in milliseconds")
+	rootCmd.PersistentFlags().UintVar(&globalFlagTimeout, "timeout", 10*60*1000, "Timeout in milliseconds")
 
 	// Map settings to flags, allowing the user to set the own default settings
 	viper.BindPFlag(SettingsDefaultPageSize, rootCmd.PersistentFlags().Lookup("pageSize"))
