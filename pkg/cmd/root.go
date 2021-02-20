@@ -393,7 +393,7 @@ func configureRootCmd() {
 	rootCmd.PersistentFlags().BoolVar(&globalFlagIgnoreAccept, "noAccept", false, "Ignore Accept header will remove the Accept header from requests, however PUT and POST requests will only see the effect")
 	rootCmd.PersistentFlags().BoolVar(&globalFlagDryRun, "dry", false, "Dry run. Don't send any data to the server")
 	rootCmd.PersistentFlags().BoolVar(&globalFlagProgressBar, "progress", false, "Show progress bar. This will also disable any other verbose output")
-	rootCmd.PersistentFlags().BoolVar(&globalFlagNoColor, "noColor", !isTerm, "Don't use colors when displaying log entries on the console")
+	rootCmd.PersistentFlags().BoolVarP(&globalFlagNoColor, "noColor", "M", !isTerm, "Don't use colors when displaying log entries on the console")
 	rootCmd.PersistentFlags().BoolVar(&globalFlagUseEnv, "useEnv", false, "Allow loading Cumulocity session setting from environment variables")
 	rootCmd.PersistentFlags().BoolVar(&globalFlagRaw, "raw", false, "Raw values")
 	rootCmd.PersistentFlags().StringVar(&globalFlagProxy, "proxy", "", "Proxy setting, i.e. http://10.0.0.1:8080")
