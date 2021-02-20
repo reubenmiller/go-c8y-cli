@@ -5,9 +5,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"regexp"
-	"sort"
 	"strings"
 
+	"github.com/facette/natsort"
 	glob "github.com/obeattie/ohmyglob"
 	"github.com/reubenmiller/go-c8y-cli/pkg/flatten"
 	"github.com/reubenmiller/go-c8y-cli/pkg/matcher"
@@ -105,7 +105,9 @@ func filterFlatMap(src map[string]interface{}, dst map[string]interface{}, patte
 		sourceKeys[i] = key
 		i++
 	}
-	sort.Strings(sourceKeys)
+	// Use natural sorting to sory array in an user friendly way
+	// i.e. 1, 10, 2 => 1, 2, 10
+	natsort.Sort(sourceKeys)
 
 	for i, pattern := range patterns {
 		found := false

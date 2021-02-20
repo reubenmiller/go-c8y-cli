@@ -2,6 +2,7 @@ module github.com/reubenmiller/go-c8y-cli
 
 require (
 	github.com/araddon/dateparse v0.0.0-20201001162425-8aadafed4dc4
+	github.com/facette/natsort v0.0.0-20181210072756-2cd4dd1e2dcb
 	github.com/fatih/color v1.10.0
 	github.com/google/go-jsonnet v0.17.0
 	github.com/gorilla/websocket v1.4.2
