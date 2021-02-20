@@ -119,22 +119,24 @@ func filterFlatMap(src map[string]interface{}, dst map[string]interface{}, patte
 					paths := strings.Split(pattern.String(), ".")
 					//
 					// len(paths) > 1
-					if strings.Contains(pattern.String(), "**") {
+					if strings.Contains(pattern.String(), "*") {
 						commonpath := bytes.Buffer{}
 						hasAlias := false
 
-						if strings.HasPrefix(pattern.String(), "**") {
+						if strings.HasPrefix(pattern.String(), "*") {
 							key = aliases[i] + "." + key
 							hasAlias = true
-						} else if strings.HasSuffix(pattern.String(), "**") {
+						} else if strings.HasSuffix(pattern.String(), "*") {
 							keylPaths := strings.Split(keyl, ".")
 							for idxPart, part := range paths {
-								if strings.Contains(part, "**") {
+								if strings.Contains(part, "**") || part == "*" {
 									break
 								}
 								// get the real key path rather than the wildcard
 								if strings.Contains(part, "*") && idxPart < len(keylPaths) {
 									part = keylPaths[idxPart]
+									commonpath.WriteString("." + part)
+									break
 								}
 								commonpath.WriteString("." + part)
 							}

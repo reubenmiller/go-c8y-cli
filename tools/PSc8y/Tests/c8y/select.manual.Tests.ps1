@@ -190,6 +190,18 @@ Describe -Name "c8y format global parameter" {
             $json.details.c8y_Details | Should -Not -BeNullOrEmpty
             $json.details.c8y_Details.data.name | Should -Not -BeNullOrEmpty
         }
+
+        It "maps nested properties and only literals to a new property name" {
+            $type = New-RandomString -Prefix "selectWithAlias"
+            1 | c8y devices create --type "$type" --template "{c8y_Details: {name: 'two', data: {name: 'one'}}}"
+            $output = c8y devices list --type $type --select "id:id,details:c8y_Details.*"
+            c8y devices list --type $type | c8y devices delete
+            $LASTEXITCODE | Should -Be 0
+            $json = $output | ConvertFrom-Json
+            $json.id | Should -MatchExactly "^\d+$"
+            $json.details.name | Should -BeExactly "two"
+            $json.details.data | Should -BeNullOrEmpty
+        }
     }
 
     Context "flat selection" {
