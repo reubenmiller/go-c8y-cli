@@ -68,6 +68,12 @@ c8y inventory create --data "./datapoint.largeint.json"
 
 No unreleased features
 
+* Added support for flag value completions (i.e. )
+    
+    ```sh
+    c8y operations list --status <TAB><TAB>
+    ```
+
 * Adding short options for various global options
   * `-p` => `--pageSize`
   * `-t` => `--withTotalPages`
