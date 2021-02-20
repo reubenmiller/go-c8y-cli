@@ -93,12 +93,18 @@ func filterFlatMap(src map[string]interface{}, dst map[string]interface{}, patte
 	sortedKeys := []string{}
 
 	for _, pattern := range patterns {
+		found := false
 		for key, value := range src {
 			keyl := strings.ToLower(key)
 			if strings.HasPrefix(keyl, pattern.String()+".") || pattern.MatchString(keyl) {
 				dst[key] = value
 				sortedKeys = append(sortedKeys, key)
+				found = true
 			}
+		}
+		if !found {
+			// store non-matching patterns for csv generation
+			sortedKeys = append(sortedKeys, pattern.String())
 		}
 	}
 	return sortedKeys, nil
@@ -306,7 +312,11 @@ func pluckJsonValues(item *gjson.Result, properties []string, flat bool, asCSV b
 
 func convertToCSV(flatMap map[string]interface{}, keys []string) string {
 	buf := bytes.Buffer{}
-	for _, key := range keys {
+	for i, key := range keys {
+		if i != 0 {
+			// handle for empty non-existant values by leaving it blank
+			buf.WriteByte(',')
+		}
 		if value, ok := flatMap[key]; ok {
 			if marshalledValue, err := json.Marshal(value); err != nil {
 				Logger.Warningf("failed to marshal value. value=%v, err=%s", value, err)
@@ -316,11 +326,10 @@ func convertToCSV(flatMap map[string]interface{}, keys []string) string {
 				} else {
 					buf.Write(marshalledValue)
 				}
-				buf.WriteByte(',')
 			}
 		}
 	}
-	return strings.TrimRight(buf.String(), ",")
+	return buf.String()
 }
 
 func matchWithWildcards(x, y interface{}) (bool, error) {
