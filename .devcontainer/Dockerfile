@@ -101,6 +101,10 @@ RUN wget https://packages.microsoft.com/config/debian/10/packages-microsoft-prod
     # https://github.com/bats-core/bats-core
     && npm install -g bats \
     && apt-get install -y jq bash-completion \
+
+    #
+    # Fish shell
+    && apt-get install -y fish \
     #
     # Clean up
     && apt-get autoremove -y \
@@ -126,6 +130,8 @@ USER $USERNAME
 
 # Update this to "on" or "off" as appropriate
 ENV GO111MODULE=auto
+ENV LANG=C.UTF-8
+ENV LC_ALL=C.UTF-8
 
 # Change default location of cumulocity profiles
 ENV C8Y_SESSION_HOME=/workspaces/go-c8y-cli/.cumulocity
