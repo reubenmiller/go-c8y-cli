@@ -1,6 +1,7 @@
 package console
 
 import (
+	"bytes"
 	"fmt"
 	"io"
 	"sync"
@@ -59,7 +60,7 @@ func (c *Console) Write(b []byte) (n int, err error) {
 	}
 	c.count++
 
-	if c.IsJSON && (jsonUtilities.IsJSONArray(b) || jsonUtilities.IsJSONObject(b)) {
+	if bt := bytes.TrimSpace(b); c.IsJSON && (jsonUtilities.IsJSONArray(bt) || jsonUtilities.IsJSONObject(bt)) {
 		b = pretty.PrettyOptions(b, &pretty.Options{
 			SortKeys: true,
 			Width:    80,
