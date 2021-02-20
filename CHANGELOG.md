@@ -71,7 +71,6 @@ No unreleased features
 * Adding short options for various global options
   * `-p` => `--pageSize`
   * `-t` => `--withTotalPages`
-  * `-d` => `--dry`
   * `-r` => `--raw`
 
 * Added colorize and pretty print options to output formatting
