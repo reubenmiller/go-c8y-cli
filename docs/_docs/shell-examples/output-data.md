@@ -56,7 +56,7 @@ c8y devices list --select "id,values.0"
 *Note*: Array indexes are mapped to `.<index>`, therefore there is no difference between between paths for an array index, and a json object using a number as a property. This may generate some unexpected results when using `--select` if you use numbers as properties in you Cumulocity data.
 
 
-Entering explicit values is not very convienient, especially when some fragments can be very long), that's why the `select` parameter also supports usage of the wildcard characters `?` and `*` and the globstar `**`.
+Entering explicit values is not very convenient, especially when some fragments can be very long), that's why the `select` parameter also supports usage of the wildcard characters `?` and `*` and the globstar `**`.
 
 The following wildcard characters are supported:
 
@@ -64,26 +64,26 @@ The following wildcard characters are supported:
 * `*` matches zero or more characters not including the path delimiter `.`
 * `**` (a.k.a. globstar) matches all characters including the path delimiter `.`
 
-All dot notation paths are case-insensitive, so there are no `c8y_softwarelist` and `c8y_SoftwareList`.
-
+All dot notation paths are case-insensitive. If more than 1 property is matches the same property, then both will be returned.
 
 ### Select features
 
-Below is the summary of actions which are supported by the `select` parameter:
+Below is a summary of actions which are supported by the `select` parameter:
 
-* Get selected properties (`--select "id,name"`)
+* Get specific properties (`--select "id,name"`)
 * Get root fragments which are not objects or arrays (`--select "*"`)
 * Get all fragments (included nested objects and arrays) (`--select "**"`)
+* Get all items matching a nested path pattern (`--select "**.self"`)
 * Map property names (id->deviceId) (`--select "deviceId:id`)
 * Get flattened json properties using (`--select "**" --flatten`)
-* Get csv output (with flattened json paths) (`--csv` and `--csvHeader`)
+* Output results in CSV format (comma delimited) (with flattened json paths) (`--csv` and `--csvHeader`)
 
 
 ## Examples
 
-The following examples should how the `select` parameter can be used. All of the examples reference the following json from a device (managed object). The examples will show how to select and manipulate specific values from this device.
+The following examples should show the `select` parameter can be used. All of the examples reference the following json from a device (managed object). The examples will show how to select and manipulate specific values from this device.
 
-**Example device data used in each example**
+**Reference device data used in each example**
 
 ```json
 {
@@ -162,7 +162,7 @@ Note: On shell remember to include the values within quotes `"` to prevent `*` f
 }
 ```
 
-##### Select nested properties using dotnotation
+##### Select nested properties using dot notation
 
 ```sh
 c8y devices list --pageSize 1 --fragmentType company_Example --select "id,c8y_SoftwareList.**"
@@ -190,9 +190,7 @@ c8y devices list --pageSize 1 --fragmentType company_Example --select "id,c8y_So
 }
 ```
 
-##### Only select root literal values
-
-If would want to exclude all complex stru
+##### Only select non-object/array properties
 
 ```sh
 c8y devices list --select "*"
@@ -318,7 +316,7 @@ id,c8y_SoftwareList.0.name,c8y_SoftwareList.1.name,c8y_SoftwareList.0.version,c8
 396806,app1,app2,1.0.0,2.0.0
 ```
 
-Or if you only want the first software packages from each value
+Or if you only want the first software package from each device
 
 ```sh
 c8y devices list --pageSize 1 --fragmentType company_Example --select "id,*software*.0.name,*software*.0.version" --csv --csvHeader
@@ -330,7 +328,7 @@ id,c8y_SoftwareList.0.name,c8y_SoftwareList.0.version
 ```
 
 
-##### output as csv
+##### Output as csv
 
 ```sh
 c8y devices list --pageSize 2 --fragmentType company_Example --select "id,name" --csv
@@ -343,7 +341,7 @@ c8y devices list --pageSize 2 --fragmentType company_Example --select "id,name" 
 396735,10
 ```
 
-##### output as csv with headers
+##### Output as csv with headers
 
 ```sh
 c8y devices list --pageSize 2 --fragmentType company_Example --select "id,name" --csv --csvHeader
@@ -357,9 +355,9 @@ id,name
 396735,10
 ```
 
-##### Reshaping data using custom names
+### Reshaping data using custom names
 
-The output data can also be reshapped by adding a name before the dot notation path in the format of:
+The output json can also be reshaped by adding a name before the dot notation path in the format of:
 `<alias>:<path>`
 
 For example renaming the id and name fields can be prefixed with `deviceId:` and `deviceName:` respectively.
@@ -388,6 +386,8 @@ c8y devices list --pageSize 2 --fragmentType company_Example --select "deviceId:
 
 Mapping objects works the same way, though you need to specify that you want the full objects by using a globstar, otherwise you will only return the last value (which is hard to predict)
 
+#### Renaming a root fragment
+
 Renaming the root fragment `agent_Details` to `agent` in the output:
 
 ```sh
@@ -410,19 +410,21 @@ c8y devices list --pageSize 1 --fragmentType company_Example --select "agent:age
 
 #### Expanding nested properties using globstar
 
-Mapping properties using globstar `**` is done differently as the globstar can return multiple values if present on the object.
+Mapping properties using globstar `**` is done differently as the globstar can return multiple values if present in the json response.
 
 There are two special cases are listed below:
 
-1. Using globstar `**` at the beginning of the dot notation path.
+##### Case 1: Using globstar `**` at the beginning of the dot notation path.
 
-If the dotnotation path starts with `**.` it means that it will map every matching property (regardless where it is), and add it as a nested property under the given alias.
+If the dot notation path starts with `**.` it means that it will map every matching property (regardless where it is) to a nested property under the given alias.
 
-So, for example, if you want to move the `agent_Details` fragment to a nested fragment, then you can
+So, for example, if you want to move the whole `agent_Details` fragment and all nested properties to a nested fragment, then you can use:
 
 ```sh
 c8y devices list --pageSize 2 --fragmentType company_Example --select "info:**.agent_Details.**"
 ```
+
+**Output**
 
 ```json
 {
@@ -439,13 +441,15 @@ c8y devices list --pageSize 2 --fragmentType company_Example --select "info:**.a
 ```
 
 
-2. Use globstar at the end of the path
+##### Case 2: Use globstar at the end of the path
 
-Use a globstar at the end of the path can essentially renames the root fragment. The following example renames the `agent_Details` fragment to `info`.
+Use a globstar at the end of the path renames the root fragment. The following example renames the `agent_Details` fragment to `info`.
 
 ```sh
 c8y devices list --pageSize 2 --fragmentType company_Example --select "info:agent_Details.**"
 ```
+
+**Output**
 
 ```json
 {
@@ -459,7 +463,7 @@ c8y devices list --pageSize 2 --fragmentType company_Example --select "info:agen
 }
 ```
 
-You can also use the globstar to move a nested property. THe following maps all of the literal properties from `agent_Details.country` to `country`: 
+You can also use the globstar to move a nested property. The following maps all of the literal properties from `agent_Details.country` to `country`: 
 
 ```sh
 c8y devices list --pageSize 1 --fragmentType company_Example --select "country:agent_Details.country.*"
