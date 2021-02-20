@@ -1,7 +1,7 @@
 module github.com/reubenmiller/go-c8y-cli
 
 require (
-	github.com/araddon/dateparse v0.0.0-20201001162425-8aadafed4dc4
+	github.com/araddon/dateparse v0.0.0-20210207001429-0eec95c9db7e
 	github.com/facette/natsort v0.0.0-20181210072756-2cd4dd1e2dcb
 	github.com/fatih/color v1.10.0
 	github.com/google/go-jsonnet v0.17.0
@@ -17,15 +17,15 @@ require (
 	github.com/pquerna/otp v1.3.0
 	github.com/reubenmiller/go-c8y v0.8.1-0.20210207143655-b91d0922d314
 	github.com/sethvargo/go-password v0.2.0
-	github.com/spf13/cobra v0.0.5
+	github.com/spf13/cobra v1.1.3
 	github.com/spf13/pflag v1.0.5
 	github.com/spf13/viper v1.7.1
 	github.com/thedevsaddam/gojsonq v2.3.0+incompatible
 	github.com/tidwall/gjson v1.6.8
-	github.com/tidwall/pretty v1.0.2
+	github.com/tidwall/pretty v1.0.5
 	github.com/tidwall/sjson v1.1.5
 	github.com/vbauerster/mpb/v6 v6.0.2
-	golang.org/x/crypto v0.0.0-20201221181555-eec23a3978ad
+	golang.org/x/crypto v0.0.0-20210220033148-5ea612d1eb83
 )
 
 go 1.13
