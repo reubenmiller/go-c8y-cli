@@ -129,6 +129,10 @@ Below shows all of the variables which are available for use in jsonnet template
 | rand.float2 | Random float32 between 0 and 1 |
 | rand.float3 | Random float32 between 0 and 1 |
 | rand.float4 | Random float32 between 0 and 1 |
+| time.now | Current datetime string in ISO8601/RFC3339 format with millisecond resolution (when template is evaluated) |
+| time.nowNano | Current datetime string in ISO8601/RFC3339 format with millisecond resolution (when template is evaluated) |
+| input.index | Input iterator as a number |
+| input.value | Input iterator as a string |
 
 **Note**
 
@@ -261,7 +265,7 @@ Invoke-Template -Template ./template.jsonnet
 ```powershell
 $Template = @"
 {
-    type: base.name + '_' + rand.int,
+    type: self.name + '_' + rand.int,
     value: 1 + 2,
 }
 "@
