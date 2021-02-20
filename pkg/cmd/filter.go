@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"regexp"
+	"sort"
 	"strings"
 
 	glob "github.com/obeattie/ohmyglob"
@@ -64,12 +65,15 @@ func FilterPropertyByWildcard(jsonValue string, prefix string, patterns []string
 		return nil, nil, err
 	}
 	compiledPatterns := []glob.Glob{}
+	aliases := []string{}
 	filteredMap := make(map[string]interface{}, 0)
 
 	for _, p := range patterns {
 		// resolve path using wildcards
 		// strip alias reference
+		alias := ""
 		if idx := strings.Index(p, ":"); idx > -1 {
+			alias = p[0:idx]
 			p = p[idx+1:]
 		}
 		p = strings.ToLower(p)
@@ -81,22 +85,63 @@ func FilterPropertyByWildcard(jsonValue string, prefix string, patterns []string
 				MatchAtEnd:   true,
 			}); err == nil {
 				compiledPatterns = append(compiledPatterns, cp)
+				aliases = append(aliases, alias)
 			}
 		}
 	}
 
-	resolvedProperties, _ := filterFlatMap(flatMap, filteredMap, compiledPatterns)
+	resolvedProperties, _ := filterFlatMap(flatMap, filteredMap, compiledPatterns, aliases)
 	return filteredMap, resolvedProperties, err
 }
 
-func filterFlatMap(src map[string]interface{}, dst map[string]interface{}, patterns []glob.Glob) ([]string, error) {
+func filterFlatMap(src map[string]interface{}, dst map[string]interface{}, patterns []glob.Glob, aliases []string) ([]string, error) {
 	sortedKeys := []string{}
 
-	for _, pattern := range patterns {
+	// sort source map keys, so matching is stable when using alias
+	// where one pattern can match multiple values (otherwise it will be random which property is selected)
+	sourceKeys := make([]string, len(src))
+	i := 0
+	for key := range src {
+		sourceKeys[i] = key
+		i++
+	}
+	sort.Strings(sourceKeys)
+
+	for i, pattern := range patterns {
 		found := false
-		for key, value := range src {
+		for _, key := range sourceKeys {
+			value := src[key]
 			keyl := strings.ToLower(key)
 			if strings.HasPrefix(keyl, pattern.String()+".") || pattern.MatchString(keyl) {
+				if aliases[i] != "" {
+					if paths := strings.Split(pattern.String(), "."); len(paths) > 1 && strings.Contains(pattern.String(), "**") {
+						commonpath := bytes.Buffer{}
+						hasAlias := false
+
+						if strings.HasSuffix(pattern.String(), "**") {
+							for _, part := range paths {
+								if strings.Contains(part, "**") {
+									break
+								}
+								commonpath.WriteString("." + part)
+							}
+							commonprefix := strings.TrimLeft(commonpath.String(), ".")
+							if strings.HasPrefix(key, commonprefix) {
+								key = aliases[i] + key[len(commonprefix):]
+								hasAlias = true
+							}
+						} else if strings.HasPrefix(pattern.String(), "**") {
+							key = aliases[i] + "." + key
+							hasAlias = true
+						}
+
+						if !hasAlias {
+							key = aliases[i]
+						}
+					} else {
+						key = aliases[i]
+					}
+				}
 				dst[key] = value
 				sortedKeys = append(sortedKeys, key)
 				found = true

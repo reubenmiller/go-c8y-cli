@@ -80,19 +80,20 @@ Describe -Name "c8y format global parameter" {
         $json."name" | Should -MatchExactly "^\w+$"
     }
 
-    It "returns json lines using custom properties names" {
-        $output = c8y applications get --id cockpit --select "appId:id,appName:name"
-        $LASTEXITCODE | Should -Be 0
-        $json = $output | ConvertFrom-Json
-        $json."appId" | Should -MatchExactly "^\d+$"
-        $json."appName" | Should -MatchExactly "^\w+$"
-    }
 
     It "returns csv ignoring the aliases when no header options is provided" {
         $output = c8y applications get --id cockpit --select "appId:id,appName:name" --csv
         $LASTEXITCODE | Should -Be 0
         $output | Should -HaveCount 1
         $output | Should -MatchExactly "^\d+,\w+$"
+    }
+
+    It "returns csv with custom column headers based on aliases" {
+        $output = c8y applications get --id cockpit --select "appId:id,appName:name" --csv --csvHeader
+        $LASTEXITCODE | Should -Be 0
+        $output | Should -HaveCount 2
+        $output[0] | Should -MatchExactly "^appId,appName$"
+        $output[1] | Should -MatchExactly "^\d+,\w+$"
     }
 
     It "filters and selects a subset of properties" {
@@ -105,12 +106,15 @@ Describe -Name "c8y format global parameter" {
         $json.name | Should -BeExactly "cockpit"
     }
 
-    It -Skip -Tag @("TODO") "devices that do not match the filter are ignored" {
+    It "devices that do not match the filter are ignored" {
         # Need to create devices to support this test scenario
+        $type = New-RandomString -Prefix "selectWithAlias"
+        "device01" | c8y devices create --type "$type"
         $output = c8y devices list | c8y devices get --filter "name like device*" --select id,name,self --workers 5
+        c8y devices list --type $type | c8y devices delete
+
         $LASTEXITCODE | Should -Be 0
-        $output | Should -Not -BeNullOrEmpty
-        $output | Should -HaveCount 3
+        $output | Should -BeNullOrEmpty
     }
 
     It "select properties and csv output" {
@@ -119,6 +123,41 @@ Describe -Name "c8y format global parameter" {
         $json = $output | ConvertFrom-Json
         $json."app Name" | Should -Not -BeNullOrEmpty
         $json.id | Should -Not -BeNullOrEmpty
+    }
+
+    Context "aliases, data shapping" {
+        It "returns json lines using custom properties names" {
+            $output = c8y applications get --id cockpit --select "appId:id,appName:name"
+            $LASTEXITCODE | Should -Be 0
+            $json = $output | ConvertFrom-Json
+            $json."appId" | Should -MatchExactly "^\d+$"
+            $json."appName" | Should -MatchExactly "^\w+$"
+        }
+    
+        It "returns json lines using custom properties names for nested values" {
+            # $output = c8y applications get --id cockpit --select "appId:id,tenantId:owner.**.id"
+            $output = c8y applications get --id cockpit --select "appId:id,tenantId:owner.**.id,tenantDetails:owner.**"
+            $LASTEXITCODE | Should -Be 0
+            $json = $output | ConvertFrom-Json
+            $json.appId | Should -MatchExactly "^\d+$"
+            $json.tenantId | Should -BeExactly "management"
+            $json.tenantDetails.self | Should -Match "^\w+://.+management$"
+            $json.tenantDetails.tenant.id | Should -BeExactly "management"
+        }
+
+        It "adds nested objects under a propery name when using globstar **" {
+            $type = New-RandomString -Prefix "selectWithAlias"
+            1 | c8y devices create --type "$type"
+            $output = c8y devices list --type $type --select "id:id,links:**.self"
+            c8y devices list --type $type | c8y devices delete
+            $LASTEXITCODE | Should -Be 0
+            $json = $output | ConvertFrom-Json
+            $json.id | Should -MatchExactly "^\d+$"
+            $json.links | Should -Not -BeNullOrEmpty
+            $json.links.deviceParents.self | Should -Not -BeNullOrEmpty
+            $json.links.assetParents.self | Should -Not -BeNullOrEmpty
+            $json.links.childDevices.self | Should -Not -BeNullOrEmpty
+        }        
     }
 
     Context "flat selection" {
@@ -188,6 +227,27 @@ Describe -Name "c8y format global parameter" {
             $output = c8y applications list --select "self" --pageSize 1 --compact=false
             $LASTEXITCODE | Should -BeExactly 0
             $output -match 'self' | Should -HaveCount 1
+        }
+
+        It "returns only objects on the selected level with the self property" {
+            $type = New-RandomString -Prefix "selectLevel"
+            1 | c8y devices create --type "$type"
+            $output1 = c8y devices list --type $type --select "*.self"
+            $output2 = c8y devices list --type $type --select "**.self"
+            c8y devices list --type $type | c8y devices delete
+            $LASTEXITCODE | Should -Be 0
+
+            # Depth 2 self links
+            $json1 = $output1 | ConvertFrom-Json
+            $json1.additionParents.self | Should -Not -BeNullOrEmpty
+            $json1.assetParents.self | Should -Not -BeNullOrEmpty
+            $json1.self | Should -BeNullOrEmpty -Because "no globstar was used, so depth matching is explicit by number of dots"
+
+            # all self links
+            $json2 = $output2 | ConvertFrom-Json
+            $json2.additionParents.self | Should -Not -BeNullOrEmpty
+            $json2.assetParents.self | Should -Not -BeNullOrEmpty
+            $json2.self | Should -Not -BeNullOrEmpty  -Because "globstar was used, so matching can occur on any depth"
         }
 
         It "selects arrays" {
