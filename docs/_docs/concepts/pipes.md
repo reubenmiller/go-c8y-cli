@@ -15,6 +15,38 @@ echo -e "12345\n22222" | c8y inventory get
 echo -e "device01\ndevice02" | c8y inventory get
 ```
 
+#### Create 
+
+```sh
+seq -f device_%04g 5
+```
+
+**Output**
+
+```sh
+device_001
+device_002
+device_003
+device_004
+device_005
+```
+
+Control the start and stop index
+
+```
+seq -f device_%04g 6 10
+```
+
+**Response**
+
+```
+device_006
+device_007
+device_008
+device_009
+device_010
+```
+
 #### Piping json
 
 Piped json must be flattened first to a stream of objects
