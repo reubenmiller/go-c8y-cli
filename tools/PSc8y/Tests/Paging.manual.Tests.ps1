@@ -30,6 +30,7 @@ Describe -Name "Get-Pagination" {
             -Device $Device.id `
             -IncludeAll `
             -Verbose 4> $cliOutputFile
+        $C8Y_SETTINGS_INCLUDEALL_PAGESIZE = ""
 
         $LASTEXITCODE | Should -Be 0
         $Response | Should -Not -BeNullOrEmpty
@@ -52,6 +53,7 @@ Describe -Name "Get-Pagination" {
             -Verbose 4> $cliOutputFile
 
         $LASTEXITCODE | Should -Be 0
+        $C8Y_SETTINGS_INCLUDEALL_PAGESIZE = ""
         $Response | Should -Not -BeNullOrEmpty
         $Response | Should -HaveCount 20
 
@@ -89,6 +91,7 @@ Describe -Name "Get-Pagination" {
             -Verbose 4> $cliOutputFile
 
         $LASTEXITCODE | Should -Be 0
+        $C8Y_SETTINGS_DEFAULT_PAGESIZE = ""
         $Response | Should -Not -BeNullOrEmpty
 
         $Response | Should -HaveCount 10
