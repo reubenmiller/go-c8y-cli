@@ -5,6 +5,7 @@ import (
 	"io"
 	"sync"
 
+	"github.com/reubenmiller/go-c8y-cli/pkg/jsonUtilities"
 	"github.com/tidwall/pretty"
 )
 
@@ -58,7 +59,7 @@ func (c *Console) Write(b []byte) (n int, err error) {
 	}
 	c.count++
 
-	if c.IsJSON {
+	if c.IsJSON && (jsonUtilities.IsJSONArray(b) || jsonUtilities.IsJSONObject(b)) {
 		b = pretty.PrettyOptions(b, &pretty.Options{
 			SortKeys: true,
 			Width:    80,
