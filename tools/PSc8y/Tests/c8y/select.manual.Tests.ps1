@@ -157,7 +157,39 @@ Describe -Name "c8y format global parameter" {
             $json.links.deviceParents.self | Should -Not -BeNullOrEmpty
             $json.links.assetParents.self | Should -Not -BeNullOrEmpty
             $json.links.childDevices.self | Should -Not -BeNullOrEmpty
-        }        
+        }
+
+        It "maps nested properties to a new name" {
+            $type = New-RandomString -Prefix "selectWithAlias"
+            1 | c8y devices create --type "$type" --template "{c8y_Details: {data: {name: 'one'}}}"
+            $output1 = c8y devices list --type $type --select "id:id,details:c8y_Details.**"
+            $output2 = c8y devices list --type $type --select "id:id,details:c8y_Detail*.**"
+            
+            c8y devices list --type $type | c8y devices delete
+            $LASTEXITCODE | Should -Be 0
+            
+            $json = $output1 | ConvertFrom-Json
+            $json.id | Should -MatchExactly "^\d+$"
+            $json.details | Should -Not -BeNullOrEmpty
+            $json.details.data.name | Should -Not -BeNullOrEmpty
+
+            $json = $output2 | ConvertFrom-Json
+            $json.id | Should -MatchExactly "^\d+$"
+            $json.details | Should -Not -BeNullOrEmpty
+            $json.details.data.name | Should -Not -BeNullOrEmpty
+        }
+
+        It "maps properties to a new property name including the root property" {
+            $type = New-RandomString -Prefix "selectWithAlias"
+            1 | c8y devices create --type "$type" --template "{c8y_Details: {data: {name: 'one'}}}"
+            $output = c8y devices list --type $type --select "id:id,details:**.c8y_Details.**"
+            c8y devices list --type $type | c8y devices delete
+            $LASTEXITCODE | Should -Be 0
+            $json = $output | ConvertFrom-Json
+            $json.id | Should -MatchExactly "^\d+$"
+            $json.details.c8y_Details | Should -Not -BeNullOrEmpty
+            $json.details.c8y_Details.data.name | Should -Not -BeNullOrEmpty
+        }
     }
 
     Context "flat selection" {
