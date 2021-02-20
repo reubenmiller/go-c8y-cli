@@ -117,8 +117,6 @@ func filterFlatMap(src map[string]interface{}, dst map[string]interface{}, patte
 			if strings.HasPrefix(keyl, pattern.String()+".") || pattern.MatchString(keyl) {
 				if aliases[i] != "" {
 					paths := strings.Split(pattern.String(), ".")
-					//
-					// len(paths) > 1
 					if strings.Contains(pattern.String(), "*") {
 						commonpath := bytes.Buffer{}
 						hasAlias := false
@@ -127,21 +125,21 @@ func filterFlatMap(src map[string]interface{}, dst map[string]interface{}, patte
 							key = aliases[i] + "." + key
 							hasAlias = true
 						} else if strings.HasSuffix(pattern.String(), "*") {
-							keylPaths := strings.Split(keyl, ".")
+							keyPaths := strings.Split(key, ".")
 							for idxPart, part := range paths {
 								if strings.Contains(part, "**") || part == "*" {
 									break
 								}
 								// get the real key path rather than the wildcard
-								if strings.Contains(part, "*") && idxPart < len(keylPaths) {
-									part = keylPaths[idxPart]
+								if strings.Contains(part, "*") && idxPart < len(keyPaths) {
+									part = keyPaths[idxPart]
 									commonpath.WriteString("." + part)
 									break
 								}
 								commonpath.WriteString("." + part)
 							}
 							commonprefix := strings.TrimLeft(commonpath.String(), ".")
-							if strings.HasPrefix(keyl, commonprefix) {
+							if strings.HasPrefix(keyl, strings.ToLower(commonprefix)) {
 								key = aliases[i] + key[len(commonprefix):]
 								hasAlias = true
 							}

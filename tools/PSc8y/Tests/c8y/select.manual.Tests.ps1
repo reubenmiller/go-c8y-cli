@@ -202,6 +202,23 @@ Describe -Name "c8y format global parameter" {
             $json.details.name | Should -BeExactly "two"
             $json.details.data | Should -BeNullOrEmpty
         }
+
+        It "handles duplicates keys by returning both of the matches" {
+            $type = New-RandomString -Prefix "selectWithAlias"
+            1 | c8y devices create --type $type --template "{value: 1, Value: 2}"
+            $output1 = c8y devices list --type $type --select "value,Value"
+            $output2 = c8y devices list --type $type --select "value:Value"
+            c8y devices list --type $type | c8y devices delete
+            $LASTEXITCODE | Should -Be 0
+            
+            $json = $output1 | ConvertFrom-Json -AsHashtable
+            $json.value | Should -BeExactly 1
+            $json.Value | Should -BeExactly 2
+
+            # Note: Duplicate values overwrite eachother when using aliases
+            $json = $output2 | ConvertFrom-Json -AsHashtable
+            $json.value | Should -BeExactly 1 -Because "alias values are not case sensitive, and value comes after Value when keys are sorted"
+        }
     }
 
     Context "flat selection" {
