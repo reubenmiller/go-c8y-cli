@@ -25,7 +25,14 @@
 		"extensions.ignoreRecommendations": true,
 		"go.testEnvVars": {
 			"C8Y_SESSION": ""
-		}
+		},
+		"go.delveConfig": {
+			"dlvLoadConfig": {
+				"maxStringLen": 1024,
+				"maxArrayValues": 1000,
+			},
+			"apiVersion": 2,
+		},
 	},
 
 	// Add the IDs of extensions you want installed when the container is created in the array below.
