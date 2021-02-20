@@ -13,7 +13,7 @@ Describe -Name "Get-MeasurementCollection" {
     }
 
     It "Get a list of measurements in csv format" {
-        $Response = PSc8y\Get-MeasurementCollection -Device $Device.id -Csv
+        $Response = PSc8y\Get-MeasurementCollection -Device $Device.id -CsvFormat
         $Response | Should -Not -BeNullOrEmpty
         $Response | Should -BeOfType string
         $Rows = $Response | ConvertFrom-Csv -Delimiter ","
@@ -21,7 +21,7 @@ Describe -Name "Get-MeasurementCollection" {
     }
 
     It "Get a list of measurements in Excel format" {
-        $Response = PSc8y\Get-MeasurementCollection -Device $Device.id -Excel
+        $Response = PSc8y\Get-MeasurementCollection -Device $Device.id -ExcelFormat
         $Response | Should -Not -BeNullOrEmpty
 
         # TODO: How to test if it is a valid excel data
