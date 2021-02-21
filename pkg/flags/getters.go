@@ -288,6 +288,13 @@ func WithStringSliceCSV(opts ...string) GetOption {
 func WithIntValue(opts ...string) GetOption {
 	return func(cmd *cobra.Command, inputIterators *RequestInputIterators) (string, interface{}, error) {
 		src, dst, _ := UnpackGetterOptions("", opts...)
+
+		if inputIterators != nil {
+			if inputIterators.PipeOptions.Name == src {
+				return WithPipelineIterator(inputIterators.PipeOptions)(cmd, inputIterators)
+			}
+		}
+
 		value, err := cmd.Flags().GetInt(src)
 		return dst, value, err
 	}
@@ -297,6 +304,13 @@ func WithIntValue(opts ...string) GetOption {
 func WithFloatValue(opts ...string) GetOption {
 	return func(cmd *cobra.Command, inputIterators *RequestInputIterators) (string, interface{}, error) {
 		src, dst, _ := UnpackGetterOptions("", opts...)
+
+		if inputIterators != nil {
+			if inputIterators.PipeOptions.Name == src {
+				return WithPipelineIterator(inputIterators.PipeOptions)(cmd, inputIterators)
+			}
+		}
+
 		value, err := cmd.Flags().GetFloat32(src)
 		return dst, value, err
 	}

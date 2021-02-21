@@ -68,9 +68,13 @@ func (i *PipeIterator) GetNext() (line []byte, input interface{}, err error) {
 			// select first property
 			for _, prop := range i.opts.Properties {
 				if prop != "" {
-
 					if v := gjson.GetBytes(line, prop); v.Exists() {
-						return []byte(v.String()), line, nil
+						// allow for different type
+						if v.Type == gjson.String {
+							return []byte(v.String()), line, nil
+						}
+						// return raw value (as it might be a number or bool)
+						return []byte(v.Raw), line, nil
 					}
 				}
 			}
