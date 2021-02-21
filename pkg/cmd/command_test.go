@@ -279,10 +279,10 @@ func Test_UpdateEventBinary(t *testing.T) {
 func Test_GetCurrentUserInventoryRole(t *testing.T) {
 	cmd := setupTest()
 
-	stdin := bytes.NewBufferString(`1` + "\n")
+	stdin := bytes.NewBufferString(`{"id":1}` + "\n")
 	cmd.SetIn(stdin)
 
-	cmdErr := ExecuteCmd(cmd, fmt.Sprintf("users getCurrentUserInventoryRole --id=1 --pretty=false --dry"))
+	cmdErr := ExecuteCmd(cmd, fmt.Sprintf("users getCurrentUserInventoryRole"))
 	assert.OK(t, cmdErr)
 }
 
