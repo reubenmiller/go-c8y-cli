@@ -21,6 +21,7 @@ type Console struct {
 	Colorized   bool
 	Compact     bool
 	IsJSON      bool
+	Disabled    bool
 }
 
 // NewConsole create a new console writter
@@ -53,6 +54,9 @@ func (c *Console) Println(a ...interface{}) (int, error) {
 
 // Write a line to the output. Supports concurrent access
 func (c *Console) Write(b []byte) (n int, err error) {
+	if c.Disabled {
+		return
+	}
 	c.mu.Lock()
 	defer c.mu.Unlock()
 	if c.count == 0 && c.header != nil {
