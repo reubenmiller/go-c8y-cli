@@ -49,37 +49,37 @@
 
     # Type Definition
     $DataType = switch ($Type) {
-        "[]agent" { "object[]" }
-        "[]device" { "object[]" }
-        "[]devicegroup" { "object[]" }
-        "[]role" { "object[]" }
-        "[]roleself" { "object[]" }
-        "[]string" { "string[]" }
-        "[]stringcsv" { "string[]" }
-        "[]tenant" { "object[]" }
-        "[]user" { "object[]" }
-        "[]usergroup" { "object[]" }
-        "[]userself" { "object[]" }
-        "application" { "object[]" }
-        "boolean" { "switch" }
-        "datefrom" { "string" }
-        "datetime" { "string" }
-        "dateto" { "string" }
-        "directory" { "string" }
-        "file" { "string" }
-        "float" { "float" }
-        "fileContents" { "string" }
-        "attachment" { "string" }
-        "id" { "object" }
-        "integer" { "long" }
-        "json" { "object" }
-        "json_custom" { "object" }
-        "microservice" { "object[]" }
-        "set" { "object[]" }
-        "source" { "object" }
-        "string" { "string" }
-        "strings" { "string" }
-        "tenant" { "object" }
+        "[]agent" { "object[]"; break }
+        "[]device" { "object[]"; break }
+        "[]devicegroup" { "object[]"; break }
+        "[]role" { "object[]"; break }
+        "[]roleself" { "object[]"; break }
+        "[]string" { "string[]"; break }
+        "[]stringcsv" { "string[]"; break }
+        "[]tenant" { "object[]"; break }
+        "[]user" { "object[]"; break }
+        "[]usergroup" { "object[]"; break }
+        "[]userself" { "object[]"; break }
+        "application" { "object[]"; break }
+        "boolean" { "switch"; break }
+        "datefrom" { "string"; break }
+        "datetime" { "string"; break }
+        "dateto" { "string"; break }
+        "directory" { "string"; break }
+        "file" { "string"; break }
+        "float" { "float"; break }
+        "fileContents" { "string"; break }
+        "attachment" { "string"; break }
+        "id" { "object[]"; break }
+        "integer" { "long"; break }
+        "json" { "object"; break }
+        "json_custom" { "object"; break }
+        "microservice" { "object[]"; break }
+        "set" { "object[]"; break }
+        "source" { "object"; break }
+        "string" { "string"; break }
+        "strings" { "string"; break }
+        "tenant" { "object"; break }
         default {
             Write-Error "Unsupported Type. $_"
         }

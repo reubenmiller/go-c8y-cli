@@ -87,7 +87,7 @@
         }
         if ($iArg.validationSet) {
             $validateSetOptions = @($iArg.validationSet | ForEach-Object { "`"$_`"" }) -join ","
-            $CompletionBuilderOptions.AppendLine("completion.WithValidateSet(`"$($iarg.Name)`", $validateSetOptions),")
+            $null = $CompletionBuilderOptions.AppendLine("completion.WithValidateSet(`"$($iarg.Name)`", $validateSetOptions),")
             
         }
         $ArgParams = @{
