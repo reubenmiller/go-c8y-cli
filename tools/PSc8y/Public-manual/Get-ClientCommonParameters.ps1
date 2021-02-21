@@ -31,7 +31,7 @@ Inherit common parameters to a custom function. This will add parameters such as
             Mandatory = $true,
             Position = 0
         )]
-        [ValidateSet("Collection", "Create", "Template")]
+        [ValidateSet("Collection", "Get", "Create", "Update", "Delete", "Template", "")]
         [string[]]
         $Type,
 
@@ -55,9 +55,13 @@ Inherit common parameters to a custom function. This will add parameters such as
                     New-DynamicParam -Name "IncludeAll" -Type "switch" -DPDictionary $Dictionary
                 }
 
-                "Create" {
-                    New-DynamicParam -Name "Data" -Type "object" -DPDictionary $Dictionary
+                {$_ -match "Create|Update|Delete" } {
+                    if ($_ -notmatch "Delete") {
+                        New-DynamicParam -Name "Data" -Type "object" -DPDictionary $Dictionary
+                    }
+                    New-DynamicParam -Name NoAccept -Type "switch" -DPDictionary $Dictionary
                     New-DynamicParam -Name "ProcessingMode" -Type "string" -ValidateSet @("PERSISTENT", "QUIESCENT", "TRANSIENT", "CEP", "") -DPDictionary $Dictionary
+                    New-DynamicParam -Name "Force" -Type "switch" -DPDictionary $Dictionary
                 }
 
                 "Template" {
@@ -72,7 +76,26 @@ Inherit common parameters to a custom function. This will add parameters such as
         New-DynamicParam -Name OutputFile -Type "string" -DPDictionary $Dictionary
         New-DynamicParam -Name NoProxy -Type "switch" -DPDictionary $Dictionary
         New-DynamicParam -Name Session -Type "string" -DPDictionary $Dictionary
-        New-DynamicParam -Name TimeoutSec -Type "double" -DPDictionary $Dictionary
+        New-DynamicParam -Name Timeout -Type "double" -DPDictionary $Dictionary
+        
+        # JSON parsing options
+        New-DynamicParam -Name Depth -Type "int" -DPDictionary $Dictionary
+        New-DynamicParam -Name AsHashTable -Type "switch" -DPDictionary $Dictionary
+        New-DynamicParam -Name AsJSON -Type "switch" -DPDictionary $Dictionary
+        New-DynamicParam -Name AsCSV -Type "switch" -DPDictionary $Dictionary
+        New-DynamicParam -Name Compress -Type "switch" -DPDictionary $Dictionary
+        New-DynamicParam -Name NoColor -Type "switch" -DPDictionary $Dictionary
+        New-DynamicParam -Name Color -Type "switch" -DPDictionary $Dictionary
+
+        # Workers
+        New-DynamicParam -Name Workers -Type "int" -DPDictionary $Dictionary
+        New-DynamicParam -Name Delay -Type "int" -DPDictionary $Dictionary
+        New-DynamicParam -Name MaxJobs -Type "int" -DPDictionary $Dictionary
+        New-DynamicParam -Name Progress -Type "switch" -DPDictionary $Dictionary
+        
+        # Select
+        New-DynamicParam -Name Select -Type "string" -DPDictionary $Dictionary
+        # New-DynamicParam -Name Filter -Type "string" -DPDictionary $Dictionary
 
         # Remove key that are already defined
         if ($BoundParameters) {

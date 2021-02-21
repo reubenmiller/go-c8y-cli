@@ -55,61 +55,11 @@ Update a tenant by name (from the mangement tenant)
         # An international contact phone number
         [Parameter()]
         [string]
-        $ContactPhone,
-
-        # A set of custom properties of the tenant
-        [Parameter()]
-        [object]
-        $Data,
-
-        # Cumulocity processing mode
-        [Parameter()]
-        [AllowNull()]
-        [AllowEmptyString()]
-        [ValidateSet("PERSISTENT", "QUIESCENT", "TRANSIENT", "CEP", "")]
-        [string]
-        $ProcessingMode,
-
-        # Template (jsonnet) file to use to create the request body.
-        [Parameter()]
-        [string]
-        $Template,
-
-        # Variables to be used when evaluating the Template. Accepts a file path, json or json shorthand, i.e. "name=peter"
-        [Parameter()]
-        [string]
-        $TemplateVars,
-
-        # Show the full (raw) response from Cumulocity including pagination information
-        [Parameter()]
-        [switch]
-        $Raw,
-
-        # Write the response to file
-        [Parameter()]
-        [string]
-        $OutputFile,
-
-        # Ignore any proxy settings when running the cmdlet
-        [Parameter()]
-        [switch]
-        $NoProxy,
-
-        # Specifiy alternative Cumulocity session to use when running the cmdlet
-        [Parameter()]
-        [string]
-        $Session,
-
-        # TimeoutSec timeout in seconds before a request will be aborted
-        [Parameter()]
-        [double]
-        $TimeoutSec,
-
-        # Don't prompt for confirmation
-        [Parameter()]
-        [switch]
-        $Force
+        $ContactPhone
     )
+    DynamicParam {
+        Get-ClientCommonParameters -Type "Update", "Template" -BoundParameters $PSBoundParameters
+    }
 
     Begin {
         $Parameters = @{}
@@ -131,60 +81,45 @@ Update a tenant by name (from the mangement tenant)
         if ($PSBoundParameters.ContainsKey("ContactPhone")) {
             $Parameters["contactPhone"] = $ContactPhone
         }
-        if ($PSBoundParameters.ContainsKey("Data")) {
-            $Parameters["data"] = ConvertTo-JsonArgument $Data
-        }
-        if ($PSBoundParameters.ContainsKey("ProcessingMode")) {
-            $Parameters["processingMode"] = $ProcessingMode
-        }
-        if ($PSBoundParameters.ContainsKey("Template") -and $Template) {
-            $Parameters["template"] = $Template
-        }
-        if ($PSBoundParameters.ContainsKey("TemplateVars") -and $TemplateVars) {
-            $Parameters["templateVars"] = $TemplateVars
-        }
-        if ($PSBoundParameters.ContainsKey("OutputFile")) {
-            $Parameters["outputFile"] = $OutputFile
-        }
-        if ($PSBoundParameters.ContainsKey("NoProxy")) {
-            $Parameters["noProxy"] = $NoProxy
-        }
-        if ($PSBoundParameters.ContainsKey("Session")) {
-            $Parameters["session"] = $Session
-        }
-        if ($PSBoundParameters.ContainsKey("TimeoutSec")) {
-            $Parameters["timeout"] = $TimeoutSec * 1000
-        }
 
         if ($env:C8Y_DISABLE_INHERITANCE -ne $true) {
             # Inherit preference variables
             Use-CallerPreference -Cmdlet $PSCmdlet -SessionState $ExecutionContext.SessionState
         }
+
+        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "tenants update"
+        $ClientOptions = Get-ClientOutputOption $PSBoundParameters
+        $TypeOptions = @{
+            Type = "application/vnd.com.nsn.cumulocity.tenant+json"
+            ItemType = ""
+            BoundParameters = $PSBoundParameters
+        }
     }
 
     Process {
-        $Parameters["id"] = PSc8y\Expand-Id $Id
+        $Force = if ($PSBoundParameters.ContainsKey("Force")) { $PSBoundParameters["Force"] } else { $False }
+        if (!$Force -and !$WhatIfPreference) {
+            $items = (PSc8y\Expand-Id $Id)
 
-        if (!$Force -and
-            !$WhatIfPreference -and
-            !$PSCmdlet.ShouldProcess(
+            $shouldContinue = $PSCmdlet.ShouldProcess(
                 (PSc8y\Get-C8ySessionProperty -Name "tenant"),
-                (Format-ConfirmationMessage -Name $PSCmdlet.MyInvocation.InvocationName -InputObject $item)
-            )) {
-            continue
+                (Format-ConfirmationMessage -Name $PSCmdlet.MyInvocation.InvocationName -InputObject $items)
+            )
+            if (!$shouldContinue) {
+                return
+            }
         }
 
-        Invoke-ClientCommand `
-            -Noun "tenants" `
-            -Verb "update" `
-            -Parameters $Parameters `
-            -Type "application/vnd.com.nsn.cumulocity.tenant+json" `
-            -ItemType "" `
-            -ResultProperty "" `
-            -Raw:$Raw `
-            -CurrentPage:$CurrentPage `
-            -TotalPages:$TotalPages `
-            -IncludeAll:$IncludeAll
+        if ($ClientOptions.ConvertToPS) {
+            $Id `
+            | c8y tenants update $c8yargs `
+            | ConvertFrom-ClientOutput @TypeOptions
+        }
+        else {
+            $Id `
+            | c8y tenants update $c8yargs
+        }
+        
     }
 
     End {}

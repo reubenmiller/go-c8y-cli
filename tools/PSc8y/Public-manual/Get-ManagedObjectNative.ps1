@@ -1,40 +1,40 @@
-﻿# Code generated from specification version 1.0.0: DO NOT EDIT
-Function Get-ManagedObject {
-<#
-.SYNOPSIS
-Get managed objects/s
+# Code generated from specification version 1.0.0: DO NOT EDIT
+Function Get-ManagedObjectNative {
+    <#
+    .SYNOPSIS
+    Get managed objects/s
 
-.DESCRIPTION
-Get a managed object by id
+    .DESCRIPTION
+    Get a managed object by id
 
-.EXAMPLE
-PS> Get-ManagedObject -Id $mo.id
+    .EXAMPLE
+    PS> Get-ManagedObject -Id $mo.id
 
-Get a managed object
+    Get a managed object
 
-.EXAMPLE
-PS> Get-ManagedObject -Id $mo.id | Get-ManagedObject
+    .EXAMPLE
+    PS> Get-ManagedObject -Id $mo.id | Get-ManagedObject
 
-Get a managed object (using pipeline)
+    Get a managed object (using pipeline)
 
-.EXAMPLE
-PS> Get-ManagedObject -Id $mo.id -WithParents
+    .EXAMPLE
+    PS> Get-ManagedObject -Id $mo.id -WithParents
 
-Get a managed object with parent references
+    Get a managed object with parent references
 
 
-#>
+    #>
     [cmdletbinding(SupportsShouldProcess = $true,
-                   PositionalBinding=$true,
-                   HelpUri='',
-                   ConfirmImpact = 'None')]
+        PositionalBinding = $true,
+        HelpUri = '',
+        ConfirmImpact = 'None')]
     [Alias()]
     [OutputType([object])]
     Param(
         # ManagedObject id (required)
         [Parameter(Mandatory = $true,
-                   ValueFromPipeline=$true,
-                   ValueFromPipelineByPropertyName=$true)]
+            ValueFromPipeline = $true,
+            ValueFromPipelineByPropertyName = $true)]
         [object[]]
         $Id,
 
@@ -57,10 +57,8 @@ Get a managed object with parent references
             # Inherit preference variables
             Use-CallerPreference -Cmdlet $PSCmdlet -SessionState $ExecutionContext.SessionState
         }
-
         $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "inventory get"
-        $ClientOptions = Get-ClientOutputOption $PSBoundParameters
-        $TypeOptions = @{
+        $OutputOptions = @{
             Type = "application/vnd.com.nsn.cumulocity.inventory+json"
             ItemType = ""
             BoundParameters = $PSBoundParameters
@@ -68,17 +66,8 @@ Get a managed object with parent references
     }
 
     Process {
-
-        if ($ClientOptions.ConvertToPS) {
-            $Id `
-            | c8y inventory get $c8yargs `
-            | ConvertFrom-ClientOutput @TypeOptions
-        }
-        else {
-            $Id `
-            | c8y inventory get $c8yargs
-        }
-        
+        $Id `
+        | c8y inventory get $c8yargs
     }
 
     End {}

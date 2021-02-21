@@ -10,7 +10,7 @@ which should only proceed once the operation has finished executing.
 .PARAMETER Id
 Operation id or object to wait for
 
-.PARAMETER TimeoutSec
+.PARAMETER Timeout
 Timeout in seconds. Defaults to 30 seconds. i.e. how long should it wait for the operation to be processed
 
 .EXAMPLE
@@ -19,7 +19,7 @@ Wait-Operation 1234567
 Wait for the operation id
 
 .EXAMPLE
-Wait-Operation 1234567 -TimeoutSec 30
+Wait-Operation 1234567 -Timeout 30
 
 Wait for the operation id, and timeout after 30 seconds
 #>
@@ -32,10 +32,12 @@ Wait for the operation id, and timeout after 30 seconds
         )]
         [string] $Id,
 
-        [int] $TimeoutSec = 30
+        # Timeout in seconds
+        [Alias("TimeoutSec")]
+        [double] $Timeout = 30
     )
     Process {
-        $ExpirationDate = (Get-Date).AddSeconds($TimeoutSec)
+        $ExpirationDate = (Get-Date).AddSeconds($Timeout)
 
         do {
             $op = Get-Operation -Id $id
@@ -50,7 +52,7 @@ Wait for the operation id, and timeout after 30 seconds
         } while (!$HasExpired -and $op.status -notmatch "(FAILED|SUCCESSFUL)" -and $op.id)
 
         if ($HasExpired) {
-            Write-Warning "Timeout: Operation is still being processed after $TimeoutSec seconds. Operation: $id"
+            Write-Warning "Timeout: Operation is still being processed after $Timeout seconds. Operation: $id"
             $op
             return
         }

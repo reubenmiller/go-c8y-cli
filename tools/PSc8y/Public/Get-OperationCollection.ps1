@@ -66,61 +66,11 @@ Get operations from a device (using pipeline)
         # Bulk operation id. Only retrieve operations related to the given bulk operation.
         [Parameter()]
         [string]
-        $BulkOperationId,
-
-        # Maximum number of results
-        [Parameter()]
-        [AllowNull()]
-        [AllowEmptyString()]
-        [ValidateRange(1,2000)]
-        [int]
-        $PageSize,
-
-        # Include total pages statistic
-        [Parameter()]
-        [switch]
-        $WithTotalPages,
-
-        # Get a specific page result
-        [Parameter()]
-        [int]
-        $CurrentPage,
-
-        # Maximum number of pages to retrieve when using -IncludeAll
-        [Parameter()]
-        [int]
-        $TotalPages,
-
-        # Include all results
-        [Parameter()]
-        [switch]
-        $IncludeAll,
-
-        # Show the full (raw) response from Cumulocity including pagination information
-        [Parameter()]
-        [switch]
-        $Raw,
-
-        # Write the response to file
-        [Parameter()]
-        [string]
-        $OutputFile,
-
-        # Ignore any proxy settings when running the cmdlet
-        [Parameter()]
-        [switch]
-        $NoProxy,
-
-        # Specifiy alternative Cumulocity session to use when running the cmdlet
-        [Parameter()]
-        [string]
-        $Session,
-
-        # TimeoutSec timeout in seconds before a request will be aborted
-        [Parameter()]
-        [double]
-        $TimeoutSec
+        $BulkOperationId
     )
+    DynamicParam {
+        Get-ClientCommonParameters -Type "Get", "Collection" -BoundParameters $PSBoundParameters
+    }
 
     Begin {
         $Parameters = @{}
@@ -139,54 +89,33 @@ Get operations from a device (using pipeline)
         if ($PSBoundParameters.ContainsKey("BulkOperationId")) {
             $Parameters["bulkOperationId"] = $BulkOperationId
         }
-        if ($PSBoundParameters.ContainsKey("PageSize")) {
-            $Parameters["pageSize"] = $PageSize
-        }
-        if ($PSBoundParameters.ContainsKey("WithTotalPages") -and $WithTotalPages) {
-            $Parameters["withTotalPages"] = $WithTotalPages
-        }
-        if ($PSBoundParameters.ContainsKey("OutputFile")) {
-            $Parameters["outputFile"] = $OutputFile
-        }
-        if ($PSBoundParameters.ContainsKey("NoProxy")) {
-            $Parameters["noProxy"] = $NoProxy
-        }
-        if ($PSBoundParameters.ContainsKey("Session")) {
-            $Parameters["session"] = $Session
-        }
-        if ($PSBoundParameters.ContainsKey("TimeoutSec")) {
-            $Parameters["timeout"] = $TimeoutSec * 1000
-        }
 
         if ($env:C8Y_DISABLE_INHERITANCE -ne $true) {
             # Inherit preference variables
             Use-CallerPreference -Cmdlet $PSCmdlet -SessionState $ExecutionContext.SessionState
         }
+
+        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "operations list"
+        $ClientOptions = Get-ClientOutputOption $PSBoundParameters
+        $TypeOptions = @{
+            Type = "application/vnd.com.nsn.cumulocity.operationCollection+json"
+            ItemType = "application/vnd.com.nsn.cumulocity.operation+json"
+            BoundParameters = $PSBoundParameters
+        }
     }
 
     Process {
-        $Parameters["device"] = PSc8y\Expand-Id $Device
 
-        if (!$Force -and
-            !$WhatIfPreference -and
-            !$PSCmdlet.ShouldProcess(
-                (PSc8y\Get-C8ySessionProperty -Name "tenant"),
-                (Format-ConfirmationMessage -Name $PSCmdlet.MyInvocation.InvocationName -InputObject $item)
-            )) {
-            continue
+        if ($ClientOptions.ConvertToPS) {
+            $Device `
+            | c8y operations list $c8yargs `
+            | ConvertFrom-ClientOutput @TypeOptions
         }
-
-        Invoke-ClientCommand `
-            -Noun "operations" `
-            -Verb "list" `
-            -Parameters $Parameters `
-            -Type "application/vnd.com.nsn.cumulocity.operationCollection+json" `
-            -ItemType "application/vnd.com.nsn.cumulocity.operation+json" `
-            -ResultProperty "operations" `
-            -Raw:$Raw `
-            -CurrentPage:$CurrentPage `
-            -TotalPages:$TotalPages `
-            -IncludeAll:$IncludeAll
+        else {
+            $Device `
+            | c8y operations list $c8yargs
+        }
+        
     }
 
     End {}

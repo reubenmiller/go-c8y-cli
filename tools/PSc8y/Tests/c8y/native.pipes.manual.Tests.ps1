@@ -180,7 +180,7 @@ Describe -Name "c8y pipes" {
             | c8y devices create --template "{ jobIndex: input.index, name: input.value.name }" --dry 2>&1
             $LASTEXITCODE | Should -BeExactly 0
 
-            $output | SHould -ContainRequest "POST /inventory/managedObjects" -Total 2
+            $output | Should -ContainRequest "POST /inventory/managedObjects" -Total 2
             $Bodies = $output | Get-RequestBodyCollection | Sort-Object jobIndex
 
             $Bodies | Should -HaveCount 2

@@ -32,71 +32,41 @@ Get the supported operations of a device (using pipeline)
                    ValueFromPipeline=$true,
                    ValueFromPipelineByPropertyName=$true)]
         [object[]]
-        $Device,
-
-        # Show the full (raw) response from Cumulocity including pagination information
-        [Parameter()]
-        [switch]
-        $Raw,
-
-        # Write the response to file
-        [Parameter()]
-        [string]
-        $OutputFile,
-
-        # Ignore any proxy settings when running the cmdlet
-        [Parameter()]
-        [switch]
-        $NoProxy,
-
-        # Specifiy alternative Cumulocity session to use when running the cmdlet
-        [Parameter()]
-        [string]
-        $Session,
-
-        # TimeoutSec timeout in seconds before a request will be aborted
-        [Parameter()]
-        [double]
-        $TimeoutSec
+        $Device
     )
+    DynamicParam {
+        Get-ClientCommonParameters -Type "Get" -BoundParameters $PSBoundParameters
+    }
 
     Begin {
         $Parameters = @{}
-        if ($PSBoundParameters.ContainsKey("OutputFile")) {
-            $Parameters["outputFile"] = $OutputFile
-        }
-        if ($PSBoundParameters.ContainsKey("NoProxy")) {
-            $Parameters["noProxy"] = $NoProxy
-        }
-        if ($PSBoundParameters.ContainsKey("Session")) {
-            $Parameters["session"] = $Session
-        }
-        if ($PSBoundParameters.ContainsKey("TimeoutSec")) {
-            $Parameters["timeout"] = $TimeoutSec * 1000
-        }
 
         if ($env:C8Y_DISABLE_INHERITANCE -ne $true) {
             # Inherit preference variables
             Use-CallerPreference -Cmdlet $PSCmdlet -SessionState $ExecutionContext.SessionState
         }
+
+        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "devices getSupportedOperations"
+        $ClientOptions = Get-ClientOutputOption $PSBoundParameters
+        $TypeOptions = @{
+            Type = "application/vnd.com.nsn.cumulocity.inventory+json"
+            ItemType = ""
+            BoundParameters = $PSBoundParameters
+        }
     }
 
     Process {
-        foreach ($item in (PSc8y\Expand-Device $Device)) {
-            if ($item) {
-                $Parameters["device"] = if ($item.id) { $item.id } else { $item }
-            }
 
-
-            Invoke-ClientCommand `
-                -Noun "devices" `
-                -Verb "getSupportedOperations" `
-                -Parameters $Parameters `
-                -Type "application/vnd.com.nsn.cumulocity.inventory+json" `
-                -ItemType "" `
-                -ResultProperty "c8y_SupportedOperations" `
-                -Raw:$Raw
+        if ($ClientOptions.ConvertToPS) {
+            $Device `
+            | c8y devices getSupportedOperations $c8yargs `
+            | ConvertFrom-ClientOutput @TypeOptions
         }
+        else {
+            $Device `
+            | c8y devices getSupportedOperations $c8yargs
+        }
+        
     }
 
     End {}
