@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## Known limition
+## Known limitations
 
 Usage of large numbers (using exponetial notation) in templates can cause the server to respond with a 422 status code. This is due to a current limitation in the jsonnet template library.
 
@@ -68,6 +68,8 @@ c8y inventory create --data "./datapoint.largeint.json"
 
 No unreleased features
 
+* Removed `TimeoutSec` to `Timeout`
+* `--timeout` has been changed to accept seconds not milliseconds. However you can enter "0.001" if you really want millisecond accuracy (not sure why though)
 * Added support for flag value completions (i.e. )
     
     ```sh
