@@ -63,6 +63,13 @@ Describe -Name "powershell pipes" {
         }
     }
 
+    Context "CSV" {
+        It "Should pipe directly between cmdlets" {
+            $output = Get-ApplicationCollection -PageSize 5 -AsCSV -Select "id,name" | ConvertFrom-CSV -Header id,name
+            $output | Should -HaveCount 5
+        }
+    }
+
     Context "Device creation" {
         It "accepts devices names from the pipeline" {
             $output = "device01", "device02" | pipe | New-Device -WhatIf 2>&1
