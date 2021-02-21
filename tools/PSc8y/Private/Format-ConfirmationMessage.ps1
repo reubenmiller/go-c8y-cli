@@ -7,6 +7,7 @@ Format the confirmation message from a cmdlet name and input object
     Param(
         [Parameter(
             Mandatory = $true,
+            ValueFromPipeline = $true,
             Position = 0)]
         [string] $Name,
 
@@ -14,36 +15,46 @@ Format the confirmation message from a cmdlet name and input object
             Mandatory = $true,
             Position = 1)]
         [AllowNull()]
-        [object] $inputObject,
+        [object[]] $inputObject,
 
         [string] $IgnorePrefix = ""
     )
 
-    $parts = New-Object System.Collections.ArrayList;
+    Process {
+    
+        $parts = New-Object System.Collections.ArrayList;
 
-    # Remove fully qualified module name
-    $Name = $Name -replace "^\w+\\", ""
+        # Remove fully qualified module name
+        $Name = $Name -replace "^\w+\\", ""
 
-    foreach ($item in ($Name -csplit '(?=[A-Z\-])')) {
-        if ($item -eq "-" -or $item -eq "" -or $item -eq $IgnorePrefix) {
-            continue;
+        foreach ($item in ($Name -csplit '(?=[A-Z\-])')) {
+            if ($item -eq "-" -or $item -eq "" -or $item -eq $IgnorePrefix) {
+                continue;
+            }
+            if ($parts.Count -eq 0) {
+                $null = $parts.Add($item);
+            } else {
+                $null = $parts.Add("$item".ToLowerInvariant());
+            }
         }
-        if ($parts.Count -eq 0) {
-            $null = $parts.Add($item);
-        } else {
-            $null = $parts.Add("$item".ToLowerInvariant());
+
+        foreach ($item in $inputObject) {
+            if ($item -is [string]) {
+                if ($item.StartsWith("{")) {
+                    $item = ConvertFrom-Json $item -Depth 100 -WarningAction SilentlyContinue -ErrorAction SilentlyContinue
+                }
+            }
+            if ($item.id -and $item.name) {
+                $null = $parts.Add(("[{1} ({0})]" -f $item.id, $item.name))
+            } elseif ($item.id) {
+                $null = $parts.Add(("[{0}]" -f $item.id))
+            } elseif ($item) {
+                $null = $parts.Add("[{0}]" -f $item)
+            } else {
+                # Don't add anything
+            }
         }
-    }
 
-    if ($inputObject.id -and $inputObject.name) {
-        $null = $parts.Add(("[{1} ({0})]" -f $inputObject.id, $inputObject.name))
-    } elseif ($inputObject.id) {
-        $null = $parts.Add(("[{0}]" -f $inputObject.id))
-    } elseif ($inputObject) {
-        $null = $parts.Add("[{0}]" -f $inputObject)
-    } else {
-        # Don't add anything
+        $parts -join " "
     }
-
-    $parts -join " "
 }

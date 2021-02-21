@@ -1,0 +1,50 @@
+Function ConvertFrom-ClientOutput {
+    [CmdletBinding()]
+    param (
+        [Parameter(
+            ValueFromPipeline = $true,
+            ValueFromPipelineByPropertyName = $true,
+            Position = 0,
+            Mandatory = $true
+        )]
+        [object[]]
+        $InputObject,
+
+        [string]
+        $Type = "application/json",
+
+        [string]
+        $ItemType = "application/json",
+
+        # Existing bound parameters from the cmdlet. Common parameters will be retrieved from it
+        [Parameter()]
+        [AllowNull()]
+        [hashtable]
+        $BoundParameters
+    )
+
+    Begin {
+        $Depth = if ($BoundParameters.ContainsKey("Depth")) { $BoundParameters["Depth"] } else { 100 }
+        $AsHashTable = if ($BoundParameters.ContainsKey("AsHashTable")) { $BoundParameters["AsHashTable"] } else { $false }
+        $Raw = if ($BoundParameters.ContainsKey("Raw")) { $BoundParameters["Raw"] } else { $false }
+        $AsJSON = if ($BoundParameters.ContainsKey("AsJSON")) { $BoundParameters["AsJSON"] } else { $false }
+
+        $SelectedType = $ItemType
+        if ($Raw) {
+            $SelectedType = $Type
+        }
+    }
+
+    Process {
+        foreach ($item in $InputObject) {
+            if ($AsJSON) {
+                $item
+            } else {
+                # Strip color codes (if present)
+                $item = $item -replace '\x1b\[[0-9;]*m'
+                ConvertFrom-Json -InputObject $item -Depth:$Depth -AsHashtable:$AsHashTable `
+                | Add-PowershellType -Type $SelectedType
+            }
+        }
+    }
+}

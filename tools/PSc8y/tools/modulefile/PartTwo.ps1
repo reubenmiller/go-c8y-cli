@@ -79,11 +79,12 @@ $script:Aliases = @{
     # utilities
     json = "ConvertTo-NestedJson"
     tojson = "ConvertTo-NestedJson"
-    fromjson = "ConvertFrom-Json"
+    fromjson = "ConvertFrom-JsonStream"
     rest = "Invoke-ClientRequest"
     base64ToUtf8 = "ConvertFrom-Base64String"
     utf8Tobase64 = "ConvertTo-Base64String"
     iterate = "Invoke-ClientIterator"
+    pipe = "Group-ClientRequests"
 
     # session
     session = "Get-Session"
