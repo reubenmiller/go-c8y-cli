@@ -104,10 +104,10 @@ func (c *c8yCmd) createCumulocityClient() {
 	// 2. "timeout" is set in the session.json file (and value is greater than 0)
 	// 3. C8Y_TIMEOUT is set and greater than 0
 	if !rootCmd.Flags().Changed("timeout") {
-		timeout := viper.GetUint("timeout")
+		timeout := viper.GetFloat64("timeout")
 		if timeout > 0 {
 			globalFlagTimeout = timeout
-			Logger.Debugf("timeout: %v", timeout)
+			Logger.Debugf("timeout: %0.3f", timeout)
 		}
 	}
 
@@ -188,7 +188,7 @@ var (
 	globalFlagProxy                  string
 	globalFlagNoProxy                bool
 	globalFlagNoLog                  bool
-	globalFlagTimeout                uint
+	globalFlagTimeout                float64
 	globalFlagUseTenantPrefix        bool
 	globalUseNonDefaultPageSize      bool
 	globalCSVOutput                  bool
@@ -413,7 +413,7 @@ func configureRootCmd() {
 	rootCmd.PersistentFlags().StringArrayVar(&globalFlagSelect, "select", nil, "select")
 	rootCmd.PersistentFlags().BoolVar(&globalCSVOutput, "csv", false, "Print output as csv format. comma (,) delimited")
 	rootCmd.PersistentFlags().BoolVar(&globalCSVOutputHeaders, "csvHeader", false, "Include header when in csv output")
-	rootCmd.PersistentFlags().UintVar(&globalFlagTimeout, "timeout", 10*60*1000, "Timeout in milliseconds")
+	rootCmd.PersistentFlags().Float64Var(&globalFlagTimeout, "timeout", float64(10*60), "Timeout in seconds")
 
 	// Map settings to flags, allowing the user to set the own default settings
 	viper.BindPFlag(SettingsDefaultPageSize, rootCmd.PersistentFlags().Lookup("pageSize"))

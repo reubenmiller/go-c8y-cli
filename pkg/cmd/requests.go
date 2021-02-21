@@ -100,7 +100,7 @@ func getCurrentPageFlag(cmd *cobra.Command, flagName string) (currentPage int64)
 }
 
 func getTimeoutContext() (context.Context, context.CancelFunc) {
-	return context.WithTimeout(context.Background(), time.Duration(globalFlagTimeout)*time.Millisecond)
+	return context.WithTimeout(context.Background(), time.Duration(globalFlagTimeout*1000)*time.Millisecond)
 }
 
 func processRequestAndResponse(requests []c8y.RequestOptions, commonOptions CommonCommandOptions) error {
@@ -143,7 +143,7 @@ func processRequestAndResponse(requests []c8y.RequestOptions, commonOptions Comm
 	}
 
 	if ctx.Err() != nil {
-		Logger.Criticalf("request timed out after %d", globalFlagTimeout)
+		Logger.Criticalf("request timed out after %.3fs", globalFlagTimeout)
 	}
 
 	if commonOptions.IncludeAll || commonOptions.TotalPages > 0 {
@@ -234,7 +234,7 @@ func fetchAllResults(req c8y.RequestOptions, resp *c8y.Response, commonOptions C
 			Query:  baseURL.RawQuery,
 			Header: req.Header.Clone(),
 		}
-		ctx, cancel := context.WithTimeout(context.Background(), time.Duration(globalFlagTimeout)*time.Millisecond)
+		ctx, cancel := context.WithTimeout(context.Background(), time.Duration(globalFlagTimeout*1000)*time.Millisecond)
 		defer cancel()
 		start := time.Now()
 		resp, err = client.SendRequest(
@@ -355,7 +355,7 @@ func fetchAllInventoryQueryResults(req c8y.RequestOptions, resp *c8y.Response, c
 			Query:  baseURL.RawQuery,
 			Header: req.Header.Clone(),
 		}
-		ctx, cancel := context.WithTimeout(context.Background(), time.Duration(globalFlagTimeout)*time.Millisecond)
+		ctx, cancel := context.WithTimeout(context.Background(), time.Duration(globalFlagTimeout*1000)*time.Millisecond)
 		defer cancel()
 		start := time.Now()
 		resp, err = client.SendRequest(
