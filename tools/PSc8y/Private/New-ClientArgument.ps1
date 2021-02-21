@@ -25,7 +25,7 @@ Function New-ClientArgument {
         $BoundParameters = @{} + $Parameters
 
         # strip automatic variables
-        $BoundParameters.Keys -match "(Verbose|WhatIf|Variable|Action|Confirm|Buffer|Debug|AsJSON|AsHashtable|AsCSV|Force|Color)$" | ForEach-Object {
+        $BoundParameters.Keys -match "(Verbose|WhatIf|Variable|Action|Confirm|Buffer|Debug|AsJSON|AsHashtable|AsCSV|Force|Color|Pretty)$" | ForEach-Object {
             $BoundParameters.Remove($_)
         }
         
@@ -71,10 +71,15 @@ Function New-ClientArgument {
             $null = $c8yargs.Add("--verbose")
         }
         
-        if ($true -eq $Parameters["Color"]) {
+        
+        if ($true -eq $Parameters["Color"] -or $true -eq $Parameters["Pretty"]) {
             $null = $c8yargs.Add("--noColor=false")
         } elseif ($true -eq $Parameters["NoColor"]) {
             $null = $c8yargs.Add("--noColor")
+        }
+
+        if ($true -eq $Parameters["Pretty"]) {
+            $null = $c8yargs.Add("--compress=false")
         }
 
         if ($true -eq $Parameters["AsCSV"]) {
