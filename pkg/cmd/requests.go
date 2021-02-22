@@ -448,7 +448,8 @@ func processResponse(resp *c8y.Response, respError error, commonOptions CommonCo
 
 	// write response to file instead of to stdout
 	if resp != nil && respError == nil && commonOptions.OutputFile != "" {
-		fullFilePath, err := saveResponseToFile(resp, commonOptions.OutputFile, true)
+		newline := strings.Contains(strings.ToLower(resp.Header.Get("Content-Type")), "json")
+		fullFilePath, err := saveResponseToFile(resp, commonOptions.OutputFile, true, newline)
 
 		if err != nil {
 			return 0, newSystemError("write to file failed", err)

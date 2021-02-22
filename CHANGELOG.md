@@ -68,6 +68,8 @@ c8y inventory create --data "./datapoint.largeint.json"
 
 No unreleased features
 
+* --outputFile appends a new line character to the output when the Content-Type header contains "json"
+
 * Removed `TimeoutSec` to `Timeout`
 * `--timeout` has been changed to accept seconds not milliseconds. However you can enter "0.001" if you really want millisecond accuracy (not sure why though)
 * Added support for flag value completions (i.e. )

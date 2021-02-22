@@ -51,7 +51,7 @@ func getTempFilepath(name string, outputDir string) (string, error) {
 // @filename	filename
 // @directory	output directory. If empty, then a temp directory will be used
 // if filename
-func saveResponseToFile(resp *c8y.Response, filename string, append bool) (string, error) {
+func saveResponseToFile(resp *c8y.Response, filename string, append bool, newline bool) (string, error) {
 
 	var out *os.File
 	var err error
@@ -69,6 +69,11 @@ func saveResponseToFile(resp *c8y.Response, filename string, append bool) (strin
 	// Writer the body to file
 	Logger.Printf("header: %v", resp.Header)
 	_, err = io.Copy(out, resp.Body)
+
+	if newline {
+		// add trailing newline so that json lines are seperated by lines
+		fmt.Fprintf(out, "\n")
+	}
 	if err != nil {
 		return "", fmt.Errorf("failed to copy file contents to file. %s", err)
 	}
