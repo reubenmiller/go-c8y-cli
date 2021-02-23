@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"context"
+	"strings"
 
 	"github.com/pkg/errors"
 	"github.com/reubenmiller/go-c8y-cli/pkg/matcher"
@@ -39,6 +40,16 @@ func (f *roleFetcher) getByID(id string) ([]fetcherResultSet, error) {
 }
 
 func (f *roleFetcher) getByName(name string) ([]fetcherResultSet, error) {
+	// check if already resolved, so we can safe a lookup
+	if strings.Contains(name, "/roles/") {
+		return []fetcherResultSet{
+			{
+				ID:   name,
+				Name: name,
+				Self: name,
+			},
+		}, nil
+	}
 	roles, _, err := client.User.GetRoles(
 		context.Background(),
 		&c8y.RoleOptions{
@@ -47,19 +58,19 @@ func (f *roleFetcher) getByName(name string) ([]fetcherResultSet, error) {
 	)
 
 	if err != nil {
-		return nil, errors.Wrap(err, "Could not fetch by id")
+		return nil, errors.Wrap(err, "Could not fetch by name")
 	}
 
 	results := make([]fetcherResultSet, len(roles.Roles))
 
-	for i, user := range roles.Roles {
-		if isMatch, _ := matcher.MatchWithWildcards(user.Name, name); !isMatch {
+	for i, role := range roles.Roles {
+		if isMatch, _ := matcher.MatchWithWildcards(role.Name, name); !isMatch {
 			continue
 		}
 		results = append(results, fetcherResultSet{
-			ID:    user.ID,
-			Name:  user.Name,
-			Self:  user.Self,
+			ID:    role.ID,
+			Name:  role.Name,
+			Self:  role.Self,
 			Value: roles.Items[i],
 		})
 	}

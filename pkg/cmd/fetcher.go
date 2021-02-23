@@ -166,6 +166,7 @@ type EntityIterator struct {
 	Client         *c8y.Client
 	valueIterator  iterator.Iterator
 	GetID          bool
+	UseSelfLink    bool
 	MinimumMatches int
 }
 
@@ -256,7 +257,13 @@ func (i *EntityIterator) GetNext() (value []byte, input interface{}, err error) 
 	} else {
 		data = rawValue
 	}
-	return []byte(refs[0].ID), data, nil
+
+	// use self rather than id if not empty
+	returnValue := refs[0].ID
+	if i.UseSelfLink && refs[0].Data.Self != "" {
+		returnValue = refs[0].Data.Self
+	}
+	return []byte(returnValue), data, nil
 }
 
 // WithReferenceByName adds support for looking up values by name via cli args
@@ -333,6 +340,22 @@ func WithSelfReferenceByName(fetcher entityFetcher, args []string, opts ...strin
 	return func(cmd *cobra.Command, inputIterators *flags.RequestInputIterators) (string, interface{}, error) {
 
 		src, dst, _ := flags.UnpackGetterOptions("", opts...)
+
+		if inputIterators != nil && inputIterators.PipeOptions.Name == src {
+			hasPipeSupport := inputIterators.PipeOptions.Name == src
+			pipeIter, err := flags.NewFlagWithPipeIterator(cmd, inputIterators.PipeOptions, hasPipeSupport)
+
+			if err != nil || pipeIter == nil {
+				return "", nil, err
+			}
+			minMatches := 0
+			if inputIterators.PipeOptions.Required {
+				minMatches = 1
+			}
+			iter := NewReferenceByNameIterator(fetcher, client, pipeIter, minMatches)
+			iter.UseSelfLink = true
+			return inputIterators.PipeOptions.Property, iter, nil
+		}
 
 		values, err := cmd.Flags().GetStringSlice(src)
 		if err != nil {
@@ -418,6 +441,10 @@ func WithSelfReferenceByNameFirstMatch(fetcher entityFetcher, args []string, opt
 		opt := WithSelfReferenceByName(fetcher, args, opts...)
 		name, values, err := opt(cmd, inputIterators)
 
+		if name == "" {
+			return "", "", nil
+		}
+
 		switch v := values.(type) {
 		case []string:
 			if len(v) == 0 {
@@ -425,6 +452,9 @@ func WithSelfReferenceByNameFirstMatch(fetcher entityFetcher, args []string, opt
 			}
 
 			return name, newIDValue(v[0]).GetID(), err
+		case iterator.Iterator:
+			// value will be evalulated later
+			return name, v, nil
 		default:
 			return "", "", fmt.Errorf("reference by name: invalid name lookup type. only strings are supported")
 		}

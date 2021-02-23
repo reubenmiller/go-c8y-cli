@@ -76,6 +76,9 @@ endpoints:
         pipeline: true
         property: role.self
         description: User role id
+        pipelineAliases:
+          - self
+          - id
 
   - name: deleteRoleFromUser
     description: Unassign/Remove role from a user
@@ -161,6 +164,9 @@ endpoints:
         required: true
         property: role.self
         description: User role id
+        pipelineAliases:
+          - self
+          - id
 
   - name: deleteRoleFromGroup
     description: Unassign/Remove role from a group

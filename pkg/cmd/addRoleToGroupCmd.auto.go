@@ -43,7 +43,7 @@ Add a role to the admin group
 
 	flags.WithOptions(
 		cmd,
-		flags.WithExtendedPipelineSupport("role", "role.self", true),
+		flags.WithExtendedPipelineSupport("role", "role.self", true, "self", "id"),
 	)
 
 	// Required flags

@@ -43,7 +43,7 @@ Add a role (ROLE_ALARM_READ) to a user
 
 	flags.WithOptions(
 		cmd,
-		flags.WithExtendedPipelineSupport("role", "role.self", false),
+		flags.WithExtendedPipelineSupport("role", "role.self", false, "self", "id"),
 	)
 
 	// Required flags
