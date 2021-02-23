@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"sort"
 	"strings"
 
 	"github.com/manifoldco/promptui"
@@ -16,8 +17,9 @@ type passphraseExchange struct {
 }
 
 type checkSessionPassphraseCmd struct {
-	OutputJSON bool
-	prompter   *prompt.Prompt
+	OutputJSON         bool
+	OutputEnvVariables bool
+	prompter           *prompt.Prompt
 	*baseCmd
 }
 
@@ -35,6 +37,7 @@ func newCheckSessionPassphraseCmd() *checkSessionPassphraseCmd {
 	}
 
 	cmd.Flags().BoolVar(&ccmd.OutputJSON, "json", false, "Output passphrase in json")
+	cmd.Flags().BoolVar(&ccmd.OutputEnvVariables, "env", false, "Output settings as shell text that can be imported using eval")
 	cmd.SilenceUsage = true
 
 	ccmd.baseCmd = newBaseCmd(cmd)
@@ -74,6 +77,18 @@ func (n *checkSessionPassphraseCmd) checkSession(cmd *cobra.Command, args []stri
 			return err
 		}
 		fmt.Printf("%s\n", b)
+	} else if n.OutputEnvVariables {
+		// sort output variables
+		variables := []string{}
+		output := cliConfig.GetEnvironmentVariables()
+		for name := range output {
+			variables = append(variables, name)
+		}
+		sort.Strings(variables)
+		for _, name := range variables {
+			value := output[name]
+			fmt.Printf("export %s=%s\n", name, value)
+		}
 	} else {
 		n.showEnvironmentVariableUsage()
 	}

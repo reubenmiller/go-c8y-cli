@@ -77,7 +77,7 @@ set-session () {
     export C8Y_SESSION=$resp
 
     # Check encryption passphrase
-    passphraseCheck=$( c8y sessions checkPassphrase --json )
+    passphraseCheck=$( c8y sessions checkPassphrase --env )
 
     if [ $? -ne 0 ]; then
         echo "Encryption check failed"
@@ -88,20 +88,10 @@ set-session () {
     # Export session as individual settings
     # to support other 3rd party applicatsion (i.e. java c8y sdk apps)
     # which will read these variables
-    session_info=$( cat "$C8Y_SESSION" )
-    if [[ $(command -v jq) ]]; then
-        export C8Y_HOST=$( echo $session_info | jq -r ".host | select (.!=null)" )
-        export C8Y_TENANT=$( echo $session_info | jq -r ".tenant | select (.!=null)" )
-        export C8Y_USER=$( echo $session_info | jq -r ".username | select (.!=null)" )
-        export C8Y_USERNAME=$( echo $session_info | jq -r ".username | select (.!=null)" )
+    eval $passphraseCheck
 
-        export C8Y_PASSPHRASE=$( echo $passphraseCheck | jq -r ".C8Y_PASSPHRASE | select (.!=null)" )
-        export C8Y_PASSPHRASE_TEXT=$( echo $passphraseCheck | jq -r ".C8Y_PASSPHRASE_TEXT | select (.!=null)" )
-        export C8Y_PASSWORD=$( echo $passphraseCheck | jq -r ".C8Y_PASSWORD | select (.!=null)" )
-
-        # login / test session credentials
-        c8y sessions login
-    fi
+    # login / test session credentials
+    c8y sessions login
 
     # reset any enabled side-effect commands
     unset C8Y_SETTINGS_MODE_ENABLECREATE
@@ -118,6 +108,8 @@ set-session () {
 #
 clear-session () {
     unset C8Y_HOST
+    unset C8Y_URL
+    unset C8Y_BASEURL
     unset C8Y_TENANT
     unset C8Y_USER
     unset C8Y_USERNAME
@@ -126,6 +118,11 @@ clear-session () {
     unset C8Y_SETTINGS_MODE_ENABLECREATE
     unset C8Y_SETTINGS_MODE_ENABLEUPDATE
     unset C8Y_SETTINGS_MODE_ENABLEDELETE
+    unset C8Y_CREDENTIAL_COOKIES_0
+    unset C8Y_CREDENTIAL_COOKIES_1
+    unset C8Y_CREDENTIAL_COOKIES_2
+    unset C8Y_CREDENTIAL_COOKIES_3
+    unset C8Y_CREDENTIAL_COOKIES_4
 }
 
 # ----------

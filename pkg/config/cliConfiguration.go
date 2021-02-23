@@ -215,7 +215,14 @@ func (c *CliConfiguration) ReadKeyFile() error {
 }
 
 func (c CliConfiguration) GetEnvironmentVariables() map[string]interface{} {
+	host := c.GetHost()
 	output := map[string]interface{}{
+		"C8Y_URL":             host,
+		"C8Y_BASEURL":         host,
+		"C8Y_HOST":            host,
+		"C8Y_TENANT":          c.GetTenant(),
+		"C8Y_USER":            c.GetUsername(),
+		"C8Y_USERNAME":        c.GetUsername(),
 		"C8Y_PASSPHRASE":      c.Passphrase,
 		"C8Y_PASSPHRASE_TEXT": c.SecretText,
 		"C8Y_PASSWORD":        c.MustGetPassword(),
