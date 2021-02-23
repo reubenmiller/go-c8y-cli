@@ -252,7 +252,7 @@ func (lh *LoginHandler) promptForPassword() error {
 }
 func (lh *LoginHandler) login() {
 	lh.do(func() error {
-		if lh.LoginOptions == nil && len(lh.LoginOptions.LoginOptions) == 0 {
+		if lh.LoginOptions == nil || len(lh.LoginOptions.LoginOptions) == 0 {
 			lh.state <- LoginStateAbort
 			return fmt.Errorf("No login options")
 		}
