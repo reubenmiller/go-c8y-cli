@@ -48,7 +48,7 @@ Get a list of audit records
 
 	flags.WithOptions(
 		cmd,
-		flags.WithExtendedPipelineSupport("source", "source", false),
+		flags.WithExtendedPipelineSupport("source", "source", false, "id", "source.id", "managedObject.id"),
 	)
 
 	// Required flags
