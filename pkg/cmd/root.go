@@ -323,6 +323,7 @@ func (c *c8yCmd) checkSessionExists(cmd *cobra.Command, args []string) error {
 		"version",
 		"tenants getID",
 		"tenants getId",
+		"settings list",
 	}
 
 	for i := range localCmds {
