@@ -8,7 +8,7 @@ Describe -Name "powershell pipes" {
 
     Context "Get commands" {
         It "Pipe by id a simple getter" {
-            $output = $deviceIds | pipe | Get-ManagedObject -AsJSON -Verbose 2>&1
+            $output = ,$deviceIds | Get-ManagedObject -AsJSON -Verbose 2>&1
             $LASTEXITCODE | Should -Be 0
             $output -match "Loaded session:" | Should -HaveCount 1
             $output -match "adding job: 2" | Should -HaveCount 1
@@ -18,14 +18,14 @@ Describe -Name "powershell pipes" {
         }
 
         It "Should handle piping objects directly with integer ids" {
-            $output = Get-CurrentUserInventoryRoleCollection -PageSize 1 | pipe | Get-CurrentUserInventoryRole
+            $output = Get-CurrentUserInventoryRoleCollection -PageSize 1 | Get-CurrentUserInventoryRole
             $output | Should -HaveCount 1
         }
     }
 
     Context "Update commands" {
         It "Pipe by id a update managed object" {
-            $output = $deviceIds | pipe | Update-Device -Data "myvalue=1" -AsJSON -Verbose 2>&1
+            $output = ,$deviceIds | Update-Device -Data "myvalue=1" -AsJSON -Verbose 2>&1
             $LASTEXITCODE | Should -Be 0
             $output -match "Loaded session:" | Should -HaveCount 1
             $output -match "adding job: 2" | Should -HaveCount 1
@@ -35,7 +35,7 @@ Describe -Name "powershell pipes" {
         }
 
         It "Pipe by id a update managed object using hashtable as body" {
-            $output = $deviceIds | pipe | Update-Device -Data @{myvalue = 1} -AsJSON -Verbose 2>&1
+            $output = ,$deviceIds | Update-Device -Data @{myvalue = 1} -AsJSON -Verbose 2>&1
             $LASTEXITCODE | Should -Be 0
             $output -match "Loaded session:" | Should -HaveCount 1
             $output -match "adding job: 2" | Should -HaveCount 1
@@ -47,8 +47,8 @@ Describe -Name "powershell pipes" {
         InModuleScope -ModuleName PSc8y {
             It "Confirmation handles multiple items" {
                 $itemIds = 1..2 | c8y devices create --select id --csv
-                $items = $itemIds | Get-ManagedObject | pipe
-                $items | c8y devices delete
+                $items = $itemIds | Get-ManagedObject
+                $items.id | c8y devices delete
                 $message = Format-ConfirmationMessage -Name "Get-ExampleName" -InputObject $items
                 $message | Should -Match $itemIds[0]
                 $message | Should -Match $itemIds[1]
@@ -57,9 +57,14 @@ Describe -Name "powershell pipes" {
     }
 
     Context "Direct piping" {
-        It "Should pipe directly between cmdlets" {
+        It "Should pipe directly between cmdlets with interger id types" {
             $output = Get-CurrentUserInventoryRoleCollection -PageSize 1 | Get-CurrentUserInventoryRole
             $output | Should -HaveCount 1
+        }
+
+        It "Should pipe directly between cmdlets" {
+            $output = Get-DeviceCollection -PageSize 4 | Get-ManagedObject
+            $output | Should -HaveCount 4
         }
     }
 
@@ -72,7 +77,7 @@ Describe -Name "powershell pipes" {
 
     Context "Device creation" {
         It "accepts devices names from the pipeline" {
-            $output = "device01", "device02" | pipe | New-Device -WhatIf 2>&1
+            $output = ,@("device01", "device02") | New-Device -WhatIf 2>&1
             $LASTEXITCODE | Should -Be 0
             $output -match "Loaded session:" | Should -HaveCount 1
             $output -match "adding job: 2" | Should -HaveCount 1
@@ -87,9 +92,37 @@ Describe -Name "powershell pipes" {
 
     Context "Colors" {
         It "can pipe colored output into other functions" {
-            $output = Get-ManagedObjectCollection -Color -PageSize 1 | pipe | Get-ManagedObject
+            $output = Get-ManagedObjectCollection -Color -PageSize 1 | Get-ManagedObject
             $LASTEXITCODE | Should -BeExactly 0
             $output | Should -Not -BeNullOrEmpty
+        }
+    }
+
+    Context "streaming" {
+        It "can stream include results to a downstream command in json format" {
+            $env:C8Y_SETTINGS_INCLUDEALL_PAGESIZE = 10
+            $env:C8Y_SETTINGS_INCLUDEALL_DELAYMS = 1000
+            $output = devices -IncludeAll -AsJSON | batch | Get-Device -Verbose -Delay 0 -Workers 5 -WhatIf 2>&1
+            $LASTEXITCODE | Should -BeExactly 0
+            $output -match "Loaded session:" | Should -HaveCount 1 -Because "all gets should be executed by one c8y call"
+            $output | Should -ContainRequest "GET /inventory/managedObjects" -Minimum 5 -Maximum 10000
+        }
+
+        # TODO: include all 
+        It "streams each page size to the pipeline when it is received and not when all the results are done" {
+            $env:C8Y_SETTINGS_INCLUDEALL_PAGESIZE = 10
+            $env:C8Y_SETTINGS_INCLUDEALL_DELAYMS = 1000
+
+
+        }
+        $env:C8Y_SETTINGS_INCLUDEALL_DELAYMS = 1000
+    }
+
+    Context "View" {
+        It "Uses the overall view" {
+            $output = devices -WithTotalPages -PageSize 1
+            $LASTEXITCODE | Should -BeExactly 0
+            $output.psobject.TypeNames[0] | Should -MatchExactly "collection"
         }
     }
 
