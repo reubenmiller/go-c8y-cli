@@ -140,6 +140,7 @@
     $IteratorType = ""
     $IteratorVariable = ""
     $PipelineTemplateFormat = ""
+    $NoEnumerate = $false
 
     # Sort argument sources by position (if specified)
     [array] $ArgumentSources = $ArgumentSources | ForEach-Object {
@@ -273,6 +274,9 @@
     #
     if ($ResultType -match "collection") {
         $null = $C8yCommonSetNames.Add("Collection")
+
+        # note: don't enumerate collection output 
+        $NoEnumerate = $true
     }
 
     # Examples
@@ -403,7 +407,9 @@ $($CmdletParameters -join ",`n`n")
     }
 
     Begin {
-$($BeginParameterBuilder -join "`n")
+$(
+    #$BeginParameterBuilder -join "`n"
+)
         if (`$env:C8Y_DISABLE_INHERITANCE -ne `$true) {
             # Inherit preference variables
             Use-CallerPreference -Cmdlet `$PSCmdlet -SessionState `$ExecutionContext.SessionState
@@ -419,7 +425,18 @@ $($BeginParameterBuilder -join "`n")
     }
 
     Process {
-$(New-Body2 -Noun $Noun -PipelineTemplateFormat $PipelineTemplateFormat -ConfirmImpact $CmdletConfirmImpact -IteratorVariable $IteratorVariable -SetParameters $ProcessParameterBuilder -Verb $Verb -IteratorType $IteratorType -ResultType $ResultType -ResultItemType $ResultItemType -ResultSelectProperty $ResultSelectProperty)
+$(New-Body2 `
+    -Noun $Noun `
+    -PipelineTemplateFormat $PipelineTemplateFormat `
+    -ConfirmImpact $CmdletConfirmImpact `
+    -IteratorVariable $IteratorVariable `
+    -SetParameters $ProcessParameterBuilder `
+    -Verb $Verb `
+    -IteratorType $IteratorType `
+    -ResultType $ResultType `
+    -ResultItemType $ResultItemType `
+    -ResultSelectProperty $ResultSelectProperty `
+    -NoEnumerate:$NoEnumerate)
     }
 
     End {}
@@ -442,7 +459,8 @@ Function New-Body2 {
         [string] $IteratorType,
         [string] $IteratorVariable,
         [string] $PipelineTemplateType,
-        [string] $ConfirmImpact
+        [string] $ConfirmImpact,
+        [switch] $NoEnumerate
     )
 
     $ExpandFunction = Get-IteratorFunction -Type $IteratorType -Variable $IteratorVariable
@@ -466,18 +484,25 @@ Function New-Body2 {
 "@
     }
 
+    if ($NoEnumerate) {
+        $prefix = ",("
+        $suffix = ")"
+    }
+
     $Template1 = @"
 $ConfirmationStatement
 $(
             if ($IteratorVariable) {
                 @"
         if (`$ClientOptions.ConvertToPS) {
-            $IteratorVariable ``
+            ${prefix}$IteratorVariable ``
+            | Group-ClientRequests ``
             | c8y $Noun $Verb `$c8yargs ``
-            | ConvertFrom-ClientOutput @TypeOptions
+            | ConvertFrom-ClientOutput @TypeOptions${suffix}
         }
         else {
             $IteratorVariable ``
+            | Group-ClientRequests ``
             | c8y $Noun $Verb `$c8yargs
         }
         
@@ -485,8 +510,8 @@ $(
             } else {
             @"
         if (`$ClientOptions.ConvertToPS) {
-            c8y $Noun $Verb `$c8yargs ``
-            | ConvertFrom-ClientOutput @TypeOptions
+            ${prefix}c8y $Noun $Verb `$c8yargs ``
+            | ConvertFrom-ClientOutput @TypeOptions${suffix}
         }
         else {
             c8y $Noun $Verb `$c8yargs
@@ -499,16 +524,18 @@ $(
 $ConfirmationStatement
 $SetParameters
         if (`$ClientOptions.ConvertToPS) {
-            c8y $Noun $Verb `$c8yargs `
-            | ConvertFrom-ClientOutput @TypeOptions
+            ${prefix}c8y $Noun $Verb `$c8yargs `
+            | ConvertFrom-ClientOutput @TypeOptions${suffix}
         }
         else {
             c8y $Noun $Verb `$c8yargs
         }
 "@
+
+
         # Return the appropriate process block
         switch ($PipelineTemplateFormat) {
-            "loop_without_pipeline" { $Template2 }
+            "loop_without_pipeline" { $Template2; break }
             default {
                 $Template1
             }
