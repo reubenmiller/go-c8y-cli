@@ -75,13 +75,15 @@
             $PipelineVariableProperty = if ($iArg.Property) { $iArg.Property } else { $iArg.Name }
             $PipelineVariableAliases = $iArg.pipelineAliases
             if (!$PipelineVariableAliases) {
-                if ($PipelineVariableName -match "device$") {
+                if ($PipelineVariableName -match "device$" -or $iArg.type -match "device$") {
                     $PipelineVariableAliases = @(
                         "deviceId",
                         "source.id",
                         "managedObject.id",
                         "id"
                     )
+                } elseif ($PipelineVariableName -ne "id") {
+                    $PipelineVariableAliases = @("id")
                 }
             }
         }
