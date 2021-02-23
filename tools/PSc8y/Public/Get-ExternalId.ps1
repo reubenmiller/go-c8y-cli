@@ -39,10 +39,6 @@ Get external identity
     }
 
     Begin {
-        $Parameters = @{}
-        if ($PSBoundParameters.ContainsKey("Type")) {
-            $Parameters["type"] = $Type
-        }
 
         if ($env:C8Y_DISABLE_INHERITANCE -ne $true) {
             # Inherit preference variables
@@ -62,11 +58,13 @@ Get external identity
 
         if ($ClientOptions.ConvertToPS) {
             $Name `
+            | Group-ClientRequests `
             | c8y identity get $c8yargs `
             | ConvertFrom-ClientOutput @TypeOptions
         }
         else {
             $Name `
+            | Group-ClientRequests `
             | c8y identity get $c8yargs
         }
         

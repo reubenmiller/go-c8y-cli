@@ -58,25 +58,6 @@ Update the current user's lastname
     }
 
     Begin {
-        $Parameters = @{}
-        if ($PSBoundParameters.ContainsKey("FirstName")) {
-            $Parameters["firstName"] = $FirstName
-        }
-        if ($PSBoundParameters.ContainsKey("LastName")) {
-            $Parameters["lastName"] = $LastName
-        }
-        if ($PSBoundParameters.ContainsKey("Phone")) {
-            $Parameters["phone"] = $Phone
-        }
-        if ($PSBoundParameters.ContainsKey("Email")) {
-            $Parameters["email"] = $Email
-        }
-        if ($PSBoundParameters.ContainsKey("Enabled")) {
-            $Parameters["enabled"] = $Enabled
-        }
-        if ($PSBoundParameters.ContainsKey("Password")) {
-            $Parameters["password"] = $Password
-        }
 
         if ($env:C8Y_DISABLE_INHERITANCE -ne $true) {
             # Inherit preference variables

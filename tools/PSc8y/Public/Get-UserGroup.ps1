@@ -37,10 +37,6 @@ Get a user group
     }
 
     Begin {
-        $Parameters = @{}
-        if ($PSBoundParameters.ContainsKey("Tenant")) {
-            $Parameters["tenant"] = $Tenant
-        }
 
         if ($env:C8Y_DISABLE_INHERITANCE -ne $true) {
             # Inherit preference variables
@@ -60,11 +56,13 @@ Get a user group
 
         if ($ClientOptions.ConvertToPS) {
             $Id `
+            | Group-ClientRequests `
             | c8y userGroups get $c8yargs `
             | ConvertFrom-ClientOutput @TypeOptions
         }
         else {
             $Id `
+            | Group-ClientRequests `
             | c8y userGroups get $c8yargs
         }
         

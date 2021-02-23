@@ -27,7 +27,7 @@ Get a list of devices which have been updated more recently than 2020-01-01
                    HelpUri='',
                    ConfirmImpact = 'None')]
     [Alias()]
-    [OutputType([object])]
+    # [OutputType([object])]
     Param(
         # Device name. Wildcards accepted
         [Parameter(Mandatory = $false)]
@@ -71,31 +71,6 @@ Get a list of devices which have been updated more recently than 2020-01-01
     )
 
     Begin {
-        $Parameters = @{}
-        if ($PSBoundParameters.ContainsKey("Name")) {
-            $Parameters["name"] = $Name
-        }
-        if ($PSBoundParameters.ContainsKey("Type")) {
-            $Parameters["type"] = $Type
-        }
-        if ($PSBoundParameters.ContainsKey("FragmentType")) {
-            $Parameters["fragmentType"] = $FragmentType
-        }
-        if ($PSBoundParameters.ContainsKey("owner")) {
-            $Parameters["owner"] = $Owner
-        }
-        if ($PSBoundParameters.ContainsKey("Query")) {
-            $Parameters["query"] = $Query
-        }
-        if ($PSBoundParameters.ContainsKey("OrderBy")) {
-            $Parameters["orderBy"] = $OrderBy
-        }
-        if ($PSBoundParameters.ContainsKey("Agents")) {
-            $Parameters["agents"] = $Agents
-        }
-        if ($PSBoundParameters.ContainsKey("WithParents")) {
-            $Parameters["withParents"] = $WithParents
-        }
 
         if ($env:C8Y_DISABLE_INHERITANCE -ne $true) {
             # Inherit preference variables
@@ -117,8 +92,8 @@ Get a list of devices which have been updated more recently than 2020-01-01
     Process {
 
         if ($ClientOptions.ConvertToPS) {
-            c8y devices list $c8yargs `
-            | ConvertFrom-ClientOutput @TypeOptions
+            ,(c8y devices list $c8yargs `
+            | ConvertFrom-ClientOutput @TypeOptions)
         }
         else {
             c8y devices list $c8yargs

@@ -67,22 +67,6 @@ Get events from a device (using pipeline)
     }
 
     Begin {
-        $Parameters = @{}
-        if ($PSBoundParameters.ContainsKey("Type")) {
-            $Parameters["type"] = $Type
-        }
-        if ($PSBoundParameters.ContainsKey("FragmentType")) {
-            $Parameters["fragmentType"] = $FragmentType
-        }
-        if ($PSBoundParameters.ContainsKey("DateFrom")) {
-            $Parameters["dateFrom"] = $DateFrom
-        }
-        if ($PSBoundParameters.ContainsKey("DateTo")) {
-            $Parameters["dateTo"] = $DateTo
-        }
-        if ($PSBoundParameters.ContainsKey("Revert")) {
-            $Parameters["revert"] = $Revert
-        }
 
         if ($env:C8Y_DISABLE_INHERITANCE -ne $true) {
             # Inherit preference variables
@@ -101,12 +85,14 @@ Get events from a device (using pipeline)
     Process {
 
         if ($ClientOptions.ConvertToPS) {
-            $Device `
+            ,($Device `
+            | Group-ClientRequests `
             | c8y events list $c8yargs `
-            | ConvertFrom-ClientOutput @TypeOptions
+            | ConvertFrom-ClientOutput @TypeOptions)
         }
         else {
             $Device `
+            | Group-ClientRequests `
             | c8y events list $c8yargs
         }
         

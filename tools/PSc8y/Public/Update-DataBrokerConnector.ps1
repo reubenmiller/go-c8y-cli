@@ -39,10 +39,6 @@ Change the status of a specific data broker connector by given connector id
     }
 
     Begin {
-        $Parameters = @{}
-        if ($PSBoundParameters.ContainsKey("Status")) {
-            $Parameters["status"] = $Status
-        }
 
         if ($env:C8Y_DISABLE_INHERITANCE -ne $true) {
             # Inherit preference variables
@@ -74,11 +70,13 @@ Change the status of a specific data broker connector by given connector id
 
         if ($ClientOptions.ConvertToPS) {
             $Id `
+            | Group-ClientRequests `
             | c8y databroker update $c8yargs `
             | ConvertFrom-ClientOutput @TypeOptions
         }
         else {
             $Id `
+            | Group-ClientRequests `
             | c8y databroker update $c8yargs
         }
         

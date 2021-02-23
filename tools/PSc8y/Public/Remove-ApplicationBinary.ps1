@@ -46,10 +46,6 @@ Remove all application binaries (except for the active one) for an application (
     }
 
     Begin {
-        $Parameters = @{}
-        if ($PSBoundParameters.ContainsKey("Application")) {
-            $Parameters["application"] = $Application
-        }
 
         if ($env:C8Y_DISABLE_INHERITANCE -ne $true) {
             # Inherit preference variables
@@ -81,11 +77,13 @@ Remove all application binaries (except for the active one) for an application (
 
         if ($ClientOptions.ConvertToPS) {
             $BinaryId `
+            | Group-ClientRequests `
             | c8y applications deleteApplicationBinary $c8yargs `
             | ConvertFrom-ClientOutput @TypeOptions
         }
         else {
             $BinaryId `
+            | Group-ClientRequests `
             | c8y applications deleteApplicationBinary $c8yargs
         }
         

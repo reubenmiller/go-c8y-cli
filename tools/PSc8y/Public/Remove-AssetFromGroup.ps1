@@ -42,13 +42,6 @@ Unassign a child device from its parent asset
     }
 
     Begin {
-        $Parameters = @{}
-        if ($PSBoundParameters.ContainsKey("Group")) {
-            $Parameters["group"] = PSc8y\Expand-Id $Group
-        }
-        if ($PSBoundParameters.ContainsKey("ChildGroup")) {
-            $Parameters["childGroup"] = PSc8y\Expand-Id $ChildGroup
-        }
 
         if ($env:C8Y_DISABLE_INHERITANCE -ne $true) {
             # Inherit preference variables
@@ -80,11 +73,13 @@ Unassign a child device from its parent asset
 
         if ($ClientOptions.ConvertToPS) {
             $ChildDevice `
+            | Group-ClientRequests `
             | c8y inventoryReferences unassignAssetFromGroup $c8yargs `
             | ConvertFrom-ClientOutput @TypeOptions
         }
         else {
             $ChildDevice `
+            | Group-ClientRequests `
             | c8y inventoryReferences unassignAssetFromGroup $c8yargs
         }
         

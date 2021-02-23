@@ -53,16 +53,6 @@ Create bulk operation for a group (using pipeline)
     }
 
     Begin {
-        $Parameters = @{}
-        if ($PSBoundParameters.ContainsKey("StartDate")) {
-            $Parameters["startDate"] = $StartDate
-        }
-        if ($PSBoundParameters.ContainsKey("CreationRampSec")) {
-            $Parameters["creationRampSec"] = $CreationRampSec
-        }
-        if ($PSBoundParameters.ContainsKey("Operation")) {
-            $Parameters["operation"] = ConvertTo-JsonArgument $Operation
-        }
 
         if ($env:C8Y_DISABLE_INHERITANCE -ne $true) {
             # Inherit preference variables
@@ -94,11 +84,13 @@ Create bulk operation for a group (using pipeline)
 
         if ($ClientOptions.ConvertToPS) {
             $Group `
+            | Group-ClientRequests `
             | c8y bulkOperations create $c8yargs `
             | ConvertFrom-ClientOutput @TypeOptions
         }
         else {
             $Group `
+            | Group-ClientRequests `
             | c8y bulkOperations create $c8yargs
         }
         

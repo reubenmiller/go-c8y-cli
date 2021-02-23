@@ -29,7 +29,6 @@ Get a list of binaries
     }
 
     Begin {
-        $Parameters = @{}
 
         if ($env:C8Y_DISABLE_INHERITANCE -ne $true) {
             # Inherit preference variables
@@ -48,8 +47,8 @@ Get a list of binaries
     Process {
 
         if ($ClientOptions.ConvertToPS) {
-            c8y binaries list $c8yargs `
-            | ConvertFrom-ClientOutput @TypeOptions
+            ,(c8y binaries list $c8yargs `
+            | ConvertFrom-ClientOutput @TypeOptions)
         }
         else {
             c8y binaries list $c8yargs

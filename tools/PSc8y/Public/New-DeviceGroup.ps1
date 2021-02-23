@@ -44,10 +44,6 @@ Create device group with custom properties
     }
 
     Begin {
-        $Parameters = @{}
-        if ($PSBoundParameters.ContainsKey("Type")) {
-            $Parameters["type"] = $Type
-        }
 
         if ($env:C8Y_DISABLE_INHERITANCE -ne $true) {
             # Inherit preference variables
@@ -79,11 +75,13 @@ Create device group with custom properties
 
         if ($ClientOptions.ConvertToPS) {
             $Name `
+            | Group-ClientRequests `
             | c8y devices createGroup $c8yargs `
             | ConvertFrom-ClientOutput @TypeOptions
         }
         else {
             $Name `
+            | Group-ClientRequests `
             | c8y devices createGroup $c8yargs
         }
         

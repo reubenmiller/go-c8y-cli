@@ -43,10 +43,6 @@ Upload application microservice binary
     }
 
     Begin {
-        $Parameters = @{}
-        if ($PSBoundParameters.ContainsKey("File")) {
-            $Parameters["file"] = $File
-        }
 
         if ($env:C8Y_DISABLE_INHERITANCE -ne $true) {
             # Inherit preference variables
@@ -78,11 +74,13 @@ Upload application microservice binary
 
         if ($ClientOptions.ConvertToPS) {
             $Id `
+            | Group-ClientRequests `
             | c8y applications createBinary $c8yargs `
             | ConvertFrom-ClientOutput @TypeOptions
         }
         else {
             $Id `
+            | Group-ClientRequests `
             | c8y applications createBinary $c8yargs
         }
         

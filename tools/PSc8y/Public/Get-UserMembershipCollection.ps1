@@ -38,10 +38,6 @@ Get a list of groups that a user belongs to
     }
 
     Begin {
-        $Parameters = @{}
-        if ($PSBoundParameters.ContainsKey("Tenant")) {
-            $Parameters["tenant"] = $Tenant
-        }
 
         if ($env:C8Y_DISABLE_INHERITANCE -ne $true) {
             # Inherit preference variables
@@ -60,12 +56,14 @@ Get a list of groups that a user belongs to
     Process {
 
         if ($ClientOptions.ConvertToPS) {
-            $Id `
+            ,($Id `
+            | Group-ClientRequests `
             | c8y users listUserMembership $c8yargs `
-            | ConvertFrom-ClientOutput @TypeOptions
+            | ConvertFrom-ClientOutput @TypeOptions)
         }
         else {
             $Id `
+            | Group-ClientRequests `
             | c8y users listUserMembership $c8yargs
         }
         

@@ -50,13 +50,6 @@ Update multiple operations
     }
 
     Begin {
-        $Parameters = @{}
-        if ($PSBoundParameters.ContainsKey("Status")) {
-            $Parameters["status"] = $Status
-        }
-        if ($PSBoundParameters.ContainsKey("FailureReason")) {
-            $Parameters["failureReason"] = $FailureReason
-        }
 
         if ($env:C8Y_DISABLE_INHERITANCE -ne $true) {
             # Inherit preference variables
@@ -88,11 +81,13 @@ Update multiple operations
 
         if ($ClientOptions.ConvertToPS) {
             $Id `
+            | Group-ClientRequests `
             | c8y operations update $c8yargs `
             | ConvertFrom-ClientOutput @TypeOptions
         }
         else {
             $Id `
+            | Group-ClientRequests `
             | c8y operations update $c8yargs
         }
         

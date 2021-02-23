@@ -38,7 +38,6 @@ Delete a microservice by name
     }
 
     Begin {
-        $Parameters = @{}
 
         if ($env:C8Y_DISABLE_INHERITANCE -ne $true) {
             # Inherit preference variables
@@ -70,11 +69,13 @@ Delete a microservice by name
 
         if ($ClientOptions.ConvertToPS) {
             $Id `
+            | Group-ClientRequests `
             | c8y microservices delete $c8yargs `
             | ConvertFrom-ClientOutput @TypeOptions
         }
         else {
             $Id `
+            | Group-ClientRequests `
             | c8y microservices delete $c8yargs
         }
         

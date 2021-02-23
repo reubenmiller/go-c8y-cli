@@ -38,7 +38,6 @@ Copy an existing application
     }
 
     Begin {
-        $Parameters = @{}
 
         if ($env:C8Y_DISABLE_INHERITANCE -ne $true) {
             # Inherit preference variables
@@ -70,11 +69,13 @@ Copy an existing application
 
         if ($ClientOptions.ConvertToPS) {
             $Id `
+            | Group-ClientRequests `
             | c8y applications copy $c8yargs `
             | ConvertFrom-ClientOutput @TypeOptions
         }
         else {
             $Id `
+            | Group-ClientRequests `
             | c8y applications copy $c8yargs
         }
         

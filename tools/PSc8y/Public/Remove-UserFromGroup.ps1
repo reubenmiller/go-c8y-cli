@@ -43,13 +43,6 @@ Add a user to a user group
     }
 
     Begin {
-        $Parameters = @{}
-        if ($PSBoundParameters.ContainsKey("Group")) {
-            $Parameters["group"] = PSc8y\Expand-Id $Group
-        }
-        if ($PSBoundParameters.ContainsKey("Tenant")) {
-            $Parameters["tenant"] = $Tenant
-        }
 
         if ($env:C8Y_DISABLE_INHERITANCE -ne $true) {
             # Inherit preference variables
@@ -81,11 +74,13 @@ Add a user to a user group
 
         if ($ClientOptions.ConvertToPS) {
             $User `
+            | Group-ClientRequests `
             | c8y userReferences deleteUserFromGroup $c8yargs `
             | ConvertFrom-ClientOutput @TypeOptions
         }
         else {
             $User `
+            | Group-ClientRequests `
             | c8y userReferences deleteUserFromGroup $c8yargs
         }
         

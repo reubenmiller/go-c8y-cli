@@ -73,25 +73,6 @@ Get a list of audit records related to an operation
     }
 
     Begin {
-        $Parameters = @{}
-        if ($PSBoundParameters.ContainsKey("Type")) {
-            $Parameters["type"] = $Type
-        }
-        if ($PSBoundParameters.ContainsKey("User")) {
-            $Parameters["user"] = $User
-        }
-        if ($PSBoundParameters.ContainsKey("Application")) {
-            $Parameters["application"] = $Application
-        }
-        if ($PSBoundParameters.ContainsKey("DateFrom")) {
-            $Parameters["dateFrom"] = $DateFrom
-        }
-        if ($PSBoundParameters.ContainsKey("DateTo")) {
-            $Parameters["dateTo"] = $DateTo
-        }
-        if ($PSBoundParameters.ContainsKey("Revert")) {
-            $Parameters["revert"] = $Revert
-        }
 
         if ($env:C8Y_DISABLE_INHERITANCE -ne $true) {
             # Inherit preference variables
@@ -110,12 +91,14 @@ Get a list of audit records related to an operation
     Process {
 
         if ($ClientOptions.ConvertToPS) {
-            $Source `
+            ,($Source `
+            | Group-ClientRequests `
             | c8y auditRecords list $c8yargs `
-            | ConvertFrom-ClientOutput @TypeOptions
+            | ConvertFrom-ClientOutput @TypeOptions)
         }
         else {
             $Source `
+            | Group-ClientRequests `
             | c8y auditRecords list $c8yargs
         }
         

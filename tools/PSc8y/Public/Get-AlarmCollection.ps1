@@ -89,34 +89,6 @@ Get active alarms from a device (using pipeline)
     }
 
     Begin {
-        $Parameters = @{}
-        if ($PSBoundParameters.ContainsKey("DateFrom")) {
-            $Parameters["dateFrom"] = $DateFrom
-        }
-        if ($PSBoundParameters.ContainsKey("DateTo")) {
-            $Parameters["dateTo"] = $DateTo
-        }
-        if ($PSBoundParameters.ContainsKey("Type")) {
-            $Parameters["type"] = $Type
-        }
-        if ($PSBoundParameters.ContainsKey("FragmentType")) {
-            $Parameters["fragmentType"] = $FragmentType
-        }
-        if ($PSBoundParameters.ContainsKey("Status")) {
-            $Parameters["status"] = $Status
-        }
-        if ($PSBoundParameters.ContainsKey("Severity")) {
-            $Parameters["severity"] = $Severity
-        }
-        if ($PSBoundParameters.ContainsKey("Resolved")) {
-            $Parameters["resolved"] = $Resolved
-        }
-        if ($PSBoundParameters.ContainsKey("WithAssets")) {
-            $Parameters["withAssets"] = $WithAssets
-        }
-        if ($PSBoundParameters.ContainsKey("WithDevices")) {
-            $Parameters["withDevices"] = $WithDevices
-        }
 
         if ($env:C8Y_DISABLE_INHERITANCE -ne $true) {
             # Inherit preference variables
@@ -135,12 +107,14 @@ Get active alarms from a device (using pipeline)
     Process {
 
         if ($ClientOptions.ConvertToPS) {
-            $Device `
+            ,($Device `
+            | Group-ClientRequests `
             | c8y alarms list $c8yargs `
-            | ConvertFrom-ClientOutput @TypeOptions
+            | ConvertFrom-ClientOutput @TypeOptions)
         }
         else {
             $Device `
+            | Group-ClientRequests `
             | c8y alarms list $c8yargs
         }
         

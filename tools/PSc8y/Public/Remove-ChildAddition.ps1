@@ -40,10 +40,6 @@ Unassign a child addition from its parent managed object
     }
 
     Begin {
-        $Parameters = @{}
-        if ($PSBoundParameters.ContainsKey("Id")) {
-            $Parameters["id"] = $Id
-        }
 
         if ($env:C8Y_DISABLE_INHERITANCE -ne $true) {
             # Inherit preference variables
@@ -75,11 +71,13 @@ Unassign a child addition from its parent managed object
 
         if ($ClientOptions.ConvertToPS) {
             $ChildId `
+            | Group-ClientRequests `
             | c8y inventoryReferences unassignChildAddition $c8yargs `
             | ConvertFrom-ClientOutput @TypeOptions
         }
         else {
             $ChildId `
+            | Group-ClientRequests `
             | c8y inventoryReferences unassignChildAddition $c8yargs
         }
         

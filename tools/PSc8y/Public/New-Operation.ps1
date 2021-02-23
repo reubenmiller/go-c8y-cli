@@ -43,10 +43,6 @@ Create operation for a device (using pipeline)
     }
 
     Begin {
-        $Parameters = @{}
-        if ($PSBoundParameters.ContainsKey("Description")) {
-            $Parameters["description"] = $Description
-        }
 
         if ($env:C8Y_DISABLE_INHERITANCE -ne $true) {
             # Inherit preference variables
@@ -78,11 +74,13 @@ Create operation for a device (using pipeline)
 
         if ($ClientOptions.ConvertToPS) {
             $Device `
+            | Group-ClientRequests `
             | c8y operations create $c8yargs `
             | ConvertFrom-ClientOutput @TypeOptions
         }
         else {
             $Device `
+            | Group-ClientRequests `
             | c8y operations create $c8yargs
         }
         

@@ -33,7 +33,6 @@ Get an inventory role of the current user (using pipeline)
     }
 
     Begin {
-        $Parameters = @{}
 
         if ($env:C8Y_DISABLE_INHERITANCE -ne $true) {
             # Inherit preference variables
@@ -53,11 +52,13 @@ Get an inventory role of the current user (using pipeline)
 
         if ($ClientOptions.ConvertToPS) {
             $Id `
+            | Group-ClientRequests `
             | c8y users getCurrentUserInventoryRole $c8yargs `
             | ConvertFrom-ClientOutput @TypeOptions
         }
         else {
             $Id `
+            | Group-ClientRequests `
             | c8y users getCurrentUserInventoryRole $c8yargs
         }
         

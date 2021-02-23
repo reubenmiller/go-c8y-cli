@@ -28,7 +28,6 @@ Get a list of data broker connectors
     }
 
     Begin {
-        $Parameters = @{}
 
         if ($env:C8Y_DISABLE_INHERITANCE -ne $true) {
             # Inherit preference variables
@@ -47,8 +46,8 @@ Get a list of data broker connectors
     Process {
 
         if ($ClientOptions.ConvertToPS) {
-            c8y databroker list $c8yargs `
-            | ConvertFrom-ClientOutput @TypeOptions
+            ,(c8y databroker list $c8yargs `
+            | ConvertFrom-ClientOutput @TypeOptions)
         }
         else {
             c8y databroker list $c8yargs

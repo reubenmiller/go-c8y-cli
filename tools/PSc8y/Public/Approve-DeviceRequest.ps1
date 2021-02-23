@@ -39,10 +39,6 @@ Approve a new device request
     }
 
     Begin {
-        $Parameters = @{}
-        if ($PSBoundParameters.ContainsKey("Status")) {
-            $Parameters["status"] = $Status
-        }
 
         if ($env:C8Y_DISABLE_INHERITANCE -ne $true) {
             # Inherit preference variables
@@ -74,11 +70,13 @@ Approve a new device request
 
         if ($ClientOptions.ConvertToPS) {
             $Id `
+            | Group-ClientRequests `
             | c8y deviceCredentials approveDeviceRequest $c8yargs `
             | ConvertFrom-ClientOutput @TypeOptions
         }
         else {
             $Id `
+            | Group-ClientRequests `
             | c8y deviceCredentials approveDeviceRequest $c8yargs
         }
         

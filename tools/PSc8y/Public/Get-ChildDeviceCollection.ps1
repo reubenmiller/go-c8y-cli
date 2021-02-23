@@ -38,7 +38,6 @@ Get a list of the child devices of an existing device (using pipeline)
     }
 
     Begin {
-        $Parameters = @{}
 
         if ($env:C8Y_DISABLE_INHERITANCE -ne $true) {
             # Inherit preference variables
@@ -57,12 +56,14 @@ Get a list of the child devices of an existing device (using pipeline)
     Process {
 
         if ($ClientOptions.ConvertToPS) {
-            $Device `
+            ,($Device `
+            | Group-ClientRequests `
             | c8y inventoryReferences listChildDevices $c8yargs `
-            | ConvertFrom-ClientOutput @TypeOptions
+            | ConvertFrom-ClientOutput @TypeOptions)
         }
         else {
             $Device `
+            | Group-ClientRequests `
             | c8y inventoryReferences listChildDevices $c8yargs
         }
         

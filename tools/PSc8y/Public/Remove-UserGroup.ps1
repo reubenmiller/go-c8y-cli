@@ -43,10 +43,6 @@ Delete a user group (using pipeline)
     }
 
     Begin {
-        $Parameters = @{}
-        if ($PSBoundParameters.ContainsKey("Tenant")) {
-            $Parameters["tenant"] = $Tenant
-        }
 
         if ($env:C8Y_DISABLE_INHERITANCE -ne $true) {
             # Inherit preference variables
@@ -78,11 +74,13 @@ Delete a user group (using pipeline)
 
         if ($ClientOptions.ConvertToPS) {
             $Id `
+            | Group-ClientRequests `
             | c8y userGroups delete $c8yargs `
             | ConvertFrom-ClientOutput @TypeOptions
         }
         else {
             $Id `
+            | Group-ClientRequests `
             | c8y userGroups delete $c8yargs
         }
         

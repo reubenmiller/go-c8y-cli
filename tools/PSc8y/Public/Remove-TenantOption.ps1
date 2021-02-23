@@ -38,10 +38,6 @@ Delete a tenant option
     }
 
     Begin {
-        $Parameters = @{}
-        if ($PSBoundParameters.ContainsKey("Category")) {
-            $Parameters["category"] = $Category
-        }
 
         if ($env:C8Y_DISABLE_INHERITANCE -ne $true) {
             # Inherit preference variables
@@ -73,11 +69,13 @@ Delete a tenant option
 
         if ($ClientOptions.ConvertToPS) {
             $Key `
+            | Group-ClientRequests `
             | c8y tenantOptions delete $c8yargs `
             | ConvertFrom-ClientOutput @TypeOptions
         }
         else {
             $Key `
+            | Group-ClientRequests `
             | c8y tenantOptions delete $c8yargs
         }
         

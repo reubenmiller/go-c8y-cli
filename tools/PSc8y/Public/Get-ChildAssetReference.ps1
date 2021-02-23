@@ -38,10 +38,6 @@ Get an existing child asset reference
     }
 
     Begin {
-        $Parameters = @{}
-        if ($PSBoundParameters.ContainsKey("Reference")) {
-            $Parameters["reference"] = PSc8y\Expand-Id $Reference
-        }
 
         if ($env:C8Y_DISABLE_INHERITANCE -ne $true) {
             # Inherit preference variables
@@ -61,11 +57,13 @@ Get an existing child asset reference
 
         if ($ClientOptions.ConvertToPS) {
             $Asset `
+            | Group-ClientRequests `
             | c8y inventoryReferences getChildAsset $c8yargs `
             | ConvertFrom-ClientOutput @TypeOptions
         }
         else {
             $Asset `
+            | Group-ClientRequests `
             | c8y inventoryReferences getChildAsset $c8yargs
         }
         

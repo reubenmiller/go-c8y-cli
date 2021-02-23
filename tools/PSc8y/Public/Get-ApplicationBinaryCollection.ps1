@@ -39,7 +39,6 @@ List all of the binaries related to a Hosted (web) application (using pipeline)
     }
 
     Begin {
-        $Parameters = @{}
 
         if ($env:C8Y_DISABLE_INHERITANCE -ne $true) {
             # Inherit preference variables
@@ -58,12 +57,14 @@ List all of the binaries related to a Hosted (web) application (using pipeline)
     Process {
 
         if ($ClientOptions.ConvertToPS) {
-            $Id `
+            ,($Id `
+            | Group-ClientRequests `
             | c8y applications listApplicationBinaries $c8yargs `
-            | ConvertFrom-ClientOutput @TypeOptions
+            | ConvertFrom-ClientOutput @TypeOptions)
         }
         else {
             $Id `
+            | Group-ClientRequests `
             | c8y applications listApplicationBinaries $c8yargs
         }
         

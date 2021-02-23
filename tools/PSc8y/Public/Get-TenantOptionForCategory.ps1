@@ -33,7 +33,6 @@ Get a list of options for a category
     }
 
     Begin {
-        $Parameters = @{}
 
         if ($env:C8Y_DISABLE_INHERITANCE -ne $true) {
             # Inherit preference variables
@@ -52,12 +51,14 @@ Get a list of options for a category
     Process {
 
         if ($ClientOptions.ConvertToPS) {
-            $Category `
+            ,($Category `
+            | Group-ClientRequests `
             | c8y tenantOptions getForCategory $c8yargs `
-            | ConvertFrom-ClientOutput @TypeOptions
+            | ConvertFrom-ClientOutput @TypeOptions)
         }
         else {
             $Category `
+            | Group-ClientRequests `
             | c8y tenantOptions getForCategory $c8yargs
         }
         

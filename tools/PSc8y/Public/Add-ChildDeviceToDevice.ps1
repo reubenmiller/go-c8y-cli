@@ -43,10 +43,6 @@ Assign a device as a child device to an existing device (using pipeline)
     }
 
     Begin {
-        $Parameters = @{}
-        if ($PSBoundParameters.ContainsKey("Device")) {
-            $Parameters["device"] = PSc8y\Expand-Id $Device
-        }
 
         if ($env:C8Y_DISABLE_INHERITANCE -ne $true) {
             # Inherit preference variables
@@ -78,11 +74,13 @@ Assign a device as a child device to an existing device (using pipeline)
 
         if ($ClientOptions.ConvertToPS) {
             $NewChild `
+            | Group-ClientRequests `
             | c8y inventoryReferences assignChildDevice $c8yargs `
             | ConvertFrom-ClientOutput @TypeOptions
         }
         else {
             $NewChild `
+            | Group-ClientRequests `
             | c8y inventoryReferences assignChildDevice $c8yargs
         }
         

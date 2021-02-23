@@ -43,10 +43,6 @@ List the users within a user group (using pipeline)
     }
 
     Begin {
-        $Parameters = @{}
-        if ($PSBoundParameters.ContainsKey("Tenant")) {
-            $Parameters["tenant"] = $Tenant
-        }
 
         if ($env:C8Y_DISABLE_INHERITANCE -ne $true) {
             # Inherit preference variables
@@ -65,12 +61,14 @@ List the users within a user group (using pipeline)
     Process {
 
         if ($ClientOptions.ConvertToPS) {
-            $Id `
+            ,($Id `
+            | Group-ClientRequests `
             | c8y userReferences listGroupMembership $c8yargs `
-            | ConvertFrom-ClientOutput @TypeOptions
+            | ConvertFrom-ClientOutput @TypeOptions)
         }
         else {
             $Id `
+            | Group-ClientRequests `
             | c8y userReferences listGroupMembership $c8yargs
         }
         

@@ -93,37 +93,6 @@ Get measurements from a device (using pipeline)
     }
 
     Begin {
-        $Parameters = @{}
-        if ($PSBoundParameters.ContainsKey("Type")) {
-            $Parameters["type"] = $Type
-        }
-        if ($PSBoundParameters.ContainsKey("ValueFragmentType")) {
-            $Parameters["valueFragmentType"] = $ValueFragmentType
-        }
-        if ($PSBoundParameters.ContainsKey("ValueFragmentSeries")) {
-            $Parameters["valueFragmentSeries"] = $ValueFragmentSeries
-        }
-        if ($PSBoundParameters.ContainsKey("FragmentType")) {
-            $Parameters["fragmentType"] = $FragmentType
-        }
-        if ($PSBoundParameters.ContainsKey("DateFrom")) {
-            $Parameters["dateFrom"] = $DateFrom
-        }
-        if ($PSBoundParameters.ContainsKey("DateTo")) {
-            $Parameters["dateTo"] = $DateTo
-        }
-        if ($PSBoundParameters.ContainsKey("Revert")) {
-            $Parameters["revert"] = $Revert
-        }
-        if ($PSBoundParameters.ContainsKey("CsvFormat")) {
-            $Parameters["csvFormat"] = $CsvFormat
-        }
-        if ($PSBoundParameters.ContainsKey("ExcelFormat")) {
-            $Parameters["excelFormat"] = $ExcelFormat
-        }
-        if ($PSBoundParameters.ContainsKey("Unit")) {
-            $Parameters["unit"] = $Unit
-        }
 
         if ($env:C8Y_DISABLE_INHERITANCE -ne $true) {
             # Inherit preference variables
@@ -142,12 +111,14 @@ Get measurements from a device (using pipeline)
     Process {
 
         if ($ClientOptions.ConvertToPS) {
-            $Device `
+            ,($Device `
+            | Group-ClientRequests `
             | c8y measurements list $c8yargs `
-            | ConvertFrom-ClientOutput @TypeOptions
+            | ConvertFrom-ClientOutput @TypeOptions)
         }
         else {
             $Device `
+            | Group-ClientRequests `
             | c8y measurements list $c8yargs
         }
         

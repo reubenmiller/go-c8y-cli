@@ -65,22 +65,6 @@ Create a new alarm for device (using pipeline)
     }
 
     Begin {
-        $Parameters = @{}
-        if ($PSBoundParameters.ContainsKey("Type")) {
-            $Parameters["type"] = $Type
-        }
-        if ($PSBoundParameters.ContainsKey("Time")) {
-            $Parameters["time"] = $Time
-        }
-        if ($PSBoundParameters.ContainsKey("Text")) {
-            $Parameters["text"] = $Text
-        }
-        if ($PSBoundParameters.ContainsKey("Severity")) {
-            $Parameters["severity"] = $Severity
-        }
-        if ($PSBoundParameters.ContainsKey("Status")) {
-            $Parameters["status"] = $Status
-        }
 
         if ($env:C8Y_DISABLE_INHERITANCE -ne $true) {
             # Inherit preference variables
@@ -112,11 +96,13 @@ Create a new alarm for device (using pipeline)
 
         if ($ClientOptions.ConvertToPS) {
             $Device `
+            | Group-ClientRequests `
             | c8y alarms create $c8yargs `
             | ConvertFrom-ClientOutput @TypeOptions
         }
         else {
             $Device `
+            | Group-ClientRequests `
             | c8y alarms create $c8yargs
         }
         

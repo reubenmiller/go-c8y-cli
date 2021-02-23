@@ -28,7 +28,6 @@ List the current application users/subscriptions
     }
 
     Begin {
-        $Parameters = @{}
 
         if ($env:C8Y_DISABLE_INHERITANCE -ne $true) {
             # Inherit preference variables
@@ -47,8 +46,8 @@ List the current application users/subscriptions
     Process {
 
         if ($ClientOptions.ConvertToPS) {
-            c8y currentApplication listSubscriptions $c8yargs `
-            | ConvertFrom-ClientOutput @TypeOptions
+            ,(c8y currentApplication listSubscriptions $c8yargs `
+            | ConvertFrom-ClientOutput @TypeOptions)
         }
         else {
             c8y currentApplication listSubscriptions $c8yargs

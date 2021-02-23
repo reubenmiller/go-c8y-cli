@@ -39,7 +39,6 @@ Get the supported measurements of a device (using pipeline)
     }
 
     Begin {
-        $Parameters = @{}
 
         if ($env:C8Y_DISABLE_INHERITANCE -ne $true) {
             # Inherit preference variables
@@ -59,11 +58,13 @@ Get the supported measurements of a device (using pipeline)
 
         if ($ClientOptions.ConvertToPS) {
             $Device `
+            | Group-ClientRequests `
             | c8y devices getSupportedMeasurements $c8yargs `
             | ConvertFrom-ClientOutput @TypeOptions
         }
         else {
             $Device `
+            | Group-ClientRequests `
             | c8y devices getSupportedMeasurements $c8yargs
         }
         

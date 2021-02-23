@@ -37,10 +37,6 @@ Create a managed object
     }
 
     Begin {
-        $Parameters = @{}
-        if ($PSBoundParameters.ContainsKey("Type")) {
-            $Parameters["type"] = $Type
-        }
 
         if ($env:C8Y_DISABLE_INHERITANCE -ne $true) {
             # Inherit preference variables
@@ -72,11 +68,13 @@ Create a managed object
 
         if ($ClientOptions.ConvertToPS) {
             $Name `
+            | Group-ClientRequests `
             | c8y inventory create $c8yargs `
             | ConvertFrom-ClientOutput @TypeOptions
         }
         else {
             $Name `
+            | Group-ClientRequests `
             | c8y inventory create $c8yargs
         }
         

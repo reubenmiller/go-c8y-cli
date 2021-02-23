@@ -42,10 +42,6 @@ Get a list of the child assets of an existing group
     }
 
     Begin {
-        $Parameters = @{}
-        if ($PSBoundParameters.ContainsKey("Device")) {
-            $Parameters["device"] = PSc8y\Expand-Id $Device
-        }
 
         if ($env:C8Y_DISABLE_INHERITANCE -ne $true) {
             # Inherit preference variables
@@ -64,12 +60,14 @@ Get a list of the child assets of an existing group
     Process {
 
         if ($ClientOptions.ConvertToPS) {
-            $Group `
+            ,($Group `
+            | Group-ClientRequests `
             | c8y inventoryReferences listChildAssets $c8yargs `
-            | ConvertFrom-ClientOutput @TypeOptions
+            | ConvertFrom-ClientOutput @TypeOptions)
         }
         else {
             $Group `
+            | Group-ClientRequests `
             | c8y inventoryReferences listChildAssets $c8yargs
         }
         

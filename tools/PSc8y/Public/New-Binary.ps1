@@ -36,10 +36,6 @@ Upload a config file and make it globally accessible for all users
     }
 
     Begin {
-        $Parameters = @{}
-        if ($PSBoundParameters.ContainsKey("File")) {
-            $Parameters["file"] = $File
-        }
 
         if ($env:C8Y_DISABLE_INHERITANCE -ne $true) {
             # Inherit preference variables

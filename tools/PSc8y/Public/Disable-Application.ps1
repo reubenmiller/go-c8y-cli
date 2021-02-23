@@ -38,10 +38,6 @@ Disable an application of a tenant
     }
 
     Begin {
-        $Parameters = @{}
-        if ($PSBoundParameters.ContainsKey("Tenant")) {
-            $Parameters["tenant"] = $Tenant
-        }
 
         if ($env:C8Y_DISABLE_INHERITANCE -ne $true) {
             # Inherit preference variables
@@ -73,11 +69,13 @@ Disable an application of a tenant
 
         if ($ClientOptions.ConvertToPS) {
             $Application `
+            | Group-ClientRequests `
             | c8y tenants disableApplication $c8yargs `
             | ConvertFrom-ClientOutput @TypeOptions
         }
         else {
             $Application `
+            | Group-ClientRequests `
             | c8y tenants disableApplication $c8yargs
         }
         

@@ -89,34 +89,6 @@ Remove alarms on the device which are active and created in the last 10 minutes 
     }
 
     Begin {
-        $Parameters = @{}
-        if ($PSBoundParameters.ContainsKey("DateFrom")) {
-            $Parameters["dateFrom"] = $DateFrom
-        }
-        if ($PSBoundParameters.ContainsKey("DateTo")) {
-            $Parameters["dateTo"] = $DateTo
-        }
-        if ($PSBoundParameters.ContainsKey("Type")) {
-            $Parameters["type"] = $Type
-        }
-        if ($PSBoundParameters.ContainsKey("FragmentType")) {
-            $Parameters["fragmentType"] = $FragmentType
-        }
-        if ($PSBoundParameters.ContainsKey("Status")) {
-            $Parameters["status"] = $Status
-        }
-        if ($PSBoundParameters.ContainsKey("Severity")) {
-            $Parameters["severity"] = $Severity
-        }
-        if ($PSBoundParameters.ContainsKey("Resolved")) {
-            $Parameters["resolved"] = $Resolved
-        }
-        if ($PSBoundParameters.ContainsKey("WithSourceAssets")) {
-            $Parameters["withSourceAssets"] = $WithSourceAssets
-        }
-        if ($PSBoundParameters.ContainsKey("WithSourceDevices")) {
-            $Parameters["withSourceDevices"] = $WithSourceDevices
-        }
 
         if ($env:C8Y_DISABLE_INHERITANCE -ne $true) {
             # Inherit preference variables
@@ -148,11 +120,13 @@ Remove alarms on the device which are active and created in the last 10 minutes 
 
         if ($ClientOptions.ConvertToPS) {
             $Device `
+            | Group-ClientRequests `
             | c8y alarms deleteCollection $c8yargs `
             | ConvertFrom-ClientOutput @TypeOptions
         }
         else {
             $Device `
+            | Group-ClientRequests `
             | c8y alarms deleteCollection $c8yargs
         }
         

@@ -46,13 +46,6 @@ Get tenant statistics collection for the day before yesterday
     }
 
     Begin {
-        $Parameters = @{}
-        if ($PSBoundParameters.ContainsKey("DateFrom")) {
-            $Parameters["dateFrom"] = $DateFrom
-        }
-        if ($PSBoundParameters.ContainsKey("DateTo")) {
-            $Parameters["dateTo"] = $DateTo
-        }
 
         if ($env:C8Y_DISABLE_INHERITANCE -ne $true) {
             # Inherit preference variables
@@ -71,8 +64,8 @@ Get tenant statistics collection for the day before yesterday
     Process {
 
         if ($ClientOptions.ConvertToPS) {
-            c8y tenantStatistics list $c8yargs `
-            | ConvertFrom-ClientOutput @TypeOptions
+            ,(c8y tenantStatistics list $c8yargs `
+            | ConvertFrom-ClientOutput @TypeOptions)
         }
         else {
             c8y tenantStatistics list $c8yargs

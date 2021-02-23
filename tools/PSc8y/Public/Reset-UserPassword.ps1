@@ -48,13 +48,6 @@ Resets a user's password by generating a new password
     }
 
     Begin {
-        $Parameters = @{}
-        if ($PSBoundParameters.ContainsKey("NewPassword")) {
-            $Parameters["newPassword"] = $NewPassword
-        }
-        if ($PSBoundParameters.ContainsKey("Tenant")) {
-            $Parameters["tenant"] = $Tenant
-        }
 
         if ($env:C8Y_DISABLE_INHERITANCE -ne $true) {
             # Inherit preference variables
@@ -86,11 +79,13 @@ Resets a user's password by generating a new password
 
         if ($ClientOptions.ConvertToPS) {
             $Id `
+            | Group-ClientRequests `
             | c8y users resetUserPassword $c8yargs `
             | ConvertFrom-ClientOutput @TypeOptions
         }
         else {
             $Id `
+            | Group-ClientRequests `
             | c8y users resetUserPassword $c8yargs
         }
         

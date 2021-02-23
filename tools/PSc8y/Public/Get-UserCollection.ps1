@@ -71,34 +71,6 @@ Get a list of users
     }
 
     Begin {
-        $Parameters = @{}
-        if ($PSBoundParameters.ContainsKey("Username")) {
-            $Parameters["username"] = $Username
-        }
-        if ($PSBoundParameters.ContainsKey("Groups")) {
-            $Parameters["groups"] = $Groups
-        }
-        if ($PSBoundParameters.ContainsKey("Owner")) {
-            $Parameters["owner"] = $Owner
-        }
-        if ($PSBoundParameters.ContainsKey("OnlyDevices")) {
-            $Parameters["onlyDevices"] = $OnlyDevices
-        }
-        if ($PSBoundParameters.ContainsKey("WithSubusersCount")) {
-            $Parameters["withSubusersCount"] = $WithSubusersCount
-        }
-        if ($PSBoundParameters.ContainsKey("WithApps")) {
-            $Parameters["withApps"] = $WithApps
-        }
-        if ($PSBoundParameters.ContainsKey("WithGroups")) {
-            $Parameters["withGroups"] = $WithGroups
-        }
-        if ($PSBoundParameters.ContainsKey("WithRoles")) {
-            $Parameters["withRoles"] = $WithRoles
-        }
-        if ($PSBoundParameters.ContainsKey("Tenant")) {
-            $Parameters["tenant"] = $Tenant
-        }
 
         if ($env:C8Y_DISABLE_INHERITANCE -ne $true) {
             # Inherit preference variables
@@ -117,8 +89,8 @@ Get a list of users
     Process {
 
         if ($ClientOptions.ConvertToPS) {
-            c8y users list $c8yargs `
-            | ConvertFrom-ClientOutput @TypeOptions
+            ,(c8y users list $c8yargs `
+            | ConvertFrom-ClientOutput @TypeOptions)
         }
         else {
             c8y users list $c8yargs

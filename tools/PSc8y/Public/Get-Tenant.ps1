@@ -32,7 +32,6 @@ Get a tenant by name (from the management tenant)
     }
 
     Begin {
-        $Parameters = @{}
 
         if ($env:C8Y_DISABLE_INHERITANCE -ne $true) {
             # Inherit preference variables
@@ -52,11 +51,13 @@ Get a tenant by name (from the management tenant)
 
         if ($ClientOptions.ConvertToPS) {
             $Id `
+            | Group-ClientRequests `
             | c8y tenants get $c8yargs `
             | ConvertFrom-ClientOutput @TypeOptions
         }
         else {
             $Id `
+            | Group-ClientRequests `
             | c8y tenants get $c8yargs
         }
         

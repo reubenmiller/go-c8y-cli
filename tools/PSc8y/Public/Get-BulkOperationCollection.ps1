@@ -31,10 +31,6 @@ Get a list of bulk operations
     }
 
     Begin {
-        $Parameters = @{}
-        if ($PSBoundParameters.ContainsKey("WithDeleted")) {
-            $Parameters["withDeleted"] = $WithDeleted
-        }
 
         if ($env:C8Y_DISABLE_INHERITANCE -ne $true) {
             # Inherit preference variables
@@ -53,8 +49,8 @@ Get a list of bulk operations
     Process {
 
         if ($ClientOptions.ConvertToPS) {
-            c8y bulkOperations list $c8yargs `
-            | ConvertFrom-ClientOutput @TypeOptions
+            ,(c8y bulkOperations list $c8yargs `
+            | ConvertFrom-ClientOutput @TypeOptions)
         }
         else {
             c8y bulkOperations list $c8yargs

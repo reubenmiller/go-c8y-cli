@@ -79,34 +79,6 @@ Update a user
     }
 
     Begin {
-        $Parameters = @{}
-        if ($PSBoundParameters.ContainsKey("FirstName")) {
-            $Parameters["firstName"] = $FirstName
-        }
-        if ($PSBoundParameters.ContainsKey("LastName")) {
-            $Parameters["lastName"] = $LastName
-        }
-        if ($PSBoundParameters.ContainsKey("Phone")) {
-            $Parameters["phone"] = $Phone
-        }
-        if ($PSBoundParameters.ContainsKey("Email")) {
-            $Parameters["email"] = $Email
-        }
-        if ($PSBoundParameters.ContainsKey("Enabled")) {
-            $Parameters["enabled"] = $Enabled
-        }
-        if ($PSBoundParameters.ContainsKey("Password")) {
-            $Parameters["password"] = $Password
-        }
-        if ($PSBoundParameters.ContainsKey("SendPasswordResetEmail")) {
-            $Parameters["sendPasswordResetEmail"] = $SendPasswordResetEmail
-        }
-        if ($PSBoundParameters.ContainsKey("CustomProperties")) {
-            $Parameters["customProperties"] = ConvertTo-JsonArgument $CustomProperties
-        }
-        if ($PSBoundParameters.ContainsKey("Tenant")) {
-            $Parameters["tenant"] = $Tenant
-        }
 
         if ($env:C8Y_DISABLE_INHERITANCE -ne $true) {
             # Inherit preference variables
@@ -138,11 +110,13 @@ Update a user
 
         if ($ClientOptions.ConvertToPS) {
             $Id `
+            | Group-ClientRequests `
             | c8y users update $c8yargs `
             | ConvertFrom-ClientOutput @TypeOptions
         }
         else {
             $Id `
+            | Group-ClientRequests `
             | c8y users update $c8yargs
         }
         

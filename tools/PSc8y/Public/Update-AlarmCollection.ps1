@@ -70,25 +70,6 @@ Update the status of all active alarms on a device to ACKNOWLEDGED (using pipeli
     }
 
     Begin {
-        $Parameters = @{}
-        if ($PSBoundParameters.ContainsKey("Status")) {
-            $Parameters["status"] = $Status
-        }
-        if ($PSBoundParameters.ContainsKey("Severity")) {
-            $Parameters["severity"] = $Severity
-        }
-        if ($PSBoundParameters.ContainsKey("Resolved")) {
-            $Parameters["resolved"] = $Resolved
-        }
-        if ($PSBoundParameters.ContainsKey("DateFrom")) {
-            $Parameters["dateFrom"] = $DateFrom
-        }
-        if ($PSBoundParameters.ContainsKey("DateTo")) {
-            $Parameters["dateTo"] = $DateTo
-        }
-        if ($PSBoundParameters.ContainsKey("NewStatus")) {
-            $Parameters["newStatus"] = $NewStatus
-        }
 
         if ($env:C8Y_DISABLE_INHERITANCE -ne $true) {
             # Inherit preference variables
@@ -120,11 +101,13 @@ Update the status of all active alarms on a device to ACKNOWLEDGED (using pipeli
 
         if ($ClientOptions.ConvertToPS) {
             $Device `
+            | Group-ClientRequests `
             | c8y alarms updateCollection $c8yargs `
             | ConvertFrom-ClientOutput @TypeOptions
         }
         else {
             $Device `
+            | Group-ClientRequests `
             | c8y alarms updateCollection $c8yargs
         }
         

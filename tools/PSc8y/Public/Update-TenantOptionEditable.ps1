@@ -45,13 +45,6 @@ Update editable property for an existing tenant option
     }
 
     Begin {
-        $Parameters = @{}
-        if ($PSBoundParameters.ContainsKey("Category")) {
-            $Parameters["category"] = $Category
-        }
-        if ($PSBoundParameters.ContainsKey("Editable")) {
-            $Parameters["editable"] = $Editable
-        }
 
         if ($env:C8Y_DISABLE_INHERITANCE -ne $true) {
             # Inherit preference variables
@@ -83,11 +76,13 @@ Update editable property for an existing tenant option
 
         if ($ClientOptions.ConvertToPS) {
             $Key `
+            | Group-ClientRequests `
             | c8y tenantOptions updateEdit $c8yargs `
             | ConvertFrom-ClientOutput @TypeOptions
         }
         else {
             $Key `
+            | Group-ClientRequests `
             | c8y tenantOptions updateEdit $c8yargs
         }
         

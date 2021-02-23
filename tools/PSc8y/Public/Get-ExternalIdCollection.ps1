@@ -33,7 +33,6 @@ Get a list of external ids
     }
 
     Begin {
-        $Parameters = @{}
 
         if ($env:C8Y_DISABLE_INHERITANCE -ne $true) {
             # Inherit preference variables
@@ -52,12 +51,14 @@ Get a list of external ids
     Process {
 
         if ($ClientOptions.ConvertToPS) {
-            $Device `
+            ,($Device `
+            | Group-ClientRequests `
             | c8y identity list $c8yargs `
-            | ConvertFrom-ClientOutput @TypeOptions
+            | ConvertFrom-ClientOutput @TypeOptions)
         }
         else {
             $Device `
+            | Group-ClientRequests `
             | c8y identity list $c8yargs
         }
         

@@ -38,10 +38,6 @@ Get system option value
     }
 
     Begin {
-        $Parameters = @{}
-        if ($PSBoundParameters.ContainsKey("Category")) {
-            $Parameters["category"] = $Category
-        }
 
         if ($env:C8Y_DISABLE_INHERITANCE -ne $true) {
             # Inherit preference variables
@@ -61,11 +57,13 @@ Get system option value
 
         if ($ClientOptions.ConvertToPS) {
             $Key `
+            | Group-ClientRequests `
             | c8y systemOptions get $c8yargs `
             | ConvertFrom-ClientOutput @TypeOptions
         }
         else {
             $Key `
+            | Group-ClientRequests `
             | c8y systemOptions get $c8yargs
         }
         

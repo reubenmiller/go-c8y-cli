@@ -40,10 +40,6 @@ Add a related managed object as a child to an existing managed object
     }
 
     Begin {
-        $Parameters = @{}
-        if ($PSBoundParameters.ContainsKey("Id")) {
-            $Parameters["id"] = $Id
-        }
 
         if ($env:C8Y_DISABLE_INHERITANCE -ne $true) {
             # Inherit preference variables
@@ -75,11 +71,13 @@ Add a related managed object as a child to an existing managed object
 
         if ($ClientOptions.ConvertToPS) {
             $NewChild `
+            | Group-ClientRequests `
             | c8y inventoryReferences createChildAddition $c8yargs `
             | ConvertFrom-ClientOutput @TypeOptions
         }
         else {
             $NewChild `
+            | Group-ClientRequests `
             | c8y inventoryReferences createChildAddition $c8yargs
         }
         

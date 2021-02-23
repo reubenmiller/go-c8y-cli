@@ -38,10 +38,6 @@ Update bulk operation wait period between the creation of each operation to 1.5 
     }
 
     Begin {
-        $Parameters = @{}
-        if ($PSBoundParameters.ContainsKey("CreationRampSec")) {
-            $Parameters["creationRampSec"] = $CreationRampSec
-        }
 
         if ($env:C8Y_DISABLE_INHERITANCE -ne $true) {
             # Inherit preference variables
@@ -73,11 +69,13 @@ Update bulk operation wait period between the creation of each operation to 1.5 
 
         if ($ClientOptions.ConvertToPS) {
             $Id `
+            | Group-ClientRequests `
             | c8y bulkOperations update $c8yargs `
             | ConvertFrom-ClientOutput @TypeOptions
         }
         else {
             $Id `
+            | Group-ClientRequests `
             | c8y bulkOperations update $c8yargs
         }
         

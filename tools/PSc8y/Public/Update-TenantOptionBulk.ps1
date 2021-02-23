@@ -33,7 +33,6 @@ Update multiple tenant options
     }
 
     Begin {
-        $Parameters = @{}
 
         if ($env:C8Y_DISABLE_INHERITANCE -ne $true) {
             # Inherit preference variables
@@ -65,11 +64,13 @@ Update multiple tenant options
 
         if ($ClientOptions.ConvertToPS) {
             $Category `
+            | Group-ClientRequests `
             | c8y tenantOptions updateBulk $c8yargs `
             | ConvertFrom-ClientOutput @TypeOptions
         }
         else {
             $Category `
+            | Group-ClientRequests `
             | c8y tenantOptions updateBulk $c8yargs
         }
         

@@ -43,10 +43,6 @@ Set the required availability of a device (using pipeline)
     }
 
     Begin {
-        $Parameters = @{}
-        if ($PSBoundParameters.ContainsKey("Interval")) {
-            $Parameters["interval"] = $Interval
-        }
 
         if ($env:C8Y_DISABLE_INHERITANCE -ne $true) {
             # Inherit preference variables
@@ -78,11 +74,13 @@ Set the required availability of a device (using pipeline)
 
         if ($ClientOptions.ConvertToPS) {
             $Device `
+            | Group-ClientRequests `
             | c8y devices setRequiredAvailability $c8yargs `
             | ConvertFrom-ClientOutput @TypeOptions
         }
         else {
             $Device `
+            | Group-ClientRequests `
             | c8y devices setRequiredAvailability $c8yargs
         }
         

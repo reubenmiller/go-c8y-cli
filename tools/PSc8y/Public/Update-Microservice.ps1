@@ -55,19 +55,6 @@ Update microservice availability to MARKET
     }
 
     Begin {
-        $Parameters = @{}
-        if ($PSBoundParameters.ContainsKey("Key")) {
-            $Parameters["key"] = $Key
-        }
-        if ($PSBoundParameters.ContainsKey("Availability")) {
-            $Parameters["availability"] = $Availability
-        }
-        if ($PSBoundParameters.ContainsKey("ContextPath")) {
-            $Parameters["contextPath"] = $ContextPath
-        }
-        if ($PSBoundParameters.ContainsKey("ResourcesUrl")) {
-            $Parameters["resourcesUrl"] = $ResourcesUrl
-        }
 
         if ($env:C8Y_DISABLE_INHERITANCE -ne $true) {
             # Inherit preference variables
@@ -99,11 +86,13 @@ Update microservice availability to MARKET
 
         if ($ClientOptions.ConvertToPS) {
             $Id `
+            | Group-ClientRequests `
             | c8y microservices update $c8yargs `
             | ConvertFrom-ClientOutput @TypeOptions
         }
         else {
             $Id `
+            | Group-ClientRequests `
             | c8y microservices update $c8yargs
         }
         

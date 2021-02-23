@@ -63,25 +63,6 @@ Create a new tenant (from the management tenant)
     }
 
     Begin {
-        $Parameters = @{}
-        if ($PSBoundParameters.ContainsKey("Company")) {
-            $Parameters["company"] = $Company
-        }
-        if ($PSBoundParameters.ContainsKey("AdminName")) {
-            $Parameters["adminName"] = $AdminName
-        }
-        if ($PSBoundParameters.ContainsKey("AdminPass")) {
-            $Parameters["adminPass"] = $AdminPass
-        }
-        if ($PSBoundParameters.ContainsKey("ContactName")) {
-            $Parameters["contactName"] = $ContactName
-        }
-        if ($PSBoundParameters.ContainsKey("ContactPhone")) {
-            $Parameters["contactPhone"] = $ContactPhone
-        }
-        if ($PSBoundParameters.ContainsKey("TenantId")) {
-            $Parameters["tenantId"] = $TenantId
-        }
 
         if ($env:C8Y_DISABLE_INHERITANCE -ne $true) {
             # Inherit preference variables
@@ -113,11 +94,13 @@ Create a new tenant (from the management tenant)
 
         if ($ClientOptions.ConvertToPS) {
             $Domain `
+            | Group-ClientRequests `
             | c8y tenants create $c8yargs `
             | ConvertFrom-ClientOutput @TypeOptions
         }
         else {
             $Domain `
+            | Group-ClientRequests `
             | c8y tenants create $c8yargs
         }
         

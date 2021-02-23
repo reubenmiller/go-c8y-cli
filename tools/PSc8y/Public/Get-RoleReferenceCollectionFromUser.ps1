@@ -38,10 +38,6 @@ Get a list of role references for a user
     }
 
     Begin {
-        $Parameters = @{}
-        if ($PSBoundParameters.ContainsKey("Tenant")) {
-            $Parameters["tenant"] = $Tenant
-        }
 
         if ($env:C8Y_DISABLE_INHERITANCE -ne $true) {
             # Inherit preference variables
@@ -60,12 +56,14 @@ Get a list of role references for a user
     Process {
 
         if ($ClientOptions.ConvertToPS) {
-            $User `
+            ,($User `
+            | Group-ClientRequests `
             | c8y userRoles getRoleReferenceCollectionFromUser $c8yargs `
-            | ConvertFrom-ClientOutput @TypeOptions
+            | ConvertFrom-ClientOutput @TypeOptions)
         }
         else {
             $User `
+            | Group-ClientRequests `
             | c8y userRoles getRoleReferenceCollectionFromUser $c8yargs
         }
         

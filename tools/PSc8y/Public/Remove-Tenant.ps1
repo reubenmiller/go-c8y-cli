@@ -32,7 +32,6 @@ Delete a tenant by name (from the mangement tenant)
     }
 
     Begin {
-        $Parameters = @{}
 
         if ($env:C8Y_DISABLE_INHERITANCE -ne $true) {
             # Inherit preference variables
@@ -64,11 +63,13 @@ Delete a tenant by name (from the mangement tenant)
 
         if ($ClientOptions.ConvertToPS) {
             $Id `
+            | Group-ClientRequests `
             | c8y tenants delete $c8yargs `
             | ConvertFrom-ClientOutput @TypeOptions
         }
         else {
             $Id `
+            | Group-ClientRequests `
             | c8y tenants delete $c8yargs
         }
         

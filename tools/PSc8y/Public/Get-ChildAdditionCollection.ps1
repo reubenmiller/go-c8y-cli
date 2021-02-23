@@ -38,7 +38,6 @@ Get a list of the child additions of an existing managed object (using pipeline)
     }
 
     Begin {
-        $Parameters = @{}
 
         if ($env:C8Y_DISABLE_INHERITANCE -ne $true) {
             # Inherit preference variables
@@ -57,12 +56,14 @@ Get a list of the child additions of an existing managed object (using pipeline)
     Process {
 
         if ($ClientOptions.ConvertToPS) {
-            $Id `
+            ,($Id `
+            | Group-ClientRequests `
             | c8y inventoryReferences listChildAdditions $c8yargs `
-            | ConvertFrom-ClientOutput @TypeOptions
+            | ConvertFrom-ClientOutput @TypeOptions)
         }
         else {
             $Id `
+            | Group-ClientRequests `
             | c8y inventoryReferences listChildAdditions $c8yargs
         }
         

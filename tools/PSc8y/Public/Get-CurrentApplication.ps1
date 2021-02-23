@@ -29,7 +29,6 @@ Get the current application (requires using application credentials)
     }
 
     Begin {
-        $Parameters = @{}
 
         if ($env:C8Y_DISABLE_INHERITANCE -ne $true) {
             # Inherit preference variables

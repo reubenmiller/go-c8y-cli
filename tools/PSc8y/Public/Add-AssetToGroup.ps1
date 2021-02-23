@@ -42,13 +42,6 @@ Create group heirachy (parent group -> child group)
     }
 
     Begin {
-        $Parameters = @{}
-        if ($PSBoundParameters.ContainsKey("Group")) {
-            $Parameters["group"] = PSc8y\Expand-Id $Group
-        }
-        if ($PSBoundParameters.ContainsKey("NewChildGroup")) {
-            $Parameters["newChildGroup"] = PSc8y\Expand-Id $NewChildGroup
-        }
 
         if ($env:C8Y_DISABLE_INHERITANCE -ne $true) {
             # Inherit preference variables
@@ -80,11 +73,13 @@ Create group heirachy (parent group -> child group)
 
         if ($ClientOptions.ConvertToPS) {
             $NewChildDevice `
+            | Group-ClientRequests `
             | c8y inventoryReferences createChildAsset $c8yargs `
             | ConvertFrom-ClientOutput @TypeOptions
         }
         else {
             $NewChildDevice `
+            | Group-ClientRequests `
             | c8y inventoryReferences createChildAsset $c8yargs
         }
         

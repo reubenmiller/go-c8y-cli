@@ -38,10 +38,6 @@ Unassign a child device from its parent device
     }
 
     Begin {
-        $Parameters = @{}
-        if ($PSBoundParameters.ContainsKey("Device")) {
-            $Parameters["device"] = PSc8y\Expand-Id $Device
-        }
 
         if ($env:C8Y_DISABLE_INHERITANCE -ne $true) {
             # Inherit preference variables
@@ -73,11 +69,13 @@ Unassign a child device from its parent device
 
         if ($ClientOptions.ConvertToPS) {
             $ChildDevice `
+            | Group-ClientRequests `
             | c8y inventoryReferences unassignChildDevice $c8yargs `
             | ConvertFrom-ClientOutput @TypeOptions
         }
         else {
             $ChildDevice `
+            | Group-ClientRequests `
             | c8y inventoryReferences unassignChildDevice $c8yargs
         }
         

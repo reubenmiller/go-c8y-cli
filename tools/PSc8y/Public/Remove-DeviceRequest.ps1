@@ -33,7 +33,6 @@ Delete a new device request
     }
 
     Begin {
-        $Parameters = @{}
 
         if ($env:C8Y_DISABLE_INHERITANCE -ne $true) {
             # Inherit preference variables
@@ -65,11 +64,13 @@ Delete a new device request
 
         if ($ClientOptions.ConvertToPS) {
             $Id `
+            | Group-ClientRequests `
             | c8y deviceCredentials deleteNewDeviceRequest $c8yargs `
             | ConvertFrom-ClientOutput @TypeOptions
         }
         else {
             $Id `
+            | Group-ClientRequests `
             | c8y deviceCredentials deleteNewDeviceRequest $c8yargs
         }
         

@@ -58,25 +58,6 @@ Create a retention rule to delete all alarms after 180 days
     }
 
     Begin {
-        $Parameters = @{}
-        if ($PSBoundParameters.ContainsKey("DataType")) {
-            $Parameters["dataType"] = $DataType
-        }
-        if ($PSBoundParameters.ContainsKey("FragmentType")) {
-            $Parameters["fragmentType"] = $FragmentType
-        }
-        if ($PSBoundParameters.ContainsKey("Type")) {
-            $Parameters["type"] = $Type
-        }
-        if ($PSBoundParameters.ContainsKey("Source")) {
-            $Parameters["source"] = $Source
-        }
-        if ($PSBoundParameters.ContainsKey("MaximumAge")) {
-            $Parameters["maximumAge"] = $MaximumAge
-        }
-        if ($PSBoundParameters.ContainsKey("Editable")) {
-            $Parameters["editable"] = $Editable
-        }
 
         if ($env:C8Y_DISABLE_INHERITANCE -ne $true) {
             # Inherit preference variables

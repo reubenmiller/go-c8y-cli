@@ -33,7 +33,6 @@ Get applications
     }
 
     Begin {
-        $Parameters = @{}
 
         if ($env:C8Y_DISABLE_INHERITANCE -ne $true) {
             # Inherit preference variables
@@ -52,12 +51,14 @@ Get applications
     Process {
 
         if ($ClientOptions.ConvertToPS) {
-            $Type `
+            ,($Type `
+            | Group-ClientRequests `
             | c8y applications list $c8yargs `
-            | ConvertFrom-ClientOutput @TypeOptions
+            | ConvertFrom-ClientOutput @TypeOptions)
         }
         else {
             $Type `
+            | Group-ClientRequests `
             | c8y applications list $c8yargs
         }
         

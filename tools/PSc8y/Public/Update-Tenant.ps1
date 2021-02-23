@@ -62,25 +62,6 @@ Update a tenant by name (from the mangement tenant)
     }
 
     Begin {
-        $Parameters = @{}
-        if ($PSBoundParameters.ContainsKey("Company")) {
-            $Parameters["company"] = $Company
-        }
-        if ($PSBoundParameters.ContainsKey("Domain")) {
-            $Parameters["domain"] = $Domain
-        }
-        if ($PSBoundParameters.ContainsKey("AdminName")) {
-            $Parameters["adminName"] = $AdminName
-        }
-        if ($PSBoundParameters.ContainsKey("AdminPass")) {
-            $Parameters["adminPass"] = $AdminPass
-        }
-        if ($PSBoundParameters.ContainsKey("ContactName")) {
-            $Parameters["contactName"] = $ContactName
-        }
-        if ($PSBoundParameters.ContainsKey("ContactPhone")) {
-            $Parameters["contactPhone"] = $ContactPhone
-        }
 
         if ($env:C8Y_DISABLE_INHERITANCE -ne $true) {
             # Inherit preference variables
@@ -112,11 +93,13 @@ Update a tenant by name (from the mangement tenant)
 
         if ($ClientOptions.ConvertToPS) {
             $Id `
+            | Group-ClientRequests `
             | c8y tenants update $c8yargs `
             | ConvertFrom-ClientOutput @TypeOptions
         }
         else {
             $Id `
+            | Group-ClientRequests `
             | c8y tenants update $c8yargs
         }
         

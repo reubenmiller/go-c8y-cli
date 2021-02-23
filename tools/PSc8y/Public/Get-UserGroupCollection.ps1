@@ -31,10 +31,6 @@ Get a list of user groups for the current tenant
     }
 
     Begin {
-        $Parameters = @{}
-        if ($PSBoundParameters.ContainsKey("Tenant")) {
-            $Parameters["tenant"] = $Tenant
-        }
 
         if ($env:C8Y_DISABLE_INHERITANCE -ne $true) {
             # Inherit preference variables
@@ -53,8 +49,8 @@ Get a list of user groups for the current tenant
     Process {
 
         if ($ClientOptions.ConvertToPS) {
-            c8y userGroups list $c8yargs `
-            | ConvertFrom-ClientOutput @TypeOptions
+            ,(c8y userGroups list $c8yargs `
+            | ConvertFrom-ClientOutput @TypeOptions)
         }
         else {
             c8y userGroups list $c8yargs

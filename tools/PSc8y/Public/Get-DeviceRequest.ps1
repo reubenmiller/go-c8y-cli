@@ -33,7 +33,6 @@ Get a new device request
     }
 
     Begin {
-        $Parameters = @{}
 
         if ($env:C8Y_DISABLE_INHERITANCE -ne $true) {
             # Inherit preference variables
@@ -53,11 +52,13 @@ Get a new device request
 
         if ($ClientOptions.ConvertToPS) {
             $Id `
+            | Group-ClientRequests `
             | c8y deviceCredentials getNewDeviceRequest $c8yargs `
             | ConvertFrom-ClientOutput @TypeOptions
         }
         else {
             $Id `
+            | Group-ClientRequests `
             | c8y deviceCredentials getNewDeviceRequest $c8yargs
         }
         

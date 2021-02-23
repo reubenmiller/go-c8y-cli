@@ -48,10 +48,6 @@ Delete a managed object and all child devices
     }
 
     Begin {
-        $Parameters = @{}
-        if ($PSBoundParameters.ContainsKey("Cascade")) {
-            $Parameters["cascade"] = $Cascade
-        }
 
         if ($env:C8Y_DISABLE_INHERITANCE -ne $true) {
             # Inherit preference variables
@@ -83,11 +79,13 @@ Delete a managed object and all child devices
 
         if ($ClientOptions.ConvertToPS) {
             $Id `
+            | Group-ClientRequests `
             | c8y inventory delete $c8yargs `
             | ConvertFrom-ClientOutput @TypeOptions
         }
         else {
             $Id `
+            | Group-ClientRequests `
             | c8y inventory delete $c8yargs
         }
         

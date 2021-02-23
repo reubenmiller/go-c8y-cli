@@ -28,7 +28,6 @@ Get the current tenant (based on your current credentials)
     }
 
     Begin {
-        $Parameters = @{}
 
         if ($env:C8Y_DISABLE_INHERITANCE -ne $true) {
             # Inherit preference variables

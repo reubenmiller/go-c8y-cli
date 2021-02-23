@@ -61,25 +61,6 @@ Get a list of managed objects by id
     }
 
     Begin {
-        $Parameters = @{}
-        if ($PSBoundParameters.ContainsKey("Ids")) {
-            $Parameters["ids"] = $Ids -join ','
-        }
-        if ($PSBoundParameters.ContainsKey("Type")) {
-            $Parameters["type"] = $Type
-        }
-        if ($PSBoundParameters.ContainsKey("FragmentType")) {
-            $Parameters["fragmentType"] = $FragmentType
-        }
-        if ($PSBoundParameters.ContainsKey("Text")) {
-            $Parameters["text"] = $Text
-        }
-        if ($PSBoundParameters.ContainsKey("WithParents")) {
-            $Parameters["withParents"] = $WithParents
-        }
-        if ($PSBoundParameters.ContainsKey("SkipChildrenNames")) {
-            $Parameters["skipChildrenNames"] = $SkipChildrenNames
-        }
 
         if ($env:C8Y_DISABLE_INHERITANCE -ne $true) {
             # Inherit preference variables
@@ -98,8 +79,8 @@ Get a list of managed objects by id
     Process {
 
         if ($ClientOptions.ConvertToPS) {
-            c8y inventory list $c8yargs `
-            | ConvertFrom-ClientOutput @TypeOptions
+            ,(c8y inventory list $c8yargs `
+            | ConvertFrom-ClientOutput @TypeOptions)
         }
         else {
             c8y inventory list $c8yargs

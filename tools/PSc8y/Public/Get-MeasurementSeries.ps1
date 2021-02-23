@@ -63,19 +63,6 @@ Get measurement series from a device (using pipeline)
     }
 
     Begin {
-        $Parameters = @{}
-        if ($PSBoundParameters.ContainsKey("Series")) {
-            $Parameters["series"] = $Series
-        }
-        if ($PSBoundParameters.ContainsKey("AggregationType")) {
-            $Parameters["aggregationType"] = $AggregationType
-        }
-        if ($PSBoundParameters.ContainsKey("DateFrom")) {
-            $Parameters["dateFrom"] = $DateFrom
-        }
-        if ($PSBoundParameters.ContainsKey("DateTo")) {
-            $Parameters["dateTo"] = $DateTo
-        }
 
         if ($env:C8Y_DISABLE_INHERITANCE -ne $true) {
             # Inherit preference variables
@@ -95,11 +82,13 @@ Get measurement series from a device (using pipeline)
 
         if ($ClientOptions.ConvertToPS) {
             $Device `
+            | Group-ClientRequests `
             | c8y measurements getSeries $c8yargs `
             | ConvertFrom-ClientOutput @TypeOptions
         }
         else {
             $Device `
+            | Group-ClientRequests `
             | c8y measurements getSeries $c8yargs
         }
         

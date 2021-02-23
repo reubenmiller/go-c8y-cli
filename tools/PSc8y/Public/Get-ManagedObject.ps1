@@ -48,10 +48,6 @@ Get a managed object with parent references
     }
 
     Begin {
-        $Parameters = @{}
-        if ($PSBoundParameters.ContainsKey("WithParents")) {
-            $Parameters["withParents"] = $WithParents
-        }
 
         if ($env:C8Y_DISABLE_INHERITANCE -ne $true) {
             # Inherit preference variables
@@ -71,11 +67,13 @@ Get a managed object with parent references
 
         if ($ClientOptions.ConvertToPS) {
             $Id `
+            | Group-ClientRequests `
             | c8y inventory get $c8yargs `
             | ConvertFrom-ClientOutput @TypeOptions
         }
         else {
             $Id `
+            | Group-ClientRequests `
             | c8y inventory get $c8yargs
         }
         

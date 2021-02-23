@@ -52,13 +52,6 @@ Add a role to a user using wildcards (using pipeline)
     }
 
     Begin {
-        $Parameters = @{}
-        if ($PSBoundParameters.ContainsKey("User")) {
-            $Parameters["user"] = PSc8y\Expand-Id $User
-        }
-        if ($PSBoundParameters.ContainsKey("Tenant")) {
-            $Parameters["tenant"] = $Tenant
-        }
 
         if ($env:C8Y_DISABLE_INHERITANCE -ne $true) {
             # Inherit preference variables
@@ -90,11 +83,13 @@ Add a role to a user using wildcards (using pipeline)
 
         if ($ClientOptions.ConvertToPS) {
             $Role `
+            | Group-ClientRequests `
             | c8y userRoles addRoleTouser $c8yargs `
             | ConvertFrom-ClientOutput @TypeOptions
         }
         else {
             $Role `
+            | Group-ClientRequests `
             | c8y userRoles addRoleTouser $c8yargs
         }
         

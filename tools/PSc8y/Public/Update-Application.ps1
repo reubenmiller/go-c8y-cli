@@ -74,31 +74,6 @@ Update application availability to MARKET
     }
 
     Begin {
-        $Parameters = @{}
-        if ($PSBoundParameters.ContainsKey("Name")) {
-            $Parameters["name"] = $Name
-        }
-        if ($PSBoundParameters.ContainsKey("Key")) {
-            $Parameters["key"] = $Key
-        }
-        if ($PSBoundParameters.ContainsKey("Availability")) {
-            $Parameters["availability"] = $Availability
-        }
-        if ($PSBoundParameters.ContainsKey("ContextPath")) {
-            $Parameters["contextPath"] = $ContextPath
-        }
-        if ($PSBoundParameters.ContainsKey("ResourcesUrl")) {
-            $Parameters["resourcesUrl"] = $ResourcesUrl
-        }
-        if ($PSBoundParameters.ContainsKey("ResourcesUsername")) {
-            $Parameters["resourcesUsername"] = $ResourcesUsername
-        }
-        if ($PSBoundParameters.ContainsKey("ResourcesPassword")) {
-            $Parameters["resourcesPassword"] = $ResourcesPassword
-        }
-        if ($PSBoundParameters.ContainsKey("ExternalUrl")) {
-            $Parameters["externalUrl"] = $ExternalUrl
-        }
 
         if ($env:C8Y_DISABLE_INHERITANCE -ne $true) {
             # Inherit preference variables
@@ -130,11 +105,13 @@ Update application availability to MARKET
 
         if ($ClientOptions.ConvertToPS) {
             $Id `
+            | Group-ClientRequests `
             | c8y applications update $c8yargs `
             | ConvertFrom-ClientOutput @TypeOptions
         }
         else {
             $Id `
+            | Group-ClientRequests `
             | c8y applications update $c8yargs
         }
         

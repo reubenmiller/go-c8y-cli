@@ -50,10 +50,6 @@ to filter for a collection of devices and assign the results to a single group.
     }
 
     Begin {
-        $Parameters = @{}
-        if ($PSBoundParameters.ContainsKey("Group")) {
-            $Parameters["group"] = PSc8y\Expand-Id $Group
-        }
 
         if ($env:C8Y_DISABLE_INHERITANCE -ne $true) {
             # Inherit preference variables
@@ -85,11 +81,13 @@ to filter for a collection of devices and assign the results to a single group.
 
         if ($ClientOptions.ConvertToPS) {
             $NewChildDevice `
+            | Group-ClientRequests `
             | c8y inventoryReferences assignDeviceToGroup $c8yargs `
             | ConvertFrom-ClientOutput @TypeOptions
         }
         else {
             $NewChildDevice `
+            | Group-ClientRequests `
             | c8y inventoryReferences assignDeviceToGroup $c8yargs
         }
         

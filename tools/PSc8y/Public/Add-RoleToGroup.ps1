@@ -48,13 +48,6 @@ Add a role to a group using wildcards (using pipeline)
     }
 
     Begin {
-        $Parameters = @{}
-        if ($PSBoundParameters.ContainsKey("Group")) {
-            $Parameters["group"] = PSc8y\Expand-Id $Group
-        }
-        if ($PSBoundParameters.ContainsKey("Tenant")) {
-            $Parameters["tenant"] = $Tenant
-        }
 
         if ($env:C8Y_DISABLE_INHERITANCE -ne $true) {
             # Inherit preference variables
@@ -86,11 +79,13 @@ Add a role to a group using wildcards (using pipeline)
 
         if ($ClientOptions.ConvertToPS) {
             $Role `
+            | Group-ClientRequests `
             | c8y userRoles addRoleToGroup $c8yargs `
             | ConvertFrom-ClientOutput @TypeOptions
         }
         else {
             $Role `
+            | Group-ClientRequests `
             | c8y userRoles addRoleToGroup $c8yargs
         }
         

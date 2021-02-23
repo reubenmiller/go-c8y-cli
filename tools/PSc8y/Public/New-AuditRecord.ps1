@@ -69,28 +69,6 @@ Create an audit record for a custom managed object update
     }
 
     Begin {
-        $Parameters = @{}
-        if ($PSBoundParameters.ContainsKey("Type")) {
-            $Parameters["type"] = $Type
-        }
-        if ($PSBoundParameters.ContainsKey("Time")) {
-            $Parameters["time"] = $Time
-        }
-        if ($PSBoundParameters.ContainsKey("Text")) {
-            $Parameters["text"] = $Text
-        }
-        if ($PSBoundParameters.ContainsKey("Activity")) {
-            $Parameters["activity"] = $Activity
-        }
-        if ($PSBoundParameters.ContainsKey("Severity")) {
-            $Parameters["severity"] = $Severity
-        }
-        if ($PSBoundParameters.ContainsKey("User")) {
-            $Parameters["user"] = $User
-        }
-        if ($PSBoundParameters.ContainsKey("Application")) {
-            $Parameters["application"] = $Application
-        }
 
         if ($env:C8Y_DISABLE_INHERITANCE -ne $true) {
             # Inherit preference variables
@@ -122,11 +100,13 @@ Create an audit record for a custom managed object update
 
         if ($ClientOptions.ConvertToPS) {
             $Source `
+            | Group-ClientRequests `
             | c8y auditRecords create $c8yargs `
             | ConvertFrom-ClientOutput @TypeOptions
         }
         else {
             $Source `
+            | Group-ClientRequests `
             | c8y auditRecords create $c8yargs
         }
         

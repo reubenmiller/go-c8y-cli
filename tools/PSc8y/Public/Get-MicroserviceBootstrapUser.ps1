@@ -34,7 +34,6 @@ Get application bootstrap user
     }
 
     Begin {
-        $Parameters = @{}
 
         if ($env:C8Y_DISABLE_INHERITANCE -ne $true) {
             # Inherit preference variables
@@ -54,11 +53,13 @@ Get application bootstrap user
 
         if ($ClientOptions.ConvertToPS) {
             $Id `
+            | Group-ClientRequests `
             | c8y microservices getBootstrapUser $c8yargs `
             | ConvertFrom-ClientOutput @TypeOptions
         }
         else {
             $Id `
+            | Group-ClientRequests `
             | c8y microservices getBootstrapUser $c8yargs
         }
         
