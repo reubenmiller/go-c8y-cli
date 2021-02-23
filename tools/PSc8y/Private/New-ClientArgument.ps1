@@ -70,32 +70,35 @@ Function New-ClientArgument {
         if ($VerbosePreference) {
             $null = $c8yargs.Add("--verbose")
         }
+
+        if ($Parameters["WithTotalPages"]) {
+            $null = $c8yargs.Add("--raw")
+        }
         
-        
-        if ($true -eq $Parameters["Color"] -or $true -eq $Parameters["Pretty"]) {
+        if ($Parameters["Color"] -or $Parameters["Pretty"]) {
             $null = $c8yargs.Add("--noColor=false")
-        } elseif ($true -eq $Parameters["NoColor"]) {
+        } elseif ($Parameters["NoColor"]) {
             $null = $c8yargs.Add("--noColor")
         }
 
-        if ($true -eq $Parameters["Pretty"]) {
+        if ($Parameters["Pretty"]) {
             $null = $c8yargs.Add("--compress=false")
         }
 
-        if ($true -eq $Parameters["AsCSV"]) {
+        if ($Parameters["AsCSV"]) {
             $null = $c8yargs.Add("--csv")
         }
         
-        if ($null -ne $Parameters["currentPage"]) {
+        if ($null -ne $Parameters["CurrentPage"]) {
             $null = $c8yargs.AddRange(@("--currentPage", $CurrentPage))
         }
         
-        if ($null -ne $Parameters["totalPages"]) {
+        if ($null -ne $Parameters["TotalPages"]) {
             $null = $c8yargs.AddRange(@("--totalPages", $TotalPages))
         }
         
         # Include all pagination results
-        if ($true -eq $Parameters["includeAll"]) {
+        if ($Parameters["IncludeAll"]) {
             # Write-Warning "IncludeAll operation is currently not implemented"
             $null = $c8yargs.Add("--includeAll")
         }

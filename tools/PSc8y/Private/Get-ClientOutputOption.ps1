@@ -10,11 +10,12 @@ Function Get-ClientOutputOption {
     )
 
     Process {
-        $ConvertToPS = ($true -ne $BoundParameters["AsJson"]) `
-            -and ($true -ne $BoundParameters["AsCSV"]) `
-            -and ($true -ne $BoundParameters["Progress"])
+        $UseNativeOutput = $BoundParameters["AsJSON"] `
+            -or $BoundParameters["IncludeAll"] `
+            -or $BoundParameters["AsCSV"] `
+            -or $BoundParameters["Progress"]
         [PSCustomObject]@{
-            ConvertToPS = $ConvertToPS
+            ConvertToPS = !$UseNativeOutput
         }
     }   
 }
