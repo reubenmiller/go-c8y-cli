@@ -61,10 +61,10 @@ List the users within a user group (using pipeline)
     Process {
 
         if ($ClientOptions.ConvertToPS) {
-            ,($Id `
+            $Id `
             | Group-ClientRequests `
             | c8y userReferences listGroupMembership $c8yargs `
-            | ConvertFrom-ClientOutput @TypeOptions)
+            | ConvertFrom-ClientOutput @TypeOptions
         }
         else {
             $Id `

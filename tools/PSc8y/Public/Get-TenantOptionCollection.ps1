@@ -46,8 +46,8 @@ Get a list of tenant options
     Process {
 
         if ($ClientOptions.ConvertToPS) {
-            ,(c8y tenantOptions list $c8yargs `
-            | ConvertFrom-ClientOutput @TypeOptions)
+            c8y tenantOptions list $c8yargs `
+            | ConvertFrom-ClientOutput @TypeOptions
         }
         else {
             c8y tenantOptions list $c8yargs

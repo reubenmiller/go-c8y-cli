@@ -89,8 +89,8 @@ Get a list of users
     Process {
 
         if ($ClientOptions.ConvertToPS) {
-            ,(c8y users list $c8yargs `
-            | ConvertFrom-ClientOutput @TypeOptions)
+            c8y users list $c8yargs `
+            | ConvertFrom-ClientOutput @TypeOptions
         }
         else {
             c8y users list $c8yargs

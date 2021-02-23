@@ -2,7 +2,7 @@
 
 Describe -Name "Get-RoleReferenceCollectionFromGroup" {
     BeforeEach {
-        $Group = Get-UserGroupByName -Name "business"
+        $Group = Get-UserGroupByName -Name "devices"
 
     }
 

@@ -56,10 +56,10 @@ Get a list of the child devices of an existing device (using pipeline)
     Process {
 
         if ($ClientOptions.ConvertToPS) {
-            ,($Device `
+            $Device `
             | Group-ClientRequests `
             | c8y inventoryReferences listChildDevices $c8yargs `
-            | ConvertFrom-ClientOutput @TypeOptions)
+            | ConvertFrom-ClientOutput @TypeOptions
         }
         else {
             $Device `

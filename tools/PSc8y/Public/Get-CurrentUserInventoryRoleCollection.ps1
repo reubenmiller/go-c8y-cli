@@ -46,8 +46,8 @@ Get the current users inventory roles
     Process {
 
         if ($ClientOptions.ConvertToPS) {
-            ,(c8y users listInventoryRoles $c8yargs `
-            | ConvertFrom-ClientOutput @TypeOptions)
+            c8y users listInventoryRoles $c8yargs `
+            | ConvertFrom-ClientOutput @TypeOptions
         }
         else {
             c8y users listInventoryRoles $c8yargs

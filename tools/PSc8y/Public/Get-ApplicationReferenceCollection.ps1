@@ -50,10 +50,10 @@ Get a list of referenced applications on a given tenant (from management tenant)
     Process {
 
         if ($ClientOptions.ConvertToPS) {
-            ,($Tenant `
+            $Tenant `
             | Group-ClientRequests `
             | c8y tenants listReferences $c8yargs `
-            | ConvertFrom-ClientOutput @TypeOptions)
+            | ConvertFrom-ClientOutput @TypeOptions
         }
         else {
             $Tenant `

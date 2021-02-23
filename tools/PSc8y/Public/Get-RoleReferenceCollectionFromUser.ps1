@@ -56,10 +56,10 @@ Get a list of role references for a user
     Process {
 
         if ($ClientOptions.ConvertToPS) {
-            ,($User `
+            $User `
             | Group-ClientRequests `
             | c8y userRoles getRoleReferenceCollectionFromUser $c8yargs `
-            | ConvertFrom-ClientOutput @TypeOptions)
+            | ConvertFrom-ClientOutput @TypeOptions
         }
         else {
             $User `

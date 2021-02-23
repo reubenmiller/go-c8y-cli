@@ -47,8 +47,8 @@ Get a list of retention rules
     Process {
 
         if ($ClientOptions.ConvertToPS) {
-            ,(c8y retentionRules list $c8yargs `
-            | ConvertFrom-ClientOutput @TypeOptions)
+            c8y retentionRules list $c8yargs `
+            | ConvertFrom-ClientOutput @TypeOptions
         }
         else {
             c8y retentionRules list $c8yargs

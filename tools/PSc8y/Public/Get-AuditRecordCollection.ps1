@@ -91,10 +91,10 @@ Get a list of audit records related to an operation
     Process {
 
         if ($ClientOptions.ConvertToPS) {
-            ,($Source `
+            $Source `
             | Group-ClientRequests `
             | c8y auditRecords list $c8yargs `
-            | ConvertFrom-ClientOutput @TypeOptions)
+            | ConvertFrom-ClientOutput @TypeOptions
         }
         else {
             $Source `

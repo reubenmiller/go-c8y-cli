@@ -47,8 +47,8 @@ Get a list of binaries
     Process {
 
         if ($ClientOptions.ConvertToPS) {
-            ,(c8y binaries list $c8yargs `
-            | ConvertFrom-ClientOutput @TypeOptions)
+            c8y binaries list $c8yargs `
+            | ConvertFrom-ClientOutput @TypeOptions
         }
         else {
             c8y binaries list $c8yargs

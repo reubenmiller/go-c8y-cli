@@ -56,10 +56,10 @@ Get a list of the child additions of an existing managed object (using pipeline)
     Process {
 
         if ($ClientOptions.ConvertToPS) {
-            ,($Id `
+            $Id `
             | Group-ClientRequests `
             | c8y inventoryReferences listChildAdditions $c8yargs `
-            | ConvertFrom-ClientOutput @TypeOptions)
+            | ConvertFrom-ClientOutput @TypeOptions
         }
         else {
             $Id `

@@ -56,10 +56,10 @@ Get a list of groups that a user belongs to
     Process {
 
         if ($ClientOptions.ConvertToPS) {
-            ,($Id `
+            $Id `
             | Group-ClientRequests `
             | c8y users listUserMembership $c8yargs `
-            | ConvertFrom-ClientOutput @TypeOptions)
+            | ConvertFrom-ClientOutput @TypeOptions
         }
         else {
             $Id `

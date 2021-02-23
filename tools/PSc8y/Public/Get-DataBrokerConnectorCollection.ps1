@@ -46,8 +46,8 @@ Get a list of data broker connectors
     Process {
 
         if ($ClientOptions.ConvertToPS) {
-            ,(c8y databroker list $c8yargs `
-            | ConvertFrom-ClientOutput @TypeOptions)
+            c8y databroker list $c8yargs `
+            | ConvertFrom-ClientOutput @TypeOptions
         }
         else {
             c8y databroker list $c8yargs

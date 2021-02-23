@@ -107,10 +107,10 @@ Get active alarms from a device (using pipeline)
     Process {
 
         if ($ClientOptions.ConvertToPS) {
-            ,($Device `
+            $Device `
             | Group-ClientRequests `
             | c8y alarms list $c8yargs `
-            | ConvertFrom-ClientOutput @TypeOptions)
+            | ConvertFrom-ClientOutput @TypeOptions
         }
         else {
             $Device `

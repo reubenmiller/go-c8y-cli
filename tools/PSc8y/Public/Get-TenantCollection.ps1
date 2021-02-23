@@ -46,8 +46,8 @@ Get a list of tenants
     Process {
 
         if ($ClientOptions.ConvertToPS) {
-            ,(c8y tenants list $c8yargs `
-            | ConvertFrom-ClientOutput @TypeOptions)
+            c8y tenants list $c8yargs `
+            | ConvertFrom-ClientOutput @TypeOptions
         }
         else {
             c8y tenants list $c8yargs

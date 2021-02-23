@@ -51,10 +51,10 @@ Get a list of external ids
     Process {
 
         if ($ClientOptions.ConvertToPS) {
-            ,($Device `
+            $Device `
             | Group-ClientRequests `
             | c8y identity list $c8yargs `
-            | ConvertFrom-ClientOutput @TypeOptions)
+            | ConvertFrom-ClientOutput @TypeOptions
         }
         else {
             $Device `

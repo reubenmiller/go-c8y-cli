@@ -49,8 +49,8 @@ Get a list of bulk operations
     Process {
 
         if ($ClientOptions.ConvertToPS) {
-            ,(c8y bulkOperations list $c8yargs `
-            | ConvertFrom-ClientOutput @TypeOptions)
+            c8y bulkOperations list $c8yargs `
+            | ConvertFrom-ClientOutput @TypeOptions
         }
         else {
             c8y bulkOperations list $c8yargs

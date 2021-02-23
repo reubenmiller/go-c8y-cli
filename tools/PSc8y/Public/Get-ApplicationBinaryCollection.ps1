@@ -57,10 +57,10 @@ List all of the binaries related to a Hosted (web) application (using pipeline)
     Process {
 
         if ($ClientOptions.ConvertToPS) {
-            ,($Id `
+            $Id `
             | Group-ClientRequests `
             | c8y applications listApplicationBinaries $c8yargs `
-            | ConvertFrom-ClientOutput @TypeOptions)
+            | ConvertFrom-ClientOutput @TypeOptions
         }
         else {
             $Id `

@@ -353,7 +353,7 @@
           {
             "description": "Get a list of role references for a user group",
             "beforeEach": [
-              "$Group = Get-UserGroupByName -Name \"business\""
+              "$Group = Get-UserGroupByName -Name \"devices\""
             ],
             "command": "Get-RoleReferenceCollectionFromGroup -Group $Group.id"
           }

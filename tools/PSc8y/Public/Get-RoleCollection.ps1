@@ -46,8 +46,8 @@ Get a list of roles
     Process {
 
         if ($ClientOptions.ConvertToPS) {
-            ,(c8y userRoles list $c8yargs `
-            | ConvertFrom-ClientOutput @TypeOptions)
+            c8y userRoles list $c8yargs `
+            | ConvertFrom-ClientOutput @TypeOptions
         }
         else {
             c8y userRoles list $c8yargs

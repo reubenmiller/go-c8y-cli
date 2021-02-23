@@ -51,10 +51,10 @@ Get applications
     Process {
 
         if ($ClientOptions.ConvertToPS) {
-            ,($Type `
+            $Type `
             | Group-ClientRequests `
             | c8y applications list $c8yargs `
-            | ConvertFrom-ClientOutput @TypeOptions)
+            | ConvertFrom-ClientOutput @TypeOptions
         }
         else {
             $Type `

@@ -49,8 +49,8 @@ Get a list of user groups for the current tenant
     Process {
 
         if ($ClientOptions.ConvertToPS) {
-            ,(c8y userGroups list $c8yargs `
-            | ConvertFrom-ClientOutput @TypeOptions)
+            c8y userGroups list $c8yargs `
+            | ConvertFrom-ClientOutput @TypeOptions
         }
         else {
             c8y userGroups list $c8yargs

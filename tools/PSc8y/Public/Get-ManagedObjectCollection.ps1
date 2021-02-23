@@ -79,8 +79,8 @@ Get a list of managed objects by id
     Process {
 
         if ($ClientOptions.ConvertToPS) {
-            ,(c8y inventory list $c8yargs `
-            | ConvertFrom-ClientOutput @TypeOptions)
+            c8y inventory list $c8yargs `
+            | ConvertFrom-ClientOutput @TypeOptions
         }
         else {
             c8y inventory list $c8yargs

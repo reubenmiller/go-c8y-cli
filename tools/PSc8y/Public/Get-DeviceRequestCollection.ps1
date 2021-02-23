@@ -46,8 +46,8 @@ Get a list of new device requests
     Process {
 
         if ($ClientOptions.ConvertToPS) {
-            ,(c8y deviceCredentials listNewDeviceRequests $c8yargs `
-            | ConvertFrom-ClientOutput @TypeOptions)
+            c8y deviceCredentials listNewDeviceRequests $c8yargs `
+            | ConvertFrom-ClientOutput @TypeOptions
         }
         else {
             c8y deviceCredentials listNewDeviceRequests $c8yargs

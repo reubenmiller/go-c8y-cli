@@ -64,8 +64,8 @@ Get tenant statistics collection for the day before yesterday
     Process {
 
         if ($ClientOptions.ConvertToPS) {
-            ,(c8y tenantStatistics list $c8yargs `
-            | ConvertFrom-ClientOutput @TypeOptions)
+            c8y tenantStatistics list $c8yargs `
+            | ConvertFrom-ClientOutput @TypeOptions
         }
         else {
             c8y tenantStatistics list $c8yargs
