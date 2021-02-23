@@ -3,6 +3,18 @@
 #mkdir -p "$ZSH/completions"
 #c8y completion zsh > ~/.oh-my-zsh/completions/_c8y
 
+
+if [[ $(command -v c8y) ]]; then
+    # create session home folder (if it does not exist)
+    if [[ $(command -v jq) ]]; then
+        sessionhome=$( c8y settings list | jq -r '."session.home" | select (.!=null)' )
+
+        if [[ ! -e "$sessionhome" ]]; then
+            mkdir -p "$sessionhome"
+        fi
+    fi
+fi
+
 ########################################################################
 # c8y helpers
 ########################################################################
