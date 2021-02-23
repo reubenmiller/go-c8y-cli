@@ -43,7 +43,7 @@ List the users within a user group
 
 	flags.WithOptions(
 		cmd,
-		flags.WithExtendedPipelineSupport("user", "user", true),
+		flags.WithExtendedPipelineSupport("user", "user", true, "id"),
 	)
 
 	// Required flags

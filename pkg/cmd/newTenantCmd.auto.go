@@ -48,7 +48,7 @@ Create a new tenant (from the management tenant)
 
 	flags.WithOptions(
 		cmd,
-		flags.WithExtendedPipelineSupport("domain", "domain", true),
+		flags.WithExtendedPipelineSupport("domain", "domain", true, "id"),
 	)
 
 	// Required flags

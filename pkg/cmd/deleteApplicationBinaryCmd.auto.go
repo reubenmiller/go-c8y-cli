@@ -44,7 +44,7 @@ Remove an application binary related to a Hosted (web) application
 
 	flags.WithOptions(
 		cmd,
-		flags.WithExtendedPipelineSupport("binaryId", "binaryId", true),
+		flags.WithExtendedPipelineSupport("binaryId", "binaryId", true, "id"),
 	)
 
 	// Required flags

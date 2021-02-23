@@ -42,7 +42,7 @@ Update multiple tenant options
 
 	flags.WithOptions(
 		cmd,
-		flags.WithExtendedPipelineSupport("category", "category", true),
+		flags.WithExtendedPipelineSupport("category", "category", true, "id"),
 	)
 
 	// Required flags

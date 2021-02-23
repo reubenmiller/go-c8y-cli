@@ -52,7 +52,7 @@ Create a user
 
 	flags.WithOptions(
 		cmd,
-		flags.WithExtendedPipelineSupport("userName", "userName", false),
+		flags.WithExtendedPipelineSupport("userName", "userName", false, "id"),
 	)
 
 	// Required flags

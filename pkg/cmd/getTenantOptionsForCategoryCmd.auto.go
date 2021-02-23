@@ -44,7 +44,7 @@ Get a list of options for a category
 
 	flags.WithOptions(
 		cmd,
-		flags.WithExtendedPipelineSupport("category", "category", true),
+		flags.WithExtendedPipelineSupport("category", "category", true, "id"),
 	)
 
 	// Required flags

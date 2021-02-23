@@ -42,7 +42,7 @@ Get a list of the child devices of an existing device
 
 	flags.WithOptions(
 		cmd,
-		flags.WithExtendedPipelineSupport("group", "id", false),
+		flags.WithExtendedPipelineSupport("group", "id", false, "id"),
 	)
 
 	// Required flags

@@ -42,7 +42,7 @@ Get a list of system options
 
 	flags.WithOptions(
 		cmd,
-		flags.WithExtendedPipelineSupport("key", "key", true),
+		flags.WithExtendedPipelineSupport("key", "key", true, "id"),
 	)
 
 	// Required flags

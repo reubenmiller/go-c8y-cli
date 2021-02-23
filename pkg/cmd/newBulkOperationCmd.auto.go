@@ -45,7 +45,7 @@ Create operation for a device
 
 	flags.WithOptions(
 		cmd,
-		flags.WithExtendedPipelineSupport("group", "groupId", true),
+		flags.WithExtendedPipelineSupport("group", "groupId", true, "id"),
 	)
 
 	// Required flags

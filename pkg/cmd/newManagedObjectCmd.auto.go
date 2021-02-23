@@ -43,7 +43,7 @@ Create a managed object
 
 	flags.WithOptions(
 		cmd,
-		flags.WithExtendedPipelineSupport("name", "name", false),
+		flags.WithExtendedPipelineSupport("name", "name", false, "id"),
 	)
 
 	// Required flags

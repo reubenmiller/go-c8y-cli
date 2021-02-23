@@ -45,7 +45,7 @@ Add multiple groups to a group
 
 	flags.WithOptions(
 		cmd,
-		flags.WithExtendedPipelineSupport("newChildGroup", "managedObject.id", true),
+		flags.WithExtendedPipelineSupport("newChildGroup", "managedObject.id", true, "id"),
 	)
 
 	// Required flags

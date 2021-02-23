@@ -42,7 +42,7 @@ Enable an application of a tenant by name
 
 	flags.WithOptions(
 		cmd,
-		flags.WithExtendedPipelineSupport("application", "application.id", true),
+		flags.WithExtendedPipelineSupport("application", "application.id", true, "id"),
 	)
 
 	// Required flags

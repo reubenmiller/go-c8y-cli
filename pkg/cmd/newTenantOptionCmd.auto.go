@@ -43,7 +43,7 @@ Create a tenant option
 
 	flags.WithOptions(
 		cmd,
-		flags.WithExtendedPipelineSupport("key", "key", true),
+		flags.WithExtendedPipelineSupport("key", "key", true, "id"),
 	)
 
 	// Required flags

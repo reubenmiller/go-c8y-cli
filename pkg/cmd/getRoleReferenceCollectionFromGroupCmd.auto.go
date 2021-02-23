@@ -42,7 +42,7 @@ Get a list of role references for a user group
 
 	flags.WithOptions(
 		cmd,
-		flags.WithExtendedPipelineSupport("group", "group", true),
+		flags.WithExtendedPipelineSupport("group", "group", true, "id"),
 	)
 
 	// Required flags

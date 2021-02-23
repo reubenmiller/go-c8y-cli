@@ -42,7 +42,7 @@ Delete external identity
 
 	flags.WithOptions(
 		cmd,
-		flags.WithExtendedPipelineSupport("name", "name", true),
+		flags.WithExtendedPipelineSupport("name", "name", true, "id"),
 	)
 
 	// Required flags

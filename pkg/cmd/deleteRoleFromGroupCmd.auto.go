@@ -43,7 +43,7 @@ Remove a role from the given user
 
 	flags.WithOptions(
 		cmd,
-		flags.WithExtendedPipelineSupport("role", "role", true),
+		flags.WithExtendedPipelineSupport("role", "role", true, "id"),
 	)
 
 	// Required flags

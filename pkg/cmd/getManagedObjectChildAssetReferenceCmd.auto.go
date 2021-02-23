@@ -42,7 +42,7 @@ Get an existing child asset reference
 
 	flags.WithOptions(
 		cmd,
-		flags.WithExtendedPipelineSupport("asset", "asset", true),
+		flags.WithExtendedPipelineSupport("asset", "asset", true, "deviceId", "source.id", "managedObject.id", "id"),
 	)
 
 	// Required flags

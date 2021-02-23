@@ -42,7 +42,7 @@ Disable an application of a tenant by name
 
 	flags.WithOptions(
 		cmd,
-		flags.WithExtendedPipelineSupport("application", "application", true),
+		flags.WithExtendedPipelineSupport("application", "application", true, "id"),
 	)
 
 	// Required flags

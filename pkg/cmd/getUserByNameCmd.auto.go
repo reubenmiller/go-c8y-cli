@@ -42,7 +42,7 @@ Get a user by name
 
 	flags.WithOptions(
 		cmd,
-		flags.WithExtendedPipelineSupport("name", "name", true),
+		flags.WithExtendedPipelineSupport("name", "name", true, "id"),
 	)
 
 	// Required flags
