@@ -29,7 +29,7 @@ Describe -Name "Get-Pagination" {
         $Response = PSc8y\Get-AlarmCollection `
             -Device $Device.id `
             -IncludeAll `
-            -Verbose 4> $cliOutputFile
+            -Verbose 2> $cliOutputFile
         $C8Y_SETTINGS_INCLUDEALL_PAGESIZE = ""
 
         $LASTEXITCODE | Should -Be 0
@@ -50,7 +50,7 @@ Describe -Name "Get-Pagination" {
         $Response = PSc8y\Get-AlarmCollection `
             -Device $Device.id `
             -IncludeAll `
-            -Verbose 4> $cliOutputFile
+            -Verbose 2> $cliOutputFile
 
         $LASTEXITCODE | Should -Be 0
         $C8Y_SETTINGS_INCLUDEALL_PAGESIZE = ""
@@ -73,7 +73,7 @@ Describe -Name "Get-Pagination" {
         $Response = PSc8y\Get-DeviceCollection `
             -IncludeAll `
             -WhatIf `
-            -Verbose 4> $cliOutputFile
+            -Verbose 2> $cliOutputFile
 
         $LASTEXITCODE | Should -Be 0
         $Response | Should -BeNullOrEmpty
@@ -88,7 +88,7 @@ Describe -Name "Get-Pagination" {
 
         $Response = PSc8y\Get-AlarmCollection `
             -Device $Device.id `
-            -Verbose 4> $cliOutputFile
+            -Verbose 2> $cliOutputFile
 
         $LASTEXITCODE | Should -Be 0
         $C8Y_SETTINGS_DEFAULT_PAGESIZE = ""

@@ -118,6 +118,14 @@ Describe -Name "powershell pipes" {
         $env:C8Y_SETTINGS_INCLUDEALL_DELAYMS = 1000
     }
 
+    Context "Filtering using where-object" {
+        It "Filters the output using where-object" {
+            $output = Get-RoleCollection -PageSize 100 | Where-Object Name -like "*ALARM*"
+            $LASTEXITCODE | Should -BeExactly 0
+            $output.Count | Should -BeGreaterThan 1
+        }
+    }
+
     Context "View" {
         It "Uses the overall view" {
             $output = devices -WithTotalPages -PageSize 1
