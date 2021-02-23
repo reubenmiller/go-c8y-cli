@@ -31,7 +31,7 @@ Function ConvertFrom-ClientOutput {
         
         $AsJSON = if ($BoundParameters.ContainsKey("AsJSON")) { $BoundParameters["AsJSON"] } else { $false }
 
-        $SelectedType = $ItemType
+        $SelectedType = if ($ItemType) { $ItemType } else { $Type }
         if ($Raw) {
             $SelectedType = $Type
         }
@@ -43,11 +43,11 @@ Function ConvertFrom-ClientOutput {
                 $item
             }
             else {
-                # Strip color codes (if present)
-                $item = $item -replace '\x1b\[[0-9;]*m'
-
                 # Detect json responses automatically
-                if ($item -match "^\s*[\[\{]") {
+                if ($SelectedType -match "json") {
+                    # Strip color codes (if present)
+                    $item = $item -replace '\x1b\[[0-9;]*m'
+
                     ConvertFrom-Json -InputObject $item -Depth:$Depth -AsHashtable:$AsHashTable `
                     | Add-PowershellType -Type $SelectedType
                 } else {
