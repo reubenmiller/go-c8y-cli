@@ -122,7 +122,7 @@ Describe -Name "powershell pipes" {
         It "Uses the overall view" {
             $output = devices -WithTotalPages -PageSize 1
             $LASTEXITCODE | Should -BeExactly 0
-            $output.psobject.TypeNames[0] | Should -MatchExactly "collection"
+            $output.psobject.TypeNames[0] | Should -match "collection"
         }
     }
 
