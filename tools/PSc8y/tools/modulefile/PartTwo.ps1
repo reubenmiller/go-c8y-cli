@@ -84,7 +84,7 @@ $script:Aliases = @{
     base64ToUtf8 = "ConvertFrom-Base64String"
     utf8Tobase64 = "ConvertTo-Base64String"
     iterate = "Invoke-ClientIterator"
-    pipe = "Group-ClientRequests"
+    batch = "Group-ClientRequests"
 
     # session
     session = "Get-Session"
@@ -127,7 +127,8 @@ $ModuleCommands = @( $Manifest.ExportedFunctions.Keys ) `
 
 try {
     if (Get-Command -Name Register-ArgumentCompleter -ErrorAction SilentlyContinue) {
-        $ModuleCommands | Register-ClientArgumentCompleter
+        # TODO: Registering completion is very slow when using dynamic components
+        # $ModuleCommands | Register-ClientArgumentCompleter
     }
 }
 catch {
