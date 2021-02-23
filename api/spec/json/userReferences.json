@@ -58,7 +58,11 @@
           "pipeline": true,
           "required": true,
           "property": "user.self",
-          "description": "User id"
+          "description": "User id",
+          "pipelineAliases": [
+            "id",
+            "self"
+          ]
         }
       ]
     },

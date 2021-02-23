@@ -46,6 +46,9 @@ endpoints:
         required: true
         property: user.self
         description: User id
+        pipelineAliases:
+          - id
+          - self
 
 
   - name: deleteUserFromGroup
