@@ -46,6 +46,7 @@ Function ConvertFrom-ClientOutput {
                 # Strip color codes (if present)
                 $item = $item -replace '\x1b\[[0-9;]*m'
 
+                # Detect json responses automatically
                 if ($item -match "^\s*[\[\{]") {
                     ConvertFrom-Json -InputObject $item -Depth:$Depth -AsHashtable:$AsHashTable `
                     | Add-PowershellType -Type $SelectedType
