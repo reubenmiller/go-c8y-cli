@@ -235,6 +235,12 @@ func (n *newSessionCmd) writeSessionFile(outputDir, outputFile string, session C
 
 	outputPath := path.Join(outputDir, outputFile)
 
+	if outputDir != "" {
+		if err := os.MkdirAll(outputDir, os.ModePerm); err != nil {
+			Logger.Errorf("failed to create folder. folder=%s, err=%s", outputDir, err)
+			return err
+		}
+	}
 	Logger.Debugf("output file: %s", outputPath)
 
 	if err := ioutil.WriteFile(path.Join(outputDir, outputFile), data, 0644); err != nil {
