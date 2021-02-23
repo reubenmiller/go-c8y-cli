@@ -40,11 +40,7 @@ Function New-ClientArgument {
                     }
                     else {
                         if ($key -eq "data" -or $Value -is [hashtable] -or $Value -is [PSCustomObject]) {
-                            $ArgValue = if ($Value -is [string]) {
-                                $Value
-                            } else {
-                                (ConvertTo-JsonArgument $Value)
-                            }
+                            $ArgValue = ConvertTo-JsonArgument $Value
                             # due to cli parsing, data needs to be sent using "="
                             $null = $c8yargs.AddRange(@("--${key}", $ArgValue))
                         }
