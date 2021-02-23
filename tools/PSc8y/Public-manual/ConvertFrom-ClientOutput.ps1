@@ -26,7 +26,9 @@ Function ConvertFrom-ClientOutput {
     Begin {
         $Depth = if ($BoundParameters.ContainsKey("Depth")) { $BoundParameters["Depth"] } else { 100 }
         $AsHashTable = if ($BoundParameters.ContainsKey("AsHashTable")) { $BoundParameters["AsHashTable"] } else { $false }
-        $Raw = if ($BoundParameters.ContainsKey("Raw")) { $BoundParameters["Raw"] } else { $false }
+        $Raw = $BoundParameters["WithTotalPages"] `
+            -or $BoundParameters["Raw"]
+        
         $AsJSON = if ($BoundParameters.ContainsKey("AsJSON")) { $BoundParameters["AsJSON"] } else { $false }
 
         $SelectedType = $ItemType
@@ -39,7 +41,8 @@ Function ConvertFrom-ClientOutput {
         foreach ($item in $InputObject) {
             if ($AsJSON) {
                 $item
-            } else {
+            }
+            else {
                 # Strip color codes (if present)
                 $item = $item -replace '\x1b\[[0-9;]*m'
                 ConvertFrom-Json -InputObject $item -Depth:$Depth -AsHashtable:$AsHashTable `
