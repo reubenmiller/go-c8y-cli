@@ -39,7 +39,7 @@ Function New-ClientArgument {
                         $null = $c8yargs.AddRange(@("--${key}"))
                     }
                     else {
-                        if ($key -eq "data") {
+                        if ($key -eq "data" -or $Value -is [hashtable] -or $Value -is [PSCustomObject]) {
                             $ArgValue = if ($Value -is [string]) {
                                 $Value
                             } else {
