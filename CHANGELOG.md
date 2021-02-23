@@ -2,7 +2,7 @@
 
 ## Known limitations
 
-Usage of large numbers (using exponetial notation) in templates can cause the server to respond with a 422 status code. This is due to a current limitation in the jsonnet template library.
+Usage of large numbers (using exponential notation) in templates can cause the server to respond with a 422 status code. This is due to a current limitation in the jsonnet template library.
 
 As a workaround, use the `data` parameter when working with large numbers (and don't specify a `template` parameter). This will preserve the number format as provided.
 
@@ -25,6 +25,7 @@ c8y inventory create --data "./datapoint.largeint.json"
 
 ## TODO
 
+* Convert hashtable to json, i.e. or reject it automatically? replace ";" with ",", and replace "@{" with "{", "=" with ":"
 * Check if progress can be written to stderr when using variable assignment (i.e. d=$( seq 100 | c8y devices create --progress --dry --delay 1000 ))
 
 * Add confirmation prompts to c8y binary
@@ -57,17 +58,12 @@ c8y inventory create --data "./datapoint.largeint.json"
   * Create activity log cmdlets?
     * Get recent history, get commands with filter (api, host, method etc.)
 
-## Failed Tests
-
-./tools/PSc8y/reports/Failed_Get-DeviceCollection.manual.Tests_Pester.xml
- => ErrorVariables and InformationVariables are not written to when using IncludeAll
-
-./tools/PSc8y/reports/Failed_Get-TenantOptionCollection.auto.Tests_Pester.xml
 
 ## Unreleased
 
 No unreleased features
 
+* Session folder is created automatically if it does not yet exist when creating a new session
 * --outputFile appends a new line character to the output when the Content-Type header contains "json"
 
 * Removed `TimeoutSec` to `Timeout`
