@@ -31,28 +31,43 @@ Function New-ClientArgument {
         
         foreach ($iKey in $BoundParameters.Keys) {
             $Value = $BoundParameters[$iKey]
-        
-            foreach ($iValue in $Value) {
-                if ("$Value" -notmatch "^$") {
-                    $key = $iKey[0].ToString().ToLowerInvariant() + $iKey.SubString(1)
-                    if ($Value -is [bool] -and $Value) {
+
+            if ("$Value" -notmatch "^$") {
+                $key = $iKey[0].ToString().ToLowerInvariant() + $iKey.SubString(1)
+
+                switch ($Value) {
+                    # boolean
+                    { $Value -is [bool] -and $Value } {
                         $null = $c8yargs.AddRange(@("--${key}"))
+                        break
                     }
-                    else {
-                        if ($key -eq "data" -or $Value -is [hashtable] -or $Value -is [PSCustomObject]) {
-                            $ArgValue = ConvertTo-JsonArgument $Value
-                            # due to cli parsing, data needs to be sent using "="
-                            $null = $c8yargs.AddRange(@("--${key}", $ArgValue))
+
+                    # json like values
+                    { $key -eq "data" -or $Value -is [hashtable] -or $Value -is [PSCustomObject] } {
+                        $ArgValue = ConvertTo-JsonArgument $Value
+                        # due to cli parsing, data needs to be sent using "="
+                        $null = $c8yargs.AddRange(@("--${key}", $ArgValue))
+                        break
+                    }
+
+                    { $Value -is [array] } {
+                        $items = Expand-Id $Value
+                        if ($items.Count -eq 1) {
+                            $null = $c8yargs.Add("--${key}=$($items -join ',')")
+                            
+                        } elseif ($items.Count -gt 1) {
+                            $null = $c8yargs.Add("--${key}=`"$($items -join ',')`"")
                         }
-                        else {
-                            if ($Value -match " ") {
-                                # $null = $c8yargs.AddRange(@("--${key}", "$Value"))
-                                $null = $c8yargs.Add("--${key}=`"$Value`"")
-                            }
-                            else {
-                                $null = $c8yargs.Add("--${key}=$Value")
-                            }
-                        }
+                        break
+                    }
+
+                    { $Value -match " " } {
+                        $null = $c8yargs.Add("--${key}=`"$Value`"")
+                        break
+                    }
+
+                    default {
+                        $null = $c8yargs.Add("--${key}=$Value")
                     }
                 }
             }
