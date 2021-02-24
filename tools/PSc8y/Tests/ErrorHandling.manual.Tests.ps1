@@ -26,7 +26,7 @@ Describe -Name "Error handling" {
     }
 
     It "Redirects errors to response and ErrorVariable" {
-        $response = Get-ManagedObject -Id 0 -ErrorVariable c8yError 2>&1
+        $c8yError = $( $response = Get-ManagedObject -Id 0 -Verbose )
         $LASTEXITCODE | Should -Not -Be 0
 
         # Variable can also
@@ -59,24 +59,12 @@ Describe -Name "Error handling" {
     }
 
     It "produces verbose output" {
-        $VerboseMessages = $( $null = Get-ManagedObjectCollection -Verbose ) 4>&1
+        $VerboseMessages = $( $null = Get-ManagedObjectCollection -Verbose ) 2>&1
         @($VerboseMessages -like "*Sending request*") | Should -HaveCount 1
     }
 
-    It "saves request information to the InformationVariable (hiding verbose messages)" {
-        $null = Get-ManagedObjectCollection -InformationVariable responseInfo
-
-        $responseInfo | Should -Not -BeNullOrEmpty
-        $responseInfo.MessageData.request | Should -Not -BeNullOrEmpty
-        $responseInfo.MessageData.requestHeader | Should -Not -BeNullOrEmpty
-        $responseInfo.MessageData.responseHeader | Should -Not -BeNullOrEmpty
-        $responseInfo.MessageData.responseTime | Should -Match "^\d+ms$"
-        $responseInfo.MessageData.statusCode | Should -Match "^\d+$"
-        $responseInfo.MessageData.responseLength | Should -Not -BeNullOrEmpty
-    }
-
     It "saves whatif information to a variable" {
-        $response = New-ManagedObject -Name "My Name" -WhatIf -InformationVariable requestInfo
+        $requestInfo = $( $response = New-ManagedObject -Name "My Name" -WhatIf ) 2>&1
 
         $response | Should -BeNullOrEmpty
         $requestInfo | Should -Not -BeNullOrEmpty
@@ -87,7 +75,7 @@ Describe -Name "Error handling" {
     }
 
     It "redirects whatif information standard output" {
-        $requestInfo = New-ManagedObject -Name "My Name" -WhatIf 6>&1
+        $requestInfo = New-ManagedObject -Name "My Name" -WhatIf 2>&1
 
         $requestInfo | Should -Not -BeNullOrEmpty
         $requestInfo -match "What If" | Should -HaveCount 1

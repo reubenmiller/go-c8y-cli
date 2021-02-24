@@ -79,8 +79,8 @@ Describe -Name "New-ManagedObject" {
 
     It "Managed object allow setting the processing mode" {
         foreach ($mode in @("PERSISTENT", "QUIESCENT", "TRANSIENT", "CEP")) {
-            PSc8y\New-ManagedObject -Data @{} -ProcessingMode $mode -WhatIf -InformationVariable Request
-            ($Request | Out-String) -match "X-Cumulocity-Processing-Mode:\s+$mode" | Should -HaveCount 1
+            $output = PSc8y\New-ManagedObject -Data @{} -ProcessingMode $mode -WhatIf 2>&1
+            ($output | Out-String) -match "X-Cumulocity-Processing-Mode:\s+$mode" | Should -HaveCount 1
         }
     }
 
