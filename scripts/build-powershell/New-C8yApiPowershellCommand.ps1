@@ -276,7 +276,7 @@
         $null = $C8yCommonSetNames.Add("Collection")
 
         # note: don't enumerate collection output 
-        $NoEnumerate = $true
+        $NoEnumerate = $false
     }
 
     # Examples
