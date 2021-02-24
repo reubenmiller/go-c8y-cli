@@ -13,6 +13,8 @@ Function Get-ClientOutputOption {
         $UseNativeOutput = $BoundParameters["AsJSON"] `
             -or $BoundParameters["IncludeAll"] `
             -or $BoundParameters["AsCSV"] `
+            -or $BoundParameters["CsvFormat"] `
+            -or $BoundParameters["ExcelFormat"] `
             -or $BoundParameters["Progress"]
         [PSCustomObject]@{
             ConvertToPS = !$UseNativeOutput
