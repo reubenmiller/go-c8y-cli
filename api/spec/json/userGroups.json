@@ -231,6 +231,7 @@
       "description": "Update a user group",
       "method": "PUT",
       "path": "/user/{tenant}/groups/{id}",
+      "accept": "application/vnd.com.nsn.cumulocity.group+json",
       "alias": {
         "go": "update",
         "powershell": "Update-UserGroup"
