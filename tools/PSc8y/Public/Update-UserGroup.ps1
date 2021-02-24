@@ -57,7 +57,7 @@ Update a user group (using pipeline)
         $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "userGroups update"
         $ClientOptions = Get-ClientOutputOption $PSBoundParameters
         $TypeOptions = @{
-            Type = ""
+            Type = "application/vnd.com.nsn.cumulocity.group+json"
             ItemType = ""
             BoundParameters = $PSBoundParameters
         }
