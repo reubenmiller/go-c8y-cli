@@ -61,10 +61,10 @@ Function New-ServiceUser {
             [string]
             $Session,
 
-            # TimeoutSec timeout in seconds before a request will be aborted
+            # Timeout in seconds before a request will be aborted
             [Parameter()]
             [double]
-            $TimeoutSec,
+            $Timeout,
 
             # Don't prompt for confirmation
             [Parameter()]
@@ -92,8 +92,8 @@ Function New-ServiceUser {
             if ($PSBoundParameters.ContainsKey("Session")) {
                 $Parameters["session"] = $Session
             }
-            if ($PSBoundParameters.ContainsKey("TimeoutSec")) {
-                $Parameters["timeout"] = $TimeoutSec * 1000
+            if ($PSBoundParameters.ContainsKey("Timeout")) {
+                $Parameters["timeout"] = $Timeout
             }
         }
 

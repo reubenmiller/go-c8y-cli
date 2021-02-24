@@ -7,6 +7,8 @@ Describe -Name "Common parameters" {
             "Get-ClientBinary",
             "Get-ClientBinaryVersion",
             "Get-CurrentTenantApplicationCollection",
+            "Group-ClientRequests",
+            "ConvertFrom-ClientOutput",
             "Install-ClientBinary"
         )
 
@@ -19,10 +21,14 @@ Describe -Name "Common parameters" {
             }
 
         foreach ($icmdlet in $cmdlets) {
-            $icmdlet | Should -HaveParameter "OutputFile"
-            $icmdlet | Should -HaveParameter "NoProxy"
-            $icmdlet | Should -HaveParameter "Session"
-            $icmdlet | Should -HaveParameter "TimeoutSec"
+            $resolvedCommand = $icmdlet
+            if ($icmdlet.CommandType -eq "Alias") {
+                $resolvedCommand = $icmdlet.ResolvedCommand
+            }
+            $resolvedCommand | Should -HaveParameter "OutputFile"
+            $resolvedCommand | Should -HaveParameter "NoProxy"
+            $resolvedCommand | Should -HaveParameter "Session"
+            $resolvedCommand | Should -HaveParameter "Timeout"
         }
     }
 
@@ -113,11 +119,11 @@ Describe -Name "Common parameters" {
     }
 
     It "Using -WhatIf should show output on the console" {
-        PSc8y\New-Device `
+        $output = PSc8y\New-Device `
             -Name "testme" `
-            -WhatIf -InformationVariable responseInfo
+            -WhatIf 2>&1
         $LASTEXITCODE | Should -Be 0
-        $responseInfo | Should -Not -BeNullOrEmpty
-        $responseInfo | Out-String | Should -BeLike "*/inventory/managedObject*"
+        $output | Should -Not -BeNullOrEmpty
+        $output | Out-String | Should -BeLike "*/inventory/managedObject*"
     }
 }

@@ -49,7 +49,7 @@ Function Get-ServiceUser {
             # TimeoutSec timeout in seconds before a request will be aborted
             [Parameter()]
             [double]
-            $TimeoutSec
+            $Timeout
         )
     
         Begin {
@@ -63,8 +63,8 @@ Function Get-ServiceUser {
             if ($PSBoundParameters.ContainsKey("Session")) {
                 $Parameters["session"] = $Session
             }
-            if ($PSBoundParameters.ContainsKey("TimeoutSec")) {
-                $Parameters["timeout"] = $TimeoutSec * 1000
+            if ($PSBoundParameters.ContainsKey("Timeout")) {
+                $Parameters["timeout"] = $Timeout
             }
         }
     

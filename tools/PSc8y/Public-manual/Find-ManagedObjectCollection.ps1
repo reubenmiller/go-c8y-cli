@@ -83,10 +83,10 @@ Find all devices with their names starting with 'roomUpperFloor_'
         [string]
         $Session,
 
-        # TimeoutSec timeout in seconds before a request will be aborted
+        # Timeout in seconds before a request will be aborted
         [Parameter()]
         [double]
-        $TimeoutSec
+        $Timeout
     )
 
     Begin {
@@ -115,8 +115,8 @@ Find all devices with their names starting with 'roomUpperFloor_'
         if ($PSBoundParameters.ContainsKey("Session")) {
             $Parameters["session"] = $Session
         }
-        if ($PSBoundParameters.ContainsKey("TimeoutSec")) {
-            $Parameters["timeout"] = $TimeoutSec * 1000
+        if ($PSBoundParameters.ContainsKey("Timeout")) {
+            $Parameters["timeout"] = $Timeout
         }
 
     }

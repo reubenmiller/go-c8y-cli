@@ -112,7 +112,7 @@ Create a new managed object but add a custom accept header value
         # Timeout in seconds
         [Parameter()]
         [double]
-        $TimeoutSec,
+        $Timeout,
 
         # Compress the json response (i.e. opposite of pretty print)
         [Parameter()]
@@ -230,10 +230,8 @@ Create a new managed object but add a custom accept header value
         $null = $c8yargs.AddRange(@("--host", $HostName))
     }
 
-    if ($TimeoutSec) {
-        # Convert to milliseconds (cast to an integer)
-        [int] $TimeoutInMS = $TimeoutSec * 1000
-        $null = $c8yargs.AddRange(@("--timeout", $TimeoutInMS))
+    if ($Timeout) {
+        $null = $c8yargs.AddRange(@("--timeout", $Timeout))
     }
 
     if ($InFile) {

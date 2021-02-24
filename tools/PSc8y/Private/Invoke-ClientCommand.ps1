@@ -51,8 +51,9 @@ only relevant information is shown.
 
         # TimeoutSec timeout in seconds before a request will be aborted
         [Parameter()]
+        [Alias("TimeoutSec")]
         [double]
-        $TimeoutSec
+        $Timeout
     )
 
     $c8yargs = New-Object System.Collections.ArrayList
@@ -94,10 +95,8 @@ only relevant information is shown.
     # Don't use colours as it can interfere with log parsing
     $null = $c8yargs.Add("--noColor")
 
-    if ($TimeoutSec) {
-        # Convert to milliseconds (cast to an integer)
-        [int] $TimeoutInMS = $TimeoutSec * 1000
-        $null = $c8yargs.AddRange(@("--timeout", $TimeoutInMS))
+    if ($Timeout) {
+        $null = $c8yargs.AddRange(@("--timeout", $Timeout))
     }
 
     if ($CurrentPage) {
