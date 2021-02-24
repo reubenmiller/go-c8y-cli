@@ -32,7 +32,7 @@ Function New-ClientArgument {
         foreach ($iKey in $BoundParameters.Keys) {
             $Value = $BoundParameters[$iKey]
 
-            if ("$Value" -notmatch "^$") {
+            if ($null -ne $Value) {
                 $key = $iKey[0].ToString().ToLowerInvariant() + $iKey.SubString(1)
 
                 switch ($Value) {
@@ -61,13 +61,15 @@ Function New-ClientArgument {
                         break
                     }
 
-                    { $Value -match " " } {
+                    { $Value -match " " -and ![string]::IsNullOrWhiteSpace($Value) } {
                         $null = $c8yargs.Add("--${key}=`"$Value`"")
                         break
                     }
 
                     default {
-                        $null = $c8yargs.Add("--${key}=$Value")
+                        if (![string]::IsNullOrWhiteSpace($Value)) {
+                            $null = $c8yargs.Add("--${key}=$Value")
+                        }
                     }
                 }
             }
