@@ -90,6 +90,16 @@ set-session () {
         export C8Y_PASSPHRASE_TEXT=$( echo $passphraseCheck | jq -r ".C8Y_PASSPHRASE_TEXT | select (.!=null)" )
         export C8Y_PASSWORD=$( echo $passphraseCheck | jq -r ".C8Y_PASSWORD | select (.!=null)" )
 
+        # temp fix: will be solved using new env option in v2
+        cookie=$( echo $passphraseCheck | jq -r ".C8Y_CREDENTIAL_COOKIES_0 | select (.!=null)" )
+        if [[ "$cookie" != "" ]]; then
+            export C8Y_CREDENTIAL_COOKIES_0=$cookie
+        fi
+        cookie=$( echo $passphraseCheck | jq -r ".C8Y_CREDENTIAL_COOKIES_1 | select (.!=null)" )
+        if [[ "$cookie" != "" ]]; then
+            export C8Y_CREDENTIAL_COOKIES_1=$cookie
+        fi
+
         # login / test session credentials
         c8y sessions login
     fi
@@ -117,6 +127,8 @@ clear-session () {
     unset C8Y_SETTINGS_MODE_ENABLECREATE
     unset C8Y_SETTINGS_MODE_ENABLEUPDATE
     unset C8Y_SETTINGS_MODE_ENABLEDELETE
+    unset C8Y_CREDENTIAL_COOKIES_0
+    unset C8Y_CREDENTIAL_COOKIES_1
 }
 
 # ----------
