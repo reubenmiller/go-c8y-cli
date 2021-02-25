@@ -23,8 +23,15 @@ As a workaround, use the `data` parameter when working with large numbers (and d
 c8y inventory create --data "./datapoint.largeint.json"
 ```
 
+## Failing tests
+
+./tools/PSc8y/reports/Failed_Wait-Operation.manual.Tests_Pester.xml
+./tools/PSc8y/reports/Failed_ErrorHandling.manual.Tests_Pester.xml
+
 ## TODO
 
+* Errors should return no response in powershell? This is currently the reason for the above failed tests. The c8y raw error is being returned
+  * Currently errors are also no sorted into client errors or server errors
 * Convert hashtable to json, i.e. or reject it automatically? replace ";" with ",", and replace "@{" with "{", "=" with ":"
 * Check if progress can be written to stderr when using variable assignment (i.e. d=$( seq 100 | c8y devices create --progress --dry --delay 1000 ))
 
@@ -63,6 +70,14 @@ c8y inventory create --data "./datapoint.largeint.json"
 
 No unreleased features
 
+* `Get-TenantVersion` returns an object instead of a single value.
+    ```json
+    {
+        "category": "system",
+        "key": "version",
+        "value": "1006.6.0"
+    }
+    ```
 * Session folder is created automatically if it does not yet exist when creating a new session
 * --outputFile appends a new line character to the output when the Content-Type header contains "json"
 
