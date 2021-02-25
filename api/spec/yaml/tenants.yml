@@ -297,7 +297,6 @@ endpoints:
     method: GET
     path: /tenant/system/options/system/version
     accept: application/vnd.com.nsn.cumulocity.option+json
-    collectionProperty: value
     alias:
         go: getVersion
         powershell: Get-TenantVersion
