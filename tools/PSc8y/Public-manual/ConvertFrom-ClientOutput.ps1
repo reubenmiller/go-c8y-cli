@@ -48,8 +48,14 @@ Function ConvertFrom-ClientOutput {
                     # Strip color codes (if present)
                     $item = $item -replace '\x1b\[[0-9;]*m'
 
-                    ConvertFrom-Json -InputObject $item -Depth:$Depth -AsHashtable:$AsHashTable `
+                    $output = ConvertFrom-Json -InputObject $item -Depth:$Depth -AsHashtable:$AsHashTable `
                     | Add-PowershellType -Type $SelectedType
+                
+                    if ($LASTEXITCODE -eq 0) {
+                        $output
+                    } else {
+                        Write-Error $output
+                    }
                 } else {
                     $item
                 }
