@@ -59,6 +59,9 @@ func getCommonOptions(cmd *cobra.Command) (CommonCommandOptions, error) {
 		return options, err
 	}
 
+	// default return property from the raw response
+	options.ResultProperty = flags.GetCollectionPropertyFromAnnotation(cmd)
+
 	// Filters and selectors
 	options.Filters = getFilterFlag(cmd, "filter")
 

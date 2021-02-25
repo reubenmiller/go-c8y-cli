@@ -14,8 +14,9 @@ const (
 	FlagProcessingModeName        = "processingMode"
 )
 const (
-	AnnotationValueFromPipeline     = "valueFromPipeline"
-	AnnotationValueFromPipelineData = "valueFromPipeline.data"
+	AnnotationValueFromPipeline       = "valueFromPipeline"
+	AnnotationValueFromPipelineData   = "valueFromPipeline.data"
+	AnnotationValueCollectionProperty = "collectionProperty"
 )
 
 // Option adds flags to a given command
@@ -119,6 +120,17 @@ func WithExtendedPipelineSupport(name string, property string, required bool, al
 	}
 }
 
+// WithCollectionProperty adds the default property to be plucked from the raw json response so that the important information is returned by default
+func WithCollectionProperty(property string) Option {
+	return func(cmd *cobra.Command) *cobra.Command {
+		if cmd.Annotations == nil {
+			cmd.Annotations = map[string]string{}
+		}
+		cmd.Annotations[AnnotationValueCollectionProperty] = property
+		return cmd
+	}
+}
+
 // GetPipeOptionsFromAnnotation returns the pipeline options stored in the annotations
 func GetPipeOptionsFromAnnotation(cmd *cobra.Command) (options *PipelineOptions, err error) {
 	options = &PipelineOptions{}
@@ -133,6 +145,34 @@ func GetPipeOptionsFromAnnotation(cmd *cobra.Command) (options *PipelineOptions,
 		if err != nil {
 			return
 		}
+	}
+	return
+}
+
+// GetCollectionPropertyFromAnnotation returns the collection property path used to return a subset of the json response by default
+func GetCollectionPropertyFromAnnotation(cmd *cobra.Command) (value string) {
+	if cmd == nil {
+		return
+	}
+	if cmd.Annotations == nil {
+		return
+	}
+	if v, ok := cmd.Annotations[AnnotationValueCollectionProperty]; ok {
+		value = v
+	}
+	return
+}
+
+// GetStringFromAnnotation returns a string value stored in the annotations
+func GetStringFromAnnotation(cmd *cobra.Command, path string) (value string) {
+	if cmd == nil {
+		return
+	}
+	if cmd.Annotations == nil {
+		return
+	}
+	if v, ok := cmd.Annotations[path]; ok {
+		value = v
 	}
 	return
 }
