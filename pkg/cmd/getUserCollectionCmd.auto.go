@@ -50,6 +50,7 @@ Get a list of users
 	flags.WithOptions(
 		cmd,
 		flags.WithExtendedPipelineSupport("", "", false),
+		flags.WithCollectionProperty("users"),
 	)
 
 	// Required flags

@@ -42,6 +42,7 @@ Get a list of bulk operations
 	flags.WithOptions(
 		cmd,
 		flags.WithExtendedPipelineSupport("", "", false),
+		flags.WithCollectionProperty("bulkOperations"),
 	)
 
 	// Required flags

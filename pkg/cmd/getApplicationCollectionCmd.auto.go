@@ -43,6 +43,7 @@ Get applications
 	flags.WithOptions(
 		cmd,
 		flags.WithExtendedPipelineSupport("type", "type", false, "id"),
+		flags.WithCollectionProperty("applications"),
 	)
 
 	// Required flags

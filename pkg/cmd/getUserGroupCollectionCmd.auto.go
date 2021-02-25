@@ -42,6 +42,7 @@ Get a list of user groups for the current tenant
 	flags.WithOptions(
 		cmd,
 		flags.WithExtendedPipelineSupport("", "", false),
+		flags.WithCollectionProperty("groups"),
 	)
 
 	// Required flags

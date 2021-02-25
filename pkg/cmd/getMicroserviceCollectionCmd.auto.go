@@ -44,6 +44,7 @@ Get microservices
 	flags.WithOptions(
 		cmd,
 		flags.WithExtendedPipelineSupport("", "", false),
+		flags.WithCollectionProperty("applications"),
 	)
 
 	// Required flags

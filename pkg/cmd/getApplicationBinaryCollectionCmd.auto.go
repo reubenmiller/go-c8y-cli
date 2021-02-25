@@ -43,6 +43,7 @@ List all of the binaries related to a Hosted (web) application
 	flags.WithOptions(
 		cmd,
 		flags.WithExtendedPipelineSupport("id", "id", true),
+		flags.WithCollectionProperty("attachments"),
 	)
 
 	// Required flags

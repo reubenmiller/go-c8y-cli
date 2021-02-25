@@ -40,6 +40,7 @@ Get a list of data broker connectors
 	flags.WithOptions(
 		cmd,
 		flags.WithExtendedPipelineSupport("", "", false),
+		flags.WithCollectionProperty("connectors"),
 	)
 
 	// Required flags

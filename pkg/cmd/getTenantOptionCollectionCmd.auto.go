@@ -40,6 +40,7 @@ Get a list of tenant options
 	flags.WithOptions(
 		cmd,
 		flags.WithExtendedPipelineSupport("", "", false),
+		flags.WithCollectionProperty("options"),
 	)
 
 	// Required flags

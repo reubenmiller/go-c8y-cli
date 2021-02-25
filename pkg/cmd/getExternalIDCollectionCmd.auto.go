@@ -42,6 +42,7 @@ Get a list of external ids
 	flags.WithOptions(
 		cmd,
 		flags.WithExtendedPipelineSupport("device", "device", true, "deviceId", "source.id", "managedObject.id", "id"),
+		flags.WithCollectionProperty("externalIds"),
 	)
 
 	// Required flags

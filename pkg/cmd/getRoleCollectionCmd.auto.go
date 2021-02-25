@@ -40,6 +40,7 @@ Get a list of roles
 	flags.WithOptions(
 		cmd,
 		flags.WithExtendedPipelineSupport("", "", false),
+		flags.WithCollectionProperty("roles"),
 	)
 
 	// Required flags

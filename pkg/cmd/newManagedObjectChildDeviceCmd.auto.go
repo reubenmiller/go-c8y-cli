@@ -43,6 +43,7 @@ Assign a device as a child device to an existing device
 	flags.WithOptions(
 		cmd,
 		flags.WithExtendedPipelineSupport("newChild", "managedObject.id", true, "deviceId", "source.id", "managedObject.id", "id"),
+		flags.WithCollectionProperty("managedObject"),
 	)
 
 	// Required flags

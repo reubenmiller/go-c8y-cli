@@ -51,6 +51,7 @@ Update the status of all active alarms on a device to ACKNOWLEDGED
 	flags.WithOptions(
 		cmd,
 		flags.WithExtendedPipelineSupport("device", "source", false, "deviceId", "source.id", "managedObject.id", "id"),
+		flags.WithCollectionProperty("alarms"),
 	)
 
 	// Required flags

@@ -40,6 +40,7 @@ Get a list of new device requests
 	flags.WithOptions(
 		cmd,
 		flags.WithExtendedPipelineSupport("", "", false),
+		flags.WithCollectionProperty("newDeviceRequests"),
 	)
 
 	// Required flags

@@ -40,6 +40,7 @@ Get the current user
 	flags.WithOptions(
 		cmd,
 		flags.WithExtendedPipelineSupport("", "", false),
+		flags.WithCollectionProperty("roles"),
 	)
 
 	// Required flags

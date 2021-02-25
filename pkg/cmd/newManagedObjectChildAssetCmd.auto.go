@@ -44,6 +44,7 @@ Create group heirachy (parent group -> child group)
 	flags.WithOptions(
 		cmd,
 		flags.WithExtendedPipelineSupport("newChildDevice", "managedObject.id", false, "deviceId", "source.id", "managedObject.id", "id"),
+		flags.WithCollectionProperty("managedObject"),
 	)
 
 	// Required flags

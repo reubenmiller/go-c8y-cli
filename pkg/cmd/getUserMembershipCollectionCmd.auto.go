@@ -43,6 +43,7 @@ Get a list of groups that a user belongs to
 	flags.WithOptions(
 		cmd,
 		flags.WithExtendedPipelineSupport("id", "id", true),
+		flags.WithCollectionProperty("references.#.group"),
 	)
 
 	// Required flags

@@ -41,6 +41,7 @@ Get a list of retention rules
 	flags.WithOptions(
 		cmd,
 		flags.WithExtendedPipelineSupport("", "", false),
+		flags.WithCollectionProperty("retentionRules"),
 	)
 
 	// Required flags

@@ -56,6 +56,7 @@ Get collection of active alarms which occurred in the last 10 minutes
 	flags.WithOptions(
 		cmd,
 		flags.WithExtendedPipelineSupport("device", "source", false, "deviceId", "source.id", "managedObject.id", "id"),
+		flags.WithCollectionProperty("alarms"),
 	)
 
 	// Required flags

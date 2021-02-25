@@ -50,6 +50,7 @@ Get a list of managed objects by ids
 	flags.WithOptions(
 		cmd,
 		flags.WithExtendedPipelineSupport("", "", false),
+		flags.WithCollectionProperty("managedObjects"),
 	)
 
 	// Required flags

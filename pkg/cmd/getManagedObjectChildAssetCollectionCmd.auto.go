@@ -43,6 +43,7 @@ Get a list of the child devices of an existing device
 	flags.WithOptions(
 		cmd,
 		flags.WithExtendedPipelineSupport("group", "id", false, "id"),
+		flags.WithCollectionProperty("references.#.managedObject"),
 	)
 
 	// Required flags

@@ -53,6 +53,7 @@ Get a list of measurements
 	flags.WithOptions(
 		cmd,
 		flags.WithExtendedPipelineSupport("device", "source", false, "deviceId", "source.id", "managedObject.id", "id"),
+		flags.WithCollectionProperty("measurements"),
 	)
 
 	// Required flags

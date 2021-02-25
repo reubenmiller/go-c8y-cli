@@ -43,6 +43,7 @@ Get the supported measurements of a device by name
 	flags.WithOptions(
 		cmd,
 		flags.WithExtendedPipelineSupport("device", "device", true, "deviceId", "source.id", "managedObject.id", "id"),
+		flags.WithCollectionProperty("c8y_SupportedMeasurements"),
 	)
 
 	// Required flags

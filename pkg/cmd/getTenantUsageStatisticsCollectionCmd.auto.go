@@ -49,6 +49,7 @@ Get tenant statistics collection for the day before yesterday
 	flags.WithOptions(
 		cmd,
 		flags.WithExtendedPipelineSupport("", "", false),
+		flags.WithCollectionProperty("usageStatistics"),
 	)
 
 	// Required flags

@@ -41,6 +41,7 @@ Get a list of binaries
 	flags.WithOptions(
 		cmd,
 		flags.WithExtendedPipelineSupport("", "", false),
+		flags.WithCollectionProperty("managedObjects"),
 	)
 
 	// Required flags
