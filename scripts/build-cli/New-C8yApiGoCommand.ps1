@@ -67,6 +67,12 @@
     $PipelineVariableRequired = "false"
     $PipelineVariableProperty = ""
     $PipelineVariableAliases = ""
+    $collectionProperty = ""
+
+    if ($Specification.collectionProperty) {
+        $collectionProperty = $Specification.collectionProperty
+    }
+
     $CompletionBuilderOptions = New-Object System.Text.StringBuilder
     foreach ($iArg in (Remove-SkippedParameters $ArgumentSources)) {
         if ($iArg.pipeline) {
@@ -371,6 +377,11 @@ $($Examples -join "`n`n")
                 "flags.WithExtendedPipelineSupport(`"$PipelineVariableName`", `"$PipelineVariableProperty`", $PipelineVariableRequired, $aliases),"
             } else {
                 "flags.WithExtendedPipelineSupport(`"$PipelineVariableName`", `"$PipelineVariableProperty`", $PipelineVariableRequired),"
+            }   
+        )
+        $(
+            if ($collectionProperty) {
+                "flags.WithCollectionProperty(`"$collectionProperty`"),"
             }
         )
 	)
