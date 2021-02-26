@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"context"
 	"fmt"
 	"regexp"
 	"strings"
@@ -29,12 +30,16 @@ type commandError struct {
 	silent      bool
 	exitCode    int
 	statusCode  int
+	err         error
 }
 
 func (c commandError) Error() string {
 	details := ""
 	if c.statusCode > 0 {
 		details = fmt.Sprintf(" ::statusCode=%d", c.statusCode)
+	}
+	if c.err != nil {
+		details = fmt.Sprintf("%s", c.err)
 	}
 	return c.s + details
 }
@@ -52,15 +57,15 @@ func (c commandError) isSilent() bool {
 }
 
 func newUserError(a ...interface{}) commandError {
-	return commandError{s: fmt.Sprintln(a...), userError: true, exitCode: 101}
+	return commandError{s: fmt.Sprintln(a...), userError: true, exitCode: 101, silent: false}
 }
 
 func newUserErrorWithExitCode(exitCode int, a ...interface{}) commandError {
-	return commandError{s: fmt.Sprintln(a...), userError: true, exitCode: exitCode}
+	return commandError{s: fmt.Sprintln(a...), userError: true, exitCode: exitCode, silent: false}
 }
 
 func newSystemError(a ...interface{}) commandError {
-	return commandError{s: fmt.Sprintln(a...), userError: false, exitCode: 100}
+	return commandError{s: fmt.Sprintln(a...), userError: false, exitCode: 100, silent: false}
 }
 
 var httpStatusCodeToExitCode = map[int]int{
@@ -88,6 +93,13 @@ func newServerError(r *c8y.Response, err error) commandError {
 	message := ""
 	exitCode := 99
 	statusCode := 0
+
+	if errors.Is(err, context.DeadlineExceeded) {
+		message = "command timed out"
+		exitCode = 106
+		err = nil
+	}
+
 	if r != nil {
 		if r.Response != nil {
 			statusCode = r.Response.StatusCode
@@ -100,9 +112,10 @@ func newServerError(r *c8y.Response, err error) commandError {
 		s:           message,
 		userError:   false,
 		serverError: true,
-		silent:      true,
+		silent:      false,
 		exitCode:    exitCode,
 		statusCode:  statusCode,
+		err:         err,
 	}
 }
 

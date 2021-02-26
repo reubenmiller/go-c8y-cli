@@ -517,14 +517,16 @@ func processResponse(resp *c8y.Response, respError error, commonOptions CommonCo
 			responseText = []byte(*resp.JSONData)
 		}
 
-		jsonformatter.WithOutputFormatters(
-			Console,
-			responseText,
-			!isJSONResponse,
-			jsonformatter.WithTrimSpace(true),
-			jsonformatter.WithJSONStreamOutput(isJSONResponse, globalFlagStream, globalCSVOutput),
-			jsonformatter.WithSuffix(len(responseText) > 0, "\n"),
-		)
+		if respError == nil {
+			jsonformatter.WithOutputFormatters(
+				Console,
+				responseText,
+				!isJSONResponse,
+				jsonformatter.WithTrimSpace(true),
+				jsonformatter.WithJSONStreamOutput(isJSONResponse, globalFlagStream, globalCSVOutput),
+				jsonformatter.WithSuffix(len(responseText) > 0, "\n"),
+			)
+		}
 	}
 
 	color.Unset()

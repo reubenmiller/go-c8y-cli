@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"crypto/tls"
 	"fmt"
+	"io"
 	"math/rand"
 	"net/http"
 	"os"
@@ -123,7 +124,7 @@ func (c *c8yCmd) createCumulocityClient() {
 	Console.Colorized = !globalFlagNoColor && !globalCSVOutput
 	Console.Compact = globalFlagCompact || globalCSVOutput
 	Console.IsJSON = !globalCSVOutput
-	Console.Disabled = globalFlagProgressBar
+	Console.Disabled = globalFlagProgressBar && isTerminal()
 
 	// Add the realtime client
 	client.Realtime = c8y.NewRealtimeClient(
@@ -199,7 +200,9 @@ var (
 	globalFlagBatchDelayMS           int
 	globalFlagBatchAbortOnErrorCount int
 	globalFlagFlatten                bool
+	globalFlagPrintErrorsOnStdout    bool
 	globalFlagSelect                 []string
+	globalFlagSilentStatusCodes      string
 
 	globalModeEnableCreate bool
 	globalModeEnableUpdate bool
@@ -264,8 +267,7 @@ const (
 // SettingsGlobalName name of the settings file (without extension)
 const SettingsGlobalName = "settings"
 
-func (c *c8yCmd) checkCommandError(err error) {
-
+func (c *c8yCmd) checkCommandError(err error, w io.Writer) {
 	if cErr, ok := err.(commandError); ok {
 		if cErr.statusCode == 403 || cErr.statusCode == 401 {
 			c.Logger.Error(fmt.Sprintf("Authentication failed (statusCode=%d). Try to run set-session again, or check the password", cErr.statusCode))
@@ -273,20 +275,20 @@ func (c *c8yCmd) checkCommandError(err error) {
 
 		// format errors as json messages
 		// only log users errors
-		if !cErr.isSilent() {
+		if !cErr.isSilent() && !strings.Contains(globalFlagSilentStatusCodes, fmt.Sprintf("%d", cErr.statusCode)) {
 			message := ""
 			if cErr.statusCode != 0 {
-				message = fmt.Sprintf(`{"error":"commandError","message":"%s","statusCode":%d}`, err, cErr.statusCode)
+				message = fmt.Sprintf(`{"error":"serverError","message":"%s","statusCode":%d}`, err, cErr.statusCode)
 			} else {
 				message = fmt.Sprintf(`{"error":"commandError","message":"%s"}`, err)
 			}
-			rootCmd.PrintErrln(strings.ReplaceAll(message, "\n", ""))
+			fmt.Fprintln(w, strings.ReplaceAll(message, "\n", ""))
 		}
 	} else {
 		// unexpected error
 		c.Logger.Errorf("%s", err)
 		message := fmt.Sprintf(`{"error":"commandError","message":"%s"}`, err)
-		rootCmd.PrintErrln(strings.ReplaceAll(message, "\n", ""))
+		fmt.Fprintln(w, strings.ReplaceAll(message, "\n", ""))
 	}
 }
 
@@ -401,12 +403,16 @@ func configureRootCmd() {
 	rootCmd.PersistentFlags().StringVar(&globalFlagProxy, "proxy", "", "Proxy setting, i.e. http://10.0.0.1:8080")
 	rootCmd.PersistentFlags().BoolVar(&globalFlagNoProxy, "noProxy", false, "Ignore the proxy settings")
 	rootCmd.PersistentFlags().BoolVar(&globalFlagNoLog, "noLog", false, "Disables the activity log for the current command")
+	rootCmd.PersistentFlags().BoolVar(&globalFlagPrintErrorsOnStdout, "withError", false, "Errors will be printed on stdout instead of stderr")
 
 	// Concurrency
 	rootCmd.PersistentFlags().IntVar(&globalFlagBatchWorkers, "workers", 1, "Number of workers")
 	rootCmd.PersistentFlags().Int64Var(&globalFlagBatchMaxJobs, "maxJobs", 100, "Maximum number of jobs. 0 = unlimited (use with caution!)")
 	rootCmd.PersistentFlags().IntVar(&globalFlagBatchDelayMS, "delay", 1000, "delay in milliseconds after each request")
 	rootCmd.PersistentFlags().IntVar(&globalFlagBatchAbortOnErrorCount, "abortOnErrors", 10, "Abort batch when reaching specified number of errors")
+
+	// Error handling
+	rootCmd.PersistentFlags().StringVar(&globalFlagSilentStatusCodes, "silentStatusCodes", "", "Status codes which will not print out an error message")
 
 	rootCmd.PersistentFlags().StringVar(&globalFlagOutputFile, "outputFile", "", "Output file")
 
@@ -554,7 +560,12 @@ func Execute() {
 
 func executeRootCmd() {
 	if err := rootCmd.Execute(); err != nil {
-		rootCmd.checkCommandError(err)
+
+		out := rootCmd.ErrOrStderr()
+		if globalFlagPrintErrorsOnStdout {
+			out = rootCmd.OutOrStdout()
+		}
+		rootCmd.checkCommandError(err, out)
 
 		if cErr, ok := err.(commandError); ok {
 			os.Exit(cErr.exitCode)
