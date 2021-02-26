@@ -16,7 +16,10 @@ Function New-ClientArgument {
         [hashtable] $Parameters,
 
         # Command
-        [string] $Command
+        [string] $Command,
+
+        # List of names to exclude when parsing the parameters
+        [string[]] $Exclude
     )
 
     Process {
@@ -25,10 +28,19 @@ Function New-ClientArgument {
         $BoundParameters = @{} + $Parameters
 
         # strip automatic variables
-        $BoundParameters.Keys -match "(Verbose|WhatIf|Variable|Action|Confirm|Buffer|Debug|AsJSON|AsHashtable|AsCSV|Force|Color|Pretty)$" | ForEach-Object {
+        $BoundParameters.Keys -match "(Verbose|WhatIf|Variable|Action|Confirm|Buffer|Debug|AsJSON|AsHashtable|AsCSV|AsCSVWithHeader|Force|Color|Pretty)$" | ForEach-Object {
             $BoundParameters.Remove($_)
         }
-        
+
+        # Exclude select keys
+        if ($Exclude -and $Exclude.Count -gt 0) {
+            foreach ($key in (@() + $BoundParameters.Keys)) {
+                if ($Exclude -contains $key) {
+                    $BoundParameters.Remove($key)
+                }
+            }
+        }
+
         foreach ($iKey in $BoundParameters.Keys) {
             $Value = $BoundParameters[$iKey]
 
@@ -88,7 +100,7 @@ Function New-ClientArgument {
             $null = $c8yargs.Add("--raw")
         }
         
-        if ($Parameters["Color"] -or $Parameters["Pretty"]) {
+        if ($Parameters["Color"]) {
             $null = $c8yargs.Add("--noColor=false")
         } elseif ($Parameters["NoColor"]) {
             $null = $c8yargs.Add("--noColor")
@@ -100,6 +112,11 @@ Function New-ClientArgument {
 
         if ($Parameters["AsCSV"]) {
             $null = $c8yargs.Add("--csv")
+        }
+
+        if ($Parameters["AsCSVWithHeader"]) {
+            $null = $c8yargs.Add("--csv")
+            $null = $c8yargs.Add("--csvHeader")
         }
         
         if ($null -ne $Parameters["CurrentPage"]) {
@@ -119,6 +136,6 @@ Function New-ClientArgument {
         $c8ycli = Get-ClientBinary
         Write-Verbose "binary: $c8ycli"
         Write-Verbose ("command: c8y $Command {0}" -f $c8yargs -join " ")
-        $c8yargs
+        ,$c8yargs
     }
 }
