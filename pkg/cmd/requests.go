@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/fatih/color"
+	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/pkg/encoding"
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/pkg/jsonUtilities"
@@ -109,11 +110,11 @@ func getTimeoutContext() (context.Context, context.CancelFunc) {
 func processRequestAndResponse(requests []c8y.RequestOptions, commonOptions CommonCommandOptions) error {
 
 	if len(requests) > 1 {
-		return newSystemError("Multiple request handling is currently not supported")
+		return cmderrors.NewSystemError("Multiple request handling is currently not supported")
 	}
 
 	if len(requests) == 0 {
-		return newSystemError("At least one request should be given")
+		return cmderrors.NewSystemError("At least one request should be given")
 	}
 
 	req := requests[0]
@@ -182,7 +183,7 @@ func fetchAllResults(req c8y.RequestOptions, resp *c8y.Response, commonOptions C
 	totalItems, processErr := processResponse(resp, nil, commonOptions)
 
 	if processErr != nil {
-		return newSystemError("Failed to parse response", processErr)
+		return cmderrors.NewSystemError("Failed to parse response", processErr)
 	}
 
 	results := make([]*c8y.Response, 1)
@@ -253,7 +254,7 @@ func fetchAllResults(req c8y.RequestOptions, resp *c8y.Response, commonOptions C
 			totalItems, processErr = processResponse(resp, err, commonOptions)
 
 			if processErr != nil {
-				return newSystemError("Failed to parse response")
+				return cmderrors.NewSystemError("Failed to parse response")
 			}
 		} else {
 			break
@@ -293,7 +294,7 @@ func fetchAllInventoryQueryResults(req c8y.RequestOptions, resp *c8y.Response, c
 	totalItems, processErr := processResponse(resp, nil, commonOptions)
 
 	if processErr != nil {
-		return newSystemError("Failed to parse response", processErr)
+		return cmderrors.NewSystemError("Failed to parse response", processErr)
 	}
 
 	results := make([]*c8y.Response, 1)
@@ -375,7 +376,7 @@ func fetchAllInventoryQueryResults(req c8y.RequestOptions, resp *c8y.Response, c
 			totalItems, processErr = processResponse(resp, err, commonOptions)
 
 			if processErr != nil {
-				return newSystemError("Failed to parse response")
+				return cmderrors.NewSystemError("Failed to parse response")
 			}
 		} else {
 			break
@@ -455,7 +456,7 @@ func processResponse(resp *c8y.Response, respError error, commonOptions CommonCo
 		fullFilePath, err := saveResponseToFile(resp, commonOptions.OutputFile, true, newline)
 
 		if err != nil {
-			return 0, newSystemError("write to file failed", err)
+			return 0, cmderrors.NewSystemError("write to file failed", err)
 		}
 
 		fmt.Printf("%s\n", fullFilePath)
@@ -532,7 +533,7 @@ func processResponse(resp *c8y.Response, respError error, commonOptions CommonCo
 	color.Unset()
 
 	if respError != nil {
-		return unfilteredSize, newServerError(resp, respError)
+		return unfilteredSize, cmderrors.NewServerError(resp, respError)
 	}
 	return unfilteredSize, nil
 }

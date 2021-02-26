@@ -9,6 +9,7 @@ import (
 	"sync/atomic"
 	"time"
 
+	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/pkg/iterator"
 	"github.com/reubenmiller/go-c8y-cli/pkg/progressbar"
@@ -116,7 +117,7 @@ func processRequestAndResponseWithWorkers(cmd *cobra.Command, r *c8y.RequestOpti
 	// get common options and batch settings
 	commonOptions, err := getCommonOptions(cmd)
 	if err != nil {
-		return newUserError(fmt.Sprintf("Failed to get common options. err=%s", err))
+		return cmderrors.NewUserError(fmt.Sprintf("Failed to get common options. err=%s", err))
 	}
 
 	batchOptions, err := getBatchOptions(cmd)
@@ -236,7 +237,7 @@ func runBatched(requestIterator *RequestIterator, commonOptions CommonCommandOpt
 			if atomic.AddInt32(&wasCancelled, 1) == 1 {
 				close(results)
 			}
-			return newUserErrorWithExitCode(103, fmt.Sprintf("aborted batch as error count has been exceeded. totalErrors=%d", batchOptions.AbortOnErrorCount))
+			return cmderrors.NewUserErrorWithExitCode(103, fmt.Sprintf("aborted batch as error count has been exceeded. totalErrors=%d", batchOptions.AbortOnErrorCount))
 		}
 	}
 	if progbar.IsEnabled() && jobID > 1 {
@@ -251,10 +252,10 @@ func runBatched(requestIterator *RequestIterator, commonOptions CommonCommandOpt
 			return totalErrors[0]
 		}
 		// aggregate error
-		return newUserErrorWithExitCode(104, fmt.Sprintf("jobs completed with %d errors. job limit exceeded=%v", total, maxJobsReached))
+		return cmderrors.NewUserErrorWithExitCode(104, fmt.Sprintf("jobs completed with %d errors. job limit exceeded=%v", total, maxJobsReached))
 	}
 	if maxJobsReached {
-		return newUserErrorWithExitCode(105, fmt.Sprintf("max job limit exceeded. limit=%d", globalFlagBatchMaxJobs))
+		return cmderrors.NewUserErrorWithExitCode(105, fmt.Sprintf("max job limit exceeded. limit=%d", globalFlagBatchMaxJobs))
 	}
 	return nil
 }

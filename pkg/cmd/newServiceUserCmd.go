@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
 )
@@ -73,7 +74,7 @@ func (n *newServiceUserCmd) doProcedure(cmd *cobra.Command, args []string) error
 	applicationDetails := n.getApplicationDetails()
 
 	if applicationDetails.Name == "" {
-		return newUserError("Could not detect application name for the given input")
+		return cmderrors.NewUserError("Could not detect application name for the given input")
 	}
 
 	Logger.Info("Creating new application")

@@ -8,6 +8,7 @@ import (
 	"sync"
 
 	"github.com/pkg/errors"
+	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
 	"github.com/spf13/cobra"
 )
 
@@ -46,7 +47,7 @@ func newNewBinaryManagedObjectCmd() *newBinaryManagedObjectCmd {
 // newSite creates a new Hugo site and initializes a structured Hugo directory.
 func (n *newBinaryManagedObjectCmd) newBinaryManagedObject(cmd *cobra.Command, args []string) error {
 	if len(n.files) < 1 {
-		return newUserError("at least one file needs to be provided")
+		return cmderrors.NewUserError("at least one file needs to be provided")
 	}
 
 	data := getDataFlag(cmd)

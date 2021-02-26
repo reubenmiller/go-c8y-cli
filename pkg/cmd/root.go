@@ -14,6 +14,7 @@ import (
 
 	"github.com/gorilla/websocket"
 	"github.com/reubenmiller/go-c8y-cli/pkg/activitylogger"
+	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/pkg/config"
 	"github.com/reubenmiller/go-c8y-cli/pkg/console"
 	"github.com/reubenmiller/go-c8y-cli/pkg/encrypt"
@@ -268,17 +269,18 @@ const (
 const SettingsGlobalName = "settings"
 
 func (c *c8yCmd) checkCommandError(err error, w io.Writer) {
-	if cErr, ok := err.(commandError); ok {
-		if cErr.statusCode == 403 || cErr.statusCode == 401 {
-			c.Logger.Error(fmt.Sprintf("Authentication failed (statusCode=%d). Try to run set-session again, or check the password", cErr.statusCode))
+	if cErr, ok := err.(cmderrors.CommandError); ok {
+		statusCode := cErr.StatusCode()
+		if statusCode == 403 || statusCode == 401 {
+			c.Logger.Error(fmt.Sprintf("Authentication failed (statusCode=%d). Try to run set-session again, or check the password", statusCode))
 		}
 
 		// format errors as json messages
 		// only log users errors
-		if !cErr.isSilent() && !strings.Contains(globalFlagSilentStatusCodes, fmt.Sprintf("%d", cErr.statusCode)) {
+		if !cErr.IsSilent() && !strings.Contains(globalFlagSilentStatusCodes, fmt.Sprintf("%d", statusCode)) {
 			message := ""
-			if cErr.statusCode != 0 {
-				message = fmt.Sprintf(`{"error":"serverError","message":"%s","statusCode":%d}`, err, cErr.statusCode)
+			if statusCode != 0 {
+				message = fmt.Sprintf(`{"error":"serverError","message":"%s","statusCode":%d}`, err, statusCode)
 			} else {
 				message = fmt.Sprintf(`{"error":"commandError","message":"%s"}`, err)
 			}
@@ -335,10 +337,10 @@ func (c *c8yCmd) checkSessionExists(cmd *cobra.Command, args []string) error {
 	}
 
 	if client == nil {
-		return newSystemError("Client failed to load")
+		return cmderrors.NewSystemError("Client failed to load")
 	}
 	if client.BaseURL == nil || client.BaseURL.Host == "" {
-		return newUserErrorWithExitCode(102, "A c8y session has not been loaded. Please create or activate a session and try again")
+		return cmderrors.NewUserErrorWithExitCode(102, "A c8y session has not been loaded. Please create or activate a session and try again")
 	}
 
 	return nil
@@ -567,8 +569,8 @@ func executeRootCmd() {
 		}
 		rootCmd.checkCommandError(err, out)
 
-		if cErr, ok := err.(commandError); ok {
-			os.Exit(cErr.exitCode)
+		if cErr, ok := err.(cmderrors.CommandError); ok {
+			os.Exit(cErr.ExitCode)
 		}
 		os.Exit(100)
 	}

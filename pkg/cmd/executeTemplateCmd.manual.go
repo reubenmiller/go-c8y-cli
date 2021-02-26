@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 
+	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/pkg/jsonUtilities"
 	"github.com/reubenmiller/go-c8y-cli/pkg/mapbuilder"
@@ -67,7 +68,7 @@ func (n *executeTemplateCmd) newTemplate(cmd *cobra.Command, args []string) erro
 	)
 
 	if err != nil {
-		return newUserError(err)
+		return cmderrors.NewUserError(err)
 	}
 
 	responseText, err := body.MarshalJSON()

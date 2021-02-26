@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"net/url"
 
+	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/pkg/mapbuilder"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
@@ -80,20 +81,20 @@ func (n *QueryManagedObjectCollectionCmd) RunE(cmd *cobra.Command, args []string
 			query.SetVariable("query", c8yQuery)
 		}
 	} else {
-		return newUserError(fmt.Sprintf("Flag [%s] does not exist. %s", "query", err))
+		return cmderrors.NewUserError(fmt.Sprintf("Flag [%s] does not exist. %s", "query", err))
 	}
 	if cmd.Flags().Changed("withParents") {
 		if v, err := cmd.Flags().GetBool("withParents"); err == nil {
 			query.SetVariable("withParents", fmt.Sprintf("%v", v))
 		} else {
-			return newUserError("Flag does not exist")
+			return cmderrors.NewUserError("Flag does not exist")
 		}
 	}
 
 	queryValue, err := query.GetQueryUnescape(true)
 
 	if err != nil {
-		return newSystemError("Invalid query parameter")
+		return cmderrors.NewSystemError("Invalid query parameter")
 	}
 
 	// headers

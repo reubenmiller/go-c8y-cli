@@ -6,6 +6,7 @@ import (
 	"net/url"
 	"strings"
 
+	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/pkg/mapbuilder"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
@@ -69,7 +70,7 @@ func (n *GetGenericRestCmd) RunE(cmd *cobra.Command, args []string) error {
 		flags.WithStringValue("contentType", "Content-Type"),
 	)
 	if err != nil {
-		return newUserError(err)
+		return cmderrors.NewUserError(err)
 	}
 
 	if values, err := cmd.Flags().GetStringSlice("header"); err == nil && len(values) > 0 {
@@ -95,7 +96,7 @@ func (n *GetGenericRestCmd) RunE(cmd *cobra.Command, args []string) error {
 	method = strings.ToUpper(method)
 
 	if !(method == "GET" || method == "POST" || method == "PUT" || method == "DELETE") {
-		return newUserError("Invalid method. Only GET, PUT, POST and DELETE are accepted")
+		return cmderrors.NewUserError("Invalid method. Only GET, PUT, POST and DELETE are accepted")
 	}
 
 	if method == "PUT" {
@@ -144,7 +145,7 @@ func (n *GetGenericRestCmd) RunE(cmd *cobra.Command, args []string) error {
 		)
 
 		if err != nil {
-			return newUserError(err)
+			return cmderrors.NewUserError(err)
 		}
 
 		if cmd.Flags().Changed("template") || cmd.Flags().Changed("data") {

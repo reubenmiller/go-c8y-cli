@@ -4,6 +4,7 @@ import (
 	"context"
 	"sync"
 
+	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
 	"github.com/spf13/cobra"
 )
 
@@ -63,5 +64,5 @@ func (n *deleteBinaryManagedObjectCmd) doDeleteBinaryManagedObject(ids []string)
 
 	wg.Wait()
 	close(errorsCh)
-	return newErrorSummary("command failed", errorsCh)
+	return cmderrors.NewErrorSummary("command failed", errorsCh)
 }

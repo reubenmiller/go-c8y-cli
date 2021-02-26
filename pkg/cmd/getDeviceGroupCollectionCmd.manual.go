@@ -7,6 +7,7 @@ import (
 	"net/url"
 	"strings"
 
+	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/pkg/mapbuilder"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
@@ -104,7 +105,7 @@ func (n *getDeviceGroupCollectionCmd) getDeviceGroupCollection(cmd *cobra.Comman
 	queryValue, err := query.GetQueryUnescape(true)
 
 	if err != nil {
-		return newSystemError("Invalid query parameter")
+		return cmderrors.NewSystemError("Invalid query parameter")
 	}
 
 	// headers

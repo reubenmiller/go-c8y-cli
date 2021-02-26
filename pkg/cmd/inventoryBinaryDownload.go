@@ -9,6 +9,7 @@ import (
 	"sync"
 
 	"github.com/pkg/errors"
+	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
 	"github.com/spf13/cobra"
 )
 
@@ -60,7 +61,7 @@ func (n *downloadBinaryManagedObjectCmd) doDownloadBinaryManagedObject(ids []str
 		if wd, err := os.Getwd(); err == nil {
 			outputDir = wd
 		} else {
-			errorsCh <- newSystemError(err)
+			errorsCh <- cmderrors.NewSystemError(err)
 		}
 	}
 
@@ -91,5 +92,5 @@ func (n *downloadBinaryManagedObjectCmd) doDownloadBinaryManagedObject(ids []str
 
 	wg.Wait()
 	close(errorsCh)
-	return newErrorSummary("command failed", errorsCh)
+	return cmderrors.NewErrorSummary("command failed", errorsCh)
 }

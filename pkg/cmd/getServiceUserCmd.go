@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
 )
@@ -47,7 +48,7 @@ func (n *getServiceUserCmd) getServiceUser(cmd *cobra.Command, args []string) er
 
 	commonOptions, err := getCommonOptions(cmd)
 	if err != nil {
-		return newUserError(fmt.Sprintf("Failed to get common options. err=%s", err))
+		return cmderrors.NewUserError(fmt.Sprintf("Failed to get common options. err=%s", err))
 	}
 
 	// path parameters
@@ -57,11 +58,11 @@ func (n *getServiceUserCmd) getServiceUser(cmd *cobra.Command, args []string) er
 		idInputValues, idValue, err := getMicroserviceSlice(cmd, args, "id")
 
 		if err != nil {
-			return newUserError("no matching microservices found", idInputValues, err)
+			return cmderrors.NewUserError("no matching microservices found", idInputValues, err)
 		}
 
 		if len(idValue) == 0 {
-			return newUserError("no matching microservices found", idInputValues)
+			return cmderrors.NewUserError("no matching microservices found", idInputValues)
 		}
 
 		for _, item := range idValue {
@@ -77,7 +78,7 @@ func (n *getServiceUserCmd) getServiceUser(cmd *cobra.Command, args []string) er
 		defer cancel()
 		bootstrapUser, _, err := client.Application.GetApplicationUser(ctx, appID)
 		if err != nil {
-			return newUserError(err)
+			return cmderrors.NewUserError(err)
 		}
 
 		auth := c8y.NewBasicAuthString(bootstrapUser.Tenant, bootstrapUser.Username, bootstrapUser.Password)

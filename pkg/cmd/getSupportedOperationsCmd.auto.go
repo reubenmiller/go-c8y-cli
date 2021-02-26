@@ -6,6 +6,7 @@ import (
 	"io"
 	"net/http"
 
+	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/pkg/mapbuilder"
@@ -68,18 +69,18 @@ func (n *GetSupportedOperationsCmd) RunE(cmd *cobra.Command, args []string) erro
 		inputIterators,
 	)
 	if err != nil {
-		return newUserError(err)
+		return cmderrors.NewUserError(err)
 	}
 	commonOptions, err := getCommonOptions(cmd)
 	if err != nil {
-		return newUserError(fmt.Sprintf("Failed to get common options. err=%s", err))
+		return cmderrors.NewUserError(fmt.Sprintf("Failed to get common options. err=%s", err))
 	}
 	commonOptions.AddQueryParameters(query)
 
 	queryValue, err := query.GetQueryUnescape(true)
 
 	if err != nil {
-		return newSystemError("Invalid query parameter")
+		return cmderrors.NewSystemError("Invalid query parameter")
 	}
 
 	// headers
@@ -90,7 +91,7 @@ func (n *GetSupportedOperationsCmd) RunE(cmd *cobra.Command, args []string) erro
 		inputIterators,
 	)
 	if err != nil {
-		return newUserError(err)
+		return cmderrors.NewUserError(err)
 	}
 
 	// form data
@@ -101,7 +102,7 @@ func (n *GetSupportedOperationsCmd) RunE(cmd *cobra.Command, args []string) erro
 		inputIterators,
 	)
 	if err != nil {
-		return newUserError(err)
+		return cmderrors.NewUserError(err)
 	}
 
 	// body
@@ -112,7 +113,7 @@ func (n *GetSupportedOperationsCmd) RunE(cmd *cobra.Command, args []string) erro
 		inputIterators,
 	)
 	if err != nil {
-		return newUserError(err)
+		return cmderrors.NewUserError(err)
 	}
 
 	// path parameters

@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
 )
@@ -54,11 +55,11 @@ func (n *subscribeManagedObjectCmd) subscribeManagedObject(cmd *cobra.Command, a
 		deviceInputValues, deviceValue, err := getFormattedDeviceSlice(cmd, args, "device")
 
 		if err != nil {
-			return newUserError("no matching devices found", deviceInputValues, err)
+			return cmderrors.NewUserError("no matching devices found", deviceInputValues, err)
 		}
 
 		if len(deviceValue) == 0 {
-			return newUserError("no matching devices found", deviceInputValues)
+			return cmderrors.NewUserError("no matching devices found", deviceInputValues)
 		}
 
 		for _, item := range deviceValue {

@@ -5,6 +5,7 @@ import (
 	"io"
 	"net/http"
 
+	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/pkg/mapbuilder"
@@ -65,13 +66,13 @@ func (n *LogoutCmd) RunE(cmd *cobra.Command, args []string) error {
 		inputIterators,
 	)
 	if err != nil {
-		return newUserError(err)
+		return cmderrors.NewUserError(err)
 	}
 
 	queryValue, err := query.GetQueryUnescape(true)
 
 	if err != nil {
-		return newSystemError("Invalid query parameter")
+		return cmderrors.NewSystemError("Invalid query parameter")
 	}
 
 	// headers
@@ -83,7 +84,7 @@ func (n *LogoutCmd) RunE(cmd *cobra.Command, args []string) error {
 		flags.WithProcessingModeValue(),
 	)
 	if err != nil {
-		return newUserError(err)
+		return cmderrors.NewUserError(err)
 	}
 
 	// form data
@@ -94,7 +95,7 @@ func (n *LogoutCmd) RunE(cmd *cobra.Command, args []string) error {
 		inputIterators,
 	)
 	if err != nil {
-		return newUserError(err)
+		return cmderrors.NewUserError(err)
 	}
 
 	// body
@@ -105,7 +106,7 @@ func (n *LogoutCmd) RunE(cmd *cobra.Command, args []string) error {
 		inputIterators,
 	)
 	if err != nil {
-		return newUserError(err)
+		return cmderrors.NewUserError(err)
 	}
 
 	// path parameters

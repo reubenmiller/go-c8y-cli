@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
 	"github.com/spf13/cobra"
 	"github.com/tidwall/pretty"
 )
@@ -55,7 +56,7 @@ func (n *listSettingsCmd) listSettings(cmd *cobra.Command, args []string) error 
 	responseText, err := json.Marshal(settings)
 
 	if err != nil {
-		return newUserError("Settings error. ", err)
+		return cmderrors.NewUserError("Settings error. ", err)
 	}
 
 	if globalFlagCompact {

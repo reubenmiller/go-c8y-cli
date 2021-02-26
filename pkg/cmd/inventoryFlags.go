@@ -14,6 +14,7 @@ import (
 
 	"github.com/pkg/errors"
 	"github.com/reubenmiller/go-c8y-cli/pkg/c8ydata"
+	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/pkg/jsonUtilities"
 	"github.com/reubenmiller/go-c8y-cli/pkg/mapbuilder"
@@ -216,7 +217,7 @@ func getFileFlag(cmd *cobra.Command, flagName string, includeMeta bool, formData
 	objectInfo := make(map[string]interface{})
 	err := getFormDataObjectFlag(cmd, FlagDataName, objectInfo)
 	if err != nil {
-		return newSystemErrorF("Could not parse %s flag. %s", FlagDataName, err)
+		return cmderrors.NewSystemErrorF("Could not parse %s flag. %s", FlagDataName, err)
 	}
 
 	if filename, err := cmd.Flags().GetString(flagName); err == nil {
@@ -256,7 +257,7 @@ func getOutputFileFlag(cmd *cobra.Command, flagName string) (filename string, er
 	if v, flagErr := cmd.Flags().GetString(flagName); flagErr == nil {
 		filename = v
 	} else {
-		err = newUserError(fmt.Sprintf("Flag [%s] does not exist. %s", flagName, flagErr))
+		err = cmderrors.NewUserError(fmt.Sprintf("Flag [%s] does not exist. %s", flagName, flagErr))
 	}
 	return
 }

@@ -5,6 +5,7 @@ import (
 	"io"
 	"net/http"
 
+	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/pkg/mapbuilder"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
@@ -55,7 +56,7 @@ func (n *getManagedObjectCmdManual) getManagedObject(cmd *cobra.Command, args []
 	inputIterators := &flags.RequestInputIterators{}
 	commonOptions, err := getCommonOptions(cmd)
 	if err != nil {
-		return newUserError(fmt.Sprintf("Failed to get common options. err=%s", err))
+		return cmderrors.NewUserError(fmt.Sprintf("Failed to get common options. err=%s", err))
 	}
 
 	// query parameters
@@ -67,13 +68,13 @@ func (n *getManagedObjectCmdManual) getManagedObject(cmd *cobra.Command, args []
 		flags.WithBoolValue("withParents", "withParents"),
 	)
 	if err != nil {
-		return newUserError(err)
+		return cmderrors.NewUserError(err)
 	}
 	commonOptions.AddQueryParameters(query)
 	queryValue, err := query.GetQueryUnescape(true)
 
 	if err != nil {
-		return newSystemError("Invalid query parameter")
+		return cmderrors.NewSystemError("Invalid query parameter")
 	}
 
 	// headers

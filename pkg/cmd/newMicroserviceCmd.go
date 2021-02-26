@@ -10,6 +10,7 @@ import (
 	"regexp"
 	"strings"
 
+	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/pkg/jsonUtilities"
 	"github.com/reubenmiller/go-c8y-cli/pkg/zipUtilities"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
@@ -119,7 +120,7 @@ func (n *newMicroserviceCmd) doProcedure(cmd *cobra.Command, args []string) erro
 	}
 
 	if applicationName == "" {
-		return newUserError("Could not detect application name for the given input")
+		return cmderrors.NewUserError("Could not detect application name for the given input")
 	}
 
 	if applicationName != "" {
@@ -127,17 +128,17 @@ func (n *newMicroserviceCmd) doProcedure(cmd *cobra.Command, args []string) erro
 		refs, err := findMicroservices([]string{applicationName}, true)
 
 		if err != nil {
-			return newUserError(err)
+			return cmderrors.NewUserError(err)
 		}
 
 		idValue, _ := getFetchedResultsAsString(refs)
 
 		/* if err != nil {
-			return newUserError("no matching microservices found", idInputValues, err)
+			return cmderrors.NewUserError("no matching microservices found", idInputValues, err)
 		}
 
 		if len(idValue) == 0 {
-			return newUserError("no matching microservices found", idInputValues)
+			return cmderrors.NewUserError("no matching microservices found", idInputValues)
 		} */
 		if idValue != nil {
 			for _, item := range idValue {
@@ -217,7 +218,7 @@ func (n *newMicroserviceCmd) doProcedure(cmd *cobra.Command, args []string) erro
 			manifestContents = v
 		} else {
 			Logger.Warningf("failed to decode manifest file. file=%s, err=%s", manifestFile, err)
-			return newUserError(fmt.Sprintf("invalid manifest file. Only json files are accepted. %s", strings.TrimSpace(err.Error())))
+			return cmderrors.NewUserError(fmt.Sprintf("invalid manifest file. Only json files are accepted. %s", strings.TrimSpace(err.Error())))
 		}
 
 		if roles, ok := manifestContents["requiredRoles"].([]interface{}); ok {

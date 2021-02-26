@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/pkg/prompt"
 	"github.com/spf13/cobra"
 	"github.com/tidwall/pretty"
@@ -65,7 +66,7 @@ func (n *getSessionCmd) getSession(cmd *cobra.Command, args []string) error {
 	}
 
 	if session.CumulocitySession.Host == "" {
-		return newUserError("no session is loaded")
+		return cmderrors.NewUserError("no session is loaded")
 	}
 
 	b, err := json.Marshal(session)

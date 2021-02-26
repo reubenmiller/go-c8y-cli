@@ -377,7 +377,7 @@ func Test_CreateManagedObjectWithoutInput(t *testing.T) {
 	// stdin := bytes.NewBufferString(`{"self":"https://t1640885.latest.stage.c8y.io/user/roles/ROLE_ALARM_ADMIN"}` + "\n")
 	// cmd.SetIn(stdin)
 	cmdtext := `
-	devices list --timeout 0.001
+	rest POST https://test-ci-runner01.latest.stage.c8y.io/alarm/alarms --data name=test
 	`
 	cmdErr := ExecuteCmd(cmd, strings.TrimSpace(cmdtext))
 	cmd.checkCommandError(cmdErr, os.Stderr)
