@@ -15,12 +15,14 @@ The following exit codes are general codes which relate to the usage of c8y comm
 |Exit code|Type|Description|
 |---|-|--|
 |0|Success|No error occurred|
+|99|Unexpected error|Unknown error|
 |100|System Error|Unexpected error when processing a command. i.e. can not write to a file, parsing error etc.|
 |101|User Error|User/command error such as invalid arguments|
 |102|No session loaded|The user has not selected a Cumulocity session yet|
 |103|BatchAbortedWithErrors|The batched job was aborted due to too many errors|
 |104|BatchCompletedWithErrors|The batched job completed but has 1 or more errors|
 |105|BatchJobLimitExceeded|The batched job was stopped due to exceeding the total of allowed jobs though no other errors occurred|
+|106|Command timed out|The command took longer than the timeout setting|
 
 #### Exit code to HTTP status code errors
 
@@ -62,7 +64,7 @@ fi
 
 Since the id does not exist, the server response will stored in the `response` variable. Therefore it can be used to display an error to the user.
 
-Here is the same example but which just prints a simple message of the command was succesful or not (without error details).
+Here is the same example but which just prints a simple message of the command was successful or not (without error details).
 
 ```sh
 c8y inventory get --id=0 > /dev/null  && echo "api call ok" || echo "api call failed"
@@ -98,7 +100,7 @@ if ($LASTEXITCODE -ne 0) {
 
 #### Saving errors to a variable
 
-When using the PowerShell common parameter `ErrorVariable`, all errors that occured during the execution of the command will be stored in a variable with the given name. You can check the variable for detailed information about any errors.
+When using the PowerShell common parameter `ErrorVariable`, all errors that occurred during the execution of the command will be stored in a variable with the given name. You can check the variable for detailed information about any errors.
 
 Note: The `ErrorVariable` parameter accepts just the name of the variable not the actual variable itself!
 
@@ -124,14 +126,14 @@ $EverythingWorked = $null -ne $managedObject
 
 Note: The `$null` is on the left side of the "not equal" operator (-ne), because of the way PowerShell handles comparison between two objects. Using $null on the left side will ensure that you are checking if the object is $null and not the items within the array (should the $managedObjects be an array)
 
-Now let's say that you didn't want to just check if the command was successful, but you wanted to check what kind of error occured (i.e. server error or a command/client error). To achieve this, all you have to do is check the last item in the `c8yError` array like so:
+Now let's say that you didn't want to just check if the command was successful, but you wanted to check what kind of error occurred (i.e. server error or a command/client error). To achieve this, all you have to do is check the last item in the `c8yError` array like so:
 
 ```powershell
 $managedObject = Get-ManagedObject -Id 0 -ErrorVariable "c8yError"
 
 if ($null -ne $managedObject) {
   #
-  # Recveived managed object
+  # Received managed object
   #
   Write-Host ("Found managed object: id={0}, name={1}" -f $managedObject.id, $managedObject.name)
 
@@ -141,7 +143,7 @@ if ($null -ne $managedObject) {
   #
   switch -Regex ($c8yError[-1]) {
     "serverError" {
-      Write-Error "Deteched server error. details=$_"
+      Write-Error "Detected server error. details=$_"
     }
     Default {
       Write-Error "Detected command/client error. details=$_"
@@ -158,7 +160,7 @@ If you want to hide the original error, you can add the in-built PowerShell vari
 $managedObject = Get-ManagedObject -Id 0 -ErrorVariable "c8yError" -ErrorAction "SilentlyContinue"
 ```
 
-The `c8yError` also has additional information for a detailed anaylsis of what went wrong. It stores the full verbose output of the c8y binary, so it can be helpful to look through it for additional clues to what went wrong.
+The `c8yError` also has additional information for a detailed analysis of what went wrong. It stores the full verbose output of the c8y binary, so it can be helpful to look through it for additional clues to what went wrong.
 
 #### Example: Handling specific errors based on the exit code
 
