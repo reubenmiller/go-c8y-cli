@@ -26,7 +26,7 @@ Describe -Name "c8y errors" {
 
             $output | Should -Not -BeNullOrEmpty
             $details = ConvertFrom-Json $output -Depth 100
-            $details | Should -MatchObject @{error="commandError"; message = "unknown flag: --iiiiid"}
+            $details | Should -MatchObject @{errorType="commandError"; message = "unknown flag: --iiiiid"}
         }
 
         It "returns writes errors to stdout when using withError" {
@@ -36,7 +36,7 @@ Describe -Name "c8y errors" {
 
             $output | Should -Not -BeNullOrEmpty
             $details = ConvertFrom-Json $output -Depth 100
-            $details | Should -MatchObject @{error="commandError"; message = "unknown flag: --iiiiid"}
+            $details | Should -MatchObject @{errorType="commandError"; message = "unknown flag: --iiiiid"}
         }
 
         It "silencies specific status codes as the user knows that error might not occur and is ok with it" {
@@ -51,7 +51,7 @@ Describe -Name "c8y errors" {
 
             $output | Should -Not -BeNullOrEmpty
             $details = ConvertFrom-Json $output -Depth 100
-            $details | Should -MatchObject @{error="commandError"; message = "command timed out"}
+            $details | Should -MatchObject @{errorType="commandError"; exitCode = 106; message = "command timed out"}
         }        
     }
 

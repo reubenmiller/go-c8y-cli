@@ -44,7 +44,7 @@ Describe -Name "Error handling" {
             -Method "POST" `
             -WithError
         $LASTEXITCODE | Should -BeExactly 22 -Because "Exit code 22 = Status Code 422 invalid format"
-        $response.error | Should -Match "validationError"
+        $response.c8yResponse.error | Should -Match "validationError"
         $response.message | Should -Match "Following mandatory fields should be included"
     }
 
@@ -101,7 +101,8 @@ InModuleScope PSc8y {
             $response | Should -BeNullOrEmpty
             $LASTEXITCODE | Should -Not -Be 0
             $c8yError | Should -HaveCount 2
-            $c8yError[-1] | Should -Match '^commandError: unknown flag: --invalidParameter'
+            $c8yError[-1] | Should -Match 'commandError'
+            $c8yError[-1] | Should -Match 'unknown flag: --invalidParameter'
         }
     }
 }
