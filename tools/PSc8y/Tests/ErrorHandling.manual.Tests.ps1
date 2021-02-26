@@ -42,11 +42,10 @@ Describe -Name "Error handling" {
                 "text" = "my example text"
             } `
             -Method "POST" `
-            -WithError | ConvertFrom-Json
+            -WithError
         $LASTEXITCODE | Should -BeExactly 22 -Because "Exit code 22 = Status Code 422 invalid format"
         $response.error | Should -Match "validationError"
-
-        $c8yError | Should -Not -BeNullOrEmpty
+        $response.message | Should -Match "Following mandatory fields should be included"
     }
 
     It "produces verbose output" {
