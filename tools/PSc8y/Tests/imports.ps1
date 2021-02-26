@@ -19,9 +19,11 @@ Import-Module $modulepath -Prefix "" -Force
 . "$PSScriptRoot/../Public-manual/New-TestMicroservice.ps1"
 
 # Import helper functions
-. "$PSScriptRoot/Get-JSONFromResponse.ps1"
-. "$PSScriptRoot/New-TemporaryDirectory.ps1"
-. "$PSScriptRoot/Helpers/Get-RequestBodyCollection.ps1"
+Get-ChildItem -Path "$PSScriptRoot/Helpers" -Recurse -Filter "*.ps1" | ForEach-Object {
+	Write-Verbose ("Importing {0}" -f $_.FullName)
+	. $_.FullName
+}
+
 
 # Add custom assertions
 . "$PSScriptRoot/Assertions/ContainRequest.ps1"
