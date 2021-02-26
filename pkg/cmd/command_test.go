@@ -374,12 +374,13 @@ func Test_CreateManagedObjectWithoutInput(t *testing.T) {
 
 	// cmdErr := ExecuteCmd(cmd, fmt.Sprintf("devices list --select id,nam* --csv --csvHeader"))
 	// cmdErr := ExecuteCmd(cmd, fmt.Sprintf("applications get --id cockpit --select appId:id,tenantId:owner.**.id"))
-	stdin := bytes.NewBufferString(`{"self":"https://t1640885.latest.stage.c8y.io/user/roles/ROLE_ALARM_ADMIN"}` + "\n")
-	cmd.SetIn(stdin)
+	// stdin := bytes.NewBufferString(`{"self":"https://t1640885.latest.stage.c8y.io/user/roles/ROLE_ALARM_ADMIN"}` + "\n")
+	// cmd.SetIn(stdin)
 	cmdtext := `
-	userRoles addRoleToGroup --group 1342
+	devices list --timeout 0.001
 	`
 	cmdErr := ExecuteCmd(cmd, strings.TrimSpace(cmdtext))
+	cmd.checkCommandError(cmdErr, os.Stderr)
 	assert.OK(t, cmdErr)
 }
 
