@@ -9,21 +9,32 @@ Describe -Name "Invoke-ClientRequest" {
     }
 
     It "should accept query parameters" {
-        Invoke-ClientRequest -Uri "/alarm/alarms" -QueryParameters @{
+        $output = Invoke-ClientRequest -Uri "/alarm/alarms" -QueryParameters @{
                 pageSize = "1";
             } `
-            -Whatif `
-            -InformationVariable requestInfo
+            -WhatIf 2>&1
         $LASTEXITCODE | Should -Be 0
-        $requestInfo | Should -Not -BeNullOrEmpty
-        ($requestInfo | Out-String) | Should -BeLike "*/alarm/alarms?pageSize=1*"
+        $output | Should -Not -BeNullOrEmpty
+        $output | Should -ContainRequest "GET /alarm/alarms?pageSize=1" -Total 1
     }
 
-    It "should return the raw json text when using -Raw" {
+    It "should return powershell objects by default" {
+        $Response = Invoke-ClientRequest -Uri "/inventory/managedObjects" -QueryParameters @{
+            pageSize = "2";
+        }
+        $LASTEXITCODE | Should -Be 0
+        $Response | Should -Not -BeNullOrEmpty
+        $Response.managedObjects | Should -Not -BeNullOrEmpty
+        $Response.statistics | Should -Not -BeNullOrEmpty
+        $Response.next | Should -Not -BeNullOrEmpty
+        $Response.self | Should -Not -BeNullOrEmpty
+    }
+
+    It "should return the raw json text when using -AsJSON" {
         $Response = Invoke-ClientRequest -Uri "/inventory/managedObjects" -QueryParameters @{
             pageSize = "2";
         } `
-        -Raw
+        -AsJSON
         $LASTEXITCODE | Should -Be 0
         $Response | Should -Not -BeNullOrEmpty
         $Result = $Response | ConvertFrom-Json
@@ -38,23 +49,30 @@ Describe -Name "Invoke-ClientRequest" {
         }
         $LASTEXITCODE | Should -Be 0
         $Response | Should -Not -BeNullOrEmpty
-        $Results = $Response | ConvertFrom-Json
-        $Results | Should -HaveCount 2
+        $Response | Should -HaveCount 2
     }
 
-    It "should accept query parameters and return the raw response" {
+    It "should accept query parameters and support whatif" {
         $options = @{
             Uri = "/alarm/alarms"
             QueryParameters = @{
                 pageSize = "1";
             }
             WhatIf = $true
-            InformationVariable = "requestInfo"
         }
-        Invoke-ClientRequest @options
+        $output = Invoke-ClientRequest @options 2>&1
         $LASTEXITCODE | Should -Be 0
-        $requestInfo | Should -Not -BeNullOrEmpty
-        ($requestInfo | Out-String) | Should -BeLike "*/alarm/alarms?pageSize=1*"
+        $output | Should -ContainRequest "GET /alarm/alarms?pageSize=1" -Total 1
+    }
+
+    It "return the raw response when a non-json accept header is used" {
+        $testMeasurement = New-TestMeasurement
+        $Response = Invoke-ClientRequest -Uri "/measurement/measurements" -Method "get" -Accept "text/csv"
+        $LASTEXITCODE | Should -Be 0
+        $Response | Should -Not -BeNullOrEmpty
+        Remove-Device $testMeasurement.source.id
+
+        $Response | Should -HaveType string
     }
 
     It "post an inventory managed object from a string" {
@@ -62,7 +80,7 @@ Describe -Name "Invoke-ClientRequest" {
         $LASTEXITCODE | Should -Be 0
         $Response | Should -Not -BeNullOrEmpty
 
-        $obj = $Response | ConvertFrom-Json
+        $obj = $Response
         $obj.name | Should -BeExactly "test"
 
         if ($obj.id) {
@@ -75,7 +93,7 @@ Describe -Name "Invoke-ClientRequest" {
             -Uri "/inventory/managedObjects" `
             -Method "post" `
             -Data "name=test" `
-            -Pretty
+            -Pretty -NoColor
 
         $LASTEXITCODE | Should -Be 0
         $Response | Should -Not -BeNullOrEmpty
@@ -95,7 +113,7 @@ Describe -Name "Invoke-ClientRequest" {
         $LASTEXITCODE | Should -Be 0
         $Response | Should -Not -BeNullOrEmpty
 
-        $obj = $Response | ConvertFrom-Json
+        $obj = $Response
         $obj.name | Should -BeExactly (Get-Item $TestFile).Name
 
         # Download file
@@ -127,11 +145,10 @@ Describe -Name "Invoke-ClientRequest" {
         $LASTEXITCODE | Should -Be 0
         $Response | Should -Not -BeNullOrEmpty
 
-        $obj = $Response | ConvertFrom-Json
-        $obj.name | Should -BeExactly "manual_object_001"
+        $Response.name | Should -BeExactly "manual_object_001"
 
-        if ($obj.id) {
-            Remove-ManagedObject -Id $obj.id
+        if ($Response.id) {
+            Remove-ManagedObject -Id $Response.id
         }
     }
 
@@ -149,16 +166,15 @@ Describe -Name "Invoke-ClientRequest" {
         $LASTEXITCODE | Should -Be 0
         $Response | Should -Not -BeNullOrEmpty
 
-        $obj = $Response | ConvertFrom-Json
-        $obj.name | Should -BeExactly "manual_object_002"
+        $Response.name | Should -BeExactly "manual_object_002"
 
-        if ($obj.id) {
-            Remove-ManagedObject -Id $obj.id
+        if ($Response.id) {
+            Remove-ManagedObject -Id $Response.id
         }
     }
 
     It "Send request with custom headers" {
-        Invoke-ClientRequest `
+        $output = Invoke-ClientRequest `
             -Uri "/inventory/managedObjects" `
             -Method "post" `
             -Headers @{
@@ -171,39 +187,36 @@ Describe -Name "Invoke-ClientRequest" {
                     prop1 = $false
                 }
             } `
-            -WhatIf `
-            -InformationVariable requestInfo
+            -WhatIf 2>&1
 
         $LASTEXITCODE | Should -Be 0
-        $requestInfo | Should -Not -BeNullOrEmpty
+        $output | Should -Not -BeNullOrEmpty
 
-        ($requestInfo | Out-String) | Should -BeLike "*MyHeader: SomeValue*"
-        ($requestInfo | Out-String) | Should -BeLike "*2: 1*"
+        ($output | Out-String) | Should -BeLike "*MyHeader: SomeValue*"
+        ($output | Out-String) | Should -BeLike "*2: 1*"
     }
 
     It "Sends a request without a body" {
-        Invoke-ClientRequest `
+        $output = Invoke-ClientRequest `
             -Uri "/inventory/managedObjects" `
             -Method "post" `
-            -WhatIf `
-            -InformationVariable requestInfo
+            -WhatIf 2>&1
 
         $LASTEXITCODE | Should -Be 0
-        $requestInfo | Should -Not -BeNullOrEmpty
-        ($requestInfo | Out-String) -match "Body:\s+\(empty\)" | Should -HaveCount 1
+        $output | Should -Not -BeNullOrEmpty
+        ($output | Out-String) -match "Body:\s+\(empty\)" | Should -HaveCount 1
     }
 
     It "Sends a request with an empty hashtable" {
-        Invoke-ClientRequest `
+        $output = Invoke-ClientRequest `
             -Uri "/inventory/managedObjects" `
             -Method "post" `
             -Data @{} `
-            -WhatIf `
-            -InformationVariable requestInfo
+            -WhatIf 2>&1
 
         $LASTEXITCODE | Should -Be 0
-        $requestInfo | Should -Not -BeNullOrEmpty
-        $requestInfo | Out-String | Should -match "(?ms)Body:\s*(\{.*\})"
+        $output | Should -Not -BeNullOrEmpty
+        $output | Out-String | Should -match "(?ms)Body:\s*(\{.*\})"
     }
 
     It "Sends a request using templates" {
@@ -224,9 +237,8 @@ Describe -Name "Invoke-ClientRequest" {
 
         $LASTEXITCODE | Should -Be 0
         $Response | Should -Not -BeNullOrEmpty
-        $Result = $Response | ConvertFrom-Json
-        $Result.c8y_CustomFragment.test | Should -BeExactly $true
-        $Result.id | Remove-ManagedObject
+        $Response.c8y_CustomFragment.test | Should -BeExactly $true
+        $Response.id | Remove-ManagedObject
     }
 
     It "Sends a request using deep nested object" {
@@ -252,24 +264,7 @@ Describe -Name "Invoke-ClientRequest" {
 
         $LASTEXITCODE | Should -Be 0
         $Response | Should -Not -BeNullOrEmpty
-        $Result = $Response | ConvertFrom-Json
-        $Result.root.level1.level2.level3.level4.level5.value | Should -BeExactly 1
-        $Result.id | Remove-ManagedObject
-    }
-
-    It "saves request information to the InformationVariable (hiding verbose messages)" {
-        $response = Invoke-ClientRequest `
-            -Uri "/inventory/managedObjects" `
-            -Method "get" `
-            -InformationVariable responseInfo
-
-        $responseInfo | Should -Not -BeNullOrEmpty
-        $responseInfo | Should -HaveCount 1
-        $responseInfo.MessageData.request | Should -Not -BeNullOrEmpty
-        $responseInfo.MessageData.requestHeader | Should -Not -BeNullOrEmpty
-        $responseInfo.MessageData.responseHeader | Should -Not -BeNullOrEmpty
-        $responseInfo.MessageData.responseTime | Should -Match "^\d+ms$"
-        $responseInfo.MessageData.statusCode | Should -Match "^\d+$"
-        $responseInfo.MessageData.responseLength | Should -Not -BeNullOrEmpty
+        $Response.root.level1.level2.level3.level4.level5.value | Should -BeExactly 1
+        $Response.id | Remove-ManagedObject
     }
 }

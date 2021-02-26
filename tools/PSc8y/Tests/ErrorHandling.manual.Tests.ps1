@@ -8,12 +8,12 @@ Describe -Name "Error handling" {
 
     It "Returns a server error on ErrorVariable" {
 
-        $response = Get-ManagedObject -Id 0 -ErrorVariable c8yError
+        $c8yError = $( $response = Get-ManagedObject -Id 0 -Verbose ) 2>&1
         $response | Should -BeNullOrEmpty
         $LASTEXITCODE | Should -Not -Be 0
         $c8yError | Should -Not -BeNullOrEmpty
         $c8yError.Count | Should -BeGreaterOrEqual 10
-        $c8yError | Select-Object -Last 1 | Should -Match "^serverError:.+Not Found"
+        $c8yError | Select-Object -Last 1 | Should -Match "serverError.+404"
     }
 
     It "Redirects errors to response" {
@@ -21,27 +21,18 @@ Describe -Name "Error handling" {
         $LASTEXITCODE | Should -Not -Be 0
 
         # Cast exception to string
-        "$response" | Should -Match "Not found"
+        "$response" | Should -Match "No managedObject for id"
         $response.Exception.Message | Should -Not -BeNullOrEmpty
     }
 
-    It "Redirects errors to response and ErrorVariable" {
-        $c8yError = $( $response = Get-ManagedObject -Id 0 -Verbose )
-        $LASTEXITCODE | Should -Not -Be 0
-
-        # Variable can also
-        $c8yError.Count | Should -BeGreaterOrEqual 10
-        $c8yError | Select-Object -Last 1 | Should -BeExactly $response
-    }
-
     It "sets the exit code based on the HTTP status code" {
-        $response = Get-ManagedObject -Id 0 -ErrorVariable c8yError -ErrorAction SilentlyContinue
+        $c8yError = $( $response = Get-ManagedObject -Id 0 ) 2>&1
         $LASTEXITCODE | Should -BeExactly 4 -Because "Exit code 4 = Status Code 404"
         $response | Should -BeExactly $null
 
         # Variable can also
-        $c8yError.Count | Should -BeGreaterOrEqual 10
-        $c8yError[-1] | Should -Match "Not Found"
+        $c8yError | Should -HaveCount 1
+        $c8yError[-1] | Should -Match "No managedObject for id"
     }
 
     It "custom client requests do not pipe response to error variable" {
@@ -51,7 +42,7 @@ Describe -Name "Error handling" {
                 "text" = "my example text"
             } `
             -Method "POST" `
-            -ErrorVariable c8yError -ErrorAction SilentlyContinue | ConvertFrom-Json
+            -WithError | ConvertFrom-Json
         $LASTEXITCODE | Should -BeExactly 22 -Because "Exit code 22 = Status Code 422 invalid format"
         $response.error | Should -Match "validationError"
 
