@@ -140,7 +140,7 @@ func runBatched(requestIterator *RequestIterator, commonOptions CommonCommandOpt
 	results := make(chan error, batchOptions.TotalWorkers-1)
 	workers := sync.WaitGroup{}
 
-	progbar := progressbar.NewMultiProgressBar(1, batchOptions.TotalWorkers, "requests", globalFlagProgressBar)
+	progbar := progressbar.NewMultiProgressBar(rootCmd.ErrOrStderr(), 1, batchOptions.TotalWorkers, "requests", globalFlagProgressBar)
 	progbar.Start(float64(batchOptions.Delay * 2 / 1000))
 
 	for w := 1; w <= batchOptions.TotalWorkers; w++ {

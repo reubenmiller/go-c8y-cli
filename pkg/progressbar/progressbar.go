@@ -2,6 +2,7 @@ package progressbar
 
 import (
 	"fmt"
+	"io"
 	"sync"
 	"time"
 
@@ -21,13 +22,14 @@ type ProgressBar struct {
 	refreshRate   time.Duration
 }
 
-func NewMultiProgressBar(total, numBars int, name string, enable bool) *ProgressBar {
+func NewMultiProgressBar(w io.Writer, total, numBars int, name string, enable bool) *ProgressBar {
 	var p *mpb.Progress
 	refreshRate := 120 * time.Millisecond
 	if enable {
 		p = mpb.New(
 			mpb.ContainerOptional(
 				mpb.WithRefreshRate(refreshRate), true),
+			mpb.WithOutput(w),
 		)
 	}
 
