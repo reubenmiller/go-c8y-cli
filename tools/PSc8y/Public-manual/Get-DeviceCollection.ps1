@@ -92,8 +92,8 @@ Get a list of devices which have been updated more recently than 2020-01-01
     Process {
 
         if ($ClientOptions.ConvertToPS) {
-            ,(c8y devices list $c8yargs `
-            | ConvertFrom-ClientOutput @TypeOptions)
+            c8y devices list $c8yargs `
+            | ConvertFrom-ClientOutput @TypeOptions
         }
         else {
             c8y devices list $c8yargs
