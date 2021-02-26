@@ -9,7 +9,6 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/pkg/iterator"
 	"github.com/reubenmiller/go-c8y-cli/pkg/jsonUtilities"
 	"github.com/reubenmiller/go-c8y-cli/pkg/mapbuilder"
-	"github.com/reubenmiller/go-c8y-cli/pkg/timestamp"
 	"github.com/spf13/cobra"
 )
 
@@ -338,16 +337,6 @@ func WithRelativeTimestamp(opts ...string) GetOption {
 
 		// mark iterator as unbound, so it will not increment the input iterators
 		return dst, iterator.NewRelativeTimeIterator(value), err
-
-		ts, err := timestamp.TryGetTimestamp(value)
-
-		if err != nil {
-			return dst, ts, err
-		}
-
-		// decode %2B with original "+" (if required) and
-		// let the calling function handle it
-		return dst, timestamp.DecodeC8yTimestamp(ts), nil
 	}
 }
 
