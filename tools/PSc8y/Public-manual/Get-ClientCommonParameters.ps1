@@ -83,10 +83,14 @@ Inherit common parameters to a custom function. This will add parameters such as
         New-DynamicParam -Name AsHashTable -Type "switch" -DPDictionary $Dictionary
         New-DynamicParam -Name AsJSON -Type "switch" -DPDictionary $Dictionary
         New-DynamicParam -Name AsCSV -Type "switch" -DPDictionary $Dictionary
+        New-DynamicParam -Name AsCSVWithHeader -Type "switch" -DPDictionary $Dictionary
         New-DynamicParam -Name Compress -Type "switch" -DPDictionary $Dictionary
         New-DynamicParam -Name Pretty -Type "switch" -DPDictionary $Dictionary
         New-DynamicParam -Name NoColor -Type "switch" -DPDictionary $Dictionary
         New-DynamicParam -Name Color -Type "switch" -DPDictionary $Dictionary
+
+        # Error options
+        New-DynamicParam -Name WithError -Type "switch" -DPDictionary $Dictionary
 
         # Workers
         New-DynamicParam -Name Workers -Type "int" -DPDictionary $Dictionary

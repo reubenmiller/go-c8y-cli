@@ -26,10 +26,13 @@ Function ConvertFrom-ClientOutput {
     Begin {
         $Depth = if ($BoundParameters.ContainsKey("Depth")) { $BoundParameters["Depth"] } else { 100 }
         $AsHashTable = if ($BoundParameters.ContainsKey("AsHashTable")) { $BoundParameters["AsHashTable"] } else { $false }
+        $WithError = $BoundParameters["WithError"]
         $Raw = $BoundParameters["WithTotalPages"] `
             -or $BoundParameters["Raw"]
         
-        $AsJSON = if ($BoundParameters.ContainsKey("AsJSON")) { $BoundParameters["AsJSON"] } else { $false }
+        $AsJSON = $BoundParameters["AsJSON"] `
+            -or $BoundParameters["Pretty"] `
+            -or $BoundParameters["Compress"]
 
         $SelectedType = if ($ItemType) { $ItemType } else { $Type }
         if ($Raw) {
@@ -51,10 +54,10 @@ Function ConvertFrom-ClientOutput {
                     $output = ConvertFrom-Json -InputObject $item -Depth:$Depth -AsHashtable:$AsHashTable `
                     | Add-PowershellType -Type $SelectedType
                 
-                    if ($LASTEXITCODE -eq 0) {
+                    if ($LASTEXITCODE -eq 0 -or $WithError) {
                         $output
                     } else {
-                        Write-Error $output
+                        $output
                     }
                 } else {
                     $item
