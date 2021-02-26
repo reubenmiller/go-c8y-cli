@@ -2,62 +2,71 @@ package cmderrors
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
-	"regexp"
 
 	"github.com/pkg/errors"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 )
 
+const (
+	// ErrTypeServer server error type. Server responded with an error
+	ErrTypeServer = "serverError"
+
+	// ErrTypeCommand command error. Local command error related to the usage of the tool etc.
+	ErrTypeCommand = "commandError"
+)
+
 // CommandError is an error used to signal different error situations in command handling.
 type CommandError struct {
-	s           string
-	userError   bool
-	serverError bool
-	silent      bool
-	ExitCode    int
-	statusCode  int
-	c8yError    *c8y.ErrorResponse
-	err         error
+	ErrorType       string `json:"errorType,omitempty"`
+	Message         string `json:"message,omitempty"`
+	silent          bool
+	StatusCode      int                `json:"statusCode,omitempty"`
+	ExitCode        int                `json:"exitCode,omitempty"`
+	URL             string             `json:"url,omitempty"`
+	CumulocityError *c8y.ErrorResponse `json:"c8yResponse,omitempty"`
+	err             error
 }
 
 func (c CommandError) Error() string {
 	details := ""
-	if c.statusCode > 0 {
-		details = fmt.Sprintf(" ::statusCode=%d", c.statusCode)
+	if c.StatusCode > 0 {
+		details = fmt.Sprintf(" ::StatusCode=%d", c.StatusCode)
 	}
 	if c.err != nil {
 		details = fmt.Sprintf("%s", c.err)
 	}
-	return c.s + details
+	return c.Message + details
 }
 
-func (c CommandError) StatusCode() int {
-	return c.StatusCode()
-}
-
-func (c CommandError) IsUserError() bool {
-	return c.userError
-}
-
-func (c CommandError) IsServerError() bool {
-	return c.serverError
-}
-
+// IsSilent returns true if the error should be silent
 func (c CommandError) IsSilent() bool {
 	return c.silent
 }
 
+// JSONString returns the json representation of the error
+func (c CommandError) JSONString() string {
+	out, err := json.Marshal(c)
+	if err != nil {
+		return fmt.Sprintf(`{"errorType":"%s", "message":"unexpected error. %s"}`, ErrTypeCommand, err)
+	}
+	return string(out)
+}
+
+// NewUserError creates a new user error
 func NewUserError(a ...interface{}) CommandError {
-	return CommandError{s: fmt.Sprintln(a...), userError: true, ExitCode: 101, silent: false}
+	return CommandError{Message: fmt.Sprintln(a...), ErrorType: ErrTypeCommand, ExitCode: 101, silent: false}
 }
 
+// NewUserErrorWithExitCode creates a user with a specific exit code
 func NewUserErrorWithExitCode(exitCode int, a ...interface{}) CommandError {
-	return CommandError{s: fmt.Sprintln(a...), userError: true, ExitCode: exitCode, silent: false}
+	return CommandError{Message: fmt.Sprintln(a...), ErrorType: ErrTypeCommand, ExitCode: exitCode, silent: false}
 }
 
+// NewSystemError creates a system error
 func NewSystemError(a ...interface{}) CommandError {
-	return CommandError{s: fmt.Sprintln(a...), userError: false, ExitCode: 100, silent: false}
+	return CommandError{Message: fmt.Sprintln(a...), ErrorType: ErrTypeCommand, ExitCode: 100, silent: false}
 }
 
 var httpStatusCodeToExitCode = map[int]int{
@@ -81,76 +90,50 @@ var httpStatusCodeToExitCode = map[int]int{
 	508: 58,
 }
 
+// NewServerError creates a server error from a Cumulocity response
 func NewServerError(r *c8y.Response, err error) CommandError {
-	message := ""
-	exitCode := 99
-	statusCode := 0
-	var c8yError *c8y.ErrorResponse
+	cmdError := CommandError{
+		Message:    err.Error(),
+		ErrorType:  ErrTypeServer,
+		silent:     false,
+		ExitCode:   99,
+		StatusCode: 0,
+		err:        err,
+	}
 
 	if errors.Is(err, context.DeadlineExceeded) {
-		message = "command timed out"
-		exitCode = 106
-		err = nil
+		cmdError.Message = "command timed out"
+		cmdError.ExitCode = 106
 	}
 
 	if v, ok := err.(*c8y.ErrorResponse); ok {
-		c8yError = v
+		cmdError.CumulocityError = v
+		cmdError.Message = v.Message
 	}
 
 	if r != nil {
 		if r.Response != nil {
-			statusCode = r.Response.StatusCode
-			if v, ok := httpStatusCodeToExitCode[statusCode]; ok {
-				exitCode = v
+			cmdError.StatusCode = r.Response.StatusCode
+
+			if r.Request != nil {
+				cmdError.URL = r.Request.URL.Path
+			}
+
+			if v, ok := httpStatusCodeToExitCode[cmdError.StatusCode]; ok {
+				cmdError.ExitCode = v
 			}
 		}
 	}
 
-	return CommandError{
-		s:           message,
-		userError:   false,
-		serverError: true,
-		silent:      false,
-		ExitCode:    exitCode,
-		statusCode:  statusCode,
-		err:         err,
-		c8yError:    c8yError,
-	}
+	return cmdError
 }
 
+// NewSystemErrorF creates a custom system error
 func NewSystemErrorF(format string, a ...interface{}) CommandError {
-	return CommandError{s: fmt.Sprintf(format, a...), userError: false}
+	return CommandError{Message: fmt.Sprintf(format, a...), ErrorType: ErrTypeCommand}
 }
 
-// Catch some of the obvious user errors from Cobra.
-// We don't want to show the usage message for every error.
-// The below may be to generic. Time will show.
-var userErrorRegexp = regexp.MustCompile("argument|flag|shorthand")
-
-func IsUserError(err error) bool {
-	if cErr, ok := err.(CommandError); ok && cErr.IsUserError() {
-		return true
-	}
-
-	return userErrorRegexp.MatchString(err.Error())
-}
-
-func IsServerError(err error) bool {
-	if cErr, ok := err.(CommandError); ok && cErr.IsServerError() {
-		return true
-	}
-
-	return false
-}
-
-func IsSilentError(err error) bool {
-	if cErr, ok := err.(CommandError); ok && cErr.IsSilent() {
-		return true
-	}
-
-	return false
-}
-
+// NewErrorSummary create a error summary from a chanell of errors
 func NewErrorSummary(message string, errorsCh <-chan error) error {
 	errorSummary := errors.New(message)
 	hasError := false

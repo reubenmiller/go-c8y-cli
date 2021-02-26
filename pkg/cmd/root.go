@@ -270,27 +270,20 @@ const SettingsGlobalName = "settings"
 
 func (c *c8yCmd) checkCommandError(err error, w io.Writer) {
 	if cErr, ok := err.(cmderrors.CommandError); ok {
-		statusCode := cErr.StatusCode()
-		if statusCode == 403 || statusCode == 401 {
-			c.Logger.Error(fmt.Sprintf("Authentication failed (statusCode=%d). Try to run set-session again, or check the password", statusCode))
+		if cErr.StatusCode == 403 || cErr.StatusCode == 401 {
+			c.Logger.Error(fmt.Sprintf("Authentication failed (statusCode=%d). Try to run set-session again, or check the password", cErr.StatusCode))
 		}
 
 		// format errors as json messages
 		// only log users errors
-		if !cErr.IsSilent() && !strings.Contains(globalFlagSilentStatusCodes, fmt.Sprintf("%d", statusCode)) {
-			message := ""
-			if statusCode != 0 {
-				message = fmt.Sprintf(`{"error":"serverError","message":"%s","statusCode":%d}`, err, statusCode)
-			} else {
-				message = fmt.Sprintf(`{"error":"commandError","message":"%s"}`, err)
-			}
-			fmt.Fprintln(w, strings.ReplaceAll(message, "\n", ""))
+		if !cErr.IsSilent() && !strings.Contains(globalFlagSilentStatusCodes, fmt.Sprintf("%d", cErr.StatusCode)) {
+			fmt.Fprintf(w, "%s\n", cErr.JSONString())
 		}
 	} else {
 		// unexpected error
 		c.Logger.Errorf("%s", err)
-		message := fmt.Sprintf(`{"error":"commandError","message":"%s"}`, err)
-		fmt.Fprintln(w, strings.ReplaceAll(message, "\n", ""))
+		cErr := cmderrors.NewSystemErrorF("%s", err)
+		fmt.Fprintf(w, "%s\n", cErr.JSONString())
 	}
 }
 
