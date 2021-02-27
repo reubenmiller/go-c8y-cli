@@ -33,78 +33,56 @@ if the alarm is active and was first created more than 1 day ago.
         # Device ID
         [Parameter(ValueFromPipeline=$true,
                    ValueFromPipelineByPropertyName=$true)]
-        [object[]]
+        [object]
         $Device,
 
         # Start date or date and time of alarm occurrence. (required)
+        [Alias("DurationSec")]
         [Parameter()]
         [int]
-        $DurationSec,
+        $Duration,
 
         # End date or date and time of alarm occurrence.
         [Parameter()]
-        [string]
-        $Count,
-
-        # Outputfile
-        [Parameter()]
-        [string]
-        $OutputFile,
-
-        # NoProxy
-        [Parameter()]
-        [switch]
-        $NoProxy,
-
-        # Session path
-        [Parameter()]
-        [string]
-        $Session
+        [int]
+        $Count
     )
+    DynamicParam {
+        Get-ClientCommonParameters -Type "Get" -BoundParameters $PSBoundParameters
+    }
 
     Begin {
-        $Parameters = @{}
-        if ($PSBoundParameters.ContainsKey("DurationSec")) {
-            $Parameters["duration"] = $DurationSec
-        }
-        if ($PSBoundParameters.ContainsKey("Count")) {
-            $Parameters["count"] = $Count
-        }
-        if ($PSBoundParameters.ContainsKey("OutputFile")) {
-            $Parameters["outputFile"] = $OutputFile
-        }
-        if ($PSBoundParameters.ContainsKey("NoProxy")) {
-            $Parameters["noProxy"] = $NoProxy
-        }
-        if ($PSBoundParameters.ContainsKey("Session")) {
-            $Parameters["session"] = $Session
-        }
-        if ($PSBoundParameters.ContainsKey("Session")) {
-            $Parameters["dryRun"] = $Session
+        if ($env:C8Y_DISABLE_INHERITANCE -ne $true) {
+            # Inherit preference variables
+            Use-CallerPreference -Cmdlet $PSCmdlet -SessionState $ExecutionContext.SessionState
         }
 
+        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "alarms subscribe"
+        $ClientOptions = Get-ClientOutputOption $PSBoundParameters
+        $TypeOptions = @{
+            Type = "application/json"
+            ItemType = ""
+            BoundParameters = $PSBoundParameters
+        }
     }
 
     Process {
-        $id = PSc8y\Expand-Id $Device
-        if ($id) {
-            $Parameters["device"] = PSc8y\Expand-Id $Device
-        }
-
         if (!$Force -and
             !$WhatIfPreference -and
             !$PSCmdlet.ShouldProcess(
                 (PSc8y\Get-C8ySessionProperty -Name "tenant"),
-                (Format-ConfirmationMessage -Name $PSCmdlet.MyInvocation.InvocationName -InputObject $item)
+                (Format-ConfirmationMessage -Name $PSCmdlet.MyInvocation.InvocationName -InputObject $Device)
             )) {
-            continue
+            return
         }
-        
-        Invoke-ClientCommand `
-            -Noun "alarms" `
-            -Verb "subscribe" `
-            -Parameters $Parameters `
-            -Type "application/json"
+
+        if ($ClientOptions.ConvertToPS) {
+            c8y alarms subscribe $c8yargs `
+            | ConvertFrom-ClientOutput @TypeOptions
+        }
+        else {
+            c8y alarms subscribe $c8yargs
+        }
     }
 
     End {}

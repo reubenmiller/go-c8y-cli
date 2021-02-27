@@ -18,59 +18,40 @@ Watch all measurements for 90 seconds
     [Alias()]
     [OutputType([object])]
     Param(
-        # Device ID
+        # Channel
         [Parameter(
             Mandatory = $true)]
         [string]
         $Channel,
 
         # Start date or date and time of notification occurrence. (required)
+        [Alias("DurationSec")]
         [Parameter()]
         [int]
-        $DurationSec,
+        $Duration,
 
         # End date or date and time of notification occurrence.
         [Parameter()]
-        [string]
-        $Count,
-
-        # Outputfile
-        [Parameter()]
-        [string]
-        $OutputFile,
-
-        # NoProxy
-        [Parameter()]
-        [switch]
-        $NoProxy,
-
-        # Session path
-        [Parameter()]
-        [string]
-        $Session
+        [int]
+        $Count
     )
+    DynamicParam {
+        Get-ClientCommonParameters -Type "Get" -BoundParameters $PSBoundParameters
+    }
 
     Begin {
-        $Parameters = @{}
-        if ($PSBoundParameters.ContainsKey("Channel")) {
-            $Parameters["channel"] = $Channel
-        }
-        if ($PSBoundParameters.ContainsKey("DurationSec")) {
-            $Parameters["duration"] = $DurationSec
-        }
-        if ($PSBoundParameters.ContainsKey("Count")) {
-            $Parameters["count"] = $Count
-        }
-        if ($PSBoundParameters.ContainsKey("OutputFile")) {
-            $Parameters["outputFile"] = $OutputFile
-        }
-        if ($PSBoundParameters.ContainsKey("NoProxy")) {
-            $Parameters["noProxy"] = $NoProxy
-        }
-        if ($PSBoundParameters.ContainsKey("Session")) {
-            $Parameters["session"] = $Session
+        if ($env:C8Y_DISABLE_INHERITANCE -ne $true) {
+            # Inherit preference variables
+            Use-CallerPreference -Cmdlet $PSCmdlet -SessionState $ExecutionContext.SessionState
         }
 
+        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "realtime subscribe"
+        $ClientOptions = Get-ClientOutputOption $PSBoundParameters
+        $TypeOptions = @{
+            Type = "application/json"
+            ItemType = ""
+            BoundParameters = $PSBoundParameters
+        }
     }
 
     Process {
@@ -83,11 +64,13 @@ Watch all measurements for 90 seconds
             continue
         }
 
-        Invoke-ClientCommand `
-            -Noun "realtime" `
-            -Verb "subscribe" `
-            -Parameters $Parameters `
-            -Type "application/json"
+        if ($ClientOptions.ConvertToPS) {
+            c8y realtime subscribe $c8yargs `
+            | ConvertFrom-ClientOutput @TypeOptions
+        }
+        else {
+            c8y realtime subscribe $c8yargs
+        }
     }
 
     End {}

@@ -81,28 +81,3 @@ Describe -Name "Error handling" {
         }
     }
 }
-
-InModuleScope PSc8y {
-    Describe "In module tests" {
-        It "Throws an error on invalid arguments" {
-            $Parameters = @{
-                "InvalidParameter" = "1"
-            }
-            $response = Invoke-ClientCommand `
-                -Noun "inventory" `
-                -Verb "get" `
-                -Parameters $Parameters `
-                -Type "application/vnd.com.nsn.cumulocity.inventory+json" `
-                -ItemType "" `
-                -ResultProperty "" `
-                -ErrorVariable c8yError `
-                -Raw:$false
-            
-            $response | Should -BeNullOrEmpty
-            $LASTEXITCODE | Should -Not -Be 0
-            $c8yError | Should -HaveCount 2
-            $c8yError[-1] | Should -Match 'commandError'
-            $c8yError[-1] | Should -Match 'unknown flag: --invalidParameter'
-        }
-    }
-}
