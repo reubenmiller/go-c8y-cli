@@ -111,6 +111,7 @@ $results = $Tests | ForEach-Object -ThrottleLimit:$ThrottleLimit -Parallel {
 $TotalDuration = (Get-Date) - $TestStartTime
 
 # Delete any microservices still running
+. ./Tests/imports.ps1
 Get-MicroserviceCollection -PageSize 100 | Where-Object { $_.name -like "*testms*" } | Remove-Microservice -Force
 
 $totalSeconds = 0
