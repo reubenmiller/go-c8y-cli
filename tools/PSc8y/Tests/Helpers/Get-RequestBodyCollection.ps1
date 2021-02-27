@@ -19,10 +19,13 @@ Function Get-RequestBodyCollection {
     }
 
     End {
-        $BodyMatches = $inputItems `
-        | Out-String `
-        | Select-String -AllMatches -Pattern "(?smi)Body:\s*({.+?}[^,])" `
-        | ForEach-Object { $_.Matches } `
+        $EntireResponse = $inputItems | Out-String
+
+        $MultiLineMatches = Select-String -InputObject $EntireResponse -AllMatches -Pattern "(?smi)Body:\s*({.+?\s})\s"
+        $SingleLineMatches = Select-String -InputObject $EntireResponse -AllMatches -Pattern "(?mi)Body:\s*({.+?})\s*$"
+        $AllMatches = @() + $MultiLineMatches.Matches + $SingleLineMatches.Matches | Sort-Object Index
+
+        $BodyMatches = $AllMatches
         | Where-Object { $_.Groups.Count -gt 1 } `
         | ForEach-Object { ConvertFrom-Json $_.Groups[1] -Depth 100 }
 
