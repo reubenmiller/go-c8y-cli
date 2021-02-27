@@ -90,6 +90,9 @@ This example is usefuly for local development only, when you want to run the mic
         [switch]
         $SkipSubscription
     )
+    DynamicParam {
+        Get-ClientCommonParameters -Type "Create" -BoundParameters $PSBoundParameters
+    }
 
     Begin {
         if ($env:C8Y_DISABLE_INHERITANCE -ne $true) {
