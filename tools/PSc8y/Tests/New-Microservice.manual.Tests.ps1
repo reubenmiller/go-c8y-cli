@@ -16,7 +16,7 @@ Describe -Name "New-Microservice" {
             $CustomZip = Copy-Item $MicroserviceZip -Destination "${Name}.zip" -PassThru
 
             # Remove microservice (if exists)
-            Get-Microservice -Id $Name | Remove-Microservice
+            Get-Microservice -Id $Name -SilentStatusCodes 404 | Remove-Microservice
 
             $App = New-Microservice -File $CustomZip -Key $Name
 
@@ -122,14 +122,13 @@ Describe -Name "New-Microservice" {
 Invalid json example
 "@
 
-            $App = New-Microservice -Name $AppName -File $ManifestFile -SkipUpload -ErrorVariable ErrorResponse
+            $ErrorResponse = $( $App = New-Microservice -Name $AppName -File $ManifestFile -SkipUpload ) 2>&1
             if ($App.id) {
                 $AppList.Add($App.id)
             }
             $App | Should -BeNullOrEmpty
 
             $LASTEXITCODE | Should -Not -Be 0
-            $ErrorResponse.Count | Should -BeGreaterOrEqual 10 -Because "internally verbose messages will also be logged to the ERROR output"
             $ErrorResponse | Select-Object -Last 1 | Should -BeLike "*invalid manifest*"
         }
 

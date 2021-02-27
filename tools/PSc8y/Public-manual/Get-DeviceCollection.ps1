@@ -69,6 +69,9 @@ Get a list of devices which have been updated more recently than 2020-01-01
         [switch]
         $WithParents
     )
+    DynamicParam {
+        Get-ClientCommonParameters -Type "Collection" -BoundParameters $PSBoundParameters
+    }
 
     Begin {
 
@@ -84,9 +87,6 @@ Get a list of devices which have been updated more recently than 2020-01-01
             ItemType = "application/vnd.com.nsn.cumulocity.customDevice+json"
             BoundParameters = $PSBoundParameters
         }
-    }
-    DynamicParam {
-        Get-ClientCommonParameters -Type "Collection" -BoundParameters $PSBoundParameters
     }
 
     Process {

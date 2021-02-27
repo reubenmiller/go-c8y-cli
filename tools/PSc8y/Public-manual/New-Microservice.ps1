@@ -88,99 +88,58 @@ This example is usefuly for local development only, when you want to run the mic
         # Don't subscribe to the microservice after it has been created and uploaded
         [Parameter()]
         [switch]
-        $SkipSubscription,
-
-        # Include raw response including pagination information
-        [Parameter()]
-        [switch]
-        $Raw,
-
-        # Outputfile
-        [Parameter()]
-        [string]
-        $OutputFile,
-
-        # NoProxy
-        [Parameter()]
-        [switch]
-        $NoProxy,
-
-        # Session path
-        [Parameter()]
-        [string]
-        $Session,
-
-        # Timeout in seconds before a request will be aborted
-        [Parameter()]
-        [double]
-        $Timeout,
-
-        # Don't prompt for confirmation
-        [Parameter()]
-        [switch]
-        $Force
+        $SkipSubscription
     )
 
     Begin {
-        $Parameters = @{}
-        if ($PSBoundParameters.ContainsKey("Name")) {
-            $Parameters["name"] = $Name
-        }
-        if ($PSBoundParameters.ContainsKey("Key")) {
-            $Parameters["key"] = $Key
-        }
-        if ($PSBoundParameters.ContainsKey("Availability")) {
-            $Parameters["availability"] = $Availability
-        }
-        if ($PSBoundParameters.ContainsKey("ContextPath")) {
-            $Parameters["contextPath"] = $ContextPath
-        }
-        if ($PSBoundParameters.ContainsKey("ResourcesUrl")) {
-            $Parameters["resourcesUrl"] = $ResourcesUrl
-        }
-        if ($PSBoundParameters.ContainsKey("SkipUpload")) {
-            $Parameters["skipUpload"] = $SkipUpload.ToString().ToLower()
-        }
-        if ($PSBoundParameters.ContainsKey("SkipSubscription")) {
-            $Parameters["skipSubscription"] = $SkipSubscription.ToString().ToLower()
-        }
-        if ($PSBoundParameters.ContainsKey("OutputFile")) {
-            $Parameters["outputFile"] = $OutputFile
-        }
-        if ($PSBoundParameters.ContainsKey("NoProxy")) {
-            $Parameters["noProxy"] = $NoProxy
-        }
-        if ($PSBoundParameters.ContainsKey("Session")) {
-            $Parameters["session"] = $Session
-        }
-        if ($PSBoundParameters.ContainsKey("Timeout")) {
-            $Parameters["timeout"] = $Timeout
+        if ($env:C8Y_DISABLE_INHERITANCE -ne $true) {
+            # Inherit preference variables
+            Use-CallerPreference -Cmdlet $PSCmdlet -SessionState $ExecutionContext.SessionState
         }
 
+        $Parameters = @{} + $PSBoundParameters
+        $Parameters.Remove("File")
+
+        $ArgOptions = @{
+            Parameters = $Parameters
+            Command = "microservices create"
+        }
+        $c8yargs = New-ClientArgument @ArgOptions
+        $ClientOptions = Get-ClientOutputOption $PSBoundParameters
+        $TypeOptions = @{
+            Type = "application/vnd.com.nsn.cumulocity.application+json"
+            ItemType = ""
+            BoundParameters = $PSBoundParameters
+        }
     }
 
     Process {
-        
-        foreach ($item in $File) {
-            $Parameters["file"] = $item
+        $Force = if ($PSBoundParameters.ContainsKey("Force")) { $PSBoundParameters["Force"] } else { $False }
 
-            if (!$Force -and
-                !$WhatIfPreference -and
-                !$PSCmdlet.ShouldProcess(
+        foreach ($item in $File) {
+            $ic8yArgs = New-Object System.Collections.ArrayList
+            if ($item) {
+                [void]$ic8yArgs.AddRange(@("--file", (Resolve-Path $item).ProviderPath))
+            }
+            [void]$ic8yArgs.AddRange($c8yargs)
+
+            if (!$Force -and !$WhatIfPreference) {
+                $shouldContinue = $PSCmdlet.ShouldProcess(
                     (PSc8y\Get-C8ySessionProperty -Name "tenant"),
                     (Format-ConfirmationMessage -Name $PSCmdlet.MyInvocation.InvocationName -InputObject $item)
-                )) {
-                continue
+                )
+                if (!$shouldContinue) {
+                    continue
+                }
             }
 
-            Invoke-ClientCommand `
-                -Noun "microservices" `
-                -Verb "create" `
-                -Parameters $Parameters `
-                -Type "application/vnd.com.nsn.cumulocity.application+json" `
-                -ItemType "" `
-                -ResultProperty "" `
-                -Raw:$Raw
+            if ($ClientOptions.ConvertToPS) {
+                c8y microservices create $ic8yArgs `
+                | ConvertFrom-ClientOutput @TypeOptions
+            }
+            else {
+                c8y microservices create $ic8yArgs
+            }
         }
     }
 
