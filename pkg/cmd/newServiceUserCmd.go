@@ -78,6 +78,9 @@ func (n *newServiceUserCmd) doProcedure(cmd *cobra.Command, args []string) error
 	}
 
 	Logger.Info("Creating new application")
+	client.SetRequestOptions(c8y.DefaultRequestOptions{
+		DryRun: globalFlagDryRun,
+	})
 	application, response, err = client.Application.Create(context.Background(), applicationDetails)
 
 	if err != nil {
@@ -86,17 +89,15 @@ func (n *newServiceUserCmd) doProcedure(cmd *cobra.Command, args []string) error
 
 	// App subscription
 	if len(n.tenants) > 0 {
-		if !globalFlagDryRun {
-			for _, tenant := range n.tenants {
-				Logger.Infof("Subscribing to application in tenant %s", tenant)
-				_, resp, err := client.Tenant.AddApplicationReference(context.Background(), tenant, application.Self)
+		for _, tenant := range n.tenants {
+			Logger.Infof("Subscribing to application in tenant %s", tenant)
+			_, resp, err := client.Tenant.AddApplicationReference(context.Background(), tenant, application.Self)
 
-				if err != nil {
-					if resp != nil && resp.StatusCode == 409 {
-						Logger.Infof("microservice is already enabled")
-					} else {
-						return fmt.Errorf("Failed to subscribe to application. %s", err)
-					}
+			if err != nil {
+				if resp != nil && resp.StatusCode == 409 {
+					Logger.Infof("microservice is already enabled")
+				} else {
+					return fmt.Errorf("Failed to subscribe to application. %s", err)
 				}
 			}
 		}
