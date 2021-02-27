@@ -3,6 +3,7 @@ package cmd
 import (
 	"bytes"
 	"crypto/tls"
+	"errors"
 	"fmt"
 	"io"
 	"math/rand"
@@ -269,6 +270,15 @@ const (
 const SettingsGlobalName = "settings"
 
 func (c *c8yCmd) checkCommandError(err error, w io.Writer) {
+	if errors.Is(err, ErrNoMatchesFound) {
+		// Simulate a 404 error
+		customErr := cmderrors.CommandError{}
+		customErr.StatusCode = 404
+		customErr.ExitCode = 4
+		customErr.Message = err.Error()
+		err = customErr
+	}
+
 	if cErr, ok := err.(cmderrors.CommandError); ok {
 		if cErr.StatusCode == 403 || cErr.StatusCode == 401 {
 			c.Logger.Error(fmt.Sprintf("Authentication failed (statusCode=%d). Try to run set-session again, or check the password", cErr.StatusCode))
@@ -564,6 +574,10 @@ func executeRootCmd() {
 
 		if cErr, ok := err.(cmderrors.CommandError); ok {
 			os.Exit(cErr.ExitCode)
+		}
+		if errors.Is(err, ErrNoMatchesFound) {
+			// 404
+			os.Exit(4)
 		}
 		os.Exit(100)
 	}

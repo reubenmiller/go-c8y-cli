@@ -39,8 +39,14 @@ Describe -Name "c8y errors" {
             $details | Should -MatchObject @{errorType="commandError"; message = "unknown flag: --iiiiid"}
         }
 
-        It "silencies specific status codes as the user knows that error might not occur and is ok with it" {
+        It "silences specific status codes as the user knows that error might not occur and is ok with it" {
             $output = c8y events get --id 0 --silentStatusCodes 404 2>&1
+            $LASTEXITCODE | Should -Be 4
+            $output | Should -BeNullOrEmpty -Because "The user does not want to return any errors"
+        }
+
+        It "silences specific status codes also when reference by name is being used" {
+            $output = c8y devices get --id myNonExistantDevice --silentStatusCodes 404 2>&1
             $LASTEXITCODE | Should -Be 4
             $output | Should -BeNullOrEmpty -Because "The user does not want to return any errors"
         }
