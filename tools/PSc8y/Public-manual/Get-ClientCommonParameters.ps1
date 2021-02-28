@@ -1,5 +1,5 @@
 Function Get-ClientCommonParameters {
-<# 
+<#
 .SYNOPSIS
 Get the common parameters which can be added to a function which extends PSc8y functionality
 
@@ -35,7 +35,7 @@ Inherit common parameters to a custom function. This will add parameters such as
         [string[]]
         $Type
     )
-    
+
     Process {
         $ParentCommand = @(Get-PSCallStack)[1].InvocationInfo.MyCommand
 
@@ -78,7 +78,7 @@ Inherit common parameters to a custom function. This will add parameters such as
         New-DynamicParam -Name NoProxy -Type "switch" -DPDictionary $Dictionary
         New-DynamicParam -Name Session -Type "string" -DPDictionary $Dictionary
         New-DynamicParam -Name Timeout -Type "double" -DPDictionary $Dictionary
-        
+
         # JSON parsing options
         New-DynamicParam -Name AsHashTable -Type "switch" -DPDictionary $Dictionary
         New-DynamicParam -Name AsJSON -Type "switch" -DPDictionary $Dictionary
@@ -102,7 +102,8 @@ Inherit common parameters to a custom function. This will add parameters such as
 
         # Activity logger
         New-DynamicParam -Name NoLog -Type "switch" -DPDictionary $Dictionary
-        
+        New-DynamicParam -Name LogMessage -Type "string" -DPDictionary $Dictionary
+
         # Select
         New-DynamicParam -Name Select -Type "string" -DPDictionary $Dictionary
         # New-DynamicParam -Name Filter -Type "string" -DPDictionary $Dictionary
