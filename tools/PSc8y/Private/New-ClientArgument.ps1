@@ -63,6 +63,11 @@ Function New-ClientArgument {
                         break
                     }
 
+                    { $Value -is [int] } {
+                        $null = $c8yargs.AddRange(@("--${key}=$Value"))
+                        break
+                    }
+
                     # json like values
                     { $key -eq "data" -or $Value -is [hashtable] -or $Value -is [PSCustomObject] } {
                         $ArgValue = ConvertTo-JsonArgument $Value
@@ -126,20 +131,6 @@ Function New-ClientArgument {
         if ($Parameters["AsCSVWithHeader"]) {
             $null = $c8yargs.Add("--csv")
             $null = $c8yargs.Add("--csvHeader")
-        }
-
-        if ($null -ne $Parameters["CurrentPage"]) {
-            $null = $c8yargs.AddRange(@("--currentPage", $CurrentPage))
-        }
-
-        if ($null -ne $Parameters["TotalPages"]) {
-            $null = $c8yargs.AddRange(@("--totalPages", $TotalPages))
-        }
-
-        # Include all pagination results
-        if ($Parameters["IncludeAll"]) {
-            # Write-Warning "IncludeAll operation is currently not implemented"
-            $null = $c8yargs.Add("--includeAll")
         }
 
         # Native confirmation can not be used when piping to the c8y binary
