@@ -18,7 +18,7 @@ Register-ClientArgumentCompleter -Name "Get-MyCustomCommand"
 Register PSc8y argument completion for supported parameters for a custom function called "Get-MyCustomCommand" 
 
 .EXAMPLE
-Register-ClientArgumentCompleter -Name "New-CustomManagedObject" -Force
+Register-ClientArgumentCompleter -Name "New-CustomManagedObject"
 
 Force the registration of argument completers on a function which uses dynamic parameters
 #>
@@ -31,45 +31,27 @@ Force the registration of argument completers on a function which uses dynamic p
             ValueFromPipeline = $true,
             ValueFromPipelineByPropertyName = $true
         )]
-        [string[]]
-        $Name,
+        [object]
+        $Command,
 
-        # Force the registration of all parameter (required when a cmdlet has Dynamic Parameters)
-        [switch]
-        $Force
+        [hashtable]
+        $BoundParameters
     )
 
+    Begin {
+        $script:CompletionMapping = @{
+            "Device" = $script:CompleteDevice
+        }
+    }
+
     Process {
-        foreach ($iCommand in (Get-Command $Name)) {
-
-            if ($Force -or ($null -ne $iCommand.Parameters -and $iCommand.Parameters.ContainsKey("Session"))) {
-                # Session
-                Register-ArgumentCompleter -CommandName $iCommand -ParameterName Session -ScriptBlock {
-                    param ($commandName, $parameterName, $wordToComplete)
-                    $C8ySessionHome = Get-SessionHomePath
-                    Get-ChildItem -Path $C8ySessionHome -Filter "$wordToComplete*.json" -ErrorAction SilentlyContinue -WarningAction SilentlyContinue | ForEach-Object {
-                        [System.Management.Automation.CompletionResult]::new($_.BaseName, $_.BaseName, 'ParameterValue', $_.BaseName)
-                    }
-                }
-            }
-
-            # Template
-            if ($Force -or ($null -ne $iCommand.Parameters -and $iCommand.Parameters.ContainsKey("Template"))) {
-                Register-ArgumentCompleter -CommandName $iCommand -ParameterName Template -ScriptBlock {
-                    param ($commandName, $parameterName, $wordToComplete)
-    
-                    $settings = Get-ClientSetting
-                    $c8yTemplateHome = $settings."settings.template.path"
-                    if (!$c8yTemplateHome) {
-                        return
-                    }
-                    Get-ChildItem -Path $c8yTemplateHome -Recurse -Filter "$wordToComplete*" -ErrorAction SilentlyContinue -WarningAction SilentlyContinue |
-                    ForEach-Object {
-                        if ($_.Extension -match "(jsonnet)$") {
-                            [System.Management.Automation.CompletionResult]::new($_.Name, $_.Name, 'ParameterValue', $_.Name)
-                        }
-                    }
-                }
+        foreach ($name in $BoundParameters.Keys) {
+            if ($script:CompletionMapping.ContainsKey($name)) {
+                Register-ArgumentCompleter `
+                    -CommandName $Command `
+                    -ParameterName $name `
+                    -Force
+                    -ScriptBlock $script:CompletionMapping[$name]
             }
         }
     }

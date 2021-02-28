@@ -44,6 +44,8 @@ Inherit common parameters to a custom function. This will add parameters such as
     )
     
     Process {
+        $ParentCommand = @(Get-PSCallStack)[1].InvocationInfo.MyCommand
+
         $Dictionary = New-Object System.Management.Automation.RuntimeDefinedParameterDictionary
         foreach ($iType in $Type) {
             switch ($iType) {
@@ -67,6 +69,11 @@ Inherit common parameters to a custom function. This will add parameters such as
                 "Template" {
                     New-DynamicParam -Name "Template" -Type "string" -DPDictionary $Dictionary
                     New-DynamicParam -Name "TemplateVars" -Type "string" -DPDictionary $Dictionary
+
+                    # Completions
+                    if ($ParentCommand) {
+                        Register-ArgumentCompleter -CommandName $ParentCommand -ParameterName Template -ScriptBlock $script:CompletionTemplate
+                    }
                 }
             }
         }
@@ -79,7 +86,6 @@ Inherit common parameters to a custom function. This will add parameters such as
         New-DynamicParam -Name Timeout -Type "double" -DPDictionary $Dictionary
         
         # JSON parsing options
-        New-DynamicParam -Name Depth -Type "int" -DPDictionary $Dictionary
         New-DynamicParam -Name AsHashTable -Type "switch" -DPDictionary $Dictionary
         New-DynamicParam -Name AsJSON -Type "switch" -DPDictionary $Dictionary
         New-DynamicParam -Name AsCSV -Type "switch" -DPDictionary $Dictionary
