@@ -70,7 +70,7 @@ Get a list of devices which have been updated more recently than 2020-01-01
         $WithParents
     )
     DynamicParam {
-        Get-ClientCommonParameters -Type "Collection" -BoundParameters $PSBoundParameters
+        Get-ClientCommonParameters -Type "Collection"
     }
 
     Begin {

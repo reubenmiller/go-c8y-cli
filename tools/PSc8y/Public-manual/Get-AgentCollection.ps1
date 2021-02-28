@@ -76,7 +76,7 @@ Get a list of agents which have been updated more recently than 2020-01-01
         }
     }
     DynamicParam {
-        Get-ClientCommonParameters -Type "Collection" -BoundParameters $PSBoundParameters
+        Get-ClientCommonParameters -Type "Collection"
     }
 
     Process {

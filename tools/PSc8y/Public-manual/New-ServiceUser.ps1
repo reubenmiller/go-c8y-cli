@@ -42,7 +42,7 @@ Function New-ServiceUser {
         $Tenants
     )
     DynamicParam {
-        Get-ClientCommonParameters -Type "Create" -BoundParameters $PSBoundParameters
+        Get-ClientCommonParameters -Type "Create"
     }
 
     Begin {

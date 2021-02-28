@@ -54,7 +54,7 @@ Inherit common parameters to a custom function. This will add parameters such as
                     if ($_ -notmatch "Delete") {
                         New-DynamicParam -Name "Data" -Type "object" -DPDictionary $Dictionary
                     }
-                    New-DynamicParam -Name NoAccept -Type "switch" -DPDictionary $Dictionary
+                    New-DynamicParam -Name "NoAccept" -Type "switch" -DPDictionary $Dictionary
                     New-DynamicParam -Name "ProcessingMode" -Type "string" -ValidateSet @("PERSISTENT", "QUIESCENT", "TRANSIENT", "CEP", "") -DPDictionary $Dictionary
                     New-DynamicParam -Name "Force" -Type "switch" -DPDictionary $Dictionary
                 }

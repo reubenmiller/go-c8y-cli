@@ -48,7 +48,7 @@ if the alarm is active and was first created more than 1 day ago.
         $Count
     )
     DynamicParam {
-        Get-ClientCommonParameters -Type "Get" -BoundParameters $PSBoundParameters
+        Get-ClientCommonParameters -Type "Get"
     }
 
     Begin {

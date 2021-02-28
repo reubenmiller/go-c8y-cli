@@ -96,7 +96,7 @@ Create a new managed object but add a custom accept header value
         [string] $HostName
     )
     DynamicParam {
-        Get-ClientCommonParameters -Type "Create", "Template" -BoundParameters $PSBoundParameters
+        Get-ClientCommonParameters -Type "Create", "Template"
     }
 
     Begin {

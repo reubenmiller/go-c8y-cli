@@ -36,7 +36,7 @@ Find all devices with their names starting with 'roomUpperFloor_'
         $WithParents
     )
     DynamicParam {
-        Get-ClientCommonParameters -Type "Collection" -BoundParameters $PSBoundParameters
+        Get-ClientCommonParameters -Type "Collection"
     }
 
     Begin {

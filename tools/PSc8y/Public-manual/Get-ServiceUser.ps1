@@ -27,7 +27,7 @@ Function Get-ServiceUser {
         $Id
     )
     DynamicParam {
-        Get-ClientCommonParameters -Type "Collection" -BoundParameters $PSBoundParameters
+        Get-ClientCommonParameters -Type "Collection"
     }
 
     Begin {

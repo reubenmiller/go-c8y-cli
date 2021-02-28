@@ -36,7 +36,7 @@ Watch all types of notifications for a device for 90 seconds
         $Count
     )
     DynamicParam {
-        Get-ClientCommonParameters -Type "Get" -BoundParameters $PSBoundParameters
+        Get-ClientCommonParameters -Type "Get"
     }
 
     Begin {

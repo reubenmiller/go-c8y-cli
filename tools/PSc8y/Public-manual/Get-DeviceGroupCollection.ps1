@@ -60,7 +60,7 @@ Get a list of devices groups which have been created more recently than 2020-01-
         $WithParents
     )
     DynamicParam {
-        Get-ClientCommonParameters -Type "Get", "Collection" -BoundParameters $PSBoundParameters
+        Get-ClientCommonParameters -Type "Get", "Collection"
     }
 
     Begin {

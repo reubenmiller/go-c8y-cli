@@ -91,7 +91,7 @@ This example is usefuly for local development only, when you want to run the mic
         $SkipSubscription
     )
     DynamicParam {
-        Get-ClientCommonParameters -Type "Create" -BoundParameters $PSBoundParameters
+        Get-ClientCommonParameters -Type "Create"
     }
 
     Begin {
