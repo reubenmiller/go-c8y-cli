@@ -39,6 +39,8 @@ None :)
 
 No unreleased features
 
+* Custom `--logMessage` or `-LogMessage` common parameters which adds a custom string to the activity log (if enabled). It helps the user put a more meaningful entry related to the command.
+
 * Added links to native go command in PowerShell help in the `.LINK` (related links) section
 * `Get-TenantVersion` returns an object instead of a single value.
     ```json
