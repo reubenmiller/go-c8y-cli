@@ -203,6 +203,7 @@ var (
 	globalFlagBatchAbortOnErrorCount int
 	globalFlagFlatten                bool
 	globalFlagPrintErrorsOnStdout    bool
+	globalFlagForce                  bool
 	globalFlagSelect                 []string
 	globalFlagSilentStatusCodes      string
 
@@ -255,6 +256,9 @@ const (
 
 	// SettingsModeCI enable continuous integration mode (this will enable all commands)
 	SettingsModeCI string = "settings.ci"
+
+	// SettingsModeConfirmation sets the confirm mode
+	SettingsModeConfirmation string = "settings.mode.confirmation"
 
 	// SettingsActivityLogPath path where the activity log will be stored
 	SettingsActivityLogPath string = "settings.activityLog.path"
@@ -427,6 +431,8 @@ func configureRootCmd() {
 	rootCmd.PersistentFlags().BoolVar(&globalCSVOutput, "csv", false, "Print output as csv format. comma (,) delimited")
 	rootCmd.PersistentFlags().BoolVar(&globalCSVOutputHeaders, "csvHeader", false, "Include header when in csv output")
 	rootCmd.PersistentFlags().Float64Var(&globalFlagTimeout, "timeout", float64(10*60), "Timeout in seconds")
+
+	rootCmd.PersistentFlags().BoolVarP(&globalFlagForce, "force", "f", false, "Do not prompt for confirmation")
 
 	// Map settings to flags, allowing the user to set the own default settings
 	viper.BindPFlag(SettingsDefaultPageSize, rootCmd.PersistentFlags().Lookup("pageSize"))
@@ -725,11 +731,14 @@ func loadConfiguration() error {
 	bindEnv(SettingsDefaultBatchMaxJobs, 100)
 	bindEnv(SettingsIncludeAllDelayMS, 0)
 	bindEnv(SettingsTemplatePath, "")
+
+	// Mode
 	bindEnv(SettingsModeEnableCreate, false)
 	bindEnv(SettingsModeEnableUpdate, false)
 	bindEnv(SettingsModeEnableDelete, false)
 	bindEnv(SettingsEncryptionEnabled, false)
 	bindEnv(SettingsModeCI, false)
+	bindEnv(SettingsModeConfirmation, "PUT POST DELETE")
 
 	// Activity log settings
 	bindEnv(SettingsActivityLogEnabled, true)
@@ -737,6 +746,24 @@ func loadConfiguration() error {
 	bindEnv(SettingsActivityLogMethodFilter, "GET PUT POST DELETE")
 
 	return nil
+}
+
+func shouldConfirm(methods ...string) bool {
+	if cliConfig.IsCIMode() || globalFlagForce || globalFlagDryRun {
+		return false
+	}
+
+	if len(methods) == 0 {
+		return true
+	}
+
+	confirmMethods := strings.ToUpper(viper.GetString(SettingsModeConfirmation))
+	for _, method := range methods {
+		if strings.Contains(confirmMethods, strings.ToUpper(method)) {
+			return true
+		}
+	}
+	return false
 }
 
 func configureActivityLog() {
@@ -799,6 +826,7 @@ func readConfiguration(cmd *cobra.Command) error {
 	Logger.Infof("%s: %t", SettingsModeEnableUpdate, globalModeEnableUpdate)
 	Logger.Infof("%s: %t", SettingsModeEnableDelete, globalModeEnableDelete)
 	Logger.Infof("%s: %t", SettingsModeEnableBatch, globalModeEnableBatch)
+	Logger.Infof("%s: %s", SettingsModeConfirmation, viper.GetString(SettingsModeConfirmation))
 	Logger.Infof("%s: %d", SettingsDefaultBatchMaxJobs, globalFlagBatchMaxJobs)
 
 	return nil

@@ -129,6 +129,12 @@
                             "title": "Enable delete (DELETE) commands",
                             "description": "Enable/disable delete commands",
                             "type": "boolean"
+                        },
+                        "confirmation": {
+                            "title": "Confirmation mode",
+                            "description": "ConfirmationSpace delimited values of REST Method types which should trigger a confirmation when not using force parameter",
+                            "type": "string",
+                            "default": "PUT POST DELETE"
                         }
                     }
                 },

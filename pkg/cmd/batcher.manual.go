@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"io"
 	"math/rand"
+	"os"
+	"strings"
 	"sync"
 	"sync/atomic"
 	"time"
@@ -13,6 +15,7 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/pkg/iterator"
 	"github.com/reubenmiller/go-c8y-cli/pkg/progressbar"
+	"github.com/reubenmiller/go-c8y-cli/pkg/prompt"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
 )
@@ -151,6 +154,7 @@ func runBatched(requestIterator *RequestIterator, commonOptions CommonCommandOpt
 	}
 
 	jobID := int64(0)
+	skipConfirm := false
 
 	// add jobs async
 	go func() {
@@ -195,9 +199,34 @@ func runBatched(requestIterator *RequestIterator, commonOptions CommonCommandOpt
 			}
 			Logger.Infof("adding job: %d", jobID)
 
-			if jobID == 1 {
-				if commonOptions.Filters != nil && len(commonOptions.Filters.Pluck) > 0 {
-					// fmt.Printf("%s\n", strings.Join(commonOptions.Filters.Pluck, ","))
+			// confirm action
+			if request != nil && !skipConfirm && shouldConfirm(request.Method) {
+				operation := "Execute command"
+				if len(os.Args[1:]) > 1 {
+					operation = fmt.Sprintf("%s %s", os.Args[2], strings.TrimRight(os.Args[1], "s"))
+				}
+				promptMessage := fmt.Sprintf("(job: %d) %s", jobID, operation)
+				confirmResult, err := prompt.Confirm(promptMessage, "tenant "+client.TenantName, "y", false)
+
+				switch confirmResult {
+				case prompt.ConfirmYesToAll:
+					skipConfirm = true
+				case prompt.ConfirmYes:
+					// confirmed
+				case prompt.ConfirmNo:
+					Logger.Warningf("skipping job: %d. %s", jobID, err)
+					activityLogger.LogCustom(err.Error() + ". " + request.Path)
+					results <- err
+					continue
+				case prompt.ConfirmNoToAll:
+					Logger.Warningf("skipping job: %d. %s", jobID, err)
+					activityLogger.LogCustom(err.Error() + ". " + request.Path)
+					Logger.Warning("cancelling all remaining jobs")
+					results <- err
+					break
+				}
+				if confirmResult == prompt.ConfirmNoToAll {
+					break
 				}
 			}
 
@@ -252,7 +281,11 @@ func runBatched(requestIterator *RequestIterator, commonOptions CommonCommandOpt
 			return totalErrors[0]
 		}
 		// aggregate error
-		return cmderrors.NewUserErrorWithExitCode(104, fmt.Sprintf("jobs completed with %d errors. job limit exceeded=%v", total, maxJobsReached))
+		message := fmt.Sprintf("jobs completed with %d errors", total)
+		if maxJobsReached {
+			message += fmt.Sprintf(". job limit exceeded=%v", maxJobsReached)
+		}
+		return cmderrors.NewUserErrorWithExitCode(104, message)
 	}
 	if maxJobsReached {
 		return cmderrors.NewUserErrorWithExitCode(105, fmt.Sprintf("max job limit exceeded. limit=%d", globalFlagBatchMaxJobs))

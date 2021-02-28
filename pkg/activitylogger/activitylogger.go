@@ -76,7 +76,7 @@ func (l *ActivityLogger) GetPath() string {
 }
 
 // LogCommand writes the c8y cli command used to the activity log
-func (l *ActivityLogger) LogCommand(cmd *cobra.Command, args []string, cmdStr string) {
+func (l *ActivityLogger) LogCommand(cmd *cobra.Command, args []string, cmdStr string, messages ...string) {
 	if l.options.Disabled {
 		return
 	}
@@ -84,11 +84,37 @@ func (l *ActivityLogger) LogCommand(cmd *cobra.Command, args []string, cmdStr st
 	defer l.mu.Unlock()
 
 	argc, _ := json.Marshal(os.Args[1:])
+	if len(messages) > 0 {
+		l.w.Write([]byte(fmt.Sprintf(
+			`{"time":"%s","ctx":"%s","type":"command","arguments":%s,"message":"%s"}`+"\n",
+			time.Now().Format(time.RFC3339Nano),
+			l.contextID,
+			argc,
+			strings.Join(messages, ". "),
+		)))
+	} else {
+		l.w.Write([]byte(fmt.Sprintf(
+			`{"time":"%s","ctx":"%s","type":"command","arguments":%s}`+"\n",
+			time.Now().Format(time.RFC3339Nano),
+			l.contextID,
+			argc,
+		)))
+	}
+}
+
+// LogCustom writes a custom entry to the activity log
+func (l *ActivityLogger) LogCustom(message string) {
+	if l.options.Disabled {
+		return
+	}
+	l.mu.Lock()
+	defer l.mu.Unlock()
+
 	l.w.Write([]byte(fmt.Sprintf(
-		`{"time":"%s","ctx":"%s","type":"command","arguments":%s}`+"\n",
+		`{"time":"%s","ctx":"%s","type":"user","message":"%s"}`+"\n",
 		time.Now().Format(time.RFC3339Nano),
 		l.contextID,
-		argc,
+		message,
 	)))
 }
 
