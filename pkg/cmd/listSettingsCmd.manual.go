@@ -53,6 +53,10 @@ func (n *listSettingsCmd) listSettings(cmd *cobra.Command, args []string) error 
 	settings[SettingsEncryptionEnabled] = cliConfig.IsEncryptionEnabled()
 	settings[SettingsModeCI] = globalCIMode
 
+	if activityLogger != nil {
+		settings[SettingsActivityLogPath] = activityLogger.GetPath()
+	}
+
 	responseText, err := json.Marshal(settings)
 
 	if err != nil {
