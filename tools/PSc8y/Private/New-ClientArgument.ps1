@@ -1,11 +1,11 @@
 Function New-ClientArgument {
-    <# 
+    <#
     .SYNOPSIS
     Run a Cumulocity client command using the c8y binary. Only intended for internal usage only
-    
+
     .DESCRIPTION
     The command is a wrapper around the c8y binary which is used to send the rest request to Cumulocity.
-    
+
     The result will also be parsed, and Powershell type information will be added to the result set, so
     only relevant information is shown.
     #>
@@ -75,7 +75,7 @@ Function New-ClientArgument {
                         $items = Expand-Id $Value
                         if ($items.Count -eq 1) {
                             $null = $c8yargs.Add("--${key}=$($items -join ',')")
-                            
+
                         } elseif ($items.Count -gt 1) {
                             $null = $c8yargs.Add("--${key}=`"$($items -join ',')`"")
                         }
@@ -95,11 +95,11 @@ Function New-ClientArgument {
                 }
             }
         }
-        
+
         if ($WhatIfPreference) {
             $null = $c8yargs.Add("--dry")
         }
-        
+
         # Always use verbose as information is extracted from it
         if ($VerbosePreference) {
             $null = $c8yargs.Add("--verbose")
@@ -108,7 +108,7 @@ Function New-ClientArgument {
         if ($Parameters["WithTotalPages"]) {
             $null = $c8yargs.Add("--raw")
         }
-        
+
         if ($Parameters["Color"]) {
             $null = $c8yargs.Add("--noColor=false")
         } elseif ($Parameters["NoColor"]) {
@@ -127,21 +127,25 @@ Function New-ClientArgument {
             $null = $c8yargs.Add("--csv")
             $null = $c8yargs.Add("--csvHeader")
         }
-        
+
         if ($null -ne $Parameters["CurrentPage"]) {
             $null = $c8yargs.AddRange(@("--currentPage", $CurrentPage))
         }
-        
+
         if ($null -ne $Parameters["TotalPages"]) {
             $null = $c8yargs.AddRange(@("--totalPages", $TotalPages))
         }
-        
+
         # Include all pagination results
         if ($Parameters["IncludeAll"]) {
             # Write-Warning "IncludeAll operation is currently not implemented"
             $null = $c8yargs.Add("--includeAll")
         }
-        
+
+        # Native confirmation can not be used when piping to the c8y binary
+        # as the stdin is already be redirected to!
+        $null = $c8yargs.Add("--force")
+
         $c8ycli = Get-ClientBinary
         Write-Verbose "binary: $c8ycli"
         Write-Verbose ("command: c8y $Command {0}" -f $c8yargs -join " ")
