@@ -25,15 +25,13 @@ c8y inventory create --data "./datapoint.largeint.json"
 
 ## Failing tests
 
-./tools/PSc8y/reports/Failed_Wait-Operation.manual.Tests_Pester.xml
-./tools/PSc8y/reports/Failed_ErrorHandling.manual.Tests_Pester.xml
+None :)
 
 ## TODO
 
-* Errors should return no response in powershell? This is currently the reason for the above failed tests. The c8y raw error is being returned
-  * Currently errors are also no sorted into client errors or server errors
+* Display session information after selecting a session (like in powershell but natively)
+* Option to not store the password in the session. It should force the user to use their password each time (then delete the password value?)
 * Convert hashtable to json, i.e. or reject it automatically? replace ";" with ",", and replace "@{" with "{", "=" with ":"
-* Check if progress can be written to stderr when using variable assignment (i.e. d=$( seq 100 | c8y devices create --progress --dry --delay 1000 ))
 
 * Add confirmation prompts to c8y binary
     ```json
@@ -70,6 +68,7 @@ c8y inventory create --data "./datapoint.largeint.json"
 
 No unreleased features
 
+* Added links to native go command in PowerShell help in the `.LINK` (related links) section
 * `Get-TenantVersion` returns an object instead of a single value.
     ```json
     {
