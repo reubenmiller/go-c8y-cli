@@ -74,6 +74,7 @@ Inherit common parameters to a custom function. This will add parameters such as
         # Common parameters
         New-DynamicParam -Name Raw -Type "switch" -DPDictionary $Dictionary
         New-DynamicParam -Name OutputFile -Type "string" -DPDictionary $Dictionary
+        New-DynamicParam -Name Proxy -Type "switch" -DPDictionary $Dictionary
         New-DynamicParam -Name NoProxy -Type "switch" -DPDictionary $Dictionary
         New-DynamicParam -Name Session -Type "string" -DPDictionary $Dictionary
         New-DynamicParam -Name Timeout -Type "double" -DPDictionary $Dictionary
@@ -83,6 +84,7 @@ Inherit common parameters to a custom function. This will add parameters such as
         New-DynamicParam -Name AsJSON -Type "switch" -DPDictionary $Dictionary
         New-DynamicParam -Name AsCSV -Type "switch" -DPDictionary $Dictionary
         New-DynamicParam -Name AsCSVWithHeader -Type "switch" -DPDictionary $Dictionary
+        New-DynamicParam -Name Flatten -Type "switch" -DPDictionary $Dictionary
         New-DynamicParam -Name Compress -Type "switch" -DPDictionary $Dictionary
         New-DynamicParam -Name Pretty -Type "switch" -DPDictionary $Dictionary
         New-DynamicParam -Name NoColor -Type "switch" -DPDictionary $Dictionary
@@ -97,6 +99,9 @@ Inherit common parameters to a custom function. This will add parameters such as
         New-DynamicParam -Name Delay -Type "int" -DPDictionary $Dictionary
         New-DynamicParam -Name MaxJobs -Type "int" -DPDictionary $Dictionary
         New-DynamicParam -Name Progress -Type "switch" -DPDictionary $Dictionary
+
+        # Activity logger
+        New-DynamicParam -Name NoLog -Type "switch" -DPDictionary $Dictionary
         
         # Select
         New-DynamicParam -Name Select -Type "string" -DPDictionary $Dictionary
