@@ -102,7 +102,7 @@ Describe -Name "powershell pipes" {
         It "can stream include results to a downstream command in json format" {
             $env:C8Y_SETTINGS_INCLUDEALL_PAGESIZE = 10
             $env:C8Y_SETTINGS_INCLUDEALL_DELAYMS = 1000
-            $output = devices -IncludeAll -AsJSON | batch | Get-Device -Verbose -Delay 0 -Workers 5 -WhatIf 2>&1
+            $output = devices -IncludeAll -AsJSON -TotalPages 3 | batch | Get-Device -Verbose -Delay 0 -Workers 5 -WhatIf 2>&1
             $LASTEXITCODE | Should -BeExactly 0
             $output -match "Loaded session:" | Should -HaveCount 1 -Because "all gets should be executed by one c8y call"
             $output | Should -ContainRequest "GET /inventory/managedObjects" -Minimum 5 -Maximum 10000
