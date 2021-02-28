@@ -192,7 +192,7 @@ var (
 	globalFlagProxy                  string
 	globalFlagNoProxy                bool
 	globalFlagNoLog                  bool
-	globalFlagUserActivityLogEntry   string
+	globalFlagActivityLogMessage     string
 	globalFlagTimeout                float64
 	globalFlagUseTenantPrefix        bool
 	globalUseNonDefaultPageSize      bool
@@ -326,7 +326,7 @@ func (c *c8yCmd) checkSessionExists(cmd *cobra.Command, args []string) error {
 
 	// only setup activity log after the global config
 	configureActivityLog()
-	activityLogger.LogCommand(cmd, args, cmdStr, globalFlagUserActivityLogEntry)
+	activityLogger.LogCommand(cmd, args, cmdStr, globalFlagActivityLogMessage)
 
 	localCmds := []string{
 		"completion",
@@ -416,7 +416,7 @@ func configureRootCmd() {
 
 	// Activity log
 	rootCmd.PersistentFlags().BoolVar(&globalFlagNoLog, "noLog", false, "Disables the activity log for the current command")
-	rootCmd.PersistentFlags().StringVarP(&globalFlagUserActivityLogEntry, "logMessage", "l", "", "Add custom message to the activity log")
+	rootCmd.PersistentFlags().StringVarP(&globalFlagActivityLogMessage, "logMessage", "l", "", "Add custom message to the activity log")
 
 	// Concurrency
 	rootCmd.PersistentFlags().IntVar(&globalFlagBatchWorkers, "workers", 1, "Number of workers")
