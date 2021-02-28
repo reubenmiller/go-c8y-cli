@@ -7,6 +7,9 @@ Get collection of tenants
 .DESCRIPTION
 Get collection of tenants
 
+.LINK
+c8y tenants list
+
 .EXAMPLE
 PS> Get-TenantCollection
 

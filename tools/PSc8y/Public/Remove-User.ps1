@@ -9,6 +9,9 @@ Delete a user from the a tenant. This will remove the user completely from the t
 Alternatively a user can be disabled via updating the users properties instead of deleting the user.
 
 
+.LINK
+c8y users delete
+
 .EXAMPLE
 PS> Remove-User -Id $User.id
 

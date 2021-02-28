@@ -7,6 +7,9 @@ Delete child device reference
 .DESCRIPTION
 Delete child device reference
 
+.LINK
+c8y inventoryReferences unassignChildDevice
+
 .EXAMPLE
 PS> Remove-ChildDeviceFromDevice -Device $Device.id -ChildDevice $ChildDevice.id
 

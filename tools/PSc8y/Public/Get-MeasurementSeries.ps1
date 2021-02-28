@@ -7,6 +7,9 @@ Get a collection of measurements based on filter parameters
 .DESCRIPTION
 Get a collection of measurements based on filter parameters
 
+.LINK
+c8y measurements getSeries
+
 .EXAMPLE
 PS> Get-MeasurementSeries -Device $Device.id -Series "c8y_Temperature.T" -DateFrom "1970-01-01" -DateTo "0s"
 

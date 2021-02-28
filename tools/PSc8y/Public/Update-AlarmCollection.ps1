@@ -7,6 +7,9 @@ Update a collection of alarms. Currently only the status of alarms can be change
 .DESCRIPTION
 Update the status of a collection of alarms by using a filter
 
+.LINK
+c8y alarms updateCollection
+
 .EXAMPLE
 PS> Update-AlarmCollection -Device $Device.id -Status ACTIVE -NewStatus ACKNOWLEDGED
 

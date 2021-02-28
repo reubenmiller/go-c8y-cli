@@ -7,6 +7,9 @@ Get collection of tenant options
 .DESCRIPTION
 Get collection of tenant options
 
+.LINK
+c8y tenantOptions list
+
 .EXAMPLE
 PS> Get-TenantOptionCollection
 

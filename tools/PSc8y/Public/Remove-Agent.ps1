@@ -9,6 +9,9 @@ Delete an agent from the platform. This will delete all data associated to the a
 (i.e. alarms, events, operations and measurements)
 
 
+.LINK
+c8y agents delete
+
 .EXAMPLE
 PS> Remove-Agent -Id $agent.id
 

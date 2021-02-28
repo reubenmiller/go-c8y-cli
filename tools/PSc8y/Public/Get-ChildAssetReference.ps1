@@ -7,6 +7,9 @@ Get managed object child asset reference
 .DESCRIPTION
 Get managed object child asset reference
 
+.LINK
+c8y inventoryReferences getChildAsset
+
 .EXAMPLE
 PS> Get-ChildAssetReference -Asset $Agent.id -Reference $Ref.id
 

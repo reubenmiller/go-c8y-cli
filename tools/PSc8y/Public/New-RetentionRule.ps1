@@ -8,6 +8,9 @@ New retention rule
 Create a new retention rule to managed when data is deleted in the tenant
 
 
+.LINK
+c8y retentionRules create
+
 .EXAMPLE
 PS> New-RetentionRule -DataType ALARM -MaximumAge 180
 

@@ -7,6 +7,9 @@ Get an application
 .DESCRIPTION
 Get an application by its id or name
 
+.LINK
+c8y applications get
+
 .EXAMPLE
 PS> Get-Application -Id $App.id
 

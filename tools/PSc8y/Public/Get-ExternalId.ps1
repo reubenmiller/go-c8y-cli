@@ -8,6 +8,9 @@ Get external id
 Get an external identity object. An external identify will include the reference to a single device managed object
 
 
+.LINK
+c8y identity get
+
 .EXAMPLE
 PS> Get-ExternalId -Type "my_SerialNumber" -Name "myserialnumber"
 

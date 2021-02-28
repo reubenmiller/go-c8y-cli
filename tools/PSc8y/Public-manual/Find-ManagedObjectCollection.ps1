@@ -7,6 +7,9 @@ Get a collection of managedObjects based on Cumulocity query language
 .DESCRIPTION
 Get a collection of managedObjects based on Cumulocity query language
 
+.LINK
+c8y inventory find
+
 .EXAMPLE
 PS> Find-ManagedObjectCollection -Query "name eq 'roomUpperFloor_*'"
 Find all devices with their names starting with 'roomUpperFloor_'

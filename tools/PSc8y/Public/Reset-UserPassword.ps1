@@ -7,6 +7,9 @@ Reset a user's password
 .DESCRIPTION
 The password can be reset either by issuing a password reset email (default), or be specifying a new password.
 
+.LINK
+c8y users resetUserPassword
+
 .EXAMPLE
 PS> Reset-UserPassword -Id $User.id -WhatIf 2>&1
 

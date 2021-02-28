@@ -9,6 +9,9 @@ The passphrase is used to encrypt sensitive information such as passwords and au
 The passphrase is saved in an environment variable where it used for all c8y commands to decrypt
 the sensitive information.
 
+.LINK
+c8y sessions checkPassphrase
+
 .EXAMPLE
 Test-ClientPassphrase
 

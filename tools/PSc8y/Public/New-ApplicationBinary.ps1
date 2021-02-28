@@ -12,6 +12,9 @@ For the microservice application, the zip file must consist of    * cumulocity.j
 For the web application, the zip file must include index.html in the root directory.
 
 
+.LINK
+c8y applications createBinary
+
 .EXAMPLE
 PS> New-ApplicationBinary -Id $App.id -File $MicroserviceZip
 

@@ -8,6 +8,9 @@ Delete device group
 Delete an existing device group, and optional
 
 
+.LINK
+c8y devices deleteGroup
+
 .EXAMPLE
 PS> Remove-DeviceGroup -Id $group.id
 

@@ -7,6 +7,9 @@ Get a collection of bulk operations
 .DESCRIPTION
 Get a collection of bulk operations
 
+.LINK
+c8y bulkOperations list
+
 .EXAMPLE
 PS> Get-BulkOperationCollection
 

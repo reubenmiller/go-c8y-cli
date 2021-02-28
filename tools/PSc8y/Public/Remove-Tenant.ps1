@@ -7,6 +7,9 @@ Delete tenant
 .DESCRIPTION
 Delete tenant
 
+.LINK
+c8y tenants delete
+
 .EXAMPLE
 PS> Remove-Tenant -Id mycompany
 

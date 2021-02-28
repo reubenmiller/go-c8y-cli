@@ -7,6 +7,9 @@ Get a new device requests
 .DESCRIPTION
 Get a new device requests
 
+.LINK
+c8y deviceCredentials getNewDeviceRequest
+
 .EXAMPLE
 PS> Get-DeviceRequest -Id "010af8dd0c102"
 

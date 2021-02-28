@@ -7,6 +7,9 @@ Delete a new device requests
 .DESCRIPTION
 Delete a new device requests
 
+.LINK
+c8y deviceCredentials deleteNewDeviceRequest
+
 .EXAMPLE
 PS> Remove-DeviceRequest -Id "$serial_91019192078"
 

@@ -6,6 +6,9 @@ Create a new Cumulocity Session
 .DESCRIPTION
 Create a new Cumulocity session which can be used by the cmdlets. The new session will be automatically activated.
 
+.LINK
+c8y sessions create
+
 .EXAMPLE
 New-Session -Name "develop" -Host "my-tenant-name.eu-latest.cumulocity.com"
 

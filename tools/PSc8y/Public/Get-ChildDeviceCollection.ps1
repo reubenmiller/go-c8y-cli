@@ -7,6 +7,9 @@ Get a collection of managedObjects child references
 .DESCRIPTION
 Get a collection of managedObjects child references
 
+.LINK
+c8y inventoryReferences listChildDevices
+
 .EXAMPLE
 PS> Get-ChildDeviceCollection -Device $Device.id
 

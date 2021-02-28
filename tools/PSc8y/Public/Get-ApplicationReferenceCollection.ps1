@@ -7,6 +7,9 @@ Get a collection of application references on a tenant
 .DESCRIPTION
 Get a collection of application references on a tenant
 
+.LINK
+c8y tenants listReferences
+
 .EXAMPLE
 PS> Get-ApplicationReferenceCollection -Tenant mycompany
 

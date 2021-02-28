@@ -7,6 +7,9 @@ Get a collection of external ids based on filter parameters
 .DESCRIPTION
 Get a collection of external ids based on filter parameters
 
+.LINK
+c8y identity list
+
 .EXAMPLE
 PS> Get-ExternalIdCollection -Device $Device.id
 

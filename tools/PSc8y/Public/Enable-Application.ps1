@@ -7,6 +7,9 @@ Enable application on tenant
 .DESCRIPTION
 Enable application on tenant
 
+.LINK
+c8y tenants enableApplication
+
 .EXAMPLE
 PS> Enable-Application -Tenant mycompany -Application myMicroservice
 

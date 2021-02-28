@@ -6,6 +6,9 @@ Get the active Cumulocity Session
 .DESCRIPTION
 Get the details about the active Cumulocity session which is used by all cmdlets
 
+.LINK
+c8y sessions get
+
 .EXAMPLE
 Get-Session
 

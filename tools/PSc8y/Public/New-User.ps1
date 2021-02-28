@@ -7,6 +7,9 @@ Create a new user within the collection
 .DESCRIPTION
 This command can be used to grant a new user to the tenant
 
+.LINK
+c8y users create
+
 .EXAMPLE
 PS> New-user -Username "$Username" -Password "$NewPassword"
 

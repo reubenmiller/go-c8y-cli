@@ -7,6 +7,9 @@ Unassign/Remove role from a user
 .DESCRIPTION
 Unassign/Remove role from a user
 
+.LINK
+c8y userRoles deleteRoleFromUser
+
 .EXAMPLE
 PS> Remove-RoleFromUser -User $User.id -Role "ROLE_MEASUREMENT_READ"
 

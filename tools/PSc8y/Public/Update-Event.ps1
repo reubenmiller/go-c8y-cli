@@ -7,6 +7,9 @@ Update an event
 .DESCRIPTION
 Update an event
 
+.LINK
+c8y events update
+
 .EXAMPLE
 PS> Update-Event -Id $Event.id -Text "example text 1"
 

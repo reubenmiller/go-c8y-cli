@@ -7,6 +7,9 @@ Update application meta information
 .DESCRIPTION
 Update an application by its id
 
+.LINK
+c8y applications update
+
 .EXAMPLE
 PS> Update-Application -Id $App.name -Availability "MARKET"
 

@@ -6,6 +6,9 @@ Watch realtime managedObjects
 .DESCRIPTION
 Watch realtime managedObjects
 
+.LINK
+c8y inventory subscribe
+
 .EXAMPLE
 PS> Watch-ManagedObject -Device 12345
 Watch all managedObjects for a device

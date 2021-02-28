@@ -6,6 +6,9 @@ Get a collection of device groups
 .DESCRIPTION
 Get a collection of device groups. Device groups are used to arrange devices together.
 
+.LINK
+c8y devices listDeviceGroups
+
 .EXAMPLE
 Get-DeviceGroupCollection -Name *Room*
 

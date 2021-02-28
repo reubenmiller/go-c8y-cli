@@ -8,6 +8,9 @@ Update retention rule
 Update an existing retentule rule, i.e. change maximum number of days or the data type.
 
 
+.LINK
+c8y retentionRules update
+
 .EXAMPLE
 PS> Update-RetentionRule -Id $RetentionRule.id -DataType MEASUREMENT -FragmentType "custom_FragmentType"
 

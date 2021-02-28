@@ -7,6 +7,9 @@ Get event/s
 .DESCRIPTION
 Get an event by id
 
+.LINK
+c8y events get
+
 .EXAMPLE
 PS> Get-Event -Id {{ NewEvent }}
 

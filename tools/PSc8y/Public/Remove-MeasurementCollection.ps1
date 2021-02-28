@@ -7,6 +7,9 @@ Delete a collection of measurements
 .DESCRIPTION
 Delete measurements using a filter
 
+.LINK
+c8y measurements deleteCollection
+
 .EXAMPLE
 PS> Remove-MeasurementCollection -Device $Measurement.source.id
 

@@ -6,6 +6,9 @@ Get a collection of devices
 .DESCRIPTION
 Get a collection of devices in Cumulocity by using the inventory API.
 
+.LINK
+c8y devices list
+
 .EXAMPLE
 Get-DeviceCollection -Name *sensor*
 

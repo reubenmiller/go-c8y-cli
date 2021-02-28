@@ -7,6 +7,9 @@ Create a new external id
 .DESCRIPTION
 Create a new external id
 
+.LINK
+c8y identity create
+
 .EXAMPLE
 PS> New-ExternalId -Device $Device.id -Type "$my_SerialNumber" -Name "myserialnumber"
 

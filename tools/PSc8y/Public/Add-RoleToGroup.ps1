@@ -7,6 +7,9 @@ Add role to a group
 .DESCRIPTION
 Assign a role to a user group
 
+.LINK
+c8y userRoles addRoleToGroup
+
 .EXAMPLE
 PS> Add-RoleToGroup -Group "${NamePattern}*" -Role "*ALARM_*"
 

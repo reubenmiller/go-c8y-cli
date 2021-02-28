@@ -7,6 +7,9 @@ Delete measurement/s
 .DESCRIPTION
 Delete individual measurements
 
+.LINK
+c8y measurements delete
+
 .EXAMPLE
 PS> Remove-Measurement -id $Measurement.id
 

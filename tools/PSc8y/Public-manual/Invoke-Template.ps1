@@ -6,6 +6,9 @@ Function Invoke-Template {
     .DESCRIPTION
     Execute a jsonnet data template and show the output of the template. Useful when developing new templates
     
+    .LINK
+    c8y template execute
+
     .EXAMPLE
     PS> Invoke-Template -Template ./template.jsonnet
     

@@ -6,6 +6,9 @@ Watch realtime events
 .DESCRIPTION
 Watch realtime events
 
+.LINK
+c8y events subscribe
+
 .EXAMPLE
 PS> Watch-Event -Device 12345
 Watch all events for a device

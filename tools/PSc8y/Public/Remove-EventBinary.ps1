@@ -8,6 +8,9 @@ Delete event binary
 Delete a binary which has been attached to an event
 
 
+.LINK
+c8y events deleteBinary
+
 .EXAMPLE
 PS> Remove-EventBinary -Id $Event.id
 

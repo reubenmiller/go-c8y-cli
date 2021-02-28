@@ -8,6 +8,9 @@ Get current application
 Getting the current application only works when using bootstrap credentials from an application (not user credentials)
 
 
+.LINK
+c8y currentApplication get
+
 .EXAMPLE
 PS> Get-CurrentApplication
 

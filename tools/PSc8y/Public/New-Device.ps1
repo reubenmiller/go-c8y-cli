@@ -8,6 +8,9 @@ Create a device
 Create a device (managed object) with the special c8y_IsDevice fragment.
 
 
+.LINK
+c8y devices create
+
 .EXAMPLE
 PS> New-Device -Name $DeviceName
 

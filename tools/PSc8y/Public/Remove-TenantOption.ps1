@@ -7,6 +7,9 @@ Delete tenant option
 .DESCRIPTION
 Delete tenant option
 
+.LINK
+c8y tenantOptions delete
+
 .EXAMPLE
 PS> Remove-TenantOption -Category "c8y_cli_tests" -Key "$option3"
 

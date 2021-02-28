@@ -7,6 +7,9 @@ Create a new operation
 .DESCRIPTION
 Create a new operation for an agent or device
 
+.LINK
+c8y operations create
+
 .EXAMPLE
 PS> New-Operation -Device $device.id -Description "Restart device" -Data @{ c8y_Restart = @{} }
 

@@ -8,6 +8,9 @@ Get supported operations of a device
 Returns a list of supported operations (fragments) for a device. The supported fragments list is returned from the c8y_SupportedOperations fragment of the device managed object.
 
 
+.LINK
+c8y devices getSupportedOperations
+
 .EXAMPLE
 PS> Get-SupportedOperations -Device $device.id
 

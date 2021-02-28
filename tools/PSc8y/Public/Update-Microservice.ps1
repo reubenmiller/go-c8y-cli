@@ -8,6 +8,9 @@ Update microservice meta information
 Update microservice properties such as availability, context path etc.
 
 
+.LINK
+c8y microservices update
+
 .EXAMPLE
 PS> Update-Microservice -Id $App.id -Availability "MARKET"
 

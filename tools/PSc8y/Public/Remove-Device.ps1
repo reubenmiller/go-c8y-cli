@@ -8,6 +8,9 @@ Delete device
 Delete an existing device by id or name. Deleting the object will remove all of its data (i.e. alarms, events, operations and measurements)
 
 
+.LINK
+c8y devices delete
+
 .EXAMPLE
 PS> Remove-Device -Id $device.id
 

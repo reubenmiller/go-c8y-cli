@@ -7,6 +7,9 @@ Disable application on tenant
 .DESCRIPTION
 Disable application on tenant
 
+.LINK
+c8y tenants disableApplication
+
 .EXAMPLE
 PS> Disable-Application -Tenant mycompany -Application myMicroservice
 

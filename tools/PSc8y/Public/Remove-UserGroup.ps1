@@ -7,6 +7,9 @@ Delete a user group
 .DESCRIPTION
 Delete a user group
 
+.LINK
+c8y userGroups delete
+
 .EXAMPLE
 PS> Remove-UserGroup -Id $Group.id
 

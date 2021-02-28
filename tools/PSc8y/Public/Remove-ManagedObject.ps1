@@ -7,6 +7,9 @@ Delete inventory/s
 .DESCRIPTION
 Delete a managed object by id
 
+.LINK
+c8y inventory delete
+
 .EXAMPLE
 PS> Remove-ManagedObject -Id $mo.id
 

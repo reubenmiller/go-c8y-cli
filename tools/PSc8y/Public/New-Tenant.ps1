@@ -7,6 +7,9 @@ New tenant
 .DESCRIPTION
 New tenant
 
+.LINK
+c8y tenants create
+
 .EXAMPLE
 PS> New-Tenant -Company "mycompany" -Domain "mycompany" -AdminName "admin" -Password "mys3curep9d8"
 

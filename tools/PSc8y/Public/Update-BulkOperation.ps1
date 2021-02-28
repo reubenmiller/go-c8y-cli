@@ -7,6 +7,9 @@ Update bulk operation
 .DESCRIPTION
 Update bulk operation. Making update on a started bulk operation cancels it and creates/schedules a new one.
 
+.LINK
+c8y bulkOperations update
+
 .EXAMPLE
 PS> Update-BulkOperation -Id $BulkOp.id -CreationRamp 1.5
 

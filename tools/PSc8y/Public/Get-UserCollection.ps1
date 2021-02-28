@@ -7,6 +7,9 @@ Get a collection of users based on filter parameters
 .DESCRIPTION
 Get a collection of users based on filter parameters
 
+.LINK
+c8y users list
+
 .EXAMPLE
 PS> Get-UserCollection
 

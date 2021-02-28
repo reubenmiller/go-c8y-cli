@@ -7,6 +7,9 @@ Get user by username
 .DESCRIPTION
 Get the user details by referencing their username instead of id
 
+.LINK
+c8y users getUserByName
+
 .EXAMPLE
 PS> Get-UserByName -Name $User.userName
 

@@ -7,6 +7,9 @@ Update current application
 .DESCRIPTION
 Required authentication with bootstrap user
 
+.LINK
+c8y currentApplication update
+
 .EXAMPLE
 PS> Update-CurrentApplication -Data @{ mycustomProp = @{ value1 = 1}}
 

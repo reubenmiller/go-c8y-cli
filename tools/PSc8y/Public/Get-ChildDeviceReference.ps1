@@ -7,6 +7,9 @@ Get managed object child device reference
 .DESCRIPTION
 Get managed object child device reference
 
+.LINK
+c8y inventoryReferences getChildDevice
+
 .EXAMPLE
 PS> Get-ChildDeviceReference -Device $Agent.id -Reference $Ref.id
 

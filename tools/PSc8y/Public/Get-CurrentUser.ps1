@@ -7,6 +7,9 @@ Get user
 .DESCRIPTION
 Get the user representation associated with the current credentials used by the request
 
+.LINK
+c8y users getCurrentUser
+
 .EXAMPLE
 PS> Get-CurrentUser
 

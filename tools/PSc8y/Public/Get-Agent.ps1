@@ -7,6 +7,9 @@ Get agent
 .DESCRIPTION
 Get an agent's managed object representation
 
+.LINK
+c8y agents get
+
 .EXAMPLE
 PS> Get-Agent -Id $agent.id
 

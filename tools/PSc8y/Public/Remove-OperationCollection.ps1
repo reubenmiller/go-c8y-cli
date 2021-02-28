@@ -8,6 +8,9 @@ Delete a collection of operations
 Delete a collection of operations using a set of filter criteria. Be careful when deleting operations. Where possible update operations to FAILED (with a failure reason) instead of deleting them as it is easier to track.
 
 
+.LINK
+c8y operations deleteCollection
+
 .EXAMPLE
 PS> Remove-OperationCollection -Device "{{ randomdevice }}" -Status PENDING
 

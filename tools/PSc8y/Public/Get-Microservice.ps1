@@ -7,6 +7,9 @@ Get microservice
 .DESCRIPTION
 Get an existing microservice by id or name
 
+.LINK
+c8y microservices get
+
 .EXAMPLE
 PS> Get-Microservice -Id $App.id
 

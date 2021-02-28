@@ -7,6 +7,9 @@ Update agent
 .DESCRIPTION
 Update properties of an agent
 
+.LINK
+c8y agents update
+
 .EXAMPLE
 PS> Update-Agent -Id $agent.id -NewName "MyNewName"
 

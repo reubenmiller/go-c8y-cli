@@ -6,6 +6,9 @@ Watch realtime measurements
 .DESCRIPTION
 Watch realtime measurements
 
+.LINK
+c8y measurements subscribe
+
 .EXAMPLE
 PS> Watch-Measurement -Device 12345
 Watch all measurements for a device

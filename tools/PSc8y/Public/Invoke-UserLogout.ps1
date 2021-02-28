@@ -7,6 +7,9 @@ Log out the current user
 .DESCRIPTION
 Logout the current user. This will invalidate the token associated with the user when using OAUTH_INTERNAL
 
+.LINK
+c8y users logout
+
 .EXAMPLE
 PS> Invoke-UserLogout
 

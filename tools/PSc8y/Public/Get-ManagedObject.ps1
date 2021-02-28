@@ -7,6 +7,9 @@ Get managed objects/s
 .DESCRIPTION
 Get a managed object by id
 
+.LINK
+c8y inventory get
+
 .EXAMPLE
 PS> Get-ManagedObject -Id $mo.id
 

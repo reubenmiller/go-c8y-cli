@@ -7,6 +7,9 @@ Get system option
 .DESCRIPTION
 Get a system option by category and key
 
+.LINK
+c8y systemOptions get
+
 .EXAMPLE
 PS> Get-SystemOption -Category "system" -Key "version"
 

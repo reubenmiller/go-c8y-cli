@@ -7,6 +7,9 @@ Get information about all groups that a user is a member of
 .DESCRIPTION
 Get information about all groups that a user is a member of
 
+.LINK
+c8y users listUserMembership
+
 .EXAMPLE
 PS> Get-UserMembershipCollection -Id $User.id
 

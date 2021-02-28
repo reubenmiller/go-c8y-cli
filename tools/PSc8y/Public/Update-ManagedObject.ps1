@@ -7,6 +7,9 @@ Update inventory
 .DESCRIPTION
 Update a managed object by id
 
+.LINK
+c8y inventory update
+
 .EXAMPLE
 PS> Update-ManagedObject -Id $mo.id -Data @{ com_my_props = @{ value = 1 } }
 

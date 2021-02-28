@@ -6,6 +6,9 @@ Get a collection of agents
 .DESCRIPTION
 Get a collection of agent in the current tenant
 
+.LINK
+c8y agents list
+
 .EXAMPLE
 Get-AgentCollection -Name *sensor*
 
@@ -82,11 +85,11 @@ Get a list of agents which have been updated more recently than 2020-01-01
     Process {
 
         if ($ClientOptions.ConvertToPS) {
-            ,(c8y devices list $c8yargs `
+            ,(c8y agents list $c8yargs `
             | ConvertFrom-ClientOutput @TypeOptions)
         }
         else {
-            c8y devices list $c8yargs
+            c8y agents list $c8yargs
         }
     }
 }

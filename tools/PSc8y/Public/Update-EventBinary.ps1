@@ -8,6 +8,9 @@ Update event binary
 Update an existing event binary
 
 
+.LINK
+c8y events updateBinary
+
 .EXAMPLE
 PS> Update-EventBinary -Id $Event.id -File $TestFile
 

@@ -7,6 +7,9 @@ Add a managed object as a child addition to another existing managed object
 .DESCRIPTION
 Add a managed object as a child addition to another existing managed object
 
+.LINK
+c8y inventoryReferences createChildAddition
+
 .EXAMPLE
 PS> Add-ChildAddition -Id $software.id -NewChild $version.id
 

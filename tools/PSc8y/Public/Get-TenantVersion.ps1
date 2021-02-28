@@ -7,6 +7,9 @@ Get tenant platform (backend) version
 .DESCRIPTION
 Get tenant platform (backend) version
 
+.LINK
+c8y tenants getVersion
+
 .EXAMPLE
 PS> Get-TenantVersion
 

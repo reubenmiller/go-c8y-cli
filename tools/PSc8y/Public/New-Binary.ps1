@@ -7,6 +7,9 @@ New inventory binary
 .DESCRIPTION
 Upload a new binary to Cumulocity
 
+.LINK
+c8y binaries create
+
 .EXAMPLE
 PS> New-Binary -File $File
 

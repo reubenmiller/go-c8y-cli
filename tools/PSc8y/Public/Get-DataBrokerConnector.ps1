@@ -7,6 +7,9 @@ Get data broker connector
 .DESCRIPTION
 Get data broker connector
 
+.LINK
+c8y databroker get
+
 .EXAMPLE
 PS> Get-DataBrokerConnector -Id $DataBroker.id
 

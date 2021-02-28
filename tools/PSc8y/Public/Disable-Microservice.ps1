@@ -8,6 +8,9 @@ Disable (unsubscribe) a microservice
 Disable (unsubscribe) a microservice from the current tenant
 
 
+.LINK
+c8y microservices disable
+
 .EXAMPLE
 PS> Disable-Microservice -Id $App.id
 

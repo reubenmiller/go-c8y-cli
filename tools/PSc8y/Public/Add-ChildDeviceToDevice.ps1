@@ -7,6 +7,9 @@ Create a child device reference
 .DESCRIPTION
 Create a child device reference
 
+.LINK
+c8y inventoryReferences assignChildDevice
+
 .EXAMPLE
 PS> Add-ChildDeviceToDevice -Device $Device.id -NewChild $ChildDevice.id
 

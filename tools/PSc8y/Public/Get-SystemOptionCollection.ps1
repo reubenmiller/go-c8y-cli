@@ -7,6 +7,9 @@ Get collection of system options
 .DESCRIPTION
 This endpoint provides a set of read-only properties pre-defined in platform configuration. The response format is exactly the same as for OptionCollection.
 
+.LINK
+c8y systemOptions list
+
 .EXAMPLE
 PS> Get-SystemOptionCollection
 

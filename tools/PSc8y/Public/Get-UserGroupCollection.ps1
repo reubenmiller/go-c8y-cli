@@ -7,6 +7,9 @@ Get collection of (user) groups
 .DESCRIPTION
 Get collection of (user) groups
 
+.LINK
+c8y userGroups list
+
 .EXAMPLE
 PS> Get-UserGroupCollection
 

@@ -7,6 +7,9 @@ Get the current users inventory roles
 .DESCRIPTION
 Get a list of inventory roles currently assigned to the user
 
+.LINK
+c8y users listInventoryRoles
+
 .EXAMPLE
 PS> Get-CurrentUserInventoryRoleCollection
 

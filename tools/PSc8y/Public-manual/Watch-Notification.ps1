@@ -6,6 +6,9 @@ Watch realtime notifications
 .DESCRIPTION
 Watch realtime notifications
 
+.LINK
+c8y realtime subscribe
+
 .EXAMPLE
 PS> Watch-Notification -Channel "/measurements/*" -DurationSec 90
 Watch all measurements for 90 seconds

@@ -7,6 +7,9 @@ Get collection of data broker connectors
 .DESCRIPTION
 Get collection of data broker connectors
 
+.LINK
+c8y databroker list
+
 .EXAMPLE
 PS> Get-DataBrokerConnectorCollection
 

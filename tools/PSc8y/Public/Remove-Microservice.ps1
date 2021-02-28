@@ -7,6 +7,9 @@ Delete microservice
 .DESCRIPTION
 Info: The application can only be removed when its availability is PRIVATE or in other case when it has no subscriptions.
 
+.LINK
+c8y microservices delete
+
 .EXAMPLE
 PS> Remove-Microservice -Id $App.id
 

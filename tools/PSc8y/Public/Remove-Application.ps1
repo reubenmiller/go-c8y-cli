@@ -7,6 +7,9 @@ Delete application
 .DESCRIPTION
 The application can only be removed when its availability is PRIVATE or in other case when it has no subscriptions.
 
+.LINK
+c8y applications delete
+
 .EXAMPLE
 PS> Remove-Application -Id $App.id
 

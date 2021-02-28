@@ -7,6 +7,9 @@ Get tenant
 .DESCRIPTION
 Get tenant
 
+.LINK
+c8y tenants get
+
 .EXAMPLE
 PS> Get-Tenant -Id mycompany
 

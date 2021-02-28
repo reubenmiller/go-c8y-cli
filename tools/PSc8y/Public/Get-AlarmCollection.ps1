@@ -7,6 +7,9 @@ Get a collection of alarms based on filter parameters
 .DESCRIPTION
 Get a collection of alarms based on filter parameters
 
+.LINK
+c8y alarms list
+
 .EXAMPLE
 PS> Get-AlarmCollection -Severity MAJOR -PageSize 100
 

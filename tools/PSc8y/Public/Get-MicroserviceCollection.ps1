@@ -8,6 +8,9 @@ Get collection of microservices
 Get a collection of microservices in the current tenant
 
 
+.LINK
+c8y microservices list
+
 .EXAMPLE
 PS> Get-MicroserviceCollection -PageSize 100
 

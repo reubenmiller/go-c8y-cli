@@ -7,6 +7,9 @@ Update data broker connector
 .DESCRIPTION
 Update data broker connector
 
+.LINK
+c8y databroker update
+
 .EXAMPLE
 PS> Update-DataBroker -Id 12345 -Status SUSPENDED
 

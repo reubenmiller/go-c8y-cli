@@ -8,6 +8,9 @@ Get collection of inventory binaries
 Get a list of inventory binaries. The results include the meta information about binary and not the binary itself.
 
 
+.LINK
+c8y binaries list
+
 .EXAMPLE
 PS> Get-BinaryCollection -PageSize 100
 

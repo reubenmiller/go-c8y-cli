@@ -7,6 +7,9 @@ Create a new group
 .DESCRIPTION
 Create a new group
 
+.LINK
+c8y userGroups create
+
 .EXAMPLE
 PS> New-UserGroup -Name "$GroupName"
 

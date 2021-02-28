@@ -7,6 +7,9 @@ Delete binary
 .DESCRIPTION
 Delete a binary from the tenant. This delete operation can not be undone.
 
+.LINK
+c8y binaries deleteBinary
+
 .EXAMPLE
 PS> Remove-Binary -Id $Binary.id
 

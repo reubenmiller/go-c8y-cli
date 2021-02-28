@@ -6,6 +6,9 @@ Watch realtime device notifications
 .DESCRIPTION
 Watch realtime device notifications
 
+.LINK
+c8y realtime subscribeAll
+
 .EXAMPLE
 PS> Function Watch-NotificationChannel -Device 12345 -DurationSec 90
 Watch all types of notifications for a device for 90 seconds

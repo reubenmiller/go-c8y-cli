@@ -7,6 +7,9 @@ Get user
 .DESCRIPTION
 Get information about a user
 
+.LINK
+c8y users get
+
 .EXAMPLE
 PS> Get-User -Id $User.id
 

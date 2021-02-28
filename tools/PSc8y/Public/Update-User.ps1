@@ -7,6 +7,9 @@ Update user
 .DESCRIPTION
 Update properties, reset password or enable/disable for a user in a tenant
 
+.LINK
+c8y users update
+
 .EXAMPLE
 PS> Update-User -Id $User.id -FirstName "Simon"
 

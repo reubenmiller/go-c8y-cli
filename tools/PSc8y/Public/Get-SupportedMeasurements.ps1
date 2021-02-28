@@ -8,6 +8,9 @@ Get supported measurements/s of a device
 Returns a list of fragments (valueFragmentTypes) related to the device
 
 
+.LINK
+c8y devices getSupportedMeasurements
+
 .EXAMPLE
 PS> Get-SupportedMeasurements -Device $device.id
 

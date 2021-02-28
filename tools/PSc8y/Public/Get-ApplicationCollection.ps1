@@ -7,6 +7,9 @@ Get a collection of applications
 .DESCRIPTION
 Get a collection of applications by a given filter
 
+.LINK
+c8y applications list
+
 .EXAMPLE
 PS> Get-ApplicationCollection -PageSize 100
 

@@ -6,6 +6,9 @@ Watch realtime operations
 .DESCRIPTION
 Watch realtime operations
 
+.LINK
+c8y operations subscribe
+
 .EXAMPLE
 PS> Watch-Operation -Device 12345
 Watch all operations for a device

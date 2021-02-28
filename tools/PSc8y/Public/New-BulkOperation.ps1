@@ -7,6 +7,9 @@ Create a new bulk operation
 .DESCRIPTION
 Create a new bulk operation
 
+.LINK
+c8y bulkOperations create
+
 .EXAMPLE
 PS> New-BulkOperation -Group $Group.id -StartDate "60s" -CreationRampSec 15 -Operation @{ c8y_Restart = @{} }
 

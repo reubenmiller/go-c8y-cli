@@ -7,6 +7,9 @@ Approve a new device request
 .DESCRIPTION
 Approve a new device request. Note: a device can only be approved if the platform has received a request for device credentials.
 
+.LINK
+c8y deviceCredentials approveDeviceRequest
+
 .EXAMPLE
 PS> Approve-DeviceRequest -Id $DeviceRequest.id
 

@@ -7,6 +7,9 @@ Get event binary
 .DESCRIPTION
 Get the binary associated with an event
 
+.LINK
+c8y events downloadBinary
+
 .EXAMPLE
 PS> Get-EventBinary -Id $Event.id -OutputFile ./eventbinary.txt
 

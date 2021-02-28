@@ -9,6 +9,9 @@ Create an agent managed object. An agent is a special device managed object with
 c8y_IsDevice and com_cumulocity_model_Agent fragments.
 
 
+.LINK
+c8y agents create
+
 .EXAMPLE
 PS> New-Agent -Name $AgentName
 

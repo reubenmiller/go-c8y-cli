@@ -8,6 +8,9 @@ Update inventory binary
 Update an existing binary
 
 
+.LINK
+c8y binaries update
+
 .EXAMPLE
 PS> Update-Binary -Id $Binary1.id -File $File2
 

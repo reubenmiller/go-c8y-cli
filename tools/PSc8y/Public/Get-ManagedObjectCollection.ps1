@@ -7,6 +7,9 @@ Get a collection of managedObjects based on filter parameters
 .DESCRIPTION
 Get a collection of managedObjects based on filter parameters
 
+.LINK
+c8y inventory list
+
 .EXAMPLE
 PS> Get-ManagedObjectCollection
 

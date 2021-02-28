@@ -7,6 +7,9 @@ Create a new alarm
 .DESCRIPTION
 Create a new alarm on a device or agent.
 
+.LINK
+c8y alarms create
+
 .EXAMPLE
 PS> New-Alarm -Device $device.id -Type c8y_TestAlarm -Time "-0s" -Text "Test alarm" -Severity MAJOR
 

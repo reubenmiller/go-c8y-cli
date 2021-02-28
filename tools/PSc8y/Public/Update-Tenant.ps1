@@ -7,6 +7,9 @@ Update tenant
 .DESCRIPTION
 Update tenant
 
+.LINK
+c8y tenants update
+
 .EXAMPLE
 PS> Update-Tenant -Id mycompany -ContactName "John Smith"
 

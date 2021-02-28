@@ -7,6 +7,9 @@ Create a new application
 .DESCRIPTION
 Create a new application using explicit settings
 
+.LINK
+c8y applications create
+
 .EXAMPLE
 PS> New-Application -Name $AppName -Key "${AppName}-key" -ContextPath $AppName -Type HOSTED
 

@@ -7,6 +7,9 @@ Get measurement/s
 .DESCRIPTION
 Get measurements by their ids
 
+.LINK
+c8y measurements get
+
 .EXAMPLE
 PS> Get-Measurement -Id $Measurement.id
 

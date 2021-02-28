@@ -7,6 +7,9 @@ Delete a user from a group
 .DESCRIPTION
 Delete a user from a group
 
+.LINK
+c8y userReferences deleteUserFromGroup
+
 .EXAMPLE
 PS> Remove-UserFromGroup -Group $Group.id -User $User.id
 

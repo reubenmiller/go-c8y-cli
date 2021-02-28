@@ -7,6 +7,9 @@ Get collection of user roles
 .DESCRIPTION
 Get collection of user roles
 
+.LINK
+c8y userRoles list
+
 .EXAMPLE
 PS> Get-RoleCollection -PageSize 100
 

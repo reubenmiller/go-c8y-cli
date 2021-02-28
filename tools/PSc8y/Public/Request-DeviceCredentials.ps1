@@ -7,6 +7,9 @@ Request credentials for a new device
 .DESCRIPTION
 Device credentials can be enquired by devices that do not have credentials for accessing a tenant yet. Since the device does not have credentials yet, a set of fixed credentials is used for this API. The credentials can be obtained by contacting support. Do not use your tenant credentials with this API.
 
+.LINK
+c8y deviceCredentials requestDeviceCredentials
+
 .EXAMPLE
 PS> Request-DeviceCredentials -Id "device-AD76-matrixer"
 

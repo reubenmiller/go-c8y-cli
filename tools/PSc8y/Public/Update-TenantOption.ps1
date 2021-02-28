@@ -7,6 +7,9 @@ Update tenant option
 .DESCRIPTION
 Update tenant option
 
+.LINK
+c8y tenantOptions update
+
 .EXAMPLE
 PS> Update-TenantOption -Category "c8y_cli_tests" -Key "$option4" -Value "0"
 

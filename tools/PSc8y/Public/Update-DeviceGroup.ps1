@@ -8,6 +8,9 @@ Update device group
 Update properties of an existing device group, for example name or any other custom properties.
 
 
+.LINK
+c8y devices updateGroup
+
 .EXAMPLE
 PS> Update-DeviceGroup -Id $group.id -Name "MyNewName"
 

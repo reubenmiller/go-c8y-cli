@@ -7,6 +7,9 @@ Create event
 .DESCRIPTION
 Create a new event for a device
 
+.LINK
+c8y events create
+
 .EXAMPLE
 PS> New-Event -Device $device.id -Type c8y_TestAlarm -Text "Test event"
 

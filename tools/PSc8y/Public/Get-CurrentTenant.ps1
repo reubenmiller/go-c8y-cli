@@ -7,6 +7,9 @@ Get current tenant
 .DESCRIPTION
 Get current tenant
 
+.LINK
+c8y tenants getCurrentTenant
+
 .EXAMPLE
 PS> Get-CurrentTenant
 

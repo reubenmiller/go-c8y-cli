@@ -7,6 +7,9 @@ Create a new inventory
 .DESCRIPTION
 Create a new inventory managed object
 
+.LINK
+c8y inventory create
+
 .EXAMPLE
 PS> New-ManagedObject -Name "testMO" -Type $type -Data @{ custom_data = @{ value = 1 } }
 

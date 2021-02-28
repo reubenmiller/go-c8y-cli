@@ -7,6 +7,9 @@ New event binary
 .DESCRIPTION
 Upload a new binary file to an event
 
+.LINK
+c8y events createBinary
+
 .EXAMPLE
 PS> New-EventBinary -Id $Event.id -File $TestFile
 

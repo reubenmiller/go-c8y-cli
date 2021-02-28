@@ -7,6 +7,9 @@ Get current application subscriptions
 .DESCRIPTION
 Required authentication with bootstrap user
 
+.LINK
+c8y currentApplication listSubscriptions
+
 .EXAMPLE
 PS> Get-CurrentApplicationSubscription
 

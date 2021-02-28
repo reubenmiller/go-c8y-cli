@@ -7,6 +7,9 @@ Get a specific inventory role of the current user
 .DESCRIPTION
 Get a specific inventory role of the current user
 
+.LINK
+c8y users getCurrentUserInventoryRole
+
 .EXAMPLE
 PS> Get-CurrentUserInventoryRoleCollection -PageSize 1 | Get-CurrentUserInventoryRole
 

@@ -7,6 +7,9 @@ Get collection of user role references from a user
 .DESCRIPTION
 Get collection of user role references from a user
 
+.LINK
+c8y userRoles getRoleReferenceCollectionFromUser
+
 .EXAMPLE
 PS> Get-RoleReferenceCollectionFromUser -User $User.id
 

@@ -7,6 +7,9 @@ Get a collection of operations based on filter parameters
 .DESCRIPTION
 Get a collection of operations based on filter parameters
 
+.LINK
+c8y operations list
+
 .EXAMPLE
 PS> Get-OperationCollection -Status PENDING
 

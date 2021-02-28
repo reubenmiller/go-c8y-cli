@@ -7,6 +7,9 @@ Delete child addition reference
 .DESCRIPTION
 Unassign a child addition from an existing managed object
 
+.LINK
+c8y inventoryReferences unassignChildAddition
+
 .EXAMPLE
 PS> Remove-ChildAddition -Id $software.id -ChildId $version.id
 

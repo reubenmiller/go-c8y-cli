@@ -6,6 +6,9 @@ Function Get-ServiceUser {
     .DESCRIPTION
     Get the service user associated to a microservice
 
+    .LINK
+    c8y microservices getServiceUser
+
     .EXAMPLE
     PS> Get-ServiceUser -Id $App.name
 

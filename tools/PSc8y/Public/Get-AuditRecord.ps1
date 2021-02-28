@@ -7,6 +7,9 @@ Get an audit record
 .DESCRIPTION
 Get an audit record by id
 
+.LINK
+c8y auditRecords get
+
 .EXAMPLE
 PS> Get-AuditRecord -Id $Record.id
 

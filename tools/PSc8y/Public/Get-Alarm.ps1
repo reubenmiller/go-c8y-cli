@@ -7,6 +7,9 @@ Get alarm/s
 .DESCRIPTION
 Get an alarm by its id
 
+.LINK
+c8y alarms get
+
 .EXAMPLE
 PS> Get-Alarm -Id {{ NewAlarm }}
 

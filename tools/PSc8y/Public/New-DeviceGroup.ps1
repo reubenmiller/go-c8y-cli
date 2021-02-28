@@ -8,6 +8,9 @@ Create device group
 Create a new device group to logically group one or more devices
 
 
+.LINK
+c8y devices createGroup
+
 .EXAMPLE
 PS> New-DeviceGroup -Name $GroupName
 

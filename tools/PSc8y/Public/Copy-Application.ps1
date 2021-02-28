@@ -12,6 +12,9 @@ The response contains a representation of the newly created application.
 Required role ROLE_APPLICATION_MANAGMENT_ADMIN
 
 
+.LINK
+c8y applications copy
+
 .EXAMPLE
 PS> Copy-Application -Id $App.id
 

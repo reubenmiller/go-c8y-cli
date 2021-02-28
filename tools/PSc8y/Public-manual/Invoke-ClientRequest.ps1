@@ -43,6 +43,9 @@ Function Invoke-MyMicroserviceEndpoint {
 }
 ```
 
+.LINK
+c8y rest
+
 .EXAMPLE
 Invoke-ClientRequest -Uri "/inventory/managedObjects" -Method "post" -Data "name=test"
 

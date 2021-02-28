@@ -7,6 +7,9 @@ Update an alarm
 .DESCRIPTION
 Update an alarm by its id
 
+.LINK
+c8y alarms update
+
 .EXAMPLE
 PS> Update-Alarm -Id $Alarm.id -Status ACKNOWLEDGED
 

@@ -7,6 +7,9 @@ Get device
 .DESCRIPTION
 Get a device by name or id.
 
+.LINK
+c8y devices get
+
 .EXAMPLE
 PS> Get-Device -Id $device.id
 

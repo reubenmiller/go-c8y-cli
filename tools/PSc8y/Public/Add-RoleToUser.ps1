@@ -7,6 +7,9 @@ Add role to a user
 .DESCRIPTION
 Add role to a user
 
+.LINK
+c8y userRoles addRoleTouser
+
 .EXAMPLE
 PS> Add-RoleToUser -User $User.id -Role "ROLE_ALARM_READ"
 

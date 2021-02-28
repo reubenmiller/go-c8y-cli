@@ -9,6 +9,9 @@ Remove an application binaries related to the given application
 The active version can not be deleted and the server will throw an error if you try.
 
 
+.LINK
+c8y applications deleteApplicationBinary
+
 .EXAMPLE
 PS> Remove-ApplicationBinary -Application $app.id -BinaryId $appBinary.id
 

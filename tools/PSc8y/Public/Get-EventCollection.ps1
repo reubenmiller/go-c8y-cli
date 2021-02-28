@@ -7,6 +7,9 @@ Get a collection of events based on filter parameters
 .DESCRIPTION
 Get a collection of events based on filter parameters
 
+.LINK
+c8y events list
+
 .EXAMPLE
 PS> Get-EventCollection -Type "my_CustomType2" -DateFrom "-10d"
 

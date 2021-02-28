@@ -8,6 +8,9 @@ Update operation
 Update an operation. This is commonly used to change an operation's status. For example the operation can be set to FAILED along with a failure reason.
 
 
+.LINK
+c8y operations update
+
 .EXAMPLE
 PS> Update-Operation -Id {{ NewOperation }} -Status EXECUTING
 

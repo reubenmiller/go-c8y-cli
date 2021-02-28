@@ -6,6 +6,9 @@ Watch realtime alarms
 .DESCRIPTION
 Watch realtime alarms
 
+.LINK
+c8y alarms subscribe
+
 .EXAMPLE
 PS> Watch-Alarm -Device 12345
 

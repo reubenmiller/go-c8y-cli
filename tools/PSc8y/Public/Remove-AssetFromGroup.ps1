@@ -7,6 +7,9 @@ Delete child asset reference
 .DESCRIPTION
 Unassign an asset (device or group) from a group
 
+.LINK
+c8y inventoryReferences unassignAssetFromGroup
+
 .EXAMPLE
 PS> Remove-AssetFromGroup -Group $Group.id -ChildDevice $ChildDevice.id
 

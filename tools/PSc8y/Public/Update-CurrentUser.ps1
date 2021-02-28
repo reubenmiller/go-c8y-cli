@@ -8,6 +8,9 @@ Update the current user
 Update properties or settings of your user such as first/last name, email or password
 
 
+.LINK
+c8y users updateCurrentUser
+
 .EXAMPLE
 PS> Update-CurrentUser -LastName "Smith"
 

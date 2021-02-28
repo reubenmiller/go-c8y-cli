@@ -7,6 +7,9 @@ Get bulk operation/s
 .DESCRIPTION
 Get bulk operation/s
 
+.LINK
+c8y bulkOperations get
+
 .EXAMPLE
 PS> Get-BulkOperation -Id $BulkOp.id
 

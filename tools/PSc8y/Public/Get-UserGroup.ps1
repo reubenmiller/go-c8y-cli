@@ -7,6 +7,9 @@ Create a new group by id
 .DESCRIPTION
 Create a new group by id
 
+.LINK
+c8y userGroups get
+
 .EXAMPLE
 PS> Get-UserGroup -Id $Group.id
 

@@ -7,6 +7,9 @@ Get a group by name
 .DESCRIPTION
 Get a group by name
 
+.LINK
+c8y userGroups getByName
+
 .EXAMPLE
 PS> Get-UserGroupByName -Name $Group.name
 

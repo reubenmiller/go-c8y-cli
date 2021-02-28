@@ -7,6 +7,9 @@ Get operation/s
 .DESCRIPTION
 Get an operation by id
 
+.LINK
+c8y operations get
+
 .EXAMPLE
 PS> Get-Operation -Id {{ NewOperation }}
 

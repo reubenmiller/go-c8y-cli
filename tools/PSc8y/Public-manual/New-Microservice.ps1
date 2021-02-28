@@ -14,6 +14,9 @@ This cmdlet has several operations
 .NOTES
 This cmdlet does not support template variables
 
+.LINK
+c8y microservices create
+
 .EXAMPLE
 PS> New-Microservice -File "myapp.zip"
 

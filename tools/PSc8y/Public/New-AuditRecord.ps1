@@ -7,6 +7,9 @@ Create a new audit record
 .DESCRIPTION
 Create a new audit record for a given action
 
+.LINK
+c8y auditRecords create
+
 .EXAMPLE
 PS> New-AuditRecord -Type "ManagedObject" -Time "0s" -Text "Managed Object updated: my_Prop: value" -Source $Device.id -Activity "Managed Object updated" -Severity "information"
 

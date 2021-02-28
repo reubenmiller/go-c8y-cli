@@ -7,6 +7,9 @@ Get tenant option
 .DESCRIPTION
 Get tenant option
 
+.LINK
+c8y tenantOptions get
+
 .EXAMPLE
 PS> Get-TenantOption -Category "c8y_cli_tests" -Key "$option2"
 

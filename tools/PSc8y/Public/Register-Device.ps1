@@ -7,6 +7,9 @@ Register a new device (request)
 .DESCRIPTION
 Register a new device (request)
 
+.LINK
+c8y deviceCredentials registerNewDevice
+
 .EXAMPLE
 PS> Register-Device -Id "ASDF098SD1J10912UD92JDLCNCU8"
 

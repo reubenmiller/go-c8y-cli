@@ -7,6 +7,9 @@ Get collection of tenant usage statistics summary
 .DESCRIPTION
 Get summary of requests and database usage from the start of this month until now
 
+.LINK
+c8y tenantStatistics listSummaryForTenant
+
 .EXAMPLE
 PS> Get-TenantUsageSummaryStatistics
 

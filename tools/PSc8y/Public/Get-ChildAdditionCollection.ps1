@@ -7,6 +7,9 @@ Get a collection of managedObjects child additions
 .DESCRIPTION
 Get a collection of managedObjects child additions
 
+.LINK
+c8y inventoryReferences listChildAdditions
+
 .EXAMPLE
 PS> Get-ChildAdditionCollection -Id $software.id
 

@@ -7,6 +7,9 @@ Get collection of tenant usage statistics summary
 .DESCRIPTION
 Get collection of tenant usage statistics summary
 
+.LINK
+c8y tenantStatistics listSummaryAllTenants
+
 .EXAMPLE
 PS> Get-AllTenantUsageSummaryStatistics
 

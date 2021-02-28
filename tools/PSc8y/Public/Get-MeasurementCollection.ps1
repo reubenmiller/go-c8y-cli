@@ -7,6 +7,9 @@ Get a collection of measurements based on filter parameters
 .DESCRIPTION
 Get a collection of measurements based on filter parameters
 
+.LINK
+c8y measurements list
+
 .EXAMPLE
 PS> Get-MeasurementCollection
 

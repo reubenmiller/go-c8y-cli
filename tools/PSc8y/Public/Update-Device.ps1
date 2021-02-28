@@ -7,6 +7,9 @@ Update device
 .DESCRIPTION
 Update properties of an existing device
 
+.LINK
+c8y devices update
+
 .EXAMPLE
 PS> Update-Device -Id $device.id -NewName "MyNewName"
 

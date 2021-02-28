@@ -8,6 +8,9 @@ Get collection of retention rules
 Get a collection of retention rules configured in the current tenant
 
 
+.LINK
+c8y retentionRules list
+
 .EXAMPLE
 PS> Get-RetentionRuleCollection
 

@@ -8,6 +8,9 @@ Update tenant option editibility
 Required role:: ROLE_OPTION_MANAGEMENT_ADMIN, Required tenant management Example Request:: Update access.control.allow.origin option.
 
 
+.LINK
+c8y tenantOptions updateEdit
+
 .EXAMPLE
 PS> Update-TenantOptionEditable -Category "c8y_cli_tests" -Key "$option8" -Editable "true"
 

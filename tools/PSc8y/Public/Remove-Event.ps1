@@ -7,6 +7,9 @@ Delete event/s
 .DESCRIPTION
 Delete an event by id
 
+.LINK
+c8y events delete
+
 .EXAMPLE
 PS> Remove-Event -Id {{ NewEvent }}
 

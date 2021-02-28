@@ -7,6 +7,9 @@ Get tenant options for category
 .DESCRIPTION
 Get tenant options for category
 
+.LINK
+c8y tenantOptions getForCategory
+
 .EXAMPLE
 PS> Get-TenantOptionForCategory -Category "c8y_cli_tests"
 

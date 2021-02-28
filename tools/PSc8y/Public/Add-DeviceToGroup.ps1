@@ -7,6 +7,9 @@ Add a device to an existing group
 .DESCRIPTION
 Assigns a device to a group. The device will be a childAsset of the group
 
+.LINK
+c8y inventoryReferences assignDeviceToGroup
+
 .EXAMPLE
 PS> Add-DeviceToGroup -Group $Group.id -NewChildDevice $Device.id
 

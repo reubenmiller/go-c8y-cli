@@ -7,6 +7,9 @@ Delete a collection of events
 .DESCRIPTION
 Delete a collection of events by using a filter
 
+.LINK
+c8y events deleteCollection
+
 .EXAMPLE
 PS> Remove-EventCollection -Type my_CustomType -DateFrom "-10d"
 

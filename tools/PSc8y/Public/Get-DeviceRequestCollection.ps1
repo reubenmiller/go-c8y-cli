@@ -7,6 +7,9 @@ Get a collection of new device requests
 .DESCRIPTION
 Get a collection of device requests
 
+.LINK
+c8y deviceCredentials listNewDeviceRequests
+
 .EXAMPLE
 PS> Get-DeviceRequestCollection
 

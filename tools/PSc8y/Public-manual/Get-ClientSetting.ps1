@@ -5,6 +5,9 @@ Function Get-ClientSetting {
     
     .DESCRIPTION
     Get the Cumulocity binary settings which used by the cli tool
+
+    .LINK
+    c8y settings list
     
     .EXAMPLE
     Get-ClientSetting

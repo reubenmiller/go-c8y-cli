@@ -8,6 +8,9 @@ Get device group
 Get a device group by id or name
 
 
+.LINK
+c8y devices getGroup
+
 .EXAMPLE
 PS> Get-DeviceGroup -Id $group.id
 

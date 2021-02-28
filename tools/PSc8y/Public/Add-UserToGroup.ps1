@@ -7,6 +7,9 @@ Get user
 .DESCRIPTION
 Get user
 
+.LINK
+c8y userReferences addUserToGroup
+
 .EXAMPLE
 PS> Add-UserToGroup -Group $Group.id -User $User.id
 

@@ -8,6 +8,9 @@ Delete retention rule
 Delete an existing retention rule
 
 
+.LINK
+c8y retentionRules delete
+
 .EXAMPLE
 PS> Remove-RetentionRule -Id $RetentionRule.id
 

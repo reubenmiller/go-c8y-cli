@@ -7,6 +7,9 @@ Update a user group
 .DESCRIPTION
 Update a user group
 
+.LINK
+c8y userGroups update
+
 .EXAMPLE
 PS> Update-UserGroup -Id $Group -Name "customGroup2"
 

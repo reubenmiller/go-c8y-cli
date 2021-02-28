@@ -8,6 +8,9 @@ Get application binaries
 A list of all binaries related to the given application will be returned
 
 
+.LINK
+c8y applications listApplicationBinaries
+
 .EXAMPLE
 PS> Get-ApplicationBinaryCollection -Id $App.id
 

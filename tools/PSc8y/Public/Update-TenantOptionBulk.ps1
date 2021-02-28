@@ -7,6 +7,9 @@ Update multiple tenant options in provided category
 .DESCRIPTION
 Update multiple tenant options in provided category
 
+.LINK
+c8y tenantOptions updateBulk
+
 .EXAMPLE
 PS> Update-TenantOptionBulk -Category "c8y_cli_tests" -Data @{ $option5 = 0; $option6 = 1 }
 

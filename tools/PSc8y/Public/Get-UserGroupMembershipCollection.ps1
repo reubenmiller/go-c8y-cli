@@ -7,6 +7,9 @@ Get all users in a group
 .DESCRIPTION
 Get all users in a group
 
+.LINK
+c8y userReferences listGroupMembership
+
 .EXAMPLE
 PS> Get-UserGroupMembershipCollection -Id $Group.id
 

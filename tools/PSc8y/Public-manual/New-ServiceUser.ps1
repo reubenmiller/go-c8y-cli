@@ -12,6 +12,9 @@ Function New-ServiceUser {
     Create a new microservice called automation01 which has permissions to read the inventory, and subscribe the application to tenant t123456
 
     .LINK
+    c8y microservices createServiceUser
+
+    .LINK
     Get-ServiceUser
     #>
     [cmdletbinding(SupportsShouldProcess = $true,

@@ -8,6 +8,9 @@ Get supported measurement series/s of a device
 Returns a list of supported measurement series
 
 
+.LINK
+c8y devices getSupportedSeries
+
 .EXAMPLE
 PS> Get-SupportedSeries -Device $device.id
 

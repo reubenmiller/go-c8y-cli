@@ -8,6 +8,9 @@ Get retention rule
 Get an existing retention by id
 
 
+.LINK
+c8y retentionRules get
+
 .EXAMPLE
 PS> Get-RetentionRule -Id $RetentionRule.id
 

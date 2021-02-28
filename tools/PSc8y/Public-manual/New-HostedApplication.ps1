@@ -6,6 +6,9 @@ New hosted (web) application
 .DESCRIPTION
 Create a new hosted web application by uploading a zip file which contains a web application
 
+.LINK
+c8y applications createHostedApplication
+
 .EXAMPLE
 New-HostedApplication -Name $App.id -File "myapp.zip"
 

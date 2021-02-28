@@ -7,6 +7,9 @@ Delete a collection of alarms
 .DESCRIPTION
 Delete a collection of alarms by a given filter
 
+.LINK
+c8y alarms deleteCollection
+
 .EXAMPLE
 PS> Remove-AlarmCollection -Device "{{ randomdevice }}" -Severity MAJOR
 

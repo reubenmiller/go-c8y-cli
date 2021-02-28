@@ -20,6 +20,9 @@ terms will be includes in the results. The search is applied to the following fi
 .NOTES
 On MacOS, you need to hold "control"+Arrow keys to navigate the list of sessions. Otherwise the VIM style "j" (down) and "k" (up) keys can be also used for navigation
 
+.LINK
+c8y sessions list
+
 .EXAMPLE
 Set-Session
 
