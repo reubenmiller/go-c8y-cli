@@ -401,7 +401,7 @@ $($CmdletParameters -join ",`n`n")
     DynamicParam {
         $(
             if ($null -ne $C8yCommonSetNames) {
-                "Get-ClientCommonParameters -Type `"$($C8yCommonSetNames -join '", "')`" -BoundParameters `$PSBoundParameters"
+                "Get-ClientCommonParameters -Type `"$($C8yCommonSetNames -join '", "')`""
             }
         )
     }

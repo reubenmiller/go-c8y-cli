@@ -15,7 +15,7 @@ Function Get-MyObject {
     Param()
 
     DynamicParam {
-        Get-ClientCommonParameters -Type "Create", "Template" -BoundParameters $PSBoundParameters
+        Get-ClientCommonParameters -Type "Create", "Template"
     }
 
     Process {
@@ -33,14 +33,7 @@ Inherit common parameters to a custom function. This will add parameters such as
         )]
         [ValidateSet("Collection", "Get", "Create", "Update", "Delete", "Template", "")]
         [string[]]
-        $Type,
-
-        # Existing bound parameters from the cmdlet. Providing it will ensure that the dynamic parameters do not duplicate
-        # existing parameters.
-        [Parameter()]
-        [AllowNull()]
-        [hashtable]
-        $BoundParameters
+        $Type
     )
     
     Process {
@@ -108,15 +101,6 @@ Inherit common parameters to a custom function. This will add parameters such as
         # Select
         New-DynamicParam -Name Select -Type "string" -DPDictionary $Dictionary
         # New-DynamicParam -Name Filter -Type "string" -DPDictionary $Dictionary
-
-        # Remove key that are already defined
-        if ($BoundParameters) {
-            $BoundParameters.Keys | Foreach-Object {
-                if ($Dictionary.ContainsKey($_)) {
-                    $null = $Dictionary.Remove($_)
-                }
-            }
-        }
 
         $Dictionary
     }
