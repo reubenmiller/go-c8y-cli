@@ -103,6 +103,11 @@
         $null = $CmdletDocStringBuilder.AppendLine("${DescriptionLong}`n")
     }
 
+    # Link go command
+    $null = $CmdletDocStringBuilder.AppendLine(".LINK")
+    $NativeCommandName = @("c8y", $Noun, $Verb) -join " "
+    $null = $CmdletDocStringBuilder.AppendLine("$NativeCommandName`n")
+
     #
     # Arguments
     #
