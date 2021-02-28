@@ -29,40 +29,11 @@ None :)
 
 ## TODO
 
+* Add confirmation prompts to c8y binary
+* Create activity log cmdlets?
+  * Get recent history, get commands with filter (api, host, method etc.)
 * Display session information after selecting a session (like in powershell but natively)
 * Option to not store the password in the session. It should force the user to use their password each time (then delete the password value?)
-* Convert hashtable to json, i.e. or reject it automatically? replace ";" with ",", and replace "@{" with "{", "=" with ":"
-
-* Add confirmation prompts to c8y binary
-    ```json
-    {
-        "c8y_SoftwareList": [
-            {"name": "test1", "version": "1.0.0"}
-        ],
-        "name": "myname"
-    }
-    ```
-
-
-    ```js
-    name
-    c8y_SoftwareList.0.name
-    c8y_SoftwareList.0.version
-    c8y_SoftwareList.1.name
-    c8y_SoftwareList.1.version
-    ```
-
-
-    ```sh
-    *.*name
-    *.*name
-
-    *.#.*name
-    ```
-
-  * Create activity log cmdlets?
-    * Get recent history, get commands with filter (api, host, method etc.)
-
 
 ## Unreleased
 
