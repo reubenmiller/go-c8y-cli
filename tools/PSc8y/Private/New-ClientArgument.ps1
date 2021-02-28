@@ -54,6 +54,15 @@ Function New-ClientArgument {
                         break
                     }
 
+                    { $Value -is [switch] } {
+                        if ($Value) {
+                            $null = $c8yargs.AddRange(@("--${key}"))
+                        } else {
+                            $null = $c8yargs.AddRange(@("--${key}=false"))
+                        }
+                        break
+                    }
+
                     # json like values
                     { $key -eq "data" -or $Value -is [hashtable] -or $Value -is [PSCustomObject] } {
                         $ArgValue = ConvertTo-JsonArgument $Value
