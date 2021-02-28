@@ -84,7 +84,7 @@ func (l *ActivityLogger) LogCommand(cmd *cobra.Command, args []string, cmdStr st
 	defer l.mu.Unlock()
 
 	argc, _ := json.Marshal(os.Args[1:])
-	if len(messages) > 0 {
+	if len(messages) > 0 && messages[0] != "" {
 		l.w.Write([]byte(fmt.Sprintf(
 			`{"time":"%s","ctx":"%s","type":"command","arguments":%s,"message":"%s"}`+"\n",
 			time.Now().Format(time.RFC3339Nano),
