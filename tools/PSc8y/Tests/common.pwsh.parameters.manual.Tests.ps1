@@ -20,6 +20,19 @@ Describe -Name "Common parameters" {
         }
     }
 
+    Context "Flatten" {   
+        It "Flattens the output json" {
+            $options = @{
+                Flatten = $true
+            }
+            $output = PSc8y\Get-ApplicationCollection @options
+            $LASTEXITCODE | Should -Be 0
+            $output | Should -Not -BeNullOrEmpty
+            $output.id | Should -Not -BeNullOrEmpty
+            $output."owner.tenant.id" | Should -Not -BeNullOrEmpty
+        }
+    }
+
     AfterAll {
         $ids | Remove-ManagedObject
         $names | ForEach-Object {
