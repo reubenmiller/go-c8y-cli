@@ -56,17 +56,17 @@ func (c CommandError) JSONString() string {
 
 // NewUserError creates a new user error
 func NewUserError(a ...interface{}) CommandError {
-	return CommandError{Message: fmt.Sprintln(a...), ErrorType: ErrTypeCommand, ExitCode: 101, silent: false}
+	return CommandError{Message: fmt.Sprint(a...), ErrorType: ErrTypeCommand, ExitCode: 101, silent: false}
 }
 
 // NewUserErrorWithExitCode creates a user with a specific exit code
 func NewUserErrorWithExitCode(exitCode int, a ...interface{}) CommandError {
-	return CommandError{Message: fmt.Sprintln(a...), ErrorType: ErrTypeCommand, ExitCode: exitCode, silent: false}
+	return CommandError{Message: fmt.Sprint(a...), ErrorType: ErrTypeCommand, ExitCode: exitCode, silent: false}
 }
 
 // NewSystemError creates a system error
 func NewSystemError(a ...interface{}) CommandError {
-	return CommandError{Message: fmt.Sprintln(a...), ErrorType: ErrTypeCommand, ExitCode: 100, silent: false}
+	return CommandError{Message: fmt.Sprint(a...), ErrorType: ErrTypeCommand, ExitCode: 100, silent: false}
 }
 
 var httpStatusCodeToExitCode = map[int]int{
