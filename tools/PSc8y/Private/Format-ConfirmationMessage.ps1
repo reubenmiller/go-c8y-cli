@@ -31,6 +31,7 @@ Format the confirmation message from a cmdlet name and input object
             if ($item -eq "-" -or $item -eq "" -or $item -eq $IgnorePrefix) {
                 continue;
             }
+            $item = $item -replace "^-", ""
             if ($parts.Count -eq 0) {
                 $null = $parts.Add($item);
             } else {
