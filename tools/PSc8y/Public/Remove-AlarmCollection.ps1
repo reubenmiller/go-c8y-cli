@@ -85,7 +85,7 @@ Remove alarms on the device which are active and created in the last 10 minutes 
         $WithSourceDevices
     )
     DynamicParam {
-        Get-ClientCommonParameters -Type "Delete" -BoundParameters $PSBoundParameters
+        Get-ClientCommonParameters -Type "Delete"
     }
 
     Begin {

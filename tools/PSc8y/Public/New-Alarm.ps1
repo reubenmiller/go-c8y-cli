@@ -61,7 +61,7 @@ Create a new alarm for device (using pipeline)
         $Status
     )
     DynamicParam {
-        Get-ClientCommonParameters -Type "Create", "Template" -BoundParameters $PSBoundParameters
+        Get-ClientCommonParameters -Type "Create", "Template"
     }
 
     Begin {

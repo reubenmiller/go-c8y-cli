@@ -29,7 +29,7 @@ Get bulk operation by id
         $Id
     )
     DynamicParam {
-        Get-ClientCommonParameters -Type "Get" -BoundParameters $PSBoundParameters
+        Get-ClientCommonParameters -Type "Get"
     }
 
     Begin {

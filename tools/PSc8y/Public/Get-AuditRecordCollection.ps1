@@ -69,7 +69,7 @@ Get a list of audit records related to an operation
         $Revert
     )
     DynamicParam {
-        Get-ClientCommonParameters -Type "Get", "Collection" -BoundParameters $PSBoundParameters
+        Get-ClientCommonParameters -Type "Get", "Collection"
     }
 
     Begin {

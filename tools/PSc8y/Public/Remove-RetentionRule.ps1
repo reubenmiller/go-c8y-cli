@@ -35,7 +35,7 @@ Delete a retention rule (using pipeline)
         $Id
     )
     DynamicParam {
-        Get-ClientCommonParameters -Type "Delete" -BoundParameters $PSBoundParameters
+        Get-ClientCommonParameters -Type "Delete"
     }
 
     Begin {

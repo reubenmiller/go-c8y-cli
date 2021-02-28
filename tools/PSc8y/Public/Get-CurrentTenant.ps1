@@ -24,7 +24,7 @@ Get the current tenant (based on your current credentials)
 
     )
     DynamicParam {
-        Get-ClientCommonParameters -Type "Get" -BoundParameters $PSBoundParameters
+        Get-ClientCommonParameters -Type "Get"
     }
 
     Begin {

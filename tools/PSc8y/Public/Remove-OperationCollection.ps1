@@ -50,7 +50,7 @@ Remove all pending operations for a given device
         $Status
     )
     DynamicParam {
-        Get-ClientCommonParameters -Type "Delete" -BoundParameters $PSBoundParameters
+        Get-ClientCommonParameters -Type "Delete"
     }
 
     Begin {

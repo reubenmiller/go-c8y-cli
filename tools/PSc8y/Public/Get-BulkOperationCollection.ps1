@@ -27,7 +27,7 @@ Get a list of bulk operations
         $WithDeleted
     )
     DynamicParam {
-        Get-ClientCommonParameters -Type "Get", "Collection" -BoundParameters $PSBoundParameters
+        Get-ClientCommonParameters -Type "Get", "Collection"
     }
 
     Begin {

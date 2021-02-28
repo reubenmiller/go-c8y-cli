@@ -29,7 +29,7 @@ Download a binary related to an event
         $Id
     )
     DynamicParam {
-        Get-ClientCommonParameters -Type "Get" -BoundParameters $PSBoundParameters
+        Get-ClientCommonParameters -Type "Get"
     }
 
     Begin {

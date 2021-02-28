@@ -32,7 +32,7 @@ Upload a config file and make it globally accessible for all users
         $File
     )
     DynamicParam {
-        Get-ClientCommonParameters -Type "Create", "Template" -BoundParameters $PSBoundParameters
+        Get-ClientCommonParameters -Type "Create", "Template"
     }
 
     Begin {

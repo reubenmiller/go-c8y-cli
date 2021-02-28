@@ -29,7 +29,7 @@ Get an audit record by id
         $Id
     )
     DynamicParam {
-        Get-ClientCommonParameters -Type "Get" -BoundParameters $PSBoundParameters
+        Get-ClientCommonParameters -Type "Get"
     }
 
     Begin {

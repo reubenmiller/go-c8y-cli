@@ -34,7 +34,7 @@ Disable an application of a tenant
         $Tenant
     )
     DynamicParam {
-        Get-ClientCommonParameters -Type "Delete" -BoundParameters $PSBoundParameters
+        Get-ClientCommonParameters -Type "Delete"
     }
 
     Begin {

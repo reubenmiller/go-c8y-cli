@@ -54,7 +54,7 @@ Create a retention rule to delete all alarms after 180 days
         $Editable
     )
     DynamicParam {
-        Get-ClientCommonParameters -Type "Create", "Template" -BoundParameters $PSBoundParameters
+        Get-ClientCommonParameters -Type "Create", "Template"
     }
 
     Begin {

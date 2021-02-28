@@ -39,7 +39,7 @@ Assign a device as a child device to an existing device (using pipeline)
         $NewChild
     )
     DynamicParam {
-        Get-ClientCommonParameters -Type "Create", "Template" -BoundParameters $PSBoundParameters
+        Get-ClientCommonParameters -Type "Create", "Template"
     }
 
     Begin {

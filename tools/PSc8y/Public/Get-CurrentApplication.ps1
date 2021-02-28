@@ -25,7 +25,7 @@ Get the current application (requires using application credentials)
 
     )
     DynamicParam {
-        Get-ClientCommonParameters -Type "Get" -BoundParameters $PSBoundParameters
+        Get-ClientCommonParameters -Type "Get"
     }
 
     Begin {

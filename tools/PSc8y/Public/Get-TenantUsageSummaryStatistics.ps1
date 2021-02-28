@@ -42,7 +42,7 @@ Get tenant summary statistics collection for the last 10 days, only return until
         $DateTo
     )
     DynamicParam {
-        Get-ClientCommonParameters -Type "Get" -BoundParameters $PSBoundParameters
+        Get-ClientCommonParameters -Type "Get"
     }
 
     Begin {

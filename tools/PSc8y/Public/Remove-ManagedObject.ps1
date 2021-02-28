@@ -44,7 +44,7 @@ Delete a managed object and all child devices
         $Cascade
     )
     DynamicParam {
-        Get-ClientCommonParameters -Type "Delete" -BoundParameters $PSBoundParameters
+        Get-ClientCommonParameters -Type "Delete"
     }
 
     Begin {

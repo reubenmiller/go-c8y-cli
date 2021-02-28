@@ -85,7 +85,7 @@ Get active alarms from a device (using pipeline)
         $WithDevices
     )
     DynamicParam {
-        Get-ClientCommonParameters -Type "Get", "Collection" -BoundParameters $PSBoundParameters
+        Get-ClientCommonParameters -Type "Get", "Collection"
     }
 
     Begin {

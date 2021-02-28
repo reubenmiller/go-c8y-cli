@@ -70,7 +70,7 @@ Update application availability to MARKET
         $ExternalUrl
     )
     DynamicParam {
-        Get-ClientCommonParameters -Type "Update", "Template" -BoundParameters $PSBoundParameters
+        Get-ClientCommonParameters -Type "Update", "Template"
     }
 
     Begin {

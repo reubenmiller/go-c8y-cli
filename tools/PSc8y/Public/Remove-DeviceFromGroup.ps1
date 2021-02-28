@@ -34,7 +34,7 @@ Unassign a child device from its parent asset
         $ChildDevice
     )
     DynamicParam {
-        Get-ClientCommonParameters -Type "Delete" -BoundParameters $PSBoundParameters
+        Get-ClientCommonParameters -Type "Delete"
     }
 
     Begin {

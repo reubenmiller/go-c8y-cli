@@ -35,7 +35,7 @@ Enable (subscribe) to a microservice
         $Tenant
     )
     DynamicParam {
-        Get-ClientCommonParameters -Type "Create", "Template" -BoundParameters $PSBoundParameters
+        Get-ClientCommonParameters -Type "Create", "Template"
     }
 
     Begin {

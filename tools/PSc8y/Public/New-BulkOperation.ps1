@@ -49,7 +49,7 @@ Create bulk operation for a group (using pipeline)
         $Operation
     )
     DynamicParam {
-        Get-ClientCommonParameters -Type "Create", "Template" -BoundParameters $PSBoundParameters
+        Get-ClientCommonParameters -Type "Create", "Template"
     }
 
     Begin {

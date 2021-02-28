@@ -38,7 +38,7 @@ Create group heirachy (parent group -> child group)
         $NewChildGroup
     )
     DynamicParam {
-        Get-ClientCommonParameters -Type "Create", "Template" -BoundParameters $PSBoundParameters
+        Get-ClientCommonParameters -Type "Create", "Template"
     }
 
     Begin {

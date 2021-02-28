@@ -46,7 +46,7 @@ to filter for a collection of devices and assign the results to a single group.
         $NewChildDevice
     )
     DynamicParam {
-        Get-ClientCommonParameters -Type "Create", "Template" -BoundParameters $PSBoundParameters
+        Get-ClientCommonParameters -Type "Create", "Template"
     }
 
     Begin {

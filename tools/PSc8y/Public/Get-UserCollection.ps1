@@ -67,7 +67,7 @@ Get a list of users
         $Tenant
     )
     DynamicParam {
-        Get-ClientCommonParameters -Type "Get", "Collection" -BoundParameters $PSBoundParameters
+        Get-ClientCommonParameters -Type "Get", "Collection"
     }
 
     Begin {

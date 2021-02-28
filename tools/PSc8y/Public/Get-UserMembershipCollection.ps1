@@ -34,7 +34,7 @@ Get a list of groups that a user belongs to
         $Tenant
     )
     DynamicParam {
-        Get-ClientCommonParameters -Type "Get", "Collection" -BoundParameters $PSBoundParameters
+        Get-ClientCommonParameters -Type "Get", "Collection"
     }
 
     Begin {

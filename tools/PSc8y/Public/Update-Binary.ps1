@@ -35,7 +35,7 @@ Update an existing binary file
         $File
     )
     DynamicParam {
-        Get-ClientCommonParameters -Type "Update", "Template" -BoundParameters $PSBoundParameters
+        Get-ClientCommonParameters -Type "Update", "Template"
     }
 
     Begin {

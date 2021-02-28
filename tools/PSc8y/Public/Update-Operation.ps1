@@ -46,7 +46,7 @@ Update multiple operations
         $FailureReason
     )
     DynamicParam {
-        Get-ClientCommonParameters -Type "Update", "Template" -BoundParameters $PSBoundParameters
+        Get-ClientCommonParameters -Type "Update", "Template"
     }
 
     Begin {

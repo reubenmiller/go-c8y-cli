@@ -44,7 +44,7 @@ Update agent custom properties
         $NewName
     )
     DynamicParam {
-        Get-ClientCommonParameters -Type "Update", "Template" -BoundParameters $PSBoundParameters
+        Get-ClientCommonParameters -Type "Update", "Template"
     }
 
     Begin {

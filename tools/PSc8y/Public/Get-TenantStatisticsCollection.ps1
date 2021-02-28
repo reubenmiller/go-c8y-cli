@@ -42,7 +42,7 @@ Get tenant statistics collection for the day before yesterday
         $DateTo
     )
     DynamicParam {
-        Get-ClientCommonParameters -Type "Get", "Collection" -BoundParameters $PSBoundParameters
+        Get-ClientCommonParameters -Type "Get", "Collection"
     }
 
     Begin {

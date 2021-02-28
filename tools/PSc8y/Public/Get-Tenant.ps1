@@ -28,7 +28,7 @@ Get a tenant by name (from the management tenant)
         $Id
     )
     DynamicParam {
-        Get-ClientCommonParameters -Type "Get" -BoundParameters $PSBoundParameters
+        Get-ClientCommonParameters -Type "Get"
     }
 
     Begin {

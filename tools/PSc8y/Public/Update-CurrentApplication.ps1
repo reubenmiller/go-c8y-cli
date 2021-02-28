@@ -63,7 +63,7 @@ Update custom properties of the current application (requires using application 
         $ExternalUrl
     )
     DynamicParam {
-        Get-ClientCommonParameters -Type "Update", "Template" -BoundParameters $PSBoundParameters
+        Get-ClientCommonParameters -Type "Update", "Template"
     }
 
     Begin {

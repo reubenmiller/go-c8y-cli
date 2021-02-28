@@ -44,7 +44,7 @@ Update custom properties of an existing event (using pipeline)
         $Text
     )
     DynamicParam {
-        Get-ClientCommonParameters -Type "Update", "Template" -BoundParameters $PSBoundParameters
+        Get-ClientCommonParameters -Type "Update", "Template"
     }
 
     Begin {

@@ -59,7 +59,7 @@ Get measurement series from a device (using pipeline)
         $DateTo
     )
     DynamicParam {
-        Get-ClientCommonParameters -Type "Get" -BoundParameters $PSBoundParameters
+        Get-ClientCommonParameters -Type "Get"
     }
 
     Begin {

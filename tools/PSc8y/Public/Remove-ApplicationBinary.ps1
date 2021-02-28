@@ -42,7 +42,7 @@ Remove all application binaries (except for the active one) for an application (
         $BinaryId
     )
     DynamicParam {
-        Get-ClientCommonParameters -Type "Delete" -BoundParameters $PSBoundParameters
+        Get-ClientCommonParameters -Type "Delete"
     }
 
     Begin {

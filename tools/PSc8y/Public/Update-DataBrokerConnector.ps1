@@ -35,7 +35,7 @@ Change the status of a specific data broker connector by given connector id
         $Status
     )
     DynamicParam {
-        Get-ClientCommonParameters -Type "Update", "Template" -BoundParameters $PSBoundParameters
+        Get-ClientCommonParameters -Type "Update", "Template"
     }
 
     Begin {

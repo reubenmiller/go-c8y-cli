@@ -48,7 +48,7 @@ Add a role to a user using wildcards (using pipeline)
         $Tenant
     )
     DynamicParam {
-        Get-ClientCommonParameters -Type "Create", "Template" -BoundParameters $PSBoundParameters
+        Get-ClientCommonParameters -Type "Create", "Template"
     }
 
     Begin {

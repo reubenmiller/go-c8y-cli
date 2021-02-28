@@ -28,7 +28,7 @@ Get a list of referenced applications on a given tenant (from management tenant)
         $Tenant
     )
     DynamicParam {
-        Get-ClientCommonParameters -Type "Get", "Collection" -BoundParameters $PSBoundParameters
+        Get-ClientCommonParameters -Type "Get", "Collection"
     }
 
     Begin {

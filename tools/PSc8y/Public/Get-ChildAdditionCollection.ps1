@@ -34,7 +34,7 @@ Get a list of the child additions of an existing managed object (using pipeline)
         $Id
     )
     DynamicParam {
-        Get-ClientCommonParameters -Type "Get", "Collection" -BoundParameters $PSBoundParameters
+        Get-ClientCommonParameters -Type "Get", "Collection"
     }
 
     Begin {

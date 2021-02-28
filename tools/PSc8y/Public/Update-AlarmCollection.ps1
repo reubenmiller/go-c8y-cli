@@ -66,7 +66,7 @@ Update the status of all active alarms on a device to ACKNOWLEDGED (using pipeli
         $NewStatus
     )
     DynamicParam {
-        Get-ClientCommonParameters -Type "Update", "Template" -BoundParameters $PSBoundParameters
+        Get-ClientCommonParameters -Type "Update", "Template"
     }
 
     Begin {

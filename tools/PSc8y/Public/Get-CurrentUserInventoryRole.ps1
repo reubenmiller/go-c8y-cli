@@ -29,7 +29,7 @@ Get an inventory role of the current user (using pipeline)
         $Id
     )
     DynamicParam {
-        Get-ClientCommonParameters -Type "Get" -BoundParameters $PSBoundParameters
+        Get-ClientCommonParameters -Type "Get"
     }
 
     Begin {

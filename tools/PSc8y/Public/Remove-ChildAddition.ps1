@@ -36,7 +36,7 @@ Unassign a child addition from its parent managed object
         $ChildId
     )
     DynamicParam {
-        Get-ClientCommonParameters -Type "Delete" -BoundParameters $PSBoundParameters
+        Get-ClientCommonParameters -Type "Delete"
     }
 
     Begin {

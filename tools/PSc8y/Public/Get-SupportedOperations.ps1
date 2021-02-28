@@ -35,7 +35,7 @@ Get the supported operations of a device (using pipeline)
         $Device
     )
     DynamicParam {
-        Get-ClientCommonParameters -Type "Get" -BoundParameters $PSBoundParameters
+        Get-ClientCommonParameters -Type "Get"
     }
 
     Begin {

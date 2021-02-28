@@ -34,7 +34,7 @@ Update bulk operation wait period between the creation of each operation to 1.5 
         $CreationRampSec
     )
     DynamicParam {
-        Get-ClientCommonParameters -Type "Update", "Template" -BoundParameters $PSBoundParameters
+        Get-ClientCommonParameters -Type "Update", "Template"
     }
 
     Begin {

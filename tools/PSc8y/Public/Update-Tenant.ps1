@@ -58,7 +58,7 @@ Update a tenant by name (from the mangement tenant)
         $ContactPhone
     )
     DynamicParam {
-        Get-ClientCommonParameters -Type "Update", "Template" -BoundParameters $PSBoundParameters
+        Get-ClientCommonParameters -Type "Update", "Template"
     }
 
     Begin {

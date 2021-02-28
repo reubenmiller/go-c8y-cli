@@ -35,7 +35,7 @@ List all of the binaries related to a Hosted (web) application (using pipeline)
         $Id
     )
     DynamicParam {
-        Get-ClientCommonParameters -Type "Get", "Collection" -BoundParameters $PSBoundParameters
+        Get-ClientCommonParameters -Type "Get", "Collection"
     }
 
     Begin {

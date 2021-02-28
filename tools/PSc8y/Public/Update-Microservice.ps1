@@ -51,7 +51,7 @@ Update microservice availability to MARKET
         $ResourcesUrl
     )
     DynamicParam {
-        Get-ClientCommonParameters -Type "Update", "Template" -BoundParameters $PSBoundParameters
+        Get-ClientCommonParameters -Type "Update", "Template"
     }
 
     Begin {

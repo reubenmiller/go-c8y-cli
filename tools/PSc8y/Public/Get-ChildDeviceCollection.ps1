@@ -34,7 +34,7 @@ Get a list of the child devices of an existing device (using pipeline)
         $Device
     )
     DynamicParam {
-        Get-ClientCommonParameters -Type "Get", "Collection" -BoundParameters $PSBoundParameters
+        Get-ClientCommonParameters -Type "Get", "Collection"
     }
 
     Begin {

@@ -44,7 +44,7 @@ Add a role to a group using wildcards (using pipeline)
         $Tenant
     )
     DynamicParam {
-        Get-ClientCommonParameters -Type "Create", "Template" -BoundParameters $PSBoundParameters
+        Get-ClientCommonParameters -Type "Create", "Template"
     }
 
     Begin {

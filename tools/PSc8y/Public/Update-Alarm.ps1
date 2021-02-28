@@ -56,7 +56,7 @@ Update severity of an existing alarm to CRITICAL
         $Text
     )
     DynamicParam {
-        Get-ClientCommonParameters -Type "Update", "Template" -BoundParameters $PSBoundParameters
+        Get-ClientCommonParameters -Type "Update", "Template"
     }
 
     Begin {

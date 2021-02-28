@@ -36,7 +36,7 @@ Add a related managed object as a child to an existing managed object
         $NewChild
     )
     DynamicParam {
-        Get-ClientCommonParameters -Type "Create", "Template" -BoundParameters $PSBoundParameters
+        Get-ClientCommonParameters -Type "Create", "Template"
     }
 
     Begin {
