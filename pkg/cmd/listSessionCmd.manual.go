@@ -168,7 +168,7 @@ func (n *listSessionCmd) listSession(cmd *cobra.Command, args []string) error {
 
 	prompt := promptui.Select{
 		Stdout:            &bellSkipper{}, // Workaround to pervent the terminal bell on MacOS
-		HideSelected:      false,
+		HideSelected:      true,
 		IsVimMode:         false,
 		StartInSearchMode: false,
 		Label:             "Select a Cumulocity Session",
