@@ -1,8 +1,11 @@
 package cmd
 
 import (
+	"fmt"
+	"io"
 	"net/http"
 
+	"github.com/fatih/color"
 	"github.com/reubenmiller/go-c8y-cli/pkg/c8ylogin"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -72,5 +75,30 @@ func (n *sessionLoginCmd) initSession(cmd *cobra.Command, args []string) error {
 		n.onSave()
 	}
 
+	printSessionInfo(n.cmd.ErrOrStderr(), CumulocitySession{
+		Path:     cliConfig.GetSessionFilePath(),
+		Host:     handler.C8Yclient.BaseURL.Host,
+		Tenant:   cliConfig.GetTenant(),
+		Username: handler.C8Yclient.Username,
+	})
+
 	return nil
+}
+
+func printSessionInfo(w io.Writer, session CumulocitySession) {
+	label := color.New(color.FgWhite, color.Faint).SprintfFunc()
+	value := color.New(color.FgWhite).SprintFunc()
+	header := color.New(color.FgCyan).SprintFunc()
+	fmt.Fprintf(w, label("%s", "---------------------  Cumulocity Session  ---------------------\n"))
+	fmt.Fprintf(w, "\n    %s: %s\n\n\n", label("%s", "path"), header(session.Path))
+	if session.Description != "" {
+		fmt.Fprintf(w, "%s : %s\n", label(fmt.Sprintf("%-12s", "description")), value(session.Host))
+	}
+
+	fmt.Fprintf(w, "%s : %s\n", label(fmt.Sprintf("%-12s", "host")), value(session.Host))
+	if session.Tenant != "" {
+		fmt.Fprintf(w, "%s : %s\n", label(fmt.Sprintf("%-12s", "tenant")), value(session.Tenant))
+	}
+	fmt.Fprintf(w, "%s : %s\n", label(fmt.Sprintf("%-12s", "username")), value(session.Username))
+	fmt.Fprintf(w, "\n")
 }

@@ -136,7 +136,5 @@ String
             Write-Error "$resp"
             return
         }
-
-        Get-Session
     }
 }
