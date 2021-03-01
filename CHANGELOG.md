@@ -29,16 +29,17 @@ None :)
 
 ## TODO
 
-* Add confirmation prompts to c8y binary
 * Create activity log cmdlets?
   * Get recent history, get commands with filter (api, host, method etc.)
-* Display session information after selecting a session (like in powershell but natively)
+* Add session alias for shell (print out session like)
 * Option to not store the password in the session. It should force the user to use their password each time (then delete the password value?)
 
 ## Unreleased
 
 No unreleased features
 
+* Add confirmation prompts to c8y binary
+* Display session information after selecting a session
 * Custom `--logMessage` or `-LogMessage` common parameters which adds a custom string to the activity log (if enabled). It helps the user put a more meaningful entry related to the command.
 
 * Added links to native go command in PowerShell help in the `.LINK` (related links) section
