@@ -66,7 +66,7 @@ func (n *getSessionCmd) getSession(cmd *cobra.Command, args []string) error {
 	}
 
 	if session.CumulocitySession.Host == "" {
-		return cmderrors.NewUserError("no session is loaded")
+		return cmderrors.NewUserErrorWithExitCode(102, "no session loaded")
 	}
 
 	b, err := json.Marshal(session)
@@ -76,10 +76,16 @@ func (n *getSessionCmd) getSession(cmd *cobra.Command, args []string) error {
 
 	outputEnding := "\n"
 
-	if globalFlagCompact {
-		fmt.Printf("%s%s", bytes.TrimSpace(b), outputEnding)
+	if n.OutputJSON {
+
+		if globalFlagCompact {
+			fmt.Printf("%s%s", bytes.TrimSpace(b), outputEnding)
+		} else {
+			fmt.Printf("%s%s", pretty.Pretty(bytes.TrimSpace(b)), outputEnding)
+		}
 	} else {
-		fmt.Printf("%s%s", pretty.Pretty(bytes.TrimSpace(b)), outputEnding)
+		session.CumulocitySession.Path = session.Path
+		printSessionInfo(n.cmd.ErrOrStderr(), session.CumulocitySession)
 	}
 	return nil
 }

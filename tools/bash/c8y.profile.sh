@@ -270,6 +270,10 @@ complete -F _complete_alias mo
 alias op=c8y\ operations\ get\ --id
 complete -F _complete_alias op
 
+# session
+alias session=c8y\ sessions\ get
+complete -F _complete_alias session
+
 # init passphrase (if not already set)
 if [ -t 0 ]; then
     test-c8ypassphrase

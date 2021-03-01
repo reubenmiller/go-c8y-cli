@@ -14,6 +14,11 @@ Get-Session
 
 Get the current Cumulocity session
 
+.EXAMPLE
+Get-Session -Show
+
+Print the current session information (if set)
+
 .OUTPUTS
 None
 #>
@@ -22,24 +27,27 @@ None
         # Specifiy alternative Cumulocity session to use when running the cmdlet
         [Parameter()]
         [string]
-        $Session
+        $Session,
+
+        # Only print the session information
+        [switch]
+        $Show
     )
 
-    $c8yBinary = Get-ClientBinary
     $c8yArgs = New-Object System.Collections.ArrayList
-    $null = $c8yArgs.AddRange(@("sessions", "get"))
 
     if ($Session) {
         $null = $c8yArgs.AddRange(@("--session", $Session))
     }
-    
-    $sessionResponse = & $c8yBinary $c8yArgs 2>$null
 
-    if ($LASTEXITCODE -ne 0) {
-        Write-Error "Failed to get session details. reason: $sessionResponse"
+    if ($Show) {
+        c8y sessions get $c8yArgs
         return
     }
 
+    # Convert session to powershell psobject
+    $null = $c8yArgs.Add("--json")
+    $sessionResponse = c8y sessions get $c8yArgs
     $data = $sessionResponse | ConvertFrom-Json
 
     if ($env:C8Y_LOGGER_HIDE_SENSITIVE -eq "true") {

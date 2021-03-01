@@ -255,6 +255,9 @@ alias mo=c8y\ inventory\ get\ --id
 # op
 alias op=c8y\ operations\ get\ --id
 
+# session
+alias session=c8y\ sessions\ get
+
 # init passphrase (if not already set)
 if [ -t 0 ]; then
     test-c8ypassphrase

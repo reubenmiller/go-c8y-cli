@@ -90,15 +90,15 @@ func printSessionInfo(w io.Writer, session CumulocitySession) {
 	value := color.New(color.FgWhite).SprintFunc()
 	header := color.New(color.FgCyan).SprintFunc()
 	fmt.Fprintf(w, label("%s", "---------------------  Cumulocity Session  ---------------------\n"))
-	fmt.Fprintf(w, "\n    %s: %s\n\n\n", label("%s", "path"), header(session.Path))
+	fmt.Fprintf(w, "\n    %s: %s\n\n\n", label("%s", "path"), header(hideSensitiveInformationIfActive(session.Path)))
 	if session.Description != "" {
-		fmt.Fprintf(w, "%s : %s\n", label(fmt.Sprintf("%-12s", "description")), value(session.Host))
+		fmt.Fprintf(w, "%s : %s\n", label(fmt.Sprintf("%-12s", "description")), value(hideSensitiveInformationIfActive(session.Host)))
 	}
 
-	fmt.Fprintf(w, "%s : %s\n", label(fmt.Sprintf("%-12s", "host")), value(session.Host))
+	fmt.Fprintf(w, "%s : %s\n", label(fmt.Sprintf("%-12s", "host")), value(hideSensitiveInformationIfActive(session.Host)))
 	if session.Tenant != "" {
-		fmt.Fprintf(w, "%s : %s\n", label(fmt.Sprintf("%-12s", "tenant")), value(session.Tenant))
+		fmt.Fprintf(w, "%s : %s\n", label(fmt.Sprintf("%-12s", "tenant")), value(hideSensitiveInformationIfActive(session.Tenant)))
 	}
-	fmt.Fprintf(w, "%s : %s\n", label(fmt.Sprintf("%-12s", "username")), value(session.Username))
+	fmt.Fprintf(w, "%s : %s\n", label(fmt.Sprintf("%-12s", "username")), value(hideSensitiveInformationIfActive(session.Username)))
 	fmt.Fprintf(w, "\n")
 }
