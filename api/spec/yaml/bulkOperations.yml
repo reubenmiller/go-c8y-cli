@@ -63,7 +63,7 @@ endpoints:
         powershell: Get-BulkOperation
     pathParameters:
       - name: id
-        type: integer
+        type: string
         required: true
         pipeline: true
         description: Bulk Operation id
@@ -91,7 +91,7 @@ endpoints:
         powershell: Remove-BulkOperation
     pathParameters:
       - name: id
-        type: integer
+        type: string
         required: true
         pipeline: true
         description: Bulk Operation id
@@ -196,8 +196,9 @@ endpoints:
         description: Additional properties to update on the bulk operation.
 
     pathParameters:
+      # Note: id is actually an integer but it should be handled as a string because it is being applied to a path parameter (and piped input are strings)
       - name: id
-        type: integer
+        type: string
         description: Bulk Operation id
         pipeline: true
         required: true

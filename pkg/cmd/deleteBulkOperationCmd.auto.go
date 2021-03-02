@@ -33,7 +33,7 @@ Remove bulk operation by id
 
 	cmd.SilenceUsage = true
 
-	cmd.Flags().Int("id", 0, "Bulk Operation id (required) (accepts pipeline)")
+	cmd.Flags().String("id", "", "Bulk Operation id (required) (accepts pipeline)")
 	addProcessingModeFlag(cmd)
 
 	completion.WithOptions(
@@ -116,7 +116,7 @@ func (n *DeleteBulkOperationCmd) RunE(cmd *cobra.Command, args []string) error {
 		cmd,
 		path,
 		inputIterators,
-		flags.WithIntValue("id", "id"),
+		flags.WithStringValue("id", "id"),
 	)
 	if err != nil {
 		return err

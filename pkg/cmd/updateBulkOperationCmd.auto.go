@@ -33,7 +33,7 @@ Update an bulk operation
 
 	cmd.SilenceUsage = true
 
-	cmd.Flags().Int("id", 0, "Bulk Operation id (required) (accepts pipeline)")
+	cmd.Flags().String("id", "", "Bulk Operation id (required) (accepts pipeline)")
 	cmd.Flags().Float32("creationRampSec", 0, "Delay between every operation creation. (required)")
 	addDataFlag(cmd)
 	addProcessingModeFlag(cmd)
@@ -123,7 +123,7 @@ func (n *UpdateBulkOperationCmd) RunE(cmd *cobra.Command, args []string) error {
 		cmd,
 		path,
 		inputIterators,
-		flags.WithIntValue("id", "id"),
+		flags.WithStringValue("id", "id"),
 	)
 	if err != nil {
 		return err
