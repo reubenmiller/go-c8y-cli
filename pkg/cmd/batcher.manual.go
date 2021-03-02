@@ -155,6 +155,8 @@ func runBatched(requestIterator *RequestIterator, commonOptions CommonCommandOpt
 
 	jobID := int64(0)
 	skipConfirm := false
+	promptCount := int32(0)
+	promptWG := sync.WaitGroup{}
 
 	// add jobs async
 	go func() {
@@ -201,6 +203,9 @@ func runBatched(requestIterator *RequestIterator, commonOptions CommonCommandOpt
 
 			// confirm action
 			if request != nil && !skipConfirm && shouldConfirm(request.Method) {
+				// wait for any other previous prompted jobs to finish
+				promptWG.Wait()
+
 				operation := "Execute command"
 				if len(os.Args[1:]) > 1 {
 					operation = fmt.Sprintf("%s %s", os.Args[2], strings.TrimRight(os.Args[1], "s"))
@@ -228,6 +233,9 @@ func runBatched(requestIterator *RequestIterator, commonOptions CommonCommandOpt
 				if confirmResult == prompt.ConfirmNoToAll {
 					break
 				}
+
+				promptWG.Add(1)
+				atomic.AddInt32(&promptCount, 1)
 			}
 
 			jobs <- batchArgument{
@@ -258,6 +266,7 @@ func runBatched(requestIterator *RequestIterator, commonOptions CommonCommandOpt
 
 	for err := range results {
 		Logger.Infof("reading job result: %s", err)
+
 		if err != nil && err != io.EOF {
 			totalErrors = append(totalErrors, err)
 		}
@@ -267,6 +276,12 @@ func runBatched(requestIterator *RequestIterator, commonOptions CommonCommandOpt
 				close(results)
 			}
 			return cmderrors.NewUserErrorWithExitCode(103, fmt.Sprintf("aborted batch as error count has been exceeded. totalErrors=%d", batchOptions.AbortOnErrorCount))
+		}
+
+		// communicate that the prompt has received a result
+		pendingPrompts := atomic.AddInt32(&promptCount, -1)
+		if pendingPrompts+1 > 0 {
+			promptWG.Done()
 		}
 	}
 	if progbar.IsEnabled() && jobID > 1 {
