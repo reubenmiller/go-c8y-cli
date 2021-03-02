@@ -2,14 +2,10 @@
 
 Describe -Tag "Session" -Name "Set-Session" {
     BeforeAll {
-        . "$PSScriptRoot/New-TemporaryDirectory.ps1"
-        $sessionHomeBackup = $env:C8Y_SESSION_HOME
-        $sessionBackup = $env:C8Y_SESSION
-        $sessionBackupHost = $env:C8Y_HOST
-        $sessionBackupTenant = $env:C8Y_TENANT
-        $sessionBackupUser = $env:C8Y_USER
-        $sessionBackupPassword = $env:C8Y_PASSWORD
-        $sessionBackupUseEnv = $env:C8Y_USE_ENVIRONMENT
+        $EnvBackup = Get-Item "Env:C8Y*"
+        foreach ($item in $EnvBackup) {
+            Remove-Item ("Env:{0}" -f $item.Name)
+        }
     }
 
     BeforeEach {
@@ -116,13 +112,9 @@ settings.includeAll.pagesize: 202
     }
 
     AfterAll {
-        $env:C8Y_SESSION_HOME = $sessionHomeBackup
-        $env:C8Y_SESSION = $sessionBackup
-
-        $env:C8Y_HOST = $sessionBackupHost
-        $env:C8Y_TENANT = $sessionBackupTenant
-        $env:C8Y_USER = $sessionBackupUser
-        $env:C8Y_PASSWORD = $sessionBackupPassword
-        $env:C8Y_USE_ENVIRONMENT = $sessionBackupUseEnv
+        # Restore env variables
+        foreach ($item in $EnvBackup) {
+            Set-Item -Path ("env:{0}" -f $item.Name) -Value $item.Value
+        }
     }
 }
