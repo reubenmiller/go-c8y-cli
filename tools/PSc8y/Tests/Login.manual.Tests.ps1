@@ -2,7 +2,6 @@
 
 Describe -Tag "Session" -Name "Login and Session Tests" {
     BeforeAll {
-        . "$PSScriptRoot/New-TemporaryDirectory.ps1"
         $EnvBackup = Get-Item "Env:C8Y*"
         $SessionBackup = Get-Session
         $EnvBackupHash = @{}
