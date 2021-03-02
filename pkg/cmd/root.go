@@ -213,6 +213,9 @@ var (
 	globalModeEnableDelete bool
 	globalModeEnableBatch  bool
 	globalCIMode           bool
+
+	globalStorageStorePassword bool
+	globalStorageStoreCookies  bool
 )
 
 // CumulocityDefaultPageSize is the default page size used by Cumulocity
@@ -254,6 +257,12 @@ const (
 
 	// SettingsEncryptionEnabled enables encryption when storing sensitive session data
 	SettingsEncryptionEnabled string = "settings.encryption.enabled"
+
+	// SettingsStorageStoreCookies controls if the cookies are saved to the session file or not
+	SettingsStorageStoreCookies string = "settings.storage.storeCookies"
+
+	// SettingsStorageStorePassword controls if the password is saved to the session file or not
+	SettingsStorageStorePassword string = "settings.storage.storePassword"
 
 	// SettingsModeCI enable continuous integration mode (this will enable all commands)
 	SettingsModeCI string = "settings.ci"
@@ -744,6 +753,10 @@ func loadConfiguration() error {
 	bindEnv(SettingsModeCI, false)
 	bindEnv(SettingsModeConfirmation, "PUT POST DELETE")
 
+	// Storage options
+	bindEnv(SettingsStorageStorePassword, true)
+	bindEnv(SettingsStorageStoreCookies, true)
+
 	// Activity log settings
 	bindEnv(SettingsActivityLogEnabled, true)
 	bindEnv(SettingsActivityLogPath, "")
@@ -819,6 +832,9 @@ func readConfiguration(cmd *cobra.Command) error {
 	globalModeEnableCreate = viper.GetBool(SettingsModeEnableCreate)
 	globalModeEnableUpdate = viper.GetBool(SettingsModeEnableUpdate)
 	globalModeEnableDelete = viper.GetBool(SettingsModeEnableDelete)
+
+	globalStorageStoreCookies = viper.GetBool(SettingsStorageStoreCookies)
+	globalStorageStorePassword = viper.GetBool(SettingsStorageStorePassword)
 
 	globalCIMode = viper.GetBool(SettingsModeCI)
 

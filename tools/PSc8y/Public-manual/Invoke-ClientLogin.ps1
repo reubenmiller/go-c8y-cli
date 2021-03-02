@@ -12,7 +12,7 @@ Function Invoke-ClientLogin {
 
         $cliArgs = New-Object System.Collections.ArrayList
 
-        $null = $cliArgs.AddRange(@("sessions", "login"))
+        $null = $cliArgs.AddRange(@("sessions", "login", "--env", "--powershell"))
 
         if ($TFACode) {
             $null = $cliArgs.AddRange(@("--tfaCode", $TFACode))
@@ -32,6 +32,6 @@ Function Invoke-ClientLogin {
             return
         }
 
-        $result
+        $result | Out-String | Invoke-Expression
     }
 }

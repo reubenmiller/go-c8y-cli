@@ -15,6 +15,8 @@ type sessionLoginCmd struct {
 	TFACode              string
 	LoginErr             error
 	LoginOK              bool
+	AsEnv                bool
+	Powershell           bool
 	ClearExistingCookies bool
 
 	*baseCmd
@@ -38,6 +40,8 @@ Log into the current session
 	cmd.SilenceUsage = true
 
 	cmd.Flags().StringVar(&ccmd.TFACode, "tfaCode", "", "Two Factor Authentication code")
+	cmd.Flags().BoolVar(&ccmd.AsEnv, "env", false, "Return environment variables")
+	cmd.Flags().BoolVar(&ccmd.Powershell, "powershell", false, "Return powershell environment variables")
 	cmd.Flags().BoolVar(&ccmd.ClearExistingCookies, "clear", false, "Clear any existing cookies")
 
 	ccmd.baseCmd = newBaseCmd(cmd)
@@ -46,12 +50,18 @@ Log into the current session
 }
 
 func (n *sessionLoginCmd) onSave() {
-	WriteAuth(viper.GetViper())
+	Logger.Debug("Saving session file")
+	WriteAuth(viper.GetViper(), globalStorageStorePassword, globalStorageStoreCookies)
 }
 
 func (n *sessionLoginCmd) initSession(cmd *cobra.Command, args []string) error {
 	if n.ClearExistingCookies {
 		client.SetCookies([]*http.Cookie{})
+	}
+
+	err := checkEncryption(n.cmd.ErrOrStderr())
+	if err != nil {
+		return err
 	}
 
 	// If the password is not encrypted, then save it (which will apply the encryption)
@@ -64,7 +74,7 @@ func (n *sessionLoginCmd) initSession(cmd *cobra.Command, args []string) error {
 
 	handler.TFACode = n.TFACode
 	handler.SetLogger(Logger)
-	err := handler.Run()
+	err = handler.Run()
 
 	if err != nil {
 		return err
@@ -81,6 +91,10 @@ func (n *sessionLoginCmd) initSession(cmd *cobra.Command, args []string) error {
 		Tenant:   cliConfig.GetTenant(),
 		Username: handler.C8Yclient.Username,
 	})
+
+	if n.AsEnv {
+		showEnvironmentVariables(handler.C8Yclient, n.Powershell)
+	}
 
 	return nil
 }

@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
-	"sort"
 	"strings"
 
 	"github.com/manifoldco/promptui"
@@ -71,24 +70,14 @@ func (n *checkSessionPassphraseCmd) checkSession(cmd *cobra.Command, args []stri
 
 	if n.OutputJSON {
 		cliConfig.Logger = Logger
-		output := cliConfig.GetEnvironmentVariables()
+		output := cliConfig.GetEnvironmentVariables(client, true)
 		b, err := json.Marshal(output)
 		if err != nil {
 			return err
 		}
 		fmt.Printf("%s\n", b)
 	} else if n.OutputEnvVariables {
-		// sort output variables
-		variables := []string{}
-		output := cliConfig.GetEnvironmentVariables()
-		for name := range output {
-			variables = append(variables, name)
-		}
-		sort.Strings(variables)
-		for _, name := range variables {
-			value := output[name]
-			fmt.Printf("export %s=%s\n", name, value)
-		}
+		showEnvironmentVariables(nil, false)
 	} else {
 		n.showEnvironmentVariableUsage()
 	}

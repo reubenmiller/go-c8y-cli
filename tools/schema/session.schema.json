@@ -111,6 +111,23 @@
                     "description": "Path / Folder where the templates are located. If the user gives a template name (without path), then a matching filename will be search for in this folder",
                     "type": "string"
                 },
+                "storage": {
+                    "type": "object",
+                    "description": "Session storage options",
+                    "properties": {
+                        "storePassword": {
+                            "title": "Store the session password to file. Enabled by default",
+                            "description": "Storage of sensitive information can be disabled completely. Useful if you are using it in a shared environment. The user will be prompted each time for their password",
+                            "type": "boolean",
+                            "default": "true"
+                        },
+                        "storeCookies": {
+                            "title": "Store the session cookies to file. Enabled by default",
+                            "type": "boolean",
+                            "default": "true"
+                        }
+                    }
+                },
                 "mode": {
                     "type": "object",
                     "description": "Mode settings to restrict specific commands",
@@ -164,6 +181,11 @@
                     "properties": {
                         "enabled": {
                             "description": "Enable/disable session encryption",
+                            "type": "boolean"
+                        },
+                        "cachePassphrase": {
+                            "title": "cache passphrase in environment variables",
+                            "description": "Cache passphrase in the shell's environment variables. This allows users to switch session without prompting again for their passphrase",
                             "type": "boolean"
                         }
                     }

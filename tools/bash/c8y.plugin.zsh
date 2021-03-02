@@ -27,16 +27,11 @@ fi
 #   test-c8ypassphrase
 #
 test-c8ypassphrase () {
-    passphraseCheck=$( c8y sessions checkPassphrase --json )
+    c8y sessions checkPassphrase $SESSION_OPTIONS
     if [ $? -ne 0 ]; then
         echo "Encryption check failed"
         (exit 2)
         return
-    fi
-
-    if [[ $(command -v jq) ]]; then
-        export C8Y_PASSPHRASE=$( echo $passphraseCheck | jq -r ".C8Y_PASSPHRASE | select (.!=null)" )
-        export C8Y_PASSPHRASE_TEXT=$( echo $passphraseCheck | jq -r ".C8Y_PASSPHRASE_TEXT | select (.!=null)" )
     fi
 }
 
@@ -49,7 +44,7 @@ test-c8ypassphrase () {
 #
 set-session () {
     if [ $# -gt 0 ]; then
-        resp=$( c8y sessions list --sessionFilter "$1 $2 $3 $4 $5" )
+        resp=$( c8y sessions list --sessionFilter "$1 $2 $3 $4 $5" $SESSION_OPTIONS )
     else
         resp=$( c8y sessions list )
     fi
@@ -61,30 +56,19 @@ set-session () {
 
     # clear session before settings new one as stale env variables can cause problems
     clear-session
-
     export C8Y_SESSION=$resp
-
-    # Check encryption passphrase
-    passphraseCheck=$( c8y sessions checkPassphrase --env )
-
-    if [ $? -ne 0 ]; then
-        echo "Encryption check failed"
-        (exit 2)
-        return
-    fi
 
     # Export session as individual settings
     # to support other 3rd party applicatsion (i.e. java c8y sdk apps)
     # which will read these variables
-    eval $passphraseCheck
-
     # login / test session credentials
-    c8y sessions login
-
-    # reset any enabled side-effect commands
-    unset C8Y_SETTINGS_MODE_ENABLECREATE
-    unset C8Y_SETTINGS_MODE_ENABLEUPDATE
-    unset C8Y_SETTINGS_MODE_ENABLEDELETE
+    c8yenv=$( c8y sessions login --env $SESSION_OPTIONS )
+    if [ $? -ne 0 ]; then
+        echo "Login using session failed"
+        (exit 3)
+        return
+    fi
+    eval $c8yenv
 }
 
 # -----------
@@ -111,6 +95,18 @@ clear-session () {
     unset C8Y_CREDENTIAL_COOKIES_2
     unset C8Y_CREDENTIAL_COOKIES_3
     unset C8Y_CREDENTIAL_COOKIES_4
+}
+
+# -----------
+# clear-c8ypassphrase
+# -----------
+# Description: Clear the encryption passphrase environment variables
+# Usage:
+#   clear-c8ypassphrase
+#
+clear-c8ypassphrase () {
+    unset C8Y_PASSPHRASE
+    unset C8Y_PASSPHRASE_TEXT
 }
 
 # ----------

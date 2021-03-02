@@ -8,7 +8,9 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"sort"
 
+	"github.com/manifoldco/promptui"
 	homedir "github.com/mitchellh/go-homedir"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 )
@@ -94,4 +96,67 @@ func getSessionHomeDir() string {
 		outputDir = filepath.Join(outputDir, ".cumulocity")
 	}
 	return outputDir
+}
+
+func showEnvironmentVariables(c8yclient *c8y.Client, isPowerShell bool) {
+	// sort output variables
+	variables := []string{}
+	output := cliConfig.GetEnvironmentVariables(c8yclient, false)
+	for name := range output {
+		variables = append(variables, name)
+	}
+	sort.Strings(variables)
+	for _, name := range variables {
+		value := output[name]
+
+		if isPowerShell {
+			fmt.Printf("$env:%s = '%s'\n", name, value)
+		} else {
+			fmt.Printf("export %s='%s'\n", name, value)
+		}
+	}
+}
+
+func checkEncryption(w io.Writer) error {
+	encryptionEnabled := cliConfig.IsEncryptionEnabled()
+	decryptSession := false
+	if !encryptionEnabled && cliConfig.IsPasswordEncrypted() {
+		cliConfig.Logger.Infof("Encryption has been disabled but detected a encrypted session")
+		decryptSession = true
+	}
+	if encryptionEnabled || cliConfig.IsPasswordEncrypted() {
+		if err := cliConfig.ReadKeyFile(); err != nil {
+			return err
+		}
+
+		// check if encryption is used on the current session
+		passphrase, err := cliConfig.CheckEncryption()
+		if err != nil {
+			return err
+		}
+		if passphrase == "" || passphrase == "null" {
+			return fmt.Errorf("passphrase can not be empty")
+		}
+		cliConfig.Passphrase = passphrase
+
+		// Decrypt username and cookies if necessary
+		clientpass, err := cliConfig.GetPassword()
+		if err != nil {
+			return err
+		}
+		client.SetCookies(cliConfig.GetCookies())
+		client.Password = clientpass
+
+		// decrypt settings
+		if decryptSession {
+			// cliConfig.SetPassword(clientpass)
+			// cliConfig.SetAuthorizationCookies(cliConfig.GetCookies())
+			cliConfig.DecryptSession()
+		}
+
+		green := promptui.Styler(promptui.FGGreen)
+		w.Write([]byte(green("Passphrase OK\n")))
+		Logger.Info("Passphrase accepted")
+	}
+	return nil
 }

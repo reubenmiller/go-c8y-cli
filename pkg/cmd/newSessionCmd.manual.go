@@ -45,9 +45,13 @@ type CumulocitySession struct {
 	Name  string `json:"-"`
 }
 
-func WriteAuth(v *viper.Viper) error {
-	cliConfig.SetAuthorizationCookies(client.Cookies)
-	cliConfig.SetPassword(client.Password)
+func WriteAuth(v *viper.Viper, savePassword, saveCookies bool) error {
+	if savePassword {
+		cliConfig.SetPassword(client.Password)
+	}
+	if saveCookies {
+		cliConfig.SetAuthorizationCookies(client.Cookies)
+	}
 	cliConfig.SetTenant(client.TenantName)
 	return cliConfig.WritePersistentConfig()
 }

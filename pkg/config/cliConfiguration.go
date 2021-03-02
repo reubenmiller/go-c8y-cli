@@ -13,6 +13,7 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/pkg/logger"
 	"github.com/reubenmiller/go-c8y-cli/pkg/prompt"
 	"github.com/reubenmiller/go-c8y-cli/pkg/totp"
+	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/viper"
 )
 
@@ -20,7 +21,13 @@ var (
 	// PrefixEncrypted prefix used in encrypted string fields to identify when a string is encrypted or not
 	PrefixEncrypted = "{encrypted}"
 
+	// KeyFileName is the name of the reference encryption text
 	KeyFileName = ".key"
+)
+
+const (
+	// SettingEncryptionCachePassphrase setting to cache the passphrase via environment variables
+	SettingEncryptionCachePassphrase = "settings.encryption.cachePassphrase"
 )
 
 // CliConfiguration cli configuration settings
@@ -62,7 +69,12 @@ func NewCliConfiguration(v *viper.Viper, secureData *encrypt.SecureData, home st
 		Logger:     logger.NewDummyLogger("SecureData"),
 	}
 	c.prompter.Logger = c.Logger
+	c.bindSettings()
 	return c
+}
+
+func (c *CliConfiguration) bindSettings() {
+	c.bindEnv(SettingEncryptionCachePassphrase, true)
 }
 
 // SetLogger sets the logger
@@ -77,6 +89,7 @@ func (c *CliConfiguration) ReadConfig(file string) error {
 	return c.Persistent.ReadInConfig()
 }
 
+// CheckEncryption checks if the usuer has provided the correct encryption password or not by testing the decryption of the secret text
 func (c *CliConfiguration) CheckEncryption(encryptedText ...string) (string, error) {
 	secretText := c.SecretText
 	if len(encryptedText) > 0 {
@@ -89,6 +102,7 @@ func (c *CliConfiguration) CheckEncryption(encryptedText ...string) (string, err
 	return pass, err
 }
 
+// BindAuthorization binds environment variables related to the authrorization to the configuration
 func (c *CliConfiguration) BindAuthorization() error {
 	c.viper.SetEnvPrefix("c8y")
 	c.viper.BindEnv("host")
@@ -104,6 +118,7 @@ func (c *CliConfiguration) BindAuthorization() error {
 	return nil
 }
 
+// GetUsername returns the Cumulocity username for the session
 func (c *CliConfiguration) GetUsername() string {
 	v := c.viper.GetString("username")
 
@@ -141,6 +156,9 @@ func (c *CliConfiguration) GetTenant() string {
 	if v := c.viper.GetString("tenant"); v != "" && v != "null" {
 		return v
 	}
+	if v := c.Persistent.GetString("tenant"); v != "" && v != "null" {
+		return v
+	}
 	return ""
 }
 
@@ -154,6 +172,7 @@ func (c *CliConfiguration) GetTOTP(t time.Time) (string, error) {
 	return totp.GenerateTOTP(c.viper.GetString("credential.totp.secret"), t)
 }
 
+// CreateKeyFile creates a file used as reference to validate encryption
 func (c *CliConfiguration) CreateKeyFile(keyText string) error {
 	if _, err := os.Stat(c.KeyFile); os.IsExist(err) {
 		c.Logger.Infof("Key file already exists. file=%s", c.KeyFile)
@@ -170,6 +189,7 @@ func (c *CliConfiguration) CreateKeyFile(keyText string) error {
 	return nil
 }
 
+// ReadKeyFile reads the key file used as a reference to validate encryption (i.e. when no sessions exist)
 func (c *CliConfiguration) ReadKeyFile() error {
 
 	// read from env variable
@@ -214,22 +234,59 @@ func (c *CliConfiguration) ReadKeyFile() error {
 	return nil
 }
 
-func (c CliConfiguration) GetEnvironmentVariables() map[string]interface{} {
+// GetEnvironmentVariables gets all the environment variables associated with the current session
+func (c CliConfiguration) GetEnvironmentVariables(client *c8y.Client, setPassword bool) map[string]interface{} {
 	host := c.GetHost()
+	tenant := c.GetTenant()
+	username := c.GetUsername()
+	password := c.MustGetPassword()
+	cookies := c.GetCookies()
+
+	if client != nil {
+		if client.TenantName != "" {
+			tenant = client.TenantName
+		}
+		if client.Username != "" {
+			username = client.Username
+		}
+		if client.BaseURL.Host != "" {
+			host = client.BaseURL.Scheme + "://" + client.BaseURL.Host
+		}
+		if client.Password != "" {
+			password = client.Password
+		}
+		if len(client.Cookies) > 0 {
+			cookies = client.Cookies
+		}
+	}
+
+	// hide password if it is not needed
+	if !setPassword && len(cookies) > 0 {
+		password = ""
+	}
+
 	output := map[string]interface{}{
-		"C8Y_URL":             host,
-		"C8Y_BASEURL":         host,
-		"C8Y_HOST":            host,
-		"C8Y_TENANT":          c.GetTenant(),
-		"C8Y_USER":            c.GetUsername(),
-		"C8Y_USERNAME":        c.GetUsername(),
-		"C8Y_PASSPHRASE":      c.Passphrase,
-		"C8Y_PASSPHRASE_TEXT": c.SecretText,
-		"C8Y_PASSWORD":        c.MustGetPassword(),
+		"C8Y_URL":      host,
+		"C8Y_BASEURL":  host,
+		"C8Y_HOST":     host,
+		"C8Y_TENANT":   tenant,
+		"C8Y_USER":     username,
+		"C8Y_USERNAME": username,
+		"C8Y_PASSWORD": password,
+	}
+
+	if c.CachePassphraseVariables() {
+		c.Logger.Info("Caching passphrase")
+		if c.Passphrase != "" {
+			output["C8Y_PASSPHRASE"] = c.Passphrase
+		}
+		if c.SecretText != "" {
+			output["C8Y_PASSPHRASE_TEXT"] = c.SecretText
+		}
 	}
 
 	// add decrypted cookies
-	for i, cookie := range c.GetCookies() {
+	for i, cookie := range cookies {
 		output[c.GetEnvKey(fmt.Sprintf("credential.cookies.%d", i))] = fmt.Sprintf("%s=%s", cookie.Name, cookie.Value)
 	}
 
@@ -246,6 +303,10 @@ func (c CliConfiguration) GetCookies() []*http.Cookie {
 	cookies := make([]*http.Cookie, 0)
 	for i := 0; i < 5; i++ {
 		cookieValue := c.viper.GetString(fmt.Sprintf("credential.cookies.%d", i))
+
+		if cookieValue == "" {
+			cookieValue = c.Persistent.GetString(fmt.Sprintf("credential.cookies.%d", i))
+		}
 
 		if cookieValue == "" {
 			break
@@ -317,6 +378,11 @@ func (c *CliConfiguration) SetEncryptedString(key, value string) error {
 		value = c.Persistent.GetString(key)
 	}
 
+	if value == "" {
+		c.Logger.Info("Password is not set so nothing to encrypt")
+		return nil
+	}
+
 	var err error
 	password := value
 	if c.IsEncryptionEnabled() {
@@ -372,6 +438,10 @@ func (c *CliConfiguration) SetAuthorizationCookies(cookies []*http.Cookie) {
 func (c *CliConfiguration) GetPassword() (string, error) {
 	value := c.viper.GetString("password")
 
+	if value == "" {
+		value = c.Persistent.GetString("password")
+	}
+
 	decryptedValue, err := c.DecryptString(value)
 	if err != nil {
 		return value, err
@@ -379,11 +449,14 @@ func (c *CliConfiguration) GetPassword() (string, error) {
 	return decryptedValue, nil
 }
 
-// GetPasswordRaw return ture if the password is encrypted
+// IsPasswordEncrypted return true if the password is encrypted
+// If the password is empty then treat it as encrypted
 func (c *CliConfiguration) IsPasswordEncrypted() bool {
-	return c.SecureData.IsEncrypted(c.viper.GetString("password")) == 1
+	password := c.viper.GetString("password")
+	return password == "" || c.SecureData.IsEncrypted(password) == 1
 }
 
+// MustGetPassword returns the decrypted password if there are no encryption errors, otherwise it will return an encrypted password
 func (c *CliConfiguration) MustGetPassword() string {
 	decryptedValue, err := c.GetPassword()
 	if err != nil {
@@ -392,10 +465,12 @@ func (c *CliConfiguration) MustGetPassword() string {
 	return decryptedValue
 }
 
+// SetPassword sets the password
 func (c *CliConfiguration) SetPassword(p string) {
 	c.Persistent.Set("password", p)
 }
 
+// SetTenant sets the tenant name
 func (c *CliConfiguration) SetTenant(value string) {
 	c.Persistent.Set("tenant", value)
 }
@@ -415,6 +490,24 @@ func (c *CliConfiguration) GetString(key string) string {
 	return c.viper.GetString(key)
 }
 
+// GetDefaultUsername returns the default username
 func (c *CliConfiguration) GetDefaultUsername() string {
 	return c.viper.GetString("settings.default.username")
+}
+
+// CachePassphraseVariables return true if the passphrase variables should be persisted or not
+func (c *CliConfiguration) CachePassphraseVariables() bool {
+	return c.viper.GetBool(SettingEncryptionCachePassphrase)
+}
+
+func (c *CliConfiguration) bindEnv(name string, defaultValue interface{}) {
+	c.viper.BindEnv(name)
+	c.viper.SetDefault(name, defaultValue)
+}
+
+// DecryptSession decrypts a session (as long as the encryption passphrase has already been provided)
+func (c *CliConfiguration) DecryptSession() error {
+	c.SetPassword(c.MustGetPassword())
+	c.SetAuthorizationCookies(c.GetCookies())
+	return c.WritePersistentConfig()
 }
