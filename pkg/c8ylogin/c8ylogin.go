@@ -115,7 +115,13 @@ func (lh *LoginHandler) Clear() {
 // available otherwise.
 func (lh *LoginHandler) Run() error {
 	lh.init()
-	lh.state <- LoginStateVerify
+
+	// Check if any authenitcation is set
+	if len(lh.C8Yclient.Cookies) > 0 || lh.C8Yclient.Password != "" {
+		lh.state <- LoginStateVerify
+	} else {
+		lh.state <- LoginStatePromptPassword
+	}
 
 	for {
 		c := <-lh.state
@@ -185,10 +191,18 @@ func (lh *LoginHandler) sortLoginOptions() {
 func (lh *LoginHandler) init() {
 	lh.do(func() error {
 		loginOptions, _, err := lh.C8Yclient.Tenant.GetLoginOptions(context.Background())
-		if err != nil {
+		if err != nil || loginOptions == nil {
 			lh.Logger.Errorf("Failed to get login options. %s", err)
 			return err
 		}
+
+		if lh.C8Yclient.TenantName != "" {
+			if strings.HasPrefix(loginOptions.Self, "http") && !strings.Contains(loginOptions.Self, lh.C8Yclient.TenantName+".") {
+				lh.Logger.Warningf("Detected invalid tenant name. expected %s to include %s. Tenant name will be ignored", lh.C8Yclient.TenantName, loginOptions.Self)
+				lh.C8Yclient.TenantName = ""
+			}
+		}
+
 		lh.LoginOptions = loginOptions
 		lh.sortLoginOptions()
 
@@ -359,19 +373,18 @@ func (lh *LoginHandler) errorContains(message, pattern string) bool {
 
 func (lh *LoginHandler) verify() {
 	lh.do(func() error {
-		// _, resp, err := lh.C8Yclient.User.GetCurrentUser(context.Background())
 		tenant, resp, err := lh.C8Yclient.Tenant.GetCurrentTenant(context.Background())
 
 		if resp != nil && resp.StatusCode == http.StatusUnauthorized {
 
 			if v, ok := err.(*c8y.ErrorResponse); ok {
-				lh.Logger.Warning("error message from server. %s", v.Message)
+				lh.Logger.Warningf("error message from server. %s", v.Message)
 
 				if lh.errorContains(v.Message, "TFA TOTP setup required") {
 					lh.TFACodeRequired = true
 					lh.state <- LoginStateTFASetup
 				} else if lh.errorContains(v.Message, "TFA TOTP code required") {
-					lh.Logger.Debug("TFA code is required. server response: %s", v.Message)
+					lh.Logger.Debugf("TFA code is required. server response: %s", v.Message)
 					lh.TFACodeRequired = true
 					lh.state <- LoginStateNoAuth
 				} else if lh.errorContains(v.Message, "User has been logged out") {
@@ -380,8 +393,12 @@ func (lh *LoginHandler) verify() {
 					lh.state <- LoginStateNoAuth
 					lh.C8Yclient.SetCookies([]*http.Cookie{})
 					lh.onSave()
-				} else if lh.errorContains(v.Message, "Bad credentials") {
-					lh.Logger.Infof("Bad creds using auth method: %s", lh.C8Yclient.AuthorizationMethod)
+				} else if lh.errorContains(v.Message, "Bad credentials") || lh.errorContains(v.Message, "Invalid credentials") {
+					lh.Logger.Infof("Bad credentials, using auth method: %s", lh.C8Yclient.AuthorizationMethod)
+
+					// try reseting the tenant (in case if it is incorrect)
+					lh.C8Yclient.TenantName = ""
+
 					if lh.C8Yclient.AuthorizationMethod != c8y.AuthMethodOAuth2Internal {
 						if lh.Interactive {
 							lh.state <- LoginStatePromptPassword
