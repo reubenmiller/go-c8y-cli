@@ -45,11 +45,18 @@ Describe -Name "Common parameters" {
         }
 
         It "Select a single parameter" {
-            $output = PSc8y\Get-ApplicationCollection -Select id -AsJSON
+            $output = PSc8y\Get-ApplicationCollection -Select id
             $LASTEXITCODE | Should -Be 0
             $output | Should -Not -BeNullOrEmpty
             $output.id | Should -Not -BeNullOrEmpty
             $output | Where-Object { $_.name } | Should -BeNullOrEmpty
+            $output[0].psobject.TypeNames[0] | Should -Match "PSCustomObject"
+
+            # Same command without select should have a powershell type
+            $output = PSc8y\Get-ApplicationCollection -PageSize 1
+            $LASTEXITCODE | Should -Be 0
+            $output | Should -Not -BeNullOrEmpty
+            $output[0].psobject.TypeNames[0] | Should -Match "application"
         }
     }
 

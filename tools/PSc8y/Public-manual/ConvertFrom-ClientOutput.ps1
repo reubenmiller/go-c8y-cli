@@ -38,6 +38,9 @@ Function ConvertFrom-ClientOutput {
         if ($Raw) {
             $SelectedType = $Type
         }
+
+        # Ignore powershell type when using custom select properties, otherwise the user might not see the properties they want on the console
+        $IgnorePowershellType = $BoundParameters["Select"].Count -gt 0
     }
 
     Process {
@@ -52,7 +55,10 @@ Function ConvertFrom-ClientOutput {
                     $item = $item -replace '\x1b\[[0-9;]*m'
 
                     $output = ConvertFrom-Json -InputObject $item -Depth:$Depth -AsHashtable:$AsHashTable `
-                    | Add-PowershellType -Type $SelectedType
+
+                    if (-Not $IgnorePowershellType) {
+                        $output = $output | Add-PowershellType -Type $SelectedType
+                    }
                 
                     if ($LASTEXITCODE -eq 0 -or $WithError) {
                         $output
