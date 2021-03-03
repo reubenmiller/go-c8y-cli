@@ -17,8 +17,12 @@ Function Get-ClientOutputOption {
             -or $BoundParameters["CsvFormat"] `
             -or $BoundParameters["ExcelFormat"] `
             -or $BoundParameters["Progress"]
+
+        $UsePowershellTypes = $BoundParameters["Select"]
+
         [PSCustomObject]@{
             ConvertToPS = !$UseNativeOutput
+            UsePowershellTypes = $UsePowershellTypes
         }
     }   
 }

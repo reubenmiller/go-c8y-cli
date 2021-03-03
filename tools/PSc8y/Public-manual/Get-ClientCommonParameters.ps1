@@ -105,7 +105,7 @@ Inherit common parameters to a custom function. This will add parameters such as
         New-DynamicParam -Name LogMessage -Type "string" -DPDictionary $Dictionary
 
         # Select
-        New-DynamicParam -Name Select -Type "string" -DPDictionary $Dictionary
+        New-DynamicParam -Name Select -Type "string[]" -DPDictionary $Dictionary
         # New-DynamicParam -Name Filter -Type "string" -DPDictionary $Dictionary
 
         $Dictionary
