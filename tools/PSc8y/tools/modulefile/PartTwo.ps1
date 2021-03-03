@@ -22,6 +22,12 @@ if ($script:IsLinux -or $script:IsMacOS) {
     }
 }
 
+# Add alias to c8y binary
+Set-Alias -Name "c8y" -Value (Get-ClientBinary) -Scope "Global"
+
+# Load c8y completions for powershell
+c8y completion powershell | Out-String | Invoke-Expression
+
 # Set environment variables if a session is set via the C8Y_SESSION env variable
 $ExistingSession = Get-Session -WarningAction SilentlyContinue -ErrorAction SilentlyContinue
 if ($ExistingSession) {

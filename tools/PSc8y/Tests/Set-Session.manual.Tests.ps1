@@ -26,8 +26,7 @@ Describe -Tag "Session" -Name "Set-Session" {
         }
         $Session | ConvertTo-Json | Out-File "$tmpdir/my-session.json"
 
-        $c8y = Get-ClientBinary
-        $resp = & $c8y devices list --verbose --dry --session "my-session" 2>&1
+        $resp = c8y devices list --verbose --dry --session "my-session" 2>&1
         $LASTEXITCODE | Should -BeExactly 0
 
         $resp -like "*https://example.com/inventory/managedObjects*" | Should -HaveCount 1
@@ -42,8 +41,7 @@ Describe -Tag "Session" -Name "Set-Session" {
         }
         $Settings | ConvertTo-Json | Out-File $settingsFile
 
-        $c8y = Get-ClientBinary
-        $resp = & $c8y version -v 2>&1
+        $resp = c8y version -v 2>&1
         $LASTEXITCODE | Should -BeExactly 0
 
         $resp -like "*settings.includeAll.pageSize: 123" | Should -HaveCount 1
@@ -64,8 +62,7 @@ Describe -Tag "Session" -Name "Set-Session" {
         }
         $Session | ConvertTo-Json | Out-File $env:C8Y_SESSION
 
-        $c8y = Get-ClientBinary
-        $resp = & $c8y version -v 2>&1
+        $resp = c8y version -v 2>&1
         $LASTEXITCODE | Should -BeExactly 0
 
         $resp -like "*settings.default.pageSize: 99" | Should -HaveCount 1
@@ -80,8 +77,7 @@ Describe -Tag "Session" -Name "Set-Session" {
         }
         $Session | ConvertTo-Json | Out-File $env:C8Y_SESSION
 
-        $c8y = Get-ClientBinary
-        $resp = & $c8y version -v 2>&1
+        $resp = c8y version -v 2>&1
         $LASTEXITCODE | Should -BeExactly 0
 
         $resp -like "*settings.default.pageSize: 24" | Should -HaveCount 1
@@ -99,8 +95,7 @@ settings:
 settings.includeAll.pagesize: 202
 "@ | Out-File $sessionFile
 
-        $c8y = Get-ClientBinary
-        $resp = & $c8y version --verbose 2>&1
+        $resp = c8y version --verbose 2>&1
         $LASTEXITCODE | Should -BeExactly 0
 
         $resp -like "*settings.default.pageSize: 110" | Should -HaveCount 1

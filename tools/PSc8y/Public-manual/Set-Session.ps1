@@ -89,9 +89,7 @@ String
             }
 
             default {
-                $Binary = Get-ClientBinary
                 $c8yargs = New-Object System.Collections.ArrayList
-                $null = $c8yargs.AddRange(@("sessions", "list"))
 
                 if ($Filter -gt 0) {
                     $SearchTerms = $Filter -join " "
@@ -103,7 +101,7 @@ String
                 } else {
                     $null = $c8yargs.Add("--useEnv=false")
                 }
-                $Path = & $Binary $c8yargs
+                $Path = c8y sessions list $c8yargs
 
                 if ($LASTEXITCODE -ne 0) {
                     Write-Warning "User cancelled set-session. Current session was not changed"

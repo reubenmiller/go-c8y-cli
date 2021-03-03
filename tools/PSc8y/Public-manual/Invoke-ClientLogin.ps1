@@ -8,11 +8,9 @@ Function Invoke-ClientLogin {
         [switch] $Clear
     )
     Process {
-        $c8yBinary = Get-ClientBinary
-
         $cliArgs = New-Object System.Collections.ArrayList
 
-        $null = $cliArgs.AddRange(@("sessions", "login", "--env", "--powershell"))
+        $null = $cliArgs.AddRange(@("--env", "--powershell"))
 
         if ($TFACode) {
             $null = $cliArgs.AddRange(@("--tfaCode", $TFACode))
@@ -26,7 +24,7 @@ Function Invoke-ClientLogin {
             $cliArgs.Add("--verbose")
         }
 
-        $result = & $c8yBinary $cliArgs
+        $result = c8y sessions login $cliArgs
 
         if ($LASTEXITCODE -ne 0) {
             return

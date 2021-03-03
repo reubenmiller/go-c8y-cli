@@ -16,16 +16,14 @@ Describe -Tag "Session" -Name "Login and Session Tests" {
         $env:C8Y_SESSION_HOME = $tmpdir
         $env:C8Y_USE_ENVIRONMENT = ""
         $settingsFile = "$tmpdir/settings.json"
-
-        $c8y = Get-ClientBinary
     }
 
     It -Skip "Login using OAUTH2 strategy without a session file" {
         # session
         $env:C8Y_SESSION = ""
-        & $c8y sessions login
+        c8y sessions login
         
-        $resp = & $c8y devices list --verbose --dry --session "my-session" 2>&1
+        $resp = c8y devices list --verbose --dry --session "my-session" 2>&1
         $LASTEXITCODE | Should -BeExactly 0
     }
 
@@ -40,13 +38,13 @@ Describe -Tag "Session" -Name "Login and Session Tests" {
         $env:C8Y_PASSWORD = $EnvBackupHash["C8Y_PASSWORD"]
         $env:C8Y_PASSPHRASE = $EnvBackupHash["C8Y_PASSPHRASE"]
 
-        $resp = & $c8y devices list --raw
+        $resp = c8y devices list --raw
         $LASTEXITCODE | Should -BeExactly 0
         $results = $resp | ConvertFrom-Json
         $results | Should -Not -BeNullOrEmpty
 
         $env:C8Y_PASSWORD = "wrong password"
-        $resp = & $c8y devices list
+        $resp = c8y devices list
         $LASTEXITCODE | Should -Not -BeExactly 0
     }
 
@@ -64,18 +62,18 @@ Describe -Tag "Session" -Name "Login and Session Tests" {
         $env:C8Y_PASSWORD = $EnvBackupHash["C8Y_PASSWORD"]
         $env:C8Y_PASSPHRASE = $EnvBackupHash["C8Y_PASSPHRASE"]
 
-        $resp = & $c8y devices list --raw
+        $resp = c8y devices list --raw
         $LASTEXITCODE | Should -BeExactly 0
         $results = $resp | ConvertFrom-Json
         $results | Should -Not -BeNullOrEmpty
     }
 
-    It "Saves tenant name in the session file" {
+    It -Tag "TODO: Interactive" "Saves tenant name in the session file" {
         $env:C8Y_PASSPHRASE = "TestPassword"
         $SessionFile = Join-Path -Path $tmpdir -ChildPath "session.json"
         $env:C8Y_SESSION = $SessionFile
 
-        $passwordText = & $c8y sessions decryptText --text $SessionBackup.password --passphrase $env:C8Y_PASSPHRASE
+        $passwordText = c8y sessions decryptText --text $SessionBackup.password --passphrase $env:C8Y_PASSPHRASE
         $LASTEXITCODE | Should -BeExactly 0
 
         $passwordText | Should -Not -Match "^{encrypted}.+$"
@@ -93,7 +91,7 @@ Describe -Tag "Session" -Name "Login and Session Tests" {
         $SessionBefore | ConvertTo-Json | Out-File $SessionFile
 
         # Start login
-        & $c8y sessions login
+        c8y sessions login
         $LASTEXITCODE | Should -BeExactly 0
         
         $SessionAfterLogin = Get-Content $SessionFile | ConvertFrom-Json

@@ -8,22 +8,19 @@ Describe -Tag "Session" -Name "Create-Completions" {
     }
 
     It "Create bash completions" {
-        $c8y = PSc8y\Get-ClientBinary
-        $output = & $c8y completion bash
+        $output = c8y completion bash
         $LASTEXITCODE | Should -Be 0
         $output | Should -Not -BeNullOrEmpty
     }
 
     It "Create zsh completions" {
-        $c8y = PSc8y\Get-ClientBinary
-        $output = & $c8y completion zsh
+        $output = c8y completion zsh
         $LASTEXITCODE | Should -Be 0
         $output | Should -Not -BeNullOrEmpty
     }
 
     It "Create powershell completions" {
-        $c8y = PSc8y\Get-ClientBinary
-        $output = & $c8y completion powershell
+        $output = c8y completion powershell
         $LASTEXITCODE | Should -Be 0
         $output | Should -Not -BeNullOrEmpty
     }

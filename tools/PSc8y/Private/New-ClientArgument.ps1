@@ -137,8 +137,6 @@ Function New-ClientArgument {
         # as the stdin is already be redirected to!
         $null = $c8yargs.Add("--force")
 
-        $c8ycli = Get-ClientBinary
-        Write-Verbose "binary: $c8ycli"
         Write-Verbose ("command: c8y $Command {0}" -f $c8yargs -join " ")
         ,$c8yargs
     }

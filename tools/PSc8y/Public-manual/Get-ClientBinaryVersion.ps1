@@ -14,6 +14,5 @@ Show the client binary version on the console
 #>
     [cmdletbinding()]
     Param()
-    $c8y = Get-ClientBinary
-    & $c8y version
+    c8y version
 }

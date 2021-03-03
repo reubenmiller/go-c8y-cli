@@ -22,18 +22,11 @@ Set the passphrase if it is not already set
 
     Process {
         # Check encryption
-        $Binary = Get-ClientBinary
-
         $c8yargs = New-object System.Collections.ArrayList
-        $null = $c8yargs.AddRange(@(
-            "sessions",
-            "checkPassphrase",
-            "--json"
-        ))
         if ($VerbosePreference) {
             $null = $c8yargs.Add("--verbose")
         }
-        $passphraseCheck = & $Binary $c8yargs
+        $passphraseCheck = c8y sessions checkPassphrase --json $c8yargs
 
         if ($LASTEXITCODE -ne 0) {
             Write-Error "$encryptionInfo"
