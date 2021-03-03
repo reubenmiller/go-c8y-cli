@@ -34,8 +34,9 @@ func (b *QueryTemplate) HasVariable(name string) bool {
 	return ok
 }
 
+// GetQueryUnescape returns the unescaped query. User can choose whether iterators are evalulated or not
 func (b *QueryTemplate) GetQueryUnescape(ignoreIterators bool) (string, error) {
-	q, err := b.Execute(true)
+	q, err := b.Execute(ignoreIterators)
 	if err != nil {
 		return "", err
 	}
@@ -54,7 +55,8 @@ func (b *QueryTemplate) Execute(ignoreIterators bool) (query url.Values, err err
 		var currentValue string
 		switch v := value.(type) {
 		case iterator.Iterator:
-			if !ignoreIterators {
+			// Unbound iterators are always evaluated!
+			if !v.IsBound() || (v.IsBound() && !ignoreIterators) {
 				bValue, _, err := v.GetNext()
 				if err != nil {
 					return query, err

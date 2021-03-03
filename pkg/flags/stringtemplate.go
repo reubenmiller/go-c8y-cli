@@ -53,7 +53,8 @@ func (b *StringTemplate) Execute(ignoreIterators bool, template ...string) (outp
 		var currentValue string
 		switch v := value.(type) {
 		case iterator.Iterator:
-			if !ignoreIterators {
+			// Always evaluate unbound iterators
+			if !v.IsBound() || (v.IsBound() && !ignoreIterators) {
 				nextValue, inputValue, err := v.GetNext()
 				if err != nil {
 					return "", "", err
