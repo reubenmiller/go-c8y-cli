@@ -33,6 +33,26 @@ Describe -Name "Common parameters" {
         }
     }
 
+    Context "Select" {   
+        It "Select multiple parameters via an array" {
+            $output = PSc8y\Get-ApplicationCollection -Select id, name, **tenant.id
+            $LASTEXITCODE | Should -Be 0
+            $output | Should -Not -BeNullOrEmpty
+            $output.id | Should -Not -BeNullOrEmpty
+            $output.name | Should -Not -BeNullOrEmpty
+            $output.owner.tenant.id | Should -Not -BeNullOrEmpty
+            $output | Where-Object { $_.self } | Should -BeNullOrEmpty
+        }
+
+        It "Select a single parameter" {
+            $output = PSc8y\Get-ApplicationCollection -Select id -AsJSON
+            $LASTEXITCODE | Should -Be 0
+            $output | Should -Not -BeNullOrEmpty
+            $output.id | Should -Not -BeNullOrEmpty
+            $output | Where-Object { $_.name } | Should -BeNullOrEmpty
+        }
+    }
+
     AfterAll {
         $ids | Remove-ManagedObject
         $names | ForEach-Object {
