@@ -943,6 +943,9 @@ func hideSensitiveInformationIfActive(message string) string {
 		message = strings.ReplaceAll(message, client.TenantName, "{tenant}")
 		message = strings.ReplaceAll(message, client.Username, "{username}")
 		message = strings.ReplaceAll(message, client.Password, "{password}")
+		if client.BaseURL != nil {
+			message = strings.ReplaceAll(message, strings.TrimRight(client.BaseURL.Host, "/"), "{host}")
+		}
 	}
 
 	basicAuthMatcher := regexp.MustCompile("(Basic\\s+)[A-Za-z0-9=]+")
