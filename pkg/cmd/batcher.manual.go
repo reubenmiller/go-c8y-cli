@@ -148,7 +148,7 @@ func runBatched(requestIterator *RequestIterator, commonOptions CommonCommandOpt
 	progbar.Start(float64(batchOptions.Delay * 2 / 1000))
 
 	for w := 1; w <= batchOptions.TotalWorkers; w++ {
-		Logger.Infof("starting worker: %d", w)
+		Logger.Debugf("starting worker: %d", w)
 		workers.Add(1)
 		go batchWorker(w, jobs, results, progbar, &workers)
 	}
@@ -164,7 +164,7 @@ func runBatched(requestIterator *RequestIterator, commonOptions CommonCommandOpt
 		jobInputErrors := int64(0)
 		for {
 			jobID++
-			Logger.Infof("checking job iterator: %d", jobID)
+			Logger.Debugf("checking job iterator: %d", jobID)
 
 			if jobID > globalFlagBatchMaxJobs {
 				Logger.Warningf("maximum jobs reached: limit=%d", globalFlagBatchMaxJobs)
@@ -199,7 +199,7 @@ func runBatched(requestIterator *RequestIterator, commonOptions CommonCommandOpt
 				// move to next job
 				continue
 			}
-			Logger.Infof("adding job: %d", jobID)
+			Logger.Debugf("adding job: %d", jobID)
 
 			// confirm action
 			if request != nil && !skipConfirm && shouldConfirm(request.Method) {
@@ -246,7 +246,7 @@ func runBatched(requestIterator *RequestIterator, commonOptions CommonCommandOpt
 			}
 		}
 
-		Logger.Info("finished adding jobs")
+		Logger.Debug("finished adding jobs")
 	}()
 
 	// collect all the results of the work.
@@ -265,7 +265,11 @@ func runBatched(requestIterator *RequestIterator, commonOptions CommonCommandOpt
 	}()
 
 	for err := range results {
-		Logger.Infof("reading job result: %s", err)
+		if err == nil {
+			Logger.Debugf("job successful")
+		} else {
+			Logger.Warningf("job error. %s", err)
+		}
 
 		if err != nil && err != io.EOF {
 			totalErrors = append(totalErrors, err)

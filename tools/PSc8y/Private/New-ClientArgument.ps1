@@ -101,6 +101,10 @@ Function New-ClientArgument {
             }
         }
 
+        if ($DebugPreference -ne "SilentlyContinue") {
+            $null = $c8yargs.Add("--debug")
+        }
+
         if ($WhatIfPreference) {
             $null = $c8yargs.Add("--dry")
         }

@@ -45,7 +45,7 @@ const (
 )
 
 func init() {
-	Logger = logger.NewDummyLogger(module)
+	Logger = logger.NewLogger(module, logger.Options{Silent: true})
 	SecureDataAccessor = encrypt.NewSecureData("{encrypted}")
 	rootCmd = newC8yCmd()
 	// set seed for random generation
@@ -72,7 +72,7 @@ type c8yCmd struct {
 }
 
 func (c *c8yCmd) createCumulocityClient() {
-	c.Logger.Info("Creating c8y client")
+	c.Logger.Debug("Creating c8y client")
 	httpClient := newHTTPClient(globalFlagNoProxy)
 
 	// Only bind when not setting the session
@@ -178,9 +178,11 @@ var (
 	globalFlagIncludeAll             bool
 	globalFlagIncludeAllDelayMS      int64
 	globalFlagVerbose                bool
+	globalFlagDebug                  bool
 	globalFlagWithTotalPages         bool
 	globalFlagCompact                bool
 	globalFlagDryRun                 bool
+	globalFlagDryRunJSON             bool
 	globalFlagProgressBar            bool
 	globalFlagIgnoreAccept           bool
 	globalFlagNoColor                bool
@@ -325,7 +327,7 @@ func (c *c8yCmd) checkSessionExists(cmd *cobra.Command, args []string) error {
 	if cmd.HasParent() && cmd.Parent().Use != "c8y" {
 		cmdStr = cmd.Parent().Use + " " + cmdStr
 	}
-	c.Logger.Infof("command str: %s", cmdStr)
+	c.Logger.Debugf("command str: %s", cmdStr)
 
 	if globalFlagSessionFile == "" || !(strings.HasPrefix(cmdStr, "sessions list") || strings.HasPrefix(cmdStr, "sessions checkPassphrase") || c.Flags().Changed("session")) {
 		c.useEnv = true
@@ -415,6 +417,7 @@ func configureRootCmd() {
 	rootCmd.PersistentFlags().BoolVar(&globalFlagStream, "stream", true, "Stream transforms JSON arrays to single json objects to make them pipeable. Automatically activated when output is not the terminal")
 	rootCmd.PersistentFlags().BoolVar(&globalFlagIgnoreAccept, "noAccept", false, "Ignore Accept header will remove the Accept header from requests, however PUT and POST requests will only see the effect")
 	rootCmd.PersistentFlags().BoolVar(&globalFlagDryRun, "dry", false, "Dry run. Don't send any data to the server")
+	rootCmd.PersistentFlags().BoolVar(&globalFlagDryRunJSON, "dryJSON", false, "Dry run. Print out the request details in json")
 	rootCmd.PersistentFlags().BoolVar(&globalFlagProgressBar, "progress", false, "Show progress bar. This will also disable any other verbose output")
 	rootCmd.PersistentFlags().BoolVarP(&globalFlagNoColor, "noColor", "M", !isTerm, "Don't use colors when displaying log entries on the console")
 	rootCmd.PersistentFlags().BoolVar(&globalFlagUseEnv, "useEnv", false, "Allow loading Cumulocity session setting from environment variables")
@@ -426,6 +429,7 @@ func configureRootCmd() {
 	// Activity log
 	rootCmd.PersistentFlags().BoolVar(&globalFlagNoLog, "noLog", false, "Disables the activity log for the current command")
 	rootCmd.PersistentFlags().StringVarP(&globalFlagActivityLogMessage, "logMessage", "l", "", "Add custom message to the activity log")
+	rootCmd.PersistentFlags().BoolVar(&globalFlagDebug, "debug", false, "Set very verbose log messages")
 
 	// Concurrency
 	rootCmd.PersistentFlags().IntVar(&globalFlagBatchWorkers, "workers", 1, "Number of workers")
@@ -651,19 +655,17 @@ func ReadConfigFiles(v *viper.Viper) (path string, err error) {
 }
 
 func initConfig() {
-	// Set logging
-	if globalFlagProgressBar {
-		// TODO:
-		// Silence output until progress bar is done
-		Logger = logger.NewDummyLogger(module)
-		c8y.SilenceLogger()
-	} else if globalFlagVerbose || globalFlagDryRun {
-		Logger = logger.NewLogger(module, !globalFlagNoColor)
-	} else {
-		// Disable log messages
-		Logger = logger.NewDummyLogger(module)
-		c8y.SilenceLogger()
+	// ignore all logs from c8y library
+	c8y.SilenceLogger()
+	logOptions := logger.Options{
+		Silent: true,
+		Color:  !globalFlagNoColor,
+		Debug:  globalFlagDebug,
 	}
+	if (globalFlagVerbose || globalFlagDebug) && !globalFlagProgressBar {
+		logOptions.Silent = false
+	}
+	Logger = logger.NewLogger(module, logOptions)
 	rootCmd.Logger = Logger
 
 	if globalFlagSessionFile == "" && os.Getenv("C8Y_SESSION") != "" {
@@ -734,7 +736,7 @@ func initConfig() {
 }
 
 func loadConfiguration() error {
-	Logger.Info("Loading configuration")
+	Logger.Debug("Loading configuration")
 	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
 	viper.SetEnvPrefix("c8y")
 	//viper.AutomaticEnv()
@@ -797,7 +799,7 @@ func configureActivityLog() {
 	if l, err := activitylogger.NewActivityLogger(options); err == nil {
 		activityLogger = l
 		if disabled {
-			Logger.Infof("activityLog is disabled", activityLogger.GetPath())
+			Logger.Info("activityLog is disabled")
 		} else {
 			Logger.Infof("activityLog path: %s", activityLogger.GetPath())
 		}
@@ -838,16 +840,16 @@ func readConfiguration(cmd *cobra.Command) error {
 
 	globalCIMode = viper.GetBool(SettingsModeCI)
 
-	Logger.Infof("%s: %d", SettingsDefaultPageSize, globalFlagPageSize)
-	Logger.Infof("%s: %d", SettingsIncludeAllPageSize, globalFlagIncludeAllPageSize)
-	Logger.Infof("%s: %d", SettingsIncludeAllDelayMS, globalFlagIncludeAllDelayMS)
-	Logger.Infof("%s: %s", SettingsTemplatePath, globalFlagTemplatePath)
-	Logger.Infof("%s: %t", SettingsModeEnableCreate, globalModeEnableCreate)
-	Logger.Infof("%s: %t", SettingsModeEnableUpdate, globalModeEnableUpdate)
-	Logger.Infof("%s: %t", SettingsModeEnableDelete, globalModeEnableDelete)
-	Logger.Infof("%s: %t", SettingsModeEnableBatch, globalModeEnableBatch)
-	Logger.Infof("%s: %s", SettingsModeConfirmation, viper.GetString(SettingsModeConfirmation))
-	Logger.Infof("%s: %d", SettingsDefaultBatchMaxJobs, globalFlagBatchMaxJobs)
+	Logger.Debugf("%s: %d", SettingsDefaultPageSize, globalFlagPageSize)
+	Logger.Debugf("%s: %d", SettingsIncludeAllPageSize, globalFlagIncludeAllPageSize)
+	Logger.Debugf("%s: %d", SettingsIncludeAllDelayMS, globalFlagIncludeAllDelayMS)
+	Logger.Debugf("%s: %s", SettingsTemplatePath, globalFlagTemplatePath)
+	Logger.Debugf("%s: %t", SettingsModeEnableCreate, globalModeEnableCreate)
+	Logger.Debugf("%s: %t", SettingsModeEnableUpdate, globalModeEnableUpdate)
+	Logger.Debugf("%s: %t", SettingsModeEnableDelete, globalModeEnableDelete)
+	Logger.Debugf("%s: %t", SettingsModeEnableBatch, globalModeEnableBatch)
+	Logger.Debugf("%s: %s", SettingsModeConfirmation, viper.GetString(SettingsModeConfirmation))
+	Logger.Debugf("%s: %d", SettingsDefaultBatchMaxJobs, globalFlagBatchMaxJobs)
 
 	return nil
 }

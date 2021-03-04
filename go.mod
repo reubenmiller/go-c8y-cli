@@ -9,13 +9,14 @@ require (
 	github.com/howeyc/gopass v0.0.0-20190910152052-7cb4b85ec19c
 	github.com/karrick/tparse/v2 v2.8.2
 	github.com/manifoldco/promptui v0.8.0
+	github.com/mattn/go-colorable v0.1.8
 	github.com/mdp/qrterminal v1.0.1
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/obeattie/ohmyglob v0.0.0-20150811221449-290764208a0d
 	github.com/op/go-logging v0.0.0-20160315200505-970db520ece7
 	github.com/pkg/errors v0.9.1
 	github.com/pquerna/otp v1.3.0
-	github.com/reubenmiller/go-c8y v0.8.1-0.20210227090921-72cc23628c8c
+	github.com/reubenmiller/go-c8y v0.8.1-0.20210303183831-92dcfb5da1ec
 	github.com/sethvargo/go-password v0.2.0
 	github.com/spf13/cobra v1.1.3
 	github.com/spf13/pflag v1.0.5
@@ -25,7 +26,11 @@ require (
 	github.com/tidwall/pretty v1.0.5
 	github.com/tidwall/sjson v1.1.5
 	github.com/vbauerster/mpb/v6 v6.0.2
+	go.uber.org/multierr v1.6.0 // indirect
+	go.uber.org/zap v1.16.0
 	golang.org/x/crypto v0.0.0-20210220033148-5ea612d1eb83
+	golang.org/x/sys v0.0.0-20210303074136-134d130e1a04 // indirect
+	moul.io/http2curl v1.0.0
 )
 
 go 1.13
