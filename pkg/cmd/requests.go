@@ -3,9 +3,15 @@ package cmd
 import (
 	"bytes"
 	"context"
+	"encoding/json"
 	"fmt"
+	"io"
+	"io/ioutil"
+	"net/http"
 	"net/url"
+	"os"
 	"regexp"
+	"sort"
 	"strings"
 	"time"
 
@@ -18,6 +24,8 @@ import (
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
 	"github.com/tidwall/gjson"
+	"github.com/tidwall/pretty"
+	"moul.io/http2curl"
 )
 
 // CommonCommandOptions control the handling of the response which are available for all commands
@@ -129,6 +137,9 @@ func processRequestAndResponse(requests []c8y.RequestOptions, commonOptions Comm
 		}
 	}
 
+	// enable return of would-be request
+	req.DryRunResponse = true
+
 	ctx, cancel := getTimeoutContext()
 	defer cancel()
 	start := time.Now()
@@ -136,8 +147,13 @@ func processRequestAndResponse(requests []c8y.RequestOptions, commonOptions Comm
 		ctx,
 		req,
 	)
+	isDryRun := resp != nil && resp.Response.StatusCode == 0 && resp.Response.Request != nil
 
-	if !req.DryRun {
+	if isDryRun {
+		PrintRequestDetails(os.Stdout, &req, resp.Response.Request)
+	} else if resp != nil {
+		Logger.Infof("Status code: %d", resp.StatusCode)
+
 		durationMS := int64(time.Since(start) / time.Millisecond)
 		Logger.Infof("Response time: %dms", durationMS)
 
@@ -147,7 +163,7 @@ func processRequestAndResponse(requests []c8y.RequestOptions, commonOptions Comm
 	}
 
 	if ctx.Err() != nil {
-		Logger.Criticalf("request timed out after %.3fs", globalFlagTimeout)
+		Logger.Errorf("request timed out after %.3fs", globalFlagTimeout)
 	}
 
 	if commonOptions.IncludeAll || commonOptions.TotalPages > 0 {
@@ -167,6 +183,183 @@ func processRequestAndResponse(requests []c8y.RequestOptions, commonOptions Comm
 
 	_, err = processResponse(resp, err, commonOptions)
 	return err
+}
+
+type RequestDetails struct {
+	URL         string            `json:"url,omitempty"`
+	Host        string            `json:"host,omitempty"`
+	PathEncoded string            `json:"pathEncoded,omitempty"`
+	Path        string            `json:"path,omitempty"`
+	Query       string            `json:"query,omitempty"`
+	Method      string            `json:"method,omitempty"`
+	Headers     map[string]string `json:"headers,omitempty"`
+	Body        interface{}       `json:"body,omitempty"`
+	Shell       string            `json:"shell,omitempty"`
+	PowerShell  string            `json:"powershell,omitempty"`
+}
+
+type PathDetails struct {
+}
+
+func PrintRequestDetails(w io.Writer, requestOptions *c8y.RequestOptions, req *http.Request) {
+	sectionLabel := color.New(color.Bold, color.FgHiCyan)
+	label := color.New(color.FgHiCyan)
+	value := color.New(color.FgGreen)
+
+	if globalFlagNoColor {
+		sectionLabel.DisableColor()
+		label.DisableColor()
+		value.DisableColor()
+	}
+
+	fullURL := fmt.Sprintf("%s", req.URL)
+
+	// strip headers which are not useful to anyone
+	req.Header.Del("User-Agent")
+	req.Header.Del("X-Application")
+	headers := map[string]string{}
+	for key := range req.Header {
+		headers[key] = hideSensitiveInformationIfActive(req.Header.Get(key))
+	}
+
+	// body
+	body := []byte{}
+	bodyMap := make(map[string]interface{})
+	var err error
+	if req.Body != nil && (req.Method == http.MethodPost || req.Method == http.MethodPut || req.Method == http.MethodPatch) {
+		var buf bytes.Buffer
+		bodyCopy := io.TeeReader(req.Body, &buf)
+		req.Body = ioutil.NopCloser(&buf)
+
+		peekBody := io.LimitReader(bodyCopy, 1024*1024)
+		body, err = ioutil.ReadAll(peekBody)
+
+		// try converting it to json
+		jsonUtilities.ParseJSON(string(body), bodyMap)
+	}
+
+	shell, pwsh, _ := getCurlCommands(req)
+
+	details := &RequestDetails{
+		URL:         fullURL,
+		Host:        req.URL.Scheme + "://" + req.URL.Hostname(),
+		PathEncoded: strings.Replace(fullURL, req.URL.Scheme+"://"+req.URL.Hostname(), "", 1),
+		Method:      req.Method,
+		Headers:     headers,
+		Query:       tryUnescapeURL(req.URL.RawQuery),
+		Body:        bodyMap,
+		Shell:       shell,
+		PowerShell:  pwsh,
+	}
+	details.Path = req.URL.Path
+
+	out, err := json.Marshal(details)
+	if err != nil {
+		return
+	}
+
+	if globalFlagDryRunJSON {
+		out = pretty.Pretty(out)
+		if !globalFlagNoColor {
+			out = pretty.Color(out, pretty.TerminalStyle)
+		}
+		fmt.Fprintf(w, "%s", out)
+	}
+
+	sectionLabel.Fprintf(w, "What If: Sending [%s] request to [%s]\n", req.Method, req.URL)
+
+	label.Fprintf(w, "\n### %s %s", details.Method, tryUnescapeURL(details.PathEncoded))
+
+	useMarkdown := true
+	showCurl := false
+
+	if len(req.Header) > 0 {
+		// sort header names
+		headerNames := make([]string, 0, len(req.Header))
+
+		maxWidth := 0
+		for key := range req.Header {
+			headerNames = append(headerNames, key)
+			if len(key) > maxWidth {
+				maxWidth = len(key)
+			}
+		}
+
+		sort.Strings(headerNames)
+
+		if useMarkdown {
+			label.Fprintf(w, "\n\n| %-18s| %s\n", "header", "value")
+			label.Fprintf(w, "|%s|---------------------------\n", strings.Repeat("-", 19))
+		} else {
+			sectionLabel.Fprint(w, "\n\n#### Headers\n")
+		}
+
+		for _, key := range headerNames {
+			val := req.Header[key]
+			if useMarkdown {
+				label.Fprintf(w, "| %-17s | %s \n", key, hideSensitiveInformationIfActive(val[0]))
+			} else {
+				label.Fprintf(w, "%s: ", key)
+				value.Fprintf(w, "%s\n", hideSensitiveInformationIfActive(val[0]))
+			}
+		}
+	}
+
+	message := ""
+	if len(body) > 0 {
+
+		if err != nil {
+			Logger.Warning("failed to read all contents")
+		} else {
+			sectionLabel.Fprint(w, "\n#### Body\n")
+			fmt.Fprintf(w, "\n```json\n")
+			Console.Printf("%s", body)
+			fmt.Fprintf(w, "```\n")
+			// if requestOptions.FormData != nil {
+
+			// }
+		}
+
+	}
+
+	if showCurl {
+		sectionLabel.Fprintf(w, "##### Curl (shell)\n\n")
+		label.Fprintf(w, "```sh\n%s\n```\n", details.Shell)
+
+		sectionLabel.Fprintf(w, "\n##### Curl (PowerShell)\n\n")
+		label.Fprintf(w, "```powershell\n%s\n```\n", details.PowerShell)
+	}
+
+	Console.Println(hideSensitiveInformationIfActive(message))
+}
+
+func tryUnescapeURL(v string) string {
+	unescapedQuery := v
+
+	unescapedQuery, err := url.QueryUnescape(v)
+	if err != nil {
+		return v
+	}
+	return unescapedQuery
+}
+
+func getCurlCommands(req *http.Request) (shell string, pwsh string, err error) {
+	if !strings.Contains("POST PUT", req.Method) {
+		req.Body = nil
+	}
+	var command *http2curl.CurlCommand
+	command, err = http2curl.GetCurlCommand(req)
+
+	if err != nil {
+		Logger.Warningf("failed to get curl command. %s", err)
+		return
+	}
+	curlCmd := command.String()
+	curlCmd = strings.ReplaceAll(curlCmd, "\n", "")
+
+	shell = hideSensitiveInformationIfActive(curlCmd)
+	pwsh = hideSensitiveInformationIfActive(strings.ReplaceAll(curlCmd, "\"", "\\\""))
+	return
 }
 
 func fetchAllResults(req c8y.RequestOptions, resp *c8y.Response, commonOptions CommonCommandOptions) error {
@@ -446,7 +639,7 @@ func optimizeManagedObjectsURL(u *url.URL, lastID string) *url.URL {
 }
 
 func processResponse(resp *c8y.Response, respError error, commonOptions CommonCommandOptions) (int, error) {
-	if resp != nil {
+	if resp != nil && resp.StatusCode != 0 {
 		Logger.Infof("Response header: %v", resp.Header)
 	}
 
