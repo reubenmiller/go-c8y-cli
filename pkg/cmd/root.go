@@ -16,6 +16,7 @@ import (
 	"github.com/gorilla/websocket"
 	"github.com/reubenmiller/go-c8y-cli/pkg/activitylogger"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
+	"github.com/reubenmiller/go-c8y-cli/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/pkg/config"
 	"github.com/reubenmiller/go-c8y-cli/pkg/console"
 	"github.com/reubenmiller/go-c8y-cli/pkg/encrypt"
@@ -459,6 +460,11 @@ func configureRootCmd() {
 	// Map settings to flags, allowing the user to set the own default settings
 	viper.BindPFlag(SettingsDefaultPageSize, rootCmd.PersistentFlags().Lookup("pageSize"))
 	// viper.BindPFlag(SettingsConfigPath, rootCmd.PersistentFlags().Lookup("config"))
+
+	completion.WithOptions(
+		&rootCmd.Command,
+		completion.WithValidateSet("dryFormat", "json", "dump", "curl", "markdown"),
+	)
 
 	// TODO: Make flags case-insensitive
 	// rootCmd.PersistentFlags().SetNormalizeFunc(flagNormalizeFunc)
