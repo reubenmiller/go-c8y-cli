@@ -8,6 +8,7 @@ import (
 	"io"
 	"io/ioutil"
 	"net/http"
+	"net/http/httputil"
 	"net/url"
 	"os"
 	"regexp"
@@ -140,6 +141,10 @@ func processRequestAndResponse(requests []c8y.RequestOptions, commonOptions Comm
 	// enable return of would-be request
 	req.DryRunResponse = true
 
+	if !(req.Method == http.MethodPost || req.Method == http.MethodPut) {
+		req.Body = nil
+	}
+
 	ctx, cancel := getTimeoutContext()
 	defer cancel()
 	start := time.Now()
@@ -152,8 +157,6 @@ func processRequestAndResponse(requests []c8y.RequestOptions, commonOptions Comm
 	if isDryRun {
 		PrintRequestDetails(os.Stdout, &req, resp.Response.Request)
 	} else if resp != nil {
-		Logger.Infof("Status code: %d", resp.StatusCode)
-
 		durationMS := int64(time.Since(start) / time.Millisecond)
 		Logger.Infof("Response time: %dms", durationMS)
 
@@ -198,10 +201,19 @@ type RequestDetails struct {
 	PowerShell  string            `json:"powershell,omitempty"`
 }
 
-type PathDetails struct {
+func dumpRequest(w io.Writer, req *http.Request) {
+	if out, err := httputil.DumpRequest(req, true); err == nil {
+		fmt.Fprint(w, hideSensitiveInformationIfActive(fmt.Sprintf("%s", out)))
+	}
 }
 
+// PrintRequestDetails prints the request to the console making it easier to extra informatino from it
 func PrintRequestDetails(w io.Writer, requestOptions *c8y.RequestOptions, req *http.Request) {
+	if globalFlagDryRunFormat == "dump" {
+		dumpRequest(w, req)
+		return
+	}
+
 	sectionLabel := color.New(color.Bold, color.FgHiCyan)
 	label := color.New(color.FgHiCyan)
 	value := color.New(color.FgGreen)
@@ -253,25 +265,32 @@ func PrintRequestDetails(w io.Writer, requestOptions *c8y.RequestOptions, req *h
 	}
 	details.Path = req.URL.Path
 
-	out, err := json.Marshal(details)
-	if err != nil {
-		return
-	}
+	if globalFlagDryRunFormat == "json" {
+		out, err := json.Marshal(details)
+		if err != nil {
+			return
+		}
 
-	if globalFlagDryRunJSON {
 		out = pretty.Pretty(out)
 		if !globalFlagNoColor {
 			out = pretty.Color(out, pretty.TerminalStyle)
 		}
 		fmt.Fprintf(w, "%s", out)
+		return
 	}
 
+	if globalFlagDryRunFormat == "curl" {
+		sectionLabel.Fprintf(w, "##### Curl (shell)\n\n")
+		label.Fprintf(w, "```sh\n%s\n```\n", details.Shell)
+
+		sectionLabel.Fprintf(w, "\n##### Curl (PowerShell)\n\n")
+		label.Fprintf(w, "```powershell\n%s\n```\n", details.PowerShell)
+		return
+	}
+
+	// markdown
 	sectionLabel.Fprintf(w, "What If: Sending [%s] request to [%s]\n", req.Method, req.URL)
-
 	label.Fprintf(w, "\n### %s %s", details.Method, tryUnescapeURL(details.PathEncoded))
-
-	useMarkdown := true
-	showCurl := false
 
 	if len(req.Header) > 0 {
 		// sort header names
@@ -287,50 +306,26 @@ func PrintRequestDetails(w io.Writer, requestOptions *c8y.RequestOptions, req *h
 
 		sort.Strings(headerNames)
 
-		if useMarkdown {
-			label.Fprintf(w, "\n\n| %-18s| %s\n", "header", "value")
-			label.Fprintf(w, "|%s|---------------------------\n", strings.Repeat("-", 19))
-		} else {
-			sectionLabel.Fprint(w, "\n\n#### Headers\n")
-		}
+		label.Fprintf(w, "\n\n| %-18s| %s\n", "header", "value")
+		label.Fprintf(w, "|%s|---------------------------\n", strings.Repeat("-", 19))
 
 		for _, key := range headerNames {
 			val := req.Header[key]
-			if useMarkdown {
-				label.Fprintf(w, "| %-17s | %s \n", key, hideSensitiveInformationIfActive(val[0]))
-			} else {
-				label.Fprintf(w, "%s: ", key)
-				value.Fprintf(w, "%s\n", hideSensitiveInformationIfActive(val[0]))
-			}
+			label.Fprintf(w, "| %-17s | %s \n", key, hideSensitiveInformationIfActive(val[0]))
 		}
 	}
 
-	message := ""
 	if len(body) > 0 {
-
 		if err != nil {
-			Logger.Warning("failed to read all contents")
+			Logger.Warning("failed to read all body contents")
 		} else {
 			sectionLabel.Fprint(w, "\n#### Body\n")
 			fmt.Fprintf(w, "\n```json\n")
 			Console.Printf("%s", body)
 			fmt.Fprintf(w, "```\n")
-			// if requestOptions.FormData != nil {
-
-			// }
 		}
 
 	}
-
-	if showCurl {
-		sectionLabel.Fprintf(w, "##### Curl (shell)\n\n")
-		label.Fprintf(w, "```sh\n%s\n```\n", details.Shell)
-
-		sectionLabel.Fprintf(w, "\n##### Curl (PowerShell)\n\n")
-		label.Fprintf(w, "```powershell\n%s\n```\n", details.PowerShell)
-	}
-
-	Console.Println(hideSensitiveInformationIfActive(message))
 }
 
 func tryUnescapeURL(v string) string {
@@ -640,7 +635,8 @@ func optimizeManagedObjectsURL(u *url.URL, lastID string) *url.URL {
 
 func processResponse(resp *c8y.Response, respError error, commonOptions CommonCommandOptions) (int, error) {
 	if resp != nil && resp.StatusCode != 0 {
-		Logger.Infof("Response header: %v", resp.Header)
+		Logger.Infof("Response Content-Type: %s", resp.Header.Get("Content-Type"))
+		Logger.Debugf("Response Headers: %v", resp.Header)
 	}
 
 	// write response to file instead of to stdout
@@ -652,6 +648,7 @@ func processResponse(resp *c8y.Response, respError error, commonOptions CommonCo
 			return 0, cmderrors.NewSystemError("write to file failed", err)
 		}
 
+		Logger.Infof("Saved response: %s", fullFilePath)
 		fmt.Printf("%s\n", fullFilePath)
 		return 0, nil
 	}

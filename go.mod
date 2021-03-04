@@ -13,10 +13,9 @@ require (
 	github.com/mdp/qrterminal v1.0.1
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/obeattie/ohmyglob v0.0.0-20150811221449-290764208a0d
-	github.com/op/go-logging v0.0.0-20160315200505-970db520ece7
 	github.com/pkg/errors v0.9.1
 	github.com/pquerna/otp v1.3.0
-	github.com/reubenmiller/go-c8y v0.8.1-0.20210303183831-92dcfb5da1ec
+	github.com/reubenmiller/go-c8y v0.8.1-0.20210304192824-38a231e11ad0
 	github.com/sethvargo/go-password v0.2.0
 	github.com/spf13/cobra v1.1.3
 	github.com/spf13/pflag v1.0.5

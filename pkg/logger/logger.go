@@ -77,6 +77,16 @@ func (l Logger) Warning(args ...interface{}) {
 	}
 }
 
+// Warnf logs a warning message with a format string
+func (l Logger) Warnf(format string, args ...interface{}) {
+	l.Warningf(format, args...)
+}
+
+// Warn logs a warning message
+func (l Logger) Warn(args ...interface{}) {
+	l.Warning(args...)
+}
+
 // Errorf logs an error message with a format string
 func (l Logger) Errorf(format string, args ...interface{}) {
 	if l.zlogger != nil {
@@ -116,6 +126,20 @@ func (l Logger) Info(args ...interface{}) {
 func (l Logger) Infof(format string, args ...interface{}) {
 	if l.zlogger != nil {
 		l.zlogger.Sugar().Infof(format, args...)
+	}
+}
+
+// Fatal logs a information message
+func (l Logger) Fatal(args ...interface{}) {
+	if l.zlogger != nil {
+		l.zlogger.Sugar().Fatal(args...)
+	}
+}
+
+// Fatalf logs a information message with a format string
+func (l Logger) Fatalf(format string, args ...interface{}) {
+	if l.zlogger != nil {
+		l.zlogger.Sugar().Fatalf(format, args...)
 	}
 }
 

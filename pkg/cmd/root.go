@@ -22,6 +22,7 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/pkg/logger"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
+	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
 )
 
@@ -89,6 +90,10 @@ func (c *c8yCmd) createCumulocityClient() {
 	} else {
 		cliConfig.SetSessionFilePath(sessionFilePath)
 	}
+
+	// bind config to flags
+	bindFlags(&rootCmd.Command, viper.GetViper())
+
 	client = c8y.NewClient(
 		httpClient,
 		formatHost(cliConfig.GetHost()),
@@ -182,7 +187,7 @@ var (
 	globalFlagWithTotalPages         bool
 	globalFlagCompact                bool
 	globalFlagDryRun                 bool
-	globalFlagDryRunJSON             bool
+	globalFlagDryRunFormat           string
 	globalFlagProgressBar            bool
 	globalFlagIgnoreAccept           bool
 	globalFlagNoColor                bool
@@ -417,7 +422,7 @@ func configureRootCmd() {
 	rootCmd.PersistentFlags().BoolVar(&globalFlagStream, "stream", true, "Stream transforms JSON arrays to single json objects to make them pipeable. Automatically activated when output is not the terminal")
 	rootCmd.PersistentFlags().BoolVar(&globalFlagIgnoreAccept, "noAccept", false, "Ignore Accept header will remove the Accept header from requests, however PUT and POST requests will only see the effect")
 	rootCmd.PersistentFlags().BoolVar(&globalFlagDryRun, "dry", false, "Dry run. Don't send any data to the server")
-	rootCmd.PersistentFlags().BoolVar(&globalFlagDryRunJSON, "dryJSON", false, "Dry run. Print out the request details in json")
+	rootCmd.PersistentFlags().StringVar(&globalFlagDryRunFormat, "dryFormat", "markdown", "Dry run output format. i.e. json, dump, markdown or curl")
 	rootCmd.PersistentFlags().BoolVar(&globalFlagProgressBar, "progress", false, "Show progress bar. This will also disable any other verbose output")
 	rootCmd.PersistentFlags().BoolVarP(&globalFlagNoColor, "noColor", "M", !isTerm, "Don't use colors when displaying log entries on the console")
 	rootCmd.PersistentFlags().BoolVar(&globalFlagUseEnv, "useEnv", false, "Allow loading Cumulocity session setting from environment variables")
@@ -654,9 +659,21 @@ func ReadConfigFiles(v *viper.Viper) (path string, err error) {
 	return path, err
 }
 
+// bindFlags binds cobra flag values to cobra. This allows the user to set the default values via configuration or environment variables
+func bindFlags(cmd *cobra.Command, v *viper.Viper) {
+	cmd.Flags().VisitAll(func(f *pflag.Flag) {
+		settingsName := "settings.defaults." + f.Name
+		v.BindEnv(settingsName)
+
+		// Apply the viper config value to the flag when the flag is not set and viper has a value
+		if !f.Changed && v.IsSet(settingsName) {
+			val := v.Get(settingsName)
+			cmd.Flags().Set(f.Name, fmt.Sprintf("%v", val))
+		}
+	})
+}
+
 func initConfig() {
-	// ignore all logs from c8y library
-	c8y.SilenceLogger()
 	logOptions := logger.Options{
 		Silent: true,
 		Color:  !globalFlagNoColor,
@@ -668,10 +685,16 @@ func initConfig() {
 	Logger = logger.NewLogger(module, logOptions)
 	rootCmd.Logger = Logger
 
+	c8y.Logger = Logger
+	if globalFlagDryRun {
+		// use custom handling of dry run so silence library messages
+		c8y.SilenceLogger()
+	}
+
 	if globalFlagSessionFile == "" && os.Getenv("C8Y_SESSION") != "" {
 		globalFlagSessionFile = os.Getenv("C8Y_SESSION")
 		if globalFlagSessionFile != "" {
-			Logger.Printf("Using session environment variable: %s\n", hideSensitiveInformationIfActive(globalFlagSessionFile))
+			Logger.Printf("Using session environment variable: %s", hideSensitiveInformationIfActive(globalFlagSessionFile))
 		}
 	}
 

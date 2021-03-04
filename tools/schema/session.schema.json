@@ -111,6 +111,22 @@
                     "description": "Path / Folder where the templates are located. If the user gives a template name (without path), then a matching filename will be search for in this folder",
                     "type": "string"
                 },
+                "settings.defaults": {
+                    "description": "Default parameter values. You can customize the behavior of the c8y cli.",
+                    "type": "object",
+                    "properties": {
+                        "dryFormat": {
+                            "type": "string",
+                            "description": "Dry run output format. i.e. json, dump, markdown or curl",
+                            "enum": [
+                                "json",
+                                "dump",
+                                "markdown",
+                                "curl"
+                            ]
+                        }
+                    }
+                },
                 "storage": {
                     "type": "object",
                     "description": "Session storage options",

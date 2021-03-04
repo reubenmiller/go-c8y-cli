@@ -66,7 +66,7 @@ func evaluateJsonnet(imports string, snippets ...string) (string, error) {
 		if debugJsonnet {
 			// Include full template (with injected variables/functions) otherwise the error
 			// will report line numbers that the user does not know about
-			log.Printf("jsonnet error: %s\n", err)
+			log.Printf("jsonnet error: %s", err)
 		}
 
 		err = fmt.Errorf("Could not create json from template. Error: %s", err)

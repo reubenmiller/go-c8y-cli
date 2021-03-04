@@ -126,7 +126,7 @@ func (lh *LoginHandler) Run() error {
 	for {
 		c := <-lh.state
 
-		lh.Logger.Infof("Current State: %s\n", c.String())
+		lh.Logger.Infof("Current State: %s", c.String())
 
 		if c == LoginStateUnknown {
 			lh.Clear()
