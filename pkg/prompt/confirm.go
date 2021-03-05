@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"runtime"
 	"strings"
 
 	"github.com/manifoldco/promptui"
@@ -42,6 +43,14 @@ const (
 	ConfirmNoToAll
 )
 
+func (c ConfirmResult) String() string {
+	return [...]string{"", "a", "y", "n", "l"}[c]
+}
+
+func emptyPointer(ignored []rune) []rune {
+	return []rune("")
+}
+
 // Confirm prompts for a confirmation from the user
 func Confirm(label string, target, defaultValue string, force bool) (ConfirmResult, error) {
 	if force {
@@ -55,10 +64,30 @@ func Confirm(label string, target, defaultValue string, force bool) (ConfirmResu
 		message += fmt.Sprintf("%s", label)
 	}
 
+	stdIn := os.Stdin
+	stat, _ := os.Stdin.Stat()
+	pointer := promptui.DefaultCursor
+	if (stat.Mode() & os.ModeCharDevice) == 0 {
+		// stdin is handling Piped input, so we have to prompt on a different input
+		if runtime.GOOS == "windows" {
+			if file, err := os.Open("CON"); err == nil {
+				stdIn = file
+				pointer = emptyPointer
+			}
+		} else {
+			tty, err := os.Open("/dev/tty")
+			if err == nil {
+				stdIn = tty
+				pointer = emptyPointer
+			}
+		}
+	}
+
 	prompt := promptui.Prompt{
-		Stdin:       os.Stdin,
+		Stdin:       stdIn,
 		Stdout:      os.Stderr,
 		Default:     defaultValue,
+		Pointer:     pointer,
 		HideEntered: true,
 		Label:       message,
 		IsConfirm:   true,

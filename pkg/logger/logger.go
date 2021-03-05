@@ -160,6 +160,9 @@ type Options struct {
 
 	// Debug activates all log messages
 	Debug bool
+
+	// Level default log level
+	Level zapcore.Level
 }
 
 // NewLogger create a logger with given options
@@ -181,7 +184,7 @@ func NewLogger(name string, options Options) *Logger {
 		EncodeCaller:   zapcore.ShortCallerEncoder,
 	}
 
-	consoleLevel := zapcore.InfoLevel
+	consoleLevel := options.Level
 	if options.Debug {
 		consoleLevel = zapcore.DebugLevel
 	}

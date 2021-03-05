@@ -75,7 +75,7 @@ func NewFlagWithPipeIterator(cmd *cobra.Command, pipeOpt *PipelineOptions, suppo
 			Validator:  nil,
 		}
 		if pipeOpt.IsID {
-			iterOpts.Validator = ValidateID
+			// iterOpts.Validator = ValidateID
 		}
 		iter, err := iterator.NewJSONPipeIterator(cmd.InOrStdin(), iterOpts, func(line []byte) bool {
 			line = bytes.TrimSpace(line)

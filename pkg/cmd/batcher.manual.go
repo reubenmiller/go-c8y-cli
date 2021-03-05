@@ -6,6 +6,7 @@ import (
 	"io"
 	"math/rand"
 	"os"
+	"reflect"
 	"strings"
 	"sync"
 	"sync/atomic"
@@ -18,6 +19,7 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/pkg/prompt"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
+	"github.com/tidwall/gjson"
 )
 
 type BatchOptions struct {
@@ -171,7 +173,7 @@ func runBatched(requestIterator *RequestIterator, commonOptions CommonCommandOpt
 				break
 			}
 
-			request, err := requestIterator.GetNext()
+			request, input, err := requestIterator.GetNext()
 
 			if err != nil {
 				if errors.Is(err, io.EOF) {
@@ -210,8 +212,8 @@ func runBatched(requestIterator *RequestIterator, commonOptions CommonCommandOpt
 				if len(os.Args[1:]) > 1 {
 					operation = fmt.Sprintf("%s %s", os.Args[2], strings.TrimRight(os.Args[1], "s"))
 				}
-				promptMessage := fmt.Sprintf("(job: %d) %s", jobID, operation)
-				confirmResult, err := prompt.Confirm(promptMessage, "tenant "+client.TenantName, "y", false)
+				promptMessage, err := getConfirmationMessage(fmt.Sprintf("(job: %d) %s", jobID, operation), request, input)
+				confirmResult, err := prompt.Confirm(promptMessage, "tenant "+client.TenantName, prompt.ConfirmYes.String(), false)
 
 				switch confirmResult {
 				case prompt.ConfirmYesToAll:
@@ -348,4 +350,57 @@ func batchWorker(id int, jobs <-chan batchArgument, results chan<- error, prog *
 		results <- err
 	}
 	prog.WorkerCompleted(id)
+}
+
+func getConfirmationMessage(prefix string, request *c8y.RequestOptions, input interface{}) (string, error) {
+	name := ""
+	id := ""
+	if input != nil {
+		Logger.Infof("input: %s", input)
+		Logger.Infof("input type: %s", reflect.TypeOf(input))
+
+		switch v := input.(type) {
+		case []byte:
+			id = fmt.Sprintf("%s", v)
+			if gjson.ValidBytes(v) {
+				jsonobj := gjson.ParseBytes(v)
+
+				name = jsonobj.Get("name").Str
+				if idField := jsonobj.Get("id"); idField.Exists() {
+					id = jsonobj.Get("id").Str
+				}
+			}
+
+		case string:
+			if !strings.HasPrefix(v, "{") && !strings.HasPrefix(v, "[") {
+				id = v
+			} else {
+				if gjson.Valid(v) {
+					jsonobj := gjson.Parse(v)
+
+					name = jsonobj.Get("name").Str
+					if idField := jsonobj.Get("id"); idField.Exists() {
+						id = jsonobj.Get("id").Str
+					}
+				}
+			}
+		}
+	}
+
+	target := ""
+	if id != "" {
+		target += "id=" + id
+	}
+
+	if name != "" {
+		target += ", name=" + name
+	}
+
+	Logger.Infof("target: [%s]", target)
+
+	if target != "" {
+		return fmt.Sprintf("%s [%s]", prefix, target), nil
+	}
+
+	return prefix, nil
 }

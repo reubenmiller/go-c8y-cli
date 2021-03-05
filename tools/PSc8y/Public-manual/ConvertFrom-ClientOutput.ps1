@@ -32,7 +32,8 @@ Function ConvertFrom-ClientOutput {
         
         $AsJSON = $BoundParameters["AsJSON"] `
             -or $BoundParameters["Pretty"] `
-            -or $BoundParameters["Compress"]
+            -or $BoundParameters["Compress"] `
+            -or $WhatIfPreference
 
         $SelectedType = if ($ItemType) { $ItemType } else { $Type }
         if ($Raw) {

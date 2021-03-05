@@ -44,7 +44,7 @@ func (r *RequestIterator) setDone() {
 }
 
 // GetNext return the next request. If error is io.EOF then the iterator is finished
-func (r *RequestIterator) GetNext() (*c8y.RequestOptions, error) {
+func (r *RequestIterator) GetNext() (*c8y.RequestOptions, interface{}, error) {
 
 	req := &c8y.RequestOptions{
 		Host:             r.Request.Host,
@@ -72,7 +72,7 @@ func (r *RequestIterator) GetNext() (*c8y.RequestOptions, error) {
 			if !errors.Is(err, ErrNoMatchesFound) {
 				r.setDone()
 			}
-			return nil, err
+			return nil, nil, err
 		}
 
 		inputLine = input
@@ -87,7 +87,7 @@ func (r *RequestIterator) GetNext() (*c8y.RequestOptions, error) {
 			if !errors.Is(err, ErrNoMatchesFound) {
 				r.setDone()
 			}
-			return nil, err
+			return nil, nil, err
 		}
 		inputLine = input
 		req.Query = string(q)
@@ -107,7 +107,7 @@ func (r *RequestIterator) GetNext() (*c8y.RequestOptions, error) {
 				if !errors.Is(err, ErrNoMatchesFound) {
 					r.setDone()
 				}
-				return nil, err
+				return nil, nil, err
 			}
 
 			// TODO: Find more efficient way rather than converting to and from json
@@ -117,12 +117,12 @@ func (r *RequestIterator) GetNext() (*c8y.RequestOptions, error) {
 			// 		 c8y.DecodeJSONBytes should be used instead!
 			if err := c8y.DecodeJSONBytes(bodyContents, &bodyValue); err != nil {
 				r.setDone()
-				return nil, err
+				return nil, nil, err
 			}
 			req.Body = bodyValue
 		default:
 			req.Body = v
 		}
 	}
-	return req, nil
+	return req, inputLine, nil
 }

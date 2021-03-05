@@ -141,7 +141,6 @@ Function New-ClientArgument {
         # as the stdin is already be redirected to!
         $null = $c8yargs.Add("--force")
 
-        Write-Verbose ("command: c8y $Command {0}" -f $c8yargs -join " ")
         ,$c8yargs
     }
 }

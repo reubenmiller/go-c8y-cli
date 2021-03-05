@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"os"
 	"regexp"
+	"runtime"
 	"strings"
 	"time"
 
@@ -25,6 +26,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
+	"go.uber.org/zap/zapcore"
 )
 
 // Logger is used to record the log messages which should be visible to the user when using the verbose flag
@@ -47,7 +49,7 @@ const (
 )
 
 func init() {
-	Logger = logger.NewLogger(module, logger.Options{Silent: true})
+	Logger = logger.NewLogger(module, logger.Options{})
 	SecureDataAccessor = encrypt.NewSecureData("{encrypted}")
 	rootCmd = newC8yCmd()
 	// set seed for random generation
@@ -600,11 +602,12 @@ func Execute() {
 func executeRootCmd() {
 	if err := rootCmd.Execute(); err != nil {
 
+		Logger.Errorf("%s", err)
 		out := rootCmd.ErrOrStderr()
 		if globalFlagPrintErrorsOnStdout {
 			out = rootCmd.OutOrStdout()
+			rootCmd.checkCommandError(err, out)
 		}
-		rootCmd.checkCommandError(err, out)
 
 		if cErr, ok := err.(cmderrors.CommandError); ok {
 			os.Exit(cErr.ExitCode)
@@ -679,15 +682,58 @@ func bindFlags(cmd *cobra.Command, v *viper.Viper) {
 	})
 }
 
+func printCommand() {
+	buf := bytes.Buffer{}
+
+	escapeQuotesWindows := func(value string) string {
+		return "'" + strings.ReplaceAll(value, "\"", `\"`) + "'"
+	}
+	escapeQuotesLinux := func(value string) string {
+		return "\"" + strings.ReplaceAll(value, "\"", `\"`) + "\""
+	}
+
+	quoter := escapeQuotesLinux
+	if runtime.GOOS == "windows" {
+		quoter = escapeQuotesWindows
+	}
+
+	for _, arg := range os.Args[1:] {
+		if strings.Contains(arg, " ") {
+			if strings.HasPrefix(arg, "-") {
+				if index := strings.Index(arg, "="); index > -1 {
+					buf.WriteString(arg[0:index] + "=")
+					buf.WriteString(quoter(arg[index+1:]))
+				} else {
+					buf.WriteString(quoter(arg))
+				}
+			} else {
+				buf.WriteString(quoter(arg))
+			}
+		} else {
+			buf.WriteString(arg)
+		}
+		buf.WriteByte(' ')
+	}
+	Logger.Infof("command: c8y %s", strings.TrimSpace(buf.String()))
+}
+
 func initConfig() {
 	logOptions := logger.Options{
-		Silent: true,
-		Color:  !globalFlagNoColor,
-		Debug:  globalFlagDebug,
+		Level: zapcore.ErrorLevel,
+		Color: !globalFlagNoColor,
+		Debug: globalFlagDebug,
 	}
-	if (globalFlagVerbose || globalFlagDebug) && !globalFlagProgressBar {
-		logOptions.Silent = false
+	if globalFlagProgressBar {
+		logOptions.Silent = true
+	} else {
+		if globalFlagVerbose {
+			logOptions.Level = zapcore.InfoLevel
+		}
+		if globalFlagDebug {
+			logOptions.Level = zapcore.DebugLevel
+		}
 	}
+
 	Logger = logger.NewLogger(module, logOptions)
 	rootCmd.Logger = Logger
 
@@ -695,6 +741,10 @@ func initConfig() {
 	if globalFlagDryRun {
 		// use custom handling of dry run so silence library messages
 		c8y.SilenceLogger()
+	}
+
+	if logOptions.Level.Enabled(zapcore.InfoLevel) {
+		printCommand()
 	}
 
 	if globalFlagSessionFile == "" && os.Getenv("C8Y_SESSION") != "" {
@@ -798,6 +848,7 @@ func loadConfiguration() error {
 
 func shouldConfirm(methods ...string) bool {
 	if cliConfig.IsCIMode() || globalFlagForce || globalFlagDryRun {
+		Logger.Debugf("no confirmation required. ci_mode=%v, force=%v, dry=%v", cliConfig.IsCIMode(), globalFlagForce, globalFlagDryRun)
 		return false
 	}
 
@@ -808,6 +859,7 @@ func shouldConfirm(methods ...string) bool {
 	confirmMethods := strings.ToUpper(viper.GetString(SettingsModeConfirmation))
 	for _, method := range methods {
 		if strings.Contains(confirmMethods, strings.ToUpper(method)) {
+			Logger.Debugf("confirmation required due to method=%s", method)
 			return true
 		}
 	}
