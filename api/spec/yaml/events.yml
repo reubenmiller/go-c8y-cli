@@ -9,7 +9,7 @@ information:
 endpoints:
   - name: getEventCollection
     method: GET
-    description: Get a collection of events based on filter parameters
+    description: Get event collection
     descriptionLong: Get a collection of events based on filter parameters
     examples:
       powershell:
@@ -79,7 +79,7 @@ endpoints:
         description: Return the newest instead of the oldest events. Must be used with dateFrom and dateTo parameters
 
   - name: deleteEventCollection
-    description: 'Delete a collection of events'
+    description: Delete event collection
     descriptionLong: 'Delete a collection of events by using a filter'
     method: DELETE
     path: event/events
@@ -129,8 +129,8 @@ endpoints:
         description: Return the newest instead of the oldest events. Must be used with dateFrom and dateTo parameters
 
   - name: getEvent
-    description: 'Get event/s'
-    descriptionLong: 'Get an event by id'
+    description: Get event
+    descriptionLong: Get an existing event by id
     method: GET
     path: event/events/{id}
     accept: application/vnd.com.nsn.cumulocity.event+json
@@ -217,8 +217,8 @@ endpoints:
     method: PUT
     path: event/events/{id}
     accept: application/vnd.com.nsn.cumulocity.event+json
-    description: 'Update an event'
-    descriptionLong: 'Update an event'
+    description: Update event
+    descriptionLong: Update an existing event
     examples:
       powershell:
         - description: Update the text field of an existing event
@@ -271,8 +271,8 @@ endpoints:
         description: Additional properties of the event.
 
   - name: deleteEvent
-    description: 'Delete event/s'
-    descriptionLong: 'Delete an event by id'
+    description: Delete event
+    descriptionLong: Delete an existing event
     examples:
       powershell:
         - description: Delete an event
@@ -298,7 +298,7 @@ endpoints:
   # binaries
   #
   - name: getEventBinary
-    description: 'Get event binary'
+    description: Get event binary
     descriptionLong: Get the binary associated with an event
     method: GET
     path: event/events/{id}/binaries
@@ -331,7 +331,7 @@ endpoints:
         description: Event id
 
   - name: newEventBinary
-    description: 'New event binary'
+    description: Create event binary
     descriptionLong: Upload a new binary file to an event
     method: POST
     path: event/events/{id}/binaries
@@ -368,7 +368,7 @@ endpoints:
         description: File to be uploaded as a binary
 
   - name: updateEventBinary
-    description: 'Update event binary'
+    description: Update event binary
     descriptionLong: >
       Update an existing event binary
     method: PUT
@@ -410,7 +410,7 @@ endpoints:
         description: File to be uploaded as a binary
 
   - name: deleteEventBinary
-    description: 'Delete event binary'
+    description: Delete event binary
     descriptionLong: >
       Delete a binary which has been attached to an event
     method: DELETE

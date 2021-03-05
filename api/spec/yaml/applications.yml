@@ -9,7 +9,7 @@ information:
 
 endpoints:
   - name: getApplicationCollection
-    description: 'Get a collection of applications'
+    description: Get application collection
     descriptionLong: Get a collection of applications by a given filter
     method: GET
     path: /application/applications
@@ -36,7 +36,7 @@ endpoints:
         description: Application type
 
   - name: newApplication
-    description: Create a new application
+    description: Create application
     descriptionLong: Create a new application using explicit settings
     method: POST
     path: /application/applications
@@ -120,7 +120,7 @@ endpoints:
 
       The response contains a representation of the newly created application.
 
-      Required role ROLE_APPLICATION_MANAGMENT_ADMIN
+      Required role ROLE_APPLICATION_MANAGEMENT_ADMIN
     method: POST
     path: /application/applications/{id}/clone
     accept: application/vnd.com.nsn.cumulocity.application+json
@@ -147,8 +147,8 @@ endpoints:
         description: Application id
 
   - name: getApplication
-    description: 'Get an application'
-    descriptionLong: Get an application by its id or name
+    description: Get application
+    descriptionLong: Get an existing application
     method: GET
     path: /application/applications/{id}
     accept: application/vnd.com.nsn.cumulocity.application+json
@@ -181,7 +181,7 @@ endpoints:
         description: Application id
 
   - name: deleteApplication
-    description: 'Delete application'
+    description: Delete application
     descriptionLong: 'The application can only be removed when its availability is PRIVATE or in other case when it has no subscriptions.'
     method: DELETE
     path: /application/applications/{id}
@@ -213,8 +213,8 @@ endpoints:
         description: Application id
 
   - name: updateApplication
-    description: 'Update application meta information'
-    descriptionLong: Update an application by its id
+    description: 'Update application details'
+    descriptionLong: Update details of an existing application
     method: PUT
     path: /application/applications/{id}
     accept: application/vnd.com.nsn.cumulocity.application+json
@@ -286,7 +286,7 @@ endpoints:
         description: URL to the external application
 
   - name: newApplicationBinary
-    description: 'New application binary'
+    description: New application binary
     descriptionLong: >
       For the applications of type microservice and web application to be available for Cumulocity platform users, a binary zip file must be uploaded.
 
@@ -329,7 +329,7 @@ endpoints:
         description: File to be uploaded as a binary
 
   - name: getApplicationBinaryCollection
-    description: 'Get application binaries'
+    description: Get application binaries
     descriptionLong: >
       A list of all binaries related to the given application will be returned
     method: GET
@@ -369,7 +369,7 @@ endpoints:
 
   - name: deleteApplicationBinary
     skip: false
-    description: 'Remove application binary'
+    description: Delete application binary
     descriptionLong: >
       Remove an application binaries related to the given application
 

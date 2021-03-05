@@ -9,7 +9,8 @@ information:
 
 endpoints:
   - name: getTenantCollection
-    description: 'Get collection of tenants'
+    description: Get tenant collection
+    descriptionLong: Get collection of tenants
     method: GET
     path: /tenant/tenants
     accept: application/vnd.com.nsn.cumulocity.tenantCollection+json
@@ -28,7 +29,8 @@ endpoints:
             command: c8y tenants list
 
   - name: newTenant
-    description: 'New tenant'
+    description: Create tenant
+    descriptionLong: Create a new tenant
     method: POST
     path: /tenant/tenants
     accept: application/vnd.com.nsn.cumulocity.tenant+json
@@ -88,7 +90,8 @@ endpoints:
         description: A set of custom properties of the tenant
 
   - name: getTenant
-    description: 'Get tenant'
+    description: Get tenant
+    descriptionLong: Get an existing tenant
     method: GET
     path: /tenant/tenants/{id}
     accept: application/vnd.com.nsn.cumulocity.tenant+json
@@ -111,7 +114,8 @@ endpoints:
         description: Tenant id
 
   - name: deleteTenant
-    description: 'Delete tenant'
+    description: Delete tenant
+    descriptionLong: Delete an existing tenant
     method: DELETE
     path: /tenant/tenants/{id}
     alias:
@@ -119,11 +123,11 @@ endpoints:
         powershell: Remove-Tenant
     examples:
         powershell:
-          - description: Delete a tenant by name (from the mangement tenant)
+          - description: Delete a tenant by name (from the management tenant)
             command: Remove-Tenant -Id mycompany
             skipTest: true
         go:
-          - description: Delete a tenant by name (from the mangement tenant)
+          - description: Delete a tenant by name (from the management tenant)
             command: c8y tenants delete --id "mycompany"
     pathParameters:
       - name: id
@@ -133,7 +137,8 @@ endpoints:
         description: Tenant id
 
   - name: updateTenant
-    description: 'Update tenant'
+    description: Update tenant
+    descriptionLong: Update an existing tenant
     method: PUT
     path: /tenant/tenants/{id}
     accept: application/vnd.com.nsn.cumulocity.tenant+json
@@ -142,11 +147,11 @@ endpoints:
         powershell: Update-Tenant
     examples:
         powershell:
-          - description: Update a tenant by name (from the mangement tenant)
+          - description: Update a tenant by name (from the management tenant)
             command: Update-Tenant -Id mycompany -ContactName "John Smith"
             skipTest: true
         go:
-          - description: Update a tenant by name (from the mangement tenant)
+          - description: Update a tenant by name (from the management tenant)
             command: c8y tenants update --id "mycompany" --contactName "John Smith"
     pathParameters:
       - name: id
@@ -194,7 +199,8 @@ endpoints:
         description: A set of custom properties of the tenant
 
   - name: currentTenant
-    description: 'Get current tenant'
+    description: Get current tenant
+    descriptionLong: Get the current tenant associated with the current session
     method: GET
     path: /tenant/currentTenant
     accept: application/vnd.com.nsn.cumulocity.currentTenant+json
@@ -210,7 +216,8 @@ endpoints:
             command: c8y tenants getCurrentTenant
 
   - name: enableApplicationOnTenant
-    description: 'Enable application on tenant'
+    description: Subscribe application
+    descriptionLong: Enable/subscribe an application to a tenant
     method: POST
     path: /tenant/tenants/{tenant}/applications
     accept: application/vnd.com.nsn.cumulocity.applicationReference+json
@@ -240,7 +247,8 @@ endpoints:
         description: Application id
 
   - name: disableApplicationFromTenant
-    description: 'Disable application on tenant'
+    description: Unsubscribe application
+    descriptionLong: Disable/unsubscribe an application from a tenant
     method: DELETE
     path: /tenant/tenants/{tenant}/applications/{application}
     alias:
@@ -268,7 +276,8 @@ endpoints:
         description: Application id
 
   - name: getApplicationReferenceCollection
-    description: 'Get a collection of application references on a tenant'
+    description: Get application reference collection
+    descriptionLong: Get a collection of application references on a tenant
     method: GET
     path: /tenant/tenants/{tenant}/applications
     accept: application/vnd.com.nsn.cumulocity.applicationReferenceCollection+json
@@ -293,7 +302,8 @@ endpoints:
         description: Tenant id
 
   - name: getTenantVersion
-    description: 'Get tenant platform (backend) version'
+    description: Get tenant version
+    descriptionLong: Get tenant platform (backend) version
     method: GET
     path: /tenant/system/options/system/version
     accept: application/vnd.com.nsn.cumulocity.option+json

@@ -8,8 +8,8 @@ information:
 endpoints:
   # Device
   - name: getDevice
-    description: 'Get device'
-    descriptionLong: Get a device by name or id.
+    description: Get device
+    descriptionLong: Get an existing device
     method: GET
     path: inventory/managedObjects/{id}
     accept: application/vnd.com.nsn.cumulocity.customDevice+json
@@ -44,7 +44,7 @@ endpoints:
         description: Device ID
 
   - name: updateDevice
-    description: 'Update device'
+    description: Update device
     descriptionLong: Update properties of an existing device
     method: PUT
     path: inventory/managedObjects/{id}
@@ -98,7 +98,7 @@ endpoints:
         description: Additional properties of the inventory.
 
   - name: deleteDevice
-    description: 'Delete device'
+    description: Delete device
     descriptionLong: >
       Delete an existing device by id or name. Deleting the object will remove all of its
       data (i.e. alarms, events, operations and measurements)
@@ -139,7 +139,7 @@ endpoints:
         position: 20
 
   - name: createDevice
-    description: 'Create a device'
+    description: Create device
     descriptionLong: >
       Create a device (managed object) with the special c8y_IsDevice fragment.
     method: POST
@@ -202,7 +202,7 @@ endpoints:
       - name
 
   - name: getSupportedMeasurements
-    description: 'Get supported measurements/s of a device'
+    description: Get supported measurements
     descriptionLong: >
       Returns a list of fragments (valueFragmentTypes) related to the device
     method: GET
@@ -242,9 +242,9 @@ endpoints:
         description: Device ID
 
   - name: getSupportedSeries
-    description: 'Get supported measurement series/s of a device'
+    description: Get supported measurement series
     descriptionLong: >
-      Returns a list of supported measurement series
+      Get supported measurement series/s of a device
     method: GET
     path: inventory/managedObjects/{device}/supportedSeries
     accept: application/vnd.com.nsn.cumulocity.inventory+json
@@ -282,7 +282,7 @@ endpoints:
         description: Device ID
 
   - name: getSupportedOperations
-    description: 'Get supported operations of a device'
+    description: Get supported operations
     descriptionLong: >
       Returns a list of supported operations (fragments) for a device. The supported fragments list
       is returned from the c8y_SupportedOperations fragment of the device managed object.
@@ -323,8 +323,8 @@ endpoints:
         description: Device ID
 
   - name: setDeviceRequiredAvailability
-    description: 'Set the required availability of a device'
-    descriptionLong: "Devices that have not sent any message in the response interval are considered unavailable. Response interval can have value between -32768 and 32767 and any values out of range will be shrink to range borders. Such devices are marked as unavailable (see below) and an unavailability alarm is raised. Devices with a response interval of zero minutes are considered to be under maintenance. No alarm is raised while a device is under maintenance. Devices that do not contain 'c8y_RequiredAvailability' are not monitored."
+    description: Set required availability
+    descriptionLong: "Set the required availability of a device. Devices that have not sent any message in the response interval are considered unavailable. Response interval can have value between -32768 and 32767 and any values out of range will be shrink to range borders. Such devices are marked as unavailable (see below) and an unavailability alarm is raised. Devices with a response interval of zero minutes are considered to be under maintenance. No alarm is raised while a device is under maintenance. Devices that do not contain 'c8y_RequiredAvailability' are not monitored."
     method: PUT
     path: inventory/managedObjects/{device}
     accept: application/vnd.com.nsn.cumulocity.inventory+json
@@ -366,9 +366,9 @@ endpoints:
 
   # Device groups
   - name: getDeviceGroup
-    description: 'Get device group'
+    description: Get device group
     descriptionLong: >
-      Get a device group by id or name
+      Get a device group
     method: GET
     path: inventory/managedObjects/{id}
     accept: application/vnd.com.nsn.cumulocity.customDeviceGroup+json
@@ -403,7 +403,7 @@ endpoints:
         description: Device group ID
 
   - name: updateDeviceGroup
-    description: 'Update device group'
+    description: Update device group
     descriptionLong: >
       Update properties of an existing device group, for example name or any other custom properties.
     method: PUT
@@ -457,9 +457,9 @@ endpoints:
         description: Additional properties of the inventory.
 
   - name: deleteDeviceGroup
-    description: 'Delete device group'
+    description: Delete device group
     descriptionLong: >
-      Delete an existing device group, and optional
+      Delete an existing device group, and optionally all of it's children
     method: DELETE
     path: inventory/managedObjects/{id}
     accept: ''

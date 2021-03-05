@@ -9,7 +9,8 @@ information:
 
 endpoints:
   - name: getTenantUsageStatisticsCollection
-    description: 'Get collection of tenant usage statistics'
+    description: Get tenant usage statistics
+    descriptionLong: Get collection of tenant usage statistics
     method: GET
     path: /tenant/statistics
     accept: application/vnd.com.nsn.cumulocity.tenantUsageStatisticsCollection+json
@@ -49,7 +50,8 @@ endpoints:
         description: End date or date and time of the statistics.
 
   - name: getAllTenantUsageStatisticsSummaryCollection
-    description: 'Get collection of tenant usage statistics summary'
+    description: Get all tenant usage summary statistics
+    descriptionLong: Get collection of tenant usage statistics summary
     method: GET
     path: /tenant/statistics/allTenantsSummary
     accept: application/json
@@ -91,8 +93,8 @@ endpoints:
         description: End date or date and time of the statistics.
 
   - name: getTenantUsageStatisticsSummaryCollection
-    description: 'Get collection of tenant usage statistics summary'
-    descriptionLong: 'Get summary of requests and database usage from the start of this month until now'
+    description: Get tenant usage summary statistics
+    descriptionLong: Get summary of requests and database usage from the start of this month until now
     method: GET
     path: /tenant/statistics/summary
     accept: application/vnd.com.nsn.cumulocity.tenantUsageStatisticsSummary+json

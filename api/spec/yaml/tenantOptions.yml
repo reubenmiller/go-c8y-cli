@@ -13,7 +13,8 @@ information:
 
 endpoints:
   - name: getTenantOptionCollection
-    description: 'Get collection of tenant options'
+    description: Get tenant option collection
+    descriptionLong: Get collection of tenant options
     method: GET
     path: /tenant/options
     accept: application/vnd.com.nsn.cumulocity.optionCollection+json
@@ -32,7 +33,7 @@ endpoints:
           command: c8y tenantOptions list
 
   - name: newTenantOption
-    description: 'New tenant option'
+    description: Create tenant option
     method: POST
     path: /tenant/options
     accept: application/vnd.com.nsn.cumulocity.option+json
@@ -70,7 +71,8 @@ endpoints:
 
 
   - name: getTenantOption
-    description: 'Get tenant option'
+    description: Get tenant option
+    descriptionLong: Get an existing tenant option
     method: GET
     path: /tenant/options/{category}/{key}
     accept: application/vnd.com.nsn.cumulocity.option+json
@@ -103,7 +105,8 @@ endpoints:
         description: Tenant Option key
 
   - name: deleteTenantOption
-    description: 'Delete tenant option'
+    description: Delete tenant option
+    descriptionLong: Delete an existing tenant option
     method: DELETE
     path: /tenant/options/{category}/{key}
     alias:
@@ -133,7 +136,8 @@ endpoints:
         description: Tenant Option key
 
   - name: updateTenantOption
-    description: 'Update tenant option'
+    description: Update tenant option
+    descriptionLong: Update an existing tenant option
     method: PUT
     path: /tenant/options/{category}/{key}
     accept: application/vnd.com.nsn.cumulocity.option+json
@@ -172,7 +176,8 @@ endpoints:
         description: New value
 
   - name: updateTenantOptionBulk
-    description: 'Update multiple tenant options in provided category'
+    description: Update multiple tenant options
+    descriptionLong: Update multiple tenant options in provided category
     method: PUT
     path: /tenant/options/{category}
     accept: application/vnd.com.nsn.cumulocity.option+json
@@ -209,7 +214,8 @@ endpoints:
         description: Key/value pairs
 
   - name: getTenantOptionsForCategory
-    description: 'Get tenant options for category'
+    description: Get tenant options by category
+    descriptionLong: Get existing tenant options for a category
     method: GET
     path: /tenant/options/{category}
     accept: application/vnd.com.nsn.cumulocity.optionCollection+json
@@ -240,8 +246,9 @@ endpoints:
         description: Tenant Option category
 
   - name: updateTenantOptionEditable
-    description: 'Update tenant option editibility'
+    description: Update tenant option edit setting
     descriptionLong: >
+      Update read-only setting of an existing tenant option
       Required role:: ROLE_OPTION_MANAGEMENT_ADMIN, Required tenant management Example Request:: Update access.control.allow.origin option.
     method: PUT
     path: /tenant/options/{category}/{key}/editable
@@ -278,7 +285,7 @@ endpoints:
         description: Tenant Option key
 
     body:
-      # TODO: Check if this should be a binary value, however convert to a string when assiging it to the body
+      # TODO: Check if this should be a binary value, however convert to a string when assigning it to the body
       - name: editable
         type: string
         required: true

@@ -9,7 +9,7 @@ information:
 endpoints:
   - name: getOperationCollection
     method: GET
-    description: Get a collection of operations based on filter parameters
+    description: Get operation collection
     descriptionLong: Get a collection of operations based on filter parameters
     path: devicecontrol/operations
     accept: application/vnd.com.nsn.cumulocity.operationCollection+json
@@ -55,7 +55,7 @@ endpoints:
           command: c8y operations list --status PENDING
 
         - description: Get a list of pending operations for a given agent and all of its child devices
-          command: c8y operations list --agent myagent --status PENDING
+          command: c8y operations list --agent myAgent --status PENDING
 
         - description: Get a list of pending operations for a device
           command: c8y operations list --device mydevice --status PENDING
@@ -91,8 +91,8 @@ endpoints:
         description: Bulk operation id. Only retrieve operations related to the given bulk operation.
 
   - name: getOperation
-    description: 'Get operation/s'
-    descriptionLong: Get an operation by id
+    description: Get operation
+    descriptionLong: Get an existing operation
     method: GET
     examples:
       powershell:
@@ -119,7 +119,7 @@ endpoints:
     method: POST
     path: devicecontrol/operations
     accept: application/vnd.com.nsn.cumulocity.operation+json
-    description: 'Create a new operation'
+    description: Create operation
     descriptionLong: Create a new operation for an agent or device
     examples:
       powershell:
@@ -213,7 +213,7 @@ endpoints:
         required: true
 
   - name: deleteOperationCollection
-    description: 'Delete a collection of operations'
+    description: Delete operation collection
     descriptionLong: >
       Delete a collection of operations using a set of filter criteria. Be careful when deleting
       operations. Where possible update operations to FAILED (with a failure reason) instead of

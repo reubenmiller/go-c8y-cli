@@ -9,7 +9,7 @@ information:
 endpoints:
   - name: getMeasurementCollection
     method: GET
-    description: Get a collection of measurements based on filter parameters
+    description: Get measurement collection
     descriptionLong: Get a collection of measurements based on filter parameters
     path: measurement/measurements
     accept: application/vnd.com.nsn.cumulocity.measurementCollection+json
@@ -100,8 +100,8 @@ endpoints:
 
   - name: getMeasurementLatestCollection
     method: GET
-    description: Get the latest measurement of a specific device
-    descriptionLong: Get the latest measurement of a specific device
+    description: Get latest measurement collection
+    descriptionLong: Get the latest measurement collection from a device
     path: measurement/measurements/one
     accept: application/vnd.com.nsn.cumulocity.measurementCollection+json
     collectionType: application/vnd.com.nsn.cumulocity.measurement+json
@@ -148,7 +148,7 @@ endpoints:
 
   - name: getMeasurementSeries
     method: GET
-    description: Get a collection of measurements based on filter parameters
+    description: Get measurement series
     descriptionLong: Get a collection of measurements based on filter parameters
     path: measurement/measurements/series
     accept: 'application/json'
@@ -213,8 +213,8 @@ endpoints:
         description: End date or date and time of measurement occurrence. Defaults to the current time
 
   - name: getMeasurement
-    description: 'Get measurement/s'
-    descriptionLong: Get measurements by their ids
+    description: Get measurement
+    descriptionLong: Get an existing measurement
     method: GET
     path: measurement/measurements/{id}
     accept: application/vnd.com.nsn.cumulocity.measurement+json
@@ -244,8 +244,8 @@ endpoints:
     method: POST
     path: measurement/measurements
     accept: application/vnd.com.nsn.cumulocity.measurement+json
-    description: 'Create a new measurement'
-    descriptionLong: 'Create a new measurement'
+    description: Create measurement
+    descriptionLong: Create a new measurement
     alias:
         go: create
         powershell: New-Measurement
@@ -285,8 +285,8 @@ endpoints:
       - "time"
 
   - name: deleteMeasurement
-    description: 'Delete measurement/s'
-    descriptionLong: Delete individual measurements
+    description: Delete measurement
+    descriptionLong: Delete an existing measurement
     method: DELETE
     path: measurement/measurements/{id}
     accept: ''
@@ -313,7 +313,7 @@ endpoints:
         description: Measurement id
 
   - name: deleteMeasurementCollection
-    description: 'Delete a collection of measurements'
+    description: Delete measurement collection
     descriptionLong: Delete measurements using a filter
     method: DELETE
     path: measurement/measurements
