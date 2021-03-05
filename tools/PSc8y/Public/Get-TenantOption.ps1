@@ -5,7 +5,7 @@ Function Get-TenantOption {
 Get tenant option
 
 .DESCRIPTION
-Get tenant option
+Get an existing tenant option
 
 .LINK
 c8y tenantOptions get

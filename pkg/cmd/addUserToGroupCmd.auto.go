@@ -21,8 +21,8 @@ func NewAddUserToGroupCmd() *AddUserToGroupCmd {
 	ccmd := &AddUserToGroupCmd{}
 	cmd := &cobra.Command{
 		Use:   "addUserToGroup",
-		Short: "Get user",
-		Long:  ``,
+		Short: "Add user to group",
+		Long:  `Add an existing user to a group`,
 		Example: `
 $ c8y userReferences addUserToGroup --group 1 --user myuser
 List the users within a user group

@@ -21,7 +21,7 @@ func NewDeleteEventCollectionCmd() *DeleteEventCollectionCmd {
 	ccmd := &DeleteEventCollectionCmd{}
 	cmd := &cobra.Command{
 		Use:   "deleteCollection",
-		Short: "Delete a collection of events",
+		Short: "Delete event collection",
 		Long:  `Delete a collection of events by using a filter`,
 		Example: `
 $ c8y events deleteCollection --type my_CustomType --dateFrom "-10d"

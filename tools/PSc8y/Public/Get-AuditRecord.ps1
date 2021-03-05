@@ -2,10 +2,10 @@
 Function Get-AuditRecord {
 <#
 .SYNOPSIS
-Get an audit record
+Get audit record
 
 .DESCRIPTION
-Get an audit record by id
+Get an audit record
 
 .LINK
 c8y auditRecords get

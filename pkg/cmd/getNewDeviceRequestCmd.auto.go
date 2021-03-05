@@ -22,8 +22,8 @@ func NewGetNewDeviceRequestCmd() *GetNewDeviceRequestCmd {
 	ccmd := &GetNewDeviceRequestCmd{}
 	cmd := &cobra.Command{
 		Use:   "getNewDeviceRequest",
-		Short: "Get a new device requests",
-		Long:  `Get a new device requests`,
+		Short: "Get device request",
+		Long:  `Get a device registration request`,
 		Example: `
 $ c8y devices getNewDeviceRequest
 Get a new device request

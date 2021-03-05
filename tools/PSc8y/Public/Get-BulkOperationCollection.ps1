@@ -2,7 +2,7 @@
 Function Get-BulkOperationCollection {
 <#
 .SYNOPSIS
-Get a collection of bulk operations
+Get bulk operation collection
 
 .DESCRIPTION
 Get a collection of bulk operations

@@ -5,7 +5,7 @@ Describe -Name "Update-CurrentUser" {
 
     }
 
-    It "Update the current user's lastname" {
+    It "Update the current user's last name" {
         $Response = PSc8y\Update-CurrentUser -LastName "Smith"
         $LASTEXITCODE | Should -Be 0
         $Response | Should -Not -BeNullOrEmpty

@@ -5,7 +5,7 @@ Function Get-Tenant {
 Get tenant
 
 .DESCRIPTION
-Get tenant
+Get an existing tenant
 
 .LINK
 c8y tenants get

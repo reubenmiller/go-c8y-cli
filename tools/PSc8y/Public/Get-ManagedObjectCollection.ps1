@@ -2,7 +2,7 @@
 Function Get-ManagedObjectCollection {
 <#
 .SYNOPSIS
-Get a collection of managedObjects based on filter parameters
+Get managed object collection
 
 .DESCRIPTION
 Get a collection of managedObjects based on filter parameters
@@ -54,7 +54,7 @@ Get a list of managed objects by id
         [switch]
         $WithParents,
 
-        # Don't include the child devices names in the resonse. This can improve the api's response because the names don't need to be retrieved
+        # Don't include the child devices names in the response. This can improve the API response because the names don't need to be retrieved
         [Parameter()]
         [switch]
         $SkipChildrenNames

@@ -22,7 +22,7 @@ func NewGetRetentionRuleCollectionCmd() *GetRetentionRuleCollectionCmd {
 	ccmd := &GetRetentionRuleCollectionCmd{}
 	cmd := &cobra.Command{
 		Use:   "list",
-		Short: "Get collection of retention rules",
+		Short: "Get retention rule collection",
 		Long: `Get a collection of retention rules configured in the current tenant
 `,
 		Example: `

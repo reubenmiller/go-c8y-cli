@@ -2,7 +2,7 @@
 Function Get-ApplicationCollection {
 <#
 .SYNOPSIS
-Get a collection of applications
+Get application collection
 
 .DESCRIPTION
 Get a collection of applications by a given filter

@@ -2,7 +2,7 @@
 Function Enable-Microservice {
 <#
 .SYNOPSIS
-Enable/subscribe a microservice
+subscribe to microservice
 
 .DESCRIPTION
 Enabling (subscribing) a microservice will activate the application in the tenant

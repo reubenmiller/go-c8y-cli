@@ -2,10 +2,10 @@
 Function Get-TenantOptionForCategory {
 <#
 .SYNOPSIS
-Get tenant options for category
+Get tenant options by category
 
 .DESCRIPTION
-Get tenant options for category
+Get existing tenant options for a category
 
 .LINK
 c8y tenantOptions getForCategory

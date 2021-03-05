@@ -21,8 +21,8 @@ func NewDeleteMeasurementCmd() *DeleteMeasurementCmd {
 	ccmd := &DeleteMeasurementCmd{}
 	cmd := &cobra.Command{
 		Use:   "delete",
-		Short: "Delete measurement/s",
-		Long:  `Delete individual measurements`,
+		Short: "Delete measurement",
+		Long:  `Delete an existing measurement`,
 		Example: `
 $ c8y measurements delete --id 12345
 Delete measurement

@@ -2,7 +2,7 @@
 Function Get-TenantUsageSummaryStatistics {
 <#
 .SYNOPSIS
-Get collection of tenant usage statistics summary
+Get tenant usage summary statistics
 
 .DESCRIPTION
 Get summary of requests and database usage from the start of this month until now

@@ -22,7 +22,7 @@ func NewUpdateRetentionRuleCmd() *UpdateRetentionRuleCmd {
 	cmd := &cobra.Command{
 		Use:   "update",
 		Short: "Update retention rule",
-		Long: `Update an existing retentule rule, i.e. change maximum number of days or the data type.
+		Long: `Update an existing retention rule, i.e. change maximum number of days or the data type.
 `,
 		Example: `
 $ c8y retentionRules get --id 12345

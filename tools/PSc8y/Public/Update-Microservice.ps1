@@ -2,10 +2,10 @@
 Function Update-Microservice {
 <#
 .SYNOPSIS
-Update microservice meta information
+Update microservice details
 
 .DESCRIPTION
-Update microservice properties such as availability, context path etc.
+Update details of an existing microservice, i.e. availability, context path etc.
 
 
 .LINK

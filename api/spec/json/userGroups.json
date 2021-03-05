@@ -8,7 +8,8 @@
   "endpoints": [
     {
       "name": "getUserGroupCollection",
-      "description": "Get collection of (user) groups",
+      "description": "Get user group collection",
+      "descriptionLong": "Get collection of (user) groups",
       "method": "GET",
       "path": "/user/{tenant}/groups",
       "accept": "application/vnd.com.nsn.cumulocity.groupCollection+json",
@@ -42,7 +43,8 @@
     },
     {
       "name": "createUserGroup",
-      "description": "Create a new group",
+      "description": "Create user group",
+      "descriptionLong": "Create a new user group",
       "method": "POST",
       "path": "/user/{tenant}/groups",
       "accept": "application/vnd.com.nsn.cumulocity.group+json",
@@ -89,7 +91,8 @@
     },
     {
       "name": "getUserGroup",
-      "description": "Create a new group by id",
+      "description": "Get user group",
+      "descriptionLong": "Get an existing user group",
       "method": "GET",
       "path": "/user/{tenant}/groups/{id}",
       "accept": "application/vnd.com.nsn.cumulocity.group+json",
@@ -134,7 +137,8 @@
     },
     {
       "name": "getUserGroupByName",
-      "description": "Get a group by name",
+      "description": "Get user group by name",
+      "descriptionLong": "Get an existing user group by name",
       "method": "GET",
       "path": "/user/{tenant}/groupByName/{name}",
       "accept": "application/vnd.com.nsn.cumulocity.group+json",
@@ -179,7 +183,8 @@
     },
     {
       "name": "deleteUserGroup",
-      "description": "Delete a user group",
+      "description": "Delete user group",
+      "descriptionLong": "Delete an existing user group",
       "method": "DELETE",
       "path": "/user/{tenant}/groups/{id}",
       "alias": {
@@ -228,7 +233,8 @@
     },
     {
       "name": "updateUserGroup",
-      "description": "Update a user group",
+      "description": "Update user group",
+      "descriptionLong": "Update an existing user group",
       "method": "PUT",
       "path": "/user/{tenant}/groups/{id}",
       "accept": "application/vnd.com.nsn.cumulocity.group+json",

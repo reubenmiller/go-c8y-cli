@@ -22,7 +22,7 @@ func NewGetAlarmCollectionCmd() *GetAlarmCollectionCmd {
 	ccmd := &GetAlarmCollectionCmd{}
 	cmd := &cobra.Command{
 		Use:   "list",
-		Short: "Get a collection of alarms based on filter parameters",
+		Short: "Get a collection of alarms",
 		Long:  `Get a collection of alarms based on filter parameters`,
 		Example: `
 $ c8y alarms list --severity MAJOR --pageSize 100

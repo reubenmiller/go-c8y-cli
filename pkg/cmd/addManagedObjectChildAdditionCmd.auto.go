@@ -21,7 +21,7 @@ func NewAddManagedObjectChildAdditionCmd() *AddManagedObjectChildAdditionCmd {
 	ccmd := &AddManagedObjectChildAdditionCmd{}
 	cmd := &cobra.Command{
 		Use:   "createChildAddition",
-		Short: "Add a managed object as a child addition to another existing managed object",
+		Short: "Add child addition",
 		Long:  `Add a managed object as a child addition to another existing managed object`,
 		Example: `
 $ c8y inventoryReferences createChildAddition --id 12345 --newChild 6789

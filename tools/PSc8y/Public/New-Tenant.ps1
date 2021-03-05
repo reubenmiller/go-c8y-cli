@@ -2,10 +2,10 @@
 Function New-Tenant {
 <#
 .SYNOPSIS
-New tenant
+Create tenant
 
 .DESCRIPTION
-New tenant
+Create a new tenant
 
 .LINK
 c8y tenants create

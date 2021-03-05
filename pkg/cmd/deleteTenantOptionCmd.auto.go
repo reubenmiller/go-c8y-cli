@@ -22,7 +22,7 @@ func NewDeleteTenantOptionCmd() *DeleteTenantOptionCmd {
 	cmd := &cobra.Command{
 		Use:   "delete",
 		Short: "Delete tenant option",
-		Long:  ``,
+		Long:  `Delete an existing tenant option`,
 		Example: `
 $ c8y tenantOptions delete --category "c8y_cli_tests" --key "option3"
 Get a tenant option

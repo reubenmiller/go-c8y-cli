@@ -22,8 +22,8 @@ func NewGetDataBrokerCmd() *GetDataBrokerCmd {
 	ccmd := &GetDataBrokerCmd{}
 	cmd := &cobra.Command{
 		Use:   "get",
-		Short: "Get data broker connector",
-		Long:  ``,
+		Short: "Get data broker",
+		Long:  `Get an existing data broker connector`,
 		Example: `
 $ c8y databroker get --id 12345
 Get a data broker connector

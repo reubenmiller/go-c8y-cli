@@ -21,7 +21,7 @@ func NewRegisterNewDeviceCmd() *RegisterNewDeviceCmd {
 	ccmd := &RegisterNewDeviceCmd{}
 	cmd := &cobra.Command{
 		Use:   "registerNewDevice",
-		Short: "Register a new device (request)",
+		Short: "Register device",
 		Long:  `Register a new device (request)`,
 		Example: `
 $ c8y devices registerNewDevice --id "ASDF098SD1J10912UD92JDLCNCU8"

@@ -2,10 +2,10 @@
 Function New-Alarm {
 <#
 .SYNOPSIS
-Create a new alarm
+Create an alarm
 
 .DESCRIPTION
-Create a new alarm on a device or agent.
+Create an alarm on a device or agent.
 
 .LINK
 c8y alarms create

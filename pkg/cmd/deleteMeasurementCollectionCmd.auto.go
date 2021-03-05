@@ -21,7 +21,7 @@ func NewDeleteMeasurementCollectionCmd() *DeleteMeasurementCollectionCmd {
 	ccmd := &DeleteMeasurementCollectionCmd{}
 	cmd := &cobra.Command{
 		Use:   "deleteCollection",
-		Short: "Delete a collection of measurements",
+		Short: "Delete measurement collection",
 		Long:  `Delete measurements using a filter`,
 		Example: `
 $ c8y measurements deleteCollection --device $Measurement.source.id

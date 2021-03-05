@@ -22,7 +22,7 @@ func NewGetMeasurementCollectionCmd() *GetMeasurementCollectionCmd {
 	ccmd := &GetMeasurementCollectionCmd{}
 	cmd := &cobra.Command{
 		Use:   "list",
-		Short: "Get a collection of measurements based on filter parameters",
+		Short: "Get measurement collection",
 		Long:  `Get a collection of measurements based on filter parameters`,
 		Example: `
 $ c8y measurements list

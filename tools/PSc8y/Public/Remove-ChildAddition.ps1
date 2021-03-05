@@ -2,10 +2,10 @@
 Function Remove-ChildAddition {
 <#
 .SYNOPSIS
-Delete child addition reference
+Unassign child addition
 
 .DESCRIPTION
-Unassign a child addition from an existing managed object
+Unassign/delete a child addition from an existing managed object
 
 .LINK
 c8y inventoryReferences unassignChildAddition

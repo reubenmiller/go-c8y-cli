@@ -2,10 +2,10 @@
 Function Update-Event {
 <#
 .SYNOPSIS
-Update an event
+Update event
 
 .DESCRIPTION
-Update an event
+Update an existing event
 
 .LINK
 c8y events update

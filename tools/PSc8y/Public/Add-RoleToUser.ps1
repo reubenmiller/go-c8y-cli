@@ -2,13 +2,13 @@
 Function Add-RoleToUser {
 <#
 .SYNOPSIS
-Add role to a user
+Add Role to user
 
 .DESCRIPTION
-Add role to a user
+Add a role to an existing user
 
 .LINK
-c8y userRoles addRoleTouser
+c8y userRoles addRoleToUser
 
 .EXAMPLE
 PS> Add-RoleToUser -User $User.id -Role "ROLE_ALARM_READ"
@@ -61,7 +61,7 @@ Add a role to a user using wildcards (using pipeline)
             Use-CallerPreference -Cmdlet $PSCmdlet -SessionState $ExecutionContext.SessionState
         }
 
-        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "userRoles addRoleTouser"
+        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "userRoles addRoleToUser"
         $ClientOptions = Get-ClientOutputOption $PSBoundParameters
         $TypeOptions = @{
             Type = "application/vnd.com.nsn.cumulocity.roleReference+json"
@@ -87,13 +87,13 @@ Add a role to a user using wildcards (using pipeline)
         if ($ClientOptions.ConvertToPS) {
             $Role `
             | Group-ClientRequests `
-            | c8y userRoles addRoleTouser $c8yargs `
+            | c8y userRoles addRoleToUser $c8yargs `
             | ConvertFrom-ClientOutput @TypeOptions
         }
         else {
             $Role `
             | Group-ClientRequests `
-            | c8y userRoles addRoleTouser $c8yargs
+            | c8y userRoles addRoleToUser $c8yargs
         }
         
     }

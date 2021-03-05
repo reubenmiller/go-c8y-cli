@@ -2,10 +2,10 @@
 Function Update-UserGroup {
 <#
 .SYNOPSIS
-Update a user group
+Update user group
 
 .DESCRIPTION
-Update a user group
+Update an existing user group
 
 .LINK
 c8y userGroups update

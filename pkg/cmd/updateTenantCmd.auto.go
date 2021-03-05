@@ -22,10 +22,10 @@ func NewUpdateTenantCmd() *UpdateTenantCmd {
 	cmd := &cobra.Command{
 		Use:   "update",
 		Short: "Update tenant",
-		Long:  ``,
+		Long:  `Update an existing tenant`,
 		Example: `
 $ c8y tenants update --id "mycompany" --contactName "John Smith"
-Update a tenant by name (from the mangement tenant)
+Update a tenant by name (from the management tenant)
         `,
 		PreRunE: validateUpdateMode,
 		RunE:    ccmd.RunE,

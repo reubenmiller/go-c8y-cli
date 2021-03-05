@@ -2,10 +2,10 @@
 Function Get-UserGroup {
 <#
 .SYNOPSIS
-Create a new group by id
+Get user group
 
 .DESCRIPTION
-Create a new group by id
+Get an existing user group
 
 .LINK
 c8y userGroups get

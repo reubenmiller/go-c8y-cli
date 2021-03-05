@@ -2,7 +2,7 @@
 Function Get-ApplicationReferenceCollection {
 <#
 .SYNOPSIS
-Get a collection of application references on a tenant
+Get application reference collection
 
 .DESCRIPTION
 Get a collection of application references on a tenant

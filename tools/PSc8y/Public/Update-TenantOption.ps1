@@ -5,7 +5,7 @@ Function Update-TenantOption {
 Update tenant option
 
 .DESCRIPTION
-Update tenant option
+Update an existing tenant option
 
 .LINK
 c8y tenantOptions update

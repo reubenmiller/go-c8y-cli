@@ -2,7 +2,7 @@
 Function Get-UserByName {
 <#
 .SYNOPSIS
-Get user by username
+Get user by name
 
 .DESCRIPTION
 Get the user details by referencing their username instead of id

@@ -9,7 +9,7 @@
     {
       "name": "getManagedObjectCollection",
       "method": "GET",
-      "description": "Get a collection of managedObjects based on filter parameters",
+      "description": "Get managed object collection",
       "descriptionLong": "Get a collection of managedObjects based on filter parameters",
       "path": "inventory/managedObjects",
       "accept": "application/vnd.com.nsn.cumulocity.managedObjectCollection+json",
@@ -79,7 +79,7 @@
         {
           "name": "skipChildrenNames",
           "type": "boolean",
-          "description": "Don't include the child devices names in the resonse. This can improve the api's response because the names don't need to be retrieved"
+          "description": "Don't include the child devices names in the response. This can improve the API response because the names don't need to be retrieved"
         }
       ]
     },
@@ -87,8 +87,8 @@
       "name": "queryManagedObjectCollection",
       "method": "GET",
       "skip": true,
-      "description": "Get a collection of managedObjects based on Cumulocity query language",
-      "descriptionLong": "Get a collection of managedObjects based on Cumulocity query language",
+      "description": "Find managed object collection",
+      "descriptionLong": "Get a collection of managedObjects based on the Cumulocity query language",
       "path": "inventory/managedObjects",
       "accept": "application/vnd.com.nsn.cumulocity.managedObjectCollection+json",
       "collectionType": "application/vnd.com.nsn.cumulocity.managedObject+json",
@@ -136,7 +136,7 @@
       "method": "POST",
       "path": "inventory/managedObjects",
       "accept": "application/vnd.com.nsn.cumulocity.inventory+json",
-      "description": "Create a new inventory",
+      "description": "Create managed object",
       "descriptionLong": "Create a new inventory managed object",
       "alias": {
         "go": "create",
@@ -185,8 +185,8 @@
     },
     {
       "name": "getManagedObject",
-      "description": "Get managed objects/s",
-      "descriptionLong": "Get a managed object by id",
+      "description": "Get managed objects",
+      "descriptionLong": "Get an existing managed object",
       "method": "GET",
       "path": "inventory/managedObjects/{id}",
       "accept": "application/vnd.com.nsn.cumulocity.inventory+json",
@@ -261,7 +261,7 @@
       "path": "inventory/managedObjects/{id}",
       "accept": "application/vnd.com.nsn.cumulocity.inventory+json",
       "description": "Update inventory",
-      "descriptionLong": "Update a managed object by id",
+      "descriptionLong": "Update an existing managed object",
       "alias": {
         "go": "update",
         "powershell": "Update-ManagedObject"
@@ -322,8 +322,8 @@
     },
     {
       "name": "deleteManagedObject",
-      "description": "Delete inventory/s",
-      "descriptionLong": "Delete a managed object by id",
+      "description": "Delete managed object",
+      "descriptionLong": "Delete an existing managed object",
       "method": "DELETE",
       "path": "inventory/managedObjects/{id}",
       "accept": "",

@@ -2,7 +2,7 @@
 Function Get-TenantOptionCollection {
 <#
 .SYNOPSIS
-Get collection of tenant options
+Get tenant option collection
 
 .DESCRIPTION
 Get collection of tenant options

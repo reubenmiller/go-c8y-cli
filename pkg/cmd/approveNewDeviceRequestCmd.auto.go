@@ -21,7 +21,7 @@ func NewApproveNewDeviceRequestCmd() *ApproveNewDeviceRequestCmd {
 	ccmd := &ApproveNewDeviceRequestCmd{}
 	cmd := &cobra.Command{
 		Use:   "approveDeviceRequest",
-		Short: "Approve a new device request",
+		Short: "Approve device request",
 		Long:  `Approve a new device request. Note: a device can only be approved if the platform has received a request for device credentials.`,
 		Example: `
 $ c8y devices approveDeviceRequest --id "1234010101s01ldk208"

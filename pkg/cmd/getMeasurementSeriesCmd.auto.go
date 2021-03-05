@@ -22,7 +22,7 @@ func NewGetMeasurementSeriesCmd() *GetMeasurementSeriesCmd {
 	ccmd := &GetMeasurementSeriesCmd{}
 	cmd := &cobra.Command{
 		Use:   "getSeries",
-		Short: "Get a collection of measurements based on filter parameters",
+		Short: "Get measurement series",
 		Long:  `Get a collection of measurements based on filter parameters`,
 		Example: `
 $ c8y measurements getSeries -source 12345 --series nx_WEA_29_Delta.MDL10FG001 --series nx_WEA_29_Delta.ST9 --dateFrom "-10min" --dateTo "0s"

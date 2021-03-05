@@ -22,8 +22,8 @@ func NewGetUsersInGroupCmd() *GetUsersInGroupCmd {
 	ccmd := &GetUsersInGroupCmd{}
 	cmd := &cobra.Command{
 		Use:   "listGroupMembership",
-		Short: "Get all users in a group",
-		Long:  ``,
+		Short: "Get users in group",
+		Long:  `Get all users in a user group`,
 		Example: `
 $ c8y userReferences listGroupMembership --group 1
 List the users within a user group

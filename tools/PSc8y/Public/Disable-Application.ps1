@@ -2,10 +2,10 @@
 Function Disable-Application {
 <#
 .SYNOPSIS
-Disable application on tenant
+Unsubscribe application
 
 .DESCRIPTION
-Disable application on tenant
+Disable/unsubscribe an application from a tenant
 
 .LINK
 c8y tenants disableApplication

@@ -21,8 +21,8 @@ func NewDeleteEventCmd() *DeleteEventCmd {
 	ccmd := &DeleteEventCmd{}
 	cmd := &cobra.Command{
 		Use:   "delete",
-		Short: "Delete event/s",
-		Long:  `Delete an event by id`,
+		Short: "Delete event",
+		Long:  `Delete an existing event`,
 		Example: `
 $ c8y events delete --id 12345
 Delete an event

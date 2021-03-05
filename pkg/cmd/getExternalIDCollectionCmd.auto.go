@@ -22,8 +22,8 @@ func NewGetExternalIDCollectionCmd() *GetExternalIDCollectionCmd {
 	ccmd := &GetExternalIDCollectionCmd{}
 	cmd := &cobra.Command{
 		Use:   "list",
-		Short: "Get a collection of external ids based on filter parameters",
-		Long:  `Get a collection of external ids based on filter parameters`,
+		Short: "Get external id collection",
+		Long:  `Get a collection of external ids related to an existing managed object`,
 		Example: `
 $ c8y identity list
 Get a list of external ids

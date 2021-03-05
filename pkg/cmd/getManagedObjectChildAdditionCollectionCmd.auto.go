@@ -22,7 +22,7 @@ func NewGetManagedObjectChildAdditionCollectionCmd() *GetManagedObjectChildAddit
 	ccmd := &GetManagedObjectChildAdditionCollectionCmd{}
 	cmd := &cobra.Command{
 		Use:   "listChildAdditions",
-		Short: "Get a collection of managedObjects child additions",
+		Short: "Get child addition collection",
 		Long:  `Get a collection of managedObjects child additions`,
 		Example: `
 $ c8y inventoryReferences listChildAdditions --id 12345

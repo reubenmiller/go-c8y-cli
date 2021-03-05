@@ -22,8 +22,8 @@ func NewGetTenantOptionCollectionCmd() *GetTenantOptionCollectionCmd {
 	ccmd := &GetTenantOptionCollectionCmd{}
 	cmd := &cobra.Command{
 		Use:   "list",
-		Short: "Get collection of tenant options",
-		Long:  ``,
+		Short: "Get tenant option collection",
+		Long:  `Get collection of tenant options`,
 		Example: `
 $ c8y tenantOptions list
 Get a list of tenant options

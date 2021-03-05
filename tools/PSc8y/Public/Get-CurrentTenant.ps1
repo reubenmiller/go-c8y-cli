@@ -5,7 +5,7 @@ Function Get-CurrentTenant {
 Get current tenant
 
 .DESCRIPTION
-Get current tenant
+Get the current tenant associated with the current session
 
 .LINK
 c8y tenants getCurrentTenant

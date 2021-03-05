@@ -22,8 +22,8 @@ func NewGetTenantOptionsForCategoryCmd() *GetTenantOptionsForCategoryCmd {
 	ccmd := &GetTenantOptionsForCategoryCmd{}
 	cmd := &cobra.Command{
 		Use:   "getForCategory",
-		Short: "Get tenant options for category",
-		Long:  ``,
+		Short: "Get tenant options by category",
+		Long:  `Get existing tenant options for a category`,
 		Example: `
 $ c8y tenantOptions getForCategory --category "c8y_cli_tests"
 Get a list of options for a category

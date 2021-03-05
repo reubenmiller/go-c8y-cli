@@ -22,8 +22,8 @@ func NewGetUserGroupCollectionCmd() *GetUserGroupCollectionCmd {
 	ccmd := &GetUserGroupCollectionCmd{}
 	cmd := &cobra.Command{
 		Use:   "list",
-		Short: "Get collection of (user) groups",
-		Long:  ``,
+		Short: "Get user group collection",
+		Long:  `Get collection of (user) groups`,
 		Example: `
 $ c8y userGroups list
 Get a list of user groups for the current tenant

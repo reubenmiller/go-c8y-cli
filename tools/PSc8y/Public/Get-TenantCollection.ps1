@@ -2,7 +2,7 @@
 Function Get-TenantCollection {
 <#
 .SYNOPSIS
-Get collection of tenants
+Get tenant collection
 
 .DESCRIPTION
 Get collection of tenants

@@ -2,10 +2,10 @@
 Function Remove-RoleFromGroup {
 <#
 .SYNOPSIS
-Unassign/Remove role from a group
+Unassign role from group
 
 .DESCRIPTION
-Unassign/Remove role from a group
+Unassign/delete role from a group
 
 .LINK
 c8y userRoles deleteRoleFromGroup

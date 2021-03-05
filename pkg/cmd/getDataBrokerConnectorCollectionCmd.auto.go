@@ -22,8 +22,8 @@ func NewGetDataBrokerConnectorCollectionCmd() *GetDataBrokerConnectorCollectionC
 	ccmd := &GetDataBrokerConnectorCollectionCmd{}
 	cmd := &cobra.Command{
 		Use:   "list",
-		Short: "Get collection of data broker connectors",
-		Long:  ``,
+		Short: "Get data broker collection",
+		Long:  `Get a collection of existing data broker connectors`,
 		Example: `
 $ c8y databroker list
 Get a list of data broker connectors

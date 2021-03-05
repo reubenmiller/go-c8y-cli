@@ -21,7 +21,7 @@ func NewNewMeasurementCmd() *NewMeasurementCmd {
 	ccmd := &NewMeasurementCmd{}
 	cmd := &cobra.Command{
 		Use:   "create",
-		Short: "Create a new measurement",
+		Short: "Create measurement",
 		Long:  `Create a new measurement`,
 		Example: `
 $ c8y measurements create --id 12345 --time "0s" --type "myType" --data "{\"c8y_Winding\":{ \"temperature\":{\"value\": 1.2345,\"unit\":\"°C\"}}}"

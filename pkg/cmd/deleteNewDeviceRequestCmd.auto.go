@@ -21,8 +21,8 @@ func NewDeleteNewDeviceRequestCmd() *DeleteNewDeviceRequestCmd {
 	ccmd := &DeleteNewDeviceRequestCmd{}
 	cmd := &cobra.Command{
 		Use:   "deleteNewDeviceRequest",
-		Short: "Delete a new device requests",
-		Long:  `Delete a new device requests`,
+		Short: "Delete device request",
+		Long:  `Delete an existing device registration request`,
 		Example: `
 $ c8y devices deleteNewDeviceRequest --id "91019192078"
 Delete a new device request

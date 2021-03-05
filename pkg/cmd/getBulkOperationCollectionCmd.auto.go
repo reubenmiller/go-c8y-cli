@@ -22,7 +22,7 @@ func NewGetBulkOperationCollectionCmd() *GetBulkOperationCollectionCmd {
 	ccmd := &GetBulkOperationCollectionCmd{}
 	cmd := &cobra.Command{
 		Use:   "list",
-		Short: "Get a collection of bulk operations",
+		Short: "Get bulk operation collection",
 		Long:  `Get a collection of bulk operations`,
 		Example: `
 $ c8y bulkOperations list

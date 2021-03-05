@@ -2,7 +2,7 @@
 Function New-Measurement {
 <#
 .SYNOPSIS
-Create a new measurement
+Create measurement
 
 .DESCRIPTION
 Create a new measurement

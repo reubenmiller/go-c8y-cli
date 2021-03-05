@@ -21,8 +21,8 @@ func NewNewUserCmd() *NewUserCmd {
 	ccmd := &NewUserCmd{}
 	cmd := &cobra.Command{
 		Use:   "create",
-		Short: "Create a new user within the collection",
-		Long:  `This command can be used to grant a new user to the tenant`,
+		Short: "Create user",
+		Long:  `Create a new user so that they can access the tenant`,
 		Example: `
 $ c8y users create --userName "testuser1" --password "a0)8k2kld9lm,!"
 Create a user

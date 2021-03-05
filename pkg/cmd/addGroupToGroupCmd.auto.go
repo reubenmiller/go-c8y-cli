@@ -21,7 +21,7 @@ func NewAddGroupToGroupCmd() *AddGroupToGroupCmd {
 	ccmd := &AddGroupToGroupCmd{}
 	cmd := &cobra.Command{
 		Use:   "assignGroupToGroup",
-		Short: "Add a device group to an existing group",
+		Short: "Assign child group",
 		Long:  `Assigns a group to a group. The group will be a childAsset of the group`,
 		Example: `
 $ c8y inventoryReferences assignGroupToGroup --group 12345 --newChildGroup 43234

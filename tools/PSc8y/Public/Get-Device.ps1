@@ -5,7 +5,7 @@ Function Get-Device {
 Get device
 
 .DESCRIPTION
-Get a device by name or id.
+Get an existing device
 
 .LINK
 c8y devices get

@@ -2,7 +2,7 @@
 Function Get-UserGroupCollection {
 <#
 .SYNOPSIS
-Get collection of (user) groups
+Get user group collection
 
 .DESCRIPTION
 Get collection of (user) groups

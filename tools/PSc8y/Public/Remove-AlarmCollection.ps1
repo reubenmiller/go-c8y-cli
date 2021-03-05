@@ -2,7 +2,7 @@
 Function Remove-AlarmCollection {
 <#
 .SYNOPSIS
-Delete a collection of alarms
+Delete alarm collection
 
 .DESCRIPTION
 Delete a collection of alarms by a given filter

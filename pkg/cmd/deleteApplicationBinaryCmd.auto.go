@@ -21,7 +21,7 @@ func NewDeleteApplicationBinaryCmd() *DeleteApplicationBinaryCmd {
 	ccmd := &DeleteApplicationBinaryCmd{}
 	cmd := &cobra.Command{
 		Use:   "deleteApplicationBinary",
-		Short: "Remove application binary",
+		Short: "Delete application binary",
 		Long: `Remove an application binaries related to the given application
 The active version can not be deleted and the server will throw an error if you try.
 `,

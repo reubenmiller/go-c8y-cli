@@ -21,8 +21,8 @@ func NewDisableApplicationFromTenantCmd() *DisableApplicationFromTenantCmd {
 	ccmd := &DisableApplicationFromTenantCmd{}
 	cmd := &cobra.Command{
 		Use:   "disableApplication",
-		Short: "Disable application on tenant",
-		Long:  ``,
+		Short: "Unsubscribe application",
+		Long:  `Disable/unsubscribe an application from a tenant`,
 		Example: `
 $ c8y tenants disableApplication --tenant "mycompany" --application "myMicroservice"
 Disable an application of a tenant by name

@@ -9,7 +9,7 @@
     {
       "name": "getOperationCollection",
       "method": "GET",
-      "description": "Get a collection of operations based on filter parameters",
+      "description": "Get operation collection",
       "descriptionLong": "Get a collection of operations based on filter parameters",
       "path": "devicecontrol/operations",
       "accept": "application/vnd.com.nsn.cumulocity.operationCollection+json",
@@ -69,7 +69,7 @@
           },
           {
             "description": "Get a list of pending operations for a given agent and all of its child devices",
-            "command": "c8y operations list --agent myagent --status PENDING"
+            "command": "c8y operations list --agent myAgent --status PENDING"
           },
           {
             "description": "Get a list of pending operations for a device",
@@ -122,8 +122,8 @@
     },
     {
       "name": "getOperation",
-      "description": "Get operation/s",
-      "descriptionLong": "Get an operation by id",
+      "description": "Get operation",
+      "descriptionLong": "Get an existing operation",
       "method": "GET",
       "examples": {
         "powershell": [
@@ -160,7 +160,7 @@
       "method": "POST",
       "path": "devicecontrol/operations",
       "accept": "application/vnd.com.nsn.cumulocity.operation+json",
-      "description": "Create a new operation",
+      "description": "Create operation",
       "descriptionLong": "Create a new operation for an agent or device",
       "examples": {
         "powershell": [
@@ -295,7 +295,7 @@
     },
     {
       "name": "deleteOperationCollection",
-      "description": "Delete a collection of operations",
+      "description": "Delete operation collection",
       "descriptionLong": "Delete a collection of operations using a set of filter criteria. Be careful when deleting operations. Where possible update operations to FAILED (with a failure reason) instead of deleting them as it is easier to track.\n",
       "examples": {
         "powershell": [

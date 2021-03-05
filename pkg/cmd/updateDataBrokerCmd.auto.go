@@ -21,8 +21,8 @@ func NewUpdateDataBrokerCmd() *UpdateDataBrokerCmd {
 	ccmd := &UpdateDataBrokerCmd{}
 	cmd := &cobra.Command{
 		Use:   "update",
-		Short: "Update data broker connector",
-		Long:  ``,
+		Short: "Update data broker",
+		Long:  `Update an existing data broker connector`,
 		Example: `
 $ c8y databroker update --id 12345 --status SUSPENDED
 Change the status of a specific data broker connector by given connector id

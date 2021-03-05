@@ -2,10 +2,10 @@
 Function Remove-Measurement {
 <#
 .SYNOPSIS
-Delete measurement/s
+Delete measurement
 
 .DESCRIPTION
-Delete individual measurements
+Delete an existing measurement
 
 .LINK
 c8y measurements delete

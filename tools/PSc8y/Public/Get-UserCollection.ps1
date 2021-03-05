@@ -2,7 +2,7 @@
 Function Get-UserCollection {
 <#
 .SYNOPSIS
-Get a collection of users based on filter parameters
+Get user collection
 
 .DESCRIPTION
 Get a collection of users based on filter parameters

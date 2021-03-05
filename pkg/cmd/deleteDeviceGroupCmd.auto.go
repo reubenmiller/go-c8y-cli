@@ -22,7 +22,7 @@ func NewDeleteDeviceGroupCmd() *DeleteDeviceGroupCmd {
 	cmd := &cobra.Command{
 		Use:   "deleteGroup",
 		Short: "Delete device group",
-		Long: `Delete an existing device group, and optional
+		Long: `Delete an existing device group, and optionally all of it's children
 `,
 		Example: `
 $ c8y devices deleteGroup --id 12345

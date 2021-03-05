@@ -2,10 +2,10 @@
 Function Get-DataBrokerConnectorCollection {
 <#
 .SYNOPSIS
-Get collection of data broker connectors
+Get data broker collection
 
 .DESCRIPTION
-Get collection of data broker connectors
+Get a collection of existing data broker connectors
 
 .LINK
 c8y databroker list

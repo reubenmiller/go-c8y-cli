@@ -35,8 +35,8 @@ func NewNewMicroserviceCmd() *newMicroserviceCmd {
 
 	cmd := &cobra.Command{
 		Use:   "create",
-		Short: "New microservice",
-		Long:  ``,
+		Short: "Create microservice",
+		Long:  `Create a new microservice or update the application binary of an existing microservice`,
 		Example: `
 $ c8y microservices create --file ./myapp.zip
 Create new microservice

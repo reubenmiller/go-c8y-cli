@@ -2,7 +2,7 @@
 Function Get-MeasurementSeries {
 <#
 .SYNOPSIS
-Get a collection of measurements based on filter parameters
+Get measurement series
 
 .DESCRIPTION
 Get a collection of measurements based on filter parameters

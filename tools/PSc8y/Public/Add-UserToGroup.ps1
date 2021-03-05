@@ -2,10 +2,10 @@
 Function Add-UserToGroup {
 <#
 .SYNOPSIS
-Get user
+Add user to group
 
 .DESCRIPTION
-Get user
+Add an existing user to a group
 
 .LINK
 c8y userReferences addUserToGroup

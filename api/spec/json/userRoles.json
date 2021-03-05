@@ -8,7 +8,8 @@
   "endpoints": [
     {
       "name": "getRoleCollection",
-      "description": "Get collection of user roles",
+      "description": "Get role collection",
+      "descriptionLong": "Get collection of user roles",
       "method": "GET",
       "path": "/user/roles",
       "accept": "application/vnd.com.nsn.cumulocity.roleCollection+json",
@@ -35,12 +36,13 @@
     },
     {
       "name": "addRoleToUser",
-      "description": "Add role to a user",
+      "description": "Add Role to user",
+      "descriptionLong": "Add a role to an existing user",
       "method": "POST",
       "path": "/user/{tenant}/users/{user}/roles",
       "accept": "application/vnd.com.nsn.cumulocity.roleReference+json",
       "alias": {
-        "go": "addRoleTouser",
+        "go": "addRoleToUser",
         "powershell": "Add-RoleToUser"
       },
       "examples": {
@@ -79,7 +81,7 @@
         "go": [
           {
             "description": "Add a role (ROLE_ALARM_READ) to a user",
-            "command": "c8y userRoles addRoleTouser --user \"myuser\" --role \"ROLE_ALARM_READ\""
+            "command": "c8y userRoles addRoleToUser --user \"myuser\" --role \"ROLE_ALARM_READ\""
           }
         ]
       },
@@ -113,7 +115,8 @@
     },
     {
       "name": "deleteRoleFromUser",
-      "description": "Unassign/Remove role from a user",
+      "description": "Unassign role from user",
+      "descriptionLong": "Unassign/delete role from a user",
       "method": "DELETE",
       "path": "/user/{tenant}/users/{user}/roles/{role}",
       "alias": {
@@ -165,8 +168,8 @@
     },
     {
       "name": "addRoleToGroup",
-      "description": "Add role to a group",
-      "descriptionLong": "Assign a role to a user group",
+      "description": "Add role to user group",
+      "descriptionLong": "Add a role to an existing user group",
       "method": "POST",
       "path": "/user/{tenant}/groups/{group}/roles",
       "accept": "application/vnd.com.nsn.cumulocity.roleReference+json",
@@ -237,7 +240,8 @@
     },
     {
       "name": "deleteRoleFromGroup",
-      "description": "Unassign/Remove role from a group",
+      "description": "Unassign role from group",
+      "descriptionLong": "Unassign/delete role from a group",
       "method": "DELETE",
       "path": "/user/{tenant}/groups/{group}/roles/{role}",
       "alias": {
@@ -289,7 +293,8 @@
     },
     {
       "name": "getRoleReferenceCollectionFromUser",
-      "description": "Get collection of user role references from a user",
+      "description": "Get role references from user",
+      "descriptionLong": "Get collection of user role references from a user",
       "method": "GET",
       "path": "/user/{tenant}/users/{user}/roles",
       "accept": "application/vnd.com.nsn.cumulocity.roleReferenceCollection+json",
@@ -338,7 +343,8 @@
     },
     {
       "name": "getRoleReferenceCollectionFromGroup",
-      "description": "Get collection of user role references from a group",
+      "description": "Get role references from user group",
+      "descriptionLong": "Get collection of user role references from a group",
       "method": "GET",
       "path": "/user/{tenant}/groups/{group}/roles",
       "accept": "application/vnd.com.nsn.cumulocity.roleReferenceCollection+json",

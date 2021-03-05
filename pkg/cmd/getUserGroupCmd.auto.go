@@ -22,8 +22,8 @@ func NewGetUserGroupCmd() *GetUserGroupCmd {
 	ccmd := &GetUserGroupCmd{}
 	cmd := &cobra.Command{
 		Use:   "get",
-		Short: "Create a new group by id",
-		Long:  ``,
+		Short: "Get user group",
+		Long:  `Get an existing user group`,
 		Example: `
 $ c8y userGroups get --id 12345
 Get a user group

@@ -9,7 +9,7 @@
     {
       "name": "getEventCollection",
       "method": "GET",
-      "description": "Get a collection of events based on filter parameters",
+      "description": "Get event collection",
       "descriptionLong": "Get a collection of events based on filter parameters",
       "examples": {
         "powershell": [
@@ -103,7 +103,7 @@
     },
     {
       "name": "deleteEventCollection",
-      "description": "Delete a collection of events",
+      "description": "Delete event collection",
       "descriptionLong": "Delete a collection of events by using a filter",
       "method": "DELETE",
       "path": "event/events",
@@ -171,8 +171,8 @@
     },
     {
       "name": "getEvent",
-      "description": "Get event/s",
-      "descriptionLong": "Get an event by id",
+      "description": "Get event",
+      "descriptionLong": "Get an existing event by id",
       "method": "GET",
       "path": "event/events/{id}",
       "accept": "application/vnd.com.nsn.cumulocity.event+json",
@@ -290,8 +290,8 @@
       "method": "PUT",
       "path": "event/events/{id}",
       "accept": "application/vnd.com.nsn.cumulocity.event+json",
-      "description": "Update an event",
-      "descriptionLong": "Update an event",
+      "description": "Update event",
+      "descriptionLong": "Update an existing event",
       "examples": {
         "powershell": [
           {
@@ -368,8 +368,8 @@
     },
     {
       "name": "deleteEvent",
-      "description": "Delete event/s",
-      "descriptionLong": "Delete an event by id",
+      "description": "Delete event",
+      "descriptionLong": "Delete an existing event",
       "examples": {
         "powershell": [
           {
@@ -449,7 +449,7 @@
     },
     {
       "name": "newEventBinary",
-      "description": "New event binary",
+      "description": "Create event binary",
       "descriptionLong": "Upload a new binary file to an event",
       "method": "POST",
       "path": "event/events/{id}/binaries",

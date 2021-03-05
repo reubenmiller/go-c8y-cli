@@ -2,7 +2,7 @@
 Function New-AuditRecord {
 <#
 .SYNOPSIS
-Create a new audit record
+Create audit record
 
 .DESCRIPTION
 Create a new audit record for a given action

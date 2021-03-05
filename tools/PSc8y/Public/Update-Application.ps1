@@ -2,10 +2,10 @@
 Function Update-Application {
 <#
 .SYNOPSIS
-Update application meta information
+Update application details
 
 .DESCRIPTION
-Update an application by its id
+Update details of an existing application
 
 .LINK
 c8y applications update

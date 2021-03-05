@@ -9,7 +9,7 @@
     {
       "name": "getAlarmCollection",
       "method": "GET",
-      "description": "Get a collection of alarms based on filter parameters",
+      "description": "Get a collection of alarms",
       "descriptionLong": "Get a collection of alarms based on filter parameters",
       "examples": {
         "powershell": [
@@ -130,8 +130,8 @@
       "method": "POST",
       "path": "alarm/alarms",
       "accept": "application/vnd.com.nsn.cumulocity.alarm+json",
-      "description": "Create a new alarm",
-      "descriptionLong": "Create a new alarm on a device or agent.",
+      "description": "Create an alarm",
+      "descriptionLong": "Create an alarm on a device or agent.",
       "examples": {
         "powershell": [
           {
@@ -233,8 +233,8 @@
       "name": "updateAlarmCollection",
       "method": "PUT",
       "path": "alarm/alarms",
-      "description": "Update a collection of alarms. Currently only the status of alarms can be changed",
-      "descriptionLong": "Update the status of a collection of alarms by using a filter",
+      "description": "Update alarm collection",
+      "descriptionLong": "Update the status of a collection of alarms by using a filter. Currently only the status of alarms can be changed",
       "examples": {
         "powershell": [
           {
@@ -340,7 +340,7 @@
     },
     {
       "name": "getAlarm",
-      "description": "Get alarm/s",
+      "description": "Get alarm",
       "descriptionLong": "Get an alarm by its id",
       "method": "GET",
       "path": "alarm/alarms/{id}",
@@ -378,7 +378,7 @@
       "method": "PUT",
       "path": "alarm/alarms/{id}",
       "accept": "application/vnd.com.nsn.cumulocity.alarm+json",
-      "description": "Update an alarm",
+      "description": "Update alarm",
       "descriptionLong": "Update an alarm by its id",
       "examples": {
         "powershell": [
@@ -479,7 +479,7 @@
     },
     {
       "name": "deleteAlarmCollection",
-      "description": "Delete a collection of alarms",
+      "description": "Delete alarm collection",
       "descriptionLong": "Delete a collection of alarms by a given filter",
       "examples": {
         "powershell": [

@@ -23,7 +23,7 @@ func NewGetTenantOptionCmd() *GetTenantOptionCmd {
 	cmd := &cobra.Command{
 		Use:   "get",
 		Short: "Get tenant option",
-		Long:  ``,
+		Long:  `Get an existing tenant option`,
 		Example: `
 $ c8y tenantOptions get --category "c8y_cli_tests" --key "option2"
 Get a tenant option

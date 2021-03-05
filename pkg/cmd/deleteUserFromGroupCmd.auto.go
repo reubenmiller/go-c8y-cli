@@ -21,8 +21,8 @@ func NewDeleteUserFromGroupCmd() *DeleteUserFromGroupCmd {
 	ccmd := &DeleteUserFromGroupCmd{}
 	cmd := &cobra.Command{
 		Use:   "deleteUserFromGroup",
-		Short: "Delete a user from a group",
-		Long:  ``,
+		Short: "Delete user from group",
+		Long:  `Delete an existing user from a user group`,
 		Example: `
 $ c8y userReferences deleteUserFromGroup --group 1 --user myuser
 List the users within a user group

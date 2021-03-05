@@ -5,7 +5,7 @@ Function Remove-DeviceGroup {
 Delete device group
 
 .DESCRIPTION
-Delete an existing device group, and optional
+Delete an existing device group, and optionally all of it's children
 
 
 .LINK

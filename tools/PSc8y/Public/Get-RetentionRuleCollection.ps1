@@ -2,7 +2,7 @@
 Function Get-RetentionRuleCollection {
 <#
 .SYNOPSIS
-Get collection of retention rules
+Get retention rule collection
 
 .DESCRIPTION
 Get a collection of retention rules configured in the current tenant

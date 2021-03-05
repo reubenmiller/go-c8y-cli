@@ -2,7 +2,7 @@
 Function Update-TenantOptionBulk {
 <#
 .SYNOPSIS
-Update multiple tenant options in provided category
+Update multiple tenant options
 
 .DESCRIPTION
 Update multiple tenant options in provided category

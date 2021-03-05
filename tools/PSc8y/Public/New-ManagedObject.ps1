@@ -2,7 +2,7 @@
 Function New-ManagedObject {
 <#
 .SYNOPSIS
-Create a new inventory
+Create managed object
 
 .DESCRIPTION
 Create a new inventory managed object

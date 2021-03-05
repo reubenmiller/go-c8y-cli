@@ -2,7 +2,7 @@
 Function Update-Binary {
 <#
 .SYNOPSIS
-Update inventory binary
+Update binary
 
 .DESCRIPTION
 Update an existing binary

@@ -2,10 +2,10 @@
 Function Remove-BulkOperation {
 <#
 .SYNOPSIS
-Remove bulk operation/s. Only bulk operations that are in ACTIVE or IN_PROGRESS can be deleted
+Delete bulk operation
 
 .DESCRIPTION
-Remove bulk operation/s. Only bulk operations that are in ACTIVE or IN_PROGRESS can be deleted
+Delete bulk operation/s. Only bulk operations that are in ACTIVE or IN_PROGRESS can be deleted
 
 .LINK
 c8y bulkOperations delete

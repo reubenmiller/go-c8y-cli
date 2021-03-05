@@ -21,7 +21,7 @@ func NewCreateDeviceCmd() *CreateDeviceCmd {
 	ccmd := &CreateDeviceCmd{}
 	cmd := &cobra.Command{
 		Use:   "create",
-		Short: "Create a device",
+		Short: "Create device",
 		Long: `Create a device (managed object) with the special c8y_IsDevice fragment.
 `,
 		Example: `

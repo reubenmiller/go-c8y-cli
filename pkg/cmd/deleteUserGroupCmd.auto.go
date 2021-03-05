@@ -21,8 +21,8 @@ func NewDeleteUserGroupCmd() *DeleteUserGroupCmd {
 	ccmd := &DeleteUserGroupCmd{}
 	cmd := &cobra.Command{
 		Use:   "delete",
-		Short: "Delete a user group",
-		Long:  ``,
+		Short: "Delete user group",
+		Long:  `Delete an existing user group`,
 		Example: `
 $ c8y userGroups delete --id 12345
 Delete a user group

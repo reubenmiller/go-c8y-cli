@@ -22,7 +22,7 @@ func NewGetManagedObjectCollectionCmd() *GetManagedObjectCollectionCmd {
 	ccmd := &GetManagedObjectCollectionCmd{}
 	cmd := &cobra.Command{
 		Use:   "list",
-		Short: "Get a collection of managedObjects based on filter parameters",
+		Short: "Get managed object collection",
 		Long:  `Get a collection of managedObjects based on filter parameters`,
 		Example: `
 $ c8y inventory list
@@ -42,7 +42,7 @@ Get a list of managed objects by ids
 	cmd.Flags().String("fragmentType", "", "ManagedObject fragment type.")
 	cmd.Flags().String("text", "", "managed objects containing a text value starting with the given text (placeholder {text}). Text value is any alphanumeric string starting with a latin letter (A-Z or a-z).")
 	cmd.Flags().Bool("withParents", false, "include a flat list of all parents and grandparents of the given object")
-	cmd.Flags().Bool("skipChildrenNames", false, "Don't include the child devices names in the resonse. This can improve the api's response because the names don't need to be retrieved")
+	cmd.Flags().Bool("skipChildrenNames", false, "Don't include the child devices names in the response. This can improve the API response because the names don't need to be retrieved")
 
 	completion.WithOptions(
 		cmd,

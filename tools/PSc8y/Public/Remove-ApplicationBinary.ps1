@@ -2,7 +2,7 @@
 Function Remove-ApplicationBinary {
 <#
 .SYNOPSIS
-Remove application binary
+Delete application binary
 
 .DESCRIPTION
 Remove an application binaries related to the given application

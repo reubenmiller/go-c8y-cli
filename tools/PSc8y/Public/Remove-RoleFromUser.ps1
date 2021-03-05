@@ -2,10 +2,10 @@
 Function Remove-RoleFromUser {
 <#
 .SYNOPSIS
-Unassign/Remove role from a user
+Unassign role from user
 
 .DESCRIPTION
-Unassign/Remove role from a user
+Unassign/delete role from a user
 
 .LINK
 c8y userRoles deleteRoleFromUser

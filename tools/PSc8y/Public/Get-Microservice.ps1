@@ -5,7 +5,7 @@ Function Get-Microservice {
 Get microservice
 
 .DESCRIPTION
-Get an existing microservice by id or name
+Get an existing microservice
 
 .LINK
 c8y microservices get

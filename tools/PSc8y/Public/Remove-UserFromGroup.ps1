@@ -2,10 +2,10 @@
 Function Remove-UserFromGroup {
 <#
 .SYNOPSIS
-Delete a user from a group
+Delete user from group
 
 .DESCRIPTION
-Delete a user from a group
+Delete an existing user from a user group
 
 .LINK
 c8y userReferences deleteUserFromGroup

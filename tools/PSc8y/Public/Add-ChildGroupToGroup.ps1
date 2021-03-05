@@ -2,7 +2,7 @@
 Function Add-ChildGroupToGroup {
 <#
 .SYNOPSIS
-Add a device group to an existing group
+Assign child group
 
 .DESCRIPTION
 Assigns a group to a group. The group will be a childAsset of the group

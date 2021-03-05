@@ -22,7 +22,7 @@ func NewGetAlarmCmd() *GetAlarmCmd {
 	ccmd := &GetAlarmCmd{}
 	cmd := &cobra.Command{
 		Use:   "get",
-		Short: "Get alarm/s",
+		Short: "Get alarm",
 		Long:  `Get an alarm by its id`,
 		Example: `
 $ c8y alarms get --id 12345

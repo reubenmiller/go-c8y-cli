@@ -2,7 +2,7 @@
 Function Reset-UserPassword {
 <#
 .SYNOPSIS
-Reset a user's password
+Reset user password
 
 .DESCRIPTION
 The password can be reset either by issuing a password reset email (default), or be specifying a new password.

@@ -21,7 +21,7 @@ func NewNewAuditCmd() *NewAuditCmd {
 	ccmd := &NewAuditCmd{}
 	cmd := &cobra.Command{
 		Use:   "create",
-		Short: "Create a new audit record",
+		Short: "Create audit record",
 		Long:  `Create a new audit record for a given action`,
 		Example: `
 $ c8y auditRecords create --type "ManagedObject" --time "0s" --text "Managed Object updated: my_Prop: value" --source $Device.id --activity "Managed Object updated" --severity "information"

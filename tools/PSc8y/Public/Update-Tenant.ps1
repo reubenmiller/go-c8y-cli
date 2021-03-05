@@ -5,7 +5,7 @@ Function Update-Tenant {
 Update tenant
 
 .DESCRIPTION
-Update tenant
+Update an existing tenant
 
 .LINK
 c8y tenants update
@@ -13,7 +13,7 @@ c8y tenants update
 .EXAMPLE
 PS> Update-Tenant -Id mycompany -ContactName "John Smith"
 
-Update a tenant by name (from the mangement tenant)
+Update a tenant by name (from the management tenant)
 
 
 #>

@@ -22,8 +22,8 @@ func NewGetEventCmd() *GetEventCmd {
 	ccmd := &GetEventCmd{}
 	cmd := &cobra.Command{
 		Use:   "get",
-		Short: "Get event/s",
-		Long:  `Get an event by id`,
+		Short: "Get event",
+		Long:  `Get an existing event by id`,
 		Example: `
 $ c8y events get --id 12345
 Get event

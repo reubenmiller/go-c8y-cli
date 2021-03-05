@@ -5,7 +5,7 @@ Function Update-ManagedObject {
 Update inventory
 
 .DESCRIPTION
-Update a managed object by id
+Update an existing managed object
 
 .LINK
 c8y inventory update

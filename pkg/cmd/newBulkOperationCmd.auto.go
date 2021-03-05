@@ -21,7 +21,7 @@ func NewNewBulkOperationCmd() *NewBulkOperationCmd {
 	ccmd := &NewBulkOperationCmd{}
 	cmd := &cobra.Command{
 		Use:   "create",
-		Short: "Create a new bulk operation",
+		Short: "Create bulk operation",
 		Long:  `Create a new bulk operation`,
 		Example: `
 $ c8y operations create --device mydevice --data "{c8y_Restart:{}}"

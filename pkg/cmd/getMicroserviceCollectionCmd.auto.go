@@ -22,7 +22,7 @@ func NewGetMicroserviceCollectionCmd() *GetMicroserviceCollectionCmd {
 	ccmd := &GetMicroserviceCollectionCmd{}
 	cmd := &cobra.Command{
 		Use:   "list",
-		Short: "Get collection of microservices",
+		Short: "Get microservice collection",
 		Long: `Get a collection of microservices in the current tenant
 `,
 		Example: `

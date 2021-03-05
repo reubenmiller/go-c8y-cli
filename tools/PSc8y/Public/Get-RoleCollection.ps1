@@ -2,7 +2,7 @@
 Function Get-RoleCollection {
 <#
 .SYNOPSIS
-Get collection of user roles
+Get role collection
 
 .DESCRIPTION
 Get collection of user roles

@@ -2,7 +2,7 @@
 Function New-BulkOperation {
 <#
 .SYNOPSIS
-Create a new bulk operation
+Create bulk operation
 
 .DESCRIPTION
 Create a new bulk operation

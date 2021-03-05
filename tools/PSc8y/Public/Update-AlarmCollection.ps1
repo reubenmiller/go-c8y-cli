@@ -2,10 +2,10 @@
 Function Update-AlarmCollection {
 <#
 .SYNOPSIS
-Update a collection of alarms. Currently only the status of alarms can be changed
+Update alarm collection
 
 .DESCRIPTION
-Update the status of a collection of alarms by using a filter
+Update the status of a collection of alarms by using a filter. Currently only the status of alarms can be changed
 
 .LINK
 c8y alarms updateCollection

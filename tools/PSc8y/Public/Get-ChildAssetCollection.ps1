@@ -2,7 +2,7 @@
 Function Get-ChildAssetCollection {
 <#
 .SYNOPSIS
-Get a collection of managedObjects child references
+Get child asset collection
 
 .DESCRIPTION
 Get a collection of managedObjects child references

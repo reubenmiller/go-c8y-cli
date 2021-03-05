@@ -22,7 +22,7 @@ func NewUpdateTenantOptionCmd() *UpdateTenantOptionCmd {
 	cmd := &cobra.Command{
 		Use:   "update",
 		Short: "Update tenant option",
-		Long:  ``,
+		Long:  `Update an existing tenant option`,
 		Example: `
 $ c8y tenantOptions update --category "c8y_cli_tests" --key "option4" --value "0"
 Update a tenant option

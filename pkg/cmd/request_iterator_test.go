@@ -23,12 +23,12 @@ func Test_RequestIteratorWithBodyIterator(t *testing.T) {
 	var req *c8y.RequestOptions
 	var err error
 
-	req, err = requestIter.GetNext()
+	req, _, err = requestIter.GetNext()
 	assert.OK(t, err)
 	assert.True(t, req.Path == "root/subpath")
 	assert.EqualMarshalJSON(t, req.Body, `{"nested":{"value":"1"}}`)
 
-	req, err = requestIter.GetNext()
+	req, _, err = requestIter.GetNext()
 	assert.OK(t, err)
 	assert.True(t, req.Path == "root/subpath")
 	assert.EqualMarshalJSON(t, req.Body, `{"nested":{"value":"2"}}`)

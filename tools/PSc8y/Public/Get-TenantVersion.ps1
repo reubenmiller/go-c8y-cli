@@ -2,7 +2,7 @@
 Function Get-TenantVersion {
 <#
 .SYNOPSIS
-Get tenant platform (backend) version
+Get tenant version
 
 .DESCRIPTION
 Get tenant platform (backend) version

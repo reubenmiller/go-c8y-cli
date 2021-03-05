@@ -22,8 +22,8 @@ func NewGetTenantUsageStatisticsCollectionCmd() *GetTenantUsageStatisticsCollect
 	ccmd := &GetTenantUsageStatisticsCollectionCmd{}
 	cmd := &cobra.Command{
 		Use:   "list",
-		Short: "Get collection of tenant usage statistics",
-		Long:  ``,
+		Short: "Get tenant usage statistics",
+		Long:  `Get collection of tenant usage statistics`,
 		Example: `
 $ c8y tenantStatistics list
 Get tenant statistics collection

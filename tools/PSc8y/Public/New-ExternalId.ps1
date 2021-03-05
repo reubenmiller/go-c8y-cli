@@ -2,10 +2,10 @@
 Function New-ExternalId {
 <#
 .SYNOPSIS
-Create a new external id
+Create external id
 
 .DESCRIPTION
-Create a new external id
+Create a new external id for an existing managed object
 
 .LINK
 c8y identity create

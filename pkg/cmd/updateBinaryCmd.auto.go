@@ -21,7 +21,7 @@ func NewUpdateBinaryCmd() *UpdateBinaryCmd {
 	ccmd := &UpdateBinaryCmd{}
 	cmd := &cobra.Command{
 		Use:   "update",
-		Short: "Update inventory binary",
+		Short: "Update binary",
 		Long: `Update an existing binary
 `,
 		Example: `

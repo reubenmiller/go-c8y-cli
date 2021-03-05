@@ -8,7 +8,8 @@
   "endpoints": [
     {
       "name": "addUserToGroup",
-      "description": "Get user",
+      "description": "Add user to group",
+      "descriptionLong": "Add an existing user to a group",
       "method": "POST",
       "path": "/user/{tenant}/groups/{group}/users",
       "accept": "application/vnd.com.nsn.cumulocity.userReference+json",
@@ -68,7 +69,8 @@
     },
     {
       "name": "deleteUserFromGroup",
-      "description": "Delete a user from a group",
+      "description": "Delete user from group",
+      "descriptionLong": "Delete an existing user from a user group",
       "method": "DELETE",
       "path": "/user/{tenant}/groups/{group}/users/{user}",
       "accept": "",
@@ -122,7 +124,8 @@
     },
     {
       "name": "getUsersInGroup",
-      "description": "Get all users in a group",
+      "description": "Get users in group",
+      "descriptionLong": "Get all users in a user group",
       "method": "GET",
       "path": "/user/{tenant}/groups/{id}/users",
       "accept": "application/vnd.com.nsn.cumulocity.userReferenceCollection+json",

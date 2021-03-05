@@ -2,10 +2,10 @@
 Function Get-ExternalIdCollection {
 <#
 .SYNOPSIS
-Get a collection of external ids based on filter parameters
+Get external id collection
 
 .DESCRIPTION
-Get a collection of external ids based on filter parameters
+Get a collection of external ids related to an existing managed object
 
 .LINK
 c8y identity list

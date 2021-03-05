@@ -2,10 +2,10 @@
 Function Get-ManagedObject {
 <#
 .SYNOPSIS
-Get managed objects/s
+Get managed objects
 
 .DESCRIPTION
-Get a managed object by id
+Get an existing managed object
 
 .LINK
 c8y inventory get

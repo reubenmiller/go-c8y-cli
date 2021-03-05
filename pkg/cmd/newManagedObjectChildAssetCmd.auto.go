@@ -21,11 +21,11 @@ func NewNewManagedObjectChildAssetCmd() *NewManagedObjectChildAssetCmd {
 	ccmd := &NewManagedObjectChildAssetCmd{}
 	cmd := &cobra.Command{
 		Use:   "createChildAsset",
-		Short: "Add a group or device as an asset to an existing group",
+		Short: "Assign child asset",
 		Long:  `Assigns a group or device to an existing group and marks them as assets`,
 		Example: `
 $ c8y inventoryReferences createChildAsset --group 12345 --newChildGroup 43234
-Create group heirachy (parent group -> child group)
+Create group hierarchy (parent group -> child group)
         `,
 		PreRunE: validateCreateMode,
 		RunE:    ccmd.RunE,

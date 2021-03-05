@@ -49,13 +49,13 @@
           {
             "description": "Update custom properties of the current application (requires using application credentials)",
             "skipTest": true,
-            "command": "Update-CurrentApplication -Data @{ mycustomProp = @{ value1 = 1}}"
+            "command": "Update-CurrentApplication -Data @{ myCustomProp = @{ value1 = 1}}"
           }
         ],
         "go": [
           {
             "description": "Update custom properties of the current application (requires using application credentials)",
-            "command": "c8y currentApplication update --data \"mycustomProp=1\""
+            "command": "c8y currentApplication update --data \"myCustomProp=1\""
           }
         ]
       },
@@ -122,7 +122,7 @@
     {
       "name": "getCurrentApplicationUserCollection",
       "description": "Get current application subscriptions",
-      "descriptionLong": "Required authentication with bootstrap user",
+      "descriptionLong": "Requires authentication with the application bootstrap user",
       "method": "GET",
       "path": "/application/currentApplication/subscriptions",
       "accept": "application/vnd.com.nsn.cumulocity.applicationUserCollection+json",

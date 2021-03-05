@@ -31,8 +31,8 @@ func NewNewHostedApplicationCmd() *newHostedApplicationCmd {
 
 	cmd := &cobra.Command{
 		Use:   "createHostedApplication",
-		Short: "New Hosted (web) Application",
-		Long:  ``,
+		Short: "Create hosted application",
+		Long:  `Create a new hosted web application or update the binary of an existing hosted application`,
 		Example: `
 $ c8y applications createHostedApplication --file ./myapp.zip
 

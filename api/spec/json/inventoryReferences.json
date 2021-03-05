@@ -9,7 +9,7 @@
     {
       "name": "getManagedObjectChildDeviceCollection",
       "method": "GET",
-      "description": "Get a collection of managedObjects child references",
+      "description": "Get child device collection",
       "descriptionLong": "Get a collection of managedObjects child references",
       "path": "inventory/managedObjects/{device}/childDevices",
       "accept": "application/vnd.com.nsn.cumulocity.managedObjectReferenceCollection+json",
@@ -68,7 +68,7 @@
     {
       "name": "getManagedObjectChildAssetCollection",
       "method": "GET",
-      "description": "Get a collection of managedObjects child references",
+      "description": "Get child asset collection",
       "descriptionLong": "Get a collection of managedObjects child references",
       "path": "inventory/managedObjects/{id}/childAssets",
       "accept": "application/vnd.com.nsn.cumulocity.managedObjectReferenceCollection+json",
@@ -136,7 +136,7 @@
       "path": "inventory/managedObjects/{device}/childDevices",
       "accept": "application/vnd.com.nsn.cumulocity.managedObjectReference+json",
       "collectionType": "application/vnd.com.nsn.cumulocity.managedObject+json",
-      "description": "Create a child device reference",
+      "description": "Assign child device",
       "descriptionLong": "Create a child device reference",
       "collectionProperty": "managedObject",
       "alias": {
@@ -202,7 +202,7 @@
       "path": "inventory/managedObjects/{id}/childAssets",
       "accept": "application/vnd.com.nsn.cumulocity.managedObjectReference+json",
       "collectionType": "application/vnd.com.nsn.cumulocity.managedObject+json",
-      "description": "Add a device to an existing group",
+      "description": "Assign device to group",
       "descriptionLong": "Assigns a device to a group. The device will be a childAsset of the group",
       "collectionProperty": "managedObject",
       "alias": {
@@ -287,7 +287,7 @@
       "path": "inventory/managedObjects/{id}/childAssets",
       "accept": "application/vnd.com.nsn.cumulocity.managedObjectReference+json",
       "collectionType": "application/vnd.com.nsn.cumulocity.managedObject+json",
-      "description": "Add a device group to an existing group",
+      "description": "Assign child group",
       "descriptionLong": "Assigns a group to a group. The group will be a childAsset of the group",
       "collectionProperty": "managedObject",
       "alias": {
@@ -360,7 +360,7 @@
       "path": "inventory/managedObjects/{id}/childAssets",
       "accept": "application/vnd.com.nsn.cumulocity.managedObjectReference+json",
       "collectionType": "application/vnd.com.nsn.cumulocity.managedObject+json",
-      "description": "Add a group or device as an asset to an existing group",
+      "description": "Assign child asset",
       "descriptionLong": "Assigns a group or device to an existing group and marks them as assets",
       "collectionProperty": "managedObject",
       "alias": {
@@ -370,7 +370,7 @@
       "examples": {
         "powershell": [
           {
-            "description": "Create group heirachy (parent group -> child group)",
+            "description": "Create group hierarchy (parent group -> child group)",
             "beforeEach": [
               "$Group1 = PSc8y\\New-TestDeviceGroup",
               "$Group2 = PSc8y\\New-TestDeviceGroup"
@@ -384,7 +384,7 @@
         ],
         "go": [
           {
-            "description": "Create group heirachy (parent group -> child group)",
+            "description": "Create group hierarchy (parent group -> child group)",
             "command": "c8y inventoryReferences createChildAsset --group 12345 --newChildGroup 43234"
           }
         ]
@@ -421,7 +421,8 @@
     },
     {
       "name": "getManagedObjectChildDeviceReference",
-      "description": "Get managed object child device reference",
+      "description": "Get child device reference",
+      "descriptionLong": "Get managed object child device reference",
       "method": "GET",
       "path": "inventory/managedObjects/{device}/childDevices/{reference}",
       "accept": "application/vnd.com.nsn.cumulocity.managedObjectReference+json",
@@ -470,7 +471,8 @@
     },
     {
       "name": "getManagedObjectChildAssetReference",
-      "description": "Get managed object child asset reference",
+      "description": "Get child asset reference",
+      "descriptionLong": "Get managed object child asset reference",
       "method": "GET",
       "path": "inventory/managedObjects/{asset}/childAssets/{reference}",
       "accept": "application/vnd.com.nsn.cumulocity.managedObjectReference+json",
@@ -520,6 +522,7 @@
     {
       "name": "deleteManagedObjectChildDeviceReference",
       "description": "Delete child device reference",
+      "descriptionLong": "Delete child device reference",
       "method": "DELETE",
       "path": "inventory/managedObjects/{device}/childDevices/{childDevice}",
       "accept": "",
@@ -569,6 +572,7 @@
     {
       "name": "deleteManagedObjectChildAssetReference",
       "description": "Delete child asset reference",
+      "descriptionLong": "Delete child asset reference",
       "method": "DELETE",
       "path": "inventory/managedObjects/{group}/childAssets/{reference}",
       "accept": "",
@@ -625,8 +629,8 @@
     },
     {
       "name": "deleteDeviceFromGroup",
-      "description": "Delete child asset reference",
-      "descriptionLong": "Unassign a device from a group",
+      "description": "Unassign device from group",
+      "descriptionLong": "Unassign/delete a device from a group",
       "method": "DELETE",
       "path": "inventory/managedObjects/{group}/childAssets/{reference}",
       "accept": "",
@@ -677,8 +681,8 @@
     },
     {
       "name": "deleteAssetFromGroup",
-      "description": "Delete child asset reference",
-      "descriptionLong": "Unassign an asset (device or group) from a group",
+      "description": "Unassign asset from group",
+      "descriptionLong": "Unassign/delete an asset (device or group) from a group",
       "method": "DELETE",
       "path": "inventory/managedObjects/{group}/childAssets/{reference}",
       "accept": "",
@@ -736,7 +740,7 @@
     {
       "name": "getManagedObjectChildAdditionCollection",
       "method": "GET",
-      "description": "Get a collection of managedObjects child additions",
+      "description": "Get child addition collection",
       "descriptionLong": "Get a collection of managedObjects child additions",
       "path": "inventory/managedObjects/{id}/childAdditions",
       "accept": "application/vnd.com.nsn.cumulocity.managedObjectReferenceCollection+json",
@@ -798,7 +802,7 @@
       "path": "inventory/managedObjects/{id}/childAdditions",
       "accept": "application/vnd.com.nsn.cumulocity.managedObjectReference+json",
       "collectionType": "application/vnd.com.nsn.cumulocity.managedObject+json",
-      "description": "Add a managed object as a child addition to another existing managed object",
+      "description": "Add child addition",
       "descriptionLong": "Add a managed object as a child addition to another existing managed object",
       "collectionProperty": "managedObject",
       "alias": {
@@ -851,8 +855,8 @@
     },
     {
       "name": "deleteChildAddition",
-      "description": "Delete child addition reference",
-      "descriptionLong": "Unassign a child addition from an existing managed object",
+      "description": "Unassign child addition",
+      "descriptionLong": "Unassign/delete a child addition from an existing managed object",
       "method": "DELETE",
       "path": "inventory/managedObjects/{id}/childAdditions/{childId}",
       "accept": "",

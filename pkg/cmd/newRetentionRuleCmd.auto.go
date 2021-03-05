@@ -21,7 +21,7 @@ func NewNewRetentionRuleCmd() *NewRetentionRuleCmd {
 	ccmd := &NewRetentionRuleCmd{}
 	cmd := &cobra.Command{
 		Use:   "create",
-		Short: "New retention rule",
+		Short: "Create retention rule",
 		Long: `Create a new retention rule to managed when data is deleted in the tenant
 `,
 		Example: `

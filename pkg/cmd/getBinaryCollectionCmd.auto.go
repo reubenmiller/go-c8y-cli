@@ -22,8 +22,8 @@ func NewGetBinaryCollectionCmd() *GetBinaryCollectionCmd {
 	ccmd := &GetBinaryCollectionCmd{}
 	cmd := &cobra.Command{
 		Use:   "list",
-		Short: "Get collection of inventory binaries",
-		Long: `Get a list of inventory binaries. The results include the meta information about binary and not the binary itself.
+		Short: "Get binary collection",
+		Long: `Get a collection of inventory binaries. The results include the meta information about binary and not the binary itself.
 `,
 		Example: `
 $ c8y binaries list --pageSize 100

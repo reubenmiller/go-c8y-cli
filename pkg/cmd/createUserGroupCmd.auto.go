@@ -21,8 +21,8 @@ func NewCreateUserGroupCmd() *CreateUserGroupCmd {
 	ccmd := &CreateUserGroupCmd{}
 	cmd := &cobra.Command{
 		Use:   "create",
-		Short: "Create a new group",
-		Long:  ``,
+		Short: "Create user group",
+		Long:  `Create a new user group`,
 		Example: `
 $ c8y userGroups create --name customGroup1
 Create a user group

@@ -2,10 +2,10 @@
 Function Add-RoleToGroup {
 <#
 .SYNOPSIS
-Add role to a group
+Add role to user group
 
 .DESCRIPTION
-Assign a role to a user group
+Add a role to an existing user group
 
 .LINK
 c8y userRoles addRoleToGroup

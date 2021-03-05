@@ -2,7 +2,7 @@
 Function Update-CurrentUser {
 <#
 .SYNOPSIS
-Update the current user
+Update current user
 
 .DESCRIPTION
 Update properties or settings of your user such as first/last name, email or password
@@ -14,7 +14,7 @@ c8y users updateCurrentUser
 .EXAMPLE
 PS> Update-CurrentUser -LastName "Smith"
 
-Update the current user's lastname
+Update the current user's last name
 
 
 #>

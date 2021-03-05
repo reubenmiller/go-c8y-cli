@@ -21,12 +21,12 @@ func NewUpdateUserCurrentCmd() *UpdateUserCurrentCmd {
 	ccmd := &UpdateUserCurrentCmd{}
 	cmd := &cobra.Command{
 		Use:   "updateCurrentUser",
-		Short: "Update the current user",
+		Short: "Update current user",
 		Long: `Update properties or settings of your user such as first/last name, email or password
 `,
 		Example: `
 $ c8y users updateCurrentUser --lastName "Smith"
-Update the current user's lastname
+Update the current user's last name
         `,
 		PreRunE: validateUpdateMode,
 		RunE:    ccmd.RunE,

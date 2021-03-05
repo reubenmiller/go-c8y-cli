@@ -22,8 +22,8 @@ func NewGetCurrentUserInventoryRoleCmd() *GetCurrentUserInventoryRoleCmd {
 	ccmd := &GetCurrentUserInventoryRoleCmd{}
 	cmd := &cobra.Command{
 		Use:   "getCurrentUserInventoryRole",
-		Short: "Get a specific inventory role of the current user",
-		Long:  ``,
+		Short: "Get current user inventory role",
+		Long:  `Get a specific inventory role of the current user`,
 		Example: `
 $ c8y users getCurrentUserInventoryRole --id 12345
 Get an inventory role of the current user

@@ -22,7 +22,7 @@ func NewGetSupportedOperationsCmd() *GetSupportedOperationsCmd {
 	ccmd := &GetSupportedOperationsCmd{}
 	cmd := &cobra.Command{
 		Use:   "getSupportedOperations",
-		Short: "Get supported operations of a device",
+		Short: "Get supported operations",
 		Long: `Returns a list of supported operations (fragments) for a device. The supported fragments list is returned from the c8y_SupportedOperations fragment of the device managed object.
 `,
 		Example: `

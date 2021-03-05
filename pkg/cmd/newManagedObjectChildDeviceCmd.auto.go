@@ -21,7 +21,7 @@ func NewNewManagedObjectChildDeviceCmd() *NewManagedObjectChildDeviceCmd {
 	ccmd := &NewManagedObjectChildDeviceCmd{}
 	cmd := &cobra.Command{
 		Use:   "assignChildDevice",
-		Short: "Create a child device reference",
+		Short: "Assign child device",
 		Long:  `Create a child device reference`,
 		Example: `
 $ c8y inventoryReferences assignChildDevice --device 12345 --newChild 44235

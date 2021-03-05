@@ -2,10 +2,10 @@
 Function Get-Operation {
 <#
 .SYNOPSIS
-Get operation/s
+Get operation
 
 .DESCRIPTION
-Get an operation by id
+Get an existing operation
 
 .LINK
 c8y operations get

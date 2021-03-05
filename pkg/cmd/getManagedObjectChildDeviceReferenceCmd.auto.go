@@ -22,8 +22,8 @@ func NewGetManagedObjectChildDeviceReferenceCmd() *GetManagedObjectChildDeviceRe
 	ccmd := &GetManagedObjectChildDeviceReferenceCmd{}
 	cmd := &cobra.Command{
 		Use:   "getChildDevice",
-		Short: "Get managed object child device reference",
-		Long:  ``,
+		Short: "Get child device reference",
+		Long:  `Get managed object child device reference`,
 		Example: `
 $ c8y inventoryReferences getChildDevice --device 12345 --reference 12345
 Get an existing child device reference

@@ -21,8 +21,8 @@ func NewDeleteRoleFromUserCmd() *DeleteRoleFromUserCmd {
 	ccmd := &DeleteRoleFromUserCmd{}
 	cmd := &cobra.Command{
 		Use:   "deleteRoleFromUser",
-		Short: "Unassign/Remove role from a user",
-		Long:  ``,
+		Short: "Unassign role from user",
+		Long:  `Unassign/delete role from a user`,
 		Example: `
 $ c8y userRoles deleteRoleFromUser --user "myuser" --role "ROLE_MEASUREMENT_READ"
 Remove a role from the given user

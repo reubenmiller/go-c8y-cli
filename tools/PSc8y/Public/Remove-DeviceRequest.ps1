@@ -2,10 +2,10 @@
 Function Remove-DeviceRequest {
 <#
 .SYNOPSIS
-Delete a new device requests
+Delete device request
 
 .DESCRIPTION
-Delete a new device requests
+Delete an existing device registration request
 
 .LINK
 c8y deviceCredentials deleteNewDeviceRequest

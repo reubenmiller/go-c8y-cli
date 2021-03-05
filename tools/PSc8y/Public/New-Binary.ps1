@@ -2,10 +2,10 @@
 Function New-Binary {
 <#
 .SYNOPSIS
-New inventory binary
+Create binary
 
 .DESCRIPTION
-Upload a new binary to Cumulocity
+Create/upload a new binary to Cumulocity
 
 .LINK
 c8y binaries create

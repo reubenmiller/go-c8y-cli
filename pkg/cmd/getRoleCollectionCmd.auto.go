@@ -22,8 +22,8 @@ func NewGetRoleCollectionCmd() *GetRoleCollectionCmd {
 	ccmd := &GetRoleCollectionCmd{}
 	cmd := &cobra.Command{
 		Use:   "list",
-		Short: "Get collection of user roles",
-		Long:  ``,
+		Short: "Get role collection",
+		Long:  `Get collection of user roles`,
 		Example: `
 $ c8y userRoles list --pageSize 100
 Get a list of roles

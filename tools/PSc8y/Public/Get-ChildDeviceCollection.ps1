@@ -2,7 +2,7 @@
 Function Get-ChildDeviceCollection {
 <#
 .SYNOPSIS
-Get a collection of managedObjects child references
+Get child device collection
 
 .DESCRIPTION
 Get a collection of managedObjects child references

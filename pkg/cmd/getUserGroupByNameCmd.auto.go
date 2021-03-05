@@ -22,8 +22,8 @@ func NewGetUserGroupByNameCmd() *GetUserGroupByNameCmd {
 	ccmd := &GetUserGroupByNameCmd{}
 	cmd := &cobra.Command{
 		Use:   "getByName",
-		Short: "Get a group by name",
-		Long:  ``,
+		Short: "Get user group by name",
+		Long:  `Get an existing user group by name`,
 		Example: `
 $ c8y userGroups getByName --name customGroup1
 Get user group by its name

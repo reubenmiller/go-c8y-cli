@@ -23,7 +23,7 @@ func NewGetDeviceGroupCmd() *GetDeviceGroupCmd {
 	cmd := &cobra.Command{
 		Use:   "getGroup",
 		Short: "Get device group",
-		Long: `Get a device group by id or name
+		Long: `Get a device group
 `,
 		Example: `
 $ c8y devices getGroup --id 12345

@@ -2,7 +2,7 @@
 Function Add-ChildAddition {
 <#
 .SYNOPSIS
-Add a managed object as a child addition to another existing managed object
+Add child addition
 
 .DESCRIPTION
 Add a managed object as a child addition to another existing managed object

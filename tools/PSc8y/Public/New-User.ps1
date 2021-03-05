@@ -2,10 +2,10 @@
 Function New-User {
 <#
 .SYNOPSIS
-Create a new user within the collection
+Create user
 
 .DESCRIPTION
-This command can be used to grant a new user to the tenant
+Create a new user so that they can access the tenant
 
 .LINK
 c8y users create

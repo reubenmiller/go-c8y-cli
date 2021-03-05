@@ -21,8 +21,8 @@ func NewEnableApplicationOnTenantCmd() *EnableApplicationOnTenantCmd {
 	ccmd := &EnableApplicationOnTenantCmd{}
 	cmd := &cobra.Command{
 		Use:   "enableApplication",
-		Short: "Enable application on tenant",
-		Long:  ``,
+		Short: "Subscribe application",
+		Long:  `Enable/subscribe an application to a tenant`,
 		Example: `
 $ c8y tenants enableApplication --tenant "mycompany" --application "myMicroservice"
 Enable an application of a tenant by name

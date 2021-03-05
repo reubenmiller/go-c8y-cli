@@ -21,7 +21,7 @@ func NewDisableMicroserviceCmd() *DisableMicroserviceCmd {
 	ccmd := &DisableMicroserviceCmd{}
 	cmd := &cobra.Command{
 		Use:   "disable",
-		Short: "Disable (unsubscribe) a microservice",
+		Short: "unsubscribe microservice",
 		Long: `Disable (unsubscribe) a microservice from the current tenant
 `,
 		Example: `

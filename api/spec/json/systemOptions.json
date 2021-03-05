@@ -8,8 +8,8 @@
   "endpoints": [
     {
       "name": "getSystemOptionCollection",
-      "description": "Get collection of system options",
-      "descriptionLong": "This endpoint provides a set of read-only properties pre-defined in platform configuration. The response format is exactly the same as for OptionCollection.",
+      "description": "Get system option collection",
+      "descriptionLong": "Get a collection of system options. This endpoint provides a set of read-only properties pre-defined in platform configuration. The response format is exactly the same as for OptionCollection.",
       "method": "GET",
       "path": "/tenant/system/options",
       "accept": "application/vnd.com.nsn.cumulocity.optionCollection+json",

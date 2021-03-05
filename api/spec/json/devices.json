@@ -9,7 +9,7 @@
     {
       "name": "getDevice",
       "description": "Get device",
-      "descriptionLong": "Get a device by name or id.",
+      "descriptionLong": "Get an existing device",
       "method": "GET",
       "path": "inventory/managedObjects/{id}",
       "accept": "application/vnd.com.nsn.cumulocity.customDevice+json",
@@ -188,7 +188,7 @@
     },
     {
       "name": "createDevice",
-      "description": "Create a device",
+      "description": "Create device",
       "descriptionLong": "Create a device (managed object) with the special c8y_IsDevice fragment.\n",
       "method": "POST",
       "path": "inventory/managedObjects",
@@ -271,7 +271,7 @@
     },
     {
       "name": "getSupportedMeasurements",
-      "description": "Get supported measurements/s of a device",
+      "description": "Get supported measurements",
       "descriptionLong": "Returns a list of fragments (valueFragmentTypes) related to the device\n",
       "method": "GET",
       "path": "inventory/managedObjects/{device}/supportedMeasurements",
@@ -325,8 +325,8 @@
     },
     {
       "name": "getSupportedSeries",
-      "description": "Get supported measurement series/s of a device",
-      "descriptionLong": "Returns a list of supported measurement series\n",
+      "description": "Get supported measurement series",
+      "descriptionLong": "Get supported measurement series/s of a device\n",
       "method": "GET",
       "path": "inventory/managedObjects/{device}/supportedSeries",
       "accept": "application/vnd.com.nsn.cumulocity.inventory+json",
@@ -379,7 +379,7 @@
     },
     {
       "name": "getSupportedOperations",
-      "description": "Get supported operations of a device",
+      "description": "Get supported operations",
       "descriptionLong": "Returns a list of supported operations (fragments) for a device. The supported fragments list is returned from the c8y_SupportedOperations fragment of the device managed object.\n",
       "method": "GET",
       "path": "inventory/managedObjects/{device}",
@@ -433,8 +433,8 @@
     },
     {
       "name": "setDeviceRequiredAvailability",
-      "description": "Set the required availability of a device",
-      "descriptionLong": "Devices that have not sent any message in the response interval are considered unavailable. Response interval can have value between -32768 and 32767 and any values out of range will be shrink to range borders. Such devices are marked as unavailable (see below) and an unavailability alarm is raised. Devices with a response interval of zero minutes are considered to be under maintenance. No alarm is raised while a device is under maintenance. Devices that do not contain 'c8y_RequiredAvailability' are not monitored.",
+      "description": "Set required availability",
+      "descriptionLong": "Set the required availability of a device. Devices that have not sent any message in the response interval are considered unavailable. Response interval can have value between -32768 and 32767 and any values out of range will be shrink to range borders. Such devices are marked as unavailable (see below) and an unavailability alarm is raised. Devices with a response interval of zero minutes are considered to be under maintenance. No alarm is raised while a device is under maintenance. Devices that do not contain 'c8y_RequiredAvailability' are not monitored.",
       "method": "PUT",
       "path": "inventory/managedObjects/{device}",
       "accept": "application/vnd.com.nsn.cumulocity.inventory+json",
@@ -494,7 +494,7 @@
     {
       "name": "getDeviceGroup",
       "description": "Get device group",
-      "descriptionLong": "Get a device group by id or name\n",
+      "descriptionLong": "Get a device group\n",
       "method": "GET",
       "path": "inventory/managedObjects/{id}",
       "accept": "application/vnd.com.nsn.cumulocity.customDeviceGroup+json",
@@ -619,7 +619,7 @@
     {
       "name": "deleteDeviceGroup",
       "description": "Delete device group",
-      "descriptionLong": "Delete an existing device group, and optional\n",
+      "descriptionLong": "Delete an existing device group, and optionally all of it's children\n",
       "method": "DELETE",
       "path": "inventory/managedObjects/{id}",
       "accept": "",

@@ -5,7 +5,7 @@ Describe -Name "Remove-Tenant" {
 
     }
 
-    It -Skip "Delete a tenant by name (from the mangement tenant)" {
+    It -Skip "Delete a tenant by name (from the management tenant)" {
         $Response = PSc8y\Remove-Tenant -Id mycompany
         $LASTEXITCODE | Should -Be 0
     }

@@ -22,10 +22,10 @@ func NewDeleteTenantCmd() *DeleteTenantCmd {
 	cmd := &cobra.Command{
 		Use:   "delete",
 		Short: "Delete tenant",
-		Long:  ``,
+		Long:  `Delete an existing tenant`,
 		Example: `
 $ c8y tenants delete --id "mycompany"
-Delete a tenant by name (from the mangement tenant)
+Delete a tenant by name (from the management tenant)
         `,
 		PreRunE: validateDeleteMode,
 		RunE:    ccmd.RunE,

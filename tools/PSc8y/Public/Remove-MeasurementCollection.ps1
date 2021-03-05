@@ -2,7 +2,7 @@
 Function Remove-MeasurementCollection {
 <#
 .SYNOPSIS
-Delete a collection of measurements
+Delete measurement collection
 
 .DESCRIPTION
 Delete measurements using a filter

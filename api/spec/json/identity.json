@@ -9,8 +9,8 @@
     {
       "name": "getExternalIDCollection",
       "method": "GET",
-      "description": "Get a collection of external ids based on filter parameters",
-      "descriptionLong": "Get a collection of external ids based on filter parameters",
+      "description": "Get external id collection",
+      "descriptionLong": "Get a collection of external ids related to an existing managed object",
       "path": "identity/globalIds/{device}/externalIds",
       "accept": "application/vnd.com.nsn.cumulocity.externalIdCollection+json",
       "collectionType": "application/vnd.com.nsn.cumulocity.externalId+json",
@@ -152,8 +152,8 @@
       "method": "POST",
       "path": "identity/globalIds/{device}/externalIds",
       "accept": "application/vnd.com.nsn.cumulocity.externalId+json",
-      "description": "Create a new external id",
-      "descriptionLong": "Create a new external id",
+      "description": "Create external id",
+      "descriptionLong": "Create a new external id for an existing managed object",
       "alias": {
         "go": "create",
         "powershell": "New-ExternalId"

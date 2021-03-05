@@ -21,8 +21,8 @@ func NewUpdateEventCmd() *UpdateEventCmd {
 	ccmd := &UpdateEventCmd{}
 	cmd := &cobra.Command{
 		Use:   "update",
-		Short: "Update an event",
-		Long:  `Update an event`,
+		Short: "Update event",
+		Long:  `Update an existing event`,
 		Example: `
 $ c8y events update --id 12345 --text "example text 1"
 Update the text field of an existing event

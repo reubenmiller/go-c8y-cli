@@ -21,8 +21,8 @@ func NewUpdateAlarmCollectionCmd() *UpdateAlarmCollectionCmd {
 	ccmd := &UpdateAlarmCollectionCmd{}
 	cmd := &cobra.Command{
 		Use:   "updateCollection",
-		Short: "Update a collection of alarms. Currently only the status of alarms can be changed",
-		Long:  `Update the status of a collection of alarms by using a filter`,
+		Short: "Update alarm collection",
+		Long:  `Update the status of a collection of alarms by using a filter. Currently only the status of alarms can be changed`,
 		Example: `
 $ c8y alarms updateCollection --device mydevice --status ACTIVE --newStatus ACKNOWLEDGED
 Update the status of all active alarms on a device to ACKNOWLEDGED

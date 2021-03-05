@@ -2,10 +2,10 @@
 Function Get-UserGroupMembershipCollection {
 <#
 .SYNOPSIS
-Get all users in a group
+Get users in group
 
 .DESCRIPTION
-Get all users in a group
+Get all users in a user group
 
 .LINK
 c8y userReferences listGroupMembership

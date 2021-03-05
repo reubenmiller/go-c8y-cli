@@ -23,7 +23,7 @@ func NewGetTenantCmd() *GetTenantCmd {
 	cmd := &cobra.Command{
 		Use:   "get",
 		Short: "Get tenant",
-		Long:  ``,
+		Long:  `Get an existing tenant`,
 		Example: `
 $ c8y tenants get --id "mycompany"
 Get a tenant by name (from the management tenant)

@@ -21,7 +21,7 @@ func NewNewManagedObjectCmd() *NewManagedObjectCmd {
 	ccmd := &NewManagedObjectCmd{}
 	cmd := &cobra.Command{
 		Use:   "create",
-		Short: "Create a new inventory",
+		Short: "Create managed object",
 		Long:  `Create a new inventory managed object`,
 		Example: `
 $ c8y inventory create --name "testMO" --type "custom_type"

@@ -2,10 +2,10 @@
 Function Get-SupportedSeries {
 <#
 .SYNOPSIS
-Get supported measurement series/s of a device
+Get supported measurement series
 
 .DESCRIPTION
-Returns a list of supported measurement series
+Get supported measurement series/s of a device
 
 
 .LINK

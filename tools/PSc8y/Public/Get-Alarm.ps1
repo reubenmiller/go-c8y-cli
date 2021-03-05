@@ -2,7 +2,7 @@
 Function Get-Alarm {
 <#
 .SYNOPSIS
-Get alarm/s
+Get alarm
 
 .DESCRIPTION
 Get an alarm by its id

@@ -2,10 +2,10 @@
 Function Update-DataBrokerConnector {
 <#
 .SYNOPSIS
-Update data broker connector
+Update data broker
 
 .DESCRIPTION
-Update data broker connector
+Update an existing data broker connector
 
 .LINK
 c8y databroker update

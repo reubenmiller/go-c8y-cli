@@ -2,7 +2,7 @@
 Function Get-CurrentUserInventoryRole {
 <#
 .SYNOPSIS
-Get a specific inventory role of the current user
+Get current user inventory role
 
 .DESCRIPTION
 Get a specific inventory role of the current user

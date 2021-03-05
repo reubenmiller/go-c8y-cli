@@ -2,7 +2,7 @@
 Function Update-Alarm {
 <#
 .SYNOPSIS
-Update an alarm
+Update alarm
 
 .DESCRIPTION
 Update an alarm by its id

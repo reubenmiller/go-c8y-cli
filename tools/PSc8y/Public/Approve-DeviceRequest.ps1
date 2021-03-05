@@ -2,7 +2,7 @@
 Function Approve-DeviceRequest {
 <#
 .SYNOPSIS
-Approve a new device request
+Approve device request
 
 .DESCRIPTION
 Approve a new device request. Note: a device can only be approved if the platform has received a request for device credentials.

@@ -2,7 +2,7 @@
 Function Get-ChildDeviceReference {
 <#
 .SYNOPSIS
-Get managed object child device reference
+Get child device reference
 
 .DESCRIPTION
 Get managed object child device reference

@@ -22,7 +22,7 @@ func NewGetUserCollectionCmd() *GetUserCollectionCmd {
 	ccmd := &GetUserCollectionCmd{}
 	cmd := &cobra.Command{
 		Use:   "list",
-		Short: "Get a collection of users based on filter parameters",
+		Short: "Get user collection",
 		Long:  `Get a collection of users based on filter parameters`,
 		Example: `
 $ c8y users list

@@ -2,10 +2,10 @@
 Function Get-BinaryCollection {
 <#
 .SYNOPSIS
-Get collection of inventory binaries
+Get binary collection
 
 .DESCRIPTION
-Get a list of inventory binaries. The results include the meta information about binary and not the binary itself.
+Get a collection of inventory binaries. The results include the meta information about binary and not the binary itself.
 
 
 .LINK

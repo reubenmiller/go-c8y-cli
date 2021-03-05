@@ -22,8 +22,8 @@ func NewGetApplicationCmd() *GetApplicationCmd {
 	ccmd := &GetApplicationCmd{}
 	cmd := &cobra.Command{
 		Use:   "get",
-		Short: "Get an application",
-		Long:  `Get an application by its id or name`,
+		Short: "Get application",
+		Long:  `Get an existing application`,
 		Example: `
 $ c8y applications get --id 12345
 Get an application

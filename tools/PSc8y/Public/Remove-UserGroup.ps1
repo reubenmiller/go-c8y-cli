@@ -2,10 +2,10 @@
 Function Remove-UserGroup {
 <#
 .SYNOPSIS
-Delete a user group
+Delete user group
 
 .DESCRIPTION
-Delete a user group
+Delete an existing user group
 
 .LINK
 c8y userGroups delete

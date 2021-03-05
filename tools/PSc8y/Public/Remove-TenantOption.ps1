@@ -5,7 +5,7 @@ Function Remove-TenantOption {
 Delete tenant option
 
 .DESCRIPTION
-Delete tenant option
+Delete an existing tenant option
 
 .LINK
 c8y tenantOptions delete

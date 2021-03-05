@@ -2,10 +2,10 @@
 Function Get-Measurement {
 <#
 .SYNOPSIS
-Get measurement/s
+Get measurement
 
 .DESCRIPTION
-Get measurements by their ids
+Get an existing measurement
 
 .LINK
 c8y measurements get

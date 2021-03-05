@@ -21,8 +21,8 @@ func NewUpdateTenantOptionBulkCmd() *UpdateTenantOptionBulkCmd {
 	ccmd := &UpdateTenantOptionBulkCmd{}
 	cmd := &cobra.Command{
 		Use:   "updateBulk",
-		Short: "Update multiple tenant options in provided category",
-		Long:  ``,
+		Short: "Update multiple tenant options",
+		Long:  `Update multiple tenant options in provided category`,
 		Example: `
 $ c8y tenantOptions updateBulk --category "c8y_cli_tests" --data "{\"option5\":0,\"option6\":1"}"
 Update multiple tenant options

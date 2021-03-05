@@ -8,7 +8,7 @@
   "endpoints": [
     {
       "name": "getUserCurrent",
-      "description": "Get user",
+      "description": "Get current user",
       "descriptionLong": "Get the user representation associated with the current credentials used by the request",
       "method": "GET",
       "path": "/user/currentUser",
@@ -34,7 +34,7 @@
     },
     {
       "name": "updateUserCurrent",
-      "description": "Update the current user",
+      "description": "Update current user",
       "descriptionLong": "Update properties or settings of your user such as first/last name, email or password\n",
       "method": "PUT",
       "path": "/user/currentUser",
@@ -46,13 +46,13 @@
       "examples": {
         "powershell": [
           {
-            "description": "Update the current user's lastname",
+            "description": "Update the current user's last name",
             "command": "Update-CurrentUser -LastName \"Smith\""
           }
         ],
         "go": [
           {
-            "description": "Update the current user's lastname",
+            "description": "Update the current user's last name",
             "command": "c8y users updateCurrentUser --lastName \"Smith\""
           }
         ]
@@ -102,7 +102,7 @@
     },
     {
       "name": "getCurrentUserInventoryRoleCollection",
-      "description": "Get the current users inventory roles",
+      "description": "Get current user inventory role collection",
       "descriptionLong": "Get a list of inventory roles currently assigned to the user",
       "method": "GET",
       "path": "/user/inventoryroles",
@@ -130,7 +130,8 @@
     },
     {
       "name": "getCurrentUserInventoryRole",
-      "description": "Get a specific inventory role of the current user",
+      "description": "Get current user inventory role",
+      "descriptionLong": "Get a specific inventory role of the current user",
       "method": "GET",
       "path": "/user/inventoryroles/{id}",
       "accept": "application/vnd.com.nsn.cumulocity.inventoryrole+json",
@@ -165,7 +166,7 @@
     {
       "name": "getUserCollection",
       "method": "GET",
-      "description": "Get a collection of users based on filter parameters",
+      "description": "Get user collection",
       "descriptionLong": "Get a collection of users based on filter parameters",
       "path": "/user/{tenant}/users",
       "accept": "application/vnd.com.nsn.cumulocity.userCollection+json",
@@ -242,8 +243,8 @@
     },
     {
       "name": "newUser",
-      "description": "Create a new user within the collection",
-      "descriptionLong": "This command can be used to grant a new user to the tenant",
+      "description": "Create user",
+      "descriptionLong": "Create a new user so that they can access the tenant",
       "method": "POST",
       "path": "user/{tenant}/users",
       "accept": "application/vnd.com.nsn.cumulocity.user+json",
@@ -398,7 +399,7 @@
     },
     {
       "name": "getUserByName",
-      "description": "Get user by username",
+      "description": "Get user by name",
       "descriptionLong": "Get the user details by referencing their username instead of id",
       "method": "GET",
       "path": "user/{tenant}/userByName/{name}",
@@ -447,7 +448,7 @@
     {
       "name": "deleteUser",
       "description": "Delete user",
-      "descriptionLong": "Delete a user from the a tenant. This will remove the user completely from the tenant and can not be reversed.\nAlternatively a user can be disabled via updating the users properties instead of deleting the user.\n",
+      "descriptionLong": "Delete a user from a tenant. This will remove the user completely from the tenant and can not be reversed.\nAlternatively a user can be disabled via updating the users properties instead of deleting the user.\n",
       "method": "DELETE",
       "path": "user/{tenant}/users/{id}",
       "accept": "",
@@ -593,7 +594,7 @@
     },
     {
       "name": "resetUserPassword",
-      "description": "Reset a user's password",
+      "description": "Reset user password",
       "descriptionLong": "The password can be reset either by issuing a password reset email (default), or be specifying a new password.",
       "method": "PUT",
       "path": "user/{tenant}/users/{id}",
@@ -665,7 +666,8 @@
     },
     {
       "name": "getUserMembershipCollection",
-      "description": "Get information about all groups that a user is a member of",
+      "description": "get user membership collection",
+      "descriptionLong": "Get information about all groups that a user is a member of",
       "method": "GET",
       "path": "/user/{tenant}/users/{id}/groups",
       "accept": "application/vnd.com.nsn.cumulocity.groupReferenceCollection+json",
@@ -710,7 +712,7 @@
     },
     {
       "name": "logout",
-      "description": "Log out the current user",
+      "description": "Logout current user",
       "descriptionLong": "Logout the current user. This will invalidate the token associated with the user when using OAUTH_INTERNAL",
       "method": "POST",
       "path": "/user/logout",

@@ -2,7 +2,7 @@
 Function Get-SupportedMeasurements {
 <#
 .SYNOPSIS
-Get supported measurements/s of a device
+Get supported measurements
 
 .DESCRIPTION
 Returns a list of fragments (valueFragmentTypes) related to the device

@@ -2,7 +2,7 @@
 Function New-EventBinary {
 <#
 .SYNOPSIS
-New event binary
+Create event binary
 
 .DESCRIPTION
 Upload a new binary file to an event

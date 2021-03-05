@@ -22,7 +22,7 @@ func NewGetSupportedMeasurementsCmd() *GetSupportedMeasurementsCmd {
 	ccmd := &GetSupportedMeasurementsCmd{}
 	cmd := &cobra.Command{
 		Use:   "getSupportedMeasurements",
-		Short: "Get supported measurements/s of a device",
+		Short: "Get supported measurements",
 		Long: `Returns a list of fragments (valueFragmentTypes) related to the device
 `,
 		Example: `

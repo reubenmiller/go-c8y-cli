@@ -2,10 +2,10 @@
 Function Get-UserGroupByName {
 <#
 .SYNOPSIS
-Get a group by name
+Get user group by name
 
 .DESCRIPTION
-Get a group by name
+Get an existing user group by name
 
 .LINK
 c8y userGroups getByName

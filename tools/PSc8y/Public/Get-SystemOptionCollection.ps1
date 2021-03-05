@@ -2,10 +2,10 @@
 Function Get-SystemOptionCollection {
 <#
 .SYNOPSIS
-Get collection of system options
+Get system option collection
 
 .DESCRIPTION
-This endpoint provides a set of read-only properties pre-defined in platform configuration. The response format is exactly the same as for OptionCollection.
+Get a collection of system options. This endpoint provides a set of read-only properties pre-defined in platform configuration. The response format is exactly the same as for OptionCollection.
 
 .LINK
 c8y systemOptions list

@@ -2,7 +2,7 @@
 Function Register-Device {
 <#
 .SYNOPSIS
-Register a new device (request)
+Register device
 
 .DESCRIPTION
 Register a new device (request)

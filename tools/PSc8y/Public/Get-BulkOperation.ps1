@@ -2,10 +2,10 @@
 Function Get-BulkOperation {
 <#
 .SYNOPSIS
-Get bulk operation/s
+Get bulk operation
 
 .DESCRIPTION
-Get bulk operation/s
+Get an existing bulk operation
 
 .LINK
 c8y bulkOperations get

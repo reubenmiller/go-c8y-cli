@@ -21,8 +21,8 @@ func NewNewTenantCmd() *NewTenantCmd {
 	ccmd := &NewTenantCmd{}
 	cmd := &cobra.Command{
 		Use:   "create",
-		Short: "New tenant",
-		Long:  ``,
+		Short: "Create tenant",
+		Long:  `Create a new tenant`,
 		Example: `
 $ c8y tenants create --company "mycompany" --domain "mycompany" --adminName "admin" --password "mys3curep9d8"
 Create a new tenant (from the management tenant)

@@ -22,8 +22,8 @@ func NewGetBulkOperationCmd() *GetBulkOperationCmd {
 	ccmd := &GetBulkOperationCmd{}
 	cmd := &cobra.Command{
 		Use:   "get",
-		Short: "Get bulk operation/s",
-		Long:  ``,
+		Short: "Get bulk operation",
+		Long:  `Get an existing bulk operation`,
 		Example: `
 $ c8y bulkOperations get --id 12345
 Get bulk operation by id

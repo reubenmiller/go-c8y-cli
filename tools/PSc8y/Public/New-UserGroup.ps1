@@ -2,10 +2,10 @@
 Function New-UserGroup {
 <#
 .SYNOPSIS
-Create a new group
+Create user group
 
 .DESCRIPTION
-Create a new group
+Create a new user group
 
 .LINK
 c8y userGroups create

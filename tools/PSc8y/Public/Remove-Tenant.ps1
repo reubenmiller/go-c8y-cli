@@ -5,7 +5,7 @@ Function Remove-Tenant {
 Delete tenant
 
 .DESCRIPTION
-Delete tenant
+Delete an existing tenant
 
 .LINK
 c8y tenants delete
@@ -13,7 +13,7 @@ c8y tenants delete
 .EXAMPLE
 PS> Remove-Tenant -Id mycompany
 
-Delete a tenant by name (from the mangement tenant)
+Delete a tenant by name (from the management tenant)
 
 
 #>

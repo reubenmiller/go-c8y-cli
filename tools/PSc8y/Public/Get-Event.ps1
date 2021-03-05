@@ -2,10 +2,10 @@
 Function Get-Event {
 <#
 .SYNOPSIS
-Get event/s
+Get event
 
 .DESCRIPTION
-Get an event by id
+Get an existing event by id
 
 .LINK
 c8y events get

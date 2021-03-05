@@ -23,7 +23,7 @@ func NewGetMicroserviceCmd() *GetMicroserviceCmd {
 	cmd := &cobra.Command{
 		Use:   "get",
 		Short: "Get microservice",
-		Long:  `Get an existing microservice by id or name`,
+		Long:  `Get an existing microservice`,
 		Example: `
 $ c8y microservices get --id 12345
 Get an application

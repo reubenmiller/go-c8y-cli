@@ -22,7 +22,7 @@ func NewGetEventCollectionCmd() *GetEventCollectionCmd {
 	ccmd := &GetEventCollectionCmd{}
 	cmd := &cobra.Command{
 		Use:   "list",
-		Short: "Get a collection of events based on filter parameters",
+		Short: "Get event collection",
 		Long:  `Get a collection of events based on filter parameters`,
 		Example: `
 $ c8y events list --type my_CustomType --dateFrom "-10d"

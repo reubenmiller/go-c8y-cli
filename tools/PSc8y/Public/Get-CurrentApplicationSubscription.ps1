@@ -5,7 +5,7 @@ Function Get-CurrentApplicationSubscription {
 Get current application subscriptions
 
 .DESCRIPTION
-Required authentication with bootstrap user
+Requires authentication with the application bootstrap user
 
 .LINK
 c8y currentApplication listSubscriptions

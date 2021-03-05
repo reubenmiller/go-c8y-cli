@@ -2,7 +2,7 @@
 Function Get-ChildAdditionCollection {
 <#
 .SYNOPSIS
-Get a collection of managedObjects child additions
+Get child addition collection
 
 .DESCRIPTION
 Get a collection of managedObjects child additions

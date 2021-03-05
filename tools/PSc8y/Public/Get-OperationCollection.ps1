@@ -2,7 +2,7 @@
 Function Get-OperationCollection {
 <#
 .SYNOPSIS
-Get a collection of operations based on filter parameters
+Get operation collection
 
 .DESCRIPTION
 Get a collection of operations based on filter parameters

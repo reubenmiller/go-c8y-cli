@@ -2,7 +2,7 @@
 Function Add-ChildDeviceToDevice {
 <#
 .SYNOPSIS
-Create a child device reference
+Assign child device
 
 .DESCRIPTION
 Create a child device reference

@@ -2,10 +2,10 @@
 Function Get-DeviceRequestCollection {
 <#
 .SYNOPSIS
-Get a collection of new device requests
+Get device request collection
 
 .DESCRIPTION
-Get a collection of device requests
+Get a collection of device registration requests
 
 .LINK
 c8y deviceCredentials listNewDeviceRequests

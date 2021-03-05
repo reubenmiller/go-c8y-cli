@@ -21,7 +21,7 @@ func NewNewOperationCmd() *NewOperationCmd {
 	ccmd := &NewOperationCmd{}
 	cmd := &cobra.Command{
 		Use:   "create",
-		Short: "Create a new operation",
+		Short: "Create operation",
 		Long:  `Create a new operation for an agent or device`,
 		Example: `
 $ c8y operations create --device mydevice --data "{c8y_Restart:{}}"

@@ -22,7 +22,7 @@ func NewUpdateManagedObjectCmd() *UpdateManagedObjectCmd {
 	cmd := &cobra.Command{
 		Use:   "update",
 		Short: "Update inventory",
-		Long:  `Update a managed object by id`,
+		Long:  `Update an existing managed object`,
 		Example: `
 $ c8y inventory update --id 12345 --newName "my_custom_name" --data "{\"com_my_props\":{}\"value\":1}"
 Update a managed object

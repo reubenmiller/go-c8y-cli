@@ -2,10 +2,10 @@
 Function Enable-Application {
 <#
 .SYNOPSIS
-Enable application on tenant
+Subscribe application
 
 .DESCRIPTION
-Enable application on tenant
+Enable/subscribe an application to a tenant
 
 .LINK
 c8y tenants enableApplication

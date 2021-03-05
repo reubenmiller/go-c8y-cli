@@ -5,7 +5,7 @@ Function Update-RetentionRule {
 Update retention rule
 
 .DESCRIPTION
-Update an existing retentule rule, i.e. change maximum number of days or the data type.
+Update an existing retention rule, i.e. change maximum number of days or the data type.
 
 
 .LINK

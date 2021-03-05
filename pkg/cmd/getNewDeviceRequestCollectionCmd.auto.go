@@ -22,8 +22,8 @@ func NewGetNewDeviceRequestCollectionCmd() *GetNewDeviceRequestCollectionCmd {
 	ccmd := &GetNewDeviceRequestCollectionCmd{}
 	cmd := &cobra.Command{
 		Use:   "listNewDeviceRequests",
-		Short: "Get a collection of new device requests",
-		Long:  `Get a collection of device requests`,
+		Short: "Get device request collection",
+		Long:  `Get a collection of device registration requests`,
 		Example: `
 $ c8y devices listNewDeviceRequests
 Get a list of new device requests

@@ -21,8 +21,8 @@ func NewDeleteRoleFromGroupCmd() *DeleteRoleFromGroupCmd {
 	ccmd := &DeleteRoleFromGroupCmd{}
 	cmd := &cobra.Command{
 		Use:   "deleteRoleFromGroup",
-		Short: "Unassign/Remove role from a group",
-		Long:  ``,
+		Short: "Unassign role from group",
+		Long:  `Unassign/delete role from a group`,
 		Example: `
 $ c8y userRoles deleteRoleFromGroup --group "myuser" --role "ROLE_MEASUREMENT_READ"
 Remove a role from the given user

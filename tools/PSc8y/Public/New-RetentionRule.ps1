@@ -2,7 +2,7 @@
 Function New-RetentionRule {
 <#
 .SYNOPSIS
-New retention rule
+Create retention rule
 
 .DESCRIPTION
 Create a new retention rule to managed when data is deleted in the tenant

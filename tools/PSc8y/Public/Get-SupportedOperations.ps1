@@ -2,7 +2,7 @@
 Function Get-SupportedOperations {
 <#
 .SYNOPSIS
-Get supported operations of a device
+Get supported operations
 
 .DESCRIPTION
 Returns a list of supported operations (fragments) for a device. The supported fragments list is returned from the c8y_SupportedOperations fragment of the device managed object.

@@ -2,7 +2,7 @@
 Function Request-DeviceCredentials {
 <#
 .SYNOPSIS
-Request credentials for a new device
+Request device credentials
 
 .DESCRIPTION
 Device credentials can be enquired by devices that do not have credentials for accessing a tenant yet. Since the device does not have credentials yet, a set of fixed credentials is used for this API. The credentials can be obtained by contacting support. Do not use your tenant credentials with this API.

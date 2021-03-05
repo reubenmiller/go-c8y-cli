@@ -2,7 +2,7 @@
 Function New-Application {
 <#
 .SYNOPSIS
-Create a new application
+Create application
 
 .DESCRIPTION
 Create a new application using explicit settings

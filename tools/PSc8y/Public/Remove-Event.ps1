@@ -2,10 +2,10 @@
 Function Remove-Event {
 <#
 .SYNOPSIS
-Delete event/s
+Delete event
 
 .DESCRIPTION
-Delete an event by id
+Delete an existing event
 
 .LINK
 c8y events delete

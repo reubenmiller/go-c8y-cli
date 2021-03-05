@@ -23,7 +23,7 @@ func NewGetDeviceCmd() *GetDeviceCmd {
 	cmd := &cobra.Command{
 		Use:   "get",
 		Short: "Get device",
-		Long:  `Get a device by name or id.`,
+		Long:  `Get an existing device`,
 		Example: `
 $ c8y devices get --id 12345
 Get device by id

@@ -2,7 +2,7 @@
 Function Get-AllTenantUsageSummaryStatistics {
 <#
 .SYNOPSIS
-Get collection of tenant usage statistics summary
+Get all tenant usage summary statistics
 
 .DESCRIPTION
 Get collection of tenant usage statistics summary

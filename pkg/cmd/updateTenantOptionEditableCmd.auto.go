@@ -21,8 +21,8 @@ func NewUpdateTenantOptionEditableCmd() *UpdateTenantOptionEditableCmd {
 	ccmd := &UpdateTenantOptionEditableCmd{}
 	cmd := &cobra.Command{
 		Use:   "updateEdit",
-		Short: "Update tenant option editibility",
-		Long: `Required role:: ROLE_OPTION_MANAGEMENT_ADMIN, Required tenant management Example Request:: Update access.control.allow.origin option.
+		Short: "Update tenant option edit setting",
+		Long: `Update read-only setting of an existing tenant option Required role:: ROLE_OPTION_MANAGEMENT_ADMIN, Required tenant management Example Request:: Update access.control.allow.origin option.
 `,
 		Example: `
 $ c8y tenantOptions updateEdit --category "c8y_cli_tests" --key "option8" --editable "true"

@@ -2,7 +2,7 @@
 Function Get-EventCollection {
 <#
 .SYNOPSIS
-Get a collection of events based on filter parameters
+Get event collection
 
 .DESCRIPTION
 Get a collection of events based on filter parameters

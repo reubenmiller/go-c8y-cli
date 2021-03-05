@@ -21,8 +21,8 @@ func NewDeleteAssetFromGroupCmd() *DeleteAssetFromGroupCmd {
 	ccmd := &DeleteAssetFromGroupCmd{}
 	cmd := &cobra.Command{
 		Use:   "unassignAssetFromGroup",
-		Short: "Delete child asset reference",
-		Long:  `Unassign an asset (device or group) from a group`,
+		Short: "Unassign asset from group",
+		Long:  `Unassign/delete an asset (device or group) from a group`,
 		Example: `
 $ c8y inventoryReferences unassignAssetFromGroup --device 12345 --childDevice 22553
 Unassign a child device from its parent device

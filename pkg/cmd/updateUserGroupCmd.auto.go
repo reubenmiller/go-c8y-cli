@@ -21,8 +21,8 @@ func NewUpdateUserGroupCmd() *UpdateUserGroupCmd {
 	ccmd := &UpdateUserGroupCmd{}
 	cmd := &cobra.Command{
 		Use:   "update",
-		Short: "Update a user group",
-		Long:  ``,
+		Short: "Update user group",
+		Long:  `Update an existing user group`,
 		Example: `
 $ c8y userGroups update --id 12345 --name "customGroup2"
 Update a user group

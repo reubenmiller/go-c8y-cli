@@ -22,8 +22,8 @@ func NewGetTenantVersionCmd() *GetTenantVersionCmd {
 	ccmd := &GetTenantVersionCmd{}
 	cmd := &cobra.Command{
 		Use:   "getVersion",
-		Short: "Get tenant platform (backend) version",
-		Long:  ``,
+		Short: "Get tenant version",
+		Long:  `Get tenant platform (backend) version`,
 		Example: `
 $ c8y tenants getVersion
 Set the required availability of a device by name to 10 minutes

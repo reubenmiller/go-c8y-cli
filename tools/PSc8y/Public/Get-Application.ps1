@@ -2,10 +2,10 @@
 Function Get-Application {
 <#
 .SYNOPSIS
-Get an application
+Get application
 
 .DESCRIPTION
-Get an application by its id or name
+Get an existing application
 
 .LINK
 c8y applications get

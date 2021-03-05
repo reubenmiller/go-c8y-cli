@@ -2,10 +2,10 @@
 Function New-MicroserviceBinary {
 <#
 .SYNOPSIS
-Create/upload a new microservice binary
+Create microservice binary
 
 .DESCRIPTION
-For the applications of type 'MICROSERVICE' to be available for Cumulocity platform users, a binary zip file must be uploaded.
+Create/upload a new microservice binary. For the applications of type 'MICROSERVICE' to be available for Cumulocity platform users, a binary zip file must be uploaded.
 For the microservice application, the zip file must consist of    * cumulocity.json - file describing the deployment
     * image.tar - executable docker image
 

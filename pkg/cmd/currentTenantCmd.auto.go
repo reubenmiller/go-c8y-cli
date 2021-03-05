@@ -23,7 +23,7 @@ func NewCurrentTenantCmd() *CurrentTenantCmd {
 	cmd := &cobra.Command{
 		Use:   "getCurrentTenant",
 		Short: "Get current tenant",
-		Long:  ``,
+		Long:  `Get the current tenant associated with the current session`,
 		Example: `
 $ c8y tenants getCurrentTenant
 Get the current tenant (based on your current credentials)

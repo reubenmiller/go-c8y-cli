@@ -2,7 +2,7 @@
 Function Get-ChildAssetReference {
 <#
 .SYNOPSIS
-Get managed object child asset reference
+Get child asset reference
 
 .DESCRIPTION
 Get managed object child asset reference

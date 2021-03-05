@@ -21,8 +21,8 @@ func NewDeleteChildAdditionCmd() *DeleteChildAdditionCmd {
 	ccmd := &DeleteChildAdditionCmd{}
 	cmd := &cobra.Command{
 		Use:   "unassignChildAddition",
-		Short: "Delete child addition reference",
-		Long:  `Unassign a child addition from an existing managed object`,
+		Short: "Unassign child addition",
+		Long:  `Unassign/delete a child addition from an existing managed object`,
 		Example: `
 $ c8y inventoryReferences unassignChildAddition --id 12345 --childId 22553
 Unassign a child addition from its parent managed object

@@ -21,8 +21,8 @@ func NewNewExternalIDCmd() *NewExternalIDCmd {
 	ccmd := &NewExternalIDCmd{}
 	cmd := &cobra.Command{
 		Use:   "create",
-		Short: "Create a new external id",
-		Long:  `Create a new external id`,
+		Short: "Create external id",
+		Long:  `Create a new external id for an existing managed object`,
 		Example: `
 $ c8y identity create --device 1234 --type test --name myserialnumber
 Create external identity

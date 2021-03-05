@@ -2,7 +2,7 @@
 Function New-Operation {
 <#
 .SYNOPSIS
-Create a new operation
+Create operation
 
 .DESCRIPTION
 Create a new operation for an agent or device

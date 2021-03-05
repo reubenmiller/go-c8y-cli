@@ -2,7 +2,7 @@
 Function Disable-Microservice {
 <#
 .SYNOPSIS
-Disable (unsubscribe) a microservice
+unsubscribe microservice
 
 .DESCRIPTION
 Disable (unsubscribe) a microservice from the current tenant

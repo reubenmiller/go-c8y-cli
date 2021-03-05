@@ -21,7 +21,7 @@ func NewNewTenantOptionCmd() *NewTenantOptionCmd {
 	ccmd := &NewTenantOptionCmd{}
 	cmd := &cobra.Command{
 		Use:   "create",
-		Short: "New tenant option",
+		Short: "Create tenant option",
 		Long:  ``,
 		Example: `
 $ c8y tenantOptions create --category "c8y_cli_tests" --key "option1" --value "1"

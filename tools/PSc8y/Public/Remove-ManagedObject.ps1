@@ -2,10 +2,10 @@
 Function Remove-ManagedObject {
 <#
 .SYNOPSIS
-Delete inventory/s
+Delete managed object
 
 .DESCRIPTION
-Delete a managed object by id
+Delete an existing managed object
 
 .LINK
 c8y inventory delete

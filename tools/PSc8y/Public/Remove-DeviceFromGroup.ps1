@@ -2,10 +2,10 @@
 Function Remove-DeviceFromGroup {
 <#
 .SYNOPSIS
-Delete child asset reference
+Unassign device from group
 
 .DESCRIPTION
-Unassign a device from a group
+Unassign/delete a device from a group
 
 .LINK
 c8y inventoryReferences unassignDeviceFromGroup

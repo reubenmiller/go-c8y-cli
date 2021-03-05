@@ -2,7 +2,7 @@
 Function Get-TenantStatisticsCollection {
 <#
 .SYNOPSIS
-Get collection of tenant usage statistics
+Get tenant usage statistics
 
 .DESCRIPTION
 Get collection of tenant usage statistics

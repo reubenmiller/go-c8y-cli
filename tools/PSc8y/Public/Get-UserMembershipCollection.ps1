@@ -2,7 +2,7 @@
 Function Get-UserMembershipCollection {
 <#
 .SYNOPSIS
-Get information about all groups that a user is a member of
+get user membership collection
 
 .DESCRIPTION
 Get information about all groups that a user is a member of

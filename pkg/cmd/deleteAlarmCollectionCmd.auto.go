@@ -21,7 +21,7 @@ func NewDeleteAlarmCollectionCmd() *DeleteAlarmCollectionCmd {
 	ccmd := &DeleteAlarmCollectionCmd{}
 	cmd := &cobra.Command{
 		Use:   "deleteCollection",
-		Short: "Delete a collection of alarms",
+		Short: "Delete alarm collection",
 		Long:  `Delete a collection of alarms by a given filter`,
 		Example: `
 $ c8y alarms deleteCollection --device mydevice --severity MAJOR

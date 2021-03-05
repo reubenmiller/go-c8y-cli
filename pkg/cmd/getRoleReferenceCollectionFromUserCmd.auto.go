@@ -22,8 +22,8 @@ func NewGetRoleReferenceCollectionFromUserCmd() *GetRoleReferenceCollectionFromU
 	ccmd := &GetRoleReferenceCollectionFromUserCmd{}
 	cmd := &cobra.Command{
 		Use:   "getRoleReferenceCollectionFromUser",
-		Short: "Get collection of user role references from a user",
-		Long:  ``,
+		Short: "Get role references from user",
+		Long:  `Get collection of user role references from a user`,
 		Example: `
 $ c8y userRoles getRoleReferenceCollectionFromUser --user "myuser"
 Get a list of role references for a user

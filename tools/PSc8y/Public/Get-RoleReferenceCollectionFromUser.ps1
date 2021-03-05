@@ -2,7 +2,7 @@
 Function Get-RoleReferenceCollectionFromUser {
 <#
 .SYNOPSIS
-Get collection of user role references from a user
+Get role references from user
 
 .DESCRIPTION
 Get collection of user role references from a user

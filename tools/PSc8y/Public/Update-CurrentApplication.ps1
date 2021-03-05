@@ -11,7 +11,7 @@ Required authentication with bootstrap user
 c8y currentApplication update
 
 .EXAMPLE
-PS> Update-CurrentApplication -Data @{ mycustomProp = @{ value1 = 1}}
+PS> Update-CurrentApplication -Data @{ myCustomProp = @{ value1 = 1}}
 
 Update custom properties of the current application (requires using application credentials)
 

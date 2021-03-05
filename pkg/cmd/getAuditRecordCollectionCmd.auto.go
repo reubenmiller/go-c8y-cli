@@ -22,7 +22,7 @@ func NewGetAuditRecordCollectionCmd() *GetAuditRecordCollectionCmd {
 	ccmd := &GetAuditRecordCollectionCmd{}
 	cmd := &cobra.Command{
 		Use:   "list",
-		Short: "Get collection of (user) audits",
+		Short: "Get audit record collection",
 		Long: `Audit records contain information about modifications to other Cumulocity entities. For example the audit records contain each operation state transition, so they can be used to check when an operation transitioned from PENDING -> EXECUTING -> SUCCESSFUL.
 `,
 		Example: `

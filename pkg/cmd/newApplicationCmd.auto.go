@@ -21,7 +21,7 @@ func NewNewApplicationCmd() *NewApplicationCmd {
 	ccmd := &NewApplicationCmd{}
 	cmd := &cobra.Command{
 		Use:   "create",
-		Short: "Create a new application",
+		Short: "Create application",
 		Long:  `Create a new application using explicit settings`,
 		Example: `
 $ c8y applications create --name myapp --type HOSTED --key "myapp-key" --contextPath "myapp"

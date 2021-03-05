@@ -2,7 +2,7 @@
 Function New-Device {
 <#
 .SYNOPSIS
-Create a device
+Create device
 
 .DESCRIPTION
 Create a device (managed object) with the special c8y_IsDevice fragment.

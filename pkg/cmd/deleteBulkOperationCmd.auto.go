@@ -21,8 +21,8 @@ func NewDeleteBulkOperationCmd() *DeleteBulkOperationCmd {
 	ccmd := &DeleteBulkOperationCmd{}
 	cmd := &cobra.Command{
 		Use:   "delete",
-		Short: "Remove bulk operation/s. Only bulk operations that are in ACTIVE or IN_PROGRESS can be deleted",
-		Long:  ``,
+		Short: "Delete bulk operation",
+		Long:  `Delete bulk operation/s. Only bulk operations that are in ACTIVE or IN_PROGRESS can be deleted`,
 		Example: `
 $ c8y bulkOperations delete --id 12345
 Remove bulk operation by id

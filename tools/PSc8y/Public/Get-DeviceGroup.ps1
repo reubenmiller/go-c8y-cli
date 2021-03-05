@@ -5,7 +5,7 @@ Function Get-DeviceGroup {
 Get device group
 
 .DESCRIPTION
-Get a device group by id or name
+Get a device group
 
 
 .LINK

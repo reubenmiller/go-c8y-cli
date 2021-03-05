@@ -2,7 +2,7 @@
 Function Get-CurrentUser {
 <#
 .SYNOPSIS
-Get user
+Get current user
 
 .DESCRIPTION
 Get the user representation associated with the current credentials used by the request

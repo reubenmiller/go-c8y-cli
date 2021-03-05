@@ -2,7 +2,7 @@
 Function Add-AssetToGroup {
 <#
 .SYNOPSIS
-Add a group or device as an asset to an existing group
+Assign child asset
 
 .DESCRIPTION
 Assigns a group or device to an existing group and marks them as assets
@@ -13,7 +13,7 @@ c8y inventoryReferences createChildAsset
 .EXAMPLE
 PS> Add-AssetToGroup -Group $Group1.id -NewChildGroup $Group2.id
 
-Create group heirachy (parent group -> child group)
+Create group hierarchy (parent group -> child group)
 
 
 #>

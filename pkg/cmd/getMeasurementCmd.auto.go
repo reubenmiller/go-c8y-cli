@@ -22,8 +22,8 @@ func NewGetMeasurementCmd() *GetMeasurementCmd {
 	ccmd := &GetMeasurementCmd{}
 	cmd := &cobra.Command{
 		Use:   "get",
-		Short: "Get measurement/s",
-		Long:  `Get measurements by their ids`,
+		Short: "Get measurement",
+		Long:  `Get an existing measurement`,
 		Example: `
 $ c8y measurements get --id 12345
 Get measurement

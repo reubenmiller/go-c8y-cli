@@ -2,7 +2,7 @@
 Function Remove-EventCollection {
 <#
 .SYNOPSIS
-Delete a collection of events
+Delete event collection
 
 .DESCRIPTION
 Delete a collection of events by using a filter

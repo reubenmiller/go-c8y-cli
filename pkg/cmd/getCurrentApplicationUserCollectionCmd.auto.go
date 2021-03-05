@@ -23,7 +23,7 @@ func NewGetCurrentApplicationUserCollectionCmd() *GetCurrentApplicationUserColle
 	cmd := &cobra.Command{
 		Use:   "listSubscriptions",
 		Short: "Get current application subscriptions",
-		Long:  `Required authentication with bootstrap user`,
+		Long:  `Requires authentication with the application bootstrap user`,
 		Example: `
 $ c8y currentApplication listSubscriptions
 List the current application users/subscriptions

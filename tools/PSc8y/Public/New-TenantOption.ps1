@@ -2,10 +2,10 @@
 Function New-TenantOption {
 <#
 .SYNOPSIS
-New tenant option
+Create tenant option
 
 .DESCRIPTION
-New tenant option
+Create tenant option
 
 .LINK
 c8y tenantOptions create

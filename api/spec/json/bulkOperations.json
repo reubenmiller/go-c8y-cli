@@ -9,7 +9,7 @@
     {
       "name": "getBulkOperationCollection",
       "method": "GET",
-      "description": "Get a collection of bulk operations",
+      "description": "Get bulk operation collection",
       "descriptionLong": "Get a collection of bulk operations",
       "path": "devicecontrol/bulkoperations",
       "accept": "application/vnd.com.nsn.cumulocity.bulkOperationCollection+json",
@@ -51,7 +51,8 @@
     },
     {
       "name": "getBulkOperation",
-      "description": "Get bulk operation/s",
+      "description": "Get bulk operation",
+      "descriptionLong": "Get an existing bulk operation",
       "method": "GET",
       "examples": {
         "powershell": [
@@ -93,7 +94,8 @@
     },
     {
       "name": "deleteBulkOperation",
-      "description": "Remove bulk operation/s. Only bulk operations that are in ACTIVE or IN_PROGRESS can be deleted",
+      "description": "Delete bulk operation",
+      "descriptionLong": "Delete bulk operation/s. Only bulk operations that are in ACTIVE or IN_PROGRESS can be deleted",
       "method": "DELETE",
       "examples": {
         "powershell": [
@@ -136,7 +138,7 @@
       "method": "POST",
       "path": "devicecontrol/bulkoperations",
       "accept": "application/vnd.com.nsn.cumulocity.bulkoperation+json",
-      "description": "Create a new bulk operation",
+      "description": "Create bulk operation",
       "descriptionLong": "Create a new bulk operation",
       "examples": {
         "powershell": [

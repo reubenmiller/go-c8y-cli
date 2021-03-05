@@ -21,7 +21,7 @@ func NewResetUserPasswordCmd() *ResetUserPasswordCmd {
 	ccmd := &ResetUserPasswordCmd{}
 	cmd := &cobra.Command{
 		Use:   "resetUserPassword",
-		Short: "Reset a user's password",
+		Short: "Reset user password",
 		Long:  `The password can be reset either by issuing a password reset email (default), or be specifying a new password.`,
 		Example: `
 $ c8y users resetUserPassword --id "myuser"

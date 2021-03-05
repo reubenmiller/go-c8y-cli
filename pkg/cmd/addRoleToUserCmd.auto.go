@@ -20,11 +20,11 @@ type AddRoleToUserCmd struct {
 func NewAddRoleToUserCmd() *AddRoleToUserCmd {
 	ccmd := &AddRoleToUserCmd{}
 	cmd := &cobra.Command{
-		Use:   "addRoleTouser",
-		Short: "Add role to a user",
-		Long:  ``,
+		Use:   "addRoleToUser",
+		Short: "Add Role to user",
+		Long:  `Add a role to an existing user`,
 		Example: `
-$ c8y userRoles addRoleTouser --user "myuser" --role "ROLE_ALARM_READ"
+$ c8y userRoles addRoleToUser --user "myuser" --role "ROLE_ALARM_READ"
 Add a role (ROLE_ALARM_READ) to a user
         `,
 		PreRunE: validateCreateMode,

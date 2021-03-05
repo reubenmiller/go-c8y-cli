@@ -22,13 +22,13 @@ func NewGetOperationCollectionCmd() *GetOperationCollectionCmd {
 	ccmd := &GetOperationCollectionCmd{}
 	cmd := &cobra.Command{
 		Use:   "list",
-		Short: "Get a collection of operations based on filter parameters",
+		Short: "Get operation collection",
 		Long:  `Get a collection of operations based on filter parameters`,
 		Example: `
 $ c8y operations list --status PENDING
 Get a list of pending operations
 
-$ c8y operations list --agent myagent --status PENDING
+$ c8y operations list --agent myAgent --status PENDING
 Get a list of pending operations for a given agent and all of its child devices
 
 $ c8y operations list --device mydevice --status PENDING

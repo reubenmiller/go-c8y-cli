@@ -22,8 +22,8 @@ func NewGetUserMembershipCollectionCmd() *GetUserMembershipCollectionCmd {
 	ccmd := &GetUserMembershipCollectionCmd{}
 	cmd := &cobra.Command{
 		Use:   "listUserMembership",
-		Short: "Get information about all groups that a user is a member of",
-		Long:  ``,
+		Short: "get user membership collection",
+		Long:  `Get information about all groups that a user is a member of`,
 		Example: `
 $ c8y users listUserMembership --id "myuser"
 Get a list of groups that a user belongs to

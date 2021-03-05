@@ -21,8 +21,8 @@ func NewAddRoleToGroupCmd() *AddRoleToGroupCmd {
 	ccmd := &AddRoleToGroupCmd{}
 	cmd := &cobra.Command{
 		Use:   "addRoleToGroup",
-		Short: "Add role to a group",
-		Long:  `Assign a role to a user group`,
+		Short: "Add role to user group",
+		Long:  `Add a role to an existing user group`,
 		Example: `
 $ c8y userRoles addRoleToGroup --group "customGroup1*" --role "*ALARM*"
 Add a role to the admin group

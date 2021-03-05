@@ -21,7 +21,7 @@ func NewRequestDeviceCredentialsCmd() *RequestDeviceCredentialsCmd {
 	ccmd := &RequestDeviceCredentialsCmd{}
 	cmd := &cobra.Command{
 		Use:   "requestDeviceCredentials",
-		Short: "Request credentials for a new device",
+		Short: "Request device credentials",
 		Long:  `Device credentials can be enquired by devices that do not have credentials for accessing a tenant yet. Since the device does not have credentials yet, a set of fixed credentials is used for this API. The credentials can be obtained by contacting support. Do not use your tenant credentials with this API.`,
 		Example: `
 $ c8y devices requestDeviceCredentials --id "device-AD76-matrixer"

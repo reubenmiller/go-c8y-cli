@@ -21,8 +21,8 @@ func NewDeleteManagedObjectCmd() *DeleteManagedObjectCmd {
 	ccmd := &DeleteManagedObjectCmd{}
 	cmd := &cobra.Command{
 		Use:   "delete",
-		Short: "Delete inventory/s",
-		Long:  `Delete a managed object by id`,
+		Short: "Delete managed object",
+		Long:  `Delete an existing managed object`,
 		Example: `
 $ c8y inventory delete --id 12345
 Delete a managed object

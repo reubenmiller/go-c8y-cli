@@ -2,7 +2,7 @@
 Function Get-MicroserviceCollection {
 <#
 .SYNOPSIS
-Get collection of microservices
+Get microservice collection
 
 .DESCRIPTION
 Get a collection of microservices in the current tenant

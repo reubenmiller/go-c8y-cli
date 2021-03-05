@@ -21,8 +21,8 @@ func NewNewBinaryCmd() *NewBinaryCmd {
 	ccmd := &NewBinaryCmd{}
 	cmd := &cobra.Command{
 		Use:   "create",
-		Short: "New inventory binary",
-		Long:  `Upload a new binary to Cumulocity`,
+		Short: "Create binary",
+		Long:  `Create/upload a new binary to Cumulocity`,
 		Example: `
 $ c8y binaries create --file ./output.log
 Upload a log file
