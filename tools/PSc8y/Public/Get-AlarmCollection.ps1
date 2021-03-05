@@ -2,7 +2,7 @@
 Function Get-AlarmCollection {
 <#
 .SYNOPSIS
-Get a collection of alarms
+Get alarm collection
 
 .DESCRIPTION
 Get a collection of alarms based on filter parameters

@@ -9,7 +9,7 @@ information:
 endpoints:
   - name: getAlarmCollection
     method: GET
-    description: Get a collection of alarms
+    description: Get alarm collection
     descriptionLong: Get a collection of alarms based on filter parameters
     examples:
       powershell:
