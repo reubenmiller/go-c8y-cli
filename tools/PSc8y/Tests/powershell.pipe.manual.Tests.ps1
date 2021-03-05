@@ -8,7 +8,7 @@ Describe -Name "powershell pipes" {
 
     Context "Get commands" {
         It "Pipe by id a simple getter" {
-            $output = ,$deviceIds | Get-ManagedObject -AsJSON -Verbose 2>&1
+            $output = ,$deviceIds | Get-ManagedObject -AsJSON -Debug 2>&1
             $LASTEXITCODE | Should -Be 0
             $output -match "Loaded session:" | Should -HaveCount 1
             $output -match "adding job: 2" | Should -HaveCount 1
@@ -25,7 +25,7 @@ Describe -Name "powershell pipes" {
 
     Context "Update commands" {
         It "Pipe by id a update managed object" {
-            $output = ,$deviceIds | Update-Device -Data "myvalue=1" -AsJSON -Verbose 2>&1
+            $output = ,$deviceIds | Update-Device -Data "myvalue=1" -AsJSON -Debug 2>&1
             $LASTEXITCODE | Should -Be 0
             $output -match "Loaded session:" | Should -HaveCount 1
             $output -match "adding job: 2" | Should -HaveCount 1
@@ -35,7 +35,7 @@ Describe -Name "powershell pipes" {
         }
 
         It "Pipe by id a update managed object using hashtable as body" {
-            $output = ,$deviceIds | Update-Device -Data @{myvalue = 1} -AsJSON -Verbose 2>&1
+            $output = ,$deviceIds | Update-Device -Data @{myvalue = 1} -AsJSON -Debug 2>&1
             $LASTEXITCODE | Should -Be 0
             $output -match "Loaded session:" | Should -HaveCount 1
             $output -match "adding job: 2" | Should -HaveCount 1
@@ -77,7 +77,7 @@ Describe -Name "powershell pipes" {
 
     Context "Device creation" {
         It "accepts devices names from the pipeline" {
-            $output = ,@("device01", "device02") | New-Device -WhatIf 2>&1
+            $output = ,@("device01", "device02") | New-Device -WhatIf -Debug 2>&1
             $LASTEXITCODE | Should -Be 0
             $output -match "Loaded session:" | Should -HaveCount 1
             $output -match "adding job: 2" | Should -HaveCount 1
