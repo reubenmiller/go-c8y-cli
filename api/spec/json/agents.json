@@ -179,7 +179,7 @@
     },
     {
       "name": "createAgent",
-      "description": "Create an agent",
+      "description": "Create agent",
       "descriptionLong": "Create an agent managed object. An agent is a special device managed object with both the\nc8y_IsDevice and com_cumulocity_model_Agent fragments.\n",
       "method": "POST",
       "path": "inventory/managedObjects",

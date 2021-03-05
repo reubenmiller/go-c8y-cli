@@ -209,7 +209,10 @@ func runBatched(requestIterator *RequestIterator, commonOptions CommonCommandOpt
 				promptWG.Wait()
 
 				operation := "Execute command"
-				if len(os.Args[1:]) > 1 {
+				if commonOptions.ConfirmText != "" {
+					operation = commonOptions.ConfirmText
+				} else if len(os.Args[1:]) > 1 {
+					// build confirm text from cmd structure
 					operation = fmt.Sprintf("%s %s", os.Args[2], strings.TrimRight(os.Args[1], "s"))
 				}
 				promptMessage, err := getConfirmationMessage(fmt.Sprintf("(job: %d) %s", jobID, operation), request, input)
@@ -388,7 +391,7 @@ func getConfirmationMessage(prefix string, request *c8y.RequestOptions, input in
 	}
 
 	target := ""
-	if id != "" {
+	if id != "" && isID(id) {
 		target += "id=" + id
 	}
 
@@ -403,4 +406,13 @@ func getConfirmationMessage(prefix string, request *c8y.RequestOptions, input in
 	}
 
 	return prefix, nil
+}
+
+func isID(v string) bool {
+	isNotDigit := func(c rune) bool { return c < '0' || c > '9' }
+	value := strings.TrimSpace(v)
+	if strings.IndexFunc(value, isNotDigit) > -1 {
+		return false
+	}
+	return true
 }

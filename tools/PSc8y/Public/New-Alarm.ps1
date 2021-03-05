@@ -2,7 +2,7 @@
 Function New-Alarm {
 <#
 .SYNOPSIS
-Create an alarm
+Create alarm
 
 .DESCRIPTION
 Create an alarm on a device or agent.

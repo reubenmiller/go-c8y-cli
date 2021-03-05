@@ -130,7 +130,7 @@
       "method": "POST",
       "path": "alarm/alarms",
       "accept": "application/vnd.com.nsn.cumulocity.alarm+json",
-      "description": "Create an alarm",
+      "description": "Create alarm",
       "descriptionLong": "Create an alarm on a device or agent.",
       "examples": {
         "powershell": [

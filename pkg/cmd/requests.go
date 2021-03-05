@@ -32,6 +32,7 @@ import (
 // CommonCommandOptions control the handling of the response which are available for all commands
 // which interact with the server
 type CommonCommandOptions struct {
+	ConfirmText    string
 	OutputFile     string
 	Filters        *JSONFilters
 	ResultProperty string
@@ -94,6 +95,8 @@ func getCommonOptions(cmd *cobra.Command) (CommonCommandOptions, error) {
 
 	options.CurrentPage = globalFlagCurrentPage
 	options.TotalPages = globalFlagTotalPages
+
+	options.ConfirmText = cmd.Short
 
 	return options, nil
 }

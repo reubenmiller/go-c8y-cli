@@ -2,7 +2,7 @@
 Function New-Agent {
 <#
 .SYNOPSIS
-Create an agent
+Create agent
 
 .DESCRIPTION
 Create an agent managed object. An agent is a special device managed object with both the
