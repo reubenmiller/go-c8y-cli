@@ -150,6 +150,9 @@ func (n *listSessionCmd) listSession(cmd *cobra.Command, args []string) error {
 {{ "Username:" | faint }}	{{ .Username | hide }}
 `,
 	}
+	templates.Help = fmt.Sprintf(`{{ "Use the arrow keys to navigate (some terminals require you to hold control as well):" | faint }} {{ .NextKey | faint }} ` +
+		`{{ .PrevKey | faint }} {{ .PageDownKey | faint }} {{ .PageUpKey | faint }} ` +
+		`{{ if .Search }} {{ "and" | faint }} {{ .SearchKey | faint }} {{ "toggles search" | faint }}{{ end }}`)
 
 	filteredSessions := make([]CumulocitySession, 0)
 	sessionIndex := 1
@@ -176,6 +179,15 @@ func (n *listSessionCmd) listSession(cmd *cobra.Command, args []string) error {
 		Templates:         templates,
 		Size:              10,
 		Searcher:          searcher,
+	}
+
+	// Customize select keys
+	prompt.Keys = &promptui.SelectKeys{
+		Prev:     promptui.Key{Code: promptui.KeyPrev, Display: promptui.KeyPrevDisplay + ""},
+		Next:     promptui.Key{Code: promptui.KeyNext, Display: promptui.KeyNextDisplay + ""},
+		PageUp:   promptui.Key{Code: promptui.KeyBackward, Display: promptui.KeyBackwardDisplay + ""},
+		PageDown: promptui.Key{Code: promptui.KeyForward, Display: promptui.KeyForwardDisplay + ""},
+		Search:   promptui.Key{Code: '/', Display: "/"},
 	}
 
 	var idx int
