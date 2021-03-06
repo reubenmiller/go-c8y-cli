@@ -366,13 +366,12 @@ func getCurlCommands(req *http.Request) (shell string, pwsh string, err error) {
 }
 
 func fetchAllResults(req c8y.RequestOptions, resp *c8y.Response, commonOptions CommonCommandOptions) error {
-
-	if req.DryRun {
+	if req.DryRun || (resp != nil && resp.StatusCode == 0) {
 		return nil
 	}
 
 	// check if response does really contain a response
-	if resp == nil || resp.StatusCode != 0 {
+	if resp == nil {
 		return fmt.Errorf("Response is empty")
 	}
 
@@ -475,12 +474,12 @@ func fetchAllResults(req c8y.RequestOptions, resp *c8y.Response, commonOptions C
 }
 
 func fetchAllInventoryQueryResults(req c8y.RequestOptions, resp *c8y.Response, commonOptions CommonCommandOptions) error {
-	if req.DryRun {
+	if req.DryRun || (resp != nil && resp.StatusCode == 0) {
 		return nil
 	}
 
 	// check if response does really contain a response
-	if resp == nil || resp.StatusCode != 0 {
+	if resp == nil {
 		return fmt.Errorf("Response is empty")
 	}
 
