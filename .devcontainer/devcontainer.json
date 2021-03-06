@@ -12,6 +12,7 @@
 		"terminal.integrated.shell.linux": "/bin/bash",
 		"go.gopath": "/go",
 		"go.goroot": "/usr/local/go",
+		"go.lintTool": "golangci-lint",
 		// "go.inferGopath": true,
 		"go.useLanguageServer": true,
 
