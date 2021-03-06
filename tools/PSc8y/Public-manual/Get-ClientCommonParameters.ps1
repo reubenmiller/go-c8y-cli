@@ -94,6 +94,9 @@ Inherit common parameters to a custom function. This will add parameters such as
         New-DynamicParam -Name WithError -Type "switch" -DPDictionary $Dictionary
         New-DynamicParam -Name SilentStatusCodes -Type "string" -DPDictionary $Dictionary
 
+        # WhatIf options
+        New-DynamicParam -Name WhatIfFormat -Type "string" -ValidateSet @("markdown", "json", "dump", "curl") -DPDictionary $Dictionary
+
         # Workers
         New-DynamicParam -Name Workers -Type "int" -DPDictionary $Dictionary
         New-DynamicParam -Name Delay -Type "int" -DPDictionary $Dictionary

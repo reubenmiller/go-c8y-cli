@@ -28,7 +28,7 @@ Function New-ClientArgument {
         $BoundParameters = @{} + $Parameters
 
         # strip automatic variables
-        $BoundParameters.Keys -match "(Verbose|WhatIf|Variable|Action|Confirm|Buffer|Debug|AsJSON|AsHashtable|AsCSV|AsCSVWithHeader|Force|Color|Pretty)$" | ForEach-Object {
+        $BoundParameters.Keys -match "(Verbose|WhatIf|WhatIfFormat|Variable|Action|Confirm|Buffer|Debug|AsJSON|AsHashtable|AsCSV|AsCSVWithHeader|Force|Color|Pretty)$" | ForEach-Object {
             $BoundParameters.Remove($_)
         }
 
@@ -107,6 +107,10 @@ Function New-ClientArgument {
 
         if ($WhatIfPreference) {
             $null = $c8yargs.Add("--dry")
+        }
+
+        if ($Parameters["WhatIfFormat"]) {
+            $null = $c8yargs.AddRange(("--dryFormat={0}" -f $Parameters["WhatIfFormat"]))
         }
 
         # Always use verbose as information is extracted from it
