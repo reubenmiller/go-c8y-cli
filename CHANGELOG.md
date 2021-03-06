@@ -8,7 +8,7 @@ As a workaround, use the `data` parameter when working with large numbers (and d
 
 **Example**
 
-*datapoint.largeint.json*
+*datapoint.largeInt.json*
 
 ```json
 {
@@ -20,7 +20,7 @@ As a workaround, use the `data` parameter when working with large numbers (and d
 ```
 
 ```sh
-c8y inventory create --data "./datapoint.largeint.json"
+c8y inventory create --data "./datapoint.largeInt.json"
 ```
 
 ## Failing tests
@@ -29,11 +29,17 @@ None :)
 
 ## TODO
 
+* Add custom prompt text global flag to make it easier for users to extend.
+* remove powershell should process prompts (now handled by c8y binary)
 * Improve go confirmation prompts to include id/name information (if available)
+  * Creating entities on devices should include the device ids to prompt information (id and name if possible)
+  * c8y alarms create --device xxxxx --type "myType" --text "Test alarm" --severity MAJOR 
+    ? Confirm: (job: 1) Create alarm on tenant t12345? [y] Yes [a] Yes to All [n] No. Default is 'y':
 * Show message to user if deleting on terminal (i.e. DELETED NO Content, some kind of feedback so the user knows that something has happened.)
 * Create activity log cmdlets?
   * Get recent history, get commands with filter (api, host, method etc.)
-
+* Add -WhatIfFormat to 
+* Rename --dry to --whatIf for consistency with powershell --whatIfFormat
 
 ## Unreleased
 
@@ -85,7 +91,7 @@ No unreleased features
     * input.index (current iteration when using pipelines)
 
 * TODO: Create custom ConvertFrom-Json
-    * Replace ConvertFrom-Json -Depth calls in code as the default is already high enough (1024). This simpifies the code as the check for powershell version can be ignored
+    * Replace ConvertFrom-Json -Depth calls in code as the default is already high enough (1024). This simplifies the code as the check for powershell version can be ignored
     * add options to strip out cumulocity noise (i.e. additionParents etc.)
 * TODO: Make -InformationVariable or at least ErrorVariable work when using IncludeAll
 
@@ -129,7 +135,7 @@ No unreleased features
 
 #### PowerShell
 
-* Renamed all user group related cmdelts from "Group" to "UserGroup"
+* Renamed all user group related cmdlets from "Group" to "UserGroup"
     |From|New Name|
     |-|-|
     |New-Group|New-UserGroup|
@@ -232,7 +238,7 @@ The activity log settings can be set for individual c8y sessions or globally in 
     **Example: Add a fragment based on the type name**
 
     ```sh
-    seq 1 | c8y devices create --data "type=myvalue" \
+    seq 1 | c8y devices create --data "type=myValue" \
         | c8y devices update --template "{ [input.value.type]: {} }"
     ```
 
@@ -248,7 +254,7 @@ The activity log settings can be set for individual c8y sessions or globally in 
 * `--progress` bar can be used when performing operations in a pipeline.
 
     ```
-    cat mylist.txt | c8y inventory get --progress
+    cat myList.txt | c8y inventory get --progress
     ```
 
 ### PSc8y improvements
@@ -322,7 +328,7 @@ The activity log settings can be set for individual c8y sessions or globally in 
 
     Headers:
     Accept: application/json
-    Authorization: Basic asdfasfd........
+    Authorization: Basic {base64 tenant/username:password}
     Content-Type: application/json
     User-Agent: go-client
     X-Application: go-client
@@ -370,7 +376,7 @@ The activity log settings can be set for individual c8y sessions or globally in 
         ```
 #### Minor Changes
 
-* Updated PowerShell version from 7.0 to 7.1.1 inside docker image `c8y-pwsh`. This fixed a bug when using `Foreach-Object -Parallel` which would re-import modules instead of re-using it within each runspace.
+* Updated PowerShell version from 7.0 to 7.1.1 inside docker image `c8y-pwsh`. This fixed a bug when using `Foreach-Object -Parallel` which would re-import modules instead of re-using it within each run space.
 * PSc8y will enforce PowerShell encoding to UTF8 to prevent encoding issues when sending data to the c8y go binary. The console encoding will be changed when importing `PSc8y`. UTF8 is the only text encoding supported. This mainly effects Windows, as MacOS and Linux use UTF8 encoding on the console by default.
 * Added a global `--noColor` to the c8y binary to remove console colours from the log messages to make it easier to parse entries. By default PowerShell uses this option when calling the c8y binary as PowerShell handling the coloured log output itself.
 
@@ -404,10 +410,10 @@ The activity log settings can be set for individual c8y sessions or globally in 
     # API calls: 2 x GET    (previously 5 x GET!)
     Get-Device 1234 | Get-Device
 
-    # API calls: 1 x GET and 1 x PUT    (prevously 4 x GET and 1 x PUT)
+    # API calls: 1 x GET and 1 x PUT    (previously 4 x GET and 1 x PUT)
     Get-Device 1234 | Update-Device
 
-    # API calls: 1 x POST   (prevously 3 x GET and 1 x POST)
+    # API calls: 1 x POST   (previously 3 x GET and 1 x POST)
     Add-DeviceToGroup -Group 11111 -NewChildDevice 222222 -ProcessingMode QUIESCENT -Force
     ```
 
@@ -438,7 +444,7 @@ The activity log settings can be set for individual c8y sessions or globally in 
     ./my-script.ps1 -Device 12345
 
     # array of items mixing ids with names
-    ./my-script.ps1 -Device "myDevicename", 1234
+    ./my-script.ps1 -Device "myDeviceName", 1234
 
     # using pipelines from other PSc8y cmdlets
     Get-DeviceCollection | ./my-script.ps1
@@ -476,7 +482,7 @@ The activity log settings can be set for individual c8y sessions or globally in 
     deviceParents   : @{references=System.Object[]; self=https://example.cumulocity.com/inventory/managedObjects/1234/deviceParents}
     id              : 1234
     lastUpdated     : 1/19/2021 8:52:29 PM
-    name            : mynewname
+    name            : myNewName
     owner           : user@example.com
     self            : https://example.cumulocity.com/inventory/managedObjects/3882
     ```
@@ -499,7 +505,7 @@ The activity log settings can be set for individual c8y sessions or globally in 
 
 #### Performance improvements
 
-* Reduced number of API calls within PSc8y and c8y binary by skipping lookups when an ID is given by the user. Previously PSc8y and c8y were sending two API calls to the server in order to normalize the request by retrieving additional information and potentiall shown to the user. Since this is currently not used, it has been removed.
+* Reduced number of API calls within PSc8y and c8y binary by skipping lookups when an ID is given by the user. Previously PSc8y and c8y were sending two API calls to the server in order to normalize the request by retrieving additional information and potential shown to the user. Since this is currently not used, it has been removed.
 
 #### Bug fixes
 
@@ -689,20 +695,20 @@ The activity log settings can be set for individual c8y sessions or globally in 
 ### v1.8.0
 
 * `Get-Session` uses a new c8y session get to retrieve information about the current session
-* Fixed bug when using the `-Session` on PUT and POST commands which resulted in an error being displayed eventhough the request would be successful
+* Fixed bug when using the `-Session` on PUT and POST commands which resulted in an error being displayed even though the request would be successful
 * `Expand-Device` supports piping of alarms, events, measurements and operations
 * Added `-ProcessingMode` parameter to all commands that use DELETE, PUT and POST requests.
 
     ```powershell
-    New-ManagedObject -Name myobject -ProcessingMode TRANSIENT
-    New-ManagedObject -Name myobject -ProcessingMode QUIESCENT
-    New-ManagedObject -Name myobject -ProcessingMode PERSISTENT
-    New-ManagedObject -Name myobject -ProcessingMode CEP
+    New-ManagedObject -Name myObject -ProcessingMode TRANSIENT
+    New-ManagedObject -Name myObject -ProcessingMode QUIESCENT
+    New-ManagedObject -Name myObject -ProcessingMode PERSISTENT
+    New-ManagedObject -Name myObject -ProcessingMode CEP
     ```
 * `Set-session` automatically selects a session if only one matching session is found rather than prompting the user for the selection
 * `source` fragment is removed when being passed via file to the `Data` parameter in all create and update commands
     ```json
-    // myevent.json
+    // myEvent.json
     {
         "source": {
             "id": "99999",
@@ -715,13 +721,13 @@ The activity log settings can be set for individual c8y sessions or globally in 
 
     When executing the following command:
     ```powershell
-    PSc8y\New-Event -Device 12345 -Data myevent.json
+    PSc8y\New-Event -Device 12345 -Data myEvent.json
     ```
 
     The `source` id fragment will be replaced entirely by the new source as specified by the `Device` parameter
 
     ```json
-    // myevent.json
+    // myEvent.json
     {
         "source": {
             "id": "12345",
@@ -764,7 +770,7 @@ The activity log settings can be set for individual c8y sessions or globally in 
     ```powershell
     New-ServiceUser -Name "myapp1" -Roles "ROLE_INVENTORY_READ" -Tenants "t12345"
 
-    Get-Serviceuser -Name "myapp1"
+    Get-ServiceUser -Name "myapp1"
     ```
 * Fixed target tenant confirmation when using the `-Session` parameter on PUT/POST commands
 * `Invoke-ClientRequest`: Added support for `-Template` and `-TemplateVars` parameters
@@ -815,13 +821,13 @@ The activity log settings can be set for individual c8y sessions or globally in 
     **PowerShell**
 
     ```powershell
-    Invoke-ClientRequest -Uri "/service/exampleMS/myendpoint" -Method "POST"
+    Invoke-ClientRequest -Uri "/service/exampleMS/endpoint" -Method "POST"
     ```
 
     **Bash/zsh**
 
     ```sh
-    c8y rest POST /service/exampleMS/myendpoint
+    c8y rest POST /service/exampleMS/endpoint
     ```
 
 * Added command to read the current configuration settings as json
@@ -889,7 +895,7 @@ The activity log settings can be set for individual c8y sessions or globally in 
     **Bash/zsh**
 
     ```sh
-    c8y template execute --template ./mytemplate.jsonnet
+    c8y template execute --template ./template.jsonnet
     ```
 
     **PowerShell**
@@ -997,11 +1003,11 @@ The activity log settings can be set for individual c8y sessions or globally in 
 
 * Renamed `Watch-NotificationChannels` to `Watch-NotificationChannel`
 
-* `Watch-*` cmdlets now support piping results as soon as they are received rather than waiting for the duration expire before passing the results back. This enables more complex scenarios, and adhoc event processing tasks
+* `Watch-*` cmdlets now support piping results as soon as they are received rather than waiting for the duration expire before passing the results back. This enables more complex scenarios, and ad hoc event processing tasks
 
     **Examples**
 
-    Update each alarm which comes in with the serverity CRITICAL. `Update-Alarm` will be run as soon as a result is received, and not just after the 60 second duration of `Watch-Alarm`. 
+    Update each alarm which comes in with the severity CRITICAL. `Update-Alarm` will be run as soon as a result is received, and not just after the 60 second duration of `Watch-Alarm`. 
 
     ```powershell
     Watch-Alarm -Device 12345 -DurationSec 60 | Update-Alarm -Severity CRITICAL -Force
@@ -1077,8 +1083,8 @@ The activity log settings can be set for individual c8y sessions or globally in 
     * `c8y devices listDeviceGroups`
 
 * Added common options to (i.e. --outputFile, --pretty)
-    * `c8y micrservices create`
-    * `c8y micrservices createHostedApplication`
+    * `c8y microservices create`
+    * `c8y microservices createHostedApplication`
 
 * Added bash profile script to add support for aliases
 * Added guide to creating custom bash aliases
@@ -1097,7 +1103,7 @@ The activity log settings can be set for individual c8y sessions or globally in 
 
 #### Docs
 
-* Fixed line wrapping within code blocks. Now horizontal scrollbars are show to preserve the line spacing.
+* Fixed line wrapping within code blocks. Now horizontal scroll bars are show to preserve the line spacing.
 * Added github project link
 
 #### Build
