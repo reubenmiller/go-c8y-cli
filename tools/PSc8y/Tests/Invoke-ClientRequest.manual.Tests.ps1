@@ -187,13 +187,17 @@ Describe -Name "Invoke-ClientRequest" {
                     prop1 = $false
                 }
             } `
-            -WhatIf 2>&1
+            -WithError `
+            -WhatIfFormat "json" `
+            -WhatIf
 
         $LASTEXITCODE | Should -Be 0
         $output | Should -Not -BeNullOrEmpty
 
-        ($output | Out-String) | Should -BeLike "*MyHeader: SomeValue*"
-        ($output | Out-String) | Should -BeLike "*2: 1*"
+        $request = $output | ConvertFrom-Json
+        $request | Should -HaveCount 1
+        $request.headers.MyHeader | Should -BeExactly "SomeValue"
+        $request.headers.2 | Should -BeExactly "1"
     }
 
     It "Sends a request without a body" {
@@ -212,11 +216,15 @@ Describe -Name "Invoke-ClientRequest" {
             -Uri "/inventory/managedObjects" `
             -Method "post" `
             -Data @{} `
+            -WithError `
+            -WhatIfFormat "json" `
             -WhatIf 2>&1
 
         $LASTEXITCODE | Should -Be 0
         $output | Should -Not -BeNullOrEmpty
-        $output | Out-String | Should -match "(?ms)Body:\s*(\{.*\})"
+        $request = $output | ConvertFrom-Json
+        $request | Should -HaveCount 1
+        ($request.body | ConvertTo-Json) | Should -BeExactly "{}"
     }
 
     It "Sends a request using templates" {
