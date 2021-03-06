@@ -13,10 +13,12 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// ResetUserPasswordCmd command
 type ResetUserPasswordCmd struct {
 	*baseCmd
 }
 
+// NewResetUserPasswordCmd creates a command to Reset user password
 func NewResetUserPasswordCmd() *ResetUserPasswordCmd {
 	ccmd := &ResetUserPasswordCmd{}
 	cmd := &cobra.Command{
@@ -54,6 +56,7 @@ Update a user
 	return ccmd
 }
 
+// RunE executes the command
 func (n *ResetUserPasswordCmd) RunE(cmd *cobra.Command, args []string) error {
 	var err error
 	inputIterators, err := flags.NewRequestInputIterators(cmd)

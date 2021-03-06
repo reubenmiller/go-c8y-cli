@@ -70,7 +70,6 @@ func newBaseCmd(cmd *cobra.Command) *baseCmd {
 
 type c8yCmd struct {
 	cobra.Command
-	client *c8y.Client
 	Logger *logger.Logger
 	useEnv bool
 }
@@ -195,7 +194,6 @@ var (
 	globalFlagIgnoreAccept           bool
 	globalFlagNoColor                bool
 	globalFlagSessionFile            string
-	globalFlagConfigFile             string
 	globalFlagOutputFile             string
 	globalFlagUseEnv                 bool
 	globalFlagRaw                    bool
@@ -204,8 +202,6 @@ var (
 	globalFlagNoLog                  bool
 	globalFlagActivityLogMessage     string
 	globalFlagTimeout                float64
-	globalFlagUseTenantPrefix        bool
-	globalUseNonDefaultPageSize      bool
 	globalCSVOutput                  bool
 	globalCSVOutputHeaders           bool
 	globalFlagTemplatePath           string
@@ -514,6 +510,9 @@ func configureRootCmd() {
 
 	// currentApplication commands
 	rootCmd.AddCommand(NewCurrentApplicationRootCmd().getCommand())
+
+	// currentUser commands
+	rootCmd.AddCommand(newCurrentUserRootCmd().getCommand())
 
 	// databroker commands
 	rootCmd.AddCommand(NewDatabrokerRootCmd().getCommand())

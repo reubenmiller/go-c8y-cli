@@ -45,6 +45,9 @@ func (f *applicationFetcher) getByName(name string) ([]fetcherResultSet, error) 
 			PaginationOptions: *c8y.NewPaginationOptions(2000),
 		},
 	)
+	if err != nil {
+		return nil, err
+	}
 
 	pattern, err := regexp.Compile(name)
 

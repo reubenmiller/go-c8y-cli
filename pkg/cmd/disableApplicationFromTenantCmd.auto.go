@@ -13,10 +13,12 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// DisableApplicationFromTenantCmd command
 type DisableApplicationFromTenantCmd struct {
 	*baseCmd
 }
 
+// NewDisableApplicationFromTenantCmd creates a command to Unsubscribe application
 func NewDisableApplicationFromTenantCmd() *DisableApplicationFromTenantCmd {
 	ccmd := &DisableApplicationFromTenantCmd{}
 	cmd := &cobra.Command{
@@ -53,6 +55,7 @@ Disable an application of a tenant by name
 	return ccmd
 }
 
+// RunE executes the command
 func (n *DisableApplicationFromTenantCmd) RunE(cmd *cobra.Command, args []string) error {
 	var err error
 	inputIterators, err := flags.NewRequestInputIterators(cmd)

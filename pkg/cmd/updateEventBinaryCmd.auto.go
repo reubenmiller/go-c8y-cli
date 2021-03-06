@@ -13,10 +13,12 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// UpdateEventBinaryCmd command
 type UpdateEventBinaryCmd struct {
 	*baseCmd
 }
 
+// NewUpdateEventBinaryCmd creates a command to Update event binary
 func NewUpdateEventBinaryCmd() *UpdateEventBinaryCmd {
 	ccmd := &UpdateEventBinaryCmd{}
 	cmd := &cobra.Command{
@@ -55,6 +57,7 @@ Update a binary related to an event
 	return ccmd
 }
 
+// RunE executes the command
 func (n *UpdateEventBinaryCmd) RunE(cmd *cobra.Command, args []string) error {
 	var err error
 	inputIterators, err := flags.NewRequestInputIterators(cmd)

@@ -14,10 +14,12 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// GetOperationCollectionCmd command
 type GetOperationCollectionCmd struct {
 	*baseCmd
 }
 
+// NewGetOperationCollectionCmd creates a command to Get operation collection
 func NewGetOperationCollectionCmd() *GetOperationCollectionCmd {
 	ccmd := &GetOperationCollectionCmd{}
 	cmd := &cobra.Command{
@@ -65,6 +67,7 @@ Get a list of pending operations for a device
 	return ccmd
 }
 
+// RunE executes the command
 func (n *GetOperationCollectionCmd) RunE(cmd *cobra.Command, args []string) error {
 	var err error
 	inputIterators, err := flags.NewRequestInputIterators(cmd)

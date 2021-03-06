@@ -13,10 +13,12 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// UpdateUserCurrentCmd command
 type UpdateUserCurrentCmd struct {
 	*baseCmd
 }
 
+// NewUpdateUserCurrentCmd creates a command to Update current user
 func NewUpdateUserCurrentCmd() *UpdateUserCurrentCmd {
 	ccmd := &UpdateUserCurrentCmd{}
 	cmd := &cobra.Command{
@@ -59,6 +61,7 @@ Update the current user's last name
 	return ccmd
 }
 
+// RunE executes the command
 func (n *UpdateUserCurrentCmd) RunE(cmd *cobra.Command, args []string) error {
 	var err error
 	inputIterators, err := flags.NewRequestInputIterators(cmd)

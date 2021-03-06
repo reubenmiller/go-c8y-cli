@@ -13,10 +13,12 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// DeleteApplicationCmd command
 type DeleteApplicationCmd struct {
 	*baseCmd
 }
 
+// NewDeleteApplicationCmd creates a command to Delete application
 func NewDeleteApplicationCmd() *DeleteApplicationCmd {
 	ccmd := &DeleteApplicationCmd{}
 	cmd := &cobra.Command{
@@ -55,6 +57,7 @@ Delete an application by name
 	return ccmd
 }
 
+// RunE executes the command
 func (n *DeleteApplicationCmd) RunE(cmd *cobra.Command, args []string) error {
 	var err error
 	inputIterators, err := flags.NewRequestInputIterators(cmd)

@@ -13,10 +13,12 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// ApproveNewDeviceRequestCmd command
 type ApproveNewDeviceRequestCmd struct {
 	*baseCmd
 }
 
+// NewApproveNewDeviceRequestCmd creates a command to Approve device request
 func NewApproveNewDeviceRequestCmd() *ApproveNewDeviceRequestCmd {
 	ccmd := &ApproveNewDeviceRequestCmd{}
 	cmd := &cobra.Command{
@@ -54,6 +56,7 @@ Approve a new device request
 	return ccmd
 }
 
+// RunE executes the command
 func (n *ApproveNewDeviceRequestCmd) RunE(cmd *cobra.Command, args []string) error {
 	var err error
 	inputIterators, err := flags.NewRequestInputIterators(cmd)

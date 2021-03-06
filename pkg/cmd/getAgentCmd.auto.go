@@ -14,10 +14,12 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// GetAgentCmd command
 type GetAgentCmd struct {
 	*baseCmd
 }
 
+// NewGetAgentCmd creates a command to Get agent
 func NewGetAgentCmd() *GetAgentCmd {
 	ccmd := &GetAgentCmd{}
 	cmd := &cobra.Command{
@@ -52,6 +54,7 @@ Get agent by id
 	return ccmd
 }
 
+// RunE executes the command
 func (n *GetAgentCmd) RunE(cmd *cobra.Command, args []string) error {
 	var err error
 	inputIterators, err := flags.NewRequestInputIterators(cmd)

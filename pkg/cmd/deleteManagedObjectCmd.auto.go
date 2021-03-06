@@ -13,10 +13,12 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// DeleteManagedObjectCmd command
 type DeleteManagedObjectCmd struct {
 	*baseCmd
 }
 
+// NewDeleteManagedObjectCmd creates a command to Delete managed object
 func NewDeleteManagedObjectCmd() *DeleteManagedObjectCmd {
 	ccmd := &DeleteManagedObjectCmd{}
 	cmd := &cobra.Command{
@@ -56,6 +58,7 @@ Delete a managed object
 	return ccmd
 }
 
+// RunE executes the command
 func (n *DeleteManagedObjectCmd) RunE(cmd *cobra.Command, args []string) error {
 	var err error
 	inputIterators, err := flags.NewRequestInputIterators(cmd)

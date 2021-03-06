@@ -14,10 +14,12 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// GetApplicationReferenceCollectionCmd command
 type GetApplicationReferenceCollectionCmd struct {
 	*baseCmd
 }
 
+// NewGetApplicationReferenceCollectionCmd creates a command to Get application reference collection
 func NewGetApplicationReferenceCollectionCmd() *GetApplicationReferenceCollectionCmd {
 	ccmd := &GetApplicationReferenceCollectionCmd{}
 	cmd := &cobra.Command{
@@ -53,6 +55,7 @@ Get a list of referenced applications on a given tenant (from management tenant)
 	return ccmd
 }
 
+// RunE executes the command
 func (n *GetApplicationReferenceCollectionCmd) RunE(cmd *cobra.Command, args []string) error {
 	var err error
 	inputIterators, err := flags.NewRequestInputIterators(cmd)

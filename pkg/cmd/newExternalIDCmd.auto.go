@@ -13,10 +13,12 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// NewExternalIDCmd command
 type NewExternalIDCmd struct {
 	*baseCmd
 }
 
+// NewNewExternalIDCmd creates a command to Create external id
 func NewNewExternalIDCmd() *NewExternalIDCmd {
 	ccmd := &NewExternalIDCmd{}
 	cmd := &cobra.Command{
@@ -56,6 +58,7 @@ Create external identity
 	return ccmd
 }
 
+// RunE executes the command
 func (n *NewExternalIDCmd) RunE(cmd *cobra.Command, args []string) error {
 	var err error
 	inputIterators, err := flags.NewRequestInputIterators(cmd)

@@ -268,7 +268,8 @@ func Test_UpdateEventBinary(t *testing.T) {
 
 	f, err := ioutil.TempFile(os.TempDir(), "eventBinary")
 	assert.OK(t, err)
-	f.WriteString("äüß1234dfÖ")
+	_, err = f.WriteString("äüß1234dfÖ")
+	assert.OK(t, err)
 	f.Close()
 	defer os.Remove(f.Name())
 
@@ -282,7 +283,7 @@ func Test_GetCurrentUserInventoryRole(t *testing.T) {
 	stdin := bytes.NewBufferString(`{"id":1}` + "\n")
 	cmd.SetIn(stdin)
 
-	cmdErr := ExecuteCmd(cmd, fmt.Sprintf("users getCurrentUserInventoryRole"))
+	cmdErr := ExecuteCmd(cmd, "users getCurrentUserInventoryRole")
 	assert.OK(t, cmdErr)
 }
 
@@ -292,7 +293,7 @@ func Test_EventListWithoutDeviceIterator(t *testing.T) {
 	// stdin := bytes.NewBufferString(`1` + "\n")
 	// cmd.SetIn(stdin)
 
-	cmdErr := ExecuteCmd(cmd, fmt.Sprintf("events list --dateFrom=-10d --type=my_CustomType2"))
+	cmdErr := ExecuteCmd(cmd, "events list --dateFrom=-10d --type=my_CustomType2")
 	assert.OK(t, cmdErr)
 }
 
@@ -310,20 +311,20 @@ func Test_PipingWithLookupNonExistant(t *testing.T) {
 	stdin := bytes.NewBufferString("pipeNameDoesNotExist1\npipeNameDoesNotExist2")
 	cmd.SetIn(stdin)
 
-	cmdErr := ExecuteCmd(cmd, fmt.Sprintf("events list --dry"))
+	cmdErr := ExecuteCmd(cmd, "events list --dry")
 	assert.OK(t, cmdErr)
 }
 
 func Test_NilQueryParameters(t *testing.T) {
 	cmd := setupTest()
 
-	cmdErr := ExecuteCmd(cmd, fmt.Sprintf("auditRecords list --dry"))
+	cmdErr := ExecuteCmd(cmd, "auditRecords list --dry")
 	assert.OK(t, cmdErr)
 }
 
 func Test_NilManagedObject(t *testing.T) {
 	cmd := setupTest()
-	cmdErr := ExecuteCmd(cmd, fmt.Sprintf("inventory create --dry"))
+	cmdErr := ExecuteCmd(cmd, "inventory create --dry")
 	assert.OK(t, cmdErr)
 }
 
@@ -333,19 +334,19 @@ func Test_PipingNamesToCommandExpectingIds(t *testing.T) {
 	stdin := bytes.NewBufferString("pipeNameDoesNotExist1\npipeNameDoesNotExist2")
 	cmd.SetIn(stdin)
 
-	cmdErr := ExecuteCmd(cmd, fmt.Sprintf("events get --dry"))
+	cmdErr := ExecuteCmd(cmd, "events get --dry")
 	assert.OK(t, cmdErr)
 }
 
 func Test_NoAccept(t *testing.T) {
 	cmd := setupTest()
-	cmdErr := ExecuteCmd(cmd, fmt.Sprintf("inventory create --name test01 --noAccept"))
+	cmdErr := ExecuteCmd(cmd, "inventory create --name test01 --noAccept")
 	assert.OK(t, cmdErr)
 }
 
 func Test_GetAllDevices(t *testing.T) {
 	cmd := setupTest()
-	cmdErr := ExecuteCmd(cmd, fmt.Sprintf("devices list --includeAll"))
+	cmdErr := ExecuteCmd(cmd, "devices list --includeAll")
 	assert.OK(t, cmdErr)
 }
 
@@ -355,7 +356,7 @@ func Test_CreateManagedObjectViaPipeline(t *testing.T) {
 	stdin := bytes.NewBufferString("1\n2")
 	cmd.SetIn(stdin)
 
-	cmdErr := ExecuteCmd(cmd, fmt.Sprintf("inventory create --dry"))
+	cmdErr := ExecuteCmd(cmd, "inventory create --dry")
 	assert.OK(t, cmdErr)
 }
 
@@ -365,7 +366,7 @@ func Test_CreateDeviceViaPipeline(t *testing.T) {
 	stdin := bytes.NewBufferString("1\n")
 	cmd.SetIn(stdin)
 
-	cmdErr := ExecuteCmd(cmd, fmt.Sprintf("devices create --template {type:input.index} --dry"))
+	cmdErr := ExecuteCmd(cmd, "devices create --template {type:input.index} --dry")
 	assert.OK(t, cmdErr)
 }
 
@@ -390,7 +391,7 @@ func Test_PipedDataToTemplate(t *testing.T) {
 	stdin := bytes.NewBufferString("10\n")
 	cmd.SetIn(stdin)
 
-	cmdErr := ExecuteCmd(cmd, fmt.Sprintf("devices create --template {type:input.index} --dry"))
+	cmdErr := ExecuteCmd(cmd, "devices create --template {type:input.index} --dry")
 	assert.OK(t, cmdErr)
 }
 

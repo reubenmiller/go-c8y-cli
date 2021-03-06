@@ -155,7 +155,9 @@ func (n *GetGenericRestCmd) RunE(cmd *cobra.Command, args []string) error {
 		// get file info
 		if cmd.Flags().Changed("file") {
 			req.FormData = make(map[string]io.Reader)
-			getFileFlag(cmd, "file", true, req.FormData)
+			if err := getFileFlag(cmd, "file", true, req.FormData); err != nil {
+				return err
+			}
 		}
 	}
 

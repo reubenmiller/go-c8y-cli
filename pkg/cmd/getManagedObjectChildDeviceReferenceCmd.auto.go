@@ -14,10 +14,12 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// GetManagedObjectChildDeviceReferenceCmd command
 type GetManagedObjectChildDeviceReferenceCmd struct {
 	*baseCmd
 }
 
+// NewGetManagedObjectChildDeviceReferenceCmd creates a command to Get child device reference
 func NewGetManagedObjectChildDeviceReferenceCmd() *GetManagedObjectChildDeviceReferenceCmd {
 	ccmd := &GetManagedObjectChildDeviceReferenceCmd{}
 	cmd := &cobra.Command{
@@ -54,6 +56,7 @@ Get an existing child device reference
 	return ccmd
 }
 
+// RunE executes the command
 func (n *GetManagedObjectChildDeviceReferenceCmd) RunE(cmd *cobra.Command, args []string) error {
 	var err error
 	inputIterators, err := flags.NewRequestInputIterators(cmd)

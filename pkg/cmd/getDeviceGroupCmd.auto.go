@@ -14,10 +14,12 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// GetDeviceGroupCmd command
 type GetDeviceGroupCmd struct {
 	*baseCmd
 }
 
+// NewGetDeviceGroupCmd creates a command to Get device group
 func NewGetDeviceGroupCmd() *GetDeviceGroupCmd {
 	ccmd := &GetDeviceGroupCmd{}
 	cmd := &cobra.Command{
@@ -53,6 +55,7 @@ Get device group by id
 	return ccmd
 }
 
+// RunE executes the command
 func (n *GetDeviceGroupCmd) RunE(cmd *cobra.Command, args []string) error {
 	var err error
 	inputIterators, err := flags.NewRequestInputIterators(cmd)

@@ -14,10 +14,12 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// GetTenantCollectionCmd command
 type GetTenantCollectionCmd struct {
 	*baseCmd
 }
 
+// NewGetTenantCollectionCmd creates a command to Get tenant collection
 func NewGetTenantCollectionCmd() *GetTenantCollectionCmd {
 	ccmd := &GetTenantCollectionCmd{}
 	cmd := &cobra.Command{
@@ -51,6 +53,7 @@ Get a list of tenants
 	return ccmd
 }
 
+// RunE executes the command
 func (n *GetTenantCollectionCmd) RunE(cmd *cobra.Command, args []string) error {
 	var err error
 	inputIterators, err := flags.NewRequestInputIterators(cmd)

@@ -13,10 +13,12 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// NewManagedObjectChildAssetCmd command
 type NewManagedObjectChildAssetCmd struct {
 	*baseCmd
 }
 
+// NewNewManagedObjectChildAssetCmd creates a command to Assign child asset
 func NewNewManagedObjectChildAssetCmd() *NewManagedObjectChildAssetCmd {
 	ccmd := &NewManagedObjectChildAssetCmd{}
 	cmd := &cobra.Command{
@@ -56,6 +58,7 @@ Create group hierarchy (parent group -> child group)
 	return ccmd
 }
 
+// RunE executes the command
 func (n *NewManagedObjectChildAssetCmd) RunE(cmd *cobra.Command, args []string) error {
 	var err error
 	inputIterators, err := flags.NewRequestInputIterators(cmd)

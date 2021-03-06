@@ -13,10 +13,12 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// LogoutCmd command
 type LogoutCmd struct {
 	*baseCmd
 }
 
+// NewLogoutCmd creates a command to Logout current user
 func NewLogoutCmd() *LogoutCmd {
 	ccmd := &LogoutCmd{}
 	cmd := &cobra.Command{
@@ -51,6 +53,7 @@ Log out the current user
 	return ccmd
 }
 
+// RunE executes the command
 func (n *LogoutCmd) RunE(cmd *cobra.Command, args []string) error {
 	var err error
 	inputIterators, err := flags.NewRequestInputIterators(cmd)

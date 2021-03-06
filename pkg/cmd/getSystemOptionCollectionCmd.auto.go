@@ -14,10 +14,12 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// GetSystemOptionCollectionCmd command
 type GetSystemOptionCollectionCmd struct {
 	*baseCmd
 }
 
+// NewGetSystemOptionCollectionCmd creates a command to Get system option collection
 func NewGetSystemOptionCollectionCmd() *GetSystemOptionCollectionCmd {
 	ccmd := &GetSystemOptionCollectionCmd{}
 	cmd := &cobra.Command{
@@ -51,6 +53,7 @@ Get a list of system options
 	return ccmd
 }
 
+// RunE executes the command
 func (n *GetSystemOptionCollectionCmd) RunE(cmd *cobra.Command, args []string) error {
 	var err error
 	inputIterators, err := flags.NewRequestInputIterators(cmd)

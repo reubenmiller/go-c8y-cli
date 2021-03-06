@@ -13,10 +13,12 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// NewMeasurementCmd command
 type NewMeasurementCmd struct {
 	*baseCmd
 }
 
+// NewNewMeasurementCmd creates a command to Create measurement
 func NewNewMeasurementCmd() *NewMeasurementCmd {
 	ccmd := &NewMeasurementCmd{}
 	cmd := &cobra.Command{
@@ -55,6 +57,7 @@ Create measurement
 	return ccmd
 }
 
+// RunE executes the command
 func (n *NewMeasurementCmd) RunE(cmd *cobra.Command, args []string) error {
 	var err error
 	inputIterators, err := flags.NewRequestInputIterators(cmd)

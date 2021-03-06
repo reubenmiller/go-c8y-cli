@@ -215,7 +215,7 @@ func runBatched(requestIterator *RequestIterator, commonOptions CommonCommandOpt
 					// build confirm text from cmd structure
 					operation = fmt.Sprintf("%s %s", os.Args[2], strings.TrimRight(os.Args[1], "s"))
 				}
-				promptMessage, err := getConfirmationMessage(fmt.Sprintf("(job: %d) %s", jobID, operation), request, input)
+				promptMessage, _ := getConfirmationMessage(fmt.Sprintf("(job: %d) %s", jobID, operation), request, input)
 				confirmResult, err := prompt.Confirm(promptMessage, "tenant "+client.TenantName, prompt.ConfirmYes.String(), false)
 
 				switch confirmResult {
@@ -233,7 +233,6 @@ func runBatched(requestIterator *RequestIterator, commonOptions CommonCommandOpt
 					activityLogger.LogCustom(err.Error() + ". " + request.Path)
 					Logger.Warning("cancelling all remaining jobs")
 					results <- err
-					break
 				}
 				if confirmResult == prompt.ConfirmNoToAll {
 					break
@@ -411,8 +410,5 @@ func getConfirmationMessage(prefix string, request *c8y.RequestOptions, input in
 func isID(v string) bool {
 	isNotDigit := func(c rune) bool { return c < '0' || c > '9' }
 	value := strings.TrimSpace(v)
-	if strings.IndexFunc(value, isNotDigit) > -1 {
-		return false
-	}
-	return true
+	return strings.IndexFunc(value, isNotDigit) <= -1
 }

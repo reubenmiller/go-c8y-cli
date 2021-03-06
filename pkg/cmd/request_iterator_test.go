@@ -10,10 +10,12 @@ import (
 )
 
 func Test_RequestIteratorWithBodyIterator(t *testing.T) {
+	var err error
 	pathIter := iterator.NewRepeatIterator("root/subpath", 0)
 	valueIter := iterator.NewSliceIterator([]string{"1", "2"})
 	body := mapbuilder.NewInitializedMapBuilder()
-	body.Set("nested.value", valueIter)
+	err = body.Set("nested.value", valueIter)
+	assert.OK(t, err)
 	options := &c8y.RequestOptions{
 		Path: "someother/path",
 		Body: body,
@@ -21,7 +23,6 @@ func Test_RequestIteratorWithBodyIterator(t *testing.T) {
 	requestIter := NewRequestIterator(*options, pathIter, nil, body)
 
 	var req *c8y.RequestOptions
-	var err error
 
 	req, _, err = requestIter.GetNext()
 	assert.OK(t, err)

@@ -13,10 +13,12 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// UpdateTenantOptionBulkCmd command
 type UpdateTenantOptionBulkCmd struct {
 	*baseCmd
 }
 
+// NewUpdateTenantOptionBulkCmd creates a command to Update multiple tenant options
 func NewUpdateTenantOptionBulkCmd() *UpdateTenantOptionBulkCmd {
 	ccmd := &UpdateTenantOptionBulkCmd{}
 	cmd := &cobra.Command{
@@ -54,6 +56,7 @@ Update multiple tenant options
 	return ccmd
 }
 
+// RunE executes the command
 func (n *UpdateTenantOptionBulkCmd) RunE(cmd *cobra.Command, args []string) error {
 	var err error
 	inputIterators, err := flags.NewRequestInputIterators(cmd)

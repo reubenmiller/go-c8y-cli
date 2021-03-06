@@ -13,10 +13,12 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// DeleteExternalIDCmd command
 type DeleteExternalIDCmd struct {
 	*baseCmd
 }
 
+// NewDeleteExternalIDCmd creates a command to Delete external id
 func NewDeleteExternalIDCmd() *DeleteExternalIDCmd {
 	ccmd := &DeleteExternalIDCmd{}
 	cmd := &cobra.Command{
@@ -54,6 +56,7 @@ Delete external identity
 	return ccmd
 }
 
+// RunE executes the command
 func (n *DeleteExternalIDCmd) RunE(cmd *cobra.Command, args []string) error {
 	var err error
 	inputIterators, err := flags.NewRequestInputIterators(cmd)

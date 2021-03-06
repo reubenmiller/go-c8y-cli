@@ -13,10 +13,12 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// DeleteChildAdditionCmd command
 type DeleteChildAdditionCmd struct {
 	*baseCmd
 }
 
+// NewDeleteChildAdditionCmd creates a command to Unassign child addition
 func NewDeleteChildAdditionCmd() *DeleteChildAdditionCmd {
 	ccmd := &DeleteChildAdditionCmd{}
 	cmd := &cobra.Command{
@@ -54,6 +56,7 @@ Unassign a child addition from its parent managed object
 	return ccmd
 }
 
+// RunE executes the command
 func (n *DeleteChildAdditionCmd) RunE(cmd *cobra.Command, args []string) error {
 	var err error
 	inputIterators, err := flags.NewRequestInputIterators(cmd)

@@ -13,10 +13,12 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// UpdateAgentCmd command
 type UpdateAgentCmd struct {
 	*baseCmd
 }
 
+// NewUpdateAgentCmd creates a command to Update agent
 func NewUpdateAgentCmd() *UpdateAgentCmd {
 	ccmd := &UpdateAgentCmd{}
 	cmd := &cobra.Command{
@@ -54,6 +56,7 @@ Update agent by id
 	return ccmd
 }
 
+// RunE executes the command
 func (n *UpdateAgentCmd) RunE(cmd *cobra.Command, args []string) error {
 	var err error
 	inputIterators, err := flags.NewRequestInputIterators(cmd)

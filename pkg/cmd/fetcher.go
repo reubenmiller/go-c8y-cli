@@ -133,17 +133,6 @@ func parseAndSanitizeIDs(values []string) (ids []string, names []string) {
 	return
 }
 
-// getFetchedIDs returns non empty ids from an array of entity references
-func getFetchedIDs(results []entityReference) []string {
-	ids := make([]string, 0)
-	for _, item := range results {
-		if item.Data.ID != "" {
-			ids = append(ids, item.Data.ID)
-		}
-	}
-	return ids
-}
-
 func getFetchedResultsAsString(refs []entityReference) (results []string, invalidLookups []string) {
 	for _, item := range refs {
 		if item.ID != "" {

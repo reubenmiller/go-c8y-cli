@@ -13,10 +13,12 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// UpdateAlarmCollectionCmd command
 type UpdateAlarmCollectionCmd struct {
 	*baseCmd
 }
 
+// NewUpdateAlarmCollectionCmd creates a command to Update alarm collection
 func NewUpdateAlarmCollectionCmd() *UpdateAlarmCollectionCmd {
 	ccmd := &UpdateAlarmCollectionCmd{}
 	cmd := &cobra.Command{
@@ -63,6 +65,7 @@ Update the status of all active alarms on a device to ACKNOWLEDGED
 	return ccmd
 }
 
+// RunE executes the command
 func (n *UpdateAlarmCollectionCmd) RunE(cmd *cobra.Command, args []string) error {
 	var err error
 	inputIterators, err := flags.NewRequestInputIterators(cmd)

@@ -14,10 +14,12 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// GetSupportedSeriesCmd command
 type GetSupportedSeriesCmd struct {
 	*baseCmd
 }
 
+// NewGetSupportedSeriesCmd creates a command to Get supported measurement series
 func NewGetSupportedSeriesCmd() *GetSupportedSeriesCmd {
 	ccmd := &GetSupportedSeriesCmd{}
 	cmd := &cobra.Command{
@@ -54,6 +56,7 @@ Get the supported measurement series of a device by name
 	return ccmd
 }
 
+// RunE executes the command
 func (n *GetSupportedSeriesCmd) RunE(cmd *cobra.Command, args []string) error {
 	var err error
 	inputIterators, err := flags.NewRequestInputIterators(cmd)

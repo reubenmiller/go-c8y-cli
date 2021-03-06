@@ -13,10 +13,12 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// NewMicroserviceBinaryCmd command
 type NewMicroserviceBinaryCmd struct {
 	*baseCmd
 }
 
+// NewNewMicroserviceBinaryCmd creates a command to Create microservice binary
 func NewNewMicroserviceBinaryCmd() *NewMicroserviceBinaryCmd {
 	ccmd := &NewMicroserviceBinaryCmd{}
 	cmd := &cobra.Command{
@@ -59,6 +61,7 @@ Upload microservice binary
 	return ccmd
 }
 
+// RunE executes the command
 func (n *NewMicroserviceBinaryCmd) RunE(cmd *cobra.Command, args []string) error {
 	var err error
 	inputIterators, err := flags.NewRequestInputIterators(cmd)

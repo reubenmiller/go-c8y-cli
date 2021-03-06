@@ -13,10 +13,12 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// AddGroupToGroupCmd command
 type AddGroupToGroupCmd struct {
 	*baseCmd
 }
 
+// NewAddGroupToGroupCmd creates a command to Assign child group
 func NewAddGroupToGroupCmd() *AddGroupToGroupCmd {
 	ccmd := &AddGroupToGroupCmd{}
 	cmd := &cobra.Command{
@@ -58,6 +60,7 @@ Add multiple groups to a group
 	return ccmd
 }
 
+// RunE executes the command
 func (n *AddGroupToGroupCmd) RunE(cmd *cobra.Command, args []string) error {
 	var err error
 	inputIterators, err := flags.NewRequestInputIterators(cmd)

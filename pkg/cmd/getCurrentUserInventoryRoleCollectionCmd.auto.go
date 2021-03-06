@@ -14,10 +14,12 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// GetCurrentUserInventoryRoleCollectionCmd command
 type GetCurrentUserInventoryRoleCollectionCmd struct {
 	*baseCmd
 }
 
+// NewGetCurrentUserInventoryRoleCollectionCmd creates a command to Get current user inventory role collection
 func NewGetCurrentUserInventoryRoleCollectionCmd() *GetCurrentUserInventoryRoleCollectionCmd {
 	ccmd := &GetCurrentUserInventoryRoleCollectionCmd{}
 	cmd := &cobra.Command{
@@ -51,6 +53,7 @@ Get the current user
 	return ccmd
 }
 
+// RunE executes the command
 func (n *GetCurrentUserInventoryRoleCollectionCmd) RunE(cmd *cobra.Command, args []string) error {
 	var err error
 	inputIterators, err := flags.NewRequestInputIterators(cmd)

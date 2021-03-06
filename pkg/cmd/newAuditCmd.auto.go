@@ -13,10 +13,12 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// NewAuditCmd command
 type NewAuditCmd struct {
 	*baseCmd
 }
 
+// NewNewAuditCmd creates a command to Create audit record
 func NewNewAuditCmd() *NewAuditCmd {
 	ccmd := &NewAuditCmd{}
 	cmd := &cobra.Command{
@@ -65,6 +67,7 @@ Create an audit record for a custom managed object update
 	return ccmd
 }
 
+// RunE executes the command
 func (n *NewAuditCmd) RunE(cmd *cobra.Command, args []string) error {
 	var err error
 	inputIterators, err := flags.NewRequestInputIterators(cmd)

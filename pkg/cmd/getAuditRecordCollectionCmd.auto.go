@@ -14,10 +14,12 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// GetAuditRecordCollectionCmd command
 type GetAuditRecordCollectionCmd struct {
 	*baseCmd
 }
 
+// NewGetAuditRecordCollectionCmd creates a command to Get audit record collection
 func NewGetAuditRecordCollectionCmd() *GetAuditRecordCollectionCmd {
 	ccmd := &GetAuditRecordCollectionCmd{}
 	cmd := &cobra.Command{
@@ -60,6 +62,7 @@ Get a list of audit records
 	return ccmd
 }
 
+// RunE executes the command
 func (n *GetAuditRecordCollectionCmd) RunE(cmd *cobra.Command, args []string) error {
 	var err error
 	inputIterators, err := flags.NewRequestInputIterators(cmd)

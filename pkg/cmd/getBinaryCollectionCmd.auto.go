@@ -14,10 +14,12 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// GetBinaryCollectionCmd command
 type GetBinaryCollectionCmd struct {
 	*baseCmd
 }
 
+// NewGetBinaryCollectionCmd creates a command to Get binary collection
 func NewGetBinaryCollectionCmd() *GetBinaryCollectionCmd {
 	ccmd := &GetBinaryCollectionCmd{}
 	cmd := &cobra.Command{
@@ -52,6 +54,7 @@ Get a list of binaries
 	return ccmd
 }
 
+// RunE executes the command
 func (n *GetBinaryCollectionCmd) RunE(cmd *cobra.Command, args []string) error {
 	var err error
 	inputIterators, err := flags.NewRequestInputIterators(cmd)

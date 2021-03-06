@@ -13,10 +13,12 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// UpdateBinaryCmd command
 type UpdateBinaryCmd struct {
 	*baseCmd
 }
 
+// NewUpdateBinaryCmd creates a command to Update binary
 func NewUpdateBinaryCmd() *UpdateBinaryCmd {
 	ccmd := &UpdateBinaryCmd{}
 	cmd := &cobra.Command{
@@ -55,6 +57,7 @@ Update an existing binary file
 	return ccmd
 }
 
+// RunE executes the command
 func (n *UpdateBinaryCmd) RunE(cmd *cobra.Command, args []string) error {
 	var err error
 	inputIterators, err := flags.NewRequestInputIterators(cmd)

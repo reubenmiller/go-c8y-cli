@@ -14,10 +14,12 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// GetAllTenantUsageStatisticsSummaryCollectionCmd command
 type GetAllTenantUsageStatisticsSummaryCollectionCmd struct {
 	*baseCmd
 }
 
+// NewGetAllTenantUsageStatisticsSummaryCollectionCmd creates a command to Get all tenant usage summary statistics
 func NewGetAllTenantUsageStatisticsSummaryCollectionCmd() *GetAllTenantUsageStatisticsSummaryCollectionCmd {
 	ccmd := &GetAllTenantUsageStatisticsSummaryCollectionCmd{}
 	cmd := &cobra.Command{
@@ -59,6 +61,7 @@ Get tenant summary statistics collection for the last 10 days, only return until
 	return ccmd
 }
 
+// RunE executes the command
 func (n *GetAllTenantUsageStatisticsSummaryCollectionCmd) RunE(cmd *cobra.Command, args []string) error {
 	var err error
 	inputIterators, err := flags.NewRequestInputIterators(cmd)

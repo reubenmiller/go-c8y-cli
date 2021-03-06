@@ -13,10 +13,12 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// DeleteBinaryCmd command
 type DeleteBinaryCmd struct {
 	*baseCmd
 }
 
+// NewDeleteBinaryCmd creates a command to Delete binary
 func NewDeleteBinaryCmd() *DeleteBinaryCmd {
 	ccmd := &DeleteBinaryCmd{}
 	cmd := &cobra.Command{
@@ -52,6 +54,7 @@ Delete a binary
 	return ccmd
 }
 
+// RunE executes the command
 func (n *DeleteBinaryCmd) RunE(cmd *cobra.Command, args []string) error {
 	var err error
 	inputIterators, err := flags.NewRequestInputIterators(cmd)

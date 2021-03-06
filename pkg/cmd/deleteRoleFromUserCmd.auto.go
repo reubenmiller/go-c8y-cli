@@ -13,10 +13,12 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// DeleteRoleFromUserCmd command
 type DeleteRoleFromUserCmd struct {
 	*baseCmd
 }
 
+// NewDeleteRoleFromUserCmd creates a command to Unassign role from user
 func NewDeleteRoleFromUserCmd() *DeleteRoleFromUserCmd {
 	ccmd := &DeleteRoleFromUserCmd{}
 	cmd := &cobra.Command{
@@ -55,6 +57,7 @@ Remove a role from the given user
 	return ccmd
 }
 
+// RunE executes the command
 func (n *DeleteRoleFromUserCmd) RunE(cmd *cobra.Command, args []string) error {
 	var err error
 	inputIterators, err := flags.NewRequestInputIterators(cmd)

@@ -14,10 +14,12 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// GetNewDeviceRequestCollectionCmd command
 type GetNewDeviceRequestCollectionCmd struct {
 	*baseCmd
 }
 
+// NewGetNewDeviceRequestCollectionCmd creates a command to Get device request collection
 func NewGetNewDeviceRequestCollectionCmd() *GetNewDeviceRequestCollectionCmd {
 	ccmd := &GetNewDeviceRequestCollectionCmd{}
 	cmd := &cobra.Command{
@@ -51,6 +53,7 @@ Get a list of new device requests
 	return ccmd
 }
 
+// RunE executes the command
 func (n *GetNewDeviceRequestCollectionCmd) RunE(cmd *cobra.Command, args []string) error {
 	var err error
 	inputIterators, err := flags.NewRequestInputIterators(cmd)

@@ -13,10 +13,12 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// UpdateEventCmd command
 type UpdateEventCmd struct {
 	*baseCmd
 }
 
+// NewUpdateEventCmd creates a command to Update event
 func NewUpdateEventCmd() *UpdateEventCmd {
 	ccmd := &UpdateEventCmd{}
 	cmd := &cobra.Command{
@@ -57,6 +59,7 @@ Update custom properties of an existing event
 	return ccmd
 }
 
+// RunE executes the command
 func (n *UpdateEventCmd) RunE(cmd *cobra.Command, args []string) error {
 	var err error
 	inputIterators, err := flags.NewRequestInputIterators(cmd)

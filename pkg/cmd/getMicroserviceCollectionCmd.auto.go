@@ -14,10 +14,12 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// GetMicroserviceCollectionCmd command
 type GetMicroserviceCollectionCmd struct {
 	*baseCmd
 }
 
+// NewGetMicroserviceCollectionCmd creates a command to Get microservice collection
 func NewGetMicroserviceCollectionCmd() *GetMicroserviceCollectionCmd {
 	ccmd := &GetMicroserviceCollectionCmd{}
 	cmd := &cobra.Command{
@@ -55,6 +57,7 @@ Get microservices
 	return ccmd
 }
 
+// RunE executes the command
 func (n *GetMicroserviceCollectionCmd) RunE(cmd *cobra.Command, args []string) error {
 	var err error
 	inputIterators, err := flags.NewRequestInputIterators(cmd)

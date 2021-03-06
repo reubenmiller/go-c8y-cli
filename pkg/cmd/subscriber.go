@@ -36,7 +36,7 @@ func subscribe(channelPattern string, timeoutSec int64, maxMessages int64, cmd *
 
 	defer func() {
 		// client.Realtime.UnsubscribeAll()
-		client.Realtime.Disconnect()
+		_ = client.Realtime.Disconnect()
 	}()
 
 	var receivedCounter int64
@@ -93,7 +93,7 @@ func subscribeMultiple(channelPatterns []string, timeoutSec int64, maxMessages i
 	timeoutCh := time.After(timeoutDuration)
 
 	defer func() {
-		client.Realtime.Disconnect()
+		_ = client.Realtime.Disconnect()
 	}()
 
 	var receivedCounter int64

@@ -14,10 +14,12 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// GetCurrentApplicationCmd command
 type GetCurrentApplicationCmd struct {
 	*baseCmd
 }
 
+// NewGetCurrentApplicationCmd creates a command to Get current application
 func NewGetCurrentApplicationCmd() *GetCurrentApplicationCmd {
 	ccmd := &GetCurrentApplicationCmd{}
 	cmd := &cobra.Command{
@@ -51,6 +53,7 @@ Get the current application (requires using application credentials)
 	return ccmd
 }
 
+// RunE executes the command
 func (n *GetCurrentApplicationCmd) RunE(cmd *cobra.Command, args []string) error {
 	var err error
 	inputIterators, err := flags.NewRequestInputIterators(cmd)

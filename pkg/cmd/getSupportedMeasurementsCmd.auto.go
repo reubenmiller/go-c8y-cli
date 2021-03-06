@@ -14,10 +14,12 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// GetSupportedMeasurementsCmd command
 type GetSupportedMeasurementsCmd struct {
 	*baseCmd
 }
 
+// NewGetSupportedMeasurementsCmd creates a command to Get supported measurements
 func NewGetSupportedMeasurementsCmd() *GetSupportedMeasurementsCmd {
 	ccmd := &GetSupportedMeasurementsCmd{}
 	cmd := &cobra.Command{
@@ -54,6 +56,7 @@ Get the supported measurements of a device by name
 	return ccmd
 }
 
+// RunE executes the command
 func (n *GetSupportedMeasurementsCmd) RunE(cmd *cobra.Command, args []string) error {
 	var err error
 	inputIterators, err := flags.NewRequestInputIterators(cmd)

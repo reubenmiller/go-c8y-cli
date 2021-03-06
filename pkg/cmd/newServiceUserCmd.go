@@ -12,11 +12,9 @@ import (
 type newServiceUserCmd struct {
 	*baseCmd
 
-	name        string
-	key         string
-	contextPath string
-	tenants     []string
-	roles       []string
+	name    string
+	tenants []string
+	roles   []string
 }
 
 func NewNewServiceUserCmd() *newServiceUserCmd {

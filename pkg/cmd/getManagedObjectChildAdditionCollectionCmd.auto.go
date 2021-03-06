@@ -14,10 +14,12 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// GetManagedObjectChildAdditionCollectionCmd command
 type GetManagedObjectChildAdditionCollectionCmd struct {
 	*baseCmd
 }
 
+// NewGetManagedObjectChildAdditionCollectionCmd creates a command to Get child addition collection
 func NewGetManagedObjectChildAdditionCollectionCmd() *GetManagedObjectChildAdditionCollectionCmd {
 	ccmd := &GetManagedObjectChildAdditionCollectionCmd{}
 	cmd := &cobra.Command{
@@ -53,6 +55,7 @@ Get a list of the child additions of an existing managed object
 	return ccmd
 }
 
+// RunE executes the command
 func (n *GetManagedObjectChildAdditionCollectionCmd) RunE(cmd *cobra.Command, args []string) error {
 	var err error
 	inputIterators, err := flags.NewRequestInputIterators(cmd)

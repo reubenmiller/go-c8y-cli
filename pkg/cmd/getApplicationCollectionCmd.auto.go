@@ -14,10 +14,12 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// GetApplicationCollectionCmd command
 type GetApplicationCollectionCmd struct {
 	*baseCmd
 }
 
+// NewGetApplicationCollectionCmd creates a command to Get application collection
 func NewGetApplicationCollectionCmd() *GetApplicationCollectionCmd {
 	ccmd := &GetApplicationCollectionCmd{}
 	cmd := &cobra.Command{
@@ -54,6 +56,7 @@ Get applications
 	return ccmd
 }
 
+// RunE executes the command
 func (n *GetApplicationCollectionCmd) RunE(cmd *cobra.Command, args []string) error {
 	var err error
 	inputIterators, err := flags.NewRequestInputIterators(cmd)

@@ -40,18 +40,6 @@ func (f *JSONFilters) Add(property, operation, value string) {
 	})
 }
 
-func getGlobSubString(pattern, path string) string {
-	if !strings.Contains(pattern, "**") && strings.Contains(pattern, "*") {
-		patternParts := strings.Split(pattern, ".")
-
-		if len(patternParts) > 0 {
-			match := strings.Join(strings.Split(path, ".")[0:len(patternParts)], ".")
-			return match
-		}
-	}
-	return path
-}
-
 // FilterPropertyByWildcard filtery a json string by using globstar (wildcards) on the nested json paths
 func FilterPropertyByWildcard(jsonValue string, prefix string, patterns []string, setAlias bool) (map[string]interface{}, []string, error) {
 	rawMap := make(map[string]interface{})
@@ -66,7 +54,7 @@ func FilterPropertyByWildcard(jsonValue string, prefix string, patterns []string
 	}
 	compiledPatterns := []glob.Glob{}
 	aliases := []string{}
-	filteredMap := make(map[string]interface{}, 0)
+	filteredMap := make(map[string]interface{})
 
 	for _, p := range patterns {
 		// resolve path using wildcards
@@ -176,17 +164,6 @@ type JSONFilter struct {
 	Property  string
 	Operation string
 	Value     string
-}
-
-func isJSONArrayString(jsonValue string) bool {
-	trimmed := strings.TrimSpace(jsonValue)
-	Logger.Debugf("checking string: %s, first=%v, last=%v", trimmed, trimmed[0], trimmed[len(trimmed)-1])
-	return strings.HasPrefix(trimmed, "[") && strings.HasSuffix(trimmed, "]")
-}
-
-func isJSONArrayBytes(jsonValue []byte) bool {
-	trimmed := bytes.TrimSpace(jsonValue)
-	return bytes.HasPrefix(trimmed, []byte("[")) && bytes.HasSuffix(trimmed, []byte("]"))
 }
 
 func removeJSONArrayValues(jsonValue []byte) []byte {
@@ -421,9 +398,7 @@ func getFilterFlag(cmd *cobra.Command, flagName string) *JSONFilters {
 		if properties, err := cmd.Flags().GetStringArray("select"); err == nil {
 			formattedProperties := []string{}
 
-			for _, prop := range properties {
-				formattedProperties = append(formattedProperties, prop)
-			}
+			formattedProperties = append(formattedProperties, properties...)
 			filters.AsCSV = enableCSV
 			filters.Pluck = formattedProperties
 		}
@@ -432,7 +407,7 @@ func getFilterFlag(cmd *cobra.Command, flagName string) *JSONFilters {
 	if cmd.Flags().Changed(flagName) {
 		if rawFilters, err := cmd.Flags().GetStringSlice(flagName); err == nil {
 			for _, item := range rawFilters {
-				sepPattern := regexp.MustCompile("(\\s+[\\-]?(like|match|eq|neq|lt|lte|gt|gte|notIn|in|startsWith|endsWth|contains|len[n]?eq|lengt[e]?|lenlt[e]?)\\s+|(!?=|[<>]=?))")
+				sepPattern := regexp.MustCompile(`(\s+[\-]?(like|match|eq|neq|lt|lte|gt|gte|notIn|in|startsWith|endsWth|contains|len[n]?eq|lengt[e]?|lenlt[e]?)\s+|(!?=|[<>]=?))`)
 
 				parts := sepPattern.Split(item, 2)
 

@@ -14,10 +14,12 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// GetMeasurementSeriesCmd command
 type GetMeasurementSeriesCmd struct {
 	*baseCmd
 }
 
+// NewGetMeasurementSeriesCmd creates a command to Get measurement series
 func NewGetMeasurementSeriesCmd() *GetMeasurementSeriesCmd {
 	ccmd := &GetMeasurementSeriesCmd{}
 	cmd := &cobra.Command{
@@ -57,6 +59,7 @@ Get a list of series [nx_WEA_29_Delta.MDL10FG001] and [nx_WEA_29_Delta.ST9] for 
 	return ccmd
 }
 
+// RunE executes the command
 func (n *GetMeasurementSeriesCmd) RunE(cmd *cobra.Command, args []string) error {
 	var err error
 	inputIterators, err := flags.NewRequestInputIterators(cmd)

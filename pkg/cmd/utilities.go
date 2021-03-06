@@ -3,10 +3,8 @@ package cmd
 import (
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"os"
-	"path"
 	"path/filepath"
 	"sort"
 
@@ -31,22 +29,6 @@ func GetFileContentType(out *os.File) (string, error) {
 	contentType := http.DetectContentType(buffer)
 
 	return contentType, nil
-}
-
-// getTempFilepath returns a temp file path. If outputDir is empty, then a temp folder will be created
-func getTempFilepath(name string, outputDir string) (string, error) {
-	directory := "./"
-
-	if outputDir == "" {
-		tempDir, err := ioutil.TempDir("", "go-c8y_")
-
-		if err != nil {
-			return "", fmt.Errorf("Could not create temp folder. %s", err)
-		}
-		directory = tempDir
-	}
-
-	return path.Join(directory, name), nil
 }
 
 // saveResponseToFile saves a response to file
@@ -149,13 +131,13 @@ func checkEncryption(w io.Writer) error {
 
 		// decrypt settings
 		if decryptSession {
-			// cliConfig.SetPassword(clientpass)
-			// cliConfig.SetAuthorizationCookies(cliConfig.GetCookies())
-			cliConfig.DecryptSession()
+			if err := cliConfig.DecryptSession(); err != nil {
+				return err
+			}
 		}
 
 		green := promptui.Styler(promptui.FGGreen)
-		w.Write([]byte(green("Passphrase OK\n")))
+		fmt.Fprint(w, green("Passphrase OK\n"))
 		Logger.Info("Passphrase accepted")
 	}
 	return nil

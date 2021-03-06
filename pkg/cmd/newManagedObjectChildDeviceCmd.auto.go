@@ -13,10 +13,12 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// NewManagedObjectChildDeviceCmd command
 type NewManagedObjectChildDeviceCmd struct {
 	*baseCmd
 }
 
+// NewNewManagedObjectChildDeviceCmd creates a command to Assign child device
 func NewNewManagedObjectChildDeviceCmd() *NewManagedObjectChildDeviceCmd {
 	ccmd := &NewManagedObjectChildDeviceCmd{}
 	cmd := &cobra.Command{
@@ -55,6 +57,7 @@ Assign a device as a child device to an existing device
 	return ccmd
 }
 
+// RunE executes the command
 func (n *NewManagedObjectChildDeviceCmd) RunE(cmd *cobra.Command, args []string) error {
 	var err error
 	inputIterators, err := flags.NewRequestInputIterators(cmd)

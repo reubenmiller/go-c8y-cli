@@ -13,10 +13,12 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// UpdateUserGroupCmd command
 type UpdateUserGroupCmd struct {
 	*baseCmd
 }
 
+// NewUpdateUserGroupCmd creates a command to Update user group
 func NewUpdateUserGroupCmd() *UpdateUserGroupCmd {
 	ccmd := &UpdateUserGroupCmd{}
 	cmd := &cobra.Command{
@@ -54,6 +56,7 @@ Update a user group
 	return ccmd
 }
 
+// RunE executes the command
 func (n *UpdateUserGroupCmd) RunE(cmd *cobra.Command, args []string) error {
 	var err error
 	inputIterators, err := flags.NewRequestInputIterators(cmd)

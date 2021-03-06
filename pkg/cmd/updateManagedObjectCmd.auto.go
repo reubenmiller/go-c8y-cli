@@ -13,10 +13,12 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// UpdateManagedObjectCmd command
 type UpdateManagedObjectCmd struct {
 	*baseCmd
 }
 
+// NewUpdateManagedObjectCmd creates a command to Update inventory
 func NewUpdateManagedObjectCmd() *UpdateManagedObjectCmd {
 	ccmd := &UpdateManagedObjectCmd{}
 	cmd := &cobra.Command{
@@ -54,6 +56,7 @@ Update a managed object
 	return ccmd
 }
 
+// RunE executes the command
 func (n *UpdateManagedObjectCmd) RunE(cmd *cobra.Command, args []string) error {
 	var err error
 	inputIterators, err := flags.NewRequestInputIterators(cmd)

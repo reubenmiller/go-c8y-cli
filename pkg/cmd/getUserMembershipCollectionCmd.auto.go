@@ -14,10 +14,12 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// GetUserMembershipCollectionCmd command
 type GetUserMembershipCollectionCmd struct {
 	*baseCmd
 }
 
+// NewGetUserMembershipCollectionCmd creates a command to get user membership collection
 func NewGetUserMembershipCollectionCmd() *GetUserMembershipCollectionCmd {
 	ccmd := &GetUserMembershipCollectionCmd{}
 	cmd := &cobra.Command{
@@ -54,6 +56,7 @@ Get a list of groups that a user belongs to
 	return ccmd
 }
 
+// RunE executes the command
 func (n *GetUserMembershipCollectionCmd) RunE(cmd *cobra.Command, args []string) error {
 	var err error
 	inputIterators, err := flags.NewRequestInputIterators(cmd)

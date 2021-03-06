@@ -13,10 +13,12 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// AddRoleToGroupCmd command
 type AddRoleToGroupCmd struct {
 	*baseCmd
 }
 
+// NewAddRoleToGroupCmd creates a command to Add role to user group
 func NewAddRoleToGroupCmd() *AddRoleToGroupCmd {
 	ccmd := &AddRoleToGroupCmd{}
 	cmd := &cobra.Command{
@@ -55,6 +57,7 @@ Add a role to the admin group
 	return ccmd
 }
 
+// RunE executes the command
 func (n *AddRoleToGroupCmd) RunE(cmd *cobra.Command, args []string) error {
 	var err error
 	inputIterators, err := flags.NewRequestInputIterators(cmd)

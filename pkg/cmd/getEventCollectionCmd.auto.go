@@ -14,10 +14,12 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// GetEventCollectionCmd command
 type GetEventCollectionCmd struct {
 	*baseCmd
 }
 
+// NewGetEventCollectionCmd creates a command to Get event collection
 func NewGetEventCollectionCmd() *GetEventCollectionCmd {
 	ccmd := &GetEventCollectionCmd{}
 	cmd := &cobra.Command{
@@ -61,6 +63,7 @@ Get events from a device
 	return ccmd
 }
 
+// RunE executes the command
 func (n *GetEventCollectionCmd) RunE(cmd *cobra.Command, args []string) error {
 	var err error
 	inputIterators, err := flags.NewRequestInputIterators(cmd)

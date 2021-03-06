@@ -14,10 +14,12 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// GetApplicationBinaryCollectionCmd command
 type GetApplicationBinaryCollectionCmd struct {
 	*baseCmd
 }
 
+// NewGetApplicationBinaryCollectionCmd creates a command to Get application binaries
 func NewGetApplicationBinaryCollectionCmd() *GetApplicationBinaryCollectionCmd {
 	ccmd := &GetApplicationBinaryCollectionCmd{}
 	cmd := &cobra.Command{
@@ -54,6 +56,7 @@ List all of the binaries related to a Hosted (web) application
 	return ccmd
 }
 
+// RunE executes the command
 func (n *GetApplicationBinaryCollectionCmd) RunE(cmd *cobra.Command, args []string) error {
 	var err error
 	inputIterators, err := flags.NewRequestInputIterators(cmd)

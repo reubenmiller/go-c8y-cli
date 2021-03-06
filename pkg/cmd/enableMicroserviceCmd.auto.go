@@ -13,10 +13,12 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// EnableMicroserviceCmd command
 type EnableMicroserviceCmd struct {
 	*baseCmd
 }
 
+// NewEnableMicroserviceCmd creates a command to subscribe to microservice
 func NewEnableMicroserviceCmd() *EnableMicroserviceCmd {
 	ccmd := &EnableMicroserviceCmd{}
 	cmd := &cobra.Command{
@@ -57,6 +59,7 @@ Enable (subscribe) to a microservice
 	return ccmd
 }
 
+// RunE executes the command
 func (n *EnableMicroserviceCmd) RunE(cmd *cobra.Command, args []string) error {
 	var err error
 	inputIterators, err := flags.NewRequestInputIterators(cmd)

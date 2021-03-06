@@ -13,10 +13,12 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// UpdateMicroserviceCmd command
 type UpdateMicroserviceCmd struct {
 	*baseCmd
 }
 
+// NewUpdateMicroserviceCmd creates a command to Update microservice details
 func NewUpdateMicroserviceCmd() *UpdateMicroserviceCmd {
 	ccmd := &UpdateMicroserviceCmd{}
 	cmd := &cobra.Command{
@@ -59,6 +61,7 @@ Update microservice availability to MARKET
 	return ccmd
 }
 
+// RunE executes the command
 func (n *UpdateMicroserviceCmd) RunE(cmd *cobra.Command, args []string) error {
 	var err error
 	inputIterators, err := flags.NewRequestInputIterators(cmd)

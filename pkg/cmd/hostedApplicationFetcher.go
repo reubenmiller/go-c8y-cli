@@ -48,6 +48,9 @@ func (f *hostedApplicationFetcher) getByName(name string) ([]fetcherResultSet, e
 			Type: c8y.ApplicationTypeHosted,
 		},
 	)
+	if err != nil {
+		return nil, errors.Wrap(err, "could not fetch applications")
+	}
 
 	pattern, err := regexp.Compile(regexp.QuoteMeta(name))
 

@@ -13,10 +13,12 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// AddDeviceToGroupCmd command
 type AddDeviceToGroupCmd struct {
 	*baseCmd
 }
 
+// NewAddDeviceToGroupCmd creates a command to Assign device to group
 func NewAddDeviceToGroupCmd() *AddDeviceToGroupCmd {
 	ccmd := &AddDeviceToGroupCmd{}
 	cmd := &cobra.Command{
@@ -58,6 +60,7 @@ Add multiple devices to a group
 	return ccmd
 }
 
+// RunE executes the command
 func (n *AddDeviceToGroupCmd) RunE(cmd *cobra.Command, args []string) error {
 	var err error
 	inputIterators, err := flags.NewRequestInputIterators(cmd)

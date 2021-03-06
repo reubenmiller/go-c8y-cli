@@ -13,10 +13,12 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// CreateAgentCmd command
 type CreateAgentCmd struct {
 	*baseCmd
 }
 
+// NewCreateAgentCmd creates a command to Create agent
 func NewCreateAgentCmd() *CreateAgentCmd {
 	ccmd := &CreateAgentCmd{}
 	cmd := &cobra.Command{
@@ -59,6 +61,7 @@ Create agent with custom properties
 	return ccmd
 }
 
+// RunE executes the command
 func (n *CreateAgentCmd) RunE(cmd *cobra.Command, args []string) error {
 	var err error
 	inputIterators, err := flags.NewRequestInputIterators(cmd)

@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"mime"
 	"os"
 	"path"
@@ -13,42 +12,11 @@ import (
 	"strings"
 
 	"github.com/pkg/errors"
-	"github.com/reubenmiller/go-c8y-cli/pkg/c8ydata"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/pkg/jsonUtilities"
-	"github.com/reubenmiller/go-c8y-cli/pkg/mapbuilder"
 	"github.com/spf13/cobra"
 )
-
-const (
-	inventoryFlagFragmentType = "fragmentType"
-	inventoryFlagQuery        = "query"
-	inventoryFlagType         = "type"
-	inventoryFlagText         = "text"
-	inventoryFlagWithParents  = "withParents"
-	inventoryFlagFilter       = "filter"
-	inventoryFlagID           = "id"
-	inventoryFlagFile         = "file"
-)
-
-func addInventoryOptions(cmd *cobra.Command) {
-	cmd.Flags().Bool(inventoryFlagWithParents, false, "With parents")
-}
-
-func addResultFilterFlags(cmd *cobra.Command) {
-	cmd.Flags().StringP(inventoryFlagFilter, "f", "", "Filter property")
-}
-
-func addIDFlag(cmd *cobra.Command) {
-	cmd.Flags().StringArrayP(inventoryFlagID, "i", []string{}, "Managed Object ID")
-	cmd.MarkFlagRequired(inventoryFlagID)
-}
-
-func addApplicationFlag(cmd *cobra.Command) {
-	cmd.Flags().StringSliceP("application", "i", []string{}, "Application")
-	cmd.MarkFlagRequired(inventoryFlagID)
-}
 
 func addDataFlag(cmd *cobra.Command) {
 	cmd.Flags().StringP(FlagDataName, "d", "", "json")
@@ -68,11 +36,6 @@ func addTemplateFlag(cmd *cobra.Command) {
 
 func addProcessingModeFlag(cmd *cobra.Command) {
 	cmd.Flags().String(FlagProcessingModeName, "", "Processing mode")
-}
-
-// resolveTemplatePath resolves a template path
-func resolveTemplatePath(name string) (string, error) {
-	return matchFilePath(globalFlagTemplatePath, name, ".jsonnet", "ignore")
 }
 
 type TemplatePathResolver struct{}
@@ -159,53 +122,11 @@ func resolvePaths(sourceDir string, pattern string, extension string, ignoreDir 
 	return files, err
 }
 
-func getDataFlag(cmd *cobra.Command) map[string]interface{} {
-	if !cmd.Flags().Changed(FlagDataName) {
-		return nil
-	}
-	if value, err := cmd.Flags().GetString(FlagDataName); err == nil {
-		return c8ydata.RemoveCumulocityProperties(jsonUtilities.MustParseJSON(getContents(value)), true)
-	}
-	return nil
-}
-
-// getContents checks whether the given string is a file reference if so it returns the contents, otherwise it returns the
-// input value as is
-func getContents(content string) string {
-	if _, err := os.Stat(content); err != nil {
-		// not a file
-		return content
-	}
-
-	fileContent, err := ioutil.ReadFile(content)
-	if err != nil {
-		return content
-	}
-	// file contents
-	return string(fileContent)
-}
-
-func getTenantWithDefaultFlag(cmd *cobra.Command, flagName string, defaultTenant string) string {
-	if cmd.Flags().Changed(flagName) {
-		if value, err := cmd.Flags().GetString(flagName); err == nil {
-			return value
-		}
-	}
-
-	return defaultTenant
-}
-
 func getFormDataObjectFlag(cmd *cobra.Command, flagName string, data map[string]interface{}) error {
 	if value, err := cmd.Flags().GetString(flagName); err == nil {
 		return jsonUtilities.ParseJSON(value, data)
 	}
 	return nil
-}
-
-func getFileContentsFlag(cmd *cobra.Command, flagName string, body *mapbuilder.MapBuilder) {
-	if value, err := cmd.Flags().GetString(flagName); err == nil {
-		body.SetFile(value)
-	}
 }
 
 func getFileFlag(cmd *cobra.Command, flagName string, includeMeta bool, formData map[string]io.Reader) error {

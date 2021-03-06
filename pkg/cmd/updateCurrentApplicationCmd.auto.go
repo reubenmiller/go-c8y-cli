@@ -13,10 +13,12 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// UpdateCurrentApplicationCmd command
 type UpdateCurrentApplicationCmd struct {
 	*baseCmd
 }
 
+// NewUpdateCurrentApplicationCmd creates a command to Update current application
 func NewUpdateCurrentApplicationCmd() *UpdateCurrentApplicationCmd {
 	ccmd := &UpdateCurrentApplicationCmd{}
 	cmd := &cobra.Command{
@@ -61,6 +63,7 @@ Update custom properties of the current application (requires using application 
 	return ccmd
 }
 
+// RunE executes the command
 func (n *UpdateCurrentApplicationCmd) RunE(cmd *cobra.Command, args []string) error {
 	var err error
 	inputIterators, err := flags.NewRequestInputIterators(cmd)

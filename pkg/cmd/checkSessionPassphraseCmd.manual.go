@@ -11,10 +11,6 @@ import (
 	"github.com/spf13/cobra"
 )
 
-type passphraseExchange struct {
-	passphrase string ``
-}
-
 type checkSessionPassphraseCmd struct {
 	OutputJSON         bool
 	OutputEnvVariables bool
@@ -42,11 +38,6 @@ func newCheckSessionPassphraseCmd() *checkSessionPassphraseCmd {
 	ccmd.baseCmd = newBaseCmd(cmd)
 
 	return ccmd
-}
-
-func (n *checkSessionPassphraseCmd) savePassword(pass string) error {
-	cliConfig.SetPassword(pass)
-	return cliConfig.WritePersistentConfig()
 }
 
 func (n *checkSessionPassphraseCmd) checkSession(cmd *cobra.Command, args []string) error {
@@ -84,8 +75,11 @@ func (n *checkSessionPassphraseCmd) checkSession(cmd *cobra.Command, args []stri
 
 	if encryptionEnabled {
 		green := promptui.Styler(promptui.FGGreen)
-		n.cmd.ErrOrStderr().Write([]byte(green("Passphrase OK\n")))
-		Logger.Info("Passphrase accepted")
+		if _, err := n.cmd.ErrOrStderr().Write([]byte(green("Passphrase OK\n"))); err != nil {
+			Logger.Errorf("Failed to write message. %s", err)
+		} else {
+			Logger.Info("Passphrase accepted")
+		}
 	}
 
 	return nil

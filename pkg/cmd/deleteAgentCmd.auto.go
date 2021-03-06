@@ -13,10 +13,12 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// DeleteAgentCmd command
 type DeleteAgentCmd struct {
 	*baseCmd
 }
 
+// NewDeleteAgentCmd creates a command to Delete agent
 func NewDeleteAgentCmd() *DeleteAgentCmd {
 	ccmd := &DeleteAgentCmd{}
 	cmd := &cobra.Command{
@@ -54,6 +56,7 @@ Get agent by id
 	return ccmd
 }
 
+// RunE executes the command
 func (n *DeleteAgentCmd) RunE(cmd *cobra.Command, args []string) error {
 	var err error
 	inputIterators, err := flags.NewRequestInputIterators(cmd)

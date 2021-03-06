@@ -14,10 +14,12 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// GetSupportedOperationsCmd command
 type GetSupportedOperationsCmd struct {
 	*baseCmd
 }
 
+// NewGetSupportedOperationsCmd creates a command to Get supported operations
 func NewGetSupportedOperationsCmd() *GetSupportedOperationsCmd {
 	ccmd := &GetSupportedOperationsCmd{}
 	cmd := &cobra.Command{
@@ -54,6 +56,7 @@ Get the supported operations of a device by name
 	return ccmd
 }
 
+// RunE executes the command
 func (n *GetSupportedOperationsCmd) RunE(cmd *cobra.Command, args []string) error {
 	var err error
 	inputIterators, err := flags.NewRequestInputIterators(cmd)

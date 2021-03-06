@@ -14,10 +14,12 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// GetTenantOptionsForCategoryCmd command
 type GetTenantOptionsForCategoryCmd struct {
 	*baseCmd
 }
 
+// NewGetTenantOptionsForCategoryCmd creates a command to Get tenant options by category
 func NewGetTenantOptionsForCategoryCmd() *GetTenantOptionsForCategoryCmd {
 	ccmd := &GetTenantOptionsForCategoryCmd{}
 	cmd := &cobra.Command{
@@ -55,6 +57,7 @@ Get a list of options for a category
 	return ccmd
 }
 
+// RunE executes the command
 func (n *GetTenantOptionsForCategoryCmd) RunE(cmd *cobra.Command, args []string) error {
 	var err error
 	inputIterators, err := flags.NewRequestInputIterators(cmd)

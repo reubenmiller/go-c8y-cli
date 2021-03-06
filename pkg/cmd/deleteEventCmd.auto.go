@@ -13,10 +13,12 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// DeleteEventCmd command
 type DeleteEventCmd struct {
 	*baseCmd
 }
 
+// NewDeleteEventCmd creates a command to Delete event
 func NewDeleteEventCmd() *DeleteEventCmd {
 	ccmd := &DeleteEventCmd{}
 	cmd := &cobra.Command{
@@ -52,6 +54,7 @@ Delete an event
 	return ccmd
 }
 
+// RunE executes the command
 func (n *DeleteEventCmd) RunE(cmd *cobra.Command, args []string) error {
 	var err error
 	inputIterators, err := flags.NewRequestInputIterators(cmd)

@@ -14,10 +14,12 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// GetUsersInGroupCmd command
 type GetUsersInGroupCmd struct {
 	*baseCmd
 }
 
+// NewGetUsersInGroupCmd creates a command to Get users in group
 func NewGetUsersInGroupCmd() *GetUsersInGroupCmd {
 	ccmd := &GetUsersInGroupCmd{}
 	cmd := &cobra.Command{
@@ -54,6 +56,7 @@ List the users within a user group
 	return ccmd
 }
 
+// RunE executes the command
 func (n *GetUsersInGroupCmd) RunE(cmd *cobra.Command, args []string) error {
 	var err error
 	inputIterators, err := flags.NewRequestInputIterators(cmd)

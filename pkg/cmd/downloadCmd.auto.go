@@ -14,10 +14,12 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// DownloadCmd command
 type DownloadCmd struct {
 	*baseCmd
 }
 
+// NewDownloadCmd creates a command to Download binary
 func NewDownloadCmd() *DownloadCmd {
 	ccmd := &DownloadCmd{}
 	cmd := &cobra.Command{
@@ -56,6 +58,7 @@ Get a binary and save it to a file
 	return ccmd
 }
 
+// RunE executes the command
 func (n *DownloadCmd) RunE(cmd *cobra.Command, args []string) error {
 	var err error
 	inputIterators, err := flags.NewRequestInputIterators(cmd)

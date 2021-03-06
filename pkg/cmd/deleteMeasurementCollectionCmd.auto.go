@@ -13,10 +13,12 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// DeleteMeasurementCollectionCmd command
 type DeleteMeasurementCollectionCmd struct {
 	*baseCmd
 }
 
+// NewDeleteMeasurementCollectionCmd creates a command to Delete measurement collection
 func NewDeleteMeasurementCollectionCmd() *DeleteMeasurementCollectionCmd {
 	ccmd := &DeleteMeasurementCollectionCmd{}
 	cmd := &cobra.Command{
@@ -56,6 +58,7 @@ Delete measurement collection for a device
 	return ccmd
 }
 
+// RunE executes the command
 func (n *DeleteMeasurementCollectionCmd) RunE(cmd *cobra.Command, args []string) error {
 	var err error
 	inputIterators, err := flags.NewRequestInputIterators(cmd)

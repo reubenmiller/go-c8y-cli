@@ -13,10 +13,12 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// DeleteBulkOperationCmd command
 type DeleteBulkOperationCmd struct {
 	*baseCmd
 }
 
+// NewDeleteBulkOperationCmd creates a command to Delete bulk operation
 func NewDeleteBulkOperationCmd() *DeleteBulkOperationCmd {
 	ccmd := &DeleteBulkOperationCmd{}
 	cmd := &cobra.Command{
@@ -52,6 +54,7 @@ Remove bulk operation by id
 	return ccmd
 }
 
+// RunE executes the command
 func (n *DeleteBulkOperationCmd) RunE(cmd *cobra.Command, args []string) error {
 	var err error
 	inputIterators, err := flags.NewRequestInputIterators(cmd)

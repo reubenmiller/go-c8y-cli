@@ -13,10 +13,12 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// UpdateTenantCmd command
 type UpdateTenantCmd struct {
 	*baseCmd
 }
 
+// NewUpdateTenantCmd creates a command to Update tenant
 func NewUpdateTenantCmd() *UpdateTenantCmd {
 	ccmd := &UpdateTenantCmd{}
 	cmd := &cobra.Command{
@@ -59,6 +61,7 @@ Update a tenant by name (from the management tenant)
 	return ccmd
 }
 
+// RunE executes the command
 func (n *UpdateTenantCmd) RunE(cmd *cobra.Command, args []string) error {
 	var err error
 	inputIterators, err := flags.NewRequestInputIterators(cmd)

@@ -13,10 +13,12 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// UpdateTenantOptionEditableCmd command
 type UpdateTenantOptionEditableCmd struct {
 	*baseCmd
 }
 
+// NewUpdateTenantOptionEditableCmd creates a command to Update tenant option edit setting
 func NewUpdateTenantOptionEditableCmd() *UpdateTenantOptionEditableCmd {
 	ccmd := &UpdateTenantOptionEditableCmd{}
 	cmd := &cobra.Command{
@@ -58,6 +60,7 @@ Update editable property for an existing tenant option
 	return ccmd
 }
 
+// RunE executes the command
 func (n *UpdateTenantOptionEditableCmd) RunE(cmd *cobra.Command, args []string) error {
 	var err error
 	inputIterators, err := flags.NewRequestInputIterators(cmd)

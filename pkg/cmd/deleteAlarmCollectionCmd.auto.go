@@ -13,10 +13,12 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// DeleteAlarmCollectionCmd command
 type DeleteAlarmCollectionCmd struct {
 	*baseCmd
 }
 
+// NewDeleteAlarmCollectionCmd creates a command to Delete alarm collection
 func NewDeleteAlarmCollectionCmd() *DeleteAlarmCollectionCmd {
 	ccmd := &DeleteAlarmCollectionCmd{}
 	cmd := &cobra.Command{
@@ -66,6 +68,7 @@ Remove alarms on the device which are active and created in the last 10 minutes
 	return ccmd
 }
 
+// RunE executes the command
 func (n *DeleteAlarmCollectionCmd) RunE(cmd *cobra.Command, args []string) error {
 	var err error
 	inputIterators, err := flags.NewRequestInputIterators(cmd)

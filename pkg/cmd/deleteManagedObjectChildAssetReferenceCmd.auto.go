@@ -13,10 +13,12 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// DeleteManagedObjectChildAssetReferenceCmd command
 type DeleteManagedObjectChildAssetReferenceCmd struct {
 	*baseCmd
 }
 
+// NewDeleteManagedObjectChildAssetReferenceCmd creates a command to Delete child asset reference
 func NewDeleteManagedObjectChildAssetReferenceCmd() *DeleteManagedObjectChildAssetReferenceCmd {
 	ccmd := &DeleteManagedObjectChildAssetReferenceCmd{}
 	cmd := &cobra.Command{
@@ -55,6 +57,7 @@ Unassign a child device from its parent device
 	return ccmd
 }
 
+// RunE executes the command
 func (n *DeleteManagedObjectChildAssetReferenceCmd) RunE(cmd *cobra.Command, args []string) error {
 	var err error
 	inputIterators, err := flags.NewRequestInputIterators(cmd)

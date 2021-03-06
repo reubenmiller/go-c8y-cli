@@ -13,10 +13,12 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// DeleteNewDeviceRequestCmd command
 type DeleteNewDeviceRequestCmd struct {
 	*baseCmd
 }
 
+// NewDeleteNewDeviceRequestCmd creates a command to Delete device request
 func NewDeleteNewDeviceRequestCmd() *DeleteNewDeviceRequestCmd {
 	ccmd := &DeleteNewDeviceRequestCmd{}
 	cmd := &cobra.Command{
@@ -52,6 +54,7 @@ Delete a new device request
 	return ccmd
 }
 
+// RunE executes the command
 func (n *DeleteNewDeviceRequestCmd) RunE(cmd *cobra.Command, args []string) error {
 	var err error
 	inputIterators, err := flags.NewRequestInputIterators(cmd)

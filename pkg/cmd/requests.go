@@ -108,13 +108,6 @@ func getIncludeAllFlag(cmd *cobra.Command, flagName string) (includeAll bool) {
 	return
 }
 
-func getCurrentPageFlag(cmd *cobra.Command, flagName string) (currentPage int64) {
-	if v, flagErr := cmd.Flags().GetInt64(flagName); flagErr == nil {
-		currentPage = v
-	}
-	return
-}
-
 func getTimeoutContext() (context.Context, context.CancelFunc) {
 	return context.WithTimeout(context.Background(), time.Duration(globalFlagTimeout*1000)*time.Millisecond)
 }
@@ -231,7 +224,7 @@ func PrintRequestDetails(w io.Writer, requestOptions *c8y.RequestOptions, req *h
 		value.DisableColor()
 	}
 
-	fullURL := fmt.Sprintf("%s", req.URL)
+	fullURL := req.URL.String()
 
 	// strip headers which are not useful to anyone
 	req.Header.Del("User-Agent")
@@ -253,8 +246,18 @@ func PrintRequestDetails(w io.Writer, requestOptions *c8y.RequestOptions, req *h
 		peekBody := io.LimitReader(bodyCopy, 1024*1024)
 		body, err = ioutil.ReadAll(peekBody)
 
+		if err != nil {
+			Logger.Warnf("Could not read body. %s", err)
+			return
+		}
+
 		// try converting it to json
-		jsonUtilities.ParseJSON(string(body), bodyMap)
+		err = jsonUtilities.ParseJSON(string(body), bodyMap)
+
+		if err != nil {
+			Logger.Warnf("Could not parse json body. %s", err)
+			return
+		}
 	}
 
 	shell, pwsh, _ := getCurlCommands(req)
@@ -336,8 +339,6 @@ func PrintRequestDetails(w io.Writer, requestOptions *c8y.RequestOptions, req *h
 }
 
 func tryUnescapeURL(v string) string {
-	unescapedQuery := v
-
 	unescapedQuery, err := url.QueryUnescape(v)
 	if err != nil {
 		return v
@@ -385,10 +386,6 @@ func fetchAllResults(req c8y.RequestOptions, resp *c8y.Response, commonOptions C
 
 	results := make([]*c8y.Response, 1)
 	results[0] = resp
-
-	if resp.JSONData != nil {
-		// fmt.Printf("%s\n", *resp.JSONData)
-	}
 
 	var err error
 
@@ -497,10 +494,6 @@ func fetchAllInventoryQueryResults(req c8y.RequestOptions, resp *c8y.Response, c
 
 	results := make([]*c8y.Response, 1)
 	results[0] = resp
-
-	if resp.JSONData != nil {
-		// fmt.Printf("%s\n", *resp.JSONData)
-	}
 
 	var err error
 
@@ -710,7 +703,7 @@ func processResponse(resp *c8y.Response, respError error, commonOptions CommonCo
 
 			emptyArray := []byte("[]\n")
 
-			if len(responseText) == len(emptyArray) && bytes.Compare(responseText, emptyArray) == 0 {
+			if len(responseText) == len(emptyArray) && bytes.Equal(responseText, emptyArray) {
 				Logger.Info("No matching results found. Empty response will be ommitted")
 				responseText = []byte{}
 			}

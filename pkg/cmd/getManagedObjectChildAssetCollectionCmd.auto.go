@@ -14,10 +14,12 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// GetManagedObjectChildAssetCollectionCmd command
 type GetManagedObjectChildAssetCollectionCmd struct {
 	*baseCmd
 }
 
+// NewGetManagedObjectChildAssetCollectionCmd creates a command to Get child asset collection
 func NewGetManagedObjectChildAssetCollectionCmd() *GetManagedObjectChildAssetCollectionCmd {
 	ccmd := &GetManagedObjectChildAssetCollectionCmd{}
 	cmd := &cobra.Command{
@@ -54,6 +56,7 @@ Get a list of the child devices of an existing device
 	return ccmd
 }
 
+// RunE executes the command
 func (n *GetManagedObjectChildAssetCollectionCmd) RunE(cmd *cobra.Command, args []string) error {
 	var err error
 	inputIterators, err := flags.NewRequestInputIterators(cmd)

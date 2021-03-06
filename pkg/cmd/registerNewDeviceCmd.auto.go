@@ -13,10 +13,12 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// RegisterNewDeviceCmd command
 type RegisterNewDeviceCmd struct {
 	*baseCmd
 }
 
+// NewRegisterNewDeviceCmd creates a command to Register device
 func NewRegisterNewDeviceCmd() *RegisterNewDeviceCmd {
 	ccmd := &RegisterNewDeviceCmd{}
 	cmd := &cobra.Command{
@@ -52,6 +54,7 @@ Register a new device request
 	return ccmd
 }
 
+// RunE executes the command
 func (n *RegisterNewDeviceCmd) RunE(cmd *cobra.Command, args []string) error {
 	var err error
 	inputIterators, err := flags.NewRequestInputIterators(cmd)

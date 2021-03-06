@@ -13,10 +13,12 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// NewManagedObjectCmd command
 type NewManagedObjectCmd struct {
 	*baseCmd
 }
 
+// NewNewManagedObjectCmd creates a command to Create managed object
 func NewNewManagedObjectCmd() *NewManagedObjectCmd {
 	ccmd := &NewManagedObjectCmd{}
 	cmd := &cobra.Command{
@@ -54,6 +56,7 @@ Create a managed object
 	return ccmd
 }
 
+// RunE executes the command
 func (n *NewManagedObjectCmd) RunE(cmd *cobra.Command, args []string) error {
 	var err error
 	inputIterators, err := flags.NewRequestInputIterators(cmd)

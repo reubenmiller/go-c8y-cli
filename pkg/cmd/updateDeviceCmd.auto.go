@@ -13,10 +13,12 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// UpdateDeviceCmd command
 type UpdateDeviceCmd struct {
 	*baseCmd
 }
 
+// NewUpdateDeviceCmd creates a command to Update device
 func NewUpdateDeviceCmd() *UpdateDeviceCmd {
 	ccmd := &UpdateDeviceCmd{}
 	cmd := &cobra.Command{
@@ -54,6 +56,7 @@ Update device by id
 	return ccmd
 }
 
+// RunE executes the command
 func (n *UpdateDeviceCmd) RunE(cmd *cobra.Command, args []string) error {
 	var err error
 	inputIterators, err := flags.NewRequestInputIterators(cmd)

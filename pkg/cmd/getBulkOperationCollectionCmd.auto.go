@@ -14,10 +14,12 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// GetBulkOperationCollectionCmd command
 type GetBulkOperationCollectionCmd struct {
 	*baseCmd
 }
 
+// NewGetBulkOperationCollectionCmd creates a command to Get bulk operation collection
 func NewGetBulkOperationCollectionCmd() *GetBulkOperationCollectionCmd {
 	ccmd := &GetBulkOperationCollectionCmd{}
 	cmd := &cobra.Command{
@@ -53,6 +55,7 @@ Get a list of bulk operations
 	return ccmd
 }
 
+// RunE executes the command
 func (n *GetBulkOperationCollectionCmd) RunE(cmd *cobra.Command, args []string) error {
 	var err error
 	inputIterators, err := flags.NewRequestInputIterators(cmd)

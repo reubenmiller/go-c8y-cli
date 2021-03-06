@@ -2,14 +2,11 @@ package cmd
 
 import (
 	"context"
-	"fmt"
 	"strings"
 
 	"github.com/pkg/errors"
-	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/reubenmiller/go-c8y-cli/pkg/matcher"
-	"github.com/spf13/cobra"
-	"github.com/tidwall/gjson"
+	"github.com/reubenmiller/go-c8y/pkg/c8y"
 )
 
 type userFetcher struct {
@@ -69,124 +66,4 @@ func (f *userFetcher) getByName(name string) ([]fetcherResultSet, error) {
 	}
 
 	return results, nil
-}
-
-// getFormattedUserSlice returns the user id and username
-// returns raw strings, lookuped values, and errors
-func getFormattedUserSlice(cmd *cobra.Command, args []string, name string) ([]string, []string, error) {
-	f := newUserFetcher(client)
-
-	if !cmd.Flags().Changed(name) {
-		// TODO: Read from os.PIPE
-		pipedInput, err := getPipe()
-		if err != nil {
-			Logger.Debug("No pipeline input detected")
-		} else {
-			Logger.Debugf("PIPED Input: %s\n", pipedInput)
-			return nil, nil, nil
-		}
-	}
-
-	values, err := cmd.Flags().GetStringSlice(name)
-	if err != nil {
-		Logger.Warning("Flag is missing", err)
-	}
-
-	values = ParseValues(append(values, args...))
-
-	formattedValues, err := lookupEntity(f, values, true)
-
-	if err != nil {
-		Logger.Warningf("Failed to fetch entities. %s", err)
-		return values, nil, err
-	}
-
-	results := []string{}
-
-	invalidLookups := []string{}
-	for _, item := range formattedValues {
-		if item.ID != "" {
-			if item.Name != "" {
-				results = append(results, fmt.Sprintf("%s|%s", item.ID, item.Name))
-			} else {
-				results = append(results, item.ID)
-			}
-		} else {
-			if item.Name != "" {
-				invalidLookups = append(invalidLookups, item.Name)
-			}
-		}
-	}
-
-	var errors error
-
-	if len(invalidLookups) > 0 {
-		errors = fmt.Errorf("no results %v", invalidLookups)
-	}
-
-	return values, results, errors
-}
-
-// getFormattedUserLinkSlice returns the user id and username
-// returns raw strings, lookuped values, and errors
-func getFormattedUserLinkSlice(cmd *cobra.Command, args []string, name string) ([]string, []string, error) {
-	f := newUserFetcher(client)
-
-	if !cmd.Flags().Changed(name) {
-		// TODO: Read from os.PIPE
-		pipedInput, err := getPipe()
-		if err != nil {
-			Logger.Debug("No pipeline input detected")
-		} else {
-			Logger.Debugf("PIPED Input: %s\n", pipedInput)
-			return nil, nil, nil
-		}
-	}
-
-	values, err := cmd.Flags().GetStringSlice(name)
-	if err != nil {
-		Logger.Warning("Flag is missing", err)
-	}
-
-	values = ParseValues(append(values, args...))
-
-	formattedValues, err := lookupEntity(f, values, true)
-
-	if err != nil {
-		Logger.Warningf("Failed to fetch entities. %s", err)
-		return values, nil, err
-	}
-
-	results := []string{}
-
-	invalidLookups := []string{}
-	for _, item := range formattedValues {
-		var selfLink string
-		// Try to retrieve self link
-		if data, ok := item.Data.Value.(gjson.Result); ok {
-			if value := data.Get("self"); value.Exists() {
-				selfLink = value.Str
-			}
-		}
-
-		if selfLink != "" {
-			if item.Name != "" {
-				results = append(results, fmt.Sprintf("%s|%s", selfLink, item.Name))
-			} else {
-				results = append(results, selfLink)
-			}
-		} else {
-			if item.Name != "" {
-				invalidLookups = append(invalidLookups, item.Name)
-			}
-		}
-	}
-
-	var errors error
-
-	if len(invalidLookups) > 0 {
-		errors = fmt.Errorf("no results %v", invalidLookups)
-	}
-
-	return values, results, errors
 }

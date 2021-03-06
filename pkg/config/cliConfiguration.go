@@ -74,7 +74,10 @@ func NewCliConfiguration(v *viper.Viper, secureData *encrypt.SecureData, home st
 }
 
 func (c *CliConfiguration) bindSettings() {
-	c.bindEnv(SettingEncryptionCachePassphrase, true)
+	err := c.bindEnv(SettingEncryptionCachePassphrase, true)
+	if err != nil {
+		c.Logger.Warnf("Could not bind settings. %s", err)
+	}
 }
 
 // SetLogger sets the logger
@@ -105,16 +108,23 @@ func (c *CliConfiguration) CheckEncryption(encryptedText ...string) (string, err
 // BindAuthorization binds environment variables related to the authrorization to the configuration
 func (c *CliConfiguration) BindAuthorization() error {
 	c.viper.SetEnvPrefix("c8y")
-	c.viper.BindEnv("host")
-	c.viper.BindEnv("username")
-	c.viper.BindEnv("tenant")
-	c.viper.BindEnv("password")
-	c.viper.BindEnv("credential.totp.secret")
-	c.viper.BindEnv("credential.cookies.0")
-	c.viper.BindEnv("credential.cookies.1")
-	c.viper.BindEnv("credential.cookies.2")
-	c.viper.BindEnv("credential.cookies.3")
-	c.viper.BindEnv("credential.cookies.4")
+	auth_variables := [...]string{
+		"host",
+		"username",
+		"tenant",
+		"password",
+		"credential.totp.secret",
+		"credential.cookies.0",
+		"credential.cookies.1",
+		"credential.cookies.2",
+		"credential.cookies.3",
+		"credential.cookies.4",
+	}
+	for _, name := range auth_variables {
+		if err := c.viper.BindEnv(name); err != nil {
+			return err
+		}
+	}
 	return nil
 }
 
@@ -196,8 +206,7 @@ func (c *CliConfiguration) ReadKeyFile() error {
 	if v := os.Getenv("C8Y_PASSPHRASE_TEXT"); v != "" && c.SecureData.IsEncrypted(v) == 1 {
 		c.Logger.Infof("Using env variable 'C8Y_PASSPHRASE_TEXT' as example encryption text")
 		c.SecretText = v
-		c.CreateKeyFile(v)
-		return nil
+		return c.CreateKeyFile(v)
 	}
 
 	// read from file
@@ -406,19 +415,19 @@ func (c *CliConfiguration) WritePersistentConfig() error {
 	}
 	c.Persistent.Set("$schema", "https://raw.githubusercontent.com/reubenmiller/go-c8y-cli/master/tools/schema/session.schema.json")
 
-	c.SetEncryptedString("password", "")
+	err := c.SetEncryptedString("password", "")
+	if err != nil {
+		return err
+	}
 	return c.Persistent.WriteConfig()
 }
 
 // SetAuthorizationCookies saves the authorization cookies
 func (c *CliConfiguration) SetAuthorizationCookies(cookies []*http.Cookie) {
-	cookieValues := make([]string, 0)
-
 	encryptedCookies := make(map[string]string)
 	var err error
 
 	for i, cookie := range cookies {
-		cookieValues = append(cookieValues, fmt.Sprintf("%s", cookie.Raw))
 		c.Persistent.Set(fmt.Sprintf("credential.cookies.%d", i), "cookie")
 
 		cookieData := cookie.Raw
@@ -500,9 +509,10 @@ func (c *CliConfiguration) CachePassphraseVariables() bool {
 	return c.viper.GetBool(SettingEncryptionCachePassphrase)
 }
 
-func (c *CliConfiguration) bindEnv(name string, defaultValue interface{}) {
-	c.viper.BindEnv(name)
+func (c *CliConfiguration) bindEnv(name string, defaultValue interface{}) error {
+	err := c.viper.BindEnv(name)
 	c.viper.SetDefault(name, defaultValue)
+	return err
 }
 
 // DecryptSession decrypts a session (as long as the encryption passphrase has already been provided)

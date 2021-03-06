@@ -13,10 +13,12 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// DeleteAssetFromGroupCmd command
 type DeleteAssetFromGroupCmd struct {
 	*baseCmd
 }
 
+// NewDeleteAssetFromGroupCmd creates a command to Unassign asset from group
 func NewDeleteAssetFromGroupCmd() *DeleteAssetFromGroupCmd {
 	ccmd := &DeleteAssetFromGroupCmd{}
 	cmd := &cobra.Command{
@@ -55,6 +57,7 @@ Unassign a child device from its parent device
 	return ccmd
 }
 
+// RunE executes the command
 func (n *DeleteAssetFromGroupCmd) RunE(cmd *cobra.Command, args []string) error {
 	var err error
 	inputIterators, err := flags.NewRequestInputIterators(cmd)

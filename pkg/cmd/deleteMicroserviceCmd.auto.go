@@ -13,10 +13,12 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// DeleteMicroserviceCmd command
 type DeleteMicroserviceCmd struct {
 	*baseCmd
 }
 
+// NewDeleteMicroserviceCmd creates a command to Delete microservice
 func NewDeleteMicroserviceCmd() *DeleteMicroserviceCmd {
 	ccmd := &DeleteMicroserviceCmd{}
 	cmd := &cobra.Command{
@@ -55,6 +57,7 @@ Delete a microservice by name
 	return ccmd
 }
 
+// RunE executes the command
 func (n *DeleteMicroserviceCmd) RunE(cmd *cobra.Command, args []string) error {
 	var err error
 	inputIterators, err := flags.NewRequestInputIterators(cmd)

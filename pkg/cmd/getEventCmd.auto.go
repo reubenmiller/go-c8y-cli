@@ -14,10 +14,12 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// GetEventCmd command
 type GetEventCmd struct {
 	*baseCmd
 }
 
+// NewGetEventCmd creates a command to Get event
 func NewGetEventCmd() *GetEventCmd {
 	ccmd := &GetEventCmd{}
 	cmd := &cobra.Command{
@@ -52,6 +54,7 @@ Get event
 	return ccmd
 }
 
+// RunE executes the command
 func (n *GetEventCmd) RunE(cmd *cobra.Command, args []string) error {
 	var err error
 	inputIterators, err := flags.NewRequestInputIterators(cmd)

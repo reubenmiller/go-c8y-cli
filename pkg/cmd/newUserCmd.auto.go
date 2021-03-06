@@ -13,10 +13,12 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// NewUserCmd command
 type NewUserCmd struct {
 	*baseCmd
 }
 
+// NewNewUserCmd creates a command to Create user
 func NewNewUserCmd() *NewUserCmd {
 	ccmd := &NewUserCmd{}
 	cmd := &cobra.Command{
@@ -63,6 +65,7 @@ Create a user
 	return ccmd
 }
 
+// RunE executes the command
 func (n *NewUserCmd) RunE(cmd *cobra.Command, args []string) error {
 	var err error
 	inputIterators, err := flags.NewRequestInputIterators(cmd)

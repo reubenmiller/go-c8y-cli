@@ -14,10 +14,12 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// GetDataBrokerConnectorCollectionCmd command
 type GetDataBrokerConnectorCollectionCmd struct {
 	*baseCmd
 }
 
+// NewGetDataBrokerConnectorCollectionCmd creates a command to Get data broker collection
 func NewGetDataBrokerConnectorCollectionCmd() *GetDataBrokerConnectorCollectionCmd {
 	ccmd := &GetDataBrokerConnectorCollectionCmd{}
 	cmd := &cobra.Command{
@@ -51,6 +53,7 @@ Get a list of data broker connectors
 	return ccmd
 }
 
+// RunE executes the command
 func (n *GetDataBrokerConnectorCollectionCmd) RunE(cmd *cobra.Command, args []string) error {
 	var err error
 	inputIterators, err := flags.NewRequestInputIterators(cmd)

@@ -133,18 +133,9 @@ func (n *newMicroserviceCmd) doProcedure(cmd *cobra.Command, args []string) erro
 
 		idValue, _ := getFetchedResultsAsString(refs)
 
-		/* if err != nil {
-			return cmderrors.NewUserError("no matching microservices found", idInputValues, err)
-		}
-
-		if len(idValue) == 0 {
-			return cmderrors.NewUserError("no matching microservices found", idInputValues)
-		} */
-		if idValue != nil {
-			for _, item := range idValue {
-				if item != "" {
-					applicationID = newIDValue(item).GetID()
-				}
+		for _, item := range idValue {
+			if item != "" {
+				applicationID = newIDValue(item).GetID()
 			}
 		}
 	}
@@ -236,8 +227,10 @@ func (n *newMicroserviceCmd) doProcedure(cmd *cobra.Command, args []string) erro
 		if !globalFlagDryRun {
 			_, response, err = client.Application.Update(context.Background(), application.ID, &c8y.Application{
 				RequiredRoles: requiredRoles,
-				// manifest: manifestContents,
 			})
+			if err != nil {
+				return err
+			}
 		}
 	}
 

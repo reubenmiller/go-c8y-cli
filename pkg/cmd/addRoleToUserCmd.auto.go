@@ -13,10 +13,12 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// AddRoleToUserCmd command
 type AddRoleToUserCmd struct {
 	*baseCmd
 }
 
+// NewAddRoleToUserCmd creates a command to Add Role to user
 func NewAddRoleToUserCmd() *AddRoleToUserCmd {
 	ccmd := &AddRoleToUserCmd{}
 	cmd := &cobra.Command{
@@ -55,6 +57,7 @@ Add a role (ROLE_ALARM_READ) to a user
 	return ccmd
 }
 
+// RunE executes the command
 func (n *AddRoleToUserCmd) RunE(cmd *cobra.Command, args []string) error {
 	var err error
 	inputIterators, err := flags.NewRequestInputIterators(cmd)

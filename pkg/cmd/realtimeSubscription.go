@@ -5,8 +5,6 @@ import (
 )
 
 type subscribeRealtimeCmd struct {
-	device          string
-	deviceID        string
 	flagChannel     string
 	flagDurationSec int64
 	flagCount       int64

@@ -85,7 +85,9 @@ func (n *getServiceUserCmd) getServiceUser(cmd *cobra.Command, args []string) er
 		bootstrapCtx := context.WithValue(context.Background(), c8y.GetContextAuthTokenKey(), auth)
 
 		_, resp, err := client.Application.GetCurrentApplicationSubscriptions(bootstrapCtx)
-		processResponse(resp, err, commonOptions)
+		if _, err := processResponse(resp, err, commonOptions); err != nil {
+			return err
+		}
 	}
 
 	return nil

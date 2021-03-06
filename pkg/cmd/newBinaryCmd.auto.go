@@ -13,10 +13,12 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// NewBinaryCmd command
 type NewBinaryCmd struct {
 	*baseCmd
 }
 
+// NewNewBinaryCmd creates a command to Create binary
 func NewNewBinaryCmd() *NewBinaryCmd {
 	ccmd := &NewBinaryCmd{}
 	cmd := &cobra.Command{
@@ -57,6 +59,7 @@ Upload a config file and make it globally accessible for all users
 	return ccmd
 }
 
+// RunE executes the command
 func (n *NewBinaryCmd) RunE(cmd *cobra.Command, args []string) error {
 	var err error
 	inputIterators, err := flags.NewRequestInputIterators(cmd)

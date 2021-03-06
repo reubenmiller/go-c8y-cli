@@ -14,10 +14,12 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// GetRoleReferenceCollectionFromGroupCmd command
 type GetRoleReferenceCollectionFromGroupCmd struct {
 	*baseCmd
 }
 
+// NewGetRoleReferenceCollectionFromGroupCmd creates a command to Get role references from user group
 func NewGetRoleReferenceCollectionFromGroupCmd() *GetRoleReferenceCollectionFromGroupCmd {
 	ccmd := &GetRoleReferenceCollectionFromGroupCmd{}
 	cmd := &cobra.Command{
@@ -54,6 +56,7 @@ Get a list of role references for a user group
 	return ccmd
 }
 
+// RunE executes the command
 func (n *GetRoleReferenceCollectionFromGroupCmd) RunE(cmd *cobra.Command, args []string) error {
 	var err error
 	inputIterators, err := flags.NewRequestInputIterators(cmd)

@@ -49,6 +49,9 @@ func (f *microserviceFetcher) getByName(name string) ([]fetcherResultSet, error)
 			Type: c8y.ApplicationTypeMicroservice,
 		},
 	)
+	if err != nil {
+		return nil, errors.Wrap(err, "could not fetch microservices")
+	}
 
 	pattern, err := regexp.Compile(name)
 

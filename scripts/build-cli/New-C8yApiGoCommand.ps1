@@ -151,9 +151,6 @@
         }
 
         foreach ($iArg in (Remove-SkippedParameters $Specification.body)) {
-            if ($iArg.pipeline -eq $true) {
-                $PipelineVariableIteratorType = "body"
-            }
             $code = New-C8yApiGoGetValueFromFlag -Parameters $iArg -SetterType "body"
             if ($code) {
                 switch -Regex ($code) {
@@ -243,11 +240,6 @@
     #
     $RESTPathBuilderOptions = New-Object System.Text.StringBuilder
     foreach ($Properties in (Remove-SkippedParameters $Specification.pathParameters)) {
-        # if ($Properties.pipeline) {
-        #     Write-Verbose "Skipping path parameters for pipeline arguments"
-        #     $PipelineVariableIteratorType = "path"
-        #     continue
-        # }
         $code = New-C8yApiGoGetValueFromFlag -Parameters $Properties -SetterType "path"
         if ($code) {
             $null = $RESTPathBuilderOptions.AppendLine($code)
@@ -344,10 +336,12 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// ${NameCamel}Cmd command
 type ${NameCamel}Cmd struct {
     *baseCmd
 }
 
+// New${NameCamel}Cmd creates a command to $Description
 func New${NameCamel}Cmd() *${NameCamel}Cmd {
 	ccmd := &${NameCamel}Cmd{}
 	cmd := &cobra.Command{
@@ -395,6 +389,7 @@ $($Examples -join "`n`n")
 	return ccmd
 }
 
+// RunE executes the command
 func (n *${NameCamel}Cmd) RunE(cmd *cobra.Command, args []string) error {
     var err error
     inputIterators, err := flags.NewRequestInputIterators(cmd)

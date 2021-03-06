@@ -51,7 +51,10 @@ Log into the current session
 
 func (n *sessionLoginCmd) onSave() {
 	Logger.Debug("Saving session file")
-	WriteAuth(viper.GetViper(), globalStorageStorePassword, globalStorageStoreCookies)
+	err := WriteAuth(viper.GetViper(), globalStorageStorePassword, globalStorageStoreCookies)
+	if err != nil {
+		Logger.Errorf("Saving file error. %s", err)
+	}
 }
 
 func (n *sessionLoginCmd) initSession(cmd *cobra.Command, args []string) error {
@@ -100,10 +103,12 @@ func (n *sessionLoginCmd) initSession(cmd *cobra.Command, args []string) error {
 }
 
 func printSessionInfo(w io.Writer, session CumulocitySession) {
-	label := color.New(color.FgWhite, color.Faint).SprintfFunc()
+	labelS := color.New(color.FgWhite, color.Faint)
+	label := labelS.SprintfFunc()
 	value := color.New(color.FgWhite).SprintFunc()
 	header := color.New(color.FgCyan).SprintFunc()
-	fmt.Fprintf(w, label("%s", "---------------------  Cumulocity Session  ---------------------\n"))
+
+	labelS.Fprintf(w, "---------------------  Cumulocity Session  ---------------------\n")
 	fmt.Fprintf(w, "\n    %s: %s\n\n\n", label("%s", "path"), header(hideSensitiveInformationIfActive(session.Path)))
 	if session.Description != "" {
 		fmt.Fprintf(w, "%s : %s\n", label(fmt.Sprintf("%-12s", "description")), value(hideSensitiveInformationIfActive(session.Host)))

@@ -13,10 +13,12 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// UpdateDataBrokerCmd command
 type UpdateDataBrokerCmd struct {
 	*baseCmd
 }
 
+// NewUpdateDataBrokerCmd creates a command to Update data broker
 func NewUpdateDataBrokerCmd() *UpdateDataBrokerCmd {
 	ccmd := &UpdateDataBrokerCmd{}
 	cmd := &cobra.Command{
@@ -56,6 +58,7 @@ Change the status of a specific data broker connector by given connector id
 	return ccmd
 }
 
+// RunE executes the command
 func (n *UpdateDataBrokerCmd) RunE(cmd *cobra.Command, args []string) error {
 	var err error
 	inputIterators, err := flags.NewRequestInputIterators(cmd)

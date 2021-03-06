@@ -14,10 +14,12 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// GetMicroserviceBootstrapUserCmd command
 type GetMicroserviceBootstrapUserCmd struct {
 	*baseCmd
 }
 
+// NewGetMicroserviceBootstrapUserCmd creates a command to Get microservice bootstrap user
 func NewGetMicroserviceBootstrapUserCmd() *GetMicroserviceBootstrapUserCmd {
 	ccmd := &GetMicroserviceBootstrapUserCmd{}
 	cmd := &cobra.Command{
@@ -56,6 +58,7 @@ Get application bootstrap user by app name
 	return ccmd
 }
 
+// RunE executes the command
 func (n *GetMicroserviceBootstrapUserCmd) RunE(cmd *cobra.Command, args []string) error {
 	var err error
 	inputIterators, err := flags.NewRequestInputIterators(cmd)

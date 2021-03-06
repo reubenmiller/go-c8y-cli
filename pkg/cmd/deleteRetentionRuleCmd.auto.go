@@ -13,10 +13,12 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// DeleteRetentionRuleCmd command
 type DeleteRetentionRuleCmd struct {
 	*baseCmd
 }
 
+// NewDeleteRetentionRuleCmd creates a command to Delete retention rule
 func NewDeleteRetentionRuleCmd() *DeleteRetentionRuleCmd {
 	ccmd := &DeleteRetentionRuleCmd{}
 	cmd := &cobra.Command{
@@ -53,6 +55,7 @@ Delete a retention rule
 	return ccmd
 }
 
+// RunE executes the command
 func (n *DeleteRetentionRuleCmd) RunE(cmd *cobra.Command, args []string) error {
 	var err error
 	inputIterators, err := flags.NewRequestInputIterators(cmd)

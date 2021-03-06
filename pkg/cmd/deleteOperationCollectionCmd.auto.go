@@ -13,10 +13,12 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// DeleteOperationCollectionCmd command
 type DeleteOperationCollectionCmd struct {
 	*baseCmd
 }
 
+// NewDeleteOperationCollectionCmd creates a command to Delete operation collection
 func NewDeleteOperationCollectionCmd() *DeleteOperationCollectionCmd {
 	ccmd := &DeleteOperationCollectionCmd{}
 	cmd := &cobra.Command{
@@ -58,6 +60,7 @@ Remove all pending operations for a given device
 	return ccmd
 }
 
+// RunE executes the command
 func (n *DeleteOperationCollectionCmd) RunE(cmd *cobra.Command, args []string) error {
 	var err error
 	inputIterators, err := flags.NewRequestInputIterators(cmd)

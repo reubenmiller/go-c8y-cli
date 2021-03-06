@@ -13,10 +13,12 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// NewRetentionRuleCmd command
 type NewRetentionRuleCmd struct {
 	*baseCmd
 }
 
+// NewNewRetentionRuleCmd creates a command to Create retention rule
 func NewNewRetentionRuleCmd() *NewRetentionRuleCmd {
 	ccmd := &NewRetentionRuleCmd{}
 	cmd := &cobra.Command{
@@ -61,6 +63,7 @@ Create a retention rule
 	return ccmd
 }
 
+// RunE executes the command
 func (n *NewRetentionRuleCmd) RunE(cmd *cobra.Command, args []string) error {
 	var err error
 	inputIterators, err := flags.NewRequestInputIterators(cmd)

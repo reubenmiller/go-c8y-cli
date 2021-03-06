@@ -14,10 +14,12 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// CurrentTenantCmd command
 type CurrentTenantCmd struct {
 	*baseCmd
 }
 
+// NewCurrentTenantCmd creates a command to Get current tenant
 func NewCurrentTenantCmd() *CurrentTenantCmd {
 	ccmd := &CurrentTenantCmd{}
 	cmd := &cobra.Command{
@@ -50,6 +52,7 @@ Get the current tenant (based on your current credentials)
 	return ccmd
 }
 
+// RunE executes the command
 func (n *CurrentTenantCmd) RunE(cmd *cobra.Command, args []string) error {
 	var err error
 	inputIterators, err := flags.NewRequestInputIterators(cmd)

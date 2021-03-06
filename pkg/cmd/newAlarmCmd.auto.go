@@ -13,10 +13,12 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// NewAlarmCmd command
 type NewAlarmCmd struct {
 	*baseCmd
 }
 
+// NewNewAlarmCmd creates a command to Create alarm
 func NewNewAlarmCmd() *NewAlarmCmd {
 	ccmd := &NewAlarmCmd{}
 	cmd := &cobra.Command{
@@ -60,6 +62,7 @@ Create a new alarm for device
 	return ccmd
 }
 
+// RunE executes the command
 func (n *NewAlarmCmd) RunE(cmd *cobra.Command, args []string) error {
 	var err error
 	inputIterators, err := flags.NewRequestInputIterators(cmd)

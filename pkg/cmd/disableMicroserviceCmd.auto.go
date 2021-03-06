@@ -13,10 +13,12 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// DisableMicroserviceCmd command
 type DisableMicroserviceCmd struct {
 	*baseCmd
 }
 
+// NewDisableMicroserviceCmd creates a command to unsubscribe microservice
 func NewDisableMicroserviceCmd() *DisableMicroserviceCmd {
 	ccmd := &DisableMicroserviceCmd{}
 	cmd := &cobra.Command{
@@ -57,6 +59,7 @@ Disable (unsubscribe) to a microservice
 	return ccmd
 }
 
+// RunE executes the command
 func (n *DisableMicroserviceCmd) RunE(cmd *cobra.Command, args []string) error {
 	var err error
 	inputIterators, err := flags.NewRequestInputIterators(cmd)

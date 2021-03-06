@@ -14,10 +14,12 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// GetManagedObjectCollectionCmd command
 type GetManagedObjectCollectionCmd struct {
 	*baseCmd
 }
 
+// NewGetManagedObjectCollectionCmd creates a command to Get managed object collection
 func NewGetManagedObjectCollectionCmd() *GetManagedObjectCollectionCmd {
 	ccmd := &GetManagedObjectCollectionCmd{}
 	cmd := &cobra.Command{
@@ -61,6 +63,7 @@ Get a list of managed objects by ids
 	return ccmd
 }
 
+// RunE executes the command
 func (n *GetManagedObjectCollectionCmd) RunE(cmd *cobra.Command, args []string) error {
 	var err error
 	inputIterators, err := flags.NewRequestInputIterators(cmd)

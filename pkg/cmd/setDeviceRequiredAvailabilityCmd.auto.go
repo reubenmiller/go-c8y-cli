@@ -13,10 +13,12 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// SetDeviceRequiredAvailabilityCmd command
 type SetDeviceRequiredAvailabilityCmd struct {
 	*baseCmd
 }
 
+// NewSetDeviceRequiredAvailabilityCmd creates a command to Set required availability
 func NewSetDeviceRequiredAvailabilityCmd() *SetDeviceRequiredAvailabilityCmd {
 	ccmd := &SetDeviceRequiredAvailabilityCmd{}
 	cmd := &cobra.Command{
@@ -54,6 +56,7 @@ Set the required availability of a device by name to 10 minutes
 	return ccmd
 }
 
+// RunE executes the command
 func (n *SetDeviceRequiredAvailabilityCmd) RunE(cmd *cobra.Command, args []string) error {
 	var err error
 	inputIterators, err := flags.NewRequestInputIterators(cmd)

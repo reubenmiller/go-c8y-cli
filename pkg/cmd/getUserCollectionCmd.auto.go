@@ -14,10 +14,12 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// GetUserCollectionCmd command
 type GetUserCollectionCmd struct {
 	*baseCmd
 }
 
+// NewGetUserCollectionCmd creates a command to Get user collection
 func NewGetUserCollectionCmd() *GetUserCollectionCmd {
 	ccmd := &GetUserCollectionCmd{}
 	cmd := &cobra.Command{
@@ -61,6 +63,7 @@ Get a list of users
 	return ccmd
 }
 
+// RunE executes the command
 func (n *GetUserCollectionCmd) RunE(cmd *cobra.Command, args []string) error {
 	var err error
 	inputIterators, err := flags.NewRequestInputIterators(cmd)

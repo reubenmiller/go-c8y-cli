@@ -13,10 +13,12 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// CreateDeviceGroupCmd command
 type CreateDeviceGroupCmd struct {
 	*baseCmd
 }
 
+// NewCreateDeviceGroupCmd creates a command to Create device group
 func NewCreateDeviceGroupCmd() *CreateDeviceGroupCmd {
 	ccmd := &CreateDeviceGroupCmd{}
 	cmd := &cobra.Command{
@@ -59,6 +61,7 @@ Create device group with custom properties
 	return ccmd
 }
 
+// RunE executes the command
 func (n *CreateDeviceGroupCmd) RunE(cmd *cobra.Command, args []string) error {
 	var err error
 	inputIterators, err := flags.NewRequestInputIterators(cmd)

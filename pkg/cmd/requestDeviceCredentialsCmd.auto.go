@@ -13,10 +13,12 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// RequestDeviceCredentialsCmd command
 type RequestDeviceCredentialsCmd struct {
 	*baseCmd
 }
 
+// NewRequestDeviceCredentialsCmd creates a command to Request device credentials
 func NewRequestDeviceCredentialsCmd() *RequestDeviceCredentialsCmd {
 	ccmd := &RequestDeviceCredentialsCmd{}
 	cmd := &cobra.Command{
@@ -52,6 +54,7 @@ Request credentials for a new device
 	return ccmd
 }
 
+// RunE executes the command
 func (n *RequestDeviceCredentialsCmd) RunE(cmd *cobra.Command, args []string) error {
 	var err error
 	inputIterators, err := flags.NewRequestInputIterators(cmd)

@@ -13,10 +13,12 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// DeleteTenantCmd command
 type DeleteTenantCmd struct {
 	*baseCmd
 }
 
+// NewDeleteTenantCmd creates a command to Delete tenant
 func NewDeleteTenantCmd() *DeleteTenantCmd {
 	ccmd := &DeleteTenantCmd{}
 	cmd := &cobra.Command{
@@ -52,6 +54,7 @@ Delete a tenant by name (from the management tenant)
 	return ccmd
 }
 
+// RunE executes the command
 func (n *DeleteTenantCmd) RunE(cmd *cobra.Command, args []string) error {
 	var err error
 	inputIterators, err := flags.NewRequestInputIterators(cmd)

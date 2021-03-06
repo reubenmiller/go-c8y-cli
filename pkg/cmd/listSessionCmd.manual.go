@@ -222,10 +222,3 @@ func (n *listSessionCmd) listSession(cmd *cobra.Command, args []string) error {
 
 	return nil
 }
-
-func (n *listSessionCmd) formatFilename(name string) string {
-	if !strings.HasSuffix(name, ".json") {
-		name = fmt.Sprintf("%s.json", name)
-	}
-	return name
-}

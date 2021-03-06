@@ -13,10 +13,12 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// NewTenantCmd command
 type NewTenantCmd struct {
 	*baseCmd
 }
 
+// NewNewTenantCmd creates a command to Create tenant
 func NewNewTenantCmd() *NewTenantCmd {
 	ccmd := &NewTenantCmd{}
 	cmd := &cobra.Command{
@@ -60,6 +62,7 @@ Create a new tenant (from the management tenant)
 	return ccmd
 }
 
+// RunE executes the command
 func (n *NewTenantCmd) RunE(cmd *cobra.Command, args []string) error {
 	var err error
 	inputIterators, err := flags.NewRequestInputIterators(cmd)

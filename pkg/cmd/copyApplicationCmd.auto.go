@@ -13,10 +13,12 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// CopyApplicationCmd command
 type CopyApplicationCmd struct {
 	*baseCmd
 }
 
+// NewCopyApplicationCmd creates a command to Copy application
 func NewCopyApplicationCmd() *CopyApplicationCmd {
 	ccmd := &CopyApplicationCmd{}
 	cmd := &cobra.Command{
@@ -57,6 +59,7 @@ Copy an existing application
 	return ccmd
 }
 
+// RunE executes the command
 func (n *CopyApplicationCmd) RunE(cmd *cobra.Command, args []string) error {
 	var err error
 	inputIterators, err := flags.NewRequestInputIterators(cmd)

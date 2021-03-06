@@ -14,10 +14,12 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// GetTenantVersionCmd command
 type GetTenantVersionCmd struct {
 	*baseCmd
 }
 
+// NewGetTenantVersionCmd creates a command to Get tenant version
 func NewGetTenantVersionCmd() *GetTenantVersionCmd {
 	ccmd := &GetTenantVersionCmd{}
 	cmd := &cobra.Command{
@@ -50,6 +52,7 @@ Set the required availability of a device by name to 10 minutes
 	return ccmd
 }
 
+// RunE executes the command
 func (n *GetTenantVersionCmd) RunE(cmd *cobra.Command, args []string) error {
 	var err error
 	inputIterators, err := flags.NewRequestInputIterators(cmd)

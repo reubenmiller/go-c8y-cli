@@ -14,10 +14,12 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// GetTenantUsageStatisticsCollectionCmd command
 type GetTenantUsageStatisticsCollectionCmd struct {
 	*baseCmd
 }
 
+// NewGetTenantUsageStatisticsCollectionCmd creates a command to Get tenant usage statistics
 func NewGetTenantUsageStatisticsCollectionCmd() *GetTenantUsageStatisticsCollectionCmd {
 	ccmd := &GetTenantUsageStatisticsCollectionCmd{}
 	cmd := &cobra.Command{
@@ -60,6 +62,7 @@ Get tenant statistics collection for the day before yesterday
 	return ccmd
 }
 
+// RunE executes the command
 func (n *GetTenantUsageStatisticsCollectionCmd) RunE(cmd *cobra.Command, args []string) error {
 	var err error
 	inputIterators, err := flags.NewRequestInputIterators(cmd)

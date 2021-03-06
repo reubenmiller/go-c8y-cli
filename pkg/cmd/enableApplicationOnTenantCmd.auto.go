@@ -13,10 +13,12 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// EnableApplicationOnTenantCmd command
 type EnableApplicationOnTenantCmd struct {
 	*baseCmd
 }
 
+// NewEnableApplicationOnTenantCmd creates a command to Subscribe application
 func NewEnableApplicationOnTenantCmd() *EnableApplicationOnTenantCmd {
 	ccmd := &EnableApplicationOnTenantCmd{}
 	cmd := &cobra.Command{
@@ -53,6 +55,7 @@ Enable an application of a tenant by name
 	return ccmd
 }
 
+// RunE executes the command
 func (n *EnableApplicationOnTenantCmd) RunE(cmd *cobra.Command, args []string) error {
 	var err error
 	inputIterators, err := flags.NewRequestInputIterators(cmd)

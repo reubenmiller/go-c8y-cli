@@ -13,10 +13,12 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// UpdateOperationCmd command
 type UpdateOperationCmd struct {
 	*baseCmd
 }
 
+// NewUpdateOperationCmd creates a command to Update operation
 func NewUpdateOperationCmd() *UpdateOperationCmd {
 	ccmd := &UpdateOperationCmd{}
 	cmd := &cobra.Command{
@@ -57,6 +59,7 @@ Update an operation
 	return ccmd
 }
 
+// RunE executes the command
 func (n *UpdateOperationCmd) RunE(cmd *cobra.Command, args []string) error {
 	var err error
 	inputIterators, err := flags.NewRequestInputIterators(cmd)

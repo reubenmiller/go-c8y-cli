@@ -13,10 +13,12 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// AddManagedObjectChildAdditionCmd command
 type AddManagedObjectChildAdditionCmd struct {
 	*baseCmd
 }
 
+// NewAddManagedObjectChildAdditionCmd creates a command to Add child addition
 func NewAddManagedObjectChildAdditionCmd() *AddManagedObjectChildAdditionCmd {
 	ccmd := &AddManagedObjectChildAdditionCmd{}
 	cmd := &cobra.Command{
@@ -55,6 +57,7 @@ Add a related managed object as a child to an existing managed object
 	return ccmd
 }
 
+// RunE executes the command
 func (n *AddManagedObjectChildAdditionCmd) RunE(cmd *cobra.Command, args []string) error {
 	var err error
 	inputIterators, err := flags.NewRequestInputIterators(cmd)

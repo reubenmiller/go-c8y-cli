@@ -14,10 +14,12 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// GetManagedObjectChildAssetReferenceCmd command
 type GetManagedObjectChildAssetReferenceCmd struct {
 	*baseCmd
 }
 
+// NewGetManagedObjectChildAssetReferenceCmd creates a command to Get child asset reference
 func NewGetManagedObjectChildAssetReferenceCmd() *GetManagedObjectChildAssetReferenceCmd {
 	ccmd := &GetManagedObjectChildAssetReferenceCmd{}
 	cmd := &cobra.Command{
@@ -54,6 +56,7 @@ Get an existing child asset reference
 	return ccmd
 }
 
+// RunE executes the command
 func (n *GetManagedObjectChildAssetReferenceCmd) RunE(cmd *cobra.Command, args []string) error {
 	var err error
 	inputIterators, err := flags.NewRequestInputIterators(cmd)

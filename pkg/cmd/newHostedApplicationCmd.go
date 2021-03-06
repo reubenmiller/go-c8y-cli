@@ -214,7 +214,7 @@ func (n *newHostedApplicationCmd) doProcedure(cmd *cobra.Command, args []string)
 			return fmt.Errorf("failed to activate new application version because binary id is empty")
 		}
 
-		app, resp, err := client.Application.Update(
+		_, resp, err := client.Application.Update(
 			context.Background(),
 			applicationID,
 			&c8y.Application{
@@ -231,7 +231,6 @@ func (n *newHostedApplicationCmd) doProcedure(cmd *cobra.Command, args []string)
 		}
 
 		// use the updated application json
-		application = app
 		response = resp
 	}
 

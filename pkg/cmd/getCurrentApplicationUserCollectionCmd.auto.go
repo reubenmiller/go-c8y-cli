@@ -14,10 +14,12 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// GetCurrentApplicationUserCollectionCmd command
 type GetCurrentApplicationUserCollectionCmd struct {
 	*baseCmd
 }
 
+// NewGetCurrentApplicationUserCollectionCmd creates a command to Get current application subscriptions
 func NewGetCurrentApplicationUserCollectionCmd() *GetCurrentApplicationUserCollectionCmd {
 	ccmd := &GetCurrentApplicationUserCollectionCmd{}
 	cmd := &cobra.Command{
@@ -50,6 +52,7 @@ List the current application users/subscriptions
 	return ccmd
 }
 
+// RunE executes the command
 func (n *GetCurrentApplicationUserCollectionCmd) RunE(cmd *cobra.Command, args []string) error {
 	var err error
 	inputIterators, err := flags.NewRequestInputIterators(cmd)

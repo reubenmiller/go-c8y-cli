@@ -13,10 +13,12 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// DeleteUserGroupCmd command
 type DeleteUserGroupCmd struct {
 	*baseCmd
 }
 
+// NewDeleteUserGroupCmd creates a command to Delete user group
 func NewDeleteUserGroupCmd() *DeleteUserGroupCmd {
 	ccmd := &DeleteUserGroupCmd{}
 	cmd := &cobra.Command{
@@ -53,6 +55,7 @@ Delete a user group
 	return ccmd
 }
 
+// RunE executes the command
 func (n *DeleteUserGroupCmd) RunE(cmd *cobra.Command, args []string) error {
 	var err error
 	inputIterators, err := flags.NewRequestInputIterators(cmd)

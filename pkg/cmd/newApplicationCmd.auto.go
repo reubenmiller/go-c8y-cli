@@ -13,10 +13,12 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// NewApplicationCmd command
 type NewApplicationCmd struct {
 	*baseCmd
 }
 
+// NewNewApplicationCmd creates a command to Create application
 func NewNewApplicationCmd() *NewApplicationCmd {
 	ccmd := &NewApplicationCmd{}
 	cmd := &cobra.Command{
@@ -66,6 +68,7 @@ Create a new hosted application
 	return ccmd
 }
 
+// RunE executes the command
 func (n *NewApplicationCmd) RunE(cmd *cobra.Command, args []string) error {
 	var err error
 	inputIterators, err := flags.NewRequestInputIterators(cmd)
