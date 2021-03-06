@@ -59,7 +59,7 @@ func evaluateJsonnet(imports string, snippets ...string) (string, error) {
 	}
 
 	// evaluate the jsonnet
-	out, err := vm.EvaluateSnippet("file", jsonnetImport)
+	out, err := vm.EvaluateAnonymousSnippet("file", jsonnetImport)
 
 	if err != nil {
 
@@ -127,12 +127,11 @@ type MapBuilder struct {
 	TemplateIterator      iterator.Iterator
 	TemplateIteratorNames []string
 
-	templateVariables     map[string]interface{}
-	requiredKeys          []string
-	autoApplyTemplate     bool
-	templates             []string
-	reverseTempateDefault bool
-	externalInput         []byte
+	templateVariables map[string]interface{}
+	requiredKeys      []string
+	autoApplyTemplate bool
+	templates         []string
+	externalInput     []byte
 }
 
 // AppendTemplate appends a templates to be merged in with the body
@@ -363,23 +362,6 @@ func (b *MapBuilder) GetString(key string) (string, bool) {
 // Nested paths are accepted via dot notation
 func (b *MapBuilder) SetRequiredKeys(keys ...string) {
 	b.requiredKeys = keys
-}
-
-func (b *MapBuilder) validateRequiredKeys(body map[string]interface{}) error {
-	missingKeys := make([]string, 0)
-	if body == nil {
-		body = b.body
-	}
-	for _, key := range b.requiredKeys {
-		if _, ok := body[key]; !ok {
-			missingKeys = append(missingKeys, key)
-		}
-	}
-
-	if len(missingKeys) > 0 {
-		return fmt.Errorf("Body is missing required properties: %s", strings.Join(missingKeys, ", "))
-	}
-	return nil
 }
 
 func (b *MapBuilder) validateRequiredKeysBytes(body []byte) error {
