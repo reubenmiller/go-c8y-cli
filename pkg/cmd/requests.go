@@ -280,8 +280,9 @@ func PrintRequestDetails(w io.Writer, requestOptions *c8y.RequestOptions, req *h
 		if err != nil {
 			return
 		}
-
-		out = pretty.Pretty(out)
+		if !globalFlagCompact {
+			out = pretty.Pretty(out)
+		}
 		if !globalFlagNoColor {
 			out = pretty.Color(out, pretty.TerminalStyle)
 		}
@@ -331,7 +332,10 @@ func PrintRequestDetails(w io.Writer, requestOptions *c8y.RequestOptions, req *h
 		} else {
 			sectionLabel.Fprint(w, "\n#### Body\n")
 			fmt.Fprintf(w, "\n```json\n")
-			body = pretty.Pretty(body)
+
+			if !globalFlagCompact {
+				body = pretty.Pretty(body)
+			}
 			if !globalFlagNoColor {
 				body = pretty.Color(body, pretty.TerminalStyle)
 			}
