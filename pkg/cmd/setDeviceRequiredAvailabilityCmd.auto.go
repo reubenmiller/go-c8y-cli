@@ -49,7 +49,7 @@ Set the required availability of a device by name to 10 minutes
 	)
 
 	// Required flags
-	cmd.MarkFlagRequired("interval")
+	_ = cmd.MarkFlagRequired("interval")
 
 	ccmd.baseCmd = newBaseCmd(cmd)
 

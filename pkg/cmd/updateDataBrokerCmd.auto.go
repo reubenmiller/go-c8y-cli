@@ -51,7 +51,7 @@ Change the status of a specific data broker connector by given connector id
 	)
 
 	// Required flags
-	cmd.MarkFlagRequired("status")
+	_ = cmd.MarkFlagRequired("status")
 
 	ccmd.baseCmd = newBaseCmd(cmd)
 

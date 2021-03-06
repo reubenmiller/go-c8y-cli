@@ -46,7 +46,7 @@ type BWUri struct {
 func getBWItems(name ...string) []BWItem {
 
 	bw := exec.Command("bw", "list", "items", "--session", os.Getenv("BW_SESSION"))
-	bw.Env = append(os.Environ())
+	bw.Env = os.Environ()
 
 	bwItems := make([]BWItem, 0)
 

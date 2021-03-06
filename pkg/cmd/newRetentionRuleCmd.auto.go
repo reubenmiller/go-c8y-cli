@@ -55,8 +55,8 @@ Create a retention rule
 	)
 
 	// Required flags
-	cmd.MarkFlagRequired("dataType")
-	cmd.MarkFlagRequired("maximumAge")
+	_ = cmd.MarkFlagRequired("dataType")
+	_ = cmd.MarkFlagRequired("maximumAge")
 
 	ccmd.baseCmd = newBaseCmd(cmd)
 

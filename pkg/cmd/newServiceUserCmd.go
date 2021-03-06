@@ -40,7 +40,7 @@ Create new application service user
 	cmd.Flags().StringSliceVar(&ccmd.roles, "roles", []string{}, "Roles which should be assigned to the service user")
 
 	// Required flags
-	cmd.MarkFlagRequired("name")
+	_ = cmd.MarkFlagRequired("name")
 
 	ccmd.baseCmd = newBaseCmd(cmd)
 

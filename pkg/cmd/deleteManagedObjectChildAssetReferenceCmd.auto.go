@@ -50,7 +50,7 @@ Unassign a child device from its parent device
 	)
 
 	// Required flags
-	cmd.MarkFlagRequired("group")
+	_ = cmd.MarkFlagRequired("group")
 
 	ccmd.baseCmd = newBaseCmd(cmd)
 

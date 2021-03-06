@@ -51,7 +51,7 @@ Remove an application binary related to a Hosted (web) application
 	)
 
 	// Required flags
-	cmd.MarkFlagRequired("application")
+	_ = cmd.MarkFlagRequired("application")
 
 	ccmd.baseCmd = newBaseCmd(cmd)
 

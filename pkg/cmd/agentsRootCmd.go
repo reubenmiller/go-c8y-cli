@@ -4,12 +4,10 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// AgentsCmd command
 type AgentsCmd struct {
 	*baseCmd
 }
 
-// NewAgentsRootCmd creates command to create an agent
 func NewAgentsRootCmd() *AgentsCmd {
 	ccmd := &AgentsCmd{}
 

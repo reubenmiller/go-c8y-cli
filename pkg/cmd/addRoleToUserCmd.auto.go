@@ -50,7 +50,7 @@ Add a role (ROLE_ALARM_READ) to a user
 	)
 
 	// Required flags
-	cmd.MarkFlagRequired("user")
+	_ = cmd.MarkFlagRequired("user")
 
 	ccmd.baseCmd = newBaseCmd(cmd)
 

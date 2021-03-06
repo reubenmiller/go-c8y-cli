@@ -227,7 +227,10 @@ func (s *SecureData) EncryptFile(filename string, data []byte, passphrase string
 	if err != nil {
 		panic("Failed to encrypt file")
 	}
-	f.Write(encryptedData)
+	_, err = f.Write(encryptedData)
+	if err != nil {
+		panic(fmt.Errorf("failed to write to file. %w", err))
+	}
 }
 
 func (s *SecureData) DecryptFile(filename string, passphrase string) ([]byte, error) {

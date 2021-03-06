@@ -50,8 +50,8 @@ Update a tenant option
 	)
 
 	// Required flags
-	cmd.MarkFlagRequired("category")
-	cmd.MarkFlagRequired("value")
+	_ = cmd.MarkFlagRequired("category")
+	_ = cmd.MarkFlagRequired("value")
 
 	ccmd.baseCmd = newBaseCmd(cmd)
 

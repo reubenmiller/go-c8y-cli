@@ -85,20 +85,20 @@ func (l *ActivityLogger) LogCommand(cmd *cobra.Command, args []string, cmdStr st
 
 	argc, _ := json.Marshal(os.Args[1:])
 	if len(messages) > 0 && messages[0] != "" {
-		l.w.Write([]byte(fmt.Sprintf(
+		fmt.Fprintf(l.w,
 			`{"time":"%s","ctx":"%s","type":"command","arguments":%s,"message":"%s"}`+"\n",
 			time.Now().Format(time.RFC3339Nano),
 			l.contextID,
 			argc,
 			strings.Join(messages, ". "),
-		)))
+		)
 	} else {
-		l.w.Write([]byte(fmt.Sprintf(
+		fmt.Fprintf(l.w,
 			`{"time":"%s","ctx":"%s","type":"command","arguments":%s}`+"\n",
 			time.Now().Format(time.RFC3339Nano),
 			l.contextID,
 			argc,
-		)))
+		)
 	}
 }
 
@@ -110,12 +110,12 @@ func (l *ActivityLogger) LogCustom(message string) {
 	l.mu.Lock()
 	defer l.mu.Unlock()
 
-	l.w.Write([]byte(fmt.Sprintf(
+	fmt.Fprintf(l.w,
 		`{"time":"%s","ctx":"%s","type":"user","message":"%s"}`+"\n",
 		time.Now().Format(time.RFC3339Nano),
 		l.contextID,
 		message,
-	)))
+	)
 }
 
 // LogRequest writes a http response to the activity log
@@ -139,7 +139,7 @@ func (l *ActivityLogger) LogRequest(resp *http.Response, body *gjson.Result, res
 
 	l.mu.Lock()
 	defer l.mu.Unlock()
-	l.w.Write([]byte(fmt.Sprintf(
+	fmt.Fprintf(l.w,
 		`{"time":"%s","ctx":"%s","type":"request","method":"%s","host":"%s","path":"%s","query":"%s","accept":"%s","processingMode":"%s","statusCode":%d,"responseTimeMS":%d,"responseSelf":"%s"}`+"\n",
 		time.Now().Format(time.RFC3339Nano),
 		l.contextID,
@@ -152,5 +152,5 @@ func (l *ActivityLogger) LogRequest(resp *http.Response, body *gjson.Result, res
 		resp.StatusCode,
 		responseTime,
 		body.Get("self").Str,
-	)))
+	)
 }

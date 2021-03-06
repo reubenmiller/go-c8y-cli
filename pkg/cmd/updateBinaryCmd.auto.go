@@ -50,7 +50,7 @@ Update an existing binary file
 	)
 
 	// Required flags
-	cmd.MarkFlagRequired("file")
+	_ = cmd.MarkFlagRequired("file")
 
 	ccmd.baseCmd = newBaseCmd(cmd)
 

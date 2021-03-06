@@ -50,7 +50,7 @@ Add a role to the admin group
 	)
 
 	// Required flags
-	cmd.MarkFlagRequired("group")
+	_ = cmd.MarkFlagRequired("group")
 
 	ccmd.baseCmd = newBaseCmd(cmd)
 

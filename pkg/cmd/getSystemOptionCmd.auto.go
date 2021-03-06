@@ -49,7 +49,7 @@ Get a list of system options
 	)
 
 	// Required flags
-	cmd.MarkFlagRequired("category")
+	_ = cmd.MarkFlagRequired("category")
 
 	ccmd.baseCmd = newBaseCmd(cmd)
 

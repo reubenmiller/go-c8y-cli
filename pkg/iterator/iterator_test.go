@@ -12,7 +12,7 @@ func Test_MarshalJSON(t *testing.T) {
 
 	iter := NewRangeIterator(1, 3, 1)
 
-	data := make(map[string]interface{}, 0)
+	data := make(map[string]interface{})
 	data["data"] = iter
 
 	assert.EqualMarshalJSON(t, data, `{"data":"1"}`)

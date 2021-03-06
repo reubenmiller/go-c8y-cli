@@ -51,7 +51,7 @@ Create group hierarchy (parent group -> child group)
 	)
 
 	// Required flags
-	cmd.MarkFlagRequired("group")
+	_ = cmd.MarkFlagRequired("group")
 
 	ccmd.baseCmd = newBaseCmd(cmd)
 

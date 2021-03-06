@@ -53,7 +53,7 @@ Add multiple groups to a group
 	)
 
 	// Required flags
-	cmd.MarkFlagRequired("group")
+	_ = cmd.MarkFlagRequired("group")
 
 	ccmd.baseCmd = newBaseCmd(cmd)
 

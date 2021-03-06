@@ -22,7 +22,7 @@ func WithOptions(cmd *cobra.Command, opts ...Option) *cobra.Command {
 // WithValidateSet adds a completion function with the given values
 func WithValidateSet(flagName string, values ...string) Option {
 	return func(cmd *cobra.Command) *cobra.Command {
-		cmd.RegisterFlagCompletionFunc(flagName, func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+		_ = cmd.RegisterFlagCompletionFunc(flagName, func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 			return values, cobra.ShellCompDirectiveDefault
 		})
 		return cmd
@@ -32,7 +32,7 @@ func WithValidateSet(flagName string, values ...string) Option {
 // WithTenantID tenant id completion
 func WithTenantID(flagName string, client *c8y.Client) Option {
 	return func(cmd *cobra.Command) *cobra.Command {
-		cmd.RegisterFlagCompletionFunc(flagName, func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+		_ = cmd.RegisterFlagCompletionFunc(flagName, func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 			tenants, _, err := client.Tenant.GetTenants(
 				context.Background(),
 				c8y.NewPaginationOptions(20),

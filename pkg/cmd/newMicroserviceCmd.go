@@ -59,7 +59,7 @@ Create new microservice
 	cmd.Flags().BoolVar(&ccmd.skipUpload, "skipUpload", false, "Skip uploading the binary to the platform")
 
 	// Required flags
-	cmd.MarkFlagRequired("file")
+	_ = cmd.MarkFlagRequired("file")
 
 	ccmd.baseCmd = newBaseCmd(cmd)
 

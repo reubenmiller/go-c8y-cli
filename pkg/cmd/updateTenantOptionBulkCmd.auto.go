@@ -49,7 +49,7 @@ Update multiple tenant options
 	)
 
 	// Required flags
-	cmd.MarkFlagRequired("data")
+	_ = cmd.MarkFlagRequired("data")
 
 	ccmd.baseCmd = newBaseCmd(cmd)
 

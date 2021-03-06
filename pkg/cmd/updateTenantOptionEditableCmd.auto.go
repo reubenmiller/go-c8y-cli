@@ -52,8 +52,8 @@ Update editable property for an existing tenant option
 	)
 
 	// Required flags
-	cmd.MarkFlagRequired("category")
-	cmd.MarkFlagRequired("editable")
+	_ = cmd.MarkFlagRequired("category")
+	_ = cmd.MarkFlagRequired("editable")
 
 	ccmd.baseCmd = newBaseCmd(cmd)
 

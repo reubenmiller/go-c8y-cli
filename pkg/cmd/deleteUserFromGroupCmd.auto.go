@@ -50,7 +50,7 @@ List the users within a user group
 	)
 
 	// Required flags
-	cmd.MarkFlagRequired("group")
+	_ = cmd.MarkFlagRequired("group")
 
 	ccmd.baseCmd = newBaseCmd(cmd)
 

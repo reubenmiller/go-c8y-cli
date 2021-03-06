@@ -57,7 +57,7 @@ Update a retention rule
 	)
 
 	// Required flags
-	cmd.MarkFlagRequired("dataType")
+	_ = cmd.MarkFlagRequired("dataType")
 
 	ccmd.baseCmd = newBaseCmd(cmd)
 

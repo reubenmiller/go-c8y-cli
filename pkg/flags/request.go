@@ -3,8 +3,6 @@ package flags
 import (
 	"io"
 	"net/http"
-	"net/url"
-	"strings"
 
 	"github.com/reubenmiller/go-c8y-cli/pkg/mapbuilder"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
@@ -44,10 +42,13 @@ func WithRequestOptions(cmd *cobra.Command, args []string, req *c8y.RequestOptio
 		inputIterators,
 		builderOpts.PathOptions...,
 	)
+	if err != nil {
+		return err
+	}
 
 	//
 	// query parameters
-	queryValue := url.QueryEscape("")
+	queryValue := ""
 	query := NewQueryTemplate()
 
 	err = WithQueryParameters(
@@ -100,16 +101,6 @@ func WithRequestOptions(cmd *cobra.Command, args []string, req *c8y.RequestOptio
 	req.FormData = formData
 
 	return nil
-}
-
-func replacePathParameters(uri string, parameters map[string]string) string {
-	if parameters == nil {
-		return uri
-	}
-	for key, value := range parameters {
-		uri = strings.ReplaceAll(uri, "{"+key+"}", value)
-	}
-	return uri
 }
 
 /*

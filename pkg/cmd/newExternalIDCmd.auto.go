@@ -50,8 +50,8 @@ Create external identity
 	)
 
 	// Required flags
-	cmd.MarkFlagRequired("type")
-	cmd.MarkFlagRequired("name")
+	_ = cmd.MarkFlagRequired("type")
+	_ = cmd.MarkFlagRequired("name")
 
 	ccmd.baseCmd = newBaseCmd(cmd)
 

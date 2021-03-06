@@ -74,7 +74,7 @@ func isNumber(value string) (float64, bool) {
 }
 
 func isArray(value string) ([]string, bool) {
-	if strings.HasPrefix(value, "[") && strings.HasPrefix(value, "[") {
+	if strings.HasPrefix(value, "[") && strings.HasSuffix(value, "]") {
 		return strings.Split(value[1:len(value)-1], ","), true
 	}
 	return []string{}, false

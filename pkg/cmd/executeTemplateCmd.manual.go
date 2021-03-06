@@ -42,7 +42,7 @@ Verify a jsonnet template and specify input data to be used as the input when ev
 	addDataFlag(cmd)
 
 	// Required flags
-	cmd.MarkFlagRequired(FlagDataTemplateName)
+	_ = cmd.MarkFlagRequired(FlagDataTemplateName)
 
 	ccmd.baseCmd = newBaseCmd(cmd)
 

@@ -68,7 +68,7 @@ func (b *QueryTemplate) Execute(ignoreIterators bool) (query url.Values, err err
 			// Add each item individually. Don't handle it like the other types
 			for _, ivalue := range v {
 				if ivalue != "" {
-					query.Add(key, fmt.Sprintf("%s", ivalue))
+					query.Add(key, ivalue)
 				}
 			}
 

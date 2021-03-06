@@ -49,7 +49,7 @@ Get an existing child device reference
 	)
 
 	// Required flags
-	cmd.MarkFlagRequired("reference")
+	_ = cmd.MarkFlagRequired("reference")
 
 	ccmd.baseCmd = newBaseCmd(cmd)
 

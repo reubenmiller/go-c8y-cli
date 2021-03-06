@@ -50,7 +50,7 @@ Remove a role from the given user
 	)
 
 	// Required flags
-	cmd.MarkFlagRequired("user")
+	_ = cmd.MarkFlagRequired("user")
 
 	ccmd.baseCmd = newBaseCmd(cmd)
 

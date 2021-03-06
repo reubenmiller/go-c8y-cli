@@ -55,7 +55,7 @@ Create a new tenant (from the management tenant)
 	)
 
 	// Required flags
-	cmd.MarkFlagRequired("company")
+	_ = cmd.MarkFlagRequired("company")
 
 	ccmd.baseCmd = newBaseCmd(cmd)
 

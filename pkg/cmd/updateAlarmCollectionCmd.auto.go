@@ -58,7 +58,7 @@ Update the status of all active alarms on a device to ACKNOWLEDGED
 	)
 
 	// Required flags
-	cmd.MarkFlagRequired("newStatus")
+	_ = cmd.MarkFlagRequired("newStatus")
 
 	ccmd.baseCmd = newBaseCmd(cmd)
 

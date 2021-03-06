@@ -39,7 +39,6 @@ func (c *Console) SetHeaderFromInput(input string) {
 		c.samples = append(c.samples, input)
 		c.sampleCount++
 	}
-	return
 }
 
 // Printf mimics fmt.Printf
@@ -60,7 +59,7 @@ func (c *Console) Write(b []byte) (n int, err error) {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 	if c.count == 0 && c.header != nil {
-		c.out.Write(c.header(c.samples))
+		fmt.Fprintf(c.out, "%s", c.header(c.samples))
 	}
 	c.count++
 

@@ -52,8 +52,8 @@ Create operation for a device
 	)
 
 	// Required flags
-	cmd.MarkFlagRequired("creationRampSec")
-	cmd.MarkFlagRequired("operation")
+	_ = cmd.MarkFlagRequired("creationRampSec")
+	_ = cmd.MarkFlagRequired("operation")
 
 	ccmd.baseCmd = newBaseCmd(cmd)
 

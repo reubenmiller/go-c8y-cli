@@ -361,7 +361,6 @@ func (lh *LoginHandler) login() {
 			case c8y.AuthMethodBasic:
 				// do nothing
 			}
-			break
 		}
 		return nil
 	})
@@ -425,11 +424,15 @@ func (lh *LoginHandler) verify() {
 }
 
 func (lh LoginHandler) writeMessage(m string) {
-	io.WriteString(lh.Writer, m)
+	if _, err := io.WriteString(lh.Writer, m); err != nil {
+		lh.Logger.Warnf("Failed to write message. %s", err)
+	}
 }
 
 func (lh LoginHandler) writeMessageF(format string, a interface{}) {
-	io.WriteString(lh.Writer, fmt.Sprintf(format, a))
+	if _, err := io.WriteString(lh.Writer, fmt.Sprintf(format, a)); err != nil {
+		lh.Logger.Warnf("Failed to write message. %s", err)
+	}
 }
 
 func (lh *LoginHandler) setupTFA() error {
@@ -489,7 +492,7 @@ func (lh *LoginHandler) setupTFA() error {
 	}
 
 	// Activate totp
-	resp, err = lh.C8Yclient.SendRequest(
+	_, err = lh.C8Yclient.SendRequest(
 		context.Background(),
 		c8y.RequestOptions{
 			Method: http.MethodPost,

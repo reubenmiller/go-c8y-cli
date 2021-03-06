@@ -59,9 +59,9 @@ Create a new hosted application
 	)
 
 	// Required flags
-	cmd.MarkFlagRequired("name")
-	cmd.MarkFlagRequired("key")
-	cmd.MarkFlagRequired("type")
+	_ = cmd.MarkFlagRequired("name")
+	_ = cmd.MarkFlagRequired("key")
+	_ = cmd.MarkFlagRequired("type")
 
 	ccmd.baseCmd = newBaseCmd(cmd)
 

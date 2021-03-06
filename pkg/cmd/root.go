@@ -81,7 +81,9 @@ func (c *c8yCmd) createCumulocityClient() {
 	// Only bind when not setting the session
 	if c.useEnv {
 		c.Logger.Info("Binding authorization environment variables")
-		cliConfig.BindAuthorization()
+		if err := cliConfig.BindAuthorization(); err != nil {
+			c.Logger.Warnf("Failed to bind to authorization variables. %s", err)
+		}
 	}
 
 	// Try reading session from file
@@ -106,7 +108,9 @@ func (c *c8yCmd) createCumulocityClient() {
 	)
 
 	// load authentication
-	loadAuthentication(cliConfig, client)
+	if err := loadAuthentication(cliConfig, client); err != nil {
+		Logger.Warnf("Could not load authentication. %s", err)
+	}
 
 	//
 	// Timeout setting preference
@@ -129,7 +133,9 @@ func (c *c8yCmd) createCumulocityClient() {
 	// Logger.Printf("Use tenant prefix: %v", client.UseTenantInUsername)
 
 	// read additional configuration
-	readConfiguration(&rootCmd.Command)
+	if err := readConfiguration(&rootCmd.Command); err != nil {
+		Logger.Errorf("Could not read configuration. %s", err)
+	}
 	Console.Colorized = !globalFlagNoColor && !globalCSVOutput
 	Console.Compact = globalFlagCompact || globalCSVOutput
 	Console.IsJSON = !globalCSVOutput
@@ -317,14 +323,6 @@ func (c *c8yCmd) checkCommandError(err error, w io.Writer) {
 	}
 }
 
-func (c c8yCmd) showLoginUsage() {
-	if globalFlagSessionFile != "" {
-		fmt.Printf("c8y sessions login")
-	} else {
-		fmt.Printf("export C8Y_SESSION=$(c8y sessions list)")
-	}
-}
-
 func (c *c8yCmd) checkSessionExists(cmd *cobra.Command, args []string) error {
 
 	cmdStr := cmd.Use
@@ -456,16 +454,14 @@ func configureRootCmd() {
 	rootCmd.PersistentFlags().BoolVarP(&globalFlagForce, "force", "f", false, "Do not prompt for confirmation")
 
 	// Map settings to flags, allowing the user to set the own default settings
-	viper.BindPFlag(SettingsDefaultPageSize, rootCmd.PersistentFlags().Lookup("pageSize"))
-	// viper.BindPFlag(SettingsConfigPath, rootCmd.PersistentFlags().Lookup("config"))
+	if err := viper.BindPFlag(SettingsDefaultPageSize, rootCmd.PersistentFlags().Lookup("pageSize")); err != nil {
+		Logger.Warnf("Could not bind pageSize. %s", err)
+	}
 
 	completion.WithOptions(
 		&rootCmd.Command,
 		completion.WithValidateSet("dryFormat", "json", "dump", "curl", "markdown"),
 	)
-
-	// TODO: Make flags case-insensitive
-	// rootCmd.PersistentFlags().SetNormalizeFunc(flagNormalizeFunc)
 
 	rootCmd.AddCommand(NewCompletionsCmd().getCommand())
 	rootCmd.AddCommand(NewVersionCmd().getCommand())
@@ -602,9 +598,8 @@ func executeRootCmd() {
 	if err := rootCmd.Execute(); err != nil {
 
 		Logger.Errorf("%s", err)
-		out := rootCmd.ErrOrStderr()
 		if globalFlagPrintErrorsOnStdout {
-			out = rootCmd.OutOrStdout()
+			out := rootCmd.OutOrStdout()
 			rootCmd.checkCommandError(err, out)
 		}
 
@@ -642,7 +637,9 @@ func ReadConfigFiles(v *viper.Viper) (path string, err error) {
 	if _, err := os.Stat(globalFlagSessionFile); err == nil {
 		// Load config by file path
 		v.SetConfigFile(globalFlagSessionFile)
-		cliConfig.ReadConfig(globalFlagSessionFile)
+		if err := cliConfig.ReadConfig(globalFlagSessionFile); err != nil {
+			Logger.Warnf("Could not read global settings file. file=%s, err=%s", globalFlagSessionFile, err)
+		}
 	} else {
 		// Load config by name
 		sessionName := "session"
@@ -671,12 +668,16 @@ func ReadConfigFiles(v *viper.Viper) (path string, err error) {
 func bindFlags(cmd *cobra.Command, v *viper.Viper) {
 	cmd.Flags().VisitAll(func(f *pflag.Flag) {
 		settingsName := "settings.defaults." + f.Name
-		v.BindEnv(settingsName)
+		if err := v.BindEnv(settingsName); err != nil {
+			Logger.Warnf("Could not bind to environment variable. name=%s, err=%s", settingsName, err)
+		}
 
 		// Apply the viper config value to the flag when the flag is not set and viper has a value
 		if !f.Changed && v.IsSet(settingsName) {
 			val := v.Get(settingsName)
-			cmd.Flags().Set(f.Name, fmt.Sprintf("%v", val))
+			if err := cmd.Flags().Set(f.Name, fmt.Sprintf("%v", val)); err != nil {
+				Logger.Warnf("Could not set flag. name=%s, err=%s", settingsName, err)
+			}
 		}
 	})
 }
@@ -762,7 +763,9 @@ func initConfig() {
 
 	cliConfig = config.NewCliConfiguration(viper.GetViper(), SecureDataAccessor, getSessionHomeDir(), os.Getenv("C8Y_PASSPHRASE"))
 	cliConfig.SetLogger(Logger)
-	loadConfiguration()
+	if err := loadConfiguration(); err != nil {
+		Logger.Warnf("Loading configuration had errors. %s", err)
+	}
 
 	// only parse env variables if no explict config file is given
 	if globalFlagUseEnv {
@@ -817,6 +820,7 @@ func loadConfiguration() error {
 	Logger.Debug("Loading configuration")
 	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
 	viper.SetEnvPrefix("c8y")
+
 	//viper.AutomaticEnv()
 	bindEnv(SettingsIncludeAllPageSize, 2000)
 	bindEnv(SettingsDefaultPageSize, CumulocityDefaultPageSize)
@@ -935,8 +939,12 @@ func readConfiguration(cmd *cobra.Command) error {
 }
 
 func bindEnv(name string, defaultValue interface{}) {
-	viper.BindEnv(name)
+	err := viper.BindEnv(name)
 	viper.SetDefault(name, defaultValue)
+
+	if err != nil {
+		Logger.Warnf("Could not bind env variable. name=%s, err=%s", name, err)
+	}
 }
 
 func newWebsocketDialer(ignoreProxySettings bool) *websocket.Dialer {
@@ -999,7 +1007,7 @@ func hideSensitiveInformationIfActive(message string) string {
 		}
 	}
 
-	basicAuthMatcher := regexp.MustCompile("(Basic\\s+)[A-Za-z0-9=]+")
+	basicAuthMatcher := regexp.MustCompile(`(Basic\s+)[A-Za-z0-9=]+`)
 	message = basicAuthMatcher.ReplaceAllString(message, "$1 {base64 tenant/username:password}")
 
 	return message

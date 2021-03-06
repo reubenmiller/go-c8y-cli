@@ -49,7 +49,7 @@ Delete external identity
 	)
 
 	// Required flags
-	cmd.MarkFlagRequired("type")
+	_ = cmd.MarkFlagRequired("type")
 
 	ccmd.baseCmd = newBaseCmd(cmd)
 

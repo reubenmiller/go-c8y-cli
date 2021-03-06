@@ -49,7 +49,7 @@ Add a binary to an event
 	)
 
 	// Required flags
-	cmd.MarkFlagRequired("file")
+	_ = cmd.MarkFlagRequired("file")
 
 	ccmd.baseCmd = newBaseCmd(cmd)
 

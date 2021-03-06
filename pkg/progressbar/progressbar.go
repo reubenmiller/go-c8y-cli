@@ -147,7 +147,6 @@ func (p *ProgressBar) Start(age float64) {
 		)
 		p.Bars = append(p.Bars, bar)
 	}
-	return
 }
 
 func (p *ProgressBar) Wait() {

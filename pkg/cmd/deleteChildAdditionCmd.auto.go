@@ -49,7 +49,7 @@ Unassign a child addition from its parent managed object
 	)
 
 	// Required flags
-	cmd.MarkFlagRequired("id")
+	_ = cmd.MarkFlagRequired("id")
 
 	ccmd.baseCmd = newBaseCmd(cmd)
 

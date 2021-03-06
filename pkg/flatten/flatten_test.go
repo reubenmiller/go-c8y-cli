@@ -15,6 +15,7 @@ func Test(t *testing.T) {
 	err := json.Unmarshal([]byte(rawjson), &flatMap)
 	assert.OK(t, err)
 	nestedJSON, err := Unflatten(flatMap)
+	assert.OK(t, err)
 
 	nestedMap := make(map[string]interface{})
 	err = json.Unmarshal(nestedJSON, &nestedMap)

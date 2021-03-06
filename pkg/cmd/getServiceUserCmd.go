@@ -37,7 +37,7 @@ Get application service user by app name
 	cmd.Flags().String("id", "", "Microservice id (required)")
 
 	// Required flags
-	cmd.MarkFlagRequired("id")
+	_ = cmd.MarkFlagRequired("id")
 
 	ccmd.baseCmd = newBaseCmd(cmd)
 

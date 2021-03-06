@@ -43,7 +43,7 @@ Get a list of managed objects
 	)
 
 	// Required flags
-	cmd.MarkFlagRequired("query")
+	_ = cmd.MarkFlagRequired("query")
 
 	ccmd.baseCmd = newBaseCmd(cmd)
 

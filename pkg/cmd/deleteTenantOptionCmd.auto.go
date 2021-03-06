@@ -49,7 +49,7 @@ Get a tenant option
 	)
 
 	// Required flags
-	cmd.MarkFlagRequired("category")
+	_ = cmd.MarkFlagRequired("category")
 
 	ccmd.baseCmd = newBaseCmd(cmd)
 

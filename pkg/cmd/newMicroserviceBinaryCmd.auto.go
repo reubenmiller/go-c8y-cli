@@ -54,7 +54,7 @@ Upload microservice binary
 	)
 
 	// Required flags
-	cmd.MarkFlagRequired("file")
+	_ = cmd.MarkFlagRequired("file")
 
 	ccmd.baseCmd = newBaseCmd(cmd)
 

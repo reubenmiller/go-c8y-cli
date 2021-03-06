@@ -57,10 +57,10 @@ Create an audit record for a custom managed object update
 	)
 
 	// Required flags
-	cmd.MarkFlagRequired("type")
-	cmd.MarkFlagRequired("text")
-	cmd.MarkFlagRequired("activity")
-	cmd.MarkFlagRequired("severity")
+	_ = cmd.MarkFlagRequired("type")
+	_ = cmd.MarkFlagRequired("text")
+	_ = cmd.MarkFlagRequired("activity")
+	_ = cmd.MarkFlagRequired("severity")
 
 	ccmd.baseCmd = newBaseCmd(cmd)
 

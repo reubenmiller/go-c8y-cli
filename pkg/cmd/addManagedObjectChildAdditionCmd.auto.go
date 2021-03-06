@@ -50,7 +50,7 @@ Add a related managed object as a child to an existing managed object
 	)
 
 	// Required flags
-	cmd.MarkFlagRequired("id")
+	_ = cmd.MarkFlagRequired("id")
 
 	ccmd.baseCmd = newBaseCmd(cmd)
 

@@ -50,7 +50,7 @@ Update an bulk operation
 	)
 
 	// Required flags
-	cmd.MarkFlagRequired("creationRampSec")
+	_ = cmd.MarkFlagRequired("creationRampSec")
 
 	ccmd.baseCmd = newBaseCmd(cmd)
 

@@ -155,7 +155,7 @@ func newNewSessionCmd() *newSessionCmd {
 	cmd.Flags().BoolVar(&ccmd.noTenantPrefix, "noTenantPrefix", false, "Don't use tenant name as a prefix to the user name when using Basic Authentication. Defaults to false")
 
 	// Required flags
-	cmd.MarkFlagRequired("host")
+	_ = cmd.MarkFlagRequired("host")
 	// cmd.MarkFlagRequired("tenant")
 	// cmd.MarkFlagRequired("username")
 	// cmd.MarkFlagRequired("password")

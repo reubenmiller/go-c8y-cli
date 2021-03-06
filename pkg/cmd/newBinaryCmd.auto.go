@@ -52,7 +52,7 @@ Upload a config file and make it globally accessible for all users
 	)
 
 	// Required flags
-	cmd.MarkFlagRequired("file")
+	_ = cmd.MarkFlagRequired("file")
 
 	ccmd.baseCmd = newBaseCmd(cmd)
 

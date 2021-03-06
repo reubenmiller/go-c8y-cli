@@ -50,7 +50,7 @@ Assign a device as a child device to an existing device
 	)
 
 	// Required flags
-	cmd.MarkFlagRequired("device")
+	_ = cmd.MarkFlagRequired("device")
 
 	ccmd.baseCmd = newBaseCmd(cmd)
 

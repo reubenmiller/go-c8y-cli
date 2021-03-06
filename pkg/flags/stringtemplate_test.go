@@ -50,6 +50,6 @@ func Test_StringTemplateWithIterators(t *testing.T) {
 	assert.True(t, out == "/inventory/managedObjects/12345/something/mydevice")
 
 	// calling a second time should not be possilbe (as the iterator only has 1 value)
-	out, _, err = tmpl.Execute(false)
+	_, _, err = tmpl.Execute(false)
 	assert.ErrorType(t, err, io.EOF)
 }

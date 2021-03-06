@@ -57,7 +57,7 @@ func WithPathParameters(cmd *cobra.Command, path *StringTemplate, inputIterators
 		if name != "" {
 			switch v := value.(type) {
 			case []string:
-				path.SetVariable(name, fmt.Sprintf("%s", strings.Join(v, ",")))
+				path.SetVariable(name, strings.Join(v, ","))
 
 			case []int:
 				path.SetVariable(name, strings.Trim(strings.Join(strings.Fields(fmt.Sprint(v)), ","), "[]"))
@@ -146,8 +146,8 @@ func WithBody(cmd *cobra.Command, body *mapbuilder.MapBuilder, inputIterators *R
 		case map[string]interface{}:
 			if v != nil {
 				if name != "" {
-					body.Set(name, v)
-
+					err = body.Set(name, v)
+					return err
 				} else {
 					body.SetMap(v)
 				}

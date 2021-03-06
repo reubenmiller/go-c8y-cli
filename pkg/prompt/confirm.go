@@ -56,12 +56,12 @@ func Confirm(label string, target, defaultValue string, force bool) (ConfirmResu
 	if force {
 		return ConfirmYesToAll, nil
 	}
-	message := fmt.Sprintf("Confirm: ")
+	message := "Confirm: "
 
 	if target != "" {
 		message += fmt.Sprintf("%s on %s", label, target)
 	} else {
-		message += fmt.Sprintf("%s", label)
+		message += label
 	}
 
 	stdIn := os.Stdin
