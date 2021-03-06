@@ -77,16 +77,15 @@ Describe -Name "powershell pipes" {
 
     Context "Device creation" {
         It "accepts devices names from the pipeline" {
-            $output = ,@("device01", "device02") | New-Device -WhatIf -Debug 2>&1
+            $output = $( $response = ,@("device01", "device02") | New-Device -WhatIf -WhatIfFormat json -WithError -Debug ) 2>&1
             $LASTEXITCODE | Should -Be 0
             $output -match "Loaded session:" | Should -HaveCount 1
             $output -match "adding job: 2" | Should -HaveCount 1
-            $output | Should -ContainRequest "POST /inventory/managedObjects" -Total 2
-
-            $Bodies = $output | Get-RequestBodyCollection | Sort-Object name
-            $Bodies | Should -HaveCount 2
-            $Bodies[0] | Should -MatchObject @{c8y_IsDevice=@{}; name="device01"}
-            $Bodies[1] | Should -MatchObject @{c8y_IsDevice=@{}; name="device02"}
+            $requests = $response | ConvertFrom-Json
+            $requests | Should -HaveCount 2
+            $PartialRequest = $requests | Select-Object path, method, body
+            $PartialRequest[0] | Should -MatchObject @{ method = "POST"; path = "/inventory/managedObjects"; body = @{c8y_IsDevice=@{}; name="device01"} }
+            $PartialRequest[1] | Should -MatchObject @{ method = "POST"; path = "/inventory/managedObjects"; body = @{c8y_IsDevice=@{}; name="device02"} }
         }
     }
 
