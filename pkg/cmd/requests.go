@@ -331,7 +331,11 @@ func PrintRequestDetails(w io.Writer, requestOptions *c8y.RequestOptions, req *h
 		} else {
 			sectionLabel.Fprint(w, "\n#### Body\n")
 			fmt.Fprintf(w, "\n```json\n")
-			Console.Printf("%s", body)
+			body = pretty.Pretty(body)
+			if !globalFlagNoColor {
+				body = pretty.Color(body, pretty.TerminalStyle)
+			}
+			fmt.Fprintf(w, "%s", body)
 			fmt.Fprintf(w, "```\n")
 		}
 
