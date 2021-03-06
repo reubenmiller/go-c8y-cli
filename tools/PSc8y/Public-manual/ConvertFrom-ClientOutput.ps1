@@ -59,13 +59,8 @@ Function ConvertFrom-ClientOutput {
 
                     if (-Not $IgnorePowershellType) {
                         $output = $output | Add-PowershellType -Type $SelectedType
-                    }
-                
-                    if ($LASTEXITCODE -eq 0 -or $WithError) {
-                        $output
-                    } else {
-                        $output
-                    }
+                    }                
+                    $output
                 } else {
                     $item
                 }
