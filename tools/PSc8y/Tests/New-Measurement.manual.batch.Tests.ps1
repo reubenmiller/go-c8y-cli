@@ -32,7 +32,6 @@ Describe -Name "New-Measurement" {
             Workers = 1
             Data = $rawjson
             Template = "{time:time.now}"
-            InformationVariable = "request"
         }
         # using WhatIf
         $options.WhatIf = $true
