@@ -110,7 +110,7 @@ Function New-ClientArgument {
         }
 
         if ($Parameters["WhatIfFormat"]) {
-            $null = $c8yargs.AddRange(("--dryFormat={0}" -f $Parameters["WhatIfFormat"]))
+            $null = $c8yargs.Add(("--dryFormat={0}" -f $Parameters["WhatIfFormat"]))
         }
 
         # Always use verbose as information is extracted from it
