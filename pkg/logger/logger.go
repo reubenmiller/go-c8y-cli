@@ -203,7 +203,7 @@ func NewLogger(name string, options Options) *Logger {
 		if options.Color {
 			output = colorable.NewColorableStderr()
 		}
-		cores = append(cores, zapcore.NewCore(consoleEncoder, zapcore.AddSync(output), consoleLevelEnabler))
+		cores = append(cores, zapcore.NewCore(consoleEncoder, zapcore.Lock(zapcore.AddSync(output)), consoleLevelEnabler))
 	}
 
 	core := zapcore.NewTee(cores...)
