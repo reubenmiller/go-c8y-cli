@@ -158,7 +158,11 @@ func processRequestAndResponse(requests []c8y.RequestOptions, commonOptions Comm
 	isDryRun := resp != nil && resp.Response.StatusCode == 0 && resp.Response.Request != nil
 
 	if isDryRun {
-		PrintRequestDetails(os.Stdout, &req, resp.Response.Request)
+		dryWriter := os.Stderr
+		if globalFlagPrintErrorsOnStdout {
+			dryWriter = os.Stdout
+		}
+		PrintRequestDetails(dryWriter, &req, resp.Response.Request)
 	} else if resp != nil {
 		durationMS := int64(time.Since(start) / time.Millisecond)
 		Logger.Infof("Response time: %dms", durationMS)
@@ -362,10 +366,12 @@ func getCurlCommands(req *http.Request) (shell string, pwsh string, err error) {
 
 func fetchAllResults(req c8y.RequestOptions, resp *c8y.Response, commonOptions CommonCommandOptions) error {
 
-	if resp == nil {
-		if req.DryRun {
-			return nil
-		}
+	if req.DryRun {
+		return nil
+	}
+
+	// check if response does really contain a response
+	if resp == nil || resp.StatusCode != 0 {
 		return fmt.Errorf("Response is empty")
 	}
 
@@ -472,11 +478,12 @@ func fetchAllResults(req c8y.RequestOptions, resp *c8y.Response, commonOptions C
 }
 
 func fetchAllInventoryQueryResults(req c8y.RequestOptions, resp *c8y.Response, commonOptions CommonCommandOptions) error {
+	if req.DryRun {
+		return nil
+	}
 
-	if resp == nil {
-		if req.DryRun {
-			return nil
-		}
+	// check if response does really contain a response
+	if resp == nil || resp.StatusCode != 0 {
 		return fmt.Errorf("Response is empty")
 	}
 
