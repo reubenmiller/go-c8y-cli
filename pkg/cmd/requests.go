@@ -286,7 +286,8 @@ func PrintRequestDetails(w io.Writer, requestOptions *c8y.RequestOptions, req *h
 		if !globalFlagNoColor {
 			out = pretty.Color(out, pretty.TerminalStyle)
 		}
-		fmt.Fprintf(w, "%s", out)
+		// note: include newline to make it easier to parse multiple dry outputs
+		fmt.Fprintf(w, "%s\n", out)
 		return
 	}
 
