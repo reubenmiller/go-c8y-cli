@@ -15,7 +15,7 @@ require (
 	github.com/obeattie/ohmyglob v0.0.0-20150811221449-290764208a0d
 	github.com/pkg/errors v0.9.1
 	github.com/pquerna/otp v1.3.0
-	github.com/reubenmiller/go-c8y v0.8.1-0.20210307204916-4a810c2b5903
+	github.com/reubenmiller/go-c8y v0.8.1-0.20210307212503-2fcaaecd459c
 	github.com/sethvargo/go-password v0.2.0
 	github.com/spf13/cobra v1.1.3
 	github.com/spf13/pflag v1.0.5
