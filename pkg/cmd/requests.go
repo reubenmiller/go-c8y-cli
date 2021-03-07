@@ -10,7 +10,6 @@ import (
 	"net/http"
 	"net/http/httputil"
 	"net/url"
-	"os"
 	"regexp"
 	"sort"
 	"strings"
@@ -150,13 +149,7 @@ func processRequestAndResponse(requests []c8y.RequestOptions, commonOptions Comm
 	)
 	isDryRun := resp != nil && resp.Response.StatusCode == 0 && resp.Response.Request != nil
 
-	if isDryRun {
-		dryWriter := os.Stderr
-		if globalFlagPrintErrorsOnStdout {
-			dryWriter = os.Stdout
-		}
-		PrintRequestDetails(dryWriter, &req, resp.Response.Request)
-	} else if resp != nil {
+	if !isDryRun && resp != nil {
 		durationMS := int64(time.Since(start) / time.Millisecond)
 		Logger.Infof("Response time: %dms", durationMS)
 

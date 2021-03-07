@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"context"
 	"strings"
 
 	"github.com/pkg/errors"
@@ -21,7 +20,7 @@ func newUserFetcher(client *c8y.Client) *userFetcher {
 
 func (f *userFetcher) getByID(id string) ([]fetcherResultSet, error) {
 	user, resp, err := client.User.GetUser(
-		context.Background(),
+		WithDisabledDryRunContext(f.client),
 		id,
 	)
 
@@ -40,7 +39,7 @@ func (f *userFetcher) getByID(id string) ([]fetcherResultSet, error) {
 
 func (f *userFetcher) getByName(name string) ([]fetcherResultSet, error) {
 	users, _, err := client.User.GetUsers(
-		context.Background(),
+		WithDisabledDryRunContext(f.client),
 		&c8y.UserOptions{
 			Username:          strings.ReplaceAll(name, "*", ""),
 			PaginationOptions: *c8y.NewPaginationOptions(5),

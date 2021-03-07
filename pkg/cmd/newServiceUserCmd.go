@@ -76,9 +76,6 @@ func (n *newServiceUserCmd) doProcedure(cmd *cobra.Command, args []string) error
 	}
 
 	Logger.Info("Creating new application")
-	client.SetRequestOptions(c8y.DefaultRequestOptions{
-		DryRun: globalFlagDryRun,
-	})
 	application, response, err = client.Application.Create(context.Background(), applicationDetails)
 
 	if err != nil {

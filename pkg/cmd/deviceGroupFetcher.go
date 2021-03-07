@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"context"
 	"fmt"
 
 	"github.com/pkg/errors"
@@ -20,7 +19,7 @@ func newDeviceGroupFetcher(client *c8y.Client) *deviceGroupFetcher {
 
 func (f *deviceGroupFetcher) getByID(id string) ([]fetcherResultSet, error) {
 	mo, resp, err := client.Inventory.GetManagedObject(
-		context.Background(),
+		WithDisabledDryRunContext(f.client),
 		id,
 		nil,
 	)
@@ -40,7 +39,7 @@ func (f *deviceGroupFetcher) getByID(id string) ([]fetcherResultSet, error) {
 
 func (f *deviceGroupFetcher) getByName(name string) ([]fetcherResultSet, error) {
 	mcol, _, err := client.Inventory.GetManagedObjects(
-		context.Background(),
+		WithDisabledDryRunContext(f.client),
 		&c8y.ManagedObjectOptions{
 			Query:             fmt.Sprintf("has(c8y_IsDeviceGroup) and name eq '%s'", name),
 			PaginationOptions: *c8y.NewPaginationOptions(5),

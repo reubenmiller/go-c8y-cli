@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"context"
 	"fmt"
 
 	"github.com/pkg/errors"
@@ -21,7 +20,7 @@ func newDeviceFetcher(client *c8y.Client) *deviceFetcher {
 
 func (f *deviceFetcher) getByID(id string) ([]fetcherResultSet, error) {
 	mo, resp, err := client.Inventory.GetManagedObject(
-		context.Background(),
+		WithDisabledDryRunContext(f.client),
 		id,
 		nil,
 	)
@@ -41,7 +40,7 @@ func (f *deviceFetcher) getByID(id string) ([]fetcherResultSet, error) {
 
 func (f *deviceFetcher) getByName(name string) ([]fetcherResultSet, error) {
 	mcol, _, err := client.Inventory.GetDevicesByName(
-		context.Background(),
+		WithDisabledDryRunContext(f.client),
 		name,
 		c8y.NewPaginationOptions(5),
 	)

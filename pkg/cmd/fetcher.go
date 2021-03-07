@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"io"
@@ -29,6 +30,12 @@ type fetcherResultSet struct {
 
 type idValue struct {
 	raw string
+}
+
+func WithDisabledDryRunContext(c *c8y.Client) context.Context {
+	return c.Context.CommonOptions(c8y.CommonOptions{
+		DryRun: false,
+	})
 }
 
 // newIDValue returns a new id formatter

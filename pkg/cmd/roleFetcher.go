@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"context"
 	"strings"
 
 	"github.com/pkg/errors"
@@ -21,7 +20,7 @@ func newRoleFetcher(client *c8y.Client) *roleFetcher {
 
 func (f *roleFetcher) getByID(id string) ([]fetcherResultSet, error) {
 	role, resp, err := client.User.GetRole(
-		context.Background(),
+		WithDisabledDryRunContext(f.client),
 		id,
 	)
 
@@ -51,7 +50,7 @@ func (f *roleFetcher) getByName(name string) ([]fetcherResultSet, error) {
 		}, nil
 	}
 	roles, _, err := client.User.GetRoles(
-		context.Background(),
+		WithDisabledDryRunContext(f.client),
 		&c8y.RoleOptions{
 			PaginationOptions: *c8y.NewPaginationOptions(100),
 		},

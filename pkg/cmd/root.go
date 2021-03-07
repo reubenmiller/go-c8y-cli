@@ -74,6 +74,22 @@ type c8yCmd struct {
 	useEnv bool
 }
 
+func (c *c8yCmd) DryRunHandler(options *c8y.RequestOptions, req *http.Request) {
+
+	if !globalFlagDryRun {
+		return
+	}
+	if req == nil {
+		Logger.Warn("Response is nil")
+		return
+	}
+	w := c.Command.ErrOrStderr()
+	if globalFlagPrintErrorsOnStdout {
+		w = c.Command.OutOrStdout()
+	}
+
+	PrintRequestDetails(w, nil, req)
+}
 func (c *c8yCmd) createCumulocityClient() {
 	c.Logger.Debug("Creating c8y client")
 	httpClient := newHTTPClient(globalFlagNoProxy)
@@ -106,6 +122,11 @@ func (c *c8yCmd) createCumulocityClient() {
 		cliConfig.MustGetPassword(),
 		true,
 	)
+
+	client.SetRequestOptions(c8y.DefaultRequestOptions{
+		DryRun:        globalFlagDryRun,
+		DryRunHandler: c.DryRunHandler,
+	})
 
 	// load authentication
 	if err := loadAuthentication(cliConfig, client); err != nil {
@@ -738,10 +759,6 @@ func initConfig() {
 	rootCmd.Logger = Logger
 
 	c8y.Logger = Logger
-	if globalFlagDryRun {
-		// use custom handling of dry run so silence library messages
-		c8y.SilenceLogger()
-	}
 
 	if logOptions.Level.Enabled(zapcore.InfoLevel) {
 		printCommand()

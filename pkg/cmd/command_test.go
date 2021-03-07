@@ -424,3 +424,18 @@ func Test_PipingWithObjectPipeToTemplateWithIDs(t *testing.T) {
 	cmdErr := ExecuteCmd(cmd, `devices update --dry`)
 	assert.OK(t, cmdErr)
 }
+
+func Test_DebugCommand(t *testing.T) {
+	cmd := setupTest()
+
+	// cmdErr := ExecuteCmd(cmd, fmt.Sprintf("devices list --select id,nam* --csv --csvHeader"))
+	// cmdErr := ExecuteCmd(cmd, fmt.Sprintf("applications get --id cockpit --select appId:id,tenantId:owner.**.id"))
+	stdin := bytes.NewBufferString("440811\n440812\n")
+	cmd.SetIn(stdin)
+	cmdtext := `
+	measurements create --data {"type":"myType"} --dry
+	`
+	cmdErr := ExecuteCmd(cmd, strings.TrimSpace(cmdtext))
+	cmd.checkCommandError(cmdErr, os.Stderr)
+	assert.OK(t, cmdErr)
+}

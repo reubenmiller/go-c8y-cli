@@ -1,8 +1,6 @@
 package cmd
 
 import (
-	"context"
-
 	"github.com/pkg/errors"
 	"github.com/reubenmiller/go-c8y-cli/pkg/matcher"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
@@ -20,7 +18,7 @@ func newUserGroupFetcher(client *c8y.Client) *userGroupFetcher {
 
 func (f *userGroupFetcher) getByID(id string) ([]fetcherResultSet, error) {
 	group, resp, err := client.User.GetGroup(
-		context.Background(),
+		WithDisabledDryRunContext(f.client),
 		id,
 	)
 
@@ -39,7 +37,7 @@ func (f *userGroupFetcher) getByID(id string) ([]fetcherResultSet, error) {
 
 func (f *userGroupFetcher) getByName(name string) ([]fetcherResultSet, error) {
 	groups, _, err := client.User.GetGroups(
-		context.Background(),
+		WithDisabledDryRunContext(f.client),
 		&c8y.GroupOptions{
 			PaginationOptions: *c8y.NewPaginationOptions(2000),
 		},

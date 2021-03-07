@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"context"
 	"fmt"
 
 	"github.com/pkg/errors"
@@ -20,7 +19,7 @@ func newAgentFetcher(client *c8y.Client) *agentFetcher {
 
 func (f *agentFetcher) getByID(id string) ([]fetcherResultSet, error) {
 	mo, resp, err := client.Inventory.GetManagedObject(
-		context.Background(),
+		WithDisabledDryRunContext(f.client),
 		id,
 		nil,
 	)
@@ -40,7 +39,7 @@ func (f *agentFetcher) getByID(id string) ([]fetcherResultSet, error) {
 
 func (f *agentFetcher) getByName(name string) ([]fetcherResultSet, error) {
 	mcol, _, err := client.Inventory.GetManagedObjects(
-		context.Background(),
+		WithDisabledDryRunContext(f.client),
 		&c8y.ManagedObjectOptions{
 			// fmt.Sprintf("$filter=%s+$orderby=name", filter)
 			Query:             fmt.Sprintf("$filter=has(com_cumulocity_model_Agent) and name eq '%s' $orderby=name", name),

@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"context"
 	"regexp"
 
 	"github.com/pkg/errors"
@@ -20,7 +19,7 @@ func newApplicationFetcher(client *c8y.Client) *applicationFetcher {
 
 func (f *applicationFetcher) getByID(id string) ([]fetcherResultSet, error) {
 	app, resp, err := client.Application.GetApplication(
-		context.Background(),
+		WithDisabledDryRunContext(f.client),
 		id,
 	)
 
@@ -40,7 +39,7 @@ func (f *applicationFetcher) getByID(id string) ([]fetcherResultSet, error) {
 // getByName returns applications matching a given using regular expression
 func (f *applicationFetcher) getByName(name string) ([]fetcherResultSet, error) {
 	col, _, err := client.Application.GetApplications(
-		context.Background(),
+		WithDisabledDryRunContext(f.client),
 		&c8y.ApplicationOptions{
 			PaginationOptions: *c8y.NewPaginationOptions(2000),
 		},
