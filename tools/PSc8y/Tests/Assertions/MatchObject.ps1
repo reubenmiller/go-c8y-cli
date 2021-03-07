@@ -12,16 +12,22 @@ Function MatchObject {
         $ActualValue,
         $Expected,
         [switch]$Negate,
+        [string[]] $Property,
         $Because,
         $CallerSessionState
     )
 
-    if ($ActualValue -is [hashtable]) {
-        $ActualKeys = $ActualValue.Keys | Sort-Object
-    } else {
-        $ActualKeys = $ActualValue.psobject.Properties.Name | Sort-Object
+    $ActualValueCopy = $ActualValue
+    if ($Property.Count -gt 0) {
+        $ActualValueCopy | Select-Object -Property $Property
     }
-    $ActualValues = $ActualKeys | ForEach-Object { $ActualValue."$_" }
+
+    if ($ActualValueCopy -is [hashtable]) {
+        $ActualKeys = $ActualValueCopy.Keys | Sort-Object
+    } else {
+        $ActualKeys = $ActualValueCopy.psobject.Properties.Name | Sort-Object
+    }
+    $ActualValues = $ActualKeys | ForEach-Object { $ActualValueCopy."$_" }
 
     if ($Expected -is [hashtable]) {
         $ExpectedKeys = $Expected.Keys | Sort-Object
