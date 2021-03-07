@@ -31,12 +31,15 @@ Describe -Name "c8y pipes" {
         }
 
         It "Pipe by id create command" {
-            $output = @("10", "11") | c8y events create --template "{type: 'c8y_Event', text: 'custom info ' + input.index}" --dry 2>&1
+            $output = @("10", "11") | c8y events create --template "{type: 'c8y_Event', text: 'custom info ' + input.index}" --dry --dryFormat json --withError
             $LASTEXITCODE | Should -Be 0
-            $output | Should -ContainRequest "POST" -Total 2
-            $output | Should -ContainRequest "POST /event/events" -Total 2
-            $output -like '*"text": "custom info 1"*' | should -HaveCount 1
-            $output -like '*"text": "custom info 2"*' | should -HaveCount 1
+            $requests = $output | ConvertFrom-Json
+            $requests | Should -HaveCount 2
+            
+            $requests[0] | Should -MatchObject @{method = "POST"; path = "/event/events"} -Property method, path
+            $requests[0].body.text | Should -BeExactly "custom info 1"
+            $requests[1] | Should -MatchObject @{method = "POST"; path = "/event/events"} -Property method, path
+            $requests[1].body.text | Should -BeExactly "custom info 2"
         }
     }
     
@@ -95,7 +98,7 @@ Describe -Name "c8y pipes" {
         }
 
         It "Pipe by name which do not match to query parameters ignoring names that does not exist" {
-            $output = @("pipeNameDoesNotExist1", "pipeNameDoesNotExist2", "pipeNameDoesNotExist3") | c8y events list --dry 2>&1
+            $output = @("pipeNameDoesNotExist1", "pipeNameDoesNotExist2", "pipeNameDoesNotExist3") | c8y events list --dry --verbose 2>&1
             $LASTEXITCODE | Should -Be 104
             $output | Should -ContainRequest "GET" -Total 3
             $output | Should -ContainRequest "GET /inventory/managedObjects" -Total 3
@@ -103,14 +106,16 @@ Describe -Name "c8y pipes" {
         }
 
         It "Pipe by name which do not match to query parameters aborts after specified number of errors" {
-            $output = @("pipeNameDoesNotExist1", "pipeNameDoesNotExist2", "pipeNameDoesNotExist3", "pipeNameDoesNotExist4") | c8y events list --dry --abortOnErrors 1 2>&1
+            $inputItems = @("pipeNameDoesNotExist1", "pipeNameDoesNotExist2", "pipeNameDoesNotExist3", "pipeNameDoesNotExist4")
+            
+            $output = $inputItems | c8y events list --verbose --dry --dryFormat json --abortOnErrors 1 2>&1
             $LASTEXITCODE | Should -Be 103
             $output | Should -ContainRequest "GET" -Minimum 1 -Maximum 2 -Because "Abort is not instantaneous, so lookups can be sent out"
             $output | Should -ContainRequest "GET /inventory/managedObjects" -Minimum 1 -Maximum 2
         }
 
         It "Pipe by id and name to query parameters. Invalid reference by names should be skipped or should throw an error?" {
-            $output = @("1", "pipeNameDoesNotExist2") | c8y events list --dry 2>&1
+            $output = @("1", "pipeNameDoesNotExist2") | c8y events list --dry --dryFormat markdown --verbose 2>&1
             $LASTEXITCODE | Should -Not -Be 0
             $output | Should -ContainRequest "GET" -Total 2
             $output | Should -ContainRequest "GET /event/events" -Total 1
@@ -160,52 +165,56 @@ Describe -Name "c8y pipes" {
 
     Context "pipeline - devices" {
         It "Provides piped strings to template" {
-            $output = "11", "12" | c8y devices create --template "{ jobIndex: input.index, jobValue: input.value }" --dry 2>&1
+            $output = "11", "12" | c8y devices create --template "{ jobIndex: input.index, jobValue: input.value }" --dry --dryFormat json 2>&1
             $LASTEXITCODE | Should -BeExactly 0
+            $requests = $output | ConvertFrom-Json
+            $requests | Should -HaveCount 2
 
-            $output | SHould -ContainRequest "POST /inventory/managedObjects" -Total 2
-            $Bodies = $output | Get-RequestBodyCollection | Sort-Object jobIndex
-            $Bodies | Should -HaveCount 2
-            $Bodies[0] | Should -MatchObject @{c8y_IsDevice=@{}; jobIndex=1; jobValue="11"; name="11"}
-            $Bodies[1] | Should -MatchObject @{c8y_IsDevice=@{}; jobIndex=2; jobValue="12"; name="12"}
+            $requests[0] | Should -MatchObject @{method = "POST"; path = "/inventory/managedObjects"} -Property method, path
+            $requests[1] | Should -MatchObject @{method = "POST"; path = "/inventory/managedObjects"} -Property method, path
+            $requests[0].body | Should -MatchObject @{c8y_IsDevice=@{}; jobIndex=1; jobValue="11"; name="11"}
+            $requests[1].body | Should -MatchObject @{c8y_IsDevice=@{}; jobIndex=2; jobValue="12"; name="12"}
 
-            $Bodies[0].name | Should -BeOfType [string]
-            $Bodies[0].jobIndex | Should -BeOfType [long]
-            $Bodies[0].jobValue | Should -BeOfType [string]
+            $requests[0].body.name | Should -BeOfType [string]
+            $requests[0].body.jobIndex | Should -BeOfType [long]
+            $requests[0].body.jobValue | Should -BeOfType [string]
         }
 
         It "Provides piped json to template" {
             $output = @{name="myDevice01"}, @{name="myDevice02"} `
             | Invoke-ClientIterator -AsJSON `
-            | c8y devices create --template "{ jobIndex: input.index, name: input.value.name }" --dry 2>&1
+            | c8y devices create --template "{ jobIndex: input.index, name: input.value.name }" --dry --dryFormat json 2>&1
             $LASTEXITCODE | Should -BeExactly 0
 
-            $output | Should -ContainRequest "POST /inventory/managedObjects" -Total 2
-            $Bodies = $output | Get-RequestBodyCollection | Sort-Object jobIndex
+            $requests = $output | ConvertFrom-Json
+            
+            $requests | Should -HaveCount 2
+            $requests[0] | Should -MatchObject @{method = "POST"; path = "/inventory/managedObjects"} -Property method, path
+            $requests[1] | Should -MatchObject @{method = "POST"; path = "/inventory/managedObjects"} -Property method, path
 
-            $Bodies | Should -HaveCount 2
-            $Bodies[0] | Should -MatchObject @{c8y_IsDevice=@{}; jobIndex=1; name="myDevice01"}
-            $Bodies[1] | Should -MatchObject @{c8y_IsDevice=@{}; jobIndex=2; name="myDevice02"}
+            $requests[0].body | Should -MatchObject @{c8y_IsDevice=@{}; jobIndex=1; name="myDevice01"}
+            $requests[1].body | Should -MatchObject @{c8y_IsDevice=@{}; jobIndex=2; name="myDevice02"}
 
-            $Bodies[0].name | Should -BeOfType [string]
-            $Bodies[0].jobIndex | Should -BeOfType [long]
+            $requests.body[0].name | Should -BeOfType [string]
+            $requests.body[0].jobIndex | Should -BeOfType [long]
         }
 
         It "pipes objects from powershell to the c8y binary" {
             $output = 1..2 `
             | Invoke-ClientIterator "device" `
-            | c8y devices create --template "{ jobIndex: input.index, name: input.value.name }" --dry 2>&1
+            | c8y devices create --template "{ jobIndex: input.index, name: input.value.name }" --dry --dryFormat json 2>&1
             $LASTEXITCODE | Should -BeExactly 0
+            $requests = $output | ConvertFrom-Json
 
-            $output | SHould -ContainRequest "POST /inventory/managedObjects" -Total 2
-            $Bodies = $output | Get-RequestBodyCollection | Sort-Object jobIndex
+            $requests | Should -HaveCount 2
+            $requests[0] | Should -MatchObject @{method = "POST"; path = "/inventory/managedObjects"} -Property method, path
+            $requests[1] | Should -MatchObject @{method = "POST"; path = "/inventory/managedObjects"} -Property method, path
 
-            $Bodies | Should -HaveCount 2
-            $Bodies[0] | Should -MatchObject @{c8y_IsDevice=@{}; jobIndex=1; name="device0001"}
-            $Bodies[1] | Should -MatchObject @{c8y_IsDevice=@{}; jobIndex=2; name="device0002"}
+            $requests[0].body | Should -MatchObject @{c8y_IsDevice=@{}; jobIndex=1; name="device0001"}
+            $requests[1].body | Should -MatchObject @{c8y_IsDevice=@{}; jobIndex=2; name="device0002"}
 
-            $Bodies[0].name | Should -BeOfType [string]
-            $Bodies[0].jobIndex | Should -BeOfType [long]
+            $requests[0].body.name | Should -BeOfType [string]
+            $requests[0].body.jobIndex | Should -BeOfType [long]
         }
 
         It "supports templates referencing input values: ids => get => update" {
@@ -217,20 +226,20 @@ Describe -Name "c8y pipes" {
             # pipe output 
             $output = $device1.id, $device2.id `
             | c8y devices get `
-            | c8y devices update --template "{ type: input.value.type + 'Suffix', index: input.index }" --dry 2>&1
+            | c8y devices update --template "{ type: input.value.type + 'Suffix', index: input.index }" --dry --dryFormat json 2>&1
             $LASTEXITCODE | Should -BeExactly 0
 
-            $output | Should -ContainRequest "PUT /inventory/managedObjects" -Total 2
-            $Bodies = $output | Get-RequestBodyCollection | Sort-Object index
+            $requests = $output | ConvertFrom-Json
 
-            $Bodies | Should -HaveCount 2
+            $requests | Should -HaveCount 2
+            $requests[0] | Should -MatchObject @{method = "PUT"; path = "/inventory/managedObjects/$($device1.id)"; body = @{type="customType1Suffix"; index=1}} -Property method, path, body
+            $requests[1] | Should -MatchObject @{method = "PUT"; path = "/inventory/managedObjects/$($device2.id)"; body = @{type="customType2Suffix"; index=2}} -Property method, path, body
 
-            $Bodies[0] | Should -MatchObject @{type="customType1Suffix"; index=1}
-            $Bodies[0].type | Should -BeOfType [string]
-            $Bodies[0].index | Should -BeOfType [long]
-            $Bodies[0] | Should -MatchObject @{type="customType2Suffix"; index=2}
-            $Bodies[0].type | Should -BeOfType [string]
-            $Bodies[0].index | Should -BeOfType [long]
+            $requests[0].body.type | Should -BeOfType [string]
+            $requests[0].body.index | Should -BeOfType [long]
+
+            $requests[1].body.type | Should -BeOfType [string]
+            $requests[1].body.index | Should -BeOfType [long]
         }
     }
 
