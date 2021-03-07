@@ -249,7 +249,6 @@ func PrintRequestDetails(w io.Writer, requestOptions *c8y.RequestOptions, req *h
 
 		if err != nil {
 			Logger.Warnf("Could not parse json body. %s", err)
-			return
 		}
 	}
 
