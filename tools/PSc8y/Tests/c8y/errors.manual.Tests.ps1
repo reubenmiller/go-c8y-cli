@@ -20,8 +20,15 @@ Describe -Name "c8y errors" {
             $output | Should -BeNullOrEmpty
         }
 
-        It "returns writes errors as json to stderr" {
+        It "returns writes errors to stderr" {
             $output = c8y events get --iiiiid 0 2>&1
+            $LASTEXITCODE | Should -Be 100
+            $output | Should -Not -BeNullOrEmpty
+            $output | Should -Match "ERROR\s+commandError: unknown flag: --iiiiid"
+        }
+
+        It "returns returns errors as json" {
+            $output = c8y events get --withError --iiiiid 0
             $LASTEXITCODE | Should -Be 100
 
             $output | Should -Not -BeNullOrEmpty
