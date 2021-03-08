@@ -31,21 +31,21 @@ Describe -Name "Inherit-Parameters" {
         $mo | Should -BeNullOrEmpty
         $LASTEXITCODE | Should -Be 0
 
-        $VerboseMessage = $($mo = Test-MyCustomFunction -Force -Verbose) 4>&1
+        $VerboseMessage = $($mo = Test-MyCustomFunction -Force -Verbose) 2>&1
         $mo.id | Should -Match "^\d+$"
         $null = $ids.Add($mo.id)
         $mo | Should -Not -BeNullOrEmpty
         $LASTEXITCODE | Should -Be 0
         $VerboseMessage | Should -Not -BeNullOrEmpty
 
-        $VerboseMessage = $($mo = Test-MyCustomFunction -Force -Verbose:$false) 4>&1
+        $VerboseMessage = $($mo = Test-MyCustomFunction -Force -Verbose:$false) 2>&1
         $mo.id | Should -Match "^\d+$"
         $null = $ids.Add($mo.id)
         $mo | Should -Not -BeNullOrEmpty
         $LASTEXITCODE | Should -Be 0
         $VerboseMessage | Should -BeNullOrEmpty
 
-        $VerboseMessage = $($mo = Test-MyCustomFunction -Force) 4>&1
+        $VerboseMessage = $($mo = Test-MyCustomFunction -Force) 2>&1
         $mo.id | Should -Match "^\d+$"
         $null = $ids.Add($mo.id)
         $mo | Should -Not -BeNullOrEmpty
@@ -54,7 +54,7 @@ Describe -Name "Inherit-Parameters" {
 
         # Set via preference
         $VerbosePreference = "Continue"
-        $VerboseMessage = $($mo = Test-MyCustomFunction -Force) 4>&1
+        $VerboseMessage = $($mo = Test-MyCustomFunction -Force) 2>&1
         $mo.id | Should -Match "^\d+$"
         $null = $ids.Add($mo.id)
         $mo | Should -Not -BeNullOrEmpty
@@ -64,7 +64,7 @@ Describe -Name "Inherit-Parameters" {
         # Reset verbose preference
         $VerbosePreference = ""
 
-        $VerboseMessage = $($mo = Test-MyCustomFunction -Force) 4>&1
+        $VerboseMessage = $($mo = Test-MyCustomFunction -Force) 2>&1
         $mo.id | Should -Match "^\d+$"
         $null = $ids.Add($mo.id)
         $mo | Should -Not -BeNullOrEmpty
