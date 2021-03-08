@@ -5,7 +5,7 @@ import (
 	"crypto/tls"
 	"errors"
 	"fmt"
-	"io"
+	"io/ioutil"
 	"math/rand"
 	"net/http"
 	"os"
@@ -316,7 +316,13 @@ const (
 // SettingsGlobalName name of the settings file (without extension)
 const SettingsGlobalName = "settings"
 
-func (c *c8yCmd) checkCommandError(err error, w io.Writer) {
+func (c *c8yCmd) checkCommandError(err error) {
+
+	w := ioutil.Discard
+	if globalFlagPrintErrorsOnStdout {
+		w = rootCmd.OutOrStdout()
+	}
+
 	if errors.Is(err, ErrNoMatchesFound) {
 		// Simulate a 404 error
 		customErr := cmderrors.CommandError{}
@@ -334,12 +340,13 @@ func (c *c8yCmd) checkCommandError(err error, w io.Writer) {
 		// format errors as json messages
 		// only log users errors
 		if !cErr.IsSilent() && !strings.Contains(globalFlagSilentStatusCodes, fmt.Sprintf("%d", cErr.StatusCode)) {
+			c.Logger.Errorf("%s", cErr)
 			fmt.Fprintf(w, "%s\n", cErr.JSONString())
 		}
 	} else {
 		// unexpected error
-		c.Logger.Errorf("%s", err)
 		cErr := cmderrors.NewSystemErrorF("%s", err)
+		c.Logger.Errorf("%s", cErr)
 		fmt.Fprintf(w, "%s\n", cErr.JSONString())
 	}
 }
@@ -618,11 +625,7 @@ func Execute() {
 func executeRootCmd() {
 	if err := rootCmd.Execute(); err != nil {
 
-		Logger.Errorf("%s", err)
-		if globalFlagPrintErrorsOnStdout {
-			out := rootCmd.OutOrStdout()
-			rootCmd.checkCommandError(err, out)
-		}
+		rootCmd.checkCommandError(err)
 
 		if cErr, ok := err.(cmderrors.CommandError); ok {
 			os.Exit(cErr.ExitCode)
