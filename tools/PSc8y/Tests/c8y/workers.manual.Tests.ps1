@@ -35,11 +35,12 @@ Describe -Name "c8y pipes" {
 
         It "aborts on job errors piping to non-existant values" {
             # Piping values to an id should not result in lookups!
-            $output = @("NonExistantName1", "NonExistantName2", "NonExistantName3") | c8y events get --abortOnErrors 1 --dry --verbose 2>&1
+            $output = @("NonExistantName1", "NonExistantName2", "NonExistantName3") | c8y events list --abortOnErrors 1 --dry --verbose 2>&1
             $LASTEXITCODE | Should -Be 103
-            $output | Should -ContainRequest "GET" -Total 0
+            $output | Should -ContainRequest "GET" -Total 1
+            $output | Should -ContainRequest "GET /inventory/managedObjects" -Total 1
             $output | Should -ContainRequest "GET /event/events" -Total 0
-            ($output -match "checking job iterator") | Should -HaveCount 1
+            ($output -match "aborted batch as error count has been exceeded") | Should -HaveCount 1
         }
     }
 
