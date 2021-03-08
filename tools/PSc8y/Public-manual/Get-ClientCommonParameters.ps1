@@ -90,6 +90,9 @@ Inherit common parameters to a custom function. This will add parameters such as
         New-DynamicParam -Name NoColor -Type "switch" -DPDictionary $Dictionary
         New-DynamicParam -Name Color -Type "switch" -DPDictionary $Dictionary
 
+        # Confirmation
+        New-DynamicParam -Name ConfirmText -Type "string" -DPDictionary $Dictionary
+
         # Error options
         New-DynamicParam -Name WithError -Type "switch" -DPDictionary $Dictionary
         New-DynamicParam -Name SilentStatusCodes -Type "string" -DPDictionary $Dictionary

@@ -239,6 +239,7 @@ var (
 	globalFlagPrintErrorsOnStdout    bool
 	globalFlagForce                  bool
 	globalFlagConfirm                bool
+	globalFlagConfirmText            string
 	globalFlagSelect                 []string
 	globalFlagSilentStatusCodes      string
 
@@ -480,8 +481,10 @@ func configureRootCmd() {
 	rootCmd.PersistentFlags().BoolVar(&globalCSVOutputHeaders, "csvHeader", false, "Include header when in csv output")
 	rootCmd.PersistentFlags().Float64Var(&globalFlagTimeout, "timeout", float64(10*60), "Timeout in seconds")
 
+	// confirmation
 	rootCmd.PersistentFlags().BoolVarP(&globalFlagForce, "force", "f", false, "Do not prompt for confirmation")
 	rootCmd.PersistentFlags().BoolVar(&globalFlagConfirm, "confirm", false, "Prompt for confirmation")
+	rootCmd.PersistentFlags().StringVar(&globalFlagConfirmText, "confirmText", "", "Custom confirmation text")
 
 	// Map settings to flags, allowing the user to set the own default settings
 	if err := viper.BindPFlag(SettingsDefaultPageSize, rootCmd.PersistentFlags().Lookup("pageSize")); err != nil {

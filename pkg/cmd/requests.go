@@ -95,7 +95,11 @@ func getCommonOptions(cmd *cobra.Command) (CommonCommandOptions, error) {
 	options.CurrentPage = globalFlagCurrentPage
 	options.TotalPages = globalFlagTotalPages
 
-	options.ConfirmText = cmd.Short
+	if globalFlagConfirmText != "" {
+		options.ConfirmText = globalFlagConfirmText
+	} else {
+		options.ConfirmText = cmd.Short
+	}
 
 	return options, nil
 }
