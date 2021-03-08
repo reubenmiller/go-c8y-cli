@@ -33,8 +33,6 @@ None :)
 * Add session creator which adds pre-configured templates (i.e. dev, qual, prod) with sensible settings (additional sessionDefault flag)
 * Add shell helper to set mode env variables (like in powershell)
 * Add session editor (--add property/value to file) (complete values?)
-* Add custom prompt text global flag to make it easier for users to extend.
-* Add global flag `--confirm` to prompt for confirmation no matter the other settings
 * remove powershell should process prompts (now handled by c8y binary)
 * Improve go confirmation prompts to include id/name information (if available)
   * Creating entities on devices should include the device ids to prompt information (id and name if possible)
