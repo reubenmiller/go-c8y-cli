@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"strings"
 
 	"github.com/pkg/errors"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
@@ -37,7 +38,7 @@ func (c CommandError) Error() string {
 	if c.err != nil {
 		details = fmt.Sprintf("%s", c.err)
 	}
-	return c.Message + details
+	return strings.Join([]string{c.ErrorType + ":", c.Message, details}, " ")
 }
 
 // IsSilent returns true if the error should be silent
