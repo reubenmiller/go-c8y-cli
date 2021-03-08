@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
@@ -385,6 +386,26 @@ func getConfirmationMessage(prefix string, request *c8y.RequestOptions, input in
 						id = jsonobj.Get("id").Str
 					}
 				}
+			}
+		}
+	}
+
+	if request != nil {
+		switch v := request.Body.(type) {
+		case map[string]interface{}:
+			jsonText, err := json.Marshal(v)
+
+			if err == nil {
+				devicePaths := []string{"source.id", "deviceId", "id"}
+				for _, path := range devicePaths {
+					if device := gjson.ParseBytes(jsonText).Get(path); device.Exists() {
+						Logger.Infof("device: %s", device.Str)
+						id = device.Str
+						break
+					}
+				}
+			} else {
+				Logger.Debugf("json error: %s", err)
 			}
 		}
 	}
