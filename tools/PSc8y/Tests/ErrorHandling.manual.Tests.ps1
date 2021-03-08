@@ -54,24 +54,24 @@ Describe -Name "Error handling" {
     }
 
     It "saves whatif information to a variable" {
-        $requestInfo = $( $response = New-ManagedObject -Name "My Name" -WhatIf ) 2>&1
-
-        $response | Should -BeNullOrEmpty
-        $requestInfo | Should -Not -BeNullOrEmpty
-        $requestInfo -match "What If" | Should -HaveCount 1
-        $requestInfo -match "Sending \[POST\] request to" | Should -HaveCount 1
-        $requestInfo -match "Headers:" | Should -HaveCount 1
-        $requestInfo -match "Body:" | Should -HaveCount 1
+        $output = New-ManagedObject -Name "My Name" -WhatIf -WhatIfFormat json 2>&1
+        $output | Should -Not -BeNullOrEmpty
+        $request = $output | ConvertFrom-Json
+        $request | Should -HaveCount 1
+        $request.method | Should -BeExactly "POST"
+        $request.path | Should -BeExactly "/inventory/managedObjects"
+        $request.body | Should -Not -BeNullOrEmpty
+        $request.headers | Should -Not -BeNullOrEmpty
     }
 
     It "redirects whatif information standard output" {
-        $requestInfo = New-ManagedObject -Name "My Name" -WhatIf 2>&1
+        $requestInfo = New-ManagedObject -Name "My Name" -WhatIf -WhatIfFormat markdown -WithError
 
         $requestInfo | Should -Not -BeNullOrEmpty
         $requestInfo -match "What If" | Should -HaveCount 1
         $requestInfo -match "Sending \[POST\] request to" | Should -HaveCount 1
-        $requestInfo -match "Headers:" | Should -HaveCount 1
-        $requestInfo -match "Body:" | Should -HaveCount 1
+        $requestInfo -match "header" | Should -HaveCount 1
+        $requestInfo -match "Body" | Should -HaveCount 1
     }
 
     AfterAll {
