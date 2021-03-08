@@ -28,7 +28,7 @@ Function New-ClientArgument {
         $BoundParameters = @{} + $Parameters
 
         # strip automatic variables
-        $BoundParameters.Keys -match "(Verbose|WhatIf|WhatIfFormat|Variable|Action|Confirm|Buffer|Debug|AsJSON|AsHashtable|AsCSV|AsCSVWithHeader|Force|Color|Pretty)$" | ForEach-Object {
+        $BoundParameters.Keys -match "(Verbose|WhatIf|WhatIfFormat|Variable|Action|Buffer|Debug|AsJSON|AsHashtable|AsCSV|AsCSVWithHeader|Force|Color|Pretty)$" | ForEach-Object {
             $BoundParameters.Remove($_)
         }
 

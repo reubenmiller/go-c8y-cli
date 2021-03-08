@@ -238,6 +238,7 @@ var (
 	globalFlagFlatten                bool
 	globalFlagPrintErrorsOnStdout    bool
 	globalFlagForce                  bool
+	globalFlagConfirm                bool
 	globalFlagSelect                 []string
 	globalFlagSilentStatusCodes      string
 
@@ -480,6 +481,7 @@ func configureRootCmd() {
 	rootCmd.PersistentFlags().Float64Var(&globalFlagTimeout, "timeout", float64(10*60), "Timeout in seconds")
 
 	rootCmd.PersistentFlags().BoolVarP(&globalFlagForce, "force", "f", false, "Do not prompt for confirmation")
+	rootCmd.PersistentFlags().BoolVar(&globalFlagConfirm, "confirm", false, "Prompt for confirmation")
 
 	// Map settings to flags, allowing the user to set the own default settings
 	if err := viper.BindPFlag(SettingsDefaultPageSize, rootCmd.PersistentFlags().Lookup("pageSize")); err != nil {
@@ -870,6 +872,10 @@ func loadConfiguration() error {
 }
 
 func shouldConfirm(methods ...string) bool {
+	if globalFlagConfirm {
+		return true
+	}
+
 	if cliConfig.IsCIMode() || globalFlagForce || globalFlagDryRun {
 		Logger.Debugf("no confirmation required. ci_mode=%v, force=%v, dry=%v", cliConfig.IsCIMode(), globalFlagForce, globalFlagDryRun)
 		return false
