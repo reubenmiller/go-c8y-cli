@@ -28,17 +28,21 @@ c8y inventory create --data "./datapoint.largeInt.json"
 None :)
 
 ## TODO
-
+* Should `echo "asdf" | c8y events get` be prevented client side? (i.e. if field is is and no lookup is configured)
+* Add new install script like curl -l install.sh | sudo bash
+* Add session creator which adds pre-configured templates (i.e. dev, qual, prod) with sensible settings (additional sessionDefault flag)
+* Add shell helper to set mode env variables (like in powershell)
+* Add session editor (--add property/value to file) (complete values?)
 * Add custom prompt text global flag to make it easier for users to extend.
+* Add global flag `--confirm` to prompt for confirmation no matter the other settings
 * remove powershell should process prompts (now handled by c8y binary)
 * Improve go confirmation prompts to include id/name information (if available)
   * Creating entities on devices should include the device ids to prompt information (id and name if possible)
   * c8y alarms create --device xxxxx --type "myType" --text "Test alarm" --severity MAJOR 
     ? Confirm: (job: 1) Create alarm on tenant t12345? [y] Yes [a] Yes to All [n] No. Default is 'y':
-* Show message to user if deleting on terminal (i.e. DELETED NO Content, some kind of feedback so the user knows that something has happened.)
+* Show message to user if deleting on terminal (i.e. DELETED NO Content, some kind of feedback so the user knows that something has happened)
 * Create activity log cmdlets?
   * Get recent history, get commands with filter (api, host, method etc.)
-* Add -WhatIfFormat to 
 * Rename --dry to --whatIf for consistency with powershell --whatIfFormat
 
 ## Unreleased
