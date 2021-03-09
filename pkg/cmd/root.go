@@ -246,7 +246,6 @@ var (
 	globalModeEnableCreate bool
 	globalModeEnableUpdate bool
 	globalModeEnableDelete bool
-	globalModeEnableBatch  bool
 	globalCIMode           bool
 
 	globalStorageStorePassword bool
@@ -280,9 +279,6 @@ const (
 
 	// SettingsModeEnableCreate enables create (post) commands
 	SettingsModeEnableCreate string = "settings.mode.enableCreate"
-
-	// SettingsModeEnableBatch enables batch commands
-	SettingsModeEnableBatch string = "settings.mode.enableBatch"
 
 	// SettingsModeEnableUpdate enables update commands
 	SettingsModeEnableUpdate string = "settings.mode.enableUpdate"
@@ -748,7 +744,7 @@ func printCommand() {
 
 func initConfig() {
 	logOptions := logger.Options{
-		Level: zapcore.ErrorLevel,
+		Level: zapcore.WarnLevel,
 		Color: !globalFlagNoColor,
 		Debug: globalFlagDebug,
 	}
@@ -943,7 +939,6 @@ func readConfiguration(cmd *cobra.Command) error {
 	globalFlagIncludeAllDelayMS = viper.GetInt64(SettingsIncludeAllDelayMS)
 	globalFlagTemplatePath = viper.GetString(SettingsTemplatePath)
 
-	globalModeEnableBatch = viper.GetBool(SettingsModeEnableBatch)
 	globalModeEnableCreate = viper.GetBool(SettingsModeEnableCreate)
 	globalModeEnableUpdate = viper.GetBool(SettingsModeEnableUpdate)
 	globalModeEnableDelete = viper.GetBool(SettingsModeEnableDelete)
@@ -960,7 +955,6 @@ func readConfiguration(cmd *cobra.Command) error {
 	Logger.Debugf("%s: %t", SettingsModeEnableCreate, globalModeEnableCreate)
 	Logger.Debugf("%s: %t", SettingsModeEnableUpdate, globalModeEnableUpdate)
 	Logger.Debugf("%s: %t", SettingsModeEnableDelete, globalModeEnableDelete)
-	Logger.Debugf("%s: %t", SettingsModeEnableBatch, globalModeEnableBatch)
 	Logger.Debugf("%s: %s", SettingsModeConfirmation, viper.GetString(SettingsModeConfirmation))
 	Logger.Debugf("%s: %d", SettingsDefaultBatchMaxJobs, globalFlagBatchMaxJobs)
 
