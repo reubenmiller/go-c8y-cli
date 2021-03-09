@@ -1,7 +1,7 @@
 #!/bin/zsh
 
-#mkdir -p "$ZSH/completions"
-#c8y completion zsh > ~/.oh-my-zsh/completions/_c8y
+mkdir -p "$ZSH/completions"
+c8y completion zsh > "$ZSH/completions/_c8y"
 
 
 if [[ $(command -v c8y) ]]; then
@@ -188,11 +188,11 @@ c8y-update () {
     fi
     
     # update completions
-    [ ! -d ~/.oh-my-zsh/completions ] && mkdir -p ~/.oh-my-zsh/completions
+    [ ! -d "$ZSH/completions" ] && mkdir -p "$ZSH/completions"
 
     if [ $(command -v c8y) ]; then
         echo -n "updating completions..."
-        c8y completion zsh > $ZSH/completions/_c8y
+        c8y completion zsh > "$ZSH/completions/_c8y"
         echo -e "${green}ok${normal}"
     fi
 
