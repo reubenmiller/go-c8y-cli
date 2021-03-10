@@ -372,6 +372,10 @@ func (c *c8yCmd) checkSessionExists(cmd *cobra.Command, args []string) error {
 		"tenants getID",
 		"tenants getId",
 		"settings list",
+
+		// allow hidden completion commands
+		"__complete",
+		"__completeNoDesc",
 	}
 
 	for i := range localCmds {
