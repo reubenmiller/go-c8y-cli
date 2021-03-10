@@ -24,8 +24,8 @@ func newCheckSessionPassphraseCmd() *checkSessionPassphraseCmd {
 
 	cmd := &cobra.Command{
 		Use:   "checkPassphrase",
-		Short: "Check session passphrase",
-		Long:  `Check session passphrase`,
+		Short: "Check encryption passphrase",
+		Long:  `Check the passphrase used when encrypting a session`,
 		Example: `
 		`,
 		RunE: ccmd.checkSession,

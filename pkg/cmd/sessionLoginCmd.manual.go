@@ -27,7 +27,7 @@ func newSessionLoginCmd() *sessionLoginCmd {
 
 	cmd := &cobra.Command{
 		Use:   "login",
-		Short: "Login into a cumulocity session",
+		Short: "Login to cumulocity",
 		Long:  `Login and test the Cumulocity session and get either OAuth2 token, or using two factor authentication`,
 		Example: `
 c8y session login
