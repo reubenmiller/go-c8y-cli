@@ -3,7 +3,7 @@
 # Licensed under the MIT License. See https://go.microsoft.com/fwlink/?linkid=2090316 for license information.
 #-------------------------------------------------------------------------------------------------------------
 
-FROM golang:1
+FROM golang:1.16
 
 # Avoid warnings by switching to noninteractive
 ENV DEBIAN_FRONTEND=noninteractive
@@ -35,7 +35,7 @@ RUN wget https://packages.microsoft.com/config/debian/10/packages-microsoft-prod
     && gem install jekyll bundler \
     #
     # Extra tooling
-    && apt-get -y install make powershell nodejs \
+    && apt-get -y install make powershell nodejs unzip \
     && npm install -g yamljs \
     #
     # Build Go tools w/module support
@@ -64,16 +64,8 @@ RUN wget https://packages.microsoft.com/config/debian/10/packages-microsoft-prod
         github.com/mgechev/revive@latest  \
         github.com/go-delve/delve/cmd/dlv@latest 2>&1 \
     #
-    # Build Go tools w/o module support
-    && GOPATH=/tmp/gotools go get -v github.com/alecthomas/gometalinter 2>&1 \
-    #
-    # Build gocode-gomod
-    && GOPATH=/tmp/gotools go get -x -d github.com/stamblerre/gocode 2>&1 \
-    && GOPATH=/tmp/gotools go build -o gocode-gomod github.com/stamblerre/gocode \
-    #
     # Install Go tools
     && mv /tmp/gotools/bin/* /usr/local/bin/ \
-    && mv gocode-gomod /usr/local/bin/ \
     #
     # Install golangci-lint
     && curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b /usr/local/bin 2>&1 \
@@ -114,10 +106,10 @@ RUN wget https://packages.microsoft.com/config/debian/10/packages-microsoft-prod
 #
 # Install password manager/s
 #
-RUN curl -L "https://vault.bitwarden.com/download/?app=cli&platform=linux" -o /tmp/bw.zip \
+RUN curl -sSfL "https://vault.bitwarden.com/download/?app=cli&platform=linux" -o /tmp/bw.zip \
     && unzip /tmp/bw.zip -d /usr/local/bin/ \
     && chmod a+x /usr/local/bin/bw \
-    && rm /tmp/bw.zip
+    && rm -f /tmp/bw.zip
 
 #
 # Shells
@@ -125,11 +117,18 @@ RUN curl -L "https://vault.bitwarden.com/download/?app=cli&platform=linux" -o /t
 RUN echo "Installing shells" \
     # Fish shell
     && apt-get install -y fish zsh \
-    && sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended \
+    && curl -sSfL https://raw.githubusercontent.com/robbyrussell/oh-my-zsh/master/tools/install.sh | sh -s -- "" --unattended 2>&1 \
     && mkdir -p /home/$USERNAME/.oh-my-zsh/custom/plugins/c8y
 
 COPY tools/shell/.zshrc /home/$USERNAME/.zshrc
 COPY tools/shell/c8y.plugin.zsh /home/$USERNAME/.oh-my-zsh/custom/plugins/c8y/
+RUN sed -iE 's/plugins=(\(.*\))/plugins=(\1 c8y)/' /home/$USERNAME/.zshrc \
+    && echo "autoload -U compinit; compinit -i" >> /home/$USERNAME/.zshrc \
+    #
+    # Create completions before zsh runs otherwise
+    # it will not automatically load the completions until the user
+    # runs 'source ~/.zshrc'
+    && c8y completion zsh > /home/$USERNAME/.oh-my-zsh/custom/plugins/c8y/_c8y
 
 # AsciiCinema configuration
 RUN chown -R $USER_UID:$USER_GID /home/$USERNAME \

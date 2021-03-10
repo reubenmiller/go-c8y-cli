@@ -22,14 +22,14 @@ require (
 	github.com/spf13/viper v1.7.1
 	github.com/thedevsaddam/gojsonq v2.3.0+incompatible
 	github.com/tidwall/gjson v1.6.8
-	github.com/tidwall/pretty v1.0.5
+	github.com/tidwall/pretty v1.1.0
 	github.com/tidwall/sjson v1.1.5
 	github.com/vbauerster/mpb/v6 v6.0.2
 	go.uber.org/multierr v1.6.0 // indirect
 	go.uber.org/zap v1.16.0
 	golang.org/x/crypto v0.0.0-20210220033148-5ea612d1eb83
-	golang.org/x/sys v0.0.0-20210303074136-134d130e1a04 // indirect
+	golang.org/x/sys v0.0.0-20210309074719-68d13333faf2 // indirect
 	moul.io/http2curl v1.0.0
 )
 
-go 1.13
+go 1.16
