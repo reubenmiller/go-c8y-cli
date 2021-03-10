@@ -20,7 +20,7 @@ To make the installation and future updates easier, a script is provided in the 
 1. Download the c8y profile helper script
 
     ```sh
-    curl -L https://raw.githubusercontent.com/reubenmiller/go-c8y-cli/master/tools/bash/c8y.profile.sh -o ~/c8y.profile.sh
+    curl -L https://raw.githubusercontent.com/reubenmiller/go-c8y-cli/master/tools/shell/c8y.profile.sh -o ~/c8y.profile.sh
 
     # make the script executable
     chmod +x ~/c8y.profile.sh
@@ -79,7 +79,7 @@ Similar to `c8y.profile.sh` for bash, there is a pre-configured zsh plugin `c8y.
 2. Download the c8y zsh plugin
 
     ```sh
-    curl -L https://raw.githubusercontent.com/reubenmiller/go-c8y-cli/master/tools/bash/c8y.plugin.zsh -o ~/.oh-my-zsh/custom/plugins/c8y/c8y.plugin.zsh
+    curl -L https://raw.githubusercontent.com/reubenmiller/go-c8y-cli/master/tools/shell/c8y.plugin.zsh -o ~/.oh-my-zsh/custom/plugins/c8y/c8y.plugin.zsh
     chmod +x ~/.oh-my-zsh/custom/plugins/c8y/c8y.plugin.zsh
     ```
 

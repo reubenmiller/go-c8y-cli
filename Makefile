@@ -168,13 +168,13 @@ test_powershell_sessions:		## Run tests which interfere with the session variabl
 	pwsh -ExecutionPolicy bypass -NonInteractive -File tools/PSc8y/test.parallel.ps1 -ThrottleLimit 1 -TestFileFilter "Set-Session|Get-SessionHomePath|Login|DisableCommands|BulkOperation|activitylog"
 
 test_bash:
-	./tools/bash/tests/test.sh
+	./tools/shell/tests/test.sh
 
 install_c8y: build			## Install c8y in dev environment
 	@if [ ! -f /usr/local/bin/c8y ]; then \
 		sudo ln -s "$$(pwd)/tools/PSc8y/Dependencies/c8y.linux" /usr/local/bin/c8y; \
 	fi
-	@cp ./tools/bash/c8y.profile.sh ~/
+	@cp ./tools/shell/c8y.profile.sh ~/
 	@echo "source ~/c8y.profile.sh"  >> ~/.bashrc
 
 	@echo Installed c8y successfully
@@ -184,8 +184,8 @@ publish:
 
 build-docker:
 	@cp tools/PSc8y/Dependencies/c8y.linux ./docker/c8y.linux
-	@cp tools/bash/c8y.plugin.zsh ./docker/c8y.plugin.zsh
-	@cp tools/bash/c8y.profile.sh ./docker/c8y.profile.sh
+	@cp tools/shell/c8y.plugin.zsh ./docker/c8y.plugin.zsh
+	@cp tools/shell/c8y.profile.sh ./docker/c8y.profile.sh
 
 	@sudo docker build ./docker --file ./docker/zsh.dockerfile $(DOCKER_BUILD_ARGS) --build-arg C8Y_VERSION=$(VERSION) --tag $(TAG_PREFIX)c8y-zsh
 	@sudo docker build ./docker --file ./docker/bash.dockerfile $(DOCKER_BUILD_ARGS) --build-arg C8Y_VERSION=$(VERSION) --tag $(TAG_PREFIX)c8y-bash
