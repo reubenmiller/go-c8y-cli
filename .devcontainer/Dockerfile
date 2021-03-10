@@ -100,7 +100,7 @@ RUN wget https://packages.microsoft.com/config/debian/10/packages-microsoft-prod
     # Install bash tools
     # https://github.com/bats-core/bats-core
     && npm install -g bats \
-    && apt-get install -y jq bash-completion \
+    && apt-get install -y jq bash-completion asciinema \
 
     #
     # Fish shell
@@ -127,6 +127,9 @@ USER $USERNAME
     # create symlink to c8y
 #    && mkdir -p /workspaces/go-c8y-cli/tools/PSc8y/dist/PSc8y/Dependencies/ \
 #    && ln -s /workspaces/go-c8y-cli/tools/PSc8y/dist/PSc8y/Dependencies/c8y.linux /usr/local/bin/c8y
+# AsciiCinema configuration
+RUN mkdir -p /home/$USERNAME/.config/asciinema/
+COPY tools/asciinema/config /home/$USERNAME/.config/asciinema/config
 
 # Update this to "on" or "off" as appropriate
 ENV GO111MODULE=auto

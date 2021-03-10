@@ -1,0 +1,59 @@
+[api]
+
+; API server URL, default: https://asciinema.org
+; If you run your own instance of asciinema-server then set its address here
+; It can also be overridden by setting ASCIINEMA_API_URL environment variable
+url = https://asciinema.example.com
+
+[record]
+
+; Command to record, default: $SHELL
+command = /bin/bash -l
+
+; Enable stdin (keyboard) recording, default: no
+stdin = yes
+
+; List of environment variables to capture, default: SHELL,TERM
+env = SHELL,TERM,USER
+
+; Limit recorded terminal inactivity to max n seconds, default: off
+idle_time_limit = 2
+
+; Answer "yes" to all interactive prompts, default: no
+yes = no
+
+; Be quiet, suppress all notices/warnings, default: no
+quiet = true
+
+; Define hotkey for pausing recording (suspending capture of output),
+; default: C-\
+pause_key = C-p
+
+; Define hotkey prefix key - when defined other recording hotkeys must
+; be proceeded by it, default: no prefix
+; prefix_key = C-a
+
+[play]
+
+; Playback speed (can be fractional), default: 1
+speed = 2
+
+; Limit replayed terminal inactivity to max n seconds, default: off
+idle_time_limit = 1
+
+; Define hotkey for pausing/resuming playback,
+; default: space
+pause_key = p
+
+; Define hotkey for stepping through playback, a frame at a time,
+; default: .
+pause_key = ]
+
+[notifications]
+
+; Should desktop notifications be enabled, default: yes
+enabled = no
+
+; Custom notification command
+; Environment variable $TEXT contains notification text
+command = tmux display-message "$TEXT"
