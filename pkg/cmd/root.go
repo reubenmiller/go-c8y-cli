@@ -262,14 +262,11 @@ const (
 	// SettingsIncludeAllDelayMS property name used to control the delay between fetching the next page
 	SettingsIncludeAllDelayMS string = "settings.includeAll.delayMS"
 
-	// SettingsDefaultPageSize property name used to control the default page size
-	SettingsDefaultPageSize string = "settings.default.pageSize"
+	// SettingsDefaultsPageSize default pageSize
+	SettingsDefaultsPageSize string = "settings.defaults.pageSize"
 
 	// SettingsDefaultBatchMaxWorkers property name used to control the hard limit on the maximum workers used in batch operations
 	SettingsDefaultBatchMaxWorkers string = "settings.default.batchMaximumWorkers"
-
-	// SettingsDefaultBatchMaxJobs maximum number of jobs in one batch
-	SettingsDefaultBatchMaxJobs string = "settings.default.batchMaximumJobs"
 
 	// SettingsConfigPath configuration path
 	SettingsConfigPath string = "settings.path"
@@ -435,7 +432,7 @@ func configureRootCmd() {
 
 	// Global flags
 	rootCmd.PersistentFlags().BoolVarP(&globalFlagVerbose, "verbose", "v", false, "Verbose logging")
-	rootCmd.PersistentFlags().IntVarP(&globalFlagPageSize, "pageSize", "p", 5, "Maximum results per page")
+	rootCmd.PersistentFlags().IntVarP(&globalFlagPageSize, "pageSize", "p", CumulocityDefaultPageSize, "Maximum results per page")
 	rootCmd.PersistentFlags().Int64Var(&globalFlagCurrentPage, "currentPage", 0, "Current page size which should be returned")
 	rootCmd.PersistentFlags().Int64Var(&globalFlagTotalPages, "totalPages", 0, "Total number of pages to get")
 	rootCmd.PersistentFlags().BoolVar(&globalFlagIncludeAll, "includeAll", false, "Include all results by iterating through each page")
@@ -481,11 +478,6 @@ func configureRootCmd() {
 	rootCmd.PersistentFlags().BoolVarP(&globalFlagForce, "force", "f", false, "Do not prompt for confirmation")
 	rootCmd.PersistentFlags().BoolVar(&globalFlagConfirm, "confirm", false, "Prompt for confirmation")
 	rootCmd.PersistentFlags().StringVar(&globalFlagConfirmText, "confirmText", "", "Custom confirmation text")
-
-	// Map settings to flags, allowing the user to set the own default settings
-	if err := viper.BindPFlag(SettingsDefaultPageSize, rootCmd.PersistentFlags().Lookup("pageSize")); err != nil {
-		Logger.Warnf("Could not bind pageSize. %s", err)
-	}
 
 	completion.WithOptions(
 		&rootCmd.Command,
@@ -844,9 +836,7 @@ func loadConfiguration() error {
 
 	//viper.AutomaticEnv()
 	bindEnv(SettingsIncludeAllPageSize, 2000)
-	bindEnv(SettingsDefaultPageSize, CumulocityDefaultPageSize)
 	bindEnv(SettingsDefaultBatchMaxWorkers, 5)
-	bindEnv(SettingsDefaultBatchMaxJobs, 100)
 	bindEnv(SettingsIncludeAllDelayMS, 0)
 	bindEnv(SettingsTemplatePath, "")
 
@@ -931,11 +921,7 @@ func loadAuthentication(v *config.CliConfiguration, c *c8y.Client) error {
 func readConfiguration(cmd *cobra.Command) error {
 
 	globalFlagIncludeAllPageSize = viper.GetInt(SettingsIncludeAllPageSize)
-	globalFlagPageSize = viper.GetInt(SettingsDefaultPageSize)
 	globalFlagBatchMaxWorkers = viper.GetInt(SettingsDefaultBatchMaxWorkers)
-	if !cmd.Flags().Changed("maxJobs") {
-		globalFlagBatchMaxJobs = viper.GetInt64(SettingsDefaultBatchMaxJobs)
-	}
 	globalFlagIncludeAllDelayMS = viper.GetInt64(SettingsIncludeAllDelayMS)
 	globalFlagTemplatePath = viper.GetString(SettingsTemplatePath)
 
@@ -948,7 +934,7 @@ func readConfiguration(cmd *cobra.Command) error {
 
 	globalCIMode = viper.GetBool(SettingsModeCI)
 
-	Logger.Debugf("%s: %d", SettingsDefaultPageSize, globalFlagPageSize)
+	Logger.Debugf("%s: %d", SettingsDefaultsPageSize, globalFlagPageSize)
 	Logger.Debugf("%s: %d", SettingsIncludeAllPageSize, globalFlagIncludeAllPageSize)
 	Logger.Debugf("%s: %d", SettingsIncludeAllDelayMS, globalFlagIncludeAllDelayMS)
 	Logger.Debugf("%s: %s", SettingsTemplatePath, globalFlagTemplatePath)
@@ -956,7 +942,6 @@ func readConfiguration(cmd *cobra.Command) error {
 	Logger.Debugf("%s: %t", SettingsModeEnableUpdate, globalModeEnableUpdate)
 	Logger.Debugf("%s: %t", SettingsModeEnableDelete, globalModeEnableDelete)
 	Logger.Debugf("%s: %s", SettingsModeConfirmation, viper.GetString(SettingsModeConfirmation))
-	Logger.Debugf("%s: %d", SettingsDefaultBatchMaxJobs, globalFlagBatchMaxJobs)
 
 	return nil
 }
