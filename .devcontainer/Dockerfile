@@ -93,7 +93,6 @@ RUN wget https://packages.microsoft.com/config/debian/10/packages-microsoft-prod
     # https://github.com/bats-core/bats-core
     && npm install -g bats \
     && apt-get install -y jq bash-completion asciinema \
-
     #
     # Fish shell
     && apt-get install -y fish zsh \
@@ -116,24 +115,12 @@ RUN curl -sSfL "https://vault.bitwarden.com/download/?app=cli&platform=linux" -o
 #
 RUN echo "Installing shells" \
     # Fish shell
-    && apt-get install -y fish zsh \
-    && curl -sSfL https://raw.githubusercontent.com/robbyrussell/oh-my-zsh/master/tools/install.sh | sh -s -- "" --unattended 2>&1 \
-    && mkdir -p /home/$USERNAME/.oh-my-zsh/custom/plugins/c8y
+    && apt-get install -y fish zsh
 
-COPY tools/shell/.zshrc /home/$USERNAME/.zshrc
-COPY tools/shell/c8y.plugin.zsh /home/$USERNAME/.oh-my-zsh/custom/plugins/c8y/
-RUN sed -iE 's/plugins=(\(.*\))/plugins=(\1 c8y)/' /home/$USERNAME/.zshrc \
-    && echo "autoload -U compinit; compinit -i" >> /home/$USERNAME/.zshrc \
-    #
-    # Create completions before zsh runs otherwise
-    # it will not automatically load the completions until the user
-    # runs 'source ~/.zshrc'
-    && c8y completion zsh > /home/$USERNAME/.oh-my-zsh/custom/plugins/c8y/_c8y
 
 # AsciiCinema configuration
 RUN chown -R $USER_UID:$USER_GID /home/$USERNAME \
     && mkdir -p /home/$USERNAME/.config/asciinema \
-    && chown -R $USERNAME:$USERNAME /home/$USERNAME/.config/asciinema
 COPY tools/asciinema/config /home/$USERNAME/.config/asciinema/config
 
 # Install powershell dependencies
@@ -144,6 +131,21 @@ USER $USERNAME
     # create symlink to c8y
 #    && mkdir -p /workspaces/go-c8y-cli/tools/PSc8y/dist/PSc8y/Dependencies/ \
 #    && ln -s /workspaces/go-c8y-cli/tools/PSc8y/dist/PSc8y/Dependencies/c8y.linux /usr/local/bin/c8y
+
+# Install oh-my-zsh
+RUN curl -sSfL https://raw.githubusercontent.com/robbyrussell/oh-my-zsh/master/tools/install.sh | sh -s -- "" --unattended 2>&1 \
+    && mkdir -p /home/$USERNAME/.oh-my-zsh/custom/plugins/c8y
+
+COPY tools/shell/.zshrc /home/$USERNAME/.zshrc
+COPY tools/shell/c8y.plugin.zsh /home/$USERNAME/.oh-my-zsh/custom/plugins/c8y/
+COPY tools/shell/c8y.plugin.fish /home/$USERNAME/
+RUN sed -iE 's/plugins=(\(.*\))/plugins=(\1 c8y)/' /home/$USERNAME/.zshrc \
+    && echo "autoload -U compinit; compinit -i" >> /home/$USERNAME/.zshrc \
+    #
+    # fish config
+    && sudo mkdir -p /home/$USERNAME/.config/fish/
+    # && echo "c8y completion fish | source" >> /home/$USERNAME/.config/fish/config.fish
+    # && echo "source ~/c8y.plugin.fish" >> /home/$USERNAME/.config/fish/config.fish
 
 # Update this to "on" or "off" as appropriate
 ENV GO111MODULE=auto
