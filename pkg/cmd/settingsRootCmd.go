@@ -19,6 +19,7 @@ func NewSettingsRootCmd() *settingsCmd {
 
 	// Subcommands
 	cmd.AddCommand(newListSettingsCmd().getCommand())
+	cmd.AddCommand(NewUpdateSettingsCmd().getCommand())
 
 	ccmd.baseCmd = newBaseCmd(cmd)
 
