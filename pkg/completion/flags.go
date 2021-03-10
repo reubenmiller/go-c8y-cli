@@ -29,6 +29,14 @@ func WithValidateSet(flagName string, values ...string) Option {
 	}
 }
 
+// WithLazyRequired marks a flag as required but does not enforce it.
+func WithLazyRequired(flagName string, values ...string) Option {
+	return func(cmd *cobra.Command) *cobra.Command {
+		_ = cmd.Flags().SetAnnotation(flagName, cobra.BashCompOneRequiredFlag, []string{"false"})
+		return cmd
+	}
+}
+
 // WithTenantID tenant id completion
 func WithTenantID(flagName string, client *c8y.Client) Option {
 	return func(cmd *cobra.Command) *cobra.Command {
