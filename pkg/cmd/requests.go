@@ -762,3 +762,22 @@ func guessDataProperty(resp *c8y.Response) string {
 	}
 	return property
 }
+
+// WriteJSONToConsole writes given json output to the console supporting the common options of select, csv, csvHeader etc.
+func WriteJSONToConsole(cmd *cobra.Command, property string, output []byte) error {
+	commonOptions, err := getCommonOptions(cmd)
+	if err != nil {
+		return err
+	}
+	output = commonOptions.Filters.Apply(string(output), property, false)
+
+	jsonformatter.WithOutputFormatters(
+		Console,
+		output,
+		false,
+		jsonformatter.WithTrimSpace(true),
+		jsonformatter.WithJSONStreamOutput(true, globalFlagStream, globalCSVOutput),
+		jsonformatter.WithSuffix(len(output) > 0, "\n"),
+	)
+	return nil
+}

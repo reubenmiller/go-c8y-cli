@@ -1,13 +1,12 @@
 package cmd
 
 import (
-	"bytes"
 	"encoding/json"
-	"fmt"
 
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
+	"github.com/reubenmiller/go-c8y-cli/pkg/mapbuilder"
 	"github.com/spf13/cobra"
-	"github.com/tidwall/pretty"
+	"github.com/spf13/viper"
 )
 
 type listSettingsCmd struct {
@@ -23,8 +22,10 @@ func newListSettingsCmd() *listSettingsCmd {
 		Long:  `Show the current settings which are being used by the cli tool`,
 		Example: `
 $ c8y settings list
+Show the all settings (as json)
 
-Show the active cli settings
+$ c8y settings list --select "activityLog" --flatten
+Show active log settings in a flattened json format
 		`,
 		RunE: ccmd.listSettings,
 	}
@@ -37,36 +38,31 @@ Show the active cli settings
 }
 
 func (n *listSettingsCmd) listSettings(cmd *cobra.Command, args []string) error {
+	var responseText []byte
+	var err error
 
-	settings := map[string]interface{}{}
+	settings := viper.GetViper().AllSettings()
 
-	settings["session.home"] = getSessionHomeDir()
+	allSettings := mapbuilder.NewInitializedMapBuilder()
+	allSettings.ApplyMap(settings)
 
-	settings[SettingsTemplatePath] = globalFlagTemplatePath
-	settings[SettingsDefaultPageSize] = globalFlagPageSize
-	settings[SettingsIncludeAllPageSize] = globalFlagIncludeAllPageSize
-	settings[SettingsIncludeAllDelayMS] = globalFlagIncludeAllDelayMS
-
-	settings[SettingsModeEnableCreate] = globalModeEnableCreate
-	settings[SettingsModeEnableUpdate] = globalModeEnableUpdate
-	settings[SettingsModeEnableDelete] = globalModeEnableDelete
-	settings[SettingsEncryptionEnabled] = cliConfig.IsEncryptionEnabled()
-	settings[SettingsModeCI] = globalCIMode
-
-	if activityLogger != nil {
-		settings[SettingsActivityLogPath] = activityLogger.GetPath()
+	// add additional settings
+	err = allSettings.Set("settings.session.home", getSessionHomeDir())
+	if err != nil {
+		Logger.Warnf("Could not get home session directory. %s", err)
 	}
 
-	responseText, err := json.Marshal(settings)
+	if activityLogger != nil {
+		err := allSettings.Set("settings.activitylog.currentPath", activityLogger.GetPath())
+		if err != nil {
+			Logger.Warnf("Could not get activity logger path. %s", err)
+		}
+	}
 
+	responseText, err = json.Marshal(allSettings)
 	if err != nil {
 		return cmderrors.NewUserError("Settings error. ", err)
 	}
 
-	if globalFlagCompact {
-		fmt.Printf("%s\n", bytes.TrimSpace(responseText))
-	} else {
-		fmt.Printf("%s", pretty.Pretty(bytes.TrimSpace(responseText)))
-	}
-	return nil
+	return WriteJSONToConsole(cmd, "settings", responseText)
 }
