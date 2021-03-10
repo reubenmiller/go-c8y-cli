@@ -12,6 +12,7 @@ import (
 	"strings"
 
 	"github.com/pkg/errors"
+	"github.com/reubenmiller/go-c8y-cli/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/pkg/prompt"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -28,6 +29,8 @@ type Authentication struct {
 
 // CumulocitySession contains all settings required to communicate with a Cumulocity service
 type CumulocitySession struct {
+	Schema string `json:"$schema,omitempty"`
+
 	// ID          string `json:"id"`
 	Host            string `json:"host"`
 	Tenant          string `json:"tenant"`
@@ -36,7 +39,7 @@ type CumulocitySession struct {
 	Description     string `json:"description"`
 	UseTenantPrefix bool   `json:"useTenantPrefix"`
 
-	// Authentication `json:"authentication,omitempty"`
+	Settings *CommandSettings `json:"settings,omitempty"`
 
 	MicroserviceAliases map[string]string `json:"microserviceAliases,omitempty"`
 
@@ -120,7 +123,10 @@ type newSessionCmd struct {
 	description    string
 	name           string
 	tenant         string
+	sessionType    string
 	noTenantPrefix bool
+	noStorage      bool
+	encrypt        bool
 
 	*baseCmd
 }
@@ -130,16 +136,26 @@ func newNewSessionCmd() *newSessionCmd {
 
 	cmd := &cobra.Command{
 		Use:   "create",
-		Short: "Create a new Cumulocity session credentials",
-		Long:  `Create a new Cumulocity session credentials`,
+		Short: "Create session",
+		Long:  `Create a new Cumulocity session`,
 		Example: `
-		c8y sessions create \
-			--host "https://mytenant.eu-latest.cumulocity.com" \
-			--username "myUser@me.com"
-		
-		// Create a new session and prompt for the password
+### Example 1: Create a DEV new session. Prompt for username and password
+
+$ c8y sessions create --type dev --host "https://mytenant.eu-latest.cumulocity.com"
+
+### Example 2: Create a new QA (QUAL) session prompting for password
+
+$ c8y sessions create \
+    --type qual \
+	--host "https://mytenant.eu-latest.cumulocity.com"
+	--username "myUser@me.com"
+
+### Example 3: Create a new production session where only only GET commands are enabled (with no password storage)
+
+$ c8y sessions create --type prod --host "https://mytenant.eu-latest.cumulocity.com" --noStorage
 		`,
 		PersistentPreRunE: ccmd.promptArgs,
+		Args:              cobra.NoArgs,
 		RunE:              ccmd.newSession,
 	}
 
@@ -151,14 +167,22 @@ func newNewSessionCmd() *newSessionCmd {
 	cmd.Flags().StringVar(&ccmd.tenant, "tenant", "", "Tenant ID")
 	cmd.Flags().StringVar(&ccmd.description, "description", "", "Description about the session")
 	cmd.Flags().StringVar(&ccmd.name, "name", "", "Name of the session")
-	// cmd.Flags().String("microserviceAliases", "", "Name of the session")
+	cmd.Flags().StringVar(&ccmd.sessionType, "type", "", "Session type. List of predefined session types")
 	cmd.Flags().BoolVar(&ccmd.noTenantPrefix, "noTenantPrefix", false, "Don't use tenant name as a prefix to the user name when using Basic Authentication. Defaults to false")
+	cmd.Flags().BoolVar(&ccmd.noStorage, "noStorage", false, "Don't store any passwords or cookies in the session file")
+	cmd.Flags().BoolVar(&ccmd.encrypt, "encrypt", false, "Encrypt passwords and cookies (occurs when logging in)")
 
 	// Required flags
 	_ = cmd.MarkFlagRequired("host")
-	// cmd.MarkFlagRequired("tenant")
-	// cmd.MarkFlagRequired("username")
-	// cmd.MarkFlagRequired("password")
+	completion.WithOptions(cmd,
+		completion.WithLazyRequired("type"),
+		completion.WithValidateSet(
+			"type",
+			"prod\tProduction mode (read only)",
+			"qual\tQA mode (delete disabled)",
+			"dev\tDevelopment mode (no restrictions)",
+		),
+	)
 
 	ccmd.baseCmd = newBaseCmd(cmd)
 
@@ -167,6 +191,11 @@ func newNewSessionCmd() *newSessionCmd {
 
 func (n *newSessionCmd) promptArgs(cmd *cobra.Command, args []string) error {
 	prompter := prompt.NewPrompt(Logger)
+
+	// read global config
+	if _, err := ReadConfigFiles(viper.GetViper()); err != nil {
+		Logger.Infof("failed to read configuration files. %s", err)
+	}
 
 	if !cmd.Flags().Changed("username") {
 		v, err := prompter.Username("Enter username", cliConfig.GetDefaultUsername())
@@ -177,7 +206,7 @@ func (n *newSessionCmd) promptArgs(cmd *cobra.Command, args []string) error {
 		n.username = v
 	}
 
-	if !cmd.Flags().Changed("password") {
+	if !n.noStorage && !cmd.Flags().Changed("password") {
 		password, err := prompter.Password("Enter c8y password", "")
 		if err != nil {
 			return err
@@ -191,15 +220,64 @@ func (n *newSessionCmd) promptArgs(cmd *cobra.Command, args []string) error {
 func (n *newSessionCmd) newSession(cmd *cobra.Command, args []string) error {
 
 	session := &CumulocitySession{
+		Schema:          "https://raw.githubusercontent.com/reubenmiller/go-c8y-cli/master/tools/schema/session.schema.json",
 		Host:            n.host,
 		Tenant:          n.tenant,
 		Username:        n.username,
 		Description:     n.description,
 		UseTenantPrefix: !n.noTenantPrefix,
 	}
+
 	session.MicroserviceAliases = make(map[string]string)
 
-	session.SetPassword(n.password)
+	settings := &CommandSettings{}
+	settings.ActivityLog = &ActivityLogSettings{
+		Enabled: settings.Bool(true),
+	}
+
+	if n.noStorage {
+		settings.Storage = &StorageSettings{
+			StorePassword: settings.Bool(false),
+			StoreCookies:  settings.Bool(false),
+		}
+	}
+
+	switch n.sessionType {
+	case "dev":
+		settings.Mode = &ModeSettings{
+			Confirmation: "PUT POST DELETE",
+			EnableCreate: settings.Bool(true),
+			EnableUpdate: settings.Bool(true),
+			EnableDelete: settings.Bool(true),
+		}
+	case "qual":
+		settings.Mode = &ModeSettings{
+			Confirmation: "PUT POST DELETE",
+			EnableCreate: settings.Bool(true),
+			EnableUpdate: settings.Bool(true),
+			EnableDelete: settings.Bool(false),
+		}
+	case "prod":
+		settings.Mode = &ModeSettings{
+			Confirmation: "PUT POST DELETE",
+			EnableCreate: settings.Bool(false),
+			EnableUpdate: settings.Bool(false),
+			EnableDelete: settings.Bool(false),
+		}
+	}
+
+	if n.encrypt {
+		settings.Encryption = &EncryptionSettings{
+			Enabled:         settings.Bool(true),
+			CachePassphrase: settings.Bool(true),
+		}
+	}
+
+	session.Settings = settings
+
+	if !n.noStorage {
+		session.SetPassword(n.password)
+	}
 
 	// session name (default to host and username)
 	hostname := "c8y"
