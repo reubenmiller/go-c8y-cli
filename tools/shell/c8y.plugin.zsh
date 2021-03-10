@@ -1,11 +1,9 @@
 #!/bin/zsh
 
-# mkdir -p "$ZSH/completions"
-c8y completion zsh > "$ZSH_CUSTOM/plugins/_c8y"
-
 if [[ $(command -v c8y) ]]; then
-    # create session home folder (if it does not exist)
+    c8y completion zsh > "$ZSH_CUSTOM/plugins/c8y/_c8y"
 
+    # create session home folder (if it does not exist)
     sessionhome=$( c8y settings list --select "session.home" --csv )
     if [[ ! -e "$sessionhome" ]]; then
         echo "creating folder"
@@ -186,11 +184,11 @@ c8y-update () {
     fi
     
     # update completions
-    [ ! -d "$ZSH/completions" ] && mkdir -p "$ZSH/completions"
+    mkdir -p "$ZSH_CUSTOM/plugins/c8y/_c8y"
 
     if [ $(command -v c8y) ]; then
         echo -n "updating completions..."
-        c8y completion zsh > "$ZSH/completions/_c8y"
+        c8y completion zsh > "$ZSH_CUSTOM/plugins/c8y/_c8y"
         echo -e "${green}ok${normal}"
     fi
 
