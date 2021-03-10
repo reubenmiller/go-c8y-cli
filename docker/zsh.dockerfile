@@ -28,7 +28,7 @@ RUN sed -iE 's/plugins=(\(.*\))/plugins=(\1 c8y)/' ~/.zshrc \
     # Create completions before zsh runs otherwise
     # it will not automatically load the completions until the user
     # runs 'source ~/.zshrc'
-    && c8y completion zsh > ~/home/$USERNAME/.oh-my-zsh/custom/plugins/c8y/_c8y
+    && c8y completion zsh > /home/$USERNAME/.oh-my-zsh/custom/plugins/c8y/_c8y
 
 # Working settings
 RUN chown $USERNAME /home/$USERNAME
