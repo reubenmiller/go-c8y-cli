@@ -430,12 +430,12 @@ func Test_DebugCommand(t *testing.T) {
 
 	// cmdErr := ExecuteCmd(cmd, fmt.Sprintf("devices list --select id,nam* --csv --csvHeader"))
 	// cmdErr := ExecuteCmd(cmd, fmt.Sprintf("applications get --id cockpit --select appId:id,tenantId:owner.**.id"))
-	stdin := bytes.NewBufferString("440811\n440812\n")
+	stdin := bytes.NewBufferString(`{"id": "87551"}` + "\n" + `{"id": "1111"}` + "\n")
 	cmd.SetIn(stdin)
 	cmdtext := `
-	measurements create --data {"type":"myType"} --dry
+	alarms create --type "myType" --text "Test alarm" --severity WARNING --dry -v --debug --confirm
 	`
 	cmdErr := ExecuteCmd(cmd, strings.TrimSpace(cmdtext))
-	cmd.checkCommandError(cmdErr, os.Stderr)
+	cmd.checkCommandError(cmdErr)
 	assert.OK(t, cmdErr)
 }
