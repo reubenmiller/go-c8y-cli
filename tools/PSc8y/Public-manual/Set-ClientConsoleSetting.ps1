@@ -76,9 +76,9 @@ Enable all create and update commands until the session is changed
 
     if ($PSBoundParameters.ContainsKey("DefaultPageSize")) {
         if ($DefaultPageSize -gt 0) {
-            $env:C8Y_DEFAULT_PAGESIZE = "$DefaultPageSize"
+            $env:C8Y_SETTINGS_DEFAULTS_PAGESIZE = "$DefaultPageSize"
         } else {
-            $env:C8Y_DEFAULT_PAGESIZE = ""
+            $env:C8Y_SETTINGS_DEFAULTS_PAGESIZE = ""
         }
     }
 }

@@ -90,10 +90,6 @@
             "type": "object",
             "description": "c8y cli settings",
             "properties": {
-                "default.pageSize": {
-                    "description": "Default paging size for collection related REST requests",
-                    "$ref": "#/definitions/pagingProperty"
-                },
                 "includeAll.pageSize": {
                     "description": "Default paging size to use when using the includeAll option, which fetches all results from Cumulocity",
                     "$ref": "#/definitions/pagingProperty"
@@ -124,6 +120,10 @@
                                 "markdown",
                                 "curl"
                             ]
+                        },
+                        "pageSize": {
+                            "description": "Default paging size for collection related REST requests",
+                            "$ref": "#/definitions/pagingProperty"
                         }
                     }
                 },
