@@ -381,7 +381,7 @@ func Test_CreateManagedObjectWithoutInput(t *testing.T) {
 	rest POST https://test-ci-runner01.latest.stage.c8y.io/alarm/alarms --data name=test
 	`
 	cmdErr := ExecuteCmd(cmd, strings.TrimSpace(cmdtext))
-	cmd.checkCommandError(cmdErr, os.Stderr)
+	cmd.checkCommandError(cmdErr)
 	assert.OK(t, cmdErr)
 }
 
