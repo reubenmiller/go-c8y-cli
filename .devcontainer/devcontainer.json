@@ -1,6 +1,7 @@
 {
 	"name": "go-c8y-cli",
 	"dockerFile": "Dockerfile",
+	"context": "..",
 	"runArgs": [ "--cap-add=SYS_PTRACE", "--security-opt", "seccomp=unconfined" ],
 
 	// Use 'forwardPorts' to make a list of ports inside the container available locally.

@@ -104,7 +104,7 @@ RUN wget https://packages.microsoft.com/config/debian/10/packages-microsoft-prod
 
     #
     # Fish shell
-    && apt-get install -y fish \
+    && apt-get install -y fish zsh \
     #
     # Clean up
     && apt-get autoremove -y \
@@ -119,6 +119,24 @@ RUN curl -L "https://vault.bitwarden.com/download/?app=cli&platform=linux" -o /t
     && chmod a+x /usr/local/bin/bw \
     && rm /tmp/bw.zip
 
+#
+# Shells
+#
+RUN echo "Installing shells" \
+    # Fish shell
+    && apt-get install -y fish zsh \
+    && sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended \
+    && mkdir -p /home/$USERNAME/.oh-my-zsh/custom/plugins/c8y
+
+COPY tools/shell/.zshrc /home/$USERNAME/.zshrc
+COPY tools/shell/c8y.plugin.zsh /home/$USERNAME/.oh-my-zsh/custom/plugins/c8y/
+
+# AsciiCinema configuration
+RUN chown -R $USER_UID:$USER_GID /home/$USERNAME \
+    && mkdir -p /home/$USERNAME/.config/asciinema \
+    && chown -R $USERNAME:$USERNAME /home/$USERNAME/.config/asciinema
+COPY tools/asciinema/config /home/$USERNAME/.config/asciinema/config
+
 # Install powershell dependencies
 USER $USERNAME
 #RUN pwsh -Command "Install-Module -Name platyPS -Scope CurrentUser -Force" \
@@ -127,9 +145,6 @@ USER $USERNAME
     # create symlink to c8y
 #    && mkdir -p /workspaces/go-c8y-cli/tools/PSc8y/dist/PSc8y/Dependencies/ \
 #    && ln -s /workspaces/go-c8y-cli/tools/PSc8y/dist/PSc8y/Dependencies/c8y.linux /usr/local/bin/c8y
-# AsciiCinema configuration
-RUN mkdir -p /home/$USERNAME/.config/asciinema/
-COPY tools/asciinema/config /home/$USERNAME/.config/asciinema/config
 
 # Update this to "on" or "off" as appropriate
 ENV GO111MODULE=auto
