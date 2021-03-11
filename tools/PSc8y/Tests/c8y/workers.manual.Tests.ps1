@@ -17,9 +17,9 @@ Describe -Name "c8y pipes" {
         }
 
         It "stops early due to job limit being exceeded using env variable" {
-            $env:C8Y_SETTINGS_DEFAULT_BATCHMAXIMUMJOBS = "2"
+            $env:C8Y_SETTINGS_DEFAULTS_MAXJOBS = "2"
             $output = @("1", "2", "3") | c8y events get --dry --verbose 2>&1
-            $env:C8Y_SETTINGS_DEFAULT_BATCHMAXIMUMJOBS = ""
+            $env:C8Y_SETTINGS_DEFAULTS_MAXJOBS = ""
             $LASTEXITCODE | Should -Be 105
             $output | Should -ContainRequest "GET /event/events/1" -Total 1
             $output | Should -ContainRequest "GET /event/events/2" -Total 1
