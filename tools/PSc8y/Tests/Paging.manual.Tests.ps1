@@ -4,7 +4,7 @@ Describe -Name "Get-Pagination" {
     BeforeAll {
         $backupEnvSettings = @{
             C8Y_SETTINGS_INCLUDEALL_PAGESIZE = $env:C8Y_SETTINGS_INCLUDEALL_PAGESIZE
-            C8Y_SETTINGS_DEFAULT_PAGESIZE = $env:C8Y_SETTINGS_DEFAULT_PAGESIZE
+            C8Y_SETTINGS_DEFAULTS_PAGESIZE = $env:C8Y_SETTINGS_DEFAULTS_PAGESIZE
         }
         $Device = New-TestDevice
         
@@ -84,14 +84,14 @@ Describe -Name "Get-Pagination" {
     }
 
     It "Set default pagesize using environment setting" {
-        $env:C8Y_SETTINGS_DEFAULT_PAGESIZE = "10"
+        $env:C8Y_SETTINGS_DEFAULTS_PAGESIZE = "10"
 
         $Response = PSc8y\Get-AlarmCollection `
             -Device $Device.id `
             -Debug 2> $cliOutputFile
 
         $LASTEXITCODE | Should -Be 0
-        $C8Y_SETTINGS_DEFAULT_PAGESIZE = ""
+        $C8Y_SETTINGS_DEFAULTS_PAGESIZE = ""
         $Response | Should -Not -BeNullOrEmpty
 
         $Response | Should -HaveCount 10
