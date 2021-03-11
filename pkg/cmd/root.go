@@ -346,6 +346,25 @@ func (c *c8yCmd) checkCommandError(err error) {
 	}
 }
 
+// LogErrorF dynamically changes where the error is logged based on the users Silent Status Codes preferences
+// Silent errors are only logged on the INFO level, where as non-silent errors are logged on the ERROR level
+func LogErrorF(err error, format string, args ...interface{}) {
+	errorLogger := Logger.Errorf
+	if errors.Is(err, ErrNoMatchesFound) {
+		if strings.Contains(globalFlagSilentStatusCodes, "404") {
+			errorLogger = Logger.Infof
+		}
+	} else if cErr, ok := err.(cmderrors.CommandError); ok {
+
+		// format errors as json messages
+		// only log users errors
+		if strings.Contains(globalFlagSilentStatusCodes, fmt.Sprintf("%d", cErr.StatusCode)) {
+			errorLogger = Logger.Infof
+		}
+	}
+	errorLogger(format, args...)
+}
+
 func (c *c8yCmd) checkSessionExists(cmd *cobra.Command, args []string) error {
 
 	cmdStr := cmd.Use

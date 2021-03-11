@@ -189,7 +189,8 @@ func runBatched(requestIterator *RequestIterator, commonOptions CommonCommandOpt
 				} else if parentErr := errors.Unwrap(err); parentErr != nil {
 					rootCauseErr = parentErr
 				}
-				Logger.Warningf("skipping job: %d. %s", jobID, rootCauseErr)
+
+				LogErrorF(rootCauseErr, "skipping job: %d. %s", jobID, rootCauseErr)
 				results <- err
 
 				// Note: stop adding jobs if total errors are exceeded
@@ -273,7 +274,7 @@ func runBatched(requestIterator *RequestIterator, commonOptions CommonCommandOpt
 		if err == nil {
 			Logger.Debugf("job successful")
 		} else {
-			Logger.Warningf("job error. %s", err)
+			Logger.Infof("job error. %s", err)
 		}
 
 		if err != nil && err != io.EOF {
