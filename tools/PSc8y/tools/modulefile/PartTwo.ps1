@@ -31,7 +31,6 @@ c8y completion powershell | Out-String | Invoke-Expression
 # Set environment variables if a session is set via the C8Y_SESSION env variable
 $ExistingSession = Get-Session -WarningAction SilentlyContinue -ErrorAction SilentlyContinue
 if ($ExistingSession) {
-    Set-EnvironmentVariablesFromSession
 
     # Display current session
     $ConsoleMessage = $ExistingSession | Out-String

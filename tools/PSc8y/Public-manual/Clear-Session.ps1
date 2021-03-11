@@ -6,6 +6,9 @@ Clear the active Cumulocity Session
 .DESCRIPTION
 Clear the active Cumulocity Session
 
+.LINK
+c8y sessions clear
+
 .EXAMPLE
 Clear-Session
 
@@ -16,8 +19,5 @@ None
 #>
     [CmdletBinding()]
     Param()
-    Write-Verbose "Clearing cumulocity session"
-    $env:C8Y_SESSION = ""
-    $env:C8Y_HOST = ""
-    Set-EnvironmentVariablesFromSession -WarningAction SilentlyContinue
+    c8y sessions clear --shell powershell | Out-String | Invoke-Expression
 }

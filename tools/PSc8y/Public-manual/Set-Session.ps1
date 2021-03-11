@@ -121,9 +121,6 @@ String
         Write-Verbose "Setting new session: $Path"
         $env:C8Y_SESSION = Resolve-Path $Path
 
-        # Update environment variables
-        Set-EnvironmentVariablesFromSession
-
         # Get OAuth2 and test client authentication
         $null = Invoke-ClientLogin
 

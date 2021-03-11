@@ -10,7 +10,7 @@ Function Invoke-ClientLogin {
     Process {
         $cliArgs = New-Object System.Collections.ArrayList
 
-        $null = $cliArgs.AddRange(@("--env", "--powershell"))
+        $null = $cliArgs.AddRange(@("--env", "--shell", "powershell"))
 
         if ($TFACode) {
             $null = $cliArgs.AddRange(@("--tfaCode", $TFACode))

@@ -320,7 +320,6 @@ FunctionsToExport = @(
 	'Register-ClientArgumentCompleter',
 	'Set-ClientConsoleSetting',
 	'Set-Session',
-	'Test-ClientPassphrase',
 	'Test-Json',
 	'Unregister-Alias',
 	'Wait-Operation',
