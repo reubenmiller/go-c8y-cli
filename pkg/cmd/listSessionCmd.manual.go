@@ -150,7 +150,7 @@ func (n *listSessionCmd) listSession(cmd *cobra.Command, args []string) error {
 {{ "Username:" | faint }}	{{ .Username | hide }}
 `,
 	}
-	templates.Help = fmt.Sprintf(`{{ "Use the arrow keys to navigate (some terminals require you to hold control as well):" | faint }} {{ .NextKey | faint }} ` +
+	templates.Help = fmt.Sprintf(`{{ "Use the arrow keys to navigate (some terminals require you to hold shift as well):" | faint }} {{ .NextKey | faint }} ` +
 		`{{ .PrevKey | faint }} {{ .PageDownKey | faint }} {{ .PageUpKey | faint }} ` +
 		`{{ if .Search }} {{ "and" | faint }} {{ .SearchKey | faint }} {{ "toggles search" | faint }}{{ end }}`)
 
