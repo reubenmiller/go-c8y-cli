@@ -107,10 +107,9 @@ Describe -Name "c8y format global parameter" {
     }
 
     It "devices that do not match the filter are ignored" {
-        # Need to create devices to support this test scenario
         $type = New-RandomString -Prefix "selectWithAlias"
         "device01" | c8y devices create --type "$type"
-        $output = c8y devices list | c8y devices get --filter "name like device*" --select id,name,self --workers 5
+        $output = c8y devices list | c8y devices get --filter "name like asdf*" --select id,name,self --workers 5
         c8y devices list --type $type | c8y devices delete
 
         $LASTEXITCODE | Should -Be 0
