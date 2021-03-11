@@ -13,9 +13,11 @@ import (
 
 	"github.com/pkg/errors"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
+	"github.com/reubenmiller/go-c8y-cli/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/pkg/jsonUtilities"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 )
 
 func addDataFlag(cmd *cobra.Command) {
@@ -32,10 +34,30 @@ func addDataFlagWithoutTemplates(cmd *cobra.Command) {
 func addTemplateFlag(cmd *cobra.Command) {
 	cmd.Flags().String(FlagDataTemplateName, "", "Body template")
 	cmd.Flags().String(FlagDataTemplateVariablesName, "", "Body template variables")
+
+	_ = cmd.RegisterFlagCompletionFunc(FlagDataTemplateName, func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+		templatePath := viper.GetViper().GetString("settings.template.path")
+		Logger.Debugf("Template path: %s", templatePath)
+
+		matches, err := resolvePaths(templatePath, "*"+toComplete+"*", ".jsonnet", "ignore")
+		for i, match := range matches {
+			matches[i] = filepath.Base(match)
+		}
+		Logger.Debugf("Found: toComplete=%s, total=%d, err=%s", toComplete, len(matches), err)
+
+		if err != nil {
+			return []string{"jsonnet"}, cobra.ShellCompDirectiveFilterFileExt
+		}
+		return matches, cobra.ShellCompDirectiveNoFileComp
+	})
 }
 
 func addProcessingModeFlag(cmd *cobra.Command) {
 	cmd.Flags().String(FlagProcessingModeName, "", "Processing mode")
+	completion.WithOptions(
+		cmd,
+		completion.WithValidateSet(FlagProcessingModeName, "PERSISTENT", "QUIESCENT", "TRANSIENT", "CEP"),
+	)
 }
 
 type TemplatePathResolver struct{}
