@@ -20,7 +20,7 @@ func NewGetAgentCollectionCmd() *GetAgentCollectionCmd {
 
 	cmd := &cobra.Command{
 		Use:   "list",
-		Short: "Get a collection of agents based on filter parameters",
+		Short: "Get agent collection",
 		Long:  `Get a collection of agents based on filter parameters`,
 		Example: `
 		c8y agents list --name "sensor*" --type myType

@@ -22,7 +22,7 @@ func NewGetDeviceCollectionCmd() *GetDeviceCollectionCmd {
 	ccmd := &GetDeviceCollectionCmd{}
 	cmd := &cobra.Command{
 		Use:   "list",
-		Short: "Get a collection of devices based on filter parameters",
+		Short: "Get device collection",
 		Long:  `Get a collection of devices based on filter parameters`,
 		Example: `
 		c8y devices list --name "sensor*" --type myType

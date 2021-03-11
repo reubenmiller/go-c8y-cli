@@ -23,7 +23,7 @@ func NewGetDeviceGroupCollectionCmd() *getDeviceGroupCollectionCmd {
 
 	cmd := &cobra.Command{
 		Use:   "listDeviceGroups",
-		Short: "Get a collection of device groups based on filter parameters",
+		Short: "Get device group collection",
 		Long:  `Get a collection of device groups based on filter parameters`,
 		Example: `
 		c8y devices listDeviceGroups --name "MyGroup*"

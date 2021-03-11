@@ -24,15 +24,16 @@ func NewGetGenericRestCmd() *GetGenericRestCmd {
 
 	cmd := &cobra.Command{
 		Use:   "rest",
-		Short: "Send generic REST request",
-		Long:  `Send generic REST request`,
+		Short: "Send custom request",
+		Long:  `Send a custom REST request to a given endpoint`,
 		Example: `
-Get a list of managed objects
-c8y rest GET /alarm/alarms
+### Get a list of alarms
+$ c8y rest GET /alarm/alarms
 
+### Get a list of alarms with custom query parameters
 c8y rest GET "/alarm/alarms?pageSize=10&status=ACTIVE"
 
-// Create a new alarm
+### Create a new alarm
 c8y rest POST "alarm/alarms" --data "text=one,severity=MAJOR,type=test_Type,time=2019-01-01,source={'id': '12345'}"
 		`,
 		RunE: ccmd.RunE,
