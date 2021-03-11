@@ -15,8 +15,8 @@ func NewVersionCmd() *versionCmd {
 
 	cmd := &cobra.Command{
 		Use:   "version",
-		Short: "Print the version number of c8y",
-		Long:  `All software has versions. This is c8y`,
+		Short: "Show command version",
+		Long:  `Version number of c8y`,
 		Run: func(cmd *cobra.Command, args []string) {
 			fmt.Printf("Cumulocity command line tool\n%s -- %s\n", buildVersion, buildBranch)
 		},
