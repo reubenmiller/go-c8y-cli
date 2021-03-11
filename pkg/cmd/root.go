@@ -61,6 +61,11 @@ type baseCmd struct {
 }
 
 func (c *baseCmd) getCommand() *cobra.Command {
+	// mark local flags so the appear in completions before global flags
+	completion.WithOptions(
+		c.cmd,
+		completion.MarkLocalFlag(),
+	)
 	return c.cmd
 }
 

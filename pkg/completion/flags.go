@@ -6,6 +6,7 @@ import (
 
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
+	"github.com/spf13/pflag"
 )
 
 // Option adds flags to a given command
@@ -84,5 +85,21 @@ func WithTenantCompletion(flagName string, client *c8y.Client) CobraCompletion {
 			values = append(values, tenant.ID)
 		}
 		return values, cobra.ShellCompDirectiveNoFileComp
+	}
+}
+
+// MarkLocalFlag marks a flag as local flag so it get prioritized in the completions
+func MarkLocalFlag(exclude ...string) Option {
+	excludeLookup := map[string]bool{}
+	for _, name := range exclude {
+		excludeLookup[name] = true
+	}
+	return func(cmd *cobra.Command) *cobra.Command {
+		cmd.Flags().VisitAll(func(f *pflag.Flag) {
+			if _, ok := excludeLookup[f.Name]; !ok {
+				_ = cmd.Flags().SetAnnotation(f.Name, cobra.BashCompOneRequiredFlag, []string{"false"})
+			}
+		})
+		return cmd
 	}
 }
