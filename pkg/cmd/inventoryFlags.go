@@ -48,7 +48,7 @@ func addTemplateFlag(cmd *cobra.Command) {
 		if err != nil {
 			return []string{"jsonnet"}, cobra.ShellCompDirectiveFilterFileExt
 		}
-		return matches, cobra.ShellCompDirectiveNoFileComp
+		return matches, cobra.ShellCompDirectiveDefault
 	})
 }
 
