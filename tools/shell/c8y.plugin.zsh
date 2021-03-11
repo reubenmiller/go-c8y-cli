@@ -1,36 +1,58 @@
 #!/bin/zsh
 
-if [[ $(command -v c8y) ]]; then
-    c8y completion zsh > "$ZSH_CUSTOM/plugins/c8y/_c8y"
+# Force encoding
+export LANG=C.UTF-8
+export LC_ALL=C.UTF-8
 
-    # create session home folder (if it does not exist)
-    sessionhome=$( c8y settings list --select "session.home" --csv )
-    if [[ ! -e "$sessionhome" ]]; then
-        echo "creating folder"
-        mkdir -p "$sessionhome"
+C8Y_SHELL="zsh"
+
+install_bash_dependencies () {
+    if [[ ! -d ~/.bash_completion.d ]]; then
+        mkdir -p ~/.bash_completion.d
     fi
-fi
+
+    if [ ! -f ~/.bash_completion.d/complete_alias ]; then
+        echo "Installing bash completion for aliases"
+        curl https://raw.githubusercontent.com/cykerway/complete-alias/master/complete_alias \
+                > ~/.bash_completion.d/complete_alias
+    fi
+
+    # Enable completion for aliases
+    [ -f /usr/share/bash-completion/bash_completion ] && source /usr/share/bash-completion/bash_completion
+    [ -f ~/.bash_completion.d/complete_alias ] && source ~/.bash_completion.d/complete_alias
+}
+
+init-c8y () {
+    if [[ $(command -v c8y) ]]; then
+        if [ "$C8Y_SHELL" = "zsh" ]; then
+
+            mkdir -p "$ZSH_CUSTOM/plugins/c8y"
+
+            if [ ! -f "$ZSH_CUSTOM/plugins/c8y/_c8y" ]; then
+                c8y completion zsh > "$ZSH_CUSTOM/plugins/c8y/_c8y"
+
+                # create session home folder (if it does not exist)
+                sessionhome=$( c8y settings list --select "session.home" --csv )
+                if [[ ! -e "$sessionhome" ]]; then
+                    echo "creating folder"
+                    mkdir -p "$sessionhome"
+                fi
+                echo -e "${green}Updated c8y completions. \n\n${bold}Please load your zsh profile again using 'source ~/.zshrc'${normal}"
+            fi
+        fi
+
+        if [ "$C8Y_SHELL" = "bash" ]; then
+            install_bash_dependencies
+            source <(c8y completion bash)
+        fi
+    fi
+}
+
+init-c8y
 
 ########################################################################
 # c8y helpers
 ########################################################################
-
-# -----------
-# test-c8ypassphrase
-# -----------
-# Description: Set the encryption passphrase interactively
-# Usage:
-#   test-c8ypassphrase
-#
-test-c8ypassphrase () {
-    c8y sessions checkPassphrase $SESSION_OPTIONS
-    if [ $? -ne 0 ]; then
-        echo "Encryption check failed"
-        (exit 2)
-        return
-    fi
-}
-
 # -----------
 # set-session
 # -----------
@@ -58,7 +80,7 @@ set-session () {
     # to support other 3rd party applicatsion (i.e. java c8y sdk apps)
     # which will read these variables
     # login / test session credentials
-    c8yenv=$( c8y sessions login --env $SESSION_OPTIONS )
+    c8yenv=$( c8y sessions login --env $SESSION_OPTIONS --shell bash )
     if [ $? -ne 0 ]; then
         echo "Login using session failed"
         (exit 3)
@@ -75,22 +97,7 @@ set-session () {
 #   clear-session
 #
 clear-session () {
-    unset C8Y_HOST
-    unset C8Y_URL
-    unset C8Y_BASEURL
-    unset C8Y_TENANT
-    unset C8Y_USER
-    unset C8Y_USERNAME
-    unset C8Y_PASSWORD
-    unset C8Y_SESSION
-    unset C8Y_SETTINGS_MODE_ENABLECREATE
-    unset C8Y_SETTINGS_MODE_ENABLEUPDATE
-    unset C8Y_SETTINGS_MODE_ENABLEDELETE
-    unset C8Y_CREDENTIAL_COOKIES_0
-    unset C8Y_CREDENTIAL_COOKIES_1
-    unset C8Y_CREDENTIAL_COOKIES_2
-    unset C8Y_CREDENTIAL_COOKIES_3
-    unset C8Y_CREDENTIAL_COOKIES_4
+    source <(c8y sessions clear --shell zsh)
 }
 
 # -----------
@@ -183,16 +190,7 @@ c8y-update () {
         return 0
     fi
     
-    # update completions
-    mkdir -p "$ZSH_CUSTOM/plugins/c8y/_c8y"
-
-    if [ $(command -v c8y) ]; then
-        echo -n "updating completions..."
-        c8y completion zsh > "$ZSH_CUSTOM/plugins/c8y/_c8y"
-        echo -e "${green}ok${normal}"
-    fi
-
-    echo -e "${green}Updated c8y completions. \n\n${bold}Please load your zsh profile again using 'source ~/.zshrc'${normal}"
+    init-c8y
 
     # show new version to user
     c8y version
@@ -202,55 +200,126 @@ c8y-update () {
 # c8y aliases
 ########################################################################
 
-# alarms
-alias alarms=c8y\ alarms\ list
+set_c8y_alias () {
+    if [ "$C8Y_SHELL" = "zsh" ]; then
+        set_c8y_zsh_alias
+    elif [ "$C8Y_SHELL" = "bash" ]; then
+        set_c8y_bash_alias
+    fi
+}
 
-# apps
-alias apps=c8y\ applications\ list
+set_c8y_bash_alias () {
 
-# devices
-alias devices=c8y\ devices\ list
+    # alarms
+    alias alarms=c8y\ alarms\ list
+    complete -F _complete_alias alarms
 
-# events
-alias events=c8y\ events\ list
+    # apps
+    alias apps=c8y\ applications\ list
+    complete -F _complete_alias apps
 
-# fmo
-alias fmo=c8y\ inventory\ find\ --query
+    # devices
+    alias devices=c8y\ devices\ list
+    complete -F _complete_alias devices
 
-# measurements
-alias measurements=c8y\ measurements\ list
+    # events
+    alias events=c8y\ events\ list
+    complete -F _complete_alias events
 
-# operations
-alias ops=c8y\ operations\ list
+    # fmo
+    alias fmo=c8y\ inventory\ find\ --query
+    complete -F _complete_alias fmo
 
-# series
-alias series=c8y\ measurements\ getSeries
+    # measurements
+    alias measurements=c8y\ measurements\ list
+    complete -F _complete_alias measurements
 
-#
-# Single item getters
-#
-# alarm
-alias alarm=c8y\ alarms\ get\ --id
+    # operations
+    alias ops=c8y\ operations\ list
+    complete -F _complete_alias ops
 
-# app
-alias app=c8y\ applications\ get\ --id
+    # series
+    alias series=c8y\ measurements\ getSeries
+    complete -F _complete_alias series
 
-# event
-alias event=c8y\ events\ get\ --id
+    #
+    # Single item getters
+    #
+    # alarm
+    alias alarm=c8y\ alarms\ get\ --id
+    complete -F _complete_alias alarm
 
-# m
-alias m=c8y\ measurements\ get\ --id
+    # app
+    alias app=c8y\ applications\ get\ --id
+    complete -F _complete_alias app
 
-# mo
-alias mo=c8y\ inventory\ get\ --id
+    # event
+    alias event=c8y\ events\ get\ --id
+    complete -F _complete_alias event
 
-# op
-alias op=c8y\ operations\ get\ --id
+    # m
+    alias m=c8y\ measurements\ get\ --id
+    complete -F _complete_alias m
 
-# session
-alias session=c8y\ sessions\ get
+    # mo
+    alias mo=c8y\ inventory\ get\ --id
+    complete -F _complete_alias mo
 
-# init passphrase (if not already set)
-if [ -t 0 ]; then
-    test-c8ypassphrase
-fi
+    # op
+    alias op=c8y\ operations\ get\ --id
+    complete -F _complete_alias op
+
+    # session
+    alias session=c8y\ sessions\ get
+    complete -F _complete_alias session
+}
+
+set_c8y_zsh_alias () {
+    # alarms
+    alias alarms=c8y\ alarms\ list
+
+    # apps
+    alias apps=c8y\ applications\ list
+
+    # devices
+    alias devices=c8y\ devices\ list
+
+    # events
+    alias events=c8y\ events\ list
+
+    # fmo
+    alias fmo=c8y\ inventory\ find\ --query
+
+    # measurements
+    alias measurements=c8y\ measurements\ list
+
+    # operations
+    alias ops=c8y\ operations\ list
+
+    # series
+    alias series=c8y\ measurements\ getSeries
+
+    #
+    # Single item getters
+    #
+    # alarm
+    alias alarm=c8y\ alarms\ get\ --id
+
+    # app
+    alias app=c8y\ applications\ get\ --id
+
+    # event
+    alias event=c8y\ events\ get\ --id
+
+    # m
+    alias m=c8y\ measurements\ get\ --id
+
+    # mo
+    alias mo=c8y\ inventory\ get\ --id
+
+    # op
+    alias op=c8y\ operations\ get\ --id
+
+    # session
+    alias session=c8y\ sessions\ get
+}

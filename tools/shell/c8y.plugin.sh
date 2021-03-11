@@ -33,22 +33,6 @@ fi
 ########################################################################
 
 # -----------
-# test-c8ypassphrase
-# -----------
-# Description: Set the encryption passphrase interactively
-# Usage:
-#   test-c8ypassphrase
-#
-test-c8ypassphrase () {
-    c8y sessions checkPassphrase $SESSION_OPTIONS
-    if [ $? -ne 0 ]; then
-        echo "Encryption check failed"
-        (exit 2)
-        return
-    fi
-}
-
-# -----------
 # set-session
 # -----------
 # Description: Switch Cumulocity session interactively
@@ -75,7 +59,7 @@ set-session () {
     # to support other 3rd party applicatsion (i.e. java c8y sdk apps)
     # which will read these variables
     # login / test session credentials
-    c8yenv=$( c8y sessions login --env $SESSION_OPTIONS )
+    c8yenv=$( c8y sessions login --env $SESSION_OPTIONS --shell bash )
     if [ $? -ne 0 ]; then
         echo "Login using session failed"
         (exit 3)
@@ -92,22 +76,7 @@ set-session () {
 #   clear-session
 #
 clear-session () {
-    unset C8Y_HOST
-    unset C8Y_URL
-    unset C8Y_BASEURL
-    unset C8Y_TENANT
-    unset C8Y_USER
-    unset C8Y_USERNAME
-    unset C8Y_PASSWORD
-    unset C8Y_SESSION
-    unset C8Y_SETTINGS_MODE_ENABLECREATE
-    unset C8Y_SETTINGS_MODE_ENABLEUPDATE
-    unset C8Y_SETTINGS_MODE_ENABLEDELETE
-    unset C8Y_CREDENTIAL_COOKIES_0
-    unset C8Y_CREDENTIAL_COOKIES_1
-    unset C8Y_CREDENTIAL_COOKIES_2
-    unset C8Y_CREDENTIAL_COOKIES_3
-    unset C8Y_CREDENTIAL_COOKIES_4
+    source <(c8y sessions clear --shell bash)
 }
 
 # -----------
@@ -270,8 +239,3 @@ complete -F _complete_alias op
 # session
 alias session=c8y\ sessions\ get
 complete -F _complete_alias session
-
-# init passphrase (if not already set)
-if [ -t 0 ]; then
-    test-c8ypassphrase
-fi

@@ -34,20 +34,20 @@ The following steps can be used to add custom c8y aliases to save in typing out 
 2. Download the c8y helper script
 
     ```sh
-    curl -L -o ~/c8y.profile.sh \
-    https://raw.githubusercontent.com/reubenmiller/go-c8y-cli/master/tools/shell/c8y.profile.sh
+    curl -L -o ~/c8y.plugin.sh \
+    https://raw.githubusercontent.com/reubenmiller/go-c8y-cli/master/tools/shell/c8y.plugin.sh
     ```
 
 3. Add the following line to your bash profile `~/.bashrc`
 
     ```sh
-    source ~/c8y.profile.sh
+    source ~/c8y.plugin.sh
     ```
 
     Or using the command line
 
     ```sh
-    echo "source ~/c8y.profile.sh" >> ~/.bashrc
+    echo "source ~/c8y.plugin.sh" >> ~/.bashrc
     ```
 
 4. Reload your bash profile again
@@ -70,7 +70,7 @@ The following steps can be used to add custom c8y aliases to save in typing out 
 
 #### Creating custom bash aliases
 
-1. Add a new alias definition to the `~/c8y.profile.sh`
+1. Add a new alias definition to the `~/c8y.plugin.sh`
 
     ```sh
     # create custom devices collection

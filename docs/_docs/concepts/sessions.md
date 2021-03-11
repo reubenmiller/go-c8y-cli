@@ -35,7 +35,7 @@ Note: On MacOS, you need to hold "option"+Arrow keys to navigate the list of ses
 
 ##### Bash
 
-Assuming that you have already loaded the `c8y.profile.sh` helper.
+Assuming that you have already loaded the `c8y.plugin.sh` helper.
 
 ```sh
 set-session

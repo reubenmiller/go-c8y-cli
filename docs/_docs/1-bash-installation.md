@@ -7,7 +7,7 @@ title: Installation
 
 ## Bash installation
 
-To make the installation and future updates easier, a script is provided in the repository. The `c8y.profile.sh` script 
+To make the installation and future updates easier, a script is provided in the repository. The `c8y.plugin.sh` script 
 
 * `set-session` to help switch between c8y sessions and set the appropriate environment variables
 * Bash completion
@@ -20,16 +20,16 @@ To make the installation and future updates easier, a script is provided in the 
 1. Download the c8y profile helper script
 
     ```sh
-    curl -L https://raw.githubusercontent.com/reubenmiller/go-c8y-cli/master/tools/shell/c8y.profile.sh -o ~/c8y.profile.sh
+    curl -L https://raw.githubusercontent.com/reubenmiller/go-c8y-cli/master/tools/shell/c8y.plugin.sh -o ~/c8y.plugin.sh
 
     # make the script executable
-    chmod +x ~/c8y.profile.sh
+    chmod +x ~/c8y.plugin.sh
     ```
 
 2. Add the following line to your bash profile `~/.bashrc`
 
     ```sh
-    source ~/c8y.profile.sh
+    source ~/c8y.plugin.sh
     ```
 
 3. Reload your bash profile
@@ -66,7 +66,7 @@ To make the installation and future updates easier, a script is provided in the 
 
 ## Zsh (oh-my-zsh) installation
 
-Similar to `c8y.profile.sh` for bash, there is a pre-configured zsh plugin `c8y.plugin.zsh` which provides the same functions but for zsh.
+Similar to `c8y.plugin.sh` for bash, there is a pre-configured zsh plugin `c8y.plugin.zsh` which provides the same functions but for zsh.
 
 ### Installing
 
@@ -124,7 +124,7 @@ Similar to `c8y.profile.sh` for bash, there is a pre-configured zsh plugin `c8y.
 
 Since the c8y cli tool is a golang binary, it is very portable and can therefore be downloaded manually and added to your `PATH` environment variable.
 
-However if you don't install the `c8y.profile.sh` script or the zsh `c8y` plugin, then you are reponsible for repeating this procedure when updating c8y, and when setting/switching c8y sessions.
+However if you don't install the `c8y.plugin.sh` script or the zsh `c8y` plugin, then you are reponsible for repeating this procedure when updating c8y, and when setting/switching c8y sessions.
 
 1. Download the latest version
 
@@ -210,7 +210,7 @@ However if you don't install the `c8y.profile.sh` script or the zsh `c8y` plugin
 
     **Note**
 
-    It is highly recommended that you use the `c8y.profile.sh` or `c8y` zsh plugin, as these include helpers to set the c8y session which improve your c8y experience.
+    It is highly recommended that you use the `c8y.plugin.sh` or `c8y` zsh plugin, as these include helpers to set the c8y session which improve your c8y experience.
 
 ---
 

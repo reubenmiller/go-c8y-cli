@@ -174,8 +174,8 @@ install_c8y: build			## Install c8y in dev environment
 	@if [ ! -f /usr/local/bin/c8y ]; then \
 		sudo ln -s "$$(pwd)/tools/PSc8y/Dependencies/c8y.linux" /usr/local/bin/c8y; \
 	fi
-	@cp ./tools/shell/c8y.profile.sh ~/
-	@echo "source ~/c8y.profile.sh"  >> ~/.bashrc
+	@cp ./tools/shell/c8y.plugin.sh ~/
+	@echo "source ~/c8y.plugin.sh"  >> ~/.bashrc
 
 	@echo Installed c8y successfully
 
@@ -185,7 +185,7 @@ publish:
 build-docker:
 	@cp tools/PSc8y/Dependencies/c8y.linux ./docker/c8y.linux
 	@cp tools/shell/c8y.plugin.zsh ./docker/c8y.plugin.zsh
-	@cp tools/shell/c8y.profile.sh ./docker/c8y.profile.sh
+	@cp tools/shell/c8y.plugin.sh ./docker/c8y.plugin.sh
 
 	@sudo docker build ./docker --file ./docker/zsh.dockerfile $(DOCKER_BUILD_ARGS) --build-arg C8Y_VERSION=$(VERSION) --tag $(TAG_PREFIX)c8y-zsh
 	@sudo docker build ./docker --file ./docker/bash.dockerfile $(DOCKER_BUILD_ARGS) --build-arg C8Y_VERSION=$(VERSION) --tag $(TAG_PREFIX)c8y-bash
@@ -193,7 +193,7 @@ build-docker:
 
 	@rm ./docker/c8y.linux
 	@rm ./docker/c8y.plugin.zsh
-	@rm ./docker/c8y.profile.sh
+	@rm ./docker/c8y.plugin.sh
 
 publish-docker: show-version build build-docker		## Publish docker c8y cli images
 	@chmod +x ./scripts/publish-docker.sh

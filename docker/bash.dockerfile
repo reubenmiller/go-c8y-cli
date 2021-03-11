@@ -12,13 +12,13 @@ USER c8yuser
 WORKDIR /home/c8yuser
 
 COPY ./c8y.linux /home/c8yuser/bin/c8y
-COPY ./c8y.profile.sh /home/c8yuser/
+COPY ./c8y.plugin.sh /home/c8yuser/
 
 ENV PATH=${PATH}:/home/c8yuser/bin
 ENV C8Y_SESSION_HOME=/sessions
 
-RUN echo "source /home/c8yuser/c8y.profile.sh" >> /home/c8yuser/.bashrc \
-    && bash -c "source ~/c8y.profile.sh; c8y version"
+RUN echo "source /home/c8yuser/c8y.plugin.sh" >> /home/c8yuser/.bashrc \
+    && bash -c "source ~/c8y.plugin.sh; c8y version"
 
 VOLUME [ "/sessions" ]
 

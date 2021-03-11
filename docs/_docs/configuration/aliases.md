@@ -68,7 +68,7 @@ Get-MyApplications
 
 ### Bash / zsh
 
-The following aliases are defined for both bash and zsh in the `c8y.profile.sh` (for bash) and `c8y.plugin.zsh` (for zsh, oh-my-zsh).
+The following aliases are defined for both bash and zsh in the `c8y.plugin.sh` (for bash) and `c8y.plugin.zsh` (for zsh, oh-my-zsh).
 
 | Alias | Command |
 |-------|---------|

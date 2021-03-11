@@ -1,7 +1,7 @@
 #!/bin/bash
 
 shopt -s expand_aliases
-source ../c8y.profile.sh
+source ../c8y.plugin.sh
 
 resp=$(alarms || exit 1)
 resp=$(apps || exit 2)

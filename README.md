@@ -103,7 +103,7 @@ See the [documenation website](https://reubenmiller.github.io/go-c8y-cli/) for i
 1. Import the bash profile
 
     ```sh
-    source tools/shell/c8y.profile.sh
+    source tools/shell/c8y.plugin.sh
     ```
 
 1. Set the c8y session that you want to use for the tests
