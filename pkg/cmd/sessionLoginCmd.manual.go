@@ -7,6 +7,7 @@ import (
 
 	"github.com/fatih/color"
 	"github.com/reubenmiller/go-c8y-cli/pkg/c8ylogin"
+	"github.com/reubenmiller/go-c8y-cli/pkg/completion"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -16,7 +17,7 @@ type sessionLoginCmd struct {
 	LoginErr             error
 	LoginOK              bool
 	AsEnv                bool
-	Powershell           bool
+	Shell                string
 	ClearExistingCookies bool
 
 	*baseCmd
@@ -41,9 +42,15 @@ Log into the current session
 
 	cmd.Flags().StringVar(&ccmd.TFACode, "tfaCode", "", "Two Factor Authentication code")
 	cmd.Flags().BoolVar(&ccmd.AsEnv, "env", false, "Return environment variables")
-	cmd.Flags().BoolVar(&ccmd.Powershell, "powershell", false, "Return powershell environment variables")
+	cmd.Flags().StringVar(&ccmd.Shell, "shell", "bash", "Shell type")
 	cmd.Flags().BoolVar(&ccmd.ClearExistingCookies, "clear", false, "Clear any existing cookies")
 
+	_ = cmd.MarkFlagRequired("shell")
+
+	completion.WithOptions(
+		cmd,
+		completion.WithValidateSet("shell", "bash", "zsh", "fish", "powershell"),
+	)
 	ccmd.baseCmd = newBaseCmd(cmd)
 
 	return ccmd
@@ -96,7 +103,8 @@ func (n *sessionLoginCmd) initSession(cmd *cobra.Command, args []string) error {
 	})
 
 	if n.AsEnv {
-		showEnvironmentVariables(handler.C8Yclient, n.Powershell)
+		shell := ShellBash
+		showEnvironmentVariables(handler.C8Yclient, shell.FromString(n.Shell))
 	}
 
 	return nil

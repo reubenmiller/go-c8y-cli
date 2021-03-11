@@ -373,7 +373,7 @@ func (c *c8yCmd) checkSessionExists(cmd *cobra.Command, args []string) error {
 	}
 	c.Logger.Debugf("command str: %s", cmdStr)
 
-	if globalFlagSessionFile == "" || !(strings.HasPrefix(cmdStr, "sessions list") || strings.HasPrefix(cmdStr, "sessions checkPassphrase") || c.Flags().Changed("session")) {
+	if globalFlagSessionFile == "" || !(strings.HasPrefix(cmdStr, "sessions list") || c.Flags().Changed("session")) {
 		c.useEnv = true
 	}
 

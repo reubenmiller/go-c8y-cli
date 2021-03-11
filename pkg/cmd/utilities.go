@@ -7,6 +7,7 @@ import (
 	"os"
 	"path/filepath"
 	"sort"
+	"strings"
 
 	"github.com/manifoldco/promptui"
 	homedir "github.com/mitchellh/go-homedir"
@@ -80,7 +81,37 @@ func getSessionHomeDir() string {
 	return outputDir
 }
 
-func showEnvironmentVariables(c8yclient *c8y.Client, isPowerShell bool) {
+type ShellType int
+
+func (t ShellType) FromString(name string) ShellType {
+	values := map[string]ShellType{
+		"powershell": ShellPowerShell,
+		"bash":       ShellBash,
+		"zsh":        ShellZSH,
+		"fish":       ShellFish,
+	}
+
+	if v, ok := values[strings.ToLower(name)]; ok {
+		return v
+	}
+	return t
+}
+
+const (
+	// ShellBash bash
+	ShellBash ShellType = iota
+
+	// ShellZSH zsh
+	ShellZSH
+
+	// ShellPowerShell PowerShell
+	ShellPowerShell
+
+	// ShellFish fish
+	ShellFish
+)
+
+func showEnvironmentVariables(c8yclient *c8y.Client, shell ShellType) {
 	// sort output variables
 	variables := []string{}
 	output := cliConfig.GetEnvironmentVariables(c8yclient, false)
@@ -91,10 +122,48 @@ func showEnvironmentVariables(c8yclient *c8y.Client, isPowerShell bool) {
 	for _, name := range variables {
 		value := output[name]
 
-		if isPowerShell {
+		switch shell {
+		case ShellPowerShell:
 			fmt.Printf("$env:%s = '%s'\n", name, value)
-		} else {
+		case ShellFish:
+			fmt.Printf("set -gx %s '%s'\n", name, value)
+		default:
 			fmt.Printf("export %s='%s'\n", name, value)
+		}
+	}
+}
+
+// clearEnvironmentVariables clears all the session related environment variables by passing
+// a shell snippet to execute via source or eval.
+func clearEnvironmentVariables(shell ShellType) {
+	variables := []string{
+		"C8Y_HOST",
+		"C8Y_URL",
+		"C8Y_BASEURL",
+		"C8Y_TENANT",
+		"C8Y_USER",
+		"C8Y_USERNAME",
+		"C8Y_PASSWORD",
+		"C8Y_SESSION",
+		"C8Y_SETTINGS_MODE_ENABLECREATE",
+		"C8Y_SETTINGS_MODE_ENABLEUPDATE",
+		"C8Y_SETTINGS_MODE_ENABLEDELETE",
+		"C8Y_CREDENTIAL_COOKIES_0",
+		"C8Y_CREDENTIAL_COOKIES_1",
+		"C8Y_CREDENTIAL_COOKIES_2",
+		"C8Y_CREDENTIAL_COOKIES_3",
+		"C8Y_CREDENTIAL_COOKIES_4",
+	}
+
+	sort.Strings(variables)
+	for _, name := range variables {
+		switch shell {
+		case ShellPowerShell:
+			fmt.Printf("$env:%s = $null\n", name)
+		case ShellFish:
+			fmt.Printf("set -u %s\n", name)
+		default:
+			fmt.Printf("export %s=\n", name)
 		}
 	}
 }

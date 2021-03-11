@@ -20,9 +20,9 @@ func NewSessionsRootCmd() *sessionsCmd {
 	// Subcommands
 	cmd.AddCommand(newNewSessionCmd().getCommand())
 	cmd.AddCommand(newGetSessionCmd().getCommand())
+	cmd.AddCommand(NewClearSessionCmd().getCommand())
 	cmd.AddCommand(newEncryptTextCmd().getCommand())
 	cmd.AddCommand(newDecryptTextCmd().getCommand())
-	cmd.AddCommand(newCheckSessionPassphraseCmd().getCommand())
 	cmd.AddCommand(newListSessionCmd().getCommand())
 	cmd.AddCommand(newSessionLoginCmd().getCommand())
 
