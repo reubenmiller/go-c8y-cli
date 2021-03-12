@@ -2,7 +2,7 @@
 ---
 information:
   name: inventoryReferences
-  description: Cumulocity managed objects
+  description: Cumulocity inventory references
   descriptionLong: 'REST endpoint to interact with Cumulocity managed objects'
   link: https://cumulocity.com/guides/reference/inventory/
 
