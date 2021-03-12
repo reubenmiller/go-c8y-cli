@@ -1,0 +1,14 @@
+{
+    "version": "1",
+    "definitions": [
+        {
+            "name": "managedObjectReference",
+            "priority": 0,
+            "contentType": "vnd.com.nsn.cumulocity.managedObjectReferenceCollection",
+            "columns": [
+                "self",
+                "managedObject"
+            ]
+        }
+    ]
+}

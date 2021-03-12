@@ -1,0 +1,21 @@
+{
+    "version": "1",
+    "definitions": [
+        {
+            "name": "alarm",
+            "priority": 0,
+            "self": "alarm/alarms",
+            "columns": [
+                "id",
+                "status",
+                "type",
+                "severity",
+                "text",
+                "count",
+                "source.id",
+                "source.name",
+                "creationTime"
+            ]
+        }
+    ]
+}

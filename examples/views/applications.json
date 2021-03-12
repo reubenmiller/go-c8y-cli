@@ -1,0 +1,44 @@
+{
+    "version": "1",
+    "definitions": [
+        {
+            "name": "microservice",
+            "priority": 1,
+            "self": "application",
+            "type": "MICROSERVICE",
+            "columns": [
+                "id",
+                "name",
+                "key",
+                "type",
+                "manifest.version",
+                "availability",
+                "resources",
+                "*.tenant.id",
+                "requiredRoles.0"
+            ]
+        },
+        {
+            "name": "application",
+            "priority": 100,
+            "self": "application",
+            "columns": [
+                "id",
+                "name",
+                "key",
+                "type",
+                "availability"
+            ]
+        },
+        {
+            "name": "bootstrapuser",
+            "priority": 100,
+            "contentType": "vnd.com.nsn.cumulocity.user",
+            "columns": [
+                "tenant",
+                "name",
+                "password"
+            ]
+        }
+    ]
+}

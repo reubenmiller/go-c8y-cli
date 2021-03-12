@@ -1,0 +1,20 @@
+{
+    "version": "1",
+    "definitions": [
+        {
+            "name": "tenant",
+            "priority": 0,
+            "contentType": "vnd.com.nsn.cumulocity.tenant",
+            "columns": [
+                "id",
+                "status",
+                "parent",
+                "company",
+                "domain",
+                "adminName",
+                "contactName",
+                "allowCreateTenants"
+            ]
+        }
+    ]
+}

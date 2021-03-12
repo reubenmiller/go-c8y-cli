@@ -1,0 +1,18 @@
+{
+    "version": "1",
+    "definitions": [
+        {
+            "name": "user",
+            "priority": 0,
+            "contentType": "vnd.com.nsn.cumulocity.(user|userCollection)\\+json",
+            "columns": [
+                "id",
+                "enabled",
+                "passwordStrength",
+                "lastPasswordChange",
+                "shouldResetPassword",
+                "customProperties.*"
+            ]
+        }
+    ]
+}

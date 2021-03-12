@@ -1,0 +1,15 @@
+{
+    "version": "1",
+    "definitions": [
+        {
+            "name": "option",
+            "priority": 0,
+            "contentType": "vnd.com.nsn.cumulocity.option",
+            "columns": [
+                "category",
+                "key",
+                "value"
+            ]
+        }
+    ]
+}

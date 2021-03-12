@@ -1,0 +1,18 @@
+{
+    "version": "1",
+    "definitions": [
+        {
+            "name": "measurement",
+            "priority": 0,
+            "contentType": "vnd.com.nsn.cumulocity.measurement",
+            "columns": [
+                "id",
+                "time",
+                "type",
+                "source.id",
+                "**.value",
+                "**.unit"
+            ]
+        }
+    ]
+}
