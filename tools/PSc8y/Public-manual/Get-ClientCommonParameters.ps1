@@ -80,10 +80,9 @@ Inherit common parameters to a custom function. This will add parameters such as
         New-DynamicParam -Name Timeout -Type "double" -DPDictionary $Dictionary
 
         # JSON parsing options
+        New-DynamicParam -Name Output -Type "string" -ValidateSet @("json", "csv", "csvheader", "table") -DPDictionary $Dictionary
         New-DynamicParam -Name AsHashTable -Type "switch" -DPDictionary $Dictionary
-        New-DynamicParam -Name AsJSON -Type "switch" -DPDictionary $Dictionary
-        New-DynamicParam -Name AsCSV -Type "switch" -DPDictionary $Dictionary
-        New-DynamicParam -Name AsCSVWithHeader -Type "switch" -DPDictionary $Dictionary
+        New-DynamicParam -Name AsPSObject -Type "switch" -DPDictionary $Dictionary
         New-DynamicParam -Name Flatten -Type "switch" -DPDictionary $Dictionary
         New-DynamicParam -Name Compress -Type "switch" -DPDictionary $Dictionary
         New-DynamicParam -Name Pretty -Type "switch" -DPDictionary $Dictionary

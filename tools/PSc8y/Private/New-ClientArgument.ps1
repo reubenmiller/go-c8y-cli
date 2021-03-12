@@ -28,7 +28,7 @@ Function New-ClientArgument {
         $BoundParameters = @{} + $Parameters
 
         # strip automatic variables
-        $BoundParameters.Keys -match "(Verbose|WhatIf|WhatIfFormat|Variable|Action|Buffer|Debug|AsJSON|AsHashtable|AsCSV|AsCSVWithHeader|Color|Pretty)$" | ForEach-Object {
+        $BoundParameters.Keys -match "(Verbose|WhatIf|WhatIfFormat|Variable|Action|Buffer|Debug|AsHashtable|AsPSObject|Color|Pretty)$" | ForEach-Object {
             $BoundParameters.Remove($_)
         }
 
@@ -130,15 +130,6 @@ Function New-ClientArgument {
 
         if ($Parameters["Pretty"]) {
             $null = $c8yargs.Add("--compress=false")
-        }
-
-        if ($Parameters["AsCSV"]) {
-            $null = $c8yargs.Add("--csv")
-        }
-
-        if ($Parameters["AsCSVWithHeader"]) {
-            $null = $c8yargs.Add("--csv")
-            $null = $c8yargs.Add("--csvHeader")
         }
 
         ,$c8yargs

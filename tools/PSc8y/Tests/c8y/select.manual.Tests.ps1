@@ -2,19 +2,19 @@
 
 Describe -Name "c8y format global parameter" {
     It "returns just the id" {
-        $output = c8y applications get --id cockpit --select id --csv
+        $output = c8y applications get --id cockpit --select id --output csv
         $LASTEXITCODE | Should -Be 0
         $output | Should -MatchExactly "^\d+$"
     }
 
     It "returns just the name using wildcard" {
-        $output = c8y applications get --id cockpit --select "nam*" --csv
+        $output = c8y applications get --id cockpit --select "nam*" --output csv
         $LASTEXITCODE | Should -Be 0
         $output | Should -BeExactly "cockpit"
     }
 
     It "returns id and name" {
-        $output = c8y applications get --id cockpit --select "id,name" --csv
+        $output = c8y applications get --id cockpit --select "id,name" --output csv
         $LASTEXITCODE | Should -Be 0
         $output | Should -MatchExactly "^\d+,cockpit$"
     }
@@ -23,7 +23,7 @@ Describe -Name "c8y format global parameter" {
         $type = New-RandomString -Prefix "selectType"
         1..2 | c8y devices create --data "type=$type,text=value"
         3 | c8y devices create --data "type=$type"
-        $output = c8y devices list --type $type --select "name,id,text,type" --csv
+        $output = c8y devices list --type $type --select "name,id,text,type" --output csv
         c8y devices list --type $type | c8y devices delete
         $LASTEXITCODE | Should -Be 0
         $output = $output | Sort-Object
@@ -36,14 +36,14 @@ Describe -Name "c8y format global parameter" {
     It "includes empty values for non-existant values in the last field" {
         $type = New-RandomString -Prefix "selectType"
         1 | c8y devices create --data "type=$type"
-        $output = c8y devices list --type $type --select "name,id,type,nonexistant" --csv
+        $output = c8y devices list --type $type --select "name,id,type,nonexistant" --output csv
         c8y devices list --type $type | c8y devices delete
         $LASTEXITCODE | Should -Be 0
         $output | Should -MatchExactly "^1,\d+,$type,$"
     }
 
     It "includes multiple lines for a list of inputs" {
-        $output = c8y applications list --pageSize 2 --select "id,name" --csv
+        $output = c8y applications list --pageSize 2 --select "id,name" --output csv
         $LASTEXITCODE | Should -Be 0
         $output | Should -Not -BeNullOrEmpty
         $output | Should -HaveCount 2
@@ -51,7 +51,7 @@ Describe -Name "c8y format global parameter" {
     }
 
     It "returns output which can be read via csv (without headers)" {
-        $output = c8y applications get --id cockpit --select "id,name,doesnotexist" --csv
+        $output = c8y applications get --id cockpit --select "id,name,doesnotexist" --output csv
         $LASTEXITCODE | Should -Be 0
         $table = $output | ConvertFrom-Csv -Header id, name, unknown
         $table.id | Should -MatchExactly "^\d+$"
@@ -60,7 +60,7 @@ Describe -Name "c8y format global parameter" {
     }
 
     It "returns just the id using wildcards" {
-        $output = c8y applications get --id cockpit --select "id*" --csv
+        $output = c8y applications get --id cockpit --select "id*" --output csv
         $LASTEXITCODE | Should -Be 0
         $output | Should -MatchExactly "^\d+$"
     }
@@ -82,14 +82,14 @@ Describe -Name "c8y format global parameter" {
 
 
     It "returns csv ignoring the aliases when no header options is provided" {
-        $output = c8y applications get --id cockpit --select "appId:id,appName:name" --csv
+        $output = c8y applications get --id cockpit --select "appId:id,appName:name" --output csv
         $LASTEXITCODE | Should -Be 0
         $output | Should -HaveCount 1
         $output | Should -MatchExactly "^\d+,\w+$"
     }
 
     It "returns csv with custom column headers based on aliases" {
-        $output = c8y applications get --id cockpit --select "appId:id,appName:name" --csv --csvHeader
+        $output = c8y applications get --id cockpit --select "appId:id,appName:name" --output csvheader
         $LASTEXITCODE | Should -Be 0
         $output | Should -HaveCount 2
         $output[0] | Should -MatchExactly "^appId,appName$"

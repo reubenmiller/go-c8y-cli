@@ -29,7 +29,7 @@ Describe -Name "json" {
         }
 
         It "does not print in color when csv is being used" {
-            $output = c8y applications get --id cockpit --select id,name --csv --compact=false
+            $output = c8y applications get --id cockpit --select id,name --output csv --compact=false
             $output | Out-String | Should -Not -Match "\x1b\[[0-9;]*m"
         }
     }
@@ -87,7 +87,7 @@ Describe -Name "json" {
         }
 
         It "Ignores settings when csv is being used" {
-            $output = c8y applications get --id cockpit --select id,name --csv --compact=false
+            $output = c8y applications get --id cockpit --select id,name --output csv --compact=false
             $output | Should -MatchExactly "^\d+,cockpit$"
         }
     }

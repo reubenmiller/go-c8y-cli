@@ -10,10 +10,8 @@ Function Get-ClientOutputOption {
     )
 
     Process {
-        $UseNativeOutput = $BoundParameters["AsJSON"] `
+        $UseNativeOutput = $BoundParameters["Output"] `
             -or $BoundParameters["IncludeAll"] `
-            -or $BoundParameters["AsCSV"] `
-            -or $BoundParameters["AsCSVWithHeader"] `
             -or $BoundParameters["CsvFormat"] `
             -or $BoundParameters["ExcelFormat"] `
             -or $BoundParameters["Progress"]

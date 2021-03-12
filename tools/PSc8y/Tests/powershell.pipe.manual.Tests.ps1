@@ -3,7 +3,7 @@
 Describe -Name "powershell pipes" {
     BeforeAll {
         $ids = New-Object System.Collections.ArrayList
-        $deviceIds = 1..2 | c8y devices create --select id --csv
+        $deviceIds = 1..2 | c8y devices create --select id --output csv
     }
 
     Context "Get commands" {
@@ -46,7 +46,7 @@ Describe -Name "powershell pipes" {
 
         InModuleScope -ModuleName PSc8y {
             It "Confirmation handles multiple items" {
-                $itemIds = 1..2 | c8y devices create --select id --csv
+                $itemIds = 1..2 | c8y devices create --select id --output csv
                 $items = $itemIds | Get-ManagedObject
                 $items.id | c8y devices delete
                 $message = Format-ConfirmationMessage -Name "Get-ExampleName" -InputObject $items

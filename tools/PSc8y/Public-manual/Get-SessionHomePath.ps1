@@ -14,5 +14,5 @@ Get-SessionHomePath
 #>
     [cmdletbinding()]
     Param()
-    c8y settings list --select "session.home" --csv
+    c8y settings list --select "session.home" --output csv
 }
