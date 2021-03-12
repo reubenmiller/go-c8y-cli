@@ -76,7 +76,7 @@ Below is a summary of actions which are supported by the `select` parameter:
 * Get all items matching a nested path pattern (`--select "**.self"`)
 * Map property names (id->deviceId) (`--select "deviceId:id`)
 * Get flattened json properties using (`--select "**" --flatten`)
-* Output results in CSV format (comma delimited) (with flattened json paths) (`--csv` and `--csvHeader`)
+* Output results in CSV format (comma delimited) (with flattened json paths) (`--output csv` and `--output csvheader`)
 
 
 ## Examples
@@ -292,12 +292,11 @@ c8y devices list --select "id,name,type,c8y_Software*.**" --flatten
 }
 ```
 
-The same data can also be returned as csv using the `--csv` and `--csvHeader` options.
+The same data can also be returned as csv using the `--output csv` and `--output csvheader` options.
 
-`--csvHeader` prints out the properties in the first line.
 
 ```sh
-c8y devices list --pageSize 1 --fragmentType company_Example --select "id,name,type,c8y_Software*.**" --csv --csvHeader
+c8y devices list --pageSize 1 --fragmentType company_Example --select "id,name,type,c8y_Software*.**" --output csvheader
 ```
 
 ```csv
@@ -308,7 +307,7 @@ id,name,type,c8y_SoftwareList.0.name,c8y_SoftwareList.0.url,c8y_SoftwareList.0.v
 Or if you only want to return the `name` and `version` of each software item.
 
 ```sh
-c8y devices list --pageSize 1 --fragmentType company_Example --select "id,*software*.**.name,*software*.**.version" --csv --csvHeader
+c8y devices list --pageSize 1 --fragmentType company_Example --select "id,*software*.**.name,*software*.**.version" --output csvheader
 ```
 
 ```csv
@@ -319,7 +318,7 @@ id,c8y_SoftwareList.0.name,c8y_SoftwareList.1.name,c8y_SoftwareList.0.version,c8
 Or if you only want the first software package from each device
 
 ```sh
-c8y devices list --pageSize 1 --fragmentType company_Example --select "id,*software*.0.name,*software*.0.version" --csv --csvHeader
+c8y devices list --pageSize 1 --fragmentType company_Example --select "id,*software*.0.name,*software*.0.version" --output csvheader
 ```
 
 ```csv
@@ -344,7 +343,7 @@ c8y devices list --pageSize 2 --fragmentType company_Example --select "id,name" 
 ##### Output as csv with headers
 
 ```sh
-c8y devices list --pageSize 2 --fragmentType company_Example --select "id,name" --csv --csvHeader
+c8y devices list --pageSize 2 --fragmentType company_Example --select "id,name" --output csvheader
 ```
 
 **Output**

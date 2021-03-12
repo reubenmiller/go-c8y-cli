@@ -373,7 +373,7 @@ func Test_CreateDeviceViaPipeline(t *testing.T) {
 func Test_CreateManagedObjectWithoutInput(t *testing.T) {
 	cmd := setupTest()
 
-	// cmdErr := ExecuteCmd(cmd, fmt.Sprintf("devices list --select id,nam* --csv --csvHeader"))
+	// cmdErr := ExecuteCmd(cmd, fmt.Sprintf("devices list --select id,nam* --output csvheader"))
 	// cmdErr := ExecuteCmd(cmd, fmt.Sprintf("applications get --id cockpit --select appId:id,tenantId:owner.**.id"))
 	// stdin := bytes.NewBufferString(`{"self":"https://t1640885.latest.stage.c8y.io/user/roles/ROLE_ALARM_ADMIN"}` + "\n")
 	// cmd.SetIn(stdin)
@@ -428,7 +428,7 @@ func Test_PipingWithObjectPipeToTemplateWithIDs(t *testing.T) {
 func Test_DebugCommand(t *testing.T) {
 	cmd := setupTest()
 
-	// cmdErr := ExecuteCmd(cmd, fmt.Sprintf("devices list --select id,nam* --csv --csvHeader"))
+	// cmdErr := ExecuteCmd(cmd, fmt.Sprintf("devices list --select id,nam* --output csvheader"))
 	// cmdErr := ExecuteCmd(cmd, fmt.Sprintf("applications get --id cockpit --select appId:id,tenantId:owner.**.id"))
 	stdin := bytes.NewBufferString(`{"id": "87551"}` + "\n" + `{"id": "1111"}` + "\n")
 	cmd.SetIn(stdin)

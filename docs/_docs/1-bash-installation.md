@@ -224,7 +224,7 @@ Since the output of the c8y cli tool is mainly json, it is highly recommended th
 c8y devices list --select id
 
 # Or csv output using
-c8y devices list --select id --csv --csvHeader
+c8y devices list --select id --output csvheader
 ```
 
 If you are more familar with the popular `jq` tool, then you can use it to extract information that you need.
