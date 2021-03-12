@@ -323,3 +323,5 @@ set_c8y_zsh_alias () {
     # session
     alias session=c8y\ sessions\ get
 }
+
+set_c8y_alias
