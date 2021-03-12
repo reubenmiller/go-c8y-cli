@@ -388,16 +388,16 @@
     #
     # Template
     #
+    # SupportsShouldProcess = `$true,
+    # ConfirmImpact = '$CmdletConfirmImpact',
     $Template = @"
 # Code generated from specification version 1.0.0: DO NOT EDIT
 Function $CmdletName {
 <#
 $($CmdletDocStringBuilder.ToString())
 #>
-    [cmdletbinding(SupportsShouldProcess = `$true,
-                   PositionalBinding=`$true,
-                   HelpUri='$DocumentationLink',
-                   ConfirmImpact = '$CmdletConfirmImpact')]
+    [cmdletbinding(PositionalBinding=`$true,
+                   HelpUri='$DocumentationLink')]
     [Alias()]
     [OutputType([object])]
     Param(
@@ -471,7 +471,8 @@ Function New-Body2 {
     $ExpandFunction = Get-IteratorFunction -Type $IteratorType -Variable $IteratorVariable
 
     $ConfirmationStatement = ""
-    if ($ConfirmImpact -ne "None") {
+    $EnablePowershellConfirmation = $false
+    if ($EnablePowershellConfirmation -and $ConfirmImpact -ne "None") {
         $ConfirmationStatement = @"
         `$Force = if (`$PSBoundParameters.ContainsKey("Force")) { `$PSBoundParameters["Force"] } else { `$False }
         if (!`$Force -and !`$WhatIfPreference) {

@@ -28,7 +28,7 @@ Function New-ClientArgument {
         $BoundParameters = @{} + $Parameters
 
         # strip automatic variables
-        $BoundParameters.Keys -match "(Verbose|WhatIf|WhatIfFormat|Variable|Action|Buffer|Debug|AsJSON|AsHashtable|AsCSV|AsCSVWithHeader|Force|Color|Pretty)$" | ForEach-Object {
+        $BoundParameters.Keys -match "(Verbose|WhatIf|WhatIfFormat|Variable|Action|Buffer|Debug|AsJSON|AsHashtable|AsCSV|AsCSVWithHeader|Color|Pretty)$" | ForEach-Object {
             $BoundParameters.Remove($_)
         }
 
@@ -105,11 +105,11 @@ Function New-ClientArgument {
             $null = $c8yargs.Add("--debug")
         }
 
-        if ($WhatIfPreference) {
+        if (-Not $Parameters.ContainsKey("Dry") -and $WhatIfPreference) {
             $null = $c8yargs.Add("--dry")
         }
 
-        if ($Parameters["WhatIfFormat"]) {
+        if (-Not $Parameters.ContainsKey("DryFormat") -and $Parameters["WhatIfFormat"]) {
             $null = $c8yargs.Add(("--dryFormat={0}" -f $Parameters["WhatIfFormat"]))
         }
 
@@ -140,10 +140,6 @@ Function New-ClientArgument {
             $null = $c8yargs.Add("--csv")
             $null = $c8yargs.Add("--csvHeader")
         }
-
-        # Native confirmation can not be used when piping to the c8y binary
-        # as the stdin is already be redirected to!
-        $null = $c8yargs.Add("--force")
 
         ,$c8yargs
     }
