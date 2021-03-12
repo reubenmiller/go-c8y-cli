@@ -386,20 +386,12 @@ func matchWithRegex(x, y interface{}) (bool, error) {
 
 func getFilterFlag(cmd *cobra.Command, flagName string) *JSONFilters {
 	filters := newJSONFilters()
-
-	enableCSV := false
-	if cmd.Flags().Changed("csv") {
-		if value, err := cmd.Flags().GetBool("csv"); err == nil {
-			enableCSV = value
-		}
-	}
+	filters.AsCSV = Console.IsCSV()
 
 	if cmd.Flags().Changed("select") {
 		if properties, err := cmd.Flags().GetStringArray("select"); err == nil {
 			formattedProperties := []string{}
-
 			formattedProperties = append(formattedProperties, properties...)
-			filters.AsCSV = enableCSV
 			filters.Pluck = formattedProperties
 		}
 	}

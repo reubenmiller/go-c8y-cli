@@ -8,6 +8,7 @@ type CommandSettings struct {
 	Mode        *ModeSettings        `json:"mode,omitempty"`
 	Storage     *StorageSettings     `json:"storage,omitempty"`
 	Template    *TemplateSettings    `json:"template,omitempty"`
+	View        *ViewSettings        `json:"views,omitempty"`
 }
 
 // Bool returns a bool pointer set to the given value
@@ -53,4 +54,10 @@ type IncludeAllSettings struct {
 // TemplateSettings controls the jsonnet template settings
 type TemplateSettings struct {
 	Path string `json:"path,omitempty"`
+}
+
+// ViewSettings controls the console table view settings
+type ViewSettings struct {
+	Path    string `json:"path,omitempty"`
+	Enabled *bool  `json:"enabled,omitempty"`
 }

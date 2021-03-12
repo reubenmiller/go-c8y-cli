@@ -20,6 +20,7 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/pkg/config"
 	"github.com/reubenmiller/go-c8y-cli/pkg/console"
+	"github.com/reubenmiller/go-c8y-cli/pkg/dataview"
 	"github.com/reubenmiller/go-c8y-cli/pkg/encrypt"
 	"github.com/reubenmiller/go-c8y-cli/pkg/logger"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
@@ -77,6 +78,8 @@ type c8yCmd struct {
 	cobra.Command
 	Logger *logger.Logger
 	useEnv bool
+
+	dataView *dataview.DataView
 }
 
 func (c *c8yCmd) DryRunHandler(options *c8y.RequestOptions, req *http.Request) {
@@ -162,9 +165,8 @@ func (c *c8yCmd) createCumulocityClient() {
 	if err := readConfiguration(&rootCmd.Command); err != nil {
 		Logger.Errorf("Could not read configuration. %s", err)
 	}
-	Console.Colorized = !globalFlagNoColor && !globalCSVOutput
-	Console.Compact = globalFlagCompact || globalCSVOutput
-	Console.IsJSON = !globalCSVOutput
+	Console.Colorized = !globalFlagNoColor
+	Console.Compact = globalFlagCompact
 	Console.Disabled = globalFlagProgressBar && isTerminal()
 
 	// Add the realtime client
@@ -234,8 +236,6 @@ var (
 	globalFlagNoLog                  bool
 	globalFlagActivityLogMessage     string
 	globalFlagTimeout                float64
-	globalCSVOutput                  bool
-	globalCSVOutputHeaders           bool
 	globalFlagTemplatePath           string
 	globalFlagBatchWorkers           int
 	globalFlagBatchDelayMS           int
@@ -247,6 +247,8 @@ var (
 	globalFlagConfirmText            string
 	globalFlagSelect                 []string
 	globalFlagSilentStatusCodes      string
+
+	globalFlagOutputFormat string
 
 	globalModeEnableCreate bool
 	globalModeEnableUpdate bool
@@ -311,6 +313,9 @@ const (
 
 	// SettingsActivityLogMethodFilter filters the activity log entries by a space delimited methods, i.e. GET POST PUT
 	SettingsActivityLogMethodFilter string = "settings.activityLog.methodFilter"
+
+	// SettingsViewsPaths view definitions
+	SettingsViewsPaths string = "settings.views.paths"
 )
 
 // SettingsGlobalName name of the settings file (without extension)
@@ -388,6 +393,20 @@ func (c *c8yCmd) checkSessionExists(cmd *cobra.Command, args []string) error {
 	configureActivityLog()
 	activityLogger.LogCommand(cmd, args, cmdStr, globalFlagActivityLogMessage)
 
+	// set output format
+	outputFormat := console.OutputJSON.FromString(globalFlagOutputFormat)
+	if isTerminal() && outputFormat == console.OutputTable {
+		Console.Format = console.OutputTable
+	} else {
+		Console.Format = console.OutputJSON.FromString(globalFlagOutputFormat)
+	}
+	Logger.Debugf("output format: %d", outputFormat)
+
+	// load views
+	if views, err := dataview.NewDataView(".*", ".json", Logger, viper.GetViper().GetStringSlice(SettingsViewsPaths)...); err == nil {
+		c.dataView = views
+	}
+
 	localCmds := []string{
 		"completion",
 		"sessions",
@@ -426,7 +445,8 @@ func isTerminal() bool {
 }
 
 func getOutputHeaders(input []string) (headers []byte) {
-	if !globalCSVOutput || !globalCSVOutputHeaders || len(input) == 0 {
+	if !Console.IsCSV() || !Console.WithCSVHeader() || len(input) == 0 {
+		Logger.Debugf("Ignoring csv headers: isCSV=%v, WithHeader=%v", Console.IsCSV(), Console.WithCSVHeader())
 		return
 	}
 	if len(input) > 0 {
@@ -493,14 +513,14 @@ func configureRootCmd() {
 	// Error handling
 	rootCmd.PersistentFlags().StringVar(&globalFlagSilentStatusCodes, "silentStatusCodes", "", "Status codes which will not print out an error message")
 
-	rootCmd.PersistentFlags().StringVar(&globalFlagOutputFile, "outputFile", "", "Output file")
-
 	rootCmd.PersistentFlags().BoolVar(&globalFlagFlatten, "flatten", false, "flatten")
 	rootCmd.PersistentFlags().StringSlice("filter", nil, "filter")
 	rootCmd.PersistentFlags().StringArrayVar(&globalFlagSelect, "select", nil, "select")
-	rootCmd.PersistentFlags().BoolVar(&globalCSVOutput, "csv", false, "Print output as csv format. comma (,) delimited")
-	rootCmd.PersistentFlags().BoolVar(&globalCSVOutputHeaders, "csvHeader", false, "Include header when in csv output")
 	rootCmd.PersistentFlags().Float64Var(&globalFlagTimeout, "timeout", float64(10*60), "Timeout in seconds")
+
+	// output
+	rootCmd.PersistentFlags().StringVarP(&globalFlagOutputFormat, "output", "o", "", "Output format (i.e. table, json, csv, csvheader")
+	rootCmd.PersistentFlags().StringVar(&globalFlagOutputFile, "outputFile", "", "Output file")
 
 	// confirmation
 	rootCmd.PersistentFlags().BoolVarP(&globalFlagForce, "force", "f", false, "Do not prompt for confirmation")
@@ -510,6 +530,7 @@ func configureRootCmd() {
 	completion.WithOptions(
 		&rootCmd.Command,
 		completion.WithValidateSet("dryFormat", "json", "dump", "curl", "markdown"),
+		completion.WithValidateSet("output", "json", "table", "csv", "csvheader"),
 	)
 
 	rootCmd.AddCommand(NewCompletionsCmd().getCommand())

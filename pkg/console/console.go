@@ -4,11 +4,43 @@ import (
 	"bytes"
 	"fmt"
 	"io"
+	"strings"
 	"sync"
 
 	"github.com/reubenmiller/go-c8y-cli/pkg/jsonUtilities"
+	"github.com/reubenmiller/go-c8y-cli/pkg/tableviewer"
 	"github.com/tidwall/pretty"
 )
+
+type OutputFormat int
+
+const (
+	// OutputJSON json output
+	OutputJSON OutputFormat = iota
+
+	// OutputTable table output
+	OutputTable
+
+	// OutputCSV csv output
+	OutputCSV
+
+	// OutputCSVWithHeader csv output with header
+	OutputCSVWithHeader
+)
+
+func (f OutputFormat) FromString(name string) OutputFormat {
+	values := map[string]OutputFormat{
+		"json":      OutputJSON,
+		"table":     OutputTable,
+		"csv":       OutputCSV,
+		"csvheader": OutputCSVWithHeader,
+	}
+
+	if v, ok := values[strings.ToLower(name)]; ok {
+		return v
+	}
+	return f
+}
 
 // Console thread safe way to write to an output
 type Console struct {
@@ -20,8 +52,9 @@ type Console struct {
 	sampleCount int
 	Colorized   bool
 	Compact     bool
-	IsJSON      bool
 	Disabled    bool
+	Format      OutputFormat
+	TableViewer *tableviewer.TableView
 }
 
 // NewConsole create a new console writter
@@ -29,7 +62,34 @@ func NewConsole(w io.Writer, header func([]string) []byte) *Console {
 	return &Console{
 		out:    w,
 		header: header,
+		TableViewer: &tableviewer.TableView{
+			Out:            w,
+			MinColumnWidth: 10,
+			MaxColumnWidth: 40,
+			ColumnPadding:  5,
+		},
+		Format: OutputTable,
 	}
+}
+
+// IsCSV return true if csv output is set
+func (c *Console) IsCSV() bool {
+	return c.Format == OutputCSV || c.Format == OutputCSVWithHeader
+}
+
+// WithCSVHeader returns true if the csv output should include a header
+func (c *Console) WithCSVHeader() bool {
+	return c.Format == OutputCSVWithHeader
+}
+
+// IsJSON return true if JSON output is set
+func (c *Console) IsJSON() bool {
+	return c.Format != OutputCSV && c.Format != OutputCSVWithHeader
+}
+
+// IsTable return true if table output is set
+func (c *Console) IsTable() bool {
+	return c.Format == OutputTable
 }
 
 func (c *Console) SetHeaderFromInput(input string) {
@@ -61,19 +121,33 @@ func (c *Console) Write(b []byte) (n int, err error) {
 	if c.count == 0 && c.header != nil {
 		fmt.Fprintf(c.out, "%s", c.header(c.samples))
 	}
+	showHeader := c.count == 0
 	c.count++
 
-	if bt := bytes.TrimSpace(b); c.IsJSON && (jsonUtilities.IsJSONArray(bt) || jsonUtilities.IsJSONObject(bt)) {
+	if bt := bytes.TrimSpace(b); c.IsJSON() && (jsonUtilities.IsJSONArray(bt) || jsonUtilities.IsJSONObject(bt)) {
+
+		// TODO: WIP
+		switch c.Format {
+		case OutputTable:
+			cols := []string{}
+			if len(c.samples) > 0 {
+				cols = append(cols, strings.Split(c.samples[0], ",")...)
+			}
+			c.TableViewer.Columns = cols
+			c.TableViewer.Render(b, showHeader)
+			return 0, nil
+		}
+
 		b = pretty.PrettyOptions(b, &pretty.Options{
 			SortKeys: true,
 			Width:    80,
 			Prefix:   "",
 			Indent:   "  ",
 		})
-		if c.Compact {
+		if c.Compact || c.IsCSV() {
 			b = append(pretty.Ugly(b), '\n')
 		}
-		if c.Colorized {
+		if c.Colorized && c.IsJSON() {
 			b = pretty.Color(b, pretty.TerminalStyle)
 		}
 	}

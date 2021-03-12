@@ -14,6 +14,7 @@ require (
 	github.com/mdp/qrterminal v1.0.1
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/obeattie/ohmyglob v0.0.0-20150811221449-290764208a0d
+	github.com/olekukonko/tablewriter v0.0.5 // indirect
 	github.com/pkg/errors v0.9.1
 	github.com/pquerna/otp v1.3.0
 	github.com/reubenmiller/go-c8y v0.8.1-0.20210307212503-2fcaaecd459c

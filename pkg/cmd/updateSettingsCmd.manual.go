@@ -175,10 +175,12 @@ var updateSettingsOptions = map[string]argumentHandler{
 		"false",
 	}, nil, cobra.ShellCompDirectiveNoFileComp},
 
-	// csvHeader
-	"defaults.csvHeader": {"defaults.csvHeader", "bool", "settings.defaults.csvHeader", []string{
-		"true",
-		"false",
+	// output
+	"defaults.output": {"defaults.output", "string", "settings.defaults.output", []string{
+		"csv",
+		"csvheader",
+		"json",
+		"table",
 	}, nil, cobra.ShellCompDirectiveNoFileComp},
 
 	// noColor

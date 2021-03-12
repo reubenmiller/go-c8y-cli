@@ -708,6 +708,26 @@ func processResponse(resp *c8y.Response, respError error, commonOptions CommonCo
 			if showRaw {
 				dataProperty = ""
 			}
+
+			// Detect view (if no filters are given)
+			if len(commonOptions.Filters.Pluck) == 0 {
+				if resp.JSON != nil && rootCmd.dataView != nil {
+					inputData := resp.JSON
+					if dataProperty != "" {
+						subpro := resp.JSON.Get(dataProperty)
+						inputData = &subpro
+					}
+					props, err := rootCmd.dataView.GetView(inputData, resp.Header.Get("Content-Type"))
+
+					if err != nil {
+						Logger.Warnf("Failed to detect view. %s", err)
+					} else {
+						Logger.Infof("Detected data view. %s", props)
+						commonOptions.Filters.Pluck = props
+					}
+				}
+			}
+
 			responseText = commonOptions.Filters.Apply(*resp.JSONData, dataProperty, false)
 
 			emptyArray := []byte("[]\n")
@@ -726,7 +746,7 @@ func processResponse(resp *c8y.Response, respError error, commonOptions CommonCo
 				responseText,
 				!isJSONResponse,
 				jsonformatter.WithTrimSpace(true),
-				jsonformatter.WithJSONStreamOutput(isJSONResponse, globalFlagStream, globalCSVOutput),
+				jsonformatter.WithJSONStreamOutput(isJSONResponse, globalFlagStream, Console.IsCSV()),
 				jsonformatter.WithSuffix(len(responseText) > 0, "\n"),
 			)
 		}
@@ -768,7 +788,7 @@ func guessDataProperty(resp *c8y.Response) string {
 	return property
 }
 
-// WriteJSONToConsole writes given json output to the console supporting the common options of select, csv, csvHeader etc.
+// WriteJSONToConsole writes given json output to the console supporting the common options of select, output etc.
 func WriteJSONToConsole(cmd *cobra.Command, property string, output []byte) error {
 	commonOptions, err := getCommonOptions(cmd)
 	if err != nil {
@@ -781,7 +801,7 @@ func WriteJSONToConsole(cmd *cobra.Command, property string, output []byte) erro
 		output,
 		false,
 		jsonformatter.WithTrimSpace(true),
-		jsonformatter.WithJSONStreamOutput(true, globalFlagStream, globalCSVOutput),
+		jsonformatter.WithJSONStreamOutput(true, globalFlagStream, Console.IsCSV()),
 		jsonformatter.WithSuffix(len(output) > 0, "\n"),
 	)
 	return nil
