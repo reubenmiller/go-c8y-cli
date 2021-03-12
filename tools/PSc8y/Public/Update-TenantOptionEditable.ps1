@@ -18,10 +18,8 @@ Update editable property for an existing tenant option
 
 
 #>
-    [cmdletbinding(SupportsShouldProcess = $true,
-                   PositionalBinding=$true,
-                   HelpUri='',
-                   ConfirmImpact = 'High')]
+    [cmdletbinding(PositionalBinding=$true,
+                   HelpUri='')]
     [Alias()]
     [OutputType([object])]
     Param(
@@ -64,18 +62,6 @@ Update editable property for an existing tenant option
     }
 
     Process {
-        $Force = if ($PSBoundParameters.ContainsKey("Force")) { $PSBoundParameters["Force"] } else { $False }
-        if (!$Force -and !$WhatIfPreference) {
-            $items = (PSc8y\Expand-Id $Key)
-
-            $shouldContinue = $PSCmdlet.ShouldProcess(
-                (PSc8y\Get-C8ySessionProperty -Name "tenant"),
-                (Format-ConfirmationMessage -Name $PSCmdlet.MyInvocation.InvocationName -InputObject $items)
-            )
-            if (!$shouldContinue) {
-                return
-            }
-        }
 
         if ($ClientOptions.ConvertToPS) {
             $Key `

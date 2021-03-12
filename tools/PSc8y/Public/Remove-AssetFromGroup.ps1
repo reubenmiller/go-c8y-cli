@@ -17,10 +17,8 @@ Unassign a child device from its parent asset
 
 
 #>
-    [cmdletbinding(SupportsShouldProcess = $true,
-                   PositionalBinding=$true,
-                   HelpUri='',
-                   ConfirmImpact = 'High')]
+    [cmdletbinding(PositionalBinding=$true,
+                   HelpUri='')]
     [Alias()]
     [OutputType([object])]
     Param(
@@ -61,18 +59,6 @@ Unassign a child device from its parent asset
     }
 
     Process {
-        $Force = if ($PSBoundParameters.ContainsKey("Force")) { $PSBoundParameters["Force"] } else { $False }
-        if (!$Force -and !$WhatIfPreference) {
-            $items = (PSc8y\Expand-Id $ChildDevice)
-
-            $shouldContinue = $PSCmdlet.ShouldProcess(
-                (PSc8y\Get-C8ySessionProperty -Name "tenant"),
-                (Format-ConfirmationMessage -Name $PSCmdlet.MyInvocation.InvocationName -InputObject $items)
-            )
-            if (!$shouldContinue) {
-                return
-            }
-        }
 
         if ($ClientOptions.ConvertToPS) {
             $ChildDevice `

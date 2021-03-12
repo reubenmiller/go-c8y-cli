@@ -98,7 +98,9 @@ Inherit common parameters to a custom function. This will add parameters such as
         New-DynamicParam -Name SilentStatusCodes -Type "string" -DPDictionary $Dictionary
 
         # WhatIf options
-        New-DynamicParam -Name WhatIfFormat -Type "string" -ValidateSet @("markdown", "json", "dump", "curl") -DPDictionary $Dictionary
+        New-DynamicParam -Name Dry -Type "switch" -DPDictionary $Dictionary
+        New-DynamicParam -Name DryFormat -Type "string" -ValidateSet @("markdown", "json", "dump", "curl") -DPDictionary $Dictionary
+        # New-DynamicParam -Name WhatIfFormat -Type "string" -ValidateSet @("markdown", "json", "dump", "curl") -DPDictionary $Dictionary
 
         # Workers
         New-DynamicParam -Name Workers -Type "int" -DPDictionary $Dictionary

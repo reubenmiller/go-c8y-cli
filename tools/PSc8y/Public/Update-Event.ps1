@@ -27,10 +27,8 @@ Update custom properties of an existing event (using pipeline)
 
 
 #>
-    [cmdletbinding(SupportsShouldProcess = $true,
-                   PositionalBinding=$true,
-                   HelpUri='',
-                   ConfirmImpact = 'High')]
+    [cmdletbinding(PositionalBinding=$true,
+                   HelpUri='')]
     [Alias()]
     [OutputType([object])]
     Param(
@@ -67,18 +65,6 @@ Update custom properties of an existing event (using pipeline)
     }
 
     Process {
-        $Force = if ($PSBoundParameters.ContainsKey("Force")) { $PSBoundParameters["Force"] } else { $False }
-        if (!$Force -and !$WhatIfPreference) {
-            $items = (PSc8y\Expand-Id $Id)
-
-            $shouldContinue = $PSCmdlet.ShouldProcess(
-                (PSc8y\Get-C8ySessionProperty -Name "tenant"),
-                (Format-ConfirmationMessage -Name $PSCmdlet.MyInvocation.InvocationName -InputObject $items)
-            )
-            if (!$shouldContinue) {
-                return
-            }
-        }
 
         if ($ClientOptions.ConvertToPS) {
             $Id `

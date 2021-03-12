@@ -27,10 +27,8 @@ Remove alarms on the device which are active and created in the last 10 minutes 
 
 
 #>
-    [cmdletbinding(SupportsShouldProcess = $true,
-                   PositionalBinding=$true,
-                   HelpUri='',
-                   ConfirmImpact = 'High')]
+    [cmdletbinding(PositionalBinding=$true,
+                   HelpUri='')]
     [Alias()]
     [OutputType([object])]
     Param(
@@ -108,18 +106,6 @@ Remove alarms on the device which are active and created in the last 10 minutes 
     }
 
     Process {
-        $Force = if ($PSBoundParameters.ContainsKey("Force")) { $PSBoundParameters["Force"] } else { $False }
-        if (!$Force -and !$WhatIfPreference) {
-            $items = (PSc8y\Expand-Id $Device)
-
-            $shouldContinue = $PSCmdlet.ShouldProcess(
-                (PSc8y\Get-C8ySessionProperty -Name "tenant"),
-                (Format-ConfirmationMessage -Name $PSCmdlet.MyInvocation.InvocationName -InputObject $items)
-            )
-            if (!$shouldContinue) {
-                return
-            }
-        }
 
         if ($ClientOptions.ConvertToPS) {
             $Device `

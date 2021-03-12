@@ -29,10 +29,8 @@ Create device using a template
 
 
 #>
-    [cmdletbinding(SupportsShouldProcess = $true,
-                   PositionalBinding=$true,
-                   HelpUri='',
-                   ConfirmImpact = 'High')]
+    [cmdletbinding(PositionalBinding=$true,
+                   HelpUri='')]
     [Alias()]
     [OutputType([object])]
     Param(
@@ -68,18 +66,6 @@ Create device using a template
     }
 
     Process {
-        $Force = if ($PSBoundParameters.ContainsKey("Force")) { $PSBoundParameters["Force"] } else { $False }
-        if (!$Force -and !$WhatIfPreference) {
-            $items = (PSc8y\Expand-Id $Name)
-
-            $shouldContinue = $PSCmdlet.ShouldProcess(
-                (PSc8y\Get-C8ySessionProperty -Name "tenant"),
-                (Format-ConfirmationMessage -Name $PSCmdlet.MyInvocation.InvocationName -InputObject $items)
-            )
-            if (!$shouldContinue) {
-                return
-            }
-        }
 
         if ($ClientOptions.ConvertToPS) {
             $Name `
