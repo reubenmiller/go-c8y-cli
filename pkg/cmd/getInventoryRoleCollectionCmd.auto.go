@@ -14,21 +14,21 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// GetCurrentUserInventoryRoleCmd command
-type GetCurrentUserInventoryRoleCmd struct {
+// GetInventoryRoleCollectionCmd command
+type GetInventoryRoleCollectionCmd struct {
 	*baseCmd
 }
 
-// NewGetCurrentUserInventoryRoleCmd creates a command to Get current user inventory role
-func NewGetCurrentUserInventoryRoleCmd() *GetCurrentUserInventoryRoleCmd {
-	ccmd := &GetCurrentUserInventoryRoleCmd{}
+// NewGetInventoryRoleCollectionCmd creates a command to Get inventory role collection
+func NewGetInventoryRoleCollectionCmd() *GetInventoryRoleCollectionCmd {
+	ccmd := &GetInventoryRoleCollectionCmd{}
 	cmd := &cobra.Command{
-		Use:   "getCurrentUserInventoryRole",
-		Short: "Get current user inventory role",
-		Long:  `Get a specific inventory role of the current user`,
+		Use:   "listInventoryRoles",
+		Short: "Get inventory role collection",
+		Long:  `Get a list of inventory roles`,
 		Example: `
-$ c8y users getCurrentUserInventoryRole --id 12345
-Get an inventory role of the current user
+$ c8y users listInventoryRoles
+Get list of inventory roles
         `,
 		PreRunE: nil,
 		RunE:    ccmd.RunE,
@@ -36,15 +36,14 @@ Get an inventory role of the current user
 
 	cmd.SilenceUsage = true
 
-	cmd.Flags().Int("id", 0, "Role id. Note: lookup by name is not yet supported (required) (accepts pipeline)")
-
 	completion.WithOptions(
 		cmd,
 	)
 
 	flags.WithOptions(
 		cmd,
-		flags.WithExtendedPipelineSupport("id", "id", true),
+		flags.WithExtendedPipelineSupport("", "", false),
+		flags.WithCollectionProperty("roles"),
 	)
 
 	// Required flags
@@ -55,7 +54,7 @@ Get an inventory role of the current user
 }
 
 // RunE executes the command
-func (n *GetCurrentUserInventoryRoleCmd) RunE(cmd *cobra.Command, args []string) error {
+func (n *GetInventoryRoleCollectionCmd) RunE(cmd *cobra.Command, args []string) error {
 	var err error
 	inputIterators, err := flags.NewRequestInputIterators(cmd)
 	if err != nil {
@@ -118,12 +117,11 @@ func (n *GetCurrentUserInventoryRoleCmd) RunE(cmd *cobra.Command, args []string)
 	}
 
 	// path parameters
-	path := flags.NewStringTemplate("/user/inventoryroles/{id}")
+	path := flags.NewStringTemplate("/user/inventoryroles")
 	err = flags.WithPathParameters(
 		cmd,
 		path,
 		inputIterators,
-		flags.WithIntValue("id", "id"),
 	)
 	if err != nil {
 		return err

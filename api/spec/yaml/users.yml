@@ -76,9 +76,9 @@ endpoints:
 
 
   # Inventory Roles
-  - name: getCurrentUserInventoryRoleCollection
-    description: Get current user inventory role collection
-    descriptionLong: Get a list of inventory roles currently assigned to the user
+  - name: getInventoryRoleCollection
+    description: Get inventory role collection
+    descriptionLong: Get a list of inventory roles
     method: GET
     path: /user/inventoryroles
     accept: 'application/vnd.com.nsn.cumulocity.inventoryrolecollection+json'
@@ -86,34 +86,34 @@ endpoints:
     collectionProperty: 'roles'
     alias:
         go: listInventoryRoles
-        powershell: Get-CurrentUserInventoryRoleCollection
+        powershell: Get-InventoryRoleCollection
     examples:
       powershell:
-        - description: Get the current users inventory roles
-          command: Get-CurrentUserInventoryRoleCollection
+        - description: Get list of inventory roles
+          command: Get-InventoryRoleCollection
       go:
-        - description: Get the current user
-          command: c8y currentUser listInventoryRoles
+        - description: Get list of inventory roles
+          command: c8y users listInventoryRoles
 
-  - name: getCurrentUserInventoryRole
-    description: Get current user inventory role
-    descriptionLong: Get a specific inventory role of the current user
+  - name: getInventoryRole
+    description: Get inventory role
+    descriptionLong: Get a specific inventory role
     method: GET
     path: /user/inventoryroles/{id}
     accept: 'application/vnd.com.nsn.cumulocity.inventoryrole+json'
     alias:
-        go: getCurrentUserInventoryRole
-        powershell: Get-CurrentUserInventoryRole
+        go: getInventoryRole
+        powershell: Get-InventoryRole
     examples:
       powershell:
-        - description: Get an inventory role of the current user (using pipeline)
-          command: Get-CurrentUserInventoryRoleCollection -PageSize 1 | Get-CurrentUserInventoryRole
+        - description: Get an inventory role (using pipeline)
+          command: Get-InventoryRoleCollection -PageSize 1 | Get-InventoryRole
       go:
-        - description: Get an inventory role of the current user
-          command: c8y users getCurrentUserInventoryRole --id 12345
+        - description: Get an inventory role
+          command: c8y users getInventoryRole --id 12345
     pathParameters:
       - name: id
-        type: integer
+        type: string
         required: true
         pipeline: true
         description: 'Role id. Note: lookup by name is not yet supported'

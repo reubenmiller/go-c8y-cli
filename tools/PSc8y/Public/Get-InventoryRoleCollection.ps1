@@ -1,19 +1,19 @@
 ﻿# Code generated from specification version 1.0.0: DO NOT EDIT
-Function Get-CurrentUserInventoryRoleCollection {
+Function Get-InventoryRoleCollection {
 <#
 .SYNOPSIS
-Get current user inventory role collection
+Get inventory role collection
 
 .DESCRIPTION
-Get a list of inventory roles currently assigned to the user
+Get a list of inventory roles
 
 .LINK
 c8y users listInventoryRoles
 
 .EXAMPLE
-PS> Get-CurrentUserInventoryRoleCollection
+PS> Get-InventoryRoleCollection
 
-Get the current users inventory roles
+Get list of inventory roles
 
 
 #>

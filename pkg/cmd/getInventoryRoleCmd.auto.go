@@ -14,21 +14,21 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// GetCurrentUserInventoryRoleCollectionCmd command
-type GetCurrentUserInventoryRoleCollectionCmd struct {
+// GetInventoryRoleCmd command
+type GetInventoryRoleCmd struct {
 	*baseCmd
 }
 
-// NewGetCurrentUserInventoryRoleCollectionCmd creates a command to Get current user inventory role collection
-func NewGetCurrentUserInventoryRoleCollectionCmd() *GetCurrentUserInventoryRoleCollectionCmd {
-	ccmd := &GetCurrentUserInventoryRoleCollectionCmd{}
+// NewGetInventoryRoleCmd creates a command to Get inventory role
+func NewGetInventoryRoleCmd() *GetInventoryRoleCmd {
+	ccmd := &GetInventoryRoleCmd{}
 	cmd := &cobra.Command{
-		Use:   "listInventoryRoles",
-		Short: "Get current user inventory role collection",
-		Long:  `Get a list of inventory roles currently assigned to the user`,
+		Use:   "getInventoryRole",
+		Short: "Get inventory role",
+		Long:  `Get a specific inventory role`,
 		Example: `
-$ c8y currentUser listInventoryRoles
-Get the current user
+$ c8y users getInventoryRole --id 12345
+Get an inventory role
         `,
 		PreRunE: nil,
 		RunE:    ccmd.RunE,
@@ -36,14 +36,15 @@ Get the current user
 
 	cmd.SilenceUsage = true
 
+	cmd.Flags().String("id", "", "Role id. Note: lookup by name is not yet supported (required) (accepts pipeline)")
+
 	completion.WithOptions(
 		cmd,
 	)
 
 	flags.WithOptions(
 		cmd,
-		flags.WithExtendedPipelineSupport("", "", false),
-		flags.WithCollectionProperty("roles"),
+		flags.WithExtendedPipelineSupport("id", "id", true),
 	)
 
 	// Required flags
@@ -54,7 +55,7 @@ Get the current user
 }
 
 // RunE executes the command
-func (n *GetCurrentUserInventoryRoleCollectionCmd) RunE(cmd *cobra.Command, args []string) error {
+func (n *GetInventoryRoleCmd) RunE(cmd *cobra.Command, args []string) error {
 	var err error
 	inputIterators, err := flags.NewRequestInputIterators(cmd)
 	if err != nil {
@@ -117,11 +118,12 @@ func (n *GetCurrentUserInventoryRoleCollectionCmd) RunE(cmd *cobra.Command, args
 	}
 
 	// path parameters
-	path := flags.NewStringTemplate("/user/inventoryroles")
+	path := flags.NewStringTemplate("/user/inventoryroles/{id}")
 	err = flags.WithPathParameters(
 		cmd,
 		path,
 		inputIterators,
+		flags.WithStringValue("id", "id"),
 	)
 	if err != nil {
 		return err

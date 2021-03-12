@@ -1,12 +1,12 @@
 ﻿. $PSScriptRoot/imports.ps1
 
-Describe -Name "Get-CurrentUserInventoryRoleCollection" {
+Describe -Name "Get-InventoryRoleCollection" {
     BeforeEach {
 
     }
 
-    It "Get the current users inventory roles" {
-        $Response = PSc8y\Get-CurrentUserInventoryRoleCollection
+    It "Get list of inventory roles" {
+        $Response = PSc8y\Get-InventoryRoleCollection
         $LASTEXITCODE | Should -Be 0
         $Response | Should -Not -BeNullOrEmpty
     }

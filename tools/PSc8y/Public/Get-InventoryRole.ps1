@@ -1,19 +1,19 @@
 ﻿# Code generated from specification version 1.0.0: DO NOT EDIT
-Function Get-CurrentUserInventoryRole {
+Function Get-InventoryRole {
 <#
 .SYNOPSIS
-Get current user inventory role
+Get inventory role
 
 .DESCRIPTION
-Get a specific inventory role of the current user
+Get a specific inventory role
 
 .LINK
-c8y users getCurrentUserInventoryRole
+c8y users getInventoryRole
 
 .EXAMPLE
-PS> Get-CurrentUserInventoryRoleCollection -PageSize 1 | Get-CurrentUserInventoryRole
+PS> Get-InventoryRoleCollection -PageSize 1 | Get-InventoryRole
 
-Get an inventory role of the current user (using pipeline)
+Get an inventory role (using pipeline)
 
 
 #>
@@ -40,7 +40,7 @@ Get an inventory role of the current user (using pipeline)
             Use-CallerPreference -Cmdlet $PSCmdlet -SessionState $ExecutionContext.SessionState
         }
 
-        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "users getCurrentUserInventoryRole"
+        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "users getInventoryRole"
         $ClientOptions = Get-ClientOutputOption $PSBoundParameters
         $TypeOptions = @{
             Type = "application/vnd.com.nsn.cumulocity.inventoryrole+json"
@@ -54,13 +54,13 @@ Get an inventory role of the current user (using pipeline)
         if ($ClientOptions.ConvertToPS) {
             $Id `
             | Group-ClientRequests `
-            | c8y users getCurrentUserInventoryRole $c8yargs `
+            | c8y users getInventoryRole $c8yargs `
             | ConvertFrom-ClientOutput @TypeOptions
         }
         else {
             $Id `
             | Group-ClientRequests `
-            | c8y users getCurrentUserInventoryRole $c8yargs
+            | c8y users getInventoryRole $c8yargs
         }
         
     }

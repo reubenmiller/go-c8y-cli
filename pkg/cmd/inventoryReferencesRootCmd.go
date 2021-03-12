@@ -13,7 +13,7 @@ func NewInventoryReferencesRootCmd() *InventoryReferencesCmd {
 
 	cmd := &cobra.Command{
 		Use:   "inventoryReferences",
-		Short: "Cumulocity managed objects",
+		Short: "Cumulocity inventory references",
 		Long:  `REST endpoint to interact with Cumulocity managed objects`,
 	}
 

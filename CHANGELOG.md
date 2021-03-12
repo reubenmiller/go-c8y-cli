@@ -46,6 +46,10 @@ None :)
 
 No unreleased features
 
+* Fixed inventory roles commands
+    * `c8y users getCurrentUserInventoryRoleCollection` => `c8y users listInventoryRoles`
+    * `c8y users getCurrentUserInventoryRole` => `c8y users getInventoryRole`
+
 * Show message to user if deleting on terminal (i.e. DELETED NO Content, some kind of feedback so the user knows that something has happened) - and for commands using --noAccept
 
 * Added completions for `template` parameters
