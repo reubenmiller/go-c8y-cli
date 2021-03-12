@@ -433,7 +433,7 @@ func Test_DebugCommand(t *testing.T) {
 	stdin := bytes.NewBufferString(`{"id": "87551"}` + "\n" + `{"id": "1111"}` + "\n")
 	cmd.SetIn(stdin)
 	cmdtext := `
-	alarms create --type "myType" --text "Test alarm" --severity WARNING --dry -v --debug --confirm
+	alarms create --type "myType" --text "Test alarm" --severity WARNING --dry -v --debug --prompt
 	`
 	cmdErr := ExecuteCmd(cmd, strings.TrimSpace(cmdtext))
 	cmd.checkCommandError(cmdErr)

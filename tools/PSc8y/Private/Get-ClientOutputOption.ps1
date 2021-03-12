@@ -10,16 +10,12 @@ Function Get-ClientOutputOption {
     )
 
     Process {
-        $UseNativeOutput = $BoundParameters["Output"] `
-            -or $BoundParameters["IncludeAll"] `
-            -or $BoundParameters["CsvFormat"] `
-            -or $BoundParameters["ExcelFormat"] `
-            -or $BoundParameters["Progress"]
-
+        $ConvertToPS = $BoundParameters["AsHashTable"] `
+            -or $BoundParameters["AsPSObject"]
         $UsePowershellTypes = $BoundParameters["Select"]
 
         [PSCustomObject]@{
-            ConvertToPS = !$UseNativeOutput
+            ConvertToPS = $ConvertToPS
             UsePowershellTypes = $UsePowershellTypes
         }
     }   

@@ -524,7 +524,7 @@ func configureRootCmd() {
 
 	// confirmation
 	rootCmd.PersistentFlags().BoolVarP(&globalFlagForce, "force", "f", false, "Do not prompt for confirmation")
-	rootCmd.PersistentFlags().BoolVar(&globalFlagConfirm, "confirm", false, "Prompt for confirmation")
+	rootCmd.PersistentFlags().BoolVar(&globalFlagConfirm, "prompt", false, "Prompt for confirmation")
 	rootCmd.PersistentFlags().StringVar(&globalFlagConfirmText, "confirmText", "", "Custom confirmation text")
 
 	completion.WithOptions(
