@@ -217,8 +217,8 @@ func runBatched(requestIterator *RequestIterator, commonOptions CommonCommandOpt
 					// build confirm text from cmd structure
 					operation = fmt.Sprintf("%s %s", os.Args[2], strings.TrimRight(os.Args[1], "s"))
 				}
-				promptMessage, _ := getConfirmationMessage(fmt.Sprintf("(job: %d) %s", jobID, operation), request, input)
-				confirmResult, err := prompt.Confirm(promptMessage, "tenant "+client.TenantName, prompt.ConfirmYes.String(), false)
+				promptMessage, _ := getConfirmationMessage(operation, request, input)
+				confirmResult, err := prompt.Confirm(fmt.Sprintf("(job: %d)", jobID), promptMessage, "tenant "+client.TenantName, prompt.ConfirmYes.String(), false)
 
 				switch confirmResult {
 				case prompt.ConfirmYesToAll:

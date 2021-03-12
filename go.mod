@@ -1,6 +1,7 @@
 module github.com/reubenmiller/go-c8y-cli
 
 require (
+	github.com/AlecAivazis/survey/v2 v2.2.9 // indirect
 	github.com/araddon/dateparse v0.0.0-20210207001429-0eec95c9db7e
 	github.com/facette/natsort v0.0.0-20181210072756-2cd4dd1e2dcb
 	github.com/fatih/color v1.10.0
