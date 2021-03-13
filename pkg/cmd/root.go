@@ -530,7 +530,7 @@ func configureRootCmd() {
 	rootCmd.PersistentFlags().Float64Var(&globalFlagTimeout, "timeout", float64(10*60), "Timeout in seconds")
 
 	// output
-	rootCmd.PersistentFlags().StringVarP(&globalFlagOutputFormat, "output", "o", defaultOutputFormat, "Output format (i.e. table, json, csv, csvheader")
+	rootCmd.PersistentFlags().StringVarP(&globalFlagOutputFormat, "output", "o", defaultOutputFormat, "Output format i.e. table, json, csv, csvheader")
 	rootCmd.PersistentFlags().StringVar(&globalFlagOutputFile, "outputFile", "", "Output file")
 
 	// confirmation
