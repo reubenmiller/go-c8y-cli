@@ -89,8 +89,20 @@ func FlattenString(nestedstr, prefix string, style SeparatorStyle) (string, erro
 
 func flatten(top bool, flatMap map[string]interface{}, nested interface{}, prefix string, style SeparatorStyle) error {
 	assign := func(newKey string, v interface{}) error {
-		switch v.(type) {
-		case map[string]interface{}, []interface{}:
+		switch typedV := v.(type) {
+		case map[string]interface{}:
+			if len(typedV) == 0 {
+				flatMap[newKey] = typedV
+				return nil
+			}
+			if err := flatten(false, flatMap, v, newKey, style); err != nil {
+				return err
+			}
+		case []interface{}:
+			if len(typedV) == 0 {
+				flatMap[newKey] = typedV
+				return nil
+			}
 			if err := flatten(false, flatMap, v, newKey, style); err != nil {
 				return err
 			}
@@ -105,14 +117,23 @@ func flatten(top bool, flatMap map[string]interface{}, nested interface{}, prefi
 
 	switch nestedValue := nested.(type) {
 	case map[string]interface{}:
-		for k, v := range nestedValue {
-			newKey := enkey(top, prefix, k, style)
-			err = assign(newKey, v)
+		if len(nestedValue) == 0 {
+			err = assign(prefix, nestedValue)
+		} else {
+			for k, v := range nestedValue {
+				newKey := enkey(top, prefix, k, style)
+				err = assign(newKey, v)
+			}
 		}
+
 	case []interface{}:
-		for i, v := range nestedValue {
-			newKey := enkey(top, prefix, strconv.Itoa(i), style)
-			err = assign(newKey, v)
+		if len(nestedValue) == 0 {
+			err = assign(prefix, nestedValue)
+		} else {
+			for i, v := range nestedValue {
+				newKey := enkey(top, prefix, strconv.Itoa(i), style)
+				err = assign(newKey, v)
+			}
 		}
 	default:
 		return NotValidInputError
