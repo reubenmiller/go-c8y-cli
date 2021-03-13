@@ -27,6 +27,7 @@ type TableView struct {
 	ColumnPadding  int
 	Data           gjson.Result
 	TableData      [][]string
+	EnableColor    bool
 }
 
 func (v *TableView) getValue(value gjson.Result) []string {
@@ -171,13 +172,19 @@ func (v *TableView) Render(jsonData []byte, withHeader bool) {
 	}
 
 	maxWidth := 0
+	headerColors := []tablewriter.Colors{}
 	for i, width := range v.ColumnWidths {
+		headerColors = append(headerColors, tablewriter.Colors{tablewriter.FgCyanColor})
 		table.SetColMinWidth(i, width)
 		if width > maxWidth {
 			maxWidth = width
 		}
 	}
 	table.SetColWidth(maxWidth)
+
+	if withHeader && v.EnableColor {
+		table.SetHeaderColor(headerColors...)
+	}
 
 	table.SetHeaderAlignment(tablewriter.ALIGN_LEFT)
 	table.SetAlignment(tablewriter.ALIGN_LEFT)

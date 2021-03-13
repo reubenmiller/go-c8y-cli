@@ -67,6 +67,7 @@ func NewConsole(w io.Writer, header func([]string) []byte) *Console {
 			MinColumnWidth: 2,
 			MaxColumnWidth: 80,
 			ColumnPadding:  5,
+			EnableColor:    false,
 		},
 		Format: OutputTable,
 	}
@@ -129,6 +130,7 @@ func (c *Console) Write(b []byte) (n int, err error) {
 	}
 	showHeader := c.count == 0
 	c.count++
+	c.TableViewer.EnableColor = c.Colorized
 
 	if bt := bytes.TrimSpace(b); c.IsJSON() && (jsonUtilities.IsJSONArray(bt) || jsonUtilities.IsJSONObject(bt)) {
 
