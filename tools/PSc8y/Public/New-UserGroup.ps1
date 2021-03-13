@@ -28,6 +28,11 @@ Create a user group
         [object[]]
         $Name,
 
+        # List of device permissions
+        [Parameter()]
+        [string[]]
+        $DeviceProperties,
+
         # Tenant
         [Parameter()]
         [object]

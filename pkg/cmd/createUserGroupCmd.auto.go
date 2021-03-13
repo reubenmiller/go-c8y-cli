@@ -37,6 +37,8 @@ Create a user group
 
 	cmd.Flags().String("tenant", "", "Tenant")
 	cmd.Flags().String("name", "", "Group name (accepts pipeline)")
+	cmd.Flags().StringSlice("deviceProperties", []string{""}, "List of device permissions")
+	addDataFlag(cmd)
 	addProcessingModeFlag(cmd)
 
 	completion.WithOptions(
@@ -111,6 +113,7 @@ func (n *CreateUserGroupCmd) RunE(cmd *cobra.Command, args []string) error {
 		inputIterators,
 		WithDataValue(),
 		flags.WithStringValue("name", "name"),
+		flags.WithStringSliceValues("deviceProperties", "deviceProperties", ""),
 		WithTemplateValue(),
 		WithTemplateVariablesValue(),
 	)
