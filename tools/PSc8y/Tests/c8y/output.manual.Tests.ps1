@@ -22,22 +22,20 @@ Describe -Name "c8y format" {
         $output = c8y applications list --output table --pageSize 5
         $LASTEXITCODE | Should -Be 0
         $output | Should -Not -BeNullOrEmpty
-        $output[0] | Should -Match "^id\s+name\s+key\s+"
-        $output[1] | Should -Match "^--\s+----\s+---\s+"
-        $output[2] | Should -Match "^\d+\s+\S+\s+\S+\s+"
-        $csv = $output | ConvertFrom-Csv -Delimiter "`t"
-        $csv | Should -HaveCount (1+5)
+        $output[0] | Should -Match "^|\s*id\s+|\s*name\s*|\s*key\s*|$"
+        $output[1] | Should -Match "^|-+|-+|-+|$"
+        $output[2] | Should -Match "^|\s*\d+\s*|\s*\S+\s*|\s*\S+\s*|$"
+        $output | Should -HaveCount (5+2)
     }
 
     It "Displays output as a table with custom columns" {
         $output = c8y applications list --output table --pageSize 5 --select id,name
         $LASTEXITCODE | Should -Be 0
         $output | Should -Not -BeNullOrEmpty
-        $output[0] | Should -Match "^id\s+name\s+$"
-        $output[1] | Should -Match "^--\s+----\s+$"
-        $output[2] | Should -Match "^\d+\s+\S+\s+$"
-        $csv = $output | ConvertFrom-Csv -Delimiter "`t"
-        $csv | Should -HaveCount (1+5)
+        $output[0] | Should -Match "^|\s*id\s+|\s*name\s*|$"
+        $output[1] | Should -Match "^|-+|-+|-+|$"
+        $output[2] | Should -Match "^|\s*\d+\s*|\s*\S+\s*|$"
+        $output | Should -HaveCount (2+5)
     }
 
     AfterEach {
