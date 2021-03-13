@@ -8,10 +8,7 @@ Get the common parameters which can be added to a function which extends PSc8y f
 
 .EXAMPLE
 Function Get-MyObject {
-    [cmdletbinding(
-        SupportsShouldProcess = $True,
-        ConfirmImpact = "None"
-    )]
+    [cmdletbinding()]
     Param()
 
     DynamicParam {
@@ -100,7 +97,6 @@ Inherit common parameters to a custom function. This will add parameters such as
         # WhatIf options
         New-DynamicParam -Name Dry -Type "switch" -DPDictionary $Dictionary
         New-DynamicParam -Name DryFormat -Type "string" -ValidateSet @("markdown", "json", "dump", "curl") -DPDictionary $Dictionary
-        # New-DynamicParam -Name WhatIfFormat -Type "string" -ValidateSet @("markdown", "json", "dump", "curl") -DPDictionary $Dictionary
 
         # Workers
         New-DynamicParam -Name Workers -Type "int" -DPDictionary $Dictionary

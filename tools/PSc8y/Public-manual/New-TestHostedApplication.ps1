@@ -11,10 +11,7 @@ New-TestHostedApplication
 
 Create a test hosted web application
 #>
-    [cmdletbinding(
-        SupportsShouldProcess = $true,
-        ConfirmImpact = "High"
-    )]
+    [cmdletbinding()]
     Param(
         # Hosted application name
         [string] $Name,

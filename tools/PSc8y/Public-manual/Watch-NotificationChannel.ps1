@@ -14,10 +14,8 @@ PS> Function Watch-NotificationChannel -Device 12345 -DurationSec 90
 Watch all types of notifications for a device for 90 seconds
 
 #>
-    [cmdletbinding(SupportsShouldProcess = $true,
-                   PositionalBinding=$true,
-                   HelpUri='',
-                   ConfirmImpact = 'None')]
+    [cmdletbinding(PositionalBinding=$true,
+                   HelpUri='')]
     [Alias()]
     [OutputType([object])]
     Param(
@@ -58,14 +56,6 @@ Watch all types of notifications for a device for 90 seconds
     }
 
     Process {
-        if (!$Force -and
-            !$WhatIfPreference -and
-            !$PSCmdlet.ShouldProcess(
-                (PSc8y\Get-C8ySessionProperty -Name "tenant"),
-                (Format-ConfirmationMessage -Name $PSCmdlet.MyInvocation.InvocationName -InputObject $Device)
-            )) {
-            return
-        }
 
         if ($ClientOptions.ConvertToPS) {
             c8y realtime subscribeAll $c8yargs `

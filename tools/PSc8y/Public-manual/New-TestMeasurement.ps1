@@ -18,10 +18,7 @@ New-TestMeasurement -Device "myExistingDevice"
 
 Create a measurement on the existing device "myExistingDevice"
 #>
-    [cmdletbinding(
-        SupportsShouldProcess = $true,
-        ConfirmImpact = "High"
-    )]
+    [cmdletbinding()]
     Param(
         # Device id, name or object. If left blank then a randomized device will be created
         [Parameter(

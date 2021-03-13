@@ -21,10 +21,7 @@ New-TestDeviceGroup -TotalDevices 10
 
 Create a test device group with 10 newly created devices
 #>
-    [cmdletbinding(
-        SupportsShouldProcess = $true,
-        ConfirmImpact = "High"
-    )]
+    [cmdletbinding()]
     Param(
         # Device group name prefix which is added before the randomized string
         [Parameter(

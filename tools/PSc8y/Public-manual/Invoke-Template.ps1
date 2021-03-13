@@ -28,10 +28,7 @@ Function Invoke-Template {
     String
     
     #>
-    [cmdletbinding(SupportsShouldProcess = $false,
-        PositionalBinding = $true,
-        HelpUri = '',
-        ConfirmImpact = 'None')]
+    [cmdletbinding(PositionalBinding=$true, HelpUri='')]
     [Alias()]
     [OutputType([object])]
     Param(    

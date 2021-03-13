@@ -18,10 +18,7 @@ New-TestEvent -Device "myExistingDevice"
 
 Create an event on the existing device "myExistingDevice"
 #>
-    [cmdletbinding(
-        SupportsShouldProcess = $true,
-        ConfirmImpact = "High"
-    )]
+    [cmdletbinding()]
     Param(
         # Device id, name or object. If left blank then a randomized device will be created
         [Parameter(
@@ -71,7 +68,7 @@ Create an event on the existing device "myExistingDevice"
         }
         
         # Fake device (if whatif prevented it from being created)
-        if ($WhatIfPreference -and $null -eq $iDevice) {
+        if ($Dry -and $null -eq $iDevice) {
             $iDevice = @{ id = "12345" }
         }
         
@@ -86,7 +83,7 @@ Create an event on the existing device "myExistingDevice"
             -Force:$Force
         
         if ($WithBinary) {
-            if ($WhatIfPreference -and $null -eq $iDevice) {
+            if ($Dry -and $null -eq $iDevice) {
                 $c8yEvent = @{ id = "12345" }
             }
             

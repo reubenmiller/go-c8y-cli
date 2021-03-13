@@ -16,10 +16,7 @@ Find all devices with their names starting with 'roomUpperFloor_'
 
 
 #>
-    [cmdletbinding(SupportsShouldProcess = $true,
-                   PositionalBinding=$true,
-                   HelpUri='',
-                   ConfirmImpact = 'None')]
+    [cmdletbinding(PositionalBinding=$true, HelpUri='')]
     [Alias()]
     [OutputType([object])]
     Param(

@@ -11,10 +11,7 @@ Describe -Name "Inherit-Parameters" {
 
     It "Force and WhatIf parameters are automatically inherited to module cmdlets" {
         Function Test-MyCustomFunction {
-            [cmdletbinding(
-                SupportsShouldProcess = $true,
-                ConfirmImpact = "High"
-            )]
+            [cmdletbinding()]
             Param(
                 [switch] $Force
             )
@@ -79,10 +76,7 @@ Describe -Name "Inherit-Parameters" {
 
     It "WhatIf inheritance can be disabled via an environment variable allow user to control it themselves" {
         Function Test-MyCustomFunction {
-            [cmdletbinding(
-                SupportsShouldProcess = $true,
-                ConfirmImpact = "High"
-            )]
+            [cmdletbinding()]
             Param(
                 [switch] $Force
             )

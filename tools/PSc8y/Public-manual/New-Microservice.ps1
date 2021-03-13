@@ -42,10 +42,7 @@ The microservice's bootstrap credentials can be retrieved using `Get-Microservic
 This example is usefuly for local development only, when you want to run the microservice locally (not hosted in Cumulocity).
 
 #>
-    [cmdletbinding(SupportsShouldProcess = $true,
-                   PositionalBinding=$true,
-                   HelpUri='',
-                   ConfirmImpact = 'High')]
+    [cmdletbinding(PositionalBinding=$true, HelpUri='')]
     [Alias()]
     [OutputType([object])]
     Param(
@@ -120,7 +117,6 @@ This example is usefuly for local development only, when you want to run the mic
     }
 
     Process {
-        $Force = if ($PSBoundParameters.ContainsKey("Force")) { $PSBoundParameters["Force"] } else { $False }
 
         foreach ($item in $File) {
             $ic8yArgs = New-Object System.Collections.ArrayList
@@ -128,16 +124,6 @@ This example is usefuly for local development only, when you want to run the mic
                 [void]$ic8yArgs.AddRange(@("--file", (Resolve-Path $item).ProviderPath))
             }
             [void]$ic8yArgs.AddRange($c8yargs)
-
-            if (!$Force -and !$WhatIfPreference) {
-                $shouldContinue = $PSCmdlet.ShouldProcess(
-                    (PSc8y\Get-C8ySessionProperty -Name "tenant"),
-                    (Format-ConfirmationMessage -Name $PSCmdlet.MyInvocation.InvocationName -InputObject $item)
-                )
-                if (!$shouldContinue) {
-                    continue
-                }
-            }
 
             if ($ClientOptions.ConvertToPS) {
                 c8y microservices create $ic8yArgs `

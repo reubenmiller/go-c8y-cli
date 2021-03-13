@@ -14,10 +14,8 @@ PS> Watch-ManagedObject -Device 12345
 Watch all managedObjects for a device
 
 #>
-    [cmdletbinding(SupportsShouldProcess = $true,
-                   PositionalBinding=$true,
-                   HelpUri='',
-                   ConfirmImpact = 'None')]
+    [cmdletbinding(PositionalBinding=$true,
+                   HelpUri='')]
     [Alias()]
     [OutputType([object])]
     Param(
@@ -55,14 +53,6 @@ Watch all managedObjects for a device
     }
 
     Process {
-        if (!$Force -and
-            !$WhatIfPreference -and
-            !$PSCmdlet.ShouldProcess(
-                (PSc8y\Get-C8ySessionProperty -Name "tenant"),
-                (Format-ConfirmationMessage -Name $PSCmdlet.MyInvocation.InvocationName -InputObject $Device)
-            )) {
-            return
-        }
 
         if ($ClientOptions.ConvertToPS) {
             c8y inventory subscribe $c8yargs `

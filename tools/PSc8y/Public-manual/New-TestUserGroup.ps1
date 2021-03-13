@@ -11,10 +11,7 @@ New-TestUserGroup -Name mygroup
 
 Create a new user group with the prefix "mygroup". A random postfix will be added to it
 #>
-    [cmdletbinding(
-        SupportsShouldProcess = $true,
-        ConfirmImpact = "High"
-    )]
+    [cmdletbinding()]
     Param(
         # Name of the user group. A random postfix will be added to it to make it unique
         [Parameter(

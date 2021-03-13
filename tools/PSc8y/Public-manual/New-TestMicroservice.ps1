@@ -3,10 +3,7 @@ Function New-TestMicroservice {
 .SYNOPSIS
 Create a new test microservice
 #>
-    [cmdletbinding(
-        SupportsShouldProcess = $true,
-        ConfirmImpact = "High"
-    )]
+    [cmdletbinding()]
     Param(
         # Name of the microservice
         [string] $Name,

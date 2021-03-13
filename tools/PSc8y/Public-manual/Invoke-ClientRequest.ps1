@@ -18,9 +18,7 @@ filtering can be done on the response (i.e. using `Where-Object`)
 
 ```powershell
 Function Invoke-MyMicroserviceEndpoint {
-    [cmdletbinding(
-        SupportsShouldProcess = $true
-    )]
+    [cmdletbinding()]
     Param(
         [hashtable] $Body
     )
@@ -29,10 +27,6 @@ Function Invoke-MyMicroserviceEndpoint {
         Method = "POST"
         Uri = "/service/mymicroservice"
         Data = $Body
-
-        # Add these to support -WhatIf and -Verbose parameters
-        WhatIfPreference = $WhatIfPreference `
-        VerbosePreference = $VerbosePreference
     }
 
     # Send request
@@ -66,9 +60,7 @@ Invoke-ClientRequest -Uri "/inventory/managedObjects" -Method "post" -Data "name
 
 Create a new managed object but add a custom accept header value
 #>
-    [cmdletbinding(
-        SupportsShouldProcess = $true,
-        ConfirmImpact = "None")]
+    [cmdletbinding()]
     Param(
         # Uri (or partial uri). i.e. /application/applications
         [Parameter(

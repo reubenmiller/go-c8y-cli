@@ -26,7 +26,6 @@ Function ConvertFrom-ClientOutput {
     Begin {
         $Depth = if ($BoundParameters.ContainsKey("Depth")) { $BoundParameters["Depth"] } else { 100 }
         $AsHashTable = if ($BoundParameters.ContainsKey("AsHashTable")) { $BoundParameters["AsHashTable"] } else { $false }
-        $WithError = $BoundParameters["WithError"]
         $Raw = $BoundParameters["WithTotalPages"] `
             -or $BoundParameters["Raw"]
         

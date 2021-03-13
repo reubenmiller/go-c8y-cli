@@ -14,10 +14,8 @@ PS> Watch-Notification -Channel "/measurements/*" -DurationSec 90
 Watch all measurements for 90 seconds
 
 #>
-    [cmdletbinding(SupportsShouldProcess = $true,
-                   PositionalBinding=$true,
-                   HelpUri='',
-                   ConfirmImpact = 'None')]
+    [cmdletbinding(PositionalBinding=$true,
+                   HelpUri='')]
     [Alias()]
     [OutputType([object])]
     Param(
@@ -58,14 +56,6 @@ Watch all measurements for 90 seconds
     }
 
     Process {
-        if (!$Force -and
-            !$WhatIfPreference -and
-            !$PSCmdlet.ShouldProcess(
-                (PSc8y\Get-C8ySessionProperty -Name "tenant"),
-                (Format-ConfirmationMessage -Name $PSCmdlet.MyInvocation.InvocationName -InputObject $item)
-            )) {
-            continue
-        }
 
         if ($ClientOptions.ConvertToPS) {
             c8y realtime subscribe $c8yargs `

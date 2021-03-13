@@ -20,10 +20,7 @@ Get-DeviceGroupCollection -Query "creationTime.date gt '2020-01-01T00:00:00Z'"
 Get a list of devices groups which have been created more recently than 2020-01-01
 
 #>
-    [cmdletbinding(SupportsShouldProcess = $true,
-                   PositionalBinding=$true,
-                   HelpUri='',
-                   ConfirmImpact = 'None')]
+    [cmdletbinding(PositionalBinding=$true, HelpUri='')]
     [Alias()]
     [OutputType([object])]
     Param(

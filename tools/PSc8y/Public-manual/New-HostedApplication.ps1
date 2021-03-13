@@ -15,10 +15,7 @@ New-HostedApplication -Name $App.id -File "myapp.zip"
 Upload application zip file containing the web application
 
 #>
-    [cmdletbinding(SupportsShouldProcess = $true,
-                   PositionalBinding=$true,
-                   HelpUri='',
-                   ConfirmImpact = 'High')]
+    [cmdletbinding(PositionalBinding=$true, HelpUri='')]
     [Alias()]
     [OutputType([object])]
     Param(
@@ -115,24 +112,12 @@ Upload application zip file containing the web application
             $File = @("")
         }
 
-        $Force = if ($PSBoundParameters.ContainsKey("Force")) { $PSBoundParameters["Force"] } else { $False }
-
         foreach ($item in $File) {
             $ic8yArgs = New-Object System.Collections.ArrayList
             if ($item) {
                 [void]$ic8yArgs.AddRange(@("--file", (Resolve-Path $item).ProviderPath))
             }
             [void]$ic8yArgs.AddRange($c8yargs)
-
-            if (!$Force -and !$WhatIfPreference) {
-                $shouldContinue = $PSCmdlet.ShouldProcess(
-                    (PSc8y\Get-C8ySessionProperty -Name "tenant"),
-                    (Format-ConfirmationMessage -Name $PSCmdlet.MyInvocation.InvocationName -InputObject $item)
-                )
-                if (!$shouldContinue) {
-                    continue
-                }
-            }
 
             if ($ClientOptions.ConvertToPS) {
                 c8y applications createHostedApplication $ic8yArgs `

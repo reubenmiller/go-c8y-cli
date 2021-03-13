@@ -26,10 +26,8 @@ Subscribe to realtime alarm notifications for a device, and update the alarm sev
 if the alarm is active and was first created more than 1 day ago.
 
 #>
-    [cmdletbinding(SupportsShouldProcess = $true,
-                   PositionalBinding=$true,
-                   HelpUri='',
-                   ConfirmImpact = 'None')]
+    [cmdletbinding(PositionalBinding=$true,
+                   HelpUri='')]
     [Alias()]
     [OutputType([object])]
     Param(
@@ -70,14 +68,6 @@ if the alarm is active and was first created more than 1 day ago.
     }
 
     Process {
-        if (!$Force -and
-            !$WhatIfPreference -and
-            !$PSCmdlet.ShouldProcess(
-                (PSc8y\Get-C8ySessionProperty -Name "tenant"),
-                (Format-ConfirmationMessage -Name $PSCmdlet.MyInvocation.InvocationName -InputObject $Device)
-            )) {
-            return
-        }
 
         if ($ClientOptions.ConvertToPS) {
             c8y alarms subscribe $c8yargs `

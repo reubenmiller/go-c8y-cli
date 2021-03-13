@@ -22,11 +22,10 @@ Get-DeviceParent -RootParent
 Returns the root parent. In most cases this will be the agent
 
 #>
-    [cmdletbinding(SupportsShouldProcess = $true,
+    [cmdletbinding(
         PositionalBinding=$true,
         DefaultParameterSetName = "ByLevel",
-        HelpUri='',
-        ConfirmImpact = 'None')]
+        HelpUri='')]
     Param(
         # Device id, name or object. Wildcards accepted
         [Parameter(

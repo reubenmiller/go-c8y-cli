@@ -64,10 +64,7 @@ Get all the device object (with app in their name). Note the Expand cmdlet won't
 Expand the devices and always fetch device managed object if an object is not provided via the pipeline
 
 #>
-    [cmdletbinding(
-        # SupportsShouldProcess = $true,
-        # ConfirmImpact = "None"
-    )]
+    [cmdletbinding()]
     Param(
         [Parameter(
             Mandatory=$true,
