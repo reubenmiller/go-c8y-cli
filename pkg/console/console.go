@@ -134,7 +134,6 @@ func (c *Console) Write(b []byte) (n int, err error) {
 
 	if bt := bytes.TrimSpace(b); c.IsJSON() && (jsonUtilities.IsJSONArray(bt) || jsonUtilities.IsJSONObject(bt)) {
 
-		// TODO: WIP
 		switch c.Format {
 		case OutputTable:
 			cols := []string{}
