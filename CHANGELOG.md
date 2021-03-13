@@ -119,7 +119,7 @@ No unreleased features
 * Removed `--format` as `select` and `csv` can be used for the same effect (and more).
 
     ```
-    id=$( c8y devices list --select id --csv | head -1 )
+    id=$( c8y devices list --select id --output csv | head -1 )
     ```
 
 ### PSc8y

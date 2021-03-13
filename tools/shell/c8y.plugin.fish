@@ -4,7 +4,7 @@ if type -q c8y
     c8y completion fish | source
 
     # create session home folder (if it does not exist)
-    set sessionhome ( c8y settings list --select "session.home" --csv )
+    set sessionhome ( c8y settings list --select "session.home" --output csv )
     if test ! -e "$sessionhome"
         echo "creating folder"
         mkdir -p "$sessionhome"

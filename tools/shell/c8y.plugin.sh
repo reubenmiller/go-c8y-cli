@@ -22,7 +22,7 @@ if [[ $(command -v c8y) ]]; then
     source <(c8y completion bash)
 
     # create session home folder (if it does not exist)
-    sessionhome=$( c8y settings list --select "session.home" --csv )
+    sessionhome=$( c8y settings list --select "session.home" --output csv )
     if [[ ! -e "$sessionhome" ]]; then
         mkdir -p "$sessionhome"
     fi

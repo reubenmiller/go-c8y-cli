@@ -60,7 +60,7 @@ Currently not known
 * [x] Allow spec to define static values if of type switch (on headerParameters)
 * [x] Fix New-ApplicationBinary test. Create a example microservice (something small hopefully)
 * [x] Manual realtime commands (for alarms, events, measurements, etc.)
-  * [x] c8y measurements subscribe --device * --series <filter> --csv
+  * [x] c8y measurements subscribe --device * --series <filter> --output csv
   * [x] c8y alarms subscribe --device * (if *, then don't do anything, use as is) otherwise find device
   * [x] c8y events subscribe --device *
   * [x] c8y operations subscribe --device *

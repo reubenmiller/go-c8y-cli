@@ -31,7 +31,7 @@ func Test_HeaderFlags(t *testing.T) {
 	cmd.Flags().String("dateFrom", "", "Relative date")
 	cmd.Flags().Bool("csv", false, "Boolean type")
 
-	cmd.SetArgs([]string{"--csv", "--type", "myType", "--dateFrom", "0s"})
+	cmd.SetArgs([]string{"--output=csv", "--type", "myType", "--dateFrom", "0s"})
 	cmdErr := cmd.Execute()
 	assert.OK(t, cmdErr)
 

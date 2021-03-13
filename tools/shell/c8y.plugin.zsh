@@ -32,7 +32,7 @@ init-c8y () {
                 c8y completion zsh > "$ZSH_CUSTOM/plugins/c8y/_c8y"
 
                 # create session home folder (if it does not exist)
-                sessionhome=$( c8y settings list --select "session.home" --csv )
+                sessionhome=$( c8y settings list --select "session.home" --output csv )
                 if [[ ! -e "$sessionhome" ]]; then
                     echo "creating folder"
                     mkdir -p "$sessionhome"

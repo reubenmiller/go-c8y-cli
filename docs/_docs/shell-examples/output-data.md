@@ -330,7 +330,7 @@ id,c8y_SoftwareList.0.name,c8y_SoftwareList.0.version
 ##### Output as csv
 
 ```sh
-c8y devices list --pageSize 2 --fragmentType company_Example --select "id,name" --csv
+c8y devices list --pageSize 2 --fragmentType company_Example --select "id,name" --output csv
 ```
 
 **Output**
@@ -482,7 +482,7 @@ c8y devices list --pageSize 1 --fragmentType company_Example --select "country:a
 #### Get a list of ids and save it to file
 
 ```sh
-c8y devices list --pageSize 2 --fragmentType company_Example --select id --csv > devices.csv
+c8y devices list --pageSize 2 --fragmentType company_Example --select id --output csv > devices.csv
 ```
 
 **File contents: devices.csv**
@@ -495,7 +495,7 @@ c8y devices list --pageSize 2 --fragmentType company_Example --select id --csv >
 ##### Get the application id by looking it up by its name
 
 ```sh
-c8y applications get --id cockpit --select id --csv
+c8y applications get --id cockpit --select id --output csv
 ```
 
 **Response**

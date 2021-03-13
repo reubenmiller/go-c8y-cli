@@ -20,4 +20,4 @@ The `select` parameter was re-worked in v2.0.0, and information about how to use
 
 ### Formatting data (removed in v2.0.0)
 
-The `--format` parameter has been removed replaced by combining the use of `--select` and `--csv`. Please read the section on outputing data as csv.
+The `--format` parameter has been removed replaced by combining the use of `--select` and `--output csv`. Please read the section on outputing data as csv.
