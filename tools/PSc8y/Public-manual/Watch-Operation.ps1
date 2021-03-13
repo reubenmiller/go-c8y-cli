@@ -14,8 +14,7 @@ PS> Watch-Operation -Device 12345
 Watch all operations for a device
 
 #>
-    [cmdletbinding(PositionalBinding=$true,
-                   HelpUri='']
+    [cmdletbinding(PositionalBinding=$true, HelpUri='')]
     [Alias()]
     [OutputType([object])]
     Param(
