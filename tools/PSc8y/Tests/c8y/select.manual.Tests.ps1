@@ -1,6 +1,6 @@
 . $PSScriptRoot/../imports.ps1
 
-Describe -Name "c8y format global parameter" {
+Describe -Name "c8y select global parameter" {
     It "returns just the id" {
         $output = c8y applications get --id cockpit --select id --output csv
         $LASTEXITCODE | Should -Be 0
@@ -78,6 +78,18 @@ Describe -Name "c8y format global parameter" {
         $json = $output | ConvertFrom-Json
         $json."id" | Should -MatchExactly "^\d+$"
         $json."name" | Should -MatchExactly "^\w+$"
+    }
+
+    It "includes empty objects in the response" {
+        $type = New-RandomString -Prefix "withEmptyFragments"
+        $device = "test1234" | c8y devices create --type $type
+        $output = c8y devices list --type $type --select "**" --output "json"
+        $exitcode = $LASTEXITCODE
+        $device | c8y devices delete
+
+        $exitcode | Should -Be 0
+        $json = $output | ConvertFrom-Json
+        $json.c8y_IsDevice | ConvertTo-Json -Compress | Should -BeExactly "{}"
     }
 
 
