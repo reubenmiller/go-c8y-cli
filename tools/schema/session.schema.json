@@ -206,6 +206,28 @@
                         }
                     }
                 },
+                "views": {
+                    "type": "object",
+                    "description": "View definition settings",
+                    "properties": {
+                        "commonPaths": {
+                            "title": "List of directory paths where common view definitions are located.",
+                            "description": "This works best if you set it in your global configuration so it can be reused by all sessions",
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        },
+                        "customPaths": {
+                            "title": "List of directory paths where custom view definitions are located.",
+                            "description": "This works best if you it in your session configuration, as it should only be relevant for specific sessions",
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                },
                 "ci": {
                     "description": "Enable CI/CD mode where all commands are enabled (create/update/delete)",
                     "type": "boolean"
