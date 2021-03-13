@@ -65,6 +65,14 @@ endpoints:
         description: Group name
         pipeline: true
 
+      - name: deviceProperties
+        type: '[]string'
+        description: List of device permissions
+
+      - name: data
+        type: json
+        description: Additional properties
+
   - name: getUserGroup
     description: Get user group
     descriptionLong: Get an existing user group
