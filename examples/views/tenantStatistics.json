@@ -3,7 +3,7 @@
     "definitions": [
         {
             "name": "tenantStatistics",
-            "priority": 0,
+            "priority": 500,
             "contentType": "vnd.com.nsn.cumulocity.tenantUsageStatisticsSummary",
             "columns": [
                 "day",

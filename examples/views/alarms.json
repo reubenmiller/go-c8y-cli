@@ -3,18 +3,18 @@
     "definitions": [
         {
             "name": "alarm",
-            "priority": 0,
+            "priority": 500,
             "self": "alarm/alarms",
             "columns": [
                 "id",
                 "status",
                 "type",
                 "severity",
-                "text",
                 "count",
                 "source.id",
                 "source.name",
-                "creationTime"
+                "creationTime",
+                "text"
             ]
         }
     ]

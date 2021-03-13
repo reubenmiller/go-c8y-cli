@@ -3,7 +3,7 @@
     "definitions": [
         {
             "name": "event",
-            "priority": 0,
+            "priority": 500,
             "self": "event/events",
             "columns": [
                 "id",

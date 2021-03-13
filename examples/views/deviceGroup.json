@@ -3,7 +3,7 @@
     "definitions": [
         {
             "name": "deviceGroup",
-            "priority": 0,
+            "priority": 500,
             "fragments": ["c8y_IsDeviceGroup"],
             "columns": [
                 "id",

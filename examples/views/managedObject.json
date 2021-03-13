@@ -3,7 +3,7 @@
     "definitions": [
         {
             "name": "managedObject",
-            "priority": 0,
+            "priority": 500,
             "contentType": "vnd.com.nsn.cumulocity.managedObject",
             "columns": [
                 "id",

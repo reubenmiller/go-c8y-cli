@@ -3,7 +3,7 @@
     "definitions": [
         {
             "name": "device/agent",
-            "priority": 0,
+            "priority": 500,
             "fragments": ["c8y_IsDevice"],
             "columns": [
                 "id",
@@ -11,7 +11,6 @@
                 "type",
                 "owner",
                 "lastUpdated",
-                "c8y_ActiveAlarmsStatus",
                 "c8y_Availability.status"
             ]
         }

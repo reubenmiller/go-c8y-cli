@@ -1,0 +1,16 @@
+{
+    "version": "1",
+    "definitions": [
+        {
+            "name": "statistics",
+            "priority": 100,
+            "contentType": "collection",
+            "fragments": ["statistics.pageSize", "self"],
+            "columns": [
+                "totalPages:statistics.totalPages",
+                "pageSize:statistics.pageSize",
+                "currentPage:statistics.currentPage"
+            ]
+        }
+    ]
+}

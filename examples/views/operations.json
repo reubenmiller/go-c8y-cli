@@ -3,7 +3,7 @@
     "definitions": [
         {
             "name": "operation",
-            "priority": 0,
+            "priority": 500,
             "contentType": "vnd.com.nsn.cumulocity.operation",
             "columns": [
                 "id",

@@ -3,7 +3,7 @@
     "definitions": [
         {
             "name": "role",
-            "priority": 0,
+            "priority": 500,
             "contentType": "vnd.com.nsn.cumulocity.role\\+json",
             "columns": [
                 "id",
@@ -13,7 +13,7 @@
         },
         {
             "name": "roleCollection",
-            "priority": 0,
+            "priority": 500,
             "contentType": "vnd.com.nsn.cumulocity.roleCollection\\+json",
             "columns": [
                 "id",
@@ -23,7 +23,7 @@
         },
         {
             "name": "roleReference",
-            "priority": 0,
+            "priority": 500,
             "contentType": "vnd.com.nsn.cumulocity.roleReference\\+json",
             "columns": [
                 "role.id",
