@@ -717,13 +717,17 @@ func processResponse(resp *c8y.Response, respError error, commonOptions CommonCo
 						subpro := resp.JSON.Get(dataProperty)
 						inputData = &subpro
 					}
-					props, err := rootCmd.dataView.GetView(inputData, resp.Header.Get("Content-Type"))
+					if !strings.EqualFold(globalFlagView, ViewsNone) {
+						props, err := rootCmd.dataView.GetView(inputData, resp.Header.Get("Content-Type"))
 
-					if err != nil {
-						Logger.Warnf("Failed to detect view. %s", err)
+						if err != nil {
+							Logger.Warnf("Failed to detect view. %s", err)
+						} else {
+							Logger.Infof("Detected view: %s", strings.Join(props, ", "))
+							commonOptions.Filters.Pluck = props
+						}
 					} else {
-						Logger.Infof("Detected view: %s", strings.Join(props, ", "))
-						commonOptions.Filters.Pluck = props
+						commonOptions.Filters.Pluck = []string{"**"}
 					}
 				}
 			} else {

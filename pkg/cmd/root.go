@@ -245,6 +245,7 @@ var (
 	globalFlagConfirm                bool
 	globalFlagConfirmText            string
 	globalFlagSelect                 []string
+	globalFlagView                   string
 	globalFlagSilentStatusCodes      string
 
 	globalFlagOutputFormat string
@@ -260,6 +261,8 @@ var (
 
 // CumulocityDefaultPageSize is the default page size used by Cumulocity
 const CumulocityDefaultPageSize int = 5
+
+const ViewsNone = "none"
 
 const (
 	// SettingsIncludeAllPageSize property name used to control the default page size when using includeAll parameter
@@ -313,8 +316,11 @@ const (
 	// SettingsActivityLogMethodFilter filters the activity log entries by a space delimited methods, i.e. GET POST PUT
 	SettingsActivityLogMethodFilter string = "settings.activityLog.methodFilter"
 
-	// SettingsViewsPaths view definitions
-	SettingsViewsPaths string = "settings.views.paths"
+	// SettingsViewsCommonPaths paths to common view definition files
+	SettingsViewsCommonPaths string = "settings.views.commonPaths"
+
+	// SettingsViewsCustomPaths paths to custom fiew definition files
+	SettingsViewsCustomPaths string = "settings.views.customPaths"
 )
 
 // SettingsGlobalName name of the settings file (without extension)
@@ -402,7 +408,9 @@ func (c *c8yCmd) checkSessionExists(cmd *cobra.Command, args []string) error {
 	Logger.Debugf("output format: %d", outputFormat)
 
 	// load views
-	if views, err := dataview.NewDataView(".*", ".json", Logger, viper.GetViper().GetStringSlice(SettingsViewsPaths)...); err == nil {
+	viewPaths := viper.GetViper().GetStringSlice(SettingsViewsCommonPaths)
+	viewPaths = append(viewPaths, viper.GetViper().GetStringSlice(SettingsViewsCustomPaths)...)
+	if views, err := dataview.NewDataView(".*", ".json", Logger, viewPaths...); err == nil {
 		c.dataView = views
 	}
 
@@ -518,6 +526,7 @@ func configureRootCmd() {
 	rootCmd.PersistentFlags().BoolVar(&globalFlagFlatten, "flatten", false, "flatten")
 	rootCmd.PersistentFlags().StringSlice("filter", nil, "filter")
 	rootCmd.PersistentFlags().StringArrayVar(&globalFlagSelect, "select", nil, "select")
+	rootCmd.PersistentFlags().StringVar(&globalFlagView, "view", "", "View file")
 	rootCmd.PersistentFlags().Float64Var(&globalFlagTimeout, "timeout", float64(10*60), "Timeout in seconds")
 
 	// output
@@ -533,6 +542,7 @@ func configureRootCmd() {
 		&rootCmd.Command,
 		completion.WithValidateSet("dryFormat", "json", "dump", "curl", "markdown"),
 		completion.WithValidateSet("output", "json", "table", "csv", "csvheader"),
+		completion.WithValidateSet("view", ViewsNone),
 	)
 
 	rootCmd.AddCommand(NewCompletionsCmd().getCommand())

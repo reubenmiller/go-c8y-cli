@@ -58,6 +58,6 @@ type TemplateSettings struct {
 
 // ViewSettings controls the console table view settings
 type ViewSettings struct {
-	Path    string `json:"path,omitempty"`
-	Enabled *bool  `json:"enabled,omitempty"`
+	CommonPaths string `json:"commonPaths,omitempty"`
+	CustomPaths string `json:"customPaths,omitempty"`
 }
