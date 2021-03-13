@@ -1,6 +1,9 @@
 {
     "go.inferGopath": false,
     "powershell.codeFormatting.addWhitespaceAroundPipe": true,
+    "go.testEnvVars": {
+        "C8Y_SESSION": "/workspaces/go-c8y-cli/.cumulocity/test.runner.ciuser.json",
+    },
     "cSpell.ignorePaths": [
         "**/package-lock.json",
         "**/node_modules/**",
