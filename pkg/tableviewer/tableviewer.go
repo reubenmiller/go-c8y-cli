@@ -2,13 +2,20 @@ package tableviewer
 
 import (
 	"io"
-	"math"
+	"log"
 	"os"
 	"strings"
 
 	"github.com/olekukonko/tablewriter"
+	"github.com/olekukonko/ts"
 	"github.com/tidwall/gjson"
 )
+
+var Logger *log.Logger
+
+func init() {
+	Logger = log.New(io.Discard, "tableviewer", 0)
+}
 
 // TableView renders a table in the terminal
 type TableView struct {
@@ -24,7 +31,6 @@ type TableView struct {
 
 func (v *TableView) getValue(value gjson.Result) []string {
 	row := []string{}
-	lastIndex := len(v.Columns) - 1
 	for i, col := range v.Columns {
 		columnValue := strings.Trim(value.Get(col).Raw, "\"")
 
@@ -32,14 +38,10 @@ func (v *TableView) getValue(value gjson.Result) []string {
 		if i < len(v.ColumnWidths) {
 			columnWidth = v.ColumnWidths[i]
 		}
+		enableTruncate := true
 		if columnWidth != 0 && len(columnValue) > columnWidth {
-			if i == lastIndex {
-				if len(columnValue) > v.MaxColumnWidth {
-					columnValue = columnValue[0:v.MaxColumnWidth-3] + "..."
-				}
-			} else {
-				// fmt.Printf("column width: %d, maxColumnWidth: %d, value='%s'\n", len(columnValue), columnWidth, columnValue)
-				columnValue = columnValue[0:columnWidth-3] + "..."
+			if enableTruncate {
+				columnValue = columnValue[0:columnWidth-1] + "…"
 			}
 		}
 		row = append(row, columnValue)
@@ -48,16 +50,67 @@ func (v *TableView) getValue(value gjson.Result) []string {
 	return row
 }
 
-func (v *TableView) calculateColumnWidths(minWidth int, row []string) {
-	if len(v.ColumnWidths) == 0 {
-		// fmt.Printf("Calculating column widths\n")
-		v.ColumnWidths = make([]int, len(row))
-		for i, columnValue := range row {
-			v.ColumnWidths[i] = int(math.Max(float64(len(columnValue)), float64(minWidth))) + v.ColumnPadding
-			// v.ColumnWidths[i] = int(math.Min(float64(v.ColumnWidths[i]), float64(v.MaxColumnWidth)))
+func (v *TableView) getWidth(defaultWidth int) int {
+	termSize, err := ts.GetSize()
+	if err != nil {
+		return defaultWidth
+	}
+	return termSize.Col()
+}
+
+var TABLE_MAX_WIDTH = 120
+
+func minmax(values []int) (min int, max int) {
+	for _, val := range values {
+		if val > max {
+			max = val
+		}
+		if val < min {
+			min = val
 		}
 	}
+	return
+}
 
+func (v *TableView) calculateColumnWidths(minWidth int, row []string) {
+	if len(v.ColumnWidths) == 0 {
+		maxTableWidth := v.getWidth(TABLE_MAX_WIDTH)
+		v.ColumnWidths = make([]int, 0)
+		columnSeperatorWidth := 3
+		tableEndBuffer := 3
+		usedWith := 0
+		columns := []string{}
+
+		// only include columns if they fit in the view
+		for i, columnValue := range row {
+			_, colWidth := minmax([]int{
+				// only pad value (not column widths)
+				tablewriter.DisplayWidth(columnValue) + v.ColumnPadding,
+				minWidth + v.ColumnPadding,
+				tablewriter.DisplayWidth(v.Columns[i]),
+			})
+
+			if usedWith+colWidth+columnSeperatorWidth > maxTableWidth {
+				leftOver := maxTableWidth - usedWith - columnSeperatorWidth - tableEndBuffer
+				Logger.Printf("Left over: %d", leftOver)
+				if leftOver > minWidth {
+					v.ColumnWidths = append(v.ColumnWidths, leftOver)
+					columns = append(columns, v.Columns[i])
+				}
+				break
+			}
+			v.ColumnWidths = append(v.ColumnWidths, colWidth)
+			usedWith += colWidth + 3 // overhead
+			if i < len(v.ColumnWidths) {
+				columns = append(columns, v.Columns[i])
+			}
+		}
+		v.Columns = columns
+
+		Logger.Printf("columns: %v\n", v.Columns)
+		Logger.Printf("column widths: %v\n", v.ColumnWidths)
+		Logger.Printf("Column summary: max=%d, used=%d", maxTableWidth, usedWith)
+	}
 }
 
 func (v *TableView) getHeaderRow() []string {
@@ -66,7 +119,6 @@ func (v *TableView) getHeaderRow() []string {
 		width := v.MinColumnWidth
 		if i < len(v.ColumnWidths) {
 			width = len(name)
-			// width = v.ColumnWidths[i]
 		}
 		header = append(header, strings.Repeat("-", width))
 	}
@@ -88,11 +140,13 @@ func (v *TableView) TransformData(j []byte, property string) [][]string {
 			v.calculateColumnWidths(v.MinColumnWidth, v.getValue(r.Array()[0]))
 		}
 		r.ForEach(func(key, value gjson.Result) bool {
+			Logger.Printf("parsing row: columns: %v", v.Columns)
 			data = append(data, v.getValue(value))
 			return true
 		})
 	} else if r.IsObject() {
 		v.calculateColumnWidths(v.MinColumnWidth, v.getValue(r))
+		Logger.Printf("parsing row: columns: %v", v.Columns)
 		data = append(data, v.getValue(r))
 	}
 
@@ -107,26 +161,45 @@ func (v *TableView) Render(jsonData []byte, withHeader bool) {
 		v.Out = os.Stdout
 	}
 	table := tablewriter.NewWriter(v.Out)
+
+	isMarkdown := true
 	if withHeader {
 		table.SetHeader(v.Columns)
-		table.Append(v.getHeaderRow())
+		if !isMarkdown {
+			table.Append(v.getHeaderRow())
+		}
 	}
 
+	maxWidth := 0
 	for i, width := range v.ColumnWidths {
-		table.SetColMinWidth(i, width+v.ColumnPadding)
+		table.SetColMinWidth(i, width)
+		if width > maxWidth {
+			maxWidth = width
+		}
 	}
+	table.SetColWidth(maxWidth)
 
-	table.SetAutoWrapText(true)
-	table.SetAutoFormatHeaders(false)
 	table.SetHeaderAlignment(tablewriter.ALIGN_LEFT)
 	table.SetAlignment(tablewriter.ALIGN_LEFT)
-	table.SetCenterSeparator("")
-	table.SetColumnSeparator("")
-	table.SetRowSeparator("")
-	table.SetHeaderLine(false)
-	table.SetBorder(false)
-	table.SetTablePadding("\t")
-	table.SetNoWhiteSpace(true)
+
+	if isMarkdown {
+		table.SetBorders(tablewriter.Border{Left: true, Top: false, Right: true, Bottom: false})
+		table.SetCenterSeparator("|")
+		table.SetAutoFormatHeaders(false)
+		table.SetAutoWrapText(true)
+	} else {
+		table.SetAutoWrapText(true)
+		table.SetReflowDuringAutoWrap(true)
+		table.SetAutoFormatHeaders(false)
+
+		table.SetHeaderLine(false)
+		table.SetBorder(false)
+		table.SetCenterSeparator("")
+		table.SetColumnSeparator("")
+		table.SetRowSeparator("")
+		table.SetTablePadding(" ")
+		table.SetNoWhiteSpace(true)
+	}
 	table.AppendBulk(data)
 	table.Render()
 }

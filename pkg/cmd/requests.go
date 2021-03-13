@@ -722,10 +722,12 @@ func processResponse(resp *c8y.Response, respError error, commonOptions CommonCo
 					if err != nil {
 						Logger.Warnf("Failed to detect view. %s", err)
 					} else {
-						Logger.Infof("Detected data view. %s", props)
+						Logger.Infof("Detected view: %s", strings.Join(props, ", "))
 						commonOptions.Filters.Pluck = props
 					}
 				}
+			} else {
+				Logger.Debugf("using existing pluck values. %v", commonOptions.Filters.Pluck)
 			}
 
 			responseText = commonOptions.Filters.Apply(*resp.JSONData, dataProperty, false)
@@ -746,7 +748,7 @@ func processResponse(resp *c8y.Response, respError error, commonOptions CommonCo
 				responseText,
 				!isJSONResponse,
 				jsonformatter.WithTrimSpace(true),
-				jsonformatter.WithJSONStreamOutput(isJSONResponse, globalFlagStream, Console.IsCSV()),
+				jsonformatter.WithJSONStreamOutput(isJSONResponse, Console.IsJSONStream(), Console.IsCSV()),
 				jsonformatter.WithSuffix(len(responseText) > 0, "\n"),
 			)
 		}
@@ -801,7 +803,7 @@ func WriteJSONToConsole(cmd *cobra.Command, property string, output []byte) erro
 		output,
 		false,
 		jsonformatter.WithTrimSpace(true),
-		jsonformatter.WithJSONStreamOutput(true, globalFlagStream, Console.IsCSV()),
+		jsonformatter.WithJSONStreamOutput(true, Console.IsJSONStream(), Console.IsCSV()),
 		jsonformatter.WithSuffix(len(output) > 0, "\n"),
 	)
 	return nil

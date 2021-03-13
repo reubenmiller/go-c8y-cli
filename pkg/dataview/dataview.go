@@ -147,5 +147,6 @@ func (v *DataView) GetView(data *gjson.Result, contentType ...string) ([]string,
 		v.Logger.Debugf("Found matching view: name=%s", matchingDefinition.Name)
 		return matchingDefinition.Columns, nil
 	}
+	v.Logger.Debug("No matching view found")
 	return nil, nil
 }

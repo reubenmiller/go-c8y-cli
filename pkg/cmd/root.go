@@ -209,7 +209,6 @@ var rootCmd *c8yCmd
 var (
 	client                           *c8y.Client
 	cliConfig                        *config.CliConfiguration
-	globalFlagStream                 bool
 	globalFlagPageSize               int
 	globalFlagIncludeAllPageSize     int
 	globalFlagBatchMaxWorkers        int
@@ -398,7 +397,7 @@ func (c *c8yCmd) checkSessionExists(cmd *cobra.Command, args []string) error {
 	if isTerminal() && outputFormat == console.OutputTable {
 		Console.Format = console.OutputTable
 	} else {
-		Console.Format = console.OutputJSON.FromString(globalFlagOutputFormat)
+		Console.Format = outputFormat
 	}
 	Logger.Debugf("output format: %d", outputFormat)
 
@@ -477,6 +476,10 @@ func configureRootCmd() {
 
 	isTerm := isTerminal()
 	Console = console.NewConsole(rootCmd.OutOrStdout(), getOutputHeaders)
+	defaultOutputFormat := ""
+	if isTerm {
+		defaultOutputFormat = "table"
+	}
 
 	// Global flags
 	rootCmd.PersistentFlags().BoolVarP(&globalFlagVerbose, "verbose", "v", false, "Verbose logging")
@@ -487,7 +490,6 @@ func configureRootCmd() {
 	rootCmd.PersistentFlags().BoolVarP(&globalFlagWithTotalPages, "withTotalPages", "t", false, "Include all results")
 	rootCmd.PersistentFlags().BoolVarP(&globalFlagCompact, "compact", "c", !isTerm, "Compact instead of pretty-printed output. Pretty print is the default if output is the terminal")
 	rootCmd.PersistentFlags().BoolVar(&globalFlagCompact, "compress", !isTerm, "Alias for --compact for users coming from PowerShell")
-	rootCmd.PersistentFlags().BoolVar(&globalFlagStream, "stream", true, "Stream transforms JSON arrays to single json objects to make them pipeable. Automatically activated when output is not the terminal")
 	rootCmd.PersistentFlags().BoolVar(&globalFlagIgnoreAccept, "noAccept", false, "Ignore Accept header will remove the Accept header from requests, however PUT and POST requests will only see the effect")
 	rootCmd.PersistentFlags().BoolVar(&globalFlagDryRun, "dry", false, "Dry run. Don't send any data to the server")
 	rootCmd.PersistentFlags().StringVar(&globalFlagDryRunFormat, "dryFormat", "markdown", "Dry run output format. i.e. json, dump, markdown or curl")
@@ -519,7 +521,7 @@ func configureRootCmd() {
 	rootCmd.PersistentFlags().Float64Var(&globalFlagTimeout, "timeout", float64(10*60), "Timeout in seconds")
 
 	// output
-	rootCmd.PersistentFlags().StringVarP(&globalFlagOutputFormat, "output", "o", "", "Output format (i.e. table, json, csv, csvheader")
+	rootCmd.PersistentFlags().StringVarP(&globalFlagOutputFormat, "output", "o", defaultOutputFormat, "Output format (i.e. table, json, csv, csvheader")
 	rootCmd.PersistentFlags().StringVar(&globalFlagOutputFile, "outputFile", "", "Output file")
 
 	// confirmation

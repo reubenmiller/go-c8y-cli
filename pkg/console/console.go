@@ -64,8 +64,8 @@ func NewConsole(w io.Writer, header func([]string) []byte) *Console {
 		header: header,
 		TableViewer: &tableviewer.TableView{
 			Out:            w,
-			MinColumnWidth: 10,
-			MaxColumnWidth: 40,
+			MinColumnWidth: 2,
+			MaxColumnWidth: 80,
 			ColumnPadding:  5,
 		},
 		Format: OutputTable,
@@ -85,6 +85,12 @@ func (c *Console) WithCSVHeader() bool {
 // IsJSON return true if JSON output is set
 func (c *Console) IsJSON() bool {
 	return c.Format != OutputCSV && c.Format != OutputCSVWithHeader
+}
+
+// IsJSONStream check if json stream mode is activated
+func (c *Console) IsJSONStream() bool {
+	// deprecated
+	return false
 }
 
 // IsTable return true if table output is set
@@ -133,7 +139,9 @@ func (c *Console) Write(b []byte) (n int, err error) {
 			if len(c.samples) > 0 {
 				cols = append(cols, strings.Split(c.samples[0], ",")...)
 			}
-			c.TableViewer.Columns = cols
+			if len(c.TableViewer.Columns) == 0 {
+				c.TableViewer.Columns = cols
+			}
 			c.TableViewer.Render(b, showHeader)
 			return 0, nil
 		}
