@@ -726,7 +726,7 @@ func processResponse(resp *c8y.Response, respError error, commonOptions CommonCo
 							Logger.Infof("Detected view: %s", strings.Join(props, ", "))
 							commonOptions.Filters.Pluck = props
 						}
-					} else {
+					} else if Console.IsTable() {
 						commonOptions.Filters.Pluck = []string{"**"}
 					}
 				}
