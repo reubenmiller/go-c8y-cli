@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"io"
+	"os"
 
 	"github.com/tidwall/gjson"
 )
@@ -85,5 +86,43 @@ func WithOptionalFormatter(enabled bool, formatter ByteFormatter) OutputFormatte
 			return formatter(input)
 		}
 		return input
+	}
+}
+
+func writeToFile(text []byte, filename string, append bool) error {
+
+	var out *os.File
+	var err error
+	if append {
+		out, err = os.OpenFile(filename, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	} else {
+		out, err = os.Create(filename)
+	}
+
+	if err != nil {
+		return fmt.Errorf("Could not create file. %s", err)
+	}
+	defer out.Close()
+
+	// Writer the body to file
+	fmt.Fprintf(out, "%s\n", text)
+
+	if err != nil {
+		return fmt.Errorf("failed to copy file contents to file. %s", err)
+	}
+
+	return nil
+}
+
+// WithFileOutput writes the response to file if enabled
+func WithFileOutput(enabled bool, filename string, append bool) OutputFormatter {
+	return func(i io.Writer, b []byte) []byte {
+		return WithOptionalFormatter(enabled, func(input []byte) []byte {
+			err := writeToFile(b, filename, append)
+			if err != nil {
+				panic(err)
+			}
+			return input
+		})(i, b)
 	}
 }

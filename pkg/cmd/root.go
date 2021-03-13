@@ -227,6 +227,7 @@ var (
 	globalFlagIgnoreAccept           bool
 	globalFlagNoColor                bool
 	globalFlagSessionFile            string
+	globalFlagOutputFileRaw          string
 	globalFlagOutputFile             string
 	globalFlagUseEnv                 bool
 	globalFlagRaw                    bool
@@ -531,7 +532,8 @@ func configureRootCmd() {
 
 	// output
 	rootCmd.PersistentFlags().StringVarP(&globalFlagOutputFormat, "output", "o", defaultOutputFormat, "Output format i.e. table, json, csv, csvheader")
-	rootCmd.PersistentFlags().StringVar(&globalFlagOutputFile, "outputFile", "", "Output file")
+	rootCmd.PersistentFlags().StringVar(&globalFlagOutputFile, "outputFile", "", "Save JSON output to file (after select)")
+	rootCmd.PersistentFlags().StringVar(&globalFlagOutputFileRaw, "outputFileRaw", "", "Save raw response to file")
 
 	// confirmation
 	rootCmd.PersistentFlags().BoolVarP(&globalFlagForce, "force", "f", false, "Do not prompt for confirmation")

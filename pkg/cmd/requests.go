@@ -33,6 +33,7 @@ import (
 type CommonCommandOptions struct {
 	ConfirmText    string
 	OutputFile     string
+	OutputFileRaw  string
 	Filters        *JSONFilters
 	ResultProperty string
 	IncludeAll     bool
@@ -65,6 +66,12 @@ func getCommonOptions(cmd *cobra.Command) (CommonCommandOptions, error) {
 	options := CommonCommandOptions{}
 	if v, err := getOutputFileFlag(cmd, "outputFile"); err == nil {
 		options.OutputFile = v
+	} else {
+		return options, err
+	}
+
+	if v, err := getOutputFileFlag(cmd, "outputFileRaw"); err == nil {
+		options.OutputFileRaw = v
 	} else {
 		return options, err
 	}
@@ -652,17 +659,15 @@ func processResponse(resp *c8y.Response, respError error, commonOptions CommonCo
 	}
 
 	// write response to file instead of to stdout
-	if resp != nil && respError == nil && commonOptions.OutputFile != "" {
+	if resp != nil && respError == nil && commonOptions.OutputFileRaw != "" {
 		newline := strings.Contains(strings.ToLower(resp.Header.Get("Content-Type")), "json")
-		fullFilePath, err := saveResponseToFile(resp, commonOptions.OutputFile, true, newline)
+		fullFilePath, err := saveResponseToFile(resp, commonOptions.OutputFileRaw, false, newline)
 
 		if err != nil {
 			return 0, cmderrors.NewSystemError("write to file failed", err)
 		}
 
 		Logger.Infof("Saved response: %s", fullFilePath)
-		fmt.Printf("%s\n", fullFilePath)
-		return 0, nil
 	}
 
 	if resp != nil && respError == nil && resp.Header.Get("Content-Type") == "application/octet-stream" && resp.JSONData != nil {
@@ -751,6 +756,7 @@ func processResponse(resp *c8y.Response, respError error, commonOptions CommonCo
 				Console,
 				responseText,
 				!isJSONResponse,
+				jsonformatter.WithFileOutput(commonOptions.OutputFile != "", commonOptions.OutputFile, false),
 				jsonformatter.WithTrimSpace(true),
 				jsonformatter.WithJSONStreamOutput(isJSONResponse, Console.IsJSONStream(), Console.IsCSV()),
 				jsonformatter.WithSuffix(len(responseText) > 0, "\n"),
