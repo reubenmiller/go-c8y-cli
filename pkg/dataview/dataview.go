@@ -47,8 +47,7 @@ func NewDataView(pattern string, extension string, log *logger.Logger, paths ...
 		Extension: extension,
 		Logger:    log,
 	}
-	err := view.LoadDefinitions()
-	return view, err
+	return view, nil
 }
 
 func (v *DataView) LoadDefinitions() error {
@@ -95,6 +94,10 @@ func (v *DataView) LoadDefinitions() error {
 }
 
 func (v *DataView) GetView(data *gjson.Result, contentType ...string) ([]string, error) {
+	err := v.LoadDefinitions()
+	if err != nil {
+		return nil, err
+	}
 	if data.IsArray() {
 		if len(data.Array()) == 0 {
 			return nil, nil
