@@ -7,8 +7,7 @@
             "contentType": "vnd.com.nsn.cumulocity.group(Collection|Reference)?\\+json",
             "columns": [
                 "id",
-                "name",
-                "applications.*.name"
+                "name"
             ]
         }
     ]
