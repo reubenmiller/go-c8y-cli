@@ -296,13 +296,6 @@
     }
 
     #
-    #
-    #
-
-    $CmdletRestMethod = $Specification.method
-    $CmdletRestPath = $Specification.path
-
-    #
     # Body
     #
     $RESTBodyBuilder = New-Object System.Text.StringBuilder
@@ -310,7 +303,6 @@
         $null = $RESTBodyBuilder.AppendLine('$body = @{}')
 
         foreach ($iArg in $Specification.body) {
-            $argname = $iArg.name
             $prop = $iArg.property
             $type = $iArg.type
 
