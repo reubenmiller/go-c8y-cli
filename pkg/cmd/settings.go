@@ -5,6 +5,7 @@ type CommandSettings struct {
 	ActivityLog *ActivityLogSettings `json:"activityLog,omitempty"`
 	Encryption  *EncryptionSettings  `json:"encryption,omitempty"`
 	IncludeAll  *IncludeAllSettings  `json:"includeAll,omitempty"`
+	Session     *SessionSettings     `json:"session,omitempty"`
 	Mode        *ModeSettings        `json:"mode,omitempty"`
 	Storage     *StorageSettings     `json:"storage,omitempty"`
 	Template    *TemplateSettings    `json:"template,omitempty"`
@@ -60,4 +61,8 @@ type TemplateSettings struct {
 type ViewSettings struct {
 	CommonPaths string `json:"commonPaths,omitempty"`
 	CustomPaths string `json:"customPaths,omitempty"`
+}
+
+type SessionSettings struct {
+	DefaultUsername string `json:"defaultUsername,omitempty"`
 }

@@ -46,7 +46,8 @@ var buildVersion string
 var buildBranch string
 
 const (
-	module = "c8yapi"
+	module            = "c8yapi"
+	EnvSettingsPrefix = "c8y"
 )
 
 func init() {
@@ -423,6 +424,7 @@ func (c *c8yCmd) checkSessionExists(cmd *cobra.Command, args []string) error {
 		"tenants getID",
 		"tenants getId",
 		"settings list",
+		"settings update",
 
 		// allow hidden completion commands
 		"__complete",
@@ -895,7 +897,7 @@ func initConfig() {
 func loadConfiguration() error {
 	Logger.Debug("Loading configuration")
 	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
-	viper.SetEnvPrefix("c8y")
+	viper.SetEnvPrefix(EnvSettingsPrefix)
 
 	//viper.AutomaticEnv()
 	bindEnv(SettingsIncludeAllPageSize, 2000)

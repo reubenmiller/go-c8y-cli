@@ -501,7 +501,7 @@ func (c *CliConfiguration) GetString(key string) string {
 
 // GetDefaultUsername returns the default username
 func (c *CliConfiguration) GetDefaultUsername() string {
-	return c.viper.GetString("settings.default.username")
+	return c.viper.GetString("settings.session.defaultUsername")
 }
 
 // CachePassphraseVariables return true if the passphrase variables should be persisted or not

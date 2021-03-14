@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/fatih/color"
+	"github.com/reubenmiller/go-c8y-cli/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/pkg/config"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -13,7 +14,8 @@ import (
 
 // UpdateSettingsCmd updates settings in a session
 type UpdateSettingsCmd struct {
-	file string
+	file  string
+	shell string
 
 	*baseCmd
 }
@@ -224,7 +226,10 @@ var updateSettingsOptions = map[string]argumentHandler{
 	}, nil, cobra.ShellCompDirectiveNoFileComp},
 
 	// outputFile
-	"defaults.outputFile": {"defaults.outputFile", "int", "settings.defaults.outputFile", []string{}, nil, cobra.ShellCompDirectiveDefault},
+	"defaults.outputFile": {"defaults.outputFile", "string", "settings.defaults.outputFile", []string{}, nil, cobra.ShellCompDirectiveDefault},
+
+	// session
+	"session.defaultUsername": {"session.defaultUsername", "string", "settings.session.defaultUsername", []string{}, nil, cobra.ShellCompDirectiveDefault},
 }
 
 // UpdateSettingsCmd returns a new command used to update session settings
@@ -267,6 +272,12 @@ Show the active cli settings
 	}
 
 	cmd.Flags().StringVar(&ccmd.file, "file", "", "Session or settings file to be modified")
+	cmd.Flags().StringVar(&ccmd.shell, "shell", "", "Output variables as shell variables which can be sourced")
+
+	completion.WithOptions(
+		cmd,
+		completion.WithValidateSet("shell", "bash", "fish", "powershell", "zsh"),
+	)
 
 	cmd.SilenceUsage = true
 
@@ -279,12 +290,16 @@ Show the active cli settings
 func (n *UpdateSettingsCmd) RunE(cmd *cobra.Command, args []string) error {
 
 	var v *viper.Viper
+	writeToFile := true
 	if n.file != "" {
 		v = viper.New()
 		v.SetConfigFile(n.file)
 		if err := v.ReadInConfig(); err != nil {
 			return err
 		}
+	} else if n.shell != "" {
+		v = viper.New()
+		writeToFile = false
 	} else {
 		v = cliConfig.Persistent
 	}
@@ -330,12 +345,26 @@ func (n *UpdateSettingsCmd) RunE(cmd *cobra.Command, args []string) error {
 		}
 	}
 
-	err := WriteAuth(v, globalStorageStorePassword, globalStorageStoreCookies)
-
-	if err != nil {
-		return err
+	if writeToFile {
+		var err error
+		if n.file != "" {
+			err = v.WriteConfig()
+		} else {
+			err = WriteAuth(v, globalStorageStorePassword, globalStorageStoreCookies)
+		}
+		if err != nil {
+			return err
+		}
+		fmt.Fprintln(cmd.ErrOrStderr(), color.GreenString("Updated session file %s", v.ConfigFileUsed()))
+	} else {
+		shell := ShellBash
+		config := make(map[string]interface{})
+		for _, key := range v.AllKeys() {
+			envKey := strings.ToUpper(strings.ReplaceAll(EnvSettingsPrefix+"_"+key, ".", "_"))
+			config[envKey] = v.Get(key)
+		}
+		showEnvironmentVariables(config, shell.FromString(n.shell))
 	}
 
-	fmt.Fprintln(cmd.ErrOrStderr(), color.GreenString("Updated session file %s", v.ConfigFileUsed()))
 	return nil
 }

@@ -104,7 +104,7 @@ func (n *sessionLoginCmd) initSession(cmd *cobra.Command, args []string) error {
 
 	if n.AsEnv {
 		shell := ShellBash
-		showEnvironmentVariables(handler.C8Yclient, shell.FromString(n.Shell))
+		showClientEnvironmentVariables(handler.C8Yclient, shell.FromString(n.Shell))
 	}
 
 	return nil

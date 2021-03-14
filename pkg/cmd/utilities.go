@@ -111,24 +111,29 @@ const (
 	ShellFish
 )
 
-func showEnvironmentVariables(c8yclient *c8y.Client, shell ShellType) {
+func showClientEnvironmentVariables(c8yclient *c8y.Client, shell ShellType) {
+	output := cliConfig.GetEnvironmentVariables(c8yclient, false)
+	showEnvironmentVariables(output, shell)
+}
+
+func showEnvironmentVariables(config map[string]interface{}, shell ShellType) {
 	// sort output variables
 	variables := []string{}
-	output := cliConfig.GetEnvironmentVariables(c8yclient, false)
-	for name := range output {
+
+	for name := range config {
 		variables = append(variables, name)
 	}
 	sort.Strings(variables)
 	for _, name := range variables {
-		value := output[name]
+		value := config[name]
 
 		switch shell {
 		case ShellPowerShell:
-			fmt.Printf("$env:%s = '%s'\n", name, value)
+			fmt.Printf("$env:%s = '%v'\n", name, value)
 		case ShellFish:
-			fmt.Printf("set -gx %s '%s'\n", name, value)
+			fmt.Printf("set -gx %s '%v'\n", name, value)
 		default:
-			fmt.Printf("export %s='%s'\n", name, value)
+			fmt.Printf("export %s='%v'\n", name, value)
 		}
 	}
 }
