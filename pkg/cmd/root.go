@@ -408,7 +408,7 @@ func (c *RootCmd) checkSessionExists(cmd *cobra.Command, args []string) error {
 	} else {
 		Console.Format = outputFormat
 	}
-	Logger.Debugf("output format: %d", outputFormat)
+	Logger.Debugf("output format: %s", outputFormat.String())
 
 	// load views
 	viewPaths := viper.GetViper().GetStringSlice(SettingsViewsCommonPaths)

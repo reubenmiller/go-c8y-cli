@@ -28,6 +28,20 @@ const (
 	OutputCSVWithHeader
 )
 
+func (f OutputFormat) String() string {
+	values := map[OutputFormat]string{
+		OutputJSON:          "json",
+		OutputTable:         "table",
+		OutputCSV:           "csv",
+		OutputCSVWithHeader: "csvheader",
+	}
+
+	if v, ok := values[f]; ok {
+		return v
+	}
+	return ""
+}
+
 func (f OutputFormat) FromString(name string) OutputFormat {
 	values := map[string]OutputFormat{
 		"json":      OutputJSON,
