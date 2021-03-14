@@ -73,7 +73,13 @@ func getSessionHomeDir() string {
 	var outputDir string
 
 	if v := os.Getenv("C8Y_SESSION_HOME"); v != "" {
+		expandedV, err := homedir.Expand(v)
 		outputDir = v
+		if err == nil {
+			outputDir = expandedV
+		} else {
+			Logger.Warnf("Could not expand path. %s", err)
+		}
 	} else {
 		outputDir, _ = homedir.Dir()
 		outputDir = filepath.Join(outputDir, ".cumulocity")

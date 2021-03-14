@@ -15,6 +15,7 @@ import (
 	"time"
 
 	"github.com/gorilla/websocket"
+	"github.com/mitchellh/go-homedir"
 	"github.com/reubenmiller/go-c8y-cli/pkg/activitylogger"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/pkg/completion"
@@ -412,6 +413,9 @@ func (c *RootCmd) checkSessionExists(cmd *cobra.Command, args []string) error {
 	// load views
 	viewPaths := viper.GetViper().GetStringSlice(SettingsViewsCommonPaths)
 	viewPaths = append(viewPaths, viper.GetViper().GetStringSlice(SettingsViewsCustomPaths)...)
+	for i, path := range viewPaths {
+		viewPaths[i] = ExpandHomePath(path)
+	}
 	if views, err := dataview.NewDataView(".*", ".json", Logger, viewPaths...); err == nil {
 		c.dataView = views
 	}
@@ -956,7 +960,7 @@ func configureActivityLog() {
 	}
 	options := activitylogger.Options{
 		Disabled:     disabled,
-		OutputFolder: viper.GetString(SettingsActivityLogPath),
+		OutputFolder: ExpandHomePath(viper.GetString(SettingsActivityLogPath)),
 		Methods:      strings.ToUpper(viper.GetString(SettingsActivityLogMethodFilter)),
 	}
 
@@ -983,12 +987,22 @@ func loadAuthentication(v *config.CliConfiguration, c *c8y.Client) error {
 	return nil
 }
 
+// ExpandHomePath try to expand the home directory path. If not then just return the input path
+func ExpandHomePath(path string) string {
+	expanded, err := homedir.Expand(path)
+	if err != nil {
+		Logger.Warnf("Could not expand path to home directory. %s", err)
+		return path
+	}
+	return expanded
+}
+
 func readConfiguration(cmd *cobra.Command) error {
 
 	globalFlagIncludeAllPageSize = viper.GetInt(SettingsIncludeAllPageSize)
 	globalFlagBatchMaxWorkers = viper.GetInt(SettingsDefaultBatchMaxWorkers)
 	globalFlagIncludeAllDelayMS = viper.GetInt64(SettingsIncludeAllDelayMS)
-	globalFlagTemplatePath = viper.GetString(SettingsTemplatePath)
+	globalFlagTemplatePath = ExpandHomePath(viper.GetString(SettingsTemplatePath))
 
 	globalModeEnableCreate = viper.GetBool(SettingsModeEnableCreate)
 	globalModeEnableUpdate = viper.GetBool(SettingsModeEnableUpdate)
