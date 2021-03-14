@@ -198,12 +198,12 @@ func (n *newSessionCmd) promptArgs(cmd *cobra.Command, args []string) error {
 	}
 
 	if !cmd.Flags().Changed("username") {
-		v, err := prompter.Username("Enter username", cliConfig.GetDefaultUsername())
+		v, err := prompter.Username("Enter username", " "+cliConfig.GetDefaultUsername())
 
 		if err != nil {
 			return err
 		}
-		n.username = v
+		n.username = strings.TrimSpace(v)
 	}
 
 	if !n.noStorage && !cmd.Flags().Changed("password") {

@@ -185,16 +185,10 @@ func (p *Prompt) Username(label string, defaultValue string) (string, error) {
 		}
 		return nil
 	}
-	pointer := promptui.DefaultCursor
-	if defaultValue != "" {
-		// use piped cursor so it does not block the first character of the default text
-		pointer = promptui.PipeCursor
-	}
 	prompt := promptui.Prompt{
 		Stdin:       os.Stdin,
 		Stdout:      os.Stderr,
 		Default:     defaultValue,
-		Pointer:     pointer,
 		HideEntered: true,
 		Label:       label,
 		Validate:    validate,
