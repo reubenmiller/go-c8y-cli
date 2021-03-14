@@ -328,6 +328,7 @@ import (
 	"net/http"
 	"net/url"
 
+    "github.com/MakeNowJust/heredoc/v2"
     "github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
     "github.com/reubenmiller/go-c8y-cli/pkg/completion"
     "github.com/reubenmiller/go-c8y-cli/pkg/flags"
@@ -348,9 +349,9 @@ func New${NameCamel}Cmd() *${NameCamel}Cmd {
 		Use:   "$Use",
 		Short: "$Description",
 		Long:  ``$DescriptionLong``,
-        Example: ``
+        Example: heredoc.Doc(``
 $($Examples -join "`n`n")
-        ``,
+        ``),
         PreRunE: $PreRunFunction,
 		RunE: ccmd.RunE,
     }
