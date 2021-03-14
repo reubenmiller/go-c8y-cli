@@ -39,3 +39,7 @@ tools/PSc8y/report.xml
 tools/PSc8y/dist
 docs/_site
 node_modules
+
+# release binaries and docs
+dist/**
+share/**

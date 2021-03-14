@@ -148,6 +148,9 @@ build: update_spec build_cli build_powershell
 build_cli:
 	pwsh -File scripts/build-cli/build.ps1;
 
+generate_go_code: update_spec		# Generate go code from spec
+	pwsh -File scripts/build-cli/build.ps1 -SkipBuildBinary;
+
 build_cli_fast:
 	pwsh -File ./scripts/build-cli/build-binary.ps1 -OutputDir ./tools/PSc8y/dist/PSc8y/Dependencies -Target "linux:amd64"
 	cp ./tools/PSc8y/dist/PSc8y/Dependencies/c8y.linux /workspaces/go-c8y-cli/tools/PSc8y/Dependencies/c8y.linux
@@ -182,6 +185,13 @@ install_c8y: build			## Install c8y in dev environment
 publish:
 	pwsh -File ./scripts/build-powershell/publish.ps1
 
+.PHONY: manpages
+manpages:
+	go run ./cmd/gen-docs --man-page --doc-path "./share/man/man1/"
+
+docs-c8y:
+	go run ./cmd/gen-docs --website --doc-path "docs/_c8y/commands"
+
 build-docker:
 	@cp tools/PSc8y/Dependencies/c8y.linux ./docker/c8y.linux
 	@cp tools/shell/c8y.plugin.zsh ./docker/c8y.plugin.zsh
@@ -198,6 +208,9 @@ build-docker:
 publish-docker: show-version build build-docker		## Publish docker c8y cli images
 	@chmod +x ./scripts/publish-docker.sh
 	@sudo CR_PAT=$(CR_PAT) VERSION=$(VERSION) ./scripts/publish-docker.sh
+
+publish-local-snapshot:		## Publish local snapshot release 
+	goreleaser --snapshot --skip-publish --rm-dist
 
 run-docker-bash:
 	sudo docker run -it --rm \

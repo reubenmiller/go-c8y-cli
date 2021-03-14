@@ -1,0 +1,69 @@
+project_name: c8y
+
+release:
+  prerelease: auto
+  draft: true # we only publish after the Windows MSI gets uploaded
+  name_template: "GitHub CLI {{.Version}}"
+
+before:
+  hooks:
+    - go mod tidy
+    - make generate_go_code 
+    - make manpages
+
+builds:
+  - <<: &build_defaults
+      binary: bin/c8y
+      main: ./cmd/c8y/main.go
+      ldflags:
+        - -s -w -X github.com/reubenmiller/go-c8y-cli/pkg/cmd.buildVersion={{.Version}} -X github.com/reubenmiller/go-c8y-cli/pkg/cmd.buildBranch={{.Branch}}
+        - -X main.updaterEnabled=cli/cli
+    id: macos
+    goos: [darwin]
+    goarch: [amd64]
+
+  - <<: *build_defaults
+    id: linux
+    goos: [linux]
+    goarch: [386, arm, amd64, arm64]
+    env:
+      - CGO_ENABLED=0
+
+  - <<: *build_defaults
+    id: windows
+    goos: [windows]
+    goarch: [386, amd64]
+
+archives:
+  - id: nix
+    builds: [macos, linux]
+    <<: &archive_defaults
+      name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}{{ if .Arm }}v{{ .Arm }}{{ end }}"
+    wrap_in_directory: true
+    replacements:
+      darwin: macOS
+    format: tar.gz
+    files:
+      - LICENSE
+      - ./share/man/man1/c8y*.1
+  - id: windows
+    builds: [windows]
+    <<: *archive_defaults
+    wrap_in_directory: false
+    format: zip
+    files:
+      - LICENSE
+
+nfpms:
+  - license: MIT
+    maintainer: GitHub
+    homepage: https://reubenmiller.github.io/go-c8y-cli/
+    bindir: /usr
+    dependencies:
+      - git
+    description: Cumulocity's unoffical command line tool.
+    formats:
+      - deb
+      - rpm
+    files:
+      "./share/man/man1/c8y*.1": "/usr/share/man/man1"

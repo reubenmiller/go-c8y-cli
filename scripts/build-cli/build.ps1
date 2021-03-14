@@ -1,5 +1,8 @@
 ﻿[cmdletbinding()]
-Param()
+Param(
+    # Skip building the go binary. Only generate the go code
+    [switch] $SkipBuildBinary
+)
 
 # Import functions
 . $PSScriptRoot/New-C8yApi.ps1
@@ -25,21 +28,9 @@ $ImportStatements
 #
 # Build binary
 #
-$OutputDir = "$PSScriptRoot/../../output"
-& "$PSScriptRoot/build-binary.ps1" -OutputDir $OutputDir
-$OutputDir = Resolve-Path $OutputDir
-
-
-# Generate code completions
-if ($IsMacOS) {
-    $BinaryName = "c8y.macos"
-} elseif ($IsLinux) {
-    $BinaryName = "c8y.linux"
-} else {
-    $BinaryName = "c8y.windows.exe"
+if (-not $SkipBuildBinary) {
+    $OutputDir = "$PSScriptRoot/../../output"
+    & "$PSScriptRoot/build-binary.ps1" -OutputDir $OutputDir
+    $OutputDir = Resolve-Path $OutputDir   
+    Write-Host "Build successful! $OutputDir"
 }
-
-& "$OutputDir/$BinaryName" completion powershell > "$OutputDir/c8y.completion.ps1"
-& "$OutputDir/$BinaryName" completion bash > "$OutputDir/c8y.completion.sh"
-
-Write-Host "Build successful! $OutputDir"
