@@ -82,7 +82,12 @@ func getSessionHomeDir() string {
 		}
 	} else {
 		outputDir, _ = homedir.Dir()
-		outputDir = filepath.Join(outputDir, ".cumulocity")
+		outputDir = filepath.Join(outputDir, ".cumulocity", "sessions")
+	}
+
+	err := os.MkdirAll(outputDir, os.ModePerm)
+	if err != nil {
+		Logger.Errorf("Could not create sessions directory and it does not exist. %s", err)
 	}
 	return outputDir
 }
