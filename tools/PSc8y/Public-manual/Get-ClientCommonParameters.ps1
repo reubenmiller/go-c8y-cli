@@ -28,7 +28,7 @@ Inherit common parameters to a custom function. This will add parameters such as
             Mandatory = $true,
             Position = 0
         )]
-        [ValidateSet("Collection", "Get", "Create", "Update", "Delete", "Template", "")]
+        [ValidateSet("Collection", "Get", "Create", "Update", "Delete", "Template", "TemplateVars", "")]
         [string[]]
         $Type
     )
@@ -65,6 +65,11 @@ Inherit common parameters to a custom function. This will add parameters such as
                         Register-ArgumentCompleter -CommandName $ParentCommand -ParameterName Template -ScriptBlock $script:CompletionTemplate
                     }
                 }
+
+                # Only template variables
+                "TemplateVars" {
+                    New-DynamicParam -Name "TemplateVars" -Type "string" -DPDictionary $Dictionary
+                }
             }
         }
 
@@ -78,7 +83,7 @@ Inherit common parameters to a custom function. This will add parameters such as
 
         # JSON parsing options
         New-DynamicParam -Name Output -Type "string" -ValidateSet @("json", "csv", "csvheader", "table") -DPDictionary $Dictionary
-        New-DynamicParam -Name View -Type "string" -ValidateSet @("none") -DPDictionary $Dictionary
+        New-DynamicParam -Name View -Type "string" -ValidateSet @("none", "all") -DPDictionary $Dictionary
         New-DynamicParam -Name AsHashTable -Type "switch" -DPDictionary $Dictionary
         New-DynamicParam -Name AsPSObject -Type "switch" -DPDictionary $Dictionary
         New-DynamicParam -Name Flatten -Type "switch" -DPDictionary $Dictionary

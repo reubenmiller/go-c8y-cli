@@ -265,7 +265,10 @@ var (
 // CumulocityDefaultPageSize is the default page size used by Cumulocity
 const CumulocityDefaultPageSize int = 5
 
-const ViewsNone = "none"
+const (
+	ViewsNone = "none"
+	ViewsAll  = "all"
+)
 
 const (
 	// SettingsIncludeAllPageSize property name used to control the default page size when using includeAll parameter
@@ -492,8 +495,10 @@ func (c *RootCmd) ConfigureRootCmd() {
 	isTerm := isTerminal()
 	Console = console.NewConsole(rootCmd.OutOrStdout(), getOutputHeaders)
 	defaultOutputFormat := ""
+	defaultView := ViewsNone
 	if isTerm {
 		defaultOutputFormat = "table"
+		defaultView = ViewsAll
 	}
 
 	// Global flags
@@ -533,7 +538,7 @@ func (c *RootCmd) ConfigureRootCmd() {
 	c.PersistentFlags().BoolVar(&globalFlagFlatten, "flatten", false, "flatten")
 	c.PersistentFlags().StringSlice("filter", nil, "filter")
 	c.PersistentFlags().StringArrayVar(&globalFlagSelect, "select", nil, "select")
-	c.PersistentFlags().StringVar(&globalFlagView, "view", "", "View file")
+	c.PersistentFlags().StringVar(&globalFlagView, "view", defaultView, "View file")
 	c.PersistentFlags().Float64Var(&globalFlagTimeout, "timeout", float64(10*60), "Timeout in seconds")
 
 	// output
@@ -550,7 +555,7 @@ func (c *RootCmd) ConfigureRootCmd() {
 		&c.Command,
 		completion.WithValidateSet("dryFormat", "json", "dump", "curl", "markdown"),
 		completion.WithValidateSet("output", "json", "table", "csv", "csvheader"),
-		completion.WithValidateSet("view", ViewsNone),
+		completion.WithValidateSet("view", ViewsNone, ViewsAll),
 	)
 
 	c.AddCommand(NewCompletionsCmd().getCommand())
