@@ -6,7 +6,7 @@ title: find
 ---
 ## c8y inventory find
 
-Get a collection of managedObjects based on Cumulocity query language
+Find managed object collection
 
 ### Synopsis
 
