@@ -9,7 +9,7 @@ sitemap: false
 
 <script>
 	window.data = {
-		{% assign sites = site.docs | concat: site.pwsh %}
+		{% assign sites = site.docs | concat: site.pwsh | concat: site.c8y %}
 		{% for item in sites %}
 			{% if item.title %}
 				{% unless item.excluded_in_search %}

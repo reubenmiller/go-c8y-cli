@@ -1,0 +1,26 @@
+<div>
+    <ul>
+        <li class="nav-item top-level">
+            <a>c8y (command) Docs</a>
+        </li>
+    </ul>
+    <ul>
+        {% assign c8yGroupedPages = site.c8y | sort: 'category' | group_by: 'category' %}
+
+        {% for group in c8yGroupedPages %}
+            <li class="nav-item top-level {% if group.name == page.category %}current{% endif %}">
+                {% assign items = group.items |  | sort: 'name' %}
+                <a href="{{ site.baseurl }}/c8y/commands/c8y_{{ group.name }}">{{ group.name }}</a>
+                <ul>
+                    {% for item in items %}
+                        {% if forloop.index0 != 0 %}
+                        <li class="nav-item {% if item.url == page.url %}current{% endif %}" title="{{ item.title }}">
+                            <a href="{{ site.baseurl }}{{ item.url }}">{{ item.title }}</a>
+                        </li>
+                        {% endif %}    
+                    {% endfor %}
+                </ul>
+            </li>
+        {% endfor %}
+    </ul>
+</div>
