@@ -5,6 +5,7 @@ import (
 	"io"
 	"net/http"
 
+	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
@@ -25,10 +26,10 @@ func NewNewManagedObjectChildDeviceCmd() *NewManagedObjectChildDeviceCmd {
 		Use:   "assignChildDevice",
 		Short: "Assign child device",
 		Long:  `Create a child device reference`,
-		Example: `
+		Example: heredoc.Doc(`
 $ c8y inventoryReferences assignChildDevice --device 12345 --newChild 44235
 Assign a device as a child device to an existing device
-        `,
+        `),
 		PreRunE: validateCreateMode,
 		RunE:    ccmd.RunE,
 	}

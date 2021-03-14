@@ -53,7 +53,7 @@ const (
 func init() {
 	Logger = logger.NewLogger(module, logger.Options{})
 	SecureDataAccessor = encrypt.NewSecureData("{encrypted}")
-	rootCmd = newC8yCmd()
+	rootCmd = NewRootCmd()
 	// set seed for random generation
 	rand.Seed(time.Now().UTC().UnixNano())
 }
@@ -75,7 +75,7 @@ func newBaseCmd(cmd *cobra.Command) *baseCmd {
 	return &baseCmd{cmd: cmd}
 }
 
-type c8yCmd struct {
+type RootCmd struct {
 	cobra.Command
 	Logger *logger.Logger
 	useEnv bool
@@ -83,7 +83,7 @@ type c8yCmd struct {
 	dataView *dataview.DataView
 }
 
-func (c *c8yCmd) DryRunHandler(options *c8y.RequestOptions, req *http.Request) {
+func (c *RootCmd) DryRunHandler(options *c8y.RequestOptions, req *http.Request) {
 
 	if !globalFlagDryRun {
 		return
@@ -99,7 +99,7 @@ func (c *c8yCmd) DryRunHandler(options *c8y.RequestOptions, req *http.Request) {
 
 	PrintRequestDetails(w, nil, req)
 }
-func (c *c8yCmd) createCumulocityClient() {
+func (c *RootCmd) createCumulocityClient() {
 	c.Logger.Debug("Creating c8y client")
 	httpClient := newHTTPClient(globalFlagNoProxy)
 
@@ -191,8 +191,8 @@ func (c *c8yCmd) createCumulocityClient() {
 	}
 }
 
-func newC8yCmd() *c8yCmd {
-	command := &c8yCmd{
+func NewRootCmd() *RootCmd {
+	command := &RootCmd{
 		Logger: Logger,
 	}
 	command.Command = cobra.Command{
@@ -205,7 +205,7 @@ func newC8yCmd() *c8yCmd {
 	return command
 }
 
-var rootCmd *c8yCmd
+var rootCmd *RootCmd
 
 var (
 	client                           *c8y.Client
@@ -328,7 +328,7 @@ const (
 // SettingsGlobalName name of the settings file (without extension)
 const SettingsGlobalName = "settings"
 
-func (c *c8yCmd) checkCommandError(err error) {
+func (c *RootCmd) checkCommandError(err error) {
 
 	w := ioutil.Discard
 	if globalFlagPrintErrorsOnStdout {
@@ -382,7 +382,7 @@ func LogErrorF(err error, format string, args ...interface{}) {
 	errorLogger(format, args...)
 }
 
-func (c *c8yCmd) checkSessionExists(cmd *cobra.Command, args []string) error {
+func (c *RootCmd) checkSessionExists(cmd *cobra.Command, args []string) error {
 
 	cmdStr := cmd.Use
 	if cmd.HasParent() && cmd.Parent().Use != "c8y" {
@@ -478,12 +478,12 @@ func getOutputHeaders(input []string) (headers []byte) {
 	return append(bytes.Join(columns, []byte(",")), []byte("\n")...)
 }
 
-// configureRootCmd initializes the configuration manager and c8y client
-func configureRootCmd() {
+// ConfigureRootCmd initializes the configuration manager and c8y client
+func (c *RootCmd) ConfigureRootCmd() {
 	// config file
 	cobra.OnInitialize(initConfig)
 
-	rootCmd.PersistentFlags().StringVar(&globalFlagSessionFile, "session", "", "Session configuration")
+	c.PersistentFlags().StringVar(&globalFlagSessionFile, "session", "", "Session configuration")
 
 	isTerm := isTerminal()
 	Console = console.NewConsole(rootCmd.OutOrStdout(), getOutputHeaders)
@@ -493,190 +493,190 @@ func configureRootCmd() {
 	}
 
 	// Global flags
-	rootCmd.PersistentFlags().BoolVarP(&globalFlagVerbose, "verbose", "v", false, "Verbose logging")
-	rootCmd.PersistentFlags().IntVarP(&globalFlagPageSize, "pageSize", "p", CumulocityDefaultPageSize, "Maximum results per page")
-	rootCmd.PersistentFlags().Int64Var(&globalFlagCurrentPage, "currentPage", 0, "Current page size which should be returned")
-	rootCmd.PersistentFlags().Int64Var(&globalFlagTotalPages, "totalPages", 0, "Total number of pages to get")
-	rootCmd.PersistentFlags().BoolVar(&globalFlagIncludeAll, "includeAll", false, "Include all results by iterating through each page")
-	rootCmd.PersistentFlags().BoolVarP(&globalFlagWithTotalPages, "withTotalPages", "t", false, "Include all results")
-	rootCmd.PersistentFlags().BoolVarP(&globalFlagCompact, "compact", "c", !isTerm, "Compact instead of pretty-printed output. Pretty print is the default if output is the terminal")
-	rootCmd.PersistentFlags().BoolVar(&globalFlagCompact, "compress", !isTerm, "Alias for --compact for users coming from PowerShell")
-	rootCmd.PersistentFlags().BoolVar(&globalFlagIgnoreAccept, "noAccept", false, "Ignore Accept header will remove the Accept header from requests, however PUT and POST requests will only see the effect")
-	rootCmd.PersistentFlags().BoolVar(&globalFlagDryRun, "dry", false, "Dry run. Don't send any data to the server")
-	rootCmd.PersistentFlags().StringVar(&globalFlagDryRunFormat, "dryFormat", "markdown", "Dry run output format. i.e. json, dump, markdown or curl")
-	rootCmd.PersistentFlags().BoolVar(&globalFlagProgressBar, "progress", false, "Show progress bar. This will also disable any other verbose output")
-	rootCmd.PersistentFlags().BoolVarP(&globalFlagNoColor, "noColor", "M", !isTerm, "Don't use colors when displaying log entries on the console")
-	rootCmd.PersistentFlags().BoolVar(&globalFlagUseEnv, "useEnv", false, "Allow loading Cumulocity session setting from environment variables")
-	rootCmd.PersistentFlags().BoolVarP(&globalFlagRaw, "raw", "r", false, "Raw values")
-	rootCmd.PersistentFlags().StringVar(&globalFlagProxy, "proxy", "", "Proxy setting, i.e. http://10.0.0.1:8080")
-	rootCmd.PersistentFlags().BoolVar(&globalFlagNoProxy, "noProxy", false, "Ignore the proxy settings")
-	rootCmd.PersistentFlags().BoolVar(&globalFlagPrintErrorsOnStdout, "withError", false, "Errors will be printed on stdout instead of stderr")
+	c.PersistentFlags().BoolVarP(&globalFlagVerbose, "verbose", "v", false, "Verbose logging")
+	c.PersistentFlags().IntVarP(&globalFlagPageSize, "pageSize", "p", CumulocityDefaultPageSize, "Maximum results per page")
+	c.PersistentFlags().Int64Var(&globalFlagCurrentPage, "currentPage", 0, "Current page size which should be returned")
+	c.PersistentFlags().Int64Var(&globalFlagTotalPages, "totalPages", 0, "Total number of pages to get")
+	c.PersistentFlags().BoolVar(&globalFlagIncludeAll, "includeAll", false, "Include all results by iterating through each page")
+	c.PersistentFlags().BoolVarP(&globalFlagWithTotalPages, "withTotalPages", "t", false, "Include all results")
+	c.PersistentFlags().BoolVarP(&globalFlagCompact, "compact", "c", !isTerm, "Compact instead of pretty-printed output. Pretty print is the default if output is the terminal")
+	c.PersistentFlags().BoolVar(&globalFlagCompact, "compress", !isTerm, "Alias for --compact for users coming from PowerShell")
+	c.PersistentFlags().BoolVar(&globalFlagIgnoreAccept, "noAccept", false, "Ignore Accept header will remove the Accept header from requests, however PUT and POST requests will only see the effect")
+	c.PersistentFlags().BoolVar(&globalFlagDryRun, "dry", false, "Dry run. Don't send any data to the server")
+	c.PersistentFlags().StringVar(&globalFlagDryRunFormat, "dryFormat", "markdown", "Dry run output format. i.e. json, dump, markdown or curl")
+	c.PersistentFlags().BoolVar(&globalFlagProgressBar, "progress", false, "Show progress bar. This will also disable any other verbose output")
+	c.PersistentFlags().BoolVarP(&globalFlagNoColor, "noColor", "M", !isTerm, "Don't use colors when displaying log entries on the console")
+	c.PersistentFlags().BoolVar(&globalFlagUseEnv, "useEnv", false, "Allow loading Cumulocity session setting from environment variables")
+	c.PersistentFlags().BoolVarP(&globalFlagRaw, "raw", "r", false, "Raw values")
+	c.PersistentFlags().StringVar(&globalFlagProxy, "proxy", "", "Proxy setting, i.e. http://10.0.0.1:8080")
+	c.PersistentFlags().BoolVar(&globalFlagNoProxy, "noProxy", false, "Ignore the proxy settings")
+	c.PersistentFlags().BoolVar(&globalFlagPrintErrorsOnStdout, "withError", false, "Errors will be printed on stdout instead of stderr")
 
 	// Activity log
-	rootCmd.PersistentFlags().BoolVar(&globalFlagNoLog, "noLog", false, "Disables the activity log for the current command")
-	rootCmd.PersistentFlags().StringVarP(&globalFlagActivityLogMessage, "logMessage", "l", "", "Add custom message to the activity log")
-	rootCmd.PersistentFlags().BoolVar(&globalFlagDebug, "debug", false, "Set very verbose log messages")
+	c.PersistentFlags().BoolVar(&globalFlagNoLog, "noLog", false, "Disables the activity log for the current command")
+	c.PersistentFlags().StringVarP(&globalFlagActivityLogMessage, "logMessage", "l", "", "Add custom message to the activity log")
+	c.PersistentFlags().BoolVar(&globalFlagDebug, "debug", false, "Set very verbose log messages")
 
 	// Concurrency
-	rootCmd.PersistentFlags().IntVar(&globalFlagBatchWorkers, "workers", 1, "Number of workers")
-	rootCmd.PersistentFlags().Int64Var(&globalFlagBatchMaxJobs, "maxJobs", 100, "Maximum number of jobs. 0 = unlimited (use with caution!)")
-	rootCmd.PersistentFlags().IntVar(&globalFlagBatchDelayMS, "delay", 1000, "delay in milliseconds after each request")
-	rootCmd.PersistentFlags().IntVar(&globalFlagBatchAbortOnErrorCount, "abortOnErrors", 10, "Abort batch when reaching specified number of errors")
+	c.PersistentFlags().IntVar(&globalFlagBatchWorkers, "workers", 1, "Number of workers")
+	c.PersistentFlags().Int64Var(&globalFlagBatchMaxJobs, "maxJobs", 100, "Maximum number of jobs. 0 = unlimited (use with caution!)")
+	c.PersistentFlags().IntVar(&globalFlagBatchDelayMS, "delay", 1000, "delay in milliseconds after each request")
+	c.PersistentFlags().IntVar(&globalFlagBatchAbortOnErrorCount, "abortOnErrors", 10, "Abort batch when reaching specified number of errors")
 
 	// Error handling
-	rootCmd.PersistentFlags().StringVar(&globalFlagSilentStatusCodes, "silentStatusCodes", "", "Status codes which will not print out an error message")
+	c.PersistentFlags().StringVar(&globalFlagSilentStatusCodes, "silentStatusCodes", "", "Status codes which will not print out an error message")
 
-	rootCmd.PersistentFlags().BoolVar(&globalFlagFlatten, "flatten", false, "flatten")
-	rootCmd.PersistentFlags().StringSlice("filter", nil, "filter")
-	rootCmd.PersistentFlags().StringArrayVar(&globalFlagSelect, "select", nil, "select")
-	rootCmd.PersistentFlags().StringVar(&globalFlagView, "view", "", "View file")
-	rootCmd.PersistentFlags().Float64Var(&globalFlagTimeout, "timeout", float64(10*60), "Timeout in seconds")
+	c.PersistentFlags().BoolVar(&globalFlagFlatten, "flatten", false, "flatten")
+	c.PersistentFlags().StringSlice("filter", nil, "filter")
+	c.PersistentFlags().StringArrayVar(&globalFlagSelect, "select", nil, "select")
+	c.PersistentFlags().StringVar(&globalFlagView, "view", "", "View file")
+	c.PersistentFlags().Float64Var(&globalFlagTimeout, "timeout", float64(10*60), "Timeout in seconds")
 
 	// output
-	rootCmd.PersistentFlags().StringVarP(&globalFlagOutputFormat, "output", "o", defaultOutputFormat, "Output format i.e. table, json, csv, csvheader")
-	rootCmd.PersistentFlags().StringVar(&globalFlagOutputFile, "outputFile", "", "Save JSON output to file (after select)")
-	rootCmd.PersistentFlags().StringVar(&globalFlagOutputFileRaw, "outputFileRaw", "", "Save raw response to file")
+	c.PersistentFlags().StringVarP(&globalFlagOutputFormat, "output", "o", defaultOutputFormat, "Output format i.e. table, json, csv, csvheader")
+	c.PersistentFlags().StringVar(&globalFlagOutputFile, "outputFile", "", "Save JSON output to file (after select)")
+	c.PersistentFlags().StringVar(&globalFlagOutputFileRaw, "outputFileRaw", "", "Save raw response to file")
 
 	// confirmation
-	rootCmd.PersistentFlags().BoolVarP(&globalFlagForce, "force", "f", false, "Do not prompt for confirmation")
-	rootCmd.PersistentFlags().BoolVar(&globalFlagConfirm, "prompt", false, "Prompt for confirmation")
-	rootCmd.PersistentFlags().StringVar(&globalFlagConfirmText, "confirmText", "", "Custom confirmation text")
+	c.PersistentFlags().BoolVarP(&globalFlagForce, "force", "f", false, "Do not prompt for confirmation")
+	c.PersistentFlags().BoolVar(&globalFlagConfirm, "prompt", false, "Prompt for confirmation")
+	c.PersistentFlags().StringVar(&globalFlagConfirmText, "confirmText", "", "Custom confirmation text")
 
 	completion.WithOptions(
-		&rootCmd.Command,
+		&c.Command,
 		completion.WithValidateSet("dryFormat", "json", "dump", "curl", "markdown"),
 		completion.WithValidateSet("output", "json", "table", "csv", "csvheader"),
 		completion.WithValidateSet("view", ViewsNone),
 	)
 
-	rootCmd.AddCommand(NewCompletionsCmd().getCommand())
-	rootCmd.AddCommand(NewVersionCmd().getCommand())
+	c.AddCommand(NewCompletionsCmd().getCommand())
+	c.AddCommand(NewVersionCmd().getCommand())
 
-	rootCmd.AddCommand(NewRealtimeCmd().getCommand())
-	rootCmd.AddCommand(NewSessionsRootCmd().getCommand())
+	c.AddCommand(NewRealtimeCmd().getCommand())
+	c.AddCommand(NewSessionsRootCmd().getCommand())
 
 	// generic commands
-	rootCmd.AddCommand(NewGetGenericRestCmd().getCommand())
+	c.AddCommand(NewGetGenericRestCmd().getCommand())
 
 	// template commands
-	rootCmd.AddCommand(NewTemplateRootCmd().getCommand())
+	c.AddCommand(NewTemplateRootCmd().getCommand())
 
 	// settings commands
-	rootCmd.AddCommand(NewSettingsRootCmd().getCommand())
+	c.AddCommand(NewSettingsRootCmd().getCommand())
 
 	// Auto generated commands
 
 	// agents commands
 	agents := NewAgentsRootCmd().getCommand()
 	agents.AddCommand(NewGetAgentCollectionCmd().getCommand())
-	rootCmd.AddCommand(agents)
+	c.AddCommand(agents)
 
 	// alarms commands
 	alarms := NewAlarmsRootCmd().getCommand()
 	alarms.AddCommand(NewSubscribeAlarmCmd().getCommand())
-	rootCmd.AddCommand(alarms)
+	c.AddCommand(alarms)
 
 	// applications commands
 	applications := NewApplicationsRootCmd().getCommand()
 	applications.AddCommand(NewNewHostedApplicationCmd().getCommand())
-	rootCmd.AddCommand(applications)
+	c.AddCommand(applications)
 
 	// auditRecords commands
-	rootCmd.AddCommand(NewAuditRecordsRootCmd().getCommand())
+	c.AddCommand(NewAuditRecordsRootCmd().getCommand())
 
 	// binaries commands
-	rootCmd.AddCommand(NewBinariesRootCmd().getCommand())
+	c.AddCommand(NewBinariesRootCmd().getCommand())
 
 	// bulkOperations commands
-	rootCmd.AddCommand(NewBulkOperationsRootCmd().getCommand())
+	c.AddCommand(NewBulkOperationsRootCmd().getCommand())
 
 	// currentApplication commands
-	rootCmd.AddCommand(NewCurrentApplicationRootCmd().getCommand())
+	c.AddCommand(NewCurrentApplicationRootCmd().getCommand())
 
 	// currentUser commands
-	rootCmd.AddCommand(newCurrentUserRootCmd().getCommand())
+	c.AddCommand(newCurrentUserRootCmd().getCommand())
 
 	// databroker commands
-	rootCmd.AddCommand(NewDatabrokerRootCmd().getCommand())
+	c.AddCommand(NewDatabrokerRootCmd().getCommand())
 
 	// deviceCredentials commands
-	rootCmd.AddCommand(NewDeviceCredentialsRootCmd().getCommand())
+	c.AddCommand(NewDeviceCredentialsRootCmd().getCommand())
 
 	// devices commands
 	devices := NewDevicesRootCmd().getCommand()
 	devices.AddCommand(NewGetDeviceCollectionCmd().getCommand())
 	devices.AddCommand(NewGetDeviceGroupCollectionCmd().getCommand())
-	rootCmd.AddCommand(devices)
+	c.AddCommand(devices)
 
 	// operations commands
 	operations := NewOperationsRootCmd().getCommand()
 	operations.AddCommand(NewSubscribeOperationCmd().getCommand())
-	rootCmd.AddCommand(operations)
+	c.AddCommand(operations)
 
 	// events commands
 	events := NewEventsRootCmd().getCommand()
 	events.AddCommand(NewSubscribeEventCmd().getCommand())
-	rootCmd.AddCommand(events)
+	c.AddCommand(events)
 
 	// identity commands
-	rootCmd.AddCommand(NewIdentityRootCmd().getCommand())
+	c.AddCommand(NewIdentityRootCmd().getCommand())
 
 	// inventory commands
 	inventory := NewInventoryRootCmd().getCommand()
 	inventory.AddCommand(NewSubscribeManagedObjectCmd().getCommand())
 	inventory.AddCommand(NewQueryManagedObjectCollectionCmd().getCommand())
-	rootCmd.AddCommand(inventory)
+	c.AddCommand(inventory)
 
 	// inventoryReferences commands
-	rootCmd.AddCommand(NewInventoryReferencesRootCmd().getCommand())
+	c.AddCommand(NewInventoryReferencesRootCmd().getCommand())
 
 	// measurements commands
 	measurements := NewMeasurementsRootCmd().getCommand()
 	measurements.AddCommand(NewSubscribeMeasurementCmd().getCommand())
-	rootCmd.AddCommand(measurements)
+	c.AddCommand(measurements)
 
 	// microservices commands
 	microservices := NewMicroservicesRootCmd().getCommand()
 	microservices.AddCommand(NewNewMicroserviceCmd().getCommand())
 	microservices.AddCommand(NewNewServiceUserCmd().getCommand())
 	microservices.AddCommand(NewGetServiceUserCmd().getCommand())
-	rootCmd.AddCommand(microservices)
+	c.AddCommand(microservices)
 
 	// retentionRules commands
-	rootCmd.AddCommand(NewRetentionRulesRootCmd().getCommand())
+	c.AddCommand(NewRetentionRulesRootCmd().getCommand())
 
 	// systemOptions commands
-	rootCmd.AddCommand(NewSystemOptionsRootCmd().getCommand())
+	c.AddCommand(NewSystemOptionsRootCmd().getCommand())
 
 	// tenantOptions commands
-	rootCmd.AddCommand(NewTenantOptionsRootCmd().getCommand())
+	c.AddCommand(NewTenantOptionsRootCmd().getCommand())
 
 	// tenants commands
-	rootCmd.AddCommand(NewTenantsRootCmd().getCommand())
+	c.AddCommand(NewTenantsRootCmd().getCommand())
 
 	// tenantStatistics commands
-	rootCmd.AddCommand(NewTenantStatisticsRootCmd().getCommand())
+	c.AddCommand(NewTenantStatisticsRootCmd().getCommand())
 
 	// users commands
-	rootCmd.AddCommand(NewUsersRootCmd().getCommand())
+	c.AddCommand(NewUsersRootCmd().getCommand())
 
 	// userGroups commands
-	rootCmd.AddCommand(NewUserGroupsRootCmd().getCommand())
+	c.AddCommand(NewUserGroupsRootCmd().getCommand())
 
 	// userReferences commands
-	rootCmd.AddCommand(NewUserReferencesRootCmd().getCommand())
+	c.AddCommand(NewUserReferencesRootCmd().getCommand())
 
 	// userRoles commands
-	rootCmd.AddCommand(NewUserRolesRootCmd().getCommand())
+	c.AddCommand(NewUserRolesRootCmd().getCommand())
 
 	// Handle errors (not in cobra libary)
-	rootCmd.SilenceErrors = true
+	c.SilenceErrors = true
 
 }
 
 // Execute runs the root command
 func Execute() {
-	configureRootCmd()
+	rootCmd.ConfigureRootCmd()
 	executeRootCmd()
 }
 

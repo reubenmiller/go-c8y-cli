@@ -5,6 +5,7 @@ import (
 	"io"
 	"net/http"
 
+	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
@@ -25,10 +26,10 @@ func NewDeleteManagedObjectChildDeviceReferenceCmd() *DeleteManagedObjectChildDe
 		Use:   "unassignChildDevice",
 		Short: "Delete child device reference",
 		Long:  `Delete child device reference`,
-		Example: `
+		Example: heredoc.Doc(`
 $ c8y inventoryReferences unassignChildDevice --device 12345 --childDevice 22553
 Unassign a child device from its parent device
-        `,
+        `),
 		PreRunE: validateDeleteMode,
 		RunE:    ccmd.RunE,
 	}

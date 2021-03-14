@@ -5,6 +5,7 @@ import (
 	"io"
 	"net/http"
 
+	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
@@ -25,13 +26,13 @@ func NewDeleteMicroserviceCmd() *DeleteMicroserviceCmd {
 		Use:   "delete",
 		Short: "Delete microservice",
 		Long:  `Info: The application can only be removed when its availability is PRIVATE or in other case when it has no subscriptions.`,
-		Example: `
+		Example: heredoc.Doc(`
 $ c8y microservices delete --id 12345
 Delete an microservice by id
 
 $ c8y microservices delete --id my-temp-app
 Delete a microservice by name
-        `,
+        `),
 		PreRunE: validateDeleteMode,
 		RunE:    ccmd.RunE,
 	}

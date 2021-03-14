@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/manifoldco/promptui"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
@@ -24,7 +25,7 @@ func newListSessionCmd() *listSessionCmd {
 		Use:   "list",
 		Short: "Get a Cumulocity session",
 		Long:  `Get a Cumulocity session`,
-		Example: `
+		Example: heredoc.Doc(`
 			Example 1: Show an interactive list of all available sessions
 
 			#> c8y sessions list
@@ -32,7 +33,7 @@ func newListSessionCmd() *listSessionCmd {
 			Example 2: Select a session and filter the selection of session by the name "customer"
 
 			#> export C8Y_SESSION=$( c8y sessions list --sessionFilter "customer" )
-		`,
+		`),
 		RunE: ccmd.listSession,
 	}
 

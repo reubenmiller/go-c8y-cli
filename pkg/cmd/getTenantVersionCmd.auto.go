@@ -6,6 +6,7 @@ import (
 	"io"
 	"net/http"
 
+	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
@@ -26,10 +27,10 @@ func NewGetTenantVersionCmd() *GetTenantVersionCmd {
 		Use:   "getVersion",
 		Short: "Get tenant version",
 		Long:  `Get tenant platform (backend) version`,
-		Example: `
+		Example: heredoc.Doc(`
 $ c8y tenants getVersion
 Set the required availability of a device by name to 10 minutes
-        `,
+        `),
 		PreRunE: nil,
 		RunE:    ccmd.RunE,
 	}

@@ -5,6 +5,7 @@ import (
 	"io"
 	"net/http"
 
+	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
@@ -25,10 +26,10 @@ func NewUpdateDataBrokerCmd() *UpdateDataBrokerCmd {
 		Use:   "update",
 		Short: "Update data broker",
 		Long:  `Update an existing data broker connector`,
-		Example: `
+		Example: heredoc.Doc(`
 $ c8y databroker update --id 12345 --status SUSPENDED
 Change the status of a specific data broker connector by given connector id
-        `,
+        `),
 		PreRunE: validateUpdateMode,
 		RunE:    ccmd.RunE,
 	}

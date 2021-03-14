@@ -5,6 +5,7 @@ import (
 	"io"
 	"net/http"
 
+	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
@@ -27,10 +28,10 @@ func NewDeleteAgentCmd() *DeleteAgentCmd {
 		Long: `Delete an agent from the platform. This will delete all data associated to the agent
 (i.e. alarms, events, operations and measurements)
 `,
-		Example: `
+		Example: heredoc.Doc(`
 $ c8y agents delete --id 12345
 Get agent by id
-        `,
+        `),
 		PreRunE: validateDeleteMode,
 		RunE:    ccmd.RunE,
 	}

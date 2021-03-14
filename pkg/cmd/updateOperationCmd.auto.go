@@ -5,6 +5,7 @@ import (
 	"io"
 	"net/http"
 
+	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
@@ -26,10 +27,10 @@ func NewUpdateOperationCmd() *UpdateOperationCmd {
 		Short: "Update operation",
 		Long: `Update an operation. This is commonly used to change an operation's status. For example the operation can be set to FAILED along with a failure reason.
 `,
-		Example: `
+		Example: heredoc.Doc(`
 $ c8y operations update --id 12345 --status EXECUTING
 Update an operation
-        `,
+        `),
 		PreRunE: validateUpdateMode,
 		RunE:    ccmd.RunE,
 	}

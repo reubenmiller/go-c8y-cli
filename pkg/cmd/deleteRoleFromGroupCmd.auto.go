@@ -5,6 +5,7 @@ import (
 	"io"
 	"net/http"
 
+	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
@@ -25,10 +26,10 @@ func NewDeleteRoleFromGroupCmd() *DeleteRoleFromGroupCmd {
 		Use:   "deleteRoleFromGroup",
 		Short: "Unassign role from group",
 		Long:  `Unassign/delete role from a group`,
-		Example: `
+		Example: heredoc.Doc(`
 $ c8y userRoles deleteRoleFromGroup --group "myuser" --role "ROLE_MEASUREMENT_READ"
 Remove a role from the given user
-        `,
+        `),
 		PreRunE: validateDeleteMode,
 		RunE:    ccmd.RunE,
 	}

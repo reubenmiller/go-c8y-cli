@@ -5,6 +5,7 @@ import (
 	"io"
 	"net/http"
 
+	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
@@ -25,10 +26,10 @@ func NewCreateUserGroupCmd() *CreateUserGroupCmd {
 		Use:   "create",
 		Short: "Create user group",
 		Long:  `Create a new user group`,
-		Example: `
+		Example: heredoc.Doc(`
 $ c8y userGroups create --name customGroup1
 Create a user group
-        `,
+        `),
 		PreRunE: validateCreateMode,
 		RunE:    ccmd.RunE,
 	}

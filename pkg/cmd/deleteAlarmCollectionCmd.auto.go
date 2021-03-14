@@ -5,6 +5,7 @@ import (
 	"io"
 	"net/http"
 
+	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
@@ -25,13 +26,13 @@ func NewDeleteAlarmCollectionCmd() *DeleteAlarmCollectionCmd {
 		Use:   "deleteCollection",
 		Short: "Delete alarm collection",
 		Long:  `Delete a collection of alarms by a given filter`,
-		Example: `
+		Example: heredoc.Doc(`
 $ c8y alarms deleteCollection --device mydevice --severity MAJOR
 Remove alarms on the device with the severity set to MAJOR
 
 $ c8y alarms deleteCollection --device mydevice --dateFrom "-10m" --status ACTIVE
 Remove alarms on the device which are active and created in the last 10 minutes
-        `,
+        `),
 		PreRunE: validateDeleteMode,
 		RunE:    ccmd.RunE,
 	}

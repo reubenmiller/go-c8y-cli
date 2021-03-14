@@ -5,6 +5,7 @@ import (
 	"io"
 	"net/http"
 
+	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
@@ -25,10 +26,10 @@ func NewDeleteAssetFromGroupCmd() *DeleteAssetFromGroupCmd {
 		Use:   "unassignAssetFromGroup",
 		Short: "Unassign asset from group",
 		Long:  `Unassign/delete an asset (device or group) from a group`,
-		Example: `
+		Example: heredoc.Doc(`
 $ c8y inventoryReferences unassignAssetFromGroup --device 12345 --childDevice 22553
 Unassign a child device from its parent device
-        `,
+        `),
 		PreRunE: validateDeleteMode,
 		RunE:    ccmd.RunE,
 	}

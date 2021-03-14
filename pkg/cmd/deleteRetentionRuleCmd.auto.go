@@ -5,6 +5,7 @@ import (
 	"io"
 	"net/http"
 
+	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
@@ -26,10 +27,10 @@ func NewDeleteRetentionRuleCmd() *DeleteRetentionRuleCmd {
 		Short: "Delete retention rule",
 		Long: `Delete an existing retention rule
 `,
-		Example: `
+		Example: heredoc.Doc(`
 $ c8y retentionRules delete --id 12345
 Delete a retention rule
-        `,
+        `),
 		PreRunE: validateDeleteMode,
 		RunE:    ccmd.RunE,
 	}

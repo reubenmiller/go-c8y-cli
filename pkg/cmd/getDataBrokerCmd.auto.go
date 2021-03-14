@@ -6,6 +6,7 @@ import (
 	"io"
 	"net/http"
 
+	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
@@ -26,10 +27,10 @@ func NewGetDataBrokerCmd() *GetDataBrokerCmd {
 		Use:   "get",
 		Short: "Get data broker",
 		Long:  `Get an existing data broker connector`,
-		Example: `
+		Example: heredoc.Doc(`
 $ c8y databroker get --id 12345
 Get a data broker connector
-        `,
+        `),
 		PreRunE: nil,
 		RunE:    ccmd.RunE,
 	}

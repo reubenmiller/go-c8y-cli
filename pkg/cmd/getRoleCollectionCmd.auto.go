@@ -6,6 +6,7 @@ import (
 	"io"
 	"net/http"
 
+	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
@@ -26,10 +27,10 @@ func NewGetRoleCollectionCmd() *GetRoleCollectionCmd {
 		Use:   "list",
 		Short: "Get role collection",
 		Long:  `Get collection of user roles`,
-		Example: `
+		Example: heredoc.Doc(`
 $ c8y userRoles list --pageSize 100
 Get a list of roles
-        `,
+        `),
 		PreRunE: nil,
 		RunE:    ccmd.RunE,
 	}

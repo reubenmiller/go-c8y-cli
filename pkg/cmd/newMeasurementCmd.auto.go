@@ -5,6 +5,7 @@ import (
 	"io"
 	"net/http"
 
+	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
@@ -25,10 +26,10 @@ func NewNewMeasurementCmd() *NewMeasurementCmd {
 		Use:   "create",
 		Short: "Create measurement",
 		Long:  `Create a new measurement`,
-		Example: `
+		Example: heredoc.Doc(`
 $ c8y measurements create --id 12345 --time "0s" --type "myType" --data "{\"c8y_Winding\":{ \"temperature\":{\"value\": 1.2345,\"unit\":\"°C\"}}}"
 Create measurement
-        `,
+        `),
 		PreRunE: validateCreateMode,
 		RunE:    ccmd.RunE,
 	}

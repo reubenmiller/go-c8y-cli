@@ -7,6 +7,7 @@ import (
 	"net/url"
 	"strings"
 
+	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/pkg/mapbuilder"
@@ -24,11 +25,11 @@ func NewGetDeviceCollectionCmd() *GetDeviceCollectionCmd {
 		Use:   "list",
 		Short: "Get device collection",
 		Long:  `Get a collection of devices based on filter parameters`,
-		Example: `
+		Example: heredoc.Doc(`
 		c8y devices list --name "sensor*" --type myType
 
 		Get a collection of devices of type "myType", and their names start with "sensor"
-		`,
+		`),
 		RunE: ccmd.RunE,
 	}
 

@@ -6,6 +6,7 @@ import (
 	"io"
 	"net/http"
 
+	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
@@ -26,10 +27,10 @@ func NewGetEventCmd() *GetEventCmd {
 		Use:   "get",
 		Short: "Get event",
 		Long:  `Get an existing event by id`,
-		Example: `
+		Example: heredoc.Doc(`
 $ c8y events get --id 12345
 Get event
-        `,
+        `),
 		PreRunE: nil,
 		RunE:    ccmd.RunE,
 	}

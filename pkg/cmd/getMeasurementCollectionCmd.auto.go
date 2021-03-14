@@ -6,6 +6,7 @@ import (
 	"io"
 	"net/http"
 
+	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
@@ -26,10 +27,10 @@ func NewGetMeasurementCollectionCmd() *GetMeasurementCollectionCmd {
 		Use:   "list",
 		Short: "Get measurement collection",
 		Long:  `Get a collection of measurements based on filter parameters`,
-		Example: `
+		Example: heredoc.Doc(`
 $ c8y measurements list
 Get a list of measurements
-        `,
+        `),
 		PreRunE: nil,
 		RunE:    ccmd.RunE,
 	}

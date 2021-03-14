@@ -10,6 +10,7 @@ import (
 	"regexp"
 	"strings"
 
+	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/pkg/jsonUtilities"
 	"github.com/reubenmiller/go-c8y-cli/pkg/zipUtilities"
@@ -37,10 +38,10 @@ func NewNewMicroserviceCmd() *newMicroserviceCmd {
 		Use:   "create",
 		Short: "Create microservice",
 		Long:  `Create a new microservice or update the application binary of an existing microservice`,
-		Example: `
+		Example: heredoc.Doc(`
 $ c8y microservices create --file ./myapp.zip
 Create new microservice
-		`,
+		`),
 		PreRunE: validateCreateMode,
 		RunE:    ccmd.doProcedure,
 	}

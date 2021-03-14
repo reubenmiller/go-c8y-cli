@@ -6,6 +6,7 @@ import (
 	"io"
 	"net/http"
 
+	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
@@ -26,10 +27,10 @@ func NewGetApplicationReferenceCollectionCmd() *GetApplicationReferenceCollectio
 		Use:   "listReferences",
 		Short: "Get application reference collection",
 		Long:  `Get a collection of application references on a tenant`,
-		Example: `
+		Example: heredoc.Doc(`
 $ c8y tenants listReferences --tenant "mycompany"
 Get a list of referenced applications on a given tenant (from management tenant)
-        `,
+        `),
 		PreRunE: nil,
 		RunE:    ccmd.RunE,
 	}

@@ -6,6 +6,7 @@ import (
 	"io"
 	"net/http"
 
+	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
@@ -27,10 +28,10 @@ func NewGetAuditRecordCollectionCmd() *GetAuditRecordCollectionCmd {
 		Short: "Get audit record collection",
 		Long: `Audit records contain information about modifications to other Cumulocity entities. For example the audit records contain each operation state transition, so they can be used to check when an operation transitioned from PENDING -> EXECUTING -> SUCCESSFUL.
 `,
-		Example: `
+		Example: heredoc.Doc(`
 $ c8y auditRecords list --pageSize 100
 Get a list of audit records
-        `,
+        `),
 		PreRunE: nil,
 		RunE:    ccmd.RunE,
 	}

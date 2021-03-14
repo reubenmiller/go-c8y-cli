@@ -5,6 +5,7 @@ import (
 	"io"
 	"net/http"
 
+	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
@@ -25,10 +26,10 @@ func NewUpdateTenantOptionCmd() *UpdateTenantOptionCmd {
 		Use:   "update",
 		Short: "Update tenant option",
 		Long:  `Update an existing tenant option`,
-		Example: `
+		Example: heredoc.Doc(`
 $ c8y tenantOptions update --category "c8y_cli_tests" --key "option4" --value "0"
 Update a tenant option
-        `,
+        `),
 		PreRunE: validateUpdateMode,
 		RunE:    ccmd.RunE,
 	}

@@ -5,6 +5,7 @@ import (
 	"io"
 	"net/http"
 
+	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
@@ -25,10 +26,10 @@ func NewDeleteBulkOperationCmd() *DeleteBulkOperationCmd {
 		Use:   "delete",
 		Short: "Delete bulk operation",
 		Long:  `Delete bulk operation/s. Only bulk operations that are in ACTIVE or IN_PROGRESS can be deleted`,
-		Example: `
+		Example: heredoc.Doc(`
 $ c8y bulkOperations delete --id 12345
 Remove bulk operation by id
-        `,
+        `),
 		PreRunE: validateDeleteMode,
 		RunE:    ccmd.RunE,
 	}

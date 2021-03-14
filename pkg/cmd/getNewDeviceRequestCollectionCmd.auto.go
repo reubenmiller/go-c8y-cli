@@ -6,6 +6,7 @@ import (
 	"io"
 	"net/http"
 
+	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
@@ -26,10 +27,10 @@ func NewGetNewDeviceRequestCollectionCmd() *GetNewDeviceRequestCollectionCmd {
 		Use:   "listNewDeviceRequests",
 		Short: "Get device request collection",
 		Long:  `Get a collection of device registration requests`,
-		Example: `
+		Example: heredoc.Doc(`
 $ c8y devices listNewDeviceRequests
 Get a list of new device requests
-        `,
+        `),
 		PreRunE: nil,
 		RunE:    ccmd.RunE,
 	}

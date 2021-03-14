@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
@@ -21,13 +22,13 @@ func NewGetServiceUserCmd() *getServiceUserCmd {
 		Short: "Get microservice service user",
 		Long: `Get the service user associated to a microservice
 `,
-		Example: `
+		Example: heredoc.Doc(`
 $ c8y microservices getServiceUser --id 12345
 Get application service user by app id
 
 $ c8y microservices getServiceUser --id myapp
 Get application service user by app name
-        `,
+        `),
 		PreRunE: nil,
 		RunE:    ccmd.getServiceUser,
 	}

@@ -5,6 +5,7 @@ import (
 	"io"
 	"net/http"
 
+	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
@@ -25,10 +26,10 @@ func NewEnableApplicationOnTenantCmd() *EnableApplicationOnTenantCmd {
 		Use:   "enableApplication",
 		Short: "Subscribe application",
 		Long:  `Enable/subscribe an application to a tenant`,
-		Example: `
+		Example: heredoc.Doc(`
 $ c8y tenants enableApplication --tenant "mycompany" --application "myMicroservice"
 Enable an application of a tenant by name
-        `,
+        `),
 		PreRunE: validateCreateMode,
 		RunE:    ccmd.RunE,
 	}

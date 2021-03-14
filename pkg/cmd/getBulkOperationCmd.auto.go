@@ -6,6 +6,7 @@ import (
 	"io"
 	"net/http"
 
+	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
@@ -26,10 +27,10 @@ func NewGetBulkOperationCmd() *GetBulkOperationCmd {
 		Use:   "get",
 		Short: "Get bulk operation",
 		Long:  `Get an existing bulk operation`,
-		Example: `
+		Example: heredoc.Doc(`
 $ c8y bulkOperations get --id 12345
 Get bulk operation by id
-        `,
+        `),
 		PreRunE: nil,
 		RunE:    ccmd.RunE,
 	}

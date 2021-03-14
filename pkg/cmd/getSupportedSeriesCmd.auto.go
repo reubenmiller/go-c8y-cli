@@ -6,6 +6,7 @@ import (
 	"io"
 	"net/http"
 
+	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
@@ -27,10 +28,10 @@ func NewGetSupportedSeriesCmd() *GetSupportedSeriesCmd {
 		Short: "Get supported measurement series",
 		Long: `Get supported measurement series/s of a device
 `,
-		Example: `
+		Example: heredoc.Doc(`
 $ c8y inventory getSupportedSeries --device 12345
 Get the supported measurement series of a device by name
-        `,
+        `),
 		PreRunE: nil,
 		RunE:    ccmd.RunE,
 	}

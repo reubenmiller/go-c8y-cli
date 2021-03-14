@@ -6,6 +6,7 @@ import (
 	"io"
 	"net/http"
 
+	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
@@ -26,10 +27,10 @@ func NewGetAgentCmd() *GetAgentCmd {
 		Use:   "get",
 		Short: "Get agent",
 		Long:  `Get an agent's managed object representation`,
-		Example: `
+		Example: heredoc.Doc(`
 $ c8y agents get --id 12345
 Get agent by id
-        `,
+        `),
 		PreRunE: nil,
 		RunE:    ccmd.RunE,
 	}

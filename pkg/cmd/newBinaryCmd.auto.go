@@ -5,6 +5,7 @@ import (
 	"io"
 	"net/http"
 
+	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
@@ -25,13 +26,13 @@ func NewNewBinaryCmd() *NewBinaryCmd {
 		Use:   "create",
 		Short: "Create binary",
 		Long:  `Create/upload a new binary to Cumulocity`,
-		Example: `
+		Example: heredoc.Doc(`
 $ c8y binaries create --file ./output.log
 Upload a log file
 
 $ c8y binaries create --file "myConfig.json" --data "c8y_Global={},type=c8y_upload"
 Upload a config file and make it globally accessible for all users
-        `,
+        `),
 		PreRunE: validateCreateMode,
 		RunE:    ccmd.RunE,
 	}

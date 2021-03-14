@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/reubenmiller/go-c8y-cli/pkg/completion"
 	"github.com/spf13/cobra"
 )
@@ -20,7 +21,7 @@ func NewClearSessionCmd() *ClearSessionCmd {
 		Use:   "clear",
 		Short: "Clear current session",
 		Long:  `Clear the current session by returning all the environment variables which should be unset via a shell snippet`,
-		Example: `
+		Example: heredoc.Doc(`
 ### Example 1: Clear session in bash
 $ eval $(c8y session clear)
 
@@ -28,7 +29,7 @@ Clear the current session
 
 ## Example 2: Clear session in fish
 $ c8y session clear | source
-		`,
+		`),
 		RunE: ccmd.RunE,
 	}
 

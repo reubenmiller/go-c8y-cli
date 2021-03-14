@@ -6,6 +6,7 @@ import (
 	"io"
 	"net/http"
 
+	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
@@ -26,13 +27,13 @@ func NewGetManagedObjectCmd() *GetManagedObjectCmd {
 		Use:   "get",
 		Short: "Get managed objects",
 		Long:  `Get an existing managed object`,
-		Example: `
+		Example: heredoc.Doc(`
 $ c8y inventory get --id 12345
 Get a managed object
 
 $ c8y inventory get --id 12345 --withParents
 Get a managed object with parent references
-        `,
+        `),
 		PreRunE: nil,
 		RunE:    ccmd.RunE,
 	}

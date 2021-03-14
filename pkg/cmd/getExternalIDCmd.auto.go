@@ -6,6 +6,7 @@ import (
 	"io"
 	"net/http"
 
+	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
@@ -27,10 +28,10 @@ func NewGetExternalIDCmd() *GetExternalIDCmd {
 		Short: "Get external id",
 		Long: `Get an external identity object. An external identify will include the reference to a single device managed object
 `,
-		Example: `
+		Example: heredoc.Doc(`
 $ c8y identity get --type test --name myserialnumber
 Get external identity
-        `,
+        `),
 		PreRunE: nil,
 		RunE:    ccmd.RunE,
 	}

@@ -5,6 +5,7 @@ import (
 	"io"
 	"net/http"
 
+	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
@@ -30,10 +31,10 @@ If the target application is hosted and has an active version, the new applicati
 The response contains a representation of the newly created application.
 Required role ROLE_APPLICATION_MANAGEMENT_ADMIN
 `,
-		Example: `
+		Example: heredoc.Doc(`
 $ c8y applications copy --id my-example-app
 Copy an existing application
-        `,
+        `),
 		PreRunE: validateCreateMode,
 		RunE:    ccmd.RunE,
 	}

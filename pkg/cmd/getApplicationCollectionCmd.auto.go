@@ -6,6 +6,7 @@ import (
 	"io"
 	"net/http"
 
+	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
@@ -26,10 +27,10 @@ func NewGetApplicationCollectionCmd() *GetApplicationCollectionCmd {
 		Use:   "list",
 		Short: "Get application collection",
 		Long:  `Get a collection of applications by a given filter`,
-		Example: `
+		Example: heredoc.Doc(`
 $ c8y applications list --pageSize 100
 Get applications
-        `,
+        `),
 		PreRunE: nil,
 		RunE:    ccmd.RunE,
 	}

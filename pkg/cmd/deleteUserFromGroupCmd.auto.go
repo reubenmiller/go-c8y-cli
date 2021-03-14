@@ -5,6 +5,7 @@ import (
 	"io"
 	"net/http"
 
+	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
@@ -25,10 +26,10 @@ func NewDeleteUserFromGroupCmd() *DeleteUserFromGroupCmd {
 		Use:   "deleteUserFromGroup",
 		Short: "Delete user from group",
 		Long:  `Delete an existing user from a user group`,
-		Example: `
+		Example: heredoc.Doc(`
 $ c8y userReferences deleteUserFromGroup --group 1 --user myuser
 List the users within a user group
-        `,
+        `),
 		PreRunE: validateDeleteMode,
 		RunE:    ccmd.RunE,
 	}

@@ -6,6 +6,7 @@ import (
 	"io"
 	"net/http"
 
+	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
@@ -27,10 +28,10 @@ func NewGetDeviceGroupCmd() *GetDeviceGroupCmd {
 		Short: "Get device group",
 		Long: `Get a device group
 `,
-		Example: `
+		Example: heredoc.Doc(`
 $ c8y devices getGroup --id 12345
 Get device group by id
-        `,
+        `),
 		PreRunE: nil,
 		RunE:    ccmd.RunE,
 	}

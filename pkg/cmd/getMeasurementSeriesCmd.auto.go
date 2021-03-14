@@ -6,6 +6,7 @@ import (
 	"io"
 	"net/http"
 
+	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
@@ -26,10 +27,10 @@ func NewGetMeasurementSeriesCmd() *GetMeasurementSeriesCmd {
 		Use:   "getSeries",
 		Short: "Get measurement series",
 		Long:  `Get a collection of measurements based on filter parameters`,
-		Example: `
+		Example: heredoc.Doc(`
 $ c8y measurements getSeries -source 12345 --series nx_WEA_29_Delta.MDL10FG001 --series nx_WEA_29_Delta.ST9 --dateFrom "-10min" --dateTo "0s"
 Get a list of series [nx_WEA_29_Delta.MDL10FG001] and [nx_WEA_29_Delta.ST9] for device 12345
-        `,
+        `),
 		PreRunE: nil,
 		RunE:    ccmd.RunE,
 	}

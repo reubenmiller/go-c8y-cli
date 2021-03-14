@@ -5,6 +5,7 @@ import (
 	"io"
 	"net/http"
 
+	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
@@ -25,10 +26,10 @@ func NewDeleteTenantCmd() *DeleteTenantCmd {
 		Use:   "delete",
 		Short: "Delete tenant",
 		Long:  `Delete an existing tenant`,
-		Example: `
+		Example: heredoc.Doc(`
 $ c8y tenants delete --id "mycompany"
 Delete a tenant by name (from the management tenant)
-        `,
+        `),
 		PreRunE: validateDeleteMode,
 		RunE:    ccmd.RunE,
 	}

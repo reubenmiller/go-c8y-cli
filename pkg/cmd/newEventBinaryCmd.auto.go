@@ -5,6 +5,7 @@ import (
 	"io"
 	"net/http"
 
+	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
@@ -25,10 +26,10 @@ func NewNewEventBinaryCmd() *NewEventBinaryCmd {
 		Use:   "createBinary",
 		Short: "Create event binary",
 		Long:  `Upload a new binary file to an event`,
-		Example: `
+		Example: heredoc.Doc(`
 $ c8y events createBinary --id 12345 --file ./myfile.log
 Add a binary to an event
-        `,
+        `),
 		PreRunE: validateCreateMode,
 		RunE:    ccmd.RunE,
 	}

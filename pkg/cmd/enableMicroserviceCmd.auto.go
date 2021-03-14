@@ -5,6 +5,7 @@ import (
 	"io"
 	"net/http"
 
+	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
@@ -26,13 +27,13 @@ func NewEnableMicroserviceCmd() *EnableMicroserviceCmd {
 		Short: "subscribe to microservice",
 		Long: `Enabling (subscribing) a microservice will activate the application in the tenant
 `,
-		Example: `
+		Example: heredoc.Doc(`
 $ c8y microservices enable --id 12345
 Enable (subscribe) to a microservice
 
 $ c8y microservices enable --id myapp
 Enable (subscribe) to a microservice
-        `,
+        `),
 		PreRunE: validateCreateMode,
 		RunE:    ccmd.RunE,
 	}

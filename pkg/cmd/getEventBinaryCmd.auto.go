@@ -6,6 +6,7 @@ import (
 	"io"
 	"net/http"
 
+	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
@@ -26,10 +27,10 @@ func NewGetEventBinaryCmd() *GetEventBinaryCmd {
 		Use:   "downloadBinary",
 		Short: "Get event binary",
 		Long:  `Get the binary associated with an event`,
-		Example: `
+		Example: heredoc.Doc(`
 $ c8y events downloadBinary --id 12345 --outputFile ./eventbinary.txt
 Download a binary related to an event
-        `,
+        `),
 		PreRunE: nil,
 		RunE:    ccmd.RunE,
 	}

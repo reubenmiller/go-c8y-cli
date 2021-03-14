@@ -5,6 +5,7 @@ import (
 	"io"
 	"net/http"
 
+	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
@@ -26,13 +27,13 @@ func NewCreateDeviceGroupCmd() *CreateDeviceGroupCmd {
 		Short: "Create device group",
 		Long: `Create a new device group to logically group one or more devices
 `,
-		Example: `
+		Example: heredoc.Doc(`
 $ c8y devices createGroup --name mygroup
 Create device group
 
 $ c8y devices createGroup --name mygroup --data "custom_value1=1234"
 Create device group with custom properties
-        `,
+        `),
 		PreRunE: validateCreateMode,
 		RunE:    ccmd.RunE,
 	}

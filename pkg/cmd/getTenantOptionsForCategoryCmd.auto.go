@@ -6,6 +6,7 @@ import (
 	"io"
 	"net/http"
 
+	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
@@ -26,13 +27,13 @@ func NewGetTenantOptionsForCategoryCmd() *GetTenantOptionsForCategoryCmd {
 		Use:   "getForCategory",
 		Short: "Get tenant options by category",
 		Long:  `Get existing tenant options for a category`,
-		Example: `
+		Example: heredoc.Doc(`
 $ c8y tenantOptions getForCategory --category "c8y_cli_tests"
 Get a list of options for a category
 
 $ echo -e "c8y_cli_tests\ncategory2" | c8y tenantOptions getForCategory
 Get a list of options for a category
-        `,
+        `),
 		PreRunE: nil,
 		RunE:    ccmd.RunE,
 	}

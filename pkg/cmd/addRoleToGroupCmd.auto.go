@@ -5,6 +5,7 @@ import (
 	"io"
 	"net/http"
 
+	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
@@ -25,10 +26,10 @@ func NewAddRoleToGroupCmd() *AddRoleToGroupCmd {
 		Use:   "addRoleToGroup",
 		Short: "Add role to user group",
 		Long:  `Add a role to an existing user group`,
-		Example: `
+		Example: heredoc.Doc(`
 $ c8y userRoles addRoleToGroup --group "customGroup1*" --role "*ALARM*"
 Add a role to the admin group
-        `,
+        `),
 		PreRunE: validateCreateMode,
 		RunE:    ccmd.RunE,
 	}

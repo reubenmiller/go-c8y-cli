@@ -430,10 +430,10 @@ func Test_DebugCommand(t *testing.T) {
 
 	// cmdErr := ExecuteCmd(cmd, fmt.Sprintf("devices list --select id,nam* --output csvheader"))
 	// cmdErr := ExecuteCmd(cmd, fmt.Sprintf("applications get --id cockpit --select appId:id,tenantId:owner.**.id"))
-	stdin := bytes.NewBufferString(`{"id": "87551"}` + "\n" + `{"id": "1111"}` + "\n")
+	stdin := bytes.NewBufferString("\n")
 	cmd.SetIn(stdin)
 	cmdtext := `
-	alarms create --type "myType" --text "Test alarm" --severity WARNING --dry -v --debug --prompt
+	alarms list --output table
 	`
 	cmdErr := ExecuteCmd(cmd, strings.TrimSpace(cmdtext))
 	cmd.checkCommandError(cmdErr)

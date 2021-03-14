@@ -5,6 +5,7 @@ import (
 	"io"
 	"net/http"
 
+	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
@@ -25,10 +26,10 @@ func NewNewUserCmd() *NewUserCmd {
 		Use:   "create",
 		Short: "Create user",
 		Long:  `Create a new user so that they can access the tenant`,
-		Example: `
+		Example: heredoc.Doc(`
 $ c8y users create --userName "testuser1" --password "a0)8k2kld9lm,!"
 Create a user
-        `,
+        `),
 		PreRunE: validateCreateMode,
 		RunE:    ccmd.RunE,
 	}

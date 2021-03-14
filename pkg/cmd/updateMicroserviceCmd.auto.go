@@ -5,6 +5,7 @@ import (
 	"io"
 	"net/http"
 
+	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
@@ -26,10 +27,10 @@ func NewUpdateMicroserviceCmd() *UpdateMicroserviceCmd {
 		Short: "Update microservice details",
 		Long: `Update details of an existing microservice, i.e. availability, context path etc.
 `,
-		Example: `
+		Example: heredoc.Doc(`
 $ c8y microservices update --id "helloworld-app" --availability MARKET
 Update microservice availability to MARKET
-        `,
+        `),
 		PreRunE: validateUpdateMode,
 		RunE:    ccmd.RunE,
 	}

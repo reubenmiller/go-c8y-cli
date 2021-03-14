@@ -6,6 +6,7 @@ import (
 	"io"
 	"net/http"
 
+	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
@@ -26,10 +27,10 @@ func NewGetDeviceCmd() *GetDeviceCmd {
 		Use:   "get",
 		Short: "Get device",
 		Long:  `Get an existing device`,
-		Example: `
+		Example: heredoc.Doc(`
 $ c8y devices get --id 12345
 Get device by id
-        `,
+        `),
 		PreRunE: nil,
 		RunE:    ccmd.RunE,
 	}

@@ -6,6 +6,7 @@ import (
 	"io"
 	"net/http"
 
+	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
@@ -26,10 +27,10 @@ func NewGetUserGroupCollectionCmd() *GetUserGroupCollectionCmd {
 		Use:   "list",
 		Short: "Get user group collection",
 		Long:  `Get collection of (user) groups`,
-		Example: `
+		Example: heredoc.Doc(`
 $ c8y userGroups list
 Get a list of user groups for the current tenant
-        `,
+        `),
 		PreRunE: nil,
 		RunE:    ccmd.RunE,
 	}

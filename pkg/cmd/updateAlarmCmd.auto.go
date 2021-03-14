@@ -5,6 +5,7 @@ import (
 	"io"
 	"net/http"
 
+	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
@@ -25,13 +26,13 @@ func NewUpdateAlarmCmd() *UpdateAlarmCmd {
 		Use:   "update",
 		Short: "Update alarm",
 		Long:  `Update an alarm by its id`,
-		Example: `
+		Example: heredoc.Doc(`
 $ c8y alarms update --id 12345 --status ACKNOWLEDGED
 Acknowledge an existing alarm
 
 $ c8y alarms update --id 12345 --severity CRITICAL
 Update severity of an existing alarm to CRITICAL
-        `,
+        `),
 		PreRunE: validateUpdateMode,
 		RunE:    ccmd.RunE,
 	}

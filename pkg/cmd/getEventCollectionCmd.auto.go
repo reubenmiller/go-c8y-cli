@@ -6,6 +6,7 @@ import (
 	"io"
 	"net/http"
 
+	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
@@ -26,13 +27,13 @@ func NewGetEventCollectionCmd() *GetEventCollectionCmd {
 		Use:   "list",
 		Short: "Get event collection",
 		Long:  `Get a collection of events based on filter parameters`,
-		Example: `
+		Example: heredoc.Doc(`
 $ c8y events list --type my_CustomType --dateFrom "-10d"
 Get events with type 'my_CustomType' that were created in the last 10 days
 
 $ c8y events list --device mydevice
 Get events from a device
-        `,
+        `),
 		PreRunE: nil,
 		RunE:    ccmd.RunE,
 	}

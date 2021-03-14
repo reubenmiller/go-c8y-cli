@@ -6,6 +6,7 @@ import (
 	"io"
 	"net/http"
 
+	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
@@ -26,10 +27,10 @@ func NewCurrentTenantCmd() *CurrentTenantCmd {
 		Use:   "getCurrentTenant",
 		Short: "Get current tenant",
 		Long:  `Get the current tenant associated with the current session`,
-		Example: `
+		Example: heredoc.Doc(`
 $ c8y tenants getCurrentTenant
 Get the current tenant (based on your current credentials)
-        `,
+        `),
 		PreRunE: nil,
 		RunE:    ccmd.RunE,
 	}

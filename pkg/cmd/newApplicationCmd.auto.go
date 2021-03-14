@@ -5,6 +5,7 @@ import (
 	"io"
 	"net/http"
 
+	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
@@ -25,10 +26,10 @@ func NewNewApplicationCmd() *NewApplicationCmd {
 		Use:   "create",
 		Short: "Create application",
 		Long:  `Create a new application using explicit settings`,
-		Example: `
+		Example: heredoc.Doc(`
 $ c8y applications create --name myapp --type HOSTED --key "myapp-key" --contextPath "myapp"
 Create a new hosted application
-        `,
+        `),
 		PreRunE: validateCreateMode,
 		RunE:    ccmd.RunE,
 	}

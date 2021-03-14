@@ -5,6 +5,7 @@ import (
 	"io"
 	"net/http"
 
+	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
@@ -25,10 +26,10 @@ func NewAddManagedObjectChildAdditionCmd() *AddManagedObjectChildAdditionCmd {
 		Use:   "createChildAddition",
 		Short: "Add child addition",
 		Long:  `Add a managed object as a child addition to another existing managed object`,
-		Example: `
+		Example: heredoc.Doc(`
 $ c8y inventoryReferences createChildAddition --id 12345 --newChild 6789
 Add a related managed object as a child to an existing managed object
-        `,
+        `),
 		PreRunE: validateCreateMode,
 		RunE:    ccmd.RunE,
 	}

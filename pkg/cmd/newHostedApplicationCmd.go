@@ -8,6 +8,7 @@ import (
 	"path/filepath"
 	"regexp"
 
+	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/reubenmiller/go-c8y-cli/pkg/zipUtilities"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
@@ -33,11 +34,11 @@ func NewNewHostedApplicationCmd() *newHostedApplicationCmd {
 		Use:   "createHostedApplication",
 		Short: "Create hosted application",
 		Long:  `Create a new hosted web application or update the binary of an existing hosted application`,
-		Example: `
+		Example: heredoc.Doc(`
 $ c8y applications createHostedApplication --file ./myapp.zip
 
 Create new hosted application from a given zip file
-		`,
+		`),
 		PreRunE: validateCreateMode,
 		RunE:    ccmd.doProcedure,
 	}

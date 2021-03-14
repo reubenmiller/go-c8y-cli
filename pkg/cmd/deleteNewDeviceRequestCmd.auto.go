@@ -5,6 +5,7 @@ import (
 	"io"
 	"net/http"
 
+	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
@@ -25,10 +26,10 @@ func NewDeleteNewDeviceRequestCmd() *DeleteNewDeviceRequestCmd {
 		Use:   "deleteNewDeviceRequest",
 		Short: "Delete device request",
 		Long:  `Delete an existing device registration request`,
-		Example: `
+		Example: heredoc.Doc(`
 $ c8y devices deleteNewDeviceRequest --id "91019192078"
 Delete a new device request
-        `,
+        `),
 		PreRunE: validateDeleteMode,
 		RunE:    ccmd.RunE,
 	}

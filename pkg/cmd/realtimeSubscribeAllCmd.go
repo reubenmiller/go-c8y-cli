@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
@@ -20,11 +21,11 @@ func newSubscribeAllRealtimeCmd() *subscribeRealtimeAllCmd {
 		Use:   "subscribeAll",
 		Short: "Subscribe to all realtime notifications",
 		Long:  `Subscribe to all realtime notifications`,
-		Example: `
+		Example: heredoc.Doc(`
 $ c8y realtime subscribeAll --device 12345 --duration 90
 
 Subscribe to all notifications (alarms/events/operations etc.) for device 12345 for 90 seconds
-		`,
+		`),
 		RunE: ccmd.subscribeAllRealtime,
 	}
 

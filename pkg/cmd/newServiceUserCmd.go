@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
@@ -24,10 +25,10 @@ func NewNewServiceUserCmd() *newServiceUserCmd {
 		Use:   "createServiceUser",
 		Short: "New application service user",
 		Long:  ``,
-		Example: `
+		Example: heredoc.Doc(`
 $ c8y microservices createServiceUser --name my-user
 Create new application service user
-		`,
+		`),
 		PreRunE: validateCreateMode,
 		RunE:    ccmd.doProcedure,
 	}

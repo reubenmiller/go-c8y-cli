@@ -6,6 +6,7 @@ import (
 	"io"
 	"net/http"
 
+	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
@@ -26,10 +27,10 @@ func NewGetDataBrokerConnectorCollectionCmd() *GetDataBrokerConnectorCollectionC
 		Use:   "list",
 		Short: "Get data broker collection",
 		Long:  `Get a collection of existing data broker connectors`,
-		Example: `
+		Example: heredoc.Doc(`
 $ c8y databroker list
 Get a list of data broker connectors
-        `,
+        `),
 		PreRunE: nil,
 		RunE:    ccmd.RunE,
 	}

@@ -7,6 +7,7 @@ import (
 	"net/url"
 	"strings"
 
+	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/pkg/mapbuilder"
@@ -25,11 +26,11 @@ func NewGetDeviceGroupCollectionCmd() *getDeviceGroupCollectionCmd {
 		Use:   "listDeviceGroups",
 		Short: "Get device group collection",
 		Long:  `Get a collection of device groups based on filter parameters`,
-		Example: `
+		Example: heredoc.Doc(`
 		c8y devices listDeviceGroups --name "MyGroup*"
 
 		Get a collection of device groups with names that start with "MyGroup"
-		`,
+		`),
 		RunE: ccmd.getDeviceGroupCollection,
 	}
 

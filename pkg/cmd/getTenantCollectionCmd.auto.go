@@ -6,6 +6,7 @@ import (
 	"io"
 	"net/http"
 
+	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
@@ -26,10 +27,10 @@ func NewGetTenantCollectionCmd() *GetTenantCollectionCmd {
 		Use:   "list",
 		Short: "Get tenant collection",
 		Long:  `Get collection of tenants`,
-		Example: `
+		Example: heredoc.Doc(`
 $ c8y tenants list
 Get a list of tenants
-        `,
+        `),
 		PreRunE: nil,
 		RunE:    ccmd.RunE,
 	}

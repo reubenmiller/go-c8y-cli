@@ -5,6 +5,7 @@ import (
 	"io"
 	"net/http"
 
+	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
@@ -27,10 +28,10 @@ func NewDeleteApplicationBinaryCmd() *DeleteApplicationBinaryCmd {
 		Long: `Remove an application binaries related to the given application
 The active version can not be deleted and the server will throw an error if you try.
 `,
-		Example: `
+		Example: heredoc.Doc(`
 $ c8y applications deleteApplicationBinary --application 12345 --binaryId 9876
 Remove an application binary related to a Hosted (web) application
-        `,
+        `),
 		PreRunE: validateDeleteMode,
 		RunE:    ccmd.RunE,
 	}

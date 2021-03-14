@@ -5,6 +5,7 @@ import (
 	"io"
 	"net/http"
 
+	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
@@ -26,10 +27,10 @@ func NewUpdateDeviceGroupCmd() *UpdateDeviceGroupCmd {
 		Short: "Update device group",
 		Long: `Update properties of an existing device group, for example name or any other custom properties.
 `,
-		Example: `
+		Example: heredoc.Doc(`
 $ c8y devices updateGroup --id 12345
 Update device group by id
-        `,
+        `),
 		PreRunE: validateUpdateMode,
 		RunE:    ccmd.RunE,
 	}

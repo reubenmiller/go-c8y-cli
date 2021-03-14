@@ -5,6 +5,7 @@ import (
 	"io"
 	"net/http"
 
+	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
@@ -25,10 +26,10 @@ func NewUpdateTenantCmd() *UpdateTenantCmd {
 		Use:   "update",
 		Short: "Update tenant",
 		Long:  `Update an existing tenant`,
-		Example: `
+		Example: heredoc.Doc(`
 $ c8y tenants update --id "mycompany" --contactName "John Smith"
 Update a tenant by name (from the management tenant)
-        `,
+        `),
 		PreRunE: validateUpdateMode,
 		RunE:    ccmd.RunE,
 	}

@@ -5,6 +5,7 @@ import (
 	"io"
 	"net/http"
 
+	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
@@ -25,10 +26,10 @@ func NewUpdateApplicationCmd() *UpdateApplicationCmd {
 		Use:   "update",
 		Short: "Update application details",
 		Long:  `Update details of an existing application`,
-		Example: `
+		Example: heredoc.Doc(`
 $ c8y applications update --id "helloworld-app" --availability MARKET
 Update application availability to MARKET
-        `,
+        `),
 		PreRunE: validateUpdateMode,
 		RunE:    ccmd.RunE,
 	}

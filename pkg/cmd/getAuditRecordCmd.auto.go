@@ -6,6 +6,7 @@ import (
 	"io"
 	"net/http"
 
+	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
@@ -26,10 +27,10 @@ func NewGetAuditRecordCmd() *GetAuditRecordCmd {
 		Use:   "get",
 		Short: "Get audit record",
 		Long:  `Get an audit record`,
-		Example: `
+		Example: heredoc.Doc(`
 $ c8y auditRecords get --id 12345
 Get an audit record by id
-        `,
+        `),
 		PreRunE: nil,
 		RunE:    ccmd.RunE,
 	}

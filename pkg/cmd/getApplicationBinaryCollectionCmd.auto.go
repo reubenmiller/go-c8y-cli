@@ -6,6 +6,7 @@ import (
 	"io"
 	"net/http"
 
+	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
@@ -27,10 +28,10 @@ func NewGetApplicationBinaryCollectionCmd() *GetApplicationBinaryCollectionCmd {
 		Short: "Get application binaries",
 		Long: `A list of all binaries related to the given application will be returned
 `,
-		Example: `
+		Example: heredoc.Doc(`
 $ c8y applications listApplicationBinaries --id 12345
 List all of the binaries related to a Hosted (web) application
-        `,
+        `),
 		PreRunE: nil,
 		RunE:    ccmd.RunE,
 	}

@@ -5,6 +5,7 @@ import (
 	"io"
 	"net/http"
 
+	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
@@ -25,10 +26,10 @@ func NewApproveNewDeviceRequestCmd() *ApproveNewDeviceRequestCmd {
 		Use:   "approveDeviceRequest",
 		Short: "Approve device request",
 		Long:  `Approve a new device request. Note: a device can only be approved if the platform has received a request for device credentials.`,
-		Example: `
+		Example: heredoc.Doc(`
 $ c8y devices approveDeviceRequest --id "1234010101s01ldk208"
 Approve a new device request
-        `,
+        `),
 		PreRunE: validateUpdateMode,
 		RunE:    ccmd.RunE,
 	}

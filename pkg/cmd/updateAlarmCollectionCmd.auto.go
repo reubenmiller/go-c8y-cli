@@ -5,6 +5,7 @@ import (
 	"io"
 	"net/http"
 
+	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
@@ -25,10 +26,10 @@ func NewUpdateAlarmCollectionCmd() *UpdateAlarmCollectionCmd {
 		Use:   "updateCollection",
 		Short: "Update alarm collection",
 		Long:  `Update the status of a collection of alarms by using a filter. Currently only the status of alarms can be changed`,
-		Example: `
+		Example: heredoc.Doc(`
 $ c8y alarms updateCollection --device mydevice --status ACTIVE --newStatus ACKNOWLEDGED
 Update the status of all active alarms on a device to ACKNOWLEDGED
-        `,
+        `),
 		PreRunE: validateUpdateMode,
 		RunE:    ccmd.RunE,
 	}

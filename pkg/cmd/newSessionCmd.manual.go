@@ -11,6 +11,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/pkg/errors"
 	"github.com/reubenmiller/go-c8y-cli/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/pkg/prompt"
@@ -138,7 +139,7 @@ func newNewSessionCmd() *newSessionCmd {
 		Use:   "create",
 		Short: "Create session",
 		Long:  `Create a new Cumulocity session`,
-		Example: `
+		Example: heredoc.Doc(`
 ### Example 1: Create a DEV new session. Prompt for username and password
 
 $ c8y sessions create --type dev --host "https://mytenant.eu-latest.cumulocity.com"
@@ -153,7 +154,7 @@ $ c8y sessions create \
 ### Example 3: Create a new production session where only only GET commands are enabled (with no password storage)
 
 $ c8y sessions create --type prod --host "https://mytenant.eu-latest.cumulocity.com" --noStorage
-		`,
+		`),
 		PersistentPreRunE: ccmd.promptArgs,
 		Args:              cobra.NoArgs,
 		RunE:              ccmd.newSession,

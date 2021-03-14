@@ -5,6 +5,7 @@ import (
 	"io"
 	"net/http"
 
+	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
@@ -25,10 +26,10 @@ func NewUpdateAgentCmd() *UpdateAgentCmd {
 		Use:   "update",
 		Short: "Update agent",
 		Long:  `Update properties of an agent`,
-		Example: `
+		Example: heredoc.Doc(`
 $ c8y agents update --id 12345
 Update agent by id
-        `,
+        `),
 		PreRunE: validateUpdateMode,
 		RunE:    ccmd.RunE,
 	}

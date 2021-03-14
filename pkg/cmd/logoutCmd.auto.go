@@ -5,6 +5,7 @@ import (
 	"io"
 	"net/http"
 
+	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
@@ -25,10 +26,10 @@ func NewLogoutCmd() *LogoutCmd {
 		Use:   "logout",
 		Short: "Logout current user",
 		Long:  `Logout the current user. This will invalidate the token associated with the user when using OAUTH_INTERNAL`,
-		Example: `
+		Example: heredoc.Doc(`
 $ c8y users logout
 Log out the current user
-        `,
+        `),
 		PreRunE: validateCreateMode,
 		RunE:    ccmd.RunE,
 	}

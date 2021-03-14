@@ -6,6 +6,7 @@ import (
 	"io"
 	"net/http"
 
+	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
@@ -26,7 +27,7 @@ func NewGetOperationCollectionCmd() *GetOperationCollectionCmd {
 		Use:   "list",
 		Short: "Get operation collection",
 		Long:  `Get a collection of operations based on filter parameters`,
-		Example: `
+		Example: heredoc.Doc(`
 $ c8y operations list --status PENDING
 Get a list of pending operations
 
@@ -35,7 +36,7 @@ Get a list of pending operations for a given agent and all of its child devices
 
 $ c8y operations list --device mydevice --status PENDING
 Get a list of pending operations for a device
-        `,
+        `),
 		PreRunE: nil,
 		RunE:    ccmd.RunE,
 	}

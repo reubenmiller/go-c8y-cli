@@ -5,6 +5,7 @@ import (
 	"io"
 	"net/http"
 
+	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
@@ -25,10 +26,10 @@ func NewRequestDeviceCredentialsCmd() *RequestDeviceCredentialsCmd {
 		Use:   "requestDeviceCredentials",
 		Short: "Request device credentials",
 		Long:  `Device credentials can be enquired by devices that do not have credentials for accessing a tenant yet. Since the device does not have credentials yet, a set of fixed credentials is used for this API. The credentials can be obtained by contacting support. Do not use your tenant credentials with this API.`,
-		Example: `
+		Example: heredoc.Doc(`
 $ c8y devices requestDeviceCredentials --id "device-AD76-matrixer"
 Request credentials for a new device
-        `,
+        `),
 		PreRunE: validateCreateMode,
 		RunE:    ccmd.RunE,
 	}

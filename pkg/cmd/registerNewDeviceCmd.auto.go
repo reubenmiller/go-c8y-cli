@@ -5,6 +5,7 @@ import (
 	"io"
 	"net/http"
 
+	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
@@ -25,10 +26,10 @@ func NewRegisterNewDeviceCmd() *RegisterNewDeviceCmd {
 		Use:   "registerNewDevice",
 		Short: "Register device",
 		Long:  `Register a new device (request)`,
-		Example: `
+		Example: heredoc.Doc(`
 $ c8y devices registerNewDevice --id "ASDF098SD1J10912UD92JDLCNCU8"
 Register a new device request
-        `,
+        `),
 		PreRunE: validateCreateMode,
 		RunE:    ccmd.RunE,
 	}

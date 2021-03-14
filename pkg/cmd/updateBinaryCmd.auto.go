@@ -5,6 +5,7 @@ import (
 	"io"
 	"net/http"
 
+	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
@@ -26,10 +27,10 @@ func NewUpdateBinaryCmd() *UpdateBinaryCmd {
 		Short: "Update binary",
 		Long: `Update an existing binary
 `,
-		Example: `
+		Example: heredoc.Doc(`
 $ c8y binaries update --id 12345 --file ./output.log
 Update an existing binary file
-        `,
+        `),
 		PreRunE: validateUpdateMode,
 		RunE:    ccmd.RunE,
 	}

@@ -6,6 +6,7 @@ import (
 	"io"
 	"net/http"
 
+	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
@@ -26,7 +27,7 @@ func NewGetTenantUsageStatisticsCollectionCmd() *GetTenantUsageStatisticsCollect
 		Use:   "list",
 		Short: "Get tenant usage statistics",
 		Long:  `Get collection of tenant usage statistics`,
-		Example: `
+		Example: heredoc.Doc(`
 $ c8y tenantStatistics list
 Get tenant statistics collection
 
@@ -35,7 +36,7 @@ Get tenant statistics collection for the last 30 days
 
 $ c8y tenantStatistics list --dateFrom "-3d" --dateTo "-2d"
 Get tenant statistics collection for the day before yesterday
-        `,
+        `),
 		PreRunE: nil,
 		RunE:    ccmd.RunE,
 	}

@@ -5,6 +5,7 @@ import (
 	"io"
 	"net/http"
 
+	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
@@ -27,13 +28,13 @@ func NewCreateAgentCmd() *CreateAgentCmd {
 		Long: `Create an agent managed object. An agent is a special device managed object with both the
 c8y_IsDevice and com_cumulocity_model_Agent fragments.
 `,
-		Example: `
+		Example: heredoc.Doc(`
 $ c8y agents create --name myAgent
 Create agent
 
 $ c8y agents create --name myAgent --data "custom_value1=1234"
 Create agent with custom properties
-        `,
+        `),
 		PreRunE: validateCreateMode,
 		RunE:    ccmd.RunE,
 	}

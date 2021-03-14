@@ -6,6 +6,7 @@ import (
 	"net/url"
 	"strings"
 
+	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/pkg/mapbuilder"
@@ -26,7 +27,7 @@ func NewGetGenericRestCmd() *GetGenericRestCmd {
 		Use:   "rest",
 		Short: "Send custom request",
 		Long:  `Send a custom REST request to a given endpoint`,
-		Example: `
+		Example: heredoc.Doc(`
 ### Get a list of alarms
 $ c8y rest GET /alarm/alarms
 
@@ -35,7 +36,7 @@ c8y rest GET "/alarm/alarms?pageSize=10&status=ACTIVE"
 
 ### Create a new alarm
 c8y rest POST "alarm/alarms" --data "text=one,severity=MAJOR,type=test_Type,time=2019-01-01,source={'id': '12345'}"
-		`,
+		`),
 		RunE: ccmd.RunE,
 	}
 

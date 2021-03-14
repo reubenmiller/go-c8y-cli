@@ -6,6 +6,7 @@ import (
 	"io"
 	"net/http"
 
+	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
@@ -26,10 +27,10 @@ func NewGetUserGroupByNameCmd() *GetUserGroupByNameCmd {
 		Use:   "getByName",
 		Short: "Get user group by name",
 		Long:  `Get an existing user group by name`,
-		Example: `
+		Example: heredoc.Doc(`
 $ c8y userGroups getByName --name customGroup1
 Get user group by its name
-        `,
+        `),
 		PreRunE: nil,
 		RunE:    ccmd.RunE,
 	}

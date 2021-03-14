@@ -6,6 +6,7 @@ import (
 	"io"
 	"net/http"
 
+	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
@@ -26,10 +27,10 @@ func NewGetMicroserviceCmd() *GetMicroserviceCmd {
 		Use:   "get",
 		Short: "Get microservice",
 		Long:  `Get an existing microservice`,
-		Example: `
+		Example: heredoc.Doc(`
 $ c8y microservices get --id 12345
 Get an application
-        `,
+        `),
 		PreRunE: nil,
 		RunE:    ccmd.RunE,
 	}

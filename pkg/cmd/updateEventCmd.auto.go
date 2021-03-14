@@ -5,6 +5,7 @@ import (
 	"io"
 	"net/http"
 
+	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
@@ -25,13 +26,13 @@ func NewUpdateEventCmd() *UpdateEventCmd {
 		Use:   "update",
 		Short: "Update event",
 		Long:  `Update an existing event`,
-		Example: `
+		Example: heredoc.Doc(`
 $ c8y events update --id 12345 --text "example text 1"
 Update the text field of an existing event
 
 $ c8y events update --id 12345 --data "{\"my_event\":{\"active\": true }}"
 Update custom properties of an existing event
-        `,
+        `),
 		PreRunE: validateUpdateMode,
 		RunE:    ccmd.RunE,
 	}

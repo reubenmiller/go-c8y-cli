@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"net/url"
 
+	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/pkg/mapbuilder"
@@ -22,12 +23,12 @@ func NewQueryManagedObjectCollectionCmd() *QueryManagedObjectCollectionCmd {
 
 	cmd := &cobra.Command{
 		Use:   "find",
-		Short: "Get a collection of managedObjects based on Cumulocity query language",
+		Short: "Find managed object collection",
 		Long:  `Get a collection of managedObjects based on Cumulocity query language`,
-		Example: `
+		Example: heredoc.Doc(`
 $ c8y inventory find --query "name eq 'roomUpperFloor_*'"
 Get a list of managed objects
-		`,
+		`),
 		RunE: ccmd.RunE,
 	}
 

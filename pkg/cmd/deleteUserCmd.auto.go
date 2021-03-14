@@ -5,6 +5,7 @@ import (
 	"io"
 	"net/http"
 
+	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
@@ -27,10 +28,10 @@ func NewDeleteUserCmd() *DeleteUserCmd {
 		Long: `Delete a user from a tenant. This will remove the user completely from the tenant and can not be reversed.
 Alternatively a user can be disabled via updating the users properties instead of deleting the user.
 `,
-		Example: `
+		Example: heredoc.Doc(`
 $ c8y users delete --id "myuser"
 Delete a user
-        `,
+        `),
 		PreRunE: validateDeleteMode,
 		RunE:    ccmd.RunE,
 	}

@@ -6,6 +6,7 @@ import (
 	"io"
 	"net/http"
 
+	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
@@ -26,10 +27,10 @@ func NewGetBulkOperationCollectionCmd() *GetBulkOperationCollectionCmd {
 		Use:   "list",
 		Short: "Get bulk operation collection",
 		Long:  `Get a collection of bulk operations`,
-		Example: `
+		Example: heredoc.Doc(`
 $ c8y bulkOperations list
 Get a list of bulk operations
-        `,
+        `),
 		PreRunE: nil,
 		RunE:    ccmd.RunE,
 	}

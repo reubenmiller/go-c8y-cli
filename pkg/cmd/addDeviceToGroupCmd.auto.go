@@ -5,6 +5,7 @@ import (
 	"io"
 	"net/http"
 
+	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
@@ -25,13 +26,13 @@ func NewAddDeviceToGroupCmd() *AddDeviceToGroupCmd {
 		Use:   "assignDeviceToGroup",
 		Short: "Assign device to group",
 		Long:  `Assigns a device to a group. The device will be a childAsset of the group`,
-		Example: `
+		Example: heredoc.Doc(`
 $ c8y inventoryReferences assignDeviceToGroup --group 12345 --newChildDevice 43234
 Add a device to a group
 
 $ c8y inventoryReferences assignDeviceToGroup --group 12345 --newChildDevice 43234, 99292, 12222
 Add multiple devices to a group
-        `,
+        `),
 		PreRunE: validateCreateMode,
 		RunE:    ccmd.RunE,
 	}

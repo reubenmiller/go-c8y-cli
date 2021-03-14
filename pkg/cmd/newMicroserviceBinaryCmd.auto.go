@@ -5,6 +5,7 @@ import (
 	"io"
 	"net/http"
 
+	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
@@ -30,10 +31,10 @@ For the microservice application, the zip file must consist of    * cumulocity.j
 
 For the web application, the zip file must include index.html in the root directory.
 `,
-		Example: `
+		Example: heredoc.Doc(`
 $ c8y microservices createBinary --id 12345 --file ./helloworld.zip
 Upload microservice binary
-        `,
+        `),
 		PreRunE: validateCreateMode,
 		RunE:    ccmd.RunE,
 	}

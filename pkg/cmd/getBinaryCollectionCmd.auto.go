@@ -6,6 +6,7 @@ import (
 	"io"
 	"net/http"
 
+	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
@@ -27,10 +28,10 @@ func NewGetBinaryCollectionCmd() *GetBinaryCollectionCmd {
 		Short: "Get binary collection",
 		Long: `Get a collection of inventory binaries. The results include the meta information about binary and not the binary itself.
 `,
-		Example: `
+		Example: heredoc.Doc(`
 $ c8y binaries list --pageSize 100
 Get a list of binaries
-        `,
+        `),
 		PreRunE: nil,
 		RunE:    ccmd.RunE,
 	}

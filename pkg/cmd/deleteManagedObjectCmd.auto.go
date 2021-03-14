@@ -5,6 +5,7 @@ import (
 	"io"
 	"net/http"
 
+	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
@@ -25,13 +26,13 @@ func NewDeleteManagedObjectCmd() *DeleteManagedObjectCmd {
 		Use:   "delete",
 		Short: "Delete managed object",
 		Long:  `Delete an existing managed object`,
-		Example: `
+		Example: heredoc.Doc(`
 $ c8y inventory delete --id 12345
 Delete a managed object
 
 $ c8y inventory delete --id 12345 --cascade
 Delete a managed object
-        `,
+        `),
 		PreRunE: validateDeleteMode,
 		RunE:    ccmd.RunE,
 	}

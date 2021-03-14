@@ -5,6 +5,7 @@ import (
 	"io"
 	"net/http"
 
+	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
@@ -25,10 +26,10 @@ func NewDeleteMeasurementCmd() *DeleteMeasurementCmd {
 		Use:   "delete",
 		Short: "Delete measurement",
 		Long:  `Delete an existing measurement`,
-		Example: `
+		Example: heredoc.Doc(`
 $ c8y measurements delete --id 12345
 Delete measurement
-        `,
+        `),
 		PreRunE: validateDeleteMode,
 		RunE:    ccmd.RunE,
 	}

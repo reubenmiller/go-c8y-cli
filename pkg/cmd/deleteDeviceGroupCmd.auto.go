@@ -5,6 +5,7 @@ import (
 	"io"
 	"net/http"
 
+	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
@@ -26,10 +27,10 @@ func NewDeleteDeviceGroupCmd() *DeleteDeviceGroupCmd {
 		Short: "Delete device group",
 		Long: `Delete an existing device group, and optionally all of it's children
 `,
-		Example: `
+		Example: heredoc.Doc(`
 $ c8y devices deleteGroup --id 12345
 Get device group by id
-        `,
+        `),
 		PreRunE: validateDeleteMode,
 		RunE:    ccmd.RunE,
 	}

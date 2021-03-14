@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/pkg/prompt"
 	"github.com/spf13/cobra"
@@ -33,13 +34,13 @@ func newGetSessionCmd() *getSessionCmd {
 		Use:   "get",
 		Short: "Get session information",
 		Long:  `Get session information`,
-		Example: `
+		Example: heredoc.Doc(`
 Get the details about the current session
 $ c8y sessions get
 
 Get the details about the current session which is specified via the --session argument
 $ c8y sessions get --session mycustomsession
-		`,
+		`),
 		RunE: ccmd.getSession,
 	}
 

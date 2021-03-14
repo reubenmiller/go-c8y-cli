@@ -5,6 +5,7 @@ import (
 	"io"
 	"net/http"
 
+	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
@@ -25,10 +26,10 @@ func NewDeleteChildAdditionCmd() *DeleteChildAdditionCmd {
 		Use:   "unassignChildAddition",
 		Short: "Unassign child addition",
 		Long:  `Unassign/delete a child addition from an existing managed object`,
-		Example: `
+		Example: heredoc.Doc(`
 $ c8y inventoryReferences unassignChildAddition --id 12345 --childId 22553
 Unassign a child addition from its parent managed object
-        `,
+        `),
 		PreRunE: validateDeleteMode,
 		RunE:    ccmd.RunE,
 	}

@@ -6,6 +6,7 @@ import (
 	"io"
 	"net/http"
 
+	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
@@ -26,10 +27,10 @@ func NewGetAlarmCmd() *GetAlarmCmd {
 		Use:   "get",
 		Short: "Get alarm",
 		Long:  `Get an alarm by its id`,
-		Example: `
+		Example: heredoc.Doc(`
 $ c8y alarms get --id 12345
 Get alarm
-        `,
+        `),
 		PreRunE: nil,
 		RunE:    ccmd.RunE,
 	}

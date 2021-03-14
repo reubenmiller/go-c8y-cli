@@ -6,6 +6,7 @@ import (
 	"io"
 	"net/http"
 
+	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
@@ -26,10 +27,10 @@ func NewGetExternalIDCollectionCmd() *GetExternalIDCollectionCmd {
 		Use:   "list",
 		Short: "Get external id collection",
 		Long:  `Get a collection of external ids related to an existing managed object`,
-		Example: `
+		Example: heredoc.Doc(`
 $ c8y identity list
 Get a list of external ids
-        `,
+        `),
 		PreRunE: nil,
 		RunE:    ccmd.RunE,
 	}

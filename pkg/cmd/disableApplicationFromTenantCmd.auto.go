@@ -5,6 +5,7 @@ import (
 	"io"
 	"net/http"
 
+	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
@@ -25,10 +26,10 @@ func NewDisableApplicationFromTenantCmd() *DisableApplicationFromTenantCmd {
 		Use:   "disableApplication",
 		Short: "Unsubscribe application",
 		Long:  `Disable/unsubscribe an application from a tenant`,
-		Example: `
+		Example: heredoc.Doc(`
 $ c8y tenants disableApplication --tenant "mycompany" --application "myMicroservice"
 Disable an application of a tenant by name
-        `,
+        `),
 		PreRunE: validateDeleteMode,
 		RunE:    ccmd.RunE,
 	}

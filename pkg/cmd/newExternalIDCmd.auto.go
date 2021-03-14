@@ -5,6 +5,7 @@ import (
 	"io"
 	"net/http"
 
+	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
@@ -25,10 +26,10 @@ func NewNewExternalIDCmd() *NewExternalIDCmd {
 		Use:   "create",
 		Short: "Create external id",
 		Long:  `Create a new external id for an existing managed object`,
-		Example: `
+		Example: heredoc.Doc(`
 $ c8y identity create --device 1234 --type test --name myserialnumber
 Create external identity
-        `,
+        `),
 		PreRunE: validateCreateMode,
 		RunE:    ccmd.RunE,
 	}

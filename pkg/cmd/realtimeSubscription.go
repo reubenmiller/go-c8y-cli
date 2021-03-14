@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/spf13/cobra"
 )
 
@@ -19,11 +20,11 @@ func newSubscribeRealtimeCmd() *subscribeRealtimeCmd {
 		Use:   "subscribe",
 		Short: "Subscribe to realtime notifications",
 		Long:  `Subscribe to realtime notifications`,
-		Example: `
+		Example: heredoc.Doc(`
 $ c8y realtime subscribe --channel /measurements/* --duration 90
 
 Subscribe to all measurements for 90 seconds
-		`,
+		`),
 		RunE: ccmd.subscribeRealtime,
 	}
 

@@ -6,6 +6,7 @@ import (
 	"io"
 	"net/http"
 
+	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
@@ -27,10 +28,10 @@ func NewGetCurrentApplicationCmd() *GetCurrentApplicationCmd {
 		Short: "Get current application",
 		Long: `Getting the current application only works when using bootstrap credentials from an application (not user credentials)
 `,
-		Example: `
+		Example: heredoc.Doc(`
 $ c8y currentApplication get
 Get the current application (requires using application credentials)
-        `,
+        `),
 		PreRunE: nil,
 		RunE:    ccmd.RunE,
 	}

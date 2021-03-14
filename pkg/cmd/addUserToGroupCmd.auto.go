@@ -5,6 +5,7 @@ import (
 	"io"
 	"net/http"
 
+	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
@@ -25,10 +26,10 @@ func NewAddUserToGroupCmd() *AddUserToGroupCmd {
 		Use:   "addUserToGroup",
 		Short: "Add user to group",
 		Long:  `Add an existing user to a group`,
-		Example: `
+		Example: heredoc.Doc(`
 $ c8y userReferences addUserToGroup --group 1 --user myuser
 List the users within a user group
-        `,
+        `),
 		PreRunE: validateCreateMode,
 		RunE:    ccmd.RunE,
 	}

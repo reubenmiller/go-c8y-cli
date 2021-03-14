@@ -5,6 +5,7 @@ import (
 	"io"
 	"net/http"
 
+	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
@@ -25,10 +26,10 @@ func NewUpdateBulkOperationCmd() *UpdateBulkOperationCmd {
 		Use:   "update",
 		Short: "Update bulk operation",
 		Long:  `Update bulk operation. Making update on a started bulk operation cancels it and creates/schedules a new one.`,
-		Example: `
+		Example: heredoc.Doc(`
 $ c8y bulkOperations update --id 12345 --creationRamp 15
 Update an bulk operation
-        `,
+        `),
 		PreRunE: validateUpdateMode,
 		RunE:    ccmd.RunE,
 	}

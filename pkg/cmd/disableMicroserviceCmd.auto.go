@@ -5,6 +5,7 @@ import (
 	"io"
 	"net/http"
 
+	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
@@ -26,13 +27,13 @@ func NewDisableMicroserviceCmd() *DisableMicroserviceCmd {
 		Short: "unsubscribe microservice",
 		Long: `Disable (unsubscribe) a microservice from the current tenant
 `,
-		Example: `
+		Example: heredoc.Doc(`
 $ c8y microservices disable --id 12345
 Disable (unsubscribe) to a microservice
 
 $ c8y microservices disable --id myapp
 Disable (unsubscribe) to a microservice
-        `,
+        `),
 		PreRunE: validateDeleteMode,
 		RunE:    ccmd.RunE,
 	}

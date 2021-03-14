@@ -5,6 +5,7 @@ import (
 	"io"
 	"net/http"
 
+	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
@@ -25,10 +26,10 @@ func NewDeleteBinaryCmd() *DeleteBinaryCmd {
 		Use:   "deleteBinary",
 		Short: "Delete binary",
 		Long:  `Delete a binary from the tenant. This delete operation can not be undone.`,
-		Example: `
+		Example: heredoc.Doc(`
 $ c8y binaries delete --id 12345
 Delete a binary
-        `,
+        `),
 		PreRunE: validateDeleteMode,
 		RunE:    ccmd.RunE,
 	}

@@ -5,6 +5,7 @@ import (
 	"io"
 	"net/http"
 
+	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
@@ -26,10 +27,10 @@ func NewNewRetentionRuleCmd() *NewRetentionRuleCmd {
 		Short: "Create retention rule",
 		Long: `Create a new retention rule to managed when data is deleted in the tenant
 `,
-		Example: `
+		Example: heredoc.Doc(`
 $ c8y retentionRules create --dataType ALARM --maximumAge 180
 Create a retention rule
-        `,
+        `),
 		PreRunE: validateCreateMode,
 		RunE:    ccmd.RunE,
 	}

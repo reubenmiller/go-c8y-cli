@@ -6,6 +6,7 @@ import (
 	"io"
 	"net/http"
 
+	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
@@ -26,10 +27,10 @@ func NewGetInventoryRoleCmd() *GetInventoryRoleCmd {
 		Use:   "getInventoryRole",
 		Short: "Get inventory role",
 		Long:  `Get a specific inventory role`,
-		Example: `
+		Example: heredoc.Doc(`
 $ c8y users getInventoryRole --id 12345
 Get an inventory role
-        `,
+        `),
 		PreRunE: nil,
 		RunE:    ccmd.RunE,
 	}

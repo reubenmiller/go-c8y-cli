@@ -5,6 +5,7 @@ import (
 	"io"
 	"net/http"
 
+	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
@@ -25,10 +26,10 @@ func NewNewOperationCmd() *NewOperationCmd {
 		Use:   "create",
 		Short: "Create operation",
 		Long:  `Create a new operation for an agent or device`,
-		Example: `
+		Example: heredoc.Doc(`
 $ c8y operations create --device mydevice --data "{c8y_Restart:{}}"
 Create operation for a device
-        `,
+        `),
 		PreRunE: validateCreateMode,
 		RunE:    ccmd.RunE,
 	}

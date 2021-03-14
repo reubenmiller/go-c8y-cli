@@ -5,6 +5,7 @@ import (
 	"io"
 	"net/http"
 
+	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
@@ -25,13 +26,13 @@ func NewAddGroupToGroupCmd() *AddGroupToGroupCmd {
 		Use:   "assignGroupToGroup",
 		Short: "Assign child group",
 		Long:  `Assigns a group to a group. The group will be a childAsset of the group`,
-		Example: `
+		Example: heredoc.Doc(`
 $ c8y inventoryReferences assignGroupToGroup --group 12345 --newChildGroup 43234
 Add a group to a group
 
 $ c8y inventoryReferences assignGroupToGroup --group 12345 --newChildGroup 43234, 99292, 12222
 Add multiple groups to a group
-        `,
+        `),
 		PreRunE: validateCreateMode,
 		RunE:    ccmd.RunE,
 	}

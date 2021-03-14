@@ -5,6 +5,7 @@ import (
 	"io"
 	"net/http"
 
+	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
@@ -25,10 +26,10 @@ func NewUpdateCurrentApplicationCmd() *UpdateCurrentApplicationCmd {
 		Use:   "update",
 		Short: "Update current application",
 		Long:  `Required authentication with bootstrap user`,
-		Example: `
+		Example: heredoc.Doc(`
 $ c8y currentApplication update --data "myCustomProp=1"
 Update custom properties of the current application (requires using application credentials)
-        `,
+        `),
 		PreRunE: validateUpdateMode,
 		RunE:    ccmd.RunE,
 	}

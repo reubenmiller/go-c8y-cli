@@ -5,6 +5,7 @@ import (
 	"io"
 	"net/http"
 
+	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
@@ -25,10 +26,10 @@ func NewDeleteExternalIDCmd() *DeleteExternalIDCmd {
 		Use:   "delete",
 		Short: "Delete external id",
 		Long:  `Delete an existing external id. This does not delete the device managed object`,
-		Example: `
+		Example: heredoc.Doc(`
 $ c8y identity delete --type test --name myserialnumber
 Delete external identity
-        `,
+        `),
 		PreRunE: validateDeleteMode,
 		RunE:    ccmd.RunE,
 	}

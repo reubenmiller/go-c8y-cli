@@ -6,6 +6,7 @@ import (
 	"io"
 	"net/http"
 
+	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
@@ -26,10 +27,10 @@ func NewGetCurrentApplicationUserCollectionCmd() *GetCurrentApplicationUserColle
 		Use:   "listSubscriptions",
 		Short: "Get current application subscriptions",
 		Long:  `Requires authentication with the application bootstrap user`,
-		Example: `
+		Example: heredoc.Doc(`
 $ c8y currentApplication listSubscriptions
 List the current application users/subscriptions
-        `,
+        `),
 		PreRunE: nil,
 		RunE:    ccmd.RunE,
 	}

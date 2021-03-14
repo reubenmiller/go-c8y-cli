@@ -6,6 +6,7 @@ import (
 	"io"
 	"net/http"
 
+	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
@@ -26,10 +27,10 @@ func NewGetUserCurrentCmd() *GetUserCurrentCmd {
 		Use:   "getCurrentUser",
 		Short: "Get current user",
 		Long:  `Get the user representation associated with the current credentials used by the request`,
-		Example: `
+		Example: heredoc.Doc(`
 $ c8y users getCurrentUser
 Get the current user
-        `,
+        `),
 		PreRunE: nil,
 		RunE:    ccmd.RunE,
 	}

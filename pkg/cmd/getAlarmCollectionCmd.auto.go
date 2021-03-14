@@ -6,6 +6,7 @@ import (
 	"io"
 	"net/http"
 
+	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
@@ -26,13 +27,13 @@ func NewGetAlarmCollectionCmd() *GetAlarmCollectionCmd {
 		Use:   "list",
 		Short: "Get alarm collection",
 		Long:  `Get a collection of alarms based on filter parameters`,
-		Example: `
+		Example: heredoc.Doc(`
 $ c8y alarms list --severity MAJOR --pageSize 100
 Get alarms with the severity set to MAJOR
 
 $ c8y alarms list --dateFrom "-10m" --status ACTIVE
 Get collection of active alarms which occurred in the last 10 minutes
-        `,
+        `),
 		PreRunE: nil,
 		RunE:    ccmd.RunE,
 	}

@@ -3,6 +3,7 @@
 package cmd
 
 import (
+	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
@@ -22,7 +23,7 @@ func NewSubscribeMeasurementCmd() *subscribeMeasurementCmd {
 		Use:   "subscribe",
 		Short: "Subscribe to realtime measurements",
 		Long:  `Subscribe to realtime measurements`,
-		Example: `
+		Example: heredoc.Doc(`
 $ c8y measurements subscribe --device 12345
 Subscribe to measurements (in realtime) for device 12345
 
@@ -31,7 +32,7 @@ Subscribe to measurements (in realtime) for device 12345 for 30 seconds
 
 $ c8y measurements subscribe --count 10
 Subscribe to measurements (in realtime) for all devices, and stop after receiving 10 measurements
-		`,
+		`),
 		RunE: ccmd.subscribeMeasurement,
 	}
 

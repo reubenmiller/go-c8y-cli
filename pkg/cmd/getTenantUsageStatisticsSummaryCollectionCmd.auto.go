@@ -6,6 +6,7 @@ import (
 	"io"
 	"net/http"
 
+	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
@@ -26,7 +27,7 @@ func NewGetTenantUsageStatisticsSummaryCollectionCmd() *GetTenantUsageStatistics
 		Use:   "listSummaryForTenant",
 		Short: "Get tenant usage summary statistics",
 		Long:  `Get summary of requests and database usage from the start of this month until now`,
-		Example: `
+		Example: heredoc.Doc(`
 $ c8y tenantStatistics listSummaryForTenant
 Get tenant summary statistics for the current tenant
 
@@ -35,7 +36,7 @@ Get tenant summary statistics collection for the last 30 days
 
 $ c8y tenantStatistics listSummaryForTenant --dateFrom "-10d" --dateTo "-9d"
 Get tenant summary statistics collection for the last 10 days, only return until the last 9 days
-        `,
+        `),
 		PreRunE: nil,
 		RunE:    ccmd.RunE,
 	}

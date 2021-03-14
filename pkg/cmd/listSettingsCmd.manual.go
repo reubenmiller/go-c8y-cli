@@ -3,6 +3,7 @@ package cmd
 import (
 	"encoding/json"
 
+	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/pkg/mapbuilder"
 	"github.com/spf13/cobra"
@@ -20,13 +21,13 @@ func newListSettingsCmd() *listSettingsCmd {
 		Use:   "list",
 		Short: "Show the current settings",
 		Long:  `Show the current settings which are being used by the cli tool`,
-		Example: `
+		Example: heredoc.Doc(`
 $ c8y settings list
 Show the all settings (as json)
 
 $ c8y settings list --select "activityLog" --flatten
 Show active log settings in a flattened json format
-		`,
+		`),
 		RunE: ccmd.listSettings,
 	}
 

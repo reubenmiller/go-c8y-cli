@@ -6,6 +6,7 @@ import (
 	"io"
 	"net/http"
 
+	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
@@ -26,10 +27,10 @@ func NewGetManagedObjectChildAdditionCollectionCmd() *GetManagedObjectChildAddit
 		Use:   "listChildAdditions",
 		Short: "Get child addition collection",
 		Long:  `Get a collection of managedObjects child additions`,
-		Example: `
+		Example: heredoc.Doc(`
 $ c8y inventoryReferences listChildAdditions --id 12345
 Get a list of the child additions of an existing managed object
-        `,
+        `),
 		PreRunE: nil,
 		RunE:    ccmd.RunE,
 	}

@@ -6,6 +6,7 @@ import (
 	"io"
 	"net/http"
 
+	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
@@ -27,13 +28,13 @@ func NewGetMicroserviceBootstrapUserCmd() *GetMicroserviceBootstrapUserCmd {
 		Short: "Get microservice bootstrap user",
 		Long: `Get the bootstrap user associated to a microservice. The bootstrap user is required when running a microservice locally (i.e. during development)
 `,
-		Example: `
+		Example: heredoc.Doc(`
 $ c8y microservices getBootstrapUser --id 12345
 Get application bootstrap user by app id
 
 $ c8y microservices getBootstrapUser --id myapp
 Get application bootstrap user by app name
-        `,
+        `),
 		PreRunE: nil,
 		RunE:    ccmd.RunE,
 	}

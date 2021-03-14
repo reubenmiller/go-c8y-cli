@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 
+	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/pkg/jsonUtilities"
@@ -23,7 +24,7 @@ func newExecuteTemplateCmd() *executeTemplateCmd {
 		Use:   "execute",
 		Short: "Execute a jsonnet template",
 		Long:  `Execute a jsonnet template and return the output. Useful when creating new templates`,
-		Example: `
+		Example: heredoc.Doc(`
 Example 1:
 $ c8y template execute --template ./mytemplate.jsonnet
 
@@ -33,7 +34,7 @@ Example 2:
 $ c8y template execute --template ./mytemplate.jsonnet --templateVars "name=testme" --data "name=myDeviceName"
 
 Verify a jsonnet template and specify input data to be used as the input when evaluating the template
-		`,
+		`),
 		RunE: ccmd.newTemplate,
 	}
 

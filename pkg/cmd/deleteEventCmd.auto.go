@@ -5,6 +5,7 @@ import (
 	"io"
 	"net/http"
 
+	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
@@ -25,10 +26,10 @@ func NewDeleteEventCmd() *DeleteEventCmd {
 		Use:   "delete",
 		Short: "Delete event",
 		Long:  `Delete an existing event`,
-		Example: `
+		Example: heredoc.Doc(`
 $ c8y events delete --id 12345
 Delete an event
-        `,
+        `),
 		PreRunE: validateDeleteMode,
 		RunE:    ccmd.RunE,
 	}

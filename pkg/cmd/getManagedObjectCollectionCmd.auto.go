@@ -6,6 +6,7 @@ import (
 	"io"
 	"net/http"
 
+	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
@@ -26,13 +27,13 @@ func NewGetManagedObjectCollectionCmd() *GetManagedObjectCollectionCmd {
 		Use:   "list",
 		Short: "Get managed object collection",
 		Long:  `Get a collection of managedObjects based on filter parameters`,
-		Example: `
+		Example: heredoc.Doc(`
 $ c8y inventory list
 Get a list of managed objects
 
 $ c8y inventory list --ids 1111,2222
 Get a list of managed objects by ids
-        `,
+        `),
 		PreRunE: nil,
 		RunE:    ccmd.RunE,
 	}

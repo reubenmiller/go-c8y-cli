@@ -6,6 +6,7 @@ import (
 	"io"
 	"net/http"
 
+	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
@@ -26,10 +27,10 @@ func NewGetSystemOptionCollectionCmd() *GetSystemOptionCollectionCmd {
 		Use:   "list",
 		Short: "Get system option collection",
 		Long:  `Get a collection of system options. This endpoint provides a set of read-only properties pre-defined in platform configuration. The response format is exactly the same as for OptionCollection.`,
-		Example: `
+		Example: heredoc.Doc(`
 $ c8y systemOptions list
 Get a list of system options
-        `,
+        `),
 		PreRunE: nil,
 		RunE:    ccmd.RunE,
 	}

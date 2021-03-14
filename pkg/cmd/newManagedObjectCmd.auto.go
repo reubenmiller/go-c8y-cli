@@ -5,6 +5,7 @@ import (
 	"io"
 	"net/http"
 
+	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
@@ -25,10 +26,10 @@ func NewNewManagedObjectCmd() *NewManagedObjectCmd {
 		Use:   "create",
 		Short: "Create managed object",
 		Long:  `Create a new inventory managed object`,
-		Example: `
+		Example: heredoc.Doc(`
 $ c8y inventory create --name "testMO" --type "custom_type"
 Create a managed object
-        `,
+        `),
 		PreRunE: validateCreateMode,
 		RunE:    ccmd.RunE,
 	}

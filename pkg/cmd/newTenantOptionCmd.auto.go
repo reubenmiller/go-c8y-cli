@@ -5,6 +5,7 @@ import (
 	"io"
 	"net/http"
 
+	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
@@ -25,10 +26,10 @@ func NewNewTenantOptionCmd() *NewTenantOptionCmd {
 		Use:   "create",
 		Short: "Create tenant option",
 		Long:  ``,
-		Example: `
+		Example: heredoc.Doc(`
 $ c8y tenantOptions create --category "c8y_cli_tests" --key "option1" --value "1"
 Create a tenant option
-        `,
+        `),
 		PreRunE: validateCreateMode,
 		RunE:    ccmd.RunE,
 	}

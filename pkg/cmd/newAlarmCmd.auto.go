@@ -5,6 +5,7 @@ import (
 	"io"
 	"net/http"
 
+	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
@@ -25,10 +26,10 @@ func NewNewAlarmCmd() *NewAlarmCmd {
 		Use:   "create",
 		Short: "Create alarm",
 		Long:  `Create an alarm on a device or agent.`,
-		Example: `
+		Example: heredoc.Doc(`
 $ c8y alarms create --device mydevice --type c8y_TestAlarm --time "-0s" --text "Test alarm" --severity MAJOR
 Create a new alarm for device
-        `,
+        `),
 		PreRunE: validateCreateMode,
 		RunE:    ccmd.RunE,
 	}

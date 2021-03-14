@@ -5,6 +5,7 @@ import (
 	"io"
 	"net/http"
 
+	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/fatih/color"
 	"github.com/reubenmiller/go-c8y-cli/pkg/c8ylogin"
 	"github.com/reubenmiller/go-c8y-cli/pkg/completion"
@@ -30,11 +31,11 @@ func newSessionLoginCmd() *sessionLoginCmd {
 		Use:   "login",
 		Short: "Login to cumulocity",
 		Long:  `Login and test the Cumulocity session and get either OAuth2 token, or using two factor authentication`,
-		Example: `
+		Example: heredoc.Doc(`
 c8y session login
 
 Log into the current session
-		`,
+		`),
 		RunE: ccmd.initSession,
 	}
 

@@ -5,6 +5,7 @@ import (
 	"io"
 	"net/http"
 
+	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
@@ -26,10 +27,10 @@ func NewUpdateUserCurrentCmd() *UpdateUserCurrentCmd {
 		Short: "Update current user",
 		Long: `Update properties or settings of your user such as first/last name, email or password
 `,
-		Example: `
+		Example: heredoc.Doc(`
 $ c8y users updateCurrentUser --lastName "Smith"
 Update the current user's last name
-        `,
+        `),
 		PreRunE: validateUpdateMode,
 		RunE:    ccmd.RunE,
 	}

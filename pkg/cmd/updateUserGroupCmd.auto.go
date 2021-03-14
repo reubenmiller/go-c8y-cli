@@ -5,6 +5,7 @@ import (
 	"io"
 	"net/http"
 
+	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
@@ -25,10 +26,10 @@ func NewUpdateUserGroupCmd() *UpdateUserGroupCmd {
 		Use:   "update",
 		Short: "Update user group",
 		Long:  `Update an existing user group`,
-		Example: `
+		Example: heredoc.Doc(`
 $ c8y userGroups update --id 12345 --name "customGroup2"
 Update a user group
-        `,
+        `),
 		PreRunE: validateUpdateMode,
 		RunE:    ccmd.RunE,
 	}

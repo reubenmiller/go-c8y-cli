@@ -3,6 +3,7 @@
 package cmd
 
 import (
+	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
@@ -22,7 +23,7 @@ func NewSubscribeOperationCmd() *subscribeOperationCmd {
 		Use:   "subscribe",
 		Short: "Subscribe to realtime operations",
 		Long:  `Subscribe to realtime operations`,
-		Example: `
+		Example: heredoc.Doc(`
 $ c8y operations subscribe --device 12345
 Subscribe to operations (in realtime) for device 12345
 
@@ -31,7 +32,7 @@ Subscribe to operations (in realtime) for device 12345 for 30 seconds
 
 $ c8y operations subscribe --count 10
 Subscribe to operations (in realtime) for all devices, and stop after receiving 10 operations
-		`,
+		`),
 		RunE: ccmd.subscribeOperation,
 	}
 

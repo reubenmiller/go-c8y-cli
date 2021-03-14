@@ -6,6 +6,7 @@ import (
 	"io"
 	"net/http"
 
+	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
@@ -27,10 +28,10 @@ func NewGetRetentionRuleCmd() *GetRetentionRuleCmd {
 		Short: "Get retention rule",
 		Long: `Get an existing retention by id
 `,
-		Example: `
+		Example: heredoc.Doc(`
 $ c8y retentionRules get --id 12345
 Get a retention rule
-        `,
+        `),
 		PreRunE: nil,
 		RunE:    ccmd.RunE,
 	}

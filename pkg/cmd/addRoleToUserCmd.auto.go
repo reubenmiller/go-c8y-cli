@@ -5,6 +5,7 @@ import (
 	"io"
 	"net/http"
 
+	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
@@ -25,10 +26,10 @@ func NewAddRoleToUserCmd() *AddRoleToUserCmd {
 		Use:   "addRoleToUser",
 		Short: "Add Role to user",
 		Long:  `Add a role to an existing user`,
-		Example: `
+		Example: heredoc.Doc(`
 $ c8y userRoles addRoleToUser --user "myuser" --role "ROLE_ALARM_READ"
 Add a role (ROLE_ALARM_READ) to a user
-        `,
+        `),
 		PreRunE: validateCreateMode,
 		RunE:    ccmd.RunE,
 	}

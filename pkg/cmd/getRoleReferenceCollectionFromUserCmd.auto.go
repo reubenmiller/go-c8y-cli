@@ -6,6 +6,7 @@ import (
 	"io"
 	"net/http"
 
+	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
@@ -26,10 +27,10 @@ func NewGetRoleReferenceCollectionFromUserCmd() *GetRoleReferenceCollectionFromU
 		Use:   "getRoleReferenceCollectionFromUser",
 		Short: "Get role references from user",
 		Long:  `Get collection of user role references from a user`,
-		Example: `
+		Example: heredoc.Doc(`
 $ c8y userRoles getRoleReferenceCollectionFromUser --user "myuser"
 Get a list of role references for a user
-        `,
+        `),
 		PreRunE: nil,
 		RunE:    ccmd.RunE,
 	}

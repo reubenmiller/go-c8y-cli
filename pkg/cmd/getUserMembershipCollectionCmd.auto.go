@@ -6,6 +6,7 @@ import (
 	"io"
 	"net/http"
 
+	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
@@ -26,10 +27,10 @@ func NewGetUserMembershipCollectionCmd() *GetUserMembershipCollectionCmd {
 		Use:   "listUserMembership",
 		Short: "get user membership collection",
 		Long:  `Get information about all groups that a user is a member of`,
-		Example: `
+		Example: heredoc.Doc(`
 $ c8y users listUserMembership --id "myuser"
 Get a list of groups that a user belongs to
-        `,
+        `),
 		PreRunE: nil,
 		RunE:    ccmd.RunE,
 	}

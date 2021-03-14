@@ -5,6 +5,7 @@ import (
 	"io"
 	"net/http"
 
+	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
@@ -26,13 +27,13 @@ func NewCreateDeviceCmd() *CreateDeviceCmd {
 		Short: "Create device",
 		Long: `Create a device (managed object) with the special c8y_IsDevice fragment.
 `,
-		Example: `
+		Example: heredoc.Doc(`
 $ c8y devices create --name myDevice
 Create device
 
 $ c8y devices create --name myDevice --data "custom_value1=1234"
 Create device with custom properties
-        `,
+        `),
 		PreRunE: validateCreateMode,
 		RunE:    ccmd.RunE,
 	}

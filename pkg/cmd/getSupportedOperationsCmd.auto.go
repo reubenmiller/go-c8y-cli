@@ -6,6 +6,7 @@ import (
 	"io"
 	"net/http"
 
+	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
@@ -27,10 +28,10 @@ func NewGetSupportedOperationsCmd() *GetSupportedOperationsCmd {
 		Short: "Get supported operations",
 		Long: `Returns a list of supported operations (fragments) for a device. The supported fragments list is returned from the c8y_SupportedOperations fragment of the device managed object.
 `,
-		Example: `
+		Example: heredoc.Doc(`
 $ c8y inventory getSupportedOperations --device 12345
 Get the supported operations of a device by name
-        `,
+        `),
 		PreRunE: nil,
 		RunE:    ccmd.RunE,
 	}

@@ -6,6 +6,7 @@ import (
 	"io"
 	"net/http"
 
+	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
@@ -26,10 +27,10 @@ func NewGetUserCmd() *GetUserCmd {
 		Use:   "get",
 		Short: "Get user",
 		Long:  `Get information about a user`,
-		Example: `
+		Example: heredoc.Doc(`
 $ c8y users get --id "myuser"
 Get a user
-        `,
+        `),
 		PreRunE: nil,
 		RunE:    ccmd.RunE,
 	}

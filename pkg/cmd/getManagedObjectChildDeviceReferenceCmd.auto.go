@@ -6,6 +6,7 @@ import (
 	"io"
 	"net/http"
 
+	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
@@ -26,10 +27,10 @@ func NewGetManagedObjectChildDeviceReferenceCmd() *GetManagedObjectChildDeviceRe
 		Use:   "getChildDevice",
 		Short: "Get child device reference",
 		Long:  `Get managed object child device reference`,
-		Example: `
+		Example: heredoc.Doc(`
 $ c8y inventoryReferences getChildDevice --device 12345 --reference 12345
 Get an existing child device reference
-        `,
+        `),
 		PreRunE: nil,
 		RunE:    ccmd.RunE,
 	}

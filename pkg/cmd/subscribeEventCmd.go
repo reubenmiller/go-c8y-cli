@@ -3,6 +3,7 @@
 package cmd
 
 import (
+	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
@@ -22,7 +23,7 @@ func NewSubscribeEventCmd() *subscribeEventCmd {
 		Use:   "subscribe",
 		Short: "Subscribe to realtime events",
 		Long:  `Subscribe to realtime events`,
-		Example: `
+		Example: heredoc.Doc(`
 $ c8y events subscribe --device 12345
 Subscribe to events (in realtime) for device 12345
 
@@ -31,7 +32,7 @@ Subscribe to events (in realtime) for device 12345 for 30 seconds
 
 $ c8y events subscribe --count 10
 Subscribe to events (in realtime) for all devices, and stop after receiving 10 events
-		`,
+		`),
 		RunE: ccmd.subscribeEvent,
 	}
 

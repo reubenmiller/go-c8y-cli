@@ -5,6 +5,7 @@ import (
 	"io"
 	"net/http"
 
+	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
@@ -25,10 +26,10 @@ func NewNewManagedObjectChildAssetCmd() *NewManagedObjectChildAssetCmd {
 		Use:   "createChildAsset",
 		Short: "Assign child asset",
 		Long:  `Assigns a group or device to an existing group and marks them as assets`,
-		Example: `
+		Example: heredoc.Doc(`
 $ c8y inventoryReferences createChildAsset --group 12345 --newChildGroup 43234
 Create group hierarchy (parent group -> child group)
-        `,
+        `),
 		PreRunE: validateCreateMode,
 		RunE:    ccmd.RunE,
 	}

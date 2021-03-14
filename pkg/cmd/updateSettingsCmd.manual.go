@@ -5,6 +5,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/fatih/color"
 	"github.com/reubenmiller/go-c8y-cli/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/pkg/config"
@@ -240,11 +241,11 @@ func NewUpdateSettingsCmd() *UpdateSettingsCmd {
 		Use:   "update",
 		Short: "Update session settings",
 		Long:  `Update settings in the current session or a given session file`,
-		Example: `
-$ c8y settings update mode dev
+		Example: heredoc.Doc(`
+			$ c8y settings update mode dev
 
-Show the active cli settings
-		`,
+			Show the active cli settings
+		`),
 		RunE: ccmd.RunE,
 		Args: cobra.ExactArgs(2),
 		ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {

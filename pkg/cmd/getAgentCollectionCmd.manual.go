@@ -5,6 +5,7 @@ import (
 	"net/url"
 	"strings"
 
+	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
@@ -22,11 +23,11 @@ func NewGetAgentCollectionCmd() *GetAgentCollectionCmd {
 		Use:   "list",
 		Short: "Get agent collection",
 		Long:  `Get a collection of agents based on filter parameters`,
-		Example: `
+		Example: heredoc.Doc(`
 		c8y agents list --name "sensor*" --type myType
 
 		Get a collection of agents of type "myType", and their names start with "sensor"
-		`,
+		`),
 		RunE: ccmd.RunE,
 	}
 
