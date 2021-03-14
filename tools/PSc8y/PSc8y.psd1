@@ -318,6 +318,7 @@ FunctionsToExport = @(
 	'Open-Website',
 	'Register-Alias',
 	'Register-ClientArgumentCompleter',
+	'Set-c8yMode',
 	'Set-ClientConsoleSetting',
 	'Set-Session',
 	'Test-Json',
