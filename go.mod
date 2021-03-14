@@ -2,7 +2,7 @@ module github.com/reubenmiller/go-c8y-cli
 
 require (
 	github.com/AlecAivazis/survey/v2 v2.2.9
-	github.com/MakeNowJust/heredoc/v2 v2.0.1 // indirect
+	github.com/MakeNowJust/heredoc/v2 v2.0.1
 	github.com/araddon/dateparse v0.0.0-20210207001429-0eec95c9db7e
 	github.com/cpuguy83/go-md2man/v2 v2.0.0
 	github.com/facette/natsort v0.0.0-20181210072756-2cd4dd1e2dcb
