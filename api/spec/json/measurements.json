@@ -29,7 +29,7 @@
             "description": "Get a list of measurements for a particular device",
             "beforeEach": [
               "$Device = PSc8y\\New-TestDevice",
-              "$Measurement = New-TestMeasurement -Device $Device.id -Type \"TempReading\""
+              "$Measurement = New-Measurement -Template \"test.measurement.jsonnet\" -Device $Device.id -Type \"TempReading\""
             ],
             "command": "Get-MeasurementCollection -Device $Device.id -Type \"TempReading\"",
             "afterEach": [
@@ -40,7 +40,7 @@
             "description": "Get measurements from a device (using pipeline)",
             "beforeEach": [
               "$Device = PSc8y\\New-TestDevice",
-              "$Measurement = New-TestMeasurement -Device $Device.id -Type \"TempReading\""
+              "$Measurement = New-Measurement -Template \"test.measurement.jsonnet\" -Device $Device.id -Type \"TempReading\""
             ],
             "command": "Get-DeviceCollection -Name $Device.name | Get-MeasurementCollection",
             "afterEach": [
@@ -208,7 +208,7 @@
             "description": "Get a list of measurements for a particular device",
             "beforeEach": [
               "$Device = PSc8y\\New-TestDevice",
-              "$Measurement = New-TestMeasurement -Device $Device.id -Type \"TempReading\" -ValueFragmentType \"c8y_Temperature\" -ValueFragmentSeries \"T\""
+              "$Measurement = New-Measurement -Template \"test.measurement.jsonnet\" -Device $Device.id -Type \"TempReading\" -ValueFragmentType \"c8y_Temperature\" -ValueFragmentSeries \"T\""
             ],
             "command": "Get-MeasurementSeries -Device $Device.id -Series \"c8y_Temperature.T\" -DateFrom \"1970-01-01\" -DateTo \"0s\"",
             "afterEach": [
@@ -218,7 +218,7 @@
           {
             "description": "Get measurement series c8y_Temperature.T on a device",
             "beforeEach": [
-              "$Measurement2 = New-TestMeasurement -Type \"TempReading\" -ValueFragmentType \"c8y_Temperature\" -ValueFragmentSeries \"T\""
+              "$Measurement2 = New-Measurement -Template \"test.measurement.jsonnet\" -Type \"TempReading\" -ValueFragmentType \"c8y_Temperature\" -ValueFragmentSeries \"T\""
             ],
             "command": "Get-MeasurementSeries -Device $Measurement2.source.id -Series \"c8y_Temperature.T\" -DateFrom \"1970-01-01\" -DateTo \"0s\"",
             "afterEach": [
@@ -229,7 +229,7 @@
             "description": "Get measurement series from a device (using pipeline)",
             "beforeEach": [
               "$Device = PSc8y\\New-TestDevice",
-              "$Measurement2 = New-TestMeasurement -Type \"TempReading\" -ValueFragmentType \"c8y_Temperature\" -ValueFragmentSeries \"T\""
+              "$Measurement2 = New-Measurement -Template \"test.measurement.jsonnet\" -Type \"TempReading\" -ValueFragmentType \"c8y_Temperature\" -ValueFragmentSeries \"T\""
             ],
             "command": "Get-DeviceCollection -Name $Device.name | Get-MeasurementSeries -Series \"c8y_Temperature.T\"",
             "afterEach": [
@@ -299,7 +299,7 @@
           {
             "description": "Get measurement",
             "beforeEach": [
-              "$Measurement = New-TestMeasurement"
+              "$Measurement = New-TestDevice | New-Measurement -Template \"test.measurement.jsonnet\""
             ],
             "command": "Get-Measurement -Id $Measurement.id",
             "afterEach": [
@@ -398,7 +398,7 @@
           {
             "description": "Delete measurement",
             "beforeEach": [
-              "$Measurement = New-TestMeasurement"
+              "$Measurement = New-TestDevice | New-Measurement -Template \"test.measurement.jsonnet\""
             ],
             "command": "Remove-Measurement -id $Measurement.id",
             "afterEach": [
@@ -439,7 +439,7 @@
           {
             "description": "Delete measurement collection for a device",
             "beforeEach": [
-              "$Measurement = New-TestMeasurement"
+              "$Measurement = New-TestDevice | New-Measurement -Template \"test.measurement.jsonnet\""
             ],
             "command": "Remove-MeasurementCollection -Device $Measurement.source.id",
             "afterEach": [

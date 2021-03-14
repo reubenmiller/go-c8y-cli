@@ -20,7 +20,7 @@ Describe -Name "Watch-NotificationChannel" {
             Start-Sleep -Seconds 2
             $DeviceID = $args[2]
             @(1..60) | ForEach-Object {
-                New-TestMeasurement -Device $DeviceID -Force
+                New-Measurement -Template "test.measurement.jsonnet" -Device $DeviceID -Force
                 Start-Sleep -Milliseconds 1000
             }
         }

@@ -3,13 +3,17 @@
 Describe -Name "Get-MeasurementCollection" {
     BeforeEach {
         $Device = PSc8y\New-TestDevice;
-        $Measurement = New-TestMeasurement `
+        $Measurement = New-Measurement `
+            -Template "test.measurement.jsonnet" `
             -Device $Device.id `
-            -ValueFragmentType "c8y_cargo" `
-            -ValueFragmentSeries "sensor1" `
-            -Value 1.234 `
-            -Unit "kg";
-
+            -Data @{
+                c8y_cargo = @{
+                    sensor1 = @{
+                        value = 1.234
+                        unit = "kg"
+                    }
+                }
+            }
     }
 
     It "Get a list of measurements in csv format" {

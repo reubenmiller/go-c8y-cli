@@ -2,7 +2,7 @@
 
 Describe -Name "Get-Measurement" {
     BeforeEach {
-        $Measurement = New-TestMeasurement
+        $Measurement = New-TestDevice | New-Measurement -Template "test.measurement.jsonnet"
 
     }
 

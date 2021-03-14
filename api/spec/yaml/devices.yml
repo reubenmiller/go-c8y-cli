@@ -217,7 +217,7 @@ endpoints:
         - description: Get the supported measurements of a device by name
           beforeEach:
             - $device = PSc8y\New-TestDevice
-            - $Measurement = PSc8y\New-TestMeasurement -Device $device.id
+            - $Measurement = PSc8y\New-Measurement -Template "test.measurement.jsonnet" -Device $device.id
           command: Get-SupportedMeasurements -Device $device.id
           afterEach:
             - Remove-ManagedObject -Id $device.id
@@ -225,7 +225,7 @@ endpoints:
         - description: Get the supported measurements of a device (using pipeline)
           beforeEach:
             - $device = PSc8y\New-TestDevice
-            - $Measurement = PSc8y\New-TestMeasurement -Device $device.id
+            - $Measurement = PSc8y\New-Measurement -Template "test.measurement.jsonnet" -Device $device.id
           command: Get-SupportedMeasurements -Device $device.id
           afterEach:
             - Remove-ManagedObject -Id $device.id
@@ -257,7 +257,7 @@ endpoints:
         - description: Get the supported measurement series of a device by name
           beforeEach:
             - $device = PSc8y\New-TestDevice
-            - $Measurement = PSc8y\New-TestMeasurement -Device $device.id
+            - $Measurement = PSc8y\New-Measurement -Template "test.measurement.jsonnet" -Device $device.id
           command: Get-SupportedSeries -Device $device.id
           afterEach:
             - Remove-ManagedObject -Id $device.id
@@ -265,7 +265,7 @@ endpoints:
         - description: Get the supported measurement series of a device (using pipeline)
           beforeEach:
             - $device = PSc8y\New-TestDevice
-            - $Measurement = PSc8y\New-TestMeasurement -Device $device.id
+            - $Measurement = PSc8y\New-Measurement -Template "test.measurement.jsonnet" -Device $device.id
           command: Get-SupportedSeries -Device $device.id
           afterEach:
             - Remove-ManagedObject -Id $device.id

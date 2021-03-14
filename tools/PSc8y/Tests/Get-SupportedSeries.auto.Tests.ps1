@@ -3,7 +3,7 @@
 Describe -Name "Get-SupportedSeries" {
     BeforeEach {
         $device = PSc8y\New-TestDevice
-        $Measurement = PSc8y\New-TestMeasurement -Device $device.id
+        $Measurement = PSc8y\New-Measurement -Template "test.measurement.jsonnet" -Device $device.id
 
     }
 
