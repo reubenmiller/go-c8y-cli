@@ -3,7 +3,7 @@ project_name: c8y
 release:
   prerelease: auto
   draft: true # we only publish after the Windows MSI gets uploaded
-  name_template: "GitHub CLI {{.Version}}"
+  name_template: "Cumulocity CLI {{.Version}}"
 
 before:
   hooks:
@@ -17,7 +17,6 @@ builds:
       main: ./cmd/c8y/main.go
       ldflags:
         - -s -w -X github.com/reubenmiller/go-c8y-cli/pkg/cmd.buildVersion={{.Version}} -X github.com/reubenmiller/go-c8y-cli/pkg/cmd.buildBranch={{.Branch}}
-        - -X main.updaterEnabled=cli/cli
     id: macos
     goos: [darwin]
     goarch: [amd64]
@@ -58,12 +57,34 @@ nfpms:
   - license: MIT
     maintainer: GitHub
     homepage: https://reubenmiller.github.io/go-c8y-cli/
-    bindir: /usr
-    dependencies:
-      - git
+    bindir: /usr/bin
     description: Cumulocity's unoffical command line tool.
     formats:
       - deb
       - rpm
-    files:
-      "./share/man/man1/c8y*.1": "/usr/share/man/man1"
+      - apk
+    # Packages your package suggests installing.
+    suggests:
+      - jq
+      - git
+
+    # create empty folder for the user to add their own templates and views
+    empty_folders:
+      - /opt/c8y/templates/custom
+      - /opt/c8y/views/custom
+
+    contents:
+      - src: "./share/man/man1/c8y*.1"
+        dst: "/usr/share/man/man1"
+
+      - src: "./tools/shell/c8y.plugin.*"
+        dst: /opt/c8y/plugins/
+      
+      - src: ./examples/views/default/*.json
+        dst: /opt/c8y/views/default/
+
+      - src: ./examples/templates/test/test*.jsonnet
+        dst: /opt/c8y/templates/test/
+      
+      - src: ./examples/settings.json
+        dst: /opt/c8y/settings.json
