@@ -1,0 +1,22 @@
+{
+    "$schema": "https://raw.githubusercontent.com/reubenmiller/go-c8y-cli/master/tools/schema/session.schema.json",
+    "settings": {
+        "activitylog": {
+            "path": "~/.cumulocity/activityLog"
+        },
+        "session": {
+            "defaultUsername": ""
+        },
+        "defaults": {
+            "pagesize": 20
+        },
+        "template": {
+            "path": "/opt/c8y/templates"
+        },
+        "views": {
+            "commonpaths": [
+                "/opt/c8y/views"
+            ]
+        }
+    }
+}
