@@ -139,7 +139,7 @@
           },
           "collectionProperty": {
             "type": "string",
-            "description": "Type of each item in the array related to the collectionType"
+            "description": "Type of each item in the array related to the collectionType. Use '-' disable any automatic guessing"
           },
           "skip": {
             "type": "boolean",
