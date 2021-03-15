@@ -655,7 +655,9 @@ func processResponse(resp *c8y.Response, respError error, commonOptions CommonCo
 
 	// Display log output in special scenarios (i.e. Delete and no Accept header), so the user gets some feedback that it did something
 	if resp != nil && (resp.Request.Method == http.MethodDelete && resp.StatusCode == 204 || resp.Request.Header.Get("Accept") == "" && resp.Request.Method != http.MethodDelete && resp.StatusCode == 201) {
-		Logger.Warnf("%s. method: %s, status=%s, path=%s", color.GreenString("Request successful"), resp.Request.Method, resp.Status, resp.Request.URL.Path)
+		if isTerminal() {
+			Logger.Warnf("%s. method: %s, status=%s, path=%s", color.GreenString("Request successful"), resp.Request.Method, resp.Status, resp.Request.URL.Path)
+		}
 	}
 
 	// write response to file instead of to stdout
