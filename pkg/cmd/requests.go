@@ -704,6 +704,8 @@ func processResponse(resp *c8y.Response, respError error, commonOptions CommonCo
 		dataProperty = commonOptions.ResultProperty
 		if dataProperty == "" {
 			dataProperty = guessDataProperty(resp)
+		} else if dataProperty == "-" {
+			dataProperty = ""
 		}
 
 		if v := resp.JSON.Get(dataProperty); v.Exists() && v.IsArray() {
@@ -784,6 +786,7 @@ func processResponse(resp *c8y.Response, respError error, commonOptions CommonCo
 
 func guessDataProperty(resp *c8y.Response) string {
 	property := ""
+	arrayPropertes := []string{}
 	totalKeys := 0
 
 	if v := resp.JSON.Get("id"); !v.Exists() {
@@ -791,12 +794,23 @@ func guessDataProperty(resp *c8y.Response) string {
 		resp.JSON.ForEach(func(key, value gjson.Result) bool {
 			totalKeys++
 			if value.IsArray() {
-				property = key.String()
-				return false
+				arrayPropertes = append(arrayPropertes, key.String())
 			}
 			return true
 		})
 	}
+
+	if len(arrayPropertes) > 1 {
+		Logger.Debugf("Could not detect property as more than 1 array like property detected: %v", arrayPropertes)
+		return ""
+	}
+	Logger.Debugf("Array properties: %v", arrayPropertes)
+
+	if len(arrayPropertes) == 0 {
+		return ""
+	}
+
+	property = arrayPropertes[0]
 
 	// if total keys is a high number, than it is most likely not an array of data
 	// i.e. for the /tenant/statistics
