@@ -3,8 +3,8 @@
 Describe -Name "Get-MeasurementSeries" {
     BeforeEach {
         $Device = PSc8y\New-TestDevice
-        $Measurement = New-TestMeasurement -Device $Device.id -Type "TempReading" -ValueFragmentType "c8y_Temperature" -ValueFragmentSeries "T"
-        $Measurement2 = New-TestMeasurement -Type "TempReading" -ValueFragmentType "c8y_Temperature" -ValueFragmentSeries "T"
+        $Measurement = New-Measurement -Template "{c8y_Temperature:{T:{value:rand.int,unit:'°C'}}}" -Device $Device.id -Type "TempReading"
+        $Measurement2 = New-Measurement -Template "{c8y_Temperature:{T:{value:rand.int,unit:'°C'}}}" -Device $Device.id -Type "TempReading"
 
     }
 
