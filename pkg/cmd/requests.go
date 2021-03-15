@@ -714,6 +714,8 @@ func processResponse(resp *c8y.Response, respError error, commonOptions CommonCo
 				dataProperty = ""
 			}
 
+			Logger.Infof("View mode: %s", globalFlagView)
+
 			// Detect view (if no filters are given)
 			if len(commonOptions.Filters.Pluck) == 0 {
 				if resp.JSON != nil && rootCmd.dataView != nil {
@@ -722,17 +724,23 @@ func processResponse(resp *c8y.Response, respError error, commonOptions CommonCo
 						subpro := resp.JSON.Get(dataProperty)
 						inputData = &subpro
 					}
-					if !strings.EqualFold(globalFlagView, ViewsNone) {
+
+					switch strings.ToLower(globalFlagView) {
+					case ViewsNone:
+						// dont apply a view
+						if !globalFlagRaw {
+							commonOptions.Filters.Pluck = []string{"**"}
+						}
+					case ViewsAll:
 						props, err := rootCmd.dataView.GetView(inputData, resp.Header.Get("Content-Type"))
 
 						if err != nil {
-							Logger.Warnf("Failed to detect view. %s", err)
+							Logger.Warnf("Failed to detect view. defaulting to '**'. %s", err)
+							commonOptions.Filters.Pluck = []string{"**"}
 						} else {
 							Logger.Infof("Detected view: %s", strings.Join(props, ", "))
 							commonOptions.Filters.Pluck = props
 						}
-					} else if Console.IsTable() {
-						commonOptions.Filters.Pluck = []string{"**"}
 					}
 				}
 			} else {
