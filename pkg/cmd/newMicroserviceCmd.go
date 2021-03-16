@@ -114,6 +114,7 @@ func (n *newMicroserviceCmd) doProcedure(cmd *cobra.Command, args []string) erro
 	var applicationName string
 	var err error
 
+	dryRun := cliConfig.DryRun()
 	applicationDetails := n.getApplicationDetails()
 
 	if applicationDetails != nil {
@@ -174,7 +175,7 @@ func (n *newMicroserviceCmd) doProcedure(cmd *cobra.Command, args []string) erro
 	// Upload binary
 	if !skipUpload {
 		Logger.Infof("uploading binary [id=%s]", application.ID)
-		if !globalFlagDryRun {
+		if !dryRun {
 			_, err := client.Application.CreateBinary(context.Background(), n.file, application.ID)
 
 			if err != nil {
@@ -225,7 +226,7 @@ func (n *newMicroserviceCmd) doProcedure(cmd *cobra.Command, args []string) erro
 
 		// Read the Cumulocity.json file, and upload
 		Logger.Infof("updating application details [id=%s], requiredRoles=%s", application.ID, strings.Join(requiredRoles, ","))
-		if !globalFlagDryRun {
+		if !dryRun {
 			_, response, err = client.Application.Update(context.Background(), application.ID, &c8y.Application{
 				RequiredRoles: requiredRoles,
 			})
@@ -238,7 +239,7 @@ func (n *newMicroserviceCmd) doProcedure(cmd *cobra.Command, args []string) erro
 	// App subscription
 	if !n.skipSubscription {
 		Logger.Infof("Subscribing to application")
-		if !globalFlagDryRun {
+		if !dryRun {
 			_, resp, err := client.Tenant.AddApplicationReference(context.Background(), client.TenantName, application.Self)
 
 			if err != nil {

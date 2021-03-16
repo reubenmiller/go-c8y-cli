@@ -3,7 +3,7 @@
 Describe -Name "c8y pipes" {
     BeforeAll {
         $DeviceList = @(1..10) | ForEach-Object {
-            New-TestDevice -AsAgent
+            New-TestAgent
         }
         $ids = New-Object System.Collections.ArrayList
     }
@@ -265,7 +265,7 @@ Describe -Name "c8y pipes" {
             $group = New-TestDeviceGroup
             $output = $devices `
             | Invoke-ClientIterator `
-            | c8y inventoryReferences assignDeviceToGroup --group $group.id --workers 5 --raw `
+            | c8y inventoryReferences assignDeviceToGroup --group $group.id --workers 5 --raw -o json `
             | ConvertFrom-Json -Depth 100
             $LASTEXITCODE | Should -BeExactly 0
             $output | Should -HaveCount $devices.Count

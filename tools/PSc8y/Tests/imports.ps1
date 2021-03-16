@@ -39,9 +39,12 @@ $env:C8Y_USE_ENVIRONMENT = "on"
 $env:C8Y_SETTINGS_CI = "true"
 
 # required in non-interactive mode, otherwise powershell throws errors (regardless of confirmation preference)
-$PSDefaultParameterValues = @{
+$global:PSDefaultParameterValues = @{
 	"*:Confirm" = $false;
 	"*:Force" = $true;
+
+	# Use PSoutput by default
+	"*:AsPSObject" = $true;
 
 	# required when using PowershellCore on linux
 	# otherwise it will generate errors "You do not have sufficient access rights to perform this operation or the item is hidden, system, or read only."
@@ -57,4 +60,13 @@ if (!$SkipSessionTest) {
 		Write-Error 'No Cumulocity Session found. Please set $env:C8Y_SESSION or $env:C8Y_HOST, $env:C8Y_TENANT, $env:C8Y_USER, $env:C8Y_PASSWORD and try again'
 	}
 	Write-Host ("Session: {0}/{1} on {2}" -f $TenantInfo.name, $User.id, $TenantInfo.domainName)
+}
+
+# Pre-defined argument arrays
+# Usage: c8y (createMeasurement)
+Function createMeasurement {
+	@(
+		"measurements", "create",
+		"--template", "test.measurement.jsonnet"
+	)
 }

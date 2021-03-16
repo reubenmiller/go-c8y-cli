@@ -139,8 +139,8 @@ func (n *GetApplicationBinaryCollectionCmd) RunE(cmd *cobra.Command, args []stri
 		Body:         body,
 		FormData:     formData,
 		Header:       headers,
-		IgnoreAccept: globalFlagIgnoreAccept,
-		DryRun:       globalFlagDryRun,
+		IgnoreAccept: cliConfig.IgnoreAcceptHeader(),
+		DryRun:       cliConfig.DryRun(),
 	}
 
 	return processRequestAndResponseWithWorkers(cmd, &req, inputIterators)

@@ -146,8 +146,8 @@ func (n *CreateDeviceCmd) RunE(cmd *cobra.Command, args []string) error {
 		Body:         body,
 		FormData:     formData,
 		Header:       headers,
-		IgnoreAccept: globalFlagIgnoreAccept,
-		DryRun:       globalFlagDryRun,
+		IgnoreAccept: cliConfig.IgnoreAcceptHeader(),
+		DryRun:       cliConfig.DryRun(),
 	}
 
 	return processRequestAndResponseWithWorkers(cmd, &req, inputIterators)

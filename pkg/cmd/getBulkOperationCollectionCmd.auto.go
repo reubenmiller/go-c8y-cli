@@ -138,8 +138,8 @@ func (n *GetBulkOperationCollectionCmd) RunE(cmd *cobra.Command, args []string) 
 		Body:         body,
 		FormData:     formData,
 		Header:       headers,
-		IgnoreAccept: globalFlagIgnoreAccept,
-		DryRun:       globalFlagDryRun,
+		IgnoreAccept: cliConfig.IgnoreAcceptHeader(),
+		DryRun:       cliConfig.DryRun(),
 	}
 
 	return processRequestAndResponseWithWorkers(cmd, &req, inputIterators)

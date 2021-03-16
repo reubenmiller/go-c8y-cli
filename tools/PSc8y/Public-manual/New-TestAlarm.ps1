@@ -27,40 +27,30 @@ Create an alarm on the existing device "myExistingDevice"
             ValueFromPipelineByPropertyName = $true,
             Position = 0
         )]
-        [object] $Device,
-
-        # Time
-        [Parameter()]
-        [string]
-        $Time = "0s",
-
-        # Cumulocity processing mode
-        [Parameter()]
-        [AllowNull()]
-        [AllowEmptyString()]
-        [ValidateSet("PERSISTENT", "QUIESCENT", "TRANSIENT", "CEP")]
-        [string]
-        $ProcessingMode,
-
-        # Template (jsonnet) file to use to create the request body.
-        [Parameter()]
-        [string]
-        $Template,
-
-        # Variables to be used when evaluating the Template. Accepts json or json shorthand, i.e. "name=peter"
-        [Parameter()]
-        [string]
-        $TemplateVars,
-
-        # Don't prompt for confirmation
-        [switch] $Force
+        [object] $Device
     )
+    DynamicParam {
+        Get-ClientCommonParameters -Type "Create", "TemplateVars"
+    }
+    Begin {
+        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "alarms create"
+        $ClientOptions = Get-ClientOutputOption $PSBoundParameters
+        $TypeOptions = @{
+            Type = "application/vnd.com.nsn.cumulocity.customDevice+json"
+            ItemType = ""
+            BoundParameters = $PSBoundParameters
+        }
+        [void] $c8yargs.AddRange(@(
+            "--template",
+            "test.alarm.jsonnet"
+        ))
+    }
 
     Process {
         if ($null -ne $Device) {
             $iDevice = Expand-Device $Device
         } else {
-            $iDevice = PSc8y\New-TestDevice -Force:$Force
+            $iDevice = PSc8y\New-TestDevice -Force:$Force -AsPSObject
         }
 
         # Fake device (if whatif prevented it from being created)
@@ -68,17 +58,14 @@ Create an alarm on the existing device "myExistingDevice"
             $iDevice = @{ id = "12345" }
         }
 
-        if ($iDevice.id) {
-            PSc8y\New-Alarm `
-                -Device $iDevice.id `
-                -Time:$Time `
-                -Type "c8y_ci_TestAlarm" `
-                -Severity MAJOR `
-                -Text "Test CI Alarm" `
-                -ProcessingMode:$ProcessingMode `
-                -Template:$Template `
-                -TemplateVars:$TemplateVars `
-                -Force:$Force
+        if ($ClientOptions.ConvertToPS) {
+            $iDevice.id `
+            | c8y alarms create $c8yargs `
+            | ConvertFrom-ClientOutput @TypeOptions
+        }
+        else {
+            $iDevice.id `
+            | c8y alarms create $c8yargs
         }
     }
 }

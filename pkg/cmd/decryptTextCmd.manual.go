@@ -62,8 +62,8 @@ func (n *decryptTextCmd) decryptText(cmd *cobra.Command, args []string) error {
 
 	if v, err := cmd.Flags().GetString("text"); err == nil && v != "" {
 
-		if SecureDataAccessor.IsEncrypted(v) != 0 {
-			password, err = SecureDataAccessor.DecryptString(v, n.passphrase)
+		if cliConfig.SecureData.IsEncrypted(v) != 0 {
+			password, err = cliConfig.SecureData.DecryptString(v, n.passphrase)
 			if err != nil {
 				return err
 			}

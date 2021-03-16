@@ -79,7 +79,7 @@ func (n *getSessionCmd) getSession(cmd *cobra.Command, args []string) error {
 
 	if n.OutputJSON {
 
-		if globalFlagCompact {
+		if cliConfig.CompactJSON() {
 			fmt.Printf("%s%s", bytes.TrimSpace(b), outputEnding)
 		} else {
 			fmt.Printf("%s%s", pretty.Pretty(bytes.TrimSpace(b)), outputEnding)

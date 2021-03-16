@@ -3,6 +3,7 @@ package cmd
 import (
 	"os"
 
+	"github.com/reubenmiller/go-c8y-cli/pkg/cmdutil"
 	"github.com/spf13/cobra"
 )
 
@@ -77,6 +78,7 @@ func NewCompletionsCmd() *CompletionsCmd {
 		},
 	}
 
+	cmdutil.DisableAuthCheck(cmd)
 	ccmd.baseCmd = newBaseCmd(cmd)
 
 	return ccmd

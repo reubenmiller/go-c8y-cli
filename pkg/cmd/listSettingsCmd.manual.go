@@ -5,9 +5,9 @@ import (
 
 	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
+	"github.com/reubenmiller/go-c8y-cli/pkg/cmdutil"
 	"github.com/reubenmiller/go-c8y-cli/pkg/mapbuilder"
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 )
 
 type listSettingsCmd struct {
@@ -32,6 +32,7 @@ Show active log settings in a flattened json format
 	}
 
 	cmd.SilenceUsage = true
+	cmdutil.DisableAuthCheck(cmd)
 
 	ccmd.baseCmd = newBaseCmd(cmd)
 
@@ -42,7 +43,8 @@ func (n *listSettingsCmd) listSettings(cmd *cobra.Command, args []string) error 
 	var responseText []byte
 	var err error
 
-	settings := viper.GetViper().AllSettings()
+	// settings := viper.GetViper().AllSettings()
+	settings := cliConfig.AllSettings()
 
 	allSettings := mapbuilder.NewInitializedMapBuilder()
 	allSettings.ApplyMap(settings)

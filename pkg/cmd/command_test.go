@@ -12,8 +12,8 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/pkg/assert"
 )
 
-func setupTest() *c8yCmd {
-	configureRootCmd()
+func setupTest() *RootCmd {
+	rootCmd.ConfigureRootCmd()
 	return rootCmd
 }
 
@@ -142,7 +142,7 @@ func splitCmd(line string) []string {
 	// return r.FindAllString(line, -1)
 }
 
-func ExecuteCmd(cmd *c8yCmd, cmdArgs interface{}) error {
+func ExecuteCmd(cmd *RootCmd, cmdArgs interface{}) error {
 	switch v := cmdArgs.(type) {
 	case string:
 		cmd.SetArgs(splitCmd(v))
@@ -150,6 +150,7 @@ func ExecuteCmd(cmd *c8yCmd, cmdArgs interface{}) error {
 	case []string:
 		cmd.SetArgs(v)
 	}
+	executeRootCmd()
 	return cmd.Execute()
 }
 
@@ -433,7 +434,7 @@ func Test_DebugCommand(t *testing.T) {
 	stdin := bytes.NewBufferString("\n")
 	cmd.SetIn(stdin)
 	cmdtext := `
-	alarms list --output table
+	devices list -o json
 	`
 	cmdErr := ExecuteCmd(cmd, strings.TrimSpace(cmdtext))
 	cmd.checkCommandError(cmdErr)

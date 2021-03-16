@@ -130,8 +130,8 @@ func (n *GetGenericRestCmd) RunE(cmd *cobra.Command, args []string) error {
 		Path:         baseURL.Path,
 		Query:        baseURL.RawQuery,
 		Header:       headers,
-		DryRun:       globalFlagDryRun,
-		IgnoreAccept: globalFlagIgnoreAccept,
+		DryRun:       cliConfig.DryRun(),
+		IgnoreAccept: cliConfig.IgnoreAcceptHeader(),
 		ResponseData: nil,
 	}
 

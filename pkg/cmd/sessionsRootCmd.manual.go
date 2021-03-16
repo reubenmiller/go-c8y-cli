@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"github.com/reubenmiller/go-c8y-cli/pkg/cmdutil"
 	"github.com/spf13/cobra"
 )
 
@@ -18,13 +19,13 @@ func NewSessionsRootCmd() *sessionsCmd {
 	}
 
 	// Subcommands
-	cmd.AddCommand(newNewSessionCmd().getCommand())
+	cmd.AddCommand(cmdutil.DisableAuthCheck(newNewSessionCmd().getCommand()))
 	cmd.AddCommand(newGetSessionCmd().getCommand())
-	cmd.AddCommand(NewClearSessionCmd().getCommand())
-	cmd.AddCommand(newEncryptTextCmd().getCommand())
-	cmd.AddCommand(newDecryptTextCmd().getCommand())
-	cmd.AddCommand(newListSessionCmd().getCommand())
-	cmd.AddCommand(newSessionLoginCmd().getCommand())
+	cmd.AddCommand(cmdutil.DisableAuthCheck(NewClearSessionCmd().getCommand()))
+	cmd.AddCommand(cmdutil.DisableAuthCheck(newEncryptTextCmd().getCommand()))
+	cmd.AddCommand(cmdutil.DisableAuthCheck(newDecryptTextCmd().getCommand()))
+	cmd.AddCommand(cmdutil.DisableAuthCheck(newListSessionCmd().getCommand()))
+	cmd.AddCommand(cmdutil.DisableAuthCheck(newSessionLoginCmd().getCommand()))
 
 	ccmd.baseCmd = newBaseCmd(cmd)
 

@@ -16,7 +16,9 @@ import (
 	"time"
 
 	"github.com/fatih/color"
+	"github.com/reubenmiller/go-c8y-cli/pkg/c8ydefaults"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
+	"github.com/reubenmiller/go-c8y-cli/pkg/config"
 	"github.com/reubenmiller/go-c8y-cli/pkg/encoding"
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/pkg/jsonUtilities"
@@ -63,17 +65,9 @@ func (options CommonCommandOptions) AddQueryParameters(query *flags.QueryTemplat
 }
 
 func getCommonOptions(cmd *cobra.Command) (CommonCommandOptions, error) {
-	options := CommonCommandOptions{}
-	if v, err := getOutputFileFlag(cmd, "outputFile"); err == nil {
-		options.OutputFile = v
-	} else {
-		return options, err
-	}
-
-	if v, err := getOutputFileFlag(cmd, "outputFileRaw"); err == nil {
-		options.OutputFileRaw = v
-	} else {
-		return options, err
+	options := CommonCommandOptions{
+		OutputFile:    cliConfig.GetOutputFile(),
+		OutputFileRaw: cliConfig.GetOutputFileRaw(),
 	}
 
 	// default return property from the raw response
@@ -82,8 +76,9 @@ func getCommonOptions(cmd *cobra.Command) (CommonCommandOptions, error) {
 	// Filters and selectors
 	options.Filters = getFilterFlag(cmd, "filter")
 
-	if globalFlagPageSize > 0 && globalFlagPageSize != CumulocityDefaultPageSize {
-		options.PageSize = globalFlagPageSize
+	pageSize := cliConfig.GetPageSize()
+	if pageSize > 0 && pageSize != c8ydefaults.PageSize {
+		options.PageSize = pageSize
 	}
 
 	if cmd.Flags().Changed("withTotalPages") {
@@ -92,34 +87,26 @@ func getCommonOptions(cmd *cobra.Command) (CommonCommandOptions, error) {
 		}
 	}
 
-	options.IncludeAll = getIncludeAllFlag(cmd, "includeAll")
+	options.IncludeAll = cliConfig.IncludeAll()
 
 	if options.IncludeAll {
-		options.PageSize = globalFlagIncludeAllPageSize
+		options.PageSize = cliConfig.GetIncludeAllPageSize()
 		Logger.Debugf("Setting pageSize to maximum value to limit number of requests. value=%d", options.PageSize)
 	}
 
-	options.CurrentPage = globalFlagCurrentPage
-	options.TotalPages = globalFlagTotalPages
+	options.CurrentPage = cliConfig.GetCurrentPage()
+	options.TotalPages = cliConfig.GetTotalPages()
 
-	if globalFlagConfirmText != "" {
-		options.ConfirmText = globalFlagConfirmText
-	} else {
+	options.ConfirmText = cliConfig.ConfirmText()
+	if options.ConfirmText == "" {
 		options.ConfirmText = cmd.Short
 	}
 
 	return options, nil
 }
 
-func getIncludeAllFlag(cmd *cobra.Command, flagName string) (includeAll bool) {
-	if v, flagErr := cmd.Flags().GetBool(flagName); flagErr == nil {
-		includeAll = v
-	}
-	return
-}
-
 func getTimeoutContext() (context.Context, context.CancelFunc) {
-	return context.WithTimeout(context.Background(), time.Duration(globalFlagTimeout*1000)*time.Millisecond)
+	return context.WithTimeout(context.Background(), time.Duration(cliConfig.RequestTimeout()*1000)*time.Millisecond)
 }
 
 func processRequestAndResponse(requests []c8y.RequestOptions, commonOptions CommonCommandOptions) error {
@@ -170,7 +157,7 @@ func processRequestAndResponse(requests []c8y.RequestOptions, commonOptions Comm
 	}
 
 	if ctx.Err() != nil {
-		Logger.Errorf("request timed out after %.3fs", globalFlagTimeout)
+		Logger.Errorf("request timed out after %.3fs", cliConfig.RequestTimeout())
 	}
 
 	if commonOptions.IncludeAll || commonOptions.TotalPages > 0 {
@@ -213,7 +200,8 @@ func dumpRequest(w io.Writer, req *http.Request) {
 
 // PrintRequestDetails prints the request to the console making it easier to extra informatino from it
 func PrintRequestDetails(w io.Writer, requestOptions *c8y.RequestOptions, req *http.Request) {
-	if globalFlagDryRunFormat == "dump" {
+	format := cliConfig.DryRunFormat()
+	if format == "dump" {
 		dumpRequest(w, req)
 		return
 	}
@@ -222,7 +210,7 @@ func PrintRequestDetails(w io.Writer, requestOptions *c8y.RequestOptions, req *h
 	label := color.New(color.FgHiCyan)
 	value := color.New(color.FgGreen)
 
-	if globalFlagNoColor {
+	if cliConfig.DisableColor() {
 		sectionLabel.DisableColor()
 		label.DisableColor()
 		value.DisableColor()
@@ -277,16 +265,17 @@ func PrintRequestDetails(w io.Writer, requestOptions *c8y.RequestOptions, req *h
 		PowerShell:  pwsh,
 	}
 	details.Path = req.URL.Path
+	compactJSON := cliConfig.CompactJSON()
 
-	if globalFlagDryRunFormat == "json" {
+	if format == "json" {
 		out, err := json.Marshal(details)
 		if err != nil {
 			return
 		}
-		if !globalFlagCompact {
+		if !compactJSON {
 			out = pretty.Pretty(out)
 		}
-		if !globalFlagNoColor {
+		if !cliConfig.DisableColor() {
 			out = pretty.Color(out, pretty.TerminalStyle)
 		}
 		// note: include newline to make it easier to parse multiple dry outputs
@@ -294,7 +283,7 @@ func PrintRequestDetails(w io.Writer, requestOptions *c8y.RequestOptions, req *h
 		return
 	}
 
-	if globalFlagDryRunFormat == "curl" {
+	if format == "curl" {
 		sectionLabel.Fprintf(w, "##### Curl (shell)\n\n")
 		label.Fprintf(w, "```sh\n%s\n```\n", details.Shell)
 
@@ -337,10 +326,10 @@ func PrintRequestDetails(w io.Writer, requestOptions *c8y.RequestOptions, req *h
 			sectionLabel.Fprint(w, "\n#### Body\n")
 			fmt.Fprintf(w, "\n```json\n")
 
-			if !globalFlagCompact {
+			if !compactJSON {
 				body = pretty.Pretty(body)
 			}
-			if !globalFlagNoColor {
+			if !cliConfig.DisableColor() {
 				body = pretty.Color(body, pretty.TerminalStyle)
 			}
 			fmt.Fprintf(w, "%s", body)
@@ -418,6 +407,9 @@ func fetchAllResults(req c8y.RequestOptions, resp *c8y.Response, commonOptions C
 		commonOptions.ResultProperty = dataProperty
 	}
 
+	delayMS := cliConfig.GetIncludeAllDelay()
+	timeout := time.Duration(cliConfig.RequestTimeout()*1000) * time.Millisecond
+
 	// check if data is already fetched
 
 	for {
@@ -443,7 +435,7 @@ func fetchAllResults(req c8y.RequestOptions, resp *c8y.Response, commonOptions C
 			Query:  baseURL.RawQuery,
 			Header: req.Header.Clone(),
 		}
-		ctx, cancel := context.WithTimeout(context.Background(), time.Duration(globalFlagTimeout*1000)*time.Millisecond)
+		ctx, cancel := context.WithTimeout(context.Background(), timeout)
 		defer cancel()
 		start := time.Now()
 		resp, err = client.SendRequest(
@@ -476,9 +468,9 @@ func fetchAllResults(req c8y.RequestOptions, resp *c8y.Response, commonOptions C
 			break
 		}
 
-		if globalFlagIncludeAllDelayMS > 0 {
-			Logger.Infof("Pausing %d ms before next request.", globalFlagIncludeAllDelayMS)
-			time.Sleep(time.Duration(globalFlagIncludeAllDelayMS) * time.Millisecond)
+		if delayMS > 0 {
+			Logger.Infof("Pausing %d ms before next request.", delayMS)
+			time.Sleep(time.Duration(delayMS) * time.Millisecond)
 		}
 	}
 
@@ -531,6 +523,9 @@ func fetchAllInventoryQueryResults(req c8y.RequestOptions, resp *c8y.Response, c
 		commonOptions.ResultProperty = dataProperty
 	}
 
+	delayMS := cliConfig.GetIncludeAllDelay()
+	timeout := time.Duration(cliConfig.RequestTimeout()*1000) * time.Millisecond
+
 	// check if data is already fetched
 	for {
 
@@ -561,7 +556,7 @@ func fetchAllInventoryQueryResults(req c8y.RequestOptions, resp *c8y.Response, c
 			Query:  baseURL.RawQuery,
 			Header: req.Header.Clone(),
 		}
-		ctx, cancel := context.WithTimeout(context.Background(), time.Duration(globalFlagTimeout*1000)*time.Millisecond)
+		ctx, cancel := context.WithTimeout(context.Background(), timeout)
 		defer cancel()
 		start := time.Now()
 		resp, err = client.SendRequest(
@@ -595,9 +590,9 @@ func fetchAllInventoryQueryResults(req c8y.RequestOptions, resp *c8y.Response, c
 			break
 		}
 
-		if globalFlagIncludeAllDelayMS > 0 {
-			Logger.Infof("Pausing %d ms before next request.", globalFlagIncludeAllDelayMS)
-			time.Sleep(time.Duration(globalFlagIncludeAllDelayMS) * time.Millisecond)
+		if delayMS > 0 {
+			Logger.Infof("Pausing %d ms before next request.", delayMS)
+			time.Sleep(time.Duration(delayMS) * time.Millisecond)
 		}
 	}
 
@@ -699,7 +694,7 @@ func processResponse(resp *c8y.Response, respError error, commonOptions CommonCo
 		isJSONResponse := jsonUtilities.IsValidJSON([]byte(*resp.JSONData))
 
 		dataProperty := ""
-		showRaw := globalFlagRaw || globalFlagWithTotalPages
+		showRaw := cliConfig.RawOutput() || cliConfig.WithTotalPages()
 
 		dataProperty = commonOptions.ResultProperty
 		if dataProperty == "" {
@@ -718,7 +713,8 @@ func processResponse(resp *c8y.Response, respError error, commonOptions CommonCo
 				dataProperty = ""
 			}
 
-			Logger.Infof("View mode: %s", globalFlagView)
+			view := cliConfig.ViewOption()
+			Logger.Infof("View mode: %s", view)
 
 			// Detect view (if no filters are given)
 			if len(commonOptions.Filters.Pluck) == 0 {
@@ -729,13 +725,13 @@ func processResponse(resp *c8y.Response, respError error, commonOptions CommonCo
 						inputData = &subpro
 					}
 
-					switch strings.ToLower(globalFlagView) {
-					case ViewsNone:
+					switch strings.ToLower(view) {
+					case config.ViewsNone:
 						// dont apply a view
-						if !globalFlagRaw {
+						if !showRaw {
 							commonOptions.Filters.Pluck = []string{"**"}
 						}
-					case ViewsAll:
+					case config.ViewsAll:
 						props, err := rootCmd.dataView.GetView(inputData, resp.Header.Get("Content-Type"))
 
 						if err != nil {

@@ -47,7 +47,7 @@ Describe -Name "Expand-Device" {
     }
 
     It "Expand device from operation" {
-        $measurement = PSc8y\New-TestMeasurement -Device $Device.id
+        $measurement = PSc8y\New-Measurement -Template "test.measurement.jsonnet" -Device $Device.id
         $Result = $measurement | PSc8y\Expand-Device
         $Result.id | Should -BeExactly $Device.id
     }

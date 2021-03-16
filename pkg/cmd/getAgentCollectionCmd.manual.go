@@ -116,8 +116,8 @@ func (n *GetAgentCollectionCmd) RunE(cmd *cobra.Command, args []string) error {
 		Method:       "GET",
 		Path:         path.GetTemplate(),
 		Query:        queryValue,
-		IgnoreAccept: globalFlagIgnoreAccept,
-		DryRun:       globalFlagDryRun,
+		DryRun:       cliConfig.DryRun(),
+		IgnoreAccept: cliConfig.IgnoreAcceptHeader(),
 	}
 
 	return processRequestAndResponseWithWorkers(cmd, &req, inputIterators)

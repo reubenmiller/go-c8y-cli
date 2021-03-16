@@ -7,6 +7,8 @@ import (
 
 	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/fatih/color"
+	"github.com/reubenmiller/go-c8y-cli/pkg/c8ydefaults"
+	"github.com/reubenmiller/go-c8y-cli/pkg/cmdutil"
 	"github.com/reubenmiller/go-c8y-cli/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/pkg/config"
 	"github.com/spf13/cobra"
@@ -65,28 +67,28 @@ var updateSettingsOptions = map[string]argumentHandler{
 		"ci\tCI mode (no restrictions)",
 	}, nil, cobra.ShellCompDirectiveNoFileComp},
 
-	"mode.enableCreate": {"mode.enableCreate", "bool", SettingsModeEnableCreate, []string{
+	"mode.enableCreate": {"mode.enableCreate", "bool", config.SettingsModeEnableCreate, []string{
 		"true",
 		"false",
 	}, nil, cobra.ShellCompDirectiveNoFileComp},
 
-	"mode.enableUpdate": {"mode.enableUpdate", "bool", SettingsModeEnableUpdate, []string{
+	"mode.enableUpdate": {"mode.enableUpdate", "bool", config.SettingsModeEnableUpdate, []string{
 		"true",
 		"false",
 	}, nil, cobra.ShellCompDirectiveNoFileComp},
 
-	"mode.enableDelete": {"mode.enableDelete", "bool", SettingsModeEnableDelete, []string{
+	"mode.enableDelete": {"mode.enableDelete", "bool", config.SettingsModeEnableDelete, []string{
 		"true",
 		"false",
 	}, nil, cobra.ShellCompDirectiveNoFileComp},
 
-	"mode.confirmation": {"mode.confirmation", "string", SettingsModeConfirmation, []string{
+	"mode.confirmation": {"mode.confirmation", "string", config.SettingsModeConfirmation, []string{
 		"GET,PUT,POST,DELETE\tAll methods",
 		"PUT,POST,DELETE\tAll methods but GET",
 	}, TransformReplaceAll(",", " "), cobra.ShellCompDirectiveNoFileComp},
 
 	// encryption
-	"encryption.enabled": {"encryption.enabled", "bool", SettingsEncryptionEnabled, []string{
+	"encryption.enabled": {"encryption.enabled", "bool", config.SettingsEncryptionEnabled, []string{
 		"true",
 		"false",
 	}, nil, cobra.ShellCompDirectiveNoFileComp},
@@ -96,40 +98,40 @@ var updateSettingsOptions = map[string]argumentHandler{
 	}, nil, cobra.ShellCompDirectiveNoFileComp},
 
 	// template
-	"template.path": {"template.path", "string", SettingsTemplatePath, []string{}, nil, cobra.ShellCompDirectiveFilterDirs},
+	"template.path": {"template.path", "string", config.SettingsTemplatePath, []string{}, nil, cobra.ShellCompDirectiveFilterDirs},
 
 	// settings path
-	"settings.path": {"settings.path", "string", SettingsConfigPath, []string{"json"}, nil, cobra.ShellCompDirectiveFilterFileExt},
+	"settings.path": {"settings.path", "string", config.SettingsConfigPath, []string{"json"}, nil, cobra.ShellCompDirectiveFilterFileExt},
 
 	// activity log
-	"activityLog.path": {"activityLog.path", "string", SettingsActivityLogPath, []string{}, nil, cobra.ShellCompDirectiveFilterDirs},
-	"activityLog.enabled": {"activityLog.enabled", "bool", SettingsActivityLogEnabled, []string{
+	"activityLog.path": {"activityLog.path", "string", config.SettingsActivityLogPath, []string{}, nil, cobra.ShellCompDirectiveFilterDirs},
+	"activityLog.enabled": {"activityLog.enabled", "bool", config.SettingsActivityLogEnabled, []string{
 		"true",
 		"false",
 	}, nil, cobra.ShellCompDirectiveNoFileComp},
-	"activityLog.methodFilter": {"activityLog.methodFilter", "string", SettingsActivityLogMethodFilter, []string{
+	"activityLog.methodFilter": {"activityLog.methodFilter", "string", config.SettingsActivityLogMethodFilter, []string{
 		"GET,PUT,POST,DELETE\tAll methods",
 		"PUT,POST,DELETE\tAll method except GET",
 	}, TransformReplaceAll(",", " "), cobra.ShellCompDirectiveNoFileComp},
 
 	// Storage
-	"storage.storePassword": {"storage.storePassword", "bool", SettingsStorageStorePassword, []string{
+	"storage.storePassword": {"storage.storePassword", "bool", config.SettingsStorageStorePassword, []string{
 		"true",
 		"false",
 	}, nil, cobra.ShellCompDirectiveNoFileComp},
-	"storage.storeCookies": {"storage.storeCookies", "bool", SettingsStorageStoreCookies, []string{
+	"storage.storeCookies": {"storage.storeCookies", "bool", config.SettingsStorageStoreCookies, []string{
 		"true",
 		"false",
 	}, nil, cobra.ShellCompDirectiveNoFileComp},
 
 	// Include All
-	"includeAll.pageSize": {"includeAll.pageSize", "int", SettingsIncludeAllPageSize, []string{
+	"includeAll.pageSize": {"includeAll.pageSize", "int", config.SettingsIncludeAllPageSize, []string{
 		"2000",
 		"1000",
 		"500",
 	}, nil, cobra.ShellCompDirectiveNoFileComp},
 
-	"includeAll.delayMS": {"includeAll.delayMS", "int", SettingsIncludeAllDelayMS, []string{
+	"includeAll.delayMS": {"includeAll.delayMS", "int", config.SettingsIncludeAllDelayMS, []string{
 		"0",
 		"50",
 		"100",
@@ -164,7 +166,7 @@ var updateSettingsOptions = map[string]argumentHandler{
 		"100",
 		"1000",
 		"2000",
-	}, TransformReplaceAll("default", fmt.Sprintf("%d", CumulocityDefaultPageSize)), cobra.ShellCompDirectiveNoFileComp},
+	}, TransformReplaceAll("default", fmt.Sprintf("%d", c8ydefaults.PageSize)), cobra.ShellCompDirectiveNoFileComp},
 
 	// no accept
 	"defaults.noAccept": {"defaults.noAccept", "bool", "settings.defaults.noAccept", []string{
@@ -281,6 +283,7 @@ func NewUpdateSettingsCmd() *UpdateSettingsCmd {
 	)
 
 	cmd.SilenceUsage = true
+	cmdutil.DisableAuthCheck(cmd)
 
 	ccmd.baseCmd = newBaseCmd(cmd)
 
@@ -315,24 +318,24 @@ func (n *UpdateSettingsCmd) RunE(cmd *cobra.Command, args []string) error {
 		switch name {
 		case "mode":
 			if value == "prod" {
-				v.Set(SettingsModeEnableCreate, false)
-				v.Set(SettingsModeEnableUpdate, false)
-				v.Set(SettingsModeEnableDelete, false)
-				v.Set(SettingsModeCI, false)
+				v.Set(config.SettingsModeEnableCreate, false)
+				v.Set(config.SettingsModeEnableUpdate, false)
+				v.Set(config.SettingsModeEnableDelete, false)
+				v.Set(config.SettingsModeCI, false)
 
 			} else if value == "qual" {
-				v.Set(SettingsModeEnableCreate, true)
-				v.Set(SettingsModeEnableUpdate, true)
-				v.Set(SettingsModeEnableDelete, false)
-				v.Set(SettingsModeCI, false)
+				v.Set(config.SettingsModeEnableCreate, true)
+				v.Set(config.SettingsModeEnableUpdate, true)
+				v.Set(config.SettingsModeEnableDelete, false)
+				v.Set(config.SettingsModeCI, false)
 
 			} else if value == "dev" {
-				v.Set(SettingsModeEnableCreate, true)
-				v.Set(SettingsModeEnableUpdate, true)
-				v.Set(SettingsModeEnableDelete, true)
-				v.Set(SettingsModeCI, false)
+				v.Set(config.SettingsModeEnableCreate, true)
+				v.Set(config.SettingsModeEnableUpdate, true)
+				v.Set(config.SettingsModeEnableDelete, true)
+				v.Set(config.SettingsModeCI, false)
 			} else if value == "ci" {
-				v.Set(SettingsModeCI, true)
+				v.Set(config.SettingsModeCI, true)
 			}
 		default:
 			if handler, ok := updateSettingsOptions[name]; ok {
@@ -351,7 +354,7 @@ func (n *UpdateSettingsCmd) RunE(cmd *cobra.Command, args []string) error {
 		if n.file != "" {
 			err = v.WriteConfig()
 		} else {
-			err = WriteAuth(v, globalStorageStorePassword, globalStorageStoreCookies)
+			err = cliConfig.SaveClientConfig(client)
 		}
 		if err != nil {
 			return err
@@ -359,12 +362,12 @@ func (n *UpdateSettingsCmd) RunE(cmd *cobra.Command, args []string) error {
 		fmt.Fprintln(cmd.ErrOrStderr(), color.GreenString("Updated session file %s", v.ConfigFileUsed()))
 	} else {
 		shell := ShellBash
-		config := make(map[string]interface{})
+		cfg := make(map[string]interface{})
 		for _, key := range v.AllKeys() {
-			envKey := strings.ToUpper(strings.ReplaceAll(EnvSettingsPrefix+"_"+key, ".", "_"))
-			config[envKey] = v.Get(key)
+			envKey := strings.ToUpper(strings.ReplaceAll(config.EnvSettingsPrefix+"_"+key, ".", "_"))
+			cfg[envKey] = v.Get(key)
 		}
-		showEnvironmentVariables(config, shell.FromString(n.shell))
+		showEnvironmentVariables(cfg, shell.FromString(n.shell))
 	}
 
 	return nil

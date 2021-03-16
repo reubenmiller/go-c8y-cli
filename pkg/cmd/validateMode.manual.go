@@ -3,6 +3,7 @@ package cmd
 import (
 	"fmt"
 
+	"github.com/reubenmiller/go-c8y-cli/pkg/config"
 	"github.com/spf13/cobra"
 )
 
@@ -11,22 +12,22 @@ func getValidationError(mode string, setting string) error {
 }
 
 func validateCreateMode(cmd *cobra.Command, args []string) error {
-	if !(globalModeEnableCreate || globalCIMode) {
-		return getValidationError("create", SettingsModeEnableCreate)
+	if !cliConfig.AllowModeCreate() {
+		return getValidationError("create", config.SettingsModeEnableCreate)
 	}
 	return nil
 }
 
 func validateUpdateMode(cmd *cobra.Command, args []string) error {
-	if !(globalModeEnableUpdate || globalCIMode) {
-		return getValidationError("update", SettingsModeEnableUpdate)
+	if !cliConfig.AllowModeUpdate() {
+		return getValidationError("update", config.SettingsModeEnableUpdate)
 	}
 	return nil
 }
 
 func validateDeleteMode(cmd *cobra.Command, args []string) error {
-	if !(globalModeEnableDelete || globalCIMode) {
-		return getValidationError("delete", SettingsModeEnableDelete)
+	if !cliConfig.AllowModeDelete() {
+		return getValidationError("delete", config.SettingsModeEnableDelete)
 	}
 	return nil
 }

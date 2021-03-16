@@ -9,24 +9,29 @@ import (
 	"math/rand"
 	"net/http"
 	"os"
+	"os/exec"
 	"regexp"
 	"runtime"
 	"strings"
 	"time"
 
+	"github.com/cli/safeexec"
 	"github.com/gorilla/websocket"
-	"github.com/mitchellh/go-homedir"
+	"github.com/reubenmiller/go-c8y-cli/internal/run"
 	"github.com/reubenmiller/go-c8y-cli/pkg/activitylogger"
+	"github.com/reubenmiller/go-c8y-cli/pkg/c8ydefaults"
+	"github.com/reubenmiller/go-c8y-cli/pkg/cmd/alias"
+	"github.com/reubenmiller/go-c8y-cli/pkg/cmd/alias/expand"
+	"github.com/reubenmiller/go-c8y-cli/pkg/cmd/factory"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
+	"github.com/reubenmiller/go-c8y-cli/pkg/cmdutil"
 	"github.com/reubenmiller/go-c8y-cli/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/pkg/config"
 	"github.com/reubenmiller/go-c8y-cli/pkg/console"
 	"github.com/reubenmiller/go-c8y-cli/pkg/dataview"
-	"github.com/reubenmiller/go-c8y-cli/pkg/encrypt"
 	"github.com/reubenmiller/go-c8y-cli/pkg/logger"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
-	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
 	"go.uber.org/zap/zapcore"
 )
@@ -38,22 +43,17 @@ var activityLogger *activitylogger.ActivityLogger
 // Console provides a thread safe way to write to the console output
 var Console *console.Console
 
-// SecureDataAccessor reads and writes encrypted data
-var SecureDataAccessor *encrypt.SecureData
-
 // Build data
 // These variables should be set using the -ldflags "-X github.com/reubenmiller/go-c8y-cli/pkg/cmd.version=1.0.0" when running go build
 var buildVersion string
 var buildBranch string
 
 const (
-	module            = "c8yapi"
-	EnvSettingsPrefix = "c8y"
+	module = "c8yapi"
 )
 
 func init() {
 	Logger = logger.NewLogger(module, logger.Options{})
-	SecureDataAccessor = encrypt.NewSecureData("{encrypted}")
 	rootCmd = NewRootCmd()
 	// set seed for random generation
 	rand.Seed(time.Now().UTC().UnixNano())
@@ -86,7 +86,7 @@ type RootCmd struct {
 
 func (c *RootCmd) DryRunHandler(options *c8y.RequestOptions, req *http.Request) {
 
-	if !globalFlagDryRun {
+	if !cliConfig.DryRun() {
 		return
 	}
 	if req == nil {
@@ -94,7 +94,7 @@ func (c *RootCmd) DryRunHandler(options *c8y.RequestOptions, req *http.Request) 
 		return
 	}
 	w := c.Command.ErrOrStderr()
-	if globalFlagPrintErrorsOnStdout {
+	if cliConfig.WithError() {
 		w = c.Command.OutOrStdout()
 	}
 
@@ -102,7 +102,7 @@ func (c *RootCmd) DryRunHandler(options *c8y.RequestOptions, req *http.Request) 
 }
 func (c *RootCmd) createCumulocityClient() {
 	c.Logger.Debug("Creating c8y client")
-	httpClient := newHTTPClient(globalFlagNoProxy)
+	httpClient := newHTTPClient(cliConfig.IgnoreProxy())
 
 	// Only bind when not setting the session
 	if c.useEnv {
@@ -121,9 +121,6 @@ func (c *RootCmd) createCumulocityClient() {
 		cliConfig.SetSessionFilePath(sessionFilePath)
 	}
 
-	// bind config to flags
-	bindFlags(&rootCmd.Command, viper.GetViper())
-
 	client = c8y.NewClient(
 		httpClient,
 		formatHost(cliConfig.GetHost()),
@@ -134,7 +131,7 @@ func (c *RootCmd) createCumulocityClient() {
 	)
 
 	client.SetRequestOptions(c8y.DefaultRequestOptions{
-		DryRun:        globalFlagDryRun,
+		DryRun:        cliConfig.DryRun(),
 		DryRunHandler: c.DryRunHandler,
 	})
 
@@ -143,38 +140,26 @@ func (c *RootCmd) createCumulocityClient() {
 		Logger.Warnf("Could not load authentication. %s", err)
 	}
 
-	//
-	// Timeout setting preference
-	// 1. User provideds --timeout argument
-	// 2. "timeout" is set in the session.json file (and value is greater than 0)
-	// 3. C8Y_TIMEOUT is set and greater than 0
-	if !rootCmd.Flags().Changed("timeout") {
-		timeout := viper.GetFloat64("timeout")
-		if timeout > 0 {
-			globalFlagTimeout = timeout
-			Logger.Debugf("timeout: %0.3f", timeout)
-		}
-	}
+	timeout := cliConfig.RequestTimeout()
+	Logger.Debugf("timeout: %0.3f", timeout)
 
 	// Should we use the tenant in the name or not
 	if viper.IsSet("useTenantPrefix") {
 		client.UseTenantInUsername = viper.GetBool("useTenantPrefix")
 	}
 
-	// Logger.Printf("Use tenant prefix: %v", client.UseTenantInUsername)
-
-	// read additional configuration
-	if err := readConfiguration(&rootCmd.Command); err != nil {
-		Logger.Errorf("Could not read configuration. %s", err)
-	}
+	// set output format
+	outputFormat := console.OutputJSON.FromString(cliConfig.GetOutputFormat())
+	Logger.Debugf("output format: %s", outputFormat.String())
+	Console.Format = outputFormat
 	Console.Colorized = !globalFlagNoColor
-	Console.Compact = globalFlagCompact
+	Console.Compact = cliConfig.CompactJSON()
 	Console.Disabled = globalFlagProgressBar && isTerminal()
 
 	// Add the realtime client
 	client.Realtime = c8y.NewRealtimeClient(
 		client.BaseURL.String(),
-		newWebsocketDialer(globalFlagNoProxy),
+		newWebsocketDialer(cliConfig.IgnoreProxy()),
 		client.TenantName,
 		client.Username,
 		client.Password,
@@ -209,124 +194,18 @@ func NewRootCmd() *RootCmd {
 var rootCmd *RootCmd
 
 var (
-	client                           *c8y.Client
-	cliConfig                        *config.CliConfiguration
-	globalFlagPageSize               int
-	globalFlagIncludeAllPageSize     int
-	globalFlagBatchMaxWorkers        int
-	globalFlagBatchMaxJobs           int64
-	globalFlagCurrentPage            int64
-	globalFlagTotalPages             int64
-	globalFlagIncludeAll             bool
-	globalFlagIncludeAllDelayMS      int64
-	globalFlagVerbose                bool
-	globalFlagDebug                  bool
-	globalFlagWithTotalPages         bool
-	globalFlagCompact                bool
-	globalFlagDryRun                 bool
-	globalFlagDryRunFormat           string
-	globalFlagProgressBar            bool
-	globalFlagIgnoreAccept           bool
-	globalFlagNoColor                bool
-	globalFlagSessionFile            string
-	globalFlagOutputFileRaw          string
-	globalFlagOutputFile             string
-	globalFlagUseEnv                 bool
-	globalFlagRaw                    bool
-	globalFlagProxy                  string
-	globalFlagNoProxy                bool
-	globalFlagNoLog                  bool
-	globalFlagActivityLogMessage     string
-	globalFlagTimeout                float64
-	globalFlagTemplatePath           string
-	globalFlagBatchWorkers           int
-	globalFlagBatchDelayMS           int
-	globalFlagBatchAbortOnErrorCount int
-	globalFlagFlatten                bool
-	globalFlagPrintErrorsOnStdout    bool
-	globalFlagForce                  bool
-	globalFlagConfirm                bool
-	globalFlagConfirmText            string
-	globalFlagSelect                 []string
-	globalFlagView                   string
-	globalFlagSilentStatusCodes      string
-
-	globalFlagOutputFormat string
-
-	globalModeEnableCreate bool
-	globalModeEnableUpdate bool
-	globalModeEnableDelete bool
-	globalCIMode           bool
-
-	globalStorageStorePassword bool
-	globalStorageStoreCookies  bool
-)
-
-// CumulocityDefaultPageSize is the default page size used by Cumulocity
-const CumulocityDefaultPageSize int = 5
-
-const (
-	ViewsNone = "none"
-	ViewsAll  = "all"
-)
-
-const (
-	// SettingsIncludeAllPageSize property name used to control the default page size when using includeAll parameter
-	SettingsIncludeAllPageSize string = "settings.includeAll.pageSize"
-
-	// SettingsIncludeAllDelayMS property name used to control the delay between fetching the next page
-	SettingsIncludeAllDelayMS string = "settings.includeAll.delayMS"
-
-	// SettingsDefaultsPageSize default pageSize
-	SettingsDefaultsPageSize string = "settings.defaults.pageSize"
-
-	// SettingsDefaultBatchMaxWorkers property name used to control the hard limit on the maximum workers used in batch operations
-	SettingsDefaultBatchMaxWorkers string = "settings.default.batchMaximumWorkers"
-
-	// SettingsConfigPath configuration path
-	SettingsConfigPath string = "settings.path"
-
-	// SettingsTemplatePath template path where the template files are located
-	SettingsTemplatePath string = "settings.template.path"
-
-	// SettingsModeEnableCreate enables create (post) commands
-	SettingsModeEnableCreate string = "settings.mode.enableCreate"
-
-	// SettingsModeEnableUpdate enables update commands
-	SettingsModeEnableUpdate string = "settings.mode.enableUpdate"
-
-	// SettingsModeEnableDelete enables delete commands
-	SettingsModeEnableDelete string = "settings.mode.enableDelete"
-
-	// SettingsEncryptionEnabled enables encryption when storing sensitive session data
-	SettingsEncryptionEnabled string = "settings.encryption.enabled"
-
-	// SettingsStorageStoreCookies controls if the cookies are saved to the session file or not
-	SettingsStorageStoreCookies string = "settings.storage.storeCookies"
-
-	// SettingsStorageStorePassword controls if the password is saved to the session file or not
-	SettingsStorageStorePassword string = "settings.storage.storePassword"
-
-	// SettingsModeCI enable continuous integration mode (this will enable all commands)
-	SettingsModeCI string = "settings.ci"
-
-	// SettingsModeConfirmation sets the confirm mode
-	SettingsModeConfirmation string = "settings.mode.confirmation"
-
-	// SettingsActivityLogPath path where the activity log will be stored
-	SettingsActivityLogPath string = "settings.activityLog.path"
-
-	// SettingsActivityLogEnabled enables/disables the activity log
-	SettingsActivityLogEnabled string = "settings.activityLog.enabled"
-
-	// SettingsActivityLogMethodFilter filters the activity log entries by a space delimited methods, i.e. GET POST PUT
-	SettingsActivityLogMethodFilter string = "settings.activityLog.methodFilter"
-
-	// SettingsViewsCommonPaths paths to common view definition files
-	SettingsViewsCommonPaths string = "settings.views.commonPaths"
-
-	// SettingsViewsCustomPaths paths to custom fiew definition files
-	SettingsViewsCustomPaths string = "settings.views.customPaths"
+	client                       *c8y.Client
+	cliConfig                    *config.Config
+	globalFlagVerbose            bool
+	globalFlagDebug              bool
+	globalFlagProgressBar        bool
+	globalFlagNoColor            bool
+	globalFlagSessionFile        string
+	globalFlagUseEnv             bool
+	globalFlagNoLog              bool
+	globalFlagActivityLogMessage string
+	globalFlagSelect             []string
+	globalFlagSilentStatusCodes  string
 )
 
 // SettingsGlobalName name of the settings file (without extension)
@@ -335,7 +214,7 @@ const SettingsGlobalName = "settings"
 func (c *RootCmd) checkCommandError(err error) {
 
 	w := ioutil.Discard
-	if globalFlagPrintErrorsOnStdout {
+	if cliConfig != nil && cliConfig.WithError() {
 		w = rootCmd.OutOrStdout()
 	}
 
@@ -398,41 +277,27 @@ func (c *RootCmd) checkSessionExists(cmd *cobra.Command, args []string) error {
 		c.useEnv = true
 	}
 
+	// config/env binding
+	if err := cliConfig.BindPFlag(rootCmd.PersistentFlags()); err != nil {
+		Logger.Warningf("Some configuration binding failed. %s", err)
+	}
+
 	c.createCumulocityClient()
 
 	// only setup activity log after the global config
 	configureActivityLog()
 	activityLogger.LogCommand(cmd, args, cmdStr, globalFlagActivityLogMessage)
 
-	// set output format
-	outputFormat := console.OutputJSON.FromString(globalFlagOutputFormat)
-	if isTerminal() && outputFormat == console.OutputTable {
-		Console.Format = console.OutputTable
-	} else {
-		Console.Format = outputFormat
-	}
-	Logger.Debugf("output format: %s", outputFormat.String())
-
 	// load views
-	viewPaths := viper.GetViper().GetStringSlice(SettingsViewsCommonPaths)
-	viewPaths = append(viewPaths, viper.GetViper().GetStringSlice(SettingsViewsCustomPaths)...)
-	for i, path := range viewPaths {
-		viewPaths[i] = ExpandHomePath(path)
-	}
-	if views, err := dataview.NewDataView(".*", ".json", Logger, viewPaths...); err == nil {
+	if views, err := dataview.NewDataView(".*", ".json", Logger, cliConfig.GetViewPaths()...); err == nil {
 		c.dataView = views
 	}
 
-	localCmds := []string{
-		"completion",
-		"sessions",
-		"template",
-		"version",
-		"tenants getID",
-		"tenants getId",
-		"settings list",
-		"settings update",
+	if !cmdutil.IsAuthCheckEnabled(cmd) {
+		return nil
+	}
 
+	localCmds := []string{
 		// allow hidden completion commands
 		"__complete",
 		"__completeNoDesc",
@@ -452,6 +317,53 @@ func (c *RootCmd) checkSessionExists(cmd *cobra.Command, args []string) error {
 	}
 
 	return nil
+}
+
+func setArgs() ([]string, error) {
+	expandedArgs := []string{}
+	if len(os.Args) > 0 {
+		expandedArgs = os.Args[1:]
+	}
+	cmd, _, err := rootCmd.Traverse(expandedArgs)
+	if err != nil || cmd == rootCmd.Root() {
+		originalArgs := expandedArgs
+		isShell := false
+
+		v := viper.GetViper()
+		aliases := v.GetStringMapString("settings.aliases")
+		expandedArgs, isShell, err = expand.ExpandAlias(aliases, os.Args, nil)
+		if err != nil {
+			Logger.Errorf("failed to process aliases:  %s", err)
+			return nil, err
+		}
+
+		Logger.Debugf("%v -> %v", originalArgs, expandedArgs)
+
+		if isShell {
+			exe, err := safeexec.LookPath(expandedArgs[0])
+			if err != nil {
+				Logger.Errorf("failed to run external command: %s", err)
+				return nil, err
+			}
+
+			externalCmd := exec.Command(exe, expandedArgs[1:]...)
+			externalCmd.Stderr = os.Stderr
+			externalCmd.Stdout = os.Stdout
+			externalCmd.Stdin = os.Stdin
+			preparedCmd := run.PrepareCmd(externalCmd)
+
+			err = preparedCmd.Run()
+			if err != nil {
+				if ee, ok := err.(*exec.ExitError); ok {
+					return nil, cmderrors.NewUserErrorWithExitCode(ee.ExitCode(), ee)
+				}
+
+				Logger.Errorf("failed to run external command: %s", err)
+				return nil, err
+			}
+		}
+	}
+	return expandedArgs, nil
 }
 
 func isTerminal() bool {
@@ -494,32 +406,56 @@ func (c *RootCmd) ConfigureRootCmd() {
 
 	isTerm := isTerminal()
 	Console = console.NewConsole(rootCmd.OutOrStdout(), getOutputHeaders)
-	defaultOutputFormat := ""
-	defaultView := ViewsNone
+	defaultOutputFormat := "json"
+	defaultView := config.ViewsNone
 	if isTerm {
 		defaultOutputFormat = "table"
-		defaultView = ViewsAll
+		defaultView = config.ViewsAll
 	}
+
+	// TODO: Migrate to new root command
+	// cmd factory
+	configFunc := func() (*config.Config, error) {
+		if cliConfig == nil {
+			return nil, fmt.Errorf("config is missing")
+		}
+		return cliConfig, nil
+	}
+	clientFunc := func() (*c8y.Client, error) {
+		if client == nil {
+			return nil, fmt.Errorf("client is missing")
+		}
+		return client, nil
+	}
+	loggerFunc := func() (*logger.Logger, error) {
+		if Logger == nil {
+			return nil, fmt.Errorf("logger is missing")
+		}
+		return Logger, nil
+	}
+	cmdFactory := factory.New(buildVersion, configFunc, clientFunc, loggerFunc)
+
+	// customRootCmd := root.NewCmdRoot(cmdFactory, buildVersion, "")
+	// rootCmd.AddCommand(customRootCmd)
 
 	// Global flags
 	c.PersistentFlags().BoolVarP(&globalFlagVerbose, "verbose", "v", false, "Verbose logging")
-	c.PersistentFlags().IntVarP(&globalFlagPageSize, "pageSize", "p", CumulocityDefaultPageSize, "Maximum results per page")
-	c.PersistentFlags().Int64Var(&globalFlagCurrentPage, "currentPage", 0, "Current page size which should be returned")
-	c.PersistentFlags().Int64Var(&globalFlagTotalPages, "totalPages", 0, "Total number of pages to get")
-	c.PersistentFlags().BoolVar(&globalFlagIncludeAll, "includeAll", false, "Include all results by iterating through each page")
-	c.PersistentFlags().BoolVarP(&globalFlagWithTotalPages, "withTotalPages", "t", false, "Include all results")
-	c.PersistentFlags().BoolVarP(&globalFlagCompact, "compact", "c", !isTerm, "Compact instead of pretty-printed output. Pretty print is the default if output is the terminal")
-	c.PersistentFlags().BoolVar(&globalFlagCompact, "compress", !isTerm, "Alias for --compact for users coming from PowerShell")
-	c.PersistentFlags().BoolVar(&globalFlagIgnoreAccept, "noAccept", false, "Ignore Accept header will remove the Accept header from requests, however PUT and POST requests will only see the effect")
-	c.PersistentFlags().BoolVar(&globalFlagDryRun, "dry", false, "Dry run. Don't send any data to the server")
-	c.PersistentFlags().StringVar(&globalFlagDryRunFormat, "dryFormat", "markdown", "Dry run output format. i.e. json, dump, markdown or curl")
+	c.PersistentFlags().IntP("pageSize", "p", c8ydefaults.PageSize, "Maximum results per page")
+	c.PersistentFlags().Int64("currentPage", 0, "Current page size which should be returned")
+	c.PersistentFlags().Int64("totalPages", 0, "Total number of pages to get")
+	c.PersistentFlags().Bool("includeAll", false, "Include all results by iterating through each page")
+	c.PersistentFlags().BoolP("withTotalPages", "t", false, "Include all results")
+	c.PersistentFlags().BoolP("compact", "c", !isTerm, "Compact instead of pretty-printed output. Pretty print is the default if output is the terminal")
+	c.PersistentFlags().Bool("noAccept", false, "Ignore Accept header will remove the Accept header from requests, however PUT and POST requests will only see the effect")
+	c.PersistentFlags().Bool("dry", false, "Dry run. Don't send any data to the server")
+	c.PersistentFlags().String("dryFormat", "markdown", "Dry run output format. i.e. json, dump, markdown or curl")
 	c.PersistentFlags().BoolVar(&globalFlagProgressBar, "progress", false, "Show progress bar. This will also disable any other verbose output")
 	c.PersistentFlags().BoolVarP(&globalFlagNoColor, "noColor", "M", !isTerm, "Don't use colors when displaying log entries on the console")
 	c.PersistentFlags().BoolVar(&globalFlagUseEnv, "useEnv", false, "Allow loading Cumulocity session setting from environment variables")
-	c.PersistentFlags().BoolVarP(&globalFlagRaw, "raw", "r", false, "Raw values")
-	c.PersistentFlags().StringVar(&globalFlagProxy, "proxy", "", "Proxy setting, i.e. http://10.0.0.1:8080")
-	c.PersistentFlags().BoolVar(&globalFlagNoProxy, "noProxy", false, "Ignore the proxy settings")
-	c.PersistentFlags().BoolVar(&globalFlagPrintErrorsOnStdout, "withError", false, "Errors will be printed on stdout instead of stderr")
+	c.PersistentFlags().BoolP("raw", "r", false, "Raw values")
+	c.PersistentFlags().String("proxy", "", "Proxy setting, i.e. http://10.0.0.1:8080")
+	c.PersistentFlags().Bool("noProxy", false, "Ignore the proxy settings")
+	c.PersistentFlags().Bool("withError", false, "Errors will be printed on stdout instead of stderr")
 
 	// Activity log
 	c.PersistentFlags().BoolVar(&globalFlagNoLog, "noLog", false, "Disables the activity log for the current command")
@@ -527,35 +463,37 @@ func (c *RootCmd) ConfigureRootCmd() {
 	c.PersistentFlags().BoolVar(&globalFlagDebug, "debug", false, "Set very verbose log messages")
 
 	// Concurrency
-	c.PersistentFlags().IntVar(&globalFlagBatchWorkers, "workers", 1, "Number of workers")
-	c.PersistentFlags().Int64Var(&globalFlagBatchMaxJobs, "maxJobs", 100, "Maximum number of jobs. 0 = unlimited (use with caution!)")
-	c.PersistentFlags().IntVar(&globalFlagBatchDelayMS, "delay", 1000, "delay in milliseconds after each request")
-	c.PersistentFlags().IntVar(&globalFlagBatchAbortOnErrorCount, "abortOnErrors", 10, "Abort batch when reaching specified number of errors")
+	c.PersistentFlags().Int("workers", 1, "Number of workers")
+	c.PersistentFlags().Int64("maxJobs", 100, "Maximum number of jobs. 0 = unlimited (use with caution!)")
+
+	// viper.BindPFlag("settings.defaults.maxJobs", c.PersistentFlags().Lookup("maxJobs"))
+	c.PersistentFlags().Int("delay", 1000, "delay in milliseconds after each request")
+	c.PersistentFlags().Int("abortOnErrors", 10, "Abort batch when reaching specified number of errors")
 
 	// Error handling
 	c.PersistentFlags().StringVar(&globalFlagSilentStatusCodes, "silentStatusCodes", "", "Status codes which will not print out an error message")
 
-	c.PersistentFlags().BoolVar(&globalFlagFlatten, "flatten", false, "flatten")
+	c.PersistentFlags().Bool("flatten", false, "flatten")
 	c.PersistentFlags().StringSlice("filter", nil, "filter")
 	c.PersistentFlags().StringArrayVar(&globalFlagSelect, "select", nil, "select")
-	c.PersistentFlags().StringVar(&globalFlagView, "view", defaultView, "View file")
-	c.PersistentFlags().Float64Var(&globalFlagTimeout, "timeout", float64(10*60), "Timeout in seconds")
+	c.PersistentFlags().String("view", defaultView, "View option")
+	c.PersistentFlags().Float64("timeout", float64(10*60), "Timeout in seconds")
 
 	// output
-	c.PersistentFlags().StringVarP(&globalFlagOutputFormat, "output", "o", defaultOutputFormat, "Output format i.e. table, json, csv, csvheader")
-	c.PersistentFlags().StringVar(&globalFlagOutputFile, "outputFile", "", "Save JSON output to file (after select)")
-	c.PersistentFlags().StringVar(&globalFlagOutputFileRaw, "outputFileRaw", "", "Save raw response to file")
+	c.PersistentFlags().StringP("output", "o", defaultOutputFormat, "Output format i.e. table, json, csv, csvheader")
+	c.PersistentFlags().String("outputFile", "", "Save JSON output to file (after select)")
+	c.PersistentFlags().String("outputFileRaw", "", "Save raw response to file")
 
 	// confirmation
-	c.PersistentFlags().BoolVarP(&globalFlagForce, "force", "f", false, "Do not prompt for confirmation")
-	c.PersistentFlags().BoolVar(&globalFlagConfirm, "prompt", false, "Prompt for confirmation")
-	c.PersistentFlags().StringVar(&globalFlagConfirmText, "confirmText", "", "Custom confirmation text")
+	c.PersistentFlags().BoolP("force", "f", false, "Do not prompt for confirmation")
+	c.PersistentFlags().Bool("prompt", false, "Prompt for confirmation")
+	c.PersistentFlags().String("confirmText", "", "Custom confirmation text")
 
 	completion.WithOptions(
 		&c.Command,
 		completion.WithValidateSet("dryFormat", "json", "dump", "curl", "markdown"),
 		completion.WithValidateSet("output", "json", "table", "csv", "csvheader"),
-		completion.WithValidateSet("view", ViewsNone, ViewsAll),
+		completion.WithValidateSet("view", config.ViewsNone, config.ViewsAll),
 	)
 
 	c.AddCommand(NewCompletionsCmd().getCommand())
@@ -572,6 +510,9 @@ func (c *RootCmd) ConfigureRootCmd() {
 
 	// settings commands
 	c.AddCommand(NewSettingsRootCmd().getCommand())
+
+	// alias commands
+	c.AddCommand(alias.NewCmdAlias(cmdFactory))
 
 	// Auto generated commands
 
@@ -690,6 +631,18 @@ func Execute() {
 }
 
 func executeRootCmd() {
+	// Expand any aliases
+	if globalFlagSessionFile == "" && os.Getenv("C8Y_SESSION") != "" {
+		globalFlagSessionFile = os.Getenv("C8Y_SESSION")
+	}
+	_, _ = ReadConfigFiles(viper.GetViper())
+	expandedArgs, err := setArgs()
+	if err != nil {
+		Logger.Errorf("Could not expand aliases. %s", err)
+	}
+	Logger.Debugf("Expanded args: %v", expandedArgs)
+	rootCmd.SetArgs(expandedArgs)
+
 	if err := rootCmd.Execute(); err != nil {
 
 		rootCmd.checkCommandError(err)
@@ -728,8 +681,10 @@ func ReadConfigFiles(v *viper.Viper) (path string, err error) {
 	if _, err := os.Stat(globalFlagSessionFile); err == nil {
 		// Load config by file path
 		v.SetConfigFile(globalFlagSessionFile)
-		if err := cliConfig.ReadConfig(globalFlagSessionFile); err != nil {
-			Logger.Warnf("Could not read global settings file. file=%s, err=%s", globalFlagSessionFile, err)
+		if cliConfig != nil {
+			if err := cliConfig.ReadConfig(globalFlagSessionFile); err != nil {
+				Logger.Warnf("Could not read global settings file. file=%s, err=%s", globalFlagSessionFile, err)
+			}
 		}
 	} else {
 		// Load config by name
@@ -753,24 +708,6 @@ func ReadConfigFiles(v *viper.Viper) (path string, err error) {
 	Logger.Infof("Loaded session: %s", hideSensitiveInformationIfActive(path))
 
 	return path, err
-}
-
-// bindFlags binds cobra flag values to cobra. This allows the user to set the default values via configuration or environment variables
-func bindFlags(cmd *cobra.Command, v *viper.Viper) {
-	cmd.Flags().VisitAll(func(f *pflag.Flag) {
-		settingsName := "settings.defaults." + f.Name
-		if err := v.BindEnv(settingsName); err != nil {
-			Logger.Warnf("Could not bind to environment variable. name=%s, err=%s", settingsName, err)
-		}
-
-		// Apply the viper config value to the flag when the flag is not set and viper has a value
-		if !f.Changed && v.IsSet(settingsName) {
-			val := v.Get(settingsName)
-			if err := cmd.Flags().Set(f.Name, fmt.Sprintf("%v", val)); err != nil {
-				Logger.Warnf("Could not set flag. name=%s, err=%s", settingsName, err)
-			}
-		}
-	})
 }
 
 func printCommand() {
@@ -829,6 +766,8 @@ func initConfig() {
 	rootCmd.Logger = Logger
 
 	c8y.Logger = Logger
+	cliConfig = config.NewConfig(viper.GetViper(), getSessionHomeDir(), os.Getenv("C8Y_PASSPHRASE"))
+	cliConfig.SetLogger(Logger)
 
 	if logOptions.Level.Enabled(zapcore.InfoLevel) {
 		printCommand()
@@ -848,12 +787,6 @@ func initConfig() {
 		}
 	}
 
-	cliConfig = config.NewCliConfiguration(viper.GetViper(), SecureDataAccessor, getSessionHomeDir(), os.Getenv("C8Y_PASSPHRASE"))
-	cliConfig.SetLogger(Logger)
-	if err := loadConfiguration(); err != nil {
-		Logger.Warnf("Loading configuration had errors. %s", err)
-	}
-
 	// only parse env variables if no explict config file is given
 	if globalFlagUseEnv {
 		Logger.Println("C8Y_USE_ENVIRONMENT is set. Environment variables can be used to override config settings")
@@ -866,24 +799,22 @@ func initConfig() {
 	// --noProxy
 	// HTTP_PROXY=http://10.0.0.1:8080
 	// NO_PROXY=localhost,127.0.0.1
-	explictProxy := rootCmd.Flags().Changed("proxy")
-	explictNoProxy := rootCmd.Flags().Changed("noProxy")
-	if explictNoProxy {
+	proxy := cliConfig.Proxy()
+	noProxy := cliConfig.IgnoreProxy()
+	if noProxy {
 		Logger.Debug("using explicit noProxy setting")
 		os.Setenv("HTTP_PROXY", "")
 		os.Setenv("HTTPS_PROXY", "")
 		os.Setenv("http_proxy", "")
 		os.Setenv("https_proxy", "")
 	} else {
-		if explictProxy {
-			Logger.Debugf("using explicit proxy [%s]", globalFlagProxy)
+		if proxy != "" {
+			Logger.Debugf("using explicit proxy [%s]", proxy)
 
-			globalFlagProxy = strings.TrimSpace(globalFlagProxy)
-
-			os.Setenv("HTTP_PROXY", globalFlagProxy)
-			os.Setenv("HTTPS_PROXY", globalFlagProxy)
-			os.Setenv("http_proxy", globalFlagProxy)
-			os.Setenv("https_proxy", globalFlagProxy)
+			os.Setenv("HTTP_PROXY", proxy)
+			os.Setenv("HTTPS_PROXY", proxy)
+			os.Setenv("http_proxy", proxy)
+			os.Setenv("https_proxy", proxy)
 
 		} else {
 			proxyVars := []string{"HTTP_PROXY", "http_proxy", "HTTPS_PROXY", "https_proxy", "NO_PROXY", "no_proxy"}
@@ -903,70 +834,15 @@ func initConfig() {
 	}
 }
 
-func loadConfiguration() error {
-	Logger.Debug("Loading configuration")
-	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
-	viper.SetEnvPrefix(EnvSettingsPrefix)
-
-	//viper.AutomaticEnv()
-	bindEnv(SettingsIncludeAllPageSize, 2000)
-	bindEnv(SettingsDefaultBatchMaxWorkers, 5)
-	bindEnv(SettingsIncludeAllDelayMS, 0)
-	bindEnv(SettingsTemplatePath, "")
-
-	// Mode
-	bindEnv(SettingsModeEnableCreate, false)
-	bindEnv(SettingsModeEnableUpdate, false)
-	bindEnv(SettingsModeEnableDelete, false)
-	bindEnv(SettingsEncryptionEnabled, false)
-	bindEnv(SettingsModeCI, false)
-	bindEnv(SettingsModeConfirmation, "PUT POST DELETE")
-
-	// Storage options
-	bindEnv(SettingsStorageStorePassword, true)
-	bindEnv(SettingsStorageStoreCookies, true)
-
-	// Activity log settings
-	bindEnv(SettingsActivityLogEnabled, true)
-	bindEnv(SettingsActivityLogPath, "")
-	bindEnv(SettingsActivityLogMethodFilter, "GET PUT POST DELETE")
-
-	return nil
-}
-
-func shouldConfirm(methods ...string) bool {
-	if globalFlagConfirm {
-		return true
-	}
-
-	if cliConfig.IsCIMode() || globalFlagForce || globalFlagDryRun {
-		Logger.Debugf("no confirmation required. ci_mode=%v, force=%v, dry=%v", cliConfig.IsCIMode(), globalFlagForce, globalFlagDryRun)
-		return false
-	}
-
-	if len(methods) == 0 {
-		return true
-	}
-
-	confirmMethods := strings.ToUpper(viper.GetString(SettingsModeConfirmation))
-	for _, method := range methods {
-		if strings.Contains(confirmMethods, strings.ToUpper(method)) {
-			Logger.Debugf("confirmation required due to method=%s", method)
-			return true
-		}
-	}
-	return false
-}
-
 func configureActivityLog() {
-	disabled := !viper.GetBool(SettingsActivityLogEnabled)
+	disabled := !cliConfig.ActivityLogEnabled()
 	if globalFlagNoLog {
 		disabled = true
 	}
 	options := activitylogger.Options{
 		Disabled:     disabled,
-		OutputFolder: ExpandHomePath(viper.GetString(SettingsActivityLogPath)),
-		Methods:      strings.ToUpper(viper.GetString(SettingsActivityLogMethodFilter)),
+		OutputFolder: cliConfig.GetActivityLogPath(),
+		Methods:      strings.ToUpper(cliConfig.GetActivityLogMethodFilter()),
 	}
 
 	if l, err := activitylogger.NewActivityLogger(options); err == nil {
@@ -981,7 +857,7 @@ func configureActivityLog() {
 	}
 }
 
-func loadAuthentication(v *config.CliConfiguration, c *c8y.Client) error {
+func loadAuthentication(v *config.Config, c *c8y.Client) error {
 	cookies := v.GetCookies()
 
 	if len(cookies) > 0 {
@@ -990,53 +866,6 @@ func loadAuthentication(v *config.CliConfiguration, c *c8y.Client) error {
 	}
 
 	return nil
-}
-
-// ExpandHomePath try to expand the home directory path. If not then just return the input path
-func ExpandHomePath(path string) string {
-	expanded, err := homedir.Expand(path)
-	if err != nil {
-		Logger.Warnf("Could not expand path to home directory. %s", err)
-		return path
-	}
-	return expanded
-}
-
-func readConfiguration(cmd *cobra.Command) error {
-
-	globalFlagIncludeAllPageSize = viper.GetInt(SettingsIncludeAllPageSize)
-	globalFlagBatchMaxWorkers = viper.GetInt(SettingsDefaultBatchMaxWorkers)
-	globalFlagIncludeAllDelayMS = viper.GetInt64(SettingsIncludeAllDelayMS)
-	globalFlagTemplatePath = ExpandHomePath(viper.GetString(SettingsTemplatePath))
-
-	globalModeEnableCreate = viper.GetBool(SettingsModeEnableCreate)
-	globalModeEnableUpdate = viper.GetBool(SettingsModeEnableUpdate)
-	globalModeEnableDelete = viper.GetBool(SettingsModeEnableDelete)
-
-	globalStorageStoreCookies = viper.GetBool(SettingsStorageStoreCookies)
-	globalStorageStorePassword = viper.GetBool(SettingsStorageStorePassword)
-
-	globalCIMode = viper.GetBool(SettingsModeCI)
-
-	Logger.Debugf("%s: %d", SettingsDefaultsPageSize, globalFlagPageSize)
-	Logger.Debugf("%s: %d", SettingsIncludeAllPageSize, globalFlagIncludeAllPageSize)
-	Logger.Debugf("%s: %d", SettingsIncludeAllDelayMS, globalFlagIncludeAllDelayMS)
-	Logger.Debugf("%s: %s", SettingsTemplatePath, globalFlagTemplatePath)
-	Logger.Debugf("%s: %t", SettingsModeEnableCreate, globalModeEnableCreate)
-	Logger.Debugf("%s: %t", SettingsModeEnableUpdate, globalModeEnableUpdate)
-	Logger.Debugf("%s: %t", SettingsModeEnableDelete, globalModeEnableDelete)
-	Logger.Debugf("%s: %s", SettingsModeConfirmation, viper.GetString(SettingsModeConfirmation))
-
-	return nil
-}
-
-func bindEnv(name string, defaultValue interface{}) {
-	err := viper.BindEnv(name)
-	viper.SetDefault(name, defaultValue)
-
-	if err != nil {
-		Logger.Warnf("Could not bind env variable. name=%s, err=%s", name, err)
-	}
 }
 
 func newWebsocketDialer(ignoreProxySettings bool) *websocket.Dialer {

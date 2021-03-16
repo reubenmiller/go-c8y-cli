@@ -6,6 +6,7 @@ import (
 
 	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
+	"github.com/reubenmiller/go-c8y-cli/pkg/cmdutil"
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/pkg/jsonUtilities"
 	"github.com/reubenmiller/go-c8y-cli/pkg/mapbuilder"
@@ -45,6 +46,7 @@ Verify a jsonnet template and specify input data to be used as the input when ev
 	// Required flags
 	_ = cmd.MarkFlagRequired(FlagDataTemplateName)
 
+	cmdutil.DisableAuthCheck(cmd)
 	ccmd.baseCmd = newBaseCmd(cmd)
 
 	return ccmd
@@ -86,7 +88,7 @@ func (n *executeTemplateCmd) newTemplate(cmd *cobra.Command, args []string) erro
 
 	if isJSONResponse {
 		formatter := pretty.Pretty
-		if globalFlagCompact {
+		if cliConfig.CompactJSON() {
 			formatter = pretty.UglyInPlace
 		}
 		fmt.Printf("%s%s", formatter(bytes.TrimSpace(responseText)), outputEnding)

@@ -10,7 +10,6 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/pkg/c8ylogin"
 	"github.com/reubenmiller/go-c8y-cli/pkg/completion"
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 )
 
 type sessionLoginCmd struct {
@@ -59,7 +58,7 @@ Log into the current session
 
 func (n *sessionLoginCmd) onSave() {
 	Logger.Debug("Saving session file")
-	err := WriteAuth(viper.GetViper(), globalStorageStorePassword, globalStorageStoreCookies)
+	err := cliConfig.SaveClientConfig(client)
 	if err != nil {
 		Logger.Errorf("Saving file error. %s", err)
 	}

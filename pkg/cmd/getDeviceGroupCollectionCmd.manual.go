@@ -128,8 +128,8 @@ func (n *getDeviceGroupCollectionCmd) getDeviceGroupCollection(cmd *cobra.Comman
 		Body:         body,
 		FormData:     formData,
 		Header:       headers,
-		IgnoreAccept: globalFlagIgnoreAccept,
-		DryRun:       globalFlagDryRun,
+		DryRun:       cliConfig.DryRun(),
+		IgnoreAccept: cliConfig.IgnoreAcceptHeader(),
 	}
 
 	return processRequestAndResponseWithWorkers(cmd, &req, inputIterators)

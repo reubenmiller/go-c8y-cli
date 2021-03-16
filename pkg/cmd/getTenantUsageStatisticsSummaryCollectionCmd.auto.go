@@ -145,8 +145,8 @@ func (n *GetTenantUsageStatisticsSummaryCollectionCmd) RunE(cmd *cobra.Command, 
 		Body:         body,
 		FormData:     formData,
 		Header:       headers,
-		IgnoreAccept: globalFlagIgnoreAccept,
-		DryRun:       globalFlagDryRun,
+		IgnoreAccept: cliConfig.IgnoreAcceptHeader(),
+		DryRun:       cliConfig.DryRun(),
 	}
 
 	return processRequestAndResponseWithWorkers(cmd, &req, inputIterators)

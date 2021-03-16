@@ -3,6 +3,7 @@ package cmd
 import (
 	"fmt"
 
+	"github.com/reubenmiller/go-c8y-cli/pkg/cmdutil"
 	"github.com/spf13/cobra"
 )
 
@@ -22,6 +23,7 @@ func NewVersionCmd() *versionCmd {
 		},
 	}
 
+	cmdutil.DisableAuthCheck(cmd)
 	ccmd.baseCmd = newBaseCmd(cmd)
 
 	return ccmd

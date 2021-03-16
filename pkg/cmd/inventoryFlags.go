@@ -17,7 +17,6 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/pkg/jsonUtilities"
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 )
 
 func addDataFlag(cmd *cobra.Command) {
@@ -36,7 +35,7 @@ func addTemplateFlag(cmd *cobra.Command) {
 	cmd.Flags().String(FlagDataTemplateVariablesName, "", "Body template variables")
 
 	_ = cmd.RegisterFlagCompletionFunc(FlagDataTemplateName, func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
-		templatePath := viper.GetViper().GetString("settings.template.path")
+		templatePath := cliConfig.GetTemplatePath()
 		Logger.Debugf("Template path: %s", templatePath)
 
 		matches, err := resolvePaths(templatePath, "*"+toComplete+"*", ".jsonnet", "ignore")
@@ -60,10 +59,12 @@ func addProcessingModeFlag(cmd *cobra.Command) {
 	)
 }
 
-type TemplatePathResolver struct{}
+type TemplatePathResolver struct {
+	Path string
+}
 
 func (t *TemplatePathResolver) Resolve(name string) (string, error) {
-	return matchFilePath(globalFlagTemplatePath, name, ".jsonnet", "ignore")
+	return matchFilePath(t.Path, name, ".jsonnet", "ignore")
 }
 
 func WithDataValue() flags.GetOption {
@@ -71,7 +72,9 @@ func WithDataValue() flags.GetOption {
 }
 
 func WithTemplateValue() flags.GetOption {
-	resolve := &TemplatePathResolver{}
+	resolve := &TemplatePathResolver{
+		Path: cliConfig.GetTemplatePath(),
+	}
 	return flags.WithTemplateValue(FlagDataTemplateName, resolve)
 }
 
@@ -194,13 +197,4 @@ func getFileFlag(cmd *cobra.Command, flagName string, includeMeta bool, formData
 		}
 	}
 	return nil
-}
-
-func getOutputFileFlag(cmd *cobra.Command, flagName string) (filename string, err error) {
-	if v, flagErr := cmd.Flags().GetString(flagName); flagErr == nil {
-		filename = v
-	} else {
-		err = cmderrors.NewUserError(fmt.Sprintf("Flag [%s] does not exist. %s", flagName, flagErr))
-	}
-	return
 }

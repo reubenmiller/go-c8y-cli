@@ -49,17 +49,6 @@ type CumulocitySession struct {
 	Name  string `json:"-"`
 }
 
-func WriteAuth(v *viper.Viper, savePassword, saveCookies bool) error {
-	if savePassword {
-		cliConfig.SetPassword(client.Password)
-	}
-	if saveCookies {
-		cliConfig.SetAuthorizationCookies(client.Cookies)
-	}
-	cliConfig.SetTenant(client.TenantName)
-	return cliConfig.WritePersistentConfig()
-}
-
 func NewCumulocitySessionFromFile(filePath string) (*CumulocitySession, error) {
 	session := &CumulocitySession{}
 	data, err := ioutil.ReadFile(filePath)
@@ -107,7 +96,7 @@ func (s CumulocitySession) GetHost() string {
 }
 
 func (s CumulocitySession) GetPassword() string {
-	pass, err := SecureDataAccessor.TryDecryptString(s.Password, s.GetSessionPassphrase())
+	pass, err := cliConfig.SecureData.TryDecryptString(s.Password, s.GetSessionPassphrase())
 
 	if err != nil {
 		Logger.Errorf("Could not decrypt password. %s", err)
@@ -193,7 +182,7 @@ $ c8y sessions create --type prod --host "https://mytenant.eu-latest.cumulocity.
 func (n *newSessionCmd) promptArgs(cmd *cobra.Command, args []string) error {
 	prompter := prompt.NewPrompt(Logger)
 
-	// read global config
+	// read config
 	if _, err := ReadConfigFiles(viper.GetViper()); err != nil {
 		Logger.Infof("failed to read configuration files. %s", err)
 	}

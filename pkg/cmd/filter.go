@@ -21,11 +21,12 @@ type JSONFilters struct {
 	Filters   []JSONFilter
 	Selectors []string
 	Pluck     []string
+	Flatten   bool
 	AsCSV     bool
 }
 
 func (f JSONFilters) Apply(jsonValue string, property string, showHeaders bool) []byte {
-	return filterJSON(jsonValue, property, f, f.Selectors, f.Pluck, f.AsCSV, showHeaders)
+	return f.filterJSON(jsonValue, property, showHeaders)
 }
 
 func (f *JSONFilters) AddSelectors(props ...string) {
@@ -153,7 +154,8 @@ func filterFlatMap(src map[string]interface{}, dst map[string]interface{}, patte
 	return sortedKeys, nil
 }
 
-func newJSONFilters() *JSONFilters {
+// NewJSONFilters create a json filter
+func NewJSONFilters() *JSONFilters {
 	return &JSONFilters{
 		Filters:   make([]JSONFilter, 0),
 		Selectors: make([]string, 0),
@@ -177,7 +179,7 @@ func removeJSONArrayValues(jsonValue []byte) []byte {
 	return []byte("")
 }
 
-func filterJSON(jsonValue string, property string, filters JSONFilters, selectors []string, pluckValues []string, asCSV bool, showHeaders bool) []byte {
+func (f JSONFilters) filterJSON(jsonValue string, property string, showHeaders bool) []byte {
 	var b bytes.Buffer
 
 	var jq *gojsonq.JSONQ
@@ -203,17 +205,17 @@ func filterJSON(jsonValue string, property string, filters JSONFilters, selector
 	jq.Macro("match", matchWithRegex)
 	jq.Macro("-match", matchWithRegex)
 
-	for _, query := range filters.Filters {
+	for _, query := range f.Filters {
 		Logger.Debugf("filtering data: %s %s %s", query.Property, query.Operation, query.Value)
 		jq.Where(query.Property, query.Operation, query.Value)
 	}
 
-	if len(selectors) > 0 {
-		jq.Select(selectors...)
+	if len(f.Selectors) > 0 {
+		jq.Select(f.Selectors...)
 	}
 
 	// format values (using gjson)
-	if len(pluckValues) > 0 || globalFlagFlatten {
+	if len(f.Pluck) > 0 || f.Flatten {
 		var bsub bytes.Buffer
 		jq.Writer(&bsub)
 		formattedJSON := gjson.ParseBytes(bsub.Bytes())
@@ -222,12 +224,12 @@ func filterJSON(jsonValue string, property string, filters JSONFilters, selector
 			outputValues := make([]string, 0)
 
 			if showHeaders {
-				outputValues = append(outputValues, expandHeaderProperties(&formattedJSON, pluckValues))
+				outputValues = append(outputValues, expandHeaderProperties(&formattedJSON, f.Pluck))
 			}
 
 			for _, myval := range formattedJSON.Array() {
 
-				if line, keys := pluckJsonValues(&myval, pluckValues, globalFlagFlatten, asCSV); line != "" {
+				if line, keys := pluckJsonValues(&myval, f.Pluck, f.Flatten, f.AsCSV); line != "" {
 					outputValues = append(outputValues, line)
 					Console.SetHeaderFromInput(strings.Join(keys, ","))
 
@@ -236,12 +238,12 @@ func filterJSON(jsonValue string, property string, filters JSONFilters, selector
 			return []byte(strings.Join(outputValues, "\n"))
 		}
 
-		if line, keys := pluckJsonValues(&formattedJSON, pluckValues, globalFlagFlatten, asCSV); line != "" {
+		if line, keys := pluckJsonValues(&formattedJSON, f.Pluck, f.Flatten, f.AsCSV); line != "" {
 			Console.SetHeaderFromInput(strings.Join(keys, ","))
 			return []byte(line)
 		}
 
-		Logger.Debugf("ERROR: gjson path does not exist. %v", pluckValues)
+		Logger.Debugf("ERROR: gjson path does not exist. %v", f.Pluck)
 		return []byte("")
 	}
 
@@ -385,8 +387,9 @@ func matchWithRegex(x, y interface{}) (bool, error) {
 }
 
 func getFilterFlag(cmd *cobra.Command, flagName string) *JSONFilters {
-	filters := newJSONFilters()
+	filters := NewJSONFilters()
 	filters.AsCSV = Console.IsCSV()
+	filters.Flatten = cliConfig.FlattenJSON()
 
 	if cmd.Flags().Changed("select") {
 		if properties, err := cmd.Flags().GetStringArray("select"); err == nil {

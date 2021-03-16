@@ -472,8 +472,8 @@ func (n *${NameCamel}Cmd) RunE(cmd *cobra.Command, args []string) error {
         Body:         $GetBodyContents,
         FormData:     formData,
         Header:       headers,
-        IgnoreAccept: globalFlagIgnoreAccept,
-        DryRun:       globalFlagDryRun,
+        IgnoreAccept: cliConfig.IgnoreAcceptHeader(),
+        DryRun:       cliConfig.DryRun(),
     }
 
     return processRequestAndResponseWithWorkers(cmd, &req, inputIterators)

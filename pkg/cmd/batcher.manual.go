@@ -61,9 +61,9 @@ func (b *BatchOptions) useInputData() bool {
 
 func getBatchOptions(cmd *cobra.Command) (*BatchOptions, error) {
 	options := &BatchOptions{
-		AbortOnErrorCount: 10,
-		TotalWorkers:      1,
-		Delay:             1000,
+		AbortOnErrorCount: cliConfig.AbortOnErrorCount(),
+		TotalWorkers:      cliConfig.GetWorkers(),
+		Delay:             cliConfig.WorkerDelay(),
 	}
 
 	if v, err := cmd.Flags().GetInt("count"); err == nil {
@@ -72,21 +72,6 @@ func getBatchOptions(cmd *cobra.Command) (*BatchOptions, error) {
 
 	if v, err := cmd.Flags().GetInt("startIndex"); err == nil {
 		options.StartIndex = v
-	}
-
-	if v, err := cmd.Flags().GetInt("delay"); err == nil {
-		options.Delay = v
-	}
-
-	if v, err := cmd.Flags().GetInt("workers"); err == nil {
-		if v > globalFlagBatchMaxWorkers {
-			return nil, fmt.Errorf("number of workers exceeds the maximum workers limit of %d", globalFlagBatchMaxWorkers)
-		}
-		options.TotalWorkers = v
-	}
-
-	if v, err := cmd.Flags().GetInt("abortOnErrors"); err == nil {
-		options.AbortOnErrorCount = v
 	}
 
 	return options, nil
@@ -146,8 +131,9 @@ func runBatched(requestIterator *RequestIterator, commonOptions CommonCommandOpt
 	jobs := make(chan batchArgument, batchOptions.TotalWorkers-1)
 	results := make(chan error, batchOptions.TotalWorkers-1)
 	workers := sync.WaitGroup{}
+	showProgress := cliConfig.ShowProgress()
 
-	progbar := progressbar.NewMultiProgressBar(rootCmd.ErrOrStderr(), 1, batchOptions.TotalWorkers, "requests", globalFlagProgressBar)
+	progbar := progressbar.NewMultiProgressBar(rootCmd.ErrOrStderr(), 1, batchOptions.TotalWorkers, "requests", showProgress)
 	progbar.Start(float64(batchOptions.Delay * 2 / 1000))
 
 	for w := 1; w <= batchOptions.TotalWorkers; w++ {
@@ -160,6 +146,7 @@ func runBatched(requestIterator *RequestIterator, commonOptions CommonCommandOpt
 	skipConfirm := false
 	promptCount := int32(0)
 	promptWG := sync.WaitGroup{}
+	maxJobs := cliConfig.GetMaxJobs()
 
 	// add jobs async
 	go func() {
@@ -169,8 +156,8 @@ func runBatched(requestIterator *RequestIterator, commonOptions CommonCommandOpt
 			jobID++
 			Logger.Debugf("checking job iterator: %d", jobID)
 
-			if jobID > globalFlagBatchMaxJobs {
-				Logger.Warningf("maximum jobs reached: limit=%d", globalFlagBatchMaxJobs)
+			if jobID > maxJobs {
+				Logger.Warningf("maximum jobs reached: limit=%d", maxJobs)
 				break
 			}
 
@@ -206,7 +193,7 @@ func runBatched(requestIterator *RequestIterator, commonOptions CommonCommandOpt
 			Logger.Debugf("adding job: %d", jobID)
 
 			// confirm action
-			if request != nil && !skipConfirm && shouldConfirm(request.Method) {
+			if request != nil && !skipConfirm && cliConfig.ShouldConfirm(request.Method) {
 				// wait for any other previous prompted jobs to finish
 				promptWG.Wait()
 
@@ -299,7 +286,7 @@ func runBatched(requestIterator *RequestIterator, commonOptions CommonCommandOpt
 		time.Sleep(progbar.RefreshRate())
 	}
 
-	maxJobsReached := jobID > globalFlagBatchMaxJobs
+	maxJobsReached := jobID > maxJobs
 	if total := len(totalErrors); total > 0 {
 		if total == 1 {
 			// return only error
@@ -313,7 +300,7 @@ func runBatched(requestIterator *RequestIterator, commonOptions CommonCommandOpt
 		return cmderrors.NewUserErrorWithExitCode(104, message)
 	}
 	if maxJobsReached {
-		return cmderrors.NewUserErrorWithExitCode(105, fmt.Sprintf("max job limit exceeded. limit=%d", globalFlagBatchMaxJobs))
+		return cmderrors.NewUserErrorWithExitCode(105, fmt.Sprintf("max job limit exceeded. limit=%d", maxJobs))
 	}
 	return nil
 }

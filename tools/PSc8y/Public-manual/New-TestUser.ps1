@@ -25,30 +25,19 @@ Create a new test user with a custom username prefix
             ValueFromPipelineByPropertyName = $true,
             Position = 0
         )]
-        [string] $Name = "testuser",
-
-        # Template (jsonnet) file to use to create the request body.
-        [Parameter()]
-        [string]
-        $Template,
-
-        # Variables to be used when evaluating the Template. Accepts json or json shorthand, i.e. "name=peter"
-        [Parameter()]
-        [string]
-        $TemplateVars,
-
-        # Don't prompt for confirmation
-        [switch] $Force
+        [string] $Name = "testuser"
     )
+    DynamicParam {
+        Get-ClientCommonParameters -Type "Create", "TemplateVars"
+    }
 
     Process {
         $Username = New-RandomString -Prefix "${Name}_"
+        $options = @{} + $PSBoundParameters
+        $options.Remove("Name")
+        $options["UserName"] = $Username
+        $options["Password"] = New-RandomString
         
-        PSc8y\New-User `
-            -UserName $Username `
-            -Password (New-RandomString) `
-            -Template:$Template `
-            -TemplateVars:$TemplateVars `
-            -Force:$Force
+        PSc8y\New-User @options
     }
 }

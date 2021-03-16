@@ -106,8 +106,8 @@ func WithRequestOptions(cmd *cobra.Command, args []string, req *c8y.RequestOptio
 /*
 	req := c8y.RequestOptions{
 		Method:       "POST",
-		IgnoreAccept: globalFlagIgnoreAccept,
-		DryRun:       globalFlagDryRun,
+		IgnoreAccept: cliConfig.IgnoreAcceptHeader(),
+        DryRun:       cliConfig.DryRun(),
 	}
 
 	err = flags.WithRequestOptions(
@@ -142,8 +142,8 @@ func WithRequestOptions(cmd *cobra.Command, args []string, req *c8y.RequestOptio
 		$RESTHost
 		Path:         "$RESTPath",
 		Method:       "$RESTMethod",
-		IgnoreAccept: globalFlagIgnoreAccept,
-		DryRun:       globalFlagDryRun,
+		IgnoreAccept: cliConfig.IgnoreAcceptHeader(),
+        DryRun:       cliConfig.DryRun(),
 	}
 
 	err = flags.WithRequestOptions(
