@@ -7,6 +7,7 @@ import (
 	"net/http"
 
 	"github.com/MakeNowJust/heredoc/v2"
+	"github.com/reubenmiller/go-c8y-cli/pkg/cmd/subcommand"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
@@ -17,7 +18,7 @@ import (
 
 // CurrentTenantCmd command
 type CurrentTenantCmd struct {
-	*baseCmd
+	*subcommand.SubCommand
 }
 
 // NewCurrentTenantCmd creates a command to Get current tenant
@@ -48,7 +49,7 @@ Get the current tenant (based on your current credentials)
 
 	// Required flags
 
-	ccmd.baseCmd = newBaseCmd(cmd)
+	ccmd.SubCommand = subcommand.NewSubCommand(cmd)
 
 	return ccmd
 }

@@ -1,11 +1,12 @@
 package cmd
 
 import (
+	"github.com/reubenmiller/go-c8y-cli/pkg/cmd/subcommand"
 	"github.com/spf13/cobra"
 )
 
 type DeviceCredentialsCmd struct {
-	*baseCmd
+	*subcommand.SubCommand
 }
 
 func NewDeviceCredentialsRootCmd() *DeviceCredentialsCmd {
@@ -18,14 +19,14 @@ func NewDeviceCredentialsRootCmd() *DeviceCredentialsCmd {
 	}
 
 	// Subcommands
-	cmd.AddCommand(NewGetNewDeviceRequestCollectionCmd().getCommand())
-	cmd.AddCommand(NewGetNewDeviceRequestCmd().getCommand())
-	cmd.AddCommand(NewRegisterNewDeviceCmd().getCommand())
-	cmd.AddCommand(NewApproveNewDeviceRequestCmd().getCommand())
-	cmd.AddCommand(NewDeleteNewDeviceRequestCmd().getCommand())
-	cmd.AddCommand(NewRequestDeviceCredentialsCmd().getCommand())
+	cmd.AddCommand(NewGetNewDeviceRequestCollectionCmd().GetCommand())
+	cmd.AddCommand(NewGetNewDeviceRequestCmd().GetCommand())
+	cmd.AddCommand(NewRegisterNewDeviceCmd().GetCommand())
+	cmd.AddCommand(NewApproveNewDeviceRequestCmd().GetCommand())
+	cmd.AddCommand(NewDeleteNewDeviceRequestCmd().GetCommand())
+	cmd.AddCommand(NewRequestDeviceCredentialsCmd().GetCommand())
 
-	ccmd.baseCmd = newBaseCmd(cmd)
+	ccmd.SubCommand = subcommand.NewSubCommand(cmd)
 
 	return ccmd
 }

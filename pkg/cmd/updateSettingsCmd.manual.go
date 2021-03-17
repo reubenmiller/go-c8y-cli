@@ -8,6 +8,7 @@ import (
 	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/fatih/color"
 	"github.com/reubenmiller/go-c8y-cli/pkg/c8ydefaults"
+	"github.com/reubenmiller/go-c8y-cli/pkg/cmd/subcommand"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmdutil"
 	"github.com/reubenmiller/go-c8y-cli/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/pkg/config"
@@ -20,7 +21,7 @@ type UpdateSettingsCmd struct {
 	file  string
 	shell string
 
-	*baseCmd
+	*subcommand.SubCommand
 }
 
 type argumentHandler struct {
@@ -285,7 +286,7 @@ func NewUpdateSettingsCmd() *UpdateSettingsCmd {
 	cmd.SilenceUsage = true
 	cmdutil.DisableAuthCheck(cmd)
 
-	ccmd.baseCmd = newBaseCmd(cmd)
+	ccmd.SubCommand = subcommand.NewSubCommand(cmd)
 
 	return ccmd
 }

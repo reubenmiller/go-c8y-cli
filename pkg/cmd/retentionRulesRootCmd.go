@@ -1,11 +1,12 @@
 package cmd
 
 import (
+	"github.com/reubenmiller/go-c8y-cli/pkg/cmd/subcommand"
 	"github.com/spf13/cobra"
 )
 
 type RetentionRulesCmd struct {
-	*baseCmd
+	*subcommand.SubCommand
 }
 
 func NewRetentionRulesRootCmd() *RetentionRulesCmd {
@@ -18,13 +19,13 @@ func NewRetentionRulesRootCmd() *RetentionRulesCmd {
 	}
 
 	// Subcommands
-	cmd.AddCommand(NewGetRetentionRuleCollectionCmd().getCommand())
-	cmd.AddCommand(NewNewRetentionRuleCmd().getCommand())
-	cmd.AddCommand(NewGetRetentionRuleCmd().getCommand())
-	cmd.AddCommand(NewDeleteRetentionRuleCmd().getCommand())
-	cmd.AddCommand(NewUpdateRetentionRuleCmd().getCommand())
+	cmd.AddCommand(NewGetRetentionRuleCollectionCmd().GetCommand())
+	cmd.AddCommand(NewNewRetentionRuleCmd().GetCommand())
+	cmd.AddCommand(NewGetRetentionRuleCmd().GetCommand())
+	cmd.AddCommand(NewDeleteRetentionRuleCmd().GetCommand())
+	cmd.AddCommand(NewUpdateRetentionRuleCmd().GetCommand())
 
-	ccmd.baseCmd = newBaseCmd(cmd)
+	ccmd.SubCommand = subcommand.NewSubCommand(cmd)
 
 	return ccmd
 }

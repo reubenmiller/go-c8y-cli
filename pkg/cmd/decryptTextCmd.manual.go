@@ -4,13 +4,14 @@ import (
 	"fmt"
 
 	"github.com/howeyc/gopass"
+	"github.com/reubenmiller/go-c8y-cli/pkg/cmd/subcommand"
 	"github.com/spf13/cobra"
 )
 
 type decryptTextCmd struct {
 	passphrase string
 
-	*baseCmd
+	*subcommand.SubCommand
 }
 
 func newDecryptTextCmd() *decryptTextCmd {
@@ -42,7 +43,7 @@ Encrypt the text "Hello World", the text will be encrypted using the given passp
 	// Required flags
 	_ = cmd.MarkFlagRequired("text")
 
-	ccmd.baseCmd = newBaseCmd(cmd)
+	ccmd.SubCommand = subcommand.NewSubCommand(cmd)
 
 	return ccmd
 }

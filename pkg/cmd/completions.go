@@ -3,13 +3,14 @@ package cmd
 import (
 	"os"
 
+	"github.com/reubenmiller/go-c8y-cli/pkg/cmd/subcommand"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmdutil"
 	"github.com/spf13/cobra"
 )
 
 // CompletionsCmd shell completions
 type CompletionsCmd struct {
-	*baseCmd
+	*subcommand.SubCommand
 }
 
 // NewCompletionsCmd creates a new shell completions command to generate completions files in variables shell languages
@@ -79,7 +80,7 @@ func NewCompletionsCmd() *CompletionsCmd {
 	}
 
 	cmdutil.DisableAuthCheck(cmd)
-	ccmd.baseCmd = newBaseCmd(cmd)
+	ccmd.SubCommand = subcommand.NewSubCommand(cmd)
 
 	return ccmd
 }

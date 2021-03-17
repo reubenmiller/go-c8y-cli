@@ -1,11 +1,12 @@
 package cmd
 
 import (
+	"github.com/reubenmiller/go-c8y-cli/pkg/cmd/subcommand"
 	"github.com/spf13/cobra"
 )
 
 type IdentityCmd struct {
-	*baseCmd
+	*subcommand.SubCommand
 }
 
 func NewIdentityRootCmd() *IdentityCmd {
@@ -18,12 +19,12 @@ func NewIdentityRootCmd() *IdentityCmd {
 	}
 
 	// Subcommands
-	cmd.AddCommand(NewGetExternalIDCollectionCmd().getCommand())
-	cmd.AddCommand(NewGetExternalIDCmd().getCommand())
-	cmd.AddCommand(NewDeleteExternalIDCmd().getCommand())
-	cmd.AddCommand(NewNewExternalIDCmd().getCommand())
+	cmd.AddCommand(NewGetExternalIDCollectionCmd().GetCommand())
+	cmd.AddCommand(NewGetExternalIDCmd().GetCommand())
+	cmd.AddCommand(NewDeleteExternalIDCmd().GetCommand())
+	cmd.AddCommand(NewNewExternalIDCmd().GetCommand())
 
-	ccmd.baseCmd = newBaseCmd(cmd)
+	ccmd.SubCommand = subcommand.NewSubCommand(cmd)
 
 	return ccmd
 }

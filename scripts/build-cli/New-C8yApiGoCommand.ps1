@@ -329,6 +329,7 @@ import (
 	"net/url"
 
     "github.com/MakeNowJust/heredoc/v2"
+    "github.com/reubenmiller/go-c8y-cli/pkg/cmd/subcommand"
     "github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
     "github.com/reubenmiller/go-c8y-cli/pkg/completion"
     "github.com/reubenmiller/go-c8y-cli/pkg/flags"
@@ -339,7 +340,7 @@ import (
 
 // ${NameCamel}Cmd command
 type ${NameCamel}Cmd struct {
-    *baseCmd
+    *subcommand.SubCommand
 }
 
 // New${NameCamel}Cmd creates a command to $Description
@@ -385,7 +386,7 @@ $($Examples -join "`n`n")
     // Required flags
     $($CommandArgs.Required -join "`n	")
 
-	ccmd.baseCmd = newBaseCmd(cmd)
+    ccmd.SubCommand = subcommand.NewSubCommand(cmd)
 
 	return ccmd
 }

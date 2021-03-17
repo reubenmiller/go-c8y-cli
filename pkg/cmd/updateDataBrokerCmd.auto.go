@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"github.com/MakeNowJust/heredoc/v2"
+	"github.com/reubenmiller/go-c8y-cli/pkg/cmd/subcommand"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
@@ -16,7 +17,7 @@ import (
 
 // UpdateDataBrokerCmd command
 type UpdateDataBrokerCmd struct {
-	*baseCmd
+	*subcommand.SubCommand
 }
 
 // NewUpdateDataBrokerCmd creates a command to Update data broker
@@ -54,7 +55,7 @@ Change the status of a specific data broker connector by given connector id
 	// Required flags
 	_ = cmd.MarkFlagRequired("status")
 
-	ccmd.baseCmd = newBaseCmd(cmd)
+	ccmd.SubCommand = subcommand.NewSubCommand(cmd)
 
 	return ccmd
 }

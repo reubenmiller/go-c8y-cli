@@ -1,11 +1,12 @@
 package cmd
 
 import (
+	"github.com/reubenmiller/go-c8y-cli/pkg/cmd/subcommand"
 	"github.com/spf13/cobra"
 )
 
 type CurrentApplicationCmd struct {
-	*baseCmd
+	*subcommand.SubCommand
 }
 
 func NewCurrentApplicationRootCmd() *CurrentApplicationCmd {
@@ -18,11 +19,11 @@ func NewCurrentApplicationRootCmd() *CurrentApplicationCmd {
 	}
 
 	// Subcommands
-	cmd.AddCommand(NewGetCurrentApplicationCmd().getCommand())
-	cmd.AddCommand(NewUpdateCurrentApplicationCmd().getCommand())
-	cmd.AddCommand(NewGetCurrentApplicationUserCollectionCmd().getCommand())
+	cmd.AddCommand(NewGetCurrentApplicationCmd().GetCommand())
+	cmd.AddCommand(NewUpdateCurrentApplicationCmd().GetCommand())
+	cmd.AddCommand(NewGetCurrentApplicationUserCollectionCmd().GetCommand())
 
-	ccmd.baseCmd = newBaseCmd(cmd)
+	ccmd.SubCommand = subcommand.NewSubCommand(cmd)
 
 	return ccmd
 }

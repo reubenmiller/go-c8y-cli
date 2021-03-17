@@ -1,11 +1,12 @@
 package cmd
 
 import (
+	"github.com/reubenmiller/go-c8y-cli/pkg/cmd/subcommand"
 	"github.com/spf13/cobra"
 )
 
 type BinariesCmd struct {
-	*baseCmd
+	*subcommand.SubCommand
 }
 
 func NewBinariesRootCmd() *BinariesCmd {
@@ -18,13 +19,13 @@ func NewBinariesRootCmd() *BinariesCmd {
 	}
 
 	// Subcommands
-	cmd.AddCommand(NewGetBinaryCollectionCmd().getCommand())
-	cmd.AddCommand(NewDownloadCmd().getCommand())
-	cmd.AddCommand(NewNewBinaryCmd().getCommand())
-	cmd.AddCommand(NewUpdateBinaryCmd().getCommand())
-	cmd.AddCommand(NewDeleteBinaryCmd().getCommand())
+	cmd.AddCommand(NewGetBinaryCollectionCmd().GetCommand())
+	cmd.AddCommand(NewDownloadCmd().GetCommand())
+	cmd.AddCommand(NewNewBinaryCmd().GetCommand())
+	cmd.AddCommand(NewUpdateBinaryCmd().GetCommand())
+	cmd.AddCommand(NewDeleteBinaryCmd().GetCommand())
 
-	ccmd.baseCmd = newBaseCmd(cmd)
+	ccmd.SubCommand = subcommand.NewSubCommand(cmd)
 
 	return ccmd
 }

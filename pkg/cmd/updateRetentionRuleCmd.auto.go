@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"github.com/MakeNowJust/heredoc/v2"
+	"github.com/reubenmiller/go-c8y-cli/pkg/cmd/subcommand"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
@@ -16,7 +17,7 @@ import (
 
 // UpdateRetentionRuleCmd command
 type UpdateRetentionRuleCmd struct {
-	*baseCmd
+	*subcommand.SubCommand
 }
 
 // NewUpdateRetentionRuleCmd creates a command to Update retention rule
@@ -60,7 +61,7 @@ Update a retention rule
 	// Required flags
 	_ = cmd.MarkFlagRequired("dataType")
 
-	ccmd.baseCmd = newBaseCmd(cmd)
+	ccmd.SubCommand = subcommand.NewSubCommand(cmd)
 
 	return ccmd
 }

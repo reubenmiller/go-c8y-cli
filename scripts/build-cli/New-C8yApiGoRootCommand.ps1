@@ -33,22 +33,23 @@
         $EndpointName = $endpoint.name
         $EndpointNameCamel = $EndpointName[0].ToString().ToUpperInvariant() + $EndpointName.Substring(1)
 
-        $null = $SubcommandsCode.AppendLine("    cmd.AddCommand(New${EndpointNameCamel}Cmd().getCommand())")
+        $null = $SubcommandsCode.AppendLine("    cmd.AddCommand(New${EndpointNameCamel}Cmd().GetCommand())")
     }
 
     # Create root import command helper
     $null = $RootImportCode.AppendLine("    // ${Name} commands")
-    $null = $RootImportCode.AppendLine("    rootCmd.AddCommand(New${NameCamel}RootCmd().getCommand())")
+    $null = $RootImportCode.AppendLine("    rootCmd.AddCommand(New${NameCamel}RootCmd().GetCommand())")
 
     $Template = @"
 package cmd
 
 import (
     "github.com/spf13/cobra"
+    "github.com/reubenmiller/go-c8y-cli/pkg/cmd/subcommand"
 )
 
 type ${NameCamel}Cmd struct {
-    *baseCmd
+    *subcommand.SubCommand
 }
 
 func New${NameCamel}RootCmd() *${NameCamel}Cmd {
@@ -63,7 +64,7 @@ func New${NameCamel}RootCmd() *${NameCamel}Cmd {
     // Subcommands
 $SubcommandsCode
 
-    ccmd.baseCmd = newBaseCmd(cmd)
+    ccmd.SubCommand = subcommand.NewSubCommand(cmd)
 
     return ccmd
 }

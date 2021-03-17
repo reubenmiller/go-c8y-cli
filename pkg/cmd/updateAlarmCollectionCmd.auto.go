@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"github.com/MakeNowJust/heredoc/v2"
+	"github.com/reubenmiller/go-c8y-cli/pkg/cmd/subcommand"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
@@ -16,7 +17,7 @@ import (
 
 // UpdateAlarmCollectionCmd command
 type UpdateAlarmCollectionCmd struct {
-	*baseCmd
+	*subcommand.SubCommand
 }
 
 // NewUpdateAlarmCollectionCmd creates a command to Update alarm collection
@@ -61,7 +62,7 @@ Update the status of all active alarms on a device to ACKNOWLEDGED
 	// Required flags
 	_ = cmd.MarkFlagRequired("newStatus")
 
-	ccmd.baseCmd = newBaseCmd(cmd)
+	ccmd.SubCommand = subcommand.NewSubCommand(cmd)
 
 	return ccmd
 }

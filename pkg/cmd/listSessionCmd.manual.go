@@ -8,12 +8,13 @@ import (
 
 	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/manifoldco/promptui"
+	"github.com/reubenmiller/go-c8y-cli/pkg/cmd/subcommand"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
 )
 
 type listSessionCmd struct {
-	*baseCmd
+	*subcommand.SubCommand
 
 	sessionFilter string
 }
@@ -41,7 +42,7 @@ func newListSessionCmd() *listSessionCmd {
 
 	cmd.Flags().StringVar(&ccmd.sessionFilter, "sessionFilter", "", "Filter to be applied to the list of sessions even before the values can be selected")
 
-	ccmd.baseCmd = newBaseCmd(cmd)
+	ccmd.SubCommand = subcommand.NewSubCommand(cmd)
 
 	return ccmd
 }

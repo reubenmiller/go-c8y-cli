@@ -9,13 +9,14 @@ import (
 	"regexp"
 
 	"github.com/MakeNowJust/heredoc/v2"
+	"github.com/reubenmiller/go-c8y-cli/pkg/cmd/subcommand"
 	"github.com/reubenmiller/go-c8y-cli/pkg/zipUtilities"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
 )
 
 type newHostedApplicationCmd struct {
-	*baseCmd
+	*subcommand.SubCommand
 
 	file           string
 	name           string
@@ -58,7 +59,7 @@ Create new hosted application from a given zip file
 
 	// Required flags
 
-	ccmd.baseCmd = newBaseCmd(cmd)
+	ccmd.SubCommand = subcommand.NewSubCommand(cmd)
 
 	return ccmd
 }
@@ -201,7 +202,7 @@ func (n *newHostedApplicationCmd) doProcedure(cmd *cobra.Command, args []string)
 
 		if err != nil {
 			// handle error
-			n.cmd.PrintErrf("failed to upload file. %s", err)
+			n.SubCommand.GetCommand().PrintErrf("failed to upload file. %s", err)
 		} else {
 			applicationBinaryID = resp.JSON.Get("id").String()
 		}

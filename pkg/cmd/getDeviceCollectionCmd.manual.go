@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/MakeNowJust/heredoc/v2"
+	"github.com/reubenmiller/go-c8y-cli/pkg/cmd/subcommand"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmdutil"
 	"github.com/reubenmiller/go-c8y-cli/pkg/config"
@@ -18,7 +19,7 @@ import (
 )
 
 type GetDeviceCollectionCmd struct {
-	*baseCmd
+	*subcommand.SubCommand
 
 	Config func() (*config.Config, error)
 }
@@ -56,7 +57,7 @@ func NewGetDeviceCollectionCmd(f *cmdutil.Factory) *GetDeviceCollectionCmd {
 	)
 
 	// Required flags
-	ccmd.baseCmd = newBaseCmd(cmd)
+	ccmd.SubCommand = subcommand.NewSubCommand(cmd)
 
 	return ccmd
 }

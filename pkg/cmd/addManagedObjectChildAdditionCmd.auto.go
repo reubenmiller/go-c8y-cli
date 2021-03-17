@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"github.com/MakeNowJust/heredoc/v2"
+	"github.com/reubenmiller/go-c8y-cli/pkg/cmd/subcommand"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
@@ -16,7 +17,7 @@ import (
 
 // AddManagedObjectChildAdditionCmd command
 type AddManagedObjectChildAdditionCmd struct {
-	*baseCmd
+	*subcommand.SubCommand
 }
 
 // NewAddManagedObjectChildAdditionCmd creates a command to Add child addition
@@ -53,7 +54,7 @@ Add a related managed object as a child to an existing managed object
 	// Required flags
 	_ = cmd.MarkFlagRequired("id")
 
-	ccmd.baseCmd = newBaseCmd(cmd)
+	ccmd.SubCommand = subcommand.NewSubCommand(cmd)
 
 	return ccmd
 }

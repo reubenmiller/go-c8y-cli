@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"github.com/MakeNowJust/heredoc/v2"
+	"github.com/reubenmiller/go-c8y-cli/pkg/cmd/subcommand"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
@@ -11,7 +12,7 @@ type subscribeRealtimeAllCmd struct {
 	flagDurationSec int64
 	flagCount       int64
 
-	*baseCmd
+	*subcommand.SubCommand
 }
 
 func newSubscribeAllRealtimeCmd() *subscribeRealtimeAllCmd {
@@ -34,7 +35,7 @@ Subscribe to all notifications (alarms/events/operations etc.) for device 12345 
 	cmd.Flags().Int64Var(&ccmd.flagDurationSec, "duration", 30, "Timeout in seconds")
 	cmd.Flags().Int64Var(&ccmd.flagCount, "count", 0, "Max number of realtime notifications to wait for")
 
-	ccmd.baseCmd = newBaseCmd(cmd)
+	ccmd.SubCommand = subcommand.NewSubCommand(cmd)
 
 	return ccmd
 }

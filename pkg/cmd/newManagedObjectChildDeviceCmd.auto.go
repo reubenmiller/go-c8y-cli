@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"github.com/MakeNowJust/heredoc/v2"
+	"github.com/reubenmiller/go-c8y-cli/pkg/cmd/subcommand"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
@@ -16,7 +17,7 @@ import (
 
 // NewManagedObjectChildDeviceCmd command
 type NewManagedObjectChildDeviceCmd struct {
-	*baseCmd
+	*subcommand.SubCommand
 }
 
 // NewNewManagedObjectChildDeviceCmd creates a command to Assign child device
@@ -53,7 +54,7 @@ Assign a device as a child device to an existing device
 	// Required flags
 	_ = cmd.MarkFlagRequired("device")
 
-	ccmd.baseCmd = newBaseCmd(cmd)
+	ccmd.SubCommand = subcommand.NewSubCommand(cmd)
 
 	return ccmd
 }

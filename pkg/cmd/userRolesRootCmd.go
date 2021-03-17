@@ -1,11 +1,12 @@
 package cmd
 
 import (
+	"github.com/reubenmiller/go-c8y-cli/pkg/cmd/subcommand"
 	"github.com/spf13/cobra"
 )
 
 type UserRolesCmd struct {
-	*baseCmd
+	*subcommand.SubCommand
 }
 
 func NewUserRolesRootCmd() *UserRolesCmd {
@@ -18,15 +19,15 @@ func NewUserRolesRootCmd() *UserRolesCmd {
 	}
 
 	// Subcommands
-	cmd.AddCommand(NewGetRoleCollectionCmd().getCommand())
-	cmd.AddCommand(NewAddRoleToUserCmd().getCommand())
-	cmd.AddCommand(NewDeleteRoleFromUserCmd().getCommand())
-	cmd.AddCommand(NewAddRoleToGroupCmd().getCommand())
-	cmd.AddCommand(NewDeleteRoleFromGroupCmd().getCommand())
-	cmd.AddCommand(NewGetRoleReferenceCollectionFromUserCmd().getCommand())
-	cmd.AddCommand(NewGetRoleReferenceCollectionFromGroupCmd().getCommand())
+	cmd.AddCommand(NewGetRoleCollectionCmd().GetCommand())
+	cmd.AddCommand(NewAddRoleToUserCmd().GetCommand())
+	cmd.AddCommand(NewDeleteRoleFromUserCmd().GetCommand())
+	cmd.AddCommand(NewAddRoleToGroupCmd().GetCommand())
+	cmd.AddCommand(NewDeleteRoleFromGroupCmd().GetCommand())
+	cmd.AddCommand(NewGetRoleReferenceCollectionFromUserCmd().GetCommand())
+	cmd.AddCommand(NewGetRoleReferenceCollectionFromGroupCmd().GetCommand())
 
-	ccmd.baseCmd = newBaseCmd(cmd)
+	ccmd.SubCommand = subcommand.NewSubCommand(cmd)
 
 	return ccmd
 }

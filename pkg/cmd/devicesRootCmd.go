@@ -1,11 +1,12 @@
 package cmd
 
 import (
+	"github.com/reubenmiller/go-c8y-cli/pkg/cmd/subcommand"
 	"github.com/spf13/cobra"
 )
 
 type DevicesCmd struct {
-	*baseCmd
+	*subcommand.SubCommand
 }
 
 func NewDevicesRootCmd() *DevicesCmd {
@@ -18,20 +19,20 @@ func NewDevicesRootCmd() *DevicesCmd {
 	}
 
 	// Subcommands
-	cmd.AddCommand(NewGetDeviceCmd().getCommand())
-	cmd.AddCommand(NewUpdateDeviceCmd().getCommand())
-	cmd.AddCommand(NewDeleteDeviceCmd().getCommand())
-	cmd.AddCommand(NewCreateDeviceCmd().getCommand())
-	cmd.AddCommand(NewGetSupportedMeasurementsCmd().getCommand())
-	cmd.AddCommand(NewGetSupportedSeriesCmd().getCommand())
-	cmd.AddCommand(NewGetSupportedOperationsCmd().getCommand())
-	cmd.AddCommand(NewSetDeviceRequiredAvailabilityCmd().getCommand())
-	cmd.AddCommand(NewGetDeviceGroupCmd().getCommand())
-	cmd.AddCommand(NewUpdateDeviceGroupCmd().getCommand())
-	cmd.AddCommand(NewDeleteDeviceGroupCmd().getCommand())
-	cmd.AddCommand(NewCreateDeviceGroupCmd().getCommand())
+	cmd.AddCommand(NewGetDeviceCmd().GetCommand())
+	cmd.AddCommand(NewUpdateDeviceCmd().GetCommand())
+	cmd.AddCommand(NewDeleteDeviceCmd().GetCommand())
+	cmd.AddCommand(NewCreateDeviceCmd().GetCommand())
+	cmd.AddCommand(NewGetSupportedMeasurementsCmd().GetCommand())
+	cmd.AddCommand(NewGetSupportedSeriesCmd().GetCommand())
+	cmd.AddCommand(NewGetSupportedOperationsCmd().GetCommand())
+	cmd.AddCommand(NewSetDeviceRequiredAvailabilityCmd().GetCommand())
+	cmd.AddCommand(NewGetDeviceGroupCmd().GetCommand())
+	cmd.AddCommand(NewUpdateDeviceGroupCmd().GetCommand())
+	cmd.AddCommand(NewDeleteDeviceGroupCmd().GetCommand())
+	cmd.AddCommand(NewCreateDeviceGroupCmd().GetCommand())
 
-	ccmd.baseCmd = newBaseCmd(cmd)
+	ccmd.SubCommand = subcommand.NewSubCommand(cmd)
 
 	return ccmd
 }

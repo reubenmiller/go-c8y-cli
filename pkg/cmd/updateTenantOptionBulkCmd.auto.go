@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"github.com/MakeNowJust/heredoc/v2"
+	"github.com/reubenmiller/go-c8y-cli/pkg/cmd/subcommand"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
@@ -16,7 +17,7 @@ import (
 
 // UpdateTenantOptionBulkCmd command
 type UpdateTenantOptionBulkCmd struct {
-	*baseCmd
+	*subcommand.SubCommand
 }
 
 // NewUpdateTenantOptionBulkCmd creates a command to Update multiple tenant options
@@ -52,7 +53,7 @@ Update multiple tenant options
 	// Required flags
 	_ = cmd.MarkFlagRequired("data")
 
-	ccmd.baseCmd = newBaseCmd(cmd)
+	ccmd.SubCommand = subcommand.NewSubCommand(cmd)
 
 	return ccmd
 }

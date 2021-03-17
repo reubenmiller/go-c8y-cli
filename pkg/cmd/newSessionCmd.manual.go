@@ -13,6 +13,7 @@ import (
 
 	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/pkg/errors"
+	"github.com/reubenmiller/go-c8y-cli/pkg/cmd/subcommand"
 	"github.com/reubenmiller/go-c8y-cli/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/pkg/prompt"
 	"github.com/spf13/cobra"
@@ -118,7 +119,7 @@ type newSessionCmd struct {
 	noStorage      bool
 	encrypt        bool
 
-	*baseCmd
+	*subcommand.SubCommand
 }
 
 func newNewSessionCmd() *newSessionCmd {
@@ -174,7 +175,7 @@ $ c8y sessions create --type prod --host "https://mytenant.eu-latest.cumulocity.
 		),
 	)
 
-	ccmd.baseCmd = newBaseCmd(cmd)
+	ccmd.SubCommand = subcommand.NewSubCommand(cmd)
 
 	return ccmd
 }

@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"github.com/MakeNowJust/heredoc/v2"
+	"github.com/reubenmiller/go-c8y-cli/pkg/cmd/subcommand"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
@@ -16,7 +17,7 @@ import (
 
 // DeleteAlarmCollectionCmd command
 type DeleteAlarmCollectionCmd struct {
-	*baseCmd
+	*subcommand.SubCommand
 }
 
 // NewDeleteAlarmCollectionCmd creates a command to Delete alarm collection
@@ -64,7 +65,7 @@ Remove alarms on the device which are active and created in the last 10 minutes
 
 	// Required flags
 
-	ccmd.baseCmd = newBaseCmd(cmd)
+	ccmd.SubCommand = subcommand.NewSubCommand(cmd)
 
 	return ccmd
 }

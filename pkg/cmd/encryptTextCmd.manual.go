@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/howeyc/gopass"
+	"github.com/reubenmiller/go-c8y-cli/pkg/cmd/subcommand"
 	"github.com/spf13/cobra"
 )
 
@@ -11,7 +12,7 @@ type encryptTextCmd struct {
 	passphrase string
 	raw        bool
 
-	*baseCmd
+	*subcommand.SubCommand
 }
 
 func newEncryptTextCmd() *encryptTextCmd {
@@ -45,7 +46,7 @@ Password: {encrypted}ec5b837a03408ffb731307584eac40ac047989a002951e4b7139fa60189
 	// Required flags
 	_ = cmd.MarkFlagRequired("text")
 
-	ccmd.baseCmd = newBaseCmd(cmd)
+	ccmd.SubCommand = subcommand.NewSubCommand(cmd)
 
 	return ccmd
 }

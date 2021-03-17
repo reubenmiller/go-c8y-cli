@@ -5,13 +5,14 @@ import (
 	"fmt"
 
 	"github.com/MakeNowJust/heredoc/v2"
+	"github.com/reubenmiller/go-c8y-cli/pkg/cmd/subcommand"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
 )
 
 type newServiceUserCmd struct {
-	*baseCmd
+	*subcommand.SubCommand
 
 	name    string
 	tenants []string
@@ -43,7 +44,7 @@ Create new application service user
 	// Required flags
 	_ = cmd.MarkFlagRequired("name")
 
-	ccmd.baseCmd = newBaseCmd(cmd)
+	ccmd.SubCommand = subcommand.NewSubCommand(cmd)
 
 	return ccmd
 }

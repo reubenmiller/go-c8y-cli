@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"github.com/MakeNowJust/heredoc/v2"
+	"github.com/reubenmiller/go-c8y-cli/pkg/cmd/subcommand"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
@@ -16,7 +17,7 @@ import (
 
 // CreateDeviceGroupCmd command
 type CreateDeviceGroupCmd struct {
-	*baseCmd
+	*subcommand.SubCommand
 }
 
 // NewCreateDeviceGroupCmd creates a command to Create device group
@@ -57,7 +58,7 @@ Create device group with custom properties
 
 	// Required flags
 
-	ccmd.baseCmd = newBaseCmd(cmd)
+	ccmd.SubCommand = subcommand.NewSubCommand(cmd)
 
 	return ccmd
 }

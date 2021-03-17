@@ -1,11 +1,12 @@
 package cmd
 
 import (
+	"github.com/reubenmiller/go-c8y-cli/pkg/cmd/subcommand"
 	"github.com/spf13/cobra"
 )
 
 type ApplicationsCmd struct {
-	*baseCmd
+	*subcommand.SubCommand
 }
 
 func NewApplicationsRootCmd() *ApplicationsCmd {
@@ -18,17 +19,17 @@ func NewApplicationsRootCmd() *ApplicationsCmd {
 	}
 
 	// Subcommands
-	cmd.AddCommand(NewGetApplicationCollectionCmd().getCommand())
-	cmd.AddCommand(NewNewApplicationCmd().getCommand())
-	cmd.AddCommand(NewCopyApplicationCmd().getCommand())
-	cmd.AddCommand(NewGetApplicationCmd().getCommand())
-	cmd.AddCommand(NewDeleteApplicationCmd().getCommand())
-	cmd.AddCommand(NewUpdateApplicationCmd().getCommand())
-	cmd.AddCommand(NewNewApplicationBinaryCmd().getCommand())
-	cmd.AddCommand(NewGetApplicationBinaryCollectionCmd().getCommand())
-	cmd.AddCommand(NewDeleteApplicationBinaryCmd().getCommand())
+	cmd.AddCommand(NewGetApplicationCollectionCmd().GetCommand())
+	cmd.AddCommand(NewNewApplicationCmd().GetCommand())
+	cmd.AddCommand(NewCopyApplicationCmd().GetCommand())
+	cmd.AddCommand(NewGetApplicationCmd().GetCommand())
+	cmd.AddCommand(NewDeleteApplicationCmd().GetCommand())
+	cmd.AddCommand(NewUpdateApplicationCmd().GetCommand())
+	cmd.AddCommand(NewNewApplicationBinaryCmd().GetCommand())
+	cmd.AddCommand(NewGetApplicationBinaryCollectionCmd().GetCommand())
+	cmd.AddCommand(NewDeleteApplicationBinaryCmd().GetCommand())
 
-	ccmd.baseCmd = newBaseCmd(cmd)
+	ccmd.SubCommand = subcommand.NewSubCommand(cmd)
 
 	return ccmd
 }

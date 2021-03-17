@@ -1,11 +1,12 @@
 package cmd
 
 import (
+	"github.com/reubenmiller/go-c8y-cli/pkg/cmd/subcommand"
 	"github.com/spf13/cobra"
 )
 
 type realtimeCmd struct {
-	*baseCmd
+	*subcommand.SubCommand
 }
 
 func NewRealtimeCmd() *realtimeCmd {
@@ -18,10 +19,10 @@ func NewRealtimeCmd() *realtimeCmd {
 	}
 
 	// Subcommands
-	cmd.AddCommand(newSubscribeRealtimeCmd().getCommand())
-	cmd.AddCommand(newSubscribeAllRealtimeCmd().getCommand())
+	cmd.AddCommand(newSubscribeRealtimeCmd().GetCommand())
+	cmd.AddCommand(newSubscribeAllRealtimeCmd().GetCommand())
 
-	ccmd.baseCmd = newBaseCmd(cmd)
+	ccmd.SubCommand = subcommand.NewSubCommand(cmd)
 
 	return ccmd
 }

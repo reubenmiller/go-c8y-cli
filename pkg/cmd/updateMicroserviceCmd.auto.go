@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"github.com/MakeNowJust/heredoc/v2"
+	"github.com/reubenmiller/go-c8y-cli/pkg/cmd/subcommand"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
@@ -16,7 +17,7 @@ import (
 
 // UpdateMicroserviceCmd command
 type UpdateMicroserviceCmd struct {
-	*baseCmd
+	*subcommand.SubCommand
 }
 
 // NewUpdateMicroserviceCmd creates a command to Update microservice details
@@ -57,7 +58,7 @@ Update microservice availability to MARKET
 
 	// Required flags
 
-	ccmd.baseCmd = newBaseCmd(cmd)
+	ccmd.SubCommand = subcommand.NewSubCommand(cmd)
 
 	return ccmd
 }

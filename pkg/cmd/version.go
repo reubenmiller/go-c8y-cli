@@ -3,12 +3,13 @@ package cmd
 import (
 	"fmt"
 
+	"github.com/reubenmiller/go-c8y-cli/pkg/cmd/subcommand"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmdutil"
 	"github.com/spf13/cobra"
 )
 
 type versionCmd struct {
-	*baseCmd
+	*subcommand.SubCommand
 }
 
 func NewVersionCmd() *versionCmd {
@@ -24,7 +25,7 @@ func NewVersionCmd() *versionCmd {
 	}
 
 	cmdutil.DisableAuthCheck(cmd)
-	ccmd.baseCmd = newBaseCmd(cmd)
+	ccmd.SubCommand = subcommand.NewSubCommand(cmd)
 
 	return ccmd
 }

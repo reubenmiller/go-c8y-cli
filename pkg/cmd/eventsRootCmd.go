@@ -1,11 +1,12 @@
 package cmd
 
 import (
+	"github.com/reubenmiller/go-c8y-cli/pkg/cmd/subcommand"
 	"github.com/spf13/cobra"
 )
 
 type EventsCmd struct {
-	*baseCmd
+	*subcommand.SubCommand
 }
 
 func NewEventsRootCmd() *EventsCmd {
@@ -18,18 +19,18 @@ func NewEventsRootCmd() *EventsCmd {
 	}
 
 	// Subcommands
-	cmd.AddCommand(NewGetEventCollectionCmd().getCommand())
-	cmd.AddCommand(NewDeleteEventCollectionCmd().getCommand())
-	cmd.AddCommand(NewGetEventCmd().getCommand())
-	cmd.AddCommand(NewNewEventCmd().getCommand())
-	cmd.AddCommand(NewUpdateEventCmd().getCommand())
-	cmd.AddCommand(NewDeleteEventCmd().getCommand())
-	cmd.AddCommand(NewGetEventBinaryCmd().getCommand())
-	cmd.AddCommand(NewNewEventBinaryCmd().getCommand())
-	cmd.AddCommand(NewUpdateEventBinaryCmd().getCommand())
-	cmd.AddCommand(NewDeleteEventBinaryCmd().getCommand())
+	cmd.AddCommand(NewGetEventCollectionCmd().GetCommand())
+	cmd.AddCommand(NewDeleteEventCollectionCmd().GetCommand())
+	cmd.AddCommand(NewGetEventCmd().GetCommand())
+	cmd.AddCommand(NewNewEventCmd().GetCommand())
+	cmd.AddCommand(NewUpdateEventCmd().GetCommand())
+	cmd.AddCommand(NewDeleteEventCmd().GetCommand())
+	cmd.AddCommand(NewGetEventBinaryCmd().GetCommand())
+	cmd.AddCommand(NewNewEventBinaryCmd().GetCommand())
+	cmd.AddCommand(NewUpdateEventBinaryCmd().GetCommand())
+	cmd.AddCommand(NewDeleteEventBinaryCmd().GetCommand())
 
-	ccmd.baseCmd = newBaseCmd(cmd)
+	ccmd.SubCommand = subcommand.NewSubCommand(cmd)
 
 	return ccmd
 }

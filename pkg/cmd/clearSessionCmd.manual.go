@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"github.com/MakeNowJust/heredoc/v2"
+	"github.com/reubenmiller/go-c8y-cli/pkg/cmd/subcommand"
 	"github.com/reubenmiller/go-c8y-cli/pkg/completion"
 	"github.com/spf13/cobra"
 )
@@ -10,7 +11,7 @@ import (
 type ClearSessionCmd struct {
 	Shell string
 
-	*baseCmd
+	*subcommand.SubCommand
 }
 
 // NewClearSessionCmd creates a command used to clear the current session
@@ -41,7 +42,7 @@ $ c8y session clear | source
 		cmd,
 		completion.WithValidateSet("shell", "bash", "zsh", "fish", "powershell"),
 	)
-	ccmd.baseCmd = newBaseCmd(cmd)
+	ccmd.SubCommand = subcommand.NewSubCommand(cmd)
 
 	return ccmd
 }

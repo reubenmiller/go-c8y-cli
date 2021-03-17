@@ -1,11 +1,12 @@
 package cmd
 
 import (
+	"github.com/reubenmiller/go-c8y-cli/pkg/cmd/subcommand"
 	"github.com/spf13/cobra"
 )
 
 type TenantStatisticsCmd struct {
-	*baseCmd
+	*subcommand.SubCommand
 }
 
 func NewTenantStatisticsRootCmd() *TenantStatisticsCmd {
@@ -18,11 +19,11 @@ func NewTenantStatisticsRootCmd() *TenantStatisticsCmd {
 	}
 
 	// Subcommands
-	cmd.AddCommand(NewGetTenantUsageStatisticsCollectionCmd().getCommand())
-	cmd.AddCommand(NewGetAllTenantUsageStatisticsSummaryCollectionCmd().getCommand())
-	cmd.AddCommand(NewGetTenantUsageStatisticsSummaryCollectionCmd().getCommand())
+	cmd.AddCommand(NewGetTenantUsageStatisticsCollectionCmd().GetCommand())
+	cmd.AddCommand(NewGetAllTenantUsageStatisticsSummaryCollectionCmd().GetCommand())
+	cmd.AddCommand(NewGetTenantUsageStatisticsSummaryCollectionCmd().GetCommand())
 
-	ccmd.baseCmd = newBaseCmd(cmd)
+	ccmd.SubCommand = subcommand.NewSubCommand(cmd)
 
 	return ccmd
 }

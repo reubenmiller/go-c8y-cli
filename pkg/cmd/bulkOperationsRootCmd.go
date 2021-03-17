@@ -1,11 +1,12 @@
 package cmd
 
 import (
+	"github.com/reubenmiller/go-c8y-cli/pkg/cmd/subcommand"
 	"github.com/spf13/cobra"
 )
 
 type BulkOperationsCmd struct {
-	*baseCmd
+	*subcommand.SubCommand
 }
 
 func NewBulkOperationsRootCmd() *BulkOperationsCmd {
@@ -18,13 +19,13 @@ func NewBulkOperationsRootCmd() *BulkOperationsCmd {
 	}
 
 	// Subcommands
-	cmd.AddCommand(NewGetBulkOperationCollectionCmd().getCommand())
-	cmd.AddCommand(NewGetBulkOperationCmd().getCommand())
-	cmd.AddCommand(NewDeleteBulkOperationCmd().getCommand())
-	cmd.AddCommand(NewNewBulkOperationCmd().getCommand())
-	cmd.AddCommand(NewUpdateBulkOperationCmd().getCommand())
+	cmd.AddCommand(NewGetBulkOperationCollectionCmd().GetCommand())
+	cmd.AddCommand(NewGetBulkOperationCmd().GetCommand())
+	cmd.AddCommand(NewDeleteBulkOperationCmd().GetCommand())
+	cmd.AddCommand(NewNewBulkOperationCmd().GetCommand())
+	cmd.AddCommand(NewUpdateBulkOperationCmd().GetCommand())
 
-	ccmd.baseCmd = newBaseCmd(cmd)
+	ccmd.SubCommand = subcommand.NewSubCommand(cmd)
 
 	return ccmd
 }

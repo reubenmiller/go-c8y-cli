@@ -1,12 +1,13 @@
 package cmd
 
 import (
+	"github.com/reubenmiller/go-c8y-cli/pkg/cmd/subcommand"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmdutil"
 	"github.com/spf13/cobra"
 )
 
 type sessionsCmd struct {
-	*baseCmd
+	*subcommand.SubCommand
 }
 
 func NewSessionsRootCmd() *sessionsCmd {
@@ -19,15 +20,15 @@ func NewSessionsRootCmd() *sessionsCmd {
 	}
 
 	// Subcommands
-	cmd.AddCommand(cmdutil.DisableAuthCheck(newNewSessionCmd().getCommand()))
-	cmd.AddCommand(newGetSessionCmd().getCommand())
-	cmd.AddCommand(cmdutil.DisableAuthCheck(NewClearSessionCmd().getCommand()))
-	cmd.AddCommand(cmdutil.DisableAuthCheck(newEncryptTextCmd().getCommand()))
-	cmd.AddCommand(cmdutil.DisableAuthCheck(newDecryptTextCmd().getCommand()))
-	cmd.AddCommand(cmdutil.DisableAuthCheck(newListSessionCmd().getCommand()))
-	cmd.AddCommand(cmdutil.DisableAuthCheck(newSessionLoginCmd().getCommand()))
+	cmd.AddCommand(cmdutil.DisableAuthCheck(newNewSessionCmd().GetCommand()))
+	cmd.AddCommand(newGetSessionCmd().GetCommand())
+	cmd.AddCommand(cmdutil.DisableAuthCheck(NewClearSessionCmd().GetCommand()))
+	cmd.AddCommand(cmdutil.DisableAuthCheck(newEncryptTextCmd().GetCommand()))
+	cmd.AddCommand(cmdutil.DisableAuthCheck(newDecryptTextCmd().GetCommand()))
+	cmd.AddCommand(cmdutil.DisableAuthCheck(newListSessionCmd().GetCommand()))
+	cmd.AddCommand(cmdutil.DisableAuthCheck(newSessionLoginCmd().GetCommand()))
 
-	ccmd.baseCmd = newBaseCmd(cmd)
+	ccmd.SubCommand = subcommand.NewSubCommand(cmd)
 
 	return ccmd
 }

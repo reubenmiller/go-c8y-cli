@@ -5,13 +5,14 @@ import (
 	"fmt"
 
 	"github.com/MakeNowJust/heredoc/v2"
+	"github.com/reubenmiller/go-c8y-cli/pkg/cmd/subcommand"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
 )
 
 type getServiceUserCmd struct {
-	*baseCmd
+	*subcommand.SubCommand
 }
 
 func NewGetServiceUserCmd() *getServiceUserCmd {
@@ -40,7 +41,7 @@ Get application service user by app name
 	// Required flags
 	_ = cmd.MarkFlagRequired("id")
 
-	ccmd.baseCmd = newBaseCmd(cmd)
+	ccmd.SubCommand = subcommand.NewSubCommand(cmd)
 
 	return ccmd
 }

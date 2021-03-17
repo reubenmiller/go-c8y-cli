@@ -1,11 +1,12 @@
 package cmd
 
 import (
+	"github.com/reubenmiller/go-c8y-cli/pkg/cmd/subcommand"
 	"github.com/spf13/cobra"
 )
 
 type templateCmd struct {
-	*baseCmd
+	*subcommand.SubCommand
 }
 
 func NewTemplateRootCmd() *templateCmd {
@@ -18,9 +19,9 @@ func NewTemplateRootCmd() *templateCmd {
 	}
 
 	// Subcommands
-	cmd.AddCommand(newExecuteTemplateCmd().getCommand())
+	cmd.AddCommand(newExecuteTemplateCmd().GetCommand())
 
-	ccmd.baseCmd = newBaseCmd(cmd)
+	ccmd.SubCommand = subcommand.NewSubCommand(cmd)
 
 	return ccmd
 }

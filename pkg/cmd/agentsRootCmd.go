@@ -1,11 +1,12 @@
 package cmd
 
 import (
+	"github.com/reubenmiller/go-c8y-cli/pkg/cmd/subcommand"
 	"github.com/spf13/cobra"
 )
 
 type AgentsCmd struct {
-	*baseCmd
+	*subcommand.SubCommand
 }
 
 func NewAgentsRootCmd() *AgentsCmd {
@@ -18,12 +19,12 @@ func NewAgentsRootCmd() *AgentsCmd {
 	}
 
 	// Subcommands
-	cmd.AddCommand(NewGetAgentCmd().getCommand())
-	cmd.AddCommand(NewUpdateAgentCmd().getCommand())
-	cmd.AddCommand(NewDeleteAgentCmd().getCommand())
-	cmd.AddCommand(NewCreateAgentCmd().getCommand())
+	cmd.AddCommand(NewGetAgentCmd().GetCommand())
+	cmd.AddCommand(NewUpdateAgentCmd().GetCommand())
+	cmd.AddCommand(NewDeleteAgentCmd().GetCommand())
+	cmd.AddCommand(NewCreateAgentCmd().GetCommand())
 
-	ccmd.baseCmd = newBaseCmd(cmd)
+	ccmd.SubCommand = subcommand.NewSubCommand(cmd)
 
 	return ccmd
 }

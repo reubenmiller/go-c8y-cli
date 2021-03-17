@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"github.com/MakeNowJust/heredoc/v2"
+	"github.com/reubenmiller/go-c8y-cli/pkg/cmd/subcommand"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
@@ -16,7 +17,7 @@ import (
 
 // NewBulkOperationCmd command
 type NewBulkOperationCmd struct {
-	*baseCmd
+	*subcommand.SubCommand
 }
 
 // NewNewBulkOperationCmd creates a command to Create bulk operation
@@ -56,7 +57,7 @@ Create operation for a device
 	_ = cmd.MarkFlagRequired("creationRampSec")
 	_ = cmd.MarkFlagRequired("operation")
 
-	ccmd.baseCmd = newBaseCmd(cmd)
+	ccmd.SubCommand = subcommand.NewSubCommand(cmd)
 
 	return ccmd
 }

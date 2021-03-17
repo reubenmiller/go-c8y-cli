@@ -1,11 +1,12 @@
 package cmd
 
 import (
+	"github.com/reubenmiller/go-c8y-cli/pkg/cmd/subcommand"
 	"github.com/spf13/cobra"
 )
 
 type AlarmsCmd struct {
-	*baseCmd
+	*subcommand.SubCommand
 }
 
 func NewAlarmsRootCmd() *AlarmsCmd {
@@ -18,14 +19,14 @@ func NewAlarmsRootCmd() *AlarmsCmd {
 	}
 
 	// Subcommands
-	cmd.AddCommand(NewGetAlarmCollectionCmd().getCommand())
-	cmd.AddCommand(NewNewAlarmCmd().getCommand())
-	cmd.AddCommand(NewUpdateAlarmCollectionCmd().getCommand())
-	cmd.AddCommand(NewGetAlarmCmd().getCommand())
-	cmd.AddCommand(NewUpdateAlarmCmd().getCommand())
-	cmd.AddCommand(NewDeleteAlarmCollectionCmd().getCommand())
+	cmd.AddCommand(NewGetAlarmCollectionCmd().GetCommand())
+	cmd.AddCommand(NewNewAlarmCmd().GetCommand())
+	cmd.AddCommand(NewUpdateAlarmCollectionCmd().GetCommand())
+	cmd.AddCommand(NewGetAlarmCmd().GetCommand())
+	cmd.AddCommand(NewUpdateAlarmCmd().GetCommand())
+	cmd.AddCommand(NewDeleteAlarmCollectionCmd().GetCommand())
 
-	ccmd.baseCmd = newBaseCmd(cmd)
+	ccmd.SubCommand = subcommand.NewSubCommand(cmd)
 
 	return ccmd
 }

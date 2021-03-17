@@ -1,11 +1,12 @@
 package cmd
 
 import (
+	"github.com/reubenmiller/go-c8y-cli/pkg/cmd/subcommand"
 	"github.com/spf13/cobra"
 )
 
 type InventoryCmd struct {
-	*baseCmd
+	*subcommand.SubCommand
 }
 
 func NewInventoryRootCmd() *InventoryCmd {
@@ -18,13 +19,13 @@ func NewInventoryRootCmd() *InventoryCmd {
 	}
 
 	// Subcommands
-	cmd.AddCommand(NewGetManagedObjectCollectionCmd().getCommand())
-	cmd.AddCommand(NewNewManagedObjectCmd().getCommand())
-	cmd.AddCommand(NewGetManagedObjectCmd().getCommand())
-	cmd.AddCommand(NewUpdateManagedObjectCmd().getCommand())
-	cmd.AddCommand(NewDeleteManagedObjectCmd().getCommand())
+	cmd.AddCommand(NewGetManagedObjectCollectionCmd().GetCommand())
+	cmd.AddCommand(NewNewManagedObjectCmd().GetCommand())
+	cmd.AddCommand(NewGetManagedObjectCmd().GetCommand())
+	cmd.AddCommand(NewUpdateManagedObjectCmd().GetCommand())
+	cmd.AddCommand(NewDeleteManagedObjectCmd().GetCommand())
 
-	ccmd.baseCmd = newBaseCmd(cmd)
+	ccmd.SubCommand = subcommand.NewSubCommand(cmd)
 
 	return ccmd
 }

@@ -8,6 +8,7 @@ import (
 	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/fatih/color"
 	"github.com/reubenmiller/go-c8y-cli/pkg/c8ylogin"
+	"github.com/reubenmiller/go-c8y-cli/pkg/cmd/subcommand"
 	"github.com/reubenmiller/go-c8y-cli/pkg/completion"
 	"github.com/spf13/cobra"
 )
@@ -20,7 +21,7 @@ type sessionLoginCmd struct {
 	Shell                string
 	ClearExistingCookies bool
 
-	*baseCmd
+	*subcommand.SubCommand
 }
 
 func newSessionLoginCmd() *sessionLoginCmd {
@@ -51,7 +52,7 @@ Log into the current session
 		cmd,
 		completion.WithValidateSet("shell", "bash", "zsh", "fish", "powershell"),
 	)
-	ccmd.baseCmd = newBaseCmd(cmd)
+	ccmd.SubCommand = subcommand.NewSubCommand(cmd)
 
 	return ccmd
 }
@@ -69,7 +70,7 @@ func (n *sessionLoginCmd) initSession(cmd *cobra.Command, args []string) error {
 		client.SetCookies([]*http.Cookie{})
 	}
 
-	err := checkEncryption(n.cmd.ErrOrStderr())
+	err := checkEncryption(n.SubCommand.GetCommand().ErrOrStderr())
 	if err != nil {
 		return err
 	}
@@ -95,7 +96,7 @@ func (n *sessionLoginCmd) initSession(cmd *cobra.Command, args []string) error {
 		n.onSave()
 	}
 
-	printSessionInfo(n.cmd.ErrOrStderr(), CumulocitySession{
+	printSessionInfo(n.SubCommand.GetCommand().ErrOrStderr(), CumulocitySession{
 		Path:     cliConfig.GetSessionFilePath(),
 		Host:     handler.C8Yclient.BaseURL.Host,
 		Tenant:   cliConfig.GetTenant(),

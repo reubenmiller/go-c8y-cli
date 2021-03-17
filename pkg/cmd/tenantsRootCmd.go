@@ -1,11 +1,12 @@
 package cmd
 
 import (
+	"github.com/reubenmiller/go-c8y-cli/pkg/cmd/subcommand"
 	"github.com/spf13/cobra"
 )
 
 type TenantsCmd struct {
-	*baseCmd
+	*subcommand.SubCommand
 }
 
 func NewTenantsRootCmd() *TenantsCmd {
@@ -18,18 +19,18 @@ func NewTenantsRootCmd() *TenantsCmd {
 	}
 
 	// Subcommands
-	cmd.AddCommand(NewGetTenantCollectionCmd().getCommand())
-	cmd.AddCommand(NewNewTenantCmd().getCommand())
-	cmd.AddCommand(NewGetTenantCmd().getCommand())
-	cmd.AddCommand(NewDeleteTenantCmd().getCommand())
-	cmd.AddCommand(NewUpdateTenantCmd().getCommand())
-	cmd.AddCommand(NewCurrentTenantCmd().getCommand())
-	cmd.AddCommand(NewEnableApplicationOnTenantCmd().getCommand())
-	cmd.AddCommand(NewDisableApplicationFromTenantCmd().getCommand())
-	cmd.AddCommand(NewGetApplicationReferenceCollectionCmd().getCommand())
-	cmd.AddCommand(NewGetTenantVersionCmd().getCommand())
+	cmd.AddCommand(NewGetTenantCollectionCmd().GetCommand())
+	cmd.AddCommand(NewNewTenantCmd().GetCommand())
+	cmd.AddCommand(NewGetTenantCmd().GetCommand())
+	cmd.AddCommand(NewDeleteTenantCmd().GetCommand())
+	cmd.AddCommand(NewUpdateTenantCmd().GetCommand())
+	cmd.AddCommand(NewCurrentTenantCmd().GetCommand())
+	cmd.AddCommand(NewEnableApplicationOnTenantCmd().GetCommand())
+	cmd.AddCommand(NewDisableApplicationFromTenantCmd().GetCommand())
+	cmd.AddCommand(NewGetApplicationReferenceCollectionCmd().GetCommand())
+	cmd.AddCommand(NewGetTenantVersionCmd().GetCommand())
 
-	ccmd.baseCmd = newBaseCmd(cmd)
+	ccmd.SubCommand = subcommand.NewSubCommand(cmd)
 
 	return ccmd
 }

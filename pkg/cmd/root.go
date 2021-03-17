@@ -60,23 +60,6 @@ func init() {
 	rand.Seed(time.Now().UTC().UnixNano())
 }
 
-type baseCmd struct {
-	cmd *cobra.Command
-}
-
-func (c *baseCmd) getCommand() *cobra.Command {
-	// mark local flags so the appear in completions before global flags
-	completion.WithOptions(
-		c.cmd,
-		completion.MarkLocalFlag(),
-	)
-	return c.cmd
-}
-
-func newBaseCmd(cmd *cobra.Command) *baseCmd {
-	return &baseCmd{cmd: cmd}
-}
-
 type RootCmd struct {
 	cobra.Command
 	Logger *logger.Logger
@@ -478,20 +461,20 @@ func (c *RootCmd) ConfigureRootCmd() {
 		completion.WithValidateSet("view", config.ViewsNone, config.ViewsAll),
 	)
 
-	c.AddCommand(NewCompletionsCmd().getCommand())
-	c.AddCommand(NewVersionCmd().getCommand())
+	c.AddCommand(NewCompletionsCmd().GetCommand())
+	c.AddCommand(NewVersionCmd().GetCommand())
 
-	c.AddCommand(NewRealtimeCmd().getCommand())
-	c.AddCommand(NewSessionsRootCmd().getCommand())
+	c.AddCommand(NewRealtimeCmd().GetCommand())
+	c.AddCommand(NewSessionsRootCmd().GetCommand())
 
 	// generic commands
-	c.AddCommand(NewGetGenericRestCmd().getCommand())
+	c.AddCommand(NewGetGenericRestCmd().GetCommand())
 
 	// template commands
-	c.AddCommand(NewTemplateRootCmd().getCommand())
+	c.AddCommand(NewTemplateRootCmd().GetCommand())
 
 	// settings commands
-	c.AddCommand(NewSettingsRootCmd().getCommand())
+	c.AddCommand(NewSettingsRootCmd().GetCommand())
 
 	// alias commands
 	c.AddCommand(alias.NewCmdAlias(cmdFactory))
@@ -499,107 +482,107 @@ func (c *RootCmd) ConfigureRootCmd() {
 	// Auto generated commands
 
 	// agents commands
-	agents := NewAgentsRootCmd().getCommand()
-	agents.AddCommand(NewGetAgentCollectionCmd().getCommand())
+	agents := NewAgentsRootCmd().GetCommand()
+	agents.AddCommand(NewGetAgentCollectionCmd().GetCommand())
 	c.AddCommand(agents)
 
 	// alarms commands
-	alarms := NewAlarmsRootCmd().getCommand()
-	alarms.AddCommand(NewSubscribeAlarmCmd().getCommand())
+	alarms := NewAlarmsRootCmd().GetCommand()
+	alarms.AddCommand(NewSubscribeAlarmCmd().GetCommand())
 	c.AddCommand(alarms)
 
 	// applications commands
-	applications := NewApplicationsRootCmd().getCommand()
-	applications.AddCommand(NewNewHostedApplicationCmd().getCommand())
+	applications := NewApplicationsRootCmd().GetCommand()
+	applications.AddCommand(NewNewHostedApplicationCmd().GetCommand())
 	c.AddCommand(applications)
 
 	// auditRecords commands
-	c.AddCommand(NewAuditRecordsRootCmd().getCommand())
+	c.AddCommand(NewAuditRecordsRootCmd().GetCommand())
 
 	// binaries commands
-	c.AddCommand(NewBinariesRootCmd().getCommand())
+	c.AddCommand(NewBinariesRootCmd().GetCommand())
 
 	// bulkOperations commands
-	c.AddCommand(NewBulkOperationsRootCmd().getCommand())
+	c.AddCommand(NewBulkOperationsRootCmd().GetCommand())
 
 	// currentApplication commands
-	c.AddCommand(NewCurrentApplicationRootCmd().getCommand())
+	c.AddCommand(NewCurrentApplicationRootCmd().GetCommand())
 
 	// currentUser commands
-	c.AddCommand(newCurrentUserRootCmd().getCommand())
+	c.AddCommand(newCurrentUserRootCmd().GetCommand())
 
 	// databroker commands
-	c.AddCommand(NewDatabrokerRootCmd().getCommand())
+	c.AddCommand(NewDatabrokerRootCmd().GetCommand())
 
 	// deviceCredentials commands
-	c.AddCommand(NewDeviceCredentialsRootCmd().getCommand())
+	c.AddCommand(NewDeviceCredentialsRootCmd().GetCommand())
 
 	// devices commands
-	devices := NewDevicesRootCmd().getCommand()
-	devices.AddCommand(NewGetDeviceCollectionCmd(cmdFactory).getCommand())
-	devices.AddCommand(NewGetDeviceGroupCollectionCmd().getCommand())
+	devices := NewDevicesRootCmd().GetCommand()
+	devices.AddCommand(NewGetDeviceCollectionCmd(cmdFactory).GetCommand())
+	devices.AddCommand(NewGetDeviceGroupCollectionCmd().GetCommand())
 	c.AddCommand(devices)
 
 	// operations commands
-	operations := NewOperationsRootCmd().getCommand()
-	operations.AddCommand(NewSubscribeOperationCmd().getCommand())
+	operations := NewOperationsRootCmd().GetCommand()
+	operations.AddCommand(NewSubscribeOperationCmd().GetCommand())
 	c.AddCommand(operations)
 
 	// events commands
-	events := NewEventsRootCmd().getCommand()
-	events.AddCommand(NewSubscribeEventCmd().getCommand())
+	events := NewEventsRootCmd().GetCommand()
+	events.AddCommand(NewSubscribeEventCmd().GetCommand())
 	c.AddCommand(events)
 
 	// identity commands
-	c.AddCommand(NewIdentityRootCmd().getCommand())
+	c.AddCommand(NewIdentityRootCmd().GetCommand())
 
 	// inventory commands
-	inventory := NewInventoryRootCmd().getCommand()
-	inventory.AddCommand(NewSubscribeManagedObjectCmd().getCommand())
-	inventory.AddCommand(NewQueryManagedObjectCollectionCmd().getCommand())
+	inventory := NewInventoryRootCmd().GetCommand()
+	inventory.AddCommand(NewSubscribeManagedObjectCmd().GetCommand())
+	inventory.AddCommand(NewQueryManagedObjectCollectionCmd().GetCommand())
 	c.AddCommand(inventory)
 
 	// inventoryReferences commands
-	c.AddCommand(NewInventoryReferencesRootCmd().getCommand())
+	c.AddCommand(NewInventoryReferencesRootCmd().GetCommand())
 
 	// measurements commands
-	measurements := NewMeasurementsRootCmd().getCommand()
-	measurements.AddCommand(NewSubscribeMeasurementCmd().getCommand())
+	measurements := NewMeasurementsRootCmd().GetCommand()
+	measurements.AddCommand(NewSubscribeMeasurementCmd().GetCommand())
 	c.AddCommand(measurements)
 
 	// microservices commands
-	microservices := NewMicroservicesRootCmd().getCommand()
-	microservices.AddCommand(NewNewMicroserviceCmd().getCommand())
-	microservices.AddCommand(NewNewServiceUserCmd().getCommand())
-	microservices.AddCommand(NewGetServiceUserCmd().getCommand())
+	microservices := NewMicroservicesRootCmd().GetCommand()
+	microservices.AddCommand(NewNewMicroserviceCmd().GetCommand())
+	microservices.AddCommand(NewNewServiceUserCmd().GetCommand())
+	microservices.AddCommand(NewGetServiceUserCmd().GetCommand())
 	c.AddCommand(microservices)
 
 	// retentionRules commands
-	c.AddCommand(NewRetentionRulesRootCmd().getCommand())
+	c.AddCommand(NewRetentionRulesRootCmd().GetCommand())
 
 	// systemOptions commands
-	c.AddCommand(NewSystemOptionsRootCmd().getCommand())
+	c.AddCommand(NewSystemOptionsRootCmd().GetCommand())
 
 	// tenantOptions commands
-	c.AddCommand(NewTenantOptionsRootCmd().getCommand())
+	c.AddCommand(NewTenantOptionsRootCmd().GetCommand())
 
 	// tenants commands
-	c.AddCommand(NewTenantsRootCmd().getCommand())
+	c.AddCommand(NewTenantsRootCmd().GetCommand())
 
 	// tenantStatistics commands
-	c.AddCommand(NewTenantStatisticsRootCmd().getCommand())
+	c.AddCommand(NewTenantStatisticsRootCmd().GetCommand())
 
 	// users commands
-	c.AddCommand(NewUsersRootCmd().getCommand())
+	c.AddCommand(NewUsersRootCmd().GetCommand())
 
 	// userGroups commands
-	c.AddCommand(NewUserGroupsRootCmd().getCommand())
+	c.AddCommand(NewUserGroupsRootCmd().GetCommand())
 
 	// userReferences commands
-	c.AddCommand(NewUserReferencesRootCmd().getCommand())
+	c.AddCommand(NewUserReferencesRootCmd().GetCommand())
 
 	// userRoles commands
-	c.AddCommand(NewUserRolesRootCmd().getCommand())
+	c.AddCommand(NewUserRolesRootCmd().GetCommand())
 
 	// Handle errors (not in cobra libary)
 	c.SilenceErrors = true

@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/MakeNowJust/heredoc/v2"
+	"github.com/reubenmiller/go-c8y-cli/pkg/cmd/subcommand"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmdutil"
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
@@ -15,7 +16,7 @@ import (
 )
 
 type executeTemplateCmd struct {
-	*baseCmd
+	*subcommand.SubCommand
 }
 
 func newExecuteTemplateCmd() *executeTemplateCmd {
@@ -47,7 +48,7 @@ Verify a jsonnet template and specify input data to be used as the input when ev
 	_ = cmd.MarkFlagRequired(FlagDataTemplateName)
 
 	cmdutil.DisableAuthCheck(cmd)
-	ccmd.baseCmd = newBaseCmd(cmd)
+	ccmd.SubCommand = subcommand.NewSubCommand(cmd)
 
 	return ccmd
 }

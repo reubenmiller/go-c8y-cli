@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"github.com/MakeNowJust/heredoc/v2"
+	"github.com/reubenmiller/go-c8y-cli/pkg/cmd/subcommand"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
@@ -16,7 +17,7 @@ import (
 
 // AddGroupToGroupCmd command
 type AddGroupToGroupCmd struct {
-	*baseCmd
+	*subcommand.SubCommand
 }
 
 // NewAddGroupToGroupCmd creates a command to Assign child group
@@ -56,7 +57,7 @@ Add multiple groups to a group
 	// Required flags
 	_ = cmd.MarkFlagRequired("group")
 
-	ccmd.baseCmd = newBaseCmd(cmd)
+	ccmd.SubCommand = subcommand.NewSubCommand(cmd)
 
 	return ccmd
 }

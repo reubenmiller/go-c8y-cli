@@ -1,11 +1,12 @@
 package cmd
 
 import (
+	"github.com/reubenmiller/go-c8y-cli/pkg/cmd/subcommand"
 	"github.com/spf13/cobra"
 )
 
 type UserGroupsCmd struct {
-	*baseCmd
+	*subcommand.SubCommand
 }
 
 func NewUserGroupsRootCmd() *UserGroupsCmd {
@@ -18,14 +19,14 @@ func NewUserGroupsRootCmd() *UserGroupsCmd {
 	}
 
 	// Subcommands
-	cmd.AddCommand(NewGetUserGroupCollectionCmd().getCommand())
-	cmd.AddCommand(NewCreateUserGroupCmd().getCommand())
-	cmd.AddCommand(NewGetUserGroupCmd().getCommand())
-	cmd.AddCommand(NewGetUserGroupByNameCmd().getCommand())
-	cmd.AddCommand(NewDeleteUserGroupCmd().getCommand())
-	cmd.AddCommand(NewUpdateUserGroupCmd().getCommand())
+	cmd.AddCommand(NewGetUserGroupCollectionCmd().GetCommand())
+	cmd.AddCommand(NewCreateUserGroupCmd().GetCommand())
+	cmd.AddCommand(NewGetUserGroupCmd().GetCommand())
+	cmd.AddCommand(NewGetUserGroupByNameCmd().GetCommand())
+	cmd.AddCommand(NewDeleteUserGroupCmd().GetCommand())
+	cmd.AddCommand(NewUpdateUserGroupCmd().GetCommand())
 
-	ccmd.baseCmd = newBaseCmd(cmd)
+	ccmd.SubCommand = subcommand.NewSubCommand(cmd)
 
 	return ccmd
 }

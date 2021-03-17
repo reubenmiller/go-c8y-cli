@@ -1,11 +1,12 @@
 package cmd
 
 import (
+	"github.com/reubenmiller/go-c8y-cli/pkg/cmd/subcommand"
 	"github.com/spf13/cobra"
 )
 
 type DatabrokerCmd struct {
-	*baseCmd
+	*subcommand.SubCommand
 }
 
 func NewDatabrokerRootCmd() *DatabrokerCmd {
@@ -18,11 +19,11 @@ func NewDatabrokerRootCmd() *DatabrokerCmd {
 	}
 
 	// Subcommands
-	cmd.AddCommand(NewGetDataBrokerConnectorCollectionCmd().getCommand())
-	cmd.AddCommand(NewGetDataBrokerCmd().getCommand())
-	cmd.AddCommand(NewUpdateDataBrokerCmd().getCommand())
+	cmd.AddCommand(NewGetDataBrokerConnectorCollectionCmd().GetCommand())
+	cmd.AddCommand(NewGetDataBrokerCmd().GetCommand())
+	cmd.AddCommand(NewUpdateDataBrokerCmd().GetCommand())
 
-	ccmd.baseCmd = newBaseCmd(cmd)
+	ccmd.SubCommand = subcommand.NewSubCommand(cmd)
 
 	return ccmd
 }

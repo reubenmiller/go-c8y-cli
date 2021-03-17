@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/MakeNowJust/heredoc/v2"
+	"github.com/reubenmiller/go-c8y-cli/pkg/cmd/subcommand"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/pkg/mapbuilder"
@@ -15,7 +16,7 @@ import (
 )
 
 type GetGenericRestCmd struct {
-	*baseCmd
+	*subcommand.SubCommand
 
 	flagHost string
 }
@@ -47,7 +48,7 @@ c8y rest POST "alarm/alarms" --data "text=one,severity=MAJOR,type=test_Type,time
 	cmd.Flags().String("contentType", "", "content type (header)")
 	cmd.Flags().StringVar(&ccmd.flagHost, "host", "", "host to use for the rest request. If empty, then the session's host will be used")
 
-	ccmd.baseCmd = newBaseCmd(cmd)
+	ccmd.SubCommand = subcommand.NewSubCommand(cmd)
 
 	return ccmd
 }

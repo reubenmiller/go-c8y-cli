@@ -11,6 +11,7 @@ import (
 	"strings"
 
 	"github.com/MakeNowJust/heredoc/v2"
+	"github.com/reubenmiller/go-c8y-cli/pkg/cmd/subcommand"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/pkg/jsonUtilities"
 	"github.com/reubenmiller/go-c8y-cli/pkg/zipUtilities"
@@ -19,7 +20,7 @@ import (
 )
 
 type newMicroserviceCmd struct {
-	*baseCmd
+	*subcommand.SubCommand
 
 	file             string
 	name             string
@@ -62,7 +63,7 @@ Create new microservice
 	// Required flags
 	_ = cmd.MarkFlagRequired("file")
 
-	ccmd.baseCmd = newBaseCmd(cmd)
+	ccmd.SubCommand = subcommand.NewSubCommand(cmd)
 
 	return ccmd
 }
@@ -180,7 +181,7 @@ func (n *newMicroserviceCmd) doProcedure(cmd *cobra.Command, args []string) erro
 
 			if err != nil {
 				// handle error
-				n.cmd.PrintErrf("failed to upload file. %s", err)
+				n.SubCommand.GetCommand().PrintErrf("failed to upload file. %s", err)
 			}
 		}
 	} else {

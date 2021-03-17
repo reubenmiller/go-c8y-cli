@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"github.com/MakeNowJust/heredoc/v2"
+	"github.com/reubenmiller/go-c8y-cli/pkg/cmd/subcommand"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
@@ -16,7 +17,7 @@ import (
 
 // NewMicroserviceBinaryCmd command
 type NewMicroserviceBinaryCmd struct {
-	*baseCmd
+	*subcommand.SubCommand
 }
 
 // NewNewMicroserviceBinaryCmd creates a command to Create microservice binary
@@ -57,7 +58,7 @@ Upload microservice binary
 	// Required flags
 	_ = cmd.MarkFlagRequired("file")
 
-	ccmd.baseCmd = newBaseCmd(cmd)
+	ccmd.SubCommand = subcommand.NewSubCommand(cmd)
 
 	return ccmd
 }

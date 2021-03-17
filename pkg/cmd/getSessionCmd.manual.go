@@ -6,6 +6,7 @@ import (
 	"fmt"
 
 	"github.com/MakeNowJust/heredoc/v2"
+	"github.com/reubenmiller/go-c8y-cli/pkg/cmd/subcommand"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/pkg/prompt"
 	"github.com/spf13/cobra"
@@ -23,7 +24,7 @@ type CumulocitySessionDetails struct {
 type getSessionCmd struct {
 	OutputJSON bool
 	prompter   *prompt.Prompt
-	*baseCmd
+	*subcommand.SubCommand
 }
 
 func newGetSessionCmd() *getSessionCmd {
@@ -47,7 +48,7 @@ $ c8y sessions get --session mycustomsession
 	cmd.Flags().BoolVar(&ccmd.OutputJSON, "json", false, "Output passphrase in json")
 	cmd.SilenceUsage = true
 
-	ccmd.baseCmd = newBaseCmd(cmd)
+	ccmd.SubCommand = subcommand.NewSubCommand(cmd)
 
 	return ccmd
 }
@@ -86,7 +87,7 @@ func (n *getSessionCmd) getSession(cmd *cobra.Command, args []string) error {
 		}
 	} else {
 		session.CumulocitySession.Path = session.Path
-		printSessionInfo(n.cmd.ErrOrStderr(), session.CumulocitySession)
+		printSessionInfo(n.SubCommand.GetCommand().ErrOrStderr(), session.CumulocitySession)
 	}
 	return nil
 }

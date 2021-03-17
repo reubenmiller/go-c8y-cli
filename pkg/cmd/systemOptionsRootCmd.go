@@ -1,11 +1,12 @@
 package cmd
 
 import (
+	"github.com/reubenmiller/go-c8y-cli/pkg/cmd/subcommand"
 	"github.com/spf13/cobra"
 )
 
 type SystemOptionsCmd struct {
-	*baseCmd
+	*subcommand.SubCommand
 }
 
 func NewSystemOptionsRootCmd() *SystemOptionsCmd {
@@ -18,10 +19,10 @@ func NewSystemOptionsRootCmd() *SystemOptionsCmd {
 	}
 
 	// Subcommands
-	cmd.AddCommand(NewGetSystemOptionCollectionCmd().getCommand())
-	cmd.AddCommand(NewGetSystemOptionCmd().getCommand())
+	cmd.AddCommand(NewGetSystemOptionCollectionCmd().GetCommand())
+	cmd.AddCommand(NewGetSystemOptionCmd().GetCommand())
 
-	ccmd.baseCmd = newBaseCmd(cmd)
+	ccmd.SubCommand = subcommand.NewSubCommand(cmd)
 
 	return ccmd
 }

@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"github.com/MakeNowJust/heredoc/v2"
+	"github.com/reubenmiller/go-c8y-cli/pkg/cmd/subcommand"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
@@ -16,7 +17,7 @@ import (
 
 // NewApplicationCmd command
 type NewApplicationCmd struct {
-	*baseCmd
+	*subcommand.SubCommand
 }
 
 // NewNewApplicationCmd creates a command to Create application
@@ -64,7 +65,7 @@ Create a new hosted application
 	_ = cmd.MarkFlagRequired("key")
 	_ = cmd.MarkFlagRequired("type")
 
-	ccmd.baseCmd = newBaseCmd(cmd)
+	ccmd.SubCommand = subcommand.NewSubCommand(cmd)
 
 	return ccmd
 }

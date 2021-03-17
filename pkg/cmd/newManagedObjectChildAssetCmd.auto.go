@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"github.com/MakeNowJust/heredoc/v2"
+	"github.com/reubenmiller/go-c8y-cli/pkg/cmd/subcommand"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
@@ -16,7 +17,7 @@ import (
 
 // NewManagedObjectChildAssetCmd command
 type NewManagedObjectChildAssetCmd struct {
-	*baseCmd
+	*subcommand.SubCommand
 }
 
 // NewNewManagedObjectChildAssetCmd creates a command to Assign child asset
@@ -54,7 +55,7 @@ Create group hierarchy (parent group -> child group)
 	// Required flags
 	_ = cmd.MarkFlagRequired("group")
 
-	ccmd.baseCmd = newBaseCmd(cmd)
+	ccmd.SubCommand = subcommand.NewSubCommand(cmd)
 
 	return ccmd
 }

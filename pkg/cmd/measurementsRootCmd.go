@@ -1,11 +1,12 @@
 package cmd
 
 import (
+	"github.com/reubenmiller/go-c8y-cli/pkg/cmd/subcommand"
 	"github.com/spf13/cobra"
 )
 
 type MeasurementsCmd struct {
-	*baseCmd
+	*subcommand.SubCommand
 }
 
 func NewMeasurementsRootCmd() *MeasurementsCmd {
@@ -18,14 +19,14 @@ func NewMeasurementsRootCmd() *MeasurementsCmd {
 	}
 
 	// Subcommands
-	cmd.AddCommand(NewGetMeasurementCollectionCmd().getCommand())
-	cmd.AddCommand(NewGetMeasurementSeriesCmd().getCommand())
-	cmd.AddCommand(NewGetMeasurementCmd().getCommand())
-	cmd.AddCommand(NewNewMeasurementCmd().getCommand())
-	cmd.AddCommand(NewDeleteMeasurementCmd().getCommand())
-	cmd.AddCommand(NewDeleteMeasurementCollectionCmd().getCommand())
+	cmd.AddCommand(NewGetMeasurementCollectionCmd().GetCommand())
+	cmd.AddCommand(NewGetMeasurementSeriesCmd().GetCommand())
+	cmd.AddCommand(NewGetMeasurementCmd().GetCommand())
+	cmd.AddCommand(NewNewMeasurementCmd().GetCommand())
+	cmd.AddCommand(NewDeleteMeasurementCmd().GetCommand())
+	cmd.AddCommand(NewDeleteMeasurementCollectionCmd().GetCommand())
 
-	ccmd.baseCmd = newBaseCmd(cmd)
+	ccmd.SubCommand = subcommand.NewSubCommand(cmd)
 
 	return ccmd
 }

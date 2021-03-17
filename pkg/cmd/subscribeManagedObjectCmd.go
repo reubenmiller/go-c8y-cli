@@ -2,13 +2,14 @@ package cmd
 
 import (
 	"github.com/MakeNowJust/heredoc/v2"
+	"github.com/reubenmiller/go-c8y-cli/pkg/cmd/subcommand"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
 )
 
 type subscribeManagedObjectCmd struct {
-	*baseCmd
+	*subcommand.SubCommand
 
 	flagDurationSec int64
 	flagCount       int64
@@ -42,7 +43,7 @@ Subscribe to managedObjects (in realtime) for all devices, and stop after receiv
 
 	// Required flags
 
-	ccmd.baseCmd = newBaseCmd(cmd)
+	ccmd.SubCommand = subcommand.NewSubCommand(cmd)
 
 	return ccmd
 }

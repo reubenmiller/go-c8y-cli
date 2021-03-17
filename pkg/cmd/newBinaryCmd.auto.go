@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"github.com/MakeNowJust/heredoc/v2"
+	"github.com/reubenmiller/go-c8y-cli/pkg/cmd/subcommand"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
@@ -16,7 +17,7 @@ import (
 
 // NewBinaryCmd command
 type NewBinaryCmd struct {
-	*baseCmd
+	*subcommand.SubCommand
 }
 
 // NewNewBinaryCmd creates a command to Create binary
@@ -55,7 +56,7 @@ Upload a config file and make it globally accessible for all users
 	// Required flags
 	_ = cmd.MarkFlagRequired("file")
 
-	ccmd.baseCmd = newBaseCmd(cmd)
+	ccmd.SubCommand = subcommand.NewSubCommand(cmd)
 
 	return ccmd
 }

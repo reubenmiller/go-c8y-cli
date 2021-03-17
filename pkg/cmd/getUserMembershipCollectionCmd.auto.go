@@ -7,6 +7,7 @@ import (
 	"net/http"
 
 	"github.com/MakeNowJust/heredoc/v2"
+	"github.com/reubenmiller/go-c8y-cli/pkg/cmd/subcommand"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
@@ -17,7 +18,7 @@ import (
 
 // GetUserMembershipCollectionCmd command
 type GetUserMembershipCollectionCmd struct {
-	*baseCmd
+	*subcommand.SubCommand
 }
 
 // NewGetUserMembershipCollectionCmd creates a command to get user membership collection
@@ -52,7 +53,7 @@ Get a list of groups that a user belongs to
 
 	// Required flags
 
-	ccmd.baseCmd = newBaseCmd(cmd)
+	ccmd.SubCommand = subcommand.NewSubCommand(cmd)
 
 	return ccmd
 }

@@ -7,6 +7,7 @@ import (
 	"net/http"
 
 	"github.com/MakeNowJust/heredoc/v2"
+	"github.com/reubenmiller/go-c8y-cli/pkg/cmd/subcommand"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
@@ -17,7 +18,7 @@ import (
 
 // GetManagedObjectChildAssetReferenceCmd command
 type GetManagedObjectChildAssetReferenceCmd struct {
-	*baseCmd
+	*subcommand.SubCommand
 }
 
 // NewGetManagedObjectChildAssetReferenceCmd creates a command to Get child asset reference
@@ -52,7 +53,7 @@ Get an existing child asset reference
 	// Required flags
 	_ = cmd.MarkFlagRequired("reference")
 
-	ccmd.baseCmd = newBaseCmd(cmd)
+	ccmd.SubCommand = subcommand.NewSubCommand(cmd)
 
 	return ccmd
 }

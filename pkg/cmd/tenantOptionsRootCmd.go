@@ -1,11 +1,12 @@
 package cmd
 
 import (
+	"github.com/reubenmiller/go-c8y-cli/pkg/cmd/subcommand"
 	"github.com/spf13/cobra"
 )
 
 type TenantOptionsCmd struct {
-	*baseCmd
+	*subcommand.SubCommand
 }
 
 func NewTenantOptionsRootCmd() *TenantOptionsCmd {
@@ -22,16 +23,16 @@ Any option of any tenant can be defined as "non-editable" by "management" tenant
 	}
 
 	// Subcommands
-	cmd.AddCommand(NewGetTenantOptionCollectionCmd().getCommand())
-	cmd.AddCommand(NewNewTenantOptionCmd().getCommand())
-	cmd.AddCommand(NewGetTenantOptionCmd().getCommand())
-	cmd.AddCommand(NewDeleteTenantOptionCmd().getCommand())
-	cmd.AddCommand(NewUpdateTenantOptionCmd().getCommand())
-	cmd.AddCommand(NewUpdateTenantOptionBulkCmd().getCommand())
-	cmd.AddCommand(NewGetTenantOptionsForCategoryCmd().getCommand())
-	cmd.AddCommand(NewUpdateTenantOptionEditableCmd().getCommand())
+	cmd.AddCommand(NewGetTenantOptionCollectionCmd().GetCommand())
+	cmd.AddCommand(NewNewTenantOptionCmd().GetCommand())
+	cmd.AddCommand(NewGetTenantOptionCmd().GetCommand())
+	cmd.AddCommand(NewDeleteTenantOptionCmd().GetCommand())
+	cmd.AddCommand(NewUpdateTenantOptionCmd().GetCommand())
+	cmd.AddCommand(NewUpdateTenantOptionBulkCmd().GetCommand())
+	cmd.AddCommand(NewGetTenantOptionsForCategoryCmd().GetCommand())
+	cmd.AddCommand(NewUpdateTenantOptionEditableCmd().GetCommand())
 
-	ccmd.baseCmd = newBaseCmd(cmd)
+	ccmd.SubCommand = subcommand.NewSubCommand(cmd)
 
 	return ccmd
 }

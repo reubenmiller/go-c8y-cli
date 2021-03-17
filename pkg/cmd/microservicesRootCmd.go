@@ -1,11 +1,12 @@
 package cmd
 
 import (
+	"github.com/reubenmiller/go-c8y-cli/pkg/cmd/subcommand"
 	"github.com/spf13/cobra"
 )
 
 type MicroservicesCmd struct {
-	*baseCmd
+	*subcommand.SubCommand
 }
 
 func NewMicroservicesRootCmd() *MicroservicesCmd {
@@ -18,16 +19,16 @@ func NewMicroservicesRootCmd() *MicroservicesCmd {
 	}
 
 	// Subcommands
-	cmd.AddCommand(NewGetMicroserviceCollectionCmd().getCommand())
-	cmd.AddCommand(NewGetMicroserviceCmd().getCommand())
-	cmd.AddCommand(NewDeleteMicroserviceCmd().getCommand())
-	cmd.AddCommand(NewUpdateMicroserviceCmd().getCommand())
-	cmd.AddCommand(NewNewMicroserviceBinaryCmd().getCommand())
-	cmd.AddCommand(NewGetMicroserviceBootstrapUserCmd().getCommand())
-	cmd.AddCommand(NewEnableMicroserviceCmd().getCommand())
-	cmd.AddCommand(NewDisableMicroserviceCmd().getCommand())
+	cmd.AddCommand(NewGetMicroserviceCollectionCmd().GetCommand())
+	cmd.AddCommand(NewGetMicroserviceCmd().GetCommand())
+	cmd.AddCommand(NewDeleteMicroserviceCmd().GetCommand())
+	cmd.AddCommand(NewUpdateMicroserviceCmd().GetCommand())
+	cmd.AddCommand(NewNewMicroserviceBinaryCmd().GetCommand())
+	cmd.AddCommand(NewGetMicroserviceBootstrapUserCmd().GetCommand())
+	cmd.AddCommand(NewEnableMicroserviceCmd().GetCommand())
+	cmd.AddCommand(NewDisableMicroserviceCmd().GetCommand())
 
-	ccmd.baseCmd = newBaseCmd(cmd)
+	ccmd.SubCommand = subcommand.NewSubCommand(cmd)
 
 	return ccmd
 }

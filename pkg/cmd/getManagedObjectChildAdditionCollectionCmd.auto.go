@@ -7,6 +7,7 @@ import (
 	"net/http"
 
 	"github.com/MakeNowJust/heredoc/v2"
+	"github.com/reubenmiller/go-c8y-cli/pkg/cmd/subcommand"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
@@ -17,7 +18,7 @@ import (
 
 // GetManagedObjectChildAdditionCollectionCmd command
 type GetManagedObjectChildAdditionCollectionCmd struct {
-	*baseCmd
+	*subcommand.SubCommand
 }
 
 // NewGetManagedObjectChildAdditionCollectionCmd creates a command to Get child addition collection
@@ -51,7 +52,7 @@ Get a list of the child additions of an existing managed object
 
 	// Required flags
 
-	ccmd.baseCmd = newBaseCmd(cmd)
+	ccmd.SubCommand = subcommand.NewSubCommand(cmd)
 
 	return ccmd
 }

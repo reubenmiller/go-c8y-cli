@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/MakeNowJust/heredoc/v2"
+	"github.com/reubenmiller/go-c8y-cli/pkg/cmd/subcommand"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/pkg/mapbuilder"
@@ -16,7 +17,7 @@ import (
 )
 
 type getDeviceGroupCollectionCmd struct {
-	*baseCmd
+	*subcommand.SubCommand
 }
 
 func NewGetDeviceGroupCollectionCmd() *getDeviceGroupCollectionCmd {
@@ -45,7 +46,7 @@ func NewGetDeviceGroupCollectionCmd() *getDeviceGroupCollectionCmd {
 	cmd.Flags().Bool("withParents", false, "include a flat list of all parents and grandparents of the given object")
 
 	// Required flags
-	ccmd.baseCmd = newBaseCmd(cmd)
+	ccmd.SubCommand = subcommand.NewSubCommand(cmd)
 
 	return ccmd
 }

@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 
 	"github.com/MakeNowJust/heredoc/v2"
+	"github.com/reubenmiller/go-c8y-cli/pkg/cmd/subcommand"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmdutil"
 	"github.com/reubenmiller/go-c8y-cli/pkg/mapbuilder"
@@ -11,7 +12,7 @@ import (
 )
 
 type listSettingsCmd struct {
-	*baseCmd
+	*subcommand.SubCommand
 }
 
 func newListSettingsCmd() *listSettingsCmd {
@@ -34,7 +35,7 @@ Show active log settings in a flattened json format
 	cmd.SilenceUsage = true
 	cmdutil.DisableAuthCheck(cmd)
 
-	ccmd.baseCmd = newBaseCmd(cmd)
+	ccmd.SubCommand = subcommand.NewSubCommand(cmd)
 
 	return ccmd
 }
