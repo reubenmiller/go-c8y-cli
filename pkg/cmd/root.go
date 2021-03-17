@@ -203,7 +203,6 @@ var (
 	globalFlagUseEnv             bool
 	globalFlagNoLog              bool
 	globalFlagActivityLogMessage string
-	globalFlagSilentStatusCodes  string
 )
 
 // SettingsGlobalName name of the settings file (without extension)
@@ -232,7 +231,11 @@ func (c *RootCmd) checkCommandError(err error) {
 
 		// format errors as json messages
 		// only log users errors
-		if !cErr.IsSilent() && !strings.Contains(globalFlagSilentStatusCodes, fmt.Sprintf("%d", cErr.StatusCode)) {
+		silentStatusCodes := ""
+		if cliConfig != nil {
+			silentStatusCodes = cliConfig.GetSilentStatusCodes()
+		}
+		if !cErr.IsSilent() && !strings.Contains(silentStatusCodes, fmt.Sprintf("%d", cErr.StatusCode)) {
 			c.Logger.Errorf("%s", cErr)
 			fmt.Fprintf(w, "%s\n", cErr.JSONString())
 		}
@@ -242,25 +245,6 @@ func (c *RootCmd) checkCommandError(err error) {
 		c.Logger.Errorf("%s", cErr)
 		fmt.Fprintf(w, "%s\n", cErr.JSONString())
 	}
-}
-
-// LogErrorF dynamically changes where the error is logged based on the users Silent Status Codes preferences
-// Silent errors are only logged on the INFO level, where as non-silent errors are logged on the ERROR level
-func LogErrorF(err error, format string, args ...interface{}) {
-	errorLogger := Logger.Errorf
-	if errors.Is(err, clierrors.ErrNoMatchesFound) {
-		if strings.Contains(globalFlagSilentStatusCodes, "404") {
-			errorLogger = Logger.Infof
-		}
-	} else if cErr, ok := err.(cmderrors.CommandError); ok {
-
-		// format errors as json messages
-		// only log users errors
-		if strings.Contains(globalFlagSilentStatusCodes, fmt.Sprintf("%d", cErr.StatusCode)) {
-			errorLogger = Logger.Infof
-		}
-	}
-	errorLogger(format, args...)
 }
 
 func (c *RootCmd) checkSessionExists(cmd *cobra.Command, args []string) error {
@@ -469,7 +453,7 @@ func (c *RootCmd) ConfigureRootCmd() {
 	c.PersistentFlags().Int("abortOnErrors", 10, "Abort batch when reaching specified number of errors")
 
 	// Error handling
-	c.PersistentFlags().StringVar(&globalFlagSilentStatusCodes, "silentStatusCodes", "", "Status codes which will not print out an error message")
+	c.PersistentFlags().String("silentStatusCodes", "", "Status codes which will not print out an error message")
 
 	c.PersistentFlags().Bool("flatten", false, "flatten")
 	c.PersistentFlags().StringSlice("filter", nil, "filter")
@@ -552,7 +536,7 @@ func (c *RootCmd) ConfigureRootCmd() {
 
 	// devices commands
 	devices := NewDevicesRootCmd().getCommand()
-	devices.AddCommand(NewGetDeviceCollectionCmd().getCommand())
+	devices.AddCommand(NewGetDeviceCollectionCmd(cmdFactory).getCommand())
 	devices.AddCommand(NewGetDeviceGroupCollectionCmd().getCommand())
 	c.AddCommand(devices)
 

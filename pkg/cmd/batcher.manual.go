@@ -180,7 +180,7 @@ func runBatched(requestIterator *requestiterator.RequestIterator, commonOptions 
 					rootCauseErr = parentErr
 				}
 
-				LogErrorF(rootCauseErr, "skipping job: %d. %s", jobID, rootCauseErr)
+				cliConfig.LogErrorF(rootCauseErr, "skipping job: %d. %s", jobID, rootCauseErr)
 				results <- err
 
 				// Note: stop adding jobs if total errors are exceeded

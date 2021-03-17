@@ -9,6 +9,8 @@ import (
 
 	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
+	"github.com/reubenmiller/go-c8y-cli/pkg/cmdutil"
+	"github.com/reubenmiller/go-c8y-cli/pkg/config"
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/pkg/mapbuilder"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
@@ -17,10 +19,14 @@ import (
 
 type GetDeviceCollectionCmd struct {
 	*baseCmd
+
+	Config func() (*config.Config, error)
 }
 
-func NewGetDeviceCollectionCmd() *GetDeviceCollectionCmd {
-	ccmd := &GetDeviceCollectionCmd{}
+func NewGetDeviceCollectionCmd(f *cmdutil.Factory) *GetDeviceCollectionCmd {
+	ccmd := &GetDeviceCollectionCmd{
+		Config: f.Config,
+	}
 	cmd := &cobra.Command{
 		Use:   "list",
 		Short: "Get device collection",
@@ -56,12 +62,17 @@ func NewGetDeviceCollectionCmd() *GetDeviceCollectionCmd {
 }
 
 func (n *GetDeviceCollectionCmd) RunE(cmd *cobra.Command, args []string) error {
+	cfg, err := n.Config()
+	if err != nil {
+		return err
+	}
+
 	inputIterators := &flags.RequestInputIterators{}
 
 	// query parameters
 	query := flags.NewQueryTemplate()
 
-	commonOptions, err := cliConfig.GetOutputCommonOptions(cmd)
+	commonOptions, err := cfg.GetOutputCommonOptions(cmd)
 	if err != nil {
 		return err
 	}
@@ -133,8 +144,8 @@ func (n *GetDeviceCollectionCmd) RunE(cmd *cobra.Command, args []string) error {
 		Body:         body,
 		FormData:     formData,
 		Header:       headers,
-		DryRun:       cliConfig.DryRun(),
-		IgnoreAccept: cliConfig.IgnoreAcceptHeader(),
+		DryRun:       cfg.DryRun(),
+		IgnoreAccept: cfg.IgnoreAcceptHeader(),
 	}
 
 	return processRequestAndResponseWithWorkers(cmd, &req, inputIterators)

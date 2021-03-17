@@ -1,6 +1,7 @@
 package config
 
 import (
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -11,6 +12,8 @@ import (
 
 	"github.com/mitchellh/go-homedir"
 	"github.com/reubenmiller/go-c8y-cli/pkg/c8ydefaults"
+	"github.com/reubenmiller/go-c8y-cli/pkg/clierrors"
+	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/pkg/encrypt"
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/pkg/jsonfilter"
@@ -185,6 +188,9 @@ const (
 
 	// SettingsSelect json properties to be selected from the output. Only the given properties will be returned
 	SettingsSelect = "settings.defaults.select"
+
+	// SettingsSilentStatusCodes Status codes which will not print out an error message
+	SettingsSilentStatusCodes = "settings.defaults.silentStatusCodes"
 )
 
 var (
@@ -989,6 +995,11 @@ func (c *Config) GetJSONFilter() []string {
 	return c.viper.GetStringSlice(SettingsFilter)
 }
 
+// GetSilentStatusCodes Status codes which will not print out an error message
+func (c *Config) GetSilentStatusCodes() string {
+	return c.viper.GetString(SettingsSilentStatusCodes)
+}
+
 // GetJSONSelect get json properties to be selected from the output. Only the given properties will be returned
 func (c *Config) GetJSONSelect() []string {
 	// Note: select is stored as an cobra Array String, which add special formating of values.
@@ -1130,4 +1141,24 @@ func (c *Config) ExpandHomePath(path string) string {
 		return path
 	}
 	return expanded
+}
+
+// LogErrorF dynamically changes where the error is logged based on the users Silent Status Codes preferences
+// Silent errors are only logged on the INFO level, where as non-silent errors are logged on the ERROR level
+func (c *Config) LogErrorF(err error, format string, args ...interface{}) {
+	errorLogger := c.Logger.Errorf
+	silentStatusCodes := c.GetSilentStatusCodes()
+	if errors.Is(err, clierrors.ErrNoMatchesFound) {
+		if strings.Contains(silentStatusCodes, "404") {
+			errorLogger = c.Logger.Infof
+		}
+	} else if cErr, ok := err.(cmderrors.CommandError); ok {
+
+		// format errors as json messages
+		// only log users errors
+		if strings.Contains(silentStatusCodes, fmt.Sprintf("%d", cErr.StatusCode)) {
+			errorLogger = c.Logger.Infof
+		}
+	}
+	errorLogger(format, args...)
 }
