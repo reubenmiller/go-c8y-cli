@@ -66,8 +66,6 @@ func listRun(opts *ListOptions) error {
 
 	w := opts.IO.Out
 
-	fmt.Fprintf(w, "%s: %v\n", "select", cfg.GetJSONSelect())
-
 	// TODO: Change to json writer
 	for _, alias := range keys {
 		_, err := fmt.Fprintf(w, "%s: %s\n", alias, aliasCfg[alias])
