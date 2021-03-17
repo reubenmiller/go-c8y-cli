@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"strings"
 
+	"github.com/reubenmiller/go-c8y-cli/pkg/completion"
 	"github.com/spf13/cobra"
 )
 
@@ -45,6 +46,10 @@ func HasValueFromPipeline(cmd *cobra.Command, name string) bool {
 func WithProcessingMode() Option {
 	return func(cmd *cobra.Command) *cobra.Command {
 		cmd.Flags().String(FlagProcessingModeName, "", "Processing mode")
+		completion.WithOptions(
+			cmd,
+			completion.WithValidateSet(FlagProcessingModeName, "PERSISTENT", "QUIESCENT", "TRANSIENT", "CEP"),
+		)
 		return cmd
 	}
 }
