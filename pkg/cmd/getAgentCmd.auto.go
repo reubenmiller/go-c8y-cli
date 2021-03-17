@@ -73,7 +73,7 @@ func (n *GetAgentCmd) RunE(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return cmderrors.NewUserError(err)
 	}
-	commonOptions, err := getCommonOptions(cmd)
+	commonOptions, err := cliConfig.GetOutputCommonOptions(cmd)
 	if err != nil {
 		return cmderrors.NewUserError(fmt.Sprintf("Failed to get common options. err=%s", err))
 	}

@@ -61,7 +61,7 @@ func (n *GetDeviceCollectionCmd) RunE(cmd *cobra.Command, args []string) error {
 	// query parameters
 	query := flags.NewQueryTemplate()
 
-	commonOptions, err := getCommonOptions(cmd)
+	commonOptions, err := cliConfig.GetOutputCommonOptions(cmd)
 	if err != nil {
 		return err
 	}

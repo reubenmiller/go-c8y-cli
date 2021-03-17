@@ -13,11 +13,14 @@ import (
 	"sync/atomic"
 	"time"
 
+	"github.com/reubenmiller/go-c8y-cli/pkg/clierrors"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
+	"github.com/reubenmiller/go-c8y-cli/pkg/config"
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/pkg/iterator"
 	"github.com/reubenmiller/go-c8y-cli/pkg/progressbar"
 	"github.com/reubenmiller/go-c8y-cli/pkg/prompt"
+	"github.com/reubenmiller/go-c8y-cli/pkg/requestiterator"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
 	"github.com/tidwall/gjson"
@@ -80,7 +83,7 @@ func getBatchOptions(cmd *cobra.Command) (*BatchOptions, error) {
 type batchArgument struct {
 	id            int64
 	request       c8y.RequestOptions
-	commonOptions CommonCommandOptions
+	commonOptions config.CommonCommandOptions
 	batchOptions  BatchOptions
 }
 
@@ -103,10 +106,10 @@ func processRequestAndResponseWithWorkers(cmd *cobra.Command, r *c8y.RequestOpti
 		pathIter = iterator.NewRepeatIterator(r.Path, 1)
 	}
 	// Note: Body accepts iterator types, so no need for special handling here
-	requestIter := NewRequestIterator(*r, pathIter, inputIterators.Query, r.Body)
+	requestIter := requestiterator.NewRequestIterator(*r, pathIter, inputIterators.Query, r.Body)
 
 	// get common options and batch settings
-	commonOptions, err := getCommonOptions(cmd)
+	commonOptions, err := cliConfig.GetOutputCommonOptions(cmd)
 	if err != nil {
 		return cmderrors.NewUserError(fmt.Sprintf("Failed to get common options. err=%s", err))
 	}
@@ -119,7 +122,7 @@ func processRequestAndResponseWithWorkers(cmd *cobra.Command, r *c8y.RequestOpti
 	return runBatched(requestIter, commonOptions, *batchOptions)
 }
 
-func runBatched(requestIterator *RequestIterator, commonOptions CommonCommandOptions, batchOptions BatchOptions) error {
+func runBatched(requestIterator *requestiterator.RequestIterator, commonOptions config.CommonCommandOptions, batchOptions BatchOptions) error {
 	// Two channels - to send them work and to collect their results.
 	// buffer size does not really matter, it just needs to be high
 	// enough not to block the workers
@@ -171,7 +174,7 @@ func runBatched(requestIterator *RequestIterator, commonOptions CommonCommandOpt
 				jobInputErrors++
 
 				rootCauseErr := err
-				if errors.Is(err, ErrNoMatchesFound) {
+				if errors.Is(err, clierrors.ErrNoMatchesFound) {
 					rootCauseErr = err
 				} else if parentErr := errors.Unwrap(err); parentErr != nil {
 					rootCauseErr = parentErr

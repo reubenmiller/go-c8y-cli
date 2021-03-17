@@ -1,4 +1,4 @@
-package cmd
+package requestiterator
 
 import (
 	"errors"
@@ -7,6 +7,7 @@ import (
 	"strings"
 	"sync/atomic"
 
+	"github.com/reubenmiller/go-c8y-cli/pkg/clierrors"
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/pkg/iterator"
 	"github.com/reubenmiller/go-c8y-cli/pkg/mapbuilder"
@@ -59,7 +60,7 @@ func (r *RequestIterator) GetNext() (*c8y.RequestOptions, interface{}, error) {
 		ResponseData:     r.Request.ResponseData,
 		NoAuthentication: r.Request.NoAuthentication,
 		IgnoreAccept:     r.Request.IgnoreAccept,
-		DryRun:           cliConfig.DryRun(),
+		DryRun:           r.Request.DryRun,
 	}
 
 	var inputLine interface{}
@@ -69,7 +70,7 @@ func (r *RequestIterator) GetNext() (*c8y.RequestOptions, interface{}, error) {
 		path, input, err := r.Path.GetNext()
 
 		if err != nil {
-			if !errors.Is(err, ErrNoMatchesFound) {
+			if !errors.Is(err, clierrors.ErrNoMatchesFound) {
 				r.setDone()
 			}
 			return nil, nil, err
@@ -84,7 +85,7 @@ func (r *RequestIterator) GetNext() (*c8y.RequestOptions, interface{}, error) {
 	if r.Query != nil && !reflect.ValueOf(r.Query).IsNil() {
 		q, input, err := r.Query.GetNext()
 		if err != nil {
-			if !errors.Is(err, ErrNoMatchesFound) {
+			if !errors.Is(err, clierrors.ErrNoMatchesFound) {
 				r.setDone()
 			}
 			return nil, nil, err
@@ -93,7 +94,7 @@ func (r *RequestIterator) GetNext() (*c8y.RequestOptions, interface{}, error) {
 		req.Query = string(q)
 	}
 
-	Logger.Debugf("Input line: %s", inputLine)
+	// Logger.Debugf("Input line: %s", inputLine)
 
 	// apply body iterator
 	if r.Body != nil && !reflect.ValueOf(r.Body).IsNil() && (strings.EqualFold(req.Method, "POST") || strings.EqualFold(req.Method, "PUT")) {
@@ -104,7 +105,7 @@ func (r *RequestIterator) GetNext() (*c8y.RequestOptions, interface{}, error) {
 		case *mapbuilder.MapBuilder:
 			bodyContents, err := v.MarshalJSONWithInput(inputLine)
 			if err != nil {
-				if !errors.Is(err, ErrNoMatchesFound) {
+				if !errors.Is(err, clierrors.ErrNoMatchesFound) {
 					r.setDone()
 				}
 				return nil, nil, err

@@ -47,7 +47,7 @@ Get application service user by app name
 
 func (n *getServiceUserCmd) getServiceUser(cmd *cobra.Command, args []string) error {
 
-	commonOptions, err := getCommonOptions(cmd)
+	commonOptions, err := cliConfig.GetOutputCommonOptions(cmd)
 	if err != nil {
 		return cmderrors.NewUserError(fmt.Sprintf("Failed to get common options. err=%s", err))
 	}

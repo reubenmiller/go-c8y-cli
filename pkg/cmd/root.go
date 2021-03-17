@@ -20,6 +20,7 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/internal/run"
 	"github.com/reubenmiller/go-c8y-cli/pkg/activitylogger"
 	"github.com/reubenmiller/go-c8y-cli/pkg/c8ydefaults"
+	"github.com/reubenmiller/go-c8y-cli/pkg/clierrors"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmd/alias"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmd/alias/expand"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmd/factory"
@@ -149,9 +150,7 @@ func (c *RootCmd) createCumulocityClient() {
 	}
 
 	// set output format
-	outputFormat := console.OutputJSON.FromString(cliConfig.GetOutputFormat())
-	Logger.Debugf("output format: %s", outputFormat.String())
-	Console.Format = outputFormat
+	Console.Format = cliConfig.GetOutputFormat()
 	Console.Colorized = !globalFlagNoColor
 	Console.Compact = cliConfig.CompactJSON()
 	Console.Disabled = globalFlagProgressBar && isTerminal()
@@ -204,7 +203,6 @@ var (
 	globalFlagUseEnv             bool
 	globalFlagNoLog              bool
 	globalFlagActivityLogMessage string
-	globalFlagSelect             []string
 	globalFlagSilentStatusCodes  string
 )
 
@@ -218,7 +216,7 @@ func (c *RootCmd) checkCommandError(err error) {
 		w = rootCmd.OutOrStdout()
 	}
 
-	if errors.Is(err, ErrNoMatchesFound) {
+	if errors.Is(err, clierrors.ErrNoMatchesFound) {
 		// Simulate a 404 error
 		customErr := cmderrors.CommandError{}
 		customErr.StatusCode = 404
@@ -250,7 +248,7 @@ func (c *RootCmd) checkCommandError(err error) {
 // Silent errors are only logged on the INFO level, where as non-silent errors are logged on the ERROR level
 func LogErrorF(err error, format string, args ...interface{}) {
 	errorLogger := Logger.Errorf
-	if errors.Is(err, ErrNoMatchesFound) {
+	if errors.Is(err, clierrors.ErrNoMatchesFound) {
 		if strings.Contains(globalFlagSilentStatusCodes, "404") {
 			errorLogger = Logger.Infof
 		}
@@ -384,7 +382,7 @@ func getOutputHeaders(input []string) (headers []byte) {
 
 	// TODO: improve detection by parsing more lines to find column names (if more lines are available)
 	columns := make([][]byte, 0)
-	for _, v := range globalFlagSelect {
+	for _, v := range cliConfig.GetJSONSelect() {
 		for _, column := range strings.Split(v, ",") {
 
 			if i := strings.Index(column, ":"); i > -1 {
@@ -475,7 +473,7 @@ func (c *RootCmd) ConfigureRootCmd() {
 
 	c.PersistentFlags().Bool("flatten", false, "flatten")
 	c.PersistentFlags().StringSlice("filter", nil, "filter")
-	c.PersistentFlags().StringArrayVar(&globalFlagSelect, "select", nil, "select")
+	c.PersistentFlags().StringArray("select", nil, "select")
 	c.PersistentFlags().String("view", defaultView, "View option")
 	c.PersistentFlags().Float64("timeout", float64(10*60), "Timeout in seconds")
 
@@ -650,7 +648,7 @@ func executeRootCmd() {
 		if cErr, ok := err.(cmderrors.CommandError); ok {
 			os.Exit(cErr.ExitCode)
 		}
-		if errors.Is(err, ErrNoMatchesFound) {
+		if errors.Is(err, clierrors.ErrNoMatchesFound) {
 			// 404
 			os.Exit(4)
 		}

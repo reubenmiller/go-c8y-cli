@@ -56,7 +56,7 @@ func (n *getDeviceGroupCollectionCmd) getDeviceGroupCollection(cmd *cobra.Comman
 	// query parameters
 	query := flags.NewQueryTemplate()
 
-	commonOptions, err := getCommonOptions(cmd)
+	commonOptions, err := cliConfig.GetOutputCommonOptions(cmd)
 	if err != nil {
 		return err
 	}

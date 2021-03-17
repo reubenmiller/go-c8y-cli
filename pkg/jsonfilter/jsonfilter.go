@@ -1,4 +1,4 @@
-package cmd
+package jsonfilter
 
 import (
 	"bytes"
@@ -10,12 +10,14 @@ import (
 	"github.com/facette/natsort"
 	glob "github.com/obeattie/ohmyglob"
 	"github.com/reubenmiller/go-c8y-cli/pkg/flatten"
+	"github.com/reubenmiller/go-c8y-cli/pkg/logger"
 	"github.com/reubenmiller/go-c8y-cli/pkg/matcher"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
-	"github.com/spf13/cobra"
 	"github.com/thedevsaddam/gojsonq"
 	"github.com/tidwall/gjson"
 )
+
+var Logger logger.Logger
 
 type JSONFilters struct {
 	Filters   []JSONFilter
@@ -25,12 +27,34 @@ type JSONFilters struct {
 	AsCSV     bool
 }
 
-func (f JSONFilters) Apply(jsonValue string, property string, showHeaders bool) []byte {
-	return f.filterJSON(jsonValue, property, showHeaders)
+func (f JSONFilters) Apply(jsonValue string, property string, showHeaders bool, setHeaderFunc func(string)) []byte {
+	return f.filterJSON(jsonValue, property, showHeaders, setHeaderFunc)
 }
 
 func (f *JSONFilters) AddSelectors(props ...string) {
 	f.Selectors = append(f.Selectors, props...)
+}
+
+// AddRawFilters add list of raw filters
+func (f *JSONFilters) AddRawFilters(rawFilters []string) error {
+	for _, item := range rawFilters {
+		sepPattern := regexp.MustCompile(`(\s+[\-]?(like|match|eq|neq|lt|lte|gt|gte|notIn|in|startsWith|endsWth|contains|len[n]?eq|lengt[e]?|lenlt[e]?)\s+|(!?=|[<>]=?))`)
+
+		parts := sepPattern.Split(item, 2)
+
+		if len(parts) != 2 {
+			continue
+		}
+		operator := sepPattern.FindString(item)
+
+		if operator == "" {
+			operator = "contains"
+		}
+		operator = strings.TrimSpace(operator)
+		operator = strings.ReplaceAll(operator, " ", "")
+		f.Add(strings.TrimSpace(parts[0]), operator, strings.TrimSpace(parts[1]))
+	}
+	return nil
 }
 
 func (f *JSONFilters) Add(property, operation, value string) {
@@ -179,7 +203,7 @@ func removeJSONArrayValues(jsonValue []byte) []byte {
 	return []byte("")
 }
 
-func (f JSONFilters) filterJSON(jsonValue string, property string, showHeaders bool) []byte {
+func (f JSONFilters) filterJSON(jsonValue string, property string, showHeaders bool, setHeaderFunc func(string)) []byte {
 	var b bytes.Buffer
 
 	var jq *gojsonq.JSONQ
@@ -231,15 +255,14 @@ func (f JSONFilters) filterJSON(jsonValue string, property string, showHeaders b
 
 				if line, keys := pluckJsonValues(&myval, f.Pluck, f.Flatten, f.AsCSV); line != "" {
 					outputValues = append(outputValues, line)
-					Console.SetHeaderFromInput(strings.Join(keys, ","))
-
+					setHeaderFunc(strings.Join(keys, ","))
 				}
 			}
 			return []byte(strings.Join(outputValues, "\n"))
 		}
 
 		if line, keys := pluckJsonValues(&formattedJSON, f.Pluck, f.Flatten, f.AsCSV); line != "" {
-			Console.SetHeaderFromInput(strings.Join(keys, ","))
+			setHeaderFunc(strings.Join(keys, ","))
 			return []byte(line)
 		}
 
@@ -384,42 +407,4 @@ func matchWithRegex(x, y interface{}) (bool, error) {
 	}
 
 	return matcher.MatchWithRegex(xs, pattern)
-}
-
-func getFilterFlag(cmd *cobra.Command, flagName string) *JSONFilters {
-	filters := NewJSONFilters()
-	filters.AsCSV = Console.IsCSV()
-	filters.Flatten = cliConfig.FlattenJSON()
-
-	if cmd.Flags().Changed("select") {
-		if properties, err := cmd.Flags().GetStringArray("select"); err == nil {
-			formattedProperties := []string{}
-			formattedProperties = append(formattedProperties, properties...)
-			filters.Pluck = formattedProperties
-		}
-	}
-
-	if cmd.Flags().Changed(flagName) {
-		if rawFilters, err := cmd.Flags().GetStringSlice(flagName); err == nil {
-			for _, item := range rawFilters {
-				sepPattern := regexp.MustCompile(`(\s+[\-]?(like|match|eq|neq|lt|lte|gt|gte|notIn|in|startsWith|endsWth|contains|len[n]?eq|lengt[e]?|lenlt[e]?)\s+|(!?=|[<>]=?))`)
-
-				parts := sepPattern.Split(item, 2)
-
-				if len(parts) != 2 {
-					continue
-				}
-				operator := sepPattern.FindString(item)
-
-				if operator == "" {
-					operator = "contains"
-				}
-				operator = strings.TrimSpace(operator)
-				operator = strings.ReplaceAll(operator, " ", "")
-				filters.Add(strings.TrimSpace(parts[0]), operator, strings.TrimSpace(parts[1]))
-			}
-		}
-	}
-
-	return filters
 }

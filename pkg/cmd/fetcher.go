@@ -2,15 +2,16 @@ package cmd
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"io"
 	"strconv"
 	"strings"
 
+	"github.com/reubenmiller/go-c8y-cli/pkg/clierrors"
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/pkg/iterator"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
+
 	"github.com/spf13/cobra"
 	"github.com/tidwall/gjson"
 )
@@ -177,27 +178,6 @@ func NewReferenceByNameIterator(fetcher entityFetcher, c8yClient *c8y.Client, va
 	}
 }
 
-type NoMatchesFoundError struct {
-	Name string
-	Err  error
-}
-
-func NewNoMatchesFoundError(name string) *NoMatchesFoundError {
-	return &NoMatchesFoundError{
-		Name: name,
-		Err:  ErrNoMatchesFound,
-	}
-}
-
-func (e *NoMatchesFoundError) Error() string {
-	e.Err = ErrNoMatchesFound
-	return fmt.Sprintf("%s. name=%s", e.Err, e.Name)
-}
-func (e *NoMatchesFoundError) Unwrap() error { return e.Err }
-
-var ErrNoMatchesFound = errors.New("referenceByName: no matching items found")
-var ErrMoreThanOneFound = errors.New("referenceByName: more than 1 found")
-
 // MarshalJSON return the value in a json compatible value
 func (i *EntityIterator) MarshalJSON() (line []byte, err error) {
 	return iterator.MarshalJSON(i)
@@ -229,19 +209,19 @@ func (i *EntityIterator) GetNext() (value []byte, input interface{}, err error) 
 		// Return an error if no matches are found regardless of minimum
 		// matches, as the user is using lookup by name
 		if len(refs) == 0 {
-			return nil, nil, NewNoMatchesFoundError(string(value))
+			return nil, nil, clierrors.NewNoMatchesFoundError(string(value))
 		}
 	}
 
 	if len(refs) == 0 {
 		if len(refs) < i.MinimumMatches {
-			return nil, nil, NewNoMatchesFoundError(string(value))
+			return nil, nil, clierrors.NewNoMatchesFoundError(string(value))
 		}
 		return nil, nil, nil
 	}
 
 	if len(refs) < i.MinimumMatches {
-		return nil, nil, NewNoMatchesFoundError(string(value))
+		return nil, nil, clierrors.NewNoMatchesFoundError(string(value))
 	}
 
 	var data interface{}
@@ -321,13 +301,13 @@ func WithReferenceByName(fetcher entityFetcher, args []string, opts ...string) f
 			}
 		}
 
-		var errors error
+		var errs error
 
 		if len(invalidLookups) > 0 {
-			errors = fmt.Errorf("no results %v", invalidLookups)
+			errs = fmt.Errorf("no results %v", invalidLookups)
 		}
 
-		return dst, results, errors
+		return dst, results, errs
 	}
 }
 

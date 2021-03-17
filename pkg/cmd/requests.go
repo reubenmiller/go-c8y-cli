@@ -16,11 +16,9 @@ import (
 	"time"
 
 	"github.com/fatih/color"
-	"github.com/reubenmiller/go-c8y-cli/pkg/c8ydefaults"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/pkg/config"
 	"github.com/reubenmiller/go-c8y-cli/pkg/encoding"
-	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/pkg/jsonUtilities"
 	"github.com/reubenmiller/go-c8y-cli/pkg/jsonformatter"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
@@ -30,86 +28,11 @@ import (
 	"moul.io/http2curl"
 )
 
-// CommonCommandOptions control the handling of the response which are available for all commands
-// which interact with the server
-type CommonCommandOptions struct {
-	ConfirmText    string
-	OutputFile     string
-	OutputFileRaw  string
-	Filters        *JSONFilters
-	ResultProperty string
-	IncludeAll     bool
-	WithTotalPages bool
-	PageSize       int
-	CurrentPage    int64
-	TotalPages     int64
-}
-
-// AddQueryParameters adds the common query parameters to the given query values
-func (options CommonCommandOptions) AddQueryParameters(query *flags.QueryTemplate) {
-	if query == nil {
-		return
-	}
-
-	if options.CurrentPage > 0 {
-		query.SetVariable("currentPage", options.CurrentPage)
-	}
-
-	if options.PageSize > 0 {
-		query.SetVariable("pageSize", options.PageSize)
-	}
-
-	if options.WithTotalPages {
-		query.SetVariable("withTotalPages", "true")
-	}
-}
-
-func getCommonOptions(cmd *cobra.Command) (CommonCommandOptions, error) {
-	options := CommonCommandOptions{
-		OutputFile:    cliConfig.GetOutputFile(),
-		OutputFileRaw: cliConfig.GetOutputFileRaw(),
-	}
-
-	// default return property from the raw response
-	options.ResultProperty = flags.GetCollectionPropertyFromAnnotation(cmd)
-
-	// Filters and selectors
-	options.Filters = getFilterFlag(cmd, "filter")
-
-	pageSize := cliConfig.GetPageSize()
-	if pageSize > 0 && pageSize != c8ydefaults.PageSize {
-		options.PageSize = pageSize
-	}
-
-	if cmd.Flags().Changed("withTotalPages") {
-		if v, err := cmd.Flags().GetBool("withTotalPages"); err == nil && v {
-			options.WithTotalPages = true
-		}
-	}
-
-	options.IncludeAll = cliConfig.IncludeAll()
-
-	if options.IncludeAll {
-		options.PageSize = cliConfig.GetIncludeAllPageSize()
-		Logger.Debugf("Setting pageSize to maximum value to limit number of requests. value=%d", options.PageSize)
-	}
-
-	options.CurrentPage = cliConfig.GetCurrentPage()
-	options.TotalPages = cliConfig.GetTotalPages()
-
-	options.ConfirmText = cliConfig.ConfirmText()
-	if options.ConfirmText == "" {
-		options.ConfirmText = cmd.Short
-	}
-
-	return options, nil
-}
-
 func getTimeoutContext() (context.Context, context.CancelFunc) {
 	return context.WithTimeout(context.Background(), time.Duration(cliConfig.RequestTimeout()*1000)*time.Millisecond)
 }
 
-func processRequestAndResponse(requests []c8y.RequestOptions, commonOptions CommonCommandOptions) error {
+func processRequestAndResponse(requests []c8y.RequestOptions, commonOptions config.CommonCommandOptions) error {
 
 	if len(requests) > 1 {
 		return cmderrors.NewSystemError("Multiple request handling is currently not supported")
@@ -366,7 +289,7 @@ func getCurlCommands(req *http.Request) (shell string, pwsh string, err error) {
 	return
 }
 
-func fetchAllResults(req c8y.RequestOptions, resp *c8y.Response, commonOptions CommonCommandOptions) error {
+func fetchAllResults(req c8y.RequestOptions, resp *c8y.Response, commonOptions config.CommonCommandOptions) error {
 	if req.DryRun || (resp != nil && resp.StatusCode == 0) {
 		return nil
 	}
@@ -477,7 +400,7 @@ func fetchAllResults(req c8y.RequestOptions, resp *c8y.Response, commonOptions C
 	return err
 }
 
-func fetchAllInventoryQueryResults(req c8y.RequestOptions, resp *c8y.Response, commonOptions CommonCommandOptions) error {
+func fetchAllInventoryQueryResults(req c8y.RequestOptions, resp *c8y.Response, commonOptions config.CommonCommandOptions) error {
 	if req.DryRun || (resp != nil && resp.StatusCode == 0) {
 		return nil
 	}
@@ -642,7 +565,7 @@ func optimizeManagedObjectsURL(u *url.URL, lastID string) *url.URL {
 	return u
 }
 
-func processResponse(resp *c8y.Response, respError error, commonOptions CommonCommandOptions) (int, error) {
+func processResponse(resp *c8y.Response, respError error, commonOptions config.CommonCommandOptions) (int, error) {
 	if resp != nil && resp.StatusCode != 0 {
 		Logger.Infof("Response Content-Type: %s", resp.Header.Get("Content-Type"))
 		Logger.Debugf("Response Headers: %v", resp.Header)
@@ -747,7 +670,7 @@ func processResponse(resp *c8y.Response, respError error, commonOptions CommonCo
 				Logger.Debugf("using existing pluck values. %v", commonOptions.Filters.Pluck)
 			}
 
-			responseText = commonOptions.Filters.Apply(*resp.JSONData, dataProperty, false)
+			responseText = commonOptions.Filters.Apply(*resp.JSONData, dataProperty, false, Console.SetHeaderFromInput)
 
 			emptyArray := []byte("[]\n")
 
@@ -822,11 +745,11 @@ func guessDataProperty(resp *c8y.Response) string {
 
 // WriteJSONToConsole writes given json output to the console supporting the common options of select, output etc.
 func WriteJSONToConsole(cmd *cobra.Command, property string, output []byte) error {
-	commonOptions, err := getCommonOptions(cmd)
+	commonOptions, err := cliConfig.GetOutputCommonOptions(cmd)
 	if err != nil {
 		return err
 	}
-	output = commonOptions.Filters.Apply(string(output), property, false)
+	output = commonOptions.Filters.Apply(string(output), property, false, Console.SetHeaderFromInput)
 
 	jsonformatter.WithOutputFormatters(
 		Console,

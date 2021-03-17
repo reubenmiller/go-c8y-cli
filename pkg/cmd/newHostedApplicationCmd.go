@@ -235,7 +235,7 @@ func (n *newHostedApplicationCmd) doProcedure(cmd *cobra.Command, args []string)
 		response = resp
 	}
 
-	commonOptions, err := getCommonOptions(cmd)
+	commonOptions, err := cliConfig.GetOutputCommonOptions(cmd)
 	if err != nil {
 		return err
 	}

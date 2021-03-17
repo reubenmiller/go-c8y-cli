@@ -10,11 +10,15 @@ import (
 	"time"
 
 	"github.com/mitchellh/go-homedir"
+	"github.com/reubenmiller/go-c8y-cli/pkg/c8ydefaults"
 	"github.com/reubenmiller/go-c8y-cli/pkg/encrypt"
+	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
+	"github.com/reubenmiller/go-c8y-cli/pkg/jsonfilter"
 	"github.com/reubenmiller/go-c8y-cli/pkg/logger"
 	"github.com/reubenmiller/go-c8y-cli/pkg/prompt"
 	"github.com/reubenmiller/go-c8y-cli/pkg/totp"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
+	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
 )
@@ -175,6 +179,12 @@ const (
 
 	// SettingsViewsCustomPaths paths to custom fiew definition files
 	SettingsViewsCustomPaths = "settings.views.customPaths"
+
+	// SettingsFilter json filter to be applied to the output
+	SettingsFilter = "settings.defaults.filter"
+
+	// SettingsSelect json properties to be selected from the output. Only the given properties will be returned
+	SettingsSelect = "settings.defaults.select"
 )
 
 var (
@@ -925,9 +935,18 @@ func (c *Config) GetOutputFile() string {
 	return c.ExpandHomePath(c.viper.GetString(SettingsOutputFile))
 }
 
-// GetOutputFormat Get output format
-func (c *Config) GetOutputFormat() string {
-	return c.viper.GetString(SettingsOutputFormat)
+// GetOutputFormat Get output format type, i.e. json, csv, table etc.
+func (c *Config) GetOutputFormat() OutputFormat {
+	format := c.viper.GetString(SettingsOutputFormat)
+	outputFormat := OutputJSON.FromString(format)
+	c.Logger.Debugf("output format: %s", outputFormat.String())
+	return outputFormat
+}
+
+// IsCSVOutput check if csv output is enabled
+func (c *Config) IsCSVOutput() bool {
+	format := c.GetOutputFormat()
+	return format == OutputCSV || format == OutputCSVWithHeader
 }
 
 // EncryptionEnabled enables encryption when storing sensitive session data
@@ -963,6 +982,79 @@ func (c *Config) GetViewPaths() []string {
 		viewPaths[i] = c.ExpandHomePath(path)
 	}
 	return viewPaths
+}
+
+// GetJSONFilter get json filter to be applied to the output
+func (c *Config) GetJSONFilter() []string {
+	return c.viper.GetStringSlice(SettingsFilter)
+}
+
+// GetJSONSelect get json properties to be selected from the output. Only the given properties will be returned
+func (c *Config) GetJSONSelect() []string {
+	// Note: select is stored as an cobra Array String, which add special formating of values.
+	// so it needs to be converted to an array of strings
+	values := c.viper.GetStringSlice(SettingsSelect)
+	allitems := []string{}
+
+	for _, item := range values {
+		item = strings.Trim(item, "[]")
+		item = strings.Trim(item, "\"")
+		if item != "" {
+			allitems = append(allitems, item)
+		}
+	}
+
+	c.Logger.Debugf("json select: len=%d, values=%v", len(values), allitems)
+	return allitems
+}
+
+// GetOutputCommonOptions get common output options which controls how the output should be handled i.e. json filter, selects, csv etc.
+func (c *Config) GetOutputCommonOptions(cmd *cobra.Command) (CommonCommandOptions, error) {
+	options := CommonCommandOptions{
+		OutputFile:    c.GetOutputFile(),
+		OutputFileRaw: c.GetOutputFileRaw(),
+	}
+
+	// default return property from the raw response
+	options.ResultProperty = flags.GetCollectionPropertyFromAnnotation(cmd)
+
+	// Filters and selectors
+	filters := jsonfilter.NewJSONFilters()
+	filters.AsCSV = c.IsCSVOutput()
+	filters.Flatten = c.FlattenJSON()
+	filters.Pluck = c.GetJSONSelect()
+	if err := filters.AddRawFilters(c.GetJSONFilter()); err != nil {
+		return options, err
+	}
+	options.Filters = filters
+
+	pageSize := c.GetPageSize()
+	if pageSize > 0 && pageSize != c8ydefaults.PageSize {
+		options.PageSize = pageSize
+	}
+
+	if cmd.Flags().Changed("withTotalPages") {
+		if v, err := cmd.Flags().GetBool("withTotalPages"); err == nil && v {
+			options.WithTotalPages = true
+		}
+	}
+
+	options.IncludeAll = c.IncludeAll()
+
+	if options.IncludeAll {
+		options.PageSize = c.GetIncludeAllPageSize()
+		c.Logger.Debugf("Setting pageSize to maximum value to limit number of requests. value=%d", options.PageSize)
+	}
+
+	options.CurrentPage = c.GetCurrentPage()
+	options.TotalPages = c.GetTotalPages()
+
+	options.ConfirmText = c.ConfirmText()
+	if options.ConfirmText == "" {
+		options.ConfirmText = cmd.Short
+	}
+
+	return options, nil
 }
 
 // AllSettings get all the settings as a map

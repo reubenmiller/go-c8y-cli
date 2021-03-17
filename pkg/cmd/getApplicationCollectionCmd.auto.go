@@ -76,7 +76,7 @@ func (n *GetApplicationCollectionCmd) RunE(cmd *cobra.Command, args []string) er
 	if err != nil {
 		return cmderrors.NewUserError(err)
 	}
-	commonOptions, err := getCommonOptions(cmd)
+	commonOptions, err := cliConfig.GetOutputCommonOptions(cmd)
 	if err != nil {
 		return cmderrors.NewUserError(fmt.Sprintf("Failed to get common options. err=%s", err))
 	}
