@@ -17,14 +17,14 @@ import (
 	"github.com/spf13/cobra"
 )
 
-type GetDeviceCollectionCmd struct {
+type CmdDevicesList struct {
 	*subcommand.SubCommand
 
 	factory *cmdutil.Factory
 }
 
-func NewGetDeviceCollectionCmd(f *cmdutil.Factory) *GetDeviceCollectionCmd {
-	ccmd := &GetDeviceCollectionCmd{
+func NewCmdDevicesList(f *cmdutil.Factory) *CmdDevicesList {
+	ccmd := &CmdDevicesList{
 		factory: f,
 	}
 	cmd := &cobra.Command{
@@ -61,7 +61,7 @@ func NewGetDeviceCollectionCmd(f *cmdutil.Factory) *GetDeviceCollectionCmd {
 	return ccmd
 }
 
-func (n *GetDeviceCollectionCmd) RunE(cmd *cobra.Command, args []string) error {
+func (n *CmdDevicesList) RunE(cmd *cobra.Command, args []string) error {
 	cfg, err := n.factory.Config()
 	if err != nil {
 		return err

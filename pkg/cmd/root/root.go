@@ -24,6 +24,7 @@ import (
 	databrokerCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/databroker"
 	devicecredentialsCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/devicecredentials"
 	devicesCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/devices"
+	devicesListCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/devices/list"
 	eventsCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/events"
 	identityCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/identity"
 	inventoryCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/inventory"
@@ -183,7 +184,6 @@ func NewCmdRoot(f *cmdutil.Factory, version, buildDate string) *CmdRoot {
 		databrokerCmd.NewSubCommand(f).GetCommand(),
 		auditrecordsCmd.NewSubCommand(f).GetCommand(),
 		devicecredentialsCmd.NewSubCommand(f).GetCommand(),
-		devicesCmd.NewSubCommand(f).GetCommand(),
 		eventsCmd.NewSubCommand(f).GetCommand(),
 		identityCmd.NewSubCommand(f).GetCommand(),
 		inventoryCmd.NewSubCommand(f).GetCommand(),
@@ -208,6 +208,13 @@ func NewCmdRoot(f *cmdutil.Factory, version, buildDate string) *CmdRoot {
 	// todo: merge custom commands
 	//
 
+	// devices
+	devices := devicesCmd.NewSubCommand(f).GetCommand()
+	devices.AddCommand(devicesListCmd.NewCmdDevicesList(f).GetCommand())
+	// devices.AddCommand(NewGetDeviceGroupCollectionCmd(f).GetCommand())
+	cmd.AddCommand(devices)
+
+	// Manual commands
 	cmd.AddCommand(aliasCmd.NewCmdAlias(f))
 	cmd.AddCommand(apiCmd.NewSubCommand(f).GetCommand())
 
