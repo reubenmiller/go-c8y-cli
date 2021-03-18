@@ -25,6 +25,9 @@ type Factory struct {
 	Console        func() (*console.Console, error)
 	DataView       func() (*dataview.DataView, error)
 
+	BuildVersion string
+	BuildBranch  string
+
 	// Executable is the path to the currently invoked binary
 	Executable string
 }

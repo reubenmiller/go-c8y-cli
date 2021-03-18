@@ -259,7 +259,7 @@ func Initialize() (*root.CmdRoot, error) {
 		}
 		return consoleHandler, nil
 	}
-	cmdFactory := factory.New(buildVersion, configFunc, clientFunc, loggerFunc, activityLoggerFunc, dataViewFunc, consoleFunc)
+	cmdFactory := factory.New(buildVersion, buildBranch, configFunc, clientFunc, loggerFunc, activityLoggerFunc, dataViewFunc, consoleFunc)
 	rootCmd := root.NewCmdRoot(cmdFactory, buildVersion, "")
 	consoleHandler = console.NewConsole(rootCmd.OutOrStdout(), func(s []string) []byte {
 		return getOutputHeaders(consoleHandler, configHandler, s)
