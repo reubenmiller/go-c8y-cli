@@ -20,6 +20,7 @@ import (
 	auditrecordsCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/auditrecords"
 	binariesCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/binaries"
 	bulkoperationsCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/bulkoperations"
+	completionCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/completion"
 	currentapplicationCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/currentapplication"
 	databrokerCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/databroker"
 	devicecredentialsCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/devicecredentials"
@@ -203,6 +204,7 @@ func NewCmdRoot(f *cmdutil.Factory, version, buildDate string) *CmdRoot {
 		userrolesCmd.NewSubCommand(f).GetCommand(),
 		usersCmd.NewSubCommand(f).GetCommand(),
 		versionCmd.NewCmdVersion(f).GetCommand(),
+		completionCmd.NewCmdCompletion().GetCommand(),
 	}
 
 	cmd.AddCommand(commands...)

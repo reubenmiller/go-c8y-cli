@@ -8,14 +8,14 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// CompletionsCmd shell completions
-type CompletionsCmd struct {
+// CmdCompletion shell completions
+type CmdCompletion struct {
 	*subcommand.SubCommand
 }
 
-// NewCompletionsCmd creates a new shell completions command to generate completions files in variables shell languages
-func NewCompletionsCmd() *CompletionsCmd {
-	ccmd := &CompletionsCmd{}
+// NewCmdCompletion creates a new shell completions command to generate completions files in variables shell languages
+func NewCmdCompletion() *CmdCompletion {
+	ccmd := &CmdCompletion{}
 
 	cmd := &cobra.Command{
 		Use:   "completion [bash|zsh|fish|powershell]",
