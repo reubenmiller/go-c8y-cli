@@ -18,43 +18,42 @@ import (
 	"github.com/spf13/cobra"
 )
 
-type GetDeviceCollectionCmd struct {
+type CmdDeviceGroupList struct {
 	*subcommand.SubCommand
 
-	Config func() (*config.Config, error)
+	factory *cmdutil.Factory
+	Config  func() (*config.Config, error)
+	Client  func() (*c8y.Client, error)
 }
 
-func NewGetDeviceCollectionCmd(f *cmdutil.Factory) *GetDeviceCollectionCmd {
-	ccmd := &GetDeviceCollectionCmd{
-		Config: f.Config,
+func NewGetDeviceGroupCollectionCmd(f *cmdutil.Factory) *CmdDeviceGroupList {
+	ccmd := &CmdDeviceGroupList{
+		factory: f,
+		Config:  f.Config,
+		Client:  f.Client,
 	}
-	cmd := &cobra.Command{
-		Use:   "list",
-		Short: "Get device collection",
-		Long:  `Get a collection of devices based on filter parameters`,
-		Example: heredoc.Doc(`
-		c8y devices list --name "sensor*" --type myType
 
-		Get a collection of devices of type "myType", and their names start with "sensor"
+	cmd := &cobra.Command{
+		Use:   "listDeviceGroups",
+		Short: "Get device group collection",
+		Long:  `Get a collection of device groups based on filter parameters`,
+		Example: heredoc.Doc(`
+		c8y devices listDeviceGroups --name "MyGroup*"
+
+		Get a collection of device groups with names that start with "MyGroup"
 		`),
-		RunE: ccmd.RunE,
+		RunE: ccmd.getDeviceGroupCollection,
 	}
 
 	cmd.SilenceUsage = true
 
-	cmd.Flags().String("name", "", "Device name.")
-	cmd.Flags().String("type", "", "Device type.")
-	cmd.Flags().Bool("agents", false, "Only include agents.")
-	cmd.Flags().String("fragmentType", "", "Device fragment type.")
-	cmd.Flags().String("owner", "", "Device owner.")
+	cmd.Flags().String("name", "", "Device group name.")
+	cmd.Flags().String("type", "", "Device group type.")
+	cmd.Flags().String("fragmentType", "", "Device group fragment type.")
+	cmd.Flags().String("owner", "", "Device group owner.")
 	cmd.Flags().String("query", "", "Additional query filter")
-	cmd.Flags().String("orderBy", "name", "Order by. e.g. _id asc or name asc or creationTime.date desc")
+	cmd.Flags().Bool("excludeRootGroup", false, "Exclude root groups from the list")
 	cmd.Flags().Bool("withParents", false, "include a flat list of all parents and grandparents of the given object")
-
-	flags.WithOptions(
-		cmd,
-		flags.WithPipelineSupport(""),
-	)
 
 	// Required flags
 	ccmd.SubCommand = subcommand.NewSubCommand(cmd)
@@ -62,12 +61,15 @@ func NewGetDeviceCollectionCmd(f *cmdutil.Factory) *GetDeviceCollectionCmd {
 	return ccmd
 }
 
-func (n *GetDeviceCollectionCmd) RunE(cmd *cobra.Command, args []string) error {
+func (n *CmdDeviceGroupList) getDeviceGroupCollection(cmd *cobra.Command, args []string) error {
 	cfg, err := n.Config()
 	if err != nil {
 		return err
 	}
-
+	client, err := n.Client()
+	if err != nil {
+		return err
+	}
 	inputIterators := &flags.RequestInputIterators{}
 
 	// query parameters
@@ -83,11 +85,12 @@ func (n *GetDeviceCollectionCmd) RunE(cmd *cobra.Command, args []string) error {
 
 	c8yQueryParts, err := flags.WithC8YQueryOptions(
 		cmd,
+		flags.WithC8YQueryFixedString("(has(c8y_IsDeviceGroup))"),
 		flags.WithC8YQueryFormat("name", "(name eq '%s')"),
 		flags.WithC8YQueryFormat("type", "(type eq '%s')"),
 		flags.WithC8YQueryFormat("fragmentType", "has(%s)"),
 		flags.WithC8YQueryFormat("owner", "(owner eq '%s')"),
-		flags.WithC8YQueryBool("agents", "has(com_cumulocity_model_Agent)"),
+		flags.WithC8YQueryBool("excludeRootGroup", "not(type eq 'c8y_DeviceGroup')"),
 		flags.WithC8YQueryFormat("query", "%s"),
 	)
 
@@ -106,8 +109,7 @@ func (n *GetDeviceCollectionCmd) RunE(cmd *cobra.Command, args []string) error {
 		}
 	}
 
-	// q will automatically add a fragmentType=c8y_IsDevice to the query
-	query.SetVariable("q", fmt.Sprintf("$filter=%s+$orderby=%s", filter, orderBy))
+	query.SetVariable("query", fmt.Sprintf("$filter=%s+$orderby=%s", filter, orderBy))
 
 	err = flags.WithQueryParameters(
 		cmd,
@@ -149,5 +151,5 @@ func (n *GetDeviceCollectionCmd) RunE(cmd *cobra.Command, args []string) error {
 		IgnoreAccept: cfg.IgnoreAcceptHeader(),
 	}
 
-	return processRequestAndResponseWithWorkers(cmd, &req, inputIterators)
+	return n.factory.RunWithWorkers(client, cmd, &req, inputIterators)
 }

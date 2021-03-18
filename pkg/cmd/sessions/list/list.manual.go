@@ -1,4 +1,4 @@
-package cmd
+package list
 
 import (
 	"fmt"
@@ -8,19 +8,32 @@ import (
 
 	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/manifoldco/promptui"
+	"github.com/reubenmiller/go-c8y-cli/pkg/c8ysession"
+	createCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/sessions/create"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmd/subcommand"
+	"github.com/reubenmiller/go-c8y-cli/pkg/cmdutil"
+	"github.com/reubenmiller/go-c8y-cli/pkg/config"
+	"github.com/reubenmiller/go-c8y-cli/pkg/utilities/bellskipper"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
 )
 
-type listSessionCmd struct {
+type CmdList struct {
 	*subcommand.SubCommand
+
+	factory *cmdutil.Factory
+	Config  func() (*config.Config, error)
+	Client  func() (*c8y.Client, error)
 
 	sessionFilter string
 }
 
-func newListSessionCmd() *listSessionCmd {
-	ccmd := &listSessionCmd{}
+func NewCmdList(f *cmdutil.Factory) *CmdList {
+	ccmd := &CmdList{
+		factory: f,
+		Config:  f.Config,
+		Client:  f.Client,
+	}
 
 	cmd := &cobra.Command{
 		Use:   "list",
@@ -35,7 +48,7 @@ func newListSessionCmd() *listSessionCmd {
 
 			#> export C8Y_SESSION=$( c8y sessions list --sessionFilter "customer" )
 		`),
-		RunE: ccmd.listSession,
+		RunE: ccmd.RunE,
 	}
 
 	cmd.SilenceUsage = true
@@ -47,7 +60,7 @@ func newListSessionCmd() *listSessionCmd {
 	return ccmd
 }
 
-func matchSession(session CumulocitySession, input string) bool {
+func matchSession(session c8ysession.CumulocitySession, input string) bool {
 	// strip url scheme
 	uri := strings.ReplaceAll(session.Host, "https://", "")
 	uri = strings.ReplaceAll(uri, "http://", "")
@@ -72,19 +85,27 @@ func matchSession(session CumulocitySession, input string) bool {
 	return match || input == ""
 }
 
-func (n *listSessionCmd) listSession(cmd *cobra.Command, args []string) error {
-	config := &CumulocitySessions{}
-	config.Sessions = make([]CumulocitySession, 0)
+func (n *CmdList) RunE(cmd *cobra.Command, args []string) error {
+	cfg, err := n.Config()
+	if err != nil {
+		return err
+	}
+	log, err := n.factory.Logger()
+	if err != nil {
+		return err
+	}
+	sessions := &c8ysession.CumulocitySessions{}
+	sessions.Sessions = make([]c8ysession.CumulocitySession, 0)
 
 	subDirToSkip := "ignore"
 
 	files := make([]string, 0)
 
-	outputDir := getSessionHomeDir()
+	outputDir := cfg.GetSessionHomeDir()
 
-	Logger.Infof("using c8y session folder: %s", outputDir)
+	log.Infof("using c8y session folder: %s", outputDir)
 
-	err := filepath.Walk(outputDir, func(path string, info os.FileInfo, err error) error {
+	err = filepath.Walk(outputDir, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
 			fmt.Printf("prevent panic by handling failure accessing a path %q: %v\n", path, err)
 			return err
@@ -95,15 +116,15 @@ func (n *listSessionCmd) listSession(cmd *cobra.Command, args []string) error {
 		}
 
 		// skip settings file
-		if strings.HasPrefix(info.Name(), SettingsGlobalName+".") {
+		if strings.HasPrefix(info.Name(), config.SettingsGlobalName+".") {
 			return nil
 		}
 
-		Logger.Infof("Walking folder/file: %s", path)
+		log.Infof("Walking folder/file: %s", path)
 		files = append(files, path)
 
-		if session, err := NewCumulocitySessionFromFile(path); err == nil {
-			config.Sessions = append(config.Sessions, *session)
+		if session, err := createCmd.NewCumulocitySessionFromFile(path, log, cfg); err == nil {
+			sessions.Sessions = append(sessions.Sessions, *session)
 		}
 		return nil
 	})
@@ -113,8 +134,8 @@ func (n *listSessionCmd) listSession(cmd *cobra.Command, args []string) error {
 	}
 
 	// Add index numbers
-	for i := range config.Sessions {
-		config.Sessions[i].Index = i + 1
+	for i := range sessions.Sessions {
+		sessions.Sessions[i].Index = i + 1
 	}
 
 	// template.Fun
@@ -156,9 +177,9 @@ func (n *listSessionCmd) listSession(cmd *cobra.Command, args []string) error {
 		`{{ .PrevKey | faint }} {{ .PageDownKey | faint }} {{ .PageUpKey | faint }} ` +
 		`{{ if .Search }} {{ "and" | faint }} {{ .SearchKey | faint }} {{ "toggles search" | faint }}{{ end }}`)
 
-	filteredSessions := make([]CumulocitySession, 0)
+	filteredSessions := make([]c8ysession.CumulocitySession, 0)
 	sessionIndex := 1
-	for _, session := range config.Sessions {
+	for _, session := range sessions.Sessions {
 		if matchSession(session, n.sessionFilter) {
 			session.Index = sessionIndex
 			filteredSessions = append(filteredSessions, session)
@@ -172,7 +193,7 @@ func (n *listSessionCmd) listSession(cmd *cobra.Command, args []string) error {
 	}
 
 	prompt := promptui.Select{
-		Stdout:            &bellSkipper{}, // Workaround to pervent the terminal bell on MacOS
+		Stdout:            &bellskipper.BellSkipper{}, // Workaround to pervent the terminal bell on MacOS
 		HideSelected:      true,
 		IsVimMode:         false,
 		StartInSearchMode: false,
@@ -196,7 +217,7 @@ func (n *listSessionCmd) listSession(cmd *cobra.Command, args []string) error {
 	var result string
 
 	if len(filteredSessions) == 1 {
-		Logger.Info("Only 1 session found. Selecting it automatically")
+		log.Info("Only 1 session found. Selecting it automatically")
 		idx = 0
 		result = filteredSessions[0].Path
 		err = nil

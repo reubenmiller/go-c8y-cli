@@ -1,10 +1,9 @@
-package cmd
+package create
 
 import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"net/http"
 	"net/url"
 	"os"
 	"path"
@@ -13,45 +12,22 @@ import (
 
 	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/pkg/errors"
+	"github.com/reubenmiller/go-c8y-cli/pkg/c8ysession"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmd/subcommand"
+	"github.com/reubenmiller/go-c8y-cli/pkg/cmdutil"
 	"github.com/reubenmiller/go-c8y-cli/pkg/completion"
+	"github.com/reubenmiller/go-c8y-cli/pkg/config"
+	"github.com/reubenmiller/go-c8y-cli/pkg/logger"
 	"github.com/reubenmiller/go-c8y-cli/pkg/prompt"
+	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 )
 
-type CumulocitySessions struct {
-	Sessions []CumulocitySession `json:"sessions"`
-}
-
-type Authentication struct {
-	AuthType string         `json:"authType,omitempty"`
-	Cookies  []*http.Cookie `json:"cookies,omitempty"`
-}
-
-// CumulocitySession contains all settings required to communicate with a Cumulocity service
-type CumulocitySession struct {
-	Schema string `json:"$schema,omitempty"`
-
-	// ID          string `json:"id"`
-	Host            string `json:"host"`
-	Tenant          string `json:"tenant"`
-	Username        string `json:"username"`
-	Password        string `json:"password"`
-	Description     string `json:"description"`
-	UseTenantPrefix bool   `json:"useTenantPrefix"`
-
-	Settings *CommandSettings `json:"settings,omitempty"`
-
-	MicroserviceAliases map[string]string `json:"microserviceAliases,omitempty"`
-
-	Index int    `json:"-"`
-	Path  string `json:"-"`
-	Name  string `json:"-"`
-}
-
-func NewCumulocitySessionFromFile(filePath string) (*CumulocitySession, error) {
-	session := &CumulocitySession{}
+func NewCumulocitySessionFromFile(filePath string, log *logger.Logger, cfg *config.Config) (*c8ysession.CumulocitySession, error) {
+	session := &c8ysession.CumulocitySession{
+		Config: cfg,
+		Logger: log,
+	}
 	data, err := ioutil.ReadFile(filePath)
 	if err != nil {
 		return nil, err
@@ -73,41 +49,7 @@ func NewCumulocitySessionFromFile(filePath string) (*CumulocitySession, error) {
 	return session, nil
 }
 
-func (s CumulocitySession) GetSessionPassphrase() string {
-	return os.Getenv("C8Y_PASSPHRASE")
-}
-
-func (s *CumulocitySession) SetPassword(password string) {
-	s.Password = password
-}
-
-func (s *CumulocitySession) SetHost(host string) {
-	s.Host = formatHost(host)
-}
-
-func formatHost(host string) string {
-	if !strings.HasPrefix(host, "http://") && !strings.HasPrefix(host, "https://") {
-		host = "https://" + host
-	}
-	return host
-}
-
-func (s CumulocitySession) GetHost() string {
-	return formatHost(s.Host)
-}
-
-func (s CumulocitySession) GetPassword() string {
-	pass, err := cliConfig.SecureData.TryDecryptString(s.Password, s.GetSessionPassphrase())
-
-	if err != nil {
-		Logger.Errorf("Could not decrypt password. %s", err)
-		return ""
-	}
-
-	return pass
-}
-
-type newSessionCmd struct {
+type CmdCreate struct {
 	host           string
 	username       string
 	password       string
@@ -120,10 +62,18 @@ type newSessionCmd struct {
 	encrypt        bool
 
 	*subcommand.SubCommand
+
+	factory *cmdutil.Factory
+	Config  func() (*config.Config, error)
+	Client  func() (*c8y.Client, error)
 }
 
-func newNewSessionCmd() *newSessionCmd {
-	ccmd := &newSessionCmd{}
+func NewCmdCreate(f *cmdutil.Factory) *CmdCreate {
+	ccmd := &CmdCreate{
+		factory: f,
+		Config:  f.Config,
+		Client:  f.Client,
+	}
 
 	cmd := &cobra.Command{
 		Use:   "create",
@@ -147,7 +97,7 @@ $ c8y sessions create --type prod --host "https://mytenant.eu-latest.cumulocity.
 		`),
 		PersistentPreRunE: ccmd.promptArgs,
 		Args:              cobra.NoArgs,
-		RunE:              ccmd.newSession,
+		RunE:              ccmd.RunE,
 	}
 
 	cmd.SilenceUsage = true
@@ -180,16 +130,19 @@ $ c8y sessions create --type prod --host "https://mytenant.eu-latest.cumulocity.
 	return ccmd
 }
 
-func (n *newSessionCmd) promptArgs(cmd *cobra.Command, args []string) error {
-	prompter := prompt.NewPrompt(Logger)
-
-	// read config
-	if _, err := ReadConfigFiles(viper.GetViper()); err != nil {
-		Logger.Infof("failed to read configuration files. %s", err)
+func (n *CmdCreate) promptArgs(cmd *cobra.Command, args []string) error {
+	cfg, err := n.Config()
+	if err != nil {
+		return err
 	}
+	log, err := n.factory.Logger()
+	if err != nil {
+		return err
+	}
+	prompter := prompt.NewPrompt(log)
 
 	if !cmd.Flags().Changed("username") {
-		v, err := prompter.Username("Enter username", " "+cliConfig.GetDefaultUsername())
+		v, err := prompter.Username("Enter username", " "+cfg.GetDefaultUsername())
 
 		if err != nil {
 			return err
@@ -208,26 +161,35 @@ func (n *newSessionCmd) promptArgs(cmd *cobra.Command, args []string) error {
 	return nil
 }
 
-func (n *newSessionCmd) newSession(cmd *cobra.Command, args []string) error {
-
-	session := &CumulocitySession{
+func (n *CmdCreate) RunE(cmd *cobra.Command, args []string) error {
+	cfg, err := n.Config()
+	if err != nil {
+		return err
+	}
+	log, err := n.factory.Logger()
+	if err != nil {
+		return err
+	}
+	session := &c8ysession.CumulocitySession{
 		Schema:          "https://raw.githubusercontent.com/reubenmiller/go-c8y-cli/master/tools/schema/session.schema.json",
 		Host:            n.host,
 		Tenant:          n.tenant,
 		Username:        n.username,
 		Description:     n.description,
 		UseTenantPrefix: !n.noTenantPrefix,
+		Config:          cfg,
+		Logger:          log,
 	}
 
 	session.MicroserviceAliases = make(map[string]string)
 
-	settings := &CommandSettings{}
-	settings.ActivityLog = &ActivityLogSettings{
+	settings := &config.CommandSettings{}
+	settings.ActivityLog = &config.ActivityLogSettings{
 		Enabled: settings.Bool(true),
 	}
 
 	if n.noStorage {
-		settings.Storage = &StorageSettings{
+		settings.Storage = &config.StorageSettings{
 			StorePassword: settings.Bool(false),
 			StoreCookies:  settings.Bool(false),
 		}
@@ -235,21 +197,21 @@ func (n *newSessionCmd) newSession(cmd *cobra.Command, args []string) error {
 
 	switch n.sessionType {
 	case "dev":
-		settings.Mode = &ModeSettings{
+		settings.Mode = &config.ModeSettings{
 			Confirmation: "PUT POST DELETE",
 			EnableCreate: settings.Bool(true),
 			EnableUpdate: settings.Bool(true),
 			EnableDelete: settings.Bool(true),
 		}
 	case "qual":
-		settings.Mode = &ModeSettings{
+		settings.Mode = &config.ModeSettings{
 			Confirmation: "PUT POST DELETE",
 			EnableCreate: settings.Bool(true),
 			EnableUpdate: settings.Bool(true),
 			EnableDelete: settings.Bool(false),
 		}
 	case "prod":
-		settings.Mode = &ModeSettings{
+		settings.Mode = &config.ModeSettings{
 			Confirmation: "PUT POST DELETE",
 			EnableCreate: settings.Bool(false),
 			EnableUpdate: settings.Bool(false),
@@ -258,7 +220,7 @@ func (n *newSessionCmd) newSession(cmd *cobra.Command, args []string) error {
 	}
 
 	if n.encrypt {
-		settings.Encryption = &EncryptionSettings{
+		settings.Encryption = &config.EncryptionSettings{
 			Enabled:         settings.Bool(true),
 			CachePassphrase: settings.Bool(true),
 		}
@@ -281,7 +243,7 @@ func (n *newSessionCmd) newSession(cmd *cobra.Command, args []string) error {
 		sessionName = v
 	}
 
-	outputDir := getSessionHomeDir()
+	outputDir := cfg.GetSessionHomeDir()
 	outputFile := n.formatFilename(sessionName)
 
 	if err := n.writeSessionFile(outputDir, outputFile, *session); err != nil {
@@ -292,14 +254,18 @@ func (n *newSessionCmd) newSession(cmd *cobra.Command, args []string) error {
 	return nil
 }
 
-func (n *newSessionCmd) formatFilename(name string) string {
+func (n *CmdCreate) formatFilename(name string) string {
 	if !strings.HasSuffix(name, ".json") {
 		name = fmt.Sprintf("%s.json", name)
 	}
 	return name
 }
 
-func (n *newSessionCmd) writeSessionFile(outputDir, outputFile string, session CumulocitySession) error {
+func (n *CmdCreate) writeSessionFile(outputDir, outputFile string, session c8ysession.CumulocitySession) error {
+	log, err := n.factory.Logger()
+	if err != nil {
+		return err
+	}
 	data, err := json.MarshalIndent(session, "", "  ")
 
 	if err != nil {
@@ -310,11 +276,11 @@ func (n *newSessionCmd) writeSessionFile(outputDir, outputFile string, session C
 
 	if outputDir != "" {
 		if err := os.MkdirAll(outputDir, os.ModePerm); err != nil {
-			Logger.Errorf("failed to create folder. folder=%s, err=%s", outputDir, err)
+			log.Errorf("failed to create folder. folder=%s, err=%s", outputDir, err)
 			return err
 		}
 	}
-	Logger.Debugf("output file: %s", outputPath)
+	log.Debugf("output file: %s", outputPath)
 
 	if err := ioutil.WriteFile(path.Join(outputDir, outputFile), data, 0644); err != nil {
 		return errors.Wrap(err, "failed to write to file")

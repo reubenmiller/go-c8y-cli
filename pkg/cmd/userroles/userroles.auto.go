@@ -17,7 +17,7 @@ type SubCmdUserroles struct {
 	*subcommand.SubCommand
 }
 
-func NewSubCmdUserroles(f *cmdutil.Factory) *SubCmdUserroles {
+func NewSubCommand(f *cmdutil.Factory) *SubCmdUserroles {
 	ccmd := &SubCmdUserroles{}
 
 	cmd := &cobra.Command{

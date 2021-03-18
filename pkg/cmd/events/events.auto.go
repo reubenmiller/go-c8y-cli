@@ -20,7 +20,7 @@ type SubCmdEvents struct {
 	*subcommand.SubCommand
 }
 
-func NewSubCmdEvents(f *cmdutil.Factory) *SubCmdEvents {
+func NewSubCommand(f *cmdutil.Factory) *SubCmdEvents {
 	ccmd := &SubCmdEvents{}
 
 	cmd := &cobra.Command{

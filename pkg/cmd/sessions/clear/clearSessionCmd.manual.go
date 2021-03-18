@@ -1,22 +1,34 @@
-package cmd
+package clear
 
 import (
 	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmd/subcommand"
+	"github.com/reubenmiller/go-c8y-cli/pkg/cmdutil"
 	"github.com/reubenmiller/go-c8y-cli/pkg/completion"
+	"github.com/reubenmiller/go-c8y-cli/pkg/config"
+	"github.com/reubenmiller/go-c8y-cli/pkg/utilities"
+	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
 )
 
-// ClearSessionCmd clear session command
-type ClearSessionCmd struct {
+// CmdClearSession clear session command
+type CmdClearSession struct {
 	Shell string
 
 	*subcommand.SubCommand
+
+	factory *cmdutil.Factory
+	Config  func() (*config.Config, error)
+	Client  func() (*c8y.Client, error)
 }
 
-// NewClearSessionCmd creates a command used to clear the current session
-func NewClearSessionCmd() *ClearSessionCmd {
-	ccmd := &ClearSessionCmd{}
+// NewCmdClearSession creates a command used to clear the current session
+func NewCmdClearSession(f *cmdutil.Factory) *CmdClearSession {
+	ccmd := &CmdClearSession{
+		factory: f,
+		Config:  f.Config,
+		Client:  f.Client,
+	}
 
 	cmd := &cobra.Command{
 		Use:   "clear",
@@ -47,8 +59,8 @@ $ c8y session clear | source
 	return ccmd
 }
 
-func (n *ClearSessionCmd) RunE(cmd *cobra.Command, args []string) error {
-	shell := ShellBash
-	clearEnvironmentVariables(shell.FromString(n.Shell))
+func (n *CmdClearSession) RunE(cmd *cobra.Command, args []string) error {
+	shell := utilities.ShellBash
+	utilities.ClearEnvironmentVariables(shell.FromString(n.Shell))
 	return nil
 }

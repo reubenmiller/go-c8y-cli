@@ -1,4 +1,4 @@
-package cmd
+package find
 
 import (
 	"fmt"
@@ -9,18 +9,28 @@ import (
 	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmd/subcommand"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
+	"github.com/reubenmiller/go-c8y-cli/pkg/cmdutil"
+	"github.com/reubenmiller/go-c8y-cli/pkg/config"
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/pkg/mapbuilder"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
 )
 
-type QueryManagedObjectCollectionCmd struct {
+type CmdFind struct {
 	*subcommand.SubCommand
+
+	factory *cmdutil.Factory
+	Config  func() (*config.Config, error)
+	Client  func() (*c8y.Client, error)
 }
 
-func NewQueryManagedObjectCollectionCmd() *QueryManagedObjectCollectionCmd {
-	ccmd := &QueryManagedObjectCollectionCmd{}
+func NewCmdFind(f *cmdutil.Factory) *CmdFind {
+	ccmd := &CmdFind{
+		factory: f,
+		Config:  f.Config,
+		Client:  f.Client,
+	}
 
 	cmd := &cobra.Command{
 		Use:   "find",
@@ -52,13 +62,21 @@ Get a list of managed objects
 	return ccmd
 }
 
-func (n *QueryManagedObjectCollectionCmd) RunE(cmd *cobra.Command, args []string) error {
+func (n *CmdFind) RunE(cmd *cobra.Command, args []string) error {
+	cfg, err := n.Config()
+	if err != nil {
+		return err
+	}
+	client, err := n.Client()
+	if err != nil {
+		return err
+	}
 	inputIterators := &flags.RequestInputIterators{}
 
 	// query parameters
 	query := flags.NewQueryTemplate()
 
-	commonOptions, err := cliConfig.GetOutputCommonOptions(cmd)
+	commonOptions, err := cfg.GetOutputCommonOptions(cmd)
 	if err != nil {
 		return err
 	}
@@ -118,9 +136,9 @@ func (n *QueryManagedObjectCollectionCmd) RunE(cmd *cobra.Command, args []string
 		Body:         body,
 		FormData:     formData,
 		Header:       headers,
-		IgnoreAccept: cliConfig.IgnoreAcceptHeader(),
-		DryRun:       cliConfig.DryRun(),
+		IgnoreAccept: cfg.IgnoreAcceptHeader(),
+		DryRun:       cfg.DryRun(),
 	}
 
-	return processRequestAndResponseWithWorkers(cmd, &req, inputIterators)
+	return n.factory.RunWithWorkers(client, cmd, &req, inputIterators)
 }

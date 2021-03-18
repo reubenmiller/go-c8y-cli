@@ -13,7 +13,7 @@ type SubCmdTenantstatistics struct {
 	*subcommand.SubCommand
 }
 
-func NewSubCmdTenantstatistics(f *cmdutil.Factory) *SubCmdTenantstatistics {
+func NewSubCommand(f *cmdutil.Factory) *SubCmdTenantstatistics {
 	ccmd := &SubCmdTenantstatistics{}
 
 	cmd := &cobra.Command{

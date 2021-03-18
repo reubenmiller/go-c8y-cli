@@ -91,7 +91,7 @@ func (n *ListCmd) RunE(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return err
 	}
-	client, err := n.Client()
+	client, err := n.factory.Client()
 	if err != nil {
 		return err
 	}

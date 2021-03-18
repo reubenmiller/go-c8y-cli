@@ -19,7 +19,7 @@ type SubCmdApplications struct {
 	*subcommand.SubCommand
 }
 
-func NewSubCmdApplications(f *cmdutil.Factory) *SubCmdApplications {
+func NewSubCommand(f *cmdutil.Factory) *SubCmdApplications {
 	ccmd := &SubCmdApplications{}
 
 	cmd := &cobra.Command{

@@ -12,6 +12,7 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmdutil"
 	"github.com/reubenmiller/go-c8y-cli/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/pkg/config"
+	"github.com/reubenmiller/go-c8y-cli/pkg/utilities"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -362,13 +363,13 @@ func (n *UpdateSettingsCmd) RunE(cmd *cobra.Command, args []string) error {
 		}
 		fmt.Fprintln(cmd.ErrOrStderr(), color.GreenString("Updated session file %s", v.ConfigFileUsed()))
 	} else {
-		shell := ShellBash
+		shell := utilities.ShellBash
 		cfg := make(map[string]interface{})
 		for _, key := range v.AllKeys() {
 			envKey := strings.ToUpper(strings.ReplaceAll(config.EnvSettingsPrefix+"_"+key, ".", "_"))
 			cfg[envKey] = v.Get(key)
 		}
-		showEnvironmentVariables(cfg, shell.FromString(n.shell))
+		utilities.ShowEnvironmentVariables(cfg, shell.FromString(n.shell))
 	}
 
 	return nil

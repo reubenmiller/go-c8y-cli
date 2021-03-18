@@ -16,7 +16,7 @@ type SubCmdMeasurements struct {
 	*subcommand.SubCommand
 }
 
-func NewSubCmdMeasurements(f *cmdutil.Factory) *SubCmdMeasurements {
+func NewSubCommand(f *cmdutil.Factory) *SubCmdMeasurements {
 	ccmd := &SubCmdMeasurements{}
 
 	cmd := &cobra.Command{

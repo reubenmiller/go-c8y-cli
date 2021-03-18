@@ -12,7 +12,7 @@ type SubCmdSystemoptions struct {
 	*subcommand.SubCommand
 }
 
-func NewSubCmdSystemoptions(f *cmdutil.Factory) *SubCmdSystemoptions {
+func NewSubCommand(f *cmdutil.Factory) *SubCmdSystemoptions {
 	ccmd := &SubCmdSystemoptions{}
 
 	cmd := &cobra.Command{

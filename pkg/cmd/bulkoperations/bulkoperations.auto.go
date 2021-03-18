@@ -15,7 +15,7 @@ type SubCmdBulkoperations struct {
 	*subcommand.SubCommand
 }
 
-func NewSubCmdBulkoperations(f *cmdutil.Factory) *SubCmdBulkoperations {
+func NewSubCommand(f *cmdutil.Factory) *SubCmdBulkoperations {
 	ccmd := &SubCmdBulkoperations{}
 
 	cmd := &cobra.Command{

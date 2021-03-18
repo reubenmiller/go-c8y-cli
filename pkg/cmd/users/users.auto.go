@@ -23,7 +23,7 @@ type SubCmdUsers struct {
 	*subcommand.SubCommand
 }
 
-func NewSubCmdUsers(f *cmdutil.Factory) *SubCmdUsers {
+func NewSubCommand(f *cmdutil.Factory) *SubCmdUsers {
 	ccmd := &SubCmdUsers{}
 
 	cmd := &cobra.Command{

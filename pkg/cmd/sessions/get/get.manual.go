@@ -1,4 +1,4 @@
-package cmd
+package get
 
 import (
 	"bytes"
@@ -6,30 +6,42 @@ import (
 	"fmt"
 
 	"github.com/MakeNowJust/heredoc/v2"
+	"github.com/reubenmiller/go-c8y-cli/pkg/c8ysession"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmd/subcommand"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
+	"github.com/reubenmiller/go-c8y-cli/pkg/cmdutil"
+	"github.com/reubenmiller/go-c8y-cli/pkg/config"
 	"github.com/reubenmiller/go-c8y-cli/pkg/prompt"
+	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
 	"github.com/tidwall/pretty"
 )
 
 // CumulocitySessionDetails public details about the current session
 type CumulocitySessionDetails struct {
-	CumulocitySession
+	c8ysession.CumulocitySession
 
 	Path string `json:"path"`
 	Name string `json:"name"`
 }
 
-type getSessionCmd struct {
+type CmdGetSession struct {
 	OutputJSON bool
 	prompter   *prompt.Prompt
+
 	*subcommand.SubCommand
+
+	factory *cmdutil.Factory
+	Config  func() (*config.Config, error)
+	Client  func() (*c8y.Client, error)
 }
 
-func newGetSessionCmd() *getSessionCmd {
-	ccmd := &getSessionCmd{}
-	ccmd.prompter = prompt.NewPrompt(Logger)
+func NewCmdGetSession(f *cmdutil.Factory) *CmdGetSession {
+	ccmd := &CmdGetSession{
+		factory: f,
+		Config:  f.Config,
+		Client:  f.Client,
+	}
 
 	cmd := &cobra.Command{
 		Use:   "get",
@@ -42,7 +54,7 @@ $ c8y sessions get
 Get the details about the current session which is specified via the --session argument
 $ c8y sessions get --session mycustomsession
 		`),
-		RunE: ccmd.getSession,
+		RunE: ccmd.RunE,
 	}
 
 	cmd.Flags().BoolVar(&ccmd.OutputJSON, "json", false, "Output passphrase in json")
@@ -53,17 +65,32 @@ $ c8y sessions get --session mycustomsession
 	return ccmd
 }
 
-func (n *getSessionCmd) getSession(cmd *cobra.Command, args []string) error {
-
+func (n *CmdGetSession) RunE(cmd *cobra.Command, args []string) error {
+	cfg, err := n.Config()
+	if err != nil {
+		return err
+	}
+	client, err := n.factory.Client()
+	if err != nil {
+		return err
+	}
+	log, err := n.factory.Logger()
+	if err != nil {
+		return err
+	}
+	n.prompter = prompt.NewPrompt(log)
 	session := CumulocitySessionDetails{
-		Path: cliConfig.GetSessionFilePath(),
-		Name: cliConfig.GetName(),
-		CumulocitySession: CumulocitySession{
-			Host:            cliConfig.GetHost(),
-			Tenant:          cliConfig.GetTenant(),
-			Username:        cliConfig.GetUsername(),
-			Description:     cliConfig.GetDescription(),
-			UseTenantPrefix: cliConfig.Persistent.GetBool("useTenantPrefix"),
+		Path: cfg.GetSessionFilePath(),
+		Name: cfg.GetName(),
+		CumulocitySession: c8ysession.CumulocitySession{
+			Host:            cfg.GetHost(),
+			Tenant:          cfg.GetTenant(),
+			Username:        cfg.GetUsername(),
+			Description:     cfg.GetDescription(),
+			UseTenantPrefix: cfg.Persistent.GetBool("useTenantPrefix"),
+
+			Logger: log,
+			Config: cfg,
 		},
 	}
 
@@ -80,14 +107,14 @@ func (n *getSessionCmd) getSession(cmd *cobra.Command, args []string) error {
 
 	if n.OutputJSON {
 
-		if cliConfig.CompactJSON() {
+		if cfg.CompactJSON() {
 			fmt.Printf("%s%s", bytes.TrimSpace(b), outputEnding)
 		} else {
 			fmt.Printf("%s%s", pretty.Pretty(bytes.TrimSpace(b)), outputEnding)
 		}
 	} else {
 		session.CumulocitySession.Path = session.Path
-		printSessionInfo(n.SubCommand.GetCommand().ErrOrStderr(), session.CumulocitySession)
+		c8ysession.PrintSessionInfo(n.SubCommand.GetCommand().ErrOrStderr(), client, session.CumulocitySession)
 	}
 	return nil
 }

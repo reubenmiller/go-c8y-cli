@@ -1,4 +1,4 @@
-package cmd
+package config
 
 // CommandSettings contains the standard commonly used configuration settings
 type CommandSettings struct {

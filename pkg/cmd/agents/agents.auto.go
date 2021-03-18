@@ -14,7 +14,7 @@ type SubCmdAgents struct {
 	*subcommand.SubCommand
 }
 
-func NewSubCmdAgents(f *cmdutil.Factory) *SubCmdAgents {
+func NewSubCommand(f *cmdutil.Factory) *SubCmdAgents {
 	ccmd := &SubCmdAgents{}
 
 	cmd := &cobra.Command{

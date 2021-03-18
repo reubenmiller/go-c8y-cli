@@ -15,7 +15,7 @@ type SubCmdOperations struct {
 	*subcommand.SubCommand
 }
 
-func NewSubCmdOperations(f *cmdutil.Factory) *SubCmdOperations {
+func NewSubCommand(f *cmdutil.Factory) *SubCmdOperations {
 	ccmd := &SubCmdOperations{}
 
 	cmd := &cobra.Command{

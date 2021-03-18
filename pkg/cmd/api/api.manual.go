@@ -27,7 +27,7 @@ type CmdAPI struct {
 	flagHost string
 }
 
-func NewCmdAPI(f *cmdutil.Factory) *CmdAPI {
+func NewSubCommand(f *cmdutil.Factory) *CmdAPI {
 	ccmd := &CmdAPI{
 		factory: f,
 		Config:  f.Config,

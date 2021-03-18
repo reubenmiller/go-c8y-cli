@@ -60,7 +60,7 @@ type SubCmd${NameCamel} struct {
     *subcommand.SubCommand
 }
 
-func NewSubCmd${NameCamel}(f *cmdutil.Factory) *SubCmd${NameCamel} {
+func NewSubCommand(f *cmdutil.Factory) *SubCmd${NameCamel} {
     ccmd := &SubCmd${NameCamel}{}
 
     cmd := &cobra.Command{

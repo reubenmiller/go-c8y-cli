@@ -15,7 +15,7 @@ type SubCmdRetentionrules struct {
 	*subcommand.SubCommand
 }
 
-func NewSubCmdRetentionrules(f *cmdutil.Factory) *SubCmdRetentionrules {
+func NewSubCommand(f *cmdutil.Factory) *SubCmdRetentionrules {
 	ccmd := &SubCmdRetentionrules{}
 
 	cmd := &cobra.Command{

@@ -1,4 +1,4 @@
-package cmd
+package list
 
 import (
 	"fmt"
@@ -8,17 +8,27 @@ import (
 	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmd/subcommand"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
+	"github.com/reubenmiller/go-c8y-cli/pkg/cmdutil"
+	"github.com/reubenmiller/go-c8y-cli/pkg/config"
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
 )
 
-type GetAgentCollectionCmd struct {
+type CmdAgentList struct {
 	*subcommand.SubCommand
+
+	factory *cmdutil.Factory
+	Config  func() (*config.Config, error)
+	Client  func() (*c8y.Client, error)
 }
 
-func NewGetAgentCollectionCmd() *GetAgentCollectionCmd {
-	ccmd := &GetAgentCollectionCmd{}
+func NewCmdAgentList(f *cmdutil.Factory) *CmdAgentList {
+	ccmd := &CmdAgentList{
+		factory: f,
+		Config:  f.Config,
+		Client:  f.Client,
+	}
 
 	cmd := &cobra.Command{
 		Use:   "list",
@@ -47,8 +57,15 @@ func NewGetAgentCollectionCmd() *GetAgentCollectionCmd {
 	return ccmd
 }
 
-func (n *GetAgentCollectionCmd) RunE(cmd *cobra.Command, args []string) error {
-	var err error
+func (n *CmdAgentList) RunE(cmd *cobra.Command, args []string) error {
+	cfg, err := n.Config()
+	if err != nil {
+		return err
+	}
+	client, err := n.Client()
+	if err != nil {
+		return err
+	}
 	inputIterators, err := flags.NewRequestInputIterators(cmd)
 	if err != nil {
 		return err
@@ -57,7 +74,7 @@ func (n *GetAgentCollectionCmd) RunE(cmd *cobra.Command, args []string) error {
 	// query parameters
 	query := flags.NewQueryTemplate()
 
-	commonOptions, err := cliConfig.GetOutputCommonOptions(cmd)
+	commonOptions, err := cfg.GetOutputCommonOptions(cmd)
 	if err != nil {
 		return err
 	}
@@ -117,9 +134,9 @@ func (n *GetAgentCollectionCmd) RunE(cmd *cobra.Command, args []string) error {
 		Method:       "GET",
 		Path:         path.GetTemplate(),
 		Query:        queryValue,
-		DryRun:       cliConfig.DryRun(),
-		IgnoreAccept: cliConfig.IgnoreAcceptHeader(),
+		DryRun:       cfg.DryRun(),
+		IgnoreAccept: cfg.IgnoreAcceptHeader(),
 	}
 
-	return processRequestAndResponseWithWorkers(cmd, &req, inputIterators)
+	return n.factory.RunWithWorkers(client, cmd, &req, inputIterators)
 }

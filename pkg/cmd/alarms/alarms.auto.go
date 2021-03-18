@@ -16,7 +16,7 @@ type SubCmdAlarms struct {
 	*subcommand.SubCommand
 }
 
-func NewSubCmdAlarms(f *cmdutil.Factory) *SubCmdAlarms {
+func NewSubCommand(f *cmdutil.Factory) *SubCmdAlarms {
 	ccmd := &SubCmdAlarms{}
 
 	cmd := &cobra.Command{

@@ -13,7 +13,7 @@ type SubCmdDatabroker struct {
 	*subcommand.SubCommand
 }
 
-func NewSubCmdDatabroker(f *cmdutil.Factory) *SubCmdDatabroker {
+func NewSubCommand(f *cmdutil.Factory) *SubCmdDatabroker {
 	ccmd := &SubCmdDatabroker{}
 
 	cmd := &cobra.Command{

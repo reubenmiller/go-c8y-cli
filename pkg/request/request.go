@@ -24,11 +24,11 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/pkg/console"
 	"github.com/reubenmiller/go-c8y-cli/pkg/dataview"
 	"github.com/reubenmiller/go-c8y-cli/pkg/encoding"
+	"github.com/reubenmiller/go-c8y-cli/pkg/iostreams"
 	"github.com/reubenmiller/go-c8y-cli/pkg/jsonUtilities"
 	"github.com/reubenmiller/go-c8y-cli/pkg/jsonformatter"
 	"github.com/reubenmiller/go-c8y-cli/pkg/logger"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
-	"github.com/spf13/cobra"
 	"github.com/tidwall/gjson"
 	"github.com/tidwall/pretty"
 	"moul.io/http2curl"
@@ -139,7 +139,7 @@ func (r *RequestHandler) DumpRequest(w io.Writer, req *http.Request) {
 	}
 }
 
-func (r *RequestHandler) DryRunHandler(cmd *cobra.Command, options *c8y.RequestOptions, req *http.Request) {
+func (r *RequestHandler) DryRunHandler(iostream *iostreams.IOStreams, options *c8y.RequestOptions, req *http.Request) {
 
 	if !r.Config.DryRun() {
 		return
@@ -148,9 +148,9 @@ func (r *RequestHandler) DryRunHandler(cmd *cobra.Command, options *c8y.RequestO
 		r.Logger.Warn("Response is nil")
 		return
 	}
-	w := cmd.ErrOrStderr()
+	w := iostream.ErrOut
 	if r.Config.WithError() {
-		w = cmd.OutOrStdout()
+		w = iostream.Out
 	}
 
 	r.PrintRequestDetails(w, nil, req)

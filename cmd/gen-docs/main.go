@@ -6,7 +6,7 @@ import (
 	"strings"
 
 	"github.com/reubenmiller/go-c8y-cli/internal/docs"
-	"github.com/reubenmiller/go-c8y-cli/pkg/cmd"
+	"github.com/reubenmiller/go-c8y-cli/pkg/cmd/root"
 	"github.com/spf13/pflag"
 )
 
@@ -35,9 +35,9 @@ func main() {
 		fatal("no dir set")
 	}
 
-	rootCmd := cmd.NewRootCmd()
+	rootCmd := root.NewCmdRoot(nil, "", "")
 	rootCmd.InitDefaultHelpCmd()
-	rootCmd.ConfigureRootCmd()
+	// rootCmd.ConfigureRootCmd()
 	// rootCmd.ConfigureRootCmd()
 
 	err := os.MkdirAll(*dir, 0755)
@@ -46,7 +46,7 @@ func main() {
 	}
 
 	if *website {
-		err = docs.GenMarkdownTreeCustom(&rootCmd.Command, *dir, filePrepender, linkHandler)
+		err = docs.GenMarkdownTreeCustom(rootCmd.Command, *dir, filePrepender, linkHandler)
 		if err != nil {
 			fatal(err)
 		}
@@ -60,7 +60,7 @@ func main() {
 			Source:  "",
 			Manual:  "",
 		}
-		err = docs.GenManTree(&rootCmd.Command, header, *dir)
+		err = docs.GenManTree(rootCmd.Command, header, *dir)
 		if err != nil {
 			fatal(err)
 		}

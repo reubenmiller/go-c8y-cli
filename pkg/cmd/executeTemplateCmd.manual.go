@@ -59,7 +59,7 @@ Verify a jsonnet template and specify input data to be used as the input when ev
 	)
 
 	// Required flags
-	_ = cmd.MarkFlagRequired(FlagDataTemplateName)
+	_ = cmd.MarkFlagRequired(flags.FlagDataTemplateName)
 
 	cmdutil.DisableAuthCheck(cmd)
 	ccmd.SubCommand = subcommand.NewSubCommand(cmd)

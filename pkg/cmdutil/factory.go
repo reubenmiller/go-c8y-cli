@@ -1,10 +1,6 @@
 package cmdutil
 
 import (
-	"os"
-	"regexp"
-	"strings"
-
 	"github.com/reubenmiller/go-c8y-cli/pkg/activitylogger"
 	"github.com/reubenmiller/go-c8y-cli/pkg/config"
 	"github.com/reubenmiller/go-c8y-cli/pkg/console"
@@ -95,7 +91,7 @@ func (f *Factory) GetRequestHandler() (*request.RequestHandler, error) {
 		DataView:       dataview,
 		Console:        consol,
 		ActivityLogger: activityLogger,
-		HideSensitive:  HideSensitiveInformationIfActive,
+		HideSensitive:  config.HideSensitiveInformationIfActive,
 	}
 	return handler, nil
 }
@@ -131,7 +127,7 @@ func (f *Factory) RunWithWorkers(client *c8y.Client, cmd *cobra.Command, req *c8
 		DataView:       dataview,
 		Console:        consol,
 		ActivityLogger: activityLogger,
-		HideSensitive:  HideSensitiveInformationIfActive,
+		HideSensitive:  config.HideSensitiveInformationIfActive,
 	}
 	w, err := worker.NewWorker(log, cfg, f.IOStreams, client, activityLogger, handler.ProcessRequestAndResponse)
 
@@ -139,34 +135,6 @@ func (f *Factory) RunWithWorkers(client *c8y.Client, cmd *cobra.Command, req *c8
 		return err
 	}
 	return w.ProcessRequestAndResponse(cmd, req, inputIterators)
-}
-
-func HideSensitiveInformationIfActive(client *c8y.Client, message string) string {
-	if client == nil {
-		return message
-	}
-
-	if !strings.EqualFold(os.Getenv(c8y.EnvVarLoggerHideSensitive), "true") {
-		return message
-	}
-
-	if os.Getenv("USERNAME") != "" {
-		message = strings.ReplaceAll(message, os.Getenv("USERNAME"), "******")
-	}
-
-	if client != nil {
-		message = strings.ReplaceAll(message, client.TenantName, "{tenant}")
-		message = strings.ReplaceAll(message, client.Username, "{username}")
-		message = strings.ReplaceAll(message, client.Password, "{password}")
-		if client.BaseURL != nil {
-			message = strings.ReplaceAll(message, strings.TrimRight(client.BaseURL.Host, "/"), "{host}")
-		}
-	}
-
-	basicAuthMatcher := regexp.MustCompile(`(Basic\s+)[A-Za-z0-9=]+`)
-	message = basicAuthMatcher.ReplaceAllString(message, "$1 {base64 tenant/username:password}")
-
-	return message
 }
 
 // WriteJSONToConsole writes given json output to the console supporting the common options of select, output etc.

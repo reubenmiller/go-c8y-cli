@@ -16,7 +16,7 @@ type SubCmdUsergroups struct {
 	*subcommand.SubCommand
 }
 
-func NewSubCmdUsergroups(f *cmdutil.Factory) *SubCmdUsergroups {
+func NewSubCommand(f *cmdutil.Factory) *SubCmdUsergroups {
 	ccmd := &SubCmdUsergroups{}
 
 	cmd := &cobra.Command{

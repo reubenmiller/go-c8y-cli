@@ -18,7 +18,7 @@ type SubCmdTenantoptions struct {
 	*subcommand.SubCommand
 }
 
-func NewSubCmdTenantoptions(f *cmdutil.Factory) *SubCmdTenantoptions {
+func NewSubCommand(f *cmdutil.Factory) *SubCmdTenantoptions {
 	ccmd := &SubCmdTenantoptions{}
 
 	cmd := &cobra.Command{

@@ -52,6 +52,10 @@ func (n *listSettingsCmd) listSettings(cmd *cobra.Command, args []string) error 
 	if err != nil {
 		return err
 	}
+	activitylog, err := n.Factory.ActivityLogger()
+	if err != nil {
+		return err
+	}
 	var responseText []byte
 
 	// settings := viper.GetViper().AllSettings()
@@ -61,13 +65,13 @@ func (n *listSettingsCmd) listSettings(cmd *cobra.Command, args []string) error 
 	allSettings.ApplyMap(settings)
 
 	// add additional settings
-	err = allSettings.Set("settings.session.home", getSessionHomeDir())
+	err = allSettings.Set("settings.session.home", cfg.GetSessionHomeDir())
 	if err != nil {
 		Logger.Warnf("Could not get home session directory. %s", err)
 	}
 
-	if activityLogger != nil {
-		err := allSettings.Set("settings.activitylog.currentPath", activityLogger.GetPath())
+	if activitylog != nil {
+		err := allSettings.Set("settings.activitylog.currentPath", activitylog.GetPath())
 		if err != nil {
 			Logger.Warnf("Could not get activity logger path. %s", err)
 		}

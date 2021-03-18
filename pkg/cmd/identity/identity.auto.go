@@ -14,7 +14,7 @@ type SubCmdIdentity struct {
 	*subcommand.SubCommand
 }
 
-func NewSubCmdIdentity(f *cmdutil.Factory) *SubCmdIdentity {
+func NewSubCommand(f *cmdutil.Factory) *SubCmdIdentity {
 	ccmd := &SubCmdIdentity{}
 
 	cmd := &cobra.Command{

@@ -22,7 +22,7 @@ type SubCmdDevices struct {
 	*subcommand.SubCommand
 }
 
-func NewSubCmdDevices(f *cmdutil.Factory) *SubCmdDevices {
+func NewSubCommand(f *cmdutil.Factory) *SubCmdDevices {
 	ccmd := &SubCmdDevices{}
 
 	cmd := &cobra.Command{

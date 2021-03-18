@@ -13,7 +13,7 @@ type SubCmdCurrentapplication struct {
 	*subcommand.SubCommand
 }
 
-func NewSubCmdCurrentapplication(f *cmdutil.Factory) *SubCmdCurrentapplication {
+func NewSubCommand(f *cmdutil.Factory) *SubCmdCurrentapplication {
 	ccmd := &SubCmdCurrentapplication{}
 
 	cmd := &cobra.Command{

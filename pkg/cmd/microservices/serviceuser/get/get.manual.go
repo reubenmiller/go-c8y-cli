@@ -3,6 +3,7 @@ package cmd
 import (
 	"context"
 	"fmt"
+	"io"
 
 	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/reubenmiller/go-c8y-cli/pkg/c8yfetcher"
@@ -10,6 +11,7 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmdutil"
 	"github.com/reubenmiller/go-c8y-cli/pkg/config"
+	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
 )
@@ -74,21 +76,32 @@ func (n *CmdGet) RunE(cmd *cobra.Command, args []string) error {
 	// path parameters
 	appIDs := []string{}
 
-	if cmd.Flags().Lookup("id") != nil {
-		idInputValues, idValue, err := getMicroserviceSlice(cmd, args, "id")
+	inputIterators, err := flags.NewRequestInputIterators(cmd)
+	if err != nil {
+		return err
+	}
 
-		if err != nil {
-			return cmderrors.NewUserError("no matching microservices found", idInputValues, err)
+	// path parameters
+	path := flags.NewStringTemplate("{id}")
+	err = flags.WithPathParameters(
+		cmd,
+		path,
+		inputIterators,
+		c8yfetcher.WithMicroserviceByNameFirstMatch(client, args, "id", "id"),
+	)
+	if err != nil {
+		return err
+	}
+
+	for {
+		v, _, err := path.GetNext()
+
+		if err == nil && len(v) > 0 {
+			appIDs = append(appIDs, fmt.Sprintf("%s", v))
 		}
 
-		if len(idValue) == 0 {
-			return cmderrors.NewUserError("no matching microservices found", idInputValues)
-		}
-
-		for _, item := range idValue {
-			if item != "" {
-				appIDs = append(appIDs, c8yfetcher.NewIDValue(item).GetID())
-			}
+		if err == io.EOF {
+			break
 		}
 	}
 

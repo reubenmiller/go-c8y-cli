@@ -1,21 +1,32 @@
-package cmd
+package decrypttext
 
 import (
 	"fmt"
 
 	"github.com/howeyc/gopass"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmd/subcommand"
+	"github.com/reubenmiller/go-c8y-cli/pkg/cmdutil"
+	"github.com/reubenmiller/go-c8y-cli/pkg/config"
+	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
 )
 
-type decryptTextCmd struct {
+type CmdDecryptText struct {
 	passphrase string
 
 	*subcommand.SubCommand
+
+	factory *cmdutil.Factory
+	Config  func() (*config.Config, error)
+	Client  func() (*c8y.Client, error)
 }
 
-func newDecryptTextCmd() *decryptTextCmd {
-	ccmd := &decryptTextCmd{}
+func NewCmdDecryptText(f *cmdutil.Factory) *CmdDecryptText {
+	ccmd := &CmdDecryptText{
+		factory: f,
+		Config:  f.Config,
+		Client:  f.Client,
+	}
 
 	cmd := &cobra.Command{
 		Use:   "decryptText",
@@ -32,7 +43,7 @@ c8y session encryptText --text "Hello World" --passphrase "so4methIng-7hat-Matte
 
 Encrypt the text "Hello World", the text will be encrypted using the given passphrase (without being prompted)
 		`,
-		RunE: ccmd.decryptText,
+		RunE: ccmd.RunE,
 	}
 
 	cmd.SilenceUsage = true
@@ -48,8 +59,15 @@ Encrypt the text "Hello World", the text will be encrypted using the given passp
 	return ccmd
 }
 
-func (n *decryptTextCmd) decryptText(cmd *cobra.Command, args []string) error {
-
+func (n *CmdDecryptText) RunE(cmd *cobra.Command, args []string) error {
+	cfg, err := n.Config()
+	if err != nil {
+		return err
+	}
+	log, err := n.factory.Logger()
+	if err != nil {
+		return err
+	}
 	if n.passphrase == "" {
 		cmd.Printf("Enter password 🔒: [input is hidden] ")
 		inputPassphrase, err := gopass.GetPasswd() // Silent
@@ -63,13 +81,13 @@ func (n *decryptTextCmd) decryptText(cmd *cobra.Command, args []string) error {
 
 	if v, err := cmd.Flags().GetString("text"); err == nil && v != "" {
 
-		if cliConfig.SecureData.IsEncrypted(v) != 0 {
-			password, err = cliConfig.SecureData.DecryptString(v, n.passphrase)
+		if cfg.SecureData.IsEncrypted(v) != 0 {
+			password, err = cfg.SecureData.DecryptString(v, n.passphrase)
 			if err != nil {
 				return err
 			}
 		} else {
-			Logger.Info("Text is already decrypted")
+			log.Info("Text is already decrypted")
 			password = v
 		}
 	}

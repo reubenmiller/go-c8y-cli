@@ -1,16 +1,17 @@
-package cmd
+package utilities
 
 import (
+	"bytes"
 	"fmt"
 	"io"
 	"net/http"
 	"os"
-	"path/filepath"
+	"runtime"
 	"sort"
 	"strings"
 
 	"github.com/manifoldco/promptui"
-	homedir "github.com/mitchellh/go-homedir"
+	"github.com/reubenmiller/go-c8y-cli/pkg/config"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 )
 
@@ -30,29 +31,6 @@ func GetFileContentType(out *os.File) (string, error) {
 	contentType := http.DetectContentType(buffer)
 
 	return contentType, nil
-}
-
-func getSessionHomeDir() string {
-	var outputDir string
-
-	if v := os.Getenv("C8Y_SESSION_HOME"); v != "" {
-		expandedV, err := homedir.Expand(v)
-		outputDir = v
-		if err == nil {
-			outputDir = expandedV
-		} else {
-			Logger.Warnf("Could not expand path. %s", err)
-		}
-	} else {
-		outputDir, _ = homedir.Dir()
-		outputDir = filepath.Join(outputDir, ".cumulocity", "sessions")
-	}
-
-	err := os.MkdirAll(outputDir, os.ModePerm)
-	if err != nil {
-		Logger.Errorf("Could not create sessions directory and it does not exist. %s", err)
-	}
-	return outputDir
 }
 
 type ShellType int
@@ -85,12 +63,12 @@ const (
 	ShellFish
 )
 
-func showClientEnvironmentVariables(c8yclient *c8y.Client, shell ShellType) {
-	output := cliConfig.GetEnvironmentVariables(c8yclient, false)
-	showEnvironmentVariables(output, shell)
+func ShowClientEnvironmentVariables(cfg *config.Config, c8yclient *c8y.Client, shell ShellType) {
+	output := cfg.GetEnvironmentVariables(c8yclient, false)
+	ShowEnvironmentVariables(output, shell)
 }
 
-func showEnvironmentVariables(config map[string]interface{}, shell ShellType) {
+func ShowEnvironmentVariables(config map[string]interface{}, shell ShellType) {
 	// sort output variables
 	variables := []string{}
 
@@ -112,9 +90,9 @@ func showEnvironmentVariables(config map[string]interface{}, shell ShellType) {
 	}
 }
 
-// clearEnvironmentVariables clears all the session related environment variables by passing
+// ClearEnvironmentVariables clears all the session related environment variables by passing
 // a shell snippet to execute via source or eval.
-func clearEnvironmentVariables(shell ShellType) {
+func ClearEnvironmentVariables(shell ShellType) {
 	variables := []string{
 		"C8Y_HOST",
 		"C8Y_URL",
@@ -147,46 +125,80 @@ func clearEnvironmentVariables(shell ShellType) {
 	}
 }
 
-func checkEncryption(w io.Writer) error {
-	encryptionEnabled := cliConfig.IsEncryptionEnabled()
+func CheckEncryption(w io.Writer, cfg *config.Config, client *c8y.Client) error {
+	encryptionEnabled := cfg.IsEncryptionEnabled()
 	decryptSession := false
-	if !encryptionEnabled && cliConfig.IsPasswordEncrypted() {
-		cliConfig.Logger.Infof("Encryption has been disabled but detected a encrypted session")
+	if !encryptionEnabled && cfg.IsPasswordEncrypted() {
+		cfg.Logger.Infof("Encryption has been disabled but detected a encrypted session")
 		decryptSession = true
 	}
-	if encryptionEnabled || cliConfig.IsPasswordEncrypted() {
-		if err := cliConfig.ReadKeyFile(); err != nil {
+	if encryptionEnabled || cfg.IsPasswordEncrypted() {
+		if err := cfg.ReadKeyFile(); err != nil {
 			return err
 		}
 
 		// check if encryption is used on the current session
-		passphrase, err := cliConfig.CheckEncryption()
+		passphrase, err := cfg.CheckEncryption()
 		if err != nil {
 			return err
 		}
 		if passphrase == "" || passphrase == "null" {
 			return fmt.Errorf("passphrase can not be empty")
 		}
-		cliConfig.Passphrase = passphrase
+		cfg.Passphrase = passphrase
 
 		// Decrypt username and cookies if necessary
-		clientpass, err := cliConfig.GetPassword()
+		clientpass, err := cfg.GetPassword()
 		if err != nil {
 			return err
 		}
-		client.SetCookies(cliConfig.GetCookies())
+		client.SetCookies(cfg.GetCookies())
 		client.Password = clientpass
 
 		// decrypt settings
 		if decryptSession {
-			if err := cliConfig.DecryptSession(); err != nil {
+			if err := cfg.DecryptSession(); err != nil {
 				return err
 			}
 		}
 
 		green := promptui.Styler(promptui.FGGreen)
 		fmt.Fprint(w, green("Passphrase OK\n"))
-		Logger.Info("Passphrase accepted")
 	}
 	return nil
+}
+
+func GetCommandLineArgs() string {
+	buf := bytes.Buffer{}
+
+	escapeQuotesWindows := func(value string) string {
+		return "'" + strings.ReplaceAll(value, "\"", `\"`) + "'"
+	}
+	escapeQuotesLinux := func(value string) string {
+		return "\"" + strings.ReplaceAll(value, "\"", `\"`) + "\""
+	}
+
+	quoter := escapeQuotesLinux
+	if runtime.GOOS == "windows" {
+		quoter = escapeQuotesWindows
+	}
+
+	for _, arg := range os.Args[1:] {
+		if strings.Contains(arg, " ") {
+			if strings.HasPrefix(arg, "-") {
+				if index := strings.Index(arg, "="); index > -1 {
+					buf.WriteString(arg[0:index] + "=")
+					buf.WriteString(quoter(arg[index+1:]))
+				} else {
+					buf.WriteString(quoter(arg))
+				}
+			} else {
+				buf.WriteString(quoter(arg))
+			}
+		} else {
+			buf.WriteString(arg)
+		}
+		buf.WriteByte(' ')
+	}
+	return buf.String()
 }

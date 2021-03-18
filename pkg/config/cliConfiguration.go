@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"os"
 	"path"
+	"regexp"
 	"strings"
 	"time"
 
@@ -36,6 +37,9 @@ var (
 
 const (
 	EnvSettingsPrefix = "c8y"
+
+	// SettingsGlobalName name of the settings file (without extension)
+	SettingsGlobalName = "settings"
 )
 
 const (
@@ -84,8 +88,11 @@ const (
 	// SettingsDryRunFormat dry run output format. Controls how the dry run information is displayed
 	SettingsDryRunFormat = "settings.defaults.dryFormat"
 
-	// SettingsDebug Debug show debug messages
+	// SettingsDebug Show debug messages
 	SettingsDebug = "settings.defaults.debug"
+
+	// SettingsVerbose Show verbose log messages
+	SettingsVerbose = "settings.defaults.verbose"
 
 	// SettingsJSONCompact show compact json output
 	SettingsJSONCompact = "settings.defaults.compact"
@@ -191,6 +198,9 @@ const (
 
 	// SettingsSilentStatusCodes Status codes which will not print out an error message
 	SettingsSilentStatusCodes = "settings.defaults.silentStatusCodes"
+
+	// SettingsUseEnvironment Read session authentication from environment variables instead of from configuration
+	SettingsUseEnvironment = "settings.defaults.useEnv"
 )
 
 var (
@@ -223,9 +233,6 @@ type Config struct {
 	// Passphrase used for encrypting/decrypting fields
 	Passphrase string
 
-	// KeyFile path to the key file used to test encryption
-	KeyFile string
-
 	prompter prompt.Prompt
 
 	// SecretText used to test the encryption passphrase
@@ -235,7 +242,9 @@ type Config struct {
 }
 
 // NewConfig returns a new CLI configuration object
-func NewConfig(v *viper.Viper, home string, passphrase string) *Config {
+func NewConfig(v *viper.Viper) *Config {
+
+	passphrase := os.Getenv("C8Y_PASSPHRASE")
 
 	c := &Config{
 		viper:      v,
@@ -243,7 +252,6 @@ func NewConfig(v *viper.Viper, home string, passphrase string) *Config {
 		SecureData: encrypt.NewSecureData("{encrypted}"),
 		Persistent: viper.New(),
 		prompter:   prompt.Prompt{},
-		KeyFile:    path.Join(home, KeyFileName),
 		Logger:     logger.NewDummyLogger("SecureData"),
 	}
 	c.prompter.Logger = c.Logger
@@ -357,6 +365,7 @@ func (c *Config) SetSessionFilePath(v string) {
 }
 
 // GetSessionFilePath returns the session file path
+// TODO: Check if this is still needed, as there is a GetSessionFile method as well!
 func (c *Config) GetSessionFilePath() string {
 	return c.path
 }
@@ -397,11 +406,11 @@ func (c *Config) GetTOTP(t time.Time) (string, error) {
 
 // CreateKeyFile creates a file used as reference to validate encryption
 func (c *Config) CreateKeyFile(keyText string) error {
-	if _, err := os.Stat(c.KeyFile); os.IsExist(err) {
+	if _, err := os.Stat(c.KeyFile()); os.IsExist(err) {
 		c.Logger.Infof("Key file already exists. file=%s", c.KeyFile)
 		return nil
 	}
-	key, err := os.Create(c.KeyFile)
+	key, err := os.Create(c.KeyFile())
 	if err != nil {
 		return err
 	}
@@ -410,6 +419,11 @@ func (c *Config) CreateKeyFile(keyText string) error {
 		return err
 	}
 	return nil
+}
+
+// KeyFile path to the key file used to test encryption
+func (c *Config) KeyFile() string {
+	return path.Join(c.GetSessionHomeDir(), KeyFileName)
 }
 
 // ReadKeyFile reads the key file used as a reference to validate encryption (i.e. when no sessions exist)
@@ -423,7 +437,7 @@ func (c *Config) ReadKeyFile() error {
 	}
 
 	// read from file
-	contents, err := ioutil.ReadFile(c.KeyFile)
+	contents, err := ioutil.ReadFile(c.KeyFile())
 
 	if err == nil {
 		if c.SecureData.IsEncryptedBytes(contents) == 1 {
@@ -821,6 +835,11 @@ func (c *Config) Debug() bool {
 	return c.viper.GetBool(SettingsDebug)
 }
 
+// Verbose show verbose messages
+func (c *Config) Verbose() bool {
+	return c.viper.GetBool(SettingsVerbose)
+}
+
 // CompactJSON show compact json output
 func (c *Config) CompactJSON() bool {
 	return c.viper.GetBool(SettingsJSONCompact)
@@ -1068,6 +1087,12 @@ func (c *Config) GetOutputCommonOptions(cmd *cobra.Command) (CommonCommandOption
 	return options, nil
 }
 
+// UseEnvironment Read session authentication from environment variables instead of from configuration
+func (c *Config) UseEnvironment() bool {
+	return c.viper.GetBool(SettingsUseEnvironment)
+
+}
+
 // AllSettings get all the settings as a map
 func (c *Config) AllSettings() map[string]interface{} {
 	return c.viper.AllSettings()
@@ -1161,4 +1186,97 @@ func (c *Config) LogErrorF(err error, format string, args ...interface{}) {
 		}
 	}
 	errorLogger(format, args...)
+}
+
+// GetSessionFile detect the session file path
+func (c *Config) GetSessionFile() string {
+	sessionFile := c.viper.GetString("c8y.settings.defaults.session")
+
+	if sessionFile == "" {
+		// TODO: Create viper env alias rather than checking it manually
+		sessionFile = os.Getenv("C8Y_SESSION")
+	}
+	return c.ExpandHomePath(sessionFile)
+}
+
+// ReadConfigFiles reads multiple configuration files to load the c8y session and other settings
+//
+// The session files are
+// 1. load settings (from C8Y_SESSION_HOME path)
+// 2. load session file (by path)
+// 3. load session file (by name)
+func (c *Config) ReadConfigFiles(client *c8y.Client) (path string, err error) {
+	v := c.viper
+	home := c.GetSessionHomeDir()
+	v.AddConfigPath(".")
+	v.AddConfigPath(home)
+
+	sessionFile := c.GetSessionFile()
+
+	// Load (non-session) preferences
+	v.SetConfigName(SettingsGlobalName)
+
+	if err := v.ReadInConfig(); err == nil {
+		path = v.ConfigFileUsed()
+		c.Logger.Infof("Loaded settings: %s", HideSensitiveInformationIfActive(client, path))
+	}
+
+	// Load session
+	if _, err := os.Stat(sessionFile); err == nil {
+		// Load config by file path
+		v.SetConfigFile(sessionFile)
+
+		if err := c.ReadConfig(sessionFile); err != nil {
+			c.Logger.Warnf("Could not read global settings file. file=%s, err=%s", sessionFile, err)
+		}
+	} else {
+		// Load config by name
+		sessionName := "session"
+		if sessionFile != "" {
+			sessionName = sessionFile
+		}
+
+		if sessionName != "" {
+			v.SetConfigName(sessionName)
+		}
+	}
+
+	err = v.MergeInConfig()
+	path = v.ConfigFileUsed()
+
+	if err != nil {
+		c.Logger.Debugf("Failed to merge config. %s", err)
+	}
+
+	c.Logger.Infof("Loaded session: %s", HideSensitiveInformationIfActive(client, path))
+
+	return path, err
+}
+
+func HideSensitiveInformationIfActive(client *c8y.Client, message string) string {
+	if client == nil {
+		return message
+	}
+
+	if !strings.EqualFold(os.Getenv(c8y.EnvVarLoggerHideSensitive), "true") {
+		return message
+	}
+
+	if os.Getenv("USERNAME") != "" {
+		message = strings.ReplaceAll(message, os.Getenv("USERNAME"), "******")
+	}
+
+	if client != nil {
+		message = strings.ReplaceAll(message, client.TenantName, "{tenant}")
+		message = strings.ReplaceAll(message, client.Username, "{username}")
+		message = strings.ReplaceAll(message, client.Password, "{password}")
+		if client.BaseURL != nil {
+			message = strings.ReplaceAll(message, strings.TrimRight(client.BaseURL.Host, "/"), "{host}")
+		}
+	}
+
+	basicAuthMatcher := regexp.MustCompile(`(Basic\s+)[A-Za-z0-9=]+`)
+	message = basicAuthMatcher.ReplaceAllString(message, "$1 {base64 tenant/username:password}")
+
+	return message
 }

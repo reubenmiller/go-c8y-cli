@@ -1,4 +1,4 @@
-package cmd
+package timestamp
 
 import (
 	"testing"
@@ -6,7 +6,7 @@ import (
 
 func TestInvalidDates(t *testing.T) {
 
-	timestamp, err := parseDurationRelativeToNow("2020010101")
+	timestamp, err := ParseDurationRelativeToNow("2020010101")
 
 	if err == nil {
 		t.Errorf("Timestamp should throw an error. got %s, expected nil", err)

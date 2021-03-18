@@ -6,7 +6,7 @@ import (
 	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/reubenmiller/go-c8y-cli/pkg/c8yfetcher"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmd/subcommand"
-	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
+	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
 )
@@ -52,26 +52,27 @@ Subscribe to alarms (in realtime) for all devices, and stop after receiving 10 a
 }
 
 func (n *subscribeAlarmCmd) subscribeAlarm(cmd *cobra.Command, args []string) error {
+	inputIterators, err := flags.NewRequestInputIterators(cmd)
+	if err != nil {
+		return err
+	}
 
-	// options
-	device := "*"
+	// path parameters
+	path := flags.NewStringTemplate("{device}")
+	err = flags.WithPathParameters(
+		cmd,
+		path,
+		inputIterators,
+		flags.WithStringDefaultValue("*", "device", "device"),
+		c8yfetcher.WithDeviceByNameFirstMatch(client, args, "device", "device"),
+	)
+	if err != nil {
+		return err
+	}
 
-	if cmd.Flags().Changed("device") {
-		deviceInputValues, deviceValue, err := getFormattedDeviceSlice(cmd, args, "device")
-
-		if err != nil {
-			return cmderrors.NewUserError("no matching devices found", deviceInputValues, err)
-		}
-
-		if len(deviceValue) == 0 {
-			return cmderrors.NewUserError("no matching devices found", deviceInputValues)
-		}
-
-		for _, item := range deviceValue {
-			if item != "" {
-				device = c8yfetcher.NewIDValue(item).GetID()
-			}
-		}
+	device, _, err := path.Execute(false)
+	if err != nil {
+		return err
 	}
 
 	return subscribe(c8y.RealtimeAlarms(device), n.flagDurationSec, n.flagCount, cmd)

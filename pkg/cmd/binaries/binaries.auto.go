@@ -15,7 +15,7 @@ type SubCmdBinaries struct {
 	*subcommand.SubCommand
 }
 
-func NewSubCmdBinaries(f *cmdutil.Factory) *SubCmdBinaries {
+func NewSubCommand(f *cmdutil.Factory) *SubCmdBinaries {
 	ccmd := &SubCmdBinaries{}
 
 	cmd := &cobra.Command{

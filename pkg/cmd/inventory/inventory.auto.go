@@ -15,7 +15,7 @@ type SubCmdInventory struct {
 	*subcommand.SubCommand
 }
 
-func NewSubCmdInventory(f *cmdutil.Factory) *SubCmdInventory {
+func NewSubCommand(f *cmdutil.Factory) *SubCmdInventory {
 	ccmd := &SubCmdInventory{}
 
 	cmd := &cobra.Command{

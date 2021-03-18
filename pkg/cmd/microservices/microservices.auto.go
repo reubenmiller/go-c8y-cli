@@ -18,7 +18,7 @@ type SubCmdMicroservices struct {
 	*subcommand.SubCommand
 }
 
-func NewSubCmdMicroservices(f *cmdutil.Factory) *SubCmdMicroservices {
+func NewSubCommand(f *cmdutil.Factory) *SubCmdMicroservices {
 	ccmd := &SubCmdMicroservices{}
 
 	cmd := &cobra.Command{

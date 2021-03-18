@@ -16,7 +16,7 @@ type SubCmdDevicecredentials struct {
 	*subcommand.SubCommand
 }
 
-func NewSubCmdDevicecredentials(f *cmdutil.Factory) *SubCmdDevicecredentials {
+func NewSubCommand(f *cmdutil.Factory) *SubCmdDevicecredentials {
 	ccmd := &SubCmdDevicecredentials{}
 
 	cmd := &cobra.Command{

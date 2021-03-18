@@ -13,7 +13,7 @@ type SubCmdUserreferences struct {
 	*subcommand.SubCommand
 }
 
-func NewSubCmdUserreferences(f *cmdutil.Factory) *SubCmdUserreferences {
+func NewSubCommand(f *cmdutil.Factory) *SubCmdUserreferences {
 	ccmd := &SubCmdUserreferences{}
 
 	cmd := &cobra.Command{

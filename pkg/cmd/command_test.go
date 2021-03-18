@@ -10,10 +10,15 @@ import (
 	"testing"
 
 	"github.com/reubenmiller/go-c8y-cli/pkg/assert"
+	"github.com/reubenmiller/go-c8y-cli/pkg/cmd/root"
 )
 
-func setupTest() *RootCmd {
-	rootCmd.ConfigureRootCmd()
+func setupTest() *root.CmdRoot {
+
+	rootCmd, err := Initialize()
+	if err != nil {
+		panic(err)
+	}
 	return rootCmd
 }
 
@@ -142,7 +147,7 @@ func splitCmd(line string) []string {
 	// return r.FindAllString(line, -1)
 }
 
-func ExecuteCmd(cmd *RootCmd, cmdArgs interface{}) error {
+func ExecuteCmd(cmd *root.CmdRoot, cmdArgs interface{}) error {
 	switch v := cmdArgs.(type) {
 	case string:
 		cmd.SetArgs(splitCmd(v))
@@ -150,7 +155,6 @@ func ExecuteCmd(cmd *RootCmd, cmdArgs interface{}) error {
 	case []string:
 		cmd.SetArgs(v)
 	}
-	executeRootCmd()
 	return cmd.Execute()
 }
 
@@ -382,7 +386,7 @@ func Test_CreateManagedObjectWithoutInput(t *testing.T) {
 	rest POST https://test-ci-runner01.latest.stage.c8y.io/alarm/alarms --data name=test
 	`
 	cmdErr := ExecuteCmd(cmd, strings.TrimSpace(cmdtext))
-	cmd.checkCommandError(cmdErr)
+	CheckCommandError(cmd.Command, nil, cmdErr)
 	assert.OK(t, cmdErr)
 }
 
@@ -437,6 +441,6 @@ func Test_DebugCommand(t *testing.T) {
 	devices list -o json
 	`
 	cmdErr := ExecuteCmd(cmd, strings.TrimSpace(cmdtext))
-	cmd.checkCommandError(cmdErr)
+	CheckCommandError(cmd.Command, nil, cmdErr)
 	assert.OK(t, cmdErr)
 }

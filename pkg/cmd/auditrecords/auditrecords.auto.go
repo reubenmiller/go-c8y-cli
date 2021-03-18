@@ -13,7 +13,7 @@ type SubCmdAuditrecords struct {
 	*subcommand.SubCommand
 }
 
-func NewSubCmdAuditrecords(f *cmdutil.Factory) *SubCmdAuditrecords {
+func NewSubCommand(f *cmdutil.Factory) *SubCmdAuditrecords {
 	ccmd := &SubCmdAuditrecords{}
 
 	cmd := &cobra.Command{

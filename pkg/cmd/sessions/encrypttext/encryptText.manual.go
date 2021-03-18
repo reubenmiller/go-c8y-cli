@@ -5,18 +5,29 @@ import (
 
 	"github.com/howeyc/gopass"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmd/subcommand"
+	"github.com/reubenmiller/go-c8y-cli/pkg/cmdutil"
+	"github.com/reubenmiller/go-c8y-cli/pkg/config"
+	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
 )
 
-type encryptTextCmd struct {
+type CmdEncryptText struct {
 	passphrase string
 	raw        bool
 
 	*subcommand.SubCommand
+
+	factory *cmdutil.Factory
+	Config  func() (*config.Config, error)
+	Client  func() (*c8y.Client, error)
 }
 
-func newEncryptTextCmd() *encryptTextCmd {
-	ccmd := &encryptTextCmd{}
+func NewCmdEncryptText(f *cmdutil.Factory) *CmdEncryptText {
+	ccmd := &CmdEncryptText{
+		factory: f,
+		Config:  f.Config,
+		Client:  f.Client,
+	}
 
 	cmd := &cobra.Command{
 		Use:   "encryptText",
@@ -34,7 +45,7 @@ Example 2: Encrypt the text "Hello World", the text will be encrypted using the 
 > c8y session encryptText --text "Hello World" --passphrase "so4methIng-7hat-Matters"
 Password: {encrypted}ec5b837a03408ffb731307584eac40ac047989a002951e4b7139fa60189e504b6840bc027cece28b3f36717839d96af1c5dba8c850b9a9079846066ee1596cc8d26f4138f76ce3
 		`,
-		RunE: ccmd.encryptText,
+		RunE: ccmd.RunE,
 	}
 
 	cmd.SilenceUsage = true
@@ -51,8 +62,15 @@ Password: {encrypted}ec5b837a03408ffb731307584eac40ac047989a002951e4b7139fa60189
 	return ccmd
 }
 
-func (n *encryptTextCmd) encryptText(cmd *cobra.Command, args []string) error {
-
+func (n *CmdEncryptText) RunE(cmd *cobra.Command, args []string) error {
+	cfg, err := n.Config()
+	if err != nil {
+		return err
+	}
+	log, err := n.factory.Logger()
+	if err != nil {
+		return err
+	}
 	if n.passphrase == "" {
 		cmd.Printf("Enter password 🔒: [input is hidden] ")
 		inputPassphrase, err := gopass.GetPasswd() // Silent
@@ -65,15 +83,15 @@ func (n *encryptTextCmd) encryptText(cmd *cobra.Command, args []string) error {
 	encryptedPassword := ""
 	if v, err := cmd.Flags().GetString("text"); err == nil && v != "" {
 
-		if cliConfig.SecureData.IsEncrypted(v) != 1 {
-			data, err := cliConfig.SecureData.EncryptString(v, n.passphrase)
+		if cfg.SecureData.IsEncrypted(v) != 1 {
+			data, err := cfg.SecureData.EncryptString(v, n.passphrase)
 
 			if err != nil {
 				return err
 			}
 			encryptedPassword = data
 		} else {
-			Logger.Info("Text is already encrypted")
+			log.Info("Text is already encrypted")
 			encryptedPassword = v
 		}
 	}
