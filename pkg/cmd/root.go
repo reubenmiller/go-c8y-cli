@@ -34,8 +34,6 @@ import (
 // Logger is used to record the log messages which should be visible to the user when using the verbose flag
 var Logger *logger.Logger
 
-var BootstrapLogger *logger.Logger
-
 var (
 	// TODO: Delete these globals!
 	cliConfig *config.Config
@@ -60,10 +58,8 @@ func init() {
 
 // Execute runs the root command
 func MainRun() {
-	log.Println("DEBUG REFACTOR: Running initialize")
 	cmd, err := Initialize()
 	if err != nil {
-		log.Fatalf("DEBUG REFACTOR: Initialize failed. %s", err)
 		os.Exit(int(clierrors.ExitError))
 	}
 
@@ -75,9 +71,7 @@ func MainRun() {
 	Logger.Debugf("Expanded args: %v", expandedArgs)
 	cmd.SetArgs(expandedArgs)
 
-	log.Println("DEBUG REFACTOR: Calling execute")
 	if err := cmd.Execute(); err != nil {
-
 		CheckCommandError(cmd.Command, cmd.Factory, err)
 
 		if cErr, ok := err.(cmderrors.CommandError); ok {
@@ -85,20 +79,20 @@ func MainRun() {
 		}
 		if errors.Is(err, clierrors.ErrNoMatchesFound) {
 			// 404
-			os.Exit(4)
+			os.Exit(int(clierrors.ExitNotFound404))
 		}
-		os.Exit(100)
+		os.Exit(int(clierrors.ExitError))
 	}
 }
 
 func CheckCommandError(cmd *cobra.Command, f *cmdutil.Factory, err error) {
 	cfg, configErr := f.Config()
 	if configErr != nil {
-		// todo
+		// TODO: Handle error or at least log it
 	}
 	logg, logErr := f.Logger()
 	if logErr != nil {
-
+		// TODO: Handle error or at least log it
 	}
 	w := ioutil.Discard
 	if cfg != nil && cfg.WithError() {
@@ -184,13 +178,6 @@ func setArgs(cmd *cobra.Command) ([]string, error) {
 	return expandedArgs, nil
 }
 
-func isTerminal() bool {
-	if fileInfo, _ := os.Stdout.Stat(); (fileInfo.Mode() & os.ModeCharDevice) != 0 {
-		return true
-	}
-	return false
-}
-
 func getOutputHeaders(c *console.Console, cfg *config.Config, input []string) (headers []byte) {
 	if !c.IsCSV() || !c.WithCSVHeader() || len(input) == 0 {
 		Logger.Debugf("Ignoring csv headers: isCSV=%v, WithHeader=%v", c.IsCSV(), c.WithCSVHeader())
@@ -225,16 +212,15 @@ func Initialize() (*root.CmdRoot, error) {
 	var activityLoggerHandler *activitylogger.ActivityLogger
 	var configHandler = config.NewConfig(viper.GetViper())
 	if _, err := configHandler.ReadConfigFiles(nil); err != nil {
-		log.Printf("DEBUG REFACTOR: Read config files failed. Ignoring error. %s", err)
+		log.Printf("WARNING: Failed to read configuration. Trying to proceed anyway. %s", err)
 		// return nil, err
 	}
 
 	// init logger
-	BootstrapLogger = logger.NewLogger(module, logger.Options{
+	logHandler = logger.NewLogger(module, logger.Options{
 		Level: zapcore.WarnLevel,
 		Debug: false,
 	})
-	logHandler = BootstrapLogger
 
 	// cmd factory
 	configFunc := func() (*config.Config, error) {
@@ -279,90 +265,5 @@ func Initialize() (*root.CmdRoot, error) {
 		return getOutputHeaders(consoleHandler, configHandler, s)
 	})
 
-	log.Printf("DEBUG REFACTOR: Settings: %v", configHandler.AllSettings())
-
-	// config file
-	cobra.OnInitialize(func() {
-		log.Println("DEBUG REFACTOR: cobra.OnInitialize")
-		log.Printf("DEBUG REFACTOR: Settings: %v", configHandler.AllSettings())
-		logOptions := logger.Options{
-			// Level: zapcore.DebugLevel,
-			Level: zapcore.WarnLevel,
-			Color: !configHandler.DisableColor(),
-			Debug: configHandler.Debug(),
-		}
-		if configHandler.ShowProgress() {
-			logOptions.Silent = true
-		} else {
-			if configHandler.Verbose() {
-				logOptions.Level = zapcore.InfoLevel
-			}
-			if configHandler.Debug() {
-				logOptions.Level = zapcore.DebugLevel
-			}
-		}
-
-		logHandler = logger.NewLogger(module, logOptions)
-		c8y.Logger = logHandler
-		configHandler.SetLogger(logHandler)
-		log.Println("DEBUG REFACTOR: leaving cobra.OnInitialize")
-	})
-
 	return rootCmd, nil
-
-}
-
-func initConfig(cfg *config.Config) {
-
-	// only parse env variables if no explict config file is given
-	// if globalFlagUseEnv {
-	// 	Logger.Println("C8Y_USE_ENVIRONMENT is set. Environment variables can be used to override config settings")
-	// 	viper.AutomaticEnv()
-	// }
-
-	// set output format
-	// Console.Format = cliConfig.GetOutputFormat()
-	// Console.Colorized = !cliConfig.DisableColor()
-	// Console.Compact = cliConfig.CompactJSON()
-	// Console.Disabled = cliConfig.ShowProgress() && isTerminal()
-
-	// Proxy settings
-	// Either use explicit proxy, ignore proxy, or use existing env variables
-	// --proxy "http://10.0.0.1:8080"
-	// --noProxy
-	// HTTP_PROXY=http://10.0.0.1:8080
-	// NO_PROXY=localhost,127.0.0.1
-	proxy := cfg.Proxy()
-	noProxy := cfg.IgnoreProxy()
-	if noProxy {
-		Logger.Debug("using explicit noProxy setting")
-		os.Setenv("HTTP_PROXY", "")
-		os.Setenv("HTTPS_PROXY", "")
-		os.Setenv("http_proxy", "")
-		os.Setenv("https_proxy", "")
-	} else {
-		if proxy != "" {
-			Logger.Debugf("using explicit proxy [%s]", proxy)
-
-			os.Setenv("HTTP_PROXY", proxy)
-			os.Setenv("HTTPS_PROXY", proxy)
-			os.Setenv("http_proxy", proxy)
-			os.Setenv("https_proxy", proxy)
-
-		} else {
-			proxyVars := []string{"HTTP_PROXY", "http_proxy", "HTTPS_PROXY", "https_proxy", "NO_PROXY", "no_proxy"}
-
-			var proxySettings strings.Builder
-
-			for _, name := range proxyVars {
-				if v := os.Getenv(name); v != "" {
-					proxySettings.WriteString(fmt.Sprintf(" %s [%s]", name, v))
-				}
-			}
-			if proxySettings.Len() > 0 {
-				Logger.Debugf("Using existing env variables.%s", proxySettings)
-			}
-
-		}
-	}
 }

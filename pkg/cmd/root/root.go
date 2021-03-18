@@ -2,7 +2,9 @@ package root
 
 import (
 	"crypto/tls"
+	"fmt"
 	"net/http"
+	"os"
 	"strings"
 	"time"
 
@@ -49,6 +51,7 @@ import (
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"go.uber.org/zap/zapcore"
 )
 
 type CmdRoot struct {
@@ -235,12 +238,40 @@ func (c *CmdRoot) Configure() error {
 		log.Warningf("Some configuration binding failed. %s", err)
 	}
 
-	// Update activity logger settings
+	//
+	// Update cmd factory before passing it along
+	//
+
+	// Update logger
+	c.Factory.Logger = func() (*logger.Logger, error) {
+		logOptions := logger.Options{
+			Level: zapcore.WarnLevel,
+			Color: !cfg.DisableColor(),
+			Debug: cfg.Debug(),
+		}
+		if cfg.ShowProgress() {
+			logOptions.Silent = true
+		} else {
+			if cfg.Verbose() {
+				logOptions.Level = zapcore.InfoLevel
+			}
+			if cfg.Debug() {
+				logOptions.Level = zapcore.DebugLevel
+			}
+		}
+
+		customLogger := logger.NewLogger("c8y", logOptions)
+		c8y.Logger = customLogger
+		cfg.SetLogger(customLogger)
+		return customLogger, nil
+	}
+
+	// Update activity logger
 	c.Factory.ActivityLogger = func() (*activitylogger.ActivityLogger, error) {
 		return c.configureActivityLog(cfg)
 	}
 
-	// TODO: Update data views in a persistent way
+	// Update data views
 	c.Factory.DataView = func() (*dataview.DataView, error) {
 		return dataview.NewDataView(".*", ".json", log, cfg.GetViewPaths()...)
 	}
@@ -324,7 +355,7 @@ func (c *CmdRoot) configureActivityLog(cfg *config.Config) (*activitylogger.Acti
 	if disabled {
 		cfg.Logger.Info("activityLog is disabled")
 	} else {
-		cfg.Logger.Infof("activityLog path: %s", activitylog.GetPath())
+		cfg.Logger.Infof("activityLog path2: %s", activitylog.GetPath())
 	}
 	return activitylog, nil
 }
@@ -462,6 +493,7 @@ func createCumulocityClient(f *cmdutil.Factory) func() (*c8y.Client, error) {
 		}
 
 		log.Debug("Creating c8y client")
+		configureProxySettings(cfg, log)
 		httpClient := newHTTPClient(cfg.IgnoreProxy())
 
 		// Only bind when not setting the session
@@ -481,6 +513,7 @@ func createCumulocityClient(f *cmdutil.Factory) func() (*c8y.Client, error) {
 			true,
 		)
 
+		// TODO: Fix recursive call bug when creating request handler
 		// handler, err := f.GetRequestHandler()
 		// if err != nil {
 		// 	return nil, err
@@ -578,5 +611,53 @@ func newHTTPClient(ignoreProxySettings bool) *http.Client {
 
 	return &http.Client{
 		Transport: tr,
+	}
+}
+
+func configureProxySettings(cfg *config.Config, log *logger.Logger) {
+
+	// only parse env variables if no explict config file is given
+	// if globalFlagUseEnv {
+	// 	Logger.Println("C8Y_USE_ENVIRONMENT is set. Environment variables can be used to override config settings")
+	// 	viper.AutomaticEnv()
+	// }
+
+	// Proxy settings
+	// Either use explicit proxy, ignore proxy, or use existing env variables
+	// --proxy "http://10.0.0.1:8080"
+	// --noProxy
+	// HTTP_PROXY=http://10.0.0.1:8080
+	// NO_PROXY=localhost,127.0.0.1
+	proxy := cfg.Proxy()
+	noProxy := cfg.IgnoreProxy()
+	if noProxy {
+		log.Debug("using explicit noProxy setting")
+		os.Setenv("HTTP_PROXY", "")
+		os.Setenv("HTTPS_PROXY", "")
+		os.Setenv("http_proxy", "")
+		os.Setenv("https_proxy", "")
+	} else {
+		if proxy != "" {
+			log.Debugf("using explicit proxy [%s]", proxy)
+
+			os.Setenv("HTTP_PROXY", proxy)
+			os.Setenv("HTTPS_PROXY", proxy)
+			os.Setenv("http_proxy", proxy)
+			os.Setenv("https_proxy", proxy)
+
+		} else {
+			proxyVars := []string{"HTTP_PROXY", "http_proxy", "HTTPS_PROXY", "https_proxy", "NO_PROXY", "no_proxy"}
+
+			var proxySettings strings.Builder
+
+			for _, name := range proxyVars {
+				if v := os.Getenv(name); v != "" {
+					proxySettings.WriteString(fmt.Sprintf(" %s [%s]", name, v))
+				}
+			}
+			if proxySettings.Len() > 0 {
+				log.Debugf("Using existing env variables.%s", proxySettings)
+			}
+		}
 	}
 }
