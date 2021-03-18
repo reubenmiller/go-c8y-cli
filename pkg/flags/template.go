@@ -49,7 +49,7 @@ func WithTemplateValue(src string, pathResolver Resolver) GetOption {
 func WithTemplateVariablesValue(src ...string) GetOption {
 	return func(cmd *cobra.Command, inputIterators *RequestInputIterators) (string, interface{}, error) {
 		sourceName := FlagDataTemplateVariablesName
-		if len(src) >= 0 {
+		if len(src) > 0 {
 			sourceName = src[0]
 		}
 		opt := WithDataValueAdvanced(false, sourceName)
