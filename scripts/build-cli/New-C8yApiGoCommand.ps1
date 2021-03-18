@@ -12,9 +12,11 @@
         [string] $OutputDir = "./"
     )
 
-    $Name = $Specification.name
+    $Name = $Specification.alias.go
 	$NameCamel = $Name[0].ToString().ToUpperInvariant() + $Name.Substring(1)
-	$File = Join-Path -Path $OutputDir -ChildPath ("{0}Cmd.auto.go" -f $Name)
+
+    $FileName = $Specification.alias.go
+	$File = Join-Path -Path $OutputDir -ChildPath ("{0}.auto.go" -f $FileName)
 
 
     #
@@ -117,12 +119,6 @@
         ))
     }
 
-    # Add common parameters
-    if ($Specification.method -match "DELETE|PUT|POST") {
-        $null = $CommandArgs.Add(@{
-            SetFlag = 'addProcessingModeFlag(cmd)'
-        })
-    }
 
     $RESTPath = $Specification.path
     $RESTMethod = $Specification.method
@@ -146,7 +142,7 @@
             }
             default {
                 $GetBodyContents = "body"
-                $null = $RESTBodyBuilderOptions.AppendLine("WithDataValue(),")
+                $null = $RESTBodyBuilderOptions.AppendLine("flags.WithDataFlagValue(),")
             }
         }
 
@@ -178,7 +174,9 @@
         #
         if ($Specification.bodyTemplateOptions.enabled -eq $true) {
             $CommandArgs += @{
-                SetFlag = "addTemplateFlag(cmd)"
+                SetFlagOptions = @(
+                    "f.WithTemplateFlag(cmd)"
+                )
             }
         }
 
@@ -215,8 +213,8 @@
         # Add support for user defined templates to control body
         #
         if ($Specification.bodyTemplate.type -ne "none") {
-            $null = $RESTBodyBuilderOptions.AppendLine("WithTemplateValue(),")
-            $null = $RESTBodyBuilderOptions.AppendLine("WithTemplateVariablesValue(),")
+            $null = $RESTBodyBuilderOptions.AppendLine("cmdutil.WithTemplateValue(cfg),")
+            $null = $RESTBodyBuilderOptions.AppendLine("flags.WithTemplateVariablesValue(),")
         }
 
         if ($Specification.bodyRequiredKeys) {
@@ -262,7 +260,7 @@
     if ($Specification.method -match "GET") {
         
         $null = $RESTQueryBuilderPost.AppendLine(@"
-        commonOptions, err := cliConfig.GetOutputCommonOptions(cmd)
+        commonOptions, err := cfg.GetOutputCommonOptions(cmd)
         if err != nil {
             return cmderrors.NewUserError(fmt.Sprintf("Failed to get common options. err=%s", err))
         }
@@ -304,14 +302,20 @@
         }
     }
 
+    # Add common parameters
+    $FlagBuilderOptions = New-Object System.Text.StringBuilder
+    if ($Specification.method -match "DELETE|PUT|POST") {
+        $null = $FlagBuilderOptions.AppendLine("flags.WithProcessingMode(),")
+    }
+
 
     #
     # Pre run validation (disable some commands without switch flags)
     #
     $PreRunFunction = switch ($Specification.method) {
-        "POST" { "validateCreateMode" }
-        "PUT" { "validateUpdateMode" }
-        "DELETE" { "validateDeleteMode" }
+        "POST" { "f.CreateModeEnabled()" }
+        "PUT" { "f.UpdateModeEnabled()" }
+        "DELETE" { "f.DeleteModeEnabled()" }
         default { "nil" }
     }
 
@@ -320,7 +324,7 @@
     #
     $Template = @"
 // Code generated from specification version 1.0.0: DO NOT EDIT
-package cmd
+package $($Name.ToLower())
 
 import (
 	"fmt"
@@ -329,8 +333,10 @@ import (
 	"net/url"
 
     "github.com/MakeNowJust/heredoc/v2"
+    "github.com/reubenmiller/go-c8y-cli/pkg/c8yfetcher"
     "github.com/reubenmiller/go-c8y-cli/pkg/cmd/subcommand"
     "github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
+    "github.com/reubenmiller/go-c8y-cli/pkg/cmdutil"
     "github.com/reubenmiller/go-c8y-cli/pkg/completion"
     "github.com/reubenmiller/go-c8y-cli/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/pkg/mapbuilder"
@@ -341,11 +347,19 @@ import (
 // ${NameCamel}Cmd command
 type ${NameCamel}Cmd struct {
     *subcommand.SubCommand
+
+    factory *cmdutil.Factory
+    Config func() (*config.Config, error)
+    Client func() (*c8y.Client, error)
 }
 
 // New${NameCamel}Cmd creates a command to $Description
-func New${NameCamel}Cmd() *${NameCamel}Cmd {
-	ccmd := &${NameCamel}Cmd{}
+func New${NameCamel}Cmd(f *cmdutil.Factory) *${NameCamel}Cmd {
+	ccmd := &${NameCamel}Cmd{
+        factory: f,
+        Config: f.Config,
+        Client: f.Client,
+    }
 	cmd := &cobra.Command{
 		Use:   "$Use",
 		Short: "$Description",
@@ -353,7 +367,9 @@ func New${NameCamel}Cmd() *${NameCamel}Cmd {
         Example: heredoc.Doc(``
 $($Examples -join "`n`n")
         ``),
-        PreRunE: $PreRunFunction,
+        PreRunE: func(cmd *cobra.Command, args []string) error {
+            return $PreRunFunction
+        },
 		RunE: ccmd.RunE,
     }
 
@@ -368,6 +384,16 @@ $($Examples -join "`n`n")
 
     flags.WithOptions(
 		cmd,
+        $(
+            if ($FlagBuilderOptions) {
+                $FlagBuilderOptions.ToString().TrimEnd()
+            }
+        )
+        $(
+            if ($CommandArgs.SetFlagOptions) {
+                ($CommandArgs.SetFlagOptions -join ",`n") + ","
+            }
+        )
         $(
             if ($PipelineVariableAliases) {
                 $aliases = ($PipelineVariableAliases | ForEach-Object { "`"$_`""` }) -join ", "
@@ -393,7 +419,14 @@ $($Examples -join "`n`n")
 
 // RunE executes the command
 func (n *${NameCamel}Cmd) RunE(cmd *cobra.Command, args []string) error {
-    var err error
+    cfg, err := n.Config()
+	if err != nil {
+		return err
+	}
+    client, err := n.Client()
+	if err != nil {
+		return err
+	}
     inputIterators, err := flags.NewRequestInputIterators(cmd)
     if err != nil {
         return err
@@ -473,11 +506,11 @@ func (n *${NameCamel}Cmd) RunE(cmd *cobra.Command, args []string) error {
         Body:         $GetBodyContents,
         FormData:     formData,
         Header:       headers,
-        IgnoreAccept: cliConfig.IgnoreAcceptHeader(),
-        DryRun:       cliConfig.DryRun(),
+        IgnoreAccept: cfg.IgnoreAcceptHeader(),
+        DryRun:       cfg.DryRun(),
     }
 
-    return processRequestAndResponseWithWorkers(cmd, &req, inputIterators)
+    return n.factory.RunWithWorkers(client, cmd, &req, inputIterators)
 }
 
 "@
@@ -569,7 +602,10 @@ Function Get-C8yGoArgs {
 
         "json" {
             @{
-                SetFlag = "addDataFlag(cmd)"
+                SetFlagOptions = @(
+                    "flags.WithData()"
+                    "f.WithTemplateFlag(cmd)"
+                ) 
             }
         }
 

@@ -1,13 +1,23 @@
 package cmdutil
 
 import (
+	"os"
+	"regexp"
+	"strings"
+
 	"github.com/reubenmiller/go-c8y-cli/pkg/activitylogger"
 	"github.com/reubenmiller/go-c8y-cli/pkg/config"
 	"github.com/reubenmiller/go-c8y-cli/pkg/console"
+	"github.com/reubenmiller/go-c8y-cli/pkg/dataview"
+	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/pkg/iostreams"
+	"github.com/reubenmiller/go-c8y-cli/pkg/jsonformatter"
 	"github.com/reubenmiller/go-c8y-cli/pkg/logger"
 	"github.com/reubenmiller/go-c8y-cli/pkg/mode"
+	"github.com/reubenmiller/go-c8y-cli/pkg/request"
+	"github.com/reubenmiller/go-c8y-cli/pkg/worker"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
+	"github.com/spf13/cobra"
 )
 
 type Factory struct {
@@ -17,6 +27,7 @@ type Factory struct {
 	Logger         func() (*logger.Logger, error)
 	ActivityLogger func() (*activitylogger.ActivityLogger, error)
 	Console        func() (*console.Console, error)
+	DataView       func() (*dataview.DataView, error)
 
 	// Executable is the path to the currently invoked binary
 	Executable string
@@ -47,4 +58,136 @@ func (f *Factory) DeleteModeEnabled() error {
 		return err
 	}
 	return mode.ValidateDeleteMode(cfg)
+}
+
+func (f *Factory) GetRequestHandler() (*request.RequestHandler, error) {
+	cfg, err := f.Config()
+	if err != nil {
+		return nil, err
+	}
+	log, err := f.Logger()
+	if err != nil {
+		return nil, err
+	}
+
+	activityLogger, err := f.ActivityLogger()
+	if err != nil {
+		return nil, err
+	}
+	consol, err := f.Console()
+	if err != nil {
+		return nil, err
+	}
+	dataview, err := f.DataView()
+	if err != nil {
+		return nil, err
+	}
+	client, err := f.Client()
+	if err != nil {
+		return nil, err
+	}
+
+	handler := &request.RequestHandler{
+		IsTerminal:     f.IOStreams.IsStdoutTTY(),
+		Client:         client,
+		Config:         cfg,
+		Logger:         log,
+		DataView:       dataview,
+		Console:        consol,
+		ActivityLogger: activityLogger,
+		HideSensitive:  HideSensitiveInformationIfActive,
+	}
+	return handler, nil
+}
+
+func (f *Factory) RunWithWorkers(client *c8y.Client, cmd *cobra.Command, req *c8y.RequestOptions, inputIterators *flags.RequestInputIterators) error {
+	cfg, err := f.Config()
+	if err != nil {
+		return err
+	}
+	log, err := f.Logger()
+	if err != nil {
+		return err
+	}
+
+	activityLogger, err := f.ActivityLogger()
+	if err != nil {
+		return err
+	}
+	consol, err := f.Console()
+	if err != nil {
+		return err
+	}
+	dataview, err := f.DataView()
+	if err != nil {
+		return err
+	}
+
+	handler := &request.RequestHandler{
+		IsTerminal:     f.IOStreams.IsStdoutTTY(),
+		Client:         client,
+		Config:         cfg,
+		Logger:         log,
+		DataView:       dataview,
+		Console:        consol,
+		ActivityLogger: activityLogger,
+		HideSensitive:  HideSensitiveInformationIfActive,
+	}
+	w, err := worker.NewWorker(log, cfg, f.IOStreams, client, activityLogger, handler.ProcessRequestAndResponse)
+
+	if err != nil {
+		return err
+	}
+	return w.ProcessRequestAndResponse(cmd, req, inputIterators)
+}
+
+func HideSensitiveInformationIfActive(client *c8y.Client, message string) string {
+	if client == nil {
+		return message
+	}
+
+	if !strings.EqualFold(os.Getenv(c8y.EnvVarLoggerHideSensitive), "true") {
+		return message
+	}
+
+	if os.Getenv("USERNAME") != "" {
+		message = strings.ReplaceAll(message, os.Getenv("USERNAME"), "******")
+	}
+
+	if client != nil {
+		message = strings.ReplaceAll(message, client.TenantName, "{tenant}")
+		message = strings.ReplaceAll(message, client.Username, "{username}")
+		message = strings.ReplaceAll(message, client.Password, "{password}")
+		if client.BaseURL != nil {
+			message = strings.ReplaceAll(message, strings.TrimRight(client.BaseURL.Host, "/"), "{host}")
+		}
+	}
+
+	basicAuthMatcher := regexp.MustCompile(`(Basic\s+)[A-Za-z0-9=]+`)
+	message = basicAuthMatcher.ReplaceAllString(message, "$1 {base64 tenant/username:password}")
+
+	return message
+}
+
+// WriteJSONToConsole writes given json output to the console supporting the common options of select, output etc.
+func (f *Factory) WriteJSONToConsole(cfg *config.Config, cmd *cobra.Command, property string, output []byte) error {
+	consol, err := f.Console()
+	if err != nil {
+		return err
+	}
+	commonOptions, err := cfg.GetOutputCommonOptions(cmd)
+	if err != nil {
+		return err
+	}
+	output = commonOptions.Filters.Apply(string(output), property, false, consol.SetHeaderFromInput)
+
+	jsonformatter.WithOutputFormatters(
+		consol,
+		output,
+		false,
+		jsonformatter.WithTrimSpace(true),
+		jsonformatter.WithJSONStreamOutput(true, consol.IsJSONStream(), consol.IsCSV()),
+		jsonformatter.WithSuffix(len(output) > 0, "\n"),
+	)
+	return nil
 }

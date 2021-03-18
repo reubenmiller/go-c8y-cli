@@ -67,36 +67,36 @@
         "tenant" = "flags.WithStringDefaultValue(client.TenantName, `"${prop}`", `"${queryParam}`"),"
 
         # application
-        "application" = "WithApplicationByNameFirstMatch(args, `"${prop}`", `"${queryParam}`"),"
+        "application" = "c8yfetcher.WithApplicationByNameFirstMatch(client, args, `"${prop}`", `"${queryParam}`"),"
 
         # microservice
-        "microservice" = "WithMicroserviceByNameFirstMatch(args, `"${prop}`", `"${queryParam}`"),"
+        "microservice" = "c8yfetcher.WithMicroserviceByNameFirstMatch(client, args, `"${prop}`", `"${queryParam}`"),"
 
         # device array
-        "[]device" = "WithDeviceByNameFirstMatch(args, `"${prop}`", `"${queryParam}`"),"
+        "[]device" = "c8yfetcher.WithDeviceByNameFirstMatch(client, args, `"${prop}`", `"${queryParam}`"),"
 
         # agent array
-        "[]agent" = "WithAgentByNameFirstMatch(args, `"${prop}`", `"${queryParam}`"),"
+        "[]agent" = "c8yfetcher.WithAgentByNameFirstMatch(client, args, `"${prop}`", `"${queryParam}`"),"
 
 
         # devicegroup array
-        "[]devicegroup" = "WithDeviceGroupByNameFirstMatch(args, `"${prop}`", `"${queryParam}`"),"
+        "[]devicegroup" = "c8yfetcher.WithDeviceGroupByNameFirstMatch(client, args, `"${prop}`", `"${queryParam}`"),"
         
         # user array
-        "[]user" = "WithUserByNameFirstMatch(args, `"${prop}`", `"${queryParam}`"),"
+        "[]user" = "c8yfetcher.WithUserByNameFirstMatch(client, args, `"${prop}`", `"${queryParam}`"),"
 
         # user self url array
-        "[]userself" = "WithUserSelfByNameFirstMatch(args, `"${prop}`", `"${queryParam}`"),"
+        "[]userself" = "c8yfetcher.WithUserSelfByNameFirstMatch(client, args, `"${prop}`", `"${queryParam}`"),"
         
         
         # role self url array
-        "[]roleself" = "WithRoleSelfByNameFirstMatch(args, `"${prop}`", `"${queryParam}`"),"
+        "[]roleself" = "c8yfetcher.WithRoleSelfByNameFirstMatch(client, args, `"${prop}`", `"${queryParam}`"),"
         
         # role array
-        "[]role" = "WithRoleByNameFirstMatch(args, `"${prop}`", `"${queryParam}`"),"
+        "[]role" = "c8yfetcher.WithRoleByNameFirstMatch(client, args, `"${prop}`", `"${queryParam}`"),"
         
         # user group array
-        "[]usergroup" = "WithUserGroupByNameFirstMatch(args, `"${prop}`", `"${queryParam}`"),"
+        "[]usergroup" = "c8yfetcher.WithUserGroupByNameFirstMatch(client, args, `"${prop}`", `"${queryParam}`"),"
     }
 
 

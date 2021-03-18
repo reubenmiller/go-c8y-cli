@@ -10,7 +10,7 @@
         [string] $OutputDir = "./"
     )
 
-    $Name = $Specification.information.name
+    $Name = $Specification.information.name.ToLower()
 
     if (!$Name) {
         Write-Error "Missing root command name"
@@ -22,8 +22,9 @@
 
     $SubcommandsCode = New-Object System.Text.StringBuilder
     $RootImportCode = New-Object System.Text.StringBuilder
+    $GoImports = New-Object System.Text.StringBuilder
 
-    $File = Join-Path -Path $OutputDir -ChildPath ("{0}RootCmd.go" -f $Name)
+    $File = Join-Path -Path $OutputDir -ChildPath ("{0}.auto.go" -f $Name.ToLower())
 
     foreach ($endpoint in $Specification.endpoints) {
         if ($endpoint.skip -eq $true) {
@@ -32,13 +33,18 @@
         }
         $EndpointName = $endpoint.name
         $EndpointNameCamel = $EndpointName[0].ToString().ToUpperInvariant() + $EndpointName.Substring(1)
+        $GoCmdName = $endpoint.alias.go
+        $GoCmdNameLower = $GoCmdName.ToLower()
+        $GoCmdNameCamel = $GoCmdName[0].ToString().ToUpperInvariant() + $GoCmdName.Substring(1)
+        $ImportAlias = "cmd" + $GoCmdNameCamel
 
-        $null = $SubcommandsCode.AppendLine("    cmd.AddCommand(New${EndpointNameCamel}Cmd().GetCommand())")
+        $null = $GoImports.AppendLine("$ImportAlias `"github.com/reubenmiller/go-c8y-cli/pkg/cmd/$Name/$GoCmdNameLower`"")
+        $null = $SubcommandsCode.AppendLine("    cmd.AddCommand(${ImportAlias}.New${GoCmdNameCamel}Cmd(f).GetCommand())")
     }
 
     # Create root import command helper
     $null = $RootImportCode.AppendLine("    // ${Name} commands")
-    $null = $RootImportCode.AppendLine("    rootCmd.AddCommand(New${NameCamel}RootCmd().GetCommand())")
+    $null = $RootImportCode.AppendLine("    rootCmd.AddCommand(New${NameCamel}RootCmd(f).GetCommand())")
 
     $Template = @"
 package cmd
@@ -46,14 +52,16 @@ package cmd
 import (
     "github.com/spf13/cobra"
     "github.com/reubenmiller/go-c8y-cli/pkg/cmd/subcommand"
+    "github.com/reubenmiller/go-c8y-cli/pkg/cmdutil"
+    $GoImports
 )
 
-type ${NameCamel}Cmd struct {
+type SubCmd${NameCamel} struct {
     *subcommand.SubCommand
 }
 
-func New${NameCamel}RootCmd() *${NameCamel}Cmd {
-    ccmd := &${NameCamel}Cmd{}
+func NewSubCmd${NameCamel}(f *cmdutil.Factory) *SubCmd${NameCamel} {
+    ccmd := &SubCmd${NameCamel}{}
 
     cmd := &cobra.Command{
         Use:   "${Name}",

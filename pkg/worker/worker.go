@@ -13,9 +13,9 @@ import (
 	"sync/atomic"
 	"time"
 
+	"github.com/reubenmiller/go-c8y-cli/pkg/activitylogger"
 	"github.com/reubenmiller/go-c8y-cli/pkg/clierrors"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
-	"github.com/reubenmiller/go-c8y-cli/pkg/cmdutil"
 	"github.com/reubenmiller/go-c8y-cli/pkg/config"
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/pkg/iostreams"
@@ -65,14 +65,14 @@ func (b *BatchOptions) useInputData() bool {
 	return b.InputData != nil && len(b.InputData) > 0
 }
 
-func NewWorker(cfg *config.Config, io iostreams.IOStreams, cmdFactory *cmdutil.Factory, reqHandlerFunc RequestHandler) (*Worker, error) {
-	log, err := cmdFactory.Logger()
-	if err != nil {
-		return nil, err
-	}
+func NewWorker(log *logger.Logger, cfg *config.Config, iostream *iostreams.IOStreams, client *c8y.Client, activityLog *activitylogger.ActivityLogger, reqHandlerFunc RequestHandler) (*Worker, error) {
+
 	return &Worker{
 		config:         cfg,
 		logger:         log,
+		io:             iostream,
+		activityLogger: activityLog,
+		client:         client,
 		requestHandler: reqHandlerFunc,
 	}, nil
 }
@@ -80,10 +80,11 @@ func NewWorker(cfg *config.Config, io iostreams.IOStreams, cmdFactory *cmdutil.F
 type RequestHandler func(requests []c8y.RequestOptions, commonOptions config.CommonCommandOptions) error
 
 type Worker struct {
-	config     *config.Config
-	io         iostreams.IOStreams
-	cmdFactory *cmdutil.Factory
-	logger     *logger.Logger
+	config         *config.Config
+	io             *iostreams.IOStreams
+	logger         *logger.Logger
+	client         *c8y.Client
+	activityLogger *activitylogger.ActivityLogger
 
 	requestHandler RequestHandler
 }
@@ -129,7 +130,7 @@ type batchArgument struct {
 	batchOptions  BatchOptions
 }
 
-func (w *Worker) ProcessRequestAndResponse(cmdFactory *cmdutil.Factory, cmd *cobra.Command, r *c8y.RequestOptions, inputIterators *flags.RequestInputIterators) error {
+func (w *Worker) ProcessRequestAndResponse(cmd *cobra.Command, r *c8y.RequestOptions, inputIterators *flags.RequestInputIterators) error {
 	var err error
 	var pathIter iterator.Iterator
 
@@ -191,15 +192,10 @@ func (w *Worker) runBatched(requestIterator *requestiterator.RequestIterator, co
 	promptCount := int32(0)
 	promptWG := sync.WaitGroup{}
 
-	activityLogger, activityLoggerErr := w.cmdFactory.ActivityLogger()
-	if activityLoggerErr != nil {
-		w.logger.Warningf("activity logger is misisng. %s", activityLoggerErr)
-	}
-
 	maxJobs := w.GetMaxJobs()
 	tenantName := ""
-	if client, err := w.cmdFactory.Client(); err == nil {
-		tenantName = client.TenantName
+	if w.client != nil {
+		tenantName = w.client.TenantName
 	}
 
 	// add jobs async
@@ -268,15 +264,15 @@ func (w *Worker) runBatched(requestIterator *requestiterator.RequestIterator, co
 					// confirmed
 				case prompt.ConfirmNo:
 					w.logger.Warningf("skipping job: %d. %s", jobID, err)
-					if activityLogger != nil {
-						activityLogger.LogCustom(err.Error() + ". " + request.Path)
+					if w.activityLogger != nil {
+						w.activityLogger.LogCustom(err.Error() + ". " + request.Path)
 					}
 					results <- err
 					continue
 				case prompt.ConfirmNoToAll:
 					w.logger.Warningf("skipping job: %d. %s", jobID, err)
-					if activityLogger != nil {
-						activityLogger.LogCustom(err.Error() + ". " + request.Path)
+					if w.activityLogger != nil {
+						w.activityLogger.LogCustom(err.Error() + ". " + request.Path)
 					}
 					w.logger.Warning("cancelling all remaining jobs")
 					results <- err

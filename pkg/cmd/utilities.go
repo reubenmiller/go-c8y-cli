@@ -32,43 +32,6 @@ func GetFileContentType(out *os.File) (string, error) {
 	return contentType, nil
 }
 
-// saveResponseToFile saves a response to file
-// @filename	filename
-// @directory	output directory. If empty, then a temp directory will be used
-// if filename
-func saveResponseToFile(resp *c8y.Response, filename string, append bool, newline bool) (string, error) {
-
-	var out *os.File
-	var err error
-	if append {
-		out, err = os.OpenFile(filename, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
-	} else {
-		out, err = os.Create(filename)
-	}
-
-	if err != nil {
-		return "", fmt.Errorf("Could not create file. %s", err)
-	}
-	defer out.Close()
-
-	// Writer the body to file
-	Logger.Printf("header: %v", resp.Header)
-	_, err = io.Copy(out, resp.Body)
-
-	if newline {
-		// add trailing newline so that json lines are seperated by lines
-		fmt.Fprintf(out, "\n")
-	}
-	if err != nil {
-		return "", fmt.Errorf("failed to copy file contents to file. %s", err)
-	}
-
-	if fullpath, err := filepath.Abs(filename); err == nil {
-		return fullpath, nil
-	}
-	return filename, nil
-}
-
 func getSessionHomeDir() string {
 	var outputDir string
 

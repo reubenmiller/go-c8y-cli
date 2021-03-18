@@ -414,6 +414,10 @@ func WithDataValueAdvanced(stripCumulocityKeys bool, opts ...string) GetOption {
 	}
 }
 
+func WithDataFlagValue() GetOption {
+	return WithDataValue(FlagDataName, "")
+}
+
 func WithDataValue(opts ...string) GetOption {
 	return WithDataValueAdvanced(true, opts...)
 }

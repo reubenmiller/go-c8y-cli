@@ -46,10 +46,13 @@ func WithTemplateValue(src string, pathResolver Resolver) GetOption {
 	}
 }
 
-func WithTemplateVariablesValue(src string) GetOption {
+func WithTemplateVariablesValue(src ...string) GetOption {
 	return func(cmd *cobra.Command, inputIterators *RequestInputIterators) (string, interface{}, error) {
-
-		opt := WithDataValueAdvanced(false, src)
+		sourceName := FlagDataTemplateVariablesName
+		if len(src) >= 0 {
+			sourceName = src[0]
+		}
+		opt := WithDataValueAdvanced(false, sourceName)
 		dst, value, err := opt(cmd, inputIterators)
 
 		if err != nil {
@@ -63,10 +66,10 @@ func WithTemplateVariablesValue(src string) GetOption {
 
 		switch v := value.(type) {
 		case map[string]interface{}:
-			return src, TemplateVariables(v), err
+			return sourceName, TemplateVariables(v), err
 		}
 
-		return src, nil, fmt.Errorf("unsupported template variable type")
+		return sourceName, nil, fmt.Errorf("unsupported template variable type")
 	}
 }
 
