@@ -7,16 +7,23 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmd/subcommand"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmdutil"
+	"github.com/reubenmiller/go-c8y-cli/pkg/config"
 	"github.com/reubenmiller/go-c8y-cli/pkg/mapbuilder"
 	"github.com/spf13/cobra"
 )
 
 type listSettingsCmd struct {
 	*subcommand.SubCommand
+
+	Config  func() (*config.Config, error)
+	Factory *cmdutil.Factory
 }
 
-func newListSettingsCmd() *listSettingsCmd {
-	ccmd := &listSettingsCmd{}
+func newListSettingsCmd(f *cmdutil.Factory) *listSettingsCmd {
+	ccmd := &listSettingsCmd{
+		Config:  f.Config,
+		Factory: f,
+	}
 
 	cmd := &cobra.Command{
 		Use:   "list",
@@ -41,8 +48,11 @@ Show active log settings in a flattened json format
 }
 
 func (n *listSettingsCmd) listSettings(cmd *cobra.Command, args []string) error {
+	cfg, err := n.Config()
+	if err != nil {
+		return err
+	}
 	var responseText []byte
-	var err error
 
 	// settings := viper.GetViper().AllSettings()
 	settings := cliConfig.AllSettings()
@@ -68,5 +78,5 @@ func (n *listSettingsCmd) listSettings(cmd *cobra.Command, args []string) error 
 		return cmderrors.NewUserError("Settings error. ", err)
 	}
 
-	return WriteJSONToConsole(cmd, "settings", responseText)
+	return n.Factory.WriteJSONToConsole(cfg, cmd, "settings", responseText)
 }

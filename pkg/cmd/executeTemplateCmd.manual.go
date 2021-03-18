@@ -8,19 +8,29 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmd/subcommand"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmdutil"
+	"github.com/reubenmiller/go-c8y-cli/pkg/config"
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/pkg/jsonUtilities"
 	"github.com/reubenmiller/go-c8y-cli/pkg/mapbuilder"
+	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
 	"github.com/tidwall/pretty"
 )
 
 type executeTemplateCmd struct {
 	*subcommand.SubCommand
+
+	factory *cmdutil.Factory
+	Config  func() (*config.Config, error)
+	Client  func() (*c8y.Client, error)
 }
 
-func newExecuteTemplateCmd() *executeTemplateCmd {
-	ccmd := &executeTemplateCmd{}
+func newExecuteTemplateCmd(f *cmdutil.Factory) *executeTemplateCmd {
+	ccmd := &executeTemplateCmd{
+		factory: f,
+		Config:  f.Config,
+		Client:  f.Client,
+	}
 
 	cmd := &cobra.Command{
 		Use:   "execute",
@@ -42,7 +52,11 @@ Verify a jsonnet template and specify input data to be used as the input when ev
 
 	cmd.SilenceUsage = true
 
-	addDataFlag(cmd)
+	flags.WithOptions(
+		cmd,
+		flags.WithData(),
+		f.WithTemplateFlag(cmd),
+	)
 
 	// Required flags
 	_ = cmd.MarkFlagRequired(FlagDataTemplateName)
@@ -54,7 +68,10 @@ Verify a jsonnet template and specify input data to be used as the input when ev
 }
 
 func (n *executeTemplateCmd) newTemplate(cmd *cobra.Command, args []string) error {
-	var err error
+	cfg, err := n.Config()
+	if err != nil {
+		return err
+	}
 	inputIterators, err := flags.NewRequestInputIterators(cmd)
 	if err != nil {
 		return err
@@ -66,9 +83,9 @@ func (n *executeTemplateCmd) newTemplate(cmd *cobra.Command, args []string) erro
 		cmd,
 		body,
 		inputIterators,
-		WithDataValue(),
-		WithTemplateValue(),
-		WithTemplateVariablesValue(),
+		flags.WithDataFlagValue(),
+		cmdutil.WithTemplateValue(cfg),
+		flags.WithTemplateVariablesValue(),
 	)
 
 	if err != nil {

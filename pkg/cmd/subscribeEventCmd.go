@@ -4,6 +4,7 @@ package cmd
 
 import (
 	"github.com/MakeNowJust/heredoc/v2"
+	"github.com/reubenmiller/go-c8y-cli/pkg/c8yfetcher"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmd/subcommand"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
@@ -68,7 +69,7 @@ func (n *subscribeEventCmd) subscribeEvent(cmd *cobra.Command, args []string) er
 
 		for _, item := range deviceValue {
 			if item != "" {
-				device = newIDValue(item).GetID()
+				device = c8yfetcher.NewIDValue(item).GetID()
 			}
 		}
 	}

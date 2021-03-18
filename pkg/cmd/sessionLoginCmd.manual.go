@@ -9,6 +9,7 @@ import (
 	"github.com/fatih/color"
 	"github.com/reubenmiller/go-c8y-cli/pkg/c8ylogin"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmd/subcommand"
+	"github.com/reubenmiller/go-c8y-cli/pkg/cmdutil"
 	"github.com/reubenmiller/go-c8y-cli/pkg/completion"
 	"github.com/spf13/cobra"
 )
@@ -118,15 +119,15 @@ func printSessionInfo(w io.Writer, session CumulocitySession) {
 	header := color.New(color.FgCyan).SprintFunc()
 
 	labelS.Fprintf(w, "---------------------  Cumulocity Session  ---------------------\n")
-	fmt.Fprintf(w, "\n    %s: %s\n\n\n", label("%s", "path"), header(hideSensitiveInformationIfActive(session.Path)))
+	fmt.Fprintf(w, "\n    %s: %s\n\n\n", label("%s", "path"), header(cmdutil.HideSensitiveInformationIfActive(client, session.Path)))
 	if session.Description != "" {
-		fmt.Fprintf(w, "%s : %s\n", label(fmt.Sprintf("%-12s", "description")), value(hideSensitiveInformationIfActive(session.Host)))
+		fmt.Fprintf(w, "%s : %s\n", label(fmt.Sprintf("%-12s", "description")), value(cmdutil.HideSensitiveInformationIfActive(client, session.Host)))
 	}
 
-	fmt.Fprintf(w, "%s : %s\n", label(fmt.Sprintf("%-12s", "host")), value(hideSensitiveInformationIfActive(session.Host)))
+	fmt.Fprintf(w, "%s : %s\n", label(fmt.Sprintf("%-12s", "host")), value(cmdutil.HideSensitiveInformationIfActive(client, session.Host)))
 	if session.Tenant != "" {
-		fmt.Fprintf(w, "%s : %s\n", label(fmt.Sprintf("%-12s", "tenant")), value(hideSensitiveInformationIfActive(session.Tenant)))
+		fmt.Fprintf(w, "%s : %s\n", label(fmt.Sprintf("%-12s", "tenant")), value(cmdutil.HideSensitiveInformationIfActive(client, session.Tenant)))
 	}
-	fmt.Fprintf(w, "%s : %s\n", label(fmt.Sprintf("%-12s", "username")), value(hideSensitiveInformationIfActive(session.Username)))
+	fmt.Fprintf(w, "%s : %s\n", label(fmt.Sprintf("%-12s", "username")), value(cmdutil.HideSensitiveInformationIfActive(client, session.Username)))
 	fmt.Fprintf(w, "\n")
 }

@@ -10,7 +10,6 @@ import (
 	"net/http"
 	"os"
 	"os/exec"
-	"regexp"
 	"runtime"
 	"strings"
 	"time"
@@ -398,7 +397,25 @@ func (c *RootCmd) ConfigureRootCmd() {
 		}
 		return Logger, nil
 	}
-	cmdFactory := factory.New(buildVersion, configFunc, clientFunc, loggerFunc)
+	activityLoggerFunc := func() (*activitylogger.ActivityLogger, error) {
+		if Logger == nil {
+			return nil, fmt.Errorf("logger is missing")
+		}
+		return activityLogger, nil
+	}
+	dataViewFunc := func() (*dataview.DataView, error) {
+		if c.dataView == nil {
+			return nil, fmt.Errorf("logger is missing")
+		}
+		return c.dataView, nil
+	}
+	consoleFunc := func() (*console.Console, error) {
+		if Console == nil {
+			return nil, fmt.Errorf("logger is missing")
+		}
+		return Console, nil
+	}
+	cmdFactory := factory.New(buildVersion, configFunc, clientFunc, loggerFunc, activityLoggerFunc, dataViewFunc, consoleFunc)
 
 	// customRootCmd := root.NewCmdRoot(cmdFactory, buildVersion, "")
 	// rootCmd.AddCommand(customRootCmd)
@@ -639,7 +656,7 @@ func ReadConfigFiles(v *viper.Viper) (path string, err error) {
 
 	if err := v.ReadInConfig(); err == nil {
 		path = v.ConfigFileUsed()
-		Logger.Infof("Loaded settings: %s", hideSensitiveInformationIfActive(path))
+		Logger.Infof("Loaded settings: %s", cmdutil.HideSensitiveInformationIfActive(client, path))
 	}
 
 	// Load session
@@ -670,7 +687,7 @@ func ReadConfigFiles(v *viper.Viper) (path string, err error) {
 		Logger.Debugf("Failed to merge config. %s", err)
 	}
 
-	Logger.Infof("Loaded session: %s", hideSensitiveInformationIfActive(path))
+	Logger.Infof("Loaded session: %s", cmdutil.HideSensitiveInformationIfActive(client, path))
 
 	return path, err
 }
@@ -741,7 +758,7 @@ func initConfig() {
 	if globalFlagSessionFile == "" && os.Getenv("C8Y_SESSION") != "" {
 		globalFlagSessionFile = os.Getenv("C8Y_SESSION")
 		if globalFlagSessionFile != "" {
-			Logger.Printf("Using session environment variable: %s", hideSensitiveInformationIfActive(globalFlagSessionFile))
+			Logger.Printf("Using session environment variable: %s", cmdutil.HideSensitiveInformationIfActive(client, globalFlagSessionFile))
 		}
 	}
 
@@ -872,29 +889,4 @@ func newHTTPClient(ignoreProxySettings bool) *http.Client {
 	return &http.Client{
 		Transport: tr,
 	}
-}
-
-func hideSensitiveInformationIfActive(message string) string {
-
-	if !strings.EqualFold(os.Getenv(c8y.EnvVarLoggerHideSensitive), "true") {
-		return message
-	}
-
-	if os.Getenv("USERNAME") != "" {
-		message = strings.ReplaceAll(message, os.Getenv("USERNAME"), "******")
-	}
-
-	if client != nil {
-		message = strings.ReplaceAll(message, client.TenantName, "{tenant}")
-		message = strings.ReplaceAll(message, client.Username, "{username}")
-		message = strings.ReplaceAll(message, client.Password, "{password}")
-		if client.BaseURL != nil {
-			message = strings.ReplaceAll(message, strings.TrimRight(client.BaseURL.Host, "/"), "{host}")
-		}
-	}
-
-	basicAuthMatcher := regexp.MustCompile(`(Basic\s+)[A-Za-z0-9=]+`)
-	message = basicAuthMatcher.ReplaceAllString(message, "$1 {base64 tenant/username:password}")
-
-	return message
 }
