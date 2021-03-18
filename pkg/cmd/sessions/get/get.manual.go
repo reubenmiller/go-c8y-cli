@@ -74,7 +74,7 @@ func (n *CmdGetSession) RunE(cmd *cobra.Command, args []string) error {
 	}
 	n.prompter = prompt.NewPrompt(log)
 	session := CumulocitySessionDetails{
-		Path: cfg.GetSessionFilePath(),
+		Path: cfg.GetSessionFile(),
 		Name: cfg.GetName(),
 		CumulocitySession: c8ysession.CumulocitySession{
 			Host:            cfg.GetHost(),
