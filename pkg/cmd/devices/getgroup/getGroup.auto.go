@@ -12,7 +12,6 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmdutil"
 	"github.com/reubenmiller/go-c8y-cli/pkg/completion"
-	"github.com/reubenmiller/go-c8y-cli/pkg/config"
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/pkg/mapbuilder"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
@@ -24,16 +23,12 @@ type GetGroupCmd struct {
 	*subcommand.SubCommand
 
 	factory *cmdutil.Factory
-	Config  func() (*config.Config, error)
-	Client  func() (*c8y.Client, error)
 }
 
 // NewGetGroupCmd creates a command to Get device group
 func NewGetGroupCmd(f *cmdutil.Factory) *GetGroupCmd {
 	ccmd := &GetGroupCmd{
 		factory: f,
-		Config:  f.Config,
-		Client:  f.Client,
 	}
 	cmd := &cobra.Command{
 		Use:   "getGroup",
@@ -73,11 +68,11 @@ Get device group by id
 
 // RunE executes the command
 func (n *GetGroupCmd) RunE(cmd *cobra.Command, args []string) error {
-	cfg, err := n.Config()
+	cfg, err := n.factory.Config()
 	if err != nil {
 		return err
 	}
-	client, err := n.Client()
+	client, err := n.factory.Client()
 	if err != nil {
 		return err
 	}

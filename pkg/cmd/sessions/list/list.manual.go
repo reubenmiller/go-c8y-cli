@@ -22,8 +22,6 @@ type CmdList struct {
 	*subcommand.SubCommand
 
 	factory *cmdutil.Factory
-	Config  func() (*config.Config, error)
-	Client  func() (*c8y.Client, error)
 
 	sessionFilter string
 }
@@ -31,8 +29,6 @@ type CmdList struct {
 func NewCmdList(f *cmdutil.Factory) *CmdList {
 	ccmd := &CmdList{
 		factory: f,
-		Config:  f.Config,
-		Client:  f.Client,
 	}
 
 	cmd := &cobra.Command{
@@ -86,7 +82,7 @@ func matchSession(session c8ysession.CumulocitySession, input string) bool {
 }
 
 func (n *CmdList) RunE(cmd *cobra.Command, args []string) error {
-	cfg, err := n.Config()
+	cfg, err := n.factory.Config()
 	if err != nil {
 		return err
 	}

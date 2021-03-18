@@ -11,7 +11,6 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmdutil"
 	"github.com/reubenmiller/go-c8y-cli/pkg/completion"
-	"github.com/reubenmiller/go-c8y-cli/pkg/config"
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/pkg/mapbuilder"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
@@ -23,16 +22,12 @@ type ListReferencesCmd struct {
 	*subcommand.SubCommand
 
 	factory *cmdutil.Factory
-	Config  func() (*config.Config, error)
-	Client  func() (*c8y.Client, error)
 }
 
 // NewListReferencesCmd creates a command to Get application reference collection
 func NewListReferencesCmd(f *cmdutil.Factory) *ListReferencesCmd {
 	ccmd := &ListReferencesCmd{
 		factory: f,
-		Config:  f.Config,
-		Client:  f.Client,
 	}
 	cmd := &cobra.Command{
 		Use:   "listReferences",
@@ -72,11 +67,11 @@ Get a list of referenced applications on a given tenant (from management tenant)
 
 // RunE executes the command
 func (n *ListReferencesCmd) RunE(cmd *cobra.Command, args []string) error {
-	cfg, err := n.Config()
+	cfg, err := n.factory.Config()
 	if err != nil {
 		return err
 	}
-	client, err := n.Client()
+	client, err := n.factory.Client()
 	if err != nil {
 		return err
 	}

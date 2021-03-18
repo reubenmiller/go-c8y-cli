@@ -11,7 +11,6 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmdutil"
 	"github.com/reubenmiller/go-c8y-cli/pkg/completion"
-	"github.com/reubenmiller/go-c8y-cli/pkg/config"
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/pkg/mapbuilder"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
@@ -23,16 +22,12 @@ type DeleteCollectionCmd struct {
 	*subcommand.SubCommand
 
 	factory *cmdutil.Factory
-	Config  func() (*config.Config, error)
-	Client  func() (*c8y.Client, error)
 }
 
 // NewDeleteCollectionCmd creates a command to Delete operation collection
 func NewDeleteCollectionCmd(f *cmdutil.Factory) *DeleteCollectionCmd {
 	ccmd := &DeleteCollectionCmd{
 		factory: f,
-		Config:  f.Config,
-		Client:  f.Client,
 	}
 	cmd := &cobra.Command{
 		Use:   "deleteCollection",
@@ -78,11 +73,11 @@ Remove all pending operations for a given device
 
 // RunE executes the command
 func (n *DeleteCollectionCmd) RunE(cmd *cobra.Command, args []string) error {
-	cfg, err := n.Config()
+	cfg, err := n.factory.Config()
 	if err != nil {
 		return err
 	}
-	client, err := n.Client()
+	client, err := n.factory.Client()
 	if err != nil {
 		return err
 	}

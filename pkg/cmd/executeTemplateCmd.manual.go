@@ -8,11 +8,9 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmd/subcommand"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmdutil"
-	"github.com/reubenmiller/go-c8y-cli/pkg/config"
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/pkg/jsonUtilities"
 	"github.com/reubenmiller/go-c8y-cli/pkg/mapbuilder"
-	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
 	"github.com/tidwall/pretty"
 )
@@ -21,15 +19,11 @@ type executeTemplateCmd struct {
 	*subcommand.SubCommand
 
 	factory *cmdutil.Factory
-	Config  func() (*config.Config, error)
-	Client  func() (*c8y.Client, error)
 }
 
 func newExecuteTemplateCmd(f *cmdutil.Factory) *executeTemplateCmd {
 	ccmd := &executeTemplateCmd{
 		factory: f,
-		Config:  f.Config,
-		Client:  f.Client,
 	}
 
 	cmd := &cobra.Command{
@@ -68,7 +62,7 @@ Verify a jsonnet template and specify input data to be used as the input when ev
 }
 
 func (n *executeTemplateCmd) newTemplate(cmd *cobra.Command, args []string) error {
-	cfg, err := n.Config()
+	cfg, err := n.factory.Config()
 	if err != nil {
 		return err
 	}

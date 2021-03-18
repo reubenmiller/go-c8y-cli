@@ -8,7 +8,6 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmd/subcommand"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmdutil"
-	"github.com/reubenmiller/go-c8y-cli/pkg/config"
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
@@ -18,8 +17,6 @@ type CmdCreate struct {
 	*subcommand.SubCommand
 
 	factory *cmdutil.Factory
-	Config  func() (*config.Config, error)
-	Client  func() (*c8y.Client, error)
 
 	name    string
 	tenants []string
@@ -29,8 +26,6 @@ type CmdCreate struct {
 func NewCmdCreateServiceUser(f *cmdutil.Factory) *CmdCreate {
 	ccmd := &CmdCreate{
 		factory: f,
-		Config:  f.Config,
-		Client:  f.Client,
 	}
 
 	cmd := &cobra.Command{
@@ -84,11 +79,11 @@ func (n *CmdCreate) getApplicationDetails() *c8y.Application {
 }
 
 func (n *CmdCreate) RunE(cmd *cobra.Command, args []string) error {
-	cfg, err := n.Config()
+	cfg, err := n.factory.Config()
 	if err != nil {
 		return err
 	}
-	client, err := n.Client()
+	client, err := n.factory.Client()
 	if err != nil {
 		return err
 	}

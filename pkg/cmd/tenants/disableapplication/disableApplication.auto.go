@@ -11,7 +11,6 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmdutil"
 	"github.com/reubenmiller/go-c8y-cli/pkg/completion"
-	"github.com/reubenmiller/go-c8y-cli/pkg/config"
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/pkg/mapbuilder"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
@@ -23,16 +22,12 @@ type DisableApplicationCmd struct {
 	*subcommand.SubCommand
 
 	factory *cmdutil.Factory
-	Config  func() (*config.Config, error)
-	Client  func() (*c8y.Client, error)
 }
 
 // NewDisableApplicationCmd creates a command to Unsubscribe application
 func NewDisableApplicationCmd(f *cmdutil.Factory) *DisableApplicationCmd {
 	ccmd := &DisableApplicationCmd{
 		factory: f,
-		Config:  f.Config,
-		Client:  f.Client,
 	}
 	cmd := &cobra.Command{
 		Use:   "disableApplication",
@@ -73,11 +68,11 @@ Disable an application of a tenant by name
 
 // RunE executes the command
 func (n *DisableApplicationCmd) RunE(cmd *cobra.Command, args []string) error {
-	cfg, err := n.Config()
+	cfg, err := n.factory.Config()
 	if err != nil {
 		return err
 	}
-	client, err := n.Client()
+	client, err := n.factory.Client()
 	if err != nil {
 		return err
 	}

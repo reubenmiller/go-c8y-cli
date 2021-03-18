@@ -6,8 +6,6 @@ import (
 	"github.com/howeyc/gopass"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmd/subcommand"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmdutil"
-	"github.com/reubenmiller/go-c8y-cli/pkg/config"
-	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
 )
 
@@ -18,15 +16,11 @@ type CmdEncryptText struct {
 	*subcommand.SubCommand
 
 	factory *cmdutil.Factory
-	Config  func() (*config.Config, error)
-	Client  func() (*c8y.Client, error)
 }
 
 func NewCmdEncryptText(f *cmdutil.Factory) *CmdEncryptText {
 	ccmd := &CmdEncryptText{
 		factory: f,
-		Config:  f.Config,
-		Client:  f.Client,
 	}
 
 	cmd := &cobra.Command{
@@ -63,7 +57,7 @@ Password: {encrypted}ec5b837a03408ffb731307584eac40ac047989a002951e4b7139fa60189
 }
 
 func (n *CmdEncryptText) RunE(cmd *cobra.Command, args []string) error {
-	cfg, err := n.Config()
+	cfg, err := n.factory.Config()
 	if err != nil {
 		return err
 	}

@@ -10,7 +10,6 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmdutil"
 	"github.com/reubenmiller/go-c8y-cli/pkg/completion"
-	"github.com/reubenmiller/go-c8y-cli/pkg/config"
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/pkg/mapbuilder"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
@@ -22,16 +21,12 @@ type CreateGroupCmd struct {
 	*subcommand.SubCommand
 
 	factory *cmdutil.Factory
-	Config  func() (*config.Config, error)
-	Client  func() (*c8y.Client, error)
 }
 
 // NewCreateGroupCmd creates a command to Create device group
 func NewCreateGroupCmd(f *cmdutil.Factory) *CreateGroupCmd {
 	ccmd := &CreateGroupCmd{
 		factory: f,
-		Config:  f.Config,
-		Client:  f.Client,
 	}
 	cmd := &cobra.Command{
 		Use:   "createGroup",
@@ -78,11 +73,11 @@ Create device group with custom properties
 
 // RunE executes the command
 func (n *CreateGroupCmd) RunE(cmd *cobra.Command, args []string) error {
-	cfg, err := n.Config()
+	cfg, err := n.factory.Config()
 	if err != nil {
 		return err
 	}
-	client, err := n.Client()
+	client, err := n.factory.Client()
 	if err != nil {
 		return err
 	}

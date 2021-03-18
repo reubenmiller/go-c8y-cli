@@ -10,7 +10,6 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmd/subcommand"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmdutil"
-	"github.com/reubenmiller/go-c8y-cli/pkg/config"
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/pkg/mapbuilder"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
@@ -21,8 +20,6 @@ type CmdAPI struct {
 	*subcommand.SubCommand
 
 	factory *cmdutil.Factory
-	Config  func() (*config.Config, error)
-	Client  func() (*c8y.Client, error)
 
 	flagHost string
 }
@@ -30,8 +27,6 @@ type CmdAPI struct {
 func NewSubCommand(f *cmdutil.Factory) *CmdAPI {
 	ccmd := &CmdAPI{
 		factory: f,
-		Config:  f.Config,
-		Client:  f.Client,
 	}
 
 	cmd := &cobra.Command{
@@ -69,11 +64,11 @@ c8y api POST "alarm/alarms" --data "text=one,severity=MAJOR,type=test_Type,time=
 }
 
 func (n *CmdAPI) RunE(cmd *cobra.Command, args []string) error {
-	cfg, err := n.Config()
+	cfg, err := n.factory.Config()
 	if err != nil {
 		return err
 	}
-	client, err := n.Client()
+	client, err := n.factory.Client()
 	if err != nil {
 		return err
 	}

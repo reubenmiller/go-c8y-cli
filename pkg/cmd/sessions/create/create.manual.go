@@ -19,7 +19,6 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/pkg/config"
 	"github.com/reubenmiller/go-c8y-cli/pkg/logger"
 	"github.com/reubenmiller/go-c8y-cli/pkg/prompt"
-	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
 )
 
@@ -64,15 +63,11 @@ type CmdCreate struct {
 	*subcommand.SubCommand
 
 	factory *cmdutil.Factory
-	Config  func() (*config.Config, error)
-	Client  func() (*c8y.Client, error)
 }
 
 func NewCmdCreate(f *cmdutil.Factory) *CmdCreate {
 	ccmd := &CmdCreate{
 		factory: f,
-		Config:  f.Config,
-		Client:  f.Client,
 	}
 
 	cmd := &cobra.Command{
@@ -131,7 +126,7 @@ $ c8y sessions create --type prod --host "https://mytenant.eu-latest.cumulocity.
 }
 
 func (n *CmdCreate) promptArgs(cmd *cobra.Command, args []string) error {
-	cfg, err := n.Config()
+	cfg, err := n.factory.Config()
 	if err != nil {
 		return err
 	}
@@ -162,7 +157,7 @@ func (n *CmdCreate) promptArgs(cmd *cobra.Command, args []string) error {
 }
 
 func (n *CmdCreate) RunE(cmd *cobra.Command, args []string) error {
-	cfg, err := n.Config()
+	cfg, err := n.factory.Config()
 	if err != nil {
 		return err
 	}

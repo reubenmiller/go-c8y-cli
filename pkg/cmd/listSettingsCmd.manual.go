@@ -7,7 +7,6 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmd/subcommand"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmdutil"
-	"github.com/reubenmiller/go-c8y-cli/pkg/config"
 	"github.com/reubenmiller/go-c8y-cli/pkg/mapbuilder"
 	"github.com/spf13/cobra"
 )
@@ -15,14 +14,12 @@ import (
 type listSettingsCmd struct {
 	*subcommand.SubCommand
 
-	Config  func() (*config.Config, error)
-	Factory *cmdutil.Factory
+	factory *cmdutil.Factory
 }
 
 func newListSettingsCmd(f *cmdutil.Factory) *listSettingsCmd {
 	ccmd := &listSettingsCmd{
-		Config:  f.Config,
-		Factory: f,
+		factory: f,
 	}
 
 	cmd := &cobra.Command{
@@ -48,11 +45,11 @@ Show active log settings in a flattened json format
 }
 
 func (n *listSettingsCmd) listSettings(cmd *cobra.Command, args []string) error {
-	cfg, err := n.Config()
+	cfg, err := n.factory.Config()
 	if err != nil {
 		return err
 	}
-	activitylog, err := n.Factory.ActivityLogger()
+	activitylog, err := n.factory.ActivityLogger()
 	if err != nil {
 		return err
 	}
@@ -82,5 +79,5 @@ func (n *listSettingsCmd) listSettings(cmd *cobra.Command, args []string) error 
 		return cmderrors.NewUserError("Settings error. ", err)
 	}
 
-	return n.Factory.WriteJSONToConsole(cfg, cmd, "settings", responseText)
+	return n.factory.WriteJSONToConsole(cfg, cmd, "settings", responseText)
 }

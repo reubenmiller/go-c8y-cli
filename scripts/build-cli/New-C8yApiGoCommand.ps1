@@ -349,16 +349,12 @@ type ${NameCamel}Cmd struct {
     *subcommand.SubCommand
 
     factory *cmdutil.Factory
-    Config func() (*config.Config, error)
-    Client func() (*c8y.Client, error)
 }
 
 // New${NameCamel}Cmd creates a command to $Description
 func New${NameCamel}Cmd(f *cmdutil.Factory) *${NameCamel}Cmd {
 	ccmd := &${NameCamel}Cmd{
         factory: f,
-        Config: f.Config,
-        Client: f.Client,
     }
 	cmd := &cobra.Command{
 		Use:   "$Use",
@@ -419,7 +415,7 @@ $($Examples -join "`n`n")
 
 // RunE executes the command
 func (n *${NameCamel}Cmd) RunE(cmd *cobra.Command, args []string) error {
-    cfg, err := n.Config()
+    cfg, err := n.factory.Config()
 	if err != nil {
 		return err
 	}
