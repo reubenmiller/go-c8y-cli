@@ -32,10 +32,14 @@ import (
 	inventoryreferencesCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/inventoryreferences"
 	measurementsCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/measurements"
 	microservicesCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/microservices"
+	microservicesCreateCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/microservices/create"
+	microservicesServiceUserCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/microservices/serviceuser"
 	operationsCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/operations"
 	retentionrulesCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/retentionrules"
 	sessionsCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/sessions"
+	settingsCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/settings"
 	systemoptionsCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/systemoptions"
+	templateCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/template"
 	tenantoptionsCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/tenantoptions"
 	tenantsCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/tenants"
 	tenantstatisticsCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/tenantstatistics"
@@ -191,7 +195,7 @@ func NewCmdRoot(f *cmdutil.Factory, version, buildDate string) *CmdRoot {
 		inventoryCmd.NewSubCommand(f).GetCommand(),
 		inventoryreferencesCmd.NewSubCommand(f).GetCommand(),
 		measurementsCmd.NewSubCommand(f).GetCommand(),
-		microservicesCmd.NewSubCommand(f).GetCommand(),
+
 		operationsCmd.NewSubCommand(f).GetCommand(),
 		retentionrulesCmd.NewSubCommand(f).GetCommand(),
 		sessionsCmd.NewSubCommand(f).GetCommand(),
@@ -205,6 +209,8 @@ func NewCmdRoot(f *cmdutil.Factory, version, buildDate string) *CmdRoot {
 		usersCmd.NewSubCommand(f).GetCommand(),
 		versionCmd.NewCmdVersion(f).GetCommand(),
 		completionCmd.NewCmdCompletion().GetCommand(),
+		templateCmd.NewSubCommand(f).GetCommand(),
+		settingsCmd.NewSubCommand(f).GetCommand(),
 	}
 
 	cmd.AddCommand(commands...)
@@ -217,6 +223,12 @@ func NewCmdRoot(f *cmdutil.Factory, version, buildDate string) *CmdRoot {
 	devices.AddCommand(devicesListCmd.NewCmdDevicesList(f).GetCommand())
 	// devices.AddCommand(NewGetDeviceGroupCollectionCmd(f).GetCommand())
 	cmd.AddCommand(devices)
+
+	// microservices
+	microservices := microservicesCmd.NewSubCommand(f).GetCommand()
+	microservices.AddCommand(microservicesCreateCmd.NewCmdCreate(f).GetCommand())
+	microservices.AddCommand(microservicesServiceUserCmd.NewSubCommand(f).GetCommand())
+	cmd.AddCommand(microservices)
 
 	// Manual commands
 	cmd.AddCommand(aliasCmd.NewCmdAlias(f))
@@ -372,124 +384,68 @@ func (c *CmdRoot) configureActivityLog(cfg *config.Config) (*activitylogger.Acti
 }
 
 /* Old imports
- 	c.AddCommand(NewCompletionsCmd().GetCommand())
-	c.AddCommand(NewVersionCmd().GetCommand())
 
-	c.AddCommand(NewRealtimeCmd().GetCommand())
+c.AddCommand(NewRealtimeCmd().GetCommand())
 
-	// template commands
-	c.AddCommand(NewTemplateRootCmd().GetCommand())
 
-	// settings commands
-	c.AddCommand(NewSettingsRootCmd().GetCommand())
+// Auto generated commands
 
-	// alias commands
-	c.AddCommand(alias.NewCmdAlias(cmdFactory))
+// agents commands
+agents := NewAgentsRootCmd().GetCommand()
+agents.AddCommand(NewGetAgentCollectionCmd().GetCommand())
+c.AddCommand(agents)
 
-	// Auto generated commands
+// alarms commands
+alarms := NewAlarmsRootCmd().GetCommand()
+alarms.AddCommand(NewSubscribeAlarmCmd().GetCommand())
+c.AddCommand(alarms)
 
-	// agents commands
-	agents := NewAgentsRootCmd().GetCommand()
-	agents.AddCommand(NewGetAgentCollectionCmd().GetCommand())
-	c.AddCommand(agents)
+// applications commands
+applications := NewApplicationsRootCmd().GetCommand()
+applications.AddCommand(NewNewHostedApplicationCmd().GetCommand())
+c.AddCommand(applications)
 
-	// alarms commands
-	alarms := NewAlarmsRootCmd().GetCommand()
-	alarms.AddCommand(NewSubscribeAlarmCmd().GetCommand())
-	c.AddCommand(alarms)
 
-	// applications commands
-	applications := NewApplicationsRootCmd().GetCommand()
-	applications.AddCommand(NewNewHostedApplicationCmd().GetCommand())
-	c.AddCommand(applications)
+// currentUser commands
+c.AddCommand(newCurrentUserRootCmd().GetCommand())
 
-	// auditRecords commands
-	c.AddCommand(NewAuditRecordsRootCmd().GetCommand())
 
-	// binaries commands
-	c.AddCommand(NewBinariesRootCmd().GetCommand())
+// devices commands
+devices := NewDevicesRootCmd().GetCommand()
+devices.AddCommand(NewGetDeviceCollectionCmd(cmdFactory).GetCommand())
+devices.AddCommand(NewGetDeviceGroupCollectionCmd().GetCommand())
+c.AddCommand(devices)
 
-	// bulkOperations commands
-	c.AddCommand(NewBulkOperationsRootCmd().GetCommand())
+// operations commands
+operations := NewOperationsRootCmd().GetCommand()
+operations.AddCommand(NewSubscribeOperationCmd().GetCommand())
+c.AddCommand(operations)
 
-	// currentApplication commands
-	c.AddCommand(NewCurrentApplicationRootCmd().GetCommand())
+// events commands
+events := NewEventsRootCmd().GetCommand()
+events.AddCommand(NewSubscribeEventCmd().GetCommand())
+c.AddCommand(events)
 
-	// currentUser commands
-	c.AddCommand(newCurrentUserRootCmd().GetCommand())
 
-	// databroker commands
-	c.AddCommand(NewDatabrokerRootCmd().GetCommand())
+// inventory commands
+inventory := NewInventoryRootCmd().GetCommand()
+inventory.AddCommand(NewSubscribeManagedObjectCmd().GetCommand())
+inventory.AddCommand(NewQueryManagedObjectCollectionCmd().GetCommand())
+c.AddCommand(inventory)
 
-	// deviceCredentials commands
-	c.AddCommand(NewDeviceCredentialsRootCmd().GetCommand())
 
-	// devices commands
-	devices := NewDevicesRootCmd().GetCommand()
-	devices.AddCommand(NewGetDeviceCollectionCmd(cmdFactory).GetCommand())
-	devices.AddCommand(NewGetDeviceGroupCollectionCmd().GetCommand())
-	c.AddCommand(devices)
+// measurements commands
+measurements := NewMeasurementsRootCmd().GetCommand()
+measurements.AddCommand(NewSubscribeMeasurementCmd().GetCommand())
+c.AddCommand(measurements)
 
-	// operations commands
-	operations := NewOperationsRootCmd().GetCommand()
-	operations.AddCommand(NewSubscribeOperationCmd().GetCommand())
-	c.AddCommand(operations)
+// microservices commands
+microservices := NewMicroservicesRootCmd().GetCommand()
+microservices.AddCommand(NewNewMicroserviceCmd().GetCommand())
+microservices.AddCommand(NewNewServiceUserCmd().GetCommand())
+microservices.AddCommand(NewGetServiceUserCmd().GetCommand())
+c.AddCommand(microservices)
 
-	// events commands
-	events := NewEventsRootCmd().GetCommand()
-	events.AddCommand(NewSubscribeEventCmd().GetCommand())
-	c.AddCommand(events)
-
-	// identity commands
-	c.AddCommand(NewIdentityRootCmd().GetCommand())
-
-	// inventory commands
-	inventory := NewInventoryRootCmd().GetCommand()
-	inventory.AddCommand(NewSubscribeManagedObjectCmd().GetCommand())
-	inventory.AddCommand(NewQueryManagedObjectCollectionCmd().GetCommand())
-	c.AddCommand(inventory)
-
-	// inventoryReferences commands
-	c.AddCommand(NewInventoryReferencesRootCmd().GetCommand())
-
-	// measurements commands
-	measurements := NewMeasurementsRootCmd().GetCommand()
-	measurements.AddCommand(NewSubscribeMeasurementCmd().GetCommand())
-	c.AddCommand(measurements)
-
-	// microservices commands
-	microservices := NewMicroservicesRootCmd().GetCommand()
-	microservices.AddCommand(NewNewMicroserviceCmd().GetCommand())
-	microservices.AddCommand(NewNewServiceUserCmd().GetCommand())
-	microservices.AddCommand(NewGetServiceUserCmd().GetCommand())
-	c.AddCommand(microservices)
-
-	// retentionRules commands
-	c.AddCommand(NewRetentionRulesRootCmd().GetCommand())
-
-	// systemOptions commands
-	c.AddCommand(NewSystemOptionsRootCmd().GetCommand())
-
-	// tenantOptions commands
-	c.AddCommand(NewTenantOptionsRootCmd().GetCommand())
-
-	// tenants commands
-	c.AddCommand(NewTenantsRootCmd().GetCommand())
-
-	// tenantStatistics commands
-	c.AddCommand(NewTenantStatisticsRootCmd().GetCommand())
-
-	// users commands
-	c.AddCommand(NewUsersRootCmd().GetCommand())
-
-	// userGroups commands
-	c.AddCommand(NewUserGroupsRootCmd().GetCommand())
-
-	// userReferences commands
-	c.AddCommand(NewUserReferencesRootCmd().GetCommand())
-
-	// userRoles commands
-	c.AddCommand(NewUserRolesRootCmd().GetCommand())
 */
 
 func createCumulocityClient(f *cmdutil.Factory) func() (*c8y.Client, error) {

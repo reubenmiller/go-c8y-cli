@@ -15,14 +15,14 @@ import (
 	"github.com/tidwall/pretty"
 )
 
-type executeTemplateCmd struct {
+type CmdExecute struct {
 	*subcommand.SubCommand
 
 	factory *cmdutil.Factory
 }
 
-func newExecuteTemplateCmd(f *cmdutil.Factory) *executeTemplateCmd {
-	ccmd := &executeTemplateCmd{
+func NewCmdExecute(f *cmdutil.Factory) *CmdExecute {
+	ccmd := &CmdExecute{
 		factory: f,
 	}
 
@@ -61,7 +61,7 @@ Verify a jsonnet template and specify input data to be used as the input when ev
 	return ccmd
 }
 
-func (n *executeTemplateCmd) newTemplate(cmd *cobra.Command, args []string) error {
+func (n *CmdExecute) newTemplate(cmd *cobra.Command, args []string) error {
 	cfg, err := n.factory.Config()
 	if err != nil {
 		return err
@@ -100,7 +100,7 @@ func (n *executeTemplateCmd) newTemplate(cmd *cobra.Command, args []string) erro
 
 	if isJSONResponse {
 		formatter := pretty.Pretty
-		if cliConfig.CompactJSON() {
+		if cfg.CompactJSON() {
 			formatter = pretty.UglyInPlace
 		}
 		fmt.Printf("%s%s", formatter(bytes.TrimSpace(responseText)), outputEnding)

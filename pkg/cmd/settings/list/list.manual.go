@@ -11,14 +11,14 @@ import (
 	"github.com/spf13/cobra"
 )
 
-type listSettingsCmd struct {
+type CmdList struct {
 	*subcommand.SubCommand
 
 	factory *cmdutil.Factory
 }
 
-func newListSettingsCmd(f *cmdutil.Factory) *listSettingsCmd {
-	ccmd := &listSettingsCmd{
+func NewCmdList(f *cmdutil.Factory) *CmdList {
+	ccmd := &CmdList{
 		factory: f,
 	}
 
@@ -44,7 +44,7 @@ Show active log settings in a flattened json format
 	return ccmd
 }
 
-func (n *listSettingsCmd) listSettings(cmd *cobra.Command, args []string) error {
+func (n *CmdList) listSettings(cmd *cobra.Command, args []string) error {
 	cfg, err := n.factory.Config()
 	if err != nil {
 		return err
@@ -56,7 +56,7 @@ func (n *listSettingsCmd) listSettings(cmd *cobra.Command, args []string) error 
 	var responseText []byte
 
 	// settings := viper.GetViper().AllSettings()
-	settings := cliConfig.AllSettings()
+	settings := cfg.AllSettings()
 
 	allSettings := mapbuilder.NewInitializedMapBuilder()
 	allSettings.ApplyMap(settings)
@@ -64,13 +64,13 @@ func (n *listSettingsCmd) listSettings(cmd *cobra.Command, args []string) error 
 	// add additional settings
 	err = allSettings.Set("settings.session.home", cfg.GetSessionHomeDir())
 	if err != nil {
-		Logger.Warnf("Could not get home session directory. %s", err)
+		cfg.Logger.Warnf("Could not get home session directory. %s", err)
 	}
 
 	if activitylog != nil {
 		err := allSettings.Set("settings.activitylog.currentPath", activitylog.GetPath())
 		if err != nil {
-			Logger.Warnf("Could not get activity logger path. %s", err)
+			cfg.Logger.Warnf("Could not get activity logger path. %s", err)
 		}
 	}
 

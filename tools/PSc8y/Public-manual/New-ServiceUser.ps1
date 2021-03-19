@@ -12,7 +12,7 @@ Function New-ServiceUser {
     Create a new microservice called automation01 which has permissions to read the inventory, and subscribe the application to tenant t123456
 
     .LINK
-    c8y microservices createServiceUser
+    c8y microservices serviceusers create
 
     .LINK
     Get-ServiceUser
@@ -53,7 +53,7 @@ Function New-ServiceUser {
             Use-CallerPreference -Cmdlet $PSCmdlet -SessionState $ExecutionContext.SessionState
         }
 
-        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "microservices createServiceUser"
+        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "microservices serviceusers create"
         $ClientOptions = Get-ClientOutputOption $PSBoundParameters
         $TypeOptions = @{
             Type            = "application/json"
@@ -65,11 +65,11 @@ Function New-ServiceUser {
     Process {
 
         if ($ClientOptions.ConvertToPS) {
-            c8y microservices createServiceUser $c8yargs `
+            c8y microservices serviceusers create $c8yargs `
             | ConvertFrom-ClientOutput @TypeOptions
         }
         else {
-            c8y microservices createServiceUser $c8yargs
+            c8y microservices serviceusers create $c8yargs
         }
     }
 

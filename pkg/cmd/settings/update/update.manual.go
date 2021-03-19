@@ -23,6 +23,7 @@ type UpdateSettingsCmd struct {
 	shell string
 
 	*subcommand.SubCommand
+	factory *cmdutil.Factory
 }
 
 type argumentHandler struct {
@@ -237,9 +238,11 @@ var updateSettingsOptions = map[string]argumentHandler{
 	"session.defaultUsername": {"session.defaultUsername", "string", "settings.session.defaultUsername", []string{}, nil, cobra.ShellCompDirectiveDefault},
 }
 
-// UpdateSettingsCmd returns a new command used to update session settings
-func NewUpdateSettingsCmd() *UpdateSettingsCmd {
-	ccmd := &UpdateSettingsCmd{}
+// NewCmdUpdate returns a new command used to update session settings
+func NewCmdUpdate(f *cmdutil.Factory) *UpdateSettingsCmd {
+	ccmd := &UpdateSettingsCmd{
+		factory: f,
+	}
 
 	cmd := &cobra.Command{
 		Use:   "update",
@@ -294,7 +297,14 @@ func NewUpdateSettingsCmd() *UpdateSettingsCmd {
 
 // RunE executes the command
 func (n *UpdateSettingsCmd) RunE(cmd *cobra.Command, args []string) error {
-
+	cfg, err := n.factory.Config()
+	if err != nil {
+		return err
+	}
+	client, err := n.factory.Client()
+	if err != nil {
+		return err
+	}
 	var v *viper.Viper
 	writeToFile := true
 	if n.file != "" {
@@ -307,7 +317,7 @@ func (n *UpdateSettingsCmd) RunE(cmd *cobra.Command, args []string) error {
 		v = viper.New()
 		writeToFile = false
 	} else {
-		v = cliConfig.Persistent
+		v = cfg.Persistent
 	}
 
 	name := ""
@@ -356,7 +366,7 @@ func (n *UpdateSettingsCmd) RunE(cmd *cobra.Command, args []string) error {
 		if n.file != "" {
 			err = v.WriteConfig()
 		} else {
-			err = cliConfig.SaveClientConfig(client)
+			err = cfg.SaveClientConfig(client)
 		}
 		if err != nil {
 			return err

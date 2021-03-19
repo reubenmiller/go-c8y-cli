@@ -23,17 +23,17 @@ type CmdCreate struct {
 	roles   []string
 }
 
-func NewCmdCreateServiceUser(f *cmdutil.Factory) *CmdCreate {
+func NewCmdCreate(f *cmdutil.Factory) *CmdCreate {
 	ccmd := &CmdCreate{
 		factory: f,
 	}
 
 	cmd := &cobra.Command{
-		Use:   "createServiceUser",
+		Use:   "create",
 		Short: "New application service user",
 		Long:  ``,
 		Example: heredoc.Doc(`
-$ c8y microservices createServiceUser --name my-user
+$ c8y microservices serviceusers create --name my-user
 Create new application service user
 		`),
 		PreRunE: func(cmd *cobra.Command, args []string) error {

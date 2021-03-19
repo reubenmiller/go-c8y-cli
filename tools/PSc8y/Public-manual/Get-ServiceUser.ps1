@@ -7,7 +7,7 @@ Function Get-ServiceUser {
     Get the service user associated to a microservice
 
     .LINK
-    c8y microservices getServiceUser
+    c8y microservices serviceusers get
 
     .EXAMPLE
     PS> Get-ServiceUser -Id $App.name
@@ -37,7 +37,7 @@ Function Get-ServiceUser {
             Use-CallerPreference -Cmdlet $PSCmdlet -SessionState $ExecutionContext.SessionState
         }
 
-        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "microservices getServiceUser" -Exclude "Id"
+        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "microservices serviceusers get" -Exclude "Id"
         $ClientOptions = Get-ClientOutputOption $PSBoundParameters
         $TypeOptions = @{
             Type            = "application/vnd.com.nsn.cumulocity.applicationUserCollection+json"
@@ -53,11 +53,11 @@ Function Get-ServiceUser {
             }
 
             if ($ClientOptions.ConvertToPS) {
-                c8y microservices getServiceUser --id $appId $c8yargs `
+                c8y microservices serviceusers get --id $appId $c8yargs `
                 | ConvertFrom-ClientOutput @TypeOptions
             }
             else {
-                c8y microservices getServiceUser --id $appId $c8yargs
+                c8y microservices serviceusers get --id $appId $c8yargs
             }
         }
     }
