@@ -17,6 +17,8 @@ import (
 	alarmsCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/alarms"
 	aliasCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/alias"
 	apiCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/api"
+	applicationsCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/applications"
+	applicationsCreateHostedCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/applications/createhostedapplication"
 	auditrecordsCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/auditrecords"
 	binariesCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/binaries"
 	bulkoperationsCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/bulkoperations"
@@ -235,6 +237,11 @@ func NewCmdRoot(f *cmdutil.Factory, version, buildDate string) *CmdRoot {
 	inventory.AddCommand(inventoryFindCmd.NewCmdFind(f).GetCommand())
 	cmd.AddCommand(inventory)
 
+	// applications
+	applications := applicationsCmd.NewSubCommand(f).GetCommand()
+	applications.AddCommand(applicationsCreateHostedCmd.NewCmdCreateHostedApplication(f).GetCommand())
+	cmd.AddCommand(applications)
+
 	// Manual commands
 	cmd.AddCommand(aliasCmd.NewCmdAlias(f))
 	cmd.AddCommand(apiCmd.NewSubCommand(f).GetCommand())
@@ -411,9 +418,6 @@ applications.AddCommand(NewNewHostedApplicationCmd().GetCommand())
 c.AddCommand(applications)
 
 
-// currentUser commands
-c.AddCommand(newCurrentUserRootCmd().GetCommand())
-
 
 // devices commands
 devices := NewDevicesRootCmd().GetCommand()
@@ -435,7 +439,6 @@ c.AddCommand(events)
 // inventory commands
 inventory := NewInventoryRootCmd().GetCommand()
 inventory.AddCommand(NewSubscribeManagedObjectCmd().GetCommand())
-inventory.AddCommand(NewQueryManagedObjectCollectionCmd().GetCommand())
 c.AddCommand(inventory)
 
 
