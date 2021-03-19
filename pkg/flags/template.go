@@ -30,7 +30,7 @@ func WithTemplateValue(src string, pathResolver Resolver) GetOption {
 		}
 
 		value, err := cmd.Flags().GetString(src)
-		if err != nil {
+		if err != nil || strings.TrimSpace(value) == "" {
 			return "", nil, err
 		}
 
