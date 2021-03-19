@@ -1,4 +1,4 @@
-package cmd
+package tenantstatistics
 
 import (
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmd/subcommand"

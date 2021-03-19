@@ -1,4 +1,4 @@
-package cmd
+package settings
 
 import (
 	cmdList "github.com/reubenmiller/go-c8y-cli/pkg/cmd/settings/list"

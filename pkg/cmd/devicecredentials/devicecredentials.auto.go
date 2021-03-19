@@ -1,4 +1,4 @@
-package cmd
+package devicecredentials
 
 import (
 	cmdApproveDeviceRequest "github.com/reubenmiller/go-c8y-cli/pkg/cmd/devicecredentials/approvedevicerequest"

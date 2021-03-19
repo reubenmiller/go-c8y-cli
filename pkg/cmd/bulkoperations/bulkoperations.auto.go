@@ -1,4 +1,4 @@
-package cmd
+package bulkoperations
 
 import (
 	cmdCreate "github.com/reubenmiller/go-c8y-cli/pkg/cmd/bulkoperations/create"

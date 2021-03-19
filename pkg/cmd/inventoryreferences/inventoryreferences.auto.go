@@ -1,4 +1,4 @@
-package cmd
+package inventoryreferences
 
 import (
 	cmdAssignChildDevice "github.com/reubenmiller/go-c8y-cli/pkg/cmd/inventoryreferences/assignchilddevice"

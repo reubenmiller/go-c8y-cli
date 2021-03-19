@@ -1,4 +1,4 @@
-package cmd
+package databroker
 
 import (
 	cmdGet "github.com/reubenmiller/go-c8y-cli/pkg/cmd/databroker/get"

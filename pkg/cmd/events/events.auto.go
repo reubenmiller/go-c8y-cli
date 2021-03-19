@@ -1,4 +1,4 @@
-package cmd
+package events
 
 import (
 	cmdCreate "github.com/reubenmiller/go-c8y-cli/pkg/cmd/events/create"

@@ -1,4 +1,4 @@
-package cmd
+package devices
 
 import (
 	cmdCreate "github.com/reubenmiller/go-c8y-cli/pkg/cmd/devices/create"

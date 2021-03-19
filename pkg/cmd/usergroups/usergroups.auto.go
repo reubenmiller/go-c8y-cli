@@ -1,4 +1,4 @@
-package cmd
+package usergroups
 
 import (
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmd/subcommand"

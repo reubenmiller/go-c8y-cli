@@ -1,4 +1,4 @@
-package cmd
+package agents
 
 import (
 	cmdCreate "github.com/reubenmiller/go-c8y-cli/pkg/cmd/agents/create"

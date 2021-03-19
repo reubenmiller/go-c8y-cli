@@ -1,4 +1,4 @@
-package cmd
+package userroles
 
 import (
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmd/subcommand"

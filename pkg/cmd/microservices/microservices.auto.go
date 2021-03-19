@@ -1,4 +1,4 @@
-package cmd
+package microservices
 
 import (
 	cmdCreateBinary "github.com/reubenmiller/go-c8y-cli/pkg/cmd/microservices/createbinary"

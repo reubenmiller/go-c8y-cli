@@ -1,4 +1,4 @@
-package cmd
+package serviceuser
 
 import (
 	cmdCreate "github.com/reubenmiller/go-c8y-cli/pkg/cmd/microservices/serviceuser/create"

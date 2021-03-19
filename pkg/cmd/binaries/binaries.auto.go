@@ -1,4 +1,4 @@
-package cmd
+package binaries
 
 import (
 	cmdCreate "github.com/reubenmiller/go-c8y-cli/pkg/cmd/binaries/create"

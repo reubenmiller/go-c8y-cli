@@ -1,4 +1,4 @@
-package cmd
+package applications
 
 import (
 	cmdCopy "github.com/reubenmiller/go-c8y-cli/pkg/cmd/applications/copy"

@@ -1,4 +1,4 @@
-package cmd
+package currentapplication
 
 import (
 	cmdGet "github.com/reubenmiller/go-c8y-cli/pkg/cmd/currentapplication/get"
