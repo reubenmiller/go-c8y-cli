@@ -16,6 +16,7 @@
         Write-Error "Missing root command name"
         return
     }
+    $NameLowercase = $Name.ToLower()
     $NameCamel = $Name[0].ToString().ToUpperInvariant() + $Name.Substring(1)
     $Description = $Specification.information.description
     $DescriptionLong = $Specification.information.descriptionLong
@@ -24,7 +25,7 @@
     $RootImportCode = New-Object System.Text.StringBuilder
     $GoImports = New-Object System.Text.StringBuilder
 
-    $File = Join-Path -Path $OutputDir -ChildPath ("{0}.auto.go" -f $Name.ToLower())
+    $File = Join-Path -Path $OutputDir -ChildPath ("{0}.auto.go" -f $NameLowercase)
 
     foreach ($endpoint in $Specification.endpoints) {
         if ($endpoint.skip -eq $true) {
@@ -47,7 +48,7 @@
     $null = $RootImportCode.AppendLine("    rootCmd.AddCommand(New${NameCamel}RootCmd(f).GetCommand())")
 
     $Template = @"
-package cmd
+package $NameLowercase
 
 import (
     "github.com/spf13/cobra"
