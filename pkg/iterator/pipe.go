@@ -28,6 +28,9 @@ type PipeOptions struct {
 	// Property name if the input data is json
 	Properties []string
 
+	// AllowEmpty allow pipeline items without any matching properties.
+	AllowEmpty bool
+
 	// Validator to be applied on each item
 	Validator Validator
 }
@@ -75,6 +78,9 @@ func (i *PipeIterator) GetNext() (line []byte, input interface{}, err error) {
 						}
 						// return raw value (as it might be a number or bool)
 						return []byte(v.Raw), line, nil
+					} else if i.opts.AllowEmpty {
+						// allow empty values, as the user can use the raw piped data in a template
+						return []byte(""), line, nil
 					}
 				}
 			}
