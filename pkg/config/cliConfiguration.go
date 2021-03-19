@@ -223,9 +223,6 @@ type Config struct {
 	// Persistent settings (stored to file)
 	Persistent *viper.Viper
 
-	// Session file path
-	path string
-
 	// SecureData accessor to encrypt/decrypt data
 	SecureData *encrypt.SecureData
 
@@ -356,17 +353,6 @@ func (c *Config) GetUsername() string {
 		return v
 	}
 	return os.Getenv("C8Y_USER")
-}
-
-// SetSessionFilePath sets the session's file path
-func (c *Config) SetSessionFilePath(v string) {
-	c.path = v
-}
-
-// GetSessionFilePath returns the session file path
-// TODO: Check if this is still needed, as there is a GetSessionFile method as well!
-func (c *Config) GetSessionFilePath() string {
-	return c.path
 }
 
 // GetName returns the name of the current session
