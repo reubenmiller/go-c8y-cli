@@ -39,9 +39,13 @@ func WithLazyRequired(flagName string, values ...string) Option {
 }
 
 // WithTenantID tenant id completion
-func WithTenantID(flagName string, client *c8y.Client) Option {
+func WithTenantID(flagName string, clientFunc func() (*c8y.Client, error)) Option {
 	return func(cmd *cobra.Command) *cobra.Command {
 		_ = cmd.RegisterFlagCompletionFunc(flagName, func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+			client, err := clientFunc()
+			if err != nil {
+				return []string{err.Error()}, cobra.ShellCompDirectiveDefault
+			}
 			tenants, _, err := client.Tenant.GetTenants(
 				context.Background(),
 				c8y.NewPaginationOptions(20),
@@ -51,40 +55,13 @@ func WithTenantID(flagName string, client *c8y.Client) Option {
 				values := []string{fmt.Sprintf("unknown. %s", err)}
 				return values, cobra.ShellCompDirectiveError
 			}
-			values := []string{"default"}
+			values := []string{client.TenantName}
 			for _, tenant := range tenants.Tenants {
 				values = append(values, tenant.ID)
 			}
 			return values, cobra.ShellCompDirectiveDefault
 		})
 		return cmd
-	}
-}
-
-type CobraCompletion func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective)
-
-func WithTenantCompletion(flagName string, client *c8y.Client) CobraCompletion {
-	return func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
-		// if len(args) != 0 {
-		// 	return []string{"no args"}, cobra.ShellCompDirectiveNoFileComp
-		// }
-
-		// inputValue, err := cmd.Flags().GetString(flagName)
-
-		tenants, _, err := client.Tenant.GetTenants(
-			context.Background(),
-			c8y.NewPaginationOptions(20),
-		)
-
-		if err != nil {
-			values := []string{fmt.Sprintf("unknown. %s", err)}
-			return values, cobra.ShellCompDirectiveNoFileComp
-		}
-		values := []string{"default"}
-		for _, tenant := range tenants.Tenants {
-			values = append(values, tenant.ID)
-		}
-		return values, cobra.ShellCompDirectiveNoFileComp
 	}
 }
 
