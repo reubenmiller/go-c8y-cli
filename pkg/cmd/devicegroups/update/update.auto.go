@@ -1,11 +1,12 @@
 // Code generated from specification version 1.0.0: DO NOT EDIT
-package creategroup
+package update
 
 import (
 	"io"
 	"net/http"
 
 	"github.com/MakeNowJust/heredoc/v2"
+	"github.com/reubenmiller/go-c8y-cli/pkg/c8yfetcher"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmd/subcommand"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmdutil"
@@ -16,44 +17,40 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// CreateGroupCmd command
-type CreateGroupCmd struct {
+// UpdateCmd command
+type UpdateCmd struct {
 	*subcommand.SubCommand
 
 	factory *cmdutil.Factory
 }
 
-// NewCreateGroupCmd creates a command to Create device group
-func NewCreateGroupCmd(f *cmdutil.Factory) *CreateGroupCmd {
-	ccmd := &CreateGroupCmd{
+// NewUpdateCmd creates a command to Update device group
+func NewUpdateCmd(f *cmdutil.Factory) *UpdateCmd {
+	ccmd := &UpdateCmd{
 		factory: f,
 	}
 	cmd := &cobra.Command{
-		Use:   "createGroup",
-		Short: "Create device group",
-		Long: `Create a new device group to logically group one or more devices
+		Use:   "update",
+		Short: "Update device group",
+		Long: `Update properties of an existing device group, for example name or any other custom properties.
 `,
 		Example: heredoc.Doc(`
-$ c8y devices createGroup --name mygroup
-Create device group
-
-$ c8y devices createGroup --name mygroup --data "custom_value1=1234"
-Create device group with custom properties
+$ c8y devicegroups update --id 12345
+Update device group by id
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
-			return f.CreateModeEnabled()
+			return f.UpdateModeEnabled()
 		},
 		RunE: ccmd.RunE,
 	}
 
 	cmd.SilenceUsage = true
 
-	cmd.Flags().String("name", "", "Device group name (accepts pipeline)")
-	cmd.Flags().String("type", "", "Device group type (c8y_DeviceGroup (root folder) or c8y_DeviceSubGroup (sub folder)). Defaults to c8y_DeviceGroup")
+	cmd.Flags().StringSlice("id", []string{""}, "Device group ID (required) (accepts pipeline)")
+	cmd.Flags().String("name", "", "Device group name")
 
 	completion.WithOptions(
 		cmd,
-		completion.WithValidateSet("type", "c8y_DeviceGroup", "c8y_DeviceSubGroup"),
 	)
 
 	flags.WithOptions(
@@ -61,7 +58,7 @@ Create device group with custom properties
 		flags.WithProcessingMode(),
 		flags.WithData(),
 		f.WithTemplateFlag(cmd),
-		flags.WithExtendedPipelineSupport("name", "name", false, "id"),
+		flags.WithExtendedPipelineSupport("id", "id", true),
 	)
 
 	// Required flags
@@ -72,7 +69,7 @@ Create device group with custom properties
 }
 
 // RunE executes the command
-func (n *CreateGroupCmd) RunE(cmd *cobra.Command, args []string) error {
+func (n *UpdateCmd) RunE(cmd *cobra.Command, args []string) error {
 	cfg, err := n.factory.Config()
 	if err != nil {
 		return err
@@ -134,30 +131,27 @@ func (n *CreateGroupCmd) RunE(cmd *cobra.Command, args []string) error {
 		inputIterators,
 		flags.WithDataFlagValue(),
 		flags.WithStringValue("name", "name"),
-		flags.WithStringValue("type", "type"),
-		flags.WithDefaultTemplateString(`
-{type: 'c8y_DeviceGroup', c8y_IsDeviceGroup: {}}`),
 		cmdutil.WithTemplateValue(cfg),
 		flags.WithTemplateVariablesValue(),
-		flags.WithRequiredProperties("name"),
 	)
 	if err != nil {
 		return cmderrors.NewUserError(err)
 	}
 
 	// path parameters
-	path := flags.NewStringTemplate("inventory/managedObjects")
+	path := flags.NewStringTemplate("inventory/managedObjects/{id}")
 	err = flags.WithPathParameters(
 		cmd,
 		path,
 		inputIterators,
+		c8yfetcher.WithDeviceGroupByNameFirstMatch(client, args, "id", "id"),
 	)
 	if err != nil {
 		return err
 	}
 
 	req := c8y.RequestOptions{
-		Method:       "POST",
+		Method:       "PUT",
 		Path:         path.GetTemplate(),
 		Query:        queryValue,
 		Body:         body,

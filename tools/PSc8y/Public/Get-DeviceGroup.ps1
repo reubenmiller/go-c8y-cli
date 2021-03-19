@@ -9,7 +9,7 @@ Get a device group
 
 
 .LINK
-c8y devices getGroup
+c8y devicegroups get
 
 .EXAMPLE
 PS> Get-DeviceGroup -Id $group.id
@@ -46,7 +46,7 @@ Get device group by name
             Use-CallerPreference -Cmdlet $PSCmdlet -SessionState $ExecutionContext.SessionState
         }
 
-        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "devices getGroup"
+        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "devicegroups get"
         $ClientOptions = Get-ClientOutputOption $PSBoundParameters
         $TypeOptions = @{
             Type = "application/vnd.com.nsn.cumulocity.customDeviceGroup+json"
@@ -60,13 +60,13 @@ Get device group by name
         if ($ClientOptions.ConvertToPS) {
             $Id `
             | Group-ClientRequests `
-            | c8y devices getGroup $c8yargs `
+            | c8y devicegroups get $c8yargs `
             | ConvertFrom-ClientOutput @TypeOptions
         }
         else {
             $Id `
             | Group-ClientRequests `
-            | c8y devices getGroup $c8yargs
+            | c8y devicegroups get $c8yargs
         }
         
     }

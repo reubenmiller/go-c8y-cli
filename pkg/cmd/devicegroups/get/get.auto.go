@@ -1,7 +1,8 @@
 // Code generated from specification version 1.0.0: DO NOT EDIT
-package deletegroup
+package get
 
 import (
+	"fmt"
 	"io"
 	"net/http"
 
@@ -17,29 +18,29 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// DeleteGroupCmd command
-type DeleteGroupCmd struct {
+// GetCmd command
+type GetCmd struct {
 	*subcommand.SubCommand
 
 	factory *cmdutil.Factory
 }
 
-// NewDeleteGroupCmd creates a command to Delete device group
-func NewDeleteGroupCmd(f *cmdutil.Factory) *DeleteGroupCmd {
-	ccmd := &DeleteGroupCmd{
+// NewGetCmd creates a command to Get device group
+func NewGetCmd(f *cmdutil.Factory) *GetCmd {
+	ccmd := &GetCmd{
 		factory: f,
 	}
 	cmd := &cobra.Command{
-		Use:   "deleteGroup",
-		Short: "Delete device group",
-		Long: `Delete an existing device group, and optionally all of it's children
+		Use:   "get",
+		Short: "Get device group",
+		Long: `Get a device group
 `,
 		Example: heredoc.Doc(`
-$ c8y devices deleteGroup --id 12345
+$ c8y devicegroups get --id 12345
 Get device group by id
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
-			return f.DeleteModeEnabled()
+			return nil
 		},
 		RunE: ccmd.RunE,
 	}
@@ -47,7 +48,6 @@ Get device group by id
 	cmd.SilenceUsage = true
 
 	cmd.Flags().StringSlice("id", []string{""}, "Device group ID (required) (accepts pipeline)")
-	cmd.Flags().Bool("cascade", false, "Remove all child devices and child assets will be deleted recursively. By default, the delete operation is propagated to the subgroups only if the deleted object is a group")
 
 	completion.WithOptions(
 		cmd,
@@ -55,7 +55,6 @@ Get device group by id
 
 	flags.WithOptions(
 		cmd,
-		flags.WithProcessingMode(),
 
 		flags.WithExtendedPipelineSupport("id", "id", true),
 	)
@@ -68,7 +67,7 @@ Get device group by id
 }
 
 // RunE executes the command
-func (n *DeleteGroupCmd) RunE(cmd *cobra.Command, args []string) error {
+func (n *GetCmd) RunE(cmd *cobra.Command, args []string) error {
 	cfg, err := n.factory.Config()
 	if err != nil {
 		return err
@@ -88,11 +87,15 @@ func (n *DeleteGroupCmd) RunE(cmd *cobra.Command, args []string) error {
 		cmd,
 		query,
 		inputIterators,
-		flags.WithBoolValue("cascade", "cascade", ""),
 	)
 	if err != nil {
 		return cmderrors.NewUserError(err)
 	}
+	commonOptions, err := cfg.GetOutputCommonOptions(cmd)
+	if err != nil {
+		return cmderrors.NewUserError(fmt.Sprintf("Failed to get common options. err=%s", err))
+	}
+	commonOptions.AddQueryParameters(query)
 
 	queryValue, err := query.GetQueryUnescape(true)
 
@@ -106,7 +109,6 @@ func (n *DeleteGroupCmd) RunE(cmd *cobra.Command, args []string) error {
 		cmd,
 		headers,
 		inputIterators,
-		flags.WithProcessingModeValue(),
 	)
 	if err != nil {
 		return cmderrors.NewUserError(err)
@@ -147,7 +149,7 @@ func (n *DeleteGroupCmd) RunE(cmd *cobra.Command, args []string) error {
 	}
 
 	req := c8y.RequestOptions{
-		Method:       "DELETE",
+		Method:       "GET",
 		Path:         path.GetTemplate(),
 		Query:        queryValue,
 		Body:         body,

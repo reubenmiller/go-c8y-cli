@@ -2,17 +2,13 @@ package cmd
 
 import (
 	cmdCreate "github.com/reubenmiller/go-c8y-cli/pkg/cmd/devices/create"
-	cmdCreateGroup "github.com/reubenmiller/go-c8y-cli/pkg/cmd/devices/creategroup"
 	cmdDelete "github.com/reubenmiller/go-c8y-cli/pkg/cmd/devices/delete"
-	cmdDeleteGroup "github.com/reubenmiller/go-c8y-cli/pkg/cmd/devices/deletegroup"
 	cmdGet "github.com/reubenmiller/go-c8y-cli/pkg/cmd/devices/get"
-	cmdGetGroup "github.com/reubenmiller/go-c8y-cli/pkg/cmd/devices/getgroup"
 	cmdGetSupportedMeasurements "github.com/reubenmiller/go-c8y-cli/pkg/cmd/devices/getsupportedmeasurements"
 	cmdGetSupportedOperations "github.com/reubenmiller/go-c8y-cli/pkg/cmd/devices/getsupportedoperations"
 	cmdGetSupportedSeries "github.com/reubenmiller/go-c8y-cli/pkg/cmd/devices/getsupportedseries"
 	cmdSetRequiredAvailability "github.com/reubenmiller/go-c8y-cli/pkg/cmd/devices/setrequiredavailability"
 	cmdUpdate "github.com/reubenmiller/go-c8y-cli/pkg/cmd/devices/update"
-	cmdUpdateGroup "github.com/reubenmiller/go-c8y-cli/pkg/cmd/devices/updategroup"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmd/subcommand"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmdutil"
 	"github.com/spf13/cobra"
@@ -40,10 +36,6 @@ func NewSubCommand(f *cmdutil.Factory) *SubCmdDevices {
 	cmd.AddCommand(cmdGetSupportedSeries.NewGetSupportedSeriesCmd(f).GetCommand())
 	cmd.AddCommand(cmdGetSupportedOperations.NewGetSupportedOperationsCmd(f).GetCommand())
 	cmd.AddCommand(cmdSetRequiredAvailability.NewSetRequiredAvailabilityCmd(f).GetCommand())
-	cmd.AddCommand(cmdGetGroup.NewGetGroupCmd(f).GetCommand())
-	cmd.AddCommand(cmdUpdateGroup.NewUpdateGroupCmd(f).GetCommand())
-	cmd.AddCommand(cmdDeleteGroup.NewDeleteGroupCmd(f).GetCommand())
-	cmd.AddCommand(cmdCreateGroup.NewCreateGroupCmd(f).GetCommand())
 
 	ccmd.SubCommand = subcommand.NewSubCommand(cmd)
 

@@ -9,7 +9,7 @@ Delete an existing device group, and optionally all of it's children
 
 
 .LINK
-c8y devices deleteGroup
+c8y devicegroups delete
 
 .EXAMPLE
 PS> Remove-DeviceGroup -Id $group.id
@@ -51,7 +51,7 @@ Remove device group by name
             Use-CallerPreference -Cmdlet $PSCmdlet -SessionState $ExecutionContext.SessionState
         }
 
-        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "devices deleteGroup"
+        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "devicegroups delete"
         $ClientOptions = Get-ClientOutputOption $PSBoundParameters
         $TypeOptions = @{
             Type = ""
@@ -65,13 +65,13 @@ Remove device group by name
         if ($ClientOptions.ConvertToPS) {
             $Id `
             | Group-ClientRequests `
-            | c8y devices deleteGroup $c8yargs `
+            | c8y devicegroups delete $c8yargs `
             | ConvertFrom-ClientOutput @TypeOptions
         }
         else {
             $Id `
             | Group-ClientRequests `
-            | c8y devices deleteGroup $c8yargs
+            | c8y devicegroups delete $c8yargs
         }
         
     }

@@ -9,7 +9,7 @@ Create a new device group to logically group one or more devices
 
 
 .LINK
-c8y devices createGroup
+c8y devicegroups create
 
 .EXAMPLE
 PS> New-DeviceGroup -Name $GroupName
@@ -51,7 +51,7 @@ Create device group with custom properties
             Use-CallerPreference -Cmdlet $PSCmdlet -SessionState $ExecutionContext.SessionState
         }
 
-        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "devices createGroup"
+        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "devicegroups create"
         $ClientOptions = Get-ClientOutputOption $PSBoundParameters
         $TypeOptions = @{
             Type = "application/vnd.com.nsn.cumulocity.customDeviceGroup+json"
@@ -65,13 +65,13 @@ Create device group with custom properties
         if ($ClientOptions.ConvertToPS) {
             $Name `
             | Group-ClientRequests `
-            | c8y devices createGroup $c8yargs `
+            | c8y devicegroups create $c8yargs `
             | ConvertFrom-ClientOutput @TypeOptions
         }
         else {
             $Name `
             | Group-ClientRequests `
-            | c8y devices createGroup $c8yargs
+            | c8y devicegroups create $c8yargs
         }
         
     }

@@ -17,19 +17,19 @@ import (
 	"github.com/spf13/cobra"
 )
 
-type CmdDeviceGroupList struct {
+type CmdList struct {
 	*subcommand.SubCommand
 
 	factory *cmdutil.Factory
 }
 
-func NewGetDeviceGroupCollectionCmd(f *cmdutil.Factory) *CmdDeviceGroupList {
-	ccmd := &CmdDeviceGroupList{
+func NewCmdList(f *cmdutil.Factory) *CmdList {
+	ccmd := &CmdList{
 		factory: f,
 	}
 
 	cmd := &cobra.Command{
-		Use:   "listDeviceGroups",
+		Use:   "list",
 		Short: "Get device group collection",
 		Long:  `Get a collection of device groups based on filter parameters`,
 		Example: heredoc.Doc(`
@@ -56,7 +56,7 @@ func NewGetDeviceGroupCollectionCmd(f *cmdutil.Factory) *CmdDeviceGroupList {
 	return ccmd
 }
 
-func (n *CmdDeviceGroupList) getDeviceGroupCollection(cmd *cobra.Command, args []string) error {
+func (n *CmdList) getDeviceGroupCollection(cmd *cobra.Command, args []string) error {
 	cfg, err := n.factory.Config()
 	if err != nil {
 		return err

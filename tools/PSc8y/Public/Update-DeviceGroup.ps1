@@ -9,7 +9,7 @@ Update properties of an existing device group, for example name or any other cus
 
 
 .LINK
-c8y devices updateGroup
+c8y devicegroups update
 
 .EXAMPLE
 PS> Update-DeviceGroup -Id $group.id -Name "MyNewName"
@@ -56,7 +56,7 @@ Update device group custom properties
             Use-CallerPreference -Cmdlet $PSCmdlet -SessionState $ExecutionContext.SessionState
         }
 
-        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "devices updateGroup"
+        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "devicegroups update"
         $ClientOptions = Get-ClientOutputOption $PSBoundParameters
         $TypeOptions = @{
             Type = "application/vnd.com.nsn.cumulocity.customDeviceGroup+json"
@@ -70,13 +70,13 @@ Update device group custom properties
         if ($ClientOptions.ConvertToPS) {
             $Id `
             | Group-ClientRequests `
-            | c8y devices updateGroup $c8yargs `
+            | c8y devicegroups update $c8yargs `
             | ConvertFrom-ClientOutput @TypeOptions
         }
         else {
             $Id `
             | Group-ClientRequests `
-            | c8y devices updateGroup $c8yargs
+            | c8y devicegroups update $c8yargs
         }
         
     }
