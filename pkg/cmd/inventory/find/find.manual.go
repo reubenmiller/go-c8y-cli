@@ -41,7 +41,7 @@ Get a list of managed objects
 	cmd.SilenceUsage = true
 
 	cmd.Flags().String("query", "", "ManagedObject query. (required)")
-	cmd.Flags().String("orderBy", "", "Order the results by the given parameter. i.e. 'id asc'")
+	cmd.Flags().String("orderBy", "", "Order the results by the given parameter. i.e. 'id asc' or 'name desc'")
 	cmd.Flags().Bool("withParents", false, "include a flat list of all parents and grandparents of the given object")
 
 	flags.WithOptions(
