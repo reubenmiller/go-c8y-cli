@@ -7,7 +7,7 @@ import (
 	"strings"
 	"sync/atomic"
 
-	"github.com/reubenmiller/go-c8y-cli/pkg/clierrors"
+	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/pkg/iterator"
 	"github.com/reubenmiller/go-c8y-cli/pkg/mapbuilder"
@@ -70,7 +70,7 @@ func (r *RequestIterator) GetNext() (*c8y.RequestOptions, interface{}, error) {
 		path, input, err := r.Path.GetNext()
 
 		if err != nil {
-			if !errors.Is(err, clierrors.ErrNoMatchesFound) {
+			if !errors.Is(err, cmderrors.ErrNoMatchesFound) {
 				r.setDone()
 			}
 			return nil, nil, err
@@ -85,7 +85,7 @@ func (r *RequestIterator) GetNext() (*c8y.RequestOptions, interface{}, error) {
 	if r.Query != nil && !reflect.ValueOf(r.Query).IsNil() {
 		q, input, err := r.Query.GetNext()
 		if err != nil {
-			if !errors.Is(err, clierrors.ErrNoMatchesFound) {
+			if !errors.Is(err, cmderrors.ErrNoMatchesFound) {
 				r.setDone()
 			}
 			return nil, nil, err
@@ -105,7 +105,7 @@ func (r *RequestIterator) GetNext() (*c8y.RequestOptions, interface{}, error) {
 		case *mapbuilder.MapBuilder:
 			bodyContents, err := v.MarshalJSONWithInput(inputLine)
 			if err != nil {
-				if !errors.Is(err, clierrors.ErrNoMatchesFound) {
+				if !errors.Is(err, cmderrors.ErrNoMatchesFound) {
 					r.setDone()
 				}
 				return nil, nil, err

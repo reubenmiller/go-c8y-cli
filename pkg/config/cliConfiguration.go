@@ -13,7 +13,6 @@ import (
 
 	"github.com/mitchellh/go-homedir"
 	"github.com/reubenmiller/go-c8y-cli/pkg/c8ydefaults"
-	"github.com/reubenmiller/go-c8y-cli/pkg/clierrors"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/pkg/encrypt"
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
@@ -1173,7 +1172,7 @@ func (c *Config) ExpandHomePath(path string) string {
 func (c *Config) LogErrorF(err error, format string, args ...interface{}) {
 	errorLogger := c.Logger.Errorf
 	silentStatusCodes := c.GetSilentStatusCodes()
-	if errors.Is(err, clierrors.ErrNoMatchesFound) {
+	if errors.Is(err, cmderrors.ErrNoMatchesFound) {
 		if strings.Contains(silentStatusCodes, "404") {
 			errorLogger = c.Logger.Infof
 		}

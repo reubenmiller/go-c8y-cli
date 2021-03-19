@@ -1,8 +1,9 @@
-package clierrors
+package cmderrors
 
 import (
-	"errors"
 	"fmt"
+
+	"github.com/pkg/errors"
 )
 
 type NoMatchesFoundError struct {

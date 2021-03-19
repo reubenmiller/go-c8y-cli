@@ -89,7 +89,7 @@ func (n *CmdGetSession) RunE(cmd *cobra.Command, args []string) error {
 	}
 
 	if session.CumulocitySession.Host == "" {
-		return cmderrors.NewUserErrorWithExitCode(102, "no session loaded")
+		return cmderrors.NewUserErrorWithExitCode(cmderrors.ExitNoSession, "no session loaded")
 	}
 
 	b, err := json.Marshal(session)

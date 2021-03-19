@@ -15,7 +15,6 @@ import (
 	"github.com/cli/safeexec"
 	"github.com/reubenmiller/go-c8y-cli/internal/run"
 	"github.com/reubenmiller/go-c8y-cli/pkg/activitylogger"
-	"github.com/reubenmiller/go-c8y-cli/pkg/clierrors"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmd/alias/expand"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmd/factory"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmd/root"
@@ -60,7 +59,7 @@ func init() {
 func MainRun() {
 	cmd, err := Initialize()
 	if err != nil {
-		os.Exit(int(clierrors.ExitError))
+		os.Exit(int(cmderrors.ExitError))
 	}
 
 	// Expand any aliases
@@ -75,13 +74,12 @@ func MainRun() {
 		CheckCommandError(cmd.Command, cmd.Factory, err)
 
 		if cErr, ok := err.(cmderrors.CommandError); ok {
-			os.Exit(cErr.ExitCode)
+			os.Exit(int(cErr.ExitCode))
 		}
-		if errors.Is(err, clierrors.ErrNoMatchesFound) {
-			// 404
-			os.Exit(int(clierrors.ExitNotFound404))
+		if errors.Is(err, cmderrors.ErrNoMatchesFound) {
+			os.Exit(int(cmderrors.ExitNotFound404))
 		}
-		os.Exit(int(clierrors.ExitError))
+		os.Exit(int(cmderrors.ExitError))
 	}
 }
 
@@ -99,7 +97,7 @@ func CheckCommandError(cmd *cobra.Command, f *cmdutil.Factory, err error) {
 		w = cmd.OutOrStdout()
 	}
 
-	if errors.Is(err, clierrors.ErrNoMatchesFound) {
+	if errors.Is(err, cmderrors.ErrNoMatchesFound) {
 		// Simulate a 404 error
 		customErr := cmderrors.CommandError{}
 		customErr.StatusCode = 404
@@ -167,7 +165,7 @@ func setArgs(cmd *cobra.Command) ([]string, error) {
 			err = preparedCmd.Run()
 			if err != nil {
 				if ee, ok := err.(*exec.ExitError); ok {
-					return nil, cmderrors.NewUserErrorWithExitCode(ee.ExitCode(), ee)
+					return nil, cmderrors.NewUserErrorWithExitCode(cmderrors.ExitCode(ee.ExitCode()), ee)
 				}
 
 				Logger.Errorf("failed to run external command: %s", err)

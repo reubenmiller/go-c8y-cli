@@ -18,13 +18,49 @@ const (
 	ErrTypeCommand = "commandError"
 )
 
+type ExitCode int
+
+const (
+	ExitOK ExitCode = 0
+
+	// Map HTTP status codes to exit codes
+	ExitBadRequest400          ExitCode = 40
+	ExitUnauthorized401        ExitCode = 1
+	ExitForbidden403           ExitCode = 3
+	ExitNotFound404            ExitCode = 4
+	ExitMethodNotAllowed405    ExitCode = 5
+	ExitConflict409            ExitCode = 9
+	ExitExecutionTimeout413    ExitCode = 13
+	ExitInvalidData422         ExitCode = 22
+	ExitTooManyRequests429     ExitCode = 29
+	ExitInternalServerError500 ExitCode = 50
+	ExitNotImplemented501      ExitCode = 51
+	ExitBadGateway502          ExitCode = 52
+	ExitServiceUnavailable503  ExitCode = 53
+
+	ExitGatewayTimeout504          ExitCode = 54
+	ExitHTTPVersionNotSupported505 ExitCode = 55
+	ExitVariantAlsoNegotiates506   ExitCode = 56
+	ExitInsufficientStorage507     ExitCode = 57
+	ExitLoopDetected508            ExitCode = 58
+
+	ExitCancel              ExitCode = 2
+	ExitError               ExitCode = 100
+	ExitUserError           ExitCode = 101
+	ExitNoSession           ExitCode = 102
+	ExitAbortedWithErrors   ExitCode = 103
+	ExitCompletedWithErrors ExitCode = 104
+	ExitJobLimitExceeded    ExitCode = 105
+	ExitTimeout             ExitCode = 106
+)
+
 // CommandError is an error used to signal different error situations in command handling.
 type CommandError struct {
 	ErrorType       string `json:"errorType,omitempty"`
 	Message         string `json:"message,omitempty"`
 	silent          bool
 	StatusCode      int                `json:"statusCode,omitempty"`
-	ExitCode        int                `json:"exitCode,omitempty"`
+	ExitCode        ExitCode           `json:"exitCode,omitempty"`
 	URL             string             `json:"url,omitempty"`
 	CumulocityError *c8y.ErrorResponse `json:"c8yResponse,omitempty"`
 	err             error
@@ -57,38 +93,38 @@ func (c CommandError) JSONString() string {
 
 // NewUserError creates a new user error
 func NewUserError(a ...interface{}) CommandError {
-	return CommandError{Message: fmt.Sprint(a...), ErrorType: ErrTypeCommand, ExitCode: 101, silent: false}
+	return CommandError{Message: fmt.Sprint(a...), ErrorType: ErrTypeCommand, ExitCode: ExitUserError, silent: false}
 }
 
 // NewUserErrorWithExitCode creates a user with a specific exit code
-func NewUserErrorWithExitCode(exitCode int, a ...interface{}) CommandError {
+func NewUserErrorWithExitCode(exitCode ExitCode, a ...interface{}) CommandError {
 	return CommandError{Message: fmt.Sprint(a...), ErrorType: ErrTypeCommand, ExitCode: exitCode, silent: false}
 }
 
 // NewSystemError creates a system error
 func NewSystemError(a ...interface{}) CommandError {
-	return CommandError{Message: fmt.Sprint(a...), ErrorType: ErrTypeCommand, ExitCode: 100, silent: false}
+	return CommandError{Message: fmt.Sprint(a...), ErrorType: ErrTypeCommand, ExitCode: ExitError, silent: false}
 }
 
-var httpStatusCodeToExitCode = map[int]int{
-	400: 40,
-	401: 1,
-	403: 3,
-	404: 4,
-	405: 5,
-	409: 9,
-	413: 13,
-	422: 22,
-	429: 29,
-	500: 50,
-	501: 51,
-	502: 52,
-	503: 53,
-	504: 54,
-	505: 55,
-	506: 56,
-	507: 57,
-	508: 58,
+var httpStatusCodeToExitCode = map[int]ExitCode{
+	400: ExitBadRequest400,
+	401: ExitUnauthorized401,
+	403: ExitForbidden403,
+	404: ExitNotFound404,
+	405: ExitMethodNotAllowed405,
+	409: ExitConflict409,
+	413: ExitExecutionTimeout413,
+	422: ExitInvalidData422,
+	429: ExitTooManyRequests429,
+	500: ExitInternalServerError500,
+	501: ExitNotImplemented501,
+	502: ExitBadGateway502,
+	503: ExitServiceUnavailable503,
+	504: ExitGatewayTimeout504,
+	505: ExitHTTPVersionNotSupported505,
+	506: ExitVariantAlsoNegotiates506,
+	507: ExitInsufficientStorage507,
+	508: ExitLoopDetected508,
 }
 
 // NewServerError creates a server error from a Cumulocity response

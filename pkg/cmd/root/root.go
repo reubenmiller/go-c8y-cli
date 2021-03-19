@@ -393,7 +393,7 @@ func (c *CmdRoot) checkSessionExists(cmd *cobra.Command, args []string) error {
 		return cmderrors.NewSystemError("Client failed to load")
 	}
 	if client.BaseURL == nil || client.BaseURL.Host == "" {
-		return cmderrors.NewUserErrorWithExitCode(102, "A c8y session has not been loaded. Please create or activate a session and try again")
+		return cmderrors.NewUserErrorWithExitCode(cmderrors.ExitNoSession, "A c8y session has not been loaded. Please create or activate a session and try again")
 	}
 
 	return nil

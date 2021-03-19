@@ -7,7 +7,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/reubenmiller/go-c8y-cli/pkg/clierrors"
+	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/pkg/iterator"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
@@ -223,19 +223,19 @@ func (i *EntityIterator) GetNext() (value []byte, input interface{}, err error) 
 		// Return an error if no matches are found regardless of minimum
 		// matches, as the user is using lookup by name
 		if len(refs) == 0 {
-			return nil, nil, clierrors.NewNoMatchesFoundError(string(value))
+			return nil, nil, cmderrors.NewNoMatchesFoundError(string(value))
 		}
 	}
 
 	if len(refs) == 0 {
 		if len(refs) < i.MinimumMatches {
-			return nil, nil, clierrors.NewNoMatchesFoundError(string(value))
+			return nil, nil, cmderrors.NewNoMatchesFoundError(string(value))
 		}
 		return nil, nil, nil
 	}
 
 	if len(refs) < i.MinimumMatches {
-		return nil, nil, clierrors.NewNoMatchesFoundError(string(value))
+		return nil, nil, cmderrors.NewNoMatchesFoundError(string(value))
 	}
 
 	var data interface{}

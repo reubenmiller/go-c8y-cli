@@ -14,7 +14,6 @@ import (
 	"time"
 
 	"github.com/reubenmiller/go-c8y-cli/pkg/activitylogger"
-	"github.com/reubenmiller/go-c8y-cli/pkg/clierrors"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/pkg/config"
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
@@ -221,7 +220,7 @@ func (w *Worker) runBatched(requestIterator *requestiterator.RequestIterator, co
 				jobInputErrors++
 
 				rootCauseErr := err
-				if errors.Is(err, clierrors.ErrNoMatchesFound) {
+				if errors.Is(err, cmderrors.ErrNoMatchesFound) {
 					rootCauseErr = err
 				} else if parentErr := errors.Unwrap(err); parentErr != nil {
 					rootCauseErr = parentErr
@@ -326,7 +325,7 @@ func (w *Worker) runBatched(requestIterator *requestiterator.RequestIterator, co
 			if atomic.AddInt32(&wasCancelled, 1) == 1 {
 				close(results)
 			}
-			return cmderrors.NewUserErrorWithExitCode(103, fmt.Sprintf("aborted batch as error count has been exceeded. totalErrors=%d", batchOptions.AbortOnErrorCount))
+			return cmderrors.NewUserErrorWithExitCode(cmderrors.ExitAbortedWithErrors, fmt.Sprintf("aborted batch as error count has been exceeded. totalErrors=%d", batchOptions.AbortOnErrorCount))
 		}
 
 		// communicate that the prompt has received a result
@@ -351,10 +350,10 @@ func (w *Worker) runBatched(requestIterator *requestiterator.RequestIterator, co
 		if maxJobsReached {
 			message += fmt.Sprintf(". job limit exceeded=%v", maxJobsReached)
 		}
-		return cmderrors.NewUserErrorWithExitCode(104, message)
+		return cmderrors.NewUserErrorWithExitCode(cmderrors.ExitCompletedWithErrors, message)
 	}
 	if maxJobsReached {
-		return cmderrors.NewUserErrorWithExitCode(105, fmt.Sprintf("max job limit exceeded. limit=%d", maxJobs))
+		return cmderrors.NewUserErrorWithExitCode(cmderrors.ExitJobLimitExceeded, fmt.Sprintf("max job limit exceeded. limit=%d", maxJobs))
 	}
 	return nil
 }
