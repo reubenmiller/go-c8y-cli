@@ -29,6 +29,7 @@ import (
 	eventsCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/events"
 	identityCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/identity"
 	inventoryCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/inventory"
+	inventoryFindCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/inventory/find"
 	inventoryreferencesCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/inventoryreferences"
 	measurementsCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/measurements"
 	microservicesCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/microservices"
@@ -192,7 +193,6 @@ func NewCmdRoot(f *cmdutil.Factory, version, buildDate string) *CmdRoot {
 		devicecredentialsCmd.NewSubCommand(f).GetCommand(),
 		eventsCmd.NewSubCommand(f).GetCommand(),
 		identityCmd.NewSubCommand(f).GetCommand(),
-		inventoryCmd.NewSubCommand(f).GetCommand(),
 		inventoryreferencesCmd.NewSubCommand(f).GetCommand(),
 		measurementsCmd.NewSubCommand(f).GetCommand(),
 
@@ -229,6 +229,11 @@ func NewCmdRoot(f *cmdutil.Factory, version, buildDate string) *CmdRoot {
 	microservices.AddCommand(microservicesCreateCmd.NewCmdCreate(f).GetCommand())
 	microservices.AddCommand(microservicesServiceUserCmd.NewSubCommand(f).GetCommand())
 	cmd.AddCommand(microservices)
+
+	// inventory
+	inventory := inventoryCmd.NewSubCommand(f).GetCommand()
+	inventory.AddCommand(inventoryFindCmd.NewCmdFind(f).GetCommand())
+	cmd.AddCommand(inventory)
 
 	// Manual commands
 	cmd.AddCommand(aliasCmd.NewCmdAlias(f))
@@ -439,12 +444,6 @@ measurements := NewMeasurementsRootCmd().GetCommand()
 measurements.AddCommand(NewSubscribeMeasurementCmd().GetCommand())
 c.AddCommand(measurements)
 
-// microservices commands
-microservices := NewMicroservicesRootCmd().GetCommand()
-microservices.AddCommand(NewNewMicroserviceCmd().GetCommand())
-microservices.AddCommand(NewNewServiceUserCmd().GetCommand())
-microservices.AddCommand(NewGetServiceUserCmd().GetCommand())
-c.AddCommand(microservices)
 
 */
 
