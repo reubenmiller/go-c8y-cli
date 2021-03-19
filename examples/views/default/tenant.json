@@ -15,6 +15,16 @@
                 "contactName",
                 "allowCreateTenants"
             ]
+        },
+        {
+            "name": "currentTenant",
+            "priority": 500,
+            "contentType": "vnd.com.nsn.cumulocity.currenttenant",
+            "columns": [
+                "name",
+                "domainName",
+                "allowCreateTenants"
+            ]
         }
     ]
 }
