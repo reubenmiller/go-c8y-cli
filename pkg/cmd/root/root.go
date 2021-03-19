@@ -196,7 +196,6 @@ func NewCmdRoot(f *cmdutil.Factory, version, buildDate string) *CmdRoot {
 		bulkoperationsCmd.NewSubCommand(f).GetCommand(),
 		currentapplicationCmd.NewSubCommand(f).GetCommand(),
 		databrokerCmd.NewSubCommand(f).GetCommand(),
-		auditrecordsCmd.NewSubCommand(f).GetCommand(),
 		devicecredentialsCmd.NewSubCommand(f).GetCommand(),
 		identityCmd.NewSubCommand(f).GetCommand(),
 		inventoryreferencesCmd.NewSubCommand(f).GetCommand(),
