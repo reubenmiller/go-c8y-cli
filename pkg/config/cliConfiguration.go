@@ -764,7 +764,7 @@ func (c *Config) GetWorkers() int {
 	maxWorkers := c.GetMaxWorkers()
 	if workers > maxWorkers {
 		workers = maxWorkers
-		c.Logger.Warningf("number of workers exceeds the maximum workers limit of %d. Use max instead", maxWorkers)
+		c.Logger.Warningf("number of workers exceeds the maximum workers limit of %d. Using maximum value (%d) instead", maxWorkers, maxWorkers)
 	}
 	return workers
 }
