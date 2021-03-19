@@ -3,7 +3,6 @@ package cmd
 import (
 	"context"
 	"fmt"
-	"io"
 
 	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/reubenmiller/go-c8y-cli/pkg/c8yfetcher"
@@ -46,8 +45,10 @@ Get application service user by app name
 
 	cmd.Flags().String("id", "", "Microservice id (required)")
 
-	// Required flags
-	_ = cmd.MarkFlagRequired("id")
+	flags.WithOptions(
+		cmd,
+		flags.WithExtendedPipelineSupport("id", "id", true, "id"),
+	)
 
 	ccmd.SubCommand = subcommand.NewSubCommand(cmd)
 
@@ -88,14 +89,21 @@ func (n *CmdGet) RunE(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	for {
-		v, _, err := path.GetNext()
+	remainingJobs := cfg.GetMaxJobs()
 
-		if err == nil && len(v) > 0 {
-			appIDs = append(appIDs, fmt.Sprintf("%s", v))
+	for {
+		v, _, err := path.Execute(false)
+
+		if len(v) > 0 {
+			appIDs = append(appIDs, v)
 		}
 
-		if err == io.EOF {
+		if err != nil {
+			break
+		}
+
+		remainingJobs--
+		if remainingJobs <= 0 {
 			break
 		}
 	}
