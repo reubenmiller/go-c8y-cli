@@ -424,15 +424,6 @@ func (c *CmdRoot) configureActivityLog(cfg *config.Config) (*activitylogger.Acti
 	return activitylog, nil
 }
 
-/* Old imports
-
-// devices commands
-devices := NewDevicesRootCmd().GetCommand()
-devices.AddCommand(NewGetDeviceGroupCollectionCmd().GetCommand())
-c.AddCommand(devices)
-
-*/
-
 func createCumulocityClient(f *cmdutil.Factory) func() (*c8y.Client, error) {
 	return func() (*c8y.Client, error) {
 		cfg, err := f.Config()
