@@ -33,12 +33,6 @@ import (
 // Logger is used to record the log messages which should be visible to the user when using the verbose flag
 var Logger *logger.Logger
 
-var (
-	// TODO: Delete these globals!
-	cliConfig *config.Config
-	client    *c8y.Client
-)
-
 // Build data
 // These variables should be set using the -ldflags "-X github.com/reubenmiller/go-c8y-cli/pkg/cmd.version=1.0.0" when running go build
 var buildVersion string
