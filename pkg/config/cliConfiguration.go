@@ -1087,9 +1087,9 @@ func (c *Config) GetOutputCommonOptions(cmd *cobra.Command) (CommonCommandOption
 }
 
 // UseEnvironment Read session authentication from environment variables instead of from configuration
+// Use environment will be true if explicitly activated or if there is no session file being used.
 func (c *Config) UseEnvironment() bool {
-	return c.viper.GetBool(SettingsUseEnvironment)
-
+	return strings.TrimSpace(c.GetSessionFile()) == "" || c.viper.GetBool(SettingsUseEnvironment)
 }
 
 // AllSettings get all the settings as a map
