@@ -155,7 +155,7 @@
                         break
                     }
 
-                    "^(flags\.|With)" {
+                    "^(flags\.|c8yfetcher\.|With)" {
                         $null = $RESTBodyBuilderOptions.AppendLine($code)
                         break
                     }
