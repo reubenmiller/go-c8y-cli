@@ -1,21 +1,27 @@
-package cmd
+package subscribe
 
 import (
 	"github.com/MakeNowJust/heredoc/v2"
+	"github.com/reubenmiller/go-c8y-cli/pkg/c8ysubscribe"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmd/subcommand"
+	"github.com/reubenmiller/go-c8y-cli/pkg/cmdutil"
 	"github.com/spf13/cobra"
 )
 
-type subscribeRealtimeCmd struct {
+type CmdSubscribe struct {
 	flagChannel     string
 	flagDurationSec int64
 	flagCount       int64
 
 	*subcommand.SubCommand
+
+	factory *cmdutil.Factory
 }
 
-func newSubscribeRealtimeCmd() *subscribeRealtimeCmd {
-	ccmd := &subscribeRealtimeCmd{}
+func NewCmdSubscribe(f *cmdutil.Factory) *CmdSubscribe {
+	ccmd := &CmdSubscribe{
+		factory: f,
+	}
 
 	cmd := &cobra.Command{
 		Use:   "subscribe",
@@ -26,7 +32,7 @@ $ c8y realtime subscribe --channel /measurements/* --duration 90
 
 Subscribe to all measurements for 90 seconds
 		`),
-		RunE: ccmd.subscribeRealtime,
+		RunE: ccmd.RunE,
 	}
 
 	// Flags
@@ -39,6 +45,14 @@ Subscribe to all measurements for 90 seconds
 	return ccmd
 }
 
-func (n *subscribeRealtimeCmd) subscribeRealtime(cmd *cobra.Command, args []string) error {
-	return subscribe(n.flagChannel, n.flagDurationSec, n.flagCount, cmd)
+func (n *CmdSubscribe) RunE(cmd *cobra.Command, args []string) error {
+	client, err := n.factory.Client()
+	if err != nil {
+		return err
+	}
+	log, err := n.factory.Logger()
+	if err != nil {
+		return err
+	}
+	return c8ysubscribe.Subscribe(client, log, n.flagChannel, n.flagDurationSec, n.flagCount, cmd)
 }

@@ -1,41 +1,47 @@
 // TODO
 
-package cmd
+package subscribe
 
 import (
 	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/reubenmiller/go-c8y-cli/pkg/c8yfetcher"
+	"github.com/reubenmiller/go-c8y-cli/pkg/c8ysubscribe"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmd/subcommand"
+	"github.com/reubenmiller/go-c8y-cli/pkg/cmdutil"
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
 )
 
-type subscribeAlarmCmd struct {
+type CmdSubscribe struct {
 	*subcommand.SubCommand
+
+	factory *cmdutil.Factory
 
 	flagDurationSec int64
 	flagCount       int64
 }
 
-func NewSubscribeAlarmCmd() *subscribeAlarmCmd {
-	ccmd := &subscribeAlarmCmd{}
+func NewCmdSubscribe(f *cmdutil.Factory) *CmdSubscribe {
+	ccmd := &CmdSubscribe{
+		factory: f,
+	}
 
 	cmd := &cobra.Command{
 		Use:   "subscribe",
-		Short: "Subscribe to realtime alarms",
-		Long:  `Subscribe to realtime alarms`,
+		Short: "Subscribe to realtime events",
+		Long:  `Subscribe to realtime events`,
 		Example: heredoc.Doc(`
-$ c8y alarms subscribe --device 12345
-Subscribe to alarms (in realtime) for device 12345
+$ c8y events subscribe --device 12345
+Subscribe to events (in realtime) for device 12345
 
-$ c8y alarms subscribe --device 12345 --duration 30
-Subscribe to alarms (in realtime) for device 12345 for 30 seconds
+$ c8y events subscribe --device 12345 --duration 30
+Subscribe to events (in realtime) for device 12345 for 30 seconds
 
-$ c8y alarms subscribe --count 10
-Subscribe to alarms (in realtime) for all devices, and stop after receiving 10 alarms
+$ c8y events subscribe --count 10
+Subscribe to events (in realtime) for all devices, and stop after receiving 10 events
 		`),
-		RunE: ccmd.subscribeAlarm,
+		RunE: ccmd.RunE,
 	}
 
 	cmd.SilenceUsage = true
@@ -51,7 +57,15 @@ Subscribe to alarms (in realtime) for all devices, and stop after receiving 10 a
 	return ccmd
 }
 
-func (n *subscribeAlarmCmd) subscribeAlarm(cmd *cobra.Command, args []string) error {
+func (n *CmdSubscribe) RunE(cmd *cobra.Command, args []string) error {
+	client, err := n.factory.Client()
+	if err != nil {
+		return err
+	}
+	log, err := n.factory.Logger()
+	if err != nil {
+		return err
+	}
 	inputIterators, err := flags.NewRequestInputIterators(cmd)
 	if err != nil {
 		return err
@@ -75,5 +89,5 @@ func (n *subscribeAlarmCmd) subscribeAlarm(cmd *cobra.Command, args []string) er
 		return err
 	}
 
-	return subscribe(c8y.RealtimeAlarms(device), n.flagDurationSec, n.flagCount, cmd)
+	return c8ysubscribe.Subscribe(client, log, c8y.RealtimeEvents(device), n.flagDurationSec, n.flagCount, cmd)
 }

@@ -14,7 +14,9 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/pkg/c8ydefaults"
 	"github.com/reubenmiller/go-c8y-cli/pkg/c8ysession"
 	agentsCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/agents"
+	agentsListCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/agents/list"
 	alarmsCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/alarms"
+	alarmsSubscribeCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/alarms/subscribe"
 	aliasCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/alias"
 	apiCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/api"
 	applicationsCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/applications"
@@ -29,15 +31,20 @@ import (
 	devicesCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/devices"
 	devicesListCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/devices/list"
 	eventsCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/events"
+	eventsSubscribeCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/events/subscribe"
 	identityCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/identity"
 	inventoryCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/inventory"
 	inventoryFindCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/inventory/find"
+	inventorySubscribeCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/inventory/subscribe"
 	inventoryreferencesCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/inventoryreferences"
 	measurementsCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/measurements"
+	measurementsSubscribeCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/measurements/subscribe"
 	microservicesCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/microservices"
 	microservicesCreateCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/microservices/create"
 	microservicesServiceUserCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/microservices/serviceuser"
 	operationsCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/operations"
+	operationsSubscribeCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/operations/subscribe"
+	realtimeCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/realtime"
 	retentionrulesCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/retentionrules"
 	sessionsCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/sessions"
 	settingsCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/settings"
@@ -184,8 +191,6 @@ func NewCmdRoot(f *cmdutil.Factory, version, buildDate string) *CmdRoot {
 
 	// Child commands
 	commands := []*cobra.Command{
-		alarmsCmd.NewSubCommand(f).GetCommand(),
-		agentsCmd.NewSubCommand(f).GetCommand(),
 		auditrecordsCmd.NewSubCommand(f).GetCommand(),
 		binariesCmd.NewSubCommand(f).GetCommand(),
 		bulkoperationsCmd.NewSubCommand(f).GetCommand(),
@@ -193,12 +198,9 @@ func NewCmdRoot(f *cmdutil.Factory, version, buildDate string) *CmdRoot {
 		databrokerCmd.NewSubCommand(f).GetCommand(),
 		auditrecordsCmd.NewSubCommand(f).GetCommand(),
 		devicecredentialsCmd.NewSubCommand(f).GetCommand(),
-		eventsCmd.NewSubCommand(f).GetCommand(),
 		identityCmd.NewSubCommand(f).GetCommand(),
 		inventoryreferencesCmd.NewSubCommand(f).GetCommand(),
-		measurementsCmd.NewSubCommand(f).GetCommand(),
 
-		operationsCmd.NewSubCommand(f).GetCommand(),
 		retentionrulesCmd.NewSubCommand(f).GetCommand(),
 		sessionsCmd.NewSubCommand(f).GetCommand(),
 		systemoptionsCmd.NewSubCommand(f).GetCommand(),
@@ -213,18 +215,38 @@ func NewCmdRoot(f *cmdutil.Factory, version, buildDate string) *CmdRoot {
 		completionCmd.NewCmdCompletion().GetCommand(),
 		templateCmd.NewSubCommand(f).GetCommand(),
 		settingsCmd.NewSubCommand(f).GetCommand(),
+		realtimeCmd.NewSubCommand(f).GetCommand(),
 	}
 
 	cmd.AddCommand(commands...)
 
 	// todo: merge custom commands
 	//
+	alarms := alarmsCmd.NewSubCommand(f).GetCommand()
+	alarms.AddCommand(alarmsSubscribeCmd.NewCmdSubscribe(f).GetCommand())
+	cmd.AddCommand(alarms)
+
+	events := eventsCmd.NewSubCommand(f).GetCommand()
+	events.AddCommand(eventsSubscribeCmd.NewCmdSubscribe(f).GetCommand())
+	cmd.AddCommand(events)
+
+	operations := operationsCmd.NewSubCommand(f).GetCommand()
+	operations.AddCommand(operationsSubscribeCmd.NewCmdSubscribe(f).GetCommand())
+	cmd.AddCommand(operations)
+
+	measurements := measurementsCmd.NewSubCommand(f).GetCommand()
+	measurements.AddCommand(measurementsSubscribeCmd.NewCmdSubscribe(f).GetCommand())
+	cmd.AddCommand(measurements)
 
 	// devices
 	devices := devicesCmd.NewSubCommand(f).GetCommand()
 	devices.AddCommand(devicesListCmd.NewCmdDevicesList(f).GetCommand())
 	// devices.AddCommand(NewGetDeviceGroupCollectionCmd(f).GetCommand())
 	cmd.AddCommand(devices)
+
+	agents := agentsCmd.NewSubCommand(f).GetCommand()
+	agents.AddCommand(agentsListCmd.NewCmdAgentList(f).GetCommand())
+	cmd.AddCommand(agents)
 
 	// microservices
 	microservices := microservicesCmd.NewSubCommand(f).GetCommand()
@@ -235,6 +257,7 @@ func NewCmdRoot(f *cmdutil.Factory, version, buildDate string) *CmdRoot {
 	// inventory
 	inventory := inventoryCmd.NewSubCommand(f).GetCommand()
 	inventory.AddCommand(inventoryFindCmd.NewCmdFind(f).GetCommand())
+	inventory.AddCommand(inventorySubscribeCmd.NewCmdSubscribe(f).GetCommand())
 	cmd.AddCommand(inventory)
 
 	// applications
@@ -397,56 +420,10 @@ func (c *CmdRoot) configureActivityLog(cfg *config.Config) (*activitylogger.Acti
 
 /* Old imports
 
-c.AddCommand(NewRealtimeCmd().GetCommand())
-
-
-// Auto generated commands
-
-// agents commands
-agents := NewAgentsRootCmd().GetCommand()
-agents.AddCommand(NewGetAgentCollectionCmd().GetCommand())
-c.AddCommand(agents)
-
-// alarms commands
-alarms := NewAlarmsRootCmd().GetCommand()
-alarms.AddCommand(NewSubscribeAlarmCmd().GetCommand())
-c.AddCommand(alarms)
-
-// applications commands
-applications := NewApplicationsRootCmd().GetCommand()
-applications.AddCommand(NewNewHostedApplicationCmd().GetCommand())
-c.AddCommand(applications)
-
-
-
 // devices commands
 devices := NewDevicesRootCmd().GetCommand()
-devices.AddCommand(NewGetDeviceCollectionCmd(cmdFactory).GetCommand())
 devices.AddCommand(NewGetDeviceGroupCollectionCmd().GetCommand())
 c.AddCommand(devices)
-
-// operations commands
-operations := NewOperationsRootCmd().GetCommand()
-operations.AddCommand(NewSubscribeOperationCmd().GetCommand())
-c.AddCommand(operations)
-
-// events commands
-events := NewEventsRootCmd().GetCommand()
-events.AddCommand(NewSubscribeEventCmd().GetCommand())
-c.AddCommand(events)
-
-
-// inventory commands
-inventory := NewInventoryRootCmd().GetCommand()
-inventory.AddCommand(NewSubscribeManagedObjectCmd().GetCommand())
-c.AddCommand(inventory)
-
-
-// measurements commands
-measurements := NewMeasurementsRootCmd().GetCommand()
-measurements.AddCommand(NewSubscribeMeasurementCmd().GetCommand())
-c.AddCommand(measurements)
-
 
 */
 

@@ -1,4 +1,4 @@
-package cmd
+package c8ysubscribe
 
 import (
 	"fmt"
@@ -10,14 +10,15 @@ import (
 
 	"github.com/fatih/color"
 	"github.com/reubenmiller/go-c8y-cli/pkg/jsonUtilities"
+	"github.com/reubenmiller/go-c8y-cli/pkg/logger"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
 )
 
-func subscribe(channelPattern string, timeoutSec int64, maxMessages int64, cmd *cobra.Command) error {
+func Subscribe(client *c8y.Client, log *logger.Logger, channelPattern string, timeoutSec int64, maxMessages int64, cmd *cobra.Command) error {
 
 	if err := client.Realtime.Connect(); err != nil {
-		Logger.Errorf("Could not connect to /cep/realtime. %s", err)
+		log.Errorf("Could not connect to /cep/realtime. %s", err)
 		return err
 	}
 
@@ -27,7 +28,7 @@ func subscribe(channelPattern string, timeoutSec int64, maxMessages int64, cmd *
 	signalCh := make(chan os.Signal, 1)
 	signal.Notify(signalCh, os.Interrupt)
 
-	Logger.Infof("Listenening to subscriptions: %s", channelPattern)
+	log.Infof("Listenening to subscriptions: %s", channelPattern)
 
 	client.Realtime.Subscribe(channelPattern, msgCh)
 
@@ -44,7 +45,7 @@ func subscribe(channelPattern string, timeoutSec int64, maxMessages int64, cmd *
 	for {
 		select {
 		case <-timeoutCh:
-			Logger.Info("Duration has expired. Stopping realtime client")
+			log.Info("Duration has expired. Stopping realtime client")
 			return nil
 		case msg := <-msgCh:
 
@@ -64,16 +65,16 @@ func subscribe(channelPattern string, timeoutSec int64, maxMessages int64, cmd *
 
 		case <-signalCh:
 			// Enable ctrl-c to stop
-			Logger.Info("Stopping realtime client")
+			log.Info("Stopping realtime client")
 			return nil
 		}
 	}
 }
 
-func subscribeMultiple(channelPatterns []string, timeoutSec int64, maxMessages int64, useColorOutput bool, cmd *cobra.Command) error {
+func SubscribeMultiple(client *c8y.Client, log *logger.Logger, channelPatterns []string, timeoutSec int64, maxMessages int64, useColorOutput bool, cmd *cobra.Command) error {
 
 	if err := client.Realtime.Connect(); err != nil {
-		Logger.Errorf("Could not connect to /cep/realtime. %s", err)
+		log.Errorf("Could not connect to /cep/realtime. %s", err)
 		return nil
 	}
 
@@ -84,7 +85,7 @@ func subscribeMultiple(channelPatterns []string, timeoutSec int64, maxMessages i
 	signal.Notify(signalCh, os.Interrupt)
 
 	for _, pattern := range channelPatterns {
-		Logger.Infof("Listenening to subscriptions: %s", pattern)
+		log.Infof("Listenening to subscriptions: %s", pattern)
 
 		client.Realtime.Subscribe(pattern, msgCh)
 	}
@@ -101,7 +102,7 @@ func subscribeMultiple(channelPatterns []string, timeoutSec int64, maxMessages i
 	for {
 		select {
 		case <-timeoutCh:
-			Logger.Info("Duration has expired. Stopping realtime client")
+			log.Info("Duration has expired. Stopping realtime client")
 			return nil
 		case msg := <-msgCh:
 
@@ -143,7 +144,7 @@ func subscribeMultiple(channelPatterns []string, timeoutSec int64, maxMessages i
 
 		case <-signalCh:
 			// Enable ctrl-c to stop
-			Logger.Info("Stopping realtime client")
+			log.Info("Stopping realtime client")
 			return nil
 		}
 	}

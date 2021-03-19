@@ -1,48 +1,71 @@
-package cmd
+// TODO
+
+package subscribe
 
 import (
 	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/reubenmiller/go-c8y-cli/pkg/c8yfetcher"
+	"github.com/reubenmiller/go-c8y-cli/pkg/c8ysubscribe"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmd/subcommand"
+	"github.com/reubenmiller/go-c8y-cli/pkg/cmdutil"
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
 )
 
-type subscribeRealtimeAllCmd struct {
+type CmdSubscribe struct {
+	*subcommand.SubCommand
+
+	factory *cmdutil.Factory
+
 	flagDurationSec int64
 	flagCount       int64
-
-	*subcommand.SubCommand
 }
 
-func newSubscribeAllRealtimeCmd() *subscribeRealtimeAllCmd {
-	ccmd := &subscribeRealtimeAllCmd{}
-
-	cmd := &cobra.Command{
-		Use:   "subscribeAll",
-		Short: "Subscribe to all realtime notifications",
-		Long:  `Subscribe to all realtime notifications`,
-		Example: heredoc.Doc(`
-$ c8y realtime subscribeAll --device 12345 --duration 90
-
-Subscribe to all notifications (alarms/events/operations etc.) for device 12345 for 90 seconds
-		`),
-		RunE: ccmd.subscribeAllRealtime,
+func NewCmdSubscribe(f *cmdutil.Factory) *CmdSubscribe {
+	ccmd := &CmdSubscribe{
+		factory: f,
 	}
 
-	// Flags
+	cmd := &cobra.Command{
+		Use:   "subscribe",
+		Short: "Subscribe to realtime alarms",
+		Long:  `Subscribe to realtime alarms`,
+		Example: heredoc.Doc(`
+$ c8y alarms subscribe --device 12345
+Subscribe to alarms (in realtime) for device 12345
+
+$ c8y alarms subscribe --device 12345 --duration 30
+Subscribe to alarms (in realtime) for device 12345 for 30 seconds
+
+$ c8y alarms subscribe --count 10
+Subscribe to alarms (in realtime) for all devices, and stop after receiving 10 alarms
+		`),
+		RunE: ccmd.RunE,
+	}
+
+	cmd.SilenceUsage = true
+
 	cmd.Flags().StringSlice("device", []string{""}, "Device ID")
 	cmd.Flags().Int64Var(&ccmd.flagDurationSec, "duration", 30, "Timeout in seconds")
 	cmd.Flags().Int64Var(&ccmd.flagCount, "count", 0, "Max number of realtime notifications to wait for")
+
+	// Required flags
 
 	ccmd.SubCommand = subcommand.NewSubCommand(cmd)
 
 	return ccmd
 }
 
-func (n *subscribeRealtimeAllCmd) subscribeAllRealtime(cmd *cobra.Command, args []string) error {
-
+func (n *CmdSubscribe) RunE(cmd *cobra.Command, args []string) error {
+	client, err := n.factory.Client()
+	if err != nil {
+		return err
+	}
+	log, err := n.factory.Logger()
+	if err != nil {
+		return err
+	}
 	inputIterators, err := flags.NewRequestInputIterators(cmd)
 	if err != nil {
 		return err
@@ -66,12 +89,5 @@ func (n *subscribeRealtimeAllCmd) subscribeAllRealtime(cmd *cobra.Command, args 
 		return err
 	}
 
-	patterns := []string{
-		c8y.RealtimeAlarms(device),
-		c8y.RealtimeEvents(device),
-		c8y.RealtimeMeasurements(device),
-		c8y.RealtimeOperations(device),
-	}
-
-	return subscribeMultiple(patterns, n.flagDurationSec, n.flagCount, false, cmd)
+	return c8ysubscribe.Subscribe(client, log, c8y.RealtimeAlarms(device), n.flagDurationSec, n.flagCount, cmd)
 }

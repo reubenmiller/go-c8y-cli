@@ -1,39 +1,47 @@
-package cmd
+// TODO
+
+package subscribe
 
 import (
 	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/reubenmiller/go-c8y-cli/pkg/c8yfetcher"
+	"github.com/reubenmiller/go-c8y-cli/pkg/c8ysubscribe"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmd/subcommand"
+	"github.com/reubenmiller/go-c8y-cli/pkg/cmdutil"
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
 )
 
-type subscribeManagedObjectCmd struct {
+type CmdSubscribe struct {
 	*subcommand.SubCommand
+
+	factory *cmdutil.Factory
 
 	flagDurationSec int64
 	flagCount       int64
 }
 
-func NewSubscribeManagedObjectCmd() *subscribeManagedObjectCmd {
-	ccmd := &subscribeManagedObjectCmd{}
+func NewCmdSubscribe(f *cmdutil.Factory) *CmdSubscribe {
+	ccmd := &CmdSubscribe{
+		factory: f,
+	}
 
 	cmd := &cobra.Command{
 		Use:   "subscribe",
-		Short: "Subscribe to realtime managedObjects",
-		Long:  `Subscribe to realtime managedObjects`,
+		Short: "Subscribe to realtime measurements",
+		Long:  `Subscribe to realtime measurements`,
 		Example: heredoc.Doc(`
-$ c8y inventory subscribe --device 12345
-Subscribe to managedObjects (in realtime) for device 12345
+$ c8y measurements subscribe --device 12345
+Subscribe to measurements (in realtime) for device 12345
 
-$ c8y inventory subscribe --device 12345 --duration 30
-Subscribe to managedObjects (in realtime) for device 12345 for 30 seconds
+$ c8y measurements subscribe --device 12345 --duration 30
+Subscribe to measurements (in realtime) for device 12345 for 30 seconds
 
-$ c8y inventory subscribe --count 10
-Subscribe to managedObjects (in realtime) for all devices, and stop after receiving 10 managedObjects
+$ c8y measurements subscribe --count 10
+Subscribe to measurements (in realtime) for all devices, and stop after receiving 10 measurements
 		`),
-		RunE: ccmd.subscribeManagedObject,
+		RunE: ccmd.RunE,
 	}
 
 	cmd.SilenceUsage = true
@@ -49,8 +57,15 @@ Subscribe to managedObjects (in realtime) for all devices, and stop after receiv
 	return ccmd
 }
 
-func (n *subscribeManagedObjectCmd) subscribeManagedObject(cmd *cobra.Command, args []string) error {
-
+func (n *CmdSubscribe) RunE(cmd *cobra.Command, args []string) error {
+	client, err := n.factory.Client()
+	if err != nil {
+		return err
+	}
+	log, err := n.factory.Logger()
+	if err != nil {
+		return err
+	}
 	inputIterators, err := flags.NewRequestInputIterators(cmd)
 	if err != nil {
 		return err
@@ -74,5 +89,5 @@ func (n *subscribeManagedObjectCmd) subscribeManagedObject(cmd *cobra.Command, a
 		return err
 	}
 
-	return subscribe(c8y.RealtimeManagedObjects(device), n.flagDurationSec, n.flagCount, cmd)
+	return c8ysubscribe.Subscribe(client, log, c8y.RealtimeMeasurements(device), n.flagDurationSec, n.flagCount, cmd)
 }
