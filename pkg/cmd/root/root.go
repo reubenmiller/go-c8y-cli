@@ -66,6 +66,7 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/pkg/config"
 	"github.com/reubenmiller/go-c8y-cli/pkg/dataview"
 	"github.com/reubenmiller/go-c8y-cli/pkg/logger"
+	"github.com/reubenmiller/go-c8y-cli/pkg/request"
 	"github.com/reubenmiller/go-c8y-cli/pkg/utilities"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
@@ -340,13 +341,13 @@ func (c *CmdRoot) Configure() error {
 		return dataview.NewDataView(".*", ".json", log, cfg.GetViewPaths()...)
 	}
 
-	// Update client
-	c.Factory.Client = createCumulocityClient(c.Factory)
-
 	consoleHandler.Format = cfg.GetOutputFormat()
 	consoleHandler.Colorized = !cfg.DisableColor()
 	consoleHandler.Compact = cfg.CompactJSON()
 	consoleHandler.Disabled = cfg.ShowProgress() && c.Factory.IOStreams.IsStdoutTTY()
+
+	// Update client
+	c.Factory.Client = createCumulocityClient(c.Factory)
 	return nil
 }
 
@@ -419,7 +420,7 @@ func (c *CmdRoot) configureActivityLog(cfg *config.Config) (*activitylogger.Acti
 	if disabled {
 		cfg.Logger.Info("activityLog is disabled")
 	} else {
-		cfg.Logger.Infof("activityLog path2: %s", activitylog.GetPath())
+		cfg.Logger.Infof("activityLog path: %s", activitylog.GetPath())
 	}
 	return activitylog, nil
 }
@@ -431,6 +432,10 @@ func createCumulocityClient(f *cmdutil.Factory) func() (*c8y.Client, error) {
 			return nil, err
 		}
 		log, err := f.Logger()
+		if err != nil {
+			return nil, err
+		}
+		consol, err := f.Console()
 		if err != nil {
 			return nil, err
 		}
@@ -456,17 +461,19 @@ func createCumulocityClient(f *cmdutil.Factory) func() (*c8y.Client, error) {
 			true,
 		)
 
-		// TODO: Fix recursive call bug when creating request handler
-		// handler, err := f.GetRequestHandler()
-		// if err != nil {
-		// 	return nil, err
-		// }
-
 		client.SetRequestOptions(c8y.DefaultRequestOptions{
 			DryRun: cfg.DryRun(),
-			// DryRunHandler: func(options *c8y.RequestOptions, req *http.Request) {
-			// 	handler.DryRunHandler(f.IOStreams, options, req)
-			// },
+			DryRunHandler: func(options *c8y.RequestOptions, req *http.Request) {
+				handler := &request.RequestHandler{
+					IsTerminal:    f.IOStreams.IsStdoutTTY(),
+					Client:        client,
+					Config:        cfg,
+					Logger:        log,
+					Console:       consol,
+					HideSensitive: config.HideSensitiveInformationIfActive,
+				}
+				handler.DryRunHandler(f.IOStreams, options, req)
+			},
 		})
 
 		// load authentication
