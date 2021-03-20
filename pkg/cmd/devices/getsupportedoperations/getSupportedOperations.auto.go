@@ -132,6 +132,7 @@ func (n *GetSupportedOperationsCmd) RunE(cmd *cobra.Command, args []string) erro
 		cmd,
 		body,
 		inputIterators,
+		flags.WithOverrideValue("device", "device"),
 	)
 	if err != nil {
 		return cmderrors.NewUserError(err)

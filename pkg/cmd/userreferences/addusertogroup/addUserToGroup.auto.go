@@ -129,6 +129,7 @@ func (n *AddUserToGroupCmd) RunE(cmd *cobra.Command, args []string) error {
 		cmd,
 		body,
 		inputIterators,
+		flags.WithOverrideValue("user", "user.self"),
 		flags.WithDataFlagValue(),
 		c8yfetcher.WithUserSelfByNameFirstMatch(client, args, "user", "user.self"),
 		cmdutil.WithTemplateValue(cfg),

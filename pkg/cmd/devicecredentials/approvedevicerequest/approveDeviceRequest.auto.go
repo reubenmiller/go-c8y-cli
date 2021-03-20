@@ -127,6 +127,7 @@ func (n *ApproveDeviceRequestCmd) RunE(cmd *cobra.Command, args []string) error 
 		cmd,
 		body,
 		inputIterators,
+		flags.WithOverrideValue("id", "id"),
 		flags.WithDataFlagValue(),
 		flags.WithStringValue("status", "status"),
 		cmdutil.WithTemplateValue(cfg),

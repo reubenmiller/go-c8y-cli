@@ -134,6 +134,7 @@ func (n *CreateBinaryCmd) RunE(cmd *cobra.Command, args []string) error {
 		cmd,
 		body,
 		inputIterators,
+		flags.WithOverrideValue("id", "id"),
 		flags.WithDataFlagValue(),
 		cmdutil.WithTemplateValue(cfg),
 		flags.WithTemplateVariablesValue(),

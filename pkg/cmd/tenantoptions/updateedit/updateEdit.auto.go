@@ -131,6 +131,7 @@ func (n *UpdateEditCmd) RunE(cmd *cobra.Command, args []string) error {
 		cmd,
 		body,
 		inputIterators,
+		flags.WithOverrideValue("key", "key"),
 		flags.WithDataFlagValue(),
 		flags.WithStringValue("editable", "editable"),
 		cmdutil.WithTemplateValue(cfg),

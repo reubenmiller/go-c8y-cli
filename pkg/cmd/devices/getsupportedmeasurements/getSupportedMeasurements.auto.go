@@ -132,6 +132,7 @@ func (n *GetSupportedMeasurementsCmd) RunE(cmd *cobra.Command, args []string) er
 		cmd,
 		body,
 		inputIterators,
+		flags.WithOverrideValue("device", "device"),
 	)
 	if err != nil {
 		return cmderrors.NewUserError(err)

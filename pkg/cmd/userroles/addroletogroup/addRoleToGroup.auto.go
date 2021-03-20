@@ -129,6 +129,7 @@ func (n *AddRoleToGroupCmd) RunE(cmd *cobra.Command, args []string) error {
 		cmd,
 		body,
 		inputIterators,
+		flags.WithOverrideValue("role", "role.self"),
 		flags.WithDataFlagValue(),
 		c8yfetcher.WithRoleSelfByNameFirstMatch(client, args, "role", "role.self"),
 		cmdutil.WithTemplateValue(cfg),

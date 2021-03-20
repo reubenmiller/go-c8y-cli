@@ -125,6 +125,7 @@ func (n *DeleteNewDeviceRequestCmd) RunE(cmd *cobra.Command, args []string) erro
 		cmd,
 		body,
 		inputIterators,
+		flags.WithOverrideValue("id", "id"),
 	)
 	if err != nil {
 		return cmderrors.NewUserError(err)

@@ -125,6 +125,7 @@ func (n *RequestDeviceCredentialsCmd) RunE(cmd *cobra.Command, args []string) er
 		cmd,
 		body,
 		inputIterators,
+		flags.WithOverrideValue("id", "id"),
 		flags.WithDataFlagValue(),
 		flags.WithStringValue("id", "id"),
 		cmdutil.WithTemplateValue(cfg),

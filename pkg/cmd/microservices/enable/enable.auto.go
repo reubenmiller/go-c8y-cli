@@ -131,6 +131,7 @@ func (n *EnableCmd) RunE(cmd *cobra.Command, args []string) error {
 		cmd,
 		body,
 		inputIterators,
+		flags.WithOverrideValue("id", "application.id"),
 		flags.WithDataFlagValue(),
 		c8yfetcher.WithMicroserviceByNameFirstMatch(client, args, "id", "application.id"),
 		cmdutil.WithTemplateValue(cfg),

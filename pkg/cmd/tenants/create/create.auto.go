@@ -133,6 +133,7 @@ func (n *CreateCmd) RunE(cmd *cobra.Command, args []string) error {
 		cmd,
 		body,
 		inputIterators,
+		flags.WithOverrideValue("domain", "domain"),
 		flags.WithDataFlagValue(),
 		flags.WithStringValue("company", "company"),
 		flags.WithStringValue("domain", "domain"),

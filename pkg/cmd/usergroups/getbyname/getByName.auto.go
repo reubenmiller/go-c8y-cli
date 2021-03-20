@@ -130,6 +130,7 @@ func (n *GetByNameCmd) RunE(cmd *cobra.Command, args []string) error {
 		cmd,
 		body,
 		inputIterators,
+		flags.WithOverrideValue("name", "name"),
 	)
 	if err != nil {
 		return cmderrors.NewUserError(err)

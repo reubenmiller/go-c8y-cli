@@ -132,6 +132,7 @@ func (n *GetForCategoryCmd) RunE(cmd *cobra.Command, args []string) error {
 		cmd,
 		body,
 		inputIterators,
+		flags.WithOverrideValue("category", "category"),
 	)
 	if err != nil {
 		return cmderrors.NewUserError(err)

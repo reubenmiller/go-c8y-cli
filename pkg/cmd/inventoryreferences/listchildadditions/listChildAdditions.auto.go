@@ -130,6 +130,7 @@ func (n *ListChildAdditionsCmd) RunE(cmd *cobra.Command, args []string) error {
 		cmd,
 		body,
 		inputIterators,
+		flags.WithOverrideValue("id", "id"),
 	)
 	if err != nil {
 		return cmderrors.NewUserError(err)

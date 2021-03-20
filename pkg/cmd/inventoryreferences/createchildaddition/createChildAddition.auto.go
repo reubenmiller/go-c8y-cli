@@ -128,6 +128,7 @@ func (n *CreateChildAdditionCmd) RunE(cmd *cobra.Command, args []string) error {
 		cmd,
 		body,
 		inputIterators,
+		flags.WithOverrideValue("newChild", "managedObject.id"),
 		flags.WithDataFlagValue(),
 		flags.WithStringValue("newChild", "managedObject.id"),
 		cmdutil.WithTemplateValue(cfg),

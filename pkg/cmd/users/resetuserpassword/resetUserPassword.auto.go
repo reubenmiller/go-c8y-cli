@@ -128,6 +128,7 @@ func (n *ResetUserPasswordCmd) RunE(cmd *cobra.Command, args []string) error {
 		cmd,
 		body,
 		inputIterators,
+		flags.WithOverrideValue("id", "id"),
 		flags.WithDataFlagValue(),
 		flags.WithStringValue("newPassword", "password"),
 		flags.WithRequiredTemplateString(`

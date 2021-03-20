@@ -127,6 +127,7 @@ func (n *UpdateBulkCmd) RunE(cmd *cobra.Command, args []string) error {
 		cmd,
 		body,
 		inputIterators,
+		flags.WithOverrideValue("category", "category"),
 		flags.WithDataFlagValue(),
 		cmdutil.WithTemplateValue(cfg),
 		flags.WithTemplateVariablesValue(),

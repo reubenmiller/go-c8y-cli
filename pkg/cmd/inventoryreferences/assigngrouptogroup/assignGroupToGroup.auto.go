@@ -132,6 +132,7 @@ func (n *AssignGroupToGroupCmd) RunE(cmd *cobra.Command, args []string) error {
 		cmd,
 		body,
 		inputIterators,
+		flags.WithOverrideValue("newChildGroup", "managedObject.id"),
 		flags.WithDataFlagValue(),
 		c8yfetcher.WithDeviceGroupByNameFirstMatch(client, args, "newChildGroup", "managedObject.id"),
 		cmdutil.WithTemplateValue(cfg),

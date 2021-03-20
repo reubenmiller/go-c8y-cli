@@ -130,6 +130,7 @@ func (n *CreateCmd) RunE(cmd *cobra.Command, args []string) error {
 		cmd,
 		body,
 		inputIterators,
+		flags.WithOverrideValue("device", "device"),
 		flags.WithDataFlagValue(),
 		flags.WithStringValue("type", "type"),
 		flags.WithStringValue("name", "externalId"),

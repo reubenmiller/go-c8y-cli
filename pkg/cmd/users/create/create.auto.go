@@ -135,6 +135,7 @@ func (n *CreateCmd) RunE(cmd *cobra.Command, args []string) error {
 		cmd,
 		body,
 		inputIterators,
+		flags.WithOverrideValue("userName", "userName"),
 		flags.WithDataFlagValue(),
 		flags.WithStringValue("userName", "userName"),
 		flags.WithStringValue("firstName", "firstName"),
