@@ -130,6 +130,7 @@ func (n *AddRoleToUserCmd) RunE(cmd *cobra.Command, args []string) error {
 		body,
 		inputIterators,
 		flags.WithDataFlagValue(),
+		c8yfetcher.WithRoleSelfByNameFirstMatch(client, args, "role", "role.self"),
 		cmdutil.WithTemplateValue(cfg),
 		flags.WithTemplateVariablesValue(),
 	)

@@ -44,9 +44,9 @@ Create a new hosted application
 
 	cmd.SilenceUsage = true
 
-	cmd.Flags().String("name", "", "Name of application (required)")
-	cmd.Flags().String("key", "", "Shared secret of application (required)")
-	cmd.Flags().String("type", "", "Type of application. Possible values are EXTERNAL, HOSTED, MICROSERVICE (required)")
+	cmd.Flags().String("name", "", "Name of application (accepts pipeline)")
+	cmd.Flags().String("key", "", "Shared secret of application")
+	cmd.Flags().String("type", "", "Type of application. Possible values are EXTERNAL, HOSTED, MICROSERVICE")
 	cmd.Flags().String("availability", "", "Access level for other tenants. Possible values are : MARKET, PRIVATE (default)")
 	cmd.Flags().String("contextPath", "", "contextPath of the hosted application. Required when application type is HOSTED")
 	cmd.Flags().String("resourcesUrl", "", "URL to application base directory hosted on an external server. Required when application type is HOSTED")
@@ -65,13 +65,10 @@ Create a new hosted application
 		flags.WithProcessingMode(),
 		flags.WithData(),
 		f.WithTemplateFlag(cmd),
-		flags.WithExtendedPipelineSupport("", "", false),
+		flags.WithExtendedPipelineSupport("name", "name", false, "id"),
 	)
 
 	// Required flags
-	_ = cmd.MarkFlagRequired("name")
-	_ = cmd.MarkFlagRequired("key")
-	_ = cmd.MarkFlagRequired("type")
 
 	ccmd.SubCommand = subcommand.NewSubCommand(cmd)
 
@@ -151,6 +148,7 @@ func (n *CreateCmd) RunE(cmd *cobra.Command, args []string) error {
 		flags.WithStringValue("externalUrl", "externalUrl"),
 		cmdutil.WithTemplateValue(cfg),
 		flags.WithTemplateVariablesValue(),
+		flags.WithRequiredProperties("name", "key", "type"),
 	)
 	if err != nil {
 		return cmderrors.NewUserError(err)

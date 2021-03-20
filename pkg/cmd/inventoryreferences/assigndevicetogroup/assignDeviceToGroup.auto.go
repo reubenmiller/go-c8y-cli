@@ -133,6 +133,7 @@ func (n *AssignDeviceToGroupCmd) RunE(cmd *cobra.Command, args []string) error {
 		body,
 		inputIterators,
 		flags.WithDataFlagValue(),
+		c8yfetcher.WithDeviceByNameFirstMatch(client, args, "newChildDevice", "managedObject.id"),
 		cmdutil.WithTemplateValue(cfg),
 		flags.WithTemplateVariablesValue(),
 	)
