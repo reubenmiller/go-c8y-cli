@@ -13,13 +13,17 @@ Function MatchObject {
         $Expected,
         [switch]$Negate,
         [string[]] $Property,
+        [string[]] $ExcludeProperty,
         $Because,
         $CallerSessionState
     )
 
     $ActualValueCopy = $ActualValue
     if ($Property.Count -gt 0) {
-        $ActualValueCopy | Select-Object -Property $Property
+        $ActualValueCopy = $ActualValueCopy | Select-Object -Property $Property
+    }
+    if ($ExcludeProperty.Count -gt 0) {
+        $ActualValueCopy = $ActualValueCopy | Select-Object -ExcludeProperty:$ExcludeProperty
     }
 
     if ($ActualValueCopy -is [hashtable]) {
