@@ -65,7 +65,7 @@ func (b *BatchOptions) useInputData() bool {
 }
 
 func NewWorker(log *logger.Logger, cfg *config.Config, iostream *iostreams.IOStreams, client *c8y.Client, activityLog *activitylogger.ActivityLogger, reqHandlerFunc RequestHandler) (*Worker, error) {
-
+	log.Infof("Creating worker: session=%s", config.HideSensitiveInformationIfActive(client, cfg.GetSessionFile()))
 	return &Worker{
 		config:         cfg,
 		logger:         log,
