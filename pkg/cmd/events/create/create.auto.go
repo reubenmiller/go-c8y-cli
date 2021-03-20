@@ -45,7 +45,7 @@ Create a new event for a device
 
 	cmd.SilenceUsage = true
 
-	cmd.Flags().StringSlice("device", []string{""}, "The ManagedObject which is the source of this event. (required) (accepts pipeline)")
+	cmd.Flags().StringSlice("device", []string{""}, "The ManagedObject which is the source of this event. (accepts pipeline)")
 	cmd.Flags().String("time", "0s", "Time of the event. Defaults to current timestamp.")
 	cmd.Flags().String("type", "", "Identifies the type of this event.")
 	cmd.Flags().String("text", "", "Text description of the event.")
@@ -59,7 +59,7 @@ Create a new event for a device
 		flags.WithProcessingMode(),
 		flags.WithData(),
 		f.WithTemplateFlag(cmd),
-		flags.WithExtendedPipelineSupport("device", "source.id", true, "deviceId", "source.id", "managedObject.id", "id"),
+		flags.WithExtendedPipelineSupport("device", "source.id", false, "deviceId", "source.id", "managedObject.id", "id"),
 	)
 
 	// Required flags
@@ -138,7 +138,7 @@ func (n *CreateCmd) RunE(cmd *cobra.Command, args []string) error {
 		flags.WithStringValue("text", "text"),
 		cmdutil.WithTemplateValue(cfg),
 		flags.WithTemplateVariablesValue(),
-		flags.WithRequiredProperties("type", "text", "time"),
+		flags.WithRequiredProperties("type", "text", "time", "source.id"),
 	)
 	if err != nil {
 		return cmderrors.NewUserError(err)

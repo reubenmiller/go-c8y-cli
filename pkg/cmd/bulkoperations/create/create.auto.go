@@ -45,7 +45,7 @@ Create operation for a device
 
 	cmd.SilenceUsage = true
 
-	cmd.Flags().StringSlice("group", []string{""}, "Identifies the target group on which this operation should be performed. (required) (accepts pipeline)")
+	cmd.Flags().StringSlice("group", []string{""}, "Identifies the target group on which this operation should be performed. (accepts pipeline)")
 	cmd.Flags().String("startDate", "300s", "Time when operations should be created. Defaults to 300s")
 	cmd.Flags().Float32("creationRampSec", 0, "Delay between every operation creation. (required)")
 	cmd.Flags().String("operation", "", "Operation prototype to send to each device in the group (required)")
@@ -59,7 +59,7 @@ Create operation for a device
 		flags.WithProcessingMode(),
 		flags.WithData(),
 		f.WithTemplateFlag(cmd),
-		flags.WithExtendedPipelineSupport("group", "groupId", true, "id"),
+		flags.WithExtendedPipelineSupport("group", "groupId", false, "id"),
 	)
 
 	// Required flags

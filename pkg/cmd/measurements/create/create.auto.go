@@ -45,7 +45,7 @@ Create measurement
 
 	cmd.SilenceUsage = true
 
-	cmd.Flags().StringSlice("device", []string{""}, "The ManagedObject which is the source of this measurement. (required) (accepts pipeline)")
+	cmd.Flags().StringSlice("device", []string{""}, "The ManagedObject which is the source of this measurement. (accepts pipeline)")
 	cmd.Flags().String("time", "0s", "Time of the measurement. Defaults to current timestamp.")
 	cmd.Flags().String("type", "", "The most specific type of this entire measurement.")
 
@@ -58,7 +58,7 @@ Create measurement
 		flags.WithProcessingMode(),
 		flags.WithData(),
 		f.WithTemplateFlag(cmd),
-		flags.WithExtendedPipelineSupport("device", "source.id", true, "deviceId", "source.id", "managedObject.id", "id"),
+		flags.WithExtendedPipelineSupport("device", "source.id", false, "deviceId", "source.id", "managedObject.id", "id"),
 	)
 
 	// Required flags
@@ -136,7 +136,7 @@ func (n *CreateCmd) RunE(cmd *cobra.Command, args []string) error {
 		flags.WithStringValue("type", "type"),
 		cmdutil.WithTemplateValue(cfg),
 		flags.WithTemplateVariablesValue(),
-		flags.WithRequiredProperties("type", "time"),
+		flags.WithRequiredProperties("type", "time", "source.id"),
 	)
 	if err != nil {
 		return cmderrors.NewUserError(err)

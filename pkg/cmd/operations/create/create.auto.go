@@ -45,7 +45,7 @@ Create operation for a device
 
 	cmd.SilenceUsage = true
 
-	cmd.Flags().StringSlice("device", []string{""}, "Identifies the target device on which this operation should be performed. (required) (accepts pipeline)")
+	cmd.Flags().StringSlice("device", []string{""}, "Identifies the target device on which this operation should be performed. (accepts pipeline)")
 	cmd.Flags().String("description", "", "Text description of the operation.")
 
 	completion.WithOptions(
@@ -57,7 +57,7 @@ Create operation for a device
 		flags.WithProcessingMode(),
 		flags.WithData(),
 		f.WithTemplateFlag(cmd),
-		flags.WithExtendedPipelineSupport("device", "deviceId", true, "deviceId", "source.id", "managedObject.id", "id"),
+		flags.WithExtendedPipelineSupport("device", "deviceId", false, "deviceId", "source.id", "managedObject.id", "id"),
 	)
 
 	// Required flags
@@ -134,6 +134,7 @@ func (n *CreateCmd) RunE(cmd *cobra.Command, args []string) error {
 		flags.WithStringValue("description", "description"),
 		cmdutil.WithTemplateValue(cfg),
 		flags.WithTemplateVariablesValue(),
+		flags.WithRequiredProperties("deviceId"),
 	)
 	if err != nil {
 		return cmderrors.NewUserError(err)
