@@ -265,7 +265,7 @@ Describe -Name "c8y pipes" {
             $group = New-TestDeviceGroup
             $output = $devices `
             | Invoke-ClientIterator `
-            | c8y inventoryReferences assignDeviceToGroup --group $group.id --workers 5 --raw -o json `
+            | c8y inventoryreferences assignDeviceToGroup --group $group.id --workers 5 --raw -o json `
             | ConvertFrom-Json -Depth 100
             $LASTEXITCODE | Should -BeExactly 0
             $output | Should -HaveCount $devices.Count
@@ -277,7 +277,7 @@ Describe -Name "c8y pipes" {
             # Get child assets
             $childAssets = $group `
             | Invoke-ClientIterator `
-            | c8y inventoryReferences listChildAssets `
+            | c8y inventoryreferences listChildAssets `
             | ConvertFrom-Json -Depth 100
             $LASTEXITCODE | Should -BeExactly 0
             $childAssets | Should -HaveCount $devices.Count
@@ -285,7 +285,7 @@ Describe -Name "c8y pipes" {
             # Unassign assets from group
             $output = $childAssets `
             | Invoke-ClientIterator `
-            | c8y inventoryReferences unassignDeviceFromGroup --group $group.id --workers 5 --verbose 2>&1            
+            | c8y inventoryreferences unassignDeviceFromGroup --group $group.id --workers 5 --verbose 2>&1            
             $LASTEXITCODE | Should -BeExactly 0
             $output | Should -ContainRequest "DELETE" -Total $childAssets.Count
             $childAssets.id | ForEach-Object {
