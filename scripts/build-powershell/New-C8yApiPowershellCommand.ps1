@@ -15,6 +15,7 @@
     )
 
     $CmdletName = $Specification.alias.powershell
+    $NounLower = $Noun.ToLower()
     $Name = $Specification.name
 	$NameCamel = $Name[0].ToString().ToUpperInvariant() + $Name.Substring(1)
     $File = Join-Path -Path $OutputDir -ChildPath ("{0}.ps1" -f $CmdletName)
@@ -105,7 +106,7 @@
 
     # Link go command
     $null = $CmdletDocStringBuilder.AppendLine(".LINK")
-    $NativeCommandName = @("c8y", $Noun, $Verb) -join " "
+    $NativeCommandName = @("c8y", $NounLower, $Verb) -join " "
     $null = $CmdletDocStringBuilder.AppendLine("$NativeCommandName`n")
 
     #
@@ -412,7 +413,7 @@ $(
             Use-CallerPreference -Cmdlet `$PSCmdlet -SessionState `$ExecutionContext.SessionState
         }
 
-        `$c8yargs = New-ClientArgument -Parameters `$PSBoundParameters -Command "$Noun $Verb"
+        `$c8yargs = New-ClientArgument -Parameters `$PSBoundParameters -Command "$NounLower $Verb"
         `$ClientOptions = Get-ClientOutputOption `$PSBoundParameters
         `$TypeOptions = @{
             Type = "$ResultType"
@@ -459,6 +460,7 @@ Function New-Body2 {
         [string] $ConfirmImpact,
         [switch] $NoEnumerate
     )
+    $NounLower = $Noun.ToLower()
 
     $ExpandFunction = Get-IteratorFunction -Type $IteratorType -Variable $IteratorVariable
 
@@ -495,24 +497,24 @@ $(
         if (`$ClientOptions.ConvertToPS) {
             ${prefix}$IteratorVariable ``
             | Group-ClientRequests ``
-            | c8y $Noun $Verb `$c8yargs ``
+            | c8y $NounLower $Verb `$c8yargs ``
             | ConvertFrom-ClientOutput @TypeOptions${suffix}
         }
         else {
             $IteratorVariable ``
             | Group-ClientRequests ``
-            | c8y $Noun $Verb `$c8yargs
+            | c8y $NounLower $Verb `$c8yargs
         }
         
 "@
             } else {
             @"
         if (`$ClientOptions.ConvertToPS) {
-            ${prefix}c8y $Noun $Verb `$c8yargs ``
+            ${prefix}c8y $NounLower $Verb `$c8yargs ``
             | ConvertFrom-ClientOutput @TypeOptions${suffix}
         }
         else {
-            c8y $Noun $Verb `$c8yargs
+            c8y $NounLower $Verb `$c8yargs
         }
 "@
             }
@@ -522,11 +524,11 @@ $(
 $ConfirmationStatement
 $SetParameters
         if (`$ClientOptions.ConvertToPS) {
-            ${prefix}c8y $Noun $Verb `$c8yargs `
+            ${prefix}c8y $NounLower $Verb `$c8yargs `
             | ConvertFrom-ClientOutput @TypeOptions${suffix}
         }
         else {
-            c8y $Noun $Verb `$c8yargs
+            c8y $NounLower $Verb `$c8yargs
         }
 "@
 
