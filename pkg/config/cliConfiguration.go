@@ -1019,7 +1019,7 @@ func (c *Config) GetJSONSelect() []string {
 		}
 	}
 
-	c.Logger.Debugf("json select: len=%d, values=%v", len(values), allitems)
+	c.Logger.Debugf("json select: len=%d, values=%v", len(allitems), allitems)
 	return allitems
 }
 
@@ -1048,11 +1048,7 @@ func (c *Config) GetOutputCommonOptions(cmd *cobra.Command) (CommonCommandOption
 		options.PageSize = pageSize
 	}
 
-	if cmd.Flags().Changed("withTotalPages") {
-		if v, err := cmd.Flags().GetBool("withTotalPages"); err == nil && v {
-			options.WithTotalPages = true
-		}
-	}
+	options.WithTotalPages = c.WithTotalPages()
 
 	options.IncludeAll = c.IncludeAll()
 
