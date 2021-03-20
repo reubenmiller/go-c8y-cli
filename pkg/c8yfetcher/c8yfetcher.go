@@ -208,7 +208,7 @@ func (i *EntityIterator) GetNext() (value []byte, input interface{}, err error) 
 	}
 	value, rawValue, err := i.valueIterator.GetNext()
 	if err != nil {
-		return
+		return value, rawValue, err
 	}
 
 	refs := []entityReference{}
@@ -217,25 +217,25 @@ func (i *EntityIterator) GetNext() (value []byte, input interface{}, err error) 
 		// only lookup if value is not empty
 		refs, err = lookupIDByName(i.Fetcher, string(value))
 		if err != nil {
-			return nil, nil, err
+			return nil, rawValue, err
 		}
 
 		// Return an error if no matches are found regardless of minimum
 		// matches, as the user is using lookup by name
 		if len(refs) == 0 {
-			return nil, nil, cmderrors.NewNoMatchesFoundError(string(value))
+			return nil, rawValue, cmderrors.NewNoMatchesFoundError(string(value))
 		}
 	}
 
 	if len(refs) == 0 {
 		if len(refs) < i.MinimumMatches {
-			return nil, nil, cmderrors.NewNoMatchesFoundError(string(value))
+			return nil, rawValue, cmderrors.NewNoMatchesFoundError(string(value))
 		}
-		return nil, nil, nil
+		return nil, rawValue, nil
 	}
 
 	if len(refs) < i.MinimumMatches {
-		return nil, nil, cmderrors.NewNoMatchesFoundError(string(value))
+		return nil, rawValue, cmderrors.NewNoMatchesFoundError(string(value))
 	}
 
 	var data interface{}
