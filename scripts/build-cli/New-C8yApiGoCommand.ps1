@@ -75,6 +75,11 @@
         $collectionProperty = $Specification.collectionProperty
     }
 
+    # Body init
+    $RESTBodyBuilderOptions = New-Object System.Text.StringBuilder
+    $RESTFormDataBuilderOptions = New-Object System.Text.StringBuilder
+
+
     $CompletionBuilderOptions = New-Object System.Text.StringBuilder
     foreach ($iArg in (Remove-SkippedParameters $ArgumentSources)) {
         if ($iArg.pipeline) {
@@ -94,6 +99,9 @@
                     $PipelineVariableAliases = @("id")
                 }
             }
+
+            # Add override capability to piped arguments, so the user can still override piped data with the argument
+            [void] $RESTBodyBuilderOptions.AppendLine("flags.WithOverrideValue(`"$($iarg.Name)`", `"$PipelineVariableProperty`"),")
         }
         if ($iArg.validationSet) {
             $validateSetOptions = @($iArg.validationSet | ForEach-Object { "`"$_`"" }) -join ","
@@ -126,8 +134,6 @@
     #
     # Body
     #
-    $RESTBodyBuilderOptions = New-Object System.Text.StringBuilder
-    $RESTFormDataBuilderOptions = New-Object System.Text.StringBuilder
     $GetBodyContents = "body"
     
     if ($Specification.body) {
