@@ -13,6 +13,9 @@ const (
 	FlagDataTemplateName          = "template"
 	FlagDataTemplateVariablesName = "templateVars"
 	FlagProcessingModeName        = "processingMode"
+	FlagWithTotalPages            = "withTotalPages"
+	FlagPageSize                  = "pageSize"
+	FlagCurrentPage               = "currentPage"
 )
 const (
 	AnnotationValueFromPipeline       = "valueFromPipeline"

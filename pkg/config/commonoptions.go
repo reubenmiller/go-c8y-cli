@@ -27,14 +27,14 @@ func (options CommonCommandOptions) AddQueryParameters(query *flags.QueryTemplat
 	}
 
 	if options.CurrentPage > 0 {
-		query.SetVariable("currentPage", options.CurrentPage)
+		query.SetVariable(flags.FlagCurrentPage, options.CurrentPage)
 	}
 
 	if options.PageSize > 0 {
-		query.SetVariable("pageSize", options.PageSize)
+		query.SetVariable(flags.FlagPageSize, options.PageSize)
 	}
 
 	if options.WithTotalPages {
-		query.SetVariable("withTotalPages", "true")
+		query.SetVariable(flags.FlagWithTotalPages, "true")
 	}
 }

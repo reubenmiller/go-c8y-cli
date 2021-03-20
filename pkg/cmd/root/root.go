@@ -65,6 +65,7 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/pkg/config"
 	"github.com/reubenmiller/go-c8y-cli/pkg/dataview"
+	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/pkg/logger"
 	"github.com/reubenmiller/go-c8y-cli/pkg/request"
 	"github.com/reubenmiller/go-c8y-cli/pkg/utilities"
@@ -136,11 +137,11 @@ func NewCmdRoot(f *cmdutil.Factory, version, buildDate string) *CmdRoot {
 	// Global flags
 	cmd.PersistentFlags().StringVar(&ccmd.SessionFile, "session", "", "Session configuration")
 	cmd.PersistentFlags().BoolVarP(&ccmd.Verbose, "verbose", "v", false, "Verbose logging")
-	cmd.PersistentFlags().IntP("pageSize", "p", c8ydefaults.PageSize, "Maximum results per page")
-	cmd.PersistentFlags().Int64("currentPage", 0, "Current page size which should be returned")
+	cmd.PersistentFlags().IntP(flags.FlagPageSize, "p", c8ydefaults.PageSize, "Maximum results per page")
+	cmd.PersistentFlags().Int64(flags.FlagCurrentPage, 0, "Current page size which should be returned")
 	cmd.PersistentFlags().Int64("totalPages", 0, "Total number of pages to get")
 	cmd.PersistentFlags().Bool("includeAll", false, "Include all results by iterating through each page")
-	cmd.PersistentFlags().BoolP("withTotalPages", "t", false, "Include all results")
+	cmd.PersistentFlags().BoolP(flags.FlagWithTotalPages, "t", false, "Include all results")
 	cmd.PersistentFlags().BoolP("compact", "c", !isTerm, "Compact instead of pretty-printed output. Pretty print is the default if output is the terminal")
 	cmd.PersistentFlags().Bool("noAccept", false, "Ignore Accept header will remove the Accept header from requests, however PUT and POST requests will only see the effect")
 	cmd.PersistentFlags().Bool("dry", false, "Dry run. Don't send any data to the server")
