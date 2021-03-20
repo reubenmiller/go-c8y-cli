@@ -15,9 +15,18 @@ import (
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/thedevsaddam/gojsonq"
 	"github.com/tidwall/gjson"
+	"go.uber.org/zap/zapcore"
 )
 
-var Logger logger.Logger
+var Logger *logger.Logger
+
+func init() {
+	Logger = logger.NewLogger("jsonfilter", logger.Options{
+		Level:  zapcore.DebugLevel,
+		Color:  true,
+		Silent: true,
+	})
+}
 
 type JSONFilters struct {
 	Filters   []JSONFilter
@@ -237,7 +246,7 @@ func (f JSONFilters) filterJSON(jsonValue string, property string, showHeaders b
 	if len(f.Selectors) > 0 {
 		jq.Select(f.Selectors...)
 	}
-
+	Logger.Debugf("Pluck values: %v", f.Pluck)
 	// format values (using gjson)
 	if len(f.Pluck) > 0 || f.Flatten {
 		var bsub bytes.Buffer
