@@ -148,7 +148,7 @@ func (w *Worker) ProcessRequestAndResponse(cmd *cobra.Command, r *c8y.RequestOpt
 		pathIter = iterator.NewRepeatIterator(r.Path, 1)
 	}
 	// Note: Body accepts iterator types, so no need for special handling here
-	requestIter := requestiterator.NewRequestIterator(*r, pathIter, inputIterators.Query, r.Body)
+	requestIter := requestiterator.NewRequestIterator(w.logger, *r, pathIter, inputIterators.Query, r.Body)
 
 	// get common options and batch settings
 	commonOptions, err := w.config.GetOutputCommonOptions(cmd)
