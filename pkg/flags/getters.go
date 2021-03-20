@@ -3,6 +3,7 @@ package flags
 import (
 	"fmt"
 	"net/http"
+	"os"
 	"strings"
 
 	"github.com/reubenmiller/go-c8y-cli/pkg/c8ydata"
@@ -209,6 +210,36 @@ func WithStringValue(opts ...string) GetOption {
 			// dont assign the value anywhere
 			dst = ""
 		}
+		return dst, applyFormatter(format, value), err
+	}
+}
+
+// WithOverrideValue adds an options to override a value via cli arguments. Pipeline input is ignored if this value is present
+// However if the argument refers to an existing file then the value will be ignored!
+func WithOverrideValue(opts ...string) GetOption {
+	return func(cmd *cobra.Command, inputIterators *RequestInputIterators) (string, interface{}, error) {
+
+		src, dst, format := UnpackGetterOptions("%s", opts...)
+
+		value, err := cmd.Flags().GetString(src)
+		if err != nil {
+			fValue, fErr := cmd.Flags().GetStringSlice(src)
+			if fErr != nil || len(fValue) == 0 {
+				return dst, value, fErr
+			}
+			value = fValue[0]
+			err = nil
+		}
+		if value == "" {
+			// dont assign the value anywhere
+			dst = ""
+		}
+
+		if _, err := os.Stat(value); err == nil {
+			// ignore input files (they should be piped)
+			return "", "", nil
+		}
+
 		return dst, applyFormatter(format, value), err
 	}
 }
