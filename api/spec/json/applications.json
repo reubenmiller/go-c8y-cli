@@ -88,13 +88,14 @@
         {
           "name": "name",
           "type": "string",
-          "required": true,
+          "required": false,
+          "pipeline": true,
           "description": "Name of application"
         },
         {
           "name": "key",
           "type": "string",
-          "required": true,
+          "required": false,
           "description": "Shared secret of application"
         },
         {
@@ -105,7 +106,7 @@
             "HOSTED",
             "MICROSERVICE"
           ],
-          "required": true,
+          "required": false,
           "description": "Type of application. Possible values are EXTERNAL, HOSTED, MICROSERVICE"
         },
         {
@@ -148,6 +149,11 @@
           "required": false,
           "description": "URL to the external application. Required when application type is EXTERNAL"
         }
+      ],
+      "bodyRequiredKeys": [
+        "name",
+        "key",
+        "type"
       ]
     },
     {

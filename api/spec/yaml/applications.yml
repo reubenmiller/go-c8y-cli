@@ -62,19 +62,20 @@ endpoints:
 
       - name: name
         type: string
-        required: true
+        required: false
+        pipeline: true
         description: Name of application
 
       # TODO: Change to optional switch. When not set, then set to the value of name with a "-key" postfix
       - name: key
         type: string
-        required: true
+        required: false
         description: Shared secret of application
 
       - name: type
         type: string
         validationSet: [EXTERNAL, HOSTED, MICROSERVICE]
-        required: true
+        required: false
         description: Type of application. Possible values are EXTERNAL, HOSTED, MICROSERVICE
 
       - name: availability
@@ -108,6 +109,10 @@ endpoints:
         type: string
         required: false
         description: URL to the external application. Required when application type is EXTERNAL
+    bodyRequiredKeys:
+      - name
+      - key
+      - type
 
   - name: copyApplication
     description: 'Copy application'
