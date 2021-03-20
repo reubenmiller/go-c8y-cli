@@ -10,13 +10,18 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/pkg/iterator"
+	"github.com/reubenmiller/go-c8y-cli/pkg/logger"
 	"github.com/reubenmiller/go-c8y-cli/pkg/mapbuilder"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 )
 
 // NewRequestIterator returns an iterator that can be used to send multiple requests until the give iterators in the path/body are exhausted
-func NewRequestIterator(r c8y.RequestOptions, path iterator.Iterator, query iterator.Iterator, body interface{}) *RequestIterator {
+func NewRequestIterator(customLogger *logger.Logger, r c8y.RequestOptions, path iterator.Iterator, query iterator.Iterator, body interface{}) *RequestIterator {
+	if customLogger == nil {
+		customLogger = logger.NewDummyLogger("requestiterator")
+	}
 	reqIter := &RequestIterator{
+		Logger:  customLogger,
 		Request: r,
 		Path:    path,
 		Query:   query,
@@ -27,6 +32,7 @@ func NewRequestIterator(r c8y.RequestOptions, path iterator.Iterator, query iter
 
 // RequestIterator iterates through a c8y rest request with given request options and path iterators
 type RequestIterator struct {
+	Logger         *logger.Logger
 	Request        c8y.RequestOptions
 	Path           iterator.Iterator
 	Query          iterator.Iterator
@@ -94,7 +100,7 @@ func (r *RequestIterator) GetNext() (*c8y.RequestOptions, interface{}, error) {
 		req.Query = string(q)
 	}
 
-	// Logger.Debugf("Input line: %s", inputLine)
+	r.Logger.Debugf("Input line: %s", inputLine)
 
 	// apply body iterator
 	if r.Body != nil && !reflect.ValueOf(r.Body).IsNil() && (strings.EqualFold(req.Method, "POST") || strings.EqualFold(req.Method, "PUT")) {

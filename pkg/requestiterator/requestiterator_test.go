@@ -20,7 +20,7 @@ func Test_RequestIteratorWithBodyIterator(t *testing.T) {
 		Path: "someother/path",
 		Body: body,
 	}
-	requestIter := NewRequestIterator(*options, pathIter, nil, body)
+	requestIter := NewRequestIterator(nil, *options, pathIter, nil, body)
 
 	var req *c8y.RequestOptions
 
