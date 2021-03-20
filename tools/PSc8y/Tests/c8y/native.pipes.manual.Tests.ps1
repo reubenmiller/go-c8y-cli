@@ -47,11 +47,18 @@ Describe -Name "c8y pipes" {
 
     
         It "Pipe by id to query parameters" {
-            $output = @("1", "2") | c8y events list --dry 2>&1
+            $output = @("1", "2") | c8y events list --dry --dryFormat json 2>&1
             $LASTEXITCODE | Should -Be 0
-            $output | Should -ContainRequest "GET /event/events?source=1" -Total 1
-            $output | Should -ContainRequest "GET /event/events?source=2" -Total 1
-            $output | Should -ContainRequest "GET /event/events" -Total 2
+            $requests = $output | ConvertFrom-Json
+
+            $requests | Should -HaveCount 2
+            $partial = $requests | Select-Object path, method
+
+            $requests[0].query | Should -Match "source=1"
+            $partial[0] | Should -MatchObject @{method="GET"; path="/event/events"}
+            
+            $requests[1].query | Should -Match "source=2"
+            $partial[1] | Should -MatchObject @{method="GET"; path="/event/events"}
         }
 
         It "Empty pipe. Empty values should not cause a lookup, however they should also not stop the iteration" {
@@ -65,36 +72,49 @@ Describe -Name "c8y pipes" {
         It "Pipe by id object to query parameters" {
             $output = @{id=1}, @{id=2} `
             | Invoke-ClientIterator -AsJSON `
-            | c8y events list --dry 2>&1
+            | c8y events list --dry --dryFormat json 2>&1
 
             $LASTEXITCODE | Should -Be 0
-            $output | Should -ContainRequest "GET /event/events?source=1" -Total 1
-            $output | Should -ContainRequest "GET /event/events?source=2" -Total 1
-            $output | Should -ContainRequest "GET /event/events" -Total 2
+            $requests = $output | ConvertFrom-Json
+            $requests | Should -HaveCount 2
+            
+            $requests[0] | Should -MatchObject @{method="GET"; path="/event/events"} -Property method, path
+            $requests[0].query | Should -Match "source=1"
+
+            $requests[1] | Should -MatchObject @{method="GET"; path="/event/events"} -Property method, path
+            $requests[1].query | Should -Match "source=2"
         }
 
         It "Pipe by json object using deviceId rather than id to query parameters" {
             $output = @{id=3; deviceId=1}, @{id=4; deviceId=2} `
             | Invoke-ClientIterator -AsJSON `
-            | c8y events list --dry 2>&1
+            | c8y events list --dry --dryFormat json 2>&1
 
             $LASTEXITCODE | Should -Be 0
-            $output | Should -ContainRequest "GET" -Total 2
-            $output | Should -ContainRequest "GET /event/events?source=1" -Total 1
-            $output | Should -ContainRequest "GET /event/events?source=2" -Total 1
-            $output | Should -ContainRequest "GET /event/events" -Total 2
+            $requests = $output | ConvertFrom-Json
+            $requests | Should -HaveCount 2
+            
+            $requests[0] | Should -MatchObject @{method="GET"; path="/event/events"} -Property method, path
+            $requests[0].query | Should -Match "source=1"
+
+            $requests[1] | Should -MatchObject @{method="GET"; path="/event/events"} -Property method, path
+            $requests[1].query | Should -Match "source=2"
         }
 
         It "Pipe by json object using source.id rather than id to query parameters" {
             $output = @{id=3; source=@{id=1}}, @{id=4; source=@{id=2}} `
             | Invoke-ClientIterator -AsJSON `
-            | c8y events list --dry 2>&1
+            | c8y events list --dry --dryFormat json 2>&1
 
             $LASTEXITCODE | Should -Be 0
-            $output | Should -ContainRequest "GET" -Total 2
-            $output | Should -ContainRequest "GET /event/events?source=1" -Total 1
-            $output | Should -ContainRequest "GET /event/events?source=2" -Total 1
-            $output | Should -ContainRequest "GET /event/events" -Total 2
+            $requests = $output | ConvertFrom-Json
+            $requests | Should -HaveCount 2
+            
+            $requests[0] | Should -MatchObject @{method="GET"; path="/event/events"} -Property method, path
+            $requests[0].query | Should -Match "source=1"
+
+            $requests[1] | Should -MatchObject @{method="GET"; path="/event/events"} -Property method, path
+            $requests[1].query | Should -Match "source=2"
         }
 
         It "Pipe by name which do not match to query parameters ignoring names that does not exist" {
@@ -218,8 +238,8 @@ Describe -Name "c8y pipes" {
         }
 
         It "supports templates referencing input values: ids => get => update" {
-            $device1 = New-TestDevice -Template "{type: 'customType1'}"
-            $device2 = New-TestDevice -Template "{type: 'customType2'}"
+            $device1 = New-Device -Name "testDevice01" -Template "{type: 'customType1'}"
+            $device2 = New-Device -Name "testDevice02" -Template "{type: 'customType2'}"
             $null = $ids.Add($device1.id)
             $null = $ids.Add($device2.id)
 
