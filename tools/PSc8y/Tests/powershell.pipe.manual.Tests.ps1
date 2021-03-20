@@ -8,9 +8,9 @@ Describe -Name "powershell pipes" {
 
     Context "Get commands" {
         It "Pipe by id a simple getter" {
-            $output = ,$deviceIds | Get-ManagedObject -AsJSON -Debug 2>&1
+            $output = ,$deviceIds | Get-ManagedObject -AsPSObject:$false -Debug 2>&1
             $LASTEXITCODE | Should -Be 0
-            $output -match "Loaded session:" | Should -HaveCount 1
+            $output -match "Creating worker:" | Should -HaveCount 1
             $output -match "adding job: 2" | Should -HaveCount 1
             $output | Should -ContainRequest "GET /inventory/managedObjects/$($deviceIds[0])" -Total 1
             $output | Should -ContainRequest "GET /inventory/managedObjects/$($deviceIds[1])" -Total 1
@@ -18,36 +18,54 @@ Describe -Name "powershell pipes" {
         }
 
         It "Should handle piping objects directly with integer ids" {
-            $output = Get-CurrentUserInventoryRoleCollection -PageSize 1 | Get-CurrentUserInventoryRole
+            $output = Get-InventoryRoleCollection -PageSize 1 | Get-InventoryRole
             $output | Should -HaveCount 1
         }
     }
 
     Context "Update commands" {
         It "Pipe by id a update managed object" {
-            $output = ,$deviceIds | Update-Device -Data "myvalue=1" -AsJSON -Debug 2>&1
+            $output = ,$deviceIds | Update-Device -Data "myvalue=1" -Dry -DryFormat json 2>&1
             $LASTEXITCODE | Should -Be 0
-            $output -match "Loaded session:" | Should -HaveCount 1
-            $output -match "adding job: 2" | Should -HaveCount 1
-            $output | Should -ContainRequest "PUT /inventory/managedObjects/$($deviceIds[0])" -Total 1
-            $output | Should -ContainRequest "PUT /inventory/managedObjects/$($deviceIds[1])" -Total 1
-            $output | Should -ContainRequest "PUT /inventory/managedObjects" -Total 2
+            $requests = $output | ConvertFrom-Json
+            $requests | Should -HaveCount 2
+
+            $requests[0].method | Should -Be "PUT"
+            $requests[0].path | Should -BeExactly "/inventory/managedObjects/$($deviceIds[0])"
+            $requests[1].body | Should -MatchObject @{
+                myvalue = 1
+            }
+
+            $requests[1].method | Should -Be "PUT"
+            $requests[1].path | Should -BeExactly "/inventory/managedObjects/$($deviceIds[1])"
+            $requests[1].body | Should -MatchObject @{
+                myvalue = 1
+            }
         }
 
         It "Pipe by id a update managed object using hashtable as body" {
-            $output = ,$deviceIds | Update-Device -Data @{myvalue = 1} -AsJSON -Debug 2>&1
+            $output = ,$deviceIds | Update-Device -Data @{myvalue = 1} -Dry -DryFormat json 2>&1
             $LASTEXITCODE | Should -Be 0
-            $output -match "Loaded session:" | Should -HaveCount 1
-            $output -match "adding job: 2" | Should -HaveCount 1
-            $output | Should -ContainRequest "PUT /inventory/managedObjects/$($deviceIds[0])" -Total 1
-            $output | Should -ContainRequest "PUT /inventory/managedObjects/$($deviceIds[1])" -Total 1
-            $output | Should -ContainRequest "PUT /inventory/managedObjects" -Total 2
+            $requests = $output | ConvertFrom-Json
+            $requests | Should -HaveCount 2
+
+            $requests[0].method | Should -Be "PUT"
+            $requests[0].path | Should -BeExactly "/inventory/managedObjects/$($deviceIds[0])"
+            $requests[1].body | Should -MatchObject @{
+                myvalue = 1
+            }
+
+            $requests[1].method | Should -Be "PUT"
+            $requests[1].path | Should -BeExactly "/inventory/managedObjects/$($deviceIds[1])"
+            $requests[1].body | Should -MatchObject @{
+                myvalue = 1
+            }
         }
 
         InModuleScope -ModuleName PSc8y {
             It "Confirmation handles multiple items" {
                 $itemIds = 1..2 | c8y devices create --select id --output csv
-                $items = $itemIds | Get-ManagedObject
+                $items = $itemIds | Get-ManagedObject -AsPSObject
                 $items.id | c8y devices delete
                 $message = Format-ConfirmationMessage -Name "Get-ExampleName" -InputObject $items
                 $message | Should -Match $itemIds[0]
@@ -58,7 +76,7 @@ Describe -Name "powershell pipes" {
 
     Context "Direct piping" {
         It "Should pipe directly between cmdlets with interger id types" {
-            $output = Get-CurrentUserInventoryRoleCollection -PageSize 1 | Get-CurrentUserInventoryRole
+            $output = Get-InventoryRoleCollection -PageSize 1 | Get-InventoryRole
             $output | Should -HaveCount 1
         }
 
@@ -70,18 +88,17 @@ Describe -Name "powershell pipes" {
 
     Context "CSV" {
         It "Should pipe directly between cmdlets" {
-            $output = Get-ApplicationCollection -PageSize 5 -AsCSV -Select "id,name" | ConvertFrom-CSV -Header id,name
+            $output = Get-ApplicationCollection -PageSize 5 -Output csv -Select "id,name" | ConvertFrom-CSV -Header id,name
             $output | Should -HaveCount 5
         }
     }
 
     Context "Device creation" {
         It "accepts devices names from the pipeline" {
-            $output = $( $response = ,@("device01", "device02") | New-Device -WhatIf -WhatIfFormat json -WithError -Debug ) 2>&1
+            $output = ,@("device01", "device02") | New-Device -Dry -DryFormat json 2>&1
             $LASTEXITCODE | Should -Be 0
-            $output -match "Loaded session:" | Should -HaveCount 1
-            $output -match "adding job: 2" | Should -HaveCount 1
-            $requests = $response | ConvertFrom-Json
+
+            $requests = $output | ConvertFrom-Json
             $requests | Should -HaveCount 2
             $PartialRequest = $requests | Select-Object path, method, body
             $PartialRequest[0] | Should -MatchObject @{ method = "POST"; path = "/inventory/managedObjects"; body = @{c8y_IsDevice=@{}; name="device01"} }
@@ -101,14 +118,14 @@ Describe -Name "powershell pipes" {
         It "can stream include results to a downstream command in json format" {
             $env:C8Y_SETTINGS_INCLUDEALL_PAGESIZE = 10
             $env:C8Y_SETTINGS_INCLUDEALL_DELAYMS = 1000
-            $output = devices -IncludeAll -AsJSON -TotalPages 3 | batch | Get-Device -Verbose -Delay 0 -Workers 5 -WhatIf 2>&1
+            $messages = $( $output = devices -IncludeAll -AsPSObject:$false -TotalPages 3 | batch | Get-Device -Verbose -Delay 0 -Workers 5 -Dry -DryFormat json -WithError ) 2>&1
             $LASTEXITCODE | Should -BeExactly 0
-            $output -match "Loaded session:" | Should -HaveCount 1 -Because "all gets should be executed by one c8y call"
-            $output | Should -ContainRequest "GET /inventory/managedObjects" -Minimum 5 -Maximum 10000
+            $messages -match "Creating worker:" | Should -HaveCount 1 -Because "all gets should be executed by one c8y call"
+            $output.Count | Should -BeGreaterThan 1
+            $output.Count | Should -BeLessOrEqual 30
         }
-
-        # TODO: include all 
-        It "streams each page size to the pipeline when it is received and not when all the results are done" {
+ 
+        It -Tag "TODO" "streams each page size to the pipeline when it is received and not when all the results are done" {
             $env:C8Y_SETTINGS_INCLUDEALL_PAGESIZE = 10
             $env:C8Y_SETTINGS_INCLUDEALL_DELAYMS = 1000
 
