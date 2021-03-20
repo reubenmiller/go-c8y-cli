@@ -78,12 +78,14 @@ func (i *PipeIterator) GetNext() (line []byte, input interface{}, err error) {
 						}
 						// return raw value (as it might be a number or bool)
 						return []byte(v.Raw), line, nil
-					} else if i.opts.AllowEmpty {
-						// allow empty values, as the user can use the raw piped data in a template
-						return []byte(""), line, nil
 					}
 				}
 			}
+			if i.opts.AllowEmpty && len(bytes.TrimSpace(line)) > 0 {
+				// allow empty values, as the user can use the raw piped data in a template
+				return []byte(""), line, nil
+			}
+
 			// stop iterator if not found
 			err = io.EOF
 		}
