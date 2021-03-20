@@ -8,7 +8,7 @@ Assign child group
 Assigns a group to a group. The group will be a childAsset of the group
 
 .LINK
-c8y inventoryReferences assignGroupToGroup
+c8y inventoryreferences assignGroupToGroup
 
 .EXAMPLE
 PS> Add-ChildGroupToGroup -Group $Group.id -NewChildGroup $ChildGroup1.id
@@ -52,7 +52,7 @@ to filter for a collection of devices and assign the results to a single group.
             Use-CallerPreference -Cmdlet $PSCmdlet -SessionState $ExecutionContext.SessionState
         }
 
-        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "inventoryReferences assignGroupToGroup"
+        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "inventoryreferences assignGroupToGroup"
         $ClientOptions = Get-ClientOutputOption $PSBoundParameters
         $TypeOptions = @{
             Type = "application/vnd.com.nsn.cumulocity.managedObjectReference+json"
@@ -66,13 +66,13 @@ to filter for a collection of devices and assign the results to a single group.
         if ($ClientOptions.ConvertToPS) {
             $NewChildGroup `
             | Group-ClientRequests `
-            | c8y inventoryReferences assignGroupToGroup $c8yargs `
+            | c8y inventoryreferences assignGroupToGroup $c8yargs `
             | ConvertFrom-ClientOutput @TypeOptions
         }
         else {
             $NewChildGroup `
             | Group-ClientRequests `
-            | c8y inventoryReferences assignGroupToGroup $c8yargs
+            | c8y inventoryreferences assignGroupToGroup $c8yargs
         }
         
     }

@@ -8,7 +8,7 @@ Add child addition
 Add a managed object as a child addition to another existing managed object
 
 .LINK
-c8y inventoryReferences createChildAddition
+c8y inventoryreferences createChildAddition
 
 .EXAMPLE
 PS> Add-ChildAddition -Id $software.id -NewChild $version.id
@@ -47,7 +47,7 @@ Add a related managed object as a child to an existing managed object
             Use-CallerPreference -Cmdlet $PSCmdlet -SessionState $ExecutionContext.SessionState
         }
 
-        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "inventoryReferences createChildAddition"
+        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "inventoryreferences createChildAddition"
         $ClientOptions = Get-ClientOutputOption $PSBoundParameters
         $TypeOptions = @{
             Type = "application/vnd.com.nsn.cumulocity.managedObjectReference+json"
@@ -61,13 +61,13 @@ Add a related managed object as a child to an existing managed object
         if ($ClientOptions.ConvertToPS) {
             $NewChild `
             | Group-ClientRequests `
-            | c8y inventoryReferences createChildAddition $c8yargs `
+            | c8y inventoryreferences createChildAddition $c8yargs `
             | ConvertFrom-ClientOutput @TypeOptions
         }
         else {
             $NewChild `
             | Group-ClientRequests `
-            | c8y inventoryReferences createChildAddition $c8yargs
+            | c8y inventoryreferences createChildAddition $c8yargs
         }
         
     }

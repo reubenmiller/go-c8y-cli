@@ -8,7 +8,7 @@ Create bulk operation
 Create a new bulk operation
 
 .LINK
-c8y bulkOperations create
+c8y bulkoperations create
 
 .EXAMPLE
 PS> New-BulkOperation -Group $Group.id -StartDate "60s" -CreationRampSec 15 -Operation @{ c8y_Restart = @{} }
@@ -59,7 +59,7 @@ Create bulk operation for a group (using pipeline)
             Use-CallerPreference -Cmdlet $PSCmdlet -SessionState $ExecutionContext.SessionState
         }
 
-        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "bulkOperations create"
+        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "bulkoperations create"
         $ClientOptions = Get-ClientOutputOption $PSBoundParameters
         $TypeOptions = @{
             Type = "application/vnd.com.nsn.cumulocity.bulkoperation+json"
@@ -73,13 +73,13 @@ Create bulk operation for a group (using pipeline)
         if ($ClientOptions.ConvertToPS) {
             $Group `
             | Group-ClientRequests `
-            | c8y bulkOperations create $c8yargs `
+            | c8y bulkoperations create $c8yargs `
             | ConvertFrom-ClientOutput @TypeOptions
         }
         else {
             $Group `
             | Group-ClientRequests `
-            | c8y bulkOperations create $c8yargs
+            | c8y bulkoperations create $c8yargs
         }
         
     }

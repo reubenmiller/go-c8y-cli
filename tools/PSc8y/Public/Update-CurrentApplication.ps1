@@ -8,7 +8,7 @@ Update current application
 Required authentication with bootstrap user
 
 .LINK
-c8y currentApplication update
+c8y currentapplication update
 
 .EXAMPLE
 PS> Update-CurrentApplication -Data @{ myCustomProp = @{ value1 = 1}}
@@ -74,7 +74,7 @@ Update custom properties of the current application (requires using application 
             Use-CallerPreference -Cmdlet $PSCmdlet -SessionState $ExecutionContext.SessionState
         }
 
-        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "currentApplication update"
+        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "currentapplication update"
         $ClientOptions = Get-ClientOutputOption $PSBoundParameters
         $TypeOptions = @{
             Type = "application/vnd.com.nsn.cumulocity.application+json"
@@ -86,11 +86,11 @@ Update custom properties of the current application (requires using application 
     Process {
 
         if ($ClientOptions.ConvertToPS) {
-            c8y currentApplication update $c8yargs `
+            c8y currentapplication update $c8yargs `
             | ConvertFrom-ClientOutput @TypeOptions
         }
         else {
-            c8y currentApplication update $c8yargs
+            c8y currentapplication update $c8yargs
         }
     }
 

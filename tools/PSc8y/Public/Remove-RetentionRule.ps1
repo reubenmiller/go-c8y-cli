@@ -9,7 +9,7 @@ Delete an existing retention rule
 
 
 .LINK
-c8y retentionRules delete
+c8y retentionrules delete
 
 .EXAMPLE
 PS> Remove-RetentionRule -Id $RetentionRule.id
@@ -46,7 +46,7 @@ Delete a retention rule (using pipeline)
             Use-CallerPreference -Cmdlet $PSCmdlet -SessionState $ExecutionContext.SessionState
         }
 
-        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "retentionRules delete"
+        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "retentionrules delete"
         $ClientOptions = Get-ClientOutputOption $PSBoundParameters
         $TypeOptions = @{
             Type = ""
@@ -60,13 +60,13 @@ Delete a retention rule (using pipeline)
         if ($ClientOptions.ConvertToPS) {
             $Id `
             | Group-ClientRequests `
-            | c8y retentionRules delete $c8yargs `
+            | c8y retentionrules delete $c8yargs `
             | ConvertFrom-ClientOutput @TypeOptions
         }
         else {
             $Id `
             | Group-ClientRequests `
-            | c8y retentionRules delete $c8yargs
+            | c8y retentionrules delete $c8yargs
         }
         
     }

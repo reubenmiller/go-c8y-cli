@@ -9,7 +9,7 @@ Getting the current application only works when using bootstrap credentials from
 
 
 .LINK
-c8y currentApplication get
+c8y currentapplication get
 
 .EXAMPLE
 PS> Get-CurrentApplication
@@ -36,7 +36,7 @@ Get the current application (requires using application credentials)
             Use-CallerPreference -Cmdlet $PSCmdlet -SessionState $ExecutionContext.SessionState
         }
 
-        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "currentApplication get"
+        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "currentapplication get"
         $ClientOptions = Get-ClientOutputOption $PSBoundParameters
         $TypeOptions = @{
             Type = "application/vnd.com.nsn.cumulocity.application+json"
@@ -48,11 +48,11 @@ Get the current application (requires using application credentials)
     Process {
 
         if ($ClientOptions.ConvertToPS) {
-            c8y currentApplication get $c8yargs `
+            c8y currentapplication get $c8yargs `
             | ConvertFrom-ClientOutput @TypeOptions
         }
         else {
-            c8y currentApplication get $c8yargs
+            c8y currentapplication get $c8yargs
         }
     }
 

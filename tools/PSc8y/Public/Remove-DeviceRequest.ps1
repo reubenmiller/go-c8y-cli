@@ -8,7 +8,7 @@ Delete device request
 Delete an existing device registration request
 
 .LINK
-c8y deviceCredentials deleteNewDeviceRequest
+c8y devicecredentials deleteNewDeviceRequest
 
 .EXAMPLE
 PS> Remove-DeviceRequest -Id "$serial_91019192078"
@@ -40,7 +40,7 @@ Delete a new device request
             Use-CallerPreference -Cmdlet $PSCmdlet -SessionState $ExecutionContext.SessionState
         }
 
-        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "deviceCredentials deleteNewDeviceRequest"
+        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "devicecredentials deleteNewDeviceRequest"
         $ClientOptions = Get-ClientOutputOption $PSBoundParameters
         $TypeOptions = @{
             Type = ""
@@ -54,13 +54,13 @@ Delete a new device request
         if ($ClientOptions.ConvertToPS) {
             $Id `
             | Group-ClientRequests `
-            | c8y deviceCredentials deleteNewDeviceRequest $c8yargs `
+            | c8y devicecredentials deleteNewDeviceRequest $c8yargs `
             | ConvertFrom-ClientOutput @TypeOptions
         }
         else {
             $Id `
             | Group-ClientRequests `
-            | c8y deviceCredentials deleteNewDeviceRequest $c8yargs
+            | c8y devicecredentials deleteNewDeviceRequest $c8yargs
         }
         
     }

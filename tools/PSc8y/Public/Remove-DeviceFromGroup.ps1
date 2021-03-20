@@ -8,7 +8,7 @@ Unassign device from group
 Unassign/delete a device from a group
 
 .LINK
-c8y inventoryReferences unassignDeviceFromGroup
+c8y inventoryreferences unassignDeviceFromGroup
 
 .EXAMPLE
 PS> Remove-DeviceFromGroup -Group $Group.id -ChildDevice $ChildDevice.id
@@ -45,7 +45,7 @@ Unassign a child device from its parent asset
             Use-CallerPreference -Cmdlet $PSCmdlet -SessionState $ExecutionContext.SessionState
         }
 
-        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "inventoryReferences unassignDeviceFromGroup"
+        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "inventoryreferences unassignDeviceFromGroup"
         $ClientOptions = Get-ClientOutputOption $PSBoundParameters
         $TypeOptions = @{
             Type = ""
@@ -59,13 +59,13 @@ Unassign a child device from its parent asset
         if ($ClientOptions.ConvertToPS) {
             $ChildDevice `
             | Group-ClientRequests `
-            | c8y inventoryReferences unassignDeviceFromGroup $c8yargs `
+            | c8y inventoryreferences unassignDeviceFromGroup $c8yargs `
             | ConvertFrom-ClientOutput @TypeOptions
         }
         else {
             $ChildDevice `
             | Group-ClientRequests `
-            | c8y inventoryReferences unassignDeviceFromGroup $c8yargs
+            | c8y inventoryreferences unassignDeviceFromGroup $c8yargs
         }
         
     }

@@ -8,7 +8,7 @@ Update user group
 Update an existing user group
 
 .LINK
-c8y userGroups update
+c8y usergroups update
 
 .EXAMPLE
 PS> Update-UserGroup -Id $Group -Name "customGroup2"
@@ -55,7 +55,7 @@ Update a user group (using pipeline)
             Use-CallerPreference -Cmdlet $PSCmdlet -SessionState $ExecutionContext.SessionState
         }
 
-        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "userGroups update"
+        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "usergroups update"
         $ClientOptions = Get-ClientOutputOption $PSBoundParameters
         $TypeOptions = @{
             Type = "application/vnd.com.nsn.cumulocity.group+json"
@@ -69,13 +69,13 @@ Update a user group (using pipeline)
         if ($ClientOptions.ConvertToPS) {
             $Id `
             | Group-ClientRequests `
-            | c8y userGroups update $c8yargs `
+            | c8y usergroups update $c8yargs `
             | ConvertFrom-ClientOutput @TypeOptions
         }
         else {
             $Id `
             | Group-ClientRequests `
-            | c8y userGroups update $c8yargs
+            | c8y usergroups update $c8yargs
         }
         
     }

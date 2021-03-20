@@ -9,7 +9,7 @@ Update an existing retention rule, i.e. change maximum number of days or the dat
 
 
 .LINK
-c8y retentionRules update
+c8y retentionrules update
 
 .EXAMPLE
 PS> Update-RetentionRule -Id $RetentionRule.id -DataType MEASUREMENT -FragmentType "custom_FragmentType"
@@ -77,7 +77,7 @@ Update a retention rule (using pipeline)
             Use-CallerPreference -Cmdlet $PSCmdlet -SessionState $ExecutionContext.SessionState
         }
 
-        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "retentionRules update"
+        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "retentionrules update"
         $ClientOptions = Get-ClientOutputOption $PSBoundParameters
         $TypeOptions = @{
             Type = "application/vnd.com.nsn.cumulocity.retentionRule+json"
@@ -91,13 +91,13 @@ Update a retention rule (using pipeline)
         if ($ClientOptions.ConvertToPS) {
             $Id `
             | Group-ClientRequests `
-            | c8y retentionRules update $c8yargs `
+            | c8y retentionrules update $c8yargs `
             | ConvertFrom-ClientOutput @TypeOptions
         }
         else {
             $Id `
             | Group-ClientRequests `
-            | c8y retentionRules update $c8yargs
+            | c8y retentionrules update $c8yargs
         }
         
     }

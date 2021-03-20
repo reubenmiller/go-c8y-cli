@@ -8,7 +8,7 @@ Create tenant option
 Create tenant option
 
 .LINK
-c8y tenantOptions create
+c8y tenantoptions create
 
 .EXAMPLE
 PS> New-TenantOption -Category "c8y_cli_tests" -Key "$option1" -Value "1"
@@ -50,7 +50,7 @@ Create a tenant option
             Use-CallerPreference -Cmdlet $PSCmdlet -SessionState $ExecutionContext.SessionState
         }
 
-        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "tenantOptions create"
+        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "tenantoptions create"
         $ClientOptions = Get-ClientOutputOption $PSBoundParameters
         $TypeOptions = @{
             Type = "application/vnd.com.nsn.cumulocity.option+json"
@@ -64,13 +64,13 @@ Create a tenant option
         if ($ClientOptions.ConvertToPS) {
             $Key `
             | Group-ClientRequests `
-            | c8y tenantOptions create $c8yargs `
+            | c8y tenantoptions create $c8yargs `
             | ConvertFrom-ClientOutput @TypeOptions
         }
         else {
             $Key `
             | Group-ClientRequests `
-            | c8y tenantOptions create $c8yargs
+            | c8y tenantoptions create $c8yargs
         }
         
     }

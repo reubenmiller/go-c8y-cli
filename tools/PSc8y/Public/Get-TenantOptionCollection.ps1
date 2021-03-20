@@ -8,7 +8,7 @@ Get tenant option collection
 Get collection of tenant options
 
 .LINK
-c8y tenantOptions list
+c8y tenantoptions list
 
 .EXAMPLE
 PS> Get-TenantOptionCollection
@@ -35,7 +35,7 @@ Get a list of tenant options
             Use-CallerPreference -Cmdlet $PSCmdlet -SessionState $ExecutionContext.SessionState
         }
 
-        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "tenantOptions list"
+        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "tenantoptions list"
         $ClientOptions = Get-ClientOutputOption $PSBoundParameters
         $TypeOptions = @{
             Type = "application/vnd.com.nsn.cumulocity.optionCollection+json"
@@ -47,11 +47,11 @@ Get a list of tenant options
     Process {
 
         if ($ClientOptions.ConvertToPS) {
-            c8y tenantOptions list $c8yargs `
+            c8y tenantoptions list $c8yargs `
             | ConvertFrom-ClientOutput @TypeOptions
         }
         else {
-            c8y tenantOptions list $c8yargs
+            c8y tenantoptions list $c8yargs
         }
     }
 

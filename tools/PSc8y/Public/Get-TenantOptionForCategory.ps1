@@ -8,7 +8,7 @@ Get tenant options by category
 Get existing tenant options for a category
 
 .LINK
-c8y tenantOptions getForCategory
+c8y tenantoptions getForCategory
 
 .EXAMPLE
 PS> Get-TenantOptionForCategory -Category "c8y_cli_tests"
@@ -40,7 +40,7 @@ Get a list of options for a category
             Use-CallerPreference -Cmdlet $PSCmdlet -SessionState $ExecutionContext.SessionState
         }
 
-        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "tenantOptions getForCategory"
+        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "tenantoptions getForCategory"
         $ClientOptions = Get-ClientOutputOption $PSBoundParameters
         $TypeOptions = @{
             Type = "application/vnd.com.nsn.cumulocity.optionCollection+json"
@@ -54,13 +54,13 @@ Get a list of options for a category
         if ($ClientOptions.ConvertToPS) {
             $Category `
             | Group-ClientRequests `
-            | c8y tenantOptions getForCategory $c8yargs `
+            | c8y tenantoptions getForCategory $c8yargs `
             | ConvertFrom-ClientOutput @TypeOptions
         }
         else {
             $Category `
             | Group-ClientRequests `
-            | c8y tenantOptions getForCategory $c8yargs
+            | c8y tenantoptions getForCategory $c8yargs
         }
         
     }

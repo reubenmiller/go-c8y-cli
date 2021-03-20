@@ -8,7 +8,7 @@ Delete tenant option
 Delete an existing tenant option
 
 .LINK
-c8y tenantOptions delete
+c8y tenantoptions delete
 
 .EXAMPLE
 PS> Remove-TenantOption -Category "c8y_cli_tests" -Key "$option3"
@@ -45,7 +45,7 @@ Delete a tenant option
             Use-CallerPreference -Cmdlet $PSCmdlet -SessionState $ExecutionContext.SessionState
         }
 
-        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "tenantOptions delete"
+        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "tenantoptions delete"
         $ClientOptions = Get-ClientOutputOption $PSBoundParameters
         $TypeOptions = @{
             Type = ""
@@ -59,13 +59,13 @@ Delete a tenant option
         if ($ClientOptions.ConvertToPS) {
             $Key `
             | Group-ClientRequests `
-            | c8y tenantOptions delete $c8yargs `
+            | c8y tenantoptions delete $c8yargs `
             | ConvertFrom-ClientOutput @TypeOptions
         }
         else {
             $Key `
             | Group-ClientRequests `
-            | c8y tenantOptions delete $c8yargs
+            | c8y tenantoptions delete $c8yargs
         }
         
     }

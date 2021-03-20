@@ -8,7 +8,7 @@ Get system option
 Get a system option by category and key
 
 .LINK
-c8y systemOptions get
+c8y systemoptions get
 
 .EXAMPLE
 PS> Get-SystemOption -Category "system" -Key "version"
@@ -45,7 +45,7 @@ Get system option value
             Use-CallerPreference -Cmdlet $PSCmdlet -SessionState $ExecutionContext.SessionState
         }
 
-        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "systemOptions get"
+        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "systemoptions get"
         $ClientOptions = Get-ClientOutputOption $PSBoundParameters
         $TypeOptions = @{
             Type = "application/vnd.com.nsn.cumulocity.option+json"
@@ -59,13 +59,13 @@ Get system option value
         if ($ClientOptions.ConvertToPS) {
             $Key `
             | Group-ClientRequests `
-            | c8y systemOptions get $c8yargs `
+            | c8y systemoptions get $c8yargs `
             | ConvertFrom-ClientOutput @TypeOptions
         }
         else {
             $Key `
             | Group-ClientRequests `
-            | c8y systemOptions get $c8yargs
+            | c8y systemoptions get $c8yargs
         }
         
     }

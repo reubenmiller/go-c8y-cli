@@ -8,7 +8,7 @@ Update tenant option
 Update an existing tenant option
 
 .LINK
-c8y tenantOptions update
+c8y tenantoptions update
 
 .EXAMPLE
 PS> Update-TenantOption -Category "c8y_cli_tests" -Key "$option4" -Value "0"
@@ -50,7 +50,7 @@ Update a tenant option
             Use-CallerPreference -Cmdlet $PSCmdlet -SessionState $ExecutionContext.SessionState
         }
 
-        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "tenantOptions update"
+        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "tenantoptions update"
         $ClientOptions = Get-ClientOutputOption $PSBoundParameters
         $TypeOptions = @{
             Type = "application/vnd.com.nsn.cumulocity.option+json"
@@ -64,13 +64,13 @@ Update a tenant option
         if ($ClientOptions.ConvertToPS) {
             $Key `
             | Group-ClientRequests `
-            | c8y tenantOptions update $c8yargs `
+            | c8y tenantoptions update $c8yargs `
             | ConvertFrom-ClientOutput @TypeOptions
         }
         else {
             $Key `
             | Group-ClientRequests `
-            | c8y tenantOptions update $c8yargs
+            | c8y tenantoptions update $c8yargs
         }
         
     }

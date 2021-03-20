@@ -8,7 +8,7 @@ Unassign role from user
 Unassign/delete role from a user
 
 .LINK
-c8y userRoles deleteRoleFromUser
+c8y userroles deleteRoleFromUser
 
 .EXAMPLE
 PS> Remove-RoleFromUser -User $User.id -Role "ROLE_MEASUREMENT_READ"
@@ -50,7 +50,7 @@ Remove a role from the given user
             Use-CallerPreference -Cmdlet $PSCmdlet -SessionState $ExecutionContext.SessionState
         }
 
-        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "userRoles deleteRoleFromUser"
+        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "userroles deleteRoleFromUser"
         $ClientOptions = Get-ClientOutputOption $PSBoundParameters
         $TypeOptions = @{
             Type = ""
@@ -64,13 +64,13 @@ Remove a role from the given user
         if ($ClientOptions.ConvertToPS) {
             $Role `
             | Group-ClientRequests `
-            | c8y userRoles deleteRoleFromUser $c8yargs `
+            | c8y userroles deleteRoleFromUser $c8yargs `
             | ConvertFrom-ClientOutput @TypeOptions
         }
         else {
             $Role `
             | Group-ClientRequests `
-            | c8y userRoles deleteRoleFromUser $c8yargs
+            | c8y userroles deleteRoleFromUser $c8yargs
         }
         
     }

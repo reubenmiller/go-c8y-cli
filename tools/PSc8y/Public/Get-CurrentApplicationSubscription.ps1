@@ -8,7 +8,7 @@ Get current application subscriptions
 Requires authentication with the application bootstrap user
 
 .LINK
-c8y currentApplication listSubscriptions
+c8y currentapplication listSubscriptions
 
 .EXAMPLE
 PS> Get-CurrentApplicationSubscription
@@ -35,7 +35,7 @@ List the current application users/subscriptions
             Use-CallerPreference -Cmdlet $PSCmdlet -SessionState $ExecutionContext.SessionState
         }
 
-        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "currentApplication listSubscriptions"
+        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "currentapplication listSubscriptions"
         $ClientOptions = Get-ClientOutputOption $PSBoundParameters
         $TypeOptions = @{
             Type = "application/vnd.com.nsn.cumulocity.applicationUserCollection+json"
@@ -47,11 +47,11 @@ List the current application users/subscriptions
     Process {
 
         if ($ClientOptions.ConvertToPS) {
-            c8y currentApplication listSubscriptions $c8yargs `
+            c8y currentapplication listSubscriptions $c8yargs `
             | ConvertFrom-ClientOutput @TypeOptions
         }
         else {
-            c8y currentApplication listSubscriptions $c8yargs
+            c8y currentapplication listSubscriptions $c8yargs
         }
     }
 

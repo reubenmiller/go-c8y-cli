@@ -8,7 +8,7 @@ Register device
 Register a new device (request)
 
 .LINK
-c8y deviceCredentials registerNewDevice
+c8y devicecredentials registerNewDevice
 
 .EXAMPLE
 PS> Register-Device -Id "ASDF098SD1J10912UD92JDLCNCU8"
@@ -40,7 +40,7 @@ Register a new device
             Use-CallerPreference -Cmdlet $PSCmdlet -SessionState $ExecutionContext.SessionState
         }
 
-        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "deviceCredentials registerNewDevice"
+        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "devicecredentials registerNewDevice"
         $ClientOptions = Get-ClientOutputOption $PSBoundParameters
         $TypeOptions = @{
             Type = "application/vnd.com.nsn.cumulocity.newDeviceRequest+json"
@@ -54,13 +54,13 @@ Register a new device
         if ($ClientOptions.ConvertToPS) {
             $Id `
             | Group-ClientRequests `
-            | c8y deviceCredentials registerNewDevice $c8yargs `
+            | c8y devicecredentials registerNewDevice $c8yargs `
             | ConvertFrom-ClientOutput @TypeOptions
         }
         else {
             $Id `
             | Group-ClientRequests `
-            | c8y deviceCredentials registerNewDevice $c8yargs
+            | c8y devicecredentials registerNewDevice $c8yargs
         }
         
     }

@@ -8,7 +8,7 @@ Add user to group
 Add an existing user to a group
 
 .LINK
-c8y userReferences addUserToGroup
+c8y userreferences addUserToGroup
 
 .EXAMPLE
 PS> Add-UserToGroup -Group $Group.id -User $User.id
@@ -50,7 +50,7 @@ Add a user to a user group
             Use-CallerPreference -Cmdlet $PSCmdlet -SessionState $ExecutionContext.SessionState
         }
 
-        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "userReferences addUserToGroup"
+        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "userreferences addUserToGroup"
         $ClientOptions = Get-ClientOutputOption $PSBoundParameters
         $TypeOptions = @{
             Type = "application/vnd.com.nsn.cumulocity.userReference+json"
@@ -64,13 +64,13 @@ Add a user to a user group
         if ($ClientOptions.ConvertToPS) {
             $User `
             | Group-ClientRequests `
-            | c8y userReferences addUserToGroup $c8yargs `
+            | c8y userreferences addUserToGroup $c8yargs `
             | ConvertFrom-ClientOutput @TypeOptions
         }
         else {
             $User `
             | Group-ClientRequests `
-            | c8y userReferences addUserToGroup $c8yargs
+            | c8y userreferences addUserToGroup $c8yargs
         }
         
     }

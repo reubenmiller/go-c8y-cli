@@ -9,7 +9,7 @@ Get an existing retention by id
 
 
 .LINK
-c8y retentionRules get
+c8y retentionrules get
 
 .EXAMPLE
 PS> Get-RetentionRule -Id $RetentionRule.id
@@ -41,7 +41,7 @@ Get a retention rule
             Use-CallerPreference -Cmdlet $PSCmdlet -SessionState $ExecutionContext.SessionState
         }
 
-        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "retentionRules get"
+        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "retentionrules get"
         $ClientOptions = Get-ClientOutputOption $PSBoundParameters
         $TypeOptions = @{
             Type = "application/vnd.com.nsn.cumulocity.retentionRule+json"
@@ -55,13 +55,13 @@ Get a retention rule
         if ($ClientOptions.ConvertToPS) {
             $Id `
             | Group-ClientRequests `
-            | c8y retentionRules get $c8yargs `
+            | c8y retentionrules get $c8yargs `
             | ConvertFrom-ClientOutput @TypeOptions
         }
         else {
             $Id `
             | Group-ClientRequests `
-            | c8y retentionRules get $c8yargs
+            | c8y retentionrules get $c8yargs
         }
         
     }

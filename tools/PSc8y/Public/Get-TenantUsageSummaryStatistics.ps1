@@ -8,7 +8,7 @@ Get tenant usage summary statistics
 Get summary of requests and database usage from the start of this month until now
 
 .LINK
-c8y tenantStatistics listSummaryForTenant
+c8y tenantstatistics listSummaryForTenant
 
 .EXAMPLE
 PS> Get-TenantUsageSummaryStatistics
@@ -53,7 +53,7 @@ Get tenant summary statistics collection for the last 10 days, only return until
             Use-CallerPreference -Cmdlet $PSCmdlet -SessionState $ExecutionContext.SessionState
         }
 
-        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "tenantStatistics listSummaryForTenant"
+        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "tenantstatistics listSummaryForTenant"
         $ClientOptions = Get-ClientOutputOption $PSBoundParameters
         $TypeOptions = @{
             Type = "application/vnd.com.nsn.cumulocity.tenantUsageStatisticsSummary+json"
@@ -65,11 +65,11 @@ Get tenant summary statistics collection for the last 10 days, only return until
     Process {
 
         if ($ClientOptions.ConvertToPS) {
-            c8y tenantStatistics listSummaryForTenant $c8yargs `
+            c8y tenantstatistics listSummaryForTenant $c8yargs `
             | ConvertFrom-ClientOutput @TypeOptions
         }
         else {
-            c8y tenantStatistics listSummaryForTenant $c8yargs
+            c8y tenantstatistics listSummaryForTenant $c8yargs
         }
     }
 

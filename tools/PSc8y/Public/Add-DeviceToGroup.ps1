@@ -8,7 +8,7 @@ Assign device to group
 Assigns a device to a group. The device will be a childAsset of the group
 
 .LINK
-c8y inventoryReferences assignDeviceToGroup
+c8y inventoryreferences assignDeviceToGroup
 
 .EXAMPLE
 PS> Add-DeviceToGroup -Group $Group.id -NewChildDevice $Device.id
@@ -57,7 +57,7 @@ to filter for a collection of devices and assign the results to a single group.
             Use-CallerPreference -Cmdlet $PSCmdlet -SessionState $ExecutionContext.SessionState
         }
 
-        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "inventoryReferences assignDeviceToGroup"
+        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "inventoryreferences assignDeviceToGroup"
         $ClientOptions = Get-ClientOutputOption $PSBoundParameters
         $TypeOptions = @{
             Type = "application/vnd.com.nsn.cumulocity.managedObjectReference+json"
@@ -71,13 +71,13 @@ to filter for a collection of devices and assign the results to a single group.
         if ($ClientOptions.ConvertToPS) {
             $NewChildDevice `
             | Group-ClientRequests `
-            | c8y inventoryReferences assignDeviceToGroup $c8yargs `
+            | c8y inventoryreferences assignDeviceToGroup $c8yargs `
             | ConvertFrom-ClientOutput @TypeOptions
         }
         else {
             $NewChildDevice `
             | Group-ClientRequests `
-            | c8y inventoryReferences assignDeviceToGroup $c8yargs
+            | c8y inventoryreferences assignDeviceToGroup $c8yargs
         }
         
     }

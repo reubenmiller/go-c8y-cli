@@ -8,7 +8,7 @@ Get users in group
 Get all users in a user group
 
 .LINK
-c8y userReferences listGroupMembership
+c8y userreferences listGroupMembership
 
 .EXAMPLE
 PS> Get-UserGroupMembershipCollection -Id $Group.id
@@ -50,7 +50,7 @@ List the users within a user group (using pipeline)
             Use-CallerPreference -Cmdlet $PSCmdlet -SessionState $ExecutionContext.SessionState
         }
 
-        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "userReferences listGroupMembership"
+        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "userreferences listGroupMembership"
         $ClientOptions = Get-ClientOutputOption $PSBoundParameters
         $TypeOptions = @{
             Type = "application/vnd.com.nsn.cumulocity.userReferenceCollection+json"
@@ -64,13 +64,13 @@ List the users within a user group (using pipeline)
         if ($ClientOptions.ConvertToPS) {
             $Id `
             | Group-ClientRequests `
-            | c8y userReferences listGroupMembership $c8yargs `
+            | c8y userreferences listGroupMembership $c8yargs `
             | ConvertFrom-ClientOutput @TypeOptions
         }
         else {
             $Id `
             | Group-ClientRequests `
-            | c8y userReferences listGroupMembership $c8yargs
+            | c8y userreferences listGroupMembership $c8yargs
         }
         
     }

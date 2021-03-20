@@ -8,7 +8,7 @@ Unassign role from group
 Unassign/delete role from a group
 
 .LINK
-c8y userRoles deleteRoleFromGroup
+c8y userroles deleteRoleFromGroup
 
 .EXAMPLE
 PS> Remove-RoleFromGroup -Group $UserGroup.id -Role "ROLE_MEASUREMENT_READ"
@@ -50,7 +50,7 @@ Remove a role from the given user group
             Use-CallerPreference -Cmdlet $PSCmdlet -SessionState $ExecutionContext.SessionState
         }
 
-        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "userRoles deleteRoleFromGroup"
+        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "userroles deleteRoleFromGroup"
         $ClientOptions = Get-ClientOutputOption $PSBoundParameters
         $TypeOptions = @{
             Type = ""
@@ -64,13 +64,13 @@ Remove a role from the given user group
         if ($ClientOptions.ConvertToPS) {
             $Role `
             | Group-ClientRequests `
-            | c8y userRoles deleteRoleFromGroup $c8yargs `
+            | c8y userroles deleteRoleFromGroup $c8yargs `
             | ConvertFrom-ClientOutput @TypeOptions
         }
         else {
             $Role `
             | Group-ClientRequests `
-            | c8y userRoles deleteRoleFromGroup $c8yargs
+            | c8y userroles deleteRoleFromGroup $c8yargs
         }
         
     }

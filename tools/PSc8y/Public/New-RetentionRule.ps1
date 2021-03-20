@@ -9,7 +9,7 @@ Create a new retention rule to managed when data is deleted in the tenant
 
 
 .LINK
-c8y retentionRules create
+c8y retentionrules create
 
 .EXAMPLE
 PS> New-RetentionRule -DataType ALARM -MaximumAge 180
@@ -65,7 +65,7 @@ Create a retention rule to delete all alarms after 180 days
             Use-CallerPreference -Cmdlet $PSCmdlet -SessionState $ExecutionContext.SessionState
         }
 
-        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "retentionRules create"
+        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "retentionrules create"
         $ClientOptions = Get-ClientOutputOption $PSBoundParameters
         $TypeOptions = @{
             Type = "application/vnd.com.nsn.cumulocity.retentionRule+json"
@@ -77,11 +77,11 @@ Create a retention rule to delete all alarms after 180 days
     Process {
 
         if ($ClientOptions.ConvertToPS) {
-            c8y retentionRules create $c8yargs `
+            c8y retentionrules create $c8yargs `
             | ConvertFrom-ClientOutput @TypeOptions
         }
         else {
-            c8y retentionRules create $c8yargs
+            c8y retentionrules create $c8yargs
         }
     }
 

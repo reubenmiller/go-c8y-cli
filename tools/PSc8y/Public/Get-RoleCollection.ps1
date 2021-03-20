@@ -8,7 +8,7 @@ Get role collection
 Get collection of user roles
 
 .LINK
-c8y userRoles list
+c8y userroles list
 
 .EXAMPLE
 PS> Get-RoleCollection -PageSize 100
@@ -35,7 +35,7 @@ Get a list of roles
             Use-CallerPreference -Cmdlet $PSCmdlet -SessionState $ExecutionContext.SessionState
         }
 
-        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "userRoles list"
+        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "userroles list"
         $ClientOptions = Get-ClientOutputOption $PSBoundParameters
         $TypeOptions = @{
             Type = "application/vnd.com.nsn.cumulocity.roleCollection+json"
@@ -47,11 +47,11 @@ Get a list of roles
     Process {
 
         if ($ClientOptions.ConvertToPS) {
-            c8y userRoles list $c8yargs `
+            c8y userroles list $c8yargs `
             | ConvertFrom-ClientOutput @TypeOptions
         }
         else {
-            c8y userRoles list $c8yargs
+            c8y userroles list $c8yargs
         }
     }
 

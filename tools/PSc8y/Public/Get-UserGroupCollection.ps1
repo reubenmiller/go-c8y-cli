@@ -8,7 +8,7 @@ Get user group collection
 Get collection of (user) groups
 
 .LINK
-c8y userGroups list
+c8y usergroups list
 
 .EXAMPLE
 PS> Get-UserGroupCollection
@@ -38,7 +38,7 @@ Get a list of user groups for the current tenant
             Use-CallerPreference -Cmdlet $PSCmdlet -SessionState $ExecutionContext.SessionState
         }
 
-        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "userGroups list"
+        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "usergroups list"
         $ClientOptions = Get-ClientOutputOption $PSBoundParameters
         $TypeOptions = @{
             Type = "application/vnd.com.nsn.cumulocity.groupCollection+json"
@@ -50,11 +50,11 @@ Get a list of user groups for the current tenant
     Process {
 
         if ($ClientOptions.ConvertToPS) {
-            c8y userGroups list $c8yargs `
+            c8y usergroups list $c8yargs `
             | ConvertFrom-ClientOutput @TypeOptions
         }
         else {
-            c8y userGroups list $c8yargs
+            c8y usergroups list $c8yargs
         }
     }
 

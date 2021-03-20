@@ -8,7 +8,7 @@ Get user group by name
 Get an existing user group by name
 
 .LINK
-c8y userGroups getByName
+c8y usergroups getByName
 
 .EXAMPLE
 PS> Get-UserGroupByName -Name $Group.name
@@ -44,7 +44,7 @@ Get user group by its name
             Use-CallerPreference -Cmdlet $PSCmdlet -SessionState $ExecutionContext.SessionState
         }
 
-        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "userGroups getByName"
+        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "usergroups getByName"
         $ClientOptions = Get-ClientOutputOption $PSBoundParameters
         $TypeOptions = @{
             Type = "application/vnd.com.nsn.cumulocity.group+json"
@@ -58,13 +58,13 @@ Get user group by its name
         if ($ClientOptions.ConvertToPS) {
             $Name `
             | Group-ClientRequests `
-            | c8y userGroups getByName $c8yargs `
+            | c8y usergroups getByName $c8yargs `
             | ConvertFrom-ClientOutput @TypeOptions
         }
         else {
             $Name `
             | Group-ClientRequests `
-            | c8y userGroups getByName $c8yargs
+            | c8y usergroups getByName $c8yargs
         }
         
     }

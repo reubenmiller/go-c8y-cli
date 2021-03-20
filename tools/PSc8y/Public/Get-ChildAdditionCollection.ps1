@@ -8,7 +8,7 @@ Get child addition collection
 Get a collection of managedObjects child additions
 
 .LINK
-c8y inventoryReferences listChildAdditions
+c8y inventoryreferences listChildAdditions
 
 .EXAMPLE
 PS> Get-ChildAdditionCollection -Id $software.id
@@ -45,7 +45,7 @@ Get a list of the child additions of an existing managed object (using pipeline)
             Use-CallerPreference -Cmdlet $PSCmdlet -SessionState $ExecutionContext.SessionState
         }
 
-        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "inventoryReferences listChildAdditions"
+        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "inventoryreferences listChildAdditions"
         $ClientOptions = Get-ClientOutputOption $PSBoundParameters
         $TypeOptions = @{
             Type = "application/vnd.com.nsn.cumulocity.managedObjectReferenceCollection+json"
@@ -59,13 +59,13 @@ Get a list of the child additions of an existing managed object (using pipeline)
         if ($ClientOptions.ConvertToPS) {
             $Id `
             | Group-ClientRequests `
-            | c8y inventoryReferences listChildAdditions $c8yargs `
+            | c8y inventoryreferences listChildAdditions $c8yargs `
             | ConvertFrom-ClientOutput @TypeOptions
         }
         else {
             $Id `
             | Group-ClientRequests `
-            | c8y inventoryReferences listChildAdditions $c8yargs
+            | c8y inventoryreferences listChildAdditions $c8yargs
         }
         
     }

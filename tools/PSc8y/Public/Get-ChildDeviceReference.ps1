@@ -8,7 +8,7 @@ Get child device reference
 Get managed object child device reference
 
 .LINK
-c8y inventoryReferences getChildDevice
+c8y inventoryreferences getChildDevice
 
 .EXAMPLE
 PS> Get-ChildDeviceReference -Device $Agent.id -Reference $Ref.id
@@ -45,7 +45,7 @@ Get an existing child device reference
             Use-CallerPreference -Cmdlet $PSCmdlet -SessionState $ExecutionContext.SessionState
         }
 
-        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "inventoryReferences getChildDevice"
+        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "inventoryreferences getChildDevice"
         $ClientOptions = Get-ClientOutputOption $PSBoundParameters
         $TypeOptions = @{
             Type = "application/vnd.com.nsn.cumulocity.managedObjectReference+json"
@@ -59,13 +59,13 @@ Get an existing child device reference
         if ($ClientOptions.ConvertToPS) {
             $Device `
             | Group-ClientRequests `
-            | c8y inventoryReferences getChildDevice $c8yargs `
+            | c8y inventoryreferences getChildDevice $c8yargs `
             | ConvertFrom-ClientOutput @TypeOptions
         }
         else {
             $Device `
             | Group-ClientRequests `
-            | c8y inventoryReferences getChildDevice $c8yargs
+            | c8y inventoryreferences getChildDevice $c8yargs
         }
         
     }

@@ -8,7 +8,7 @@ Get bulk operation
 Get an existing bulk operation
 
 .LINK
-c8y bulkOperations get
+c8y bulkoperations get
 
 .EXAMPLE
 PS> Get-BulkOperation -Id $BulkOp.id
@@ -40,7 +40,7 @@ Get bulk operation by id
             Use-CallerPreference -Cmdlet $PSCmdlet -SessionState $ExecutionContext.SessionState
         }
 
-        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "bulkOperations get"
+        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "bulkoperations get"
         $ClientOptions = Get-ClientOutputOption $PSBoundParameters
         $TypeOptions = @{
             Type = "application/vnd.com.nsn.cumulocity.bulkoperation+json"
@@ -54,13 +54,13 @@ Get bulk operation by id
         if ($ClientOptions.ConvertToPS) {
             $Id `
             | Group-ClientRequests `
-            | c8y bulkOperations get $c8yargs `
+            | c8y bulkoperations get $c8yargs `
             | ConvertFrom-ClientOutput @TypeOptions
         }
         else {
             $Id `
             | Group-ClientRequests `
-            | c8y bulkOperations get $c8yargs
+            | c8y bulkoperations get $c8yargs
         }
         
     }

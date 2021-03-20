@@ -8,7 +8,7 @@ Create user group
 Create a new user group
 
 .LINK
-c8y userGroups create
+c8y usergroups create
 
 .EXAMPLE
 PS> New-UserGroup -Name "$GroupName"
@@ -49,7 +49,7 @@ Create a user group
             Use-CallerPreference -Cmdlet $PSCmdlet -SessionState $ExecutionContext.SessionState
         }
 
-        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "userGroups create"
+        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "usergroups create"
         $ClientOptions = Get-ClientOutputOption $PSBoundParameters
         $TypeOptions = @{
             Type = "application/vnd.com.nsn.cumulocity.group+json"
@@ -63,13 +63,13 @@ Create a user group
         if ($ClientOptions.ConvertToPS) {
             $Name `
             | Group-ClientRequests `
-            | c8y userGroups create $c8yargs `
+            | c8y usergroups create $c8yargs `
             | ConvertFrom-ClientOutput @TypeOptions
         }
         else {
             $Name `
             | Group-ClientRequests `
-            | c8y userGroups create $c8yargs
+            | c8y usergroups create $c8yargs
         }
         
     }

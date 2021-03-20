@@ -8,7 +8,7 @@ Get user group
 Get an existing user group
 
 .LINK
-c8y userGroups get
+c8y usergroups get
 
 .EXAMPLE
 PS> Get-UserGroup -Id $Group.id
@@ -44,7 +44,7 @@ Get a user group
             Use-CallerPreference -Cmdlet $PSCmdlet -SessionState $ExecutionContext.SessionState
         }
 
-        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "userGroups get"
+        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "usergroups get"
         $ClientOptions = Get-ClientOutputOption $PSBoundParameters
         $TypeOptions = @{
             Type = "application/vnd.com.nsn.cumulocity.group+json"
@@ -58,13 +58,13 @@ Get a user group
         if ($ClientOptions.ConvertToPS) {
             $Id `
             | Group-ClientRequests `
-            | c8y userGroups get $c8yargs `
+            | c8y usergroups get $c8yargs `
             | ConvertFrom-ClientOutput @TypeOptions
         }
         else {
             $Id `
             | Group-ClientRequests `
-            | c8y userGroups get $c8yargs
+            | c8y usergroups get $c8yargs
         }
         
     }

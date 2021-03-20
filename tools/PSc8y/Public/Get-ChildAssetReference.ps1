@@ -8,7 +8,7 @@ Get child asset reference
 Get managed object child asset reference
 
 .LINK
-c8y inventoryReferences getChildAsset
+c8y inventoryreferences getChildAsset
 
 .EXAMPLE
 PS> Get-ChildAssetReference -Asset $Agent.id -Reference $Ref.id
@@ -45,7 +45,7 @@ Get an existing child asset reference
             Use-CallerPreference -Cmdlet $PSCmdlet -SessionState $ExecutionContext.SessionState
         }
 
-        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "inventoryReferences getChildAsset"
+        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "inventoryreferences getChildAsset"
         $ClientOptions = Get-ClientOutputOption $PSBoundParameters
         $TypeOptions = @{
             Type = "application/vnd.com.nsn.cumulocity.managedObjectReference+json"
@@ -59,13 +59,13 @@ Get an existing child asset reference
         if ($ClientOptions.ConvertToPS) {
             $Asset `
             | Group-ClientRequests `
-            | c8y inventoryReferences getChildAsset $c8yargs `
+            | c8y inventoryreferences getChildAsset $c8yargs `
             | ConvertFrom-ClientOutput @TypeOptions
         }
         else {
             $Asset `
             | Group-ClientRequests `
-            | c8y inventoryReferences getChildAsset $c8yargs
+            | c8y inventoryreferences getChildAsset $c8yargs
         }
         
     }

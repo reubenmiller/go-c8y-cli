@@ -8,7 +8,7 @@ Get all tenant usage summary statistics
 Get collection of tenant usage statistics summary
 
 .LINK
-c8y tenantStatistics listSummaryAllTenants
+c8y tenantstatistics listSummaryAllTenants
 
 .EXAMPLE
 PS> Get-AllTenantUsageSummaryStatistics
@@ -53,7 +53,7 @@ Get tenant summary statistics collection for the last 10 days, only return until
             Use-CallerPreference -Cmdlet $PSCmdlet -SessionState $ExecutionContext.SessionState
         }
 
-        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "tenantStatistics listSummaryAllTenants"
+        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "tenantstatistics listSummaryAllTenants"
         $ClientOptions = Get-ClientOutputOption $PSBoundParameters
         $TypeOptions = @{
             Type = "application/json"
@@ -65,11 +65,11 @@ Get tenant summary statistics collection for the last 10 days, only return until
     Process {
 
         if ($ClientOptions.ConvertToPS) {
-            c8y tenantStatistics listSummaryAllTenants $c8yargs `
+            c8y tenantstatistics listSummaryAllTenants $c8yargs `
             | ConvertFrom-ClientOutput @TypeOptions
         }
         else {
-            c8y tenantStatistics listSummaryAllTenants $c8yargs
+            c8y tenantstatistics listSummaryAllTenants $c8yargs
         }
     }
 

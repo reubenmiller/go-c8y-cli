@@ -8,7 +8,7 @@ Get role references from user
 Get collection of user role references from a user
 
 .LINK
-c8y userRoles getRoleReferenceCollectionFromUser
+c8y userroles getRoleReferenceCollectionFromUser
 
 .EXAMPLE
 PS> Get-RoleReferenceCollectionFromUser -User $User.id
@@ -45,7 +45,7 @@ Get a list of role references for a user
             Use-CallerPreference -Cmdlet $PSCmdlet -SessionState $ExecutionContext.SessionState
         }
 
-        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "userRoles getRoleReferenceCollectionFromUser"
+        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "userroles getRoleReferenceCollectionFromUser"
         $ClientOptions = Get-ClientOutputOption $PSBoundParameters
         $TypeOptions = @{
             Type = "application/vnd.com.nsn.cumulocity.roleReferenceCollection+json"
@@ -59,13 +59,13 @@ Get a list of role references for a user
         if ($ClientOptions.ConvertToPS) {
             $User `
             | Group-ClientRequests `
-            | c8y userRoles getRoleReferenceCollectionFromUser $c8yargs `
+            | c8y userroles getRoleReferenceCollectionFromUser $c8yargs `
             | ConvertFrom-ClientOutput @TypeOptions
         }
         else {
             $User `
             | Group-ClientRequests `
-            | c8y userRoles getRoleReferenceCollectionFromUser $c8yargs
+            | c8y userroles getRoleReferenceCollectionFromUser $c8yargs
         }
         
     }

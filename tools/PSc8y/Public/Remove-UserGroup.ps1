@@ -8,7 +8,7 @@ Delete user group
 Delete an existing user group
 
 .LINK
-c8y userGroups delete
+c8y usergroups delete
 
 .EXAMPLE
 PS> Remove-UserGroup -Id $Group.id
@@ -50,7 +50,7 @@ Delete a user group (using pipeline)
             Use-CallerPreference -Cmdlet $PSCmdlet -SessionState $ExecutionContext.SessionState
         }
 
-        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "userGroups delete"
+        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "usergroups delete"
         $ClientOptions = Get-ClientOutputOption $PSBoundParameters
         $TypeOptions = @{
             Type = ""
@@ -64,13 +64,13 @@ Delete a user group (using pipeline)
         if ($ClientOptions.ConvertToPS) {
             $Id `
             | Group-ClientRequests `
-            | c8y userGroups delete $c8yargs `
+            | c8y usergroups delete $c8yargs `
             | ConvertFrom-ClientOutput @TypeOptions
         }
         else {
             $Id `
             | Group-ClientRequests `
-            | c8y userGroups delete $c8yargs
+            | c8y usergroups delete $c8yargs
         }
         
     }

@@ -8,7 +8,7 @@ Get tenant option
 Get an existing tenant option
 
 .LINK
-c8y tenantOptions get
+c8y tenantoptions get
 
 .EXAMPLE
 PS> Get-TenantOption -Category "c8y_cli_tests" -Key "$option2"
@@ -45,7 +45,7 @@ Get a tenant option
             Use-CallerPreference -Cmdlet $PSCmdlet -SessionState $ExecutionContext.SessionState
         }
 
-        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "tenantOptions get"
+        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "tenantoptions get"
         $ClientOptions = Get-ClientOutputOption $PSBoundParameters
         $TypeOptions = @{
             Type = "application/vnd.com.nsn.cumulocity.option+json"
@@ -59,13 +59,13 @@ Get a tenant option
         if ($ClientOptions.ConvertToPS) {
             $Key `
             | Group-ClientRequests `
-            | c8y tenantOptions get $c8yargs `
+            | c8y tenantoptions get $c8yargs `
             | ConvertFrom-ClientOutput @TypeOptions
         }
         else {
             $Key `
             | Group-ClientRequests `
-            | c8y tenantOptions get $c8yargs
+            | c8y tenantoptions get $c8yargs
         }
         
     }

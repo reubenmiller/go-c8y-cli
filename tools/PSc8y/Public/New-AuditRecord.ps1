@@ -8,7 +8,7 @@ Create audit record
 Create a new audit record for a given action
 
 .LINK
-c8y auditRecords create
+c8y auditrecords create
 
 .EXAMPLE
 PS> New-AuditRecord -Type "ManagedObject" -Time "0s" -Text "Managed Object updated: my_Prop: value" -Source $Device.id -Activity "Managed Object updated" -Severity "information"
@@ -76,7 +76,7 @@ Create an audit record for a custom managed object update
             Use-CallerPreference -Cmdlet $PSCmdlet -SessionState $ExecutionContext.SessionState
         }
 
-        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "auditRecords create"
+        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "auditrecords create"
         $ClientOptions = Get-ClientOutputOption $PSBoundParameters
         $TypeOptions = @{
             Type = "application/vnd.com.nsn.cumulocity.auditRecord+json"
@@ -90,13 +90,13 @@ Create an audit record for a custom managed object update
         if ($ClientOptions.ConvertToPS) {
             $Source `
             | Group-ClientRequests `
-            | c8y auditRecords create $c8yargs `
+            | c8y auditrecords create $c8yargs `
             | ConvertFrom-ClientOutput @TypeOptions
         }
         else {
             $Source `
             | Group-ClientRequests `
-            | c8y auditRecords create $c8yargs
+            | c8y auditrecords create $c8yargs
         }
         
     }

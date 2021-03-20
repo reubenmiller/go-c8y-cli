@@ -8,7 +8,7 @@ Delete user from group
 Delete an existing user from a user group
 
 .LINK
-c8y userReferences deleteUserFromGroup
+c8y userreferences deleteUserFromGroup
 
 .EXAMPLE
 PS> Remove-UserFromGroup -Group $Group.id -User $User.id
@@ -50,7 +50,7 @@ Add a user to a user group
             Use-CallerPreference -Cmdlet $PSCmdlet -SessionState $ExecutionContext.SessionState
         }
 
-        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "userReferences deleteUserFromGroup"
+        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "userreferences deleteUserFromGroup"
         $ClientOptions = Get-ClientOutputOption $PSBoundParameters
         $TypeOptions = @{
             Type = ""
@@ -64,13 +64,13 @@ Add a user to a user group
         if ($ClientOptions.ConvertToPS) {
             $User `
             | Group-ClientRequests `
-            | c8y userReferences deleteUserFromGroup $c8yargs `
+            | c8y userreferences deleteUserFromGroup $c8yargs `
             | ConvertFrom-ClientOutput @TypeOptions
         }
         else {
             $User `
             | Group-ClientRequests `
-            | c8y userReferences deleteUserFromGroup $c8yargs
+            | c8y userreferences deleteUserFromGroup $c8yargs
         }
         
     }

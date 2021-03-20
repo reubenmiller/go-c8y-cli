@@ -8,7 +8,7 @@ Add role to user group
 Add a role to an existing user group
 
 .LINK
-c8y userRoles addRoleToGroup
+c8y userroles addRoleToGroup
 
 .EXAMPLE
 PS> Add-RoleToGroup -Group "${NamePattern}*" -Role "*ALARM_*"
@@ -55,7 +55,7 @@ Add a role to a group using wildcards (using pipeline)
             Use-CallerPreference -Cmdlet $PSCmdlet -SessionState $ExecutionContext.SessionState
         }
 
-        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "userRoles addRoleToGroup"
+        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "userroles addRoleToGroup"
         $ClientOptions = Get-ClientOutputOption $PSBoundParameters
         $TypeOptions = @{
             Type = "application/vnd.com.nsn.cumulocity.roleReference+json"
@@ -69,13 +69,13 @@ Add a role to a group using wildcards (using pipeline)
         if ($ClientOptions.ConvertToPS) {
             $Role `
             | Group-ClientRequests `
-            | c8y userRoles addRoleToGroup $c8yargs `
+            | c8y userroles addRoleToGroup $c8yargs `
             | ConvertFrom-ClientOutput @TypeOptions
         }
         else {
             $Role `
             | Group-ClientRequests `
-            | c8y userRoles addRoleToGroup $c8yargs
+            | c8y userroles addRoleToGroup $c8yargs
         }
         
     }

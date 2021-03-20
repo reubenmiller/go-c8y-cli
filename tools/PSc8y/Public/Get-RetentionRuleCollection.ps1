@@ -9,7 +9,7 @@ Get a collection of retention rules configured in the current tenant
 
 
 .LINK
-c8y retentionRules list
+c8y retentionrules list
 
 .EXAMPLE
 PS> Get-RetentionRuleCollection
@@ -36,7 +36,7 @@ Get a list of retention rules
             Use-CallerPreference -Cmdlet $PSCmdlet -SessionState $ExecutionContext.SessionState
         }
 
-        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "retentionRules list"
+        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "retentionrules list"
         $ClientOptions = Get-ClientOutputOption $PSBoundParameters
         $TypeOptions = @{
             Type = "application/vnd.com.nsn.cumulocity.retentionRuleCollection+json"
@@ -48,11 +48,11 @@ Get a list of retention rules
     Process {
 
         if ($ClientOptions.ConvertToPS) {
-            c8y retentionRules list $c8yargs `
+            c8y retentionrules list $c8yargs `
             | ConvertFrom-ClientOutput @TypeOptions
         }
         else {
-            c8y retentionRules list $c8yargs
+            c8y retentionrules list $c8yargs
         }
     }
 

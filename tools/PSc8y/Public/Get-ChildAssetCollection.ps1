@@ -8,7 +8,7 @@ Get child asset collection
 Get a collection of managedObjects child references
 
 .LINK
-c8y inventoryReferences listChildAssets
+c8y inventoryreferences listChildAssets
 
 .EXAMPLE
 PS> Get-ChildAssetCollection -Group $Group.id
@@ -49,7 +49,7 @@ Get a list of the child assets of an existing group
             Use-CallerPreference -Cmdlet $PSCmdlet -SessionState $ExecutionContext.SessionState
         }
 
-        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "inventoryReferences listChildAssets"
+        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "inventoryreferences listChildAssets"
         $ClientOptions = Get-ClientOutputOption $PSBoundParameters
         $TypeOptions = @{
             Type = "application/vnd.com.nsn.cumulocity.managedObjectReferenceCollection+json"
@@ -63,13 +63,13 @@ Get a list of the child assets of an existing group
         if ($ClientOptions.ConvertToPS) {
             $Group `
             | Group-ClientRequests `
-            | c8y inventoryReferences listChildAssets $c8yargs `
+            | c8y inventoryreferences listChildAssets $c8yargs `
             | ConvertFrom-ClientOutput @TypeOptions
         }
         else {
             $Group `
             | Group-ClientRequests `
-            | c8y inventoryReferences listChildAssets $c8yargs
+            | c8y inventoryreferences listChildAssets $c8yargs
         }
         
     }

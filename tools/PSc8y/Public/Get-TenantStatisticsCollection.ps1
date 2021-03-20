@@ -8,7 +8,7 @@ Get tenant usage statistics
 Get collection of tenant usage statistics
 
 .LINK
-c8y tenantStatistics list
+c8y tenantstatistics list
 
 .EXAMPLE
 PS> Get-TenantStatisticsCollection
@@ -53,7 +53,7 @@ Get tenant statistics collection for the day before yesterday
             Use-CallerPreference -Cmdlet $PSCmdlet -SessionState $ExecutionContext.SessionState
         }
 
-        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "tenantStatistics list"
+        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "tenantstatistics list"
         $ClientOptions = Get-ClientOutputOption $PSBoundParameters
         $TypeOptions = @{
             Type = "application/vnd.com.nsn.cumulocity.tenantUsageStatisticsCollection+json"
@@ -65,11 +65,11 @@ Get tenant statistics collection for the day before yesterday
     Process {
 
         if ($ClientOptions.ConvertToPS) {
-            c8y tenantStatistics list $c8yargs `
+            c8y tenantstatistics list $c8yargs `
             | ConvertFrom-ClientOutput @TypeOptions
         }
         else {
-            c8y tenantStatistics list $c8yargs
+            c8y tenantstatistics list $c8yargs
         }
     }
 

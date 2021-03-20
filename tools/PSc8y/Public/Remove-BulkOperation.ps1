@@ -8,7 +8,7 @@ Delete bulk operation
 Delete bulk operation/s. Only bulk operations that are in ACTIVE or IN_PROGRESS can be deleted
 
 .LINK
-c8y bulkOperations delete
+c8y bulkoperations delete
 
 .EXAMPLE
 PS> Remove-BulkOperation -Id $BulkOp.id
@@ -40,7 +40,7 @@ Remove bulk operation by id
             Use-CallerPreference -Cmdlet $PSCmdlet -SessionState $ExecutionContext.SessionState
         }
 
-        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "bulkOperations delete"
+        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "bulkoperations delete"
         $ClientOptions = Get-ClientOutputOption $PSBoundParameters
         $TypeOptions = @{
             Type = ""
@@ -54,13 +54,13 @@ Remove bulk operation by id
         if ($ClientOptions.ConvertToPS) {
             $Id `
             | Group-ClientRequests `
-            | c8y bulkOperations delete $c8yargs `
+            | c8y bulkoperations delete $c8yargs `
             | ConvertFrom-ClientOutput @TypeOptions
         }
         else {
             $Id `
             | Group-ClientRequests `
-            | c8y bulkOperations delete $c8yargs
+            | c8y bulkoperations delete $c8yargs
         }
         
     }

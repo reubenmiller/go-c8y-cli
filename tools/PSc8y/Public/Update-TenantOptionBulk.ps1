@@ -8,7 +8,7 @@ Update multiple tenant options
 Update multiple tenant options in provided category
 
 .LINK
-c8y tenantOptions updateBulk
+c8y tenantoptions updateBulk
 
 .EXAMPLE
 PS> Update-TenantOptionBulk -Category "c8y_cli_tests" -Data @{ $option5 = 0; $option6 = 1 }
@@ -40,7 +40,7 @@ Update multiple tenant options
             Use-CallerPreference -Cmdlet $PSCmdlet -SessionState $ExecutionContext.SessionState
         }
 
-        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "tenantOptions updateBulk"
+        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "tenantoptions updateBulk"
         $ClientOptions = Get-ClientOutputOption $PSBoundParameters
         $TypeOptions = @{
             Type = "application/vnd.com.nsn.cumulocity.option+json"
@@ -54,13 +54,13 @@ Update multiple tenant options
         if ($ClientOptions.ConvertToPS) {
             $Category `
             | Group-ClientRequests `
-            | c8y tenantOptions updateBulk $c8yargs `
+            | c8y tenantoptions updateBulk $c8yargs `
             | ConvertFrom-ClientOutput @TypeOptions
         }
         else {
             $Category `
             | Group-ClientRequests `
-            | c8y tenantOptions updateBulk $c8yargs
+            | c8y tenantoptions updateBulk $c8yargs
         }
         
     }

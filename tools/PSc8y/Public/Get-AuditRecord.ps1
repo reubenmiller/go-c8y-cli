@@ -8,7 +8,7 @@ Get audit record
 Get an audit record
 
 .LINK
-c8y auditRecords get
+c8y auditrecords get
 
 .EXAMPLE
 PS> Get-AuditRecord -Id $Record.id
@@ -40,7 +40,7 @@ Get an audit record by id
             Use-CallerPreference -Cmdlet $PSCmdlet -SessionState $ExecutionContext.SessionState
         }
 
-        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "auditRecords get"
+        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "auditrecords get"
         $ClientOptions = Get-ClientOutputOption $PSBoundParameters
         $TypeOptions = @{
             Type = "application/vnd.com.nsn.cumulocity.auditRecord+json"
@@ -54,13 +54,13 @@ Get an audit record by id
         if ($ClientOptions.ConvertToPS) {
             $Id `
             | Group-ClientRequests `
-            | c8y auditRecords get $c8yargs `
+            | c8y auditrecords get $c8yargs `
             | ConvertFrom-ClientOutput @TypeOptions
         }
         else {
             $Id `
             | Group-ClientRequests `
-            | c8y auditRecords get $c8yargs
+            | c8y auditrecords get $c8yargs
         }
         
     }

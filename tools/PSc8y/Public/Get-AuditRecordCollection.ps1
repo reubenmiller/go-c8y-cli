@@ -9,7 +9,7 @@ Audit records contain information about modifications to other Cumulocity entiti
 
 
 .LINK
-c8y auditRecords list
+c8y auditrecords list
 
 .EXAMPLE
 PS> Get-AuditRecordCollection -PageSize 100
@@ -80,7 +80,7 @@ Get a list of audit records related to an operation
             Use-CallerPreference -Cmdlet $PSCmdlet -SessionState $ExecutionContext.SessionState
         }
 
-        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "auditRecords list"
+        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "auditrecords list"
         $ClientOptions = Get-ClientOutputOption $PSBoundParameters
         $TypeOptions = @{
             Type = "application/vnd.com.nsn.cumulocity.auditRecordCollection+json"
@@ -94,13 +94,13 @@ Get a list of audit records related to an operation
         if ($ClientOptions.ConvertToPS) {
             $Source `
             | Group-ClientRequests `
-            | c8y auditRecords list $c8yargs `
+            | c8y auditrecords list $c8yargs `
             | ConvertFrom-ClientOutput @TypeOptions
         }
         else {
             $Source `
             | Group-ClientRequests `
-            | c8y auditRecords list $c8yargs
+            | c8y auditrecords list $c8yargs
         }
         
     }

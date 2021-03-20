@@ -8,7 +8,7 @@ Approve device request
 Approve a new device request. Note: a device can only be approved if the platform has received a request for device credentials.
 
 .LINK
-c8y deviceCredentials approveDeviceRequest
+c8y devicecredentials approveDeviceRequest
 
 .EXAMPLE
 PS> Approve-DeviceRequest -Id $DeviceRequest.id
@@ -46,7 +46,7 @@ Approve a new device request
             Use-CallerPreference -Cmdlet $PSCmdlet -SessionState $ExecutionContext.SessionState
         }
 
-        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "deviceCredentials approveDeviceRequest"
+        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "devicecredentials approveDeviceRequest"
         $ClientOptions = Get-ClientOutputOption $PSBoundParameters
         $TypeOptions = @{
             Type = "application/vnd.com.nsn.cumulocity.newDeviceRequest+json"
@@ -60,13 +60,13 @@ Approve a new device request
         if ($ClientOptions.ConvertToPS) {
             $Id `
             | Group-ClientRequests `
-            | c8y deviceCredentials approveDeviceRequest $c8yargs `
+            | c8y devicecredentials approveDeviceRequest $c8yargs `
             | ConvertFrom-ClientOutput @TypeOptions
         }
         else {
             $Id `
             | Group-ClientRequests `
-            | c8y deviceCredentials approveDeviceRequest $c8yargs
+            | c8y devicecredentials approveDeviceRequest $c8yargs
         }
         
     }
