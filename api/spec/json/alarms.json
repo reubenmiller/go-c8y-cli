@@ -170,7 +170,7 @@
         {
           "name": "device",
           "type": "[]device",
-          "required": true,
+          "required": false,
           "pipeline": true,
           "property": "source.id",
           "description": "The ManagedObject that the alarm originated from"
@@ -226,7 +226,8 @@
         "type",
         "text",
         "time",
-        "severity"
+        "severity",
+        "source.id"
       ]
     },
     {

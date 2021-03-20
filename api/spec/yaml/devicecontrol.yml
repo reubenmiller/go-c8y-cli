@@ -147,7 +147,7 @@ endpoints:
       - name: device
         type: '[]device'
         property: deviceId
-        required: true
+        required: false
         pipeline: true
         description: Identifies the target device on which this operation should be performed.
 
@@ -159,6 +159,8 @@ endpoints:
       - name: data
         type: json
         description: Additional properties describing the operation which will be performed on the device.
+    bodyRequiredKeys:
+      - deviceId
 
   - name: updateOperation
     description: Update operation

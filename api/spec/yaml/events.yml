@@ -183,7 +183,7 @@ endpoints:
     body:
       - name: device
         type: '[]device'
-        required: true
+        required: false
         pipeline: true
         property: source.id
         description: The ManagedObject which is the source of this event.
@@ -212,6 +212,7 @@ endpoints:
       - "type"
       - "text"
       - "time"
+      - "source.id"
 
   - name: updateEvent
     method: PUT

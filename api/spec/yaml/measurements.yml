@@ -262,7 +262,7 @@ endpoints:
       - name: device
         type: '[]device'
         pipeline: true
-        required: true
+        required: false
         property: source.id
         description: The ManagedObject which is the source of this measurement.
 
@@ -284,6 +284,7 @@ endpoints:
     bodyRequiredKeys:
       - "type"
       - "time"
+      - "source.id"
 
   - name: deleteMeasurement
     description: Delete measurement

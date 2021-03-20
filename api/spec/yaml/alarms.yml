@@ -120,7 +120,7 @@ endpoints:
     body:
       - name: device
         type: '[]device'
-        required: true
+        required: false
         pipeline: true
         property: source.id
         description: The ManagedObject that the alarm originated from
@@ -161,6 +161,7 @@ endpoints:
       - "text"
       - "time"
       - "severity"
+      - "source.id"
 
   - name: updateAlarmCollection
     method: PUT

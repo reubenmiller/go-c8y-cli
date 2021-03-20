@@ -132,7 +132,7 @@ endpoints:
       - name: group
         type: '[]devicegroup'
         property: groupId
-        required: true
+        required: false
         pipeline: true
         description: Identifies the target group on which this operation should be performed.
 
