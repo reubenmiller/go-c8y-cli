@@ -692,8 +692,12 @@ func (r *RequestHandler) ProcessResponse(resp *c8y.Response, respError error, co
 					case config.ViewsAll:
 						props, err := r.DataView.GetView(inputData, resp.Header.Get("Content-Type"))
 
-						if err != nil {
-							r.Logger.Warnf("Failed to detect view. defaulting to '**'. %s", err)
+						if err != nil || len(props) == 0 {
+							if err != nil {
+								r.Logger.Warnf("Failed to detect view. defaulting to '**'. %s", err)
+							} else {
+								r.Logger.Warn("Failed to detect view. defaulting to '**'")
+							}
 							commonOptions.Filters.Pluck = []string{"**"}
 						} else {
 							r.Logger.Infof("Detected view: %s", strings.Join(props, ", "))
