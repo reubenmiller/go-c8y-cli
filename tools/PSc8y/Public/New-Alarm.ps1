@@ -27,9 +27,8 @@ Create a new alarm for device (using pipeline)
     [Alias()]
     [OutputType([object])]
     Param(
-        # The ManagedObject that the alarm originated from (required)
-        [Parameter(Mandatory = $true,
-                   ValueFromPipeline=$true,
+        # The ManagedObject that the alarm originated from
+        [Parameter(ValueFromPipeline=$true,
                    ValueFromPipelineByPropertyName=$true)]
         [object[]]
         $Device,

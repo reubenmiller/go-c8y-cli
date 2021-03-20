@@ -27,9 +27,8 @@ Create operation for a device (using pipeline)
     [Alias()]
     [OutputType([object])]
     Param(
-        # Identifies the target device on which this operation should be performed. (required)
-        [Parameter(Mandatory = $true,
-                   ValueFromPipeline=$true,
+        # Identifies the target device on which this operation should be performed.
+        [Parameter(ValueFromPipeline=$true,
                    ValueFromPipelineByPropertyName=$true)]
         [object[]]
         $Device,

@@ -22,9 +22,8 @@ Create measurement
     [Alias()]
     [OutputType([object])]
     Param(
-        # The ManagedObject which is the source of this measurement. (required)
-        [Parameter(Mandatory = $true,
-                   ValueFromPipeline=$true,
+        # The ManagedObject which is the source of this measurement.
+        [Parameter(ValueFromPipeline=$true,
                    ValueFromPipelineByPropertyName=$true)]
         [object[]]
         $Device,

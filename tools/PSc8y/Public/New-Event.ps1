@@ -27,9 +27,8 @@ Create a new event for a device (using pipeline)
     [Alias()]
     [OutputType([object])]
     Param(
-        # The ManagedObject which is the source of this event. (required)
-        [Parameter(Mandatory = $true,
-                   ValueFromPipeline=$true,
+        # The ManagedObject which is the source of this event.
+        [Parameter(ValueFromPipeline=$true,
                    ValueFromPipelineByPropertyName=$true)]
         [object[]]
         $Device,

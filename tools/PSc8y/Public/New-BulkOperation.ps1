@@ -27,9 +27,8 @@ Create bulk operation for a group (using pipeline)
     [Alias()]
     [OutputType([object])]
     Param(
-        # Identifies the target group on which this operation should be performed. (required)
-        [Parameter(Mandatory = $true,
-                   ValueFromPipeline=$true,
+        # Identifies the target group on which this operation should be performed.
+        [Parameter(ValueFromPipeline=$true,
                    ValueFromPipelineByPropertyName=$true)]
         [object[]]
         $Group,
