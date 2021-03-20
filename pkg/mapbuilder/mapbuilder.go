@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"io"
 	"log"
 	"math/rand"
 	"os"
@@ -14,6 +15,7 @@ import (
 
 	"github.com/google/go-jsonnet"
 	"github.com/reubenmiller/go-c8y-cli/pkg/iterator"
+	"github.com/reubenmiller/go-c8y-cli/pkg/logger"
 	"github.com/sethvargo/go-password/password"
 	"github.com/tidwall/gjson"
 )
@@ -23,6 +25,12 @@ const (
 	Separator              = "."
 	timeFormatRFC3339Micro = "2006-01-02T15:04:05.999Z07:00"
 )
+
+var Logger *logger.Logger
+
+func init() {
+	Logger = logger.NewDummyLogger("mapbuilder")
+}
 
 func evaluateJsonnet(imports string, snippets ...string) (string, error) {
 	// Create a JSonnet VM
@@ -119,10 +127,16 @@ func NewMapBuilderFromJSON(data string) (*MapBuilder, error) {
 	return NewMapBuilderWithInit(body), nil
 }
 
+type IteratorReference struct {
+	Path  string
+	Value iterator.Iterator
+}
+
 // MapBuilder creates body builder
 type MapBuilder struct {
 	mu                    sync.Mutex
 	body                  map[string]interface{}
+	bodyIterators         []IteratorReference
 	file                  string
 	TemplateIterator      iterator.Iterator
 	TemplateIteratorNames []string
@@ -280,9 +294,14 @@ func (b *MapBuilder) getTemplateVariablesJsonnet(existingJSON []byte, input []by
 	// add external input to input.value
 	externalInput := "{}"
 	input = bytes.TrimSpace(input)
-	if len(input) > 0 && bytes.HasPrefix(input, []byte("{")) && bytes.HasSuffix(input, []byte("}")) {
-		externalInput = "{value: " + string(input) + "}"
+	if len(input) > 0 {
+		if bytes.HasPrefix(input, []byte("{")) && bytes.HasSuffix(input, []byte("}")) {
+			externalInput = "{value: " + string(input) + "}"
+		} else {
+			externalInput = fmt.Sprintf("{value: \"%s\" }", input)
+		}
 	}
+	Logger.Debugf("externalInput: %s", externalInput)
 
 	inputHelper := fmt.Sprintf(`local input = {index: %d} + %s + %s;`,
 		indexInt,
@@ -328,7 +347,7 @@ func (b *MapBuilder) GetMap() map[string]interface{} {
 func (b *MapBuilder) GetFileContents() *os.File {
 	file, err := os.Open(b.file)
 	if err != nil {
-		log.Printf("failed to open file. %s", err)
+		Logger.Errorf("failed to open file. %s", err)
 		return nil
 	}
 	return file
@@ -402,11 +421,56 @@ func (b *MapBuilder) MarshalJSON() (body []byte, err error) {
 		return
 	}
 
-	// evaluate any iterators
-	body, err = json.Marshal(b.body)
+	// TODO: deep clone
+	// clone body to eliminate side-effects
+	bodyClone := NewInitializedMapBuilder()
+	for k, v := range b.body {
+		bodyClone.body[k] = v
+	}
+
+	for _, it := range b.bodyIterators {
+		value, input, itErr := it.Value.GetNext()
+
+		Logger.Debugf("body iterator value: %s", value)
+
+		if itErr != nil {
+			if itErr == io.EOF {
+				err = itErr
+				return
+			}
+		} else {
+			switch extInput := input.(type) {
+			case []byte:
+				if bytes.HasPrefix(extInput, []byte("{")) {
+					b.externalInput = extInput
+				}
+			}
+			Logger.Debugf("setting externalInput: %s", b.externalInput)
+
+			if _, ok := bodyClone.body[it.Path]; !ok && len(value) > 0 {
+				tempValue := make(map[string]interface{})
+				var bErr error
+				// Only set non-object values. Complex objects can be referred to via the input.value template variable
+				if jsonErr := json.Unmarshal(value, &tempValue); jsonErr != nil {
+					Logger.Debugf("Setting value: key=%s, value=%s", it.Path, value)
+					bErr = bodyClone.Set(it.Path, fmt.Sprintf("%s", value))
+				}
+
+				if bErr != nil {
+					break
+				}
+			}
+		}
+	}
+
+	Logger.Debugf("Body (pre marshalling). %v", bodyClone)
+
+	body, err = json.Marshal(bodyClone.body)
 	if err != nil {
 		return
 	}
+
+	Logger.Debugf("Body (pre templating)\nbody:\t%s\n\texternalInput:\t%s", body, b.externalInput)
 
 	if b.autoApplyTemplate && len(b.templates) > 0 {
 		body, err = b.ApplyTemplates(body, b.externalInput, false)
@@ -427,6 +491,14 @@ func (b *MapBuilder) Set(path string, value interface{}) error {
 	if b.body == nil {
 		b.body = make(map[string]interface{})
 	}
+
+	// store iterators seprately so we can itercept the raw value which is otherwise lost during json marshalling
+	if it, ok := value.(iterator.Iterator); ok {
+		b.bodyIterators = append(b.bodyIterators, IteratorReference{path, it})
+		Logger.Debugf("DEBUG: Found iterator. path=%s", path)
+		return nil
+	}
+
 	keys := strings.Split(path, Separator)
 
 	currentMap := b.body
