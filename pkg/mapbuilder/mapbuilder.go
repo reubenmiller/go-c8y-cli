@@ -18,6 +18,7 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/pkg/logger"
 	"github.com/sethvargo/go-password/password"
 	"github.com/tidwall/gjson"
+	"go.uber.org/zap/zapcore"
 )
 
 const (
@@ -29,7 +30,11 @@ const (
 var Logger *logger.Logger
 
 func init() {
-	Logger = logger.NewDummyLogger("mapbuilder")
+	Logger = logger.NewLogger("mapbuilder", logger.Options{
+		Level:  zapcore.DebugLevel,
+		Color:  true,
+		Silent: true,
+	})
 }
 
 func evaluateJsonnet(imports string, snippets ...string) (string, error) {
@@ -431,7 +436,7 @@ func (b *MapBuilder) MarshalJSON() (body []byte, err error) {
 	for _, it := range b.bodyIterators {
 		value, input, itErr := it.Value.GetNext()
 
-		Logger.Debugf("body iterator value: %s", value)
+		Logger.Debugf("body iterator. path=%s, value=%s", it.Path, value)
 
 		if itErr != nil {
 			if itErr == io.EOF {
