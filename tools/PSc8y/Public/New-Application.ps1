@@ -22,18 +22,19 @@ Create a new hosted application
     [Alias()]
     [OutputType([object])]
     Param(
-        # Name of application (required)
-        [Parameter(Mandatory = $true)]
-        [string]
+        # Name of application
+        [Parameter(ValueFromPipeline=$true,
+                   ValueFromPipelineByPropertyName=$true)]
+        [object[]]
         $Name,
 
-        # Shared secret of application (required)
-        [Parameter(Mandatory = $true)]
+        # Shared secret of application
+        [Parameter()]
         [string]
         $Key,
 
-        # Type of application. Possible values are EXTERNAL, HOSTED, MICROSERVICE (required)
-        [Parameter(Mandatory = $true)]
+        # Type of application. Possible values are EXTERNAL, HOSTED, MICROSERVICE
+        [Parameter()]
         [ValidateSet('EXTERNAL','HOSTED','MICROSERVICE')]
         [string]
         $Type,
@@ -92,12 +93,17 @@ Create a new hosted application
     Process {
 
         if ($ClientOptions.ConvertToPS) {
-            c8y applications create $c8yargs `
+            $Name `
+            | Group-ClientRequests `
+            | c8y applications create $c8yargs `
             | ConvertFrom-ClientOutput @TypeOptions
         }
         else {
-            c8y applications create $c8yargs
+            $Name `
+            | Group-ClientRequests `
+            | c8y applications create $c8yargs
         }
+        
     }
 
     End {}
