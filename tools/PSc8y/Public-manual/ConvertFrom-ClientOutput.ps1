@@ -29,9 +29,13 @@ Function ConvertFrom-ClientOutput {
         $Raw = $BoundParameters["WithTotalPages"] `
             -or $BoundParameters["Raw"]
         
-        $AsJSON = $BoundParameters["AsJSON"] `
+        $UseNativeOutput = $BoundParameters["AsJSON"] `
+            -or $BoundParameters["Output"] -eq "csv" `
+            -or $BoundParameters["Output"] -eq "csvheader" `
+            -or $BoundParameters["Output"] -eq "table" `
             -or $BoundParameters["Pretty"] `
             -or $BoundParameters["Compress"] `
+            -or $BoundParameters["Dry"] `
             -or $WhatIfPreference
 
         $SelectedType = if ($ItemType) { $ItemType } else { $Type }
@@ -45,7 +49,7 @@ Function ConvertFrom-ClientOutput {
 
     Process {
         foreach ($item in $InputObject) {
-            if ($AsJSON) {
+            if ($UseNativeOutput) {
                 $item
             }
             else {
