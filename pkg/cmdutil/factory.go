@@ -1,6 +1,8 @@
 package cmdutil
 
 import (
+	"strings"
+
 	"github.com/reubenmiller/go-c8y-cli/pkg/activitylogger"
 	"github.com/reubenmiller/go-c8y-cli/pkg/config"
 	"github.com/reubenmiller/go-c8y-cli/pkg/console"
@@ -14,6 +16,7 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/pkg/worker"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
+	"github.com/tidwall/gjson"
 )
 
 type Factory struct {
@@ -140,6 +143,47 @@ func (f *Factory) RunWithWorkers(client *c8y.Client, cmd *cobra.Command, req *c8
 	return w.ProcessRequestAndResponse(cmd, req, inputIterators)
 }
 
+// GetViewProperties Look up the view properties to display
+func (f *Factory) GetViewProperties(cfg *config.Config, cmd *cobra.Command, output []byte) ([]string, error) {
+	dataview, err := f.DataView()
+	if err != nil {
+		return nil, err
+	}
+	log, err := f.Logger()
+	if err != nil {
+		return nil, err
+	}
+
+	view := cfg.ViewOption()
+	showRaw := cfg.RawOutput() || cfg.WithTotalPages()
+
+	if showRaw {
+		return []string{"**"}, nil
+	}
+	viewProperties := []string{}
+	switch strings.ToLower(view) {
+	case config.ViewsNone:
+		// dont apply a view
+		return []string{"**"}, nil
+	case config.ViewsAll:
+		jsonResponse := gjson.ParseBytes(output)
+		props, err := dataview.GetView(&jsonResponse, "")
+
+		if err != nil || len(props) == 0 {
+			if err != nil {
+				log.Warnf("Failed to detect view. defaulting to '**'. %s", err)
+			} else {
+				log.Warn("Failed to detect view. defaulting to '**'")
+			}
+			viewProperties = append(viewProperties, "**")
+		} else {
+			log.Infof("Detected view: %s", strings.Join(props, ", "))
+			viewProperties = append(viewProperties, props...)
+		}
+	}
+	return viewProperties, nil
+}
+
 // WriteJSONToConsole writes given json output to the console supporting the common options of select, output etc.
 func (f *Factory) WriteJSONToConsole(cfg *config.Config, cmd *cobra.Command, property string, output []byte) error {
 	consol, err := f.Console()
@@ -149,6 +193,14 @@ func (f *Factory) WriteJSONToConsole(cfg *config.Config, cmd *cobra.Command, pro
 	commonOptions, err := cfg.GetOutputCommonOptions(cmd)
 	if err != nil {
 		return err
+	}
+
+	if len(commonOptions.Filters.Pluck) == 0 {
+		// don't fail if view properties fail
+		props, _ := f.GetViewProperties(cfg, cmd, output)
+		if len(props) > 0 {
+			commonOptions.Filters.Pluck = props
+		}
 	}
 	output = commonOptions.Filters.Apply(string(output), property, false, consol.SetHeaderFromInput)
 
