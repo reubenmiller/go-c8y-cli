@@ -27,6 +27,33 @@ func (e *ParameterError) Error() string {
 // or from the pipeline
 // It will automatically try to get the value from a String or a StringSlice flag
 func NewFlagWithPipeIterator(cmd *cobra.Command, pipeOpt *PipelineOptions, supportsPipeline bool) (iterator.Iterator, error) {
+	if supportsPipeline {
+		sourceProperties := make([]string, 0)
+		if len(pipeOpt.Aliases) > 0 {
+			sourceProperties = append(sourceProperties, pipeOpt.Aliases...)
+		}
+		if pipeOpt.Property != "" {
+			sourceProperties = append(sourceProperties, pipeOpt.Property)
+		}
+		iterOpts := &iterator.PipeOptions{
+			Properties: sourceProperties,
+			Validator:  nil,
+			AllowEmpty: !pipeOpt.Required,
+		}
+		iter, err := iterator.NewJSONPipeIterator(cmd.InOrStdin(), iterOpts, func(line []byte) bool {
+			line = bytes.TrimSpace(line)
+			if !bytes.HasPrefix(line, []byte("{")) && !bytes.HasPrefix(line, []byte("[")) {
+				return true
+			}
+			// only allow json objects
+			isJSONObject := jsonUtilities.IsJSONObject(line)
+			return isJSONObject
+		})
+		if err == nil {
+			return iter, nil
+		}
+	}
+
 	if cmd.Flags().Changed(pipeOpt.Name) {
 
 		items, err := cmd.Flags().GetStringSlice(pipeOpt.Name)
@@ -62,35 +89,6 @@ func NewFlagWithPipeIterator(cmd *cobra.Command, pipeOpt *PipelineOptions, suppo
 			// return array of results
 			return iterator.NewSliceIterator(items), nil
 		}
-	} else if supportsPipeline {
-		sourceProperties := make([]string, 0)
-		if len(pipeOpt.Aliases) > 0 {
-			sourceProperties = append(sourceProperties, pipeOpt.Aliases...)
-		}
-		if pipeOpt.Property != "" {
-			sourceProperties = append(sourceProperties, pipeOpt.Property)
-		}
-		iterOpts := &iterator.PipeOptions{
-			Properties: sourceProperties,
-			Validator:  nil,
-		}
-		iter, err := iterator.NewJSONPipeIterator(cmd.InOrStdin(), iterOpts, func(line []byte) bool {
-			line = bytes.TrimSpace(line)
-			if !bytes.HasPrefix(line, []byte("{")) && !bytes.HasPrefix(line, []byte("[")) {
-				return true
-			}
-			// only allow json objects
-			isJSONObject := jsonUtilities.IsJSONObject(line)
-			return isJSONObject
-		})
-		if err != nil {
-			if pipeOpt.Required {
-				return iter, err
-			}
-			// ignore error as it is not required
-			return nil, nil
-		}
-		return iter, nil
 	}
 	if pipeOpt.Required {
 		return nil, fmt.Errorf("no input detected")
