@@ -128,7 +128,6 @@ func (n *UnassignDeviceFromGroupCmd) RunE(cmd *cobra.Command, args []string) err
 		cmd,
 		body,
 		inputIterators,
-		flags.WithOverrideValue("childDevice", "reference"),
 	)
 	if err != nil {
 		return cmderrors.NewUserError(err)

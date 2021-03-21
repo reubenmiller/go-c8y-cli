@@ -133,7 +133,6 @@ func (n *UpdateCmd) RunE(cmd *cobra.Command, args []string) error {
 		cmd,
 		body,
 		inputIterators,
-		flags.WithOverrideValue("id", "id"),
 		flags.WithDataFlagValue(),
 		flags.WithStringValue("key", "key"),
 		flags.WithStringValue("availability", "availability"),

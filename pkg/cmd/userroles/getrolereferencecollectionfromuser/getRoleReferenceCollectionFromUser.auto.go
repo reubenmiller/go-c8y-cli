@@ -132,7 +132,6 @@ func (n *GetRoleReferenceCollectionFromUserCmd) RunE(cmd *cobra.Command, args []
 		cmd,
 		body,
 		inputIterators,
-		flags.WithOverrideValue("user", "user"),
 	)
 	if err != nil {
 		return cmderrors.NewUserError(err)

@@ -129,7 +129,6 @@ func (n *DeleteRoleFromGroupCmd) RunE(cmd *cobra.Command, args []string) error {
 		cmd,
 		body,
 		inputIterators,
-		flags.WithOverrideValue("role", "role"),
 	)
 	if err != nil {
 		return cmderrors.NewUserError(err)

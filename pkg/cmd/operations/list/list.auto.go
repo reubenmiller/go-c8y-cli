@@ -149,7 +149,6 @@ func (n *ListCmd) RunE(cmd *cobra.Command, args []string) error {
 		cmd,
 		body,
 		inputIterators,
-		flags.WithOverrideValue("device", "deviceId"),
 	)
 	if err != nil {
 		return cmderrors.NewUserError(err)

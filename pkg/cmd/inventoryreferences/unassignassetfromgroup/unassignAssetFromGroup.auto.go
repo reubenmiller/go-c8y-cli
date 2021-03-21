@@ -129,7 +129,6 @@ func (n *UnassignAssetFromGroupCmd) RunE(cmd *cobra.Command, args []string) erro
 		cmd,
 		body,
 		inputIterators,
-		flags.WithOverrideValue("childDevice", "reference"),
 	)
 	if err != nil {
 		return cmderrors.NewUserError(err)

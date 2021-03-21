@@ -130,7 +130,6 @@ func (n *DeleteApplicationBinaryCmd) RunE(cmd *cobra.Command, args []string) err
 		cmd,
 		body,
 		inputIterators,
-		flags.WithOverrideValue("binaryId", "binaryId"),
 	)
 	if err != nil {
 		return cmderrors.NewUserError(err)

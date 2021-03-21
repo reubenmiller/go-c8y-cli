@@ -141,7 +141,6 @@ func (n *GetSeriesCmd) RunE(cmd *cobra.Command, args []string) error {
 		cmd,
 		body,
 		inputIterators,
-		flags.WithOverrideValue("device", "source"),
 	)
 	if err != nil {
 		return cmderrors.NewUserError(err)

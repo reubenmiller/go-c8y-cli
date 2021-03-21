@@ -132,7 +132,6 @@ func (n *GetRoleReferenceCollectionFromGroupCmd) RunE(cmd *cobra.Command, args [
 		cmd,
 		body,
 		inputIterators,
-		flags.WithOverrideValue("group", "group"),
 	)
 	if err != nil {
 		return cmderrors.NewUserError(err)

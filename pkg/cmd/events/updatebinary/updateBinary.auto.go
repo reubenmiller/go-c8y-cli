@@ -128,7 +128,6 @@ func (n *UpdateBinaryCmd) RunE(cmd *cobra.Command, args []string) error {
 		cmd,
 		body,
 		inputIterators,
-		flags.WithOverrideValue("id", "id"),
 		flags.WithFilePath("file", "file", ""),
 	)
 	if err != nil {

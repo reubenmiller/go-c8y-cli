@@ -143,7 +143,6 @@ func (n *UpdateCollectionCmd) RunE(cmd *cobra.Command, args []string) error {
 		cmd,
 		body,
 		inputIterators,
-		flags.WithOverrideValue("device", "source"),
 		flags.WithDataFlagValue(),
 		flags.WithStringValue("newStatus", "status"),
 		cmdutil.WithTemplateValue(cfg),
