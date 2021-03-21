@@ -33,6 +33,8 @@
         }
         $ExampleText
     }
+    $RESTPath = $Specification.path
+    $RESTMethod = $Specification.method
 
     #
     # Arguments
@@ -100,8 +102,10 @@
                 }
             }
 
-            # Add override capability to piped arguments, so the user can still override piped data with the argument
-            [void] $RESTBodyBuilderOptions.AppendLine("flags.WithOverrideValue(`"$($iarg.Name)`", `"$PipelineVariableProperty`"),")
+            if ($RESTMethod -eq "POST") {
+                # Add override capability to piped arguments, so the user can still override piped data with the argument
+                [void] $RESTBodyBuilderOptions.AppendLine("flags.WithOverrideValue(`"$($iarg.Name)`", `"$PipelineVariableProperty`"),")
+            }
         }
         if ($iArg.validationSet) {
             $validateSetOptions = @($iArg.validationSet | ForEach-Object { "`"$_`"" }) -join ","
@@ -126,10 +130,6 @@
             $Specification.name
         ))
     }
-
-
-    $RESTPath = $Specification.path
-    $RESTMethod = $Specification.method
 
     #
     # Body
