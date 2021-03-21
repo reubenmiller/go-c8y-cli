@@ -33,6 +33,8 @@ Function ConvertFrom-ClientOutput {
             -or $BoundParameters["Output"] -eq "csv" `
             -or $BoundParameters["Output"] -eq "csvheader" `
             -or $BoundParameters["Output"] -eq "table" `
+            -or $BoundParameters["CsvFormat"] `
+            -or $BoundParameters["ExcelFormat"] `
             -or $BoundParameters["Pretty"] `
             -or $BoundParameters["Compress"] `
             -or $BoundParameters["Dry"] `
