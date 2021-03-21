@@ -4,17 +4,17 @@ InModuleScope PSc8y {
     Describe "New-ClientArgument" {
         It "Accepts an array of values" {
             $c8yargs = New-ClientArgument -Parameters @{"Ids" = @("1111", "2222")}
-            $c8yargs | Should -BeExactly @("--ids=`"1111,2222`"", "--force")
+            $c8yargs | Should -BeExactly @("--ids=`"1111,2222`"")
         }
 
         It "handles an empty array" {
             $c8yargs = New-ClientArgument -Parameters @{"Ids" = @()}
-            $c8yargs | Should -BeExactly @("--force")
+            $c8yargs | Should -BeExactly @()
         }
 
         It "handles an array with a single value" {
             $c8yargs = New-ClientArgument -Parameters @{"Ids" = @("1111")}
-            $c8yargs | Should -BeExactly @("--ids=1111", "--force")
+            $c8yargs | Should -BeExactly @("--ids=1111")
         }
 
         It "handles an array of objects picking out the id" {
@@ -22,7 +22,7 @@ InModuleScope PSc8y {
                 @{id="1111"},
                 @{id="2222"}
             )}
-            $c8yargs | Should -BeExactly @("--id=`"1111,2222`"", "--force")
+            $c8yargs | Should -BeExactly @("--id=`"1111,2222`"")
         }
 
         It "Converts hashtables to escapped json" {
@@ -30,9 +30,9 @@ InModuleScope PSc8y {
                 complex = @{"id" = 1}
             }
             $c8yargs = New-ClientArgument -Parameters:$Parameters
+            $c8yargs | Should -HaveCount 2
             $c8yargs[0] | Should -BeExactly '--complex'
             $c8yargs[1] | Should -BeExactly '{\"id\":1}'
-            $c8yargs[2] | Should -BeExactly '--force'
         }
     }
 }
