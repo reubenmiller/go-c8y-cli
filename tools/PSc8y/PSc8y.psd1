@@ -158,7 +158,6 @@ FunctionsToExport = @(
 	'Get-RoleReferenceCollectionFromGroup',
 	'Get-RoleReferenceCollectionFromUser',
 	'Get-SupportedMeasurements',
-	'Get-SupportedOperations',
 	'Get-SupportedSeries',
 	'Get-SystemOption',
 	'Get-SystemOptionCollection',

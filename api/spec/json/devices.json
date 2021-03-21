@@ -276,7 +276,7 @@
       "method": "GET",
       "path": "inventory/managedObjects/{device}/supportedMeasurements",
       "accept": "application/vnd.com.nsn.cumulocity.inventory+json",
-      "collectionProperty": "c8y_SupportedMeasurements",
+      "collectionProperty": "-",
       "alias": {
         "go": "getSupportedMeasurements",
         "powershell": "Get-SupportedMeasurements"
@@ -330,7 +330,7 @@
       "method": "GET",
       "path": "inventory/managedObjects/{device}/supportedSeries",
       "accept": "application/vnd.com.nsn.cumulocity.inventory+json",
-      "collectionProperty": "c8y_SupportedSeries",
+      "collectionProperty": "-",
       "alias": {
         "go": "getSupportedSeries",
         "powershell": "Get-SupportedSeries"
@@ -364,60 +364,6 @@
           {
             "description": "Get the supported measurement series of a device by name",
             "command": "c8y inventory getSupportedSeries --device 12345"
-          }
-        ]
-      },
-      "pathParameters": [
-        {
-          "name": "device",
-          "type": "[]device",
-          "pipeline": true,
-          "required": true,
-          "description": "Device ID"
-        }
-      ]
-    },
-    {
-      "name": "getSupportedOperations",
-      "description": "Get supported operations",
-      "descriptionLong": "Returns a list of supported operations (fragments) for a device. The supported fragments list is returned from the c8y_SupportedOperations fragment of the device managed object.\n",
-      "method": "GET",
-      "path": "inventory/managedObjects/{device}",
-      "accept": "application/vnd.com.nsn.cumulocity.inventory+json",
-      "collectionProperty": "c8y_SupportedOperations",
-      "alias": {
-        "go": "getSupportedOperations",
-        "powershell": "Get-SupportedOperations"
-      },
-      "examples": {
-        "powershell": [
-          {
-            "description": "Get the supported operations of a device by name",
-            "beforeEach": [
-              "$device = PSc8y\\New-TestDevice",
-              "$device = PSc8y\\Update-ManagedObject -Id $device.id -Data @{ c8y_SupportedOperations = @( \"c8y_Restart\", \"c8y_SoftwareList\", \"c8y_Firmware\" ) }"
-            ],
-            "command": "Get-SupportedOperations -Device $device.id",
-            "afterEach": [
-              "Remove-ManagedObject -Id $device.id"
-            ]
-          },
-          {
-            "description": "Get the supported operations of a device (using pipeline)",
-            "beforeEach": [
-              "$device = PSc8y\\New-TestDevice",
-              "$device = PSc8y\\Update-ManagedObject -Id $device.id -Data @{ c8y_SupportedOperations = @( \"c8y_Restart\", \"c8y_SoftwareList\", \"c8y_Firmware\" ) }"
-            ],
-            "command": "Get-SupportedOperations -Device $device.id",
-            "afterEach": [
-              "Remove-ManagedObject -Id $device.id"
-            ]
-          }
-        ],
-        "go": [
-          {
-            "description": "Get the supported operations of a device by name",
-            "command": "c8y inventory getSupportedOperations --device 12345"
           }
         ]
       },

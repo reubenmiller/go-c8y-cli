@@ -120,7 +120,6 @@ $CommandsWithDevice = @(
     "Get-MeasurementSeries",
     "Get-OperationCollection",
     "Get-SupportedMeasurements",
-    "Get-SupportedOperations",
     "Get-SupportedSeries",
     "Get-UserCollection",
     "New-Alarm",
