@@ -10,19 +10,23 @@ Describe -Name "Get-EventBinary" {
     }
 
     It "Download a binary related to an event should have expected contents" {
-        $Response = PSc8y\Get-EventBinary -Id $Event.id -OutputFile "./value1.output.txt"
+        $tmpfile = New-TemporaryFile
+        $Response = PSc8y\Get-EventBinary -Id $Event.id -OutputFileRaw $tmpfile
         $LASTEXITCODE | Should -Be 0
-        $Response | Should -Exist
-        $Response | Should -FileContentMatchMultiline (Get-Content -Raw -LiteralPath $TestFile)
-        Remove-Item $Response
+        $tmpfile | Should -Exist
+        (Get-Content $tmpfile -Raw) | Should -BeExactly (Get-Content -Raw -LiteralPath $TestFile)
+        $Response | Should -BeExactly (Get-Content -Raw -LiteralPath $TestFile).TrimEnd()
+        Remove-Item $tmpfile
     }
 
     It "Download a binary related to an event should have expected contents (using pipeline)" {
-        $Response = $Event | PSc8y\Get-EventBinary -OutputFile "./value2.output.txt"
+        $tmpfile = New-TemporaryFile
+        $Response = $Event | PSc8y\Get-EventBinary -OutputFileRaw $tmpfile
         $LASTEXITCODE | Should -Be 0
-        $Response | Should -Exist
-        $Response | Should -FileContentMatchMultiline (Get-Content -Raw -LiteralPath $TestFile)
-        Remove-Item $Response
+        $tmpfile | Should -Exist
+        (Get-Content $tmpfile -Raw) | Should -BeExactly (Get-Content -Raw -LiteralPath $TestFile)
+        $Response | Should -BeExactly (Get-Content -Raw -LiteralPath $TestFile).TrimEnd()
+        Remove-Item $tmpfile
     }
 
     AfterEach {
