@@ -949,7 +949,7 @@ func (c *Config) GetOutputFile() string {
 func (c *Config) GetOutputFormat() OutputFormat {
 	format := c.viper.GetString(SettingsOutputFormat)
 	outputFormat := OutputJSON.FromString(format)
-	c.Logger.Debugf("output format: %s", outputFormat.String())
+	// c.Logger.Debugf("output format: %s", outputFormat.String())
 	return outputFormat
 }
 
@@ -1019,7 +1019,7 @@ func (c *Config) GetJSONSelect() []string {
 		}
 	}
 
-	c.Logger.Debugf("json select: len=%d, values=%v", len(allitems), allitems)
+	// c.Logger.Debugf("json select: len=%d, values=%v", len(allitems), allitems)
 	return allitems
 }
 
@@ -1054,7 +1054,7 @@ func (c *Config) GetOutputCommonOptions(cmd *cobra.Command) (CommonCommandOption
 
 	if options.IncludeAll {
 		options.PageSize = c.GetIncludeAllPageSize()
-		c.Logger.Debugf("Setting pageSize to maximum value to limit number of requests. value=%d", options.PageSize)
+		// c.Logger.Debugf("Setting pageSize to maximum value to limit number of requests. value=%d", options.PageSize)
 	}
 
 	options.CurrentPage = c.GetCurrentPage()

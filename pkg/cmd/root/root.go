@@ -418,14 +418,15 @@ func (c *CmdRoot) checkSessionExists(cmd *cobra.Command, args []string) error {
 		cmdStr = cmd.Parent().Use + " " + cmdStr
 	}
 
+	// print log information
 	sessionFile := cfg.GetSessionFile()
 	if sessionFile != "" {
 		log.Infof("Loaded session: %s", config.HideSensitiveInformationIfActive(client, sessionFile))
 	}
 
 	log.Debugf("command str: %s", cmdStr)
-
 	log.Infof("command: c8y %s", utilities.GetCommandLineArgs())
+	log.Debugf("output format: %s", cfg.GetOutputFormat().String())
 
 	activityHandler.LogCommand(cmd, args, cmdStr, c.ActivityLogMessage)
 
