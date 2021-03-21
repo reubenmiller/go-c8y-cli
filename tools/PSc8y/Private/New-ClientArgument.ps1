@@ -129,7 +129,7 @@ Function New-ClientArgument {
         }
 
         if ($Parameters["Pretty"]) {
-            $null = $c8yargs.Add("--compress=false")
+            $null = $c8yargs.Add("--compact=false")
         }
 
         ,$c8yargs
