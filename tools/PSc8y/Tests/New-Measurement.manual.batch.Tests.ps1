@@ -33,8 +33,8 @@ Describe -Name "New-Measurement" {
             Data = $rawjson
             Template = "{time:time.now}"
         }
-        # using WhatIf
-        $options.WhatIf = $true
+        # using Dry
+        $options.Dry = $true
         $output = $( $Response = Get-Content $inputFile | batch | New-Measurement @options ) 2>&1
         $LASTEXITCODE | Should -Be 0
         $Response | Should -BeNullOrEmpty
@@ -42,7 +42,7 @@ Describe -Name "New-Measurement" {
         $output | Should -ContainRequest "POST /measurement/measurements" -Total 2
 
         # send request
-        $options.WhatIf = $false
+        $options.Dry = $false
         $Response = Get-Content $inputFile | batch | New-Measurement @options
         $LASTEXITCODE | Should -Be 0
         $Response | Should -Not -BeNullOrEmpty
@@ -70,7 +70,7 @@ Describe -Name "New-Measurement" {
             Template = $TemplateFile
         }
 
-        $options.WhatIf = $true
+        $options.Dry = $true
         $output = $( $Response = Get-Content $inputFile | batch | New-Measurement @options ) 2>&1
         
         $LASTEXITCODE | Should -Be 0
@@ -79,7 +79,7 @@ Describe -Name "New-Measurement" {
         $output | Should -ContainRequest "POST /measurement/measurements" -Total 2
 
         # send request
-        $options.WhatIf = $false
+        $options.Dry = $false
         $Response = Get-Content $inputFile | batch | New-Measurement @options
         $LASTEXITCODE | Should -Be 0
         $Response | Should -Not -BeNullOrEmpty

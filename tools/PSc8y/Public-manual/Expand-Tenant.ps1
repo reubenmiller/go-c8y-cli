@@ -45,7 +45,7 @@ Get all the tenant object (with app in their name). Note the Expand cmdlet won't
             {
                 Get-TenantCollection -PageSize 2000 | Where-Object {
                     $_.id -like $iTenant
-                } -WhatIf:$false
+                } -Dry:$false
             }
             else
             {

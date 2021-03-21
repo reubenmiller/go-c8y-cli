@@ -9,7 +9,7 @@ Describe -Name "Inherit-Parameters" {
         $ids = New-Object System.Collections.ArrayList
     }
 
-    It "Force and WhatIf parameters are automatically inherited to module cmdlets" {
+    It "Force and Dry parameters are automatically inherited to module cmdlets" {
         Function Test-MyCustomFunction {
             [cmdletbinding()]
             Param(
@@ -18,13 +18,13 @@ Describe -Name "Inherit-Parameters" {
             PSc8y\New-ManagedObject -Name "myname"
         }
 
-        $mo = Test-MyCustomFunction -Force -WhatIf:$false
+        $mo = Test-MyCustomFunction -Force -Dry:$false
         $null = $ids.Add($mo.id)
         $LASTEXITCODE | Should -Be 0
         $mo | Should -Not -BeNullOrEmpty
         $mo.id | Should -Match "^\d+$"
 
-        $mo = Test-MyCustomFunction -Force -WhatIf
+        $mo = Test-MyCustomFunction -Force -Dry
         $mo | Should -BeNullOrEmpty
         $LASTEXITCODE | Should -Be 0
 
@@ -85,9 +85,9 @@ Describe -Name "Inherit-Parameters" {
 
         $env:C8Y_DISABLE_INHERITANCE = $true
         $WhatIfPreference = $null
-        $mo = Test-MyCustomFunction -Force -WhatIf
+        $mo = Test-MyCustomFunction -Force -Dry
         $ids.Add($mo.id)
-        $mo | Should -Not -BeNullOrEmpty -Because "Function does not pass on WhatIf parameter"
+        $mo | Should -Not -BeNullOrEmpty -Because "Function does not pass on Dry parameter"
         $LASTEXITCODE | Should -Be 0
 
         $WhatIfPreference = $true

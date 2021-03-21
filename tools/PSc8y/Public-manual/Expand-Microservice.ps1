@@ -50,7 +50,7 @@ Get all the microservice object (with app in their name). Note the Expand cmdlet
             }
 
             if ($iApp.applicationId) {
-                PSc8y\Get-Microservice -Id $iApp.applicationId -WhatIf:$false
+                PSc8y\Get-Microservice -Id $iApp.applicationId -Dry:$false
                 continue
             }
 

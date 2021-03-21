@@ -12,7 +12,7 @@ Describe -Name "Invoke-ClientRequest" {
         $output = Invoke-ClientRequest -Uri "/alarm/alarms" -QueryParameters @{
                 pageSize = "1";
             } `
-            -WhatIf 2>&1
+            -Dry 2>&1
         $LASTEXITCODE | Should -Be 0
         $output | Should -Not -BeNullOrEmpty
         $output | Should -ContainRequest "GET /alarm/alarms?pageSize=1" -Total 1
@@ -51,13 +51,13 @@ Describe -Name "Invoke-ClientRequest" {
         $Response | Should -HaveCount 2
     }
 
-    It "should accept query parameters and support whatif" {
+    It "should accept query parameters and support Dry" {
         $options = @{
             Uri = "/alarm/alarms"
             QueryParameters = @{
                 pageSize = "1";
             }
-            WhatIf = $true
+            Dry = $true
         }
         $output = Invoke-ClientRequest @options 2>&1
         $LASTEXITCODE | Should -Be 0
@@ -187,8 +187,8 @@ Describe -Name "Invoke-ClientRequest" {
                 }
             } `
             -WithError `
-            -WhatIfFormat "json" `
-            -WhatIf
+            -DryFormat "json" `
+            -Dry
 
         $LASTEXITCODE | Should -Be 0
         $output | Should -Not -BeNullOrEmpty
@@ -203,7 +203,7 @@ Describe -Name "Invoke-ClientRequest" {
         $output = Invoke-ClientRequest `
             -Uri "/inventory/managedObjects" `
             -Method "post" `
-            -WhatIf 2>&1
+            -Dry 2>&1
 
         $LASTEXITCODE | Should -Be 0
         $output | Should -Not -BeNullOrEmpty
@@ -216,8 +216,8 @@ Describe -Name "Invoke-ClientRequest" {
             -Method "post" `
             -Data @{} `
             -WithError `
-            -WhatIfFormat "json" `
-            -WhatIf 2>&1
+            -DryFormat "json" `
+            -Dry 2>&1
 
         $LASTEXITCODE | Should -Be 0
         $output | Should -Not -BeNullOrEmpty

@@ -53,8 +53,8 @@ Describe -Name "Error handling" {
         @($VerboseMessages -like "*Sending request*") | Should -HaveCount 1
     }
 
-    It "saves whatif information to a variable" {
-        $output = New-ManagedObject -Name "My Name" -WhatIf -WhatIfFormat json 2>&1
+    It "saves Dry information to a variable" {
+        $output = New-ManagedObject -Name "My Name" -Dry -DryFormat json 2>&1
         $output | Should -Not -BeNullOrEmpty
         $request = $output | ConvertFrom-Json
         $request | Should -HaveCount 1
@@ -64,8 +64,8 @@ Describe -Name "Error handling" {
         $request.headers | Should -Not -BeNullOrEmpty
     }
 
-    It "redirects whatif information standard output" {
-        $requestInfo = New-ManagedObject -Name "My Name" -WhatIf -WhatIfFormat markdown -WithError
+    It "redirects Dry information standard output" {
+        $requestInfo = New-ManagedObject -Name "My Name" -Dry -DryFormat markdown -WithError
 
         $requestInfo | Should -Not -BeNullOrEmpty
         $requestInfo -match "What If" | Should -HaveCount 1

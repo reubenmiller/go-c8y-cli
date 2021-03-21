@@ -53,7 +53,7 @@ Create an event on the existing device "myExistingDevice"
             $iDevice = PSc8y\New-TestDevice @commonOptions
         }
         
-        # Fake device (if whatif prevented it from being created)
+        # Fake device (if Dry prevented it from being created)
         if ($Dry -and $null -eq $iDevice) {
             $iDevice = @{ id = "12345" }
         }

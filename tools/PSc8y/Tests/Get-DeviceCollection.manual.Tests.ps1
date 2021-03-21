@@ -34,10 +34,10 @@ Describe -Name "Get-DeviceCollection" {
             $Response[1].id | Should -BeExactly $Device02.id
         }
 
-        It -Skip -Tag @("todo") "Returns all devices using includeAll with WhatIf" {
+        It -Skip -Tag @("todo") "Returns all devices using includeAll with Dry" {
             $options = @{
                 IncludeAll = $true
-                WhatIf = $true
+                Dry = $true
                 Verbose = $true
                 InformationVariable = "requestInfo"
                 ErrorVariable = "ErrorMessages"

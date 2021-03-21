@@ -44,7 +44,7 @@ Create an operation on the existing device "myExistingDevice"
             $iAgent = PSc8y\New-TestAgent @commonOptions
         }
 
-        # Fake device (if whatif prevented it from being created)
+        # Fake device (if Dry prevented it from being created)
         if ($Dry -and $null -eq $iAgent) {
             $iAgent = @{ id = "12345" }
         }

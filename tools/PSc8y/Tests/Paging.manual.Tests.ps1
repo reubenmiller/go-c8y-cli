@@ -67,7 +67,7 @@ Describe -Name "Get-Pagination" {
         ($VerboseOutput -match "Fetching next page").Count | Should -BeExactly 1
     }
 
-    It "Using include All with WhatIf" {
+    It "Using include All with Dry" {
         $env:C8Y_SETTINGS_INCLUDEALL_PAGESIZE = ""
 
         $output = PSc8y\Get-DeviceCollection `

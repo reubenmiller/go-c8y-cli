@@ -32,7 +32,7 @@ Describe -Name "Common parameters" {
         }
     }
 
-    It "All side-effect commands support WhatIf" {
+    It "All side-effect commands support Dry" {
         $ExcludeCmdlets = @(
             "Add-PowershellType",
             "Add-ClientResponseType",
@@ -52,7 +52,7 @@ Describe -Name "Common parameters" {
         }
 
         foreach ($icmdlet in $cmdlets) {
-            $icmdlet | Should -HaveParameter "WhatIf"
+            $icmdlet | Should -HaveParameter "Dry"
             $icmdlet | Should -HaveParameter "Force"
         }
     }
@@ -118,10 +118,10 @@ Describe -Name "Common parameters" {
         }
     }
 
-    It "Using -WhatIf should show output on the console" {
+    It "Using -Dry should show output on the console" {
         $output = PSc8y\New-Device `
             -Name "testme" `
-            -WhatIf 2>&1
+            -Dry 2>&1
         $LASTEXITCODE | Should -Be 0
         $output | Should -Not -BeNullOrEmpty
         $output | Out-String | Should -BeLike "*/inventory/managedObject*"

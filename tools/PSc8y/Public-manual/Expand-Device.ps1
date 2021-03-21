@@ -125,7 +125,7 @@ Expand the devices and always fetch device managed object if an object is not pr
                         }
                     } else {
                         if ($FetchFullDevice) {
-                            Get-ManagedObject -Id $iDevice -WhatIf:$false
+                            Get-ManagedObject -Id $iDevice -Dry:$false
                         } else {
                             [PSCustomObject]@{
                                 id = $iDevice
@@ -135,7 +135,7 @@ Expand the devices and always fetch device managed object if an object is not pr
                         }
                     }
                 } else {
-                    Get-DeviceCollection -Name $iDevice -WhatIf:$false
+                    Get-DeviceCollection -Name $iDevice -Dry:$false
                 }
             }
         }
