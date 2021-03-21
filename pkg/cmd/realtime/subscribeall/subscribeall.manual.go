@@ -38,7 +38,7 @@ Subscribe to all notifications (alarms/events/operations etc.) for device 12345 
 	}
 
 	// Flags
-	cmd.Flags().StringSlice("device", []string{""}, "Device ID")
+	cmd.Flags().String("device", "", "Device ID")
 	cmd.Flags().Int64Var(&ccmd.flagDurationSec, "duration", 30, "Timeout in seconds")
 	cmd.Flags().Int64Var(&ccmd.flagCount, "count", 0, "Max number of realtime notifications to wait for")
 

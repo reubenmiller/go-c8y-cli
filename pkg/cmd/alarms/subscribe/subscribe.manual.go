@@ -46,7 +46,7 @@ Subscribe to alarms (in realtime) for all devices, and stop after receiving 10 a
 
 	cmd.SilenceUsage = true
 
-	cmd.Flags().StringSlice("device", []string{""}, "Device ID")
+	cmd.Flags().String("device", "", "Device ID")
 	cmd.Flags().Int64Var(&ccmd.flagDurationSec, "duration", 30, "Timeout in seconds")
 	cmd.Flags().Int64Var(&ccmd.flagCount, "count", 0, "Max number of realtime notifications to wait for")
 
