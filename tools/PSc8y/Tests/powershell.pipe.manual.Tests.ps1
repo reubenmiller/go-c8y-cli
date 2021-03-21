@@ -10,7 +10,7 @@ Describe -Name "powershell pipes" {
         It "Pipe by id a simple getter" {
             $output = ,$deviceIds | Get-ManagedObject -AsPSObject:$false -Debug 2>&1
             $LASTEXITCODE | Should -Be 0
-            $output -match "Creating worker:" | Should -HaveCount 1
+            $output -match "command: c8y" | Should -HaveCount 1
             $output -match "adding job: 2" | Should -HaveCount 1
             $output | Should -ContainRequest "GET /inventory/managedObjects/$($deviceIds[0])" -Total 1
             $output | Should -ContainRequest "GET /inventory/managedObjects/$($deviceIds[1])" -Total 1
@@ -120,7 +120,7 @@ Describe -Name "powershell pipes" {
             $env:C8Y_SETTINGS_INCLUDEALL_DELAYMS = 1000
             $messages = $( $output = devices -IncludeAll -AsPSObject:$false -TotalPages 3 | batch | Get-Device -Verbose -Delay 0 -Workers 5 -Dry -DryFormat json -WithError ) 2>&1
             $LASTEXITCODE | Should -BeExactly 0
-            $messages -match "Creating worker:" | Should -HaveCount 1 -Because "all gets should be executed by one c8y call"
+            $messages -match "command: c8y" | Should -HaveCount 1 -Because "all gets should be executed by one c8y call"
             $output.Count | Should -BeGreaterThan 1
             $output.Count | Should -BeLessOrEqual 30
         }
