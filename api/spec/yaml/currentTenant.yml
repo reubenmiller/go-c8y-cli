@@ -1,0 +1,62 @@
+
+---
+
+information:
+  name: currenttenant
+  description: Cumulocity current tenant
+  descriptionLong: 'Cumulocity current tenant commands'
+  link: https://cumulocity.com/guides/reference/tenants/#tenants
+
+endpoints:
+  - name: currentTenant
+    description: Get current tenant
+    descriptionLong: Get the current tenant associated with the current session
+    method: GET
+    path: /tenant/currentTenant
+    accept: application/vnd.com.nsn.cumulocity.currentTenant+json
+    alias:
+        go: get
+        powershell: Get-CurrentTenant
+    examples:
+        powershell:
+          - description: Get the current tenant (based on your current credentials)
+            command: Get-CurrentTenant
+        go:
+          - description: Get the current tenant (based on your current credentials)
+            command: c8y currenttenant get
+  
+  - name: listApplications
+    description: List applications in current tenant
+    descriptionLong: Get the applications of the current tenant
+    method: GET
+    path: /tenant/currentTenant
+    accept: application/vnd.com.nsn.cumulocity.currentTenant+json
+    collectionType: application/vnd.com.nsn.cumulocity.application+json
+    collectionProperty: applications.references
+    alias:
+        go: listApplications
+        powershell: Get-CurrentTenantApplicationCollection
+    examples:
+        powershell:
+          - description: Get a list of applications in the current tenant
+            command: Get-CurrentTenantApplicationCollection
+        go:
+          - description: Get a list of applications in the current tenant
+            command: c8y currenttenant listApplications
+
+  - name: getTenantVersion
+    description: Get tenant version
+    descriptionLong: Get tenant platform (backend) version
+    method: GET
+    path: /tenant/system/options/system/version
+    accept: application/vnd.com.nsn.cumulocity.option+json
+    alias:
+        go: getVersion
+        powershell: Get-TenantVersion
+    examples:
+      powershell:
+        - description: Get the Cumulocity backend version
+          command: Get-TenantVersion
+      go:
+        - description: Set the required availability of a device by name to 10 minutes
+          command: c8y tenants getVersion

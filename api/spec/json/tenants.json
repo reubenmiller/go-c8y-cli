@@ -269,32 +269,6 @@
       ]
     },
     {
-      "name": "currentTenant",
-      "description": "Get current tenant",
-      "descriptionLong": "Get the current tenant associated with the current session",
-      "method": "GET",
-      "path": "/tenant/currentTenant",
-      "accept": "application/vnd.com.nsn.cumulocity.currentTenant+json",
-      "alias": {
-        "go": "getCurrentTenant",
-        "powershell": "Get-CurrentTenant"
-      },
-      "examples": {
-        "powershell": [
-          {
-            "description": "Get the current tenant (based on your current credentials)",
-            "command": "Get-CurrentTenant"
-          }
-        ],
-        "go": [
-          {
-            "description": "Get the current tenant (based on your current credentials)",
-            "command": "c8y tenants getCurrentTenant"
-          }
-        ]
-      }
-    },
-    {
       "name": "enableApplicationOnTenant",
       "description": "Subscribe application",
       "descriptionLong": "Enable/subscribe an application to a tenant",
@@ -419,32 +393,6 @@
           "description": "Tenant id"
         }
       ]
-    },
-    {
-      "name": "getTenantVersion",
-      "description": "Get tenant version",
-      "descriptionLong": "Get tenant platform (backend) version",
-      "method": "GET",
-      "path": "/tenant/system/options/system/version",
-      "accept": "application/vnd.com.nsn.cumulocity.option+json",
-      "alias": {
-        "go": "getVersion",
-        "powershell": "Get-TenantVersion"
-      },
-      "examples": {
-        "powershell": [
-          {
-            "description": "Get the Cumulocity backend version",
-            "command": "Get-TenantVersion"
-          }
-        ],
-        "go": [
-          {
-            "description": "Set the required availability of a device by name to 10 minutes",
-            "command": "c8y tenants getVersion"
-          }
-        ]
-      }
     }
   ]
 }
