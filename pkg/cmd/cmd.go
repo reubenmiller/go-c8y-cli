@@ -80,11 +80,11 @@ func MainRun() {
 func CheckCommandError(cmd *cobra.Command, f *cmdutil.Factory, err error) {
 	cfg, configErr := f.Config()
 	if configErr != nil {
-		// TODO: Handle error or at least log it
+		log.Fatalf("Could not load configuration. %s", configErr)
 	}
 	logg, logErr := f.Logger()
 	if logErr != nil {
-		// TODO: Handle error or at least log it
+		log.Fatalf("Could not configure logger. %s", logErr)
 	}
 	w := ioutil.Discard
 	if cfg != nil && cfg.WithError() {
@@ -203,16 +203,16 @@ func Initialize() (*root.CmdRoot, error) {
 	var logHandler *logger.Logger
 	var activityLoggerHandler *activitylogger.ActivityLogger
 	var configHandler = config.NewConfig(viper.GetViper())
-	if _, err := configHandler.ReadConfigFiles(nil); err != nil {
-		log.Printf("WARNING: Failed to read configuration. Trying to proceed anyway. %s", err)
-		// return nil, err
-	}
 
 	// init logger
 	logHandler = logger.NewLogger(module, logger.Options{
 		Level: zapcore.WarnLevel,
 		Debug: false,
 	})
+
+	if _, err := configHandler.ReadConfigFiles(nil); err != nil {
+		logHandler.Infof("Failed to read configuration. Trying to proceed anyway. %s", err)
+	}
 
 	// cmd factory
 	configFunc := func() (*config.Config, error) {
