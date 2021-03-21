@@ -28,6 +28,9 @@ Create a test hosted web application
         if (-Not $options["Name"]) {
             $options["Name"] = New-RandomString -Prefix "web-"
         }
+        if ($File) {
+            $options["File"] = $File
+        }
         New-HostedApplication @options
     }
 }
