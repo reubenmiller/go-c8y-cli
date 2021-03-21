@@ -257,9 +257,10 @@
           {
             "description": "Update a user group",
             "beforeEach": [
-              "$Group = New-TestUserGroup"
+              "$Group = New-TestUserGroup",
+              "$GroupName = New-RandomString -Prefix \"customGroup2\""
             ],
-            "command": "Update-UserGroup -Id $Group -Name \"customGroup2\"",
+            "command": "Update-UserGroup -Id $Group -Name $GroupName",
             "afterEach": [
               "Remove-UserGroup -Id $Group.id"
             ]
@@ -267,9 +268,10 @@
           {
             "description": "Update a user group (using pipeline)",
             "beforeEach": [
-              "$Group = New-TestUserGroup"
+              "$Group = New-TestUserGroup",
+              "$NewGroupName = New-RandomString -Prefix \"newCustomGroup2\""
             ],
-            "command": "Get-UserGroupByName -Name $Group.name | Update-UserGroup -Name \"customGroup2\"",
+            "command": "Get-UserGroupByName -Name $Group.name | Update-UserGroup -Name $NewGroupName",
             "afterEach": [
               "Remove-UserGroup -Id $Group.id"
             ]

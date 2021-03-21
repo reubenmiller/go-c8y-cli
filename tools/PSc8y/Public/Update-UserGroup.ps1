@@ -11,12 +11,12 @@ Update an existing user group
 c8y usergroups update
 
 .EXAMPLE
-PS> Update-UserGroup -Id $Group -Name "customGroup2"
+PS> Update-UserGroup -Id $Group -Name $GroupName
 
 Update a user group
 
 .EXAMPLE
-PS> Get-UserGroupByName -Name $Group.name | Update-UserGroup -Name "customGroup2"
+PS> Get-UserGroupByName -Name $Group.name | Update-UserGroup -Name $NewGroupName
 
 Update a user group (using pipeline)
 
