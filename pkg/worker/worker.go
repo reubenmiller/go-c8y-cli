@@ -89,7 +89,7 @@ type Worker struct {
 
 // GetMaxWorkers maximum number of workers
 func (w *Worker) GetMaxWorkers() int {
-	if w.config != nil {
+	if w.config == nil {
 		return 5
 	}
 	return w.config.GetMaxWorkers()
@@ -97,7 +97,7 @@ func (w *Worker) GetMaxWorkers() int {
 
 // GetMaxJob maximum number of jobs allowed
 func (w *Worker) GetMaxJobs() int64 {
-	if w.config != nil {
+	if w.config == nil {
 		return 100
 	}
 	return w.config.GetMaxJobs()
@@ -195,6 +195,7 @@ func (w *Worker) runBatched(requestIterator *requestiterator.RequestIterator, co
 	if w.client != nil {
 		tenantName = w.client.TenantName
 	}
+	w.logger.Infof("Max jobs: %d", maxJobs)
 
 	// add jobs async
 	go func() {
