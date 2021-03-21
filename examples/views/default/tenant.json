@@ -25,18 +25,6 @@
                 "domainName",
                 "allowCreateTenants"
             ]
-        },
-        {
-            "name": "currentTenantApplications",
-            "priority": 501,
-            "contentType": "vnd.com.nsn.cumulocity.currenttenant",
-            "columns": [
-                "**.application.id",
-                "**.application.name",
-                "**.application.key",
-                "**.application.type",
-                "**.application.availability"
-            ]
         }
     ]
 }
