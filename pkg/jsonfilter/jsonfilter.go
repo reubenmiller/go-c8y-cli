@@ -262,9 +262,13 @@ func (f JSONFilters) filterJSON(jsonValue string, property string, showHeaders b
 
 			for _, myval := range formattedJSON.Array() {
 
-				if line, keys := pluckJsonValues(&myval, f.Pluck, f.Flatten, f.AsCSV); line != "" {
-					outputValues = append(outputValues, line)
-					setHeaderFunc(strings.Join(keys, ","))
+				if myval.IsObject() {
+					if line, keys := pluckJsonValues(&myval, f.Pluck, f.Flatten, f.AsCSV); line != "" {
+						outputValues = append(outputValues, line)
+						setHeaderFunc(strings.Join(keys, ","))
+					}
+				} else {
+					outputValues = append(outputValues, myval.Raw)
 				}
 			}
 			return []byte(strings.Join(outputValues, "\n"))
