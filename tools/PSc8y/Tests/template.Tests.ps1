@@ -114,14 +114,16 @@ local CreateEvent(major='1',minor='1',extid='123456789',timestamp='2021-01-20T12
         $TestDevice | Should -Not -BeNullOrEmpty
         $null = $items.Add($TestDevice.id)
 
-        $Response = New-Event `
+        $output = New-Event `
             -Device $TestDevice.id `
             -Template $TemplateFile `
             -TemplateVars "timestamp=$(Format-Date),eventCount=5" `
-            -WhatIf *>&1
+            -Dry `
+            -DryFormat json 2>&1
 
-        $Response | Should -Not -BeNullOrEmpty
         $LASTEXITCODE | Should -BeExactly 0
+        $request = $output | ConvertFrom-Json -Depth 100
+        $request.body.c8y_Update.subComponentId | Should -BeExactly "a5d1c5d4"
     }
 
     AfterEach {

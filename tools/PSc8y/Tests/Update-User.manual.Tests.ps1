@@ -26,7 +26,7 @@ Describe -Name "Update-User" {
         }
 
         It "Shows the request to be sent when disabling an existing user sends a boolean" {
-            $output = PSc8y\Update-User -Id $User.id -Enabled:$false -WhatIf -WhatIfFormat json 2>&1
+            $output = PSc8y\Update-User -Id $User.id -Enabled:$false -Dry -DryFormat json 2>&1
             $LASTEXITCODE | Should -Be 0
 
             $request = $output | Out-String | ConvertFrom-Json
