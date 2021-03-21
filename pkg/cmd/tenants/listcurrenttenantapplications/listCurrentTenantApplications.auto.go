@@ -1,5 +1,5 @@
 // Code generated from specification version 1.0.0: DO NOT EDIT
-package getcurrenttenant
+package listcurrenttenantapplications
 
 import (
 	"fmt"
@@ -17,25 +17,25 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// GetCurrentTenantCmd command
-type GetCurrentTenantCmd struct {
+// ListCurrentTenantApplicationsCmd command
+type ListCurrentTenantApplicationsCmd struct {
 	*subcommand.SubCommand
 
 	factory *cmdutil.Factory
 }
 
-// NewGetCurrentTenantCmd creates a command to Get current tenant
-func NewGetCurrentTenantCmd(f *cmdutil.Factory) *GetCurrentTenantCmd {
-	ccmd := &GetCurrentTenantCmd{
+// NewListCurrentTenantApplicationsCmd creates a command to Get current tenant applications
+func NewListCurrentTenantApplicationsCmd(f *cmdutil.Factory) *ListCurrentTenantApplicationsCmd {
+	ccmd := &ListCurrentTenantApplicationsCmd{
 		factory: f,
 	}
 	cmd := &cobra.Command{
-		Use:   "getCurrentTenant",
-		Short: "Get current tenant",
-		Long:  `Get the current tenant associated with the current session`,
+		Use:   "listCurrentTenantApplications",
+		Short: "Get current tenant applications",
+		Long:  `Get the applications of the current tenant`,
 		Example: heredoc.Doc(`
-$ c8y tenants getCurrentTenant
-Get the current tenant (based on your current credentials)
+$ c8y tenants listCurrentTenantApplications
+Get a list of applications in the current tenant
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
 			return nil
@@ -53,6 +53,7 @@ Get the current tenant (based on your current credentials)
 		cmd,
 
 		flags.WithExtendedPipelineSupport("", "", false),
+		flags.WithCollectionProperty("applications.references"),
 	)
 
 	// Required flags
@@ -63,7 +64,7 @@ Get the current tenant (based on your current credentials)
 }
 
 // RunE executes the command
-func (n *GetCurrentTenantCmd) RunE(cmd *cobra.Command, args []string) error {
+func (n *ListCurrentTenantApplicationsCmd) RunE(cmd *cobra.Command, args []string) error {
 	cfg, err := n.factory.Config()
 	if err != nil {
 		return err

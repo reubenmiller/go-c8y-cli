@@ -1,19 +1,19 @@
 ﻿# Code generated from specification version 1.0.0: DO NOT EDIT
-Function Get-TenantVersion {
+Function Get-CurrentTenantApplicationCollection {
 <#
 .SYNOPSIS
-Get tenant version
+List applications in current tenant
 
 .DESCRIPTION
-Get tenant platform (backend) version
+Get the applications of the current tenant
 
 .LINK
-c8y currenttenant getVersion
+c8y currenttenant listApplications
 
 .EXAMPLE
-PS> Get-TenantVersion
+PS> Get-CurrentTenantApplicationCollection
 
-Get the Cumulocity backend version
+Get a list of applications in the current tenant
 
 
 #>
@@ -35,11 +35,11 @@ Get the Cumulocity backend version
             Use-CallerPreference -Cmdlet $PSCmdlet -SessionState $ExecutionContext.SessionState
         }
 
-        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "currenttenant getVersion"
+        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "currenttenant listApplications"
         $ClientOptions = Get-ClientOutputOption $PSBoundParameters
         $TypeOptions = @{
-            Type = "application/vnd.com.nsn.cumulocity.option+json"
-            ItemType = ""
+            Type = "application/vnd.com.nsn.cumulocity.currentTenant+json"
+            ItemType = "application/vnd.com.nsn.cumulocity.application+json"
             BoundParameters = $PSBoundParameters
         }
     }
@@ -47,11 +47,11 @@ Get the Cumulocity backend version
     Process {
 
         if ($ClientOptions.ConvertToPS) {
-            c8y currenttenant getVersion $c8yargs `
+            c8y currenttenant listApplications $c8yargs `
             | ConvertFrom-ClientOutput @TypeOptions
         }
         else {
-            c8y currenttenant getVersion $c8yargs
+            c8y currenttenant listApplications $c8yargs
         }
     }
 

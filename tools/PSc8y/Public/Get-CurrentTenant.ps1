@@ -8,7 +8,7 @@ Get current tenant
 Get the current tenant associated with the current session
 
 .LINK
-c8y tenants getCurrentTenant
+c8y currenttenant get
 
 .EXAMPLE
 PS> Get-CurrentTenant
@@ -35,7 +35,7 @@ Get the current tenant (based on your current credentials)
             Use-CallerPreference -Cmdlet $PSCmdlet -SessionState $ExecutionContext.SessionState
         }
 
-        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "tenants getCurrentTenant"
+        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "currenttenant get"
         $ClientOptions = Get-ClientOutputOption $PSBoundParameters
         $TypeOptions = @{
             Type = "application/vnd.com.nsn.cumulocity.currentTenant+json"
@@ -47,11 +47,11 @@ Get the current tenant (based on your current credentials)
     Process {
 
         if ($ClientOptions.ConvertToPS) {
-            c8y tenants getCurrentTenant $c8yargs `
+            c8y currenttenant get $c8yargs `
             | ConvertFrom-ClientOutput @TypeOptions
         }
         else {
-            c8y tenants getCurrentTenant $c8yargs
+            c8y currenttenant get $c8yargs
         }
     }
 
