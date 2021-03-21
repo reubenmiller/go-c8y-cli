@@ -27,36 +27,21 @@ Create an operation on the existing device "myExistingDevice"
             ValueFromPipelineByPropertyName = $true,
             Position = 0
         )]
-        [object] $Device,
-
-        # Cumulocity processing mode
-        [Parameter()]
-        [AllowNull()]
-        [AllowEmptyString()]
-        [ValidateSet("PERSISTENT", "QUIESCENT", "TRANSIENT", "CEP")]
-        [string]
-        $ProcessingMode,
-
-        # Template (jsonnet) file to use to create the request body.
-        [Parameter()]
-        [string]
-        $Template,
-
-        # Variables to be used when evaluating the Template. Accepts json or json shorthand, i.e. "name=peter"
-        [Parameter()]
-        [string]
-        $TemplateVars,
-
-        # Don't prompt for confirmation
-        [switch] $Force
+        [object] $Device
     )
+    DynamicParam {
+        Get-ClientCommonParameters -Type "Create", "Template"
+    }
 
     Process {
+        $commonOptions = @{} + $PSBoundParameters
+        $commonOptions.Remove("Device")
+
         if ($null -ne $Device) {
             $iAgent = Expand-Device $Device
         }
         else {
-            $iAgent = PSc8y\New-TestAgent -Force:$Force
+            $iAgent = PSc8y\New-TestAgent @commonOptions
         }
 
         # Fake device (if whatif prevented it from being created)
@@ -64,17 +49,15 @@ Create an operation on the existing device "myExistingDevice"
             $iAgent = @{ id = "12345" }
         }
 
-        PSc8y\New-Operation `
-            -Device $iAgent.id `
-            -Description "Test operation" `
-            -Data @{
-            c8y_Restart = @{
-                    parameters = @{ }
-                }
-            } `
-            -ProcessingMode:$ProcessingMode `
-            -Template:$Template `
-            -TemplateVars:$TemplateVars `
-            -Force:$Force
+        $options = @{} + $PSBoundParameters
+        $options["Device"] = $iAgent.id
+        $options["Description"] = "Test operation"
+
+        if ($null -eq $options["Data"]) {
+            $options["Data"] = @{}
+        }
+        $options["Data"].c8y_Restart = @{ parameters = @{ } }
+
+        PSc8y\New-Operation @options
     }
 }
