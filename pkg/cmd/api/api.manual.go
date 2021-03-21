@@ -30,9 +30,10 @@ func NewSubCommand(f *cmdutil.Factory) *CmdAPI {
 	}
 
 	cmd := &cobra.Command{
-		Use:   "api",
-		Short: "Send api request",
-		Long:  `Send an authenticated api request to a given endpoint`,
+		Use:     "api",
+		Aliases: []string{"rest"},
+		Short:   "Send api request",
+		Long:    `Send an authenticated api request to a given endpoint`,
 		Example: heredoc.Doc(`
 ### Get a list of alarms
 $ c8y api GET /alarm/alarms
