@@ -38,7 +38,7 @@ Describe -Name "Get-Pagination" {
 
         $VerboseOutput = Get-Content $cliOutputFile
 
-        ($VerboseOutput -match "settings.includeAll.pageSize") | Should -BeLike "*settings.includeAll.pageSize: 10"
+        ($VerboseOutput -match "pageSize=10") | Should -Not -BeNullOrEmpty
 
         # 2 because the first result does not have the "fetching next page"
         ($VerboseOutput -match "Fetching next page").Count | Should -BeExactly 2
@@ -59,7 +59,7 @@ Describe -Name "Get-Pagination" {
 
         $VerboseOutput = Get-Content $cliOutputFile
 
-        ($VerboseOutput -match "settings.includeAll.pageSize") | Should -BeLike "*settings.includeAll.pageSize: 12"
+        ($VerboseOutput -match "pageSize=12") | Should -Not -BeNullOrEmpty
 
         # 1 because only one extra fetch should be required
         # as the first has 12 results, and the second result set has less than the requested
@@ -70,34 +70,33 @@ Describe -Name "Get-Pagination" {
     It "Using include All with WhatIf" {
         $env:C8Y_SETTINGS_INCLUDEALL_PAGESIZE = ""
 
-        $Response = PSc8y\Get-DeviceCollection `
+        $output = PSc8y\Get-DeviceCollection `
             -IncludeAll `
-            -WhatIf `
-            -Debug 2> $cliOutputFile
+            -Dry `
+            -DryFormat json 2>&1
 
         $LASTEXITCODE | Should -Be 0
-        $Response | Should -BeNullOrEmpty
+        $output | Should -Not -BeNullOrEmpty
+        $requests = $output | ConvertFrom-Json
 
-        $VerboseOutput = Get-Content $cliOutputFile
-
-        ($VerboseOutput -match "settings.includeAll.pageSize") | Should -BeLike "*settings.includeAll.pageSize: 2000"
+        $requests[0].query | Should -Match "pageSize=2000"
     }
 
     It "Set default pagesize using environment setting" {
         $env:C8Y_SETTINGS_DEFAULTS_PAGESIZE = "10"
 
-        $Response = PSc8y\Get-AlarmCollection `
+        $output = PSc8y\Get-AlarmCollection `
             -Device $Device.id `
-            -Debug 2> $cliOutputFile
+            -Dry `
+            -DryFormat json 2>&1
 
         $LASTEXITCODE | Should -Be 0
         $C8Y_SETTINGS_DEFAULTS_PAGESIZE = ""
-        $Response | Should -Not -BeNullOrEmpty
+        $output | Should -Not -BeNullOrEmpty
+        $requests = $output | ConvertFrom-Json
 
-        $Response | Should -HaveCount 10
-
-        # $VerboseOutput = Get-Content $cliOutputFile
-        # ($VerboseOutput -match "settings.default.pageSize") | Should -BeLike "*settings.default.pageSize: 10"
+        $requests | Should -HaveCount 1
+        $requests[0].query | Should -Match "pageSize=10"
     }
 
     It "All collection commands support paging parameters" {
