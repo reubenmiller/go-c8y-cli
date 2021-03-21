@@ -449,7 +449,7 @@ endpoints:
         - description: Resets a user's password by sending a reset email to the user
           beforeEach:
             - $User = PSc8y\New-TestUser
-          command: Reset-UserPassword -Id $User.id -WhatIf 2>&1
+          command: Reset-UserPassword -Id $User.id -Dry 2>&1
           afterEach:
             - PSc8y\Remove-User -Id $User.id
 
