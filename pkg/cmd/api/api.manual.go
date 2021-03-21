@@ -51,6 +51,7 @@ c8y api POST "alarm/alarms" --data "text=one,severity=MAJOR,type=test_Type,time=
 	cmd.Flags().StringSliceP("header", "H", nil, "headers. i.e. --header \"Accept: value\"")
 	cmd.Flags().String("accept", "", "accept (header)")
 	cmd.Flags().String("contentType", "", "content type (header)")
+	cmd.Flags().String("formdata", "", "form data (json or shorthand json)")
 	cmd.Flags().StringVar(&ccmd.flagHost, "host", "", "host to use for the rest request. If empty, then the session's host will be used")
 
 	flags.WithOptions(
@@ -184,7 +185,7 @@ func (n *CmdAPI) RunE(cmd *cobra.Command, args []string) error {
 			cmd,
 			formData,
 			inputIterators,
-			flags.WithFormDataFileAndInfo("file", "data")...,
+			flags.WithFormDataFileAndInfo("file", "formdata")...,
 		)
 		if err != nil {
 			return cmderrors.NewUserError(err)
