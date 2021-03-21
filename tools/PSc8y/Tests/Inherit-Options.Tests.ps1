@@ -12,10 +12,14 @@ Describe -Name "Inherit-Parameters" {
     It "Force and Dry parameters are automatically inherited to module cmdlets" {
         Function Test-MyCustomFunction {
             [cmdletbinding()]
-            Param(
-                [switch] $Force
-            )
-            PSc8y\New-ManagedObject -Name "myname"
+            Param()
+            DynamicParam {
+                Get-ClientCommonParameters -Type "Create", "Template"
+            }
+            Process {
+                $options = @{ name = "myname" } + $PSBoundParameters
+                PSc8y\New-ManagedObject @options
+            }
         }
 
         $mo = Test-MyCustomFunction -Force -Dry:$false
@@ -71,29 +75,6 @@ Describe -Name "Inherit-Parameters" {
         $WhatIfPreference = $true
         $mo = Test-MyCustomFunction -Force
         $mo | Should -BeNullOrEmpty
-        $LASTEXITCODE | Should -Be 0
-    }
-
-    It "WhatIf inheritance can be disabled via an environment variable allow user to control it themselves" {
-        Function Test-MyCustomFunction {
-            [cmdletbinding()]
-            Param(
-                [switch] $Force
-            )
-            PSc8y\New-ManagedObject -Name "myname" -Force:$Force
-        }
-
-        $env:C8Y_DISABLE_INHERITANCE = $true
-        $WhatIfPreference = $null
-        $mo = Test-MyCustomFunction -Force -Dry
-        $ids.Add($mo.id)
-        $mo | Should -Not -BeNullOrEmpty -Because "Function does not pass on Dry parameter"
-        $LASTEXITCODE | Should -Be 0
-
-        $WhatIfPreference = $true
-        $mo = Test-MyCustomFunction -Force
-        $ids.Add($mo.id)
-        $mo | Should -Not -BeNullOrEmpty
         $LASTEXITCODE | Should -Be 0
     }
 
