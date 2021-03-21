@@ -7,14 +7,13 @@ import (
 	"github.com/MakeNowJust/heredoc"
 	"github.com/google/shlex"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmdutil"
-	"github.com/reubenmiller/go-c8y-cli/pkg/config"
 	"github.com/reubenmiller/go-c8y-cli/pkg/iostreams"
 	"github.com/spf13/cobra"
 )
 
 type SetOptions struct {
-	Config func() (*config.Config, error)
-	IO     *iostreams.IOStreams
+	factory *cmdutil.Factory
+	IO      *iostreams.IOStreams
 
 	Name      string
 	Expansion string
@@ -24,8 +23,8 @@ type SetOptions struct {
 
 func NewCmdSet(f *cmdutil.Factory, runF func(*SetOptions) error) *cobra.Command {
 	opts := &SetOptions{
-		IO:     f.IOStreams,
-		Config: f.Config,
+		IO:      f.IOStreams,
+		factory: f,
 	}
 
 	cmd := &cobra.Command{
@@ -80,7 +79,7 @@ func NewCmdSet(f *cmdutil.Factory, runF func(*SetOptions) error) *cobra.Command 
 }
 
 func setRun(opts *SetOptions) error {
-	cfg, err := opts.Config()
+	cfg, err := opts.factory.Config()
 	if err != nil {
 		return err
 	}

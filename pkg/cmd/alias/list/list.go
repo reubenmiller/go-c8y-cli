@@ -6,20 +6,19 @@ import (
 
 	"github.com/MakeNowJust/heredoc"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmdutil"
-	"github.com/reubenmiller/go-c8y-cli/pkg/config"
 	"github.com/reubenmiller/go-c8y-cli/pkg/iostreams"
 	"github.com/spf13/cobra"
 )
 
 type ListOptions struct {
-	Config func() (*config.Config, error)
-	IO     *iostreams.IOStreams
+	IO      *iostreams.IOStreams
+	factory *cmdutil.Factory
 }
 
 func NewCmdList(f *cmdutil.Factory, runF func(*ListOptions) error) *cobra.Command {
 	opts := &ListOptions{
-		IO:     f.IOStreams,
-		Config: f.Config,
+		IO:      f.IOStreams,
+		factory: f,
 	}
 
 	cmd := &cobra.Command{
@@ -44,7 +43,7 @@ func NewCmdList(f *cmdutil.Factory, runF func(*ListOptions) error) *cobra.Comman
 
 func listRun(opts *ListOptions) error {
 
-	cfg, err := opts.Config()
+	cfg, err := opts.factory.Config()
 	if err != nil {
 		return err
 	}
