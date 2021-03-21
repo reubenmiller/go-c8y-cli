@@ -30,11 +30,10 @@ Describe -Name "Invoke-ClientRequest" {
         $Response.self | Should -Not -BeNullOrEmpty
     }
 
-    It "should return the raw json text when using -AsJSON" {
-        $Response = Invoke-ClientRequest -Uri "/inventory/managedObjects" -QueryParameters @{
-            pageSize = "2";
-        } `
-        -AsJSON
+    It "should return the raw json text when using" {
+        $Response = Invoke-ClientRequest `
+            -Uri "/inventory/managedObjects" -QueryParameters @{ pageSize = "2" } `
+            -AsPSObject:$false
         $LASTEXITCODE | Should -Be 0
         $Response | Should -Not -BeNullOrEmpty
         $Result = $Response | ConvertFrom-Json
