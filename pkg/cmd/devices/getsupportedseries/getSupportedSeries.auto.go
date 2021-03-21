@@ -57,7 +57,7 @@ Get the supported measurement series of a device by name
 		cmd,
 
 		flags.WithExtendedPipelineSupport("device", "device", true, "deviceId", "source.id", "managedObject.id", "id"),
-		flags.WithCollectionProperty("c8y_SupportedSeries"),
+		flags.WithCollectionProperty("-"),
 	)
 
 	// Required flags
