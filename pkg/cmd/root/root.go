@@ -348,6 +348,7 @@ func (c *CmdRoot) Configure() error {
 		customLogger := logger.NewLogger("c8y", logOptions)
 		c8y.Logger = customLogger
 		cfg.SetLogger(customLogger)
+		c.log = customLogger
 		return customLogger, nil
 	}
 
@@ -392,6 +393,11 @@ func (c *CmdRoot) Configure() error {
 			return c.client, nil
 		}
 		client, err := createCumulocityClient(c.Factory)()
+		if c.log != nil {
+			c8y.Logger = c.log
+		} else {
+			c8y.Logger = logger.NewDummyLogger("c8y")
+		}
 		c.client = client
 		return client, err
 	}
