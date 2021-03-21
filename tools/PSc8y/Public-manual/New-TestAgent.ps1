@@ -16,11 +16,6 @@
     
     Create 10 test agents all with unique names
     
-    .EXAMPLE
-    1..10 | Foreach-Object { New-TestAgent -AsAgent -Force }
-    
-    Create 10 test agents (with agent functionality) all with unique names
-    
     #>
         [cmdletbinding()]
         Param(

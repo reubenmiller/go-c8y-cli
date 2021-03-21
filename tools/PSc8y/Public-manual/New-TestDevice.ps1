@@ -18,11 +18,6 @@ Create a test device
 
 Create 10 test devices all with unique names
 
-.EXAMPLE
-1..10 | Foreach-Object { New-TestDevice -AsAgent -Force }
-
-Create 10 test devices (with agent functionality) all with unique names
-
 #>
     [cmdletbinding()]
     Param(
