@@ -40,7 +40,7 @@ Wait for the operation id, and timeout after 30 seconds
         $ExpirationDate = (Get-Date).AddSeconds($Timeout)
 
         do {
-            $op = Get-Operation -Id $id
+            $op = Get-Operation -Id $id -AsPSObject
 
             if ($null -eq $op) {
                 # Cancel early if the operation does not exist
