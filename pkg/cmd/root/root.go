@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"os"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/MakeNowJust/heredoc"
@@ -88,15 +89,17 @@ type CmdRoot struct {
 	ActivityLogMessage string
 
 	Factory *cmdutil.Factory
-	Config  func() (*config.Config, error)
-	Logger  func() (*logger.Logger, error)
+
+	client      *c8y.Client
+	log         *logger.Logger
+	activitylog *activitylogger.ActivityLogger
+	mu          sync.RWMutex
+	muLog       sync.RWMutex
 }
 
 func NewCmdRoot(f *cmdutil.Factory, version, buildDate string) *CmdRoot {
 	ccmd := &CmdRoot{
 		Factory: f,
-		Config:  f.Config,
-		Logger:  f.Logger,
 	}
 	cmd := &cobra.Command{
 		Use:   "c8y",
@@ -192,7 +195,7 @@ func NewCmdRoot(f *cmdutil.Factory, version, buildDate string) *CmdRoot {
 		completion.WithValidateSet("output", "json", "table", "csv", "csvheader"),
 		completion.WithValidateSet("view", config.ViewsNone, config.ViewsAll),
 		completion.WithSessionFile("session", func() string {
-			cfg, err := ccmd.Config()
+			cfg, err := ccmd.Factory.Config()
 			if err != nil {
 				return ""
 			}
@@ -292,11 +295,11 @@ func NewCmdRoot(f *cmdutil.Factory, version, buildDate string) *CmdRoot {
 }
 
 func (c *CmdRoot) Configure() error {
-	cfg, err := c.Config()
+	cfg, err := c.Factory.Config()
 	if err != nil {
 		return err
 	}
-	log, err := c.Logger()
+	log, err := c.Factory.Logger()
 	if err != nil {
 		return err
 	}
@@ -317,6 +320,11 @@ func (c *CmdRoot) Configure() error {
 
 	// Update logger
 	c.Factory.Logger = func() (*logger.Logger, error) {
+		c.muLog.Lock()
+		defer c.muLog.Unlock()
+		if c.log != nil {
+			return c.log, nil
+		}
 		logOptions := logger.Options{
 			Level: zapcore.WarnLevel,
 			Color: !cfg.DisableColor(),
@@ -341,7 +349,14 @@ func (c *CmdRoot) Configure() error {
 
 	// Update activity logger
 	c.Factory.ActivityLogger = func() (*activitylogger.ActivityLogger, error) {
-		return c.configureActivityLog(cfg)
+		c.mu.Lock()
+		defer c.mu.Unlock()
+		if c.activitylog != nil {
+			return c.activitylog, nil
+		}
+		al, err := c.configureActivityLog(cfg)
+		c.activitylog = al
+		return al, err
 	}
 
 	// Update data views
@@ -355,12 +370,27 @@ func (c *CmdRoot) Configure() error {
 	consoleHandler.Disabled = cfg.ShowProgress() && c.Factory.IOStreams.IsStdoutTTY()
 
 	// Update client
-	c.Factory.Client = createCumulocityClient(c.Factory)
+
+	c.Factory.Client = func() (*c8y.Client, error) {
+		c.mu.Lock()
+		defer c.mu.Unlock()
+
+		if c.client != nil {
+			return c.client, nil
+		}
+		client, err := createCumulocityClient(c.Factory)()
+		c.client = client
+		return client, err
+	}
 	return nil
 }
 
 func (c *CmdRoot) checkSessionExists(cmd *cobra.Command, args []string) error {
-	log, err := c.Logger()
+	log, err := c.Factory.Logger()
+	if err != nil {
+		return err
+	}
+	cfg, err := c.Factory.Config()
 	if err != nil {
 		return err
 	}
@@ -376,6 +406,12 @@ func (c *CmdRoot) checkSessionExists(cmd *cobra.Command, args []string) error {
 	if cmd.HasParent() && cmd.Parent().Use != "c8y" {
 		cmdStr = cmd.Parent().Use + " " + cmdStr
 	}
+
+	sessionFile := cfg.GetSessionFile()
+	if sessionFile != "" {
+		log.Infof("Loaded session: %s", config.HideSensitiveInformationIfActive(client, sessionFile))
+	}
+
 	log.Debugf("command str: %s", cmdStr)
 
 	log.Infof("command: c8y %s", utilities.GetCommandLineArgs())
