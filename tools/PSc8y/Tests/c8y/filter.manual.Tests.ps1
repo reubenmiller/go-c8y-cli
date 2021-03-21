@@ -3,10 +3,10 @@
 Describe -Name "c8y filter common parameter" {
     BeforeAll {
         $TypeSuffix = New-RandomString
-        $Template = "{ type: 'c8yci_$TypeSuffix', ci_filterTest: {} }"
+        $Template = "{ name: 'testFilter', type: 'c8yci_$TypeSuffix', ci_filterTest: {} }"
         $ids = New-Object System.Collections.ArrayList
-        $Device1 = New-TestDevice -Template $Template
-        $Device2 = New-TestDevice -Template $Template
+        $Device1 = New-Device -Template $Template
+        $Device2 = New-Device -Template $Template
         $null = $ids.AddRange(@($Device1.id, $Device2.id))
     }
 

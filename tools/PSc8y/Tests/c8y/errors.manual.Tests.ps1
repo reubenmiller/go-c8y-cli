@@ -27,7 +27,7 @@ Describe -Name "c8y errors" {
             $output | Should -Match "ERROR\s+commandError: unknown flag: --iiiiid"
         }
 
-        It "returns returns errors as json" {
+        It "returns errors as json" {
             $output = c8y events get --withError --iiiiid 0
             $LASTEXITCODE | Should -Be 100
 
@@ -36,7 +36,7 @@ Describe -Name "c8y errors" {
             $details | Should -MatchObject @{errorType="commandError"; message = "unknown flag: --iiiiid"}
         }
 
-        It "returns writes errors to stdout when using withError" {
+        It "writes errors to stdout when using withError" {
             # Note: --withError must be included before the invalid flag
             $output = c8y events get --withError --iiiiid 0
             $LASTEXITCODE | Should -Be 100

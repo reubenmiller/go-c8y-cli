@@ -24,7 +24,7 @@ Describe -Name "json" {
         }
 
         It "should not print json in color when using pretty print and no color and no streaming" {
-            $output = c8y applications list --noColor=true --stream=false --compact=false
+            $output = c8y applications list --noColor=true --compact=false
             $output | Out-String | Should -Not -Match "\x1b\[[0-9;]*m"
         }
 
@@ -89,32 +89,6 @@ Describe -Name "json" {
         It "Ignores settings when csv is being used" {
             $output = c8y applications get --id cockpit --select id,name --output csv --compact=false
             $output | Should -MatchExactly "^\d+,cockpit$"
-        }
-    }
-
-    Context "stream" {
-        It "Prints json lines when using stream parameter (<option>)" -TestCases @(
-            @{option = ""},
-            @{option = "--stream"},
-            @{option = "--stream=true"}
-        ) {
-            param([string] $option)
-            $output = c8y applications list --pageSize 2 $option
-            $output | Should -BeOfType string
-            $output | Should -HaveCount 2
-            $output | ForEach-Object {
-                $_ | Should -BeLike "{*}"
-            }
-            $json = $output | ConvertFrom-Json
-            $json | Should -Not -BeNullOrEmpty
-            $json | Should -HaveCount 2
-        }
-
-        It "Prints the json array (not json lines)" {
-            $output = c8y applications list --pageSize 1 --stream=false --compact=false
-            ($output -split "\n").Count | Should -BeGreaterThan 5
-            ($output | Out-String).Trim() | Should -BeLike '`[*`]'
-            $output | ConvertFrom-Json | Should -Not -BeNullOrEmpty
         }
     }
 }
