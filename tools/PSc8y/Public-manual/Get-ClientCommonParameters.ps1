@@ -76,6 +76,7 @@ Inherit common parameters to a custom function. This will add parameters such as
         # Common parameters
         New-DynamicParam -Name Raw -Type "switch" -DPDictionary $Dictionary
         New-DynamicParam -Name OutputFile -Type "string" -DPDictionary $Dictionary
+        New-DynamicParam -Name OutputFileRaw -Type "string" -DPDictionary $Dictionary
         New-DynamicParam -Name Proxy -Type "switch" -DPDictionary $Dictionary
         New-DynamicParam -Name NoProxy -Type "switch" -DPDictionary $Dictionary
         New-DynamicParam -Name Session -Type "string" -DPDictionary $Dictionary
