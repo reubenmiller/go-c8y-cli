@@ -3,7 +3,7 @@
     "definitions": [
         {
             "name": "microservice",
-            "priority": 1,
+            "priority": 500,
             "self": "application",
             "type": "MICROSERVICE",
             "columns": [
@@ -20,7 +20,7 @@
         },
         {
             "name": "application",
-            "priority": 100,
+            "priority": 500,
             "self": "application",
             "columns": [
                 "id",
@@ -32,7 +32,7 @@
         },
         {
             "name": "bootstrapuser",
-            "priority": 100,
+            "priority": 500,
             "contentType": "vnd.com.nsn.cumulocity.user",
             "columns": [
                 "tenant",

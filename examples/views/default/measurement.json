@@ -13,6 +13,24 @@
                 "**.value",
                 "**.unit"
             ]
+        },
+        {
+            "name": "supportedMeasurements",
+            "priority": 500,
+            "contentType": "json",
+            "fragments": ["c8y_SupportedMeasurements"],
+            "columns": [
+                "c8y_SupportedMeasurements.**"
+            ]
+        },
+        {
+            "name": "supportedSeries",
+            "priority": 500,
+            "contentType": "json",
+            "fragments": ["c8y_SupportedSeries"],
+            "columns": [
+                "c8y_SupportedSeries.**"
+            ]
         }
     ]
 }

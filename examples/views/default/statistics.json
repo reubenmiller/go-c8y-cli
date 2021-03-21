@@ -3,7 +3,7 @@
     "definitions": [
         {
             "name": "statistics",
-            "priority": 100,
+            "priority": 500,
             "contentType": "collection",
             "fragments": ["statistics.pageSize", "self"],
             "columns": [
