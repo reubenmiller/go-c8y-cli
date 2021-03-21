@@ -54,26 +54,16 @@ Create 10 test devices (with agent functionality) all with unique names
     }
 
     Process {
-        if ($Name) {
-            if ($ClientOptions.ConvertToPS) {
-                $Name `
-                | Group-ClientRequests `
-                | c8y devices create $c8yargs `
-                | ConvertFrom-ClientOutput @TypeOptions
-            }
-            else {
-                $Name `
-                | Group-ClientRequests `
-                | c8y devices create $c8yargs
-            }
-        } else {
-            if ($ClientOptions.ConvertToPS) {
-                c8y devices create $c8yargs `
-                | ConvertFrom-ClientOutput @TypeOptions
-            }
-            else {
-                c8y devices create $c8yargs
-            }
+        if ($ClientOptions.ConvertToPS) {
+            $Name `
+            | Group-ClientRequests `
+            | c8y devices create $c8yargs `
+            | ConvertFrom-ClientOutput @TypeOptions
+        }
+        else {
+            $Name `
+            | Group-ClientRequests `
+            | c8y devices create $c8yargs
         }
     }
 }
