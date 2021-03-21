@@ -93,8 +93,10 @@ type CmdRoot struct {
 	client      *c8y.Client
 	log         *logger.Logger
 	activitylog *activitylogger.ActivityLogger
+	dataview    *dataview.DataView
 	mu          sync.RWMutex
 	muLog       sync.RWMutex
+	muDataView  sync.RWMutex
 }
 
 func NewCmdRoot(f *cmdutil.Factory, version, buildDate string) *CmdRoot {
@@ -361,7 +363,16 @@ func (c *CmdRoot) Configure() error {
 
 	// Update data views
 	c.Factory.DataView = func() (*dataview.DataView, error) {
-		return dataview.NewDataView(".*", ".json", log, cfg.GetViewPaths()...)
+		c.muDataView.Lock()
+		defer c.muDataView.Unlock()
+		if c.dataview != nil {
+			return c.dataview, nil
+		}
+
+		l, _ := c.Factory.Logger()
+		dv, err := dataview.NewDataView(".*", ".json", l, cfg.GetViewPaths()...)
+		c.dataview = dv
+		return dv, err
 	}
 
 	consoleHandler.Format = cfg.GetOutputFormat()

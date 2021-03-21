@@ -41,6 +41,9 @@ type DataView struct {
 
 // NewDataView creates a new data view which selected a view based in json data
 func NewDataView(pattern string, extension string, log *logger.Logger, paths ...string) (*DataView, error) {
+	if log == nil {
+		log = logger.NewDummyLogger("dataview")
+	}
 	view := &DataView{
 		Paths:     paths,
 		Pattern:   pattern,
@@ -111,6 +114,7 @@ func (v *DataView) GetView(data *gjson.Result, contentType ...string) ([]string,
 
 		for _, fragment := range definition.Fragments {
 			if result := data.Get(fragment); !result.Exists() {
+				// v.Logger.Debugf("Data did not contain fragment. view=%s, fragment=%s, input=%s", definition.FileName, fragment, data.Raw)
 				isMatch = false
 				break
 			}
