@@ -87,7 +87,11 @@ func CheckCommandError(cmd *cobra.Command, f *cmdutil.Factory, err error) {
 		log.Fatalf("Could not configure logger. %s", logErr)
 	}
 	w := ioutil.Discard
-	if cfg != nil && cfg.WithError() {
+
+	// read directly from flags, as unknown flag errors are thrown before the config is read
+	if localWithError, fErr := cmd.Flags().GetBool("withError"); localWithError && fErr == nil {
+		w = cmd.OutOrStdout()
+	} else if cfg != nil && cfg.WithError() {
 		w = cmd.OutOrStdout()
 	}
 
