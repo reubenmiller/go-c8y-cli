@@ -42,7 +42,7 @@ Get all the device groups (with "test" in their name). Note the Expand cmdlet wo
         [array] $AllItems = foreach ($item in $InputObject) {
             if (($item -is [string])) {
                 if ($item -match "\*") {
-                    PSc8y\Get-DeviceGroupCollection -Name $item -Dry:$false -PageSize 100
+                    PSc8y\Get-DeviceGroupCollection -Name $item -Dry:$false -PageSize 100 -AsPSObject
                 }
                 else {
                     $item

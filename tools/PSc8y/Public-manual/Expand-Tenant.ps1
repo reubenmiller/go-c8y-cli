@@ -43,7 +43,7 @@ Get all the tenant object (with app in their name). Note the Expand cmdlet won't
         {
             if ("$iTenant".Contains("*"))
             {
-                Get-TenantCollection -PageSize 2000 | Where-Object {
+                Get-TenantCollection -PageSize 2000 -AsPSObject | Where-Object {
                     $_.id -like $iTenant
                 } -Dry:$false
             }

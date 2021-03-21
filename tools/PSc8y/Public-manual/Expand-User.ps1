@@ -47,7 +47,7 @@ Get all the user object (with app in their name). Note the Expand cmdlet won't d
                     # Remove any wildcard characters, as they are not supported by c8y
                     $iUserNormalized = $iUser -replace "\*", ""
 
-                    PSc8y\Get-UserCollection -Username $iUserNormalized -Dry:$false -PageSize 100 |
+                    PSc8y\Get-UserCollection -Username $iUserNormalized -Dry:$false -PageSize 100 -AsPSObject |
                         Where-Object { $_.id -like $iUser -or $_.userName -like $iUser }
                 } else {
                     $iUser

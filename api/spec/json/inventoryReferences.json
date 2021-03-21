@@ -435,7 +435,7 @@
           {
             "description": "Get an existing child device reference",
             "beforeEach": [
-              "$Agent = New-TestDevice -AsAgent",
+              "$Agent = New-TestAgent",
               "$Device = New-TestDevice",
               "$Ref = Add-ChildDeviceToDevice -Device $Agent.id -NewChild $Device.id"
             ],
@@ -485,7 +485,7 @@
           {
             "description": "Get an existing child asset reference",
             "beforeEach": [
-              "$Agent = New-TestDevice -AsAgent",
+              "$Agent = New-TestAgent",
               "$Device = New-TestDevice",
               "$Ref = Add-AssetToGroup -Group $Agent.id -NewChildDevice $Device.id"
             ],

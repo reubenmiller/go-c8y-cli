@@ -326,7 +326,7 @@ endpoints:
         powershell:
           - description: Get an existing child device reference
             beforeEach:
-              - $Agent = New-TestDevice -AsAgent
+              - $Agent = New-TestAgent
               - $Device = New-TestDevice
               - $Ref = Add-ChildDeviceToDevice -Device $Agent.id -NewChild $Device.id
             command: Get-ChildDeviceReference -Device $Agent.id -Reference $Ref.id
@@ -361,7 +361,7 @@ endpoints:
         powershell:
           - description: Get an existing child asset reference
             beforeEach:
-              - $Agent = New-TestDevice -AsAgent
+              - $Agent = New-TestAgent
               - $Device = New-TestDevice
               - $Ref = Add-AssetToGroup -Group $Agent.id -NewChildDevice $Device.id
             command: Get-ChildAssetReference -Asset $Agent.id -Reference $Ref.id

@@ -14,7 +14,7 @@ ConvertFrom-Json can not be used for streamed json as it waits to receive all pi
 to convert the json to PowerShell objects.
 
 .EXAMPLE
-Get-DeviceCollection | Get-Device -AsJson | ConvertFrom-JsonStream
+Get-DeviceCollection | Get-Device -AsPSObject:$false | ConvertFrom-JsonStream
 
 Convert the pipeline objects to json as they come through the pipeline.
 

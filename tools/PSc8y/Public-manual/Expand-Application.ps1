@@ -59,7 +59,7 @@ Expand applications that match a name of "*" and have a type of "MICROSERVICE"
             }
 
             if ($iApp.applicationId) {
-                PSc8y\Get-Application -Id $iApp.applicationId -Dry:$false
+                PSc8y\Get-Application -Id $iApp.applicationId -Dry:$false -AsPSObject
                 continue
             }
 
@@ -69,7 +69,7 @@ Expand applications that match a name of "*" and have a type of "MICROSERVICE"
                 # PSc8y\Get-Application -Id $iApp -Dry:$false
             } else {
                 # Provided with a query
-                PSc8y\Get-ApplicationCollection -PageSize 2000 |
+                PSc8y\Get-ApplicationCollection -PageSize 2000 -AsPSObject |
                         Where-Object { $_.name -like "$iApp" }
             }
         }

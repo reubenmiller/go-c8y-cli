@@ -116,7 +116,7 @@ Get a measurement collection, then retrieve all the measurements by iterating th
       while (!$Done) {
         Write-Verbose "Requesting next item: (iteration $Iteration)"
 
-        $Result = Invoke-ClientRequest -Method Get -Uri $Result.next -Raw | ConvertFrom-Json
+        $Result = Invoke-ClientRequest -Method Get -Uri $Result.next -Raw -AsPSObject:$false | ConvertFrom-Json
 
         # Detect the type of c8y object
         $Prop = Get-ResultProperty -InputObject $Result
