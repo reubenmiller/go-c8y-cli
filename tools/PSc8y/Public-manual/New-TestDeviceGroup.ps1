@@ -70,7 +70,7 @@ Create a test device group with 10 newly created devices
 
         $GroupName = New-RandomString -Prefix "${Name}_"
         $options["Name"] = $GroupName
-        $options["Type"] = $Type
+        $options["Type"] = $TypeName
         $options["Data"] = $Data
         $Group = PSc8y\New-ManagedObject @options 
         

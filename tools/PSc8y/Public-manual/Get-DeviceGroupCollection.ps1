@@ -7,7 +7,7 @@ Get a collection of device groups
 Get a collection of device groups. Device groups are used to arrange devices together.
 
 .LINK
-c8y devices listDeviceGroups
+c8y devicegroups list
 
 .EXAMPLE
 Get-DeviceGroupCollection -Name *Room*
@@ -69,7 +69,7 @@ Get a list of devices groups which have been created more recently than 2020-01-
             Use-CallerPreference -Cmdlet $PSCmdlet -SessionState $ExecutionContext.SessionState
         }
 
-        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "devices listDeviceGroups"
+        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "devicegroups list"
         $ClientOptions = Get-ClientOutputOption $PSBoundParameters
         $TypeOptions = @{
             Type = "application/vnd.com.nsn.cumulocity.customDeviceGroupCollection+json"
@@ -81,11 +81,11 @@ Get a list of devices groups which have been created more recently than 2020-01-
     Process {
 
         if ($ClientOptions.ConvertToPS) {
-            c8y devices listDeviceGroups $c8yargs `
+            c8y devicegroups list $c8yargs `
             | ConvertFrom-ClientOutput @TypeOptions
         }
         else {
-            c8y devices listDeviceGroups $c8yargs
+            c8y devicegroups list $c8yargs
         }
     }
 
