@@ -32,7 +32,7 @@ endpoints:
     path: /tenant/currentTenant
     accept: application/vnd.com.nsn.cumulocity.currentTenant+json
     collectionType: application/vnd.com.nsn.cumulocity.application+json
-    collectionProperty: applications.references
+    collectionProperty: applications.references.#.application
     alias:
         go: listApplications
         powershell: Get-CurrentTenantApplicationCollection
