@@ -66,10 +66,13 @@ func listRun(opts *ListOptions) error {
 	w := opts.IO.Out
 
 	// TODO: Change to json writer
-	for _, alias := range keys {
-		_, err := fmt.Fprintf(w, "%s: %s\n", alias, aliasCfg[alias])
-		if err != nil {
-			return err
+	if opts.IO.IsStdoutTTY() {
+		cs := opts.IO.ColorScheme()
+		for _, alias := range keys {
+			_, err := fmt.Fprintf(w, "%s: %s\n", cs.CyanBold(alias), aliasCfg[alias])
+			if err != nil {
+				return err
+			}
 		}
 	}
 

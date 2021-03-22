@@ -204,6 +204,9 @@ const (
 
 	// SettingsSessionFile Session file to use for api authentication
 	SettingsSessionFile = "settings.defaults.session"
+
+	// SettingsAliases list of aliases
+	SettingsAliases = "settings.aliases"
 )
 
 var (
@@ -742,7 +745,11 @@ func (c *Config) DecryptSession() error {
 }
 
 func (c *Config) Aliases() map[string]string {
-	return c.viper.GetStringMapString("settings.aliases")
+	return c.viper.GetStringMapString(SettingsAliases)
+}
+
+func (c *Config) SetAliases(v map[string]string) {
+	c.Persistent.Set(SettingsAliases, v)
 }
 
 // GetMaxWorkers maximum number of workers allowed. If the number of works is larger than this value then an error will be raised

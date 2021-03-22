@@ -2,6 +2,7 @@ package alias
 
 import (
 	"github.com/MakeNowJust/heredoc"
+	deleteCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/alias/delete"
 	listCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/alias/list"
 	setCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/alias/set"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmdutil"
@@ -23,6 +24,7 @@ func NewCmdAlias(f *cmdutil.Factory) *cobra.Command {
 
 	cmd.AddCommand(listCmd.NewCmdList(f, nil))
 	cmd.AddCommand(setCmd.NewCmdSet(f, nil))
+	cmd.AddCommand(deleteCmd.NewCmdDelete(f, nil))
 
 	return cmd
 }

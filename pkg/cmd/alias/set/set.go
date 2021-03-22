@@ -117,6 +117,10 @@ func setRun(opts *SetOptions) error {
 	}
 
 	aliasCfg[opts.Name] = expansion
+	cfg.SetAliases(aliasCfg)
+	if err := cfg.WritePersistentConfig(); err != nil {
+		return err
+	}
 
 	if isTerminal {
 		fmt.Fprintln(opts.IO.ErrOut, successMsg)
@@ -132,5 +136,6 @@ func validCommand(rootCmd *cobra.Command, expansion string) bool {
 	}
 
 	cmd, _, err := rootCmd.Traverse(split)
+	fmt.Printf("traverse cmd. cmd=%s, useLine=%s, split=%v\n", cmd.Use, cmd.UseLine(), split)
 	return err == nil && cmd != rootCmd
 }

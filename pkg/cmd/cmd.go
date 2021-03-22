@@ -60,6 +60,7 @@ func MainRun() {
 	expandedArgs, err := setArgs(cmd.Command)
 	if err != nil {
 		Logger.Errorf("Could not expand aliases. %s", err)
+		os.Exit(int(cmderrors.ExitInvalidAlias))
 	}
 	Logger.Debugf("Expanded args: %v", expandedArgs)
 	cmd.SetArgs(expandedArgs)
@@ -141,7 +142,6 @@ func setArgs(cmd *cobra.Command) ([]string, error) {
 		aliases := v.GetStringMapString("settings.aliases")
 		expandedArgs, isShell, err = expand.ExpandAlias(aliases, os.Args, nil)
 		if err != nil {
-			Logger.Errorf("failed to process aliases:  %s", err)
 			return nil, err
 		}
 
@@ -150,7 +150,6 @@ func setArgs(cmd *cobra.Command) ([]string, error) {
 		if isShell {
 			exe, err := safeexec.LookPath(expandedArgs[0])
 			if err != nil {
-				Logger.Errorf("failed to run external command: %s", err)
 				return nil, err
 			}
 
@@ -166,9 +165,9 @@ func setArgs(cmd *cobra.Command) ([]string, error) {
 					return nil, cmderrors.NewUserErrorWithExitCode(cmderrors.ExitCode(ee.ExitCode()), ee)
 				}
 
-				Logger.Errorf("failed to run external command: %s", err)
 				return nil, err
 			}
+			os.Exit(int(cmderrors.ExitOK))
 		}
 	}
 	return expandedArgs, nil
