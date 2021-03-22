@@ -32,7 +32,7 @@
         },
         {
             "name": "bootstrapuser",
-            "priority": 500,
+            "priority": 510,
             "contentType": "vnd.com.nsn.cumulocity.user",
             "columns": [
                 "tenant",
