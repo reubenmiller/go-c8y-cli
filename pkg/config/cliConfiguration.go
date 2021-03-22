@@ -18,6 +18,7 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/pkg/jsonfilter"
 	"github.com/reubenmiller/go-c8y-cli/pkg/logger"
+	"github.com/reubenmiller/go-c8y-cli/pkg/pathresolver"
 	"github.com/reubenmiller/go-c8y-cli/pkg/prompt"
 	"github.com/reubenmiller/go-c8y-cli/pkg/totp"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
@@ -200,6 +201,9 @@ const (
 
 	// SettingsUseEnvironment Read session authentication from environment variables instead of from configuration
 	SettingsUseEnvironment = "settings.defaults.useEnv"
+
+	// SettingsSessionFile Session file to use for api authentication
+	SettingsSessionFile = "settings.defaults.session"
 )
 
 var (
@@ -235,6 +239,8 @@ type Config struct {
 	SecretText string
 
 	Logger *logger.Logger
+
+	sessionFile string
 }
 
 // NewConfig returns a new CLI configuration object
@@ -1171,13 +1177,30 @@ func (c *Config) LogErrorF(err error, format string, args ...interface{}) {
 
 // GetSessionFile detect the session file path
 func (c *Config) GetSessionFile() string {
-	sessionFile := c.viper.GetString("c8y.settings.defaults.session")
+	sessionFile := c.viper.GetString(SettingsSessionFile)
+	if c.sessionFile != "" && sessionFile == c.sessionFile {
+		return c.sessionFile
+	}
 
 	if sessionFile == "" {
 		// TODO: Create viper env alias rather than checking it manually
 		sessionFile = os.Getenv("C8Y_SESSION")
+	} else {
+		if _, fileErr := os.Stat(sessionFile); fileErr != nil {
+			home := c.GetSessionHomeDir()
+			c.Logger.Debugf("Resolving session %s in %s", sessionFile, home)
+			matches, err := pathresolver.ResolvePaths(home, sessionFile, "json", "ignore")
+			if err != nil {
+				c.Logger.Warnf("Failed to find session. %s", err)
+			}
+			if len(matches) > 0 {
+				sessionFile = matches[0]
+				c.Logger.Debugf("Resolved session. %s", sessionFile)
+			}
+		}
 	}
-	return c.ExpandHomePath(sessionFile)
+	c.sessionFile = c.ExpandHomePath(sessionFile)
+	return c.sessionFile
 }
 
 // ReadConfigFiles reads multiple configuration files to load the c8y session and other settings
@@ -1187,6 +1210,7 @@ func (c *Config) GetSessionFile() string {
 // 2. load session file (by path)
 // 3. load session file (by name)
 func (c *Config) ReadConfigFiles(client *c8y.Client) (path string, err error) {
+	c.Logger.Debugf("Reading configuration files")
 	v := c.viper
 	home := c.GetSessionHomeDir()
 	v.AddConfigPath(".")
@@ -1228,8 +1252,6 @@ func (c *Config) ReadConfigFiles(client *c8y.Client) (path string, err error) {
 	if err != nil {
 		c.Logger.Debugf("Failed to merge config. %s", err)
 	}
-
-	c.Logger.Infof("Loaded session: %s", HideSensitiveInformationIfActive(client, path))
 
 	return path, err
 }

@@ -314,8 +314,18 @@ func (c *CmdRoot) Configure() error {
 	}
 
 	// config/env binding
+	previousSession := cfg.GetSessionFile()
 	if err := cfg.BindPFlag(c.Command.PersistentFlags()); err != nil {
 		log.Warningf("Some configuration binding failed. %s", err)
+	}
+
+	// re-load config if they are using the session argument
+	currentSession := cfg.GetSessionFile()
+	if previousSession != currentSession {
+		log.Infof("Session file has changed from %s to %s. Reading new session", previousSession, currentSession)
+		if _, err := cfg.ReadConfigFiles(nil); err != nil {
+			log.Infof("Failed to read configuration. Trying to proceed anyway. %s", err)
+		}
 	}
 
 	//
@@ -430,6 +440,9 @@ func (c *CmdRoot) checkSessionExists(cmd *cobra.Command, args []string) error {
 	sessionFile := cfg.GetSessionFile()
 	if sessionFile != "" {
 		log.Infof("Loaded session: %s", config.HideSensitiveInformationIfActive(client, sessionFile))
+		if _, err := os.Stat(sessionFile); err != nil {
+			log.Warnf("Failed to verify session file. %s", err)
+		}
 	}
 
 	log.Debugf("command str: %s", cmdStr)
