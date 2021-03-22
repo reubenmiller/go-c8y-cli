@@ -171,9 +171,9 @@ func (f *Factory) GetViewProperties(cfg *config.Config, cmd *cobra.Command, outp
 
 		if err != nil || len(props) == 0 {
 			if err != nil {
-				log.Warnf("Failed to detect view. defaulting to '**'. %s", err)
+				log.Infof("Failed to detect view. defaulting to '**'. %s", err)
 			} else {
-				log.Warn("Failed to detect view. defaulting to '**'")
+				log.Info("Failed to detect view. defaulting to '**'")
 			}
 			viewProperties = append(viewProperties, "**")
 		} else {
