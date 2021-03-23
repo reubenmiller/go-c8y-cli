@@ -449,7 +449,9 @@ func (c *CmdRoot) checkSessionExists(cmd *cobra.Command, args []string) error {
 	log.Infof("command: c8y %s", utilities.GetCommandLineArgs())
 	log.Debugf("output format: %s", cfg.GetOutputFormat().String())
 
-	activityHandler.LogCommand(cmd, args, cmdStr, c.ActivityLogMessage)
+	if cmd.Name() != cobra.ShellCompRequestCmd && cmd.CalledAs() != cobra.ShellCompNoDescRequestCmd {
+		activityHandler.LogCommand(cmd, args, cmdStr, c.ActivityLogMessage)
+	}
 
 	if !cmdutil.IsAuthCheckEnabled(cmd) {
 		return nil
