@@ -2,6 +2,7 @@ package list
 
 import (
 	"fmt"
+	"io"
 	"sort"
 
 	"github.com/MakeNowJust/heredoc"
@@ -49,32 +50,48 @@ func listRun(opts *ListOptions) error {
 	}
 
 	aliasCfg := cfg.Aliases()
+	commonAliasCfg := cfg.CommonAliases()
 
-	if len(aliasCfg) == 0 {
+	if len(aliasCfg) == 0 && len(commonAliasCfg) == 0 {
 		if opts.IO.IsStdoutTTY() {
 			fmt.Fprintf(opts.IO.ErrOut, "no aliases configured\n")
 		}
 		return nil
 	}
 
+	w := opts.IO.Out
+
+	err = printAliases(w, opts.IO.ColorScheme(), "session aliases", aliasCfg)
+	if err != nil {
+		return err
+	}
+
+	err = printAliases(w, opts.IO.ColorScheme(), "common aliases", commonAliasCfg)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func printAliases(w io.Writer, cs *iostreams.ColorScheme, title string, aliases map[string]string) error {
+	if len(aliases) == 0 {
+		return nil
+	}
 	keys := []string{}
-	for alias := range aliasCfg {
+	for alias := range aliases {
 		keys = append(keys, alias)
 	}
 	sort.Strings(keys)
 
-	w := opts.IO.Out
+	fmt.Fprintf(w, "\n%s\n", cs.Bold(cs.Magenta(title)))
 
 	// TODO: Change to json writer
-	if opts.IO.IsStdoutTTY() {
-		cs := opts.IO.ColorScheme()
-		for _, alias := range keys {
-			_, err := fmt.Fprintf(w, "%s: %s\n", cs.CyanBold(alias), aliasCfg[alias])
-			if err != nil {
-				return err
-			}
+	for _, alias := range keys {
+		_, err := fmt.Fprintf(w, "%s: %s\n", cs.CyanBold(alias), aliases[alias])
+		if err != nil {
+			return err
 		}
 	}
-
 	return nil
 }

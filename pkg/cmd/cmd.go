@@ -139,7 +139,10 @@ func setArgs(cmd *cobra.Command) ([]string, error) {
 		isShell := false
 
 		v := viper.GetViper()
-		aliases := v.GetStringMapString("settings.aliases")
+		aliases := v.GetStringMapString(config.SettingsCommonAliases)
+		for k, v := range v.GetStringMapString(config.SettingsAliases) {
+			aliases[k] = v
+		}
 		expandedArgs, isShell, err = expand.ExpandAlias(aliases, os.Args, nil)
 		if err != nil {
 			return nil, err

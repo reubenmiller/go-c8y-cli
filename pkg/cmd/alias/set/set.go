@@ -44,20 +44,21 @@ func NewCmdSet(f *cmdutil.Factory, runF func(*SetOptions) error) *cobra.Command 
 			Quotes must always be used when defining a command as in the examples.
 		`),
 		Example: heredoc.Doc(`
-			$ c8y alias set createTestDevice 'c8y devices create --template test.device.json'
+			$ c8y alias set createTestDevice 'devices create --template test.device.json'
 			$ c8y createTestDevice
 			#=> c8y devices create --template test.device.json
-			
-			$ c8y alias set bugs 'issue list --label="bugs"'
-			$ c8y bugs
-			$ c8y alias set homework 'issue list --assigned @me'
-			$ c8y homework
-			$ c8y alias set epicsBy 'issue list --author="$1" --label="epic"'
-			$ c8y epicsBy vilmibm
-			#=> c8y issue list --author="vilmibm" --label="epic"
-			$ c8y alias set --shell igrep 'c8y issue list --label="$1" | grep $2'
-			$ c8y igrep epic foo
-			#=> c8y issue list --label="epic" | grep "foo"
+
+			$ c8y alias set listAlarmsByType 'alarms list --type="$1"'
+			$ c8y listAlarmsByType myType
+			#=> c8y alarms list --type="myType"
+
+			$ c8y alias set recentEvents 'operations list --dateFrom="-1h"'
+			$ c8y recentEvents
+			#=> c8y operations list --dateFrom="-1h"
+
+			$ c8y alias set --shell findInAudit 'c8y auditrecords list --dateFrom="-30d" --view all --includeAll | grep $1'
+			$ c8y findInAudit deleted
+			#=> c8y auditrecords list --dateFrom="-30d" --output json --view all --includeAll | grep deleted
 		`),
 		Args: cobra.ExactArgs(2),
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -136,6 +137,5 @@ func validCommand(rootCmd *cobra.Command, expansion string) bool {
 	}
 
 	cmd, _, err := rootCmd.Traverse(split)
-	fmt.Printf("traverse cmd. cmd=%s, useLine=%s, split=%v\n", cmd.Use, cmd.UseLine(), split)
 	return err == nil && cmd != rootCmd
 }

@@ -207,6 +207,9 @@ const (
 
 	// SettingsAliases list of aliases
 	SettingsAliases = "settings.aliases"
+
+	// SettingsCommonAliases list of common aliases which are usually kept in the global configuration and shared amongst sessions
+	SettingsCommonAliases = "settings.commonAliases"
 )
 
 var (
@@ -744,10 +747,17 @@ func (c *Config) DecryptSession() error {
 	return c.WritePersistentConfig()
 }
 
-func (c *Config) Aliases() map[string]string {
-	return c.viper.GetStringMapString(SettingsAliases)
+// CommonAliases Get common aliases from the global configuration file
+func (c *Config) CommonAliases() map[string]string {
+	return c.viper.GetStringMapString(SettingsCommonAliases)
 }
 
+// Aliases get aliases configured in the current session
+func (c *Config) Aliases() map[string]string {
+	return c.Persistent.GetStringMapString(SettingsAliases)
+}
+
+// SetAliases set aliases for the current session
 func (c *Config) SetAliases(v map[string]string) {
 	c.Persistent.Set(SettingsAliases, v)
 }

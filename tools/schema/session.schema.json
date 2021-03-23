@@ -237,6 +237,14 @@
                 "ci": {
                     "description": "Enable CI/CD mode where all commands are enabled (create/update/delete)",
                     "type": "boolean"
+                },
+                "aliases": {
+                    "type": "object",
+                    "description": "Aliases"
+                },
+                "commonAliases": {
+                    "type": "object",
+                    "description": "Common aliases (usually only set in the global settings.json file)"
                 }
             }
         }
