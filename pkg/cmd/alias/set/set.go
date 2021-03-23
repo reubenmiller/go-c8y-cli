@@ -56,9 +56,9 @@ func NewCmdSet(f *cmdutil.Factory, runF func(*SetOptions) error) *cobra.Command 
 			$ c8y recentEvents
 			#=> c8y operations list --dateFrom="-1h"
 
-			$ c8y alias set --shell findInAudit 'c8y auditrecords list --dateFrom="-30d" --view all --includeAll | grep $1'
+			$ c8y alias set --shell findInAudit 'c8y auditrecords list --dateFrom="-30d" --view auto --includeAll | grep $1'
 			$ c8y findInAudit deleted
-			#=> c8y auditrecords list --dateFrom="-30d" --output json --view all --includeAll | grep deleted
+			#=> c8y auditrecords list --dateFrom="-30d" --output json --view auto --includeAll | grep deleted
 		`),
 		Args: cobra.ExactArgs(2),
 		RunE: func(cmd *cobra.Command, args []string) error {

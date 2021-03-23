@@ -217,8 +217,8 @@ var (
 )
 
 const (
-	ViewsNone = "none"
-	ViewsAll  = "all"
+	ViewsOff  = "off"
+	ViewsAuto = "auto"
 )
 
 // GetSettingsName get the settings name from a flag name
