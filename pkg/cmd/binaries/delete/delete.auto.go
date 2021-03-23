@@ -1,5 +1,5 @@
 // Code generated from specification version 1.0.0: DO NOT EDIT
-package deletebinary
+package delete
 
 import (
 	"io"
@@ -16,20 +16,20 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// DeleteBinaryCmd command
-type DeleteBinaryCmd struct {
+// DeleteCmd command
+type DeleteCmd struct {
 	*subcommand.SubCommand
 
 	factory *cmdutil.Factory
 }
 
-// NewDeleteBinaryCmd creates a command to Delete binary
-func NewDeleteBinaryCmd(f *cmdutil.Factory) *DeleteBinaryCmd {
-	ccmd := &DeleteBinaryCmd{
+// NewDeleteCmd creates a command to Delete binary
+func NewDeleteCmd(f *cmdutil.Factory) *DeleteCmd {
+	ccmd := &DeleteCmd{
 		factory: f,
 	}
 	cmd := &cobra.Command{
-		Use:   "deleteBinary",
+		Use:   "delete",
 		Short: "Delete binary",
 		Long:  `Delete a binary from the tenant. This delete operation can not be undone.`,
 		Example: heredoc.Doc(`
@@ -65,7 +65,7 @@ Delete a binary
 }
 
 // RunE executes the command
-func (n *DeleteBinaryCmd) RunE(cmd *cobra.Command, args []string) error {
+func (n *DeleteCmd) RunE(cmd *cobra.Command, args []string) error {
 	cfg, err := n.factory.Config()
 	if err != nil {
 		return err

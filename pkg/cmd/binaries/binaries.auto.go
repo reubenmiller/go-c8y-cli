@@ -2,7 +2,7 @@ package binaries
 
 import (
 	cmdCreate "github.com/reubenmiller/go-c8y-cli/pkg/cmd/binaries/create"
-	cmdDeleteBinary "github.com/reubenmiller/go-c8y-cli/pkg/cmd/binaries/deletebinary"
+	cmdDelete "github.com/reubenmiller/go-c8y-cli/pkg/cmd/binaries/delete"
 	cmdGet "github.com/reubenmiller/go-c8y-cli/pkg/cmd/binaries/get"
 	cmdList "github.com/reubenmiller/go-c8y-cli/pkg/cmd/binaries/list"
 	cmdUpdate "github.com/reubenmiller/go-c8y-cli/pkg/cmd/binaries/update"
@@ -29,7 +29,7 @@ func NewSubCommand(f *cmdutil.Factory) *SubCmdBinaries {
 	cmd.AddCommand(cmdGet.NewGetCmd(f).GetCommand())
 	cmd.AddCommand(cmdCreate.NewCreateCmd(f).GetCommand())
 	cmd.AddCommand(cmdUpdate.NewUpdateCmd(f).GetCommand())
-	cmd.AddCommand(cmdDeleteBinary.NewDeleteBinaryCmd(f).GetCommand())
+	cmd.AddCommand(cmdDelete.NewDeleteCmd(f).GetCommand())
 
 	ccmd.SubCommand = subcommand.NewSubCommand(cmd)
 

@@ -227,7 +227,7 @@
       "method": "DELETE",
       "path": "/inventory/binaries/{id}",
       "alias": {
-        "go": "deleteBinary",
+        "go": "delete",
         "powershell": "Remove-Binary"
       },
       "examples": {
