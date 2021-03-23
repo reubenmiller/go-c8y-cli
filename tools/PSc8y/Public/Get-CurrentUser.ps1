@@ -8,7 +8,7 @@ Get current user
 Get the user representation associated with the current credentials used by the request
 
 .LINK
-c8y users getCurrentUser
+c8y currentuser get
 
 .EXAMPLE
 PS> Get-CurrentUser
@@ -35,7 +35,7 @@ Get the current user
             Use-CallerPreference -Cmdlet $PSCmdlet -SessionState $ExecutionContext.SessionState
         }
 
-        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "users getCurrentUser"
+        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "currentuser get"
         $ClientOptions = Get-ClientOutputOption $PSBoundParameters
         $TypeOptions = @{
             Type = "application/vnd.com.nsn.cumulocity.currentUser+json"
@@ -47,11 +47,11 @@ Get the current user
     Process {
 
         if ($ClientOptions.ConvertToPS) {
-            c8y users getCurrentUser $c8yargs `
+            c8y currentuser get $c8yargs `
             | ConvertFrom-ClientOutput @TypeOptions
         }
         else {
-            c8y users getCurrentUser $c8yargs
+            c8y currentuser get $c8yargs
         }
     }
 

@@ -8,7 +8,7 @@ Logout current user
 Logout the current user. This will invalidate the token associated with the user when using OAUTH_INTERNAL
 
 .LINK
-c8y users logout
+c8y currentuser logout
 
 .EXAMPLE
 PS> Invoke-UserLogout
@@ -35,7 +35,7 @@ Log out the current user
             Use-CallerPreference -Cmdlet $PSCmdlet -SessionState $ExecutionContext.SessionState
         }
 
-        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "users logout"
+        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "currentuser logout"
         $ClientOptions = Get-ClientOutputOption $PSBoundParameters
         $TypeOptions = @{
             Type = ""
@@ -47,11 +47,11 @@ Log out the current user
     Process {
 
         if ($ClientOptions.ConvertToPS) {
-            c8y users logout $c8yargs `
+            c8y currentuser logout $c8yargs `
             | ConvertFrom-ClientOutput @TypeOptions
         }
         else {
-            c8y users logout $c8yargs
+            c8y currentuser logout $c8yargs
         }
     }
 

@@ -5,16 +5,13 @@ import (
 	cmdCreate "github.com/reubenmiller/go-c8y-cli/pkg/cmd/users/create"
 	cmdDelete "github.com/reubenmiller/go-c8y-cli/pkg/cmd/users/delete"
 	cmdGet "github.com/reubenmiller/go-c8y-cli/pkg/cmd/users/get"
-	cmdGetCurrentUser "github.com/reubenmiller/go-c8y-cli/pkg/cmd/users/getcurrentuser"
 	cmdGetInventoryRole "github.com/reubenmiller/go-c8y-cli/pkg/cmd/users/getinventoryrole"
 	cmdGetUserByName "github.com/reubenmiller/go-c8y-cli/pkg/cmd/users/getuserbyname"
 	cmdList "github.com/reubenmiller/go-c8y-cli/pkg/cmd/users/list"
 	cmdListInventoryRoles "github.com/reubenmiller/go-c8y-cli/pkg/cmd/users/listinventoryroles"
 	cmdListUserMembership "github.com/reubenmiller/go-c8y-cli/pkg/cmd/users/listusermembership"
-	cmdLogout "github.com/reubenmiller/go-c8y-cli/pkg/cmd/users/logout"
 	cmdResetUserPassword "github.com/reubenmiller/go-c8y-cli/pkg/cmd/users/resetuserpassword"
 	cmdUpdate "github.com/reubenmiller/go-c8y-cli/pkg/cmd/users/update"
-	cmdUpdateCurrentUser "github.com/reubenmiller/go-c8y-cli/pkg/cmd/users/updatecurrentuser"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmdutil"
 	"github.com/spf13/cobra"
 )
@@ -33,8 +30,6 @@ func NewSubCommand(f *cmdutil.Factory) *SubCmdUsers {
 	}
 
 	// Subcommands
-	cmd.AddCommand(cmdGetCurrentUser.NewGetCurrentUserCmd(f).GetCommand())
-	cmd.AddCommand(cmdUpdateCurrentUser.NewUpdateCurrentUserCmd(f).GetCommand())
 	cmd.AddCommand(cmdListInventoryRoles.NewListInventoryRolesCmd(f).GetCommand())
 	cmd.AddCommand(cmdGetInventoryRole.NewGetInventoryRoleCmd(f).GetCommand())
 	cmd.AddCommand(cmdList.NewListCmd(f).GetCommand())
@@ -45,7 +40,6 @@ func NewSubCommand(f *cmdutil.Factory) *SubCmdUsers {
 	cmd.AddCommand(cmdUpdate.NewUpdateCmd(f).GetCommand())
 	cmd.AddCommand(cmdResetUserPassword.NewResetUserPasswordCmd(f).GetCommand())
 	cmd.AddCommand(cmdListUserMembership.NewListUserMembershipCmd(f).GetCommand())
-	cmd.AddCommand(cmdLogout.NewLogoutCmd(f).GetCommand())
 
 	ccmd.SubCommand = subcommand.NewSubCommand(cmd)
 

@@ -7,100 +7,6 @@
   },
   "endpoints": [
     {
-      "name": "getUserCurrent",
-      "description": "Get current user",
-      "descriptionLong": "Get the user representation associated with the current credentials used by the request",
-      "method": "GET",
-      "path": "/user/currentUser",
-      "accept": "application/vnd.com.nsn.cumulocity.currentUser+json",
-      "alias": {
-        "go": "getCurrentUser",
-        "powershell": "Get-CurrentUser"
-      },
-      "examples": {
-        "powershell": [
-          {
-            "description": "Get the current user",
-            "command": "Get-CurrentUser"
-          }
-        ],
-        "go": [
-          {
-            "description": "Get the current user",
-            "command": "c8y users getCurrentUser"
-          }
-        ]
-      }
-    },
-    {
-      "name": "updateUserCurrent",
-      "description": "Update current user",
-      "descriptionLong": "Update properties or settings of your user such as first/last name, email or password\n",
-      "method": "PUT",
-      "path": "/user/currentUser",
-      "accept": "application/vnd.com.nsn.cumulocity.currentUser+json",
-      "alias": {
-        "go": "updateCurrentUser",
-        "powershell": "Update-CurrentUser"
-      },
-      "examples": {
-        "powershell": [
-          {
-            "description": "Update the current user's last name",
-            "command": "Update-CurrentUser -LastName \"Smith\""
-          }
-        ],
-        "go": [
-          {
-            "description": "Update the current user's last name",
-            "command": "c8y users updateCurrentUser --lastName \"Smith\""
-          }
-        ]
-      },
-      "body": [
-        {
-          "name": "firstName",
-          "type": "string",
-          "required": false,
-          "description": "User first name"
-        },
-        {
-          "name": "lastName",
-          "type": "string",
-          "required": false,
-          "description": "User last name"
-        },
-        {
-          "name": "phone",
-          "type": "string",
-          "required": false,
-          "description": "User phone number. Format: '+[country code][number]', has to be a valid MSISDN"
-        },
-        {
-          "name": "email",
-          "type": "string",
-          "required": false,
-          "description": "User email address"
-        },
-        {
-          "name": "enabled",
-          "type": "string",
-          "required": false,
-          "validationSet": [
-            "true",
-            "false"
-          ],
-          "description": "User activation status (true/false)"
-        },
-        {
-          "name": "password",
-          "type": "string",
-          "required": false,
-          "description": "User password. Min: 6, max: 32 characters. Only Latin1 chars allowed"
-        }
-      ]
-    },
-    {
       "name": "getInventoryRoleCollection",
       "description": "Get inventory role collection",
       "descriptionLong": "Get a list of inventory roles",
@@ -709,32 +615,6 @@
           "position": 99
         }
       ]
-    },
-    {
-      "name": "logout",
-      "description": "Logout current user",
-      "descriptionLong": "Logout the current user. This will invalidate the token associated with the user when using OAUTH_INTERNAL",
-      "method": "POST",
-      "path": "/user/logout",
-      "accept": "",
-      "alias": {
-        "go": "logout",
-        "powershell": "Invoke-UserLogout"
-      },
-      "examples": {
-        "powershell": [
-          {
-            "description": "Log out the current user",
-            "command": "Invoke-UserLogout"
-          }
-        ],
-        "go": [
-          {
-            "description": "Log out the current user",
-            "command": "c8y users logout"
-          }
-        ]
-      }
     }
   ]
 }

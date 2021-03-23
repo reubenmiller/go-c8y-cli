@@ -1,5 +1,5 @@
 // Code generated from specification version 1.0.0: DO NOT EDIT
-package updatecurrentuser
+package update
 
 import (
 	"io"
@@ -16,25 +16,25 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// UpdateCurrentUserCmd command
-type UpdateCurrentUserCmd struct {
+// UpdateCmd command
+type UpdateCmd struct {
 	*subcommand.SubCommand
 
 	factory *cmdutil.Factory
 }
 
-// NewUpdateCurrentUserCmd creates a command to Update current user
-func NewUpdateCurrentUserCmd(f *cmdutil.Factory) *UpdateCurrentUserCmd {
-	ccmd := &UpdateCurrentUserCmd{
+// NewUpdateCmd creates a command to Update current user
+func NewUpdateCmd(f *cmdutil.Factory) *UpdateCmd {
+	ccmd := &UpdateCmd{
 		factory: f,
 	}
 	cmd := &cobra.Command{
-		Use:   "updateCurrentUser",
+		Use:   "update",
 		Short: "Update current user",
 		Long: `Update properties or settings of your user such as first/last name, email or password
 `,
 		Example: heredoc.Doc(`
-$ c8y users updateCurrentUser --lastName "Smith"
+$ c8y currentuser update --lastName "Smith"
 Update the current user's last name
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
@@ -72,7 +72,7 @@ Update the current user's last name
 }
 
 // RunE executes the command
-func (n *UpdateCurrentUserCmd) RunE(cmd *cobra.Command, args []string) error {
+func (n *UpdateCmd) RunE(cmd *cobra.Command, args []string) error {
 	cfg, err := n.factory.Config()
 	if err != nil {
 		return err

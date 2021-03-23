@@ -28,6 +28,7 @@ import (
 	completionCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/completion"
 	currentapplicationCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/currentapplication"
 	currenttenantCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/currenttenant"
+	currentuserCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/currentuser"
 	databrokerCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/databroker"
 	devicecredentialsCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/devicecredentials"
 	devicegroupsCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/devicegroups"
@@ -233,6 +234,7 @@ func NewCmdRoot(f *cmdutil.Factory, version, buildDate string) *CmdRoot {
 		settingsCmd.NewSubCommand(f).GetCommand(),
 		realtimeCmd.NewSubCommand(f).GetCommand(),
 		currenttenantCmd.NewSubCommand(f).GetCommand(),
+		currentuserCmd.NewSubCommand(f).GetCommand(),
 	}
 
 	cmd.AddCommand(commands...)

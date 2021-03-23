@@ -1,8 +1,7 @@
 // Code generated from specification version 1.0.0: DO NOT EDIT
-package getcurrentuser
+package logout
 
 import (
-	"fmt"
 	"io"
 	"net/http"
 
@@ -17,28 +16,28 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// GetCurrentUserCmd command
-type GetCurrentUserCmd struct {
+// LogoutCmd command
+type LogoutCmd struct {
 	*subcommand.SubCommand
 
 	factory *cmdutil.Factory
 }
 
-// NewGetCurrentUserCmd creates a command to Get current user
-func NewGetCurrentUserCmd(f *cmdutil.Factory) *GetCurrentUserCmd {
-	ccmd := &GetCurrentUserCmd{
+// NewLogoutCmd creates a command to Logout current user
+func NewLogoutCmd(f *cmdutil.Factory) *LogoutCmd {
+	ccmd := &LogoutCmd{
 		factory: f,
 	}
 	cmd := &cobra.Command{
-		Use:   "getCurrentUser",
-		Short: "Get current user",
-		Long:  `Get the user representation associated with the current credentials used by the request`,
+		Use:   "logout",
+		Short: "Logout current user",
+		Long:  `Logout the current user. This will invalidate the token associated with the user when using OAUTH_INTERNAL`,
 		Example: heredoc.Doc(`
-$ c8y users getCurrentUser
-Get the current user
+$ c8y currentuser logout
+Log out the current user
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
-			return nil
+			return f.CreateModeEnabled()
 		},
 		RunE: ccmd.RunE,
 	}
@@ -51,6 +50,7 @@ Get the current user
 
 	flags.WithOptions(
 		cmd,
+		flags.WithProcessingMode(),
 
 		flags.WithExtendedPipelineSupport("", "", false),
 	)
@@ -63,7 +63,7 @@ Get the current user
 }
 
 // RunE executes the command
-func (n *GetCurrentUserCmd) RunE(cmd *cobra.Command, args []string) error {
+func (n *LogoutCmd) RunE(cmd *cobra.Command, args []string) error {
 	cfg, err := n.factory.Config()
 	if err != nil {
 		return err
@@ -87,11 +87,6 @@ func (n *GetCurrentUserCmd) RunE(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return cmderrors.NewUserError(err)
 	}
-	commonOptions, err := cfg.GetOutputCommonOptions(cmd)
-	if err != nil {
-		return cmderrors.NewUserError(fmt.Sprintf("Failed to get common options. err=%s", err))
-	}
-	commonOptions.AddQueryParameters(query)
 
 	queryValue, err := query.GetQueryUnescape(true)
 
@@ -105,6 +100,7 @@ func (n *GetCurrentUserCmd) RunE(cmd *cobra.Command, args []string) error {
 		cmd,
 		headers,
 		inputIterators,
+		flags.WithProcessingModeValue(),
 	)
 	if err != nil {
 		return cmderrors.NewUserError(err)
@@ -133,7 +129,7 @@ func (n *GetCurrentUserCmd) RunE(cmd *cobra.Command, args []string) error {
 	}
 
 	// path parameters
-	path := flags.NewStringTemplate("/user/currentUser")
+	path := flags.NewStringTemplate("/user/logout")
 	err = flags.WithPathParameters(
 		cmd,
 		path,
@@ -144,7 +140,7 @@ func (n *GetCurrentUserCmd) RunE(cmd *cobra.Command, args []string) error {
 	}
 
 	req := c8y.RequestOptions{
-		Method:       "GET",
+		Method:       "POST",
 		Path:         path.GetTemplate(),
 		Query:        queryValue,
 		Body:         body,

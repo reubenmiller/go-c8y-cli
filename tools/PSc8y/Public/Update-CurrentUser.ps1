@@ -9,7 +9,7 @@ Update properties or settings of your user such as first/last name, email or pas
 
 
 .LINK
-c8y users updateCurrentUser
+c8y currentuser update
 
 .EXAMPLE
 PS> Update-CurrentUser -LastName "Smith"
@@ -65,7 +65,7 @@ Update the current user's last name
             Use-CallerPreference -Cmdlet $PSCmdlet -SessionState $ExecutionContext.SessionState
         }
 
-        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "users updateCurrentUser"
+        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "currentuser update"
         $ClientOptions = Get-ClientOutputOption $PSBoundParameters
         $TypeOptions = @{
             Type = "application/vnd.com.nsn.cumulocity.currentUser+json"
@@ -77,11 +77,11 @@ Update the current user's last name
     Process {
 
         if ($ClientOptions.ConvertToPS) {
-            c8y users updateCurrentUser $c8yargs `
+            c8y currentuser update $c8yargs `
             | ConvertFrom-ClientOutput @TypeOptions
         }
         else {
-            c8y users updateCurrentUser $c8yargs
+            c8y currentuser update $c8yargs
         }
     }
 
