@@ -302,6 +302,16 @@ func (c *Config) bindSettings() {
 		WithBindEnv(SettingsActivityLogEnabled, true),
 		WithBindEnv(SettingsActivityLogPath, ""),
 		WithBindEnv(SettingsActivityLogMethodFilter, "GET PUT POST DELETE"),
+
+		WithBindEnv(SettingsIncludeAllDelayMS, 50),
+		WithBindEnv(SettingsTemplatePath, ""),
+		WithBindEnv(SettingsModeEnableCreate, false),
+		WithBindEnv(SettingsModeEnableUpdate, false),
+		WithBindEnv(SettingsModeEnableDelete, false),
+		WithBindEnv(SettingsModeCI, false),
+		WithBindEnv(SettingsConfigPath, ""),
+		WithBindEnv(SettingsViewsCommonPaths, ""),
+		WithBindEnv(SettingsViewsCustomPaths, ""),
 	)
 
 	if err != nil {
