@@ -9,6 +9,7 @@
                 "id",
                 "time",
                 "type",
+                "AuditSourceDevice:com_cumulocity_model_event_AuditSourceDevice.id",
                 "activity",
                 "text",
                 "user",
