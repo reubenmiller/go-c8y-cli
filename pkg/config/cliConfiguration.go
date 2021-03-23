@@ -98,7 +98,7 @@ const (
 	SettingsJSONCompact = "settings.defaults.compact"
 
 	// ShowProgress show progress bar
-	SettingsShowProgress = "settings.defaults.progess"
+	SettingsShowProgress = "settings.defaults.progress"
 
 	// DisableColor don't print console output in color
 	SettingsDisableColor = "settings.defaults.noColor"
