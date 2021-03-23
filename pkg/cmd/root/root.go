@@ -134,10 +134,10 @@ func NewCmdRoot(f *cmdutil.Factory, version, buildDate string) *CmdRoot {
 
 	isTerm := f.IOStreams.IsStdoutTTY()
 	defaultOutputFormat := "json"
-	defaultView := config.ViewsNone
+	defaultView := config.ViewsOff
 	if isTerm {
 		defaultOutputFormat = "table"
-		defaultView = config.ViewsAll
+		defaultView = config.ViewsAuto
 	}
 
 	// Global flags
@@ -196,7 +196,7 @@ func NewCmdRoot(f *cmdutil.Factory, version, buildDate string) *CmdRoot {
 		cmd,
 		completion.WithValidateSet("dryFormat", "json", "dump", "curl", "markdown"),
 		completion.WithValidateSet("output", "json", "table", "csv", "csvheader"),
-		completion.WithValidateSet("view", config.ViewsNone, config.ViewsAll),
+		completion.WithValidateSet("view", config.ViewsOff, config.ViewsAuto),
 		completion.WithSessionFile("session", func() string {
 			cfg, err := ccmd.Factory.Config()
 			if err != nil {

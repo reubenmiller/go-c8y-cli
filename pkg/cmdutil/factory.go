@@ -162,10 +162,10 @@ func (f *Factory) GetViewProperties(cfg *config.Config, cmd *cobra.Command, outp
 	}
 	viewProperties := []string{}
 	switch strings.ToLower(view) {
-	case config.ViewsNone:
+	case config.ViewsOff:
 		// dont apply a view
 		return []string{"**"}, nil
-	case config.ViewsAll:
+	case config.ViewsAuto:
 		jsonResponse := gjson.ParseBytes(output)
 		props, err := dataview.GetView(&jsonResponse, "")
 

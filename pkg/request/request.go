@@ -684,12 +684,12 @@ func (r *RequestHandler) ProcessResponse(resp *c8y.Response, respError error, co
 					}
 
 					switch strings.ToLower(view) {
-					case config.ViewsNone:
+					case config.ViewsOff:
 						// dont apply a view
 						if !showRaw {
 							commonOptions.Filters.Pluck = []string{"**"}
 						}
-					case config.ViewsAll:
+					case config.ViewsAuto:
 						props, err := r.DataView.GetView(inputData, resp.Header.Get("Content-Type"))
 
 						if err != nil || len(props) == 0 {
