@@ -139,18 +139,36 @@ func (l *ActivityLogger) LogRequest(resp *http.Response, body *gjson.Result, res
 
 	l.mu.Lock()
 	defer l.mu.Unlock()
-	fmt.Fprintf(l.w,
-		`{"time":"%s","ctx":"%s","type":"request","method":"%s","host":"%s","path":"%s","query":"%s","accept":"%s","processingMode":"%s","statusCode":%d,"responseTimeMS":%d,"responseSelf":"%s"}`+"\n",
-		time.Now().Format(time.RFC3339Nano),
-		l.contextID,
-		resp.Request.Method,
-		resp.Request.URL.Host,
-		resp.Request.URL.Path,
-		query,
-		resp.Request.Header.Get("Accept"),
-		resp.Request.Header.Get("X-Cumulocity-Processing-Mode"),
-		resp.StatusCode,
-		responseTime,
-		body.Get("self").Str,
-	)
+	if resp.StatusCode >= 200 && resp.StatusCode <= 299 {
+		fmt.Fprintf(l.w,
+			`{"time":"%s","ctx":"%s","type":"request","method":"%s","host":"%s","path":"%s","query":"%s","accept":"%s","processingMode":"%s","statusCode":%d,"responseTimeMS":%d,"responseSelf":"%s"}`+"\n",
+			time.Now().Format(time.RFC3339Nano),
+			l.contextID,
+			resp.Request.Method,
+			resp.Request.URL.Host,
+			resp.Request.URL.Path,
+			query,
+			resp.Request.Header.Get("Accept"),
+			resp.Request.Header.Get("X-Cumulocity-Processing-Mode"),
+			resp.StatusCode,
+			responseTime,
+			body.Get("self").Str,
+		)
+	} else {
+		fmt.Fprintf(l.w,
+			`{"time":"%s","ctx":"%s","type":"request","method":"%s","host":"%s","path":"%s","query":"%s","accept":"%s","processingMode":"%s","statusCode":%d,"responseTimeMS":%d,"responseSelf":"%s","responseError":%s}`+"\n",
+			time.Now().Format(time.RFC3339Nano),
+			l.contextID,
+			resp.Request.Method,
+			resp.Request.URL.Host,
+			resp.Request.URL.Path,
+			query,
+			resp.Request.Header.Get("Accept"),
+			resp.Request.Header.Get("X-Cumulocity-Processing-Mode"),
+			resp.StatusCode,
+			responseTime,
+			body.Get("self").Str,
+			body.Raw,
+		)
+	}
 }
