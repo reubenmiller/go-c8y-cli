@@ -136,7 +136,7 @@ func filterFlatMap(src map[string]interface{}, dst map[string]interface{}, patte
 		for _, key := range sourceKeys {
 			value := src[key]
 			keyl := strings.ToLower(key)
-			if strings.HasPrefix(keyl, pattern.String()+".") || pattern.MatchString(keyl) {
+			if strings.HasPrefix(keyl, pattern.String()+".") || (pattern.MatchString(keyl) && !pattern.IsNegative()) {
 				if aliases[i] != "" {
 					paths := strings.Split(pattern.String(), ".")
 					if strings.Contains(pattern.String(), "*") {
@@ -179,12 +179,31 @@ func filterFlatMap(src map[string]interface{}, dst map[string]interface{}, patte
 				found = true
 			}
 		}
-		if !found {
+		if !found && !pattern.IsNegative() {
 			// store non-matching patterns for csv generation
 			sortedKeys = append(sortedKeys, pattern.String())
 		}
 	}
-	return sortedKeys, nil
+
+	// filter for negated keys
+	sortedMatchingKeys := make([]string, 0)
+	for _, key := range sortedKeys {
+		keyl := strings.ToLower(key)
+		match := true
+		for _, pattern := range patterns {
+			if pattern.IsNegative() {
+				if pattern.MatchString(keyl) {
+					match = false
+					delete(dst, key)
+				}
+			}
+		}
+		if match {
+			sortedMatchingKeys = append(sortedMatchingKeys, key)
+		}
+	}
+
+	return sortedMatchingKeys, nil
 }
 
 // NewJSONFilters create a json filter
