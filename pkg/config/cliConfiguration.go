@@ -44,7 +44,7 @@ const (
 
 const (
 	// SettingsIncludeAllPageSize property name used to control the default page size when using includeAll parameter
-	SettingsIncludeAllPageSize string = "settings.includeAll.pageSize"
+	SettingsIncludeAllPageSize = "settings.includeAll.pageSize"
 
 	// SettingEncryptionCachePassphrase setting to cache the passphrase via environment variables
 	SettingEncryptionCachePassphrase = "settings.encryption.cachePassphrase"
