@@ -1,10 +1,8 @@
 package completion
 
 import (
-	"context"
-	"fmt"
+	"path/filepath"
 
-	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 )
@@ -38,33 +36,6 @@ func WithLazyRequired(flagName string, values ...string) Option {
 	}
 }
 
-// WithTenantID tenant id completion
-func WithTenantID(flagName string, clientFunc func() (*c8y.Client, error)) Option {
-	return func(cmd *cobra.Command) *cobra.Command {
-		_ = cmd.RegisterFlagCompletionFunc(flagName, func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
-			client, err := clientFunc()
-			if err != nil {
-				return []string{err.Error()}, cobra.ShellCompDirectiveDefault
-			}
-			tenants, _, err := client.Tenant.GetTenants(
-				context.Background(),
-				c8y.NewPaginationOptions(20),
-			)
-
-			if err != nil {
-				values := []string{fmt.Sprintf("unknown. %s", err)}
-				return values, cobra.ShellCompDirectiveError
-			}
-			values := []string{client.TenantName}
-			for _, tenant := range tenants.Tenants {
-				values = append(values, tenant.ID)
-			}
-			return values, cobra.ShellCompDirectiveDefault
-		})
-		return cmd
-	}
-}
-
 // MarkLocalFlag marks a flag as local flag so it get prioritized in the completions
 func MarkLocalFlag(exclude ...string) Option {
 	excludeLookup := map[string]bool{}
@@ -79,4 +50,12 @@ func MarkLocalFlag(exclude ...string) Option {
 		})
 		return cmd
 	}
+}
+
+func MatchString(pattern, name string) bool {
+	match, err := filepath.Match(pattern, name)
+	if err != nil {
+		return false
+	}
+	return match
 }
