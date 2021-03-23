@@ -68,7 +68,7 @@
       "path": "/tenant/system/options/system/version",
       "accept": "application/vnd.com.nsn.cumulocity.option+json",
       "alias": {
-        "go": "getVersion",
+        "go": "version",
         "powershell": "Get-TenantVersion"
       },
       "examples": {
@@ -81,7 +81,7 @@
         "go": [
           {
             "description": "Set the required availability of a device by name to 10 minutes",
-            "command": "c8y tenants getVersion"
+            "command": "c8y currenttenant version"
           }
         ]
       }

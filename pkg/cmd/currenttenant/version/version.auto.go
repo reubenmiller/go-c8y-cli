@@ -1,5 +1,5 @@
 // Code generated from specification version 1.0.0: DO NOT EDIT
-package getversion
+package version
 
 import (
 	"fmt"
@@ -17,24 +17,24 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// GetVersionCmd command
-type GetVersionCmd struct {
+// VersionCmd command
+type VersionCmd struct {
 	*subcommand.SubCommand
 
 	factory *cmdutil.Factory
 }
 
-// NewGetVersionCmd creates a command to Get tenant version
-func NewGetVersionCmd(f *cmdutil.Factory) *GetVersionCmd {
-	ccmd := &GetVersionCmd{
+// NewVersionCmd creates a command to Get tenant version
+func NewVersionCmd(f *cmdutil.Factory) *VersionCmd {
+	ccmd := &VersionCmd{
 		factory: f,
 	}
 	cmd := &cobra.Command{
-		Use:   "getVersion",
+		Use:   "version",
 		Short: "Get tenant version",
 		Long:  `Get tenant platform (backend) version`,
 		Example: heredoc.Doc(`
-$ c8y tenants getVersion
+$ c8y currenttenant version
 Set the required availability of a device by name to 10 minutes
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
@@ -63,7 +63,7 @@ Set the required availability of a device by name to 10 minutes
 }
 
 // RunE executes the command
-func (n *GetVersionCmd) RunE(cmd *cobra.Command, args []string) error {
+func (n *VersionCmd) RunE(cmd *cobra.Command, args []string) error {
 	cfg, err := n.factory.Config()
 	if err != nil {
 		return err

@@ -8,7 +8,7 @@ Delete binary
 Delete a binary from the tenant. This delete operation can not be undone.
 
 .LINK
-c8y binaries deleteBinary
+c8y binaries delete
 
 .EXAMPLE
 PS> Remove-Binary -Id $Binary.id
@@ -40,7 +40,7 @@ Delete a binary
             Use-CallerPreference -Cmdlet $PSCmdlet -SessionState $ExecutionContext.SessionState
         }
 
-        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "binaries deleteBinary"
+        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "binaries delete"
         $ClientOptions = Get-ClientOutputOption $PSBoundParameters
         $TypeOptions = @{
             Type = ""
@@ -54,13 +54,13 @@ Delete a binary
         if ($ClientOptions.ConvertToPS) {
             $Id `
             | Group-ClientRequests `
-            | c8y binaries deleteBinary $c8yargs `
+            | c8y binaries delete $c8yargs `
             | ConvertFrom-ClientOutput @TypeOptions
         }
         else {
             $Id `
             | Group-ClientRequests `
-            | c8y binaries deleteBinary $c8yargs
+            | c8y binaries delete $c8yargs
         }
         
     }

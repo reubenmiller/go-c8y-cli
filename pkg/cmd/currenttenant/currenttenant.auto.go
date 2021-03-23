@@ -2,8 +2,8 @@ package currenttenant
 
 import (
 	cmdGet "github.com/reubenmiller/go-c8y-cli/pkg/cmd/currenttenant/get"
-	cmdGetVersion "github.com/reubenmiller/go-c8y-cli/pkg/cmd/currenttenant/getversion"
 	cmdListApplications "github.com/reubenmiller/go-c8y-cli/pkg/cmd/currenttenant/listapplications"
+	cmdVersion "github.com/reubenmiller/go-c8y-cli/pkg/cmd/currenttenant/version"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmd/subcommand"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmdutil"
 	"github.com/spf13/cobra"
@@ -25,7 +25,7 @@ func NewSubCommand(f *cmdutil.Factory) *SubCmdCurrenttenant {
 	// Subcommands
 	cmd.AddCommand(cmdGet.NewGetCmd(f).GetCommand())
 	cmd.AddCommand(cmdListApplications.NewListApplicationsCmd(f).GetCommand())
-	cmd.AddCommand(cmdGetVersion.NewGetVersionCmd(f).GetCommand())
+	cmd.AddCommand(cmdVersion.NewVersionCmd(f).GetCommand())
 
 	ccmd.SubCommand = subcommand.NewSubCommand(cmd)
 

@@ -8,7 +8,7 @@ Get tenant version
 Get tenant platform (backend) version
 
 .LINK
-c8y currenttenant getVersion
+c8y currenttenant version
 
 .EXAMPLE
 PS> Get-TenantVersion
@@ -35,7 +35,7 @@ Get the Cumulocity backend version
             Use-CallerPreference -Cmdlet $PSCmdlet -SessionState $ExecutionContext.SessionState
         }
 
-        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "currenttenant getVersion"
+        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "currenttenant version"
         $ClientOptions = Get-ClientOutputOption $PSBoundParameters
         $TypeOptions = @{
             Type = "application/vnd.com.nsn.cumulocity.option+json"
@@ -47,11 +47,11 @@ Get the Cumulocity backend version
     Process {
 
         if ($ClientOptions.ConvertToPS) {
-            c8y currenttenant getVersion $c8yargs `
+            c8y currenttenant version $c8yargs `
             | ConvertFrom-ClientOutput @TypeOptions
         }
         else {
-            c8y currenttenant getVersion $c8yargs
+            c8y currenttenant version $c8yargs
         }
     }
 
