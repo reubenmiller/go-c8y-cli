@@ -14,6 +14,7 @@ import (
 	"time"
 
 	"github.com/reubenmiller/go-c8y-cli/pkg/activitylogger"
+	"github.com/reubenmiller/go-c8y-cli/pkg/c8ydata"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/pkg/config"
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
@@ -452,7 +453,7 @@ func (w *Worker) getConfirmationMessage(prefix string, request *c8y.RequestOptio
 	}
 
 	target := ""
-	if id != "" && isID(id) {
+	if id != "" && c8ydata.IsID(id) {
 		target += "id=" + id
 	}
 
@@ -467,10 +468,4 @@ func (w *Worker) getConfirmationMessage(prefix string, request *c8y.RequestOptio
 	}
 
 	return prefix, nil
-}
-
-func isID(v string) bool {
-	isNotDigit := func(c rune) bool { return c < '0' || c > '9' }
-	value := strings.TrimSpace(v)
-	return strings.IndexFunc(value, isNotDigit) <= -1
 }
