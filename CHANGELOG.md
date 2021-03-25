@@ -56,7 +56,6 @@ None :)
 ### Bugs
 
 * Command confirmation does not work with --progress! 
-* Using "--confirm" does not force confirmation! (this should trigger a confirmation regardless of other settings)
     * --confirm "force|auto|off" ?
 * Creating alias on windows uses different quoting to shell!
         
@@ -77,32 +76,6 @@ None :)
         * `c8y generate names -f "testdevice_%03d { .Index } { .RandomName }" --count 10 --start 0 --end 10`
         * `c8y generate names -f "%d" --count 10 --start 0 --end 10`
 
-* Dont write output when using dry (i.e no output is there)
-
-```
-io.copyBuffer(0xdc9e20, 0xc000598c30, 0x0, 0x0, 0xc00048c000, 0x8000, 0x8000, 0x0, 0xb45ae9, 0xbe9660)
-        /usr/local/go/src/io/io.go:423 +0x10b
-io.Copy(...)
-        /usr/local/go/src/io/io.go:382
-os.genericReadFrom(0xc00000e030, 0x0, 0x0, 0x0, 0xd09000, 0x0)
-        /usr/local/go/src/os/file.go:160 +0x99
-os.(*File).ReadFrom(0xc00000e030, 0x0, 0x0, 0x7f8dbbc68b18, 0xc00000e030, 0x1)
-        /usr/local/go/src/os/file.go:154 +0x250
-io.copyBuffer(0xdc8d80, 0xc00000e030, 0x0, 0x0, 0x0, 0x0, 0x0, 0xc0000c2010, 0xcaf461, 0x1)
-        /usr/local/go/src/io/io.go:409 +0x357
-io.Copy(...)
-        /usr/local/go/src/io/io.go:382
-github.com/reubenmiller/go-c8y-cli/pkg/request.(*RequestHandler).saveResponseToFile(0xc0002a7640, 0xc00000c060, 0xc0000d4660, 0x11, 0xffffffffffff0000, 0x0, 0x0, 0x0, 0x0)
-        /workspaces/go-c8y-cli/pkg/request/request.go:807 +0x245
-github.com/reubenmiller/go-c8y-cli/pkg/request.(*RequestHandler).ProcessResponse(0xc0002a7640, 0xc00000c060, 0x0, 0x0, 0xcb4add, 0x15, 0xc0001b2270, 0xd, 0xc0000d4660, 0x11, ...)
-        /workspaces/go-c8y-cli/pkg/request/request.go:619 +0x16fa
-github.com/reubenmiller/go-c8y-cli/pkg/request.(*RequestHandler).ProcessRequestAndResponse(0xc0002a7640, 0xc00007e140, 0x1, 0x1, 0xcb4add, 0x15, 0xc0001b2270, 0xd, 0xc0000d4660, 0x11, ...)
-        /workspaces/go-c8y-cli/pkg/request/request.go:119 +0x6e5
-github.com/reubenmiller/go-c8y-cli/pkg/worker.(*Worker).batchWorker(0xc00041ac90, 0x1, 0xc00009dc20, 0xc00009dc80, 0xc000446b40, 0xc0004450f0)
-        /workspaces/go-c8y-cli/pkg/worker/worker.go:387 +0x5b5
-created by github.com/reubenmiller/go-c8y-cli/pkg/worker.(*Worker).runBatched
-        /workspaces/go-c8y-cli/pkg/worker/worker.go:185 +0x29a
-```
 ### New Functions
 
 * Add option to print out request and response as markdown
@@ -121,13 +94,11 @@ created by github.com/reubenmiller/go-c8y-cli/pkg/worker.(*Worker).runBatched
 ### Refactoring
 
 * Move dataview to configuration
+* Combine set session with login so only one command has to be used
 
 ### Completions
 
-    * Get Series (based on supported series fragment)
     * Approve pending device request
-
-
 
 ### Packaging
 
