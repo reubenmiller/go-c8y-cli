@@ -32,7 +32,7 @@ func WithUserGroup(flagName string, clientFunc func() (*c8y.Client, error)) Opti
 			pattern := "*" + toComplete + "*"
 			for _, item := range items.Groups {
 				if toComplete == "" || MatchString(pattern, item.Name) || MatchString(pattern, item.GetID()) {
-					values = append(values, fmt.Sprintf("%s\t(id=%s)", item.Name, item.GetID()))
+					values = append(values, fmt.Sprintf("%s\tid: %s", item.Name, item.GetID()))
 				}
 			}
 			return values, cobra.ShellCompDirectiveNoFileComp

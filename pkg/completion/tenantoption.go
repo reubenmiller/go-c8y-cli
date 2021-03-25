@@ -8,8 +8,8 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// WithDevice device completion
-func WithDevice(flagName string, clientFunc func() (*c8y.Client, error)) Option {
+// WithTenantOptionCategory tenant option category completion
+func WithTenantOptionCategory(flagName string, clientFunc func() (*c8y.Client, error)) Option {
 	return func(cmd *cobra.Command) *cobra.Command {
 		_ = cmd.RegisterFlagCompletionFunc(flagName, func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 			client, err := clientFunc()
@@ -18,10 +18,9 @@ func WithDevice(flagName string, clientFunc func() (*c8y.Client, error)) Option 
 			}
 
 			pattern := "*" + toComplete + "*"
-			items, _, err := client.Inventory.GetDevicesByName(
+			items, _, err := client.TenantOptions.GetOptions(
 				context.Background(),
-				pattern,
-				c8y.NewPaginationOptions(100),
+				c8y.NewPaginationOptions(200),
 			)
 
 			if err != nil {
@@ -29,34 +28,39 @@ func WithDevice(flagName string, clientFunc func() (*c8y.Client, error)) Option 
 				return values, cobra.ShellCompDirectiveError
 			}
 			values := []string{}
-			for _, item := range items.ManagedObjects {
-				if toComplete == "" || MatchString(pattern, item.Name) || MatchString(pattern, item.ID) {
-					values = append(values, fmt.Sprintf("%s\t%s | id: %s", item.Name, item.Type, item.ID))
+			keys := make(map[string]interface{})
+			for _, item := range items.Options {
+				if toComplete == "" || MatchString(pattern, item.Category) {
+					if _, ok := keys[item.Category]; !ok {
+						values = append(values, item.Category)
+						keys[item.Category] = struct{}{}
+					}
 				}
 			}
+
 			return values, cobra.ShellCompDirectiveNoFileComp
 		})
 		return cmd
 	}
 }
 
-// WithAgent agent completion
-func WithAgent(flagName string, clientFunc func() (*c8y.Client, error)) Option {
+// WithTenantOptionKey tenant option key completion (requires category)
+func WithTenantOptionKey(flagName string, flagNameCategory string, clientFunc func() (*c8y.Client, error)) Option {
 	return func(cmd *cobra.Command) *cobra.Command {
 		_ = cmd.RegisterFlagCompletionFunc(flagName, func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 			client, err := clientFunc()
 			if err != nil {
 				return []string{err.Error()}, cobra.ShellCompDirectiveDefault
 			}
+			category, err := cmd.Flags().GetString(flagNameCategory)
+			if err != nil {
+				return []string{err.Error()}, cobra.ShellCompDirectiveDefault
+			}
 
 			pattern := "*" + toComplete + "*"
-			opt := &c8y.ManagedObjectOptions{
-				Query:             fmt.Sprintf("(name eq '%s') and has(%s)", pattern, "com_cumulocity_model_Agent"),
-				PaginationOptions: *c8y.NewPaginationOptions(100),
-			}
-			items, _, err := client.Inventory.GetManagedObjects(
+			items, _, err := client.TenantOptions.GetOptions(
 				context.Background(),
-				opt,
+				c8y.NewPaginationOptions(200),
 			)
 
 			if err != nil {
@@ -64,11 +68,19 @@ func WithAgent(flagName string, clientFunc func() (*c8y.Client, error)) Option {
 				return values, cobra.ShellCompDirectiveError
 			}
 			values := []string{}
-			for _, item := range items.ManagedObjects {
-				if toComplete == "" || MatchString(pattern, item.Name) || MatchString(pattern, item.ID) {
-					values = append(values, fmt.Sprintf("%s\t%s | id: %s", item.Name, item.Type, item.ID))
+			keys := make(map[string]interface{})
+			for _, item := range items.Options {
+				if item.Category != category {
+					continue
+				}
+				if toComplete == "" || MatchString(pattern, item.Key) {
+					if _, ok := keys[item.Key]; !ok {
+						values = append(values, item.Key)
+						keys[item.Key] = struct{}{}
+					}
 				}
 			}
+
 			return values, cobra.ShellCompDirectiveNoFileComp
 		})
 		return cmd

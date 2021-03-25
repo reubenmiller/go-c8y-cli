@@ -3,6 +3,7 @@ package completion
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
@@ -25,9 +26,16 @@ func WithTenantID(flagName string, clientFunc func() (*c8y.Client, error)) Optio
 				values := []string{fmt.Sprintf("unknown. %s", err)}
 				return values, cobra.ShellCompDirectiveError
 			}
-			values := []string{client.TenantName}
+			values := []string{client.TenantName + "\tcurrent tenant"}
 			for _, tenant := range tenants.Tenants {
-				values = append(values, tenant.ID)
+				details := []string{}
+				if tenant.Company != "" {
+					details = append(details, fmt.Sprintf("company: %s", tenant.Company))
+				}
+				if tenant.Domain != "" {
+					details = append(details, fmt.Sprintf("domain: %s", tenant.Domain))
+				}
+				values = append(values, fmt.Sprintf("%s\t%s", tenant.ID, strings.Join(details, " | ")))
 			}
 			return values, cobra.ShellCompDirectiveDefault
 		})

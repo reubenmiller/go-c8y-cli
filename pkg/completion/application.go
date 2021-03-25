@@ -32,7 +32,7 @@ func WithApplication(flagName string, clientFunc func() (*c8y.Client, error)) Op
 			pattern := "*" + toComplete + "*"
 			for _, item := range items.Applications {
 				if toComplete == "" || MatchString(pattern, item.Name) || MatchString(pattern, item.ID) {
-					values = append(values, fmt.Sprintf("%s\t%s (id=%s)", item.Name, item.Type, item.ID))
+					values = append(values, fmt.Sprintf("%s\t%s | id: %s", item.Name, item.Type, item.ID))
 				}
 			}
 			return values, cobra.ShellCompDirectiveNoFileComp
@@ -63,11 +63,11 @@ func WithHostedApplication(flagName string, clientFunc func() (*c8y.Client, erro
 			values := []string{}
 			pattern := "*" + toComplete + "*"
 			for _, item := range items.Applications {
-				if strings.EqualFold(item.Type, "HOSTED") {
+				if !strings.EqualFold(item.Type, "HOSTED") {
 					continue
 				}
 				if toComplete == "" || MatchString(pattern, item.Name) || MatchString(pattern, item.ID) {
-					values = append(values, fmt.Sprintf("%s\t%s (id=%s)", item.Name, item.Type, item.ID))
+					values = append(values, fmt.Sprintf("%s\t%s | id: %s", item.Name, item.Type, item.ID))
 				}
 			}
 			return values, cobra.ShellCompDirectiveNoFileComp
@@ -98,11 +98,11 @@ func WithMicroservice(flagName string, clientFunc func() (*c8y.Client, error)) O
 			values := []string{}
 			pattern := "*" + toComplete + "*"
 			for _, item := range items.Applications {
-				if strings.EqualFold(item.Type, "MICROSERVICE") {
+				if !strings.EqualFold(item.Type, "MICROSERVICE") {
 					continue
 				}
 				if toComplete == "" || MatchString(pattern, item.Name) || MatchString(pattern, item.ID) {
-					values = append(values, fmt.Sprintf("%s\t%s (id=%s)", item.Name, item.Type, item.ID))
+					values = append(values, fmt.Sprintf("%s\t%s | id: %s", item.Name, item.Type, item.ID))
 				}
 			}
 			return values, cobra.ShellCompDirectiveNoFileComp

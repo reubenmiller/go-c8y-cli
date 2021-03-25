@@ -34,7 +34,7 @@ func WithDeviceGroup(flagName string, clientFunc func() (*c8y.Client, error)) Op
 			values := []string{}
 			for _, item := range items.ManagedObjects {
 				if toComplete == "" || MatchString(pattern, item.Name) || MatchString(pattern, item.ID) {
-					values = append(values, fmt.Sprintf("%s\t%s (id=%s)", item.Name, item.Type, item.ID))
+					values = append(values, fmt.Sprintf("%s\t%s | id: %s", item.Name, item.Type, item.ID))
 				}
 			}
 			return values, cobra.ShellCompDirectiveNoFileComp

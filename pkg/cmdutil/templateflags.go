@@ -1,10 +1,13 @@
 package cmdutil
 
 import (
+	"bufio"
 	"fmt"
 	"os"
 	"path"
 	"path/filepath"
+	"regexp"
+	"strings"
 
 	"github.com/reubenmiller/go-c8y-cli/pkg/config"
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
@@ -73,6 +76,63 @@ func (f *Factory) WithTemplateFlag(cmd *cobra.Command) flags.Option {
 			}
 			return matches, cobra.ShellCompDirectiveDefault
 		})
+
+		_ = cmd.RegisterFlagCompletionFunc(flags.FlagDataTemplateVariablesName, func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+			templatePath := cfg.GetTemplatePath()
+			templateFlag, err := cmd.Flags().GetString(flags.FlagDataTemplateName)
+			if err != nil {
+				return nil, cobra.ShellCompDirectiveNoSpace
+			}
+			matches, err := pathresolver.ResolvePaths(templatePath, templateFlag, ".jsonnet", "ignore")
+
+			if err != nil {
+				return nil, cobra.ShellCompDirectiveNoSpace
+			}
+
+			templateFile := ""
+			if len(matches) > 0 {
+				templateFile = matches[0]
+			}
+
+			if strings.TrimSpace(templateFile) == "" {
+				return nil, cobra.ShellCompDirectiveNoSpace
+			}
+
+			file, err := os.Open(templateFile)
+			if err != nil {
+				return []string{err.Error()}, cobra.ShellCompDirectiveNoSpace
+			}
+
+			scanner := bufio.NewScanner(file)
+			pattern := regexp.MustCompile(`var\("(.+?)"(\s*,\s*"?([^"\(\)]+)"?)?`)
+			variableNames := make(map[string]string)
+			values := []string{}
+			for scanner.Scan() {
+				matches := pattern.FindAllStringSubmatch(scanner.Text(), -1)
+				for _, match := range matches {
+					if len(match) < 2 {
+						continue
+					}
+					if _, ok := variableNames[match[1]]; !ok {
+						var value string
+						if len(match) >= 4 {
+							if match[3] != "" {
+								value = fmt.Sprintf("%s\tdefault: %s", match[1], match[3])
+							} else {
+								value = fmt.Sprintf("%s\t(required)", match[1])
+							}
+						}
+
+						valueKey := match[1]
+						variableNames[valueKey] = match[1]
+						values = append(values, strings.TrimSpace(value))
+					}
+				}
+			}
+
+			return values, cobra.ShellCompDirectiveNoSpace
+		})
+
 		return cmd
 	}
 }
