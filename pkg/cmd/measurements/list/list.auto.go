@@ -61,6 +61,8 @@ Get a list of measurements
 	completion.WithOptions(
 		cmd,
 		completion.WithDevice("device", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
+		completion.WithDeviceMeasurementValueFragmentType("valueFragmentType", "device", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
+		completion.WithDeviceMeasurementValueFragmentSeries("valueFragmentSeries", "device", "valueFragmentType", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
 		completion.WithValidateSet("unit", "imperial", "metric"),
 	)
 
