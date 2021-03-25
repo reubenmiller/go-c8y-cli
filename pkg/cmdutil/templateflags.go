@@ -117,9 +117,9 @@ func (f *Factory) WithTemplateFlag(cmd *cobra.Command) flags.Option {
 						var value string
 						if len(match) >= 4 {
 							if match[3] != "" {
-								value = fmt.Sprintf("%s\tdefault: %s", match[1], match[3])
+								value = fmt.Sprintf("%s=\tdefault: %s", match[1], match[3])
 							} else {
-								value = fmt.Sprintf("%s\t(required)", match[1])
+								value = fmt.Sprintf("%s=\t(required)", match[1])
 							}
 						}
 
@@ -128,6 +128,9 @@ func (f *Factory) WithTemplateFlag(cmd *cobra.Command) flags.Option {
 						values = append(values, strings.TrimSpace(value))
 					}
 				}
+			}
+			if len(values) == 1 {
+				values[0] = strings.Split(values[0], "\t")[0]
 			}
 
 			return values, cobra.ShellCompDirectiveNoSpace
