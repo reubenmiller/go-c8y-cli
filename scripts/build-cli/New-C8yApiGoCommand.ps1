@@ -133,6 +133,22 @@
             }
         }
 
+        # Special measurement series/fragments completions
+        if ($ParentName -match "measurements") {
+            $CompletionName = $ParentName + ":" + $iArg.Name
+            switch -Regex ($CompletionName) {
+                "measurements:series" {
+                    [void] $CompletionBuilderOptions.AppendLine("completion.WithDeviceMeasurementSeries(`"$($iArg.Name)`", `"device`", func() (*c8y.Client, error) { return ccmd.factory.Client()}),")
+                }
+                "measurements:valueFragmentType" {
+                    [void] $CompletionBuilderOptions.AppendLine("completion.WithDeviceMeasurementValueFragmentType(`"$($iArg.Name)`", `"device`", func() (*c8y.Client, error) { return ccmd.factory.Client()}),")
+                }
+                "measurements:valueFragmentSeries" {
+                    [void] $CompletionBuilderOptions.AppendLine("completion.WithDeviceMeasurementValueFragmentSeries(`"$($iArg.Name)`", `"device`", `"valueFragmentType`", func() (*c8y.Client, error) { return ccmd.factory.Client()}),")
+                }
+            }
+        }
+
         # Add Completions based on type
         $ArgType = $iArg.type
         switch -Regex ($ArgType) {
