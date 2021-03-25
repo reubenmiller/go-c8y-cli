@@ -51,6 +51,9 @@ Add a role (ROLE_ALARM_READ) to a user
 
 	completion.WithOptions(
 		cmd,
+		completion.WithTenantID("tenant", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
+		completion.WithUser("user", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
+		completion.WithUserRole("role", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
 	)
 
 	flags.WithOptions(

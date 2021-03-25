@@ -50,6 +50,8 @@ Assign a device as a child device to an existing device
 
 	completion.WithOptions(
 		cmd,
+		completion.WithDevice("device", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
+		completion.WithDevice("newChild", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
 	)
 
 	flags.WithOptions(

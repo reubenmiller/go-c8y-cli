@@ -52,6 +52,7 @@ Create operation for a device
 
 	completion.WithOptions(
 		cmd,
+		completion.WithDeviceGroup("group", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
 	)
 
 	flags.WithOptions(

@@ -49,6 +49,8 @@ Get a tenant option
 
 	completion.WithOptions(
 		cmd,
+		completion.WithTenantOptionCategory("category", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
+		completion.WithTenantOptionKey("key", "category", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
 	)
 
 	flags.WithOptions(

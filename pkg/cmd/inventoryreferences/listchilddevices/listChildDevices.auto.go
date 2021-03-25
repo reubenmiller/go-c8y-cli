@@ -50,6 +50,7 @@ Get a list of the child devices of an existing device
 
 	completion.WithOptions(
 		cmd,
+		completion.WithDevice("device", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
 	)
 
 	flags.WithOptions(

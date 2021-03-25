@@ -51,6 +51,9 @@ Unassign a child device from its parent device
 
 	completion.WithOptions(
 		cmd,
+		completion.WithDevice("group", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
+		completion.WithDevice("childDevice", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
+		completion.WithDeviceGroup("childGroup", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
 	)
 
 	flags.WithOptions(

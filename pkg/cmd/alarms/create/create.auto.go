@@ -54,6 +54,7 @@ Create a new alarm for device
 
 	completion.WithOptions(
 		cmd,
+		completion.WithDevice("device", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
 		completion.WithValidateSet("severity", "CRITICAL", "MAJOR", "MINOR", "WARNING"),
 		completion.WithValidateSet("status", "ACTIVE", "ACKNOWLEDGED", "CLEARED"),
 	)

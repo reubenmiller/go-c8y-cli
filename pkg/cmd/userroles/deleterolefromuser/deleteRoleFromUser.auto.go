@@ -51,6 +51,9 @@ Remove a role from the given user
 
 	completion.WithOptions(
 		cmd,
+		completion.WithUser("user", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
+		completion.WithUserRole("role", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
+		completion.WithTenantID("tenant", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
 	)
 
 	flags.WithOptions(

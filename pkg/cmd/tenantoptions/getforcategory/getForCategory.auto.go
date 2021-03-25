@@ -52,6 +52,7 @@ Get a list of options for a category
 
 	completion.WithOptions(
 		cmd,
+		completion.WithTenantOptionCategory("category", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
 	)
 
 	flags.WithOptions(

@@ -53,6 +53,8 @@ Add multiple devices to a group
 
 	completion.WithOptions(
 		cmd,
+		completion.WithDeviceGroup("group", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
+		completion.WithDevice("newChildDevice", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
 	)
 
 	flags.WithOptions(

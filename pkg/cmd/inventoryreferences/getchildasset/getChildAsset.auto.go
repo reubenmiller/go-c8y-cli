@@ -51,6 +51,8 @@ Get an existing child asset reference
 
 	completion.WithOptions(
 		cmd,
+		completion.WithDevice("asset", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
+		completion.WithDevice("reference", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
 	)
 
 	flags.WithOptions(

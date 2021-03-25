@@ -51,6 +51,8 @@ Update a user
 
 	completion.WithOptions(
 		cmd,
+		completion.WithUser("id", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
+		completion.WithTenantID("tenant", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
 	)
 
 	flags.WithOptions(

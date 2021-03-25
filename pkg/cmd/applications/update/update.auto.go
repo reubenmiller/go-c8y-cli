@@ -57,6 +57,7 @@ Update application availability to MARKET
 
 	completion.WithOptions(
 		cmd,
+		completion.WithApplication("id", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
 		completion.WithValidateSet("availability", "MARKET", "PRIVATE"),
 	)
 

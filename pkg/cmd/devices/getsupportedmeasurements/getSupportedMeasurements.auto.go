@@ -51,6 +51,7 @@ Get the supported measurements of a device by name
 
 	completion.WithOptions(
 		cmd,
+		completion.WithDevice("device", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
 	)
 
 	flags.WithOptions(

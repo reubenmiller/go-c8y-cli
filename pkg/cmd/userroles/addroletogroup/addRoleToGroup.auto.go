@@ -51,6 +51,9 @@ Add a role to the admin group
 
 	completion.WithOptions(
 		cmd,
+		completion.WithTenantID("tenant", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
+		completion.WithUserGroup("group", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
+		completion.WithUserRole("role", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
 	)
 
 	flags.WithOptions(

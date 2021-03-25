@@ -54,6 +54,8 @@ Remove all pending operations for a given device
 
 	completion.WithOptions(
 		cmd,
+		completion.WithDevice("agent", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
+		completion.WithDevice("device", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
 		completion.WithValidateSet("status", "PENDING", "EXECUTING", "SUCCESSFUL", "FAILED"),
 	)
 

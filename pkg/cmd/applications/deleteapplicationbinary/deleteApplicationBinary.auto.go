@@ -52,6 +52,7 @@ Remove an application binary related to a Hosted (web) application
 
 	completion.WithOptions(
 		cmd,
+		completion.WithApplication("application", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
 	)
 
 	flags.WithOptions(

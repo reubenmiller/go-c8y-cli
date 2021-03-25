@@ -50,6 +50,7 @@ Update device by id
 
 	completion.WithOptions(
 		cmd,
+		completion.WithDevice("id", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
 	)
 
 	flags.WithOptions(

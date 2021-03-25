@@ -51,6 +51,9 @@ List the users within a user group
 
 	completion.WithOptions(
 		cmd,
+		completion.WithUserGroup("group", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
+		completion.WithUser("user", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
+		completion.WithTenantID("tenant", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
 	)
 
 	flags.WithOptions(

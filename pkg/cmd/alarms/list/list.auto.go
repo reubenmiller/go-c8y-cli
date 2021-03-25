@@ -62,6 +62,7 @@ Get collection of active alarms which occurred in the last 10 minutes
 
 	completion.WithOptions(
 		cmd,
+		completion.WithDevice("device", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
 		completion.WithValidateSet("status", "ACTIVE", "ACKNOWLEDGED", "CLEARED"),
 		completion.WithValidateSet("severity", "CRITICAL", "MAJOR", "MINOR", "WARNING"),
 	)

@@ -50,6 +50,7 @@ Get an application
 
 	completion.WithOptions(
 		cmd,
+		completion.WithMicroservice("id", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
 	)
 
 	flags.WithOptions(

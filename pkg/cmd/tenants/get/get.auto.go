@@ -49,6 +49,7 @@ Get a tenant by name (from the management tenant)
 
 	completion.WithOptions(
 		cmd,
+		completion.WithTenantID("id", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
 	)
 
 	flags.WithOptions(

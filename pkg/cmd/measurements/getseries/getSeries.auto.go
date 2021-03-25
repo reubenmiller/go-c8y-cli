@@ -54,6 +54,7 @@ Get a list of series [nx_WEA_29_Delta.MDL10FG001] and [nx_WEA_29_Delta.ST9] for 
 
 	completion.WithOptions(
 		cmd,
+		completion.WithDevice("device", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
 		completion.WithValidateSet("aggregationType", "DAILY", "HOURLY", "MINUTELY"),
 	)
 

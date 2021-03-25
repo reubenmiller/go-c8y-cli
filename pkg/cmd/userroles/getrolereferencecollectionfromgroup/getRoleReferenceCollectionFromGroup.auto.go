@@ -51,6 +51,8 @@ Get a list of role references for a user group
 
 	completion.WithOptions(
 		cmd,
+		completion.WithTenantID("tenant", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
+		completion.WithUserGroup("group", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
 	)
 
 	flags.WithOptions(

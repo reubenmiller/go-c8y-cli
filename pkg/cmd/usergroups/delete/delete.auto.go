@@ -50,6 +50,8 @@ Delete a user group
 
 	completion.WithOptions(
 		cmd,
+		completion.WithTenantID("tenant", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
+		completion.WithUserGroup("id", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
 	)
 
 	flags.WithOptions(

@@ -51,6 +51,9 @@ Create group hierarchy (parent group -> child group)
 
 	completion.WithOptions(
 		cmd,
+		completion.WithDeviceGroup("group", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
+		completion.WithDevice("newChildDevice", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
+		completion.WithDeviceGroup("newChildGroup", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
 	)
 
 	flags.WithOptions(

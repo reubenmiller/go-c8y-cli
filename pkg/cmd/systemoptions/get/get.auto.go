@@ -50,6 +50,8 @@ Get a list of system options
 
 	completion.WithOptions(
 		cmd,
+		completion.WithSystemOptionCategory("category", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
+		completion.WithSystemOptionKey("key", "category", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
 	)
 
 	flags.WithOptions(

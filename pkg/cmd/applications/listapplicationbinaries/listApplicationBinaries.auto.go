@@ -51,6 +51,7 @@ List all of the binaries related to a Hosted (web) application
 
 	completion.WithOptions(
 		cmd,
+		completion.WithApplication("id", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
 	)
 
 	flags.WithOptions(

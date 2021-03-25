@@ -51,6 +51,7 @@ Get agent by id
 
 	completion.WithOptions(
 		cmd,
+		completion.WithAgent("id", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
 	)
 
 	flags.WithOptions(

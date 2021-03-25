@@ -51,6 +51,7 @@ Get device group by id
 
 	completion.WithOptions(
 		cmd,
+		completion.WithDeviceGroup("id", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
 	)
 
 	flags.WithOptions(
