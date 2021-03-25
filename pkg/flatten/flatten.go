@@ -7,6 +7,7 @@ import (
 	"errors"
 	"regexp"
 	"strconv"
+	"strings"
 )
 
 // The style of keys.  If there is an input with two
@@ -144,6 +145,10 @@ func flatten(top bool, flatMap map[string]interface{}, nested interface{}, prefi
 
 func enkey(top bool, prefix, subkey string, style SeparatorStyle) string {
 	key := prefix
+
+	if strings.Contains(subkey, style.Middle) {
+		subkey = strings.ReplaceAll(subkey, style.Middle, "\\"+style.Middle)
+	}
 
 	if top {
 		key += subkey
