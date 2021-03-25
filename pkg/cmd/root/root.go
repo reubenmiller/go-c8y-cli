@@ -190,7 +190,7 @@ func NewCmdRoot(f *cmdutil.Factory, version, buildDate string) *CmdRoot {
 
 	// confirmation
 	cmd.PersistentFlags().BoolP("force", "f", false, "Do not prompt for confirmation")
-	cmd.PersistentFlags().Bool("prompt", false, "Prompt for confirmation")
+	cmd.PersistentFlags().Bool("confirm", false, "Prompt for confirmation")
 	cmd.PersistentFlags().String("confirmText", "", "Custom confirmation text")
 
 	completion.WithOptions(
