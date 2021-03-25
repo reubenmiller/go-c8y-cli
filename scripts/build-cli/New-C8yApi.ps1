@@ -47,7 +47,7 @@
                 $SubCommandOutput = Join-Path -Path $CommandOutput -ChildPath $SubCommandPackageName
 				$null = New-Item -Path $SubCommandOutput -ItemType Directory -Force
                 Write-Host ("Generating subcommand: {0}" -f $SubCommandOutput) -ForegroundColor Magenta
-                New-C8yApiGoCommand -Specification:$iSpec -OutputDir:$SubCommandOutput
+                New-C8yApiGoCommand -Specification:$iSpec -OutputDir:$SubCommandOutput -ParentName $packageName
 			}
         }
 

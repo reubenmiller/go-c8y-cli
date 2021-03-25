@@ -9,7 +9,9 @@
         )]
         [object[]] $Specification,
 
-        [string] $OutputDir = "./"
+        [string] $OutputDir = "./",
+
+        [string] $ParentName = ""
     )
 
     $Name = $Specification.alias.go
@@ -110,8 +112,41 @@
         if ($iArg.validationSet) {
             $validateSetOptions = @($iArg.validationSet | ForEach-Object { "`"$_`"" }) -join ","
             $null = $CompletionBuilderOptions.AppendLine("completion.WithValidateSet(`"$($iarg.Name)`", $validateSetOptions),")
-            
         }
+
+        # Special system and tenant options completions
+        if ($ParentName -match "tenantoptions|systemoptions") {
+            $CompletionName = $ParentName + ":" + $iArg.Name
+            switch -Regex ($CompletionName) {
+                "tenantoptions:category" {
+                    [void] $CompletionBuilderOptions.AppendLine("completion.WithTenantOptionCategory(`"$($iArg.Name)`", func() (*c8y.Client, error) { return ccmd.factory.Client()}),")
+                }
+                "tenantoptions:key" {
+                    [void] $CompletionBuilderOptions.AppendLine("completion.WithTenantOptionKey(`"$($iArg.Name)`", `"category`", func() (*c8y.Client, error) { return ccmd.factory.Client()}),")
+                }
+                "systemoptions:category" {
+                    [void] $CompletionBuilderOptions.AppendLine("completion.WithSystemOptionCategory(`"$($iArg.Name)`", func() (*c8y.Client, error) { return ccmd.factory.Client()}),")
+                }
+                "systemoptions:key" {
+                    [void] $CompletionBuilderOptions.AppendLine("completion.WithSystemOptionKey(`"$($iArg.Name)`", `"category`", func() (*c8y.Client, error) { return ccmd.factory.Client()}),")
+                }
+            }
+        }
+
+        # Add Completions based on type
+        $ArgType = $iArg.type
+        switch -Regex ($ArgType) {
+            "application" { [void] $CompletionBuilderOptions.AppendLine("completion.WithApplication(`"$($iArg.Name)`", func() (*c8y.Client, error) { return ccmd.factory.Client()}),") }
+            "microservice" { [void] $CompletionBuilderOptions.AppendLine("completion.WithMicroservice(`"$($iArg.Name)`", func() (*c8y.Client, error) { return ccmd.factory.Client()}),") }
+            "role" { [void] $CompletionBuilderOptions.AppendLine("completion.WithUserRole(`"$($iArg.Name)`", func() (*c8y.Client, error) { return ccmd.factory.Client()}),") }
+            "\[\]user$" { [void] $CompletionBuilderOptions.AppendLine("completion.WithUser(`"$($iArg.Name)`", func() (*c8y.Client, error) { return ccmd.factory.Client()}),") }
+            "(\[\])?usergroup$" { [void] $CompletionBuilderOptions.AppendLine("completion.WithUserGroup(`"$($iArg.Name)`", func() (*c8y.Client, error) { return ccmd.factory.Client()}),") }
+            "(\[\])?devicegroup$" { [void] $CompletionBuilderOptions.AppendLine("completion.WithDeviceGroup(`"$($iArg.Name)`", func() (*c8y.Client, error) { return ccmd.factory.Client()}),") }
+            "(\[\])?tenant$" { [void] $CompletionBuilderOptions.AppendLine("completion.WithTenantID(`"$($iArg.Name)`", func() (*c8y.Client, error) { return ccmd.factory.Client()}),") }
+            "(\[\])?device$" { [void] $CompletionBuilderOptions.AppendLine("completion.WithDevice(`"$($iArg.Name)`", func() (*c8y.Client, error) { return ccmd.factory.Client()}),") }
+            "(\[\])?agent$" { [void] $CompletionBuilderOptions.AppendLine("completion.WithAgent(`"$($iArg.Name)`", func() (*c8y.Client, error) { return ccmd.factory.Client()}),") }
+        }
+
         $ArgParams = @{
             Name = $iArg.name
             Type = $iArg.type
