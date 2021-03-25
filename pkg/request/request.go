@@ -615,14 +615,17 @@ func (r *RequestHandler) ProcessResponse(resp *c8y.Response, respError error, co
 
 	// write response to file instead of to stdout
 	if resp != nil && respError == nil && commonOptions.OutputFileRaw != "" {
-		newline := strings.Contains(strings.ToLower(resp.Header.Get("Content-Type")), "json")
-		fullFilePath, err := r.saveResponseToFile(resp, commonOptions.OutputFileRaw, false, newline)
+		if resp.StatusCode != 0 {
+			// check if it is a dummy reseponse (i.e. no status code)
+			newline := strings.Contains(strings.ToLower(resp.Header.Get("Content-Type")), "json")
+			fullFilePath, err := r.saveResponseToFile(resp, commonOptions.OutputFileRaw, false, newline)
 
-		if err != nil {
-			return 0, cmderrors.NewSystemError("write to file failed", err)
+			if err != nil {
+				return 0, cmderrors.NewSystemError("write to file failed", err)
+			}
+
+			r.Logger.Infof("Saved response: %s", fullFilePath)
 		}
-
-		r.Logger.Infof("Saved response: %s", fullFilePath)
 	}
 
 	if resp != nil && respError == nil && resp.Header.Get("Content-Type") == "application/octet-stream" && resp.JSONData != nil {
