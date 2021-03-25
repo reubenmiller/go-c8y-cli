@@ -27,25 +27,126 @@ c8y inventory create --data "./datapoint.largeInt.json"
 
 None :)
 
+## Known limitations
+
+* When using --session, if the session required TFA, then it will not work! The cookies/tokens have to be present in the session file first
 ## TODO
 
-* OutputResponse: Save output response to file (i.e. with --select rather than the full response), or store both? like $_rawdata and $_data in powershell
+### Naming Consistency
 
-* Add option to set the X-Cumulocity-Application-Key for all requests (as it can affect the availability calculation. If the header is not present, the communication is deemed to come from the device). Check if the key needs to really exist as an application or if it can just be a default non-empty value
+* Review devicecredentials command names    => deviceregistration => approve => list => register
+* Review inventoryreferences command names
+    * relationships childassets list
+    * relationships childassets get
+    * relationships childassets create
+    * relationships childassets unassignFromDeviceGroup
 
-* Add new install script like curl -l install.sh | sudo bash
+    * devicegroups unassignDevice
+    * devicegroups assignDevice
 
-* Add shell helper to set mode env variables (like in powershell)
+    * inventory assets children list
+    * inventory assets children 
+
+    * relationships childadditions create
+    * relationships childadditions get
+    * relationships childadditions list
+    * relationships childadditions list
+* Get feedback on c8y measurements getSeries vs listSeries
+
+### Bugs
+
+* Command confirmation does not work with --progress! 
+* Using "--confirm" does not force confirmation! (this should trigger a confirmation regardless of other settings)
+    * --confirm "force|auto|off" ?
+* Creating alias on windows uses different quoting to shell!
+        
+        ```powershell
+        # Fails
+        c8y alias set cancelop 'operations update --status FAILED --failureReason "User cancelled operation"'
+        
+
+        # Works
+        c8y alias set cancelop "operations update --status=FAILED --failureReason='User cancelled operation'"
+        ```
+### Commands
+
+* add wait for operation to go-c8y-cli
+
+* Create c8y names generator
+    * name with random values
+        * `c8y generate names -f "testdevice_%03d { .Index } { .RandomName }" --count 10 --start 0 --end 10`
+        * `c8y generate names -f "%d" --count 10 --start 0 --end 10`
+
+* Dont write output when using dry (i.e no output is there)
+
+```
+io.copyBuffer(0xdc9e20, 0xc000598c30, 0x0, 0x0, 0xc00048c000, 0x8000, 0x8000, 0x0, 0xb45ae9, 0xbe9660)
+        /usr/local/go/src/io/io.go:423 +0x10b
+io.Copy(...)
+        /usr/local/go/src/io/io.go:382
+os.genericReadFrom(0xc00000e030, 0x0, 0x0, 0x0, 0xd09000, 0x0)
+        /usr/local/go/src/os/file.go:160 +0x99
+os.(*File).ReadFrom(0xc00000e030, 0x0, 0x0, 0x7f8dbbc68b18, 0xc00000e030, 0x1)
+        /usr/local/go/src/os/file.go:154 +0x250
+io.copyBuffer(0xdc8d80, 0xc00000e030, 0x0, 0x0, 0x0, 0x0, 0x0, 0xc0000c2010, 0xcaf461, 0x1)
+        /usr/local/go/src/io/io.go:409 +0x357
+io.Copy(...)
+        /usr/local/go/src/io/io.go:382
+github.com/reubenmiller/go-c8y-cli/pkg/request.(*RequestHandler).saveResponseToFile(0xc0002a7640, 0xc00000c060, 0xc0000d4660, 0x11, 0xffffffffffff0000, 0x0, 0x0, 0x0, 0x0)
+        /workspaces/go-c8y-cli/pkg/request/request.go:807 +0x245
+github.com/reubenmiller/go-c8y-cli/pkg/request.(*RequestHandler).ProcessResponse(0xc0002a7640, 0xc00000c060, 0x0, 0x0, 0xcb4add, 0x15, 0xc0001b2270, 0xd, 0xc0000d4660, 0x11, ...)
+        /workspaces/go-c8y-cli/pkg/request/request.go:619 +0x16fa
+github.com/reubenmiller/go-c8y-cli/pkg/request.(*RequestHandler).ProcessRequestAndResponse(0xc0002a7640, 0xc00007e140, 0x1, 0x1, 0xcb4add, 0x15, 0xc0001b2270, 0xd, 0xc0000d4660, 0x11, ...)
+        /workspaces/go-c8y-cli/pkg/request/request.go:119 +0x6e5
+github.com/reubenmiller/go-c8y-cli/pkg/worker.(*Worker).batchWorker(0xc00041ac90, 0x1, 0xc00009dc20, 0xc00009dc80, 0xc000446b40, 0xc0004450f0)
+        /workspaces/go-c8y-cli/pkg/worker/worker.go:387 +0x5b5
+created by github.com/reubenmiller/go-c8y-cli/pkg/worker.(*Worker).runBatched
+        /workspaces/go-c8y-cli/pkg/worker/worker.go:185 +0x29a
+```
+### New Functions
+
+* Add option to print out request and response as markdown
+
+* allow default view definitions for a static value (or fixed column headers)
+
+* Add global header flag
+
+* Add global query parameter flag
 
 * Create activity log cmdlets?
   * Get recent history, get commands with filter (api, host, method etc.)
 
-* Add test create items commands (create testing createDevice, createAlarm, createEvent etc.)? Or integrate some standard templates better?
+* Add option to set the X-Cumulocity-Application-Key for all requests (as it can affect the availability calculation. If the header is not present, the communication is deemed to come from the device). Check if the key needs to really exist as an application or if it can just be a default non-empty value
+
+### Refactoring
+
+* Move dataview to configuration
+
+### Completions
+
+    * Get Series (based on supported series fragment)
+    * Approve pending device request
+
+
+
+### Packaging
+
+* Add new install script like curl -l install.sh | sudo bash
+    * create repository holding views and templates. clone the repository if the user opts into it
+    * add small script to move sessions from `.cumulocity` to `.cumulocity/sessions`
+
 
 ## Unreleased
 
 No unreleased features
 
+* Removed Get-SupportedOperation command. The supported operations can be read from the managed object using a select statment
+    ```sh
+    Get-Device -Select "c8y_SupportedOperations**"
+    ```
+
+* Refactored project structure to improve maintainability
+* Changed default directory for sessions from `.cumulocity` to `.cumulocity/sessions`
 * Fixed inventory roles commands
     * `c8y users getCurrentUserInventoryRoleCollection` => `c8y users listInventoryRoles`
     * `c8y users getCurrentUserInventoryRole` => `c8y users getInventoryRole`
