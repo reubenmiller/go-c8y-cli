@@ -30,7 +30,10 @@ Inherit common parameters to a custom function. This will add parameters such as
         )]
         [ValidateSet("Collection", "Get", "Create", "Update", "Delete", "Template", "TemplateVars", "")]
         [string[]]
-        $Type
+        $Type,
+
+        # Ignore confirm parameter (i.e. when using inbuilt powershell -Confirm)
+        [switch] $SkipConfirm
     )
 
     Process {
@@ -94,7 +97,9 @@ Inherit common parameters to a custom function. This will add parameters such as
         New-DynamicParam -Name Color -Type "switch" -DPDictionary $Dictionary
 
         # Confirmation
-        New-DynamicParam -Name Prompt -Type "switch" -DPDictionary $Dictionary
+        if (-Not $SkipConfirm) {
+            New-DynamicParam -Name Confirm -Type "switch" -DPDictionary $Dictionary
+        }
         New-DynamicParam -Name ConfirmText -Type "string" -DPDictionary $Dictionary
 
         # Error options
