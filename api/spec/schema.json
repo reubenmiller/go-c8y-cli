@@ -45,6 +45,7 @@
         "string",
         "source",
         "tenant",
+        "devicerequest",
         "[]agent",
         "[]string",
         "[]stringcsv",
