@@ -38,6 +38,7 @@ type RequestHandler struct {
 	Console *console.Console
 
 	IsTerminal     bool
+	IO             *iostreams.IOStreams
 	Client         *c8y.Client
 	Config         *config.Config
 	Logger         *logger.Logger
@@ -609,7 +610,8 @@ func (r *RequestHandler) ProcessResponse(resp *c8y.Response, respError error, co
 	// Display log output in special scenarios (i.e. Delete and no Accept header), so the user gets some feedback that it did something
 	if resp != nil && (resp.Request.Method == http.MethodDelete && resp.StatusCode == 204 || resp.Request.Header.Get("Accept") == "" && resp.Request.Method != http.MethodDelete && resp.StatusCode == 201) {
 		if r.IsTerminal {
-			r.Logger.Warnf("%s. method: %s, status=%s, path=%s", color.GreenString("Request successful"), resp.Request.Method, resp.Status, resp.Request.URL.Path)
+			cs := r.IO.ColorScheme()
+			fmt.Fprintf(r.IO.ErrOut, "%s %s %s => %s\n", cs.SuccessIconWithColor(cs.Red), "Deleted", resp.Request.URL.Path, resp.Status)
 		}
 	}
 

@@ -91,6 +91,7 @@ func (f *Factory) GetRequestHandler() (*request.RequestHandler, error) {
 
 	handler := &request.RequestHandler{
 		IsTerminal:     f.IOStreams.IsStdoutTTY(),
+		IO:             f.IOStreams,
 		Client:         client,
 		Config:         cfg,
 		Logger:         log,
@@ -127,6 +128,7 @@ func (f *Factory) RunWithWorkers(client *c8y.Client, cmd *cobra.Command, req *c8
 
 	handler := &request.RequestHandler{
 		IsTerminal:     f.IOStreams.IsStdoutTTY(),
+		IO:             f.IOStreams,
 		Client:         client,
 		Config:         cfg,
 		Logger:         log,

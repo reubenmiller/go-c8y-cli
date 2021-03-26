@@ -547,6 +547,7 @@ func createCumulocityClient(f *cmdutil.Factory) func() (*c8y.Client, error) {
 			DryRunHandler: func(options *c8y.RequestOptions, req *http.Request) {
 				handler := &request.RequestHandler{
 					IsTerminal:    f.IOStreams.IsStdoutTTY(),
+					IO:            f.IOStreams,
 					Client:        client,
 					Config:        cfg,
 					Logger:        log,
