@@ -177,8 +177,8 @@ func (w *Worker) runBatched(requestIterator *requestiterator.RequestIterator, co
 	results := make(chan error, batchOptions.TotalWorkers-1)
 	workers := sync.WaitGroup{}
 
+	// don't start the progress bar until all confirmations are done
 	progbar := progressbar.NewMultiProgressBar(w.io.ErrOut, 1, batchOptions.TotalWorkers, "requests", w.config.ShowProgress())
-	progbar.Start(float64(batchOptions.Delay * 2 / 1000))
 
 	for iWork := 1; iWork <= batchOptions.TotalWorkers; iWork++ {
 		w.logger.Debugf("starting worker: %d", iWork)
@@ -188,6 +188,7 @@ func (w *Worker) runBatched(requestIterator *requestiterator.RequestIterator, co
 
 	jobID := int64(0)
 	skipConfirm := false
+	shouldConfirm := false
 	promptCount := int32(0)
 	promptWG := sync.WaitGroup{}
 
@@ -242,8 +243,12 @@ func (w *Worker) runBatched(requestIterator *requestiterator.RequestIterator, co
 			}
 			w.logger.Debugf("adding job: %d", jobID)
 
+			if request != nil {
+				shouldConfirm = w.config.ShouldConfirm(request.Method)
+			}
+
 			// confirm action
-			if request != nil && !skipConfirm && w.config.ShouldConfirm(request.Method) {
+			if !skipConfirm && shouldConfirm {
 				// wait for any other previous prompted jobs to finish
 				promptWG.Wait()
 
@@ -283,6 +288,10 @@ func (w *Worker) runBatched(requestIterator *requestiterator.RequestIterator, co
 
 				promptWG.Add(1)
 				atomic.AddInt32(&promptCount, 1)
+			}
+
+			if skipConfirm || !shouldConfirm {
+				progbar.Start(float64(batchOptions.Delay * 2 / 1000))
 			}
 
 			jobs <- batchArgument{
@@ -335,7 +344,7 @@ func (w *Worker) runBatched(requestIterator *requestiterator.RequestIterator, co
 			promptWG.Done()
 		}
 	}
-	if progbar.IsEnabled() && jobID > 1 {
+	if progbar.IsEnabled() && progbar.IsRunning() && jobID > 1 {
 		// wait for progress bar to update last increment
 		time.Sleep(progbar.RefreshRate())
 	}
