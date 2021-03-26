@@ -72,6 +72,9 @@
         # microservice
         "microservice" = "c8yfetcher.WithMicroserviceByNameFirstMatch(client, args, `"${prop}`", `"${queryParam}`"),"
 
+        # devicerequest
+        "devicerequest" = "flags.WithStringValue(`"${prop}`", `"${queryParam}`"),"
+
         # device array
         "[]device" = "c8yfetcher.WithDeviceByNameFirstMatch(client, args, `"${prop}`", `"${queryParam}`"),"
 

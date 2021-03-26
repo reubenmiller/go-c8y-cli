@@ -78,6 +78,7 @@
         "set" { "object[]"; break }
         "source" { "object"; break }
         "string" { "string"; break }
+        "devicerequest" { "string"; break }
         "strings" { "string"; break }
         "tenant" { "object"; break }
         default {
