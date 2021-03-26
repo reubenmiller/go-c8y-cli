@@ -1,8 +1,7 @@
 // Code generated from specification version 1.0.0: DO NOT EDIT
-package listnewdevicerequests
+package approve
 
 import (
-	"fmt"
 	"io"
 	"net/http"
 
@@ -17,43 +16,47 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// ListNewDeviceRequestsCmd command
-type ListNewDeviceRequestsCmd struct {
+// ApproveCmd command
+type ApproveCmd struct {
 	*subcommand.SubCommand
 
 	factory *cmdutil.Factory
 }
 
-// NewListNewDeviceRequestsCmd creates a command to Get device request collection
-func NewListNewDeviceRequestsCmd(f *cmdutil.Factory) *ListNewDeviceRequestsCmd {
-	ccmd := &ListNewDeviceRequestsCmd{
+// NewApproveCmd creates a command to Approve device request
+func NewApproveCmd(f *cmdutil.Factory) *ApproveCmd {
+	ccmd := &ApproveCmd{
 		factory: f,
 	}
 	cmd := &cobra.Command{
-		Use:   "listNewDeviceRequests",
-		Short: "Get device request collection",
-		Long:  `Get a collection of device registration requests`,
+		Use:   "approve",
+		Short: "Approve device request",
+		Long:  `Approve a new device request. Note: a device can only be approved if the platform has received a request for device credentials.`,
 		Example: heredoc.Doc(`
-$ c8y devices listNewDeviceRequests
-Get a list of new device requests
+$ c8y deviceregistration approve --id "1234010101s01ldk208"
+Approve a new device request
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
-			return nil
+			return f.UpdateModeEnabled()
 		},
 		RunE: ccmd.RunE,
 	}
 
 	cmd.SilenceUsage = true
 
+	cmd.Flags().String("id", "", "Device identifier (required) (accepts pipeline)")
+	cmd.Flags().String("status", "ACCEPTED", "Status of registration")
+
 	completion.WithOptions(
 		cmd,
+		completion.WithValidateSet("status", "ACCEPTED"),
 	)
 
 	flags.WithOptions(
 		cmd,
+		flags.WithProcessingMode(),
 
-		flags.WithExtendedPipelineSupport("", "", false),
-		flags.WithCollectionProperty("newDeviceRequests"),
+		flags.WithExtendedPipelineSupport("id", "id", true),
 	)
 
 	// Required flags
@@ -64,7 +67,7 @@ Get a list of new device requests
 }
 
 // RunE executes the command
-func (n *ListNewDeviceRequestsCmd) RunE(cmd *cobra.Command, args []string) error {
+func (n *ApproveCmd) RunE(cmd *cobra.Command, args []string) error {
 	cfg, err := n.factory.Config()
 	if err != nil {
 		return err
@@ -88,11 +91,6 @@ func (n *ListNewDeviceRequestsCmd) RunE(cmd *cobra.Command, args []string) error
 	if err != nil {
 		return cmderrors.NewUserError(err)
 	}
-	commonOptions, err := cfg.GetOutputCommonOptions(cmd)
-	if err != nil {
-		return cmderrors.NewUserError(fmt.Sprintf("Failed to get common options. err=%s", err))
-	}
-	commonOptions.AddQueryParameters(query)
 
 	queryValue, err := query.GetQueryUnescape(true)
 
@@ -106,6 +104,7 @@ func (n *ListNewDeviceRequestsCmd) RunE(cmd *cobra.Command, args []string) error
 		cmd,
 		headers,
 		inputIterators,
+		flags.WithProcessingModeValue(),
 	)
 	if err != nil {
 		return cmderrors.NewUserError(err)
@@ -128,24 +127,29 @@ func (n *ListNewDeviceRequestsCmd) RunE(cmd *cobra.Command, args []string) error
 		cmd,
 		body,
 		inputIterators,
+		flags.WithDataFlagValue(),
+		flags.WithStringValue("status", "status"),
+		cmdutil.WithTemplateValue(cfg),
+		flags.WithTemplateVariablesValue(),
 	)
 	if err != nil {
 		return cmderrors.NewUserError(err)
 	}
 
 	// path parameters
-	path := flags.NewStringTemplate("devicecontrol/newDeviceRequests")
+	path := flags.NewStringTemplate("devicecontrol/newDeviceRequests/{id}")
 	err = flags.WithPathParameters(
 		cmd,
 		path,
 		inputIterators,
+		flags.WithStringValue("id", "id"),
 	)
 	if err != nil {
 		return err
 	}
 
 	req := c8y.RequestOptions{
-		Method:       "GET",
+		Method:       "PUT",
 		Path:         path.GetTemplate(),
 		Query:        queryValue,
 		Body:         body,

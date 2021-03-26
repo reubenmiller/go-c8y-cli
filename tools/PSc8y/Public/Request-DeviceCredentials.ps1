@@ -8,7 +8,7 @@ Request device credentials
 Device credentials can be enquired by devices that do not have credentials for accessing a tenant yet. Since the device does not have credentials yet, a set of fixed credentials is used for this API. The credentials can be obtained by contacting support. Do not use your tenant credentials with this API.
 
 .LINK
-c8y devicecredentials requestDeviceCredentials
+c8y deviceregistration getCredentials
 
 .EXAMPLE
 PS> Request-DeviceCredentials -Id "device-AD76-matrixer"
@@ -40,7 +40,7 @@ Request credentials for a new device
             Use-CallerPreference -Cmdlet $PSCmdlet -SessionState $ExecutionContext.SessionState
         }
 
-        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "devicecredentials requestDeviceCredentials"
+        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "deviceregistration getCredentials"
         $ClientOptions = Get-ClientOutputOption $PSBoundParameters
         $TypeOptions = @{
             Type = "application/vnd.com.nsn.cumulocity.deviceCredentials+json"
@@ -54,13 +54,13 @@ Request credentials for a new device
         if ($ClientOptions.ConvertToPS) {
             $Id `
             | Group-ClientRequests `
-            | c8y devicecredentials requestDeviceCredentials $c8yargs `
+            | c8y deviceregistration getCredentials $c8yargs `
             | ConvertFrom-ClientOutput @TypeOptions
         }
         else {
             $Id `
             | Group-ClientRequests `
-            | c8y devicecredentials requestDeviceCredentials $c8yargs
+            | c8y deviceregistration getCredentials $c8yargs
         }
         
     }

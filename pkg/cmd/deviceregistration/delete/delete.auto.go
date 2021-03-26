@@ -1,5 +1,5 @@
 // Code generated from specification version 1.0.0: DO NOT EDIT
-package registernewdevice
+package delete
 
 import (
 	"io"
@@ -16,35 +16,35 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// RegisterNewDeviceCmd command
-type RegisterNewDeviceCmd struct {
+// DeleteCmd command
+type DeleteCmd struct {
 	*subcommand.SubCommand
 
 	factory *cmdutil.Factory
 }
 
-// NewRegisterNewDeviceCmd creates a command to Register device
-func NewRegisterNewDeviceCmd(f *cmdutil.Factory) *RegisterNewDeviceCmd {
-	ccmd := &RegisterNewDeviceCmd{
+// NewDeleteCmd creates a command to Delete device request
+func NewDeleteCmd(f *cmdutil.Factory) *DeleteCmd {
+	ccmd := &DeleteCmd{
 		factory: f,
 	}
 	cmd := &cobra.Command{
-		Use:   "registerNewDevice",
-		Short: "Register device",
-		Long:  `Register a new device (request)`,
+		Use:   "delete",
+		Short: "Delete device request",
+		Long:  `Delete an existing device registration request`,
 		Example: heredoc.Doc(`
-$ c8y devices registerNewDevice --id "ASDF098SD1J10912UD92JDLCNCU8"
-Register a new device request
+$ c8y deviceregistration delete --id "91019192078"
+Delete a new device request
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
-			return f.CreateModeEnabled()
+			return f.DeleteModeEnabled()
 		},
 		RunE: ccmd.RunE,
 	}
 
 	cmd.SilenceUsage = true
 
-	cmd.Flags().String("id", "", "Device identifier. Max: 1000 characters. E.g. IMEI (required) (accepts pipeline)")
+	cmd.Flags().String("id", "", "New Device Request ID (required) (accepts pipeline)")
 
 	completion.WithOptions(
 		cmd,
@@ -65,7 +65,7 @@ Register a new device request
 }
 
 // RunE executes the command
-func (n *RegisterNewDeviceCmd) RunE(cmd *cobra.Command, args []string) error {
+func (n *DeleteCmd) RunE(cmd *cobra.Command, args []string) error {
 	cfg, err := n.factory.Config()
 	if err != nil {
 		return err
@@ -125,29 +125,25 @@ func (n *RegisterNewDeviceCmd) RunE(cmd *cobra.Command, args []string) error {
 		cmd,
 		body,
 		inputIterators,
-		flags.WithOverrideValue("id", "id"),
-		flags.WithDataFlagValue(),
-		flags.WithStringValue("id", "id"),
-		cmdutil.WithTemplateValue(cfg),
-		flags.WithTemplateVariablesValue(),
 	)
 	if err != nil {
 		return cmderrors.NewUserError(err)
 	}
 
 	// path parameters
-	path := flags.NewStringTemplate("devicecontrol/newDeviceRequests")
+	path := flags.NewStringTemplate("devicecontrol/newDeviceRequests/{id}")
 	err = flags.WithPathParameters(
 		cmd,
 		path,
 		inputIterators,
+		flags.WithStringValue("id", "id"),
 	)
 	if err != nil {
 		return err
 	}
 
 	req := c8y.RequestOptions{
-		Method:       "POST",
+		Method:       "DELETE",
 		Path:         path.GetTemplate(),
 		Query:        queryValue,
 		Body:         body,

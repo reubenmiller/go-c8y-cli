@@ -8,7 +8,7 @@ Get device request
 Get a device registration request
 
 .LINK
-c8y devicecredentials getNewDeviceRequest
+c8y deviceregistration get
 
 .EXAMPLE
 PS> Get-DeviceRequest -Id "010af8dd0c102"
@@ -40,7 +40,7 @@ Get a new device request
             Use-CallerPreference -Cmdlet $PSCmdlet -SessionState $ExecutionContext.SessionState
         }
 
-        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "devicecredentials getNewDeviceRequest"
+        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "deviceregistration get"
         $ClientOptions = Get-ClientOutputOption $PSBoundParameters
         $TypeOptions = @{
             Type = "application/vnd.com.nsn.cumulocity.newDeviceRequest+json"
@@ -54,13 +54,13 @@ Get a new device request
         if ($ClientOptions.ConvertToPS) {
             $Id `
             | Group-ClientRequests `
-            | c8y devicecredentials getNewDeviceRequest $c8yargs `
+            | c8y deviceregistration get $c8yargs `
             | ConvertFrom-ClientOutput @TypeOptions
         }
         else {
             $Id `
             | Group-ClientRequests `
-            | c8y devicecredentials getNewDeviceRequest $c8yargs
+            | c8y deviceregistration get $c8yargs
         }
         
     }

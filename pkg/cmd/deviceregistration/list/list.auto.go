@@ -1,7 +1,8 @@
 // Code generated from specification version 1.0.0: DO NOT EDIT
-package deletenewdevicerequest
+package list
 
 import (
+	"fmt"
 	"io"
 	"net/http"
 
@@ -16,35 +17,33 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// DeleteNewDeviceRequestCmd command
-type DeleteNewDeviceRequestCmd struct {
+// ListCmd command
+type ListCmd struct {
 	*subcommand.SubCommand
 
 	factory *cmdutil.Factory
 }
 
-// NewDeleteNewDeviceRequestCmd creates a command to Delete device request
-func NewDeleteNewDeviceRequestCmd(f *cmdutil.Factory) *DeleteNewDeviceRequestCmd {
-	ccmd := &DeleteNewDeviceRequestCmd{
+// NewListCmd creates a command to Get device request collection
+func NewListCmd(f *cmdutil.Factory) *ListCmd {
+	ccmd := &ListCmd{
 		factory: f,
 	}
 	cmd := &cobra.Command{
-		Use:   "deleteNewDeviceRequest",
-		Short: "Delete device request",
-		Long:  `Delete an existing device registration request`,
+		Use:   "list",
+		Short: "Get device request collection",
+		Long:  `Get a collection of device registration requests`,
 		Example: heredoc.Doc(`
-$ c8y devices deleteNewDeviceRequest --id "91019192078"
-Delete a new device request
+$ c8y deviceregistration list
+Get a list of new device requests
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
-			return f.DeleteModeEnabled()
+			return nil
 		},
 		RunE: ccmd.RunE,
 	}
 
 	cmd.SilenceUsage = true
-
-	cmd.Flags().String("id", "", "New Device Request ID (required) (accepts pipeline)")
 
 	completion.WithOptions(
 		cmd,
@@ -52,9 +51,9 @@ Delete a new device request
 
 	flags.WithOptions(
 		cmd,
-		flags.WithProcessingMode(),
 
-		flags.WithExtendedPipelineSupport("id", "id", true),
+		flags.WithExtendedPipelineSupport("", "", false),
+		flags.WithCollectionProperty("newDeviceRequests"),
 	)
 
 	// Required flags
@@ -65,7 +64,7 @@ Delete a new device request
 }
 
 // RunE executes the command
-func (n *DeleteNewDeviceRequestCmd) RunE(cmd *cobra.Command, args []string) error {
+func (n *ListCmd) RunE(cmd *cobra.Command, args []string) error {
 	cfg, err := n.factory.Config()
 	if err != nil {
 		return err
@@ -89,6 +88,11 @@ func (n *DeleteNewDeviceRequestCmd) RunE(cmd *cobra.Command, args []string) erro
 	if err != nil {
 		return cmderrors.NewUserError(err)
 	}
+	commonOptions, err := cfg.GetOutputCommonOptions(cmd)
+	if err != nil {
+		return cmderrors.NewUserError(fmt.Sprintf("Failed to get common options. err=%s", err))
+	}
+	commonOptions.AddQueryParameters(query)
 
 	queryValue, err := query.GetQueryUnescape(true)
 
@@ -102,7 +106,6 @@ func (n *DeleteNewDeviceRequestCmd) RunE(cmd *cobra.Command, args []string) erro
 		cmd,
 		headers,
 		inputIterators,
-		flags.WithProcessingModeValue(),
 	)
 	if err != nil {
 		return cmderrors.NewUserError(err)
@@ -131,19 +134,18 @@ func (n *DeleteNewDeviceRequestCmd) RunE(cmd *cobra.Command, args []string) erro
 	}
 
 	// path parameters
-	path := flags.NewStringTemplate("devicecontrol/newDeviceRequests/{id}")
+	path := flags.NewStringTemplate("devicecontrol/newDeviceRequests")
 	err = flags.WithPathParameters(
 		cmd,
 		path,
 		inputIterators,
-		flags.WithStringValue("id", "id"),
 	)
 	if err != nil {
 		return err
 	}
 
 	req := c8y.RequestOptions{
-		Method:       "DELETE",
+		Method:       "GET",
 		Path:         path.GetTemplate(),
 		Query:        queryValue,
 		Body:         body,

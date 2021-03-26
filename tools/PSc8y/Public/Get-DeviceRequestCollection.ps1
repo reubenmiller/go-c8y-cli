@@ -8,7 +8,7 @@ Get device request collection
 Get a collection of device registration requests
 
 .LINK
-c8y devicecredentials listNewDeviceRequests
+c8y deviceregistration list
 
 .EXAMPLE
 PS> Get-DeviceRequestCollection
@@ -35,7 +35,7 @@ Get a list of new device requests
             Use-CallerPreference -Cmdlet $PSCmdlet -SessionState $ExecutionContext.SessionState
         }
 
-        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "devicecredentials listNewDeviceRequests"
+        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "deviceregistration list"
         $ClientOptions = Get-ClientOutputOption $PSBoundParameters
         $TypeOptions = @{
             Type = "application/vnd.com.nsn.cumulocity.newDeviceRequestCollection+json"
@@ -47,11 +47,11 @@ Get a list of new device requests
     Process {
 
         if ($ClientOptions.ConvertToPS) {
-            c8y devicecredentials listNewDeviceRequests $c8yargs `
+            c8y deviceregistration list $c8yargs `
             | ConvertFrom-ClientOutput @TypeOptions
         }
         else {
-            c8y devicecredentials listNewDeviceRequests $c8yargs
+            c8y deviceregistration list $c8yargs
         }
     }
 

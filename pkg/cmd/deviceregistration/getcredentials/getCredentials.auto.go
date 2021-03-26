@@ -1,5 +1,5 @@
 // Code generated from specification version 1.0.0: DO NOT EDIT
-package requestdevicecredentials
+package getcredentials
 
 import (
 	"io"
@@ -16,24 +16,24 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// RequestDeviceCredentialsCmd command
-type RequestDeviceCredentialsCmd struct {
+// GetCredentialsCmd command
+type GetCredentialsCmd struct {
 	*subcommand.SubCommand
 
 	factory *cmdutil.Factory
 }
 
-// NewRequestDeviceCredentialsCmd creates a command to Request device credentials
-func NewRequestDeviceCredentialsCmd(f *cmdutil.Factory) *RequestDeviceCredentialsCmd {
-	ccmd := &RequestDeviceCredentialsCmd{
+// NewGetCredentialsCmd creates a command to Request device credentials
+func NewGetCredentialsCmd(f *cmdutil.Factory) *GetCredentialsCmd {
+	ccmd := &GetCredentialsCmd{
 		factory: f,
 	}
 	cmd := &cobra.Command{
-		Use:   "requestDeviceCredentials",
+		Use:   "getCredentials",
 		Short: "Request device credentials",
 		Long:  `Device credentials can be enquired by devices that do not have credentials for accessing a tenant yet. Since the device does not have credentials yet, a set of fixed credentials is used for this API. The credentials can be obtained by contacting support. Do not use your tenant credentials with this API.`,
 		Example: heredoc.Doc(`
-$ c8y devices requestDeviceCredentials --id "device-AD76-matrixer"
+$ c8y deviceregistration getCredentials --id "device-AD76-matrixer"
 Request credentials for a new device
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
@@ -65,7 +65,7 @@ Request credentials for a new device
 }
 
 // RunE executes the command
-func (n *RequestDeviceCredentialsCmd) RunE(cmd *cobra.Command, args []string) error {
+func (n *GetCredentialsCmd) RunE(cmd *cobra.Command, args []string) error {
 	cfg, err := n.factory.Config()
 	if err != nil {
 		return err

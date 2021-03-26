@@ -1,8 +1,7 @@
 // Code generated from specification version 1.0.0: DO NOT EDIT
-package getnewdevicerequest
+package register
 
 import (
-	"fmt"
 	"io"
 	"net/http"
 
@@ -17,35 +16,35 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// GetNewDeviceRequestCmd command
-type GetNewDeviceRequestCmd struct {
+// RegisterCmd command
+type RegisterCmd struct {
 	*subcommand.SubCommand
 
 	factory *cmdutil.Factory
 }
 
-// NewGetNewDeviceRequestCmd creates a command to Get device request
-func NewGetNewDeviceRequestCmd(f *cmdutil.Factory) *GetNewDeviceRequestCmd {
-	ccmd := &GetNewDeviceRequestCmd{
+// NewRegisterCmd creates a command to Register device
+func NewRegisterCmd(f *cmdutil.Factory) *RegisterCmd {
+	ccmd := &RegisterCmd{
 		factory: f,
 	}
 	cmd := &cobra.Command{
-		Use:   "getNewDeviceRequest",
-		Short: "Get device request",
-		Long:  `Get a device registration request`,
+		Use:   "register",
+		Short: "Register device",
+		Long:  `Register a new device (request)`,
 		Example: heredoc.Doc(`
-$ c8y devices getNewDeviceRequest
-Get a new device request
+$ c8y deviceregistration register --id "ASDF098SD1J10912UD92JDLCNCU8"
+Register a new device request
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
-			return nil
+			return f.CreateModeEnabled()
 		},
 		RunE: ccmd.RunE,
 	}
 
 	cmd.SilenceUsage = true
 
-	cmd.Flags().String("id", "", "New Device Request ID (required) (accepts pipeline)")
+	cmd.Flags().String("id", "", "Device identifier. Max: 1000 characters. E.g. IMEI (required) (accepts pipeline)")
 
 	completion.WithOptions(
 		cmd,
@@ -53,6 +52,7 @@ Get a new device request
 
 	flags.WithOptions(
 		cmd,
+		flags.WithProcessingMode(),
 
 		flags.WithExtendedPipelineSupport("id", "id", true),
 	)
@@ -65,7 +65,7 @@ Get a new device request
 }
 
 // RunE executes the command
-func (n *GetNewDeviceRequestCmd) RunE(cmd *cobra.Command, args []string) error {
+func (n *RegisterCmd) RunE(cmd *cobra.Command, args []string) error {
 	cfg, err := n.factory.Config()
 	if err != nil {
 		return err
@@ -89,11 +89,6 @@ func (n *GetNewDeviceRequestCmd) RunE(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return cmderrors.NewUserError(err)
 	}
-	commonOptions, err := cfg.GetOutputCommonOptions(cmd)
-	if err != nil {
-		return cmderrors.NewUserError(fmt.Sprintf("Failed to get common options. err=%s", err))
-	}
-	commonOptions.AddQueryParameters(query)
 
 	queryValue, err := query.GetQueryUnescape(true)
 
@@ -107,6 +102,7 @@ func (n *GetNewDeviceRequestCmd) RunE(cmd *cobra.Command, args []string) error {
 		cmd,
 		headers,
 		inputIterators,
+		flags.WithProcessingModeValue(),
 	)
 	if err != nil {
 		return cmderrors.NewUserError(err)
@@ -129,25 +125,29 @@ func (n *GetNewDeviceRequestCmd) RunE(cmd *cobra.Command, args []string) error {
 		cmd,
 		body,
 		inputIterators,
+		flags.WithOverrideValue("id", "id"),
+		flags.WithDataFlagValue(),
+		flags.WithStringValue("id", "id"),
+		cmdutil.WithTemplateValue(cfg),
+		flags.WithTemplateVariablesValue(),
 	)
 	if err != nil {
 		return cmderrors.NewUserError(err)
 	}
 
 	// path parameters
-	path := flags.NewStringTemplate("devicecontrol/newDeviceRequests/{id}")
+	path := flags.NewStringTemplate("devicecontrol/newDeviceRequests")
 	err = flags.WithPathParameters(
 		cmd,
 		path,
 		inputIterators,
-		flags.WithStringValue("id", "id"),
 	)
 	if err != nil {
 		return err
 	}
 
 	req := c8y.RequestOptions{
-		Method:       "GET",
+		Method:       "POST",
 		Path:         path.GetTemplate(),
 		Query:        queryValue,
 		Body:         body,
