@@ -4,6 +4,7 @@
         {
             "name": "ignoreinbuilt",
             "priority": 900,
+            "type": "dummyvalue",
             "columns": [
                 "**",
                 "!firstOccurrenceTime",
@@ -22,11 +23,3 @@
         }
     ]
 }
-
-
-
-
-
-
-
-
