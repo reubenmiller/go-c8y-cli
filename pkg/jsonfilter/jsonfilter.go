@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"regexp"
+	"strconv"
 	"strings"
 
 	"github.com/facette/natsort"
@@ -61,12 +62,25 @@ func (f *JSONFilters) AddRawFilters(rawFilters []string) error {
 		}
 		operator = strings.TrimSpace(operator)
 		operator = strings.ReplaceAll(operator, " ", "")
-		f.Add(strings.TrimSpace(parts[0]), operator, strings.TrimSpace(parts[1]))
+		value := strings.TrimSpace(parts[1])
+		if isQuotedString(value) {
+			f.Add(strings.TrimSpace(parts[0]), operator, strings.Trim(value, "\"'"))
+			continue
+		}
+		if v, err := strconv.ParseFloat(value, 64); err == nil {
+			f.Add(strings.TrimSpace(parts[0]), operator, v)
+		} else {
+			f.Add(strings.TrimSpace(parts[0]), operator, value)
+		}
 	}
 	return nil
 }
 
-func (f *JSONFilters) Add(property, operation, value string) {
+func isQuotedString(v string) bool {
+	return (strings.HasPrefix(v, "\"") && strings.HasSuffix(v, "\"")) || (strings.HasPrefix(v, "'") && strings.HasSuffix(v, "'"))
+}
+
+func (f *JSONFilters) Add(property, operation string, value interface{}) {
 	f.Filters = append(f.Filters, JSONFilter{
 		Property:  property,
 		Operation: operation,
@@ -217,7 +231,7 @@ func NewJSONFilters() *JSONFilters {
 type JSONFilter struct {
 	Property  string
 	Operation string
-	Value     string
+	Value     interface{}
 }
 
 func removeJSONArrayValues(jsonValue []byte) []byte {
