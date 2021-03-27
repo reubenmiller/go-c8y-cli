@@ -39,9 +39,10 @@ import (
 	eventsSubscribeCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/events/subscribe"
 	identityCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/identity"
 	inventoryCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/inventory"
+	inventoryAdditionsCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/inventory/additions"
+	inventoryAssetsCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/inventory/assets"
 	inventoryFindCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/inventory/find"
 	inventorySubscribeCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/inventory/subscribe"
-	inventoryreferencesCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/inventoryreferences"
 	measurementsCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/measurements"
 	measurementsSubscribeCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/measurements/subscribe"
 	microservicesCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/microservices"
@@ -216,8 +217,6 @@ func NewCmdRoot(f *cmdutil.Factory, version, buildDate string) *CmdRoot {
 		databrokerCmd.NewSubCommand(f).GetCommand(),
 		deviceregistrationCmd.NewSubCommand(f).GetCommand(),
 		identityCmd.NewSubCommand(f).GetCommand(),
-		inventoryreferencesCmd.NewSubCommand(f).GetCommand(),
-
 		retentionrulesCmd.NewSubCommand(f).GetCommand(),
 		sessionsCmd.NewSubCommand(f).GetCommand(),
 		systemoptionsCmd.NewSubCommand(f).GetCommand(),
@@ -282,6 +281,8 @@ func NewCmdRoot(f *cmdutil.Factory, version, buildDate string) *CmdRoot {
 	inventory := inventoryCmd.NewSubCommand(f).GetCommand()
 	inventory.AddCommand(inventoryFindCmd.NewCmdFind(f).GetCommand())
 	inventory.AddCommand(inventorySubscribeCmd.NewCmdSubscribe(f).GetCommand())
+	inventory.AddCommand(inventoryAdditionsCmd.NewSubCommand(f).GetCommand())
+	inventory.AddCommand(inventoryAssetsCmd.NewSubCommand(f).GetCommand())
 	cmd.AddCommand(inventory)
 
 	// applications
