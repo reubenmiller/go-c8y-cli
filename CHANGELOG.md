@@ -34,30 +34,22 @@ None :)
 
 ### Naming Consistency
 
-* Review devicecredentials command names    => deviceregistration => approve => list => register
-* Review inventoryreferences command names
-    * relationships childassets list
-    * relationships childassets get
-    * relationships childassets create
-    * relationships childassets unassignFromDeviceGroup
-
-    * devicegroups unassignDevice
-    * devicegroups assignDevice
-
-    * inventory assets children list
-    * inventory assets children 
-
-    * relationships childadditions create
-    * relationships childadditions get
-    * relationships childadditions list
-    * relationships childadditions list
-* Get feedback on c8y measurements getSeries vs listSeries
+None
 
 ### Bugs
 
-* Command confirmation does not work with --progress! 
-    * --confirm "force|auto|off" ?
-* Creating alias on windows uses different quoting to shell!
+* Piping a non-existant devices still sends a request
+
+    ```sh
+     c8y devices list --name "doesnotexist" -p 100 | c8y devices delete --withError
+     2021-03-26T10:49:06.416Z        ERROR   serverError:  DELETE https://{example.url}/inventory/managedObjects/%7Bid%7D: 400 
+
+    c8y devices delete --withError
+    ```
+
+    Expected result: if the template variables is not expanded then it should throw an error and not send a request
+
+* Creating alias on windows uses different quoting to shell! Just show in documentation and/or examples
         
         ```powershell
         # Fails
@@ -67,6 +59,7 @@ None :)
         # Works
         c8y alias set cancelop "operations update --status=FAILED --failureReason='User cancelled operation'"
         ```
+
 ### Commands
 
 * add wait for operation to go-c8y-cli
@@ -80,16 +73,11 @@ None :)
 
 * Add option to print out request and response as markdown
 
-* allow default view definitions for a static value (or fixed column headers)
-
-* Add global header flag
-
-* Add global query parameter flag
-
 * Create activity log cmdlets?
   * Get recent history, get commands with filter (api, host, method etc.)
 
-* Add option to set the X-Cumulocity-Application-Key for all requests (as it can affect the availability calculation. If the header is not present, the communication is deemed to come from the device). Check if the key needs to really exist as an application or if it can just be a default non-empty value
+* Allow global --sessionUsername --sessionPassword flags to override for once off requests (i.e. for device credentials)
+    * usecase: simulate registering as a device, without having to create a session file with the same url etc.
 
 ### Refactoring
 
@@ -98,7 +86,9 @@ None :)
 
 ### Completions
 
-    * Approve pending device request
+* Unassign child device (list child assets)
+* Unassign child addition (list child assets)
+* Unassign child asset (list child assets)
 
 ### Packaging
 
