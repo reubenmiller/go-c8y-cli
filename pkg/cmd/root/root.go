@@ -14,6 +14,7 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/pkg/activitylogger"
 	"github.com/reubenmiller/go-c8y-cli/pkg/c8ydefaults"
 	"github.com/reubenmiller/go-c8y-cli/pkg/c8ysession"
+	activityLogCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/activitylog"
 	agentsCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/agents"
 	agentsListCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/agents/list"
 	alarmsCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/alarms"
@@ -240,6 +241,7 @@ func NewCmdRoot(f *cmdutil.Factory, version, buildDate string) *CmdRoot {
 		realtimeCmd.NewSubCommand(f).GetCommand(),
 		currenttenantCmd.NewSubCommand(f).GetCommand(),
 		currentuserCmd.NewSubCommand(f).GetCommand(),
+		activityLogCmd.NewSubCommand(f).GetCommand(),
 	}
 
 	cmd.AddCommand(commands...)
@@ -458,7 +460,7 @@ func (c *CmdRoot) checkSessionExists(cmd *cobra.Command, args []string) error {
 	log.Infof("command: c8y %s", utilities.GetCommandLineArgs())
 	log.Debugf("output format: %s", cfg.GetOutputFormat().String())
 
-	if cmd.Name() != cobra.ShellCompRequestCmd && cmd.CalledAs() != cobra.ShellCompNoDescRequestCmd {
+	if cmd.Name() != cobra.ShellCompRequestCmd && cmd.CalledAs() != cobra.ShellCompNoDescRequestCmd && !strings.HasPrefix(cmdStr, "activitylog") {
 		activityHandler.LogCommand(cmd, args, cmdStr, c.ActivityLogMessage)
 	}
 

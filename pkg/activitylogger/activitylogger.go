@@ -1,9 +1,11 @@
 package activitylogger
 
 import (
+	"bufio"
 	"encoding/json"
 	"fmt"
 	"io"
+	"log"
 	"math/rand"
 	"net/http"
 	"net/url"
@@ -73,6 +75,29 @@ func NewActivityLogger(options Options) (*ActivityLogger, error) {
 // GetPath returns the path to the activity log
 func (l *ActivityLogger) GetPath() string {
 	return l.fullName
+}
+
+type CommandEntry struct {
+	Time      string   `json:"time,omitempty"`
+	Context   string   `json:"ctx,omitempty"`
+	Type      string   `json:"type,omitempty"`
+	Arguments []string `json:"arguments,omitempty"`
+	Message   string   `json:"message,omitempty"`
+}
+
+type RequestEntry struct {
+	Time           string `json:"time,omitempty"`
+	Context        string `json:"ctx,omitempty"`
+	Type           string `json:"type,omitempty"`
+	Method         string `json:"method,omitempty"`
+	Host           string `json:"host,omitempty"`
+	Path           string `json:"path,omitempty"`
+	Query          string `json:"query,omitempty"`
+	Accept         string `json:"accept,omitempty"`
+	ProcessingMode string `json:"processingMode,omitempty"`
+	StatusCode     int    `json:"statusCode,omitempty"`
+	ResponseTimeMS int    `json:"responseTimeMS,omitempty"`
+	ResponseSelf   string `json:"responseSelf,omitempty"`
 }
 
 // LogCommand writes the c8y cli command used to the activity log
@@ -155,6 +180,10 @@ func (l *ActivityLogger) LogRequest(resp *http.Response, body *gjson.Result, res
 			body.Get("self").Str,
 		)
 	} else {
+		errorResponse := body.Raw
+		if !strings.HasPrefix(errorResponse, "{") {
+			errorResponse = "\"" + errorResponse + "\""
+		}
 		fmt.Fprintf(l.w,
 			`{"time":"%s","ctx":"%s","type":"request","method":"%s","host":"%s","path":"%s","query":"%s","accept":"%s","processingMode":"%s","statusCode":%d,"responseTimeMS":%d,"responseSelf":"%s","responseError":%s}`+"\n",
 			time.Now().Format(time.RFC3339Nano),
@@ -168,7 +197,52 @@ func (l *ActivityLogger) LogRequest(resp *http.Response, body *gjson.Result, res
 			resp.StatusCode,
 			responseTime,
 			body.Get("self").Str,
-			body.Raw,
+			errorResponse,
 		)
 	}
+}
+
+type Filter struct {
+	Host     string `json:"host"`
+	Type     string `json:"type"`
+	DateFrom string `json:"dateFrom"`
+	DateTo   string `json:"dateTo"`
+}
+
+// GetLogEntries get log entries
+func (l *ActivityLogger) GetLogEntries(filter Filter, onValue func(line []byte) error) error {
+	path := l.GetPath()
+	file, err := os.Open(path)
+
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+
+	scan := bufio.NewScanner(file)
+	entry := &RequestEntry{}
+	for scan.Scan() {
+		line := scan.Bytes()
+		err := json.Unmarshal(line, entry)
+		if err != nil {
+			log.Fatalf("unmarshal error. line=%s, err=%s", line, err)
+			continue
+		}
+		if filter.Type != "" && !strings.EqualFold(filter.Type, entry.Type) {
+			continue
+		}
+		if filter.Host != "" && entry.Host != filter.Host {
+			continue
+		}
+		if filter.DateTo != "" && entry.Time > filter.DateTo {
+			continue
+		}
+		if filter.DateFrom != "" && entry.Time < filter.DateFrom {
+			continue
+		}
+		if err := onValue(line); err != nil {
+			return err
+		}
+	}
+	return nil
 }

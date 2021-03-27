@@ -1,0 +1,39 @@
+{
+    "version": "1",
+    "definitions": [
+        {
+            "name": "activitylogEntry",
+            "priority": 500,
+            "fragments": [
+                "ctx",
+                "time"
+            ],
+            "type": "request",
+            "columns": [
+                "time",
+                "ctx",
+                "type",
+                "method",
+                "path",
+                "query",
+                "statusCode",
+                "responseTimeMS"
+            ]
+        },
+        {
+            "name": "activitylogEntry",
+            "priority": 500,
+            "fragments": [
+                "ctx",
+                "time"
+            ],
+            "type": "command",
+            "columns": [
+                "time",
+                "ctx",
+                "type",
+                "arguments:arguments.**"
+            ]
+        }
+    ]
+}
