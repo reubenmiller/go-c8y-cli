@@ -7,7 +7,7 @@
   },
   "endpoints": [
     {
-      "name": "getManagedObjectChildAssetCollection",
+      "name": "listChildAssetCollection",
       "method": "GET",
       "description": "Get child asset collection",
       "descriptionLong": "Get a collection of managedObjects child references",
@@ -23,51 +23,22 @@
         "powershell": [
           {
             "description": "Get a list of the child assets of an existing device",
-            "beforeEach": [
-              "$Device = PSc8y\\New-TestDevice",
-              "$ChildDevice = PSc8y\\New-TestDevice",
-              "PSc8y\\Add-AssetToGroup -Group $Device.id -NewChildDevice $ChildDevice.id"
-            ],
-            "command": "Get-ChildAssetCollection -Group $Group.id",
-            "afterEach": [
-              "PSc8y\\Remove-ManagedObject -Id $ChildDevice.id",
-              "PSc8y\\Remove-ManagedObject -Id $Device.id"
-            ]
-          },
-          {
-            "description": "Get a list of the child assets of an existing group",
-            "beforeEach": [
-              "$Group = PSc8y\\New-TestDeviceGroup",
-              "$ChildGroup = PSc8y\\New-TestDeviceGroup",
-              "PSc8y\\Add-AssetToGroup -Group $Group.id -NewChildGroup $ChildGroup.id"
-            ],
-            "command": "Get-ChildAssetCollection -Group $Group.id",
-            "afterEach": [
-              "PSc8y\\Remove-ManagedObject -Id $ChildGroup.id",
-              "PSc8y\\Remove-ManagedObject -Id $Group.id"
-            ]
+            "skipTest": true,
+            "command": "Get-ChildAssetCollection -Id 12345"
           }
         ],
         "go": [
           {
             "description": "Get a list of the child devices of an existing device",
-            "command": "c8y inventory assets list --device 12345"
+            "command": "c8y inventory assets list --id 12345"
           }
         ]
       },
       "pathParameters": [
         {
-          "name": "device",
-          "type": "[]device",
-          "property": "id",
-          "description": "Device."
-        },
-        {
-          "name": "group",
-          "type": "[]devicegroup",
-          "pipeline": true,
-          "property": "id",
-          "description": "Group."
+          "name": "id",
+          "type": "string",
+          "description": "Managed object."
         }
       ]
     },
