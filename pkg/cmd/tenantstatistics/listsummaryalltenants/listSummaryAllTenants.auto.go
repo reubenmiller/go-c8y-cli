@@ -116,6 +116,7 @@ func (n *ListSummaryAllTenantsCmd) RunE(cmd *cobra.Command, args []string) error
 		cmd,
 		headers,
 		inputIterators,
+		flags.WithCustomStringSlice(func() ([]string, error) { return cfg.GetHeader(), nil }, "header"),
 	)
 	if err != nil {
 		return cmderrors.NewUserError(err)

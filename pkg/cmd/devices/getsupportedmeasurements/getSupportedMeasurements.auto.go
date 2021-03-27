@@ -111,6 +111,7 @@ func (n *GetSupportedMeasurementsCmd) RunE(cmd *cobra.Command, args []string) er
 		cmd,
 		headers,
 		inputIterators,
+		flags.WithCustomStringSlice(func() ([]string, error) { return cfg.GetHeader(), nil }, "header"),
 	)
 	if err != nil {
 		return cmderrors.NewUserError(err)

@@ -88,9 +88,16 @@ func WithHeaders(cmd *cobra.Command, header http.Header, inputIterators *Request
 		if err != nil {
 			return err
 		}
-		headerValue := fmt.Sprintf("%v", value)
 		if name != "" {
-			header.Add(name, headerValue)
+			switch v := value.(type) {
+			case map[string]string:
+				for key, val := range v {
+					header.Add(key, val)
+				}
+			default:
+				headerValue := fmt.Sprintf("%v", value)
+				header.Add(name, headerValue)
+			}
 		}
 	}
 	return
@@ -211,6 +218,34 @@ func WithStringValue(opts ...string) GetOption {
 			dst = ""
 		}
 		return dst, applyFormatter(format, value), err
+	}
+}
+
+// WithCustomStringSlice adds string  map values from cli arguments
+func WithCustomStringSlice(valuesFunc func() ([]string, error), opts ...string) GetOption {
+	return func(cmd *cobra.Command, inputIterators *RequestInputIterators) (string, interface{}, error) {
+
+		_, dst, format := UnpackGetterOptions("%s", opts...)
+
+		values, err := valuesFunc()
+		if err != nil {
+			return dst, values, err
+		}
+		if len(values) == 0 {
+			// dont assign the value anywhere
+			dst = ""
+		}
+
+		outputValues := make(map[string]string)
+		for _, v := range values {
+			parts := strings.SplitN(v, ":", 2)
+			if len(parts) != 2 {
+				continue
+			}
+			outputValues[strings.TrimSpace(parts[0])] = strings.TrimSpace(applyFormatter(format, parts[1]))
+		}
+
+		return dst, outputValues, err
 	}
 }
 

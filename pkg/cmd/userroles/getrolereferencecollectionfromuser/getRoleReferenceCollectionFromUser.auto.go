@@ -112,6 +112,7 @@ func (n *GetRoleReferenceCollectionFromUserCmd) RunE(cmd *cobra.Command, args []
 		cmd,
 		headers,
 		inputIterators,
+		flags.WithCustomStringSlice(func() ([]string, error) { return cfg.GetHeader(), nil }, "header"),
 	)
 	if err != nil {
 		return cmderrors.NewUserError(err)

@@ -104,6 +104,7 @@ func (n *DeleteCmd) RunE(cmd *cobra.Command, args []string) error {
 		cmd,
 		headers,
 		inputIterators,
+		flags.WithCustomStringSlice(func() ([]string, error) { return cfg.GetHeader(), nil }, "header"),
 		flags.WithProcessingModeValue(),
 	)
 	if err != nil {

@@ -131,6 +131,7 @@ func (n *ListCmd) RunE(cmd *cobra.Command, args []string) error {
 		cmd,
 		headers,
 		inputIterators,
+		flags.WithCustomStringSlice(func() ([]string, error) { return cfg.GetHeader(), nil }, "header"),
 		flags.WithBoolValue("csvFormat", "Accept", "text/csv"),
 		flags.WithBoolValue("excelFormat", "Accept", "application/vnd.ms-excel"),
 		flags.WithStringValue("unit", "X-Cumulocity-System-Of-Units"),

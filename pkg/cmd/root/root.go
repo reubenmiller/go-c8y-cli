@@ -161,6 +161,7 @@ func NewCmdRoot(f *cmdutil.Factory, version, buildDate string) *CmdRoot {
 	cmd.PersistentFlags().String("proxy", "", "Proxy setting, i.e. http://10.0.0.1:8080")
 	cmd.PersistentFlags().Bool("noProxy", false, "Ignore the proxy settings")
 	cmd.PersistentFlags().Bool("withError", false, "Errors will be printed on stdout instead of stderr")
+	cmd.PersistentFlags().StringSliceP("header", "H", nil, `custom headers. i.e. --header "Accept: value, AnotherHeader: myvalue"`)
 
 	// Activity log
 	cmd.PersistentFlags().BoolVar(&ccmd.NoLog, "noLog", false, "Disables the activity log for the current command")

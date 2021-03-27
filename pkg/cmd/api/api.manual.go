@@ -48,7 +48,6 @@ c8y api POST "alarm/alarms" --data "text=one,severity=MAJOR,type=test_Type,time=
 	}
 
 	cmd.Flags().String("file", "", "File to be uploaded as a binary")
-	cmd.Flags().StringSliceP("header", "H", nil, "headers. i.e. --header \"Accept: value\"")
 	cmd.Flags().String("accept", "", "accept (header)")
 	cmd.Flags().String("contentType", "", "content type (header)")
 	cmd.Flags().String("formdata", "", "form data (json or shorthand json)")
@@ -74,10 +73,6 @@ func (n *CmdAPI) RunE(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return err
 	}
-	log, err := n.factory.Logger()
-	if err != nil {
-		return err
-	}
 	inputIterators, err := flags.NewRequestInputIterators(cmd)
 	if err != nil {
 		return err
@@ -94,21 +89,10 @@ func (n *CmdAPI) RunE(cmd *cobra.Command, args []string) error {
 		flags.WithProcessingModeValue(),
 		flags.WithStringValue("accept", "Accept"),
 		flags.WithStringValue("contentType", "Content-Type"),
+		flags.WithCustomStringSlice(func() ([]string, error) { return cfg.GetHeader(), nil }, "header"),
 	)
 	if err != nil {
 		return cmderrors.NewUserError(err)
-	}
-
-	if values, err := cmd.Flags().GetStringSlice("header"); err == nil && len(values) > 0 {
-		for _, v := range values {
-			parts := strings.SplitN(v, ":", 2)
-			if len(parts) != 2 {
-				log.Warningf("Invalid header. %s", v)
-				continue
-			}
-			log.Debugf("Setting header: name=%s, value=%s", parts[0], parts[1])
-			headers.Add(parts[0], strings.TrimSpace(parts[1]))
-		}
 	}
 
 	var uri string

@@ -114,6 +114,15 @@ func (n *CmdFind) RunE(cmd *cobra.Command, args []string) error {
 
 	// headers
 	headers := http.Header{}
+	err = flags.WithHeaders(
+		cmd,
+		headers,
+		inputIterators,
+		flags.WithCustomStringSlice(func() ([]string, error) { return cfg.GetHeader(), nil }, "header"),
+	)
+	if err != nil {
+		return cmderrors.NewUserError(err)
+	}
 
 	// form data
 	formData := make(map[string]io.Reader)
