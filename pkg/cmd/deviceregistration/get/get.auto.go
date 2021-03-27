@@ -49,6 +49,7 @@ Get a new device request
 
 	completion.WithOptions(
 		cmd,
+		completion.WithDeviceRegistrationRequest("id", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
 	)
 
 	flags.WithOptions(

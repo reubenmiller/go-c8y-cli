@@ -48,6 +48,7 @@ Request credentials for a new device
 
 	completion.WithOptions(
 		cmd,
+		completion.WithDeviceRegistrationRequest("id", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
 	)
 
 	flags.WithOptions(
