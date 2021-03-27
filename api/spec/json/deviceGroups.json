@@ -261,6 +261,274 @@
       "bodyRequiredKeys": [
         "name"
       ]
+    },
+    {
+      "name": "addDeviceToGroup",
+      "method": "POST",
+      "path": "inventory/managedObjects/{id}/childAssets",
+      "accept": "application/vnd.com.nsn.cumulocity.managedObjectReference+json",
+      "collectionType": "application/vnd.com.nsn.cumulocity.managedObject+json",
+      "description": "Assign device to group",
+      "descriptionLong": "Assigns a device to a group. The device will be a childAsset of the group",
+      "collectionProperty": "managedObject",
+      "alias": {
+        "go": "assignDevice",
+        "powershell": "Add-DeviceToGroup"
+      },
+      "examples": {
+        "powershell": [
+          {
+            "description": "Add a device to a group",
+            "beforeEach": [
+              "$Device = PSc8y\\New-TestDevice",
+              "$Group = PSc8y\\New-TestDeviceGroup"
+            ],
+            "command": "Add-DeviceToGroup -Group $Group.id -NewChildDevice $Device.id",
+            "afterEach": [
+              "PSc8y\\Remove-ManagedObject -Id $Device.id",
+              "PSc8y\\Remove-ManagedObject -Id $Group.id"
+            ]
+          },
+          {
+            "description": "Add a device to a group by passing device and groups instead of an id or name",
+            "beforeEach": [
+              "$Device = PSc8y\\New-TestDevice",
+              "$Group = PSc8y\\New-TestDeviceGroup"
+            ],
+            "command": "Add-DeviceToGroup -Group $Group -NewChildDevice $Device",
+            "afterEach": [
+              "PSc8y\\Remove-ManagedObject -Id $Device.id",
+              "PSc8y\\Remove-ManagedObject -Id $Group.id"
+            ]
+          },
+          {
+            "description": "Add multiple devices to a group. Alternatively `Get-DeviceCollection` can be used\nto filter for a collection of devices and assign the results to a single group.\n",
+            "beforeEach": [
+              "$Device1 = PSc8y\\New-TestDevice",
+              "$Device2 = PSc8y\\New-TestDevice",
+              "$Group = PSc8y\\New-TestDeviceGroup"
+            ],
+            "command": "Get-Device $Device1.name, $Device2.name | Add-DeviceToGroup -Group $Group.id",
+            "afterEach": [
+              "PSc8y\\Remove-ManagedObject -Id $Device1.id",
+              "PSc8y\\Remove-ManagedObject -Id $Device2.id",
+              "PSc8y\\Remove-ManagedObject -Id $Group.id"
+            ]
+          }
+        ],
+        "go": [
+          {
+            "description": "Add a device to a group",
+            "command": "c8y devicegroups assignDevice --group 12345 --newChildDevice 43234"
+          },
+          {
+            "description": "Add multiple devices to a group",
+            "command": "c8y devicegroups assignDevice --group 12345 --newChildDevice 43234, 99292, 12222"
+          }
+        ]
+      },
+      "pathParameters": [
+        {
+          "name": "group",
+          "type": "[]devicegroup",
+          "property": "id",
+          "required": true,
+          "description": "Group"
+        }
+      ],
+      "body": [
+        {
+          "name": "newChildDevice",
+          "type": "[]device",
+          "required": true,
+          "pipeline": true,
+          "property": "managedObject.id",
+          "description": "New device to be added to the group as an child asset"
+        }
+      ]
+    },
+    {
+      "name": "addGroupToGroup",
+      "method": "POST",
+      "path": "inventory/managedObjects/{id}/childAssets",
+      "accept": "application/vnd.com.nsn.cumulocity.managedObjectReference+json",
+      "collectionType": "application/vnd.com.nsn.cumulocity.managedObject+json",
+      "description": "Assign child group",
+      "descriptionLong": "Assigns a group to a group. The group will be a childAsset of the group",
+      "collectionProperty": "managedObject",
+      "alias": {
+        "go": "assignGroup",
+        "powershell": "Add-ChildGroupToGroup"
+      },
+      "examples": {
+        "powershell": [
+          {
+            "description": "Add a group to a group as a child",
+            "beforeEach": [
+              "$Group = PSc8y\\New-TestDeviceGroup",
+              "$ChildGroup1 = PSc8y\\New-TestDeviceGroup"
+            ],
+            "command": "Add-ChildGroupToGroup -Group $Group.id -NewChildGroup $ChildGroup1.id",
+            "afterEach": [
+              "PSc8y\\Remove-ManagedObject -Id $ChildGroup1.id",
+              "PSc8y\\Remove-ManagedObject -Id $Group.id"
+            ]
+          },
+          {
+            "description": "Add multiple devices to a group. Alternatively `Get-DeviceCollection` can be used\nto filter for a collection of devices and assign the results to a single group.\n",
+            "beforeEach": [
+              "$CustomGroup = PSc8y\\New-TestDeviceGroup",
+              "$SubGroup1 = PSc8y\\New-TestDeviceGroup -Type SubGroup",
+              "$SubGroup2 = PSc8y\\New-TestDeviceGroup -Type SubGroup"
+            ],
+            "command": "Get-DeviceGroup $SubGroup1.name, $SubGroup2.name | Add-ChildGroupToGroup -Group $CustomGroup.id",
+            "afterEach": [
+              "PSc8y\\Remove-ManagedObject -Id $SubGroup1.id",
+              "PSc8y\\Remove-ManagedObject -Id $SubGroup2.id",
+              "PSc8y\\Remove-ManagedObject -Id $CustomGroup.id"
+            ]
+          }
+        ],
+        "go": [
+          {
+            "description": "Add a group to a group",
+            "command": "c8y devicegroups assignGroup --group 12345 --newChildGroup 43234"
+          },
+          {
+            "description": "Add multiple groups to a group",
+            "command": "c8y devicegroups assignGroup --group 12345 --newChildGroup 43234, 99292, 12222"
+          }
+        ]
+      },
+      "pathParameters": [
+        {
+          "name": "group",
+          "type": "[]devicegroup",
+          "property": "id",
+          "required": true,
+          "description": "Group"
+        }
+      ],
+      "body": [
+        {
+          "name": "newChildGroup",
+          "type": "[]devicegroup",
+          "pipeline": true,
+          "required": true,
+          "property": "managedObject.id",
+          "description": "New child group to be added to the group as an child asset"
+        }
+      ]
+    },
+    {
+      "name": "deleteDeviceFromGroup",
+      "description": "Unassign device from group",
+      "descriptionLong": "Unassign/delete a device from a group",
+      "method": "DELETE",
+      "path": "inventory/managedObjects/{group}/childAssets/{reference}",
+      "accept": "",
+      "skip": false,
+      "alias": {
+        "go": "unassignDevice",
+        "powershell": "Remove-DeviceFromGroup"
+      },
+      "examples": {
+        "powershell": [
+          {
+            "description": "Unassign a child device from its parent asset",
+            "beforeEach": [
+              "$Group = PSc8y\\New-TestDeviceGroup",
+              "$ChildDevice = PSc8y\\New-TestDevice",
+              "PSc8y\\Add-AssetToGroup -Group $Group.id -NewChildDevice $ChildDevice.id"
+            ],
+            "command": "Remove-DeviceFromGroup -Group $Group.id -ChildDevice $ChildDevice.id",
+            "afterEach": [
+              "PSc8y\\Remove-ManagedObject -Id $ChildDevice.id",
+              "PSc8y\\Remove-ManagedObject -Id $Group.id"
+            ]
+          }
+        ],
+        "go": [
+          {
+            "description": "Unassign a child device from its parent device",
+            "command": "c8y devicegroups unassignDevice --group 12345 --childDevice 22553"
+          }
+        ]
+      },
+      "pathParameters": [
+        {
+          "name": "group",
+          "type": "[]devicegroup",
+          "required": true,
+          "description": "Asset id"
+        },
+        {
+          "name": "childDevice",
+          "type": "[]device",
+          "property": "reference",
+          "pipeline": true,
+          "required": true,
+          "description": "Child device"
+        }
+      ]
+    },
+    {
+      "name": "deleteManagedObjectChildAssetReference",
+      "description": "Delete child asset reference",
+      "descriptionLong": "Delete child asset reference",
+      "method": "DELETE",
+      "path": "inventory/managedObjects/{group}/childAssets/{reference}",
+      "accept": "",
+      "alias": {
+        "go": "unassignAsset",
+        "powershell": "Remove-AssetFromGroup"
+      },
+      "examples": {
+        "powershell": [
+          {
+            "description": "Unassign a child device from its parent asset",
+            "beforeEach": [
+              "$Group = PSc8y\\New-TestDeviceGroup",
+              "$ChildDevice = PSc8y\\New-TestDevice",
+              "PSc8y\\Add-AssetToGroup -Group $Group.id -NewChildDevice $ChildDevice.id"
+            ],
+            "command": "Remove-AssetFromGroup -Group $Group.id -ChildDevice $ChildDevice.id",
+            "afterEach": [
+              "PSc8y\\Remove-ManagedObject -Id $ChildDevice.id",
+              "PSc8y\\Remove-ManagedObject -Id $Group.id"
+            ]
+          }
+        ],
+        "go": [
+          {
+            "description": "Unassign a child device from its parent device",
+            "command": "c8y devicegroups unassignAsset --group 12345 --childDevice 22553"
+          }
+        ]
+      },
+      "pathParameters": [
+        {
+          "name": "group",
+          "type": "[]devicegroup",
+          "required": true,
+          "description": "Asset id"
+        },
+        {
+          "name": "childDevice",
+          "type": "[]device",
+          "property": "reference",
+          "pipeline": true,
+          "required": false,
+          "description": "Child device"
+        },
+        {
+          "name": "childGroup",
+          "type": "[]devicegroup",
+          "property": "reference",
+          "required": false,
+          "description": "Child device group"
+        }
+      ]
     }
   ]
 }
