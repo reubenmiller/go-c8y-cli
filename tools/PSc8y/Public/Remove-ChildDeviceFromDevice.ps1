@@ -8,7 +8,7 @@ Delete child device reference
 Delete child device reference
 
 .LINK
-c8y inventoryreferences unassignChildDevice
+c8y devices unassignChild
 
 .EXAMPLE
 PS> Remove-ChildDeviceFromDevice -Device $Device.id -ChildDevice $ChildDevice.id
@@ -45,7 +45,7 @@ Unassign a child device from its parent device
             Use-CallerPreference -Cmdlet $PSCmdlet -SessionState $ExecutionContext.SessionState
         }
 
-        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "inventoryreferences unassignChildDevice"
+        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "devices unassignChild"
         $ClientOptions = Get-ClientOutputOption $PSBoundParameters
         $TypeOptions = @{
             Type = ""
@@ -59,13 +59,13 @@ Unassign a child device from its parent device
         if ($ClientOptions.ConvertToPS) {
             $ChildDevice `
             | Group-ClientRequests `
-            | c8y inventoryreferences unassignChildDevice $c8yargs `
+            | c8y devices unassignChild $c8yargs `
             | ConvertFrom-ClientOutput @TypeOptions
         }
         else {
             $ChildDevice `
             | Group-ClientRequests `
-            | c8y inventoryreferences unassignChildDevice $c8yargs
+            | c8y devices unassignChild $c8yargs
         }
         
     }

@@ -1,14 +1,14 @@
 ﻿# Code generated from specification version 1.0.0: DO NOT EDIT
-Function Remove-AssetFromGroup {
+Function Remove-GroupFromGroup {
 <#
 .SYNOPSIS
-Unassign asset from group
+Delete child group reference
 
 .DESCRIPTION
-Unassign/delete an asset (device or group) from a group
+Delete child group reference
 
 .LINK
-c8y inventoryreferences unassignAssetFromGroup
+c8y devicegroups unassignGroup
 
 .EXAMPLE
 PS> Remove-AssetFromGroup -Group $Group.id -ChildDevice $ChildDevice.id
@@ -22,21 +22,19 @@ Unassign a child device from its parent asset
     [Alias()]
     [OutputType([object])]
     Param(
-        # Asset id (required)
-        [Parameter(Mandatory = $true)]
-        [object[]]
-        $Group,
-
-        # Child device
-        [Parameter(ValueFromPipeline=$true,
+        # Device group (required)
+        [Parameter(Mandatory = $true,
+                   ValueFromPipeline=$true,
                    ValueFromPipelineByPropertyName=$true)]
         [object[]]
-        $ChildDevice,
+        $Id,
 
-        # Child device group
-        [Parameter()]
+        # Child device group (required)
+        [Parameter(Mandatory = $true,
+                   ValueFromPipeline=$true,
+                   ValueFromPipelineByPropertyName=$true)]
         [object[]]
-        $ChildGroup
+        $Child
     )
     DynamicParam {
         Get-ClientCommonParameters -Type "Delete"
@@ -49,7 +47,7 @@ Unassign a child device from its parent asset
             Use-CallerPreference -Cmdlet $PSCmdlet -SessionState $ExecutionContext.SessionState
         }
 
-        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "inventoryreferences unassignAssetFromGroup"
+        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "devicegroups unassignGroup"
         $ClientOptions = Get-ClientOutputOption $PSBoundParameters
         $TypeOptions = @{
             Type = ""
@@ -61,15 +59,15 @@ Unassign a child device from its parent asset
     Process {
 
         if ($ClientOptions.ConvertToPS) {
-            $ChildDevice `
+            $Child `
             | Group-ClientRequests `
-            | c8y inventoryreferences unassignAssetFromGroup $c8yargs `
+            | c8y devicegroups unassignGroup $c8yargs `
             | ConvertFrom-ClientOutput @TypeOptions
         }
         else {
-            $ChildDevice `
+            $Child `
             | Group-ClientRequests `
-            | c8y inventoryreferences unassignAssetFromGroup $c8yargs
+            | c8y devicegroups unassignGroup $c8yargs
         }
         
     }

@@ -8,17 +8,12 @@ Get child asset collection
 Get a collection of managedObjects child references
 
 .LINK
-c8y inventoryreferences listChildAssets
+c8y inventory/assets list
 
 .EXAMPLE
-PS> Get-ChildAssetCollection -Group $Group.id
+PS> Get-ChildAssetCollection -Id 12345
 
 Get a list of the child assets of an existing device
-
-.EXAMPLE
-PS> Get-ChildAssetCollection -Group $Group.id
-
-Get a list of the child assets of an existing group
 
 
 #>
@@ -27,16 +22,11 @@ Get a list of the child assets of an existing group
     [Alias()]
     [OutputType([object])]
     Param(
-        # Device.
-        [Parameter()]
-        [object[]]
-        $Device,
-
-        # Group.
+        # Managed object.
         [Parameter(ValueFromPipeline=$true,
                    ValueFromPipelineByPropertyName=$true)]
         [object[]]
-        $Group
+        $Id
     )
     DynamicParam {
         Get-ClientCommonParameters -Type "Get", "Collection"
@@ -49,7 +39,7 @@ Get a list of the child assets of an existing group
             Use-CallerPreference -Cmdlet $PSCmdlet -SessionState $ExecutionContext.SessionState
         }
 
-        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "inventoryreferences listChildAssets"
+        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "inventory/assets list"
         $ClientOptions = Get-ClientOutputOption $PSBoundParameters
         $TypeOptions = @{
             Type = "application/vnd.com.nsn.cumulocity.managedObjectReferenceCollection+json"
@@ -61,15 +51,15 @@ Get a list of the child assets of an existing group
     Process {
 
         if ($ClientOptions.ConvertToPS) {
-            $Group `
+            $Id `
             | Group-ClientRequests `
-            | c8y inventoryreferences listChildAssets $c8yargs `
+            | c8y inventory/assets list $c8yargs `
             | ConvertFrom-ClientOutput @TypeOptions
         }
         else {
-            $Group `
+            $Id `
             | Group-ClientRequests `
-            | c8y inventoryreferences listChildAssets $c8yargs
+            | c8y inventory/assets list $c8yargs
         }
         
     }

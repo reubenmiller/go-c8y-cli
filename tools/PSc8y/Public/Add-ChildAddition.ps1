@@ -2,13 +2,13 @@
 Function Add-ChildAddition {
 <#
 .SYNOPSIS
-Add child addition
+Assign child addition
 
 .DESCRIPTION
-Add a managed object as a child addition to another existing managed object
+Add an existing managed object as a child addition to another existing managed object
 
 .LINK
-c8y inventoryreferences createChildAddition
+c8y inventory/additions assign
 
 .EXAMPLE
 PS> Add-ChildAddition -Id $software.id -NewChild $version.id
@@ -47,7 +47,7 @@ Add a related managed object as a child to an existing managed object
             Use-CallerPreference -Cmdlet $PSCmdlet -SessionState $ExecutionContext.SessionState
         }
 
-        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "inventoryreferences createChildAddition"
+        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "inventory/additions assign"
         $ClientOptions = Get-ClientOutputOption $PSBoundParameters
         $TypeOptions = @{
             Type = "application/vnd.com.nsn.cumulocity.managedObjectReference+json"
@@ -61,13 +61,13 @@ Add a related managed object as a child to an existing managed object
         if ($ClientOptions.ConvertToPS) {
             $NewChild `
             | Group-ClientRequests `
-            | c8y inventoryreferences createChildAddition $c8yargs `
+            | c8y inventory/additions assign $c8yargs `
             | ConvertFrom-ClientOutput @TypeOptions
         }
         else {
             $NewChild `
             | Group-ClientRequests `
-            | c8y inventoryreferences createChildAddition $c8yargs
+            | c8y inventory/additions assign $c8yargs
         }
         
     }

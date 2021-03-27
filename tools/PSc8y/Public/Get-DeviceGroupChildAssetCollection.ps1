@@ -1,19 +1,24 @@
 ﻿# Code generated from specification version 1.0.0: DO NOT EDIT
-Function Add-AssetToGroup {
+Function Get-DeviceGroupChildAssetCollection {
 <#
 .SYNOPSIS
-Assign child asset
+Get child asset collection
 
 .DESCRIPTION
-Assigns a group or device to an existing group and marks them as assets
+Get a collection of managedObjects child references
 
 .LINK
-c8y inventory/assets assign
+c8y devicegroups listAssets
 
 .EXAMPLE
-PS> Add-AssetToGroup -Group $Group1.id -NewChildGroup $Group2.id
+PS> DeviceGroupChildAssetCollection -Id $Group.id
 
-Create group hierarchy (parent group -> child group)
+Get a list of the child assets of an existing device
+
+.EXAMPLE
+PS> DeviceGroupChildAssetCollection -Id $Group.id
+
+Get a list of the child assets of an existing group
 
 
 #>
@@ -22,24 +27,15 @@ Create group hierarchy (parent group -> child group)
     [Alias()]
     [OutputType([object])]
     Param(
-        # Group (required)
-        [Parameter(Mandatory = $true)]
-        [object[]]
-        $Group,
-
-        # New child device to be added to the group as an asset
-        [Parameter(ValueFromPipeline=$true,
+        # Device Group. (required)
+        [Parameter(Mandatory = $true,
+                   ValueFromPipeline=$true,
                    ValueFromPipelineByPropertyName=$true)]
         [object[]]
-        $NewChildDevice,
-
-        # New child device group to be added to the group as an asset
-        [Parameter()]
-        [object[]]
-        $NewChildGroup
+        $Id
     )
     DynamicParam {
-        Get-ClientCommonParameters -Type "Create", "Template"
+        Get-ClientCommonParameters -Type "Get", "Collection"
     }
 
     Begin {
@@ -49,10 +45,10 @@ Create group hierarchy (parent group -> child group)
             Use-CallerPreference -Cmdlet $PSCmdlet -SessionState $ExecutionContext.SessionState
         }
 
-        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "inventory/assets assign"
+        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "devicegroups listAssets"
         $ClientOptions = Get-ClientOutputOption $PSBoundParameters
         $TypeOptions = @{
-            Type = "application/vnd.com.nsn.cumulocity.managedObjectReference+json"
+            Type = "application/vnd.com.nsn.cumulocity.managedObjectReferenceCollection+json"
             ItemType = "application/vnd.com.nsn.cumulocity.managedObject+json"
             BoundParameters = $PSBoundParameters
         }
@@ -61,15 +57,15 @@ Create group hierarchy (parent group -> child group)
     Process {
 
         if ($ClientOptions.ConvertToPS) {
-            $NewChildDevice `
+            $Id `
             | Group-ClientRequests `
-            | c8y inventory/assets assign $c8yargs `
+            | c8y devicegroups listAssets $c8yargs `
             | ConvertFrom-ClientOutput @TypeOptions
         }
         else {
-            $NewChildDevice `
+            $Id `
             | Group-ClientRequests `
-            | c8y inventory/assets assign $c8yargs
+            | c8y devicegroups listAssets $c8yargs
         }
         
     }

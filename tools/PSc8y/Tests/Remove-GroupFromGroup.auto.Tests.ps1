@@ -1,6 +1,6 @@
 ﻿. $PSScriptRoot/imports.ps1
 
-Describe -Name "Remove-AssetFromGroup" {
+Describe -Name "Remove-GroupFromGroup" {
     BeforeEach {
         $Group = PSc8y\New-TestDeviceGroup
         $ChildDevice = PSc8y\New-TestDevice

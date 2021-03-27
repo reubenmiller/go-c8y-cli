@@ -8,7 +8,7 @@ Assign child device
 Create a child device reference
 
 .LINK
-c8y inventoryreferences assignChildDevice
+c8y devices assignChild
 
 .EXAMPLE
 PS> Add-ChildDeviceToDevice -Device $Device.id -NewChild $ChildDevice.id
@@ -50,7 +50,7 @@ Assign a device as a child device to an existing device (using pipeline)
             Use-CallerPreference -Cmdlet $PSCmdlet -SessionState $ExecutionContext.SessionState
         }
 
-        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "inventoryreferences assignChildDevice"
+        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "devices assignChild"
         $ClientOptions = Get-ClientOutputOption $PSBoundParameters
         $TypeOptions = @{
             Type = "application/vnd.com.nsn.cumulocity.managedObjectReference+json"
@@ -64,13 +64,13 @@ Assign a device as a child device to an existing device (using pipeline)
         if ($ClientOptions.ConvertToPS) {
             $NewChild `
             | Group-ClientRequests `
-            | c8y inventoryreferences assignChildDevice $c8yargs `
+            | c8y devices assignChild $c8yargs `
             | ConvertFrom-ClientOutput @TypeOptions
         }
         else {
             $NewChild `
             | Group-ClientRequests `
-            | c8y inventoryreferences assignChildDevice $c8yargs
+            | c8y devices assignChild $c8yargs
         }
         
     }
