@@ -36,6 +36,10 @@ func WithQueryParameters(cmd *cobra.Command, query *QueryTemplate, inputIterator
 			if v.IsBound() {
 				totalIterators++
 			}
+		case map[string]string:
+			for key, val := range v {
+				query.SetVariable(key, val)
+			}
 		default:
 			query.SetVariable(name, v)
 		}
@@ -240,7 +244,10 @@ func WithCustomStringSlice(valuesFunc func() ([]string, error), opts ...string) 
 		for _, v := range values {
 			parts := strings.SplitN(v, ":", 2)
 			if len(parts) != 2 {
-				continue
+				parts = strings.SplitN(v, "=", 2)
+				if len(parts) != 2 {
+					continue
+				}
 			}
 			outputValues[strings.TrimSpace(parts[0])] = strings.TrimSpace(applyFormatter(format, parts[1]))
 		}

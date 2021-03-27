@@ -82,8 +82,11 @@ const (
 	// SettingsIgnoreAcceptHeader ignore the accept header / set the Accept header to an empty string
 	SettingsIgnoreAcceptHeader = "settings.defaults.noAccept"
 
-	// SettingsHeader custom headers to use in outgoing requests
+	// SettingsHeader custom headers to be added to outgoing requests
 	SettingsHeader = "settings.defaults.header"
+
+	// SettingsQueryParameters custom query parameters to be added to outgoing requests
+	SettingsQueryParameters = "settings.defaults.queryParam"
 
 	// SettingsDryRun dry run. Don't send any requests, just print out the information
 	SettingsDryRun = "settings.defaults.dry"
@@ -844,6 +847,11 @@ func (c *Config) IgnoreAcceptHeader() bool {
 // GetHeader get custom headers
 func (c *Config) GetHeader() []string {
 	return c.viper.GetStringSlice(SettingsHeader)
+}
+
+// GetQueryParameters get custom query parameters
+func (c *Config) GetQueryParameters() []string {
+	return c.viper.GetStringSlice(SettingsQueryParameters)
 }
 
 // DryRun dont sent any destructive requests. Just print out what would be sent
