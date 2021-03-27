@@ -87,6 +87,8 @@ type CmdRoot struct {
 	ProgressBar        bool
 	NoColor            bool
 	SessionFile        string
+	SessionUsername    string
+	SessionPassword    string
 	UseEnv             bool
 	NoLog              bool
 	ActivityLogMessage string
@@ -144,6 +146,8 @@ func NewCmdRoot(f *cmdutil.Factory, version, buildDate string) *CmdRoot {
 
 	// Global flags
 	cmd.PersistentFlags().StringVar(&ccmd.SessionFile, "session", "", "Session configuration")
+	cmd.PersistentFlags().StringVarP(&ccmd.SessionUsername, "sessionUsername", "U", "", "Override session username. i.e. peter or t1234/peter (with tenant)")
+	cmd.PersistentFlags().StringVarP(&ccmd.SessionPassword, "sessionPassword", "P", "", "Override session password")
 	cmd.PersistentFlags().BoolVarP(&ccmd.Verbose, "verbose", "v", false, "Verbose logging")
 	cmd.PersistentFlags().IntP(flags.FlagPageSize, "p", c8ydefaults.PageSize, "Maximum results per page")
 	cmd.PersistentFlags().Int64(flags.FlagCurrentPage, 0, "Current page size which should be returned")
@@ -407,7 +411,7 @@ func (c *CmdRoot) Configure() error {
 		if c.client != nil {
 			return c.client, nil
 		}
-		client, err := createCumulocityClient(c.Factory)()
+		client, err := createCumulocityClient(c.Factory, c.SessionUsername, c.SessionPassword)()
 		if c.log != nil {
 			c8y.Logger = c.log
 		} else {
@@ -509,7 +513,7 @@ func (c *CmdRoot) configureActivityLog(cfg *config.Config) (*activitylogger.Acti
 	return activitylog, nil
 }
 
-func createCumulocityClient(f *cmdutil.Factory) func() (*c8y.Client, error) {
+func createCumulocityClient(f *cmdutil.Factory, username, password string) func() (*c8y.Client, error) {
 	return func() (*c8y.Client, error) {
 		cfg, err := f.Config()
 		if err != nil {
@@ -536,12 +540,30 @@ func createCumulocityClient(f *cmdutil.Factory) func() (*c8y.Client, error) {
 			}
 		}
 
+		if username == "" {
+			username = cfg.GetUsername()
+		}
+
+		tenant := ""
+		if parts := strings.SplitN(username, "/", 2); len(parts) == 2 {
+			if parts[0] != "" {
+				tenant = parts[0]
+			}
+			username = parts[1]
+		}
+		if tenant == "" {
+			tenant = cfg.GetTenant()
+		}
+		if password == "" {
+			password = cfg.MustGetPassword()
+		}
+
 		client := c8y.NewClient(
 			httpClient,
 			c8ysession.FormatHost(cfg.GetHost()),
-			cfg.GetTenant(),
-			cfg.GetUsername(),
-			cfg.MustGetPassword(),
+			tenant,
+			username,
+			password,
 			true,
 		)
 
