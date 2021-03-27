@@ -87,6 +87,7 @@ func (n *ListCmd) RunE(cmd *cobra.Command, args []string) error {
 		cmd,
 		query,
 		inputIterators,
+		flags.WithCustomStringSlice(func() ([]string, error) { return cfg.GetQueryParameters(), nil }, "custom"),
 		flags.WithStringValue("type", "type"),
 	)
 	if err != nil {

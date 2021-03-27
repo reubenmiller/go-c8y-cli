@@ -127,6 +127,27 @@ func (n *CmdAPI) RunE(cmd *cobra.Command, args []string) error {
 
 	baseURL, _ := url.Parse(uri)
 
+	// query parameters
+	query := flags.NewQueryTemplate()
+	for key, values := range baseURL.Query() {
+		query.SetVariable(key, values)
+	}
+
+	err = flags.WithQueryParameters(
+		cmd,
+		query,
+		inputIterators,
+		flags.WithCustomStringSlice(func() ([]string, error) { return cfg.GetQueryParameters(), nil }, "custom"),
+	)
+	if err != nil {
+		return nil
+	}
+	queryValue, err := query.GetQueryUnescape(true)
+
+	if err != nil {
+		return cmderrors.NewSystemError("Invalid query parameter")
+	}
+
 	var host string
 	if n.flagHost != "" {
 		host = n.flagHost
@@ -136,7 +157,7 @@ func (n *CmdAPI) RunE(cmd *cobra.Command, args []string) error {
 		Method:       method,
 		Host:         host,
 		Path:         baseURL.Path,
-		Query:        baseURL.RawQuery,
+		Query:        queryValue,
 		Header:       headers,
 		DryRun:       cfg.DryRun(),
 		IgnoreAccept: cfg.IgnoreAcceptHeader(),

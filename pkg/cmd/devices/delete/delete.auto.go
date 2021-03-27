@@ -89,6 +89,7 @@ func (n *DeleteCmd) RunE(cmd *cobra.Command, args []string) error {
 		cmd,
 		query,
 		inputIterators,
+		flags.WithCustomStringSlice(func() ([]string, error) { return cfg.GetQueryParameters(), nil }, "custom"),
 		flags.WithBoolValue("cascade", "cascade", ""),
 	)
 	if err != nil {

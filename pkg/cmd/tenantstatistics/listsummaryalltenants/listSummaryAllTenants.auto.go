@@ -92,6 +92,7 @@ func (n *ListSummaryAllTenantsCmd) RunE(cmd *cobra.Command, args []string) error
 		cmd,
 		query,
 		inputIterators,
+		flags.WithCustomStringSlice(func() ([]string, error) { return cfg.GetQueryParameters(), nil }, "custom"),
 		flags.WithRelativeTimestamp("dateFrom", "dateFrom", ""),
 		flags.WithRelativeTimestamp("dateTo", "dateTo", ""),
 	)

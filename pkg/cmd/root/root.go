@@ -162,6 +162,7 @@ func NewCmdRoot(f *cmdutil.Factory, version, buildDate string) *CmdRoot {
 	cmd.PersistentFlags().Bool("noProxy", false, "Ignore the proxy settings")
 	cmd.PersistentFlags().Bool("withError", false, "Errors will be printed on stdout instead of stderr")
 	cmd.PersistentFlags().StringSliceP("header", "H", nil, `custom headers. i.e. --header "Accept: value, AnotherHeader: myvalue"`)
+	cmd.PersistentFlags().StringSlice("queryParam", nil, `custom query parameters. i.e. --queryParam "withCustomOption=true myOtherOption=myvalue"`)
 
 	// Activity log
 	cmd.PersistentFlags().BoolVar(&ccmd.NoLog, "noLog", false, "Disables the activity log for the current command")

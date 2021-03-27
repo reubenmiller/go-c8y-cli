@@ -94,6 +94,7 @@ func (n *AssignGroupCmd) RunE(cmd *cobra.Command, args []string) error {
 		cmd,
 		query,
 		inputIterators,
+		flags.WithCustomStringSlice(func() ([]string, error) { return cfg.GetQueryParameters(), nil }, "custom"),
 	)
 	if err != nil {
 		return cmderrors.NewUserError(err)

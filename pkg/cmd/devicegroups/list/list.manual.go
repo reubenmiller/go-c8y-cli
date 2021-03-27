@@ -111,6 +111,7 @@ func (n *CmdList) getDeviceGroupCollection(cmd *cobra.Command, args []string) er
 		query,
 		inputIterators,
 		flags.WithBoolValue("withParents", "withParents"),
+		flags.WithCustomStringSlice(func() ([]string, error) { return cfg.GetQueryParameters(), nil }, "custom"),
 	)
 
 	if err != nil {

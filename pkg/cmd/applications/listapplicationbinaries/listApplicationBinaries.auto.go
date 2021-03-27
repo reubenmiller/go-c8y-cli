@@ -89,6 +89,7 @@ func (n *ListApplicationBinariesCmd) RunE(cmd *cobra.Command, args []string) err
 		cmd,
 		query,
 		inputIterators,
+		flags.WithCustomStringSlice(func() ([]string, error) { return cfg.GetQueryParameters(), nil }, "custom"),
 	)
 	if err != nil {
 		return cmderrors.NewUserError(err)

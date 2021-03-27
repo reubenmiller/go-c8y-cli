@@ -101,6 +101,7 @@ func (n *ListCmd) RunE(cmd *cobra.Command, args []string) error {
 		cmd,
 		query,
 		inputIterators,
+		flags.WithCustomStringSlice(func() ([]string, error) { return cfg.GetQueryParameters(), nil }, "custom"),
 		c8yfetcher.WithDeviceByNameFirstMatch(client, args, "device", "source"),
 		flags.WithStringValue("type", "type"),
 		flags.WithStringValue("valueFragmentType", "valueFragmentType"),
