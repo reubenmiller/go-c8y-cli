@@ -11,13 +11,14 @@
     )
 
     $Name = $Specification.information.name.ToLower()
+    $BaseName = Split-Path -Path $Specification.information.name.ToLower() -Leaf
 
     if (!$Name) {
         Write-Error "Missing root command name"
         return
     }
-    $NameLowercase = $Name.ToLower()
-    $NameCamel = $Name[0].ToString().ToUpperInvariant() + $Name.Substring(1)
+    $BaseNameLowercase = $BaseName.ToLower()
+    $NameCamel = $BaseNameLowercase[0].ToString().ToUpperInvariant() + $BaseNameLowercase.Substring(1)
     $Description = $Specification.information.description
     $DescriptionLong = $Specification.information.descriptionLong
 
@@ -25,7 +26,7 @@
     $RootImportCode = New-Object System.Text.StringBuilder
     $GoImports = New-Object System.Text.StringBuilder
 
-    $File = Join-Path -Path $OutputDir -ChildPath ("{0}.auto.go" -f $NameLowercase)
+    $File = Join-Path -Path $OutputDir -ChildPath ("{0}.auto.go" -f $BaseNameLowercase)
 
     foreach ($endpoint in $Specification.endpoints) {
         if ($endpoint.skip -eq $true) {
@@ -33,7 +34,6 @@
             continue
         }
         $EndpointName = $endpoint.name
-        $EndpointNameCamel = $EndpointName[0].ToString().ToUpperInvariant() + $EndpointName.Substring(1)
         $GoCmdName = $endpoint.alias.go
         $GoCmdNameLower = $GoCmdName.ToLower()
         $GoCmdNameCamel = $GoCmdName[0].ToString().ToUpperInvariant() + $GoCmdName.Substring(1)
@@ -48,7 +48,7 @@
     $null = $RootImportCode.AppendLine("    rootCmd.AddCommand(New${NameCamel}RootCmd(f).GetCommand())")
 
     $Template = @"
-package $NameLowercase
+package $BaseNameLowercase
 
 import (
     "github.com/spf13/cobra"
@@ -65,7 +65,7 @@ func NewSubCommand(f *cmdutil.Factory) *SubCmd${NameCamel} {
     ccmd := &SubCmd${NameCamel}{}
 
     cmd := &cobra.Command{
-        Use:   "${Name}",
+        Use:   "${BaseNameLowercase}",
         Short: "${Description}",
         Long:  ``${DescriptionLong}``,
     }
