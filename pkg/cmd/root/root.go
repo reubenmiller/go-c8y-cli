@@ -198,7 +198,6 @@ func NewCmdRoot(f *cmdutil.Factory, version, buildDate string) *CmdRoot {
 		cmd,
 		completion.WithValidateSet("dryFormat", "json", "dump", "curl", "markdown"),
 		completion.WithValidateSet("output", "json", "table", "csv", "csvheader"),
-		completion.WithValidateSet("view", config.ViewsOff, config.ViewsAuto),
 		completion.WithSessionFile("session", func() string {
 			cfg, err := ccmd.Factory.Config()
 			if err != nil {
@@ -206,6 +205,7 @@ func NewCmdRoot(f *cmdutil.Factory, version, buildDate string) *CmdRoot {
 			}
 			return cfg.GetSessionHomeDir()
 		}),
+		cmdutil.WithViewCompletion("view", func() (*dataview.DataView, error) { return ccmd.Factory.DataView() }),
 	)
 
 	// Child commands

@@ -708,6 +708,19 @@ func (r *RequestHandler) ProcessResponse(resp *c8y.Response, respError error, co
 							r.Logger.Infof("Detected view: %s", strings.Join(props, ", "))
 							commonOptions.Filters.Pluck = props
 						}
+					default:
+						props, err := r.DataView.GetViewByName(view)
+						if err != nil || len(props) == 0 {
+							if err != nil {
+								r.Logger.Warnf("no matching view found. %s, name=%s", err, view)
+							} else {
+								r.Logger.Warnf("no matching view found. name=%s", view)
+							}
+							commonOptions.Filters.Pluck = []string{"**"}
+						} else {
+							r.Logger.Infof("Detected view: %s", strings.Join(props, ", "))
+							commonOptions.Filters.Pluck = props
+						}
 					}
 				}
 			} else {

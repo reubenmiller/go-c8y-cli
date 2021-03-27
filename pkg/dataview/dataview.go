@@ -10,6 +10,7 @@ import (
 	"strings"
 
 	"github.com/reubenmiller/go-c8y-cli/pkg/logger"
+	"github.com/reubenmiller/go-c8y-cli/pkg/matcher"
 	"github.com/tidwall/gjson"
 )
 
@@ -54,6 +55,10 @@ func NewDataView(pattern string, extension string, log *logger.Logger, paths ...
 }
 
 func (v *DataView) LoadDefinitions() error {
+	if len(v.Definitions) > 0 {
+		v.Logger.Debugf("Views already loaded")
+		return nil
+	}
 	definitions := make([]Definition, 0)
 	v.Logger.Debugf("Looking for definitions in: %v", v.Paths)
 	for _, path := range v.Paths {
@@ -77,6 +82,9 @@ func (v *DataView) LoadDefinitions() error {
 					v.Logger.Warnf("Could not load view definitions. %s", err)
 					return err
 				}
+				for i := range viewDefinition.Definitions {
+					viewDefinition.Definitions[i].FileName = d.Name()
+				}
 				definitions = append(definitions, viewDefinition.Definitions...)
 			}
 			return nil
@@ -94,6 +102,48 @@ func (v *DataView) LoadDefinitions() error {
 	})
 	v.Definitions = definitions
 	return nil
+}
+
+// GetViewByName get view by name. Accepts wildcard name
+func (v *DataView) GetViewByName(pattern string) ([]string, error) {
+	err := v.LoadDefinitions()
+	if err != nil {
+		return nil, err
+	}
+
+	var matchingDefinition *Definition
+
+	for _, definition := range v.Definitions {
+
+		if match, _ := matcher.MatchWithWildcards(definition.Name, pattern); match {
+			matchingDefinition = &definition
+			break
+		}
+	}
+
+	if matchingDefinition == nil {
+		return nil, nil
+	}
+
+	return matchingDefinition.Columns, nil
+}
+
+// GetViews get a list of view names
+func (v *DataView) GetViews(pattern string) ([]Definition, error) {
+	err := v.LoadDefinitions()
+	if err != nil {
+		return nil, err
+	}
+
+	matches := []Definition{}
+
+	for _, definition := range v.Definitions {
+		if match, _ := matcher.MatchWithWildcards(definition.Name, pattern); match {
+			matches = append(matches, definition)
+		}
+	}
+
+	return matches, nil
 }
 
 func (v *DataView) GetView(data *gjson.Result, contentType ...string) ([]string, error) {

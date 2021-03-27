@@ -1,0 +1,32 @@
+{
+    "version": "1",
+    "definitions": [
+        {
+            "name": "ignoreinbuilt",
+            "priority": 900,
+            "columns": [
+                "**",
+                "!firstOccurrenceTime",
+                "!count",
+                "!history.**",
+                "!additionParents.**",
+                "!assetParents.**",
+                "!childAdditions.**",
+                "!childAssets.**",
+                "!childDevices.**",
+                "!deviceParents.**",
+                "!creationTime",
+                "!lastUpdated",
+                "!self"
+            ]
+        }
+    ]
+}
+
+
+
+
+
+
+
+
