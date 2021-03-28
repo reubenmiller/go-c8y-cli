@@ -1,21 +1,34 @@
 package c8ysubscribe
 
 import (
-	"fmt"
 	"os"
 	"os/signal"
 	"strings"
 
 	"time"
 
-	"github.com/fatih/color"
 	"github.com/reubenmiller/go-c8y-cli/pkg/jsonUtilities"
 	"github.com/reubenmiller/go-c8y-cli/pkg/logger"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
-	"github.com/spf13/cobra"
 )
 
-func Subscribe(client *c8y.Client, log *logger.Logger, channelPattern string, timeoutSec int64, maxMessages int64, cmd *cobra.Command) error {
+// Options subscription options
+type Options struct {
+	// TimeoutSec timeout in seconds
+	TimeoutSec int64
+
+	// MaxMessages maximum messages
+	MaxMessages int64
+
+	// ActionTypes filter by action types
+	ActionTypes []string
+
+	// OnMessage on message callback
+	OnMessage func(msg string) error
+}
+
+// Subscribe subscribe to a single channel
+func Subscribe(client *c8y.Client, log *logger.Logger, channelPattern string, opts Options) error {
 
 	if err := client.Realtime.Connect(); err != nil {
 		log.Errorf("Could not connect to /cep/realtime. %s", err)
@@ -32,7 +45,7 @@ func Subscribe(client *c8y.Client, log *logger.Logger, channelPattern string, ti
 
 	client.Realtime.Subscribe(channelPattern, msgCh)
 
-	timeoutDuration := time.Duration(timeoutSec) * time.Second
+	timeoutDuration := time.Duration(opts.TimeoutSec) * time.Second
 	timeoutCh := time.After(timeoutDuration)
 
 	defer func() {
@@ -41,6 +54,7 @@ func Subscribe(client *c8y.Client, log *logger.Logger, channelPattern string, ti
 	}()
 
 	var receivedCounter int64
+	actionTypes := strings.ToLower(strings.Join(opts.ActionTypes, " "))
 
 	for {
 		select {
@@ -48,19 +62,16 @@ func Subscribe(client *c8y.Client, log *logger.Logger, channelPattern string, ti
 			log.Info("Duration has expired. Stopping realtime client")
 			return nil
 		case msg := <-msgCh:
+			if actionTypes == "" || strings.Contains(actionTypes, strings.ToLower(msg.Payload.RealtimeAction)) {
 
-			data := jsonUtilities.UnescapeJSON(msg.Payload.Data)
+				data := jsonUtilities.UnescapeJSON(msg.Payload.Data)
+				_ = opts.OnMessage(data + "\n")
 
-			// show data on console
-			// cmd.Printf("%s\n", data)
+				receivedCounter++
 
-			// return data from cli
-			fmt.Printf("%s\n", data)
-
-			receivedCounter++
-
-			if maxMessages != 0 && receivedCounter >= maxMessages {
-				return nil
+				if opts.MaxMessages != 0 && receivedCounter >= opts.MaxMessages {
+					return nil
+				}
 			}
 
 		case <-signalCh:
@@ -71,7 +82,8 @@ func Subscribe(client *c8y.Client, log *logger.Logger, channelPattern string, ti
 	}
 }
 
-func SubscribeMultiple(client *c8y.Client, log *logger.Logger, channelPatterns []string, timeoutSec int64, maxMessages int64, useColorOutput bool, cmd *cobra.Command) error {
+// SubscribeMultiple subscribe to multiple channels
+func SubscribeMultiple(client *c8y.Client, log *logger.Logger, channelPatterns []string, opts Options) error {
 
 	if err := client.Realtime.Connect(); err != nil {
 		log.Errorf("Could not connect to /cep/realtime. %s", err)
@@ -90,7 +102,7 @@ func SubscribeMultiple(client *c8y.Client, log *logger.Logger, channelPatterns [
 		client.Realtime.Subscribe(pattern, msgCh)
 	}
 
-	timeoutDuration := time.Duration(timeoutSec) * time.Second
+	timeoutDuration := time.Duration(opts.TimeoutSec) * time.Second
 	timeoutCh := time.After(timeoutDuration)
 
 	defer func() {
@@ -108,37 +120,14 @@ func SubscribeMultiple(client *c8y.Client, log *logger.Logger, channelPatterns [
 
 			data := jsonUtilities.UnescapeJSON(msg.Payload.Data)
 
-			if useColorOutput {
-
-				// set color based on channel
-				channelInfo := strings.Split(msg.Channel, "/")
-
-				colorPrint := color.GreenString
-				if len(channelInfo) > 1 {
-					switch channelInfo[1] {
-					case "measurements":
-						colorPrint = color.GreenString
-					case "events":
-						colorPrint = color.HiYellowString
-					case "operations":
-						colorPrint = color.MagentaString
-					case "alarms":
-						colorPrint = color.RedString
-					default:
-						colorPrint = color.GreenString
-					}
-				}
-
-				// show data on console
-				cmd.Printf("%s%s\n", colorPrint("[%s]: ", msg.Channel), data)
-			}
-
 			// return data from cli
-			fmt.Printf("%s\n", data)
+			if opts.OnMessage != nil {
+				_ = opts.OnMessage(data + "\n")
+			}
 
 			receivedCounter++
 
-			if maxMessages != 0 && receivedCounter >= maxMessages {
+			if opts.MaxMessages != 0 && receivedCounter >= opts.MaxMessages {
 				return nil
 			}
 

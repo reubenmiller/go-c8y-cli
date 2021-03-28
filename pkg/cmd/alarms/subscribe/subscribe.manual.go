@@ -8,6 +8,7 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/pkg/c8ysubscribe"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmd/subcommand"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmdutil"
+	"github.com/reubenmiller/go-c8y-cli/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
@@ -20,6 +21,7 @@ type CmdSubscribe struct {
 
 	flagDurationSec int64
 	flagCount       int64
+	actionTypes     []string
 }
 
 func NewCmdSubscribe(f *cmdutil.Factory) *CmdSubscribe {
@@ -49,8 +51,13 @@ Subscribe to alarms (in realtime) for all devices, and stop after receiving 10 a
 	cmd.Flags().String("device", "", "Device ID")
 	cmd.Flags().Int64Var(&ccmd.flagDurationSec, "duration", 30, "Timeout in seconds")
 	cmd.Flags().Int64Var(&ccmd.flagCount, "count", 0, "Max number of realtime notifications to wait for")
+	cmd.Flags().StringSliceVar(&ccmd.actionTypes, "actionTypes", nil, "Realtime action types, i.e. CREATE,UPDATE,DELETE")
 
-	// Required flags
+	completion.WithOptions(
+		cmd,
+		completion.WithDevice("device", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
+		completion.WithValidateSet("actionTypes", "CREATE", "UPDATE", "DELETE"),
+	)
 
 	ccmd.SubCommand = subcommand.NewSubCommand(cmd)
 
@@ -59,6 +66,10 @@ Subscribe to alarms (in realtime) for all devices, and stop after receiving 10 a
 
 func (n *CmdSubscribe) RunE(cmd *cobra.Command, args []string) error {
 	client, err := n.factory.Client()
+	if err != nil {
+		return err
+	}
+	cfg, err := n.factory.Config()
 	if err != nil {
 		return err
 	}
@@ -89,5 +100,13 @@ func (n *CmdSubscribe) RunE(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	return c8ysubscribe.Subscribe(client, log, c8y.RealtimeAlarms(device), n.flagDurationSec, n.flagCount, cmd)
+	opts := c8ysubscribe.Options{
+		TimeoutSec:  n.flagDurationSec,
+		MaxMessages: n.flagCount,
+		ActionTypes: n.actionTypes,
+		OnMessage: func(msg string) error {
+			return n.factory.WriteJSONToConsole(cfg, cmd, "", []byte(msg))
+		},
+	}
+	return c8ysubscribe.Subscribe(client, log, c8y.RealtimeAlarms(device), opts)
 }
