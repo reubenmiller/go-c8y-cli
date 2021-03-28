@@ -54,13 +54,13 @@ Function MatchObject {
     }
 
     # compare keys
-    $Compare = Compare-Object $ExpectedKeys $ActualKeys
+    $Compare = Compare-Object (ConvertTo-Json $ExpectedValues) (ConvertTo-Json $ActualValues)
     if ($null -ne $Compare) {
         [PSCustomObject]@{
             Succeeded = $false
             FailureMessage = "Object does not contain expected values. Actual {{{0}}}, got {{{1}}}" -f @(
-                ($ActualValues -join ","),
-                ($ExpectedValues -join ",")
+                (ConvertTo-Json $ActualValues),
+                (ConvertTo-Json $ExpectedValues)
             )
         }
         return
