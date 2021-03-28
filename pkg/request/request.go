@@ -154,7 +154,7 @@ func (r *RequestHandler) DryRunHandler(iostream *iostreams.IOStreams, options *c
 		w = iostream.Out
 	}
 
-	r.PrintRequestDetails(w, nil, req)
+	r.PrintRequestDetails(w, options, req)
 }
 
 // PrintRequestDetails prints the request to the console making it easier to extra informatino from it
@@ -187,7 +187,11 @@ func (r *RequestHandler) PrintRequestDetails(w io.Writer, requestOptions *c8y.Re
 
 	// body
 	body := []byte{}
+	var requestBody interface{}
 	bodyMap := make(map[string]interface{})
+	r.Logger.Warnf("input body: %s", req.Body)
+	isJSON := true
+
 	var err error
 	if req.Body != nil && (req.Method == http.MethodPost || req.Method == http.MethodPut || req.Method == http.MethodPatch) {
 		var buf bytes.Buffer
@@ -205,9 +209,16 @@ func (r *RequestHandler) PrintRequestDetails(w io.Writer, requestOptions *c8y.Re
 		// try converting it to json
 		err = jsonUtilities.ParseJSON(string(body), bodyMap)
 
-		if err != nil {
+		if err == nil && (jsonUtilities.IsJSONObject(body) || jsonUtilities.IsJSONArray(body)) {
+			requestBody = bodyMap
+		} else {
 			r.Logger.Warnf("Could not parse json body. %s", err)
+			requestBody = string(body)
+			isJSON = false
 		}
+	}
+	if err != nil {
+		r.Logger.Warningf("failed to read all body contents. %s", err)
 	}
 
 	shell, pwsh, _ := r.GetCurlCommands(req)
@@ -219,7 +230,7 @@ func (r *RequestHandler) PrintRequestDetails(w io.Writer, requestOptions *c8y.Re
 		Method:      req.Method,
 		Headers:     headers,
 		Query:       tryUnescapeURL(req.URL.RawQuery),
-		Body:        bodyMap,
+		Body:        requestBody,
 		Shell:       shell,
 		PowerShell:  pwsh,
 	}
@@ -279,9 +290,7 @@ func (r *RequestHandler) PrintRequestDetails(w io.Writer, requestOptions *c8y.Re
 	}
 
 	if len(body) > 0 {
-		if err != nil {
-			r.Logger.Warning("failed to read all body contents")
-		} else {
+		if isJSON {
 			sectionLabel.Fprint(w, "\n#### Body\n")
 			fmt.Fprintf(w, "\n```json\n")
 
@@ -293,8 +302,12 @@ func (r *RequestHandler) PrintRequestDetails(w io.Writer, requestOptions *c8y.Re
 			}
 			fmt.Fprintf(w, "%s", body)
 			fmt.Fprintf(w, "```\n")
+		} else {
+			sectionLabel.Fprint(w, "\n#### Body\n")
+			fmt.Fprintf(w, "\n```text\n")
+			fmt.Fprintf(w, "%s", body)
+			fmt.Fprintf(w, "\n```\n")
 		}
-
 	}
 }
 
@@ -836,4 +849,16 @@ func (r *RequestHandler) saveResponseToFile(resp *c8y.Response, filename string,
 		return fullpath, nil
 	}
 	return filename, nil
+}
+
+// HasJSONHeader returns true if the header contains a json content type
+func HasJSONHeader(h *http.Header) bool {
+	if h == nil {
+		return true
+	}
+	contentType := h.Get("Content-Type")
+	if contentType == "" {
+		return true
+	}
+	return strings.Contains(strings.ToLower(contentType), "json")
 }

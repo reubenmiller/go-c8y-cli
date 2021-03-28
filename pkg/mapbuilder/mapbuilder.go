@@ -143,6 +143,7 @@ type MapBuilder struct {
 	body                  map[string]interface{}
 	bodyIterators         []IteratorReference
 	file                  string
+	raw                   string
 	TemplateIterator      iterator.Iterator
 	TemplateIteratorNames []string
 
@@ -343,6 +344,11 @@ func (b *MapBuilder) SetFile(path string) {
 	b.file = path
 }
 
+// SetRaw sets the body to a raw string
+func (b *MapBuilder) SetRaw(v string) {
+	b.raw = v
+}
+
 // GetMap returns the body as a map[string]interface{}
 func (b *MapBuilder) GetMap() map[string]interface{} {
 	return b.body
@@ -363,10 +369,28 @@ func (b *MapBuilder) HasFile() bool {
 	return b.file != ""
 }
 
+// HasRaw return true if the body is being set from raw data
+func (b *MapBuilder) HasRaw() bool {
+	return b.raw != ""
+}
+
+// GetRaw get raw body
+func (b *MapBuilder) GetRaw() string {
+	return b.raw
+}
+
+// GetFile get the file reference
+func (b *MapBuilder) GetFile() (*os.File, error) {
+	return os.Open(b.file)
+}
+
 // GetBody returns the body as an interface
 func (b *MapBuilder) GetBody() (interface{}, error) {
 	if b.HasFile() {
 		return os.Open(b.file)
+	}
+	if b.HasRaw() {
+		return b.raw, nil
 	}
 	return b.GetMap(), nil
 }

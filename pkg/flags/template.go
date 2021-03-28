@@ -53,7 +53,7 @@ func WithTemplateVariablesValue(src ...string) GetOption {
 		if len(src) > 0 {
 			sourceName = src[0]
 		}
-		opt := WithDataValueAdvanced(false, sourceName)
+		opt := WithDataValueAdvanced(false, false, sourceName)
 		dst, value, err := opt(cmd, inputIterators)
 
 		if err != nil {

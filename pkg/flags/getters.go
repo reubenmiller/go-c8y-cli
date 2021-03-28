@@ -124,6 +124,10 @@ func WithBody(cmd *cobra.Command, body *mapbuilder.MapBuilder, inputIterators *R
 				iteratorSources = append(iteratorSources, name)
 				totalIterators++
 			}
+		case RawString:
+			if v != "" {
+				body.SetRaw(string(v))
+			}
 		case string:
 			// only set non-empty values by default
 			if v != "" {
@@ -458,8 +462,11 @@ func WithFilePath(opts ...string) GetOption {
 	}
 }
 
+// RawString raw string type
+type RawString string
+
 // WithDataValueAdvanced adds json or shorthand json parsing with additional option to strip the Cumulocity properties from the input
-func WithDataValueAdvanced(stripCumulocityKeys bool, opts ...string) GetOption {
+func WithDataValueAdvanced(stripCumulocityKeys bool, raw bool, opts ...string) GetOption {
 	return func(cmd *cobra.Command, inputIterators *RequestInputIterators) (string, interface{}, error) {
 
 		src, dst, _ := UnpackGetterOptions("%s", opts...)
@@ -473,6 +480,9 @@ func WithDataValueAdvanced(stripCumulocityKeys bool, opts ...string) GetOption {
 			return dst, value, err
 		}
 
+		if raw {
+			return dst, RawString(resolveContents(value)), nil
+		}
 		data := make(map[string]interface{})
 
 		err = jsonUtilities.ParseJSON(resolveContents(value), data)
@@ -488,11 +498,11 @@ func WithDataValueAdvanced(stripCumulocityKeys bool, opts ...string) GetOption {
 }
 
 func WithDataFlagValue() GetOption {
-	return WithDataValue(FlagDataName, "")
+	return WithDataValueAdvanced(true, false, FlagDataName, "")
 }
 
 func WithDataValue(opts ...string) GetOption {
-	return WithDataValueAdvanced(true, opts...)
+	return WithDataValueAdvanced(true, false, opts...)
 }
 
 type DefaultTemplateString string

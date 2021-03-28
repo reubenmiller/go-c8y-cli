@@ -106,27 +106,39 @@ func (r *RequestIterator) GetNext() (*c8y.RequestOptions, interface{}, error) {
 	if r.Body != nil && !reflect.ValueOf(r.Body).IsNil() && (strings.EqualFold(req.Method, "POST") || strings.EqualFold(req.Method, "PUT")) {
 		// iterator body. Any validation will be run here
 		switch v := r.Body.(type) {
+		case flags.RawString:
+			req.Body = v
 		case *os.File:
 			req.Body = v
 		case *mapbuilder.MapBuilder:
-			bodyContents, err := v.MarshalJSONWithInput(inputLine)
-			if err != nil {
-				if !errors.Is(err, cmderrors.ErrNoMatchesFound) {
-					r.setDone()
+			if v.HasFile() {
+				if f, err := v.GetFile(); err != nil {
+					return nil, nil, err
+				} else {
+					req.Body = f
 				}
-				return nil, nil, err
-			}
+			} else if v.HasRaw() {
+				req.Body = v.GetRaw()
+			} else {
+				bodyContents, err := v.MarshalJSONWithInput(inputLine)
+				if err != nil {
+					if !errors.Is(err, cmderrors.ErrNoMatchesFound) {
+						r.setDone()
+					}
+					return nil, nil, err
+				}
 
-			// TODO: Find more efficient way rather than converting to and from json
-			bodyValue := make(map[string]interface{})
+				// TODO: Find more efficient way rather than converting to and from json
+				bodyValue := make(map[string]interface{})
 
-			// Note: UnmarshalJSON does not support large numbers by default, so
-			// 		 c8y.DecodeJSONBytes should be used instead!
-			if err := c8y.DecodeJSONBytes(bodyContents, &bodyValue); err != nil {
-				r.setDone()
-				return nil, nil, err
+				// Note: UnmarshalJSON does not support large numbers by default, so
+				// 		 c8y.DecodeJSONBytes should be used instead!
+				if err := c8y.DecodeJSONBytes(bodyContents, &bodyValue); err != nil {
+					r.setDone()
+					return nil, nil, err
+				}
+				req.Body = bodyValue
 			}
-			req.Body = bodyValue
 		default:
 			req.Body = v
 		}

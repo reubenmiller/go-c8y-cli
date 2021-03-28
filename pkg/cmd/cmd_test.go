@@ -438,7 +438,7 @@ func Test_DebugCommand(t *testing.T) {
 	stdin := bytes.NewBufferString("\n")
 	cmd.SetIn(stdin)
 	cmdtext := `
-	devices list -o json
+	api POST /testme --dry --data myvalue
 	`
 	cmdErr := ExecuteCmd(cmd, strings.TrimSpace(cmdtext))
 	CheckCommandError(cmd.Command, nil, cmdErr)

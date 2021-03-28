@@ -12,6 +12,7 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmdutil"
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/pkg/mapbuilder"
+	"github.com/reubenmiller/go-c8y-cli/pkg/request"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
 )
@@ -170,7 +171,7 @@ func (n *CmdAPI) RunE(cmd *cobra.Command, args []string) error {
 			cmd,
 			body,
 			inputIterators,
-			flags.WithDataFlagValue(),
+			flags.WithDataValueAdvanced(true, !request.HasJSONHeader(&headers), flags.FlagDataName, ""),
 			cmdutil.WithTemplateValue(cfg),
 			flags.WithTemplateVariablesValue(),
 		)
