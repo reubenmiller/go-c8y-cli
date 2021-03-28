@@ -3,6 +3,7 @@ package c8ywaiter
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 )
@@ -11,13 +12,13 @@ import (
 type OperationState struct {
 	ID     string
 	Client *c8y.Client
-	Status string
+	Status []string
 }
 
 // Check check if operation has reached its expected status
 func (s *OperationState) Check(m interface{}) (done bool, err error) {
 	if op, ok := m.(*c8y.Operation); ok {
-		done = op.Status == s.Status
+		done = strings.Contains(strings.ToLower(strings.Join(s.Status, " ")), strings.ToLower(op.Status))
 
 		if done {
 			return done, nil

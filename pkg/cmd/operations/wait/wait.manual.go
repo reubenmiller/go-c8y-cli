@@ -22,9 +22,8 @@ type CmdWait struct {
 
 	factory *cmdutil.Factory
 
-	flagDurationSec int64
-	expectedStatus  string
-	Timeout         time.Duration
+	ExpectedStatus []string
+	Timeout        time.Duration
 }
 
 func NewCmdWait(f *cmdutil.Factory) *CmdWait {
@@ -37,7 +36,14 @@ func NewCmdWait(f *cmdutil.Factory) *CmdWait {
 		Short: "Wait for operation",
 		Long:  `Wait for an operation to complete`,
 		Example: heredoc.Doc(`
+			$ c8y operations wait --id 1234
+			# Wait for the operation to be set to SUCCESSFUL
 
+			$ c8y operations wait --id 1234 --duration 1m
+			# Wait for the operation to be set to SUCCESSFUL and give up after 1 minute
+
+			$ c8y operations list --device 1111 | c8y operations wait --status "FAILED" --status "SUCCESSFUL"
+			# Wait for operation to be set to either FAILED or SUCCESSFUL
 		`),
 		RunE: ccmd.RunE,
 	}
@@ -45,7 +51,7 @@ func NewCmdWait(f *cmdutil.Factory) *CmdWait {
 	cmd.SilenceUsage = true
 
 	cmd.Flags().String("id", "", "Operation id (required) (accepts pipeline)")
-	cmd.Flags().StringVar(&ccmd.expectedStatus, "status", "SUCCESSFUL", "Status")
+	cmd.Flags().StringSliceVar(&ccmd.ExpectedStatus, "status", []string{"SUCCESSFUL"}, "Status to wait for. If multiple values are given, then it will be applied as an OR operation")
 	cmd.Flags().DurationVar(&ccmd.Timeout, "duration", 30*time.Second, "Timeout. i.e. 30s or 1m (1 minute)")
 
 	flags.WithOptions(
@@ -55,7 +61,7 @@ func NewCmdWait(f *cmdutil.Factory) *CmdWait {
 
 	completion.WithOptions(
 		cmd,
-		completion.WithValidateSet("status", "PENDING", "EXECUTING", "SUCCESSFUL", "FAILED"),
+		completion.WithValidateSet("status", c8y.OperationStatusPending, c8y.OperationStatusExecuting, c8y.OperationStatusSuccessful, c8y.OperationStatusFailed),
 	)
 
 	ccmd.SubCommand = subcommand.NewSubCommand(cmd)
@@ -92,7 +98,7 @@ func (n *CmdWait) RunE(cmd *cobra.Command, args []string) error {
 
 	state := &c8ywaiter.OperationState{
 		Client: client,
-		Status: n.expectedStatus,
+		Status: n.ExpectedStatus,
 	}
 
 	totalErrors := 0
