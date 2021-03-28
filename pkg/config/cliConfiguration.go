@@ -121,6 +121,9 @@ const (
 	// SettingsWorkerDelay delay in milliseconds to wait after each request before the worker processes a new job (request)
 	SettingsWorkerDelay = "settings.defaults.delay"
 
+	// WorkerDelayBefore delay in milliseconds to wait before each request
+	SettingsWorkerDelayBefore = "settings.defaults.delayBefore"
+
 	// SettingsAbortOnErrorCount abort when the number of errors reaches this value
 	SettingsAbortOnErrorCount = "settings.defaults.abortOnErrors"
 
@@ -907,6 +910,11 @@ func (c *Config) WithError() bool {
 // WorkerDelay delay in milliseconds to wait after each request before the worker processes a new job (request)
 func (c *Config) WorkerDelay() int {
 	return c.viper.GetInt(SettingsWorkerDelay)
+}
+
+// WorkerDelayBefore delay in milliseconds to wait before each request
+func (c *Config) WorkerDelayBefore() int {
+	return c.viper.GetInt(SettingsWorkerDelayBefore)
 }
 
 // AbortOnErrorTotal abort when the number of errors reaches this value

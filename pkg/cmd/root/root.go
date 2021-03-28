@@ -51,6 +51,7 @@ import (
 	microservicesServiceUserCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/microservices/serviceuser"
 	operationsCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/operations"
 	operationsSubscribeCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/operations/subscribe"
+	operationsWaitCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/operations/wait"
 	realtimeCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/realtime"
 	retentionrulesCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/retentionrules"
 	sessionsCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/sessions"
@@ -258,6 +259,7 @@ func NewCmdRoot(f *cmdutil.Factory, version, buildDate string) *CmdRoot {
 
 	operations := operationsCmd.NewSubCommand(f).GetCommand()
 	operations.AddCommand(operationsSubscribeCmd.NewCmdSubscribe(f).GetCommand())
+	operations.AddCommand(operationsWaitCmd.NewCmdWait(f).GetCommand())
 	cmd.AddCommand(operations)
 
 	measurements := measurementsCmd.NewSubCommand(f).GetCommand()
