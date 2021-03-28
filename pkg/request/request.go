@@ -189,7 +189,6 @@ func (r *RequestHandler) PrintRequestDetails(w io.Writer, requestOptions *c8y.Re
 	body := []byte{}
 	var requestBody interface{}
 	bodyMap := make(map[string]interface{})
-	r.Logger.Warnf("input body: %s", req.Body)
 	isJSON := true
 
 	var err error
@@ -212,13 +211,10 @@ func (r *RequestHandler) PrintRequestDetails(w io.Writer, requestOptions *c8y.Re
 		if err == nil && (jsonUtilities.IsJSONObject(body) || jsonUtilities.IsJSONArray(body)) {
 			requestBody = bodyMap
 		} else {
-			r.Logger.Warnf("Could not parse json body. %s", err)
+			r.Logger.Debugf("Using non-json body. %s", err)
 			requestBody = string(body)
 			isJSON = false
 		}
-	}
-	if err != nil {
-		r.Logger.Warningf("failed to read all body contents. %s", err)
 	}
 
 	shell, pwsh, _ := r.GetCurlCommands(req)
