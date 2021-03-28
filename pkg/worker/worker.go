@@ -34,6 +34,7 @@ type BatchOptions struct {
 	NumJobs           int
 	TotalWorkers      int
 	Delay             int
+	DelayBefore       int
 	AbortOnErrorCount int
 
 	InputData []string
@@ -109,6 +110,7 @@ func (w *Worker) getBatchOptions(cmd *cobra.Command) (*BatchOptions, error) {
 		AbortOnErrorCount: w.config.AbortOnErrorCount(),
 		TotalWorkers:      w.config.GetWorkers(),
 		Delay:             w.config.WorkerDelay(),
+		DelayBefore:       w.config.WorkerDelayBefore(),
 	}
 
 	if v, err := cmd.Flags().GetInt("count"); err == nil {
@@ -380,6 +382,12 @@ func (w *Worker) batchWorker(id int, jobs <-chan batchArgument, results chan<- e
 	for job := range jobs {
 		total++
 		workerStart := prog.StartJob(id, total)
+
+		if job.batchOptions.DelayBefore > 0 {
+			w.logger.Infof("worker %d: sleeping %dms before starting job", id, job.batchOptions.DelayBefore)
+			time.Sleep(time.Duration(job.batchOptions.DelayBefore) * time.Millisecond)
+		}
+
 		if !onStartup {
 			if !errors.Is(err, io.EOF) && job.batchOptions.Delay > 0 {
 				w.logger.Infof("worker %d: sleeping %dms before fetching next job", id, job.batchOptions.Delay)
