@@ -3,7 +3,6 @@ package c8ysession
 import (
 	"fmt"
 	"io"
-	"net/http"
 	"os"
 	"strings"
 
@@ -17,11 +16,6 @@ type CumulocitySessions struct {
 	Sessions []CumulocitySession `json:"sessions"`
 }
 
-type Authentication struct {
-	AuthType string         `json:"authType,omitempty"`
-	Cookies  []*http.Cookie `json:"cookies,omitempty"`
-}
-
 // CumulocitySession contains all settings required to communicate with a Cumulocity service
 type CumulocitySession struct {
 	Schema string `json:"$schema,omitempty"`
@@ -31,6 +25,7 @@ type CumulocitySession struct {
 	Tenant          string `json:"tenant"`
 	Username        string `json:"username"`
 	Password        string `json:"password"`
+	Token           string `json:"token"`
 	Description     string `json:"description"`
 	UseTenantPrefix bool   `json:"useTenantPrefix"`
 
@@ -52,6 +47,10 @@ func (s CumulocitySession) GetSessionPassphrase() string {
 
 func (s *CumulocitySession) SetPassword(password string) {
 	s.Password = password
+}
+
+func (s *CumulocitySession) SetToken(token string) {
+	s.Token = token
 }
 
 func (s *CumulocitySession) SetHost(host string) {

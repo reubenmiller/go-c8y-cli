@@ -52,6 +52,7 @@ type CmdCreate struct {
 	host           string
 	username       string
 	password       string
+	token          string
 	description    string
 	name           string
 	tenant         string
@@ -100,13 +101,14 @@ $ c8y sessions create --type prod --host "https://mytenant.eu-latest.cumulocity.
 	cmd.Flags().StringVar(&ccmd.host, "host", "", "Host. .e.g. test.cumulocity.com. (required)")
 	cmd.Flags().StringVar(&ccmd.username, "username", "", "Username (without tenant). (required)")
 	cmd.Flags().StringVar(&ccmd.password, "password", "", "Password. If left blank then you will be prompted for the password")
+	cmd.Flags().StringVar(&ccmd.token, "token", "", "Token")
 	cmd.Flags().StringVar(&ccmd.tenant, "tenant", "", "Tenant ID")
 	cmd.Flags().StringVar(&ccmd.description, "description", "", "Description about the session")
 	cmd.Flags().StringVar(&ccmd.name, "name", "", "Name of the session")
 	cmd.Flags().StringVar(&ccmd.sessionType, "type", "", "Session type. List of predefined session types")
 	cmd.Flags().BoolVar(&ccmd.noTenantPrefix, "noTenantPrefix", false, "Don't use tenant name as a prefix to the user name when using Basic Authentication. Defaults to false")
-	cmd.Flags().BoolVar(&ccmd.noStorage, "noStorage", false, "Don't store any passwords or cookies in the session file")
-	cmd.Flags().BoolVar(&ccmd.encrypt, "encrypt", false, "Encrypt passwords and cookies (occurs when logging in)")
+	cmd.Flags().BoolVar(&ccmd.noStorage, "noStorage", false, "Don't store any passwords or tokens in the session file")
+	cmd.Flags().BoolVar(&ccmd.encrypt, "encrypt", false, "Encrypt passwords and tokens (occurs when logging in)")
 
 	// Required flags
 	_ = cmd.MarkFlagRequired("host")
@@ -186,7 +188,7 @@ func (n *CmdCreate) RunE(cmd *cobra.Command, args []string) error {
 	if n.noStorage {
 		settings.Storage = &config.StorageSettings{
 			StorePassword: settings.Bool(false),
-			StoreCookies:  settings.Bool(false),
+			StoreToken:    settings.Bool(false),
 		}
 	}
 
@@ -225,6 +227,7 @@ func (n *CmdCreate) RunE(cmd *cobra.Command, args []string) error {
 
 	if !n.noStorage {
 		session.SetPassword(n.password)
+		session.SetToken(n.token)
 	}
 
 	// session name (default to host and username)

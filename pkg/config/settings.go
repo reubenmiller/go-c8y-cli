@@ -40,9 +40,9 @@ type ModeSettings struct {
 	EnableDelete *bool  `json:"enableDelete,omitempty"`
 }
 
-// StorageSettings storage settings whether cookies and passwords are stored
+// StorageSettings storage settings whether passwords and tokens are stored
 type StorageSettings struct {
-	StoreCookies  *bool `json:"storeCookies,omitempty"`
+	StoreToken    *bool `json:"storeToken,omitempty"`
 	StorePassword *bool `json:"storePassword,omitempty"`
 }
 

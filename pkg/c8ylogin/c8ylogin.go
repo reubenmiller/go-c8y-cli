@@ -62,7 +62,6 @@ type LoginHandler struct {
 	Interactive     bool
 	Err             error
 	TFACode         string
-	Cookies         []*http.Cookie
 	C8Yclient       *c8y.Client
 	LoginOptions    *c8y.TenantLoginOptions
 	state           chan LoginState
@@ -105,7 +104,7 @@ func (lh *LoginHandler) Clear() {
 	}
 	lh.Authorized = false
 	// lh.TFACodeRequired = false
-	lh.C8Yclient.SetCookies([]*http.Cookie{})
+	lh.C8Yclient.SetToken("")
 	lh.onSave()
 	lh.C8Yclient.AuthorizationMethod = c8y.AuthMethodBasic
 	lh.Err = nil
@@ -117,7 +116,7 @@ func (lh *LoginHandler) Run() error {
 	lh.init()
 
 	// Check if any authenitcation is set
-	if len(lh.C8Yclient.Cookies) > 0 || lh.C8Yclient.Password != "" {
+	if lh.C8Yclient.Token != "" || lh.C8Yclient.Password != "" {
 		lh.state <- LoginStateVerify
 	} else {
 		lh.state <- LoginStatePromptPassword
@@ -387,10 +386,9 @@ func (lh *LoginHandler) verify() {
 					lh.TFACodeRequired = true
 					lh.state <- LoginStateNoAuth
 				} else if lh.errorContains(v.Message, "User has been logged out") {
-					// TODO: Invalidate the cookies
-					lh.Logger.Warning("User had been logged out. Clearing cookies and trying again")
+					lh.Logger.Warning("User had been logged out. Clearing token and trying again")
 					lh.state <- LoginStateNoAuth
-					lh.C8Yclient.SetCookies([]*http.Cookie{})
+					lh.C8Yclient.SetToken("")
 					lh.onSave()
 				} else if lh.errorContains(v.Message, "Bad credentials") || lh.errorContains(v.Message, "Invalid credentials") {
 					lh.Logger.Infof("Bad credentials, using auth method: %s", lh.C8Yclient.AuthorizationMethod)

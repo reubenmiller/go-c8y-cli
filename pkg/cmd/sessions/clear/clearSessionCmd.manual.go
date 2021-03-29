@@ -1,10 +1,13 @@
 package clear
 
 import (
+	"strings"
+
 	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmd/subcommand"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmdutil"
 	"github.com/reubenmiller/go-c8y-cli/pkg/completion"
+	"github.com/reubenmiller/go-c8y-cli/pkg/shell"
 	"github.com/reubenmiller/go-c8y-cli/pkg/utilities"
 	"github.com/spf13/cobra"
 )
@@ -41,12 +44,11 @@ $ c8y session clear | source
 	}
 
 	cmd.SilenceUsage = true
-	cmd.Flags().StringVar(&ccmd.Shell, "shell", "bash", "Shell type")
-	_ = cmd.MarkFlagRequired("shell")
+	cmd.Flags().StringVar(&ccmd.Shell, "shell", "auto", "Shell type. Defaults to auto if not printing to terminal")
 
 	completion.WithOptions(
 		cmd,
-		completion.WithValidateSet("shell", "bash", "zsh", "fish", "powershell"),
+		completion.WithValidateSet("shell", "auto", "bash", "zsh", "fish", "powershell"),
 	)
 	ccmd.SubCommand = subcommand.NewSubCommand(cmd)
 
@@ -54,7 +56,10 @@ $ c8y session clear | source
 }
 
 func (n *CmdClearSession) RunE(cmd *cobra.Command, args []string) error {
-	shell := utilities.ShellBash
-	utilities.ClearEnvironmentVariables(shell.FromString(n.Shell))
+	shellType := utilities.ShellBash
+	if strings.EqualFold(n.Shell, "auto") {
+		n.Shell = shell.DetectShell("bash")
+	}
+	utilities.ClearEnvironmentVariables(shellType.FromString(n.Shell))
 	return nil
 }

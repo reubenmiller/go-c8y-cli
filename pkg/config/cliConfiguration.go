@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
-	"net/http"
 	"os"
 	"path"
 	"regexp"
@@ -139,8 +138,8 @@ const (
 	// SettingsJSONFlatten flatten nested json using dot notation
 	SettingsJSONFlatten = "settings.defaults.flatten"
 
-	// SettingsStorageStoreCookies controls if the cookies are saved to the session file or not
-	SettingsStorageStoreCookies = "settings.storage.storeCookies"
+	// SettingsStorageStoreToken controls if the token is saved to the session file or not
+	SettingsStorageStoreToken = "settings.storage.storeToken"
 
 	// SettingsStorageStorePassword controls if the password is saved to the session file or not
 	SettingsStorageStorePassword = "settings.storage.storePassword"
@@ -304,7 +303,7 @@ func (c *Config) bindSettings() {
 		WithBindEnv(SettingsWorkers, 1),
 		WithBindEnv(SettingsIncludeAllPageSize, 2000),
 		WithBindEnv(SettingsStorageStorePassword, true),
-		WithBindEnv(SettingsStorageStoreCookies, true),
+		WithBindEnv(SettingsStorageStoreToken, true),
 		WithBindEnv(SettingsModeConfirmation, "PUT POST DELETE"),
 
 		WithBindEnv(SettingsEncryptionEnabled, false),
@@ -361,12 +360,8 @@ func (c *Config) BindAuthorization() error {
 		"username",
 		"tenant",
 		"password",
+		"token",
 		"credential.totp.secret",
-		"credential.cookies.0",
-		"credential.cookies.1",
-		"credential.cookies.2",
-		"credential.cookies.3",
-		"credential.cookies.4",
 	}
 	for _, name := range auth_variables {
 		if err := c.viper.BindEnv(name); err != nil {
@@ -492,7 +487,7 @@ func (c Config) GetEnvironmentVariables(client *c8y.Client, setPassword bool) ma
 	tenant := c.GetTenant()
 	username := c.GetUsername()
 	password := c.MustGetPassword()
-	cookies := c.GetCookies()
+	token := c.MustGetToken()
 
 	if client != nil {
 		if client.TenantName != "" {
@@ -507,22 +502,24 @@ func (c Config) GetEnvironmentVariables(client *c8y.Client, setPassword bool) ma
 		if client.Password != "" {
 			password = client.Password
 		}
-		if len(client.Cookies) > 0 {
-			cookies = client.Cookies
+		if client.Token != "" {
+			token = client.Token
 		}
 	}
 
 	// hide password if it is not needed
-	if !setPassword && len(cookies) > 0 {
+	if !setPassword && token != "" {
 		password = ""
 	}
 
 	output := map[string]interface{}{
+		"C8Y_SESSION":  c.GetSessionFile(),
 		"C8Y_URL":      host,
 		"C8Y_BASEURL":  host,
 		"C8Y_HOST":     host,
 		"C8Y_TENANT":   tenant,
 		"C8Y_USER":     username,
+		"C8Y_TOKEN":    token,
 		"C8Y_USERNAME": username,
 		"C8Y_PASSWORD": password,
 	}
@@ -536,12 +533,6 @@ func (c Config) GetEnvironmentVariables(client *c8y.Client, setPassword bool) ma
 			output["C8Y_PASSPHRASE_TEXT"] = c.SecretText
 		}
 	}
-
-	// add decrypted cookies
-	for i, cookie := range cookies {
-		output[c.GetEnvKey(fmt.Sprintf("credential.cookies.%d", i))] = fmt.Sprintf("%s=%s", cookie.Name, cookie.Value)
-	}
-
 	return output
 }
 
@@ -550,52 +541,21 @@ func (c Config) GetEnvKey(key string) string {
 	return "C8Y_" + strings.ToUpper(strings.ReplaceAll(key, ".", "_"))
 }
 
-// GetCookies gets the cookies stored in the configuration
-func (c Config) GetCookies() []*http.Cookie {
-	cookies := make([]*http.Cookie, 0)
-	for i := 0; i < 5; i++ {
-		cookieValue := c.viper.GetString(fmt.Sprintf("credential.cookies.%d", i))
+var SettingsToken = "token"
 
-		if cookieValue == "" {
-			cookieValue = c.Persistent.GetString(fmt.Sprintf("credential.cookies.%d", i))
-		}
+// GetToken return the decrypted token from the current session
+func (c *Config) GetToken() (string, error) {
+	value := c.viper.GetString(SettingsToken)
 
-		if cookieValue == "" {
-			break
-		}
-
-		if v, err := c.DecryptString(cookieValue); err == nil {
-			cookieValue = v
-		} else {
-			c.Logger.Warningf("Could not decrypt cookie. %s", err)
-			continue
-		}
-
-		cookie := newCookie(cookieValue)
-		if cookies != nil {
-			cookies = append(cookies, cookie)
-		}
-	}
-	return cookies
-}
-
-func newCookie(raw string) *http.Cookie {
-	parts := strings.SplitN(raw, "=", 2)
-	if len(parts) != 2 {
-		return nil
+	if value == "" {
+		value = c.Persistent.GetString(SettingsToken)
 	}
 
-	valueParts := strings.SplitN(strings.TrimSpace(parts[1]), ";", 2)
-
-	if len(valueParts) == 0 {
-		return nil
+	decryptedValue, err := c.DecryptString(value)
+	if err != nil {
+		return value, err
 	}
-
-	return &http.Cookie{
-		Name:  parts[0],
-		Value: valueParts[0],
-		Raw:   raw,
-	}
+	return decryptedValue, nil
 }
 
 // DebugViper debug viper configuration
@@ -666,27 +626,6 @@ func (c *Config) WritePersistentConfig() error {
 	return c.Persistent.WriteConfig()
 }
 
-// SetAuthorizationCookies saves the authorization cookies
-func (c *Config) SetAuthorizationCookies(cookies []*http.Cookie) {
-	encryptedCookies := make(map[string]string)
-	var err error
-
-	for i, cookie := range cookies {
-		c.Persistent.Set(fmt.Sprintf("credential.cookies.%d", i), "cookie")
-
-		cookieData := cookie.Raw
-		if c.IsEncryptionEnabled() {
-			cookieData, err = c.SecureData.EncryptString(cookie.Raw, c.Passphrase)
-			if err != nil {
-				continue
-			}
-		}
-
-		encryptedCookies[fmt.Sprintf("%d", i)] = cookieData
-	}
-	c.Persistent.Set("credential.cookies", encryptedCookies)
-}
-
 // GetPassword returns the decrypted password of the current session
 func (c *Config) GetPassword() (string, error) {
 	value := c.viper.GetString("password")
@@ -706,7 +645,8 @@ func (c *Config) GetPassword() (string, error) {
 // If the password is empty then treat it as encrypted
 func (c *Config) IsPasswordEncrypted() bool {
 	password := c.viper.GetString("password")
-	return password == "" || c.SecureData.IsEncrypted(password) == 1
+	return password != "" && c.SecureData.IsEncrypted(password) == 1
+	// return password == "" || c.SecureData.IsEncrypted(password) == 1
 }
 
 // MustGetPassword returns the decrypted password if there are no encryption errors, otherwise it will return an encrypted password
@@ -718,9 +658,23 @@ func (c *Config) MustGetPassword() string {
 	return decryptedValue
 }
 
+// MustGetToken returns the decrypted token if there are no encryption errors, otherwise it will return an encrypted value
+func (c *Config) MustGetToken() string {
+	decryptedValue, err := c.GetToken()
+	if err != nil {
+		c.Logger.Warningf("Could not decrypt token. %s", err)
+	}
+	return decryptedValue
+}
+
 // SetPassword sets the password
 func (c *Config) SetPassword(p string) {
 	c.Persistent.Set("password", p)
+}
+
+// SetToken sets the token used for OAUTH authentication
+func (c *Config) SetToken(p string) {
+	c.Persistent.Set(SettingsToken, p)
 }
 
 // SetTenant sets the tenant name
@@ -762,7 +716,7 @@ func (c *Config) bindEnv(name string, defaultValue interface{}) error {
 // DecryptSession decrypts a session (as long as the encryption passphrase has already been provided)
 func (c *Config) DecryptSession() error {
 	c.SetPassword(c.MustGetPassword())
-	c.SetAuthorizationCookies(c.GetCookies())
+	c.SetToken(c.MustGetToken())
 	return c.WritePersistentConfig()
 }
 
@@ -942,9 +896,9 @@ func (c *Config) ConfirmText() string {
 	return c.viper.GetString(SettingsConfirmText)
 }
 
-// StoreCookies controls if the cookies are saved to the session file or not
-func (c *Config) StoreCookies() bool {
-	return c.viper.GetBool(SettingsStorageStoreCookies)
+// StoreToken controls if the tokens are saved to the session file or not
+func (c *Config) StoreToken() bool {
+	return c.viper.GetBool(SettingsStorageStoreToken)
 }
 
 // StorePassword controls if the password is saved to the session file or not
@@ -1141,8 +1095,9 @@ func (c *Config) SaveClientConfig(client *c8y.Client) error {
 	if c.StorePassword() {
 		c.SetPassword(client.Password)
 	}
-	if c.StoreCookies() {
-		c.SetAuthorizationCookies(client.Cookies)
+
+	if c.StoreToken() {
+		c.SetToken(client.Token)
 	}
 	c.SetTenant(client.TenantName)
 	return c.WritePersistentConfig()
@@ -1226,30 +1181,56 @@ func (c *Config) LogErrorF(err error, format string, args ...interface{}) {
 	errorLogger(format, args...)
 }
 
+func (c *Config) SetSessionFile(path string) {
+	if _, fileErr := os.Stat(path); fileErr != nil {
+		home := c.GetSessionHomeDir()
+		c.Logger.Debugf("Resolving session %s in %s", path, home)
+		matches, err := pathresolver.ResolvePaths(home, path, "json", "ignore")
+		if err != nil {
+			c.Logger.Warnf("Failed to find session. %s", err)
+		}
+		if len(matches) > 0 {
+			path = matches[0]
+			c.Logger.Debugf("Resolved session. %s", path)
+		}
+	}
+	c.sessionFile = c.ExpandHomePath(path)
+}
+
 // GetSessionFile detect the session file path
-func (c *Config) GetSessionFile() string {
-	sessionFile := c.viper.GetString(SettingsSessionFile)
-	if c.sessionFile != "" && sessionFile == c.sessionFile {
+func (c *Config) GetSessionFile(overrideSession ...string) string {
+	var sessionFile string
+
+	if len(overrideSession) > 0 {
+		sessionFile = overrideSession[0]
+	}
+
+	if sessionFile == "" && c.sessionFile != "" {
 		return c.sessionFile
+	}
+
+	if sessionFile == "" {
+		sessionFile = c.viper.GetString(SettingsSessionFile)
 	}
 
 	if sessionFile == "" {
 		// TODO: Create viper env alias rather than checking it manually
 		sessionFile = os.Getenv("C8Y_SESSION")
-	} else {
-		if _, fileErr := os.Stat(sessionFile); fileErr != nil {
-			home := c.GetSessionHomeDir()
-			c.Logger.Debugf("Resolving session %s in %s", sessionFile, home)
-			matches, err := pathresolver.ResolvePaths(home, sessionFile, "json", "ignore")
-			if err != nil {
-				c.Logger.Warnf("Failed to find session. %s", err)
-			}
-			if len(matches) > 0 {
-				sessionFile = matches[0]
-				c.Logger.Debugf("Resolved session. %s", sessionFile)
-			}
+	}
+
+	if _, fileErr := os.Stat(sessionFile); fileErr != nil {
+		home := c.GetSessionHomeDir()
+		c.Logger.Debugf("Resolving session %s in %s", sessionFile, home)
+		matches, err := pathresolver.ResolvePaths(home, sessionFile, "json", "ignore")
+		if err != nil {
+			c.Logger.Warnf("Failed to find session. %s", err)
+		}
+		if len(matches) > 0 {
+			sessionFile = matches[0]
+			c.Logger.Debugf("Resolved session. %s", sessionFile)
 		}
 	}
+
 	c.sessionFile = c.ExpandHomePath(sessionFile)
 	return c.sessionFile
 }
@@ -1267,7 +1248,7 @@ func (c *Config) ReadConfigFiles(client *c8y.Client) (path string, err error) {
 	v.AddConfigPath(".")
 	v.AddConfigPath(home)
 
-	sessionFile := c.GetSessionFile()
+	sessionFile := c.GetSessionFile("")
 
 	// Load (non-session) preferences
 	v.SetConfigName(SettingsGlobalName)

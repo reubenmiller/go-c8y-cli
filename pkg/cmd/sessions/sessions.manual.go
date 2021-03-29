@@ -7,7 +7,7 @@ import (
 	encryptCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/sessions/encrypttext"
 	getCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/sessions/get"
 	listCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/sessions/list"
-	loginCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/sessions/login"
+	setCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/sessions/set"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmd/subcommand"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmdutil"
 	"github.com/spf13/cobra"
@@ -33,7 +33,7 @@ func NewSubCommand(f *cmdutil.Factory) *sessionsCmd {
 	cmd.AddCommand(cmdutil.DisableAuthCheck(decryptCmd.NewCmdDecryptText(f).GetCommand()))
 	cmd.AddCommand(cmdutil.DisableAuthCheck(encryptCmd.NewCmdEncryptText(f).GetCommand()))
 	cmd.AddCommand(cmdutil.DisableAuthCheck(listCmd.NewCmdList(f).GetCommand()))
-	cmd.AddCommand(cmdutil.DisableAuthCheck(loginCmd.NewCmdLogin(f).GetCommand()))
+	cmd.AddCommand(cmdutil.DisableAuthCheck(setCmd.NewCmdSet(f).GetCommand()))
 
 	ccmd.SubCommand = subcommand.NewSubCommand(cmd)
 

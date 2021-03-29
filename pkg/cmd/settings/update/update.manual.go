@@ -12,6 +12,7 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmdutil"
 	"github.com/reubenmiller/go-c8y-cli/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/pkg/config"
+	"github.com/reubenmiller/go-c8y-cli/pkg/shell"
 	"github.com/reubenmiller/go-c8y-cli/pkg/utilities"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -122,7 +123,7 @@ var updateSettingsOptions = map[string]argumentHandler{
 		"true",
 		"false",
 	}, nil, cobra.ShellCompDirectiveNoFileComp},
-	"storage.storeCookies": {"storage.storeCookies", "bool", config.SettingsStorageStoreCookies, []string{
+	"storage.storeToken": {"storage.storeToken", "bool", config.SettingsStorageStoreToken, []string{
 		"true",
 		"false",
 	}, nil, cobra.ShellCompDirectiveNoFileComp},
@@ -284,7 +285,7 @@ func NewCmdUpdate(f *cmdutil.Factory) *UpdateSettingsCmd {
 
 	completion.WithOptions(
 		cmd,
-		completion.WithValidateSet("shell", "bash", "fish", "powershell", "zsh"),
+		completion.WithValidateSet("shell", "auto", "bash", "fish", "powershell", "zsh"),
 	)
 
 	cmd.SilenceUsage = true
@@ -314,6 +315,9 @@ func (n *UpdateSettingsCmd) RunE(cmd *cobra.Command, args []string) error {
 			return err
 		}
 	} else if n.shell != "" {
+		if strings.EqualFold(n.shell, "auto") {
+			n.shell = shell.DetectShell("bash")
+		}
 		v = viper.New()
 		writeToFile = false
 	} else {

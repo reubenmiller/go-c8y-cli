@@ -21,7 +21,7 @@ func WithSessionFile(flagName string, pathFunc func() string) Option {
 			if err != nil {
 				return []string{"json"}, cobra.ShellCompDirectiveFilterFileExt
 			}
-			return matches, cobra.ShellCompDirectiveDefault
+			return matches, cobra.ShellCompDirectiveNoSpace
 		})
 		return cmd
 	}

@@ -101,15 +101,11 @@ func ClearEnvironmentVariables(shell ShellType) {
 		"C8Y_USER",
 		"C8Y_USERNAME",
 		"C8Y_PASSWORD",
+		"C8Y_TOKEN",
 		"C8Y_SESSION",
 		"C8Y_SETTINGS_MODE_ENABLECREATE",
 		"C8Y_SETTINGS_MODE_ENABLEUPDATE",
 		"C8Y_SETTINGS_MODE_ENABLEDELETE",
-		"C8Y_CREDENTIAL_COOKIES_0",
-		"C8Y_CREDENTIAL_COOKIES_1",
-		"C8Y_CREDENTIAL_COOKIES_2",
-		"C8Y_CREDENTIAL_COOKIES_3",
-		"C8Y_CREDENTIAL_COOKIES_4",
 	}
 
 	sort.Strings(variables)
@@ -147,13 +143,17 @@ func CheckEncryption(w io.Writer, cfg *config.Config, client *c8y.Client) error 
 		}
 		cfg.Passphrase = passphrase
 
-		// Decrypt username and cookies if necessary
+		// Decrypt username and token if necessary
 		clientpass, err := cfg.GetPassword()
 		if err != nil {
 			return err
 		}
-		client.SetCookies(cfg.GetCookies())
 		client.Password = clientpass
+		clienttoken, err := cfg.GetToken()
+		if err != nil {
+			return err
+		}
+		client.SetToken(clienttoken)
 
 		// decrypt settings
 		if decryptSession {
