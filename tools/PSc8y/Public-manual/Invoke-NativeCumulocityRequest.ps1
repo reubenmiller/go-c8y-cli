@@ -4,6 +4,7 @@ Function Invoke-NativeCumulocityRequest {
         ConfirmImpact = "High"
     )]
     Param(
+        [Alias("Url")]
         [Parameter(
             Mandatory = $true,
             Position = 0
@@ -37,15 +38,8 @@ Function Invoke-NativeCumulocityRequest {
             $Allheaders = @{} + $Headers
         }
 
-        $AllCookies = get-item "Env:\C8Y_CREDENTIAL_COOKIES*"
-
-        if ($AllCookies.Count -gt 0) {
-            foreach ($iCookie in $AllCookies) {
-                $parts = $iCookie.Value -Split "=", 2 | Where-Object { $_ }
-                if ($parts.Count -eq 2) {
-                    $Allheaders[$parts[0].ToUpper()] = $parts[1]
-                }
-            }
+        if ($Env:C8Y_TOKEN) {
+            $AllHeaders.Authorization = "Bearer " + $env:C8Y_TOKEN
         } else {
             $AllHeaders.Authorization = "Basic " + (ConvertTo-Base64String ("{0}/{1}:{2}" -f $env:C8Y_TENANT, $env:C8Y_USERNAME, $env:C8Y_PASSWORD))
         }

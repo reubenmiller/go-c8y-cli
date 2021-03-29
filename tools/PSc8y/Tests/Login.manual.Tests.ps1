@@ -48,7 +48,7 @@ Describe -Tag "Session" -Name "Login and Session Tests" {
         $LASTEXITCODE | Should -Not -BeExactly 0
     }
 
-    It -Skip "Uses encryption to store passwords and authorization cookies" {
+    It -Skip "Uses encryption to store passwords and authorization token" {
 
     }
 
@@ -103,12 +103,8 @@ Describe -Tag "Session" -Name "Login and Session Tests" {
         $SessionAfterLogin.credential | Should -Not -BeNullOrEmpty
 
         # Only if OAUTH2 is being used
-        if ($SessionAfterLogin.credential.cookies.0) {
-            $SessionAfterLogin.credential.cookies.0 | Should -Match "^{encrypted}.+$"
-        }
-
-        if ($SessionAfterLogin.credential.cookies.1) {
-            $SessionAfterLogin.credential.cookies.1 | Should -Match "^{encrypted}.+$"
+        if ($SessionAfterLogin.token) {
+            $SessionAfterLogin.token | Should -Match "^{encrypted}.+$"
         }
 
         $SessionAfterLogin.'$schema' | Should -Match "^https://.+"

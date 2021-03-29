@@ -40,29 +40,11 @@ fi
 #   set-session
 #
 set-session () {
-    if [ $# -gt 0 ]; then
-        resp=$( c8y sessions list --sessionFilter "$1 $2 $3 $4 $5" $SESSION_OPTIONS )
-    else
-        resp=$( c8y sessions list )
-    fi
-
-    if [ $? -ne 0 ]; then
-        echo "Set session aborted"
-        return
-    fi
-
-    # clear session before settings new one as stale env variables can cause problems
-    clear-session
-    export C8Y_SESSION=$resp
-
-    # Export session as individual settings
-    # to support other 3rd party applicatsion (i.e. java c8y sdk apps)
-    # which will read these variables
-    # login / test session credentials
-    c8yenv=$( c8y sessions login --env $SESSION_OPTIONS --shell bash )
-    if [ $? -ne 0 ]; then
-        echo "Login using session failed"
-        (exit 3)
+    c8yenv=$( c8y sessions set $@ )
+    code=$?
+    if [ $code -ne 0 ]; then
+        echo "Set session failed"
+        (exit $code)
         return
     fi
     eval $c8yenv
@@ -76,7 +58,7 @@ set-session () {
 #   clear-session
 #
 clear-session () {
-    source <(c8y sessions clear --shell bash)
+    source <(c8y sessions clear)
 }
 
 # -----------
@@ -101,7 +83,7 @@ clear-c8ypassphrase () {
 #   set-c8ymode-prod    (disable PUT, POST and DELETE)
 #
 set-c8ymode () {
-    source <(c8y settings update --shell $C8Y_SHELL mode $1);
+    source <(c8y settings update --shell auto mode $1);
     echo -e "\e[32mEnabled $1 mode (temporarily)\e[0m";
 }
 set-c8ymode-dev () { set-c8ymode dev; }

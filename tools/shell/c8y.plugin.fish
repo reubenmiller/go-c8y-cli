@@ -23,26 +23,12 @@ end
 #   set-session
 #
 function set-session --description "Switch Cumulocity session interactively"
-    if test (count $argv) -gt 0
-        set resp ( c8y sessions list --sessionFilter "$argv" $SESSION_OPTIONS )
-    else
-        set resp ( c8y sessions list )
-    end
-
+    set c8yenv ( c8y sessions set --noColor=false $argv )
     if test $status -ne 0
-        echo "Set session aborted"
+        echo "Set session failed"
         return
     end
-
-    # clear session before settings new one as stale env variables can cause problems
-    clear-session
-    set -gx C8Y_SESSION "$resp"
-
-    # Export session as individual settings
-    # to support other 3rd party applicatsion (i.e. java c8y sdk apps)
-    # which will read these variables
-    # login / test session credentials
-    c8y sessions login --noColor=false --env $SESSION_OPTIONS --shell fish | source
+    echo $c8yenv | source
 end
 
 # -----------
@@ -53,7 +39,7 @@ end
 #   clear-session
 #
 function clear-session --description "Clear all cumulocity session variables"
-    c8y sessions clear --shell fish | source
+    c8y sessions clear | source
 end
 
 # -----------
@@ -78,7 +64,7 @@ end
 #   set-c8ymode-prod    (disable PUT, POST and DELETE)
 #
 function set-c8ymode --description "Enable a c8y temporary mode by setting the environment variables"
-    c8y settings update --shell fish mode $argv[1] | source
+    c8y settings update --shell auto mode $argv[1] | source
     echo (set_color green)"Enabled "$argv[1]" mode (temporarily)"(set_color normal)
 end
 

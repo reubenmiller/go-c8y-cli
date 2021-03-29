@@ -6,10 +6,6 @@
             "type": "integer",
             "minimum": 1,
             "maximum": 2000
-        },
-        "cookieProperty": {
-            "type": "string",
-            "description": "Cookies value in the form of key=value"
         }
     },
     "properties":{
@@ -33,38 +29,16 @@
             "description": "Cumulocity password",
             "type": "string"
         },
+        "token": {
+            "title": "Cumulocity token",
+            "description": "Cumulocity token",
+            "type": "string"
+        },
         "credential": {
             "title": "Credential settings",
             "description": "Cumulocity username, without tenant prefix!",
             "type": "object",
             "properties": {
-                "cookies": {
-                    "description": "Cookies which should be added to each outgoing request. Cookies are ordered sorted by their index/key",
-                    "type": "object",
-                    "properties": {
-                        "0": {
-                            "$ref": "#/definitions/cookieProperty"
-                        },
-                        "1": {
-                            "$ref": "#/definitions/cookieProperty"
-                        },
-                        "2": {
-                            "$ref": "#/definitions/cookieProperty"
-                        },
-                        "3": {
-                            "$ref": "#/definitions/cookieProperty"
-                        },
-                        "4": {
-                            "$ref": "#/definitions/cookieProperty"
-                        },
-                        "5": {
-                            "$ref": "#/definitions/cookieProperty"
-                        }
-                    },
-                    "items": {
-                        "type": "string"
-                    }
-                },
                 "loginType": {
                     "type": "string",
                     "description": "Login option type",
@@ -143,8 +117,8 @@
                             "type": "boolean",
                             "default": "true"
                         },
-                        "storeCookies": {
-                            "title": "Store the session cookies to file. Enabled by default",
+                        "storeToken": {
+                            "title": "Store the session token to file. Enabled by default",
                             "type": "boolean",
                             "default": "true"
                         }
