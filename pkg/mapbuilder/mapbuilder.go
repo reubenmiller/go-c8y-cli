@@ -14,9 +14,11 @@ import (
 	"time"
 
 	"github.com/google/go-jsonnet"
+	"github.com/google/go-jsonnet/ast"
 	"github.com/reubenmiller/go-c8y-cli/pkg/iterator"
 	"github.com/reubenmiller/go-c8y-cli/pkg/logger"
-	"github.com/sethvargo/go-password/password"
+	"github.com/reubenmiller/go-c8y-cli/pkg/randdata"
+	"github.com/reubenmiller/go-c8y-cli/pkg/timestamp"
 	"github.com/tidwall/gjson"
 	"go.uber.org/zap/zapcore"
 )
@@ -37,33 +39,155 @@ func init() {
 	})
 }
 
+func registerNativeFuntions(vm *jsonnet.VM) {
+	vm.NativeFunction(&jsonnet.NativeFunction{
+		Name:   "Name",
+		Params: ast.Identifiers{"prefix", "postfix"},
+		Func: func(parameters []interface{}) (interface{}, error) {
+			if len(parameters) == 0 {
+				return randdata.Name(), nil
+			}
+			if len(parameters) == 1 {
+				return randdata.Name(parameters[0].(string)), nil
+			}
+			if len(parameters) > 1 {
+				return randdata.Name(parameters[0].(string), parameters[1].(string)), nil
+			}
+			return randdata.Name(), nil
+		},
+	})
+
+	vm.NativeFunction(&jsonnet.NativeFunction{
+		Name:   "Password",
+		Params: ast.Identifiers{},
+		Func: func(parameters []interface{}) (interface{}, error) {
+			return randdata.Password(), nil
+		},
+	})
+
+	vm.NativeFunction(&jsonnet.NativeFunction{
+		Name:   "Bool",
+		Params: ast.Identifiers{},
+		Func: func(parameters []interface{}) (interface{}, error) {
+			return randdata.Bool(), nil
+		},
+	})
+
+	vm.NativeFunction(&jsonnet.NativeFunction{
+		Name:   "Int",
+		Params: ast.Identifiers{"maximum"},
+		Func: func(parameters []interface{}) (interface{}, error) {
+			max := getIntParameter(parameters)
+			return float64(randdata.Integer(max)), nil
+		},
+	})
+
+	vm.NativeFunction(&jsonnet.NativeFunction{
+		Name:   "Float",
+		Params: ast.Identifiers{},
+		Func: func(parameters []interface{}) (interface{}, error) {
+			return randdata.Float(), nil
+		},
+	})
+
+	vm.NativeFunction(&jsonnet.NativeFunction{
+		Name:   "Char",
+		Params: ast.Identifiers{"maximum"},
+		Func: func(parameters []interface{}) (interface{}, error) {
+			max := getIntParameter(parameters)
+			return randdata.Char(int(max)), nil
+		},
+	})
+
+	vm.NativeFunction(&jsonnet.NativeFunction{
+		Name:   "Digit",
+		Params: ast.Identifiers{"maximum"},
+		Func: func(parameters []interface{}) (interface{}, error) {
+			max := getIntParameter(parameters)
+			return randdata.Digit(int(max)), nil
+		},
+	})
+
+	vm.NativeFunction(&jsonnet.NativeFunction{
+		Name:   "AlphaNumeric",
+		Params: ast.Identifiers{"maximum"},
+		Func: func(parameters []interface{}) (interface{}, error) {
+			max := getIntParameter(parameters)
+			return randdata.AlphaNumeric(int(max)), nil
+		},
+	})
+
+	vm.NativeFunction(&jsonnet.NativeFunction{
+		Name:   "Hex",
+		Params: ast.Identifiers{"maximum"},
+		Func: func(parameters []interface{}) (interface{}, error) {
+			max := getIntParameter(parameters)
+			return randdata.Hex(int(max)), nil
+		},
+	})
+
+	vm.NativeFunction(&jsonnet.NativeFunction{
+		Name:   "Now",
+		Params: ast.Identifiers{"offset"},
+		Func: func(parameters []interface{}) (interface{}, error) {
+
+			d, err := timestamp.ParseDurationRelativeToNow(getStringParameter(parameters))
+			if err != nil {
+				return nil, err
+			}
+			return d.Format(time.RFC3339), nil
+		},
+	})
+
+	vm.NativeFunction(&jsonnet.NativeFunction{
+		Name:   "NowNano",
+		Params: ast.Identifiers{"offset"},
+		Func: func(parameters []interface{}) (interface{}, error) {
+
+			d, err := timestamp.ParseDurationRelativeToNow(getStringParameter(parameters))
+			if err != nil {
+				return nil, err
+			}
+			return d.Format(time.RFC3339Nano), nil
+		},
+	})
+}
+
+func getIntParameter(parameters []interface{}) int64 {
+	if len(parameters) > 0 {
+		maximum, err := strconv.ParseInt(fmt.Sprintf("%v", parameters[0]), 10, 64)
+
+		if err != nil {
+			return 0
+		}
+		return maximum
+	}
+	return 0
+}
+
+func getStringParameter(parameters []interface{}) string {
+	if len(parameters) > 0 {
+		return fmt.Sprintf("%v", parameters[0])
+	}
+	return ""
+}
+
 func evaluateJsonnet(imports string, snippets ...string) (string, error) {
 	// Create a JSonnet VM
 	vm := jsonnet.MakeVM()
+	registerNativeFuntions(vm)
 
-	jsonnetImport := imports
+	jsonnetImport := "\n" + `local _ = {Name: std.native("Name"),Password: std.native("Password"),Now: std.native("Now"),NowNano: std.native("NowNano"),Bool: std.native("Bool"),Float: std.native("Float"),Int: std.native("Int"),Hex: std.native("Hex"),Char: std.native("Char"),Digit: std.native("Digit"),AlphaNumeric: std.native("AlphaNumeric")};` + imports
 
 	jsonnetImport += `
-// body
+// output
 `
 
-	// base = strings.TrimSpace(base)
-
-	// // Add closing ";" if required
-	// if strings.HasSuffix(base, "}") {
-	// 	base = base + ";"
-	// }
-
-	// jsonnetImport += "\nlocal base = " + base
-
-	// jsonnetImport += "\nlocal final = "
 	if len(snippets) > 0 {
 		jsonnetImport += strings.Join(snippets, " +\n")
 	} else {
 		jsonnetImport += "{}"
 	}
-
-	// jsonnetImport += "\nfinal"
 
 	debugJsonnet := strings.EqualFold(os.Getenv("C8Y_JSONNET_DEBUG"), "true")
 
@@ -218,22 +342,6 @@ func (b *MapBuilder) SetTemplateVariables(variables map[string]interface{}) {
 	b.templateVariables = variables
 }
 
-func generatePassword() string {
-	passwordGen, err := password.NewGenerator(&password.GeneratorInput{
-		Symbols: "!@#%^()[]*+-_;,.",
-	})
-
-	if err != nil {
-		return ""
-	}
-
-	if res, err := passwordGen.Generate(32, 2, 2, false, false); err == nil {
-		return res
-	}
-
-	return ""
-}
-
 func (b *MapBuilder) getTemplateVariablesJsonnet(existingJSON []byte, input []byte) (string, error) {
 	jsonStr := []byte("{}")
 	// default to empty object (if no custom template variables are provided)
@@ -258,7 +366,7 @@ func (b *MapBuilder) getTemplateVariablesJsonnet(existingJSON []byte, input []by
 		rand.Float32(),
 		rand.Float32(),
 		rand.Float32(),
-		generatePassword(),
+		randdata.Password(),
 	)
 
 	index := "1"
