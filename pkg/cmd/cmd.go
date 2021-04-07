@@ -265,7 +265,13 @@ func Initialize() (*root.CmdRoot, error) {
 	}
 	cmdFactory := factory.New(buildVersion, buildBranch, configFunc, clientFunc, loggerFunc, activityLoggerFunc, dataViewFunc, consoleFunc)
 	rootCmd := root.NewCmdRoot(cmdFactory, buildVersion, "")
-	consoleHandler = console.NewConsole(rootCmd.OutOrStdout(), func(s []string) []byte {
+
+	tableOptions := &console.TableOptions{
+		MinColumnWidth: configHandler.ViewColumnMinWidth(),
+		MaxColumnWidth: configHandler.ViewColumnMaxWidth(),
+		ColumnPadding:  configHandler.ViewColumnPadding(),
+	}
+	consoleHandler = console.NewConsole(rootCmd.OutOrStdout(), tableOptions, func(s []string) []byte {
 		return getOutputHeaders(consoleHandler, configHandler, s)
 	})
 

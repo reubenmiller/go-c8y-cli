@@ -28,16 +28,36 @@ type Console struct {
 	TableViewer *tableviewer.TableView
 }
 
+// TableOptions table options to control the column behaviour
+type TableOptions struct {
+	// MinColumnWidth minimum column width
+	MinColumnWidth int
+
+	// MaxColumnWidth maximum column width
+	MaxColumnWidth int
+
+	// ColumnPadding column padding
+	ColumnPadding int
+}
+
 // NewConsole create a new console writter
-func NewConsole(w io.Writer, header func([]string) []byte) *Console {
+func NewConsole(w io.Writer, tableOptions *TableOptions, header func([]string) []byte) *Console {
+	minColumnWidth := 2
+	maxColumnWidth := 80
+	columnPadding := 15
+	if tableOptions != nil {
+		minColumnWidth = tableOptions.MinColumnWidth
+		maxColumnWidth = tableOptions.MaxColumnWidth
+		columnPadding = tableOptions.ColumnPadding
+	}
 	return &Console{
 		out:    w,
 		header: header,
 		TableViewer: &tableviewer.TableView{
 			Out:            w,
-			MinColumnWidth: 2,
-			MaxColumnWidth: 80,
-			ColumnPadding:  5,
+			MinColumnWidth: minColumnWidth,
+			MaxColumnWidth: maxColumnWidth,
+			ColumnPadding:  columnPadding,
 			EnableColor:    false,
 		},
 		Format: config.OutputTable,

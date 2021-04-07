@@ -218,6 +218,15 @@ const (
 
 	// SettingsCommonAliases list of common aliases which are usually kept in the global configuration and shared amongst sessions
 	SettingsCommonAliases = "settings.commonAliases"
+
+	// SettingsViewMinColumnWidth minimum column width in characters
+	SettingsViewMinColumnWidth = "settings.views.columnMinWidth"
+
+	// SettingsViewMaxColumnWidth maximum column width in characters
+	SettingsViewMaxColumnWidth = "settings.views.columnMaxWidth"
+
+	// SettingsViewColumnPadding column padding
+	SettingsViewColumnPadding = "settings.views.columnPadding"
 )
 
 var (
@@ -320,6 +329,10 @@ func (c *Config) bindSettings() {
 		WithBindEnv(SettingsConfigPath, ""),
 		WithBindEnv(SettingsViewsCommonPaths, ""),
 		WithBindEnv(SettingsViewsCustomPaths, ""),
+
+		WithBindEnv(SettingsViewMinColumnWidth, 2),
+		WithBindEnv(SettingsViewMaxColumnWidth, 80),
+		WithBindEnv(SettingsViewColumnPadding, 15),
 	)
 
 	if err != nil {
@@ -920,6 +933,21 @@ func (c *Config) AbortOnErrorCount() int {
 // ViewOption controls whether views are applied the output or not
 func (c *Config) ViewOption() string {
 	return c.viper.GetString(SettingsViewOption)
+}
+
+// ViewColumnMinWidth minimum column width in characters
+func (c *Config) ViewColumnMinWidth() int {
+	return c.viper.GetInt(SettingsViewMinColumnWidth)
+}
+
+// ViewColumnMinWidth maximum column width in characters
+func (c *Config) ViewColumnMaxWidth() int {
+	return c.viper.GetInt(SettingsViewMaxColumnWidth)
+}
+
+// ViewColumnPadding column padding
+func (c *Config) ViewColumnPadding() int {
+	return c.viper.GetInt(SettingsViewColumnPadding)
 }
 
 // RequestTimeout timeout in seconds use when sending requests
