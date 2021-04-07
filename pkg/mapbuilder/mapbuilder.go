@@ -406,7 +406,7 @@ func (b *MapBuilder) getTemplateVariablesJsonnet(existingJSON []byte, input []by
 	}
 
 	// add external input to input.value
-	externalInput := "{}"
+	externalInput := "{value: null}"
 	input = bytes.TrimSpace(input)
 	if len(input) > 0 {
 		if bytes.HasPrefix(input, []byte("{")) && bytes.HasSuffix(input, []byte("}")) {
