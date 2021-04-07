@@ -3,6 +3,7 @@ package login
 import (
 	"os"
 	"strings"
+	"time"
 
 	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/reubenmiller/go-c8y-cli/pkg/c8ylogin"
@@ -15,6 +16,7 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/pkg/config"
 	"github.com/reubenmiller/go-c8y-cli/pkg/shell"
 	"github.com/reubenmiller/go-c8y-cli/pkg/utilities"
+	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
 )
 
@@ -76,11 +78,9 @@ func NewCmdSet(f *cmdutil.Factory) *CmdSet {
 	return ccmd
 }
 
-func (n *CmdSet) onSave() {
+func (n *CmdSet) onSave(client *c8y.Client) {
 	cfg, _ := n.factory.Config()
-	client, _ := n.factory.Client()
 	log, _ := n.factory.Logger()
-	log.Debug("Saving session file")
 
 	if err := cfg.SaveClientConfig(client); err != nil {
 		log.Errorf("Saving file error. %s", err)
@@ -97,9 +97,11 @@ func (n *CmdSet) RunE(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	// cmd.Flags().GetString("session")
-	sessionFile := cfg.GetSessionFile()
-	// sessionFile := n.sessionFile
+	sessionFile := ""
+	if cmd.Root().PersistentFlags().Changed("session") {
+		sessionFile = cfg.GetSessionFile()
+	}
+
 	if sessionFile == "" {
 		sessionFile, err = selectsession.SelectSession(cfg, log, strings.Join(append(args, n.sessionFilter), " "))
 
@@ -109,7 +111,6 @@ func (n *CmdSet) RunE(cmd *cobra.Command, args []string) error {
 	}
 	cfg.Logger.Debugf("selected session file: %s", sessionFile)
 	if sessionFile != "" {
-		// os.Clearenv()
 		for _, env := range os.Environ() {
 			if strings.HasPrefix(env, "C8Y") && !strings.HasPrefix(env, "C8Y_PASSPHRASE") && !strings.HasPrefix(env, "C8Y_SESSION_HOME") {
 				parts := strings.SplitN(env, "=", 2)
@@ -118,12 +119,12 @@ func (n *CmdSet) RunE(cmd *cobra.Command, args []string) error {
 				}
 			}
 		}
-		// os.Setenv("C8Y_SESSION", sessionFile)
+
 		cfg.SetSessionFile(sessionFile)
-		_, _ = cfg.ReadConfigFiles(nil)
-		// if err != nil {
-		// 	return err
-		// }
+		_, err = cfg.ReadConfigFiles(nil)
+		if err != nil {
+			return err
+		}
 	}
 
 	n.factory.Config = func() (*config.Config, error) {
@@ -139,7 +140,7 @@ func (n *CmdSet) RunE(cmd *cobra.Command, args []string) error {
 		client.SetToken("")
 	}
 
-	if err := utilities.CheckEncryption(n.SubCommand.GetCommand().ErrOrStderr(), cfg, client); err != nil {
+	if err := utilities.CheckEncryption(n.factory.IOStreams, cfg, client); err != nil {
 		return err
 	}
 
@@ -147,12 +148,20 @@ func (n *CmdSet) RunE(cmd *cobra.Command, args []string) error {
 	if !cfg.IsPasswordEncrypted() {
 		if cfg.EncryptionEnabled() {
 			log.Infof("Password is unencrypted. enforcing encryption")
-			n.onSave()
+			n.onSave(nil)
 		}
 	}
 
-	handler := c8ylogin.NewLoginHandler(client, cmd.ErrOrStderr(), n.onSave)
+	handler := c8ylogin.NewLoginHandler(client, cmd.ErrOrStderr(), func() {
+		n.onSave(client)
+	})
 
+	if n.TFACode == "" {
+		if code, err := cfg.GetTOTP(time.Now()); err == nil {
+			cfg.Logger.Warnf("Setting totp code: %s", code)
+			n.TFACode = code
+		}
+	}
 	handler.TFACode = n.TFACode
 	handler.SetLogger(log)
 	err = handler.Run()
@@ -161,10 +170,9 @@ func (n *CmdSet) RunE(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	// TODO: Persist password and/or tokens if enabled
-	if handler.C8Yclient.TenantName != "" && cfg.GetTenant() != handler.C8Yclient.TenantName {
+	if hasChanged(handler.C8Yclient, cfg) {
 		log.Infof("Saving tenant name")
-		n.onSave()
+		n.onSave(handler.C8Yclient)
 	}
 
 	c8ysession.PrintSessionInfo(n.SubCommand.GetCommand().ErrOrStderr(), client, c8ysession.CumulocitySession{
@@ -183,4 +191,19 @@ func (n *CmdSet) RunE(cmd *cobra.Command, args []string) error {
 	}
 
 	return nil
+}
+
+func hasChanged(client *c8y.Client, cfg *config.Config) bool {
+	if client.TenantName != "" && client.TenantName != cfg.GetTenant() {
+		return true
+	}
+
+	if client.Token != "" && client.Token != cfg.MustGetToken() && cfg.StoreToken() {
+		return true
+	}
+
+	if client.Password != "" && client.Password != cfg.MustGetPassword() && cfg.StorePassword() {
+		return true
+	}
+	return false
 }

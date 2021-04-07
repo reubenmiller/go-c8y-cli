@@ -197,7 +197,7 @@ func NewCmdRoot(f *cmdutil.Factory, version, buildDate string) *CmdRoot {
 		cmd,
 		completion.WithValidateSet("dryFormat", "json", "dump", "curl", "markdown"),
 		completion.WithValidateSet("output", "json", "table", "csv", "csvheader"),
-		completion.WithSessionFile("session", func() string {
+		completion.WithSessionFile("session", config.ConfigExtensions, func() string {
 			cfg, err := ccmd.Factory.Config()
 			if err != nil {
 				return ""

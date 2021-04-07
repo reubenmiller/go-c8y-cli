@@ -20,6 +20,7 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/pkg/logger"
 	"github.com/reubenmiller/go-c8y-cli/pkg/prompt"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 )
 
 func NewCumulocitySessionFromFile(filePath string, log *logger.Logger, cfg *config.Config) (*c8ysession.CumulocitySession, error) {
@@ -27,20 +28,26 @@ func NewCumulocitySessionFromFile(filePath string, log *logger.Logger, cfg *conf
 		Config: cfg,
 		Logger: log,
 	}
-	data, err := ioutil.ReadFile(filePath)
-	if err != nil {
+
+	config := viper.New()
+	config.SetConfigFile(filePath)
+	config.SetConfigType("json")
+	if err := config.ReadInConfig(); err != nil {
 		return nil, err
 	}
-
-	if err := json.Unmarshal(data, &session); err != nil {
-		return nil, err
-	}
-
-	if session == nil {
-		return nil, fmt.Errorf("Session marshalling failed")
-	}
+	session.Schema = config.GetString("$schema")
+	session.Name = config.GetString("name")
+	session.Description = config.GetString("description")
+	session.Host = config.GetString("host")
+	session.Tenant = config.GetString("tenant")
+	session.Username = config.GetString("username")
+	session.Password = config.GetString("password")
+	session.Token = config.GetString("token")
+	session.UseTenantPrefix = config.GetBool("useTenantPrefix")
+	session.MicroserviceAliases = config.GetStringMapString("microserviceAliases")
 
 	session.Path = filePath
+	session.Extension = filepath.Ext(filePath)[1:]
 
 	basename := filepath.Base(filePath)
 	extension := filepath.Ext(basename)

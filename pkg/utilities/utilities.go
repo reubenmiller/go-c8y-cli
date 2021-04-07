@@ -3,15 +3,14 @@ package utilities
 import (
 	"bytes"
 	"fmt"
-	"io"
 	"net/http"
 	"os"
 	"runtime"
 	"sort"
 	"strings"
 
-	"github.com/manifoldco/promptui"
 	"github.com/reubenmiller/go-c8y-cli/pkg/config"
+	"github.com/reubenmiller/go-c8y-cli/pkg/iostreams"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 )
 
@@ -81,11 +80,23 @@ func ShowEnvironmentVariables(config map[string]interface{}, shell ShellType) {
 
 		switch shell {
 		case ShellPowerShell:
-			fmt.Printf("$env:%s = '%v'\n", name, value)
+			if value == "" {
+				fmt.Printf("$env:%s = $null\n", name)
+			} else {
+				fmt.Printf("$env:%s = '%v'\n", name, value)
+			}
 		case ShellFish:
-			fmt.Printf("set -gx %s '%v'\n", name, value)
+			if value == "" {
+				fmt.Printf("set -e %s\n", name)
+			} else {
+				fmt.Printf("set -gx %s '%v'\n", name, value)
+			}
 		default:
-			fmt.Printf("export %s='%v'\n", name, value)
+			if value == "" {
+				fmt.Printf("unset %s\n", name)
+			} else {
+				fmt.Printf("export %s='%v'\n", name, value)
+			}
 		}
 	}
 }
@@ -114,14 +125,14 @@ func ClearEnvironmentVariables(shell ShellType) {
 		case ShellPowerShell:
 			fmt.Printf("$env:%s = $null\n", name)
 		case ShellFish:
-			fmt.Printf("set -u %s\n", name)
+			fmt.Printf("set -e %s\n", name)
 		default:
-			fmt.Printf("export %s=\n", name)
+			fmt.Printf("unset %s\n", name)
 		}
 	}
 }
 
-func CheckEncryption(w io.Writer, cfg *config.Config, client *c8y.Client) error {
+func CheckEncryption(IO *iostreams.IOStreams, cfg *config.Config, client *c8y.Client) error {
 	encryptionEnabled := cfg.IsEncryptionEnabled()
 	decryptSession := false
 	if !encryptionEnabled && cfg.IsPasswordEncrypted() {
@@ -162,8 +173,9 @@ func CheckEncryption(w io.Writer, cfg *config.Config, client *c8y.Client) error 
 			}
 		}
 
-		green := promptui.Styler(promptui.FGGreen)
-		fmt.Fprint(w, green("Passphrase OK\n"))
+		cs := IO.ColorScheme()
+		successMsg := fmt.Sprintf("%s Passphrase OK\n", cs.SuccessIcon())
+		fmt.Fprint(IO.ErrOut, successMsg)
 	}
 	return nil
 }

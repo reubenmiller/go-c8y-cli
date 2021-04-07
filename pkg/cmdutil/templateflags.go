@@ -20,10 +20,10 @@ type TemplatePathResolver struct {
 }
 
 func (t *TemplatePathResolver) Resolve(name string) (string, error) {
-	return matchFilePath(t.Path, name, ".jsonnet", "ignore")
+	return matchFilePath(t.Path, name, []string{".jsonnet"}, "ignore")
 }
 
-func matchFilePath(sourceDir string, pattern string, extension, ignoreDir string) (string, error) {
+func matchFilePath(sourceDir string, pattern string, extensions []string, ignoreDir string) (string, error) {
 	// full path
 	if _, err := os.Stat(pattern); err == nil {
 		return pattern, nil
@@ -41,7 +41,7 @@ func matchFilePath(sourceDir string, pattern string, extension, ignoreDir string
 	}
 
 	// try to resolve path in nested
-	names, err := pathresolver.ResolvePaths(sourceDir, pattern, extension, ignoreDir)
+	names, err := pathresolver.ResolvePaths(sourceDir, pattern, extensions, ignoreDir)
 	if err != nil {
 		return "", err
 	}
@@ -66,7 +66,7 @@ func (f *Factory) WithTemplateFlag(cmd *cobra.Command) flags.Option {
 		_ = cmd.RegisterFlagCompletionFunc(flags.FlagDataTemplateName, func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 			templatePath := cfg.GetTemplatePath()
 
-			matches, err := pathresolver.ResolvePaths(templatePath, "*"+toComplete+"*", ".jsonnet", "ignore")
+			matches, err := pathresolver.ResolvePaths(templatePath, "*"+toComplete+"*", []string{".jsonnet"}, "ignore")
 			for i, match := range matches {
 				matches[i] = filepath.Base(match)
 			}
@@ -83,7 +83,7 @@ func (f *Factory) WithTemplateFlag(cmd *cobra.Command) flags.Option {
 			if err != nil {
 				return nil, cobra.ShellCompDirectiveNoSpace
 			}
-			matches, err := pathresolver.ResolvePaths(templatePath, templateFlag, ".jsonnet", "ignore")
+			matches, err := pathresolver.ResolvePaths(templatePath, templateFlag, []string{".jsonnet"}, "ignore")
 
 			if err != nil {
 				return nil, cobra.ShellCompDirectiveNoSpace

@@ -108,8 +108,8 @@ func SelectSession(cfg *config.Config, log *logger.Logger, filter string) (sessi
 
 	templates := &promptui.SelectTemplates{
 		// Label:    "{{ .Host }}?",
-		Active:   `-> {{ printf "#%02d: %-25s" .Index .Name | cyan }} {{ .Host | hide | magenta }} {{ printf "(%s/" .Tenant | hide | red }}{{ printf "%s)" .Username | hide | red }}`,
-		Inactive: `   {{ printf "#%02d: %-25s" .Index .Name | cyan }} {{ .Host | hide | magenta }} {{ printf "(%s/" .Tenant | hide | red }}{{ printf "%s)" .Username | hide | red }}`,
+		Active:   `▶ {{ printf "#%02d %4s" .Index .Extension | bold }} {{ printf "%-30s" .Name | cyan | bold }} {{ .Host | hide | magenta | bold }} {{ printf "(%s/" .Tenant | hide | red | bold }}{{ printf "%s)" .Username | hide | red | bold }}`,
+		Inactive: `  {{ printf "#%02d %4s" .Index .Extension | faint }} {{ printf "%-30s" .Name | cyan }} {{ .Host | hide | magenta }} {{ printf "(%s/" .Tenant | hide | red }}{{ printf "%s)" .Username | hide | red }}`,
 		Selected: "{{ .Path | hideUser }}",
 		FuncMap:  funcMap,
 		Details: `
@@ -127,6 +127,9 @@ func SelectSession(cfg *config.Config, log *logger.Logger, filter string) (sessi
 	filteredSessions := make([]c8ysession.CumulocitySession, 0)
 	sessionIndex := 1
 	for _, session := range sessions.Sessions {
+		if session.Host == "" && session.Username == "" && session.Tenant == "" {
+			continue
+		}
 		if matchSession(session, filter) {
 			session.Index = sessionIndex
 			filteredSessions = append(filteredSessions, session)

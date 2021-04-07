@@ -8,7 +8,7 @@ import (
 )
 
 // ResolvePaths find matching files within a directory. The filenames ca be filtered by pattern and extension
-func ResolvePaths(sourceDir string, pattern string, extension string, ignoreDir string) ([]string, error) {
+func ResolvePaths(sourceDir string, pattern string, extensions []string, ignoreDir string) ([]string, error) {
 	files := make([]string, 0)
 
 	err := filepath.Walk(sourceDir, func(path string, info os.FileInfo, err error) error {
@@ -22,8 +22,17 @@ func ResolvePaths(sourceDir string, pattern string, extension string, ignoreDir 
 			return filepath.SkipDir
 		}
 
-		if extension != "" && !strings.HasSuffix(path, extension) {
-			return nil
+		if len(extensions) > 0 {
+			extMatch := false
+			for _, extension := range extensions {
+				if extension != "" && strings.HasSuffix(strings.ToLower(path), extension) {
+					extMatch = true
+					break
+				}
+			}
+			if !extMatch {
+				return nil
+			}
 		}
 
 		isMatch := false

@@ -33,9 +33,10 @@ type CumulocitySession struct {
 
 	MicroserviceAliases map[string]string `json:"microserviceAliases,omitempty"`
 
-	Index int    `json:"-"`
-	Path  string `json:"-"`
-	Name  string `json:"-"`
+	Index     int    `json:"-"`
+	Path      string `json:"-"`
+	Extension string `json:"-"`
+	Name      string `json:"-"`
 
 	Logger *logger.Logger `json:"-"`
 	Config *config.Config `json:"-"`
