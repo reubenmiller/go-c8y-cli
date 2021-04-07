@@ -95,6 +95,7 @@ func (n *CmdExecute) newTemplate(cmd *cobra.Command, args []string) error {
 		return cmderrors.NewUserError(err)
 	}
 
+	bounded := inputIterators.Total > 0
 	for {
 		responseText, err := body.MarshalJSON()
 		if err != nil {
@@ -117,6 +118,10 @@ func (n *CmdExecute) newTemplate(cmd *cobra.Command, args []string) error {
 			}
 		} else {
 			fmt.Printf("%s%s", bytes.TrimSpace(responseText), outputEnding)
+		}
+
+		if !bounded {
+			break
 		}
 	}
 
