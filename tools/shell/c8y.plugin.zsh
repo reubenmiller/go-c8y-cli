@@ -66,7 +66,7 @@ init-c8y
 #   set-session
 #
 set-session () {
-    c8yenv=$( c8y sessions set $@ )
+    c8yenv=$( c8y sessions set --noColor=false $@ )
     code=$?
     if [ $code -ne 0 ]; then
         echo "Set session failed"
