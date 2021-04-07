@@ -5,7 +5,7 @@
 #
 $HomePath = Get-SessionHomePath
 
-if (!(Test-Path $HomePath)) {
+if ($HomePath -and !(Test-Path $HomePath)) {
     Write-Host "Creating home directory [$HomePath]"
     $null = New-Item -Path $HomePath -ItemType Directory
 }
@@ -27,6 +27,9 @@ Set-Alias -Name "c8y" -Value (Get-ClientBinary) -Scope "Global"
 
 # Load c8y completions for powershell
 c8y completion powershell | Out-String | Invoke-Expression
+
+# Session
+Register-ArgumentCompleter -CommandName "Set-Session" -ParameterName Session -ScriptBlock $script:CompletionSession
 
 # Set environment variables if a session is set via the C8Y_SESSION env variable
 $ExistingSession = Get-Session -WarningAction SilentlyContinue -ErrorAction SilentlyContinue

@@ -307,6 +307,7 @@ FunctionsToExport = @(
 	'New-RandomString',
 	'New-ServiceUser',
 	'New-Session',
+	'New-TemporaryDirectory',
 	'New-TestAgent',
 	'New-TestAlarm',
 	'New-TestDevice',

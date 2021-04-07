@@ -82,8 +82,13 @@ Inherit common parameters to a custom function. This will add parameters such as
         New-DynamicParam -Name OutputFileRaw -Type "string" -DPDictionary $Dictionary
         New-DynamicParam -Name Proxy -Type "switch" -DPDictionary $Dictionary
         New-DynamicParam -Name NoProxy -Type "switch" -DPDictionary $Dictionary
-        New-DynamicParam -Name Session -Type "string" -DPDictionary $Dictionary
         New-DynamicParam -Name Timeout -Type "double" -DPDictionary $Dictionary
+        
+        # Session
+        New-DynamicParam -Name Session -Type "string" -DPDictionary $Dictionary
+        if ($ParentCommand) {
+            Register-ArgumentCompleter -CommandName $ParentCommand -ParameterName Session -ScriptBlock $script:CompletionSession
+        }
 
         # JSON parsing options
         New-DynamicParam -Name Output -Type "string" -ValidateSet @("json", "csv", "csvheader", "table") -DPDictionary $Dictionary
