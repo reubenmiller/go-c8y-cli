@@ -49,6 +49,7 @@ Pass external json data into the template, and reference it via the "input.value
 		RunE: ccmd.newTemplate,
 	}
 
+	cmdutil.DisableEncryptionCheck(cmd)
 	cmd.SilenceUsage = true
 
 	flags.WithOptions(

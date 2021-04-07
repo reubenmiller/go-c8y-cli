@@ -23,6 +23,7 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/pkg/config"
 	"github.com/reubenmiller/go-c8y-cli/pkg/console"
 	"github.com/reubenmiller/go-c8y-cli/pkg/dataview"
+	"github.com/reubenmiller/go-c8y-cli/pkg/encrypt"
 	"github.com/reubenmiller/go-c8y-cli/pkg/logger"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
@@ -66,7 +67,7 @@ func MainRun() {
 	cmd.SetArgs(expandedArgs)
 
 	if err := cmd.Execute(); err != nil {
-		CheckCommandError(cmd.Command, cmd.Factory, err)
+		err = CheckCommandError(cmd.Command, cmd.Factory, err)
 
 		if cErr, ok := err.(cmderrors.CommandError); ok {
 			os.Exit(int(cErr.ExitCode))
@@ -78,7 +79,7 @@ func MainRun() {
 	}
 }
 
-func CheckCommandError(cmd *cobra.Command, f *cmdutil.Factory, err error) {
+func CheckCommandError(cmd *cobra.Command, f *cmdutil.Factory, err error) error {
 	cfg, configErr := f.Config()
 	if configErr != nil {
 		log.Fatalf("Could not load configuration. %s", configErr)
@@ -98,10 +99,14 @@ func CheckCommandError(cmd *cobra.Command, f *cmdutil.Factory, err error) {
 
 	if errors.Is(err, cmderrors.ErrNoMatchesFound) {
 		// Simulate a 404 error
-		customErr := cmderrors.CommandError{}
+		customErr := cmderrors.NewUserErrorWithExitCode(cmderrors.ExitNotFound404, err)
 		customErr.StatusCode = 404
-		customErr.ExitCode = 4
-		customErr.Message = err.Error()
+		err = customErr
+	}
+
+	if errors.Is(err, encrypt.ErrDecryptFailed) {
+		// Decryption error
+		customErr := cmderrors.NewUserErrorWithExitCode(cmderrors.ExitDecryption, err)
 		err = customErr
 	}
 
@@ -126,6 +131,7 @@ func CheckCommandError(cmd *cobra.Command, f *cmdutil.Factory, err error) {
 		logg.Errorf("%s", cErr)
 		fmt.Fprintf(w, "%s\n", cErr.JSONString())
 	}
+	return err
 }
 
 func setArgs(cmd *cobra.Command) ([]string, error) {

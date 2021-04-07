@@ -386,7 +386,7 @@ func Test_CreateManagedObjectWithoutInput(t *testing.T) {
 	rest POST https://test-ci-runner01.latest.stage.c8y.io/alarm/alarms --data name=test
 	`
 	cmdErr := ExecuteCmd(cmd, strings.TrimSpace(cmdtext))
-	CheckCommandError(cmd.Command, nil, cmdErr)
+	cmdErr = CheckCommandError(cmd.Command, nil, cmdErr)
 	assert.OK(t, cmdErr)
 }
 
@@ -441,6 +441,6 @@ func Test_DebugCommand(t *testing.T) {
 	sessions login --sessionFile /workspaces/go-c8y-cli/.cumulocity/schindler.d.main.json
 	`
 	cmdErr := ExecuteCmd(cmd, strings.TrimSpace(cmdtext))
-	CheckCommandError(cmd.Command, nil, cmdErr)
+	cmdErr = CheckCommandError(cmd.Command, nil, cmdErr)
 	assert.OK(t, cmdErr)
 }

@@ -18,7 +18,7 @@ import (
 	"github.com/spf13/viper"
 )
 
-func CreateCumulocityClient(f *cmdutil.Factory, sessionFile, username, password string) func() (*c8y.Client, error) {
+func CreateCumulocityClient(f *cmdutil.Factory, sessionFile, username, password string, disableEncryptionCheck bool) func() (*c8y.Client, error) {
 	return func() (*c8y.Client, error) {
 		cfg, err := f.Config()
 		if err != nil {
@@ -61,7 +61,11 @@ func CreateCumulocityClient(f *cmdutil.Factory, sessionFile, username, password 
 			tenant = cfg.GetTenant()
 		}
 		if password == "" {
-			password = cfg.MustGetPassword()
+			pass, err := cfg.GetPassword()
+			if !disableEncryptionCheck && err != nil {
+				return nil, err
+			}
+			password = pass
 		}
 
 		c8yURL := cfg.GetHost()
@@ -97,8 +101,9 @@ func CreateCumulocityClient(f *cmdutil.Factory, sessionFile, username, password 
 		})
 
 		// load authentication
-		if err := loadAuthentication(cfg, client); err != nil {
+		if err := loadAuthentication(cfg, client); !disableEncryptionCheck && err != nil {
 			log.Warnf("Could not load authentication. %s", err)
+			return nil, err
 		}
 
 		timeout := cfg.RequestTimeout()
@@ -132,11 +137,12 @@ func CreateCumulocityClient(f *cmdutil.Factory, sessionFile, username, password 
 
 func loadAuthentication(v *config.Config, c *c8y.Client) error {
 	token, err := v.GetToken()
-	if err == nil {
-		if token != "" {
-			c.SetToken(token)
-			c.AuthorizationMethod = c8y.AuthMethodOAuth2Internal
-		}
+	if err != nil {
+		return err
+	}
+	if token != "" {
+		c.SetToken(token)
+		c.AuthorizationMethod = c8y.AuthMethodOAuth2Internal
 	}
 	return nil
 }

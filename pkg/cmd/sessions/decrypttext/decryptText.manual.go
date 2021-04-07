@@ -40,6 +40,7 @@ Encrypt the text "Hello World", the text will be encrypted using the given passp
 		RunE: ccmd.RunE,
 	}
 
+	cmdutil.DisableEncryptionCheck(cmd)
 	cmd.SilenceUsage = true
 
 	cmd.Flags().String("text", "", "Encrypted text. (required)")

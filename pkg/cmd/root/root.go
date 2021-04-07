@@ -120,7 +120,8 @@ func NewCmdRoot(f *cmdutil.Factory, version, buildDate string) *CmdRoot {
 			`),
 		},
 		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
-			if err := ccmd.Configure(); err != nil {
+			disableEncryptionCheck := !cmdutil.IsConfigEncryptionCheckEnabled(cmd)
+			if err := ccmd.Configure(disableEncryptionCheck); err != nil {
 				return err
 			}
 			return ccmd.checkSessionExists(cmd, args)
@@ -302,7 +303,7 @@ func NewCmdRoot(f *cmdutil.Factory, version, buildDate string) *CmdRoot {
 	return ccmd
 }
 
-func (c *CmdRoot) Configure() error {
+func (c *CmdRoot) Configure(disableEncryptionCheck bool) error {
 	cfg, err := c.Factory.Config()
 	if err != nil {
 		return err
@@ -410,7 +411,7 @@ func (c *CmdRoot) Configure() error {
 		if c.client != nil {
 			return c.client, nil
 		}
-		client, err := factory.CreateCumulocityClient(c.Factory, c.SessionFile, c.SessionUsername, c.SessionPassword)()
+		client, err := factory.CreateCumulocityClient(c.Factory, c.SessionFile, c.SessionUsername, c.SessionPassword, disableEncryptionCheck)()
 		if c.log != nil {
 			c8y.Logger = c.log
 		} else {

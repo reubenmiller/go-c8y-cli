@@ -53,6 +53,7 @@ const (
 	ExitJobLimitExceeded    ExitCode = 105
 	ExitTimeout             ExitCode = 106
 	ExitInvalidAlias        ExitCode = 107
+	ExitDecryption          ExitCode = 108
 )
 
 // CommandError is an error used to signal different error situations in command handling.

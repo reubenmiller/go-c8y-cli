@@ -481,6 +481,37 @@ func (c *Config) ReadKeyFile() error {
 	return nil
 }
 
+// HasEncryptedProperties check if some fields are encrypted
+func (c Config) HasEncryptedProperties() bool {
+	encryptedKeys := []string{}
+	for key, value := range c.Persistent.AllSettings() {
+		if s, ok := value.(string); ok {
+			if c.SecureData.IsEncrypted(s) > 0 {
+				encryptedKeys = append(encryptedKeys, key)
+			}
+		}
+	}
+	return len(encryptedKeys) > 0
+}
+
+// DecryptAllProperties decrypt all properties
+func (c Config) DecryptAllProperties() (err error) {
+	for key, value := range c.Persistent.AllSettings() {
+		if s, ok := value.(string); ok {
+
+			if c.SecureData.IsEncrypted(s) > 0 {
+				ds, err := c.SecureData.DecryptString(s, c.Passphrase)
+
+				if err != nil {
+					return ErrDecrypt{err}
+				}
+				c.Persistent.Set(key, ds)
+			}
+		}
+	}
+	return err
+}
+
 // GetEnvironmentVariables gets all the environment variables associated with the current session
 func (c Config) GetEnvironmentVariables(client *c8y.Client, setPassword bool) map[string]interface{} {
 	host := c.GetHost()
@@ -524,8 +555,9 @@ func (c Config) GetEnvironmentVariables(client *c8y.Client, setPassword bool) ma
 		"C8Y_PASSWORD": password,
 	}
 
-	if c.CachePassphraseVariables() {
-		c.Logger.Info("Caching passphrase")
+	cache := c.CachePassphraseVariables()
+	c.Logger.Debugf("Cache passphrase: %v", cache)
+	if cache {
 		if c.Passphrase != "" {
 			output["C8Y_PASSPHRASE"] = c.Passphrase
 		}
@@ -623,6 +655,10 @@ func (c *Config) WritePersistentConfig() error {
 	if err != nil {
 		return err
 	}
+	err = c.SetEncryptedString("token", "")
+	if err != nil {
+		return err
+	}
 	return c.Persistent.WriteConfig()
 }
 
@@ -645,8 +681,13 @@ func (c *Config) GetPassword() (string, error) {
 // If the password is empty then treat it as encrypted
 func (c *Config) IsPasswordEncrypted() bool {
 	password := c.viper.GetString("password")
-	return password != "" && c.SecureData.IsEncrypted(password) == 1
-	// return password == "" || c.SecureData.IsEncrypted(password) == 1
+	// return password != "" && c.SecureData.IsEncrypted(password) == 1
+	return password == "" || c.SecureData.IsEncrypted(password) == 1
+}
+
+func (c *Config) IsTokenEncrypted() bool {
+	token := c.viper.GetString("token")
+	return token == "" || c.SecureData.IsEncrypted(token) == 1
 }
 
 // MustGetPassword returns the decrypted password if there are no encryption errors, otherwise it will return an encrypted password
@@ -1092,14 +1133,16 @@ func (c *Config) AllSettings() map[string]interface{} {
 
 // SaveClientConfig save client settings to the session configuration
 func (c *Config) SaveClientConfig(client *c8y.Client) error {
-	if c.StorePassword() {
-		c.SetPassword(client.Password)
-	}
+	if client != nil {
+		if c.StorePassword() {
+			c.SetPassword(client.Password)
+		}
 
-	if c.StoreToken() {
-		c.SetToken(client.Token)
+		if c.StoreToken() {
+			c.SetToken(client.Token)
+		}
+		c.SetTenant(client.TenantName)
 	}
-	c.SetTenant(client.TenantName)
 	return c.WritePersistentConfig()
 }
 
@@ -1181,11 +1224,13 @@ func (c *Config) LogErrorF(err error, format string, args ...interface{}) {
 	errorLogger(format, args...)
 }
 
+var ConfigExtensions = []string{"json", "yaml", "yml", "env", "toml", "hcl", "ini", "properties"}
+
 func (c *Config) SetSessionFile(path string) {
 	if _, fileErr := os.Stat(path); fileErr != nil {
 		home := c.GetSessionHomeDir()
 		c.Logger.Debugf("Resolving session %s in %s", path, home)
-		matches, err := pathresolver.ResolvePaths(home, path, "json", "ignore")
+		matches, err := pathresolver.ResolvePaths(home, path, ConfigExtensions, "ignore")
 		if err != nil {
 			c.Logger.Warnf("Failed to find session. %s", err)
 		}
@@ -1221,7 +1266,7 @@ func (c *Config) GetSessionFile(overrideSession ...string) string {
 	if _, fileErr := os.Stat(sessionFile); fileErr != nil {
 		home := c.GetSessionHomeDir()
 		c.Logger.Debugf("Resolving session %s in %s", sessionFile, home)
-		matches, err := pathresolver.ResolvePaths(home, sessionFile, "json", "ignore")
+		matches, err := pathresolver.ResolvePaths(home, sessionFile, ConfigExtensions, "ignore")
 		if err != nil {
 			c.Logger.Warnf("Failed to find session. %s", err)
 		}

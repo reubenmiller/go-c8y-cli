@@ -370,6 +370,11 @@ func (n *UpdateSettingsCmd) RunE(cmd *cobra.Command, args []string) error {
 		if n.file != "" {
 			err = v.WriteConfig()
 		} else {
+			if cfg.IsEncryptionEnabled() || cfg.IsPasswordEncrypted() || cfg.IsTokenEncrypted() {
+				if err := utilities.CheckEncryption(n.factory.IOStreams, cfg, client); err != nil {
+					return err
+				}
+			}
 			err = cfg.SaveClientConfig(client)
 		}
 		if err != nil {

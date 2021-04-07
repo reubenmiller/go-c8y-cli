@@ -43,6 +43,8 @@ $ c8y session clear | source
 		RunE: ccmd.RunE,
 	}
 
+	cmdutil.DisableEncryptionCheck(cmd)
+
 	cmd.SilenceUsage = true
 	cmd.Flags().StringVar(&ccmd.Shell, "shell", "auto", "Shell type. Defaults to auto if not printing to terminal")
 

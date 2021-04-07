@@ -42,6 +42,7 @@ Password: {encrypted}ec5b837a03408ffb731307584eac40ac047989a002951e4b7139fa60189
 		RunE: ccmd.RunE,
 	}
 
+	cmdutil.DisableEncryptionCheck(cmd)
 	cmd.SilenceUsage = true
 
 	cmd.Flags().String("text", "", "Text to be encrypted. (required)")
