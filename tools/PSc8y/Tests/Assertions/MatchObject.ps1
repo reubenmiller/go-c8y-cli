@@ -45,7 +45,7 @@ Function MatchObject {
     if ($null -ne $Compare) {
         [PSCustomObject]@{
             Succeeded = $false
-            FailureMessage = "Object does not contain expected keys. Actual {{{0}}}, got {{{1}}}" -f @(
+            FailureMessage = "Object does not contain expected keys. Actual {{{0}}}, Expected {{{1}}}" -f @(
                 ($ActualKeys -join ","),
                 ($ExpectedKeys -join ",")
             )
@@ -58,7 +58,7 @@ Function MatchObject {
     if ($null -ne $Compare) {
         [PSCustomObject]@{
             Succeeded = $false
-            FailureMessage = "Object does not contain expected values. Actual {{{0}}}, got {{{1}}}" -f @(
+            FailureMessage = "Object does not contain expected values. Actual {{{0}}}, Expected {{{1}}}" -f @(
                 (ConvertTo-Json $ActualValues),
                 (ConvertTo-Json $ExpectedValues)
             )
