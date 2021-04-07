@@ -11,12 +11,12 @@ Get a collection of managedObjects child references
 c8y devicegroups listAssets
 
 .EXAMPLE
-PS> DeviceGroupChildAssetCollection -Id $Group.id
+PS> Get-DeviceGroupChildAssetCollection -Id $Group.id
 
 Get a list of the child assets of an existing device
 
 .EXAMPLE
-PS> DeviceGroupChildAssetCollection -Id $Group.id
+PS> Get-DeviceGroupChildAssetCollection -Id $Group.id
 
 Get a list of the child assets of an existing group
 

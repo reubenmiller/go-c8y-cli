@@ -8,7 +8,7 @@ Unassign asset from managed object
 Unassign/delete an asset from an existing managed object
 
 .LINK
-c8y inventory/assets unassign
+c8y inventory assets unassign
 
 .EXAMPLE
 PS> Remove-Asset -Id $Group.id -Child $ChildDevice.id
@@ -46,7 +46,7 @@ Unassign a child device from its parent asset
             Use-CallerPreference -Cmdlet $PSCmdlet -SessionState $ExecutionContext.SessionState
         }
 
-        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "inventory/assets unassign"
+        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "inventory assets unassign"
         $ClientOptions = Get-ClientOutputOption $PSBoundParameters
         $TypeOptions = @{
             Type = ""
@@ -60,13 +60,13 @@ Unassign a child device from its parent asset
         if ($ClientOptions.ConvertToPS) {
             $Child `
             | Group-ClientRequests `
-            | c8y inventory/assets unassign $c8yargs `
+            | c8y inventory assets unassign $c8yargs `
             | ConvertFrom-ClientOutput @TypeOptions
         }
         else {
             $Child `
             | Group-ClientRequests `
-            | c8y inventory/assets unassign $c8yargs
+            | c8y inventory assets unassign $c8yargs
         }
         
     }

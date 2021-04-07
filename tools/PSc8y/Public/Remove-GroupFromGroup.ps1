@@ -11,9 +11,9 @@ Delete child group reference
 c8y devicegroups unassignGroup
 
 .EXAMPLE
-PS> Remove-AssetFromGroup -Group $Group.id -ChildDevice $ChildDevice.id
+PS> Remove-GroupFromGroup -Id $Group.id -Child $ChildGroup.id
 
-Unassign a child device from its parent asset
+Unassign a child group from its parent
 
 
 #>

@@ -8,7 +8,7 @@ Unassign child addition
 Unassign/delete a child addition from an existing managed object
 
 .LINK
-c8y inventory/additions unassign
+c8y inventory additions unassign
 
 .EXAMPLE
 PS> Remove-ChildAddition -Id $software.id -ChildId $version.id
@@ -47,7 +47,7 @@ Unassign a child addition from its parent managed object
             Use-CallerPreference -Cmdlet $PSCmdlet -SessionState $ExecutionContext.SessionState
         }
 
-        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "inventory/additions unassign"
+        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "inventory additions unassign"
         $ClientOptions = Get-ClientOutputOption $PSBoundParameters
         $TypeOptions = @{
             Type = ""
@@ -61,13 +61,13 @@ Unassign a child addition from its parent managed object
         if ($ClientOptions.ConvertToPS) {
             $ChildId `
             | Group-ClientRequests `
-            | c8y inventory/additions unassign $c8yargs `
+            | c8y inventory additions unassign $c8yargs `
             | ConvertFrom-ClientOutput @TypeOptions
         }
         else {
             $ChildId `
             | Group-ClientRequests `
-            | c8y inventory/additions unassign $c8yargs
+            | c8y inventory additions unassign $c8yargs
         }
         
     }

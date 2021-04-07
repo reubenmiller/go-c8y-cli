@@ -8,7 +8,7 @@ Assign child asset
 Assigns a group or device to an existing group and marks them as assets
 
 .LINK
-c8y inventory/assets assign
+c8y inventory assets assign
 
 .EXAMPLE
 PS> Add-AssetToGroup -Group $Group1.id -NewChildGroup $Group2.id
@@ -49,7 +49,7 @@ Create group hierarchy (parent group -> child group)
             Use-CallerPreference -Cmdlet $PSCmdlet -SessionState $ExecutionContext.SessionState
         }
 
-        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "inventory/assets assign"
+        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "inventory assets assign"
         $ClientOptions = Get-ClientOutputOption $PSBoundParameters
         $TypeOptions = @{
             Type = "application/vnd.com.nsn.cumulocity.managedObjectReference+json"
@@ -63,13 +63,13 @@ Create group hierarchy (parent group -> child group)
         if ($ClientOptions.ConvertToPS) {
             $NewChildDevice `
             | Group-ClientRequests `
-            | c8y inventory/assets assign $c8yargs `
+            | c8y inventory assets assign $c8yargs `
             | ConvertFrom-ClientOutput @TypeOptions
         }
         else {
             $NewChildDevice `
             | Group-ClientRequests `
-            | c8y inventory/assets assign $c8yargs
+            | c8y inventory assets assign $c8yargs
         }
         
     }

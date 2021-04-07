@@ -38,11 +38,15 @@ Describe -Name "Common parameters" {
             "Add-ClientResponseType",
             "New-RandomPassword",
             "New-RandomString",
+            "New-TemporaryDirectory",
             "New-Session",
             "Register-Alias",
             "Register-ClientArgumentCompleter",
             "Set-Session",
-            "Set-ClientConsoleSetting"
+            "Set-ClientConsoleSetting",
+
+            "New-TestFile",
+            "Set-c8yMode"
         )
 
         $cmdlets = Get-Command -Module PSc8y -Name "*" | Where-Object {
@@ -63,6 +67,7 @@ Describe -Name "Common parameters" {
             "Add-ClientResponseType",
             "New-RandomPassword",
             "New-RandomString",
+            "New-TemporaryDirectory",
             "New-Session",
             "Register-Alias",
             "Register-ClientArgumentCompleter",
@@ -70,7 +75,14 @@ Describe -Name "Common parameters" {
             "Set-ClientConsoleSetting",
             "New-TestFile",
             "New-Microservice",
-            "New-ServiceUser"
+            "New-ServiceUser",
+
+            "Set-c8yMode",
+            "New-TestAgent",
+            "New-TestAlarm",
+            "New-TestDevice",
+            "New-TestUser",
+            "New-TestMeasurement"
         )
 
         $cmdlets = Get-Command -Module PSc8y -Name "*" | Where-Object {

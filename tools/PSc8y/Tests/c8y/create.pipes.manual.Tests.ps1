@@ -160,7 +160,7 @@ Describe -Name "creating data with pipes" {
             )
             $pipedInput | Out-File $inputFile
             
-            $output = c8y applications create $commonArgs --name $inputFile --template "{ key: self.name, type: 'MICROSERVICE' }"
+            $output = c8y applications create $commonArgs --name $inputFile --template "{ key: self.name  + '-key', type: 'MICROSERVICE' }"
             $LASTEXITCODE | Should -Be 0
             Remove-Item $inputFile
             $requests = $output | ConvertFrom-Json

@@ -12,13 +12,13 @@ Describe -Name "Get-DeviceGroupChildAssetCollection" {
     }
 
     It "Get a list of the child assets of an existing device" {
-        $Response = PSc8y\DeviceGroupChildAssetCollection -Id $Group.id
+        $Response = PSc8y\Get-DeviceGroupChildAssetCollection -Id $Group.id
         $LASTEXITCODE | Should -Be 0
         $Response | Should -Not -BeNullOrEmpty
     }
 
     It "Get a list of the child assets of an existing group" {
-        $Response = PSc8y\DeviceGroupChildAssetCollection -Id $Group.id
+        $Response = PSc8y\Get-DeviceGroupChildAssetCollection -Id $Group.id
         $LASTEXITCODE | Should -Be 0
         $Response | Should -Not -BeNullOrEmpty
     }

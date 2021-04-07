@@ -34,7 +34,7 @@ func NewUnassignGroupCmd(f *cmdutil.Factory) *UnassignGroupCmd {
 		Short: "Delete child group reference",
 		Long:  `Delete child group reference`,
 		Example: heredoc.Doc(`
-$ c8y devicegroups unassignGroup --group 12345 --childDevice 22553
+$ c8y devicegroups unassignGroup --id 12345 --child 22553
 Unassign a child device from its parent device
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {

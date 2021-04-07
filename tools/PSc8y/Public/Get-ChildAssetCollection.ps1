@@ -8,7 +8,7 @@ Get child asset collection
 Get a collection of managedObjects child references
 
 .LINK
-c8y inventory/assets list
+c8y inventory assets list
 
 .EXAMPLE
 PS> Get-ChildAssetCollection -Id 12345
@@ -39,7 +39,7 @@ Get a list of the child assets of an existing device
             Use-CallerPreference -Cmdlet $PSCmdlet -SessionState $ExecutionContext.SessionState
         }
 
-        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "inventory/assets list"
+        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "inventory assets list"
         $ClientOptions = Get-ClientOutputOption $PSBoundParameters
         $TypeOptions = @{
             Type = "application/vnd.com.nsn.cumulocity.managedObjectReferenceCollection+json"
@@ -53,13 +53,13 @@ Get a list of the child assets of an existing device
         if ($ClientOptions.ConvertToPS) {
             $Id `
             | Group-ClientRequests `
-            | c8y inventory/assets list $c8yargs `
+            | c8y inventory assets list $c8yargs `
             | ConvertFrom-ClientOutput @TypeOptions
         }
         else {
             $Id `
             | Group-ClientRequests `
-            | c8y inventory/assets list $c8yargs
+            | c8y inventory assets list $c8yargs
         }
         
     }
