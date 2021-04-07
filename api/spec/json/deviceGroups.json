@@ -486,15 +486,15 @@
       "examples": {
         "powershell": [
           {
-            "description": "Unassign a child device from its parent asset",
+            "description": "Unassign a child group from its parent",
             "beforeEach": [
               "$Group = PSc8y\\New-TestDeviceGroup",
-              "$ChildDevice = PSc8y\\New-TestDevice",
-              "PSc8y\\Add-AssetToGroup -Group $Group.id -NewChildDevice $ChildDevice.id"
+              "$ChildGroup = PSc8y\\New-TestDevice",
+              "PSc8y\\Add-AssetToGroup -Group $Group.id -NewChildGroup $ChildGroup.id"
             ],
-            "command": "Remove-AssetFromGroup -Group $Group.id -ChildDevice $ChildDevice.id",
+            "command": "Remove-GroupFromGroup -Id $Group.id -Child $ChildGroup.id",
             "afterEach": [
-              "PSc8y\\Remove-ManagedObject -Id $ChildDevice.id",
+              "PSc8y\\Remove-ManagedObject -Id $ChildGroup.id",
               "PSc8y\\Remove-ManagedObject -Id $Group.id"
             ]
           }
@@ -502,7 +502,7 @@
         "go": [
           {
             "description": "Unassign a child device from its parent device",
-            "command": "c8y devicegroups unassignGroup --group 12345 --childDevice 22553"
+            "command": "c8y devicegroups unassignGroup --id 12345 --child 22553"
           }
         ]
       },
@@ -545,7 +545,7 @@
               "$ChildDevice = PSc8y\\New-TestDevice",
               "PSc8y\\Add-AssetToGroup -Group $Device.id -NewChildDevice $ChildDevice.id"
             ],
-            "command": "DeviceGroupChildAssetCollection -Id $Group.id",
+            "command": "Get-DeviceGroupChildAssetCollection -Id $Group.id",
             "afterEach": [
               "PSc8y\\Remove-ManagedObject -Id $ChildDevice.id",
               "PSc8y\\Remove-ManagedObject -Id $Device.id"
@@ -558,7 +558,7 @@
               "$ChildGroup = PSc8y\\New-TestDeviceGroup",
               "PSc8y\\Add-AssetToGroup -Group $Group.id -NewChildGroup $ChildGroup.id"
             ],
-            "command": "DeviceGroupChildAssetCollection -Id $Group.id",
+            "command": "Get-DeviceGroupChildAssetCollection -Id $Group.id",
             "afterEach": [
               "PSc8y\\Remove-ManagedObject -Id $ChildGroup.id",
               "PSc8y\\Remove-ManagedObject -Id $Group.id"
