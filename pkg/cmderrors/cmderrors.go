@@ -141,6 +141,7 @@ func NewServerError(r *c8y.Response, err error) CommandError {
 	}
 
 	if errors.Is(err, context.DeadlineExceeded) {
+		cmdError.ErrorType = ErrTypeCommand
 		cmdError.Message = "command timed out"
 		cmdError.ExitCode = 106
 	}
