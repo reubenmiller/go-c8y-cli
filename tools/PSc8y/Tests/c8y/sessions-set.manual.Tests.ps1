@@ -139,6 +139,8 @@ Describe -Tag "Session" -Name "sessions-set" {
         Get-Content $Session01 | ConvertFrom-Json | Select-Object username, password | ConvertTo-Json | Out-File $Session03
         $env:C8Y_SESSION = $session03
         $env:C8Y_HOST = $c8yhost
+        $env:C8Y_USERNAME = $null
+        $env:C8Y_PASSWORD = $null
 
         # using C8Y_SESSION
         $output = c8y inventory list --dry --dryFormat json 2>&1
