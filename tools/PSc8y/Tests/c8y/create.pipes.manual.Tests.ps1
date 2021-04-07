@@ -207,7 +207,53 @@ Describe -Name "creating data with pipes" {
     }
 
     Context "Devices" {
-        
+        It "Accepts piped names" {
+            $output = "device01", "device02" | c8y devices create $commonArgs --template "{ jobInput: input.value }"
+            $LASTEXITCODE | Should -Be 0
+            $request = $output | ConvertFrom-Json
+
+            # request
+            $request[0].body | Should -MatchObject @{
+                name = "device01"
+                jobInput = "device01"
+                c8y_IsDevice = @{}
+            }
+            $request[0].path | Should -BeExactly "/inventory/managedObjects"
+            $request[0].method | Should -Be "POST"
+
+            # request
+            $request[1].body | Should -MatchObject @{
+                name = "device02"
+                jobInput = "device02"
+                c8y_IsDevice = @{}
+            }
+            $request[1].path | Should -BeExactly "/inventory/managedObjects"
+            $request[1].method | Should -Be "POST"
+        }
+
+        It "Accepts piped objects" {
+            $output = @{name = "device01"}, @{name = "device02"} | batch -AsPSObject:$false | c8y devices create $commonArgs --template "{ jobInput: input.value }"
+            $LASTEXITCODE | Should -Be 0
+            $request = $output | ConvertFrom-Json
+
+            # request
+            $request[0].body | Should -MatchObject @{
+                name = "device01"
+                jobInput = @{name="device01"}
+                c8y_IsDevice = @{}
+            }
+            $request[0].path | Should -BeExactly "/inventory/managedObjects"
+            $request[0].method | Should -Be "POST"
+
+            # request
+            $request[1].body | Should -MatchObject @{
+                name = "device02"
+                jobInput = @{name="device02"}
+                c8y_IsDevice = @{}
+            }
+            $request[1].path | Should -BeExactly "/inventory/managedObjects"
+            $request[1].method | Should -Be "POST"
+        }
     }
 
     Context "Alarms" {
