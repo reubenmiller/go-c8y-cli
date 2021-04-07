@@ -133,6 +133,41 @@ Describe -Tag "Session" -Name "sessions-set" {
         $LASTEXITCODE | Should -BeExactly 0
     }
 
+    It "combines session configuration from environment and file" {
+        # session
+        $Session03 = Join-Path $tmpdir "session03.json"
+        Get-Content $Session01 | ConvertFrom-Json | Select-Object username, password | ConvertTo-Json | Out-File $Session03
+        $env:C8Y_SESSION = $session03
+        $env:C8Y_HOST = $c8yhost
+
+        # using C8Y_SESSION
+        $output = c8y inventory list --dry --dryFormat json 2>&1
+        $LASTEXITCODE | Should -BeExactly 0
+        $request = $output | ConvertFrom-Json
+
+        $request | Should -MatchObject @{
+            path = "/inventory/managedObjects"
+        } -Property path
+
+        $basicauth = [Convert]::ToBase64String([Text.Encoding]::UTF8.GetBytes($input01.userName + ":" + $input01.password))
+        $request.headers.Authorization | Should -Match "Basic $basicauth"
+        $request.host | Should -BeExactly ("https://" + $c8yhost)
+
+        # Use --session parameter (should override C8Y_SESSION value)
+        $env:C8Y_SESSION = $session02
+        $output = c8y inventory list --dry --dryFormat json --session $session03 2>&1
+        $LASTEXITCODE | Should -BeExactly 0
+        $request = $output | ConvertFrom-Json
+
+        $request | Should -MatchObject @{
+            path = "/inventory/managedObjects"
+        } -Property path
+
+        $basicauth = [Convert]::ToBase64String([Text.Encoding]::UTF8.GetBytes($input01.userName + ":" + $input01.password))
+        $request.headers.Authorization | Should -Match "Basic $basicauth"
+        $request.host | Should -BeExactly ("https://" + $c8yhost)
+    }
+
     AfterAll {
         Clear-Session
 
