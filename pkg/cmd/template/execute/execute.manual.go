@@ -3,6 +3,7 @@ package execute
 import (
 	"bytes"
 	"fmt"
+	"io"
 
 	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmd/subcommand"
@@ -94,21 +95,30 @@ func (n *CmdExecute) newTemplate(cmd *cobra.Command, args []string) error {
 		return cmderrors.NewUserError(err)
 	}
 
-	responseText, err := body.MarshalJSON()
-	if err != nil {
-		return err
+	for {
+		responseText, err := body.MarshalJSON()
+		if err != nil {
+			if err == io.EOF {
+				break
+			}
+			return err
+		}
+
+		isJSONResponse := jsonUtilities.IsValidJSON([]byte(responseText))
+
+		outputEnding := ""
+		if len(responseText) > 0 {
+			outputEnding = "\n"
+		}
+
+		if isJSONResponse {
+			if err := n.factory.WriteJSONToConsole(cfg, cmd, "", responseText); err != nil {
+				return err
+			}
+		} else {
+			fmt.Printf("%s%s", bytes.TrimSpace(responseText), outputEnding)
+		}
 	}
 
-	isJSONResponse := jsonUtilities.IsValidJSON([]byte(responseText))
-
-	outputEnding := ""
-	if len(responseText) > 0 {
-		outputEnding = "\n"
-	}
-
-	if isJSONResponse {
-		return n.factory.WriteJSONToConsole(cfg, cmd, "", responseText)
-	}
-	fmt.Printf("%s%s", bytes.TrimSpace(responseText), outputEnding)
 	return nil
 }
