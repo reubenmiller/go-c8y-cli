@@ -15,7 +15,7 @@
     )
 
     $CmdletName = $Specification.alias.powershell
-    $NounLower = $Noun.ToLower()
+    $NounLower = $Noun.ToLower() -replace "/", " "
     $Name = $Specification.name
 	$NameCamel = $Name[0].ToString().ToUpperInvariant() + $Name.Substring(1)
     $File = Join-Path -Path $OutputDir -ChildPath ("{0}.ps1" -f $CmdletName)
@@ -460,7 +460,7 @@ Function New-Body2 {
         [string] $ConfirmImpact,
         [switch] $NoEnumerate
     )
-    $NounLower = $Noun.ToLower()
+    $NounLower = $Noun.ToLower() -replace "/", " "
 
     $ExpandFunction = Get-IteratorFunction -Type $IteratorType -Variable $IteratorVariable
 
