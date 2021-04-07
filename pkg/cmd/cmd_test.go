@@ -438,7 +438,7 @@ func Test_DebugCommand(t *testing.T) {
 	stdin := bytes.NewBufferString("\n")
 	cmd.SetIn(stdin)
 	cmdtext := `
-	sessions login --sessionFile /workspaces/go-c8y-cli/.cumulocity/schindler.d.main.json
+	
 	`
 	cmdErr := ExecuteCmd(cmd, strings.TrimSpace(cmdtext))
 	cmdErr = CheckCommandError(cmd.Command, nil, cmdErr)
