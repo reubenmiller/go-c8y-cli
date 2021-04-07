@@ -578,9 +578,7 @@ func (b *MapBuilder) MarshalJSON() (body []byte, err error) {
 		} else {
 			switch extInput := input.(type) {
 			case []byte:
-				if bytes.HasPrefix(extInput, []byte("{")) {
-					b.externalInput = extInput
-				}
+				b.externalInput = extInput
 			}
 			Logger.Debugf("setting externalInput: %s", b.externalInput)
 
