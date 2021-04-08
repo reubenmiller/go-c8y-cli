@@ -44,12 +44,12 @@ Enable all create and update commands until the session is changed
 
     if ($ShowSensitive) {
         Write-Host "Sensitive session information will be visible (except clear-text passwords)" -ForegroundColor Gray
-        $env:C8Y_LOGGER_HIDE_SENSITIVE = $false
+        $env:C8Y_SETTINGS_LOGGER_HIDESENSITIVE = $false
     }
 
     if ($HideSensitive) {
         Write-Host "Sensitive session information will be hidden" -ForegroundColor Gray
-        $env:C8Y_LOGGER_HIDE_SENSITIVE = $true
+        $env:C8Y_SETTINGS_LOGGER_HIDESENSITIVE = $true
     }
 
     if ($DisableCommands) {
