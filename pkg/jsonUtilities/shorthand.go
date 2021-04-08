@@ -12,6 +12,11 @@ import (
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 )
 
+const (
+	// Separator character which is used when setting the path via a dot notation
+	Separator = "."
+)
+
 // Logger is the package logger
 var Logger *logger.Logger
 
@@ -180,7 +185,8 @@ func parseShorthandJSONStructure(value string, data map[string]interface{}) erro
 
 	for i := 0; i < len(outputValues); i += 2 {
 		key := strings.Trim(outputValues[i], " ")
-		data[key] = parseValue(outputValues[i+1])
+		setValue(data, key, parseValue(outputValues[i+1]))
+		// data[key] = parseValue(outputValues[i+1])
 		validItems++
 	}
 
@@ -191,4 +197,24 @@ func parseShorthandJSONStructure(value string, data map[string]interface{}) erro
 	}
 
 	return nil
+}
+
+func setValue(data map[string]interface{}, path string, value interface{}) {
+	keys := strings.Split(path, Separator)
+	currentMap := data
+
+	lastIndex := len(keys) - 1
+
+	for i, key := range keys {
+		if key != "" {
+			if i != lastIndex {
+				if _, ok := currentMap[key]; !ok {
+					currentMap[key] = make(map[string]interface{})
+				}
+				currentMap = currentMap[key].(map[string]interface{})
+			} else {
+				currentMap[key] = value
+			}
+		}
+	}
 }
