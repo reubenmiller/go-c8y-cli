@@ -104,7 +104,7 @@ func (f *Factory) WithTemplateFlag(cmd *cobra.Command) flags.Option {
 			}
 
 			scanner := bufio.NewScanner(file)
-			pattern := regexp.MustCompile(`var\("(.+?)"(\s*,\s*"?([^"\(\)]+)"?)?`)
+			pattern := regexp.MustCompile(`var\(['"](.+?)['"](\s*,\s*["']?([^"'\(\)]+)['"]?)?`)
 			variableNames := make(map[string]string)
 			values := []string{}
 			for scanner.Scan() {
