@@ -68,7 +68,7 @@ Describe -Tag "Session" -Name "Login and Session Tests" {
         $results | Should -Not -BeNullOrEmpty
     }
 
-    It -Tag "TODO: Interactive" "Saves tenant name in the session file" {
+    It "Saves tenant name in the session file" {
         $env:C8Y_PASSPHRASE = "TestPassword"
         $SessionFile = Join-Path -Path $tmpdir -ChildPath "session.json"
         $env:C8Y_SESSION = $SessionFile
