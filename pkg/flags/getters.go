@@ -78,6 +78,11 @@ func WithPathParameters(cmd *cobra.Command, path *StringTemplate, inputIterators
 			}
 		}
 	}
+
+	if err := path.CheckRequired(); err != nil {
+		return err
+	}
+
 	if totalIterators > 0 {
 		inputIterators.Total += totalIterators
 		inputIterators.Path = path
