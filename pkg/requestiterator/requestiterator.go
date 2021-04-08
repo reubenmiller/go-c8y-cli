@@ -1,6 +1,7 @@
 package requestiterator
 
 import (
+	"bytes"
 	"errors"
 	"os"
 	"reflect"
@@ -82,6 +83,10 @@ func (r *RequestIterator) GetNext() (*c8y.RequestOptions, interface{}, error) {
 			return nil, nil, err
 		}
 
+		if hasUnresolvedVariables(path) {
+			return nil, nil, cmderrors.ErrNoMatchesFound
+		}
+
 		inputLine = input
 		req.Path = string(path)
 	}
@@ -144,4 +149,10 @@ func (r *RequestIterator) GetNext() (*c8y.RequestOptions, interface{}, error) {
 		}
 	}
 	return req, inputLine, nil
+}
+
+func hasUnresolvedVariables(v []byte) bool {
+	left := bytes.Index(v, []byte("{"))
+	right := bytes.Index(v, []byte("}"))
+	return left > -1 && right > -1 && right > left
 }

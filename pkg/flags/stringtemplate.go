@@ -3,6 +3,7 @@ package flags
 import (
 	"fmt"
 	"io"
+	"regexp"
 	"strings"
 
 	"github.com/reubenmiller/go-c8y-cli/pkg/iterator"
@@ -32,6 +33,24 @@ func (b *StringTemplate) SetVariable(name string, value interface{}) {
 func (b *StringTemplate) GetTemplate() string {
 	output, _, _ := b.Execute(true)
 	return output
+}
+
+// CheckRequired check if all required variables are provided
+func (b *StringTemplate) CheckRequired() error {
+	pattern := regexp.MustCompile(`\{(\w+)\}`)
+
+	missingNames := []string{}
+	for _, names := range pattern.FindAllStringSubmatch(b.template, -1) {
+		if _, ok := b.templateVariables[names[1]]; !ok {
+			missingNames = append(missingNames, names[1])
+		}
+	}
+
+	if len(missingNames) == 0 {
+		return nil
+	}
+
+	return fmt.Errorf("missing required parameters. %v", missingNames)
 }
 
 // Execute replaces all of the path parameters in a given URI with the provided values
