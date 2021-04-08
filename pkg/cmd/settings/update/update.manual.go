@@ -145,6 +145,11 @@ var updateSettingsOptions = map[string]argumentHandler{
 		"2000",
 	}, nil, cobra.ShellCompDirectiveNoFileComp},
 
+	"logger.hideSensitive": {"logger.hideSensitive", "bool", "settings.logger.hideSensitive", []string{
+		"true",
+		"false",
+	}, nil, cobra.ShellCompDirectiveNoFileComp},
+
 	// defaults
 	// dry format
 	"defaults.dryformat": {"defaultDryFormat", "string", "settings.defaults.dryFormat", []string{

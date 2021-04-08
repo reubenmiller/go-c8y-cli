@@ -33,6 +33,10 @@ func CreateCumulocityClient(f *cmdutil.Factory, sessionFile, username, password 
 			return nil, err
 		}
 
+		if cfg.HideSensitive() {
+			os.Setenv(c8y.EnvVarLoggerHideSensitive, "true")
+		}
+
 		log.Debug("Creating c8y client")
 		configureProxySettings(cfg, log)
 		httpClient := newHTTPClient(cfg.IgnoreProxy())
@@ -94,7 +98,7 @@ func CreateCumulocityClient(f *cmdutil.Factory, sessionFile, username, password 
 					Config:        cfg,
 					Logger:        log,
 					Console:       consol,
-					HideSensitive: config.HideSensitiveInformationIfActive,
+					HideSensitive: cfg.HideSensitiveInformationIfActive,
 				}
 				handler.DryRunHandler(f.IOStreams, options, req)
 			},

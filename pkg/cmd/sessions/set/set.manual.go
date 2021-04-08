@@ -175,7 +175,7 @@ func (n *CmdSet) RunE(cmd *cobra.Command, args []string) error {
 		n.onSave(handler.C8Yclient)
 	}
 
-	c8ysession.PrintSessionInfo(n.SubCommand.GetCommand().ErrOrStderr(), client, c8ysession.CumulocitySession{
+	c8ysession.PrintSessionInfo(n.SubCommand.GetCommand().ErrOrStderr(), client, cfg, c8ysession.CumulocitySession{
 		Path:     cfg.GetSessionFile(),
 		Host:     handler.C8Yclient.BaseURL.Host,
 		Tenant:   cfg.GetTenant(),

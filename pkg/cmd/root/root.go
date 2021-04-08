@@ -448,7 +448,7 @@ func (c *CmdRoot) checkSessionExists(cmd *cobra.Command, args []string) error {
 	// print log information
 	sessionFile := cfg.GetSessionFile()
 	if sessionFile != "" {
-		log.Infof("Loaded session: %s", config.HideSensitiveInformationIfActive(client, sessionFile))
+		log.Infof("Loaded session: %s", cfg.HideSensitiveInformationIfActive(client, sessionFile))
 		if _, err := os.Stat(sessionFile); err != nil {
 			log.Warnf("Failed to verify session file. %s", err)
 		}

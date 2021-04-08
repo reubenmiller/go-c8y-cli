@@ -108,7 +108,7 @@ func (n *CmdGetSession) RunE(cmd *cobra.Command, args []string) error {
 		}
 	} else {
 		session.CumulocitySession.Path = session.Path
-		c8ysession.PrintSessionInfo(n.SubCommand.GetCommand().ErrOrStderr(), client, session.CumulocitySession)
+		c8ysession.PrintSessionInfo(n.SubCommand.GetCommand().ErrOrStderr(), client, cfg, session.CumulocitySession)
 	}
 	return nil
 }

@@ -12,7 +12,6 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/pkg/config"
 	"github.com/reubenmiller/go-c8y-cli/pkg/logger"
 	"github.com/reubenmiller/go-c8y-cli/pkg/utilities/bellskipper"
-	"github.com/reubenmiller/go-c8y/pkg/c8y"
 )
 
 func matchSession(session c8ysession.CumulocitySession, input string) bool {
@@ -89,15 +88,16 @@ func SelectSession(cfg *config.Config, log *logger.Logger, filter string) (sessi
 	funcMap := promptui.FuncMap
 
 	funcMap["hide"] = func(v interface{}) string {
-		if !strings.EqualFold(os.Getenv(c8y.EnvVarLoggerHideSensitive), "true") {
-			return fmt.Sprintf("%v", v)
+		if cfg.HideSensitive() {
+			return "*****"
 		}
-		return "*****"
+		return fmt.Sprintf("%v", v)
 	}
 
 	funcMap["hideUser"] = func(v interface{}) string {
 		msg := fmt.Sprintf("%v", v)
-		if !strings.EqualFold(os.Getenv(c8y.EnvVarLoggerHideSensitive), "true") {
+
+		if !cfg.HideSensitive() {
 			return msg
 		}
 		if os.Getenv("USERNAME") != "" {
@@ -108,8 +108,8 @@ func SelectSession(cfg *config.Config, log *logger.Logger, filter string) (sessi
 
 	templates := &promptui.SelectTemplates{
 		// Label:    "{{ .Host }}?",
-		Active:   `▶ {{ printf "#%02d %4s" .Index .Extension | bold }} {{ printf "%-30s" .Name | cyan | bold }} {{ .Host | hide | magenta | bold }} {{ printf "(%s/" .Tenant | hide | red | bold }}{{ printf "%s)" .Username | hide | red | bold }}`,
-		Inactive: `  {{ printf "#%02d %4s" .Index .Extension | faint }} {{ printf "%-30s" .Name | cyan }} {{ .Host | hide | magenta }} {{ printf "(%s/" .Tenant | hide | red }}{{ printf "%s)" .Username | hide | red }}`,
+		Active:   `▶ {{ printf "#%02d %4s" .Index .Extension | bold }} {{ printf "%-40s" .Name | cyan | bold }} {{ .Host | hide | magenta | bold }} {{ printf "(%s/" .Tenant | hide | red | bold }}{{ printf "%s)" .Username | hide | red | bold }}`,
+		Inactive: `  {{ printf "#%02d %4s" .Index .Extension | faint }} {{ printf "%-40s" .Name | cyan }} {{ .Host | hide | magenta }} {{ printf "(%s/" .Tenant | hide | red }}{{ printf "%s)" .Username | hide | red }}`,
 		Selected: "{{ .Path | hideUser }}",
 		FuncMap:  funcMap,
 		Details: `

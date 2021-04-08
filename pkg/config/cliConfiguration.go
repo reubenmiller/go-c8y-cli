@@ -227,6 +227,9 @@ const (
 
 	// SettingsViewColumnPadding column padding
 	SettingsViewColumnPadding = "settings.views.columnPadding"
+
+	// SettingsLoggerHideSensitive hide sensitive information in log entries
+	SettingsLoggerHideSensitive = "settings.logger.hideSensitive"
 )
 
 var (
@@ -333,6 +336,8 @@ func (c *Config) bindSettings() {
 		WithBindEnv(SettingsViewMinColumnWidth, 2),
 		WithBindEnv(SettingsViewMaxColumnWidth, 80),
 		WithBindEnv(SettingsViewColumnPadding, 15),
+
+		WithBindEnv(SettingsLoggerHideSensitive, false),
 	)
 
 	if err != nil {
@@ -1059,6 +1064,11 @@ func (c *Config) GetActivityLogMethodFilter() string {
 	return c.viper.GetString(SettingsActivityLogMethodFilter)
 }
 
+// HideSensitive hide sensitive information in log entries
+func (c *Config) HideSensitive() bool {
+	return c.viper.GetBool(SettingsLoggerHideSensitive)
+}
+
 // GetConfigPath get global settings file path
 func (c *Config) GetConfigPath() string {
 	return c.ExpandHomePath(c.viper.GetString(SettingsConfigPath))
@@ -1328,7 +1338,7 @@ func (c *Config) ReadConfigFiles(client *c8y.Client) (path string, err error) {
 
 	if err := v.ReadInConfig(); err == nil {
 		path = v.ConfigFileUsed()
-		c.Logger.Infof("Loaded settings: %s", HideSensitiveInformationIfActive(client, path))
+		c.Logger.Infof("Loaded settings: %s", c.HideSensitiveInformationIfActive(client, path))
 	}
 
 	// Load session
@@ -1361,17 +1371,18 @@ func (c *Config) ReadConfigFiles(client *c8y.Client) (path string, err error) {
 	return path, err
 }
 
-func HideSensitiveInformationIfActive(client *c8y.Client, message string) string {
+func (c *Config) HideSensitiveInformationIfActive(client *c8y.Client, message string) string {
 	if client == nil {
 		return message
 	}
 
-	if !strings.EqualFold(os.Getenv(c8y.EnvVarLoggerHideSensitive), "true") {
+	if !c.HideSensitive() {
 		return message
 	}
 
-	if os.Getenv("USERNAME") != "" {
-		message = strings.ReplaceAll(message, os.Getenv("USERNAME"), "******")
+	username := os.Getenv("USERNAME")
+	if username != "" {
+		message = strings.ReplaceAll(message, username, "******")
 	}
 
 	if client != nil {

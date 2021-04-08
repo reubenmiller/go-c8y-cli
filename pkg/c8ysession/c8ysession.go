@@ -83,22 +83,22 @@ func (s CumulocitySession) GetPassword() string {
 }
 
 // PrintSessionInfo print out the session information to writer (i.e. console or file)
-func PrintSessionInfo(w io.Writer, client *c8y.Client, session CumulocitySession) {
+func PrintSessionInfo(w io.Writer, client *c8y.Client, cfg *config.Config, session CumulocitySession) {
 	labelS := color.New(color.FgWhite, color.Faint)
 	label := labelS.SprintfFunc()
 	value := color.New(color.FgWhite).SprintFunc()
 	header := color.New(color.FgCyan).SprintFunc()
 
 	labelS.Fprintf(w, "---------------------  Cumulocity Session  ---------------------\n")
-	fmt.Fprintf(w, "\n    %s: %s\n\n\n", label("%s", "path"), header(config.HideSensitiveInformationIfActive(client, session.Path)))
+	fmt.Fprintf(w, "\n    %s: %s\n\n\n", label("%s", "path"), header(cfg.HideSensitiveInformationIfActive(client, session.Path)))
 	if session.Description != "" {
-		fmt.Fprintf(w, "%s : %s\n", label(fmt.Sprintf("%-12s", "description")), value(config.HideSensitiveInformationIfActive(client, session.Host)))
+		fmt.Fprintf(w, "%s : %s\n", label(fmt.Sprintf("%-12s", "description")), value(cfg.HideSensitiveInformationIfActive(client, session.Host)))
 	}
 
-	fmt.Fprintf(w, "%s : %s\n", label(fmt.Sprintf("%-12s", "host")), value(config.HideSensitiveInformationIfActive(client, session.Host)))
+	fmt.Fprintf(w, "%s : %s\n", label(fmt.Sprintf("%-12s", "host")), value(cfg.HideSensitiveInformationIfActive(client, session.Host)))
 	if session.Tenant != "" {
-		fmt.Fprintf(w, "%s : %s\n", label(fmt.Sprintf("%-12s", "tenant")), value(config.HideSensitiveInformationIfActive(client, session.Tenant)))
+		fmt.Fprintf(w, "%s : %s\n", label(fmt.Sprintf("%-12s", "tenant")), value(cfg.HideSensitiveInformationIfActive(client, session.Tenant)))
 	}
-	fmt.Fprintf(w, "%s : %s\n", label(fmt.Sprintf("%-12s", "username")), value(config.HideSensitiveInformationIfActive(client, session.Username)))
+	fmt.Fprintf(w, "%s : %s\n", label(fmt.Sprintf("%-12s", "username")), value(cfg.HideSensitiveInformationIfActive(client, session.Username)))
 	fmt.Fprintf(w, "\n")
 }
