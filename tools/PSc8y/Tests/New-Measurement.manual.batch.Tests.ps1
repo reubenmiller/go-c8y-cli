@@ -31,15 +31,18 @@ Describe -Name "New-Measurement" {
         $options = @{
             Workers = 1
             Data = $rawjson
-            Template = "{time:time.now}"
+            Template = "{time:_.Now()}"
         }
         # using Dry
         $options.Dry = $true
+        $options.DryFormat = "json"
         $output = $( $Response = Get-Content $inputFile | batch | New-Measurement @options ) 2>&1
         $LASTEXITCODE | Should -Be 0
-        $Response | Should -BeNullOrEmpty
-        $output | Should -ContainRequest "POST" -Total 2
-        $output | Should -ContainRequest "POST /measurement/measurements" -Total 2
+        
+        $requests = $output | ConvertFrom-Json
+        $requests | Should -HaveCount 2
+        $requests[0] | Should -MatchObject @{method = "POST"; pathEncoded = "/measurement/measurements"} -Property method, pathEncoded
+        $requests[1] | Should -MatchObject @{method = "POST"; pathEncoded = "/measurement/measurements"} -Property method, pathEncoded
 
         # send request
         $options.Dry = $false
@@ -71,12 +74,15 @@ Describe -Name "New-Measurement" {
         }
 
         $options.Dry = $true
+        $options.DryFormat = "json"
         $output = $( $Response = Get-Content $inputFile | batch | New-Measurement @options ) 2>&1
         
         $LASTEXITCODE | Should -Be 0
-        $Response | Should -BeNullOrEmpty
-        $output | Should -ContainRequest "POST" -Total 2
-        $output | Should -ContainRequest "POST /measurement/measurements" -Total 2
+        $requests = $output | ConvertFrom-Json
+        $requests | Should -HaveCount 2
+        $requests[0] | Should -MatchObject @{method = "POST"; pathEncoded = "/measurement/measurements"} -Property method, pathEncoded
+        $requests[1] | Should -MatchObject @{method = "POST"; pathEncoded = "/measurement/measurements"} -Property method, pathEncoded
+
 
         # send request
         $options.Dry = $false

@@ -11,7 +11,7 @@ Describe -Tag "Session" -Name "sessions-set" {
         c8y users create --userName $input02.userName --password $input02.password
 
         $encrypted02 = c8y sessions encryptText --text $input02.password --passphrase test --raw
-        $c8yhost = (Get-Session).host
+        $c8yhost = (Get-Session).host -replace "https://", ""
 
         $Session01 = Join-Path $tmpdir "session01.json"
         $Session02 = Join-Path $tmpdir "session02.json"

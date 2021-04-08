@@ -12,10 +12,12 @@ Describe -Name "Invoke-ClientRequest" {
         $output = Invoke-ClientRequest -Uri "/alarm/alarms" -QueryParameters @{
                 pageSize = "1";
             } `
-            -Dry 2>&1
+            -Dry -DryFormat json 2>&1
         $LASTEXITCODE | Should -Be 0
-        $output | Should -Not -BeNullOrEmpty
-        $output | Should -ContainRequest "GET /alarm/alarms?pageSize=1" -Total 1
+
+        $requests = $output | ConvertFrom-Json
+        $requests | Should -HaveCount 1
+        $requests[0] | Should -MatchObject @{method = "GET"; pathEncoded = "/alarm/alarms?pageSize=1"} -Property method, pathEncoded
     }
 
     It "should return powershell objects by default" {
@@ -58,10 +60,14 @@ Describe -Name "Invoke-ClientRequest" {
                 pageSize = "1";
             }
             Dry = $true
+            DryFormat = "json"
         }
         $output = Invoke-ClientRequest @options 2>&1
         $LASTEXITCODE | Should -Be 0
-        $output | Should -ContainRequest "GET /alarm/alarms?pageSize=1" -Total 1
+
+        $requests = $output | ConvertFrom-Json
+        $requests | Should -HaveCount 1
+        $requests[0] | Should -MatchObject @{method = "GET"; pathEncoded = "/alarm/alarms?pageSize=1"} -Property method, pathEncoded
     }
 
     It "return the raw response when a non-json accept header is used" {

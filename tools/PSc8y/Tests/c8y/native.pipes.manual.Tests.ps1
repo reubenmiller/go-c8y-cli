@@ -7,27 +7,33 @@ Describe -Name "c8y pipes" {
 
     Context "Piping to single commands" {
         It "Pipe by id a simple getter" {
-            $output = @("1", "2") | c8y events get --dry 2>&1
+            $output = @("1", "2") | c8y events get --dry --dryFormat json 2>&1
             $LASTEXITCODE | Should -Be 0
-            $output | Should -ContainRequest "GET /event/events/1" -Total 1
-            $output | Should -ContainRequest "GET /event/events/2" -Total 1
-            $output | Should -ContainRequest "GET /event/events" -Total 2
+            
+            $requests = $output | ConvertFrom-Json
+            $requests | Should -HaveCount 2
+            $requests[0] | Should -MatchObject @{method = "GET"; pathEncoded = "/event/events/1"} -Property method, pathEncoded
+            $requests[1] | Should -MatchObject @{method = "GET"; pathEncoded = "/event/events/2"} -Property method, pathEncoded
         }
 
         It "Pipe by id update command" {
-            $output = @("1", "2") | c8y events update --dry 2>&1
+            $output = @("1", "2") | c8y events update --dry --dryFormat json 2>&1
             $LASTEXITCODE | Should -Be 0
-            $output | Should -ContainRequest "PUT" -Total 2
-            $output | Should -ContainRequest "PUT /event/events/1" -Total 1
-            $output | Should -ContainRequest "PUT /event/events/2" -Total 1
+
+            $requests = $output | ConvertFrom-Json
+            $requests | Should -HaveCount 2
+            $requests[0] | Should -MatchObject @{method = "PUT"; pathEncoded = "/event/events/1"} -Property method, pathEncoded
+            $requests[1] | Should -MatchObject @{method = "PUT"; pathEncoded = "/event/events/2"} -Property method, pathEncoded
         }
 
         It "Pipe by id delete command" {
             $output = @("1", "2") | c8y events delete --dry 2>&1
             $LASTEXITCODE | Should -Be 0
-            $output | Should -ContainRequest "DELETE" -Total 2
-            $output | Should -ContainRequest "DELETE /event/events/1" -Total 1
-            $output | Should -ContainRequest "DELETE /event/events/2" -Total 1
+
+            $requests = $output | ConvertFrom-Json
+            $requests | Should -HaveCount 2
+            $requests[0] | Should -MatchObject @{method = "DELETE"; pathEncoded = "/event/events/1"} -Property method, pathEncoded
+            $requests[1] | Should -MatchObject @{method = "DELETE"; pathEncoded = "/event/events/2"} -Property method, pathEncoded
         }
 
         It "Pipe by id create command" {
@@ -62,11 +68,13 @@ Describe -Name "c8y pipes" {
         }
 
         It "Empty pipe. Empty values should not cause a lookup, however they should also not stop the iteration" {
-            $output = @("", "") | c8y events list --dry 2>&1
+            $output = @("", "") | c8y events list --dry --dryFormat json 2>&1
             $LASTEXITCODE | Should -Be 0
-            $output | Should -ContainRequest "GET" -Total 2
-            $output | Should -ContainRequest "GET /event/events?source" -Total 0
-            $output | Should -ContainRequest "GET /event/events" -Total 2
+
+            $requests = $output | ConvertFrom-Json
+            $requests | Should -HaveCount 2
+            $requests[0] | Should -MatchObject @{method = "GET"; pathEncoded = "/event/events"} -Property method, pathEncoded
+            $requests[1] | Should -MatchObject @{method = "GET"; pathEncoded = "/event/events"} -Property method, pathEncoded
         }
 
         It "Pipe by id object to query parameters" {
@@ -118,8 +126,9 @@ Describe -Name "c8y pipes" {
         }
 
         It "Pipe by name which do not match to query parameters ignoring names that does not exist" {
-            $output = @("pipeNameDoesNotExist1", "pipeNameDoesNotExist2", "pipeNameDoesNotExist3") | c8y events list --dry --verbose 2>&1
+            $output = @("pipeNameDoesNotExist1", "pipeNameDoesNotExist2", "pipeNameDoesNotExist3") | c8y events list --dry --dryFormat markdown --verbose 2>&1
             $LASTEXITCODE | Should -Be 104
+
             $output | Should -ContainRequest "GET" -Total 3
             $output | Should -ContainRequest "GET /inventory/managedObjects" -Total 3
             $output | Should -ContainRequest "GET /event/events" -Total 0 -Because "Unresolved names should not trigger queries"
@@ -144,42 +153,51 @@ Describe -Name "c8y pipes" {
         }
 
         It "Get results without piped variable" {
-            $output = c8y events list --dry 2>&1
+            $output = c8y events list --dry --dryFormat json 2>&1
             $LASTEXITCODE | Should -Be 0
-            $output | Should -ContainRequest "GET" -Total 1
-            $output | Should -ContainRequest "GET /event/events" -Total 1
-            $output | Should -ContainRequest "GET /event/events/source" -Total 0
+
+            $requests = $output | ConvertFrom-Json
+            $requests | Should -HaveCount 1
+            $requests[0] | Should -MatchObject @{method = "GET"; pathEncoded = "/event/events"} -Property method, pathEncoded
         }
     }
 
     Context "Pipe to optional query parameters" {
         It "Pipe an ids to a query parameter" {
-            $output = @("1", "2") | c8y events deleteCollection --dry 2>&1
+            $output = @("1", "2") | c8y events deleteCollection --dry --dryFormat json 2>&1
             $LASTEXITCODE | Should -Be 0
-            $output | Should -ContainRequest "DELETE /event/events?source=1" -Total 1
-            $output | Should -ContainRequest "DELETE /event/events?source=2" -Total 1
-            $output | Should -ContainRequest "DELETE /event/events" -Total 2
+            $requests = $output | ConvertFrom-Json
+            $requests | Should -HaveCount 2
+            $requests[0] | Should -MatchObject @{method = "DELETE"; path = "/event/events"; query = "source=1"} -Property method, path, query
+            $requests[1] | Should -MatchObject @{method = "DELETE"; path = "/event/events"; query = "source=2"} -Property method, path, query
         }
 
         It "Pipe an ids to a query parameter" {
-            $output = c8y events deleteCollection --dry 2>&1
+            $output = c8y events deleteCollection --dry --dryFormat json 2>&1
             $LASTEXITCODE | Should -Be 0
-            $output | Should -ContainRequest "DELETE /event/events?source" -Total 0
-            $output | Should -ContainRequest "DELETE /event/events" -Total 1
+            $requests = $output | ConvertFrom-Json
+            $requests | Should -HaveCount 1
+            $requests[0] | Should -MatchObject @{method = "DELETE"; pathEncoded = "/event/events" } -Property method, pathEncoded
         }
     }
 
     Context "Pipe to optional body" {
-        It -Skip -Tag @("Deprecated:UsingBatch") "Pipe an ids to a body parameter" {
-            $output = @("name1", "name2") | c8y inventory create --dry 2>&1
+        It "Pipe values to a body parameter" {
+            $output = @("name1", "name2") | c8y inventory create --dry --dryFormat json 2>&1
             $LASTEXITCODE | Should -Be 0
-            $output | Should -ContainRequest "POST /inventory/managedObjects" -Total 2
+            $requests = $output | ConvertFrom-Json
+            $requests | Should -HaveCount 2
+            $requests[0] | Should -MatchObject @{method = "POST"; path = "/inventory/managedObjects"; body = @{name = "name1"}} -Property method, path, body
+            $requests[1] | Should -MatchObject @{method = "POST"; path = "/inventory/managedObjects"; body = @{name = "name2"}} -Property method, path, body
         }
 
-        It "No pipe input to a body parameter" {
-            $output = c8y inventory create --dry 2>&1
+        It "No pipe input to an optional body parameter" {
+            $output = c8y inventory create --dry --dryFormat json 2>&1
             $LASTEXITCODE | Should -Be 0
-            $output | Should -ContainRequest "POST /inventory/managedObjects" -Total 1
+
+            $requests = $output | ConvertFrom-Json
+            $requests | Should -HaveCount 1
+            $requests[0] | Should -MatchObject @{method = "POST"; path = "/inventory/managedObjects"; body = @{}} -Property method, path, body
         }
     }
 

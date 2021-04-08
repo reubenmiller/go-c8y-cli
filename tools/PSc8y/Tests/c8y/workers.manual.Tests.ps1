@@ -10,20 +10,24 @@ Describe -Name "c8y pipes" {
 
     Context "Job limits" {
         It "stops early due to job limit being exceeded" {
-            $output = @("1", "2", "3") | c8y events get --maxJobs 1 --dry --verbose 2>&1
+            $output = @("1", "2", "3") | c8y events get --maxJobs 1 --dry --dryFormat json --withError
             $LASTEXITCODE | Should -Be 105
-            $output | Should -ContainRequest "GET /event/events/1" -Total 1
-            $output | Should -ContainRequest "GET /event/events" -Total 1
+
+            $requests = $output[0..$($output.Length-2)] | ConvertFrom-Json
+            $requests | Should -HaveCount 1
+            $requests[0] | Should -MatchObject @{method = "GET"; pathEncoded = "/event/events/1"} -Property method, pathEncoded
         }
 
         It "stops early due to job limit being exceeded using env variable" {
             $env:C8Y_SETTINGS_DEFAULTS_MAXJOBS = "2"
-            $output = @("1", "2", "3") | c8y events get --dry --verbose 2>&1
+            $output = @("1", "2", "3") | c8y events get --dry --dryFormat json --withError
             $env:C8Y_SETTINGS_DEFAULTS_MAXJOBS = ""
             $LASTEXITCODE | Should -Be 105
-            $output | Should -ContainRequest "GET /event/events/1" -Total 1
-            $output | Should -ContainRequest "GET /event/events/2" -Total 1
-            $output | Should -ContainRequest "GET /event/events" -Total 2
+
+            $requests = $output[0..$($output.Length-2)] | ConvertFrom-Json
+            $requests | Should -HaveCount 2
+            $requests[0] | Should -MatchObject @{method = "GET"; pathEncoded = "/event/events/1"} -Property method, pathEncoded
+            $requests[1] | Should -MatchObject @{method = "GET"; pathEncoded = "/event/events/2"} -Property method, pathEncoded
         }
 
         It "aborts on job errors" {
