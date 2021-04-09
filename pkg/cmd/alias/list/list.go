@@ -5,7 +5,7 @@ import (
 	"io"
 	"sort"
 
-	"github.com/MakeNowJust/heredoc"
+	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmdutil"
 	"github.com/reubenmiller/go-c8y-cli/pkg/iostreams"
 	"github.com/spf13/cobra"

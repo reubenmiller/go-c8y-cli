@@ -2,7 +2,6 @@ module github.com/reubenmiller/go-c8y-cli
 
 require (
 	github.com/AlecAivazis/survey/v2 v2.2.9
-	github.com/MakeNowJust/heredoc v1.0.0
 	github.com/MakeNowJust/heredoc/v2 v2.0.1
 	github.com/araddon/dateparse v0.0.0-20210207001429-0eec95c9db7e
 	github.com/cli/safeexec v1.0.0
@@ -40,6 +39,7 @@ require (
 	go.uber.org/zap v1.16.0
 	golang.org/x/crypto v0.0.0-20210314154223-e6e6c4f2bb5b
 	golang.org/x/sys v0.0.0-20210309074719-68d13333faf2 // indirect
+	golang.org/x/term v0.0.0-20210406210042-72f3dc4e9b72
 	golang.org/x/text v0.3.4 // indirect
 	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b // indirect
 	moul.io/http2curl v1.0.0

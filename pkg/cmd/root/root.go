@@ -5,7 +5,7 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/MakeNowJust/heredoc"
+	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/reubenmiller/go-c8y-cli/pkg/activitylogger"
 	"github.com/reubenmiller/go-c8y-cli/pkg/c8ydefaults"
 	activityLogCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/activitylog"

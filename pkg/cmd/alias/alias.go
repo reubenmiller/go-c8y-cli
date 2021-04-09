@@ -1,7 +1,7 @@
 package alias
 
 import (
-	"github.com/MakeNowJust/heredoc"
+	"github.com/MakeNowJust/heredoc/v2"
 	deleteCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/alias/delete"
 	listCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/alias/list"
 	setCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/alias/set"
