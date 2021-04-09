@@ -1,7 +1,6 @@
 #
 # Variables
 #
-C8Y_PKGS = $$(go list ./... | grep -v /vendor/)
 TEST_THROTTLE_LIMIT=10
 TEST_FILE_FILTER = .+
 GITHUB_TOKEN ?=
