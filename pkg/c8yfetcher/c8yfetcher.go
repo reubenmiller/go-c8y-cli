@@ -108,10 +108,8 @@ func lookupEntity(fetch EntityFetcher, values []string, getID bool) ([]entityRef
 						Data: resultSet,
 					})
 				}
-			} else {
-				// TODO: Handle error
-				// Logger.Errorf("Failed to get entity by id. %s", err)
 			}
+			// TODO: Handle error
 		} else {
 			entities = append(entities, entityReference{
 				ID: id,
@@ -130,10 +128,8 @@ func lookupEntity(fetch EntityFetcher, values []string, getID bool) ([]entityRef
 					Data: resultSet,
 				})
 			}
-		} else {
-			// TODO: Handle error
-			// Logger.Errorf("Failed to get entity by id. %s", err)
 		}
+		// TODO: Handle error
 	}
 
 	return entities, nil
