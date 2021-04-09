@@ -8,6 +8,7 @@ C8Y_PKGS = $$(go list ./... | grep -v /vendor/)
 GOMOD=$(GOCMD) mod
 TEST_THROTTLE_LIMIT=10
 TEST_FILE_FILTER = .+
+# GITHUB_TOKEN =
 
 # Set VERSION from git describe
 VERSION := $(shell git describe | sed "s/^v\?\([0-9]\{1,\}\.[0-9]\{1,\}\.[0-9]\{1,\}\).*/\1/")
@@ -211,6 +212,9 @@ publish-docker: show-version build build-docker		## Publish docker c8y cli image
 
 publish-local-snapshot:		## Publish local snapshot release 
 	goreleaser --snapshot --skip-publish --rm-dist
+
+publish-release:		## Publish release 
+	goreleaser --rm-dist
 
 run-docker-bash:
 	sudo docker run -it --rm \

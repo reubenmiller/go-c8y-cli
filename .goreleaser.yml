@@ -45,6 +45,10 @@ archives:
     files:
       - LICENSE
       - ./share/man/man1/c8y*.1
+      - ./tools/shell/c8y.plugin.*
+      - ./examples/views/default/*.json
+      - ./examples/templates/test/test*.jsonnet
+      - ./examples/settings.json
   - id: windows
     builds: [windows]
     <<: *archive_defaults
@@ -52,6 +56,10 @@ archives:
     format: zip
     files:
       - LICENSE
+      - ./tools/shell/c8y.plugin.*
+      - ./examples/views/default/*.json
+      - ./examples/templates/test/test*.jsonnet
+      - ./examples/settings.json
 
 nfpms:
   - license: MIT
