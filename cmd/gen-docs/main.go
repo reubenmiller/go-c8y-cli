@@ -6,8 +6,17 @@ import (
 	"strings"
 
 	"github.com/reubenmiller/go-c8y-cli/internal/docs"
+	"github.com/reubenmiller/go-c8y-cli/pkg/activitylogger"
+	"github.com/reubenmiller/go-c8y-cli/pkg/cmd/factory"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmd/root"
+	"github.com/reubenmiller/go-c8y-cli/pkg/config"
+	"github.com/reubenmiller/go-c8y-cli/pkg/console"
+	"github.com/reubenmiller/go-c8y-cli/pkg/dataview"
+	"github.com/reubenmiller/go-c8y-cli/pkg/logger"
+	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/pflag"
+	"github.com/spf13/viper"
+	"go.uber.org/zap/zapcore"
 )
 
 func main() {
@@ -35,10 +44,8 @@ func main() {
 		fatal("no dir set")
 	}
 
-	rootCmd := root.NewCmdRoot(nil, "", "")
+	rootCmd := createCmdRoot()
 	rootCmd.InitDefaultHelpCmd()
-	// rootCmd.ConfigureRootCmd()
-	// rootCmd.ConfigureRootCmd()
 
 	err := os.MkdirAll(*dir, 0755)
 	if err != nil {
@@ -90,4 +97,64 @@ func linkHandler(name string, opts ...string) string {
 func fatal(msg interface{}) {
 	fmt.Fprintln(os.Stderr, msg)
 	os.Exit(1)
+}
+
+func createCmdRoot() *root.CmdRoot {
+	var client *c8y.Client
+	var dataView *dataview.DataView
+	var consoleHandler *console.Console
+	var logHandler *logger.Logger
+	var activityLoggerHandler *activitylogger.ActivityLogger
+	var configHandler = config.NewConfig(viper.GetViper())
+
+	// init logger
+	logHandler = logger.NewLogger("", logger.Options{
+		Level: zapcore.WarnLevel,
+		Debug: false,
+	})
+
+	if _, err := configHandler.ReadConfigFiles(nil); err != nil {
+		logHandler.Infof("Failed to read configuration. Trying to proceed anyway. %s", err)
+	}
+
+	// cmd factory
+	configFunc := func() (*config.Config, error) {
+		if configHandler == nil {
+			return nil, fmt.Errorf("config is missing")
+		}
+		return configHandler, nil
+	}
+	clientFunc := func() (*c8y.Client, error) {
+		if client == nil {
+			return nil, fmt.Errorf("client is missing")
+		}
+		return client, nil
+	}
+	loggerFunc := func() (*logger.Logger, error) {
+		if logHandler == nil {
+			return nil, fmt.Errorf("logger is missing")
+		}
+		return logHandler, nil
+	}
+	activityLoggerFunc := func() (*activitylogger.ActivityLogger, error) {
+		if activityLoggerHandler == nil {
+			return nil, fmt.Errorf("activityLogger is missing")
+		}
+		return activityLoggerHandler, nil
+	}
+	dataViewFunc := func() (*dataview.DataView, error) {
+		if dataView == nil {
+			return nil, fmt.Errorf("dataView is missing")
+		}
+		return dataView, nil
+	}
+	consoleFunc := func() (*console.Console, error) {
+		if consoleHandler == nil {
+			return nil, fmt.Errorf("console is missing")
+		}
+		return consoleHandler, nil
+	}
+	cmdFactory := factory.New("", "", configFunc, clientFunc, loggerFunc, activityLoggerFunc, dataViewFunc, consoleFunc)
+
+	return root.NewCmdRoot(cmdFactory, "", "")
 }
