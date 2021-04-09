@@ -34,20 +34,7 @@ None :)
 
 ### Naming Consistency
 
-None
-
 ### Bugs
-
-* Piping a non-existant devices still sends a request
-
-    ```sh
-     c8y devices list --name "doesnotexist" -p 100 | c8y devices delete --withError
-     2021-03-26T10:49:06.416Z        ERROR   serverError:  DELETE https://{example.url}/inventory/managedObjects/%7Bid%7D: 400 
-
-    c8y devices delete --withError
-    ```
-
-    Expected result: if the template variables is not expanded then it should throw an error and not send a request
 
 * Creating alias on windows uses different quoting to shell! Just show in documentation and/or examples
         
@@ -62,27 +49,20 @@ None
 
 ### Commands
 
-* add wait for operation to go-c8y-cli
-
 * Create c8y names generator
     * name with random values
         * `c8y generate names -f "testdevice_%03d { .Index } { .RandomName }" --count 10 --start 0 --end 10`
         * `c8y generate names -f "%d" --count 10 --start 0 --end 10`
+* custom command to parse input json and apply --select, --filter etc
+    * Workaround is to use c8y template execute --template "input.value" --filter "type eq myvalue" --select id,name
 
-### New Functions
+### New Functions   
 
 * Add option to print out request and response as markdown
-
-* Create activity log cmdlets?
-  * Get recent history, get commands with filter (api, host, method etc.)
-
-* Allow global --sessionUsername --sessionPassword flags to override for once off requests (i.e. for device credentials)
-    * usecase: simulate registering as a device, without having to create a session file with the same url etc.
 
 ### Refactoring
 
 * Move dataview to configuration
-* Combine set session with login so only one command has to be used
 
 ### Completions
 
@@ -101,6 +81,40 @@ None
 
 No unreleased features
 
+* Support dotnotation in --data
+    ```
+    c8y devices update --data "c8y_RequiredAvailability.responseInterval=240"
+
+    => 
+    {
+        "c8y_RequiredAvailability": {
+            "responseInterval": 240
+        }
+    }
+    ```
+
+* Table view columns min, max and padding can be controlled via settings
+
+* Bearer authentication header is used when using OAUTH2 Internal authentication instead of cookies
+
+* c8y api
+    * If contentType is not json, dont try to convert it to json
+
+* Add fixed delay before processing job
+    usecase: Wait for operations and set apply operation transitions (with 1s delay)
+        PENDING => EXECUTING
+        EXECUTING => SUCCESSFUL 
+
+    ```sh
+    c8y operations subscribe --device 454373 --duration 1000 --actionTypes CREATE --actionTypes UPDATE --filter "status != SUCCESSFUL" | c8y operations update --delayBefore 1000 --template "{ status: if input.value.status == 'PENDING' then 'EXECUTING' else 'SUCCESSFUL' }"
+    ```
+
+* New command `c8y operations wait --device 12345` to wait for a command to be finished
+
+* Activity logger command
+    ```
+    c8y activitylog list --dateFrom -1h
+    ```
 * Removed Get-SupportedOperation command. The supported operations can be read from the managed object using a select statment
     ```sh
     Get-Device -Select "c8y_SupportedOperations**"
