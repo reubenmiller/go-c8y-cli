@@ -1,11 +1,7 @@
-# Copyright 2012 tsuru authors. All rights reserved.
-# Use of this source code is governed by a BSD-style
-# license that can be found in the LICENSE file.
-
-GOCMD=go
-BUILD_DIR = build
+#
+# Variables
+#
 C8Y_PKGS = $$(go list ./... | grep -v /vendor/)
-GOMOD=$(GOCMD) mod
 TEST_THROTTLE_LIMIT=10
 TEST_FILE_FILTER = .+
 # GITHUB_TOKEN =
@@ -18,161 +14,21 @@ ENV_FILE ?= c8y.env
 export $(shell sed 's/=.*//' $(ENV_FILE) 2>/dev/null)
 export C8Y_SETTINGS_CI=true
 
-.PHONY: all check-path test race docs install tsurud
+.PHONY: all test install docs-c8y manpages
 
-all: check-path build test
+all: build test
 
+# ---------------------------------------------------------------
+# Helpers
+# ---------------------------------------------------------------
 show-version:		## Show current version
 	@echo "VERSION: $(VERSION)"
-
-# Check that given variables are set and all have non-empty values,
-# die with an error otherwise.
-#
-# Params:
-#   1. Variable name(s) to test.
-#   2. (optional) Error message to print.
-check_defined = \
-    $(strip $(foreach 1,$1, \
-        $(call __check_defined,$1,$(strip $(value 2)))))
-__check_defined = \
-    $(if $(value $1),, \
-      $(error Undefined $1$(if $2, ($2))))
-
-# It does not support GOPATH with multiple paths.
-check-path:
-	ifndef GOPATH
-		@echo "FATAL: you must declare GOPATH environment variable, for more"
-		@echo "       details, please check"
-		@echo "       http://golang.org/doc/code.html#GOPATH"
-		@exit 1
-	endif
-	@exit 0
-
-check-integration-variables:
-	$(call check_defined, C8Y_HOST, Cumulocity host url. i.e. https://cumulocity.com)
-	$(call check_defined, C8Y_TENANT , Cumulocity tenant)
-	$(call check_defined, C8Y_USER, Cumulocity username)
-	$(call check_defined, C8Y_PASSWORD, Cumulocity password)
-	@exit 0
-
-gh_pages_install:	## Install github pages dependencies for viewing docs locally
-	cd docs && bundle install
-
-gh_pages_update:	## Update github pages dependencies
-	cd docs && bundle update
-
-gh_pages:			## Run github pages locally
-	cd docs && bundle exec jekyll server --baseurl ""
 
 init_setup: install_c8y
 	pwsh -File ./scripts/build-powershell/install.ps1
 
-install_powershell_deps:
-docs-powershell: build		## Update the powershell docs
-	pwsh -File ./scripts/build-powershell/build-docs.ps1 -Recreate
-
-test: test_powershell test_powershell_sessions
-
-lint: metalint
-
 install:
 	go mod download
-
-metalint:
-	go get -u github.com/golangci/golangci-lint/cmd/golangci-lint
-	go install $(C8Y_PKGS)
-	go test -i $(C8Y_PKGS)
-	echo "$(C8Y_PKGS)" | sed 's|github.com/tsuru/tsuru/|./|' | xargs -t -n 4 \
-		time golangci-lint run -c ./.golangci.yml
-
-race:
-	go test $(GO_EXTRAFLAGS) -race -i $(C8Y_PKGS)
-	go test $(GO_EXTRAFLAGS) -race $(C8Y_PKGS)
-
-
-docs:
-	godoc -http=":6060"
-
-release:
-	@if [ ! $(version) ]; then \
-		echo "version parameter is required... use: make release version=<value>"; \
-		exit 1; \
-	fi
-
-	$(eval PATCH := $(shell echo $(version) | sed "s/^\([0-9]\{1,\}\.[0-9]\{1,\}\.[0-9]\{1,\}\).*/\1/"))
-	$(eval MINOR := $(shell echo $(PATCH) | sed "s/^\([0-9]\{1,\}\.[0-9]\{1,\}\).*/\1/"))
-	@if [ $(MINOR) == $(PATCH) ]; then \
-		echo "invalid version"; \
-		exit 1; \
-	fi
-
-	@if [ ! -f docs/releases/go-c8y-cli/$(PATCH).rst ]; then \
-		echo "to release the $(version) version you should create a release notes for version $(PATCH) first."; \
-		exit 1; \
-	fi
-
-	@echo "Releasing go-c8y $(version) version."
-	@echo "Replacing version string."
-
-	# @git add docs/conf.py api/server.go
-	@git commit -m "bump to $(version)"
-
-	@echo "Creating $(version) tag."
-	@git tag $(version)
-
-	@git push --tags
-	@git push origin master
-
-	@echo "$(version) released!"
-
-update-vendor:
-	GO111MODULE=on $(GOMOD) download
-	GO111MODULE=on $(GOMOD) vendor
-
-cpu-trace:
-	$(GOCMD) test -bench=. -cpuprofile cpu.prof github.com/reubenmiller/go-c8y-cli/pkg/cmd
-	$(GOCMD) tool pprof -svg cpu.prof > cpu.svg
-
-trace:
-	GO111MODULE=on $(GOCMD) test -trace trace.out github.com/reubenmiller/go-c8y-cli/pkg/cmd
-
-view-trace:
-	$(GOCMD) tool trace trace.out
-
-
-
-profile:
-	GO111MODULE=on $(GOCMD) test -bench=Div_SSA -cpuprofile=cpu.pb.gz github.com/reubenmiller/go-c8y-cli/pkg/cmd
-
-build: update_spec build_cli build_powershell
-
-build_cli:
-	pwsh -File scripts/build-cli/build.ps1;
-
-generate_go_code: update_spec		# Generate go code from spec
-	pwsh -File scripts/build-cli/build.ps1 -SkipBuildBinary;
-
-build_cli_fast:
-	pwsh -File ./scripts/build-cli/build-binary.ps1 -OutputDir ./tools/PSc8y/dist/PSc8y/Dependencies -Target "linux:amd64"
-	cp ./tools/PSc8y/dist/PSc8y/Dependencies/c8y.linux /workspaces/go-c8y-cli/tools/PSc8y/Dependencies/c8y.linux
-
-#
-# Powershell Module
-#
-update_spec:
-	pwsh -File scripts/generate-spec.ps1;
-
-build_powershell:
-	pwsh -File scripts/build-powershell/build.ps1;
-
-test_powershell:
-	pwsh -ExecutionPolicy bypass -NonInteractive -File tools/PSc8y/test.parallel.ps1 -ThrottleLimit $(TEST_THROTTLE_LIMIT) -TestFileFilter "$(TEST_FILE_FILTER)" -TestFileExclude "Set-Session|Get-SessionHomePath|Login|DisableCommands|BulkOperation|activitylog"
-
-test_powershell_sessions:		## Run tests which interfere with the session variable
-	pwsh -ExecutionPolicy bypass -NonInteractive -File tools/PSc8y/test.parallel.ps1 -ThrottleLimit 1 -TestFileFilter "Set-Session|Get-SessionHomePath|Login|DisableCommands|BulkOperation|activitylog"
-
-test_bash:
-	./tools/shell/tests/test.sh
 
 install_c8y: build			## Install c8y in dev environment
 	@if [ ! -f /usr/local/bin/c8y ]; then \
@@ -183,17 +39,66 @@ install_c8y: build			## Install c8y in dev environment
 
 	@echo Installed c8y successfully
 
-publish:
-	pwsh -File ./scripts/build-powershell/publish.ps1
+# ---------------------------------------------------------------
+# Docs
+# ---------------------------------------------------------------
+docs-powershell: build		## Update the powershell docs
+	pwsh -File ./scripts/build-powershell/build-docs.ps1 -Recreate
 
-.PHONY: manpages
-manpages:
-	go run ./cmd/gen-docs --man-page --doc-path "./share/man/man1/"
-
-docs-c8y:
+docs-c8y:					## create c8y documentation
 	go run ./cmd/gen-docs --website --doc-path "docs/_c8y/commands"
 
-build-docker:
+manpages:					## create c8y man packages
+	go run ./cmd/gen-docs --man-page --doc-path "./share/man/man1/"
+
+
+# ---------------------------------------------------------------
+# Github pages
+# ---------------------------------------------------------------
+gh_pages_install:	## Install github pages dependencies for viewing docs locally
+	cd docs && bundle install
+
+gh_pages_update:	## Update github pages dependencies
+	cd docs && bundle update
+
+gh_pages:			## Run github pages locally
+	cd docs && bundle exec jekyll server --baseurl ""
+
+# ---------------------------------------------------------------
+# Spec and code generation
+# ---------------------------------------------------------------
+update_spec:					## Update json specifications
+	pwsh -File scripts/generate-spec.ps1;
+
+generate_go_code: update_spec		## Generate go code from spec
+	pwsh -File scripts/build-cli/build.ps1 -SkipBuildBinary;
+
+# ---------------------------------------------------------------
+# Linting
+# ---------------------------------------------------------------
+lint:
+	go get -u github.com/golangci/golangci-lint/cmd/golangci-lint
+	go install $(C8Y_PKGS)
+	go test -i $(C8Y_PKGS)
+	echo "$(C8Y_PKGS)" | sed 's|github.com/tsuru/tsuru/|./|' | xargs -t -n 4 \
+		time golangci-lint run -c ./.golangci.yml
+
+# ---------------------------------------------------------------
+# Build
+# ---------------------------------------------------------------
+build: update_spec build_cli build_powershell
+
+build_cli:						## Generate the cli code and build the binaries
+	pwsh -File scripts/build-cli/build.ps1;
+
+build_cli_fast:					## Only build the linux version of the c8y binary
+	pwsh -File ./scripts/build-cli/build-binary.ps1 -OutputDir ./tools/PSc8y/dist/PSc8y/Dependencies -Target "linux:amd64"
+	cp ./tools/PSc8y/dist/PSc8y/Dependencies/c8y.linux /workspaces/go-c8y-cli/tools/PSc8y/Dependencies/c8y.linux
+
+build_powershell:				## Build the powershell module
+	pwsh -File scripts/build-powershell/build.ps1;
+
+build-docker:					## Build the docker images
 	@cp tools/PSc8y/Dependencies/c8y.linux ./docker/c8y.linux
 	@cp tools/shell/c8y.plugin.zsh ./docker/c8y.plugin.zsh
 	@cp tools/shell/c8y.plugin.sh ./docker/c8y.plugin.sh
@@ -206,16 +111,40 @@ build-docker:
 	@rm ./docker/c8y.plugin.zsh
 	@rm ./docker/c8y.plugin.sh
 
+# ---------------------------------------------------------------
+# Tests
+# ---------------------------------------------------------------
+test: test_powershell test_powershell_sessions		## Run all tests
+
+test_powershell:				## Run powershell tests
+	pwsh -ExecutionPolicy bypass -NonInteractive -File tools/PSc8y/test.parallel.ps1 -ThrottleLimit $(TEST_THROTTLE_LIMIT) -TestFileFilter "$(TEST_FILE_FILTER)" -TestFileExclude "Set-Session|Get-SessionHomePath|Login|DisableCommands|BulkOperation|activitylog"
+
+test_powershell_sessions:		## Run powershell tests which interfere with the session variable
+	pwsh -ExecutionPolicy bypass -NonInteractive -File tools/PSc8y/test.parallel.ps1 -ThrottleLimit 1 -TestFileFilter "Set-Session|Get-SessionHomePath|Login|DisableCommands|BulkOperation|activitylog"
+
+test_bash:
+	./tools/shell/tests/test.sh
+
+
+# ---------------------------------------------------------------
+# Publish
+# ---------------------------------------------------------------
+publish:					## Publish powershell module
+	pwsh -File ./scripts/build-powershell/publish.ps1
+
 publish-docker: show-version build build-docker		## Publish docker c8y cli images
 	@chmod +x ./scripts/publish-docker.sh
 	@sudo CR_PAT=$(CR_PAT) VERSION=$(VERSION) ./scripts/publish-docker.sh
 
-publish-local-snapshot:		## Publish local snapshot release 
+publish-local-snapshot:		## Publish local snapshot release
 	goreleaser --snapshot --skip-publish --rm-dist
 
-publish-release:		## Publish release 
+publish-release:			## Publish release
 	goreleaser --rm-dist
 
+# ---------------------------------------------------------------
+# Docker examples
+# ---------------------------------------------------------------
 run-docker-bash:
 	sudo docker run -it --rm \
 		-e C8Y_USE_ENVIRONMENT=true \
