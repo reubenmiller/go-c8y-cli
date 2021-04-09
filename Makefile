@@ -4,7 +4,7 @@
 C8Y_PKGS = $$(go list ./... | grep -v /vendor/)
 TEST_THROTTLE_LIMIT=10
 TEST_FILE_FILTER = .+
-# GITHUB_TOKEN =
+GITHUB_TOKEN ?=
 
 # Set VERSION from git describe
 VERSION := $(shell git describe | sed "s/^v\?\([0-9]\{1,\}\.[0-9]\{1,\}\.[0-9]\{1,\}\).*/\1/")
@@ -77,11 +77,7 @@ generate_go_code: update_spec		## Generate go code from spec
 # Linting
 # ---------------------------------------------------------------
 lint:
-	go get -u github.com/golangci/golangci-lint/cmd/golangci-lint
-	go install $(C8Y_PKGS)
-	go test -i $(C8Y_PKGS)
-	echo "$(C8Y_PKGS)" | sed 's|github.com/tsuru/tsuru/|./|' | xargs -t -n 4 \
-		time golangci-lint run -c ./.golangci.yml
+	golangci-lint run
 
 # ---------------------------------------------------------------
 # Build
