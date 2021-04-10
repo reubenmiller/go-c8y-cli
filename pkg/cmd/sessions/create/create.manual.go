@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/url"
-	"os"
 	"path"
 	"path/filepath"
 	"strings"
@@ -17,6 +16,7 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmdutil"
 	"github.com/reubenmiller/go-c8y-cli/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/pkg/config"
+	"github.com/reubenmiller/go-c8y-cli/pkg/fileutilities"
 	"github.com/reubenmiller/go-c8y-cli/pkg/logger"
 	"github.com/reubenmiller/go-c8y-cli/pkg/prompt"
 	"github.com/spf13/cobra"
@@ -280,7 +280,7 @@ func (n *CmdCreate) writeSessionFile(outputDir, outputFile string, session c8yse
 	outputPath := path.Join(outputDir, outputFile)
 
 	if outputDir != "" {
-		if err := os.MkdirAll(outputDir, os.ModePerm); err != nil {
+		if err := fileutilities.CreateDirs(outputDir); err != nil {
 			log.Errorf("failed to create folder. folder=%s, err=%s", outputDir, err)
 			return err
 		}

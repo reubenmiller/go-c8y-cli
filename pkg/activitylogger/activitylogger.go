@@ -15,6 +15,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/reubenmiller/go-c8y-cli/pkg/fileutilities"
 	"github.com/spf13/cobra"
 	"github.com/tidwall/gjson"
 )
@@ -52,7 +53,7 @@ func NewActivityLogger(options Options) (*ActivityLogger, error) {
 	var err error
 
 	if options.OutputFolder != "" {
-		if err := os.MkdirAll(options.OutputFolder, os.ModePerm); err != nil {
+		if err := fileutilities.CreateDirs(options.OutputFolder); err != nil {
 			return nil, err
 		}
 	}

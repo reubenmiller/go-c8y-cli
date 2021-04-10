@@ -5,6 +5,7 @@ import (
 	"path/filepath"
 
 	"github.com/mitchellh/go-homedir"
+	"github.com/reubenmiller/go-c8y-cli/pkg/fileutilities"
 )
 
 func (c *Config) GetSessionHomeDir() string {
@@ -23,7 +24,7 @@ func (c *Config) GetSessionHomeDir() string {
 		outputDir = filepath.Join(outputDir, ".cumulocity", "sessions")
 	}
 
-	err := os.MkdirAll(outputDir, os.ModePerm)
+	err := fileutilities.CreateDirs(outputDir)
 	if err != nil && c.Logger != nil {
 		c.Logger.Errorf("Could not create sessions directory and it does not exist. %s", err)
 	}

@@ -67,16 +67,16 @@ func ShowClientEnvironmentVariables(cfg *config.Config, c8yclient *c8y.Client, s
 	ShowEnvironmentVariables(output, shell)
 }
 
-func ShowEnvironmentVariables(config map[string]interface{}, shell ShellType) {
+func ShowEnvironmentVariables(cfg map[string]interface{}, shell ShellType) {
 	// sort output variables
 	variables := []string{}
 
-	for name := range config {
+	for name := range cfg {
 		variables = append(variables, name)
 	}
 	sort.Strings(variables)
 	for _, name := range variables {
-		value := config[name]
+		value := cfg[name]
 
 		switch shell {
 		case ShellPowerShell:
