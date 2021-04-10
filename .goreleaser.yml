@@ -8,7 +8,7 @@ release:
 before:
   hooks:
     - go mod tidy
-    - make generate_go_code 
+    - make generate_go_code
     - make manpages
 
 builds:
@@ -91,12 +91,12 @@ nfpms:
 
       - src: "./tools/shell/c8y.plugin.*"
         dst: /opt/c8y/plugins/
-      
+
       - src: ./examples/views/default/*.json
         dst: /opt/c8y/views/default/
 
       - src: ./examples/templates/test/test*.jsonnet
         dst: /opt/c8y/templates/test/
-      
+
       - src: ./examples/settings.json
         dst: /opt/c8y/settings.json
