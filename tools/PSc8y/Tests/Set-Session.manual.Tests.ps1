@@ -4,7 +4,7 @@ Describe -Tag "Session" -Name "Set-Session" {
     BeforeAll {
         $EnvBackup = Get-Item "Env:C8Y*"
         foreach ($item in $EnvBackup) {
-            Remove-Item ("Env:{0}" -f $item.Name)
+            Remove-Item ("Env:{0}" -f $item.Key)
         }
     }
 
@@ -108,7 +108,7 @@ settings.includeAll.pagesize: 202
     AfterAll {
         # Restore env variables
         foreach ($item in $EnvBackup) {
-            Set-Item -Path ("env:{0}" -f $item.Name) -Value $item.Value
+            Set-Item -Path ("env:{0}" -f $item.Key) -Value $item.Value
         }
     }
 }

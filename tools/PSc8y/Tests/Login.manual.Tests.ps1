@@ -6,8 +6,8 @@ Describe -Tag "Session" -Name "Login and Session Tests" {
         $SessionBackup = Get-Session
         $EnvBackupHash = @{}
         foreach ($item in $EnvBackup) {
-            $EnvBackupHash[$item.Name] = $item.Value
-            Remove-Item ("Env:{0}" -f $item.Name)
+            $EnvBackupHash[$item.Key] = $item.Value
+            Remove-Item ("Env:{0}" -f $item.Key)
         }
     }
 
@@ -126,7 +126,7 @@ Describe -Tag "Session" -Name "Login and Session Tests" {
     AfterAll {
         # Restore env variables
         foreach ($item in $EnvBackup) {
-            Set-Item -Path ("env:{0}" -f $item.Name) -Value $item.Value
+            Set-Item -Path ("env:{0}" -f $item.Key) -Value $item.Value
         }
     }
 }

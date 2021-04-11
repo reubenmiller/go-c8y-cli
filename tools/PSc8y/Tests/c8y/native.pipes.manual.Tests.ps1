@@ -270,8 +270,11 @@ Describe -Name "c8y pipes" {
             $requests = $output | ConvertFrom-Json
 
             $requests | Should -HaveCount 2
-            $requests[0] | Should -MatchObject @{method = "PUT"; path = "/inventory/managedObjects/$($device1.id)"; body = @{type="customType1Suffix"; index=1}} -Property method, path, body
-            $requests[1] | Should -MatchObject @{method = "PUT"; path = "/inventory/managedObjects/$($device2.id)"; body = @{type="customType2Suffix"; index=2}} -Property method, path, body
+            $requests[0] | Should -MatchObject @{method = "PUT"; path = "/inventory/managedObjects/$($device1.id)"} -Property method, path
+            $requests[0].body | Should -MatchObject @{type="customType1Suffix"; index=1}
+
+            $requests[1] | Should -MatchObject @{method = "PUT"; path = "/inventory/managedObjects/$($device2.id)"} -Property method, path
+            $requests[1].body | Should -MatchObject @{type="customType2Suffix"; index=2}
 
             $requests[0].body.type | Should -BeOfType [string]
             $requests[0].body.index | Should -BeOfType [long]

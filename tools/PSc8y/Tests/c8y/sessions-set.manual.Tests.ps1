@@ -29,7 +29,7 @@ Describe -Tag "Session" -Name "sessions-set" {
 
         $EnvBackup = Get-Item "Env:C8Y*"
         foreach ($item in $EnvBackup) {
-            Remove-Item ("Env:{0}" -f $item.Name)
+            Remove-Item ("Env:{0}" -f $item.Key)
         }
 
         $env:C8Y_SESSION_HOME = $tmpdir
@@ -175,7 +175,7 @@ Describe -Tag "Session" -Name "sessions-set" {
 
         # Restore env variables
         foreach ($item in $EnvBackup) {
-            Set-Item -Path ("env:{0}" -f $item.Name) -Value $item.Value
+            Set-Item -Path ("env:{0}" -f $item.Key) -Value $item.Value
         }
 
         Remove-Item $tmpdir -Force -Recurse -ErrorAction SilentlyContinue
