@@ -1,6 +1,9 @@
 package list
 
 import (
+	"net/url"
+	"strings"
+
 	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/reubenmiller/go-c8y-cli/pkg/activitylogger"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmd/subcommand"
@@ -91,7 +94,14 @@ func (n *CmdList) RunE(cmd *cobra.Command, args []string) error {
 		}
 		filter.DateTo = dateTo
 	}
-	filter.Host = cfg.GetHost()
+
+	u, err := url.Parse(cfg.GetHost())
+	if err != nil {
+		filter.Host = strings.ReplaceAll(cfg.GetHost(), "https://", "")
+	} else {
+		filter.Host = u.Host
+	}
+	cfg.Logger.Debugf("activity log filter: path=%s, host=%s, datefrom=%s, dateto=%s", activitylog.GetPath(), filter.Host, filter.DateFrom, filter.DateTo)
 
 	err = activitylog.GetLogEntries(filter, func(line []byte) error {
 		return n.factory.WriteJSONToConsole(cfg, cmd, "", line)
