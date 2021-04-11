@@ -23,6 +23,9 @@ jobs:
         with:
           go-version: 1.16
 
+      - name: install tooling
+        run: golang.org/x/tools/cmd/goimports@latest
+
       - name: Run GoReleaser
         uses: goreleaser/goreleaser-action@v2
         with:
@@ -66,10 +69,18 @@ jobs:
     steps:
     - uses: actions/checkout@v2 # Checking out the repo
 
+    - name: Use Node.js 14
+      uses: actions/setup-node@v1
+      with:
+        node-version: 14
+
     - name: Set up Go 1.16
       uses: actions/setup-go@v2
       with:
         go-version: 1.16
+    
+    - name: install tooling
+      run: golang.org/x/tools/cmd/goimports@latest
 
     - name: publish docker images
       run: make VERSION=${GITHUB_REF} publish-docker
