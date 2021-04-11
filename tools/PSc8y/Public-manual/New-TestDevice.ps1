@@ -42,9 +42,13 @@ Create 10 test devices all with unique names
             ItemType = ""
             BoundParameters = $PSBoundParameters
         }
+        $Template = ""
+        if (-Not $Template) {
+            $Template = (Join-Path $script:Templates "test.device.jsonnet")
+        }
         [void] $c8yargs.AddRange(@(
             "--template",
-            "test.device.jsonnet"
+            $Template
         ))
     }
 

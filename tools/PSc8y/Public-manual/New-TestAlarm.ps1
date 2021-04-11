@@ -40,9 +40,13 @@ Create an alarm on the existing device "myExistingDevice"
             ItemType = ""
             BoundParameters = $PSBoundParameters
         }
+        $Template = ""
+        if (-Not $Template) {
+            $Template = (Join-Path $script:Templates "test.alarm.jsonnet")
+        }
         [void] $c8yargs.AddRange(@(
             "--template",
-            "test.alarm.jsonnet"
+            $Template
         ))
     }
 

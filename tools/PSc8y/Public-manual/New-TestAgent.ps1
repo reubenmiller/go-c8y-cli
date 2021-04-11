@@ -40,9 +40,15 @@
                 ItemType = ""
                 BoundParameters = $PSBoundParameters
             }
+
+            $Template = ""
+            if (-Not $Template) {
+                $Template = (Join-Path $script:Templates "test.agent.jsonnet")
+            }
+
             [void] $c8yargs.AddRange(@(
                 "--template",
-                "test.agent.jsonnet"
+                $Template
             ))
         }
     

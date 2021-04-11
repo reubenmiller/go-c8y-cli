@@ -34,7 +34,11 @@ Create a measurement on the existing device "myExistingDevice"
     }
     Begin {
         $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Exclude Device -Command "measurements create"
-        [void] $c8yargs.AddRange(@("--template", "test.measurement.jsonnet"))
+        $Template = ""
+        if (-Not $Template) {
+            $Template = (Join-Path $script:Templates "test.measurement.jsonnet")
+        }
+        [void] $c8yargs.AddRange(@("--template", $Template))
     }
 
     Process {
