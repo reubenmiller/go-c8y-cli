@@ -129,6 +129,7 @@ function Publish-ModuleArtifacts {
     # Copy the module into the dist folder
     Copy-Item -Path "$ModuleRoot\Dependencies\" -Filter "c8y*" -Destination "$ArtifactRoot\$ModuleName\Dependencies" -Recurse
     Copy-Item -Path "$ModuleRoot\format-data" -Destination "$ArtifactRoot\$ModuleName\" -Recurse
+    Copy-Item -Path "$ModuleRoot\Templates" -Destination "$ArtifactRoot\$ModuleName\" -Recurse
     Copy-Item -Path "$ModuleRoot\$ModuleName.psd1" -Destination "$ArtifactRoot\$ModuleName\" -Recurse
 
     # Construct the distributed .psm1 file.
