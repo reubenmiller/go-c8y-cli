@@ -9,7 +9,7 @@ import (
 )
 
 var (
-	DefaultHome       = "~/.cumulocity"
+	DefaultHome       = "~/.go-c8y-cli"
 	DefaultSessionDir = "sessions"
 	EnvHome           = "C8Y_HOME"
 	EnvSessionHome    = "C8Y_SESSION_HOME"
