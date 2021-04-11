@@ -101,8 +101,11 @@ Describe -Name "powershell pipes" {
             $requests = $output | ConvertFrom-Json
             $requests | Should -HaveCount 2
             $PartialRequest = $requests | Select-Object path, method, body
-            $PartialRequest[0] | Should -MatchObject @{ method = "POST"; path = "/inventory/managedObjects"; body = @{c8y_IsDevice=@{}; name="device01"} }
-            $PartialRequest[1] | Should -MatchObject @{ method = "POST"; path = "/inventory/managedObjects"; body = @{c8y_IsDevice=@{}; name="device02"} }
+            $PartialRequest[0] | Should -MatchObject @{ method = "POST"; path = "/inventory/managedObjects" } -Property method, path
+            $PartialRequest[0].body | Should -MatchObject @{c8y_IsDevice=@{}; name="device01"}
+            
+            $PartialRequest[1] | Should -MatchObject @{ method = "POST"; path = "/inventory/managedObjects" } -Property method, path
+            $PartialRequest[1].body | Should -MatchObject @{c8y_IsDevice=@{}; name="device02"}
         }
     }
 

@@ -126,7 +126,7 @@ Describe -Name "c8y pipes" {
         }
 
         It "Pipe by name which do not match to query parameters ignoring names that does not exist" {
-            $output = @("pipeNameDoesNotExist1", "pipeNameDoesNotExist2", "pipeNameDoesNotExist3") | c8y events list --dry --dryFormat markdown --verbose 2>&1
+            $output = @("pipeNameDoesNotExist1", "pipeNameDoesNotExist2", "pipeNameDoesNotExist3") | c8y events list --dry --dryFormat markdown --abortOnErrors 5 --verbose 2>&1
             $LASTEXITCODE | Should -Be 104
 
             $output | Should -ContainRequest "GET" -Total 3
