@@ -65,6 +65,25 @@ function New-ModulePSMFile {
     Get-Content -Path "$ModuleRoot\tools\modulefile\PartTwo.ps1" | Out-File -FilePath $moduleFile -Append
 }
 
+Function Get-GitVersion {
+    Param()
+    $version = git describe
+
+    if ($LASTEXITCODE -ne 0) {
+        if ($Env:GITHUB_REF) {
+            $version = $Env:GITHUB_REF -replace ".+/", ""
+        }
+    }
+
+    $parts = $Version -split "-", 2
+
+    [pscustomobject]@{
+        Version = $parts[0] -replace "^v", ""
+        PreRelease = ($parts[1] -split "-", 2)[0]
+        IsPrerelease = $parts[1].Length -gt 0
+    }
+}
+
 function Update-ModuleManifestFunctions {
     # Update the psd1 file with the /public/psgetfunctions
     # Update-ModuleManifest is not used because a) it is not availabe for ps version <5.0 and b) it is destructive.
@@ -93,6 +112,24 @@ function Update-ModuleManifestFunctions {
     $ManifestFileContent = $ManifestFileContent.Replace('FunctionsToExport = "*"', $ManifestFunctionExportString)
     Set-Content -Path "$ManifestFile" -Value $ManifestFileContent.TrimEnd()
 }
+
+Function Set-ModuleManifestVersion {
+    Param(
+        [Parameter(
+            Mandatory = $true
+        )]
+        [string] $Path
+    )
+
+    # Update version info from the git tag
+    $VersionInfo = Get-GitVersion
+    Update-ModuleManifest -Path $Path -ModuleVersion $VersionInfo.Version
+
+    if ($VersionInfo.IsPrerelease) {
+        Update-ModuleManifest -Path $Path -Prerelease $VersionInfo.PreRelease
+    }
+}
+
 function Remove-ModuleManifestFunctions ($Path) {
     # Utility method to remove the list of functions from a manifest. This is specific to this modules manifest and
     # assumes the next item in the manifest file after the functions is a comment containing 'VariablesToExport'.
@@ -134,6 +171,9 @@ function Publish-ModuleArtifacts {
 
     # Construct the distributed .psm1 file.
     New-ModulePSMFile
+
+    # Update version
+    Set-ModuleManifestVersion -Path "$ArtifactRoot\$ModuleName\$ModuleName.psd1"
 
     # Package the module in /dist
     $zipFileName = "$ModuleName.zip"
