@@ -1236,9 +1236,14 @@ func (c *Config) BindPFlag(flags *pflag.FlagSet) error {
 func (c *Config) ExpandHomePath(path string) string {
 	expanded, err := homedir.Expand(path)
 	if err != nil {
-		c.Logger.Warnf("Could not expand path to home directory. %s", err)
-		return path
+		if c.Logger != nil {
+			c.Logger.Warnf("Could not expand path to home directory. %s", err)
+		}
+		expanded = path
 	}
+	// replace special variables
+	expanded = strings.ReplaceAll(expanded, "$C8Y_HOME", c.GetHomeDir())
+	expanded = strings.ReplaceAll(expanded, "$C8Y_SESSION_HOME", c.GetSessionHomeDir())
 	return expanded
 }
 
@@ -1327,9 +1332,8 @@ func (c *Config) GetSessionFile(overrideSession ...string) string {
 func (c *Config) ReadConfigFiles(client *c8y.Client) (path string, err error) {
 	c.Logger.Debugf("Reading configuration files")
 	v := c.viper
-	home := c.GetSessionHomeDir()
 	v.AddConfigPath(".")
-	v.AddConfigPath(home)
+	v.AddConfigPath(c.GetHomeDir())
 
 	sessionFile := c.GetSessionFile("")
 

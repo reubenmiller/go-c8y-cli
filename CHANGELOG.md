@@ -81,6 +81,8 @@ None :)
 
 No unreleased features
 
+* Support `$C8Y_HOME` and `$C8Y_SESSION_HOME` variables in settings
+
 * Support dotnotation in --data
     ```
     c8y devices update --data "c8y_RequiredAvailability.responseInterval=240"
