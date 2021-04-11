@@ -194,12 +194,6 @@ func newHTTPClient(ignoreProxySettings bool) *http.Client {
 
 func configureProxySettings(cfg *config.Config, log *logger.Logger) {
 
-	// only parse env variables if no explict config file is given
-	// if globalFlagUseEnv {
-	// 	Logger.Println("C8Y_USE_ENVIRONMENT is set. Environment variables can be used to override config settings")
-	// 	viper.AutomaticEnv()
-	// }
-
 	// Proxy settings
 	// Either use explicit proxy, ignore proxy, or use existing env variables
 	// --proxy "http://10.0.0.1:8080"

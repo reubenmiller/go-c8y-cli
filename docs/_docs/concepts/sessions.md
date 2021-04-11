@@ -109,7 +109,7 @@ For example:
 }
 ```
 
-All of the values in the sessions file, can also be overridden using environment variables when either the `--useEnv` switch or the `C8Y_USE_ENVIRONMENT=true` variable is set. The following is the mapping between the properties in the session json file to their environment equivalents.
+All of the values in the sessions file, can also be overridden using environment variables. The following is the mapping between the properties in the session json file to their environment equivalents.
 
 | Setting name | Environment Variable |
 |--------------|----------------------|
@@ -119,8 +119,6 @@ All of the values in the sessions file, can also be overridden using environment
 ### Continuous Integration usage (environment variables)
 
 Alternatively, the Cumulocity session can be controlled purely by environment variables.
-
-Firstly, the `C8Y_USE_ENVIRONMENT` environment needs to be set to `true` to activate this mode.
 
 Then the Cumulocity settings can be set by the following environment variables.
 

@@ -35,7 +35,6 @@ Add-AssertionOperator -Name "MatchObject" -Test $Function:MatchObject -ErrorActi
 
 
 # Get credentials from the environment
-$env:C8Y_USE_ENVIRONMENT = "on"
 $env:C8Y_SETTINGS_CI = "true"
 
 # required in non-interactive mode, otherwise powershell throws errors (regardless of confirmation preference)

@@ -14,7 +14,6 @@ Describe -Tag "Session" -Name "Login and Session Tests" {
     BeforeEach {
         $tmpdir = New-TemporaryDirectory
         $env:C8Y_SESSION_HOME = $tmpdir
-        $env:C8Y_USE_ENVIRONMENT = ""
         $settingsFile = "$tmpdir/settings.json"
     }
 

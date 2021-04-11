@@ -52,7 +52,6 @@ You can provide the session information via environment variables, deviced in a 
     *session.env*
 
     ```sh
-    C8Y_USE_ENVIRONMENT=true
     C8Y_HOST=https://example.cumulocity.eu-latest.com
     C8Y_TENANT=t12345
     C8Y_USER=myuser@example.com
@@ -121,7 +120,6 @@ If you have already activated a c8y session on a command console, you can re-use
 
     ```sh
     docker run -it --rm \
-        -e C8Y_USE_ENVIRONMENT=true \
         -e C8Y_HOST=$C8Y_HOST \
         -e C8Y_TENANT=$C8Y_TENANT \
         -e C8Y_USER=$C8Y_USER \
@@ -133,7 +131,6 @@ If you have already activated a c8y session on a command console, you can re-use
     
     ```powershell
     docker run -it --rm `
-        -e C8Y_USE_ENVIRONMENT=true `
         -e C8Y_HOST=$env:C8Y_HOST `
         -e C8Y_TENANT=$env:C8Y_TENANT `
         -e C8Y_USER=$env:C8Y_USER `

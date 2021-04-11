@@ -11,7 +11,6 @@ Describe -Tag "Session" -Name "Set-Session" {
     BeforeEach {
         $tmpdir = New-TemporaryDirectory
         $env:C8Y_SESSION_HOME = $tmpdir
-        $env:C8Y_USE_ENVIRONMENT = ""
         $settingsFile = "$tmpdir/settings.json"
     }
 

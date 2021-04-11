@@ -84,7 +84,6 @@ The following is a list of available environment variables which control how c8y
 |----------------------|-------------|
 | C8Y_SESSION | Path to the Cumulocity session file to be used. |
 | C8Y_SESSION_HOME | Path where the session files and settings are located. Defaults to `~/.cumulocity` if it is not set. |
-| C8Y_USE_ENVIRONMENT | When set to `on`, the Cumulocity session settings will be loaded from environment variables. This will override the `C8Y_SESSION` variable. Useful when using in a CI/CD pipeline. |
 | C8Y_LOGGER_HIDE_SENSITIVE | Control whether sensitive session information is logged to the console or not. |
 | C8Y_JSONNET_DEBUG | Display debugging information for jsonnet templates (if used) |
 | C8Y_DISABLE_ENFORCE_ENCODING | (PowerShell only) Disable enforcement of UTF8 encoding on the console. If UTF8 encoding is disabled it will cause encoding problems if non-ascii characters are used! |
@@ -106,28 +105,6 @@ By default the `$HOME/.cumulocity` directory is used to store the Cumulocity ses
 
 Use a custom folder where the Cumulocity Session files should be kept and searched through.
 
----
-
-#### C8Y_USE_ENVIRONMENT
-
-When set to `on`, the Cumulocity session settings will be loaded from the following environment variables:
-
-* C8Y_HOST (example "https://cumulocity.com")
-* C8Y_TENANT (example "myTenant")
-* C8Y_USER
-* C8Y_PASSWORD
-* C8Y_TFA_CODE
-
-`C8Y_USE_ENVIRONMENT` will override the `C8Y_SESSION` environment variable settings.
-
-**Example**
-```sh
-# bash/zsh
-export C8Y_USE_ENVIRONMENT=on
-
-# PowerShell
-$env:C8Y_USE_ENVIRONMENT = "on"
-```
 ---
 
 #### C8Y_LOGGER_HIDE_SENSITIVE

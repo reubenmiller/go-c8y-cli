@@ -142,7 +142,6 @@ publish-release:			## Publish release
 # ---------------------------------------------------------------
 run-docker-bash:
 	sudo docker run -it --rm \
-		-e C8Y_USE_ENVIRONMENT=true \
 		-e C8Y_HOST=$$C8Y_HOST \
 		-e C8Y_TENANT=$$C8Y_TENANT \
 		-e C8Y_USER=$$C8Y_USER \
@@ -151,7 +150,6 @@ run-docker-bash:
 
 run-docker-zsh:
 	sudo docker run -it --rm \
-		-e C8Y_USE_ENVIRONMENT=true \
 		-e C8Y_HOST=$$C8Y_HOST \
 		-e C8Y_TENANT=$$C8Y_TENANT \
 		-e C8Y_USER=$$C8Y_USER \
@@ -160,7 +158,6 @@ run-docker-zsh:
 
 run-docker-pwsh:
 	sudo docker run -it --rm \
-		-e C8Y_USE_ENVIRONMENT=true \
 		-e C8Y_HOST=$$C8Y_HOST \
 		-e C8Y_TENANT=$$C8Y_TENANT \
 		-e C8Y_USER=$$C8Y_USER \
