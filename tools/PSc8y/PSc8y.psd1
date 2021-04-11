@@ -342,9 +342,6 @@ AliasesToExport = '*'
 # Private data to pass to the module specified in RootModule/ModuleToProcess. This may also contain a PSData hashtable with additional module metadata used by PowerShell.
 PrivateData = @{
     PSData = @{
-        #Prerelease of this module
-        #Prerelease = '-alpha01'
-
         # Tags applied to this module. These help with module discovery in online galleries.
         Tags = @(
             'Cumulocity',
@@ -367,7 +364,9 @@ PrivateData = @{
         # IconUri = ''
 
         # ReleaseNotes of this module
-        # ReleaseNotes = ''
+        ReleaseNotes = @(
+			'Release notes can be found here: https://github.com/reubenmiller/go-c8y-cli/blob/master/CHANGELOG.md'
+		)
 
         # External dependent modules of this module
         # ExternalModuleDependencies = ''
