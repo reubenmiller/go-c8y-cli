@@ -61,12 +61,3 @@ if (!$SkipSessionTest) {
 	}
 	Write-Host ("Session: {0}/{1} on {2}" -f $TenantInfo.name, $User.id, $TenantInfo.domainName)
 }
-
-# Pre-defined argument arrays
-# Usage: c8y (createMeasurement)
-Function createMeasurement {
-	@(
-		"measurements", "create",
-		"--template", "test.measurement.jsonnet"
-	)
-}
