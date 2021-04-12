@@ -56,9 +56,7 @@ c8y devices list --select "id,values.0"
 *Note*: Array indexes are mapped to `.<index>`, therefore there is no difference between between paths for an array index, and a json object using a number as a property. This may generate some unexpected results when using `--select` if you use numbers as properties in you Cumulocity data.
 
 
-Entering explicit values is not very convenient, especially when some fragments can be very long), that's why the `select` parameter also supports usage of the wildcard characters `?` and `*` and the globstar `**`.
-
-The following wildcard characters are supported:
+Entering explicit values is not very convenient, especially when some fragments can be very long, that's why the `select` parameter also supports usage of the following wildcard characters:
 
 * `?` matches a single character not including the path delimiter `.`
 * `*` matches zero or more characters not including the path delimiter `.`
@@ -70,18 +68,20 @@ All dot notation paths are case-insensitive. If more than 1 property is matches 
 
 Below is a summary of actions which are supported by the `select` parameter:
 
-* Get specific properties (`--select "id,name"`)
-* Get root fragments which are not objects or arrays (`--select "*"`)
-* Get all fragments (included nested objects and arrays) (`--select "**"`)
-* Get all items matching a nested path pattern (`--select "**.self"`)
-* Map property names (id->deviceId) (`--select "deviceId:id`)
-* Get flattened json properties using (`--select "**" --flatten`)
-* Output results in CSV format (comma delimited) (with flattened json paths) (`--output csv` and `--output csvheader`)
+|use case|usage|
+|--|--|
+|Get specific properties|`--select "id,name"`|
+|Get root fragments which are not objects or arrays|`--select "*"`|
+|Get all fragments (included nested objects and arrays)|`--select "**"`|
+|Get all items matching a nested path pattern|`--select "**.self"`|
+|Map property names (id->deviceId)|`--select "deviceId:id`|
+|Get flattened json properties|`--select "**" --flatten`|
+|Output results in CSV format (comma delimited) (with flattened json paths)|`--output csv` or `--output csvheader`|
 
 
 ## Examples
 
-The following examples should show the `select` parameter can be used. All of the examples reference the following json from a device (managed object). The examples will show how to select and manipulate specific values from this device.
+The following examples should show how the `select` parameter can be used. All of the examples reference the following json from a device (managed object).
 
 **Reference device data used in each example**
 
@@ -151,7 +151,7 @@ The following examples should show the `select` parameter can be used. All of th
 c8y devices list --pageSize 1 --fragmentType company_Example --select "id,nam*"
 ```
 
-Note: On shell remember to include the values within quotes `"` to prevent `*` from being expanded by the shell interpreter.
+Note: In shells like zsh, bash, and fish, remember to include the values within quotes `"` to prevent `*` from being expanded by the shell interpreter.
 
 **Output**
 
@@ -166,7 +166,8 @@ Note: On shell remember to include the values within quotes `"` to prevent `*` f
 
 ```sh
 c8y devices list --pageSize 1 --fragmentType company_Example --select "id,c8y_SoftwareList.**"
-// or
+
+# or
 c8y devices list --pageSize 1 --fragmentType company_Example --select "id,c8y_SoftwareList.*.*"
 ```
 
@@ -343,7 +344,7 @@ c8y devices list --pageSize 2 --fragmentType company_Example --select "id,name" 
 ##### Output as csv with headers
 
 ```sh
-c8y devices list --pageSize 2 --fragmentType company_Example --select "id,name" --output csvheader
+c8y devices list --pageSize 2 --fragmentType company_Example --select "id,nam*" --output csvheader
 ```
 
 **Output**
@@ -359,9 +360,7 @@ id,name
 The output json can also be reshaped by adding a name before the dot notation path in the format of:
 `<alias>:<path>`
 
-For example renaming the id and name fields can be prefixed with `deviceId:` and `deviceName:` respectively.
-
-The following example shows how to map the following properties
+For example, the following example shows how to map the following properties
 
 * `id` to `deviceId`
 * `name` to `deviceName`
@@ -462,7 +461,7 @@ c8y devices list --pageSize 2 --fragmentType company_Example --select "info:agen
 }
 ```
 
-You can also use the globstar to move a nested property. The following maps all of the literal properties from `agent_Details.country` to `country`: 
+You can also use wildcards to move a nested property. The following maps all of the literal properties from `agent_Details.country` to `country`: 
 
 ```sh
 c8y devices list --pageSize 1 --fragmentType company_Example --select "country:agent_Details.country.*"
