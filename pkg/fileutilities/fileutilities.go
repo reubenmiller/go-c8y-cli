@@ -17,8 +17,9 @@ func CreateDirs(p string) error {
 	// Change file ownership
 	if runtime.GOOS != "windows" {
 		var uid, gid int
-		if os.Geteuid() == 0 {
-			currentUser, err := user.Lookup(os.Getenv("SUDO_USER"))
+		sudoUser := os.Getenv("SUDO_USER")
+		if os.Geteuid() == 0 && sudoUser != "" {
+			currentUser, err := user.Lookup(sudoUser)
 
 			if err != nil {
 				return err
