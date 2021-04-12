@@ -38,11 +38,16 @@ publish_ghcr_docker () {
 
 login_ghcr
 
-publish_ghcr_docker c8y-bash $VERSION
-publish_ghcr_docker c8y-zsh $VERSION
+publish_ghcr_docker c8y-shell $VERSION
 publish_ghcr_docker c8y-pwsh $VERSION
 
-# also use latest tag
-publish_ghcr_docker c8y-bash latest
-publish_ghcr_docker c8y-zsh latest
-publish_ghcr_docker c8y-pwsh latest
+# also use latest (or next) tag
+if [[ "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$  ]]; then
+    # official release
+    publish_ghcr_docker c8y-shell latest
+    publish_ghcr_docker c8y-pwsh latest
+else
+    # beta release
+    publish_ghcr_docker c8y-shell next
+    publish_ghcr_docker c8y-pwsh next
+fi

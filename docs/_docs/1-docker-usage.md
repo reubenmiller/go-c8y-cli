@@ -22,19 +22,17 @@ The session persistence is achieved by mounting a docker volume to your host ope
 
 It is recommended that you run these commands from your home folder, so that the `~/.cumulocity` folder will be used to store the sessions, as this is the default folder that is used should you install the c8y cli tool on your host machine later on. That way you will you be able to continue using 
 
-#### bash
+
+#### zsh/bash/fish
 
 ```sh
 cd ~
-docker run -it -v $PWD/.cumulocity:/sessions --rm ghcr.io/reubenmiller/c8y-bash:latest
+docker run -it -v $PWD/.cumulocity:/sessions --rm ghcr.io/reubenmiller/c8y-shell:latest
 ```
 
-#### zsh
+**Note**
 
-```sh
-cd ~
-docker run -it -v $PWD/.cumulocity:/sessions --rm ghcr.io/reubenmiller/c8y-zsh:latest
-```
+ZSH will start by default, however you can load another shell manuall using `bash` or `fish`.
 
 #### PowerShell (pwsh)
 
@@ -63,7 +61,7 @@ You can provide the session information via environment variables, deviced in a 
 2. Start the docker container
 
     ```sh
-    docker run --rm -it --env-file=session.env ghcr.io/reubenmiller/c8y-zsh:latest
+    docker run --rm -it --env-file=session.env ghcr.io/reubenmiller/c8y-shell:latest
     ```
 
     The `--env-file` argument will direct docker to map the file contents to environment variables within the container.
@@ -124,7 +122,7 @@ If you have already activated a c8y session on a command console, you can re-use
         -e C8Y_TENANT=$C8Y_TENANT \
         -e C8Y_USER=$C8Y_USER \
         -e C8Y_PASSWORD=$C8Y_PASSWORD \
-        ghcr.io/reubenmiller/c8y-zsh:latest
+        ghcr.io/reubenmiller/c8y-shell:latest
     ```
 
     **PowerShell**
@@ -135,19 +133,19 @@ If you have already activated a c8y session on a command console, you can re-use
         -e C8Y_TENANT=$env:C8Y_TENANT `
         -e C8Y_USER=$env:C8Y_USER `
         -e C8Y_PASSWORD=$env:C8Y_PASSWORD `
-        ghcr.io/reubenmiller/c8y-zsh:latest
+        ghcr.io/reubenmiller/c8y-shell:latest
     ```
 
 **Note**
 
 You have to execute a docker pull if you want to re-check if there is a newer image available (i.e. also tagged with latest). 
 
-You can also specify the version that you want to try out by replacing `latest` with the version number, i.e. `1.7.3`.
+You can also specify the version that you want to try out by replacing `latest` with the version number, i.e. `2.0.0`.
 
 ```sh
 # update to the latest image
-docker pull ghcr.io/reubenmiller/c8y-zsh:latest
+docker pull ghcr.io/reubenmiller/c8y-shell:latest
 
 # use a known version
-docker pull ghcr.io/reubenmiller/c8y-zsh:1.7.3
+docker pull ghcr.io/reubenmiller/c8y-shell:2.0.0
 ```

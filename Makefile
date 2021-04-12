@@ -95,16 +95,9 @@ build_powershell:				## Build the powershell module
 
 build-docker:					## Build the docker images
 	@cp tools/PSc8y/Dependencies/c8y.linux ./docker/c8y.linux
-	@cp tools/shell/c8y.plugin.zsh ./docker/c8y.plugin.zsh
-	@cp tools/shell/c8y.plugin.sh ./docker/c8y.plugin.sh
-
-	@sudo docker build ./docker --file ./docker/zsh.dockerfile $(DOCKER_BUILD_ARGS) --build-arg C8Y_VERSION=$(VERSION) --tag $(TAG_PREFIX)c8y-zsh
-	@sudo docker build ./docker --file ./docker/bash.dockerfile $(DOCKER_BUILD_ARGS) --build-arg C8Y_VERSION=$(VERSION) --tag $(TAG_PREFIX)c8y-bash
+	@sudo docker build ./docker --file ./docker/shell.dockerfile $(DOCKER_BUILD_ARGS) --build-arg C8Y_VERSION=$(VERSION) --tag $(TAG_PREFIX)c8y-shell
 	@sudo docker build ./docker --file ./docker/pwsh.dockerfile $(DOCKER_BUILD_ARGS) --tag $(TAG_PREFIX)c8y-pwsh
-
 	@rm ./docker/c8y.linux
-	@rm ./docker/c8y.plugin.zsh
-	@rm ./docker/c8y.plugin.sh
 
 # ---------------------------------------------------------------
 # Tests
@@ -140,21 +133,13 @@ publish-release:			## Publish release
 # ---------------------------------------------------------------
 # Docker examples
 # ---------------------------------------------------------------
-run-docker-bash:
+run-docker-shell:
 	sudo docker run -it --rm \
 		-e C8Y_HOST=$$C8Y_HOST \
 		-e C8Y_TENANT=$$C8Y_TENANT \
 		-e C8Y_USER=$$C8Y_USER \
 		-e C8Y_PASSWORD=$$C8Y_PASSWORD \
-		c8y-bash
-
-run-docker-zsh:
-	sudo docker run -it --rm \
-		-e C8Y_HOST=$$C8Y_HOST \
-		-e C8Y_TENANT=$$C8Y_TENANT \
-		-e C8Y_USER=$$C8Y_USER \
-		-e C8Y_PASSWORD=$$C8Y_PASSWORD \
-		c8y-zsh
+		c8y-shell
 
 run-docker-pwsh:
 	sudo docker run -it --rm \
