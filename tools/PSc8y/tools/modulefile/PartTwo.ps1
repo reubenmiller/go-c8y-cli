@@ -1,5 +1,9 @@
 
 #region imports
+
+# Add alias to c8y binary
+Set-Alias -Name "c8y" -Value (Get-ClientBinary) -Scope "Global"
+
 #
 # Create session folder
 #
@@ -21,9 +25,6 @@ if ($script:IsLinux -or $script:IsMacOS) {
         & chmod +x $binary
     }
 }
-
-# Add alias to c8y binary
-Set-Alias -Name "c8y" -Value (Get-ClientBinary) -Scope "Global"
 
 # Load c8y completions for powershell
 c8y completion powershell | Out-String | Invoke-Expression
