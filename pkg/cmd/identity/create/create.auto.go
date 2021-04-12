@@ -46,8 +46,8 @@ Create external identity
 	cmd.SilenceUsage = true
 
 	cmd.Flags().StringSlice("device", []string{""}, "The ManagedObject linked to the external ID. (required) (accepts pipeline)")
-	cmd.Flags().String("type", "", "The type of the external identifier as string, e.g. 'com_cumulocity_model_idtype_SerialNumber'. (required)")
-	cmd.Flags().String("name", "", "The identifier used in the external system that Cumulocity interfaces with. (required)")
+	cmd.Flags().String("type", "c8y_Serial", "The type of the external identifier as string, e.g. 'com_cumulocity_model_idtype_SerialNumber'.")
+	cmd.Flags().String("name", "", "The identifier used in the external system that Cumulocity interfaces with.")
 
 	completion.WithOptions(
 		cmd,
@@ -57,13 +57,11 @@ Create external identity
 	flags.WithOptions(
 		cmd,
 		flags.WithProcessingMode(),
-
+		f.WithTemplateFlag(cmd),
 		flags.WithExtendedPipelineSupport("device", "device", true, "deviceId", "source.id", "managedObject.id", "id"),
 	)
 
 	// Required flags
-	_ = cmd.MarkFlagRequired("type")
-	_ = cmd.MarkFlagRequired("name")
 
 	ccmd.SubCommand = subcommand.NewSubCommand(cmd)
 
@@ -139,6 +137,7 @@ func (n *CreateCmd) RunE(cmd *cobra.Command, args []string) error {
 		flags.WithStringValue("name", "externalId"),
 		cmdutil.WithTemplateValue(cfg),
 		flags.WithTemplateVariablesValue(),
+		flags.WithRequiredProperties("type", "externalId"),
 	)
 	if err != nil {
 		return cmderrors.NewUserError(err)

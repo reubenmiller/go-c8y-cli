@@ -22,8 +22,8 @@ Delete external identity
     [Alias()]
     [OutputType([object])]
     Param(
-        # External identity type (required)
-        [Parameter(Mandatory = $true)]
+        # External identity type
+        [Parameter()]
         [string]
         $Type,
 

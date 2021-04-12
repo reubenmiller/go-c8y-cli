@@ -34,13 +34,13 @@ Create external identity (using pipeline)
         [object[]]
         $Device,
 
-        # The type of the external identifier as string, e.g. 'com_cumulocity_model_idtype_SerialNumber'. (required)
-        [Parameter(Mandatory = $true)]
+        # The type of the external identifier as string, e.g. 'com_cumulocity_model_idtype_SerialNumber'.
+        [Parameter()]
         [string]
         $Type,
 
-        # The identifier used in the external system that Cumulocity interfaces with. (required)
-        [Parameter(Mandatory = $true)]
+        # The identifier used in the external system that Cumulocity interfaces with.
+        [Parameter()]
         [string]
         $Name
     )
