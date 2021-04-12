@@ -81,6 +81,8 @@ None :)
 
 No unreleased features
 
+* `c8y identity create|get|delete` type is set to `c8y_Serial` by default
+* `c8y identity create` added template support
 * Merging zsh, bash and fish shells into one docker image called `c8y-shell`. ZSH is launched by default but other shells can be used by launching them manually inside the same container. It makes it easier to try out different shells.
 
 * Support `$C8Y_HOME` and `$C8Y_SESSION_HOME` variables in settings
