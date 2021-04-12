@@ -1,7 +1,7 @@
 ---
 layout: default
 category: Getting started
-title: Bash
+title: Shell
 ---
 
 Before getting started, you need to configure the Cumulocity session which has the details which Cumulocity platform and authentication should be used for each of the commands/requests. This operation only needs to be done once.
@@ -11,13 +11,15 @@ Before getting started, you need to configure the Cumulocity session which has t
     ```sh
     c8y sessions create \
         --host "https://mytenant.eu-latest.cumulocity.com" \
-        --tenant "myTenant" \
-        --username "myUser@me.com"
+        --username "myUser@me.com" \
+        --type dev
     ```
 
     You will be prompted for your password. Alternatively you can also enter the password using the `--password` argument.
 
     You may also provide a more meaningful session name by using the `--name` argument.
+
+    The `--type` parameter indicates what kind of tenant you are using which directly controls which commands are enabled by default, and which are disabled. `dev` will enable all commands, whereas `prod` only allows GET commands.
 
     Alternatively you can create a session by creating a json file in your `~/.cumulocity` folder.
 
@@ -27,13 +29,9 @@ Before getting started, you need to configure the Cumulocity session which has t
 
     ```json
     {
-        "host": "https://example01.cumulocity.eu-latest.com",
-        "tenant": "t12345",
+        "host": "example01.cumulocity.eu-latest.com",
         "username": "hello.user@example.com",
         "password": "mys3cureP4assw!rd",
-        "description": "",
-        "useTenantPrefix": true,
-        "microserviceAliases": {}
     }
     ```
 
@@ -43,16 +41,19 @@ Before getting started, you need to configure the Cumulocity session which has t
     set-session
     ```
 
-    Or you can manually set the path to the session (json) file by setting the `C8Y_SESSION` environment variable.
+    The list of sessions can be filtered by adding additional filter terms when calling `set-session`. If only 1 session is found, then it will be automatically selected without the user having to confirm the selection.
 
     ```sh
-    export C8Y_SESSION=/path/to/any/session/session1.json
+    set-session myname partial_string
     ```
 
 3. Test your credentials by getting your current user information from the platform:
 
     ```sh
-    c8y users getCurrentUser
+    c8y currentuser get
+
+    # or list devices
+    c8y devices list
     ```
 
     **Note**
@@ -73,12 +74,20 @@ The sessions can be changed again by using the interactive session selector
 set-session
 ```
 
-Alternatively you can switch sessions manually via setting the `C8Y_SESSION` environment variable.
+Alternatively you can switch sessions by calling the c8y binary directly (without the set-session helper)
 
 ```sh
 # Set session interactively
-export C8Y_SESSION=$( c8y sessions list )
+eval $( c8y sessions set --shell=auto )
 
 # Set a session to an already known json path.
-export C8Y_SESSION=/my/path/session.json
+eval $( c8y sessions set --shell=auto --session=/my/path/session.json )
+```
+
+#### Switching session for a single command
+
+A single command can be redirected to use another session by using the `--session <name>` parameter. A full file path can be provided or just the file name for a file located in session directory defined by the `C8Y_SESSION_HOME` environment variable.
+
+```sh
+c8y devices list --session myothersession.json
 ```

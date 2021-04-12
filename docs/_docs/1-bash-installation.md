@@ -202,7 +202,7 @@ However if you don't install the `c8y.plugin.sh` script or the zsh `c8y` plugin,
 
 1. Setting / switching c8y sessions
 
-    If you don't have a session then see the [Getting started](https://reubenmiller.github.io/go-c8y-cli/docs/2-getting-started-bash/) section.
+    If you don't have a session then see the [Getting started](https://reubenmiller.github.io/go-c8y-cli/docs/2-getting-started-shell/) section.
 
     ```sh
     export C8Y_SESSION=$( c8y sessions list )
