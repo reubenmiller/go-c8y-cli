@@ -1,10 +1,10 @@
 package fileutilities
 
 import (
+	"fmt"
 	"os"
-	"os/user"
+	"os/exec"
 	"runtime"
-	"strconv"
 )
 
 // CreateDirs create directory. All non-existing nested paths will be created.
@@ -16,24 +16,22 @@ func CreateDirs(p string) error {
 
 	// Change file ownership
 	if runtime.GOOS != "windows" {
-		var uid, gid int
+		owner := ""
 		sudoUser := os.Getenv("SUDO_USER")
+
 		if os.Geteuid() == 0 && sudoUser != "" {
-			currentUser, err := user.Lookup(sudoUser)
-
-			if err != nil {
-				return err
-			}
-
-			uid, _ = strconv.Atoi(currentUser.Uid)
-			gid, _ = strconv.Atoi(currentUser.Gid)
-
+			owner = sudoUser
 		} else {
-			uid = os.Getuid()
-			gid = os.Getgid()
+			owner = fmt.Sprintf("%d", os.Getuid())
 		}
-		if err := os.Chown(p, uid, gid); err != nil {
-			return err
+
+		// Note: os.Chown can't be used as os/user.Lookup is not reliable on macOS
+		// golang bug: https://github.com/golang/go/issues/24383
+		cmd := exec.Command("chown", "-R", "-L", owner, p)
+
+		b, err := cmd.CombinedOutput()
+		if err != nil {
+			return fmt.Errorf("error change owner of dir %s to %s: %w %s", p, owner, err, b)
 		}
 	}
 	return nil
