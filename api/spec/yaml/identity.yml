@@ -67,7 +67,8 @@ endpoints:
     pathParameters:
       - name: type
         type: string
-        required: true
+        required: false
+        default: c8y_Serial
         description: External identity type
 
       - name: name
@@ -101,7 +102,8 @@ endpoints:
     pathParameters:
       - name: type
         type: string
-        required: true
+        required: false
+        default: c8y_Serial
         description: External identity type
 
       - name: name
@@ -149,11 +151,17 @@ endpoints:
     body:
       - name: type
         type: string
-        required: true
+        required: false
+        default: c8y_Serial
         description: The type of the external identifier as string, e.g. 'com_cumulocity_model_idtype_SerialNumber'.
 
       - name: name
         property: externalId
         type: string
-        required: true
+        required: false
         description: The identifier used in the external system that Cumulocity interfaces with.
+    bodyTemplateOptions:
+      enabled: true
+    bodyRequiredKeys:
+      - "type"
+      - "externalId"
