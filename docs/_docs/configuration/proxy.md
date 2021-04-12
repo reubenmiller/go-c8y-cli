@@ -8,7 +8,7 @@ c8y has first class support for corporate proxies. The proxy can either be confi
 
 ### Setting proxy using environment variables
 
-##### Bash
+##### Shell
 
 ```sh
 export HTTP_PROXY=http://10.0.0.1:8080

@@ -1,11 +1,11 @@
 ---
 layout: default
-category: Installation - bash/zsh
+category: Installation - shell
 order: 200
 title: Creating aliases
 ---
 
-### Bash
+### Shell
 
 #### Install bash profile and dependencies
 

@@ -12,7 +12,7 @@ A user can add any number of session that that want. They are then free to switc
 
 ### Create a new session
 
-##### Bash
+##### Shell
 
 ```bash
 c8y sessions create \
@@ -33,7 +33,7 @@ A helper is provided to set the session interactively by providing the user a li
 
 Note: On MacOS, you need to hold "option"+Arrow keys to navigate the list of sessions. Otherwise the VIM style "j" (down) and "k" (up) keys can be also used for navigation
 
-##### Bash
+##### Shell
 
 Assuming that you have already loaded the `c8y.plugin.sh` helper.
 
@@ -61,7 +61,7 @@ If you wish to manage your sessions manually, then you can set the `C8Y_SESSION`
 
 For example:
 
-###### Bash
+###### Shell
 
 ```sh
 export C8Y_SESSION=~/.cumulocity/my-settings01.json
@@ -135,7 +135,7 @@ If you only need to set a session for a single session, then you can use the glo
 
 You can set the `C8Y_SESSION_HOME` environment variable to control where the sessions should be stored.
 
-###### Bash
+###### Shell
 
 ```sh
 c8y devices list --session myother.tenant

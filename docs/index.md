@@ -11,6 +11,6 @@ Welcome to the Unofficial Cumulocity REST CLI Tool.
 
 ---
 
-## Bash
+## Shell
 
 TODO: Add screenshot or video of the command line in action

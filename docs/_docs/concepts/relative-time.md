@@ -42,7 +42,7 @@ The relative time and dates is supported in any commands which have the followin
 
 #### Example 1: Get a list of FAILED operations in the last day
 
-##### Bash
+##### Shell
 
 Get a list of FAILED operations in the last day
 

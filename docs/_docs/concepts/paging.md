@@ -78,7 +78,7 @@ Get-DeviceCollection -Name "My*" -IncludeAll |
 
 ### Setting a default pageSize
 
-The default pageSize can be controlled via the `settings.json` or in your session file. See [configuration options](https://reubenmiller.github.io/go-c8y-cli/docs/configuration/options/) for details.
+The default pageSize can be controlled via the `settings` file or in your session file. See [configuration options](https://reubenmiller.github.io/go-c8y-cli/docs/configuration/options/) for details.
 
 ### Notes / Warnings
 

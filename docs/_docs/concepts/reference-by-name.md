@@ -12,7 +12,7 @@ If more than one device has the same name, then only the first result will be ma
 
 The following shows how the get a list of alarms for a device by only referencing the device by its name:
 
-##### Bash
+##### Shell
 
 ```sh
 c8y alarms list --device myDevice
@@ -28,7 +28,7 @@ Get-AlarmCollection -Device myDevice
 
 Applications can also be referenced by its name, making it easier to use:
 
-##### Bash
+##### Shell
 
 ```sh
 c8y applications get --id cockpit
