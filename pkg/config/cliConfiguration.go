@@ -207,9 +207,6 @@ const (
 	// SettingsSilentStatusCodes Status codes which will not print out an error message
 	SettingsSilentStatusCodes = "settings.defaults.silentStatusCodes"
 
-	// SettingsUseEnvironment Read session authentication from environment variables instead of from configuration
-	SettingsUseEnvironment = "settings.defaults.useEnv"
-
 	// SettingsSessionFile Session file to use for api authentication
 	SettingsSessionFile = "settings.defaults.session"
 
@@ -1156,12 +1153,6 @@ func (c *Config) GetOutputCommonOptions(cmd *cobra.Command) (CommonCommandOption
 	}
 
 	return options, nil
-}
-
-// UseEnvironment Read session authentication from environment variables instead of from configuration
-// Use environment will be true if explicitly activated or if there is no session file being used.
-func (c *Config) UseEnvironment() bool {
-	return strings.TrimSpace(c.GetSessionFile()) == "" || c.viper.GetBool(SettingsUseEnvironment)
 }
 
 // AllSettings get all the settings as a map
