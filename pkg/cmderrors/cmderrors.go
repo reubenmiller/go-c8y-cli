@@ -45,6 +45,7 @@ const (
 	ExitLoopDetected508            ExitCode = 58
 
 	ExitCancel              ExitCode = 2
+	ExitUnknownError        ExitCode = 99
 	ExitError               ExitCode = 100
 	ExitUserError           ExitCode = 101
 	ExitNoSession           ExitCode = 102
@@ -135,7 +136,7 @@ func NewServerError(r *c8y.Response, err error) CommandError {
 		Message:    err.Error(),
 		ErrorType:  ErrTypeServer,
 		silent:     false,
-		ExitCode:   99,
+		ExitCode:   ExitUnknownError,
 		StatusCode: 0,
 		err:        err,
 	}
@@ -143,7 +144,7 @@ func NewServerError(r *c8y.Response, err error) CommandError {
 	if errors.Is(err, context.DeadlineExceeded) {
 		cmdError.ErrorType = ErrTypeCommand
 		cmdError.Message = "command timed out"
-		cmdError.ExitCode = 106
+		cmdError.ExitCode = ExitTimeout
 	}
 
 	if v, ok := err.(*c8y.ErrorResponse); ok {
