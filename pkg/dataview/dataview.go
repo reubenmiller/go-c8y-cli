@@ -8,6 +8,7 @@ import (
 	"regexp"
 	"sort"
 	"strings"
+	"sync"
 
 	"github.com/reubenmiller/go-c8y-cli/pkg/logger"
 	"github.com/reubenmiller/go-c8y-cli/pkg/matcher"
@@ -33,11 +34,13 @@ type DefinitionCollection struct {
 
 // DataView data view containing pre-definied views
 type DataView struct {
+	mu          sync.RWMutex
 	Paths       []string
 	Extension   string
 	Pattern     string
 	Definitions []Definition
 	Logger      *logger.Logger
+	ActiveView  *Definition
 }
 
 // NewDataView creates a new data view which selected a view based in json data
@@ -46,6 +49,7 @@ func NewDataView(pattern string, extension string, log *logger.Logger, paths ...
 		log = logger.NewDummyLogger("dataview")
 	}
 	view := &DataView{
+		mu:        sync.RWMutex{},
 		Paths:     paths,
 		Pattern:   pattern,
 		Extension: extension,
@@ -54,11 +58,17 @@ func NewDataView(pattern string, extension string, log *logger.Logger, paths ...
 	return view, nil
 }
 
+// LoadDefinitions load the view definitions
 func (v *DataView) LoadDefinitions() error {
-	if len(v.Definitions) > 0 {
+
+	if len(v.GetDefinitions()) > 0 {
 		v.Logger.Debugf("Views already loaded")
 		return nil
 	}
+
+	v.mu.Lock()
+	defer v.mu.Unlock()
+
 	definitions := make([]Definition, 0)
 	v.Logger.Debugf("Looking for definitions in: %v", v.Paths)
 	for _, path := range v.Paths {
@@ -113,7 +123,7 @@ func (v *DataView) GetViewByName(pattern string) ([]string, error) {
 
 	var matchingDefinition *Definition
 
-	for _, definition := range v.Definitions {
+	for _, definition := range v.GetDefinitions() {
 
 		if match, _ := matcher.MatchWithWildcards(definition.Name, pattern); match {
 			matchingDefinition = &definition
@@ -137,7 +147,7 @@ func (v *DataView) GetViews(pattern string) ([]Definition, error) {
 
 	matches := []Definition{}
 
-	for _, definition := range v.Definitions {
+	for _, definition := range v.GetDefinitions() {
 		if match, _ := matcher.MatchWithWildcards(definition.Name, pattern); match {
 			matches = append(matches, definition)
 		}
@@ -146,7 +156,32 @@ func (v *DataView) GetViews(pattern string) ([]Definition, error) {
 	return matches, nil
 }
 
+func (v *DataView) GetDefinitions() []Definition {
+	v.mu.RLock()
+	defer v.mu.RUnlock()
+	return v.Definitions
+}
+
+// GetActiveView get the active view
+func (v *DataView) GetActiveView() *Definition {
+	v.mu.RLock()
+	defer v.mu.RUnlock()
+	return v.ActiveView
+}
+
+// ClearActiveView clear the active view
+func (v *DataView) ClearActiveView() {
+	v.mu.Lock()
+	defer v.mu.Unlock()
+	v.ActiveView = nil
+}
+
 func (v *DataView) GetView(data *gjson.Result, contentType ...string) ([]string, error) {
+	if view := v.GetActiveView(); view != nil {
+		v.Logger.Debugf("Using already active view")
+		return view.Columns, nil
+	}
+
 	err := v.LoadDefinitions()
 	if err != nil {
 		return nil, err
@@ -157,9 +192,12 @@ func (v *DataView) GetView(data *gjson.Result, contentType ...string) ([]string,
 		}
 		data = &data.Array()[0]
 	}
+	definitions := v.GetDefinitions()
+	v.mu.Lock()
+	defer v.mu.Unlock()
 
 	var matchingDefinition *Definition
-	for _, definition := range v.Definitions {
+	for _, definition := range definitions {
 		isMatch := true
 
 		for _, fragment := range definition.Fragments {
@@ -202,6 +240,7 @@ func (v *DataView) GetView(data *gjson.Result, contentType ...string) ([]string,
 	}
 	if matchingDefinition != nil {
 		v.Logger.Debugf("Found matching view: name=%s", matchingDefinition.Name)
+		v.ActiveView = matchingDefinition
 		return matchingDefinition.Columns, nil
 	}
 	v.Logger.Debug("No matching view found")
