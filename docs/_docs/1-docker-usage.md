@@ -6,8 +6,7 @@ title: Installation
 
 The c8y tool is also available in the following docker images
 
-* ghcr.io/reubenmiller/c8y-bash
-* ghcr.io/reubenmiller/c8y-zsh
+* ghcr.io/reubenmiller/c8y-shell
 * ghcr.io/reubenmiller/c8y-pwsh
 
 **Note:** All of these images are linux containers (not Windows!), but can be called from any x64 based operating system
@@ -18,7 +17,7 @@ The following sections will details both methods. It is assumed that you have do
 
 ### Using a c8y docker image
 
-The session persistence is achieved by mounting a docker volume to your host operating system. Any sessions that are created in the docker container, will be persistend on your operation sytsem in the specific folder.
+The session persistence is achieved by mounting a docker volume to your host operating system. Any sessions that are created in the docker container, will be stored on your operation system in the mounted folder.
 
 It is recommended that you run these commands from your home folder, so that the `~/.cumulocity` folder will be used to store the sessions, as this is the default folder that is used should you install the c8y cli tool on your host machine later on. That way you will you be able to continue using 
 
@@ -56,7 +55,7 @@ You can provide the session information via environment variables, deviced in a 
     C8Y_PASSWORD=my4s3curep4assword
     ```
 
-    **Note:** Please use LF line endings, and utf8 formated with out a BOM.
+    **Note:** Please use LF line endings, and utf8 encoding (without a BOM).
 
 2. Start the docker container
 
@@ -68,12 +67,12 @@ You can provide the session information via environment variables, deviced in a 
 
 ### Re-using an existing c8y session in docker
 
-If you have already activated a c8y session on a command console, you can re-use the current session by simply passing the environment variables to the docker image. This can be useful if you want to try out the same session that you have loaded but in an other environment (i.e. using a zsh console).
+If you have already activated a c8y session on a command console, you can re-use the current session by simply passing the environment variables to the docker image. This can be useful if you want to try out the same session that you have loaded but in an other environment (i.e. using zsh).
 
 
 1. Set a c8y session on your console
 
-    **Bash/zsh**
+    **Shell**
 
     ```sh
     set-session
@@ -98,7 +97,7 @@ If you have already activated a c8y session on a command console, you can re-use
 
 2. Check if the environment variables have been set
 
-    **Bash/zsh**
+    **Shell**
 
     ```sh
     echo $C8Y_HOST
@@ -114,7 +113,7 @@ If you have already activated a c8y session on a command console, you can re-use
 
 3. Create a new container re-using the session
 
-    **Bash/zsh**
+    **Shell**
 
     ```sh
     docker run -it --rm \
