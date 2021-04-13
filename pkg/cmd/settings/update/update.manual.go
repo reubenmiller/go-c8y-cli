@@ -229,6 +229,27 @@ var updateSettingsOptions = map[string]argumentHandler{
 		"5",
 	}, nil, cobra.ShellCompDirectiveNoFileComp},
 
+	// delay
+	"defaults.delay": {"defaults.delay", "int", "settings.defaults.delay", []string{
+		"0",
+		"50",
+		"100",
+		"250",
+		"500",
+		"1000",
+		"2000",
+	}, nil, cobra.ShellCompDirectiveNoFileComp},
+
+	// delayBefore
+	"defaults.delayBefore": {"defaults.delayBefore", "int", "settings.defaults.delayBefore", []string{
+		"0",
+		"500",
+		"1000",
+		"2000",
+		"5000",
+		"10000",
+	}, nil, cobra.ShellCompDirectiveNoFileComp},
+
 	// abortOnErrors
 	"defaults.abortOnErrors": {"defaults.abortOnErrors", "int", "settings.defaults.abortOnErrors", []string{
 		"1",
