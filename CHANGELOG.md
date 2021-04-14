@@ -81,6 +81,12 @@ None :)
 
 No unreleased features
 
+* Added new filter operators notmatch and notlike to do inverted regex and wildcard matches respectively
+
+    ```sh
+    c8y devices list --filter "type notlike *myvalue*"
+    c8y devices list --filter "type notmatch myvalue?"
+    ```
 * `c8y identity create|get|delete` type is set to `c8y_Serial` by default
 * `c8y identity create` added template support
 * Merging zsh, bash and fish shells into one docker image called `c8y-shell`. ZSH is launched by default but other shells can be used by launching them manually inside the same container. It makes it easier to try out different shells.
