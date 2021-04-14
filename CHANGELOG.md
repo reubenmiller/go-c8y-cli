@@ -30,7 +30,22 @@ None :)
 ## Known limitations
 
 * When using --session, if the session required TFA, then it will not work! The cookies/tokens have to be present in the session file first
-## TODO
+
+## TODO (next branch)
+
+### Docs
+
+* [ ] Activity Log
+* [ ] Workers
+* [ ] Filtering
+* [ ] Confirmation
+* [ ] Views
+* [ ] Configuration (defaults, environment variables, arguments)
+* [ ] Session encryption
+* [ ] Common Parameters
+* [ ] Error handling
+* [ ] Aliases
+* [ ] Partial setting of sessions (i.e. bootstrap credentials with only the username/password set)
 
 ### Naming Consistency
 
@@ -47,6 +62,12 @@ None :)
         c8y alias set cancelop "operations update --status=FAILED --failureReason='User cancelled operation'"
         ```
 
+* No error is shown to the user when POST is disabled
+
+    ```sh
+    echo -e "1\n2\n3" | c8y devicegroups assignDevice --group 6907807778 --workers 2 --delay 250 --progress
+    ```
+
 ### Commands
 
 * Create c8y names generator
@@ -60,9 +81,19 @@ None :)
 
 * Add option to print out request and response as markdown
 
+* Allow template variable for GETs to also combine data to the response (i.e. )
+
+    ```sh
+    c8y operations list | c8y devices get --template "{ operation: input.value }"
+    ```
+
 ### Refactoring
 
 * Move dataview to configuration
+
+## Improvements
+
+* Use wide-format / column padding for completion description to better align extra information
 
 ### Completions
 
