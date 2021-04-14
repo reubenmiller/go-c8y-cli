@@ -48,7 +48,7 @@ func (f *JSONFilters) AddSelectors(props ...string) {
 // AddRawFilters add list of raw filters
 func (f *JSONFilters) AddRawFilters(rawFilters []string) error {
 	for _, item := range rawFilters {
-		sepPattern := regexp.MustCompile(`(\s+[\-]?(like|match|eq|neq|lt|lte|gt|gte|notIn|in|startsWith|endsWth|contains|len[n]?eq|lengt[e]?|lenlt[e]?)\s+|(!?=|[<>]=?))`)
+		sepPattern := regexp.MustCompile(`(\s+[\-]?(like|match|notlike|notmatch|eq|neq|lt|lte|gt|gte|notIn|in|startsWith|endsWth|contains|len[n]?eq|lengt[e]?|lenlt[e]?)\s+|(!?=|[<>]=?))`)
 
 		parts := sepPattern.Split(item, 2)
 
@@ -268,8 +268,13 @@ func (f JSONFilters) filterJSON(jsonValue string, property string, showHeaders b
 	// Add custom filters
 	jq.Macro("like", matchWithWildcards)
 	jq.Macro("-like", matchWithWildcards)
+	jq.Macro("-notlike", matchWithWildcardsNegated)
+	jq.Macro("notlike", matchWithWildcardsNegated)
+
 	jq.Macro("match", matchWithRegex)
 	jq.Macro("-match", matchWithRegex)
+	jq.Macro("-notmatch", matchWithRegexNegated)
+	jq.Macro("notmatch", matchWithRegexNegated)
 
 	for _, query := range f.Filters {
 		Logger.Debugf("filtering data: %s %s %s", query.Property, query.Operation, query.Value)
@@ -445,6 +450,17 @@ func matchWithWildcards(x, y interface{}) (bool, error) {
 	return matcher.MatchWithWildcards(xs, pattern)
 }
 
+func matchWithWildcardsNegated(x, y interface{}) (bool, error) {
+	xs, okx := x.(string)
+	pattern, oky := y.(string)
+	if !okx || !oky {
+		return false, fmt.Errorf("wildcard matching only supports strings")
+	}
+
+	match, err := matcher.MatchWithWildcards(xs, pattern)
+	return !match, err
+}
+
 func matchWithRegex(x, y interface{}) (bool, error) {
 	xs, okx := x.(string)
 	pattern, oky := y.(string)
@@ -453,4 +469,15 @@ func matchWithRegex(x, y interface{}) (bool, error) {
 	}
 
 	return matcher.MatchWithRegex(xs, pattern)
+}
+
+func matchWithRegexNegated(x, y interface{}) (bool, error) {
+	xs, okx := x.(string)
+	pattern, oky := y.(string)
+	if !okx || !oky {
+		return false, fmt.Errorf("wildcard matching only supports strings")
+	}
+
+	match, err := matcher.MatchWithRegex(xs, pattern)
+	return !match, err
 }
