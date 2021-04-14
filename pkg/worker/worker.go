@@ -209,7 +209,7 @@ func (w *Worker) runBatched(requestIterator *requestiterator.RequestIterator, co
 			jobID++
 			w.logger.Debugf("checking job iterator: %d", jobID)
 
-			if jobID > maxJobs {
+			if maxJobs != 0 && jobID > maxJobs {
 				w.logger.Infof("maximum jobs reached: limit=%d", maxJobs)
 				break
 			}
@@ -351,7 +351,7 @@ func (w *Worker) runBatched(requestIterator *requestiterator.RequestIterator, co
 		time.Sleep(progbar.RefreshRate())
 	}
 
-	maxJobsReached := jobID > maxJobs
+	maxJobsReached := maxJobs != 0 && jobID > maxJobs
 	if total := len(totalErrors); total > 0 {
 		if total == 1 {
 			// return only error
