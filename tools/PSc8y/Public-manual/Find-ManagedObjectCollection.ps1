@@ -21,9 +21,15 @@ Find all devices with their names starting with 'roomUpperFloor_'
     [OutputType([object])]
     Param(
         # ManagedObject query. (required)
-        [Parameter(Mandatory = $true)]
-        [string]
+        [Parameter(ValueFromPipeline=$true,
+                   ValueFromPipelineByPropertyName=$true)]
+        [object[]]
         $Query,
+
+        # String template to be used when applying the given query. Use %s to reference the query/pipeline input
+        [Parameter(Mandatory = $false)]
+        [string]
+        $QueryTemplate,
 
         # ManagedObject sort results by.
         [Parameter(Mandatory = $false)]
@@ -33,7 +39,12 @@ Find all devices with their names starting with 'roomUpperFloor_'
         # include a flat list of all parents and grandparents of the given object
         [Parameter()]
         [switch]
-        $WithParents
+        $WithParents,
+
+        # only include devices (i.e. add has(c8y_IsDevice) to the query)
+        [Parameter()]
+        [switch]        
+        $OnlyDevices
     )
     DynamicParam {
         Get-ClientCommonParameters -Type "Collection"
@@ -58,11 +69,15 @@ Find all devices with their names starting with 'roomUpperFloor_'
     Process {
 
         if ($ClientOptions.ConvertToPS) {
-            c8y inventory find $c8yargs `
+            $Query `
+            | Group-ClientRequests `
+            | c8y inventory find $c8yargs `
             | ConvertFrom-ClientOutput @TypeOptions
         }
         else {
-            c8y inventory find $c8yargs
+            $Query `
+            | Group-ClientRequests `
+            | c8y inventory find $c8yargs
         }
     }
 
