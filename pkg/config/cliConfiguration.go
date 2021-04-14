@@ -1381,9 +1381,18 @@ func (c *Config) HideSensitiveInformationIfActive(client *c8y.Client, message st
 	}
 
 	if client != nil {
-		message = strings.ReplaceAll(message, client.TenantName, "{tenant}")
-		message = strings.ReplaceAll(message, client.Username, "{username}")
-		message = strings.ReplaceAll(message, client.Password, "{password}")
+		if client.TenantName != "" {
+			message = strings.ReplaceAll(message, client.TenantName, "{tenant}")
+		}
+		if client.Username != "" {
+			message = strings.ReplaceAll(message, client.Username, "{username}")
+		}
+		if client.Password != "" {
+			message = strings.ReplaceAll(message, client.Password, "{password}")
+		}
+		if client.Token != "" {
+			message = strings.ReplaceAll(message, client.Token, "{token}")
+		}
 		if client.BaseURL != nil {
 			message = strings.ReplaceAll(message, strings.TrimRight(client.BaseURL.Host, "/"), "{host}")
 		}
