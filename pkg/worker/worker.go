@@ -210,7 +210,7 @@ func (w *Worker) runBatched(requestIterator *requestiterator.RequestIterator, co
 			w.logger.Debugf("checking job iterator: %d", jobID)
 
 			if jobID > maxJobs {
-				w.logger.Warningf("maximum jobs reached: limit=%d", maxJobs)
+				w.logger.Infof("maximum jobs reached: limit=%d", maxJobs)
 				break
 			}
 
@@ -277,11 +277,11 @@ func (w *Worker) runBatched(requestIterator *requestiterator.RequestIterator, co
 					results <- err
 					continue
 				case prompt.ConfirmNoToAll:
-					w.logger.Warningf("skipping job: %d. %s", jobID, err)
+					w.logger.Infof("skipping job: %d. %s", jobID, err)
 					if w.activityLogger != nil {
 						w.activityLogger.LogCustom(err.Error() + ". " + request.Path)
 					}
-					w.logger.Warning("cancelling all remaining jobs")
+					w.logger.Infof("cancelling all remaining jobs")
 					results <- err
 				}
 				if confirmResult == prompt.ConfirmNoToAll {
