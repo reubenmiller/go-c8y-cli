@@ -73,7 +73,7 @@ set-session () {
         (exit $code)
         return
     fi
-    eval $c8yenv
+    eval "$c8yenv"
 }
 
 # -----------

@@ -28,7 +28,7 @@ function set-session --description "Switch Cumulocity session interactively"
         echo "Set session failed"
         return
     end
-    echo $c8yenv | source
+    echo "$c8yenv" | source
 end
 
 # -----------
