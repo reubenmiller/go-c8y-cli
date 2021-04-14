@@ -3,11 +3,10 @@
 
 ## current todo
 
-* [ ] Add device commands. New-Device, Update-Device, Remove-Device, Get-DeviceCollection (already exists)
+* [x] Add device commands. New-Device, Update-Device, Remove-Device, Get-DeviceCollection (already exists)
 
 ## Bugs
 
-* Subscription tests are flakey
 Currently not known
 
 ## c8y (golang)
@@ -83,7 +82,7 @@ Currently not known
   * [x] WithTotalPages
   * [x] Raw
   * [x] Force
-  * [ ] Without Accept header (for performance improvements)
+  * [x] Without Accept header (for performance improvements)
 * [x] Validate set
 * [x] Add types (using cumulocity types) and default columns
   * [x] Get-AlarmCollection.ps1
@@ -126,16 +125,16 @@ Manual commands
 * [x] Adding encoding tests
 * [x] Add aliases for all the commands, i.e. Get-ApplicationCollection -> apps, Get-DeviceCollection -> devices
 
-* [ ] Client side filtering of results for those that don't support server side filters
-  * [ ] Application
-    * [ ] Name
+* [x] Client side filtering of results for those that don't support server side filters
+  * [x] Application
+    * [x] Name
 * [ ] Remove child devices and child references by wildcard. Only delete matching children
 
 ## Packaging
 
 * [x] Package c8y binary with the powershell app
-* [ ] Publish c8y binaries to github
-* [ ] Publish powershell module to PSGallery
+* [x] Publish c8y binaries to github
+* [x] Publish powershell module to PSGallery
 
 * Installation problem with Windows 10. Requires PowerShellGet minimum version 2.2.3! Which is not installed by default on Windows 10 PS 5.1
     Maybe add recommendation that powershell 6 (core) should be used, also with an updated PowerShellGet
@@ -148,32 +147,35 @@ Manual commands
 
 ## Docs
 
-* [ ] Write github pages with a tutorial
-* [ ] General concepts
-    * [ ] Dates
-    * [ ] Lookups
-* [ ] Setup
-    * [ ] Install binary
+* [x] Write github pages with a tutorial
+* [x] General concepts
+    * [x] Dates
+    * [x] Lookups
+* [x] Setup
+    * [x] Install binary
 
 * [ ] Add/Remove child devices
 * [ ] users (add, skip send email, or static password)
 * [ ] managed objects
 * [ ] aliases
-* [ ] custom requests
+* [x] custom requests
 * [ ] Extending modules
 * [ ] notifications
-* [ ]
 
 # Future
 
 ### Phase 2
 
-* [ ] Implement --all switch for collections to iterate through all results (max results)
+* [x] Implement --all switch for collections to iterate through all results (max results)
 * [ ] Make options case insensitive
-* [ ] Look over devices where []device type is used (parallel tasks?) Probably need a new template
+* [x] Look over devices where []device type is used (parallel tasks?) Probably need a new template
 
 ### Phase 3
 
-* [ ] Cumulocity sessions
-  * [ ] Store session credentials securely
-  * [ ] Set credentials from a microservice subscription
+* [x] Cumulocity sessions
+  * [x] Store session credentials securely
+  * [x] Set credentials from a microservice subscription
+
+### Future
+
+* Provide local caching to reduce number of request to platform
