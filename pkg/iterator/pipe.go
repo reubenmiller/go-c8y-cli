@@ -23,6 +23,13 @@ type Filter func([]byte) bool
 // This can be used if you want to apply simple validation logic to each item, i.e. validate that it is an id like value or not.
 type Validator func([]byte) error
 
+// Formatter a function to transform input pipeline value and returns the formatted value as output
+type Formatter func([]byte) []byte
+
+func DummyFormatter(v []byte) []byte {
+	return v
+}
+
 // PipeOptions additional options on how to interpret the piped data
 type PipeOptions struct {
 	// Property name if the input data is json
@@ -33,6 +40,9 @@ type PipeOptions struct {
 
 	// Validator to be applied on each item
 	Validator Validator
+
+	// Formatter
+	Formatter Formatter
 }
 
 // PipeIterator is a thread safe iterator to retrieve the input values from piped standard input
@@ -65,6 +75,11 @@ func (i *PipeIterator) GetNext() (line []byte, input interface{}, err error) {
 		}
 	}
 
+	formatter := DummyFormatter
+	if i.opts != nil && i.opts.Formatter != nil {
+		formatter = i.opts.Formatter
+	}
+
 	// check if json, if so pluck the value from it
 	if i.opts != nil && jsonUtilities.IsJSONObject(line) {
 		if len(i.opts.Properties) > 0 {
@@ -74,10 +89,10 @@ func (i *PipeIterator) GetNext() (line []byte, input interface{}, err error) {
 					if v := gjson.GetBytes(line, prop); v.Exists() {
 						// allow for different type
 						if v.Type == gjson.String {
-							return []byte(v.String()), line, nil
+							return formatter([]byte(v.String())), line, nil
 						}
 						// return raw value (as it might be a number or bool)
-						return []byte(v.Raw), line, nil
+						return formatter([]byte(v.Raw)), line, nil
 					}
 				}
 			}
@@ -98,7 +113,7 @@ func (i *PipeIterator) GetNext() (line []byte, input interface{}, err error) {
 		}
 	}
 
-	return line, line, err
+	return formatter(line), line, err
 }
 
 // MarshalJSON return the value in a json compatible value

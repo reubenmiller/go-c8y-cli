@@ -39,6 +39,7 @@ func NewFlagWithPipeIterator(cmd *cobra.Command, pipeOpt *PipelineOptions, suppo
 			Properties: sourceProperties,
 			Validator:  nil,
 			AllowEmpty: !pipeOpt.Required,
+			Formatter:  pipeOpt.Formatter,
 		}
 		iter, err := iterator.NewJSONPipeIterator(cmd.InOrStdin(), iterOpts, func(line []byte) bool {
 			line = bytes.TrimSpace(line)
@@ -55,7 +56,6 @@ func NewFlagWithPipeIterator(cmd *cobra.Command, pipeOpt *PipelineOptions, suppo
 	}
 
 	if cmd.Flags().Changed(pipeOpt.Name) {
-
 		items, err := cmd.Flags().GetStringSlice(pipeOpt.Name)
 
 		if err != nil {
@@ -84,6 +84,12 @@ func NewFlagWithPipeIterator(cmd *cobra.Command, pipeOpt *PipelineOptions, suppo
 					return nil, err
 				}
 				return iter, nil
+			}
+
+			if pipeOpt.Formatter != nil {
+				for i, item := range items {
+					items[i] = string(pipeOpt.Formatter([]byte(item)))
+				}
 			}
 
 			// return array of results

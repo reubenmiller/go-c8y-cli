@@ -84,6 +84,87 @@
       ]
     },
     {
+      "name": "findByTextManagedObjectCollection",
+      "method": "GET",
+      "description": "Find managed object by text collection",
+      "descriptionLong": "Find a collection of managedObjects which match a given text value",
+      "path": "inventory/managedObjects",
+      "accept": "application/vnd.com.nsn.cumulocity.managedObjectCollection+json",
+      "collectionType": "application/vnd.com.nsn.cumulocity.managedObject+json",
+      "collectionProperty": "managedObjects",
+      "alias": {
+        "go": "findByText",
+        "powershell": "Find-ByTextManagedObjectCollection"
+      },
+      "examples": {
+        "powershell": [
+          {
+            "description": "Find a list of managed objects by text",
+            "beforeEach": [
+              "$Device1 = New-TestDevice"
+            ],
+            "command": "Find-ByTextManagedObjectCollection -Text $Device1.name",
+            "afterEach": [
+              "Remove-ManagedObject -Id $Device1.id"
+            ]
+          },
+          {
+            "description": "Find managed objects which contain the text 'myText' (using pipeline)",
+            "beforeEach": [
+              "$Device1 = New-TestDevice"
+            ],
+            "command": "Find-ByTextManagedObjectCollection -Text $Device1.name",
+            "afterEach": [
+              "Remove-ManagedObject -Id $Device1.id"
+            ]
+          }
+        ],
+        "go": [
+          {
+            "description": "Get a list of managed objects",
+            "command": "c8y inventory findByText --text \"myText\""
+          },
+          {
+            "description": "Find managed objects which contain the text 'myText' (using pipeline)",
+            "command": "echo \"myText\" | c8y inventory findByText"
+          },
+          {
+            "description": "Find managed objects which contain the text 'myText' and is a device (using pipeline)",
+            "command": "echo \"myText\" | c8y inventory findByText --fragment c8y_IsDevice"
+          }
+        ]
+      },
+      "queryParameters": [
+        {
+          "name": "text",
+          "type": "string",
+          "pipeline": true,
+          "required": true,
+          "description": "managed objects containing a text value starting with the given text (placeholder {text}). Text value is any alphanumeric string starting with a latin letter (A-Z or a-z)."
+        },
+        {
+          "name": "type",
+          "type": "string",
+          "description": "ManagedObject type."
+        },
+        {
+          "name": "fragmentType",
+          "type": "string",
+          "description": "ManagedObject fragment type."
+        },
+        {
+          "name": "withParents",
+          "type": "boolean",
+          "description": "include a flat list of all parents and grandparents of the given object"
+        },
+        {
+          "name": "skipChildrenNames",
+          "type": "boolean",
+          "description": "Don't include the child devices names in the response. This can improve the API response because the names don't need to be retrieved"
+        }
+      ]
+    },
+    {
       "name": "queryManagedObjectCollection",
       "method": "GET",
       "skip": true,

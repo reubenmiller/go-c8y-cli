@@ -1,10 +1,10 @@
 package find
 
 import (
+	"bytes"
 	"fmt"
 	"io"
 	"net/http"
-	"net/url"
 
 	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmd/subcommand"
@@ -19,7 +19,10 @@ import (
 type CmdFind struct {
 	*subcommand.SubCommand
 
-	factory *cmdutil.Factory
+	onlyDevices   bool
+	queryTemplate string
+	orderBy       string
+	factory       *cmdutil.Factory
 }
 
 func NewCmdFind(f *cmdutil.Factory) *CmdFind {
@@ -32,8 +35,14 @@ func NewCmdFind(f *cmdutil.Factory) *CmdFind {
 		Short: "Find managed object collection",
 		Long:  `Get a collection of managedObjects based on Cumulocity query language`,
 		Example: heredoc.Doc(`
-$ c8y inventory find --query "name eq 'roomUpperFloor_*'"
-Get a list of managed objects
+			$ c8y inventory find --query "name eq 'roomUpperFloor_*'"
+			Get a list of managed objects
+
+			$ echo "myname" | c8y inventory find --queryTemplate 'name eq '*%s*' --onlyDevices
+			Find devices which include myname in their names. query=$filter=name eq '*myname*'
+
+			$ echo "name eq 'name'" | c8y inventory find --queryTemplate 'not(%s)'
+			Invert a given query received via piped input (stdin) by using a template
 		`),
 		RunE: ccmd.RunE,
 	}
@@ -41,12 +50,14 @@ Get a list of managed objects
 	cmd.SilenceUsage = true
 
 	cmd.Flags().String("query", "", "ManagedObject query. (required)")
-	cmd.Flags().String("orderBy", "", "Order the results by the given parameter. i.e. 'id asc' or 'name desc'")
+	cmd.Flags().StringVar(&ccmd.queryTemplate, "queryTemplate", "", "String template to be used when applying the given query. Use %s to reference the query/pipeline input")
+	cmd.Flags().StringVar(&ccmd.orderBy, "orderBy", "", "Order the results by the given parameter. i.e. 'id asc' or 'name desc'")
 	cmd.Flags().Bool("withParents", false, "include a flat list of all parents and grandparents of the given object")
+	cmd.Flags().BoolVar(&ccmd.onlyDevices, "onlyDevices", false, "Only include devices in the query")
 
 	flags.WithOptions(
 		cmd,
-		flags.WithPipelineSupport(""),
+		flags.WithExtendedPipelineSupport("query", "query", true, "c8y_DeviceQueryString"),
 	)
 
 	// Required flags
@@ -66,10 +77,47 @@ func (n *CmdFind) RunE(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return err
 	}
-	inputIterators := &flags.RequestInputIterators{}
+	inputIterators, err := flags.NewRequestInputIterators(cmd)
+	if err != nil {
+		return err
+	}
 
 	// query parameters
 	query := flags.NewQueryTemplate()
+	err = flags.WithQueryParameters(
+		cmd,
+		query,
+		inputIterators,
+		flags.WithCustomStringSlice(func() ([]string, error) { return cfg.GetQueryParameters(), nil }, "custom"),
+		flags.WithCustomStringValue(func(b []byte) []byte {
+
+			if n.queryTemplate != "" {
+				b = []byte(fmt.Sprintf(n.queryTemplate, b))
+			}
+
+			if !bytes.HasPrefix(b, []byte("$filter")) {
+				b = append([]byte("$filter="), b...)
+			}
+
+			if n.orderBy != "" {
+				if !bytes.Contains(b, []byte("$orderby=")) {
+					b = append(b, []byte(" $orderby="+n.orderBy)...)
+				}
+			}
+
+			// prepend device filter
+			if cmd.Flags().Changed("onlyDevices") {
+				if n.onlyDevices {
+					b = bytes.Replace(b, []byte("$filter="), []byte("$filter=has(c8y_IsDevice) and "), 1)
+				}
+			}
+			return b
+		}, "query", "query"),
+		flags.WithBoolValue("withParents", "withParents"),
+	)
+	if err != nil {
+		return cmderrors.NewUserError(err)
+	}
 
 	commonOptions, err := cfg.GetOutputCommonOptions(cmd)
 	if err != nil {
@@ -78,33 +126,6 @@ func (n *CmdFind) RunE(cmd *cobra.Command, args []string) error {
 
 	commonOptions.ResultProperty = "managedObjects"
 	commonOptions.AddQueryParameters(query)
-
-	orderBy := ""
-	if v, err := cmd.Flags().GetString("orderBy"); err == nil {
-		if v != "" {
-			orderBy = v
-		}
-	}
-	if v, err := cmd.Flags().GetString("query"); err == nil {
-		if v != "" {
-			c8yQuery := fmt.Sprintf("$filter=%s", url.QueryEscape(v))
-
-			if orderBy != "" {
-				c8yQuery = c8yQuery + fmt.Sprintf("+$orderby=%s", url.QueryEscape(orderBy))
-			}
-
-			query.SetVariable("query", c8yQuery)
-		}
-	} else {
-		return cmderrors.NewUserError(fmt.Sprintf("Flag [%s] does not exist. %s", "query", err))
-	}
-	if cmd.Flags().Changed("withParents") {
-		if v, err := cmd.Flags().GetBool("withParents"); err == nil {
-			query.SetVariable("withParents", fmt.Sprintf("%v", v))
-		} else {
-			return cmderrors.NewUserError("Flag does not exist")
-		}
-	}
 
 	queryValue, err := query.GetQueryUnescape(true)
 

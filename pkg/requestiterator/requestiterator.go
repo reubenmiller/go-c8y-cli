@@ -102,7 +102,7 @@ func (r *RequestIterator) GetNext() (*c8y.RequestOptions, interface{}, error) {
 			return nil, nil, err
 		}
 		inputLine = input
-		req.Query = string(q)
+		req.Query = strings.ReplaceAll(string(q), " ", "+")
 	}
 
 	r.Logger.Debugf("Input line: %s", inputLine)

@@ -216,7 +216,7 @@ func WithStringValue(opts ...string) GetOption {
 
 		src, dst, format := UnpackGetterOptions("%s", opts...)
 
-		if inputIterators != nil {
+		if inputIterators != nil && inputIterators.PipeOptions != nil {
 			if inputIterators.PipeOptions.Name == src {
 				return WithPipelineIterator(inputIterators.PipeOptions)(cmd, inputIterators)
 			}
@@ -231,6 +231,37 @@ func WithStringValue(opts ...string) GetOption {
 			dst = ""
 		}
 		return dst, applyFormatter(format, value), err
+	}
+}
+
+// WithCustomStringValue add a custom string value with a custom tranform function
+func WithCustomStringValue(transform func([]byte) []byte, opts ...string) GetOption {
+	return func(cmd *cobra.Command, inputIterators *RequestInputIterators) (string, interface{}, error) {
+
+		src, dst, format := UnpackGetterOptions("%s", opts...)
+
+		if inputIterators != nil && inputIterators.PipeOptions != nil {
+			if transform != nil {
+				inputIterators.PipeOptions.Formatter = transform
+			}
+			if inputIterators.PipeOptions.Name == src {
+				return WithPipelineIterator(inputIterators.PipeOptions)(cmd, inputIterators)
+			}
+		}
+
+		value, err := cmd.Flags().GetString(src)
+		if err != nil {
+			return dst, value, err
+		}
+		if value == "" {
+			// dont assign the value anywhere
+			dst = ""
+		}
+		outputValue := applyFormatter(format, value)
+		if transform != nil {
+			outputValue = string(transform([]byte(outputValue)))
+		}
+		return dst, outputValue, err
 	}
 }
 
@@ -540,12 +571,13 @@ func WithRequiredProperties(values ...string) GetOption {
 }
 
 type PipelineOptions struct {
-	Name      string             `json:"name"`
-	Required  bool               `json:"required"`
-	Property  string             `json:"property"`
-	Aliases   []string           `json:"aliases"`
-	IsID      bool               `json:"isID"`
-	Validator iterator.Validator `json:"-"`
+	Name      string              `json:"name"`
+	Required  bool                `json:"required"`
+	Property  string              `json:"property"`
+	Aliases   []string            `json:"aliases"`
+	IsID      bool                `json:"isID"`
+	Validator iterator.Validator  `json:"-"`
+	Formatter func([]byte) []byte `json:"-"`
 }
 
 // WithPipelineIterator adds pipeline support from cli arguments
