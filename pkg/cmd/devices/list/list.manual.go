@@ -71,7 +71,10 @@ func (n *CmdDevicesList) RunE(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	inputIterators := &flags.RequestInputIterators{}
+	inputIterators, err := flags.NewRequestInputIterators(cmd)
+	if err != nil {
+		return err
+	}
 
 	// query parameters
 	query := flags.NewQueryTemplate()

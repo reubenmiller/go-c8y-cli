@@ -65,7 +65,10 @@ func (n *CmdList) getDeviceGroupCollection(cmd *cobra.Command, args []string) er
 	if err != nil {
 		return err
 	}
-	inputIterators := &flags.RequestInputIterators{}
+	inputIterators, err := flags.NewRequestInputIterators(cmd)
+	if err != nil {
+		return err
+	}
 
 	// query parameters
 	query := flags.NewQueryTemplate()
