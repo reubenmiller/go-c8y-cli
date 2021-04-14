@@ -51,18 +51,14 @@ title: Powershell
         ```json
         {
             "host": "https://example.eu-latest.cumulocity.com",
-            "tenant": "t123456789",
             "username": "myUserName@example.com",
-            "password": "hopefully-something-complicated",
-            "description": "",
-            "useTenantPrefix": true,
-            "microserviceAliases": {}
+            "password": "hopefu/ly-something-compl1cated"
         }
         ```
 
         **Warning**
 
-        Please use the `tenantId` (i.e. t12345678) in the `tenant` property if you have a new t-style tenant id.
+        You can also add the `"tenant"` property to the session but it is not mandatory as it will be automatically detected and saved to the session the first time you run a request. However if you want to manually specify the tenant please use the `tenantId` (i.e. t12345678) in the `tenant` property if you have a new t-style tenant id.
 
     **Tips:**
 
