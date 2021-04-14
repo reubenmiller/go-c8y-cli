@@ -41,11 +41,11 @@ Describe -Name "c8y filter common parameter" {
     }
 
     It "filters by negated regex" {
-        $output = c8y devices list --fragmentType "ci_filterTest" --filter "id notmatch $($Device1.id)*" --orderBy "_id asc" | ConvertFrom-Json
+        $output = c8y devices list --fragmentType "ci_filterTest" --filter "id notmatch $($Device1.id)?" --orderBy "_id asc" | ConvertFrom-Json
         $LASTEXITCODE | Should -Be 0
         $output | Should -ContainInCollection $Device2
 
-        $output = c8y devices list --fragmentType "ci_filterTest" --filter "id -notmatch $($Device1.id)*" --orderBy "_id asc" | ConvertFrom-Json
+        $output = c8y devices list --fragmentType "ci_filterTest" --filter "id -notmatch $($Device1.id)?" --orderBy "_id asc" | ConvertFrom-Json
         $LASTEXITCODE | Should -Be 0
         $output | Should -ContainInCollection $Device2
     }
