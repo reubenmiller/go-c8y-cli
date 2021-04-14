@@ -169,9 +169,9 @@ func NewCmdRoot(f *cmdutil.Factory, version, buildDate string) *CmdRoot {
 
 	// Concurrency
 	cmd.PersistentFlags().Int("workers", 1, "Number of workers")
-	cmd.PersistentFlags().Int64("maxJobs", 100, "Maximum number of jobs. 0 = unlimited (use with caution!)")
+	cmd.PersistentFlags().Int64("maxJobs", 0, "Maximum number of jobs. 0 = unlimited (use with caution!)")
 
-	cmd.PersistentFlags().Int("delay", 1000, "delay in milliseconds after each request")
+	cmd.PersistentFlags().Int("delay", 0, "delay in milliseconds after each request")
 	cmd.PersistentFlags().Int("delayBefore", 0, "delay in milliseconds before each request")
 	cmd.PersistentFlags().Int("abortOnErrors", 10, "Abort batch when reaching specified number of errors")
 
