@@ -65,7 +65,7 @@ func (r *RequestHandler) ProcessRequestAndResponse(requests []c8y.RequestOptions
 
 	// Modify request if special mode is being used
 	if commonOptions.IncludeAll || commonOptions.TotalPages > 0 {
-		if strings.Contains(req.Path, "inventory/managedObjects") {
+		if isInventoryQuery(&req) {
 			tempURL, _ := url.Parse("https://dummy.com?" + req.Query.(string))
 			tempURL = optimizeManagedObjectsURL(tempURL, "0")
 			req.Query = tempURL.RawQuery
@@ -103,7 +103,7 @@ func (r *RequestHandler) ProcessRequestAndResponse(requests []c8y.RequestOptions
 	}
 
 	if commonOptions.IncludeAll || commonOptions.TotalPages > 0 {
-		if strings.Contains(req.Path, "inventory/managedObjects") {
+		if isInventoryQuery(&req) {
 			// TODO: Optimize implementation for inventory managed object queries to use the following
 			r.Logger.Info("Using inventory optimized query")
 			if err := r.fetchAllInventoryQueryResults(req, resp, commonOptions); err != nil {
@@ -119,6 +119,24 @@ func (r *RequestHandler) ProcessRequestAndResponse(requests []c8y.RequestOptions
 
 	_, err = r.ProcessResponse(resp, err, commonOptions)
 	return err
+}
+
+func isInventoryQuery(r *c8y.RequestOptions) bool {
+	if r == nil {
+		return false
+	}
+	currentQuery := ""
+	switch v := r.Query.(type) {
+	case string:
+		currentQuery = v
+	}
+	if !strings.Contains(r.Path, "inventory/managedObjects") {
+		return false
+	}
+	if values, err := url.ParseQuery(currentQuery); err == nil {
+		return values.Get("q") != "" || values.Get("query") != ""
+	}
+	return false
 }
 
 type RequestDetails struct {
