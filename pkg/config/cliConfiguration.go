@@ -308,7 +308,7 @@ func (c *Config) bindSettings() {
 	c.viper.SetEnvPrefix(EnvSettingsPrefix)
 	err := c.WithOptions(
 		WithBindEnv(SettingEncryptionCachePassphrase, true),
-		WithBindEnv(SettingsMaxWorkers, 5),
+		WithBindEnv(SettingsMaxWorkers, 50),
 		WithBindEnv(SettingsWorkers, 1),
 		WithBindEnv(SettingsIncludeAllPageSize, 2000),
 		WithBindEnv(SettingsStorageStorePassword, true),
