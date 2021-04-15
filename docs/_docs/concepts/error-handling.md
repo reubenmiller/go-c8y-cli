@@ -52,7 +52,7 @@ Note: Only HTTP status codes between 400 and 599 are mapped to exit codes. HTTP 
 
 Errors which are related to command usage (not server errors), are written to standard error, while server responses (error or otherwise) are written to standard output.
 
-For example, the following code tries to retrieve an non-existant managed object (id=0).
+For example, the following code tries to retrieve an non-existent managed object (id=0).
 
 ```sh
 response=$( c8y inventory get --id=0 )
@@ -108,7 +108,7 @@ fi
 If you would like to return the error as json, then the `--withError` option can be given which will return any errors as a json response where individual fields can be parsed by using jq, or any other json parser.
 
 ```sh
-# Note: stderrs are be redirected to null so they are not printed to the console
+# Note: stderr is redirected to null so it is not printed to the console
 c8y inventory get --id=0 --withError 2>/dev/null | jq
 ```
 
