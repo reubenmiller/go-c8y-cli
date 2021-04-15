@@ -48,7 +48,7 @@ UNIQUE_ID_4
     cat list.ids.csv  | c8y devicegroups assignDevice --group 1234 --workers 2 --progress --silentStatusCodes 409
     ```
 
-    `--silentStatusCodes` is used to silent 409 (duplicate) errors, as we don't care if the device is already assigned to the group.
+    `--silentStatusCodes` is used to silence 409 (duplicate) errors, as we don't care if the device is already assigned to the group.
 
     **Note**
 
