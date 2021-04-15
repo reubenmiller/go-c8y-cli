@@ -73,6 +73,11 @@ func (v *DataView) LoadDefinitions() error {
 	v.Logger.Debugf("Looking for definitions in: %v", v.Paths)
 	for _, path := range v.Paths {
 		err := filepath.WalkDir(path, func(path string, d fs.DirEntry, err error) error {
+			if err != nil {
+				// do not block walking folder
+				v.Logger.Warnf("Failed to walk path: %s, err=%s. file will be ignored", path, err)
+				return nil
+			}
 			if !d.IsDir() {
 				if !strings.EqualFold(filepath.Ext(d.Name()), v.Extension) {
 					return nil
