@@ -14,12 +14,12 @@ The `pageSize` has an upper limit of 2000 which is enforced on the server side.
 
 In addition, Cumulocity also supports a `currentPage` parameter which can be used to control which page from the collection the server should return. The `currentPage` defaults 1, however can be changed to return a different page of the collection.
 
-Please read the [Cumulocity IoT documentation](http://cumulocity.com/guides/reference/rest-implementation/#rest-usage) for futher details about paging.
+Please read the [Cumulocity IoT documentation](http://cumulocity.com/guides/reference/rest-implementation/#rest-usage) for further details about paging.
 
 
 #### Using paging on the command line
 
-The c8y cli tool supports interfacting with Cumulocity's paging, and provides a few enhancements to help to get all of the data that you need to be productive.
+The c8y cli tool supports interacting with Cumulocity's paging, and provides a few enhancements to help to get all of the data that you need to be productive.
 
 The following command line arguments are supported by all collection related commands.
 
@@ -42,13 +42,13 @@ The `includeAll` parameter is used to get all of the results.
 **Powershell**
 
 ```powershell
-Get-DeviceCollection -Name "MyDevices*" -IncludeAll
+Get-DeviceCollection -Name "MyDevices*" -IncludeAll --select "id,name,*.serialNumber" -Output csvheader > devicelist.csv
 ```
 
-**Bash/zsh**
+**Shell**
 
 ```sh
-c8y devices list --name "MyDevices*" --includeAll
+c8y devices list --name "MyDevices*" --includeAll --select "id,name,*.serialNumber" --output csvheader > devicelist.csv
 ```
 
 #### Iterating through the results
@@ -59,28 +59,28 @@ This has the advantages that all of the results do not need to be kept in memory
 
 **Example: Add a fragment to each device**
 
-The following shows how ot add a fragment `myNewFragment` to each devices where the name starts with "My".
+The following shows how to add a fragment `myNewFragment` to each devices where the name starts with "My".
+
+PowerShell
 
 ```powershell
 Get-DeviceCollection -Name "My*" -IncludeAll |
-    Update-ManagedObject -Data @{
-            myNewFragment = @{
-                # add timestamp (in ISO8601 format)
-                fragmentCreationTime = Format-Date
-            }
-        }
+    Update-ManagedObject -Data "myNewFragment.fragmentCreationTime=$(Format-Date)"
+
+# or using templates
+Get-DeviceCollection -Name "My*" -IncludeAll |
+    Update-ManagedObject -Template "{ myNewFragment: {fragmentCreationTime: _.Now() }}"
 ```
 
-**Notes**
+Shell
 
-* An `foreach` loop is need in the `ForEach-CumulocityPage` because the PowerShell iterator object `$_` will be an array of managed objects.
+```sh
+c8y devices list --name "My*" --includeAll | c8y devices update --data "myNewFragment.fragmentCreationTime=$( date --iso-8601=seconds )"
 
+# or using templates
+c8y devices list --name "My*" --includeAll | c8y devices update --template "{ myNewFragment: {fragmentCreationTime: _.Now() }}"
+```
 
 ### Setting a default pageSize
 
 The default pageSize can be controlled via the `settings` file or in your session file. See [configuration options](https://reubenmiller.github.io/go-c8y-cli/docs/configuration/options/) for details.
-
-### Notes / Warnings
-
-* Retrieving all results will use more memory!!!
-* When retrieving all results, it is recommended to use the maximum pages size rather than the default 5, otherwise you will have to send a lot of requests to get all of the results that you want
