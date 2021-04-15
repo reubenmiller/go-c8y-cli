@@ -155,7 +155,7 @@ func NewCmdRoot(f *cmdutil.Factory, version, buildDate string) *CmdRoot {
 	cmd.PersistentFlags().String("dryFormat", "markdown", "Dry run output format. i.e. json, dump, markdown or curl")
 	cmd.PersistentFlags().BoolVar(&ccmd.ProgressBar, "progress", false, "Show progress bar. This will also disable any other verbose output")
 	cmd.PersistentFlags().BoolVarP(&ccmd.NoColor, "noColor", "M", !isTerm, "Don't use colors when displaying log entries on the console")
-	cmd.PersistentFlags().BoolP("raw", "r", false, "Raw values")
+	cmd.PersistentFlags().BoolP("raw", "r", false, "Show raw response. This mode will force output=json and view=off")
 	cmd.PersistentFlags().String("proxy", "", "Proxy setting, i.e. http://10.0.0.1:8080")
 	cmd.PersistentFlags().Bool("noProxy", false, "Ignore the proxy settings")
 	cmd.PersistentFlags().Bool("withError", false, "Errors will be printed on stdout instead of stderr")

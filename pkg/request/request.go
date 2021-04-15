@@ -703,6 +703,9 @@ func (r *RequestHandler) ProcessResponse(resp *c8y.Response, respError error, co
 				dataProperty = ""
 			}
 
+			if r.Config.RawOutput() {
+				r.Logger.Infof("Raw mode active. In raw mode the following settings are forced, view=off, output=json")
+			}
 			view := r.Config.ViewOption()
 			r.Logger.Infof("View mode: %s", view)
 

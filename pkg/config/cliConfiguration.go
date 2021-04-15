@@ -934,6 +934,9 @@ func (c *Config) AbortOnErrorCount() int {
 
 // ViewOption controls whether views are applied the output or not
 func (c *Config) ViewOption() string {
+	if c.RawOutput() {
+		return ViewsOff
+	}
 	return c.viper.GetString(SettingsViewOption)
 }
 
@@ -1029,6 +1032,9 @@ func (c *Config) GetOutputFile() string {
 
 // GetOutputFormat Get output format type, i.e. json, csv, table etc.
 func (c *Config) GetOutputFormat() OutputFormat {
+	if c.RawOutput() {
+		return OutputJSON
+	}
 	format := c.viper.GetString(SettingsOutputFormat)
 	outputFormat := OutputJSON.FromString(format)
 	// c.Logger.Debugf("output format: %s", outputFormat.String())
