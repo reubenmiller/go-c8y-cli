@@ -124,7 +124,7 @@ Similar to `c8y.plugin.sh` for bash, there is a pre-configured zsh plugin `c8y.p
 
 Since the c8y cli tool is a golang binary, it is very portable and can therefore be downloaded manually and added to your `PATH` environment variable.
 
-However if you don't install the `c8y.plugin.sh` script or the zsh `c8y` plugin, then you are reponsible for repeating this procedure when updating c8y, and when setting/switching c8y sessions.
+However if you don't install the `c8y.plugin.sh` script or the zsh `c8y` plugin, then you are responsible for repeating this procedure when updating c8y, and when setting/switching c8y sessions.
 
 1. Download the latest version
 
@@ -227,7 +227,7 @@ c8y devices list --select id
 c8y devices list --select id --output csvheader
 ```
 
-If you are more familar with the popular `jq` tool, then you can use it to extract information that you need.
+If you are more familiar with the popular `jq` tool, then you can use it to extract information that you need.
 
 ```sh
 c8y devices list | jq -r ".id"
