@@ -15,6 +15,7 @@ The following exit codes are general codes which relate to the usage of c8y comm
 |Exit code|Type|Description|
 |---|-|--|
 |0|Success|No error occurred|
+|2|Cancelled|User cancelled the command or did not confirm a prompt|
 |99|Unexpected error|Unknown error|
 |100|System Error|Unexpected error when processing a command. i.e. can not write to a file, parsing error etc.|
 |101|User Error|User/command error such as invalid arguments|
@@ -23,6 +24,8 @@ The following exit codes are general codes which relate to the usage of c8y comm
 |104|BatchCompletedWithErrors|The batched job completed but has 1 or more errors|
 |105|BatchJobLimitExceeded|The batched job was stopped due to exceeding the total of allowed jobs though no other errors occurred|
 |106|Command timed out|The command took longer than the timeout setting|
+|107|Invalid alias|The command took longer than the timeout setting|
+|108|Decryption error|Error occurred when decrypting a session, i.e. invalid passphrase|
 
 #### Exit code to HTTP status code errors
 
@@ -45,7 +48,7 @@ Note: Only HTTP status codes between 400 and 599 are mapped to exit codes. HTTP 
 |52|502|Bad Gateway|The server, while acting as a gateway or proxy, received an invalid response from the upstream server|
 |53|503|Service Unavailable|The service is currently not available. This may be caused by an overloaded instance or it is down for maintenance. Please try it again in a few minutes.|
 
-### Handling errors (Bash/zsh)
+### Handling errors (Shell)
 
 Errors which are related to command usage (not server errors), are written to standard error, while server responses (error or otherwise) are written to standard output.
 
@@ -56,30 +59,74 @@ response=$( c8y inventory get --id=0 )
 code=$?
 
 if [ $code -ne 0 ]; then
-  echo "An error occurred: code=$code, details=$response"
+  echo "An error occurred: code=$code"
 else
   echo "ok"
 fi
 ```
 
-Since the id does not exist, the server response will stored in the `response` variable. Therefore it can be used to display an error to the user.
-
-Here is the same example but which just prints a simple message of the command was successful or not (without error details).
+*Output*
 
 ```sh
-c8y inventory get --id=0 > /dev/null  && echo "api call ok" || echo "api call failed"
+2021-04-13T08:24:58.484+0200    ERROR   serverError: Finding device data from database failed : No managedObject for id '0'! GET https://test-ci-runner01.latest.stage.c8y.io/inventory/managedObjects/0: 404 inventory/Not Found Finding device data from database failed : No managedObject for id '0'!
+An error occurred: code=4
 ```
 
-The output can also be redirected to file for later, for example:
+
+#### Silencing specific HTTP status codes
+
+Errors and warnings will be written to stderr. This means in the previous example the `response` variable will be empty, and an error message will still be displayed on the console (as no stderr redirection is being used).
+
+You can silence specific error output for specific status codes by using the `--silentStatusCodes=xxx,yyyy` option. The previous example can also be written as a one-liner:
 
 ```sh
-c8y inventory get --id=0 > response  && echo "success" || echo "failed. details=$(cat response | jq -r .message)"
+c8y inventory get --id=0 --silentStatusCodes=404,409 && echo "ok" || echo "an error occurred code=$?"
 ```
 
 *Output*
 
 ```sh
-failed. details=Finding device data from database failed : No managedObject for id '0'!
+an error occurred code=4
+```
+
+The most common use-case for this is when you are creating something and you don't want to see an error message if the item already exists.
+
+For example, let's say that are creating users but some users might already exist. You just want to be sure that after the script has been run the user is there (regardless when it was created).
+
+```sh
+user=$( c8y users create --userName=myexampleuser --template "{ password: _.Password() }" --silentStatusCodes 409 --select userName -o csv || c8y users get --id myexampleuser --select userName -o csv )
+if [[ -n "$user" ]]; then
+  echo "OK: $user: "
+else
+  echo "Unexpected error"
+fi
+```
+
+
+#### Include error in response
+
+If you would like to return the error as json, then the `--withError` option can be given which will return any errors as a json response where individual fields can be parsed by using jq, or any other json parser.
+
+```sh
+# Note: stderrs are be redirected to null so they are not printed to the console
+c8y inventory get --id=0 --withError 2>/dev/null | jq
+```
+
+*Output*
+
+```sh
+{
+  "errorType": "serverError",
+  "message": "Finding device data from database failed : No managedObject for id '0'!",
+  "statusCode": 404,
+  "exitCode": 4,
+  "url": "/inventory/managedObjects/0",
+  "c8yResponse": {
+    "error": "inventory/Not Found",
+    "message": "Finding device data from database failed : No managedObject for id '0'!",
+    "info": "https://cumulocity.com/guides/reference/rest-implementation/#a-name-error-reporting-a-error-reporting"
+  }
+}
 ```
 
 ### Handling errors in PowerShell
@@ -97,70 +144,6 @@ if ($LASTEXITCODE -ne 0) {
     Write-Error "Something went wrong!"
 }
 ```
-
-#### Saving errors to a variable
-
-When using the PowerShell common parameter `ErrorVariable`, all errors that occurred during the execution of the command will be stored in a variable with the given name. You can check the variable for detailed information about any errors.
-
-Note: The `ErrorVariable` parameter accepts just the name of the variable not the actual variable itself!
-
-For example, we try to get a managed object and store the error information to variable called "c8yError"
-
-```powershell
-$managedObject = Get-ManagedObject -Id 0 -ErrorVariable "c8yError"
-```
-
-You can check if the call was successful by checking the `$LASTEXITCODE` variable.
-
-```powershell
-$EverythingOK = $LASTEXITCODE -eq 0
-```
-
-In most cases you could just check the return value of the command, i.e. `$managedObject` as it only receives a value if the command was successful.
-
-For this same example, we could re-write the check as:
-
-```powershell
-$EverythingWorked = $null -ne $managedObject
-```
-
-Note: The `$null` is on the left side of the "not equal" operator (-ne), because of the way PowerShell handles comparison between two objects. Using $null on the left side will ensure that you are checking if the object is $null and not the items within the array (should the $managedObjects be an array)
-
-Now let's say that you didn't want to just check if the command was successful, but you wanted to check what kind of error occurred (i.e. server error or a command/client error). To achieve this, all you have to do is check the last item in the `c8yError` array like so:
-
-```powershell
-$managedObject = Get-ManagedObject -Id 0 -ErrorVariable "c8yError"
-
-if ($null -ne $managedObject) {
-  #
-  # Received managed object
-  #
-  Write-Host ("Found managed object: id={0}, name={1}" -f $managedObject.id, $managedObject.name)
-
-} else {
-  #
-  # Custom error handling
-  #
-  switch -Regex ($c8yError[-1]) {
-    "serverError" {
-      Write-Error "Detected server error. details=$_"
-    }
-    Default {
-      Write-Error "Detected command/client error. details=$_"
-    }
-  }
-}
-```
-
-Now the example above will now display two errors to the user. The first one is from PSc8y itself, and the second one from our custom error handling.
-
-If you want to hide the original error, you can add the in-built PowerShell variable `-ErrorAction SilentlyContinue` to the `Get-ManagedObject` call:
-
-```powershell
-$managedObject = Get-ManagedObject -Id 0 -ErrorVariable "c8yError" -ErrorAction "SilentlyContinue"
-```
-
-The `c8yError` also has additional information for a detailed analysis of what went wrong. It stores the full verbose output of the c8y binary, so it can be helpful to look through it for additional clues to what went wrong.
 
 #### Example: Handling specific errors based on the exit code
 
@@ -183,12 +166,11 @@ Param(
 )
 
 # try to create the new id (store the error messages, and silence them because we want to handle within our script)
-$null = New-ExternalId `
+$response = New-ExternalId `
   -Device $Device `
   -Type "mySerial" `
   -Name $SerialNumber `
-  -ErrorAction "SilentlyContinue" `
-  -ErrorVariable "c8yError"
+  -WithError
 
 # Save the code for better re-use (in case something else updates it unexpectedly)
 $Code = $LASTEXITCODE
@@ -208,13 +190,13 @@ switch ($Code) {
 
   3 {
     # 3 -> Status code 403 : Permission denied
-    Write-Error "Failed: You don not have the correct ROLE to create an external identity"
+    Write-Error "Failed: You do not have the correct ROLE to create an external identity"
   }
 
   Default {
     # Handle unknown error
     $ErrorDetails = $c8yError[-1]
-    Write-Error "Failed to Some other error occurred! code=$_, details=$ErrorDetails"
+    Write-Error "Failed due to some other error! code=$_, details=$($response.message)"
   }
 }
 ```
@@ -225,7 +207,7 @@ The script can be called using the following command
 ./create-identity.ps1 -Device 12345 -SerialNumber 7DHD875d501SS
 ```
 
-*Outputs*
+*Output*
 
 ```powershell
 Success: Created new identity. name=7DHD875d501SS

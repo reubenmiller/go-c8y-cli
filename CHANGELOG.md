@@ -112,6 +112,20 @@ None :)
 
 No unreleased features
 
+* Added pipeline support in c8y inventory find on the `query` parameter and added a string format support via `queryTemplate` parameter.
+
+    Example: Find all managed objects where the .name field includes "example". The name is piped in enabling it to be provided from a file
+    ```sh
+    echo "example" | c8y inventory find --queryTemplate "name eq '*%s*'"
+
+    # or from a list of names
+    cat mylonglistOfNames.txt | c8y inventory find --queryTemplate "name eq '*%s*'"
+    ```
+
+* Added command to find managed objects by text which also accepts piped input
+    ```sh
+    echo "mytext" | c8y inventory findByText
+    ```
 * Added new filter operators notmatch and notlike to do inverted regex and wildcard matches respectively
 
     ```sh
