@@ -3,7 +3,8 @@
 Describe -Name "c8y filter common parameter" {
     BeforeAll {
         $TypeSuffix = New-RandomString
-        $Template = "{ name: 'testFilter', type: 'c8yci_$TypeSuffix', ci_filterTest: {} }"
+        $UniqueFragment = New-RandomString -Prefix "c8y_citest"
+        $Template = "{ name: 'testFilter', type: 'c8yci_$TypeSuffix', ${UniqueFragment}: {} }"
         $ids = New-Object System.Collections.ArrayList
         $Device1 = New-Device -Template $Template
         $Device2 = New-Device -Template $Template
@@ -11,41 +12,41 @@ Describe -Name "c8y filter common parameter" {
     }
 
     It "filters by wildcards" {
-        $output = c8y devices list --fragmentType "ci_filterTest" --filter "type like *$TypeSuffix*" --orderBy "_id asc" | ConvertFrom-Json
+        $output = c8y devices list --fragmentType $UniqueFragment --filter "type like *$TypeSuffix*" --orderBy "_id asc" | ConvertFrom-Json
         $LASTEXITCODE | Should -Be 0
         $output | Should -ContainInCollection $Device1, $Device2
 
-        $output = c8y devices list --fragmentType "ci_filterTest" --filter "type -like *$TypeSuffix*" --orderBy "_id asc" | ConvertFrom-Json
+        $output = c8y devices list --fragmentType $UniqueFragment --filter "type -like *$TypeSuffix*" --orderBy "_id asc" | ConvertFrom-Json
         $LASTEXITCODE | Should -Be 0
         $output | Should -ContainInCollection $Device1, $Device2
     }
 
     It "filters by negated wildcards" {
-        $output = c8y devices list --fragmentType "ci_filterTest" --filter "id notlike $($Device1.id)*" --orderBy "_id asc" | ConvertFrom-Json
+        $output = c8y devices list --fragmentType $UniqueFragment --filter "id notlike $($Device1.id)*" --orderBy "_id asc" | ConvertFrom-Json
         $LASTEXITCODE | Should -Be 0
         $output | Should -ContainInCollection $Device2
 
-        $output = c8y devices list --fragmentType "ci_filterTest" --filter "id -notlike $($Device1.id)*" --orderBy "_id asc" | ConvertFrom-Json
+        $output = c8y devices list --fragmentType $UniqueFragment --filter "id -notlike $($Device1.id)*" --orderBy "_id asc" | ConvertFrom-Json
         $LASTEXITCODE | Should -Be 0
         $output | Should -ContainInCollection $Device2
     }
 
     It "filters by regex" {
-        $output = c8y devices list --fragmentType "ci_filterTest" --filter "type match c8yci_.+[a-z0-9]*" --orderBy "_id asc" | ConvertFrom-Json
+        $output = c8y devices list --fragmentType $UniqueFragment --filter "type match c8yci_.+[a-z0-9]*" --orderBy "_id asc" | ConvertFrom-Json
         $LASTEXITCODE | Should -Be 0
         $output | Should -ContainInCollection $Device1, $Device2
 
-        $output = c8y devices list --fragmentType "ci_filterTest" --filter "type -match c8yci_.+[a-z0-9]*" --orderBy "_id asc" | ConvertFrom-Json
+        $output = c8y devices list --fragmentType $UniqueFragment --filter "type -match c8yci_.+[a-z0-9]*" --orderBy "_id asc" | ConvertFrom-Json
         $LASTEXITCODE | Should -Be 0
         $output | Should -ContainInCollection $Device1, $Device2
     }
 
     It "filters by negated regex" {
-        $output = c8y devices list --fragmentType "ci_filterTest" --filter "id notmatch $($Device1.id)?" --orderBy "_id asc" | ConvertFrom-Json
+        $output = c8y devices list --fragmentType $UniqueFragment --filter "id notmatch $($Device1.id)x?" --orderBy "_id asc" | ConvertFrom-Json
         $LASTEXITCODE | Should -Be 0
         $output | Should -ContainInCollection $Device2
 
-        $output = c8y devices list --fragmentType "ci_filterTest" --filter "id -notmatch $($Device1.id)?" --orderBy "_id asc" | ConvertFrom-Json
+        $output = c8y devices list --fragmentType $UniqueFragment --filter "id -notmatch $($Device1.id)x?" --orderBy "_id asc" | ConvertFrom-Json
         $LASTEXITCODE | Should -Be 0
         $output | Should -ContainInCollection $Device2
     }
