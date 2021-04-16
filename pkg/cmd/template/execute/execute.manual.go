@@ -79,6 +79,13 @@ func (n *CmdExecute) newTemplate(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
+	if !cmd.Flags().Changed(flags.FlagDataTemplateName) {
+		return &flags.ParameterError{
+			Name: flags.FlagDataTemplateName,
+			Err:  flags.ErrParameterMissing,
+		}
+	}
+
 	// body
 	body := mapbuilder.NewInitializedMapBuilder()
 	err = flags.WithBody(
