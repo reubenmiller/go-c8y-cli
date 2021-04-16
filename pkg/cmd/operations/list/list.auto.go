@@ -58,6 +58,7 @@ Get a list of pending operations for a device
 	cmd.Flags().String("dateTo", "", "End date or date and time of operation.")
 	cmd.Flags().String("status", "", "Operation status, can be one of SUCCESSFUL, FAILED, EXECUTING or PENDING.")
 	cmd.Flags().String("bulkOperationId", "", "Bulk operation id. Only retrieve operations related to the given bulk operation.")
+	cmd.Flags().Bool("revert", false, "Sort operations newest to oldest. Must be used with dateFrom and/or dateTo parameters")
 
 	completion.WithOptions(
 		cmd,
@@ -108,6 +109,7 @@ func (n *ListCmd) RunE(cmd *cobra.Command, args []string) error {
 		flags.WithRelativeTimestamp("dateTo", "dateTo", ""),
 		flags.WithStringValue("status", "status"),
 		flags.WithStringValue("bulkOperationId", "bulkOperationId"),
+		flags.WithBoolValue("revert", "revert", ""),
 	)
 	if err != nil {
 		return cmderrors.NewUserError(err)

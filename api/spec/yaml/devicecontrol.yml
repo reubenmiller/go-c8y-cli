@@ -89,6 +89,10 @@ endpoints:
       - name: bulkOperationId
         type: string
         description: Bulk operation id. Only retrieve operations related to the given bulk operation.
+      
+      - name: revert
+        type: boolean
+        description: Sort operations newest to oldest. Must be used with dateFrom and/or dateTo parameters
 
   - name: getOperation
     description: Get operation

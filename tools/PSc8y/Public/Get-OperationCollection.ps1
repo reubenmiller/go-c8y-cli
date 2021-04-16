@@ -67,7 +67,12 @@ Get operations from a device (using pipeline)
         # Bulk operation id. Only retrieve operations related to the given bulk operation.
         [Parameter()]
         [string]
-        $BulkOperationId
+        $BulkOperationId,
+
+        # Sort operations newest to oldest. Must be used with dateFrom and/or dateTo parameters
+        [Parameter()]
+        [switch]
+        $Revert
     )
     DynamicParam {
         Get-ClientCommonParameters -Type "Get", "Collection"
