@@ -20,7 +20,7 @@ Describe -Name "Find-ManagedObjectCollection" {
 
         $requests[0] | Should -MatchObject @{
             path = "/inventory/managedObjects";
-            query = "query=`$filter=has(c8y_IsDevice) and name eq '*a*' `$orderby=_id desc"
+            query = "q=`$filter=name eq '*a*' `$orderby=_id desc"
         } -Property path, query
     }
 
@@ -32,7 +32,7 @@ Describe -Name "Find-ManagedObjectCollection" {
 
         $requests[0] | Should -MatchObject @{
             path = "/inventory/managedObjects";
-            query = "query=`$filter=has(c8y_IsDevice) and name eq '*a*' `$orderby=_id desc"
+            query = "q=`$filter=name eq '*a*' `$orderby=_id desc"
         } -Property path, query
     }
 
@@ -45,6 +45,18 @@ Describe -Name "Find-ManagedObjectCollection" {
         $requests[0] | Should -MatchObject @{
             path = "/inventory/managedObjects";
             query = "query=`$filter=not(name eq '*a*') `$orderby=_id desc"
+        } -Property path, query
+    }
+
+    It "handles empty device query string" {
+        $output = @{ "c8y_DeviceQueryString" = "" } | PSc8y\Find-ManagedObjectCollection -OrderBy "_id desc" -Dry 2>&1
+        $LASTEXITCODE | Should -Be 0
+        $requests = $output | ConvertFrom-Json
+        $requests | Should -HaveCount 1
+
+        $requests[0] | Should -MatchObject @{
+            path = "/inventory/managedObjects";
+            query = "query=`$filter= `$orderby=_id desc"
         } -Property path, query
     }
 

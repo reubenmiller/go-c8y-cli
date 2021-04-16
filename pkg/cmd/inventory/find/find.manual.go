@@ -90,13 +90,8 @@ func (n *CmdFind) RunE(cmd *cobra.Command, args []string) error {
 		inputIterators,
 		flags.WithCustomStringSlice(func() ([]string, error) { return cfg.GetQueryParameters(), nil }, "custom"),
 		flags.WithCustomStringValue(func(b []byte) []byte {
-
 			if n.queryTemplate != "" {
 				b = []byte(fmt.Sprintf(n.queryTemplate, b))
-			}
-
-			if !bytes.HasPrefix(b, []byte("$filter")) {
-				b = append([]byte("$filter="), b...)
 			}
 
 			if n.orderBy != "" {
@@ -105,14 +100,16 @@ func (n *CmdFind) RunE(cmd *cobra.Command, args []string) error {
 				}
 			}
 
-			// prepend device filter
-			if cmd.Flags().Changed("onlyDevices") {
-				if n.onlyDevices {
-					b = bytes.Replace(b, []byte("$filter="), []byte("$filter=has(c8y_IsDevice) and "), 1)
-				}
+			if len(b) != 0 && !bytes.HasPrefix(b, []byte("$filter")) {
+				b = append([]byte("$filter="), b...)
 			}
 			return b
-		}, "query", "query"),
+		}, func() string {
+			if n.onlyDevices {
+				return "q"
+			}
+			return "query"
+		}, "query"),
 		flags.WithBoolValue("withParents", "withParents"),
 	)
 	if err != nil {

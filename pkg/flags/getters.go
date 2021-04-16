@@ -235,16 +235,25 @@ func WithStringValue(opts ...string) GetOption {
 }
 
 // WithCustomStringValue add a custom string value with a custom tranform function
-func WithCustomStringValue(transform func([]byte) []byte, opts ...string) GetOption {
+func WithCustomStringValue(transform func([]byte) []byte, targetFunc func() string, opts ...string) GetOption {
 	return func(cmd *cobra.Command, inputIterators *RequestInputIterators) (string, interface{}, error) {
 
 		src, dst, format := UnpackGetterOptions("%s", opts...)
+
+		if targetFunc != nil {
+			if dstName := targetFunc(); dstName != "" {
+				dst = dstName
+			}
+		}
 
 		if inputIterators != nil && inputIterators.PipeOptions != nil {
 			if transform != nil {
 				inputIterators.PipeOptions.Formatter = transform
 			}
 			if inputIterators.PipeOptions.Name == src {
+				if dst != "" {
+					inputIterators.PipeOptions.Property = dst
+				}
 				return WithPipelineIterator(inputIterators.PipeOptions)(cmd, inputIterators)
 			}
 		}
