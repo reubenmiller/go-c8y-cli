@@ -19,9 +19,9 @@ The `--filter` parameter uses a query language which supports the following oper
 |eq|equals|`--filter "count eq 3"`|
 |neq|not equals|`--filter "count neq 3"`|
 |gt| greater than (numbers only)|`--filter "count gt 3"`|
-|ge|greater than or equal to (numbers only)|`--filter "count ge 3"`|
+|gte|greater than or equal to (numbers only)|`--filter "count ge 3"`|
 |lt|less than (numbers only)|`--filter "count lt 3"`|
-|le|less than or equal to (numbers only)|`--filter "count le 3"`|
+|lte|less than or equal to (numbers only)|`--filter "count le 3"`|
 |leneq|equality match length of (string/array/map)|`--filter "name leneq 10"` or `--filter "childAdditions.references leneq 1"`|
 |lenneq|inverted equality match length of (string/array/map)|`--filter "name lenneq 10"` or `--filter "childAdditions.references lenneq 1"`|
 |lengt|match length greater than value of (string/array/map)|`--filter "name lengt 10"` or `--filter "childAdditions.references lengt 1"`|
