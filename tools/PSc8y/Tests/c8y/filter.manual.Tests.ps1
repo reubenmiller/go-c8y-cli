@@ -91,6 +91,86 @@ Describe -Name "c8y filter common parameter" {
         $output | Should -HaveCount 0
     }
 
+    It "filters by int: greater than" {
+        $output = c8y devices list --fragmentType $UniqueFragment --filter "intValue gt 99" --orderBy "_id asc" | ConvertFrom-Json
+        $LASTEXITCODE | Should -Be 0
+        $output | Should -HaveCount 2
+        $output | Should -ContainInCollection $Device1, $Device2
+
+        $output = c8y devices list --fragmentType $UniqueFragment --filter "intValue gt 98.5000001" --orderBy "_id asc" | ConvertFrom-Json
+        $LASTEXITCODE | Should -Be 0
+        $output | Should -HaveCount 2
+        $output | Should -ContainInCollection $Device1, $Device2
+
+        $output = c8y devices list --fragmentType $UniqueFragment --filter "intValue gt 101" --orderBy "_id asc" | ConvertFrom-Json
+        $LASTEXITCODE | Should -Be 0
+        $output | Should -HaveCount 0
+
+        $output = c8y devices list --fragmentType $UniqueFragment --filter "intValue gt 100.5" --orderBy "_id asc" | ConvertFrom-Json
+        $LASTEXITCODE | Should -Be 0
+        $output | Should -HaveCount 0
+    }
+
+    It "filters by int: greater than or equal to" {
+        $output = c8y devices list --fragmentType $UniqueFragment --filter "intValue gte 100" --orderBy "_id asc" | ConvertFrom-Json
+        $LASTEXITCODE | Should -Be 0
+        $output | Should -HaveCount 2
+        $output | Should -ContainInCollection $Device1, $Device2
+
+        $output = c8y devices list --fragmentType $UniqueFragment --filter "intValue gte 99.1" --orderBy "_id asc" | ConvertFrom-Json
+        $LASTEXITCODE | Should -Be 0
+        $output | Should -HaveCount 2
+        $output | Should -ContainInCollection $Device1, $Device2
+
+        $output = c8y devices list --fragmentType $UniqueFragment --filter "intValue gte 101" --orderBy "_id asc" | ConvertFrom-Json
+        $LASTEXITCODE | Should -Be 0
+        $output | Should -HaveCount 0
+
+        $output = c8y devices list --fragmentType $UniqueFragment --filter "intValue gte 100.5" --orderBy "_id asc" | ConvertFrom-Json
+        $LASTEXITCODE | Should -Be 0
+        $output | Should -HaveCount 0
+    }
+
+    It "filters by int: less than" {
+        $output = c8y devices list --fragmentType $UniqueFragment --filter "intValue lt 101" --orderBy "_id asc" | ConvertFrom-Json
+        $LASTEXITCODE | Should -Be 0
+        $output | Should -HaveCount 2
+        $output | Should -ContainInCollection $Device1, $Device2
+
+        $output = c8y devices list --fragmentType $UniqueFragment --filter "intValue lt 100.10001" --orderBy "_id asc" | ConvertFrom-Json
+        $LASTEXITCODE | Should -Be 0
+        $output | Should -HaveCount 2
+        $output | Should -ContainInCollection $Device1, $Device2
+
+        $output = c8y devices list --fragmentType $UniqueFragment --filter "intValue lt 99.99999" --orderBy "_id asc" | ConvertFrom-Json
+        $LASTEXITCODE | Should -Be 0
+        $output | Should -HaveCount 0
+
+        $output = c8y devices list --fragmentType $UniqueFragment --filter "intValue lt 90" --orderBy "_id asc" | ConvertFrom-Json
+        $LASTEXITCODE | Should -Be 0
+        $output | Should -HaveCount 0
+    }
+
+    It "filters by int: less than or equal to" {
+        $output = c8y devices list --fragmentType $UniqueFragment --filter "intValue lte 100" --orderBy "_id asc" | ConvertFrom-Json
+        $LASTEXITCODE | Should -Be 0
+        $output | Should -HaveCount 2
+        $output | Should -ContainInCollection $Device1, $Device2
+
+        $output = c8y devices list --fragmentType $UniqueFragment --filter "intValue lte 101.5" --orderBy "_id asc" | ConvertFrom-Json
+        $LASTEXITCODE | Should -Be 0
+        $output | Should -HaveCount 2
+        $output | Should -ContainInCollection $Device1, $Device2
+
+        $output = c8y devices list --fragmentType $UniqueFragment --filter "intValue lte -99.5" --orderBy "_id asc" | ConvertFrom-Json
+        $LASTEXITCODE | Should -Be 0
+        $output | Should -HaveCount 0
+
+        $output = c8y devices list --fragmentType $UniqueFragment --filter "intValue lte 99.9999" --orderBy "_id asc" | ConvertFrom-Json
+        $LASTEXITCODE | Should -Be 0
+        $output | Should -HaveCount 0
+    }
+
     It "filters by float: greater than" {
         $output = c8y devices list --fragmentType $UniqueFragment --filter "floatValue gt 1" --orderBy "_id asc" | ConvertFrom-Json
         $LASTEXITCODE | Should -Be 0
