@@ -9,6 +9,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/google/shlex"
 	"github.com/reubenmiller/go-c8y-cli/pkg/assert"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmd/root"
 )
@@ -142,6 +143,9 @@ func Test_DataFlag(t *testing.T) {
 }
 
 func splitCmd(line string) []string {
+	if args, err := shlex.Split(line); err == nil {
+		return args
+	}
 	return strings.Split(line, " ")
 	// r := regexp.MustCompile(`[^\s"]+|"([^"]*)"`)
 	// return r.FindAllString(line, -1)
