@@ -774,6 +774,14 @@ func (r *RequestHandler) ProcessResponse(resp *c8y.Response, respError error, co
 			responseText = []byte(*resp.JSONData)
 		}
 
+		// replace special escaped unicode sequences
+		// todo: Use json encoding option (maybe in go-c8y?)
+		// enc := json.NewEncoder(os.Stdout)
+		// enc.SetEscapeHTML(false)
+		responseText = bytes.ReplaceAll(responseText, []byte("\\u003c"), []byte("<"))
+		responseText = bytes.ReplaceAll(responseText, []byte("\\u003e"), []byte(">"))
+		responseText = bytes.ReplaceAll(responseText, []byte("\\u0026"), []byte("&"))
+
 		consol := r.Console
 		if respError == nil {
 			jsonformatter.WithOutputFormatters(
