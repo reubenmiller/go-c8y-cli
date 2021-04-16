@@ -37,7 +37,7 @@ type JSONFilters struct {
 	AsCSV     bool
 }
 
-func (f JSONFilters) Apply(jsonValue string, property string, showHeaders bool, setHeaderFunc func(string)) []byte {
+func (f JSONFilters) Apply(jsonValue string, property string, showHeaders bool, setHeaderFunc func(string)) ([]byte, error) {
 	return f.filterJSON(jsonValue, property, showHeaders, setHeaderFunc)
 }
 
@@ -67,8 +67,15 @@ func (f *JSONFilters) AddRawFilters(rawFilters []string) error {
 			f.Add(strings.TrimSpace(parts[0]), operator, strings.Trim(value, "\"'"))
 			continue
 		}
+
 		if v, err := strconv.ParseFloat(value, 64); err == nil {
-			f.Add(strings.TrimSpace(parts[0]), operator, v)
+			if strings.Contains(value, ".") {
+				// use float
+				f.Add(strings.TrimSpace(parts[0]), operator, v)
+			} else {
+				// use int (required by jsonq in some cases, i.e. array length operators like leneq etc.)
+				f.Add(strings.TrimSpace(parts[0]), operator, int(v))
+			}
 		} else {
 			f.Add(strings.TrimSpace(parts[0]), operator, value)
 		}
@@ -245,7 +252,14 @@ func removeJSONArrayValues(jsonValue []byte) []byte {
 	return []byte("")
 }
 
-func (f JSONFilters) filterJSON(jsonValue string, property string, showHeaders bool, setHeaderFunc func(string)) []byte {
+func formatErrors(errs []error) error {
+	if len(errs) == 0 {
+		return nil
+	}
+	return fmt.Errorf("filter error. %v", errs)
+}
+
+func (f JSONFilters) filterJSON(jsonValue string, property string, showHeaders bool, setHeaderFunc func(string)) ([]byte, error) {
 	var b bytes.Buffer
 
 	var jq *gojsonq.JSONQ
@@ -281,6 +295,10 @@ func (f JSONFilters) filterJSON(jsonValue string, property string, showHeaders b
 		jq.Where(query.Property, query.Operation, query.Value)
 	}
 
+	if errs := jq.Errors(); len(errs) > 0 {
+		Logger.Warnf("filter errors. %v", errs)
+	}
+
 	if len(f.Selectors) > 0 {
 		jq.Select(f.Selectors...)
 	}
@@ -309,25 +327,25 @@ func (f JSONFilters) filterJSON(jsonValue string, property string, showHeaders b
 					outputValues = append(outputValues, myval.Raw)
 				}
 			}
-			return []byte(strings.Join(outputValues, "\n"))
+			return []byte(strings.Join(outputValues, "\n")), formatErrors(jq.Errors())
 		}
 
 		if line, keys := pluckJsonValues(&formattedJSON, f.Pluck, f.Flatten, f.AsCSV); line != "" {
 			setHeaderFunc(strings.Join(keys, ","))
-			return []byte(line)
+			return []byte(line), formatErrors(jq.Errors())
 		}
 
 		Logger.Debugf("ERROR: gjson path does not exist. %v", f.Pluck)
-		return []byte("")
+		return []byte(""), formatErrors(jq.Errors())
 	}
 
 	jq.Writer(&b)
 
 	// Convert back to an object if it
 	if convertBackFromArray {
-		return removeJSONArrayValues(b.Bytes())
+		return removeJSONArrayValues(b.Bytes()), formatErrors(jq.Errors())
 	}
-	return b.Bytes()
+	return b.Bytes(), formatErrors(jq.Errors())
 }
 
 func expandHeaderProperties(item *gjson.Result, properties []string) string {

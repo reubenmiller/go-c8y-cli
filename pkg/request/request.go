@@ -757,7 +757,12 @@ func (r *RequestHandler) ProcessResponse(resp *c8y.Response, respError error, co
 				r.Logger.Debugf("using existing pluck values. %v", commonOptions.Filters.Pluck)
 			}
 
-			responseText = commonOptions.Filters.Apply(*resp.JSONData, dataProperty, false, r.Console.SetHeaderFromInput)
+			if filterOutput, filterErr := commonOptions.Filters.Apply(*resp.JSONData, dataProperty, false, r.Console.SetHeaderFromInput); filterErr != nil {
+				r.Logger.Warnf("filter error. %s", filterErr)
+				responseText = filterOutput
+			} else {
+				responseText = filterOutput
+			}
 
 			emptyArray := []byte("[]\n")
 

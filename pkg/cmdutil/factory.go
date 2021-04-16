@@ -204,7 +204,10 @@ func (f *Factory) WriteJSONToConsole(cfg *config.Config, cmd *cobra.Command, pro
 			commonOptions.Filters.Pluck = props
 		}
 	}
-	output = commonOptions.Filters.Apply(string(output), property, false, consol.SetHeaderFromInput)
+	output, filterErr := commonOptions.Filters.Apply(string(output), property, false, consol.SetHeaderFromInput)
+	if filterErr != nil {
+		return filterErr
+	}
 
 	jsonformatter.WithOutputFormatters(
 		consol,
