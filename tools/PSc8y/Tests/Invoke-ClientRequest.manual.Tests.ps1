@@ -280,4 +280,59 @@ Describe -Name "Invoke-ClientRequest" {
         $Response.root.level1.level2.level3.level4.level5.value | Should -BeExactly 1
         $Response.id | Remove-ManagedObject
     }
+
+    It "uses existing environment variables for native powershell requests" {
+        Function Invoke-MyRequest {
+            [cmdletbinding()]
+            Param(
+                [string] $Path,
+
+                [string] $Method = "GET",
+
+                [object] $Body,
+
+                [object] $Accept = "application/json",
+
+                [object] $ContentType = "application/json",
+
+                [hashtable] $Headers,
+
+                # Additional options that will be passed to Invoke-RestMethod
+                [hashtable] $AdditionalOptions
+            )
+            $options = @{
+                Uri = "$env:C8Y_HOST".TrimEnd("/") + "/" + "$Path".TrimStart("/")
+                Method = $Method
+                ContentType = $ContentType
+                Headers = @{ Authorization = $env:C8Y_HEADER_AUTHORIZATION }
+            }
+            if ($Accept) {
+                $options.Headers.Accept = $Accept
+            }
+            if ($Headers) {
+                $options.Headers += $Headers
+            }
+            if ($Body) {
+                if ($Body -is [hashtable]) {
+                    $options.Body = ConvertTo-Json $Body -Compress
+                } else {
+                    $options.Body = $Body
+                }
+            }
+            if ($AdditionalOptions) {
+                $options += $AdditionalOptions
+            }
+
+            Invoke-RestMethod @options
+        }
+
+        $output = Invoke-MyRequest -Path "user/currentUser"
+        $output | Should -Not -BeNullOrEmpty
+
+        $output = Invoke-MyRequest "/inventory/managedObjects" -Method "POST" -Body @{
+            name = "testme"
+        }
+        $output.name | Should -Be "testme"
+        $output.id | Remove-ManagedObject
+    }
 }
