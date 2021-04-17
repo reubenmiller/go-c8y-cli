@@ -534,6 +534,8 @@ func (c Config) GetEnvironmentVariables(client *c8y.Client, setPassword bool) ma
 	username := c.GetUsername()
 	password := c.MustGetPassword()
 	token := c.MustGetToken()
+	authHeaderValue := ""
+	authHeader := ""
 
 	if client != nil {
 		if client.TenantName != "" {
@@ -551,6 +553,10 @@ func (c Config) GetEnvironmentVariables(client *c8y.Client, setPassword bool) ma
 		if client.Token != "" {
 			token = client.Token
 		}
+		if dummyReq, err := client.NewRequest("GET", "/", "", nil); err == nil {
+			authHeaderValue = dummyReq.Header.Get("Authorization")
+			authHeader = "Authorization: " + authHeaderValue
+		}
 	}
 
 	// hide password if it is not needed
@@ -559,15 +565,17 @@ func (c Config) GetEnvironmentVariables(client *c8y.Client, setPassword bool) ma
 	}
 
 	output := map[string]interface{}{
-		"C8Y_SESSION":  c.GetSessionFile(),
-		"C8Y_URL":      host,
-		"C8Y_BASEURL":  host,
-		"C8Y_HOST":     host,
-		"C8Y_TENANT":   tenant,
-		"C8Y_USER":     username,
-		"C8Y_TOKEN":    token,
-		"C8Y_USERNAME": username,
-		"C8Y_PASSWORD": password,
+		"C8Y_SESSION":              c.GetSessionFile(),
+		"C8Y_URL":                  host,
+		"C8Y_BASEURL":              host,
+		"C8Y_HOST":                 host,
+		"C8Y_TENANT":               tenant,
+		"C8Y_USER":                 username,
+		"C8Y_TOKEN":                token,
+		"C8Y_USERNAME":             username,
+		"C8Y_PASSWORD":             password,
+		"C8Y_HEADER_AUTHORIZATION": authHeaderValue,
+		"C8Y_HEADER":               authHeader,
 	}
 
 	cache := c.CachePassphraseVariables()

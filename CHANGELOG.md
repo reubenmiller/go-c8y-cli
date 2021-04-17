@@ -112,6 +112,37 @@ None :)
 
 No unreleased features
 
+* Setting a session includes the following new environment variables
+
+    * `C8Y_HEADER` Authorization header (including header name), i.e. `Authorization: {auth_method} {value}`
+    * `C8Y_HEADER_AUTHORIZATION` Authorization header value (without the header name), i.e. `{auth_method} {value}`
+
+    This allows easier use of other 3rd party tools to send Cumulocity API requests
+
+    **Shell**
+
+    ```bash
+    curl -H "$C8Y_HEADER" $C8Y_HOST/inventory/managedObjects
+
+    # Or using a helper function
+    c8ycurl () 
+    { 
+        curl --silent -H "$C8Y_HEADER" ${C8Y_HOST%%/}/$@
+    }
+    c8ycurl /inventory/managedObjects
+    ```
+
+    **PowerShell**
+
+    ```powershell
+    Invoke-RestMethod -Headers @{ Authorization = $env:C8Y_HEADER_AUTHORIZATION } -Uri "$env:C8Y_HOST/inventory/managedObjects"
+
+    # or using ps default values
+    $PSDefaultParameterValues["Invoke-RestMethod:Headers"] = @{ Authorization = $env:C8Y_HEADER_AUTHORIZATION }
+    Invoke-RestMethod -Uri "$env:C8Y_HOST/inventory/managedObjects"
+    ```
+
+
 * Added pipeline support in c8y inventory find on the `query` parameter and added a string format support via `queryTemplate` parameter.
 
     Example: Find all managed objects where the .name field includes "example". The name is piped in enabling it to be provided from a file
