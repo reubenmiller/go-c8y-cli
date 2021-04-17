@@ -14,18 +14,17 @@ c8y smartgroups create
 .EXAMPLE
 PS> New-SmartGroup -Name $smartgroupName
 
-Create smart group
+Create smart group (without a filter)
 
 .EXAMPLE
-PS> New-SmartGroup -Name $smartgroupName -Data @{ myValue = @{ value1 = $true } }
+PS> New-SmartGroup -Name $smartgroupName -Query "type eq 'IS*' and has(c8y_Hardware.serialNumber)"
 
-Create smart group with custom properties
+Create smart group with a device filter (filter by type and has a serial number)
 
 .EXAMPLE
-PS> New-SmartGroup -Template "{ name: '$smartgroupName' }"
+PS> New-SmartGroup -Name $smartgroupName -Query "type eq 'IS*'" -Invisible
 
-
-Create smart group using a template
+Create a smart group which is not visible in the UI
 
 
 #>

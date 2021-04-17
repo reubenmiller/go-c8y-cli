@@ -82,7 +82,8 @@ Describe -Name "Common parameters" {
             "New-TestAlarm",
             "New-TestDevice",
             "New-TestUser",
-            "New-TestMeasurement"
+            "New-TestMeasurement",
+            "New-TestSmartGroup"
         )
 
         $cmdlets = Get-Command -Module PSc8y -Name "*" | Where-Object {

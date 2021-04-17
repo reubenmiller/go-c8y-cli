@@ -35,10 +35,13 @@ func NewCreateCmd(f *cmdutil.Factory) *CreateCmd {
 `,
 		Example: heredoc.Doc(`
 $ c8y smartgroups create --name mySmartGroup --query "name eq 'my*'"
-Create smart group
+Create smart group (without a filter)
 
-$ c8y smartgroups create --name mySmartGroup --data "custom_value1=1234"
-Create smart group with custom properties
+$ c8y smartgroups create --name mySmartGroup --query "type eq 'IS*' and has(c8y_Hardware.serialNumber)"
+Create smart group with a device filter (filter by type and has a serial number)
+
+$ c8y smartgroups create --name mySmartGroup --query "type eq 'IS*'" --invisible
+Create a smart group which is not visible in the UI
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
 			return f.CreateModeEnabled()
@@ -140,7 +143,7 @@ func (n *CreateCmd) RunE(cmd *cobra.Command, args []string) error {
 		flags.WithStringValue("query", "c8y_DeviceQueryString"),
 		flags.WithBoolValue("invisible", "c8y_IsDynamicGroup.invisible", "{}"),
 		flags.WithRequiredTemplateString(`
-{type: 'c8y_DynamicGroup', c8y_IsDynamicGroup: {}}`),
+{type: 'c8y_DynamicGroup', c8y_DeviceQueryString: '', c8y_IsDynamicGroup: {}}`),
 		cmdutil.WithTemplateValue(cfg),
 		flags.WithTemplateVariablesValue(),
 		flags.WithRequiredProperties("name", "c8y_DeviceQueryString"),

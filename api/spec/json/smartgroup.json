@@ -32,7 +32,7 @@
           {
             "description": "Get smart group by name",
             "beforeEach": [
-              "$smartgroup = PSc8y\\New-SmartGroup"
+              "$smartgroup = PSc8y\\New-TestSmartGroup"
             ],
             "command": "Get-SmartGroup -Id $smartgroup.name",
             "afterEach": [
@@ -203,9 +203,9 @@
       "examples": {
         "powershell": [
           {
-            "description": "Create smart group",
+            "description": "Create smart group (without a filter)",
             "beforeEach": [
-              "$smartgroupName = PSc8y\\New-RandomString -Prefix \"mySmartGroup\""
+              "$smartgroupName = PSc8y\\New-RandomString -Prefix \"mySmartGroup_createTests\""
             ],
             "command": "New-SmartGroup -Name $smartgroupName",
             "afterEach": [
@@ -213,21 +213,21 @@
             ]
           },
           {
-            "description": "Create smart group with custom properties",
+            "description": "Create smart group with a device filter (filter by type and has a serial number)",
             "beforeEach": [
-              "$smartgroupName = PSc8y\\New-RandomString -Prefix \"mySmartGroup\""
+              "$smartgroupName = PSc8y\\New-RandomString -Prefix \"mySmartGroup_createTests\""
             ],
-            "command": "New-SmartGroup -Name $smartgroupName -Data @{ myValue = @{ value1 = $true } }",
+            "command": "New-SmartGroup -Name $smartgroupName -Query \"type eq 'IS*' and has(c8y_Hardware.serialNumber)\"",
             "afterEach": [
               "Remove-SmartGroup -Id $smartgroupName"
             ]
           },
           {
-            "description": "Create smart group using a template",
+            "description": "Create a smart group which is not visible in the UI",
             "beforeEach": [
-              "$smartgroupName = PSc8y\\New-RandomString -Prefix \"mySmartGroup\""
+              "$smartgroupName = PSc8y\\New-RandomString -Prefix \"mySmartGroup_createTests\""
             ],
-            "command": "New-SmartGroup -Template \"{ name: '$smartgroupName' }\"\n",
+            "command": "New-SmartGroup -Name $smartgroupName -Query \"type eq 'IS*'\" -Invisible",
             "afterEach": [
               "Remove-SmartGroup -Id $smartgroupName"
             ]
@@ -235,19 +235,23 @@
         ],
         "go": [
           {
-            "description": "Create smart group",
+            "description": "Create smart group (without a filter)",
             "command": "c8y smartgroups create --name mySmartGroup --query \"name eq 'my*'\""
           },
           {
-            "description": "Create smart group with custom properties",
-            "command": "c8y smartgroups create --name mySmartGroup --data \"custom_value1=1234\""
+            "description": "Create smart group with a device filter (filter by type and has a serial number)",
+            "command": "c8y smartgroups create --name mySmartGroup --query \"type eq 'IS*' and has(c8y_Hardware.serialNumber)\""
+          },
+          {
+            "description": "Create a smart group which is not visible in the UI",
+            "command": "c8y smartgroups create --name mySmartGroup --query \"type eq 'IS*'\" --invisible"
           }
         ]
       },
       "bodyTemplate": {
         "type": "jsonnet",
         "applyLast": true,
-        "template": "{type: 'c8y_DynamicGroup', c8y_IsDynamicGroup: {}}"
+        "template": "{type: 'c8y_DynamicGroup', c8y_DeviceQueryString: '', c8y_IsDynamicGroup: {}}"
       },
       "body": [
         {

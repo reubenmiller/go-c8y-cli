@@ -3,7 +3,6 @@
 Describe -Name "Get-SmartGroup" {
     BeforeEach {
         $smartgroup = PSc8y\New-TestSmartGroup
-        $smartgroup = PSc8y\New-SmartGroup
 
     }
 
