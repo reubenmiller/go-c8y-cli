@@ -30,21 +30,32 @@ func NewCmdAgentList(f *cmdutil.Factory) *CmdAgentList {
 		Short: "Get agent collection",
 		Long:  `Get a collection of agents based on filter parameters`,
 		Example: heredoc.Doc(`
-		c8y agents list --name "sensor*" --type myType
+			$ c8y agents list --name "sensor*" --type myType
+			Get a collection of agents with type "myType", and their names start with "sensor"
 
-		Get a collection of agents of type "myType", and their names start with "sensor"
+			$ echo "name eq 'sensor*'" | c8y agents list
+			Get a collection of agents with names starting with "sensor" using a piped inventory query (or could be piped from a file)
+
+			$ c8y agents list --name "my example agent" --select type --output csv | c8y agents list --queryTemplate "type eq '%s'"
+			Find an agent by name, then find other agents which the same type
 		`),
 		RunE: ccmd.RunE,
 	}
 
 	cmd.SilenceUsage = true
 
-	cmd.Flags().String("name", "", "Agent name.")
-	cmd.Flags().String("type", "", "Agent type.")
-	cmd.Flags().String("fragmentType", "", "Agent fragment type.")
-	cmd.Flags().String("owner", "", "Agent owner.")
-	cmd.Flags().String("query", "", "Additional query filter")
-	cmd.Flags().Bool("withParents", false, "include a flat list of all parents and grandparents of the given object")
+	cmd.Flags().String("name", "", "Filter by name")
+	cmd.Flags().String("type", "", "Filter by type")
+	cmd.Flags().String("fragmentType", "", "Filter by fragment type")
+	cmd.Flags().String("owner", "", "Filter by owner")
+	cmd.Flags().String("query", "", "Additional query filter (accepts pipeline)")
+	cmd.Flags().String("queryTemplate", "", "String template to be used when applying the given query. Use %s to reference the query/pipeline input")
+	cmd.Flags().Bool("withParents", false, "Include a flat list of all parents and grandparents of the given object")
+
+	flags.WithOptions(
+		cmd,
+		flags.WithExtendedPipelineSupport("query", "query", false, "c8y_DeviceQueryString"),
+	)
 
 	// Required flags
 	ccmd.SubCommand = subcommand.NewSubCommand(cmd)
@@ -84,7 +95,6 @@ func (n *CmdAgentList) RunE(cmd *cobra.Command, args []string) error {
 		flags.WithC8YQueryFormat("type", "(type eq '%s')"),
 		flags.WithC8YQueryFormat("fragmentType", "has(%s)"),
 		flags.WithC8YQueryFormat("owner", "(owner eq '%s')"),
-		flags.WithC8YQueryFormat("query", "%s"),
 	)
 
 	if err != nil {
@@ -95,7 +105,7 @@ func (n *CmdAgentList) RunE(cmd *cobra.Command, args []string) error {
 	// replace all spaces with "+" due to url encoding
 	filter := url.QueryEscape(strings.Join(c8yQueryParts, " and "))
 	orderBy := url.QueryEscape("name")
-	query.SetVariable("query", fmt.Sprintf("$filter=%s+$orderby=%s", filter, orderBy))
+	query.SetVariable("q", fmt.Sprintf("$filter=%s+$orderby=%s", filter, orderBy))
 
 	err = flags.WithQueryParameters(
 		cmd,
@@ -103,6 +113,11 @@ func (n *CmdAgentList) RunE(cmd *cobra.Command, args []string) error {
 		inputIterators,
 		flags.WithBoolValue("withParents", "withParents"),
 		flags.WithCustomStringSlice(func() ([]string, error) { return cfg.GetQueryParameters(), nil }, "custom"),
+		flags.WithCustomStringValue(
+			flags.BuildCumulocityQuery(cmd, c8yQueryParts, orderBy),
+			func() string { return "q" },
+			"query",
+		),
 	)
 
 	if err != nil {

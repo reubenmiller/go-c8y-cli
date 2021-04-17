@@ -202,6 +202,57 @@ func WithBoolValue(opts ...string) GetOption {
 			value, err := cmd.Flags().GetBool(src)
 
 			if format != "" {
+				if !value {
+					return "", false, nil
+				}
+				formattedValue := applyFormatter(format, value)
+
+				if jsonUtilities.IsJSONObject([]byte(formattedValue)) {
+					jsonValue := make(map[string]interface{})
+					if err := jsonUtilities.ParseJSON(formattedValue, jsonValue); err == nil {
+						return dst, jsonValue, err
+					}
+				}
+				return dst, formattedValue, err
+			}
+			return dst, value, err
+		}
+		return "", false, nil
+	}
+}
+
+// WithDefaultBoolValue sets a boolean value regardless if the value has been provided by the flag or not
+func WithDefaultBoolValue(opts ...string) GetOption {
+	return func(cmd *cobra.Command, inputIterators *RequestInputIterators) (string, interface{}, error) {
+		src, dst, format := UnpackGetterOptions("", opts...)
+		value, err := cmd.Flags().GetBool(src)
+
+		if format != "" {
+			if !value {
+				return "", false, nil
+			}
+			formattedValue := applyFormatter(format, value)
+
+			if jsonUtilities.IsJSONObject([]byte(formattedValue)) {
+				jsonValue := make(map[string]interface{})
+				if err := jsonUtilities.ParseJSON(formattedValue, jsonValue); err == nil {
+					return dst, jsonValue, err
+				}
+			}
+			return dst, formattedValue, err
+		}
+		return dst, value, err
+	}
+}
+
+// WithOptionalJSONFragment adds fragment if the boolean value is true a boolean value from cli arguments to a query parameter
+func WithOptionalJSONFragment(val string, opts ...string) GetOption {
+	return func(cmd *cobra.Command, inputIterators *RequestInputIterators) (string, interface{}, error) {
+		src, dst, format := UnpackGetterOptions("", opts...)
+		if cmd.Flags().Changed(src) {
+			value, err := cmd.Flags().GetBool(src)
+
+			if format != "" {
 				return dst, applyFormatter(format, value), err
 			}
 			return dst, value, err

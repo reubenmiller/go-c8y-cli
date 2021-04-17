@@ -49,7 +49,7 @@ func NewCmdFind(f *cmdutil.Factory) *CmdFind {
 
 	cmd.SilenceUsage = true
 
-	cmd.Flags().String("query", "", "ManagedObject query. (required)")
+	cmd.Flags().String("query", "", "ManagedObject query. (required) (accepts pipeline)")
 	cmd.Flags().StringVar(&ccmd.queryTemplate, "queryTemplate", "", "String template to be used when applying the given query. Use %s to reference the query/pipeline input")
 	cmd.Flags().StringVar(&ccmd.orderBy, "orderBy", "", "Order the results by the given parameter. i.e. 'id asc' or 'name desc'")
 	cmd.Flags().Bool("withParents", false, "include a flat list of all parents and grandparents of the given object")

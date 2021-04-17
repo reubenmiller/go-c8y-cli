@@ -41,18 +41,19 @@ func NewCmdDevicesList(f *cmdutil.Factory) *CmdDevicesList {
 
 	cmd.SilenceUsage = true
 
-	cmd.Flags().String("name", "", "Device name.")
-	cmd.Flags().String("type", "", "Device type.")
+	cmd.Flags().String("name", "", "Filter by name")
+	cmd.Flags().String("type", "", "Filter by type")
 	cmd.Flags().Bool("agents", false, "Only include agents.")
-	cmd.Flags().String("fragmentType", "", "Device fragment type.")
-	cmd.Flags().String("owner", "", "Device owner.")
-	cmd.Flags().String("query", "", "Additional query filter")
+	cmd.Flags().String("fragmentType", "", "Filter by fragment type")
+	cmd.Flags().String("owner", "", "Filter by owner")
+	cmd.Flags().String("query", "", "Additional query filter (accepts pipeline)")
+	cmd.Flags().String("queryTemplate", "", "String template to be used when applying the given query. Use %s to reference the query/pipeline input")
 	cmd.Flags().String("orderBy", "name", "Order by. e.g. _id asc or name asc or creationTime.date desc")
-	cmd.Flags().Bool("withParents", false, "include a flat list of all parents and grandparents of the given object")
+	cmd.Flags().Bool("withParents", false, "Include a flat list of all parents and grandparents of the given object")
 
 	flags.WithOptions(
 		cmd,
-		flags.WithPipelineSupport(""),
+		flags.WithExtendedPipelineSupport("query", "query", false, "c8y_DeviceQueryString"),
 	)
 
 	// Required flags
@@ -94,7 +95,6 @@ func (n *CmdDevicesList) RunE(cmd *cobra.Command, args []string) error {
 		flags.WithC8YQueryFormat("fragmentType", "has(%s)"),
 		flags.WithC8YQueryFormat("owner", "(owner eq '%s')"),
 		flags.WithC8YQueryBool("agents", "has(com_cumulocity_model_Agent)"),
-		flags.WithC8YQueryFormat("query", "%s"),
 	)
 
 	if err != nil {
@@ -121,6 +121,11 @@ func (n *CmdDevicesList) RunE(cmd *cobra.Command, args []string) error {
 		inputIterators,
 		flags.WithBoolValue("withParents", "withParents"),
 		flags.WithCustomStringSlice(func() ([]string, error) { return cfg.GetQueryParameters(), nil }, "custom"),
+		flags.WithCustomStringValue(
+			flags.BuildCumulocityQuery(cmd, c8yQueryParts, orderBy),
+			func() string { return "q" },
+			"query",
+		),
 	)
 
 	if err != nil {

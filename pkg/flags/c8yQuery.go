@@ -1,7 +1,10 @@
 package flags
 
 import (
+	"bytes"
 	"fmt"
+	"net/url"
+	"strings"
 
 	"github.com/spf13/cobra"
 )
@@ -58,3 +61,61 @@ func WithC8YQueryFixedString(value string) C8YQueryOption {
 		return value, nil
 	}
 }
+
+func BuildCumulocityQuery(cmd *cobra.Command, fixedParts []string, orderBy string) func([]byte) []byte {
+	return func(b []byte) []byte {
+		b = bytes.Replace(b, []byte("$filter="), []byte(""), 1)
+		queryParts := fixedParts[:]
+
+		var existingOrderBy []byte
+		if idx := bytes.Index(b, []byte("$orderby=")); idx > -1 {
+			existingOrderBy = b[idx+9:]
+			b = b[:idx]
+		} else {
+			existingOrderBy = []byte(orderBy)
+		}
+
+		if len(b) > 0 {
+			queryParts = append(queryParts, "("+string(b)+")")
+		}
+
+		if v, err := cmd.Flags().GetString("queryTemplate"); err == nil && v != "" {
+			for i := range queryParts {
+				queryParts[i] = fmt.Sprintf(v, queryParts[i])
+			}
+		}
+
+		query := url.QueryEscape(strings.Join(queryParts, " and "))
+		query = strings.ReplaceAll(query, "%28", "(")
+		query = strings.ReplaceAll(query, "%29", ")")
+		query = strings.ReplaceAll(query, "%27", "'")
+		orderBy = url.QueryEscape(orderBy)
+
+		outputQuery := []byte(fmt.Sprintf("$filter=%s", query))
+
+		if len(existingOrderBy) > 0 {
+			outputQuery = append(outputQuery, []byte(fmt.Sprintf(" $orderby=%s", existingOrderBy))...)
+		}
+		return outputQuery
+		// if len(query) == 0 {
+		// 	return []byte(fmt.Sprintf("$filter=%s $orderby=%s", query, orderBy))
+		// }
+		// return []byte(fmt.Sprintf("$filter=%s $orderby=%s", query, orderBy))
+	}
+}
+
+// flags.WithCustomStringValue(func(b []byte) []byte {
+
+// 	queryParts := c8yQueryParts[:]
+// 	queryParts = append(queryParts, "("+string(b)+")")
+
+// 	if v, err := cmd.Flags().GetString("queryTemplate"); err == nil && v != "" {
+// 		for i := range queryParts {
+// 			queryParts[i] = fmt.Sprintf(v, queryParts[i])
+// 		}
+// 	}
+// 	query := strings.Join(queryParts, " and ")
+// 	return []byte(fmt.Sprintf("$filter=(%s) $orderby=%s", query, orderBy))
+// }, func() string {
+// 	return "q"
+// }, "query")

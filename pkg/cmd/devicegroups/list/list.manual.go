@@ -33,7 +33,7 @@ func NewCmdList(f *cmdutil.Factory) *CmdList {
 		Short: "Get device group collection",
 		Long:  `Get a collection of device groups based on filter parameters`,
 		Example: heredoc.Doc(`
-		c8y devices listDeviceGroups --name "MyGroup*"
+		c8y devicesgroups list --name "MyGroup*"
 
 		Get a collection of device groups with names that start with "MyGroup"
 		`),
@@ -42,13 +42,20 @@ func NewCmdList(f *cmdutil.Factory) *CmdList {
 
 	cmd.SilenceUsage = true
 
-	cmd.Flags().String("name", "", "Device group name.")
-	cmd.Flags().String("type", "", "Device group type.")
-	cmd.Flags().String("fragmentType", "", "Device group fragment type.")
-	cmd.Flags().String("owner", "", "Device group owner.")
-	cmd.Flags().String("query", "", "Additional query filter")
+	cmd.Flags().String("name", "", "Filter by name")
+	cmd.Flags().String("type", "", "Filter by type")
+	cmd.Flags().String("fragmentType", "", "Filter by fragment type")
+	cmd.Flags().String("owner", "", "Filter by owner")
+	cmd.Flags().String("query", "", "Additional query filter (accepts pipeline)")
+	cmd.Flags().String("queryTemplate", "", "String template to be used when applying the given query. Use %s to reference the query/pipeline input")
 	cmd.Flags().Bool("excludeRootGroup", false, "Exclude root groups from the list")
-	cmd.Flags().Bool("withParents", false, "include a flat list of all parents and grandparents of the given object")
+	cmd.Flags().Bool("withParents", false, "Include a flat list of all parents and grandparents of the given object")
+	cmd.Flags().Bool("withChildren", false, "Include names of child assets (only use where necessary as it is slow for large groups)")
+
+	flags.WithOptions(
+		cmd,
+		flags.WithExtendedPipelineSupport("query", "query", false),
+	)
 
 	// Required flags
 	ccmd.SubCommand = subcommand.NewSubCommand(cmd)
@@ -89,7 +96,6 @@ func (n *CmdList) getDeviceGroupCollection(cmd *cobra.Command, args []string) er
 		flags.WithC8YQueryFormat("fragmentType", "has(%s)"),
 		flags.WithC8YQueryFormat("owner", "(owner eq '%s')"),
 		flags.WithC8YQueryBool("excludeRootGroup", "not(type eq 'c8y_DeviceGroup')"),
-		flags.WithC8YQueryFormat("query", "%s"),
 	)
 
 	if err != nil {
@@ -114,7 +120,13 @@ func (n *CmdList) getDeviceGroupCollection(cmd *cobra.Command, args []string) er
 		query,
 		inputIterators,
 		flags.WithBoolValue("withParents", "withParents"),
+		flags.WithDefaultBoolValue("withChildren", "withChildren"),
 		flags.WithCustomStringSlice(func() ([]string, error) { return cfg.GetQueryParameters(), nil }, "custom"),
+		flags.WithCustomStringValue(
+			flags.BuildCumulocityQuery(cmd, c8yQueryParts, orderBy),
+			func() string { return "query" },
+			"query",
+		),
 	)
 
 	if err != nil {
