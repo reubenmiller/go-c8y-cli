@@ -395,7 +395,7 @@ func (b *MapBuilder) getTemplateVariablesJsonnet(existingJSON []byte, input []by
 				if result.IsObject() {
 					inputImports = append(inputImports, b.TemplateIteratorNames[i]+": '"+result.String()+"'")
 				} else {
-					inputImports = append(inputImports, "value: '"+result.String()+"'")
+					inputImports = append(inputImports, "value: \""+escapeDoubleQuotes(result.String())+"\"")
 				}
 			}
 		}
@@ -412,7 +412,7 @@ func (b *MapBuilder) getTemplateVariablesJsonnet(existingJSON []byte, input []by
 		if bytes.HasPrefix(input, []byte("{")) && bytes.HasSuffix(input, []byte("}")) {
 			externalInput = "{value: " + string(input) + "}"
 		} else {
-			externalInput = fmt.Sprintf("{value: \"%s\" }", input)
+			externalInput = fmt.Sprintf("{value: \"%s\" }", escapeDoubleQuotes(string(input)))
 		}
 	}
 	Logger.Debugf("externalInput: %s", externalInput)
@@ -680,4 +680,8 @@ func mergeMaps(maps ...map[string]interface{}) map[string]interface{} {
 		}
 	}
 	return result
+}
+
+func escapeDoubleQuotes(v string) string {
+	return strings.ReplaceAll(v, `"`, `\"`)
 }
