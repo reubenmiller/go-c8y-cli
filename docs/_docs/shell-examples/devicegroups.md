@@ -52,8 +52,6 @@ UNIQUE_ID_4
 
     **Note**
 
-    cat list.ids.csv  | cut -d, -f1 | c8y devicegroups assignDevice --group 1234 --workers 2 --progress --silentStatusCodes 409
-
     If the piped input is in a csv format, then go-c8y-cli will automatically extract the first field/column and use it to lookup the device. If the first field contains an id (i.e. just numbers), then the value will be used directly as an ID, however if it contains non ID characters (i.e. any character does not match [0-9]) then it will be treated as a name, and an additional lookup by name will be performed in order to get the device id (this will take longer as it performs one request per name).
 
     If store you data in csv format, it is best practice to store the id as the first field making the data more pipe friendly. However you can still select the ids using the linux command `cut`.
