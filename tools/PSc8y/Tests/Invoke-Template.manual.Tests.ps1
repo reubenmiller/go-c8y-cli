@@ -65,4 +65,22 @@ Describe -Tag "Template" -Name "Invoke-Template" {
         $templateOutput[1].type | Should -Match "^name2_\d+$"
         $templateOutput[1].value | Should -BeExactly 3
     }
+
+    It "throws an error if no template is provided" {
+        $output = "{test: 1}" | c8y template execute
+        $LASTEXITCODE | Should -Be 100
+        $output | Should -BeNullOrEmpty
+
+        $output = c8y template execute
+        $LASTEXITCODE | Should -Be 100
+        $output | Should -BeNullOrEmpty
+
+        $output = c8y template execute --template "{test: 1}"
+        $LASTEXITCODE | Should -Be 0
+        $output | Should -Not -BeNullOrEmpty
+        
+        $output = "{test: 1}" | c8y template execute --template "input.value"
+        $LASTEXITCODE | Should -Be 0
+        $output | Should -Not -BeNullOrEmpty
+    }
 }
