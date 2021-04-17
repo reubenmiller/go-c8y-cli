@@ -112,6 +112,8 @@ None :)
 
 No unreleased features
 
+* Added additional command under the bulk operations to get the list of related bulk operations which accepts piped input. `c8y bulkoperations list | c8y bulkoperations listOperations`
+
 * Setting a session includes the following new environment variables
 
     * `C8Y_HEADER` Authorization header (including header name), i.e. `Authorization: {auth_method} {value}`

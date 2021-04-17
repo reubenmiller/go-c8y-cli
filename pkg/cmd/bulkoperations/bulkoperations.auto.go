@@ -5,6 +5,7 @@ import (
 	cmdDelete "github.com/reubenmiller/go-c8y-cli/pkg/cmd/bulkoperations/delete"
 	cmdGet "github.com/reubenmiller/go-c8y-cli/pkg/cmd/bulkoperations/get"
 	cmdList "github.com/reubenmiller/go-c8y-cli/pkg/cmd/bulkoperations/list"
+	cmdListOperations "github.com/reubenmiller/go-c8y-cli/pkg/cmd/bulkoperations/listoperations"
 	cmdUpdate "github.com/reubenmiller/go-c8y-cli/pkg/cmd/bulkoperations/update"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmd/subcommand"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmdutil"
@@ -30,6 +31,7 @@ func NewSubCommand(f *cmdutil.Factory) *SubCmdBulkoperations {
 	cmd.AddCommand(cmdDelete.NewDeleteCmd(f).GetCommand())
 	cmd.AddCommand(cmdCreate.NewCreateCmd(f).GetCommand())
 	cmd.AddCommand(cmdUpdate.NewUpdateCmd(f).GetCommand())
+	cmd.AddCommand(cmdListOperations.NewListOperationsCmd(f).GetCommand())
 
 	ccmd.SubCommand = subcommand.NewSubCommand(cmd)
 

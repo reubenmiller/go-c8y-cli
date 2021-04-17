@@ -120,6 +120,7 @@ FunctionsToExport = @(
 	'Get-BinaryCollection',
 	'Get-BulkOperation',
 	'Get-BulkOperationCollection',
+	'Get-BulkOperationOperationCollection',
 	'Get-ChildAdditionCollection',
 	'Get-ChildAssetCollection',
 	'Get-ChildAssetReference',
