@@ -85,6 +85,9 @@
         # devicegroup array
         "[]devicegroup" = "c8yfetcher.WithDeviceGroupByNameFirstMatch(client, args, `"${prop}`", `"${queryParam}`"),"
         
+        # smartgroup array
+        "[]smartgroup" = "c8yfetcher.WithSmartGroupByNameFirstMatch(client, args, `"${prop}`", `"${queryParam}`"),"
+        
         # user array
         "[]user" = "c8yfetcher.WithUserByNameFirstMatch(client, args, `"${prop}`", `"${queryParam}`"),"
 

@@ -52,6 +52,7 @@
         "[]agent" { "object[]"; break }
         "[]device" { "object[]"; break }
         "[]devicegroup" { "object[]"; break }
+        "[]smartgroup" { "object[]"; break }
         "[]role" { "object[]"; break }
         "[]roleself" { "object[]"; break }
         "[]string" { "string[]"; break }

@@ -55,7 +55,8 @@
         "[]userself",
         "[]roleself",
         "[]role",
-        "[]user"
+        "[]user",
+        "[]smartgroup"
       ]
     },
     "pipelineAliases": {

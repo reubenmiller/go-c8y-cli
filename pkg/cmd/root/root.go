@@ -51,6 +51,8 @@ import (
 	retentionrulesCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/retentionrules"
 	sessionsCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/sessions"
 	settingsCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/settings"
+	smartgroupsCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/smartgroups"
+	smartgroupsListCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/smartgroups/list"
 	systemoptionsCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/systemoptions"
 	templateCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/template"
 	tenantoptionsCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/tenantoptions"
@@ -291,6 +293,11 @@ func NewCmdRoot(f *cmdutil.Factory, version, buildDate string) *CmdRoot {
 	applications := applicationsCmd.NewSubCommand(f).GetCommand()
 	applications.AddCommand(applicationsCreateHostedCmd.NewCmdCreateHostedApplication(f).GetCommand())
 	cmd.AddCommand(applications)
+
+	// smart groups
+	smartgroups := smartgroupsCmd.NewSubCommand(f).GetCommand()
+	smartgroups.AddCommand(smartgroupsListCmd.NewListCmd(f).GetCommand())
+	cmd.AddCommand(smartgroups)
 
 	// Manual commands
 	cmd.AddCommand(aliasCmd.NewCmdAlias(f))

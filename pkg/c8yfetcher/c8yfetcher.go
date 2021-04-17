@@ -487,6 +487,14 @@ func WithDeviceGroupByNameFirstMatch(client *c8y.Client, args []string, opts ...
 	}
 }
 
+// WithSmartGroupByNameFirstMatch add reference by name matching for smart groups via cli args. Only the first match will be used
+func WithSmartGroupByNameFirstMatch(client *c8y.Client, args []string, opts ...string) flags.GetOption {
+	return func(cmd *cobra.Command, inputIterators *flags.RequestInputIterators) (string, interface{}, error) {
+		opt := WithReferenceByNameFirstMatch(client, NewSmartGroupFetcher(client), args, opts...)
+		return opt(cmd, inputIterators)
+	}
+}
+
 // WithUserByNameFirstMatch add reference by name matching for users via cli args. Only the first match will be used
 func WithUserByNameFirstMatch(client *c8y.Client, args []string, opts ...string) flags.GetOption {
 	return func(cmd *cobra.Command, inputIterators *flags.RequestInputIterators) (string, interface{}, error) {
