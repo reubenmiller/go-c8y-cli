@@ -56,7 +56,7 @@ func NewCmdList(f *cmdutil.Factory) *CmdList {
 
 	completion.WithOptions(
 		cmd,
-		completion.WithValidateSet("type", "command", "request", "user"),
+		completion.WithValidateSet("type", "command", "request", "user", "all"),
 	)
 
 	cmdutil.DisableAuthCheck(cmd)
@@ -77,6 +77,10 @@ func (n *CmdList) RunE(cmd *cobra.Command, args []string) error {
 	}
 	filter := activitylogger.Filter{
 		Type: n.entryType,
+	}
+	if strings.EqualFold(n.entryType, "all") {
+		// dont filter by type
+		filter.Type = ""
 	}
 
 	if n.dateFrom != "" {
