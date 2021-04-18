@@ -62,6 +62,7 @@ import (
 	userreferencesCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/userreferences"
 	userrolesCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/userroles"
 	usersCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/users"
+	utilCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/util"
 	versionCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/version"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmdutil"
@@ -232,6 +233,7 @@ func NewCmdRoot(f *cmdutil.Factory, version, buildDate string) *CmdRoot {
 		versionCmd.NewCmdVersion(f).GetCommand(),
 		completionCmd.NewCmdCompletion().GetCommand(),
 		templateCmd.NewSubCommand(f).GetCommand(),
+		utilCmd.NewSubCommand(f).GetCommand(),
 		settingsCmd.NewSubCommand(f).GetCommand(),
 		realtimeCmd.NewSubCommand(f).GetCommand(),
 		currenttenantCmd.NewSubCommand(f).GetCommand(),

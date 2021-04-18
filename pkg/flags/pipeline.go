@@ -41,15 +41,11 @@ func NewFlagWithPipeIterator(cmd *cobra.Command, pipeOpt *PipelineOptions, suppo
 			AllowEmpty: !pipeOpt.Required,
 			Formatter:  pipeOpt.Formatter,
 		}
-		iter, err := iterator.NewJSONPipeIterator(cmd.InOrStdin(), iterOpts, func(line []byte) bool {
-			line = bytes.TrimSpace(line)
-			if !bytes.HasPrefix(line, []byte("{")) && !bytes.HasPrefix(line, []byte("[")) {
-				return true
-			}
-			// only allow json objects
-			isJSONObject := jsonUtilities.IsJSONObject(line)
-			return isJSONObject
-		})
+		lineFilter := FilterJsonLines
+		if pipeOpt.InputFilter != nil {
+			lineFilter = pipeOpt.InputFilter
+		}
+		iter, err := iterator.NewJSONPipeIterator(cmd.InOrStdin(), iterOpts, lineFilter)
 		if err == nil {
 			return iter, nil
 		}
@@ -113,4 +109,14 @@ func ValidateID(v []byte) (err error) {
 		err = fmt.Errorf("%s. value=%s", ErrInvalidIDFormat, value)
 	}
 	return
+}
+
+func FilterJsonLines(line []byte) bool {
+	line = bytes.TrimSpace(line)
+	if !bytes.HasPrefix(line, []byte("{")) && !bytes.HasPrefix(line, []byte("[")) {
+		return true
+	}
+	// only allow json objects
+	isJSONObject := jsonUtilities.IsJSONObject(line)
+	return isJSONObject
 }
