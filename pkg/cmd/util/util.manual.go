@@ -3,6 +3,7 @@ package util
 import (
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmd/subcommand"
 	cmdRepeat "github.com/reubenmiller/go-c8y-cli/pkg/cmd/util/repeat"
+	cmdShow "github.com/reubenmiller/go-c8y-cli/pkg/cmd/util/show"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmdutil"
 	"github.com/spf13/cobra"
 )
@@ -22,6 +23,7 @@ func NewSubCommand(f *cmdutil.Factory) *SubCmdUtil {
 
 	// Subcommands
 	cmd.AddCommand(cmdRepeat.NewCmdRepeat(f).GetCommand())
+	cmd.AddCommand(cmdShow.NewCmdShow(f).GetCommand())
 
 	ccmd.SubCommand = subcommand.NewSubCommand(cmd)
 
