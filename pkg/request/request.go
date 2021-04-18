@@ -167,12 +167,7 @@ func (r *RequestHandler) DryRunHandler(iostream *iostreams.IOStreams, options *c
 		r.Logger.Warn("Response is nil")
 		return
 	}
-	w := iostream.ErrOut
-	if r.Config.WithError() {
-		w = iostream.Out
-	}
-
-	r.PrintRequestDetails(w, options, req)
+	r.PrintRequestDetails(iostream.Out, options, req)
 }
 
 // PrintRequestDetails prints the request to the console making it easier to extra informatino from it

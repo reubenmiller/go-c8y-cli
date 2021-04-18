@@ -73,7 +73,7 @@ Describe -Name "Get-Pagination" {
         $output = PSc8y\Get-DeviceCollection `
             -IncludeAll `
             -Dry `
-            -DryFormat json 2>&1
+            -DryFormat json
 
         $LASTEXITCODE | Should -Be 0
         $output | Should -Not -BeNullOrEmpty
@@ -88,7 +88,7 @@ Describe -Name "Get-Pagination" {
         $output = PSc8y\Get-AlarmCollection `
             -Device $Device.id `
             -Dry `
-            -DryFormat json 2>&1
+            -DryFormat json
 
         $LASTEXITCODE | Should -Be 0
         $C8Y_SETTINGS_DEFAULTS_PAGESIZE = ""

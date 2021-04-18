@@ -29,7 +29,9 @@ Describe -Name "Inherit-Parameters" {
         $mo.id | Should -Match "^\d+$"
 
         $mo = Test-MyCustomFunction -Force -Dry
-        $mo | Should -BeNullOrEmpty
+        $mo | Should -Not -BeNullOrEmpty
+        $requests = $mo | ConvertFrom-Json
+        $requests.path | Should -BeExactly "/inventory/managedObjects"
         $LASTEXITCODE | Should -Be 0
 
         $VerboseMessage = $($mo = Test-MyCustomFunction -Force -Verbose) 2>&1
@@ -74,8 +76,10 @@ Describe -Name "Inherit-Parameters" {
 
         $WhatIfPreference = $true
         $mo = Test-MyCustomFunction -Force
-        $mo | Should -BeNullOrEmpty
+        $mo | Should -Not -BeNullOrEmpty
         $LASTEXITCODE | Should -Be 0
+        $requests = $mo | ConvertFrom-Json
+        $requests.path | Should -BeExactly "/inventory/managedObjects"
     }
 
     AfterEach {

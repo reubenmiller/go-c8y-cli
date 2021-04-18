@@ -13,7 +13,7 @@ Describe -Name "Find-ManagedObjectCollection" {
     }
 
     It "Find all devices by piping query text" {
-        $output = "name eq '*a*'" | PSc8y\Find-ManagedObjectCollection -OrderBy "_id desc" -OnlyDevices -Dry 2>&1
+        $output = "name eq '*a*'" | PSc8y\Find-ManagedObjectCollection -OrderBy "_id desc" -OnlyDevices -Dry
         $LASTEXITCODE | Should -Be 0
         $requests = $output | ConvertFrom-Json
         $requests | Should -HaveCount 1
@@ -25,7 +25,7 @@ Describe -Name "Find-ManagedObjectCollection" {
     }
 
     It "Find matching devices by piping an object" {
-        $output = @{ "c8y_DeviceQueryString" = "name eq '*a*'"} | PSc8y\Find-ManagedObjectCollection -OrderBy "_id desc" -OnlyDevices -Dry 2>&1
+        $output = @{ "c8y_DeviceQueryString" = "name eq '*a*'"} | PSc8y\Find-ManagedObjectCollection -OrderBy "_id desc" -OnlyDevices -Dry
         $LASTEXITCODE | Should -Be 0
         $requests = $output | ConvertFrom-Json
         $requests | Should -HaveCount 1
@@ -37,7 +37,7 @@ Describe -Name "Find-ManagedObjectCollection" {
     }
 
     It "Finds inventory managed objects using a template query" {
-        $output = @{ "c8y_DeviceQueryString" = "name eq '*a*'"} | PSc8y\Find-ManagedObjectCollection -OrderBy "_id desc" -QueryTemplate "not(%s)" -Dry 2>&1
+        $output = @{ "c8y_DeviceQueryString" = "name eq '*a*'"} | PSc8y\Find-ManagedObjectCollection -OrderBy "_id desc" -QueryTemplate "not(%s)" -Dry
         $LASTEXITCODE | Should -Be 0
         $requests = $output | ConvertFrom-Json
         $requests | Should -HaveCount 1
@@ -49,7 +49,7 @@ Describe -Name "Find-ManagedObjectCollection" {
     }
 
     It "handles empty device query string" {
-        $output = @{ "c8y_DeviceQueryString" = "" } | PSc8y\Find-ManagedObjectCollection -OrderBy "_id desc" -Dry 2>&1
+        $output = @{ "c8y_DeviceQueryString" = "" } | PSc8y\Find-ManagedObjectCollection -OrderBy "_id desc" -Dry
         $LASTEXITCODE | Should -Be 0
         $requests = $output | ConvertFrom-Json
         $requests | Should -HaveCount 1

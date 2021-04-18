@@ -22,7 +22,7 @@ Describe -Tag "Session" -Name "Login and Session Tests" {
         $env:C8Y_SESSION = ""
         c8y sessions login
         
-        $resp = c8y devices list --verbose --dry --session "my-session" 2>&1
+        $resp = c8y devices list --verbose --dry --session "my-session"
         $LASTEXITCODE | Should -BeExactly 0
     }
 

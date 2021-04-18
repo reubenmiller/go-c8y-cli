@@ -7,7 +7,7 @@ Describe -Name "c8y pipes" {
 
     Context "Piping to single commands" {
         It "Pipe by id a simple getter" {
-            $output = @("1", "2") | c8y events get --dry --dryFormat json 2>&1
+            $output = @("1", "2") | c8y events get --dry --dryFormat json
             $LASTEXITCODE | Should -Be 0
             
             $requests = $output | ConvertFrom-Json
@@ -17,7 +17,7 @@ Describe -Name "c8y pipes" {
         }
 
         It "Pipe by id update command" {
-            $output = @("1", "2") | c8y events update --dry --dryFormat json 2>&1
+            $output = @("1", "2") | c8y events update --dry --dryFormat json
             $LASTEXITCODE | Should -Be 0
 
             $requests = $output | ConvertFrom-Json
@@ -27,7 +27,7 @@ Describe -Name "c8y pipes" {
         }
 
         It "Pipe by id delete command" {
-            $output = @("1", "2") | c8y events delete --dry 2>&1
+            $output = @("1", "2") | c8y events delete --dry
             $LASTEXITCODE | Should -Be 0
 
             $requests = $output | ConvertFrom-Json
@@ -37,7 +37,7 @@ Describe -Name "c8y pipes" {
         }
 
         It "Pipe by id create command" {
-            $output = @("10", "11") | c8y events create --template "{type: 'c8y_Event', text: 'custom info ' + input.index}" --dry --dryFormat json --withError
+            $output = @("10", "11") | c8y events create --template "{type: 'c8y_Event', text: 'custom info ' + input.index}" --dry --dryFormat json
             $LASTEXITCODE | Should -Be 0
             $requests = $output | ConvertFrom-Json
             $requests | Should -HaveCount 2
@@ -53,7 +53,7 @@ Describe -Name "c8y pipes" {
 
     
         It "Pipe by id to query parameters" {
-            $output = @("1", "2") | c8y events list --dry --dryFormat json 2>&1
+            $output = @("1", "2") | c8y events list --dry --dryFormat json
             $LASTEXITCODE | Should -Be 0
             $requests = $output | ConvertFrom-Json
 
@@ -68,7 +68,7 @@ Describe -Name "c8y pipes" {
         }
 
         It "Empty pipe. Empty values should not cause a lookup, however they should also not stop the iteration" {
-            $output = @("", "") | c8y events list --dry --dryFormat json 2>&1
+            $output = @("", "") | c8y events list --dry --dryFormat json
             $LASTEXITCODE | Should -Be 0
 
             $requests = $output | ConvertFrom-Json
@@ -80,7 +80,7 @@ Describe -Name "c8y pipes" {
         It "Pipe by id object to query parameters" {
             $output = @{id=1}, @{id=2} `
             | Invoke-ClientIterator -AsJSON `
-            | c8y events list --dry --dryFormat json 2>&1
+            | c8y events list --dry --dryFormat json
 
             $LASTEXITCODE | Should -Be 0
             $requests = $output | ConvertFrom-Json
@@ -96,7 +96,7 @@ Describe -Name "c8y pipes" {
         It "Pipe by json object using deviceId rather than id to query parameters" {
             $output = @{id=3; deviceId=1}, @{id=4; deviceId=2} `
             | Invoke-ClientIterator -AsJSON `
-            | c8y events list --dry --dryFormat json 2>&1
+            | c8y events list --dry --dryFormat json
 
             $LASTEXITCODE | Should -Be 0
             $requests = $output | ConvertFrom-Json
@@ -112,7 +112,7 @@ Describe -Name "c8y pipes" {
         It "Pipe by json object using source.id rather than id to query parameters" {
             $output = @{id=3; source=@{id=1}}, @{id=4; source=@{id=2}} `
             | Invoke-ClientIterator -AsJSON `
-            | c8y events list --dry --dryFormat json 2>&1
+            | c8y events list --dry --dryFormat json
 
             $LASTEXITCODE | Should -Be 0
             $requests = $output | ConvertFrom-Json
@@ -153,7 +153,7 @@ Describe -Name "c8y pipes" {
         }
 
         It "Get results without piped variable" {
-            $output = c8y events list --dry --dryFormat json 2>&1
+            $output = c8y events list --dry --dryFormat json
             $LASTEXITCODE | Should -Be 0
 
             $requests = $output | ConvertFrom-Json
@@ -164,7 +164,7 @@ Describe -Name "c8y pipes" {
 
     Context "Pipe to optional query parameters" {
         It "Pipe an ids to a query parameter" {
-            $output = @("1", "2") | c8y events deleteCollection --dry --dryFormat json 2>&1
+            $output = @("1", "2") | c8y events deleteCollection --dry --dryFormat json
             $LASTEXITCODE | Should -Be 0
             $requests = $output | ConvertFrom-Json
             $requests | Should -HaveCount 2
@@ -173,7 +173,7 @@ Describe -Name "c8y pipes" {
         }
 
         It "Pipe an ids to a query parameter" {
-            $output = c8y events deleteCollection --dry --dryFormat json 2>&1
+            $output = c8y events deleteCollection --dry --dryFormat json
             $LASTEXITCODE | Should -Be 0
             $requests = $output | ConvertFrom-Json
             $requests | Should -HaveCount 1
@@ -183,7 +183,7 @@ Describe -Name "c8y pipes" {
 
     Context "Pipe to optional body" {
         It "Pipe values to a body parameter" {
-            $output = @("name1", "name2") | c8y inventory create --dry --dryFormat json 2>&1
+            $output = @("name1", "name2") | c8y inventory create --dry --dryFormat json
             $LASTEXITCODE | Should -Be 0
             $requests = $output | ConvertFrom-Json
             $requests | Should -HaveCount 2
@@ -192,7 +192,7 @@ Describe -Name "c8y pipes" {
         }
 
         It "No pipe input to an optional body parameter" {
-            $output = c8y inventory create --dry --dryFormat json 2>&1
+            $output = c8y inventory create --dry --dryFormat json
             $LASTEXITCODE | Should -Be 0
 
             $requests = $output | ConvertFrom-Json
@@ -203,7 +203,7 @@ Describe -Name "c8y pipes" {
 
     Context "pipeline - devices" {
         It "Provides piped strings to template" {
-            $output = "11", "12" | c8y devices create --template "{ jobIndex: input.index, jobValue: input.value }" --dry --dryFormat json 2>&1
+            $output = "11", "12" | c8y devices create --template "{ jobIndex: input.index, jobValue: input.value }" --dry --dryFormat json
             $LASTEXITCODE | Should -BeExactly 0
             $requests = $output | ConvertFrom-Json
             $requests | Should -HaveCount 2
@@ -221,7 +221,7 @@ Describe -Name "c8y pipes" {
         It "Provides piped json to template" {
             $output = @{name="myDevice01"}, @{name="myDevice02"} `
             | Invoke-ClientIterator -AsJSON `
-            | c8y devices create --template "{ jobIndex: input.index, name: input.value.name }" --dry --dryFormat json 2>&1
+            | c8y devices create --template "{ jobIndex: input.index, name: input.value.name }" --dry --dryFormat json
             $LASTEXITCODE | Should -BeExactly 0
 
             $requests = $output | ConvertFrom-Json
@@ -240,7 +240,7 @@ Describe -Name "c8y pipes" {
         It "pipes objects from powershell to the c8y binary" {
             $output = 1..2 `
             | Invoke-ClientIterator "device" `
-            | c8y devices create --template "{ jobIndex: input.index, name: input.value.name }" --dry --dryFormat json 2>&1
+            | c8y devices create --template "{ jobIndex: input.index, name: input.value.name }" --dry --dryFormat json
             $LASTEXITCODE | Should -BeExactly 0
             $requests = $output | ConvertFrom-Json
 
@@ -264,7 +264,7 @@ Describe -Name "c8y pipes" {
             # pipe output 
             $output = $device1.id, $device2.id `
             | c8y devices get `
-            | c8y devices update --template "{ type: input.value.type + 'Suffix', index: input.index }" --dry --dryFormat json 2>&1
+            | c8y devices update --template "{ type: input.value.type + 'Suffix', index: input.index }" --dry --dryFormat json
             $LASTEXITCODE | Should -BeExactly 0
 
             $requests = $output | ConvertFrom-Json

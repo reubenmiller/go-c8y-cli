@@ -25,7 +25,7 @@ Describe -Name "powershell pipes" {
 
     Context "Update commands" {
         It "Pipe by id a update managed object" {
-            $output = ,$deviceIds | Update-Device -Data "myvalue=1" -Dry -DryFormat json 2>&1
+            $output = ,$deviceIds | Update-Device -Data "myvalue=1" -Dry -DryFormat json
             $LASTEXITCODE | Should -Be 0
             $requests = $output | ConvertFrom-Json
             $requests | Should -HaveCount 2
@@ -44,7 +44,7 @@ Describe -Name "powershell pipes" {
         }
 
         It "Pipe by id a update managed object using hashtable as body" {
-            $output = ,$deviceIds | Update-Device -Data @{myvalue = 1} -Dry -DryFormat json 2>&1
+            $output = ,$deviceIds | Update-Device -Data @{myvalue = 1} -Dry -DryFormat json
             $LASTEXITCODE | Should -Be 0
             $requests = $output | ConvertFrom-Json
             $requests | Should -HaveCount 2
@@ -95,7 +95,7 @@ Describe -Name "powershell pipes" {
 
     Context "Device creation" {
         It "accepts devices names from the pipeline" {
-            $output = ,@("device01", "device02") | New-Device -Dry -DryFormat json 2>&1
+            $output = ,@("device01", "device02") | New-Device -Dry -DryFormat json
             $LASTEXITCODE | Should -Be 0
 
             $requests = $output | ConvertFrom-Json
@@ -121,7 +121,7 @@ Describe -Name "powershell pipes" {
         It "can stream include results to a downstream command in json format" {
             $env:C8Y_SETTINGS_INCLUDEALL_PAGESIZE = 10
             $env:C8Y_SETTINGS_INCLUDEALL_DELAYMS = 1000
-            $messages = $( $output = devices -IncludeAll -AsPSObject:$false -TotalPages 3 | batch | Get-Device -Verbose -Delay 0 -Workers 5 -Dry -DryFormat json -WithError ) 2>&1
+            $messages = $( $output = devices -IncludeAll -AsPSObject:$false -TotalPages 3 | batch | Get-Device -Verbose -Delay 0 -Workers 5 -Dry -DryFormat json ) 2>&1
             $LASTEXITCODE | Should -BeExactly 0
             $messages -match "command: c8y" | Should -HaveCount 1 -Because "all gets should be executed by one c8y call"
             $output.Count | Should -BeGreaterThan 1

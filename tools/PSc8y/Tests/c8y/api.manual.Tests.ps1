@@ -4,7 +4,7 @@ Describe -Name "c8y api" {
 
     Context "Custom POST requests" {
         It "Allows non-json bodies" {
-            $output = c8y api POST /myvalue --data "myvalue,41,outputtext" --contentType "text/plain" --dry --dryFormat json 2>&1
+            $output = c8y api POST /myvalue --data "myvalue,41,outputtext" --contentType "text/plain" --dry --dryFormat json
             $LASTEXITCODE | Should -Be 0
 
             $request = $output | ConvertFrom-Json
@@ -16,7 +16,7 @@ Describe -Name "c8y api" {
         }
 
         It "Allows shorthand json bodies" {
-            $output = c8y api POST /myvalue --data "myvalue=1" --dry --dryFormat json 2>&1
+            $output = c8y api POST /myvalue --data "myvalue=1" --dry --dryFormat json
             $LASTEXITCODE | Should -Be 0
 
             $request = $output | ConvertFrom-Json

@@ -54,7 +54,7 @@ Describe -Name "Error handling" {
     }
 
     It "saves Dry information to a variable" {
-        $output = New-ManagedObject -Name "My Name" -Dry -DryFormat json 2>&1
+        $output = New-ManagedObject -Name "My Name" -Dry -DryFormat json
         $output | Should -Not -BeNullOrEmpty
         $request = $output | ConvertFrom-Json
         $request | Should -HaveCount 1
@@ -65,7 +65,7 @@ Describe -Name "Error handling" {
     }
 
     It "redirects Dry information standard output" {
-        $requestInfo = New-ManagedObject -Name "My Name" -Dry -DryFormat markdown -WithError
+        $requestInfo = New-ManagedObject -Name "My Name" -Dry -DryFormat markdown
 
         $requestInfo | Should -Not -BeNullOrEmpty
         $requestInfo -match "What If" | Should -HaveCount 1

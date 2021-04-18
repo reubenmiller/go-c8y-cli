@@ -119,7 +119,7 @@ local CreateEvent(major='1',minor='1',extid='123456789',timestamp='2021-01-20T12
             -Template $TemplateFile `
             -TemplateVars "timestamp=$(Format-Date),eventCount=5" `
             -Dry `
-            -DryFormat json 2>&1
+            -DryFormat json
 
         $LASTEXITCODE | Should -BeExactly 0
         $request = $output | ConvertFrom-Json -Depth 100

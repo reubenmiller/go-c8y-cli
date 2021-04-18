@@ -12,7 +12,7 @@ Describe -Name "Invoke-ClientRequest" {
         $output = Invoke-ClientRequest -Uri "/alarm/alarms" -QueryParameters @{
                 pageSize = "1";
             } `
-            -Dry -DryFormat json 2>&1
+            -Dry -DryFormat json
         $LASTEXITCODE | Should -Be 0
 
         $requests = $output | ConvertFrom-Json
@@ -62,7 +62,7 @@ Describe -Name "Invoke-ClientRequest" {
             Dry = $true
             DryFormat = "json"
         }
-        $output = Invoke-ClientRequest @options 2>&1
+        $output = Invoke-ClientRequest @options
         $LASTEXITCODE | Should -Be 0
 
         $requests = $output | ConvertFrom-Json
@@ -192,7 +192,6 @@ Describe -Name "Invoke-ClientRequest" {
                     prop1 = $false
                 }
             } `
-            -WithError `
             -DryFormat "json" `
             -Dry
 
@@ -209,7 +208,7 @@ Describe -Name "Invoke-ClientRequest" {
         $output = Invoke-ClientRequest `
             -Uri "/inventory/managedObjects" `
             -Method "post" `
-            -Dry 2>&1
+            -Dry
 
         $LASTEXITCODE | Should -Be 0
         $output | Should -Not -BeNullOrEmpty
@@ -221,9 +220,8 @@ Describe -Name "Invoke-ClientRequest" {
             -Uri "/inventory/managedObjects" `
             -Method "post" `
             -Data @{} `
-            -WithError `
             -DryFormat "json" `
-            -Dry 2>&1
+            -Dry
 
         $LASTEXITCODE | Should -Be 0
         $output | Should -Not -BeNullOrEmpty

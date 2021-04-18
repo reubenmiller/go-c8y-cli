@@ -36,7 +36,7 @@ Describe -Name "New-Measurement" {
         # using Dry
         $options.Dry = $true
         $options.DryFormat = "json"
-        $output = $( $Response = Get-Content $inputFile | batch | New-Measurement @options ) 2>&1
+        $output = Get-Content $inputFile | batch | New-Measurement @options
         $LASTEXITCODE | Should -Be 0
         
         $requests = $output | ConvertFrom-Json
@@ -75,7 +75,7 @@ Describe -Name "New-Measurement" {
 
         $options.Dry = $true
         $options.DryFormat = "json"
-        $output = $( $Response = Get-Content $inputFile | batch | New-Measurement @options ) 2>&1
+        $output = Get-Content $inputFile | batch | New-Measurement @options
         
         $LASTEXITCODE | Should -Be 0
         $requests = $output | ConvertFrom-Json

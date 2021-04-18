@@ -7,7 +7,7 @@ Describe -Name "Reset-UserPassword" {
     }
 
     It "Resets a user's password by sending a reset email to the user" {
-        $Response = PSc8y\Reset-UserPassword -Id $User.id -Dry 2>&1
+        $Response = PSc8y\Reset-UserPassword -Id $User.id -Dry
         $LASTEXITCODE | Should -Be 0
         $Response | Should -Not -BeNullOrEmpty
     }

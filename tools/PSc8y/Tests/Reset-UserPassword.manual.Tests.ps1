@@ -6,7 +6,7 @@ Describe -Name "Reset-UserPassword" {
     }
 
     It "Resets a user's password by sending a reset email to the user" {
-        $output = PSc8y\Reset-UserPassword -Id $User.id -Dry -DryFormat json 2>&1
+        $output = PSc8y\Reset-UserPassword -Id $User.id -Dry -DryFormat json
         $LASTEXITCODE | Should -Be 0
 
         $request = $output | Out-String | ConvertFrom-Json
@@ -17,7 +17,7 @@ Describe -Name "Reset-UserPassword" {
 
     It "Resets a user's password by setting a manual password" {
         $pass = New-RandomPassword
-        $output = PSc8y\Reset-UserPassword -Id $User.id -NewPassword $pass -Dry -DryFormat json 2>&1
+        $output = PSc8y\Reset-UserPassword -Id $User.id -NewPassword $pass -Dry -DryFormat json
         $LASTEXITCODE | Should -Be 0
 
         $request = $output | Out-String | ConvertFrom-Json

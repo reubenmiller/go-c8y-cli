@@ -17,7 +17,7 @@ Describe -Name "New-ServiceUser" -Tag "microservice" {
 
     It "Creates a server user and subscribes to multiple tenants" {
         $Roles = @("ROLE_INVENTORY_READ", "ROLE_INVENTORY_ADMIN")
-        $output = PSc8y\New-ServiceUser -Name $AppName -Roles $Roles -Tenants t1111,t2222 -Dry -DryFormat json 2>&1
+        $output = PSc8y\New-ServiceUser -Name $AppName -Roles $Roles -Tenants t1111,t2222 -Dry -DryFormat json
         $LASTEXITCODE | Should -Be 0
         $output | Should -Not -BeNullOrEmpty
         $Requests = $output | ConvertFrom-Json

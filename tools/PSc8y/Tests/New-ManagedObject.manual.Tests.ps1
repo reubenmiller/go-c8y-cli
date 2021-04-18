@@ -79,7 +79,7 @@ Describe -Name "New-ManagedObject" {
 
     It "Managed object allow setting the processing mode" {
         foreach ($mode in @("PERSISTENT", "QUIESCENT", "TRANSIENT", "CEP")) {
-            $output = PSc8y\New-ManagedObject -Data @{} -ProcessingMode $mode -Dry -DryFormat json 2>&1
+            $output = PSc8y\New-ManagedObject -Data @{} -ProcessingMode $mode -Dry -DryFormat json
             $request = $output | ConvertFrom-Json -AsHashtable
             $request.headers["X-Cumulocity-Processing-Mode"] | Should -Be $mode
         }

@@ -46,7 +46,7 @@ Describe -Tag "Session" -Name "sessions-set" {
 
         # session 1
         $env:C8Y_PASSPHRASE = "test"
-        $output = c8y inventory list --dry --dryFormat json 2>&1
+        $output = c8y inventory list --dry --dryFormat json
         $LASTEXITCODE | Should -BeExactly 0
         $request = $output | ConvertFrom-Json
 
@@ -59,7 +59,7 @@ Describe -Tag "Session" -Name "sessions-set" {
 
         # session 2
         $env:C8Y_PASSPHRASE = "test"
-        $output = c8y inventory list --dry --dryFormat json --session $Session02 2>&1
+        $output = c8y inventory list --dry --dryFormat json --session $Session02
         $LASTEXITCODE | Should -BeExactly 0
         $request = $output | ConvertFrom-Json
 
@@ -79,7 +79,7 @@ Describe -Tag "Session" -Name "sessions-set" {
         $env:C8Y_PASSWORD = $input01.password
 
         # session 1
-        $output = c8y inventory list --dry --dryFormat json 2>&1
+        $output = c8y inventory list --dry --dryFormat json
         $LASTEXITCODE | Should -BeExactly 0
         $request = $output | ConvertFrom-Json
 
@@ -97,7 +97,7 @@ Describe -Tag "Session" -Name "sessions-set" {
         $env:C8Y_USERNAME = $input02.userName
         $env:C8Y_PASSWORD = $encrypted02
 
-        $output = c8y inventory list --dry --dryFormat json --session $Session02 2>&1
+        $output = c8y inventory list --dry --dryFormat json --session $Session02
         $LASTEXITCODE | Should -BeExactly 0
         $request = $output | ConvertFrom-Json
 
@@ -117,7 +117,7 @@ Describe -Tag "Session" -Name "sessions-set" {
         $env:C8Y_PASSWORD = $encrypted02
         $env:C8Y_PASSPHRASE = "wrong_passphrase"
 
-        c8y inventory list --dry --dryFormat json 2>&1
+        c8y inventory list --dry --dryFormat json
         $LASTEXITCODE | Should -BeExactly 108
     }
 
@@ -129,7 +129,7 @@ Describe -Tag "Session" -Name "sessions-set" {
         $env:C8Y_PASSWORD = $encrypted02
         $env:C8Y_PASSPHRASE = "wrong_passphrase"
 
-        c8y sessions clear 2>&1
+        c8y sessions clear
         $LASTEXITCODE | Should -BeExactly 0
     }
 
@@ -143,7 +143,7 @@ Describe -Tag "Session" -Name "sessions-set" {
         $env:C8Y_PASSWORD = $null
 
         # using C8Y_SESSION
-        $output = c8y inventory list --dry --dryFormat json 2>&1
+        $output = c8y inventory list --dry --dryFormat json
         $LASTEXITCODE | Should -BeExactly 0
         $request = $output | ConvertFrom-Json
 
@@ -157,7 +157,7 @@ Describe -Tag "Session" -Name "sessions-set" {
 
         # Use --session parameter (should override C8Y_SESSION value)
         $env:C8Y_SESSION = $session02
-        $output = c8y inventory list --dry --dryFormat json --session $session03 2>&1
+        $output = c8y inventory list --dry --dryFormat json --session $session03
         $LASTEXITCODE | Should -BeExactly 0
         $request = $output | ConvertFrom-Json
 

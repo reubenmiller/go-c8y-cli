@@ -134,7 +134,7 @@ Describe -Name "Common parameters" {
     It "Using -Dry should show output on the console" {
         $output = PSc8y\New-Device `
             -Name "testme" `
-            -Dry 2>&1
+            -Dry
         $LASTEXITCODE | Should -Be 0
         $output | Should -Not -BeNullOrEmpty
         $output | Out-String | Should -BeLike "*/inventory/managedObject*"
