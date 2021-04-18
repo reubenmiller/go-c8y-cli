@@ -23,6 +23,28 @@ The dry run mode supports the following output formats
 
 The output format can be controlled via the `--dryFormat <markdown|dump|json|curl>` parameter.
 
+Sensitive information can be hidden by changing your session profile settings to hide information such as authorization headers. This can be done by running on of the following commands:
+
+For change it permanently for the current session:
+
+```sh
+# bash/zsh/fish/powershell
+c8y settings update logger.hideSensitive true
+```
+
+Or the setting can temporarily activated by setting the environment variable (via update settings command).
+
+```sh
+# bash/zsh
+eval $(c8y settings update logger.hideSensitive true --shell auto)
+
+# fish
+c8y settings update logger.hideSensitive true --shell auto | source
+
+# PowerShell
+c8y settings update logger.hideSensitive true --shell auto | Out-String | Invoke-Expression
+```
+
 The following show examples of the output from each of the formats.
 
 #### markdown (default)
