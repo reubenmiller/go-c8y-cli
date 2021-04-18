@@ -30,8 +30,9 @@ Create agent with custom properties
     [OutputType([object])]
     Param(
         # Agent name
-        [Parameter()]
-        [string]
+        [Parameter(ValueFromPipeline=$true,
+                   ValueFromPipelineByPropertyName=$true)]
+        [object[]]
         $Name,
 
         # Agent type
@@ -62,12 +63,17 @@ Create agent with custom properties
     Process {
 
         if ($ClientOptions.ConvertToPS) {
-            c8y agents create $c8yargs `
+            $Name `
+            | Group-ClientRequests `
+            | c8y agents create $c8yargs `
             | ConvertFrom-ClientOutput @TypeOptions
         }
         else {
-            c8y agents create $c8yargs
+            $Name `
+            | Group-ClientRequests `
+            | c8y agents create $c8yargs
         }
+        
     }
 
     End {}

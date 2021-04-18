@@ -49,7 +49,7 @@ Create agent with custom properties
 
 	cmd.SilenceUsage = true
 
-	cmd.Flags().String("name", "", "Agent name")
+	cmd.Flags().String("name", "", "Agent name (accepts pipeline)")
 	cmd.Flags().String("type", "", "Agent type")
 
 	completion.WithOptions(
@@ -61,7 +61,7 @@ Create agent with custom properties
 		flags.WithProcessingMode(),
 		flags.WithData(),
 		f.WithTemplateFlag(cmd),
-		flags.WithExtendedPipelineSupport("", "", false),
+		flags.WithExtendedPipelineSupport("name", "name", false, "id"),
 	)
 
 	// Required flags
@@ -134,6 +134,7 @@ func (n *CreateCmd) RunE(cmd *cobra.Command, args []string) error {
 		cmd,
 		body,
 		inputIterators,
+		flags.WithOverrideValue("name", "name"),
 		flags.WithDataFlagValue(),
 		flags.WithStringValue("name", "name"),
 		flags.WithStringValue("type", "type"),
