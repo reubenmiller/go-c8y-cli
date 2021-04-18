@@ -70,14 +70,11 @@ None :)
 
 ### Commands
 
-* Create c8y names generator
-    * name with random values
-        * `c8y generate names -f "testdevice_%03d { .Index } { .RandomName }" --count 10 --start 0 --end 10`
-        * `c8y generate names -f "%d" --count 10 --start 0 --end 10`
-* custom command to parse input json and apply --select, --filter etc
-    * Workaround is to use c8y template execute --template "input.value" --filter "type eq myvalue" --select id,name
+* Delete activity log?
+    * c8y activity log delete
+    * c8y activity log deleteAll
 
-### New Functions   
+### New Functions
 
 * Add option to print out request and response as markdown
 
@@ -103,14 +100,40 @@ None :)
 
 ### Packaging
 
-* Add new install script like curl -l install.sh | sudo bash
-    * create repository holding views and templates. clone the repository if the user opts into it
-    * add small script to move sessions from `.cumulocity` to `.cumulocity/sessions`
+* Update rpm packages to use the go-c8y-cli-addons project or package all of the views inside the package itself
 
 
 ## Unreleased
 
 No unreleased features
+
+* Added new cli utility command `c8y util repeat` to make it easier to loop over piped data
+
+    **Example**
+
+    Combine two calls to iterator over 3 devices twice. This can then be used to input into  other c8y commands
+    
+    ```sh
+    $ c8y util repeat 2 | c8y util repeat 3 --format "device%s_%s"
+    ```
+
+    *Output*
+
+    ```text
+    device_1
+    device_2
+    device_3
+    device_1
+    device_2
+    device_3
+    ```
+
+* Added commands to manage smart groups
+    * `c8y smartgroups list` Get a list of smart groups
+    * `c8y smartgroups get` Get a smart group
+    * `c8y smartgroups update` Update a smart group
+    * `c8y smartgroups delete` Delete a smart group
+    * `c8y smartgroups get --id 1234 | c8y devices list` Get a smart group and then get the list of devices matching its query
 
 * Added additional command under the bulk operations to get the list of related bulk operations which accepts piped input. `c8y bulkoperations list | c8y bulkoperations listOperations`
 
@@ -188,10 +211,10 @@ No unreleased features
 * Bearer authentication header is used when using OAUTH2 Internal authentication instead of cookies
 
 * c8y api
-    * If contentType is not json, dont try to convert it to json
+    * If contentType is not json, don't try to convert it to json
 
 * Add fixed delay before processing job
-    usecase: Wait for operations and set apply operation transitions (with 1s delay)
+    use case: Wait for operations and set apply operation transitions (with 1s delay)
         PENDING => EXECUTING
         EXECUTING => SUCCESSFUL 
 
@@ -205,7 +228,7 @@ No unreleased features
     ```
     c8y activitylog list --dateFrom -1h
     ```
-* Removed Get-SupportedOperation command. The supported operations can be read from the managed object using a select statment
+* Removed Get-SupportedOperation command. The supported operations can be read from the managed object using a select statement
     ```sh
     Get-Device -Select "c8y_SupportedOperations**"
     ```
