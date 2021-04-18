@@ -28,13 +28,13 @@ Describe -Name "c8y dry" {
         }
 
         It "Hides sensitive information" {
-            $env:C8Y_LOGGER_HIDE_SENSITIVE = "true"
+            $env:C8Y_SETTINGS_LOGGER_HIDESENSITIVE = "true"
             $output = c8y devices create --name test01 --data "test=1" --dry
             $LASTEXITCODE | Should -Be 0
             $output | Should -Not -BeNullOrEmpty
-            $output | Should -Not -Match $env:C8Y_USERNAME
+            $output | Should -Not -Match [regex]::Escape($env:C8Y_USERNAME)
 
-            $env:C8Y_LOGGER_HIDE_SENSITIVE = $null
+            $env:C8Y_SETTINGS_LOGGER_HIDESENSITIVE = $null
         }
 
         

@@ -84,7 +84,7 @@ The following is a list of available environment variables which control how c8y
 |----------------------|-------------|
 | C8Y_SESSION | Path to the Cumulocity session file to be used. |
 | C8Y_SESSION_HOME | Path where the session files and settings are located. Defaults to `~/.cumulocity` if it is not set. |
-| C8Y_LOGGER_HIDE_SENSITIVE | Control whether sensitive session information is logged to the console or not. |
+| C8Y_SETTINGS_LOGGER_HIDESENSITIVE | Control whether sensitive session information is logged to the console or not. |
 | C8Y_JSONNET_DEBUG | Display debugging information for jsonnet templates (if used) |
 | C8Y_DISABLE_ENFORCE_ENCODING | (PowerShell only) Disable enforcement of UTF8 encoding on the console. If UTF8 encoding is disabled it will cause encoding problems if non-ascii characters are used! |
 
@@ -107,7 +107,7 @@ Use a custom folder where the Cumulocity Session files should be kept and search
 
 ---
 
-#### C8Y_LOGGER_HIDE_SENSITIVE
+#### C8Y_SETTINGS_LOGGER_HIDESENSITIVE
 
 Control whether sensitive session information is logged to the console or not. When set to `true`, then session information such as `tenant`, `username`, `password`, `basic auth header` will be obfuscated. If the setting is not present, then the session information will be shown (except for clear-text passwords).
 
@@ -125,5 +125,5 @@ Set-ClientConsoleSetting -ShowSensitive
 On bash, you can configured it by setting the environment variable:
 
 ```sh
-export C8Y_LOGGER_HIDE_SENSITIVE=true
+export C8Y_SETTINGS_LOGGER_HIDESENSITIVE=true
 ```

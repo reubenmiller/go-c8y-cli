@@ -50,7 +50,7 @@ None
     $sessionResponse = c8y sessions get $c8yArgs
     $data = $sessionResponse | ConvertFrom-Json
 
-    if ($env:C8Y_LOGGER_HIDE_SENSITIVE -eq "true") {
+    if ($env:C8Y_SETTINGS_LOGGER_HIDESENSITIVE -eq "true") {
         $data | Add-PowershellType "cumulocity/session-hide-sensitive"
     } else {
         $data | Add-PowershellType "cumulocity/session"
