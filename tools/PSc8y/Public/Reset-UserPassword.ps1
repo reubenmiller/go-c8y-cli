@@ -11,7 +11,7 @@ The password can be reset either by issuing a password reset email (default), or
 c8y users resetUserPassword
 
 .EXAMPLE
-PS> Reset-UserPassword -Id $User.id -Dry 2>&1
+PS> Reset-UserPassword -Id $User.id -Dry
 
 Resets a user's password by sending a reset email to the user
 
