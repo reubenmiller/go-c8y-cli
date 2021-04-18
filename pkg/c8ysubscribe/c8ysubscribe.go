@@ -1,6 +1,7 @@
 package c8ysubscribe
 
 import (
+	"fmt"
 	"os"
 	"os/signal"
 	"strings"
@@ -28,7 +29,12 @@ type Options struct {
 }
 
 // Subscribe subscribe to a single channel
-func Subscribe(client *c8y.Client, log *logger.Logger, channelPattern string, opts Options) error {
+func Subscribe(client *c8y.Client, log *logger.Logger, channelPattern string, opts Options) (err error) {
+	defer func() {
+		if r := recover(); r != nil {
+			err = fmt.Errorf("could not create realtime client. %s", r)
+		}
+	}()
 
 	if err := client.Realtime.Connect(); err != nil {
 		log.Errorf("Could not connect to /cep/realtime. %s", err)
@@ -83,7 +89,12 @@ func Subscribe(client *c8y.Client, log *logger.Logger, channelPattern string, op
 }
 
 // SubscribeMultiple subscribe to multiple channels
-func SubscribeMultiple(client *c8y.Client, log *logger.Logger, channelPatterns []string, opts Options) error {
+func SubscribeMultiple(client *c8y.Client, log *logger.Logger, channelPatterns []string, opts Options) (err error) {
+	defer func() {
+		if r := recover(); r != nil {
+			err = fmt.Errorf("could not create realtime client. %s", r)
+		}
+	}()
 
 	if err := client.Realtime.Connect(); err != nil {
 		log.Errorf("Could not connect to /cep/realtime. %s", err)
