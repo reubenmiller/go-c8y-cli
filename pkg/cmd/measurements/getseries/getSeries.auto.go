@@ -98,8 +98,8 @@ func (n *GetSeriesCmd) RunE(cmd *cobra.Command, args []string) error {
 		c8yfetcher.WithDeviceByNameFirstMatch(client, args, "device", "source"),
 		flags.WithStringSliceValues("series", "series", ""),
 		flags.WithStringValue("aggregationType", "aggregationType"),
-		flags.WithRelativeTimestamp("dateFrom", "dateFrom", ""),
-		flags.WithRelativeTimestamp("dateTo", "dateTo", ""),
+		flags.WithEncodedRelativeTimestamp("dateFrom", "dateFrom", ""),
+		flags.WithEncodedRelativeTimestamp("dateTo", "dateTo", ""),
 	)
 	if err != nil {
 		return cmderrors.NewUserError(err)

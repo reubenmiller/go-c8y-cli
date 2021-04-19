@@ -107,8 +107,8 @@ func (n *ListCmd) RunE(cmd *cobra.Command, args []string) error {
 		flags.WithStringValue("valueFragmentType", "valueFragmentType"),
 		flags.WithStringValue("valueFragmentSeries", "valueFragmentSeries"),
 		flags.WithStringValue("fragmentType", "fragmentType"),
-		flags.WithRelativeTimestamp("dateFrom", "dateFrom", ""),
-		flags.WithRelativeTimestamp("dateTo", "dateTo", ""),
+		flags.WithEncodedRelativeTimestamp("dateFrom", "dateFrom", ""),
+		flags.WithEncodedRelativeTimestamp("dateTo", "dateTo", ""),
 		flags.WithBoolValue("revert", "revert", ""),
 	)
 	if err != nil {

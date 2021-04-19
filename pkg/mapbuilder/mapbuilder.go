@@ -131,7 +131,7 @@ func registerNativeFuntions(vm *jsonnet.VM) {
 		Params: ast.Identifiers{"offset"},
 		Func: func(parameters []interface{}) (interface{}, error) {
 
-			d, err := timestamp.ParseDurationRelativeToNow(getStringParameter(parameters))
+			d, err := timestamp.ParseTimestamp(getStringParameter(parameters))
 			if err != nil {
 				return nil, err
 			}
@@ -144,7 +144,7 @@ func registerNativeFuntions(vm *jsonnet.VM) {
 		Params: ast.Identifiers{"offset"},
 		Func: func(parameters []interface{}) (interface{}, error) {
 
-			d, err := timestamp.ParseDurationRelativeToNow(getStringParameter(parameters))
+			d, err := timestamp.ParseTimestamp(getStringParameter(parameters))
 			if err != nil {
 				return nil, err
 			}

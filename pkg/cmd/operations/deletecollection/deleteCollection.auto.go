@@ -97,8 +97,8 @@ func (n *DeleteCollectionCmd) RunE(cmd *cobra.Command, args []string) error {
 		flags.WithCustomStringSlice(func() ([]string, error) { return cfg.GetQueryParameters(), nil }, "custom"),
 		c8yfetcher.WithDeviceByNameFirstMatch(client, args, "agent", "agentId"),
 		c8yfetcher.WithDeviceByNameFirstMatch(client, args, "device", "deviceId"),
-		flags.WithRelativeTimestamp("dateFrom", "dateFrom", ""),
-		flags.WithRelativeTimestamp("dateTo", "dateTo", ""),
+		flags.WithEncodedRelativeTimestamp("dateFrom", "dateFrom", ""),
+		flags.WithEncodedRelativeTimestamp("dateTo", "dateTo", ""),
 		flags.WithStringValue("status", "status"),
 	)
 	if err != nil {

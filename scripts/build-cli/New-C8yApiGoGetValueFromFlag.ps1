@@ -114,5 +114,10 @@
         Write-Warning "Using default type [$MatchingType]"
     }
 
-    $Definitions[$MatchingType]
+    # Special type: encoded relative datetime when used as a query parameter
+    if ($MatchingType -eq "datetime" -and $SetterType -eq "query") {
+        "flags.WithEncodedRelativeTimestamp(`"${prop}`", `"${queryParam}`", `"$FixedValue`"),"
+    } else {
+        $Definitions[$MatchingType]
+    }
 }

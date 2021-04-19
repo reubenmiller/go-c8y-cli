@@ -509,7 +509,32 @@ func WithRelativeTimestamp(opts ...string) GetOption {
 		}
 
 		// mark iterator as unbound, so it will not increment the input iterators
-		return dst, iterator.NewRelativeTimeIterator(value), err
+		return dst, iterator.NewRelativeTimeIterator(value, false), err
+	}
+}
+
+// WithEncodedRelativeTimestamp adds a encoded timestamp (string) value from cli arguments
+func WithEncodedRelativeTimestamp(opts ...string) GetOption {
+	return func(cmd *cobra.Command, inputIterators *RequestInputIterators) (string, interface{}, error) {
+		src, dst, _ := UnpackGetterOptions("", opts...)
+		value, err := cmd.Flags().GetString(src)
+
+		if err != nil {
+			return dst, value, err
+		}
+
+		value, err = cmd.Flags().GetString(src)
+		if err != nil {
+			return dst, value, err
+		}
+
+		// ignore empty values
+		if value == "" {
+			return "", value, err
+		}
+
+		// mark iterator as unbound, so it will not increment the input iterators
+		return dst, iterator.NewRelativeTimeIterator(value, true), err
 	}
 }
 

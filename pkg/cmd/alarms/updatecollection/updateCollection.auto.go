@@ -103,8 +103,8 @@ func (n *UpdateCollectionCmd) RunE(cmd *cobra.Command, args []string) error {
 		flags.WithStringValue("status", "status"),
 		flags.WithStringValue("severity", "severity"),
 		flags.WithBoolValue("resolved", "resolved", ""),
-		flags.WithRelativeTimestamp("dateFrom", "dateFrom", ""),
-		flags.WithRelativeTimestamp("dateTo", "dateTo", ""),
+		flags.WithEncodedRelativeTimestamp("dateFrom", "dateFrom", ""),
+		flags.WithEncodedRelativeTimestamp("dateTo", "dateTo", ""),
 	)
 	if err != nil {
 		return cmderrors.NewUserError(err)
