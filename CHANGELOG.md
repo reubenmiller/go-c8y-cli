@@ -107,6 +107,10 @@ None :)
 
 No unreleased features
 
+* Fixed `--filter` bug when the given property does not exist, i.e. `--filter "nonexistent_prop like *`. Non-existent property warning messages will no longer be logged
+
+* Fixed bug where timestamps used in request bodies were incorrectly encoded, resulting in the `+` characters being encoded as `%2B`. 
+
 * Added new cli utility command `c8y util repeat` to make it easier to loop over piped data
 
     **Example**
