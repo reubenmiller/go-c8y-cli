@@ -252,11 +252,24 @@ func removeJSONArrayValues(jsonValue []byte) []byte {
 	return []byte("")
 }
 
+func isJQJSONQNodeError(err error) bool {
+	return strings.Contains(err.Error(), "invalid node name")
+}
+
 func formatErrors(errs []error) error {
-	if len(errs) == 0 {
-		return nil
+	filteredErrs := make([]error, 0)
+
+	for _, err := range errs {
+		// ignore invalid node name errors, as the property does not exist
+		if !isJQJSONQNodeError(err) {
+			filteredErrs = append(filteredErrs, err)
+		}
 	}
-	return fmt.Errorf("filter error. %v", errs)
+	if len(filteredErrs) > 0 {
+		return fmt.Errorf("filter error. %s", filteredErrs[0])
+	}
+
+	return nil
 }
 
 func (f JSONFilters) filterJSON(jsonValue string, property string, showHeaders bool, setHeaderFunc func(string)) ([]byte, error) {

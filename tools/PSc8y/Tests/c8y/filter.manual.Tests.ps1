@@ -265,6 +265,12 @@ Describe -Name "c8y filter common parameter" {
         $LASTEXITCODE | Should -Be 0
         $output | Should -HaveCount 0
     }
+
+    It "filters with a non-existant value do not match" {
+        $output = '{"name": "3_0_0_Software Version"}' | c8y util show --filter "nonexistant like 3_0*" 2>&1
+        $LASTEXITCODE | Should -Be 0
+        $output | Should -BeNullOrEmpty
+    }
     
     AfterAll {
         $ids | Remove-ManagedObject
