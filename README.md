@@ -8,9 +8,9 @@ Unofficial Cumulocity REST Command Line Interface for both PowerShell and *nix (
 
 Compatible with
 
-* Linux (amd64)
+* Linux (amd64, x86, armv5-7)
 * MacOS (amd64)
-* Windows (amd64)
+* Windows (amd64, x86)
 
 ## Installation
 
@@ -31,7 +31,7 @@ Please consult the docs if you are having trouble installing it.
 
 ## Documentation
 
-See the [documenation website](https://reubenmiller.github.io/go-c8y-cli/) for instructions on how to install and use it.
+See the [documentation website](https://reubenmiller.github.io/go-c8y-cli/) for instructions on how to install and use it.
 
 ## Contributing
 
@@ -87,7 +87,7 @@ See the [documenation website](https://reubenmiller.github.io/go-c8y-cli/) for i
     make gh_pages
     ```
 
-4. View the documentation in the [brower](http:/localhost:4000)
+4. View the documentation in the [browser](http:/localhost:4000)
 
 
 ## Tests

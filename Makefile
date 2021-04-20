@@ -45,7 +45,7 @@ docs-powershell: build		## Update the powershell docs
 	pwsh -File ./scripts/build-powershell/build-docs.ps1 -Recreate
 
 docs-c8y:					## create c8y documentation
-	go run ./cmd/gen-docs --website --doc-path "docs/_c8y/commands"
+	go run ./cmd/gen-docs --website --doc-path "docs-next/go-c8y-cli/docs/api/c8y"
 
 manpages:					## create c8y man packages
 	go run ./cmd/gen-docs --man-page --doc-path "./share/man/man1/"
@@ -55,13 +55,11 @@ manpages:					## create c8y man packages
 # Github pages
 # ---------------------------------------------------------------
 gh_pages_install:	## Install github pages dependencies for viewing docs locally
-	cd docs && bundle install
-
-gh_pages_update:	## Update github pages dependencies
-	cd docs && bundle update
+	cd docs && npm install
 
 gh_pages:			## Run github pages locally
-	cd docs && bundle exec jekyll server --baseurl ""
+	cd docs && npm start
+
 
 # ---------------------------------------------------------------
 # Spec and code generation
