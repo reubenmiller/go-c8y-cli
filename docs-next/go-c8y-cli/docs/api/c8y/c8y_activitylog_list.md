@@ -1,9 +1,16 @@
 ---
+id: c8y_activitylog_list
+title: activitylog list
+sidebar_label: activity log list
+# slug: /do
+---
+
+<!-- ---
 layout: manual
 # permalink: /:path/:basename
 category: activitylog
 title: list
----
+--- -->
 ## c8y activitylog list
 
 Get activity log entries
