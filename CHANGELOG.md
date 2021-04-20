@@ -68,6 +68,13 @@ None :)
     echo -e "1\n2\n3" | c8y devicegroups assignDevice --group 6907807778 --workers 2 --delay 250 --progress
     ```
 
+* Following command returns a non-zero exit code
+    ```
+    comm -3 "$all_devices" "$devices_with_operations" | head -10 | c8y operations create --template "$operation_template" --data "bulkOperationId=$bulk_id" --workers $MAX_WORKERS --delay $delay_ms --progress --force=$FORCED
+    ```
+
+* running c8y sessions set --session myfile.json (on a service user) still prompts for the full authentication. Expected: don't use OAUTH2_INTERNAL authentication for specific users, or have an option to disable it
+
 ### Commands
 
 * Delete activity log?
@@ -82,6 +89,15 @@ None :)
 
     ```sh
     c8y operations list | c8y devices get --template "{ operation: input.value }"
+    ```
+
+* c8y settings update: option to write to the global sessions file instead of the profile
+* how to get the global session file? add to settings list
+
+* Add graph to show response times: https://github.com/guptarohit/asciigraph
+
+    ```sh
+
     ```
 
 ### Refactoring
