@@ -384,7 +384,7 @@ func Test_CreateManagedObjectWithoutInput(t *testing.T) {
 
 	// cmdErr := ExecuteCmd(cmd, fmt.Sprintf("devices list --select id,nam* --output csvheader"))
 	// cmdErr := ExecuteCmd(cmd, fmt.Sprintf("applications get --id cockpit --select appId:id,tenantId:owner.**.id"))
-	// stdin := bytes.NewBufferString(`{"self":"https://t1640885.latest.stage.c8y.io/user/roles/ROLE_ALARM_ADMIN"}` + "\n")
+	// stdin := bytes.NewBufferString(`{"self":"https://example.com/user/roles/ROLE_ALARM_ADMIN"}` + "\n")
 	// cmd.SetIn(stdin)
 	cmdtext := `
 	rest POST https://example.com/alarm/alarms --data name=test
