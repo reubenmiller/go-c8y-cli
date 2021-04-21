@@ -8,7 +8,7 @@ Delete managed object
 Delete an existing managed object
 
 .LINK
-c8y inventory delete
+https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/inventory_delete
 
 .EXAMPLE
 PS> Remove-ManagedObject -Id $mo.id

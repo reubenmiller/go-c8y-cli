@@ -8,7 +8,7 @@ Delete user group
 Delete an existing user group
 
 .LINK
-c8y usergroups delete
+https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/usergroups_delete
 
 .EXAMPLE
 PS> Remove-UserGroup -Id $Group.id

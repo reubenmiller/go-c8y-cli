@@ -8,7 +8,7 @@ Get child addition collection
 Get a collection of managedObjects child additions
 
 .LINK
-c8y inventory additions list
+https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/inventory_additions_list
 
 .EXAMPLE
 PS> Get-ChildAdditionCollection -Id $software.id

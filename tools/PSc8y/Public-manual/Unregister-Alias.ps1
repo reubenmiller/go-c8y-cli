@@ -9,8 +9,12 @@ Unregister any aliases which were registered by the Register-Alias cmdlet
 .EXAMPLE
 Unregister-Alias
 
-.LINK
+Unregister c8y aliases in PowerShell
+
+.EXAMPLE
 Register-Alias
+
+Register c8y aliases in PowerShell
 #>
     [cmdletbinding()]
     Param()

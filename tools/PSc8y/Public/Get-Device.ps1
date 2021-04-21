@@ -8,7 +8,7 @@ Get device
 Get an existing device
 
 .LINK
-c8y devices get
+https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/devices_get
 
 .EXAMPLE
 PS> Get-Device -Id $device.id

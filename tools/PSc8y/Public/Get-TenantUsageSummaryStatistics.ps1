@@ -8,7 +8,7 @@ Get tenant usage summary statistics
 Get summary of requests and database usage from the start of this month until now
 
 .LINK
-c8y tenantstatistics listSummaryForTenant
+https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/tenantstatistics_listSummaryForTenant
 
 .EXAMPLE
 PS> Get-TenantUsageSummaryStatistics

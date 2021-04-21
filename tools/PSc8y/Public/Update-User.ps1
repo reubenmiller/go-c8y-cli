@@ -8,7 +8,7 @@ Update user
 Update properties, reset password or enable/disable for a user in a tenant
 
 .LINK
-c8y users update
+https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/users_update
 
 .EXAMPLE
 PS> Update-User -Id $User.id -FirstName "Simon"

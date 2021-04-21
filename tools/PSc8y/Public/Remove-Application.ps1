@@ -8,7 +8,7 @@ Delete application
 The application can only be removed when its availability is PRIVATE or in other case when it has no subscriptions.
 
 .LINK
-c8y applications delete
+https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/applications_delete
 
 .EXAMPLE
 PS> Remove-Application -Id $App.id

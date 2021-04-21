@@ -8,7 +8,7 @@ Get external id collection
 Get a collection of external ids related to an existing managed object
 
 .LINK
-c8y identity list
+https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/identity_list
 
 .EXAMPLE
 PS> Get-ExternalIdCollection -Device $Device.id

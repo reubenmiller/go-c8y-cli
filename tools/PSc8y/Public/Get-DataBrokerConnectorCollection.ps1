@@ -8,7 +8,7 @@ Get data broker collection
 Get a collection of existing data broker connectors
 
 .LINK
-c8y databroker list
+https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/databroker_list
 
 .EXAMPLE
 PS> Get-DataBrokerConnectorCollection

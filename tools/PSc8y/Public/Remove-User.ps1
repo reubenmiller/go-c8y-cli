@@ -10,7 +10,7 @@ Alternatively a user can be disabled via updating the users properties instead o
 
 
 .LINK
-c8y users delete
+https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/users_delete
 
 .EXAMPLE
 PS> Remove-User -Id $User.id

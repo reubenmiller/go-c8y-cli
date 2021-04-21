@@ -8,7 +8,7 @@ Unassign asset from managed object
 Unassign/delete an asset from an existing managed object
 
 .LINK
-c8y inventory assets unassign
+https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/inventory_assets_unassign
 
 .EXAMPLE
 PS> Remove-Asset -Id $Group.id -Child $ChildDevice.id

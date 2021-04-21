@@ -8,7 +8,7 @@ Create event
 Create a new event for a device
 
 .LINK
-c8y events create
+https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/events_create
 
 .EXAMPLE
 PS> New-Event -Device $device.id -Type c8y_TestAlarm -Text "Test event"

@@ -8,7 +8,7 @@ Create external id
 Create a new external id for an existing managed object
 
 .LINK
-c8y identity create
+https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/identity_create
 
 .EXAMPLE
 PS> New-ExternalId -Device $Device.id -Type "$my_SerialNumber" -Name "myserialnumber"

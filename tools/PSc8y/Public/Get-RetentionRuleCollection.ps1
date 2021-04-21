@@ -9,7 +9,7 @@ Get a collection of retention rules configured in the current tenant
 
 
 .LINK
-c8y retentionrules list
+https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/retentionrules_list
 
 .EXAMPLE
 PS> Get-RetentionRuleCollection

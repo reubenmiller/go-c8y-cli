@@ -8,7 +8,7 @@ Get child asset collection
 Get a collection of managedObjects child references
 
 .LINK
-c8y inventory assets list
+https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/inventory_assets_list
 
 .EXAMPLE
 PS> Get-ChildAssetCollection -Id 12345

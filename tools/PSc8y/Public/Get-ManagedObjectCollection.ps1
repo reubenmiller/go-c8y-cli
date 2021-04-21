@@ -8,7 +8,7 @@ Get managed object collection
 Get a collection of managedObjects based on filter parameters
 
 .LINK
-c8y inventory list
+https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/inventory_list
 
 .EXAMPLE
 PS> Get-ManagedObjectCollection

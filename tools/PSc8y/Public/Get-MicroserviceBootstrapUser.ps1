@@ -9,7 +9,7 @@ Get the bootstrap user associated to a microservice. The bootstrap user is requi
 
 
 .LINK
-c8y microservices getBootstrapUser
+https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/microservices_getBootstrapUser
 
 .EXAMPLE
 PS> Get-MicroserviceBootstrapUser -Id $App.name

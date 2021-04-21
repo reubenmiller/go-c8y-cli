@@ -9,7 +9,7 @@ Delete an existing device by id or name. Deleting the object will remove all of 
 
 
 .LINK
-c8y devices delete
+https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/devices_delete
 
 .EXAMPLE
 PS> Remove-Device -Id $device.id

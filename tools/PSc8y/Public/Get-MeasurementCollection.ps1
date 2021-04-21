@@ -8,7 +8,7 @@ Get measurement collection
 Get a collection of measurements based on filter parameters
 
 .LINK
-c8y measurements list
+https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/measurements_list
 
 .EXAMPLE
 PS> Get-MeasurementCollection

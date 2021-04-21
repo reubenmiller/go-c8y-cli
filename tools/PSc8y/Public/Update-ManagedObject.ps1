@@ -8,7 +8,7 @@ Update inventory
 Update an existing managed object
 
 .LINK
-c8y inventory update
+https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/inventory_update
 
 .EXAMPLE
 PS> Update-ManagedObject -Id $mo.id -Data @{ com_my_props = @{ value = 1 } }

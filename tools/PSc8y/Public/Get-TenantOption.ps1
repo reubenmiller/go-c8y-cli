@@ -8,7 +8,7 @@ Get tenant option
 Get an existing tenant option
 
 .LINK
-c8y tenantoptions get
+https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/tenantoptions_get
 
 .EXAMPLE
 PS> Get-TenantOption -Category "c8y_cli_tests" -Key "$option2"

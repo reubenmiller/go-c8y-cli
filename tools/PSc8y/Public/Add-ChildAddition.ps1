@@ -8,7 +8,7 @@ Assign child addition
 Add an existing managed object as a child addition to another existing managed object
 
 .LINK
-c8y inventory additions assign
+https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/inventory_additions_assign
 
 .EXAMPLE
 PS> Add-ChildAddition -Id $software.id -NewChild $version.id

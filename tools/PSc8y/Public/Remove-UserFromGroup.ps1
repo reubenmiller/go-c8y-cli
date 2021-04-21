@@ -8,7 +8,7 @@ Delete user from group
 Delete an existing user from a user group
 
 .LINK
-c8y userreferences deleteUserFromGroup
+https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/userreferences_deleteUserFromGroup
 
 .EXAMPLE
 PS> Remove-UserFromGroup -Group $Group.id -User $User.id

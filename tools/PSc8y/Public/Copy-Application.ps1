@@ -13,7 +13,7 @@ Required role ROLE_APPLICATION_MANAGEMENT_ADMIN
 
 
 .LINK
-c8y applications copy
+https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/applications_copy
 
 .EXAMPLE
 PS> Copy-Application -Id $App.id

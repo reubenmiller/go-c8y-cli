@@ -1,11 +1,7 @@
 ---
 layout: powershell
 category: Tutorials - Powershell
-title: Extend cmdlets
----
-
-# Extending cmdlets using scripts and Functions
-
+title: Extending cmdlets using scripts and Functions
 ---
 
 ## Example 1: Script to export data for specific devices

@@ -8,7 +8,7 @@ Get inventory role collection
 Get a list of inventory roles
 
 .LINK
-c8y users listInventoryRoles
+https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/users_listInventoryRoles
 
 .EXAMPLE
 PS> Get-InventoryRoleCollection

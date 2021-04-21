@@ -9,7 +9,7 @@ Delete an existing retention rule
 
 
 .LINK
-c8y retentionrules delete
+https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/retentionrules_delete
 
 .EXAMPLE
 PS> Remove-RetentionRule -Id $RetentionRule.id

@@ -8,7 +8,7 @@ Get operation
 Get an existing operation
 
 .LINK
-c8y operations get
+https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/operations_get
 
 .EXAMPLE
 PS> Get-Operation -Id {{ NewOperation }}

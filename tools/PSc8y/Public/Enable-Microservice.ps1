@@ -9,7 +9,7 @@ Enabling (subscribing) a microservice will activate the application in the tenan
 
 
 .LINK
-c8y microservices enable
+https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/microservices_enable
 
 .EXAMPLE
 PS> Enable-Microservice -Id $App.id

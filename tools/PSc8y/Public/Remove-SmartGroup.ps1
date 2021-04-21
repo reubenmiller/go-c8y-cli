@@ -9,7 +9,7 @@ Delete an existing smart group by id or name. Deleting a smart group will not af
 
 
 .LINK
-c8y smartgroups delete
+https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/smartgroups_delete
 
 .EXAMPLE
 PS> Remove-SmartGroup -Id $smartgroup.id

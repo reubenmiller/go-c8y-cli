@@ -8,7 +8,7 @@ Create user group
 Create a new user group
 
 .LINK
-c8y usergroups create
+https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/usergroups_create
 
 .EXAMPLE
 PS> New-UserGroup -Name "$GroupName"

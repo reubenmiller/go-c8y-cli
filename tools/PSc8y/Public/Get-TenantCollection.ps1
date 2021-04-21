@@ -8,7 +8,7 @@ Get tenant collection
 Get collection of tenants
 
 .LINK
-c8y tenants list
+https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/tenants_list
 
 .EXAMPLE
 PS> Get-TenantCollection

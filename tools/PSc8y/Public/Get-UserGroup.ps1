@@ -8,7 +8,7 @@ Get user group
 Get an existing user group
 
 .LINK
-c8y usergroups get
+https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/usergroups_get
 
 .EXAMPLE
 PS> Get-UserGroup -Id $Group.id

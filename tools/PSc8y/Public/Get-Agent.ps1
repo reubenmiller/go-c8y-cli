@@ -8,7 +8,7 @@ Get agent
 Get an agent's managed object representation
 
 .LINK
-c8y agents get
+https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/agents_get
 
 .EXAMPLE
 PS> Get-Agent -Id $agent.id

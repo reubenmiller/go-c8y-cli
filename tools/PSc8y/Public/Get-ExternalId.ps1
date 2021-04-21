@@ -9,7 +9,7 @@ Get an external identity object. An external identify will include the reference
 
 
 .LINK
-c8y identity get
+https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/identity_get
 
 .EXAMPLE
 PS> Get-ExternalId -Type "my_SerialNumber" -Name "myserialnumber"

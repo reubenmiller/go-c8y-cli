@@ -9,7 +9,7 @@ Create a smart group (managed object) which groups devices by an inventory query
 
 
 .LINK
-c8y smartgroups create
+https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/smartgroups_create
 
 .EXAMPLE
 PS> New-SmartGroup -Name $smartgroupName

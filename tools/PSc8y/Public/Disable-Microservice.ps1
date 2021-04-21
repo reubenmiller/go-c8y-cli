@@ -9,7 +9,7 @@ Disable (unsubscribe) a microservice from the current tenant
 
 
 .LINK
-c8y microservices disable
+https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/microservices_disable
 
 .EXAMPLE
 PS> Disable-Microservice -Id $App.id

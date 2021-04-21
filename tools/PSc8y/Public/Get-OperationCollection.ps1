@@ -8,7 +8,7 @@ Get operation collection
 Get a collection of operations based on filter parameters
 
 .LINK
-c8y operations list
+https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/operations_list
 
 .EXAMPLE
 PS> Get-OperationCollection -Status PENDING

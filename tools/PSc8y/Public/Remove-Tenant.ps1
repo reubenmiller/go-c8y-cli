@@ -8,7 +8,7 @@ Delete tenant
 Delete an existing tenant
 
 .LINK
-c8y tenants delete
+https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/tenants_delete
 
 .EXAMPLE
 PS> Remove-Tenant -Id mycompany

@@ -8,7 +8,7 @@ Logout current user
 Logout the current user. This will invalidate the token associated with the user when using OAUTH_INTERNAL
 
 .LINK
-c8y currentuser logout
+https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/currentuser_logout
 
 .EXAMPLE
 PS> Invoke-UserLogout

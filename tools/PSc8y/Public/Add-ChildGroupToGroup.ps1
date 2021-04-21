@@ -8,7 +8,7 @@ Assign child group
 Assigns a group to a group. The group will be a childAsset of the group
 
 .LINK
-c8y devicegroups assignGroup
+https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/devicegroups_assignGroup
 
 .EXAMPLE
 PS> Add-ChildGroupToGroup -Group $Group.id -NewChildGroup $ChildGroup1.id

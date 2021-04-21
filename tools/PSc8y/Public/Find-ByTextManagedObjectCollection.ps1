@@ -8,7 +8,7 @@ Find managed object by text collection
 Find a collection of managedObjects which match a given text value
 
 .LINK
-c8y inventory findByText
+https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/inventory_findByText
 
 .EXAMPLE
 PS> Find-ByTextManagedObjectCollection -Text $Device1.name

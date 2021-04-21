@@ -8,7 +8,7 @@ Get role references from user group
 Get collection of user role references from a group
 
 .LINK
-c8y userroles getRoleReferenceCollectionFromGroup
+https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/userroles_getRoleReferenceCollectionFromGroup
 
 .EXAMPLE
 PS> Get-RoleReferenceCollectionFromGroup -Group $Group.id

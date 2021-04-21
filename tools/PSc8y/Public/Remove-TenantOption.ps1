@@ -8,7 +8,7 @@ Delete tenant option
 Delete an existing tenant option
 
 .LINK
-c8y tenantoptions delete
+https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/tenantoptions_delete
 
 .EXAMPLE
 PS> Remove-TenantOption -Category "c8y_cli_tests" -Key "$option3"

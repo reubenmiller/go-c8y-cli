@@ -8,7 +8,7 @@ Update data broker
 Update an existing data broker connector
 
 .LINK
-c8y databroker update
+https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/databroker_update
 
 .EXAMPLE
 PS> Update-DataBroker -Id 12345 -Status SUSPENDED

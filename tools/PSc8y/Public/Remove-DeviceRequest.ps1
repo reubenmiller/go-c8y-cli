@@ -8,7 +8,7 @@ Delete device request
 Delete an existing device registration request
 
 .LINK
-c8y deviceregistration delete
+https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/deviceregistration_delete
 
 .EXAMPLE
 PS> Remove-DeviceRequest -Id "$serial_91019192078"

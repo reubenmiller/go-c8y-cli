@@ -9,7 +9,7 @@ Update read-only setting of an existing tenant option Required role:: ROLE_OPTIO
 
 
 .LINK
-c8y tenantoptions updateEdit
+https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/tenantoptions_updateEdit
 
 .EXAMPLE
 PS> Update-TenantOptionEditable -Category "c8y_cli_tests" -Key "$option8" -Editable "true"

@@ -8,7 +8,7 @@ Register device
 Register a new device (request)
 
 .LINK
-c8y deviceregistration register
+https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/deviceregistration_register
 
 .EXAMPLE
 PS> Register-Device -Id "ASDF098SD1J10912UD92JDLCNCU8"

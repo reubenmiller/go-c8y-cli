@@ -8,7 +8,7 @@ Get device request
 Get a device registration request
 
 .LINK
-c8y deviceregistration get
+https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/deviceregistration_get
 
 .EXAMPLE
 PS> Get-DeviceRequest -Id "010af8dd0c102"

@@ -8,7 +8,7 @@ Get device request collection
 Get a collection of device registration requests
 
 .LINK
-c8y deviceregistration list
+https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/deviceregistration_list
 
 .EXAMPLE
 PS> Get-DeviceRequestCollection

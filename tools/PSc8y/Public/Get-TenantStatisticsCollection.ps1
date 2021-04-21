@@ -8,7 +8,7 @@ Get tenant usage statistics
 Get collection of tenant usage statistics
 
 .LINK
-c8y tenantstatistics list
+https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/tenantstatistics_list
 
 .EXAMPLE
 PS> Get-TenantStatisticsCollection

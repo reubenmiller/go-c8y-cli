@@ -8,7 +8,7 @@ Create operation
 Create a new operation for an agent or device
 
 .LINK
-c8y operations create
+https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/operations_create
 
 .EXAMPLE
 PS> New-Operation -Device $device.id -Description "Restart device" -Data @{ c8y_Restart = @{} }

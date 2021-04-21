@@ -9,7 +9,7 @@ Update an existing retention rule, i.e. change maximum number of days or the dat
 
 
 .LINK
-c8y retentionrules update
+https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/retentionrules_update
 
 .EXAMPLE
 PS> Update-RetentionRule -Id $RetentionRule.id -DataType MEASUREMENT -FragmentType "custom_FragmentType"

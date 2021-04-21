@@ -8,7 +8,7 @@ Assign device to group
 Assigns a device to a group. The device will be a childAsset of the group
 
 .LINK
-c8y devicegroups assignDevice
+https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/devicegroups_assignDevice
 
 .EXAMPLE
 PS> Add-DeviceToGroup -Group $Group.id -NewChildDevice $Device.id

@@ -9,7 +9,7 @@ Getting the current application only works when using bootstrap credentials from
 
 
 .LINK
-c8y currentapplication get
+https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/currentapplication_get
 
 .EXAMPLE
 PS> Get-CurrentApplication

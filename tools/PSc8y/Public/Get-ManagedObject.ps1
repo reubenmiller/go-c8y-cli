@@ -8,7 +8,7 @@ Get managed objects
 Get an existing managed object
 
 .LINK
-c8y inventory get
+https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/inventory_get
 
 .EXAMPLE
 PS> Get-ManagedObject -Id $mo.id

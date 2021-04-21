@@ -8,7 +8,7 @@ Delete measurement collection
 Delete measurements using a filter
 
 .LINK
-c8y measurements deleteCollection
+https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/measurements_deleteCollection
 
 .EXAMPLE
 PS> Remove-MeasurementCollection -Device $Measurement.source.id

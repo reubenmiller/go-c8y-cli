@@ -8,7 +8,7 @@ Get role references from user
 Get collection of user role references from a user
 
 .LINK
-c8y userroles getRoleReferenceCollectionFromUser
+https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/userroles_getRoleReferenceCollectionFromUser
 
 .EXAMPLE
 PS> Get-RoleReferenceCollectionFromUser -User $User.id

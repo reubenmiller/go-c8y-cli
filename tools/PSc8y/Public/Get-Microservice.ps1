@@ -8,7 +8,7 @@ Get microservice
 Get an existing microservice
 
 .LINK
-c8y microservices get
+https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/microservices_get
 
 .EXAMPLE
 PS> Get-Microservice -Id $App.id

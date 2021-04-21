@@ -8,7 +8,7 @@ Create user
 Create a new user so that they can access the tenant
 
 .LINK
-c8y users create
+https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/users_create
 
 .EXAMPLE
 PS> New-user -Username "$Username" -Password "$NewPassword"

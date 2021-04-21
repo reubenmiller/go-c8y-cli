@@ -8,7 +8,7 @@ Get current tenant
 Get the current tenant associated with the current session
 
 .LINK
-c8y currenttenant get
+https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/currenttenant_get
 
 .EXAMPLE
 PS> Get-CurrentTenant

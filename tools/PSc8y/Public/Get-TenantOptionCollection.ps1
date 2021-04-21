@@ -8,7 +8,7 @@ Get tenant option collection
 Get collection of tenant options
 
 .LINK
-c8y tenantoptions list
+https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/tenantoptions_list
 
 .EXAMPLE
 PS> Get-TenantOptionCollection

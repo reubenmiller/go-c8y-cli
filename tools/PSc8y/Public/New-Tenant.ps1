@@ -8,7 +8,7 @@ Create tenant
 Create a new tenant
 
 .LINK
-c8y tenants create
+https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/tenants_create
 
 .EXAMPLE
 PS> New-Tenant -Company "mycompany" -Domain "mycompany" -AdminName "admin" -Password "mys3curep9d8"

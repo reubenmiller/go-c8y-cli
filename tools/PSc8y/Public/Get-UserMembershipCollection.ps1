@@ -8,7 +8,7 @@ get user membership collection
 Get information about all groups that a user is a member of
 
 .LINK
-c8y users listUserMembership
+https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/users_listUserMembership
 
 .EXAMPLE
 PS> Get-UserMembershipCollection -Id $User.id

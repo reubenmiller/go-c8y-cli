@@ -10,7 +10,7 @@ The active version can not be deleted and the server will throw an error if you 
 
 
 .LINK
-c8y applications deleteApplicationBinary
+https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/applications_deleteApplicationBinary
 
 .EXAMPLE
 PS> Remove-ApplicationBinary -Application $app.id -BinaryId $appBinary.id

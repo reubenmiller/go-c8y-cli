@@ -8,7 +8,7 @@ Delete alarm collection
 Delete a collection of alarms by a given filter
 
 .LINK
-c8y alarms deleteCollection
+https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/alarms_deleteCollection
 
 .EXAMPLE
 PS> Remove-AlarmCollection -Device "{{ randomdevice }}" -Severity MAJOR

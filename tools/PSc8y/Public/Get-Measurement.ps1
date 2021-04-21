@@ -8,7 +8,7 @@ Get measurement
 Get an existing measurement
 
 .LINK
-c8y measurements get
+https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/measurements_get
 
 .EXAMPLE
 PS> Get-Measurement -Id $Measurement.id

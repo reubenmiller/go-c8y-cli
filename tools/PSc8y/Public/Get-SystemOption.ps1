@@ -8,7 +8,7 @@ Get system option
 Get a system option by category and key
 
 .LINK
-c8y systemoptions get
+https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/systemoptions_get
 
 .EXAMPLE
 PS> Get-SystemOption -Category "system" -Key "version"

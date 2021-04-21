@@ -8,7 +8,7 @@ Update alarm
 Update an alarm by its id
 
 .LINK
-c8y alarms update
+https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/alarms_update
 
 .EXAMPLE
 PS> Update-Alarm -Id $Alarm.id -Status ACKNOWLEDGED

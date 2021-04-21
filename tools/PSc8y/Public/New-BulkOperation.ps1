@@ -8,7 +8,7 @@ Create bulk operation
 Create a new bulk operation
 
 .LINK
-c8y bulkoperations create
+https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/bulkoperations_create
 
 .EXAMPLE
 PS> New-BulkOperation -Group $Group.id -StartDate "60s" -CreationRampSec 15 -Operation @{ c8y_Restart = @{} }

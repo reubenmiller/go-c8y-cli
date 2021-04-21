@@ -8,7 +8,7 @@ Unassign role from user
 Unassign/delete role from a user
 
 .LINK
-c8y userroles deleteRoleFromUser
+https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/userroles_deleteRoleFromUser
 
 .EXAMPLE
 PS> Remove-RoleFromUser -User $User.id -Role "ROLE_MEASUREMENT_READ"

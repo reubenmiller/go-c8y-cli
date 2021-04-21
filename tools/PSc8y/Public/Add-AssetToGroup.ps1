@@ -8,7 +8,7 @@ Assign child asset
 Assigns a group or device to an existing group and marks them as assets
 
 .LINK
-c8y inventory assets assign
+https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/inventory_assets_assign
 
 .EXAMPLE
 PS> Add-AssetToGroup -Group $Group1.id -NewChildGroup $Group2.id

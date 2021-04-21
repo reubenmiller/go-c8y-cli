@@ -8,7 +8,7 @@ Delete bulk operation
 Delete bulk operation/s. Only bulk operations that are in ACTIVE or IN_PROGRESS can be deleted
 
 .LINK
-c8y bulkoperations delete
+https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/bulkoperations_delete
 
 .EXAMPLE
 PS> Remove-BulkOperation -Id $BulkOp.id

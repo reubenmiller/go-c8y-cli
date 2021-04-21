@@ -8,7 +8,7 @@ Delete child device reference
 Delete child device reference
 
 .LINK
-c8y devices unassignChild
+https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/devices_unassignChild
 
 .EXAMPLE
 PS> Remove-ChildDeviceFromDevice -Device $Device.id -ChildDevice $ChildDevice.id

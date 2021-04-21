@@ -8,7 +8,7 @@ Set required availability
 Set the required availability of a device. Devices that have not sent any message in the response interval are considered unavailable. Response interval can have value between -32768 and 32767 and any values out of range will be shrink to range borders. Such devices are marked as unavailable (see below) and an unavailability alarm is raised. Devices with a response interval of zero minutes are considered to be under maintenance. No alarm is raised while a device is under maintenance. Devices that do not contain 'c8y_RequiredAvailability' are not monitored.
 
 .LINK
-c8y devices setRequiredAvailability
+https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/devices_setRequiredAvailability
 
 .EXAMPLE
 PS> Set-DeviceRequiredAvailability -Device $device.id -Interval 10

@@ -9,7 +9,7 @@ Get supported measurement series/s of a device
 
 
 .LINK
-c8y devices getSupportedSeries
+https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/devices_getSupportedSeries
 
 .EXAMPLE
 PS> Get-SupportedSeries -Device $device.id

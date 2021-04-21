@@ -8,7 +8,7 @@ Add role to user group
 Add a role to an existing user group
 
 .LINK
-c8y userroles addRoleToGroup
+https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/userroles_addRoleToGroup
 
 .EXAMPLE
 PS> Add-RoleToGroup -Group "${NamePattern}*" -Role "*ALARM_*"

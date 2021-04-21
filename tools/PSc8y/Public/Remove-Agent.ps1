@@ -10,7 +10,7 @@ Delete an agent from the platform. This will delete all data associated to the a
 
 
 .LINK
-c8y agents delete
+https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/agents_delete
 
 .EXAMPLE
 PS> Remove-Agent -Id $agent.id

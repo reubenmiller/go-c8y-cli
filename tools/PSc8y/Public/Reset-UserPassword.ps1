@@ -8,7 +8,7 @@ Reset user password
 The password can be reset either by issuing a password reset email (default), or be specifying a new password.
 
 .LINK
-c8y users resetUserPassword
+https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/users_resetUserPassword
 
 .EXAMPLE
 PS> Reset-UserPassword -Id $User.id -Dry

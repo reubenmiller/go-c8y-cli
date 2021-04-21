@@ -9,7 +9,7 @@ Create a new retention rule to managed when data is deleted in the tenant
 
 
 .LINK
-c8y retentionrules create
+https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/retentionrules_create
 
 .EXAMPLE
 PS> New-RetentionRule -DataType ALARM -MaximumAge 180

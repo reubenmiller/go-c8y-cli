@@ -8,7 +8,7 @@ Get user collection
 Get a collection of users based on filter parameters
 
 .LINK
-c8y users list
+https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/users_list
 
 .EXAMPLE
 PS> Get-UserCollection

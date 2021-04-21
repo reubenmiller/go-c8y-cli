@@ -8,7 +8,7 @@ Delete microservice
 Info: The application can only be removed when its availability is PRIVATE or in other case when it has no subscriptions.
 
 .LINK
-c8y microservices delete
+https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/microservices_delete
 
 .EXAMPLE
 PS> Remove-Microservice -Id $App.id

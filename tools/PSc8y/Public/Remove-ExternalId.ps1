@@ -8,7 +8,7 @@ Delete external id
 Delete an existing external id. This does not delete the device managed object
 
 .LINK
-c8y identity delete
+https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/identity_delete
 
 .EXAMPLE
 PS> Remove-ExternalId -Type "my_SerialNumber" -Name "myserialnumber2"

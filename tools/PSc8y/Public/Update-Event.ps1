@@ -8,7 +8,7 @@ Update event
 Update an existing event
 
 .LINK
-c8y events update
+https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/events_update
 
 .EXAMPLE
 PS> Update-Event -Id $Event.id -Text "example text 1"

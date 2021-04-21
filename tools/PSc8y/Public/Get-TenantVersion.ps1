@@ -8,7 +8,7 @@ Get tenant version
 Get tenant platform (backend) version
 
 .LINK
-c8y currenttenant version
+https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/currenttenant_version
 
 .EXAMPLE
 PS> Get-TenantVersion

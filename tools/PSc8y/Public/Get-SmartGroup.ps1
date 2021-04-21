@@ -8,7 +8,7 @@ Get smart group
 Get an smart group
 
 .LINK
-c8y smartgroups get
+https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/smartgroups_get
 
 .EXAMPLE
 PS> Get-SmartGroup -Id $smartgroup.id

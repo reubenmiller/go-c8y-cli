@@ -9,7 +9,7 @@ Get an existing retention by id
 
 
 .LINK
-c8y retentionrules get
+https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/retentionrules_get
 
 .EXAMPLE
 PS> Get-RetentionRule -Id $RetentionRule.id

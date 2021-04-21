@@ -8,7 +8,7 @@ Update bulk operation
 Update bulk operation. Making update on a started bulk operation cancels it and creates/schedules a new one.
 
 .LINK
-c8y bulkoperations update
+https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/bulkoperations_update
 
 .EXAMPLE
 PS> Update-BulkOperation -Id $BulkOp.id -CreationRamp 1.5

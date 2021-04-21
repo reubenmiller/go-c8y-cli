@@ -9,7 +9,7 @@ Create a device (managed object) with the special c8y_IsDevice fragment.
 
 
 .LINK
-c8y devices create
+https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/devices_create
 
 .EXAMPLE
 PS> New-Device -Name $DeviceName

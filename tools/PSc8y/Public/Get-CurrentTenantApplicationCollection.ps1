@@ -8,7 +8,7 @@ List applications in current tenant
 Get the applications of the current tenant
 
 .LINK
-c8y currenttenant listApplications
+https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/currenttenant_listApplications
 
 .EXAMPLE
 PS> Get-CurrentTenantApplicationCollection

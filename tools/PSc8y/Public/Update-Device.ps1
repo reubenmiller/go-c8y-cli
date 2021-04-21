@@ -8,7 +8,7 @@ Update device
 Update properties of an existing device
 
 .LINK
-c8y devices update
+https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/devices_update
 
 .EXAMPLE
 PS> Update-Device -Id $device.id -NewName "MyNewName"

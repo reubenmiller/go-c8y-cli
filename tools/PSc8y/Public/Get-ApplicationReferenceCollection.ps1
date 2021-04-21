@@ -8,7 +8,7 @@ Get application reference collection
 Get a collection of application references on a tenant
 
 .LINK
-c8y tenants listReferences
+https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/tenants_listReferences
 
 .EXAMPLE
 PS> Get-ApplicationReferenceCollection -Tenant mycompany

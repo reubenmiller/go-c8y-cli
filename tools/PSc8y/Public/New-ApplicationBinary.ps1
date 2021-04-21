@@ -13,7 +13,7 @@ For the web application, the zip file must include index.html in the root direct
 
 
 .LINK
-c8y applications createBinary
+https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/applications_createBinary
 
 .EXAMPLE
 PS> New-ApplicationBinary -Id $App.id -File $MicroserviceZip

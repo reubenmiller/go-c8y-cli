@@ -9,7 +9,7 @@ Delete an existing device group, and optionally all of it's children
 
 
 .LINK
-c8y devicegroups delete
+https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/devicegroups_delete
 
 .EXAMPLE
 PS> Remove-DeviceGroup -Id $group.id

@@ -8,7 +8,7 @@ Get role collection
 Get collection of user roles
 
 .LINK
-c8y userroles list
+https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/userroles_list
 
 .EXAMPLE
 PS> Get-RoleCollection -PageSize 100

@@ -8,7 +8,7 @@ Get child device reference
 Get managed object child device reference
 
 .LINK
-c8y devices getChild
+https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/devices_getChild
 
 .EXAMPLE
 PS> Get-ChildDeviceReference -Device $Agent.id -Reference $Ref.id

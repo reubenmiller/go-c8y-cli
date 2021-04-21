@@ -8,7 +8,7 @@ Delete binary
 Delete a binary from the tenant. This delete operation can not be undone.
 
 .LINK
-c8y binaries delete
+https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/binaries_delete
 
 .EXAMPLE
 PS> Remove-Binary -Id $Binary.id

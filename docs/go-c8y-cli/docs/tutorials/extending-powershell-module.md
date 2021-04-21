@@ -4,10 +4,6 @@ category: Tutorials - Powershell
 title: Extend using module
 ---
 
-# Extend using modules
-
----
-
 An example how to extend the `PSc8y` PowerShell module using another PowerShell module is shown in the following demo project:
 
 [Example PSc8y.example Module](https://github.com/reubenmiller/PSc8y.example)

@@ -8,7 +8,7 @@ Get child asset reference
 Get managed object child asset reference
 
 .LINK
-c8y inventory assets get
+https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/inventory_assets_get
 
 .EXAMPLE
 PS> Get-ChildAssetReference -Asset $Agent.id -Reference $Ref.id

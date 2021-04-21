@@ -8,7 +8,7 @@ Get tenant
 Get an existing tenant
 
 .LINK
-c8y tenants get
+https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/tenants_get
 
 .EXAMPLE
 PS> Get-Tenant -Id mycompany

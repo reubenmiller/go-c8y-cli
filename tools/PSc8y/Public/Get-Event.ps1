@@ -8,7 +8,7 @@ Get event
 Get an existing event by id
 
 .LINK
-c8y events get
+https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/events_get
 
 .EXAMPLE
 PS> Get-Event -Id {{ NewEvent }}

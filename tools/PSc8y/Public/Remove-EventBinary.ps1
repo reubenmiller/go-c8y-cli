@@ -9,7 +9,7 @@ Delete a binary which has been attached to an event
 
 
 .LINK
-c8y events deleteBinary
+https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/events_deleteBinary
 
 .EXAMPLE
 PS> Remove-EventBinary -Id $Event.id

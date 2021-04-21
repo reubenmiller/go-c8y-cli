@@ -8,7 +8,7 @@ Get user group by name
 Get an existing user group by name
 
 .LINK
-c8y usergroups getByName
+https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/usergroups_getByName
 
 .EXAMPLE
 PS> Get-UserGroupByName -Name $Group.name

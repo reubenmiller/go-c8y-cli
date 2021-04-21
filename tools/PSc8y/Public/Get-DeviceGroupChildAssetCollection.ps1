@@ -8,7 +8,7 @@ Get child asset collection
 Get a collection of managedObjects child references
 
 .LINK
-c8y devicegroups listAssets
+https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/devicegroups_listAssets
 
 .EXAMPLE
 PS> Get-DeviceGroupChildAssetCollection -Id $Group.id

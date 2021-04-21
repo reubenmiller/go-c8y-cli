@@ -8,7 +8,7 @@ Update agent
 Update properties of an agent
 
 .LINK
-c8y agents update
+https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/agents_update
 
 .EXAMPLE
 PS> Update-Agent -Id $agent.id -NewName "MyNewName"

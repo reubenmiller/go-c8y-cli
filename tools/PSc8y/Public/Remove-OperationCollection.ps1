@@ -9,7 +9,7 @@ Delete a collection of operations using a set of filter criteria. Be careful whe
 
 
 .LINK
-c8y operations deleteCollection
+https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/operations_deleteCollection
 
 .EXAMPLE
 PS> Remove-OperationCollection -Device "{{ randomdevice }}" -Status PENDING

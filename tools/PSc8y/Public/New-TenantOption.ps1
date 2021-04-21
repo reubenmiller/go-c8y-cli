@@ -8,7 +8,7 @@ Create tenant option
 Create tenant option
 
 .LINK
-c8y tenantoptions create
+https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/tenantoptions_create
 
 .EXAMPLE
 PS> New-TenantOption -Category "c8y_cli_tests" -Key "$option1" -Value "1"

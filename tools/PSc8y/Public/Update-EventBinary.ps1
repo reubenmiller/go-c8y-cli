@@ -9,7 +9,7 @@ Update an existing event binary
 
 
 .LINK
-c8y events updateBinary
+https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/events_updateBinary
 
 .EXAMPLE
 PS> Update-EventBinary -Id $Event.id -File $TestFile

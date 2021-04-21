@@ -8,7 +8,7 @@ Create alarm
 Create an alarm on a device or agent.
 
 .LINK
-c8y alarms create
+https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/alarms_create
 
 .EXAMPLE
 PS> New-Alarm -Device $device.id -Type c8y_TestAlarm -Time "-0s" -Text "Test alarm" -Severity MAJOR

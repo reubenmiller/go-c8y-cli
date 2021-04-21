@@ -9,7 +9,7 @@ Update an existing binary
 
 
 .LINK
-c8y binaries update
+https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/binaries_update
 
 .EXAMPLE
 PS> Update-Binary -Id $Binary1.id -File $File2

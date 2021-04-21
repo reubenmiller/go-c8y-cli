@@ -8,7 +8,7 @@ Create managed object
 Create a new inventory managed object
 
 .LINK
-c8y inventory create
+https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/inventory_create
 
 .EXAMPLE
 PS> New-ManagedObject -Name "testMO" -Type $type -Data @{ custom_data = @{ value = 1 } }

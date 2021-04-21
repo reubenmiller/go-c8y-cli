@@ -8,7 +8,7 @@ Get user group collection
 Get collection of (user) groups
 
 .LINK
-c8y usergroups list
+https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/usergroups_list
 
 .EXAMPLE
 PS> Get-UserGroupCollection

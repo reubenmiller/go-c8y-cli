@@ -1,10 +1,8 @@
 ---
 layout: powershell
 category: Tutorials - Powershell
-title: Extend using Proxy-Functions
+title: Extend using using Proxy-Functions
 ---
-
-# Extending cmdlets using Proxy-Functions
 
 A proxy function is a way to wrap an existing PowerShell function or cmdlet with customized input parameters, or settings without having to create the entire script yourself.
 

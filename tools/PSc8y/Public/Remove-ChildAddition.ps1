@@ -8,7 +8,7 @@ Unassign child addition
 Unassign/delete a child addition from an existing managed object
 
 .LINK
-c8y inventory additions unassign
+https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/inventory_additions_unassign
 
 .EXAMPLE
 PS> Remove-ChildAddition -Id $software.id -ChildId $version.id

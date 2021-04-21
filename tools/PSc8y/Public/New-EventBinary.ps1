@@ -8,7 +8,7 @@ Create event binary
 Upload a new binary file to an event
 
 .LINK
-c8y events createBinary
+https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/events_createBinary
 
 .EXAMPLE
 PS> New-EventBinary -Id $Event.id -File $TestFile

@@ -9,7 +9,7 @@ Update details of an existing microservice, i.e. availability, context path etc.
 
 
 .LINK
-c8y microservices update
+https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/microservices_update
 
 .EXAMPLE
 PS> Update-Microservice -Id $App.id -Availability "MARKET"

@@ -8,7 +8,7 @@ Create binary
 Create/upload a new binary to Cumulocity
 
 .LINK
-c8y binaries create
+https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/binaries_create
 
 .EXAMPLE
 PS> New-Binary -File $File

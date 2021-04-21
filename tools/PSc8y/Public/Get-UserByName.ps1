@@ -8,7 +8,7 @@ Get user by name
 Get the user details by referencing their username instead of id
 
 .LINK
-c8y users getUserByName
+https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/users_getUserByName
 
 .EXAMPLE
 PS> Get-UserByName -Name $User.userName

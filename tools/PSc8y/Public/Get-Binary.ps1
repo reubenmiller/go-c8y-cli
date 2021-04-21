@@ -9,7 +9,7 @@ Download a binary stored in Cumulocity and display it on the console. For non te
 
 
 .LINK
-c8y binaries get
+https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/binaries_get
 
 .EXAMPLE
 PS> Get-Binary -Id $Binary.id

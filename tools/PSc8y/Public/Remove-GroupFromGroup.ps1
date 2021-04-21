@@ -8,7 +8,7 @@ Delete child group reference
 Delete child group reference
 
 .LINK
-c8y devicegroups unassignGroup
+https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/devicegroups_unassignGroup
 
 .EXAMPLE
 PS> Remove-GroupFromGroup -Id $Group.id -Child $ChildGroup.id

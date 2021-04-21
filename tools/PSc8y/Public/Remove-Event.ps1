@@ -8,7 +8,7 @@ Delete event
 Delete an existing event
 
 .LINK
-c8y events delete
+https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/events_delete
 
 .EXAMPLE
 PS> Remove-Event -Id {{ NewEvent }}

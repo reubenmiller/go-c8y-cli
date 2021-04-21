@@ -9,7 +9,7 @@ Get a collection of inventory binaries. The results include the meta information
 
 
 .LINK
-c8y binaries list
+https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/binaries_list
 
 .EXAMPLE
 PS> Get-BinaryCollection -PageSize 100

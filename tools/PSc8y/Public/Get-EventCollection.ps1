@@ -8,7 +8,7 @@ Get event collection
 Get a collection of events based on filter parameters
 
 .LINK
-c8y events list
+https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/events_list
 
 .EXAMPLE
 PS> Get-EventCollection -Type "my_CustomType2" -DateFrom "-10d"

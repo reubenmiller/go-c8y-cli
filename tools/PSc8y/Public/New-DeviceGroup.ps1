@@ -9,7 +9,7 @@ Create a new device group to logically group one or more devices
 
 
 .LINK
-c8y devicegroups create
+https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/devicegroups_create
 
 .EXAMPLE
 PS> New-DeviceGroup -Name $GroupName

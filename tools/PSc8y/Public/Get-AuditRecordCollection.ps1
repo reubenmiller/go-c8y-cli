@@ -9,7 +9,7 @@ Audit records contain information about modifications to other Cumulocity entiti
 
 
 .LINK
-c8y auditrecords list
+https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/auditrecords_list
 
 .EXAMPLE
 PS> Get-AuditRecordCollection -PageSize 100

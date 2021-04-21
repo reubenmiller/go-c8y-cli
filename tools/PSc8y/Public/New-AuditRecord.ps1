@@ -8,7 +8,7 @@ Create audit record
 Create a new audit record for a given action
 
 .LINK
-c8y auditrecords create
+https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/auditrecords_create
 
 .EXAMPLE
 PS> New-AuditRecord -Type "ManagedObject" -Time "0s" -Text "Managed Object updated: my_Prop: value" -Source $Device.id -Activity "Managed Object updated" -Severity "information"

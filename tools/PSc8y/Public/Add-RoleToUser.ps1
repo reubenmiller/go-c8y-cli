@@ -8,7 +8,7 @@ Add Role to user
 Add a role to an existing user
 
 .LINK
-c8y userroles addRoleToUser
+https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/userroles_addRoleToUser
 
 .EXAMPLE
 PS> Add-RoleToUser -User $User.id -Role "ROLE_ALARM_READ"

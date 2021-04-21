@@ -8,7 +8,7 @@ Unassign role from group
 Unassign/delete role from a group
 
 .LINK
-c8y userroles deleteRoleFromGroup
+https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/userroles_deleteRoleFromGroup
 
 .EXAMPLE
 PS> Remove-RoleFromGroup -Group $UserGroup.id -Role "ROLE_MEASUREMENT_READ"

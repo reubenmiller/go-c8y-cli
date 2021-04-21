@@ -8,7 +8,7 @@ Get application
 Get an existing application
 
 .LINK
-c8y applications get
+https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/applications_get
 
 .EXAMPLE
 PS> Get-Application -Id $App.id

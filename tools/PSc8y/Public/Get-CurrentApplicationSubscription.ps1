@@ -8,7 +8,7 @@ Get current application subscriptions
 Requires authentication with the application bootstrap user
 
 .LINK
-c8y currentapplication listSubscriptions
+https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/currentapplication_listSubscriptions
 
 .EXAMPLE
 PS> Get-CurrentApplicationSubscription

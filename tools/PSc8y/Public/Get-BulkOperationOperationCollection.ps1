@@ -8,7 +8,7 @@ Get operations collection
 Get a collection of operations related to a bulk operation
 
 .LINK
-c8y bulkoperations listOperations
+https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/bulkoperations_listOperations
 
 .EXAMPLE
 PS> Get-BulkOperationOperationCollection -Id 10 -Status PENDING

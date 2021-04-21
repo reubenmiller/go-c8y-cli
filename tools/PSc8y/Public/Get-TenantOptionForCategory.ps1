@@ -8,7 +8,7 @@ Get tenant options by category
 Get existing tenant options for a category
 
 .LINK
-c8y tenantoptions getForCategory
+https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/tenantoptions_getForCategory
 
 .EXAMPLE
 PS> Get-TenantOptionForCategory -Category "c8y_cli_tests"

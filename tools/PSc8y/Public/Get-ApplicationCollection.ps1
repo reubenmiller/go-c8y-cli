@@ -8,7 +8,7 @@ Get application collection
 Get a collection of applications by a given filter
 
 .LINK
-c8y applications list
+https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/applications_list
 
 .EXAMPLE
 PS> Get-ApplicationCollection -PageSize 100

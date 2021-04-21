@@ -8,7 +8,7 @@ Add user to group
 Add an existing user to a group
 
 .LINK
-c8y userreferences addUserToGroup
+https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/userreferences_addUserToGroup
 
 .EXAMPLE
 PS> Add-UserToGroup -Group $Group.id -User $User.id

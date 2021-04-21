@@ -8,7 +8,7 @@ Get current user
 Get the user representation associated with the current credentials used by the request
 
 .LINK
-c8y currentuser get
+https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/currentuser_get
 
 .EXAMPLE
 PS> Get-CurrentUser

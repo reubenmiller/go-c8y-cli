@@ -8,7 +8,7 @@ Get audit record
 Get an audit record
 
 .LINK
-c8y auditrecords get
+https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/auditrecords_get
 
 .EXAMPLE
 PS> Get-AuditRecord -Id $Record.id

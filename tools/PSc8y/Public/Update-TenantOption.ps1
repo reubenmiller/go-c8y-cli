@@ -8,7 +8,7 @@ Update tenant option
 Update an existing tenant option
 
 .LINK
-c8y tenantoptions update
+https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/tenantoptions_update
 
 .EXAMPLE
 PS> Update-TenantOption -Category "c8y_cli_tests" -Key "$option4" -Value "0"

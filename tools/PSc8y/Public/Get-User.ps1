@@ -8,7 +8,7 @@ Get user
 Get information about a user
 
 .LINK
-c8y users get
+https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/users_get
 
 .EXAMPLE
 PS> Get-User -Id $User.id

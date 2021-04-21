@@ -9,7 +9,7 @@ Returns a list of fragments (valueFragmentTypes) related to the device
 
 
 .LINK
-c8y devices getSupportedMeasurements
+https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/devices_getSupportedMeasurements
 
 .EXAMPLE
 PS> Get-SupportedMeasurements -Device $device.id

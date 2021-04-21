@@ -8,7 +8,7 @@ Assign child device
 Create a child device reference
 
 .LINK
-c8y devices assignChild
+https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/devices_assignChild
 
 .EXAMPLE
 PS> Add-ChildDeviceToDevice -Device $Device.id -NewChild $ChildDevice.id

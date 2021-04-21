@@ -8,7 +8,7 @@ Get all tenant usage summary statistics
 Get collection of tenant usage statistics summary
 
 .LINK
-c8y tenantstatistics listSummaryAllTenants
+https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/tenantstatistics_listSummaryAllTenants
 
 .EXAMPLE
 PS> Get-AllTenantUsageSummaryStatistics

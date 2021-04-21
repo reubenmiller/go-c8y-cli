@@ -8,7 +8,7 @@ Update current application
 Required authentication with bootstrap user
 
 .LINK
-c8y currentapplication update
+https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/currentapplication_update
 
 .EXAMPLE
 PS> Update-CurrentApplication -Data @{ myCustomProp = @{ value1 = 1}}

@@ -8,7 +8,7 @@ Update tenant
 Update an existing tenant
 
 .LINK
-c8y tenants update
+https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/tenants_update
 
 .EXAMPLE
 PS> Update-Tenant -Id mycompany -ContactName "John Smith"

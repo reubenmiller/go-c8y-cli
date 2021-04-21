@@ -9,7 +9,7 @@ Get a device group
 
 
 .LINK
-c8y devicegroups get
+https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/devicegroups_get
 
 .EXAMPLE
 PS> Get-DeviceGroup -Id $group.id

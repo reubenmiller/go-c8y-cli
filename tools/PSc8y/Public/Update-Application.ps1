@@ -8,7 +8,7 @@ Update application details
 Update details of an existing application
 
 .LINK
-c8y applications update
+https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/applications_update
 
 .EXAMPLE
 PS> Update-Application -Id $App.name -Availability "MARKET"

@@ -8,7 +8,7 @@ Create application
 Create a new application using explicit settings
 
 .LINK
-c8y applications create
+https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/applications_create
 
 .EXAMPLE
 PS> New-Application -Name $AppName -Key "${AppName}-key" -ContextPath $AppName -Type HOSTED

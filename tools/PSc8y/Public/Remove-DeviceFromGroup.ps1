@@ -8,7 +8,7 @@ Unassign device from group
 Unassign/delete a device from a group
 
 .LINK
-c8y devicegroups unassignDevice
+https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/devicegroups_unassignDevice
 
 .EXAMPLE
 PS> Remove-DeviceFromGroup -Group $Group.id -ChildDevice $ChildDevice.id

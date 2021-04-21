@@ -8,7 +8,7 @@ Get data broker
 Get an existing data broker connector
 
 .LINK
-c8y databroker get
+https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/databroker_get
 
 .EXAMPLE
 PS> Get-DataBrokerConnector -Id $DataBroker.id

@@ -8,7 +8,7 @@ Delete measurement
 Delete an existing measurement
 
 .LINK
-c8y measurements delete
+https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/measurements_delete
 
 .EXAMPLE
 PS> Remove-Measurement -id $Measurement.id

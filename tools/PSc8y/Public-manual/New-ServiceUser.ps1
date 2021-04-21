@@ -14,8 +14,6 @@ Function New-ServiceUser {
     .LINK
     c8y microservices serviceusers create
 
-    .LINK
-    Get-ServiceUser
     #>
     [cmdletbinding(PositionalBinding = $true,
                    HelpUri = '')]

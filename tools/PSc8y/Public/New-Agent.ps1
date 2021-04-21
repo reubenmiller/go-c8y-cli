@@ -10,7 +10,7 @@ c8y_IsDevice and com_cumulocity_model_Agent fragments.
 
 
 .LINK
-c8y agents create
+https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/agents_create
 
 .EXAMPLE
 PS> New-Agent -Name $AgentName

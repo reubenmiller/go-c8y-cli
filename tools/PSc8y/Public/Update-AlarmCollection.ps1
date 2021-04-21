@@ -8,7 +8,7 @@ Update alarm collection
 Update the status of a collection of alarms by using a filter. Currently only the status of alarms can be changed
 
 .LINK
-c8y alarms updateCollection
+https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/alarms_updateCollection
 
 .EXAMPLE
 PS> Update-AlarmCollection -Device $Device.id -Status ACTIVE -NewStatus ACKNOWLEDGED

@@ -9,7 +9,7 @@ Update properties of an existing device group, for example name or any other cus
 
 
 .LINK
-c8y devicegroups update
+https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/devicegroups_update
 
 .EXAMPLE
 PS> Update-DeviceGroup -Id $group.id -Name "MyNewName"

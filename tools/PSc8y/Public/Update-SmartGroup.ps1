@@ -8,7 +8,7 @@ Update smart group
 Update properties of an existing smart group
 
 .LINK
-c8y smartgroups update
+https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/smartgroups_update
 
 .EXAMPLE
 PS> Update-SmartGroup -Id $smartgroup.id -NewName "MyNewName"

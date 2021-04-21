@@ -8,7 +8,7 @@ Get users in group
 Get all users in a user group
 
 .LINK
-c8y userreferences listGroupMembership
+https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/userreferences_listGroupMembership
 
 .EXAMPLE
 PS> Get-UserGroupMembershipCollection -Id $Group.id

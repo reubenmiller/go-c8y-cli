@@ -8,7 +8,7 @@ Update multiple tenant options
 Update multiple tenant options in provided category
 
 .LINK
-c8y tenantoptions updateBulk
+https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/tenantoptions_updateBulk
 
 .EXAMPLE
 PS> Update-TenantOptionBulk -Category "c8y_cli_tests" -Data @{ $option5 = 0; $option6 = 1 }

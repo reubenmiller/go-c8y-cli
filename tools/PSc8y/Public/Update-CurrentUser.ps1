@@ -9,7 +9,7 @@ Update properties or settings of your user such as first/last name, email or pas
 
 
 .LINK
-c8y currentuser update
+https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/currentuser_update
 
 .EXAMPLE
 PS> Update-CurrentUser -LastName "Smith"

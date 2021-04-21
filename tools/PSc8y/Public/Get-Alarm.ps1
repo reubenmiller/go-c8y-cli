@@ -8,7 +8,7 @@ Get alarm
 Get an alarm by its id
 
 .LINK
-c8y alarms get
+https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/alarms_get
 
 .EXAMPLE
 PS> Get-Alarm -Id {{ NewAlarm }}

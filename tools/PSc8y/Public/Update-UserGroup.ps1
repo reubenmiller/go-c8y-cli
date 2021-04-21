@@ -8,7 +8,7 @@ Update user group
 Update an existing user group
 
 .LINK
-c8y usergroups update
+https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/usergroups_update
 
 .EXAMPLE
 PS> Update-UserGroup -Id $Group -Name $GroupName

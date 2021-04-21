@@ -8,7 +8,7 @@ Delete event collection
 Delete a collection of events by using a filter
 
 .LINK
-c8y events deleteCollection
+https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/events_deleteCollection
 
 .EXAMPLE
 PS> Remove-EventCollection -Type my_CustomType -DateFrom "-10d"

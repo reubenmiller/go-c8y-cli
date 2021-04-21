@@ -8,7 +8,7 @@ Get alarm collection
 Get a collection of alarms based on filter parameters
 
 .LINK
-c8y alarms list
+https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/alarms_list
 
 .EXAMPLE
 PS> Get-AlarmCollection -Severity MAJOR -PageSize 100

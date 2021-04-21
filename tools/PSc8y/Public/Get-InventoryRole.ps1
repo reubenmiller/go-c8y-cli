@@ -8,7 +8,7 @@ Get inventory role
 Get a specific inventory role
 
 .LINK
-c8y users getInventoryRole
+https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/users_getInventoryRole
 
 .EXAMPLE
 PS> Get-InventoryRoleCollection -PageSize 1 | Get-InventoryRole

@@ -9,7 +9,7 @@ Update an operation. This is commonly used to change an operation's status. For 
 
 
 .LINK
-c8y operations update
+https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/operations_update
 
 .EXAMPLE
 PS> Update-Operation -Id {{ NewOperation }} -Status EXECUTING

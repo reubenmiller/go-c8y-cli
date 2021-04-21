@@ -8,7 +8,7 @@ Get system option collection
 Get a collection of system options. This endpoint provides a set of read-only properties pre-defined in platform configuration. The response format is exactly the same as for OptionCollection.
 
 .LINK
-c8y systemoptions list
+https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/systemoptions_list
 
 .EXAMPLE
 PS> Get-SystemOptionCollection
