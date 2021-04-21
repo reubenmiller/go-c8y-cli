@@ -11,7 +11,9 @@
 
         [string] $Noun,
 
-        [string] $OutputDir = "./"
+        [string] $OutputDir = "./",
+
+        [string] $DocBaseURL = "https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y"
     )
 
     $CmdletName = $Specification.alias.powershell
@@ -106,8 +108,10 @@
 
     # Link go command
     $null = $CmdletDocStringBuilder.AppendLine(".LINK")
-    $NativeCommandName = @("c8y", $NounLower, $Verb) -join " "
-    $null = $CmdletDocStringBuilder.AppendLine("$NativeCommandName`n")
+    $pageName = "${NounLower}_${Verb}" -replace " ", "_"
+    $null = $CmdletDocStringBuilder.AppendLine("$DocBaseURL/$pageName`n")
+    # $NativeCommandName = @("c8y", $NounLower, $Verb) -join " "
+    # $null = $CmdletDocStringBuilder.AppendLine("# [$NativeCommandName]($DocBaseURL/$pageName)`n")
 
     #
     # Arguments

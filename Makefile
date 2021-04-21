@@ -42,10 +42,10 @@ install_c8y: build			## Install c8y in dev environment
 # Docs
 # ---------------------------------------------------------------
 docs-powershell: build		## Update the powershell docs
-	pwsh -File ./scripts/build-powershell/build-docs.ps1 -Recreate
+	pwsh -File ./scripts/build-powershell/build-docs.ps1 -Recreate -OutputFolder "docs/go-c8y-cli/docs/cli/psc8y"
 
 docs-c8y:					## create c8y documentation
-	go run ./cmd/gen-docs --website --doc-path "docs-next/go-c8y-cli/docs/api/c8y"
+	go run ./cmd/gen-docs --website --doc-path "docs/go-c8y-cli/docs/cli/c8y"
 
 manpages:					## create c8y man packages
 	go run ./cmd/gen-docs --man-page --doc-path "./share/man/man1/"
@@ -55,10 +55,10 @@ manpages:					## create c8y man packages
 # Github pages
 # ---------------------------------------------------------------
 gh_pages_install:	## Install github pages dependencies for viewing docs locally
-	cd docs && npm install
+	cd docs/go-c8y-cli && npm install
 
 gh_pages:			## Run github pages locally
-	cd docs && npm start
+	cd docs/go-c8y-cli && npm start
 
 
 # ---------------------------------------------------------------
