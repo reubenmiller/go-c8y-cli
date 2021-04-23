@@ -60,6 +60,8 @@ gh_pages_install:	## Install github pages dependencies for viewing docs locally
 gh_pages:			## Run github pages locally
 	cd docs/go-c8y-cli && npm start
 
+build_gh_pages:		## build github pages
+	cd docs/go-c8y-cli && npm run write-translations && npm run build
 
 # ---------------------------------------------------------------
 # Spec and code generation

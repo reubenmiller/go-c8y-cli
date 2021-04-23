@@ -8,9 +8,20 @@ const isDeployPreview =
 
 const isBootstrapPreset = process.env.DOCUSAURUS_PRESET === 'bootstrap';
 
+// Special deployment for staging locales until they get enough translations
+// https://app.netlify.com/sites/docusaurus-i18n-staging
+// https://docusaurus-i18n-staging.netlify.app/
+const isI18nStaging = process.env.I18N_STAGING === 'true';
+
+const allDocHomesPaths = [
+  '/docs/',
+  '/docs/next/',
+];
+
 const baseUrl = process.env.BASE_URL || '/';
 
-module.exports = {
+/** @type {import('@docusaurus/types').DocusaurusConfig} */
+(module.exports = {
   title: 'Cumulocity IoT CLI',
   tagline: 'Unofficial Cumulocity IoT Command Line Interface',
   url: 'https://reubenmiller.github.io/go-c8y-cli',
@@ -20,8 +31,47 @@ module.exports = {
   favicon: 'img/favicon.ico',
   organizationName: 'reubenmiller',
   projectName: 'go-c8y-cli',
+  i18n: {
+    defaultLocale: 'en',
+    locales: isDeployPreview
+      ? // Deploy preview: keep it fast!
+        ['en']
+      : isI18nStaging
+      ? // Staging locales: https://docusaurus-i18n-staging.netlify.app/
+        ['en']
+      : // Production locales
+        ['en'],
+  },
+  themes: ['@docusaurus/theme-live-codeblock'],
   plugins: [
-    '@docusaurus/plugin-google-analytics',
+    // [
+    //   '@docusaurus/plugin-client-redirects',
+    //   {
+    //     fromExtensions: ['html'],
+    //     createRedirects: function (path) {
+    //       // redirect to /docs from /docs/introduction,
+    //       // as introduction has been made the home doc
+    //       if (allDocHomesPaths.includes(path)) {
+    //         return [`${path}/introduction`];
+    //       }
+    //     },
+    //     redirects: [
+    //       {
+    //         from: ['/docs/support', '/docs/next/support'],
+    //         to: '/docs/',
+    //       },
+    //     ],
+    //   },
+    // ],
+    [
+      '@docusaurus/plugin-ideal-image',
+      {
+        quality: 70,
+        max: 1030, // max resized image's size.
+        min: 640, // min resized image's size. if original is lower, use that size.
+        steps: 2, // the max number of images generated between min and max (inclusive)
+      },
+    ],
     [
       '@docusaurus/plugin-pwa',
       {
@@ -31,7 +81,8 @@ module.exports = {
           'standalone',
           'queryString',
         ],
-        swRegister: false,
+        // Warning: Must be set to false otherwise npm run build will fail with 'unknown module false'!
+        // swRegister: false,
         swCustom: path.resolve(__dirname, 'src/sw.js'),
         pwaHead: [
           {
@@ -78,8 +129,7 @@ module.exports = {
     announcementBar: {
       id: 'v2-major-release',
       content:
-        '🎉 go-c8y-cli v2 is now supported natively in linux (pipelines and everything)! Check out the installation instructions',
-        // '➡️ go-c8y-cli v2 is no longer only for PowerShell! <a target="_blank" rel="noopener noreferrer" href="https://v1.docusaurus.io/">v1.docusaurus.io</a>! 🔄',
+        '🎉 go-c8y-cli v2 is now supports linux natively (pipelines and everything)! Check out the installation instructions',
     },
     navbar: {
       title: 'go-c8y-cli',
@@ -111,23 +161,6 @@ module.exports = {
     footer: {
       style: 'dark',
       links: [
-        // {
-        //   title: 'Community',
-        //   items: [
-        //     {
-        //       label: 'Stack Overflow',
-        //       href: 'https://stackoverflow.com/questions/tagged/docusaurus',
-        //     },
-        //     {
-        //       label: 'Discord',
-        //       href: 'https://discordapp.com/invite/docusaurus',
-        //     },
-        //     {
-        //       label: 'Twitter',
-        //       href: 'https://twitter.com/docusaurus',
-        //     },
-        //   ],
-        // },
         {
           title: 'Community',
           items: [
@@ -150,12 +183,6 @@ module.exports = {
       src: 'https://asciinema.org/a/326455.js',
       async: true,
     },
-    // 'https://buttons.github.io/buttons.js',
-    // 'https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.0/clipboard.min.js',
-    // 'http://localhost:3000/js/code-block-buttons.js',
-  ],
-  stylesheets: [
-    // 'http://localhost:3000/css/code-block-buttons.css'
   ],
   presets: [
     [
@@ -163,6 +190,7 @@ module.exports = {
         ? '@docusaurus/preset-bootstrap'
         : '@docusaurus/preset-classic',
       {
+        debug: true,
         docs: {
           sidebarPath: require.resolve('./sidebars.js'),
           editUrl:
@@ -177,4 +205,4 @@ module.exports = {
       },
     ],
   ],
-};
+});

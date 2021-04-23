@@ -15,11 +15,20 @@
   },
   "dependencies": {
     "@docusaurus/core": "2.0.0-alpha.73",
+    "@docusaurus/mdx-loader": "^2.0.0-alpha.73",
+    "@docusaurus/plugin-client-redirects": "^2.0.0-alpha.73",
+    "@docusaurus/plugin-content-blog": "^2.0.0-alpha.73",
+    "@docusaurus/plugin-content-docs": "^2.0.0-alpha.73",
     "@docusaurus/plugin-content-pages": "^2.0.0-alpha.73",
     "@docusaurus/plugin-google-analytics": "^2.0.0-alpha.73",
+    "@docusaurus/plugin-ideal-image": "^2.0.0-alpha.73",
     "@docusaurus/plugin-pwa": "^2.0.0-alpha.73",
+    "@docusaurus/plugin-sitemap": "^2.0.0-alpha.73",
     "@docusaurus/preset-bootstrap": "2.0.0-alpha.73",
     "@docusaurus/preset-classic": "^2.0.0-alpha.73",
+    "@docusaurus/theme-classic": "^2.0.0-alpha.73",
+    "@docusaurus/theme-live-codeblock": "^2.0.0-alpha.73",
+    "@docusaurus/theme-search-algolia": "^2.0.0-alpha.73",
     "@mdx-js/react": "^1.5.8",
     "classnames": "^2.2.6",
     "react": "^17.0.1",
@@ -37,5 +46,8 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "devDependencies": {
+    "raw-loader": "^4.0.2"
   }
 }
