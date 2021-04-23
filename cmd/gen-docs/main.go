@@ -75,18 +75,17 @@ func main() {
 }
 
 func filePrepender(filename string, opts ...string) string {
-	var category, title string
-	if len(opts) >= 2 {
+	var category, fullCommand string
+	if len(opts) >= 3 {
 		category = opts[0]
-		title = opts[1]
+		// title = opts[1]
+		fullCommand = opts[2]
 	}
 	header := fmt.Sprintf(`---
-layout: manual
-# permalink: /:path/:basename
 category: %s
 title: %s
 ---
-`, category, title)
+`, category, fullCommand)
 	return header
 }
 

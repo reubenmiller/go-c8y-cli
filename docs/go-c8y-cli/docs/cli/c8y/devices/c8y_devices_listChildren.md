@@ -1,21 +1,30 @@
 ---
-layout: manual
-# permalink: /:path/:basename
-category: root
-title: databroker
+category: devices
+title: c8y devices listChildren
 ---
-## c8y databroker
-
-Cumulocity databroker
+Get child device collection
 
 ### Synopsis
 
-REST endpoint to interact with Cumulocity databroker
+Get a collection of managedObjects child references
+
+```
+c8y devices listChildren [flags]
+```
+
+### Examples
+
+```
+$ c8y devices listChildren --device 12345
+Get a list of the child devices of an existing device
+        
+```
 
 ### Options
 
 ```
-  -h, --help   help for databroker
+      --device strings   Device. (required) (accepts pipeline)
+  -h, --help             help for listChildren
 ```
 
 ### Options inherited from parent commands
@@ -27,7 +36,7 @@ REST endpoint to interact with Cumulocity databroker
       --confirmText string         Custom confirmation text
       --currentPage int            Current page size which should be returned
       --debug                      Set very verbose log messages
-      --delay int                  delay in milliseconds after each request (default 1000)
+      --delay int                  delay in milliseconds after each request
       --delayBefore int            delay in milliseconds before each request
       --dry                        Dry run. Don't send any data to the server
       --dryFormat string           Dry run output format. i.e. json, dump, markdown or curl (default "markdown")
@@ -37,7 +46,7 @@ REST endpoint to interact with Cumulocity databroker
   -H, --header strings             custom headers. i.e. --header "Accept: value, AnotherHeader: myvalue"
       --includeAll                 Include all results by iterating through each page
   -l, --logMessage string          Add custom message to the activity log
-      --maxJobs int                Maximum number of jobs. 0 = unlimited (use with caution!) (default 100)
+      --maxJobs int                Maximum number of jobs. 0 = unlimited (use with caution!)
       --noAccept                   Ignore Accept header will remove the Accept header from requests, however PUT and POST requests will only see the effect
   -M, --noColor                    Don't use colors when displaying log entries on the console
       --noLog                      Disables the activity log for the current command
@@ -48,8 +57,8 @@ REST endpoint to interact with Cumulocity databroker
   -p, --pageSize int               Maximum results per page (default 5)
       --progress                   Show progress bar. This will also disable any other verbose output
       --proxy string               Proxy setting, i.e. http://10.0.0.1:8080
-      --queryParam strings         custom query parameters. i.e. --queryParam "withCustomOption=true myOtherOption=myvalue"
-  -r, --raw                        Raw values
+      --queryParam strings         custom query parameters. i.e. --queryParam "withCustomOption=true,myOtherOption=myvalue"
+  -r, --raw                        Show raw response. This mode will force output=json and view=off
       --select stringArray         select
       --session string             Session configuration
   -P, --sessionPassword string     Override session password

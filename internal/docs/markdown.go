@@ -43,7 +43,7 @@ func GenMarkdownCustom(cmd *cobra.Command, w io.Writer, linkHandler func(string,
 	buf := new(bytes.Buffer)
 	name := cmd.CommandPath()
 
-	buf.WriteString("## " + name + "\n\n")
+	// buf.WriteString("## " + name + "\n\n")
 	buf.WriteString(cmd.Short + "\n\n")
 	if len(cmd.Long) > 0 {
 		buf.WriteString("### Synopsis\n\n")
@@ -97,7 +97,34 @@ func GenMarkdownTreeCustom(cmd *cobra.Command, dir string, filePrepender, linkHa
 		basename = basenameOverride + ".md"
 	}
 
-	filename := filepath.Join(dir, basename)
+	docPath := []string{dir}
+
+	rootCmdName := cmd.Root().CommandPath()
+	pathWithoutBase := strings.Replace(cmd.CommandPath(), rootCmdName+" ", "", 1)
+
+	commandParts := strings.Split(pathWithoutBase, " ")
+
+	if len(commandParts) == 1 {
+		commandParts = commandParts[0:]
+	} else if len(commandParts) > 1 {
+		if len(cmd.Commands()) > 0 {
+			commandParts = commandParts[:]
+		} else {
+			commandParts = commandParts[0 : len(commandParts)-1]
+		}
+	}
+
+	if len(commandParts) > 0 {
+		docPath = append(docPath, commandParts...)
+	}
+	docPath = append(docPath, basename)
+	filename := strings.Join(docPath, string(filepath.Separator))
+
+	err := os.MkdirAll(filepath.Dir(filename), 0755)
+	if err != nil {
+		panic(err)
+	}
+
 	f, err := os.Create(filename)
 	if err != nil {
 		return err
@@ -111,7 +138,7 @@ func GenMarkdownTreeCustom(cmd *cobra.Command, dir string, filePrepender, linkHa
 		category = cmd.Parent().Use
 	}
 
-	if _, err := io.WriteString(f, filePrepender(filename, category, cmd.Use)); err != nil {
+	if _, err := io.WriteString(f, filePrepender(filename, category, cmd.Use, cmd.CommandPath())); err != nil {
 		return err
 	}
 	if err := GenMarkdownCustom(cmd, f, linkHandler); err != nil {
