@@ -32,7 +32,7 @@ RUN wget https://packages.microsoft.com/config/debian/10/packages-microsoft-prod
     #
     # Extra tooling
     && apt-get -y install make powershell nodejs unzip \
-    && npm install -g yamljs \
+    && npm install -g yamljs svg-term-cli \
     #
     # Build Go tools w/module support
     && mkdir -p /tmp/gotools \
@@ -117,7 +117,7 @@ RUN echo "Installing shells" \
 # AsciiCinema configuration
 RUN chown -R $USER_UID:$USER_GID /home/$USERNAME \
     && mkdir -p /home/$USERNAME/.config/asciinema \
-COPY tools/asciinema/config /home/$USERNAME/.config/asciinema/config
+COPY tools/asciinema/config /home/$USERNAME/.config/asciinema/
 
 # Install powershell dependencies
 USER $USERNAME

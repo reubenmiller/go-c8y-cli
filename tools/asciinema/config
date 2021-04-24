@@ -3,12 +3,12 @@
 ; API server URL, default: https://asciinema.org
 ; If you run your own instance of asciinema-server then set its address here
 ; It can also be overridden by setting ASCIINEMA_API_URL environment variable
-url = https://asciinema.example.com
+url =
 
 [record]
 
 ; Command to record, default: $SHELL
-command = /bin/bash -l
+command = /bin/zsh -l
 
 ; Enable stdin (keyboard) recording, default: no
 stdin = yes
@@ -43,7 +43,7 @@ idle_time_limit = 1
 
 ; Define hotkey for pausing/resuming playback,
 ; default: space
-pause_key = p
+; pause_key = p
 
 ; Define hotkey for stepping through playback, a frame at a time,
 ; default: .
