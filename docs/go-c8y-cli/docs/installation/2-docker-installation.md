@@ -1,19 +1,22 @@
 ---
-layout: default
-category: Installation - Docker
-title: Installation
+title: Docker
 ---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
 
 The c8y tool is also available in the following docker images
 
 * ghcr.io/reubenmiller/c8y-shell
 * ghcr.io/reubenmiller/c8y-pwsh
 
-**Note:** All of these images are linux containers (not Windows!), but can be called from any x64 based operating system
+:::note
+All of these images are linux containers (not Windows!), but can be called from any x64 based operating system
+:::
 
 The docker images can be configured to re-use your existing c8y sessions on your machine, or use one a session configured via environment variables.
 
-The following sections will details both methods. It is assumed that you have docker already installed on your machine, and you have permissions to run `docker` commands (or you have sudo right).
+The following sections will details both methods. It is assumed that you have docker already installed on your machine, and you have permissions to run `docker` commands (or you have sudo rights).
 
 ### Using a c8y docker image
 
@@ -22,33 +25,46 @@ The session persistence is achieved by mounting a docker volume to your host ope
 It is recommended that you run these commands from your home folder, so that the `~/.cumulocity` folder will be used to store the sessions, as this is the default folder that is used should you install the c8y cli tool on your host machine later on. That way you will you be able to continue using 
 
 
-#### zsh/bash/fish
+<Tabs
+  groupId="shell-types"
+  defaultValue="bash"
+  values={[
+    { label: 'Shell', value: 'bash', },
+    { label: 'PowerShell', value: 'powershell', },
+  ]
+}>
+<TabItem value="bash">
 
 ```bash
 cd ~
 docker run -it -v $PWD/.cumulocity:/sessions --rm ghcr.io/reubenmiller/c8y-shell:latest
 ```
 
-**Note**
+</TabItem>
+<TabItem value="powershell">
 
-ZSH will start by default, however you can load another shell manuall using `bash` or `fish`.
-
-#### PowerShell (pwsh)
-
-```bash
+```powershell
 cd ~
 docker run -it -v $PWD/.cumulocity:/sessions --rm ghcr.io/reubenmiller/c8y-pwsh:latest
 ```
 
+</TabItem>
+</Tabs>
+
+
+**Note**
+:::note
+The `c8y-shell` docker image will start ZSH by default, however you can load another shell manually using `bash` or `fish`.
+:::
+
+
 ### Using a c8y docker image with environment variables
 
-You can provide the session information via environment variables, deviced in a dotenv (.env) file.
+You can provide the session information via environment variables in a dotenv (.env) file
 
 1. Create a dotenv file with the following formatting
 
-    *session.env*
-
-    ```bash
+    ```bash title="file: session.env"
     C8Y_HOST=https://example.cumulocity.eu-latest.com
     C8Y_TENANT=t12345
     C8Y_USER=myuser@example.com
@@ -59,9 +75,29 @@ You can provide the session information via environment variables, deviced in a 
 
 2. Start the docker container
 
+    <Tabs
+    groupId="shell-types"
+    defaultValue="bash"
+    values={[
+        { label: 'Shell', value: 'bash', },
+        { label: 'PowerShell', value: 'powershell', },
+    ]
+    }>
+    <TabItem value="bash">
+
     ```bash
     docker run --rm -it --env-file=session.env ghcr.io/reubenmiller/c8y-shell:latest
     ```
+
+    </TabItem>
+    <TabItem value="powershell">
+
+    ```powershell
+    docker run --rm -it --env-file=session.env ghcr.io/reubenmiller/c8y-shell:latest
+    ```
+
+    </TabItem>
+    </Tabs>
 
     The `--env-file` argument will direct docker to map the file contents to environment variables within the container.
 
@@ -72,17 +108,29 @@ If you have already activated a c8y session on a command console, you can re-use
 
 1. Set a c8y session on your console
 
-    **Shell**
+    <Tabs
+    groupId="shell-types"
+    defaultValue="bash"
+    values={[
+        { label: 'Shell', value: 'bash', },
+        { label: 'PowerShell', value: 'powershell', },
+    ]
+    }>
+    <TabItem value="bash">
 
     ```bash
     set-session
     ```
 
-    **PowerShell**
+    </TabItem>
+    <TabItem value="powershell">
 
-    ```bash
-    Set-Session
+    ```powershell
+    set-session
     ```
+
+    </TabItem>
+    </Tabs>
 
     **Note**
 
@@ -97,23 +145,44 @@ If you have already activated a c8y session on a command console, you can re-use
 
 2. Check if the environment variables have been set
 
-    **Shell**
+    <Tabs
+    groupId="shell-types"
+    defaultValue="bash"
+    values={[
+        { label: 'Shell', value: 'bash', },
+        { label: 'PowerShell', value: 'powershell', },
+    ]
+    }>
+    <TabItem value="bash">
 
     ```bash
     echo $C8Y_HOST
     echo $C8Y_USER
     ```
 
-    **PowerShell**
+    </TabItem>
+    <TabItem value="powershell">
 
-    ```bash
-    echo $env:C8Y_HOST
-    echo $env:C8Y_USER
+    ```powershell
+    $env:C8Y_HOST
+    $env:C8Y_USER
     ```
+
+    </TabItem>
+    </Tabs>
+
 
 3. Create a new container re-using the session
 
-    **Shell**
+    <Tabs
+    groupId="shell-types"
+    defaultValue="bash"
+    values={[
+        { label: 'Shell', value: 'bash', },
+        { label: 'PowerShell', value: 'powershell', },
+    ]
+    }>
+    <TabItem value="bash">
 
     ```bash
     docker run -it --rm \
@@ -124,8 +193,9 @@ If you have already activated a c8y session on a command console, you can re-use
         ghcr.io/reubenmiller/c8y-shell:latest
     ```
 
-    **PowerShell**
-    
+    </TabItem>
+    <TabItem value="powershell">
+
     ```powershell
     docker run -it --rm `
         -e C8Y_HOST=$env:C8Y_HOST `
@@ -135,7 +205,11 @@ If you have already activated a c8y session on a command console, you can re-use
         ghcr.io/reubenmiller/c8y-shell:latest
     ```
 
-**Note**
+    </TabItem>
+    </Tabs>
+
+
+:::info
 
 You have to execute a docker pull if you want to re-check if there is a newer image available (i.e. also tagged with latest). 
 
@@ -148,3 +222,4 @@ docker pull ghcr.io/reubenmiller/c8y-shell:latest
 # use a known version
 docker pull ghcr.io/reubenmiller/c8y-shell:2.0.0
 ```
+:::

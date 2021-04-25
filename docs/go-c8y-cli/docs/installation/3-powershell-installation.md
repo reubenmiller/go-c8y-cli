@@ -1,9 +1,6 @@
 ---
-layout: default
-category: Installation - PowerShell
-order: 200
-title: Installation
-slug: installation
+title: PowerShell
+# slug: installation
 ---
 
 Try it out in a Cloud Shell!
@@ -11,7 +8,49 @@ Try it out in a Cloud Shell!
 [![Open in Cloud Shell](https://gstatic.com/cloudssh/images/open-btn.svg "Launch Cloud Shell")](https://ssh.cloud.google.com/cloudshell/editor?shellonly=true)
 
 
-[![Launch Cloud Shell](https://shell.azure.com/images/launchcloudshell.png "Launch Cloud Shell")](https://shell.azure.com/powershell)
+## Prerequisites
+
+Due to ongoing changes to the PowerShell loading module, we first need to make sure some inbuilt PowerShell modules are up-to-date, otherwise you will have problems trying to install the [PSc8y](https://www.powershellgallery.com/packages/PSc8y) module from the PowerShell Gallery (online dotnet/powershell community repository).
+
+The instructions slightly differ depending on which operating system you are using (i.e. Windows, MacOS or Linux). However the good news is that you only have to install the prerequisites once.
+
+
+##### Windows
+
+**PowerShell 7**
+
+Following the instructions to install [PowerShell 7 (Core)](https://github.com/PowerShell/PowerShell/releases).
+
+**PowerShell 5**
+
+Powershell 5 is no longer officially supported. Users should install PowerShell 7 (aka pwsh) as it provides a lot of benefits and is also supported on multiple platforms (linux, MacOS and Windows).
+
+##### MacOS and Linux
+
+1. Install the newest version of PowerShellGet
+
+    ```bash
+    Install-Module –Name PowerShellGet –Force;
+    ```
+
+1. Close the powershell session. Unfortunately you need to reload the console for this step.
+
+    ```bash
+    exit
+    ```
+
+1. Open up a powershell console again
+
+    ```bash
+    pwsh
+    ```
+
+1. Import PowerShellGet
+
+    ```bash
+    Import-Module PowerShellGet
+    ```
+
 
 ## Installing PSc8y
 
@@ -143,3 +182,19 @@ Once the `PSc8y` PowerShell module has been installed, then it can be updated fr
     **Note:**
 
     The version number does not show the pre-release version information.
+
+## Troubleshooting
+
+```powershell
+Import-Module PSc8y
+```
+
+**Note for Windows**
+
+If you get an error regarding the `Execution policy` when installing or importing PSc8y, then you will have to start a new powershell conc
+
+```bash
+pwsh -ExecutionPolicy bypass
+```
+
+More information on PowerShell's execution policy can be found on the [Microsoft website](https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_execution_policies)

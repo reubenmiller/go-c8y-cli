@@ -2,7 +2,11 @@
 title: Events
 ---
 
-## Get counts of events in two hour brackets for the last 12 hours
+## Get counts of events in two hour intervals for the last 12 hours
+
+:::info
+Requires a *nix Operating system, i.e. Linux, MacOS, WSL2 (Windows)
+:::
 
 * Requires [gnu parallel](https://www.gnu.org/software/parallel/) to be installed
 
@@ -18,9 +22,7 @@ seq 2 2 12 | parallel -j1 --env --tags \
         --output csv
 ```
 
-*Output*
-
-```sh
+```sh title="Output"
 https://{tenant}/event/events?dateTo=2021-04-21T19:42:50.367513487%2B02:00&pageSize=1&dateFrom=2021-04-21T17:42:50.367508287%2B02:00&type=device_connected&currentPage=1&withTotalPages=true,0
 https://{tenant}/event/events?dateTo=2021-04-21T17:42:50.629192387%2B02:00&pageSize=1&dateFrom=2021-04-21T15:42:50.629187187%2B02:00&type=device_connected&currentPage=1&withTotalPages=true,0
 https://{tenant}/event/events?dateTo=2021-04-21T15:42:50.888966887%2B02:00&pageSize=1&dateFrom=2021-04-21T13:42:50.888961787%2B02:00&type=device_connected&currentPage=1&withTotalPages=true,0
@@ -48,7 +50,7 @@ The output of the `seq` command is then piped into another useful utility `paral
 
 Technically `xargs` could also be used, however it is much more restrictive when it comes to handling special characters etc.
 
-Below how the command will be executed by `parallel`. Note the additional parameters i.e. `withTotalPages` have been left out so it is easier to read.
+Below how the command will be executed by `parallel`. The additional parameters i.e. `withTotalPages` have been left out so it is easier to read.
 
 ```sh
 c8y events list --type device_connected --dateFrom "-2h" --dateTo "-0h" 
