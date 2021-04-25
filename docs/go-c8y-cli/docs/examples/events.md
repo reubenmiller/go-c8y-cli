@@ -2,25 +2,57 @@
 title: Events
 ---
 
-## Get counts of events in two hour intervals for the last 12 hours
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
 
-:::info
-Requires a *nix Operating system, i.e. Linux, MacOS, WSL2 (Windows)
+## Get counts of events in one hour intervals for the last 12 hours
+
+:::caution
+The shell example requires [gnu parallel](https://www.gnu.org/software/parallel/) to be installed
 :::
 
-* Requires [gnu parallel](https://www.gnu.org/software/parallel/) to be installed
+<Tabs
+  groupId="shell-types"
+  defaultValue="bash"
+  values={[
+    { label: 'Shell', value: 'bash', },
+    { label: 'PowerShell', value: 'powershell', },
+  ]
+}>
+<TabItem value="bash">
 
-```sh
-seq 2 2 12 | parallel -j1 --env --tags \
+```bash
+# Required: gnu parallel
+seq 0 11 | parallel -j1 --env --tags \
     c8y events list \
         --type device_connected \
         --dateFrom "-{}h" \
-        --dateTo \"'-$(( {} + 2 ))h'\" \
+        --dateTo \"'-$(( {} - 1 ))h'\" \
         --withTotalPages \
         --pageSize 1 \
         --select self,statistics.totalPages \
         --output csv
 ```
+
+</TabItem>
+<TabItem value="powershell">
+
+```powershell
+0..11 | Foreach-Object {
+        Get-EventCollection `
+            -Type device_connected `
+            -DateFrom "-${PSItem}h" `
+            -DateTo "-$( $PSItem - 2 )h" `
+            -WithTotalPages `
+            -PageSize 1 `
+            -Select self,statistics.totalPages `
+            -Output csv -Dry -DryFormat markdown
+    }
+```
+
+</TabItem>
+</Tabs>
+
 
 ```sh title="Output"
 https://{tenant}/event/events?dateTo=2021-04-21T19:42:50.367513487%2B02:00&pageSize=1&dateFrom=2021-04-21T17:42:50.367508287%2B02:00&type=device_connected&currentPage=1&withTotalPages=true,0
@@ -31,7 +63,7 @@ https://{tenant}/event/events?dateTo=2021-04-21T11:42:51.267113687%2B02:00&pageS
 https://{tenant}/event/events?dateTo=2021-04-21T09:42:51.453355987%2B02:00&pageSize=1&dateFrom=2021-04-21T07:42:51.453350587%2B02:00&type=device_connected&currentPage=1&withTotalPages=true,0
 ```
 
-### Explanation
+### Explanation (shell)
 
 `seq` can is used to here to create to generate the relative `dateFrom` parameters. `seq 2 2 12` means to create a sequence of number start from 2 and stop at 12, but go in increments of 2. So running just the `seq` command gives the following output.
 
