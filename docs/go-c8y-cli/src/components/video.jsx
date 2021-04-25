@@ -3,11 +3,13 @@ import React from "react"
 // https://asciinema.org/a/326455.js
 
 const videoStyle = {
-    display: 'block',
+    display: 'flex',
     float: 'none',
     overflow: 'hidden',
     padding: 0,
     margin: '20px 0',
+    flex: 1,
+    justifyContent: 'space-around',
 };
 
 const Video = ({ videoSrcURL, videoTitle, width, height, ...props }) => (

@@ -33,7 +33,7 @@
 }
 
 .section {
-  margin: 10rem;
+  margin: 2rem;
 }
 
 .features {
@@ -43,7 +43,15 @@
   width: 100%;
 }
 
+.feature {
+  padding: 2rem 2rem;
+}
+
 .featureImage {
   height: 200px;
   width: 200px;
+}
+
+.pageHeader h1 {
+  text-align: center;
 }

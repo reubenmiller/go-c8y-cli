@@ -5,22 +5,23 @@ import Link from '@docusaurus/Link';
 import useDocusaurusContext from '@docusaurus/useDocusaurusContext';
 import useBaseUrl from '@docusaurus/useBaseUrl';
 import CookieConsent from "react-cookie-consent";
+import Video from '@site/src/components/video';
 
 import styles from './styles.module.css';
 
 const features = [
   {
     title: 'Automate',
-    imageUrl: 'img/undraw_docusaurus_mountain.svg',
+    imageUrl: 'img/automate.svg',
     description: (
       <>
-        Command line tools to automated common tasks
+        Easy to write scripts to automate tasks
       </>
     ),
   },
   {
     title: 'Native pipeline support',
-    imageUrl: 'img/undraw_docusaurus_tree.svg',
+    imageUrl: 'img/pipeline.svg',
     description: (
       <>
         Chain multiple commands together and pass data to other 3rd party tools
@@ -28,8 +29,8 @@ const features = [
     ),
   },
   {
-    title: 'activity log',
-    imageUrl: 'img/undraw_docusaurus_react.svg',
+    title: 'Activity log',
+    imageUrl: 'img/activitylog.svg',
     description: (
       <>
         Track interactions with Cumulocity for improved traceability
@@ -37,23 +38,32 @@ const features = [
     ),
   },
   {
-    title: 'activity log',
-    imageUrl: 'img/undraw_docusaurus_react.svg',
+    title: 'Workers',
+    imageUrl: 'img/workers.svg',
     description: (
       <>
-        Track interactions with Cumulocity for improved traceability
+        Controlled concurrency to send multiple requests at the same time
       </>
     ),
   },
   {
-    title: 'activity log',
-    imageUrl: 'img/undraw_docusaurus_react.svg',
+    title: 'Highly Configurable',
+    imageUrl: 'img/config.svg',
     description: (
       <>
-        Track interactions with Cumulocity for improved traceability
+        Customize to your needs
       </>
     ),
   },
+  // {
+  //   title: 'activity log',
+  //   imageUrl: 'img/undraw_docusaurus_react.svg',
+  //   description: (
+  //     <>
+  //       Track interactions with Cumulocity for improved traceability
+  //     </>
+  //   ),
+  // },
 ];
 
 function Feature({imageUrl, title, description}) {
@@ -71,6 +81,10 @@ function Feature({imageUrl, title, description}) {
   );
 }
 
+const mainStyle = {
+  width: '100%',
+};
+
 export default function Home() {
   const context = useDocusaurusContext();
   const {siteConfig = {}} = context;
@@ -80,7 +94,7 @@ export default function Home() {
       title={`${siteConfig.title}`}
       description="go-c8y-cli documentation">
       <div className={styles.hero}>
-        <header>
+        <header className={styles.pageHeader}>
           <h1>{siteConfig.title}</h1>
           <p>{siteConfig.tagline}</p>
           <div className={styles.buttons}>
@@ -91,12 +105,21 @@ export default function Home() {
           </div>
           <CookieConsent>This website uses cookies to enhance the user experience.</CookieConsent>
         </header>
-        <main>
+        <main style={mainStyle}>
+          <section>
+            <Video
+              videoSrcURL="https://asciinema.org/a/326455/embed?speed=1.2&autoplay=false&size=small&rows=30"
+              videoTitle="PSc8y PowerShell demonstration"
+              width="90%"
+              height="600px"
+              ></Video>
+          </section>
+        
           {features && features.length > 0 && (
             <section className={styles.section}>
               <div className={styles.features}>
                 {features.map((props, idx) => (
-                  <Feature key={idx} {...props} />
+                  <Feature key={idx} className={styles.feature} {...props} />
                 ))}
               </div>
             </section>
