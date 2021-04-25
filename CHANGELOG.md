@@ -94,6 +94,8 @@ None :)
 * c8y settings update: option to write to the global sessions file instead of the profile
 * how to get the global session file? add to settings list
 
+* add min/max/average/count to progress bar (and output)
+
 * Add graph to show response times: https://github.com/guptarohit/asciigraph
 
     ```sh
@@ -103,6 +105,7 @@ None :)
 ### Refactoring
 
 * Move dataview to configuration
+* Return an error if the --output view value is not valid
 
 ## Improvements
 
