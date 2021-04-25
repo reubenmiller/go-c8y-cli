@@ -14,6 +14,7 @@ module.exports = {
           },
         ],
       },
+      'gettingstarted',
       {
         type: 'category',
         label: 'Concepts',
