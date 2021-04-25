@@ -19,7 +19,7 @@ Upload application zip file containing the web application
     [Alias()]
     [OutputType([object])]
     Param(
-        # File or Folder of the web application. It should contains a index.html file in the root folder/ or zip file (required)
+        # File or Folder of the web application. It should contains a index.html file in the root folder/ or zip file
         [Parameter(Mandatory = $false,
             ValueFromPipeline=$true,
             ValueFromPipelineByPropertyName=$true)]
@@ -59,7 +59,7 @@ Upload application zip file containing the web application
         [switch]
         $SkipUpload,
 
-        # Don't subscribe to the application after it has been created and uploaded
+        # Don't activate to the application after it has been created and uploaded
         [Parameter()]
         [switch]
         $SkipActivation

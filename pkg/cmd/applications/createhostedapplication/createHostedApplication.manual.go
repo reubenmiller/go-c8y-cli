@@ -43,9 +43,14 @@ func NewCmdCreateHostedApplication(f *cmdutil.Factory) *CmdCreateHostedApplicati
 		Short: "Create hosted application",
 		Long:  `Create a new hosted web application or update the binary of an existing hosted application`,
 		Example: heredoc.Doc(`
-$ c8y applications createHostedApplication --file ./myapp.zip
+			$ c8y applications createHostedApplication --file ./myapp.zip
+			Create new hosted application from a given zip file. The application will be called "myapp". If the application placeholder does not exist then it will be created
 
-Create new hosted application from a given zip file
+			$ c8y applications createHostedApplication --file simple-helloworld/build --name custom_helloworld
+			Create/update hosted web application from a build folder and specify a custom application name
+
+			$ c8y applications createHostedApplication --file myapp.zip --skipActivation
+			Create/update hosted web application but don't activate it, so the current version (if any) will be untouched
 		`),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
 			return f.CreateModeEnabled()
@@ -55,15 +60,15 @@ Create new hosted application from a given zip file
 
 	cmd.SilenceUsage = true
 
-	cmd.Flags().StringVar(&ccmd.file, "file", "", "Web application zip file to be uploaded")
+	cmd.Flags().StringVar(&ccmd.file, "file", "", "File or Folder of the web application. It should contains a index.html file in the root folder/ or zip file")
 	cmd.Flags().StringVar(&ccmd.name, "name", "", "Name of application")
 	cmd.Flags().StringVar(&ccmd.key, "key", "", "Shared secret of application. Defaults to the name")
 	cmd.Flags().StringVar(&ccmd.availability, "availability", "", "Access level for other tenants. Possible values are : MARKET, PRIVATE (default)")
 	cmd.Flags().StringVar(&ccmd.contextPath, "contextPath", "", "contextPath of the hosted application")
 	cmd.Flags().StringVar(&ccmd.resourcesURL, "resourcesUrl", "/", "URL to application base directory hosted on an external server. Required when application type is HOSTED")
 
-	cmd.Flags().BoolVar(&ccmd.skipActivation, "skipActivation", false, "Skip microservice subscription when creating the new microservice")
-	cmd.Flags().BoolVar(&ccmd.skipUpload, "skipUpload", false, "Skip uploading the binary to the platform")
+	cmd.Flags().BoolVar(&ccmd.skipActivation, "skipActivation", false, "Don't activate to the application after it has been created and uploaded")
+	cmd.Flags().BoolVar(&ccmd.skipUpload, "skipUpload", false, "Don't uploaded the web app binary. Only the application placeholder will be created")
 
 	flags.WithOptions(
 		cmd,
