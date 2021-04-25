@@ -68,7 +68,7 @@ fi
 *Output*
 
 ```bash
-2021-04-13T08:24:58.484+0200    ERROR   serverError: Finding device data from database failed : No managedObject for id '0'! GET https://test-ci-runner01.latest.stage.c8y.io/inventory/managedObjects/0: 404 inventory/Not Found Finding device data from database failed : No managedObject for id '0'!
+2021-04-13T08:24:58.484+0200    ERROR   serverError: Finding device data from database failed : No managedObject for id '0'! GET https://test-tenant.example.com/inventory/managedObjects/0: 404 inventory/Not Found Finding device data from database failed : No managedObject for id '0'!
 An error occurred: code=4
 ```
 
