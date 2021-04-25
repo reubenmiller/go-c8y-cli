@@ -209,12 +209,19 @@ func (w *Worker) runBatched(requestIterator *requestiterator.RequestIterator, co
 			jobID++
 			w.logger.Debugf("checking job iterator: %d", jobID)
 
+			// check if iterator is exhausted
+			request, input, err := requestIterator.GetNext()
+
+			if errors.Is(err, io.EOF) {
+				// no more requests, decreement job id as the job was not started
+				jobID--
+				break
+			}
+
 			if maxJobs != 0 && jobID > maxJobs {
 				w.logger.Infof("maximum jobs reached: limit=%d", maxJobs)
 				break
 			}
-
-			request, input, err := requestIterator.GetNext()
 
 			if err != nil {
 				if errors.Is(err, io.EOF) {
@@ -304,7 +311,7 @@ func (w *Worker) runBatched(requestIterator *requestiterator.RequestIterator, co
 			}
 		}
 
-		w.logger.Debug("finished adding jobs")
+		w.logger.Debugf("finished adding jobs. lastJobID=%d", jobID)
 	}()
 
 	// collect all the results of the work.
