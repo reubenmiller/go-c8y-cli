@@ -34,7 +34,13 @@ Watch all events for a device
         # End date or date and time of event occurrence.
         [Parameter()]
         [int]
-        $Count
+        $Count,
+
+        # Filter by realtime action types, i.e. CREATE,UPDATE,DELETE
+        [Parameter()]
+        [ValidateSet('CREATE','UPDATE','DELETE','')]
+        [string[]]
+        $ActionTypes
     )
 
     Begin {

@@ -34,7 +34,13 @@ Watch all measurements for 90 seconds
         # End date or date and time of notification occurrence.
         [Parameter()]
         [int]
-        $Count
+        $Count,
+
+        # Filter by realtime action types, i.e. CREATE,UPDATE,DELETE
+        [Parameter()]
+        [ValidateSet('CREATE','UPDATE','DELETE','')]
+        [string[]]
+        $ActionTypes
     )
     DynamicParam {
         Get-ClientCommonParameters -Type "Get"

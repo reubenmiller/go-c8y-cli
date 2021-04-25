@@ -46,7 +46,13 @@ if the alarm is active and was first created more than 1 day ago.
         # End date or date and time of alarm occurrence.
         [Parameter()]
         [int]
-        $Count
+        $Count,
+
+        # Filter by realtime action types, i.e. CREATE,UPDATE,DELETE
+        [Parameter()]
+        [ValidateSet('CREATE','UPDATE','DELETE','')]
+        [string[]]
+        $ActionTypes
     )
     DynamicParam {
         Get-ClientCommonParameters -Type "Get"

@@ -34,7 +34,13 @@ Watch all managedObjects for a device
         # End date or date and time of managedObject occurrence.
         [Parameter()]
         [int]
-        $Count
+        $Count,
+
+        # Filter by realtime action types, i.e. CREATE,UPDATE,DELETE
+        [Parameter()]
+        [ValidateSet('CREATE','UPDATE','DELETE','')]
+        [string[]]
+        $ActionTypes
     )
 
     Begin {

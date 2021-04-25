@@ -49,7 +49,7 @@ Subscribe to managedObjects (in realtime) for all devices, and stop after receiv
 	cmd.Flags().String("device", "", "Device ID")
 	cmd.Flags().Int64Var(&ccmd.flagDurationSec, "duration", 30, "Timeout in seconds")
 	cmd.Flags().Int64Var(&ccmd.flagCount, "count", 0, "Max number of realtime notifications to wait for")
-	cmd.Flags().StringSliceVar(&ccmd.actionTypes, "actionTypes", nil, "Realtime action types, i.e. CREATE,UPDATE,DELETE")
+	cmd.Flags().StringSliceVar(&ccmd.actionTypes, "actionTypes", nil, "Filter by realtime action types, i.e. CREATE,UPDATE,DELETE")
 
 	completion.WithOptions(
 		cmd,
