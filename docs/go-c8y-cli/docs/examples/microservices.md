@@ -1,49 +1,114 @@
 ---
-layout: default
-category: Examples - Powershell
 title: Microservices
 ---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
 
 ## Get
 
 ### Get a microservice by name
 
-```powershell
-Get-Microservice -Id helloworld
+<Tabs
+  groupId="shell-types"
+  defaultValue="bash"
+  values={[
+    { label: 'Shell', value: 'bash', },
+    { label: 'PowerShell', value: 'powershell', },
+  ]
+}>
+<TabItem value="bash">
+
+```bash
+c8y microservices get --id helloworld
 ```
 
-**Response**
+</TabItem>
+<TabItem value="powershell">
 
-```plaintext
-id   name       key                         type         version availability requiredRoles
---   ----       ---                         ----         ------- ------------ -------------
-9994 helloworld helloworld-microservice-key MICROSERVICE         MARKET       {}
+```powershell
+Get-Microservice -Id mytestapp
+```
+
+</TabItem>
+</Tabs>
+
+
+```plaintext title="Output"
+| id         | name           | key            | type              | manifest.version | availability | resources  | owner.tenant.id | requiredRoles.0           |
+|------------|----------------|----------------|-------------------|------------------|--------------|------------|-----------------|---------------------------|
+| 14114      | helloworld     | helloworld     | MICROSERVICE      |                  | MARKET       |            | t12345         | ROLE_INVENTORY_ADMIN      |
 ```
 
 ### Get a list of microservices
 
 List microservices being hosted in the platform
 
+<Tabs
+  groupId="shell-types"
+  defaultValue="bash"
+  values={[
+    { label: 'Shell', value: 'bash', },
+    { label: 'PowerShell', value: 'powershell', },
+  ]
+}>
+<TabItem value="bash">
+
+```bash
+c8y microservices list
+```
+
+</TabItem>
+<TabItem value="powershell">
+
 ```powershell
 Get-MicroserviceCollection
 ```
 
-**Response**
+</TabItem>
+</Tabs>
 
-```plaintext
-id   name               key                  type         version         availability requiredRoles
---   ----               ---                  ----         -------         ------------ -------------
-1001 sms-gateway        sms-gateway-key      MICROSERVICE 1005.6.1        MARKET       {ROLE_INVENTORY_READ, ROLE_INVENTORY_ADMIN, ROLE_IDENTITY_READ, ROLE_IDENTITY_ADMIN…}
-11   smartrule          smartrule-key        MICROSERVICE 1005.6.1        MARKET       {ROLE_INVENTORY_READ, ROLE_INVENTORY_CREATE, ROLE_INVENTORY_ADMIN, ROLE_CEP_MANAGEMENT_READ…}
-12   device-simulator   device-simulator-key MICROSERVICE 1005.6.1        MARKET       {ROLE_INVENTORY_READ, ROLE_INVENTORY_ADMIN, ROLE_INVENTORY_CREATE, ROLE_MEASUREMENT_READ…}
-19   jwireless          jwireless-key        MICROSERVICE 1005.6.1        MARKET       {}
-3147 apama-ctrl-starter apama-ctrl-starter   MICROSERVICE 10.5.0.3.363871 MARKET       {ROLE_APPLICATION_MANAGEMENT_READ, ROLE_APPLICATION_MANAGEMENT_ADMIN, ROLE_INVENTORY_READ, ROLE_INVENTORY_ADMIN…}
+```plaintext title="Output"
+| id         | name       | key          | type              | manifest.version | availability | resources  | owner.tenant.id |
+|------------|------------|--------------|-------------------|------------------|--------------|------------|-----------------|
+| 12         | cep        | cep-key      | MICROSERVICE      | 1007.1.0        | MARKET        |            | management      |
+| 14114      | helloworld | helloworld   | MICROSERVICE      |                 | MARKET        |            | t12345        |
+| 18         | device-si… | device-simu… | MICROSERVICE      | 1007.1.0        | MARKET        |            | management      |
+| 25         | report-ag… | report-agen… | MICROSERVICE      | 1007.1.0        | MARKET        |            | management      |
+| 29         | smartrule  | smartrule-k… | MICROSERVICE      | 1007.1.0        | MARKET        |            | management      |
 ```
 
-### Get a list of microservices with names starting with citest*
+### Get a list of microservices with names starting with smart*
+
+<Tabs
+  groupId="shell-types"
+  defaultValue="bash"
+  values={[
+    { label: 'Shell', value: 'bash', },
+    { label: 'PowerShell', value: 'powershell', },
+  ]
+}>
+<TabItem value="bash">
+
+```bash
+c8y microservices list --pageSize 100 --filter "name like smart*"
+```
+
+</TabItem>
+<TabItem value="powershell">
 
 ```powershell
-Get-MicroserviceCollection -PageSize 100 |? name -like "citest*"
+Get-MicroserviceCollection -PageSize 100 -Filter "name like smart*"
+```
+
+</TabItem>
+</Tabs>
+
+
+```text title="Output"
+| id         | name           | key                | type              | manifest.version | availability | resources  | owner.tenant.id |
+|------------|----------------|--------------------|-------------------|------------------|--------------|------------|-----------------|
+| 29         | smartrule      | smartrule-key      | MICROSERVICE      | 1007.1.0        | MARKET       |            | management      |
 ```
 
 ## Create
@@ -52,11 +117,53 @@ Get-MicroserviceCollection -PageSize 100 |? name -like "citest*"
 
 The following command will create a new microservice, upload it's binary, and also subscribe to it on the current tenant:
 
+<Tabs
+  groupId="shell-types"
+  defaultValue="bash"
+  values={[
+    { label: 'Shell', value: 'bash', },
+    { label: 'PowerShell', value: 'powershell', },
+  ]
+}>
+<TabItem value="bash">
+
+```bash
+c8y microservices create --file helloworld.zip
+```
+
+</TabItem>
+<TabItem value="powershell">
+
 ```powershell
 New-Microservice -File helloworld.zip
 ```
 
-If you don't want to subscribe to the microservice immediately then use the `-SkipSubscription` option:
+</TabItem>
+</Tabs>
+
+
+If you don't want to subscribe to the microservice immediately then use the `skipSubscription` parameter:
+
+<Tabs
+  groupId="shell-types"
+  defaultValue="bash"
+  values={[
+    { label: 'Shell', value: 'bash', },
+    { label: 'PowerShell', value: 'powershell', },
+  ]
+}>
+<TabItem value="bash">
+
+```bash
+# Create microservice but don't subscribe to it
+c8y microservices create --file helloworld.zip --skipSubscription
+
+# Enable/Subscribe to the microservice when you're ready
+c8y microservices enable --id helloworld
+```
+
+</TabItem>
+<TabItem value="powershell">
 
 ```powershell
 # Create microservice but don't subscribe to it
@@ -66,53 +173,107 @@ New-Microservice -File helloworld.zip -SkipSubscription
 Enable-Microservice -Id helloworld
 ```
 
+</TabItem>
+</Tabs>
+
 ## Update
 
 ### Update the availability of the microservice to MARKET
+
+<Tabs
+  groupId="shell-types"
+  defaultValue="bash"
+  values={[
+    { label: 'Shell', value: 'bash', },
+    { label: 'PowerShell', value: 'powershell', },
+  ]
+}>
+<TabItem value="bash">
+
+```bash
+c8y microservices update --id helloworld --availability MARKET
+```
+
+</TabItem>
+<TabItem value="powershell">
 
 ```powershell
 Update-Microservice -Id helloworld -Availability MARKET
 ```
 
-**Response**
+</TabItem>
+</Tabs>
 
-```plaintext
-id   name       key                         type         version availability requiredRoles
---   ----       ---                         ----         ------- ------------ -------------
-9994 helloworld helloworld-microservice-key MICROSERVICE         MARKET       {}
+
+```plaintext title="Output"
+| id         | name       | key          | type              | manifest.version | availability | resources  | owner.tenant.id |
+|------------|------------|--------------|-------------------|------------------|--------------|------------|-----------------|
+| 14114      | mytestapp  | mytestapp    | MICROSERVICE      |                  | MARKET       |            | t12345          |
 ```
 
 ## Adding custom data to the application
 
-```powershell
-Update-Microservice -Id helloworld -Data @{ c8y_application_details = @{ branch = "master" } }
+<Tabs
+  groupId="shell-types"
+  defaultValue="bash"
+  values={[
+    { label: 'Shell', value: 'bash', },
+    { label: 'PowerShell', value: 'powershell', },
+  ]
+}>
+<TabItem value="bash">
+
+```bash
+c8y microservices update --id helloworld --template "{c8y_application_details: { branch: 'master' }}"
 ```
 
-**Response**
-
-```plaintext
-Confirm
-Are you sure you want to perform this action?
-Performing the operation "Update microservice [helloworld (9994)]" on target "goc8yci01".
-[Y] Yes  [A] Yes to All  [N] No  [L] No to All  [S] Suspend  [?] Help (default is "Y"):
-
-id   name        key                           type         version  availability requiredRoles
---   ----        ---                           ----         -------  ------------ -------------
-9994 helloworld  helloworld-microservice-key   MICROSERVICE          MARKET       {}
-```
-
-The full response can be printed to the console by piping the results to the `tojson` cmdlet.
+</TabItem>
+<TabItem value="powershell">
 
 ```powershell
-Get-Microservice -Id helloworld | tojson
+Update-Microservice -Id helloworld -Template "{c8y_application_details: { branch: 'master' }}"
 ```
 
-**Response**
+</TabItem>
+</Tabs>
 
-```json
+```plaintext title="Output"
+| id         | name       | key          | type              | manifest.version | availability | resources  | owner.tenant.id |
+|------------|------------|--------------|-------------------|------------------|--------------|------------|-----------------|
+| 14114      | mytestapp  | mytestapp    | MICROSERVICE      |                  | MARKET       |            | t12345          |
+```
+
+The full response can be printed to the console by setting the `output` to `json` or using the `raw` option
+
+<Tabs
+  groupId="shell-types"
+  defaultValue="bash"
+  values={[
+    { label: 'Shell', value: 'bash', },
+    { label: 'PowerShell', value: 'powershell', },
+  ]
+}>
+<TabItem value="bash">
+
+```bash
+c8y microservices get --id helloworld --raw
+```
+
+</TabItem>
+<TabItem value="powershell">
+
+```powershell
+Get-Microservice -Id helloworld -Raw
+```
+
+</TabItem>
+</Tabs>
+
+
+```json title="Output"
 {
   "owner": {
-    "self": "https://goc8yci01.eu-latest.cumulocity.com/tenant/tenants/goc8yci01",
+    "self": "https://mytenant.example.com/tenant/tenants/goc8yci01",
     "tenant": {
       "id": "goc8yci01"
     }
@@ -127,7 +288,7 @@ Get-Microservice -Id helloworld | tojson
   "availability": "MARKET",
   "type": "MICROSERVICE",
   "name": "helloworld",
-  "self": "https://goc8yci01.eu-latest.cumulocity.com/application/applications/9994",
+  "self": "https://mytenant.example.com/application/applications/9994",
   "id": "9994",
   "key": "helloworld-microservice-key",
   "c8y_application_details": {
@@ -140,82 +301,228 @@ Get-Microservice -Id helloworld | tojson
 
 ### Remove microservice
 
-```powershell
-Get-Microservice -Id helloworld
+<Tabs
+  groupId="shell-types"
+  defaultValue="bash"
+  values={[
+    { label: 'Shell', value: 'bash', },
+    { label: 'PowerShell', value: 'powershell', },
+  ]
+}>
+<TabItem value="bash">
+
+```bash
+c8y microservices delete --id helloworld
 ```
 
-**Response**
+</TabItem>
+<TabItem value="powershell">
 
-```plaintext
-id   name       key                         type         version availability requiredRoles
---   ----       ---                         ----         ------- ------------ -------------
-9994 helloworld helloworld-microservice-key MICROSERVICE         MARKET       {}
+```powershell
+Remove-Microservice -Id helloworld
+```
+
+</TabItem>
+</Tabs>
+
+```plaintext title="No Output"
+✓ Deleted /application/applications/9994 => 204 No Content
 ```
 
 ### Remove microservices with starting with "citest"
 
+<Tabs
+  groupId="shell-types"
+  defaultValue="bash"
+  values={[
+    { label: 'Shell', value: 'bash', },
+    { label: 'PowerShell', value: 'powershell', },
+  ]
+}>
+<TabItem value="bash">
+
+```bash
+c8y microservices list --pageSize 100 --filter "name like citest*" |
+  c8y microservices delete
+```
+
+</TabItem>
+<TabItem value="powershell">
+
 ```powershell
-Get-MicroserviceCollection -PageSize 100 |? name -like "citest*" |
+Get-MicroserviceCollection -PageSize 100 -Filter "name like citest*" | batch |
     Remove-Microservice
 ```
 
-**Response**
+</TabItem>
+</Tabs>
 
-```plaintext
-Confirm
-Are you sure you want to perform this action?
-Performing the operation "Remove microservice [citestr16cj (8977)]" on target "goc8yci01".
-[Y] Yes  [A] Yes to All  [N] No  [L] No to All  [S] Suspend  [?] Help (default is "Y"):
-```
 
-In PowerShell `?` is an alias for the `Where-Object` cmdlet, so the above example is equivalent to:
-
-```powershell
-Get-MicroserviceCollection -PageSize 100 |
-    Where-Object { $_.name -like "citest*" } |
-    Remove-Microservice
+```plaintext title="Output"
+✓ Deleted /application/applications/97388 => 204 No Content
 ```
 
 ## Enable/Disable a microservice
 
 Enabling a microservice can be done using:
 
+<Tabs
+  groupId="shell-types"
+  defaultValue="bash"
+  values={[
+    { label: 'Shell', value: 'bash', },
+    { label: 'PowerShell', value: 'powershell', },
+  ]
+}>
+<TabItem value="bash">
+
+```bash
+c8y microservices enable --id helloworld
+```
+
+</TabItem>
+<TabItem value="powershell">
+
 ```powershell
 Enable-Microservice -Id helloworld
 ```
 
+</TabItem>
+</Tabs>
+
+
+```text title="Output"
+| application.id | application.name | application.type  | self                                                                             |
+|----------------|------------------|-------------------|----------------------------------------------------------------------------------|
+| 97388          | helloworld       | MICROSERVICE      | https://t12345.latest.stage.c8y.io/http://t12345.latest.stage.c8y.io/tenant… |
+```
+
 Once the microservice has started up (this can take a few minutes), then any endpoints made available by it, then it can be reached using the following:
 
+<Tabs
+  groupId="shell-types"
+  defaultValue="bash"
+  values={[
+    { label: 'Shell', value: 'bash', },
+    { label: 'PowerShell', value: 'powershell', },
+  ]
+}>
+<TabItem value="bash">
+
+```bash
+c8y api GET /service/helloworld/health --raw
+```
+
+</TabItem>
+<TabItem value="powershell">
+
 ```powershell
-Invoke-CumulocityRequest -Uri "/service/helloworld/health"
+Invoke-ClientRequest -Method "Get" -Uri "/service/helloworld/health" -Raw
+```
+
+</TabItem>
+</Tabs>
+
+
+```json title="Output"
+{
+  "status": "UP"
+}
 ```
 
 To disable/unsubscribe a microservice from the current tenant use the following:
 
+<Tabs
+  groupId="shell-types"
+  defaultValue="bash"
+  values={[
+    { label: 'Shell', value: 'bash', },
+    { label: 'PowerShell', value: 'powershell', },
+  ]
+}>
+<TabItem value="bash">
+
+```bash
+c8y microservices disable --id helloworld
+```
+
+</TabItem>
+<TabItem value="powershell">
+
 ```powershell
 Disable-Microservice -Id helloworld
+```
+
+</TabItem>
+</Tabs>
+
+
+```text title="Output"
+✓ Deleted /tenant/tenants/t12345/applications/97388 => 204 No Content
 ```
 
 ## Advanced use cases
 
 ### Create a new microservice that will be hosted outside of Cumulocity (in private docker/kubernetes host)
 
+<Tabs
+  groupId="shell-types"
+  defaultValue="bash"
+  values={[
+    { label: 'Shell', value: 'bash', },
+    { label: 'PowerShell', value: 'powershell', },
+  ]
+}>
+<TabItem value="bash">
+
+```bash
+c8y microservices create --file helloworld.zip --skipUpload
+```
+
+</TabItem>
+<TabItem value="powershell">
+
 ```powershell
 New-Microservice -File helloworld.zip -SkipUpload
 ```
 
-The `-SkipUpload` will not upload the zip, however it will still parse the cumulocity.json manifest file which is used to update the microservice's required roles.
+</TabItem>
+</Tabs>
+
+
+The `skipUpload` parameter tells the command to skip the binary upload, however it will still parse the cumulocity.json manifest file which is used to update the microservice's required roles.
 
 Then the microservice's bootstrap credentials can be retrieved using:
 
-```powershell
-Get-MicroserviceBootstrapUser -Id helloworld
+<Tabs
+  groupId="shell-types"
+  defaultValue="bash"
+  values={[
+    { label: 'Shell', value: 'bash', },
+    { label: 'PowerShell', value: 'powershell', },
+  ]
+}>
+<TabItem value="bash">
+
+```bash
+c8y microservices getBootstrapUser --id helloworld --raw
 ```
 
-**Response**
+</TabItem>
+<TabItem value="powershell">
 
-```plaintext
-tenant         name                             password
-------         ----                             --------
-myTenant       servicebootstrap_helloworld      35aP2moL39zfe8PDo0OPH2D63kYhlqOG
+```powershell
+Get-MicroserviceBootstrapUser -Id helloworld -Raw
+```
+
+</TabItem>
+</Tabs>
+
+
+```json title="Output"
+{
+  "name": "servicebootstrap_helloworld",
+  "password": "1dkd8ajd8DJ8djd9sk)lpoyHGGOpai8s",
+  "tenant": "t12345"
+}
 ```
