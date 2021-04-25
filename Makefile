@@ -62,7 +62,7 @@ gh_pages:			## Run github pages locally
 
 build_gh_pages:		## build github pages
 	cd docs/go-c8y-cli \
-		&& npm run install \
+		&& npm install \
 		&& npm run write-translations \
 		&& npm run build
 
