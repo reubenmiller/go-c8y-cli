@@ -48,7 +48,7 @@ func HasValueFromPipeline(cmd *cobra.Command, name string) bool {
 // WithProcessingMode adds support for processing mode
 func WithProcessingMode() Option {
 	return func(cmd *cobra.Command) *cobra.Command {
-		cmd.Flags().String(FlagProcessingModeName, "", "Processing mode")
+		cmd.Flags().String(FlagProcessingModeName, "", "Cumulocity processing mode")
 		completion.WithOptions(
 			cmd,
 			completion.WithValidateSet(FlagProcessingModeName, "PERSISTENT", "QUIESCENT", "TRANSIENT", "CEP"),
@@ -77,7 +77,7 @@ func WithProcessingModeValue() GetOption {
 // WithData adds support for data input
 func WithData() Option {
 	return func(cmd *cobra.Command) *cobra.Command {
-		cmd.Flags().StringP(FlagDataName, "d", "", "json")
+		cmd.Flags().StringP(FlagDataName, "d", "", "static data to be applied to body. accepts json or shorthande json, i.e. --data 'value1=1,my.nested.value=100'")
 		return cmd
 	}
 }

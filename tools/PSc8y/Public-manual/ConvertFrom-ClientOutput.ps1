@@ -37,6 +37,7 @@ Function ConvertFrom-ClientOutput {
             -or $BoundParameters["ExcelFormat"] `
             -or $BoundParameters["Pretty"] `
             -or $BoundParameters["Compress"] `
+            -or $BoundParameters["Compact"] `
             -or $BoundParameters["Dry"] `
             -or $WhatIfPreference
 

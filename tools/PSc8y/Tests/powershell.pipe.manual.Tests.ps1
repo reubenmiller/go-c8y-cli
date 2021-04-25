@@ -111,7 +111,7 @@ Describe -Name "powershell pipes" {
 
     Context "Colors" {
         It "can pipe colored output into other functions" {
-            $output = Get-ManagedObjectCollection -Color -PageSize 1 | Get-ManagedObject
+            $output = Get-ManagedObjectCollection -NoColor:$false -PageSize 1 | Get-ManagedObject
             $LASTEXITCODE | Should -BeExactly 0
             $output | Should -Not -BeNullOrEmpty
         }

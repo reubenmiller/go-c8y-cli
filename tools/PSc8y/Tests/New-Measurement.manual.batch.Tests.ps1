@@ -31,7 +31,7 @@ Describe -Name "New-Measurement" {
         $options = @{
             Workers = 1
             Data = $rawjson
-            Template = "{time:_.Now()}"
+            Template = "{time:_.Now('')}"
         }
         # using Dry
         $options.Dry = $true

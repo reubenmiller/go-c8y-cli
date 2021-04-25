@@ -98,7 +98,7 @@ Describe -Name "Invoke-ClientRequest" {
             -Uri "/inventory/managedObjects" `
             -Method "post" `
             -Data "name=test" `
-            -Pretty -NoColor
+            -Compact:$false -NoColor
 
         $LASTEXITCODE | Should -Be 0
         $Response | Should -Not -BeNullOrEmpty

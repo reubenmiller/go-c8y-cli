@@ -28,7 +28,7 @@ Function New-ClientArgument {
         $BoundParameters = @{} + $Parameters
 
         # strip automatic variables
-        $BoundParameters.Keys -match "(Verbose|WhatIf|WhatIfFormat|Variable|Action|Buffer|Debug|AsHashtable|AsPSObject|Color|Pretty)$" | ForEach-Object {
+        $BoundParameters.Keys -match "(Verbose|WhatIf|WhatIfFormat|Variable|Action|Buffer|Debug|AsHashtable|AsPSObject)$" | ForEach-Object {
             $BoundParameters.Remove($_)
         }
 
@@ -120,16 +120,6 @@ Function New-ClientArgument {
 
         if ($Parameters["WithTotalPages"]) {
             $null = $c8yargs.Add("--raw")
-        }
-
-        if ($Parameters["Color"]) {
-            $null = $c8yargs.Add("--noColor=false")
-        } elseif ($Parameters["NoColor"]) {
-            $null = $c8yargs.Add("--noColor")
-        }
-
-        if ($Parameters["Pretty"]) {
-            $null = $c8yargs.Add("--compact=false")
         }
 
         ,$c8yargs

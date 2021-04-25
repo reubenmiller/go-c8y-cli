@@ -148,11 +148,11 @@ func NewCmdRoot(f *cmdutil.Factory, version, buildDate string) *CmdRoot {
 	cmd.PersistentFlags().StringVarP(&ccmd.SessionPassword, "sessionPassword", "P", "", "Override session password")
 	cmd.PersistentFlags().BoolVarP(&ccmd.Verbose, "verbose", "v", false, "Verbose logging")
 	cmd.PersistentFlags().IntP(flags.FlagPageSize, "p", c8ydefaults.PageSize, "Maximum results per page")
-	cmd.PersistentFlags().Int64(flags.FlagCurrentPage, 0, "Current page size which should be returned")
+	cmd.PersistentFlags().Int64(flags.FlagCurrentPage, 0, "Current page which should be returned")
 	cmd.PersistentFlags().Int64("totalPages", 0, "Total number of pages to get")
 	cmd.PersistentFlags().Bool("includeAll", false, "Include all results by iterating through each page")
-	cmd.PersistentFlags().BoolP(flags.FlagWithTotalPages, "t", false, "Include all results")
-	cmd.PersistentFlags().BoolP("compact", "c", !isTerm, "Compact instead of pretty-printed output. Pretty print is the default if output is the terminal")
+	cmd.PersistentFlags().BoolP(flags.FlagWithTotalPages, "t", false, "Request Cumulocity to include the total pages in the response statitics under .statistics.totalPages")
+	cmd.PersistentFlags().BoolP("compact", "c", !isTerm, "Compact instead of pretty-printed output when using json output. Pretty print is the default if output is the terminal")
 	cmd.PersistentFlags().Bool("noAccept", false, "Ignore Accept header will remove the Accept header from requests, however PUT and POST requests will only see the effect")
 	cmd.PersistentFlags().Bool("dry", false, "Dry run. Don't send any data to the server")
 	cmd.PersistentFlags().String("dryFormat", "markdown", "Dry run output format. i.e. json, dump, markdown or curl")
@@ -181,19 +181,19 @@ func NewCmdRoot(f *cmdutil.Factory, version, buildDate string) *CmdRoot {
 	// Error handling
 	cmd.PersistentFlags().String("silentStatusCodes", "", "Status codes which will not print out an error message")
 
-	cmd.PersistentFlags().Bool("flatten", false, "flatten")
-	cmd.PersistentFlags().StringSlice("filter", nil, "filter")
-	cmd.PersistentFlags().StringArray("select", nil, "select")
-	cmd.PersistentFlags().String("view", defaultView, "View option")
-	cmd.PersistentFlags().Float64("timeout", float64(10*60), "Timeout in seconds")
+	cmd.PersistentFlags().Bool("flatten", false, "flatten json output by replacing nested json properties with properties where their names are represented by dot notation")
+	cmd.PersistentFlags().StringSlice("filter", nil, "Apply a client side filter to response before returning it to the user")
+	cmd.PersistentFlags().StringArray("select", nil, "Comma separated list of properties to return. wildcards and globstar accepted, i.e. --select 'id,name,type,**.serialNumber'")
+	cmd.PersistentFlags().String("view", defaultView, "Use views when displaying data on the terminal. Disable using --view off")
+	cmd.PersistentFlags().Float64("timeout", float64(10*60), "Request timeout in seconds")
 
 	// output
 	cmd.PersistentFlags().StringP("output", "o", defaultOutputFormat, "Output format i.e. table, json, csv, csvheader")
-	cmd.PersistentFlags().String("outputFile", "", "Save JSON output to file (after select)")
-	cmd.PersistentFlags().String("outputFileRaw", "", "Save raw response to file")
+	cmd.PersistentFlags().String("outputFile", "", "Save JSON output to file (after select/view)")
+	cmd.PersistentFlags().String("outputFileRaw", "", "Save raw response to file (before select/view)")
 
 	// confirmation
-	cmd.PersistentFlags().BoolP("force", "f", false, "Do not prompt for confirmation")
+	cmd.PersistentFlags().BoolP("force", "f", false, "Do not prompt for confirmation. Ignored when using --confirm")
 	cmd.PersistentFlags().Bool("confirm", false, "Prompt for confirmation")
 	cmd.PersistentFlags().String("confirmText", "", "Custom confirmation text")
 
