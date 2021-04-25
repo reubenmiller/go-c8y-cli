@@ -1,8 +1,7 @@
 module.exports = {
   someSidebar: {
-    Features: ['mdx'],
-
     Documentation: [
+      'introduction',
       'demo',
       {
         type: 'category',

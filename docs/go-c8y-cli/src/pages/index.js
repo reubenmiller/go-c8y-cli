@@ -87,7 +87,7 @@ export default function Home() {
             <Link to={useBaseUrl('docs/')}>Get Started</Link>
           </div>
           <div className={styles.buttons}>
-            <Link to={useBaseUrl('api/')}>API Documentation</Link>
+            <Link to={useBaseUrl('docs/cli/')}>API Documentation</Link>
           </div>
           <CookieConsent>This website uses cookies to enhance the user experience.</CookieConsent>
         </header>

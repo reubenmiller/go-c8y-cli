@@ -26,7 +26,7 @@ const baseUrl = process.env.BASE_URL || '/';
   tagline: 'Unofficial Cumulocity IoT Command Line Interface',
   url: 'https://reubenmiller.github.io/go-c8y-cli',
   baseUrl,
-  onBrokenLinks: 'throw',
+  onBrokenLinks: isDev ? 'warn' : 'throw',
   onBrokenMarkdownLinks: 'warn',
   favicon: 'img/favicon.ico',
   organizationName: 'reubenmiller',
@@ -63,6 +63,7 @@ const baseUrl = process.env.BASE_URL || '/';
     //     ],
     //   },
     // ],
+    require.resolve('docusaurus-lunr-search'),
     [
       '@docusaurus/plugin-ideal-image',
       {
@@ -120,7 +121,7 @@ const baseUrl = process.env.BASE_URL || '/';
     prism: {
       theme: require('prism-react-renderer/themes/github'),
       darkTheme: require('prism-react-renderer/themes/dracula'),
-      additionalLanguages: ['powershell'],
+      additionalLanguages: ['powershell', 'javascript', 'markdown', 'bash'],
     },
     googleAnalytics: {
       trackingID: 'UA-155263011-1',
