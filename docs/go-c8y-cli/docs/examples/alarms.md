@@ -4,35 +4,19 @@ title: Alarms
 
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
+import CodeExample from '@site/src/components/CodeExample';
 
 ## Get
 
 ### Get a list of alarms in the last 30 days
 
-
-<Tabs
-  groupId="shell-types"
-  defaultValue="bash"
-  values={[
-    { label: 'Shell', value: 'bash', },
-    { label: 'PowerShell', value: 'powershell', },
-  ]
-}>
-<TabItem value="bash">
+<CodeExample>
 
 ```bash
 c8y alarms list --dateFrom "-30d"
 ```
 
-</TabItem>
-<TabItem value="powershell">
-
-```powershell
-Get-AlarmCollection -DateFrom "-30d"
-```
-
-</TabItem>
-</Tabs>
+</CodeExample>
 
 
 ```plaintext title="Output"
@@ -46,59 +30,32 @@ Get-AlarmCollection -DateFrom "-30d"
 :::note
 Additional filtering is possible using some parameters like `dateFrom`, `dateTo`, `fragmentType`, `status`, `severity` etc. For a full list of parameters use the inbuilt help
 
-<Tabs
-  groupId="shell-types"
-  defaultValue="bash"
-  values={[
-    { label: 'Shell', value: 'bash', },
-    { label: 'PowerShell', value: 'powershell', },
-  ]
-}>
-<TabItem value="bash">
+<CodeExample>
 
 ```bash
 c8y alarms list --help
 ```
 
-</TabItem>
-<TabItem value="powershell">
-
 ```powershell
 Get-Help Get-AlarmCollection -Full
 ```
 
-</TabItem>
-</Tabs>
+</CodeExample>
+
 :::
 
 ### Get active alarms for a device by name
 
-<Tabs
-  groupId="shell-types"
-  defaultValue="bash"
-  values={[
-    { label: 'Shell', value: 'bash', },
-    { label: 'PowerShell', value: 'powershell', },
-  ]
-}>
-<TabItem value="bash">
+<CodeExample>
 
 ```bash
 c8y alarms list --device device01 --status ACTIVE
 ```
 
-</TabItem>
-<TabItem value="powershell">
-
-```powershell
-Get-AlarmCollection -Device device01 -Status ACTIVE
-```
-
-</TabItem>
-</Tabs>
+</CodeExample>
 
 
-```plaintext title="Output"
+```text title="Output"
 | id          | status      | type                  | severity   | count      | source.id   | source.name   | creationTime                  | text          |
 |-------------|-------------|-----------------------|------------|------------|-------------|---------------|-------------------------------|---------------|
 | 497924      | ACTIVE      | c8y_temperature0      | MAJOR      | 3          | 497835      | device01      | 2021-04-25T12:18:00.290Z      | Too cold      |
@@ -112,15 +69,7 @@ Get-AlarmCollection -Device device01 -Status ACTIVE
 
 ### Create a new alarm for a device
 
-<Tabs
-  groupId="shell-types"
-  defaultValue="bash"
-  values={[
-    { label: 'Shell', value: 'bash', },
-    { label: 'PowerShell', value: 'powershell', },
-  ]
-}>
-<TabItem value="bash">
+<CodeExample>
 
 ```bash
 c8y alarms create \
@@ -131,20 +80,7 @@ c8y alarms create \
     --text "Test Alarm"
 ```
 
-</TabItem>
-<TabItem value="powershell">
-
-```powershell
-New-Alarm `
-    -Device "device01" `
-    -Time "0s" `
-    -Type "c8y_TestAlarm" `
-    -Severity "MAJOR" `
-    -Text "Test Alarm"
-```
-
-</TabItem>
-</Tabs>
+</CodeExample>
 
 
 ```plaintext title="Output"
@@ -157,29 +93,13 @@ New-Alarm `
 
 ### Update alarm status to ACKNOWLEDGED
 
-<Tabs
-  groupId="shell-types"
-  defaultValue="bash"
-  values={[
-    { label: 'Shell', value: 'bash', },
-    { label: 'PowerShell', value: 'powershell', },
-  ]
-}>
-<TabItem value="bash">
+<CodeExample>
 
 ```bash
 c8y alarms update --id 497740 --status ACKNOWLEDGED
 ```
 
-</TabItem>
-<TabItem value="powershell">
-
-```powershell
-Update-Alarm -Id 497740 -Status ACKNOWLEDGED
-```
-
-</TabItem>
-</Tabs>
+</CodeExample>
 
 
 ```plaintext title="Output"
@@ -192,29 +112,13 @@ Update-Alarm -Id 497740 -Status ACKNOWLEDGED
 
 Existing alarms from a device can be updated based on queries. This can be helpful when updating a large number of alarms
 
-<Tabs
-  groupId="shell-types"
-  defaultValue="bash"
-  values={[
-    { label: 'Shell', value: 'bash', },
-    { label: 'PowerShell', value: 'powershell', },
-  ]
-}>
-<TabItem value="bash">
+<CodeExample>
 
 ```bash
 c8y alarms updateCollection --device device01 --status ACTIVE --newStatus ACKNOWLEDGED
 ```
 
-</TabItem>
-<TabItem value="powershell">
-
-```powershell
-Update-AlarmCollection -Device device01 -Status ACTIVE -NewStatus ACKNOWLEDGED
-```
-
-</TabItem>
-</Tabs>
+</CodeExample>
 
 
 ```plaintext title="No output"
@@ -222,31 +126,16 @@ Update-AlarmCollection -Device device01 -Status ACTIVE -NewStatus ACKNOWLEDGED
 
 ## Delete/Remove
 
-### Remove an alarm
+### Remove alarms
 
-<Tabs
-  groupId="shell-types"
-  defaultValue="bash"
-  values={[
-    { label: 'Shell', value: 'bash', },
-    { label: 'PowerShell', value: 'powershell', },
-  ]
-}>
-<TabItem value="bash">
+<CodeExample>
 
 ```bash
 c8y alarms deleteCollection --device device01 --status ACKNOWLEDGED --dateFrom -1d
 ```
 
-</TabItem>
-<TabItem value="powershell">
+</CodeExample>
 
-```powershell
-Remove-AlarmCollection -Device device01 -Status ACKNOWLEDGED -DateFrom -1d
-```
-
-</TabItem>
-</Tabs>
 
 ```plaintext title="Output (standard error)"
 ✓ Deleted /alarm/alarms => 204 No Content
@@ -256,29 +145,13 @@ Remove-AlarmCollection -Device device01 -Status ACKNOWLEDGED -DateFrom -1d
 
 ### Subscribing to alarms for a device for 180 seconds
 
-<Tabs
-  groupId="shell-types"
-  defaultValue="bash"
-  values={[
-    { label: 'Shell', value: 'bash', },
-    { label: 'PowerShell', value: 'powershell', },
-  ]
-}>
-<TabItem value="bash">
+<CodeExample>
 
 ```bash
 c8y alarms subscribe --device device01 --duration 180
 ```
 
-</TabItem>
-<TabItem value="powershell">
-
-```powershell
-Watch-Alarm -Device device01 -Duration 180
-```
-
-</TabItem>
-</Tabs>
+</CodeExample>
 
 
 ```plaintext title="Output"

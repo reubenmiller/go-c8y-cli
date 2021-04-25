@@ -32,6 +32,7 @@
     "@mdx-js/react": "^1.5.8",
     "classnames": "^2.2.6",
     "docusaurus-lunr-search": "^2.1.12",
+    "prism-react-renderer": "^1.2.0",
     "react": "^17.0.1",
     "react-cookie-consent": "^6.2.3",
     "react-dom": "^17.0.1"

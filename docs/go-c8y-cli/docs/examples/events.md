@@ -2,8 +2,7 @@
 title: Events
 ---
 
-import Tabs from '@theme/Tabs';
-import TabItem from '@theme/TabItem';
+import CodeExample from '@site/src/components/CodeExample';
 
 ## Get counts of events in one hour intervals for the last 12 hours
 
@@ -11,15 +10,8 @@ import TabItem from '@theme/TabItem';
 The shell example requires [gnu parallel](https://www.gnu.org/software/parallel/) to be installed
 :::
 
-<Tabs
-  groupId="shell-types"
-  defaultValue="bash"
-  values={[
-    { label: 'Shell', value: 'bash', },
-    { label: 'PowerShell', value: 'powershell', },
-  ]
-}>
-<TabItem value="bash">
+
+<CodeExample>
 
 ```bash
 # Required: gnu parallel
@@ -34,9 +26,6 @@ seq 0 11 | parallel -j1 --env --tags \
         --output csv
 ```
 
-</TabItem>
-<TabItem value="powershell">
-
 ```powershell
 0..11 | Foreach-Object {
         Get-EventCollection `
@@ -50,8 +39,7 @@ seq 0 11 | parallel -j1 --env --tags \
     }
 ```
 
-</TabItem>
-</Tabs>
+</CodeExample>
 
 
 ```sh title="Output"
