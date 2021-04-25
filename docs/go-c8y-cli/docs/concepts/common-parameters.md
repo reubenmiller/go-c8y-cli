@@ -1,6 +1,4 @@
 ---
-layout: default
-category: Concepts
 title: Common Parameters
 ---
 
