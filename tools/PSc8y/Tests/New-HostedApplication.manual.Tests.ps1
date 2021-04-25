@@ -33,6 +33,27 @@ Describe -Name "New-HostedApplication" {
             $Binaries | Should -BeNullOrEmpty
         }
 
+        It "Create web application using dry run" {
+            $ContextPath = ($AppName -replace " ", "").ToLower()
+
+            $output = PSc8y\New-HostedApplication `
+                -Name $AppName `
+                -ResourcesUrl "/subPath" `
+                -Availability "MARKET" `
+                -ContextPath $ContextPath `
+                -Dry -DryFormat json
+
+            $LASTEXITCODE | Should -Be 0
+            $output | Should -Not -BeNullOrEmpty
+            $request = $output | ConvertFrom-Json
+            $request.path | Should -BeExactly "/application/applications"
+            $request.body.name | Should -BeExactly $AppName 
+            $request.body.type | Should -BeExactly "HOSTED" 
+            $request.body.resourcesUrl | Should -BeExactly "/subPath" 
+            $request.body.availability | Should -BeExactly "MARKET" 
+
+        }
+
         AfterEach {
             PSc8y\Get-Application -Id $AppName | PSc8y\Remove-Application
 

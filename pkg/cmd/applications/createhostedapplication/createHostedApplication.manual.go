@@ -182,6 +182,7 @@ func (n *CmdCreateHostedApplication) RunE(cmd *cobra.Command, args []string) err
 	var response *c8y.Response
 	var applicationID string
 
+	dryRun := cfg.DryRun()
 	appDetails := n.getApplicationDetails()
 
 	// TODO: Use the default name value from n.Name rather then reading it from the args again.
@@ -222,21 +223,22 @@ func (n *CmdCreateHostedApplication) RunE(cmd *cobra.Command, args []string) err
 	// Upload binary
 	applicationBinaryID := ""
 	if !skipUpload {
+		if !dryRun {
+			zipfile, err := n.packageAppIfRequired(n.file)
+			if err != nil {
+				log.Errorf("Failed to package file. %s", err)
+				return fmt.Errorf("failed to package app. %s", err)
+			}
 
-		zipfile, err := n.packageAppIfRequired(n.file)
-		if err != nil {
-			log.Errorf("Failed to package file. %s", err)
-			return fmt.Errorf("failed to package app. %s", err)
-		}
+			log.Infof("uploading binary [app=%s]", application.ID)
+			resp, err := client.Application.CreateBinary(context.Background(), zipfile, application.ID)
 
-		log.Infof("uploading binary [app=%s]", application.ID)
-		resp, err := client.Application.CreateBinary(context.Background(), zipfile, application.ID)
-
-		if err != nil {
-			// handle error
-			n.SubCommand.GetCommand().PrintErrf("failed to upload file. %s", err)
-		} else {
-			applicationBinaryID = resp.JSON.Get("id").String()
+			if err != nil {
+				// handle error
+				n.SubCommand.GetCommand().PrintErrf("failed to upload file. %s", err)
+			} else {
+				applicationBinaryID = resp.JSON.Get("id").String()
+			}
 		}
 	}
 
