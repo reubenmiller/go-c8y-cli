@@ -1,7 +1,7 @@
 ---
 layout: default
 category: Examples
-title: Shell-DeviceGroups
+title: DeviceGroups
 ---
 
 ### Assign devices from a query to a group

@@ -4,6 +4,9 @@ category: Concepts
 title: Paging
 ---
 
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
 ### Limiting query results
 
 #### Background
@@ -25,10 +28,10 @@ The following command line arguments are supported by all collection related com
 
 | PSc8y | c8y | Description |
 |-------|---------|---------|
-| -PageSize | `--pageSize` | Set the maximum number of results included in the response. Limited to 2000 by the server. |
-| -CurrentPage | `--currentPage` | Page number (or slice) of the results which should be returned. Defaults to 1. |
-| -TotalPages | `--totalPages` | Total number of pages to return. The pages will be collected serially starting from the `currentPage`  |
-| -IncludeAll | `--includeAll` | Include all pages from the collection. IncludeAll will automatically set the pageSize to the maximum value `2000` regardless what value was given to `pageSize` |
+| `-PageSize` | `--pageSize` | Set the maximum number of results included in the response. Limited to 2000 by the server. |
+| `-CurrentPage` | `--currentPage` | Page number (or slice) of the results which should be returned. Defaults to 1. |
+| `-TotalPages` | `--totalPages` | Total number of pages to return. The pages will be collected serially starting from the `currentPage`  |
+| `-IncludeAll` | `--includeAll` | Include all pages from the collection. IncludeAll will automatically set the pageSize to the maximum value `2000` regardless what value was given to `pageSize` |
 
 
 A few examples will now be detailed to clarify the usage of the parameters in real life scenarios.
@@ -39,29 +42,61 @@ If you have a large number of devices and you want to retrieve all of the result
 
 The `includeAll` parameter is used to get all of the results.
 
-**Shell**
+<Tabs
+  groupId="shell-types"
+  defaultValue="bash"
+  values={[
+    { label: 'Shell', value: 'bash', },
+    { label: 'PowerShell', value: 'powershell', },
+  ]
+}>
+<TabItem value="bash">
 
 ```bash
 c8y devices list --name "MyDevices*" --includeAll --select "id,name,*.serialNumber" --output csvheader > devicelist.csv
 ```
 
-**Powershell**
+</TabItem>
+<TabItem value="powershell">
 
 ```powershell
 Get-DeviceCollection -Name "MyDevices*" -IncludeAll --select "id,name,*.serialNumber" -Output csvheader > devicelist.csv
 ```
 
+</TabItem>
+</Tabs>
+
+
 #### Example: Get total number of devices
 
 The total number of devices can be returned by using the technic of setting the `pageSize` to 1, and using the `withTotalPages` parameter. The result will then contain the total number (in the `.statistics.totalPages` property) of whatever entity you have requested. A view has been added to only display the `statistics` fragment by default.
+
+<Tabs
+  groupId="shell-types"
+  defaultValue="bash"
+  values={[
+    { label: 'Shell', value: 'bash', },
+    { label: 'PowerShell', value: 'powershell', },
+  ]
+}>
+<TabItem value="bash">
 
 ```bash
 c8y devices list --withTotalPages --pageSize 1
 ```
 
-*Output*
+</TabItem>
+<TabItem value="powershell">
 
-```bash
+```powershell
+Get-DeviceCollection -WithTotalPages -PageSize 1
+```
+
+</TabItem>
+</Tabs>
+
+
+```json title="output"
 | totalPages | pageSize   | currentPage |
 |------------|------------|-------------|
 | 159        | 1          | 1           |
@@ -69,13 +104,32 @@ c8y devices list --withTotalPages --pageSize 1
 
 or you can get the raw json response by adding the `raw` parameter
 
+
+<Tabs
+  groupId="shell-types"
+  defaultValue="bash"
+  values={[
+    { label: 'Shell', value: 'bash', },
+    { label: 'PowerShell', value: 'powershell', },
+  ]
+}>
+<TabItem value="bash">
+
 ```bash
 c8y devices list --withTotalPages --pageSize 1 --raw
 ```
 
-*Output*
+</TabItem>
+<TabItem value="powershell">
 
-```json
+```powershell
+Get-DeviceCollection -WithTotalPages -PageSize 1 -Raw
+```
+
+</TabItem>
+</Tabs>
+
+```json title="output"
 {
   "managedObjects": [
     {
@@ -127,8 +181,6 @@ c8y devices list --withTotalPages --pageSize 1 --raw
 
 Since pipeline data is supported natively by go-c8y-cli, any pages results can be efficiently piped to downstream commands.
 
-Instead of working in batches
-
 Instead of retrieving all of the devices at once, you can run a task on each paging result, and then move on to the next page, until all of the paging have been processed.
 
 This has the advantages that all of the results do not need to be kept in memory.
@@ -138,7 +190,7 @@ This has the advantages that all of the results do not need to be kept in memory
 
 TODO
 
-**Note:** when piping json it is necessary to escape the double quotes before passing it down the pipe, this can be done by using `sed`.
+**Note:** when piping json it is necessary to escape the double quotes before passing it down the pipeline, this can be done by using `sed`.
 
 ```bash
 c8y devices list -p 10 | sed 's/"/\\"/g' | xargs -0 -I {} bash -c "echo \"{}\" | jq -r '.name'"
@@ -150,9 +202,7 @@ Alternatively, the gnu command `parallel` can be used as it handles json from st
 c8y devices list | parallel --tag echo {} | jq -r '.name'
 ```
 
-*Output*
-
-```bash
+```bash title="output"
 device_0001
 device_0002
 device_0003
@@ -169,16 +219,27 @@ TODO
 The following shows how to add a fragment `myNewFragment` to each devices where the name starts with "My".
 
 
-**Shell**
+<Tabs
+  groupId="shell-types"
+  defaultValue="bash"
+  values={[
+    { label: 'Shell', value: 'bash', },
+    { label: 'PowerShell', value: 'powershell', },
+  ]
+}>
+<TabItem value="bash">
 
 ```bash
-c8y devices list --name "My*" --includeAll | c8y devices update --data "myNewFragment.fragmentCreationTime=$( date --iso-8601=seconds )"
+c8y devices list --name "My*" --includeAll |
+  c8y devices update --data "myNewFragment.fragmentCreationTime=$( date --iso-8601=seconds )"
 
 # or using templates
-c8y devices list --name "My*" --includeAll | c8y devices update --template "{ myNewFragment: {fragmentCreationTime: _.Now() }}"
+c8y devices list --name "My*" --includeAll |
+  c8y devices update --template "{ myNewFragment: {fragmentCreationTime: _.Now('0s') }}"
 ```
 
-**PowerShell**
+</TabItem>
+<TabItem value="powershell">
 
 ```powershell
 Get-DeviceCollection -Name "My*" -IncludeAll |
@@ -186,15 +247,37 @@ Get-DeviceCollection -Name "My*" -IncludeAll |
 
 # or using templates
 Get-DeviceCollection -Name "My*" -IncludeAll |
-    Update-ManagedObject -Template "{ myNewFragment: {fragmentCreationTime: _.Now() }}"
+    Update-ManagedObject -Template "{ myNewFragment: {fragmentCreationTime: _.Now('0s') }}"
 ```
+
+</TabItem>
+</Tabs>
 
 
 ### Setting a default pageSize
 
 The default pageSize can be controlled via the session or `settings` file or in your session file.
 
+<Tabs
+  groupId="shell-types"
+  defaultValue="bash"
+  values={[
+    { label: 'Shell', value: 'bash', },
+    { label: 'PowerShell', value: 'powershell', },
+  ]
+}>
+<TabItem value="bash">
+
 ```bash
 c8y settings update defaults.pageSize 20
 ```
 
+</TabItem>
+<TabItem value="powershell">
+
+```powershell
+c8y settings update defaults.pageSize 20
+```
+
+</TabItem>
+</Tabs>

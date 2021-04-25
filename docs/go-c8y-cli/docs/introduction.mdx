@@ -1,0 +1,30 @@
+---
+id: introduction
+title: Introduction
+---
+
+`c8y` is Cumulocity on the command line. Managed devices, users, applications, It brings Cumulocity API to the command line.
+
+So this means you can
+
+* manage devices (alarms, events, measurements, operations)
+* manage users
+* deploy applications and microservices
+* create c8y items from templates
+* create workflows between commands
+* and much much more
+
+
+`c8y` comes in two forms, both are available for MacOS, Linux and Windows
+
+* [c8y](cli) - Native binary. Can be run on any shell you want, but zsh is recommended as tab completion looks really nice there :)
+* [PSc8y](https://www.powershellgallery.com/packages/PSc8y) - PowerShell module which wraps `c8y` in a PowerShell friendly way. Obviously this requires PowerShell ;)
+
+### Extending the CLI
+
+There are several ways you can make customize `c8y` to suit your needs.
+
+* Create shorthands using [c8y alias set](cli/c8y/alias/c8y_alias_set)
+* Make custom API queries using [c8y api](cli/c8y/api/c8y_api)
+* Changing default configuration either globally, per session or using environment variables
+* Customize table views to show the data that you want

@@ -1,7 +1,7 @@
 ---
 layout: default
 category: Concepts
-title: Shell-Select Parameter
+title: Select Parameter
 ---
 
 ### Select parameter (new in v2.0.0)

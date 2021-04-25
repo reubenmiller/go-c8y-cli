@@ -32,15 +32,15 @@ New-TestUserGroup
 	[-NoProxy]
 	[-Timeout <Double>]
 	[-Session <String>]
+	[-SessionUsername <String>]
+	[-SessionPassword <String>]
 	[-Output <String>]
 	[-View <String>]
 	[-AsHashTable]
 	[-AsPSObject]
 	[-Flatten]
-	[-Compress]
-	[-Pretty]
+	[-Compact]
 	[-NoColor]
-	[-Color]
 	[-Confirm]
 	[-ConfirmText <String>]
 	[-WithError]
@@ -49,11 +49,16 @@ New-TestUserGroup
 	[-DryFormat <String>]
 	[-Workers <Int32>]
 	[-Delay <Int32>]
+	[-DelayBefore <Int32>]
 	[-MaxJobs <Int32>]
 	[-Progress]
+	[-AbortOnErrors <Int32>]
 	[-NoLog]
 	[-LogMessage <String>]
 	[-Select <String[]>]
+	[-Filter <String[]>]
+	[-Header <String[]>]
+	[-QueryParam <String[]>]
 	[<CommonParameters>]
 ```
 
@@ -88,8 +93,23 @@ Accept pipeline input: True (ByPropertyName, ByValue)
 Accept wildcard characters: False
 ```
 
+### -AbortOnErrors
+Abort batch when reaching specified number of errors
+
+```yaml
+Type: Int32
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
 ### -AsHashTable
-{{ Fill AsHashTable Description }}
+Return output as PowerShell Hashtables
 
 ```yaml
 Type: SwitchParameter
@@ -104,7 +124,7 @@ Accept wildcard characters: False
 ```
 
 ### -AsPSObject
-{{ Fill AsPSObject Description }}
+Return output as PowerShell PSCustomObjects
 
 ```yaml
 Type: SwitchParameter
@@ -118,28 +138,14 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -Color
-{{ Fill Color Description }}
+### -Compact
+Compact instead of pretty-printed output when using json output.
+Pretty print is the default if output is the terminal
 
 ```yaml
 Type: SwitchParameter
 Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: Named
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
-### -Compress
-{{ Fill Compress Description }}
-
-```yaml
-Type: SwitchParameter
-Parameter Sets: (All)
-Aliases:
+Aliases: Compress
 
 Required: False
 Position: Named
@@ -149,7 +155,7 @@ Accept wildcard characters: False
 ```
 
 ### -Confirm
-Prompts you for confirmation before running the cmdlet.
+Prompt for confirmation
 
 ```yaml
 Type: SwitchParameter
@@ -164,7 +170,7 @@ Accept wildcard characters: False
 ```
 
 ### -ConfirmText
-{{ Fill ConfirmText Description }}
+Custom confirmation text
 
 ```yaml
 Type: String
@@ -179,7 +185,9 @@ Accept wildcard characters: False
 ```
 
 ### -Data
-{{ Fill Data Description }}
+static data to be applied to body.
+accepts json or shorthande json, i.e.
+--data 'value1=1,my.nested.value=100'
 
 ```yaml
 Type: Object
@@ -194,7 +202,22 @@ Accept wildcard characters: False
 ```
 
 ### -Delay
-{{ Fill Delay Description }}
+delay in milliseconds after each request
+
+```yaml
+Type: Int32
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -DelayBefore
+delay in milliseconds before each request
 
 ```yaml
 Type: Int32
@@ -209,7 +232,8 @@ Accept wildcard characters: False
 ```
 
 ### -Dry
-{{ Fill Dry Description }}
+Dry run.
+Don't send any data to the server
 
 ```yaml
 Type: SwitchParameter
@@ -224,7 +248,9 @@ Accept wildcard characters: False
 ```
 
 ### -DryFormat
-{{ Fill DryFormat Description }}
+Dry run output format.
+i.e.
+json, dump, markdown or curl
 
 ```yaml
 Type: String
@@ -238,8 +264,23 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
+### -Filter
+Apply a client side filter to response before returning it to the user
+
+```yaml
+Type: String[]
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
 ### -Flatten
-{{ Fill Flatten Description }}
+flatten json output by replacing nested json properties with properties where their names are represented by dot notation
 
 ```yaml
 Type: SwitchParameter
@@ -254,7 +295,8 @@ Accept wildcard characters: False
 ```
 
 ### -Force
-{{ Fill Force Description }}
+Do not prompt for confirmation.
+Ignored when using --confirm
 
 ```yaml
 Type: SwitchParameter
@@ -268,8 +310,25 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
+### -Header
+custom headers.
+i.e.
+--header 'Accept: value, AnotherHeader: myvalue'
+
+```yaml
+Type: String[]
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
 ### -LogMessage
-{{ Fill LogMessage Description }}
+Add custom message to the activity log
 
 ```yaml
 Type: String
@@ -284,7 +343,8 @@ Accept wildcard characters: False
 ```
 
 ### -MaxJobs
-{{ Fill MaxJobs Description }}
+Maximum number of jobs.
+0 = unlimited (use with caution!)
 
 ```yaml
 Type: Int32
@@ -299,7 +359,7 @@ Accept wildcard characters: False
 ```
 
 ### -NoAccept
-{{ Fill NoAccept Description }}
+Ignore Accept header will remove the Accept header from requests, however PUT and POST requests will only see the effect
 
 ```yaml
 Type: SwitchParameter
@@ -314,7 +374,7 @@ Accept wildcard characters: False
 ```
 
 ### -NoColor
-{{ Fill NoColor Description }}
+Don't use colors when displaying log entries on the console
 
 ```yaml
 Type: SwitchParameter
@@ -329,7 +389,7 @@ Accept wildcard characters: False
 ```
 
 ### -NoLog
-{{ Fill NoLog Description }}
+Disables the activity log for the current command
 
 ```yaml
 Type: SwitchParameter
@@ -344,7 +404,7 @@ Accept wildcard characters: False
 ```
 
 ### -NoProxy
-{{ Fill NoProxy Description }}
+Ignore the proxy settings
 
 ```yaml
 Type: SwitchParameter
@@ -359,7 +419,8 @@ Accept wildcard characters: False
 ```
 
 ### -Output
-{{ Fill Output Description }}
+Output format i.e.
+table, json, csv, csvheader
 
 ```yaml
 Type: String
@@ -374,7 +435,7 @@ Accept wildcard characters: False
 ```
 
 ### -OutputFile
-{{ Fill OutputFile Description }}
+Save JSON output to file (after select/view)
 
 ```yaml
 Type: String
@@ -389,7 +450,7 @@ Accept wildcard characters: False
 ```
 
 ### -OutputFileRaw
-{{ Fill OutputFileRaw Description }}
+Save raw response to file (before select/view)
 
 ```yaml
 Type: String
@@ -403,23 +464,8 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -Pretty
-{{ Fill Pretty Description }}
-
-```yaml
-Type: SwitchParameter
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: Named
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
 ### -ProcessingMode
-{{ Fill ProcessingMode Description }}
+Cumulocity processing mode
 
 ```yaml
 Type: String
@@ -434,7 +480,8 @@ Accept wildcard characters: False
 ```
 
 ### -Progress
-{{ Fill Progress Description }}
+Show progress bar.
+This will also disable any other verbose output
 
 ```yaml
 Type: SwitchParameter
@@ -449,7 +496,8 @@ Accept wildcard characters: False
 ```
 
 ### -Proxy
-{{ Fill Proxy Description }}
+Proxy setting, i.e.
+http://10.0.0.1:8080
 
 ```yaml
 Type: SwitchParameter
@@ -463,8 +511,26 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
+### -QueryParam
+custom query parameters.
+i.e.
+--queryParam 'withCustomOption=true,myOtherOption=myvalue'
+
+```yaml
+Type: String[]
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
 ### -Raw
-{{ Fill Raw Description }}
+Show raw response.
+This mode will force output=json and view=off
 
 ```yaml
 Type: SwitchParameter
@@ -479,7 +545,9 @@ Accept wildcard characters: False
 ```
 
 ### -Select
-{{ Fill Select Description }}
+Comma separated list of properties to return.
+wildcards and globstar accepted, i.e.
+--select 'id,name,type,**.serialNumber'
 
 ```yaml
 Type: String[]
@@ -494,7 +562,39 @@ Accept wildcard characters: False
 ```
 
 ### -Session
-{{ Fill Session Description }}
+Session configuration
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -SessionPassword
+Override session password
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -SessionUsername
+Override session username.
+i.e.
+peter or t1234/peter (with tenant)
 
 ```yaml
 Type: String
@@ -509,7 +609,7 @@ Accept wildcard characters: False
 ```
 
 ### -SilentStatusCodes
-{{ Fill SilentStatusCodes Description }}
+Status codes which will not print out an error message
 
 ```yaml
 Type: String
@@ -524,7 +624,7 @@ Accept wildcard characters: False
 ```
 
 ### -Template
-{{ Fill Template Description }}
+Body template
 
 ```yaml
 Type: String
@@ -539,7 +639,7 @@ Accept wildcard characters: False
 ```
 
 ### -TemplateVars
-{{ Fill TemplateVars Description }}
+Body template variables
 
 ```yaml
 Type: String
@@ -554,7 +654,7 @@ Accept wildcard characters: False
 ```
 
 ### -Timeout
-{{ Fill Timeout Description }}
+Request timeout in seconds
 
 ```yaml
 Type: Double
@@ -569,7 +669,8 @@ Accept wildcard characters: False
 ```
 
 ### -View
-{{ Fill View Description }}
+Use views when displaying data on the terminal.
+Disable using --view off
 
 ```yaml
 Type: String
@@ -584,7 +685,7 @@ Accept wildcard characters: False
 ```
 
 ### -WithError
-{{ Fill WithError Description }}
+Errors will be printed on stdout instead of stderr
 
 ```yaml
 Type: SwitchParameter
@@ -599,7 +700,7 @@ Accept wildcard characters: False
 ```
 
 ### -Workers
-{{ Fill Workers Description }}
+Number of workers
 
 ```yaml
 Type: Int32

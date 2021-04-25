@@ -1,26 +1,45 @@
+---
+title: Chaining commands
+---
 
-## Piping
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
 
 Most commands in go-c8y-cli support piped input (i.e. input from standard input (stdin)). This makes it easy to chain commands together.
 
 Previously in go-c8y-cli version 1, the PowerShell wrapper of go-c8y-cli was way to utilize piped data for passing data to downstream commands, for example:
 
-```powershell
-# PowerShell PSc8y Module (go-c8y-cli wrapper)
-Get-DeviceCollection | Update-Device -Data "myValue=1"
-```
-
-With the go-c8y-cli version 2 release, pipeline input is now supported natively by the c8y binary. Taking the PowerShell example above, the same can be written in any shell (event PowerShell):
+<Tabs
+  groupId="shell-types"
+  defaultValue="bash"
+  values={[
+    { label: 'Shell', value: 'bash', },
+    { label: 'PowerShell', value: 'powershell', },
+  ]
+}>
+<TabItem value="bash">
 
 ```bash
-# shell (bash/zsh/fish/powershell or really any other shell you want)
 c8y devices list | c8y devices update --data "myValue=1"
 ```
 
+</TabItem>
+<TabItem value="powershell">
+
+```powershell
+Get-DeviceCollection | batch | Update-Device -Data "myValue=1"
+```
+
+</TabItem>
+</Tabs>
+
+
+With the go-c8y-cli version 2 release, pipeline input is now supported natively by the c8y binary. Taking the PowerShell example above, the same can be written in any shell (event PowerShell):
+
 By supporting pipeline input, it enables greater flexibility as most of the commands outputs can be feed directly into another command without needing to save the output to a variable first, and in addition, it made it possible to support the following new features/optimizations:
 
-* Concurrency (sending multiple requests at the same time) (via `--workers <int>`)
-* Progress indicators (via `--progress`)
+* Concurrency (sending multiple requests at the same time) (via the `workers <int>` parameter)
+* Progress indicators (via the `progress` parameter)
 * Reduction of calls to c8y binary (as the binary is only called once instead of once per input value)
 * Easy to feed data from files (i.e. list of ids or names)
 
@@ -28,51 +47,150 @@ By supporting pipeline input, it enables greater flexibility as most of the comm
 
 Let's say you want to lookup an inventory managed object using its id (because you copied it from the browser's url from one of Cumulocity's in-built applications). Normally if you are working with just a single id then you would use the following command:
 
+<Tabs
+  groupId="shell-types"
+  defaultValue="bash"
+  values={[
+    { label: 'Shell', value: 'bash', },
+    { label: 'PowerShell', value: 'powershell', },
+  ]
+}>
+<TabItem value="bash">
+
 ```bash
 c8y devices get --id 1234
 ```
 
-Now the same can be written using piped input by using the shell's `echo` command as the input data will be mapped to the `--id` parameter automatically. The parameter which will receive pipeline input is marked in the help with `(accepts pipeline)`, but generally there should mostly be the obvious choice which parameter would make most sense (i.e. `--id`, `--device` etc.). A commands help text can be displayed by adding `--help` to a command, i.e. `c8y devices get --help`.
+</TabItem>
+<TabItem value="powershell">
 
-```bash
-# bash/zsh/fish
-echo "1234" | c8y devices get
-
-# In PowerShell, you can also just pipe a string directly into it
-"1234" | c8y devices get
+```powershell
+Get-Device -Id 1234
 ```
 
+</TabItem>
+</Tabs>
+
+
+Now the same can be written using piped input by using the shell's `echo` command as the input data will be mapped to the `--id` parameter automatically. The parameter which will receive pipeline input is marked in the help with `(accepts pipeline)`, but generally there should mostly be the obvious choice which parameter would make most sense (i.e. `--id`, `--device` etc.). A commands help text can be displayed by adding `--help` to a command, i.e. `c8y devices get --help`.
+
+<Tabs
+  groupId="shell-types"
+  defaultValue="bash"
+  values={[
+    { label: 'Shell', value: 'bash', },
+    { label: 'PowerShell', value: 'powershell', },
+  ]
+}>
+<TabItem value="bash">
+
+```bash
+echo "1234" | c8y devices get
+```
+
+</TabItem>
+<TabItem value="powershell">
+
+```powershell
+"1234" | batch | Get-Device
+```
+
+</TabItem>
+</Tabs>
+
+
 Now that does not seem so interesting as we are still fetching a single device and that is something Postman can do easily. Let's extend the command by now fetching 2 devices. Each id must be on a new line (so that it is treated as an independent value), so `echo -e` will be used so that we can use the newline character `\n` to separate the two ids.
+
+
+<Tabs
+  groupId="shell-types"
+  defaultValue="bash"
+  values={[
+    { label: 'Shell', value: 'bash', },
+    { label: 'PowerShell', value: 'powershell', },
+  ]
+}>
+<TabItem value="bash">
 
 ```bash
 echo -e "1234\n5678" | c8y devices get
 ```
 
+</TabItem>
+<TabItem value="powershell">
+
+```powershell
+1234, 5678 | batch | Get-Device
+```
+
+</TabItem>
+</Tabs>
+
+
 Again not super interesting as who really wants to type multiple ids in every time you want to get the current values. So instead of echoing the ids, let's store them to file called `ids.txt` (again one id per line):
 
-*file: ids.txt*
-
-```text
+```text title="file: ids.txt"
 1234
 5678
 ```
 
 c8y won't read the file directly, however you can use `cat` to read the file and it will pass contents of the file (line by line) to go-c8y-cli via the pipeline. By using a file it makes it easy to extend the list of ids by just appending new ids to it, and the command stays the same.
 
+<Tabs
+  groupId="shell-types"
+  defaultValue="bash"
+  values={[
+    { label: 'Shell', value: 'bash', },
+    { label: 'PowerShell', value: 'powershell', },
+  ]
+}>
+<TabItem value="bash">
+
 ```bash
 cat ids.txt | c8y devices get
 ```
+
+</TabItem>
+<TabItem value="powershell">
+
+```powershell
+Get-Content ids.txt | batch | Get-Device
+```
+
+</TabItem>
+</Tabs>
+
 
 Though finding ids is annoying, so let's find the ids first and then store them to file, and this will act as our "watch list" that we want to use to occasionally fetch the updated information about these devices.
 
 So we can build the input `ids.txt` file by doing a query by type and a custom fragment. We only want ot store the id, name and type of the devices so that the file remains relatively small, however the user has the name and type field to help identify which device the id is representing.
 
+<Tabs
+  groupId="shell-types"
+  defaultValue="bash"
+  values={[
+    { label: 'Shell', value: 'bash', },
+    { label: 'PowerShell', value: 'powershell', },
+  ]
+}>
+<TabItem value="bash">
+
 ```bash
 c8y devices list --type "myType*" --query "has(myCustomFragment)" --select id,name,type --output csv > ids.txt
 ```
 
-*file: ids.txt*
-```csv
+</TabItem>
+<TabItem value="powershell">
+
+```powershell
+Get-DeviceCollection -Type "myType*" -Query "has(myCustomFragment)" -Select id,name,type -Output csv > ids.txt
+```
+
+</TabItem>
+</Tabs>
+
+
+```csv title="file: ids.txt"
 1234,My Device 1
 5678,My Device 2
 ```
@@ -85,14 +203,50 @@ For example, you are using Cumulocity and you notice there are a lot of pending 
 
 Saving the ids of the operations in the case does not make sense because you don't really care about the operation ids, you only care if the operation is in `PENDING` and older than 14 days. So instead of saving the ids to file, you can just pipe the results from your operations query directly do the update operation command.
 
+<Tabs
+  groupId="shell-types"
+  defaultValue="bash"
+  values={[
+    { label: 'Shell', value: 'bash', },
+    { label: 'PowerShell', value: 'powershell', },
+  ]
+}>
+<TabItem value="bash">
+
 ```bash
 c8y operations list --status "PENDING" --dateTo "-14d" --includeAll |  # get list of operations
-    c8y operations update --status "FAILED" --failureReason "Cancelled stale operation as it was older than 14 days"
+    c8y operations update \
+        --status "FAILED" \
+        --failureReason "Cancelled stale operation as it was older than 14 days"
 ```
 
-The first command `c8y operations list` is responsible for getting the list of operations matching your search criteria. You can run the first part of the command first if you want to spot check the output to confirm that it behaves as you expect (though remove the `--includeAll` if you don't want to spot check the entire list of operations)
+</TabItem>
+<TabItem value="powershell">
 
-By default, piped input will be processed serially (one after the other). If you want to speed things up you can use multiple workers (in this case let's use 5). We don't want to spam the platform, so we also set a delay of 250 milliseconds between each request processed by a single worker. Since we are potentially processing a large list of operations, we can also activate the progress indicator by using the `--progress` parameter.
+```powershell
+Get-OperationCollection -Status "PENDING" -DateTo "-14d" -IncludeAll |  # get list of operations
+    Update-Operation `
+        -Status "FAILED" `
+        -FailureReason "Cancelled stale operation as it was older than 14 days"
+```
+
+</TabItem>
+</Tabs>
+
+
+The first command `c8y operations list` is responsible for getting the list of operations matching your search criteria. You can run the first part of the command first if you want to spot check the output to confirm that it behaves as you expect (though remove the `includeAll` parameter if you don't want to spot check the entire list of operations)
+
+By default, piped input will be processed serially (one after the other). If you want to speed things up you can use multiple workers (in this case let's use 5). We don't want to spam the platform, so we also set a delay of 250 milliseconds between each request processed by a single worker. Since we are potentially processing a large list of operations, we can also activate the progress indicator by using the `progress` parameter.
+
+<Tabs
+  groupId="shell-types"
+  defaultValue="bash"
+  values={[
+    { label: 'Shell', value: 'bash', },
+    { label: 'PowerShell', value: 'powershell', },
+  ]
+}>
+<TabItem value="bash">
 
 ```bash
 c8y operations list --status "PENDING" --dateTo "-14d" --includeAll |  # get list of operations
@@ -104,42 +258,168 @@ c8y operations list --status "PENDING" --dateTo "-14d" --includeAll |  # get lis
         --progress
 ```
 
-A few notes about the usage of the progress indicator. When using the `--progress` parameter it will no longer write the response to standard output, however you can still redirect the output to file.
+</TabItem>
+<TabItem value="powershell">
+
+```powershell
+Get-OperationCollection -Status "PENDING" -DateTo "-14d" -IncludeAll |  # get list of operations
+    Update-Operation `
+        -Status "FAILED" `
+        -FailureReason "Cancelled stale operation as it was older than 14 days" `
+        -Workers 5 `
+        -Delay 250 `
+        -Progress
+```
+
+</TabItem>
+</Tabs>
+
+A few notes about the usage of the progress indicator. When using the `progress` parameter it will no longer write the response to standard output, however you can still redirect the output to file.
+
+<Tabs
+  groupId="shell-types"
+  defaultValue="bash"
+  values={[
+    { label: 'Shell', value: 'bash', },
+    { label: 'PowerShell', value: 'powershell', },
+  ]
+}>
+<TabItem value="bash">
 
 ```bash
-c8y operations list ... | c8y operations update 
+c8y operations list --status PENDING --dateFrom "-14d" |
+    c8y operations update --progress > myoutput.json
 ```
+
+</TabItem>
+<TabItem value="powershell">
+
+```powershell
+Get-OperationCollection -Status PENDING -DateFrom "-14d" | batch |
+    Update-Operation -Status -Progress > myoutput.json
+```
+
+</TabItem>
+</Tabs>
+
+
+Before starting a command which will iterate over a large list of objects, it is helpful to first check how many objects exist to see if it aligns with your expectations to reduce the risk of modifying unexpected objects.
+
+<Tabs
+  groupId="shell-types"
+  defaultValue="bash"
+  values={[
+    { label: 'Shell', value: 'bash', },
+    { label: 'PowerShell', value: 'powershell', },
+  ]
+}>
+<TabItem value="bash">
 
 ```bash
 c8y operations list --status "PENDING" --dateTo "-14d" --withTotalPages --pageSize 1
 ```
 
-### Shell
+</TabItem>
+<TabItem value="powershell">
 
-#### Piping ids
+```powershell
+Get-OperationCollection -Status PENDING -DateFrom "-14d" -WithTotalPages -PageSize 1
+```
+
+</TabItem>
+</Tabs>
+
+
+## Examples
+
+### Piping ids
+
+<Tabs
+  groupId="shell-types"
+  defaultValue="bash"
+  values={[
+    { label: 'Shell', value: 'bash', },
+    { label: 'PowerShell', value: 'powershell', },
+  ]
+}>
+<TabItem value="bash">
 
 ```bash
 echo -e "12345\n22222" | c8y inventory get
 ```
 
-#### Piping names
+</TabItem>
+<TabItem value="powershell">
+
+```powershell
+12345, 22222 | batch | Get-ManagedObject
+```
+
+</TabItem>
+</Tabs>
+
+
+### Piping names
+
+<Tabs
+  groupId="shell-types"
+  defaultValue="bash"
+  values={[
+    { label: 'Shell', value: 'bash', },
+    { label: 'PowerShell', value: 'powershell', },
+  ]
+}>
+<TabItem value="bash">
 
 ```bash
 echo -e "device01\ndevice02" | c8y inventory get
 ```
 
-#### Create devices
+</TabItem>
+<TabItem value="powershell">
+
+```powershell
+"device01", "device02" | batch | Get-ManagedObject
+```
+
+</TabItem>
+</Tabs>
+
+
+### Creating devices
 
 Use the `c8y util repeat` command to create 5 devices names, then pipe the names to `c8y devices create`
 
+<Tabs
+  groupId="shell-types"
+  defaultValue="bash"
+  values={[
+    { label: 'Shell', value: 'bash', },
+    { label: 'PowerShell', value: 'powershell', },
+  ]
+}>
+<TabItem value="bash">
+
 ```bash
 c8y util repeat 5 --format "device_%s%04s" |
-    c8y devices create --template "{ other_props: {}, type: 'ci_Test'  }" --select id,name,type
+    c8y devices create --template "{ other_props: {}, type: 'ci_Test' }" \
+        --select id,name,type
 ```
 
-**Output**
+</TabItem>
+<TabItem value="powershell">
 
-```bash
+```powershell
+c8y util repeat 5 --format "device_%s%04s" |
+    batch |
+    New-Device -Template "{ other_props: {}, type: 'ci_Test' }" -Select id,name,type
+```
+
+</TabItem>
+</Tabs>
+
+
+```bash title="output"
 | id                    | name                       | type                   |
 |-----------------------|----------------------------|------------------------|
 | 481033                | device_0001                | ci_Test                |
@@ -151,14 +431,13 @@ c8y util repeat 5 --format "device_%s%04s" |
 
 Alternatively the linux command `seq` can be used to create devices names to be piped to the create command.
 
+
 ```
 seq -f device_%04g 6 10 |
     c8y devices create --template "{ other_props: {}, type: 'ci_Test' }" --select id,name,type
 ```
 
-**Response**
-
-```
+```bash title="output"
 | id                    | name                       | type                   |
 |-----------------------|----------------------------|------------------------|
 | 481036                | device_0006                | ci_Test                |
@@ -168,107 +447,285 @@ seq -f device_%04g 6 10 |
 | 480862                | device_0010                | ci_Test                |
 ```
 
-#### Piping json
+### Piping json
 
 c8y also accepts piped json input (each line must represent a json object, this is automatically handled by c8y when piping to other c8y commands)
 
+
+<Tabs
+  groupId="shell-types"
+  defaultValue="bash"
+  values={[
+    { label: 'Shell', value: 'bash', },
+    { label: 'PowerShell', value: 'powershell', },
+  ]
+}>
+<TabItem value="bash">
 
 ```bash
 c8y inventory find --query="not(has(myTag))" |
     c8y inventory update --data "myTag={}" --dry
 ```
 
+</TabItem>
+<TabItem value="powershell">
+
+```powershell
+Find-ManagedObject -Query="not(has(myTag))" | batch |
+    Update-ManagedObject -Data "myTag={}" -Dry
+```
+
+</TabItem>
+</Tabs>
+
+
 Or if you are just want to update a single item
+
+<Tabs
+  groupId="shell-types"
+  defaultValue="bash"
+  values={[
+    { label: 'Shell', value: 'bash', },
+    { label: 'PowerShell', value: 'powershell', },
+  ]
+}>
+<TabItem value="bash">
 
 ```bash
 c8y inventory get --id=12345 | c8y inventory update --data "myTag={}" --dry
 ```
 
+</TabItem>
+<TabItem value="powershell">
+
+```powershell
+Get-ManagedObject -Id 12345 | Update-ManagedObject -Data "myTag={}" -Dry
+```
+
+</TabItem>
+</Tabs>
+
 ### Chaining commands and using templates
 
-```
+<Tabs
+  groupId="shell-types"
+  defaultValue="bash"
+  values={[
+    { label: 'Shell', value: 'bash', },
+    { label: 'PowerShell', value: 'powershell', },
+  ]
+}>
+<TabItem value="bash">
+
+```bash
 c8y devices create --name "myname" |
     c8y identity create --type c8y_Serial --template "{ externalId: input.value.name }"
 ```
 
-```bash
+</TabItem>
+<TabItem value="powershell">
+
+```powershell
+New-Device -Name "myname" |
+    New-ExternalId -Type c8y_Serial -Template "{ externalId: input.value.name }"
+```
+
+</TabItem>
+</Tabs>
+
+
+```bash title="output"
 | type            | externalId  | managedObject.id |
 |-----------------|-------------|------------------|
 | c8y_Serial      | myname      | 484203           |
 ```
 
-#### Piping inventory items and us multiple workers to speed up the action
+### Piping inventory items and us multiple workers to speed up the action
+
+<Tabs
+  groupId="shell-types"
+  defaultValue="bash"
+  values={[
+    { label: 'Shell', value: 'bash', },
+    { label: 'PowerShell', value: 'powershell', },
+  ]
+}>
+<TabItem value="bash">
 
 ```bash
-c8y inventory list --pageSize 15 | c8y devices get --workers 5
+c8y inventory list --pageSize 15 | c8y inventory get --workers 5
 ```
 
+</TabItem>
+<TabItem value="powershell">
+
+```powershell
+Get-ManagedObjectCollection -PageSize 15 | batch | Get-ManagedObject -Workers 5
+```
+
+</TabItem>
+</Tabs>
+
+
 However if you are getting a list of devices, then you can just pipe the values directly
+
+<Tabs
+  groupId="shell-types"
+  defaultValue="bash"
+  values={[
+    { label: 'Shell', value: 'bash', },
+    { label: 'PowerShell', value: 'powershell', },
+  ]
+}>
+<TabItem value="bash">
 
 ```bash
 echo "1111\n2222" | c8y inventory get | c8y devices get --workers 1
 ```
 
-#### Piping data from files
+</TabItem>
+<TabItem value="powershell">
+
+```powershell
+"1111", "2222" | batch | Get-ManagedObject -Workers 1
+```
+
+</TabItem>
+</Tabs>
+
+
+## Piping data from files
 
 The following show examples of the support files inputs that can be piped to c8y commands. All of the examples retrieve operations related to each input device.
 
-##### List of ids
+### List of ids
 
-*file: ids.txt (Comma Separated Variables (csv) - comma delimited)*
-
-```text
+```json title="file: ids.txt (Comma Separated Variables (csv) - comma delimited)"
 1111
 2222
 3333
 4444    
 ```
 
+<Tabs
+  groupId="shell-types"
+  defaultValue="bash"
+  values={[
+    { label: 'Shell', value: 'bash', },
+    { label: 'PowerShell', value: 'powershell', },
+  ]
+}>
+<TabItem value="bash">
+
 ```bash
 cat input.txt | c8y operations list
 ```
 
-##### List of names
+</TabItem>
+<TabItem value="powershell">
 
-*file: names.txt (Comma Separated Variables (csv) - comma delimited)*
+```powershell
+Get-Content input.txt | batch | Get-OperationCollection
+```
 
-```text
+</TabItem>
+</Tabs>
+
+### List of names
+
+```json title="file: names.txt (Comma Separated Variables (csv) - comma delimited)"
 MyActualName1
 MyActualName2
 MyActualName3
 MyActualName4    
 ```
 
+<Tabs
+  groupId="shell-types"
+  defaultValue="bash"
+  values={[
+    { label: 'Shell', value: 'bash', },
+    { label: 'PowerShell', value: 'powershell', },
+  ]
+}>
+<TabItem value="bash">
+
 ```bash
-cat input.txt | c8y operations list
+cat names.txt | c8y operations list
 ```
 
-##### CSV list (first column with id)
+</TabItem>
+<TabItem value="powershell">
 
-*file: input.txt (Comma Separated Variables (csv) - comma delimited)*
+```powershell
+Get-Content names.txt | batch | Get-OperationCollection
+```
 
-```csv
+</TabItem>
+</Tabs>
+
+### CSV list (first column with id)
+
+```csv title="file: input.txt (Comma Separated Variables (csv) - comma delimited)"
 1111,MyActualName1
 2222,MyActualName2
 3333,MyActualName3
 4444,MyActualName4    
 ```
 
+<Tabs
+  groupId="shell-types"
+  defaultValue="bash"
+  values={[
+    { label: 'Shell', value: 'bash', },
+    { label: 'PowerShell', value: 'powershell', },
+  ]
+}>
+<TabItem value="bash">
+
 ```bash
 cat input.txt | c8y operations list
 ```
 
-##### JSON Lines
+</TabItem>
+<TabItem value="powershell">
 
-*file: input.json (JSON lines)*
+```powershell
+Get-Content input.txt | batch | Get-OperationCollection
+```
 
-```json
+</TabItem>
+</Tabs>
+
+### JSON Lines
+
+```json title="file: input.json (JSON lines)"
 {"name": "MyActualName1", "id": "1111", "c8y_Hardware": {"serialNumber": "UNIQUE_ID_1"}}
 {"name": "MyActualName2", "id": "2222", "c8y_Hardware": {"serialNumber": "UNIQUE_ID_2"}}
 {"name": "MyActualName3", "id": "3333", "c8y_Hardware": {"serialNumber": "UNIQUE_ID_3"}}
 {"name": "MyActualName4", "id": "4444", "c8y_Hardware": {"serialNumber": "UNIQUE_ID_4"}}    
 ```
 
+<Tabs
+  groupId="shell-types"
+  defaultValue="bash"
+  values={[
+    { label: 'Shell', value: 'bash', },
+    { label: 'PowerShell', value: 'powershell', },
+  ]
+}>
+<TabItem value="bash">
+
 ```bash
 cat input.json | c8y operations list
 ```
+
+</TabItem>
+<TabItem value="powershell">
+
+```powershell
+Get-Content input.json | batch | Get-OperationCollection
+```
+
+</TabItem>
+</Tabs>

@@ -21,6 +21,7 @@ Watch-ManagedObject
 	[[-Device] <Object>]
 	[[-Duration] <Int32>]
 	[[-Count] <Int32>]
+	[[-ActionTypes] <String[]>]
 	[<CommonParameters>]
 ```
 
@@ -79,6 +80,22 @@ Aliases:
 Required: False
 Position: 3
 Default value: 0
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -ActionTypes
+Filter by realtime action types, i.e.
+CREATE,UPDATE,DELETE
+
+```yaml
+Type: String[]
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 4
+Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
 ```

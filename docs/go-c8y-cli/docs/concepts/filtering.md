@@ -1,14 +1,17 @@
 ---
 layout: default
 category: Concepts
-title: Shell - Filtering
+title: Filtering (client side)
 ---
 
-### Filtering (client side)
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
 
-The response returned from the platform can also be filtered on the client side by using the `--filter` argument.
+## Supported operators
 
-The `--filter` parameter uses a query language which supports the following operators:
+The response returned from the platform can also be filtered on the client side by using the `filter` argument.
+
+The `filter` parameter uses a query language which supports the following operators:
 
 |operator|description|usage|
 |--------|-----------|-----|
@@ -29,8 +32,37 @@ The `--filter` parameter uses a query language which supports the following oper
 |lenlt|match length less than value of (string/array/map)|`--filter "name lenlt 10"` or `--filter "childAdditions.references lenlt 1"`|
 |lenlte|match length less than or equal to value of (string/array/map)|`--filter "name lenlte 10"` or `--filter "childAdditions.references lenlte 1"`|
 
-#### Filtering application with name that start with "co*"
+
+## Examples
+
+### Filtering application with name that start with "co*"
+
+<Tabs
+  groupId="shell-types"
+  defaultValue="bash"
+  values={[
+    { label: 'Shell', value: 'shell', },
+    { label: 'PowerShell', value: 'powershell', },
+  ]
+}>
+<TabItem value="shell">
 
 ```bash
-applications list --pageSize 100 --filter "name like co*"
+c8y applications list --pageSize 100 --filter "name like co*"
+```
+
+</TabItem>
+<TabItem value="powershell">
+
+```powershell
+Get-ApplicationCollection -PageSize 100 -Filter "name like co*"
+```
+
+</TabItem>
+</Tabs>
+
+```csv title="output"
+| id         | name         | key                          | type        | availability |
+|------------|--------------|------------------------------|-------------|--------------|
+| 8          | cockpit      | cockpit-application-key      | HOSTED      | MARKET       |
 ```

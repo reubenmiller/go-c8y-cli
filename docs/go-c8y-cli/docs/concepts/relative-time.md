@@ -47,6 +47,7 @@ The relative time and dates is supported in any commands which have the followin
 
 
 <Tabs
+  groupId="shell-types"
   defaultValue="bash"
   values={[
     { label: 'Shell', value: 'bash', },

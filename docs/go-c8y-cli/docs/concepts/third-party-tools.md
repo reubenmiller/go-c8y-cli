@@ -1,11 +1,9 @@
 ---
-layout: default
-category: Concepts
 title: Usage with 3rd party tools
 ---
 
 
-### Re-using sessions information in 3rd party tools like curl
+## Re-using sessions information in 3rd party tools like curl
 
 When a session is activated (via the `set-session` helper), environment variables are set containing information about the current session. This information can be re-used for other 3rd party tools like curl.
 
@@ -17,7 +15,7 @@ The `C8Y_HEADER_AUTHORIZATION` environment variable contains the authorization h
 
 The examples below will show how these environment variables can be used in both shell (bash/zsh) and PowerShell.
 
-#### bash-zsh: Sending c8y api requests using curl
+### Bash/zsh: Sending c8y api requests using curl
 
 **Get current user details**
 
@@ -55,7 +53,7 @@ c8ycurl "inventory/managedObjects?pageSize=1&q=\$filter=name+eq+'*'" -H "Accept:
 c8ycurl "inventory/managedObjects" -XPOST -H "Accept: application/json" -H "Content-Type: application/json" -d "{\"name\":\"device_name\"}"
 ```
 
-#### PowerShell: Sending c8y api requests using native PowerShell
+### PowerShell: Sending c8y api requests using native PowerShell
 
 To send native PowerShell requests, the session environment variables can be re-used. 
 
