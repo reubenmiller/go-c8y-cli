@@ -143,7 +143,7 @@ endpoints:
 
       go:
         - description: Create operation for a device
-          command: c8y operations create --device mydevice --data "{c8y_Restart:{}}"
+          command: c8y operations create --device mydevice --data "c8y_Restart={}"
     alias:
         go: create
         powershell: New-Operation

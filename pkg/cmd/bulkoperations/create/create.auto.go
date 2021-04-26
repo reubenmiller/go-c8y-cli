@@ -34,8 +34,11 @@ func NewCreateCmd(f *cmdutil.Factory) *CreateCmd {
 		Short: "Create bulk operation",
 		Long:  `Create a new bulk operation`,
 		Example: heredoc.Doc(`
-$ c8y operations create --device mydevice --data "{c8y_Restart:{}}"
-Create operation for a device
+$ c8y bulkoperations create --group 1234 --startDate "60s" --creationRampSec 15 --operation "c8y_Restart={}"
+Create bulk operation for a group
+
+$ c8y devicegroups get --id 12345 | c8y bulkoperations create --startDate "10s" --creationRampSec 15 --operation "c8y_Restart={}"
+Create bulk operation for a group (using pipeline)
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
 			return f.CreateModeEnabled()
