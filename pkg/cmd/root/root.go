@@ -192,6 +192,9 @@ func NewCmdRoot(f *cmdutil.Factory, version, buildDate string) *CmdRoot {
 	cmd.PersistentFlags().String("outputFile", "", "Save JSON output to file (after select/view)")
 	cmd.PersistentFlags().String("outputFileRaw", "", "Save raw response to file (before select/view)")
 
+	// input parsing
+	cmd.PersistentFlags().BoolP(flags.FlagNullInput, "n", false, "Don't read the input (stdin). Useful if using in shell for/while loops")
+
 	// confirmation
 	cmd.PersistentFlags().BoolP("force", "f", false, "Do not prompt for confirmation. Ignored when using --confirm")
 	cmd.PersistentFlags().Bool("confirm", false, "Prompt for confirmation")
@@ -461,6 +464,11 @@ func (c *CmdRoot) checkSessionExists(cmd *cobra.Command, args []string) error {
 		if _, err := os.Stat(sessionFile); err != nil {
 			log.Warnf("Failed to verify session file. %s", err)
 		}
+	}
+
+	if cfg.DisableStdin() {
+		// Note: Stdin is disabled elsewhere
+		log.Info("Disabling reading from stdin (does not accept piped data)")
 	}
 
 	log.Debugf("command str: %s", cmdStr)

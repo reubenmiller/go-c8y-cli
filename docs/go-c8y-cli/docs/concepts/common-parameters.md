@@ -951,6 +951,12 @@ If you are in doubt about which proxy settings are being used when running a com
 
 ---
 
+### nullInput
+
+Disable reading from standard input (stdin). Useful if you are already redirecting to stdin inside a bash for/while loop.
+
+---
+
 ### output
 
 Output format i.e. table, json, csv, csvheader (default "table" (on terminal) otherwise "json")

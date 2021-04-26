@@ -125,6 +125,7 @@ func (n *CmdRepeat) newTemplate(cmd *cobra.Command, args []string) error {
 	_, input, err := flags.WithPipelineIterator(&flags.PipelineOptions{
 		Name:        "input",
 		InputFilter: func(b []byte) bool { return true },
+		Disabled:    inputIterators.PipeOptions.Disabled,
 		Required:    false,
 	})(cmd, inputIterators)
 

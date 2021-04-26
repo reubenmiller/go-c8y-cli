@@ -73,6 +73,7 @@ func (n *CmdShow) RunE(cmd *cobra.Command, args []string) error {
 	_, input, err := flags.WithPipelineIterator(&flags.PipelineOptions{
 		Name:        "input",
 		InputFilter: flags.FilterJsonLines,
+		Disabled:    inputIterators.PipeOptions.Disabled,
 		Required:    true,
 	})(cmd, inputIterators)
 

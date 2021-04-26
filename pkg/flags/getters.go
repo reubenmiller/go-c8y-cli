@@ -658,6 +658,7 @@ func WithRequiredProperties(values ...string) GetOption {
 type PipelineOptions struct {
 	Name        string              `json:"name"`
 	Required    bool                `json:"required"`
+	Disabled    bool                `json:"disabled"`
 	Property    string              `json:"property"`
 	Aliases     []string            `json:"aliases"`
 	IsID        bool                `json:"isID"`
@@ -680,6 +681,10 @@ func WithPipelineIterator(opts *PipelineOptions) GetOption {
 // NewRequestInputIterators returns input iterations with the pipeline options loaded from the annotations
 func NewRequestInputIterators(cmd *cobra.Command) (*RequestInputIterators, error) {
 	pipeOpts, err := GetPipeOptionsFromAnnotation(cmd)
+
+	if disableStdin, _ := cmd.Root().PersistentFlags().GetBool(FlagNullInput); disableStdin {
+		pipeOpts.Disabled = disableStdin
+	}
 	inputIter := &RequestInputIterators{
 		PipeOptions: pipeOpts,
 	}

@@ -227,6 +227,9 @@ const (
 
 	// SettingsLoggerHideSensitive hide sensitive information in log entries
 	SettingsLoggerHideSensitive = "settings.logger.hideSensitive"
+
+	// SettingsDisableInput disable reading from stdin (pipeline input)
+	SettingsDisableInput = "settings.defaults.nullInput"
 )
 
 var (
@@ -1078,6 +1081,11 @@ func (c *Config) GetActivityLogMethodFilter() string {
 // HideSensitive hide sensitive information in log entries
 func (c *Config) HideSensitive() bool {
 	return c.viper.GetBool(SettingsLoggerHideSensitive)
+}
+
+// DisableStdin hide sensitive information in log entries
+func (c *Config) DisableStdin() bool {
+	return c.viper.GetBool(SettingsDisableInput)
 }
 
 // GetConfigPath get global settings file path
