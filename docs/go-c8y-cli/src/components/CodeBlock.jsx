@@ -14,17 +14,76 @@ const c8yCommands = {
     'c8y alarms get': 'Get-Alarm',
     'c8y alarms delete': 'Remove-Alarm',
     'c8y alarms subscribe': 'Watch-Alarm',
-    'c8y alarms list': 'New-AlarmCollection',
+    'c8y alarms list': 'Get-AlarmCollection',
 
     // events
     'c8y events create': 'New-Event',
     'c8y events get': 'Get-Event',
     'c8y events delete': 'Remove-Event',
     'c8y events subscribe': 'Watch-Event',
-    'c8y events list': 'New-EventCollection',
+    'c8y events list': 'Get-EventCollection',
+
+    // operations
+    'c8y operations create': 'New-Operation',
+    'c8y operations get': 'Get-Operation',
+    'c8y operations delete': 'Remove-Operation',
+    'c8y operations subscribe': 'Watch-Operation',
+    'c8y operations list': 'Get-OperationCollection',
+
+    // auditrecords
+    'c8y auditrecords create': 'New-AuditRecord',
+    'c8y auditrecords get': 'Get-AuditRecord',
+    'c8y auditrecords delete': 'Remove-AuditRecord',
+    'c8y auditrecords subscribe': 'Watch-AuditRecord',
+    'c8y auditrecords list': 'Get-AuditRecordCollection',
 
     'c8y devices list': 'New-DeviceCollection',
+
+    'c8y inventory update': 'Update-ManagedObject',
+    'c8y inventory list': 'Get-ManagedObjectCollection',
+    'c8y inventory find': 'Find-ManagedObjectCollection',
+    'c8y inventory findByText': 'Find-ByTextManagedObjectCollection',
+
+    'c8y devicegroups list': 'Get-DeviceGroupCollection',
+    'c8y devicegroups assignDevice': 'Add-DeviceToGroup',
+    'c8y devicegroups unassignDevice': 'Remove-DeviceFromGroup',
+    'c8y devicegroups listAssets': 'Get-DeviceGroupChildAssetCollection',
+    
+    'c8y applications createHostedApplication': 'New-HostedApplication',
+    'c8y applications list': 'Get-ApplicationCollection',
+    'c8y applications get': 'Get-Application',
+    'c8y applications update': 'Update-Application',
+    'c8y applications delete': 'Remove-Application',
+    
+    // microservices
+    'c8y microservices get': 'Get-Microservice',
+    'c8y microservices list': 'Get-MicroserviceCollection',
+    'c8y microservices update': 'Update-Microservice',
+    'c8y microservices delete': 'Delete-Microservice',
+    'c8y microservices create': 'New-Microservice',
+    'c8y microservices enable': 'Enable-Microservice',
+    'c8y microservices disable': 'Disable-Microservice',
+    'c8y microservices getBootstrapUser': 'Get-MicroserviceBootstrapUser',
+    
+    'c8y sessions create': 'New-Session',
+    'c8y currentuser get': 'Get-CurrentUser',
+    'set-session': 'Set-Session',
+    
+    'cat ': 'Get-Content ',
+    '-o csv': '--output csv',
+    '-o json': '--output json',
+    
 };
+
+function convertToCmdlets(code = '') {
+    const keys = Object.keys(c8yCommands);
+    for (let index = 0; index < keys.length; index++) {
+        const element = c8yCommands[keys[index]];
+        code = code.replaceAll(keys[index], element);
+    }
+    code = code.replaceAll('\\', '`');
+    return code;
+}
 
 function getCmdlet(parts) {
     let cmdlet = '';
@@ -49,9 +108,9 @@ function getCmdlet(parts) {
 }
 
 function transformToPowerShell(code = '') {
-    let parts = code.split(' ');
+    let parts = convertToCmdlets(code).split(' ');
 
-    parts = getCmdlet(parts);
+    // parts = getCmdlet(parts);
 
     if (parts.length) {
         for (let i = 0; i < parts.length; i++) {
@@ -61,7 +120,7 @@ function transformToPowerShell(code = '') {
             }
         }
     }
-    return parts.join(' ').replace('\\', '`');
+    return parts.join(' ');
 }
 
 

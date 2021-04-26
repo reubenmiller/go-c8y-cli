@@ -2,8 +2,6 @@
 title: Alarms
 ---
 
-import Tabs from '@theme/Tabs';
-import TabItem from '@theme/TabItem';
 import CodeExample from '@site/src/components/CodeExample';
 
 ## Get

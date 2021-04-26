@@ -4,8 +4,7 @@ category: Concepts
 title: Relative time/dates
 ---
 
-import Tabs from '@theme/Tabs';
-import TabItem from '@theme/TabItem';
+import CodeExample from '@site/src/components/CodeExample';
 
 ## Using relative time/dates
 
@@ -45,27 +44,10 @@ The relative time and dates is supported in any commands which have the followin
 
 ### Example 1: Get a list of FAILED operations in the last day
 
-
-<Tabs
-  groupId="shell-types"
-  defaultValue="bash"
-  values={[
-    { label: 'Shell', value: 'bash', },
-    { label: 'PowerShell', value: 'powershell', },
-  ]
-}>
-<TabItem value="bash">
+<CodeExample>
 
 ```bash
 c8y operations list --dateFrom "-1d" --status FAILED
 ```
 
-</TabItem>
-<TabItem value="powershell">
-
-```powershell
-Get-OperationCollection -DateFrom "-1d" -Status FAILED
-```
-
-</TabItem>
-</Tabs>
+</CodeExample>

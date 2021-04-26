@@ -2,36 +2,18 @@
 title: DeviceGroups
 ---
 
-import Tabs from '@theme/Tabs';
-import TabItem from '@theme/TabItem';
+import CodeExample from '@site/src/components/CodeExample';
 
 ### Assign devices from a query to a static group
 
-<Tabs
-  groupId="shell-types"
-  defaultValue="bash"
-  values={[
-    { label: 'Shell', value: 'bash', },
-    { label: 'PowerShell', value: 'powershell', },
-  ]
-}>
-<TabItem value="bash">
+<CodeExample>
 
 ```bash
 c8y inventory find --query "agentVersion eq '1.*' and not(bygroupid(123456))" --includeAll |
     c8y devicegroups assignDevice --group 123456 --workers 2 --progress
 ```
 
-</TabItem>
-<TabItem value="powershell">
-
-```powershell
-c8y inventory find --query "agentVersion eq '1.*' and not(bygroupid(123456))" --includeAll |
-    c8y devicegroups assignDevice --group 123456 --workers 2 --progress
-```
-
-</TabItem>
-</Tabs>
+</CodeExample>
 
 
 ### Assign devices from a file to a group
@@ -47,15 +29,7 @@ UNIQUE_ID_4
 
 1. Lookup the c8y id by using a text search (this is case insensitive)
 
-    <Tabs
-    groupId="shell-types"
-    defaultValue="bash"
-    values={[
-        { label: 'Shell', value: 'bash', },
-        { label: 'PowerShell', value: 'powershell', },
-    ]
-    }>
-    <TabItem value="bash">
+    <CodeExample>
 
     ```bash
     cat list.txt |
@@ -65,19 +39,8 @@ UNIQUE_ID_4
             -o csv > list.ids.csv
     ```
 
-    </TabItem>
-    <TabItem value="powershell">
+    </CodeExample>
 
-    ```powershell
-    cat list.txt |
-        c8y inventory findByText \
-            --fragmentType c8y_IsDevice \
-            --select id,name,c8y_Hardware.serialNumber \
-            -o csv > list.ids.csv
-    ```
-
-    </TabItem>
-    </Tabs>
 
     ```bash title="Output file: list.ids.csv"
     1111,MyActualName1,UNIQUE_ID_1
@@ -88,57 +51,24 @@ UNIQUE_ID_4
 
 2. Check the file to verify that everything looks ok
 
-    <Tabs
-    groupId="shell-types"
-    defaultValue="bash"
-    values={[
-        { label: 'Shell', value: 'bash', },
-        { label: 'PowerShell', value: 'powershell', },
-    ]
-    }>
-    <TabItem value="bash">
+    <CodeExample>
 
     ```bash
     cat list.ids.csv | more
     ```
 
-    </TabItem>
-    <TabItem value="powershell">
-
-    ```powershell
-    Get-Content list.ids.csv | more
-    ```
-
-    </TabItem>
-    </Tabs>
+    </CodeExample>
 
 3. Assign the devices to a single static group
 
-    <Tabs
-    groupId="shell-types"
-    defaultValue="bash"
-    values={[
-        { label: 'Shell', value: 'bash', },
-        { label: 'PowerShell', value: 'powershell', },
-    ]
-    }>
-    <TabItem value="bash">
+    <CodeExample>
 
     ```bash
     cat list.ids.csv |
         c8y devicegroups assignDevice --group 1234 --workers 2 --progress --silentStatusCodes 409
     ```
 
-    </TabItem>
-    <TabItem value="powershell">
-
-    ```powershell
-    cat list.ids.csv |
-        c8y devicegroups assignDevice --group 1234 --workers 2 --progress --silentStatusCodes 409
-    ```
-
-    </TabItem>
-    </Tabs>
+    </CodeExample>
 
     The `silentStatusCodes` parameter is used to silence 409 (duplicate) errors, as we don't care if the device is already assigned to the group.
 
@@ -164,15 +94,7 @@ UNIQUE_ID_4
 
 ### Assign devices where the operation was set to FAILED in a bulk operation
 
-<Tabs
-  groupId="shell-types"
-  defaultValue="bash"
-  values={[
-    { label: 'Shell', value: 'bash', },
-    { label: 'PowerShell', value: 'powershell', },
-  ]
-}>
-<TabItem value="bash">
+<CodeExample>
 
 ```bash
 # Create a new group
@@ -183,9 +105,6 @@ c8y operations list --bulkOperationId 8 --status FAILED --includeAll |
     c8y devicegroups assignDevice --group $group --workers 2 --progress --silentStatusCodes 409
 ```
 
-</TabItem>
-<TabItem value="powershell">
-
 ```powershell
 # Create a new group
 $group = c8y devicegroups create --name "my_custom_group" --output csv --select id
@@ -195,38 +114,21 @@ c8y operations list --bulkOperationId 8 --status FAILED --includeAll |
     c8y devicegroups assignDevice --group $group --workers 2 --progress --silentStatusCodes 409
 ```
 
-</TabItem>
-</Tabs>
+</CodeExample>
 
 ### Unassign devices from a group which match a custom inventory query
 
 The Cumulocity inventory query language supports a the `bygroupid(x)` operator which checks if a device belongs to a group. This allows a custom query to be run without needing to first get a list of devices that are already assigned to the group. 
 
-<Tabs
-  groupId="shell-types"
-  defaultValue="bash"
-  values={[
-    { label: 'Shell', value: 'bash', },
-    { label: 'PowerShell', value: 'powershell', },
-  ]
-}>
-<TabItem value="bash">
+
+<CodeExample>
 
 ```bash
 c8y inventory find --query "agentVersion eq '1.*' and bygroupid(123456)" --includeAll |
     c8y devicegroups unassignDevice --group 123456 --workers 2 --progress
 ```
 
-</TabItem>
-<TabItem value="powershell">
-
-```powershell
-c8y inventory find --query "agentVersion eq '1.*' and bygroupid(123456)" --includeAll |
-    c8y devicegroups unassignDevice --group 123456 --workers 2 --progress
-```
-
-</TabItem>
-</Tabs>
+</CodeExample>
 
 ```json title="Output"
 elapsed 01:34   (started: 2021-04-13T11:27:36+02:00)  ⠸ total requests sent:  399

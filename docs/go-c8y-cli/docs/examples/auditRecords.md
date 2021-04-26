@@ -2,8 +2,7 @@
 title: Audit Records
 ---
 
-import Tabs from '@theme/Tabs';
-import TabItem from '@theme/TabItem';
+import CodeExample from '@site/src/components/CodeExample';
 
 ## Get
 
@@ -11,29 +10,14 @@ import TabItem from '@theme/TabItem';
 
 The history of an alarm can be recalled by using the following: 
 
-<Tabs
-  groupId="shell-types"
-  defaultValue="bash"
-  values={[
-    { label: 'Shell', value: 'bash', },
-    { label: 'PowerShell', value: 'powershell', },
-  ]
-}>
-<TabItem value="bash">
+<CodeExample>
 
 ```bash
 c8y alarms get --id 70657 | c8y auditrecords list
 ```
 
-</TabItem>
-<TabItem value="powershell">
+</CodeExample>
 
-```powershell
-Get-Alarm -Id 70657 | Get-AuditRecordCollection
-```
-
-</TabItem>
-</Tabs>
 
 ```plaintext title="Output"
 | id          | time                          | type       | AuditSourceDevice | activity           | text                                                      | user          | source.id   |
@@ -45,29 +29,13 @@ Get-Alarm -Id 70657 | Get-AuditRecordCollection
 
 The history of an operation can be recalled by using the following:
 
-<Tabs
-  groupId="shell-types"
-  defaultValue="bash"
-  values={[
-    { label: 'Shell', value: 'bash', },
-    { label: 'PowerShell', value: 'powershell', },
-  ]
-}>
-<TabItem value="bash">
+<CodeExample>
 
 ```bash
 c8y operations get --id 497931 | c8y auditrecords list
 ```
 
-</TabItem>
-<TabItem value="powershell">
-
-```powershell
-Get-Operation -Id 497931 | Get-AuditRecordCollection
-```
-
-</TabItem>
-</Tabs>
+</CodeExample>
 
 ```plaintext title="Output"
 | id          | time                          | type           | AuditSourceDevice | activity               | text                                                                                  | user          | source.id   |
@@ -82,15 +50,7 @@ Get-Operation -Id 497931 | Get-AuditRecordCollection
 
 ### Create audit record related to a device
 
-<Tabs
-  groupId="shell-types"
-  defaultValue="bash"
-  values={[
-    { label: 'Shell', value: 'bash', },
-    { label: 'PowerShell', value: 'powershell', },
-  ]
-}>
-<TabItem value="bash">
+<CodeExample>
 
 ```bash
 c8y auditrecords create \
@@ -102,21 +62,7 @@ c8y auditrecords create \
     --severity "information"
 ```
 
-</TabItem>
-<TabItem value="powershell">
-
-```powershell
-New-AuditRecord `
-    -Type "ManagedObject" `
-    -Time "0s" `
-    -Text "Managed Object updated: my_Prop: value" `
-    -Source "497835" `
-    -Activity "Managed Object updated" `
-    -Severity "information"
-```
-
-</TabItem>
-</Tabs>
+</CodeExample>
 
 
 ```plaintext title="Output"

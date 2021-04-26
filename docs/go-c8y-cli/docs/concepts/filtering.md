@@ -4,8 +4,7 @@ category: Concepts
 title: Filtering (client side)
 ---
 
-import Tabs from '@theme/Tabs';
-import TabItem from '@theme/TabItem';
+import CodeExample from '@site/src/components/CodeExample';
 
 ## Supported operators
 
@@ -37,29 +36,13 @@ The `filter` parameter uses a query language which supports the following operat
 
 ### Filtering application with name that start with "co*"
 
-<Tabs
-  groupId="shell-types"
-  defaultValue="bash"
-  values={[
-    { label: 'Shell', value: 'shell', },
-    { label: 'PowerShell', value: 'powershell', },
-  ]
-}>
-<TabItem value="shell">
+<CodeExample>
 
 ```bash
 c8y applications list --pageSize 100 --filter "name like co*"
 ```
 
-</TabItem>
-<TabItem value="powershell">
-
-```powershell
-Get-ApplicationCollection -PageSize 100 -Filter "name like co*"
-```
-
-</TabItem>
-</Tabs>
+</CodeExample>
 
 ```csv title="output"
 | id         | name         | key                          | type        | availability |

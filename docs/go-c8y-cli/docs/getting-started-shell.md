@@ -5,21 +5,14 @@ title: Getting started
 
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
+import CodeExample from '@site/src/components/CodeExample';
 
 Before you can send any requests to Cumulocity you need to configure the Cumulocity session which has the details which Cumulocity platform and authentication should be used for each of the commands/requests. This process only needs to be done once.
 
 
 ## Create a new session
 
-<Tabs
-    groupId="shell-types"
-    defaultValue="bash"
-    values={[
-        { label: 'Shell', value: 'bash', },
-        { label: 'PowerShell', value: 'powershell', },
-    ]
-    }>
-<TabItem value="bash">
+<CodeExample>
 
 ```bash
 c8y sessions create \
@@ -28,19 +21,7 @@ c8y sessions create \
     --type dev
 ```
 
-</TabItem>
-<TabItem value="powershell">
-
-```powershell
-New-Session `
-    -Host "https://mytenant.eu-latest.cumulocity.com" \
-    -Username "myUser@me.com" \
-    -Type dev
-```
-
-</TabItem>
-
-</Tabs>
+</CodeExample>
 
 You will be prompted for your password. Alternatively you can also enter the password using the `password` parameter.
 
@@ -75,15 +56,7 @@ set-session eu example
 
 ## Test your credentials by getting your current user information from the platform
 
-<Tabs
-  groupId="shell-types"
-  defaultValue="bash"
-  values={[
-    { label: 'Shell', value: 'bash', },
-    { label: 'PowerShell', value: 'powershell', },
-  ]
-}>
-<TabItem value="bash">
+<CodeExample>
 
 ```bash
 c8y currentuser get
@@ -92,18 +65,7 @@ c8y currentuser get
 c8y devices list
 ```
 
-</TabItem>
-<TabItem value="powershell">
-
-```powershell
-Get-CurrentUser
-
-# or list devices
-Get-DeviceCollection
-```
-
-</TabItem>
-</Tabs>
+</CodeExample>
 
 
 :::note
@@ -115,9 +77,13 @@ If your credentials are incorrect, then you can update the session file stored i
 
 The sessions can be changed again by using the interactive session selector
 
+<CodeExample>
+
 ```bash
 set-session
 ```
+
+</CodeExample>
 
 Alternatively you can switch sessions by calling the c8y binary directly (without the set-session helper)
 
@@ -167,6 +133,10 @@ c8y sessions set --shell=auto --session "/my/path/session.json" | Out-String | I
 
 A single command can be redirected to use another session by using the `session <name>` parameter. A full file path can be provided or just the file name for a file located in session directory defined by the `C8Y_SESSION_HOME` environment variable.
 
+<CodeExample>
+
 ```bash
 c8y devices list --session myothersession.json
 ```
+
+</CodeExample>

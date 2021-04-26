@@ -4,8 +4,7 @@ category: Concepts
 title: Paging
 ---
 
-import Tabs from '@theme/Tabs';
-import TabItem from '@theme/TabItem';
+import CodeExample from '@site/src/components/CodeExample';
 
 ### Limiting query results
 
@@ -42,59 +41,25 @@ If you have a large number of devices and you want to retrieve all of the result
 
 The `includeAll` parameter is used to get all of the results.
 
-<Tabs
-  groupId="shell-types"
-  defaultValue="bash"
-  values={[
-    { label: 'Shell', value: 'bash', },
-    { label: 'PowerShell', value: 'powershell', },
-  ]
-}>
-<TabItem value="bash">
+<CodeExample>
 
 ```bash
 c8y devices list --name "MyDevices*" --includeAll --select "id,name,*.serialNumber" --output csvheader > devicelist.csv
 ```
 
-</TabItem>
-<TabItem value="powershell">
-
-```powershell
-Get-DeviceCollection -Name "MyDevices*" -IncludeAll --select "id,name,*.serialNumber" -Output csvheader > devicelist.csv
-```
-
-</TabItem>
-</Tabs>
-
+</CodeExample>
 
 #### Example: Get total number of devices
 
 The total number of devices can be returned by using the technic of setting the `pageSize` to 1, and using the `withTotalPages` parameter. The result will then contain the total number (in the `.statistics.totalPages` property) of whatever entity you have requested. A view has been added to only display the `statistics` fragment by default.
 
-<Tabs
-  groupId="shell-types"
-  defaultValue="bash"
-  values={[
-    { label: 'Shell', value: 'bash', },
-    { label: 'PowerShell', value: 'powershell', },
-  ]
-}>
-<TabItem value="bash">
+<CodeExample>
 
 ```bash
 c8y devices list --withTotalPages --pageSize 1
 ```
 
-</TabItem>
-<TabItem value="powershell">
-
-```powershell
-Get-DeviceCollection -WithTotalPages -PageSize 1
-```
-
-</TabItem>
-</Tabs>
-
+</CodeExample>
 
 ```json title="output"
 | totalPages | pageSize   | currentPage |
@@ -104,30 +69,13 @@ Get-DeviceCollection -WithTotalPages -PageSize 1
 
 or you can get the raw json response by adding the `raw` parameter
 
-
-<Tabs
-  groupId="shell-types"
-  defaultValue="bash"
-  values={[
-    { label: 'Shell', value: 'bash', },
-    { label: 'PowerShell', value: 'powershell', },
-  ]
-}>
-<TabItem value="bash">
+<CodeExample>
 
 ```bash
 c8y devices list --withTotalPages --pageSize 1 --raw
 ```
 
-</TabItem>
-<TabItem value="powershell">
-
-```powershell
-Get-DeviceCollection -WithTotalPages -PageSize 1 -Raw
-```
-
-</TabItem>
-</Tabs>
+</CodeExample>
 
 ```json title="output"
 {
@@ -218,16 +166,7 @@ TODO
 
 The following shows how to add a fragment `myNewFragment` to each devices where the name starts with "My".
 
-
-<Tabs
-  groupId="shell-types"
-  defaultValue="bash"
-  values={[
-    { label: 'Shell', value: 'bash', },
-    { label: 'PowerShell', value: 'powershell', },
-  ]
-}>
-<TabItem value="bash">
+<CodeExample>
 
 ```bash
 c8y devices list --name "My*" --includeAll |
@@ -238,46 +177,25 @@ c8y devices list --name "My*" --includeAll |
   c8y devices update --template "{ myNewFragment: {fragmentCreationTime: _.Now('0s') }}"
 ```
 
-</TabItem>
-<TabItem value="powershell">
-
 ```powershell
 Get-DeviceCollection -Name "My*" -IncludeAll |
-    Update-ManagedObject -Data "myNewFragment.fragmentCreationTime=$(Format-Date)"
+  Update-ManagedObject -Data "myNewFragment.fragmentCreationTime=$(Format-Date)"
 
 # or using templates
 Get-DeviceCollection -Name "My*" -IncludeAll |
-    Update-ManagedObject -Template "{ myNewFragment: {fragmentCreationTime: _.Now('0s') }}"
+  Update-ManagedObject -Template "{ myNewFragment: {fragmentCreationTime: _.Now('0s') }}"
 ```
 
-</TabItem>
-</Tabs>
-
+</CodeExample>
 
 ### Setting a default pageSize
 
 The default pageSize can be controlled via the session or `settings` file or in your session file.
 
-<Tabs
-  groupId="shell-types"
-  defaultValue="bash"
-  values={[
-    { label: 'Shell', value: 'bash', },
-    { label: 'PowerShell', value: 'powershell', },
-  ]
-}>
-<TabItem value="bash">
+<CodeExample>
 
 ```bash
 c8y settings update defaults.pageSize 20
 ```
 
-</TabItem>
-<TabItem value="powershell">
-
-```powershell
-c8y settings update defaults.pageSize 20
-```
-
-</TabItem>
-</Tabs>
+</CodeExample>
