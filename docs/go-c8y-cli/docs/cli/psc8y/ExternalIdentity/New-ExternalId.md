@@ -78,7 +78,7 @@ Create external identity
 
 ### EXAMPLE 2
 ```
-Get-Device $Device.id | New-ExternalId -Type "$my_SerialNumber" -Name "myserialnumber"
+Get-Device $Device.id | New-ExternalId -Type "$my_SerialNumber" -Template "{ externalId: input.value.name }"
 ```
 
 Create external identity (using pipeline)

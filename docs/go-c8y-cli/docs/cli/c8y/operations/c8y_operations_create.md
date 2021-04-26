@@ -15,7 +15,7 @@ c8y operations create [flags]
 ### Examples
 
 ```
-$ c8y operations create --device mydevice --data "{c8y_Restart:{}}"
+$ c8y operations create --device mydevice --data "c8y_Restart={}"
 Create operation for a device
         
 ```
@@ -56,6 +56,7 @@ Create operation for a device
   -M, --noColor                    Don't use colors when displaying log entries on the console
       --noLog                      Disables the activity log for the current command
       --noProxy                    Ignore the proxy settings
+  -n, --nullInput                  Don't read the input (stdin). Useful if using in shell for/while loops
   -o, --output string              Output format i.e. table, json, csv, csvheader (default "table")
       --outputFile string          Save JSON output to file (after select/view)
       --outputFileRaw string       Save raw response to file (before select/view)

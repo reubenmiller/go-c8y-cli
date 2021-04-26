@@ -61,6 +61,7 @@ Password: {encrypted}ec5b837a03408ffb731307584eac40ac047989a002951e4b7139fa60189
   -M, --noColor                    Don't use colors when displaying log entries on the console
       --noLog                      Disables the activity log for the current command
       --noProxy                    Ignore the proxy settings
+  -n, --nullInput                  Don't read the input (stdin). Useful if using in shell for/while loops
   -o, --output string              Output format i.e. table, json, csv, csvheader (default "table")
       --outputFile string          Save JSON output to file (after select/view)
       --outputFileRaw string       Save raw response to file (before select/view)

@@ -85,7 +85,7 @@ Upload application zip file containing the web application
 
 ### -File
 File or Folder of the web application.
-It should contains a index.html file in the root folder/ or zip file (required)
+It should contains a index.html file in the root folder/ or zip file
 
 ```yaml
 Type: String
@@ -195,7 +195,7 @@ Accept wildcard characters: False
 ```
 
 ### -SkipActivation
-Don't subscribe to the application after it has been created and uploaded
+Don't activate to the application after it has been created and uploaded
 
 ```yaml
 Type: SwitchParameter

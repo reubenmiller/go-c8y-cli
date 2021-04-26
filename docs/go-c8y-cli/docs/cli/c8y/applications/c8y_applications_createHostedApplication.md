@@ -16,9 +16,14 @@ c8y applications createHostedApplication [flags]
 
 ```
 $ c8y applications createHostedApplication --file ./myapp.zip
+Create new hosted application from a given zip file. The application will be called "myapp". If the application placeholder does not exist then it will be created
 
-Create new hosted application from a given zip file
-		
+$ c8y applications createHostedApplication --file simple-helloworld/build --name custom_helloworld
+Create/update hosted web application from a build folder and specify a custom application name
+
+$ c8y applications createHostedApplication --file myapp.zip --skipActivation
+Create/update hosted web application but don't activate it, so the current version (if any) will be untouched
+
 ```
 
 ### Options
@@ -27,13 +32,13 @@ Create new hosted application from a given zip file
       --availability string   Access level for other tenants. Possible values are : MARKET, PRIVATE (default)
       --contextPath string    contextPath of the hosted application
   -d, --data string           static data to be applied to body. accepts json or shorthande json, i.e. --data 'value1=1,my.nested.value=100'
-      --file string           Web application zip file to be uploaded
+      --file string           File or Folder of the web application. It should contains a index.html file in the root folder/ or zip file
   -h, --help                  help for createHostedApplication
       --key string            Shared secret of application. Defaults to the name
       --name string           Name of application
       --resourcesUrl string   URL to application base directory hosted on an external server. Required when application type is HOSTED (default "/")
-      --skipActivation        Skip microservice subscription when creating the new microservice
-      --skipUpload            Skip uploading the binary to the platform
+      --skipActivation        Don't activate to the application after it has been created and uploaded
+      --skipUpload            Don't uploaded the web app binary. Only the application placeholder will be created
       --template string       Body template
       --templateVars string   Body template variables
 ```
@@ -62,6 +67,7 @@ Create new hosted application from a given zip file
   -M, --noColor                    Don't use colors when displaying log entries on the console
       --noLog                      Disables the activity log for the current command
       --noProxy                    Ignore the proxy settings
+  -n, --nullInput                  Don't read the input (stdin). Useful if using in shell for/while loops
   -o, --output string              Output format i.e. table, json, csv, csvheader (default "table")
       --outputFile string          Save JSON output to file (after select/view)
       --outputFileRaw string       Save raw response to file (before select/view)

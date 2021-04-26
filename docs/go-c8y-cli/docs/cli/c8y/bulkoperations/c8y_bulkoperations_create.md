@@ -15,8 +15,11 @@ c8y bulkoperations create [flags]
 ### Examples
 
 ```
-$ c8y operations create --device mydevice --data "{c8y_Restart:{}}"
-Create operation for a device
+$ c8y bulkoperations create --group 1234 --startDate "60s" --creationRampSec 15 --operation "c8y_Restart={}"
+Create bulk operation for a group
+
+$ c8y devicegroups get --id 12345 | c8y bulkoperations create --startDate "10s" --creationRampSec 15 --operation "c8y_Restart={}"
+Create bulk operation for a group (using pipeline)
         
 ```
 
@@ -58,6 +61,7 @@ Create operation for a device
   -M, --noColor                    Don't use colors when displaying log entries on the console
       --noLog                      Disables the activity log for the current command
       --noProxy                    Ignore the proxy settings
+  -n, --nullInput                  Don't read the input (stdin). Useful if using in shell for/while loops
   -o, --output string              Output format i.e. table, json, csv, csvheader (default "table")
       --outputFile string          Save JSON output to file (after select/view)
       --outputFileRaw string       Save raw response to file (before select/view)

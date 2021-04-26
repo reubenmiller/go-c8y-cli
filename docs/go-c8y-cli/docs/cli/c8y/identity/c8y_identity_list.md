@@ -15,8 +15,11 @@ c8y identity list [flags]
 ### Examples
 
 ```
-$ c8y identity list
-Get a list of external ids
+$ c8y identity list --device 12345
+Get a list of external ids for a device
+
+$ c8y devices list | c8y identity list
+Get the external ids for each device using pipeline
         
 ```
 
@@ -51,6 +54,7 @@ Get a list of external ids
   -M, --noColor                    Don't use colors when displaying log entries on the console
       --noLog                      Disables the activity log for the current command
       --noProxy                    Ignore the proxy settings
+  -n, --nullInput                  Don't read the input (stdin). Useful if using in shell for/while loops
   -o, --output string              Output format i.e. table, json, csv, csvheader (default "table")
       --outputFile string          Save JSON output to file (after select/view)
       --outputFileRaw string       Save raw response to file (before select/view)
