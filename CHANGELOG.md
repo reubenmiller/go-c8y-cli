@@ -126,6 +126,8 @@ None :)
 
 No unreleased features
 
+* Add option to disable reading from stdin (piped data) (`--nullInput / -c`)
+
 * Fixed `--filter` bug when the given property does not exist, i.e. `--filter "nonexistent_prop like *`. Non-existent property warning messages will no longer be logged
 
 * Fixed bug where timestamps used in request bodies were incorrectly encoded, resulting in the `+` characters being encoded as `%2B`. 
