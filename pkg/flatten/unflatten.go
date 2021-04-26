@@ -1,6 +1,8 @@
 package flatten
 
 import (
+	"strings"
+
 	"github.com/tidwall/sjson"
 )
 
@@ -11,6 +13,10 @@ func Unflatten(data map[string]interface{}) (output []byte, err error) {
 	output = []byte("{}")
 
 	for k, v := range data {
+		// strip key helper and for the key be treated as an object key
+		// even it it is a number
+		k = strings.ReplaceAll(k, KeyPrefix, ":")
+
 		output, err = sjson.SetBytes(output, k, v)
 		if err != nil {
 			return nil, err

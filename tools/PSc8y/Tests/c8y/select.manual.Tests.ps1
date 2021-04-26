@@ -334,6 +334,30 @@ Describe -Name "c8y select global parameter" {
         }
     }
 
+    Context "Object with number like keys" {
+        It "Objects with numbers as keys should not be converted to an array" {
+            $DashboardJSON = '{"c8y_Dashboard":{"15426326034650895":{"name":"test"}}}'
+    
+            $Start = Get-Date
+            $output = $DashboardJSON | c8y util show -v --select "**"
+            $Duration = ((Get-Date) - $Start).TotalSeconds
+            $Duration | Should -BeLessThan 10
+            $json = $output | ConvertFrom-Json
+            $json.c8y_Dashboard."15426326034650895".name | Should -BeExactly "test"
+        }
+    
+        It "Objects with numbers as keys should not be converted to an array" {
+            $DashboardJSON = '{"c8y_Dashboard":{"15426326034650895":{"name":"test"}}}'
+    
+            $Start = Get-Date
+            $output = $DashboardJSON | c8y util show -v --select "c8y_Dashboard.*15426326034650895.**"
+            $Duration = ((Get-Date) - $Start).TotalSeconds
+            $Duration | Should -BeLessThan 10
+            $json = $output | ConvertFrom-Json
+            $json.c8y_Dashboard."15426326034650895".name | Should -BeExactly "test"
+        }
+    }
+
     AfterEach {
     }
 }

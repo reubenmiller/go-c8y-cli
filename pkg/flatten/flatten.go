@@ -88,6 +88,14 @@ func FlattenString(nestedstr, prefix string, style SeparatorStyle) (string, erro
 	return string(flatb), nil
 }
 
+const KeyPrefix = "::k::"
+
+func isInteger(v string) bool {
+	isNotDigit := func(c rune) bool { return c < '0' || c > '9' }
+	value := strings.TrimSpace(v)
+	return strings.IndexFunc(value, isNotDigit) <= -1
+}
+
 func flatten(top bool, flatMap map[string]interface{}, nested interface{}, prefix string, style SeparatorStyle) error {
 	assign := func(newKey string, v interface{}) error {
 		switch typedV := v.(type) {
@@ -122,6 +130,10 @@ func flatten(top bool, flatMap map[string]interface{}, nested interface{}, prefi
 			err = assign(prefix, nestedValue)
 		} else {
 			for k, v := range nestedValue {
+				if isInteger(k) {
+					k = KeyPrefix + k
+					// k = ":" + k
+				}
 				newKey := enkey(top, prefix, k, style)
 				err = assign(newKey, v)
 			}

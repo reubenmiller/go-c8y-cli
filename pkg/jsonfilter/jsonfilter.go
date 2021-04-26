@@ -156,7 +156,10 @@ func filterFlatMap(src map[string]interface{}, dst map[string]interface{}, patte
 		found := false
 		for _, key := range sourceKeys {
 			value := src[key]
-			keyl := strings.ToLower(key)
+
+			// noramlize key, and strip the key identifier
+			keyl := strings.ReplaceAll(strings.ToLower(key), flatten.KeyPrefix, "")
+
 			if strings.HasPrefix(keyl, pattern.String()+".") || (pattern.MatchString(keyl) && !pattern.IsNegative()) {
 				if aliases[i] != "" {
 					paths := strings.Split(pattern.String(), ".")
