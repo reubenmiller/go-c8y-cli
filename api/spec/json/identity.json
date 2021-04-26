@@ -183,7 +183,7 @@
               "$my_SerialNumber = New-RandomString -Prefix \"my_SerialNumber\"",
               "$Device = New-TestDevice"
             ],
-            "command": "Get-Device $Device.id | New-ExternalId -Type \"$my_SerialNumber\" -Name \"myserialnumber\"",
+            "command": "Get-Device $Device.id | New-ExternalId -Type \"$my_SerialNumber\" -Template \"{ externalId: input.value.name }\"",
             "afterEach": [
               "PSc8y\\Remove-ManagedObject -Id $Device.id"
             ]
