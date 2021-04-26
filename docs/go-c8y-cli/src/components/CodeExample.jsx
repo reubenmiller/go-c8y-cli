@@ -9,7 +9,7 @@ const codeTypes = [
     { label: 'PowerShell', value: 'powershell' },
 ];
 
-const CodeExample = ({ videoSrcURL, videoTitle, width, height, ...props }) => {
+const CodeExample = ({ transform = true, ...props }) => {
 
     let firstChild;
     let secondChild;
@@ -37,7 +37,7 @@ const CodeExample = ({ videoSrcURL, videoTitle, width, height, ...props }) => {
                 </CodeBlock>
             </TabItem>
             <TabItem value="powershell">
-                <CodeBlock render={false} className={"powershell"} transform={true}>
+                <CodeBlock render={false} className={"powershell"} transform={transform}>
                     {secondChild}
                 </CodeBlock>
             </TabItem>

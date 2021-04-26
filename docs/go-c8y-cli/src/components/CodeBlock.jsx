@@ -75,13 +75,17 @@ const c8yCommands = {
     
 };
 
+function replaceAll(string, search, replace) {
+    return string.split(search).join(replace);
+}
+
 function convertToCmdlets(code = '') {
     const keys = Object.keys(c8yCommands);
     for (let index = 0; index < keys.length; index++) {
         const element = c8yCommands[keys[index]];
-        code = code.replaceAll(keys[index], element);
+        code = replaceAll(code, keys[index], element);
     }
-    code = code.replaceAll('\\', '`');
+    code = code.replace(/\\/g, '`');
     return code;
 }
 
@@ -156,7 +160,7 @@ export default ({ children, className = 'bash', live = false, render = false, tr
     }
     let childrenCode = '';
     if (children && typeof children.trim == 'function') {
-        if (transform) {
+        if (`${transform}` == 'true') {
             childrenCode = transformToPowerShell(children.trim());
         } else {
             childrenCode = children.trim();

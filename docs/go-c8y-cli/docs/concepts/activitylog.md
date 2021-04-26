@@ -4,6 +4,8 @@ category: Concepts
 title: Activity Log
 ---
 
+import CodeExample from '@site/src/components/CodeExample';
+
 ### Overview
 
 The activity log is used as a local protocol to keep track of which commands and requests were sent by go-c8y-cli. It does not store the whole requests and responses (as that would take up too much space), so only meta information about the requests and responses are stored to file.
@@ -167,6 +169,8 @@ c8y activitylog list --dateFrom -3h --type request --filter "statusCode eq 201" 
 
 ### Save delete response times for inventory API requests to a csv file
 
+<CodeExample transform="false">
+
 ```bash
 c8y activitylog list \
   --dateFrom -3h \
@@ -176,6 +180,18 @@ c8y activitylog list \
   --filter "path like **inventory**" \
   --select time,path,method,responseTimeMS -o csvheader > delete_times.csv
 ```
+
+```powershell
+c8y activitylog list \
+  --dateFrom -3h \
+  --dateTo -1h \
+  --type request \
+  --filter "method like delete" \
+  --filter "path like **inventory**" \
+  --select time,path,method,responseTimeMS -o csvheader > delete_times.csv
+```
+
+</CodeExample>
 
 ```csv title="Output"
 time,path,method,responseTimeMS
