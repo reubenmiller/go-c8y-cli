@@ -36,6 +36,9 @@ func NewCreateCmd(f *cmdutil.Factory) *CreateCmd {
 		Example: heredoc.Doc(`
 $ c8y identity create --device 1234 --type test --name myserialnumber
 Create external identity
+
+$ c8y devices list | c8y identity create --type c8y_Serial --template "{ externalId: input.value.name }"
+Create an external identity by using the .name property of the device (via the input template variable)
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
 			return f.CreateModeEnabled()

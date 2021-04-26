@@ -35,8 +35,11 @@ func NewListCmd(f *cmdutil.Factory) *ListCmd {
 		Short: "Get external id collection",
 		Long:  `Get a collection of external ids related to an existing managed object`,
 		Example: heredoc.Doc(`
-$ c8y identity list
-Get a list of external ids
+$ c8y identity list --device 12345
+Get a list of external ids for a device
+
+$ c8y devices list | c8y identity list
+Get the external ids for each device using pipeline
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
 			return nil

@@ -36,8 +36,12 @@
         ],
         "go": [
           {
-            "description": "Get a list of external ids",
-            "command": "c8y identity list"
+            "description": "Get a list of external ids for a device",
+            "command": "c8y identity list --device 12345"
+          },
+          {
+            "description": "Get the external ids for each device using pipeline",
+            "command": "c8y devices list | c8y identity list"
           }
         ]
       },
@@ -189,6 +193,10 @@
           {
             "description": "Create external identity",
             "command": "c8y identity create --device 1234 --type test --name myserialnumber"
+          },
+          {
+            "description": "Create an external identity by using the .name property of the device (via the input template variable)",
+            "command": "c8y devices list | c8y identity create --type c8y_Serial --template \"{ externalId: input.value.name }\""
           }
         ]
       },
