@@ -17,6 +17,9 @@ c8y inventory assets list [flags]
 ```
 $ c8y inventory assets list --id 12345
 Get a list of the child devices of an existing device
+
+$ c8y devices list | c8y inventory assets list
+Get a list of the child devices using pipeline
         
 ```
 
@@ -24,7 +27,7 @@ Get a list of the child devices of an existing device
 
 ```
   -h, --help        help for list
-      --id string   Managed object.
+      --id string   Managed object. (required) (accepts pipeline)
 ```
 
 ### Options inherited from parent commands

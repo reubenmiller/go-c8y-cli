@@ -18,7 +18,7 @@ Get child asset collection
 
 ```
 Get-ChildAssetCollection
-	[[-Id] <Object[]>]
+	[-Id] <Object[]>
 	[-PageSize <Int32>]
 	[-WithTotalPages]
 	[-CurrentPage <Int32>]
@@ -77,13 +77,14 @@ Get a list of the child assets of an existing device
 
 ### -Id
 Managed object.
+(required)
 
 ```yaml
 Type: Object[]
 Parameter Sets: (All)
 Aliases:
 
-Required: False
+Required: True
 Position: 1
 Default value: None
 Accept pipeline input: True (ByPropertyName, ByValue)

@@ -18,11 +18,11 @@ Create retention rule
 
 ```
 New-RetentionRule
-	[-DataType] <String>
+	[[-DataType] <Object[]>]
 	[[-FragmentType] <String>]
 	[[-Type] <String>]
 	[[-Source] <String>]
-	[-MaximumAge] <Int64>
+	[[-MaximumAge] <Int64>]
 	[-Editable]
 	[-Data <Object>]
 	[-NoAccept]
@@ -83,17 +83,16 @@ Create a retention rule to delete all alarms after 180 days
 
 ### -DataType
 RetentionRule will be applied to this type of documents, possible values [ALARM, AUDIT, EVENT, MEASUREMENT, OPERATION, *].
-(required)
 
 ```yaml
-Type: String
+Type: Object[]
 Parameter Sets: (All)
 Aliases:
 
-Required: True
+Required: False
 Position: 1
 Default value: None
-Accept pipeline input: False
+Accept pipeline input: True (ByPropertyName, ByValue)
 Accept wildcard characters: False
 ```
 
@@ -144,14 +143,13 @@ Accept wildcard characters: False
 
 ### -MaximumAge
 Maximum age of document in days.
-(required)
 
 ```yaml
 Type: Int64
 Parameter Sets: (All)
 Aliases:
 
-Required: True
+Required: False
 Position: 5
 Default value: 0
 Accept pipeline input: False

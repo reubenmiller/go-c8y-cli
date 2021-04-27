@@ -20,6 +20,12 @@ Get a list of managed objects
 
 $ c8y inventory list --ids 1111,2222
 Get a list of managed objects by ids
+
+$ echo 'myType' | c8y inventory list
+Search by type using pipeline. piped input will be mapped to type parameter
+
+$ c8y inventory get --id 1234 | c8y inventory list
+Get managed objects which have the same type as the managed object id=1234. piped input will be mapped to type parameter
         
 ```
 
@@ -31,7 +37,7 @@ Get a list of managed objects by ids
       --ids strings           List of ids.
       --skipChildrenNames     Don't include the child devices names in the response. This can improve the API response because the names don't need to be retrieved
       --text string           managed objects containing a text value starting with the given text (placeholder {text}). Text value is any alphanumeric string starting with a latin letter (A-Z or a-z).
-      --type string           ManagedObject type.
+      --type string           ManagedObject type. (accepts pipeline)
       --withParents           include a flat list of all parents and grandparents of the given object
 ```
 
