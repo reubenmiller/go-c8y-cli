@@ -23,6 +23,17 @@ As a workaround, use the `data` parameter when working with large numbers (and d
 c8y inventory create --data "./datapoint.largeInt.json"
 ```
 
+## Piped input is not supported for
+
+* c8y microservices serviceusers get
+* c8y alarms subscribe
+* c8y events subscribe
+* c8y inventory subscribe
+* c8y measurements subscribe
+* c8y operations subscribe
+* c8y realtime subscribe
+* c8y realtime subscribeAll
+
 ## Failing tests
 
 None :)
