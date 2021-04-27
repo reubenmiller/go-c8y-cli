@@ -54,7 +54,7 @@ Get a list of the child additions of an existing managed object
 	flags.WithOptions(
 		cmd,
 
-		flags.WithExtendedPipelineSupport("id", "id", true),
+		flags.WithExtendedPipelineSupport("id", "id", true, "deviceId", "source.id", "managedObject.id", "id"),
 		flags.WithCollectionProperty("references.#.managedObject"),
 	)
 

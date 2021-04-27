@@ -27,9 +27,19 @@ endpoints:
       go:
         - description: Get a list of the child devices of an existing device
           command: c8y inventory assets list --id 12345
+
+        - description: Get a list of the child devices using pipeline
+          command: c8y devices list | c8y inventory assets list
     pathParameters:
       - name: id
         type: string
+        required: true
+        pipeline: true
+        pipelineAliases:
+          - "deviceId"
+          - "source.id"
+          - "managedObject.id"
+          - "id"
         description: Managed object.
 
   - name: newManagedObjectChildAsset

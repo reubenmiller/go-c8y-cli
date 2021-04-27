@@ -36,6 +36,9 @@ func NewListCmd(f *cmdutil.Factory) *ListCmd {
 		Example: heredoc.Doc(`
 $ c8y inventory assets list --id 12345
 Get a list of the child devices of an existing device
+
+$ c8y devices list | c8y inventory assets list
+Get a list of the child devices using pipeline
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
 			return nil
@@ -45,7 +48,7 @@ Get a list of the child devices of an existing device
 
 	cmd.SilenceUsage = true
 
-	cmd.Flags().String("id", "", "Managed object.")
+	cmd.Flags().String("id", "", "Managed object. (required) (accepts pipeline)")
 
 	completion.WithOptions(
 		cmd,
@@ -54,7 +57,7 @@ Get a list of the child devices of an existing device
 	flags.WithOptions(
 		cmd,
 
-		flags.WithExtendedPipelineSupport("", "", false),
+		flags.WithExtendedPipelineSupport("id", "id", true, "deviceId", "source.id", "managedObject.id", "id"),
 		flags.WithCollectionProperty("references.#.managedObject"),
 	)
 

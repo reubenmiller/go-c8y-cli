@@ -60,6 +60,12 @@
           "name": "id",
           "type": "string",
           "pipeline": true,
+          "pipelineAliases": [
+            "deviceId",
+            "source.id",
+            "managedObject.id",
+            "id"
+          ],
           "required": true,
           "description": "Managed object id."
         }

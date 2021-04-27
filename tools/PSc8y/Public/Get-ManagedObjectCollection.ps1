@@ -33,8 +33,9 @@ Get a list of managed objects by id
         $Ids,
 
         # ManagedObject type.
-        [Parameter()]
-        [string]
+        [Parameter(ValueFromPipeline=$true,
+                   ValueFromPipelineByPropertyName=$true)]
+        [object[]]
         $Type,
 
         # ManagedObject fragment type.
@@ -80,12 +81,17 @@ Get a list of managed objects by id
     Process {
 
         if ($ClientOptions.ConvertToPS) {
-            c8y inventory list $c8yargs `
+            $Type `
+            | Group-ClientRequests `
+            | c8y inventory list $c8yargs `
             | ConvertFrom-ClientOutput @TypeOptions
         }
         else {
-            c8y inventory list $c8yargs
+            $Type `
+            | Group-ClientRequests `
+            | c8y inventory list $c8yargs
         }
+        
     }
 
     End {}

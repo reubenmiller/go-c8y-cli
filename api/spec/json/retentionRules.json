@@ -74,7 +74,8 @@
             "OPERATION",
             "*"
           ],
-          "required": true,
+          "required": false,
+          "pipeline": true,
           "description": "RetentionRule will be applied to this type of documents, possible values [ALARM, AUDIT, EVENT, MEASUREMENT, OPERATION, *]."
         },
         {
@@ -98,7 +99,8 @@
         {
           "name": "maximumAge",
           "type": "integer",
-          "required": true,
+          "default": "365",
+          "required": false,
           "description": "Maximum age of document in days."
         },
         {
@@ -106,7 +108,17 @@
           "type": "boolean",
           "required": false,
           "description": "Whether the rule is editable. Can be updated only by management tenant."
+        },
+        {
+          "name": "data",
+          "type": "json",
+          "required": false,
+          "description": "Data"
         }
+      ],
+      "bodyRequiredKeys": [
+        "maximumAge",
+        "dataType"
       ]
     },
     {

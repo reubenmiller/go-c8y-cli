@@ -23,10 +23,11 @@ Create a retention rule to delete all alarms after 180 days
     [Alias()]
     [OutputType([object])]
     Param(
-        # RetentionRule will be applied to this type of documents, possible values [ALARM, AUDIT, EVENT, MEASUREMENT, OPERATION, *]. (required)
-        [Parameter(Mandatory = $true)]
+        # RetentionRule will be applied to this type of documents, possible values [ALARM, AUDIT, EVENT, MEASUREMENT, OPERATION, *].
+        [Parameter(ValueFromPipeline=$true,
+                   ValueFromPipelineByPropertyName=$true)]
         [ValidateSet('ALARM','AUDIT','EVENT','MEASUREMENT','OPERATION','*')]
-        [string]
+        [object[]]
         $DataType,
 
         # RetentionRule will be applied to documents with fragmentType.
@@ -44,8 +45,8 @@ Create a retention rule to delete all alarms after 180 days
         [string]
         $Source,
 
-        # Maximum age of document in days. (required)
-        [Parameter(Mandatory = $true)]
+        # Maximum age of document in days.
+        [Parameter()]
         [long]
         $MaximumAge,
 
@@ -77,12 +78,17 @@ Create a retention rule to delete all alarms after 180 days
     Process {
 
         if ($ClientOptions.ConvertToPS) {
-            c8y retentionrules create $c8yargs `
+            $DataType `
+            | Group-ClientRequests `
+            | c8y retentionrules create $c8yargs `
             | ConvertFrom-ClientOutput @TypeOptions
         }
         else {
-            c8y retentionrules create $c8yargs
+            $DataType `
+            | Group-ClientRequests `
+            | c8y retentionrules create $c8yargs
         }
+        
     }
 
     End {}

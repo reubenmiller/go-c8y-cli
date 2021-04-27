@@ -22,8 +22,9 @@ Get a list of the child assets of an existing device
     [Alias()]
     [OutputType([object])]
     Param(
-        # Managed object.
-        [Parameter(ValueFromPipeline=$true,
+        # Managed object. (required)
+        [Parameter(Mandatory = $true,
+                   ValueFromPipeline=$true,
                    ValueFromPipelineByPropertyName=$true)]
         [object[]]
         $Id

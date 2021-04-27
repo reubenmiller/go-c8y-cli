@@ -53,7 +53,8 @@ endpoints:
       - name: dataType
         type: string
         validationSet: [ALARM, AUDIT, EVENT, MEASUREMENT, OPERATION, '*']
-        required: true
+        required: false
+        pipeline: true
         description: RetentionRule will be applied to this type of documents, possible values [ALARM, AUDIT, EVENT, MEASUREMENT, OPERATION, *].
 
       - name: fragmentType
@@ -73,13 +74,23 @@ endpoints:
 
       - name: maximumAge
         type: integer
-        required: true
+        default: '365'
+        required: false
         description: Maximum age of document in days.
 
       - name: editable
         type: boolean
         required: false
         description: Whether the rule is editable. Can be updated only by management tenant.
+      
+      - name: data
+        type: json
+        required: false
+        description: Data
+
+    bodyRequiredKeys:
+      - maximumAge
+      - dataType
 
   - name: getRetentionRule
     description: Get retention rule

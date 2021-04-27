@@ -39,6 +39,12 @@ Get a list of managed objects
 
 $ c8y inventory list --ids 1111,2222
 Get a list of managed objects by ids
+
+$ echo 'myType' | c8y inventory list
+Search by type using pipeline. piped input will be mapped to type parameter
+
+$ c8y inventory get --id 1234 | c8y inventory list
+Get managed objects which have the same type as the managed object id=1234. piped input will be mapped to type parameter
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
 			return nil
@@ -49,7 +55,7 @@ Get a list of managed objects by ids
 	cmd.SilenceUsage = true
 
 	cmd.Flags().StringSlice("ids", []string{""}, "List of ids.")
-	cmd.Flags().String("type", "", "ManagedObject type.")
+	cmd.Flags().String("type", "", "ManagedObject type. (accepts pipeline)")
 	cmd.Flags().String("fragmentType", "", "ManagedObject fragment type.")
 	cmd.Flags().String("text", "", "managed objects containing a text value starting with the given text (placeholder {text}). Text value is any alphanumeric string starting with a latin letter (A-Z or a-z).")
 	cmd.Flags().Bool("withParents", false, "include a flat list of all parents and grandparents of the given object")
@@ -62,7 +68,7 @@ Get a list of managed objects by ids
 	flags.WithOptions(
 		cmd,
 
-		flags.WithExtendedPipelineSupport("", "", false),
+		flags.WithExtendedPipelineSupport("type", "type", false, "type"),
 		flags.WithCollectionProperty("managedObjects"),
 	)
 

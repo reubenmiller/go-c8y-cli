@@ -45,11 +45,11 @@ Create a retention rule
 
 	cmd.SilenceUsage = true
 
-	cmd.Flags().String("dataType", "", "RetentionRule will be applied to this type of documents, possible values [ALARM, AUDIT, EVENT, MEASUREMENT, OPERATION, *]. (required)")
+	cmd.Flags().String("dataType", "", "RetentionRule will be applied to this type of documents, possible values [ALARM, AUDIT, EVENT, MEASUREMENT, OPERATION, *]. (accepts pipeline)")
 	cmd.Flags().String("fragmentType", "", "RetentionRule will be applied to documents with fragmentType.")
 	cmd.Flags().String("type", "", "RetentionRule will be applied to documents with type.")
 	cmd.Flags().String("source", "", "RetentionRule will be applied to documents with source.")
-	cmd.Flags().Int("maximumAge", 0, "Maximum age of document in days. (required)")
+	cmd.Flags().Int("maximumAge", 365, "Maximum age of document in days.")
 	cmd.Flags().Bool("editable", false, "Whether the rule is editable. Can be updated only by management tenant.")
 
 	completion.WithOptions(
@@ -60,13 +60,12 @@ Create a retention rule
 	flags.WithOptions(
 		cmd,
 		flags.WithProcessingMode(),
-
-		flags.WithExtendedPipelineSupport("", "", false),
+		flags.WithData(),
+		f.WithTemplateFlag(cmd),
+		flags.WithExtendedPipelineSupport("dataType", "dataType", false, "id"),
 	)
 
 	// Required flags
-	_ = cmd.MarkFlagRequired("dataType")
-	_ = cmd.MarkFlagRequired("maximumAge")
 
 	ccmd.SubCommand = subcommand.NewSubCommand(cmd)
 
@@ -136,6 +135,7 @@ func (n *CreateCmd) RunE(cmd *cobra.Command, args []string) error {
 		cmd,
 		body,
 		inputIterators,
+		flags.WithOverrideValue("dataType", "dataType"),
 		flags.WithDataFlagValue(),
 		flags.WithStringValue("dataType", "dataType"),
 		flags.WithStringValue("fragmentType", "fragmentType"),
@@ -145,6 +145,7 @@ func (n *CreateCmd) RunE(cmd *cobra.Command, args []string) error {
 		flags.WithBoolValue("editable", "editable", ""),
 		cmdutil.WithTemplateValue(cfg),
 		flags.WithTemplateVariablesValue(),
+		flags.WithRequiredProperties("maximumAge", "dataType"),
 	)
 	if err != nil {
 		return cmderrors.NewUserError(err)
