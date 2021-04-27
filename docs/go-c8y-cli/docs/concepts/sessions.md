@@ -4,80 +4,66 @@ category: Concepts
 title: Sessions
 ---
 
+import CodeExample from '@site/src/components/CodeExample';
+
 A session holds the current Cumulocity settings and authentication to use for each command. For example, as session will contain the Cumulocity platform address, tenant, username and password. All of these settings are required in order to send REST requests to the platform.
 
 The active session is controlled via an environment variable `C8Y_SESSION`. The environment variable just points to a JSON file which contains the Cumulocity settings.
 
 A user can add any number of session that that want. They are then free to switch sessions at any time they want. For users with only one session, you could set the `C8Y_SESSION` environment variable to a file, however for users with multiple sessions, it is recommended to always to set the session when starting out.
 
-### Create a new session
+## Create a new session
 
-##### Shell
+<CodeExample>
 
 ```bash
 c8y sessions create \
     --host "mytenant.eu-latest.cumulocity.com"
 ```
 
+</CodeExample>
+
 You will be prompted for the username and password.
 
-##### Powershell
-
-```powershell
-New-Session
-```
-
-### Activate a session (interactive)
+## Activate a session (interactive)
 
 A helper is provided to set the session interactively by providing the user a list of configured sessions. The user will be prompted to select one of the listed sessions.
 
 Note: On MacOS, you need to hold "option"+Arrow keys to navigate the list of sessions. Otherwise the VIM style "j" (down) and "k" (up) keys can be also used for navigation
 
-##### Shell
+:::caution
+`set-session` is not provided by `c8y` itself, and it is installed automatically for you if you following the installation instructions
+:::
 
-Assuming that you have already loaded the `c8y.plugin.sh` helper.
-
-```bash
-set-session
-```
-
-##### zsh
-
-Assuming that you have already loaded the `c8y.plugin.zsh` plugin.
+<CodeExample>
 
 ```bash
 set-session
 ```
 
-##### Powershell
+</CodeExample>
 
-```bash
-Set-Session
-```
-
-### Active a session (manual)
+## Activate a session (manual)
 
 If you wish to manage your sessions manually, then you can set the `C8Y_SESSION` environment variable to an existing json session file.
 
-For example:
-
-###### Shell
+<CodeExample>
 
 ```bash
 export C8Y_SESSION=~/.cumulocity/my-settings01.json
 ```
 
-###### Powershell
-
 ```powershell
 $env:C8Y_SESSION = "~/.cumulocity/my-settings01.json"
 ```
+
+</CodeExample>
 
 ### Session file format
 
 A Cumulocity session file is simply a json file. Here is an example of the contents:
 
-```json
+```json title="mysession.json"
 {
   "host": "https://mytenant.eu-latest.cumulocity.com",
   "tenant": "mytenant",
@@ -94,9 +80,7 @@ The session file is read every time when a command is executed, so any changes w
 
 Optional properties:
 
-By default the tenant prefix will be used in the basic authentication, however if you do not what this behavior, then you can add the `use`
-
-For example:
+By default the tenant prefix will be used in the basic authentication, however if you do not what this behavior, then you can add the `useTenantPrefix` property.
 
 ```bash
 {
@@ -135,31 +119,29 @@ If you only need to set a session for a single session, then you can use the glo
 
 You can set the `C8Y_SESSION_HOME` environment variable to control where the sessions should be stored.
 
-###### Shell
+<CodeExample>
 
 ```bash
 c8y devices list --session myother.tenant
 ```
 
-###### Powershell
-
 ```powershell
 Get-DeviceCollection -Session myother.tenant
 ```
 
-### Protection against accidental data loss
+</CodeExample>
+
+## Protection against accidental data loss
 
 The c8y cli tool provides a large number of commands which can be potentially destructive if used incorrectly. Therefore all commands which create, update and/or delete data are disabled by default, to protect against accidental usage.
 
-The commands can be enabled per session or in global settings, however explicitily enabling it per session is the perferred method.
+The commands can be enabled per session or in global settings, however explicitly enabling it per session is the preferred method.
 
 Ideally for production sessions, the settings should be left disabled to protect yourself against accidental data loss, especially if you have a large number of tenants, and are constantly switching between them.
 
 The following shows how the functions can be controlled via session settings:
 
-*File: mysession.json*
-
-```json
+```json title="mysession.json"
 {
   "settings": {
     "mode.enableCreate": false,
@@ -169,75 +151,42 @@ The following shows how the functions can be controlled via session settings:
 }
 ```
 
-#### Enabling create/update/delete command temporarily
+### Enabling create/update/delete command temporarily
 
 When the commands are disabled in the session settings, they can be temporarily activated on the console by using the following command:
 
-**PowerShell**
-
-```powershell
-Set-ClientConsoleSetting -EnableCreateCommands -EnableUpdateCommands -EnableDeleteCommands
-```
-
-**Bash/zsh**
+<CodeExample>
 
 ```bash
-export C8Y_SETTINGS_MODE_ENABLECREATE=true
-export C8Y_SETTINGS_MODE_ENABLEUPDATE=true
-export C8Y_SETTINGS_MODE_ENABLEDELETE=true
+eval $( c8y settings update mode dev --shell auto )
 ```
+
+```powershell
+c8y settings update mode dev --shell auto | Out-String | Invoke-Expression
+```
+
+</CodeExample>
+
 
 The commands will remain enabled until the next time you call `set-session`.
 
 Afterwards you can disable them again using:
 
-**PowerShell**
+<CodeExample>
+
+```bash
+eval $( c8y settings update mode prod --shell auto )
+```
 
 ```powershell
-Set-ClientConsoleSetting -DisableCommands
+c8y settings update mode prod --shell auto | Out-String | Invoke-Expression
 ```
 
-**Bash/zsh**
+</CodeExample>
 
-```bash
-unset C8Y_SETTINGS_MODE_ENABLECREATE
-unset C8Y_SETTINGS_MODE_ENABLEUPDATE
-unset C8Y_SETTINGS_MODE_ENABLEDELETE
-```
+## Using encryption in Cumulocity session files
 
-#### CI/CD
-
-When used in a CI/CD environment, all commands (create/update/delete) can be enabled by setting the `settings.ci` property to `true`.
-
-The setting can also be set via an environment variable:
-
-**Bash/zsh**
-
-```bash
-export C8Y_SETTINGS_CI=true
-```
-
-**PowerShell**
-
-```bash
-$env:C8Y_SETTINGS_CI=true
-```
-
-Or alternatively, using setting it via the session file:
-
-*File: mysession.json*
-
-```json
-{
-  "settings": {
-    "ci": true
-  }
-}
-```
-
-### Beta feature (new in v1.7.0): Using encryption in Cumulocity session files
-
-Encrypted password and cookies fields can be actived by adding the following fragment into the session file or your global `settings.json` file.
+Encrypted password and cookies fields can be activated by adding the following fragment into the session file or your global `settings.json` file.
 
 ```json
 {
@@ -258,23 +207,23 @@ The user will be prompted for the passphrase if one is not already set, when act
 
 ### Loss of passphrase (encryption key)
 
-If you forget your passphrase then all of the encrypted passwords will be unuseble.
+If you forget your passphrase then all of the encrypted passwords will be unusable.
 
 In such an event, then you need to remove the `.key` file within the Cumulocity session folder, and you will be prompted to re-enter your password when the session is re-activated using `set-session`.
 
-**PowerShell**
+<CodeExample>
 
-```Powershell
-Remove-Item ~/.cumulocity/.key
-```
-
-**Bash/zsh**
 ```bash
 rm ~/.cumulocity/.key
 ```
 
-## Manually settings password via the file
+```powershell
+Remove-Item ~/.cumulocity/.key
+```
 
+</CodeExample>
+
+## Manually settings password via the file
 
 ```json
 {
@@ -290,6 +239,6 @@ rm ~/.cumulocity/.key
 }
 ```
 
-#### Updating passwords
+### Updating passwords
 
 Passwords can still be set as plain text in the session files, however the next time that you switch to the session using `set-session`, the `password` field will be encrypted. An field is marked as encrypted by starting with text `{encrypted}` followed by the encrypted string.

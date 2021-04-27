@@ -1,14 +1,10 @@
 ---
-layout: default
-category: Concepts
 title: Paging
 ---
 
 import CodeExample from '@site/src/components/CodeExample';
 
-### Limiting query results
-
-#### Background
+## Overview
 
 Cumulocity uses paging for any query which returns a collection of resources. For example, when getting a list of devices (managed objects), the query will limit the number of devices returns to the defined `pageSize`.
 
@@ -19,7 +15,7 @@ In addition, Cumulocity also supports a `currentPage` parameter which can be use
 Please read the [Cumulocity IoT documentation](http://cumulocity.com/guides/reference/rest-implementation/#rest-usage) for further details about paging.
 
 
-#### Using paging on the command line
+### Using paging on the command line
 
 The c8y cli tool supports interacting with Cumulocity's paging, and provides a few enhancements to help to get all of the data that you need to be productive.
 
@@ -35,7 +31,9 @@ The following command line arguments are supported by all collection related com
 
 A few examples will now be detailed to clarify the usage of the parameters in real life scenarios.
 
-#### Example: Get all devices with a matching name prefix
+## Examples
+
+### Get all devices with a matching name prefix
 
 If you have a large number of devices and you want to retrieve all of the results for some offline analysis.
 
@@ -49,7 +47,7 @@ c8y devices list --name "MyDevices*" --includeAll --select "id,name,*.serialNumb
 
 </CodeExample>
 
-#### Example: Get total number of devices
+### Get total number of devices
 
 The total number of devices can be returned by using the technic of setting the `pageSize` to 1, and using the `withTotalPages` parameter. The result will then contain the total number (in the `.statistics.totalPages` property) of whatever entity you have requested. A view has been added to only display the `statistics` fragment by default.
 
@@ -125,7 +123,7 @@ c8y devices list --withTotalPages --pageSize 1 --raw
 ```
 
 
-#### Iterating through the results
+## Iterating through the results
 
 Since pipeline data is supported natively by go-c8y-cli, any pages results can be efficiently piped to downstream commands.
 
@@ -133,22 +131,31 @@ Instead of retrieving all of the devices at once, you can run a task on each pag
 
 This has the advantages that all of the results do not need to be kept in memory.
 
+### Run a custom shell command on each of the results
 
-#### Example: Run a custom shell command on each of the results
+:::note
+When piping json it is necessary to escape the double quotes before passing it down the pipeline, this can be done by using `sed`.
+:::
 
-TODO
-
-**Note:** when piping json it is necessary to escape the double quotes before passing it down the pipeline, this can be done by using `sed`.
+<CodeExample>
 
 ```bash
 c8y devices list -p 10 | sed 's/"/\\"/g' | xargs -0 -I {} bash -c "echo \"{}\" | jq -r '.name'"
 ```
 
+```powershell
+c8y devices list -p 10 | ConvertFrom-Json | ForEach-Object { $_.name }
+```
+
+</CodeExample>
+
+:::tip Shell Users
 Alternatively, the gnu command `parallel` can be used as it handles json from standard input in a more convenient way.
 
 ```bash
 c8y devices list | parallel --tag echo {} | jq -r '.name'
 ```
+:::
 
 ```bash title="output"
 device_0001
@@ -158,11 +165,7 @@ device_0004
 device_0005
 ```
 
-#### Example: Add custom shell command in the pipeline
-
-TODO
-
-**Example: Add a fragment to each device**
+### Add a fragment to each device
 
 The following shows how to add a fragment `myNewFragment` to each devices where the name starts with "My".
 
@@ -188,7 +191,7 @@ Get-DeviceCollection -Name "My*" -IncludeAll |
 
 </CodeExample>
 
-### Setting a default pageSize
+## Setting a default pageSize
 
 The default pageSize can be controlled via the session or `settings` file or in your session file.
 

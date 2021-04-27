@@ -122,6 +122,9 @@ None :)
 
 * Use wide-format / column padding for completion description to better align extra information
 
+* If piped input is empty dont show an error message (maybe a warning?)
+    * `c8y devices list --type sdfasdf | c8y devices delete`
+
 ### Completions
 
 * Unassign child device (list child assets)

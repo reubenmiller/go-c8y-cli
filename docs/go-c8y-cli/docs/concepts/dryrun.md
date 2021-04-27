@@ -4,13 +4,17 @@ category: Concepts
 title: Dry run (WhatIf)
 ---
 
-All commands which send a Cumulocity API request support the dry run mode. A dry run is where the user can check the API call without sending the request to the server. This allows the user to view the request information without having to actually send anything to the server (i.e. checking what `c8y devices create --name mydevice --dry` without creating a device in the platform).
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+import CodeExample from '@site/src/components/CodeExample';
 
-The dry run mode can be activated by supplying the `--dry` option to any command.
+All commands which send a Cumulocity API request support the dry run mode. A dry run is where the user can check the API call without sending the request to the server. This allows the user to view the request information without having to actually send anything to the server (i.e. checking what `c8y devices create --name mydevice --dry` does without creating a device in the platform).
 
-Previously in go-c8y-cli, dry run mode (formally known as WhatIf mode) was only supported in the PowerShell wrapper module, `PSc8y`. In go-c8y-cli v2 onwards, dry run mode is supported natively by the client allowing non-PowerShell users to use it.
+The dry run mode can be activated by supplying the `dry` parameter to any command.
 
-### Using dry run mode for documentation
+Previously in go-c8y-cli, dry run mode (formally known as WhatIf mode) was only supported in the PowerShell module, `PSc8y`. In go-c8y-cli v2 onwards, dry run mode is supported natively by the client allowing non-PowerShell users to benefit from it.
+
+## Using dry run mode for documentation
 
 Dry run mode can also be used to generate documentation for individual rest requests to make it easier to share with other users or to document the request in a clear format that can be used to implement in other languages.
 
@@ -27,37 +31,63 @@ Sensitive information can be hidden by changing your session profile settings to
 
 For change it permanently for the current session:
 
+<CodeExample transform="false">
+
 ```bash
-# bash/zsh/fish/powershell
 c8y settings update logger.hideSensitive true
 ```
 
+</CodeExample>
+
 Or the setting can temporarily activated by setting the environment variable (via update settings command).
 
+<Tabs
+  groupId="shell-types"
+  defaultValue="bash"
+  values={[
+    { label: 'Bash/zsh', value: 'bash', },
+    { label: 'Fish', value: 'fish', },
+    { label: 'PowerShell', value: 'powershell', },
+  ]
+}>
+<TabItem value="bash">
+
 ```bash
-# bash/zsh
 eval $(c8y settings update logger.hideSensitive true --shell auto)
+```
 
-# fish
+</TabItem>
+<TabItem value="fish">
+
+```bash
 c8y settings update logger.hideSensitive true --shell auto | source
+```
 
-# PowerShell
+</TabItem>
+<TabItem value="powershell">
+
+```powershell
 c8y settings update logger.hideSensitive true --shell auto | Out-String | Invoke-Expression
 ```
 
+</TabItem>
+</Tabs>
+
 The following show examples of the output from each of the formats.
 
-#### markdown (default)
+### markdown (default)
 
 Default output mode which is useful because it can easily be copy/pasted into a markdown document or directing into your online documentations website (i.e. Confluence or similar products). The url path is shown without the server address so it can be kept generic, though the full path is also shown above it in case you need the full path.
+
+<CodeExample>
 
 ```bash
 c8y devices create --name "device001" --dry --dryFormat markdown
 ```
 
-*Output*
+</CodeExample>
 
-````markdown
+````markdown title="Output"
 What If: Sending [POST] request to [https://example.com/inventory/managedObjects]
 
 ### POST /inventory/managedObjects
@@ -78,17 +108,19 @@ What If: Sending [POST] request to [https://example.com/inventory/managedObjects
 ```
 ````
 
-#### dump (http output)
+### dump (http output)
 
 The dump format shows the http request in its HTTP/1.x wire representation, the same format shown by curl when using the verbose parameter. This output is useful if you want a plain text representation of the request.
+
+<CodeExample>
 
 ```bash
 c8y devices create --name "device001" --dry --dryFormat dump
 ```
 
-*Output*
+</CodeExample>
 
-```text
+```text title="Output"
 POST /inventory/managedObjects HTTP/1.1
 Host: example.com
 Accept: application/json
@@ -100,9 +132,11 @@ X-Application: go-client
 {"c8y_IsDevice":{},"name":"device001"}
 ```
 
-#### json
+### json
 
 The json output is useful to retrieve request information back easy-to-parse format, so the fields can be extracted using `jq` or another other json parsing tool.
+
+<CodeExample>
 
 ```bash
 c8y devices create --name "device001" --dry --dryFormat json
@@ -111,9 +145,9 @@ c8y devices create --name "device001" --dry --dryFormat json
 c8y devices create --name "device001" --dry --dryFormat json | jq -r '.url'
 ```
 
-*Output*
+</CodeExample>
 
-```json
+```json title="Output"
 {
   "url": "https://example.com/inventory/managedObjects",
   "host": "https://example.com",
@@ -134,21 +168,25 @@ c8y devices create --name "device001" --dry --dryFormat json | jq -r '.url'
 }
 ```
 
-#### curl (beta)
+### curl (beta)
 
 The curl output shows the equivalent curl command that can be used to send the same request. The curl commands are printed in markdown one showing for shell and one for PowerShell (due to different string quoting conventions).
 
-**Note:**
+
+:::caution
 
 If the command is using a multipart/form-data upload (i.e. a file upload), then the curl command might not be 100% correct, and might need a minor modification to get it to work.
+:::
+
+<CodeExample>
 
 ```bash
 c8y devices create --name "device001" --dry --dryFormat curl
 ```
 
-*Output*
+</CodeExample>
 
-````markdown
+````markdown title="Output"
 ##### Curl (shell)
 
 ```bash
@@ -162,9 +200,11 @@ curl -X 'POST' -d '{\"c8y_IsDevice\":{},\"name\":\"device001\"}' -H 'Accept: app
 ```
 ````
 
-#### Example: Write request details to file
+## Example: Write request details to file
 
 The output dry run output is printed to standard output, and can be redirected to file or piped to a downstream tool.
+
+<CodeExample>
 
 ```bash
 c8y alarms list \
@@ -174,8 +214,9 @@ c8y alarms list \
   --dry --dryFormat markdown > list_critical_alarms.md
 ```
 
-*file: list_critical_alarms.md*
-````markdown
+</CodeExample>
+
+````markdown title="file: list_critical_alarms.md"
 What If: Sending [GET] request to [https://example.com/alarm/alarms?dateFrom=2021-04-18T16:54:45.36245505Z&severity=CRITICAL&status=ACTIVE]
 
 ### GET /alarm/alarms?dateFrom=2021-04-18T16:54:45.36245505Z&severity=CRITICAL&status=ACTIVE

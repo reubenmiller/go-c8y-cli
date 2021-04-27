@@ -2,6 +2,7 @@
 title: Common Parameters
 ---
 
+import CodeExample from '@site/src/components/CodeExample';
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
 
@@ -32,17 +33,13 @@ Common parameters are also supported in the `PSc8y` PowerShell module, however t
 
 Below is an example showing the differences between `c8y` and `PSc8y` 
 
-**Shell**
+<CodeExample>
 
 ```bash
 c8y devices list --verbose --pageSize 1 --withTotalPages
 ```
 
-**PowerShell**
-
-```powershell
-Get-DeviceCollection -Verbose -PageSize 1 -WithTotalPages
-```
+</CodeExample>
 
 All common parameters are detailed in the next section along with some examples to show its use case.
 
@@ -64,31 +61,19 @@ Create 10 events for the same device. Though for the sake of the example, we wil
 
 The non-existent id will be piped 10 times using the utility command `c8y util repeat` which will be piped to try to create 10 events, where a delay of 1 second is used between creating events.
 
-<Tabs
-  groupId="shell-types"
-  defaultValue="bash"
-  values={[
-    { label: 'Shell', value: 'bash', },
-    { label: 'PowerShell', value: 'powershell', },
-  ]
-}>
-<TabItem value="bash">
+<CodeExample transform="false">
 
 ```bash
 c8y util repeat 10 --format 0 |
   c8y events create --type "io_simulation_Raw" --text "Received raw input value" --delay 1000 --abortOnErrors 2
 ```
 
-</TabItem>
-<TabItem value="powershell">
-
 ```powershell
 c8y util repeat 10 --format 0 |
   c8y events create --type "io_simulation_Raw" --text "Received raw input value" --delay 1000 --abortOnErrors 2
 ```
 
-</TabItem>
-</Tabs>
+</CodeExample>
 
 ```json title="output"
 2021-04-24T11:11:13.638Z        ERROR   commandError: aborted batch as error count has been exceeded. totalErrors=2
@@ -96,29 +81,17 @@ c8y util repeat 10 --format 0 |
 
 The exact error can be viewed in the activity log which is accessible either by viewing the json file or using the command:
 
-<Tabs
-  groupId="shell-types"
-  defaultValue="bash"
-  values={[
-    { label: 'Shell', value: 'bash', },
-    { label: 'PowerShell', value: 'powershell', },
-  ]
-}>
-<TabItem value="bash">
+<CodeExample transform="false">
 
 ```bash
 c8y activitylog list --dateFrom "-10min" --filter "method eq POST" --select "time,method,path,statusCode,responseError"
 ```
 
-</TabItem>
-<TabItem value="powershell">
-
 ```powershell
 c8y activitylog list --dateFrom "-10min" --filter "method eq POST" --select "time,method,path,statusCode,responseError"
 ```
 
-</TabItem>
-</Tabs>
+</CodeExample>
 
 ```text title="output"
 | time                              | method     | path               | statusCode | responseError.error             | responseError.info                                                                    | responseError.message                           |
@@ -133,29 +106,17 @@ c8y activitylog list --dateFrom "-10min" --filter "method eq POST" --select "tim
 
 Compact instead of pretty-printed output when using json output. Pretty print is the default if output is the terminal.
 
-<Tabs
-  groupId="shell-types"
-  defaultValue="bash"
-  values={[
-    { label: 'Shell', value: 'bash', },
-    { label: 'PowerShell', value: 'powershell', },
-  ]
-}>
-<TabItem value="bash">
+<CodeExample>
 
 ```bash
 c8y devices list --output json --compact --view auto
 ```
 
-</TabItem>
-<TabItem value="powershell">
-
 ```powershell
 Get-DeviceCollection -Output json -Compact -View auto
 ```
 
-</TabItem>
-</Tabs>
+</CodeExample>
 
 ````json  title="output"
 {"id":"494210","lastUpdated":"2021-04-24T08:44:28.080Z","name":"device_0001","owner":"ciuser01","type":"ci_Test"}
@@ -173,29 +134,18 @@ Prompt for confirmation
 
 By default only specific commands require a confirmation, i.e. by default commands which just send a GET HTTP request do not require confirmation, however confirmation can be enforced by using `confirm`.
 
-<Tabs
-  groupId="shell-types"
-  defaultValue="bash"
-  values={[
-    { label: 'Shell', value: 'bash', },
-    { label: 'PowerShell', value: 'powershell', },
-  ]
-}>
-<TabItem value="bash">
+<CodeExample>
 
 ```bash
 c8y devices list --confirm
 ```
 
-</TabItem>
-<TabItem value="powershell">
 
 ```powershell
 Get-DeviceCollection -Confirm
 ```
 
-</TabItem>
-</Tabs>
+</CodeExample>
 
 ````bash  title="output"
 ? Confirm (job: 1)
@@ -215,29 +165,13 @@ Custom confirmation text
 
 Control the confirmation message that will be shown to the user. This can be used when creating your own wrapper scripts.
 
-<Tabs
-  groupId="shell-types"
-  defaultValue="bash"
-  values={[
-    { label: 'Shell', value: 'bash', },
-    { label: 'PowerShell', value: 'powershell', },
-  ]
-}>
-<TabItem value="bash">
+<CodeExample>
 
 ```bash
 c8y devices list --confirm --confirmText "Hey there, are you sure you want to get a device list"
 ```
 
-</TabItem>
-<TabItem value="powershell">
-
-```powershell
-Get-DeviceCollection -Confirm -ConfirmText "Hey there, are you sure you want to get a device list"
-```
-
-</TabItem>
-</Tabs>
+</CodeExample>
 
 ````bash  title="output"
 ? Confirm (job: 1)
@@ -260,29 +194,13 @@ Using large page number can be slow, so it is better to use either date filterin
 
 **Example: Get the second page of results instead of the first**
 
-<Tabs
-  groupId="shell-types"
-  defaultValue="bash"
-  values={[
-    { label: 'Shell', value: 'bash', },
-    { label: 'PowerShell', value: 'powershell', },
-  ]
-}>
-<TabItem value="bash">
+<CodeExample>
 
 ```bash
 c8y devices list --pageSize 5 --currentPage 2
 ```
 
-</TabItem>
-<TabItem value="powershell">
-
-```powershell
-Get-DeviceCollection -PageSize 5 -CurrentPage 2
-```
-
-</TabItem>
-</Tabs>
+</CodeExample>
 
 ````json  title="output"
 | id          | name             | type       | owner         | lastUpdated                   | c8y_availability.status |
@@ -306,15 +224,7 @@ Debug will show both verbose and debug messages on standard error output. The de
 
 Sensitive information should be hidden before sharing it with anyone as it contains the authorization header
 
-<Tabs
-  groupId="shell-types"
-  defaultValue="bash"
-  values={[
-    { label: 'Shell', value: 'bash', },
-    { label: 'PowerShell', value: 'powershell', },
-  ]
-}>
-<TabItem value="bash">
+<CodeExample transform="false">
 
 ```bash
 # hide sensitive info
@@ -323,9 +233,6 @@ eval $( c8y settings update logger.hideSensitive true --shell auto )
 c8y alarms list --debug
 ```
 
-</TabItem>
-<TabItem value="powershell">
-
 ```powershell
 # hide sensitive info
 c8y settings update logger.hideSensitive true --shell auto | Out-String | Invoke-Expression
@@ -333,8 +240,7 @@ c8y settings update logger.hideSensitive true --shell auto | Out-String | Invoke
 Get-AlarmCollection -Debug
 ```
 
-</TabItem>
-</Tabs>
+</CodeExample>
 
 ---
 
@@ -354,29 +260,17 @@ Adding a delay after each request is useful to apply some basic rate limiting to
 
 Using a `delay` of 500 milliseconds to ensure that the requests do not overload the platform.
 
-<Tabs
-  groupId="shell-types"
-  defaultValue="bash"
-  values={[
-    { label: 'Shell', value: 'bash', },
-    { label: 'PowerShell', value: 'powershell', },
-  ]
-}>
-<TabItem value="bash">
+<CodeExample>
 
 ```bash
 seq 1 10 | c8y devices create --workers 2 --delay 500
 ```
 
-</TabItem>
-<TabItem value="powershell">
-
 ```powershell
 1..10 | batch | New-Device -Workers 2 -Delay 500
 ```
 
-</TabItem>
-</Tabs>
+</CodeExample>
 
 ---
 
@@ -394,15 +288,7 @@ A realtime client is used to subscribe to created operations for a device and it
 
 The whole process runs for 180 seconds as the subscription duration is set to `180` in the first command. Alternatively, if you only want to process a fixed count of operations then you can use the `count` parameter, but the duration will still be used to control how long the realtime client listens to operations for.
 
-<Tabs
-  groupId="shell-types"
-  defaultValue="bash"
-  values={[
-    { label: 'Shell', value: 'bash', },
-    { label: 'PowerShell', value: 'powershell', },
-  ]
-}>
-<TabItem value="bash">
+<CodeExample>
 
 ```bash
 c8y operations subscribe --device 1234 --duration 180 --actionTypes CREATE |
@@ -410,18 +296,7 @@ c8y operations subscribe --device 1234 --duration 180 --actionTypes CREATE |
   c8y operations update --delayBefore 10000 --status SUCCESSFUL
 ```
 
-</TabItem>
-<TabItem value="powershell">
-
-```powershell
-Watch-Operation -Device 1234 -Duration 180 -ActionTypes CREATE |
-  Update-Operation -DelayBefore 5000 -Status EXECUTING |
-  Update-Operation -DelayBefore 10000 -Status SUCCESSFUL
-```
-
-</TabItem>
-</Tabs>
-
+</CodeExample>
 
 ---
 
@@ -433,29 +308,13 @@ Dry run. Don't send any data to the server
 
 **Example: Check what request would be sent without creating the device**
 
-<Tabs
-  groupId="shell-types"
-  defaultValue="bash"
-  values={[
-    { label: 'Shell', value: 'bash', },
-    { label: 'PowerShell', value: 'powershell', },
-  ]
-}>
-<TabItem value="bash">
+<CodeExample>
 
 ```bash
 c8y devices create --name "my-test" --dry --dryFormat markdown
 ```
 
-</TabItem>
-<TabItem value="powershell">
-
-```powershell
-New-Device -Name my-test -Dry -DryFormat markdown
-```
-
-</TabItem>
-</Tabs>
+</CodeExample>
 
 ````markdown  title="output"
 What If: Sending [POST] request to [https://example.com/inventory/managedObjects]
@@ -501,29 +360,13 @@ You want to ensure that the `pageSize` is large enough that it will include some
 
 **Example: Get application list and filter using a wildcard search by name and type**
 
-<Tabs
-  groupId="shell-types"
-  defaultValue="bash"
-  values={[
-    { label: 'Shell', value: 'bash', },
-    { label: 'PowerShell', value: 'powershell', },
-  ]
-}>
-<TabItem value="bash">
+<CodeExample>
 
 ```bash
 c8y applications list --pageSize 100 --filter "name like *cockpit*" --filter "type match HOSTED|MICROSERVICE"
 ```
 
-</TabItem>
-<TabItem value="powershell">
-
-```powershell
-Get-ApplicationCollection -PageSize 100 -Filter "name like *cockpit*", "type eq HOSTED"
-```
-
-</TabItem>
-</Tabs>
+</CodeExample>
 
 ````text  title="output"
 | id         | name         | key                          | type        | availability |
@@ -549,29 +392,13 @@ Only used used when the output is set to json
 
 The `select` parameter is used here along with the globstar `**` to select all properties of the response. Alternatively `--view off` could be used which would have the same effect.
 
-<Tabs
-  groupId="shell-types"
-  defaultValue="bash"
-  values={[
-    { label: 'Shell', value: 'bash', },
-    { label: 'PowerShell', value: 'powershell', },
-  ]
-}>
-<TabItem value="bash">
+<CodeExample>
 
 ```bash
 c8y devices list --pageSize 1 --output json --flatten --select "**"
 ```
 
-</TabItem>
-<TabItem value="powershell">
-
-```powershell
-Get-DeviceCollection -PageSize 1 -Output json --Flatten --select "**"
-```
-
-</TabItem>
-</Tabs>
+</CodeExample>
 
 ````json  title="output"
 {
@@ -625,18 +452,9 @@ Add custom headers to the output going HTTP request. Useful when a custom micros
 
 **Example: Add custom header when requesting a list of measurements**
 
-
 In this example a custom accept header is used `text/csv` when requesting a list of measurements, the header instructs Cumulocity to return the results in a csv format instead of the default json format. `c8y measurements list` already has parameters which can control this (`csvFormat` and `excelFormat`) however for the sake of the exercise, we will add header manually. 
 
-<Tabs
-  groupId="shell-types"
-  defaultValue="bash"
-  values={[
-    { label: 'Shell', value: 'bash', },
-    { label: 'PowerShell', value: 'powershell', },
-  ]
-}>
-<TabItem value="bash">
+<CodeExample>
 
 ```bash
 c8y measurements list --device 494210 --header "Accept: text/csv"
@@ -645,18 +463,14 @@ c8y measurements list --device 494210 --header "Accept: text/csv"
 c8y measurements list --device 494210 --csvFormat
 ```
 
-</TabItem>
-<TabItem value="powershell">
-
 ```powershell
 Get-MeasurementCollection -Device 494210 -Header "Accept: text/csv" -AsPSObject:$false
 
 # equivalent to (for c8y measurements list only)
-Get-MeasurementCollection --Device 494210 --CsvFormat
+Get-MeasurementCollection -Device 494210 -CsvFormat
 ```
 
-</TabItem>
-</Tabs>
+</CodeExample>
 
 ````csv  title="output"
 time,source,device_name,fragment.series,value,unit
@@ -702,31 +516,14 @@ The example will follow the following steps:
 
 A delay of 200 milliseconds is used between each request to rate limit the requests to reduce load on the platform.
 
-<Tabs
-  groupId="shell-types"
-  defaultValue="bash"
-  values={[
-    { label: 'Shell', value: 'bash', },
-    { label: 'PowerShell', value: 'powershell', },
-  ]
-}>
-<TabItem value="bash">
+<CodeExample>
 
 ```bash
 c8y devices list --query "not(has(goc8ycli_Rename))" --includeAll |
   c8y devices update --delay 200 --template "{ name: 'ci-' + input.value.name, goc8ycli_Rename: { lastUpdated: _.Now('0s') } }"
 ```
 
-</TabItem>
-<TabItem value="powershell">
-
-```powershell
-Get-DeviceCollection -Query "not(has(goc8ycli_Rename))" -IncludeAll | batch |
-  Update-Device -Delay 200 -Template "{ name: 'ci-' + input.value.name, goc8ycli_Rename: { lastUpdated: _.Now('0s') } }"
-```
-
-</TabItem>
-</Tabs>
+</CodeExample>
 
 ````text  title="output"
 | id          | name                   | type       | owner         | lastUpdated                   | c8y_availability.status |
@@ -758,29 +555,13 @@ The message will be under the `.message` property of the entry type `command`. T
 
 **Example: Add custom message to the activity log entry related to executing a command**
 
-<Tabs
-  groupId="shell-types"
-  defaultValue="bash"
-  values={[
-    { label: 'Shell', value: 'bash', },
-    { label: 'PowerShell', value: 'powershell', },
-  ]
-}>
-<TabItem value="bash">
+<CodeExample>
 
 ```bash
 c8y devices update --id 494210 --data "ci_data.usage=100" --logMessage "setting data usage to 100%"
 ```
 
-</TabItem>
-<TabItem value="powershell">
-
-```powershell
-Update-Device -Id 494210 -Data "ci_data.usage=100" -LogMessage "setting data usage to 100%"
-```
-
-</TabItem>
-</Tabs>
+</CodeExample>
 
 ```json  title="file: activitylog entry"
 {"time":"2021-04-24T14:33:08.9024232Z","ctx":"CFWmWgDk","type":"command","arguments":["devices","update","--id","494210","--data","ci_data.usage=100","--logMessage","setting data usage to 100%"],"message":"setting data usage to 100%"}
@@ -815,29 +596,13 @@ You have an input file, `my-device-list.txt`, containing device ids (one per lin
 7777
 ```
 
-<Tabs
-  groupId="shell-types"
-  defaultValue="bash"
-  values={[
-    { label: 'Shell', value: 'bash', },
-    { label: 'PowerShell', value: 'powershell', },
-  ]
-}>
-<TabItem value="bash">
+<CodeExample>
 
 ```bash
 cat my-device-list.txt | c8y devices setRequiredAvailability --interval 30 --maxJobs 5
 ```
 
-</TabItem>
-<TabItem value="powershell">
-
-```powershell
-cat my-device-list.txt | batch | Set-DeviceRequiredAvailability -Interval 30 -MaxJobs 5
-```
-
-</TabItem>
-</Tabs>
+</CodeExample>
 
 ```json title="output"
 | id          | name                    | type       | owner         | lastUpdated                   | c8y_Availability.status |
@@ -860,29 +625,17 @@ Ignore Accept header will remove the Accept header from requests, however PUT an
 
 Updating a large about of devices can put a load on the platform. In order to minimize the load, the `noAccept` parameter can be used as less processing is required by the platform as it does not need to send the update managed object back.
 
-<Tabs
-  groupId="shell-types"
-  defaultValue="bash"
-  values={[
-    { label: 'Shell', value: 'shell', },
-    { label: 'PowerShell', value: 'powershell', },
-  ]
-}>
-<TabItem value="shell">
+<CodeExample>
 
 ```bash
 c8y devices list --name "mobile*" | c8y devices update --data "myOtherFragment={}" --noAccept
 ```
 
-</TabItem>
-<TabItem value="powershell">
-
 ```powershell
-Get-DeviceCollection -Name "mobile*" | batch | Update-Device -Data "myOtherFragment={}" --noAccept
+Get-DeviceCollection -Name "mobile*" | batch | Update-Device -Data "myOtherFragment={}" -NoAccept
 ```
 
-</TabItem>
-</Tabs>
+</CodeExample>
 
 ```bash title="output"
 ✓ Updated /inventory/managedObjects/497913 => 200 OK
@@ -920,31 +673,19 @@ Ignore the proxy settings
 
 The following command will not use the proxy settings when using the `noProxy` parameter.
 
-<Tabs
-  groupId="shell-types"
-  defaultValue="bash"
-  values={[
-    { label: 'Shell', value: 'shell', },
-    { label: 'PowerShell', value: 'powershell', },
-  ]
-}>
-<TabItem value="shell">
+<CodeExample>
 
 ```bash
 export HTTPS_PROXY="http://10.0.0.1:8000"
 c8y devices list --noProxy
 ```
 
-</TabItem>
-<TabItem value="powershell">
-
 ```powershell
 $env:HTTPS_PROXY = "http://10.0.0.1:8000"
 Get-DeviceCollection -NoProxy
 ```
 
-</TabItem>
-</Tabs>
+</CodeExample>
 
 
 If you are in doubt about which proxy settings are being used when running a command then add `verbose` parameter to turn on the verbose logging, and the proxy/noproxy settings will be displayed on the console.
@@ -969,15 +710,7 @@ The `table` format is the default when the output is being displayed in the cons
 
 Print output as CSV (without headers) so that the data is easier to stream and parse to other 3rd party tools. `select` should also be used together in order to limit which fields are included in the output.
 
-<Tabs
-  groupId="shell-types"
-  defaultValue="bash"
-  values={[
-    { label: 'Shell', value: 'shell', },
-    { label: 'PowerShell', value: 'powershell', },
-  ]
-}>
-<TabItem value="shell">
+<CodeExample>
 
 ```bash
 # csv without header
@@ -987,19 +720,7 @@ c8y devices list --name "mobile*" --select "id,name,type,creation*" --output csv
 c8y devices list --name "mobile*" --select "id,name,type,creation*" --output csvheader
 ```
 
-</TabItem>
-<TabItem value="powershell">
-
-```powershell
-# csv without header
-Get-DeviceCollection -Name "mobile*" --select "id,name,type,creation*" -Output csv
-
-# csv with header
-Get-DeviceCollection -Name "mobile*" --select "id,name,type,creation*" -Output csvheader
-```
-
-</TabItem>
-</Tabs>
+</CodeExample>
 
 ```csv title="output: csv without header"
 497913,mobile-device_0001,,2021-04-24T19:14:01.202Z
@@ -1037,15 +758,7 @@ The raw response (as returned by Cumulocity) can also be written to file in addi
 
 No view logic or select statements on the response will be applied. This can be useful if you want to tee the output
 
-<Tabs
-  groupId="shell-types"
-  defaultValue="bash"
-  values={[
-    { label: 'Shell', value: 'shell', },
-    { label: 'PowerShell', value: 'powershell', },
-  ]
-}>
-<TabItem value="shell">
+<CodeExample>
 
 ```bash
 c8y alarms list -p 1--outputFileRaw test.json
@@ -1054,19 +767,7 @@ c8y alarms list -p 1--outputFileRaw test.json
 c8y alarms list -p 1 --raw > test.json
 ```
 
-</TabItem>
-<TabItem value="powershell">
-
-```powershell
-Get-AlarmCollection -PageSize 1 -OutputFileRaw test.json
-
-# Or if you don't want any console output, just use redirection, but be sure to use raw!
-Get-AlarmCollection -PageSize 1 -Raw > test.json
-```
-
-</TabItem>
-</Tabs>
-
+</CodeExample>
 
 ```powershell title="output"
 | id         | status            | type                         | severity      | count      | source.id  |
@@ -1082,31 +783,14 @@ Or it can be used to download a binary from the platform
 
 c8y_applications_storage_9397
 
-<Tabs
-  groupId="shell-types"
-  defaultValue="bash"
-  values={[
-    { label: 'Shell', value: 'shell', },
-    { label: 'PowerShell', value: 'powershell', },
-  ]
-}>
-<TabItem value="shell">
+<CodeExample>
 
 ```bash
 c8y inventory find --query "has(c8y_IsBinary) and type eq 'c8y_applications_storage_*'" |
   c8y binaries get > my.zip
 ```
 
-</TabItem>
-<TabItem value="powershell">
-
-```powershell
-Find-ManagedObjectCollection -Query "has(c8y_IsBinary) and type eq 'c8y_applications_storage_*'" -PageSize 1 |
-    Get-Binary | Out-File my.zip
-```
-
-</TabItem>
-</Tabs>
+</CodeExample>
 
 ---
 
@@ -1119,29 +803,13 @@ Set the maximum number of results for commands which return a list of objects. T
 
 **Example: Get a collection of alarms and limit the results to 100 alarms**
 
-<Tabs
-  groupId="shell-types"
-  defaultValue="bash"
-  values={[
-    { label: 'Shell', value: 'shell', },
-    { label: 'PowerShell', value: 'powershell', },
-  ]
-}>
-<TabItem value="shell">
+<CodeExample>
 
 ```bash
 c8y alarms list --pageSize 100
 ```
 
-</TabItem>
-<TabItem value="powershell">
-
-```powershell
-Get-AlarmCollection -PageSize 100
-```
-
-</TabItem>
-</Tabs>
+</CodeExample>
 
 ---
 
@@ -1182,15 +850,7 @@ When getting an alarm list without the `raw` parameter, only the array containin
 
 So getting a list of alarms without `raw` looks like this:
 
-<Tabs
-  groupId="shell-types"
-  defaultValue="bash"
-  values={[
-    { label: 'Shell', value: 'shell', },
-    { label: 'PowerShell', value: 'powershell', },
-  ]
-}>
-<TabItem value="shell">
+<CodeExample>
 
 ```bash
 c8y alarms list -p 1 | jq
@@ -1199,9 +859,6 @@ c8y alarms list -p 1 | jq
 c8y alarms list -p 1 --output json --view off
 ```
 
-</TabItem>
-<TabItem value="powershell">
-
 ```powershell
 Get-AlarmCollection -PageSize 1 | tojson
 
@@ -1209,8 +866,7 @@ Get-AlarmCollection -PageSize 1 | tojson
 Get-AlarmCollection -PageSize 1 -Output json -View off
 ```
 
-</TabItem>
-</Tabs>
+</CodeExample>
 
 ```json
 {
@@ -1241,30 +897,13 @@ The `view` off is used to ensure all of the json properties are shown to us.
 
 Here is the same command but using the `raw` parameter.
 
-<Tabs
-  groupId="shell-types"
-  defaultValue="bash"
-  values={[
-    { label: 'Shell', value: 'shell', },
-    { label: 'PowerShell', value: 'powershell', },
-  ]
-}>
-<TabItem value="shell">
+<CodeExample>
 
 ```bash
 c8y alarms list -p 1 --raw
 ```
 
-</TabItem>
-<TabItem value="powershell">
-
-```powershell
-Get-AlarmCollection -PageSize 1 -Raw
-```
-
-</TabItem>
-</Tabs>
-
+</CodeExample>
 
 ```json title="output"
 {
@@ -1311,15 +950,7 @@ This is useful if you want to quickly see what is going on in another tenant wit
 
 **Example: Get a device name from the staging tenant, and create a new device with the same name in a dev tenant**
 
-<Tabs
-  groupId="shell-types"
-  defaultValue="bash"
-  values={[
-    { label: 'Shell', value: 'shell', },
-    { label: 'PowerShell', value: 'powershell', },
-  ]
-}>
-<TabItem value="shell">
+<CodeExample>
 
 ```bash
 devicename=$( c8y operations list --pageSize 1 --session staging-tenant -o csv --select name )
@@ -1327,17 +958,13 @@ devicename=$( c8y operations list --pageSize 1 --session staging-tenant -o csv -
 c8y devices create --name "$devicename" --session dev-tenant
 ```
 
-</TabItem>
-<TabItem value="powershell">
-
 ```powershell
 $Device = Get-OperationCollection -PageSize 1 -Session staging-tenant
 
 New-Device -Name $Device.name -Session dev-tenant
 ```
 
-</TabItem>
-</Tabs>
+</CodeExample>
 
 ---
 
@@ -1377,29 +1004,13 @@ Display verbose information when sending a command to Cumulocity. The verbose me
 
 **Example: Display detailed logging about the command**
 
-<Tabs
-  groupId="shell-types"
-  defaultValue="bash"
-  values={[
-    { label: 'Shell', value: 'bash', },
-    { label: 'PowerShell', value: 'powershell', },
-  ]
-}>
-<TabItem value="bash">
+<CodeExample>
 
 ```bash
 c8y devices list --verbose
 ```
 
-</TabItem>
-<TabItem value="powershell">
-
-```powershell
-Get-DeviceCollection -Verbose
-```
-
-</TabItem>
-</Tabs>
+</CodeExample>
 
 ```powershell title="output"
 2021-04-24T08:44:34.559Z        INFO    Binding authorization environment variables
@@ -1431,29 +1042,17 @@ Get-DeviceCollection -Verbose
 :::info
 Verbose output is written to standard error, and the output response is written to standard output. The standard output can be redirected to null to only show the verbose messages using:
 
-<Tabs
-  groupId="shell-types"
-  defaultValue="bash"
-  values={[
-    { label: 'Shell', value: 'bash', },
-    { label: 'PowerShell', value: 'powershell', },
-  ]
-}>
-<TabItem value="bash">
+<CodeExample>
 
 ```bash
 c8y devices list --verbose > /dev/null
 ```
 
-</TabItem>
-<TabItem value="powershell">
-
 ```powershell
 Get-DeviceCollection -Verbose | Out-Null
 ```
 
-</TabItem>
-</Tabs>
+</CodeExample>
 
 :::
 
@@ -1463,7 +1062,7 @@ Get-DeviceCollection -Verbose | Out-Null
 
 View option (default "auto")
 
-Use views when displaying data on the terminal. Disable using --view off
+Use views when displaying data on the terminal. Disable using `--view off`
 
 ---
 
@@ -1479,29 +1078,13 @@ Errors will be printed on stdout instead of stderr
 
 In order to get an accurate total of entities, it is recommended to use `pageSize 1` along with `withTotalPages`. The `totalPages` property in the response will then display the total number of entities.
 
-<Tabs
-  groupId="shell-types"
-  defaultValue="bash"
-  values={[
-    { label: 'Shell', value: 'shell', },
-    { label: 'PowerShell', value: 'powershell', },
-  ]
-}>
-<TabItem value="shell">
+<CodeExample>
 
 ```bash
 c8y alarms list --pageSize 1 --withTotalPages
 ```
 
-</TabItem>
-<TabItem value="powershell">
-
-```powershell
-Get-AlarmCollection -PageSize 1 -WithTotalPages
-```
-
-</TabItem>
-</Tabs>
+</CodeExample>
 
 ```powershell title="output"
 | totalPages | pageSize   | currentPage |

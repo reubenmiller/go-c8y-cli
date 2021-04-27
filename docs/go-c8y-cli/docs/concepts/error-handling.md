@@ -4,11 +4,11 @@ category: Concepts
 title: Error handling
 ---
 
-### Exit codes
+## Exit codes
 
 The c8y binary has the following exit codes to indicate the success of the command. The exit codes include either information about command usage errors or the HTTP status code returned by the Cumulocity API call associated with the command.
 
-#### General exit codes
+### General exit codes
 
 The following exit codes are general codes which relate to the usage of c8y commands.
 
@@ -27,7 +27,7 @@ The following exit codes are general codes which relate to the usage of c8y comm
 |107|Invalid alias|The command took longer than the timeout setting|
 |108|Decryption error|Error occurred when decrypting a session, i.e. invalid passphrase|
 
-#### Exit code to HTTP status code errors
+### HTTP status code errors
 
 The HTTP status code have been mapped to exit codes. To ensure compatibility with multiple operating systems, the exit codes are limited to values between 0 - 128. Therefore the HTTP status codes have been mapped to the following exit codes.
 
@@ -48,7 +48,7 @@ Note: Only HTTP status codes between 400 and 599 are mapped to exit codes. HTTP 
 |52|502|Bad Gateway|The server, while acting as a gateway or proxy, received an invalid response from the upstream server|
 |53|503|Service Unavailable|The service is currently not available. This may be caused by an overloaded instance or it is down for maintenance. Please try it again in a few minutes.|
 
-### Handling errors (Shell)
+## Handling errors (Shell)
 
 Errors which are related to command usage (not server errors), are written to standard error, while server responses (error or otherwise) are written to standard output.
 
@@ -73,19 +73,17 @@ An error occurred: code=4
 ```
 
 
-#### Silencing specific HTTP status codes
+### Silencing specific HTTP status codes
 
 Errors and warnings will be written to stderr. This means in the previous example the `response` variable will be empty, and an error message will still be displayed on the console (as no stderr redirection is being used).
 
-You can silence specific error output for specific status codes by using the `--silentStatusCodes=xxx,yyyy` option. The previous example can also be written as a one-liner:
+You can silence specific error output for specific status codes by using the `silentStatusCodes=xxx,yyyy` option. The previous example can also be written as a one-liner:
 
 ```bash
 c8y inventory get --id=0 --silentStatusCodes=404,409 && echo "ok" || echo "an error occurred code=$?"
 ```
 
-*Output*
-
-```bash
+```bash title="Output"
 an error occurred code=4
 ```
 
@@ -102,8 +100,7 @@ else
 fi
 ```
 
-
-#### Include error in response
+### Include error in response
 
 If you would like to return the error as json, then the `--withError` option can be given which will return any errors as a json response where individual fields can be parsed by using jq, or any other json parser.
 
@@ -112,9 +109,7 @@ If you would like to return the error as json, then the `--withError` option can
 c8y inventory get --id=0 --withError 2>/dev/null | jq
 ```
 
-*Output*
-
-```bash
+```bash title="Output"
 {
   "errorType": "serverError",
   "message": "Finding device data from database failed : No managedObject for id '0'!",
@@ -129,7 +124,7 @@ c8y inventory get --id=0 --withError 2>/dev/null | jq
 }
 ```
 
-### Handling errors (PowerShell)
+## Handling errors (PowerShell)
 
 All PSc8y commands can be tested if they were successful or not by checking the PowerShell variable `$LASTEXITCODE`.
 
@@ -145,7 +140,7 @@ if ($LASTEXITCODE -ne 0) {
 }
 ```
 
-#### Example: Handling specific errors based on the exit code
+### Example: Handling specific errors based on the exit code
 
 Let's say that your are writing a script to create an external identity for an existing device and you don't care if the external Id already exists (as it indicates that your script has already been run on this device).
 
@@ -207,9 +202,7 @@ The script can be called using the following command
 ./create-identity.ps1 -Device 12345 -SerialNumber 7DHD875d501SS
 ```
 
-*Output*
-
-```powershell
+```powershell title="Output"
 Success: Created new identity. name=7DHD875d501SS
 
 Success: Identity already existed. name=7DHD875d501SS

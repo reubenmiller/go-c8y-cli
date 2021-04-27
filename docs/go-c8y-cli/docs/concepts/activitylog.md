@@ -60,16 +60,24 @@ The activity log is a json line file (i.e. one object per line). Below is an exa
 
 The activity logs are all stored in the same folder (regardless of session), however this can be changed for each session by running:
 
+<CodeExample transform="false">
+
 ```bash
 # change activity log folder
 c8y settings update activityLog.path ~/.go-c8y-cli/activitylogs
 ```
 
+</CodeExample>
+
 The current activity log settings can be displayed by running
+
+<CodeExample transform="false">
 
 ```bash
 c8y settings list --select activitylog -o json
 ```
+
+</CodeExample>
 
 ```js title="Output"
 {
@@ -89,10 +97,25 @@ The current activity log file includes the current date timestamp so that the fi
 
 For example, the following one-liner will delete all activity logs older than 14 days.
 
+<CodeExample transform="false">
+
 ```bash
-# shell
-find $(dirname $(c8y settings list --select activitylog.currentPath -o csv)) -type f -mtime +14 -name "c8y.activitylog*.json" -delete
+find $(dirname $(c8y settings list --select activitylog.currentPath -o csv)) \
+  -type f \
+  -mtime +14 \
+  -name "c8y.activitylog*.json" \
+  -delete
 ```
+
+```powershell
+Get-ChildItem -Path (Split-Path (c8y settings list --select activitylog.currentPath -o csv) -Parent) `
+  -Recurse `
+  -Filter "c8y.activitylog*.json" |
+    Where-Object {$_.LastWriteTime -lt (Get-Date).AddDays(-14)} |
+    Remove-Item
+```
+
+</CodeExample>
 
 ## Querying the activity log
 
@@ -102,9 +125,13 @@ go-c8y-cli also provides commands to display and query the activity log to make 
 
 ### Get activity log entries
 
+<CodeExample transform="false">
+
 ```bash
 c8y activitylog list
 ```
+
+</CodeExample>
 
 ````markdown title="Output"
 | time                               | ctx           | type         | method     | path                       | query      | statusCode | responseTimeMS |
@@ -120,17 +147,25 @@ c8y activitylog list
 
 ### Get activity log entries from the last 2 hours
 
+<CodeExample transform="false">
+
 ```bash
 c8y activitylog list --dateFrom -2h
 ```
+
+</CodeExample>
 
 ### Get activity log entries for all requests types (as json)
 
 Piping to the cli tool `jq` can be a useful way to display all of the properties (not just those defined in the view)
 
+<CodeExample transform="false">
+
 ```bash
 c8y activitylog list --dateFrom -2h --type all | jq -c
 ```
+
+</CodeExample>
 
 ```json title="Output"
 {"arguments":["currentuser","get","--confirm=false"],"ctx":"IiMyVQfk","time":"2021-04-18T18:30:02.78461065Z","type":"command"}
@@ -145,16 +180,23 @@ c8y activitylog list --dateFrom -2h --type all | jq -c
 
 You can also interactive by piping to the linux command `more`
 
+<CodeExample transform="false">
+
 ```bash
 c8y activitylog list --dateFrom -2h --type all -o json -c | more
 ```
 
+</CodeExample>
 
 ### Get requests with a status code of 201 and the path includes "alarms"
+
+<CodeExample transform="false">
 
 ```bash
 c8y activitylog list --dateFrom -3h --type request --filter "statusCode eq 201" --filter "path like *alarms*"
 ```
+
+</CodeExample>
 
 ```markdown title="Output"
 | time                               | ctx           | type         | method     | path               | query      | statusCode | responseTimeMS |
@@ -205,24 +247,27 @@ time,path,method,responseTimeMS
 
 ### Get response times of recent api calls
 
-**Shell**
+<CodeExample transform="false">
 
 ```bash
 c8y activitylog list --dateFrom "-10min"
 ```
 
+</CodeExample>
+
 :::note
 Only requests for the current session are shown
 :::
 
-
 ### Get response times of recent api calls
 
-**Shell**
+<CodeExample transform="false">
 
 ```bash
 c8y activitylog list --dateFrom "-10min" --filter "path like *alarm*" --select time,path,method,responseTimeMS
 ```
+
+</CodeExample>
 
 ```bash title="Output"
 | time                               | path               | method     | responseTimeMS |
@@ -238,6 +283,8 @@ Only requests for the current session are shown
 
 Use the `c8y settings list` to get the directory where the activity log files are stored, then use the linux `find` command to find the activity log json files, and then call `c8y util show` to filter the input json file and 
 
+<CodeExample transform="false">
+
 ```bash
 find \
   $(dirname $(c8y settings list --select activitylog.currentPath -o csv)) \
@@ -245,6 +292,8 @@ find \
   -name "c8y.activity*.json" \
   -exec c8y util show --input {} --filter "type like request*" --select "responseTimeMS" -o csv \;
 ```
+
+</CodeExample>
 
 ```text title="Output"
 202
