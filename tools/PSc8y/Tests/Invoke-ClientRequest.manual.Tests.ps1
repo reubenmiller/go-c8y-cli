@@ -98,6 +98,7 @@ Describe -Name "Invoke-ClientRequest" {
             -Uri "/inventory/managedObjects" `
             -Method "post" `
             -Data "name=test" `
+            -AsPSObject:$false `
             -Compact:$false -NoColor
 
         $LASTEXITCODE | Should -Be 0
@@ -323,6 +324,9 @@ Describe -Name "Invoke-ClientRequest" {
 
             Invoke-RestMethod @options
         }
+
+        # Force loading session info as environment variables
+        c8y sessions set --session $env:C8Y_SESSION --shell auto | Out-String | Invoke-Expression
 
         $output = Invoke-MyRequest -Path "user/currentUser"
         $output | Should -Not -BeNullOrEmpty
