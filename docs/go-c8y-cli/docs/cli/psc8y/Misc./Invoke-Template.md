@@ -21,7 +21,7 @@ Invoke-Template
 	[-Template] <String>
 	[-TemplateVars <String>]
 	[-Data <Object[]>]
-	[-Compress]
+	[-Compact]
 	[<CommonParameters>]
 ```
 
@@ -101,13 +101,13 @@ Accept pipeline input: True (ByPropertyName, ByValue)
 Accept wildcard characters: False
 ```
 
-### -Compress
+### -Compact
 Output compressed/minified json
 
 ```yaml
 Type: SwitchParameter
 Parameter Sets: (All)
-Aliases:
+Aliases: Compress
 
 Required: False
 Position: Named
