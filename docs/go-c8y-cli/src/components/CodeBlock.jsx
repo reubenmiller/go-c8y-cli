@@ -26,6 +26,7 @@ const c8yCommands = {
     // operations
     'c8y operations create': 'New-Operation',
     'c8y operations get': 'Get-Operation',
+    'c8y operations update': 'Update-Operation',
     'c8y operations delete': 'Remove-Operation',
     'c8y operations subscribe': 'Watch-Operation',
     'c8y operations list': 'Get-OperationCollection',
@@ -37,7 +38,12 @@ const c8yCommands = {
     'c8y auditrecords subscribe': 'Watch-AuditRecord',
     'c8y auditrecords list': 'Get-AuditRecordCollection',
 
+    'c8y devices create': 'New-Device',
     'c8y devices list': 'New-DeviceCollection',
+    'c8y devices get': 'Get-Device',
+    'c8y devices update': 'Update-Device',
+    'c8y devices delete': 'Remove-Device',
+    'c8y devices setRequiredAvailability': 'Set-DeviceRequiredAvailability',
 
     'c8y inventory update': 'Update-ManagedObject',
     'c8y inventory list': 'Get-ManagedObjectCollection',
@@ -54,7 +60,10 @@ const c8yCommands = {
     'c8y applications get': 'Get-Application',
     'c8y applications update': 'Update-Application',
     'c8y applications delete': 'Remove-Application',
-    
+
+    // binaries
+    'c8y binaries get': 'Get-Binary',
+
     // microservices
     'c8y microservices get': 'Get-Microservice',
     'c8y microservices list': 'Get-MicroserviceCollection',
@@ -72,6 +81,7 @@ const c8yCommands = {
     'cat ': 'Get-Content ',
     '-o csv': '--output csv',
     '-o json': '--output json',
+    '-p ': '--pageSize ',
     
 };
 
