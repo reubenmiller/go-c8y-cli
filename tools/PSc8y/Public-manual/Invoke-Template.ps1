@@ -54,7 +54,8 @@ Function Invoke-Template {
         $Data,
             
         # Output compressed/minified json
-        [switch] $Compress
+        [Alias("Compress")]
+        [switch] $Compact
     )
     
     Begin {
@@ -67,8 +68,12 @@ Function Invoke-Template {
             $null = $c8yArgs.AddRange(@("--templateVars", $TemplateVars))
         }
 
-        if ($Compress) {
-            $null = $c8yArgs.Add("--compact=true")
+        if ($PSBoundParameters.ContainsKey("Compact")) {
+            if ($Compact) {
+                $null = $c8yArgs.Add("--compact")
+            } else {
+                $null = $c8yArgs.Add("--compact=false")
+            }
         }
     }
     
