@@ -1,82 +1,37 @@
 ---
 title: PowerShell
-# slug: installation
 ---
-
-Try it out in a Cloud Shell!
-
-[![Open in Cloud Shell](https://gstatic.com/cloudssh/images/open-btn.svg "Launch Cloud Shell")](https://ssh.cloud.google.com/cloudshell/editor?shellonly=true)
-
-
 ## Prerequisites
 
 Due to ongoing changes to the PowerShell loading module, we first need to make sure some inbuilt PowerShell modules are up-to-date, otherwise you will have problems trying to install the [PSc8y](https://www.powershellgallery.com/packages/PSc8y) module from the PowerShell Gallery (online dotnet/powershell community repository).
 
 The instructions slightly differ depending on which operating system you are using (i.e. Windows, MacOS or Linux). However the good news is that you only have to install the prerequisites once.
 
-
-##### Windows
-
-**PowerShell 7**
+### PowerShell 7 (Linux/MacOS/Windows)
 
 Following the instructions to install [PowerShell 7 (Core)](https://github.com/PowerShell/PowerShell/releases).
 
-**PowerShell 5**
+:::caution
+Powershell 5 is no longer supported. Users should install PowerShell 7 (aka pwsh) as it provides a lot of benefits and is also supported on multiple platforms (linux, MacOS and Windows).
+:::
 
-Powershell 5 is no longer officially supported. Users should install PowerShell 7 (aka pwsh) as it provides a lot of benefits and is also supported on multiple platforms (linux, MacOS and Windows).
+## Installing PSc8y (Linux/MacOS/Windows)
 
-##### MacOS and Linux
-
-1. Install the newest version of PowerShellGet
-
-    ```bash
-    Install-Module –Name PowerShellGet –Force;
-    ```
-
-1. Close the powershell session. Unfortunately you need to reload the console for this step.
-
-    ```bash
-    exit
-    ```
-
-1. Open up a powershell console again
+1. Open a PowerShell (pwsh) console
 
     ```bash
     pwsh
     ```
 
-1. Import PowerShellGet
-
-    ```bash
-    Import-Module PowerShellGet
-    ```
-
-
-## Installing PSc8y
-
-### Windows
-
-#### PowerShell 7 and newer
-
-Powershell 7 is not installed on Windows by default, however it can be installed using the following [instructions](https://docs.microsoft.com/en-us/powershell/scripting/install/installing-powershell-core-on-windows?view=powershell-7).
-
-Once powershell is installed, then `PSc8y` can be installed using:
-
-1. Open a PowerShell (pwsh) console (i.e. pwsh.exe)
-
-    ```bash
-    pwsh.exe
-    ```
-
-    **Note for Windows**
-
-    If you get an error regarding the `Execution policy` when installing or importing PSc8y, then you will have to start a new powershell conc
+    :::info Windows Users
+    If you get an error regarding the `Execution policy` when installing or importing PSc8y, then you will have to start a new powershell disabling the execution policy.
 
     ```bash
     pwsh -ExecutionPolicy bypass
     ```
     
     More information on PowerShell's execution policy can be found on the [Microsoft website](https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_execution_policies)
+    :::
 
 1. Install `PSc8y` module from [PSGallery](https://www.powershellgallery.com/packages/PSc8y)
 
@@ -90,65 +45,7 @@ Once powershell is installed, then `PSc8y` can be installed using:
     Import-Module PSc8y
     ```
 
-1. Now go to the [Getting started](https://reubenmiller.github.io/go-c8y-cli/docs/2-getting-started-powershell/) section for instructions how to use it
-
-#### PowerShell 5
-
-Powershell 5 is no longer officially supported. Users should install PowerShell 7 (aka pwsh) as it provides a lot of benefits and is also supported on multiple platforms (linux, MacOS and Windows).
-
-Following the instructions to install [PowerShell 7 (Core)](https://github.com/PowerShell/PowerShell/releases).
-
-### MacOS
-
-If you do not already have PowerShell (pwsh) on your system then it can be installed on my using these [instructions](https://docs.microsoft.com/en-us/powershell/scripting/install/installing-powershell-core-on-macos?view=powershell-7).
-
-Once powershell is installed, then `PSc8y` can be installed using:
-
-1. Open a PowerShell Console from your Terminal app
-    
-    ```powershell
-    pwsh
-    ```
-
-1. Install `PSc8y` module from [PSGallery](https://www.powershellgallery.com/packages/PSc8y)
-
-    ```powershell
-    Install-Module PSc8y -Repository PSGallery -AllowClobber -Scope CurrentUser
-    ```
-
-1. Import the module
-
-    ```powershell
-    Import-Module PSc8y
-    ```
-
-1. Now go to the [Getting started](https://reubenmiller.github.io/go-c8y-cli/docs/2-getting-started-powershell/) section for instructions how to use it
-
-### Linux
-
-If you do not already have PowerShell (pwsh) on your system then it can be installed on my using these [instructions](https://docs.microsoft.com/en-us/powershell/scripting/install/installing-powershell-core-on-linux?view=powershell-7).
-
-Once powershell is installed, then `PSc8y` can be installed using:
-
-1. Open a PowerShell Console
-    
-    ```powershell
-    pwsh
-    ```
-
-1. Install `PSc8y` module from [PSGallery](https://www.powershellgallery.com/packages/PSc8y)
-
-    ```powershell
-    Install-Module PSc8y -Repository PSGallery -AllowClobber -Scope CurrentUser
-    ```
-
-1. Import the module
-
-    ```powershell
-    Import-Module PSc8y
-    ```
-
-1. Now go to the [Getting started](https://reubenmiller.github.io/go-c8y-cli/docs/2-getting-started-powershell/) section for instructions how to use it
+1. Now go to the [Getting started](../gettingstarted) section for instructions how to use it
 
 
 ## Updating PSc8y
@@ -176,25 +73,50 @@ Once the `PSc8y` PowerShell module has been installed, then it can be updated fr
     ```powershell
     ModuleType Version    Name    ExportedCommands
     ---------- -------    ----    ----------------
-    Script     1.1.0      PSc8y   {Add-PowershellType, Add-...
+    Script     2.0.0      PSc8y   {Add-PowershellType, Add-...
     ```
 
-    **Note:**
-
+    :::info
     The version number does not show the pre-release version information.
+    :::
+## Manually installing PSc8y
 
-## Troubleshooting
+### Downloading using Save-Module
 
-```powershell
-Import-Module PSc8y
-```
+The `PSc8y` module can be downloaded manually using `Save-Module`. This has the advantage over  `Install-Module` as you can control where the module is saved to.
 
-**Note for Windows**
+:::info
+`Install-Module` does not allow you to control where the modules are installed. By default the target folder is inside your home directory, however if you have your home folder synced automatically to Microsoft OneDrive then you might run into problems as `PSc8y` contains executables (i.e. `.exe` files).
+:::
 
-If you get an error regarding the `Execution policy` when installing or importing PSc8y, then you will have to start a new powershell conc
+1. Create a folder where you want to store `PSc8y`
 
-```bash
-pwsh -ExecutionPolicy bypass
-```
+    ```powershell
+    mkdir ~/PSModules
+    ```
 
-More information on PowerShell's execution policy can be found on the [Microsoft website](https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_execution_policies)
+1. Download the `PSc8y` Module to the folder `~/PSModules`
+
+    ```powershell
+    Save-Module -Name PSc8y -Repository PSGallery -Path ~/PSModules
+    ```
+
+    :::tip
+    Save-Module also accepts `-RequiredVersion` where you can specify an exact version instead of the latest.
+    :::
+
+1. Import `PSc8y`
+
+    ```powershell
+    Import-Module ~/PSModules/PSc8y -Force
+    ```
+
+    :::tip
+    You can the `~/PSModules` folder to the `$env:PSModulePath` variable so that you can use `Import-Module` without having to specify the module location each time.
+
+    The best way to do this is by adding the following to your PowerShell profile. This can be open by editing the path stored in the `$PROFILE` variable. If the file does not exist, just create it in the specified location.
+
+    ```powershell
+    $env:PSModulePath = (Resolve-Path "~/PSModules").Path + ";" + $env:PSModulePath
+    ```
+    :::
