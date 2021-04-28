@@ -42,6 +42,8 @@ Set-DeviceRequiredAvailability
 	[-Flatten]
 	[-Compact]
 	[-NoColor]
+	[-Help]
+	[-Examples]
 	[-Confirm]
 	[-ConfirmText <String>]
 	[-WithError]
@@ -291,6 +293,21 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
+### -Examples
+Show examples for the current command
+
+```yaml
+Type: SwitchParameter
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
 ### -Filter
 Apply a client side filter to response before returning it to the user
 
@@ -344,6 +361,21 @@ i.e.
 
 ```yaml
 Type: String[]
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -Help
+Show command help
+
+```yaml
+Type: SwitchParameter
 Parameter Sets: (All)
 Aliases:
 

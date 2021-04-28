@@ -65,11 +65,11 @@ None :)
 * Creating alias on windows uses different quoting to shell! Just show in documentation and/or examples
         
         ```powershell
-        # Fails
-        c8y alias set cancelop 'operations update --status FAILED --failureReason "User cancelled operation"'
+        # Need to escape double quotes!!!
+        c8y alias set cancelop 'operations update --status FAILED --failureReason \"User cancelled operation\"'
         
 
-        # Works
+        # Or use single quotes
         c8y alias set cancelop "operations update --status=FAILED --failureReason='User cancelled operation'"
         ```
 
