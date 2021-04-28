@@ -140,6 +140,8 @@ None :)
 
 No unreleased features
 
+* Added `--examples` option to only show the help text of a function
+
 * Add option to disable reading from stdin (piped data) (`--nullInput / -c`)
 
 * Fixed `--filter` bug when the given property does not exist, i.e. `--filter "nonexistent_prop like *`. Non-existent property warning messages will no longer be logged
