@@ -1,6 +1,7 @@
 package root
 
 import (
+	"fmt"
 	"os"
 	"strings"
 	"sync"
@@ -164,6 +165,9 @@ func NewCmdRoot(f *cmdutil.Factory, version, buildDate string) *CmdRoot {
 	cmd.PersistentFlags().Bool("withError", false, "Errors will be printed on stdout instead of stderr")
 	cmd.PersistentFlags().StringSliceP("header", "H", nil, `custom headers. i.e. --header "Accept: value, AnotherHeader: myvalue"`)
 	cmd.PersistentFlags().StringSlice("queryParam", nil, `custom query parameters. i.e. --queryParam "withCustomOption=true,myOtherOption=myvalue"`)
+
+	// help
+	cmd.PersistentFlags().Bool("examples", false, "Show examples for the current command")
 
 	// Activity log
 	cmd.PersistentFlags().BoolVar(&ccmd.NoLog, "noLog", false, "Disables the activity log for the current command")
@@ -474,6 +478,16 @@ func (c *CmdRoot) checkSessionExists(cmd *cobra.Command, args []string) error {
 	log.Debugf("command str: %s", cmdStr)
 	log.Infof("command: c8y %s", utilities.GetCommandLineArgs())
 	log.Debugf("output format: %s", cfg.GetOutputFormat().String())
+
+	// print examples
+	if cmd.Flags().Changed("examples") {
+		examples := fmt.Sprintf("%s\n", cmd.Example)
+		// style := markdown.GetStyle(c.Factory.IOStreams.TerminalTheme())
+		// log.Debugf("GLAMOR style: %s", style)
+		// mdContent, _ := markdown.Render(examples, style)
+		fmt.Fprint(c.Factory.IOStreams.Out, examples)
+		return cmderrors.ErrHelp
+	}
 
 	if cmd.Name() != cobra.ShellCompRequestCmd && cmd.CalledAs() != cobra.ShellCompNoDescRequestCmd && !strings.HasPrefix(cmdStr, "activitylog") {
 		activityHandler.LogCommand(cmd, args, cmdStr, c.ActivityLogMessage)

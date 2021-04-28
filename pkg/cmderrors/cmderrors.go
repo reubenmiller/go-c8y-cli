@@ -18,6 +18,9 @@ const (
 	ErrTypeCommand = "commandError"
 )
 
+// ErrHelp help error text. This error will not be displayed to the user
+var ErrHelp = errors.New("help text: this is not an error")
+
 type ExitCode int
 
 const (

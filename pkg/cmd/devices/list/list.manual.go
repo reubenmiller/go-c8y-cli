@@ -32,7 +32,7 @@ func NewCmdDevicesList(f *cmdutil.Factory) *CmdDevicesList {
 		Short: "Get device collection",
 		Long:  `Get a collection of devices based on filter parameters`,
 		Example: heredoc.Doc(`
-		c8y devices list --name "sensor*" --type myType
+		$ c8y devices list --name "sensor*" --type myType
 
 		Get a collection of devices of type "myType", and their names start with "sensor"
 		`),

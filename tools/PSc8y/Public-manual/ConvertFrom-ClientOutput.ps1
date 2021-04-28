@@ -39,6 +39,8 @@ Function ConvertFrom-ClientOutput {
             -or $BoundParameters["Compress"] `
             -or $BoundParameters["Compact"] `
             -or $BoundParameters["Dry"] `
+            -or $BoundParameters["Help"] `
+            -or $BoundParameters["Examples"] `
             -or $WhatIfPreference
 
         $SelectedType = if ($ItemType) { $ItemType } else { $Type }

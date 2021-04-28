@@ -100,6 +100,10 @@ Inherit common parameters to a custom function. This will add parameters such as
         New-DynamicParam -Name Flatten -Type "switch" -DPDictionary $Dictionary -HelpMessage "flatten json output by replacing nested json properties with properties where their names are represented by dot notation"
         New-DynamicParam -Name Compact -Alias "Compress" -Type "switch" -DPDictionary $Dictionary -HelpMessage "Compact instead of pretty-printed output when using json output. Pretty print is the default if output is the terminal"
         New-DynamicParam -Name NoColor -Type "switch" -DPDictionary $Dictionary -HelpMessage "Don't use colors when displaying log entries on the console"
+        
+        # Help
+        New-DynamicParam -Name Help -Type "switch" -DPDictionary $Dictionary -HelpMessage "Show command help"
+        New-DynamicParam -Name Examples -Type "switch" -DPDictionary $Dictionary -HelpMessage "Show examples for the current command"
 
         # Confirmation
         if (-Not $SkipConfirm) {

@@ -348,6 +348,26 @@ See the [dry run](dryrun) concept page for more details and examples
 
 ---
 
+### examples
+
+Show examples for the current command
+
+<CodeExample>
+
+```bash
+c8y devices list --examples
+```
+
+</CodeExample>
+
+```text title="Output"
+$ c8y devices list --name "sensor*" --type myType
+
+Get a collection of devices of type "myType", and their names start with "sensor"
+```
+
+---
+
 ### filter
 
 Apply a client side filter to response before returning it to the user. It supports a simple filter language making it easy for wildcards, regular expression matches

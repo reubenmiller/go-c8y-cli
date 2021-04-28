@@ -69,6 +69,12 @@ func MainRun() {
 	if err := cmd.Execute(); err != nil {
 		err = CheckCommandError(cmd.Command, cmd.Factory, err)
 
+		// Help is not really error, just a way to exit early
+		// after displaying help to ther user
+		if errors.Is(err, cmderrors.ErrHelp) {
+			os.Exit(int(cmderrors.ExitOK))
+		}
+
 		if cErr, ok := err.(cmderrors.CommandError); ok {
 			os.Exit(int(cErr.ExitCode))
 		}
@@ -89,6 +95,10 @@ func CheckCommandError(cmd *cobra.Command, f *cmdutil.Factory, err error) error 
 		log.Fatalf("Could not configure logger. %s", logErr)
 	}
 	w := ioutil.Discard
+
+	if errors.Is(err, cmderrors.ErrHelp) {
+		return err
+	}
 
 	// read directly from flags, as unknown flag errors are thrown before the config is read
 	if localWithError, fErr := cmd.Flags().GetBool("withError"); localWithError && fErr == nil {
