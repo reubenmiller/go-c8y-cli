@@ -190,6 +190,7 @@ func evaluateJsonnet(imports string, snippets ...string) (string, error) {
 	}
 
 	debugJsonnet := strings.EqualFold(os.Getenv("C8Y_JSONNET_DEBUG"), "true")
+	hideJsonnetHints := strings.EqualFold(os.Getenv("C8Y_JSONNET_HINT"), "false")
 
 	if debugJsonnet {
 		log.Printf("jsonnet template: %s\n", jsonnetImport)
@@ -206,7 +207,11 @@ func evaluateJsonnet(imports string, snippets ...string) (string, error) {
 			log.Printf("jsonnet error: %s", err)
 		}
 
-		err = fmt.Errorf("Could not create json from template. Error: %s", err)
+		helpMsg := ""
+		if !hideJsonnetHints {
+			helpMsg = "\nHint:\nSome shells are sensitive about double quotes, try escaping any double quotes:\n\n\t--template \"{\\\"name\\\": \\\"my example text\\\"}\"\n\nAlternatively, jsonnet is more relaxed than json so you can use single quotes:\n\n\t--template \"{name: 'my example text'}\"\n"
+		}
+		err = fmt.Errorf("Could not create json from template. Error: %s%s", err, helpMsg)
 	}
 	return out, err
 }
