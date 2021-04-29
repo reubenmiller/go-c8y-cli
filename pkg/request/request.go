@@ -373,8 +373,8 @@ func (r *RequestHandler) fetchAllResults(req c8y.RequestOptions, resp *c8y.Respo
 	// start from 1, as the first request has already been sent
 	currentPage := int64(1)
 
-	// Set default total pages (when not set)
-	totalPages := int64(1000)
+	// Set total pages to unlimited
+	totalPages := int64(0)
 
 	if commonOptions.TotalPages > 0 {
 		totalPages = commonOptions.TotalPages
@@ -444,7 +444,7 @@ func (r *RequestHandler) fetchAllResults(req c8y.RequestOptions, resp *c8y.Respo
 			break
 		}
 
-		if currentPage >= totalPages {
+		if totalPages != 0 && currentPage >= totalPages {
 			r.Logger.Infof("Max pagination reached. max pages=%d", totalPages)
 			break
 		}
@@ -484,8 +484,8 @@ func (r *RequestHandler) fetchAllInventoryQueryResults(req c8y.RequestOptions, r
 	// start from 1, as the first request has already been sent
 	currentPage := int64(1)
 
-	// Set default total pages (when not set)
-	totalPages := int64(1000)
+	// Set total pages to unlimited
+	totalPages := int64(0)
 
 	if commonOptions.TotalPages > 0 {
 		totalPages = commonOptions.TotalPages
@@ -566,7 +566,7 @@ func (r *RequestHandler) fetchAllInventoryQueryResults(req c8y.RequestOptions, r
 			break
 		}
 
-		if currentPage >= totalPages {
+		if totalPages != 0 && currentPage >= totalPages {
 			r.Logger.Infof("Max pagination reached. max pages=%d", totalPages)
 			break
 		}
