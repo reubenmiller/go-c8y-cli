@@ -489,7 +489,8 @@ func (c *CmdRoot) checkSessionExists(cmd *cobra.Command, args []string) error {
 		return cmderrors.ErrHelp
 	}
 
-	if cmd.Name() != cobra.ShellCompRequestCmd && cmd.CalledAs() != cobra.ShellCompNoDescRequestCmd && !strings.HasPrefix(cmdStr, "activitylog") {
+	// TODO: Find more efficient/extensible way of ignoring specific commands in the activity log
+	if cmd.Name() != cobra.ShellCompRequestCmd && cmd.CalledAs() != cobra.ShellCompNoDescRequestCmd && !strings.HasPrefix(cmdStr, "activitylog") && !strings.HasPrefix(cmdStr, "completion") && !strings.HasPrefix(cmdStr, "version") {
 		activityHandler.LogCommand(cmd, args, cmdStr, c.ActivityLogMessage)
 	}
 
