@@ -37,7 +37,7 @@ It is recommended that you run these commands from your home folder, so that the
 
 ```bash
 cd ~
-docker run -it -v $PWD/.cumulocity:/sessions --rm ghcr.io/reubenmiller/c8y-shell:latest
+docker run -it -v $PWD/.cumulocity:/sessions --rm ghcr.io/reubenmiller/c8y-shell:next
 ```
 
 </TabItem>
@@ -45,7 +45,7 @@ docker run -it -v $PWD/.cumulocity:/sessions --rm ghcr.io/reubenmiller/c8y-shell
 
 ```powershell
 cd ~
-docker run -it -v $PWD/.cumulocity:/sessions --rm ghcr.io/reubenmiller/c8y-pwsh:latest
+docker run -it -v $PWD/.cumulocity:/sessions --rm ghcr.io/reubenmiller/c8y-pwsh:next
 ```
 
 </TabItem>
@@ -86,14 +86,14 @@ You can provide the session information via environment variables in a dotenv (.
     <TabItem value="bash">
 
     ```bash
-    docker run --rm -it --env-file=session.env ghcr.io/reubenmiller/c8y-shell:latest
+    docker run --rm -it --env-file=session.env ghcr.io/reubenmiller/c8y-shell:next
     ```
 
     </TabItem>
     <TabItem value="powershell">
 
     ```powershell
-    docker run --rm -it --env-file=session.env ghcr.io/reubenmiller/c8y-shell:latest
+    docker run --rm -it --env-file=session.env ghcr.io/reubenmiller/c8y-shell:next
     ```
 
     </TabItem>
@@ -190,7 +190,7 @@ If you have already activated a c8y session on a command console, you can re-use
         -e C8Y_TENANT=$C8Y_TENANT \
         -e C8Y_USER=$C8Y_USER \
         -e C8Y_PASSWORD=$C8Y_PASSWORD \
-        ghcr.io/reubenmiller/c8y-shell:latest
+        ghcr.io/reubenmiller/c8y-shell:next
     ```
 
     </TabItem>
@@ -202,7 +202,7 @@ If you have already activated a c8y session on a command console, you can re-use
         -e C8Y_TENANT=$env:C8Y_TENANT `
         -e C8Y_USER=$env:C8Y_USER `
         -e C8Y_PASSWORD=$env:C8Y_PASSWORD `
-        ghcr.io/reubenmiller/c8y-shell:latest
+        ghcr.io/reubenmiller/c8y-shell:next
     ```
 
     </TabItem>
@@ -211,13 +211,13 @@ If you have already activated a c8y session on a command console, you can re-use
 
 :::info
 
-You have to execute a docker pull if you want to re-check if there is a newer image available (i.e. also tagged with latest). 
+You have to execute a docker pull if you want to re-check if there is a newer image available (i.e. also tagged with `latest` or `next`). 
 
-You can also specify the version that you want to try out by replacing `latest` with the version number, i.e. `2.0.0`.
+You can also specify the version that you want to try out by replacing `latest` or `next` with the version number, i.e. `2.0.0`.
 
 ```bash
 # update to the latest image
-docker pull ghcr.io/reubenmiller/c8y-shell:latest
+docker pull ghcr.io/reubenmiller/c8y-shell:next
 
 # use a known version
 docker pull ghcr.io/reubenmiller/c8y-shell:2.0.0
