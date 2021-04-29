@@ -51,8 +51,6 @@ docker run -it -v $PWD/.cumulocity:/sessions --rm ghcr.io/reubenmiller/c8y-pwsh:
 </TabItem>
 </Tabs>
 
-
-**Note**
 :::note
 The `c8y-shell` docker image will start ZSH by default, however you can load another shell manually using `bash` or `fish`.
 :::
