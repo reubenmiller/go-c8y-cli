@@ -33,7 +33,7 @@ func (c *Config) GetSessionHomeDir() string {
 
 	err := fileutilities.CreateDirs(outputDir)
 	if err != nil && c.Logger != nil {
-		c.Logger.Errorf("Could not create sessions directory and it does not exist. %s", err)
+		c.Logger.Errorf("Sessions directory check failed. %s", err)
 	}
 	return outputDir
 }
@@ -52,7 +52,7 @@ func (c *Config) GetHomeDir() string {
 
 	err = fileutilities.CreateDirs(outputDir)
 	if err != nil && c.Logger != nil {
-		c.Logger.Errorf("Could not create sessions directory and it does not exist. %s", err)
+		c.Logger.Errorf("Sessions directory check failed. %s", err)
 	}
 	return outputDir
 }

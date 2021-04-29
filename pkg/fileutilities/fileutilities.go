@@ -16,13 +16,18 @@ func CreateDirs(p string) error {
 
 	// Change file ownership
 	if runtime.GOOS != "windows" {
-		owner := ""
-		sudoUser := os.Getenv("SUDO_USER")
+		owner := os.Getenv("SUDO_USER")
 
-		if os.Geteuid() == 0 && sudoUser != "" {
-			owner = sudoUser
-		} else {
-			owner = fmt.Sprintf("%d", os.Getuid())
+		if os.Geteuid() != 0 || owner == "" {
+			// Can change ownership if not running as sudo
+			// or user is root, and root should not take over ownership
+			return nil
+		}
+
+		if os.Geteuid() == 0 && owner == "" {
+			// TODO: Check if the user has access to it, if so don't change ownership
+			// Is root user: don't try changing permissions to the root user
+			return nil
 		}
 
 		// Note: os.Chown can't be used as os/user.Lookup is not reliable on macOS
