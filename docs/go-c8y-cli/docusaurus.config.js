@@ -195,13 +195,13 @@ const baseUrl = process.env.BASE_URL || '/';
         docs: {
           sidebarPath: require.resolve('./sidebars.js'),
           editUrl:
-            'https://github.com/reubenmiller/go-c8y-cli/edit/master/docs-next/',
+            'https://github.com/reubenmiller/go-c8y-cli/edit/next/docs/go-c8y-cli/',
         },
         blog: {
           showReadingTime: true,
           // Please change this to your repo.
           editUrl:
-            'https://github.com/facebook/docusaurus/edit/master/website/blog/',
+            'https://github.com/reubenmiller/go-c8y-cli/edit/next/docs/go-c8y-cli/',
         },
       },
     ],
