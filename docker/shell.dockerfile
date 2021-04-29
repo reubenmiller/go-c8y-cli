@@ -42,7 +42,8 @@ RUN echo "source /home/$USERNAME/.go-c8y-cli/shell/c8y.plugin.sh" >> /home/$USER
     && mkdir -p /home/$USERNAME/.config/fish \
     && echo "source /home/$USERNAME/.go-c8y-cli/shell/c8y.plugin.fish" >> /home/$USERNAME/.config/fish/config.fish \
     # && echo "set -gx C8Y_SESSION_HOME /sessions" >> /home/$USERNAME/.config/fish/config.fish \
-    && fish -c "c8y version"
+    && fish -c "c8y version" \
+    && rm -f /home/$USERNAME/c8y.activitylog*
 
 
 # Working settings

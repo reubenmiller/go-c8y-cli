@@ -13,6 +13,7 @@ VOLUME [ "/sessions" ]
 COPY profile.ps1 /root/.config/powershell/Microsoft.PowerShell_profile.ps1
 
 RUN pwsh -c "Set-PSRepository -Name 'PSGallery' -InstallationPolicy Trusted; " \
-    && pwsh -c "Install-Module PSc8y -Repository PSGallery -AllowClobber $C8Y_INSTALL_OPTIONS -Force"
+    && pwsh -c "Install-Module PSc8y -Repository PSGallery -AllowClobber $C8Y_INSTALL_OPTIONS -Force" \
+    && rm -f /root/c8y.activitylog*
 
 ENTRYPOINT [ "pwsh", "-NoExit", "-c", "Import-Module PSc8y" ]
