@@ -29,10 +29,14 @@ You will be prompted for the username and password.
 
 A helper is provided to set the session interactively by providing the user a list of configured sessions. The user will be prompted to select one of the listed sessions.
 
-Note: On MacOS, you need to hold "option"+Arrow keys to navigate the list of sessions. Otherwise the VIM style "j" (down) and "k" (up) keys can be also used for navigation
+:::note
+On some terminals, you need to hold `shift+ArrowKey` to navigate the list of sessions. 
+
+Alternatively, VIM style shortcuts "j" (down) and "k" (up) keys can be also used for navigation. Though this does not work when your using the interact search. 
+:::
 
 :::caution
-`set-session` is not provided by `c8y` itself, and it is installed automatically for you if you following the installation instructions
+`set-session` is not provided by `c8y` itself, and it is installed automatically for you if you following the [installation guide](../installation/shell-installation)
 :::
 
 <CodeExample>
@@ -93,11 +97,7 @@ By default the tenant prefix will be used in the basic authentication, however i
 }
 ```
 
-All of the values in the sessions file, can also be overridden using environment variables. The following is the mapping between the properties in the session json file to their environment equivalents.
-
-| Setting name | Environment Variable |
-|--------------|----------------------|
-| useTenantPrefix | C8Y_USETENANTPREFIX |
+All of the values in the sessions file, can also be overridden using environment variables. The   [configuration settings](configuration/settings) pages details how to modify them.
 
 
 ### Continuous Integration usage (environment variables)
@@ -242,3 +242,187 @@ Remove-Item ~/.cumulocity/.key
 ### Updating passwords
 
 Passwords can still be set as plain text in the session files, however the next time that you switch to the session using `set-session`, the `password` field will be encrypted. An field is marked as encrypted by starting with text `{encrypted}` followed by the encrypted string.
+
+## Advanced session commands
+
+The following shows some other ways how to manage sessions.
+
+### Setting a session without the helper
+
+If you have not installed the go-c8y-cli addons, then you cannot use the `set-session` helper function.
+
+You need to switch sessions by calling the c8y binary directly and evaluating the environment variables returned by the command. Each shell handles this slightly different.
+
+<Tabs
+  groupId="shell-types"
+  defaultValue="bash"
+  values={[
+    { label: 'Bash/zsh', value: 'bash', },
+    { label: 'Fish', value: 'fish', },
+    { label: 'PowerShell', value: 'powershell', },
+  ]
+}>
+<TabItem value="bash">
+
+```bash
+eval $( c8y sessions set --shell=auto )
+
+# Set a session to an already known json path.
+eval $( c8y sessions set --shell=auto --session "/my/path/session.json" )
+```
+
+</TabItem>
+<TabItem value="fish">
+
+```bash
+c8y sessions set --shell=auto | source
+
+# Set a session to an already known json path.
+c8y sessions set --shell=auto --session "/my/path/session.json" | source
+```
+
+</TabItem>
+<TabItem value="powershell">
+
+```powershell
+c8y sessions set --shell=auto | Out-String | Invoke-Expression
+
+# Set a session to an already known json path.
+c8y sessions set --shell=auto --session "/my/path/session.json" | Out-String | Invoke-Expression
+```
+
+</TabItem>
+</Tabs>
+
+:::info
+`set-session` is a small helper function (for each supported shell) which wraps the call to `c8y session set` and sets the returned environment variables which are then read by subsequent calls to `c8y`.
+:::
+
+### Switching session for a single command
+
+A single command can be redirected to use another session by using the `session <name>` parameter. A full file path can be provided or just the file name for a file located in session directory defined by the `C8Y_SESSION_HOME` environment variable.
+
+<CodeExample>
+
+```bash
+c8y devices list --session myothersession.json
+```
+
+</CodeExample>
+
+### Creating a session file manually
+
+Session files can also be manually created as each session is just a file. The file needs to be placed on the configured session folder. 
+
+You can check your where your session home folder is by running
+
+<CodeExample transform="false">
+
+```bash
+c8y settings list --select session.home
+
+# or if you want to write it to a variable
+myhome=$( c8y settings list --select session.home --output csv )
+```
+
+```powershell
+c8y settings list --select session.home
+
+# or if you want to write it to a variable
+$myhome = c8y settings list --select session.home --output csv
+```
+
+</CodeExample>
+
+```bash title="Output"
+| session.home                            |
+|-----------------------------------------|
+| /workspaces/go-c8y-cli/.cumulocity      |
+```
+
+Then you can create the a file using your preferred text editor (i.e. vim, nano, VSCode)
+
+<CodeExample>
+
+```bash
+# Using vim
+vim ~/.cumulocity/my-manual-file.json
+```
+
+```powershell
+# using VSCode
+code ~/.cumulocity/my-manual-file.json
+```
+
+</CodeExample>
+
+```powershell title="file: ~/.cumulocity/session1.json"
+{
+    "host": "example01.cumulocity.eu-latest.com",
+    "username": "hello.user@example.com",
+    "password": "mys3cureP4assw!rd",
+}
+```
+
+### Cloning an existing session
+
+You can easily clone (copy) your activated session by running. The mode can also be changed when cloning the session.
+
+<CodeExample transform="false">
+
+```bash
+c8y sessions clone --newName "customer-qual" --type "qual"
+```
+
+</CodeExample>
+
+```bash title="Output"
+✓ Cloned session file to /workspaces/go-c8y-cli/.cumulocity/customer-qual.json
+```
+
+Then switch to the cloned session
+
+<CodeExample transform="false">
+
+```bash
+set-session "customer-qual"
+```
+
+</CodeExample>
+
+:::tip
+Cloning an existing session is convenient when you a group of tenants (i.e. dev, qual, prod) where the settings only differ by url and your password. So you can just clone it and then edit the file manually in your preferred text editor.
+
+Remember it is best practice to use different passwords for different sessions!
+:::
+
+### Changing mode of the existing session
+
+The mode can be updated on the existing profile using
+#### Change mode until next set-session
+
+Changing the mode
+
+If you installed the addons then there are some helpers to set the mode temporarily until the session is changed.
+
+<CodeExample transform="false">
+
+```bash
+set-c8ymode-dev
+```
+
+```powershell
+set-c8ymode-dev
+```
+
+</CodeExample>
+
+#### Permanent
+
+<CodeExample transform="false">
+
+```bash
+c8y settings update mode dev
+```
+
+</CodeExample>

@@ -4,22 +4,20 @@ category: Troubleshooting
 title: Shell Autocompletion Installation
 ---
 
-## Enabling shell autocompletion
-
 c8y provides autocompletion support for Bash and Zsh, which can save you a lot of typing.
 
 Below are the procedures to set up autocompletion for Bash (including the difference between Linux and macOS) and Zsh.
 
 
-### Bash on Linux
+## Bash on Linux
 
-#### Introduction
+### Introduction
 
 The c8y completion script for Bash can be generated with the command c8y completion bash. Sourcing the completion script in your shell enables c8y autocompletion.
 However, the completion script depends on [bash-completion](https://github.com/scop/bash-completion), which means that you have to install this software first (you can test if you have bash-completion already installed by running type _init_completion).
 
 
-#### Install bash-completion
+### Install bash-completion
 
 bash-completion is provided by many package managers (see [here](https://github.com/scop/bash-completion#installation)). You can install it with `apt-get install bash-completion` or `yum install bash-completion`, etc.
 
@@ -35,17 +33,18 @@ source /usr/share/bash-completion/bash_completion
 Reload your shell and verify that bash-completion is correctly installed with type _init_completion.
 
 
-### Bash on MacOS
+## Bash on MacOS
 
-#### Introduction
+### Introduction
 
 The c8y completion script for Bash can be generated with c8y completion bash. Sourcing this script in your shell enables c8y completion.
 However, the c8y completion script depends on [bash-completion](https://github.com/scop/bash-completion) which you thus have to previously install.
 
-#### Install bash-completion
+### Install bash-completion
 
-**Note**
-Note: As mentioned, these instructions assume you use Bash 4.1+, which means you will install bash-completion v2 (in contrast to Bash 3.2 and bash-completion v1, in which case c8y completion won’t work).
+:::note
+These instructions assume you use Bash 4.1+, which means you will install bash-completion v2 (in contrast to Bash 3.2 and bash-completion v1, in which case c8y completion won’t work).
+:::
 
 You can test if you have bash-completion v2 already installed with `type _init_completion`. If not, you can install it with Homebrew:
 
@@ -53,7 +52,7 @@ You can test if you have bash-completion v2 already installed with `type _init_c
 brew install bash-completion@2
 ```
 
-As stated in the output of this command, add the following to your ~/.bashrc file:
+As stated in the output of this command, add the following to your `~/.bashrc file`:
 
 ```bash
 export BASH_COMPLETION_COMPAT_DIR="/usr/local/etc/bash_completion.d"

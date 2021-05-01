@@ -1,5 +1,5 @@
 ---
-title: Applications - Web (Hosted)
+title: Applications - Hosted (Web)
 ---
 
 import CodeExample from '@site/src/components/CodeExample';

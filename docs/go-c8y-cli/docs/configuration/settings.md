@@ -11,11 +11,12 @@ PSc8y and c8y supports a modern approach to configuration. It allows you to cont
 
 The settings are read and applied in the following order:
 
-1. Read `settings.json` inside the `C8Y_SESSION_HOME` env variable
-2. Read session file path in the `C8Y_SESSION` env variable
-3. Read setting from env variable (if defined)
+1. Read `settings.<json|yaml>` inside current working directory
+2. Read `settings.<json|yaml>` inside the `C8Y_SESSION_HOME` env variable
+3. Read session file path in the `C8Y_SESSION` env variable
+4. Read setting from env variable (if defined)
 
-The value last set will be used by PSc8y and c8y.
+The value last set will be used by `c8y`.
 
 #### Options
 

@@ -110,7 +110,7 @@ c8y microservices update --id helloworld --availability MARKET
 | 14114      | mytestapp  | mytestapp    | MICROSERVICE      |                  | MARKET       |            | t12345          |
 ```
 
-## Adding custom data to the application
+### Adding custom data to the application
 
 <CodeExample>
 
