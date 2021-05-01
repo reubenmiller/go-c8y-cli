@@ -22,7 +22,8 @@ type CmdAPI struct {
 
 	factory *cmdutil.Factory
 
-	flagHost string
+	flagHost       string
+	keepProperties bool
 }
 
 func NewSubCommand(f *cmdutil.Factory) *CmdAPI {
@@ -36,14 +37,14 @@ func NewSubCommand(f *cmdutil.Factory) *CmdAPI {
 		Short:   "Send api request",
 		Long:    `Send an authenticated api request to a given endpoint`,
 		Example: heredoc.Doc(`
-### Get a list of alarms
-$ c8y api GET /alarm/alarms
+			$ c8y api GET /alarm/alarms
+			Get a list of alarms
 
-### Get a list of alarms with custom query parameters
-c8y api GET "/alarm/alarms?pageSize=10&status=ACTIVE"
+			$ c8y api GET "/alarm/alarms?pageSize=10&status=ACTIVE"
+			Get a list of alarms with custom query parameters
 
-### Create a new alarm
-c8y api POST "alarm/alarms" --data "text=one,severity=MAJOR,type=test_Type,time=2019-01-01,source={'id': '12345'}"
+			$ c8y api POST "alarm/alarms" --data "text=one,severity=MAJOR,type=test_Type,time=2019-01-01,source.id='12345'" --keepProperties
+			Create a new alarm
 		`),
 		RunE: ccmd.RunE,
 	}
@@ -52,6 +53,7 @@ c8y api POST "alarm/alarms" --data "text=one,severity=MAJOR,type=test_Type,time=
 	cmd.Flags().String("accept", "", "accept (header)")
 	cmd.Flags().String("contentType", "", "content type (header)")
 	cmd.Flags().String("formdata", "", "form data (json or shorthand json)")
+	cmd.Flags().BoolVar(&ccmd.keepProperties, "keepProperties", true, "Don't strip Cumulocity properties from the data property, i.e. source etc.")
 	cmd.Flags().StringVar(&ccmd.flagHost, "host", "", "host to use for the rest request. If empty, then the session's host will be used")
 
 	flags.WithOptions(
@@ -171,7 +173,7 @@ func (n *CmdAPI) RunE(cmd *cobra.Command, args []string) error {
 			cmd,
 			body,
 			inputIterators,
-			flags.WithDataValueAdvanced(true, !request.HasJSONHeader(&headers), flags.FlagDataName, ""),
+			flags.WithDataValueAdvanced(!n.keepProperties, !request.HasJSONHeader(&headers), flags.FlagDataName, ""),
 			cmdutil.WithTemplateValue(cfg),
 			flags.WithTemplateVariablesValue(),
 		)
