@@ -74,6 +74,11 @@ func (n *CmdList) listSettings(cmd *cobra.Command, args []string) error {
 		}
 	}
 
+	err = allSettings.Set("settings.session.file", cfg.GetSessionFile())
+	if err != nil {
+		cfg.Logger.Warnf("Could not get session file. %s", err)
+	}
+
 	responseText, err = json.Marshal(allSettings)
 	if err != nil {
 		return cmderrors.NewUserError("Settings error. ", err)

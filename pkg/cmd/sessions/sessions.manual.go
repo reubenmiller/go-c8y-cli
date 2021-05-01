@@ -2,6 +2,7 @@ package sessions
 
 import (
 	clearCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/sessions/clear"
+	cloneCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/sessions/clone"
 	createCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/sessions/create"
 	decryptCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/sessions/decrypttext"
 	encryptCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/sessions/encrypttext"
@@ -34,6 +35,7 @@ func NewSubCommand(f *cmdutil.Factory) *sessionsCmd {
 	cmd.AddCommand(cmdutil.DisableAuthCheck(encryptCmd.NewCmdEncryptText(f).GetCommand()))
 	cmd.AddCommand(cmdutil.DisableAuthCheck(listCmd.NewCmdList(f).GetCommand()))
 	cmd.AddCommand(cmdutil.DisableAuthCheck(setCmd.NewCmdSet(f).GetCommand()))
+	cmd.AddCommand(cmdutil.DisableAuthCheck(cloneCmd.NewCmdCloneSession(f).GetCommand()))
 
 	ccmd.SubCommand = subcommand.NewSubCommand(cmd)
 

@@ -359,25 +359,8 @@ func (n *UpdateSettingsCmd) RunE(cmd *cobra.Command, args []string) error {
 
 		switch name {
 		case "mode":
-			if value == "prod" {
-				v.Set(config.SettingsModeEnableCreate, false)
-				v.Set(config.SettingsModeEnableUpdate, false)
-				v.Set(config.SettingsModeEnableDelete, false)
-				v.Set(config.SettingsModeCI, false)
-
-			} else if value == "qual" {
-				v.Set(config.SettingsModeEnableCreate, true)
-				v.Set(config.SettingsModeEnableUpdate, true)
-				v.Set(config.SettingsModeEnableDelete, false)
-				v.Set(config.SettingsModeCI, false)
-
-			} else if value == "dev" {
-				v.Set(config.SettingsModeEnableCreate, true)
-				v.Set(config.SettingsModeEnableUpdate, true)
-				v.Set(config.SettingsModeEnableDelete, true)
-				v.Set(config.SettingsModeCI, false)
-			} else if value == "ci" {
-				v.Set(config.SettingsModeCI, true)
+			if err := config.SetMode(v, value); err != nil {
+				cfg.Logger.Warn(err)
 			}
 		default:
 			if handler, ok := updateSettingsOptions[name]; ok {

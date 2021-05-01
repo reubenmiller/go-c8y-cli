@@ -71,6 +71,8 @@ func SelectSession(cfg *config.Config, log *logger.Logger, filter string) (sessi
 
 		if session, err := createCmd.NewCumulocitySessionFromFile(path, log, cfg); err == nil {
 			sessions.Sessions = append(sessions.Sessions, *session)
+		} else {
+			log.Infof("failed to read file: file=%s, err=%s", path, err)
 		}
 		return nil
 	})

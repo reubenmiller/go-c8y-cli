@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"os"
 	"path"
+	"path/filepath"
 	"regexp"
 	"strings"
 	"time"
@@ -1280,7 +1281,18 @@ func (c *Config) LogErrorF(err error, format string, args ...interface{}) {
 	errorLogger(format, args...)
 }
 
-var ConfigExtensions = []string{"json", "yaml", "yml", "env", "toml", "hcl", "ini", "properties"}
+var ConfigExtensions = []string{"json", "yaml", "yml", "env", "toml", "properties"}
+
+// SupportsFileExtension check if a filepath is using a supported extension or not
+func SupportsFileExtension(p string) bool {
+	ext := strings.TrimLeft(filepath.Ext(p), ".")
+	for _, iExt := range ConfigExtensions {
+		if strings.EqualFold(iExt, ext) {
+			return true
+		}
+	}
+	return false
+}
 
 func (c *Config) SetSessionFile(path string) {
 	if _, fileErr := os.Stat(path); fileErr != nil {

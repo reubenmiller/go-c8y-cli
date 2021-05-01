@@ -46,7 +46,7 @@ None
     }
 
     # Convert session to powershell psobject
-    $null = $c8yArgs.Add("--json")
+    $null = $c8yArgs.Add("--output=json")
     $sessionResponse = c8y sessions get $c8yArgs
     $data = $sessionResponse | ConvertFrom-Json
 

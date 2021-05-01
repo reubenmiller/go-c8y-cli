@@ -29,22 +29,25 @@ func NewCumulocitySessionFromFile(filePath string, log *logger.Logger, cfg *conf
 		Logger: log,
 	}
 
-	config := viper.New()
-	config.SetConfigFile(filePath)
-	config.SetConfigType("json")
-	if err := config.ReadInConfig(); err != nil {
+	sessionConfig := viper.New()
+	sessionConfig.SetConfigFile(filePath)
+	if !config.SupportsFileExtension(filePath) {
+		sessionConfig.SetConfigType("json")
+	}
+
+	if err := sessionConfig.ReadInConfig(); err != nil {
 		return nil, err
 	}
-	session.Schema = config.GetString("$schema")
-	session.Name = config.GetString("name")
-	session.Description = config.GetString("description")
-	session.Host = config.GetString("host")
-	session.Tenant = config.GetString("tenant")
-	session.Username = config.GetString("username")
-	session.Password = config.GetString("password")
-	session.Token = config.GetString("token")
-	session.UseTenantPrefix = config.GetBool("useTenantPrefix")
-	session.MicroserviceAliases = config.GetStringMapString("microserviceAliases")
+	session.Schema = sessionConfig.GetString("$schema")
+	session.Name = sessionConfig.GetString("name")
+	session.Description = sessionConfig.GetString("description")
+	session.Host = sessionConfig.GetString("host")
+	session.Tenant = sessionConfig.GetString("tenant")
+	session.Username = sessionConfig.GetString("username")
+	session.Password = sessionConfig.GetString("password")
+	session.Token = sessionConfig.GetString("token")
+	session.UseTenantPrefix = sessionConfig.GetBool("useTenantPrefix")
+	session.MicroserviceAliases = sessionConfig.GetStringMapString("microserviceAliases")
 
 	session.Path = filePath
 	session.Extension = filepath.Ext(filePath)[1:]
