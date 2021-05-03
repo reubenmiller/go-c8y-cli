@@ -97,7 +97,7 @@ By default the tenant prefix will be used in the basic authentication, however i
 }
 ```
 
-All of the values in the sessions file, can also be overridden using environment variables. The   [configuration settings](configuration/settings) pages details how to modify them.
+All of the values in the sessions file, can also be overridden using environment variables. The   [configuration settings](../configuration/settings) pages details how to modify them.
 
 
 ### Continuous Integration usage (environment variables)
