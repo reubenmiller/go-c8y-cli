@@ -36,7 +36,7 @@ Powershell 5 is no longer supported. Users should install PowerShell 7 (aka pwsh
 1. Install `PSc8y` module from [PSGallery](https://www.powershellgallery.com/packages/PSc8y)
 
     ```powershell
-    Install-Module PSc8y -Repository PSGallery -AllowClobber -Scope CurrentUser
+    Install-Module PSc8y -AllowPrerelease -Repository PSGallery -AllowClobber -Scope CurrentUser
     ```
 
 1. Import the module
@@ -98,7 +98,7 @@ The `PSc8y` module can be downloaded manually using `Save-Module`. This has the 
 1. Download the `PSc8y` Module to the folder `~/PSModules`
 
     ```powershell
-    Save-Module -Name PSc8y -Repository PSGallery -Path ~/PSModules
+    Save-Module -Name PSc8y -AllowPrerelease -Repository PSGallery -Path ~/PSModules
     ```
 
     :::tip
