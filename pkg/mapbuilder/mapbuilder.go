@@ -135,7 +135,8 @@ func registerNativeFuntions(vm *jsonnet.VM) {
 			if err != nil {
 				return nil, err
 			}
-			return d.Format(time.RFC3339), nil
+			RFC3339Milli := "2006-01-02T15:04:05.000Z07:00"
+			return d.Format(RFC3339Milli), nil
 		},
 	})
 
@@ -177,7 +178,7 @@ func evaluateJsonnet(imports string, snippets ...string) (string, error) {
 	vm := jsonnet.MakeVM()
 	registerNativeFuntions(vm)
 
-	jsonnetImport := "\n" + `local _ = {Name: std.native("Name"),Password: std.native("Password"),Now: std.native("Now"),NowNano: std.native("NowNano"),Bool: std.native("Bool"),Float: std.native("Float"),Int: std.native("Int"),Hex: std.native("Hex"),Char: std.native("Char"),Digit: std.native("Digit"),AlphaNumeric: std.native("AlphaNumeric")};` + imports
+	jsonnetImport := "\n" + `local _ = {Name: std.native("Name"),Password: std.native("Password"),Now: function(offset='0s') std.native("Now")(offset), NowNano: function(offset='0s') std.native("NowNano")(offset), Bool: std.native("Bool"),Float: std.native("Float"),Int: std.native("Int"),Hex: std.native("Hex"),Char: std.native("Char"),Digit: std.native("Digit"),AlphaNumeric: std.native("AlphaNumeric")};` + imports
 
 	jsonnetImport += `
 // output
