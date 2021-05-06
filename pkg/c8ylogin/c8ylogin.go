@@ -190,8 +190,17 @@ func (lh *LoginHandler) sortLoginOptions() {
 func (lh *LoginHandler) init() {
 	lh.do(func() error {
 		loginOptions, _, err := lh.C8Yclient.Tenant.GetLoginOptions(context.Background())
-		if err != nil || loginOptions == nil {
-			lh.Logger.Errorf("Failed to get login options. %s", err)
+
+		if err != nil {
+			if strings.Contains(err.Error(), "401") {
+				lh.Logger.Infof("Login options returned 401. This may happen when your c8y hostname is not setup correctly")
+				return nil
+			}
+			lh.Logger.Warnf("Failed to get login options")
+			return err
+		}
+		if loginOptions == nil {
+			lh.Logger.Warnf("Login options are empty. %s", err)
 			return err
 		}
 
