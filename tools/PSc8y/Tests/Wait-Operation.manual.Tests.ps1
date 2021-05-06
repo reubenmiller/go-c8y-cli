@@ -7,23 +7,23 @@ Describe -Name "Wait-Operation" {
 
     It "Wait for operation using invalid operation (fail fast)" {
         $StartTime = Get-Date
-        $Response = "asdf8229d" | PSc8y\Wait-Operation -Timeout 10 -WarningVariable "warning" -ErrorAction SilentlyContinue
-
+        $warning = $( $Response = "asdf8229d" | PSc8y\Wait-Operation -Duration "10s" ) 2>&1
+        $LASTEXITCODE | Should -BeExactly 100
         $Response | Should -BeNullOrEmpty
-        ($warning -join "`n") | Should -Match "Could not find operation"
+        ($warning -join "`n") | Should -Match "No operation for"
         $Duration = (Get-Date) - $StartTime
         $Duration.TotalSeconds | Should -BeLessThan 5
     }
 
     It "Wait for operation (using pipeline)" {
-        $Response = PSc8y\Get-Operation -Id $TestOperation.id | PSc8y\Wait-Operation -Timeout 10 -WarningVariable "warnings"
-        $warnings | Should -Match "Timeout: Operation is still being processed"
+        $warnings = $( $Response = PSc8y\Get-Operation -Id $TestOperation.id | PSc8y\Wait-Operation -Duration "10s" ) 2>&1
+        $warnings | Should -Match "Timeout"
         $Response.id | Should -BeExactly $TestOperation.id
     }
 
     It "Wait for a successful operation (using pipeline)" {
         $TestOperation = $TestOperation.id | Update-Operation -Status SUCCESSFUL
-        $Response = PSc8y\Get-Operation -Id $TestOperation.id | PSc8y\Wait-Operation -Timeout 10 -WarningVariable "warnings"
+        $Response = PSc8y\Get-Operation -Id $TestOperation.id | PSc8y\Wait-Operation -Duration "10s" -WarningVariable "warnings"
 
         $warnings | Should -BeNullOrEmpty
         $Response.id | Should -BeExactly $TestOperation.id
@@ -31,11 +31,11 @@ Describe -Name "Wait-Operation" {
     }
 
     It "Wait for a failed operation (using pipeline)" {
-        $TestOperation = $TestOperation.id | Update-Operation -Status FAILED
-        $Response = PSc8y\Get-Operation -Id $TestOperation.id | PSc8y\Wait-Operation -Timeout 10 -WarningVariable "warnings"
+        $TestOperation = $TestOperation.id | Update-Operation -Status FAILED -FailureReason "some error"
+        $warnings = $( $Response = PSc8y\Get-Operation -Id $TestOperation.id | PSc8y\Wait-Operation -Duration "10s" ) 2>&1
 
         $warnings | Should -Not -BeNullOrEmpty
-        $Warnings | Should -Match "Reason"
+        $Warnings[0] | Should -Match "Reason"
         $Response.id | Should -BeExactly $TestOperation.id
         $Response.status | Should -BeExactly "FAILED"
     }
