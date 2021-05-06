@@ -13,9 +13,9 @@ Wait-Operation 1234567
 Wait for the operation id
 
 .EXAMPLE
-Wait-Operation 1234567 -Timeout 30s
+Wait-Operation 1234567 -Duration 30s
 
-Wait for the operation id, and timeout after 30 seconds
+Wait for the operation id for a max duration of 30 seconds
 #>
     Param(
         # Operation id or object to wait for
