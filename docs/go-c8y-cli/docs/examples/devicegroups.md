@@ -41,7 +41,6 @@ UNIQUE_ID_4
 
     </CodeExample>
 
-
     ```bash title="Output file: list.ids.csv"
     1111,MyActualName1,UNIQUE_ID_1
     2222,MyActualName2,UNIQUE_ID_2

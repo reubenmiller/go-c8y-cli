@@ -1,21 +1,73 @@
 ---
 title: PowerShell
 ---
-## Prerequisites
+## PowerShell (native c8y binary)
 
-Due to ongoing changes to the PowerShell loading module, we first need to make sure some inbuilt PowerShell modules are up-to-date, otherwise you will have problems trying to install the [PSc8y](https://www.powershellgallery.com/packages/PSc8y) module from the PowerShell Gallery (online dotnet/powershell community repository).
+1. Clone the addons repository containing the install script, views and some example templates.
 
-The instructions slightly differ depending on which operating system you are using (i.e. Windows, MacOS or Linux). However the good news is that you only have to install the prerequisites once.
+    ```sh
+    git clone https://github.com/reubenmiller/go-c8y-cli-addons.git $HOME/.go-c8y-cli
+    ```
 
-### PowerShell 7 (Linux/MacOS/Windows)
+    :::info
+    This repository is not strictly required to run `c8y` however it makes is much more useful as it provides some  default views and templates to get the most out of `c8y`. The defaults also show you how you can create your own custom views.
+    :::
 
-Following the instructions to install [PowerShell 7 (Core)](https://github.com/PowerShell/PowerShell/releases).
+2. Install go-c8y-cli binary
+
+    ```sh
+    $HOME/.go-c8y-cli/install.ps1
+    ```
+
+    :::tip
+    If the following warning is displayed when you try to run the `install.ps1` script
+
+    ```powershell
+    File C:\Users\myuser\.go-c8y-cli\install.ps1 cannot be loaded because running scripts is disabled on this system...
+    ```
+
+    Then, open up a new powershell console but set the ExecutionPolicy to remotesigned (or bypass), then you can all the run the script again.
+
+    ```powershell
+    powershell -ExecutionPolicy remotesigned
+    ```
+    :::
+
+3. Verify that the `c8y` binary is executable and can be found on the command line 
+
+    ```bash
+    Get-Command c8y
+    ```
+
+    ```text title="Output"
+    CommandType    Name       Version    Source
+    -----------    ----       -------    ------
+    Application    c8y.exe    0.0.0.0    C:\Users\myusername\bin\c8y.exe
+    ```
+
+    :::tip
+    Try closing your console and re-opening it so you can be sure that your setup will work next time
+    :::
+
+3. Now go to the [Getting started](../gettingstarted) section for instructions how to use it
+
+## Alternative installation methods
 
 :::caution
-Powershell 5 is no longer supported. Users should install PowerShell 7 (aka pwsh) as it provides a lot of benefits and is also supported on multiple platforms (linux, MacOS and Windows).
+PSc8y is no longer required to get the best out of go-c8y-cli, so it recommended to use the native c8y binary instead.
 :::
 
-## Installing PSc8y (Linux/MacOS/Windows)
+### Prerequisites
+
+PowerShell (Core) 7 is available on many operating systems (i.e. Windows, MacOS, Linux). Following the [installation guide](https://docs.microsoft.com/en-us/powershell/scripting/install/installing-powershell) to install it on your machine.
+
+:::caution
+`PSc8y` no longer supports PowerShell 5. Users should install PowerShell 7 (aka pwsh) as it provides a lot of benefits and is also supported on multiple platforms (linux, MacOS and Windows).
+
+If you still don't want to or can't install PowerShell 7 then install the native go-c8y-cli binary.
+:::
+
+### Installing PSc8y
 
 1. Open a PowerShell (pwsh) console
 
@@ -48,7 +100,7 @@ Powershell 5 is no longer supported. Users should install PowerShell 7 (aka pwsh
 1. Now go to the [Getting started](../gettingstarted) section for instructions how to use it
 
 
-## Updating PSc8y
+### Updating PSc8y
 
 Once the `PSc8y` PowerShell module has been installed, then it can be updated from within PowerShell itself assuming it was installed as per the "Installing PSc8y" section above.
 
@@ -79,7 +131,6 @@ Once the `PSc8y` PowerShell module has been installed, then it can be updated fr
     :::info
     The version number does not show the pre-release version information.
     :::
-## Manually installing PSc8y
 
 ### Downloading using Save-Module
 

@@ -237,6 +237,13 @@ c8y alarms list --debug
 # hide sensitive info
 c8y settings update logger.hideSensitive true --shell auto | Out-String | Invoke-Expression
 
+c8y alarms list --debug
+```
+
+```powershell
+# hide sensitive info
+c8y settings update logger.hideSensitive true --shell auto | Out-String | Invoke-Expression
+
 Get-AlarmCollection -Debug
 ```
 
@@ -264,6 +271,10 @@ Using a `delay` of 500 milliseconds to ensure that the requests do not overload 
 
 ```bash
 seq 1 10 | c8y devices create --workers 2 --delay 500
+```
+
+```bash
+1..10 | c8y devices create --workers 2 --delay 500
 ```
 
 ```powershell
@@ -702,6 +713,11 @@ c8y devices list --noProxy
 
 ```powershell
 $env:HTTPS_PROXY = "http://10.0.0.1:8000"
+c8y devices list --noProxy
+```
+
+```powershell
+$env:HTTPS_PROXY = "http://10.0.0.1:8000"
 Get-DeviceCollection -NoProxy
 ```
 
@@ -781,7 +797,7 @@ No view logic or select statements on the response will be applied. This can be 
 <CodeExample>
 
 ```bash
-c8y alarms list -p 1--outputFileRaw test.json
+c8y alarms list -p 1 --outputFileRaw test.json
 
 # Or if you don't want any console output, just use redirection, but be sure to use raw!
 c8y alarms list -p 1 --raw > test.json
@@ -974,6 +990,12 @@ This is useful if you want to quickly see what is going on in another tenant wit
 
 ```bash
 devicename=$( c8y operations list --pageSize 1 --session staging-tenant -o csv --select name )
+
+c8y devices create --name "$devicename" --session dev-tenant
+```
+
+```powershell
+$devicename = c8y operations list --pageSize 1 --session staging-tenant -o csv --select name
 
 c8y devices create --name "$devicename" --session dev-tenant
 ```

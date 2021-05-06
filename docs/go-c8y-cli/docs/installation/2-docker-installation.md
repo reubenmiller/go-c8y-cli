@@ -44,7 +44,7 @@ docker run -it -v $PWD/.cumulocity:/sessions --rm ghcr.io/reubenmiller/c8y-shell
 <TabItem value="powershell">
 
 ```powershell
-cd ~
+cd $HOME
 docker run -it -v $PWD/.cumulocity:/sessions --rm ghcr.io/reubenmiller/c8y-pwsh:next
 ```
 

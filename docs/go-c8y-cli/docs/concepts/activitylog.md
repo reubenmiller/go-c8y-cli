@@ -115,6 +115,14 @@ Get-ChildItem -Path (Split-Path (c8y settings list --select activitylog.currentP
     Remove-Item
 ```
 
+```powershell
+Get-ChildItem -Path (Split-Path (c8y settings list --select activitylog.currentPath -o csv) -Parent) `
+  -Recurse `
+  -Filter "c8y.activitylog*.json" |
+    Where-Object {$_.LastWriteTime -lt (Get-Date).AddDays(-14)} |
+    Remove-Item
+```
+
 </CodeExample>
 
 ## Querying the activity log
@@ -291,6 +299,24 @@ find \
   -type f \
   -name "c8y.activity*.json" \
   -exec c8y util show --input {} --filter "type like request*" --select "responseTimeMS" -o csv \;
+```
+
+```powershell
+Get-ChildItem -Path (Split-Path (c8y settings list --select activitylog.currentPath -o csv) -Parent) `
+  -Recurse `
+  -Filter "c8y.activitylog*.json" |
+    Foreach-Object {
+      c8y util show --input $_ --filter "type like request*" --select "responseTimeMS" -o csv
+    }
+```
+
+```powershell
+Get-ChildItem -Path (Split-Path (c8y settings list --select activitylog.currentPath -o csv) -Parent) `
+  -Recurse `
+  -Filter "c8y.activitylog*.json" |
+    Foreach-Object {
+      c8y util show --input $_ --filter "type like request*" --select "responseTimeMS" -o csv
+    }
 ```
 
 </CodeExample>
