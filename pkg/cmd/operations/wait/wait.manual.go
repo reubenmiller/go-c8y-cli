@@ -119,14 +119,20 @@ func (n *CmdWait) RunE(cmd *cobra.Command, args []string) error {
 		result, err := desiredstate.WaitFor(1000*time.Millisecond, n.Timeout, state)
 
 		if v, ok := result.(*c8y.Operation); ok {
+			if v.FailureReason != "" {
+				cfg.Logger.Warnf("Failure reason: %s", v.FailureReason)
+			}
 			_ = n.factory.WriteJSONToConsole(cfg, cmd, "", []byte(v.Item.Raw))
 		}
 
 		if err != nil {
 			totalErrors++
-			cfg.Logger.Warnf("%s", err)
+			cfg.Logger.Infof("%s", err)
 			lastErr = err
 		}
+	}
+	if totalErrors > 0 {
+		return lastErr
 	}
 	return nil
 }

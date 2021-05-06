@@ -25,6 +25,9 @@ func (s *OperationState) Check(m interface{}) (done bool, err error) {
 		}
 
 		if op.Status == "SUCCESSFUL" || op.Status == "FAILED" {
+			if len(s.Status) == 1 {
+				return true, fmt.Errorf("Operation completed but did not match expected status. wanted=%s, got=%s", s.Status[0], op.Status)
+			}
 			return true, fmt.Errorf("Operation completed but did not match expected status. wanted=%s, got=%s", s.Status, op.Status)
 		}
 	}

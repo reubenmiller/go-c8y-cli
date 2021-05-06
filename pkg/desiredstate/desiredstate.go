@@ -34,7 +34,7 @@ func WaitFor(interval time.Duration, timeout time.Duration, predicate StateDefin
 		for {
 			item, err := predicate.Get()
 			if err != nil {
-
+				valueCh <- err
 			} else {
 				valueCh <- item
 			}
@@ -49,6 +49,9 @@ func WaitFor(interval time.Duration, timeout time.Duration, predicate StateDefin
 			return lastValue, cmderrors.NewUserErrorWithExitCode(cmderrors.ExitTimeout, fmt.Sprintf("Timeout after %d second/s", int64(timeout/time.Second)))
 
 		case msg := <-valueCh:
+			if err, ok := msg.(error); ok {
+				return nil, err
+			}
 			if msg != nil {
 				lastValue = msg
 			}
