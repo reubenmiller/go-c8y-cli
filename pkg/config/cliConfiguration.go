@@ -231,6 +231,9 @@ const (
 
 	// SettingsDisableInput disable reading from stdin (pipeline input)
 	SettingsDisableInput = "settings.defaults.nullInput"
+
+	// SettingsLoginType preferred login type, i.e. BASIC, OAUTH_INTERNAL etc.
+	SettingsLoginType = "settings.login.type"
 )
 
 var (
@@ -1112,6 +1115,11 @@ func (c *Config) GetJSONFilter() []string {
 // GetSilentStatusCodes Status codes which will not print out an error message
 func (c *Config) GetSilentStatusCodes() string {
 	return c.viper.GetString(SettingsSilentStatusCodes)
+}
+
+// GetLoginType get the preferred login type
+func (c *Config) GetLoginType() string {
+	return c.viper.GetString(SettingsLoginType)
 }
 
 // GetJSONSelect get json properties to be selected from the output. Only the given properties will be returned

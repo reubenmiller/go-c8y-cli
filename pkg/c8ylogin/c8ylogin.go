@@ -68,6 +68,7 @@ type LoginHandler struct {
 	Attempts        int
 	Writer          io.Writer
 	Logger          *logger.Logger
+	LoginType       string
 
 	onSave func()
 }
@@ -169,6 +170,13 @@ func (lh *LoginHandler) sortLoginOptions() {
 	optionOrder := map[string]int{
 		c8y.AuthMethodBasic:          2,
 		c8y.AuthMethodOAuth2Internal: 1,
+	}
+
+	if _, ok := optionOrder[lh.LoginType]; ok {
+		lh.Logger.Infof("Setting preferred login method. %s", lh.LoginType)
+		optionOrder[lh.LoginType] = 0
+	} else {
+		lh.Logger.Infof("Unsupported login method. The given option will be ignored. %s", lh.LoginType)
 	}
 
 	// sort login options
@@ -392,7 +400,7 @@ func (lh *LoginHandler) verify() {
 		if resp != nil && resp.StatusCode == http.StatusUnauthorized {
 
 			if v, ok := err.(*c8y.ErrorResponse); ok {
-				lh.Logger.Warningf("error message from server. %s", v.Message)
+				lh.Logger.Infof("error message from server. %s", v.Message)
 
 				if lh.errorContains(v.Message, "TFA TOTP setup required") {
 					lh.TFACodeRequired = true

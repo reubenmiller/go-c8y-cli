@@ -155,10 +155,11 @@ func (n *CmdSet) RunE(cmd *cobra.Command, args []string) error {
 	handler := c8ylogin.NewLoginHandler(client, cmd.ErrOrStderr(), func() {
 		n.onSave(client)
 	})
+	handler.LoginType = cfg.GetLoginType()
 
 	if n.TFACode == "" {
 		if code, err := cfg.GetTOTP(time.Now()); err == nil {
-			cfg.Logger.Warnf("Setting totp code: %s", code)
+			cfg.Logger.Infof("Setting totp code: %s", code)
 			n.TFACode = code
 		}
 	}

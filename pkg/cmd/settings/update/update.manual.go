@@ -14,6 +14,7 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/pkg/config"
 	"github.com/reubenmiller/go-c8y-cli/pkg/shell"
 	"github.com/reubenmiller/go-c8y-cli/pkg/utilities"
+	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -256,6 +257,13 @@ var updateSettingsOptions = map[string]argumentHandler{
 		"10",
 		"20",
 		"50",
+	}, nil, cobra.ShellCompDirectiveNoFileComp},
+
+	// login type
+	"login.type": {"login.type", "string", config.SettingsLoginType, []string{
+		c8y.AuthMethodBasic + "\tBasic Auth (not recommended)",
+		c8y.AuthMethodOAuth2Internal + "\tInternal OAUTH2 (tokens)",
+		"",
 	}, nil, cobra.ShellCompDirectiveNoFileComp},
 
 	// outputFile
