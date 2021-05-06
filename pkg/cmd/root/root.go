@@ -370,7 +370,9 @@ func (c *CmdRoot) Configure(disableEncryptionCheck bool) error {
 			Debug: cfg.Debug(),
 		}
 		if cfg.ShowProgress() {
-			logOptions.Silent = true
+			// Don't silence log levels completely in case of errors
+			// mode errors
+			logOptions.Silent = false
 		} else {
 			if cfg.Verbose() {
 				logOptions.Level = zapcore.InfoLevel
