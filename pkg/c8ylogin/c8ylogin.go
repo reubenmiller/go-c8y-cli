@@ -205,8 +205,15 @@ func (lh *LoginHandler) init() {
 		}
 
 		if lh.C8Yclient.TenantName != "" {
-			if strings.HasPrefix(loginOptions.Self, "http") && !strings.Contains(loginOptions.Self, lh.C8Yclient.TenantName+".") {
-				lh.Logger.Warningf("Detected invalid tenant name. expected %s to include %s. Tenant name will be ignored", lh.C8Yclient.TenantName, loginOptions.Self)
+			tenantSelfURL := ""
+
+			if len(loginOptions.LoginOptions) > 0 {
+				tenantSelfURL = loginOptions.LoginOptions[0].Self
+			} else {
+				tenantSelfURL = loginOptions.Self
+			}
+			if strings.HasPrefix(tenantSelfURL, "http") && !strings.Contains(tenantSelfURL, lh.C8Yclient.TenantName+".") {
+				lh.Logger.Warningf("Detected invalid tenant name. expected %s to include %s. Tenant name will be ignored", lh.C8Yclient.TenantName, tenantSelfURL)
 				lh.C8Yclient.TenantName = ""
 			}
 		}
