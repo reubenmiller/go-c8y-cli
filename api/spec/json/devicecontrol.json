@@ -93,6 +93,11 @@
           "pipeline": true
         },
         {
+          "name": "fragmentType",
+          "type": "string",
+          "description": "The type of fragment that must be part of the operation. i.e. c8y_Restart"
+        },
+        {
           "name": "dateFrom",
           "type": "datetime",
           "description": "Start date or date and time of operation."

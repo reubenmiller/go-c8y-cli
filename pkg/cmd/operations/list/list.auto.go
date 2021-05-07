@@ -54,6 +54,7 @@ Get a list of pending operations for a device
 
 	cmd.Flags().StringSlice("agent", []string{""}, "Agent ID")
 	cmd.Flags().StringSlice("device", []string{""}, "Device ID (accepts pipeline)")
+	cmd.Flags().String("fragmentType", "", "The type of fragment that must be part of the operation. i.e. c8y_Restart")
 	cmd.Flags().String("dateFrom", "", "Start date or date and time of operation.")
 	cmd.Flags().String("dateTo", "", "End date or date and time of operation.")
 	cmd.Flags().String("status", "", "Operation status, can be one of SUCCESSFUL, FAILED, EXECUTING or PENDING.")
@@ -105,6 +106,7 @@ func (n *ListCmd) RunE(cmd *cobra.Command, args []string) error {
 		flags.WithCustomStringSlice(func() ([]string, error) { return cfg.GetQueryParameters(), nil }, "custom"),
 		c8yfetcher.WithDeviceByNameFirstMatch(client, args, "agent", "agentId"),
 		c8yfetcher.WithDeviceByNameFirstMatch(client, args, "device", "deviceId"),
+		flags.WithStringValue("fragmentType", "fragmentType"),
 		flags.WithEncodedRelativeTimestamp("dateFrom", "dateFrom", ""),
 		flags.WithEncodedRelativeTimestamp("dateTo", "dateTo", ""),
 		flags.WithStringValue("status", "status"),

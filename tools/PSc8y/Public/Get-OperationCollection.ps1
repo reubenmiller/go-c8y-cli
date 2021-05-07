@@ -48,6 +48,11 @@ Get operations from a device (using pipeline)
         [object[]]
         $Device,
 
+        # The type of fragment that must be part of the operation. i.e. c8y_Restart
+        [Parameter()]
+        [string]
+        $FragmentType,
+
         # Start date or date and time of operation.
         [Parameter()]
         [string]
