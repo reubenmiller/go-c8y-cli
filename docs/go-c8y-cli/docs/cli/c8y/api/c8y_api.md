@@ -15,15 +15,15 @@ c8y api [flags]
 ### Examples
 
 ```
-### Get a list of alarms
 $ c8y api GET /alarm/alarms
+Get a list of alarms
 
-### Get a list of alarms with custom query parameters
-c8y api GET "/alarm/alarms?pageSize=10&status=ACTIVE"
+$ c8y api GET "/alarm/alarms?pageSize=10&status=ACTIVE"
+Get a list of alarms with custom query parameters
 
-### Create a new alarm
-c8y api POST "alarm/alarms" --data "text=one,severity=MAJOR,type=test_Type,time=2019-01-01,source={'id': '12345'}"
-		
+$ c8y api POST "alarm/alarms" --data "text=one,severity=MAJOR,type=test_Type,time=2019-01-01,source.id='12345'" --keepProperties
+Create a new alarm
+
 ```
 
 ### Options
@@ -36,6 +36,7 @@ c8y api POST "alarm/alarms" --data "text=one,severity=MAJOR,type=test_Type,time=
       --formdata string       form data (json or shorthand json)
   -h, --help                  help for api
       --host string           host to use for the rest request. If empty, then the session's host will be used
+      --keepProperties        Don't strip Cumulocity properties from the data property, i.e. source etc. (default true)
       --template string       Body template
       --templateVars string   Body template variables
 ```

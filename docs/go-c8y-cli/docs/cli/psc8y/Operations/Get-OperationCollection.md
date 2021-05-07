@@ -20,6 +20,7 @@ Get operation collection
 Get-OperationCollection
 	[[-Agent] <Object[]>]
 	[[-Device] <Object[]>]
+	[[-FragmentType] <String>]
 	[[-DateFrom] <String>]
 	[[-DateTo] <String>]
 	[[-Status] <String>]
@@ -134,6 +135,23 @@ Accept pipeline input: True (ByPropertyName, ByValue)
 Accept wildcard characters: False
 ```
 
+### -FragmentType
+The type of fragment that must be part of the operation.
+i.e.
+c8y_Restart
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 3
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
 ### -DateFrom
 Start date or date and time of operation.
 
@@ -143,7 +161,7 @@ Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: 3
+Position: 4
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
@@ -158,7 +176,7 @@ Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: 4
+Position: 5
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
@@ -173,7 +191,7 @@ Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: 5
+Position: 6
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
@@ -189,7 +207,7 @@ Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: 6
+Position: 7
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False

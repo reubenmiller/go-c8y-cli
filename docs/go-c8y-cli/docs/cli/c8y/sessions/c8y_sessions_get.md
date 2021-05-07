@@ -2,11 +2,11 @@
 category: sessions
 title: c8y sessions get
 ---
-Get session information
+Get session
 
 ### Synopsis
 
-Get session information
+Get session infomration and settings
 
 ```
 c8y sessions get [flags]
@@ -15,19 +15,21 @@ c8y sessions get [flags]
 ### Examples
 
 ```
-Get the details about the current session
 $ c8y sessions get
+Get the details about the current session
 
-Get the details about the current session which is specified via the --session argument
 $ c8y sessions get --session mycustomsession
-		
+Get the details about the current session which is specified via the --session argument
+
+$ c8y sessions get --select host,tenant
+Show the host and tenant name of the current session
+
 ```
 
 ### Options
 
 ```
   -h, --help   help for get
-      --json   Output passphrase in json
 ```
 
 ### Options inherited from parent commands

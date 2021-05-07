@@ -1,43 +1,39 @@
 ---
-category: operations
-title: c8y operations list
+category: sessions
+title: c8y sessions clone
 ---
-Get operation collection
+Clone session
 
 ### Synopsis
 
-Get a collection of operations based on filter parameters
+Clone/copy currently active session file. If no session file is activated, then an error will be returned.
+
 
 ```
-c8y operations list [flags]
+c8y sessions clone [flags]
 ```
 
 ### Examples
 
 ```
-$ c8y operations list --status PENDING
-Get a list of pending operations
+$ c8y sessions clone --newName "myNewSession"
+Clone the existing activated
 
-$ c8y operations list --agent myAgent --status PENDING
-Get a list of pending operations for a given agent and all of its child devices
+$ c8y sessions clone --newName "customer-prod" --type "prod"
+Clone the existing session and rename it to "another" and also change the mode to production to disable all dangerous commands
 
-$ c8y operations list --device mydevice --status PENDING
-Get a list of pending operations for a device
-        
+$ c8y sessions clone --newName "dev-otheruser" --fileType yaml
+Clone the existing session and rename it to "dev-otheruser" and change the session file format to yaml.
+
 ```
 
 ### Options
 
 ```
-      --agent strings            Agent ID
-      --bulkOperationId string   Bulk operation id. Only retrieve operations related to the given bulk operation.
-      --dateFrom string          Start date or date and time of operation.
-      --dateTo string            End date or date and time of operation.
-      --device strings           Device ID (accepts pipeline)
-      --fragmentType string      The type of fragment that must be part of the operation. i.e. c8y_Restart
-  -h, --help                     help for list
-      --revert                   Sort operations newest to oldest. Must be used with dateFrom and/or dateTo parameters
-      --status string            Operation status, can be one of SUCCESSFUL, FAILED, EXECUTING or PENDING.
+      --fileType string   Session file type to save as. i.e. json, yaml, toml etc. (default "json")
+  -h, --help              help for clone
+      --newName string    Name of the new session file which will be created (required)
+      --type string       Session type of the cloned session, i.e. dev, qual, prod
 ```
 
 ### Options inherited from parent commands

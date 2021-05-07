@@ -80,7 +80,7 @@ Create a new user so that they can access the tenant
 
 ### EXAMPLE 1
 ```
-New-user -Username "$Username" -Password "$NewPassword"
+New-user -Username "$Username" -Email "testuser@no-reply.dummy.com" -Password "$NewPassword"
 ```
 
 Create a user

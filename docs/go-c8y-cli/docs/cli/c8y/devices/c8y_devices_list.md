@@ -16,8 +16,13 @@ c8y devices list [flags]
 
 ```
 $ c8y devices list --name "sensor*" --type myType
-
 Get a collection of devices of type "myType", and their names start with "sensor"
+
+$ c8y devices list --query "name eq '*sensor*' and creationTime.date gt '2021-04-02T00:00:00'"
+Get devices which names containing 'sensor' and were created after 2021-04-02
+
+$ echo -e "c8y_MacOS\nc8y_Linux" | c8y devices list --queryTemplate "type eq '%s'"
+Get devices with type 'c8y_MacOS' then devices with type 'c8y_Linux' (using pipeline)
 
 ```
 

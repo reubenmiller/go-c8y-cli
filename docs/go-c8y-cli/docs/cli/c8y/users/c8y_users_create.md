@@ -15,7 +15,7 @@ c8y users create [flags]
 ### Examples
 
 ```
-$ c8y users create --userName "testuser1" --password "a0)8k2kld9lm,!"
+$ c8y users create --userName "testuser1" --email "testuser@no-reply.dummy.com" --password "a0)8k2kld9lm,!"
 Create a user
         
 ```
