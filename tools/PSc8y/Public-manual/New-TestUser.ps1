@@ -36,7 +36,8 @@ Create a new test user with a custom username prefix
         $options = @{} + $PSBoundParameters
         $options.Remove("Name")
         $options["UserName"] = $Username
-        $options["Password"] = New-RandomString
+        $options["Email"] = "$Username@no-reply.dummy.email.comm"
+        $options["Password"] = New-RandomPassword
         
         PSc8y\New-User @options
     }
