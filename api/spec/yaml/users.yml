@@ -125,13 +125,13 @@ endpoints:
         - description: Create a user
           beforeEach:
             - $Username = "testuser_" + [guid]::NewGuid().Guid.Substring(1,10)
-            - $NewPassword = [guid]::NewGuid().Guid.Substring(1,10)
-          command: New-user -Username "$Username" -Password "$NewPassword"
+            - $NewPassword = New-RandomPassword
+          command: New-user -Username "$Username" -Email "testuser@no-reply.dummy.com" -Password "$NewPassword"
           afterEach:
             - Get-UserByName -Name "$Username" | Remove-User
       go:
         - description: Create a user
-          command: c8y users create --userName "testuser1" --password "a0)8k2kld9lm,!"
+          command: c8y users create --userName "testuser1" --email "testuser@no-reply.dummy.com" --password "a0)8k2kld9lm,!"
     pathParameters:
       - name: tenant
         type: tenant
