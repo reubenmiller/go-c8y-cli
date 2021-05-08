@@ -86,7 +86,7 @@ const (
 	SettingsHeader = "settings.defaults.header"
 
 	// SettingsQueryParameters custom query parameters to be added to outgoing requests
-	SettingsQueryParameters = "settings.defaults.queryParam"
+	SettingsQueryParameters = "settings.defaults.customQueryParam"
 
 	// SettingsDryRun dry run. Don't send any requests, just print out the information
 	SettingsDryRun = "settings.defaults.dry"
