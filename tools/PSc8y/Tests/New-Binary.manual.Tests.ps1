@@ -8,7 +8,7 @@ Describe -Name "New-Binary" {
     }
 
     It "Upload a log file with custom properties" {
-        $Response = PSc8y\New-Binary -File $File -Data @{ type = "c8y_upload"; c8y_Global = @{} }
+        $Response = PSc8y\New-Binary -File $File -Type "c8y_upload" -Data @{ c8y_Global = @{} }
         $LASTEXITCODE | Should -Be 0
         $Response | Should -Not -BeNullOrEmpty
 
@@ -16,7 +16,7 @@ Describe -Name "New-Binary" {
         $Response.type | Should -BeExactly "c8y_upload"
         $Response.c8y_Global | Should -BeTrue
 
-        PSc8y\Remove-ManagedObject -Id $Response.id
+        PSc8y\Remove-Binary -Id $Response.id
     }
 
     It "Upload a log file with custom properties but let file type be detected" {
@@ -27,7 +27,7 @@ Describe -Name "New-Binary" {
         $Response.id | Should -MatchExactly "^\d+$"
         $Response.type | Should -BeExactly "application/octet-stream"
         $Response.c8y_Global | Should -BeTrue
-        PSc8y\Remove-ManagedObject -Id $Response.id
+        PSc8y\Remove-Binary -Id $Response.id
     }
 
 

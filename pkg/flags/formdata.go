@@ -109,10 +109,18 @@ func WithFileBaseName(opts ...string) GetOption {
 }
 
 // WithFileMIMEType adds the file MIME type from cli arguments
-func WithFileMIMEType(opts ...string) GetOption {
+func WithFileMIMEType(name string, opts ...string) GetOption {
 
 	return func(cmd *cobra.Command, inputIterators *RequestInputIterators) (string, interface{}, error) {
 		src, dst, _ := UnpackGetterOptions("%s", opts...)
+
+		// check for manual value
+		if cmd.Flags().Changed(name) {
+			typeName, err := cmd.Flags().GetString(name)
+			if err == nil {
+				return dst, typeName, nil
+			}
+		}
 
 		if !cmd.Flags().Changed(src) {
 			return "", nil, nil
@@ -146,7 +154,7 @@ func WithFormDataFileAndInfo(srcFile string, srcData string) []GetOption {
 	return []GetOption{
 		WithFileReader(srcFile, "file"),
 		WithFileBaseName(srcFile, "name"),
-		WithFileMIMEType(srcFile, "type"),
+		WithFileMIMEType("type", srcFile, "type"),
 		WithDataValue(srcData),
 	}
 }

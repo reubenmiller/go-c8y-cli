@@ -16,7 +16,7 @@ PS> New-Binary -File $File
 Upload a log file
 
 .EXAMPLE
-PS> New-Binary -File $File -Data @{ c8y_Global = @{}; type = "c8y_upload" }
+PS> New-Binary -File $File -Type "c8y_upload" -Data @{ c8y_Global = @{} }
 
 Upload a config file and make it globally accessible for all users
 
@@ -30,7 +30,12 @@ Upload a config file and make it globally accessible for all users
         # File to be uploaded as a binary (required)
         [Parameter(Mandatory = $true)]
         [string]
-        $File
+        $File,
+
+        # Custom type. If left blank, the MIME type will be detected from the file extension
+        [Parameter()]
+        [string]
+        $Type
     )
     DynamicParam {
         Get-ClientCommonParameters -Type "Create", "Template"
