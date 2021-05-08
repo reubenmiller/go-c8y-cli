@@ -48,7 +48,7 @@ type RequestHandler struct {
 }
 
 func (r *RequestHandler) GetTimeoutContext() (context.Context, context.CancelFunc) {
-	return context.WithTimeout(context.Background(), time.Duration(r.Config.RequestTimeout()*1000)*time.Millisecond)
+	return context.WithTimeout(context.Background(), r.Config.RequestTimeout())
 }
 
 func (r *RequestHandler) ProcessRequestAndResponse(requests []c8y.RequestOptions, commonOptions config.CommonCommandOptions) error {
@@ -99,7 +99,7 @@ func (r *RequestHandler) ProcessRequestAndResponse(requests []c8y.RequestOptions
 	}
 
 	if ctx.Err() != nil {
-		r.Logger.Errorf("request timed out after %.3fs", r.Config.RequestTimeout())
+		r.Logger.Errorf("request timed out after %s", r.Config.RequestTimeout())
 	}
 
 	if commonOptions.IncludeAll || commonOptions.TotalPages > 0 {
@@ -389,7 +389,7 @@ func (r *RequestHandler) fetchAllResults(req c8y.RequestOptions, resp *c8y.Respo
 	}
 
 	delayMS := r.Config.GetIncludeAllDelay()
-	timeout := time.Duration(r.Config.RequestTimeout()*1000) * time.Millisecond
+	timeout := r.Config.RequestTimeout()
 
 	// check if data is already fetched
 
@@ -505,7 +505,7 @@ func (r *RequestHandler) fetchAllInventoryQueryResults(req c8y.RequestOptions, r
 	}
 
 	delayMS := r.Config.GetIncludeAllDelay()
-	timeout := time.Duration(r.Config.RequestTimeout()*1000) * time.Millisecond
+	timeout := r.Config.RequestTimeout()
 
 	// check if data is already fetched
 	for {

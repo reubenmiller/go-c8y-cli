@@ -33,8 +33,8 @@ type BatchOptions struct {
 	StartIndex        int
 	NumJobs           int
 	TotalWorkers      int
-	Delay             int
-	DelayBefore       int
+	Delay             time.Duration
+	DelayBefore       time.Duration
 	AbortOnErrorCount int
 
 	InputData []string
@@ -300,7 +300,7 @@ func (w *Worker) runBatched(requestIterator *requestiterator.RequestIterator, co
 			}
 
 			if skipConfirm || !shouldConfirm {
-				progbar.Start(float64(batchOptions.Delay * 2 / 1000))
+				progbar.Start(float64(batchOptions.Delay * 2 / time.Millisecond))
 			}
 
 			jobs <- batchArgument{
@@ -391,14 +391,14 @@ func (w *Worker) batchWorker(id int, jobs <-chan batchArgument, results chan<- e
 		workerStart := prog.StartJob(id, total)
 
 		if job.batchOptions.DelayBefore > 0 {
-			w.logger.Infof("worker %d: sleeping %dms before starting job", id, job.batchOptions.DelayBefore)
-			time.Sleep(time.Duration(job.batchOptions.DelayBefore) * time.Millisecond)
+			w.logger.Infof("worker %d: sleeping %s before starting job", id, job.batchOptions.DelayBefore)
+			time.Sleep(job.batchOptions.DelayBefore)
 		}
 
 		if !onStartup {
 			if !errors.Is(err, io.EOF) && job.batchOptions.Delay > 0 {
-				w.logger.Infof("worker %d: sleeping %dms before fetching next job", id, job.batchOptions.Delay)
-				time.Sleep(time.Duration(job.batchOptions.Delay) * time.Millisecond)
+				w.logger.Infof("worker %d: sleeping %s before fetching next job", id, job.batchOptions.Delay)
+				time.Sleep(job.batchOptions.Delay)
 			}
 		} else {
 			jitter := rand.Int31n(50)

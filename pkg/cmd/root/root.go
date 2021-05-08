@@ -178,8 +178,8 @@ func NewCmdRoot(f *cmdutil.Factory, version, buildDate string) *CmdRoot {
 	cmd.PersistentFlags().Int("workers", 1, "Number of workers")
 	cmd.PersistentFlags().Int64("maxJobs", 0, "Maximum number of jobs. 0 = unlimited (use with caution!)")
 
-	cmd.PersistentFlags().Int("delay", 0, "delay in milliseconds after each request")
-	cmd.PersistentFlags().Int("delayBefore", 0, "delay in milliseconds before each request")
+	cmd.PersistentFlags().String("delay", "0ms", "delay after each request, i.e. 5ms, 1.2s")
+	cmd.PersistentFlags().String("delayBefore", "0ms", "delay before each request, i.e. 5ms, 1.2s")
 	cmd.PersistentFlags().Int("abortOnErrors", 10, "Abort batch when reaching specified number of errors")
 
 	// Error handling
@@ -189,7 +189,7 @@ func NewCmdRoot(f *cmdutil.Factory, version, buildDate string) *CmdRoot {
 	cmd.PersistentFlags().StringSlice("filter", nil, "Apply a client side filter to response before returning it to the user")
 	cmd.PersistentFlags().StringArray("select", nil, "Comma separated list of properties to return. wildcards and globstar accepted, i.e. --select 'id,name,type,**.serialNumber'")
 	cmd.PersistentFlags().String("view", defaultView, "Use views when displaying data on the terminal. Disable using --view off")
-	cmd.PersistentFlags().Float64("timeout", float64(10*60), "Request timeout in seconds")
+	cmd.PersistentFlags().String("timeout", "60s", "Request timeout duration, i.e. 60s, 2m")
 
 	// output
 	cmd.PersistentFlags().StringP("output", "o", defaultOutputFormat, "Output format i.e. table, json, csv, csvheader")

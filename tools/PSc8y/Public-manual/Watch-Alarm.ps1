@@ -15,7 +15,7 @@ PS> Watch-Alarm -Device 12345
 Watch all alarms for a device
 
 .EXAMPLE
-Watch-Alarm -Device 12345 -DurationSec 600 | Foreach-object {
+Watch-Alarm -Device 12345 -Duration 600s | Foreach-object {
     $alarm = $_
     $daysOld = ($alarm.time - $alarm.creationTime).TotalDays
     if ($alarm.status -eq "ACTIVE" -and $daysOld -gt 1) {
@@ -37,10 +37,9 @@ if the alarm is active and was first created more than 1 day ago.
         [object]
         $Device,
 
-        # Start date or date and time of alarm occurrence. (required)
-        [Alias("DurationSec")]
+        # Duration to subscribe for. It accepts a duration, i.e. 1ms, 0.5s, 1m etc.
         [Parameter()]
-        [int]
+        [string]
         $Duration,
 
         # End date or date and time of alarm occurrence.

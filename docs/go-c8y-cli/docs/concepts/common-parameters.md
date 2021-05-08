@@ -253,7 +253,7 @@ Get-AlarmCollection -Debug
 
 ### delay
 
-delay in milliseconds after each request
+delay after each request. It accepts a duration, i.e. 1ms, 0.5s, 1m etc.
 
 Adding a delay after each request is useful to apply some basic rate limiting to your commands (especially when using pipelines).
 
@@ -287,7 +287,7 @@ seq 1 10 | c8y devices create --workers 2 --delay 500
 
 ### delayBefore
 
-delay in milliseconds before each request is sent
+delay before each request is sent. It accepts a duration, i.e. 1ms, 0.5s, 1m etc.
 
 #### Example 1: Simulate a device (agent) processing operations 
 
@@ -1028,7 +1028,7 @@ Status codes which will not print out an error message
 
 ### timeout
 
-Request timeout in seconds (default 600)
+Request timeout. It accepts a duration, i.e. 1ms, 0.5s, 1m etc. (default 60s)
 
 ---
 

@@ -23,7 +23,6 @@ type CmdWait struct {
 	factory *cmdutil.Factory
 
 	ExpectedStatus []string
-	Timeout        time.Duration
 }
 
 func NewCmdWait(f *cmdutil.Factory) *CmdWait {
@@ -52,8 +51,7 @@ func NewCmdWait(f *cmdutil.Factory) *CmdWait {
 
 	cmd.Flags().String("id", "", "Operation id (required) (accepts pipeline)")
 	cmd.Flags().StringSliceVar(&ccmd.ExpectedStatus, "status", []string{"SUCCESSFUL"}, "Status to wait for. If multiple values are given, then it will be applied as an OR operation")
-	cmd.Flags().DurationVar(&ccmd.Timeout, "duration", 30*time.Second, "Timeout. i.e. 30s or 1m (1 minute)")
-
+	cmd.Flags().String("duration", "30s", "Timeout duration. i.e. 30s or 1m (1 minute)")
 	flags.WithOptions(
 		cmd,
 		flags.WithExtendedPipelineSupport("id", "id", true),
@@ -80,6 +78,11 @@ func (n *CmdWait) RunE(cmd *cobra.Command, args []string) error {
 	}
 
 	inputIterators, err := flags.NewRequestInputIterators(cmd)
+	if err != nil {
+		return err
+	}
+
+	duration, err := flags.GetDurationFlag(cmd, "duration", true, time.Second)
 	if err != nil {
 		return err
 	}
@@ -116,7 +119,7 @@ func (n *CmdWait) RunE(cmd *cobra.Command, args []string) error {
 		}
 
 		state.ID = operationID
-		result, err := desiredstate.WaitFor(1000*time.Millisecond, n.Timeout, state)
+		result, err := desiredstate.WaitFor(1000*time.Millisecond, duration, state)
 
 		if v, ok := result.(*c8y.Operation); ok {
 			if v.FailureReason != "" {

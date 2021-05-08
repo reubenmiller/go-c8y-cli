@@ -82,7 +82,7 @@ Inherit common parameters to a custom function. This will add parameters such as
         New-DynamicParam -Name OutputFileRaw -Type "string" -DPDictionary $Dictionary -HelpMessage "Save raw response to file (before select/view)"
         New-DynamicParam -Name Proxy -Type "switch" -DPDictionary $Dictionary -HelpMessage "Proxy setting, i.e. http://10.0.0.1:8080"
         New-DynamicParam -Name NoProxy -Type "switch" -DPDictionary $Dictionary -HelpMessage "Ignore the proxy settings"
-        New-DynamicParam -Name Timeout -Type "double" -DPDictionary $Dictionary -HelpMessage "Request timeout in seconds"
+        New-DynamicParam -Name Timeout -Type "string" -DPDictionary $Dictionary -HelpMessage "Request timeout. It accepts a duration, i.e. 1ms, 0.5s, 1m etc."
         
         # Session
         New-DynamicParam -Name Session -Type "string" -DPDictionary $Dictionary -HelpMessage "Session configuration"
@@ -121,8 +121,8 @@ Inherit common parameters to a custom function. This will add parameters such as
 
         # Workers
         New-DynamicParam -Name Workers -Type "int" -DPDictionary $Dictionary -HelpMessage "Number of workers"
-        New-DynamicParam -Name Delay -Type "int" -DPDictionary $Dictionary -HelpMessage "delay in milliseconds after each request"
-        New-DynamicParam -Name DelayBefore -Type "int" -DPDictionary $Dictionary -HelpMessage "delay in milliseconds before each request"
+        New-DynamicParam -Name Delay -Type "string" -DPDictionary $Dictionary -HelpMessage "delay after each request. It accepts a duration, i.e. 1ms, 0.5s, 1m etc."
+        New-DynamicParam -Name DelayBefore -Type "string" -DPDictionary $Dictionary -HelpMessage "delay before each request. It accepts a duration, i.e. 1ms, 0.5s, 1m etc."
         New-DynamicParam -Name MaxJobs -Type "int" -DPDictionary $Dictionary -HelpMessage "Maximum number of jobs. 0 = unlimited (use with caution!)"
         New-DynamicParam -Name Progress -Type "switch" -DPDictionary $Dictionary -HelpMessage "Show progress bar. This will also disable any other verbose output"
         New-DynamicParam -Name AbortOnErrors -Type "int" -DPDictionary $Dictionary -HelpMessage "Abort batch when reaching specified number of errors"

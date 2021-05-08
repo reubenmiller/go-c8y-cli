@@ -30,7 +30,7 @@ Wait for the operation id for a max duration of 30 seconds
         # Wait for status
         [string[]] $Status = "SUCCESSFUL",
 
-        # Duration, i.e. 10s, 1m. Defaults to 30 seconds. i.e. how long should it wait for the operation to be processed
+        # Duration to wait for, i.e. 10s, 1m. Defaults to 30s. i.e. how long should it wait for the operation to be processed
         [string] $Duration
     )
     DynamicParam {

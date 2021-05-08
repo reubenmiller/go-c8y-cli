@@ -1,6 +1,8 @@
 package subscribeall
 
 import (
+	"time"
+
 	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/reubenmiller/go-c8y-cli/pkg/c8yfetcher"
 	"github.com/reubenmiller/go-c8y-cli/pkg/c8ysubscribe"
@@ -13,9 +15,8 @@ import (
 )
 
 type CmdSubscribeAll struct {
-	flagDurationSec int64
-	flagCount       int64
-	actionTypes     []string
+	flagCount   int64
+	actionTypes []string
 
 	*subcommand.SubCommand
 
@@ -32,7 +33,7 @@ func NewCmdSubscribeAll(f *cmdutil.Factory) *CmdSubscribeAll {
 		Short: "Subscribe to all realtime notifications",
 		Long:  `Subscribe to all realtime notifications`,
 		Example: heredoc.Doc(`
-$ c8y realtime subscribeAll --device 12345 --duration 90
+$ c8y realtime subscribeAll --device 12345 --duration 90s
 
 Subscribe to all notifications (alarms/events/operations etc.) for device 12345 for 90 seconds
 		`),
@@ -41,7 +42,7 @@ Subscribe to all notifications (alarms/events/operations etc.) for device 12345 
 
 	// Flags
 	cmd.Flags().String("device", "", "Device ID")
-	cmd.Flags().Int64Var(&ccmd.flagDurationSec, "duration", 30, "Timeout in seconds")
+	cmd.Flags().String("duration", "30s", "Duration to subscribe for. i.e. 30s, 1m")
 	cmd.Flags().Int64Var(&ccmd.flagCount, "count", 0, "Max number of realtime notifications to wait for")
 	cmd.Flags().StringSliceVar(&ccmd.actionTypes, "actionTypes", nil, "Filter by realtime action types, i.e. CREATE,UPDATE,DELETE")
 
@@ -74,6 +75,11 @@ func (n *CmdSubscribeAll) RunE(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
+	duration, err := flags.GetDurationFlag(cmd, "duration", true, time.Second)
+	if err != nil {
+		return err
+	}
+
 	// path parameters
 	path := flags.NewStringTemplate("{device}")
 	err = flags.WithPathParameters(
@@ -100,7 +106,7 @@ func (n *CmdSubscribeAll) RunE(cmd *cobra.Command, args []string) error {
 	}
 
 	opts := c8ysubscribe.Options{
-		TimeoutSec:  n.flagDurationSec,
+		Timeout:     duration,
 		MaxMessages: n.flagCount,
 		ActionTypes: n.actionTypes,
 		OnMessage: func(msg string) error {

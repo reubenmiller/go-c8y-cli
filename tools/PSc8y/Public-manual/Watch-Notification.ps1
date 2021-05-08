@@ -10,7 +10,7 @@ Watch realtime notifications
 c8y realtime subscribe
 
 .EXAMPLE
-PS> Watch-Notification -Channel "/measurements/*" -DurationSec 90
+PS> Watch-Notification -Channel "/measurements/*" -Duration 90s
 Watch all measurements for 90 seconds
 
 #>
@@ -25,10 +25,9 @@ Watch all measurements for 90 seconds
         [string]
         $Channel,
 
-        # Start date or date and time of notification occurrence. (required)
-        [Alias("DurationSec")]
+        # Duration to subscribe for. It accepts a duration, i.e. 1ms, 0.5s, 1m etc.
         [Parameter()]
-        [int]
+        [string]
         $Duration,
 
         # End date or date and time of notification occurrence.

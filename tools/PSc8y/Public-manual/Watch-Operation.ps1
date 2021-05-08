@@ -24,10 +24,9 @@ Watch all operations for a device
         [object]
         $Device,
 
-        # Start date or date and time of operation occurrence. (required)
-        [Alias("DurationSec")]
+        # Duration to subscribe for. It accepts a duration, i.e. 1ms, 0.5s, 1m etc.
         [Parameter()]
-        [int]
+        [string]
         $Duration,
 
         # End date or date and time of operation occurrence.

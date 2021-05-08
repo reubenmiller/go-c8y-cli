@@ -59,7 +59,7 @@ Describe -Name "c8y errors" {
         }
 
         It "returns a timeout error" {
-            $output = c8y devices list --timeout 0.001 --withError
+            $output = c8y devices list --timeout "0.001s" --withError
             $LASTEXITCODE | Should -Be 106
 
             $output | Should -Not -BeNullOrEmpty

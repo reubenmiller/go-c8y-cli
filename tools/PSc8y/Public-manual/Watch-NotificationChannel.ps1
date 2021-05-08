@@ -10,7 +10,7 @@ Watch realtime device notifications
 c8y realtime subscribeAll
 
 .EXAMPLE
-PS> Function Watch-NotificationChannel -Device 12345 -DurationSec 90
+PS> Function Watch-NotificationChannel -Device 12345 -Duration 90s
 Watch all types of notifications for a device for 90 seconds
 
 #>
@@ -25,10 +25,9 @@ Watch all types of notifications for a device for 90 seconds
         [object]
         $Device,
 
-        # Start date or date and time of notification occurrence. (required)
-        [Alias("DurationSec")]
+        # Duration to subscribe for. It accepts a duration, i.e. 1ms, 0.5s, 1m etc.
         [Parameter()]
-        [int]
+        [string]
         $Duration,
 
         # End date or date and time of notification occurrence.

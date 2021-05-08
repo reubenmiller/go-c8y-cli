@@ -111,7 +111,7 @@ func CreateCumulocityClient(f *cmdutil.Factory, sessionFile, username, password 
 		}
 
 		timeout := cfg.RequestTimeout()
-		log.Debugf("timeout: %0.3f", timeout)
+		log.Debugf("timeout: %v", timeout)
 
 		// Should we use the tenant in the name or not
 		if viper.IsSet("useTenantPrefix") {

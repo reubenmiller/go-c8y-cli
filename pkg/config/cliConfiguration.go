@@ -933,13 +933,23 @@ func (c *Config) WithError() bool {
 }
 
 // WorkerDelay delay in milliseconds to wait after each request before the worker processes a new job (request)
-func (c *Config) WorkerDelay() int {
-	return c.viper.GetInt(SettingsWorkerDelay)
+func (c *Config) WorkerDelay() time.Duration {
+	return c.getDuration(SettingsWorkerDelay)
 }
 
 // WorkerDelayBefore delay in milliseconds to wait before each request
-func (c *Config) WorkerDelayBefore() int {
-	return c.viper.GetInt(SettingsWorkerDelayBefore)
+func (c *Config) WorkerDelayBefore() time.Duration {
+	return c.getDuration(SettingsWorkerDelayBefore)
+}
+
+func (c *Config) getDuration(name string) time.Duration {
+	v := c.viper.GetString(name)
+	duration, err := flags.GetDuration(v, true, time.Millisecond)
+	if err != nil {
+		c.Logger.Warnf("Invalid duration. value=%s, err=%s", v, err)
+		return 0
+	}
+	return duration
 }
 
 // AbortOnErrorTotal abort when the number of errors reaches this value
@@ -970,9 +980,15 @@ func (c *Config) ViewColumnPadding() int {
 	return c.viper.GetInt(SettingsViewColumnPadding)
 }
 
-// RequestTimeout timeout in seconds use when sending requests
-func (c *Config) RequestTimeout() float64 {
-	return c.viper.GetFloat64(SettingsTimeout)
+// RequestTimeout timeout to use when sending requests
+func (c *Config) RequestTimeout() time.Duration {
+	value := c.viper.GetString(SettingsTimeout)
+	duration, err := flags.GetDuration(value, true, time.Second)
+	if err != nil {
+		c.Logger.Warnf("Invalid duration. value=%s, err=%s", duration, err)
+		return 0
+	}
+	return duration
 }
 
 // FlattenJSON flatten nested json using dot notation

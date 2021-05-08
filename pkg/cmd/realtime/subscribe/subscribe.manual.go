@@ -1,20 +1,22 @@
 package subscribe
 
 import (
+	"time"
+
 	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/reubenmiller/go-c8y-cli/pkg/c8ysubscribe"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmd/subcommand"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmdutil"
 	"github.com/reubenmiller/go-c8y-cli/pkg/completion"
+	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
 )
 
 type CmdSubscribe struct {
-	flagChannel     string
-	flagDurationSec int64
-	flagCount       int64
-	actionTypes     []string
+	flagChannel string
+	flagCount   int64
+	actionTypes []string
 
 	*subcommand.SubCommand
 
@@ -31,7 +33,7 @@ func NewCmdSubscribe(f *cmdutil.Factory) *CmdSubscribe {
 		Short: "Subscribe to realtime notifications",
 		Long:  `Subscribe to realtime notifications`,
 		Example: heredoc.Doc(`
-$ c8y realtime subscribe --channel "/measurements/*" --duration 90
+$ c8y realtime subscribe --channel "/measurements/*" --duration 90s
 
 Subscribe to all measurements for 90 seconds
 		`),
@@ -40,7 +42,7 @@ Subscribe to all measurements for 90 seconds
 
 	// Flags
 	cmd.Flags().StringVar(&ccmd.flagChannel, "channel", "", "Channel name i.e. \"/measurements/12345\" or \"/measurements/*\"")
-	cmd.Flags().Int64Var(&ccmd.flagDurationSec, "duration", 30, "Timeout in seconds")
+	cmd.Flags().String("duration", "30s", "Duration to subscribe for. i.e. 30s, 1m")
 	cmd.Flags().Int64Var(&ccmd.flagCount, "count", 0, "Max number of realtime notifications to wait for")
 	cmd.Flags().StringSliceVar(&ccmd.actionTypes, "actionTypes", nil, "Filter by realtime action types, i.e. CREATE,UPDATE,DELETE")
 
@@ -76,8 +78,12 @@ func (n *CmdSubscribe) RunE(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return err
 	}
+	duration, err := flags.GetDurationFlag(cmd, "duration", true, time.Second)
+	if err != nil {
+		return err
+	}
 	opts := c8ysubscribe.Options{
-		TimeoutSec:  n.flagDurationSec,
+		Timeout:     duration,
 		MaxMessages: n.flagCount,
 		ActionTypes: n.actionTypes,
 		OnMessage: func(msg string) error {

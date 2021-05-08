@@ -15,8 +15,8 @@ import (
 
 // Options subscription options
 type Options struct {
-	// TimeoutSec timeout in seconds
-	TimeoutSec int64
+	// Timeout duration
+	Timeout time.Duration
 
 	// MaxMessages maximum messages
 	MaxMessages int64
@@ -51,7 +51,7 @@ func Subscribe(client *c8y.Client, log *logger.Logger, channelPattern string, op
 
 	client.Realtime.Subscribe(channelPattern, msgCh)
 
-	timeoutDuration := time.Duration(opts.TimeoutSec) * time.Second
+	timeoutDuration := opts.Timeout
 	timeoutCh := time.After(timeoutDuration)
 
 	defer func() {
@@ -113,7 +113,7 @@ func SubscribeMultiple(client *c8y.Client, log *logger.Logger, channelPatterns [
 		client.Realtime.Subscribe(pattern, msgCh)
 	}
 
-	timeoutDuration := time.Duration(opts.TimeoutSec) * time.Second
+	timeoutDuration := opts.Timeout
 	timeoutCh := time.After(timeoutDuration)
 
 	defer func() {
