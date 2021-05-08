@@ -17,4 +17,101 @@ Describe -Name "c8y template" {
         Get-Date $data.nowNano | Should -Not -BeNullOrEmpty
         Get-Date $data.nowNanoRelative | Should -Not -BeNullOrEmpty
     }
+
+    It "combines explicit arguments with data and templates parameters" {
+        $inputdata = @{self = "https://example.com"} | ConvertTo-Json -Compress
+        $output = $inputdata | c8y operations create `
+            --device 12345 `
+            --data 'other="1"' `
+            --template "{c8y_DownloadConfigFile: {url: input.value['self']}}" `
+            --dry `
+            --dryFormat json
+
+        $LASTEXITCODE | Should -Be 0
+        $request = $output | ConvertFrom-Json
+        $request.body | Should -MatchObject @{
+            c8y_DownloadConfigFile = @{
+                url = "https://example.com"
+            }
+            deviceId = "12345"
+            other = 1
+        }
+    }
+
+    It "explicit arguments override values from data and templates" {
+        $inputdata = @{self = "https://example.com"} | ConvertTo-Json -Compress
+        $output = $inputdata | c8y operations create `
+            --device "1111" `
+            --data 'deviceId=\"2222\"' `
+            --template "{deviceId: '3333'}" `
+            --dry `
+            --dryFormat json
+
+        $LASTEXITCODE | Should -Be 0
+        $request = $output | ConvertFrom-Json
+        $request.body | Should -MatchObject @{
+            deviceId = "1111"
+        }
+    }
+
+    It "piped arguments do not override data values" {
+        $inputdata = @{deviceId = "1111"} | ConvertTo-Json -Compress
+        $output = $inputdata | c8y operations create `
+            --data 'deviceId=\"2222\"' `
+            --template "{deviceId: '3333'}" `
+            --dry `
+            --dryFormat json
+
+        $LASTEXITCODE | Should -Be 0
+        $request = $output | ConvertFrom-Json
+        $request.body | Should -MatchObject @{
+            deviceId = "2222"
+        }
+    }
+
+    It "piped arguments overide template variables" {
+        $inputdata = @{deviceId = "1111"} | ConvertTo-Json -Compress
+        $output = $inputdata | c8y operations create `
+            --template "{deviceId: '3333'}" `
+            --dry `
+            --dryFormat json
+
+        $LASTEXITCODE | Should -Be 0
+        $request = $output | ConvertFrom-Json
+        $request.body | Should -MatchObject @{
+            deviceId = "1111"
+        }
+    }
+
+    It "provides a generic way to remap pipes values to property that will not be picked up" {
+        $inputdata = @{deviceId = "1111"} | ConvertTo-Json -Compress
+        $output = $inputdata `
+        | c8y util show --select "tempID:deviceId" `
+        | c8y operations create `
+            --template "{deviceId: '3333'}" `
+            --dry `
+            --dryFormat json
+
+        $LASTEXITCODE | Should -Be 0
+        $request = $output | ConvertFrom-Json
+        $request.body | Should -MatchObject @{
+            deviceId = "3333"
+        }
+    }
+
+    It "uses piped input inside the template" {
+        $inputdata = @{deviceId = "1111"} | ConvertTo-Json -Compress
+        $output = $inputdata `
+        | c8y util show --select "tempID:deviceId" `
+        | c8y operations create `
+            --template "{deviceId: input.value.tempID}" `
+            --dry `
+            --dryFormat json
+
+        $LASTEXITCODE | Should -Be 0
+        $request = $output | ConvertFrom-Json
+        $request.body | Should -MatchObject @{
+            deviceId = "1111"
+        }
+    }
 }

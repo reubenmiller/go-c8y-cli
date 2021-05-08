@@ -671,7 +671,7 @@ func (b *MapBuilder) MergeMaps(maps ...map[string]interface{}) error {
 	}
 
 	if b.body != nil {
-		maps = append([]map[string]interface{}{b.body}, maps...)
+		maps = append(maps, b.body)
 	}
 
 	b.body = mergeMaps(maps...)

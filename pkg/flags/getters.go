@@ -170,7 +170,7 @@ func WithBody(cmd *cobra.Command, body *mapbuilder.MapBuilder, inputIterators *R
 					err = body.Set(name, v)
 					return err
 				} else {
-					body.SetMap(v)
+					err = body.MergeMaps(v)
 				}
 			}
 		default:
