@@ -4,13 +4,11 @@ require (
 	github.com/AlecAivazis/survey/v2 v2.2.9
 	github.com/MakeNowJust/heredoc/v2 v2.0.1
 	github.com/araddon/dateparse v0.0.0-20210207001429-0eec95c9db7e
-	github.com/charmbracelet/glamour v0.3.0 // indirect
+	github.com/charmbracelet/glamour v0.3.0
 	github.com/cli/safeexec v1.0.0
 	github.com/cpuguy83/go-md2man/v2 v2.0.0
-	github.com/facette/natsort v0.0.0-20181210072756-2cd4dd1e2dcb
 	github.com/fatih/color v1.10.0
 	github.com/google/go-jsonnet v0.17.0
-	github.com/google/goterm v0.0.0-20190703233501-fc88cf888a3f // indirect
 	github.com/google/shlex v0.0.0-20191202100458-e7afc7fbc510
 	github.com/gorilla/websocket v1.4.2
 	github.com/howeyc/gopass v0.0.0-20190910152052-7cb4b85ec19c

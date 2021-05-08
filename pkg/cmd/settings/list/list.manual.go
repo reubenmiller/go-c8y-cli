@@ -55,8 +55,15 @@ func (n *CmdList) listSettings(cmd *cobra.Command, args []string) error {
 	}
 	var responseText []byte
 
-	// settings := viper.GetViper().AllSettings()
+	settingsPrefix := "settings"
 	settings := cfg.AllSettings()
+
+	// Stripping non-settings keys
+	for k := range settings {
+		if k != settingsPrefix {
+			delete(settings, k)
+		}
+	}
 
 	allSettings := mapbuilder.NewInitializedMapBuilder()
 	allSettings.ApplyMap(settings)
@@ -84,5 +91,5 @@ func (n *CmdList) listSettings(cmd *cobra.Command, args []string) error {
 		return cmderrors.NewUserError("Settings error. ", err)
 	}
 
-	return n.factory.WriteJSONToConsole(cfg, cmd, "settings", responseText)
+	return n.factory.WriteJSONToConsole(cfg, cmd, settingsPrefix, responseText)
 }

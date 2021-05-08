@@ -5,14 +5,15 @@ import (
 	"encoding/json"
 	"fmt"
 	"regexp"
+	"sort"
 	"strconv"
 	"strings"
 
-	"github.com/facette/natsort"
 	glob "github.com/obeattie/ohmyglob"
 	"github.com/reubenmiller/go-c8y-cli/pkg/flatten"
 	"github.com/reubenmiller/go-c8y-cli/pkg/logger"
 	"github.com/reubenmiller/go-c8y-cli/pkg/matcher"
+	"github.com/reubenmiller/go-c8y-cli/pkg/sortorder"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/thedevsaddam/gojsonq"
 	"github.com/tidwall/gjson"
@@ -30,6 +31,7 @@ func init() {
 }
 
 type JSONFilters struct {
+	Logger    *logger.Logger
 	Filters   []JSONFilter
 	Selectors []string
 	Pluck     []string
@@ -102,7 +104,9 @@ func FilterPropertyByWildcard(jsonValue string, prefix string, patterns []string
 	if err != nil {
 		return nil, nil, err
 	}
+	Logger.Debugf("flattening json")
 	flatMap, err := flatten.Flatten(rawMap, prefix, flatten.DotStyle)
+	Logger.Debugf("finished flattening json")
 
 	if err != nil {
 		return nil, nil, err
@@ -133,7 +137,9 @@ func FilterPropertyByWildcard(jsonValue string, prefix string, patterns []string
 		}
 	}
 
+	Logger.Debugf("running filterFlatMap")
 	resolvedProperties, _ := filterFlatMap(flatMap, filteredMap, compiledPatterns, aliases)
+	Logger.Debugf("finished filterFlatMap")
 	return filteredMap, resolvedProperties, err
 }
 
@@ -150,10 +156,14 @@ func filterFlatMap(src map[string]interface{}, dst map[string]interface{}, patte
 	}
 	// Use natural sorting to sory array in an user friendly way
 	// i.e. 1, 10, 2 => 1, 2, 10
-	natsort.Sort(sourceKeys)
+	// Skip sorting for very large key sets
+	if len(sourceKeys) <= 2000000 {
+		sort.Sort(sortorder.Natural(sourceKeys))
+	}
 
 	for i, pattern := range patterns {
 		found := false
+		Logger.Debugf("filtering keys by pattern: total=%d, pattern=%s", len(sourceKeys), pattern.String())
 		for _, key := range sourceKeys {
 			value := src[key]
 
@@ -231,8 +241,9 @@ func filterFlatMap(src map[string]interface{}, dst map[string]interface{}, patte
 }
 
 // NewJSONFilters create a json filter
-func NewJSONFilters() *JSONFilters {
+func NewJSONFilters(l *logger.Logger) *JSONFilters {
 	return &JSONFilters{
+		Logger:    l,
 		Filters:   make([]JSONFilter, 0),
 		Selectors: make([]string, 0),
 	}
@@ -320,7 +331,10 @@ func (f JSONFilters) filterJSON(jsonValue string, property string, showHeaders b
 	}
 	Logger.Debugf("Pluck values: %v", f.Pluck)
 	// format values (using gjson)
-	if len(f.Pluck) > 0 || f.Flatten {
+	// skip flatten and select if a only a globstar is provided
+	// selectAllProperties := len(f.Pluck) == 1 && f.Pluck[0] == "**"
+	// && !selectAllProperties
+	if (len(f.Pluck) > 0) || f.Flatten {
 		var bsub bytes.Buffer
 		jq.Writer(&bsub)
 		formattedJSON := gjson.ParseBytes(bsub.Bytes())
@@ -335,7 +349,7 @@ func (f JSONFilters) filterJSON(jsonValue string, property string, showHeaders b
 			for _, myval := range formattedJSON.Array() {
 
 				if myval.IsObject() {
-					if line, keys := pluckJsonValues(&myval, f.Pluck, f.Flatten, f.AsCSV); line != "" {
+					if line, keys := f.pluckJsonValues(&myval, f.Pluck, f.Flatten, f.AsCSV); line != "" {
 						outputValues = append(outputValues, line)
 						setHeaderFunc(strings.Join(keys, ","))
 					}
@@ -346,7 +360,7 @@ func (f JSONFilters) filterJSON(jsonValue string, property string, showHeaders b
 			return []byte(strings.Join(outputValues, "\n")), formatErrors(jq.Errors())
 		}
 
-		if line, keys := pluckJsonValues(&formattedJSON, f.Pluck, f.Flatten, f.AsCSV); line != "" {
+		if line, keys := f.pluckJsonValues(&formattedJSON, f.Pluck, f.Flatten, f.AsCSV); line != "" {
 			setHeaderFunc(strings.Join(keys, ","))
 			return []byte(line), formatErrors(jq.Errors())
 		}
@@ -403,7 +417,7 @@ func resolveKeyName(item *gjson.Result, key string) (name string, value interfac
 	return key, nil, nil
 }
 
-func pluckJsonValues(item *gjson.Result, properties []string, flat bool, asCSV bool) (string, []string) {
+func (f JSONFilters) pluckJsonValues(item *gjson.Result, properties []string, flat bool, asCSV bool) (string, []string) {
 	if item == nil {
 		return "", nil
 	}
@@ -435,7 +449,29 @@ func pluckJsonValues(item *gjson.Result, properties []string, flat bool, asCSV b
 		v, err = json.Marshal(flatMap)
 	} else {
 		// unflatten
-		v, err = flatten.Unflatten(flatMap)
+		Logger.Debugf("running unflatten. %v", pathPatterns)
+		if len(pathPatterns) == 1 && pathPatterns[0] == "**" {
+			f.Logger.Debugf("Returning all keys because globstar is being used")
+			return item.Raw, flatKeys
+		}
+
+		// Protect against large amount of keys adn
+		maxKeyCount := int64(10000)
+		keyCount := int64(len(flatMap))
+		if keyCount > maxKeyCount {
+			if f.Logger != nil {
+				itemID := ""
+				if v := item.Get("id"); v.Exists() {
+					itemID = v.Str
+				}
+				f.Logger.Warnf("Detected json with a large number of keys, returning all data by default. Use jq for further filtering. total_keys=%d, id=%s", keyCount, itemID)
+			}
+
+			return item.Raw, flatKeys
+		}
+
+		v, err = flatten.UnflattenOrdered(flatMap, flatKeys)
+		Logger.Debugf("Finished unflatten")
 	}
 	if err != nil {
 		Logger.Warningf("failed to marshal value. err=%s", err)

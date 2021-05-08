@@ -736,7 +736,7 @@ Disable reading from standard input (stdin). Useful if you are already redirecti
 
 ### output
 
-Output format i.e. table, json, csv, csvheader (default "table" (on terminal) otherwise "json")
+Output format i.e. table, json, csv, csvheader, serverresponse (default "table" (on terminal) otherwise "json")
 
 :::info
 The `table` format is the default when the output is being displayed in the console output, i.e. when no pipeline, redirection or variable assignment is being used. Otherwise `json` format is the default (when the server response is JSON of course, otherwise the raw text will be printed).
@@ -774,8 +774,6 @@ id,name,type,creationTime
 497914,mobile-device_0004,,2021-04-24T19:14:01.334Z
 497719,mobile-device_0005,,2021-04-24T19:14:01.364Z
 ```
-
-If you want to include the csv headers in the output then 
 
 ---
 

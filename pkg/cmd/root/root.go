@@ -164,7 +164,7 @@ func NewCmdRoot(f *cmdutil.Factory, version, buildDate string) *CmdRoot {
 	cmd.PersistentFlags().Bool("noProxy", false, "Ignore the proxy settings")
 	cmd.PersistentFlags().Bool("withError", false, "Errors will be printed on stdout instead of stderr")
 	cmd.PersistentFlags().StringSliceP("header", "H", nil, `custom headers. i.e. --header "Accept: value, AnotherHeader: myvalue"`)
-	cmd.PersistentFlags().StringSlice("queryParam", nil, `custom query parameters. i.e. --queryParam "withCustomOption=true,myOtherOption=myvalue"`)
+	cmd.PersistentFlags().StringSlice("customQueryParam", nil, `add custom URL query parameters. i.e. --customQueryParam 'withCustomOption=true,myOtherOption=myvalue'`)
 
 	// help
 	cmd.PersistentFlags().Bool("examples", false, "Show examples for the current command")
@@ -207,7 +207,14 @@ func NewCmdRoot(f *cmdutil.Factory, version, buildDate string) *CmdRoot {
 	completion.WithOptions(
 		cmd,
 		completion.WithValidateSet("dryFormat", "json", "dump", "curl", "markdown"),
-		completion.WithValidateSet("output", "json", "table", "csv", "csvheader"),
+		completion.WithValidateSet(
+			"output",
+			config.OutputJSON.String()+"\tjson",
+			config.OutputTable.String()+"\ttable format",
+			config.OutputCSV.String()+"\tcsv format without headers",
+			config.OutputCSVWithHeader.String()+"\tcsv format with headers",
+			config.OutputServerResponse.String()+"\tUnparsed server response",
+		),
 		completion.WithSessionFile("session", config.ConfigExtensions, func() string {
 			cfg, err := ccmd.Factory.Config()
 			if err != nil {

@@ -93,7 +93,7 @@ Inherit common parameters to a custom function. This will add parameters such as
         }
 
         # JSON parsing options
-        New-DynamicParam -Name Output -Type "string" -ValidateSet @("json", "csv", "csvheader", "table") -DPDictionary $Dictionary -HelpMessage "Output format i.e. table, json, csv, csvheader"
+        New-DynamicParam -Name Output -Type "string" -ValidateSet @("json", "csv", "csvheader", "table", "serverresponse") -DPDictionary $Dictionary -HelpMessage "Output format i.e. table, json, csv, csvheader"
         New-DynamicParam -Name View -Type "string" -ValidateSet @("off", "auto") -DPDictionary $Dictionary -HelpMessage "Use views when displaying data on the terminal. Disable using --view off"
         New-DynamicParam -Name AsHashTable -Type "switch" -DPDictionary $Dictionary -HelpMessage "Return output as PowerShell Hashtables"
         New-DynamicParam -Name AsPSObject -Type "switch" -DPDictionary $Dictionary -HelpMessage "Return output as PowerShell PSCustomObjects"
@@ -137,7 +137,7 @@ Inherit common parameters to a custom function. This will add parameters such as
 
         # General rest options
         New-DynamicParam -Name Header -Type "string[]" -DPDictionary $Dictionary -HelpMessage "custom headers. i.e. --header 'Accept: value, AnotherHeader: myvalue'"
-        New-DynamicParam -Name QueryParam -Type "string[]" -DPDictionary $Dictionary -HelpMessage "custom query parameters. i.e. --queryParam 'withCustomOption=true,myOtherOption=myvalue'"
+        New-DynamicParam -Name CustomQueryParam -Type "string[]" -DPDictionary $Dictionary -HelpMessage "add custom URL query parameters. i.e. --customQueryParam 'withCustomOption=true,myOtherOption=myvalue'"
 
         $Dictionary
     }

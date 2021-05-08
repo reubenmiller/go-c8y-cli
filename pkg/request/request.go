@@ -670,15 +670,26 @@ func (r *RequestHandler) ProcessResponse(resp *c8y.Response, respError error, co
 		}
 	}
 
-	if resp != nil && respError == nil && resp.Header.Get("Content-Type") == "application/octet-stream" && resp.JSONData != nil {
+	if resp != nil && respError == nil && (r.Config.IsResponseOutput() || resp.Header.Get("Content-Type") == "application/octet-stream") && resp.JSONData != nil {
+		// estimate size based on utf8 encoding. 1 char is 1 byte
+		r.Logger.Debugf("Writing https response output")
+		r.Logger.Infof("Response Length: %0.1fKB", float64(len(*resp.JSONData)*1)/1024)
+		outputEOL := ""
+		if r.IsTerminal {
+			outputEOL = "\n"
+		}
+		out := r.IO.Out
 		if encoding.IsUTF16(*resp.JSONData) {
 			if utf8, err := encoding.DecodeUTF16([]byte(*resp.JSONData)); err == nil {
-				fmt.Printf("%s", utf8)
+				fmt.Fprintf(out, "%s", utf8)
 			} else {
-				fmt.Printf("%s", *resp.JSONData)
+				fmt.Fprintf(out, "%s", *resp.JSONData)
 			}
 		} else {
-			fmt.Printf("%s", *resp.JSONData)
+			fmt.Fprintf(out, "%s", *resp.JSONData)
+		}
+		if outputEOL != "" {
+			fmt.Fprint(out, outputEOL)
 		}
 		return 0, nil
 	}

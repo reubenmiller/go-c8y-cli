@@ -1062,6 +1062,11 @@ func (c *Config) IsCSVOutput() bool {
 	return format == OutputCSV || format == OutputCSVWithHeader
 }
 
+// IsResponseOutput check if raw server response should be used
+func (c *Config) IsResponseOutput() bool {
+	return c.GetOutputFormat() == OutputServerResponse
+}
+
 // EncryptionEnabled enables encryption when storing sensitive session data
 func (c *Config) EncryptionEnabled() bool {
 	return c.viper.GetBool(SettingsEncryptionEnabled)
@@ -1152,7 +1157,7 @@ func (c *Config) GetOutputCommonOptions(cmd *cobra.Command) (CommonCommandOption
 	options.ResultProperty = flags.GetCollectionPropertyFromAnnotation(cmd)
 
 	// Filters and selectors
-	filters := jsonfilter.NewJSONFilters()
+	filters := jsonfilter.NewJSONFilters(c.Logger)
 	filters.AsCSV = c.IsCSVOutput()
 	filters.Flatten = c.FlattenJSON()
 	filters.Pluck = c.GetJSONSelect()
