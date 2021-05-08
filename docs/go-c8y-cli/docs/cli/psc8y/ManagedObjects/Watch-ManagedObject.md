@@ -19,7 +19,7 @@ Watch realtime managedObjects
 ```
 Watch-ManagedObject
 	[[-Device] <Object>]
-	[[-Duration] <Int32>]
+	[[-Duration] <String>]
 	[[-Count] <Int32>]
 	[[-ActionTypes] <String[]>]
 	[<CommonParameters>]
@@ -54,17 +54,18 @@ Accept wildcard characters: False
 ```
 
 ### -Duration
-Start date or date and time of managedObject occurrence.
-(required)
+Duration to subscribe for.
+It accepts a duration, i.e.
+1ms, 0.5s, 1m etc.
 
 ```yaml
-Type: Int32
+Type: String
 Parameter Sets: (All)
-Aliases: DurationSec
+Aliases:
 
 Required: False
 Position: 2
-Default value: 0
+Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
 ```

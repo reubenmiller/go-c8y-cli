@@ -31,7 +31,7 @@ New-Agent
 	[-OutputFileRaw <String>]
 	[-Proxy]
 	[-NoProxy]
-	[-Timeout <Double>]
+	[-Timeout <String>]
 	[-Session <String>]
 	[-SessionUsername <String>]
 	[-SessionPassword <String>]
@@ -51,8 +51,8 @@ New-Agent
 	[-Dry]
 	[-DryFormat <String>]
 	[-Workers <Int32>]
-	[-Delay <Int32>]
-	[-DelayBefore <Int32>]
+	[-Delay <String>]
+	[-DelayBefore <String>]
 	[-MaxJobs <Int32>]
 	[-Progress]
 	[-AbortOnErrors <Int32>]
@@ -61,7 +61,7 @@ New-Agent
 	[-Select <String[]>]
 	[-Filter <String[]>]
 	[-Header <String[]>]
-	[-QueryParam <String[]>]
+	[-CustomQueryParam <String[]>]
 	[<CommonParameters>]
 ```
 
@@ -209,6 +209,23 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
+### -CustomQueryParam
+add custom URL query parameters.
+i.e.
+--customQueryParam 'withCustomOption=true,myOtherOption=myvalue'
+
+```yaml
+Type: String[]
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
 ### -Data
 static data to be applied to body.
 accepts json or shorthande json, i.e.
@@ -227,10 +244,12 @@ Accept wildcard characters: False
 ```
 
 ### -Delay
-delay in milliseconds after each request
+delay after each request.
+It accepts a duration, i.e.
+1ms, 0.5s, 1m etc.
 
 ```yaml
-Type: Int32
+Type: String
 Parameter Sets: (All)
 Aliases:
 
@@ -242,10 +261,12 @@ Accept wildcard characters: False
 ```
 
 ### -DelayBefore
-delay in milliseconds before each request
+delay before each request.
+It accepts a duration, i.e.
+1ms, 0.5s, 1m etc.
 
 ```yaml
-Type: Int32
+Type: String
 Parameter Sets: (All)
 Aliases:
 
@@ -566,23 +587,6 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -QueryParam
-custom query parameters.
-i.e.
---queryParam 'withCustomOption=true,myOtherOption=myvalue'
-
-```yaml
-Type: String[]
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: Named
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
 ### -Raw
 Show raw response.
 This mode will force output=json and view=off
@@ -709,10 +713,12 @@ Accept wildcard characters: False
 ```
 
 ### -Timeout
-Request timeout in seconds
+Request timeout.
+It accepts a duration, i.e.
+1ms, 0.5s, 1m etc.
 
 ```yaml
-Type: Double
+Type: String
 Parameter Sets: (All)
 Aliases:
 
