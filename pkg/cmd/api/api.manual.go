@@ -10,6 +10,7 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmd/subcommand"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmdutil"
+	"github.com/reubenmiller/go-c8y-cli/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/pkg/mapbuilder"
 	"github.com/reubenmiller/go-c8y-cli/pkg/request"
@@ -22,9 +23,12 @@ type CmdAPI struct {
 
 	factory *cmdutil.Factory
 
+	method         string
 	flagHost       string
 	keepProperties bool
 }
+
+var allowedMethods = []string{"GET", "POST", "PUT", "DELETE", "PATCH"}
 
 func NewSubCommand(f *cmdutil.Factory) *CmdAPI {
 	ccmd := &CmdAPI{
@@ -45,10 +49,19 @@ func NewSubCommand(f *cmdutil.Factory) *CmdAPI {
 
 			$ c8y api POST "alarm/alarms" --data "text=one,severity=MAJOR,type=test_Type,time=2019-01-01,source.id='12345'" --keepProperties
 			Create a new alarm
+
+			$ c8y activitylog list --filter "method like POST" | c8y api --method DELETE
+			Get items created via POST from the activity log and delete them 
+
+			$ echo -e "/inventory/1111\n/inventory/2222" | c8y api --method PUT --template "{myScript: {lastUpdated: _.Now() }}"
+			Pipe a list of urls and execute HTTP PUT and use a template to generate the body
 		`),
+		Args: cobra.MaximumNArgs(2),
 		RunE: ccmd.RunE,
 	}
 
+	cmd.Flags().String("url", "", "URL path (accepts pipeline)")
+	cmd.Flags().StringVar(&ccmd.method, "method", "GET", "HTTP method")
 	cmd.Flags().String("file", "", "File to be uploaded as a binary")
 	cmd.Flags().String("accept", "", "accept (header)")
 	cmd.Flags().String("contentType", "", "content type (header)")
@@ -60,6 +73,12 @@ func NewSubCommand(f *cmdutil.Factory) *CmdAPI {
 		cmd,
 		flags.WithData(),
 		flags.WithTemplate(),
+		flags.WithExtendedPipelineSupport("url", "url", false, "self", "responseSelf"),
+	)
+
+	completion.WithOptions(
+		cmd,
+		completion.WithValidateSet("method", "GET", "POST", "DELETE", "PUT"),
 	)
 
 	ccmd.SubCommand = subcommand.NewSubCommand(cmd)
@@ -81,7 +100,7 @@ func (n *CmdAPI) RunE(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	method := "get"
+	method := n.method
 
 	// headers
 	headers := http.Header{}
@@ -100,10 +119,40 @@ func (n *CmdAPI) RunE(cmd *cobra.Command, args []string) error {
 
 	var uri string
 	if len(args) == 1 {
-		uri = args[0]
+		isMethod := false
+		for _, m := range allowedMethods {
+			if strings.EqualFold(m, args[0]) {
+				isMethod = true
+				break
+			}
+		}
+		if isMethod {
+			method = args[0]
+		} else {
+			uri = args[0]
+		}
 	} else if len(args) > 1 {
 		method = args[0]
 		uri = args[1]
+	}
+
+	// path parameters
+	path := flags.NewStringTemplate("{url}")
+
+	// set a default uri to prevent unresolved template variables when
+	// stdin is not being used
+	path.SetVariable("url", uri)
+	err = flags.WithPathParameters(
+		cmd,
+		path,
+		inputIterators,
+		flags.WithStringValue("url", "url"),
+	)
+
+	// path.
+	if err != nil {
+		cfg.Logger.Warn("something is not being detected")
+		return err
 	}
 
 	method = strings.ToUpper(method)

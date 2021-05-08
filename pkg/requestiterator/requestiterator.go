@@ -3,6 +3,7 @@ package requestiterator
 import (
 	"bytes"
 	"errors"
+	"net/url"
 	"os"
 	"reflect"
 	"strings"
@@ -71,6 +72,13 @@ func (r *RequestIterator) GetNext() (*c8y.RequestOptions, interface{}, error) {
 	}
 
 	var inputLine interface{}
+	queryParts := make([]string, 0)
+
+	if v, ok := req.Query.(string); ok {
+		if v != "" {
+			queryParts = append(queryParts, v)
+		}
+	}
 
 	// apply path iterator
 	if r.Path != nil && !reflect.ValueOf(r.Path).IsNil() {
@@ -89,6 +97,13 @@ func (r *RequestIterator) GetNext() (*c8y.RequestOptions, interface{}, error) {
 
 		inputLine = input
 		req.Path = string(path)
+
+		if p, err := url.Parse(req.Path); err == nil {
+			req.Path = p.Path
+			if p.RawQuery != "" {
+				queryParts = append(queryParts, p.RawQuery)
+			}
+		}
 	}
 
 	// apply query iterator
@@ -102,7 +117,11 @@ func (r *RequestIterator) GetNext() (*c8y.RequestOptions, interface{}, error) {
 			return nil, nil, err
 		}
 		inputLine = input
-		req.Query = strings.ReplaceAll(string(q), " ", "+")
+		queryParts = append(queryParts, strings.ReplaceAll(string(q), " ", "+"))
+	}
+
+	if len(queryParts) > 0 {
+		req.Query = strings.Join(queryParts, "&")
 	}
 
 	r.Logger.Debugf("Input line: %s", inputLine)
