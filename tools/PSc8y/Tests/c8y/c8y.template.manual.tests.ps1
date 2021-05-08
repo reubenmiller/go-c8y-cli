@@ -114,4 +114,20 @@ Describe -Name "c8y template" {
             deviceId = "1111"
         }
     }
+
+    It "provides a function to get the path and query from a full url" {
+        $output = "https://example.com/test/me?value=test&value=1" `
+        | c8y template execute --template "{input:: input.value, name: _.GetURLPath(input.value)}" `
+        | ConvertFrom-Json
+
+        $output.name | Should -BeExactly "/test/me?value=test&value=1"
+    }
+
+    It "provides a function to get the scheme and hostname from a full url" {
+        $output = "https://example.com/test/me?value=test&value=1" `
+        | c8y template execute --template "{input:: input.value, name: _.GetURLHost(input.value)}" `
+        | ConvertFrom-Json
+
+        $output.name | Should -BeExactly "https://example.com"
+    }
 }

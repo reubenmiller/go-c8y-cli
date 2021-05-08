@@ -7,6 +7,7 @@ import (
 	"io"
 	"log"
 	"math/rand"
+	"net/url"
 	"os"
 	"strconv"
 	"strings"
@@ -152,6 +153,43 @@ func registerNativeFuntions(vm *jsonnet.VM) {
 			return d.Format(time.RFC3339Nano), nil
 		},
 	})
+
+	vm.NativeFunction(&jsonnet.NativeFunction{
+		Name:   "GetURLPath",
+		Params: ast.Identifiers{"url"},
+		Func: func(parameters []interface{}) (interface{}, error) {
+			uri := getStringParameter(parameters)
+			p, err := url.Parse(uri)
+			if err != nil {
+				return "", err
+			}
+			out := p.EscapedPath()
+			if p.RawQuery != "" {
+				out += "?" + p.RawQuery
+			}
+			return out, nil
+		},
+	})
+
+	vm.NativeFunction(&jsonnet.NativeFunction{
+		Name:   "GetURLHost",
+		Params: ast.Identifiers{"url"},
+		Func: func(parameters []interface{}) (interface{}, error) {
+			uri := getStringParameter(parameters)
+			p, err := url.Parse(uri)
+			if err != nil {
+				return "", err
+			}
+			out := ""
+			if p.Host != "" {
+				if p.Scheme != "" {
+					out = p.Scheme + "://"
+				}
+				out += p.Host
+			}
+			return out, nil
+		},
+	})
 }
 
 func getIntParameter(parameters []interface{}) int64 {
@@ -178,7 +216,7 @@ func evaluateJsonnet(imports string, snippets ...string) (string, error) {
 	vm := jsonnet.MakeVM()
 	registerNativeFuntions(vm)
 
-	jsonnetImport := "\n" + `local _ = {Name: std.native("Name"),Password: std.native("Password"),Now: function(offset='0s') std.native("Now")(offset), NowNano: function(offset='0s') std.native("NowNano")(offset), Bool: std.native("Bool"),Float: std.native("Float"),Int: std.native("Int"),Hex: std.native("Hex"),Char: std.native("Char"),Digit: std.native("Digit"),AlphaNumeric: std.native("AlphaNumeric")};` + imports
+	jsonnetImport := "\n" + `local _ = {Name: std.native("Name"),GetURLPath: std.native("GetURLPath"),GetURLHost: std.native("GetURLHost"),Password: std.native("Password"),Now: function(offset='0s') std.native("Now")(offset), NowNano: function(offset='0s') std.native("NowNano")(offset), Bool: std.native("Bool"),Float: std.native("Float"),Int: std.native("Int"),Hex: std.native("Hex"),Char: std.native("Char"),Digit: std.native("Digit"),AlphaNumeric: std.native("AlphaNumeric")};` + imports
 
 	jsonnetImport += `
 // output
