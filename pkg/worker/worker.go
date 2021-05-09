@@ -66,7 +66,7 @@ func (b *BatchOptions) useInputData() bool {
 	return b.InputData != nil && len(b.InputData) > 0
 }
 
-func NewWorker(log *logger.Logger, cfg *config.Config, iostream *iostreams.IOStreams, client *c8y.Client, activityLog *activitylogger.ActivityLogger, reqHandlerFunc RequestHandler) (*Worker, error) {
+func NewWorker(log *logger.Logger, cfg *config.Config, iostream *iostreams.IOStreams, client *c8y.Client, activityLog *activitylogger.ActivityLogger, reqHandlerFunc RequestHandler, checkError func(error) error) (*Worker, error) {
 	return &Worker{
 		config:         cfg,
 		logger:         log,
@@ -74,6 +74,7 @@ func NewWorker(log *logger.Logger, cfg *config.Config, iostream *iostreams.IOStr
 		activityLogger: activityLog,
 		client:         client,
 		requestHandler: reqHandlerFunc,
+		checkError:     checkError,
 	}, nil
 }
 
@@ -85,6 +86,7 @@ type Worker struct {
 	logger         *logger.Logger
 	client         *c8y.Client
 	activityLogger *activitylogger.ActivityLogger
+	checkError     func(error) error
 
 	requestHandler RequestHandler
 }
@@ -337,7 +339,12 @@ func (w *Worker) runBatched(requestIterator *requestiterator.RequestIterator, co
 		}
 
 		if err != nil && err != io.EOF {
-			totalErrors = append(totalErrors, err)
+
+			// overwrite error
+			err = w.checkError(err)
+			if err != nil {
+				totalErrors = append(totalErrors, err)
+			}
 		}
 		// exit early
 		if batchOptions.AbortOnErrorCount != 0 && len(totalErrors) >= batchOptions.AbortOnErrorCount {

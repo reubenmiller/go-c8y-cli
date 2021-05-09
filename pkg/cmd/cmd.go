@@ -132,8 +132,13 @@ func CheckCommandError(cmd *cobra.Command, f *cmdutil.Factory, err error) error 
 			silentStatusCodes = cfg.GetSilentStatusCodes()
 		}
 		if !cErr.IsSilent() && !strings.Contains(silentStatusCodes, fmt.Sprintf("%d", cErr.StatusCode)) {
-			logg.Errorf("%s", cErr)
-			fmt.Fprintf(w, "%s\n", cErr.JSONString())
+
+			if !cErr.Processed {
+				logg.Errorf("%s", cErr)
+				fmt.Fprintf(w, "%s\n", cErr.JSONString())
+			} else {
+				logg.Debugf("Error has already been logged. %s", cErr)
+			}
 		}
 	} else {
 		// unexpected error

@@ -70,6 +70,7 @@ type CommandError struct {
 	URL             string             `json:"url,omitempty"`
 	CumulocityError *c8y.ErrorResponse `json:"c8yResponse,omitempty"`
 	err             error
+	Processed       bool `json:"-"`
 }
 
 func (c CommandError) Error() string {
@@ -81,6 +82,14 @@ func (c CommandError) Error() string {
 		details = fmt.Sprintf("%s", c.err)
 	}
 	return strings.Join([]string{c.ErrorType + ":", c.Message, details}, " ")
+}
+
+func (c CommandError) ShortError() string {
+	details := ""
+	if c.StatusCode > 0 {
+		details = fmt.Sprintf("statusCode=%d", c.StatusCode)
+	}
+	return strings.Join([]string{c.ErrorType + ":", details, c.Message}, " ")
 }
 
 // IsSilent returns true if the error should be silent

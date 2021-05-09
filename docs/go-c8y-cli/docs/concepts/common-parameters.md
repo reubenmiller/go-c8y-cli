@@ -1024,6 +1024,16 @@ Override session username. i.e. peter or t1234/peter (with tenant)
 
 Status codes which will not print out an error message
 
+:::info
+The status codes will still affect the exit code. If you also want these status codes to cause a non-zero exit code, then also add `--silentExit` to your command.
+:::
+
+---
+
+### silentExit
+
+Silent status codes do not affect the exit code. The status codes will not be treated as an error.
+
 ---
 
 ### timeout

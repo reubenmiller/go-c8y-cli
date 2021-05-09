@@ -1,12 +1,18 @@
 package cmdutil
 
 import (
+	"errors"
+	"fmt"
+	"io/ioutil"
+	"log"
 	"strings"
 
 	"github.com/reubenmiller/go-c8y-cli/pkg/activitylogger"
+	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/pkg/config"
 	"github.com/reubenmiller/go-c8y-cli/pkg/console"
 	"github.com/reubenmiller/go-c8y-cli/pkg/dataview"
+	"github.com/reubenmiller/go-c8y-cli/pkg/encrypt"
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/pkg/iostreams"
 	"github.com/reubenmiller/go-c8y-cli/pkg/jsonformatter"
@@ -137,7 +143,7 @@ func (f *Factory) RunWithWorkers(client *c8y.Client, cmd *cobra.Command, req *c8
 		ActivityLogger: activityLogger,
 		HideSensitive:  cfg.HideSensitiveInformationIfActive,
 	}
-	w, err := worker.NewWorker(log, cfg, f.IOStreams, client, activityLogger, handler.ProcessRequestAndResponse)
+	w, err := worker.NewWorker(log, cfg, f.IOStreams, client, activityLogger, handler.ProcessRequestAndResponse, f.CheckPostCommandError)
 
 	if err != nil {
 		return err
@@ -218,4 +224,84 @@ func (f *Factory) WriteJSONToConsole(cfg *config.Config, cmd *cobra.Command, pro
 		jsonformatter.WithSuffix(len(output) > 0, "\n"),
 	)
 	return nil
+}
+
+func (f *Factory) CheckPostCommandError(err error) error {
+	cfg, configErr := f.Config()
+	if configErr != nil {
+		log.Fatalf("Could not load configuration. %s", configErr)
+	}
+	logg, logErr := f.Logger()
+	if logErr != nil {
+		log.Fatalf("Could not configure logger. %s", logErr)
+	}
+	w := ioutil.Discard
+
+	if errors.Is(err, cmderrors.ErrHelp) {
+		return err
+	}
+
+	// cfg must be
+	if cfg != nil && cfg.WithError() {
+		w = f.IOStreams.Out
+	}
+
+	// consol, consolErr := f.Console()
+	// if consolErr != nil {
+	// 	log.Fatalf("Could not configure console. %s", consolErr)
+	// }
+
+	if errors.Is(err, cmderrors.ErrNoMatchesFound) {
+		// Simulate a 404 error
+		customErr := cmderrors.NewUserErrorWithExitCode(cmderrors.ExitNotFound404, err)
+		customErr.StatusCode = 404
+		err = customErr
+	}
+
+	if errors.Is(err, encrypt.ErrDecryptFailed) {
+		// Decryption error
+		customErr := cmderrors.NewUserErrorWithExitCode(cmderrors.ExitDecryption, err)
+		err = customErr
+	}
+
+	outErr := err
+	if cfg != nil && cfg.GetSilentExit() {
+		outErr = nil
+	}
+	printLogEntries := !cfg.ShowProgress()
+
+	if cErr, ok := err.(cmderrors.CommandError); ok {
+		if cErr.StatusCode == 403 || cErr.StatusCode == 401 {
+			logg.Error(fmt.Sprintf("Authentication failed (statusCode=%d). Try to run set-session again, or check the password", cErr.StatusCode))
+		}
+
+		// format errors as json messages
+		// only log users errors
+		silentStatusCodes := ""
+		if cfg != nil {
+			silentStatusCodes = cfg.GetSilentStatusCodes()
+		}
+		if !cErr.IsSilent() && !strings.Contains(silentStatusCodes, fmt.Sprintf("%d", cErr.StatusCode)) {
+			if printLogEntries {
+				logg.Errorf("%s", cErr)
+			}
+			fmt.Fprintf(w, "%s\n", cErr.JSONString())
+
+			cErr.Processed = true
+			outErr = cErr
+		}
+	} else {
+		// unexpected error
+		cErr := cmderrors.NewSystemErrorF("%s", err)
+		cErr.ExitCode = cmderrors.ExitUserError
+		if printLogEntries {
+			logg.Errorf("%s", cErr)
+		}
+		logg.Debugf("Processing unexpected error. %s, exitCode=%d", err, cErr.ExitCode)
+		fmt.Fprintf(w, "%s\n", cErr.JSONString())
+		cErr.Processed = true
+		outErr = cErr
+	}
+
+	return outErr
 }

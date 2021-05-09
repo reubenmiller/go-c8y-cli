@@ -7,8 +7,8 @@ Describe -Name "New-Event" {
     }
 
     It "Try to create a new event without the text field" {
-        $Response = PSc8y\New-Event -Device $device.id -Type c8y_TestAlarm -ErrorVariable "ErrorMessages"
-        $LASTEXITCODE | Should -Not -Be 0
+        $ErrorMessages = $( $Response = PSc8y\New-Event -Device $device.id -Type c8y_TestAlarm -Force ) 2>&1
+        $LASTEXITCODE | Should -Be 101
         $Response | Should -BeNullOrEmpty
         $ErrorMessages[-1] -match "Body is missing required properties: text" | Should -HaveCount 1
     }
@@ -31,12 +31,12 @@ Describe -Name "New-Event" {
             Device = $device.id
             Type = "c8y_TestAlarm"
             Template = "{customText: 'my custom text'}"
-            ErrorVariable = "ErrorMessages"
         }
-        $Response = PSc8y\New-Event @options
-        $LASTEXITCODE | Should -Not -Be 0
+        $stderr = $( $Response = PSc8y\New-Event @options ) 2>&1
+        $LASTEXITCODE | Should -Be 101
         $Response | Should -BeNullOrEmpty
-        $ErrorMessages[-1] -match "Body is missing required properties: text" | Should -HaveCount 1
+        $stderr | Should -HaveCount 1
+        $stderr | Should -Match "Body is missing required properties: text"
     }
 
     AfterEach {

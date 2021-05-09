@@ -208,6 +208,9 @@ const (
 	// SettingsSilentStatusCodes Status codes which will not print out an error message
 	SettingsSilentStatusCodes = "settings.defaults.silentStatusCodes"
 
+	// SettingsSilentExit silent status codes don't affect the exit code
+	SettingsSilentExit = "settings.defaults.silentExit"
+
 	// SettingsSessionFile Session file to use for api authentication
 	SettingsSessionFile = "settings.defaults.session"
 
@@ -1138,6 +1141,11 @@ func (c *Config) GetSilentStatusCodes() string {
 	return c.viper.GetString(SettingsSilentStatusCodes)
 }
 
+// GetSilentExit silent status codes don't affect the exit code
+func (c *Config) GetSilentExit() bool {
+	return c.viper.GetBool(SettingsSilentExit)
+}
+
 // GetLoginType get the preferred login type
 func (c *Config) GetLoginType() string {
 	return c.viper.GetString(SettingsLoginType)
@@ -1293,7 +1301,7 @@ func (c *Config) ExpandHomePath(path string) string {
 // LogErrorF dynamically changes where the error is logged based on the users Silent Status Codes preferences
 // Silent errors are only logged on the INFO level, where as non-silent errors are logged on the ERROR level
 func (c *Config) LogErrorF(err error, format string, args ...interface{}) {
-	errorLogger := c.Logger.Errorf
+	errorLogger := c.Logger.Infof
 	silentStatusCodes := c.GetSilentStatusCodes()
 	if errors.Is(err, cmderrors.ErrNoMatchesFound) {
 		if strings.Contains(silentStatusCodes, "404") {
