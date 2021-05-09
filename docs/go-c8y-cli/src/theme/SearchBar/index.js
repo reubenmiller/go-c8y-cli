@@ -66,7 +66,10 @@ const Search = props => {
         searchBarRef.current.focus();
       }
 
-      props.handleSearchBarToggle(!props.isSearchBarExpanded);
+      const searchToggle = props.handleSearchBarToggle;
+      if (searchToggle && {}.toString.call(searchToggle) === '[object Function]') {
+        props.handleSearchBarToggle(!props.isSearchBarExpanded);
+      }
     },
     [props.isSearchBarExpanded]
   );
