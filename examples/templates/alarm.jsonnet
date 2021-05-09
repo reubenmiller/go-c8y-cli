@@ -4,7 +4,7 @@ local type() = ["c8y_temperature", "c8y_sensor"][_.Int(2)];
 
 {    
     // Measurement (other fields will be added)
-    severity: severity(rand.int % 4),
+    severity: severity(_.Int(4)),
     text: text(),
-    type: type() + (rand.int % 4),
+    type: type() + (_.Int(4)),
 }
