@@ -89,21 +89,24 @@ func (f *Factory) WithTemplateFlag(cmd *cobra.Command) flags.Option {
 				return nil, cobra.ShellCompDirectiveNoSpace
 			}
 
-			templateFile := ""
+			template := templateFlag
 			if len(matches) > 0 {
-				templateFile = matches[0]
+				template = matches[0]
 			}
 
-			if strings.TrimSpace(templateFile) == "" {
+			if strings.TrimSpace(template) == "" {
 				return nil, cobra.ShellCompDirectiveNoSpace
 			}
 
-			file, err := os.Open(templateFile)
+			var scanner *bufio.Scanner
+			file, err := os.Open(template)
 			if err != nil {
-				return []string{err.Error()}, cobra.ShellCompDirectiveNoSpace
+				// assume template is a string
+				scanner = bufio.NewScanner(strings.NewReader(template))
+			} else {
+				scanner = bufio.NewScanner(file)
 			}
 
-			scanner := bufio.NewScanner(file)
 			pattern := regexp.MustCompile(`var\(['"](.+?)['"](\s*,\s*["']?([^"'\(\)]+)['"]?)?`)
 			variableNames := make(map[string]string)
 			values := []string{}
