@@ -62,7 +62,7 @@ Describe -Name "c8y errors" {
             $retries = 3
             $exitCode = $null
             do {
-            $output = c8y devices list --timeout "0.001s" --withError
+                $output = c8y devices list --timeout "1ms" --withError
                 $exitCode = $LASTEXITCODE
 
                 if ($exitCode -eq 106) {
