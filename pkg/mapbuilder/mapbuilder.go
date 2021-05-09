@@ -45,24 +45,18 @@ func registerNativeFuntions(vm *jsonnet.VM) {
 		Name:   "Name",
 		Params: ast.Identifiers{"prefix", "postfix"},
 		Func: func(parameters []interface{}) (interface{}, error) {
-			if len(parameters) == 0 {
-				return randdata.Name(), nil
-			}
-			if len(parameters) == 1 {
-				return randdata.Name(parameters[0].(string)), nil
-			}
-			if len(parameters) > 1 {
-				return randdata.Name(parameters[0].(string), parameters[1].(string)), nil
-			}
-			return randdata.Name(), nil
+			prefix := getStringParameter(parameters, 0)
+			postfix := getStringParameter(parameters, 1)
+			return randdata.Name(prefix, postfix), nil
 		},
 	})
 
 	vm.NativeFunction(&jsonnet.NativeFunction{
 		Name:   "Password",
-		Params: ast.Identifiers{},
+		Params: ast.Identifiers{"length"},
 		Func: func(parameters []interface{}) (interface{}, error) {
-			return randdata.Password(), nil
+			length := getIntParameter(parameters, 0)
+			return randdata.Password(int(length)), nil
 		},
 	})
 
@@ -76,18 +70,22 @@ func registerNativeFuntions(vm *jsonnet.VM) {
 
 	vm.NativeFunction(&jsonnet.NativeFunction{
 		Name:   "Int",
-		Params: ast.Identifiers{"maximum"},
+		Params: ast.Identifiers{"max", "min"},
 		Func: func(parameters []interface{}) (interface{}, error) {
-			max := getIntParameter(parameters)
-			return float64(randdata.Integer(max)), nil
+			max := getIntParameter(parameters, 0)
+			min := getIntParameter(parameters, 1)
+			return float64(randdata.Integer(max, min)), nil
 		},
 	})
 
 	vm.NativeFunction(&jsonnet.NativeFunction{
 		Name:   "Float",
-		Params: ast.Identifiers{},
+		Params: ast.Identifiers{"max", "min", "precision"},
 		Func: func(parameters []interface{}) (interface{}, error) {
-			return randdata.Float(), nil
+			max := getFloatParameter(parameters, 0)
+			min := getFloatParameter(parameters, 1)
+			precision := getIntParameter(parameters, 2)
+			return randdata.Float(max, min, int(precision)), nil
 		},
 	})
 
@@ -95,7 +93,7 @@ func registerNativeFuntions(vm *jsonnet.VM) {
 		Name:   "Char",
 		Params: ast.Identifiers{"maximum"},
 		Func: func(parameters []interface{}) (interface{}, error) {
-			max := getIntParameter(parameters)
+			max := getIntParameter(parameters, 0)
 			return randdata.Char(int(max)), nil
 		},
 	})
@@ -104,7 +102,7 @@ func registerNativeFuntions(vm *jsonnet.VM) {
 		Name:   "Digit",
 		Params: ast.Identifiers{"maximum"},
 		Func: func(parameters []interface{}) (interface{}, error) {
-			max := getIntParameter(parameters)
+			max := getIntParameter(parameters, 0)
 			return randdata.Digit(int(max)), nil
 		},
 	})
@@ -113,7 +111,7 @@ func registerNativeFuntions(vm *jsonnet.VM) {
 		Name:   "AlphaNumeric",
 		Params: ast.Identifiers{"maximum"},
 		Func: func(parameters []interface{}) (interface{}, error) {
-			max := getIntParameter(parameters)
+			max := getIntParameter(parameters, 0)
 			return randdata.AlphaNumeric(int(max)), nil
 		},
 	})
@@ -122,7 +120,7 @@ func registerNativeFuntions(vm *jsonnet.VM) {
 		Name:   "Hex",
 		Params: ast.Identifiers{"maximum"},
 		Func: func(parameters []interface{}) (interface{}, error) {
-			max := getIntParameter(parameters)
+			max := getIntParameter(parameters, 0)
 			return randdata.Hex(int(max)), nil
 		},
 	})
@@ -132,7 +130,7 @@ func registerNativeFuntions(vm *jsonnet.VM) {
 		Params: ast.Identifiers{"offset"},
 		Func: func(parameters []interface{}) (interface{}, error) {
 
-			d, err := timestamp.ParseTimestamp(getStringParameter(parameters))
+			d, err := timestamp.ParseTimestamp(getStringParameter(parameters, 0))
 			if err != nil {
 				return nil, err
 			}
@@ -146,7 +144,7 @@ func registerNativeFuntions(vm *jsonnet.VM) {
 		Params: ast.Identifiers{"offset"},
 		Func: func(parameters []interface{}) (interface{}, error) {
 
-			d, err := timestamp.ParseTimestamp(getStringParameter(parameters))
+			d, err := timestamp.ParseTimestamp(getStringParameter(parameters, 0))
 			if err != nil {
 				return nil, err
 			}
@@ -158,7 +156,7 @@ func registerNativeFuntions(vm *jsonnet.VM) {
 		Name:   "GetURLPath",
 		Params: ast.Identifiers{"url"},
 		Func: func(parameters []interface{}) (interface{}, error) {
-			uri := getStringParameter(parameters)
+			uri := getStringParameter(parameters, 0)
 			p, err := url.Parse(uri)
 			if err != nil {
 				return "", err
@@ -175,7 +173,7 @@ func registerNativeFuntions(vm *jsonnet.VM) {
 		Name:   "GetURLHost",
 		Params: ast.Identifiers{"url"},
 		Func: func(parameters []interface{}) (interface{}, error) {
-			uri := getStringParameter(parameters)
+			uri := getStringParameter(parameters, 0)
 			p, err := url.Parse(uri)
 			if err != nil {
 				return "", err
@@ -192,9 +190,9 @@ func registerNativeFuntions(vm *jsonnet.VM) {
 	})
 }
 
-func getIntParameter(parameters []interface{}) int64 {
-	if len(parameters) > 0 {
-		maximum, err := strconv.ParseInt(fmt.Sprintf("%v", parameters[0]), 10, 64)
+func getIntParameter(parameters []interface{}, i int) int64 {
+	if len(parameters) > 0 && i < len(parameters) {
+		maximum, err := strconv.ParseInt(fmt.Sprintf("%v", parameters[i]), 10, 64)
 
 		if err != nil {
 			return 0
@@ -204,11 +202,39 @@ func getIntParameter(parameters []interface{}) int64 {
 	return 0
 }
 
-func getStringParameter(parameters []interface{}) string {
-	if len(parameters) > 0 {
-		return fmt.Sprintf("%v", parameters[0])
+func getFloatParameter(parameters []interface{}, i int) float64 {
+	if len(parameters) > 0 && i < len(parameters) {
+		value, err := strconv.ParseFloat(fmt.Sprintf("%v", parameters[i]), 64)
+
+		if err != nil {
+			return 0
+		}
+		return value
+	}
+	return 0
+}
+
+func getStringParameter(parameters []interface{}, i int) string {
+	if len(parameters) > 0 && i < len(parameters) {
+		return fmt.Sprintf("%v", parameters[i])
 	}
 	return ""
+}
+
+var customJSONNetFunctions = []string{
+	`Name: function(prefix='',postfix='') std.native("Name")(prefix,postfix)`,
+	`GetURLPath: std.native("GetURLPath")`,
+	`GetURLHost: std.native("GetURLHost")`,
+	`Password: function(length=32) std.native("Password")(length)`,
+	`Now: function(offset='0s') std.native("Now")(offset)`,
+	`NowNano: function(offset='0s') std.native("NowNano")(offset)`,
+	`Bool: std.native("Bool")`,
+	`Float: function(max=1,min=0,precision=4) std.native("Float")(max,min,precision)`,
+	`Int: function(max=100,min=0) std.native("Int")(max,min)`,
+	`Hex: function(max=16) std.native("Hex")(max)`,
+	`Char: function(max=16) std.native("Char")(max)`,
+	`Digit: function(max=16) std.native("Digit")(max)`,
+	`AlphaNumeric: function(max=16) std.native("AlphaNumeric")(max)`,
 }
 
 func evaluateJsonnet(imports string, snippets ...string) (string, error) {
@@ -216,7 +242,7 @@ func evaluateJsonnet(imports string, snippets ...string) (string, error) {
 	vm := jsonnet.MakeVM()
 	registerNativeFuntions(vm)
 
-	jsonnetImport := "\n" + `local _ = {Name: std.native("Name"),GetURLPath: std.native("GetURLPath"),GetURLHost: std.native("GetURLHost"),Password: std.native("Password"),Now: function(offset='0s') std.native("Now")(offset), NowNano: function(offset='0s') std.native("NowNano")(offset), Bool: std.native("Bool"),Float: std.native("Float"),Int: std.native("Int"),Hex: std.native("Hex"),Char: std.native("Char"),Digit: std.native("Digit"),AlphaNumeric: std.native("AlphaNumeric")};` + imports
+	jsonnetImport := "\n" + "local _ = {" + strings.Join(customJSONNetFunctions, ",") + "};" + imports
 
 	jsonnetImport += `
 // output
@@ -410,7 +436,7 @@ func (b *MapBuilder) getTemplateVariablesJsonnet(existingJSON []byte, input []by
 		rand.Float32(),
 		rand.Float32(),
 		rand.Float32(),
-		randdata.Password(),
+		randdata.Password(32),
 	)
 
 	index := "1"

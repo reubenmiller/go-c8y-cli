@@ -6,7 +6,7 @@ import (
 )
 
 func Name(opts ...string) string {
-	value := Password()
+	value := Password(16)
 	if len(opts) == 0 {
 		return value
 	}

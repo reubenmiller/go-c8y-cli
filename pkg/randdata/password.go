@@ -2,7 +2,10 @@ package randdata
 
 import "github.com/sethvargo/go-password/password"
 
-func Password() string {
+func Password(total int) string {
+	if total <= 4 {
+		total = 32
+	}
 	passwordGen, err := password.NewGenerator(&password.GeneratorInput{
 		Symbols: "!@#%^()[]*+-_;,.",
 	})
@@ -11,7 +14,7 @@ func Password() string {
 		return ""
 	}
 
-	if res, err := passwordGen.Generate(32, 2, 2, false, false); err == nil {
+	if res, err := passwordGen.Generate(total, 2, 2, false, false); err == nil {
 		return res
 	}
 
