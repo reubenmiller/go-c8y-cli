@@ -212,6 +212,12 @@ var updateSettingsOptions = map[string]argumentHandler{
 		"none",
 	}, TransformReplaceAll(",", " "), cobra.ShellCompDirectiveNoFileComp},
 
+	// silentExit
+	"defaults.silentExit": {"defaults.silentExit", "bool", "settings.defaults.silentExit", []string{
+		"true",
+		"false",
+	}, nil, cobra.ShellCompDirectiveNoFileComp},
+
 	// timeout (in seconds)
 	"defaults.timeout": {"defaults.timeout", "int", "settings.defaults.timeout", []string{
 		"0",
