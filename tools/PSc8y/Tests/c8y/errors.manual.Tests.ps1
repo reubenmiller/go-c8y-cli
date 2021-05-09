@@ -59,8 +59,21 @@ Describe -Name "c8y errors" {
         }
 
         It "returns a timeout error" {
+            $retries = 3
+            $exitCode = $null
+            do {
             $output = c8y devices list --timeout "0.001s" --withError
-            $LASTEXITCODE | Should -Be 106
+                $exitCode = $LASTEXITCODE
+
+                if ($exitCode -eq 106) {
+                    break
+                }
+                $retries -= 1
+                Start-Sleep -Seconds 1
+                
+            } while ($retries -gt 0)
+
+            $exitCode | Should -Be 106
 
             $output | Should -Not -BeNullOrEmpty
             $details = ConvertFrom-Json $output -Depth 100
