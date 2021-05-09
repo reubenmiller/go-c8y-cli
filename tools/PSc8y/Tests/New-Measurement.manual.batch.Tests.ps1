@@ -56,7 +56,7 @@ Describe -Name "New-Measurement" {
 
         @"
 {
-"time": time.now,
+"time": _.Now(),
 "type": "myType",
 "c8y_MyCustomFragment": {},
 "c8y_Sensors": {

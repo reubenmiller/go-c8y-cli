@@ -9,13 +9,37 @@ Describe -Name "c8y template" {
     }
 
     It "provides relative time functions" {
-        $output = c8y template execute --template "{now: _.Now(), nowRelative: _.Now('-1h'), nowNano: _.NowNano(), nowNanoRelative: _.NowNano('-10d')}"
+        $output = c8y template execute --template "{now: _.Now(), randomNow: _.Now('-' + _.Int(10,60) + 'd'), nowRelative: _.Now('-1h'), nowNano: _.NowNano(), nowNanoRelative: _.NowNano('-10d')}"
         $LASTEXITCODE | Should -Be 0
         $data = $output | ConvertFrom-Json
         Get-Date $data.now | Should -Not -BeNullOrEmpty
+        Get-Date $data.randomNow | Should -Not -BeNullOrEmpty
         Get-Date $data.nowRelative | Should -Not -BeNullOrEmpty
         Get-Date $data.nowNano | Should -Not -BeNullOrEmpty
         Get-Date $data.nowNanoRelative | Should -Not -BeNullOrEmpty
+    }
+
+    It "provides random number generators" {
+        $output = c8y template execute --template "{int: _.Int(), int2: _.Int(-20), int3: _.Int(-50,-59), float: _.Float(), float2: _.Float(10), float3: _.Float(40, 45)}"
+        $LASTEXITCODE | Should -Be 0
+        $data = $output | ConvertFrom-Json
+        $data.int | Should -BeGreaterOrEqual 0
+        $data.int | Should -BeLessThan 100
+
+        $data.int2 | Should -BeGreaterOrEqual -20
+        $data.int2 | Should -BeLessThan 0
+
+        $data.int3 | Should -BeGreaterOrEqual -59
+        $data.int3 | Should -BeLessThan -50
+
+        $data.float | Should -BeGreaterOrEqual 0
+        $data.float | Should -BeLessThan 1
+
+        $data.float2 | Should -BeGreaterOrEqual 0
+        $data.float2 | Should -BeLessThan 10
+
+        $data.float3 | Should -BeGreaterOrEqual 40
+        $data.float3 | Should -BeLessThan 45
     }
 
     It "combines explicit arguments with data and templates parameters" {

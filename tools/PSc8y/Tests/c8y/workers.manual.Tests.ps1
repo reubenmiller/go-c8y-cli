@@ -95,7 +95,7 @@ Describe -Name "c8y pipes" {
             $c8yargs = @(
                 "--delay", "500",
                 "--workers", "2",
-                "--template", "{time: time.nowNano, type: 'type_' + input.index ,c8y_TestMeasurement:{temperature:{value:rand.float,unit:'°C'}}}"
+                "--template", "{time: _.NowNano(), type: 'type_' + input.index ,c8y_TestMeasurement:{temperature:{value:_.Float(),unit:'°C'}}}"
             )
             $output = $DeviceList.id | c8y measurements create $c8yargs
             $LASTEXITCODE | Should -BeExactly 0
@@ -111,7 +111,7 @@ Describe -Name "c8y pipes" {
             $c8yargs = @(
                 "--delay", "500",
                 "--workers", "2",
-                "--template", "{time: time.nowNano, type: 'type_' + input.index, text: std.format('custom event %03d', input.index) }"
+                "--template", "{time: _.NowNano(), type: 'type_' + input.index, text: std.format('custom event %03d', input.index) }"
             )
             $output = $DeviceList.id | c8y events create $c8yargs
             $LASTEXITCODE | Should -BeExactly 0
@@ -127,7 +127,7 @@ Describe -Name "c8y pipes" {
             $c8yargs = @(
                 "--delay", "500",
                 "--workers", "2",
-                "--template", "{time: time.nowNano, type: 'type_' + input.index, text: std.format('custom event %03d', input.index) }"
+                "--template", "{time: _.NowNano(), type: 'type_' + input.index, text: std.format('custom event %03d', input.index) }"
             )
             # Create
             $events = $DeviceList `
@@ -176,7 +176,7 @@ Describe -Name "c8y pipes" {
                 "--delay", "500",
                 "--workers", "2",
                 # -Type c8y_TestAlarm -Time "-0s" -Text "Test alarm" -Severity MAJOR
-                "--template", "{time: time.nowNano, type: '$alarmType' + input.index, severity: 'MAJOR', text: std.format('custom alarm %03d', input.index) }"
+                "--template", "{time: _.NowNano(), type: '$alarmType' + input.index, severity: 'MAJOR', text: std.format('custom alarm %03d', input.index) }"
             )
             # Create
             $alarms = $DeviceList `
