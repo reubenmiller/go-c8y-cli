@@ -45,13 +45,13 @@ const CodeExample = ({ transform = true, ...props }) => {
                 </CodeBlock>
             </TabItem>
 
-            <TabItem value="powershell_native">
+            <TabItem value="powershell">
                 <CodeBlock render={false} className={"powershell"} transform={false}>
                     {child2}
                 </CodeBlock>
             </TabItem>
 
-            <TabItem value="powershell">
+            <TabItem value="powershell_psc8y">
                 <CodeBlock render={false} className={"powershell"} transform={transform}>
                     {child3}
                 </CodeBlock>

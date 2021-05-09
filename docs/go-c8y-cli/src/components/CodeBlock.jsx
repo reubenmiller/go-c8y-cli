@@ -45,16 +45,19 @@ const c8yCommands = {
     'c8y devices delete': 'Remove-Device',
     'c8y devices setRequiredAvailability': 'Set-DeviceRequiredAvailability',
 
+    'c8y inventory create': 'New-ManagedObject',
     'c8y inventory update': 'Update-ManagedObject',
     'c8y inventory list': 'Get-ManagedObjectCollection',
     'c8y inventory find': 'Find-ManagedObjectCollection',
     'c8y inventory findByText': 'Find-ByTextManagedObjectCollection',
 
+    'c8y devicegroups create': 'New-DeviceGroup',
     'c8y devicegroups list': 'Get-DeviceGroupCollection',
     'c8y devicegroups assignDevice': 'Add-DeviceToGroup',
     'c8y devicegroups unassignDevice': 'Remove-DeviceFromGroup',
     'c8y devicegroups listAssets': 'Get-DeviceGroupChildAssetCollection',
     
+    'c8y applications create': 'New-Application',
     'c8y applications createHostedApplication': 'New-HostedApplication',
     'c8y applications list': 'Get-ApplicationCollection',
     'c8y applications get': 'Get-Application',
