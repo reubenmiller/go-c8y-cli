@@ -76,6 +76,8 @@ const c8yCommands = {
     'c8y microservices enable': 'Enable-Microservice',
     'c8y microservices disable': 'Disable-Microservice',
     'c8y microservices getBootstrapUser': 'Get-MicroserviceBootstrapUser',
+
+    'c8y template execute': 'Invoke-Template',
     
     'c8y sessions create': 'New-Session',
     'c8y currentuser get': 'Get-CurrentUser',
