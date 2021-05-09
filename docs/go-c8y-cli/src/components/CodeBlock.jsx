@@ -23,6 +23,9 @@ const c8yCommands = {
     'c8y events subscribe': 'Watch-Event',
     'c8y events list': 'Get-EventCollection',
 
+    // measurements
+    'c8y measurements create': 'New-Measurement',
+
     // operations
     'c8y operations create': 'New-Operation',
     'c8y operations get': 'Get-Operation',
