@@ -156,7 +156,7 @@ Cancel operations which are currently in EXECUTING status
                     -FailureReason "Manually cancelled" `
                     -Force:$Force `
                     -Verbose:$VerbosePreference `
-                    -WhatIf:$WhatIfPreference
+                    -Dry:$WhatIfPreference
             } else {
                 Write-Warning ("Device [{0} ({1})] does not have any operations in [$Status] status" -f @(
                     $iDevice.name,

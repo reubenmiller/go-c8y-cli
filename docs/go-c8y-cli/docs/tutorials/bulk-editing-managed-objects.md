@@ -40,7 +40,7 @@ Rename incorrect devices be removing the prefix from the name.
 
 3. Create your update command which will update the name of the device
 
-    Now that you have refined the data that you want to edit, but don't execute the command just yet. This is where the `-WhatIf` parameter is very useful!
+    Now that you have refined the data that you want to edit, but don't execute the command just yet. This is where the `-Dry` parameter is very useful!
 
     Since we are not just setting the name of the device, we actually want to update the name of the device based on the existing name, therefore we need to pipe to the `ForEach-Object` so that we can use the PowerShell `-replace` operator to remove the "MQTT Device " text from the current name.
 
@@ -50,7 +50,7 @@ Rename incorrect devices be removing the prefix from the name.
             -Id $_.id `
             -Data @{
                 name = $_.name -replace "MQTT Device ", ""
-            } -WhatIf
+            } -Dry
     }
     ```
 
