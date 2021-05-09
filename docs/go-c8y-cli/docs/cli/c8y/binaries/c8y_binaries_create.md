@@ -18,7 +18,7 @@ c8y binaries create [flags]
 $ c8y binaries create --file ./output.log
 Upload a log file
 
-$ c8y binaries create --file "myConfig.json" --data "c8y_Global={},type=c8y_upload"
+$ c8y binaries create --file "myConfig.json" --type c8y_upload --data "c8y_Global={}"
 Upload a config file and make it globally accessible for all users
         
 ```
@@ -32,6 +32,7 @@ Upload a config file and make it globally accessible for all users
       --processingMode string   Cumulocity processing mode
       --template string         Body template
       --templateVars string     Body template variables
+      --type string             Custom type. If left blank, the MIME type will be detected from the file extension
 ```
 
 ### Options inherited from parent commands
@@ -72,6 +73,7 @@ Upload a config file and make it globally accessible for all users
       --session string             Session configuration
   -P, --sessionPassword string     Override session password
   -U, --sessionUsername string     Override session username. i.e. peter or t1234/peter (with tenant)
+      --silentExit                 Silent status codes do not affect the exit code
       --silentStatusCodes string   Status codes which will not print out an error message
       --timeout string             Request timeout duration, i.e. 60s, 2m (default "60s")
       --totalPages int             Total number of pages to get

@@ -19,6 +19,7 @@ Create binary
 ```
 New-Binary
 	[-File] <String>
+	[[-Type] <String>]
 	[-Data <Object>]
 	[-NoAccept]
 	[-ProcessingMode <String>]
@@ -47,6 +48,7 @@ New-Binary
 	[-ConfirmText <String>]
 	[-WithError]
 	[-SilentStatusCodes <String>]
+	[-SilentExit]
 	[-Dry]
 	[-DryFormat <String>]
 	[-Workers <Int32>]
@@ -78,7 +80,7 @@ Upload a log file
 
 ### EXAMPLE 2
 ```
-New-Binary -File $File -Data @{ c8y_Global = @{}; type = "c8y_upload" }
+New-Binary -File $File -Type "c8y_upload" -Data @{ c8y_Global = @{} }
 ```
 
 Upload a config file and make it globally accessible for all users
@@ -95,6 +97,22 @@ Aliases:
 
 Required: True
 Position: 1
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -Type
+Custom type.
+If left blank, the MIME type will be detected from the file extension
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 2
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
@@ -639,6 +657,21 @@ peter or t1234/peter (with tenant)
 
 ```yaml
 Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -SilentExit
+Silent status codes do not affect the exit code
+
+```yaml
+Type: SwitchParameter
 Parameter Sets: (All)
 Aliases:
 

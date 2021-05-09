@@ -73,6 +73,7 @@ Get a list of users
       --session string             Session configuration
   -P, --sessionPassword string     Override session password
   -U, --sessionUsername string     Override session username. i.e. peter or t1234/peter (with tenant)
+      --silentExit                 Silent status codes do not affect the exit code
       --silentStatusCodes string   Status codes which will not print out an error message
       --timeout string             Request timeout duration, i.e. 60s, 2m (default "60s")
       --totalPages int             Total number of pages to get

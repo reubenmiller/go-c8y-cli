@@ -24,6 +24,12 @@ Get a list of alarms with custom query parameters
 $ c8y api POST "alarm/alarms" --data "text=one,severity=MAJOR,type=test_Type,time=2019-01-01,source.id='12345'" --keepProperties
 Create a new alarm
 
+$ c8y activitylog list --filter "method like POST" | c8y api --method DELETE
+Get items created via POST from the activity log and delete them 
+
+$ echo -e "/inventory/1111\n/inventory/2222" | c8y api --method PUT --template "{myScript: {lastUpdated: _.Now() }}"
+Pipe a list of urls and execute HTTP PUT and use a template to generate the body
+
 ```
 
 ### Options
@@ -37,8 +43,10 @@ Create a new alarm
   -h, --help                  help for api
       --host string           host to use for the rest request. If empty, then the session's host will be used
       --keepProperties        Don't strip Cumulocity properties from the data property, i.e. source etc. (default true)
+      --method string         HTTP method (default "GET")
       --template string       Body template
       --templateVars string   Body template variables
+      --url string            URL path (accepts pipeline)
 ```
 
 ### Options inherited from parent commands
@@ -79,6 +87,7 @@ Create a new alarm
       --session string             Session configuration
   -P, --sessionPassword string     Override session password
   -U, --sessionUsername string     Override session username. i.e. peter or t1234/peter (with tenant)
+      --silentExit                 Silent status codes do not affect the exit code
       --silentStatusCodes string   Status codes which will not print out an error message
       --timeout string             Request timeout duration, i.e. 60s, 2m (default "60s")
       --totalPages int             Total number of pages to get

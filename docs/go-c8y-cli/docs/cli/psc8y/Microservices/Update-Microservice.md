@@ -51,6 +51,7 @@ Update-Microservice
 	[-ConfirmText <String>]
 	[-WithError]
 	[-SilentStatusCodes <String>]
+	[-SilentExit]
 	[-Dry]
 	[-DryFormat <String>]
 	[-Workers <Int32>]
@@ -698,6 +699,21 @@ peter or t1234/peter (with tenant)
 
 ```yaml
 Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -SilentExit
+Silent status codes do not affect the exit code
+
+```yaml
+Type: SwitchParameter
 Parameter Sets: (All)
 Aliases:
 
