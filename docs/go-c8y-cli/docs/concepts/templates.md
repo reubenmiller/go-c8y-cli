@@ -159,14 +159,14 @@ c8y inventory create \
 }
 ```
 
-## Helper Functions (injected by go-c8y-cli)
+## Template Functions (added by go-c8y-cli)
 
-Below lists the functions which are available for use in jsonnet template files. These variables are added by the c8y cli tool itself, and are not part of the standard jsonnet library.
+Below lists the additional functions which are available in jsonnet template files. These functions are added to your template automatically by the c8y cli tool itself, and are not part of the standard jsonnet library. The built-in [jsonnet standard library](https://jsonnet.org/ref/stdlib.html) provides additional functions that can be used in combination with those injected by go-c8y-cli.
 
 
 | Function | Description | Example |
 |----------|-------------|---------|
-|var(name, [defaultValue])|Reference a template variable from the `templateVars` cli parameter| `var('name', 'server01')` | 
+|var(name, [defaultValue])|Reference a template variable from the `templateVars` cli parameter| **value of variable** |
 |_.GetURLPath(url)| Get the URL path from a string | `/test?pageSize=1` |
 |_.GetURLHost(url)| Get the hostname from a string | `https://example.com` |
 |_.Int([max=100],[min=0])| Random integer (int64) between min and (max - 1) inclusive | `42` |
