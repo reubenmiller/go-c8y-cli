@@ -21,12 +21,13 @@ The c8y cli tool supports interacting with Cumulocity's paging, and provides a f
 
 The following command line arguments are supported by all collection related commands.
 
-| PSc8y | c8y | Description |
-|-------|---------|---------|
-| `-PageSize` | `--pageSize` | Set the maximum number of results included in the response. Limited to 2000 by the server. |
-| `-CurrentPage` | `--currentPage` | Page number (or slice) of the results which should be returned. Defaults to 1. |
-| `-TotalPages` | `--totalPages` | Total number of pages to return. The pages will be collected serially starting from the `currentPage`  |
-| `-IncludeAll` | `--includeAll` | Include all pages from the collection. IncludeAll will automatically set the pageSize to the maximum value `2000` regardless what value was given to `pageSize` |
+| Parameter | Description |
+|-----------|-------------|
+| `pageSize <int>` | Set the maximum number of results included in the response. Limited to 2000 by the server. |
+| `currentPage <int>` | Page number (or slice) of the results which should be returned. Defaults to 1. |
+| `totalPages <int>` | Total number of pages to return. The pages will be collected serially starting from the `currentPage`  |
+| `includeAll` | Include all pages from the collection. IncludeAll will automatically set the pageSize to the maximum value `2000` regardless what value was given to `pageSize` |
+| `withTotalPages` | Request that Cumulocity add the `.statistics.totalPages` value to the response |
 
 
 A few examples will now be detailed to clarify the usage of the parameters in real life scenarios.

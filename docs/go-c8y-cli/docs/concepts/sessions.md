@@ -396,12 +396,10 @@ Cloning an existing session is convenient when you a group of tenants (i.e. dev,
 Remember it is best practice to use different passwords for different sessions!
 :::
 
-### Changing mode of the existing session
+### Changing mode of the existing session until next set-session
 
 The mode can be updated on the existing profile using
 #### Change mode until next set-session
-
-Changing the mode
 
 If you installed the addons then there are some helpers to set the mode temporarily until the session is changed.
 
@@ -417,7 +415,7 @@ set-c8ymode-dev
 
 </CodeExample>
 
-#### Permanent
+#### Changing the mode permanently
 
 <CodeExample transform="false">
 
