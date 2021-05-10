@@ -424,7 +424,7 @@
               "New-EventBinary -Id $Event.id -File $TestFile",
               "Remove-Item $TestFile"
             ],
-            "command": "Get-EventBinary -Id $Event.id -OutputFile ./eventbinary.txt",
+            "command": "Get-EventBinary -Id $Event.id -OutputFileRaw ./eventbinary.txt",
             "afterEach": [
               "Remove-Item \"./eventbinary.txt\"",
               "Remove-ManagedObject -Id $Device.id"
@@ -434,7 +434,7 @@
         "go": [
           {
             "description": "Download a binary related to an event",
-            "command": "c8y events downloadBinary --id 12345 --outputFile ./eventbinary.txt"
+            "command": "c8y events downloadBinary --id 12345 --outputFileRaw ./eventbinary.txt"
           }
         ]
       },

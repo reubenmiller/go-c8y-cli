@@ -71,7 +71,7 @@
               "$File = New-TestFile",
               "$Binary = PSc8y\\New-Binary -File $File"
             ],
-            "command": "Get-Binary -Id $Binary.id -OutputFile ./download-binary1.txt",
+            "command": "Get-Binary -Id $Binary.id -OutputFileRaw ./download-binary1.txt",
             "afterEach": [
               "if (Test-Path \"./download-binary1.txt\") { Remove-Item ./download-binary1.txt }",
               "Remove-Item $File",
@@ -86,7 +86,7 @@
           },
           {
             "description": "Get a binary and save it to a file",
-            "command": "c8y binaries get --id 12345 --outputFile \"./download-binary1.txt\""
+            "command": "c8y binaries get --id 12345 --outputFileRaw \"./download-binary1.txt\""
           }
         ]
       },

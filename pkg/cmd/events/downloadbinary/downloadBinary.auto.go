@@ -34,7 +34,7 @@ func NewDownloadBinaryCmd(f *cmdutil.Factory) *DownloadBinaryCmd {
 		Short: "Get event binary",
 		Long:  `Get the binary associated with an event`,
 		Example: heredoc.Doc(`
-$ c8y events downloadBinary --id 12345 --outputFile ./eventbinary.txt
+$ c8y events downloadBinary --id 12345 --outputFileRaw ./eventbinary.txt
 Download a binary related to an event
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {

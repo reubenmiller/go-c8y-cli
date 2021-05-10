@@ -11,7 +11,7 @@ Get the binary associated with an event
 https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/events_downloadBinary
 
 .EXAMPLE
-PS> Get-EventBinary -Id $Event.id -OutputFile ./eventbinary.txt
+PS> Get-EventBinary -Id $Event.id -OutputFileRaw ./eventbinary.txt
 
 Download a binary related to an event
 

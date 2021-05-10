@@ -17,7 +17,7 @@ PS> Get-Binary -Id $Binary.id
 Get a binary and display the contents on the console
 
 .EXAMPLE
-PS> Get-Binary -Id $Binary.id -OutputFile ./download-binary1.txt
+PS> Get-Binary -Id $Binary.id -OutputFileRaw ./download-binary1.txt
 
 Get a binary and save it to a file
 
