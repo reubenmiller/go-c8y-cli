@@ -47,7 +47,7 @@ func (f *UserGroupFetcher) getByName(name string) ([]fetcherResultSet, error) {
 		return nil, errors.Wrap(err, "Could not fetch by id")
 	}
 
-	results := make([]fetcherResultSet, len(groups.Groups))
+	results := make([]fetcherResultSet, 0)
 
 	for i, group := range groups.Groups {
 		// Does pattern match name (using wildcards)

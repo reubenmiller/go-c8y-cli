@@ -53,11 +53,11 @@ func (f *DeviceGroupFetcher) getByName(name string) ([]fetcherResultSet, error) 
 	results := make([]fetcherResultSet, len(mcol.ManagedObjects))
 
 	for i, device := range mcol.ManagedObjects {
-		results = append(results, fetcherResultSet{
+		results[i] = fetcherResultSet{
 			ID:    device.ID,
 			Name:  device.Name,
 			Value: mcol.Items[i],
-		})
+		}
 	}
 
 	return results, nil

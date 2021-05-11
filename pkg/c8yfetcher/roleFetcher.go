@@ -60,7 +60,7 @@ func (f *RoleFetcher) getByName(name string) ([]fetcherResultSet, error) {
 		return nil, errors.Wrap(err, "Could not fetch by name")
 	}
 
-	results := make([]fetcherResultSet, len(roles.Roles))
+	results := make([]fetcherResultSet, 0)
 
 	for i, role := range roles.Roles {
 		if isMatch, _ := matcher.MatchWithWildcards(role.Name, name); !isMatch {

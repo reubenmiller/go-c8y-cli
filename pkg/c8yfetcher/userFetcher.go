@@ -50,7 +50,7 @@ func (f *UserFetcher) getByName(name string) ([]fetcherResultSet, error) {
 		return nil, errors.Wrap(err, "Could not fetch by id")
 	}
 
-	results := make([]fetcherResultSet, len(users.Users))
+	results := make([]fetcherResultSet, 0)
 
 	for i, user := range users.Users {
 		if isMatch, _ := matcher.MatchWithWildcards(user.ID, name); !isMatch {
