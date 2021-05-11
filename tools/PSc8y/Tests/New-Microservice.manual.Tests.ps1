@@ -94,6 +94,8 @@ Describe -Name "New-Microservice" {
     }
 }
 "@
+            $currentTenant = c8y currenttenant get --select name --output csv
+            $currentTenant | Should -Not -BeNullOrEmpty
 
             $App = New-Microservice -Name $AppName -File $ManifestFile -SkipUpload
             $AppList.Add($App.id)
@@ -104,7 +106,7 @@ Describe -Name "New-Microservice" {
 
             # Check credentials
             $BootstrapUser = Get-MicroserviceBootstrapUser -Id $App.id
-            $BootstrapUser.tenant | Should -BeExactly $env:C8Y_TENANT
+            $BootstrapUser.tenant | Should -BeExactly $currentTenant
             $BootstrapUser.name | Should -BeLike "service*"
             $BootstrapUser.password | Should -Not -BeNullOrEmpty
 
