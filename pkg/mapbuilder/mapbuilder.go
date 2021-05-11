@@ -235,6 +235,7 @@ var customJSONNetFunctions = []string{
 	`Char: function(max=16) std.native("Char")(max)`,
 	`Digit: function(max=16) std.native("Digit")(max)`,
 	`AlphaNumeric: function(max=16) std.native("AlphaNumeric")(max)`,
+	`StripKeys: function(value={}) value + {lastUpdated::'','self'::'',creationTime::'',additionParents::'',assetParents::'',childAdditions::'',childAssets::'',childDevices::'',deviceParents::''}`,
 }
 
 func evaluateJsonnet(imports string, snippets ...string) (string, error) {

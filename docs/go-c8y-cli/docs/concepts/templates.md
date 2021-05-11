@@ -180,6 +180,7 @@ Below lists the additional functions which are available in jsonnet template fil
 |_.Char([length=16])| Random string with only character a-zA-Z of a given length  | `exxUQqCDFwRHpUog` |
 |_.Digit([length=16])| Random 0 padded string with only digits | `0261177197719716` |
 |_.AlphaNumeric([length=16])| Random AlphaNumeric string of a given length | `f087oAAzjnvzkPdf` |
+|_.StripKeys([object])| Strip protected Cumulocity properties from a object. The following properties are removed from the given object: additionParents, assetParents, childAdditions, childAssets, childDevices, deviceParents, creationTime, lastUpdated, self | `{}` |
 
 
 ### Example: Generating random data
