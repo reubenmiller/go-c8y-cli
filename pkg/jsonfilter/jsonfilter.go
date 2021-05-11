@@ -302,8 +302,10 @@ func (f JSONFilters) filterJSON(jsonValue string, property string, showHeaders b
 		Logger.Info("Converting json object to array")
 		jq = gojsonq.New().FromString("[" + v.String() + "]")
 		convertBackFromArray = true
-	} else {
+	} else if v.IsArray() {
 		jq = gojsonq.New().FromString(v.String())
+	} else {
+		return []byte(v.Str), nil
 	}
 
 	// Add custom filters
