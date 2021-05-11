@@ -252,7 +252,10 @@
           "type": "string",
           "required": false,
           "pipeline": true,
-          "description": "Device name"
+          "description": "Device name",
+          "pipelineAliases": [
+            "name"
+          ]
         },
         {
           "name": "type",

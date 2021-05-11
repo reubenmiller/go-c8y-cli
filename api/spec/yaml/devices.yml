@@ -189,6 +189,8 @@ endpoints:
         required: false
         pipeline: true
         description: Device name
+        pipelineAliases:
+          - "name"
 
       - name: type
         description: Device type

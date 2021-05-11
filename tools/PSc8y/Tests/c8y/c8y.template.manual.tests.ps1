@@ -45,10 +45,11 @@ Describe -Name "c8y template" {
     It "combines explicit arguments with data and templates parameters" {
         $inputdata = @{self = "https://example.com"} | ConvertTo-Json -Compress
         $output = $inputdata | c8y operations create `
-            --device 12345 `
+            --device "12345" `
             --data 'other="1"' `
             --template "{c8y_DownloadConfigFile: {url: input.value['self']}}" `
             --dry `
+            --debug `
             --dryFormat json
 
         $LASTEXITCODE | Should -Be 0

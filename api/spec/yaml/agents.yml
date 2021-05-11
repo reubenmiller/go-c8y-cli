@@ -176,6 +176,8 @@ endpoints:
         pipeline: true
         required: false
         description: Agent name
+        pipelineAliases:
+          - "name"
 
       - name: type
         description: Agent type

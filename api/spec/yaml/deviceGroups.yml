@@ -181,6 +181,8 @@ endpoints:
         required: false
         pipeline: true
         description: Device group name
+        pipelineAliases:
+          - "name"
 
       - name: type
         description: Device group type (c8y_DeviceGroup (root folder) or c8y_DeviceSubGroup (sub folder)). Defaults to c8y_DeviceGroup

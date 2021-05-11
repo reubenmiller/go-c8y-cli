@@ -262,7 +262,10 @@
           "type": "string",
           "pipeline": true,
           "required": false,
-          "description": "name"
+          "description": "name",
+          "pipelineAliases": [
+            "name"
+          ]
         },
         {
           "name": "type",

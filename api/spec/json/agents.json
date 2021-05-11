@@ -233,7 +233,10 @@
           "type": "string",
           "pipeline": true,
           "required": false,
-          "description": "Agent name"
+          "description": "Agent name",
+          "pipelineAliases": [
+            "name"
+          ]
         },
         {
           "name": "type",

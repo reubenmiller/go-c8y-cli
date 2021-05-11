@@ -85,7 +85,10 @@
           "name": "name",
           "type": "string",
           "description": "Group name",
-          "pipeline": true
+          "pipeline": true,
+          "pipelineAliases": [
+            "name"
+          ]
         },
         {
           "name": "deviceProperties",
@@ -187,7 +190,10 @@
           "name": "name",
           "type": "string",
           "description": "Group name",
-          "pipeline": true
+          "pipeline": true,
+          "pipelineAliases": [
+            "name"
+          ]
         }
       ]
     },

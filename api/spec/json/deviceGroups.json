@@ -241,7 +241,10 @@
           "type": "string",
           "required": false,
           "pipeline": true,
-          "description": "Device group name"
+          "description": "Device group name",
+          "pipelineAliases": [
+            "name"
+          ]
         },
         {
           "name": "type",

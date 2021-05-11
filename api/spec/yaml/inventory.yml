@@ -198,6 +198,8 @@ endpoints:
         pipeline: true
         required: false
         description: name
+        pipelineAliases:
+          - "name"
 
       - name: type
         type: string

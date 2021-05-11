@@ -64,6 +64,8 @@ endpoints:
         type: string
         description: Group name
         pipeline: true
+        pipelineAliases:
+          - "name"
 
       - name: deviceProperties
         type: '[]string'
@@ -136,6 +138,8 @@ endpoints:
         type: string
         description: Group name
         pipeline: true
+        pipelineAliases:
+          - "name"
 
   - name: deleteUserGroup
     description: Delete user group

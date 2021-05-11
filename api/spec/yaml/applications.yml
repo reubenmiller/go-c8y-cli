@@ -65,6 +65,8 @@ endpoints:
         required: false
         pipeline: true
         description: Name of application
+        pipelineAliases:
+          - "name"
 
       # TODO: Change to optional switch. When not set, then set to the value of name with a "-key" postfix
       - name: key

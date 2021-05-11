@@ -104,9 +104,11 @@
                 }
             }
 
-            if ($RESTMethod -eq "POST") {
-                # Add override capability to piped arguments, so the user can still override piped data with the argument
-                [void] $RESTBodyBuilderOptions.AppendLine("flags.WithOverrideValue(`"$($iarg.Name)`", `"$PipelineVariableProperty`"),")
+            if ($iArg.Type -notmatch "device\b|agent\b|group|devicegroup|self|application|microservice") {
+                if ($RESTMethod -match "POST") {
+                    # Add override capability to piped arguments, so the user can still override piped data with the argument
+                    [void] $RESTBodyBuilderOptions.AppendLine("flags.WithOverrideValue(`"$($iarg.Name)`", `"$PipelineVariableProperty`"),")
+                }
             }
         }
         if ($iArg.validationSet) {
