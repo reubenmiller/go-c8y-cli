@@ -131,7 +131,6 @@ func (n *EnableApplicationCmd) RunE(cmd *cobra.Command, args []string) error {
 		cmd,
 		body,
 		inputIterators,
-		flags.WithOverrideValue("application", "application.id"),
 		flags.WithDataFlagValue(),
 		c8yfetcher.WithApplicationByNameFirstMatch(client, args, "application", "application.id"),
 		cmdutil.WithTemplateValue(cfg),

@@ -56,7 +56,7 @@ Get user group by its name
 	flags.WithOptions(
 		cmd,
 
-		flags.WithExtendedPipelineSupport("name", "name", false, "id"),
+		flags.WithExtendedPipelineSupport("name", "name", false, "name"),
 	)
 
 	// Required flags

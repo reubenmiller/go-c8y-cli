@@ -60,7 +60,7 @@ Create device with custom properties
 		flags.WithProcessingMode(),
 		flags.WithData(),
 		f.WithTemplateFlag(cmd),
-		flags.WithExtendedPipelineSupport("name", "name", false, "id"),
+		flags.WithExtendedPipelineSupport("name", "name", false, "name"),
 	)
 
 	// Required flags

@@ -26,6 +26,7 @@ type CmdRepeat struct {
 	times          int64
 	skip           int64
 	first          int64
+	offset         int64
 	randomDelayMin int64
 	randomDelayMax int64
 	randomSkip     float32
@@ -49,6 +50,11 @@ func NewCmdRepeat(f *cmdutil.Factory) *CmdRepeat {
 			Repeat input value "my name" 2 times (using pipeline)
 				=> my prefix - my name
 				=> my prefix - my name
+			
+			$ echo "device" | c8y util repeat 2 --offset 100 --format "%s %05s"
+			Repeat input value "device" 2 times (using pipeline)
+				=> device 00101
+				=> device 00102
 
 			$ c8y util repeat 2 | c8y util repeat 3 --format "device%s_%s"
 			Combine two calls to iterator over 3 devices twice. This can then be used to input into other c8y commands
@@ -73,6 +79,7 @@ func NewCmdRepeat(f *cmdutil.Factory) *CmdRepeat {
 	cmd.Flags().StringVar(&ccmd.format, "format", "%s", "format string to be applied to each input line")
 	cmd.Flags().Int64Var(&ccmd.skip, "skip", 0, "skip first x input lines")
 	cmd.Flags().Int64Var(&ccmd.first, "first", 0, "only include first x lines. 0 = all lines")
+	cmd.Flags().Int64Var(&ccmd.offset, "offset", 0, "offset the output index counter. default = 0.")
 	cmd.Flags().Int64Var(&ccmd.randomDelayMin, "randomDelayMin", -1, "random minimum delay in milliseconds, must be less than randomDelayMax. -1 = disabled")
 	cmd.Flags().Int64Var(&ccmd.randomDelayMax, "randomDelayMax", -1, "random maximum delay in milliseconds, must be larger than randomDelayMin. -1 = disabled.")
 	cmd.Flags().Float32Var(&ccmd.randomSkip, "randomSkip", -1, "randomly skip line based on a percentage, probability as a float: 0 to 1, 1 = always skip, 0 = never skip, -1 = disabled")
@@ -214,7 +221,7 @@ func (n *CmdRepeat) newTemplate(cmd *cobra.Command, args []string) error {
 				if n.useTotalCount {
 					index = outputCount
 				}
-				line = fmt.Sprintf(formatString, bytes.TrimSpace(responseText), fmt.Sprintf("%d", index)) + outputEnding
+				line = fmt.Sprintf(formatString, bytes.TrimSpace(responseText), fmt.Sprintf("%d", index+n.offset)) + outputEnding
 			} else {
 				line = fmt.Sprintf(formatString, bytes.TrimSpace(responseText)) + outputEnding
 			}
