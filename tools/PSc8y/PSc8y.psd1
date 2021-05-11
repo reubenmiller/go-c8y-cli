@@ -154,6 +154,7 @@ FunctionsToExport = @(
 	'Get-Microservice',
 	'Get-MicroserviceBootstrapUser',
 	'Get-MicroserviceCollection',
+	'Get-MicroserviceStatus',
 	'Get-Operation',
 	'Get-OperationCollection',
 	'Get-RetentionRule',

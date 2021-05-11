@@ -511,6 +511,109 @@
           "description": "Tenant id"
         }
       ]
+    },
+    {
+      "name": "getStatus",
+      "skip": false,
+      "description": "Get microservice status",
+      "descriptionLong": "Get the status of a microservice\n",
+      "method": "GET",
+      "path": "/inventory/managedObjects?type=c8y_Application_{id}",
+      "accept": "application/json",
+      "collectionType": "application/vnd.com.nsn.cumulocity.application+json",
+      "collectionProperty": "managedObjects",
+      "alias": {
+        "go": "getStatus",
+        "powershell": "Get-MicroserviceStatus"
+      },
+      "examples": {
+        "powershell": [
+          {
+            "description": "Get microservice log entries",
+            "command": "Get-MicroserviceStatus -Id 1234 -Dry"
+          },
+          {
+            "description": "Get microservice log entries (using pipeline)",
+            "command": "Get-MicroserviceCollection | Get-MicroserviceStatus -Dry"
+          }
+        ],
+        "go": [
+          {
+            "description": "Get microservice log entries",
+            "command": "c8y microservices getStatus --id 1234"
+          },
+          {
+            "description": "Get microservice log entries (using pipeline)",
+            "command": "c8y microservices list | c8y microservices getStatus"
+          }
+        ]
+      },
+      "pathParameters": [
+        {
+          "name": "id",
+          "type": "microservice",
+          "pipeline": true,
+          "required": true,
+          "description": "Microservice id"
+        }
+      ]
+    },
+    {
+      "name": "getLog",
+      "skip": true,
+      "description": "Get microservice logs",
+      "descriptionLong": "Get logs of a microservice in the current tenant\n",
+      "method": "GET",
+      "path": "/application/applications/{id}/logs/{instance}",
+      "addAccept": true,
+      "accept": "application/vnd.com.nsn.cumulocity.applicationLogs+json",
+      "collectionType": "application/vnd.com.nsn.cumulocity.application+json",
+      "collectionProperty": "logs",
+      "alias": {
+        "go": "getLog",
+        "powershell": "Get-MicroserviceLog"
+      },
+      "examples": {
+        "powershell": [
+          {
+            "description": "Get microservice log entries",
+            "command": "Get-MicroserviceLog -Id 1234 -Instance app1-scope-t12345-deployment-54dcf96599-rtn5d -Dry"
+          }
+        ],
+        "go": [
+          {
+            "description": "Get microservice log entries",
+            "command": "c8y microservices getLog --id 1234 --instance app1-scope-t12345-deployment-54dcf96599-rtn5d --dry"
+          }
+        ]
+      },
+      "pathParameters": [
+        {
+          "name": "id",
+          "type": "microservice",
+          "pipeline": true,
+          "required": true,
+          "description": "Microservice id"
+        },
+        {
+          "name": "instance",
+          "type": "microserviceinstance",
+          "required": true,
+          "description": "Microservice instance"
+        }
+      ],
+      "queryParameters": [
+        {
+          "name": "dateFrom",
+          "type": "datetime",
+          "description": "Start date or date and time of log entries."
+        },
+        {
+          "name": "dateTo",
+          "type": "datetime",
+          "description": "End date or date and time of log entries."
+        }
+      ]
     }
   ]
 }

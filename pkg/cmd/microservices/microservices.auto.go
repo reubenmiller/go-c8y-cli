@@ -7,6 +7,7 @@ import (
 	cmdEnable "github.com/reubenmiller/go-c8y-cli/pkg/cmd/microservices/enable"
 	cmdGet "github.com/reubenmiller/go-c8y-cli/pkg/cmd/microservices/get"
 	cmdGetBootstrapUser "github.com/reubenmiller/go-c8y-cli/pkg/cmd/microservices/getbootstrapuser"
+	cmdGetStatus "github.com/reubenmiller/go-c8y-cli/pkg/cmd/microservices/getstatus"
 	cmdList "github.com/reubenmiller/go-c8y-cli/pkg/cmd/microservices/list"
 	cmdUpdate "github.com/reubenmiller/go-c8y-cli/pkg/cmd/microservices/update"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmd/subcommand"
@@ -36,6 +37,7 @@ func NewSubCommand(f *cmdutil.Factory) *SubCmdMicroservices {
 	cmd.AddCommand(cmdGetBootstrapUser.NewGetBootstrapUserCmd(f).GetCommand())
 	cmd.AddCommand(cmdEnable.NewEnableCmd(f).GetCommand())
 	cmd.AddCommand(cmdDisable.NewDisableCmd(f).GetCommand())
+	cmd.AddCommand(cmdGetStatus.NewGetStatusCmd(f).GetCommand())
 
 	ccmd.SubCommand = subcommand.NewSubCommand(cmd)
 
