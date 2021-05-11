@@ -42,6 +42,7 @@
         "json",
         "json_custom",
         "microservice",
+        "microserviceinstance",
         "string",
         "source",
         "tenant",

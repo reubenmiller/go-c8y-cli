@@ -76,6 +76,7 @@
         "json" { "object"; break }
         "json_custom" { "object"; break }
         "microservice" { "object[]"; break }
+        "microserviceinstance" { "string"; break }
         "set" { "object[]"; break }
         "source" { "object"; break }
         "string" { "string"; break }
