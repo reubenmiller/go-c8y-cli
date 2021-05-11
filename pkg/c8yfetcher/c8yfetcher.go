@@ -175,16 +175,18 @@ type EntityIterator struct {
 	GetID          bool
 	UseSelfLink    bool
 	MinimumMatches int
+	OverrideValue  string
 }
 
 // NewReferenceByNameIterator create a new iterator which can look up values by their id or names
-func NewReferenceByNameIterator(fetcher EntityFetcher, c8yClient *c8y.Client, valueIterator iterator.Iterator, minimumMatches int) *EntityIterator {
+func NewReferenceByNameIterator(fetcher EntityFetcher, c8yClient *c8y.Client, valueIterator iterator.Iterator, minimumMatches int, overrideValue string) *EntityIterator {
 	return &EntityIterator{
 		Fetcher:        fetcher,
 		Client:         c8yClient,
 		valueIterator:  valueIterator,
 		GetID:          false,
 		MinimumMatches: minimumMatches,
+		OverrideValue:  overrideValue,
 	}
 }
 
@@ -203,6 +205,11 @@ func (i *EntityIterator) GetNext() (value []byte, input interface{}, err error) 
 		return nil, nil, io.EOF
 	}
 	value, rawValue, err := i.valueIterator.GetNext()
+
+	// override the value if it is not empty
+	if i.OverrideValue != "" {
+		value = []byte(i.OverrideValue)
+	}
 	if err != nil {
 		return value, rawValue, err
 	}
@@ -234,22 +241,12 @@ func (i *EntityIterator) GetNext() (value []byte, input interface{}, err error) 
 		return nil, rawValue, cmderrors.NewNoMatchesFoundError(string(value))
 	}
 
-	var data interface{}
-	data = refs[0].ID
-	if refs[0].Data.Value != nil {
-		if v, ok := refs[0].Data.Value.(gjson.Result); ok {
-			data = v.Raw
-		}
-	} else {
-		data = rawValue
-	}
-
 	// use self rather than id if not empty
 	returnValue := refs[0].ID
 	if i.UseSelfLink && refs[0].Data.Self != "" {
 		returnValue = refs[0].Data.Self
 	}
-	return []byte(returnValue), data, nil
+	return []byte(returnValue), rawValue, nil
 }
 
 // WithReferenceByName adds support for looking up values by name via cli args
@@ -257,6 +254,23 @@ func WithReferenceByName(client *c8y.Client, fetcher EntityFetcher, args []strin
 	return func(cmd *cobra.Command, inputIterators *flags.RequestInputIterators) (string, interface{}, error) {
 
 		src, dst, _ := flags.UnpackGetterOptions("", opts...)
+
+		// check for arguments which could override the value
+		values, err := cmd.Flags().GetStringSlice(src)
+		if err != nil {
+			singleValue, err := cmd.Flags().GetString(src)
+			if err != nil {
+				return "", "", err
+			}
+			values = []string{singleValue}
+		}
+
+		values = ParseValues(append(values, args...))
+
+		overrideValue := ""
+		if len(values) > 0 {
+			overrideValue = values[0]
+		}
 
 		if inputIterators != nil && inputIterators.PipeOptions.Name == src {
 			hasPipeSupport := inputIterators.PipeOptions.Name == src
@@ -269,20 +283,9 @@ func WithReferenceByName(client *c8y.Client, fetcher EntityFetcher, args []strin
 			if inputIterators.PipeOptions.Required {
 				minMatches = 1
 			}
-			iter := NewReferenceByNameIterator(fetcher, client, pipeIter, minMatches)
+			iter := NewReferenceByNameIterator(fetcher, client, pipeIter, minMatches, overrideValue)
 			return inputIterators.PipeOptions.Property, iter, nil
 		}
-
-		values, err := cmd.Flags().GetStringSlice(src)
-		if err != nil {
-			singleValue, err := cmd.Flags().GetString(src)
-			if err != nil {
-				return "", "", err
-			}
-			values = []string{singleValue}
-		}
-
-		values = ParseValues(append(values, args...))
 
 		if len(values) == 0 {
 			return "", values, nil
@@ -327,6 +330,23 @@ func WithSelfReferenceByName(client *c8y.Client, fetcher EntityFetcher, args []s
 
 		src, dst, _ := flags.UnpackGetterOptions("", opts...)
 
+		// check for arguments which could override the value
+		values, err := cmd.Flags().GetStringSlice(src)
+		if err != nil {
+			singleValue, err := cmd.Flags().GetString(src)
+			if err != nil {
+				return "", "", err
+			}
+			values = []string{singleValue}
+		}
+
+		values = ParseValues(append(values, args...))
+
+		overrideValue := ""
+		if len(values) > 0 {
+			overrideValue = values[0]
+		}
+
 		if inputIterators != nil && inputIterators.PipeOptions.Name == src {
 			hasPipeSupport := inputIterators.PipeOptions.Name == src
 			pipeIter, err := flags.NewFlagWithPipeIterator(cmd, inputIterators.PipeOptions, hasPipeSupport)
@@ -338,21 +358,14 @@ func WithSelfReferenceByName(client *c8y.Client, fetcher EntityFetcher, args []s
 			if inputIterators.PipeOptions.Required {
 				minMatches = 1
 			}
-			iter := NewReferenceByNameIterator(fetcher, client, pipeIter, minMatches)
+			iter := NewReferenceByNameIterator(fetcher, client, pipeIter, minMatches, overrideValue)
 			iter.UseSelfLink = true
 			return inputIterators.PipeOptions.Property, iter, nil
 		}
 
-		values, err := cmd.Flags().GetStringSlice(src)
-		if err != nil {
-			singleValue, err := cmd.Flags().GetString(src)
-			if err != nil {
-				return "", "", err
-			}
-			values = []string{singleValue}
+		if len(values) == 0 {
+			return "", values, nil
 		}
-
-		values = ParseValues(append(values, args...))
 
 		formattedValues, err := lookupEntity(fetcher, values, false)
 
@@ -548,7 +561,7 @@ func WithReferenceByNamePipeline(client *c8y.Client, fetcher EntityFetcher, opts
 		if inputIterators.PipeOptions.Required {
 			minMatches = 1
 		}
-		iter := NewReferenceByNameIterator(fetcher, client, pipeIter, minMatches)
+		iter := NewReferenceByNameIterator(fetcher, client, pipeIter, minMatches, "")
 
 		return opts.Property, iter, err
 	}

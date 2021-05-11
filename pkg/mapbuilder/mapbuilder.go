@@ -652,7 +652,8 @@ func (b *MapBuilder) MarshalJSON() (body []byte, err error) {
 			}
 			Logger.Debugf("setting externalInput: %s", b.externalInput)
 
-			if _, ok := bodyClone.body[it.Path]; !ok && len(value) > 0 {
+			// NOTE: Do not overwrite existing values if non empty
+			if !bodyClone.KeyExists(it.Path) && len(value) > 0 {
 				tempValue := make(map[string]interface{})
 				var bErr error
 				// Only set non-object values. Complex objects can be referred to via the input.value template variable
@@ -689,6 +690,36 @@ func (b *MapBuilder) MarshalJSON() (body []byte, err error) {
 		return nil, err
 	}
 	return
+}
+
+// KeyExists return true if the given dot notation path exists or not
+func (b *MapBuilder) KeyExists(path string) bool {
+	if b.body == nil {
+		return false
+	}
+	exists := false
+	keys := strings.Split(path, Separator)
+	currentMap := b.body
+	lastIndex := len(keys) - 1
+	for i, key := range keys {
+		if key != "" {
+			if i != lastIndex {
+				if _, ok := currentMap[key]; !ok {
+					break
+				}
+				if v, ok := currentMap[key].(map[string]interface{}); ok {
+					currentMap = v
+				} else {
+					break
+				}
+			} else {
+				if _, ok := currentMap[key]; ok {
+					exists = true
+				}
+			}
+		}
+	}
+	return exists
 }
 
 // Set sets a value to a give dot notation path
