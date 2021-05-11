@@ -336,6 +336,7 @@ type IteratorReference struct {
 type MapBuilder struct {
 	mu                    sync.Mutex
 	body                  map[string]interface{}
+	bodyOptional          map[string]interface{}
 	bodyIterators         []IteratorReference
 	file                  string
 	raw                   string
@@ -670,6 +671,14 @@ func (b *MapBuilder) MarshalJSON() (body []byte, err error) {
 		}
 	}
 
+	// merge optional values, but prefer already set values
+	if b.bodyOptional != nil {
+		err = bodyClone.MergeMaps(b.bodyOptional)
+		if err != nil {
+			return
+		}
+	}
+
 	Logger.Debugf("Body (pre marshalling). %v", bodyClone)
 
 	body, err = json.Marshal(bodyClone.body)
@@ -721,6 +730,11 @@ func (b *MapBuilder) KeyExists(path string) bool {
 		}
 	}
 	return exists
+}
+
+// SetOptionalMap set optional map values which can be overwritten by other values
+func (b *MapBuilder) SetOptionalMap(value map[string]interface{}) {
+	b.bodyOptional = value
 }
 
 // Set sets a value to a give dot notation path
