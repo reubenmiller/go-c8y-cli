@@ -285,6 +285,16 @@ func WithStringValue(opts ...string) GetOption {
 	}
 }
 
+// WithStaticStringValue add a fixed string value
+func WithStaticStringValue(opts ...string) GetOption {
+	return func(cmd *cobra.Command, inputIterators *RequestInputIterators) (string, interface{}, error) {
+		if len(opts) < 2 {
+			return "", nil, nil
+		}
+		return opts[0], opts[1], nil
+	}
+}
+
 // WithCustomStringValue add a custom string value with a custom tranform function
 func WithCustomStringValue(transform func([]byte) []byte, targetFunc func() string, opts ...string) GetOption {
 	return func(cmd *cobra.Command, inputIterators *RequestInputIterators) (string, interface{}, error) {
