@@ -148,8 +148,8 @@ func (n *CmdRepeat) newTemplate(cmd *cobra.Command, args []string) error {
 		iter = iterator.NewRepeatIterator("", 1)
 	}
 
-	delayBefore := time.Duration(cfg.WorkerDelayBefore()) * time.Millisecond
-	delay := time.Duration(cfg.WorkerDelay()) * time.Millisecond
+	delayBefore := cfg.WorkerDelayBefore()
+	delay := cfg.WorkerDelay()
 
 	formatString := n.format
 
