@@ -159,6 +159,7 @@ func (l *ActivityLogger) LogRequest(resp *http.Response, body *gjson.Result, res
 	}
 
 	query, err := url.QueryUnescape(resp.Request.URL.RawQuery)
+	query = strings.ReplaceAll(query, `\`, `\\`)
 	if err != nil {
 		query = resp.Request.URL.RawQuery
 	}
