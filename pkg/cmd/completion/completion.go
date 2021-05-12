@@ -5,6 +5,7 @@ import (
 
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmd/subcommand"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmdutil"
+	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
 	"github.com/spf13/cobra"
 )
 
@@ -62,7 +63,7 @@ func NewCmdCompletion() *CmdCompletion {
 	`,
 		DisableFlagsInUseLine: true,
 		ValidArgs:             []string{"bash", "zsh", "fish", "powershell"},
-		Args:                  cobra.ExactValidArgs(1),
+		Args:                  flags.ExactArgsOrExample(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			var err error
 			switch args[0] {

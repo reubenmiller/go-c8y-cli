@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmdutil"
+	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/pkg/iostreams"
 	"github.com/spf13/cobra"
 )
@@ -24,7 +25,7 @@ func NewCmdDelete(f *cmdutil.Factory, runF func(*DeleteOptions) error) *cobra.Co
 	cmd := &cobra.Command{
 		Use:   "delete <alias>",
 		Short: "Delete an alias",
-		Args:  cobra.ExactArgs(1),
+		Args:  flags.ExactArgsOrExample(1),
 		ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 			if len(args) > 1 {
 				return []string{}, cobra.ShellCompDirectiveNoFileComp

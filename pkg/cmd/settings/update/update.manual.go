@@ -12,6 +12,7 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmdutil"
 	"github.com/reubenmiller/go-c8y-cli/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/pkg/config"
+	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/pkg/shell"
 	"github.com/reubenmiller/go-c8y-cli/pkg/utilities"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
@@ -291,11 +292,10 @@ func NewCmdUpdate(f *cmdutil.Factory) *UpdateSettingsCmd {
 		Long:  `Update settings in the current session or a given session file`,
 		Example: heredoc.Doc(`
 			$ c8y settings update mode dev
-
-			Show the active cli settings
+			Change mode to dev to allow all commands
 		`),
 		RunE: ccmd.RunE,
-		Args: cobra.ExactArgs(2),
+		Args: flags.ExactArgsOrExample(2),
 		ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 			if len(args) > 2 {
 				return []string{}, cobra.ShellCompDirectiveNoFileComp

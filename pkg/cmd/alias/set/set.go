@@ -7,6 +7,7 @@ import (
 	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/google/shlex"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmdutil"
+	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/pkg/iostreams"
 	"github.com/spf13/cobra"
 )
@@ -60,7 +61,7 @@ func NewCmdSet(f *cmdutil.Factory, runF func(*SetOptions) error) *cobra.Command 
 			$ c8y findInAudit deleted
 			#=> c8y auditrecords list --dateFrom="-30d" --output json --view auto --includeAll | grep deleted
 		`),
-		Args: cobra.ExactArgs(2),
+		Args: flags.ExactArgsOrExample(2),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			opts.RootCmd = cmd.Root()
 
