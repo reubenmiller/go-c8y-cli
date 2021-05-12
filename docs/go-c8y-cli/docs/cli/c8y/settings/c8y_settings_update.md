@@ -16,8 +16,7 @@ c8y settings update [flags]
 
 ```
 $ c8y settings update mode dev
-
-Show the active cli settings
+Change mode to dev to allow all commands
 
 ```
 
