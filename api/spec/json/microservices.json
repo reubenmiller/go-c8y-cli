@@ -516,7 +516,7 @@
       "name": "getStatus",
       "skip": false,
       "description": "Get microservice status",
-      "descriptionLong": "Get the status of a microservice\n",
+      "descriptionLong": "Get the status of a microservice which is stored as a managed object\n",
       "method": "GET",
       "path": "/inventory/managedObjects?type=c8y_Application_{id}",
       "accept": "application/json",
@@ -529,21 +529,21 @@
       "examples": {
         "powershell": [
           {
-            "description": "Get microservice log entries",
+            "description": "Get microservice status",
             "command": "Get-MicroserviceStatus -Id 1234 -Dry"
           },
           {
-            "description": "Get microservice log entries (using pipeline)",
+            "description": "Get microservice status (using pipeline)",
             "command": "Get-MicroserviceCollection | Get-MicroserviceStatus -Dry"
           }
         ],
         "go": [
           {
-            "description": "Get microservice log entries",
+            "description": "Get microservice status",
             "command": "c8y microservices getStatus --id 1234"
           },
           {
-            "description": "Get microservice log entries (using pipeline)",
+            "description": "Get microservice status (using pipeline)",
             "command": "c8y microservices list | c8y microservices getStatus"
           }
         ]

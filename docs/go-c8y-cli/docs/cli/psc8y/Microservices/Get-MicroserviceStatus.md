@@ -1,23 +1,23 @@
 ---
-category: Events
+category: Microservices
 external help file: PSc8y-help.xml
-id: Get-EventBinary
+id: Get-MicroserviceStatus
 Module Name: PSc8y
-online version: https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/events_downloadBinary
+online version: https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/microservices_getStatus
 schema: 2.0.0
-slug: /docs/cli/psc8y/Events/get-eventbinary
-title: Get-EventBinary
+slug: /docs/cli/psc8y/Microservices/get-microservicestatus
+title: Get-MicroserviceStatus
 ---
 
 
 
 ## SYNOPSIS
-Get event binary
+Get microservice status
 
 ## SYNTAX
 
 ```
-Get-EventBinary
+Get-MicroserviceStatus
 	[-Id] <Object[]>
 	[-Raw]
 	[-OutputFile <String>]
@@ -60,21 +60,28 @@ Get-EventBinary
 ```
 
 ## DESCRIPTION
-Get the binary associated with an event
+Get the status of a microservice which is stored as a managed object
 
 ## EXAMPLES
 
 ### EXAMPLE 1
 ```
-Get-EventBinary -Id $Event.id -OutputFileRaw ./eventbinary.txt
+Get-MicroserviceStatus -Id 1234 -Dry
 ```
 
-Download a binary related to an event
+Get microservice status
+
+### EXAMPLE 2
+```
+Get-MicroserviceCollection | Get-MicroserviceStatus -Dry
+```
+
+Get microservice status (using pipeline)
 
 ## PARAMETERS
 
 ### -Id
-Event id (required)
+Microservice id (required)
 
 ```yaml
 Type: Object[]
@@ -679,5 +686,5 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 
 ## RELATED LINKS
 
-[https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/events_downloadBinary](https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/events_downloadBinary)
+[https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/microservices_getStatus](https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/microservices_getStatus)
 

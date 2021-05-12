@@ -33,14 +33,14 @@ func NewGetStatusCmd(f *cmdutil.Factory) *GetStatusCmd {
 	cmd := &cobra.Command{
 		Use:   "getStatus",
 		Short: "Get microservice status",
-		Long: `Get the status of a microservice
+		Long: `Get the status of a microservice which is stored as a managed object
 `,
 		Example: heredoc.Doc(`
 $ c8y microservices getStatus --id 1234
-Get microservice log entries
+Get microservice status
 
 $ c8y microservices list | c8y microservices getStatus
-Get microservice log entries (using pipeline)
+Get microservice status (using pipeline)
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
 			return nil

@@ -5,13 +5,13 @@ Describe -Name "Get-MicroserviceStatus" {
 
     }
 
-    It "Get microservice log entries" {
+    It "Get microservice status" {
         $Response = PSc8y\Get-MicroserviceStatus -Id 1234 -Dry
         $LASTEXITCODE | Should -Be 0
         $Response | Should -Not -BeNullOrEmpty
     }
 
-    It "Get microservice log entries (using pipeline)" {
+    It "Get microservice status (using pipeline)" {
         $Response = PSc8y\Get-MicroserviceCollection | Get-MicroserviceStatus -Dry
         $LASTEXITCODE | Should -Be 0
         $Response | Should -Not -BeNullOrEmpty

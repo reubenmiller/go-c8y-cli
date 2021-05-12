@@ -15,7 +15,7 @@ c8y events downloadBinary [flags]
 ### Examples
 
 ```
-$ c8y events downloadBinary --id 12345 --outputFile ./eventbinary.txt
+$ c8y events downloadBinary --id 12345 --outputFileRaw ./eventbinary.txt
 Download a binary related to an event
         
 ```

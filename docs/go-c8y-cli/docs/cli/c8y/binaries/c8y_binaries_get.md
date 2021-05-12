@@ -19,7 +19,7 @@ c8y binaries get [flags]
 $ c8y binaries get --id 12345
 Get a binary and display the contents on the console
 
-$ c8y binaries get --id 12345 --outputFile "./download-binary1.txt"
+$ c8y binaries get --id 12345 --outputFileRaw "./download-binary1.txt"
 Get a binary and save it to a file
         
 ```

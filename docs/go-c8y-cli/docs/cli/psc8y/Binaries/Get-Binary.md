@@ -74,7 +74,7 @@ Get a binary and display the contents on the console
 
 ### EXAMPLE 2
 ```
-Get-Binary -Id $Binary.id -OutputFile ./download-binary1.txt
+Get-Binary -Id $Binary.id -OutputFileRaw ./download-binary1.txt
 ```
 
 Get a binary and save it to a file

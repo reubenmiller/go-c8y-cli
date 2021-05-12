@@ -1,64 +1,34 @@
 ---
-category: util
-title: c8y util repeat
+category: microservices
+title: c8y microservices getStatus
 ---
-Repeat input
+Get microservice status
 
 ### Synopsis
 
-Generic utility to repeat input values x times
+Get the status of a microservice which is stored as a managed object
+
 
 ```
-c8y util repeat [flags]
+c8y microservices getStatus [flags]
 ```
 
 ### Examples
 
 ```
-$ c8y util repeat --input "my name" 5
-Repeat input value "my name" 5 times
+$ c8y microservices getStatus --id 1234
+Get microservice status
 
-$ echo "my name" | c8y util repeat 2 --format "my prefix - %s"
-Repeat input value "my name" 2 times (using pipeline)
-	=> my prefix - my name
-	=> my prefix - my name
-
-$ echo "device" | c8y util repeat 2 --offset 100 --format "%s %05s"
-Repeat input value "device" 2 times (using pipeline)
-	=> device 00101
-	=> device 00102
-
-$ c8y util repeat 2 | c8y util repeat 3 --format "device%s_%s"
-Combine two calls to iterator over 3 devices twice. This can then be used to input into other c8y commands
-	=> device_1
-	=> device_2
-	=> device_3
-	=> device_1
-	=> device_2
-	=> device_3
-
-$ c8y devices get --id 1235 | c8y util repeat 5 | c8y events create --text "test event" --type "myType" --dry --delay 1000
-Get a device, then repeat it 5 times in order to create 5 events for it (delaying 1000 ms between each event creation)
-
-$ c8y devices get --id 1234 | c8y util repeat 5 --randomDelayMin 1000 --randomDelayMax 10000 -v | c8y events create --text "test event" --type "myType"
-Create 10 events for the same device and use a random delay between 1000ms and 10000ms between the creation of each event
-
+$ c8y microservices list | c8y microservices getStatus
+Get microservice status (using pipeline)
+        
 ```
 
 ### Options
 
 ```
-      --first int            only include first x lines. 0 = all lines
-      --format string        format string to be applied to each input line (default "%s")
-  -h, --help                 help for repeat
-      --input string         input value to be repeated (required) (accepts pipeline)
-      --offset int           offset the output index counter. default = 0.
-      --randomDelayMax int   random maximum delay in milliseconds, must be larger than randomDelayMin. -1 = disabled. (default -1)
-      --randomDelayMin int   random minimum delay in milliseconds, must be less than randomDelayMax. -1 = disabled (default -1)
-      --randomSkip float32   randomly skip line based on a percentage, probability as a float: 0 to 1, 1 = always skip, 0 = never skip, -1 = disabled (default -1)
-      --skip int             skip first x input lines
-      --times int            number of times to repeat the input (default 1)
-      --useLineCount         Use line count for the index instead of repeat counter
+  -h, --help        help for getStatus
+      --id string   Microservice id (required) (accepts pipeline)
 ```
 
 ### Options inherited from parent commands

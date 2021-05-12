@@ -5,7 +5,7 @@ Function Get-MicroserviceStatus {
 Get microservice status
 
 .DESCRIPTION
-Get the status of a microservice
+Get the status of a microservice which is stored as a managed object
 
 
 .LINK
@@ -14,12 +14,12 @@ https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/microservices_getStatus
 .EXAMPLE
 PS> Get-MicroserviceStatus -Id 1234 -Dry
 
-Get microservice log entries
+Get microservice status
 
 .EXAMPLE
 PS> Get-MicroserviceCollection | Get-MicroserviceStatus -Dry
 
-Get microservice log entries (using pipeline)
+Get microservice status (using pipeline)
 
 
 #>
