@@ -30,12 +30,12 @@ func (f *IDNameFetcher) IsID(v string) bool {
 
 func ParseValues(values []string) (ids []string) {
 	for _, value := range values {
-		parts := strings.Split(strings.ReplaceAll(value, " ", ","), ",")
+		parts := strings.Split(value, ",")
 
 		for _, part := range parts {
 			// Only add uint looking values
 			if part != "" {
-				ids = append(ids, part)
+				ids = append(ids, strings.TrimSpace(part))
 			}
 		}
 	}
