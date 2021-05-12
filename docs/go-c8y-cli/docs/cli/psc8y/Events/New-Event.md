@@ -75,14 +75,14 @@ Create a new event for a device
 
 ### EXAMPLE 1
 ```
-New-Event -Device $device.id -Type c8y_TestAlarm -Text "Test event"
+New-Event -Device $device.id -Type c8y_TestEvent -Text "Test event"
 ```
 
 Create a new event for a device
 
 ### EXAMPLE 2
 ```
-Get-Device -Id $device.id | PSc8y\New-Event -Type c8y_TestAlarm -Time "-0s" -Text "Test event"
+Get-Device -Id $device.id | PSc8y\New-Event -Type c8y_TestEvent -Time "-0s" -Text "Test event"
 ```
 
 Create a new event for a device (using pipeline)
