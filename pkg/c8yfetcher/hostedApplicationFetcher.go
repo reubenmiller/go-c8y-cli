@@ -10,6 +10,7 @@ import (
 
 type HostedApplicationFetcher struct {
 	client *c8y.Client
+	*DefaultFetcher
 }
 
 func NewHostedApplicationFetcher(client *c8y.Client) *HostedApplicationFetcher {

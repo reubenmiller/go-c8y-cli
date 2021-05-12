@@ -8,6 +8,7 @@ import (
 
 type UserGroupFetcher struct {
 	client *c8y.Client
+	*DefaultFetcher
 }
 
 func NewUserGroupFetcher(client *c8y.Client) *UserGroupFetcher {

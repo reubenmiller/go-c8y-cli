@@ -16,6 +16,18 @@ import (
 	"github.com/tidwall/gjson"
 )
 
+type DefaultFetcher struct{}
+
+func (f *DefaultFetcher) IsID(v string) bool {
+	return IsID(v)
+}
+
+type IDNameFetcher struct{}
+
+func (f *IDNameFetcher) IsID(v string) bool {
+	return !strings.ContainsAny(v, "*")
+}
+
 func ParseValues(values []string) (ids []string) {
 	for _, value := range values {
 		parts := strings.Split(strings.ReplaceAll(value, " ", ","), ",")
@@ -78,10 +90,11 @@ func (i *idValue) GetName() string {
 type EntityFetcher interface {
 	getByID(string) ([]fetcherResultSet, error)
 	getByName(string) ([]fetcherResultSet, error)
+	IsID(string) bool
 }
 
-func lookupIDByName(fetch EntityFetcher, name string) ([]entityReference, error) {
-	results, err := lookupEntity(fetch, []string{name}, false)
+func lookupIDByName(fetch EntityFetcher, name string, getID bool) ([]entityReference, error) {
+	results, err := lookupEntity(fetch, []string{name}, getID)
 
 	filteredResults := make([]entityReference, 0)
 	for _, item := range results {
@@ -93,7 +106,7 @@ func lookupIDByName(fetch EntityFetcher, name string) ([]entityReference, error)
 }
 
 func lookupEntity(fetch EntityFetcher, values []string, getID bool) ([]entityReference, error) {
-	ids, names := parseAndSanitizeIDs(values)
+	ids, names := parseAndSanitizeIDs(fetch.IsID, values)
 
 	entities := make([]entityReference, 0)
 
@@ -102,6 +115,12 @@ func lookupEntity(fetch EntityFetcher, values []string, getID bool) ([]entityRef
 		if getID {
 			if v, err := fetch.getByID(id); err == nil {
 				for _, resultSet := range v {
+					// Try to retrieve self link
+					if data, ok := resultSet.Value.(gjson.Result); ok {
+						if value := data.Get("self"); value.Exists() {
+							resultSet.Self = value.Str
+						}
+					}
 					entities = append(entities, entityReference{
 						ID:   id,
 						Name: resultSet.Name,
@@ -135,13 +154,20 @@ func lookupEntity(fetch EntityFetcher, values []string, getID bool) ([]entityRef
 	return entities, nil
 }
 
-func parseAndSanitizeIDs(values []string) (ids []string, names []string) {
+func IsID(v string) bool {
+	if _, err := strconv.ParseUint(v, 10, 64); v != "" && err == nil {
+		return true
+	}
+	return false
+}
+
+func parseAndSanitizeIDs(isID func(string) bool, values []string) (ids []string, names []string) {
 	for _, value := range values {
 		parts := strings.Split(strings.ReplaceAll(value, ", ", ","), ",")
 
 		for _, part := range parts {
 			// Only add uint looking values
-			if _, err := strconv.ParseUint(part, 10, 64); part != "" && err == nil {
+			if isID(part) {
 				ids = append(ids, part)
 			} else {
 				names = append(names, part)
@@ -218,7 +244,7 @@ func (i *EntityIterator) GetNext() (value []byte, input interface{}, err error) 
 
 	if len(value) != 0 {
 		// only lookup if value is not empty
-		refs, err = lookupIDByName(i.Fetcher, string(value))
+		refs, err = lookupIDByName(i.Fetcher, string(value), i.GetID)
 		if err != nil {
 			return nil, rawValue, err
 		}
@@ -360,6 +386,7 @@ func WithSelfReferenceByName(client *c8y.Client, fetcher EntityFetcher, args []s
 			}
 			iter := NewReferenceByNameIterator(fetcher, client, pipeIter, minMatches, overrideValue)
 			iter.UseSelfLink = true
+			iter.GetID = true
 			return inputIterators.PipeOptions.Property, iter, nil
 		}
 
@@ -367,7 +394,7 @@ func WithSelfReferenceByName(client *c8y.Client, fetcher EntityFetcher, args []s
 			return "", values, nil
 		}
 
-		formattedValues, err := lookupEntity(fetcher, values, false)
+		formattedValues, err := lookupEntity(fetcher, values, true)
 
 		if err != nil {
 			return dst, values, fmt.Errorf("failed to lookup by name. %w", err)

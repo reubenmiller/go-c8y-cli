@@ -6,7 +6,7 @@ import (
 
 func Test_parsingIDs(t *testing.T) {
 
-	ids, names := parseAndSanitizeIDs([]string{"12345, 1231123"})
+	ids, names := parseAndSanitizeIDs(IsID, []string{"12345, 1231123"})
 
 	if len(ids) != 2 {
 		t.Errorf("Failed to pass ids. wanted=2, got=%d", len(ids))
@@ -18,7 +18,7 @@ func Test_parsingIDs(t *testing.T) {
 }
 
 func Test_parsingIDsAndNames(t *testing.T) {
-	ids, names := parseAndSanitizeIDs([]string{"12345, 1231123", "0124,my values"})
+	ids, names := parseAndSanitizeIDs(IsID, []string{"12345, 1231123", "0124,my values"})
 
 	if len(ids) != 3 {
 		t.Errorf("Failed to pass ids. wanted=2, got=%d", len(ids))

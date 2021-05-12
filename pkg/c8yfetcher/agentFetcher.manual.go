@@ -9,6 +9,7 @@ import (
 
 type AgentFetcher struct {
 	client *c8y.Client
+	*DefaultFetcher
 }
 
 func NewAgentFetcher(client *c8y.Client) *AgentFetcher {

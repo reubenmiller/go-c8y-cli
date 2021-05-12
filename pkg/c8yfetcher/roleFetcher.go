@@ -10,6 +10,7 @@ import (
 
 type RoleFetcher struct {
 	client *c8y.Client
+	*DefaultFetcher
 }
 
 func NewRoleFetcher(client *c8y.Client) *RoleFetcher {

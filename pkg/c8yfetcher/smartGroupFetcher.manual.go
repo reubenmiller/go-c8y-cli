@@ -9,6 +9,7 @@ import (
 
 type SmartGroupFetcher struct {
 	client *c8y.Client
+	*DefaultFetcher
 }
 
 func NewSmartGroupFetcher(client *c8y.Client) *SmartGroupFetcher {

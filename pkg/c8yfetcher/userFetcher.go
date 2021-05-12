@@ -10,6 +10,7 @@ import (
 
 type UserFetcher struct {
 	client *c8y.Client
+	*IDNameFetcher
 }
 
 func NewUserFetcher(client *c8y.Client) *UserFetcher {

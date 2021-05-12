@@ -10,6 +10,7 @@ import (
 
 type MicroserviceFetcher struct {
 	client *c8y.Client
+	*DefaultFetcher
 }
 
 func NewMicroserviceFetcher(client *c8y.Client) *MicroserviceFetcher {

@@ -9,6 +9,7 @@ import (
 
 type ApplicationFetcher struct {
 	client *c8y.Client
+	*DefaultFetcher
 }
 
 func NewApplicationFetcher(client *c8y.Client) *ApplicationFetcher {

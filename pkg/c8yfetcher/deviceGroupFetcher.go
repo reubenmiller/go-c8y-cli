@@ -9,6 +9,7 @@ import (
 
 type DeviceGroupFetcher struct {
 	client *c8y.Client
+	*DefaultFetcher
 }
 
 func NewDeviceGroupFetcher(client *c8y.Client) *DeviceGroupFetcher {
