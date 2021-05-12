@@ -11,12 +11,12 @@ Create a new event for a device
 https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/events_create
 
 .EXAMPLE
-PS> New-Event -Device $device.id -Type c8y_TestAlarm -Text "Test event"
+PS> New-Event -Device $device.id -Type c8y_TestEvent -Text "Test event"
 
 Create a new event for a device
 
 .EXAMPLE
-PS> Get-Device -Id $device.id | PSc8y\New-Event -Type c8y_TestAlarm -Time "-0s" -Text "Test event"
+PS> Get-Device -Id $device.id | PSc8y\New-Event -Type c8y_TestEvent -Time "-0s" -Text "Test event"
 
 Create a new event for a device (using pipeline)
 

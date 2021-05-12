@@ -218,7 +218,7 @@
             "beforeEach": [
               "$device = New-TestDevice"
             ],
-            "command": "New-Event -Device $device.id -Type c8y_TestAlarm -Text \"Test event\"",
+            "command": "New-Event -Device $device.id -Type c8y_TestEvent -Text \"Test event\"",
             "afterEach": [
               "Remove-ManagedObject -Id $device.id"
             ]
@@ -228,7 +228,7 @@
             "beforeEach": [
               "$device = New-TestDevice"
             ],
-            "command": "Get-Device -Id $device.id | PSc8y\\New-Event -Type c8y_TestAlarm -Time \"-0s\" -Text \"Test event\"",
+            "command": "Get-Device -Id $device.id | PSc8y\\New-Event -Type c8y_TestEvent -Time \"-0s\" -Text \"Test event\"",
             "afterEach": [
               "Remove-ManagedObject -Id $device.id"
             ]
@@ -237,7 +237,11 @@
         "go": [
           {
             "description": "Create a new event for a device",
-            "command": "c8y events create --device mydevice --type c8y_TestAlarm --time \"-0s\" --text \"Test alarm\" --severity MAJOR"
+            "command": "c8y events create --device mydevice --type c8y_TestEvent --text \"Test event\""
+          },
+          {
+            "description": "Create a new event for a device (using pipeline)",
+            "command": "c8y devices get --id 12345 | c8y events create --type c8y_TestEvent --text \"Test event\""
           }
         ]
       },

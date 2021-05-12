@@ -34,8 +34,11 @@ func NewCreateCmd(f *cmdutil.Factory) *CreateCmd {
 		Short: "Create event",
 		Long:  `Create a new event for a device`,
 		Example: heredoc.Doc(`
-$ c8y events create --device mydevice --type c8y_TestAlarm --time "-0s" --text "Test alarm" --severity MAJOR
+$ c8y events create --device mydevice --type c8y_TestEvent --text "Test event"
 Create a new event for a device
+
+$ c8y devices get --id 12345 | c8y events create --type c8y_TestEvent --text "Test event"
+Create a new event for a device (using pipeline)
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
 			return f.CreateModeEnabled()
