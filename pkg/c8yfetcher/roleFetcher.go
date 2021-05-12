@@ -10,7 +10,7 @@ import (
 
 type RoleFetcher struct {
 	client *c8y.Client
-	*DefaultFetcher
+	*IDNameFetcher
 }
 
 func NewRoleFetcher(client *c8y.Client) *RoleFetcher {
@@ -20,6 +20,17 @@ func NewRoleFetcher(client *c8y.Client) *RoleFetcher {
 }
 
 func (f *RoleFetcher) getByID(id string) ([]fetcherResultSet, error) {
+	if strings.Contains(id, "/roles/") {
+		realID := id[strings.LastIndex(id, "/"):]
+		return []fetcherResultSet{
+			{
+				ID:   realID,
+				Name: realID,
+				Self: id,
+			},
+		}, nil
+	}
+
 	role, resp, err := f.client.User.GetRole(
 		WithDisabledDryRunContext(f.client),
 		id,
@@ -40,12 +51,13 @@ func (f *RoleFetcher) getByID(id string) ([]fetcherResultSet, error) {
 }
 
 func (f *RoleFetcher) getByName(name string) ([]fetcherResultSet, error) {
-	// check if already resolved, so we can safe a lookup
+	// check if already resolved, so we can save a lookup
 	if strings.Contains(name, "/roles/") {
+		id := name[strings.LastIndex(name, "/"):]
 		return []fetcherResultSet{
 			{
-				ID:   name,
-				Name: name,
+				ID:   id,
+				Name: id,
 				Self: name,
 			},
 		}, nil
