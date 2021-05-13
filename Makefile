@@ -41,6 +41,8 @@ install_c8y: build			## Install c8y in dev environment
 # ---------------------------------------------------------------
 # Docs
 # ---------------------------------------------------------------
+docs: docs-powershell docs-c8y		## Update all docs
+
 docs-powershell: build		## Update the powershell docs
 	pwsh -File ./scripts/build-powershell/build-docs.ps1 -Recreate -OutputFolder "docs/go-c8y-cli/docs/cli/psc8y"
 
@@ -65,6 +67,10 @@ build_gh_pages:		## build github pages
 		&& npm install \
 		&& npm run write-translations \
 		&& npm run build
+
+gh_pages_prod:  build_gh_pages		## build/serve github pages (production)
+	cd docs/go-c8y-cli \
+		&& npm run serve
 
 # ---------------------------------------------------------------
 # Spec and code generation
