@@ -3,7 +3,7 @@
 ; API server URL, default: https://asciinema.org
 ; If you run your own instance of asciinema-server then set its address here
 ; It can also be overridden by setting ASCIINEMA_API_URL environment variable
-url =
+; url =
 
 [record]
 
@@ -17,7 +17,7 @@ stdin = yes
 env = SHELL,TERM,USER
 
 ; Limit recorded terminal inactivity to max n seconds, default: off
-idle_time_limit = 2
+idle_time_limit = 5
 
 ; Answer "yes" to all interactive prompts, default: no
 yes = no
@@ -36,7 +36,7 @@ pause_key = C-p
 [play]
 
 ; Playback speed (can be fractional), default: 1
-speed = 2
+speed = 1
 
 ; Limit replayed terminal inactivity to max n seconds, default: off
 idle_time_limit = 1

@@ -16,7 +16,7 @@ Demos can be recorded using [asciinema](https://asciinema.org/)
 3. Convert the recording to an animated svg file
 
     ```sh
-    cat demo.cast | svg-term --out demo.svg
+    cat demo.cast | svg-term --out demo.svg --window --term iterm2 --profile  "Afterglow.itermcolors"
     ```
 
 4. The SVG can be referenced in markdown
