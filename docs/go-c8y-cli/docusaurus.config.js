@@ -63,7 +63,7 @@ const baseUrl = process.env.BASE_URL || '/';
     //     ],
     //   },
     // ],
-    require.resolve('docusaurus-lunr-search'),
+    // require.resolve('docusaurus-lunr-search'),
     [
       '@docusaurus/plugin-ideal-image',
       {
@@ -88,6 +88,11 @@ const baseUrl = process.env.BASE_URL || '/';
         pwaHead: [
           {
             tagName: 'link',
+            rel: 'icon',
+            href: 'img/logo.png',
+          },
+          {
+            tagName: 'link',
             rel: 'manifest',
             href: `${baseUrl}manifest.json`,
           },
@@ -107,6 +112,22 @@ const baseUrl = process.env.BASE_URL || '/';
             content: '#000',
           },
           {
+            tagName: 'link',
+            rel: 'apple-touch-icon',
+            href: 'img/logo.png',
+          },
+          {
+            tagName: 'link',
+            rel: 'mask-icon',
+            href: 'img/logo.svg',
+            color: 'rgb(62, 204, 94)',
+          },
+          {
+            tagName: 'meta',
+            name: 'msapplication-TileImage',
+            content: 'img/logo.png',
+          },
+          {
             tagName: 'meta',
             name: 'msapplication-TileColor',
             content: '#000',
@@ -122,6 +143,15 @@ const baseUrl = process.env.BASE_URL || '/';
       theme: require('prism-react-renderer/themes/github'),
       darkTheme: require('prism-react-renderer/themes/dracula'),
       additionalLanguages: ['powershell', 'javascript', 'markdown', 'bash'],
+    },
+    algolia: {
+      apiKey: '0003d78113943b9fab3bc9b8319cee82',
+      indexName: 'goc8ycli',
+      contextualSearch: false,
+      searchParameters: {
+        facetFilters: [],
+        // facetFilters: ["type:lvl1","type:lvl0"],
+      },
     },
     googleAnalytics: {
       trackingID: 'UA-155263011-1',
