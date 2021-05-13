@@ -221,11 +221,11 @@ var updateSettingsOptions = map[string]argumentHandler{
 
 	// timeout (in seconds)
 	"defaults.timeout": {"defaults.timeout", "int", "settings.defaults.timeout", []string{
-		"0",
-		"10",
-		"30",
-		"60",
-		"600",
+		"0s",
+		"10s",
+		"30s",
+		"60s",
+		"600s",
 	}, nil, cobra.ShellCompDirectiveNoFileComp},
 
 	// workers
@@ -240,22 +240,22 @@ var updateSettingsOptions = map[string]argumentHandler{
 	// delay
 	"defaults.delay": {"defaults.delay", "int", "settings.defaults.delay", []string{
 		"0",
-		"50",
-		"100",
-		"250",
-		"500",
-		"1000",
-		"2000",
+		"50ms",
+		"100ms",
+		"250ms",
+		"500ms",
+		"1000ms",
+		"2000ms",
 	}, nil, cobra.ShellCompDirectiveNoFileComp},
 
 	// delayBefore
 	"defaults.delayBefore": {"defaults.delayBefore", "int", "settings.defaults.delayBefore", []string{
 		"0",
-		"500",
-		"1000",
-		"2000",
-		"5000",
-		"10000",
+		"500ms",
+		"1000ms",
+		"2000ms",
+		"5000ms",
+		"10000ms",
 	}, nil, cobra.ShellCompDirectiveNoFileComp},
 
 	// abortOnErrors
@@ -273,8 +273,9 @@ var updateSettingsOptions = map[string]argumentHandler{
 		"",
 	}, nil, cobra.ShellCompDirectiveNoFileComp},
 
-	// outputFile
-	"defaults.outputFile": {"defaults.outputFile", "string", "settings.defaults.outputFile", []string{}, nil, cobra.ShellCompDirectiveDefault},
+	// outputFile types
+	"defaults.outputFile":    {"defaults.outputFile", "string", "settings.defaults.outputFile", []string{}, nil, cobra.ShellCompDirectiveDefault},
+	"defaults.outputFileRaw": {"defaults.outputFileRaw", "string", "settings.defaults.outputFileRaw", []string{}, nil, cobra.ShellCompDirectiveDefault},
 
 	// session
 	"session.defaultUsername": {"session.defaultUsername", "string", "settings.session.defaultUsername", []string{}, nil, cobra.ShellCompDirectiveDefault},
@@ -293,6 +294,24 @@ func NewCmdUpdate(f *cmdutil.Factory) *UpdateSettingsCmd {
 		Example: heredoc.Doc(`
 			$ c8y settings update mode dev
 			Change mode to dev to allow all commands
+
+			$ c8y settings update mode dev
+			Change mode to dev to allow all commands
+
+			$ c8y settings update defaults.delay 100ms
+			Change the default delay to 100ms (when sending more than 1 request)
+
+			Bash/zsh:
+			$ eval $( c8y settings update mode.enableCreate true --shell auto )
+			Enable create (POST) commands until the next session change
+
+			Fish:
+			$ c8y settings update mode.enableCreate true --shell auto | source
+			Enable create (POST) commands until the next session change
+
+			PowerShell:
+			$ c8y settings update mode.enableCreate true --shell auto | Out-String | Invoke-Expression
+			Enable create (POST) commands until the next session change
 		`),
 		RunE: ccmd.RunE,
 		Args: flags.ExactArgsOrExample(2),
@@ -320,7 +339,7 @@ func NewCmdUpdate(f *cmdutil.Factory) *UpdateSettingsCmd {
 		},
 	}
 
-	cmd.Flags().StringVar(&ccmd.file, "file", "", "Session or settings file to be modified")
+	// cmd.Flags().StringVar(&ccmd.file, "file", "", "Session or settings file to be modified")
 	cmd.Flags().StringVar(&ccmd.shell, "shell", "", "Output variables as shell variables which can be sourced")
 
 	completion.WithOptions(
