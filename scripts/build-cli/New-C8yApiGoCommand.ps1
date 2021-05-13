@@ -159,7 +159,7 @@
             "microserviceinstance" { [void] $CompletionBuilderOptions.AppendLine("completion.WithMicroserviceInstance(`"$($iArg.Name)`", `"id`", func() (*c8y.Client, error) { return ccmd.factory.Client()}),") }
             "role" { [void] $CompletionBuilderOptions.AppendLine("completion.WithUserRole(`"$($iArg.Name)`", func() (*c8y.Client, error) { return ccmd.factory.Client()}),") }
             "devicerequest" { [void] $CompletionBuilderOptions.AppendLine("completion.WithDeviceRegistrationRequest(`"$($iArg.Name)`", func() (*c8y.Client, error) { return ccmd.factory.Client()}),") }
-            "\[\]user$" { [void] $CompletionBuilderOptions.AppendLine("completion.WithUser(`"$($iArg.Name)`", func() (*c8y.Client, error) { return ccmd.factory.Client()}),") }
+            "\[\]user(self)?$" { [void] $CompletionBuilderOptions.AppendLine("completion.WithUser(`"$($iArg.Name)`", func() (*c8y.Client, error) { return ccmd.factory.Client()}),") }
             "(\[\])?usergroup$" { [void] $CompletionBuilderOptions.AppendLine("completion.WithUserGroup(`"$($iArg.Name)`", func() (*c8y.Client, error) { return ccmd.factory.Client()}),") }
             "(\[\])?devicegroup$" { [void] $CompletionBuilderOptions.AppendLine("completion.WithDeviceGroup(`"$($iArg.Name)`", func() (*c8y.Client, error) { return ccmd.factory.Client()}),") }
             "(\[\])?smartgroup$" { [void] $CompletionBuilderOptions.AppendLine("completion.WithSmartGroup(`"$($iArg.Name)`", func() (*c8y.Client, error) { return ccmd.factory.Client()}),") }
