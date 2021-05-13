@@ -108,8 +108,8 @@ export default function Home() {
         <main style={mainStyle}>
           <section>
             <Video
-              videoSrcURL="https://asciinema.org/a/326455/embed?speed=1.2&autoplay=false&size=small&rows=30"
-              videoTitle="PSc8y PowerShell demonstration"
+              videoSrcURL="https://asciinema.org/a/413796/embed?speed=1.0&autoplay=false&size=small&rows=30"
+              videoTitle="go-c8y-cli demo"
               width="90%"
               height="600px"
               ></Video>
