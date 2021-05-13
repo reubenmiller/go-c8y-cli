@@ -2,36 +2,31 @@
 
 ![build](https://github.com/reubenmiller/go-c8y-cli/workflows/build/badge.svg)
 
+<p align="center">
+    <img width="1000" src="demo.svg">
+</p>
 
 
-Unofficial Cumulocity REST Command Line Interface for both PowerShell and *nix (standalone binary).
+Unofficial Cumulocity IoT Command Line Tool
 
-Compatible with
+Supported on
 
-* Linux (amd64, x86, armv5-7)
+* Linux (amd64, x86, armv5->7)
 * MacOS (amd64)
 * Windows (amd64, x86)
 
 ## Installation
 
-### PowerShell Module [(PSc8y)](https://www.powershellgallery.com/packages/PSc8y)
+See the following installation instructions
 
-```powershell
-Install-Module PSc8y -AllowClobber -Scope CurrentUser
-Import-Module PSc8y
-```
-
-**Note**
-
-Please consult the docs if you are having trouble installing it.
-
-* [bash](https://reubenmiller.github.io/go-c8y-cli/docs/1-bash-installation/)
-* [PowerShell](https://reubenmiller.github.io/go-c8y-cli/docs/1-powershell-installation/)
+* [Shell](https://goc8ycli.netlify.app/docs/installation/shell-installation)
+* [Docker](https://goc8ycli.netlify.app/docs/installation/docker-installation)
+* [PowerShell](https://goc8ycli.netlify.app/docs/installation/powershell-installation)
 
 
 ## Documentation
 
-See the [documentation website](https://reubenmiller.github.io/go-c8y-cli/) for instructions on how to install and use it.
+See the [documentation website](https://goc8ycli.netlify.app/) for instructions on how to install and use it.
 
 ## Contributing
 
@@ -43,51 +38,44 @@ See the [documentation website](https://reubenmiller.github.io/go-c8y-cli/) for 
 
 2. Open the project in Microsoft VS Code (using Dev Containers - this requires Docker!)
 
-3. Edit a `.yml` specification in `api/spec/yaml/`
+3. Add or edit a command specification (`.yml` file) in `api/spec/yaml/`. The specifications are used to auto generate the go code
 
-4. Build the project using
+4. Run the code generation and build the go binary
 
     ```sh
     make build
     ```
 
-5. Try out the newly built module
+5. Try out the newly built binary (it should already be added to your)
+
+    **Shell**
+
+    ```bash
+    c8y currentuser get
+    ```
 
     **PowerShell**
 
     ```powershell
     Import-Module ./tools/PSc8y/dist/PSc8y -Force
+    Get-CurrentUser
     ```
 
-    **Bash**
+### Building the documentation
 
-    ```powershell
-    chmod +x ./output/c8y.*
-
-    ./output/c8y.linux
-    ```
-
-### Building documentation
-
-1. Build the go and powershell code
+1. Update the auto generated cli docs (if you have changed something)
 
     ```sh
-    make build
+    make docs
     ```
 
-2. Build the powershell markdown documentation
-
-    ```sh
-    make docs-powershell
-    ```
-
-3. Start a webserver to preview the documentation locally
+2. Launch the documentation preview
 
     ```sh
     make gh_pages
     ```
 
-4. View the documentation in the [browser](http:/localhost:4000)
+3. View the documentation in the [browser](http:/localhost:3000)
 
 
 ## Tests
@@ -100,12 +88,6 @@ See the [documentation website](https://reubenmiller.github.io/go-c8y-cli/) for 
     make build
     ```
 
-1. Import the bash profile
-
-    ```sh
-    source tools/shell/c8y.plugin.sh
-    ```
-
 1. Set the c8y session that you want to use for the tests
 
     ```sh
@@ -115,7 +97,7 @@ See the [documentation website](https://reubenmiller.github.io/go-c8y-cli/) for 
 ### Run all tests
 
 ```sh
-make test_powershell
+make TEST_THROTTLE_LIMIT=1 test_powershell
 ```
 
 #### Running a test on a single
