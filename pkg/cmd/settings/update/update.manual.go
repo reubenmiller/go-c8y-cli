@@ -220,7 +220,7 @@ var updateSettingsOptions = map[string]argumentHandler{
 	}, nil, cobra.ShellCompDirectiveNoFileComp},
 
 	// timeout (in seconds)
-	"defaults.timeout": {"defaults.timeout", "int", "settings.defaults.timeout", []string{
+	"defaults.timeout": {"defaults.timeout", "string", "settings.defaults.timeout", []string{
 		"0s",
 		"10s",
 		"30s",
@@ -238,7 +238,7 @@ var updateSettingsOptions = map[string]argumentHandler{
 	}, nil, cobra.ShellCompDirectiveNoFileComp},
 
 	// delay
-	"defaults.delay": {"defaults.delay", "int", "settings.defaults.delay", []string{
+	"defaults.delay": {"defaults.delay", "string", "settings.defaults.delay", []string{
 		"0",
 		"50ms",
 		"100ms",
@@ -249,7 +249,7 @@ var updateSettingsOptions = map[string]argumentHandler{
 	}, nil, cobra.ShellCompDirectiveNoFileComp},
 
 	// delayBefore
-	"defaults.delayBefore": {"defaults.delayBefore", "int", "settings.defaults.delayBefore", []string{
+	"defaults.delayBefore": {"defaults.delayBefore", "string", "settings.defaults.delayBefore", []string{
 		"0",
 		"500ms",
 		"1000ms",
