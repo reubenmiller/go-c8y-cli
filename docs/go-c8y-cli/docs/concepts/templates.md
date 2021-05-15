@@ -505,3 +505,23 @@ c8y template execute --template ./mytemplate.jsonnet
 ```
 
 </CodeExample>
+
+## Debugging
+
+If you are having problems with your templates, you can print out the full template including all of the automatically injected variables and functions by setting the following environment variable:
+
+<CodeExample>
+
+```bash
+export C8Y_JSONNET_DEBUG=true
+```
+
+```powershell
+$env:C8Y_JSONNET_DEBUG = "true"
+```
+
+```powershell
+$env:C8Y_JSONNET_DEBUG = "true"
+```
+
+</CodeExample>

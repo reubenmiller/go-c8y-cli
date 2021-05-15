@@ -20,6 +20,10 @@ c8y alarms list --device myDevice
 
 </CodeExample>
 
+:::info
+Lookup by name is not enabled for `c8y inventory` commands as name is generally not unique enough.
+:::
+
 ### Get application by name
 
 Applications can also be referenced by its name, making it easier to use:
