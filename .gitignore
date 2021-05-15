@@ -46,3 +46,4 @@ share/**
 **/.docusaurus/**
 docs/go-c8y-cli/build
 docs/go-c8y-cli/i18n
+tools/docs/demos/*.asc
