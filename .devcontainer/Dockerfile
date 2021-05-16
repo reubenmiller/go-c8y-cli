@@ -31,7 +31,7 @@ RUN wget https://packages.microsoft.com/config/debian/10/packages-microsoft-prod
     && apt-get -y install git openssh-client less iproute2 procps lsb-release gnupg \
     #
     # Extra tooling
-    && apt-get -y install make powershell nodejs unzip \
+    && apt-get -y install make powershell nodejs unzip lolcat boxes figlet randtype \
     && npm install -g yamljs svg-term-cli \
     #
     # Build Go tools w/module support
