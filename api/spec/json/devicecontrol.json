@@ -158,7 +158,7 @@
       "pathParameters": [
         {
           "name": "id",
-          "type": "string",
+          "type": "[]id",
           "required": true,
           "pipeline": true,
           "description": "Operation id"
@@ -299,7 +299,7 @@
       "pathParameters": [
         {
           "name": "id",
-          "type": "string",
+          "type": "[]id",
           "description": "Operation id",
           "pipeline": true,
           "required": true

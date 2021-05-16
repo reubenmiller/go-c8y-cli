@@ -52,6 +52,7 @@
         "[]agent" { "object[]"; break }
         "[]device" { "object[]"; break }
         "[]devicegroup" { "object[]"; break }
+        "[]id" { "object[]"; break }
         "[]smartgroup" { "object[]"; break }
         "[]role" { "object[]"; break }
         "[]roleself" { "object[]"; break }
@@ -80,7 +81,7 @@
         "set" { "object[]"; break }
         "source" { "object"; break }
         "string" { "string"; break }
-        "devicerequest" { "string"; break }
+        "[]devicerequest" { "object[]"; break }
         "strings" { "string"; break }
         "tenant" { "object"; break }
         default {

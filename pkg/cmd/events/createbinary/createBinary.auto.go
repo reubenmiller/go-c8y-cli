@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"github.com/MakeNowJust/heredoc/v2"
+	"github.com/reubenmiller/go-c8y-cli/pkg/c8yfetcher"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmd/subcommand"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmdutil"
@@ -44,7 +45,7 @@ Add a binary to an event
 
 	cmd.SilenceUsage = true
 
-	cmd.Flags().String("id", "", "Event id (required) (accepts pipeline)")
+	cmd.Flags().StringSlice("id", []string{""}, "Event id (required) (accepts pipeline)")
 	cmd.Flags().String("file", "", "File to be uploaded as a binary (required)")
 
 	completion.WithOptions(
@@ -130,7 +131,6 @@ func (n *CreateBinaryCmd) RunE(cmd *cobra.Command, args []string) error {
 		cmd,
 		body,
 		inputIterators,
-		flags.WithOverrideValue("id", "id"),
 		flags.WithDataFlagValue(),
 		cmdutil.WithTemplateValue(cfg),
 		flags.WithTemplateVariablesValue(),
@@ -145,7 +145,7 @@ func (n *CreateBinaryCmd) RunE(cmd *cobra.Command, args []string) error {
 		cmd,
 		path,
 		inputIterators,
-		flags.WithStringValue("id", "id"),
+		c8yfetcher.WithIDSlice(args, "id", "id"),
 	)
 	if err != nil {
 		return err

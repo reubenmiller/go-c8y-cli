@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"github.com/MakeNowJust/heredoc/v2"
+	"github.com/reubenmiller/go-c8y-cli/pkg/c8yfetcher"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmd/subcommand"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmdutil"
@@ -47,11 +48,12 @@ Delete a user
 	cmd.SilenceUsage = true
 
 	cmd.Flags().String("tenant", "", "Tenant")
-	cmd.Flags().String("id", "", "User id (required) (accepts pipeline)")
+	cmd.Flags().StringSlice("id", []string{""}, "User id (required) (accepts pipeline)")
 
 	completion.WithOptions(
 		cmd,
 		completion.WithTenantID("tenant", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
+		completion.WithUser("id", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
 	)
 
 	flags.WithOptions(
@@ -143,7 +145,7 @@ func (n *DeleteCmd) RunE(cmd *cobra.Command, args []string) error {
 		path,
 		inputIterators,
 		flags.WithStringDefaultValue(client.TenantName, "tenant", "tenant"),
-		flags.WithStringValue("id", "id"),
+		c8yfetcher.WithUserByNameFirstMatch(client, args, "id", "id"),
 	)
 	if err != nil {
 		return err

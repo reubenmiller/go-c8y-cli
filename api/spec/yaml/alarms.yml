@@ -254,7 +254,7 @@ endpoints:
         powershell: Get-Alarm
     pathParameters:
       - name: id
-        type: string
+        type: '[]id'
         pipeline: true
         required: true
         description: Alarm id
@@ -324,7 +324,7 @@ endpoints:
 
     pathParameters:
       - name: id
-        type: string
+        type: '[]id'
         pipeline: true
         description: Alarm id
         required: true

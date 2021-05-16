@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"github.com/MakeNowJust/heredoc/v2"
+	"github.com/reubenmiller/go-c8y-cli/pkg/c8yfetcher"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmd/subcommand"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmdutil"
@@ -44,7 +45,7 @@ Add a related managed object as a child to an existing managed object
 
 	cmd.SilenceUsage = true
 
-	cmd.Flags().String("id", "", "Managed object id where the child addition will be added to (required)")
+	cmd.Flags().StringSlice("id", []string{""}, "Managed object id where the child addition will be added to (required)")
 	cmd.Flags().String("newChild", "", "New managed object that will be added as a child addition (required) (accepts pipeline)")
 
 	completion.WithOptions(
@@ -146,7 +147,7 @@ func (n *AssignCmd) RunE(cmd *cobra.Command, args []string) error {
 		cmd,
 		path,
 		inputIterators,
-		flags.WithStringValue("id", "id"),
+		c8yfetcher.WithIDSlice(args, "id", "id"),
 	)
 	if err != nil {
 		return err

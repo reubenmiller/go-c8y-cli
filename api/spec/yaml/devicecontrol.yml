@@ -118,7 +118,7 @@ endpoints:
         powershell: Get-Operation
     pathParameters:
       - name: id
-        type: string
+        type: '[]id'
         required: true
         pipeline: true
         description: Operation id
@@ -217,7 +217,7 @@ endpoints:
       - status
     pathParameters:
       - name: id
-        type: string
+        type: '[]id'
         description: Operation id
         pipeline: true
         required: true

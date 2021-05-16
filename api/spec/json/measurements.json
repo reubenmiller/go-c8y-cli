@@ -318,7 +318,7 @@
       "pathParameters": [
         {
           "name": "id",
-          "type": "string",
+          "type": "[]id",
           "required": true,
           "pipeline": true,
           "description": "Measurement id"
@@ -418,7 +418,7 @@
       "pathParameters": [
         {
           "name": "id",
-          "type": "string",
+          "type": "[]id",
           "required": true,
           "pipeline": true,
           "description": "Measurement id"

@@ -32,7 +32,7 @@ endpoints:
           command: c8y devices list | c8y inventory assets list
     pathParameters:
       - name: id
-        type: string
+        type: '[]id'
         required: true
         pipeline: true
         pipelineAliases:
@@ -152,9 +152,9 @@ endpoints:
           command: c8y inventory assets unassign --device 12345 --childDevice 22553
     pathParameters:
       - name: id
-        type: 'string'
-        required: true
+        type: '[]id'
         description: Asset id
+        required: true
 
       - name: child
         type: 'string'

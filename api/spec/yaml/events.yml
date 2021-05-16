@@ -147,7 +147,7 @@ endpoints:
         powershell: Get-Event
     pathParameters:
       - name: id
-        type: string
+        type: '[]id'
         required: true
         pipeline: true
         description: Event id
@@ -261,7 +261,7 @@ endpoints:
         powershell: Update-Event
     pathParameters:
       - name: id
-        type: string
+        type: '[]id'
         required: true
         pipeline: true
         description: Event id
@@ -294,7 +294,7 @@ endpoints:
         powershell: Remove-Event
     pathParameters:
       - name: id
-        type: string
+        type: '[]id'
         required: true
         pipeline: true
         description: Event id
@@ -330,7 +330,7 @@ endpoints:
           command: c8y events downloadBinary --id 12345 --outputFileRaw ./eventbinary.txt
     pathParameters:
       - name: id
-        type: string
+        type: '[]id'
         required: true
         pipeline: true
         description: Event id
@@ -361,7 +361,7 @@ endpoints:
           command: c8y events createBinary --id 12345 --file ./myfile.log
     pathParameters:
       - name: id
-        type: string
+        type: '[]id'
         required: true
         pipeline: true
         description: Event id
@@ -400,7 +400,7 @@ endpoints:
 
     pathParameters:
       - name: id
-        type: string
+        type: '[]id'
         required: true
         pipeline: true
         description: Event id
@@ -442,7 +442,7 @@ endpoints:
           command: c8y events deleteBinary --id 12345
     pathParameters:
       - name: id
-        type: string
+        type: '[]id'
         required: true
         pipeline: true
         description: Event id

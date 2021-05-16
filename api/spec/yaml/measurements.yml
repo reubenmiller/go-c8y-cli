@@ -236,7 +236,7 @@ endpoints:
           command: c8y measurements get --id 12345
     pathParameters:
       - name: id
-        type: string
+        type: '[]id'
         required: true
         pipeline: true
         description: Measurement id
@@ -309,7 +309,7 @@ endpoints:
           command: c8y measurements delete --id 12345
     pathParameters:
       - name: id
-        type: string
+        type: '[]id'
         required: true
         pipeline: true
         description: Measurement id

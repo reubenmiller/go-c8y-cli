@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"github.com/MakeNowJust/heredoc/v2"
+	"github.com/reubenmiller/go-c8y-cli/pkg/c8yfetcher"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmd/subcommand"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmdutil"
@@ -44,7 +45,7 @@ Unassign a child addition from its parent managed object
 
 	cmd.SilenceUsage = true
 
-	cmd.Flags().String("id", "", "Managed object id (required)")
+	cmd.Flags().StringSlice("id", []string{""}, "Managed object id (required)")
 	cmd.Flags().String("childId", "", "Child managed object id (required) (accepts pipeline)")
 
 	completion.WithOptions(
@@ -140,7 +141,7 @@ func (n *UnassignCmd) RunE(cmd *cobra.Command, args []string) error {
 		cmd,
 		path,
 		inputIterators,
-		flags.WithStringValue("id", "id"),
+		c8yfetcher.WithIDSlice(args, "id", "id"),
 		flags.WithStringValue("childId", "childId"),
 	)
 	if err != nil {

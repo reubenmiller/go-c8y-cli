@@ -75,9 +75,12 @@
         # microservice instance
         "microserviceinstance" = "flags.WithStringValue(`"${prop}`", `"${queryParam}`"),"
 
-        # devicerequest
-        "devicerequest" = "flags.WithStringValue(`"${prop}`", `"${queryParam}`"),"
+        # devicerequest array
+        "[]devicerequest" = "c8yfetcher.WithIDSlice(args, `"${prop}`", `"${queryParam}`"),"
 
+        # id array
+        "[]id" = "c8yfetcher.WithIDSlice(args, `"${prop}`", `"${queryParam}`"),"
+        
         # device array
         "[]device" = "c8yfetcher.WithDeviceByNameFirstMatch(client, args, `"${prop}`", `"${queryParam}`"),"
 

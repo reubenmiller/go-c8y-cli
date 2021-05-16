@@ -251,7 +251,7 @@ endpoints:
 
     pathParameters:
       - name: id
-        type: string
+        type: '[]id'
         pipeline: true
         required: true
         description: ManagedObject id
@@ -302,7 +302,7 @@ endpoints:
 
     pathParameters:
       - name: id
-        type: string
+        type: '[]id'
         pipeline: true
         description: ManagedObject id
         required: true
@@ -350,7 +350,7 @@ endpoints:
           command: c8y inventory delete --id 12345 --cascade
     pathParameters:
       - name: id
-        type: string
+        type: '[]id'
         pipeline: true
         required: true
         description: ManagedObject id

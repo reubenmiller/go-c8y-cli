@@ -7,6 +7,7 @@ import (
 	"net/http"
 
 	"github.com/MakeNowJust/heredoc/v2"
+	"github.com/reubenmiller/go-c8y-cli/pkg/c8yfetcher"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmd/subcommand"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmdutil"
@@ -48,7 +49,7 @@ Get a managed object with parent references
 
 	cmd.SilenceUsage = true
 
-	cmd.Flags().String("id", "", "ManagedObject id (required) (accepts pipeline)")
+	cmd.Flags().StringSlice("id", []string{""}, "ManagedObject id (required) (accepts pipeline)")
 	cmd.Flags().Bool("withParents", false, "include a flat list of all parents and grandparents of the given object")
 
 	completion.WithOptions(
@@ -147,7 +148,7 @@ func (n *GetCmd) RunE(cmd *cobra.Command, args []string) error {
 		cmd,
 		path,
 		inputIterators,
-		flags.WithStringValue("id", "id"),
+		c8yfetcher.WithIDSlice(args, "id", "id"),
 	)
 	if err != nil {
 		return err

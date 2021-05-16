@@ -45,7 +45,7 @@ endpoints:
           command: c8y inventory additions list --id 12345
     pathParameters:
       - name: id
-        type: 'string'
+        type: '[]id'
         pipeline: true
         pipelineAliases:
           - "deviceId"
@@ -81,7 +81,7 @@ endpoints:
             command: c8y inventory additions assign --id 12345 --newChild 6789
     pathParameters:
       - name: id
-        type: string
+        type: '[]id'
         property: id
         required: true
         description: Managed object id where the child addition will be added to
@@ -121,7 +121,7 @@ endpoints:
           command: c8y inventory additions unassign --id 12345 --childId 22553
     pathParameters:
       - name: id
-        type: 'string'
+        type: '[]id'
         required: true
         description: Managed object id
 

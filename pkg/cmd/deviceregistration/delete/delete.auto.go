@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"github.com/MakeNowJust/heredoc/v2"
+	"github.com/reubenmiller/go-c8y-cli/pkg/c8yfetcher"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmd/subcommand"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmdutil"
@@ -44,7 +45,7 @@ Delete a new device request
 
 	cmd.SilenceUsage = true
 
-	cmd.Flags().String("id", "", "New Device Request ID (required) (accepts pipeline)")
+	cmd.Flags().StringSlice("id", []string{""}, "New Device Request ID (required) (accepts pipeline)")
 
 	completion.WithOptions(
 		cmd,
@@ -139,7 +140,7 @@ func (n *DeleteCmd) RunE(cmd *cobra.Command, args []string) error {
 		cmd,
 		path,
 		inputIterators,
-		flags.WithStringValue("id", "id"),
+		c8yfetcher.WithIDSlice(args, "id", "id"),
 	)
 	if err != nil {
 		return err

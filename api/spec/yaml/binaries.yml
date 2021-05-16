@@ -75,7 +75,7 @@ endpoints:
           command: c8y binaries get --id 12345 --outputFileRaw "./download-binary1.txt"
     pathParameters:
       - name: id
-        type: string
+        type: '[]id'
         required: true
         pipeline: true
         description: Inventory binary id
@@ -162,7 +162,7 @@ endpoints:
           command: c8y binaries update --id 12345 --file ./output.log
     pathParameters:
       - name: id
-        type: string
+        type: '[]id'
         required: true
         pipeline: true
         description: Inventory binary id
@@ -196,7 +196,7 @@ endpoints:
           command: c8y binaries delete --id 12345
     pathParameters:
       - name: id
-        type: string
+        type: '[]id'
         required: true
         pipeline: true
         description: Inventory binary id

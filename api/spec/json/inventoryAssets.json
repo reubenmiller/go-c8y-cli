@@ -41,7 +41,7 @@
       "pathParameters": [
         {
           "name": "id",
-          "type": "string",
+          "type": "[]id",
           "required": true,
           "pipeline": true,
           "pipelineAliases": [
@@ -206,9 +206,9 @@
       "pathParameters": [
         {
           "name": "id",
-          "type": "string",
-          "required": true,
-          "description": "Asset id"
+          "type": "[]id",
+          "description": "Asset id",
+          "required": true
         },
         {
           "name": "child",

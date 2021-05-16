@@ -555,6 +555,7 @@ Function Get-IteratorFunction {
 
     $ExpandFunction = switch ($Type) {
         "[]device" { "(PSc8y\Expand-Device $Variable)" }
+        "[]id" { "(PSc8y\Expand-Id $Variable)" }
         "[]role" { "(PSc8y\Expand-Id $Variable)" }
         "[]roleself" { "(PSc8y\Expand-Id $Variable)" }
         "[]tenant" { "(PSc8y\Expand-Tenant $Variable)" }

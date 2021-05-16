@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"github.com/MakeNowJust/heredoc/v2"
+	"github.com/reubenmiller/go-c8y-cli/pkg/c8yfetcher"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmd/subcommand"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmdutil"
@@ -47,7 +48,7 @@ Update severity of an existing alarm to CRITICAL
 
 	cmd.SilenceUsage = true
 
-	cmd.Flags().String("id", "", "Alarm id (required) (accepts pipeline)")
+	cmd.Flags().StringSlice("id", []string{""}, "Alarm id (required) (accepts pipeline)")
 	cmd.Flags().String("status", "", "Comma separated alarm statuses, for example ACTIVE,CLEARED.")
 	cmd.Flags().String("severity", "", "Alarm severity, for example CRITICAL, MAJOR, MINOR or WARNING.")
 	cmd.Flags().String("text", "", "Text description of the alarm.")
@@ -153,7 +154,7 @@ func (n *UpdateCmd) RunE(cmd *cobra.Command, args []string) error {
 		cmd,
 		path,
 		inputIterators,
-		flags.WithStringValue("id", "id"),
+		c8yfetcher.WithIDSlice(args, "id", "id"),
 	)
 	if err != nil {
 		return err

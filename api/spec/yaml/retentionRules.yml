@@ -116,7 +116,7 @@ endpoints:
           command: c8y retentionRules get --id 12345
     pathParameters:
       - name: id
-        type: string
+        type: '[]id'
         required: true
         pipeline: true
         description: Retention rule id
@@ -147,7 +147,7 @@ endpoints:
           command: c8y retentionRules delete --id 12345
     pathParameters:
       - name: id
-        type: string
+        type: '[]id'
         required: true
         pipeline: true
         description: Retention rule id
@@ -183,7 +183,7 @@ endpoints:
           command: c8y retentionRules get --id 12345
     pathParameters:
       - name: id
-        type: string
+        type: '[]id'
         required: true
         pipeline: true
         description: Retention rule id

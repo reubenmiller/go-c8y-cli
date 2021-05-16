@@ -276,6 +276,46 @@ func (i *EntityIterator) GetNext() (value []byte, input interface{}, err error) 
 	return []byte(returnValue), rawValue, nil
 }
 
+// WithIDSlice adds an id slice from cli arguments
+func WithIDSlice(args []string, opts ...string) flags.GetOption {
+	return func(cmd *cobra.Command, inputIterators *flags.RequestInputIterators) (string, interface{}, error) {
+
+		src, dst, _ := flags.UnpackGetterOptions("", opts...)
+
+		// check for arguments which could override the value
+		values, err := cmd.Flags().GetStringSlice(src)
+		if err != nil {
+			singleValue, err := cmd.Flags().GetString(src)
+			if err != nil {
+				return "", "", err
+			}
+			values = []string{singleValue}
+		}
+
+		values = ParseValues(append(values, args...))
+
+		if len(values) > 0 {
+			return dst, iterator.NewSliceIterator(values), nil
+		}
+
+		if inputIterators != nil && inputIterators.PipeOptions.Name == src {
+			hasPipeSupport := inputIterators.PipeOptions.Name == src
+			pipeIter, err := flags.NewFlagWithPipeIterator(cmd, inputIterators.PipeOptions, hasPipeSupport)
+
+			if err != nil || pipeIter == nil {
+				return "", nil, err
+			}
+			return inputIterators.PipeOptions.Property, pipeIter, nil
+		}
+
+		if len(values) == 0 {
+			return "", values, nil
+		}
+
+		return dst, values, err
+	}
+}
+
 // WithReferenceByName adds support for looking up values by name via cli args
 func WithReferenceByName(client *c8y.Client, fetcher EntityFetcher, args []string, opts ...string) flags.GetOption {
 	return func(cmd *cobra.Command, inputIterators *flags.RequestInputIterators) (string, interface{}, error) {

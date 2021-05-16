@@ -58,7 +58,7 @@
       "pathParameters": [
         {
           "name": "id",
-          "type": "string",
+          "type": "[]id",
           "pipeline": true,
           "pipelineAliases": [
             "deviceId",
@@ -109,7 +109,7 @@
       "pathParameters": [
         {
           "name": "id",
-          "type": "string",
+          "type": "[]id",
           "property": "id",
           "required": true,
           "description": "Managed object id where the child addition will be added to",
@@ -165,7 +165,7 @@
       "pathParameters": [
         {
           "name": "id",
-          "type": "string",
+          "type": "[]id",
           "required": true,
           "description": "Managed object id"
         },

@@ -7,6 +7,7 @@ import (
 	"net/http"
 
 	"github.com/MakeNowJust/heredoc/v2"
+	"github.com/reubenmiller/go-c8y-cli/pkg/c8yfetcher"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmd/subcommand"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmdutil"
@@ -51,7 +52,7 @@ Check all bulk operations if they have any related operations still in executing
 
 	cmd.SilenceUsage = true
 
-	cmd.Flags().String("id", "", "Bulk operation id. (required) (accepts pipeline)")
+	cmd.Flags().StringSlice("id", []string{""}, "Bulk operation id. (required) (accepts pipeline)")
 	cmd.Flags().String("dateFrom", "", "Start date or date and time of operation.")
 	cmd.Flags().String("dateTo", "", "End date or date and time of operation.")
 	cmd.Flags().String("status", "", "Operation status, can be one of SUCCESSFUL, FAILED, EXECUTING or PENDING.")
@@ -98,7 +99,7 @@ func (n *ListOperationsCmd) RunE(cmd *cobra.Command, args []string) error {
 		query,
 		inputIterators,
 		flags.WithCustomStringSlice(func() ([]string, error) { return cfg.GetQueryParameters(), nil }, "custom"),
-		flags.WithStringValue("id", "bulkOperationId"),
+		c8yfetcher.WithIDSlice(args, "id", "bulkOperationId"),
 		flags.WithEncodedRelativeTimestamp("dateFrom", "dateFrom", ""),
 		flags.WithEncodedRelativeTimestamp("dateTo", "dateTo", ""),
 		flags.WithStringValue("status", "status"),

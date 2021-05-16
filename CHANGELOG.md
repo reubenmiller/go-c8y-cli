@@ -65,20 +65,14 @@ None :)
 * set-session causes bad console wrapping when console is not wide enough
     * reduce message when width is not ok, or look at doing manual wrapping for
 
-* duplicate output when using c8y agents get --id name1,name2
 
-    ```sh
-    c8y agents create --name agent01
-    c8y agents create --name agent02
-    c8y agents get --id agent01,agent02 --select name -o csv
+* Piping empty results has unexpected consequences
+
+    ```
+    c8y agents list | c8y alarms list --dry | c8y auditrecords list --dry
+    echo "{}" | c8y auditrecords list --dry
     ```
 
-    Will return two output entries
-
-    ```sh
-    agent01
-    agent01
-    ```
 
 ~~not known~~
 ### Commands

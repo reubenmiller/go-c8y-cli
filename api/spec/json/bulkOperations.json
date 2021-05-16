@@ -85,7 +85,7 @@
       "pathParameters": [
         {
           "name": "id",
-          "type": "string",
+          "type": "[]id",
           "required": true,
           "pipeline": true,
           "description": "Bulk Operation id"
@@ -126,7 +126,7 @@
       "pathParameters": [
         {
           "name": "id",
-          "type": "string",
+          "type": "[]id",
           "required": true,
           "pipeline": true,
           "description": "Bulk Operation id"
@@ -273,7 +273,7 @@
       "pathParameters": [
         {
           "name": "id",
-          "type": "string",
+          "type": "[]id",
           "description": "Bulk Operation id",
           "pipeline": true,
           "required": true
@@ -329,7 +329,7 @@
       "queryParameters": [
         {
           "name": "id",
-          "type": "string",
+          "type": "[]id",
           "property": "bulkOperationId",
           "pipeline": true,
           "required": true,

@@ -284,6 +284,113 @@ Describe -Name "c8y pipes" {
         }
     }
 
+    Context "Pipe ids" {
+        It "Get by muliple ids" {
+            $output = c8y alarms get --id 1111,2222 --dry --dryFormat json
+            $requests = $output | ConvertFrom-Json
+            $requests | Should -HaveCount 2
+            $requests[0].path | Should -BeExactly "/alarm/alarms/1111"
+            $requests[1].path | Should -BeExactly "/alarm/alarms/2222"
+        }
+
+        It "Update by muliple ids" {
+            $output = c8y alarms update --id 1111,2222 --data "myvalue=one" --dry --dryFormat json
+            $requests = $output | ConvertFrom-Json
+            $requests | Should -HaveCount 2
+            $requests[0].path | Should -BeExactly "/alarm/alarms/1111"
+            $requests[1].path | Should -BeExactly "/alarm/alarms/2222"
+        }
+
+        It "Delete by muliple ids" {
+            $output = c8y events delete --id 1111,2222 --dry --dryFormat json
+            $requests = $output | ConvertFrom-Json
+            $requests | Should -HaveCount 2
+            $requests[0].path | Should -BeExactly "/event/events/1111"
+            $requests[1].path | Should -BeExactly "/event/events/2222"
+        }
+
+        It "pipes multiple ids" {
+            $output = 1111, 2222 | c8y alarms get --dry --dryFormat json
+            $requests = $output | ConvertFrom-Json
+            $requests | Should -HaveCount 2
+            $requests[0].path | Should -BeExactly "/alarm/alarms/1111"
+            $requests[1].path | Should -BeExactly "/alarm/alarms/2222"
+        }
+    }
+
+    Context "Additions" {
+        It "Read nested values from piped data" {
+            $inputvalues = @{source=@{id="2222"}} | ConvertTo-Json -Compress
+            $output = $inputvalues | c8y inventory additions list --dry --dryFormat json
+            
+            $requests = $output | ConvertFrom-Json
+            $requests[0].path | Should -BeExactly "/inventory/managedObjects/2222/childAdditions"
+        }
+    }
+
+    Context "Registration" {
+        It "Register multiple devices" {
+            $output = c8y deviceregistration register --id "1111,2222" --dry --dryFormat json
+            $requests = $output | ConvertFrom-Json
+            $requests | Should -HaveCount 2
+            $requests[0].body.id | Should -BeExactly "1111"
+            $requests[1].body.id | Should -BeExactly "2222"
+        }
+
+        It "Register multiple devices via pipeline" {
+            $output = 1111, 2222 | c8y deviceregistration register --dry --dryFormat json
+            $requests = $output | ConvertFrom-Json
+            $requests | Should -HaveCount 2
+            $requests[0].body.id | Should -BeExactly "1111"
+            $requests[1].body.id | Should -BeExactly "2222"
+        }
+
+        It "Get device credentials via arguments" {
+            $output = c8y deviceregistration getCredentials --id 1111,2222 --dry --dryFormat json
+            $requests = $output | ConvertFrom-Json
+            $requests | Should -HaveCount 2
+            $requests[0].body.id | Should -BeExactly "1111"
+            $requests[1].body.id | Should -BeExactly "2222"
+        }
+
+        It "Get device credentials via pipeline" {
+            $output = 1111, 2222 | c8y deviceregistration getCredentials --dry --dryFormat json
+            $requests = $output | ConvertFrom-Json
+            $requests | Should -HaveCount 2
+            $requests[0].body.id | Should -BeExactly "1111"
+            $requests[1].body.id | Should -BeExactly "2222"
+        }
+
+        
+    }
+
+    Context "Bulk operations" {
+
+        It "Get list of related operations via list of bulk operation ids" {
+            $output = c8y bulkoperations listOperations --id 10,20 --dry --dryFormat json
+            $requests = $output | ConvertFrom-Json
+            $requests | Should -HaveCount 2
+            $requests[0].pathEncoded | Should -BeExactly "/devicecontrol/operations?bulkOperationId=10"
+            $requests[1].pathEncoded | Should -BeExactly "/devicecontrol/operations?bulkOperationId=20"
+        }
+
+        It "Get list of related operations via piping of bulk operation ids" {
+            $output = 10, 20 |c8y bulkoperations listOperations --dry --dryFormat json
+            $requests = $output | ConvertFrom-Json
+            $requests | Should -HaveCount 2
+            $requests[0].pathEncoded | Should -BeExactly "/devicecontrol/operations?bulkOperationId=10"
+            $requests[1].pathEncoded | Should -BeExactly "/devicecontrol/operations?bulkOperationId=20"
+        }
+
+        It "arguments should be preferred over piped ids" {
+            $output = 1, 2 |c8y bulkoperations listOperations --id 10,20 --dry --dryFormat json
+            $requests = $output | ConvertFrom-Json
+            $requests | Should -HaveCount 2
+            $requests[0].pathEncoded | Should -BeExactly "/devicecontrol/operations?bulkOperationId=10"
+            $requests[1].pathEncoded | Should -BeExactly "/devicecontrol/operations?bulkOperationId=20"
+        }
+    }
+
     AfterAll {
         $ids | Remove-ManagedObject
     }

@@ -367,7 +367,7 @@
       "pathParameters": [
         {
           "name": "id",
-          "type": "string",
+          "type": "[]id",
           "pipeline": true,
           "required": true,
           "description": "Alarm id"
@@ -471,7 +471,7 @@
       "pathParameters": [
         {
           "name": "id",
-          "type": "string",
+          "type": "[]id",
           "pipeline": true,
           "description": "Alarm id",
           "required": true

@@ -62,7 +62,7 @@
       "pathParameters": [
         {
           "name": "id",
-          "type": "string",
+          "type": "[]id",
           "required": true,
           "pipeline": true,
           "description": "Role id. Note: lookup by name is not yet supported"
@@ -389,7 +389,7 @@
         },
         {
           "name": "id",
-          "type": "string",
+          "type": "[]user",
           "required": true,
           "pipeline": true,
           "description": "User id"
