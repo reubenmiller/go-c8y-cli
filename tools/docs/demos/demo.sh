@@ -9,8 +9,8 @@ sub_data () {
     local tenant=$( c8y sessions get --select tenant -o csv )
     local host=$( c8y sessions get --select host -o csv )
     local domain=$( c8y sessions get --select host -o csv | sed -E 's/[^.]+\.(.+)/\1/g' )
-
-    sed -i "s/$tenant/t12345/g" "$file"
+    sed -i 's/\bt[0-9]\+/t1234567/g' "$file"
+    sed -i "s/$tenant/t1234567/g" "$file"
     sed -i "s/$host/example.cumulocity.com/g" "$file"
     sed -i "s/$domain/cumulocity.com/g" "$file"
 }

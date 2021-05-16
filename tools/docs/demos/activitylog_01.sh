@@ -6,8 +6,7 @@ source "$dir/helpers.sh"
 demo () {
     local lb=" \\ \\\n \\\t "
     local nlb="\\\n\\\t "
-    # runCommand $( echo -e "c8y activitylog list $lb--dateFrom -5min $lb--filter \"method eq POST\" --filter \"path like *managedObjects*\" $lb--select responseTimeMS -o csv | $nlb datamash -H min 1 max 1 mean 1 | column -t" )
-    # exit
+
     showbanner "Create some example agents"
     runCommand "c8y util repeat 5 --format \"agent_%s%03s\" | c8y agents create --force --delay 250ms"
     sleep 3

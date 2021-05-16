@@ -15,6 +15,11 @@ showbanner () {
     sleep 0.800
 }
 
+showtitle () {
+    echo "$@" | boxes | lolcat -d 1
+    sleep 0.800
+}
+
 #
 # Simulate typing and then run the command
 #
