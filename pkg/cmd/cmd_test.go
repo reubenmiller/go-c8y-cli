@@ -443,7 +443,7 @@ func Test_DebugCommand(t *testing.T) {
 	cmd.SetIn(stdin)
 	// operations create --device livedemo01 --data "c8y_Restart={}"
 	cmdtext := `
-	userreferences addUserToGroup --group business --user testuser_qj8um70stc --dry --dryFormat markdown
+	agents get --id agent01,agent02 --select name -o csv
 	`
 	// operations create --dry --template "{v:input.value}" --device livedemo01
 	cmdErr := ExecuteCmd(cmd, strings.TrimSpace(cmdtext))

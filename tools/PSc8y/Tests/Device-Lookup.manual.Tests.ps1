@@ -3,6 +3,7 @@
 Describe -Name "Device lookup up manual tests" {
     BeforeEach {
         $Device = PSc8y\New-TestDevice
+        $Device2 = PSc8y\New-TestDevice
         $Group = PSc8y\New-TestDeviceGroup
 
     }
@@ -69,6 +70,14 @@ Describe -Name "Device lookup up manual tests" {
         $output | Should -ContainRequest "DELETE" -Total 0
         $output | Should -ContainRequest "POST" -Total 0
         $output | Should -ContainRequest "GET /inventory/managedObjects/$($Device.id)" -Total 1
+    }
+
+    It "Accepts multiple named values in the --id parameter" {
+        $output = c8y devices get --id $Device.name,$Device2.name --select id,name --output csv
+        $LASTEXITCODE | Should -Be 0
+        $output | Should -HaveCount 2
+        $output[0] | Should -BeExactly "$($Device.id),$($($Device.name))"
+        $output[1] | Should -BeExactly "$($Device2.id),$($($Device2.name))"
     }
 
     AfterEach {
