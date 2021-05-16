@@ -46,46 +46,41 @@ None :)
 
 ### Docs
 
-* [ ] Activity Log
 * [ ] Workers
-* [ ] Filtering
 * [ ] Confirmation
 * [ ] Views
-* [ ] Configuration (defaults, environment variables, arguments)
 * [ ] Session encryption
-* [ ] Common Parameters
-* [ ] Error handling
-* [ ] Aliases
 * [ ] Partial setting of sessions (i.e. bootstrap credentials with only the username/password set)
+* [x] Activity Log
+* [x] Filtering
+* [x] Configuration (defaults, environment variables, arguments)
+* [x] Common Parameters
+* [x] Error handling
+* [x] Aliases
 
 ### Naming Consistency
 
 ### Bugs
 
-* Creating alias on windows uses different quoting to shell! Just show in documentation and/or examples
-        
-        ```powershell
-        # Need to escape double quotes!!!
-        c8y alias set cancelop 'operations update --status FAILED --failureReason \"User cancelled operation\"'
-        
+* set-session causes bad console wrapping when console is not wide enough
+    * reduce message when width is not ok, or look at doing manual wrapping for
 
-        # Or use single quotes
-        c8y alias set cancelop "operations update --status=FAILED --failureReason='User cancelled operation'"
-        ```
-
-* No error is shown to the user when POST is disabled
+* duplicate output when using c8y agents get --id name1,name2
 
     ```sh
-    echo -e "1\n2\n3" | c8y devicegroups assignDevice --group 6907807778 --workers 2 --delay 250 --progress
+    c8y agents create --name agent01
+    c8y agents create --name agent02
+    c8y agents get --id agent01,agent02 --select name -o csv
     ```
 
-* Following command returns a non-zero exit code
-    ```
-    comm -3 "$all_devices" "$devices_with_operations" | head -10 | c8y operations create --template "$operation_template" --data "bulkOperationId=$bulk_id" --workers $MAX_WORKERS --delay $delay_ms --progress --force=$FORCED
+    Will return two output entries
+
+    ```sh
+    agent01
+    agent01
     ```
 
-* running c8y sessions set --session myfile.json (on a service user) still prompts for the full authentication. Expected: don't use OAUTH2_INTERNAL authentication for specific users, or have an option to disable it
-
+~~not known~~
 ### Commands
 
 * Delete activity log?
@@ -103,14 +98,37 @@ None :)
     ```
 
 * c8y settings update: option to write to the global sessions file instead of the profile
+
 * how to get the global session file? add to settings list
 
 * add min/max/average/count to progress bar (and output)
 
 * Add graph to show response times: https://github.com/guptarohit/asciigraph
 
-    ```sh
+* Add following template variables
+    * Tenant id
+    * Base url (without tenant id, just C8Y_URL)
+    * Base tenant url (with tenant id, where to get this from?)
+    * or _.ExpandUrl('/inventory/binaries/12345')
 
+    ```json
+    {
+        "c8y_DownloadConfigFile": {
+            "type": "EXAMPLE_CONFIG",
+            "url": "https://t12345.example.c8y.com/inventory/binaries/12345"
+        },
+        "description": "Send configuration snapshot custom-config of configuration type EXAMPLE_CONFIG to device demo01_IDKS"
+    }
+    ```
+
+    ```json
+    {
+        "c8y_DownloadConfigFile": {
+            "type": "EXAMPLE_CONFIG",
+            "url": _.tenantUrl() + "/inventory/binaries/12345"
+        },
+        "description": "Send configuration snapshot custom-config of configuration type EXAMPLE_CONFIG to device demo01_IDKS"
+    }
     ```
 
 ### Refactoring
