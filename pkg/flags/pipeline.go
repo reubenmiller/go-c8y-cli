@@ -46,6 +46,10 @@ func NewFlagWithPipeIterator(cmd *cobra.Command, pipeOpt *PipelineOptions, suppo
 			lineFilter = pipeOpt.InputFilter
 		}
 		iter, err := iterator.NewJSONPipeIterator(cmd.InOrStdin(), iterOpts, lineFilter)
+
+		if err == iterator.ErrEmptyPipeInput && !pipeOpt.EmptyPipe {
+			return iter, err
+		}
 		if err == nil {
 			return iter, nil
 		}

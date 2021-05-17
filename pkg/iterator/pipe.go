@@ -16,6 +16,9 @@ import (
 // ErrNoPipeInput is an error when there is no piped input on standard input
 var ErrNoPipeInput = errors.New("iterator: no piped input")
 
+// ErrEmptyPipeInput pipe input is being used but it is empty
+var ErrEmptyPipeInput = errors.New("iterator: empty pipe input")
+
 // Filter is a funciton applied on every iteration. Returning False will end the iterator
 type Filter func([]byte) bool
 
@@ -177,7 +180,10 @@ func NewJSONPipeIterator(in io.Reader, pipeOpts *PipeOptions, filter ...Filter) 
 
 	reader := bufio.NewReader(input)
 	if _, err := reader.Peek(1); err != nil {
-		return nil, ErrNoPipeInput
+		if err == io.EOF {
+			return nil, ErrEmptyPipeInput
+		}
+		return nil, err
 	}
 
 	var pipelineFilter Filter

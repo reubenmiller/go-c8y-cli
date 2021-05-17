@@ -347,7 +347,7 @@ func WithReferenceByName(client *c8y.Client, fetcher EntityFetcher, args []strin
 				return "", nil, err
 			}
 			minMatches := 0
-			if inputIterators.PipeOptions.Required {
+			if inputIterators.PipeOptions.Required || false {
 				minMatches = 1
 			}
 			iter := NewReferenceByNameIterator(fetcher, client, pipeIter, minMatches, overrideValue)
@@ -422,7 +422,7 @@ func WithSelfReferenceByName(client *c8y.Client, fetcher EntityFetcher, args []s
 				return "", nil, err
 			}
 			minMatches := 0
-			if inputIterators.PipeOptions.Required {
+			if inputIterators.PipeOptions.Required || false {
 				minMatches = 1
 			}
 			iter := NewReferenceByNameIterator(fetcher, client, pipeIter, minMatches, overrideValue)
@@ -626,7 +626,8 @@ func WithReferenceByNamePipeline(client *c8y.Client, fetcher EntityFetcher, opts
 		}
 
 		minMatches := 0
-		if inputIterators.PipeOptions.Required {
+		// TODO: Check if required can be ignored or not
+		if inputIterators.PipeOptions.Required || false {
 			minMatches = 1
 		}
 		iter := NewReferenceByNameIterator(fetcher, client, pipeIter, minMatches, nil)

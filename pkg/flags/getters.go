@@ -269,6 +269,7 @@ func WithStringValue(opts ...string) GetOption {
 
 		if inputIterators != nil && inputIterators.PipeOptions != nil {
 			if inputIterators.PipeOptions.Name == src {
+				inputIterators.PipeOptions.EmptyPipe = false
 				return WithPipelineIterator(inputIterators.PipeOptions)(cmd, inputIterators)
 			}
 		}
@@ -668,6 +669,7 @@ func WithRequiredProperties(values ...string) GetOption {
 type PipelineOptions struct {
 	Name        string              `json:"name"`
 	Required    bool                `json:"required"`
+	EmptyPipe   bool                `json:"allowEmptyPipe"`
 	Disabled    bool                `json:"disabled"`
 	Property    string              `json:"property"`
 	Aliases     []string            `json:"aliases"`
