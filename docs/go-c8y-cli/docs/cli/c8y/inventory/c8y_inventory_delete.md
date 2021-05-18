@@ -28,7 +28,7 @@ Delete a managed object
 ```
       --cascade                 Remove all child devices and child assets will be deleted recursively. By default, the delete operation is propagated to the subgroups only if the deleted object is a group
   -h, --help                    help for delete
-      --id string               ManagedObject id (required) (accepts pipeline)
+      --id strings              ManagedObject id (required) (accepts pipeline)
       --processingMode string   Cumulocity processing mode
 ```
 

@@ -23,8 +23,8 @@ Get bulk operation by id
 ### Options
 
 ```
-  -h, --help        help for get
-      --id string   Bulk Operation id (required) (accepts pipeline)
+  -h, --help         help for get
+      --id strings   Bulk Operation id (required) (accepts pipeline)
 ```
 
 ### Options inherited from parent commands

@@ -26,8 +26,8 @@ Get a list of the child devices using pipeline
 ### Options
 
 ```
-  -h, --help        help for list
-      --id string   Managed object. (required) (accepts pipeline)
+  -h, --help         help for list
+      --id strings   Managed object. (required) (accepts pipeline)
 ```
 
 ### Options inherited from parent commands

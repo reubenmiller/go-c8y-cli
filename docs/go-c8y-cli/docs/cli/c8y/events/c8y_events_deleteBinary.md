@@ -25,7 +25,7 @@ Delete an binary attached to an event
 
 ```
   -h, --help                    help for deleteBinary
-      --id string               Event id (required) (accepts pipeline)
+      --id strings              Event id (required) (accepts pipeline)
       --processingMode string   Cumulocity processing mode
 ```
 

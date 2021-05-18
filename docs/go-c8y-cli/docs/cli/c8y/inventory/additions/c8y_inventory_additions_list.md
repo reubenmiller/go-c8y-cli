@@ -23,8 +23,8 @@ Get a list of the child additions of an existing managed object
 ### Options
 
 ```
-  -h, --help        help for list
-      --id string   Managed object id. (required) (accepts pipeline)
+  -h, --help         help for list
+      --id strings   Managed object id. (required) (accepts pipeline)
 ```
 
 ### Options inherited from parent commands

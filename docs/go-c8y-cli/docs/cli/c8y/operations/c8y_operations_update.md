@@ -27,7 +27,7 @@ Update an operation
   -d, --data string             static data to be applied to body. accepts json or shorthande json, i.e. --data 'value1=1,my.nested.value=100'
       --failureReason string    Reason for the failure. Use when setting status to FAILED
   -h, --help                    help for update
-      --id string               Operation id (required) (accepts pipeline)
+      --id strings              Operation id (required) (accepts pipeline)
       --processingMode string   Cumulocity processing mode
       --status string           Operation status, can be one of SUCCESSFUL, FAILED, EXECUTING or PENDING.
       --template string         Body template

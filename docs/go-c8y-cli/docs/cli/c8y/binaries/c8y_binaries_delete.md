@@ -24,7 +24,7 @@ Delete a binary
 
 ```
   -h, --help                    help for delete
-      --id string               Inventory binary id (required) (accepts pipeline)
+      --id strings              Inventory binary id (required) (accepts pipeline)
       --processingMode string   Cumulocity processing mode
 ```
 

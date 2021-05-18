@@ -25,7 +25,7 @@ Update a managed object
 ```
   -d, --data string             static data to be applied to body. accepts json or shorthande json, i.e. --data 'value1=1,my.nested.value=100'
   -h, --help                    help for update
-      --id string               ManagedObject id (required) (accepts pipeline)
+      --id strings              ManagedObject id (required) (accepts pipeline)
       --newName string          name
       --processingMode string   Cumulocity processing mode
       --template string         Body template

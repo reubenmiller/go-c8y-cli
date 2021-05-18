@@ -26,7 +26,7 @@ Update a binary related to an event
 ```
       --file string             File to be uploaded as a binary (required)
   -h, --help                    help for updateBinary
-      --id string               Event id (required) (accepts pipeline)
+      --id strings              Event id (required) (accepts pipeline)
       --processingMode string   Cumulocity processing mode
 ```
 

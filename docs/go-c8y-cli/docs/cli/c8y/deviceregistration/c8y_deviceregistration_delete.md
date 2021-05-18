@@ -24,7 +24,7 @@ Delete a new device request
 
 ```
   -h, --help                    help for delete
-      --id string               New Device Request ID (required) (accepts pipeline)
+      --id strings              New Device Request ID (required) (accepts pipeline)
       --processingMode string   Cumulocity processing mode
 ```
 

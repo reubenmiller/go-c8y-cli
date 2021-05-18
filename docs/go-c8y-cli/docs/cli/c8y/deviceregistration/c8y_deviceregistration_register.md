@@ -24,7 +24,7 @@ Register a new device
 
 ```
   -h, --help                    help for register
-      --id string               Device identifier. Max: 1000 characters. E.g. IMEI (required) (accepts pipeline)
+      --id strings              Device identifier. Max: 1000 characters. E.g. IMEI (required) (accepts pipeline)
       --processingMode string   Cumulocity processing mode
 ```
 

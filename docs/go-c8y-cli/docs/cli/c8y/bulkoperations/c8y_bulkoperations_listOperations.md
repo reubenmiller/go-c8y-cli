@@ -32,7 +32,7 @@ Check all bulk operations if they have any related operations still in executing
       --dateFrom string   Start date or date and time of operation.
       --dateTo string     End date or date and time of operation.
   -h, --help              help for listOperations
-      --id string         Bulk operation id. (required) (accepts pipeline)
+      --id strings        Bulk operation id. (required) (accepts pipeline)
       --revert            Sort operations newest to oldest. Must be used with dateFrom and/or dateTo parameters
       --status string     Operation status, can be one of SUCCESSFUL, FAILED, EXECUTING or PENDING.
 ```

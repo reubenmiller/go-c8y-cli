@@ -18,12 +18,29 @@ c8y settings update [flags]
 $ c8y settings update mode dev
 Change mode to dev to allow all commands
 
+$ c8y settings update mode dev
+Change mode to dev to allow all commands
+
+$ c8y settings update defaults.delay 100ms
+Change the default delay to 100ms (when sending more than 1 request)
+
+Bash/zsh:
+$ eval $( c8y settings update mode.enableCreate true --shell auto )
+Enable create (POST) commands until the next session change
+
+Fish:
+$ c8y settings update mode.enableCreate true --shell auto | source
+Enable create (POST) commands until the next session change
+
+PowerShell:
+$ c8y settings update mode.enableCreate true --shell auto | Out-String | Invoke-Expression
+Enable create (POST) commands until the next session change
+
 ```
 
 ### Options
 
 ```
-      --file string    Session or settings file to be modified
   -h, --help           help for update
       --shell string   Output variables as shell variables which can be sourced
 ```

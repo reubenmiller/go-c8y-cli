@@ -28,7 +28,7 @@ Update severity of an existing alarm to CRITICAL
 ```
   -d, --data string             static data to be applied to body. accepts json or shorthande json, i.e. --data 'value1=1,my.nested.value=100'
   -h, --help                    help for update
-      --id string               Alarm id (required) (accepts pipeline)
+      --id strings              Alarm id (required) (accepts pipeline)
       --processingMode string   Cumulocity processing mode
       --severity string         Alarm severity, for example CRITICAL, MAJOR, MINOR or WARNING.
       --status string           Comma separated alarm statuses, for example ACTIVE,CLEARED.

@@ -23,8 +23,8 @@ Get a new device request
 ### Options
 
 ```
-  -h, --help        help for get
-      --id string   New Device Request ID (required) (accepts pipeline)
+  -h, --help         help for get
+      --id strings   New Device Request ID (required) (accepts pipeline)
 ```
 
 ### Options inherited from parent commands

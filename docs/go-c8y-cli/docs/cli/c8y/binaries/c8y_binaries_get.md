@@ -27,8 +27,8 @@ Get a binary and save it to a file
 ### Options
 
 ```
-  -h, --help        help for get
-      --id string   Inventory binary id (required) (accepts pipeline)
+  -h, --help         help for get
+      --id strings   Inventory binary id (required) (accepts pipeline)
 ```
 
 ### Options inherited from parent commands
