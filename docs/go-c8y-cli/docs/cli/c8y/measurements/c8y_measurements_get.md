@@ -23,8 +23,8 @@ Get measurement
 ### Options
 
 ```
-  -h, --help        help for get
-      --id string   Measurement id (required) (accepts pipeline)
+  -h, --help         help for get
+      --id strings   Measurement id (required) (accepts pipeline)
 ```
 
 ### Options inherited from parent commands

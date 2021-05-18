@@ -23,8 +23,8 @@ Get event
 ### Options
 
 ```
-  -h, --help        help for get
-      --id string   Event id (required) (accepts pipeline)
+  -h, --help         help for get
+      --id strings   Event id (required) (accepts pipeline)
 ```
 
 ### Options inherited from parent commands

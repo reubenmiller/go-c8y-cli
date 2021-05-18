@@ -29,7 +29,7 @@ Update a retention rule
       --editable                Whether the rule is editable. Can be updated only by management tenant.
       --fragmentType string     RetentionRule will be applied to documents with fragmentType.
   -h, --help                    help for update
-      --id string               Retention rule id (required) (accepts pipeline)
+      --id strings              Retention rule id (required) (accepts pipeline)
       --maximumAge int          Maximum age of document in days.
       --processingMode string   Cumulocity processing mode
       --source string           RetentionRule will be applied to documents with source.

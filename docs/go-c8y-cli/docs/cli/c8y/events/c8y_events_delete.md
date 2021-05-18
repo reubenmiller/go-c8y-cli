@@ -24,7 +24,7 @@ Delete an event
 
 ```
   -h, --help                    help for delete
-      --id string               Event id (required) (accepts pipeline)
+      --id strings              Event id (required) (accepts pipeline)
       --processingMode string   Cumulocity processing mode
 ```
 

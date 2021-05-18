@@ -25,7 +25,7 @@ Delete a retention rule
 
 ```
   -h, --help                    help for delete
-      --id string               Retention rule id (required) (accepts pipeline)
+      --id strings              Retention rule id (required) (accepts pipeline)
       --processingMode string   Cumulocity processing mode
 ```
 

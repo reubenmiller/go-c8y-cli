@@ -23,8 +23,8 @@ Download a binary related to an event
 ### Options
 
 ```
-  -h, --help        help for downloadBinary
-      --id string   Event id (required) (accepts pipeline)
+  -h, --help         help for downloadBinary
+      --id strings   Event id (required) (accepts pipeline)
 ```
 
 ### Options inherited from parent commands

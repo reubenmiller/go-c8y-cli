@@ -24,7 +24,7 @@ Remove bulk operation by id
 
 ```
   -h, --help                    help for delete
-      --id string               Bulk Operation id (required) (accepts pipeline)
+      --id strings              Bulk Operation id (required) (accepts pipeline)
       --processingMode string   Cumulocity processing mode
 ```
 

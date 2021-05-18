@@ -25,7 +25,7 @@ Unassign a child addition from its parent managed object
 ```
       --childId string          Child managed object id (required) (accepts pipeline)
   -h, --help                    help for unassign
-      --id string               Managed object id (required)
+      --id strings              Managed object id (required)
       --processingMode string   Cumulocity processing mode
 ```
 

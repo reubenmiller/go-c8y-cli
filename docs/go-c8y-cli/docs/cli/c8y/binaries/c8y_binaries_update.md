@@ -26,7 +26,7 @@ Update an existing binary file
 ```
       --file string             File to be uploaded as a binary (required)
   -h, --help                    help for update
-      --id string               Inventory binary id (required) (accepts pipeline)
+      --id strings              Inventory binary id (required) (accepts pipeline)
       --processingMode string   Cumulocity processing mode
 ```
 

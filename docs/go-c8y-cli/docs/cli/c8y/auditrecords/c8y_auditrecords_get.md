@@ -23,8 +23,8 @@ Get an audit record by id
 ### Options
 
 ```
-  -h, --help        help for get
-      --id string   Audit id (required) (accepts pipeline)
+  -h, --help         help for get
+      --id strings   Audit id (required) (accepts pipeline)
 ```
 
 ### Options inherited from parent commands

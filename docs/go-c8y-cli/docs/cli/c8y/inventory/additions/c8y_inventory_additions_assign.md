@@ -24,7 +24,7 @@ Add a related managed object as a child to an existing managed object
 
 ```
   -h, --help                    help for assign
-      --id string               Managed object id where the child addition will be added to (required)
+      --id strings              Managed object id where the child addition will be added to (required)
       --newChild string         New managed object that will be added as a child addition (required) (accepts pipeline)
       --processingMode string   Cumulocity processing mode
 ```

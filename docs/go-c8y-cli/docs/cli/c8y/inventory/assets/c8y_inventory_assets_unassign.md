@@ -25,7 +25,7 @@ Unassign a child device from its parent device
 ```
       --child string            Child id (accepts pipeline)
   -h, --help                    help for unassign
-      --id string               Asset id (required)
+      --id strings              Asset id (required)
       --processingMode string   Cumulocity processing mode
 ```
 

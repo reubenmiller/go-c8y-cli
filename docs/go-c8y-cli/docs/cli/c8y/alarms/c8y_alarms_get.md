@@ -23,8 +23,8 @@ Get alarm
 ### Options
 
 ```
-  -h, --help        help for get
-      --id string   Alarm id (required) (accepts pipeline)
+  -h, --help         help for get
+      --id strings   Alarm id (required) (accepts pipeline)
 ```
 
 ### Options inherited from parent commands

@@ -27,7 +27,7 @@ Get a managed object with parent references
 
 ```
   -h, --help          help for get
-      --id string     ManagedObject id (required) (accepts pipeline)
+      --id strings    ManagedObject id (required) (accepts pipeline)
       --withParents   include a flat list of all parents and grandparents of the given object
 ```
 

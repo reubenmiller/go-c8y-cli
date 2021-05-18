@@ -26,7 +26,7 @@ Delete a user
 
 ```
   -h, --help                    help for delete
-      --id string               User id (required) (accepts pipeline)
+      --id strings              User id (required) (accepts pipeline)
       --processingMode string   Cumulocity processing mode
       --tenant string           Tenant
 ```

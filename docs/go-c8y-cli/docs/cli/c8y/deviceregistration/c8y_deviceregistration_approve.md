@@ -24,7 +24,7 @@ Approve a new device request
 
 ```
   -h, --help                    help for approve
-      --id string               Device identifier (required) (accepts pipeline)
+      --id strings              Device identifier (required) (accepts pipeline)
       --processingMode string   Cumulocity processing mode
       --status string           Status of registration (default "ACCEPTED")
 ```

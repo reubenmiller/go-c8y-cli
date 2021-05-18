@@ -23,8 +23,8 @@ Get operation by id
 ### Options
 
 ```
-  -h, --help        help for get
-      --id string   Operation id (required) (accepts pipeline)
+  -h, --help         help for get
+      --id strings   Operation id (required) (accepts pipeline)
 ```
 
 ### Options inherited from parent commands

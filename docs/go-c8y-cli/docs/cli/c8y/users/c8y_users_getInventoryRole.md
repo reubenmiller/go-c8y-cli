@@ -23,8 +23,8 @@ Get an inventory role
 ### Options
 
 ```
-  -h, --help        help for getInventoryRole
-      --id string   Role id. Note: lookup by name is not yet supported (required) (accepts pipeline)
+  -h, --help         help for getInventoryRole
+      --id strings   Role id. Note: lookup by name is not yet supported (required) (accepts pipeline)
 ```
 
 ### Options inherited from parent commands

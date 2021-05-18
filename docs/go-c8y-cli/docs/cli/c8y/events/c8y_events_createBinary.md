@@ -25,7 +25,7 @@ Add a binary to an event
 ```
       --file string             File to be uploaded as a binary (required)
   -h, --help                    help for createBinary
-      --id string               Event id (required) (accepts pipeline)
+      --id strings              Event id (required) (accepts pipeline)
       --processingMode string   Cumulocity processing mode
 ```
 

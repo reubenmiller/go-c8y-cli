@@ -24,7 +24,7 @@ Delete measurement
 
 ```
   -h, --help                    help for delete
-      --id string               Measurement id (required) (accepts pipeline)
+      --id strings              Measurement id (required) (accepts pipeline)
       --processingMode string   Cumulocity processing mode
 ```
 

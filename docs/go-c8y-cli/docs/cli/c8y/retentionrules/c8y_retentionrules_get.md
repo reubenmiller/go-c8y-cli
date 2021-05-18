@@ -24,8 +24,8 @@ Get a retention rule
 ### Options
 
 ```
-  -h, --help        help for get
-      --id string   Retention rule id (required) (accepts pipeline)
+  -h, --help         help for get
+      --id strings   Retention rule id (required) (accepts pipeline)
 ```
 
 ### Options inherited from parent commands

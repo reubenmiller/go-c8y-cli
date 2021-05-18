@@ -23,8 +23,8 @@ Get a data broker connector
 ### Options
 
 ```
-  -h, --help        help for get
-      --id string   Data broker connector id (required) (accepts pipeline)
+  -h, --help         help for get
+      --id strings   Data broker connector id (required) (accepts pipeline)
 ```
 
 ### Options inherited from parent commands
