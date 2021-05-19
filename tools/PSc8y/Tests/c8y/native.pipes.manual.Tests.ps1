@@ -81,6 +81,12 @@ Describe -Name "c8y pipes" {
     Context "Piping to collection commands" {
 
         It "ignores output when piping an empty string" {
+            $output = Write-Output "" -NoEnumerate | c8y alarms get --dry --dryFormat json
+            $LASTEXITCODE | Should -Be 4
+            $output | Should -BeNullOrEmpty
+        }
+
+        It "ignores output when piping an empty string" {
             $output = Write-Output "" -NoEnumerate | c8y alarms list --dry --dryFormat json
             $LASTEXITCODE | Should -Be 4
             $output | Should -BeNullOrEmpty

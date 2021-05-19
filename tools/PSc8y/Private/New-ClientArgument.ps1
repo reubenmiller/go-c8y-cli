@@ -122,6 +122,11 @@ Function New-ClientArgument {
             $null = $c8yargs.Add("--raw")
         }
 
+        # Allow empty pipes (only in powershell as it handles empty pipes in the cmdlets)
+        # This simplifies logic on the powershell side, rather than dynamically checking if there is really piped
+        # input or not
+        $null = $c8yargs.Add("--allowEmptyPipe")
+
         ,$c8yargs
     }
 }

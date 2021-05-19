@@ -38,10 +38,16 @@ func WithQueryParameters(cmd *cobra.Command, query *QueryTemplate, inputIterator
 			}
 		case map[string]string:
 			for key, val := range v {
-				query.SetVariable(key, val)
+				if val != "" {
+					query.SetVariable(key, val)
+				}
 			}
 		default:
-			query.SetVariable(name, v)
+			strValue := fmt.Sprintf("%v", v)
+			if strValue != "" {
+				// keep value as intervalue, but filter out empty string values
+				query.SetVariable(name, v)
+			}
 		}
 	}
 	if totalIterators > 0 {
@@ -62,10 +68,14 @@ func WithPathParameters(cmd *cobra.Command, path *StringTemplate, inputIterators
 		if name != "" {
 			switch v := value.(type) {
 			case []string:
-				path.SetVariable(name, strings.Join(v, ","))
+				if len(v) > 0 {
+					path.SetVariable(name, strings.Join(v, ","))
+				}
 
 			case []int:
-				path.SetVariable(name, strings.Trim(strings.Join(strings.Fields(fmt.Sprint(v)), ","), "[]"))
+				if len(v) > 0 {
+					path.SetVariable(name, strings.Trim(strings.Join(strings.Fields(fmt.Sprint(v)), ","), "[]"))
+				}
 
 			case iterator.Iterator:
 				path.SetVariable(name, v)
@@ -74,7 +84,10 @@ func WithPathParameters(cmd *cobra.Command, path *StringTemplate, inputIterators
 				}
 
 			default:
-				path.SetVariable(name, fmt.Sprintf("%v", value))
+				strValue := fmt.Sprintf("%v", value)
+				if strValue != "" {
+					path.SetVariable(name, fmt.Sprintf("%v", value))
+				}
 			}
 		}
 	}
@@ -269,7 +282,6 @@ func WithStringValue(opts ...string) GetOption {
 
 		if inputIterators != nil && inputIterators.PipeOptions != nil {
 			if inputIterators.PipeOptions.Name == src {
-				inputIterators.PipeOptions.EmptyPipe = false
 				return WithPipelineIterator(inputIterators.PipeOptions)(cmd, inputIterators)
 			}
 		}
@@ -696,6 +708,9 @@ func NewRequestInputIterators(cmd *cobra.Command) (*RequestInputIterators, error
 
 	if disableStdin, _ := cmd.Root().PersistentFlags().GetBool(FlagNullInput); disableStdin {
 		pipeOpts.Disabled = disableStdin
+	}
+	if allowEmptyPipe, pipeErr := cmd.Root().PersistentFlags().GetBool(FlagAllowEmptyPipe); pipeErr == nil {
+		pipeOpts.EmptyPipe = allowEmptyPipe
 	}
 	inputIter := &RequestInputIterators{
 		PipeOptions: pipeOpts,
