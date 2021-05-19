@@ -32,7 +32,7 @@ Create a user
       --password string           User password. Min: 6, max: 32 characters. Only Latin1 chars allowed
       --phone string              User phone number. Format: '+[country code][number]', has to be a valid MSISDN
       --processingMode string     Cumulocity processing mode
-      --sendPasswordResetEmail    User activation status (true/false)
+      --sendPasswordResetEmail    Send password reset email to the user instead of setting a password
       --template string           Body template
       --templateVars string       Body template variables
       --tenant string             Tenant

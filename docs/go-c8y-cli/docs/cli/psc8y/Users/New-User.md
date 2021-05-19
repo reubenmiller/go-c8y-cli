@@ -198,7 +198,7 @@ Accept wildcard characters: False
 ```
 
 ### -SendPasswordResetEmail
-User activation status (true/false)
+Send password reset email to the user instead of setting a password
 
 ```yaml
 Type: SwitchParameter

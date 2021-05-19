@@ -58,7 +58,7 @@ Create a user
         [string]
         $Password,
 
-        # User activation status (true/false)
+        # Send password reset email to the user instead of setting a password
         [Parameter()]
         [ValidateSet('true','false')]
         [switch]
