@@ -34,8 +34,11 @@ func NewAddUserToGroupCmd(f *cmdutil.Factory) *AddUserToGroupCmd {
 		Short: "Add user to group",
 		Long:  `Add an existing user to a group`,
 		Example: heredoc.Doc(`
-$ c8y userReferences addUserToGroup --group 1 --user myuser
-List the users within a user group
+$ c8y userreferences addUserToGroup --group 1 --user myuser
+Add a user to a user group
+
+$ c8y users list | c8y userreferences addUserToGroup --group business | c8y userreferences addUserToGroup --group admins
+Add a list of users to business and admins group using pipeline
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
 			return f.CreateModeEnabled()
@@ -60,7 +63,7 @@ List the users within a user group
 		cmd,
 		flags.WithProcessingMode(),
 
-		flags.WithExtendedPipelineSupport("user", "user.self", true, "id", "self"),
+		flags.WithExtendedPipelineSupport("user", "user.self", true, "user.id", "id", "self"),
 	)
 
 	// Required flags

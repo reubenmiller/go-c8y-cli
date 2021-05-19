@@ -13,7 +13,7 @@ https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/userreferences_deleteUser
 .EXAMPLE
 PS> Remove-UserFromGroup -Group $Group.id -User $User.id
 
-Add a user to a user group
+From a user from a user group
 
 
 #>
