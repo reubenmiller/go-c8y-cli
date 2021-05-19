@@ -239,7 +239,7 @@
             "true",
             "false"
           ],
-          "description": "User activation status (true/false)"
+          "description": "Send password reset email to the user instead of setting a password"
         },
         {
           "name": "customProperties",
@@ -488,7 +488,7 @@
             "true",
             "false"
           ],
-          "description": "User activation status (true/false)"
+          "description": "Send password reset email to the user instead of setting a password"
         },
         {
           "name": "customProperties",

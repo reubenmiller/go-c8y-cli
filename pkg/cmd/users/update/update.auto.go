@@ -53,7 +53,7 @@ Update a user
 	cmd.Flags().String("email", "", "User email address")
 	cmd.Flags().Bool("enabled", false, "User activation status (true/false)")
 	cmd.Flags().String("password", "", "User password. Min: 6, max: 32 characters. Only Latin1 chars allowed")
-	cmd.Flags().Bool("sendPasswordResetEmail", false, "User activation status (true/false)")
+	cmd.Flags().Bool("sendPasswordResetEmail", false, "Send password reset email to the user instead of setting a password")
 	cmd.Flags().String("customProperties", "", "Custom properties to be added to the user")
 
 	completion.WithOptions(
