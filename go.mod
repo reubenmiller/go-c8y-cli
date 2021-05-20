@@ -30,7 +30,7 @@ require (
 	github.com/spf13/cobra v1.1.3
 	github.com/spf13/pflag v1.0.5
 	github.com/spf13/viper v1.7.1
-	github.com/stretchr/testify v1.7.0 // indirect
+	github.com/stretchr/testify v1.7.0
 	github.com/thedevsaddam/gojsonq v2.3.0+incompatible
 	github.com/tidwall/gjson v1.6.8
 	github.com/tidwall/pretty v1.1.0
