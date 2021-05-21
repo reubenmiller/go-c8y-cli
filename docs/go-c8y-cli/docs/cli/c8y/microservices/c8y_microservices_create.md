@@ -17,6 +17,9 @@ c8y microservices create [flags]
 ```
 $ c8y microservices create --file ./myapp.zip
 Create new microservice
+
+$ c8y microservices create --name my-application --file ./myapp.zip
+Create or update a microservice using an explicit name
 		
 ```
 
