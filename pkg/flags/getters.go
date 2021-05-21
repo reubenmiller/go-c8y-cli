@@ -3,7 +3,6 @@ package flags
 import (
 	"fmt"
 	"net/http"
-	"os"
 	"strings"
 
 	"github.com/reubenmiller/go-c8y-cli/pkg/c8ydata"
@@ -387,7 +386,7 @@ func WithOverrideValue(opts ...string) GetOption {
 			dst = ""
 		}
 
-		if _, err := os.Stat(value); err == nil {
+		if isFile(value) {
 			// ignore input files (they should be piped)
 			return "", "", nil
 		}
