@@ -439,11 +439,12 @@ func Test_DebugCommand(t *testing.T) {
 
 	// cmdErr := ExecuteCmd(cmd, fmt.Sprintf("devices list --select id,nam* --output csvheader"))
 	// cmdErr := ExecuteCmd(cmd, fmt.Sprintf("applications get --id cockpit --select appId:id,tenantId:owner.**.id"))
+	// stdin := bytes.NewBufferString(``)
 	stdin := bytes.NewBufferString(`` + "\n")
 	cmd.SetIn(stdin)
 	// operations create --device livedemo01 --data "c8y_Restart={}"
 	cmdtext := `
-	agents get --id agent01,agent02 --select name -o csv
+	alarms list --dry
 	`
 	// operations create --dry --template "{v:input.value}" --device livedemo01
 	cmdErr := ExecuteCmd(cmd, strings.TrimSpace(cmdtext))

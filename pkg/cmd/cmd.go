@@ -24,6 +24,7 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/pkg/console"
 	"github.com/reubenmiller/go-c8y-cli/pkg/dataview"
 	"github.com/reubenmiller/go-c8y-cli/pkg/encrypt"
+	"github.com/reubenmiller/go-c8y-cli/pkg/iterator"
 	"github.com/reubenmiller/go-c8y-cli/pkg/logger"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
@@ -98,6 +99,12 @@ func CheckCommandError(cmd *cobra.Command, f *cmdutil.Factory, err error) error 
 
 	if errors.Is(err, cmderrors.ErrHelp) {
 		return err
+	}
+
+	if iterator.IsEmptyPipeInputError(err) && !cfg.AllowEmptyPipe() {
+		// Ignore empty pipe errors
+		logg.Debug("detected empty piped data")
+		return cmderrors.NewUserErrorWithExitCode(cmderrors.ExitOK)
 	}
 
 	// read directly from flags, as unknown flag errors are thrown before the config is read

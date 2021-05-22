@@ -489,7 +489,7 @@ func (n *${NameCamel}Cmd) RunE(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return err
 	}
-    inputIterators, err := flags.NewRequestInputIterators(cmd)
+    inputIterators, err := cmdutil.NewRequestInputIterators(cmd, cfg)
     if err != nil {
         return err
     }
