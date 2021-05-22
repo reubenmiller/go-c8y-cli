@@ -58,7 +58,7 @@ func (n *CmdList) RunE(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	sessionFile, err := selectsession.SelectSession(cfg, log, n.sessionFilter)
+	sessionFile, err := selectsession.SelectSession(n.factory.IOStreams, cfg, log, n.sessionFilter)
 
 	if err != nil {
 		return err

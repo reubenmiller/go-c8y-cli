@@ -103,7 +103,7 @@ func (n *CmdSet) RunE(cmd *cobra.Command, args []string) error {
 	}
 
 	if sessionFile == "" {
-		sessionFile, err = selectsession.SelectSession(cfg, log, strings.Join(append(args, n.sessionFilter), " "))
+		sessionFile, err = selectsession.SelectSession(n.factory.IOStreams, cfg, log, strings.Join(append(args, n.sessionFilter), " "))
 
 		if err != nil {
 			return err
