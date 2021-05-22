@@ -49,6 +49,9 @@ func NewCmdCreate(f *cmdutil.Factory) *CmdCreate {
 		Example: heredoc.Doc(`
 $ c8y microservices create --file ./myapp.zip
 Create new microservice
+
+$ c8y microservices create --name my-application --file ./myapp.zip
+Create or update a microservice using an explicit name
 		`),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
 			return f.CreateModeEnabled()
@@ -162,7 +165,9 @@ func (n *CmdCreate) RunE(cmd *cobra.Command, args []string) error {
 
 		for _, item := range idValue {
 			if item != "" {
+				// Get first result (for consistency with c8y microservice get --id)
 				applicationID = c8yfetcher.NewIDValue(item).GetID()
+				break
 			}
 		}
 	}

@@ -49,7 +49,7 @@ func (f *ApplicationFetcher) getByName(name string) ([]fetcherResultSet, error) 
 		return nil, err
 	}
 
-	pattern, err := regexp.Compile(name)
+	pattern, err := regexp.Compile("^" + regexp.QuoteMeta(name) + "$")
 
 	if err != nil {
 		return nil, errors.Wrap(err, "invalid regex")

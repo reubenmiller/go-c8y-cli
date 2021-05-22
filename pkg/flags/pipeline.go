@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
-	"os"
 
 	"github.com/reubenmiller/go-c8y-cli/pkg/iterator"
 	"github.com/reubenmiller/go-c8y-cli/pkg/jsonUtilities"
@@ -78,7 +77,7 @@ func NewFlagWithPipeIterator(cmd *cobra.Command, pipeOpt *PipelineOptions, suppo
 		if len(items) > 0 {
 
 			// check if file reference
-			if _, err := os.Stat(items[0]); err == nil {
+			if isFile(items[0]) {
 				iter, err := iterator.NewFileContentsIterator(items[0])
 				if err != nil {
 					return nil, err

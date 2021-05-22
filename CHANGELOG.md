@@ -62,9 +62,14 @@ None :)
 
 ### Bugs
 
-* set-session causes bad console wrapping when console is not wide enough
-    * reduce message when width is not ok, or look at doing manual wrapping for
+* updating mode does not take effect immediately if environment variables are already set.
+    * The setting read from the profile is overridden by locally assigned values
 
+    ``` 
+    C8Y_SETTINGS_MODE_ENABLECREATE=false
+    C8Y_SETTINGS_MODE_ENABLEDELETE=false
+    C8Y_SETTINGS_MODE_ENABLEUPDATE=false
+    ```
 
 * Piping empty results has unexpected consequences
 
@@ -73,6 +78,7 @@ None :)
     echo "{}" | c8y auditrecords list --dry
     ```
 
+* Don't prompt for encryption key if the user is not using encryption or starting c8y for the first time
 
 ~~not known~~
 ### Commands

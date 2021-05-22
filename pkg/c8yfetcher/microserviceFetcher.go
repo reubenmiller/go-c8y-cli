@@ -52,7 +52,7 @@ func (f *MicroserviceFetcher) getByName(name string) ([]fetcherResultSet, error)
 		return nil, errors.Wrap(err, "could not fetch microservices")
 	}
 
-	pattern, err := regexp.Compile(name)
+	pattern, err := regexp.Compile("^" + regexp.QuoteMeta(name) + "$")
 
 	if err != nil {
 		return nil, errors.Wrap(err, "invalid regex")

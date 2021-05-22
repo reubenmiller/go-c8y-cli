@@ -34,8 +34,11 @@ func NewDeleteUserFromGroupCmd(f *cmdutil.Factory) *DeleteUserFromGroupCmd {
 		Short: "Delete user from group",
 		Long:  `Delete an existing user from a user group`,
 		Example: heredoc.Doc(`
-$ c8y userReferences deleteUserFromGroup --group 1 --user myuser
-List the users within a user group
+$ c8y userreferences deleteUserFromGroup --group 1 --user myuser
+From a user from a user group
+
+$ c8y users get --id myuser | c8y userreferences deleteUserFromGroup --group 1
+From a user from a user group (using pipeline)
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
 			return f.DeleteModeEnabled()

@@ -6,13 +6,27 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/fatih/color"
 	"github.com/manifoldco/promptui"
 	"github.com/reubenmiller/go-c8y-cli/pkg/c8ysession"
 	createCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/sessions/create"
 	"github.com/reubenmiller/go-c8y-cli/pkg/config"
+	"github.com/reubenmiller/go-c8y-cli/pkg/iostreams"
 	"github.com/reubenmiller/go-c8y-cli/pkg/logger"
 	"github.com/reubenmiller/go-c8y-cli/pkg/utilities/bellskipper"
 )
+
+const (
+	esc        = "\033["
+	noLineWrap = esc + "\x1b[?7l"
+	doLineWrap = esc + "\x1b[?7h"
+)
+
+func customStyle(attr ...color.Attribute) func(interface{}) string {
+	return func(v interface{}) string {
+		return color.New(attr...).Sprintf("%v", v)
+	}
+}
 
 func matchSession(session c8ysession.CumulocitySession, input string) bool {
 	// strip url scheme
@@ -40,7 +54,7 @@ func matchSession(session c8ysession.CumulocitySession, input string) bool {
 }
 
 // SelectSession select a Cumulocity session interactively
-func SelectSession(cfg *config.Config, log *logger.Logger, filter string) (sessionFile string, err error) {
+func SelectSession(io *iostreams.IOStreams, cfg *config.Config, log *logger.Logger, filter string) (sessionFile string, err error) {
 	sessions := &c8ysession.CumulocitySessions{}
 	sessions.Sessions = make([]c8ysession.CumulocitySession, 0)
 
@@ -86,8 +100,8 @@ func SelectSession(cfg *config.Config, log *logger.Logger, filter string) (sessi
 		sessions.Sessions[i].Index = i + 1
 	}
 
-	// template.Fun
 	funcMap := promptui.FuncMap
+	funcMap["highlight"] = customStyle()
 
 	funcMap["hide"] = func(v interface{}) string {
 		if cfg.HideSensitive() {
@@ -109,22 +123,21 @@ func SelectSession(cfg *config.Config, log *logger.Logger, filter string) (sessi
 	}
 
 	templates := &promptui.SelectTemplates{
-		// Label:    "{{ .Host }}?",
-		Active:   `▶ {{ printf "#%02d %4s" .Index .Extension | bold }} {{ printf "%-40s" .Name | cyan | bold }} {{ .Host | hide | magenta | bold }} {{ printf "(%s/" .Tenant | hide | red | bold }}{{ printf "%s)" .Username | hide | red | bold }}`,
-		Inactive: `  {{ printf "#%02d %4s" .Index .Extension | faint }} {{ printf "%-40s" .Name | cyan }} {{ .Host | hide | magenta }} {{ printf "(%s/" .Tenant | hide | red }}{{ printf "%s)" .Username | hide | red }}`,
+		Active:   `▶ {{ printf "#%02d %4.4s" .Index .Extension | highlight }} {{ printf "%-30.29s" .Name | highlight }} {{ .Host | hide | highlight }} {{ printf "(%s/" .Tenant | hide | highlight }}{{ printf "%s)" .Username | hide | highlight }}`,
+		Inactive: `  {{ printf "#%02d %4.4s" .Index .Extension | faint }} {{ printf "%-30.29s" .Name | cyan }} {{ .Host | hide | magenta }} {{ printf "(%s/" .Tenant | hide | red }}{{ printf "%s)" .Username | hide | red }}`,
 		Selected: "{{ .Path | hideUser }}",
 		FuncMap:  funcMap,
 		Details: `
 --------- Details ----------
-{{ "File:" | faint }}	{{ .Path | hideUser }}
-{{ "Host:" | faint }}	{{ .Host | hide }}
-{{ "Tenant:" | faint }}	{{ .Tenant | hide }}
-{{ "Username:" | faint }}	{{ .Username | hide }}
+{{ printf "%10s" "File:" | faint }}  {{ .Path | hideUser }}
+{{ printf "%10s" "Host:" | faint }}  {{ .Host | hide }}
+{{ printf "%10s" "Tenant:" | faint }}  {{ .Tenant | hide }}
+{{ printf "%10s" "Username:" | faint }}  {{ .Username | hide }}
 `,
 	}
-	templates.Help = fmt.Sprintf(`{{ "Use the arrow keys to navigate (some terminals require you to hold shift as well):" | faint }} {{ .NextKey | faint }} ` +
+	templates.Help = `{{ "Use arrow keys (holding shift) to navigate" | faint }} {{ .NextKey | faint }} ` +
 		`{{ .PrevKey | faint }} {{ .PageDownKey | faint }} {{ .PageUpKey | faint }} ` +
-		`{{ if .Search }} {{ "and" | faint }} {{ .SearchKey | faint }} {{ "toggles search" | faint }}{{ end }}`)
+		`{{ if .Search }} {{ "and" | faint }} {{ .SearchKey | faint }} {{ "toggles search" | faint }}{{ end }}`
 
 	filteredSessions := make([]c8ysession.CumulocitySession, 0)
 	sessionIndex := 1
@@ -144,6 +157,8 @@ func SelectSession(cfg *config.Config, log *logger.Logger, filter string) (sessi
 		return matchSession(session, input)
 	}
 
+	// always enable color
+	color.NoColor = false
 	prompt := promptui.Select{
 		Stdout:            bellskipper.NewBellSkipper(os.Stderr), // Workaround to pervent the terminal bell on MacOS
 		HideSelected:      true,
@@ -174,7 +189,12 @@ func SelectSession(cfg *config.Config, log *logger.Logger, filter string) (sessi
 		result = filteredSessions[0].Path
 		err = nil
 	} else {
+		// Prevent wrapping errors as promptui expects all templates to only take
+		// up one line. When multiline templates are supported by promptui, then this can be removed
+		// https://github.com/manifoldco/promptui/issues/92
+		fmt.Fprint(os.Stderr, noLineWrap)
 		idx, result, err = prompt.Run()
+		fmt.Fprint(os.Stderr, doLineWrap)
 	}
 
 	if err != nil {
