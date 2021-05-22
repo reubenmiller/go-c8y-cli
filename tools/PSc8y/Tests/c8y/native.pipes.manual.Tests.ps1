@@ -50,9 +50,9 @@ Describe -Name "c8y pipes" {
     }
 
     Context "Audit" {
-        It "ignores output when piping an empty string" {
+        It "does not send a request when piping empty results" {
             $output = c8y alarms list --device 0 | c8y auditrecords list --dry --dryFormat json
-            $LASTEXITCODE | Should -Be 101
+            $LASTEXITCODE | Should -Be 0
             $output | Should -BeNullOrEmpty
 
             $output = c8y auditrecords list --dry --dryFormat json
@@ -61,11 +61,10 @@ Describe -Name "c8y pipes" {
             $request[0].pathEncoded | Should -BeExactly "/audit/auditRecords"
         }
 
-        It "ignores output when piping an empty list" {
+        It "does not send a request when pipeing an empty string" {
             $output = Write-Output "" -NoEnumerate | c8y auditrecords list --dry --dryFormat json
             $LASTEXITCODE | Should -Be 0
-            $request = $output | ConvertFrom-Json
-            $request[0].pathEncoded | Should -BeExactly "/audit/auditRecords"
+            $output | Should -BeNullOrEmpty
         }
 
         It "accepts json pipeline" {
@@ -82,13 +81,13 @@ Describe -Name "c8y pipes" {
 
         It "ignores output when piping an empty string" {
             $output = Write-Output "" -NoEnumerate | c8y alarms get --dry --dryFormat json
-            $LASTEXITCODE | Should -Be 4
+            $LASTEXITCODE | Should -Be 0
             $output | Should -BeNullOrEmpty
         }
 
         It "ignores output when piping an empty string" {
             $output = Write-Output "" -NoEnumerate | c8y alarms list --dry --dryFormat json
-            $LASTEXITCODE | Should -Be 4
+            $LASTEXITCODE | Should -Be 0
             $output | Should -BeNullOrEmpty
 
             $output = c8y alarms list --dry --dryFormat json
@@ -97,9 +96,16 @@ Describe -Name "c8y pipes" {
             $request[0].pathEncoded | Should -BeExactly "/alarm/alarms"
         }
 
-        It "ignores output when piping an empty list" {
+        It "does not enforce argument mapping when receiving empty json input" {
             $output = Write-Output "{}" -NoEnumerate | c8y alarms list --dry --dryFormat json
-            $LASTEXITCODE | Should -Be 4
+            $LASTEXITCODE | Should -Be 0
+            $output | Should -Not -BeNullOrEmpty
+            $request = $output | ConvertFrom-Json
+            $request[0].pathEncoded | Should -BeExactly "/alarm/alarms"
+
+            # however it should fail if it requires a property
+            $output = Write-Output "{}" -NoEnumerate | c8y devices create --dry --dryFormat json
+            $LASTEXITCODE | Should -Not -Be 0
             $output | Should -BeNullOrEmpty
         }
 
@@ -127,13 +133,10 @@ Describe -Name "c8y pipes" {
             $partial[1] | Should -MatchObject @{method="GET"; path="/event/events"}
         }
 
-        It "Empty pipe. Empty values should cause a lookup error, however they should also not stop the iteration" {
+        It "does not send requests when pipeine empty strings" {
             $output = @("", "") | c8y events list --dry --dryFormat json 2>&1
-            $LASTEXITCODE | Should -Be 104
-
-            $output | Should -HaveCount 3
-            $output -match "jobs completed with 2 errors" | Should -HaveCount 1
-            $output -match "no matching items found" | Should -HaveCount 2
+            $LASTEXITCODE | Should -Be 0
+            $output | Should -BeNullOrEmpty
         }
 
         It "Pipe by id object to query parameters" {
