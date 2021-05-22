@@ -27,7 +27,7 @@ func Test_WithTemplateValue(t *testing.T) {
 		flags.WithData(),
 		flags.WithTemplate(),
 	)
-	inputIterator, _ := flags.NewRequestInputIterators(cmd)
+	inputIterator, _ := NewRequestInputIterators(cmd, nil)
 
 	cmd.SetArgs([]string{"--template", "{value: input.index}"})
 	cmdErr := cmd.Execute()

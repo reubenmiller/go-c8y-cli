@@ -235,6 +235,9 @@ const (
 	// SettingsDisableInput disable reading from stdin (pipeline input)
 	SettingsDisableInput = "settings.defaults.nullInput"
 
+	// SettingsAllowEmptyPipe allow empty piped data
+	SettingsAllowEmptyPipe = "settings.defaults.allowEmptyPipe"
+
 	// SettingsLoginType preferred login type, i.e. BASIC, OAUTH_INTERNAL etc.
 	SettingsLoginType = "settings.login.type"
 )
@@ -1114,6 +1117,11 @@ func (c *Config) HideSensitive() bool {
 // DisableStdin hide sensitive information in log entries
 func (c *Config) DisableStdin() bool {
 	return c.viper.GetBool(SettingsDisableInput)
+}
+
+// AllowEmptyPipe check if empty piped data is allowed
+func (c *Config) AllowEmptyPipe() bool {
+	return c.viper.GetBool(SettingsAllowEmptyPipe)
 }
 
 // GetConfigPath get global settings file path

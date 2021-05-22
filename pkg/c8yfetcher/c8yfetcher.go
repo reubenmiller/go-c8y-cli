@@ -343,11 +343,15 @@ func WithReferenceByName(client *c8y.Client, fetcher EntityFetcher, args []strin
 			hasPipeSupport := inputIterators.PipeOptions.Name == src
 			pipeIter, err := flags.NewFlagWithPipeIterator(cmd, inputIterators.PipeOptions, hasPipeSupport)
 
+			if err == iterator.ErrEmptyPipeInput && !inputIterators.PipeOptions.EmptyPipe {
+				return inputIterators.PipeOptions.Property, nil, err
+			}
+
 			if err != nil || pipeIter == nil {
 				return "", nil, err
 			}
 			minMatches := 0
-			if inputIterators.PipeOptions.Required || false {
+			if inputIterators.PipeOptions.Required {
 				minMatches = 1
 			}
 			iter := NewReferenceByNameIterator(fetcher, client, pipeIter, minMatches, overrideValue)
@@ -418,11 +422,15 @@ func WithSelfReferenceByName(client *c8y.Client, fetcher EntityFetcher, args []s
 			hasPipeSupport := inputIterators.PipeOptions.Name == src
 			pipeIter, err := flags.NewFlagWithPipeIterator(cmd, inputIterators.PipeOptions, hasPipeSupport)
 
+			if err == iterator.ErrEmptyPipeInput && !inputIterators.PipeOptions.EmptyPipe {
+				return inputIterators.PipeOptions.Property, nil, err
+			}
+
 			if err != nil || pipeIter == nil {
 				return "", nil, err
 			}
 			minMatches := 0
-			if inputIterators.PipeOptions.Required || false {
+			if inputIterators.PipeOptions.Required {
 				minMatches = 1
 			}
 			iter := NewReferenceByNameIterator(fetcher, client, pipeIter, minMatches, overrideValue)
@@ -497,7 +505,10 @@ func WithReferenceByNameFirstMatch(client *c8y.Client, fetcher EntityFetcher, ar
 			// value will be evalulated later
 			return name, v, nil
 		default:
-			return "", "", fmt.Errorf("reference by name: invalid name lookup type. only strings are supported")
+			if err == nil {
+				err = fmt.Errorf("reference by name: invalid name lookup type. only strings are supported")
+			}
+			return "", "", err
 		}
 	}
 }
@@ -523,7 +534,10 @@ func WithSelfReferenceByNameFirstMatch(client *c8y.Client, fetcher EntityFetcher
 			// value will be evalulated later
 			return name, v, nil
 		default:
-			return "", "", fmt.Errorf("reference by name: invalid name lookup type. only strings are supported")
+			if err == nil {
+				err = fmt.Errorf("reference by name: invalid name lookup type. only strings are supported")
+			}
+			return "", "", err
 		}
 	}
 }
@@ -613,25 +627,5 @@ func WithUserGroupByNameFirstMatch(client *c8y.Client, args []string, opts ...st
 	return func(cmd *cobra.Command, inputIterators *flags.RequestInputIterators) (string, interface{}, error) {
 		opt := WithReferenceByNameFirstMatch(client, NewUserGroupFetcher(client), args, opts...)
 		return opt(cmd, inputIterators)
-	}
-}
-
-// WithReferenceByNamePipeline adds pipeline support from cli arguments
-func WithReferenceByNamePipeline(client *c8y.Client, fetcher EntityFetcher, opts *flags.PipelineOptions) flags.GetOption {
-	return func(cmd *cobra.Command, inputIterators *flags.RequestInputIterators) (string, interface{}, error) {
-		pipeIter, err := flags.NewFlagWithPipeIterator(cmd, opts, true)
-
-		if err != nil {
-			return "", nil, err
-		}
-
-		minMatches := 0
-		// TODO: Check if required can be ignored or not
-		if inputIterators.PipeOptions.Required || false {
-			minMatches = 1
-		}
-		iter := NewReferenceByNameIterator(fetcher, client, pipeIter, minMatches, nil)
-
-		return opts.Property, iter, err
 	}
 }

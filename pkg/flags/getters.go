@@ -701,22 +701,6 @@ func WithPipelineIterator(opts *PipelineOptions) GetOption {
 	}
 }
 
-// NewRequestInputIterators returns input iterations with the pipeline options loaded from the annotations
-func NewRequestInputIterators(cmd *cobra.Command) (*RequestInputIterators, error) {
-	pipeOpts, err := GetPipeOptionsFromAnnotation(cmd)
-
-	if disableStdin, _ := cmd.Root().PersistentFlags().GetBool(FlagNullInput); disableStdin {
-		pipeOpts.Disabled = disableStdin
-	}
-	if allowEmptyPipe, pipeErr := cmd.Root().PersistentFlags().GetBool(FlagAllowEmptyPipe); pipeErr == nil {
-		pipeOpts.EmptyPipe = allowEmptyPipe
-	}
-	inputIter := &RequestInputIterators{
-		PipeOptions: pipeOpts,
-	}
-	return inputIter, err
-}
-
 // RequestInputIterators contains all request input iterators
 type RequestInputIterators struct {
 	Total       int
