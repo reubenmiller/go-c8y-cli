@@ -71,13 +71,6 @@ None :)
     C8Y_SETTINGS_MODE_ENABLEUPDATE=false
     ```
 
-* Piping empty results has unexpected consequences
-
-    ```
-    c8y agents list | c8y alarms list --dry | c8y auditrecords list --dry
-    echo "{}" | c8y auditrecords list --dry
-    ```
-
 * Don't prompt for encryption key if the user is not using encryption or starting c8y for the first time
 
 ~~not known~~
