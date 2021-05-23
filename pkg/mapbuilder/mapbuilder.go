@@ -236,6 +236,8 @@ var customJSONNetFunctions = []string{
 	`Digit: function(max=16) std.native("Digit")(max)`,
 	`AlphaNumeric: function(max=16) std.native("AlphaNumeric")(max)`,
 	`StripKeys: function(value={}) value + {lastUpdated::'','self'::'',creationTime::'',additionParents::'',assetParents::'',childAdditions::'',childAssets::'',childDevices::'',deviceParents::''}`,
+	`Get: function(key, value={}, defaultValue={}) if std.type(value) == "object" && std.objectHas(value, key) then {[key]: value[key]} else {[key]: defaultValue}`,
+	`Merge: function(key, a={}, b={}) _.Get(key, a, if std.type(b) == "array" then [] else {}) + {[key]+: b}`,
 }
 
 func evaluateJsonnet(imports string, snippets ...string) (string, error) {

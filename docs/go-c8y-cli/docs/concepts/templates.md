@@ -181,6 +181,8 @@ Below lists the additional functions which are available in jsonnet template fil
 |_.Digit([length=16])| Random 0 padded string with only digits | `0261177197719716` |
 |_.AlphaNumeric([length=16])| Random AlphaNumeric string of a given length | `f087oAAzjnvzkPdf` |
 |_.StripKeys([object])| Strip protected Cumulocity properties from a object. The following properties are removed from the given object: additionParents, assetParents, childAdditions, childAssets, childDevices, deviceParents, creationTime, lastUpdated, self | `{}` |
+|_.Get(key, object, defaultValue={}) | Get a property if `object` is an object type and the key exists in it, otherwise return the default value | See examples |
+|_.Merge(key, a={}, b={}}) | Merge object b into a on the given key (property name)| See examples |
 
 
 ### Example: Generating random data
@@ -360,6 +362,94 @@ cat input.json |
   "type": "windows_agent"
 }
 ```
+
+### Example: Merging device managed object fragments 
+
+Update a nested fragment is normally difficult as it involves retrieving the existing values, altering the existing values, then only sending the updated fragment to Cumulocity.
+
+This is made easier if you combine the piped data and using the `_.Merge()` function.
+
+This examples shows how the `c8y_SupportedOperations` fragment can be extended to support a new type.
+
+Here is the device managed object before the merge.
+
+```json title="managed object: id=1234"
+{
+  "id": "1234",
+  "c8y_IsDevice": {},
+  "c8y_SupportedOperations": [
+    "c8y_Restart"
+  ]
+}
+```
+
+The following command will add `c8y_Command` to the list of supported operations.
+
+<CodeExample>
+
+```bash
+c8y devices get --id 1234 |
+  c8y devices update --template "_.Merge('c8y_SupportedOperations', input.value, ['c8y_Command'])"
+```
+
+</CodeExample>
+
+```json title="Output"
+{
+  "id": "1234",
+  "c8y_IsDevice": {},
+  "c8y_SupportedOperations": [
+    "c8y_Restart",
+    "c8y_Command"
+  ]
+}
+```
+
+:::info
+If piped variable `input.value` does not contain a property called `c8y_SupportedOperations` then a default value will be used of the same type as the value being merged (i.e. either array or object).
+:::
+
+### Example: Remove a nested fragment from a managed object
+
+Removing a nested fragment can be done by retrieving the existing value, and merging it with snippet which uses jsonnet property defined using `::` which will hide/remove the value.
+
+Here is the device managed object before the merge.
+
+```json title="managed object: id=1234"
+{
+  "id": "1234",
+  "c8y_IsDevice": {},
+  "c8y_Model": {
+    "serialNumber": "123456789",
+    "otherValue": ""
+  }
+}
+```
+
+The following command will remove the `otherValue` property from the `c8y_Model` fragment.
+
+<CodeExample>
+
+```bash
+c8y devices get --id 1234 |
+  c8y devices update --template "_.Merge('c8y_Model', input.value, {otherValue:: null})"
+```
+
+</CodeExample>
+
+```json title="Output"
+{
+  "id": "1234",
+  "c8y_IsDevice": {},
+  "c8y_Model": {
+    "serialNumber": "123456789"
+  }
+}
+```
+
+:::info
+The same thing could als
+:::
 
 ### Example: Retry a failed operation
 

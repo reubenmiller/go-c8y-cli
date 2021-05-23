@@ -95,6 +95,98 @@ Describe -Name "c8y template" {
 
             $output.name | Should -BeExactly "https://example.com"
         }
+
+        It "provides a function to get an optional value" {
+            $inputdata = @{
+                nestedProp = @{
+                    othervalue = 1
+                }
+            }
+            
+            $output = ConvertTo-Json $inputdata -Compress |
+                c8y devices update --id 0 --dry --dryFormat json --template "_.Get('nestedProp', input.value, {dummy: 2})"
+            $request = $output | ConvertFrom-Json
+            $request.body | Should -MatchObject @{
+                nestedProp = @{
+                    othervalue = 1
+                }
+            }
+        }
+
+        It "provides a function to get an optional value and returns a default value if not present" {
+            $inputdata = @{
+                nestedProp = @{
+                    othervalue = 1
+                }
+            }
+            
+            $output = ConvertTo-Json $inputdata -Compress |
+                c8y devices update --id 0 --dry --dryFormat json --template "_.Get('nestedProp2', input.value, {dummy: 2})"
+            $request = $output | ConvertFrom-Json
+            $request.body | Should -MatchObject @{
+                nestedProp2 = @{
+                    dummy = 2
+                }
+            }
+        }
+    }
+
+    Context "Merge function" {
+        It "merges values" -TestCases @(
+            @{
+                InputValue = @{
+                    nestedProp = @{
+                        othervalue = "somevalue"
+                        inputList = @("existingValue")
+                    }
+                }
+                Template = "_.Merge('nestedProp', input.value, {inputList+: ['newValue']})"
+                Expect = @{
+                    nestedProp = @{
+                        othervalue = "somevalue"
+                        inputList = @("existingValue", "newValue")
+                    }
+                }
+            },
+            @{
+                InputValue = @{}
+                Template = "_.Merge('nestedProp', input.value, {inputList+: ['newValue']})"
+                Expect = @{
+                    nestedProp = @{
+                        inputList = @("newValue")
+                    }
+                }
+            },
+            @{
+                Because = "Merge array when array is immediate key"
+                InputValue = @{c8y_SupportedOperations = @()}
+                Template = "_.Merge('c8y_SupportedOperations', input.value, ['newValue'])"
+                Expect = @{c8y_SupportedOperations = @("newValue")}
+            },
+            @{
+                Because = "Merge array when existing value does not exist"
+                InputValue = @{}
+                Template = "_.Merge('c8y_SupportedOperations', input.value, ['newValue'])"
+                Expect = @{c8y_SupportedOperations = @("newValue")}
+            },
+            @{
+                Because = "Removes a nested fragment"
+                InputValue = @{c8y_Model=@{serialNumber="123456789"; otherValue="example"}}
+                Template = "_.Merge('c8y_Model', input.value, {otherValue:: null})"
+                Expect = @{c8y_Model=@{serialNumber="123456789"}}
+            }
+        ) {
+            Param(
+                [object] $InputValue,
+                [object] $Template,
+                [object] $Expect,
+                [string] $Because
+            )            
+            $output = ConvertTo-Json $InputValue -Compress |
+                c8y devices update --id 0 --dry --dryFormat json --template $Template
+            $request = $output | ConvertFrom-Json
+            $request.body | Should -MatchObject $Expect -Because:$Because
+        }
     }
 
     Context "Order of processing" {
