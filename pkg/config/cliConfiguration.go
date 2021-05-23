@@ -766,7 +766,7 @@ func (c *Config) IsCIMode() bool {
 
 // IsEncryptionEnabled indicates if session encryption is enabled or not
 func (c *Config) IsEncryptionEnabled() bool {
-	return c.viper.GetBool("settings.encryption.enabled")
+	return c.viper.GetBool(SettingsEncryptionEnabled)
 }
 
 // GetString returns a string from the configuration
