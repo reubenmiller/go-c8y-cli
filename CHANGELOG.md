@@ -71,8 +71,6 @@ None :)
     C8Y_SETTINGS_MODE_ENABLEUPDATE=false
     ```
 
-* Don't prompt for encryption key if the user is not using encryption or starting c8y for the first time
-
 ~~not known~~
 ### Commands
 
