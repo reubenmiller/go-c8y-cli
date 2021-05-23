@@ -166,7 +166,7 @@ Describe -Name "c8y errors" {
         }
 
         It "handles multiple errors in pipeline" {
-            $stderr = $( $output = "", "" | c8y events create --type "c8y_TestAlarm" --force ) 2>&1
+            $stderr = $( $output = "0", "0" | c8y events create --type "c8y_TestAlarm" --force ) 2>&1
             $LASTEXITCODE | Should -Be 104
             $output | Should -BeNullOrEmpty
             $stderr | Should -HaveCount 3
@@ -176,7 +176,7 @@ Describe -Name "c8y errors" {
         }
 
         It "handles multiple errors in pipeline and when mode is not set properly" {
-            $stderr = $( $output = "", "" | c8y events create --type "c8y_TestAlarm" --force ) 2>&1
+            $stderr = $( $output = "0", "0" | c8y events create --type "c8y_TestAlarm" --force ) 2>&1
             $LASTEXITCODE | Should -Be 104
             $output | Should -BeNullOrEmpty
             $stderr | Should -HaveCount 3

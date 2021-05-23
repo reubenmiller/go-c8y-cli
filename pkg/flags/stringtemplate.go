@@ -87,7 +87,9 @@ func (b *StringTemplate) Execute(ignoreIterators bool, template ...string) (outp
 		default:
 			currentValue = fmt.Sprintf("%v", v)
 		}
-		output = strings.ReplaceAll(output, "{"+key+"}", currentValue)
+		if currentValue != "" {
+			output = strings.ReplaceAll(output, "{"+key+"}", currentValue)
+		}
 	}
 
 	return

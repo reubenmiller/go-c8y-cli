@@ -37,10 +37,16 @@ func WithQueryParameters(cmd *cobra.Command, query *QueryTemplate, inputIterator
 			}
 		case map[string]string:
 			for key, val := range v {
-				query.SetVariable(key, val)
+				if val != "" {
+					query.SetVariable(key, val)
+				}
 			}
 		default:
-			query.SetVariable(name, v)
+			strValue := fmt.Sprintf("%v", v)
+			if strValue != "" {
+				// keep value as intervalue, but filter out empty string values
+				query.SetVariable(name, v)
+			}
 		}
 	}
 	if totalIterators > 0 {
@@ -61,10 +67,14 @@ func WithPathParameters(cmd *cobra.Command, path *StringTemplate, inputIterators
 		if name != "" {
 			switch v := value.(type) {
 			case []string:
-				path.SetVariable(name, strings.Join(v, ","))
+				if len(v) > 0 {
+					path.SetVariable(name, strings.Join(v, ","))
+				}
 
 			case []int:
-				path.SetVariable(name, strings.Trim(strings.Join(strings.Fields(fmt.Sprint(v)), ","), "[]"))
+				if len(v) > 0 {
+					path.SetVariable(name, strings.Trim(strings.Join(strings.Fields(fmt.Sprint(v)), ","), "[]"))
+				}
 
 			case iterator.Iterator:
 				path.SetVariable(name, v)
@@ -73,7 +83,10 @@ func WithPathParameters(cmd *cobra.Command, path *StringTemplate, inputIterators
 				}
 
 			default:
-				path.SetVariable(name, fmt.Sprintf("%v", value))
+				strValue := fmt.Sprintf("%v", value)
+				if strValue != "" {
+					path.SetVariable(name, fmt.Sprintf("%v", value))
+				}
 			}
 		}
 	}
@@ -667,6 +680,7 @@ func WithRequiredProperties(values ...string) GetOption {
 type PipelineOptions struct {
 	Name        string              `json:"name"`
 	Required    bool                `json:"required"`
+	EmptyPipe   bool                `json:"allowEmptyPipe"`
 	Disabled    bool                `json:"disabled"`
 	Property    string              `json:"property"`
 	Aliases     []string            `json:"aliases"`
@@ -685,19 +699,6 @@ func WithPipelineIterator(opts *PipelineOptions) GetOption {
 		}
 		return opts.Property, iter, err
 	}
-}
-
-// NewRequestInputIterators returns input iterations with the pipeline options loaded from the annotations
-func NewRequestInputIterators(cmd *cobra.Command) (*RequestInputIterators, error) {
-	pipeOpts, err := GetPipeOptionsFromAnnotation(cmd)
-
-	if disableStdin, _ := cmd.Root().PersistentFlags().GetBool(FlagNullInput); disableStdin {
-		pipeOpts.Disabled = disableStdin
-	}
-	inputIter := &RequestInputIterators{
-		PipeOptions: pipeOpts,
-	}
-	return inputIter, err
 }
 
 // RequestInputIterators contains all request input iterators

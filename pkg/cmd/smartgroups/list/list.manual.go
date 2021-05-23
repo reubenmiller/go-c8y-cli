@@ -84,7 +84,7 @@ func (n *ListCmd) RunE(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	inputIterators, err := flags.NewRequestInputIterators(cmd)
+	inputIterators, err := cmdutil.NewRequestInputIterators(cmd, cfg)
 	if err != nil {
 		return err
 	}

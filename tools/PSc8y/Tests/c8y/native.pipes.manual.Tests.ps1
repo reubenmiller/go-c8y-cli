@@ -48,9 +48,75 @@ Describe -Name "c8y pipes" {
             $requests[1].body.text | Should -BeExactly "custom info 2"
         }
     }
+
+    Context "Audit" {
+        It "does not send a request when piping empty results" {
+            $output = c8y alarms list --device 0 | c8y auditrecords list --dry --dryFormat json
+            $LASTEXITCODE | Should -Be 0
+            $output | Should -BeNullOrEmpty
+
+            $output = c8y auditrecords list --dry --dryFormat json
+            $LASTEXITCODE | Should -Be 0
+            $request = $output | ConvertFrom-Json
+            $request[0].pathEncoded | Should -BeExactly "/audit/auditRecords"
+        }
+
+        It "does not send a request when pipeing an empty string" {
+            $output = Write-Output "" -NoEnumerate | c8y auditrecords list --dry --dryFormat json
+            $LASTEXITCODE | Should -Be 0
+            $output | Should -BeNullOrEmpty
+        }
+
+        It "accepts json pipeline" {
+            $inputdata = @{source = @{id = "1111" }} | ConvertTo-Json -Compress
+            $output = $inputdata | c8y auditrecords list --dry --dryFormat json
+            $LASTEXITCODE | Should -Be 0
+            $requests = $output | ConvertFrom-Json
+            $requests | Should -HaveCount 1
+            $requests[0].pathEncoded | Should -BeExactly "/audit/auditRecords?source=1111"
+        }
+    }
     
     Context "Piping to collection commands" {
 
+        It "ignores output when piping an empty string" {
+            $output = Write-Output "" -NoEnumerate | c8y alarms get --dry --dryFormat json
+            $LASTEXITCODE | Should -Be 0
+            $output | Should -BeNullOrEmpty
+        }
+
+        It "ignores output when piping an empty string" {
+            $output = Write-Output "" -NoEnumerate | c8y alarms list --dry --dryFormat json
+            $LASTEXITCODE | Should -Be 0
+            $output | Should -BeNullOrEmpty
+
+            $output = c8y alarms list --dry --dryFormat json
+            $LASTEXITCODE | Should -Be 0
+            $request = $output | ConvertFrom-Json
+            $request[0].pathEncoded | Should -BeExactly "/alarm/alarms"
+        }
+
+        It "does not enforce argument mapping when receiving empty json input" {
+            $output = Write-Output "{}" -NoEnumerate | c8y alarms list --dry --dryFormat json
+            $LASTEXITCODE | Should -Be 0
+            $output | Should -Not -BeNullOrEmpty
+            $request = $output | ConvertFrom-Json
+            $request[0].pathEncoded | Should -BeExactly "/alarm/alarms"
+
+            # however it should fail if it requires a property
+            $output = Write-Output "{}" -NoEnumerate | c8y devices create --dry --dryFormat json
+            $LASTEXITCODE | Should -Not -Be 0
+            $output | Should -BeNullOrEmpty
+        }
+
+        It "accepts json pipeline" {
+            $inputdata = @{source = @{id = "1111" }} | ConvertTo-Json -Compress
+            $output = $inputdata | c8y alarms list --dry --dryFormat json
+            $LASTEXITCODE | Should -Be 0
+            $requests = $output | ConvertFrom-Json
+            $requests | Should -HaveCount 1
+            $requests[0].pathEncoded | Should -BeExactly "/alarm/alarms?source=1111"
+        }
     
         It "Pipe by id to query parameters" {
             $output = @("1", "2") | c8y events list --dry --dryFormat json
@@ -67,14 +133,10 @@ Describe -Name "c8y pipes" {
             $partial[1] | Should -MatchObject @{method="GET"; path="/event/events"}
         }
 
-        It "Empty pipe. Empty values should not cause a lookup, however they should also not stop the iteration" {
-            $output = @("", "") | c8y events list --dry --dryFormat json
+        It "does not send requests when pipeine empty strings" {
+            $output = @("", "") | c8y events list --dry --dryFormat json 2>&1
             $LASTEXITCODE | Should -Be 0
-
-            $requests = $output | ConvertFrom-Json
-            $requests | Should -HaveCount 2
-            $requests[0] | Should -MatchObject @{method = "GET"; pathEncoded = "/event/events"} -Property method, pathEncoded
-            $requests[1] | Should -MatchObject @{method = "GET"; pathEncoded = "/event/events"} -Property method, pathEncoded
+            $output | Should -BeNullOrEmpty
         }
 
         It "Pipe by id object to query parameters" {

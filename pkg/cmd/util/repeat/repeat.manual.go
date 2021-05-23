@@ -121,7 +121,7 @@ func (n *CmdRepeat) newTemplate(cmd *cobra.Command, args []string) error {
 		}
 	}
 
-	inputIterators, err := flags.NewRequestInputIterators(cmd)
+	inputIterators, err := cmdutil.NewRequestInputIterators(cmd, cfg)
 	if err != nil {
 		return err
 	}

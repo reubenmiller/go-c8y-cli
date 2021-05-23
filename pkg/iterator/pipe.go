@@ -5,6 +5,7 @@ import (
 	"bytes"
 	"io"
 	"os"
+	"strings"
 	"sync"
 
 	"errors"
@@ -15,6 +16,13 @@ import (
 
 // ErrNoPipeInput is an error when there is no piped input on standard input
 var ErrNoPipeInput = errors.New("iterator: no piped input")
+
+// ErrEmptyPipeInput pipe input is being used but it is empty
+var ErrEmptyPipeInput = errors.New("iterator: empty pipe input")
+
+func IsEmptyPipeInputError(err error) bool {
+	return strings.Contains(err.Error(), ErrEmptyPipeInput.Error())
+}
 
 // Filter is a funciton applied on every iteration. Returning False will end the iterator
 type Filter func([]byte) bool
@@ -141,8 +149,8 @@ func NewPipeIterator(in io.Reader, filter ...Filter) (Iterator, error) {
 	}
 
 	reader := bufio.NewReader(input)
-	if _, err := reader.Peek(1); err != nil {
-		return nil, ErrNoPipeInput
+	if err := PeekReader(reader); err != nil {
+		return nil, err
 	}
 
 	var pipelineFilter Filter
@@ -176,8 +184,8 @@ func NewJSONPipeIterator(in io.Reader, pipeOpts *PipeOptions, filter ...Filter) 
 	}
 
 	reader := bufio.NewReader(input)
-	if _, err := reader.Peek(1); err != nil {
-		return nil, ErrNoPipeInput
+	if err := PeekReader(reader); err != nil {
+		return nil, err
 	}
 
 	var pipelineFilter Filter
@@ -190,4 +198,22 @@ func NewJSONPipeIterator(in io.Reader, pipeOpts *PipeOptions, filter ...Filter) 
 		filter: pipelineFilter,
 		opts:   pipeOpts,
 	}, nil
+}
+
+// PeekReader check if the reader contains empty input or not
+// An error will be returned if the reader does not contain any data, or the first character
+// is whitespace
+func PeekReader(r *bufio.Reader) error {
+	peek, err := r.Peek(1)
+	if err != nil {
+		if err == io.EOF {
+			return ErrEmptyPipeInput
+		}
+		return err
+	}
+	// check first character contains only whitespace
+	if len(bytes.Trim(peek, "\n\r")) == 0 {
+		return ErrEmptyPipeInput
+	}
+	return nil
 }

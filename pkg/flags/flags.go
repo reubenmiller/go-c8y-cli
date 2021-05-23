@@ -17,6 +17,7 @@ const (
 	FlagPageSize                  = "pageSize"
 	FlagCurrentPage               = "currentPage"
 	FlagNullInput                 = "nullInput"
+	FlagAllowEmptyPipe            = "allowEmptyPipe"
 )
 const (
 	AnnotationValueFromPipeline       = "valueFromPipeline"

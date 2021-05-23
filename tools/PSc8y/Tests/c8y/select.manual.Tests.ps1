@@ -26,7 +26,9 @@ Describe -Name "c8y select global parameter" {
         $type = New-RandomString -Prefix "selectType"
         1..2 | c8y devices create --data "type=$type,text=value"
         3 | c8y devices create --data "type=$type"
+        Start-Sleep -Seconds 2  # Wait devices to be created
         $output = c8y devices list --type $type --select "name,id,text,type" --output csv
+        $output | Should -Not -BeNullOrEmpty
         c8y devices list --type $type | c8y devices delete
         $LASTEXITCODE | Should -Be 0
         $output = $output | Sort-Object

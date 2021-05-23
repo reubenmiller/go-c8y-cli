@@ -199,6 +199,7 @@ func NewCmdRoot(f *cmdutil.Factory, version, buildDate string) *CmdRoot {
 
 	// input parsing
 	cmd.PersistentFlags().BoolP(flags.FlagNullInput, "n", false, "Don't read the input (stdin). Useful if using in shell for/while loops")
+	cmd.PersistentFlags().Bool(flags.FlagAllowEmptyPipe, false, "Don't fail when piped input is empty (stdin)")
 
 	// confirmation
 	cmd.PersistentFlags().BoolP("force", "f", false, "Do not prompt for confirmation. Ignored when using --confirm")

@@ -305,3 +305,17 @@ func (f *Factory) CheckPostCommandError(err error) error {
 
 	return outErr
 }
+
+// NewRequestInputIterators create a request iterator based on pipe line configuration
+func NewRequestInputIterators(cmd *cobra.Command, cfg *config.Config) (*flags.RequestInputIterators, error) {
+	pipeOpts, err := flags.GetPipeOptionsFromAnnotation(cmd)
+
+	if cfg != nil {
+		pipeOpts.Disabled = cfg.DisableStdin()
+		pipeOpts.EmptyPipe = cfg.AllowEmptyPipe()
+	}
+	inputIter := &flags.RequestInputIterators{
+		PipeOptions: pipeOpts,
+	}
+	return inputIter, err
+}
