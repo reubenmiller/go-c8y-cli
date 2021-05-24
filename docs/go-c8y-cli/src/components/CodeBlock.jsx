@@ -49,6 +49,7 @@ const c8yCommands = {
     'c8y devices setRequiredAvailability': 'Set-DeviceRequiredAvailability',
 
     'c8y inventory create': 'New-ManagedObject',
+    'c8y inventory get': 'Get-ManagedObject',
     'c8y inventory update': 'Update-ManagedObject',
     'c8y inventory list': 'Get-ManagedObjectCollection',
     'c8y inventory find': 'Find-ManagedObjectCollection',
