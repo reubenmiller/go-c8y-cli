@@ -170,6 +170,15 @@ var updateSettingsOptions = map[string]argumentHandler{
 		"0",
 	}, nil, cobra.ShellCompDirectiveNoFileComp},
 
+	"defaults.maxWorkers": {"defaults.maxWorkers", "int", config.SettingsMaxWorkers, []string{
+		"1",
+		"5",
+		"10",
+		"15",
+		"20",
+		"50",
+	}, nil, cobra.ShellCompDirectiveNoFileComp},
+
 	"defaults.pageSize": {"defaults.pageSize", "int", "settings.defaults.pageSize", []string{
 		"default",
 		"10",
