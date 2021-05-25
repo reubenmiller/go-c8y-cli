@@ -39,6 +39,7 @@ Upload a config file and make it globally accessible for all users
 
 ```
       --abortOnErrors int          Abort batch when reaching specified number of errors (default 10)
+      --allowEmptyPipe             Don't fail when piped input is empty (stdin)
   -c, --compact                    Compact instead of pretty-printed output when using json output. Pretty print is the default if output is the terminal
       --confirm                    Prompt for confirmation
       --confirmText string         Custom confirmation text
