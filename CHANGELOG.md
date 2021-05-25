@@ -46,11 +46,11 @@ None :)
 
 ### Docs
 
-* [ ] Workers
 * [ ] Confirmation
-* [ ] Views
 * [ ] Session encryption
 * [ ] Partial setting of sessions (i.e. bootstrap credentials with only the username/password set)
+* [x] Workers
+* [x] Views
 * [x] Activity Log
 * [x] Filtering
 * [x] Configuration (defaults, environment variables, arguments)
@@ -79,6 +79,8 @@ None :)
     * c8y activity log deleteAll
 
 ### New Functions
+
+* make job jitter configurable
 
 * Add option to print out request and response as markdown
 
