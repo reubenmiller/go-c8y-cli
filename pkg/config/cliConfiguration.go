@@ -103,31 +103,31 @@ const (
 	// SettingsJSONCompact show compact json output
 	SettingsJSONCompact = "settings.defaults.compact"
 
-	// ShowProgress show progress bar
+	// SettingsShowProgress show progress bar
 	SettingsShowProgress = "settings.defaults.progress"
 
-	// DisableColor don't print console output in color
+	// SettingsDisableColor don't print console output in color
 	SettingsDisableColor = "settings.defaults.noColor"
 
 	// SettingsProxy http/s proxy settings
 	SettingsProxy = "settings.defaults.proxy"
 
-	// IgnoreProxy ignore proxy settings
+	// SettingsIgnoreProxy ignore proxy settings
 	SettingsIgnoreProxy = "settings.defaults.noProxy"
 
-	// WithError return the error response on stdout rather than stderr
+	// SettingsWithError return the error response on stdout rather than stderr
 	SettingsWithError = "settings.defaults.withError"
 
 	// SettingsWorkerDelay delay in milliseconds to wait after each request before the worker processes a new job (request)
 	SettingsWorkerDelay = "settings.defaults.delay"
 
-	// WorkerDelayBefore delay in milliseconds to wait before each request
+	// SettingsWorkerDelayBefore delay in milliseconds to wait before each request
 	SettingsWorkerDelayBefore = "settings.defaults.delayBefore"
 
 	// SettingsAbortOnErrorCount abort when the number of errors reaches this value
 	SettingsAbortOnErrorCount = "settings.defaults.abortOnErrors"
 
-	// ViewOption controls whether views are applied the output or not
+	// SettingsViewOption controls whether views are applied the output or not
 	SettingsViewOption = "settings.defaults.view"
 
 	// SettingsTimeout timeout in seconds use when sending requests
@@ -160,7 +160,7 @@ const (
 	// SettingsModeCI enable continuous integration mode (this will enable all commands)
 	SettingsModeCI = "settings.ci"
 
-	// Force don't prompt for confirmation
+	// SettingsForce don't prompt for confirmation
 	SettingsForce = "settings.defaults.force"
 
 	// SettingsForceConfirm force prompt for confirmation
