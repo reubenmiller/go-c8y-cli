@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"math/rand"
 	"os"
 	"reflect"
 	"strings"
@@ -407,9 +406,6 @@ func (w *Worker) batchWorker(id int, jobs <-chan batchArgument, results chan<- e
 				w.logger.Infof("worker %d: sleeping %s before fetching next job", id, job.batchOptions.Delay)
 				time.Sleep(job.batchOptions.Delay)
 			}
-		} else {
-			jitter := rand.Int31n(50)
-			time.Sleep(time.Duration(jitter) * time.Millisecond)
 		}
 		onStartup = false
 
