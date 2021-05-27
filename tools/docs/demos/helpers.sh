@@ -30,3 +30,16 @@ runCommand () {
     cmd="$( echo -e "$@" | tr -d '\t\n\\' )"
     eval "$cmd"
 }
+
+runCommandWithAlternative () {
+    echo -n "go-c8y-cli % "
+    local fakeCommand="$1"
+    shift
+    echo -e "$fakeCommand" | randtype -m 1 -n "%\t" -t 10,$DEMO_TYPE_SPEED_FACTOR
+    sleep 0.250
+    # Add in --view off before the pipe to jq, as the views are not automatically turned
+    # off when using eval, bug in go-c8y-cli?
+    # cmd="$( echo -e "$@" | tr -d '\t\n\\' | sed 's/| jq/--view off | jq/g' )"
+    cmd="$( echo -e "$@" | tr -d '\t\n\\' )"
+    eval "$cmd"
+}

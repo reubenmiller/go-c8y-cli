@@ -3,6 +3,16 @@ title: Views
 ---
 
 import CodeExample from '@site/src/components/CodeExample';
+import Video from '@site/src/components/video';
+
+## Demo
+
+<Video
+  videoSrcURL="https://asciinema.org/a/416566/embed?speed=1.0&autoplay=false&size=small&rows=30"
+  videoTitle="Views example"
+  width="90%"
+  height="550px"
+  ></Video>
 
 ## Overview
 
