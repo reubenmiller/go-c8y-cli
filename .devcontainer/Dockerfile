@@ -147,7 +147,7 @@ RUN sed -iE 's/plugins=(\(.*\))/plugins=(\1 c8y)/' /home/$USERNAME/.zshrc \
 RUN  cd /tmp \
     && curl -sfL https://install.goreleaser.com/github.com/goreleaser/goreleaser.sh | sh \
     && chmod a+x /tmp/bin/* \
-    && mv /tmp/bin/* /usr/local/bin/
+    && sudo mv /tmp/bin/* /usr/local/bin/
 
 # Update this to "on" or "off" as appropriate
 ENV GO111MODULE=auto
