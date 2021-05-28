@@ -140,7 +140,7 @@ func NewPipeIterator(in io.Reader, filter ...Filter) (Iterator, error) {
 			return nil, err
 		}
 
-		if info.Mode()&os.ModeCharDevice != 0 {
+		if info.Mode()&os.ModeCharDevice != 0 || info.Size() <= 0 {
 			return nil, ErrNoPipeInput
 		}
 		input = v
@@ -175,7 +175,7 @@ func NewJSONPipeIterator(in io.Reader, pipeOpts *PipeOptions, filter ...Filter) 
 			return nil, err
 		}
 
-		if info.Mode()&os.ModeCharDevice != 0 {
+		if info.Mode()&os.ModeCharDevice != 0 || info.Size() <= 0 {
 			return nil, ErrNoPipeInput
 		}
 		input = v
