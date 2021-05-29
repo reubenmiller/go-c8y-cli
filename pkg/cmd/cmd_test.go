@@ -12,6 +12,7 @@ import (
 	"github.com/google/shlex"
 	"github.com/reubenmiller/go-c8y-cli/pkg/assert"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmd/root"
+	"github.com/reubenmiller/go-c8y-cli/pkg/fakestdin"
 )
 
 func setupTest() *root.CmdRoot {
@@ -440,14 +441,27 @@ func Test_DebugCommand(t *testing.T) {
 	// cmdErr := ExecuteCmd(cmd, fmt.Sprintf("devices list --select id,nam* --output csvheader"))
 	// cmdErr := ExecuteCmd(cmd, fmt.Sprintf("applications get --id cockpit --select appId:id,tenantId:owner.**.id"))
 	// stdin := bytes.NewBufferString(``)
-	stdin := bytes.NewBufferString(`` + "\n")
+	stdin := bytes.NewBufferString(`{"source":{"id":"1111"}}` + "\n")
 	cmd.SetIn(stdin)
 	// operations create --device livedemo01 --data "c8y_Restart={}"
 	cmdtext := `
-	alarms list --dry
+	alarms list --dry --dryFormat json
 	`
 	// operations create --dry --template "{v:input.value}" --device livedemo01
 	cmdErr := ExecuteCmd(cmd, strings.TrimSpace(cmdtext))
 	cmdErr = CheckCommandError(cmd.Command, nil, cmdErr)
+	assert.OK(t, cmdErr)
+}
+
+func Test_DebugStdinCommand(t *testing.T) {
+	cmd := setupTest()
+	stdin := fakestdin.NewStdIn()
+	defer stdin.Restore()
+	stdin.Write(`{"source":{"id":"1111"}}` + "\n")
+
+	cmdtext := `
+	alarms list --dry --dryFormat json
+	`
+	cmdErr := ExecuteCmd(cmd, strings.TrimSpace(cmdtext))
 	assert.OK(t, cmdErr)
 }

@@ -302,6 +302,10 @@ func WithIDSlice(args []string, opts ...string) flags.GetOption {
 			hasPipeSupport := inputIterators.PipeOptions.Name == src
 			pipeIter, err := flags.NewFlagWithPipeIterator(cmd, inputIterators.PipeOptions, hasPipeSupport)
 
+			if err == iterator.ErrEmptyPipeInput && !inputIterators.PipeOptions.EmptyPipe {
+				return inputIterators.PipeOptions.Property, nil, err
+			}
+
 			if err != nil || pipeIter == nil {
 				return "", nil, err
 			}

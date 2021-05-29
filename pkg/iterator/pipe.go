@@ -140,7 +140,7 @@ func NewPipeIterator(in io.Reader, filter ...Filter) (Iterator, error) {
 			return nil, err
 		}
 
-		if info.Mode()&os.ModeCharDevice != 0 || info.Size() <= 0 {
+		if info.Mode()&os.ModeCharDevice != 0 {
 			return nil, ErrNoPipeInput
 		}
 		input = v
@@ -175,7 +175,7 @@ func NewJSONPipeIterator(in io.Reader, pipeOpts *PipeOptions, filter ...Filter) 
 			return nil, err
 		}
 
-		if info.Mode()&os.ModeCharDevice != 0 || info.Size() <= 0 {
+		if info.Mode()&os.ModeCharDevice != 0 {
 			return nil, ErrNoPipeInput
 		}
 		input = v
@@ -213,7 +213,10 @@ func PeekReader(r *bufio.Reader) error {
 	}
 	// check first character contains only whitespace
 	if len(bytes.Trim(peek, "\n\r")) == 0 {
-		return ErrEmptyPipeInput
+		// Treat input starting with an empty line like
+		// no pipe input, as when it runs in a cronjob
+		// stdin starts with a new lineline char
+		return ErrNoPipeInput
 	}
 	return nil
 }

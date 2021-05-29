@@ -62,7 +62,7 @@ Describe -Name "c8y pipes" {
         }
 
         It "does not send a request when pipeing an empty string" {
-            $output = Write-Output "" -NoEnumerate | c8y auditrecords list --dry --dryFormat json
+            $output = $null | c8y auditrecords list --dry --dryFormat json
             $LASTEXITCODE | Should -Be 0
             $output | Should -BeNullOrEmpty
         }
@@ -80,13 +80,25 @@ Describe -Name "c8y pipes" {
     Context "Piping to collection commands" {
 
         It "ignores output when piping an empty string" {
-            $output = Write-Output "" -NoEnumerate | c8y alarms get --dry --dryFormat json
+            $output = c8y alarms list --device 0 | c8y alarms get --dry --dryFormat json
+            $LASTEXITCODE | Should -Be 0
+            $output | Should -BeNullOrEmpty
+        }
+
+        It "sends a command and ignores pipeline if it starts with a newline char" {
+            # equivalent bash: echo "" | c8y alarms list
+            $output = "" | c8y alarms list --dry --dryFormat json
+            $LASTEXITCODE | Should -Be 0
+            $output | Should -Not -BeNullOrEmpty
+
+            # equivalent bash: echo -n "" | c8y alarms list
+            $output = $null | c8y alarms list --dry --dryFormat json 2>&1
             $LASTEXITCODE | Should -Be 0
             $output | Should -BeNullOrEmpty
         }
 
         It "ignores output when piping an empty string" {
-            $output = Write-Output "" -NoEnumerate | c8y alarms list --dry --dryFormat json
+            $output = $null | c8y alarms list --dry --dryFormat json --debug
             $LASTEXITCODE | Should -Be 0
             $output | Should -BeNullOrEmpty
 
@@ -111,7 +123,7 @@ Describe -Name "c8y pipes" {
 
         It "accepts json pipeline" {
             $inputdata = @{source = @{id = "1111" }} | ConvertTo-Json -Compress
-            $output = $inputdata | c8y alarms list --dry --dryFormat json
+            $output = $inputdata | c8y alarms list --dry --dryFormat json --debug
             $LASTEXITCODE | Should -Be 0
             $requests = $output | ConvertFrom-Json
             $requests | Should -HaveCount 1
@@ -134,7 +146,7 @@ Describe -Name "c8y pipes" {
         }
 
         It "does not send requests when pipeine empty strings" {
-            $output = @("", "") | c8y events list --dry --dryFormat json 2>&1
+            $output = @($null, $null) | c8y events list --dry --dryFormat json 2>&1
             $LASTEXITCODE | Should -Be 0
             $output | Should -BeNullOrEmpty
         }
