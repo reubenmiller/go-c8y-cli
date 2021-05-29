@@ -130,7 +130,7 @@ func (n *CmdSet) RunE(cmd *cobra.Command, args []string) error {
 	n.factory.Config = func() (*config.Config, error) {
 		return cfg, nil
 	}
-	client, err := factory.CreateCumulocityClient(n.factory, "", "", "", false)()
+	client, err := factory.CreateCumulocityClient(n.factory, "", "", "", true)()
 
 	if err != nil {
 		return err
