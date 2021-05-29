@@ -75,8 +75,12 @@ func SelectSession(io *iostreams.IOStreams, cfg *config.Config, log *logger.Logg
 			return filepath.SkipDir
 		}
 
+		if info.IsDir() {
+			return nil
+		}
 		// skip settings file
-		if strings.HasPrefix(info.Name(), config.SettingsGlobalName+".") {
+		if strings.HasPrefix(info.Name(), config.SettingsGlobalName+".") ||
+			strings.HasPrefix(info.Name(), ".") {
 			return nil
 		}
 
