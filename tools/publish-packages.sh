@@ -63,7 +63,7 @@ publish_all_debian_packages () {
 publish_alpine_package () {
     local file="$1"
     local arch="$2"
-    local BRANCHES="v3.13"
+    local BRANCHES="stable"
     # local BRANCHES="v3.9 v3.10 v3.11 v3.12 v3.13 v3.14"
     local BRANCH="$(echo "$BRANCHES" | sed 's/ /,/g')"
     local REPO_NAME="main"
@@ -102,7 +102,6 @@ publish_rpm_package () {
     local arch="$2"
     local DISTRIBUTIONS="cosmic eoan disco groovy focal stable oldstable testing sid unstable buster bullseye stretch jessie bionic trusty precise xenial hirsute impish kali-rolling"
     local TARGET_PROPS="$(echo "$DISTRIBUTIONS" | sed 's/ /,/g')"
-        # --target-props "deb.distribution=$TARGET_PROPS;deb.component=$COMPONENT;deb.architecture=$arch" \
     jfrog rt upload \
         --url "$JFROG_URL/$RPM_REPO" \
         --access-token "$JFROG_APIKEY" \

@@ -105,3 +105,63 @@ nfpms:
       - src: ./output/.go-c8y-cli/**
         dst: /etc/go-c8y-cli/
         type: config|noreplace
+
+brews:
+  -
+    # IDs of the archives to use.
+    # Defaults to all.
+    # ids:
+    # - foo
+    # - bar
+
+    # GOARM to specify which 32-bit arm version to use if there are multiple versions
+    # from the build section. Brew formulas support atm only one 32-bit version.
+    # Default is 6 for all artifacts or each id if there a multiple versions.
+    goarm: 6
+
+    # NOTE: make sure the url_template, the token and given repo (github or gitlab) owner and name are from the
+    # same kind. We will probably unify this in the next major version like it is done with scoop.
+
+    # GitHub/GitLab repository to push the formula to
+    tap:
+      owner: reubenmiller
+      name: homebrew-go-c8y-cli
+
+    # Template for the url which is determined by the given Token (github or gitlab)
+    url_template: "https://github.com/reubenmiller/homebrew-go-c8y-cli/releases/download/{{ .Tag }}/{{ .ArtifactName }}"
+
+    # Allows you to set a custom download strategy. Note that you'll need
+    # to implement the strategy and add it to your tap repository.
+    # Example: https://docs.brew.sh/Formula-Cookbook#specifying-the-download-strategy-explicitly
+    # Default is empty.
+    # download_strategy: CurlDownloadStrategy
+
+    # Allows you to add a custom require_relative at the top of the formula template
+    # Default is empty
+    # custom_require: custom_download_strategy
+
+    # Git author used to commit to the repository.
+    # Defaults are shown.
+    commit_author:
+      name: goreleaserbot
+      email: reuben.d.miller@gmail.com
+
+    # Folder inside the repository to put the formula.
+    # Default is the root folder.
+    folder: Formula
+
+    # Caveats for the user of your binary.
+    # Default is empty.
+    # caveats: "How to use this binary"
+
+    # Your app's homepage.
+    # Default is empty.
+    homepage: "https://goc8ycli.netlify.app/"
+
+    # Your app's description.
+    # Default is empty.
+    description: "Cumulocity's unofficial command line tool."
+
+    # SPDX identifier of your app's license.
+    # Default is empty.
+    license: "MIT"
