@@ -30,6 +30,11 @@ jobs:
         env:
           GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
 
+      - name: Publish Linux Packages
+        run: make publish-linux-packages
+        env:
+          JFROG_APIKEY: ${{ secrets.JFROG_APIKEY }}
+
   publish-nuget:
     runs-on: ubuntu-18.04
     env:

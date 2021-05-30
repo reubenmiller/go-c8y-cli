@@ -10,6 +10,7 @@ before:
     - go mod tidy
     - make generate_go_code
     - make manpages
+    - make build_completions
 
 builds:
   - <<: &build_defaults
@@ -67,10 +68,10 @@ archives:
 
 nfpms:
   - license: MIT
-    maintainer: GitHub
-    homepage: https://reubenmiller.github.io/go-c8y-cli/
-    bindir: /usr/bin
-    description: Cumulocity's unoffical command line tool.
+    maintainer: Reuben Miller
+    homepage: http://goc8ycli.netlify.app
+    bindir: /usr/local
+    description: Cumulocity's unofficial command line tool.
     formats:
       - deb
       - rpm
@@ -81,22 +82,26 @@ nfpms:
       - git
 
     # create empty folder for the user to add their own templates and views
-    empty_folders:
-      - /opt/c8y/templates/custom
-      - /opt/c8y/views/custom
+    # empty_folders:
+    #   - /opt/c8y/templates/custom
+    #   - /opt/c8y/views/custom
 
     contents:
+      # Man pages
       - src: "./share/man/man1/c8y*.1"
         dst: "/usr/share/man/man1"
 
-      - src: "./tools/shell/c8y.plugin.*"
-        dst: /opt/c8y/plugins/
-
-      - src: ./examples/views/default/*.json
-        dst: /opt/c8y/views/default/
-
-      - src: ./examples/templates/test/test*.jsonnet
-        dst: /opt/c8y/templates/test/
-
-      - src: ./examples/settings.json
-        dst: /opt/c8y/settings.json
+      # Completions
+      - src: ./output/bash/c8y
+        dst: /etc/bash_completion.d/c8y
+      
+      - src: ./output/zsh/_c8y
+        dst: /usr/local/share/zsh/site-functions/_c8y
+      
+      - src: ./output/fish/c8y.fish
+        dst: /usr/share/fish/vendor_completions.d/c8y.fish
+      
+      # Addons (git repo)
+      - src: ./output/.go-c8y-cli/**
+        dst: /etc/go-c8y-cli/
+        type: config|noreplace

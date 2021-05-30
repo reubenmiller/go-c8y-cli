@@ -108,6 +108,9 @@ build-docker:					## Build the docker images
 	@sudo docker build ./docker --file ./docker/pwsh.dockerfile $(DOCKER_BUILD_ARGS) --tag $(TAG_PREFIX)c8y-pwsh
 	@rm ./docker/c8y.linux
 
+build_completions:
+	@chmod +x tools/shell/completion/build_completions.sh
+	env OUTPUT_DIR=./output ./tools/shell/completion/build_completions.sh
 # ---------------------------------------------------------------
 # Tests
 # ---------------------------------------------------------------
@@ -138,6 +141,10 @@ publish-local-snapshot:		## Publish local snapshot release
 
 publish-release:			## Publish release
 	goreleaser --rm-dist
+
+publish-linux-packages:		## Publish linux packages (apk,deb,rpm)
+	@chmod +x ./tools/publish-packages.sh
+	./tools/publish-packages.sh ./dist
 
 # ---------------------------------------------------------------
 # Docker examples
