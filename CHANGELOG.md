@@ -80,9 +80,9 @@ None :)
 
 ### New Functions
 
-* make job jitter configurable
-
 * Add option to print out request and response as markdown
+
+* Support mapping piped data to multiple arguments
 
 * Allow template variable for GETs to also combine data to the response (i.e. )
 
@@ -132,9 +132,6 @@ None :)
 ## Improvements
 
 * Use wide-format / column padding for completion description to better align extra information
-
-* If piped input is empty dont show an error message (maybe a warning?)
-    * `c8y devices list --type sdfasdf | c8y devices delete`
 
 ### Completions
 
