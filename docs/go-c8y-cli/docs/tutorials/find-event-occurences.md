@@ -1,9 +1,8 @@
 ---
-layout: default
-category: Tutorials - Powershell
-title: Find event occurences across devices
+title: Find event occurrences across devices
 ---
 
+import CodeExample from '@site/src/components/CodeExample';
 ### Example: Find which devices have sent a specific event in the last hour
 
 **Scenario**
@@ -24,26 +23,37 @@ Get a list of devices where a specific event has been sent to Cumulocity in the 
 
 2. Find how many events with this type `device_disconnected` were created in the last 1 hour
 
-    ```
-    $events = Get-EventCollection -Type device_disconnected -DateFrom "-1h" -PageSize 1 -WithTotalPages
+    <CodeExample>
+    
+    ```bash
+    c8y events list --type device_disconnected --dateFrom "-1h" -p 1 --withTotalPages
     ```
 
-    ```powershell
-        self: https://{tenant}.{url}/event/events?dateFrom=2020-09-30T13:31:08.357206%2B02:00&type=device_disconnected&withTotalPages=true&pageSize=1&currentPage=1
-        next: https://{tenant}.{url}/event/events?dateFrom=2020-09-30T13:31:08.357206%2B02:00&type=device_disconnected&withTotalPages=true&pageSize=1&currentPage=2
+    </CodeExample>
 
-    currentPage     pageSize        totalPages      events
-    -----------     --------        ----------      ------
-    1               1               245             ....
+    ```bash title="Output"
+    | totalPages | pageSize   | currentPage |
+    |------------|------------|-------------|
+    | 245        | 1          | 1           |
     ```
 
     The `totalPages` property on the console show the total number of events found using the search criteria. However some of these events may have come from the same devices.
 
-    To get a list of the unique devices, in-built powershell functions can be used.
+    To get a list of the unique devices, native commands can be used.
 
-    We will set the `PageSize` parameter to something higher than the `totalPages` response, so that we can be sure we have all the result, then we assign the result back to a variable.
+    We will set the `pageSize` parameter to something higher than the `totalPages` response, so that we can be sure we have all the result, then we assign the result back to a variable.
 
     We use the assigned results in `$events` and use dot notation to reference the `.source.id` property of every item in the `$events` array. This result is then piped to the `Sort-Object` cmdlet which removes
+
+    <CodeExample>
+
+    ```bash
+    c8y events list \
+        --type device_disconnected \
+        --dateFrom "-1h" \
+        -p 2000 \
+        --select source.id -o csv | sort --unique | wc -l
+    ```
 
     ```powershell
     $events = Get-EventCollection -Type device_disconnected -DateFrom "-1h" -PageSize 2000
@@ -52,30 +62,28 @@ Get a list of devices where a specific event has been sent to Cumulocity in the 
     $events.source.id | Sort-Object -Unique | Measure-Object
     ```
 
-    *Console output*
+    </CodeExample>
 
-    ```powershell
-    Count             : 147
-    Average           :
-    Sum               :
-    Maximum           :
-    Minimum           :
-    StandardDeviation :
-    Property          :
+    ```bash title="Output"
+    147
     ```
 
     The results show that 147 devices have sent this event in the last hour.
 
-    If you want the ids or names of the devices then just leave out the last pipe `| Measure-Object`.
+    If you want the ids or names of the devices then just leave out the last pipe `| wc -l`.
 
-    ```
-    # Get unique list of names
-    $events.source.name | Sort-Object -Unique
+    <CodeExample>
 
-    # Get unique list of ids
-    $events.source.id | Sort-Object -Unique
+    ```bash
+    c8y events list \
+        --type device_disconnected \
+        --dateFrom "-1h" \
+        -p 2000 \
+        --select "source.id,source.name" -o csv | sort --unique
     ```
+
+    </CodeExample>
 
     **Notes**
 
-    * The events API is restricted to a max page size of 2000 events
+    * The events API is restricted to a max page size of 2000 events, but you can use the `includeAll` parameter to fetch all of the results as go-c8y-cli will look after the paging for you.
