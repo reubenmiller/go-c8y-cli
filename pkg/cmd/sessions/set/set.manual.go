@@ -111,8 +111,9 @@ func (n *CmdSet) RunE(cmd *cobra.Command, args []string) error {
 	}
 	cfg.Logger.Debugf("selected session file: %s", sessionFile)
 	if sessionFile != "" {
+		env_prefix := strings.ToUpper(config.EnvSettingsPrefix)
 		for _, env := range os.Environ() {
-			if strings.HasPrefix(env, "C8Y") && !strings.HasPrefix(env, "C8Y_PASSPHRASE") && !strings.HasPrefix(env, "C8Y_SESSION_HOME") {
+			if strings.HasPrefix(env, env_prefix) && !strings.HasPrefix(env, config.EnvPassphrase) && !strings.HasPrefix(env, config.EnvSessionHome) {
 				parts := strings.SplitN(env, "=", 2)
 				if len(parts) == 2 {
 					os.Unsetenv(parts[0])

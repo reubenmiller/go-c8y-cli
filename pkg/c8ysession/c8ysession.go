@@ -43,7 +43,7 @@ type CumulocitySession struct {
 }
 
 func (s CumulocitySession) GetSessionPassphrase() string {
-	return os.Getenv("C8Y_PASSPHRASE")
+	return os.Getenv(config.EnvPassphrase)
 }
 
 func (s *CumulocitySession) SetPassword(password string) {

@@ -28,11 +28,20 @@ import (
 )
 
 var (
+	// EnvPassphrase passphrase environment variable name
+	EnvPassphrase = "C8Y_PASSPHRASE"
+
+	// EnvPassphraseText passphrase text environment variable name
+	EnvPassphraseText = "C8Y_PASSPHRASE_TEXT"
+
 	// PrefixEncrypted prefix used in encrypted string fields to identify when a string is encrypted or not
 	PrefixEncrypted = "{encrypted}"
 
 	// KeyFileName is the name of the reference encryption text
 	KeyFileName = ".key"
+
+	// ActivityLogDirName name of the activitylog directory
+	ActivityLogDirName = "activitylog"
 )
 
 const (
@@ -282,7 +291,7 @@ type Config struct {
 // NewConfig returns a new CLI configuration object
 func NewConfig(v *viper.Viper) *Config {
 
-	passphrase := os.Getenv("C8Y_PASSPHRASE")
+	passphrase := os.Getenv(EnvPassphrase)
 
 	c := &Config{
 		viper:      v,
@@ -330,7 +339,7 @@ func (c *Config) bindSettings() {
 
 		WithBindEnv(SettingsEncryptionEnabled, false),
 		WithBindEnv(SettingsActivityLogEnabled, true),
-		WithBindEnv(SettingsActivityLogPath, ""),
+		WithBindEnv(SettingsActivityLogPath, path.Join(c.GetSessionHomeDir(), ActivityLogDirName)),
 		WithBindEnv(SettingsActivityLogMethodFilter, "GET PUT POST DELETE"),
 
 		WithBindEnv(SettingsIncludeAllDelayMS, 50),
@@ -382,7 +391,7 @@ func (c *Config) CheckEncryption(encryptedText ...string) (string, error) {
 
 // BindAuthorization binds environment variables related to the authrorization to the configuration
 func (c *Config) BindAuthorization() error {
-	c.viper.SetEnvPrefix("c8y")
+	c.viper.SetEnvPrefix(EnvSettingsPrefix)
 	auth_variables := [...]string{
 		"host",
 		"username",
@@ -469,8 +478,8 @@ func (c *Config) KeyFile() string {
 func (c *Config) ReadKeyFile() error {
 
 	// read from env variable
-	if v := os.Getenv("C8Y_PASSPHRASE_TEXT"); v != "" && c.SecureData.IsEncrypted(v) == 1 {
-		c.Logger.Infof("Using env variable 'C8Y_PASSPHRASE_TEXT' as example encryption text")
+	if v := os.Getenv(EnvPassphraseText); v != "" && c.SecureData.IsEncrypted(v) == 1 {
+		c.Logger.Infof("Using env variable '%s' as example encryption text", EnvPassphraseText)
 		c.SecretText = v
 		return c.CreateKeyFile(v)
 	}
@@ -595,10 +604,10 @@ func (c Config) GetEnvironmentVariables(client *c8y.Client, setPassword bool) ma
 	c.Logger.Debugf("Cache passphrase: %v", cache)
 	if cache {
 		if c.Passphrase != "" {
-			output["C8Y_PASSPHRASE"] = c.Passphrase
+			output[EnvPassphrase] = c.Passphrase
 		}
 		if c.SecretText != "" {
-			output["C8Y_PASSPHRASE_TEXT"] = c.SecretText
+			output[EnvPassphraseText] = c.SecretText
 		}
 	}
 	return output

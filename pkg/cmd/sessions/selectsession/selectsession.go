@@ -58,7 +58,7 @@ func SelectSession(io *iostreams.IOStreams, cfg *config.Config, log *logger.Logg
 	sessions := &c8ysession.CumulocitySessions{}
 	sessions.Sessions = make([]c8ysession.CumulocitySession, 0)
 
-	subDirToSkip := "ignore"
+	subDirToSkip := ":ignore:" + config.ActivityLogDirName + ":"
 
 	files := make([]string, 0)
 
@@ -70,7 +70,7 @@ func SelectSession(io *iostreams.IOStreams, cfg *config.Config, log *logger.Logg
 			fmt.Printf("prevent panic by handling failure accessing a path %q: %v\n", path, err)
 			return err
 		}
-		if info.IsDir() && info.Name() == subDirToSkip {
+		if info.IsDir() && strings.Contains(subDirToSkip, ":"+info.Name()+":") {
 			fmt.Printf("skipping a dir without errors: %+v \n", info.Name())
 			return filepath.SkipDir
 		}
