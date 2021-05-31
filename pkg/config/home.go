@@ -10,8 +10,9 @@ import (
 
 var (
 	DefaultHome = []string{
-		"~/.go-c8y-cli",   // user's home folder
-		"/etc/go-c8y-cli", // default when installing via a package (not git)
+		"~/.go-c8y-cli",                   // user's home folder
+		"$HOMEBREW_PREFIX/etc/go-c8y-cli", // Check homebrew path
+		"/etc/go-c8y-cli",                 // default when installing via a package (not git)
 	}
 	DefaultSessionDir = ".cumulocity"
 	EnvHome           = "C8Y_HOME"
@@ -44,7 +45,7 @@ func (c *Config) GetSessionHomeDir() string {
 
 	err := fileutilities.CreateDirs(outputDir)
 	if err != nil && c.Logger != nil {
-		c.Logger.Errorf("Sessions directory check failed. %s", err)
+		c.Logger.Errorf("Sessions directory check failed. path=%s, err=%s", outputDir, err)
 	}
 	return outputDir
 }
@@ -59,7 +60,7 @@ func (c *Config) GetHomeDir() string {
 	// use first existing default home path
 	if outputDir == "" {
 		for _, p := range DefaultHome {
-			p, _ = homedir.Expand(p)
+			p, _ = homedir.Expand(os.ExpandEnv(p))
 			if stat, err := os.Stat(p); err == nil && stat.IsDir() {
 				outputDir = p
 				break
@@ -67,14 +68,14 @@ func (c *Config) GetHomeDir() string {
 		}
 	}
 
-	outputDir, err := homedir.Expand(outputDir)
+	outputDir, err := homedir.Expand(os.ExpandEnv(outputDir))
 	if err != nil && c.Logger != nil {
 		c.Logger.Warnf("Could not expand path. %s", err)
 	}
 
 	err = fileutilities.CreateDirs(outputDir)
 	if err != nil && c.Logger != nil {
-		c.Logger.Errorf("Sessions directory check failed. %s", err)
+		c.Logger.Errorf("Sessions directory check failed. path=%s, err=%s", outputDir, err)
 	}
 	return outputDir
 }
