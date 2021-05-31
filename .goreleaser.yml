@@ -139,6 +139,7 @@ brews:
     tap:
       owner: reubenmiller
       name: homebrew-go-c8y-cli
+      token: "{{ .Env.HOMEBREW_TAP_GITHUB_TOKEN }}"
 
     # Template for the url which is determined by the given Token
     url_template: "https://github.com/reubenmiller/go-c8y-cli/releases/download/{{ .Tag }}/{{ .ArtifactName }}"
