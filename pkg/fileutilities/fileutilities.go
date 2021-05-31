@@ -10,6 +10,9 @@ import (
 // CreateDirs create directory. All non-existing nested paths will be created.
 // The folder owner will also be changed to match the current user (on non-windows systems only)
 func CreateDirs(p string) error {
+	if p == "" {
+		return nil
+	}
 	if err := os.MkdirAll(p, os.ModePerm); err != nil {
 		return err
 	}
