@@ -44,6 +44,7 @@ node_modules
 # release binaries and docs
 dist/**
 share/**
+.go-c8y-cli
 **/.docusaurus/**
 docs/go-c8y-cli/build
 docs/go-c8y-cli/i18n

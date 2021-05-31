@@ -111,6 +111,12 @@ build-docker:					## Build the docker images
 build_completions:
 	@chmod +x tools/shell/completion/build_completions.sh
 	env OUTPUT_DIR=./output ./tools/shell/completion/build_completions.sh
+
+
+checkout_addons:				## Checkout the go-c8y-cli-addons repository
+	@chmod +x tools/shell/addons/checkout_addons.sh
+	tools/shell/addons/checkout_addons.sh
+
 # ---------------------------------------------------------------
 # Tests
 # ---------------------------------------------------------------

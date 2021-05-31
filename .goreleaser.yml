@@ -11,6 +11,7 @@ before:
     - make generate_go_code
     - make manpages
     - make build_completions
+    - make checkout_addons
 
 builds:
   - <<: &build_defaults
@@ -50,10 +51,13 @@ archives:
     files:
       - LICENSE
       - ./share/man/man1/c8y*.1
-      - ./tools/shell/c8y.plugin.*
-      - ./examples/views/default/*.json
-      - ./examples/templates/test/test*.jsonnet
-      - ./examples/settings.json
+      - .go-c8y-cli/README.md
+      - .go-c8y-cli/install.*
+      - .go-c8y-cli/settings.*
+      - .go-c8y-cli/shell
+      - .go-c8y-cli/templates
+      - .go-c8y-cli/views
+
   - id: windows
     builds: [windows]
     <<: *archive_defaults
@@ -61,17 +65,27 @@ archives:
     format: zip
     files:
       - LICENSE
-      - ./tools/shell/c8y.plugin.*
-      - ./examples/views/default/*.json
-      - ./examples/templates/test/test*.jsonnet
-      - ./examples/settings.json
+      - .go-c8y-cli/README.md
+      - .go-c8y-cli/install.*
+      - .go-c8y-cli/settings.*
+      - .go-c8y-cli/shell
+      - .go-c8y-cli/templates
+      - .go-c8y-cli/views
+  
+  - id: plainBinaries
+    builds: [macos, linux, windows]
+    <<: &archive_defaults
+      name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}{{ if .Arm }}v{{ .Arm }}{{ end }}"
+    replacements:
+      darwin: macOS
+    format: binary
 
 nfpms:
   - license: MIT
     maintainer: Reuben Miller
     homepage: http://goc8ycli.netlify.app
     bindir: /usr/local
-    description: Cumulocity's unofficial command line tool.
+    description: Cumulocity's unofficial command line tool
     formats:
       - deb
       - rpm
@@ -102,66 +116,97 @@ nfpms:
         dst: /usr/share/fish/vendor_completions.d/c8y.fish
       
       # Addons (git repo)
-      - src: ./output/.go-c8y-cli/**
+      - src: .go-c8y-cli/**
         dst: /etc/go-c8y-cli/
         type: config|noreplace
 
 brews:
   -
     # IDs of the archives to use.
-    # Defaults to all.
     # ids:
-    # - foo
-    # - bar
+    # - c8y
 
     # GOARM to specify which 32-bit arm version to use if there are multiple versions
     # from the build section. Brew formulas support atm only one 32-bit version.
     # Default is 6 for all artifacts or each id if there a multiple versions.
     goarm: 6
 
-    # NOTE: make sure the url_template, the token and given repo (github or gitlab) owner and name are from the
-    # same kind. We will probably unify this in the next major version like it is done with scoop.
-
     # GitHub/GitLab repository to push the formula to
     tap:
       owner: reubenmiller
       name: homebrew-go-c8y-cli
 
-    # Template for the url which is determined by the given Token (github or gitlab)
-    url_template: "https://github.com/reubenmiller/homebrew-go-c8y-cli/releases/download/{{ .Tag }}/{{ .ArtifactName }}"
-
-    # Allows you to set a custom download strategy. Note that you'll need
-    # to implement the strategy and add it to your tap repository.
-    # Example: https://docs.brew.sh/Formula-Cookbook#specifying-the-download-strategy-explicitly
-    # Default is empty.
-    # download_strategy: CurlDownloadStrategy
-
-    # Allows you to add a custom require_relative at the top of the formula template
-    # Default is empty
-    # custom_require: custom_download_strategy
+    # Template for the url which is determined by the given Token
+    url_template: "https://github.com/reubenmiller/go-c8y-cli/releases/download/{{ .Tag }}/{{ .ArtifactName }}"
 
     # Git author used to commit to the repository.
-    # Defaults are shown.
     commit_author:
       name: goreleaserbot
       email: reuben.d.miller@gmail.com
 
     # Folder inside the repository to put the formula.
-    # Default is the root folder.
     folder: Formula
 
     # Caveats for the user of your binary.
-    # Default is empty.
-    # caveats: "How to use this binary"
+    caveats: |
+      Please add the following to your shell profile to enable usage of "set-session" and other helpful c8y utility functions
 
-    # Your app's homepage.
-    # Default is empty.
+      bash: ~/.bashrc
+
+        source "#{etc}/go-c8y-cli/shell/c8y.plugin.sh"
+
+      zsh: ~/.zshrc
+
+        source "#{etc}/go-c8y-cli/shell/c8y.plugin.zsh"
+
+      fish: ~/.config/fish/config.fish
+
+        source "#{etc}/go-c8y-cli/shell/c8y.plugin.fish"
+
+      powershell: ~/.config/powershell/Microsoft.PowerShell_profile.ps1
+        . "#{etc}/go-c8y-cli/shell/c8y.plugin.ps1"
+
+      You will also need to force reload of your profile:
+
+        source <profile>
+
     homepage: "https://goc8ycli.netlify.app/"
-
-    # Your app's description.
-    # Default is empty.
-    description: "Cumulocity's unofficial command line tool."
-
-    # SPDX identifier of your app's license.
-    # Default is empty.
+    description: "Cumulocity's unofficial command line tool"
     license: "MIT"
+
+    dependencies:
+      - name: git
+        type: optional
+      - name: jq
+        type: optional
+      - name: zsh
+        type: optional
+      - name: bash
+        type: optional
+      - name: fish
+        type: optional
+
+    # So you can `brew test` your formula.
+    test: |
+      system "#{bin}/c8y version --select version"
+
+    install: |
+      bin.install "bin/c8y"
+      man1.install Dir["share/man/man1/*"]
+      
+      config_dir = etc/"go-c8y-cli"
+
+      if config_dir.exist?
+        # FileUtils.rm_r etc/"go-c8y-cli"
+        system "git", "-C", config_dir, "pull", "--ff-only"
+      else
+        system "git", "clone", "--depth", "1", "https://github.com/reubenmiller/.go-c8y-cli.git", config_dir
+      end
+
+      # Add completions
+      output = Utils.safe_popen_read({ "SHELL" => "bash" }, "#{bin}/c8y", "completion", "bash")
+      (bash_completion/"c8y").write output
+      output = Utils.safe_popen_read({ "SHELL" => "zsh" }, "#{bin}/c8y", "completion", "zsh")
+      (zsh_completion/"_c8y").write output
+      output = Utils.safe_popen_read({ "SHELL" => "fish" }, "#{bin}/c8y", "completion", "fish")
+      (fish_completion/"c8y.fish").write output
