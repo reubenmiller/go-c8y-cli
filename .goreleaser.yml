@@ -74,8 +74,9 @@ archives:
   
   - id: plainBinaries
     builds: [macos, linux, windows]
+    # Don't include the binary in the filename so it is easier to download the latest
     <<: &archive_defaults
-      name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}{{ if .Arm }}v{{ .Arm }}{{ end }}"
+      name_template: "{{ .ProjectName }}_{{ .Os }}_{{ .Arch }}{{ if .Arm }}v{{ .Arm }}{{ end }}"
     replacements:
       darwin: macOS
     format: binary
