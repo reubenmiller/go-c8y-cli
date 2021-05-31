@@ -1,4 +1,4 @@
-package flags
+package cmdutil
 
 import (
 	"net/http"
@@ -6,22 +6,11 @@ import (
 	"time"
 
 	"github.com/reubenmiller/go-c8y-cli/pkg/assert"
+	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/pkg/iterator"
 	"github.com/reubenmiller/go-c8y-cli/pkg/mapbuilder"
-	"github.com/spf13/cobra"
 	"github.com/tidwall/gjson"
 )
-
-func buildDummyCommand() *cobra.Command {
-	cmd := &cobra.Command{
-		Use:     "execute",
-		PreRunE: nil,
-		RunE: func(cmd *cobra.Command, args []string) error {
-			return nil
-		},
-	}
-	return cmd
-}
 
 func Test_HeaderFlags(t *testing.T) {
 	cmd := buildDummyCommand()
@@ -36,15 +25,15 @@ func Test_HeaderFlags(t *testing.T) {
 	assert.OK(t, cmdErr)
 
 	header := http.Header{}
-	inputIterators, _ := NewRequestInputIterators(cmd)
-	err := WithHeaders(
+	inputIterators, _ := NewRequestInputIterators(cmd, nil)
+	err := flags.WithHeaders(
 		cmd,
 		header,
 		inputIterators,
-		WithIntValue("count", "CountValue"),
-		WithBoolValue("csv", "Accept", "text/csv"),
-		WithStringValue("type"),
-		WithStringValue("type", "Content-Type", "text/%s"),
+		flags.WithIntValue("count", "CountValue"),
+		flags.WithBoolValue("csv", "Accept", "text/csv"),
+		flags.WithStringValue("type"),
+		flags.WithStringValue("type", "Content-Type", "text/%s"),
 	)
 	assert.OK(t, err)
 	assert.True(t, header.Get("Accept") == "text/csv")
@@ -64,30 +53,30 @@ func Test_Body(t *testing.T) {
 	cmd.Flags().StringSlice("newChild", []string{""}, "dummy child reference")
 	cmd.Flags().StringSlice("nextID", []string{""}, "dummy child reference")
 
-	WithOptions(
+	flags.WithOptions(
 		cmd,
-		WithExtendedPipelineSupport("nextID", "nextID", true),
+		flags.WithExtendedPipelineSupport("nextID", "nextID", true),
 	)
 
 	cmd.SetArgs([]string{"--nextID", "7777,8888", "--editable", "--type", "myType", "--dateFrom", "-1d", "--newChild", "1111,2222"})
 	cmdErr := cmd.Execute()
 	assert.OK(t, cmdErr)
 
-	inputIterators, _ := NewRequestInputIterators(cmd)
+	inputIterators, _ := NewRequestInputIterators(cmd, nil)
 	body := mapbuilder.NewInitializedMapBuilder()
-	err := WithBody(
+	err := flags.WithBody(
 		cmd,
 		body,
 		inputIterators,
-		WithIntValue("count", "CountValue"),
-		WithBoolValue("editable"),
-		WithStringValue("type"),
-		WithStringValue("type", "typeMapping", "text/%s"),
-		WithRelativeTimestamp("time"),
-		WithRelativeTimestamp("dateFrom"),
-		WithRelativeTimestamp("dateFrom", "dateTo"),
-		WithStringSliceValues("newChild", "managedObject.id", ""),
-		WithStringValue("nextID", "nextID", ""),
+		flags.WithIntValue("count", "CountValue"),
+		flags.WithBoolValue("editable"),
+		flags.WithStringValue("type"),
+		flags.WithStringValue("type", "typeMapping", "text/%s"),
+		flags.WithRelativeTimestamp("time"),
+		flags.WithRelativeTimestamp("dateFrom"),
+		flags.WithRelativeTimestamp("dateFrom", "dateTo"),
+		flags.WithStringSliceValues("newChild", "managedObject.id", ""),
+		flags.WithStringValue("nextID", "nextID", ""),
 	)
 	assert.OK(t, err)
 
@@ -129,18 +118,18 @@ func Test_QueryParameters(t *testing.T) {
 	cmdErr := cmd.Execute()
 	assert.OK(t, cmdErr)
 
-	inputIterators, _ := NewRequestInputIterators(cmd)
-	query := NewQueryTemplate()
-	err := WithQueryParameters(
+	inputIterators, _ := NewRequestInputIterators(cmd, nil)
+	query := flags.NewQueryTemplate()
+	err := flags.WithQueryParameters(
 		cmd,
 		query,
 		inputIterators,
-		WithIntValue("count", "CountValue"),
-		WithBoolValue("editable"),
-		WithStringValue("type"),
-		WithStringValue("type", "typeMapping", "text/%s"),
-		WithRelativeTimestamp("dateFrom"),
-		WithRelativeTimestamp("dateFrom", "dateTo"),
+		flags.WithIntValue("count", "CountValue"),
+		flags.WithBoolValue("editable"),
+		flags.WithStringValue("type"),
+		flags.WithStringValue("type", "typeMapping", "text/%s"),
+		flags.WithRelativeTimestamp("dateFrom"),
+		flags.WithRelativeTimestamp("dateFrom", "dateTo"),
 	)
 	assert.OK(t, err)
 
