@@ -135,16 +135,16 @@ Describe -Name "c8y template" {
         It "merges values" -TestCases @(
             @{
                 InputValue = @{
-                    nestedProp = @{
-                        othervalue = "somevalue"
+                    nestedProp = [ordered]@{
                         inputList = @("existingValue")
+                        othervalue = "somevalue"
                     }
                 }
                 Template = "_.Merge('nestedProp', input.value, {inputList+: ['newValue']})"
                 Expect = @{
-                    nestedProp = @{
-                        othervalue = "somevalue"
+                    nestedProp = [ordered]@{
                         inputList = @("existingValue", "newValue")
+                        othervalue = "somevalue"
                     }
                 }
             },
