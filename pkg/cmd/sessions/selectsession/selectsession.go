@@ -58,7 +58,7 @@ func SelectSession(io *iostreams.IOStreams, cfg *config.Config, log *logger.Logg
 	sessions := &c8ysession.CumulocitySessions{}
 	sessions.Sessions = make([]c8ysession.CumulocitySession, 0)
 
-	subDirToSkip := ":ignore:" + config.ActivityLogDirName + ":"
+	subDirToSkip := strings.ToLower(":ignore:" + config.ActivityLogDirName + ":")
 
 	files := make([]string, 0)
 
@@ -67,11 +67,11 @@ func SelectSession(io *iostreams.IOStreams, cfg *config.Config, log *logger.Logg
 
 	err = filepath.Walk(srcdir, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
-			fmt.Printf("prevent panic by handling failure accessing a path %q: %v\n", path, err)
+			log.Printf("Prevent panic by handling failure accessing a path %q: %v", path, err)
 			return err
 		}
-		if info.IsDir() && strings.Contains(subDirToSkip, ":"+info.Name()+":") {
-			fmt.Printf("skipping a dir without errors: %+v \n", info.Name())
+		if info.IsDir() && strings.Contains(subDirToSkip, ":"+strings.ToLower(info.Name())+":") {
+			log.Printf("Ignoring dir: %+v", info.Name())
 			return filepath.SkipDir
 		}
 
@@ -90,7 +90,7 @@ func SelectSession(io *iostreams.IOStreams, cfg *config.Config, log *logger.Logg
 		if session, err := createCmd.NewCumulocitySessionFromFile(path, log, cfg); err == nil {
 			sessions.Sessions = append(sessions.Sessions, *session)
 		} else {
-			log.Infof("failed to read file: file=%s, err=%s", path, err)
+			log.Infof("Failed to read file: file=%s, err=%s", path, err)
 		}
 		return nil
 	})
@@ -202,7 +202,7 @@ func SelectSession(io *iostreams.IOStreams, cfg *config.Config, log *logger.Logg
 	}
 
 	if err != nil {
-		fmt.Printf("Prompt failed %v\n", err)
+		log.Warnf("Prompt failed %v\n", err)
 		return "", err
 	}
 
