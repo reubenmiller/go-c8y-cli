@@ -122,6 +122,9 @@ nfpms:
 
 brews:
   -
+    # Package name
+    name: go-c8y-cli
+
     # IDs of the archives to use.
     # ids:
     # - c8y
