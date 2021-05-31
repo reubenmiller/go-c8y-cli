@@ -205,7 +205,7 @@ brews:
         # FileUtils.rm_r etc/"go-c8y-cli"
         system "git", "-C", config_dir, "pull", "--ff-only"
       else
-        system "git", "clone", "--depth", "1", "https://github.com/reubenmiller/.go-c8y-cli.git", config_dir
+        system "git", "clone", "--depth", "1", "https://github.com/reubenmiller/go-c8y-cli-addons.git", config_dir
       end
 
       # Add completions
