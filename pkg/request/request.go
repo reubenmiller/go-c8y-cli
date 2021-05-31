@@ -753,9 +753,9 @@ func (r *RequestHandler) ProcessResponse(resp *c8y.Response, respError error, co
 
 						if err != nil || len(props) == 0 {
 							if err != nil {
-								r.Logger.Infof("Failed to detect view. defaulting to '**'. %s", err)
+								r.Logger.Infof("No matching view detected. defaulting to '**'. %s", err)
 							} else {
-								r.Logger.Info("Failed to detect view. defaulting to '**'")
+								r.Logger.Info("No matching view detected. defaulting to '**'")
 							}
 							commonOptions.Filters.Pluck = []string{"**"}
 						} else {
