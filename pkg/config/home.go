@@ -11,7 +11,8 @@ import (
 var (
 	DefaultHome = []string{
 		"~/.go-c8y-cli",                   // user's home folder
-		"$HOMEBREW_PREFIX/etc/go-c8y-cli", // Check homebrew path
+		"/usr/local/etc/go-c8y-cli",       // Default homebrew prefix
+		"$HOMEBREW_PREFIX/etc/go-c8y-cli", // Check custom homebrew prefix
 		"/etc/go-c8y-cli",                 // default when installing via a package (not git)
 	}
 	DefaultSessionDir = ".cumulocity"
