@@ -131,6 +131,9 @@ test_powershell_sessions:		## Run powershell tests which interfere with the sess
 test_bash:
 	./tools/shell/tests/test.sh
 
+test_installation:				## Test installation of linux packages
+	chmod +x ./tools/integration-tests/run.sh
+	sudo ./tools/integration-tests/run.sh
 
 # ---------------------------------------------------------------
 # Publish
