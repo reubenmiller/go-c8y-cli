@@ -71,12 +71,13 @@ publish_alpine_package () {
     # package name needs to be specially formatted
     # otherwise the index will not match, and apk will have
     # issues
+    local name="$(echo "$file" | cut -d'_' -f1 )"
     local version="$(echo "$file" | cut -d'_' -f2 | sed 's/-/~/')"
-    local package_name="c8y-$version.apk"
+    local package_name="$name-$version.apk"
 
     jfrog rt upload \
         --url "$JFROG_URL/$ALPINE_REPO" \
-        --target-props "alpine.branch=$BRANCH;alpine.repository=$REPO_NAME;alpine.architecture=$arch;alpine.name=c8y;alpine.version=$version" \
+        --target-props "alpine.branch=$BRANCH;alpine.repository=$REPO_NAME;alpine.architecture=$arch;alpine.name=$name;alpine.version=$version" \
         --access-token "$JFROG_APIKEY" \
         "$file" \
         "$BRANCH/$REPO_NAME/$arch/$package_name"

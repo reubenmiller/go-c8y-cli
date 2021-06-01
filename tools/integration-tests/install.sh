@@ -10,7 +10,7 @@ setup_debian () {
     sh -c "echo 'deb https://reubenmiller.jfrog.io/artifactory/c8y-debian stable main' >> /etc/apt/sources.list"
 
     apt-get update
-    apt-get install -y c8y
+    apt-get install -y go-c8y-cli
 }
 
 setup_apk () {
@@ -20,7 +20,7 @@ setup_apk () {
     sudo sh -c "echo 'https://reubenmiller.jfrog.io/artifactory/c8y-alpine/stable/main'" >> /etc/apk/repositories
 
     apk update
-    apk add c8y
+    apk add go-c8y-cli
 }
 
 setup_rpm () {
@@ -38,21 +38,7 @@ repo_gpgcheck=1
 EOT
 
     yum update
-    yum install -y c8y
-}
-
-setup_linuxbrew () {
-    apt-get update
-    apt-get install -y git bash sudo curl procps gcc
-    export CI=true
-    /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-
-    # import brew paths variables
-    eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
-
-    # install tap then install
-    brew tap reubenmiller/go-c8y-cli
-    brew install go-c8y-cli
+    yum install -y go-c8y-cli
 }
 
 check_installation () {
