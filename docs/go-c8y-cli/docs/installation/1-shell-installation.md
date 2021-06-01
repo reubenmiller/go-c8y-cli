@@ -220,6 +220,9 @@ Add the following line to your shell profile to enable the shell functions like 
 
 ```bash title="file: ~/.bashrc"
 source "/etc/go-c8y-cli/shell/c8y.plugin.sh"
+
+# or if you installed it via the script
+source "$HOME/.go-c8y-cli/shell/c8y.plugin.sh"
 ```
 
 </TabItem>
@@ -227,6 +230,9 @@ source "/etc/go-c8y-cli/shell/c8y.plugin.sh"
 
 ```bash title="file: ~/.zshrc"
 source "/etc/go-c8y-cli/shell/c8y.plugin.zsh
+
+# or if you installed it via the script
+source "$HOME/.go-c8y-cli/shell/c8y.plugin.zsh"
 ```
 
 </TabItem>
@@ -234,6 +240,9 @@ source "/etc/go-c8y-cli/shell/c8y.plugin.zsh
 
 ```bash title="file: ~/.config/fish/config.fish"
 source "/etc/go-c8y-cli/shell/c8y.plugin.fish"
+
+# or if you installed it via the script
+source "$HOME/.go-c8y-cli/shell/c8y.plugin.fish"
 ```
 
 </TabItem>
@@ -241,6 +250,9 @@ source "/etc/go-c8y-cli/shell/c8y.plugin.fish"
 
 ```powershell title="file: ~/.config/powershell/Microsoft.PowerShell_profile.ps1"
 . "/etc/go-c8y-cli/shell/c8y.plugin.ps1"
+
+# or if you installed it via the script
+. "$HOME/.go-c8y-cli/shell/c8y.plugin.ps1"
 ```
 
 </TabItem>
