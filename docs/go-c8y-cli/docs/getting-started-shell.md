@@ -41,13 +41,13 @@ set-session
 
 </CodeExample>
 
-:::caution
+:::info
 If you get an unknown command error when running `set-session`, it means you probably didn't install the the addons via the [installation guide](installation/shell-installation)
 :::
 
 ```text title="Output"
 ➜ set-session 
-Use the arrow keys to navigate (some terminals require you to hold shift as well): ↓ ↑ → ←  and / toggles search
+Use arrow keys (holding shift) to navigate ↓ ↑ → ←  and / toggles search
 ? Select a Cumulocity Session: 
   ▶ #01 json dev-poc                                  http://my-dev-tenant.example.com (t1111/rmiller-dev01)
     #02 json customer1-qual                           http://dev.customer-domain.com (t2222/myuser01)
@@ -92,3 +92,49 @@ If your credentials are incorrect, then you can update the session file
 c8y sessions get --select path
 ```
 :::
+
+## Advanced
+
+### Activate a session (without set-session)
+
+A session can be activated without the shell helper function `set-session`. It is useful if you don't want to install the plugin script and are just using the binary directly.
+
+<Tabs
+  groupId="shell-types"
+  defaultValue="bash"
+  values={[
+    { label: 'Bash', value: 'bash', },
+    { label: 'Zsh', value: 'zsh', },
+    { label: 'Fish', value: 'fish', },
+    { label: 'PowerShell', value: 'powershell', },
+  ]
+}>
+<TabItem value="bash">
+
+```bash
+eval $(c8y sessions set --shell bash)
+```
+
+</TabItem>
+<TabItem value="zsh">
+
+```bash
+eval $(c8y sessions set --shell zsh)
+```
+
+</TabItem>
+<TabItem value="fish">
+
+```bash
+c8y sessions set --shell fish | source
+```
+
+</TabItem>
+<TabItem value="powershell">
+
+```powershell
+c8y sessions set --shell powershell | out-string | Invoke-Expression
+```
+
+</TabItem>
+</Tabs>

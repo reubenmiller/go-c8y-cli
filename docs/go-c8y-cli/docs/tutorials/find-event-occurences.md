@@ -3,6 +3,7 @@ title: Find event occurrences across devices
 ---
 
 import CodeExample from '@site/src/components/CodeExample';
+
 ### Example: Find which devices have sent a specific event in the last hour
 
 **Scenario**

@@ -1,28 +1,5 @@
 # CHANGELOG
 
-## Known limitations
-
-Usage of large numbers (using exponential notation) in templates can cause the server to respond with a 422 status code. This is due to a current limitation in the jsonnet template library.
-
-As a workaround, use the `data` parameter when working with large numbers (and don't specify a `template` parameter). This will preserve the number format as provided.
-
-**Example**
-
-*datapoint.largeInt.json*
-
-```json
-{
-    "c8y_Kpi": {
-        "max": 19.1010101E19,
-        "description": "Counter"
-    }
-}
-```
-
-```sh
-c8y inventory create --data "./datapoint.largeInt.json"
-```
-
 ## Piped input is not supported for
 
 * c8y microservices serviceusers get
@@ -37,10 +14,6 @@ c8y inventory create --data "./datapoint.largeInt.json"
 ## Failing tests
 
 None :)
-
-## Known limitations
-
-* When using --session, if the session required TFA, then it will not work! The cookies/tokens have to be present in the session file first
 
 ## TODO (next branch)
 
@@ -72,6 +45,7 @@ None :)
     ```
 
 ~~not known~~
+
 ### Commands
 
 * Delete activity log?
@@ -141,8 +115,7 @@ None :)
 
 ### Packaging
 
-* Update rpm packages to use the go-c8y-cli-addons project or package all of the views inside the package itself
-
+* None
 
 ## Unreleased
 
