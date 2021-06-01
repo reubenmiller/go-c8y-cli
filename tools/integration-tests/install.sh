@@ -24,8 +24,8 @@ setup_apk () {
 }
 
 setup_rpm () {
-    yum update
-    yum install -y curl
+    dnf update
+    dnf install -y curl
 
     cat <<EOT > /etc/yum.repos.d/artifactory.repo
 [Artifactory]
@@ -37,8 +37,8 @@ gpgkey=https://reubenmiller.jfrog.io/artifactory/c8y-rpm/repodata/repomd.xml.key
 repo_gpgcheck=1
 EOT
 
-    yum update
-    yum install -y go-c8y-cli
+    dnf update
+    dnf install -y go-c8y-cli
 }
 
 check_installation () {
