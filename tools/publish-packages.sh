@@ -71,8 +71,8 @@ publish_alpine_package () {
     # package name needs to be specially formatted
     # otherwise the index will not match, and apk will have
     # issues
-    local name="$(echo "$file" | cut -d'_' -f1 )"
-    local version="$(echo "$file" | cut -d'_' -f2 | sed 's/-/~/')"
+    local name="$(basename "$file" | cut -d'_' -f1 )"
+    local version="$(basename "$file" | cut -d'_' -f2 | sed 's/-/~/')"
     local package_name="$name-$version.apk"
 
     jfrog rt upload \
