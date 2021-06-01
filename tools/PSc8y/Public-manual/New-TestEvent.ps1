@@ -18,10 +18,7 @@ New-TestEvent -Device "myExistingDevice"
 
 Create an event on the existing device "myExistingDevice"
 #>
-    [cmdletbinding(
-        SupportsShouldProcess = $true,
-        ConfirmImpact = "High"
-    )]
+    [cmdletbinding()]
     Param(
         # Device id, name or object. If left blank then a randomized device will be created
         [Parameter(
@@ -38,55 +35,39 @@ Create an event on the existing device "myExistingDevice"
         $Time = "0s",
 
         # Add a dummy file to the event
-        [switch] $WithBinary,
-
-        # Cumulocity processing mode
-        [Parameter()]
-        [AllowNull()]
-        [AllowEmptyString()]
-        [ValidateSet("PERSISTENT", "QUIESCENT", "TRANSIENT", "CEP", "")]
-        [string]
-        $ProcessingMode,
-
-        # Template (jsonnet) file to use to create the request body.
-        [Parameter()]
-        [string]
-        $Template,
-
-        # Variables to be used when evaluating the Template. Accepts json or json shorthand, i.e. "name=peter"
-        [Parameter()]
-        [string]
-        $TemplateVars,
-
-        # Don't prompt for confirmation
-        [switch] $Force
+        [switch] $WithBinary
     )
+    DynamicParam {
+        Get-ClientCommonParameters -Type "Create", "Template"
+    }
 
     Process {
+        $commonOptions = @{} + $PSBoundParameters
+        $commonOptions.Remove("Device")
+        $commonOptions.Remove("Time")
+        $commonOptions.Remove("WithBinary")
 
         if ($null -ne $Device) {
             $iDevice = Expand-Device $Device
         } else {
-            $iDevice = PSc8y\New-TestDevice -Force:$Force
+            $iDevice = PSc8y\New-TestDevice @commonOptions
         }
         
-        # Fake device (if whatif prevented it from being created)
-        if ($WhatIfPreference -and $null -eq $iDevice) {
+        # Fake device (if Dry prevented it from being created)
+        if ($Dry -and $null -eq $iDevice) {
             $iDevice = @{ id = "12345" }
         }
         
-        $c8yEvent = PSc8y\New-Event `
-            -Device $iDevice.id `
-            -Time:$Time `
-            -Type "c8y_ci_TestEvent" `
-            -Text "Test CI Event" `
-            -ProcessingMode:$ProcessingMode `
-            -Template:$Template `
-            -TemplateVars:$TemplateVars `
-            -Force:$Force
+        $options = @{} + $PSBoundParameters
+        $options["Device"] = $iDevice.id
+        $options.Remove("WithBinary")
+        $options["Type"] = "c8y_ci_TestEvent"
+        $options["Text"] = "Test CI Event"
+        
+        $c8yEvent = PSc8y\New-Event @options
         
         if ($WithBinary) {
-            if ($WhatIfPreference -and $null -eq $iDevice) {
+            if ($Dry -and $null -eq $iDevice) {
                 $c8yEvent = @{ id = "12345" }
             }
             

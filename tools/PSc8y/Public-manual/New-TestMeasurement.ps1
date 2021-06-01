@@ -18,84 +18,40 @@ New-TestMeasurement -Device "myExistingDevice"
 
 Create a measurement on the existing device "myExistingDevice"
 #>
-    [cmdletbinding(
-        SupportsShouldProcess = $true,
-        ConfirmImpact = "High"
-    )]
+    [cmdletbinding()]
     Param(
         # Device id, name or object. If left blank then a randomized device will be created
         [Parameter(
-            Mandatory = $false,
+            Mandatory = $true,
             ValueFromPipeline = $true,
             ValueFromPipelineByPropertyName = $true,
             Position = 0
         )]
-        [object] $Device,
-
-        # Value fragment type
-        [string] $ValueFragmentType = "c8y_Temperature",
-
-        # Value fragment series
-        [string] $ValueFragmentSeries = "T",
-
-        # Type
-        [string] $Type = "C8yTemperatureReading",
-
-        # Time
-        [Parameter()]
-        [string]
-        $Time = "0s",
-
-        # Value
-        [Double] $Value = 1.2345,
-
-        # Unit. i.e. °C, m/s
-        [string] $Unit = "°C",
-
-        # Cumulocity processing mode
-        [Parameter()]
-        [AllowNull()]
-        [AllowEmptyString()]
-        [ValidateSet("PERSISTENT", "QUIESCENT", "TRANSIENT", "CEP")]
-        [string]
-        $ProcessingMode,
-
-        # Template (jsonnet) file to use to create the request body.
-        [Parameter()]
-        [string]
-        $Template,
-
-        # Variables to be used when evaluating the Template. Accepts json or json shorthand, i.e. "name=peter"
-        [Parameter()]
-        [string]
-        $TemplateVars,
-
-        # Don't prompt for confirmation
-        [switch] $Force
+        [object] $Device
     )
+    DynamicParam {
+        Get-ClientCommonParameters -Type "Create", "TemplateVars"
+    }
+    Begin {
+        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Exclude Device -Command "measurements create"
+        $Template = ""
+        if (-Not $Template) {
+            $Template = (Join-Path $script:Templates "test.measurement.jsonnet")
+        }
+        [void] $c8yargs.AddRange(@("--template", $Template))
+    }
 
     Process {
-        if ($null -eq $Device) {
-            $iDevice = PSc8y\New-TestDevice -WhatIf:$false -Force:$Force
-        } else {
-            $iDevice = PSc8y\Expand-Device $Device
+        if ($ClientOptions.ConvertToPS) {
+            $Device `
+            | Group-ClientRequests `
+            | c8y measurements create $c8yargs `
+            | ConvertFrom-ClientOutput @TypeOptions
         }
-
-        PSc8y\New-Measurement `
-            -Device $iDevice.id `
-            -Time:$Time `
-            -Type $Type `
-            -Data @{
-                $ValueFragmentType = @{
-                    $ValueFragmentSeries = @{
-                        value = $Value
-                        unit = $Unit
-                    }
-                }
-            } `
-            -ProcessingMode:$ProcessingMode `
-            -Template:$Template `
-            -TemplateVars:$TemplateVars `
-            -Force:$Force
+        else {
+            $Device `
+            | Group-ClientRequests `
+            | c8y measurements create $c8yargs
+        }
     }
 }

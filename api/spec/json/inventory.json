@@ -9,7 +9,7 @@
     {
       "name": "getManagedObjectCollection",
       "method": "GET",
-      "description": "Get a collection of managedObjects based on filter parameters",
+      "description": "Get managed object collection",
       "descriptionLong": "Get a collection of managedObjects based on filter parameters",
       "path": "inventory/managedObjects",
       "accept": "application/vnd.com.nsn.cumulocity.managedObjectCollection+json",
@@ -26,12 +26,12 @@
             "command": "Get-ManagedObjectCollection"
           },
           {
-            "description": "Get a list of managed objects by looking up their names",
+            "description": "Get a list of managed objects by id",
             "beforeEach": [
               "$Device1 = New-TestDevice",
               "$Device2 = New-TestDevice"
             ],
-            "command": "Get-ManagedObjectCollection -Device $Device1.name, $Device2.name",
+            "command": "Get-ManagedObjectCollection -Ids $Device1.id, $Device2.id",
             "afterEach": [
               "Remove-ManagedObject -Id $Device1.id",
               "Remove-ManagedObject -Id $Device2.id"
@@ -42,19 +42,36 @@
           {
             "description": "Get a list of managed objects",
             "command": "c8y inventory list"
+          },
+          {
+            "description": "Get a list of managed objects by ids",
+            "command": "c8y inventory list --ids 1111,2222"
+          },
+          {
+            "description": "Search by type using pipeline. piped input will be mapped to type parameter",
+            "command": "echo 'myType' | c8y inventory list"
+          },
+          {
+            "description": "Get managed objects which have the same type as the managed object id=1234. piped input will be mapped to type parameter",
+            "command": "c8y inventory get --id 1234 | c8y inventory list"
           }
         ]
       },
       "queryParameters": [
         {
-          "name": "device",
-          "type": "[]device",
+          "name": "ids",
+          "type": "[]stringcsv",
           "property": "ids",
           "description": "List of ids."
         },
         {
           "name": "type",
           "type": "string",
+          "pipeline": true,
+          "pipelineAliases": [
+            "type"
+          ],
+          "required": false,
           "description": "ManagedObject type."
         },
         {
@@ -75,7 +92,88 @@
         {
           "name": "skipChildrenNames",
           "type": "boolean",
-          "description": "Don't include the child devices names in the resonse. This can improve the api's response because the names don't need to be retrieved"
+          "description": "Don't include the child devices names in the response. This can improve the API response because the names don't need to be retrieved"
+        }
+      ]
+    },
+    {
+      "name": "findByTextManagedObjectCollection",
+      "method": "GET",
+      "description": "Find managed object by text collection",
+      "descriptionLong": "Find a collection of managedObjects which match a given text value",
+      "path": "inventory/managedObjects",
+      "accept": "application/vnd.com.nsn.cumulocity.managedObjectCollection+json",
+      "collectionType": "application/vnd.com.nsn.cumulocity.managedObject+json",
+      "collectionProperty": "managedObjects",
+      "alias": {
+        "go": "findByText",
+        "powershell": "Find-ByTextManagedObjectCollection"
+      },
+      "examples": {
+        "powershell": [
+          {
+            "description": "Find a list of managed objects by text",
+            "beforeEach": [
+              "$Device1 = New-TestDevice"
+            ],
+            "command": "Find-ByTextManagedObjectCollection -Text $Device1.name",
+            "afterEach": [
+              "Remove-ManagedObject -Id $Device1.id"
+            ]
+          },
+          {
+            "description": "Find managed objects which contain the text 'myText' (using pipeline)",
+            "beforeEach": [
+              "$Device1 = New-TestDevice"
+            ],
+            "command": "Find-ByTextManagedObjectCollection -Text $Device1.name",
+            "afterEach": [
+              "Remove-ManagedObject -Id $Device1.id"
+            ]
+          }
+        ],
+        "go": [
+          {
+            "description": "Get a list of managed objects",
+            "command": "c8y inventory findByText --text \"myText\""
+          },
+          {
+            "description": "Find managed objects which contain the text 'myText' (using pipeline)",
+            "command": "echo \"myText\" | c8y inventory findByText"
+          },
+          {
+            "description": "Find managed objects which contain the text 'myText' and is a device (using pipeline)",
+            "command": "echo \"myText\" | c8y inventory findByText --fragment c8y_IsDevice"
+          }
+        ]
+      },
+      "queryParameters": [
+        {
+          "name": "text",
+          "type": "string",
+          "pipeline": true,
+          "required": true,
+          "description": "managed objects containing a text value starting with the given text (placeholder {text}). Text value is any alphanumeric string starting with a latin letter (A-Z or a-z)."
+        },
+        {
+          "name": "type",
+          "type": "string",
+          "description": "ManagedObject type."
+        },
+        {
+          "name": "fragmentType",
+          "type": "string",
+          "description": "ManagedObject fragment type."
+        },
+        {
+          "name": "withParents",
+          "type": "boolean",
+          "description": "include a flat list of all parents and grandparents of the given object"
+        },
+        {
+          "name": "skipChildrenNames",
+          "type": "boolean",
+          "description": "Don't include the child devices names in the response. This can improve the API response because the names don't need to be retrieved"
         }
       ]
     },
@@ -83,8 +181,8 @@
       "name": "queryManagedObjectCollection",
       "method": "GET",
       "skip": true,
-      "description": "Get a collection of managedObjects based on Cumulocity query language",
-      "descriptionLong": "Get a collection of managedObjects based on Cumulocity query language",
+      "description": "Find managed object collection",
+      "descriptionLong": "Get a collection of managedObjects based on the Cumulocity query language",
       "path": "inventory/managedObjects",
       "accept": "application/vnd.com.nsn.cumulocity.managedObjectCollection+json",
       "collectionType": "application/vnd.com.nsn.cumulocity.managedObject+json",
@@ -132,7 +230,7 @@
       "method": "POST",
       "path": "inventory/managedObjects",
       "accept": "application/vnd.com.nsn.cumulocity.inventory+json",
-      "description": "Create a new inventory",
+      "description": "Create managed object",
       "descriptionLong": "Create a new inventory managed object",
       "alias": {
         "go": "create",
@@ -162,8 +260,12 @@
         {
           "name": "name",
           "type": "string",
+          "pipeline": true,
           "required": false,
-          "description": "name"
+          "description": "name",
+          "pipelineAliases": [
+            "name"
+          ]
         },
         {
           "name": "type",
@@ -180,8 +282,8 @@
     },
     {
       "name": "getManagedObject",
-      "description": "Get managed objects/s",
-      "descriptionLong": "Get a managed object by id",
+      "description": "Get managed objects",
+      "descriptionLong": "Get an existing managed object",
       "method": "GET",
       "path": "inventory/managedObjects/{id}",
       "accept": "application/vnd.com.nsn.cumulocity.inventory+json",
@@ -236,7 +338,7 @@
       "pathParameters": [
         {
           "name": "id",
-          "type": "string",
+          "type": "[]id",
           "pipeline": true,
           "required": true,
           "description": "ManagedObject id"
@@ -256,7 +358,7 @@
       "path": "inventory/managedObjects/{id}",
       "accept": "application/vnd.com.nsn.cumulocity.inventory+json",
       "description": "Update inventory",
-      "descriptionLong": "Update a managed object by id",
+      "descriptionLong": "Update an existing managed object",
       "alias": {
         "go": "update",
         "powershell": "Update-ManagedObject"
@@ -308,7 +410,7 @@
       "pathParameters": [
         {
           "name": "id",
-          "type": "string",
+          "type": "[]id",
           "pipeline": true,
           "description": "ManagedObject id",
           "required": true
@@ -317,8 +419,8 @@
     },
     {
       "name": "deleteManagedObject",
-      "description": "Delete inventory/s",
-      "descriptionLong": "Delete a managed object by id",
+      "description": "Delete managed object",
+      "descriptionLong": "Delete an existing managed object",
       "method": "DELETE",
       "path": "inventory/managedObjects/{id}",
       "accept": "",
@@ -376,7 +478,7 @@
       "pathParameters": [
         {
           "name": "id",
-          "type": "string",
+          "type": "[]id",
           "pipeline": true,
           "required": true,
           "description": "ManagedObject id"

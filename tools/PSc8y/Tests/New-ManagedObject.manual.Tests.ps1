@@ -69,17 +69,19 @@ Describe -Name "New-ManagedObject" {
         $jsonfile = New-TemporaryFile
         '{"name": ' | Out-File $jsonfile
 
-        $Response = PSc8y\New-ManagedObject -Data $jsonfile.FullName
+        $Response = PSc8y\New-ManagedObject -Data $jsonfile.FullName -ErrorVariable ErrorMessages
         Remove-Item $jsonfile -Force
 
+        $ErrorMessages | Should -Not -Match "panic"
         $LASTEXITCODE | Should -Not -BeExactly 0
         $Response | Should -BeNullOrEmpty
     }
 
     It "Managed object allow setting the processing mode" {
         foreach ($mode in @("PERSISTENT", "QUIESCENT", "TRANSIENT", "CEP")) {
-            PSc8y\New-ManagedObject -Data @{} -ProcessingMode $mode -WhatIf -InformationVariable Request
-            ($Request | Out-String) -match "X-Cumulocity-Processing-Mode:\s+$mode" | Should -HaveCount 1
+            $output = PSc8y\New-ManagedObject -Data @{} -ProcessingMode $mode -Dry -DryFormat json
+            $request = $output | ConvertFrom-Json -AsHashtable
+            $request.headers["X-Cumulocity-Processing-Mode"] | Should -Be $mode
         }
     }
 

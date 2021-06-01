@@ -2,6 +2,10 @@
 
 Describe -Name "Get-Pagination" {
     BeforeAll {
+        $backupEnvSettings = @{
+            C8Y_SETTINGS_INCLUDEALL_PAGESIZE = $env:C8Y_SETTINGS_INCLUDEALL_PAGESIZE
+            C8Y_SETTINGS_DEFAULTS_PAGESIZE = $env:C8Y_SETTINGS_DEFAULTS_PAGESIZE
+        }
         $Device = New-TestDevice
         
         $Alarms = @(1..20) | ForEach-Object {
@@ -25,7 +29,8 @@ Describe -Name "Get-Pagination" {
         $Response = PSc8y\Get-AlarmCollection `
             -Device $Device.id `
             -IncludeAll `
-            -Verbose 4> $cliOutputFile
+            -Debug 2> $cliOutputFile
+        $C8Y_SETTINGS_INCLUDEALL_PAGESIZE = ""
 
         $LASTEXITCODE | Should -Be 0
         $Response | Should -Not -BeNullOrEmpty
@@ -33,7 +38,7 @@ Describe -Name "Get-Pagination" {
 
         $VerboseOutput = Get-Content $cliOutputFile
 
-        ($VerboseOutput -match "settings.includeAll.pageSize") | Should -BeLike "*settings.includeAll.pageSize: 10"
+        ($VerboseOutput -match "pageSize=10") | Should -Not -BeNullOrEmpty
 
         # 2 because the first result does not have the "fetching next page"
         ($VerboseOutput -match "Fetching next page").Count | Should -BeExactly 2
@@ -45,15 +50,16 @@ Describe -Name "Get-Pagination" {
         $Response = PSc8y\Get-AlarmCollection `
             -Device $Device.id `
             -IncludeAll `
-            -Verbose 4> $cliOutputFile
+            -Debug 2> $cliOutputFile
 
         $LASTEXITCODE | Should -Be 0
+        $C8Y_SETTINGS_INCLUDEALL_PAGESIZE = ""
         $Response | Should -Not -BeNullOrEmpty
         $Response | Should -HaveCount 20
 
         $VerboseOutput = Get-Content $cliOutputFile
 
-        ($VerboseOutput -match "settings.includeAll.pageSize") | Should -BeLike "*settings.includeAll.pageSize: 12"
+        ($VerboseOutput -match "pageSize=12") | Should -Not -BeNullOrEmpty
 
         # 1 because only one extra fetch should be required
         # as the first has 12 results, and the second result set has less than the requested
@@ -61,36 +67,36 @@ Describe -Name "Get-Pagination" {
         ($VerboseOutput -match "Fetching next page").Count | Should -BeExactly 1
     }
 
-    It "Using include All with WhatIf" {
+    It "Using include All with Dry" {
         $env:C8Y_SETTINGS_INCLUDEALL_PAGESIZE = ""
 
-        $Response = PSc8y\Get-DeviceCollection `
+        $output = PSc8y\Get-DeviceCollection `
             -IncludeAll `
-            -WhatIf `
-            -Verbose 4> $cliOutputFile
+            -Dry `
+            -DryFormat json
 
         $LASTEXITCODE | Should -Be 0
-        $Response | Should -BeNullOrEmpty
+        $output | Should -Not -BeNullOrEmpty
+        $requests = $output | ConvertFrom-Json
 
-        $VerboseOutput = Get-Content $cliOutputFile
-
-        ($VerboseOutput -match "settings.includeAll.pageSize") | Should -BeLike "*settings.includeAll.pageSize: 2000"
+        $requests[0].query | Should -Match "pageSize=2000"
     }
 
     It "Set default pagesize using environment setting" {
-        $env:C8Y_SETTINGS_DEFAULT_PAGESIZE = "10"
+        $env:C8Y_SETTINGS_DEFAULTS_PAGESIZE = "10"
 
-        $Response = PSc8y\Get-AlarmCollection `
+        $output = PSc8y\Get-AlarmCollection `
             -Device $Device.id `
-            -Verbose 4> $cliOutputFile
+            -Dry `
+            -DryFormat json
 
         $LASTEXITCODE | Should -Be 0
-        $Response | Should -Not -BeNullOrEmpty
+        $C8Y_SETTINGS_DEFAULTS_PAGESIZE = ""
+        $output | Should -Not -BeNullOrEmpty
+        $requests = $output | ConvertFrom-Json
 
-        $Response | Should -HaveCount 10
-
-        # $VerboseOutput = Get-Content $cliOutputFile
-        # ($VerboseOutput -match "settings.default.pageSize") | Should -BeLike "*settings.default.pageSize: 10"
+        $requests | Should -HaveCount 1
+        $requests[0].query | Should -Match "pageSize=10"
     }
 
     It "All collection commands support paging parameters" {
@@ -122,6 +128,12 @@ Describe -Name "Get-Pagination" {
     AfterAll {
         PSc8y\Remove-ManagedObject -Id $Device.id
 
+        if ($backupEnvSettings) {
+            foreach ($name in $backupEnvSettings.Keys) {
+                if ($null -ne $name) {
+                    [environment]::SetEnvironmentVariable($name, $backupEnvSettings[$name], "process")
+                }
+            }
+        }
     }
 }
-

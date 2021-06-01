@@ -27,11 +27,13 @@ func IsValidJSON(v []byte) bool {
 
 // IsJSONArray returns true if the byte array represents a JSON array
 func IsJSONArray(v []byte) bool {
+	v = bytes.TrimSpace(v)
 	return bytes.HasPrefix(v, arrayPrefix) && bytes.HasSuffix(v, arraySuffix)
 }
 
 // IsJSONObject returns true if the byte array represents a JSON object
 func IsJSONObject(v []byte) bool {
+	v = bytes.TrimSpace(v)
 	return bytes.HasPrefix(v, objectPrefix) && bytes.HasSuffix(v, objectSuffix)
 }
 

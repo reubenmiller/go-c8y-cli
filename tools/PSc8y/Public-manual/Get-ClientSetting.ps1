@@ -5,6 +5,9 @@ Function Get-ClientSetting {
     
     .DESCRIPTION
     Get the Cumulocity binary settings which used by the cli tool
+
+    .LINK
+    c8y settings list
     
     .EXAMPLE
     Get-ClientSetting
@@ -14,17 +17,12 @@ Function Get-ClientSetting {
     [cmdletbinding()]
     Param()
 
-    $c8ybinary = Get-ClientBinary
-    $settings = & $c8ybinary settings list --pretty=false
+    $settings = c8y settings list
     
     if ($LASTEXITCODE -ne 0) {
         Write-Error "Client error when getting settings"
         return
     }
 
-    $JSONArgs = @{}
-    if ($PSVersionTable.PSVersion.Major -gt 5) {
-        $JSONArgs.Depth = 100
-    }
-    $settings | ConvertFrom-JSON @JSONArgs
+    $settings | ConvertFrom-JSON
 }

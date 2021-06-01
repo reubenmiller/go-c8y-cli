@@ -1,8 +1,500 @@
 # CHANGELOG
 
+## Piped input is not supported for
+
+* c8y microservices serviceusers get
+* c8y alarms subscribe
+* c8y events subscribe
+* c8y inventory subscribe
+* c8y measurements subscribe
+* c8y operations subscribe
+* c8y realtime subscribe
+* c8y realtime subscribeAll
+
+## Failing tests
+
+None :)
+
+## TODO (next branch)
+
+### Docs
+
+* [ ] Confirmation
+* [ ] Session encryption
+* [ ] Partial setting of sessions (i.e. bootstrap credentials with only the username/password set)
+* [x] Workers
+* [x] Views
+* [x] Activity Log
+* [x] Filtering
+* [x] Configuration (defaults, environment variables, arguments)
+* [x] Common Parameters
+* [x] Error handling
+* [x] Aliases
+
+### Naming Consistency
+
+### Bugs
+
+* updating mode does not take effect immediately if environment variables are already set.
+    * The setting read from the profile is overridden by locally assigned values
+
+    ``` 
+    C8Y_SETTINGS_MODE_ENABLECREATE=false
+    C8Y_SETTINGS_MODE_ENABLEDELETE=false
+    C8Y_SETTINGS_MODE_ENABLEUPDATE=false
+    ```
+
+~~not known~~
+
+### Commands
+
+* Delete activity log?
+    * c8y activity log delete
+    * c8y activity log deleteAll
+
+### New Functions
+
+* Add option to print out request and response as markdown
+
+* Support mapping piped data to multiple arguments
+
+* Allow template variable for GETs to also combine data to the response (i.e. )
+
+    ```sh
+    c8y operations list | c8y devices get --template "{ operation: input.value }"
+    ```
+
+* c8y settings update: option to write to the global sessions file instead of the profile
+
+* how to get the global session file? add to settings list
+
+* add min/max/average/count to progress bar (and output)
+
+* Add graph to show response times: https://github.com/guptarohit/asciigraph
+
+* Add following template variables
+    * Tenant id
+    * Base url (without tenant id, just C8Y_URL)
+    * Base tenant url (with tenant id, where to get this from?)
+    * or _.ExpandUrl('/inventory/binaries/12345')
+
+    ```json
+    {
+        "c8y_DownloadConfigFile": {
+            "type": "EXAMPLE_CONFIG",
+            "url": "https://t12345.example.c8y.com/inventory/binaries/12345"
+        },
+        "description": "Send configuration snapshot custom-config of configuration type EXAMPLE_CONFIG to device demo01_IDKS"
+    }
+    ```
+
+    ```json
+    {
+        "c8y_DownloadConfigFile": {
+            "type": "EXAMPLE_CONFIG",
+            "url": _.tenantUrl() + "/inventory/binaries/12345"
+        },
+        "description": "Send configuration snapshot custom-config of configuration type EXAMPLE_CONFIG to device demo01_IDKS"
+    }
+    ```
+
+### Refactoring
+
+* Move dataview to configuration
+* Return an error if the --output view value is not valid
+
+## Improvements
+
+* Use wide-format / column padding for completion description to better align extra information
+
+### Completions
+
+* Unassign child device (list child assets)
+* Unassign child addition (list child assets)
+* Unassign child asset (list child assets)
+
+### Packaging
+
+* None
+
 ## Unreleased
 
 No unreleased features
+
+* Added `--examples` option to only show the help text of a function
+
+* Add option to disable reading from stdin (piped data) (`--nullInput / -c`)
+
+* Fixed `--filter` bug when the given property does not exist, i.e. `--filter "nonexistent_prop like *`. Non-existent property warning messages will no longer be logged
+
+* Fixed bug where timestamps used in request bodies were incorrectly encoded, resulting in the `+` characters being encoded as `%2B`. 
+
+* Added new cli utility command `c8y util repeat` to make it easier to loop over piped data
+
+    **Example**
+
+    Combine two calls to iterator over 3 devices twice. This can then be used to input into  other c8y commands
+    
+    ```sh
+    $ c8y util repeat 2 | c8y util repeat 3 --format "device%s_%s"
+    ```
+
+    *Output*
+
+    ```text
+    device_1
+    device_2
+    device_3
+    device_1
+    device_2
+    device_3
+    ```
+
+* Added commands to manage smart groups
+    * `c8y smartgroups list` Get a list of smart groups
+    * `c8y smartgroups get` Get a smart group
+    * `c8y smartgroups update` Update a smart group
+    * `c8y smartgroups delete` Delete a smart group
+    * `c8y smartgroups get --id 1234 | c8y devices list` Get a smart group and then get the list of devices matching its query
+
+* Added additional command under the bulk operations to get the list of related bulk operations which accepts piped input. `c8y bulkoperations list | c8y bulkoperations listOperations`
+
+* Setting a session includes the following new environment variables
+
+    * `C8Y_HEADER` Authorization header (including header name), i.e. `Authorization: {auth_method} {value}`
+    * `C8Y_HEADER_AUTHORIZATION` Authorization header value (without the header name), i.e. `{auth_method} {value}`
+
+    This allows easier use of other 3rd party tools to send Cumulocity API requests
+
+    **Shell**
+
+    ```bash
+    curl -H "$C8Y_HEADER" $C8Y_HOST/inventory/managedObjects
+
+    # Or using a helper function
+    c8ycurl () 
+    { 
+        curl --silent -H "$C8Y_HEADER" ${C8Y_HOST%%/}/$@
+    }
+    c8ycurl /inventory/managedObjects
+    ```
+
+    **PowerShell**
+
+    ```powershell
+    Invoke-RestMethod -Headers @{ Authorization = $env:C8Y_HEADER_AUTHORIZATION } -Uri "$env:C8Y_HOST/inventory/managedObjects"
+
+    # or using ps default values
+    $PSDefaultParameterValues["Invoke-RestMethod:Headers"] = @{ Authorization = $env:C8Y_HEADER_AUTHORIZATION }
+    Invoke-RestMethod -Uri "$env:C8Y_HOST/inventory/managedObjects"
+    ```
+
+
+* Added pipeline support in c8y inventory find on the `query` parameter and added a string format support via `queryTemplate` parameter.
+
+    Example: Find all managed objects where the .name field includes "example". The name is piped in enabling it to be provided from a file
+    ```sh
+    echo "example" | c8y inventory find --queryTemplate "name eq '*%s*'"
+
+    # or from a list of names
+    cat mylonglistOfNames.txt | c8y inventory find --queryTemplate "name eq '*%s*'"
+    ```
+
+* Added command to find managed objects by text which also accepts piped input
+    ```sh
+    echo "mytext" | c8y inventory findByText
+    ```
+* Added new filter operators notmatch and notlike to do inverted regex and wildcard matches respectively
+
+    ```sh
+    c8y devices list --filter "type notlike *myvalue*"
+    c8y devices list --filter "type notmatch myvalue?"
+    ```
+* `c8y identity create|get|delete` type is set to `c8y_Serial` by default
+* `c8y identity create` added template support
+* Merging zsh, bash and fish shells into one docker image called `c8y-shell`. ZSH is launched by default but other shells can be used by launching them manually inside the same container. It makes it easier to try out different shells.
+
+* Support `$C8Y_HOME` and `$C8Y_SESSION_HOME` variables in settings
+
+* Support dotnotation in --data
+    ```
+    c8y devices update --data "c8y_RequiredAvailability.responseInterval=240"
+
+    => 
+    {
+        "c8y_RequiredAvailability": {
+            "responseInterval": 240
+        }
+    }
+    ```
+
+* Table view columns min, max and padding can be controlled via settings
+
+* Bearer authentication header is used when using OAUTH2 Internal authentication instead of cookies
+
+* c8y api
+    * If contentType is not json, don't try to convert it to json
+
+* Add fixed delay before processing job
+    use case: Wait for operations and set apply operation transitions (with 1s delay)
+        PENDING => EXECUTING
+        EXECUTING => SUCCESSFUL 
+
+    ```sh
+    c8y operations subscribe --device 454373 --duration 1000 --actionTypes CREATE --actionTypes UPDATE --filter "status != SUCCESSFUL" | c8y operations update --delayBefore 1000 --template "{ status: if input.value.status == 'PENDING' then 'EXECUTING' else 'SUCCESSFUL' }"
+    ```
+
+* New command `c8y operations wait --device 12345` to wait for a command to be finished
+
+* Activity logger command
+    ```
+    c8y activitylog list --dateFrom -1h
+    ```
+* Removed Get-SupportedOperation command. The supported operations can be read from the managed object using a select statement
+    ```sh
+    Get-Device -Select "c8y_SupportedOperations**"
+    ```
+
+* Refactored project structure to improve maintainability
+* Changed default directory for sessions from `.cumulocity` to `.cumulocity/sessions`
+* Fixed inventory roles commands
+    * `c8y users getCurrentUserInventoryRoleCollection` => `c8y users listInventoryRoles`
+    * `c8y users getCurrentUserInventoryRole` => `c8y users getInventoryRole`
+
+* Show message to user if deleting on terminal (i.e. DELETED NO Content, some kind of feedback so the user knows that something has happened) - and for commands using --noAccept
+
+* Added completions for `template` parameters
+    * `template`
+    * `processingMode`
+* Removed `Test-ClientPassphrase` as encryption is handled when logging in.
+* Add session creator which adds pre-configured templates (i.e. dev, qual, prod) with sensible settings (additional sessionDefault flag)
+* Add session editor (--add property/value to file) (complete values?)
+* Updated to go 1.16
+* session details are printed out when switching to it
+* Option to not store the password in the session. It should force the user to use their password each time. User can choose to store password and/or cookies
+* Hostname is also hidden when using sensitive logging mode is activated
+* Add confirmation prompts to c8y binary
+* Display session information after selecting a session
+* Custom `--logMessage` or `-LogMessage` common parameters which adds a custom string to the activity log (if enabled). It helps the user put a more meaningful entry related to the command.
+
+* Added links to native go command in PowerShell help in the `.LINK` (related links) section
+* `Get-TenantVersion` returns an object instead of a single value.
+    ```json
+    {
+        "category": "system",
+        "key": "version",
+        "value": "1006.6.0"
+    }
+    ```
+* Session folder is created automatically if it does not yet exist when creating a new session
+* --outputFile appends a new line character to the output when the Content-Type header contains "json"
+
+* Removed `TimeoutSec` to `Timeout`
+* `--timeout` has been changed to accept seconds not milliseconds. However you can enter "0.001" if you really want millisecond accuracy (not sure why though)
+* Added support for flag value completions (i.e. )
+    
+    ```sh
+    c8y operations list --status <TAB><TAB>
+    ```
+
+* Adding short options for various global options
+  * `-p` => `--pageSize`
+  * `-t` => `--withTotalPages`
+  * `-r` => `--raw`
+
+* Added colorize and pretty print options to output formatting
+    * pretty print when using streaming (`-c` or `--compress`)
+    * colorize json and json line output (`--noColor` or `-M` (for monochromatic output)). Output is colorized by default when writing to Terminal, but it can be disabled using `--noColor` or `-M`
+* `--select` parameter now supports advanced property selection using dot notation, wildcards (including globstar)
+* Added new `--noAccept` global parameter to ignore the Accept header. This usually only affects `PUT` and `POST` requests.
+
+* Fixed #43. New-ServiceUser now accepts more than 1 role
+* Added Expand-DeviceGroup cmdlet
+* Adding following template variables
+    * time.now
+    * time.nowNano
+    * input.index (current iteration when using pipelines)
+
+* TODO: Create custom ConvertFrom-Json
+    * Replace ConvertFrom-Json -Depth calls in code as the default is already high enough (1024). This simplifies the code as the check for powershell version can be ignored
+    * add options to strip out cumulocity noise (i.e. additionParents etc.)
+* TODO: Make -InformationVariable or at least ErrorVariable work when using IncludeAll
+
+* Optimized inventory queries when using the `includeAll` parameter on inventory managed objects
+    ```sh
+    $filter=_id gt '{lastId}' $orderby=_id asc
+    ```
+
+
+* New cmdlet `ConvertTo-NestedJson` which is a proxy function of `ConvertTo-Json` where depth is set to 10 by default
+* Removed `--format` as `select` and `csv` can be used for the same effect (and more).
+
+    ```
+    id=$( c8y devices list --select id --output csv | head -1 )
+    ```
+
+### PSc8y
+
+* New alias to the c8y binary. This makes it easier to run the binary directly without the powershell wrapper.
+
+    When using the c8y binary directly, the parameter names are slightly different, and should start with "--" and not the normalized powershell "-".
+
+    ```powershell
+    c8y devices list --pageSize 1
+
+    c8y help
+    ```
+
+* [Get-MeasurementCollection / c8y measurements list]
+    * Renamed `csv` parameter to `csvFormat` to avoid conflict with new global csv (client side) parameter
+    * Renamed `excel` parameter to `excelFormat` to be consistent with the renamed `csvFormat` parameter
+
+* Added support for passing non-pipeline parameters via the object. The id field will be read from the object. #42
+    ```powershell
+    $Group = New-TestDeviceGroup
+    $Device = New-TestDevice
+    Add-DeviceToGroup -Group $Group -NewChildDevice $Device
+    ```
+
+### Breaking changes
+
+#### PowerShell
+
+* Renamed all user group related cmdlets from "Group" to "UserGroup"
+    |From|New Name|
+    |-|-|
+    |New-Group|New-UserGroup|
+    |Get-Group|Get-UserGroup|
+    |Get-GroupByName|Get-UserGroupByName|
+    |Get-GroupCollection|Get-UserGroupCollection|
+    |Get-GroupMembershipCollection|Get-UserGroupMembershipCollection|
+    |New-TestGroup|New-TestUserGroup|
+    |Update-Group|Update-UserGroup|
+    |Remove-Group|Remove-UserGroup|
+
+#### Shell
+
+* c8y rest `--ignoreAcceptHeader` has been removed as there is a global `--noAccept` header
+
+* `realtime subscribe`: Remove shorthand `-c` variant of `--channel` as it conflicts with the new `--compress`, `-c` global flag.
+* `Get-ManagedObjectCollect` renamed `Device` parameter to `Ids` and removed device lookup as the parameter is related to a generic managed object and not a device.
+* Renamed json output parameters
+    * `--pretty` has been renamed to `--compress` (or `-c`) to be inline with popular json utility jq.
+    * Invoke-ClientRequest has both `-Pretty` and `-Compress` options - renamed `Pretty` to `Compress`
+
+### New Features
+
+#### Activity log
+* Records c8y commands (c8y binary arguments only) and HTTP request/response meta information
+* Enable the logs for specific sessions or have a global setting
+* Disable activity log for single commands by using `noLog` parameter
+
+    ```sh
+    c8y devices create --name "myDeviceName" --noLog
+    ```
+
+**Example**
+
+*File: c8y.activitylog.2021.02.11.json*
+
+```json
+{"time":"2021-02-11T07:07:29.7405634Z","ctx":"gOBHCQDe","type":"command","arguments":["devices","create","--name=myDevice01"]}
+{"time":"2021-02-11T07:07:29.9139964Z","ctx":"gOBHCQDe","type":"request","method":"POST","host":"c8y.example.com","path":"/inventory/managedObjects","query":"","accept":"application/json","processingMode":"","statusCode":201,"responseTimeMS":125,"responseSelf":"https://c8y.example.com/inventory/managedObjects/367930"}
+{"time":"2021-02-11T07:08:10.8468454Z","ctx":"gCVnTfZt","type":"command","arguments":["devices","update","--id","367930","--newName","my new device"]}
+{"time":"2021-02-11T07:08:11.0067532Z","ctx":"gCVnTfZt","type":"request","method":"PUT","host":"c8y.example.com","path":"/inventory/managedObjects/367930","query":"","accept":"application/json","processingMode":"","statusCode":200,"responseTimeMS":146,"responseSelf":"https://c8y.example.com/inventory/managedObjects/367930"}
+{"time":"2021-02-11T07:08:26.9742641Z","ctx":"qFRWdUsT","type":"command","arguments":["devices","delete","--id=367930"]}
+{"time":"2021-02-11T07:08:27.1066364Z","ctx":"qFRWdUsT","type":"request","method":"DELETE","host":"c8y.example.com","path":"/inventory/managedObjects/367930","query":"","accept":"application/json","processingMode":"","statusCode":204,"responseTimeMS":122,"responseSelf":""}
+```
+
+**Settings**
+
+The activity log settings can be set for individual c8y sessions or globally in your `settings.json` file.
+
+```json
+{
+    "settings": {
+        "activityLog": {
+            "enabled": true,
+            // defaults to current working directory if not specified
+            "path": "/home/myuser/.c8y-activitylogs/",
+            "methodFilter": "GET PUT POST DELETE"
+        }
+    }
+}
+```
+
+### Bash/zsh improvements
+
+**Pipeline support**
+
+* Added pipelines to most commands
+
+    ```sh
+    c8y alarms --device 12345 --status ACTIVE | c8y alarms update --status CLEARED
+    ```
+
+    ```sh
+    c8y devices list | c8y operations list
+    ```
+
+* When doing batch size of 1, only set the exit code to the last value
+* Maximum jobs limit to protect against unexpected updates
+* New global parameters
+    * `--compact` or `-c` compact the json removing any indentation
+    * `--stream` will automatically convert a json array to individual json lines (objects)
+        ```json
+        [
+            { "id": "1"},
+            { "id": "2"}
+        ]
+        ```
+
+        Will be transformed individually stream json objects. Each object will be written to stdout as it is processed.
+
+        ```json
+        { "id": "1"}
+        { "id": "2"}
+        ```
+
+**Templates**
+
+* When using piped data the data is stored for use in a template variable `input.value`.
+
+    **Example: Add a fragment based on the type name**
+
+    ```sh
+    seq 1 | c8y devices create --data "type=myValue" \
+        | c8y devices update --template "{ [input.value.type]: {} }"
+    ```
+
+    **Example: Add a type to devices which have a specific fragment and also mark when it was updated**
+
+    ```sh
+    c8y devices list --query "has(c8y_myCustomType)" \
+        | c8y devices update --template "{ type: 'c8y_Linux', c8y_jobInfo: { job: input.index, lastUpdated: time.now } }"
+    ```
+
+**Progress bar (alpha)**
+
+* `--progress` bar can be used when performing operations in a pipeline.
+
+    ```
+    cat myList.txt | c8y inventory get --progress
+    ```
+
+### PSc8y improvements
+
+* The `Data` parameter now accepts a path object (System.IO.FileSystemInfo). Previously the user would have to use the .Name or .FullName of the object.
+
+    **Example**
+
+    ```powershell
+    $file = New-TemporaryFile
+    '{"name": "myName in a file"}' | Out-File $file
+    New-ManagedObject -Data $file
+    ```
+
+* `Wait-Operation` Fixed warning message format when operation fails. Id was being show in the incorrect position
 
 ## Released
 
@@ -67,7 +559,7 @@ No unreleased features
 
     Headers:
     Accept: application/json
-    Authorization: Basic asdfasfd........
+    Authorization: Basic {base64 tenant/username:password}
     Content-Type: application/json
     User-Agent: go-client
     X-Application: go-client
@@ -115,7 +607,7 @@ No unreleased features
         ```
 #### Minor Changes
 
-* Updated PowerShell version from 7.0 to 7.1.1 inside docker image `c8y-pwsh`. This fixed a bug when using `Foreach-Object -Parallel` which would re-import modules instead of re-using it within each runspace.
+* Updated PowerShell version from 7.0 to 7.1.1 inside docker image `c8y-pwsh`. This fixed a bug when using `Foreach-Object -Parallel` which would re-import modules instead of re-using it within each run space.
 * PSc8y will enforce PowerShell encoding to UTF8 to prevent encoding issues when sending data to the c8y go binary. The console encoding will be changed when importing `PSc8y`. UTF8 is the only text encoding supported. This mainly effects Windows, as MacOS and Linux use UTF8 encoding on the console by default.
 * Added a global `--noColor` to the c8y binary to remove console colours from the log messages to make it easier to parse entries. By default PowerShell uses this option when calling the c8y binary as PowerShell handling the coloured log output itself.
 
@@ -149,10 +641,10 @@ No unreleased features
     # API calls: 2 x GET    (previously 5 x GET!)
     Get-Device 1234 | Get-Device
 
-    # API calls: 1 x GET and 1 x PUT    (prevously 4 x GET and 1 x PUT)
+    # API calls: 1 x GET and 1 x PUT    (previously 4 x GET and 1 x PUT)
     Get-Device 1234 | Update-Device
 
-    # API calls: 1 x POST   (prevously 3 x GET and 1 x POST)
+    # API calls: 1 x POST   (previously 3 x GET and 1 x POST)
     Add-DeviceToGroup -Group 11111 -NewChildDevice 222222 -ProcessingMode QUIESCENT -Force
     ```
 
@@ -183,7 +675,7 @@ No unreleased features
     ./my-script.ps1 -Device 12345
 
     # array of items mixing ids with names
-    ./my-script.ps1 -Device "myDevicename", 1234
+    ./my-script.ps1 -Device "myDeviceName", 1234
 
     # using pipelines from other PSc8y cmdlets
     Get-DeviceCollection | ./my-script.ps1
@@ -221,7 +713,7 @@ No unreleased features
     deviceParents   : @{references=System.Object[]; self=https://example.cumulocity.com/inventory/managedObjects/1234/deviceParents}
     id              : 1234
     lastUpdated     : 1/19/2021 8:52:29 PM
-    name            : mynewname
+    name            : myNewName
     owner           : user@example.com
     self            : https://example.cumulocity.com/inventory/managedObjects/3882
     ```
@@ -244,7 +736,7 @@ No unreleased features
 
 #### Performance improvements
 
-* Reduced number of API calls within PSc8y and c8y binary by skipping lookups when an ID is given by the user. Previously PSc8y and c8y were sending two API calls to the server in order to normalize the request by retrieving additional information and potentiall shown to the user. Since this is currently not used, it has been removed.
+* Reduced number of API calls within PSc8y and c8y binary by skipping lookups when an ID is given by the user. Previously PSc8y and c8y were sending two API calls to the server in order to normalize the request by retrieving additional information and potential shown to the user. Since this is currently not used, it has been removed.
 
 #### Bug fixes
 
@@ -434,20 +926,20 @@ No unreleased features
 ### v1.8.0
 
 * `Get-Session` uses a new c8y session get to retrieve information about the current session
-* Fixed bug when using the `-Session` on PUT and POST commands which resulted in an error being displayed eventhough the request would be successful
+* Fixed bug when using the `-Session` on PUT and POST commands which resulted in an error being displayed even though the request would be successful
 * `Expand-Device` supports piping of alarms, events, measurements and operations
 * Added `-ProcessingMode` parameter to all commands that use DELETE, PUT and POST requests.
 
     ```powershell
-    New-ManagedObject -Name myobject -ProcessingMode TRANSIENT
-    New-ManagedObject -Name myobject -ProcessingMode QUIESCENT
-    New-ManagedObject -Name myobject -ProcessingMode PERSISTENT
-    New-ManagedObject -Name myobject -ProcessingMode CEP
+    New-ManagedObject -Name myObject -ProcessingMode TRANSIENT
+    New-ManagedObject -Name myObject -ProcessingMode QUIESCENT
+    New-ManagedObject -Name myObject -ProcessingMode PERSISTENT
+    New-ManagedObject -Name myObject -ProcessingMode CEP
     ```
 * `Set-session` automatically selects a session if only one matching session is found rather than prompting the user for the selection
 * `source` fragment is removed when being passed via file to the `Data` parameter in all create and update commands
     ```json
-    // myevent.json
+    // myEvent.json
     {
         "source": {
             "id": "99999",
@@ -460,13 +952,13 @@ No unreleased features
 
     When executing the following command:
     ```powershell
-    PSc8y\New-Event -Device 12345 -Data myevent.json
+    PSc8y\New-Event -Device 12345 -Data myEvent.json
     ```
 
     The `source` id fragment will be replaced entirely by the new source as specified by the `Device` parameter
 
     ```json
-    // myevent.json
+    // myEvent.json
     {
         "source": {
             "id": "12345",
@@ -509,7 +1001,7 @@ No unreleased features
     ```powershell
     New-ServiceUser -Name "myapp1" -Roles "ROLE_INVENTORY_READ" -Tenants "t12345"
 
-    Get-Serviceuser -Name "myapp1"
+    Get-ServiceUser -Name "myapp1"
     ```
 * Fixed target tenant confirmation when using the `-Session` parameter on PUT/POST commands
 * `Invoke-ClientRequest`: Added support for `-Template` and `-TemplateVars` parameters
@@ -560,13 +1052,13 @@ No unreleased features
     **PowerShell**
 
     ```powershell
-    Invoke-ClientRequest -Uri "/service/exampleMS/myendpoint" -Method "POST"
+    Invoke-ClientRequest -Uri "/service/exampleMS/endpoint" -Method "POST"
     ```
 
     **Bash/zsh**
 
     ```sh
-    c8y rest POST /service/exampleMS/myendpoint
+    c8y rest POST /service/exampleMS/endpoint
     ```
 
 * Added command to read the current configuration settings as json
@@ -634,7 +1126,7 @@ No unreleased features
     **Bash/zsh**
 
     ```sh
-    c8y template execute --template ./mytemplate.jsonnet
+    c8y template execute --template ./template.jsonnet
     ```
 
     **PowerShell**
@@ -742,11 +1234,11 @@ No unreleased features
 
 * Renamed `Watch-NotificationChannels` to `Watch-NotificationChannel`
 
-* `Watch-*` cmdlets now support piping results as soon as they are received rather than waiting for the duration expire before passing the results back. This enables more complex scenarios, and adhoc event processing tasks
+* `Watch-*` cmdlets now support piping results as soon as they are received rather than waiting for the duration expire before passing the results back. This enables more complex scenarios, and ad hoc event processing tasks
 
     **Examples**
 
-    Update each alarm which comes in with the serverity CRITICAL. `Update-Alarm` will be run as soon as a result is received, and not just after the 60 second duration of `Watch-Alarm`. 
+    Update each alarm which comes in with the severity CRITICAL. `Update-Alarm` will be run as soon as a result is received, and not just after the 60 second duration of `Watch-Alarm`. 
 
     ```powershell
     Watch-Alarm -Device 12345 -DurationSec 60 | Update-Alarm -Severity CRITICAL -Force
@@ -822,8 +1314,8 @@ No unreleased features
     * `c8y devices listDeviceGroups`
 
 * Added common options to (i.e. --outputFile, --pretty)
-    * `c8y micrservices create`
-    * `c8y micrservices createHostedApplication`
+    * `c8y microservices create`
+    * `c8y microservices createHostedApplication`
 
 * Added bash profile script to add support for aliases
 * Added guide to creating custom bash aliases
@@ -842,7 +1334,7 @@ No unreleased features
 
 #### Docs
 
-* Fixed line wrapping within code blocks. Now horizontal scrollbars are show to preserve the line spacing.
+* Fixed line wrapping within code blocks. Now horizontal scroll bars are show to preserve the line spacing.
 * Added github project link
 
 #### Build

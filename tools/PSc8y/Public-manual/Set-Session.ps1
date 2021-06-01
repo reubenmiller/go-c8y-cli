@@ -1,5 +1,5 @@
 ﻿Function Set-Session {
-<#
+    <#
 .SYNOPSIS
 Set/activate a Cumulocity Session.
 
@@ -18,7 +18,10 @@ terms will be includes in the results. The search is applied to the following fi
 * username
 
 .NOTES
-On MacOS, you need to hold "control"+Arrow keys to navigate the list of sessions. Otherwise the VIM style "j" (down) and "k" (up) keys can be also used for navigation
+On MacOS, you need to hold "shift"+Arrow keys to navigate the list of sessions. Otherwise the VIM style "j" (down) and "k" (up) keys can be also used for navigation
+
+.LINK
+c8y sessions set
 
 .EXAMPLE
 Set-Session
@@ -42,98 +45,39 @@ String
         DefaultParameterSetName = "ByInteraction"
     )]
     Param(
-        # File containing the Cumulocity session data
-        [Parameter(Mandatory=$false,
-                   Position = 0,
-                   ParameterSetName = "ByFile",
-                   ValueFromPipeline=$true,
-                   ValueFromPipelineByPropertyName=$true)]
-        [Alias("FullName")]
-        [string] $File,
-
-        # Filter list of sessions. Multiple search terms can be provided. A string "Contains" operation
+        # SessionFilter list of sessions. Multiple search terms can be provided. A string "Contains" operation
         # is done to match any of the session fields (except password)
         [Parameter(
             ParameterSetName = "ByInteraction",
             Position = 0
         )]
-        [string[]] $Filter,
+        [string[]] $SessionFilter,
 
-        # Allow loading Cumulocity session setting from environment variables
-        [switch] $UseEnvironment,
-
-        # Reload the current session. If no session is already loaded, then an warning will be returned.
+        # Session
         [Parameter(
-            ParameterSetName = "ByReloadExisting"
+            ParameterSetName = "ByFile",
+            Position = 0
         )]
-        [switch] $Reload
+        [string] $Session
     )
 
     Process {
-
-        switch ($PSCmdlet.ParameterSetName) {
-            "ByFile" {
-                $Path = $File
-            }
-
-            "ByReloadExisting" {
-                $ExistingSession = Get-Session
-                if ($null -eq $ExistingSession) {
-                    Write-Error "No session is loaded. Please call it again without the -Reload"
-                    return
-                }
-                $Path = $ExistingSession.path
-            }
-
-            default {
-                $Binary = Get-ClientBinary
-                $c8yargs = New-Object System.Collections.ArrayList
-                $null = $c8yargs.AddRange(@("sessions", "list"))
-
-                if ($Filter -gt 0) {
-                    $SearchTerms = $Filter -join " "
-                    $null = $c8yargs.AddRange(@("--sessionFilter", "$SearchTerms"))
-                }
-
-                if ($UseEnvironment) {
-                    $null = $c8yargs.Add("--useEnv=true")
-                } else {
-                    $null = $c8yargs.Add("--useEnv=false")
-                }
-                $Path = & $Binary $c8yargs
-
-                if ($LASTEXITCODE -ne 0) {
-                    Write-Warning "User cancelled set-session. Current session was not changed"
-                    return
-                }
-            }
+        $c8yargs = New-Object System.Collections.ArrayList
+        if ($SessionFilter -gt 0) {
+            $SearchTerms = $SessionFilter -join " "
+            $null = $c8yargs.AddRange(@("--sessionFilter", "$SearchTerms"))
         }
 
-        if (!$Path -or !(Test-Path $Path)) {
-            Write-Warning "Invalid path"
-            return
+        if ($Session) {
+            [void] $c8yargs.AddRange(@("--session", $Session))
         }
 
-        # Clear session before seting the new one
-        PSc8y\Clear-Session
-
-        Write-Verbose "Setting new session: $Path"
-        $env:C8Y_SESSION = Resolve-Path $Path
-
-        # Check encryption
-        Test-ClientPassphrase
-
-        # Update environment variables
-        Set-EnvironmentVariablesFromSession
-
-        # Get OAuth2 and test client authentication
-        $null = Invoke-ClientLogin
-
+        $envvars = c8y sessions set --noColor=false $c8yargs
         if ($LASTEXITCODE -ne 0) {
-            Write-Error "$resp"
+            Write-Warning "User cancelled set-session. Current session was not changed"
             return
         }
 
-        Get-Session
+        $envvars | Out-String | Invoke-Expression
     }
 }

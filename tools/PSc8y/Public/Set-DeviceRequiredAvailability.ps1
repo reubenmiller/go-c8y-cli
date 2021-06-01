@@ -2,10 +2,13 @@
 Function Set-DeviceRequiredAvailability {
 <#
 .SYNOPSIS
-Set the required availability of a device
+Set required availability
 
 .DESCRIPTION
-Devices that have not sent any message in the response interval are considered unavailable. Response interval can have value between -32768 and 32767 and any values out of range will be shrink to range borders. Such devices are marked as unavailable (see below) and an unavailability alarm is raised. Devices with a response interval of zero minutes are considered to be under maintenance. No alarm is raised while a device is under maintenance. Devices that do not contain 'c8y_RequiredAvailability' are not monitored.
+Set the required availability of a device. Devices that have not sent any message in the response interval are considered unavailable. Response interval can have value between -32768 and 32767 and any values out of range will be shrink to range borders. Such devices are marked as unavailable (see below) and an unavailability alarm is raised. Devices with a response interval of zero minutes are considered to be under maintenance. No alarm is raised while a device is under maintenance. Devices that do not contain 'c8y_RequiredAvailability' are not monitored.
+
+.LINK
+https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/devices_setRequiredAvailability
 
 .EXAMPLE
 PS> Set-DeviceRequiredAvailability -Device $device.id -Interval 10
@@ -19,10 +22,8 @@ Set the required availability of a device (using pipeline)
 
 
 #>
-    [cmdletbinding(SupportsShouldProcess = $true,
-                   PositionalBinding=$true,
-                   HelpUri='',
-                   ConfirmImpact = 'High')]
+    [cmdletbinding(PositionalBinding=$true,
+                   HelpUri='')]
     [Alias()]
     [OutputType([object])]
     Param(
@@ -36,114 +37,42 @@ Set the required availability of a device (using pipeline)
         # Interval in minutes (required)
         [Parameter(Mandatory = $true)]
         [long]
-        $Interval,
-
-        # Cumulocity processing mode
-        [Parameter()]
-        [AllowNull()]
-        [AllowEmptyString()]
-        [ValidateSet("PERSISTENT", "QUIESCENT", "TRANSIENT", "CEP", "")]
-        [string]
-        $ProcessingMode,
-
-        # Template (jsonnet) file to use to create the request body.
-        [Parameter()]
-        [string]
-        $Template,
-
-        # Variables to be used when evaluating the Template. Accepts a file path, json or json shorthand, i.e. "name=peter"
-        [Parameter()]
-        [string]
-        $TemplateVars,
-
-        # Show the full (raw) response from Cumulocity including pagination information
-        [Parameter()]
-        [switch]
-        $Raw,
-
-        # Write the response to file
-        [Parameter()]
-        [string]
-        $OutputFile,
-
-        # Ignore any proxy settings when running the cmdlet
-        [Parameter()]
-        [switch]
-        $NoProxy,
-
-        # Specifiy alternative Cumulocity session to use when running the cmdlet
-        [Parameter()]
-        [string]
-        $Session,
-
-        # TimeoutSec timeout in seconds before a request will be aborted
-        [Parameter()]
-        [double]
-        $TimeoutSec,
-
-        # Don't prompt for confirmation
-        [Parameter()]
-        [switch]
-        $Force
+        $Interval
     )
+    DynamicParam {
+        Get-ClientCommonParameters -Type "Update", "Template"
+    }
 
     Begin {
-        $Parameters = @{}
-        if ($PSBoundParameters.ContainsKey("Interval")) {
-            $Parameters["interval"] = $Interval
-        }
-        if ($PSBoundParameters.ContainsKey("ProcessingMode")) {
-            $Parameters["processingMode"] = $ProcessingMode
-        }
-        if ($PSBoundParameters.ContainsKey("Template") -and $Template) {
-            $Parameters["template"] = $Template
-        }
-        if ($PSBoundParameters.ContainsKey("TemplateVars") -and $TemplateVars) {
-            $Parameters["templateVars"] = $TemplateVars
-        }
-        if ($PSBoundParameters.ContainsKey("OutputFile")) {
-            $Parameters["outputFile"] = $OutputFile
-        }
-        if ($PSBoundParameters.ContainsKey("NoProxy")) {
-            $Parameters["noProxy"] = $NoProxy
-        }
-        if ($PSBoundParameters.ContainsKey("Session")) {
-            $Parameters["session"] = $Session
-        }
-        if ($PSBoundParameters.ContainsKey("TimeoutSec")) {
-            $Parameters["timeout"] = $TimeoutSec * 1000
-        }
 
         if ($env:C8Y_DISABLE_INHERITANCE -ne $true) {
             # Inherit preference variables
             Use-CallerPreference -Cmdlet $PSCmdlet -SessionState $ExecutionContext.SessionState
         }
+
+        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "devices setRequiredAvailability"
+        $ClientOptions = Get-ClientOutputOption $PSBoundParameters
+        $TypeOptions = @{
+            Type = "application/vnd.com.nsn.cumulocity.inventory+json"
+            ItemType = ""
+            BoundParameters = $PSBoundParameters
+        }
     }
 
     Process {
-        foreach ($item in (PSc8y\Expand-Device $Device)) {
-            if ($item) {
-                $Parameters["device"] = if ($item.id) { $item.id } else { $item }
-            }
 
-            if (!$Force -and
-                !$WhatIfPreference -and
-                !$PSCmdlet.ShouldProcess(
-                    (PSc8y\Get-C8ySessionProperty -Name "tenant"),
-                    (Format-ConfirmationMessage -Name $PSCmdlet.MyInvocation.InvocationName -InputObject $item)
-                )) {
-                continue
-            }
-
-            Invoke-ClientCommand `
-                -Noun "devices" `
-                -Verb "setRequiredAvailability" `
-                -Parameters $Parameters `
-                -Type "application/vnd.com.nsn.cumulocity.inventory+json" `
-                -ItemType "" `
-                -ResultProperty "" `
-                -Raw:$Raw
+        if ($ClientOptions.ConvertToPS) {
+            $Device `
+            | Group-ClientRequests `
+            | c8y devices setRequiredAvailability $c8yargs `
+            | ConvertFrom-ClientOutput @TypeOptions
         }
+        else {
+            $Device `
+            | Group-ClientRequests `
+            | c8y devices setRequiredAvailability $c8yargs
+        }
+        
     }
 
     End {}

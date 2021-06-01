@@ -1,0 +1,16 @@
+{
+    "version": "1",
+    "definitions": [
+        {
+            "name": "applicationReference",
+            "priority": 500,
+            "contentType": "vnd.com.nsn.cumulocity.applicationReference",
+            "columns": [
+                "application.id",
+                "application.name",
+                "application.type",
+                "self"
+            ]
+        }
+    ]
+}

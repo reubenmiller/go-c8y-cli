@@ -3,12 +3,12 @@
 Describe -Name "Remove-UserFromGroup" {
     BeforeEach {
         $User = New-TestUser
-        $Group = Get-GroupByName -Name "business"
+        $Group = Get-UserGroupByName -Name "business"
         Add-UserToGroup -Group $Group.id -User $User.id
 
     }
 
-    It "Add a user to a user group" {
+    It "From a user from a user group" {
         $Response = PSc8y\Remove-UserFromGroup -Group $Group.id -User $User.id
         $LASTEXITCODE | Should -Be 0
     }

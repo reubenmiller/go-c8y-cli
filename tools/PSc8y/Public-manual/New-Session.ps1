@@ -1,10 +1,13 @@
 ﻿Function New-Session {
-<#
+    <#
 .SYNOPSIS
 Create a new Cumulocity Session
 
 .DESCRIPTION
 Create a new Cumulocity session which can be used by the cmdlets. The new session will be automatically activated.
+
+.LINK
+c8y sessions create
 
 .EXAMPLE
 New-Session -Name "develop" -Host "my-tenant-name.eu-latest.cumulocity.com"
@@ -54,48 +57,21 @@ None
         [switch]
         $NoTenantPrefix
     )
-    
-    $Binary = Get-ClientBinary
-    
-    $c8yargs = New-object System.Collections.ArrayList
-    
-    $null = $c8yargs.AddRange(@("sessions", "create"))
 
-    if ($Username) {
-        $null = $c8yargs.AddRange(@("--username", $Username))
+    Begin {
+        if ($env:C8Y_DISABLE_INHERITANCE -ne $true) {
+            # Inherit preference variables
+            Use-CallerPreference -Cmdlet $PSCmdlet -SessionState $ExecutionContext.SessionState
+        }
+        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "sessions create"
     }
+    
+    Process {
+        $Path = c8y sessions create $c8yargs
+    
+        Set-Session -File $Path
 
-    if ($Password) {
-        $null = $c8yargs.AddRange(@("--password", $Password))
+        # Test the login
+        Invoke-ClientLogin
     }
-    
-    if ($Name) {
-        $null = $c8yargs.AddRange(@("--name", $Name))
-    }
-    if ($Host) {
-        $null = $c8yargs.AddRange(@("--host", $Host))
-    }
-    if ($Tenant) {
-        $null = $c8yargs.AddRange(@("--tenant", $Tenant))
-    }
-    if ($Username) {
-        $null = $c8yargs.AddRange(@("--username", $Username))
-    }
-    if ($Password) {
-        $null = $c8yargs.AddRange(@("--password", $Password))
-    }
-    if ($Description) {
-        $null = $c8yargs.AddRange(@("--description", $Description))
-    }
-    
-    if ($NoTenantPrefix.IsPresent) {
-        $null = $c8yargs.AddRange("--noTenantPrefix={0}" -f $NoTenantPrefix.ToString().ToLower())
-    }
-    
-    $Path = & $Binary $c8yargs
-    
-    Set-Session -File $Path
-
-    # Test the login
-    Invoke-ClientLogin
 }

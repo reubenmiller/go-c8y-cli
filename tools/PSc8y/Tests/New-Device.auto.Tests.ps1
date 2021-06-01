@@ -18,6 +18,13 @@ Describe -Name "New-Device" {
         $Response | Should -Not -BeNullOrEmpty
     }
 
+    It "Create device using a template" {
+        $Response = PSc8y\New-Device -Template "{ name: '$DeviceName' }"
+
+        $LASTEXITCODE | Should -Be 0
+        $Response | Should -Not -BeNullOrEmpty
+    }
+
 
     AfterEach {
         Remove-Device -Id $DeviceName

@@ -8,7 +8,8 @@
   "endpoints": [
     {
       "name": "getDataBrokerConnectorCollection",
-      "description": "Get collection of data broker connectors",
+      "description": "Get data broker collection",
+      "descriptionLong": "Get a collection of existing data broker connectors",
       "method": "GET",
       "path": "/databroker/connectors",
       "accept": "application/vnd.com.nsn.cumulocity.databrokerConnectorCollection+json",
@@ -36,7 +37,8 @@
     },
     {
       "name": "getDataBroker",
-      "description": "Get data broker connector",
+      "description": "Get data broker",
+      "descriptionLong": "Get an existing data broker connector",
       "method": "GET",
       "path": "/databroker/connectors/{id}",
       "accept": "application/vnd.com.nsn.cumulocity.databrokerConnector+json",
@@ -62,7 +64,7 @@
       "pathParameters": [
         {
           "name": "id",
-          "type": "string",
+          "type": "[]id",
           "required": true,
           "pipeline": true,
           "description": "Data broker connector id"
@@ -71,7 +73,8 @@
     },
     {
       "name": "updateDataBroker",
-      "description": "Update data broker connector",
+      "description": "Update data broker",
+      "descriptionLong": "Update an existing data broker connector",
       "method": "PUT",
       "path": "/databroker/connectors/{id}",
       "accept": "application/vnd.com.nsn.cumulocity.databrokerConnector+json",
@@ -97,7 +100,7 @@
       "pathParameters": [
         {
           "name": "id",
-          "type": "string",
+          "type": "[]id",
           "required": true,
           "pipeline": true,
           "description": "Data broker connector id"

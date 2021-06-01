@@ -1,0 +1,21 @@
+{
+    "version": "1",
+    "definitions": [
+        {
+            "name": "bulkOperations",
+            "priority": 500,
+            "contentType": "vnd.com.nsn.cumulocity.bulkoperation",
+            "columns": [
+                "id",
+                "groupId",
+                "status",
+                "startDate",
+                "creationRamp",
+                "generalStatus",
+                "progress.all",
+                "progress.successful",
+                "progress.failed"
+            ]
+        }
+    ]
+}

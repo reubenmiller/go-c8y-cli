@@ -6,93 +6,69 @@ Watch realtime device notifications
 .DESCRIPTION
 Watch realtime device notifications
 
+.LINK
+c8y realtime subscribeAll
+
 .EXAMPLE
-PS> Function Watch-NotificationChannel -Device 12345 -DurationSec 90
+PS> Function Watch-NotificationChannel -Device 12345 -Duration 90s
 Watch all types of notifications for a device for 90 seconds
 
 #>
-    [cmdletbinding(SupportsShouldProcess = $true,
-                   PositionalBinding=$true,
-                   HelpUri='',
-                   ConfirmImpact = 'None')]
+    [cmdletbinding(PositionalBinding=$true,
+                   HelpUri='')]
     [Alias()]
     [OutputType([object])]
     Param(
         # Device ID
         [Parameter(ValueFromPipeline=$true,
                    ValueFromPipelineByPropertyName=$true)]
-        [object[]]
+        [object]
         $Device,
 
-        # Start date or date and time of notification occurrence. (required)
+        # Duration to subscribe for. It accepts a duration, i.e. 1ms, 0.5s, 1m etc.
         [Parameter()]
-        [int]
-        $DurationSec,
+        [string]
+        $Duration,
 
         # End date or date and time of notification occurrence.
         [Parameter()]
-        [string]
+        [int]
         $Count,
 
-        # Outputfile
+        # Filter by realtime action types, i.e. CREATE,UPDATE,DELETE
         [Parameter()]
-        [string]
-        $OutputFile,
-
-        # NoProxy
-        [Parameter()]
-        [switch]
-        $NoProxy,
-
-        # Session path
-        [Parameter()]
-        [string]
-        $Session
+        [ValidateSet('CREATE','UPDATE','DELETE','')]
+        [string[]]
+        $ActionTypes
     )
+    DynamicParam {
+        Get-ClientCommonParameters -Type "Get"
+    }
 
     Begin {
-        $Parameters = @{}
-        if ($PSBoundParameters.ContainsKey("Channel")) {
-            $Parameters["channel"] = $Channel
-        }
-        if ($PSBoundParameters.ContainsKey("DurationSec")) {
-            $Parameters["duration"] = $DurationSec
-        }
-        if ($PSBoundParameters.ContainsKey("Count")) {
-            $Parameters["count"] = $Count
-        }
-        if ($PSBoundParameters.ContainsKey("OutputFile")) {
-            $Parameters["outputFile"] = $OutputFile
-        }
-        if ($PSBoundParameters.ContainsKey("NoProxy")) {
-            $Parameters["noProxy"] = $NoProxy
-        }
-        if ($PSBoundParameters.ContainsKey("Session")) {
-            $Parameters["session"] = $Session
+        if ($env:C8Y_DISABLE_INHERITANCE -ne $true) {
+            # Inherit preference variables
+            Use-CallerPreference -Cmdlet $PSCmdlet -SessionState $ExecutionContext.SessionState
         }
 
+        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "realtime subscribeAll"
+        $ClientOptions = Get-ClientOutputOption $PSBoundParameters
+        $TypeOptions = @{
+            Type = "application/json"
+            ItemType = ""
+            BoundParameters = $PSBoundParameters
+        }
     }
 
     Process {
-        $id = PSc8y\Expand-Id $Device
-        if ($id) {
-            $Parameters["device"] = PSc8y\Expand-Id $Device
-        }
 
-        if (!$Force -and
-            !$WhatIfPreference -and
-            !$PSCmdlet.ShouldProcess(
-                (PSc8y\Get-C8ySessionProperty -Name "tenant"),
-                (Format-ConfirmationMessage -Name $PSCmdlet.MyInvocation.InvocationName -InputObject $item)
-            )) {
-            continue
+        if ($ClientOptions.ConvertToPS) {
+            c8y realtime subscribeAll $c8yargs `
+            | ConvertFrom-ClientOutput @TypeOptions
         }
-
-        Invoke-ClientCommand `
-            -Noun "realtime" `
-            -Verb "subscribeAll" `
-            -Parameters $Parameters `
-            -Type "application/json"
+        else {
+            c8y realtime subscribeAll $c8yargs
+        }
     }
 
     End {}

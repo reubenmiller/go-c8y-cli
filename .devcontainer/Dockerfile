@@ -3,7 +3,7 @@
 # Licensed under the MIT License. See https://go.microsoft.com/fwlink/?linkid=2090316 for license information.
 #-------------------------------------------------------------------------------------------------------------
 
-FROM golang:1
+FROM golang:1.16
 
 # Avoid warnings by switching to noninteractive
 ENV DEBIAN_FRONTEND=noninteractive
@@ -30,13 +30,9 @@ RUN wget https://packages.microsoft.com/config/debian/10/packages-microsoft-prod
     # Verify git, process tools, lsb-release (common in install instructions for CLIs) installed
     && apt-get -y install git openssh-client less iproute2 procps lsb-release gnupg \
     #
-    # Github pages tooling
-    && apt-get -y install ruby-full build-essential zlib1g-dev \
-    && gem install jekyll bundler \
-    #
     # Extra tooling
-    && apt-get -y install make powershell nodejs \
-    && npm install -g yamljs \
+    && apt-get -y install make powershell nodejs unzip lolcat boxes figlet randtype \
+    && npm install -g yamljs svg-term-cli \
     #
     # Build Go tools w/module support
     && mkdir -p /tmp/gotools \
@@ -64,16 +60,8 @@ RUN wget https://packages.microsoft.com/config/debian/10/packages-microsoft-prod
         github.com/mgechev/revive@latest  \
         github.com/go-delve/delve/cmd/dlv@latest 2>&1 \
     #
-    # Build Go tools w/o module support
-    && GOPATH=/tmp/gotools go get -v github.com/alecthomas/gometalinter 2>&1 \
-    #
-    # Build gocode-gomod
-    && GOPATH=/tmp/gotools go get -x -d github.com/stamblerre/gocode 2>&1 \
-    && GOPATH=/tmp/gotools go build -o gocode-gomod github.com/stamblerre/gocode \
-    #
     # Install Go tools
     && mv /tmp/gotools/bin/* /usr/local/bin/ \
-    && mv gocode-gomod /usr/local/bin/ \
     #
     # Install golangci-lint
     && curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b /usr/local/bin 2>&1 \
@@ -100,7 +88,10 @@ RUN wget https://packages.microsoft.com/config/debian/10/packages-microsoft-prod
     # Install bash tools
     # https://github.com/bats-core/bats-core
     && npm install -g bats \
-    && apt-get install -y jq bash-completion \
+    && apt-get install -y jq bash-completion asciinema \
+    #
+    # Fish shell
+    && apt-get install -y fish zsh \
     #
     # Clean up
     && apt-get autoremove -y \
@@ -110,10 +101,23 @@ RUN wget https://packages.microsoft.com/config/debian/10/packages-microsoft-prod
 #
 # Install password manager/s
 #
-RUN curl -L "https://vault.bitwarden.com/download/?app=cli&platform=linux" -o /tmp/bw.zip \
+RUN curl -sSfL "https://vault.bitwarden.com/download/?app=cli&platform=linux" -o /tmp/bw.zip \
     && unzip /tmp/bw.zip -d /usr/local/bin/ \
     && chmod a+x /usr/local/bin/bw \
-    && rm /tmp/bw.zip
+    && rm -f /tmp/bw.zip
+
+#
+# Shells
+#
+RUN echo "Installing shells" \
+    # Fish shell
+    && apt-get install -y fish zsh
+
+
+# AsciiCinema configuration
+RUN chown -R $USER_UID:$USER_GID /home/$USERNAME \
+    && mkdir -p /home/$USERNAME/.config/asciinema \
+COPY tools/asciinema/config /home/$USERNAME/.config/asciinema/
 
 # Install powershell dependencies
 USER $USERNAME
@@ -124,8 +128,34 @@ USER $USERNAME
 #    && mkdir -p /workspaces/go-c8y-cli/tools/PSc8y/dist/PSc8y/Dependencies/ \
 #    && ln -s /workspaces/go-c8y-cli/tools/PSc8y/dist/PSc8y/Dependencies/c8y.linux /usr/local/bin/c8y
 
+# Install oh-my-zsh
+RUN curl -sSfL https://raw.githubusercontent.com/robbyrussell/oh-my-zsh/master/tools/install.sh | sh -s -- "" --unattended 2>&1 \
+    && mkdir -p /home/$USERNAME/.oh-my-zsh/custom/plugins/c8y
+
+COPY tools/shell/.zshrc /home/$USERNAME/.zshrc
+COPY tools/shell/c8y.plugin.zsh /home/$USERNAME/.oh-my-zsh/custom/plugins/c8y/
+COPY tools/shell/c8y.plugin.fish /home/$USERNAME/
+RUN sed -iE 's/plugins=(\(.*\))/plugins=(\1 c8y)/' /home/$USERNAME/.zshrc \
+    && echo "autoload -U compinit; compinit -i" >> /home/$USERNAME/.zshrc \
+    #
+    # fish config
+    && sudo mkdir -p /home/$USERNAME/.config/fish/
+    # && echo "c8y completion fish | source" >> /home/$USERNAME/.config/fish/config.fish
+    # && echo "source ~/c8y.plugin.fish" >> /home/$USERNAME/.config/fish/config.fish
+
+# CI/CD tools
+RUN  cd /tmp \
+    && curl -sfL https://install.goreleaser.com/github.com/goreleaser/goreleaser.sh | sh \
+    && chmod a+x /tmp/bin/* \
+    && sudo mv /tmp/bin/* /usr/local/bin/ \
+    && curl -fL https://getcli.jfrog.io | sh \
+    && chmod a+x jfrog \
+    && sudo mv jfrog /usr/local/bin/
+
 # Update this to "on" or "off" as appropriate
 ENV GO111MODULE=auto
+ENV LANG=C.UTF-8
+ENV LC_ALL=C.UTF-8
 
 # Change default location of cumulocity profiles
 ENV C8Y_SESSION_HOME=/workspaces/go-c8y-cli/.cumulocity

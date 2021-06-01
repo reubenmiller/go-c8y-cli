@@ -18,16 +18,8 @@ Create a test device
 
 Create 10 test devices all with unique names
 
-.EXAMPLE
-1..10 | Foreach-Object { New-TestDevice -AsAgent -Force }
-
-Create 10 test devices (with agent functionality) all with unique names
-
 #>
-    [cmdletbinding(
-        SupportsShouldProcess = $true,
-        ConfirmImpact = "High"
-    )]
+    [cmdletbinding()]
     Param(
         # Device name prefix which is added before the randomized string
         [Parameter(
@@ -36,48 +28,41 @@ Create 10 test devices (with agent functionality) all with unique names
             ValueFromPipelineByPropertyName = $true,
             Position = 0
         )]
-        [string] $Name = "testdevice",
-
-        # Add agent fragment to the device
-        [switch] $AsAgent,
-
-        # Cumulocity processing mode
-        [Parameter()]
-        [AllowNull()]
-        [AllowEmptyString()]
-        [ValidateSet("PERSISTENT", "QUIESCENT", "TRANSIENT", "CEP")]
-        [string]
-        $ProcessingMode,
-
-        # Template (jsonnet) file to use to create the request body.
-        [Parameter()]
-        [string]
-        $Template,
-
-        # Variables to be used when evaluating the Template. Accepts json or json shorthand, i.e. "name=peter"
-        [Parameter()]
-        [string]
-        $TemplateVars,
-
-        # Don't prompt for confirmation
-        [switch] $Force
+        [string] $Name
     )
-    Process {
-        $Data = @{
-            c8y_IsDevice = @{}
-        }
-        if ($AsAgent) {
-            $Data.com_cumulocity_model_Agent = @{}
-        }
-        $DeviceName = New-RandomString -Prefix "${Name}_"
-        $TestDevice = PSc8y\New-ManagedObject `
-            -Name $DeviceName `
-            -Data $Data `
-            -ProcessingMode:$ProcessingMode `
-            -Template:$Template `
-            -TemplateVars:$TemplateVars `
-            -Force:$Force
+    DynamicParam {
+        Get-ClientCommonParameters -Type "Create", "TemplateVars"
+    }
 
-        $TestDevice
+    Begin {
+        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "devices create"
+        $ClientOptions = Get-ClientOutputOption $PSBoundParameters
+        $TypeOptions = @{
+            Type = "application/vnd.com.nsn.cumulocity.customDevice+json"
+            ItemType = ""
+            BoundParameters = $PSBoundParameters
+        }
+        $Template = ""
+        if (-Not $Template) {
+            $Template = (Join-Path $script:Templates "test.device.jsonnet")
+        }
+        [void] $c8yargs.AddRange(@(
+            "--template",
+            $Template
+        ))
+    }
+
+    Process {
+        if ($ClientOptions.ConvertToPS) {
+            $Name `
+            | Group-ClientRequests `
+            | c8y devices create $c8yargs `
+            | ConvertFrom-ClientOutput @TypeOptions
+        }
+        else {
+            $Name `
+            | Group-ClientRequests `
+            | c8y devices create $c8yargs
+        }
     }
 }

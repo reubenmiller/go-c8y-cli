@@ -179,7 +179,7 @@
     },
     {
       "name": "createAgent",
-      "description": "Create an agent",
+      "description": "Create agent",
       "descriptionLong": "Create an agent managed object. An agent is a special device managed object with both the\nc8y_IsDevice and com_cumulocity_model_Agent fragments.\n",
       "method": "POST",
       "path": "inventory/managedObjects",
@@ -225,14 +225,18 @@
       "bodyTemplate": {
         "type": "jsonnet",
         "applyLast": true,
-        "template": "{  c8y_IsDevice: {},\n  com_cumulocity_model_Agent: {},\n}\n"
+        "template": "{c8y_IsDevice: {}, com_cumulocity_model_Agent: {}}"
       },
       "body": [
         {
           "name": "name",
           "type": "string",
-          "required": true,
-          "description": "Agent name"
+          "pipeline": true,
+          "required": false,
+          "description": "Agent name",
+          "pipelineAliases": [
+            "name"
+          ]
         },
         {
           "name": "type",
@@ -244,6 +248,9 @@
           "type": "json",
           "description": "Custom agent properties."
         }
+      ],
+      "bodyRequiredKeys": [
+        "name"
       ]
     }
   ]

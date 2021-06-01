@@ -11,10 +11,13 @@
 
         [string] $Noun,
 
-        [string] $OutputDir = "./"
+        [string] $OutputDir = "./",
+
+        [string] $DocBaseURL = "https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y"
     )
 
     $CmdletName = $Specification.alias.powershell
+    $NounLower = $Noun.ToLower() -replace "/", " "
     $Name = $Specification.name
 	$NameCamel = $Name[0].ToString().ToUpperInvariant() + $Name.Substring(1)
     $File = Join-Path -Path $OutputDir -ChildPath ("{0}.ps1" -f $CmdletName)
@@ -103,6 +106,13 @@
         $null = $CmdletDocStringBuilder.AppendLine("${DescriptionLong}`n")
     }
 
+    # Link go command
+    $null = $CmdletDocStringBuilder.AppendLine(".LINK")
+    $pageName = "${NounLower}_${Verb}" -replace " ", "_"
+    $null = $CmdletDocStringBuilder.AppendLine("$DocBaseURL/$pageName`n")
+    # $NativeCommandName = @("c8y", $NounLower, $Verb) -join " "
+    # $null = $CmdletDocStringBuilder.AppendLine("# [$NativeCommandName]($DocBaseURL/$pageName)`n")
+
     #
     # Arguments
     #
@@ -129,6 +139,7 @@
     }
 
     $CmdletParameters = New-Object System.Collections.ArrayList
+    $C8yCommonSetNames = New-Object System.Collections.ArrayList
 
     $BeginParameterBuilder = New-Object System.Text.StringBuilder
     $ProcessParameterBuilder = New-Object System.Text.StringBuilder
@@ -139,6 +150,7 @@
     $IteratorType = ""
     $IteratorVariable = ""
     $PipelineTemplateFormat = ""
+    $NoEnumerate = $false
 
     # Sort argument sources by position (if specified)
     [array] $ArgumentSources = $ArgumentSources | ForEach-Object {
@@ -150,9 +162,10 @@
     }
 
     # (stable) sort argument sources by position to control the expected order on cli
-    [array] $ArgumentSources = $ArgumentSources |
-        Sort-Object -Property position -Stable |
-        Where-Object { -Not $_.skip }
+    [array] $ArgumentSources = $ArgumentSources `
+    | Sort-Object -Property position -Stable `
+    | Where-Object { -Not $_.skip } `
+    | Where-Object { $_.name -ne "data" }
 
     foreach ($iArg in $ArgumentSources) {
         $ReadFromPipeline = $iArg.pipeline -or $iArg.name -eq "id" -or $iArg.alias -eq "id"
@@ -168,8 +181,12 @@
         $item = New-C8yPowershellArguments @ArgParams
 
         if ($ReadFromPipeline) {
+            Write-Host "$NameCamel : $($item.Name), $($iArg.type)=>$($item.type)" -ForegroundColor Magenta
+            if ($item.type -match "^(string|long)$") {
+                $item.type = "object[]"
+            }
             $IteratorVariable = "`${0}" -f $item.Name
-            $IteratorType = $iArg.type
+            $IteratorType = $item.type
         }
 
         # Set parameters
@@ -179,9 +196,9 @@
                 $null = $ProcessParameterBuilder.AppendLine("                `$Parameters[`"$($iArg.Name)`"] = if (`$item.id) { `$item.id } else { `$item }")
                 $null = $ProcessParameterBuilder.AppendLine("            }")
             } else {
-                $PipelineTemplateFormat = "loop_without_pipeline"
-                $ExpanderFunction = "PSc8y\Expand-Id `$$($item.Name)"
-                $null = $ProcessParameterBuilder.AppendLine("        `$Parameters[`"$($iArg.Name)`"] = $ExpanderFunction")
+                # $PipelineTemplateFormat = "loop_without_pipeline"
+                # $ExpanderFunction = "PSc8y\Expand-Id `$$($item.Name)"
+                # $null = $ProcessParameterBuilder.AppendLine("        `$Parameters[`"$($iArg.Name)`"] = $ExpanderFunction")
             }
 
         } else {
@@ -189,22 +206,32 @@
             $ItemValue = switch ($iArg.Type) {
                 "switch" {
                     $true
+                    break
+                }
+
+                "[]stringcsv" {
+                    "`${0} -join ','" -f $item.Name
+                    break
                 }
 
                 "hashtable" {
                     "ConvertTo-JsonArgument `${0}" -f $item.Name
+                    break
                 }
 
                 "json" {
                     "ConvertTo-JsonArgument `${0}" -f $item.Name
+                    break
                 }
 
                 "json_custom" {
                     "ConvertTo-JsonArgument `${0}" -f $item.Name
+                    break
                 }
 
-                "[]usergroup" {
+                { $_ -match "agent|device|devicegroup|usergroup|role|user" } {
                     "PSc8y\Expand-Id `${0}" -f $item.Name
+                    break
                 }
 
                 default {
@@ -237,174 +264,29 @@
     }
 
     #
-    # Processing Mode
+    # Add common parameters related to Method
     #
-    if ($Specification.method -match "DELETE|PUT|POST") {
-        $ProcessingModeParam = New-Object System.Text.StringBuilder
-        $null = $ProcessingModeParam.AppendLine('        # Cumulocity processing mode')
-        $null = $ProcessingModeParam.AppendLine('        [Parameter()]')
-        $null = $ProcessingModeParam.AppendLine('        [AllowNull()]')
-        $null = $ProcessingModeParam.AppendLine('        [AllowEmptyString()]')
-        $null = $ProcessingModeParam.AppendLine('        [ValidateSet("PERSISTENT", "QUIESCENT", "TRANSIENT", "CEP", "")]')
-        $null = $ProcessingModeParam.AppendLine('        [string]')
-        $null = $ProcessingModeParam.Append('        $ProcessingMode')
-        $null = $CmdletParameters.Add($ProcessingModeParam)
-
-        $null = $BeginParameterBuilder.AppendLine('        if ($PSBoundParameters.ContainsKey("ProcessingMode")) {')
-        $null = $BeginParameterBuilder.AppendLine('            $Parameters["processingMode"] = $ProcessingMode')
-        $null = $BeginParameterBuilder.AppendLine('        }')
+    switch ($Specification.method) {
+        "GET" { $null = $C8yCommonSetNames.Add("Get") }
+        "POST" {
+            $null = $C8yCommonSetNames.Add("Create")
+            $null = $C8yCommonSetNames.Add("Template")
+        }
+        "PUT" {
+            $null = $C8yCommonSetNames.Add("Update")
+            $null = $C8yCommonSetNames.Add("Template")
+        }
+        "DELETE" { $null = $C8yCommonSetNames.Add("Delete") }
     }
 
     #
     # Add common parameters
     #
     if ($ResultType -match "collection") {
-        $PageSizeParam = New-Object System.Text.StringBuilder
-        $null = $PageSizeParam.AppendLine('        # Maximum number of results')
-        $null = $PageSizeParam.AppendLine('        [Parameter()]')
-        $null = $PageSizeParam.AppendLine('        [AllowNull()]')
-        $null = $PageSizeParam.AppendLine('        [AllowEmptyString()]')
-        $null = $PageSizeParam.AppendLine('        [ValidateRange(1,2000)]')
-        $null = $PageSizeParam.AppendLine('        [int]')
-        $null = $PageSizeParam.Append('        $PageSize')
-        $null = $CmdletParameters.Add($PageSizeParam)
+        $null = $C8yCommonSetNames.Add("Collection")
 
-        $null = $BeginParameterBuilder.AppendLine("        if (`$PSBoundParameters.ContainsKey(`"PageSize`")) {")
-        $null = $BeginParameterBuilder.AppendLine("            `$Parameters[`"pageSize`"] = `$PageSize")
-        $null = $BeginParameterBuilder.AppendLine("        }")
-
-        # If included, then the original data set will be returned
-        $WithTotalPagesParam = New-Object System.Text.StringBuilder
-        $null = $WithTotalPagesParam.AppendLine('        # Include total pages statistic')
-        $null = $WithTotalPagesParam.AppendLine('        [Parameter()]')
-        $null = $WithTotalPagesParam.AppendLine('        [switch]')
-        $null = $WithTotalPagesParam.Append('        $WithTotalPages')
-        $null = $CmdletParameters.Add($WithTotalPagesParam)
-
-        # CurrentPage
-        $CurrentPageParam = New-Object System.Text.StringBuilder
-        $null = $CurrentPageParam.AppendLine('        # Get a specific page result')
-        $null = $CurrentPageParam.AppendLine('        [Parameter()]')
-        $null = $CurrentPageParam.AppendLine('        [int]')
-        $null = $CurrentPageParam.Append('        $CurrentPage')
-        $null = $CmdletParameters.Add($CurrentPageParam)
-
-        # TotalPages: maximum number of pages to retreive when retrieving all pages
-        $TotalPagesParam = New-Object System.Text.StringBuilder
-        $null = $TotalPagesParam.AppendLine('        # Maximum number of pages to retrieve when using -IncludeAll')
-        $null = $TotalPagesParam.AppendLine('        [Parameter()]')
-        $null = $TotalPagesParam.AppendLine('        [int]')
-        $null = $TotalPagesParam.Append('        $TotalPages')
-        $null = $CmdletParameters.Add($TotalPagesParam)
-
-        $null = $BeginParameterBuilder.AppendLine("        if (`$PSBoundParameters.ContainsKey(`"WithTotalPages`") -and `$WithTotalPages) {")
-        $null = $BeginParameterBuilder.AppendLine("            `$Parameters[`"withTotalPages`"] = `$WithTotalPages")
-        $null = $BeginParameterBuilder.AppendLine("        }")
-
-        #
-        # Include option to expand pagination results
-        # TODO: implement pagination results expansion in go
-        $IncludeAllParam = New-Object System.Text.StringBuilder
-        $null = $IncludeAllParam.AppendLine('        # Include all results')
-        $null = $IncludeAllParam.AppendLine('        [Parameter()]')
-        $null = $IncludeAllParam.AppendLine('        [switch]')
-        $null = $IncludeAllParam.Append('        $IncludeAll')
-        $null = $CmdletParameters.Add($IncludeAllParam)
-    }
-
-    # Template parameters (only for PUT)
-    if ($Specification.Method -match "PUT|POST") {
-        #
-        # Template
-        #
-        $TemplateParam = New-Object System.Text.StringBuilder
-        $null = $TemplateParam.AppendLine('        # Template (jsonnet) file to use to create the request body.')
-        $null = $TemplateParam.AppendLine('        [Parameter()]')
-        $null = $TemplateParam.AppendLine('        [string]')
-        $null = $TemplateParam.Append('        $Template')
-        $null = $CmdletParameters.Add($TemplateParam)
-
-        $null = $BeginParameterBuilder.AppendLine("        if (`$PSBoundParameters.ContainsKey(`"Template`") -and `$Template) {")
-        $null = $BeginParameterBuilder.AppendLine("            `$Parameters[`"template`"] = `$Template")
-        $null = $BeginParameterBuilder.AppendLine("        }")
-
-        #
-        # Template Variables
-        #
-        $TemplateVarsParam = New-Object System.Text.StringBuilder
-        $null = $TemplateVarsParam.AppendLine('        # Variables to be used when evaluating the Template. Accepts a file path, json or json shorthand, i.e. "name=peter"')
-        $null = $TemplateVarsParam.AppendLine('        [Parameter()]')
-        $null = $TemplateVarsParam.AppendLine('        [string]')
-        $null = $TemplateVarsParam.Append('        $TemplateVars')
-        $null = $CmdletParameters.Add($TemplateVarsParam)
-
-        $null = $BeginParameterBuilder.AppendLine("        if (`$PSBoundParameters.ContainsKey(`"TemplateVars`") -and `$TemplateVars) {")
-        $null = $BeginParameterBuilder.AppendLine("            `$Parameters[`"templateVars`"] = `$TemplateVars")
-        $null = $BeginParameterBuilder.AppendLine("        }")
-    }
-
-    $RawParam = New-Object System.Text.StringBuilder
-    $null = $RawParam.AppendLine('        # Show the full (raw) response from Cumulocity including pagination information')
-    $null = $RawParam.AppendLine('        [Parameter()]')
-    $null = $RawParam.AppendLine('        [switch]')
-    $null = $RawParam.Append('        $Raw')
-    $null = $CmdletParameters.Add($RawParam)
-
-    $OutputFileParam = New-Object System.Text.StringBuilder
-    $null = $OutputFileParam.AppendLine('        # Write the response to file')
-    $null = $OutputFileParam.AppendLine('        [Parameter()]')
-    $null = $OutputFileParam.AppendLine('        [string]')
-    $null = $OutputFileParam.Append('        $OutputFile')
-    $null = $CmdletParameters.Add($OutputFileParam)
-
-    $null = $BeginParameterBuilder.AppendLine("        if (`$PSBoundParameters.ContainsKey(`"OutputFile`")) {")
-    $null = $BeginParameterBuilder.AppendLine("            `$Parameters[`"outputFile`"] = `$OutputFile")
-    $null = $BeginParameterBuilder.AppendLine("        }")
-
-    # No Proxy
-    $NoProxyParam = New-Object System.Text.StringBuilder
-    $null = $NoProxyParam.AppendLine('        # Ignore any proxy settings when running the cmdlet')
-    $null = $NoProxyParam.AppendLine('        [Parameter()]')
-    $null = $NoProxyParam.AppendLine('        [switch]')
-    $null = $NoProxyParam.Append('        $NoProxy')
-    $null = $CmdletParameters.Add($NoProxyParam)
-
-    $null = $BeginParameterBuilder.AppendLine("        if (`$PSBoundParameters.ContainsKey(`"NoProxy`")) {")
-    $null = $BeginParameterBuilder.AppendLine("            `$Parameters[`"noProxy`"] = `$NoProxy")
-    $null = $BeginParameterBuilder.AppendLine("        }")
-
-
-    $SessionParam = New-Object System.Text.StringBuilder
-    $null = $SessionParam.AppendLine('        # Specifiy alternative Cumulocity session to use when running the cmdlet')
-    $null = $SessionParam.AppendLine('        [Parameter()]')
-    $null = $SessionParam.AppendLine('        [string]')
-    $null = $SessionParam.Append('        $Session')
-    $null = $CmdletParameters.Add($SessionParam)
-
-    $null = $BeginParameterBuilder.AppendLine("        if (`$PSBoundParameters.ContainsKey(`"Session`")) {")
-    $null = $BeginParameterBuilder.AppendLine("            `$Parameters[`"session`"] = `$Session")
-    $null = $BeginParameterBuilder.AppendLine("        }")
-
-    # Timeout (in seconds)
-    $TimeoutSecParam = New-Object System.Text.StringBuilder
-    $null = $TimeoutSecParam.AppendLine('        # TimeoutSec timeout in seconds before a request will be aborted')
-    $null = $TimeoutSecParam.AppendLine('        [Parameter()]')
-    $null = $TimeoutSecParam.AppendLine('        [double]')
-    $null = $TimeoutSecParam.Append('        $TimeoutSec')
-    $null = $CmdletParameters.Add($TimeoutSecParam)
-
-    $null = $BeginParameterBuilder.AppendLine("        if (`$PSBoundParameters.ContainsKey(`"TimeoutSec`")) {")
-    $null = $BeginParameterBuilder.AppendLine("            `$Parameters[`"timeout`"] = `$TimeoutSec * 1000")
-    $null = $BeginParameterBuilder.AppendLine("        }")
-
-    # Force parameter
-    if ($Specification.method -match "(POST|PUT|DELETE)") {
-        $ForceParam = New-Object System.Text.StringBuilder
-        $null = $ForceParam.AppendLine("        # Don't prompt for confirmation")
-        $null = $ForceParam.AppendLine('        [Parameter()]')
-        $null = $ForceParam.AppendLine('        [switch]')
-        $null = $ForceParam.Append('        $Force')
-        $null = $CmdletParameters.Add($ForceParam)
+        # note: don't enumerate collection output 
+        $NoEnumerate = $false
     }
 
     # Examples
@@ -419,13 +301,6 @@
     }
 
     #
-    #
-    #
-
-    $CmdletRestMethod = $Specification.method
-    $CmdletRestPath = $Specification.path
-
-    #
     # Body
     #
     $RESTBodyBuilder = New-Object System.Text.StringBuilder
@@ -433,7 +308,6 @@
         $null = $RESTBodyBuilder.AppendLine('$body = @{}')
 
         foreach ($iArg in $Specification.body) {
-            $argname = $iArg.name
             $prop = $iArg.property
             $type = $iArg.type
 
@@ -511,32 +385,60 @@
     #
     # Template
     #
+    # SupportsShouldProcess = `$true,
+    # ConfirmImpact = '$CmdletConfirmImpact',
     $Template = @"
 # Code generated from specification version 1.0.0: DO NOT EDIT
 Function $CmdletName {
 <#
 $($CmdletDocStringBuilder.ToString())
 #>
-    [cmdletbinding(SupportsShouldProcess = `$true,
-                   PositionalBinding=`$true,
-                   HelpUri='$DocumentationLink',
-                   ConfirmImpact = '$CmdletConfirmImpact')]
+    [cmdletbinding(PositionalBinding=`$true,
+                   HelpUri='$DocumentationLink')]
     [Alias()]
     [OutputType([object])]
     Param(
 $($CmdletParameters -join ",`n`n")
     )
+    DynamicParam {
+        $(
+            if ($null -ne $C8yCommonSetNames) {
+                "Get-ClientCommonParameters -Type `"$($C8yCommonSetNames -join '", "')`""
+            }
+        )
+    }
 
     Begin {
-$($BeginParameterBuilder -join "`n")
+$(
+    #$BeginParameterBuilder -join "`n"
+)
         if (`$env:C8Y_DISABLE_INHERITANCE -ne `$true) {
             # Inherit preference variables
             Use-CallerPreference -Cmdlet `$PSCmdlet -SessionState `$ExecutionContext.SessionState
         }
+
+        `$c8yargs = New-ClientArgument -Parameters `$PSBoundParameters -Command "$NounLower $Verb"
+        `$ClientOptions = Get-ClientOutputOption `$PSBoundParameters
+        `$TypeOptions = @{
+            Type = "$ResultType"
+            ItemType = "$ResultItemType"
+            BoundParameters = `$PSBoundParameters
+        }
     }
 
     Process {
-$(New-Body2 -Noun $Noun -PipelineTemplateFormat $PipelineTemplateFormat -ConfirmImpact $CmdletConfirmImpact -IteratorVariable $IteratorVariable -SetParameters $ProcessParameterBuilder -Verb $Verb -IteratorType $IteratorType -ResultType $ResultType -ResultItemType $ResultItemType -ResultSelectProperty $ResultSelectProperty)
+$(New-Body2 `
+    -Noun $Noun `
+    -PipelineTemplateFormat $PipelineTemplateFormat `
+    -ConfirmImpact $CmdletConfirmImpact `
+    -IteratorVariable $IteratorVariable `
+    -SetParameters $ProcessParameterBuilder `
+    -Verb $Verb `
+    -IteratorType $IteratorType `
+    -ResultType $ResultType `
+    -ResultItemType $ResultItemType `
+    -ResultSelectProperty $ResultSelectProperty `
+    -NoEnumerate:$NoEnumerate)
     }
 
     End {}
@@ -559,79 +461,85 @@ Function New-Body2 {
         [string] $IteratorType,
         [string] $IteratorVariable,
         [string] $PipelineTemplateType,
-        [string] $ConfirmImpact
+        [string] $ConfirmImpact,
+        [switch] $NoEnumerate
     )
-
-    $Target = "(PSc8y\Get-C8ySessionProperty -Name `"tenant`")"
-    $Message = "(Format-ConfirmationMessage -Name `$PSCmdlet.MyInvocation.InvocationName -InputObject `$item)"
+    $NounLower = $Noun.ToLower() -replace "/", " "
 
     $ExpandFunction = Get-IteratorFunction -Type $IteratorType -Variable $IteratorVariable
 
     $ConfirmationStatement = ""
-    if ($ConfirmImpact -ne "None") {
+    $EnablePowershellConfirmation = $false
+    if ($EnablePowershellConfirmation -and $ConfirmImpact -ne "None") {
         $ConfirmationStatement = @"
-            if (!`$Force -and
-                !`$WhatIfPreference -and
-                !`$PSCmdlet.ShouldProcess(
-                    $Target,
-                    $Message
-                )) {
-                continue
+        `$Force = if (`$PSBoundParameters.ContainsKey("Force")) { `$PSBoundParameters["Force"] } else { `$False }
+        if (!`$Force -and !`$WhatIfPreference) {
+            `$items = $ExpandFunction
+
+            `$shouldContinue = `$PSCmdlet.ShouldProcess(
+                (PSc8y\Get-C8ySessionProperty -Name "tenant"),
+                (Format-ConfirmationMessage -Name `$PSCmdlet.MyInvocation.InvocationName -InputObject `$items)
+            )
+            if (!`$shouldContinue) {
+                return
             }
+        }
 
 "@
     }
 
-    $AdditionalArgs = ""
-    if ($ResultType -match "Collection") {
-        $AdditionalArgs = @"
- ``
-                -CurrentPage:`$CurrentPage ``
-                -TotalPages:`$TotalPages ``
-                -IncludeAll:`$IncludeAll
-"@.TrimEnd()
+    if ($NoEnumerate) {
+        $prefix = ",("
+        $suffix = ")"
     }
 
     $Template1 = @"
-        foreach (`$item in $ExpandFunction) {
-$SetParameters
 $ConfirmationStatement
-            Invoke-ClientCommand ``
-                -Noun "$Noun" ``
-                -Verb "$Verb" ``
-                -Parameters `$Parameters ``
-                -Type "$ResultType" ``
-                -ItemType "$ResultItemType" ``
-                -ResultProperty "$ResultSelectProperty" ``
-                -Raw:`$Raw${AdditionalArgs}
+$(
+            if ($IteratorVariable) {
+                @"
+        if (`$ClientOptions.ConvertToPS) {
+            ${prefix}$IteratorVariable ``
+            | Group-ClientRequests ``
+            | c8y $NounLower $Verb `$c8yargs ``
+            | ConvertFrom-ClientOutput @TypeOptions${suffix}
         }
+        else {
+            $IteratorVariable ``
+            | Group-ClientRequests ``
+            | c8y $NounLower $Verb `$c8yargs
+        }
+        
+"@
+            } else {
+            @"
+        if (`$ClientOptions.ConvertToPS) {
+            ${prefix}c8y $NounLower $Verb `$c8yargs ``
+            | ConvertFrom-ClientOutput @TypeOptions${suffix}
+        }
+        else {
+            c8y $NounLower $Verb `$c8yargs
+        }
+"@
+            }
+        )
 "@
         $Template2 = @"
+$ConfirmationStatement
 $SetParameters
-        if (!`$Force -and
-            !`$WhatIfPreference -and
-            !`$PSCmdlet.ShouldProcess(
-                $Target,
-                $Message
-            )) {
-            continue
+        if (`$ClientOptions.ConvertToPS) {
+            ${prefix}c8y $NounLower $Verb `$c8yargs `
+            | ConvertFrom-ClientOutput @TypeOptions${suffix}
         }
-
-        Invoke-ClientCommand ``
-            -Noun "$Noun" ``
-            -Verb "$Verb" ``
-            -Parameters `$Parameters ``
-            -Type "$ResultType" ``
-            -ItemType "$ResultItemType" ``
-            -ResultProperty "$ResultSelectProperty" ``
-            -Raw:`$Raw ``
-            -CurrentPage:`$CurrentPage ``
-            -TotalPages:`$TotalPages ``
-            -IncludeAll:`$IncludeAll
+        else {
+            c8y $NounLower $Verb `$c8yargs
+        }
 "@
+
+
         # Return the appropriate process block
         switch ($PipelineTemplateFormat) {
-            "loop_without_pipeline" { $Template2 }
+            "loop_without_pipeline" { $Template2; break }
             default {
                 $Template1
             }
@@ -647,6 +555,7 @@ Function Get-IteratorFunction {
 
     $ExpandFunction = switch ($Type) {
         "[]device" { "(PSc8y\Expand-Device $Variable)" }
+        "[]id" { "(PSc8y\Expand-Id $Variable)" }
         "[]role" { "(PSc8y\Expand-Id $Variable)" }
         "[]roleself" { "(PSc8y\Expand-Id $Variable)" }
         "[]tenant" { "(PSc8y\Expand-Tenant $Variable)" }

@@ -4,15 +4,13 @@ Function Invoke-ClientLogin {
         # Two Factor Authentication code
         [string] $TFACode,
 
-        # Clear existing cookies (if present)
+        # Clear existing token (if present)
         [switch] $Clear
     )
     Process {
-        $c8yBinary = Get-ClientBinary
-
         $cliArgs = New-Object System.Collections.ArrayList
 
-        $null = $cliArgs.AddRange(@("sessions", "login"))
+        $null = $cliArgs.AddRange(@("--shell", "powershell"))
 
         if ($TFACode) {
             $null = $cliArgs.AddRange(@("--tfaCode", $TFACode))
@@ -26,12 +24,12 @@ Function Invoke-ClientLogin {
             $cliArgs.Add("--verbose")
         }
 
-        $result = & $c8yBinary $cliArgs
+        $result = c8y sessions login $cliArgs
 
         if ($LASTEXITCODE -ne 0) {
             return
         }
 
-        $result
+        $result | Out-String | Invoke-Expression
     }
 }

@@ -8,7 +8,7 @@
   "endpoints": [
     {
       "name": "getApplicationCollection",
-      "description": "Get a collection of applications",
+      "description": "Get application collection",
       "descriptionLong": "Get a collection of applications by a given filter",
       "method": "GET",
       "path": "/application/applications",
@@ -36,6 +36,7 @@
       "queryParameters": [
         {
           "name": "type",
+          "pipeline": true,
           "type": "string",
           "validationSet": [
             "APAMA_CEP_RULE",
@@ -49,7 +50,7 @@
     },
     {
       "name": "newApplication",
-      "description": "Create a new application",
+      "description": "Create application",
       "descriptionLong": "Create a new application using explicit settings",
       "method": "POST",
       "path": "/application/applications",
@@ -87,13 +88,17 @@
         {
           "name": "name",
           "type": "string",
-          "required": true,
-          "description": "Name of application"
+          "required": false,
+          "pipeline": true,
+          "description": "Name of application",
+          "pipelineAliases": [
+            "name"
+          ]
         },
         {
           "name": "key",
           "type": "string",
-          "required": true,
+          "required": false,
           "description": "Shared secret of application"
         },
         {
@@ -104,7 +109,7 @@
             "HOSTED",
             "MICROSERVICE"
           ],
-          "required": true,
+          "required": false,
           "description": "Type of application. Possible values are EXTERNAL, HOSTED, MICROSERVICE"
         },
         {
@@ -147,12 +152,17 @@
           "required": false,
           "description": "URL to the external application. Required when application type is EXTERNAL"
         }
+      ],
+      "bodyRequiredKeys": [
+        "name",
+        "key",
+        "type"
       ]
     },
     {
       "name": "copyApplication",
       "description": "Copy application",
-      "descriptionLong": "A POST request to the 'clone' resource creates a new application based on an already existing one.\nThe properties are copied to the newly created application. For name, key and context path a 'clone' prefix is added in order to be unique.\nIf the target application is hosted and has an active version, the new application will have the active version with the same content.\nThe response contains a representation of the newly created application.\nRequired role ROLE_APPLICATION_MANAGMENT_ADMIN\n",
+      "descriptionLong": "A POST request to the 'clone' resource creates a new application based on an already existing one.\nThe properties are copied to the newly created application. For name, key and context path a 'clone' prefix is added in order to be unique.\nIf the target application is hosted and has an active version, the new application will have the active version with the same content.\nThe response contains a representation of the newly created application.\nRequired role ROLE_APPLICATION_MANAGEMENT_ADMIN\n",
       "method": "POST",
       "path": "/application/applications/{id}/clone",
       "accept": "application/vnd.com.nsn.cumulocity.application+json",
@@ -193,8 +203,8 @@
     },
     {
       "name": "getApplication",
-      "description": "Get an application",
-      "descriptionLong": "Get an application by its id or name",
+      "description": "Get application",
+      "descriptionLong": "Get an existing application",
       "method": "GET",
       "path": "/application/applications/{id}",
       "accept": "application/vnd.com.nsn.cumulocity.application+json",
@@ -292,8 +302,8 @@
     },
     {
       "name": "updateApplication",
-      "description": "Update application meta information",
-      "descriptionLong": "Update an application by its id",
+      "description": "Update application details",
+      "descriptionLong": "Update details of an existing application",
       "method": "PUT",
       "path": "/application/applications/{id}",
       "accept": "application/vnd.com.nsn.cumulocity.application+json",
@@ -500,7 +510,7 @@
     {
       "name": "deleteApplicationBinary",
       "skip": false,
-      "description": "Remove application binary",
+      "description": "Delete application binary",
       "descriptionLong": "Remove an application binaries related to the given application\nThe active version can not be deleted and the server will throw an error if you try.\n",
       "method": "DELETE",
       "path": "/application/applications/{application}/binaries/{binaryId}",

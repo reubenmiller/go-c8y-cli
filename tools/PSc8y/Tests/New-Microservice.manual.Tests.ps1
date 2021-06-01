@@ -16,7 +16,7 @@ Describe -Name "New-Microservice" {
             $CustomZip = Copy-Item $MicroserviceZip -Destination "${Name}.zip" -PassThru
 
             # Remove microservice (if exists)
-            Get-Microservice -Id $Name | Remove-Microservice
+            Get-Microservice -Id $Name -SilentStatusCodes 404 | Remove-Microservice
 
             $App = New-Microservice -File $CustomZip -Key $Name
 
@@ -94,6 +94,8 @@ Describe -Name "New-Microservice" {
     }
 }
 "@
+            $currentTenant = c8y currenttenant get --select name --output csv
+            $currentTenant | Should -Not -BeNullOrEmpty
 
             $App = New-Microservice -Name $AppName -File $ManifestFile -SkipUpload
             $AppList.Add($App.id)
@@ -104,7 +106,7 @@ Describe -Name "New-Microservice" {
 
             # Check credentials
             $BootstrapUser = Get-MicroserviceBootstrapUser -Id $App.id
-            $BootstrapUser.tenant | Should -BeExactly $env:C8Y_TENANT
+            $BootstrapUser.tenant | Should -BeExactly $currentTenant
             $BootstrapUser.name | Should -BeLike "service*"
             $BootstrapUser.password | Should -Not -BeNullOrEmpty
 
@@ -122,14 +124,13 @@ Describe -Name "New-Microservice" {
 Invalid json example
 "@
 
-            $App = New-Microservice -Name $AppName -File $ManifestFile -SkipUpload -ErrorVariable ErrorResponse
+            $ErrorResponse = $( $App = New-Microservice -Name $AppName -File $ManifestFile -SkipUpload ) 2>&1
             if ($App.id) {
                 $AppList.Add($App.id)
             }
             $App | Should -BeNullOrEmpty
 
             $LASTEXITCODE | Should -Not -Be 0
-            $ErrorResponse.Count | Should -BeGreaterOrEqual 10 -Because "internally verbose messages will also be logged to the ERROR output"
             $ErrorResponse | Select-Object -Last 1 | Should -BeLike "*invalid manifest*"
         }
 

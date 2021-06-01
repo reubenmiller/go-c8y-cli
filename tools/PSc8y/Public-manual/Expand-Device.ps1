@@ -64,10 +64,7 @@ Get all the device object (with app in their name). Note the Expand cmdlet won't
 Expand the devices and always fetch device managed object if an object is not provided via the pipeline
 
 #>
-    [cmdletbinding(
-        # SupportsShouldProcess = $true,
-        # ConfirmImpact = "None"
-    )]
+    [cmdletbinding()]
     Param(
         [Parameter(
             Mandatory=$true,
@@ -128,7 +125,7 @@ Expand the devices and always fetch device managed object if an object is not pr
                         }
                     } else {
                         if ($FetchFullDevice) {
-                            Get-ManagedObject -Id $iDevice -WhatIf:$false
+                            Get-ManagedObject -Id $iDevice -Dry:$false -AsPSObject
                         } else {
                             [PSCustomObject]@{
                                 id = $iDevice
@@ -138,7 +135,7 @@ Expand the devices and always fetch device managed object if an object is not pr
                         }
                     }
                 } else {
-                    Get-DeviceCollection -Name $iDevice -WhatIf:$false
+                    Get-DeviceCollection -Name $iDevice -Dry:$false -AsPSObject
                 }
             }
         }

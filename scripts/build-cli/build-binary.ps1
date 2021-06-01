@@ -42,7 +42,8 @@ if (!$Version) {
     Write-Warning "No tag found, so using default version number: $Version"
 }
 $Branch = & git rev-parse --abbrev-ref HEAD
-$LDFlags = "-ldflags=`"-s -w -X github.com/reubenmiller/go-c8y-cli/pkg/cmd.buildVersion=$Version -X github.com/reubenmiller/go-c8y-cli/pkg/cmd.buildBranch=$Branch`""
+$VersionNoPrefix = $Version -replace "^v", ""
+$LDFlags = "-ldflags=`"-s -w -X github.com/reubenmiller/go-c8y-cli/pkg/cmd.buildVersion=$VersionNoPrefix -X github.com/reubenmiller/go-c8y-cli/pkg/cmd.buildBranch=$Branch`""
 
 $name = "c8y"
 

@@ -3,25 +3,27 @@
 Describe -Name "Get-MeasurementCollection" {
     BeforeEach {
         $Device = PSc8y\New-TestDevice;
-        $Measurement = New-TestMeasurement `
+        $Measurement = New-Measurement `
             -Device $Device.id `
-            -ValueFragmentType "c8y_cargo" `
-            -ValueFragmentSeries "sensor1" `
-            -Value 1.234 `
-            -Unit "kg";
-
+            -Type "ci_Type01" `
+            -Data @{
+                c8y_cargo = @{
+                    sensor1 = @{
+                        value = 1.234
+                        unit = "kg"
+                    }
+                }
+            }
     }
 
     It "Get a list of measurements in csv format" {
-        $Response = PSc8y\Get-MeasurementCollection -Device $Device.id -Csv
-        $Response | Should -Not -BeNullOrEmpty
-        $Response | Should -BeOfType string
+        $Response = PSc8y\Get-MeasurementCollection -Device $Device.id -CsvFormat
         $Rows = $Response | ConvertFrom-Csv -Delimiter ","
         $Rows | Should -HaveCount 1
     }
 
     It "Get a list of measurements in Excel format" {
-        $Response = PSc8y\Get-MeasurementCollection -Device $Device.id -Excel
+        $Response = PSc8y\Get-MeasurementCollection -Device $Device.id -ExcelFormat
         $Response | Should -Not -BeNullOrEmpty
 
         # TODO: How to test if it is a valid excel data

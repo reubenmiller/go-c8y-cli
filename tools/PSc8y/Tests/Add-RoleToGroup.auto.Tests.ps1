@@ -2,7 +2,7 @@
 
 Describe -Name "Add-RoleToGroup" {
     BeforeEach {
-        $Group = New-TestGroup -Name "customGroup1"
+        $Group = New-TestUserGroup -Name "customGroup1"
         $NamePattern = $Group.name.Substring(0, $Group.name.length - 2)
 
     }
@@ -21,7 +21,7 @@ Describe -Name "Add-RoleToGroup" {
 
 
     AfterEach {
-        PSc8y\Remove-Group -Id $Group.id
+        PSc8y\Remove-UserGroup -Id $Group.id
 
     }
 }

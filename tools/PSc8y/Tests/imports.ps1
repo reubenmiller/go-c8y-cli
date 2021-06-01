@@ -19,17 +19,31 @@ Import-Module $modulepath -Prefix "" -Force
 . "$PSScriptRoot/../Public-manual/New-TestMicroservice.ps1"
 
 # Import helper functions
-. "$PSScriptRoot/Get-JSONFromResponse.ps1"
-. "$PSScriptRoot/New-TemporaryDirectory.ps1"
+Get-ChildItem -Path "$PSScriptRoot/Helpers" -Recurse -Filter "*.ps1" | ForEach-Object {
+	Write-Verbose ("Importing {0}" -f $_.FullName)
+	. $_.FullName
+}
+
+
+# Add custom assertions
+. "$PSScriptRoot/Assertions/ContainRequest.ps1"
+Add-AssertionOperator -Name "ContainRequest" -Test $Function:ContainRequest -SupportsArrayInput -ErrorAction SilentlyContinue
+. "$PSScriptRoot/Assertions/ContainInCollection.ps1"
+Add-AssertionOperator -Name "ContainInCollection" -Test $Function:ContainInCollection -SupportsArrayInput -ErrorAction SilentlyContinue
+. "$PSScriptRoot/Assertions/MatchObject.ps1"
+Add-AssertionOperator -Name "MatchObject" -Test $Function:MatchObject -ErrorAction SilentlyContinue
+
 
 # Get credentials from the environment
-$env:C8Y_USE_ENVIRONMENT = "on"
 $env:C8Y_SETTINGS_CI = "true"
 
 # required in non-interactive mode, otherwise powershell throws errors (regardless of confirmation preference)
-$PSDefaultParameterValues = @{
+$global:PSDefaultParameterValues = @{
 	"*:Confirm" = $false;
 	"*:Force" = $true;
+
+	# Use PSoutput by default
+	"*:AsPSObject" = $true;
 
 	# required when using PowershellCore on linux
 	# otherwise it will generate errors "You do not have sufficient access rights to perform this operation or the item is hidden, system, or read only."

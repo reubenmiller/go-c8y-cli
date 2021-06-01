@@ -9,7 +9,7 @@
     {
       "name": "getEventCollection",
       "method": "GET",
-      "description": "Get a collection of events based on filter parameters",
+      "description": "Get event collection",
       "descriptionLong": "Get a collection of events based on filter parameters",
       "examples": {
         "powershell": [
@@ -103,7 +103,7 @@
     },
     {
       "name": "deleteEventCollection",
-      "description": "Delete a collection of events",
+      "description": "Delete event collection",
       "descriptionLong": "Delete a collection of events by using a filter",
       "method": "DELETE",
       "path": "event/events",
@@ -139,6 +139,7 @@
           "name": "device",
           "type": "[]device",
           "property": "source",
+          "pipeline": true,
           "description": "Device ID"
         },
         {
@@ -170,8 +171,8 @@
     },
     {
       "name": "getEvent",
-      "description": "Get event/s",
-      "descriptionLong": "Get an event by id",
+      "description": "Get event",
+      "descriptionLong": "Get an existing event by id",
       "method": "GET",
       "path": "event/events/{id}",
       "accept": "application/vnd.com.nsn.cumulocity.event+json",
@@ -196,8 +197,9 @@
       "pathParameters": [
         {
           "name": "id",
-          "type": "string",
+          "type": "[]id",
           "required": true,
+          "pipeline": true,
           "description": "Event id"
         }
       ]
@@ -216,7 +218,7 @@
             "beforeEach": [
               "$device = New-TestDevice"
             ],
-            "command": "New-Event -Device $device.id -Type c8y_TestAlarm -Text \"Test event\"",
+            "command": "New-Event -Device $device.id -Type c8y_TestEvent -Text \"Test event\"",
             "afterEach": [
               "Remove-ManagedObject -Id $device.id"
             ]
@@ -226,7 +228,7 @@
             "beforeEach": [
               "$device = New-TestDevice"
             ],
-            "command": "Get-Device -Id $device.id | PSc8y\\New-Event -Type c8y_TestAlarm -Time \"-0s\" -Text \"Test event\"",
+            "command": "Get-Device -Id $device.id | PSc8y\\New-Event -Type c8y_TestEvent -Time \"-0s\" -Text \"Test event\"",
             "afterEach": [
               "Remove-ManagedObject -Id $device.id"
             ]
@@ -235,7 +237,11 @@
         "go": [
           {
             "description": "Create a new event for a device",
-            "command": "c8y events create --device mydevice --type c8y_TestAlarm --time \"-0s\" --text \"Test alarm\" --severity MAJOR"
+            "command": "c8y events create --device mydevice --type c8y_TestEvent --text \"Test event\""
+          },
+          {
+            "description": "Create a new event for a device (using pipeline)",
+            "command": "c8y devices get --id 12345 | c8y events create --type c8y_TestEvent --text \"Test event\""
           }
         ]
       },
@@ -247,7 +253,7 @@
         {
           "name": "device",
           "type": "[]device",
-          "required": true,
+          "required": false,
           "pipeline": true,
           "property": "source.id",
           "description": "The ManagedObject which is the source of this event."
@@ -280,7 +286,8 @@
       "bodyRequiredKeys": [
         "type",
         "text",
-        "time"
+        "time",
+        "source.id"
       ]
     },
     {
@@ -288,8 +295,8 @@
       "method": "PUT",
       "path": "event/events/{id}",
       "accept": "application/vnd.com.nsn.cumulocity.event+json",
-      "description": "Update an event",
-      "descriptionLong": "Update an event",
+      "description": "Update event",
+      "descriptionLong": "Update an existing event",
       "examples": {
         "powershell": [
           {
@@ -344,7 +351,7 @@
       "pathParameters": [
         {
           "name": "id",
-          "type": "string",
+          "type": "[]id",
           "required": true,
           "pipeline": true,
           "description": "Event id"
@@ -366,8 +373,8 @@
     },
     {
       "name": "deleteEvent",
-      "description": "Delete event/s",
-      "descriptionLong": "Delete an event by id",
+      "description": "Delete event",
+      "descriptionLong": "Delete an existing event",
       "examples": {
         "powershell": [
           {
@@ -392,7 +399,7 @@
       "pathParameters": [
         {
           "name": "id",
-          "type": "string",
+          "type": "[]id",
           "required": true,
           "pipeline": true,
           "description": "Event id"
@@ -421,7 +428,7 @@
               "New-EventBinary -Id $Event.id -File $TestFile",
               "Remove-Item $TestFile"
             ],
-            "command": "Get-EventBinary -Id $Event.id -OutputFile ./eventbinary.txt",
+            "command": "Get-EventBinary -Id $Event.id -OutputFileRaw ./eventbinary.txt",
             "afterEach": [
               "Remove-Item \"./eventbinary.txt\"",
               "Remove-ManagedObject -Id $Device.id"
@@ -431,14 +438,14 @@
         "go": [
           {
             "description": "Download a binary related to an event",
-            "command": "c8y events downloadBinary --id 12345 --outputFile ./eventbinary.txt"
+            "command": "c8y events downloadBinary --id 12345 --outputFileRaw ./eventbinary.txt"
           }
         ]
       },
       "pathParameters": [
         {
           "name": "id",
-          "type": "string",
+          "type": "[]id",
           "required": true,
           "pipeline": true,
           "description": "Event id"
@@ -447,7 +454,7 @@
     },
     {
       "name": "newEventBinary",
-      "description": "New event binary",
+      "description": "Create event binary",
       "descriptionLong": "Upload a new binary file to an event",
       "method": "POST",
       "path": "event/events/{id}/binaries",
@@ -482,7 +489,7 @@
       "pathParameters": [
         {
           "name": "id",
-          "type": "string",
+          "type": "[]id",
           "required": true,
           "pipeline": true,
           "description": "Event id"
@@ -534,7 +541,7 @@
       "pathParameters": [
         {
           "name": "id",
-          "type": "string",
+          "type": "[]id",
           "required": true,
           "pipeline": true,
           "description": "Event id"
@@ -593,7 +600,7 @@
       "pathParameters": [
         {
           "name": "id",
-          "type": "string",
+          "type": "[]id",
           "required": true,
           "pipeline": true,
           "description": "Event id"

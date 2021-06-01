@@ -2,10 +2,13 @@
 Function New-Tenant {
 <#
 .SYNOPSIS
-New tenant
+Create tenant
 
 .DESCRIPTION
-New tenant
+Create a new tenant
+
+.LINK
+https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/tenants_create
 
 .EXAMPLE
 PS> New-Tenant -Company "mycompany" -Domain "mycompany" -AdminName "admin" -Password "mys3curep9d8"
@@ -14,10 +17,8 @@ Create a new tenant (from the management tenant)
 
 
 #>
-    [cmdletbinding(SupportsShouldProcess = $true,
-                   PositionalBinding=$true,
-                   HelpUri='',
-                   ConfirmImpact = 'High')]
+    [cmdletbinding(PositionalBinding=$true,
+                   HelpUri='')]
     [Alias()]
     [OutputType([object])]
     Param(
@@ -27,8 +28,10 @@ Create a new tenant (from the management tenant)
         $Company,
 
         # Domain name to be used for the tenant. Maximum 256 characters (required)
-        [Parameter(Mandatory = $true)]
-        [string]
+        [Parameter(Mandatory = $true,
+                   ValueFromPipeline=$true,
+                   ValueFromPipelineByPropertyName=$true)]
+        [object[]]
         $Domain,
 
         # Username of the tenant administrator
@@ -54,137 +57,42 @@ Create a new tenant (from the management tenant)
         # The tenant ID. This should be left bank unless you know what you are doing. Will be auto-generated if not present.
         [Parameter()]
         [string]
-        $TenantId,
-
-        # A set of custom properties of the tenant
-        [Parameter()]
-        [object]
-        $Data,
-
-        # Cumulocity processing mode
-        [Parameter()]
-        [AllowNull()]
-        [AllowEmptyString()]
-        [ValidateSet("PERSISTENT", "QUIESCENT", "TRANSIENT", "CEP", "")]
-        [string]
-        $ProcessingMode,
-
-        # Template (jsonnet) file to use to create the request body.
-        [Parameter()]
-        [string]
-        $Template,
-
-        # Variables to be used when evaluating the Template. Accepts a file path, json or json shorthand, i.e. "name=peter"
-        [Parameter()]
-        [string]
-        $TemplateVars,
-
-        # Show the full (raw) response from Cumulocity including pagination information
-        [Parameter()]
-        [switch]
-        $Raw,
-
-        # Write the response to file
-        [Parameter()]
-        [string]
-        $OutputFile,
-
-        # Ignore any proxy settings when running the cmdlet
-        [Parameter()]
-        [switch]
-        $NoProxy,
-
-        # Specifiy alternative Cumulocity session to use when running the cmdlet
-        [Parameter()]
-        [string]
-        $Session,
-
-        # TimeoutSec timeout in seconds before a request will be aborted
-        [Parameter()]
-        [double]
-        $TimeoutSec,
-
-        # Don't prompt for confirmation
-        [Parameter()]
-        [switch]
-        $Force
+        $TenantId
     )
+    DynamicParam {
+        Get-ClientCommonParameters -Type "Create", "Template"
+    }
 
     Begin {
-        $Parameters = @{}
-        if ($PSBoundParameters.ContainsKey("Company")) {
-            $Parameters["company"] = $Company
-        }
-        if ($PSBoundParameters.ContainsKey("Domain")) {
-            $Parameters["domain"] = $Domain
-        }
-        if ($PSBoundParameters.ContainsKey("AdminName")) {
-            $Parameters["adminName"] = $AdminName
-        }
-        if ($PSBoundParameters.ContainsKey("AdminPass")) {
-            $Parameters["adminPass"] = $AdminPass
-        }
-        if ($PSBoundParameters.ContainsKey("ContactName")) {
-            $Parameters["contactName"] = $ContactName
-        }
-        if ($PSBoundParameters.ContainsKey("ContactPhone")) {
-            $Parameters["contactPhone"] = $ContactPhone
-        }
-        if ($PSBoundParameters.ContainsKey("TenantId")) {
-            $Parameters["tenantId"] = $TenantId
-        }
-        if ($PSBoundParameters.ContainsKey("Data")) {
-            $Parameters["data"] = ConvertTo-JsonArgument $Data
-        }
-        if ($PSBoundParameters.ContainsKey("ProcessingMode")) {
-            $Parameters["processingMode"] = $ProcessingMode
-        }
-        if ($PSBoundParameters.ContainsKey("Template") -and $Template) {
-            $Parameters["template"] = $Template
-        }
-        if ($PSBoundParameters.ContainsKey("TemplateVars") -and $TemplateVars) {
-            $Parameters["templateVars"] = $TemplateVars
-        }
-        if ($PSBoundParameters.ContainsKey("OutputFile")) {
-            $Parameters["outputFile"] = $OutputFile
-        }
-        if ($PSBoundParameters.ContainsKey("NoProxy")) {
-            $Parameters["noProxy"] = $NoProxy
-        }
-        if ($PSBoundParameters.ContainsKey("Session")) {
-            $Parameters["session"] = $Session
-        }
-        if ($PSBoundParameters.ContainsKey("TimeoutSec")) {
-            $Parameters["timeout"] = $TimeoutSec * 1000
-        }
 
         if ($env:C8Y_DISABLE_INHERITANCE -ne $true) {
             # Inherit preference variables
             Use-CallerPreference -Cmdlet $PSCmdlet -SessionState $ExecutionContext.SessionState
         }
+
+        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "tenants create"
+        $ClientOptions = Get-ClientOutputOption $PSBoundParameters
+        $TypeOptions = @{
+            Type = "application/vnd.com.nsn.cumulocity.tenant+json"
+            ItemType = ""
+            BoundParameters = $PSBoundParameters
+        }
     }
 
     Process {
-        foreach ($item in @("")) {
 
-            if (!$Force -and
-                !$WhatIfPreference -and
-                !$PSCmdlet.ShouldProcess(
-                    (PSc8y\Get-C8ySessionProperty -Name "tenant"),
-                    (Format-ConfirmationMessage -Name $PSCmdlet.MyInvocation.InvocationName -InputObject $item)
-                )) {
-                continue
-            }
-
-            Invoke-ClientCommand `
-                -Noun "tenants" `
-                -Verb "create" `
-                -Parameters $Parameters `
-                -Type "application/vnd.com.nsn.cumulocity.tenant+json" `
-                -ItemType "" `
-                -ResultProperty "" `
-                -Raw:$Raw
+        if ($ClientOptions.ConvertToPS) {
+            $Domain `
+            | Group-ClientRequests `
+            | c8y tenants create $c8yargs `
+            | ConvertFrom-ClientOutput @TypeOptions
         }
+        else {
+            $Domain `
+            | Group-ClientRequests `
+            | c8y tenants create $c8yargs
+        }
+        
     }
 
     End {}

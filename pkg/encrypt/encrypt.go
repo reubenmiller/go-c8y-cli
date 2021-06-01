@@ -6,6 +6,7 @@ import (
 	"crypto/cipher"
 	"crypto/rand"
 	"encoding/hex"
+	"errors"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -13,6 +14,10 @@ import (
 	"strings"
 
 	"golang.org/x/crypto/scrypt"
+)
+
+var (
+	ErrDecryptFailed = errors.New("decryption failed")
 )
 
 // Source:
@@ -213,7 +218,7 @@ func (s *SecureData) Decrypt(data []byte, passphrase string) ([]byte, error) {
 	nonce, ciphertext := data[:nonceSize], data[nonceSize:]
 	plaintext, err := gcm.Open(nil, nonce, ciphertext, nil)
 	if err != nil {
-		return nil, err
+		return nil, ErrDecryptFailed
 	}
 	return plaintext, nil
 }
@@ -227,7 +232,10 @@ func (s *SecureData) EncryptFile(filename string, data []byte, passphrase string
 	if err != nil {
 		panic("Failed to encrypt file")
 	}
-	f.Write(encryptedData)
+	_, err = f.Write(encryptedData)
+	if err != nil {
+		panic(fmt.Errorf("failed to write to file. %w", err))
+	}
 }
 
 func (s *SecureData) DecryptFile(filename string, passphrase string) ([]byte, error) {

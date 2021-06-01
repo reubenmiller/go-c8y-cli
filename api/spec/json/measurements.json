@@ -9,7 +9,7 @@
     {
       "name": "getMeasurementCollection",
       "method": "GET",
-      "description": "Get a collection of measurements based on filter parameters",
+      "description": "Get measurement collection",
       "descriptionLong": "Get a collection of measurements based on filter parameters",
       "path": "measurement/measurements",
       "accept": "application/vnd.com.nsn.cumulocity.measurementCollection+json",
@@ -29,7 +29,7 @@
             "description": "Get a list of measurements for a particular device",
             "beforeEach": [
               "$Device = PSc8y\\New-TestDevice",
-              "$Measurement = New-TestMeasurement -Device $Device.id -Type \"TempReading\""
+              "$Measurement = New-Measurement -Template \"test.measurement.jsonnet\" -Device $Device.id -Type \"TempReading\""
             ],
             "command": "Get-MeasurementCollection -Device $Device.id -Type \"TempReading\"",
             "afterEach": [
@@ -40,7 +40,7 @@
             "description": "Get measurements from a device (using pipeline)",
             "beforeEach": [
               "$Device = PSc8y\\New-TestDevice",
-              "$Measurement = New-TestMeasurement -Device $Device.id -Type \"TempReading\""
+              "$Measurement = New-Measurement -Template \"test.measurement.jsonnet\" -Device $Device.id -Type \"TempReading\""
             ],
             "command": "Get-DeviceCollection -Name $Device.name | Get-MeasurementCollection",
             "afterEach": [
@@ -57,14 +57,14 @@
       },
       "headerParameters": [
         {
-          "name": "csv",
+          "name": "csvFormat",
           "type": "boolean",
           "description": "Results will be displayed in csv format. Note: -IncludeAll, is not supported when using using this parameter",
           "property": "Accept",
           "value": "text/csv"
         },
         {
-          "name": "excel",
+          "name": "excelFormat",
           "type": "boolean",
           "description": "Results will be displayed in Excel format Note: -IncludeAll, is not supported when using using this parameter",
           "property": "Accept",
@@ -130,8 +130,8 @@
     {
       "name": "getMeasurementLatestCollection",
       "method": "GET",
-      "description": "Get the latest measurement of a specific device",
-      "descriptionLong": "Get the latest measurement of a specific device",
+      "description": "Get latest measurement collection",
+      "descriptionLong": "Get the latest measurement collection from a device",
       "path": "measurement/measurements/one",
       "accept": "application/vnd.com.nsn.cumulocity.measurementCollection+json",
       "collectionType": "application/vnd.com.nsn.cumulocity.measurement+json",
@@ -157,14 +157,14 @@
       },
       "headerParameters": [
         {
-          "name": "csv",
+          "name": "csvFormat",
           "type": "boolean",
           "description": "Results will be displayed in csv format",
           "property": "Accept",
           "value": "text/csv"
         },
         {
-          "name": "excel",
+          "name": "excelFormat",
           "type": "boolean",
           "description": "Results will be displayed in Excel format",
           "property": "Accept",
@@ -194,10 +194,11 @@
     {
       "name": "getMeasurementSeries",
       "method": "GET",
-      "description": "Get a collection of measurements based on filter parameters",
+      "description": "Get measurement series",
       "descriptionLong": "Get a collection of measurements based on filter parameters",
       "path": "measurement/measurements/series",
       "accept": "application/json",
+      "collectionProperty": "-",
       "alias": {
         "go": "getSeries",
         "powershell": "Get-MeasurementSeries"
@@ -208,7 +209,7 @@
             "description": "Get a list of measurements for a particular device",
             "beforeEach": [
               "$Device = PSc8y\\New-TestDevice",
-              "$Measurement = New-TestMeasurement -Device $Device.id -Type \"TempReading\" -ValueFragmentType \"c8y_Temperature\" -ValueFragmentSeries \"T\""
+              "$Measurement = New-Measurement -Template \"{c8y_Temperature:{T:{value:_.Int(),unit:'°C'}}}\" -Device $Device.id -Type \"TempReading\""
             ],
             "command": "Get-MeasurementSeries -Device $Device.id -Series \"c8y_Temperature.T\" -DateFrom \"1970-01-01\" -DateTo \"0s\"",
             "afterEach": [
@@ -218,7 +219,7 @@
           {
             "description": "Get measurement series c8y_Temperature.T on a device",
             "beforeEach": [
-              "$Measurement2 = New-TestMeasurement -Type \"TempReading\" -ValueFragmentType \"c8y_Temperature\" -ValueFragmentSeries \"T\""
+              "$Measurement2 = New-Measurement -Template \"{c8y_Temperature:{T:{value:_.Int(),unit:'°C'}}}\" -Device $Device.id -Type \"TempReading\""
             ],
             "command": "Get-MeasurementSeries -Device $Measurement2.source.id -Series \"c8y_Temperature.T\" -DateFrom \"1970-01-01\" -DateTo \"0s\"",
             "afterEach": [
@@ -229,7 +230,7 @@
             "description": "Get measurement series from a device (using pipeline)",
             "beforeEach": [
               "$Device = PSc8y\\New-TestDevice",
-              "$Measurement2 = New-TestMeasurement -Type \"TempReading\" -ValueFragmentType \"c8y_Temperature\" -ValueFragmentSeries \"T\""
+              "$Measurement2 = New-Measurement -Template \"{c8y_Temperature:{T:{value:_.Int(),unit:'°C'}}}\" -Device $Device.id -Type \"TempReading\""
             ],
             "command": "Get-DeviceCollection -Name $Device.name | Get-MeasurementSeries -Series \"c8y_Temperature.T\"",
             "afterEach": [
@@ -285,8 +286,8 @@
     },
     {
       "name": "getMeasurement",
-      "description": "Get measurement/s",
-      "descriptionLong": "Get measurements by their ids",
+      "description": "Get measurement",
+      "descriptionLong": "Get an existing measurement",
       "method": "GET",
       "path": "measurement/measurements/{id}",
       "accept": "application/vnd.com.nsn.cumulocity.measurement+json",
@@ -299,7 +300,7 @@
           {
             "description": "Get measurement",
             "beforeEach": [
-              "$Measurement = New-TestMeasurement"
+              "$Measurement = New-TestDevice | New-Measurement -Template \"test.measurement.jsonnet\""
             ],
             "command": "Get-Measurement -Id $Measurement.id",
             "afterEach": [
@@ -317,7 +318,7 @@
       "pathParameters": [
         {
           "name": "id",
-          "type": "string",
+          "type": "[]id",
           "required": true,
           "pipeline": true,
           "description": "Measurement id"
@@ -329,7 +330,7 @@
       "method": "POST",
       "path": "measurement/measurements",
       "accept": "application/vnd.com.nsn.cumulocity.measurement+json",
-      "description": "Create a new measurement",
+      "description": "Create measurement",
       "descriptionLong": "Create a new measurement",
       "alias": {
         "go": "create",
@@ -354,7 +355,7 @@
           "name": "device",
           "type": "[]device",
           "pipeline": true,
-          "required": true,
+          "required": false,
           "property": "source.id",
           "description": "The ManagedObject which is the source of this measurement."
         },
@@ -379,13 +380,14 @@
       ],
       "bodyRequiredKeys": [
         "type",
-        "time"
+        "time",
+        "source.id"
       ]
     },
     {
       "name": "deleteMeasurement",
-      "description": "Delete measurement/s",
-      "descriptionLong": "Delete individual measurements",
+      "description": "Delete measurement",
+      "descriptionLong": "Delete an existing measurement",
       "method": "DELETE",
       "path": "measurement/measurements/{id}",
       "accept": "",
@@ -398,7 +400,7 @@
           {
             "description": "Delete measurement",
             "beforeEach": [
-              "$Measurement = New-TestMeasurement"
+              "$Measurement = New-TestDevice | New-Measurement -Template \"test.measurement.jsonnet\""
             ],
             "command": "Remove-Measurement -id $Measurement.id",
             "afterEach": [
@@ -416,7 +418,7 @@
       "pathParameters": [
         {
           "name": "id",
-          "type": "string",
+          "type": "[]id",
           "required": true,
           "pipeline": true,
           "description": "Measurement id"
@@ -425,7 +427,7 @@
     },
     {
       "name": "deleteMeasurementCollection",
-      "description": "Delete a collection of measurements",
+      "description": "Delete measurement collection",
       "descriptionLong": "Delete measurements using a filter",
       "method": "DELETE",
       "path": "measurement/measurements",
@@ -439,7 +441,7 @@
           {
             "description": "Delete measurement collection for a device",
             "beforeEach": [
-              "$Measurement = New-TestMeasurement"
+              "$Measurement = New-TestDevice | New-Measurement -Template \"test.measurement.jsonnet\""
             ],
             "command": "Remove-MeasurementCollection -Device $Measurement.source.id",
             "afterEach": [

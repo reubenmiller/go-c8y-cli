@@ -1,0 +1,19 @@
+{
+    "version": "1",
+    "definitions": [
+        {
+            "name": "retentionRule",
+            "priority": 500,
+            "contentType": "vnd.com.nsn.cumulocity.retentionRule",
+            "columns": [
+                "id",
+                "dataType",
+                "type",
+                "fragmentType",
+                "source",
+                "maximumAge",
+                "editable"
+            ]
+        }
+    ]
+}

@@ -1,6 +1,7 @@
 {
 	"name": "go-c8y-cli",
 	"dockerFile": "Dockerfile",
+	"context": "..",
 	"runArgs": [ "--cap-add=SYS_PTRACE", "--security-opt", "seccomp=unconfined" ],
 
 	// Use 'forwardPorts' to make a list of ports inside the container available locally.
@@ -12,6 +13,7 @@
 		"terminal.integrated.shell.linux": "/bin/bash",
 		"go.gopath": "/go",
 		"go.goroot": "/usr/local/go",
+		"go.lintTool": "golangci-lint",
 		// "go.inferGopath": true,
 		"go.useLanguageServer": true,
 
@@ -22,7 +24,17 @@
 			"./tools/schema/session.schema.json": ".cumulocity/*.y*ml"
 		},
 		"powershell.pester.useLegacyCodeLens": false,
-		"extensions.ignoreRecommendations": true
+		"extensions.ignoreRecommendations": true,
+		"go.testEnvVars": {
+			"C8Y_SESSION": ""
+		},
+		"go.delveConfig": {
+			"dlvLoadConfig": {
+				"maxStringLen": 1024,
+				"maxArrayValues": 1000,
+			},
+			"apiVersion": 2,
+		},
 	},
 
 	// Add the IDs of extensions you want installed when the container is created in the array below.
@@ -39,7 +51,7 @@
 	],
 	
 	// Install powershell module dependencies for tests etc.
-	"postCreateCommand": "make install_powershell_deps",
+	"postCreateCommand": "sudo chown -R vscode /home/vscode",
 
 	// Comment out the next line to run as root
 	"remoteUser": "vscode"

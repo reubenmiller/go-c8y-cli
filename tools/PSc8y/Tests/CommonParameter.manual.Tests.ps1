@@ -7,6 +7,8 @@ Describe -Name "Common parameters" {
             "Get-ClientBinary",
             "Get-ClientBinaryVersion",
             "Get-CurrentTenantApplicationCollection",
+            "Group-ClientRequests",
+            "ConvertFrom-ClientOutput",
             "Install-ClientBinary"
         )
 
@@ -19,24 +21,32 @@ Describe -Name "Common parameters" {
             }
 
         foreach ($icmdlet in $cmdlets) {
-            $icmdlet | Should -HaveParameter "OutputFile"
-            $icmdlet | Should -HaveParameter "NoProxy"
-            $icmdlet | Should -HaveParameter "Session"
-            $icmdlet | Should -HaveParameter "TimeoutSec"
+            $resolvedCommand = $icmdlet
+            if ($icmdlet.CommandType -eq "Alias") {
+                $resolvedCommand = $icmdlet.ResolvedCommand
+            }
+            $resolvedCommand | Should -HaveParameter "OutputFile"
+            $resolvedCommand | Should -HaveParameter "NoProxy"
+            $resolvedCommand | Should -HaveParameter "Session"
+            $resolvedCommand | Should -HaveParameter "Timeout"
         }
     }
 
-    It "All side-effect commands support WhatIf" {
+    It "All side-effect commands support Dry" {
         $ExcludeCmdlets = @(
             "Add-PowershellType",
             "Add-ClientResponseType",
             "New-RandomPassword",
             "New-RandomString",
+            "New-TemporaryDirectory",
             "New-Session",
             "Register-Alias",
             "Register-ClientArgumentCompleter",
             "Set-Session",
-            "Set-ClientConsoleSetting"
+            "Set-ClientConsoleSetting",
+
+            "New-TestFile",
+            "Set-c8yMode"
         )
 
         $cmdlets = Get-Command -Module PSc8y -Name "*" | Where-Object {
@@ -46,7 +56,7 @@ Describe -Name "Common parameters" {
         }
 
         foreach ($icmdlet in $cmdlets) {
-            $icmdlet | Should -HaveParameter "WhatIf"
+            $icmdlet | Should -HaveParameter "Dry"
             $icmdlet | Should -HaveParameter "Force"
         }
     }
@@ -57,6 +67,7 @@ Describe -Name "Common parameters" {
             "Add-ClientResponseType",
             "New-RandomPassword",
             "New-RandomString",
+            "New-TemporaryDirectory",
             "New-Session",
             "Register-Alias",
             "Register-ClientArgumentCompleter",
@@ -64,7 +75,15 @@ Describe -Name "Common parameters" {
             "Set-ClientConsoleSetting",
             "New-TestFile",
             "New-Microservice",
-            "New-ServiceUser"
+            "New-ServiceUser",
+
+            "Set-c8yMode",
+            "New-TestAgent",
+            "New-TestAlarm",
+            "New-TestDevice",
+            "New-TestUser",
+            "New-TestMeasurement",
+            "New-TestSmartGroup"
         )
 
         $cmdlets = Get-Command -Module PSc8y -Name "*" | Where-Object {
@@ -86,7 +105,8 @@ Describe -Name "Common parameters" {
             "Get-ManagedObjectCollection",
             "Remove-AlarmCollection",
             "Remove-EventCollection",
-            "Remove-OperationCollection"
+            "Remove-OperationCollection",
+            "Remove-ChildDeviceFromDevice"
         )
         $cmdlets = Get-Command -Module PSc8y -Name "*" -CommandType Function |
             Where-Object {
@@ -111,12 +131,12 @@ Describe -Name "Common parameters" {
         }
     }
 
-    It "Using -WhatIf should show output on the console" {
-        PSc8y\New-Device `
+    It "Using -Dry should show output on the console" {
+        $output = PSc8y\New-Device `
             -Name "testme" `
-            -WhatIf -InformationVariable responseInfo
+            -Dry
         $LASTEXITCODE | Should -Be 0
-        $responseInfo | Should -Not -BeNullOrEmpty
-        $responseInfo | Out-String | Should -BeLike "*/inventory/managedObject*"
+        $output | Should -Not -BeNullOrEmpty
+        $output | Out-String | Should -BeLike "*/inventory/managedObject*"
     }
 }

@@ -2,20 +2,15 @@
 
 Describe -Tag "Session" -Name "Set-Session" {
     BeforeAll {
-        . "$PSScriptRoot/New-TemporaryDirectory.ps1"
-        $sessionHomeBackup = $env:C8Y_SESSION_HOME
-        $sessionBackup = $env:C8Y_SESSION
-        $sessionBackupHost = $env:C8Y_HOST
-        $sessionBackupTenant = $env:C8Y_TENANT
-        $sessionBackupUser = $env:C8Y_USER
-        $sessionBackupPassword = $env:C8Y_PASSWORD
-        $sessionBackupUseEnv = $env:C8Y_USE_ENVIRONMENT
+        $EnvBackup = Get-Item "Env:C8Y*"
+        foreach ($item in $EnvBackup) {
+            Remove-Item ("Env:{0}" -f $item.Key)
+        }
     }
 
     BeforeEach {
         $tmpdir = New-TemporaryDirectory
         $env:C8Y_SESSION_HOME = $tmpdir
-        $env:C8Y_USE_ENVIRONMENT = ""
         $settingsFile = "$tmpdir/settings.json"
     }
 
@@ -30,8 +25,7 @@ Describe -Tag "Session" -Name "Set-Session" {
         }
         $Session | ConvertTo-Json | Out-File "$tmpdir/my-session.json"
 
-        $c8y = Get-ClientBinary
-        $resp = & $c8y devices list --verbose --dry --session "my-session" 2>&1
+        $resp = c8y devices list --verbose --dry --session "my-session" 2>&1
         $LASTEXITCODE | Should -BeExactly 0
 
         $resp -like "*https://example.com/inventory/managedObjects*" | Should -HaveCount 1
@@ -46,8 +40,7 @@ Describe -Tag "Session" -Name "Set-Session" {
         }
         $Settings | ConvertTo-Json | Out-File $settingsFile
 
-        $c8y = Get-ClientBinary
-        $resp = & $c8y version -v 2>&1
+        $resp = c8y version -v 2>&1
         $LASTEXITCODE | Should -BeExactly 0
 
         $resp -like "*settings.includeAll.pageSize: 123" | Should -HaveCount 1
@@ -68,8 +61,7 @@ Describe -Tag "Session" -Name "Set-Session" {
         }
         $Session | ConvertTo-Json | Out-File $env:C8Y_SESSION
 
-        $c8y = Get-ClientBinary
-        $resp = & $c8y version -v 2>&1
+        $resp = c8y version -v 2>&1
         $LASTEXITCODE | Should -BeExactly 0
 
         $resp -like "*settings.default.pageSize: 99" | Should -HaveCount 1
@@ -84,8 +76,7 @@ Describe -Tag "Session" -Name "Set-Session" {
         }
         $Session | ConvertTo-Json | Out-File $env:C8Y_SESSION
 
-        $c8y = Get-ClientBinary
-        $resp = & $c8y version -v 2>&1
+        $resp = c8y version -v 2>&1
         $LASTEXITCODE | Should -BeExactly 0
 
         $resp -like "*settings.default.pageSize: 24" | Should -HaveCount 1
@@ -103,8 +94,7 @@ settings:
 settings.includeAll.pagesize: 202
 "@ | Out-File $sessionFile
 
-        $c8y = Get-ClientBinary
-        $resp = & $c8y version --verbose 2>&1
+        $resp = c8y version --verbose 2>&1
         $LASTEXITCODE | Should -BeExactly 0
 
         $resp -like "*settings.default.pageSize: 110" | Should -HaveCount 1
@@ -116,13 +106,9 @@ settings.includeAll.pagesize: 202
     }
 
     AfterAll {
-        $env:C8Y_SESSION_HOME = $sessionHomeBackup
-        $env:C8Y_SESSION = $sessionBackup
-
-        $env:C8Y_HOST = $sessionBackupHost
-        $env:C8Y_TENANT = $sessionBackupTenant
-        $env:C8Y_USER = $sessionBackupUser
-        $env:C8Y_PASSWORD = $sessionBackupPassword
-        $env:C8Y_USE_ENVIRONMENT = $sessionBackupUseEnv
+        # Restore env variables
+        foreach ($item in $EnvBackup) {
+            Set-Item -Path ("env:{0}" -f $item.Key) -Value $item.Value
+        }
     }
 }

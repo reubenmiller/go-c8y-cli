@@ -6,20 +6,20 @@ New hosted (web) application
 .DESCRIPTION
 Create a new hosted web application by uploading a zip file which contains a web application
 
+.LINK
+c8y applications createHostedApplication
+
 .EXAMPLE
 New-HostedApplication -Name $App.id -File "myapp.zip"
 
 Upload application zip file containing the web application
 
 #>
-    [cmdletbinding(SupportsShouldProcess = $true,
-                   PositionalBinding=$true,
-                   HelpUri='',
-                   ConfirmImpact = 'High')]
+    [cmdletbinding(PositionalBinding=$true, HelpUri='')]
     [Alias()]
     [OutputType([object])]
     Param(
-        # File or Folder of the web application. It should contains a index.html file in the root folder/ or zip file (required)
+        # File or Folder of the web application. It should contains a index.html file in the root folder/ or zip file
         [Parameter(Mandatory = $false,
             ValueFromPipeline=$true,
             ValueFromPipelineByPropertyName=$true)]
@@ -59,103 +59,51 @@ Upload application zip file containing the web application
         [switch]
         $SkipUpload,
 
-        # Don't subscribe to the application after it has been created and uploaded
+        # Don't activate to the application after it has been created and uploaded
         [Parameter()]
         [switch]
-        $SkipActivation,
-
-        # Template (jsonnet) file to use to create the request body.
-        [Parameter()]
-        [string]
-        $Template,
-
-        # Variables to be used when evaluating the Template. Accepts json or json shorthand, i.e. "name=peter"
-        [Parameter()]
-        [string]
-        $TemplateVars,
-
-        # Include raw response including pagination information
-        [Parameter()]
-        [switch]
-        $Raw,
-
-        # Outputfile
-        [Parameter()]
-        [string]
-        $OutputFile,
-
-        # NoProxy
-        [Parameter()]
-        [switch]
-        $NoProxy,
-
-        # Session path
-        [Parameter()]
-        [string]
-        $Session,
-
-        # TimeoutSec timeout in seconds before a request will be aborted
-        [Parameter()]
-        [double]
-        $TimeoutSec,
-
-        # Don't prompt for confirmation
-        [Parameter()]
-        [switch]
-        $Force
+        $SkipActivation
     )
 
+    DynamicParam {
+        Get-ClientCommonParameters -Type "Create", "Template"
+    }
+
     Begin {
+
+        if ($env:C8Y_DISABLE_INHERITANCE -ne $true) {
+            # Inherit preference variables
+            Use-CallerPreference -Cmdlet $PSCmdlet -SessionState $ExecutionContext.SessionState
+        }
+
+        $Parameters = @{} + $PSBoundParameters
+        $Parameters.Remove("File")
+
         #
         # Set defaults
-        if (!$Key) {
-            $Key = $Name
+        if ($Parameters.ContainsKey("Name")) {
+            $Parameters["Name"] = $Name
         }
 
-        if (!$ContextPath) {
-            $ContextPath = $Name
+        if (!$Parameters["Key"]) {
+            $Parameters["Key"] = $Name
         }
 
-
-        $Parameters = @{}
-
-        if ($PSBoundParameters.ContainsKey("Name")) {
-            $Parameters["name"] = $Name
-        }
-        if ($PSBoundParameters.ContainsKey("Availability")) {
-            $Parameters["availability"] = $Availability
-        }
-        if ($PSBoundParameters.ContainsKey("ContextPath")) {
-            $Parameters["contextPath"] = $ContextPath
-        }
-        if ($PSBoundParameters.ContainsKey("ResourcesUrl")) {
-            $Parameters["resourcesUrl"] = $ResourcesUrl
-        }
-        if ($PSBoundParameters.ContainsKey("SkipActivation")) {
-            $Parameters["skipActivation"] = $SkipActivation.ToString().ToLower()
-        }
-        if ($PSBoundParameters.ContainsKey("SkipUpload")) {
-            $Parameters["skipUpload"] = $SkipUpload.ToString().ToLower()
-        }
-        if ($PSBoundParameters.ContainsKey("Template") -and $Template) {
-            $Parameters["template"] = $Template
-        }
-        if ($PSBoundParameters.ContainsKey("TemplateVars") -and $TemplateVars) {
-            $Parameters["templateVars"] = $TemplateVars
-        }
-        if ($PSBoundParameters.ContainsKey("OutputFile")) {
-            $Parameters["outputFile"] = $OutputFile
-        }
-        if ($PSBoundParameters.ContainsKey("NoProxy")) {
-            $Parameters["noProxy"] = $NoProxy
-        }
-        if ($PSBoundParameters.ContainsKey("Session")) {
-            $Parameters["session"] = $Session
-        }
-        if ($PSBoundParameters.ContainsKey("TimeoutSec")) {
-            $Parameters["timeout"] = $TimeoutSec * 1000
+        if (!$Parameters["ContextPath"]) {
+            $Parameters["ContextPath"] = $Name
         }
 
+        $ArgOptions = @{
+            Parameters = $Parameters
+            Command = "applications createHostedApplication"
+        }
+        $c8yargs = New-ClientArgument @ArgOptions
+        $ClientOptions = Get-ClientOutputOption $PSBoundParameters
+        $TypeOptions = @{
+            Type = "application/vnd.com.nsn.cumulocity.application+json"
+            ItemType = ""
+            BoundParameters = $PSBoundParameters
+        }
     }
 
     Process {
@@ -165,27 +113,20 @@ Upload application zip file containing the web application
         }
 
         foreach ($item in $File) {
+            $ic8yArgs = New-Object System.Collections.ArrayList
             if ($item) {
-                $Parameters["file"] = (Resolve-Path $item).ProviderPath
+                [void]$ic8yArgs.AddRange(@("--file", (Resolve-Path $item).ProviderPath))
             }
+            [void]$ic8yArgs.AddRange($c8yargs)
 
-            if (!$Force -and
-                !$WhatIfPreference -and
-                !$PSCmdlet.ShouldProcess(
-                    (PSc8y\Get-C8ySessionProperty -Name "tenant"),
-                    (Format-ConfirmationMessage -Name $PSCmdlet.MyInvocation.InvocationName -InputObject $item)
-                )) {
-                continue
+            if ($ClientOptions.ConvertToPS) {
+                c8y applications createHostedApplication $ic8yArgs `
+                | ConvertFrom-ClientOutput @TypeOptions
             }
-
-            Invoke-ClientCommand `
-                -Noun "applications" `
-                -Verb "createHostedApplication" `
-                -Parameters $Parameters `
-                -Type "application/vnd.com.nsn.cumulocity.application+json" `
-                -ItemType "" `
-                -ResultProperty "" `
-                -Raw:$Raw
+            else {
+                c8y applications createHostedApplication $ic8yArgs
+            }
+            
         }
     }
 

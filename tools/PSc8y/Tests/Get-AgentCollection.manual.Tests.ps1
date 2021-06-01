@@ -14,6 +14,8 @@ Describe -Name "Get-AgentCollection" {
             $Response | Should -Not -BeNullOrEmpty
 
             $Response.Count | Should -BeExactly 2
+            @($Response.id -match $Agent01.id) | Should -HaveCount 1
+            @($Response.id -match $Agent02.id) | Should -HaveCount 1
         }
 
         AfterAll {

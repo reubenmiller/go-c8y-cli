@@ -62,13 +62,13 @@ type LoginHandler struct {
 	Interactive     bool
 	Err             error
 	TFACode         string
-	Cookies         []*http.Cookie
 	C8Yclient       *c8y.Client
 	LoginOptions    *c8y.TenantLoginOptions
 	state           chan LoginState
 	Attempts        int
 	Writer          io.Writer
 	Logger          *logger.Logger
+	LoginType       string
 
 	onSave func()
 }
@@ -105,7 +105,7 @@ func (lh *LoginHandler) Clear() {
 	}
 	lh.Authorized = false
 	// lh.TFACodeRequired = false
-	lh.C8Yclient.SetCookies([]*http.Cookie{})
+	lh.C8Yclient.SetToken("")
 	lh.onSave()
 	lh.C8Yclient.AuthorizationMethod = c8y.AuthMethodBasic
 	lh.Err = nil
@@ -115,12 +115,18 @@ func (lh *LoginHandler) Clear() {
 // available otherwise.
 func (lh *LoginHandler) Run() error {
 	lh.init()
-	lh.state <- LoginStateVerify
+
+	// Check if any authenitcation is set
+	if lh.C8Yclient.Token != "" || lh.C8Yclient.Password != "" {
+		lh.state <- LoginStateVerify
+	} else {
+		lh.state <- LoginStatePromptPassword
+	}
 
 	for {
 		c := <-lh.state
 
-		lh.Logger.Infof("Current State: %s\n", c.String())
+		lh.Logger.Infof("Current State: %s", c.String())
 
 		if c == LoginStateUnknown {
 			lh.Clear()
@@ -166,6 +172,13 @@ func (lh *LoginHandler) sortLoginOptions() {
 		c8y.AuthMethodOAuth2Internal: 1,
 	}
 
+	if _, ok := optionOrder[lh.LoginType]; ok {
+		lh.Logger.Infof("Setting preferred login method. %s", lh.LoginType)
+		optionOrder[lh.LoginType] = 0
+	} else {
+		lh.Logger.Infof("Unsupported login method. The given option will be ignored. %s", lh.LoginType)
+	}
+
 	// sort login options
 	sort.SliceStable(lh.LoginOptions.LoginOptions[:], func(i, j int) bool {
 		iWeight := 100
@@ -185,6 +198,34 @@ func (lh *LoginHandler) sortLoginOptions() {
 func (lh *LoginHandler) init() {
 	lh.do(func() error {
 		loginOptions, _, err := lh.C8Yclient.Tenant.GetLoginOptions(context.Background())
+
+		if err != nil {
+			if strings.Contains(err.Error(), "401") {
+				lh.Logger.Infof("Login options returned 401. This may happen when your c8y hostname is not setup correctly")
+				return nil
+			}
+			lh.Logger.Warnf("Failed to get login options")
+			return err
+		}
+		if loginOptions == nil {
+			lh.Logger.Warnf("Login options are empty. %s", err)
+			return err
+		}
+
+		if lh.C8Yclient.TenantName != "" {
+			tenantSelfURL := ""
+
+			if len(loginOptions.LoginOptions) > 0 {
+				tenantSelfURL = loginOptions.LoginOptions[0].Self
+			} else {
+				tenantSelfURL = loginOptions.Self
+			}
+			if strings.HasPrefix(tenantSelfURL, "http") && !strings.Contains(tenantSelfURL, lh.C8Yclient.TenantName+".") {
+				lh.Logger.Warningf("Detected invalid tenant name. expected %s to include %s. Tenant name will be ignored", lh.C8Yclient.TenantName, tenantSelfURL)
+				lh.C8Yclient.TenantName = ""
+			}
+		}
+
 		lh.LoginOptions = loginOptions
 		lh.sortLoginOptions()
 
@@ -248,7 +289,7 @@ func (lh *LoginHandler) promptForPassword() error {
 }
 func (lh *LoginHandler) login() {
 	lh.do(func() error {
-		if lh.LoginOptions == nil && len(lh.LoginOptions.LoginOptions) == 0 {
+		if lh.LoginOptions == nil || len(lh.LoginOptions.LoginOptions) == 0 {
 			lh.state <- LoginStateAbort
 			return fmt.Errorf("No login options")
 		}
@@ -343,7 +384,6 @@ func (lh *LoginHandler) login() {
 			case c8y.AuthMethodBasic:
 				// do nothing
 			}
-			break
 		}
 		return nil
 	})
@@ -355,29 +395,31 @@ func (lh *LoginHandler) errorContains(message, pattern string) bool {
 
 func (lh *LoginHandler) verify() {
 	lh.do(func() error {
-		// _, resp, err := lh.C8Yclient.User.GetCurrentUser(context.Background())
 		tenant, resp, err := lh.C8Yclient.Tenant.GetCurrentTenant(context.Background())
 
 		if resp != nil && resp.StatusCode == http.StatusUnauthorized {
 
 			if v, ok := err.(*c8y.ErrorResponse); ok {
-				lh.Logger.Warning("error message from server. %s", v.Message)
+				lh.Logger.Infof("error message from server. %s", v.Message)
 
 				if lh.errorContains(v.Message, "TFA TOTP setup required") {
 					lh.TFACodeRequired = true
 					lh.state <- LoginStateTFASetup
 				} else if lh.errorContains(v.Message, "TFA TOTP code required") {
-					lh.Logger.Debug("TFA code is required. server response: %s", v.Message)
+					lh.Logger.Debugf("TFA code is required. server response: %s", v.Message)
 					lh.TFACodeRequired = true
 					lh.state <- LoginStateNoAuth
 				} else if lh.errorContains(v.Message, "User has been logged out") {
-					// TODO: Invalidate the cookies
-					lh.Logger.Warning("User had been logged out. Clearing cookies and trying again")
+					lh.Logger.Warning("User had been logged out. Clearing token and trying again")
 					lh.state <- LoginStateNoAuth
-					lh.C8Yclient.SetCookies([]*http.Cookie{})
+					lh.C8Yclient.SetToken("")
 					lh.onSave()
-				} else if lh.errorContains(v.Message, "Bad credentials") {
-					lh.Logger.Infof("Bad creds using auth method: %s", lh.C8Yclient.AuthorizationMethod)
+				} else if lh.errorContains(v.Message, "Bad credentials") || lh.errorContains(v.Message, "Invalid credentials") {
+					lh.Logger.Infof("Bad credentials, using auth method: %s", lh.C8Yclient.AuthorizationMethod)
+
+					// try reseting the tenant (in case if it is incorrect)
+					lh.C8Yclient.TenantName = ""
+
 					if lh.C8Yclient.AuthorizationMethod != c8y.AuthMethodOAuth2Internal {
 						if lh.Interactive {
 							lh.state <- LoginStatePromptPassword
@@ -404,11 +446,15 @@ func (lh *LoginHandler) verify() {
 }
 
 func (lh LoginHandler) writeMessage(m string) {
-	io.WriteString(lh.Writer, m)
+	if _, err := io.WriteString(lh.Writer, m); err != nil {
+		lh.Logger.Warnf("Failed to write message. %s", err)
+	}
 }
 
 func (lh LoginHandler) writeMessageF(format string, a interface{}) {
-	io.WriteString(lh.Writer, fmt.Sprintf(format, a))
+	if _, err := io.WriteString(lh.Writer, fmt.Sprintf(format, a)); err != nil {
+		lh.Logger.Warnf("Failed to write message. %s", err)
+	}
 }
 
 func (lh *LoginHandler) setupTFA() error {
@@ -468,7 +514,7 @@ func (lh *LoginHandler) setupTFA() error {
 	}
 
 	// Activate totp
-	resp, err = lh.C8Yclient.SendRequest(
+	_, err = lh.C8Yclient.SendRequest(
 		context.Background(),
 		c8y.RequestOptions{
 			Method: http.MethodPost,

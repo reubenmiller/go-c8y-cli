@@ -1,0 +1,18 @@
+{
+    "version": "1",
+    "definitions": [
+        {
+            "name": "operation",
+            "priority": 500,
+            "contentType": "vnd.com.nsn.cumulocity.operation",
+            "columns": [
+                "id",
+                "status",
+                "description",
+                "creationTime",
+                "deviceId",
+                "deviceName"
+            ]
+        }
+    ]
+}

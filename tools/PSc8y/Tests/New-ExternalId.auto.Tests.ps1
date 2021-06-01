@@ -14,7 +14,7 @@ Describe -Name "New-ExternalId" {
     }
 
     It "Create external identity (using pipeline)" {
-        $Response = PSc8y\Get-Device $Device.id | New-ExternalId -Type "$my_SerialNumber" -Name "myserialnumber"
+        $Response = PSc8y\Get-Device $Device.id | New-ExternalId -Type "$my_SerialNumber" -Template "{externalId: input.value.name}"
         $LASTEXITCODE | Should -Be 0
         $Response | Should -Not -BeNullOrEmpty
     }

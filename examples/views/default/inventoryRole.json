@@ -1,0 +1,16 @@
+{
+    "version": "1",
+    "definitions": [
+        {
+            "name": "inventoryrolecollection",
+            "priority": 500,
+            "contentType": "vnd.com.nsn.cumulocity.inventoryrolecollection",
+            "columns": [
+                "id",
+                "name",
+                "description",
+                "permissions"
+            ]
+        }
+    ]
+}

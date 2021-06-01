@@ -1,0 +1,16 @@
+{
+    "version": "1",
+    "definitions": [
+        {
+            "name": "settings",
+            "priority": 500,
+            "fragments": ["settings.defaults"],
+            "columns": [
+                "session.home",
+                "mode.**",
+                "encryption.enabled",
+                "activitylog.currentPath"
+            ]
+        }
+    ]
+}

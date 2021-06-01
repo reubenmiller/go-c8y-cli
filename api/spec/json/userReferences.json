@@ -1,6 +1,6 @@
 {
   "information": {
-    "name": "userReferences",
+    "name": "userreferences",
     "description": "Cumulocity user references",
     "descriptionLong": "REST endpoint to interact with Cumulocity user references",
     "link": "https://cumulocity.com/guides/reference/users/#user-reference-collection"
@@ -8,7 +8,8 @@
   "endpoints": [
     {
       "name": "addUserToGroup",
-      "description": "Get user",
+      "description": "Add user to group",
+      "descriptionLong": "Add an existing user to a group",
       "method": "POST",
       "path": "/user/{tenant}/groups/{group}/users",
       "accept": "application/vnd.com.nsn.cumulocity.userReference+json",
@@ -22,7 +23,7 @@
             "description": "Add a user to a user group",
             "beforeEach": [
               "$User = New-TestUser",
-              "$Group = Get-GroupByName -Name \"business\""
+              "$Group = Get-UserGroupByName -Name \"business\""
             ],
             "command": "Add-UserToGroup -Group $Group.id -User $User.id",
             "afterEach": [
@@ -32,8 +33,12 @@
         ],
         "go": [
           {
-            "description": "List the users within a user group",
-            "command": "c8y userReferences addUserToGroup --group 1 --user myuser"
+            "description": "Add a user to a user group",
+            "command": "c8y userreferences addUserToGroup --group 1 --user myuser"
+          },
+          {
+            "description": "Add a list of users to business and admins group using pipeline",
+            "command": "c8y users list | c8y userreferences addUserToGroup --group business | c8y userreferences addUserToGroup --group admins"
           }
         ]
       },
@@ -58,13 +63,19 @@
           "pipeline": true,
           "required": true,
           "property": "user.self",
-          "description": "User id"
+          "description": "User id",
+          "pipelineAliases": [
+            "user.id",
+            "id",
+            "self"
+          ]
         }
       ]
     },
     {
       "name": "deleteUserFromGroup",
-      "description": "Delete a user from a group",
+      "description": "Delete user from group",
+      "descriptionLong": "Delete an existing user from a user group",
       "method": "DELETE",
       "path": "/user/{tenant}/groups/{group}/users/{user}",
       "accept": "",
@@ -75,10 +86,10 @@
       "examples": {
         "powershell": [
           {
-            "description": "Add a user to a user group",
+            "description": "From a user from a user group",
             "beforeEach": [
               "$User = New-TestUser",
-              "$Group = Get-GroupByName -Name \"business\"",
+              "$Group = Get-UserGroupByName -Name \"business\"",
               "Add-UserToGroup -Group $Group.id -User $User.id"
             ],
             "command": "Remove-UserFromGroup -Group $Group.id -User $User.id",
@@ -89,8 +100,12 @@
         ],
         "go": [
           {
-            "description": "List the users within a user group",
-            "command": "c8y userReferences deleteUserFromGroup --group 1 --user myuser"
+            "description": "From a user from a user group",
+            "command": "c8y userreferences deleteUserFromGroup --group 1 --user myuser"
+          },
+          {
+            "description": "From a user from a user group (using pipeline)",
+            "command": "c8y users get --id myuser | c8y userreferences deleteUserFromGroup --group 1"
           }
         ]
       },
@@ -105,6 +120,7 @@
           "name": "user",
           "type": "[]user",
           "required": true,
+          "pipeline": true,
           "description": "User id/username"
         },
         {
@@ -117,7 +133,8 @@
     },
     {
       "name": "getUsersInGroup",
-      "description": "Get all users in a group",
+      "description": "Get users in group",
+      "descriptionLong": "Get all users in a user group",
       "method": "GET",
       "path": "/user/{tenant}/groups/{id}/users",
       "accept": "application/vnd.com.nsn.cumulocity.userReferenceCollection+json",
@@ -125,7 +142,7 @@
       "collectionProperty": "references.#.user",
       "alias": {
         "go": "listGroupMembership",
-        "powershell": "Get-GroupMembershipCollection"
+        "powershell": "Get-UserGroupMembershipCollection"
       },
       "examples": {
         "powershell": [
@@ -133,10 +150,10 @@
             "description": "List the users within a user group",
             "beforeEach": [
               "$User = New-TestUser",
-              "$Group = Get-GroupByName -Name \"business\"",
+              "$Group = Get-UserGroupByName -Name \"business\"",
               "Add-UserToGroup -Group $Group.id -User $User.id"
             ],
-            "command": "Get-GroupMembershipCollection -Id $Group.id",
+            "command": "Get-UserGroupMembershipCollection -Id $Group.id",
             "afterEach": [
               "Remove-User -Id $User.id"
             ]
@@ -145,10 +162,10 @@
             "description": "List the users within a user group (using pipeline)",
             "beforeEach": [
               "$User = New-TestUser",
-              "$Group = Get-GroupByName -Name \"business\"",
+              "$Group = Get-UserGroupByName -Name \"business\"",
               "Add-UserToGroup -Group $Group.id -User $User.id"
             ],
-            "command": "Get-GroupByName -Name \"business\" | Get-GroupMembershipCollection",
+            "command": "Get-UserGroupByName -Name \"business\" | Get-UserGroupMembershipCollection",
             "afterEach": [
               "Remove-User -Id $User.id"
             ]
@@ -157,7 +174,11 @@
         "go": [
           {
             "description": "List the users within a user group",
-            "command": "c8y userReferences listGroupMembership --group 1"
+            "command": "c8y userreferences listGroupMembership --group 1"
+          },
+          {
+            "description": "List users in user groups (via pipeline)",
+            "command": "c8y usergroups list | c8y userreferences listGroupMembership"
           }
         ]
       },

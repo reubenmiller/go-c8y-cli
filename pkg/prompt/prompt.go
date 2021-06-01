@@ -103,9 +103,9 @@ func (p *Prompt) EncryptionPassphrase(encryptedData string, initPassphrase strin
 		Stdin:       os.Stdin,
 		Stdout:      os.Stderr,
 		Default:     "",
-		Mask:        '*',
+		Mask:        ' ',
 		HideEntered: true,
-		Label:       "Session is encrypted, enter passphrase 🔒",
+		Label:       "Session is encrypted, enter passphrase 🔒 [input is hidden]",
 		Templates: &promptui.PromptTemplates{
 			Valid: "{{ . | bold }}: ",
 		},

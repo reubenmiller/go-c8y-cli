@@ -2,10 +2,13 @@
 Function Get-MeasurementCollection {
 <#
 .SYNOPSIS
-Get a collection of measurements based on filter parameters
+Get measurement collection
 
 .DESCRIPTION
 Get a collection of measurements based on filter parameters
+
+.LINK
+https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/measurements_list
 
 .EXAMPLE
 PS> Get-MeasurementCollection
@@ -24,10 +27,8 @@ Get measurements from a device (using pipeline)
 
 
 #>
-    [cmdletbinding(SupportsShouldProcess = $true,
-                   PositionalBinding=$true,
-                   HelpUri='',
-                   ConfirmImpact = 'None')]
+    [cmdletbinding(PositionalBinding=$true,
+                   HelpUri='')]
     [Alias()]
     [OutputType([object])]
     Param(
@@ -75,153 +76,53 @@ Get measurements from a device (using pipeline)
         # Results will be displayed in csv format. Note: -IncludeAll, is not supported when using using this parameter
         [Parameter()]
         [switch]
-        $Csv,
+        $CsvFormat,
 
         # Results will be displayed in Excel format Note: -IncludeAll, is not supported when using using this parameter
         [Parameter()]
         [switch]
-        $Excel,
+        $ExcelFormat,
 
         # Every measurement fragment which contains 'unit' property will be transformed to use required system of units.
         [Parameter()]
         [ValidateSet('imperial','metric')]
         [string]
-        $Unit,
-
-        # Maximum number of results
-        [Parameter()]
-        [AllowNull()]
-        [AllowEmptyString()]
-        [ValidateRange(1,2000)]
-        [int]
-        $PageSize,
-
-        # Include total pages statistic
-        [Parameter()]
-        [switch]
-        $WithTotalPages,
-
-        # Get a specific page result
-        [Parameter()]
-        [int]
-        $CurrentPage,
-
-        # Maximum number of pages to retrieve when using -IncludeAll
-        [Parameter()]
-        [int]
-        $TotalPages,
-
-        # Include all results
-        [Parameter()]
-        [switch]
-        $IncludeAll,
-
-        # Show the full (raw) response from Cumulocity including pagination information
-        [Parameter()]
-        [switch]
-        $Raw,
-
-        # Write the response to file
-        [Parameter()]
-        [string]
-        $OutputFile,
-
-        # Ignore any proxy settings when running the cmdlet
-        [Parameter()]
-        [switch]
-        $NoProxy,
-
-        # Specifiy alternative Cumulocity session to use when running the cmdlet
-        [Parameter()]
-        [string]
-        $Session,
-
-        # TimeoutSec timeout in seconds before a request will be aborted
-        [Parameter()]
-        [double]
-        $TimeoutSec
+        $Unit
     )
+    DynamicParam {
+        Get-ClientCommonParameters -Type "Get", "Collection"
+    }
 
     Begin {
-        $Parameters = @{}
-        if ($PSBoundParameters.ContainsKey("Type")) {
-            $Parameters["type"] = $Type
-        }
-        if ($PSBoundParameters.ContainsKey("ValueFragmentType")) {
-            $Parameters["valueFragmentType"] = $ValueFragmentType
-        }
-        if ($PSBoundParameters.ContainsKey("ValueFragmentSeries")) {
-            $Parameters["valueFragmentSeries"] = $ValueFragmentSeries
-        }
-        if ($PSBoundParameters.ContainsKey("FragmentType")) {
-            $Parameters["fragmentType"] = $FragmentType
-        }
-        if ($PSBoundParameters.ContainsKey("DateFrom")) {
-            $Parameters["dateFrom"] = $DateFrom
-        }
-        if ($PSBoundParameters.ContainsKey("DateTo")) {
-            $Parameters["dateTo"] = $DateTo
-        }
-        if ($PSBoundParameters.ContainsKey("Revert")) {
-            $Parameters["revert"] = $Revert
-        }
-        if ($PSBoundParameters.ContainsKey("Csv")) {
-            $Parameters["csv"] = $Csv
-        }
-        if ($PSBoundParameters.ContainsKey("Excel")) {
-            $Parameters["excel"] = $Excel
-        }
-        if ($PSBoundParameters.ContainsKey("Unit")) {
-            $Parameters["unit"] = $Unit
-        }
-        if ($PSBoundParameters.ContainsKey("PageSize")) {
-            $Parameters["pageSize"] = $PageSize
-        }
-        if ($PSBoundParameters.ContainsKey("WithTotalPages") -and $WithTotalPages) {
-            $Parameters["withTotalPages"] = $WithTotalPages
-        }
-        if ($PSBoundParameters.ContainsKey("OutputFile")) {
-            $Parameters["outputFile"] = $OutputFile
-        }
-        if ($PSBoundParameters.ContainsKey("NoProxy")) {
-            $Parameters["noProxy"] = $NoProxy
-        }
-        if ($PSBoundParameters.ContainsKey("Session")) {
-            $Parameters["session"] = $Session
-        }
-        if ($PSBoundParameters.ContainsKey("TimeoutSec")) {
-            $Parameters["timeout"] = $TimeoutSec * 1000
-        }
 
         if ($env:C8Y_DISABLE_INHERITANCE -ne $true) {
             # Inherit preference variables
             Use-CallerPreference -Cmdlet $PSCmdlet -SessionState $ExecutionContext.SessionState
         }
+
+        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "measurements list"
+        $ClientOptions = Get-ClientOutputOption $PSBoundParameters
+        $TypeOptions = @{
+            Type = "application/vnd.com.nsn.cumulocity.measurementCollection+json"
+            ItemType = "application/vnd.com.nsn.cumulocity.measurement+json"
+            BoundParameters = $PSBoundParameters
+        }
     }
 
     Process {
-        $Parameters["device"] = PSc8y\Expand-Id $Device
 
-        if (!$Force -and
-            !$WhatIfPreference -and
-            !$PSCmdlet.ShouldProcess(
-                (PSc8y\Get-C8ySessionProperty -Name "tenant"),
-                (Format-ConfirmationMessage -Name $PSCmdlet.MyInvocation.InvocationName -InputObject $item)
-            )) {
-            continue
+        if ($ClientOptions.ConvertToPS) {
+            $Device `
+            | Group-ClientRequests `
+            | c8y measurements list $c8yargs `
+            | ConvertFrom-ClientOutput @TypeOptions
         }
-
-        Invoke-ClientCommand `
-            -Noun "measurements" `
-            -Verb "list" `
-            -Parameters $Parameters `
-            -Type "application/vnd.com.nsn.cumulocity.measurementCollection+json" `
-            -ItemType "application/vnd.com.nsn.cumulocity.measurement+json" `
-            -ResultProperty "measurements" `
-            -Raw:$Raw `
-            -CurrentPage:$CurrentPage `
-            -TotalPages:$TotalPages `
-            -IncludeAll:$IncludeAll
+        else {
+            $Device `
+            | Group-ClientRequests `
+            | c8y measurements list $c8yargs
+        }
+        
     }
 
     End {}

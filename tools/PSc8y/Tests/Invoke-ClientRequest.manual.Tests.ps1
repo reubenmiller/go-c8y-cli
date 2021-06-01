@@ -9,21 +9,33 @@ Describe -Name "Invoke-ClientRequest" {
     }
 
     It "should accept query parameters" {
-        Invoke-ClientRequest -Uri "/alarm/alarms" -QueryParameters @{
+        $output = Invoke-ClientRequest -Uri "/alarm/alarms" -QueryParameters @{
                 pageSize = "1";
             } `
-            -Whatif `
-            -InformationVariable requestInfo
+            -Dry -DryFormat json
         $LASTEXITCODE | Should -Be 0
-        $requestInfo | Should -Not -BeNullOrEmpty
-        ($requestInfo | Out-String) | Should -BeLike "*/alarm/alarms?pageSize=1*"
+
+        $requests = $output | ConvertFrom-Json
+        $requests | Should -HaveCount 1
+        $requests[0] | Should -MatchObject @{method = "GET"; pathEncoded = "/alarm/alarms?pageSize=1"} -Property method, pathEncoded
     }
 
-    It "should return the raw json text when using -Raw" {
+    It "should return powershell objects by default" {
         $Response = Invoke-ClientRequest -Uri "/inventory/managedObjects" -QueryParameters @{
             pageSize = "2";
-        } `
-        -Raw
+        }
+        $LASTEXITCODE | Should -Be 0
+        $Response | Should -Not -BeNullOrEmpty
+        $Response.managedObjects | Should -Not -BeNullOrEmpty
+        $Response.statistics | Should -Not -BeNullOrEmpty
+        $Response.next | Should -Not -BeNullOrEmpty
+        $Response.self | Should -Not -BeNullOrEmpty
+    }
+
+    It "should return the raw json text when using" {
+        $Response = Invoke-ClientRequest `
+            -Uri "/inventory/managedObjects" -QueryParameters @{ pageSize = "2" } `
+            -AsPSObject:$false
         $LASTEXITCODE | Should -Be 0
         $Response | Should -Not -BeNullOrEmpty
         $Result = $Response | ConvertFrom-Json
@@ -38,23 +50,34 @@ Describe -Name "Invoke-ClientRequest" {
         }
         $LASTEXITCODE | Should -Be 0
         $Response | Should -Not -BeNullOrEmpty
-        $Results = $Response | ConvertFrom-Json
-        $Results | Should -HaveCount 2
+        $Response | Should -HaveCount 2
     }
 
-    It "should accept query parameters and return the raw response" {
+    It "should accept query parameters and support Dry" {
         $options = @{
             Uri = "/alarm/alarms"
             QueryParameters = @{
                 pageSize = "1";
             }
-            WhatIf = $true
-            InformationVariable = "requestInfo"
+            Dry = $true
+            DryFormat = "json"
         }
-        Invoke-ClientRequest @options
+        $output = Invoke-ClientRequest @options
         $LASTEXITCODE | Should -Be 0
-        $requestInfo | Should -Not -BeNullOrEmpty
-        ($requestInfo | Out-String) | Should -BeLike "*/alarm/alarms?pageSize=1*"
+
+        $requests = $output | ConvertFrom-Json
+        $requests | Should -HaveCount 1
+        $requests[0] | Should -MatchObject @{method = "GET"; pathEncoded = "/alarm/alarms?pageSize=1"} -Property method, pathEncoded
+    }
+
+    It "return the raw response when a non-json accept header is used" {
+        $testMeasurement = New-TestDevice | New-Measurement -Template "test.measurement.jsonnet"
+        $Response = Invoke-ClientRequest -Uri "/measurement/measurements" -Method "get" -Accept "text/csv"
+        $LASTEXITCODE | Should -Be 0
+        $Response | Should -Not -BeNullOrEmpty
+        Remove-Device $testMeasurement.source.id
+
+        $Response | Should -HaveType string
     }
 
     It "post an inventory managed object from a string" {
@@ -62,7 +85,7 @@ Describe -Name "Invoke-ClientRequest" {
         $LASTEXITCODE | Should -Be 0
         $Response | Should -Not -BeNullOrEmpty
 
-        $obj = $Response | ConvertFrom-Json
+        $obj = $Response
         $obj.name | Should -BeExactly "test"
 
         if ($obj.id) {
@@ -75,7 +98,8 @@ Describe -Name "Invoke-ClientRequest" {
             -Uri "/inventory/managedObjects" `
             -Method "post" `
             -Data "name=test" `
-            -Pretty
+            -AsPSObject:$false `
+            -Compact:$false -NoColor
 
         $LASTEXITCODE | Should -Be 0
         $Response | Should -Not -BeNullOrEmpty
@@ -95,7 +119,7 @@ Describe -Name "Invoke-ClientRequest" {
         $LASTEXITCODE | Should -Be 0
         $Response | Should -Not -BeNullOrEmpty
 
-        $obj = $Response | ConvertFrom-Json
+        $obj = $Response
         $obj.name | Should -BeExactly (Get-Item $TestFile).Name
 
         # Download file
@@ -127,11 +151,10 @@ Describe -Name "Invoke-ClientRequest" {
         $LASTEXITCODE | Should -Be 0
         $Response | Should -Not -BeNullOrEmpty
 
-        $obj = $Response | ConvertFrom-Json
-        $obj.name | Should -BeExactly "manual_object_001"
+        $Response.name | Should -BeExactly "manual_object_001"
 
-        if ($obj.id) {
-            Remove-ManagedObject -Id $obj.id
+        if ($Response.id) {
+            Remove-ManagedObject -Id $Response.id
         }
     }
 
@@ -149,16 +172,15 @@ Describe -Name "Invoke-ClientRequest" {
         $LASTEXITCODE | Should -Be 0
         $Response | Should -Not -BeNullOrEmpty
 
-        $obj = $Response | ConvertFrom-Json
-        $obj.name | Should -BeExactly "manual_object_002"
+        $Response.name | Should -BeExactly "manual_object_002"
 
-        if ($obj.id) {
-            Remove-ManagedObject -Id $obj.id
+        if ($Response.id) {
+            Remove-ManagedObject -Id $Response.id
         }
     }
 
     It "Send request with custom headers" {
-        Invoke-ClientRequest `
+        $output = Invoke-ClientRequest `
             -Uri "/inventory/managedObjects" `
             -Method "post" `
             -Headers @{
@@ -171,39 +193,42 @@ Describe -Name "Invoke-ClientRequest" {
                     prop1 = $false
                 }
             } `
-            -WhatIf `
-            -InformationVariable requestInfo
+            -DryFormat "json" `
+            -Dry
 
         $LASTEXITCODE | Should -Be 0
-        $requestInfo | Should -Not -BeNullOrEmpty
+        $output | Should -Not -BeNullOrEmpty
 
-        ($requestInfo | Out-String) | Should -BeLike "*MyHeader: SomeValue*"
-        ($requestInfo | Out-String) | Should -BeLike "*2: 1*"
+        $request = $output | ConvertFrom-Json
+        $request | Should -HaveCount 1
+        $request.headers.MyHeader | Should -BeExactly "SomeValue"
+        $request.headers.2 | Should -BeExactly "1"
     }
 
     It "Sends a request without a body" {
-        Invoke-ClientRequest `
+        $output = Invoke-ClientRequest `
             -Uri "/inventory/managedObjects" `
             -Method "post" `
-            -WhatIf `
-            -InformationVariable requestInfo
+            -Dry
 
         $LASTEXITCODE | Should -Be 0
-        $requestInfo | Should -Not -BeNullOrEmpty
-        ($requestInfo | Out-String) -match "Body:\s+\(empty\)" | Should -HaveCount 1
+        $output | Should -Not -BeNullOrEmpty
+        ($output | Out-String) -match "Body:\s+\(empty\)" | Should -HaveCount 1
     }
 
     It "Sends a request with an empty hashtable" {
-        Invoke-ClientRequest `
+        $output = Invoke-ClientRequest `
             -Uri "/inventory/managedObjects" `
             -Method "post" `
             -Data @{} `
-            -WhatIf `
-            -InformationVariable requestInfo
+            -DryFormat "json" `
+            -Dry
 
         $LASTEXITCODE | Should -Be 0
-        $requestInfo | Should -Not -BeNullOrEmpty
-        $requestInfo | Out-String | Should -match "(?ms)Body:\s*(\{.*\})"
+        $output | Should -Not -BeNullOrEmpty
+        $request = $output | ConvertFrom-Json
+        $request | Should -HaveCount 1
+        ($request.body | ConvertTo-Json) | Should -BeExactly "{}"
     }
 
     It "Sends a request using templates" {
@@ -215,16 +240,17 @@ Describe -Name "Invoke-ClientRequest" {
     }
 }
 "@ |Out-File $template
-        $Response = Invoke-ClientRequest `
-            -Uri "/inventory/managedObjects" `
-            -Method "post" `
-            -Template $template
+        $options = @{
+            Uri = "/inventory/managedObjects"
+            Method = "post"
+            Template = $template
+        }
+        $Response = Invoke-ClientRequest @options
 
         $LASTEXITCODE | Should -Be 0
         $Response | Should -Not -BeNullOrEmpty
-        $Result = $Response | ConvertFrom-Json
-        $Result.c8y_CustomFragment.test | Should -BeExactly $true
-        $Result.id | Remove-ManagedObject
+        $Response.c8y_CustomFragment.test | Should -BeExactly $true
+        $Response.id | Remove-ManagedObject
     }
 
     It "Sends a request using deep nested object" {
@@ -250,24 +276,65 @@ Describe -Name "Invoke-ClientRequest" {
 
         $LASTEXITCODE | Should -Be 0
         $Response | Should -Not -BeNullOrEmpty
-        $Result = $Response | ConvertFrom-Json -Depth 100
-        $Result.root.level1.level2.level3.level4.level5.value | Should -BeExactly 1
-        $Result.id | Remove-ManagedObject
+        $Response.root.level1.level2.level3.level4.level5.value | Should -BeExactly 1
+        $Response.id | Remove-ManagedObject
     }
 
-    It "saves request information to the InformationVariable (hiding verbose messages)" {
-        $response = Invoke-ClientRequest `
-            -Uri "/inventory/managedObjects" `
-            -Method "get" `
-            -InformationVariable responseInfo
+    It "uses existing environment variables for native powershell requests" {
+        Function Invoke-MyRequest {
+            [cmdletbinding()]
+            Param(
+                [string] $Path,
 
-        $responseInfo | Should -Not -BeNullOrEmpty
-        $responseInfo | Should -HaveCount 1
-        $responseInfo.MessageData.request | Should -Not -BeNullOrEmpty
-        $responseInfo.MessageData.requestHeader | Should -Not -BeNullOrEmpty
-        $responseInfo.MessageData.responseHeader | Should -Not -BeNullOrEmpty
-        $responseInfo.MessageData.responseTime | Should -Match "^\d+ms$"
-        $responseInfo.MessageData.statusCode | Should -Match "^\d+$"
-        $responseInfo.MessageData.responseLength | Should -Not -BeNullOrEmpty
+                [string] $Method = "GET",
+
+                [object] $Body,
+
+                [object] $Accept = "application/json",
+
+                [object] $ContentType = "application/json",
+
+                [hashtable] $Headers,
+
+                # Additional options that will be passed to Invoke-RestMethod
+                [hashtable] $AdditionalOptions
+            )
+            $options = @{
+                Uri = "$env:C8Y_HOST".TrimEnd("/") + "/" + "$Path".TrimStart("/")
+                Method = $Method
+                ContentType = $ContentType
+                Headers = @{ Authorization = $env:C8Y_HEADER_AUTHORIZATION }
+            }
+            if ($Accept) {
+                $options.Headers.Accept = $Accept
+            }
+            if ($Headers) {
+                $options.Headers += $Headers
+            }
+            if ($Body) {
+                if ($Body -is [hashtable]) {
+                    $options.Body = ConvertTo-Json $Body -Compress
+                } else {
+                    $options.Body = $Body
+                }
+            }
+            if ($AdditionalOptions) {
+                $options += $AdditionalOptions
+            }
+
+            Invoke-RestMethod @options
+        }
+
+        # Force loading session info as environment variables
+        c8y sessions set --session $env:C8Y_SESSION --shell auto | Out-String | Invoke-Expression
+
+        $output = Invoke-MyRequest -Path "user/currentUser"
+        $output | Should -Not -BeNullOrEmpty
+
+        $output = Invoke-MyRequest "/inventory/managedObjects" -Method "POST" -Body @{
+            name = "testme"
+        }
+        $output.name | Should -Be "testme"
+        $output.id | Remove-ManagedObject
     }
 }

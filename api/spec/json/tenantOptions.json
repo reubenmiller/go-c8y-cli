@@ -8,7 +8,8 @@
   "endpoints": [
     {
       "name": "getTenantOptionCollection",
-      "description": "Get collection of tenant options",
+      "description": "Get tenant option collection",
+      "descriptionLong": "Get collection of tenant options",
       "method": "GET",
       "path": "/tenant/options",
       "accept": "application/vnd.com.nsn.cumulocity.optionCollection+json",
@@ -35,7 +36,7 @@
     },
     {
       "name": "newTenantOption",
-      "description": "New tenant option",
+      "description": "Create tenant option",
       "method": "POST",
       "path": "/tenant/options",
       "accept": "application/vnd.com.nsn.cumulocity.option+json",
@@ -74,6 +75,7 @@
           "name": "key",
           "type": "string",
           "required": true,
+          "pipeline": true,
           "description": "Key of option"
         },
         {
@@ -87,6 +89,7 @@
     {
       "name": "getTenantOption",
       "description": "Get tenant option",
+      "descriptionLong": "Get an existing tenant option",
       "method": "GET",
       "path": "/tenant/options/{category}/{key}",
       "accept": "application/vnd.com.nsn.cumulocity.option+json",
@@ -126,6 +129,7 @@
           "name": "key",
           "type": "string",
           "required": true,
+          "pipeline": true,
           "description": "Tenant Option key"
         }
       ]
@@ -133,6 +137,7 @@
     {
       "name": "deleteTenantOption",
       "description": "Delete tenant option",
+      "descriptionLong": "Delete an existing tenant option",
       "method": "DELETE",
       "path": "/tenant/options/{category}/{key}",
       "alias": {
@@ -168,6 +173,7 @@
           "name": "key",
           "type": "string",
           "required": true,
+          "pipeline": true,
           "description": "Tenant Option key"
         }
       ]
@@ -175,6 +181,7 @@
     {
       "name": "updateTenantOption",
       "description": "Update tenant option",
+      "descriptionLong": "Update an existing tenant option",
       "method": "PUT",
       "path": "/tenant/options/{category}/{key}",
       "accept": "application/vnd.com.nsn.cumulocity.option+json",
@@ -214,6 +221,7 @@
           "name": "key",
           "type": "string",
           "required": true,
+          "pipeline": true,
           "description": "Tenant Option key"
         }
       ],
@@ -228,7 +236,8 @@
     },
     {
       "name": "updateTenantOptionBulk",
-      "description": "Update multiple tenant options in provided category",
+      "description": "Update multiple tenant options",
+      "descriptionLong": "Update multiple tenant options in provided category",
       "method": "PUT",
       "path": "/tenant/options/{category}",
       "accept": "application/vnd.com.nsn.cumulocity.option+json",
@@ -265,6 +274,7 @@
           "name": "category",
           "type": "string",
           "required": true,
+          "pipeline": true,
           "description": "Tenant Option category"
         }
       ],
@@ -279,7 +289,8 @@
     },
     {
       "name": "getTenantOptionsForCategory",
-      "description": "Get tenant options for category",
+      "description": "Get tenant options by category",
+      "descriptionLong": "Get existing tenant options for a category",
       "method": "GET",
       "path": "/tenant/options/{category}",
       "accept": "application/vnd.com.nsn.cumulocity.optionCollection+json",
@@ -305,6 +316,10 @@
           {
             "description": "Get a list of options for a category",
             "command": "c8y tenantOptions getForCategory --category \"c8y_cli_tests\""
+          },
+          {
+            "description": "Get a list of options for a category",
+            "command": "echo -e \"c8y_cli_tests\\ncategory2\" | c8y tenantOptions getForCategory"
           }
         ]
       },
@@ -313,14 +328,15 @@
           "name": "category",
           "type": "string",
           "required": true,
+          "pipeline": true,
           "description": "Tenant Option category"
         }
       ]
     },
     {
       "name": "updateTenantOptionEditable",
-      "description": "Update tenant option editibility",
-      "descriptionLong": "Required role:: ROLE_OPTION_MANAGEMENT_ADMIN, Required tenant management Example Request:: Update access.control.allow.origin option.\n",
+      "description": "Update tenant option edit setting",
+      "descriptionLong": "Update read-only setting of an existing tenant option Required role:: ROLE_OPTION_MANAGEMENT_ADMIN, Required tenant management Example Request:: Update access.control.allow.origin option.\n",
       "method": "PUT",
       "path": "/tenant/options/{category}/{key}/editable",
       "accept": "application/vnd.com.nsn.cumulocity.option+json",
@@ -363,6 +379,7 @@
         {
           "name": "key",
           "type": "string",
+          "pipeline": true,
           "required": true,
           "description": "Tenant Option key"
         }

@@ -46,7 +46,7 @@ if (!(Test-Path -Path "./reports" )) {
 # Dot source the invoke-parallel script
 # . "$PSScriptRoot/tools/Invoke-Parallel.ps1"
 
-$Tests = Get-ChildItem "./Tests" -Filter "*.tests.ps*" |
+$Tests = Get-ChildItem "./Tests" -Filter "*.tests.ps*" -Recurse |
     Where-Object { $_.Name -match "$TestFileFilter" } | 
     Where-Object {
         if ($TestFileExclude) {
@@ -93,6 +93,9 @@ $results = $Tests | ForEach-Object -ThrottleLimit:$ThrottleLimit -Parallel {
 
     . ./Tests/imports.ps1
 
+    # Disable activity logging by default
+    $Env:C8Y_SETTINGS_ACTIVITYLOG_ENABLED = "false"
+
     $result = Invoke-Pester -Configuration:$PesterConfig
     
     if ($result.FailedCount -gt 0) {
@@ -107,6 +110,9 @@ $results = $Tests | ForEach-Object -ThrottleLimit:$ThrottleLimit -Parallel {
 
 $TotalDuration = (Get-Date) - $TestStartTime
 
+# Delete any microservices still running
+. ./Tests/imports.ps1
+Get-MicroserviceCollection -PageSize 100 | Where-Object { $_.name -like "*testms*" } | Remove-Microservice -Force
 
 $totalSeconds = 0
 $totalCount = 0

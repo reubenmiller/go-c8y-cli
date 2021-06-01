@@ -88,7 +88,7 @@ endpoints:
 
     body:
       - name: newName
-        type: 'string'
+        type: string
         property: name
         required: false
         description: Agent name
@@ -132,7 +132,7 @@ endpoints:
         description: Agent ID
 
   - name: createAgent
-    description: 'Create an agent'
+    description: 'Create agent'
     descriptionLong: |
       Create an agent managed object. An agent is a special device managed object with both the
       c8y_IsDevice and com_cumulocity_model_Agent fragments.
@@ -168,17 +168,16 @@ endpoints:
     bodyTemplate:
       type: jsonnet
       applyLast: true
-      template: >
-        {
-          c8y_IsDevice: {},
-          com_cumulocity_model_Agent: {},
-        }
+      template: "{c8y_IsDevice: {}, com_cumulocity_model_Agent: {}}"
 
     body:
       - name: name
         type: string
-        required: true
+        pipeline: true
+        required: false
         description: Agent name
+        pipelineAliases:
+          - "name"
 
       - name: type
         description: Agent type
@@ -187,3 +186,5 @@ endpoints:
       - name: data
         type: json
         description: Custom agent properties.
+    bodyRequiredKeys:
+      - name

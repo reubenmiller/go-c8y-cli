@@ -6,10 +6,6 @@
             "type": "integer",
             "minimum": 1,
             "maximum": 2000
-        },
-        "cookieProperty": {
-            "type": "string",
-            "description": "Cookies value in the form of key=value"
         }
     },
     "properties":{
@@ -33,38 +29,16 @@
             "description": "Cumulocity password",
             "type": "string"
         },
+        "token": {
+            "title": "Cumulocity token",
+            "description": "Cumulocity token",
+            "type": "string"
+        },
         "credential": {
             "title": "Credential settings",
             "description": "Cumulocity username, without tenant prefix!",
             "type": "object",
             "properties": {
-                "cookies": {
-                    "description": "Cookies which should be added to each outgoing request. Cookies are ordered sorted by their index/key",
-                    "type": "object",
-                    "properties": {
-                        "0": {
-                            "$ref": "#/definitions/cookieProperty"
-                        },
-                        "1": {
-                            "$ref": "#/definitions/cookieProperty"
-                        },
-                        "2": {
-                            "$ref": "#/definitions/cookieProperty"
-                        },
-                        "3": {
-                            "$ref": "#/definitions/cookieProperty"
-                        },
-                        "4": {
-                            "$ref": "#/definitions/cookieProperty"
-                        },
-                        "5": {
-                            "$ref": "#/definitions/cookieProperty"
-                        }
-                    },
-                    "items": {
-                        "type": "string"
-                    }
-                },
                 "loginType": {
                     "type": "string",
                     "description": "Login option type",
@@ -90,17 +64,19 @@
             "type": "object",
             "description": "c8y cli settings",
             "properties": {
-                "default.pageSize": {
-                    "description": "Default paging size for collection related REST requests",
-                    "$ref": "#/definitions/pagingProperty"
-                },
                 "includeAll.pageSize": {
                     "description": "Default paging size to use when using the includeAll option, which fetches all results from Cumulocity",
                     "$ref": "#/definitions/pagingProperty"
                 },
-                "default.username": {
-                    "description": "Default username to use when creating a new c8y session",
-                    "type": "string"
+                "session": {
+                    "type": "object",
+                    "description": "Session settings",
+                    "properties": {
+                        "defaultUsername": {
+                            "description": "Default username to use when creating a new c8y session",
+                            "type": "string"
+                        }
+                    }
                 },
                 "includeAll.delayMS": {
                     "description": "Delay in milliseconds between fetching the next result when using the includeAll option. If value is 0 or less, then it will be ignored",
@@ -110,6 +86,43 @@
                 "template.path": {
                     "description": "Path / Folder where the templates are located. If the user gives a template name (without path), then a matching filename will be search for in this folder",
                     "type": "string"
+                },
+                "settings.defaults": {
+                    "description": "Default parameter values. You can customize the behavior of the c8y cli.",
+                    "type": "object",
+                    "properties": {
+                        "dryFormat": {
+                            "type": "string",
+                            "description": "Dry run output format. i.e. json, dump, markdown or curl",
+                            "enum": [
+                                "json",
+                                "dump",
+                                "markdown",
+                                "curl"
+                            ]
+                        },
+                        "pageSize": {
+                            "description": "Default paging size for collection related REST requests",
+                            "$ref": "#/definitions/pagingProperty"
+                        }
+                    }
+                },
+                "storage": {
+                    "type": "object",
+                    "description": "Session storage options",
+                    "properties": {
+                        "storePassword": {
+                            "title": "Store the session password to file. Enabled by default",
+                            "description": "Storage of sensitive information can be disabled completely. Useful if you are using it in a shared environment. The user will be prompted each time for their password",
+                            "type": "boolean",
+                            "default": "true"
+                        },
+                        "storeToken": {
+                            "title": "Store the session token to file. Enabled by default",
+                            "type": "boolean",
+                            "default": "true"
+                        }
+                    }
                 },
                 "mode": {
                     "type": "object",
@@ -129,6 +142,32 @@
                             "title": "Enable delete (DELETE) commands",
                             "description": "Enable/disable delete commands",
                             "type": "boolean"
+                        },
+                        "confirmation": {
+                            "title": "Confirmation mode",
+                            "description": "ConfirmationSpace delimited values of REST Method types which should trigger a confirmation when not using force parameter",
+                            "type": "string",
+                            "default": "PUT POST DELETE"
+                        }
+                    }
+                },
+                "activityLog": {
+                    "type": "object",
+                    "description": "Activity log stores the commands and meta information about the response in a file so it can be used to keep track of your Cumulocity related activities.",
+                    "properties": {
+                        "enabled": {
+                            "description": "Enable activity log. Activity log is enabled by default",
+                            "type": "boolean",
+                            "default": "true"
+                        },
+                        "path": {
+                            "description": "Output folder where the logs will be stored. Each activity log will include date information to make sorting and removing older logs easier",
+                            "type": "string"
+                        },
+                        "methodFilter": {
+                            "description": "Space delimited values of REST Method types which should be logged",
+                            "type": "string",
+                            "default": "GET PUT POST DELETE"
                         }
                     }
                 },
@@ -139,12 +178,47 @@
                         "enabled": {
                             "description": "Enable/disable session encryption",
                             "type": "boolean"
+                        },
+                        "cachePassphrase": {
+                            "title": "cache passphrase in environment variables",
+                            "description": "Cache passphrase in the shell's environment variables. This allows users to switch session without prompting again for their passphrase",
+                            "type": "boolean"
+                        }
+                    }
+                },
+                "views": {
+                    "type": "object",
+                    "description": "View definition settings",
+                    "properties": {
+                        "commonPaths": {
+                            "title": "List of directory paths where common view definitions are located.",
+                            "description": "This works best if you set it in your global configuration so it can be reused by all sessions",
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        },
+                        "customPaths": {
+                            "title": "List of directory paths where custom view definitions are located.",
+                            "description": "This works best if you it in your session configuration, as it should only be relevant for specific sessions",
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
                         }
                     }
                 },
                 "ci": {
                     "description": "Enable CI/CD mode where all commands are enabled (create/update/delete)",
                     "type": "boolean"
+                },
+                "aliases": {
+                    "type": "object",
+                    "description": "Aliases"
+                },
+                "commonAliases": {
+                    "type": "object",
+                    "description": "Common aliases (usually only set in the global settings.json file)"
                 }
             }
         }

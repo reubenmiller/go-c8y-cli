@@ -21,10 +21,7 @@ New-TestDeviceGroup -TotalDevices 10
 
 Create a test device group with 10 newly created devices
 #>
-    [cmdletbinding(
-        SupportsShouldProcess = $true,
-        ConfirmImpact = "High"
-    )]
+    [cmdletbinding()]
     Param(
         # Device group name prefix which is added before the randomized string
         [Parameter(
@@ -41,54 +38,41 @@ Create a test device group with 10 newly created devices
 
         # Number of devices to create and assign to the group
         [int]
-        $TotalDevices = 0,
-
-        # Cumulocity processing mode
-        [Parameter()]
-        [AllowNull()]
-        [AllowEmptyString()]
-        [ValidateSet("PERSISTENT", "QUIESCENT", "TRANSIENT", "CEP")]
-        [string]
-        $ProcessingMode,
-
-        # Template (jsonnet) file to use to create the request body.
-        [Parameter()]
-        [string]
-        $Template,
-
-        # Variables to be used when evaluating the Template. Accepts json or json shorthand, i.e. "name=peter"
-        [Parameter()]
-        [string]
-        $TemplateVars,
-
-        # Don't prompt for confirmation
-        [switch] $Force
+        $TotalDevices = 0
     )
+    DynamicParam {
+        Get-ClientCommonParameters -Type "Create", "Template"
+    }
 
     Process {
-        $Data = @{
-            c8y_IsDeviceGroup = @{ }
-        }
+        $options = @{} + $PSBoundParameters
+        $options.Remove("Name")
+        $options.Remove("Type")
+        $options.Remove("TotalDevices")
 
+        
+        $TypeName = ""
         switch ($Type) {
             "SubGroup" {
-                $Data.type = "c8y_DeviceSubGroup"
+                $TypeName = "c8y_DeviceSubGroup"
                 break;
             }
             default {
-                $Data.type = "c8y_DeviceGroup"
+                $TypeName = "c8y_DeviceGroup"
                 break;
             }
         }
 
+        $Data = @{
+            c8y_IsDeviceGroup = @{ }
+            type = $TypeName
+        }
+
         $GroupName = New-RandomString -Prefix "${Name}_"
-        $Group = PSc8y\New-ManagedObject `
-            -Name $GroupName `
-            -Data $Data `
-            -ProcessingMode:$ProcessingMode `
-            -Template:$Template `
-            -TemplateVars:$TemplateVars `
-            -Force:$Force
+        $options["Name"] = $GroupName
+        $options["Type"] = $TypeName
+        $options["Data"] = $Data
+        $Group = PSc8y\New-ManagedObject @options 
         
         if ($TotalDevices -gt 0) {
             for ($i = 0; $i -lt $TotalDevices; $i++) {

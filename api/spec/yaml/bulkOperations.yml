@@ -9,7 +9,7 @@ information:
 endpoints:
   - name: getBulkOperationCollection
     method: GET
-    description: Get a collection of bulk operations
+    description: Get bulk operation collection
     descriptionLong: Get a collection of bulk operations
     path: devicecontrol/bulkoperations
     accept: application/vnd.com.nsn.cumulocity.bulkOperationCollection+json
@@ -39,7 +39,8 @@ endpoints:
         description: Include CANCELLED bulk operations
 
   - name: getBulkOperation
-    description: 'Get bulk operation/s'
+    description: Get bulk operation
+    descriptionLong: Get an existing bulk operation
     method: GET
     examples:
       powershell:
@@ -63,13 +64,14 @@ endpoints:
         powershell: Get-BulkOperation
     pathParameters:
       - name: id
-        type: integer
+        type: '[]id'
         required: true
         pipeline: true
         description: Bulk Operation id
 
   - name: deleteBulkOperation
-    description: 'Remove bulk operation/s. Only bulk operations that are in ACTIVE or IN_PROGRESS can be deleted'
+    description: Delete bulk operation
+    descriptionLong: Delete bulk operation/s. Only bulk operations that are in ACTIVE or IN_PROGRESS can be deleted
     method: DELETE
     examples:
       powershell:
@@ -91,7 +93,7 @@ endpoints:
         powershell: Remove-BulkOperation
     pathParameters:
       - name: id
-        type: integer
+        type: '[]id'
         required: true
         pipeline: true
         description: Bulk Operation id
@@ -100,7 +102,7 @@ endpoints:
     method: POST
     path: devicecontrol/bulkoperations
     accept: application/vnd.com.nsn.cumulocity.bulkoperation+json
-    description: 'Create a new bulk operation'
+    description: Create bulk operation
     descriptionLong: 'Create a new bulk operation'
     examples:
       powershell:
@@ -121,8 +123,11 @@ endpoints:
             - "Remove-DeviceGroup -Id $Group.id -Cascade"
 
       go:
-        - description: Create operation for a device
-          command: c8y operations create --device mydevice --data "{c8y_Restart:{}}"
+        - description: Create bulk operation for a group
+          command: c8y bulkoperations create --group 1234 --startDate "60s" --creationRampSec 15 --operation "c8y_Restart={}"
+
+        - description: Create bulk operation for a group (using pipeline)
+          command: c8y devicegroups get --id 12345 | c8y bulkoperations create --startDate "10s" --creationRampSec 15 --operation "c8y_Restart={}"
     alias:
         go: create
         powershell: New-BulkOperation
@@ -130,7 +135,7 @@ endpoints:
       - name: group
         type: '[]devicegroup'
         property: groupId
-        required: true
+        required: false
         pipeline: true
         description: Identifies the target group on which this operation should be performed.
 
@@ -196,8 +201,73 @@ endpoints:
         description: Additional properties to update on the bulk operation.
 
     pathParameters:
+      # Note: id is actually an integer but it should be handled as a string because it is being applied to a path parameter (and piped input are strings)
       - name: id
-        type: integer
+        type: '[]id'
         description: Bulk Operation id
         pipeline: true
         required: true
+
+  # List operations related to a bulk operation
+  - name: listBulkOperationOperations
+    method: GET
+    description: Get operations collection
+    descriptionLong: Get a collection of operations related to a bulk operation
+    path: devicecontrol/operations
+    accept: application/vnd.com.nsn.cumulocity.operationCollection+json
+    collectionType: application/vnd.com.nsn.cumulocity.operation+json
+    collectionProperty: operations
+    alias:
+        go: listOperations
+        powershell: Get-BulkOperationOperationCollection
+    examples:
+      powershell:
+        - description: Get a list of pending operations from bulk operation with id 10
+          command: Get-BulkOperationOperationCollection -Id 10 -Status PENDING
+          skipTest: true
+
+        - description: Get all pending operations from all bulk operations which are still in progress (using pipeline)
+          command: Get-BulkOperationCollection | Where-Object { $_.status -eq "IN_PROGRESS" } | Get-BulkOperationOperationCollection -Status PENDING
+          skipTest: true
+
+        - description: Check all bulk operations if they have any related operations still in executing state and were created more than 10 days ago, then cancel it with a custom message
+          command: Get-BulkOperationCollection | Get-BulkOperationOperationCollection -status EXECUTING --dateTo "-10d" | Update-Operation -Status FAILED -FailureReason "Manually cancelled stale operation"
+          skipTest: true
+
+      go:
+        - description: Get a list of pending operations from bulk operation with id 10
+          command: c8y bulkoperations listOperations --id 10 --status PENDING
+
+        - description: Get all pending operations from all bulk operations which are still in progress (using pipeline)
+          command: c8y bulkoperations list --filter "status eq IN_PROGRESS" | c8y bulkoperations listOperations --status PENDING
+
+        - description: Check all bulk operations if they have any related operations still in executing state and were created more than 10 days ago, then cancel it with a custom message
+          command: c8y bulkoperations list | c8y bulkoperations listOperations --status EXECUTING --dateTo "-10d" | c8y operations update --status FAILED --failureReason "Manually cancelled stale operation"
+    queryParameters:
+      # Use string type, as an integer will default to 0 when not present in powershell
+      - name: id
+        type: '[]id'
+        property: bulkOperationId
+        pipeline: true
+        required: true
+        pipelineAliases:
+          - id
+          - bulkOperationId
+        description: Bulk operation id.
+
+      - name: dateFrom
+        type: datetime
+        description: Start date or date and time of operation.
+
+      - name: dateTo
+        type: datetime
+        description: End date or date and time of operation.
+
+      - name: status
+        type: string
+        description: Operation status, can be one of SUCCESSFUL, FAILED, EXECUTING or PENDING.
+        validationSet: [PENDING, EXECUTING, SUCCESSFUL, FAILED]
+      
+      - name: revert
+        type: boolean
+        description: Sort operations newest to oldest. Must be used with dateFrom and/or dateTo parameters

@@ -11,8 +11,12 @@ Additional aliases can be created by using the in-built Powershell `New-Alias` c
 .EXAMPLE
 Register-Alias
 
-.LINK
+Register c8y aliases in PowerShell
+
+.EXAMPLE
 Unregister-Alias
+
+Unregister c8y aliases in PowerShell
 #>
     [cmdletbinding()]
     Param()

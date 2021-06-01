@@ -6,10 +6,18 @@ Get the active Cumulocity Session
 .DESCRIPTION
 Get the details about the active Cumulocity session which is used by all cmdlets
 
+.LINK
+c8y sessions get
+
 .EXAMPLE
 Get-Session
 
 Get the current Cumulocity session
+
+.EXAMPLE
+Get-Session -Show
+
+Print the current session information (if set)
 
 .OUTPUTS
 None
@@ -19,32 +27,30 @@ None
         # Specifiy alternative Cumulocity session to use when running the cmdlet
         [Parameter()]
         [string]
-        $Session
+        $Session,
+
+        # Only print the session information
+        [switch]
+        $Show
     )
 
-    $c8yBinary = Get-ClientBinary
     $c8yArgs = New-Object System.Collections.ArrayList
-    $null = $c8yArgs.AddRange(@("sessions", "get", "--pretty=false"))
 
     if ($Session) {
         $null = $c8yArgs.AddRange(@("--session", $Session))
     }
-    
-    $sessionResponse = & $c8yBinary $c8yArgs 2>$null
 
-    if ($LASTEXITCODE -ne 0) {
-        Write-Error "Failed to get session details. reason: $sessionResponse"
+    if ($Show) {
+        c8y sessions get $c8yArgs
         return
     }
 
-    $JSONArgs = @{}
-    if ($PSVersionTable.PSVersion.Major -gt 5) {
-        $JSONArgs.Depth = 100
-    }
+    # Convert session to powershell psobject
+    $null = $c8yArgs.Add("--output=json")
+    $sessionResponse = c8y sessions get $c8yArgs
+    $data = $sessionResponse | ConvertFrom-Json
 
-    $data = $sessionResponse | ConvertFrom-Json @JSONArgs
-
-    if ($env:C8Y_LOGGER_HIDE_SENSITIVE -eq "true") {
+    if ($env:C8Y_SETTINGS_LOGGER_HIDESENSITIVE -eq "true") {
         $data | Add-PowershellType "cumulocity/session-hide-sensitive"
     } else {
         $data | Add-PowershellType "cumulocity/session"

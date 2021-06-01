@@ -7,103 +7,9 @@
   },
   "endpoints": [
     {
-      "name": "getUserCurrent",
-      "description": "Get user",
-      "descriptionLong": "Get the user representation associated with the current credentials used by the request",
-      "method": "GET",
-      "path": "/user/currentUser",
-      "accept": "application/vnd.com.nsn.cumulocity.currentUser+json",
-      "alias": {
-        "go": "getCurrentUser",
-        "powershell": "Get-CurrentUser"
-      },
-      "examples": {
-        "powershell": [
-          {
-            "description": "Get the current user",
-            "command": "Get-CurrentUser"
-          }
-        ],
-        "go": [
-          {
-            "description": "Get the current user",
-            "command": "c8y users getCurrentUser"
-          }
-        ]
-      }
-    },
-    {
-      "name": "updateUserCurrent",
-      "description": "Update the current user",
-      "descriptionLong": "Update properties or settings of your user such as first/last name, email or password\n",
-      "method": "PUT",
-      "path": "/user/currentUser",
-      "accept": "application/vnd.com.nsn.cumulocity.currentUser+json",
-      "alias": {
-        "go": "updateCurrentUser",
-        "powershell": "Update-CurrentUser"
-      },
-      "examples": {
-        "powershell": [
-          {
-            "description": "Update the current user's lastname",
-            "command": "Update-CurrentUser -LastName \"Smith\""
-          }
-        ],
-        "go": [
-          {
-            "description": "Update the current user's lastname",
-            "command": "c8y users updateCurrentUser --lastName \"Smith\""
-          }
-        ]
-      },
-      "body": [
-        {
-          "name": "firstName",
-          "type": "string",
-          "required": false,
-          "description": "User first name"
-        },
-        {
-          "name": "lastName",
-          "type": "string",
-          "required": false,
-          "description": "User last name"
-        },
-        {
-          "name": "phone",
-          "type": "string",
-          "required": false,
-          "description": "User phone number. Format: '+[country code][number]', has to be a valid MSISDN"
-        },
-        {
-          "name": "email",
-          "type": "string",
-          "required": false,
-          "description": "User email address"
-        },
-        {
-          "name": "enabled",
-          "type": "string",
-          "required": false,
-          "validationSet": [
-            "true",
-            "false"
-          ],
-          "description": "User activation status (true/false)"
-        },
-        {
-          "name": "password",
-          "type": "string",
-          "required": false,
-          "description": "User password. Min: 6, max: 32 characters. Only Latin1 chars allowed"
-        }
-      ]
-    },
-    {
-      "name": "getCurrentUserInventoryRoleCollection",
-      "description": "Get the current users inventory roles",
-      "descriptionLong": "Get a list of inventory roles currently assigned to the user",
+      "name": "getInventoryRoleCollection",
+      "description": "Get inventory role collection",
+      "descriptionLong": "Get a list of inventory roles",
       "method": "GET",
       "path": "/user/inventoryroles",
       "accept": "application/vnd.com.nsn.cumulocity.inventoryrolecollection+json",
@@ -111,51 +17,52 @@
       "collectionProperty": "roles",
       "alias": {
         "go": "listInventoryRoles",
-        "powershell": "Get-CurrentUserInventoryRoleCollection"
+        "powershell": "Get-InventoryRoleCollection"
       },
       "examples": {
         "powershell": [
           {
-            "description": "Get the current users inventory roles",
-            "command": "Get-CurrentUserInventoryRoleCollection"
+            "description": "Get list of inventory roles",
+            "command": "Get-InventoryRoleCollection"
           }
         ],
         "go": [
           {
-            "description": "Get the current user",
-            "command": "c8y currentUser listInventoryRoles"
+            "description": "Get list of inventory roles",
+            "command": "c8y users listInventoryRoles"
           }
         ]
       }
     },
     {
-      "name": "getCurrentUserInventoryRole",
-      "description": "Get a specific inventory role of the current user",
+      "name": "getInventoryRole",
+      "description": "Get inventory role",
+      "descriptionLong": "Get a specific inventory role",
       "method": "GET",
       "path": "/user/inventoryroles/{id}",
       "accept": "application/vnd.com.nsn.cumulocity.inventoryrole+json",
       "alias": {
-        "go": "getCurrentUserInventoryRole",
-        "powershell": "Get-CurrentUserInventoryRole"
+        "go": "getInventoryRole",
+        "powershell": "Get-InventoryRole"
       },
       "examples": {
         "powershell": [
           {
-            "description": "Get an inventory role of the current user (using pipeline)",
-            "command": "Get-CurrentUserInventoryRoleCollection -PageSize 1 | Get-CurrentUserInventoryRole"
+            "description": "Get an inventory role (using pipeline)",
+            "command": "Get-InventoryRoleCollection -PageSize 1 | Get-InventoryRole"
           }
         ],
         "go": [
           {
-            "description": "Get an inventory role of the current user",
-            "command": "c8y users getCurrentUserInventoryRole --id 12345"
+            "description": "Get an inventory role",
+            "command": "c8y users getInventoryRole --id 12345"
           }
         ]
       },
       "pathParameters": [
         {
           "name": "id",
-          "type": "integer",
+          "type": "[]id",
           "required": true,
           "pipeline": true,
           "description": "Role id. Note: lookup by name is not yet supported"
@@ -165,7 +72,7 @@
     {
       "name": "getUserCollection",
       "method": "GET",
-      "description": "Get a collection of users based on filter parameters",
+      "description": "Get user collection",
       "descriptionLong": "Get a collection of users based on filter parameters",
       "path": "/user/{tenant}/users",
       "accept": "application/vnd.com.nsn.cumulocity.userCollection+json",
@@ -242,8 +149,8 @@
     },
     {
       "name": "newUser",
-      "description": "Create a new user within the collection",
-      "descriptionLong": "This command can be used to grant a new user to the tenant",
+      "description": "Create user",
+      "descriptionLong": "Create a new user so that they can access the tenant",
       "method": "POST",
       "path": "user/{tenant}/users",
       "accept": "application/vnd.com.nsn.cumulocity.user+json",
@@ -257,9 +164,9 @@
             "description": "Create a user",
             "beforeEach": [
               "$Username = \"testuser_\" + [guid]::NewGuid().Guid.Substring(1,10)",
-              "$NewPassword = [guid]::NewGuid().Guid.Substring(1,10)"
+              "$NewPassword = New-RandomPassword"
             ],
-            "command": "New-user -Username \"$Username\" -Password \"$NewPassword\"",
+            "command": "New-user -Username \"$Username\" -Email \"testuser@no-reply.dummy.com\" -Password \"$NewPassword\"",
             "afterEach": [
               "Get-UserByName -Name \"$Username\" | Remove-User"
             ]
@@ -268,7 +175,7 @@
         "go": [
           {
             "description": "Create a user",
-            "command": "c8y users create --userName \"testuser1\" --password \"a0)8k2kld9lm,!\""
+            "command": "c8y users create --userName \"testuser1\" --email \"testuser@no-reply.dummy.com\" --password \"a0)8k2kld9lm,!\""
           }
         ]
       },
@@ -285,6 +192,7 @@
           "name": "userName",
           "type": "string",
           "required": false,
+          "pipeline": true,
           "description": "User name, unique for a given domain. Max: 1000 characters"
         },
         {
@@ -331,7 +239,7 @@
             "true",
             "false"
           ],
-          "description": "User activation status (true/false)"
+          "description": "Send password reset email to the user instead of setting a password"
         },
         {
           "name": "customProperties",
@@ -397,7 +305,7 @@
     },
     {
       "name": "getUserByName",
-      "description": "Get user by username",
+      "description": "Get user by name",
       "descriptionLong": "Get the user details by referencing their username instead of id",
       "method": "GET",
       "path": "user/{tenant}/userByName/{name}",
@@ -438,6 +346,7 @@
           "name": "name",
           "type": "string",
           "required": true,
+          "pipeline": true,
           "description": "Username"
         }
       ]
@@ -445,7 +354,7 @@
     {
       "name": "deleteUser",
       "description": "Delete user",
-      "descriptionLong": "Delete a user from the a tenant. This will remove the user completely from the tenant and can not be reversed.\nAlternatively a user can be disabled via updating the users properties instead of deleting the user.\n",
+      "descriptionLong": "Delete a user from a tenant. This will remove the user completely from the tenant and can not be reversed.\nAlternatively a user can be disabled via updating the users properties instead of deleting the user.\n",
       "method": "DELETE",
       "path": "user/{tenant}/users/{id}",
       "accept": "",
@@ -480,7 +389,7 @@
         },
         {
           "name": "id",
-          "type": "string",
+          "type": "[]user",
           "required": true,
           "pipeline": true,
           "description": "User id"
@@ -579,7 +488,7 @@
             "true",
             "false"
           ],
-          "description": "User activation status (true/false)"
+          "description": "Send password reset email to the user instead of setting a password"
         },
         {
           "name": "customProperties",
@@ -591,7 +500,7 @@
     },
     {
       "name": "resetUserPassword",
-      "description": "Reset a user's password",
+      "description": "Reset user password",
       "descriptionLong": "The password can be reset either by issuing a password reset email (default), or be specifying a new password.",
       "method": "PUT",
       "path": "user/{tenant}/users/{id}",
@@ -607,7 +516,7 @@
             "beforeEach": [
               "$User = PSc8y\\New-TestUser"
             ],
-            "command": "Reset-UserPassword -Id $User.id -WhatIf 6>&1",
+            "command": "Reset-UserPassword -Id $User.id -Dry",
             "afterEach": [
               "PSc8y\\Remove-User -Id $User.id"
             ]
@@ -649,7 +558,7 @@
       "bodyTemplate": {
         "type": "jsonnet",
         "applyLast": true,
-        "template": "addIfEmptyString(base, \"password\", {sendPasswordResetEmail: true})\n"
+        "template": "{sendPasswordResetEmail: !std.objectHas(self, 'password')}"
       },
       "body": [
         {
@@ -663,7 +572,8 @@
     },
     {
       "name": "getUserMembershipCollection",
-      "description": "Get information about all groups that a user is a member of",
+      "description": "get user membership collection",
+      "descriptionLong": "Get information about all groups that a user is a member of",
       "method": "GET",
       "path": "/user/{tenant}/users/{id}/groups",
       "accept": "application/vnd.com.nsn.cumulocity.groupReferenceCollection+json",
@@ -705,32 +615,6 @@
           "position": 99
         }
       ]
-    },
-    {
-      "name": "logout",
-      "description": "Log out the current user",
-      "descriptionLong": "Logout the current user. This will invalidate the token associated with the user when using OAUTH_INTERNAL",
-      "method": "POST",
-      "path": "/user/logout",
-      "accept": "",
-      "alias": {
-        "go": "logout",
-        "powershell": "Invoke-UserLogout"
-      },
-      "examples": {
-        "powershell": [
-          {
-            "description": "Log out the current user",
-            "command": "Invoke-UserLogout"
-          }
-        ],
-        "go": [
-          {
-            "description": "Log out the current user",
-            "command": "c8y users logout"
-          }
-        ]
-      }
     }
   ]
 }

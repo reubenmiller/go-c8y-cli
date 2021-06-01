@@ -7,7 +7,7 @@ Describe -Name "Add-AssetToGroup" {
 
     }
 
-    It "Create group heirachy (parent group -> child group)" {
+    It "Create group hierarchy (parent group -> child group)" {
         $Response = PSc8y\Add-AssetToGroup -Group $Group1.id -NewChildGroup $Group2.id
         $LASTEXITCODE | Should -Be 0
         $Response | Should -Not -BeNullOrEmpty

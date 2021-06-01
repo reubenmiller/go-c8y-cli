@@ -47,7 +47,7 @@ Describe -Name "Expand-Device" {
     }
 
     It "Expand device from operation" {
-        $measurement = PSc8y\New-TestMeasurement -Device $Device.id
+        $measurement = PSc8y\New-Measurement -Template "test.measurement.jsonnet" -Device $Device.id
         $Result = $measurement | PSc8y\Expand-Device
         $Result.id | Should -BeExactly $Device.id
     }
@@ -71,17 +71,15 @@ Describe -Name "Expand-Device" {
             }
         }
         # Passing id to an object
-        $VerboseMessages = $( $Results = $Device.id | Update-MyObject -Force -Verbose ) 4>&1
+        $output = $( $Results = $Device.id | Update-MyObject -Force -Verbose ) 2>&1
         $Results.id | Should -Be $Device.id
         $Results.name | Should -Not -Be $Device.name
-        [array] $APICalls = $VerboseMessages -like "*Sending request*"
-        $APICalls | Should -HaveCount 0
+        $output | Should -ContainRequest "GET /inventory/managedObjects" -Total 0
 
         # Passing an object
-        $VerboseMessages = $( $Results = $Device | Update-MyObject -Force -Verbose ) 4>&1
+        $output = $( $Results = $Device | Update-MyObject -Force -Verbose ) 2>&1
         $Results.id | Should -Be $Device.id
-        [array] $APICalls = $VerboseMessages -like "*Sending request*"
-        $APICalls | Should -HaveCount 0
+        $output | Should -ContainRequest "GET /inventory/managedObjects" -Total 0
     }
     
     It "Expand device called from a function using expand object" {
@@ -103,18 +101,16 @@ Describe -Name "Expand-Device" {
             }
         }
         # Passing id to an object
-        $VerboseMessages = $( $Results = $Device.id | Update-MyObject -Verbose ) 4>&1
+        $output = $( $Results = $Device.id | Update-MyObject -Verbose ) 2>&1
         $Results.id | Should -Be $Device.id
         $Results.name | Should -Be $Device.name
-        [array] $APICalls = $VerboseMessages -like "*Sending request*"
-        $APICalls | Should -HaveCount 1
+        $output | Should -ContainRequest "GET /inventory/managedObjects" -Total 1
 
         # Passing an object (no fetch should be done)
-        $VerboseMessages = $( $Results = $Device | Update-MyObject -Force -Verbose ) 4>&1
+        $output = $( $Results = $Device | Update-MyObject -Force -Verbose ) 2>&1
         $Results.id | Should -Be $Device.id
         $Results.name | Should -Be $Device.name
-        [array] $APICalls = $VerboseMessages -like "*Sending request*"
-        $APICalls | Should -HaveCount 0
+        $output | Should -ContainRequest "GET /inventory/managedObjects" -Total 0
     }
 
     AfterAll {

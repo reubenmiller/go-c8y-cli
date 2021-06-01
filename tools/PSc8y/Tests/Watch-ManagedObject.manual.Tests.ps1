@@ -28,7 +28,7 @@ Describe -Name "Watch-ManagedObject" {
 
     It "Watch managedObjects for a time period" {
         $StartTime = Get-Date
-        [array] $Response = PSc8y\Watch-ManagedObject -Device $Device.id -DurationSec 60 | ForEach-Object {
+        [array] $Response = PSc8y\Watch-ManagedObject -Device $Device.id -Duration "60s" | ForEach-Object {
             $_ | Add-Member -MemberType NoteProperty -Name "PSc8yTimestamp" -Value (Get-Date) -PassThru
         }
 

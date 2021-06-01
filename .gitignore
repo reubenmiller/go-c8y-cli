@@ -8,10 +8,13 @@ test/c8y_test/application.properties
 test/c8y_test/debug.test
 test/c8y_test/application.setup.properties
 .cumulocity/
+temp-example/
 c8y.env
+c8y.activitylog.*.json
 c8y~
 tools/PSc8y/c8y
 main.exe
+jfrog
 *.log
 output
 pkg/powershell/powershell.todo.txt
@@ -37,3 +40,12 @@ tools/PSc8y/report.xml
 tools/PSc8y/dist
 docs/_site
 node_modules
+
+# release binaries and docs
+dist/**
+share/**
+.go-c8y-cli
+**/.docusaurus/**
+docs/go-c8y-cli/build
+docs/go-c8y-cli/i18n
+tools/docs/demos/*.asc

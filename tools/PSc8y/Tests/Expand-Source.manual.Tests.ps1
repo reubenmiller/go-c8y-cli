@@ -32,8 +32,8 @@ Describe -Name "Expand-Source" {
     }
 
     It "Expand source id from a list of measurements" {
-        $Measurement1 = PSc8y\New-TestMeasurement -Device $Device.id
-        $Measurement2 = PSc8y\New-TestMeasurement -Device $Device.id
+        $Measurement1 = PSc8y\New-Measurement -Template "test.measurement.jsonnet" -Device $Device.id
+        $Measurement2 = PSc8y\New-Measurement -Template "test.measurement.jsonnet" -Device $Device.id
 
         $Response = Get-MeasurementCollection -Device $Device.id | PSc8y\Expand-Source
         $LASTEXITCODE | Should -Be 0

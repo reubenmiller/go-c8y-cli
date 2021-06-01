@@ -1,0 +1,19 @@
+{
+    "version": "1",
+    "definitions": [
+        {
+            "name": "event",
+            "priority": 500,
+            "self": "event/events",
+            "columns": [
+                "id",
+                "type",
+                "text",
+                "source.id",
+                "source.name",
+                "time",
+                "creationTime"
+            ]
+        }
+    ]
+}

@@ -3,7 +3,7 @@
 Describe -Name "Add-UserToGroup" {
     BeforeEach {
         $User = New-TestUser
-        $Group = Get-GroupByName -Name "business"
+        $Group = Get-UserGroupByName -Name "business"
 
     }
 

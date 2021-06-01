@@ -30,7 +30,7 @@ Converts the hashtable to an escaped json string
         [object] $Data
     )
 
-    if ($Data -is [string]) {
+    if ($Data -is [string] -or $data -is [System.IO.FileSystemInfo]) {
         if ($Data -and (Test-Path $Data)) {
             # Return path as is (and let c8y binary handle it)
             return $Data
@@ -41,9 +41,6 @@ Converts the hashtable to an escaped json string
             $JSONArgs = @{
                 InputObject = $Data
                 ErrorAction = "Stop"
-            }
-            if ($PSVersionTable.PSVersion.Major -gt 5) {
-                $JSONArgs.Depth = 100
             }
             $DataObj = (ConvertFrom-Json @JSONArgs)
         } catch {

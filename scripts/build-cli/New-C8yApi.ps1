@@ -1,4 +1,5 @@
-﻿Function New-C8yApi {
+﻿Function New-C8yApi
+ {
     [cmdletbinding()]
     Param(
         [Parameter(
@@ -26,15 +27,27 @@
 
             $Specification = Get-Content $Path -Raw -Encoding utf8 | ConvertFrom-Json
 
-            # Create root command
-            New-C8yApiGoRootCommand -Specification:$Specification -OutputDir:$OutputDir
+            if ([string]::IsNullOrWhiteSpace($Specification.information.name)) {
+                Write-Warning "Skipping spec: Specification is missing the information.name property. This is required. file=$Path"
+                continue
+            }
 
+            # Create root command (golang convention is to use lower case packages names)
+            $packageName = $Specification.information.name.ToLower()
+            $CommandOutput = Join-Path $OutputDir -ChildPath $packageName
+            $null = New-Item -Path $CommandOutput -ItemType Directory -Force
+            New-C8yApiGoRootCommand -Specification:$Specification -OutputDir:$CommandOutput
+            Write-Host ("Generating api root command: {0}" -f $CommandOutput) -ForegroundColor Cyan
 			foreach ($iSpec in $Specification.endpoints) {
                 if ($iSpec.skip -eq $true) {
                     Write-Verbose ("Skipping [{0}]" -f $iSpec.name)
                     continue
                 }
-				New-C8yApiGoCommand -Specification:$iSpec -OutputDir:$OutputDir
+                $SubCommandPackageName = $iSpec.alias.go.ToLower()
+                $SubCommandOutput = Join-Path -Path $CommandOutput -ChildPath $SubCommandPackageName
+				$null = New-Item -Path $SubCommandOutput -ItemType Directory -Force
+                Write-Host ("Generating subcommand: {0}" -f $SubCommandOutput) -ForegroundColor Magenta
+                New-C8yApiGoCommand -Specification:$iSpec -OutputDir:$SubCommandOutput -ParentName $packageName
 			}
         }
 

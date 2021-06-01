@@ -1,0 +1,185 @@
+{
+  "information": {
+    "name": "inventory/additions",
+    "description": "Cumulocity inventory additions",
+    "descriptionLong": "REST endpoint to interact with Cumulocity managed objects",
+    "link": "https://cumulocity.com/guides/reference/inventory/"
+  },
+  "endpoints": [
+    {
+      "name": "listChildAdditionCollection",
+      "method": "GET",
+      "description": "Get child addition collection",
+      "descriptionLong": "Get a collection of managedObjects child additions",
+      "path": "inventory/managedObjects/{id}/childAdditions",
+      "accept": "application/vnd.com.nsn.cumulocity.managedObjectReferenceCollection+json",
+      "collectionType": "application/vnd.com.nsn.cumulocity.managedObject+json",
+      "collectionProperty": "references.#.managedObject",
+      "alias": {
+        "go": "list",
+        "powershell": "Get-ChildAdditionCollection"
+      },
+      "examples": {
+        "powershell": [
+          {
+            "description": "Get a list of the child additions of an existing managed object",
+            "beforeEach": [
+              "$software = PSc8y\\New-ManagedObject -Name softwarePackage1",
+              "$version = PSc8y\\New-ManagedObject -Name softwareVersion1",
+              "PSc8y\\Add-ChildAddition -Id $software.id -NewChild $version.id"
+            ],
+            "command": "Get-ChildAdditionCollection -Id $software.id",
+            "afterEach": [
+              "PSc8y\\Remove-ManagedObject -Id $software.id",
+              "PSc8y\\Remove-ManagedObject -Id $version.id"
+            ]
+          },
+          {
+            "description": "Get a list of the child additions of an existing managed object (using pipeline)",
+            "beforeEach": [
+              "$software = PSc8y\\New-ManagedObject -Name softwarePackage1",
+              "$version = PSc8y\\New-ManagedObject -Name softwareVersion1",
+              "PSc8y\\Add-ChildAddition -Id $software.id -NewChild $version.id"
+            ],
+            "command": "Get-ManagedObject -Id $software.id | Get-ChildAdditionCollection",
+            "afterEach": [
+              "PSc8y\\Remove-ManagedObject -Id $software.id",
+              "PSc8y\\Remove-ManagedObject -Id $version.id"
+            ]
+          }
+        ],
+        "go": [
+          {
+            "description": "Get a list of the child additions of an existing managed object",
+            "command": "c8y inventory additions list --id 12345"
+          }
+        ]
+      },
+      "pathParameters": [
+        {
+          "name": "id",
+          "type": "[]id",
+          "pipeline": true,
+          "pipelineAliases": [
+            "deviceId",
+            "source.id",
+            "managedObject.id",
+            "id"
+          ],
+          "required": true,
+          "description": "Managed object id."
+        }
+      ]
+    },
+    {
+      "name": "assignChildAddition",
+      "method": "POST",
+      "path": "inventory/managedObjects/{id}/childAdditions",
+      "accept": "application/vnd.com.nsn.cumulocity.managedObjectReference+json",
+      "collectionType": "application/vnd.com.nsn.cumulocity.managedObject+json",
+      "description": "Assign child addition",
+      "descriptionLong": "Add an existing managed object as a child addition to another existing managed object",
+      "collectionProperty": "managedObject",
+      "alias": {
+        "go": "assign",
+        "powershell": "Add-ChildAddition"
+      },
+      "examples": {
+        "powershell": [
+          {
+            "description": "Add a related managed object as a child to an existing managed object",
+            "beforeEach": [
+              "$software = PSc8y\\New-ManagedObject -Name softwarePackage1",
+              "$version = PSc8y\\New-ManagedObject -Name softwareVersion1"
+            ],
+            "command": "Add-ChildAddition -Id $software.id -NewChild $version.id",
+            "afterEach": [
+              "PSc8y\\Remove-ManagedObject -Id $software.id",
+              "PSc8y\\Remove-ManagedObject -Id $version.id"
+            ]
+          }
+        ],
+        "go": [
+          {
+            "description": "Add a related managed object as a child to an existing managed object",
+            "command": "c8y inventory additions assign --id 12345 --newChild 6789"
+          }
+        ]
+      },
+      "pathParameters": [
+        {
+          "name": "id",
+          "type": "[]id",
+          "property": "id",
+          "required": true,
+          "description": "Managed object id where the child addition will be added to",
+          "position": 0
+        }
+      ],
+      "body": [
+        {
+          "name": "newChild",
+          "type": "string",
+          "position": 1,
+          "pipeline": true,
+          "required": true,
+          "property": "managedObject.id",
+          "description": "New managed object that will be added as a child addition"
+        }
+      ]
+    },
+    {
+      "name": "deleteChildAddition",
+      "description": "Unassign child addition",
+      "descriptionLong": "Unassign/delete a child addition from an existing managed object",
+      "method": "DELETE",
+      "path": "inventory/managedObjects/{id}/childAdditions/{childId}",
+      "accept": "",
+      "alias": {
+        "go": "unassign",
+        "powershell": "Remove-ChildAddition"
+      },
+      "examples": {
+        "powershell": [
+          {
+            "description": "Unassign a child addition from its parent managed object",
+            "beforeEach": [
+              "$software = PSc8y\\New-ManagedObject -Name softwarePackage1",
+              "$version = PSc8y\\New-ManagedObject -Name softwareVersion1",
+              "PSc8y\\Add-ChildAddition -Id $software.id -NewChild $version.id"
+            ],
+            "command": "Remove-ChildAddition -Id $software.id -ChildId $version.id",
+            "afterEach": [
+              "PSc8y\\Remove-ManagedObject -Id $version.id",
+              "PSc8y\\Remove-ManagedObject -Id $software.id"
+            ]
+          }
+        ],
+        "go": [
+          {
+            "description": "Unassign a child addition from its parent managed object",
+            "command": "c8y inventory additions unassign --id 12345 --childId 22553"
+          }
+        ]
+      },
+      "pathParameters": [
+        {
+          "name": "id",
+          "type": "[]id",
+          "required": true,
+          "description": "Managed object id"
+        },
+        {
+          "name": "childId",
+          "type": "string",
+          "required": true,
+          "pipeline": true,
+          "pipelineAliases": [
+            "id"
+          ],
+          "description": "Child managed object id"
+        }
+      ]
+    }
+  ]
+}

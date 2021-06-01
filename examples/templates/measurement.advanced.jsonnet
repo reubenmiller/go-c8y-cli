@@ -4,11 +4,11 @@
     
     ["c8y_" + var("type", "c8y_Temperature")]: {
         sensor1: {
-            value: rand.int,
+            value: _.Int(70,-50),
             unit: "°C",
         },
         barometricPressure: {
-            value: rand.float * 100 + 1000,
+            value: _.Float(1100,1000,3),
             unit: "Pa",
         },
     },

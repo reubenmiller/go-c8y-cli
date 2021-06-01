@@ -2,11 +2,14 @@
 Function Get-SupportedSeries {
 <#
 .SYNOPSIS
-Get supported measurement series/s of a device
+Get supported measurement series
 
 .DESCRIPTION
-Returns a list of supported measurement series
+Get supported measurement series/s of a device
 
+
+.LINK
+https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/devices_getSupportedSeries
 
 .EXAMPLE
 PS> Get-SupportedSeries -Device $device.id
@@ -20,10 +23,8 @@ Get the supported measurement series of a device (using pipeline)
 
 
 #>
-    [cmdletbinding(SupportsShouldProcess = $true,
-                   PositionalBinding=$true,
-                   HelpUri='',
-                   ConfirmImpact = 'None')]
+    [cmdletbinding(PositionalBinding=$true,
+                   HelpUri='')]
     [Alias()]
     [OutputType([object])]
     Param(
@@ -32,71 +33,42 @@ Get the supported measurement series of a device (using pipeline)
                    ValueFromPipeline=$true,
                    ValueFromPipelineByPropertyName=$true)]
         [object[]]
-        $Device,
-
-        # Show the full (raw) response from Cumulocity including pagination information
-        [Parameter()]
-        [switch]
-        $Raw,
-
-        # Write the response to file
-        [Parameter()]
-        [string]
-        $OutputFile,
-
-        # Ignore any proxy settings when running the cmdlet
-        [Parameter()]
-        [switch]
-        $NoProxy,
-
-        # Specifiy alternative Cumulocity session to use when running the cmdlet
-        [Parameter()]
-        [string]
-        $Session,
-
-        # TimeoutSec timeout in seconds before a request will be aborted
-        [Parameter()]
-        [double]
-        $TimeoutSec
+        $Device
     )
+    DynamicParam {
+        Get-ClientCommonParameters -Type "Get"
+    }
 
     Begin {
-        $Parameters = @{}
-        if ($PSBoundParameters.ContainsKey("OutputFile")) {
-            $Parameters["outputFile"] = $OutputFile
-        }
-        if ($PSBoundParameters.ContainsKey("NoProxy")) {
-            $Parameters["noProxy"] = $NoProxy
-        }
-        if ($PSBoundParameters.ContainsKey("Session")) {
-            $Parameters["session"] = $Session
-        }
-        if ($PSBoundParameters.ContainsKey("TimeoutSec")) {
-            $Parameters["timeout"] = $TimeoutSec * 1000
-        }
 
         if ($env:C8Y_DISABLE_INHERITANCE -ne $true) {
             # Inherit preference variables
             Use-CallerPreference -Cmdlet $PSCmdlet -SessionState $ExecutionContext.SessionState
         }
+
+        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "devices getSupportedSeries"
+        $ClientOptions = Get-ClientOutputOption $PSBoundParameters
+        $TypeOptions = @{
+            Type = "application/vnd.com.nsn.cumulocity.inventory+json"
+            ItemType = ""
+            BoundParameters = $PSBoundParameters
+        }
     }
 
     Process {
-        foreach ($item in (PSc8y\Expand-Device $Device)) {
-            if ($item) {
-                $Parameters["device"] = if ($item.id) { $item.id } else { $item }
-            }
 
-
-            Invoke-ClientCommand `
-                -Noun "devices" `
-                -Verb "getSupportedSeries" `
-                -Parameters $Parameters `
-                -Type "application/vnd.com.nsn.cumulocity.inventory+json" `
-                -ItemType "" `
-                -ResultProperty "c8y_SupportedSeries" `
-                -Raw:$Raw
+        if ($ClientOptions.ConvertToPS) {
+            $Device `
+            | Group-ClientRequests `
+            | c8y devices getSupportedSeries $c8yargs `
+            | ConvertFrom-ClientOutput @TypeOptions
         }
+        else {
+            $Device `
+            | Group-ClientRequests `
+            | c8y devices getSupportedSeries $c8yargs
+        }
+        
     }
 
     End {}

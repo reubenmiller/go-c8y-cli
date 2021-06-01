@@ -6,26 +6,26 @@ Describe -Name "Reset-UserPassword" {
     }
 
     It "Resets a user's password by sending a reset email to the user" {
-        PSc8y\Reset-UserPassword -Id $User.id -WhatIf -InformationVariable Request
+        $output = PSc8y\Reset-UserPassword -Id $User.id -Dry -DryFormat json
         $LASTEXITCODE | Should -Be 0
 
-        $Body = Get-JSONFromResponse ($Request | Out-String)
-
-        $Body.sendPasswordResetEmail | Should -BeExactly $true
-        $Body.password | Should -BeNullOrEmpty
+        $request = $output | Out-String | ConvertFrom-Json
+        $request.body | Should -MatchObject @{
+            sendPasswordResetEmail = $true
+        }
     }
 
     It "Resets a user's password by setting a manual password" {
         $pass = New-RandomPassword
-        PSc8y\Reset-UserPassword -Id $User.id -NewPassword $pass -WhatIf -InformationVariable Request
+        $output = PSc8y\Reset-UserPassword -Id $User.id -NewPassword $pass -Dry -DryFormat json
         $LASTEXITCODE | Should -Be 0
 
-        $Body = Get-JSONFromResponse ($Request | Out-String)
-
-        $Body.password | Should -BeExactly $pass
-        $Body.sendPasswordResetEmail | Should -BeNullOrEmpty
+        $request = $output | Out-String | ConvertFrom-Json
+        $request.body | Should -MatchObject @{
+            password = $pass
+            sendPasswordResetEmail = $false
+        }
     }
-
 
     AfterEach {
         PSc8y\Remove-User -Id $User.id

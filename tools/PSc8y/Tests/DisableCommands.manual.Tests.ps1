@@ -21,12 +21,12 @@ Describe -Name "Disable create/update/delete commands" {
 
     It "Enables create commands" {
 
-        $null = New-TestDevice -WhatIf
+        $null = New-TestDevice -Dry
         $LASTEXITCODE | Should -Not -Be 0
 
         Set-ClientConsoleSetting -EnableCreateCommands
 
-        $null = New-TestDevice -WhatIf
+        $null = New-TestDevice -Dry
         $LASTEXITCODE | Should -Be 0
     }
 
@@ -38,22 +38,22 @@ Describe -Name "Disable create/update/delete commands" {
         $null = $items.Add($device.id)
 
         # updates should not work
-        $device | PSc8y\Update-Device -NewName "My New Name" -WhatIf
+        $device | PSc8y\Update-Device -NewName "My New Name" -Dry
         $LASTEXITCODE | Should -Not -Be 0
 
         Set-ClientConsoleSetting -EnableUpdateCommands
 
         # updates should work
-        $device | PSc8y\Update-Device -NewName "My New Name" -WhatIf
+        $device | PSc8y\Update-Device -NewName "My New Name" -Dry
         $LASTEXITCODE | Should -Be 0
     }
 
     It "Show an error to the user if the action is not allowed" {
         # updates should not work
-        $response = PSc8y\New-Device -Name "My New Name" -WhatIf -ErrorVariable c8yError
+        $output = $( $response = PSc8y\New-Device -Name "My New Name" -Dry ) 2>&1
         $LASTEXITCODE | Should -Not -Be 0
         $response | Should -BeNullOrEmpty
-        $c8yError[-1] | Should -Match "create mode is disabled"
+        $output[-1] | Should -Match "create mode is disabled"
     }
 
     It "Enables delete commands" {
@@ -64,7 +64,7 @@ Describe -Name "Disable create/update/delete commands" {
         $null = $items.Add($device.id)
 
         # delete should not work
-        $device | PSc8y\Remove-Device -WhatIf
+        $device | PSc8y\Remove-Device -Dry
         $LASTEXITCODE | Should -Not -Be 0
 
         Set-ClientConsoleSetting -EnableDeleteCommands

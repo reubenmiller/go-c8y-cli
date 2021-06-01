@@ -2,10 +2,13 @@
 Function Get-UserCollection {
 <#
 .SYNOPSIS
-Get a collection of users based on filter parameters
+Get user collection
 
 .DESCRIPTION
 Get a collection of users based on filter parameters
+
+.LINK
+https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/users_list
 
 .EXAMPLE
 PS> Get-UserCollection
@@ -14,10 +17,8 @@ Get a list of users
 
 
 #>
-    [cmdletbinding(SupportsShouldProcess = $true,
-                   PositionalBinding=$true,
-                   HelpUri='',
-                   ConfirmImpact = 'None')]
+    [cmdletbinding(PositionalBinding=$true,
+                   HelpUri='')]
     [Alias()]
     [OutputType([object])]
     Param(
@@ -64,131 +65,36 @@ Get a list of users
         # Tenant
         [Parameter()]
         [object]
-        $Tenant,
-
-        # Maximum number of results
-        [Parameter()]
-        [AllowNull()]
-        [AllowEmptyString()]
-        [ValidateRange(1,2000)]
-        [int]
-        $PageSize,
-
-        # Include total pages statistic
-        [Parameter()]
-        [switch]
-        $WithTotalPages,
-
-        # Get a specific page result
-        [Parameter()]
-        [int]
-        $CurrentPage,
-
-        # Maximum number of pages to retrieve when using -IncludeAll
-        [Parameter()]
-        [int]
-        $TotalPages,
-
-        # Include all results
-        [Parameter()]
-        [switch]
-        $IncludeAll,
-
-        # Show the full (raw) response from Cumulocity including pagination information
-        [Parameter()]
-        [switch]
-        $Raw,
-
-        # Write the response to file
-        [Parameter()]
-        [string]
-        $OutputFile,
-
-        # Ignore any proxy settings when running the cmdlet
-        [Parameter()]
-        [switch]
-        $NoProxy,
-
-        # Specifiy alternative Cumulocity session to use when running the cmdlet
-        [Parameter()]
-        [string]
-        $Session,
-
-        # TimeoutSec timeout in seconds before a request will be aborted
-        [Parameter()]
-        [double]
-        $TimeoutSec
+        $Tenant
     )
+    DynamicParam {
+        Get-ClientCommonParameters -Type "Get", "Collection"
+    }
 
     Begin {
-        $Parameters = @{}
-        if ($PSBoundParameters.ContainsKey("Username")) {
-            $Parameters["username"] = $Username
-        }
-        if ($PSBoundParameters.ContainsKey("Groups")) {
-            $Parameters["groups"] = $Groups
-        }
-        if ($PSBoundParameters.ContainsKey("Owner")) {
-            $Parameters["owner"] = $Owner
-        }
-        if ($PSBoundParameters.ContainsKey("OnlyDevices")) {
-            $Parameters["onlyDevices"] = $OnlyDevices
-        }
-        if ($PSBoundParameters.ContainsKey("WithSubusersCount")) {
-            $Parameters["withSubusersCount"] = $WithSubusersCount
-        }
-        if ($PSBoundParameters.ContainsKey("WithApps")) {
-            $Parameters["withApps"] = $WithApps
-        }
-        if ($PSBoundParameters.ContainsKey("WithGroups")) {
-            $Parameters["withGroups"] = $WithGroups
-        }
-        if ($PSBoundParameters.ContainsKey("WithRoles")) {
-            $Parameters["withRoles"] = $WithRoles
-        }
-        if ($PSBoundParameters.ContainsKey("Tenant")) {
-            $Parameters["tenant"] = $Tenant
-        }
-        if ($PSBoundParameters.ContainsKey("PageSize")) {
-            $Parameters["pageSize"] = $PageSize
-        }
-        if ($PSBoundParameters.ContainsKey("WithTotalPages") -and $WithTotalPages) {
-            $Parameters["withTotalPages"] = $WithTotalPages
-        }
-        if ($PSBoundParameters.ContainsKey("OutputFile")) {
-            $Parameters["outputFile"] = $OutputFile
-        }
-        if ($PSBoundParameters.ContainsKey("NoProxy")) {
-            $Parameters["noProxy"] = $NoProxy
-        }
-        if ($PSBoundParameters.ContainsKey("Session")) {
-            $Parameters["session"] = $Session
-        }
-        if ($PSBoundParameters.ContainsKey("TimeoutSec")) {
-            $Parameters["timeout"] = $TimeoutSec * 1000
-        }
 
         if ($env:C8Y_DISABLE_INHERITANCE -ne $true) {
             # Inherit preference variables
             Use-CallerPreference -Cmdlet $PSCmdlet -SessionState $ExecutionContext.SessionState
         }
+
+        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "users list"
+        $ClientOptions = Get-ClientOutputOption $PSBoundParameters
+        $TypeOptions = @{
+            Type = "application/vnd.com.nsn.cumulocity.userCollection+json"
+            ItemType = "application/vnd.com.nsn.cumulocity.user+json"
+            BoundParameters = $PSBoundParameters
+        }
     }
 
     Process {
-        foreach ($item in @("")) {
 
-
-            Invoke-ClientCommand `
-                -Noun "users" `
-                -Verb "list" `
-                -Parameters $Parameters `
-                -Type "application/vnd.com.nsn.cumulocity.userCollection+json" `
-                -ItemType "application/vnd.com.nsn.cumulocity.user+json" `
-                -ResultProperty "users" `
-                -Raw:$Raw `
-                -CurrentPage:$CurrentPage `
-                -TotalPages:$TotalPages `
-                -IncludeAll:$IncludeAll
+        if ($ClientOptions.ConvertToPS) {
+            c8y users list $c8yargs `
+            | ConvertFrom-ClientOutput @TypeOptions
+        }
+        else {
+            c8y users list $c8yargs
         }
     }
 

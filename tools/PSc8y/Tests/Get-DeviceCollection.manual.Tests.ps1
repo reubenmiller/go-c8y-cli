@@ -34,10 +34,30 @@ Describe -Name "Get-DeviceCollection" {
             $Response[1].id | Should -BeExactly $Device02.id
         }
 
-        It "Returns all devices using includeAll with WhatIf" {
-            $Response = PSc8y\Get-DeviceCollection -Verbose -IncludeAll -WhatIf
+        It -Skip -Tag @("todo") "Returns all devices using includeAll with Dry" {
+            $options = @{
+                IncludeAll = $true
+                Dry = $true
+                Verbose = $true
+                InformationVariable = "requestInfo"
+                ErrorVariable = "ErrorMessages"
+            }
+            $Response = PSc8y\Get-DeviceCollection @options
             $LASTEXITCODE | Should -Be 0
             $Response | Should -BeNullOrEmpty
+            $ErrorMessages | Should -Not -BeNullOrEmpty
+            $requestInfo | Should -Not -BeNullOrEmpty
+            $ErrorMessages | Out-String | Should -match "Using inventory optimized query"
+        }
+
+        It "Returns all devices using includeAll and verbose" {
+            $overview = PSc8y\Get-DeviceCollection -PageSize 1 -WithTotalPages
+            $Total = $overview.statistics.totalPages
+
+            $devices = PSc8y\Get-DeviceCollection -Verbose -IncludeAll
+            $LASTEXITCODE | Should -Be 0
+            $devices | Should -Not -BeNullOrEmpty
+            $devices.Count | Should -BeGreaterOrEqual ($Total * 0.7)
         }
 
         AfterAll {

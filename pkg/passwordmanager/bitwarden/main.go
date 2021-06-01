@@ -46,7 +46,7 @@ type BWUri struct {
 func getBWItems(name ...string) []BWItem {
 
 	bw := exec.Command("bw", "list", "items", "--session", os.Getenv("BW_SESSION"))
-	bw.Env = append(os.Environ())
+	bw.Env = os.Environ()
 
 	bwItems := make([]BWItem, 0)
 
@@ -141,7 +141,6 @@ func main() {
 	evalStr += "\nexport C8Y_TENANT=" + bwItems[i].Login.Tenant
 	evalStr += "\nexport C8Y_USERNAME=" + bwItems[i].Login.Username
 	evalStr += "\nexport C8Y_PASSWORD=" + bwItems[i].Login.Password
-	evalStr += "\nexport C8Y_USE_ENVIRONMENT=true"
 
 	if bwItems[i].Login.TOTPSecret != "" {
 		now := time.Now()

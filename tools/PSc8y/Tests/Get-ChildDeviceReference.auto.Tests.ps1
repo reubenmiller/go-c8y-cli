@@ -2,7 +2,7 @@
 
 Describe -Name "Get-ChildDeviceReference" {
     BeforeEach {
-        $Agent = New-TestDevice -AsAgent
+        $Agent = New-TestAgent
         $Device = New-TestDevice
         $Ref = Add-ChildDeviceToDevice -Device $Agent.id -NewChild $Device.id
 

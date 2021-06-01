@@ -1,0 +1,17 @@
+{
+    "version": "1",
+    "definitions": [
+        {
+            "name": "tenantStatistics",
+            "priority": 500,
+            "contentType": "vnd.com.nsn.cumulocity.tenantUsageStatisticsSummary",
+            "columns": [
+                "day",
+                "storageSize",
+                "deviceCount",
+                "requestCount",
+                "deviceRequestCount"
+            ]
+        }
+    ]
+}

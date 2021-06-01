@@ -14,7 +14,7 @@ Describe -Name "New-Binary" {
     }
 
     It "Upload a config file and make it globally accessible for all users" {
-        $Response = PSc8y\New-Binary -File $File -Data @{ c8y_Global = @{}; type = "c8y_upload" }
+        $Response = PSc8y\New-Binary -File $File -Type "c8y_upload" -Data @{ c8y_Global = @{} }
         $LASTEXITCODE | Should -Be 0
         $Response | Should -Not -BeNullOrEmpty
     }

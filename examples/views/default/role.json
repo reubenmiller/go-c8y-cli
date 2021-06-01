@@ -1,0 +1,35 @@
+{
+    "version": "1",
+    "definitions": [
+        {
+            "name": "role",
+            "priority": 500,
+            "contentType": "vnd.com.nsn.cumulocity.role\\+json",
+            "columns": [
+                "id",
+                "name",
+                "self"
+            ]
+        },
+        {
+            "name": "roleCollection",
+            "priority": 500,
+            "contentType": "vnd.com.nsn.cumulocity.roleCollection\\+json",
+            "columns": [
+                "id",
+                "name",
+                "self"
+            ]
+        },
+        {
+            "name": "roleReference",
+            "priority": 500,
+            "contentType": "vnd.com.nsn.cumulocity.roleReference\\+json",
+            "columns": [
+                "role.id",
+                "role.name",
+                "role.self"
+            ]
+        }
+    ]
+}

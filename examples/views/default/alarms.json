@@ -1,0 +1,35 @@
+{
+    "version": "1",
+    "definitions": [
+        {
+            "name": "alarm",
+            "priority": 500,
+            "self": "alarm/alarms",
+            "columns": [
+                "id",
+                "status",
+                "type",
+                "severity",
+                "count",
+                "source.id",
+                "source.name",
+                "creationTime",
+                "text"
+            ]
+        },
+        {
+            "name": "alarmcopy",
+            "description": "Fields to use when copying alarms from one source to another",
+            "priority": 600,
+            "self": "alarm/alarms",
+            "columns": [
+                "status",
+                "type",
+                "severity",
+                "source.id",
+                "time",
+                "text"
+            ]
+        }
+    ]
+}

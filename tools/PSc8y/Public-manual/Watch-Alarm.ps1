@@ -6,13 +6,16 @@ Watch realtime alarms
 .DESCRIPTION
 Watch realtime alarms
 
+.LINK
+c8y alarms subscribe
+
 .EXAMPLE
 PS> Watch-Alarm -Device 12345
 
 Watch all alarms for a device
 
 .EXAMPLE
-Watch-Alarm -Device 12345 -DurationSec 600 | Foreach-object {
+Watch-Alarm -Device 12345 -Duration 600s | Foreach-object {
     $alarm = $_
     $daysOld = ($alarm.time - $alarm.creationTime).TotalDays
     if ($alarm.status -eq "ACTIVE" -and $daysOld -gt 1) {
@@ -23,88 +26,61 @@ Subscribe to realtime alarm notifications for a device, and update the alarm sev
 if the alarm is active and was first created more than 1 day ago.
 
 #>
-    [cmdletbinding(SupportsShouldProcess = $true,
-                   PositionalBinding=$true,
-                   HelpUri='',
-                   ConfirmImpact = 'None')]
+    [cmdletbinding(PositionalBinding=$true,
+                   HelpUri='')]
     [Alias()]
     [OutputType([object])]
     Param(
         # Device ID
         [Parameter(ValueFromPipeline=$true,
                    ValueFromPipelineByPropertyName=$true)]
-        [object[]]
+        [object]
         $Device,
 
-        # Start date or date and time of alarm occurrence. (required)
+        # Duration to subscribe for. It accepts a duration, i.e. 1ms, 0.5s, 1m etc.
         [Parameter()]
-        [int]
-        $DurationSec,
+        [string]
+        $Duration,
 
         # End date or date and time of alarm occurrence.
         [Parameter()]
-        [string]
+        [int]
         $Count,
 
-        # Outputfile
+        # Filter by realtime action types, i.e. CREATE,UPDATE,DELETE
         [Parameter()]
-        [string]
-        $OutputFile,
-
-        # NoProxy
-        [Parameter()]
-        [switch]
-        $NoProxy,
-
-        # Session path
-        [Parameter()]
-        [string]
-        $Session
+        [ValidateSet('CREATE','UPDATE','DELETE','')]
+        [string[]]
+        $ActionTypes
     )
+    DynamicParam {
+        Get-ClientCommonParameters -Type "Get"
+    }
 
     Begin {
-        $Parameters = @{}
-        if ($PSBoundParameters.ContainsKey("DurationSec")) {
-            $Parameters["duration"] = $DurationSec
-        }
-        if ($PSBoundParameters.ContainsKey("Count")) {
-            $Parameters["count"] = $Count
-        }
-        if ($PSBoundParameters.ContainsKey("OutputFile")) {
-            $Parameters["outputFile"] = $OutputFile
-        }
-        if ($PSBoundParameters.ContainsKey("NoProxy")) {
-            $Parameters["noProxy"] = $NoProxy
-        }
-        if ($PSBoundParameters.ContainsKey("Session")) {
-            $Parameters["session"] = $Session
-        }
-        if ($PSBoundParameters.ContainsKey("Session")) {
-            $Parameters["dryRun"] = $Session
+        if ($env:C8Y_DISABLE_INHERITANCE -ne $true) {
+            # Inherit preference variables
+            Use-CallerPreference -Cmdlet $PSCmdlet -SessionState $ExecutionContext.SessionState
         }
 
+        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "alarms subscribe"
+        $ClientOptions = Get-ClientOutputOption $PSBoundParameters
+        $TypeOptions = @{
+            Type = "application/json"
+            ItemType = ""
+            BoundParameters = $PSBoundParameters
+        }
     }
 
     Process {
-        $id = PSc8y\Expand-Id $Device
-        if ($id) {
-            $Parameters["device"] = PSc8y\Expand-Id $Device
-        }
 
-        if (!$Force -and
-            !$WhatIfPreference -and
-            !$PSCmdlet.ShouldProcess(
-                (PSc8y\Get-C8ySessionProperty -Name "tenant"),
-                (Format-ConfirmationMessage -Name $PSCmdlet.MyInvocation.InvocationName -InputObject $item)
-            )) {
-            continue
+        if ($ClientOptions.ConvertToPS) {
+            c8y alarms subscribe $c8yargs `
+            | ConvertFrom-ClientOutput @TypeOptions
         }
-        
-        Invoke-ClientCommand `
-            -Noun "alarms" `
-            -Verb "subscribe" `
-            -Parameters $Parameters `
-            -Type "application/json"
+        else {
+            c8y alarms subscribe $c8yargs
+        }
     }
 
     End {}

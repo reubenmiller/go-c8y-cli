@@ -2,10 +2,13 @@
 Function New-TenantOption {
 <#
 .SYNOPSIS
-New tenant option
+Create tenant option
 
 .DESCRIPTION
-New tenant option
+Create tenant option
+
+.LINK
+https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/tenantoptions_create
 
 .EXAMPLE
 PS> New-TenantOption -Category "c8y_cli_tests" -Key "$option1" -Value "1"
@@ -14,10 +17,8 @@ Create a tenant option
 
 
 #>
-    [cmdletbinding(SupportsShouldProcess = $true,
-                   PositionalBinding=$true,
-                   HelpUri='',
-                   ConfirmImpact = 'High')]
+    [cmdletbinding(PositionalBinding=$true,
+                   HelpUri='')]
     [Alias()]
     [OutputType([object])]
     Param(
@@ -27,124 +28,51 @@ Create a tenant option
         $Category,
 
         # Key of option (required)
-        [Parameter(Mandatory = $true)]
-        [string]
+        [Parameter(Mandatory = $true,
+                   ValueFromPipeline=$true,
+                   ValueFromPipelineByPropertyName=$true)]
+        [object[]]
         $Key,
 
         # Value of option (required)
         [Parameter(Mandatory = $true)]
         [string]
-        $Value,
-
-        # Cumulocity processing mode
-        [Parameter()]
-        [AllowNull()]
-        [AllowEmptyString()]
-        [ValidateSet("PERSISTENT", "QUIESCENT", "TRANSIENT", "CEP", "")]
-        [string]
-        $ProcessingMode,
-
-        # Template (jsonnet) file to use to create the request body.
-        [Parameter()]
-        [string]
-        $Template,
-
-        # Variables to be used when evaluating the Template. Accepts a file path, json or json shorthand, i.e. "name=peter"
-        [Parameter()]
-        [string]
-        $TemplateVars,
-
-        # Show the full (raw) response from Cumulocity including pagination information
-        [Parameter()]
-        [switch]
-        $Raw,
-
-        # Write the response to file
-        [Parameter()]
-        [string]
-        $OutputFile,
-
-        # Ignore any proxy settings when running the cmdlet
-        [Parameter()]
-        [switch]
-        $NoProxy,
-
-        # Specifiy alternative Cumulocity session to use when running the cmdlet
-        [Parameter()]
-        [string]
-        $Session,
-
-        # TimeoutSec timeout in seconds before a request will be aborted
-        [Parameter()]
-        [double]
-        $TimeoutSec,
-
-        # Don't prompt for confirmation
-        [Parameter()]
-        [switch]
-        $Force
+        $Value
     )
+    DynamicParam {
+        Get-ClientCommonParameters -Type "Create", "Template"
+    }
 
     Begin {
-        $Parameters = @{}
-        if ($PSBoundParameters.ContainsKey("Category")) {
-            $Parameters["category"] = $Category
-        }
-        if ($PSBoundParameters.ContainsKey("Key")) {
-            $Parameters["key"] = $Key
-        }
-        if ($PSBoundParameters.ContainsKey("Value")) {
-            $Parameters["value"] = $Value
-        }
-        if ($PSBoundParameters.ContainsKey("ProcessingMode")) {
-            $Parameters["processingMode"] = $ProcessingMode
-        }
-        if ($PSBoundParameters.ContainsKey("Template") -and $Template) {
-            $Parameters["template"] = $Template
-        }
-        if ($PSBoundParameters.ContainsKey("TemplateVars") -and $TemplateVars) {
-            $Parameters["templateVars"] = $TemplateVars
-        }
-        if ($PSBoundParameters.ContainsKey("OutputFile")) {
-            $Parameters["outputFile"] = $OutputFile
-        }
-        if ($PSBoundParameters.ContainsKey("NoProxy")) {
-            $Parameters["noProxy"] = $NoProxy
-        }
-        if ($PSBoundParameters.ContainsKey("Session")) {
-            $Parameters["session"] = $Session
-        }
-        if ($PSBoundParameters.ContainsKey("TimeoutSec")) {
-            $Parameters["timeout"] = $TimeoutSec * 1000
-        }
 
         if ($env:C8Y_DISABLE_INHERITANCE -ne $true) {
             # Inherit preference variables
             Use-CallerPreference -Cmdlet $PSCmdlet -SessionState $ExecutionContext.SessionState
         }
+
+        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "tenantoptions create"
+        $ClientOptions = Get-ClientOutputOption $PSBoundParameters
+        $TypeOptions = @{
+            Type = "application/vnd.com.nsn.cumulocity.option+json"
+            ItemType = ""
+            BoundParameters = $PSBoundParameters
+        }
     }
 
     Process {
-        foreach ($item in @("")) {
 
-            if (!$Force -and
-                !$WhatIfPreference -and
-                !$PSCmdlet.ShouldProcess(
-                    (PSc8y\Get-C8ySessionProperty -Name "tenant"),
-                    (Format-ConfirmationMessage -Name $PSCmdlet.MyInvocation.InvocationName -InputObject $item)
-                )) {
-                continue
-            }
-
-            Invoke-ClientCommand `
-                -Noun "tenantOptions" `
-                -Verb "create" `
-                -Parameters $Parameters `
-                -Type "application/vnd.com.nsn.cumulocity.option+json" `
-                -ItemType "" `
-                -ResultProperty "" `
-                -Raw:$Raw
+        if ($ClientOptions.ConvertToPS) {
+            $Key `
+            | Group-ClientRequests `
+            | c8y tenantoptions create $c8yargs `
+            | ConvertFrom-ClientOutput @TypeOptions
         }
+        else {
+            $Key `
+            | Group-ClientRequests `
+            | c8y tenantoptions create $c8yargs
+        }
+        
     }
 
     End {}

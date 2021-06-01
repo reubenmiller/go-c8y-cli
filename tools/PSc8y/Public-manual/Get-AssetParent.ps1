@@ -24,11 +24,10 @@ Get-AssetParent -RootParent
 Returns the root parent. In most cases this will be the agent
 
 #>
-    [cmdletbinding(SupportsShouldProcess = $true,
+    [cmdletbinding(
         PositionalBinding=$true,
         DefaultParameterSetName = "ByLevel",
-        HelpUri='',
-        ConfirmImpact = 'None')]
+        HelpUri='')]
     Param(
         # Asset id, name or object. Wildcards accepted
         [Parameter(
@@ -63,7 +62,7 @@ Returns the root parent. In most cases this will be the agent
         # Get list of ids
         $Ids = Expand-Id $Asset
         
-        $Results = foreach ($iasset in @(Get-ManagedObjectCollection -Device $Ids -WithParents))
+        $Results = foreach ($iasset in @(Get-ManagedObjectCollection -Ids $Ids -WithParents -AsPSObject))
         {
             $Parents = @($iasset.assetParents.references.managedObject | Foreach-Object {
                 if ($null -ne $_.id) {

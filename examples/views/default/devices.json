@@ -1,0 +1,18 @@
+{
+    "version": "1",
+    "definitions": [
+        {
+            "name": "device/agent",
+            "priority": 500,
+            "fragments": ["c8y_IsDevice"],
+            "columns": [
+                "id",
+                "name",
+                "type",
+                "owner",
+                "lastUpdated",
+                "c8y_Availability.status"
+            ]
+        }
+    ]
+}

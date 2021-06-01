@@ -3,7 +3,7 @@
 Describe -Name "Get-MeasurementCollection" {
     BeforeEach {
         $Device = PSc8y\New-TestDevice
-        $Measurement = New-TestMeasurement -Device $Device.id -Type "TempReading"
+        $Measurement = New-Measurement -Template "test.measurement.jsonnet" -Device $Device.id -Type "TempReading"
 
     }
 

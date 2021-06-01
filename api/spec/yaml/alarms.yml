@@ -9,7 +9,7 @@ information:
 endpoints:
   - name: getAlarmCollection
     method: GET
-    description: Get a collection of alarms based on filter parameters
+    description: Get alarm collection
     descriptionLong: Get a collection of alarms based on filter parameters
     examples:
       powershell:
@@ -94,8 +94,8 @@ endpoints:
     method: POST
     path: alarm/alarms
     accept: application/vnd.com.nsn.cumulocity.alarm+json
-    description: 'Create a new alarm'
-    descriptionLong: Create a new alarm on a device or agent.
+    description: 'Create alarm'
+    descriptionLong: Create an alarm on a device or agent.
     examples:
       powershell:
         - description: Create a new alarm for device
@@ -120,7 +120,7 @@ endpoints:
     body:
       - name: device
         type: '[]device'
-        required: true
+        required: false
         pipeline: true
         property: source.id
         description: The ManagedObject that the alarm originated from
@@ -161,12 +161,13 @@ endpoints:
       - "text"
       - "time"
       - "severity"
+      - "source.id"
 
   - name: updateAlarmCollection
     method: PUT
     path: alarm/alarms
-    description: Update a collection of alarms. Currently only the status of alarms can be changed
-    descriptionLong: Update the status of a collection of alarms by using a filter
+    description: Update alarm collection
+    descriptionLong: Update the status of a collection of alarms by using a filter. Currently only the status of alarms can be changed
     examples:
       powershell:
         - description: Update the status of all active alarms on a device to ACKNOWLEDGED
@@ -235,7 +236,7 @@ endpoints:
         description: End date or date and time of alarm occurrence.
 
   - name: getAlarm
-    description: 'Get alarm/s'
+    description: 'Get alarm'
     descriptionLong: Get an alarm by its id
     method: GET
     path: alarm/alarms/{id}
@@ -253,7 +254,7 @@ endpoints:
         powershell: Get-Alarm
     pathParameters:
       - name: id
-        type: string
+        type: '[]id'
         pipeline: true
         required: true
         description: Alarm id
@@ -262,7 +263,7 @@ endpoints:
     method: PUT
     path: alarm/alarms/{id}
     accept: application/vnd.com.nsn.cumulocity.alarm+json
-    description: Update an alarm
+    description: Update alarm
     descriptionLong: Update an alarm by its id
     examples:
       powershell:
@@ -323,13 +324,13 @@ endpoints:
 
     pathParameters:
       - name: id
-        type: string
+        type: '[]id'
         pipeline: true
         description: Alarm id
         required: true
 
   - name: deleteAlarmCollection
-    description: 'Delete a collection of alarms'
+    description: Delete alarm collection
     descriptionLong: Delete a collection of alarms by a given filter
     examples:
       powershell:

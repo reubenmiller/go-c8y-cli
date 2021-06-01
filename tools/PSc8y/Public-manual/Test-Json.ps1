@@ -42,9 +42,6 @@ Returns true if the input data is valid json
                 InputObject = $InputObject
                 ErrorAction = "Stop"
             }
-            if ($PSVersionTable.PSVersion.Major -gt 5) {
-                $JSONArgs.Depth = 100
-            }
             $null = ConvertFrom-Json @JSONArgs
             $IsValid = $true
         } catch {

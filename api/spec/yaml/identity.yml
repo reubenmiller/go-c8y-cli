@@ -9,8 +9,8 @@ information:
 endpoints:
   - name: getExternalIDCollection
     method: GET
-    description: Get a collection of external ids based on filter parameters
-    descriptionLong: Get a collection of external ids based on filter parameters
+    description: Get external id collection
+    descriptionLong: Get a collection of external ids related to an existing managed object
     path: identity/globalIds/{device}/externalIds
     accept: application/vnd.com.nsn.cumulocity.externalIdCollection+json
     collectionType: application/vnd.com.nsn.cumulocity.externalId+json
@@ -30,8 +30,11 @@ endpoints:
             - PSc8y\Remove-ManagedObject -Id $Device.id
 
       go:
-        - description: Get a list of external ids
-          command: c8y identity list
+        - description: Get a list of external ids for a device
+          command: c8y identity list --device 12345
+
+        - description: Get the external ids for each device using pipeline
+          command: c8y devices list | c8y identity list
     pathParameters:
       - name: device
         type: '[]device'
@@ -67,12 +70,14 @@ endpoints:
     pathParameters:
       - name: type
         type: string
-        required: true
+        required: false
+        default: c8y_Serial
         description: External identity type
 
       - name: name
         type: string
         required: true
+        pipeline: true
         description: External identity id/name
 
   - name: deleteExternalID
@@ -100,20 +105,22 @@ endpoints:
     pathParameters:
       - name: type
         type: string
-        required: true
+        required: false
+        default: c8y_Serial
         description: External identity type
 
       - name: name
         type: string
         required: true
+        pipeline: true
         description: External identity id/name
 
   - name: newExternalID
     method: POST
     path: identity/globalIds/{device}/externalIds
     accept: application/vnd.com.nsn.cumulocity.externalId+json
-    description: 'Create a new external id'
-    descriptionLong: 'Create a new external id'
+    description: Create external id
+    descriptionLong: Create a new external id for an existing managed object
     alias:
         go: create
         powershell: New-ExternalId
@@ -131,13 +138,17 @@ endpoints:
           beforeEach:
               - $my_SerialNumber = New-RandomString -Prefix "my_SerialNumber"
               - $Device = New-TestDevice
-          command: Get-Device $Device.id | New-ExternalId -Type "$my_SerialNumber" -Name "myserialnumber"
+          command: 'Get-Device $Device.id | New-ExternalId -Type "$my_SerialNumber" -Template "{externalId: input.value.name}"'
           afterEach:
               - PSc8y\Remove-ManagedObject -Id $Device.id
 
       go:
         - description: Create external identity
           command: c8y identity create --device 1234 --type test --name myserialnumber
+
+        - description: Create an external identity by using the .name property of the device (via the input template variable)
+          command: 'c8y devices list | c8y identity create --type c8y_Serial --template "{ externalId: input.value.name }"'
+
     pathParameters:
       - name: device
         type: '[]device'
@@ -147,11 +158,17 @@ endpoints:
     body:
       - name: type
         type: string
-        required: true
+        required: false
+        default: c8y_Serial
         description: The type of the external identifier as string, e.g. 'com_cumulocity_model_idtype_SerialNumber'.
 
       - name: name
         property: externalId
         type: string
-        required: true
+        required: false
         description: The identifier used in the external system that Cumulocity interfaces with.
+    bodyTemplateOptions:
+      enabled: true
+    bodyRequiredKeys:
+      - "type"
+      - "externalId"

@@ -1,11 +1,15 @@
 
 #region imports
+
+# Add alias to c8y binary
+Set-Alias -Name "c8y" -Value (Get-ClientBinary) -Scope "Global"
+
 #
 # Create session folder
 #
 $HomePath = Get-SessionHomePath
 
-if (!(Test-Path $HomePath)) {
+if ($HomePath -and !(Test-Path $HomePath)) {
     Write-Host "Creating home directory [$HomePath]"
     $null = New-Item -Path $HomePath -ItemType Directory
 }
@@ -22,10 +26,15 @@ if ($script:IsLinux -or $script:IsMacOS) {
     }
 }
 
+# Load c8y completions for powershell
+c8y completion powershell | Out-String | Invoke-Expression
+
+# Session
+Register-ArgumentCompleter -CommandName "Set-Session" -ParameterName Session -ScriptBlock $script:CompletionSession
+
 # Set environment variables if a session is set via the C8Y_SESSION env variable
 $ExistingSession = Get-Session -WarningAction SilentlyContinue -ErrorAction SilentlyContinue
 if ($ExistingSession) {
-    Set-EnvironmentVariablesFromSession
 
     # Display current session
     $ConsoleMessage = $ExistingSession | Out-String
@@ -77,12 +86,14 @@ $script:Aliases = @{
     childassets = "Get-ChildAssetCollection"
 
     # utilities
-    json = "ConvertTo-Json"
-    tojson = "ConvertTo-Json"
-    fromjson = "ConvertFrom-Json"
+    json = "ConvertTo-NestedJson"
+    tojson = "ConvertTo-NestedJson"
+    fromjson = "ConvertFrom-JsonStream"
     rest = "Invoke-ClientRequest"
     base64ToUtf8 = "ConvertFrom-Base64String"
     utf8Tobase64 = "ConvertTo-Base64String"
+    iterate = "Invoke-ClientIterator"
+    batch = "Group-ClientRequests"
 
     # session
     session = "Get-Session"
@@ -90,47 +101,3 @@ $script:Aliases = @{
 
 Register-Alias
 #endregion imports
-
-#region tab completion
-# allow -Session params to be tab-completed
-
-if (Get-Command -Name "Import-PowerShellDataFile" -ErrorAction SilentlyContinue) {
-    # Note: Test-ModuleManifest sometimes throws an error:
-    # "collection was modified; enumeration operation may not execute"
-    # Import-PowerShellDataFile seems to be more reliable
-    $Manifest = Import-PowerShellDataFile -Path $PSScriptRoot\PSc8y.psd1
-} else {
-    $Manifest = Test-ModuleManifest -Path $PSScriptRoot\PSc8y.psd1
-}
-
-$ModulePrefix = $Manifest.Prefix
-
-$ModuleCommands = @( $Manifest.ExportedFunctions.Keys ) `
-    | ForEach-Object {
-        # Note: Different PowerShell version handle internal function names 
-        # slightly differenty (some with prefix sometimes without), so we always
-        # look for both of them.
-        #
-        $Name = "$_"
-        $NameWithoutPrefix = $Name.Replace("-${ModulePrefix}", "-")
-
-        if (Test-Path "Function:\$Name") {
-            Get-Item "Function:\$Name"
-        } elseif (Test-Path "Function:\$NameWithoutPrefix") {
-            Get-Item "Function:\$NameWithoutPrefix"
-        } else {
-            throw "Could not find function '$Name'"
-        }
-    }
-
-try {
-    if (Get-Command -Name Register-ArgumentCompleter -ErrorAction SilentlyContinue) {
-        $ModuleCommands | Register-ClientArgumentCompleter
-    }
-}
-catch {
-    # All this functionality is optional, so suppress errors
-    Write-Debug -Message "Error registering argument completer: $_"
-}
-
-#endregion tab completion

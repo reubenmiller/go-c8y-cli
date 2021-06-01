@@ -1,5 +1,5 @@
 // Device
-local randomType() = ["c8y_Linux", "c8y_MacOS", "c8y_Windows"][rand.int % 3];
+local randomType() = ["c8y_Linux", "c8y_MacOS", "c8y_Windows"][_.Int(3)];
 
 {
     name: var("name", "defaultName"),

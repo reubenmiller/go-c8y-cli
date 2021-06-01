@@ -2,13 +2,16 @@
 Function Reset-UserPassword {
 <#
 .SYNOPSIS
-Reset a user's password
+Reset user password
 
 .DESCRIPTION
 The password can be reset either by issuing a password reset email (default), or be specifying a new password.
 
+.LINK
+https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/users_resetUserPassword
+
 .EXAMPLE
-PS> Reset-UserPassword -Id $User.id -WhatIf 6>&1
+PS> Reset-UserPassword -Id $User.id -Dry
 
 Resets a user's password by sending a reset email to the user
 
@@ -19,10 +22,8 @@ Resets a user's password by generating a new password
 
 
 #>
-    [cmdletbinding(SupportsShouldProcess = $true,
-                   PositionalBinding=$true,
-                   HelpUri='',
-                   ConfirmImpact = 'High')]
+    [cmdletbinding(PositionalBinding=$true,
+                   HelpUri='')]
     [Alias()]
     [OutputType([object])]
     Param(
@@ -41,117 +42,42 @@ Resets a user's password by generating a new password
         # Tenant
         [Parameter()]
         [object]
-        $Tenant,
-
-        # Cumulocity processing mode
-        [Parameter()]
-        [AllowNull()]
-        [AllowEmptyString()]
-        [ValidateSet("PERSISTENT", "QUIESCENT", "TRANSIENT", "CEP", "")]
-        [string]
-        $ProcessingMode,
-
-        # Template (jsonnet) file to use to create the request body.
-        [Parameter()]
-        [string]
-        $Template,
-
-        # Variables to be used when evaluating the Template. Accepts a file path, json or json shorthand, i.e. "name=peter"
-        [Parameter()]
-        [string]
-        $TemplateVars,
-
-        # Show the full (raw) response from Cumulocity including pagination information
-        [Parameter()]
-        [switch]
-        $Raw,
-
-        # Write the response to file
-        [Parameter()]
-        [string]
-        $OutputFile,
-
-        # Ignore any proxy settings when running the cmdlet
-        [Parameter()]
-        [switch]
-        $NoProxy,
-
-        # Specifiy alternative Cumulocity session to use when running the cmdlet
-        [Parameter()]
-        [string]
-        $Session,
-
-        # TimeoutSec timeout in seconds before a request will be aborted
-        [Parameter()]
-        [double]
-        $TimeoutSec,
-
-        # Don't prompt for confirmation
-        [Parameter()]
-        [switch]
-        $Force
+        $Tenant
     )
+    DynamicParam {
+        Get-ClientCommonParameters -Type "Update", "Template"
+    }
 
     Begin {
-        $Parameters = @{}
-        if ($PSBoundParameters.ContainsKey("NewPassword")) {
-            $Parameters["newPassword"] = $NewPassword
-        }
-        if ($PSBoundParameters.ContainsKey("Tenant")) {
-            $Parameters["tenant"] = $Tenant
-        }
-        if ($PSBoundParameters.ContainsKey("ProcessingMode")) {
-            $Parameters["processingMode"] = $ProcessingMode
-        }
-        if ($PSBoundParameters.ContainsKey("Template") -and $Template) {
-            $Parameters["template"] = $Template
-        }
-        if ($PSBoundParameters.ContainsKey("TemplateVars") -and $TemplateVars) {
-            $Parameters["templateVars"] = $TemplateVars
-        }
-        if ($PSBoundParameters.ContainsKey("OutputFile")) {
-            $Parameters["outputFile"] = $OutputFile
-        }
-        if ($PSBoundParameters.ContainsKey("NoProxy")) {
-            $Parameters["noProxy"] = $NoProxy
-        }
-        if ($PSBoundParameters.ContainsKey("Session")) {
-            $Parameters["session"] = $Session
-        }
-        if ($PSBoundParameters.ContainsKey("TimeoutSec")) {
-            $Parameters["timeout"] = $TimeoutSec * 1000
-        }
 
         if ($env:C8Y_DISABLE_INHERITANCE -ne $true) {
             # Inherit preference variables
             Use-CallerPreference -Cmdlet $PSCmdlet -SessionState $ExecutionContext.SessionState
         }
+
+        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "users resetUserPassword"
+        $ClientOptions = Get-ClientOutputOption $PSBoundParameters
+        $TypeOptions = @{
+            Type = "application/vnd.com.nsn.cumulocity.user+json"
+            ItemType = ""
+            BoundParameters = $PSBoundParameters
+        }
     }
 
     Process {
-        foreach ($item in (PSc8y\Expand-User $Id)) {
-            if ($item) {
-                $Parameters["id"] = if ($item.id) { $item.id } else { $item }
-            }
 
-            if (!$Force -and
-                !$WhatIfPreference -and
-                !$PSCmdlet.ShouldProcess(
-                    (PSc8y\Get-C8ySessionProperty -Name "tenant"),
-                    (Format-ConfirmationMessage -Name $PSCmdlet.MyInvocation.InvocationName -InputObject $item)
-                )) {
-                continue
-            }
-
-            Invoke-ClientCommand `
-                -Noun "users" `
-                -Verb "resetUserPassword" `
-                -Parameters $Parameters `
-                -Type "application/vnd.com.nsn.cumulocity.user+json" `
-                -ItemType "" `
-                -ResultProperty "" `
-                -Raw:$Raw
+        if ($ClientOptions.ConvertToPS) {
+            $Id `
+            | Group-ClientRequests `
+            | c8y users resetUserPassword $c8yargs `
+            | ConvertFrom-ClientOutput @TypeOptions
         }
+        else {
+            $Id `
+            | Group-ClientRequests `
+            | c8y users resetUserPassword $c8yargs
+        }
+        
     }
 
     End {}

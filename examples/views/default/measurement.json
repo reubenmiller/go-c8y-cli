@@ -1,0 +1,36 @@
+{
+    "version": "1",
+    "definitions": [
+        {
+            "name": "measurement",
+            "priority": 500,
+            "contentType": "vnd.com.nsn.cumulocity.measurement",
+            "columns": [
+                "id",
+                "time",
+                "type",
+                "source.id",
+                "**.value",
+                "**.unit"
+            ]
+        },
+        {
+            "name": "supportedMeasurements",
+            "priority": 500,
+            "contentType": "json",
+            "fragments": ["c8y_SupportedMeasurements"],
+            "columns": [
+                "c8y_SupportedMeasurements.**"
+            ]
+        },
+        {
+            "name": "supportedSeries",
+            "priority": 500,
+            "contentType": "json",
+            "fragments": ["c8y_SupportedSeries"],
+            "columns": [
+                "c8y_SupportedSeries.**"
+            ]
+        }
+    ]
+}

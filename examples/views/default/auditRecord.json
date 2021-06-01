@@ -1,0 +1,20 @@
+{
+    "version": "1",
+    "definitions": [
+        {
+            "name": "auditRecord",
+            "priority": 500,
+            "contentType": "vnd.com.nsn.cumulocity.auditRecord",
+            "columns": [
+                "id",
+                "time",
+                "type",
+                "AuditSourceDevice:com_cumulocity_model_event_AuditSourceDevice.id",
+                "activity",
+                "text",
+                "user",
+                "source.id"
+            ]
+        }
+    ]
+}

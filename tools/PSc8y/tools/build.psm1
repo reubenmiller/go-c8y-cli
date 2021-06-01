@@ -14,6 +14,10 @@ $script:PrivateFunctions = @( Get-ChildItem -Path $ModuleRoot\Private\*.ps1 -Err
 
 $script:EnumDefinitions = @( Get-ChildItem -Path "$ModuleRoot\Enums\*.ps1" -ErrorAction SilentlyContinue )
 
+$script:CompletionDefinitions = @( Get-ChildItem -Path "$ModuleRoot\completions\*.ps1" -ErrorAction SilentlyContinue )
+
+$script:UtilitiesDefinitions = @( Get-ChildItem -Path "$ModuleRoot\utilities\*.ps1" -ErrorAction SilentlyContinue )
+
 function New-ModulePSMFile {
     $moduleFile = New-Item -Path $ArtifactRoot\$ModuleName\$ModuleName.psm1 -ItemType File -Force
 
@@ -35,6 +39,16 @@ function New-ModulePSMFile {
     Get-Content $EnumDefinitions | Out-String | Out-File -FilePath $moduleFile -Append
     "#endregion`n" | Out-File -FilePath $moduleFile -Append
 
+    # Add a region for Completions
+    "#region Completions" | Out-File -FilePath $moduleFile -Append
+    Get-Content $CompletionDefinitions | Out-String | Out-File -FilePath $moduleFile -Append
+    "#endregion`n" | Out-File -FilePath $moduleFile -Append
+
+    # Add a region for Utilities
+    "#region Utilities" | Out-File -FilePath $moduleFile -Append
+    Get-Content $UtilitiesDefinitions | Out-String | Out-File -FilePath $moduleFile -Append
+    "#endregion`n" | Out-File -FilePath $moduleFile -Append
+
     # Build a string to export only /public/psmexports functions from the PSModule.psm1 file.
     $publicFunctionNames = @( $PublicFunctions.BaseName )
     foreach ($publicFunction in $publicFunctionNames) {
@@ -49,6 +63,25 @@ function New-ModulePSMFile {
 
     # Add the remaining part of the psm1 file from template.
     Get-Content -Path "$ModuleRoot\tools\modulefile\PartTwo.ps1" | Out-File -FilePath $moduleFile -Append
+}
+
+Function Get-GitVersion {
+    Param()
+    $version = git describe
+
+    if ($LASTEXITCODE -ne 0) {
+        if ($Env:GITHUB_REF) {
+            $version = $Env:GITHUB_REF -replace ".+/", ""
+        }
+    }
+
+    $parts = $Version -split "-", 2
+
+    [pscustomobject]@{
+        Version = $parts[0] -replace "^v", ""
+        PreRelease = ($parts[1] -split "-", 2)[0]
+        IsPrerelease = $parts[1].Length -gt 0
+    }
 }
 
 function Update-ModuleManifestFunctions {
@@ -79,6 +112,24 @@ function Update-ModuleManifestFunctions {
     $ManifestFileContent = $ManifestFileContent.Replace('FunctionsToExport = "*"', $ManifestFunctionExportString)
     Set-Content -Path "$ManifestFile" -Value $ManifestFileContent.TrimEnd()
 }
+
+Function Set-ModuleManifestVersion {
+    Param(
+        [Parameter(
+            Mandatory = $true
+        )]
+        [string] $Path
+    )
+
+    # Update version info from the git tag
+    $VersionInfo = Get-GitVersion
+    Update-ModuleManifest -Path $Path -ModuleVersion $VersionInfo.Version
+
+    if ($VersionInfo.IsPrerelease) {
+        Update-ModuleManifest -Path $Path -Prerelease $VersionInfo.PreRelease
+    }
+}
+
 function Remove-ModuleManifestFunctions ($Path) {
     # Utility method to remove the list of functions from a manifest. This is specific to this modules manifest and
     # assumes the next item in the manifest file after the functions is a comment containing 'VariablesToExport'.
@@ -115,10 +166,14 @@ function Publish-ModuleArtifacts {
     # Copy the module into the dist folder
     Copy-Item -Path "$ModuleRoot\Dependencies\" -Filter "c8y*" -Destination "$ArtifactRoot\$ModuleName\Dependencies" -Recurse
     Copy-Item -Path "$ModuleRoot\format-data" -Destination "$ArtifactRoot\$ModuleName\" -Recurse
+    Copy-Item -Path "$ModuleRoot\Templates" -Destination "$ArtifactRoot\$ModuleName\" -Recurse
     Copy-Item -Path "$ModuleRoot\$ModuleName.psd1" -Destination "$ArtifactRoot\$ModuleName\" -Recurse
 
     # Construct the distributed .psm1 file.
     New-ModulePSMFile
+
+    # Update version
+    Set-ModuleManifestVersion -Path "$ArtifactRoot\$ModuleName\$ModuleName.psd1"
 
     # Package the module in /dist
     $zipFileName = "$ModuleName.zip"

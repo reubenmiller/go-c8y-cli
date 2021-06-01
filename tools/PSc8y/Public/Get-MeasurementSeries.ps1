@@ -2,10 +2,13 @@
 Function Get-MeasurementSeries {
 <#
 .SYNOPSIS
-Get a collection of measurements based on filter parameters
+Get measurement series
 
 .DESCRIPTION
 Get a collection of measurements based on filter parameters
+
+.LINK
+https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/measurements_getSeries
 
 .EXAMPLE
 PS> Get-MeasurementSeries -Device $Device.id -Series "c8y_Temperature.T" -DateFrom "1970-01-01" -DateTo "0s"
@@ -24,10 +27,8 @@ Get measurement series from a device (using pipeline)
 
 
 #>
-    [cmdletbinding(SupportsShouldProcess = $true,
-                   PositionalBinding=$true,
-                   HelpUri='',
-                   ConfirmImpact = 'None')]
+    [cmdletbinding(PositionalBinding=$true,
+                   HelpUri='')]
     [Alias()]
     [OutputType([object])]
     Param(
@@ -56,90 +57,42 @@ Get measurement series from a device (using pipeline)
         # End date or date and time of measurement occurrence. Defaults to the current time
         [Parameter()]
         [string]
-        $DateTo,
-
-        # Show the full (raw) response from Cumulocity including pagination information
-        [Parameter()]
-        [switch]
-        $Raw,
-
-        # Write the response to file
-        [Parameter()]
-        [string]
-        $OutputFile,
-
-        # Ignore any proxy settings when running the cmdlet
-        [Parameter()]
-        [switch]
-        $NoProxy,
-
-        # Specifiy alternative Cumulocity session to use when running the cmdlet
-        [Parameter()]
-        [string]
-        $Session,
-
-        # TimeoutSec timeout in seconds before a request will be aborted
-        [Parameter()]
-        [double]
-        $TimeoutSec
+        $DateTo
     )
+    DynamicParam {
+        Get-ClientCommonParameters -Type "Get"
+    }
 
     Begin {
-        $Parameters = @{}
-        if ($PSBoundParameters.ContainsKey("Series")) {
-            $Parameters["series"] = $Series
-        }
-        if ($PSBoundParameters.ContainsKey("AggregationType")) {
-            $Parameters["aggregationType"] = $AggregationType
-        }
-        if ($PSBoundParameters.ContainsKey("DateFrom")) {
-            $Parameters["dateFrom"] = $DateFrom
-        }
-        if ($PSBoundParameters.ContainsKey("DateTo")) {
-            $Parameters["dateTo"] = $DateTo
-        }
-        if ($PSBoundParameters.ContainsKey("OutputFile")) {
-            $Parameters["outputFile"] = $OutputFile
-        }
-        if ($PSBoundParameters.ContainsKey("NoProxy")) {
-            $Parameters["noProxy"] = $NoProxy
-        }
-        if ($PSBoundParameters.ContainsKey("Session")) {
-            $Parameters["session"] = $Session
-        }
-        if ($PSBoundParameters.ContainsKey("TimeoutSec")) {
-            $Parameters["timeout"] = $TimeoutSec * 1000
-        }
 
         if ($env:C8Y_DISABLE_INHERITANCE -ne $true) {
             # Inherit preference variables
             Use-CallerPreference -Cmdlet $PSCmdlet -SessionState $ExecutionContext.SessionState
         }
+
+        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "measurements getSeries"
+        $ClientOptions = Get-ClientOutputOption $PSBoundParameters
+        $TypeOptions = @{
+            Type = "application/json"
+            ItemType = ""
+            BoundParameters = $PSBoundParameters
+        }
     }
 
     Process {
-        $Parameters["device"] = PSc8y\Expand-Id $Device
 
-        if (!$Force -and
-            !$WhatIfPreference -and
-            !$PSCmdlet.ShouldProcess(
-                (PSc8y\Get-C8ySessionProperty -Name "tenant"),
-                (Format-ConfirmationMessage -Name $PSCmdlet.MyInvocation.InvocationName -InputObject $item)
-            )) {
-            continue
+        if ($ClientOptions.ConvertToPS) {
+            $Device `
+            | Group-ClientRequests `
+            | c8y measurements getSeries $c8yargs `
+            | ConvertFrom-ClientOutput @TypeOptions
         }
-
-        Invoke-ClientCommand `
-            -Noun "measurements" `
-            -Verb "getSeries" `
-            -Parameters $Parameters `
-            -Type "application/json" `
-            -ItemType "" `
-            -ResultProperty "" `
-            -Raw:$Raw `
-            -CurrentPage:$CurrentPage `
-            -TotalPages:$TotalPages `
-            -IncludeAll:$IncludeAll
+        else {
+            $Device `
+            | Group-ClientRequests `
+            | c8y measurements getSeries $c8yargs
+        }
+        
     }
 
     End {}

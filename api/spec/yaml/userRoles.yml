@@ -9,7 +9,8 @@ information:
 
 endpoints:
   - name: getRoleCollection
-    description: Get collection of user roles
+    description: Get role collection
+    descriptionLong: Get collection of user roles
     method: GET
     path: /user/roles
     accept: application/vnd.com.nsn.cumulocity.roleCollection+json
@@ -27,12 +28,13 @@ endpoints:
           command: c8y userRoles list --pageSize 100
 
   - name: addRoleToUser
-    description: Add role to a user
+    description: Add Role to user
+    descriptionLong: Add a role to an existing user
     method: POST
     path: /user/{tenant}/users/{user}/roles
     accept: application/vnd.com.nsn.cumulocity.roleReference+json
     alias:
-        go: addRoleTouser
+        go: addRoleToUser
         powershell: Add-RoleToUser
     examples:
       powershell:
@@ -58,7 +60,7 @@ endpoints:
             - PSc8y\Remove-User -Id $User.id
       go:
         - description: Add a role (ROLE_ALARM_READ) to a user
-          command: c8y userRoles addRoleTouser --user "myuser" --role "ROLE_ALARM_READ"
+          command: c8y userRoles addRoleToUser --user "myuser" --role "ROLE_ALARM_READ"
     pathParameters:
       - name: tenant
         type: tenant
@@ -76,9 +78,13 @@ endpoints:
         pipeline: true
         property: role.self
         description: User role id
+        pipelineAliases:
+          - self
+          - id
 
   - name: deleteRoleFromUser
-    description: Unassign/Remove role from a user
+    description: Unassign role from user
+    descriptionLong: Unassign/delete role from a user
     method: DELETE
     path: /user/{tenant}/users/{user}/roles/{role}
     alias:
@@ -105,6 +111,7 @@ endpoints:
       - name: role
         type: '[]role'
         required: true
+        pipeline: true
         description: Role name
 
       - name: tenant
@@ -113,8 +120,8 @@ endpoints:
         description: Tenant
 
   - name: addRoleToGroup
-    description: Add role to a group
-    descriptionLong: Assign a role to a user group
+    description: Add role to user group
+    descriptionLong: Add a role to an existing user group
     method: POST
     path: /user/{tenant}/groups/{group}/roles
     accept: application/vnd.com.nsn.cumulocity.roleReference+json
@@ -125,19 +132,19 @@ endpoints:
       powershell:
         - description: Add a role to a group using wildcards
           beforeEach:
-            - $Group = New-TestGroup -Name "customGroup1"
+            - $Group = New-TestUserGroup -Name "customGroup1"
             - $NamePattern = $Group.name.Substring(0, $Group.name.length - 2)
           command: Add-RoleToGroup -Group "${NamePattern}*" -Role "*ALARM_*"
           afterEach:
-            - PSc8y\Remove-Group -Id $Group.id
+            - PSc8y\Remove-UserGroup -Id $Group.id
 
         - description: Add a role to a group using wildcards (using pipeline)
           beforeEach:
-            - $Group = New-TestGroup -Name "customGroup1"
+            - $Group = New-TestUserGroup -Name "customGroup1"
             - $NamePattern = $Group.name.Substring(0, $Group.name.length - 2)
           command: Get-RoleCollection -PageSize 100 | Where-Object Name -like "*ALARM*" | Add-RoleToGroup -Group "${NamePattern}*"
           afterEach:
-            - PSc8y\Remove-Group -Id $Group.id
+            - PSc8y\Remove-UserGroup -Id $Group.id
 
       go:
         - description: Add a role to the admin group
@@ -160,9 +167,13 @@ endpoints:
         required: true
         property: role.self
         description: User role id
+        pipelineAliases:
+          - self
+          - id
 
   - name: deleteRoleFromGroup
-    description: Unassign/Remove role from a group
+    description: Unassign role from group
+    descriptionLong: Unassign/delete role from a group
     method: DELETE
     path: /user/{tenant}/groups/{group}/roles/{role}
     alias:
@@ -172,11 +183,11 @@ endpoints:
         powershell:
           - description: Remove a role from the given user group
             beforeEach:
-              - $UserGroup = PSc8y\New-TestGroup
+              - $UserGroup = PSc8y\New-TestUserGroup
               - Add-RoleToGroup -Group $UserGroup.id -Role "ROLE_MEASUREMENT_READ"
             command: Remove-RoleFromGroup -Group $UserGroup.id -Role "ROLE_MEASUREMENT_READ"
             afterEach:
-              - PSc8y\Remove-Group -Id $UserGroup.id
+              - PSc8y\Remove-UserGroup -Id $UserGroup.id
         go:
           - description: Remove a role from the given user
             command: c8y userRoles deleteRoleFromGroup --group "myuser" --role "ROLE_MEASUREMENT_READ"
@@ -189,6 +200,7 @@ endpoints:
       - name: role
         type: '[]role'
         required: true
+        pipeline: true
         description: Role name, e.g. ROLE_TENANT_MANAGEMENT_ADMIN
 
       - name: tenant
@@ -198,7 +210,8 @@ endpoints:
 
 
   - name: getRoleReferenceCollectionFromUser
-    description: Get collection of user role references from a user
+    description: Get role references from user
+    descriptionLong: Get collection of user role references from a user
     method: GET
     path: /user/{tenant}/users/{user}/roles
     accept: application/vnd.com.nsn.cumulocity.roleReferenceCollection+json
@@ -228,10 +241,12 @@ endpoints:
       - name: user
         type: '[]user'
         required: true
+        pipeline: true
         description: User
 
   - name: getRoleReferenceCollectionFromGroup
-    description: Get collection of user role references from a group
+    description: Get role references from user group
+    descriptionLong: Get collection of user role references from a group
     method: GET
     path: /user/{tenant}/groups/{group}/roles
     accept: application/vnd.com.nsn.cumulocity.roleReferenceCollection+json
@@ -244,7 +259,7 @@ endpoints:
       powershell:
         - description: Get a list of role references for a user group
           beforeEach:
-            - $Group = Get-GroupByName -Name "business"
+            - $Group = Get-UserGroupByName -Name "devices"
           command: Get-RoleReferenceCollectionFromGroup -Group $Group.id
       go:
         - description: Get a list of role references for a user group
@@ -258,4 +273,5 @@ endpoints:
       - name: group
         type: '[]usergroup'
         required: true
+        pipeline: true
         description: Group id

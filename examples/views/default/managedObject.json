@@ -1,0 +1,19 @@
+{
+    "version": "1",
+    "definitions": [
+        {
+            "name": "managedObject",
+            "priority": 500,
+            "contentType": "vnd.com.nsn.cumulocity.managedObject",
+            "columns": [
+                "id",
+                "name",
+                "type",
+                "contentType",
+                "length",
+                "owner",
+                "lastUpdated"
+            ]
+        }
+    ]
+}

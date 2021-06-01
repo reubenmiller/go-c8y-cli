@@ -9,9 +9,9 @@ information:
 
 endpoints:
   - name: getBinaryCollection
-    description: 'Get collection of inventory binaries'
+    description: Get binary collection
     descriptionLong: >
-      Get a list of inventory binaries. The results include the meta information about binary and not the binary itself.
+      Get a collection of inventory binaries. The results include the meta information about binary and not the binary itself.
     method: GET
     path: /inventory/binaries
     accept: application/vnd.com.nsn.cumulocity.managedObjectCollection+json
@@ -35,7 +35,7 @@ endpoints:
           command: c8y binaries list --pageSize 100
 
   - name: download
-    description: 'Get binary'
+    description: Download binary
     descriptionLong: >
       Download a binary stored in Cumulocity and display it on the console. For non text based binaries
       or if the output should be saved to file, the output parameter should be used to write the file directly to a local
@@ -61,7 +61,7 @@ endpoints:
             - $File = New-TestFile
             - $Binary = PSc8y\New-Binary -File $File
 
-          command: Get-Binary -Id $Binary.id -OutputFile ./download-binary1.txt
+          command: Get-Binary -Id $Binary.id -OutputFileRaw ./download-binary1.txt
           afterEach:
             - if (Test-Path "./download-binary1.txt") { Remove-Item ./download-binary1.txt }
             - Remove-Item $File
@@ -72,17 +72,17 @@ endpoints:
           command: c8y binaries get --id 12345
 
         - description: Get a binary and save it to a file
-          command: c8y binaries get --id 12345 --outputFile "./download-binary1.txt"
+          command: c8y binaries get --id 12345 --outputFileRaw "./download-binary1.txt"
     pathParameters:
       - name: id
-        type: string
+        type: '[]id'
         required: true
         pipeline: true
         description: Inventory binary id
 
   - name: newBinary
-    description: 'New inventory binary'
-    descriptionLong: Upload a new binary to Cumulocity
+    description: Create binary
+    descriptionLong: Create/upload a new binary to Cumulocity
     method: POST
     path: /inventory/binaries
     accept: application/vnd.com.nsn.cumulocity.managedObject+json
@@ -104,7 +104,7 @@ endpoints:
           beforeEach:
             - $File = New-TestFile
             - $FileName = (Get-Item $File).Name
-          command: New-Binary -File $File -Data @{ c8y_Global = @{}; type = "c8y_upload" }
+          command: New-Binary -File $File -Type "c8y_upload" -Data @{ c8y_Global = @{} }
           afterEach:
             - Remove-Item $File
             - Find-ManagedObjectCollection -Query "has(c8y_IsBinary) and (name eq '$FileName')" | Remove-Binary
@@ -114,20 +114,27 @@ endpoints:
           command: c8y binaries create --file ./output.log
         
         - description: Upload a config file and make it globally accessible for all users
-          command: c8y binaries create --file "myConfig.json" --data "c8y_Global={},type=c8y_upload"
+          command: c8y binaries create --file "myConfig.json" --type c8y_upload --data "c8y_Global={}"
 
+    bodyContent:
+      type: formdata
     body:
       - name: file
         type: file
         required: true
         description: File to be uploaded as a binary
+
+      - name: type
+        type: string
+        required: false
+        description: Custom type. If left blank, the MIME type will be detected from the file extension
       
       - name: data
         type: json
         description: Additional properties to be added to the binary.
 
   - name: updateBinary
-    description: 'Update inventory binary'
+    description: Update binary
     descriptionLong: >
       Update an existing binary
     method: PUT
@@ -155,7 +162,7 @@ endpoints:
           command: c8y binaries update --id 12345 --file ./output.log
     pathParameters:
       - name: id
-        type: string
+        type: '[]id'
         required: true
         pipeline: true
         description: Inventory binary id
@@ -167,12 +174,12 @@ endpoints:
         description: File to be uploaded as a binary
 
   - name: deleteBinary
-    description: 'Delete binary'
+    description: Delete binary
     descriptionLong: Delete a binary from the tenant. This delete operation can not be undone.
     method: DELETE
     path: /inventory/binaries/{id}
     alias:
-        go: deleteBinary
+        go: delete
         powershell: Remove-Binary
     examples:
       powershell:
@@ -189,7 +196,7 @@ endpoints:
           command: c8y binaries delete --id 12345
     pathParameters:
       - name: id
-        type: string
+        type: '[]id'
         required: true
         pipeline: true
         description: Inventory binary id

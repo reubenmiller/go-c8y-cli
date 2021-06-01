@@ -1,0 +1,15 @@
+{
+    "version": "1",
+    "definitions": [
+        {
+            "name": "externalId",
+            "priority": 500,
+            "contentType": "vnd.com.nsn.cumulocity.externalId",
+            "columns": [
+                "type",
+                "externalId",
+                "managedObject"
+            ]
+        }
+    ]
+}

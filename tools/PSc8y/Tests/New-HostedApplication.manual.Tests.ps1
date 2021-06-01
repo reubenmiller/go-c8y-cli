@@ -16,7 +16,7 @@ Describe -Name "New-HostedApplication" {
                 -ResourcesUrl "/subPath" `
                 -Availability "MARKET" `
                 -ContextPath $ContextPath `
-                -Verbose 4> $VerboseFile
+                -Verbose 2> $VerboseFile
 
             $LASTEXITCODE | Should -Be 0
             $application | Should -Not -BeNullOrEmpty
@@ -33,6 +33,27 @@ Describe -Name "New-HostedApplication" {
             $Binaries | Should -BeNullOrEmpty
         }
 
+        It "Create web application using dry run" {
+            $ContextPath = ($AppName -replace " ", "").ToLower()
+
+            $output = PSc8y\New-HostedApplication `
+                -Name $AppName `
+                -ResourcesUrl "/subPath" `
+                -Availability "MARKET" `
+                -ContextPath $ContextPath `
+                -Dry -DryFormat json
+
+            $LASTEXITCODE | Should -Be 0
+            $output | Should -Not -BeNullOrEmpty
+            $request = $output | ConvertFrom-Json
+            $request.path | Should -BeExactly "/application/applications"
+            $request.body.name | Should -BeExactly $AppName 
+            $request.body.type | Should -BeExactly "HOSTED" 
+            $request.body.resourcesUrl | Should -BeExactly "/subPath" 
+            $request.body.availability | Should -BeExactly "MARKET" 
+
+        }
+
         AfterEach {
             PSc8y\Get-Application -Id $AppName | PSc8y\Remove-Application
 
@@ -47,7 +68,7 @@ Describe -Name "New-HostedApplication" {
             $AppName = New-RandomString -Prefix "app"
         }
 
-        It -Skip "Create a new web application from a folder" {
+        It "Create a new web application from a folder" {
             $application = PSc8y\New-HostedApplication -File $WebAppSource -Name $AppName
             $LASTEXITCODE | Should -Be 0
             $application | Should -Not -BeNullOrEmpty
@@ -56,7 +77,7 @@ Describe -Name "New-HostedApplication" {
             $application.resourcesUrl | Should -BeExactly "/"
             $application.activeVersionId | Should -MatchExactly "^\d+$"
 
-            $webResponse = Invoke-ClientRequest -Uri "apps/$AppName"
+            $webResponse = Invoke-ClientRequest -Uri "apps/$AppName" -Accept "text/html"
             $LASTEXITCODE | Should -BeExactly 0
             $webResponse | Out-String | Should -BeLike "*Hi there. This is a test web application*"
         }
@@ -73,7 +94,7 @@ Describe -Name "New-HostedApplication" {
             $application = PSc8y\New-HostedApplication -File $WebAppSource -Name $AppName
         }
 
-        It -Skip "Update an existing web application from a folder" {
+        It "Update an existing web application from a folder" {
             $application | Should -Not -BeNullOrEmpty
             $application.name | Should -BeExactly $AppName
             $application.contextPath | Should -BeExactly $AppName
@@ -85,11 +106,11 @@ Describe -Name "New-HostedApplication" {
             $applicationAfterUpdate.activeVersionId | Should -MatchExactly "^\d+$"
             $applicationAfterUpdate.activeVersionId | Should -Not -BeExactly $application.activeVersionId
 
-            $webResponse = Invoke-ClientRequest -Uri "apps/$AppName"
+            $webResponse = Invoke-ClientRequest -Uri "apps/$AppName" -Accept "text/html"
             $webResponse | Out-String | Should -BeLike "*Hi there. This is a test web application*"
         }
 
-        It -Skip "Uploads new applicaiton but does not activate it" {
+        It -Tag "TODO" "Uploads new applicaiton but does not activate it" {
             $application = Get-Application -Id $AppName
             $application | Should -Not -BeNullOrEmpty
             $application.name | Should -BeExactly $AppName
@@ -102,7 +123,7 @@ Describe -Name "New-HostedApplication" {
             $applicationAfterUpdate.activeVersionId | Should -MatchExactly "^\d+$"
             $applicationAfterUpdate.activeVersionId | Should -BeExactly $application.activeVersionId
 
-            $webResponse = Invoke-ClientRequest -Uri "apps/$AppName"
+            $webResponse = Invoke-ClientRequest -Uri "apps/$AppName" -Accept "text/html"
             $webResponse | Out-String | Should -BeLike "*Hi there. This is a test web application*"
         }
 

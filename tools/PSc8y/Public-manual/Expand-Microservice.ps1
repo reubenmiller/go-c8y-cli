@@ -50,7 +50,7 @@ Get all the microservice object (with app in their name). Note the Expand cmdlet
             }
 
             if ($iApp.applicationId) {
-                PSc8y\Get-Microservice -Id $iApp.applicationId -WhatIf:$false
+                PSc8y\Get-Microservice -Id $iApp.applicationId -Dry:$false -AsPSObject
                 continue
             }
 
@@ -59,7 +59,7 @@ Get all the microservice object (with app in their name). Note the Expand cmdlet
                 $iApp
             } else {
                 # Provided with a query
-                PSc8y\Get-MicroserviceCollection -PageSize 2000 |
+                PSc8y\Get-MicroserviceCollection -PageSize 2000 -AsPSObject |
                         Where-Object { $_.name -like "$iApp" }
             }
         }

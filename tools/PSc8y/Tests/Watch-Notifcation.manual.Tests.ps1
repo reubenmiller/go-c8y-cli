@@ -18,7 +18,7 @@ Describe -Name "Watch-Notifcation" {
             Start-Sleep -Seconds 2
             $DeviceID = $args[2]
             @(1..60) | ForEach-Object {
-                New-TestMeasurement -Device $DeviceID -Force
+                New-Measurement -Template "test.measurement.jsonnet" -Device $DeviceID -Force
                 Start-Sleep -Milliseconds 1000
             }
         }
@@ -27,7 +27,7 @@ Describe -Name "Watch-Notifcation" {
     It "Watch measurements for a time period" {
         $StartTime = Get-Date
 
-        [array] $Response = PSc8y\Watch-Notification -Channel ("/measurements/" + $Device.id) -DurationSec 60 | ForEach-Object {
+        [array] $Response = PSc8y\Watch-Notification -Channel ("/measurements/" + $Device.id) -Duration "60s" | ForEach-Object {
             $_ | Add-Member -MemberType NoteProperty -Name "PSc8yTimestamp" -Value (Get-Date) -PassThru
         }
         $LASTEXITCODE | Should -Be 0

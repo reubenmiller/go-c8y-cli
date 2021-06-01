@@ -3,7 +3,6 @@
 
 Describe -Name "Get-SessionHomePath" {
     BeforeAll {
-        . "$PSScriptRoot/New-TemporaryDirectory.ps1"
         $original = $env:C8Y_SESSION_HOME
     }
 

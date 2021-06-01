@@ -1,0 +1,17 @@
+{
+    "version": "1",
+    "definitions": [
+        {
+            "name": "deviceGroup",
+            "priority": 500,
+            "fragments": ["c8y_IsDeviceGroup"],
+            "columns": [
+                "id",
+                "lastUpdated",
+                "name",
+                "type",
+                "owner"
+            ]
+        }
+    ]
+}

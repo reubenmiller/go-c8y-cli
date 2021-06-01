@@ -1,0 +1,14 @@
+{
+    "version": "1",
+    "definitions": [
+        {
+            "name": "group",
+            "priority": 500,
+            "contentType": "vnd.com.nsn.cumulocity.group(Collection|Reference)?\\+json",
+            "columns": [
+                "id",
+                "name"
+            ]
+        }
+    ]
+}
