@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"io/fs"
 	"io/ioutil"
+	"os"
 	"path/filepath"
 	"regexp"
 	"sort"
@@ -72,6 +73,10 @@ func (v *DataView) LoadDefinitions() error {
 	definitions := make([]Definition, 0)
 	v.Logger.Debugf("Looking for definitions in: %v", v.Paths)
 	for _, path := range v.Paths {
+		if stat, err := os.Stat(path); os.IsNotExist(err) || !stat.IsDir() {
+			v.Logger.Debugf("Skipping view path because it does not exist. path=%s", stat)
+			continue
+		}
 		err := filepath.WalkDir(path, func(path string, d fs.DirEntry, err error) error {
 			if err != nil {
 				// do not block walking folder
