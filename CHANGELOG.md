@@ -119,7 +119,9 @@ None :)
 
 ## Unreleased
 
-No unreleased features
+## Released
+
+### v2.0.0
 
 * Added `--examples` option to only show the help text of a function
 
@@ -495,8 +497,6 @@ The activity log settings can be set for individual c8y sessions or globally in 
     ```
 
 * `Wait-Operation` Fixed warning message format when operation fails. Id was being show in the incorrect position
-
-## Released
 
 ### v1.11.1
 
