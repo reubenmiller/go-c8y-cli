@@ -82,11 +82,17 @@ archives:
     format: binary
 
 nfpms:
-  - license: MIT
-    maintainer: Reuben Miller
+  - 
+    # id: go-c8y-cli
+    package_name: go-c8y-cli
+    license: MIT
+    maintainer: Reuben Miller <reuben.d.miller@gmail.com>
     homepage: http://goc8ycli.netlify.app
     bindir: /usr/local
     description: Cumulocity's unofficial command line tool
+    section: utils
+    priority: optional
+    file_name_template: "{{ .PackageName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}{{ if .Arm }}v{{ .Arm }}{{ end }}{{ if .Mips }}_{{ .Mips }}{{ end }}"
     formats:
       - deb
       - rpm
@@ -95,11 +101,6 @@ nfpms:
     suggests:
       - jq
       - git
-
-    # create empty folder for the user to add their own templates and views
-    # empty_folders:
-    #   - /opt/c8y/templates/custom
-    #   - /opt/c8y/views/custom
 
     contents:
       # Man pages
@@ -116,10 +117,22 @@ nfpms:
       - src: ./output/fish/c8y.fish
         dst: /usr/share/fish/vendor_completions.d/c8y.fish
       
-      # Addons (git repo)
-      - src: .go-c8y-cli/**
+      # Addons
+      - src: .go-c8y-cli/settings.*
         dst: /etc/go-c8y-cli/
         type: config|noreplace
+      
+      - src: .go-c8y-cli/shell
+        dst: /etc/go-c8y-cli/shell
+        type: config
+
+      - src: .go-c8y-cli/templates
+        dst: /etc/go-c8y-cli/templates
+        type: config
+      
+      - src: .go-c8y-cli/views
+        dst: /etc/go-c8y-cli/views
+        type: config
 
 brews:
   -
