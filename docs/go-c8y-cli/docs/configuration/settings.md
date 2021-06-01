@@ -371,6 +371,10 @@ Enable storage of your OAUTH token in your session file. The token automatically
 
 Directory where the templates are located which will be available via tab completion and reference by name.
 
+### template.customPaths: string
+
+Additional directories where templates are located. Multiple paths can be specified by using a `:` delimiter. Environment variables can also be referenced using `$VARNAME`.
+
 ### views.columnmaxwidth: int
 
 Maximum width of columns when using the table view

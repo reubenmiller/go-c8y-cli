@@ -104,7 +104,11 @@ var updateSettingsOptions = map[string]argumentHandler{
 	}, nil, cobra.ShellCompDirectiveNoFileComp},
 
 	// template
-	"template.path": {"template.path", "string", config.SettingsTemplatePath, []string{}, nil, cobra.ShellCompDirectiveFilterDirs},
+	// "template.path":        {"template.path", "string", config.SettingsTemplatePath, []string{}, nil, cobra.ShellCompDirectiveFilterDirs},
+	"template.customPaths": {"template.customPaths", "string", config.SettingsTemplateCustomPaths, []string{}, nil, cobra.ShellCompDirectiveFilterDirs},
+
+	// views
+	"views.customPaths": {"views.customPaths", "string", config.SettingsViewsCustomPaths, []string{}, nil, cobra.ShellCompDirectiveFilterDirs},
 
 	// settings path
 	"settings.path": {"settings.path", "string", config.SettingsConfigPath, []string{"json"}, nil, cobra.ShellCompDirectiveFilterFileExt},

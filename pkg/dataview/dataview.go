@@ -74,7 +74,7 @@ func (v *DataView) LoadDefinitions() error {
 	v.Logger.Debugf("Looking for definitions in: %v", v.Paths)
 	for _, path := range v.Paths {
 		if stat, err := os.Stat(path); os.IsNotExist(err) || !stat.IsDir() {
-			v.Logger.Debugf("Skipping view path because it does not exist. path=%s", stat)
+			v.Logger.Debugf("Skipping view path because it does not exist. path=%s", path)
 			continue
 		}
 		err := filepath.WalkDir(path, func(path string, d fs.DirEntry, err error) error {

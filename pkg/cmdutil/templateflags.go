@@ -16,32 +16,39 @@ import (
 )
 
 type TemplatePathResolver struct {
-	Path string
+	Paths []string
 }
 
 func (t *TemplatePathResolver) Resolve(name string) (string, error) {
-	return matchFilePath(t.Path, name, []string{".jsonnet"}, "ignore")
+	return matchFilePath(t.Paths, name, []string{".jsonnet"}, "ignore")
 }
 
-func matchFilePath(sourceDir string, pattern string, extensions []string, ignoreDir string) (string, error) {
+func matchFilePath(paths []string, pattern string, extensions []string, ignoreDir string) (string, error) {
 	// full path
-	if _, err := os.Stat(pattern); err == nil {
+	if stat, err := os.Stat(pattern); err == nil && !stat.IsDir() {
 		return pattern, nil
 	}
 
 	// abort if template path does not exist
-	if _, err := os.Stat(sourceDir); err != nil {
-		return "", fmt.Errorf("Template path does not exist. %s", sourceDir)
-	}
+	validPaths := []string{}
+	for _, sourceDir := range paths {
 
-	// path exists under template path
-	fullPath := path.Join(sourceDir, pattern)
-	if _, err := os.Stat(fullPath); err == nil {
-		return fullPath, nil
+		if stat, err := os.Stat(sourceDir); err == nil && stat.IsDir() {
+			// path exists under template path (return early)
+			fullPath := path.Join(sourceDir, pattern)
+			if stat, err := os.Stat(fullPath); err == nil && !stat.IsDir() {
+				return fullPath, nil
+			}
+
+			validPaths = append(validPaths, sourceDir)
+		}
+	}
+	if len(validPaths) == 0 {
+		return "", fmt.Errorf("Template paths do not exist. %v", paths)
 	}
 
 	// try to resolve path in nested
-	names, err := pathresolver.ResolvePaths(sourceDir, pattern, extensions, ignoreDir)
+	names, err := pathresolver.ResolvePaths(paths, pattern, extensions, ignoreDir)
 	if err != nil {
 		return "", err
 	}
@@ -64,7 +71,7 @@ func (f *Factory) WithTemplateFlag(cmd *cobra.Command) flags.Option {
 		cmd.Flags().String(flags.FlagDataTemplateVariablesName, "", "Body template variables")
 
 		_ = cmd.RegisterFlagCompletionFunc(flags.FlagDataTemplateName, func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
-			templatePath := cfg.GetTemplatePath()
+			templatePath := cfg.GetTemplatePaths()
 
 			matches, err := pathresolver.ResolvePaths(templatePath, "*"+toComplete+"*", []string{".jsonnet"}, "ignore")
 			for i, match := range matches {
@@ -78,7 +85,7 @@ func (f *Factory) WithTemplateFlag(cmd *cobra.Command) flags.Option {
 		})
 
 		_ = cmd.RegisterFlagCompletionFunc(flags.FlagDataTemplateVariablesName, func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
-			templatePath := cfg.GetTemplatePath()
+			templatePath := cfg.GetTemplatePaths()
 			templateFlag, err := cmd.Flags().GetString(flags.FlagDataTemplateName)
 			if err != nil {
 				return nil, cobra.ShellCompDirectiveNoSpace
@@ -146,7 +153,7 @@ func (f *Factory) WithTemplateFlag(cmd *cobra.Command) flags.Option {
 // WithTemplateValue get the template value using the path resolver controlled by the configuration
 func WithTemplateValue(cfg *config.Config) flags.GetOption {
 	resolve := &TemplatePathResolver{
-		Path: cfg.GetTemplatePath(),
+		Paths: cfg.GetTemplatePaths(),
 	}
 	return flags.WithTemplateValue(flags.FlagDataTemplateName, resolve)
 }

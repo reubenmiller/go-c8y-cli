@@ -157,6 +157,9 @@ const (
 	// SettingsTemplatePath template folder where the template files are located
 	SettingsTemplatePath = "settings.template.path"
 
+	// SettingsTemplateCustomPaths custom template folder where the template files are located
+	SettingsTemplateCustomPaths = "settings.template.customPath"
+
 	// SettingsModeEnableCreate enables create (post) commands
 	SettingsModeEnableCreate = "settings.mode.enableCreate"
 
@@ -1026,9 +1029,12 @@ func (c *Config) StorePassword() bool {
 	return c.viper.GetBool(SettingsStorageStorePassword)
 }
 
-// GetTemplatePath template folder where the template files are located
-func (c *Config) GetTemplatePath() string {
-	return c.ExpandHomePath(c.viper.GetString(SettingsTemplatePath))
+// GetTemplatePaths template folders where the template files are located
+func (c *Config) GetTemplatePaths() (paths []string) {
+	// Prefer custom path over default path
+	paths = append(paths, c.GetPathSlice(SettingsTemplateCustomPaths)...)
+	paths = append(paths, c.GetPathSlice(SettingsTemplatePath)...)
+	return paths
 }
 
 // AllowModeCreate enables create (post) commands
@@ -1140,11 +1146,8 @@ func (c *Config) GetConfigPath() string {
 
 // GetViewPaths get list of view paths
 func (c *Config) GetViewPaths() []string {
-	viewPaths := c.viper.GetStringSlice(SettingsViewsCommonPaths)
-	viewPaths = append(viewPaths, c.viper.GetStringSlice(SettingsViewsCustomPaths)...)
-	for i, path := range viewPaths {
-		viewPaths[i] = c.ExpandHomePath(path)
-	}
+	viewPaths := c.GetPathSlice(SettingsViewsCommonPaths)
+	viewPaths = append(viewPaths, c.GetPathSlice(SettingsViewsCustomPaths)...)
 	return viewPaths
 }
 
@@ -1312,7 +1315,7 @@ func (c *Config) ExpandHomePath(path string) string {
 	// replace special variables
 	expanded = strings.ReplaceAll(expanded, "$C8Y_HOME", c.GetHomeDir())
 	expanded = strings.ReplaceAll(expanded, "$C8Y_SESSION_HOME", c.GetSessionHomeDir())
-	return expanded
+	return os.ExpandEnv(expanded)
 }
 
 // LogErrorF dynamically changes where the error is logged based on the users Silent Status Codes preferences
@@ -1352,7 +1355,7 @@ func (c *Config) SetSessionFile(path string) {
 	if _, fileErr := os.Stat(path); fileErr != nil {
 		home := c.GetSessionHomeDir()
 		c.Logger.Debugf("Resolving session %s in %s", path, home)
-		matches, err := pathresolver.ResolvePaths(home, path, ConfigExtensions, "ignore")
+		matches, err := pathresolver.ResolvePaths([]string{home}, path, ConfigExtensions, "ignore")
 		if err != nil {
 			c.Logger.Warnf("Failed to find session. %s", err)
 		}
@@ -1388,7 +1391,7 @@ func (c *Config) GetSessionFile(overrideSession ...string) string {
 	if _, fileErr := os.Stat(sessionFile); fileErr != nil {
 		home := c.GetSessionHomeDir()
 		c.Logger.Debugf("Resolving session %s in %s", sessionFile, home)
-		matches, err := pathresolver.ResolvePaths(home, sessionFile, ConfigExtensions, "ignore")
+		matches, err := pathresolver.ResolvePaths([]string{home}, sessionFile, ConfigExtensions, "ignore")
 		if err != nil {
 			c.Logger.Warnf("Failed to find session. %s", err)
 		}
@@ -1490,4 +1493,23 @@ func (c *Config) HideSensitiveInformationIfActive(client *c8y.Client, message st
 	message = basicAuthMatcher.ReplaceAllString(message, "$1 {base64 tenant/username:password}")
 
 	return message
+}
+
+var PathSplitChar = ":"
+
+// GetPathSlice get a slice of paths
+func (c *Config) GetPathSlice(name string) (paths []string) {
+	rawPaths := []string{}
+	if v := c.viper.GetString(name); v != "" {
+		rawPaths = append(rawPaths, strings.Split(v, PathSplitChar)...)
+	} else if v := c.viper.GetStringSlice(name); len(v) > 0 {
+		rawPaths = append(rawPaths, v...)
+	}
+	for _, p := range rawPaths {
+		p = c.ExpandHomePath(p)
+		if p != "" {
+			paths = append(paths, p)
+		}
+	}
+	return
 }

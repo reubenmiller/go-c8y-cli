@@ -13,7 +13,7 @@ func WithSessionFile(flagName string, extensions []string, pathFunc func() strin
 		_ = cmd.RegisterFlagCompletionFunc(flagName, func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 			sourcePath := pathFunc()
 
-			matches, err := pathresolver.ResolvePaths(sourcePath, "*"+toComplete+"*", extensions, "ignore")
+			matches, err := pathresolver.ResolvePaths([]string{sourcePath}, "*"+toComplete+"*", extensions, "ignore")
 			for i, match := range matches {
 				matches[i] = filepath.Base(match)
 			}
