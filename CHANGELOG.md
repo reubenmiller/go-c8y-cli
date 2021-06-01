@@ -498,6 +498,12 @@ The activity log settings can be set for individual c8y sessions or globally in 
 
 ## Released
 
+### v1.11.1
+
+#### Bugfixes
+
+* Update-Tenant: `Domain` is no longer a mandatory/required parameter
+
 ### v1.11.0
 
 #### New Features
