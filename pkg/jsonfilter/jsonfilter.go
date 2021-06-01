@@ -453,7 +453,7 @@ func (f JSONFilters) pluckJsonValues(item *gjson.Result, properties []string, fl
 		// unflatten
 		Logger.Debugf("running unflatten. %v", pathPatterns)
 		if len(pathPatterns) == 1 && pathPatterns[0] == "**" {
-			f.Logger.Debugf("Returning all keys because globstar is being used")
+			Logger.Debugf("Returning all keys because globstar is being used")
 			return item.Raw, flatKeys
 		}
 
