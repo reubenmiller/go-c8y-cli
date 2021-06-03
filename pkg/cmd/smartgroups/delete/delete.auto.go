@@ -35,7 +35,7 @@ func NewDeleteCmd(f *cmdutil.Factory) *DeleteCmd {
 		Long: `Delete an existing smart group by id or name. Deleting a smart group will not affect any of the devices related to it.
 `,
 		Example: heredoc.Doc(`
-$ c8y smartgroup delete --id 12345
+$ c8y smartgroups delete --id 12345
 Get smart group by id
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {

@@ -33,7 +33,7 @@ func NewDeleteCmd(f *cmdutil.Factory) *DeleteCmd {
 		Short: "Delete tenant option",
 		Long:  `Delete an existing tenant option`,
 		Example: heredoc.Doc(`
-$ c8y tenantOptions delete --category "c8y_cli_tests" --key "option3"
+$ c8y tenantoptions delete --category "c8y_cli_tests" --key "option3"
 Get a tenant option
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {

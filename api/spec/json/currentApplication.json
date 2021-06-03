@@ -28,7 +28,7 @@
         "go": [
           {
             "description": "Get the current application (requires using application credentials)",
-            "command": "c8y currentApplication get"
+            "command": "c8y currentapplication get"
           }
         ]
       }
@@ -55,7 +55,7 @@
         "go": [
           {
             "description": "Update custom properties of the current application (requires using application credentials)",
-            "command": "c8y currentApplication update --data \"myCustomProp=1\""
+            "command": "c8y currentapplication update --data \"myCustomProp=1\""
           }
         ]
       },
@@ -141,7 +141,7 @@
         "go": [
           {
             "description": "List the current application users/subscriptions",
-            "command": "c8y currentApplication listSubscriptions"
+            "command": "c8y currentapplication listSubscriptions"
           }
         ]
       }

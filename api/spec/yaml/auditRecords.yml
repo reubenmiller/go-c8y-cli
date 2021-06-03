@@ -28,7 +28,7 @@ endpoints:
 
       go:
         - description: Create an audit record for a custom managed object update
-          command: 'c8y auditRecords create --type "ManagedObject" --time "0s" --text "Managed Object updated: my_Prop: value" --source $Device.id --activity "Managed Object updated" --severity "information"'
+          command: 'c8y auditrecords create --type "ManagedObject" --time "0s" --text "Managed Object updated: my_Prop: value" --source 12345 --activity "Managed Object updated" --severity "information"'
     body:
       - name: type
         type: string
@@ -124,7 +124,7 @@ endpoints:
 
       go:
         - description: Get a list of audit records
-          command: c8y auditRecords list --pageSize 100
+          command: c8y auditrecords list --pageSize 100
     queryParameters:
       - name: source
         type: source
@@ -182,7 +182,7 @@ endpoints:
 
       go:
         - description: Get an audit record by id
-          command: c8y auditRecords get --id 12345
+          command: c8y auditrecords get --id 12345
     pathParameters:
       - name: id
         type: '[]id'
@@ -213,7 +213,7 @@ endpoints:
 
       go:
         - description: Delete audit records from a device
-          command: c8y auditRecords deleteCollection --source 12345
+          command: c8y auditrecords deleteCollection --source 12345
     queryParameters:
       - name: source
         type: string

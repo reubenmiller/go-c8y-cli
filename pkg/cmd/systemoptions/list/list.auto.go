@@ -34,7 +34,7 @@ func NewListCmd(f *cmdutil.Factory) *ListCmd {
 		Short: "Get system option collection",
 		Long:  `Get a collection of system options. This endpoint provides a set of read-only properties pre-defined in platform configuration. The response format is exactly the same as for OptionCollection.`,
 		Example: heredoc.Doc(`
-$ c8y systemOptions list
+$ c8y systemoptions list
 Get a list of system options
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {

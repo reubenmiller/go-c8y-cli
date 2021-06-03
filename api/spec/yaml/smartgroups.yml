@@ -129,7 +129,7 @@ endpoints:
 
       go:
         - description: Get smart group by id
-          command: c8y smartgroup delete --id 12345
+          command: c8y smartgroups delete --id 12345
 
     pathParameters:
       - name: id

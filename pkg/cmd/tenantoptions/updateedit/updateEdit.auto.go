@@ -34,7 +34,7 @@ func NewUpdateEditCmd(f *cmdutil.Factory) *UpdateEditCmd {
 		Long: `Update read-only setting of an existing tenant option Required role:: ROLE_OPTION_MANAGEMENT_ADMIN, Required tenant management Example Request:: Update access.control.allow.origin option.
 `,
 		Example: heredoc.Doc(`
-$ c8y tenantOptions updateEdit --category "c8y_cli_tests" --key "option8" --editable "true"
+$ c8y tenantoptions updateEdit --category "c8y_cli_tests" --key "option8" --editable "true"
 Update editable property for an existing tenant option
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {

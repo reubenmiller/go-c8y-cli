@@ -54,6 +54,8 @@ endpoints:
           - user.id
           - id
           - self
+    bodyRequiredKeys:
+      - "user.self"
 
 
   - name: deleteUserFromGroup

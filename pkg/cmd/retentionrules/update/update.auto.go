@@ -35,7 +35,7 @@ func NewUpdateCmd(f *cmdutil.Factory) *UpdateCmd {
 		Long: `Update an existing retention rule, i.e. change maximum number of days or the data type.
 `,
 		Example: heredoc.Doc(`
-$ c8y retentionRules get --id 12345
+$ c8y retentionrules update --id 12345 --maximumAge 90
 Update a retention rule
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {

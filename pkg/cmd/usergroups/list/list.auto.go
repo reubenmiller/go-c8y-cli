@@ -34,7 +34,7 @@ func NewListCmd(f *cmdutil.Factory) *ListCmd {
 		Short: "Get user group collection",
 		Long:  `Get collection of (user) groups`,
 		Example: heredoc.Doc(`
-$ c8y userGroups list
+$ c8y usergroups list
 Get a list of user groups for the current tenant
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {

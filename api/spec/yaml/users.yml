@@ -131,7 +131,7 @@ endpoints:
             - Get-UserByName -Name "$Username" | Remove-User
       go:
         - description: Create a user
-          command: c8y users create --userName "testuser1" --email "testuser@no-reply.dummy.com" --password "a0)8k2kld9lm,!"
+          command: c8y users create --userName "testuser1" --email "testuser@no-reply.dummy.com" --password "a0)8k2kld9lm!"
     pathParameters:
       - name: tenant
         type: tenant

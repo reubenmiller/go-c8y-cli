@@ -34,7 +34,7 @@ func NewUpdateCmd(f *cmdutil.Factory) *UpdateCmd {
 		Short: "Update bulk operation",
 		Long:  `Update bulk operation. Making update on a started bulk operation cancels it and creates/schedules a new one.`,
 		Example: heredoc.Doc(`
-$ c8y bulkOperations update --id 12345 --creationRamp 15
+$ c8y bulkoperations update --id 12345 --creationRamp 15
 Update an bulk operation
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {

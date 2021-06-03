@@ -143,7 +143,7 @@
           },
           {
             "description": "Find managed objects which contain the text 'myText' and is a device (using pipeline)",
-            "command": "echo \"myText\" | c8y inventory findByText --fragment c8y_IsDevice"
+            "command": "echo \"myText\" | c8y inventory findByText --fragmentType c8y_IsDevice"
           }
         ]
       },
@@ -389,7 +389,7 @@
         "go": [
           {
             "description": "Update a managed object",
-            "command": "c8y inventory update --id 12345 --newName \"my_custom_name\" --data \"{\\\"com_my_props\\\":{}\\\"value\\\":1}\""
+            "command": "c8y inventory update --id 12345 --newName \"my_custom_name\" --data \"{\\\"com_my_props\\\":{},\\\"value\\\":1}\""
           }
         ]
       },

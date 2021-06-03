@@ -417,7 +417,7 @@
         "go": [
           {
             "description": "Set the required availability of a device by name to 10 minutes",
-            "command": "c8y inventory setRequiredAvailability --device 12345 --interval 10"
+            "command": "c8y devices setRequiredAvailability --device 12345 --interval 10"
           }
         ]
       },

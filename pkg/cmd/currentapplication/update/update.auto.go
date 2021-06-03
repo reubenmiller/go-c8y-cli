@@ -33,7 +33,7 @@ func NewUpdateCmd(f *cmdutil.Factory) *UpdateCmd {
 		Short: "Update current application",
 		Long:  `Required authentication with bootstrap user`,
 		Example: heredoc.Doc(`
-$ c8y currentApplication update --data "myCustomProp=1"
+$ c8y currentapplication update --data "myCustomProp=1"
 Update custom properties of the current application (requires using application credentials)
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {

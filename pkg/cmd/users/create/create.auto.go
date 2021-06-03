@@ -33,7 +33,7 @@ func NewCreateCmd(f *cmdutil.Factory) *CreateCmd {
 		Short: "Create user",
 		Long:  `Create a new user so that they can access the tenant`,
 		Example: heredoc.Doc(`
-$ c8y users create --userName "testuser1" --email "testuser@no-reply.dummy.com" --password "a0)8k2kld9lm,!"
+$ c8y users create --userName "testuser1" --email "testuser@no-reply.dummy.com" --password "a0)8k2kld9lm!"
 Create a user
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {

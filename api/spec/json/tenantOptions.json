@@ -29,7 +29,7 @@
         "go": [
           {
             "description": "Get a list of tenant options",
-            "command": "c8y tenantOptions list"
+            "command": "c8y tenantoptions list"
           }
         ]
       }
@@ -60,7 +60,7 @@
         "go": [
           {
             "description": "Create a tenant option",
-            "command": "c8y tenantOptions create --category \"c8y_cli_tests\" --key \"option1\" --value \"1\""
+            "command": "c8y tenantoptions create --category \"c8y_cli_tests\" --key \"option1\" --value \"1\""
           }
         ]
       },
@@ -114,7 +114,7 @@
         "go": [
           {
             "description": "Get a tenant option",
-            "command": "c8y tenantOptions get --category \"c8y_cli_tests\" --key \"option2\""
+            "command": "c8y tenantoptions get --category \"c8y_cli_tests\" --key \"option2\""
           }
         ]
       },
@@ -158,7 +158,7 @@
         "go": [
           {
             "description": "Get a tenant option",
-            "command": "c8y tenantOptions delete --category \"c8y_cli_tests\" --key \"option3\""
+            "command": "c8y tenantoptions delete --category \"c8y_cli_tests\" --key \"option3\""
           }
         ]
       },
@@ -206,7 +206,7 @@
         "go": [
           {
             "description": "Update a tenant option",
-            "command": "c8y tenantOptions update --category \"c8y_cli_tests\" --key \"option4\" --value \"0\""
+            "command": "c8y tenantoptions update --category \"c8y_cli_tests\" --key \"option4\" --value \"0\""
           }
         ]
       },
@@ -265,7 +265,7 @@
         "go": [
           {
             "description": "Update multiple tenant options",
-            "command": "c8y tenantOptions updateBulk --category \"c8y_cli_tests\" --data \"{\\\"option5\\\":0,\\\"option6\\\":1\"}\""
+            "command": "c8y tenantoptions updateBulk --category \"c8y_cli_tests\" --data \"{\\\"option5\\\":0,\\\"option6\\\":1\"}\""
           }
         ]
       },
@@ -315,11 +315,11 @@
         "go": [
           {
             "description": "Get a list of options for a category",
-            "command": "c8y tenantOptions getForCategory --category \"c8y_cli_tests\""
+            "command": "c8y tenantoptions getForCategory --category \"c8y_cli_tests\""
           },
           {
             "description": "Get a list of options for a category",
-            "command": "echo -e \"c8y_cli_tests\\ncategory2\" | c8y tenantOptions getForCategory"
+            "command": "echo -e \"c8y_cli_tests\\ncategory2\" | c8y tenantoptions getForCategory"
           }
         ]
       },
@@ -365,7 +365,7 @@
         "go": [
           {
             "description": "Update editable property for an existing tenant option",
-            "command": "c8y tenantOptions updateEdit --category \"c8y_cli_tests\" --key \"option8\" --editable \"true\""
+            "command": "c8y tenantoptions updateEdit --category \"c8y_cli_tests\" --key \"option8\" --editable \"true\""
           }
         ]
       },

@@ -34,7 +34,7 @@ func NewGetByNameCmd(f *cmdutil.Factory) *GetByNameCmd {
 		Short: "Get user group by name",
 		Long:  `Get an existing user group by name`,
 		Example: heredoc.Doc(`
-$ c8y userGroups getByName --name customGroup1
+$ c8y usergroups getByName --name customGroup1
 Get user group by its name
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {

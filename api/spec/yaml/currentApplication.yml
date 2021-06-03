@@ -26,7 +26,7 @@ endpoints:
             command: Get-CurrentApplication
         go:
           - description: Get the current application (requires using application credentials)
-            command: c8y currentApplication get
+            command: c8y currentapplication get
 
 
   - name: updateCurrentApplication
@@ -45,7 +45,7 @@ endpoints:
             command: Update-CurrentApplication -Data @{ myCustomProp = @{ value1 = 1}}
         go:
           - description: Update custom properties of the current application (requires using application credentials)
-            command: c8y currentApplication update --data "myCustomProp=1"
+            command: c8y currentapplication update --data "myCustomProp=1"
     body:
       - name: data
         type: json
@@ -108,4 +108,4 @@ endpoints:
             command: Get-CurrentApplicationSubscription
         go:
           - description: List the current application users/subscriptions
-            command: c8y currentApplication listSubscriptions
+            command: c8y currentapplication listSubscriptions

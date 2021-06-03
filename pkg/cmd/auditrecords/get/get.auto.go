@@ -35,7 +35,7 @@ func NewGetCmd(f *cmdutil.Factory) *GetCmd {
 		Short: "Get audit record",
 		Long:  `Get an audit record`,
 		Example: heredoc.Doc(`
-$ c8y auditRecords get --id 12345
+$ c8y auditrecords get --id 12345
 Get an audit record by id
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {

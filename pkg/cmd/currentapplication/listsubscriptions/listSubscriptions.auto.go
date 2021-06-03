@@ -34,7 +34,7 @@ func NewListSubscriptionsCmd(f *cmdutil.Factory) *ListSubscriptionsCmd {
 		Short: "Get current application subscriptions",
 		Long:  `Requires authentication with the application bootstrap user`,
 		Example: heredoc.Doc(`
-$ c8y currentApplication listSubscriptions
+$ c8y currentapplication listSubscriptions
 List the current application users/subscriptions
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {

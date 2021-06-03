@@ -34,7 +34,7 @@ func NewGetCmd(f *cmdutil.Factory) *GetCmd {
 		Short: "Get system option",
 		Long:  `Get a system option by category and key`,
 		Example: heredoc.Doc(`
-$ c8y systemOptions get --category "system" --key "version"
+$ c8y systemoptions get --category "system" --key "version"
 Get a list of system options
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {

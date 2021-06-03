@@ -26,7 +26,7 @@ endpoints:
 
       go:
         - description: Get a list of system options
-          command: c8y systemOptions list
+          command: c8y systemoptions list
 
   - name: getSystemOption
     description: Get system option
@@ -44,7 +44,7 @@ endpoints:
 
       go:
         - description: Get a list of system options
-          command: c8y systemOptions get --category "system" --key "version"
+          command: c8y systemoptions get --category "system" --key "version"
     pathParameters:
       - name: category
         type: string

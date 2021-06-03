@@ -33,7 +33,7 @@ func NewCreateCmd(f *cmdutil.Factory) *CreateCmd {
 		Short: "Create tenant option",
 		Long:  ``,
 		Example: heredoc.Doc(`
-$ c8y tenantOptions create --category "c8y_cli_tests" --key "option1" --value "1"
+$ c8y tenantoptions create --category "c8y_cli_tests" --key "option1" --value "1"
 Create a tenant option
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {

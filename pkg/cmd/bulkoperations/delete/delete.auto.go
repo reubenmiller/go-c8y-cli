@@ -34,7 +34,7 @@ func NewDeleteCmd(f *cmdutil.Factory) *DeleteCmd {
 		Short: "Delete bulk operation",
 		Long:  `Delete bulk operation/s. Only bulk operations that are in ACTIVE or IN_PROGRESS can be deleted`,
 		Example: heredoc.Doc(`
-$ c8y bulkOperations delete --id 12345
+$ c8y bulkoperations delete --id 12345
 Remove bulk operation by id
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {

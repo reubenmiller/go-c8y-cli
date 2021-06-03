@@ -35,7 +35,7 @@ func NewListCmd(f *cmdutil.Factory) *ListCmd {
 		Long: `Get a collection of retention rules configured in the current tenant
 `,
 		Example: heredoc.Doc(`
-$ c8y retentionRules list
+$ c8y retentionrules list
 Get a list of retention rules
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {

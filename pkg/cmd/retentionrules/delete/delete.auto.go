@@ -35,7 +35,7 @@ func NewDeleteCmd(f *cmdutil.Factory) *DeleteCmd {
 		Long: `Delete an existing retention rule
 `,
 		Example: heredoc.Doc(`
-$ c8y retentionRules delete --id 12345
+$ c8y retentionrules delete --id 12345
 Delete a retention rule
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {

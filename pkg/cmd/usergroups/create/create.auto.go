@@ -33,7 +33,7 @@ func NewCreateCmd(f *cmdutil.Factory) *CreateCmd {
 		Short: "Create user group",
 		Long:  `Create a new user group`,
 		Example: heredoc.Doc(`
-$ c8y userGroups create --name customGroup1
+$ c8y usergroups create --name customGroup1
 Create a user group
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {

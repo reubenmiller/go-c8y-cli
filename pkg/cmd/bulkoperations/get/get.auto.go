@@ -35,7 +35,7 @@ func NewGetCmd(f *cmdutil.Factory) *GetCmd {
 		Short: "Get bulk operation",
 		Long:  `Get an existing bulk operation`,
 		Example: heredoc.Doc(`
-$ c8y bulkOperations get --id 12345
+$ c8y bulkoperations get --id 12345
 Get bulk operation by id
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {

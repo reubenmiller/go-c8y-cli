@@ -27,7 +27,7 @@ endpoints:
 
       go:
         - description: Get a list of retention rules
-          command: c8y retentionRules list
+          command: c8y retentionrules list
 
   - name: newRetentionRule
     description: Create retention rule
@@ -48,7 +48,7 @@ endpoints:
 
       go:
         - description: Create a retention rule
-          command: c8y retentionRules create --dataType ALARM --maximumAge 180
+          command: c8y retentionrules create --dataType ALARM --maximumAge 180
     body:
       - name: dataType
         type: string
@@ -113,7 +113,7 @@ endpoints:
 
       go:
         - description: Get a retention rule
-          command: c8y retentionRules get --id 12345
+          command: c8y retentionrules get --id 12345
     pathParameters:
       - name: id
         type: '[]id'
@@ -144,7 +144,7 @@ endpoints:
 
       go:
         - description: Delete a retention rule
-          command: c8y retentionRules delete --id 12345
+          command: c8y retentionrules delete --id 12345
     pathParameters:
       - name: id
         type: '[]id'
@@ -180,7 +180,7 @@ endpoints:
 
       go:
         - description: Update a retention rule
-          command: c8y retentionRules get --id 12345
+          command: c8y retentionrules update --id 12345 --maximumAge 90
     pathParameters:
       - name: id
         type: '[]id'

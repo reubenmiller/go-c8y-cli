@@ -31,7 +31,7 @@ endpoints:
 
       go:
         - description: Get a list of bulk operations
-          command: c8y bulkOperations list
+          command: c8y bulkoperations list
 
     queryParameters:
       - name: withDeleted
@@ -55,7 +55,7 @@ endpoints:
 
       go:
         - description: Get bulk operation by id
-          command: c8y bulkOperations get --id 12345
+          command: c8y bulkoperations get --id 12345
 
     path: devicecontrol/bulkoperations/{id}
     accept: application/vnd.com.nsn.cumulocity.bulkoperation+json
@@ -85,7 +85,7 @@ endpoints:
 
       go:
         - description: Remove bulk operation by id
-          command: c8y bulkOperations delete --id 12345
+          command: c8y bulkoperations delete --id 12345
 
     path: devicecontrol/bulkoperations/{id}
     alias:
@@ -182,7 +182,7 @@ endpoints:
             - "Remove-DeviceGroup -Id $Group.id -Cascade"
       go:
         - description: Update an bulk operation
-          command: c8y bulkOperations update --id 12345 --creationRamp 15
+          command: c8y bulkoperations update --id 12345 --creationRamp 15
     method: PUT
     path: devicecontrol/bulkoperations/{id}
     accept: application/vnd.com.nsn.cumulocity.bulkoperation+json

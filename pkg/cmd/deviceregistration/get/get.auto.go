@@ -35,7 +35,7 @@ func NewGetCmd(f *cmdutil.Factory) *GetCmd {
 		Short: "Get device request",
 		Long:  `Get a device registration request`,
 		Example: heredoc.Doc(`
-$ c8y deviceregistration get
+$ c8y deviceregistration get --id "010af8dd0c102"
 Get a new device request
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {

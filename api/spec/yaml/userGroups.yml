@@ -25,7 +25,7 @@ endpoints:
           command: Get-UserGroupCollection
       go:
         - description: Get a list of user groups for the current tenant
-          command: c8y userGroups list
+          command: c8y usergroups list
     pathParameters:
       - name: tenant
         type: tenant
@@ -52,7 +52,7 @@ endpoints:
 
       go:
         - description: Create a user group
-          command: c8y userGroups create --name customGroup1
+          command: c8y usergroups create --name customGroup1
     pathParameters:
       - name: tenant
         type: tenant
@@ -95,7 +95,7 @@ endpoints:
 
       go:
         - description: Get a user group
-          command: c8y userGroups get --id 12345
+          command: c8y usergroups get --id 12345
     pathParameters:
       - name: tenant
         type: tenant
@@ -127,7 +127,7 @@ endpoints:
 
       go:
         - description: Get user group by its name
-          command: c8y userGroups getByName --name customGroup1
+          command: c8y usergroups getByName --name customGroup1
     pathParameters:
       - name: tenant
         type: tenant
@@ -163,7 +163,7 @@ endpoints:
 
       go:
         - description: Delete a user group
-          command: c8y userGroups delete --id 12345
+          command: c8y usergroups delete --id 12345
     pathParameters:
       - name: tenant
         type: tenant
@@ -204,7 +204,7 @@ endpoints:
             - Remove-UserGroup -Id $Group.id
       go:
         - description: Update a user group
-          command: c8y userGroups update --id 12345 --name "customGroup2"
+          command: c8y usergroups update --id 12345 --name "customGroup2"
     pathParameters:
       - name: tenant
         type: tenant

@@ -244,7 +244,7 @@ endpoints:
             command: c8y devicegroups assignDevice --group 12345 --newChildDevice 43234
           
           - description: Add multiple devices to a group
-            command: c8y devicegroups assignDevice --group 12345 --newChildDevice 43234, 99292, 12222
+            command: c8y devicegroups assignDevice --group 12345 --newChildDevice 43234,99292,12222
 
     pathParameters:
       - name: group
@@ -299,7 +299,7 @@ endpoints:
             command: c8y devicegroups assignGroup --group 12345 --newChildGroup 43234
           
           - description: Add multiple groups to a group
-            command: c8y devicegroups assignGroup --group 12345 --newChildGroup 43234, 99292, 12222
+            command: c8y devicegroups assignGroup --group 12345 --newChildGroup 43234,99292,12222
 
     pathParameters:
       - name: group

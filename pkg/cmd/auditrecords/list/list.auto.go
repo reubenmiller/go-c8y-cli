@@ -35,7 +35,7 @@ func NewListCmd(f *cmdutil.Factory) *ListCmd {
 		Long: `Audit records contain information about modifications to other Cumulocity entities. For example the audit records contain each operation state transition, so they can be used to check when an operation transitioned from PENDING -> EXECUTING -> SUCCESSFUL.
 `,
 		Example: heredoc.Doc(`
-$ c8y auditRecords list --pageSize 100
+$ c8y auditrecords list --pageSize 100
 Get a list of audit records
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {

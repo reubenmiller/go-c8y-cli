@@ -34,7 +34,7 @@ func NewDeleteCmd(f *cmdutil.Factory) *DeleteCmd {
 		Short: "Delete user group",
 		Long:  `Delete an existing user group`,
 		Example: heredoc.Doc(`
-$ c8y userGroups delete --id 12345
+$ c8y usergroups delete --id 12345
 Delete a user group
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {

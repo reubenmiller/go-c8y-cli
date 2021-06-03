@@ -37,7 +37,7 @@ func NewAssignDeviceCmd(f *cmdutil.Factory) *AssignDeviceCmd {
 $ c8y devicegroups assignDevice --group 12345 --newChildDevice 43234
 Add a device to a group
 
-$ c8y devicegroups assignDevice --group 12345 --newChildDevice 43234, 99292, 12222
+$ c8y devicegroups assignDevice --group 12345 --newChildDevice 43234,99292,12222
 Add multiple devices to a group
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {

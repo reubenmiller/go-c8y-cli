@@ -35,7 +35,7 @@ func NewGetCmd(f *cmdutil.Factory) *GetCmd {
 		Long: `Getting the current application only works when using bootstrap credentials from an application (not user credentials)
 `,
 		Example: heredoc.Doc(`
-$ c8y currentApplication get
+$ c8y currentapplication get
 Get the current application (requires using application credentials)
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {

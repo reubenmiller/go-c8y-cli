@@ -42,7 +42,7 @@ endpoints:
           command: c8y events list --type my_CustomType --dateFrom "-10d"
 
         - description: Get events from a device
-          command: c8y events list --device mydevice
+          command: c8y events list --device 12345
     path: event/events
     accept: application/vnd.com.nsn.cumulocity.eventCollection+json
     collectionType: application/vnd.com.nsn.cumulocity.event+json
@@ -97,7 +97,7 @@ endpoints:
           command: c8y events deleteCollection --type my_CustomType --dateFrom "-10d"
 
         - description: Remove events from a device
-          command: c8y events deleteCollection --device mydevice
+          command: c8y events deleteCollection --device 12345
     alias:
         go: deleteCollection
         powershell: Remove-EventCollection
@@ -176,7 +176,7 @@ endpoints:
 
       go:
         - description: Create a new event for a device
-          command: c8y events create --device mydevice --type c8y_TestEvent --text "Test event"
+          command: c8y events create --device 12345 --type c8y_TestEvent --text "Test event"
         
         - description: Create a new event for a device (using pipeline)
           command: c8y devices get --id 12345 | c8y events create --type c8y_TestEvent --text "Test event"

@@ -36,7 +36,7 @@ func NewGetCmd(f *cmdutil.Factory) *GetCmd {
 		Long: `Get an existing retention by id
 `,
 		Example: heredoc.Doc(`
-$ c8y retentionRules get --id 12345
+$ c8y retentionrules get --id 12345
 Get a retention rule
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {

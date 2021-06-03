@@ -34,7 +34,7 @@ func NewListCmd(f *cmdutil.Factory) *ListCmd {
 		Short: "Get tenant option collection",
 		Long:  `Get collection of tenant options`,
 		Example: heredoc.Doc(`
-$ c8y tenantOptions list
+$ c8y tenantoptions list
 Get a list of tenant options
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {

@@ -34,7 +34,7 @@ func NewUpdateCmd(f *cmdutil.Factory) *UpdateCmd {
 		Short: "Update user group",
 		Long:  `Update an existing user group`,
 		Example: heredoc.Doc(`
-$ c8y userGroups update --id 12345 --name "customGroup2"
+$ c8y usergroups update --id 12345 --name "customGroup2"
 Update a user group
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {

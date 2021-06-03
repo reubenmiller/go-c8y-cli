@@ -40,7 +40,7 @@ Get a list of managed objects
 $ echo "myText" | c8y inventory findByText
 Find managed objects which contain the text 'myText' (using pipeline)
 
-$ echo "myText" | c8y inventory findByText --fragment c8y_IsDevice
+$ echo "myText" | c8y inventory findByText --fragmentType c8y_IsDevice
 Find managed objects which contain the text 'myText' and is a device (using pipeline)
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
