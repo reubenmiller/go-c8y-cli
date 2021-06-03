@@ -38,10 +38,10 @@ func NewListCmd(f *cmdutil.Factory) *ListCmd {
 $ c8y operations list --status PENDING
 Get a list of pending operations
 
-$ c8y operations list --agent myAgent --status PENDING
+$ c8y operations list --agent 12345 --status PENDING
 Get a list of pending operations for a given agent and all of its child devices
 
-$ c8y operations list --device mydevice --status PENDING
+$ c8y operations list --device 12345 --status PENDING
 Get a list of pending operations for a device
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {

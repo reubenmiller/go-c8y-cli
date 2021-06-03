@@ -36,7 +36,7 @@ func NewGetSupportedMeasurementsCmd(f *cmdutil.Factory) *GetSupportedMeasurement
 		Long: `Returns a list of fragments (valueFragmentTypes) related to the device
 `,
 		Example: heredoc.Doc(`
-$ c8y inventory getSupportedMeasurements --device 12345
+$ c8y devices getSupportedMeasurements --device 12345
 Get the supported measurements of a device by name
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {

@@ -312,7 +312,7 @@
         "go": [
           {
             "description": "Get the supported measurements of a device by name",
-            "command": "c8y inventory getSupportedMeasurements --device 12345"
+            "command": "c8y devices getSupportedMeasurements --device 12345"
           }
         ]
       },
@@ -366,7 +366,7 @@
         "go": [
           {
             "description": "Get the supported measurement series of a device by name",
-            "command": "c8y inventory getSupportedSeries --device 12345"
+            "command": "c8y devices getSupportedSeries --device 12345"
           }
         ]
       },

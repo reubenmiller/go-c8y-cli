@@ -36,7 +36,7 @@ func NewGetSupportedSeriesCmd(f *cmdutil.Factory) *GetSupportedSeriesCmd {
 		Long: `Get supported measurement series/s of a device
 `,
 		Example: heredoc.Doc(`
-$ c8y inventory getSupportedSeries --device 12345
+$ c8y devices getSupportedSeries --device 12345
 Get the supported measurement series of a device by name
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {

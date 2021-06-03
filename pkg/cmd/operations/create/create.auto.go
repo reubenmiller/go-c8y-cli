@@ -34,7 +34,7 @@ func NewCreateCmd(f *cmdutil.Factory) *CreateCmd {
 		Short: "Create operation",
 		Long:  `Create a new operation for an agent or device`,
 		Example: heredoc.Doc(`
-$ c8y operations create --device mydevice --data "c8y_Restart={}"
+$ c8y operations create --device 12345 --data "c8y_Restart={}"
 Create operation for a device
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
