@@ -34,10 +34,10 @@ func NewDeleteCollectionCmd(f *cmdutil.Factory) *DeleteCollectionCmd {
 		Short: "Delete alarm collection",
 		Long:  `Delete a collection of alarms by a given filter`,
 		Example: heredoc.Doc(`
-$ c8y alarms deleteCollection --device mydevice --severity MAJOR
+$ c8y alarms deleteCollection --device 12345 --severity MAJOR
 Remove alarms on the device with the severity set to MAJOR
 
-$ c8y alarms deleteCollection --device mydevice --dateFrom "-10m" --status ACTIVE
+$ c8y alarms deleteCollection --device 12345 --dateFrom "-10m" --status ACTIVE
 Remove alarms on the device which are active and created in the last 10 minutes
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {

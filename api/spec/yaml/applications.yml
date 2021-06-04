@@ -323,6 +323,7 @@ endpoints:
       go:
         - description: Upload application microservice binary
           command: c8y applications createBinary --id 12345 --file ./helloworld.zip
+          skipTest: true
     pathParameters:
       - name: id
         type: application

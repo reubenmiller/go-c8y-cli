@@ -35,7 +35,7 @@ func NewGetRoleReferenceCollectionFromGroupCmd(f *cmdutil.Factory) *GetRoleRefer
 		Short: "Get role references from user group",
 		Long:  `Get collection of user role references from a group`,
 		Example: heredoc.Doc(`
-$ c8y userRoles getRoleReferenceCollectionFromGroup --group "12345"
+$ c8y userroles getRoleReferenceCollectionFromGroup --group "12345"
 Get a list of role references for a user group
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {

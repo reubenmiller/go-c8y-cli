@@ -132,7 +132,7 @@ endpoints:
             - Remove-User -Id $User.id
       go:
         - description: List the users within a user group
-          command: c8y userreferences listGroupMembership --group 1
+          command: c8y userreferences listGroupMembership --id 1
         
         - description: List users in user groups (via pipeline)
           command: c8y usergroups list | c8y userreferences listGroupMembership

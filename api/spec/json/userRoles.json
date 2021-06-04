@@ -29,7 +29,7 @@
         "go": [
           {
             "description": "Get a list of roles",
-            "command": "c8y userRoles list --pageSize 100"
+            "command": "c8y userroles list --pageSize 100"
           }
         ]
       }
@@ -81,7 +81,12 @@
         "go": [
           {
             "description": "Add a role (ROLE_ALARM_READ) to a user",
-            "command": "c8y userRoles addRoleToUser --user \"myuser\" --role \"ROLE_ALARM_READ\""
+            "command": "c8y userroles addRoleToUser --user \"myuser\" --role \"ROLE_ALARM_READ\"",
+            "assertStdOut": {
+              "json": {
+                "body.role.self": "r/.*ROLE_ALARM_READ$"
+              }
+            }
           }
         ]
       },
@@ -140,7 +145,7 @@
         "go": [
           {
             "description": "Remove a role from the given user",
-            "command": "c8y userRoles deleteRoleFromUser --user \"myuser\" --role \"ROLE_MEASUREMENT_READ\""
+            "command": "c8y userroles deleteRoleFromUser --user \"myuser\" --role \"ROLE_MEASUREMENT_READ\""
           }
         ]
       },
@@ -205,7 +210,12 @@
         "go": [
           {
             "description": "Add a role to the admin group",
-            "command": "c8y userRoles addRoleToGroup --group \"customGroup1*\" --role \"*ALARM*\""
+            "command": "c8y userroles addRoleToGroup --group \"12345\" --role \"*ALARM*\"",
+            "assertStdOut": {
+              "json": {
+                "body.role.self": "r/.*ALARM.*$"
+              }
+            }
           }
         ]
       },
@@ -264,8 +274,8 @@
         ],
         "go": [
           {
-            "description": "Remove a role from the given user",
-            "command": "c8y userRoles deleteRoleFromGroup --group \"myuser\" --role \"ROLE_MEASUREMENT_READ\""
+            "description": "Remove a role from the given user group",
+            "command": "c8y userroles deleteRoleFromGroup --group 12345 --role \"ROLE_MEASUREMENT_READ\""
           }
         ]
       },
@@ -321,7 +331,7 @@
         "go": [
           {
             "description": "Get a list of role references for a user",
-            "command": "c8y userRoles getRoleReferenceCollectionFromUser --user \"myuser\""
+            "command": "c8y userroles getRoleReferenceCollectionFromUser --user \"myuser\""
           }
         ]
       },
@@ -367,7 +377,7 @@
         "go": [
           {
             "description": "Get a list of role references for a user group",
-            "command": "c8y userRoles getRoleReferenceCollectionFromGroup --group \"12345\""
+            "command": "c8y userroles getRoleReferenceCollectionFromGroup --group \"12345\""
           }
         ]
       },

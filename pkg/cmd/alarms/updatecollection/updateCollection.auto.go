@@ -34,7 +34,7 @@ func NewUpdateCollectionCmd(f *cmdutil.Factory) *UpdateCollectionCmd {
 		Short: "Update alarm collection",
 		Long:  `Update the status of a collection of alarms by using a filter. Currently only the status of alarms can be changed`,
 		Example: heredoc.Doc(`
-$ c8y alarms updateCollection --device mydevice --status ACTIVE --newStatus ACKNOWLEDGED
+$ c8y alarms updateCollection --device 12345 --status ACTIVE --newStatus ACKNOWLEDGED
 Update the status of all active alarms on a device to ACKNOWLEDGED
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {

@@ -149,7 +149,7 @@ endpoints:
 
       go:
         - description: Unassign a child device from its parent device
-          command: c8y inventory assets unassign --device 12345 --childDevice 22553
+          command: c8y inventory assets unassign --id 12345 --child 22553
     pathParameters:
       - name: id
         type: '[]id'

@@ -25,7 +25,7 @@ endpoints:
           command: Get-RoleCollection -PageSize 100
       go:
         - description: Get a list of roles
-          command: c8y userRoles list --pageSize 100
+          command: c8y userroles list --pageSize 100
 
   - name: addRoleToUser
     description: Add Role to user
@@ -60,7 +60,10 @@ endpoints:
             - PSc8y\Remove-User -Id $User.id
       go:
         - description: Add a role (ROLE_ALARM_READ) to a user
-          command: c8y userRoles addRoleToUser --user "myuser" --role "ROLE_ALARM_READ"
+          command: c8y userroles addRoleToUser --user "myuser" --role "ROLE_ALARM_READ"
+          assertStdOut:
+            json:
+                body.role.self: 'r/.*ROLE_ALARM_READ$'
     pathParameters:
       - name: tenant
         type: tenant
@@ -101,7 +104,7 @@ endpoints:
               - PSc8y\Remove-User -Id $User.id
         go:
           - description: Remove a role from the given user
-            command: c8y userRoles deleteRoleFromUser --user "myuser" --role "ROLE_MEASUREMENT_READ"
+            command: c8y userroles deleteRoleFromUser --user "myuser" --role "ROLE_MEASUREMENT_READ"
     pathParameters:
       - name: user
         type: '[]user'
@@ -148,7 +151,10 @@ endpoints:
 
       go:
         - description: Add a role to the admin group
-          command: c8y userRoles addRoleToGroup --group "customGroup1*" --role "*ALARM*"
+          command: c8y userroles addRoleToGroup --group "12345" --role "*ALARM*"
+          assertStdOut:
+            json:
+                body.role.self: 'r/.*ALARM.*$'
     pathParameters:
       - name: tenant
         type: tenant
@@ -189,8 +195,8 @@ endpoints:
             afterEach:
               - PSc8y\Remove-UserGroup -Id $UserGroup.id
         go:
-          - description: Remove a role from the given user
-            command: c8y userRoles deleteRoleFromGroup --group "myuser" --role "ROLE_MEASUREMENT_READ"
+          - description: Remove a role from the given user group
+            command: c8y userroles deleteRoleFromGroup --group 12345 --role "ROLE_MEASUREMENT_READ"
     pathParameters:
       - name: group
         type: '[]usergroup'
@@ -231,7 +237,7 @@ endpoints:
             - Remove-User -Id $User.id
       go:
         - description: Get a list of role references for a user
-          command: c8y userRoles getRoleReferenceCollectionFromUser --user "myuser"
+          command: c8y userroles getRoleReferenceCollectionFromUser --user "myuser"
     pathParameters:
       - name: tenant
         type: tenant
@@ -263,7 +269,7 @@ endpoints:
           command: Get-RoleReferenceCollectionFromGroup -Group $Group.id
       go:
         - description: Get a list of role references for a user group
-          command: c8y userRoles getRoleReferenceCollectionFromGroup --group "12345"
+          command: c8y userroles getRoleReferenceCollectionFromGroup --group "12345"
     pathParameters:
       - name: tenant
         type: tenant

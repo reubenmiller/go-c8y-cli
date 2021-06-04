@@ -34,7 +34,7 @@ func NewListCmd(f *cmdutil.Factory) *ListCmd {
 		Short: "Get role collection",
 		Long:  `Get collection of user roles`,
 		Example: heredoc.Doc(`
-$ c8y userRoles list --pageSize 100
+$ c8y userroles list --pageSize 100
 Get a list of roles
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {

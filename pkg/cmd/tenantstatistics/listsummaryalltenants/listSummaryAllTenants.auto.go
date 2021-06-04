@@ -34,13 +34,13 @@ func NewListSummaryAllTenantsCmd(f *cmdutil.Factory) *ListSummaryAllTenantsCmd {
 		Short: "Get all tenant usage summary statistics",
 		Long:  `Get collection of tenant usage statistics summary`,
 		Example: heredoc.Doc(`
-$ c8y tenantStatistics listSummaryAllTenants
+$ c8y tenantstatistics listSummaryAllTenants
 Get tenant summary statistics for all tenants
 
-$ c8y tenantStatistics listSummaryAllTenants --dateFrom "-30d"
+$ c8y tenantstatistics listSummaryAllTenants --dateFrom "-30d"
 Get tenant summary statistics collection for the last 30 days
 
-$ c8y tenantStatistics listSummaryAllTenants --dateFrom "-10d" --dateTo "-9d"
+$ c8y tenantstatistics listSummaryAllTenants --dateFrom "-10d" --dateTo "-9d"
 Get tenant summary statistics collection for the last 10 days, only return until the last 9 days
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {

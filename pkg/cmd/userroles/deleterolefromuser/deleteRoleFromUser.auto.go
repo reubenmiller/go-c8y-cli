@@ -34,7 +34,7 @@ func NewDeleteRoleFromUserCmd(f *cmdutil.Factory) *DeleteRoleFromUserCmd {
 		Short: "Unassign role from user",
 		Long:  `Unassign/delete role from a user`,
 		Example: heredoc.Doc(`
-$ c8y userRoles deleteRoleFromUser --user "myuser" --role "ROLE_MEASUREMENT_READ"
+$ c8y userroles deleteRoleFromUser --user "myuser" --role "ROLE_MEASUREMENT_READ"
 Remove a role from the given user
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {

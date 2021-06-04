@@ -245,7 +245,7 @@
         "go": [
           {
             "description": "Update an bulk operation",
-            "command": "c8y bulkoperations update --id 12345 --creationRamp 15"
+            "command": "c8y bulkoperations update --id 12345 --creationRampSec 15"
           }
         ]
       },

@@ -240,8 +240,8 @@
         ],
         "go": [
           {
-            "description": "Get a list of series [nx_WEA_29_Delta.MDL10FG001] and [nx_WEA_29_Delta.ST9] for device 12345",
-            "command": "c8y measurements getSeries -source 12345 --series nx_WEA_29_Delta.MDL10FG001 --series nx_WEA_29_Delta.ST9 --dateFrom \"-10min\" --dateTo \"0s\""
+            "description": "Get a list of series [app_Weather.temperature] and [app_Weather.barometer] for device 12345",
+            "command": "c8y measurements getSeries --device 12345 --series app_Weather.temperature --series app_Weather.barometer --dateFrom \"-10min\" --dateTo \"0s\""
           }
         ]
       },
@@ -346,7 +346,7 @@
         "go": [
           {
             "description": "Create measurement",
-            "command": "c8y measurements create --id 12345 --time \"0s\" --type \"myType\" --data \"{\\\"c8y_Winding\\\":{ \\\"temperature\\\":{\\\"value\\\": 1.2345,\\\"unit\\\":\\\"°C\\\"}}}\""
+            "command": "c8y measurements create --device 12345 --time \"0s\" --type \"myType\" --data \"{\\\"c8y_Winding\\\":{ \\\"temperature\\\":{\\\"value\\\": 1.2345,\\\"unit\\\":\\\"°C\\\"}}}\""
           }
         ]
       },
@@ -452,7 +452,7 @@
         "go": [
           {
             "description": "Delete measurement collection for a device",
-            "command": "c8y measurements deleteCollection --device $Measurement.source.id"
+            "command": "c8y measurements deleteCollection --device 12345"
           }
         ]
       },

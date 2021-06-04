@@ -2,6 +2,40 @@
   "$schema": "http://json-schema.org/draft-04/schema#",
   "type": "object",
   "definitions": {
+    "outputAssertion": {
+      "type": "object",
+      "properties": {
+        "json": {
+          "type": "object",
+          "title": "expected json properties",
+          "description": "JSON properties which are expected to be matched in the command output"
+        },
+        "contains": {
+          "type": "array",
+          "title": "List of strings which are expected to be inside the response.",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "assertion": {
+      "type": "object",
+      "properties": {
+        "exit-code": {
+          "type": "integer",
+          "title": "Expected exit code"
+        },
+        "skip": {
+          "type": "boolean",
+          "title": "Skip test"
+        },
+        "line-count": {
+          "type": "integer",
+          "title": "Expected number of lines (exact match)"
+        }
+      }
+    },
     "skipParameter": {
       "type": "boolean",
       "title": "Skip (ignore) parameter",
@@ -228,6 +262,12 @@
                       "type": "string",
                       "title": "Command line code which shows the usage of the command for the current endpoint",
                       "description": "This command should be what you run when using the native golang cli tool. i.e. mycliapp users list --pageSize 100"
+                    },
+                    "assertStdOut": {
+                      "$ref": "#/definitions/assertion"
+                    },
+                    "assertStdErr": {
+                      "$ref": "#/definitions/assertion"
                     }
                   },
                   "required": [

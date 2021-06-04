@@ -182,7 +182,7 @@ endpoints:
             - "Remove-DeviceGroup -Id $Group.id -Cascade"
       go:
         - description: Update an bulk operation
-          command: c8y bulkoperations update --id 12345 --creationRamp 15
+          command: c8y bulkoperations update --id 12345 --creationRampSec 15
     method: PUT
     path: devicecontrol/bulkoperations/{id}
     accept: application/vnd.com.nsn.cumulocity.bulkoperation+json

@@ -265,7 +265,7 @@
         "go": [
           {
             "description": "Update multiple tenant options",
-            "command": "c8y tenantoptions updateBulk --category \"c8y_cli_tests\" --data \"{\\\"option5\\\":0,\\\"option6\\\":1\"}\""
+            "command": "c8y tenantoptions updateBulk --category \"c8y_cli_tests\" --data \"{\\\"option5\\\":0,\\\"option6\\\":\\\"1\\\"}\""
           }
         ]
       },
@@ -319,7 +319,15 @@
           },
           {
             "description": "Get a list of options for a category",
-            "command": "echo -e \"c8y_cli_tests\\ncategory2\" | c8y tenantoptions getForCategory"
+            "command": "echo -e \"c8y_cli_tests\\ncategory2\" | c8y tenantoptions getForCategory",
+            "assertStdOut": {
+              "json": {
+                "method": "GET",
+                "path": "/tenant/options/c8y_cli_tests",
+                "..#(path=\"/tenant/options/c8y_cli_tests\").path": "/tenant/options/c8y_cli_tests",
+                "..#(path=\"/tenant/options/category2\").path": "/tenant/options/category2"
+              }
+            }
           }
         ]
       },
