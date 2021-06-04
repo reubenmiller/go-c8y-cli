@@ -16,7 +16,7 @@ c8y auditrecords list [flags]
 ### Examples
 
 ```
-$ c8y auditRecords list --pageSize 100
+$ c8y auditrecords list --pageSize 100
 Get a list of audit records
         
 ```

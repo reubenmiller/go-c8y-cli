@@ -15,7 +15,7 @@ c8y tenantoptions get [flags]
 ### Examples
 
 ```
-$ c8y tenantOptions get --category "c8y_cli_tests" --key "option2"
+$ c8y tenantoptions get --category "c8y_cli_tests" --key "option2"
 Get a tenant option
         
 ```

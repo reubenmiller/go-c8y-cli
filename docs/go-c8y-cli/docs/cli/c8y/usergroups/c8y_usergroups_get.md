@@ -15,7 +15,7 @@ c8y usergroups get [flags]
 ### Examples
 
 ```
-$ c8y userGroups get --id 12345
+$ c8y usergroups get --id 12345
 Get a user group
         
 ```

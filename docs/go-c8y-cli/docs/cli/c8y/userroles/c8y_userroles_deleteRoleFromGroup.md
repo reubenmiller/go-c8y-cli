@@ -15,8 +15,8 @@ c8y userroles deleteRoleFromGroup [flags]
 ### Examples
 
 ```
-$ c8y userRoles deleteRoleFromGroup --group "myuser" --role "ROLE_MEASUREMENT_READ"
-Remove a role from the given user
+$ c8y userroles deleteRoleFromGroup --group 12345 --role "ROLE_MEASUREMENT_READ"
+Remove a role from the given user group
         
 ```
 

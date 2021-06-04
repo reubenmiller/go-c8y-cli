@@ -15,7 +15,7 @@ c8y systemoptions list [flags]
 ### Examples
 
 ```
-$ c8y systemOptions list
+$ c8y systemoptions list
 Get a list of system options
         
 ```

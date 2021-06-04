@@ -15,7 +15,7 @@ c8y tenants enableApplication [flags]
 ### Examples
 
 ```
-$ c8y tenants enableApplication --tenant "mycompany" --application "myMicroservice"
+$ c8y tenants enableApplication --tenant "t12345" --application "myMicroservice"
 Enable an application of a tenant by name
         
 ```

@@ -18,7 +18,7 @@ c8y events deleteCollection [flags]
 $ c8y events deleteCollection --type my_CustomType --dateFrom "-10d"
 Remove events with type 'my_CustomType' that were created in the last 10 days
 
-$ c8y events deleteCollection --device mydevice
+$ c8y events deleteCollection --device 12345
 Remove events from a device
         
 ```

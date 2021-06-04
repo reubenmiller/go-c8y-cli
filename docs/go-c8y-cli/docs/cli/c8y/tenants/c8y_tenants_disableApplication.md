@@ -15,7 +15,7 @@ c8y tenants disableApplication [flags]
 ### Examples
 
 ```
-$ c8y tenants disableApplication --tenant "mycompany" --application "myMicroservice"
+$ c8y tenants disableApplication --tenant "t12345" --application "myMicroservice"
 Disable an application of a tenant by name
         
 ```

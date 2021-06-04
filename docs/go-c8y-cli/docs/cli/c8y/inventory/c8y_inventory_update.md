@@ -15,7 +15,7 @@ c8y inventory update [flags]
 ### Examples
 
 ```
-$ c8y inventory update --id 12345 --newName "my_custom_name" --data "{\"com_my_props\":{}\"value\":1}"
+$ c8y inventory update --id 12345 --newName "my_custom_name" --data "{\"com_my_props\":{},\"value\":1}"
 Update a managed object
         
 ```

@@ -15,7 +15,7 @@ c8y auditrecords get [flags]
 ### Examples
 
 ```
-$ c8y auditRecords get --id 12345
+$ c8y auditrecords get --id 12345
 Get an audit record by id
         
 ```

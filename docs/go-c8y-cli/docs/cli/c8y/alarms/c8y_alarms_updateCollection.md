@@ -15,7 +15,7 @@ c8y alarms updateCollection [flags]
 ### Examples
 
 ```
-$ c8y alarms updateCollection --device mydevice --status ACTIVE --newStatus ACKNOWLEDGED
+$ c8y alarms updateCollection --device 12345 --status ACTIVE --newStatus ACKNOWLEDGED
 Update the status of all active alarms on a device to ACKNOWLEDGED
         
 ```

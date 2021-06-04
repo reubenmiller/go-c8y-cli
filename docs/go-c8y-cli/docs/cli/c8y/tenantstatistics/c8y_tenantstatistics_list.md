@@ -15,13 +15,13 @@ c8y tenantstatistics list [flags]
 ### Examples
 
 ```
-$ c8y tenantStatistics list
+$ c8y tenantstatistics list
 Get tenant statistics collection
 
-$ c8y tenantStatistics list --dateFrom "-30d" --pageSize 30
+$ c8y tenantstatistics list --dateFrom "-30d" --pageSize 30
 Get tenant statistics collection for the last 30 days
 
-$ c8y tenantStatistics list --dateFrom "-3d" --dateTo "-2d"
+$ c8y tenantstatistics list --dateFrom "-3d" --dateTo "-2d"
 Get tenant statistics collection for the day before yesterday
         
 ```

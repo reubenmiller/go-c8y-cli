@@ -15,7 +15,7 @@ c8y usergroups create [flags]
 ### Examples
 
 ```
-$ c8y userGroups create --name customGroup1
+$ c8y usergroups create --name customGroup1
 Create a user group
         
 ```

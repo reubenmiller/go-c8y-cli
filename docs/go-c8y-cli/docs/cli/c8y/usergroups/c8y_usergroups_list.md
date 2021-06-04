@@ -15,7 +15,7 @@ c8y usergroups list [flags]
 ### Examples
 
 ```
-$ c8y userGroups list
+$ c8y usergroups list
 Get a list of user groups for the current tenant
         
 ```

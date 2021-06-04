@@ -15,7 +15,7 @@ c8y systemoptions get [flags]
 ### Examples
 
 ```
-$ c8y systemOptions get --category "system" --key "version"
+$ c8y systemoptions get --category "system" --key "version"
 Get a list of system options
         
 ```

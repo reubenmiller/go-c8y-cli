@@ -15,7 +15,7 @@ c8y userroles addRoleToUser [flags]
 ### Examples
 
 ```
-$ c8y userRoles addRoleToUser --user "myuser" --role "ROLE_ALARM_READ"
+$ c8y userroles addRoleToUser --user "myuser" --role "ROLE_ALARM_READ"
 Add a role (ROLE_ALARM_READ) to a user
         
 ```

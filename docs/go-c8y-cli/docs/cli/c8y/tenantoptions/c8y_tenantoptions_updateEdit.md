@@ -16,7 +16,7 @@ c8y tenantoptions updateEdit [flags]
 ### Examples
 
 ```
-$ c8y tenantOptions updateEdit --category "c8y_cli_tests" --key "option8" --editable "true"
+$ c8y tenantoptions updateEdit --category "c8y_cli_tests" --key "option8" --editable "true"
 Update editable property for an existing tenant option
         
 ```

@@ -15,7 +15,7 @@ c8y userroles addRoleToGroup [flags]
 ### Examples
 
 ```
-$ c8y userRoles addRoleToGroup --group "customGroup1*" --role "*ALARM*"
+$ c8y userroles addRoleToGroup --group "12345" --role "*ALARM*"
 Add a role to the admin group
         
 ```

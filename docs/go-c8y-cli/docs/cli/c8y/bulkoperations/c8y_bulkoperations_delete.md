@@ -15,7 +15,7 @@ c8y bulkoperations delete [flags]
 ### Examples
 
 ```
-$ c8y bulkOperations delete --id 12345
+$ c8y bulkoperations delete --id 12345
 Remove bulk operation by id
         
 ```

@@ -15,7 +15,7 @@ c8y usergroups delete [flags]
 ### Examples
 
 ```
-$ c8y userGroups delete --id 12345
+$ c8y usergroups delete --id 12345
 Delete a user group
         
 ```

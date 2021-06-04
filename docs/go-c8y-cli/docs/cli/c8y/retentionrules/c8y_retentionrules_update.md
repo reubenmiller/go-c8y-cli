@@ -16,7 +16,7 @@ c8y retentionrules update [flags]
 ### Examples
 
 ```
-$ c8y retentionRules get --id 12345
+$ c8y retentionrules update --id 12345 --maximumAge 90
 Update a retention rule
         
 ```

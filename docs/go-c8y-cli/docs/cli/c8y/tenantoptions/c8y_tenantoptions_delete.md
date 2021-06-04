@@ -15,7 +15,7 @@ c8y tenantoptions delete [flags]
 ### Examples
 
 ```
-$ c8y tenantOptions delete --category "c8y_cli_tests" --key "option3"
+$ c8y tenantoptions delete --category "c8y_cli_tests" --key "option3"
 Get a tenant option
         
 ```

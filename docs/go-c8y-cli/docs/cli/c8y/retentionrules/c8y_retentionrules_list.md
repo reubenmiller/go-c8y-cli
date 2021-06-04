@@ -16,7 +16,7 @@ c8y retentionrules list [flags]
 ### Examples
 
 ```
-$ c8y retentionRules list
+$ c8y retentionrules list
 Get a list of retention rules
         
 ```

@@ -15,7 +15,7 @@ c8y userroles getRoleReferenceCollectionFromUser [flags]
 ### Examples
 
 ```
-$ c8y userRoles getRoleReferenceCollectionFromUser --user "myuser"
+$ c8y userroles getRoleReferenceCollectionFromUser --user "myuser"
 Get a list of role references for a user
         
 ```

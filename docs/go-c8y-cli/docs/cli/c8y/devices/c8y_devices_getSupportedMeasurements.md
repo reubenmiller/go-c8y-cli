@@ -16,7 +16,7 @@ c8y devices getSupportedMeasurements [flags]
 ### Examples
 
 ```
-$ c8y inventory getSupportedMeasurements --device 12345
+$ c8y devices getSupportedMeasurements --device 12345
 Get the supported measurements of a device by name
         
 ```

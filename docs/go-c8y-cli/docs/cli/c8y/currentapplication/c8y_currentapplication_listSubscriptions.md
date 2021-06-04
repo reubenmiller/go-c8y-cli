@@ -15,7 +15,7 @@ c8y currentapplication listSubscriptions [flags]
 ### Examples
 
 ```
-$ c8y currentApplication listSubscriptions
+$ c8y currentapplication listSubscriptions
 List the current application users/subscriptions
         
 ```
