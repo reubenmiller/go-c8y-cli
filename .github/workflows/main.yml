@@ -87,14 +87,15 @@ jobs:
       id: download
       with:
         name: c8y.linux.amd64
-        path: /home/runner/.local/bin/c8y
+        path: /home/runner/.local/bin/
 
     - name: Test c8y examples
       if: ${{ true }}
       run: |
+        mv /home/runner/.local/bin/c8y.linux /home/runner/.local/bin/c8y
+        chmod +x /home/runner/.local/bin/c8y
         /home/runner/.local/bin/c8y version
         echo "/home/runner/.local/bin" >> $GITHUB_PATH
-        chmod +x /home/runner/.local/bin/c8y
         make test_cli
       shell: bash
       timeout-minutes: 10
