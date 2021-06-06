@@ -9,8 +9,26 @@
 
 	// Use 'settings' to set *default* container specific settings.json values on container create. 
 	// You can edit these settings after create using File > Preferences > Settings > Remote.
-	"settings": { 
-		"terminal.integrated.shell.linux": "/bin/bash",
+	"settings": {
+		"terminal.integrated.profiles.linux": {
+			"bash": {
+				"path": "bash"
+			},
+			"zsh": {
+				"path": "zsh"
+			},
+			"fish": {
+				"path": "fish"
+			},
+			"tmux": {
+				"path": "tmux",
+				"icon": "terminal-tmux"
+			},
+			"pwsh": {
+				"path": "pwsh",
+				"icon": "terminal-powershell"
+			}
+		},
 		"go.gopath": "/go",
 		"go.goroot": "/usr/local/go",
 		"go.lintTool": "golangci-lint",
@@ -20,7 +38,7 @@
 		// Yaml code completion
 		"yaml.completion": true,
 		"yaml.schemas": {
-			"./api/spec/schema.json": "api/spec/yaml/*.yml",
+			"./api/spec/schema.json": "api/spec/yaml/*.yaml",
 			"./tools/schema/session.schema.json": ".cumulocity/*.y*ml"
 		},
 		"powershell.pester.useLegacyCodeLens": false,
