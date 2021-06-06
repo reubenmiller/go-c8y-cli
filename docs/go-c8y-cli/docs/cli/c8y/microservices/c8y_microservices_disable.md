@@ -19,7 +19,7 @@ c8y microservices disable [flags]
 $ c8y microservices disable --id 12345
 Disable (unsubscribe) to a microservice
 
-$ c8y microservices disable --id myapp
+$ c8y microservices disable --id report-agent
 Disable (unsubscribe) to a microservice
         
 ```

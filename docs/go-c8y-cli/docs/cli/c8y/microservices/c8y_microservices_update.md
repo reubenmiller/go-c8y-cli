@@ -16,7 +16,7 @@ c8y microservices update [flags]
 ### Examples
 
 ```
-$ c8y microservices update --id "helloworld-app" --availability MARKET
+$ c8y microservices update --id "report-agent" --availability MARKET
 Update microservice availability to MARKET
         
 ```

@@ -15,7 +15,7 @@ c8y applications update [flags]
 ### Examples
 
 ```
-$ c8y applications update --id "helloworld-app" --availability MARKET
+$ c8y applications update --id "my-example-app" --availability MARKET
 Update application availability to MARKET
         
 ```

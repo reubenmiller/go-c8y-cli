@@ -19,7 +19,7 @@ c8y microservices getBootstrapUser [flags]
 $ c8y microservices getBootstrapUser --id 12345
 Get application bootstrap user by app id
 
-$ c8y microservices getBootstrapUser --id myapp
+$ c8y microservices getBootstrapUser --id report-agent
 Get application bootstrap user by app name
         
 ```

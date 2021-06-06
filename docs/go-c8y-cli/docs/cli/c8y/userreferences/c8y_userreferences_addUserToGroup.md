@@ -15,11 +15,14 @@ c8y userreferences addUserToGroup [flags]
 ### Examples
 
 ```
-$ c8y userreferences addUserToGroup --group 1 --user myuser
+$ c8y userreferences addUserToGroup --group 1 --user peterpi@example.com
 Add a user to a user group
 
+$ c8y users list | c8y userreferences addUserToGroup --group admins
+Add a list of users to admins group (using pipeline)
+
 $ c8y users list | c8y userreferences addUserToGroup --group business | c8y userreferences addUserToGroup --group admins
-Add a list of users to business and admins group using pipeline
+Add a list of users to business and admins group (using pipeline)
         
 ```
 

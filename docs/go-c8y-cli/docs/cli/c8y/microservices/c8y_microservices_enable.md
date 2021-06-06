@@ -19,8 +19,8 @@ c8y microservices enable [flags]
 $ c8y microservices enable --id 12345
 Enable (subscribe) to a microservice
 
-$ c8y microservices enable --id myapp
-Enable (subscribe) to a microservice
+$ c8y microservices enable --id report-agent
+Enable (subscribe) to a microservice by name
         
 ```
 

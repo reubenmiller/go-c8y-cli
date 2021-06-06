@@ -73,7 +73,7 @@ Enable/subscribe an application to a tenant
 
 ### EXAMPLE 1
 ```
-Enable-Application -Tenant mycompany -Application myMicroservice
+Enable-Application -Tenant t12345 -Application myMicroservice
 ```
 
 Enable an application of a tenant

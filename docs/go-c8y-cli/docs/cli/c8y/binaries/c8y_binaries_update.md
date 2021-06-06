@@ -16,7 +16,7 @@ c8y binaries update [flags]
 ### Examples
 
 ```
-$ c8y binaries update --id 12345 --file ./output.log
+$ c8y binaries update --id 12345 --file ./myfile.log
 Update an existing binary file
         
 ```

@@ -15,7 +15,7 @@ c8y userroles deleteRoleFromUser [flags]
 ### Examples
 
 ```
-$ c8y userroles deleteRoleFromUser --user "myuser" --role "ROLE_MEASUREMENT_READ"
+$ c8y userroles deleteRoleFromUser --user "peterpi@example.com" --role "ROLE_MEASUREMENT_READ"
 Remove a role from the given user
         
 ```

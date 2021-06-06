@@ -15,11 +15,11 @@ c8y userreferences deleteUserFromGroup [flags]
 ### Examples
 
 ```
-$ c8y userreferences deleteUserFromGroup --group 1 --user myuser
-From a user from a user group
+$ c8y userreferences deleteUserFromGroup --group 1 --user peterpi@example.com
+Delete a user from a user group
 
-$ c8y users get --id myuser | c8y userreferences deleteUserFromGroup --group 1
-From a user from a user group (using pipeline)
+$ c8y users get --id peterpi@example.com | c8y userreferences deleteUserFromGroup --group 1
+Delete a user from a user group (using pipeline)
         
 ```
 
