@@ -50,7 +50,43 @@ jobs:
         name: PSc8y Module
         path: tools/PSc8y/dist/PSc8y.zip
 
-  test:
+  test-examples:
+    runs-on: ${{ matrix.os }}
+    needs: [build]
+    if: ${{ true }}
+    env:
+      C8Y_HOST: ${{ secrets.C8Y_HOST }}
+      C8Y_TENANT: ${{ secrets.C8Y_TENANT }}
+      C8Y_USER: ${{ secrets.C8Y_USER }}
+      C8Y_PASSWORD: ${{ secrets.C8Y_PASSWORD }}
+
+      # Max timeout for each request (in milliseconds)
+      C8Y_SETTINGS_DEFAULTS_TIMEOUT: 30000
+
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-latest, windows-latest, ubuntu-18.04]
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Set up Go 1.16
+      uses: actions/setup-go@v2
+      with:
+        go-version: 1.16
+
+    - name: Build
+      run: make build
+      shell: bash
+
+    - name: Test c8y examples
+      if: ${{ true }}
+      run: make test_cli
+      shell: bash
+      timeout-minutes: 10
+
+  test-pwsh:
     runs-on: ${{ matrix.os }}
     needs: [build]
     if: ${{ false }}
@@ -61,7 +97,7 @@ jobs:
       C8Y_PASSWORD: ${{ secrets.C8Y_PASSWORD }}
 
       # Max timeout for each request (in milliseconds)
-      C8Y_TIMEOUT: 30000
+      C8Y_SETTINGS_DEFAULTS_TIMEOUT: 30000
 
     strategy:
       fail-fast: false
@@ -94,7 +130,7 @@ jobs:
 
   publish-test-results:
     runs-on: ubuntu-18.04
-    needs: [test]
+    needs: [test-pwsh]
     # Disabled as pester does not support junit reports (only nunit)
     if: always() && false
     strategy:
