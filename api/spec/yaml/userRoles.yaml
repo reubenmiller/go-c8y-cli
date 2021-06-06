@@ -60,7 +60,7 @@ endpoints:
             - PSc8y\Remove-User -Id $User.id
       go:
         - description: Add a role (ROLE_ALARM_READ) to a user
-          command: c8y userroles addRoleToUser --user "myuser" --role "ROLE_ALARM_READ"
+          command: c8y userroles addRoleToUser --user "peterpi@example.com" --role "ROLE_ALARM_READ"
           assertStdOut:
             json:
                 body.role.self: 'r/.*ROLE_ALARM_READ$'
@@ -104,7 +104,7 @@ endpoints:
               - PSc8y\Remove-User -Id $User.id
         go:
           - description: Remove a role from the given user
-            command: c8y userroles deleteRoleFromUser --user "myuser" --role "ROLE_MEASUREMENT_READ"
+            command: c8y userroles deleteRoleFromUser --user "peterpi@example.com" --role "ROLE_MEASUREMENT_READ"
     pathParameters:
       - name: user
         type: '[]user'
@@ -237,7 +237,7 @@ endpoints:
             - Remove-User -Id $User.id
       go:
         - description: Get a list of role references for a user
-          command: c8y userroles getRoleReferenceCollectionFromUser --user "myuser"
+          command: c8y userroles getRoleReferenceCollectionFromUser --user "peterpi@example.com"
     pathParameters:
       - name: tenant
         type: tenant

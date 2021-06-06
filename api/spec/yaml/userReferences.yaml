@@ -28,10 +28,21 @@ endpoints:
             - Remove-User -Id $User.id
       go:
         - description: Add a user to a user group
-          command: c8y userreferences addUserToGroup --group 1 --user myuser
+          command: c8y userreferences addUserToGroup --group 1 --user peterpi@example.com
+          assertStdOut:
+            json:
+              body.user.self: r//user/$C8Y_TENANT/users/peterpi@example.com$
 
-        - description: Add a list of users to business and admins group using pipeline
+        - description: Add a list of users to admins group (using pipeline)
+          command: c8y users list | c8y userreferences addUserToGroup --group admins
+          assertStdOut:
+            json:
+              path: r//user/$C8Y_TENANT/groups/\d+/users$
+            
+
+        - description: Add a list of users to business and admins group (using pipeline)
           command: c8y users list | c8y userreferences addUserToGroup --group business | c8y userreferences addUserToGroup --group admins
+          skipTest: true
     pathParameters:
       - name: group
         type: '[]usergroup'
@@ -69,7 +80,7 @@ endpoints:
         powershell: Remove-UserFromGroup
     examples:
       powershell:
-        - description: From a user from a user group
+        - description: Delete a user from a user group
           beforeEach:
             - $User = New-TestUser
             - $Group = Get-UserGroupByName -Name "business"
@@ -78,11 +89,14 @@ endpoints:
           afterEach:
             - Remove-User -Id $User.id
       go:
-        - description: From a user from a user group
-          command: c8y userreferences deleteUserFromGroup --group 1 --user myuser
+        - description: Delete a user from a user group
+          command: c8y userreferences deleteUserFromGroup --group 1 --user peterpi@example.com
         
-        - description: From a user from a user group (using pipeline)
-          command: c8y users get --id myuser | c8y userreferences deleteUserFromGroup --group 1
+        - description: Delete a user from a user group (using pipeline)
+          command: c8y users get --id peterpi@example.com | c8y userreferences deleteUserFromGroup --group 1
+          assertStdOut:
+            json:
+              path: r//user/$C8Y_TENANT/groups/1/users/peterpi@example.com
     pathParameters:
       - name: group
         type: '[]usergroup'
@@ -134,8 +148,13 @@ endpoints:
         - description: List the users within a user group
           command: c8y userreferences listGroupMembership --id 1
         
-        - description: List users in user groups (via pipeline)
+        - description: List users in user groups (using pipeline)
           command: c8y usergroups list | c8y userreferences listGroupMembership
+          assertStdOut:
+            line-count: 2
+            json:
+              path: r//user/$C8Y_TENANT/groups/(1|2)/users
+
     pathParameters:
       - name: id
         type: '[]usergroup'

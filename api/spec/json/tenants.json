@@ -283,14 +283,15 @@
         "powershell": [
           {
             "description": "Enable an application of a tenant",
-            "command": "Enable-Application -Tenant mycompany -Application myMicroservice",
+            "command": "Enable-Application -Tenant t12345 -Application myMicroservice",
             "skipTest": true
           }
         ],
         "go": [
           {
             "description": "Enable an application of a tenant by name",
-            "command": "c8y tenants enableApplication --tenant \"t12345\" --application \"myMicroservice\""
+            "command": "c8y tenants enableApplication --tenant \"t12345\" --application \"myMicroservice\"",
+            "skipTest": true
           }
         ]
       },
@@ -328,14 +329,15 @@
         "powershell": [
           {
             "description": "Disable an application of a tenant",
-            "command": "Disable-Application -Tenant mycompany -Application myMicroservice",
+            "command": "Disable-Application -Tenant t12345 -Application myMicroservice",
             "skipTest": true
           }
         ],
         "go": [
           {
             "description": "Disable an application of a tenant by name",
-            "command": "c8y tenants disableApplication --tenant \"t12345\" --application \"myMicroservice\""
+            "command": "c8y tenants disableApplication --tenant \"t12345\" --application \"myMicroservice\"",
+            "skipTest": true
           }
         ]
       },

@@ -322,7 +322,8 @@
           },
           {
             "description": "Check all bulk operations if they have any related operations still in executing state and were created more than 10 days ago, then cancel it with a custom message",
-            "command": "c8y bulkoperations list | c8y bulkoperations listOperations --status EXECUTING --dateTo \"-10d\" | c8y operations update --status FAILED --failureReason \"Manually cancelled stale operation\""
+            "command": "c8y bulkoperations list | c8y bulkoperations listOperations --status EXECUTING --dateTo \"-10d\" | c8y operations update --status FAILED --failureReason \"Manually cancelled stale operation\"",
+            "skipTest": true
           }
         ]
       },

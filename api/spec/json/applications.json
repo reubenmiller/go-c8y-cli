@@ -187,7 +187,12 @@
         "go": [
           {
             "description": "Copy an existing application",
-            "command": "c8y applications copy --id my-example-app"
+            "command": "c8y applications copy --id my-example-app",
+            "assertStdOut": {
+              "json": {
+                "path": "r//application/applications/\\d+/clone$"
+              }
+            }
           }
         ]
       },
@@ -286,7 +291,12 @@
           },
           {
             "description": "Delete an application by name",
-            "command": "c8y applications delete --id my-temp-app"
+            "command": "c8y applications delete --id my-example-app",
+            "assertStdOut": {
+              "json": {
+                "path": "r//application/applications/\\d+$"
+              }
+            }
           }
         ]
       },
@@ -327,7 +337,12 @@
         "go": [
           {
             "description": "Update application availability to MARKET",
-            "command": "c8y applications update --id \"helloworld-app\" --availability MARKET"
+            "command": "c8y applications update --id \"my-example-app\" --availability MARKET",
+            "assertStdOut": {
+              "json": {
+                "path": "r//application/applications/\\d+$"
+              }
+            }
           }
         ]
       },

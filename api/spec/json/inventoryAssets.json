@@ -34,7 +34,17 @@
           },
           {
             "description": "Get a list of the child devices using pipeline",
-            "command": "c8y devices list | c8y inventory assets list"
+            "command": "c8y devices list | c8y inventory assets list",
+            "assertStdOut": {
+              "json": {
+                "path": "r//inventory/managedObjects/\\d+/childAssets",
+                "..#(path=\"/inventory/managedObjects/11111/childAssets\").path": "/inventory/managedObjects/11111/childAssets",
+                "..#(path=\"/inventory/managedObjects/22222/childAssets\").path": "/inventory/managedObjects/22222/childAssets",
+                "..#(path=\"/inventory/managedObjects/33333/childAssets\").path": "/inventory/managedObjects/33333/childAssets",
+                "..#(path=\"/inventory/managedObjects/44444/childAssets\").path": "/inventory/managedObjects/44444/childAssets",
+                "..#(path=\"/inventory/managedObjects/55555/childAssets\").path": "/inventory/managedObjects/55555/childAssets"
+              }
+            }
           }
         ]
       },

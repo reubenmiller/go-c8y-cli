@@ -36,7 +36,11 @@ endpoints:
           command: c8y smartgroups get --id 12345
 
         - description: Get smart group by name
-          command: c8y smartgroups get --id "my group"
+          command: c8y smartgroups get --id "my smartgroup"
+          assertStdOut:
+            json:
+                path: r//inventory/managedObjects/\d+$
+
 
     pathParameters:
       - name: id

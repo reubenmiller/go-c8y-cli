@@ -216,7 +216,12 @@
           },
           {
             "description": "Delete a microservice by name",
-            "command": "c8y microservices delete --id my-temp-app"
+            "command": "c8y microservices delete --id report-agent",
+            "assertStdOut": {
+              "json": {
+                "path": "r//application/applications/\\d+$"
+              }
+            }
           }
         ]
       },
@@ -258,7 +263,12 @@
         "go": [
           {
             "description": "Update microservice availability to MARKET",
-            "command": "c8y microservices update --id \"helloworld-app\" --availability MARKET"
+            "command": "c8y microservices update --id \"report-agent\" --availability MARKET",
+            "assertStdOut": {
+              "json": {
+                "path": "r//application/applications/\\d+$"
+              }
+            }
           }
         ]
       },
@@ -336,7 +346,8 @@
         "go": [
           {
             "description": "Upload microservice binary",
-            "command": "c8y microservices createBinary --id 12345 --file ./helloworld.zip"
+            "command": "c8y microservices createBinary --id 12345 --file ./helloworld.zip",
+            "skipTest": true
           }
         ]
       },
@@ -390,7 +401,12 @@
           },
           {
             "description": "Get application bootstrap user by app name",
-            "command": "c8y microservices getBootstrapUser --id myapp"
+            "command": "c8y microservices getBootstrapUser --id report-agent",
+            "assertStdOut": {
+              "json": {
+                "path": "r//application/applications/\\d+/bootstrapUser$"
+              }
+            }
           }
         ]
       },
@@ -435,8 +451,13 @@
             "command": "c8y microservices enable --id 12345"
           },
           {
-            "description": "Enable (subscribe) to a microservice",
-            "command": "c8y microservices enable --id myapp"
+            "description": "Enable (subscribe) to a microservice by name",
+            "command": "c8y microservices enable --id report-agent",
+            "assertStdOut": {
+              "json": {
+                "body.application.id": "r/^\\d+$"
+              }
+            }
           }
         ]
       },
@@ -491,7 +512,12 @@
           },
           {
             "description": "Disable (unsubscribe) to a microservice",
-            "command": "c8y microservices disable --id myapp"
+            "command": "c8y microservices disable --id report-agent",
+            "assertStdOut": {
+              "json": {
+                "path": "r//tenant/tenants/$C8Y_TENANT/applications/\\d+$"
+              }
+            }
           }
         ]
       },
@@ -550,7 +576,13 @@
           },
           {
             "description": "Get microservice status (using pipeline)",
-            "command": "c8y microservices list | c8y microservices getStatus"
+            "command": "c8y microservices list | c8y microservices getStatus",
+            "assertStdOut": {
+              "json": {
+                "path": "/inventory/managedObjects",
+                "pathEncoded": "/inventory/managedObjects?type=c8y_Application_1"
+              }
+            }
           }
         ]
       },
