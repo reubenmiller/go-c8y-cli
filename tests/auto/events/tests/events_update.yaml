@@ -1,0 +1,17 @@
+tests:
+    events_update_Update custom properties of an existing event:
+        command: 'c8y events update --id 12345 --data "{\"my_event\":{\"active\": true }}"'
+        exit-code: 0
+        stdout:
+            json:
+                body.my_event.active: "true"
+                method: PUT
+                path: /event/events/12345
+    events_update_Update the text field of an existing event:
+        command: c8y events update --id 12345 --text "example text 1"
+        exit-code: 0
+        stdout:
+            json:
+                body.text: example text 1
+                method: PUT
+                path: /event/events/12345

@@ -1,0 +1,8 @@
+tests:
+    measurements_get_Get measurement:
+        command: c8y measurements get --id 12345
+        exit-code: 0
+        stdout:
+            json:
+                method: GET
+                path: /measurement/measurements/12345

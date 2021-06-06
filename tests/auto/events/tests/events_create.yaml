@@ -1,0 +1,20 @@
+tests:
+    events_create_Create a new event for a device:
+        command: c8y events create --device 12345 --type c8y_TestEvent --text "Test event"
+        exit-code: 0
+        stdout:
+            json:
+                body.source.id: "12345"
+                body.text: Test event
+                body.type: c8y_TestEvent
+                method: POST
+                path: /event/events
+    events_create_Create a new event for a device (using pipeline):
+        command: $TEST_SHELL -c 'cat ./testdata/c8y.devices.get.json | c8y events create --type c8y_TestEvent --text "Test event"'
+        exit-code: 0
+        stdout:
+            json:
+                body.text: Test event
+                body.type: c8y_TestEvent
+                method: POST
+                path: /event/events

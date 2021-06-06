@@ -15,7 +15,7 @@ c8y operations create [flags]
 ### Examples
 
 ```
-$ c8y operations create --device mydevice --data "c8y_Restart={}"
+$ c8y operations create --device 12345 --data "c8y_Restart={}"
 Create operation for a device
         
 ```

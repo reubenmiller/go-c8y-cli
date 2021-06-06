@@ -15,7 +15,7 @@ c8y bulkoperations update [flags]
 ### Examples
 
 ```
-$ c8y bulkOperations update --id 12345 --creationRamp 15
+$ c8y bulkoperations update --id 12345 --creationRampSec 15
 Update an bulk operation
         
 ```

@@ -1,0 +1,8 @@
+tests:
+    systemOptions_list_Get a list of system options:
+        command: c8y systemoptions list
+        exit-code: 0
+        stdout:
+            json:
+                method: GET
+                path: /tenant/system/options

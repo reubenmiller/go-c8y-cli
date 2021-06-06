@@ -1,0 +1,20 @@
+tests:
+    identity_list_Get a list of external ids for a device:
+        command: c8y identity list --device 12345
+        exit-code: 0
+        stdout:
+            json:
+                method: GET
+                path: /identity/globalIds/12345/externalIds
+    identity_list_Get the external ids for each device using pipeline:
+        command: $TEST_SHELL -c 'cat ./testdata/c8y.devices.list.json | c8y identity list'
+        exit-code: 0
+        stdout:
+            json:
+                ..#(path="/identity/globalIds/11111/externalIds").path: /identity/globalIds/11111/externalIds
+                ..#(path="/identity/globalIds/22222/externalIds").path: /identity/globalIds/22222/externalIds
+                ..#(path="/identity/globalIds/33333/externalIds").path: /identity/globalIds/33333/externalIds
+                ..#(path="/identity/globalIds/44444/externalIds").path: /identity/globalIds/44444/externalIds
+                ..#(path="/identity/globalIds/55555/externalIds").path: /identity/globalIds/55555/externalIds
+                method: GET
+                path: r//identity/globalIds/\d+/externalIds

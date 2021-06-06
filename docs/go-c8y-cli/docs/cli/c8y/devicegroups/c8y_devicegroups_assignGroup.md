@@ -18,7 +18,7 @@ c8y devicegroups assignGroup [flags]
 $ c8y devicegroups assignGroup --group 12345 --newChildGroup 43234
 Add a group to a group
 
-$ c8y devicegroups assignGroup --group 12345 --newChildGroup 43234, 99292, 12222
+$ c8y devicegroups assignGroup --group 12345 --newChildGroup 43234,99292,12222
 Add multiple groups to a group
         
 ```

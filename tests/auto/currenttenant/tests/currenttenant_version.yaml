@@ -1,0 +1,8 @@
+tests:
+    currenttenant_version_Set the required availability of a device by name to 10 minutes:
+        command: c8y currenttenant version
+        exit-code: 0
+        stdout:
+            json:
+                method: GET
+                path: /tenant/system/options/system/version

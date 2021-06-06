@@ -6,7 +6,7 @@ Describe -Name "Disable-Application" {
     }
 
     It -Skip "Disable an application of a tenant" {
-        $Response = PSc8y\Disable-Application -Tenant mycompany -Application myMicroservice
+        $Response = PSc8y\Disable-Application -Tenant t12345 -Application myMicroservice
         $LASTEXITCODE | Should -Be 0
     }
 

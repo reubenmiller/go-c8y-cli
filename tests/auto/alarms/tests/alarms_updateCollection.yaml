@@ -1,0 +1,12 @@
+tests:
+    alarms_updateCollection_Update the status of all active alarms on a device to ACKNOWLEDGED:
+        command: c8y alarms updateCollection --device 12345 --status ACTIVE --newStatus ACKNOWLEDGED
+        exit-code: 0
+        stdout:
+            json:
+                body.status: ACKNOWLEDGED
+                method: PUT
+                path: /alarm/alarms
+            contains:
+                - source=12345
+                - status=ACTIVE

@@ -1,0 +1,9 @@
+tests:
+    bulkOperations_update_Update an bulk operation:
+        command: c8y bulkoperations update --id 12345 --creationRampSec 15
+        exit-code: 0
+        stdout:
+            json:
+                body.creationRamp: "15"
+                method: PUT
+                path: /devicecontrol/bulkoperations/12345

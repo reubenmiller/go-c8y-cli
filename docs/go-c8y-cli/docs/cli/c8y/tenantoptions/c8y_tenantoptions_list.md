@@ -15,7 +15,7 @@ c8y tenantoptions list [flags]
 ### Examples
 
 ```
-$ c8y tenantOptions list
+$ c8y tenantoptions list
 Get a list of tenant options
         
 ```

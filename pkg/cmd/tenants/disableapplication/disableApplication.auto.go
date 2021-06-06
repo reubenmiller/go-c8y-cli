@@ -34,7 +34,7 @@ func NewDisableApplicationCmd(f *cmdutil.Factory) *DisableApplicationCmd {
 		Short: "Unsubscribe application",
 		Long:  `Disable/unsubscribe an application from a tenant`,
 		Example: heredoc.Doc(`
-$ c8y tenants disableApplication --tenant "mycompany" --application "myMicroservice"
+$ c8y tenants disableApplication --tenant "t12345" --application "myMicroservice"
 Disable an application of a tenant by name
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
@@ -157,7 +157,7 @@ func (n *DisableApplicationCmd) RunE(cmd *cobra.Command, args []string) error {
 		FormData:     formData,
 		Header:       headers,
 		IgnoreAccept: cfg.IgnoreAcceptHeader(),
-		DryRun:       cfg.DryRun(),
+		DryRun:       cfg.ShouldUseDryRun(cmd.CommandPath()),
 	}
 
 	return n.factory.RunWithWorkers(client, cmd, &req, inputIterators)

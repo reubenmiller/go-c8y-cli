@@ -1,0 +1,8 @@
+tests:
+    devices_getSupportedSeries_Get the supported measurement series of a device by name:
+        command: c8y devices getSupportedSeries --device 12345
+        exit-code: 0
+        stdout:
+            json:
+                method: GET
+                path: /inventory/managedObjects/12345/supportedSeries

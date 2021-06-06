@@ -1,0 +1,9 @@
+tests:
+    retentionRules_create_Create a retention rule:
+        command: c8y retentionrules create --dataType ALARM --maximumAge 180
+        exit-code: 0
+        stdout:
+            json:
+                body.dataType: ALARM
+                method: POST
+                path: /retention/retentions

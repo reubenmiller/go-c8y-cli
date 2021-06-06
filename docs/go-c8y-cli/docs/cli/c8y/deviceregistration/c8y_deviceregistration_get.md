@@ -15,7 +15,7 @@ c8y deviceregistration get [flags]
 ### Examples
 
 ```
-$ c8y deviceregistration get
+$ c8y deviceregistration get --id "010af8dd0c102"
 Get a new device request
         
 ```

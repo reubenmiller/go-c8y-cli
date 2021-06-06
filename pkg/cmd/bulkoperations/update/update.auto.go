@@ -34,7 +34,7 @@ func NewUpdateCmd(f *cmdutil.Factory) *UpdateCmd {
 		Short: "Update bulk operation",
 		Long:  `Update bulk operation. Making update on a started bulk operation cancels it and creates/schedules a new one.`,
 		Example: heredoc.Doc(`
-$ c8y bulkOperations update --id 12345 --creationRamp 15
+$ c8y bulkoperations update --id 12345 --creationRampSec 15
 Update an bulk operation
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
@@ -160,7 +160,7 @@ func (n *UpdateCmd) RunE(cmd *cobra.Command, args []string) error {
 		FormData:     formData,
 		Header:       headers,
 		IgnoreAccept: cfg.IgnoreAcceptHeader(),
-		DryRun:       cfg.DryRun(),
+		DryRun:       cfg.ShouldUseDryRun(cmd.CommandPath()),
 	}
 
 	return n.factory.RunWithWorkers(client, cmd, &req, inputIterators)

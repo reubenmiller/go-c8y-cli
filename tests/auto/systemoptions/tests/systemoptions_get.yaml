@@ -1,0 +1,8 @@
+tests:
+    systemOptions_get_Get a list of system options:
+        command: c8y systemoptions get --category "system" --key "version"
+        exit-code: 0
+        stdout:
+            json:
+                method: GET
+                path: /tenant/system/options/system/version

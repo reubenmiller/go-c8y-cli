@@ -35,7 +35,7 @@ func NewUpdateCmd(f *cmdutil.Factory) *UpdateCmd {
 		Long: `Update an existing binary
 `,
 		Example: heredoc.Doc(`
-$ c8y binaries update --id 12345 --file ./output.log
+$ c8y binaries update --id 12345 --file ./myfile.log
 Update an existing binary file
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
@@ -160,7 +160,7 @@ func (n *UpdateCmd) RunE(cmd *cobra.Command, args []string) error {
 		FormData:     formData,
 		Header:       headers,
 		IgnoreAccept: cfg.IgnoreAcceptHeader(),
-		DryRun:       cfg.DryRun(),
+		DryRun:       cfg.ShouldUseDryRun(cmd.CommandPath()),
 	}
 
 	return n.factory.RunWithWorkers(client, cmd, &req, inputIterators)

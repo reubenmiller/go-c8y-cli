@@ -16,7 +16,7 @@ c8y operations deleteCollection [flags]
 ### Examples
 
 ```
-$ c8y operations deleteCollection --device mydevice --status PENDING
+$ c8y operations deleteCollection --device 12345 --status PENDING
 Remove all pending operations for a given device
         
 ```

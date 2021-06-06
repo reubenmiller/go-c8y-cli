@@ -1,0 +1,8 @@
+tests:
+    deviceregistration_delete_Delete a new device request:
+        command: c8y deviceregistration delete --id "91019192078"
+        exit-code: 0
+        stdout:
+            json:
+                method: DELETE
+                path: /devicecontrol/newDeviceRequests/91019192078

@@ -25,6 +25,13 @@ jobs:
       uses: actions/setup-go@v2
       with:
         go-version: 1.16
+    - name: Use Node.js 14
+      uses: actions/setup-node@v1
+      with:
+        node-version: 14
+
+    - name: install tooling
+      run: go install golang.org/x/tools/cmd/goimports@latest
 
     - name: Build cli
       run: make build
@@ -50,7 +57,51 @@ jobs:
         name: PSc8y Module
         path: tools/PSc8y/dist/PSc8y.zip
 
-  test:
+  test-examples:
+    runs-on: ${{ matrix.os }}
+    needs: [build]
+    if: ${{ true }}
+    env:
+      C8Y_HOST: ${{ secrets.C8Y_HOST }}
+      C8Y_TENANT: ${{ secrets.C8Y_TENANT }}
+      C8Y_USER: ${{ secrets.C8Y_USER }}
+      C8Y_PASSWORD: ${{ secrets.C8Y_PASSWORD }}
+
+      # Max timeout for each request (in milliseconds)
+      C8Y_SETTINGS_DEFAULTS_TIMEOUT: 30000
+
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-18.04]
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Set up Go 1.16
+      uses: actions/setup-go@v2
+      with:
+        go-version: 1.16
+
+    - uses: actions/download-artifact@v2
+      id: download
+      with:
+        name: c8y.linux.amd64
+        path: /home/runner/.local/bin/
+
+    - name: Test c8y examples
+      if: ${{ true }}
+      run: |
+        mv /home/runner/.local/bin/c8y.linux /home/runner/.local/bin/c8y
+        chmod +x /home/runner/.local/bin/c8y
+        echo "/home/runner/.local/bin" >> $GITHUB_PATH
+        c8y version
+        c8y currentuser get --select id
+        make test_cli
+      shell: bash
+      timeout-minutes: 10
+
+  test-pwsh:
     runs-on: ${{ matrix.os }}
     needs: [build]
     if: ${{ false }}
@@ -61,7 +112,7 @@ jobs:
       C8Y_PASSWORD: ${{ secrets.C8Y_PASSWORD }}
 
       # Max timeout for each request (in milliseconds)
-      C8Y_TIMEOUT: 30000
+      C8Y_SETTINGS_DEFAULTS_TIMEOUT: 30000
 
     strategy:
       fail-fast: false
@@ -94,7 +145,7 @@ jobs:
 
   publish-test-results:
     runs-on: ubuntu-18.04
-    needs: [test]
+    needs: [test-pwsh]
     # Disabled as pester does not support junit reports (only nunit)
     if: always() && false
     strategy:

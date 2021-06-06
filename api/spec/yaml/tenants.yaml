@@ -1,0 +1,287 @@
+
+---
+
+information:
+  name: tenants
+  description: Cumulocity tenant
+  descriptionLong: 'REST endpoint to interact with Cumulocity tenants'
+  link: https://cumulocity.com/guides/reference/tenants/#tenants
+
+endpoints:
+  - name: getTenantCollection
+    description: Get tenant collection
+    descriptionLong: Get collection of tenants
+    method: GET
+    path: /tenant/tenants
+    accept: application/vnd.com.nsn.cumulocity.tenantCollection+json
+    collectionType: application/vnd.com.nsn.cumulocity.tenant+json
+    collectionProperty: tenants
+    alias:
+        go: list
+        powershell: Get-TenantCollection
+    examples:
+        powershell:
+          - description: Get a list of tenants
+            command: Get-TenantCollection
+            skipTest: true
+        go:
+          - description: Get a list of tenants
+            command: c8y tenants list
+
+  - name: newTenant
+    description: Create tenant
+    descriptionLong: Create a new tenant
+    method: POST
+    path: /tenant/tenants
+    accept: application/vnd.com.nsn.cumulocity.tenant+json
+    alias:
+        go: create
+        powershell: New-Tenant
+    examples:
+        powershell:
+          - description: Create a new tenant (from the management tenant)
+            command: New-Tenant -Company "mycompany" -Domain "mycompany" -AdminName "admin" -AdminPass "mys3curep9d8"
+            skipTest: true
+        go:
+          - description: Create a new tenant (from the management tenant)
+            command: c8y tenants create --company "mycompany" --domain "mycompany" --adminName "admin" --adminPass "mys3curep9d8"
+    body:
+      - name: company
+        type: string
+        required: true
+        description: Company name. Maximum 256 characters
+
+      - name: domain
+        type: string
+        required: true
+        pipeline: true
+        description: Domain name to be used for the tenant. Maximum 256 characters
+
+      - name: adminName
+        type: string
+        required: false
+        description: Username of the tenant administrator
+
+      - name: adminPass
+        type: string
+        required: false
+        description: Password of the tenant administrator
+
+      - name: contactName
+        type: string
+        required: false
+        description: A contact name, for example an administrator, of the tenant
+
+      - name: contactPhone
+        type: string
+        required: false
+        property: contact_phone
+        description: An international contact phone number
+
+      - name: tenantId
+        type: string
+        required: false
+        description: The tenant ID. This should be left bank unless you know what you are doing. Will be auto-generated if not present.
+
+      - name: data
+        type: json
+        property: customProperties
+        required: false
+        description: A set of custom properties of the tenant
+
+  - name: getTenant
+    description: Get tenant
+    descriptionLong: Get an existing tenant
+    method: GET
+    path: /tenant/tenants/{id}
+    accept: application/vnd.com.nsn.cumulocity.tenant+json
+    alias:
+        go: get
+        powershell: Get-Tenant
+    examples:
+        powershell:
+          - description: Get a tenant by name (from the management tenant)
+            command: Get-Tenant -Id mycompany
+            skipTest: true
+        go:
+          - description: Get a tenant by name (from the management tenant)
+            command: c8y tenants get --id "mycompany"
+    pathParameters:
+      - name: id
+        type: tenant
+        pipeline: true
+        required: false
+        description: Tenant id
+
+  - name: deleteTenant
+    description: Delete tenant
+    descriptionLong: Delete an existing tenant
+    method: DELETE
+    path: /tenant/tenants/{id}
+    alias:
+        go: delete
+        powershell: Remove-Tenant
+    examples:
+        powershell:
+          - description: Delete a tenant by name (from the management tenant)
+            command: Remove-Tenant -Id mycompany
+            skipTest: true
+        go:
+          - description: Delete a tenant by name (from the management tenant)
+            command: c8y tenants delete --id "mycompany"
+    pathParameters:
+      - name: id
+        type: tenant
+        pipeline: true
+        required: false
+        description: Tenant id
+
+  - name: updateTenant
+    description: Update tenant
+    descriptionLong: Update an existing tenant
+    method: PUT
+    path: /tenant/tenants/{id}
+    accept: application/vnd.com.nsn.cumulocity.tenant+json
+    alias:
+        go: update
+        powershell: Update-Tenant
+    examples:
+        powershell:
+          - description: Update a tenant by name (from the management tenant)
+            command: Update-Tenant -Id mycompany -ContactName "John Smith"
+            skipTest: true
+        go:
+          - description: Update a tenant by name (from the management tenant)
+            command: c8y tenants update --id "mycompany" --contactName "John Smith"
+    pathParameters:
+      - name: id
+        type: tenant
+        pipeline: true
+        required: false
+        description: Tenant id
+
+    body:
+      - name: company
+        type: string
+        required: false
+        description: Company name. Maximum 256 characters
+
+      - name: domain
+        type: string
+        required: false
+        description: Domain name to be used for the tenant. Maximum 256 characters
+
+      - name: adminName
+        type: string
+        required: false
+        description: Username of the tenant administrator
+
+      - name: adminPass
+        type: string
+        required: false
+        description: Password of the tenant administrator
+
+      - name: contactName
+        type: string
+        required: false
+        description: A contact name, for example an administrator, of the tenant
+
+      - name: contactPhone
+        type: string
+        property: contact_phone
+        required: false
+        description: An international contact phone number
+
+      - name: data
+        type: json
+        property: customProperties
+        required: false
+        description: A set of custom properties of the tenant
+
+  - name: enableApplicationOnTenant
+    description: Subscribe application
+    descriptionLong: Enable/subscribe an application to a tenant
+    method: POST
+    path: /tenant/tenants/{tenant}/applications
+    accept: application/vnd.com.nsn.cumulocity.applicationReference+json
+    alias:
+        go: enableApplication
+        powershell: Enable-Application
+    examples:
+        powershell:
+          - description: Enable an application of a tenant
+            command: Enable-Application -Tenant t12345 -Application myMicroservice
+            skipTest: true
+        go:
+          - description: Enable an application of a tenant by name
+            command: c8y tenants enableApplication --tenant "t12345" --application "myMicroservice"
+            skipTest: true
+    pathParameters:
+      - name: tenant
+        type: tenant
+        required: false
+        position: 99
+        description: Tenant id. Defaults to current tenant (based on credentials)
+    body:
+      - name: application
+        pipeline: true
+        type: application
+        property: application.id
+        required: true
+        description: Application id
+
+  - name: disableApplicationFromTenant
+    description: Unsubscribe application
+    descriptionLong: Disable/unsubscribe an application from a tenant
+    method: DELETE
+    path: /tenant/tenants/{tenant}/applications/{application}
+    alias:
+        go: disableApplication
+        powershell: Disable-Application
+    examples:
+        powershell:
+          - description: Disable an application of a tenant
+            command: Disable-Application -Tenant t12345 -Application myMicroservice
+            skipTest: true
+        go:
+          - description: Disable an application of a tenant by name
+            command: c8y tenants disableApplication --tenant "t12345" --application "myMicroservice"
+            skipTest: true
+    pathParameters:
+      - name: tenant
+        type: tenant
+        required: false
+        position: 99
+        description: Tenant id. Defaults to current tenant (based on credentials)
+
+      - name: application
+        type: application
+        pipeline: true
+        required: true
+        description: Application id
+
+  - name: getApplicationReferenceCollection
+    description: Get application reference collection
+    descriptionLong: Get a collection of application references on a tenant
+    method: GET
+    path: /tenant/tenants/{tenant}/applications
+    accept: application/vnd.com.nsn.cumulocity.applicationReferenceCollection+json
+    collectionType: application/vnd.com.nsn.cumulocity.applicationReference+json
+    collectionProperty: references
+    alias:
+        go: listReferences
+        powershell: Get-ApplicationReferenceCollection
+    examples:
+        powershell:
+          - description: Get a list of referenced applications on a given tenant (from management tenant)
+            command: Get-ApplicationReferenceCollection -Tenant mycompany
+            skipTest: true
+        go:
+          - description: Get a list of referenced applications on a given tenant (from management tenant)
+            command: c8y tenants listReferences --tenant "mycompany"
+    pathParameters:
+      - name: tenant
+        type: tenant
+        pipeline: true
+        required: false
+        description: Tenant id

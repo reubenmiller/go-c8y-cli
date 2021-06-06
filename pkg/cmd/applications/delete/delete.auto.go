@@ -37,7 +37,7 @@ func NewDeleteCmd(f *cmdutil.Factory) *DeleteCmd {
 $ c8y applications delete --id 12345
 Delete an application by id
 
-$ c8y applications delete --id my-temp-app
+$ c8y applications delete --id my-example-app
 Delete an application by name
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
@@ -157,7 +157,7 @@ func (n *DeleteCmd) RunE(cmd *cobra.Command, args []string) error {
 		FormData:     formData,
 		Header:       headers,
 		IgnoreAccept: cfg.IgnoreAcceptHeader(),
-		DryRun:       cfg.DryRun(),
+		DryRun:       cfg.ShouldUseDryRun(cmd.CommandPath()),
 	}
 
 	return n.factory.RunWithWorkers(client, cmd, &req, inputIterators)

@@ -1,0 +1,10 @@
+tests:
+    tenantOptions_updateBulk_Update multiple tenant options:
+        command: c8y tenantoptions updateBulk --category "c8y_cli_tests" --data "{\"option5\":0,\"option6\":\"1\"}"
+        exit-code: 0
+        stdout:
+            json:
+                body.option5: "0"
+                body.option6: "1"
+                method: PUT
+                path: /tenant/options/c8y_cli_tests

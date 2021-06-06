@@ -1,0 +1,8 @@
+tests:
+    deviceregistration_approve_Approve a new device request:
+        command: c8y deviceregistration approve --id "1234010101s01ldk208"
+        exit-code: 0
+        stdout:
+            json:
+                method: PUT
+                path: /devicecontrol/newDeviceRequests/1234010101s01ldk208

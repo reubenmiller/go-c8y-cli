@@ -15,7 +15,7 @@ c8y tenantoptions updateBulk [flags]
 ### Examples
 
 ```
-$ c8y tenantOptions updateBulk --category "c8y_cli_tests" --data "{\"option5\":0,\"option6\":1"}"
+$ c8y tenantoptions updateBulk --category "c8y_cli_tests" --data "{\"option5\":0,\"option6\":\"1\"}"
 Update multiple tenant options
         
 ```

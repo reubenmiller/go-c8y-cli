@@ -35,7 +35,7 @@ func NewUpdateCmd(f *cmdutil.Factory) *UpdateCmd {
 		Long: `Update details of an existing microservice, i.e. availability, context path etc.
 `,
 		Example: heredoc.Doc(`
-$ c8y microservices update --id "helloworld-app" --availability MARKET
+$ c8y microservices update --id "report-agent" --availability MARKET
 Update microservice availability to MARKET
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
@@ -168,7 +168,7 @@ func (n *UpdateCmd) RunE(cmd *cobra.Command, args []string) error {
 		FormData:     formData,
 		Header:       headers,
 		IgnoreAccept: cfg.IgnoreAcceptHeader(),
-		DryRun:       cfg.DryRun(),
+		DryRun:       cfg.ShouldUseDryRun(cmd.CommandPath()),
 	}
 
 	return n.factory.RunWithWorkers(client, cmd, &req, inputIterators)

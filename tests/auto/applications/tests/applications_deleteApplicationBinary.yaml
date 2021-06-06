@@ -1,0 +1,8 @@
+tests:
+    applications_deleteApplicationBinary_Remove an application binary related to a Hosted (web) application:
+        command: c8y applications deleteApplicationBinary --application 12345 --binaryId 9876
+        exit-code: 0
+        stdout:
+            json:
+                method: DELETE
+                path: /application/applications/12345/binaries/9876

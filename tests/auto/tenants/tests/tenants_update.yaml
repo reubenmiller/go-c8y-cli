@@ -1,0 +1,9 @@
+tests:
+    tenants_update_Update a tenant by name (from the management tenant):
+        command: c8y tenants update --id "mycompany" --contactName "John Smith"
+        exit-code: 0
+        stdout:
+            json:
+                body.contactName: John Smith
+                method: PUT
+                path: /tenant/tenants/mycompany

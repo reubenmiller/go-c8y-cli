@@ -37,7 +37,7 @@ func NewDeleteCollectionCmd(f *cmdutil.Factory) *DeleteCollectionCmd {
 $ c8y events deleteCollection --type my_CustomType --dateFrom "-10d"
 Remove events with type 'my_CustomType' that were created in the last 10 days
 
-$ c8y events deleteCollection --device mydevice
+$ c8y events deleteCollection --device 12345
 Remove events from a device
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
@@ -167,7 +167,7 @@ func (n *DeleteCollectionCmd) RunE(cmd *cobra.Command, args []string) error {
 		FormData:     formData,
 		Header:       headers,
 		IgnoreAccept: cfg.IgnoreAcceptHeader(),
-		DryRun:       cfg.DryRun(),
+		DryRun:       cfg.ShouldUseDryRun(cmd.CommandPath()),
 	}
 
 	return n.factory.RunWithWorkers(client, cmd, &req, inputIterators)

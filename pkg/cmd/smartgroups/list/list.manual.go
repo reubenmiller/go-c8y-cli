@@ -180,7 +180,7 @@ func (n *ListCmd) RunE(cmd *cobra.Command, args []string) error {
 		Body:         body,
 		FormData:     formData,
 		Header:       headers,
-		DryRun:       cfg.DryRun(),
+		DryRun:       cfg.ShouldUseDryRun(cmd.CommandPath()),
 		IgnoreAccept: cfg.IgnoreAcceptHeader(),
 	}
 

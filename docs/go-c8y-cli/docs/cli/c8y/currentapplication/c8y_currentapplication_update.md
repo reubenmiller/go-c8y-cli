@@ -15,7 +15,7 @@ c8y currentapplication update [flags]
 ### Examples
 
 ```
-$ c8y currentApplication update --data "myCustomProp=1"
+$ c8y currentapplication update --data "myCustomProp=1"
 Update custom properties of the current application (requires using application credentials)
         
 ```

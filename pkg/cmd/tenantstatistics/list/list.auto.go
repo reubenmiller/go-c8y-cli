@@ -34,13 +34,13 @@ func NewListCmd(f *cmdutil.Factory) *ListCmd {
 		Short: "Get tenant usage statistics",
 		Long:  `Get collection of tenant usage statistics`,
 		Example: heredoc.Doc(`
-$ c8y tenantStatistics list
+$ c8y tenantstatistics list
 Get tenant statistics collection
 
-$ c8y tenantStatistics list --dateFrom "-30d" --pageSize 30
+$ c8y tenantstatistics list --dateFrom "-30d" --pageSize 30
 Get tenant statistics collection for the last 30 days
 
-$ c8y tenantStatistics list --dateFrom "-3d" --dateTo "-2d"
+$ c8y tenantstatistics list --dateFrom "-3d" --dateTo "-2d"
 Get tenant statistics collection for the day before yesterday
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
@@ -165,7 +165,7 @@ func (n *ListCmd) RunE(cmd *cobra.Command, args []string) error {
 		FormData:     formData,
 		Header:       headers,
 		IgnoreAccept: cfg.IgnoreAcceptHeader(),
-		DryRun:       cfg.DryRun(),
+		DryRun:       cfg.ShouldUseDryRun(cmd.CommandPath()),
 	}
 
 	return n.factory.RunWithWorkers(client, cmd, &req, inputIterators)

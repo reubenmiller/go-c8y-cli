@@ -1,0 +1,8 @@
+tests:
+    currenttenant_listApplications_Get a list of applications in the current tenant:
+        command: c8y currenttenant listApplications
+        exit-code: 0
+        stdout:
+            json:
+                method: GET
+                path: /tenant/currentTenant

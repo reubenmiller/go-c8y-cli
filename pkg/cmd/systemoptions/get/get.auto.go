@@ -34,7 +34,7 @@ func NewGetCmd(f *cmdutil.Factory) *GetCmd {
 		Short: "Get system option",
 		Long:  `Get a system option by category and key`,
 		Example: heredoc.Doc(`
-$ c8y systemOptions get --category "system" --key "version"
+$ c8y systemoptions get --category "system" --key "version"
 Get a list of system options
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
@@ -161,7 +161,7 @@ func (n *GetCmd) RunE(cmd *cobra.Command, args []string) error {
 		FormData:     formData,
 		Header:       headers,
 		IgnoreAccept: cfg.IgnoreAcceptHeader(),
-		DryRun:       cfg.DryRun(),
+		DryRun:       cfg.ShouldUseDryRun(cmd.CommandPath()),
 	}
 
 	return n.factory.RunWithWorkers(client, cmd, &req, inputIterators)

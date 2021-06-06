@@ -34,7 +34,7 @@ func NewGetCmd(f *cmdutil.Factory) *GetCmd {
 		Short: "Get tenant option",
 		Long:  `Get an existing tenant option`,
 		Example: heredoc.Doc(`
-$ c8y tenantOptions get --category "c8y_cli_tests" --key "option2"
+$ c8y tenantoptions get --category "c8y_cli_tests" --key "option2"
 Get a tenant option
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
@@ -161,7 +161,7 @@ func (n *GetCmd) RunE(cmd *cobra.Command, args []string) error {
 		FormData:     formData,
 		Header:       headers,
 		IgnoreAccept: cfg.IgnoreAcceptHeader(),
-		DryRun:       cfg.DryRun(),
+		DryRun:       cfg.ShouldUseDryRun(cmd.CommandPath()),
 	}
 
 	return n.factory.RunWithWorkers(client, cmd, &req, inputIterators)

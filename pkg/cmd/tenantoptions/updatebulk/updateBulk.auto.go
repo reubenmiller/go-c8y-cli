@@ -33,7 +33,7 @@ func NewUpdateBulkCmd(f *cmdutil.Factory) *UpdateBulkCmd {
 		Short: "Update multiple tenant options",
 		Long:  `Update multiple tenant options in provided category`,
 		Example: heredoc.Doc(`
-$ c8y tenantOptions updateBulk --category "c8y_cli_tests" --data "{\"option5\":0,\"option6\":1"}"
+$ c8y tenantoptions updateBulk --category "c8y_cli_tests" --data "{\"option5\":0,\"option6\":\"1\"}"
 Update multiple tenant options
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
@@ -158,7 +158,7 @@ func (n *UpdateBulkCmd) RunE(cmd *cobra.Command, args []string) error {
 		FormData:     formData,
 		Header:       headers,
 		IgnoreAccept: cfg.IgnoreAcceptHeader(),
-		DryRun:       cfg.DryRun(),
+		DryRun:       cfg.ShouldUseDryRun(cmd.CommandPath()),
 	}
 
 	return n.factory.RunWithWorkers(client, cmd, &req, inputIterators)

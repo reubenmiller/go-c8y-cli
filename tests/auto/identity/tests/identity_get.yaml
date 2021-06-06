@@ -1,0 +1,8 @@
+tests:
+    identity_get_Get external identity:
+        command: c8y identity get --type test --name myserialnumber
+        exit-code: 0
+        stdout:
+            json:
+                method: GET
+                path: /identity/externalIds/test/myserialnumber

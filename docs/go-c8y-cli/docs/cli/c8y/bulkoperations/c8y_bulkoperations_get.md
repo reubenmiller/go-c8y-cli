@@ -15,7 +15,7 @@ c8y bulkoperations get [flags]
 ### Examples
 
 ```
-$ c8y bulkOperations get --id 12345
+$ c8y bulkoperations get --id 12345
 Get bulk operation by id
         
 ```

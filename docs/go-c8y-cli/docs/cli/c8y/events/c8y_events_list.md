@@ -18,7 +18,7 @@ c8y events list [flags]
 $ c8y events list --type my_CustomType --dateFrom "-10d"
 Get events with type 'my_CustomType' that were created in the last 10 days
 
-$ c8y events list --device mydevice
+$ c8y events list --device 12345
 Get events from a device
         
 ```

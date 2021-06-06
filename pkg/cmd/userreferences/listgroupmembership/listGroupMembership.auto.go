@@ -35,11 +35,11 @@ func NewListGroupMembershipCmd(f *cmdutil.Factory) *ListGroupMembershipCmd {
 		Short: "Get users in group",
 		Long:  `Get all users in a user group`,
 		Example: heredoc.Doc(`
-$ c8y userreferences listGroupMembership --group 1
+$ c8y userreferences listGroupMembership --id 1
 List the users within a user group
 
 $ c8y usergroups list | c8y userreferences listGroupMembership
-List users in user groups (via pipeline)
+List users in user groups (using pipeline)
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
 			return nil
@@ -165,7 +165,7 @@ func (n *ListGroupMembershipCmd) RunE(cmd *cobra.Command, args []string) error {
 		FormData:     formData,
 		Header:       headers,
 		IgnoreAccept: cfg.IgnoreAcceptHeader(),
-		DryRun:       cfg.DryRun(),
+		DryRun:       cfg.ShouldUseDryRun(cmd.CommandPath()),
 	}
 
 	return n.factory.RunWithWorkers(client, cmd, &req, inputIterators)

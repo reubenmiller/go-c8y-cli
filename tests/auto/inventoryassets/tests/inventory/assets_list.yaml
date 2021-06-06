@@ -1,0 +1,20 @@
+tests:
+    inventory/assets_list_Get a list of the child devices of an existing device:
+        command: c8y inventory assets list --id 12345
+        exit-code: 0
+        stdout:
+            json:
+                method: GET
+                path: /inventory/managedObjects/12345/childAssets
+    inventory/assets_list_Get a list of the child devices using pipeline:
+        command: $TEST_SHELL -c 'cat ./testdata/c8y.devices.list.json | c8y inventory assets list'
+        exit-code: 0
+        stdout:
+            json:
+                ..#(path="/inventory/managedObjects/11111/childAssets").path: /inventory/managedObjects/11111/childAssets
+                ..#(path="/inventory/managedObjects/22222/childAssets").path: /inventory/managedObjects/22222/childAssets
+                ..#(path="/inventory/managedObjects/33333/childAssets").path: /inventory/managedObjects/33333/childAssets
+                ..#(path="/inventory/managedObjects/44444/childAssets").path: /inventory/managedObjects/44444/childAssets
+                ..#(path="/inventory/managedObjects/55555/childAssets").path: /inventory/managedObjects/55555/childAssets
+                method: GET
+                path: r//inventory/managedObjects/\d+/childAssets

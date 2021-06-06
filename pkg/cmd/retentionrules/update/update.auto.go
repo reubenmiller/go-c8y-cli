@@ -35,7 +35,7 @@ func NewUpdateCmd(f *cmdutil.Factory) *UpdateCmd {
 		Long: `Update an existing retention rule, i.e. change maximum number of days or the data type.
 `,
 		Example: heredoc.Doc(`
-$ c8y retentionRules get --id 12345
+$ c8y retentionrules update --id 12345 --maximumAge 90
 Update a retention rule
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
@@ -172,7 +172,7 @@ func (n *UpdateCmd) RunE(cmd *cobra.Command, args []string) error {
 		FormData:     formData,
 		Header:       headers,
 		IgnoreAccept: cfg.IgnoreAcceptHeader(),
-		DryRun:       cfg.DryRun(),
+		DryRun:       cfg.ShouldUseDryRun(cmd.CommandPath()),
 	}
 
 	return n.factory.RunWithWorkers(client, cmd, &req, inputIterators)

@@ -1,0 +1,8 @@
+tests:
+    agents_update_Update agent by id:
+        command: c8y agents update --id 12345
+        exit-code: 0
+        stdout:
+            json:
+                method: PUT
+                path: /inventory/managedObjects/12345

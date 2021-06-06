@@ -32,17 +32,19 @@ require (
 	github.com/spf13/viper v1.7.1
 	github.com/stretchr/testify v1.7.0
 	github.com/thedevsaddam/gojsonq v2.3.0+incompatible
-	github.com/tidwall/gjson v1.6.8
+	github.com/tidwall/gjson v1.7.1
 	github.com/tidwall/pretty v1.1.0
 	github.com/tidwall/sjson v1.1.5
 	github.com/vbauerster/mpb/v6 v6.0.2
 	go.uber.org/multierr v1.6.0 // indirect
 	go.uber.org/zap v1.16.0
-	golang.org/x/crypto v0.0.0-20210314154223-e6e6c4f2bb5b
+	golang.org/x/crypto v0.0.0-20210322153248-0c34fe9e7dc2
 	golang.org/x/term v0.0.0-20210406210042-72f3dc4e9b72
 	golang.org/x/text v0.3.4 // indirect
-	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b // indirect
+	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b
 	moul.io/http2curl v1.0.0
 )
+
+replace github.com/commander-cli/commander/v2 => github.com/reubenmiller/commander/v2 v2.5.0-alpha1
 
 go 1.16

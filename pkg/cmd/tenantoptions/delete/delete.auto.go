@@ -33,7 +33,7 @@ func NewDeleteCmd(f *cmdutil.Factory) *DeleteCmd {
 		Short: "Delete tenant option",
 		Long:  `Delete an existing tenant option`,
 		Example: heredoc.Doc(`
-$ c8y tenantOptions delete --category "c8y_cli_tests" --key "option3"
+$ c8y tenantoptions delete --category "c8y_cli_tests" --key "option3"
 Get a tenant option
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
@@ -157,7 +157,7 @@ func (n *DeleteCmd) RunE(cmd *cobra.Command, args []string) error {
 		FormData:     formData,
 		Header:       headers,
 		IgnoreAccept: cfg.IgnoreAcceptHeader(),
-		DryRun:       cfg.DryRun(),
+		DryRun:       cfg.ShouldUseDryRun(cmd.CommandPath()),
 	}
 
 	return n.factory.RunWithWorkers(client, cmd, &req, inputIterators)

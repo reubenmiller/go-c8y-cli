@@ -1,0 +1,8 @@
+tests:
+    tenantOptions_get_Get a tenant option:
+        command: c8y tenantoptions get --category "c8y_cli_tests" --key "option2"
+        exit-code: 0
+        stdout:
+            json:
+                method: GET
+                path: /tenant/options/c8y_cli_tests/option2

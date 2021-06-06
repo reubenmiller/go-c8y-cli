@@ -15,7 +15,7 @@ c8y auditrecords create [flags]
 ### Examples
 
 ```
-$ c8y auditRecords create --type "ManagedObject" --time "0s" --text "Managed Object updated: my_Prop: value" --source $Device.id --activity "Managed Object updated" --severity "information"
+$ c8y auditrecords create --type "ManagedObject" --time "0s" --text "Managed Object updated: my_Prop: value" --source 12345 --activity "Managed Object updated" --severity "information"
 Create an audit record for a custom managed object update
         
 ```

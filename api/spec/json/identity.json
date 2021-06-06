@@ -41,7 +41,17 @@
           },
           {
             "description": "Get the external ids for each device using pipeline",
-            "command": "c8y devices list | c8y identity list"
+            "command": "c8y devices list | c8y identity list",
+            "assertStdOut": {
+              "json": {
+                "path": "r//identity/globalIds/\\d+/externalIds",
+                "..#(path=\"/identity/globalIds/11111/externalIds\").path": "/identity/globalIds/11111/externalIds",
+                "..#(path=\"/identity/globalIds/22222/externalIds\").path": "/identity/globalIds/22222/externalIds",
+                "..#(path=\"/identity/globalIds/33333/externalIds\").path": "/identity/globalIds/33333/externalIds",
+                "..#(path=\"/identity/globalIds/44444/externalIds\").path": "/identity/globalIds/44444/externalIds",
+                "..#(path=\"/identity/globalIds/55555/externalIds\").path": "/identity/globalIds/55555/externalIds"
+              }
+            }
           }
         ]
       },
@@ -196,7 +206,17 @@
           },
           {
             "description": "Create an external identity by using the .name property of the device (via the input template variable)",
-            "command": "c8y devices list | c8y identity create --type c8y_Serial --template \"{ externalId: input.value.name }\""
+            "command": "c8y devices list | c8y identity create --type c8y_Serial --template \"{ externalId: input.value.name }\"",
+            "assertStdOut": {
+              "json": {
+                "path": "r//identity/globalIds/\\d+/externalIds",
+                "..#(path=\"/identity/globalIds/11111/externalIds\").path": "/identity/globalIds/11111/externalIds",
+                "..#(path=\"/identity/globalIds/22222/externalIds\").path": "/identity/globalIds/22222/externalIds",
+                "..#(path=\"/identity/globalIds/33333/externalIds\").path": "/identity/globalIds/33333/externalIds",
+                "..#(path=\"/identity/globalIds/44444/externalIds\").path": "/identity/globalIds/44444/externalIds",
+                "..#(path=\"/identity/globalIds/55555/externalIds\").path": "/identity/globalIds/55555/externalIds"
+              }
+            }
           }
         ]
       },

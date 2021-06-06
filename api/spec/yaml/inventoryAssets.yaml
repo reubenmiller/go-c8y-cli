@@ -1,0 +1,173 @@
+
+---
+information:
+  name: inventory/assets
+  description: Cumulocity inventory assets
+  descriptionLong: 'REST endpoint to interact with Cumulocity managed objects'
+  link: https://cumulocity.com/guides/reference/inventory/
+
+endpoints:
+  - name: listChildAssetCollection
+    method: GET
+    description: Get child asset collection
+    descriptionLong: Get a collection of managedObjects child references
+    path: inventory/managedObjects/{id}/childAssets
+    accept: application/vnd.com.nsn.cumulocity.managedObjectReferenceCollection+json
+    collectionType: application/vnd.com.nsn.cumulocity.managedObject+json
+    collectionProperty: 'references.#.managedObject'
+    alias:
+        go: list
+        powershell: Get-ChildAssetCollection
+    examples:
+      powershell:
+        - description: Get a list of the child assets of an existing device
+          skipTest: true
+          command: Get-ChildAssetCollection -Id 12345
+
+      go:
+        - description: Get a list of the child devices of an existing device
+          command: c8y inventory assets list --id 12345
+
+        - description: Get a list of the child devices using pipeline
+          command: c8y devices list | c8y inventory assets list
+          assertStdOut:
+            json:
+              path: r//inventory/managedObjects/\d+/childAssets
+              ..#(path="/inventory/managedObjects/11111/childAssets").path: /inventory/managedObjects/11111/childAssets
+              ..#(path="/inventory/managedObjects/22222/childAssets").path: /inventory/managedObjects/22222/childAssets
+              ..#(path="/inventory/managedObjects/33333/childAssets").path: /inventory/managedObjects/33333/childAssets
+              ..#(path="/inventory/managedObjects/44444/childAssets").path: /inventory/managedObjects/44444/childAssets
+              ..#(path="/inventory/managedObjects/55555/childAssets").path: /inventory/managedObjects/55555/childAssets
+
+    pathParameters:
+      - name: id
+        type: '[]id'
+        required: true
+        pipeline: true
+        pipelineAliases:
+          - "deviceId"
+          - "source.id"
+          - "managedObject.id"
+          - "id"
+        description: Managed object.
+
+  - name: newManagedObjectChildAsset
+    method: POST
+    path: inventory/managedObjects/{id}/childAssets
+    accept: application/vnd.com.nsn.cumulocity.managedObjectReference+json
+    collectionType: application/vnd.com.nsn.cumulocity.managedObject+json
+    description: Assign child asset
+    descriptionLong: Assigns a group or device to an existing group and marks them as assets
+    collectionProperty: managedObject
+    alias:
+        go: assign
+        powershell: Add-AssetToGroup
+    examples:
+        powershell:
+          - description: Create group hierarchy (parent group -> child group)
+            beforeEach:
+              - $Group1 = PSc8y\New-TestDeviceGroup
+              - $Group2 = PSc8y\New-TestDeviceGroup
+            command: Add-AssetToGroup -Group $Group1.id -NewChildGroup $Group2.id
+            afterEach:
+              - PSc8y\Remove-ManagedObject -Id $Group2.id
+              - PSc8y\Remove-ManagedObject -Id $Group1.id
+        go:
+          - description: Create group hierarchy (parent group -> child group)
+            command: c8y inventory assets assign --group 12345 --newChildGroup 43234
+    pathParameters:
+      - name: group
+        type: '[]devicegroup'
+        property: id
+        required: true
+        description: Group
+    body:
+      - name: newChildDevice
+        type: '[]device'
+        pipeline: true
+        required: false
+        property: 'managedObject.id'
+        description: New child device to be added to the group as an asset
+
+      - name: newChildGroup
+        type: '[]devicegroup'
+        required: false
+        property: 'managedObject.id'
+        description: New child device group to be added to the group as an asset
+
+    bodyRequiredKeys:
+      - managedObject
+
+  - name: getManagedObjectChildAssetReference
+    description: Get child asset reference
+    descriptionLong: Get managed object child asset reference
+    method: GET
+    path: inventory/managedObjects/{asset}/childAssets/{reference}
+    accept: application/vnd.com.nsn.cumulocity.managedObjectReference+json
+    alias:
+        go: get
+        powershell: Get-ChildAssetReference
+    examples:
+        powershell:
+          - description: Get an existing child asset reference
+            beforeEach:
+              - $Agent = New-TestAgent
+              - $Device = New-TestDevice
+              - $Ref = Add-AssetToGroup -Group $Agent.id -NewChildDevice $Device.id
+            command: Get-ChildAssetReference -Asset $Agent.id -Reference $Ref.id
+            afterEach:
+              - Remove-ManagedObject -Id $Device.id
+              - Remove-ManagedObject -Id $Agent.id
+        go:
+          - description: Get an existing child asset reference
+            command: c8y inventory assets get --asset 12345 --reference 12345
+    pathParameters:
+      # TODO: Check if the type should be changed to []devicegroup. check if a device can have
+      # child assets
+      - name: asset
+        type: '[]device'
+        pipeline: true
+        required: true
+        description: Asset id
+
+      - name: reference
+        type: '[]device'
+        required: true
+        description: Asset reference id
+
+  - name: unassignAsset
+    description: Unassign asset from managed object
+    descriptionLong: Unassign/delete an asset from an existing managed object
+    method: DELETE
+    path: inventory/managedObjects/{id}/childAssets/{reference}
+    accept: ''
+    alias:
+        go: unassign
+        powershell: Remove-Asset
+    examples:
+      powershell:
+        - description: Unassign a child device from its parent asset
+          beforeEach:
+            - $Group = PSc8y\New-TestDeviceGroup
+            - $ChildDevice = PSc8y\New-TestDevice
+            - PSc8y\Add-AssetToGroup -Group $Group.id -NewChildDevice $ChildDevice.id
+          command: Remove-Asset -Id $Group.id -Child $ChildDevice.id
+          afterEach:
+            - PSc8y\Remove-ManagedObject -Id $ChildDevice.id
+            - PSc8y\Remove-ManagedObject -Id $Group.id
+
+      go:
+        - description: Unassign a child device from its parent device
+          command: c8y inventory assets unassign --id 12345 --child 22553
+    pathParameters:
+      - name: id
+        type: '[]id'
+        description: Asset id
+        required: true
+
+      - name: child
+        type: 'string'
+        property: reference
+        pipeline: true
+        required: false
+        description: Child id

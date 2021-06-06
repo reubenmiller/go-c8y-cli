@@ -1,0 +1,9 @@
+tests:
+    currentuser_update_Update the current user's last name:
+        command: c8y currentuser update --lastName "Smith"
+        exit-code: 0
+        stdout:
+            json:
+                body.lastName: Smith
+                method: PUT
+                path: /user/currentUser

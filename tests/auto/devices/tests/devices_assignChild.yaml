@@ -1,0 +1,9 @@
+tests:
+    devices_assignChild_Assign a device as a child device to an existing device:
+        command: c8y devices assignChild --device 12345 --newChild 44235
+        exit-code: 0
+        stdout:
+            json:
+                body.managedObject.id: "44235"
+                method: POST
+                path: /inventory/managedObjects/12345/childDevices

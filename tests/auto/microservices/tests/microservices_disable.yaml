@@ -1,0 +1,8 @@
+tests:
+    microservices_disable_Disable (unsubscribe) to a microservice:
+        command: c8y microservices disable --id report-agent
+        exit-code: 0
+        stdout:
+            json:
+                method: DELETE
+                path: r//tenant/tenants/$C8Y_TENANT/applications/\d+$

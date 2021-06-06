@@ -34,7 +34,7 @@ func NewDeleteCollectionCmd(f *cmdutil.Factory) *DeleteCollectionCmd {
 		Short: "Delete measurement collection",
 		Long:  `Delete measurements using a filter`,
 		Example: heredoc.Doc(`
-$ c8y measurements deleteCollection --device $Measurement.source.id
+$ c8y measurements deleteCollection --device 12345
 Delete measurement collection for a device
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
@@ -162,7 +162,7 @@ func (n *DeleteCollectionCmd) RunE(cmd *cobra.Command, args []string) error {
 		FormData:     formData,
 		Header:       headers,
 		IgnoreAccept: cfg.IgnoreAcceptHeader(),
-		DryRun:       cfg.DryRun(),
+		DryRun:       cfg.ShouldUseDryRun(cmd.CommandPath()),
 	}
 
 	return n.factory.RunWithWorkers(client, cmd, &req, inputIterators)

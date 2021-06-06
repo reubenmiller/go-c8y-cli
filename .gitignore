@@ -16,6 +16,7 @@ tools/PSc8y/c8y
 main.exe
 jfrog
 *.log
+!tests/testdata/*.log
 output
 pkg/powershell/powershell.todo.txt
 pkg/powershell/c8y.exe

@@ -74,7 +74,7 @@ Delete an existing user from a user group
 Remove-UserFromGroup -Group $Group.id -User $User.id
 ```
 
-From a user from a user group
+Delete a user from a user group
 
 ## PARAMETERS
 

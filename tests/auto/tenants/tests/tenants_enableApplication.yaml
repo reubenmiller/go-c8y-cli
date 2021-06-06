@@ -1,0 +1,10 @@
+tests:
+    tenants_enableApplication_Enable an application of a tenant by name:
+        command: c8y tenants enableApplication --tenant "t12345" --application "myMicroservice"
+        exit-code: 0
+        skip: true
+        stdout:
+            json:
+                body.application.id: myMicroservice
+                method: POST
+                path: /tenant/tenants/t12345/applications

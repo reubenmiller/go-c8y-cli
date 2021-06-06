@@ -1,0 +1,8 @@
+tests:
+    userRoles_getRoleReferenceCollectionFromUser_Get a list of role references for a user:
+        command: c8y userroles getRoleReferenceCollectionFromUser --user "peterpi@example.com"
+        exit-code: 0
+        stdout:
+            json:
+                method: GET
+                path: /user/$C8Y_TENANT/users/peterpi@example.com/roles

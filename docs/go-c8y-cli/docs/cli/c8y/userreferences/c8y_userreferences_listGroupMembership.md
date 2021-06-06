@@ -15,11 +15,11 @@ c8y userreferences listGroupMembership [flags]
 ### Examples
 
 ```
-$ c8y userreferences listGroupMembership --group 1
+$ c8y userreferences listGroupMembership --id 1
 List the users within a user group
 
 $ c8y usergroups list | c8y userreferences listGroupMembership
-List users in user groups (via pipeline)
+List users in user groups (using pipeline)
         
 ```
 

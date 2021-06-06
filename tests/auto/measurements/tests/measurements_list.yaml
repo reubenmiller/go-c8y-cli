@@ -1,0 +1,8 @@
+tests:
+    measurements_list_Get a list of measurements:
+        command: c8y measurements list
+        exit-code: 0
+        stdout:
+            json:
+                method: GET
+                path: /measurement/measurements

@@ -34,7 +34,7 @@ func NewListCmd(f *cmdutil.Factory) *ListCmd {
 		Short: "Get bulk operation collection",
 		Long:  `Get a collection of bulk operations`,
 		Example: heredoc.Doc(`
-$ c8y bulkOperations list
+$ c8y bulkoperations list
 Get a list of bulk operations
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
@@ -157,7 +157,7 @@ func (n *ListCmd) RunE(cmd *cobra.Command, args []string) error {
 		FormData:     formData,
 		Header:       headers,
 		IgnoreAccept: cfg.IgnoreAcceptHeader(),
-		DryRun:       cfg.DryRun(),
+		DryRun:       cfg.ShouldUseDryRun(cmd.CommandPath()),
 	}
 
 	return n.factory.RunWithWorkers(client, cmd, &req, inputIterators)

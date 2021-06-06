@@ -158,7 +158,7 @@
         "go": [
           {
             "description": "Create a new alarm for device",
-            "command": "c8y alarms create --device mydevice --type c8y_TestAlarm --time \"-0s\" --text \"Test alarm\" --severity MAJOR"
+            "command": "c8y alarms create --device 12345 --type c8y_TestAlarm --time \"-0s\" --text \"Test alarm\" --severity MAJOR"
           }
         ]
       },
@@ -264,7 +264,7 @@
         "go": [
           {
             "description": "Update the status of all active alarms on a device to ACKNOWLEDGED",
-            "command": "c8y alarms updateCollection --device mydevice --status ACTIVE --newStatus ACKNOWLEDGED"
+            "command": "c8y alarms updateCollection --device 12345 --status ACTIVE --newStatus ACKNOWLEDGED"
           }
         ]
       },
@@ -518,11 +518,11 @@
         "go": [
           {
             "description": "Remove alarms on the device with the severity set to MAJOR",
-            "command": "c8y alarms deleteCollection --device mydevice --severity MAJOR"
+            "command": "c8y alarms deleteCollection --device 12345 --severity MAJOR"
           },
           {
             "description": "Remove alarms on the device which are active and created in the last 10 minutes",
-            "command": "c8y alarms deleteCollection --device mydevice --dateFrom \"-10m\" --status ACTIVE"
+            "command": "c8y alarms deleteCollection --device 12345 --dateFrom \"-10m\" --status ACTIVE"
           }
         ]
       },

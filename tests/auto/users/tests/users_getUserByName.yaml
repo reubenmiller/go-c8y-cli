@@ -1,0 +1,8 @@
+tests:
+    users_getUserByName_Get a user by name:
+        command: c8y users getUserByName --name "myuser"
+        exit-code: 0
+        stdout:
+            json:
+                method: GET
+                path: /user/$C8Y_TENANT/userByName/myuser

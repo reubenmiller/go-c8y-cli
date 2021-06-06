@@ -1,0 +1,12 @@
+tests:
+    applications_create_Create a new hosted application:
+        command: c8y applications create --name myapp --type HOSTED --key "myapp-key" --contextPath "myapp"
+        exit-code: 0
+        stdout:
+            json:
+                body.contextPath: myapp
+                body.key: myapp-key
+                body.name: myapp
+                body.type: HOSTED
+                method: POST
+                path: /application/applications

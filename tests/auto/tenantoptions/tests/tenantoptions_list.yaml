@@ -1,0 +1,8 @@
+tests:
+    tenantOptions_list_Get a list of tenant options:
+        command: c8y tenantoptions list
+        exit-code: 0
+        stdout:
+            json:
+                method: GET
+                path: /tenant/options

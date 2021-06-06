@@ -1,0 +1,11 @@
+tests:
+    operations_deleteCollection_Remove all pending operations for a given device:
+        command: c8y operations deleteCollection --device 12345 --status PENDING
+        exit-code: 0
+        stdout:
+            json:
+                method: DELETE
+                path: /devicecontrol/operations
+            contains:
+                - deviceId=12345
+                - status=PENDING

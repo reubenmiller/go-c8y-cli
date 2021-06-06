@@ -15,7 +15,7 @@ c8y bulkoperations list [flags]
 ### Examples
 
 ```
-$ c8y bulkOperations list
+$ c8y bulkoperations list
 Get a list of bulk operations
         
 ```

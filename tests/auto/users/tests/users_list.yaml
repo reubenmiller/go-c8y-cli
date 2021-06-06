@@ -1,0 +1,8 @@
+tests:
+    users_list_Get a list of users:
+        command: c8y users list
+        exit-code: 0
+        stdout:
+            json:
+                method: GET
+                path: /user/$C8Y_TENANT/users

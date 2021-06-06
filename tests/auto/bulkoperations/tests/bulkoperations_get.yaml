@@ -1,0 +1,8 @@
+tests:
+    bulkOperations_get_Get bulk operation by id:
+        command: c8y bulkoperations get --id 12345
+        exit-code: 0
+        stdout:
+            json:
+                method: GET
+                path: /devicecontrol/bulkoperations/12345

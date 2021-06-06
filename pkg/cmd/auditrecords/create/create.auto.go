@@ -33,7 +33,7 @@ func NewCreateCmd(f *cmdutil.Factory) *CreateCmd {
 		Short: "Create audit record",
 		Long:  `Create a new audit record for a given action`,
 		Example: heredoc.Doc(`
-$ c8y auditRecords create --type "ManagedObject" --time "0s" --text "Managed Object updated: my_Prop: value" --source $Device.id --activity "Managed Object updated" --severity "information"
+$ c8y auditrecords create --type "ManagedObject" --time "0s" --text "Managed Object updated: my_Prop: value" --source 12345 --activity "Managed Object updated" --severity "information"
 Create an audit record for a custom managed object update
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
@@ -176,7 +176,7 @@ func (n *CreateCmd) RunE(cmd *cobra.Command, args []string) error {
 		FormData:     formData,
 		Header:       headers,
 		IgnoreAccept: cfg.IgnoreAcceptHeader(),
-		DryRun:       cfg.DryRun(),
+		DryRun:       cfg.ShouldUseDryRun(cmd.CommandPath()),
 	}
 
 	return n.factory.RunWithWorkers(client, cmd, &req, inputIterators)

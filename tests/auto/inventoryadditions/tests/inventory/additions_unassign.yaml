@@ -1,0 +1,8 @@
+tests:
+    inventory/additions_unassign_Unassign a child addition from its parent managed object:
+        command: c8y inventory additions unassign --id 12345 --childId 22553
+        exit-code: 0
+        stdout:
+            json:
+                method: DELETE
+                path: /inventory/managedObjects/12345/childAdditions/22553

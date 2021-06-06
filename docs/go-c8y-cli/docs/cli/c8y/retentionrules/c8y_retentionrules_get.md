@@ -16,7 +16,7 @@ c8y retentionrules get [flags]
 ### Examples
 
 ```
-$ c8y retentionRules get --id 12345
+$ c8y retentionrules get --id 12345
 Get a retention rule
         
 ```

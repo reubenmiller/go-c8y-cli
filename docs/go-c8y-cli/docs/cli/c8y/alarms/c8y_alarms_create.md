@@ -15,7 +15,7 @@ c8y alarms create [flags]
 ### Examples
 
 ```
-$ c8y alarms create --device mydevice --type c8y_TestAlarm --time "-0s" --text "Test alarm" --severity MAJOR
+$ c8y alarms create --device 12345 --type c8y_TestAlarm --time "-0s" --text "Test alarm" --severity MAJOR
 Create a new alarm for device
         
 ```

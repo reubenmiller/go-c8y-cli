@@ -1,0 +1,11 @@
+tests:
+    tenantOptions_create_Create a tenant option:
+        command: c8y tenantoptions create --category "c8y_cli_tests" --key "option1" --value "1"
+        exit-code: 0
+        stdout:
+            json:
+                body.category: c8y_cli_tests
+                body.key: option1
+                body.value: "1"
+                method: POST
+                path: /tenant/options

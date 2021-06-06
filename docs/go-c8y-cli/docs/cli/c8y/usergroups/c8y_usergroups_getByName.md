@@ -15,7 +15,7 @@ c8y usergroups getByName [flags]
 ### Examples
 
 ```
-$ c8y userGroups getByName --name customGroup1
+$ c8y usergroups getByName --name customGroup1
 Get user group by its name
         
 ```

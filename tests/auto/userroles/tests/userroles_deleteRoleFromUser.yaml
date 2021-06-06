@@ -1,0 +1,8 @@
+tests:
+    userRoles_deleteRoleFromUser_Remove a role from the given user:
+        command: c8y userroles deleteRoleFromUser --user "peterpi@example.com" --role "ROLE_MEASUREMENT_READ"
+        exit-code: 0
+        stdout:
+            json:
+                method: DELETE
+                path: /user/$C8Y_TENANT/users/peterpi@example.com/roles/ROLE_MEASUREMENT_READ

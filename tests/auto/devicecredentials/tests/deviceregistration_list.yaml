@@ -1,0 +1,8 @@
+tests:
+    deviceregistration_list_Get a list of new device requests:
+        command: c8y deviceregistration list
+        exit-code: 0
+        stdout:
+            json:
+                method: GET
+                path: /devicecontrol/newDeviceRequests

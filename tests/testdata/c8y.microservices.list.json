@@ -1,0 +1,3 @@
+{"availability":"MARKET","id":"1","key":"cep-key","name":"cep","type":"MICROSERVICE"}
+{"availability":"MARKET","id":"4","key":"device-simulator-key","name":"device-simulator","type":"MICROSERVICE"}
+{"availability":"MARKET","id":"5","key":"report-agent-key","name":"report-agent","type":"MICROSERVICE"}

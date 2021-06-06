@@ -1,0 +1,8 @@
+tests:
+    binaries_delete_Delete a binary:
+        command: c8y binaries delete --id 12345
+        exit-code: 0
+        stdout:
+            json:
+                method: DELETE
+                path: /inventory/binaries/12345

@@ -1,0 +1,8 @@
+tests:
+    operations_get_Get operation by id:
+        command: c8y operations get --id 12345
+        exit-code: 0
+        stdout:
+            json:
+                method: GET
+                path: /devicecontrol/operations/12345

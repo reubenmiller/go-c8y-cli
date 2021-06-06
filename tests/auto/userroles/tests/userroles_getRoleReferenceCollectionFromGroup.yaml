@@ -1,0 +1,8 @@
+tests:
+    userRoles_getRoleReferenceCollectionFromGroup_Get a list of role references for a user group:
+        command: c8y userroles getRoleReferenceCollectionFromGroup --group "12345"
+        exit-code: 0
+        stdout:
+            json:
+                method: GET
+                path: /user/$C8Y_TENANT/groups/12345/roles

@@ -1,0 +1,8 @@
+tests:
+    auditRecords_get_Get an audit record by id:
+        command: c8y auditrecords get --id 12345
+        exit-code: 0
+        stdout:
+            json:
+                method: GET
+                path: /audit/auditRecords/12345

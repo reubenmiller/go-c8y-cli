@@ -33,7 +33,7 @@ func NewUpdateCmd(f *cmdutil.Factory) *UpdateCmd {
 		Short: "Update current application",
 		Long:  `Required authentication with bootstrap user`,
 		Example: heredoc.Doc(`
-$ c8y currentApplication update --data "myCustomProp=1"
+$ c8y currentapplication update --data "myCustomProp=1"
 Update custom properties of the current application (requires using application credentials)
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
@@ -171,7 +171,7 @@ func (n *UpdateCmd) RunE(cmd *cobra.Command, args []string) error {
 		FormData:     formData,
 		Header:       headers,
 		IgnoreAccept: cfg.IgnoreAcceptHeader(),
-		DryRun:       cfg.DryRun(),
+		DryRun:       cfg.ShouldUseDryRun(cmd.CommandPath()),
 	}
 
 	return n.factory.RunWithWorkers(client, cmd, &req, inputIterators)

@@ -16,7 +16,7 @@ c8y devices getSupportedSeries [flags]
 ### Examples
 
 ```
-$ c8y inventory getSupportedSeries --device 12345
+$ c8y devices getSupportedSeries --device 12345
 Get the supported measurement series of a device by name
         
 ```

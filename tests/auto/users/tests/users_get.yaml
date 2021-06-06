@@ -1,0 +1,8 @@
+tests:
+    users_get_Get a user:
+        command: c8y users get --id "myuser"
+        exit-code: 0
+        stdout:
+            json:
+                method: GET
+                path: /user/$C8Y_TENANT/users/myuser

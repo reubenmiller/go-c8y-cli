@@ -1,0 +1,8 @@
+tests:
+    events_deleteBinary_Delete an binary attached to an event:
+        command: c8y events deleteBinary --id 12345
+        exit-code: 0
+        stdout:
+            json:
+                method: DELETE
+                path: /event/events/12345/binaries

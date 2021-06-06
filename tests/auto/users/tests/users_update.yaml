@@ -1,0 +1,9 @@
+tests:
+    users_update_Update a user:
+        command: c8y users update --id "myuser" --firstName "Simon"
+        exit-code: 0
+        stdout:
+            json:
+                body.firstName: Simon
+                method: PUT
+                path: /user/$C8Y_TENANT/users/myuser

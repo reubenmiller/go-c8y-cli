@@ -37,7 +37,7 @@ func NewAssignDeviceCmd(f *cmdutil.Factory) *AssignDeviceCmd {
 $ c8y devicegroups assignDevice --group 12345 --newChildDevice 43234
 Add a device to a group
 
-$ c8y devicegroups assignDevice --group 12345 --newChildDevice 43234, 99292, 12222
+$ c8y devicegroups assignDevice --group 12345 --newChildDevice 43234,99292,12222
 Add multiple devices to a group
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
@@ -165,7 +165,7 @@ func (n *AssignDeviceCmd) RunE(cmd *cobra.Command, args []string) error {
 		FormData:     formData,
 		Header:       headers,
 		IgnoreAccept: cfg.IgnoreAcceptHeader(),
-		DryRun:       cfg.DryRun(),
+		DryRun:       cfg.ShouldUseDryRun(cmd.CommandPath()),
 	}
 
 	return n.factory.RunWithWorkers(client, cmd, &req, inputIterators)

@@ -34,7 +34,7 @@ func NewUpdateCmd(f *cmdutil.Factory) *UpdateCmd {
 		Short: "Update inventory",
 		Long:  `Update an existing managed object`,
 		Example: heredoc.Doc(`
-$ c8y inventory update --id 12345 --newName "my_custom_name" --data "{\"com_my_props\":{}\"value\":1}"
+$ c8y inventory update --id 12345 --newName "my_custom_name" --data "{\"com_my_props\":{},\"value\":1}"
 Update a managed object
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
@@ -159,7 +159,7 @@ func (n *UpdateCmd) RunE(cmd *cobra.Command, args []string) error {
 		FormData:     formData,
 		Header:       headers,
 		IgnoreAccept: cfg.IgnoreAcceptHeader(),
-		DryRun:       cfg.DryRun(),
+		DryRun:       cfg.ShouldUseDryRun(cmd.CommandPath()),
 	}
 
 	return n.factory.RunWithWorkers(client, cmd, &req, inputIterators)

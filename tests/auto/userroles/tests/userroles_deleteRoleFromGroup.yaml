@@ -1,0 +1,8 @@
+tests:
+    userRoles_deleteRoleFromGroup_Remove a role from the given user group:
+        command: c8y userroles deleteRoleFromGroup --group 12345 --role "ROLE_MEASUREMENT_READ"
+        exit-code: 0
+        stdout:
+            json:
+                method: DELETE
+                path: /user/$C8Y_TENANT/groups/12345/roles/ROLE_MEASUREMENT_READ

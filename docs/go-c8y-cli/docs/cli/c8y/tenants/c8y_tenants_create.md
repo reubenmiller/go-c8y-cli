@@ -15,7 +15,7 @@ c8y tenants create [flags]
 ### Examples
 
 ```
-$ c8y tenants create --company "mycompany" --domain "mycompany" --adminName "admin" --password "mys3curep9d8"
+$ c8y tenants create --company "mycompany" --domain "mycompany" --adminName "admin" --adminPass "mys3curep9d8"
 Create a new tenant (from the management tenant)
         
 ```

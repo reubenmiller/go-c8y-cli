@@ -1,0 +1,8 @@
+tests:
+    applications_listApplicationBinaries_List all of the binaries related to a Hosted (web) application:
+        command: c8y applications listApplicationBinaries --id 12345
+        exit-code: 0
+        stdout:
+            json:
+                method: GET
+                path: /application/applications/12345/binaries

@@ -34,7 +34,7 @@ func NewAddRoleToGroupCmd(f *cmdutil.Factory) *AddRoleToGroupCmd {
 		Short: "Add role to user group",
 		Long:  `Add a role to an existing user group`,
 		Example: heredoc.Doc(`
-$ c8y userRoles addRoleToGroup --group "customGroup1*" --role "*ALARM*"
+$ c8y userroles addRoleToGroup --group "12345" --role "*ALARM*"
 Add a role to the admin group
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
@@ -164,7 +164,7 @@ func (n *AddRoleToGroupCmd) RunE(cmd *cobra.Command, args []string) error {
 		FormData:     formData,
 		Header:       headers,
 		IgnoreAccept: cfg.IgnoreAcceptHeader(),
-		DryRun:       cfg.DryRun(),
+		DryRun:       cfg.ShouldUseDryRun(cmd.CommandPath()),
 	}
 
 	return n.factory.RunWithWorkers(client, cmd, &req, inputIterators)

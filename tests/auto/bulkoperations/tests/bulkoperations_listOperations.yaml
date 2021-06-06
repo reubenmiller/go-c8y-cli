@@ -1,0 +1,26 @@
+tests:
+    ? bulkOperations_listOperations_Check all bulk operations if they have any related operations still in executing state and were created more than 10 days ago, then cancel it with a custom message
+    :   command: $TEST_SHELL -c 'c8y bulkoperations list | c8y bulkoperations listOperations --status EXECUTING --dateTo "-10d" | c8y operations update --status FAILED --failureReason "Manually cancelled stale operation"'
+        exit-code: 0
+        skip: true
+        stdout:
+            json:
+                method: GET
+                path: /devicecontrol/operations
+    bulkOperations_listOperations_Get a list of pending operations from bulk operation with id 10:
+        command: c8y bulkoperations listOperations --id 10 --status PENDING
+        exit-code: 0
+        stdout:
+            json:
+                method: GET
+                path: /devicecontrol/operations
+            contains:
+                - bulkOperationId=10
+                - status=PENDING
+    bulkOperations_listOperations_Get all pending operations from all bulk operations which are still in progress (using pipeline):
+        command: $TEST_SHELL -c 'cat ./testdata/c8y.bulkoperations.list.in_progress.json | c8y bulkoperations listOperations --status PENDING'
+        exit-code: 0
+        stdout:
+            json:
+                method: GET
+                path: /devicecontrol/operations

@@ -1,0 +1,19 @@
+tests:
+    devicegroups_assignGroup_Add a group to a group:
+        command: c8y devicegroups assignGroup --group 12345 --newChildGroup 43234
+        exit-code: 0
+        stdout:
+            json:
+                body.managedObject.id: "43234"
+                method: POST
+                path: /inventory/managedObjects/12345/childAssets
+    devicegroups_assignGroup_Add multiple groups to a group:
+        command: c8y devicegroups assignGroup --group 12345 --newChildGroup 43234,99292,12222
+        exit-code: 0
+        stdout:
+            json:
+                ..#(body.managedObject.id="12222").body.managedObject.id: "12222"
+                ..#(body.managedObject.id="43234").body.managedObject.id: "43234"
+                ..#(body.managedObject.id="99292").body.managedObject.id: "99292"
+                method: POST
+                path: /inventory/managedObjects/12345/childAssets

@@ -16,7 +16,7 @@ c8y currentapplication get [flags]
 ### Examples
 
 ```
-$ c8y currentApplication get
+$ c8y currentapplication get
 Get the current application (requires using application credentials)
         
 ```

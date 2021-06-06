@@ -1,0 +1,14 @@
+tests:
+    alarms_create_Create a new alarm for device:
+        command: c8y alarms create --device 12345 --type c8y_TestAlarm --time "-0s" --text "Test alarm" --severity MAJOR
+        exit-code: 0
+        stdout:
+            json:
+                body.severity: MAJOR
+                body.source.id: "12345"
+                body.text: Test alarm
+                body.type: c8y_TestAlarm
+                method: POST
+                path: /alarm/alarms
+            contains:
+                - '"time":'

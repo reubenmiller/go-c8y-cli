@@ -1,0 +1,8 @@
+tests:
+    currentApplication_listSubscriptions_List the current application users/subscriptions:
+        command: c8y currentapplication listSubscriptions
+        exit-code: 0
+        stdout:
+            json:
+                method: GET
+                path: /application/currentApplication/subscriptions

@@ -70,7 +70,7 @@ Disable/unsubscribe an application from a tenant
 
 ### EXAMPLE 1
 ```
-Disable-Application -Tenant mycompany -Application myMicroservice
+Disable-Application -Tenant t12345 -Application myMicroservice
 ```
 
 Disable an application of a tenant

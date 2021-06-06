@@ -1,0 +1,433 @@
+
+---
+
+information:
+  name: applications
+  description: Cumulocity applications
+  descriptionLong: 'REST endpoint to interact with Cumulocity applications'
+  link: https://cumulocity.com/guides/reference/applications/
+
+endpoints:
+  - name: getApplicationCollection
+    description: Get application collection
+    descriptionLong: Get a collection of applications by a given filter
+    method: GET
+    path: /application/applications
+    accept: application/vnd.com.nsn.cumulocity.applicationCollection+json
+    collectionType: application/vnd.com.nsn.cumulocity.application+json
+    collectionProperty: applications
+    alias:
+        go: list
+        powershell: Get-ApplicationCollection
+    examples:
+      powershell:
+        - description: Get applications
+          command: Get-ApplicationCollection -PageSize 100
+
+      go:
+        - description: Get applications
+          command: c8y applications list --pageSize 100
+
+    queryParameters:
+      - name: type
+        pipeline: true
+        type: string
+        validationSet: [APAMA_CEP_RULE, EXTERNAL, HOSTED, MICROSERVICE]
+        description: Application type
+
+  - name: newApplication
+    description: Create application
+    descriptionLong: Create a new application using explicit settings
+    method: POST
+    path: /application/applications
+    accept: application/vnd.com.nsn.cumulocity.application+json
+    alias:
+        go: create
+        powershell: New-Application
+    examples:
+      powershell:
+        - description: Create a new hosted application
+          beforeEach:
+              - $AppName = New-RandomString -Prefix "testapp_"
+          command: New-Application -Name $AppName -Key "${AppName}-key" -ContextPath $AppName -Type HOSTED
+          afterEach:
+            - Remove-Application -Id $AppName
+      go:
+        - description: Create a new hosted application
+          command: c8y applications create --name myapp --type HOSTED --key "myapp-key" --contextPath "myapp"
+    body:
+      - name: data
+        type: json
+        description: data
+
+      - name: name
+        type: string
+        required: false
+        pipeline: true
+        description: Name of application
+        pipelineAliases:
+          - "name"
+
+      # TODO: Change to optional switch. When not set, then set to the value of name with a "-key" postfix
+      - name: key
+        type: string
+        required: false
+        description: Shared secret of application
+
+      - name: type
+        type: string
+        validationSet: [EXTERNAL, HOSTED, MICROSERVICE]
+        required: false
+        description: Type of application. Possible values are EXTERNAL, HOSTED, MICROSERVICE
+
+      - name: availability
+        type: string
+        validationSet: [MARKET, PRIVATE]
+        required: false
+        description: 'Access level for other tenants. Possible values are : MARKET, PRIVATE (default)'
+
+      # Default to using the app name as the context path
+      - name: contextPath
+        type: string
+        required: false
+        description: contextPath of the hosted application. Required when application type is HOSTED
+
+      - name: resourcesUrl
+        type: string
+        required: false
+        description: URL to application base directory hosted on an external server. Required when application type is HOSTED
+
+      - name: resourcesUsername
+        type: string
+        required: false
+        description: authorization username to access resourcesUrl
+
+      - name: resourcesPassword
+        type: string
+        required: false
+        description: authorization password to access resourcesUrl
+
+      - name: externalUrl
+        type: string
+        required: false
+        description: URL to the external application. Required when application type is EXTERNAL
+    bodyRequiredKeys:
+      - name
+      - key
+      - type
+
+  - name: copyApplication
+    description: 'Copy application'
+    descriptionLong: >
+      A POST request to the 'clone' resource creates a new application based on an already existing one.
+
+      The properties are copied to the newly created application. For name, key and context path a 'clone' prefix is added in order to be unique.
+
+      If the target application is hosted and has an active version, the new application will have the active version with the same content.
+
+      The response contains a representation of the newly created application.
+
+      Required role ROLE_APPLICATION_MANAGEMENT_ADMIN
+    method: POST
+    path: /application/applications/{id}/clone
+    accept: application/vnd.com.nsn.cumulocity.application+json
+    alias:
+        go: copy
+        powershell: Copy-Application
+    examples:
+      powershell:
+        - description: Copy an existing application
+          beforeEach:
+            - $App = New-TestHostedApplication
+          command: Copy-Application -Id $App.id
+          afterEach:
+            - Remove-Application -Id $App.id
+            - Remove-Application -Id "clone$($App.name)"
+      go:
+        - description: Copy an existing application
+          command: c8y applications copy --id my-example-app
+          assertStdOut:
+            json:
+              path: r//application/applications/\d+/clone$
+    pathParameters:
+      - name: id
+        type: application
+        pipeline: true
+        required: true
+        description: Application id
+
+  - name: getApplication
+    description: Get application
+    descriptionLong: Get an existing application
+    method: GET
+    path: /application/applications/{id}
+    accept: application/vnd.com.nsn.cumulocity.application+json
+    alias:
+        go: get
+        powershell: Get-Application
+    examples:
+      powershell:
+        - description: Get an application by id
+          beforeEach:
+            - $App = New-TestHostedApplication
+          command: Get-Application -Id $App.id
+          afterEach:
+            - Remove-Application -Id $App.id
+
+        - description: Get an application by name
+          beforeEach:
+            - $App = New-TestHostedApplication
+          command: Get-Application -Id $App.name
+          afterEach:
+            - Remove-Application -Id $App.id
+      go:
+        - description: Get an application
+          command: c8y applications get --id 12345
+    pathParameters:
+      - name: id
+        type: application
+        pipeline: true
+        required: true
+        description: Application id
+
+  - name: deleteApplication
+    description: Delete application
+    descriptionLong: 'The application can only be removed when its availability is PRIVATE or in other case when it has no subscriptions.'
+    method: DELETE
+    path: /application/applications/{id}
+    alias:
+        go: delete
+        powershell: Remove-Application
+    examples:
+      powershell:
+        - description: Delete an application by id
+          beforeEach:
+            - $App = New-TestHostedApplication
+          command: Remove-Application -Id $App.id
+
+        - description: Delete an application by name
+          beforeEach:
+            - $App = New-TestHostedApplication
+          command: Remove-Application -Id $App.name
+      go:
+        - description: Delete an application by id
+          command: c8y applications delete --id 12345
+
+        - description: Delete an application by name
+          command: c8y applications delete --id my-example-app
+          assertStdOut:
+            json:
+              path: r//application/applications/\d+$
+    pathParameters:
+      - name: id
+        type: application
+        pipeline: true
+        required: true
+        description: Application id
+
+  - name: updateApplication
+    description: 'Update application details'
+    descriptionLong: Update details of an existing application
+    method: PUT
+    path: /application/applications/{id}
+    accept: application/vnd.com.nsn.cumulocity.application+json
+    alias:
+        go: update
+        powershell: Update-Application
+    examples:
+      powershell:
+        - description: Update application availability to MARKET
+          beforeEach:
+            - $App = New-TestHostedApplication
+          command: Update-Application -Id $App.name -Availability "MARKET"
+          afterEach:
+            - Remove-Application -Id $App.id
+      go:
+        - description: Update application availability to MARKET
+          command: c8y applications update --id "my-example-app" --availability MARKET
+          assertStdOut:
+            json:
+              path: r//application/applications/\d+$
+    pathParameters:
+      - name: id
+        type: application
+        pipeline: true
+        required: true
+        description: Application id
+
+    body:
+      - name: data
+        type: json
+        description: data
+
+      - name: name
+        type: string
+        required: false
+        description: Name of application
+
+      - name: key
+        type: string
+        required: false
+        description: Shared secret of application
+
+      - name: availability
+        type: string
+        validationSet: [MARKET, PRIVATE]
+        required: false
+        description: 'Access level for other tenants. Possible values are : MARKET, PRIVATE (default)'
+
+      - name: contextPath
+        type: string
+        required: false
+        description: contextPath of the hosted application
+
+      - name: resourcesUrl
+        type: string
+        required: false
+        description: URL to application base directory hosted on an external server
+
+      - name: resourcesUsername
+        type: string
+        required: false
+        description: authorization username to access resourcesUrl
+
+      - name: resourcesPassword
+        type: string
+        required: false
+        description: authorization password to access resourcesUrl
+
+      - name: externalUrl
+        type: string
+        required: false
+        description: URL to the external application
+
+  - name: newApplicationBinary
+    description: New application binary
+    descriptionLong: >
+      For the applications of type microservice and web application to be available for Cumulocity platform users, a binary zip file must be uploaded.
+
+      For the microservice application, the zip file must consist of
+          * cumulocity.json - file describing the deployment
+          * image.tar - executable docker image
+
+      For the web application, the zip file must include index.html in the root directory.
+
+    method: POST
+    path: /application/applications/{id}/binaries
+    accept: application/vnd.com.nsn.cumulocity.managedObject+json
+    alias:
+        go: createBinary
+        powershell: New-ApplicationBinary
+    examples:
+      powershell:
+        - description: Upload application microservice binary
+          beforeEach:
+            - $AppName = New-RandomString -Prefix "testms_"
+            - $App = New-Microservice -Name $AppName -Type MICROSERVICE -SkipUpload
+            - $MicroserviceZip = "$PSScriptRoot/TestData/microservice/helloworld.zip"
+          command: New-ApplicationBinary -Id $App.id -File $MicroserviceZip
+          skipTest: true
+          afterEach:
+            - Remove-Application -Id $App.id
+      go:
+        - description: Upload application microservice binary
+          command: c8y applications createBinary --id 12345 --file ./helloworld.zip
+          skipTest: true
+    pathParameters:
+      - name: id
+        type: application
+        pipeline: true
+        required: true
+        description: Application id
+    body:
+      - name: file
+        type: file
+        required: true
+        description: File to be uploaded as a binary
+
+  - name: getApplicationBinaryCollection
+    description: Get application binaries
+    descriptionLong: >
+      A list of all binaries related to the given application will be returned
+    method: GET
+    path: /application/applications/{id}/binaries
+    accept: application/vnd.com.nsn.cumulocity.customAttachmentCollection+json
+    collectionType: application/vnd.com.nsn.cumulocity.customBinaryAttachment+json
+    collectionProperty: attachments
+    alias:
+        go: listApplicationBinaries
+        powershell: Get-ApplicationBinaryCollection
+    examples:
+      powershell:
+        # TODO: Add test
+        - description: List all of the binaries related to a Hosted (web) application
+          beforeEach:
+            - $app = New-TestHostedApplication
+          command: Get-ApplicationBinaryCollection -Id $App.id
+          skipTest: true
+          afterEach:
+            - Remove-Application -Id $app.id
+        - description: List all of the binaries related to a Hosted (web) application (using pipeline)
+          beforeEach:
+            - $app = New-TestHostedApplication
+          command: Get-Application $App.id | Get-ApplicationBinaryCollection
+          skipTest: true
+          afterEach:
+            - Remove-Application -Id $app.id
+      go:
+        - description: List all of the binaries related to a Hosted (web) application
+          command: c8y applications listApplicationBinaries --id 12345
+    pathParameters:
+      - name: id
+        type: application
+        pipeline: true
+        required: true
+        description: Application id
+
+  - name: deleteApplicationBinary
+    skip: false
+    description: Delete application binary
+    descriptionLong: >
+      Remove an application binaries related to the given application
+
+      The active version can not be deleted and the server will throw an error if you try.
+    method: DELETE
+    path: /application/applications/{application}/binaries/{binaryId}
+    alias:
+        go: deleteApplicationBinary
+        powershell: Remove-ApplicationBinary
+    examples:
+      powershell:
+          # TODO: Create a test function to update an application binary
+        - description: Remove an application binary related to a Hosted (web) application
+          beforeEach:
+            - $app = New-TestHostedApplication
+            - New-ApplicationBinary -Id $app -File 
+            - $appBinary = Get-ApplicationBinaryCollection -Id $App.id
+          command: Remove-ApplicationBinary -Application $app.id -BinaryId $appBinary.id
+          skipTest: true
+          afterEach:
+            - Remove-Application -Id $app.id
+        - description: Remove all application binaries (except for the active one) for an application (using pipeline)
+          beforeEach:
+            - $app = New-TestHostedApplication
+          command: Get-ApplicationBinaryCollection -Id $app.id | Remove-ApplicationBinary -Application $app.id
+          skipTest: true
+          afterEach:
+            - Remove-Application -Id $app.id
+      go:
+        - description: Remove an application binary related to a Hosted (web) application
+          command: c8y applications deleteApplicationBinary --application 12345 --binaryId 9876
+    pathParameters:
+      - name: application
+        type: application
+        pipeline: false
+        required: true
+        description: Application id
+      
+      - name: binaryId
+        alias: id
+        type: '[]string'
+        pipeline: true
+        required: true
+        description: Application binary id

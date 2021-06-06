@@ -81,6 +81,10 @@ update_spec:					## Update json specifications
 generate_go_code: update_spec		## Generate go code from spec
 	pwsh -File scripts/build-cli/build.ps1 -SkipBuildBinary;
 
+generate_cli_tests:				## Generate CLI tests from the examples in the api specs
+	chmod +x ./scripts/build-cli-tests.sh
+	./scripts/build-cli-tests.sh
+
 # ---------------------------------------------------------------
 # Linting
 # ---------------------------------------------------------------
@@ -90,7 +94,7 @@ lint:
 # ---------------------------------------------------------------
 # Build
 # ---------------------------------------------------------------
-build: update_spec build_cli build_powershell
+build: update_spec build_cli build_powershell generate_cli_tests
 
 build_cli:						## Generate the cli code and build the binaries
 	pwsh -File scripts/build-cli/build.ps1;
@@ -130,6 +134,11 @@ test_powershell_sessions:		## Run powershell tests which interfere with the sess
 
 test_bash:
 	./tools/shell/tests/test.sh
+
+test_cli:						## Run tests on the cli examples
+	./tests/scripts/setup.sh
+	command -v commander || go get github.com/commander-cli/commander/v2/cmd/commander
+	./tests/run.sh
 
 test_installation:				## Test installation of linux packages
 	chmod +x ./tools/integration-tests/run.sh

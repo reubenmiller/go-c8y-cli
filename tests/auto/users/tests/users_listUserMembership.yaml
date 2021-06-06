@@ -1,0 +1,8 @@
+tests:
+    users_listUserMembership_Get a list of groups that a user belongs to:
+        command: c8y users listUserMembership --id "myuser"
+        exit-code: 0
+        stdout:
+            json:
+                method: GET
+                path: /user/$C8Y_TENANT/users/myuser/groups

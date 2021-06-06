@@ -15,7 +15,7 @@ c8y inventory assets unassign [flags]
 ### Examples
 
 ```
-$ c8y inventory assets unassign --device 12345 --childDevice 22553
+$ c8y inventory assets unassign --id 12345 --child 22553
 Unassign a child device from its parent device
         
 ```

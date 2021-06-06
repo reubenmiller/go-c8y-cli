@@ -1,0 +1,8 @@
+tests:
+    databroker_get_Get a data broker connector:
+        command: c8y databroker get --id 12345
+        exit-code: 0
+        stdout:
+            json:
+                method: GET
+                path: /databroker/connectors/12345

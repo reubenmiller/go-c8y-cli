@@ -35,7 +35,7 @@ func NewGetCmd(f *cmdutil.Factory) *GetCmd {
 		Short: "Get user group",
 		Long:  `Get an existing user group`,
 		Example: heredoc.Doc(`
-$ c8y userGroups get --id 12345
+$ c8y usergroups get --id 12345
 Get a user group
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
@@ -161,7 +161,7 @@ func (n *GetCmd) RunE(cmd *cobra.Command, args []string) error {
 		FormData:     formData,
 		Header:       headers,
 		IgnoreAccept: cfg.IgnoreAcceptHeader(),
-		DryRun:       cfg.DryRun(),
+		DryRun:       cfg.ShouldUseDryRun(cmd.CommandPath()),
 	}
 
 	return n.factory.RunWithWorkers(client, cmd, &req, inputIterators)

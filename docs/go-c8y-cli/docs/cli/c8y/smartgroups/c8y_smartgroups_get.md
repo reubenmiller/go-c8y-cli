@@ -18,7 +18,7 @@ c8y smartgroups get [flags]
 $ c8y smartgroups get --id 12345
 Get smart group by id
 
-$ c8y smartgroups get --id "my group"
+$ c8y smartgroups get --id "my smartgroup"
 Get smart group by name
         
 ```

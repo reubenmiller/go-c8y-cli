@@ -15,7 +15,7 @@ c8y userroles list [flags]
 ### Examples
 
 ```
-$ c8y userRoles list --pageSize 100
+$ c8y userroles list --pageSize 100
 Get a list of roles
         
 ```

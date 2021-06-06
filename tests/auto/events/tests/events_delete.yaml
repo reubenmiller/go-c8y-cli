@@ -1,0 +1,8 @@
+tests:
+    events_delete_Delete an event:
+        command: c8y events delete --id 12345
+        exit-code: 0
+        stdout:
+            json:
+                method: DELETE
+                path: /event/events/12345

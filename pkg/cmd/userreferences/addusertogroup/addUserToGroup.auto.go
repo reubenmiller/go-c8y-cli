@@ -34,11 +34,14 @@ func NewAddUserToGroupCmd(f *cmdutil.Factory) *AddUserToGroupCmd {
 		Short: "Add user to group",
 		Long:  `Add an existing user to a group`,
 		Example: heredoc.Doc(`
-$ c8y userreferences addUserToGroup --group 1 --user myuser
+$ c8y userreferences addUserToGroup --group 1 --user peterpi@example.com
 Add a user to a user group
 
+$ c8y users list | c8y userreferences addUserToGroup --group admins
+Add a list of users to admins group (using pipeline)
+
 $ c8y users list | c8y userreferences addUserToGroup --group business | c8y userreferences addUserToGroup --group admins
-Add a list of users to business and admins group using pipeline
+Add a list of users to business and admins group (using pipeline)
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
 			return f.CreateModeEnabled()
@@ -141,6 +144,7 @@ func (n *AddUserToGroupCmd) RunE(cmd *cobra.Command, args []string) error {
 		c8yfetcher.WithUserSelfByNameFirstMatch(client, args, "user", "user.self"),
 		cmdutil.WithTemplateValue(cfg),
 		flags.WithTemplateVariablesValue(),
+		flags.WithRequiredProperties("user.self"),
 	)
 	if err != nil {
 		return cmderrors.NewUserError(err)
@@ -167,7 +171,7 @@ func (n *AddUserToGroupCmd) RunE(cmd *cobra.Command, args []string) error {
 		FormData:     formData,
 		Header:       headers,
 		IgnoreAccept: cfg.IgnoreAcceptHeader(),
-		DryRun:       cfg.DryRun(),
+		DryRun:       cfg.ShouldUseDryRun(cmd.CommandPath()),
 	}
 
 	return n.factory.RunWithWorkers(client, cmd, &req, inputIterators)

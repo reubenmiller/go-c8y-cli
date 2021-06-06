@@ -34,7 +34,7 @@ func NewCreateCmd(f *cmdutil.Factory) *CreateCmd {
 		Long: `Create a new retention rule to managed when data is deleted in the tenant
 `,
 		Example: heredoc.Doc(`
-$ c8y retentionRules create --dataType ALARM --maximumAge 180
+$ c8y retentionrules create --dataType ALARM --maximumAge 180
 Create a retention rule
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
@@ -170,7 +170,7 @@ func (n *CreateCmd) RunE(cmd *cobra.Command, args []string) error {
 		FormData:     formData,
 		Header:       headers,
 		IgnoreAccept: cfg.IgnoreAcceptHeader(),
-		DryRun:       cfg.DryRun(),
+		DryRun:       cfg.ShouldUseDryRun(cmd.CommandPath()),
 	}
 
 	return n.factory.RunWithWorkers(client, cmd, &req, inputIterators)

@@ -16,7 +16,7 @@ c8y smartgroups delete [flags]
 ### Examples
 
 ```
-$ c8y smartgroup delete --id 12345
+$ c8y smartgroups delete --id 12345
 Get smart group by id
         
 ```

@@ -1,0 +1,24 @@
+tests:
+    userreferences_addUserToGroup_Add a list of users to admins group (using pipeline):
+        command: $TEST_SHELL -c 'cat ./testdata/c8y.users.list.json | c8y userreferences addUserToGroup --group admins'
+        exit-code: 0
+        stdout:
+            json:
+                method: POST
+                path: r//user/$C8Y_TENANT/groups/\d+/users$
+    userreferences_addUserToGroup_Add a list of users to business and admins group (using pipeline):
+        command: $TEST_SHELL -c 'cat ./testdata/c8y.users.list.json | c8y userreferences addUserToGroup --group business | c8y userreferences addUserToGroup --group admins'
+        exit-code: 0
+        skip: true
+        stdout:
+            json:
+                method: POST
+                path: /user/$C8Y_TENANT/groups/business/users
+    userreferences_addUserToGroup_Add a user to a user group:
+        command: c8y userreferences addUserToGroup --group 1 --user peterpi@example.com
+        exit-code: 0
+        stdout:
+            json:
+                body.user.self: r//user/$C8Y_TENANT/users/peterpi@example.com$
+                method: POST
+                path: /user/$C8Y_TENANT/groups/1/users

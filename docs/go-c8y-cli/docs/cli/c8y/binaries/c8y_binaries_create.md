@@ -15,7 +15,7 @@ c8y binaries create [flags]
 ### Examples
 
 ```
-$ c8y binaries create --file ./output.log
+$ c8y binaries create --file ./myfile.log
 Upload a log file
 
 $ c8y binaries create --file "myConfig.json" --type c8y_upload --data "c8y_Global={}"

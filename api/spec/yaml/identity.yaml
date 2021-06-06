@@ -1,0 +1,192 @@
+
+---
+information:
+  name: identity
+  description: Cumulocity identity
+  descriptionLong: 'REST endpoint to interact with Cumulocity identity objects'
+  link: https://cumulocity.com/guides/reference/identity/
+
+endpoints:
+  - name: getExternalIDCollection
+    method: GET
+    description: Get external id collection
+    descriptionLong: Get a collection of external ids related to an existing managed object
+    path: identity/globalIds/{device}/externalIds
+    accept: application/vnd.com.nsn.cumulocity.externalIdCollection+json
+    collectionType: application/vnd.com.nsn.cumulocity.externalId+json
+    collectionProperty: externalIds
+    alias:
+        go: list
+        powershell: Get-ExternalIdCollection
+    examples:
+      powershell:
+        - description: Get a list of external ids
+          beforeEach:
+            - $Device = New-TestDevice
+            - $ExtName = New-RandomString -Prefix "IMEI"
+            - $ExternalID = PSc8y\New-ExternalId -Device $Device.id -Type "my_SerialNumber" -Name "$ExtName"
+          command: Get-ExternalIdCollection -Device $Device.id
+          afterEach:
+            - PSc8y\Remove-ManagedObject -Id $Device.id
+
+      go:
+        - description: Get a list of external ids for a device
+          command: c8y identity list --device 12345
+
+        - description: Get the external ids for each device using pipeline
+          command: c8y devices list | c8y identity list
+          assertStdOut:
+            json:
+              path: r//identity/globalIds/\d+/externalIds
+              ..#(path="/identity/globalIds/11111/externalIds").path: /identity/globalIds/11111/externalIds
+              ..#(path="/identity/globalIds/22222/externalIds").path: /identity/globalIds/22222/externalIds
+              ..#(path="/identity/globalIds/33333/externalIds").path: /identity/globalIds/33333/externalIds
+              ..#(path="/identity/globalIds/44444/externalIds").path: /identity/globalIds/44444/externalIds
+              ..#(path="/identity/globalIds/55555/externalIds").path: /identity/globalIds/55555/externalIds
+
+    pathParameters:
+      - name: device
+        type: '[]device'
+        required: true
+        pipeline: true
+        description: Device id
+
+
+  - name: getExternalID
+    description: Get external id
+    descriptionLong: >
+      Get an external identity object. An external identify will include the reference
+      to a single device managed object
+    method: GET
+    path: /identity/externalIds/{type}/{name}
+    accept: application/vnd.com.nsn.cumulocity.externalId+json
+    alias:
+        go: get
+        powershell: Get-ExternalId
+    examples:
+      powershell:
+        - description: Get external identity
+          beforeEach:
+            - $Device = PSc8y\New-TestDevice
+            - $ExternalID = PSc8y\New-ExternalId -Device $Device.id -Type "my_SerialNumber" -Name "myserialnumber"
+          afterEach:
+            - Remove-ManagedObject -Id $Device.id
+          command: Get-ExternalId -Type "my_SerialNumber" -Name "myserialnumber"
+
+      go:
+        - description: Get external identity
+          command: c8y identity get --type test --name myserialnumber
+    pathParameters:
+      - name: type
+        type: string
+        required: false
+        default: c8y_Serial
+        description: External identity type
+
+      - name: name
+        type: string
+        required: true
+        pipeline: true
+        description: External identity id/name
+
+  - name: deleteExternalID
+    description: Delete external id
+    descriptionLong: Delete an existing external id. This does not delete the device managed object
+    method: DELETE
+    path: /identity/externalIds/{type}/{name}
+    accept: ''
+    alias:
+        go: delete
+        powershell: Remove-ExternalId
+    examples:
+      powershell:
+        - description: Delete external identity
+          beforeEach:
+            - $Device = PSc8y\New-TestDevice
+            - $ExternalID = PSc8y\New-ExternalId -Device $Device.id -Type "my_SerialNumber" -Name "myserialnumber2"
+          afterEach:
+            - Remove-ManagedObject -Id $Device.id
+          command: Remove-ExternalId -Type "my_SerialNumber" -Name "myserialnumber2"
+
+      go:
+        - description: Delete external identity
+          command: c8y identity delete --type test --name myserialnumber
+    pathParameters:
+      - name: type
+        type: string
+        required: false
+        default: c8y_Serial
+        description: External identity type
+
+      - name: name
+        type: string
+        required: true
+        pipeline: true
+        description: External identity id/name
+
+  - name: newExternalID
+    method: POST
+    path: identity/globalIds/{device}/externalIds
+    accept: application/vnd.com.nsn.cumulocity.externalId+json
+    description: Create external id
+    descriptionLong: Create a new external id for an existing managed object
+    alias:
+        go: create
+        powershell: New-ExternalId
+    examples:
+      powershell:
+        - description: Create external identity
+          beforeEach:
+              - $my_SerialNumber = New-RandomString -Prefix "my_SerialNumber"
+              - $Device = New-TestDevice
+          command: New-ExternalId -Device $Device.id -Type "$my_SerialNumber" -Name "myserialnumber"
+          afterEach:
+              - PSc8y\Remove-ManagedObject -Id $Device.id
+        
+        - description: Create external identity (using pipeline)
+          beforeEach:
+              - $my_SerialNumber = New-RandomString -Prefix "my_SerialNumber"
+              - $Device = New-TestDevice
+          command: 'Get-Device $Device.id | New-ExternalId -Type "$my_SerialNumber" -Template "{externalId: input.value.name}"'
+          afterEach:
+              - PSc8y\Remove-ManagedObject -Id $Device.id
+
+      go:
+        - description: Create external identity
+          command: c8y identity create --device 1234 --type test --name myserialnumber
+
+        - description: Create an external identity by using the .name property of the device (via the input template variable)
+          command: 'c8y devices list | c8y identity create --type c8y_Serial --template "{ externalId: input.value.name }"'
+          assertStdOut:
+            json:
+              path: r//identity/globalIds/\d+/externalIds
+              ..#(path="/identity/globalIds/11111/externalIds").path: /identity/globalIds/11111/externalIds
+              ..#(path="/identity/globalIds/22222/externalIds").path: /identity/globalIds/22222/externalIds
+              ..#(path="/identity/globalIds/33333/externalIds").path: /identity/globalIds/33333/externalIds
+              ..#(path="/identity/globalIds/44444/externalIds").path: /identity/globalIds/44444/externalIds
+              ..#(path="/identity/globalIds/55555/externalIds").path: /identity/globalIds/55555/externalIds
+
+
+    pathParameters:
+      - name: device
+        type: '[]device'
+        required: true
+        pipeline: true
+        description: The ManagedObject linked to the external ID.
+    body:
+      - name: type
+        type: string
+        required: false
+        default: c8y_Serial
+        description: The type of the external identifier as string, e.g. 'com_cumulocity_model_idtype_SerialNumber'.
+
+      - name: name
+        property: externalId
+        type: string
+        required: false
+        description: The identifier used in the external system that Cumulocity interfaces with.
+    bodyTemplateOptions:
+      enabled: true
+    bodyRequiredKeys:
+      - "type"
+      - "externalId"

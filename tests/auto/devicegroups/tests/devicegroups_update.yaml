@@ -1,0 +1,8 @@
+tests:
+    devicegroups_update_Update device group by id:
+        command: c8y devicegroups update --id 12345
+        exit-code: 0
+        stdout:
+            json:
+                method: PUT
+                path: /inventory/managedObjects/12345

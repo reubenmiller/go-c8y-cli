@@ -1,0 +1,8 @@
+tests:
+    tenants_delete_Delete a tenant by name (from the management tenant):
+        command: c8y tenants delete --id "mycompany"
+        exit-code: 0
+        stdout:
+            json:
+                method: DELETE
+                path: /tenant/tenants/mycompany

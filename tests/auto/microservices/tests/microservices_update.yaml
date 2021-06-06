@@ -1,0 +1,9 @@
+tests:
+    microservices_update_Update microservice availability to MARKET:
+        command: c8y microservices update --id "report-agent" --availability MARKET
+        exit-code: 0
+        stdout:
+            json:
+                body.availability: MARKET
+                method: PUT
+                path: r//application/applications/\d+$

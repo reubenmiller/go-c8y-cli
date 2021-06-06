@@ -34,7 +34,7 @@ func NewUnassignCmd(f *cmdutil.Factory) *UnassignCmd {
 		Short: "Unassign asset from managed object",
 		Long:  `Unassign/delete an asset from an existing managed object`,
 		Example: heredoc.Doc(`
-$ c8y inventory assets unassign --device 12345 --childDevice 22553
+$ c8y inventory assets unassign --id 12345 --child 22553
 Unassign a child device from its parent device
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
@@ -156,7 +156,7 @@ func (n *UnassignCmd) RunE(cmd *cobra.Command, args []string) error {
 		FormData:     formData,
 		Header:       headers,
 		IgnoreAccept: cfg.IgnoreAcceptHeader(),
-		DryRun:       cfg.DryRun(),
+		DryRun:       cfg.ShouldUseDryRun(cmd.CommandPath()),
 	}
 
 	return n.factory.RunWithWorkers(client, cmd, &req, inputIterators)

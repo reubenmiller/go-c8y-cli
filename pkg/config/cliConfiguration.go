@@ -100,6 +100,9 @@ const (
 	// SettingsDryRun dry run. Don't send any requests, just print out the information
 	SettingsDryRun = "settings.defaults.dry"
 
+	// SettingsDryRunPattern list of methods which should be conditionally dry, i.e. "PUT POST DELETE"
+	SettingsDryRunPattern = "settings.defaults.dryPattern"
+
 	// SettingsDryRunFormat dry run output format. Controls how the dry run information is displayed
 	SettingsDryRunFormat = "settings.defaults.dryFormat"
 
@@ -344,6 +347,9 @@ func (c *Config) bindSettings() {
 		WithBindEnv(SettingsActivityLogEnabled, true),
 		WithBindEnv(SettingsActivityLogPath, path.Join(c.GetSessionHomeDir(), ActivityLogDirName)),
 		WithBindEnv(SettingsActivityLogMethodFilter, "GET PUT POST DELETE"),
+
+		// Dry run options
+		WithBindEnv(SettingsDryRunPattern, ""),
 
 		WithBindEnv(SettingsIncludeAllDelayMS, 50),
 		WithBindEnv(SettingsTemplatePath, ""),
@@ -910,6 +916,40 @@ func (c *Config) DryRunFormat() string {
 	return c.viper.GetString(SettingsDryRunFormat)
 }
 
+// GetDryRunPattern pattern used to check if a command should be run using dry run or not if dry run is activated
+func (c *Config) GetDryRunPattern() string {
+	return c.viper.GetString(SettingsDryRunPattern)
+}
+
+// ShouldUseDryRun returns true of dry run should be applied to the command based on the type of method
+func (c *Config) ShouldUseDryRun(commandLine string) bool {
+	if c.DryRun() {
+		pattern := c.GetDryRunPattern()
+		if pattern == "" || commandLine == "" {
+			return true
+		}
+		shouldInvert := false
+		if strings.HasPrefix(pattern, "!") {
+			shouldInvert = true
+			pattern = pattern[1:]
+		}
+		if m, err := regexp.MatchString(pattern, commandLine); err != nil {
+			if c.Logger != nil {
+				c.Logger.Warnf("Invalid dry run pattern. pattern=%s, err=%s", commandLine, err)
+			}
+		} else {
+
+			if shouldInvert {
+				c.Logger.Infof("Should use dry run: pattern=%s, result=%v", pattern, !m)
+				return !m
+			}
+			c.Logger.Infof("Should use dry run: pattern=%s, result=%v", pattern, m)
+			return m
+		}
+	}
+	return false
+}
+
 // Debug show debug messages
 func (c *Config) Debug() bool {
 	return c.viper.GetBool(SettingsDebug)
@@ -1260,8 +1300,9 @@ func (c *Config) ShouldConfirm(methods ...string) bool {
 		return true
 	}
 
-	if c.IsCIMode() || c.Force() || c.DryRun() {
-		c.Logger.Debugf("no confirmation required. ci_mode=%v, force=%v, dry=%v", c.IsCIMode(), c.Force(), c.DryRun())
+	useDryRun := c.ShouldUseDryRun("")
+	if c.IsCIMode() || c.Force() || useDryRun {
+		c.Logger.Debugf("no confirmation required. ci_mode=%v, force=%v, dry=%v", c.IsCIMode(), c.Force(), useDryRun)
 		return false
 	}
 

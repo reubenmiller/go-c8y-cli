@@ -54,7 +54,7 @@
           },
           {
             "description": "Get events from a device",
-            "command": "c8y events list --device mydevice"
+            "command": "c8y events list --device 12345"
           }
         ]
       },
@@ -126,7 +126,7 @@
           },
           {
             "description": "Remove events from a device",
-            "command": "c8y events deleteCollection --device mydevice"
+            "command": "c8y events deleteCollection --device 12345"
           }
         ]
       },
@@ -237,7 +237,7 @@
         "go": [
           {
             "description": "Create a new event for a device",
-            "command": "c8y events create --device mydevice --type c8y_TestEvent --text \"Test event\""
+            "command": "c8y events create --device 12345 --type c8y_TestEvent --text \"Test event\""
           },
           {
             "description": "Create a new event for a device (using pipeline)",

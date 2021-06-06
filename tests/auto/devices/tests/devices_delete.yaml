@@ -1,0 +1,8 @@
+tests:
+    devices_delete_Get device by id:
+        command: c8y devices delete --id 12345
+        exit-code: 0
+        stdout:
+            json:
+                method: DELETE
+                path: /inventory/managedObjects/12345

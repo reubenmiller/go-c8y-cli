@@ -1,0 +1,8 @@
+tests:
+    retentionRules_get_Get a retention rule:
+        command: c8y retentionrules get --id 12345
+        exit-code: 0
+        stdout:
+            json:
+                method: GET
+                path: /retention/retentions/12345

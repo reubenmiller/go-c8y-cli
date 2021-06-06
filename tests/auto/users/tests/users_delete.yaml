@@ -1,0 +1,8 @@
+tests:
+    users_delete_Delete a user:
+        command: c8y users delete --id "myuser"
+        exit-code: 0
+        stdout:
+            json:
+                method: DELETE
+                path: /user/$C8Y_TENANT/users/myuser

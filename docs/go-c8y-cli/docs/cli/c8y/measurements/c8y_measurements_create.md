@@ -15,7 +15,7 @@ c8y measurements create [flags]
 ### Examples
 
 ```
-$ c8y measurements create --id 12345 --time "0s" --type "myType" --data "{\"c8y_Winding\":{ \"temperature\":{\"value\": 1.2345,\"unit\":\"°C\"}}}"
+$ c8y measurements create --device 12345 --time "0s" --type "myType" --data "{\"c8y_Winding\":{ \"temperature\":{\"value\": 1.2345,\"unit\":\"°C\"}}}"
 Create measurement
         
 ```

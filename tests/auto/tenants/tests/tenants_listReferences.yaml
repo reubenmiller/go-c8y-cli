@@ -1,0 +1,8 @@
+tests:
+    tenants_listReferences_Get a list of referenced applications on a given tenant (from management tenant):
+        command: c8y tenants listReferences --tenant "mycompany"
+        exit-code: 0
+        stdout:
+            json:
+                method: GET
+                path: /tenant/tenants/mycompany/applications

@@ -33,7 +33,7 @@ func NewUpdateCmd(f *cmdutil.Factory) *UpdateCmd {
 		Short: "Update tenant option",
 		Long:  `Update an existing tenant option`,
 		Example: heredoc.Doc(`
-$ c8y tenantOptions update --category "c8y_cli_tests" --key "option4" --value "0"
+$ c8y tenantoptions update --category "c8y_cli_tests" --key "option4" --value "0"
 Update a tenant option
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
@@ -163,7 +163,7 @@ func (n *UpdateCmd) RunE(cmd *cobra.Command, args []string) error {
 		FormData:     formData,
 		Header:       headers,
 		IgnoreAccept: cfg.IgnoreAcceptHeader(),
-		DryRun:       cfg.DryRun(),
+		DryRun:       cfg.ShouldUseDryRun(cmd.CommandPath()),
 	}
 
 	return n.factory.RunWithWorkers(client, cmd, &req, inputIterators)

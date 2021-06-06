@@ -33,7 +33,7 @@ func NewCreateCmd(f *cmdutil.Factory) *CreateCmd {
 		Short: "Create tenant",
 		Long:  `Create a new tenant`,
 		Example: heredoc.Doc(`
-$ c8y tenants create --company "mycompany" --domain "mycompany" --adminName "admin" --password "mys3curep9d8"
+$ c8y tenants create --company "mycompany" --domain "mycompany" --adminName "admin" --adminPass "mys3curep9d8"
 Create a new tenant (from the management tenant)
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
@@ -170,7 +170,7 @@ func (n *CreateCmd) RunE(cmd *cobra.Command, args []string) error {
 		FormData:     formData,
 		Header:       headers,
 		IgnoreAccept: cfg.IgnoreAcceptHeader(),
-		DryRun:       cfg.DryRun(),
+		DryRun:       cfg.ShouldUseDryRun(cmd.CommandPath()),
 	}
 
 	return n.factory.RunWithWorkers(client, cmd, &req, inputIterators)

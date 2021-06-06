@@ -34,7 +34,7 @@ func NewListCmd(f *cmdutil.Factory) *ListCmd {
 		Short: "Get role collection",
 		Long:  `Get collection of user roles`,
 		Example: heredoc.Doc(`
-$ c8y userRoles list --pageSize 100
+$ c8y userroles list --pageSize 100
 Get a list of roles
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
@@ -154,7 +154,7 @@ func (n *ListCmd) RunE(cmd *cobra.Command, args []string) error {
 		FormData:     formData,
 		Header:       headers,
 		IgnoreAccept: cfg.IgnoreAcceptHeader(),
-		DryRun:       cfg.DryRun(),
+		DryRun:       cfg.ShouldUseDryRun(cmd.CommandPath()),
 	}
 
 	return n.factory.RunWithWorkers(client, cmd, &req, inputIterators)

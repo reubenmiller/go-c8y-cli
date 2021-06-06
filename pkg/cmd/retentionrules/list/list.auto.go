@@ -35,7 +35,7 @@ func NewListCmd(f *cmdutil.Factory) *ListCmd {
 		Long: `Get a collection of retention rules configured in the current tenant
 `,
 		Example: heredoc.Doc(`
-$ c8y retentionRules list
+$ c8y retentionrules list
 Get a list of retention rules
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
@@ -155,7 +155,7 @@ func (n *ListCmd) RunE(cmd *cobra.Command, args []string) error {
 		FormData:     formData,
 		Header:       headers,
 		IgnoreAccept: cfg.IgnoreAcceptHeader(),
-		DryRun:       cfg.DryRun(),
+		DryRun:       cfg.ShouldUseDryRun(cmd.CommandPath()),
 	}
 
 	return n.factory.RunWithWorkers(client, cmd, &req, inputIterators)

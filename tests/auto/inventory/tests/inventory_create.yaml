@@ -1,0 +1,10 @@
+tests:
+    inventory_create_Create a managed object:
+        command: c8y inventory create --name "testMO" --type "custom_type"
+        exit-code: 0
+        stdout:
+            json:
+                body.name: testMO
+                body.type: custom_type
+                method: POST
+                path: /inventory/managedObjects

@@ -1,0 +1,8 @@
+tests:
+    databroker_list_Get a list of data broker connectors:
+        command: c8y databroker list
+        exit-code: 0
+        stdout:
+            json:
+                method: GET
+                path: /databroker/connectors

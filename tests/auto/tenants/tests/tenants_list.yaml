@@ -1,0 +1,8 @@
+tests:
+    tenants_list_Get a list of tenants:
+        command: c8y tenants list
+        exit-code: 0
+        stdout:
+            json:
+                method: GET
+                path: /tenant/tenants

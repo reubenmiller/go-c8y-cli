@@ -15,7 +15,7 @@ c8y usergroups update [flags]
 ### Examples
 
 ```
-$ c8y userGroups update --id 12345 --name "customGroup2"
+$ c8y usergroups update --id 12345 --name "customGroup2"
 Update a user group
         
 ```

@@ -36,7 +36,7 @@ func NewGetSupportedSeriesCmd(f *cmdutil.Factory) *GetSupportedSeriesCmd {
 		Long: `Get supported measurement series/s of a device
 `,
 		Example: heredoc.Doc(`
-$ c8y inventory getSupportedSeries --device 12345
+$ c8y devices getSupportedSeries --device 12345
 Get the supported measurement series of a device by name
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
@@ -160,7 +160,7 @@ func (n *GetSupportedSeriesCmd) RunE(cmd *cobra.Command, args []string) error {
 		FormData:     formData,
 		Header:       headers,
 		IgnoreAccept: cfg.IgnoreAcceptHeader(),
-		DryRun:       cfg.DryRun(),
+		DryRun:       cfg.ShouldUseDryRun(cmd.CommandPath()),
 	}
 
 	return n.factory.RunWithWorkers(client, cmd, &req, inputIterators)

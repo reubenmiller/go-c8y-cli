@@ -35,7 +35,7 @@ func NewDeleteCollectionCmd(f *cmdutil.Factory) *DeleteCollectionCmd {
 		Long: `Delete a collection of operations using a set of filter criteria. Be careful when deleting operations. Where possible update operations to FAILED (with a failure reason) instead of deleting them as it is easier to track.
 `,
 		Example: heredoc.Doc(`
-$ c8y operations deleteCollection --device mydevice --status PENDING
+$ c8y operations deleteCollection --device 12345 --status PENDING
 Remove all pending operations for a given device
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
@@ -165,7 +165,7 @@ func (n *DeleteCollectionCmd) RunE(cmd *cobra.Command, args []string) error {
 		FormData:     formData,
 		Header:       headers,
 		IgnoreAccept: cfg.IgnoreAcceptHeader(),
-		DryRun:       cfg.DryRun(),
+		DryRun:       cfg.ShouldUseDryRun(cmd.CommandPath()),
 	}
 
 	return n.factory.RunWithWorkers(client, cmd, &req, inputIterators)

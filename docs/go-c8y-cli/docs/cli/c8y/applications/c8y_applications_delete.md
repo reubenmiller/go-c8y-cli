@@ -18,7 +18,7 @@ c8y applications delete [flags]
 $ c8y applications delete --id 12345
 Delete an application by id
 
-$ c8y applications delete --id my-temp-app
+$ c8y applications delete --id my-example-app
 Delete an application by name
         
 ```

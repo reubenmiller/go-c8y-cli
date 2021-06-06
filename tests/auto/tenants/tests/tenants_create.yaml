@@ -1,0 +1,12 @@
+tests:
+    tenants_create_Create a new tenant (from the management tenant):
+        command: c8y tenants create --company "mycompany" --domain "mycompany" --adminName "admin" --adminPass "mys3curep9d8"
+        exit-code: 0
+        stdout:
+            json:
+                body.adminName: admin
+                body.adminPass: mys3curep9d8
+                body.company: mycompany
+                body.domain: mycompany
+                method: POST
+                path: /tenant/tenants

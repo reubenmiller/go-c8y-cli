@@ -1,0 +1,8 @@
+tests:
+    events_updateBinary_Update a binary related to an event:
+        command: c8y events updateBinary --id 12345 --file ./testdata/myfile.log
+        exit-code: 0
+        stdout:
+            json:
+                method: PUT
+                path: /event/events/12345/binaries

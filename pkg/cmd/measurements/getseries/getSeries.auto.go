@@ -35,8 +35,8 @@ func NewGetSeriesCmd(f *cmdutil.Factory) *GetSeriesCmd {
 		Short: "Get measurement series",
 		Long:  `Get a collection of measurements based on filter parameters`,
 		Example: heredoc.Doc(`
-$ c8y measurements getSeries -source 12345 --series nx_WEA_29_Delta.MDL10FG001 --series nx_WEA_29_Delta.ST9 --dateFrom "-10min" --dateTo "0s"
-Get a list of series [nx_WEA_29_Delta.MDL10FG001] and [nx_WEA_29_Delta.ST9] for device 12345
+$ c8y measurements getSeries --device 12345 --series app_Weather.temperature --series app_Weather.barometer --dateFrom "-10min" --dateTo "0s"
+Get a list of series [app_Weather.temperature] and [app_Weather.barometer] for device 12345
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
 			return nil
@@ -169,7 +169,7 @@ func (n *GetSeriesCmd) RunE(cmd *cobra.Command, args []string) error {
 		FormData:     formData,
 		Header:       headers,
 		IgnoreAccept: cfg.IgnoreAcceptHeader(),
-		DryRun:       cfg.DryRun(),
+		DryRun:       cfg.ShouldUseDryRun(cmd.CommandPath()),
 	}
 
 	return n.factory.RunWithWorkers(client, cmd, &req, inputIterators)

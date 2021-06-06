@@ -1,0 +1,8 @@
+tests:
+    retentionRules_delete_Delete a retention rule:
+        command: c8y retentionrules delete --id 12345
+        exit-code: 0
+        stdout:
+            json:
+                method: DELETE
+                path: /retention/retentions/12345

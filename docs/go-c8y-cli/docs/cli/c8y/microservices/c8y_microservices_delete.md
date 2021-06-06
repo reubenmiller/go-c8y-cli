@@ -18,7 +18,7 @@ c8y microservices delete [flags]
 $ c8y microservices delete --id 12345
 Delete an microservice by id
 
-$ c8y microservices delete --id my-temp-app
+$ c8y microservices delete --id report-agent
 Delete a microservice by name
         
 ```

@@ -6,7 +6,7 @@ Describe -Name "New-Tenant" {
     }
 
     It -Skip "Create a new tenant (from the management tenant)" {
-        $Response = PSc8y\New-Tenant -Company "mycompany" -Domain "mycompany" -AdminName "admin" -Password "mys3curep9d8"
+        $Response = PSc8y\New-Tenant -Company "mycompany" -Domain "mycompany" -AdminName "admin" -AdminPass "mys3curep9d8"
         $LASTEXITCODE | Should -Be 0
         $Response | Should -Not -BeNullOrEmpty
     }

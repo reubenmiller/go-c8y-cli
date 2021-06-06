@@ -1,0 +1,26 @@
+tests:
+    inventory_findByText_Find managed objects which contain the text 'myText' (using pipeline):
+        command: $TEST_SHELL -c 'echo "myText" | c8y inventory findByText'
+        exit-code: 0
+        stdout:
+            json:
+                method: GET
+                path: /inventory/managedObjects
+    inventory_findByText_Find managed objects which contain the text 'myText' and is a device (using pipeline):
+        command: $TEST_SHELL -c 'echo "myText" | c8y inventory findByText --fragmentType c8y_IsDevice'
+        exit-code: 0
+        stdout:
+            json:
+                method: GET
+                path: /inventory/managedObjects
+            contains:
+                - fragmentType=c8y_IsDevice
+    inventory_findByText_Get a list of managed objects:
+        command: c8y inventory findByText --text "myText"
+        exit-code: 0
+        stdout:
+            json:
+                method: GET
+                path: /inventory/managedObjects
+            contains:
+                - text=myText

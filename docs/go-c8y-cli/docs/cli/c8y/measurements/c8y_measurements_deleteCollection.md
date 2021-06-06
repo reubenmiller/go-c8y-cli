@@ -15,7 +15,7 @@ c8y measurements deleteCollection [flags]
 ### Examples
 
 ```
-$ c8y measurements deleteCollection --device $Measurement.source.id
+$ c8y measurements deleteCollection --device 12345
 Delete measurement collection for a device
         
 ```

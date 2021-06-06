@@ -1,0 +1,168 @@
+
+---
+
+information:
+  name: userreferences
+  description: Cumulocity user references
+  descriptionLong: 'REST endpoint to interact with Cumulocity user references'
+  link: https://cumulocity.com/guides/reference/users/#user-reference-collection
+
+endpoints:
+  - name: addUserToGroup
+    description: Add user to group
+    descriptionLong: Add an existing user to a group
+    method: POST
+    path: /user/{tenant}/groups/{group}/users
+    accept: 'application/vnd.com.nsn.cumulocity.userReference+json'
+    alias:
+        go: addUserToGroup
+        powershell: Add-UserToGroup
+    examples:
+      powershell:
+        - description: Add a user to a user group
+          beforeEach:
+            - $User = New-TestUser
+            - $Group = Get-UserGroupByName -Name "business"
+          command: Add-UserToGroup -Group $Group.id -User $User.id
+          afterEach:
+            - Remove-User -Id $User.id
+      go:
+        - description: Add a user to a user group
+          command: c8y userreferences addUserToGroup --group 1 --user peterpi@example.com
+          assertStdOut:
+            json:
+              body.user.self: r//user/$C8Y_TENANT/users/peterpi@example.com$
+
+        - description: Add a list of users to admins group (using pipeline)
+          command: c8y users list | c8y userreferences addUserToGroup --group admins
+          assertStdOut:
+            json:
+              path: r//user/$C8Y_TENANT/groups/\d+/users$
+            
+
+        - description: Add a list of users to business and admins group (using pipeline)
+          command: c8y users list | c8y userreferences addUserToGroup --group business | c8y userreferences addUserToGroup --group admins
+          skipTest: true
+    pathParameters:
+      - name: group
+        type: '[]usergroup'
+        required: true
+        description: Group ID
+
+      - name: tenant
+        type: tenant
+        position: 99
+        description: Tenant
+
+    body:
+      - name: user
+        type: '[]userself'
+        pipeline: true
+        required: true
+        property: user.self
+        description: User id
+        pipelineAliases:
+          - user.id
+          - id
+          - self
+    bodyRequiredKeys:
+      - "user.self"
+
+
+  - name: deleteUserFromGroup
+    description: Delete user from group
+    descriptionLong: Delete an existing user from a user group
+    method: DELETE
+    path: /user/{tenant}/groups/{group}/users/{user}
+    accept: ''
+    alias:
+        go: deleteUserFromGroup
+        powershell: Remove-UserFromGroup
+    examples:
+      powershell:
+        - description: Delete a user from a user group
+          beforeEach:
+            - $User = New-TestUser
+            - $Group = Get-UserGroupByName -Name "business"
+            - Add-UserToGroup -Group $Group.id -User $User.id
+          command: Remove-UserFromGroup -Group $Group.id -User $User.id
+          afterEach:
+            - Remove-User -Id $User.id
+      go:
+        - description: Delete a user from a user group
+          command: c8y userreferences deleteUserFromGroup --group 1 --user peterpi@example.com
+        
+        - description: Delete a user from a user group (using pipeline)
+          command: c8y users get --id peterpi@example.com | c8y userreferences deleteUserFromGroup --group 1
+          assertStdOut:
+            json:
+              path: r//user/$C8Y_TENANT/groups/1/users/peterpi@example.com
+    pathParameters:
+      - name: group
+        type: '[]usergroup'
+        required: true
+        description: Group ID
+
+      - name: user
+        type: '[]user'
+        required: true
+        pipeline: true
+        description: User id/username
+
+      - name: tenant
+        type: tenant
+        position: 99
+        description: Tenant
+
+  - name: getUsersInGroup
+    description: Get users in group
+    descriptionLong: Get all users in a user group
+    method: GET
+    path: /user/{tenant}/groups/{id}/users
+    accept: application/vnd.com.nsn.cumulocity.userReferenceCollection+json
+    collectionType: application/vnd.com.nsn.cumulocity.user+json
+    collectionProperty: references.#.user
+    alias:
+        go: listGroupMembership
+        powershell: Get-UserGroupMembershipCollection
+    examples:
+      powershell:
+        - description: List the users within a user group
+          beforeEach:
+            - $User = New-TestUser
+            - $Group = Get-UserGroupByName -Name "business"
+            - Add-UserToGroup -Group $Group.id -User $User.id
+          command: Get-UserGroupMembershipCollection -Id $Group.id
+          afterEach:
+            - Remove-User -Id $User.id
+
+        - description: List the users within a user group (using pipeline)
+          beforeEach:
+            - $User = New-TestUser
+            - $Group = Get-UserGroupByName -Name "business"
+            - Add-UserToGroup -Group $Group.id -User $User.id
+          command: Get-UserGroupByName -Name "business" | Get-UserGroupMembershipCollection
+          afterEach:
+            - Remove-User -Id $User.id
+      go:
+        - description: List the users within a user group
+          command: c8y userreferences listGroupMembership --id 1
+        
+        - description: List users in user groups (using pipeline)
+          command: c8y usergroups list | c8y userreferences listGroupMembership
+          assertStdOut:
+            line-count: 2
+            json:
+              path: r//user/$C8Y_TENANT/groups/(1|2)/users
+
+    pathParameters:
+      - name: id
+        type: '[]usergroup'
+        required: true
+        pipeline: true
+        description: Group ID
+
+      - name: tenant
+        type: tenant
+        position: 99
+        description: Tenant

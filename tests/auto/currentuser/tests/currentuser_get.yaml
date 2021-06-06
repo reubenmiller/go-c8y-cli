@@ -1,0 +1,8 @@
+tests:
+    currentuser_get_Get the current user:
+        command: c8y currentuser get
+        exit-code: 0
+        stdout:
+            json:
+                method: GET
+                path: /user/currentUser

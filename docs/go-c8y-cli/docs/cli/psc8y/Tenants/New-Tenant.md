@@ -78,7 +78,7 @@ Create a new tenant
 
 ### EXAMPLE 1
 ```
-New-Tenant -Company "mycompany" -Domain "mycompany" -AdminName "admin" -Password "mys3curep9d8"
+New-Tenant -Company "mycompany" -Domain "mycompany" -AdminName "admin" -AdminPass "mys3curep9d8"
 ```
 
 Create a new tenant (from the management tenant)

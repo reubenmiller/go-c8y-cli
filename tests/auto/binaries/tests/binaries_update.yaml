@@ -1,0 +1,8 @@
+tests:
+    binaries_update_Update an existing binary file:
+        command: c8y binaries update --id 12345 --file ./testdata/myfile.log
+        exit-code: 0
+        stdout:
+            json:
+                method: PUT
+                path: /inventory/binaries/12345

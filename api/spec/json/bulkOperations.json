@@ -37,7 +37,7 @@
         "go": [
           {
             "description": "Get a list of bulk operations",
-            "command": "c8y bulkOperations list"
+            "command": "c8y bulkoperations list"
           }
         ]
       },
@@ -72,7 +72,7 @@
         "go": [
           {
             "description": "Get bulk operation by id",
-            "command": "c8y bulkOperations get --id 12345"
+            "command": "c8y bulkoperations get --id 12345"
           }
         ]
       },
@@ -114,7 +114,7 @@
         "go": [
           {
             "description": "Remove bulk operation by id",
-            "command": "c8y bulkOperations delete --id 12345"
+            "command": "c8y bulkoperations delete --id 12345"
           }
         ]
       },
@@ -245,7 +245,7 @@
         "go": [
           {
             "description": "Update an bulk operation",
-            "command": "c8y bulkOperations update --id 12345 --creationRamp 15"
+            "command": "c8y bulkoperations update --id 12345 --creationRampSec 15"
           }
         ]
       },
@@ -322,7 +322,8 @@
           },
           {
             "description": "Check all bulk operations if they have any related operations still in executing state and were created more than 10 days ago, then cancel it with a custom message",
-            "command": "c8y bulkoperations list | c8y bulkoperations listOperations --status EXECUTING --dateTo \"-10d\" | c8y operations update --status FAILED --failureReason \"Manually cancelled stale operation\""
+            "command": "c8y bulkoperations list | c8y bulkoperations listOperations --status EXECUTING --dateTo \"-10d\" | c8y operations update --status FAILED --failureReason \"Manually cancelled stale operation\"",
+            "skipTest": true
           }
         ]
       },

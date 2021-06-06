@@ -38,7 +38,7 @@ func NewGetCmd(f *cmdutil.Factory) *GetCmd {
 $ c8y smartgroups get --id 12345
 Get smart group by id
 
-$ c8y smartgroups get --id "my group"
+$ c8y smartgroups get --id "my smartgroup"
 Get smart group by name
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
@@ -161,7 +161,7 @@ func (n *GetCmd) RunE(cmd *cobra.Command, args []string) error {
 		FormData:     formData,
 		Header:       headers,
 		IgnoreAccept: cfg.IgnoreAcceptHeader(),
-		DryRun:       cfg.DryRun(),
+		DryRun:       cfg.ShouldUseDryRun(cmd.CommandPath()),
 	}
 
 	return n.factory.RunWithWorkers(client, cmd, &req, inputIterators)

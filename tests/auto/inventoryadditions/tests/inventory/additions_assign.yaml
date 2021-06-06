@@ -1,0 +1,9 @@
+tests:
+    inventory/additions_assign_Add a related managed object as a child to an existing managed object:
+        command: c8y inventory additions assign --id 12345 --newChild 6789
+        exit-code: 0
+        stdout:
+            json:
+                body.managedObject.id: "6789"
+                method: POST
+                path: /inventory/managedObjects/12345/childAdditions

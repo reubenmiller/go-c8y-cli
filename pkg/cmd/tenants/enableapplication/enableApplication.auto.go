@@ -34,7 +34,7 @@ func NewEnableApplicationCmd(f *cmdutil.Factory) *EnableApplicationCmd {
 		Short: "Subscribe application",
 		Long:  `Enable/subscribe an application to a tenant`,
 		Example: heredoc.Doc(`
-$ c8y tenants enableApplication --tenant "mycompany" --application "myMicroservice"
+$ c8y tenants enableApplication --tenant "t12345" --application "myMicroservice"
 Enable an application of a tenant by name
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
@@ -160,7 +160,7 @@ func (n *EnableApplicationCmd) RunE(cmd *cobra.Command, args []string) error {
 		FormData:     formData,
 		Header:       headers,
 		IgnoreAccept: cfg.IgnoreAcceptHeader(),
-		DryRun:       cfg.DryRun(),
+		DryRun:       cfg.ShouldUseDryRun(cmd.CommandPath()),
 	}
 
 	return n.factory.RunWithWorkers(client, cmd, &req, inputIterators)

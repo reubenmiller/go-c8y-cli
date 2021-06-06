@@ -1,0 +1,17 @@
+tests:
+    microservices_enable_Enable (subscribe) to a microservice:
+        command: c8y microservices enable --id 12345
+        exit-code: 0
+        stdout:
+            json:
+                body.application.id: "12345"
+                method: POST
+                path: /tenant/tenants/$C8Y_TENANT/applications
+    microservices_enable_Enable (subscribe) to a microservice by name:
+        command: c8y microservices enable --id report-agent
+        exit-code: 0
+        stdout:
+            json:
+                body.application.id: r/^\d+$
+                method: POST
+                path: /tenant/tenants/$C8Y_TENANT/applications

@@ -1,0 +1,15 @@
+tests:
+    microservices_delete_Delete a microservice by name:
+        command: c8y microservices delete --id report-agent
+        exit-code: 0
+        stdout:
+            json:
+                method: DELETE
+                path: r//application/applications/\d+$
+    microservices_delete_Delete an microservice by id:
+        command: c8y microservices delete --id 12345
+        exit-code: 0
+        stdout:
+            json:
+                method: DELETE
+                path: /application/applications/12345

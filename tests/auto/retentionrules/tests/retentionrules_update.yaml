@@ -1,0 +1,8 @@
+tests:
+    retentionRules_update_Update a retention rule:
+        command: c8y retentionrules update --id 12345 --maximumAge 90
+        exit-code: 0
+        stdout:
+            json:
+                method: PUT
+                path: /retention/retentions/12345

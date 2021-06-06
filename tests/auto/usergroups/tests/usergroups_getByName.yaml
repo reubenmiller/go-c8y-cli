@@ -1,0 +1,8 @@
+tests:
+    userGroups_getByName_Get user group by its name:
+        command: c8y usergroups getByName --name customGroup1
+        exit-code: 0
+        stdout:
+            json:
+                method: GET
+                path: /user/$C8Y_TENANT/groupByName/customGroup1

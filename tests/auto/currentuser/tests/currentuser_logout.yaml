@@ -1,0 +1,8 @@
+tests:
+    currentuser_logout_Log out the current user:
+        command: c8y currentuser logout
+        exit-code: 0
+        stdout:
+            json:
+                method: POST
+                path: /user/logout

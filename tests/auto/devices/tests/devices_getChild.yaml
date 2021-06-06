@@ -1,0 +1,8 @@
+tests:
+    devices_getChild_Get an existing child device reference:
+        command: c8y devices getChild --device 12345 --reference 12345
+        exit-code: 0
+        stdout:
+            json:
+                method: GET
+                path: /inventory/managedObjects/12345/childDevices/12345

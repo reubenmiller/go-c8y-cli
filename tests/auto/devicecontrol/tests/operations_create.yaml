@@ -1,0 +1,10 @@
+tests:
+    operations_create_Create operation for a device:
+        command: c8y operations create --device 12345 --data "c8y_Restart={}"
+        exit-code: 0
+        stdout:
+            json:
+                body.c8y_Restart: '{}'
+                body.deviceId: "12345"
+                method: POST
+                path: /devicecontrol/operations
