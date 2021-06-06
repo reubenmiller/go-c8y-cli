@@ -1,6 +1,15 @@
 #!/bin/bash
 
+BIN_DIR="./output"
+
 export C8Y_SETTINGS_DEFAULTS_FORCE=true
+export PATH="$(cd "$BIN_DIR"; pwd):$PATH"
+
+if ! command -v c8y; then
+    if [[ -f "$BIN_DIR/c8y.linux" ]]; then
+        cp "$BIN_DIR/c8y.linux" "$BIN_DIR/c8y"
+    fi
+fi
 
 setup () {
     echo "Setting up c8y dependencies"

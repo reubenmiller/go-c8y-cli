@@ -94,6 +94,14 @@ See the [documentation website](https://goc8ycli.netlify.app/) for instructions 
     set-session
     ```
 
+### Run test on example code
+
+The examples included in the API specification can be validated by running the follow make task.
+
+```sh
+make test_cli
+```
+
 ### Run all tests
 
 ```sh
