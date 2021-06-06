@@ -22,6 +22,10 @@
     "assertion": {
       "type": "object",
       "properties": {
+        "json": {
+          "type": "object",
+          "title": "JSON property assertions"
+        },
         "exit-code": {
           "type": "integer",
           "title": "Expected exit code"
@@ -268,6 +272,9 @@
                     },
                     "assertStdErr": {
                       "$ref": "#/definitions/assertion"
+                    },
+                    "skipTest": {
+                      "$ref": "#/definitions/skip-test"
                     }
                   },
                   "required": [

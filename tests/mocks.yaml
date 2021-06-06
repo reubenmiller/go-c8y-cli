@@ -1,0 +1,14 @@
+
+mocks:
+    c8y devices get --id 12345: cat ./testdata/c8y.devices.get.json
+    c8y devices list: cat ./testdata/c8y.devices.list.json
+    c8y microservices list: cat ./testdata/c8y.microservices.list.json
+    c8y usergroups list: cat ./testdata/c8y.usergroups.list.json
+    c8y users get --id myuser: cat ./testdata/c8y.users.get.json
+    c8y users list: cat ./testdata/c8y.users.list.json
+    c8y users get --id peterpi@example.com: cat ./testdata/c8y.users.get.json
+    c8y bulkoperations list --filter "status eq IN_PROGRESS": cat ./testdata/c8y.bulkoperations.list.in_progress.json
+
+files:
+    myConfig.json: ./testdata/myConfig.json
+    ./myfile.log: ./testdata/myfile.log

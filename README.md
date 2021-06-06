@@ -38,7 +38,7 @@ See the [documentation website](https://goc8ycli.netlify.app/) for instructions 
 
 2. Open the project in Microsoft VS Code (using Dev Containers - this requires Docker!)
 
-3. Add or edit a command specification (`.yml` file) in `api/spec/yaml/`. The specifications are used to auto generate the go code
+3. Add or edit a command specification (`.yaml` file) in `api/spec/yaml/`. The specifications are used to auto generate the go code
 
 4. Run the code generation and build the go binary
 
