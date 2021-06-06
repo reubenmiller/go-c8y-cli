@@ -142,7 +142,7 @@ func (n *CmdCreate) RunE(cmd *cobra.Command, args []string) error {
 	var applicationID string
 	var applicationName string
 
-	dryRun := cfg.DryRun()
+	dryRun := cfg.ShouldUseDryRun(cmd.CommandPath())
 	applicationDetails := n.getApplicationDetails()
 
 	if applicationDetails != nil {

@@ -34,11 +34,11 @@ func NewDeleteUserFromGroupCmd(f *cmdutil.Factory) *DeleteUserFromGroupCmd {
 		Short: "Delete user from group",
 		Long:  `Delete an existing user from a user group`,
 		Example: heredoc.Doc(`
-$ c8y userreferences deleteUserFromGroup --group 1 --user myuser
-From a user from a user group
+$ c8y userreferences deleteUserFromGroup --group 1 --user peterpi@example.com
+Delete a user from a user group
 
-$ c8y users get --id myuser | c8y userreferences deleteUserFromGroup --group 1
-From a user from a user group (using pipeline)
+$ c8y users get --id peterpi@example.com | c8y userreferences deleteUserFromGroup --group 1
+Delete a user from a user group (using pipeline)
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
 			return f.DeleteModeEnabled()
@@ -164,7 +164,7 @@ func (n *DeleteUserFromGroupCmd) RunE(cmd *cobra.Command, args []string) error {
 		FormData:     formData,
 		Header:       headers,
 		IgnoreAccept: cfg.IgnoreAcceptHeader(),
-		DryRun:       cfg.DryRun(),
+		DryRun:       cfg.ShouldUseDryRun(cmd.CommandPath()),
 	}
 
 	return n.factory.RunWithWorkers(client, cmd, &req, inputIterators)

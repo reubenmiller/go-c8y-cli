@@ -81,6 +81,12 @@ func (r *RequestHandler) ProcessRequestAndResponse(requests []c8y.RequestOptions
 	}
 
 	ctx, cancel := r.GetTimeoutContext()
+	ctx = context.WithValue(
+		ctx,
+		c8y.GetContextCommonOptionsKey(),
+		c8y.CommonOptions{
+			DryRun: req.DryRun,
+		})
 	defer cancel()
 	start := time.Now()
 	resp, err := r.Client.SendRequest(
@@ -160,7 +166,7 @@ func (r *RequestHandler) DumpRequest(w io.Writer, req *http.Request) {
 
 func (r *RequestHandler) DryRunHandler(iostream *iostreams.IOStreams, options *c8y.RequestOptions, req *http.Request) {
 
-	if !r.Config.DryRun() {
+	if !(req != nil && r.Config.ShouldUseDryRun("")) {
 		return
 	}
 	if req == nil {

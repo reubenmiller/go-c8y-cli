@@ -35,7 +35,7 @@ func NewGetRoleReferenceCollectionFromUserCmd(f *cmdutil.Factory) *GetRoleRefere
 		Short: "Get role references from user",
 		Long:  `Get collection of user role references from a user`,
 		Example: heredoc.Doc(`
-$ c8y userroles getRoleReferenceCollectionFromUser --user "myuser"
+$ c8y userroles getRoleReferenceCollectionFromUser --user "peterpi@example.com"
 Get a list of role references for a user
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
@@ -162,7 +162,7 @@ func (n *GetRoleReferenceCollectionFromUserCmd) RunE(cmd *cobra.Command, args []
 		FormData:     formData,
 		Header:       headers,
 		IgnoreAccept: cfg.IgnoreAcceptHeader(),
-		DryRun:       cfg.DryRun(),
+		DryRun:       cfg.ShouldUseDryRun(cmd.CommandPath()),
 	}
 
 	return n.factory.RunWithWorkers(client, cmd, &req, inputIterators)

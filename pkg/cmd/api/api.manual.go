@@ -211,7 +211,7 @@ func (n *CmdAPI) RunE(cmd *cobra.Command, args []string) error {
 		Path:         baseURL.Path,
 		Query:        queryValue,
 		Header:       headers,
-		DryRun:       cfg.DryRun(),
+		DryRun:       cfg.ShouldUseDryRun(cmd.CommandPath()),
 		IgnoreAccept: cfg.IgnoreAcceptHeader(),
 		ResponseData: nil,
 	}

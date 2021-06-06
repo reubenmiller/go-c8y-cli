@@ -145,7 +145,7 @@ func (n *CmdAgentList) RunE(cmd *cobra.Command, args []string) error {
 		Method:       "GET",
 		Path:         path.GetTemplate(),
 		Query:        queryValue,
-		DryRun:       cfg.DryRun(),
+		DryRun:       cfg.ShouldUseDryRun(cmd.CommandPath()),
 		IgnoreAccept: cfg.IgnoreAcceptHeader(),
 	}
 

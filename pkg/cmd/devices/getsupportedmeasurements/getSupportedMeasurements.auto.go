@@ -160,7 +160,7 @@ func (n *GetSupportedMeasurementsCmd) RunE(cmd *cobra.Command, args []string) er
 		FormData:     formData,
 		Header:       headers,
 		IgnoreAccept: cfg.IgnoreAcceptHeader(),
-		DryRun:       cfg.DryRun(),
+		DryRun:       cfg.ShouldUseDryRun(cmd.CommandPath()),
 	}
 
 	return n.factory.RunWithWorkers(client, cmd, &req, inputIterators)

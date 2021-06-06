@@ -38,8 +38,8 @@ func NewEnableCmd(f *cmdutil.Factory) *EnableCmd {
 $ c8y microservices enable --id 12345
 Enable (subscribe) to a microservice
 
-$ c8y microservices enable --id myapp
-Enable (subscribe) to a microservice
+$ c8y microservices enable --id report-agent
+Enable (subscribe) to a microservice by name
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
 			return f.CreateModeEnabled()
@@ -164,7 +164,7 @@ func (n *EnableCmd) RunE(cmd *cobra.Command, args []string) error {
 		FormData:     formData,
 		Header:       headers,
 		IgnoreAccept: cfg.IgnoreAcceptHeader(),
-		DryRun:       cfg.DryRun(),
+		DryRun:       cfg.ShouldUseDryRun(cmd.CommandPath()),
 	}
 
 	return n.factory.RunWithWorkers(client, cmd, &req, inputIterators)

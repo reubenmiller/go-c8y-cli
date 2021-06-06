@@ -39,7 +39,7 @@ func NewGetBootstrapUserCmd(f *cmdutil.Factory) *GetBootstrapUserCmd {
 $ c8y microservices getBootstrapUser --id 12345
 Get application bootstrap user by app id
 
-$ c8y microservices getBootstrapUser --id myapp
+$ c8y microservices getBootstrapUser --id report-agent
 Get application bootstrap user by app name
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
@@ -162,7 +162,7 @@ func (n *GetBootstrapUserCmd) RunE(cmd *cobra.Command, args []string) error {
 		FormData:     formData,
 		Header:       headers,
 		IgnoreAccept: cfg.IgnoreAcceptHeader(),
-		DryRun:       cfg.DryRun(),
+		DryRun:       cfg.ShouldUseDryRun(cmd.CommandPath()),
 	}
 
 	return n.factory.RunWithWorkers(client, cmd, &req, inputIterators)

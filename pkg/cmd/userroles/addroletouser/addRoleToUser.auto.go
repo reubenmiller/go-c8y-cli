@@ -34,7 +34,7 @@ func NewAddRoleToUserCmd(f *cmdutil.Factory) *AddRoleToUserCmd {
 		Short: "Add Role to user",
 		Long:  `Add a role to an existing user`,
 		Example: heredoc.Doc(`
-$ c8y userroles addRoleToUser --user "myuser" --role "ROLE_ALARM_READ"
+$ c8y userroles addRoleToUser --user "peterpi@example.com" --role "ROLE_ALARM_READ"
 Add a role (ROLE_ALARM_READ) to a user
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
@@ -164,7 +164,7 @@ func (n *AddRoleToUserCmd) RunE(cmd *cobra.Command, args []string) error {
 		FormData:     formData,
 		Header:       headers,
 		IgnoreAccept: cfg.IgnoreAcceptHeader(),
-		DryRun:       cfg.DryRun(),
+		DryRun:       cfg.ShouldUseDryRun(cmd.CommandPath()),
 	}
 
 	return n.factory.RunWithWorkers(client, cmd, &req, inputIterators)

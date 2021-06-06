@@ -37,7 +37,7 @@ func NewDeleteCmd(f *cmdutil.Factory) *DeleteCmd {
 $ c8y microservices delete --id 12345
 Delete an microservice by id
 
-$ c8y microservices delete --id my-temp-app
+$ c8y microservices delete --id report-agent
 Delete a microservice by name
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
@@ -157,7 +157,7 @@ func (n *DeleteCmd) RunE(cmd *cobra.Command, args []string) error {
 		FormData:     formData,
 		Header:       headers,
 		IgnoreAccept: cfg.IgnoreAcceptHeader(),
-		DryRun:       cfg.DryRun(),
+		DryRun:       cfg.ShouldUseDryRun(cmd.CommandPath()),
 	}
 
 	return n.factory.RunWithWorkers(client, cmd, &req, inputIterators)

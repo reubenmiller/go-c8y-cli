@@ -38,7 +38,7 @@ func NewDisableCmd(f *cmdutil.Factory) *DisableCmd {
 $ c8y microservices disable --id 12345
 Disable (unsubscribe) to a microservice
 
-$ c8y microservices disable --id myapp
+$ c8y microservices disable --id report-agent
 Disable (unsubscribe) to a microservice
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
@@ -161,7 +161,7 @@ func (n *DisableCmd) RunE(cmd *cobra.Command, args []string) error {
 		FormData:     formData,
 		Header:       headers,
 		IgnoreAccept: cfg.IgnoreAcceptHeader(),
-		DryRun:       cfg.DryRun(),
+		DryRun:       cfg.ShouldUseDryRun(cmd.CommandPath()),
 	}
 
 	return n.factory.RunWithWorkers(client, cmd, &req, inputIterators)

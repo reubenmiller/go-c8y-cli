@@ -182,7 +182,8 @@ func (n *CmdCreateHostedApplication) RunE(cmd *cobra.Command, args []string) err
 	var response *c8y.Response
 	var applicationID string
 
-	dryRun := cfg.DryRun()
+	// note: use POST when checking if it should use try run or not, even though it could actually be PUT as well
+	dryRun := cfg.ShouldUseDryRun(cmd.CommandPath())
 	appDetails := n.getApplicationDetails()
 
 	// TODO: Use the default name value from n.Name rather then reading it from the args again.

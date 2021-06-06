@@ -33,7 +33,7 @@ func NewCreateCmd(f *cmdutil.Factory) *CreateCmd {
 		Short: "Create binary",
 		Long:  `Create/upload a new binary to Cumulocity`,
 		Example: heredoc.Doc(`
-$ c8y binaries create --file ./output.log
+$ c8y binaries create --file ./myfile.log
 Upload a log file
 
 $ c8y binaries create --file "myConfig.json" --type c8y_upload --data "c8y_Global={}"
@@ -161,7 +161,7 @@ func (n *CreateCmd) RunE(cmd *cobra.Command, args []string) error {
 		FormData:     formData,
 		Header:       headers,
 		IgnoreAccept: cfg.IgnoreAcceptHeader(),
-		DryRun:       cfg.DryRun(),
+		DryRun:       cfg.ShouldUseDryRun(cmd.CommandPath()),
 	}
 
 	return n.factory.RunWithWorkers(client, cmd, &req, inputIterators)

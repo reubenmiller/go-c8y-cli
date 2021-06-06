@@ -167,7 +167,7 @@ func (n *CmdList) getDeviceGroupCollection(cmd *cobra.Command, args []string) er
 		Body:         body,
 		FormData:     formData,
 		Header:       headers,
-		DryRun:       cfg.DryRun(),
+		DryRun:       cfg.ShouldUseDryRun(cmd.CommandPath()),
 		IgnoreAccept: cfg.IgnoreAcceptHeader(),
 	}
 
