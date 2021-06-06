@@ -94,8 +94,9 @@ jobs:
       run: |
         mv /home/runner/.local/bin/c8y.linux /home/runner/.local/bin/c8y
         chmod +x /home/runner/.local/bin/c8y
-        /home/runner/.local/bin/c8y version
         echo "/home/runner/.local/bin" >> $GITHUB_PATH
+        c8y version
+        c8y currentuser get --select id
         make test_cli
       shell: bash
       timeout-minutes: 10

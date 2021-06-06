@@ -8,13 +8,8 @@ shift
 
 export TEST_SHELL=bash
 commander test --config ./config.yaml $@ --dir auto/$folder
-# commander test --config ./config.yaml $@ --dir auto/tests
-
-# for file in $( find ./ -type d -maxdepth 1 -mindepth 1 \( ! -name "scripts" -and ! -name "dev" \) | sort )
-# do
-#     name="$file"
-#     commander test --config ./config.yaml $@ --dir $name/tests
-# done
-# commander test --config ./config.yaml $@ --dir ./inventory/tests
+code=$?
 
 popd
+
+exit $code
