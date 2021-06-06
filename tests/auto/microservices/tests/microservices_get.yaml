@@ -1,0 +1,8 @@
+tests:
+    microservices_get_Get an application:
+        command: c8y microservices get --id 12345
+        exit-code: 0
+        stdout:
+            json:
+                method: GET
+                path: /application/applications/12345

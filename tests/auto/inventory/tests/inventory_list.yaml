@@ -1,0 +1,31 @@
+tests:
+    inventory_list_Get a list of managed objects:
+        command: c8y inventory list
+        exit-code: 0
+        stdout:
+            json:
+                method: GET
+                path: /inventory/managedObjects
+    inventory_list_Get a list of managed objects by ids:
+        command: c8y inventory list --ids 1111,2222
+        exit-code: 0
+        stdout:
+            json:
+                method: GET
+                path: /inventory/managedObjects
+            contains:
+                - ids=1111,2222
+    ? inventory_list_Get managed objects which have the same type as the managed object id=1234. piped input will be mapped to type parameter
+    :   command: $TEST_SHELL -c 'c8y inventory get --id 1234 | c8y inventory list'
+        exit-code: 0
+        stdout:
+            json:
+                method: GET
+                path: /inventory/managedObjects
+    inventory_list_Search by type using pipeline. piped input will be mapped to type parameter:
+        command: $TEST_SHELL -c 'echo 'myType' | c8y inventory list'
+        exit-code: 0
+        stdout:
+            json:
+                method: GET
+                path: /inventory/managedObjects

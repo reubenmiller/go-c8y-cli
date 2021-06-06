@@ -1,0 +1,17 @@
+tests:
+    inventory_get_Get a managed object:
+        command: c8y inventory get --id 12345
+        exit-code: 0
+        stdout:
+            json:
+                method: GET
+                path: /inventory/managedObjects/12345
+    inventory_get_Get a managed object with parent references:
+        command: c8y inventory get --id 12345 --withParents
+        exit-code: 0
+        stdout:
+            json:
+                method: GET
+                path: /inventory/managedObjects/12345
+            contains:
+                - withParents=true

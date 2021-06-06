@@ -1,0 +1,8 @@
+tests:
+    microservices_list_Get microservices:
+        command: c8y microservices list --pageSize 100
+        exit-code: 0
+        stdout:
+            json:
+                method: GET
+                path: /application/applications

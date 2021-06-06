@@ -1,0 +1,9 @@
+tests:
+    tenantOptions_updateEdit_Update editable property for an existing tenant option:
+        command: c8y tenantoptions updateEdit --category "c8y_cli_tests" --key "option8" --editable "true"
+        exit-code: 0
+        stdout:
+            json:
+                body.editable: "true"
+                method: PUT
+                path: /tenant/options/c8y_cli_tests/option8/editable

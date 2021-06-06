@@ -1,0 +1,15 @@
+tests:
+    applications_delete_Delete an application by id:
+        command: c8y applications delete --id 12345
+        exit-code: 0
+        stdout:
+            json:
+                method: DELETE
+                path: /application/applications/12345
+    applications_delete_Delete an application by name:
+        command: c8y applications delete --id my-example-app
+        exit-code: 0
+        stdout:
+            json:
+                method: DELETE
+                path: r//application/applications/\d+$

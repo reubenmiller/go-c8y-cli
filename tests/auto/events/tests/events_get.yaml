@@ -1,0 +1,8 @@
+tests:
+    events_get_Get event:
+        command: c8y events get --id 12345
+        exit-code: 0
+        stdout:
+            json:
+                method: GET
+                path: /event/events/12345

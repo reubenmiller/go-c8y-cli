@@ -1,0 +1,8 @@
+tests:
+    bulkOperations_list_Get a list of bulk operations:
+        command: c8y bulkoperations list
+        exit-code: 0
+        stdout:
+            json:
+                method: GET
+                path: /devicecontrol/bulkoperations

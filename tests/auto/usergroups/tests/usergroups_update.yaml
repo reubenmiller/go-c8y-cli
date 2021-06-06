@@ -1,0 +1,9 @@
+tests:
+    userGroups_update_Update a user group:
+        command: c8y usergroups update --id 12345 --name "customGroup2"
+        exit-code: 0
+        stdout:
+            json:
+                body.name: customGroup2
+                method: PUT
+                path: /user/$C8Y_TENANT/groups/12345

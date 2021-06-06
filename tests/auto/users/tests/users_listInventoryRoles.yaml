@@ -1,0 +1,8 @@
+tests:
+    users_listInventoryRoles_Get list of inventory roles:
+        command: c8y users listInventoryRoles
+        exit-code: 0
+        stdout:
+            json:
+                method: GET
+                path: /user/inventoryroles

@@ -1,0 +1,8 @@
+tests:
+    applications_list_Get applications:
+        command: c8y applications list --pageSize 100
+        exit-code: 0
+        stdout:
+            json:
+                method: GET
+                path: /application/applications

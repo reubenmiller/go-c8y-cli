@@ -1,0 +1,9 @@
+tests:
+    operations_update_Update an operation:
+        command: c8y operations update --id 12345 --status EXECUTING
+        exit-code: 0
+        stdout:
+            json:
+                body.status: EXECUTING
+                method: PUT
+                path: /devicecontrol/operations/12345

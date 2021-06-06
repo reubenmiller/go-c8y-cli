@@ -1,0 +1,8 @@
+tests:
+    events_createBinary_Add a binary to an event:
+        command: c8y events createBinary --id 12345 --file ./testdata/myfile.log
+        exit-code: 0
+        stdout:
+            json:
+                method: POST
+                path: /event/events/12345/binaries

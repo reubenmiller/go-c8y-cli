@@ -1,0 +1,8 @@
+tests:
+    applications_copy_Copy an existing application:
+        command: c8y applications copy --id my-example-app
+        exit-code: 0
+        stdout:
+            json:
+                method: POST
+                path: r//application/applications/\d+/clone$

@@ -1,0 +1,20 @@
+tests:
+    events_list_Get events from a device:
+        command: c8y events list --device 12345
+        exit-code: 0
+        stdout:
+            json:
+                method: GET
+                path: /event/events
+            contains:
+                - source=12345
+    events_list_Get events with type 'my_CustomType' that were created in the last 10 days:
+        command: c8y events list --type my_CustomType --dateFrom "-10d"
+        exit-code: 0
+        stdout:
+            json:
+                method: GET
+                path: /event/events
+            contains:
+                - type=my_CustomType
+                - dateFrom=

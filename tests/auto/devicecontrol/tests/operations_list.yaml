@@ -1,0 +1,30 @@
+tests:
+    operations_list_Get a list of pending operations:
+        command: c8y operations list --status PENDING
+        exit-code: 0
+        stdout:
+            json:
+                method: GET
+                path: /devicecontrol/operations
+            contains:
+                - status=PENDING
+    operations_list_Get a list of pending operations for a device:
+        command: c8y operations list --device 12345 --status PENDING
+        exit-code: 0
+        stdout:
+            json:
+                method: GET
+                path: /devicecontrol/operations
+            contains:
+                - deviceId=12345
+                - status=PENDING
+    operations_list_Get a list of pending operations for a given agent and all of its child devices:
+        command: c8y operations list --agent 12345 --status PENDING
+        exit-code: 0
+        stdout:
+            json:
+                method: GET
+                path: /devicecontrol/operations
+            contains:
+                - agentId=12345
+                - status=PENDING

@@ -1,0 +1,8 @@
+tests:
+    bulkOperations_delete_Remove bulk operation by id:
+        command: c8y bulkoperations delete --id 12345
+        exit-code: 0
+        stdout:
+            json:
+                method: DELETE
+                path: /devicecontrol/bulkoperations/12345

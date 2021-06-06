@@ -1,0 +1,14 @@
+tests:
+    measurements_getSeries_Get a list of series [app_Weather.temperature] and [app_Weather.barometer] for device 12345:
+        command: c8y measurements getSeries --device 12345 --series app_Weather.temperature --series app_Weather.barometer --dateFrom "-10min" --dateTo "0s"
+        exit-code: 0
+        stdout:
+            json:
+                method: GET
+                path: /measurement/measurements/series
+            contains:
+                - source=12345
+                - series=app_Weather.temperature
+                - series=app_Weather.barometer
+                - dateFrom=
+                - dateTo=

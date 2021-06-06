@@ -1,0 +1,8 @@
+tests:
+    devices_setRequiredAvailability_Set the required availability of a device by name to 10 minutes:
+        command: c8y devices setRequiredAvailability --device 12345 --interval 10
+        exit-code: 0
+        stdout:
+            json:
+                method: PUT
+                path: /inventory/managedObjects/12345

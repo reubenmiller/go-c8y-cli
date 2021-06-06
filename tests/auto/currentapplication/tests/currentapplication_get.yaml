@@ -1,0 +1,8 @@
+tests:
+    currentApplication_get_Get the current application (requires using application credentials):
+        command: c8y currentapplication get
+        exit-code: 0
+        stdout:
+            json:
+                method: GET
+                path: /application/currentApplication

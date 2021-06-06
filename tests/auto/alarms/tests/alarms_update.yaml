@@ -1,0 +1,17 @@
+tests:
+    alarms_update_Acknowledge an existing alarm:
+        command: c8y alarms update --id 12345 --status ACKNOWLEDGED
+        exit-code: 0
+        stdout:
+            json:
+                body.status: ACKNOWLEDGED
+                method: PUT
+                path: /alarm/alarms/12345
+    alarms_update_Update severity of an existing alarm to CRITICAL:
+        command: c8y alarms update --id 12345 --severity CRITICAL
+        exit-code: 0
+        stdout:
+            json:
+                body.severity: CRITICAL
+                method: PUT
+                path: /alarm/alarms/12345

@@ -1,0 +1,9 @@
+tests:
+    applications_update_Update application availability to MARKET:
+        command: c8y applications update --id "my-example-app" --availability MARKET
+        exit-code: 0
+        stdout:
+            json:
+                body.availability: MARKET
+                method: PUT
+                path: r//application/applications/\d+$

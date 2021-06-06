@@ -1,0 +1,9 @@
+tests:
+    userRoles_addRoleToUser_Add a role (ROLE_ALARM_READ) to a user:
+        command: c8y userroles addRoleToUser --user "peterpi@example.com" --role "ROLE_ALARM_READ"
+        exit-code: 0
+        stdout:
+            json:
+                body.role.self: r/.*ROLE_ALARM_READ$
+                method: POST
+                path: /user/$C8Y_TENANT/users/peterpi@example.com/roles

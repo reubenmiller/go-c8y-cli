@@ -1,0 +1,8 @@
+tests:
+    identity_delete_Delete external identity:
+        command: c8y identity delete --type test --name myserialnumber
+        exit-code: 0
+        stdout:
+            json:
+                method: DELETE
+                path: /identity/externalIds/test/myserialnumber

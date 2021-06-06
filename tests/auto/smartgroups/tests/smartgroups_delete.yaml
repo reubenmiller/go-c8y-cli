@@ -1,0 +1,8 @@
+tests:
+    smartgroups_delete_Get smart group by id:
+        command: c8y smartgroups delete --id 12345
+        exit-code: 0
+        stdout:
+            json:
+                method: DELETE
+                path: /inventory/managedObjects/12345

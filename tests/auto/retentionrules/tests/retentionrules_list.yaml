@@ -1,0 +1,8 @@
+tests:
+    retentionRules_list_Get a list of retention rules:
+        command: c8y retentionrules list
+        exit-code: 0
+        stdout:
+            json:
+                method: GET
+                path: /retention/retentions

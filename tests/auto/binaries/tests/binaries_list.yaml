@@ -1,0 +1,8 @@
+tests:
+    binaries_list_Get a list of binaries:
+        command: c8y binaries list --pageSize 100
+        exit-code: 0
+        stdout:
+            json:
+                method: GET
+                path: /inventory/binaries

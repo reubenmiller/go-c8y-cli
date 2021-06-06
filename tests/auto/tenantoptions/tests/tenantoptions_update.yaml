@@ -1,0 +1,9 @@
+tests:
+    tenantOptions_update_Update a tenant option:
+        command: c8y tenantoptions update --category "c8y_cli_tests" --key "option4" --value "0"
+        exit-code: 0
+        stdout:
+            json:
+                body.value: "0"
+                method: PUT
+                path: /tenant/options/c8y_cli_tests/option4

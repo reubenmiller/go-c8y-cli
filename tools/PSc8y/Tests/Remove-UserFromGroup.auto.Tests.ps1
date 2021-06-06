@@ -8,7 +8,7 @@ Describe -Name "Remove-UserFromGroup" {
 
     }
 
-    It "From a user from a user group" {
+    It "Delete a user from a user group" {
         $Response = PSc8y\Remove-UserFromGroup -Group $Group.id -User $User.id
         $LASTEXITCODE | Should -Be 0
     }

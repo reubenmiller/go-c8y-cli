@@ -11,7 +11,7 @@ Disable/unsubscribe an application from a tenant
 https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/tenants_disableApplication
 
 .EXAMPLE
-PS> Disable-Application -Tenant mycompany -Application myMicroservice
+PS> Disable-Application -Tenant t12345 -Application myMicroservice
 
 Disable an application of a tenant
 

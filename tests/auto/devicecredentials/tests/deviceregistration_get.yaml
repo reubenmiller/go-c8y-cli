@@ -1,0 +1,8 @@
+tests:
+    deviceregistration_get_Get a new device request:
+        command: c8y deviceregistration get --id "010af8dd0c102"
+        exit-code: 0
+        stdout:
+            json:
+                method: GET
+                path: /devicecontrol/newDeviceRequests/010af8dd0c102

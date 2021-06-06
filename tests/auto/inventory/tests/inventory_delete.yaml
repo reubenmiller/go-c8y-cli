@@ -1,0 +1,10 @@
+tests:
+    inventory_delete_Delete a managed object:
+        command: c8y inventory delete --id 12345 --cascade
+        exit-code: 0
+        stdout:
+            json:
+                method: DELETE
+                path: /inventory/managedObjects/12345
+            contains:
+                - cascade=true

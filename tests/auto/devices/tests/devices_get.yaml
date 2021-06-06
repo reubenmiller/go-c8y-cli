@@ -1,0 +1,8 @@
+tests:
+    devices_get_Get device by id:
+        command: c8y devices get --id 12345
+        exit-code: 0
+        stdout:
+            json:
+                method: GET
+                path: /inventory/managedObjects/12345

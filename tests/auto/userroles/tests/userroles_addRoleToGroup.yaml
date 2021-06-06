@@ -1,0 +1,9 @@
+tests:
+    userRoles_addRoleToGroup_Add a role to the admin group:
+        command: c8y userroles addRoleToGroup --group "12345" --role "*ALARM*"
+        exit-code: 0
+        stdout:
+            json:
+                body.role.self: r/.*ALARM.*$
+                method: POST
+                path: /user/$C8Y_TENANT/groups/12345/roles

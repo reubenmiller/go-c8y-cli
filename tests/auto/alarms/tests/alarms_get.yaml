@@ -1,0 +1,8 @@
+tests:
+    alarms_get_Get alarm:
+        command: c8y alarms get --id 12345
+        exit-code: 0
+        stdout:
+            json:
+                method: GET
+                path: /alarm/alarms/12345

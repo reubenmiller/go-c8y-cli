@@ -1,0 +1,8 @@
+tests:
+    devices_listChildren_Get a list of the child devices of an existing device:
+        command: c8y devices listChildren --device 12345
+        exit-code: 0
+        stdout:
+            json:
+                method: GET
+                path: /inventory/managedObjects/12345/childDevices

@@ -1,0 +1,22 @@
+tests:
+    alarms_deleteCollection_Remove alarms on the device which are active and created in the last 10 minutes:
+        command: c8y alarms deleteCollection --device 12345 --dateFrom "-10m" --status ACTIVE
+        exit-code: 0
+        stdout:
+            json:
+                method: DELETE
+                path: /alarm/alarms
+            contains:
+                - source=12345
+                - dateFrom=
+                - status=ACTIVE
+    alarms_deleteCollection_Remove alarms on the device with the severity set to MAJOR:
+        command: c8y alarms deleteCollection --device 12345 --severity MAJOR
+        exit-code: 0
+        stdout:
+            json:
+                method: DELETE
+                path: /alarm/alarms
+            contains:
+                - source=12345
+                - severity=MAJOR

@@ -1,0 +1,8 @@
+tests:
+    measurements_delete_Delete measurement:
+        command: c8y measurements delete --id 12345
+        exit-code: 0
+        stdout:
+            json:
+                method: DELETE
+                path: /measurement/measurements/12345

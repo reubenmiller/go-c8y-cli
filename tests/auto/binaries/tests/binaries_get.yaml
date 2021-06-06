@@ -1,0 +1,15 @@
+tests:
+    binaries_get_Get a binary and display the contents on the console:
+        command: c8y binaries get --id 12345
+        exit-code: 0
+        stdout:
+            json:
+                method: GET
+                path: /inventory/binaries/12345
+    binaries_get_Get a binary and save it to a file:
+        command: c8y binaries get --id 12345 --outputFileRaw "./download-binary1.txt"
+        exit-code: 0
+        stdout:
+            json:
+                method: GET
+                path: /inventory/binaries/12345

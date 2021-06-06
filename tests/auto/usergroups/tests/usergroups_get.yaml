@@ -1,0 +1,8 @@
+tests:
+    userGroups_get_Get a user group:
+        command: c8y usergroups get --id 12345
+        exit-code: 0
+        stdout:
+            json:
+                method: GET
+                path: /user/$C8Y_TENANT/groups/12345

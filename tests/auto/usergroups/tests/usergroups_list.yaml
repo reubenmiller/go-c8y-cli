@@ -1,0 +1,8 @@
+tests:
+    userGroups_list_Get a list of user groups for the current tenant:
+        command: c8y usergroups list
+        exit-code: 0
+        stdout:
+            json:
+                method: GET
+                path: /user/$C8Y_TENANT/groups

@@ -1,0 +1,8 @@
+tests:
+    userGroups_delete_Delete a user group:
+        command: c8y usergroups delete --id 12345
+        exit-code: 0
+        stdout:
+            json:
+                method: DELETE
+                path: /user/$C8Y_TENANT/groups/12345

@@ -1,0 +1,9 @@
+tests:
+    microservices_createBinary_Upload microservice binary:
+        command: c8y microservices createBinary --id 12345 --file ./helloworld.zip
+        exit-code: 0
+        skip: true
+        stdout:
+            json:
+                method: POST
+                path: /application/applications/12345/binaries

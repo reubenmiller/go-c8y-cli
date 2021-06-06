@@ -1,0 +1,9 @@
+tests:
+    currentApplication_update_Update custom properties of the current application (requires using application credentials):
+        command: c8y currentapplication update --data "myCustomProp=1"
+        exit-code: 0
+        stdout:
+            json:
+                body.myCustomProp: "1"
+                method: PUT
+                path: /application/currentApplication

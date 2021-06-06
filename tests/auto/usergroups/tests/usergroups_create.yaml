@@ -1,0 +1,9 @@
+tests:
+    userGroups_create_Create a user group:
+        command: c8y usergroups create --name customGroup1
+        exit-code: 0
+        stdout:
+            json:
+                body.name: customGroup1
+                method: POST
+                path: /user/$C8Y_TENANT/groups

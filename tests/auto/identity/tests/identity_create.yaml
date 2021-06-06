@@ -1,0 +1,23 @@
+tests:
+    identity_create_Create an external identity by using the .name property of the device (via the input template variable):
+        command: '$TEST_SHELL -c ''cat ./testdata/c8y.devices.list.json | c8y identity create --type c8y_Serial --template "{ externalId: input.value.name }"'''
+        exit-code: 0
+        stdout:
+            json:
+                ..#(path="/identity/globalIds/11111/externalIds").path: /identity/globalIds/11111/externalIds
+                ..#(path="/identity/globalIds/22222/externalIds").path: /identity/globalIds/22222/externalIds
+                ..#(path="/identity/globalIds/33333/externalIds").path: /identity/globalIds/33333/externalIds
+                ..#(path="/identity/globalIds/44444/externalIds").path: /identity/globalIds/44444/externalIds
+                ..#(path="/identity/globalIds/55555/externalIds").path: /identity/globalIds/55555/externalIds
+                body.type: c8y_Serial
+                method: POST
+                path: r//identity/globalIds/\d+/externalIds
+    identity_create_Create external identity:
+        command: c8y identity create --device 1234 --type test --name myserialnumber
+        exit-code: 0
+        stdout:
+            json:
+                body.externalId: myserialnumber
+                body.type: test
+                method: POST
+                path: /identity/globalIds/1234/externalIds

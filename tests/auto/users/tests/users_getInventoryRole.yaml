@@ -1,0 +1,8 @@
+tests:
+    users_getInventoryRole_Get an inventory role:
+        command: c8y users getInventoryRole --id 12345
+        exit-code: 0
+        stdout:
+            json:
+                method: GET
+                path: /user/inventoryroles/12345

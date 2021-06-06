@@ -1,0 +1,18 @@
+tests:
+    agents_create_Create agent:
+        command: c8y agents create --name myAgent
+        exit-code: 0
+        stdout:
+            json:
+                body.name: myAgent
+                method: POST
+                path: /inventory/managedObjects
+    agents_create_Create agent with custom properties:
+        command: c8y agents create --name myAgent --data "custom_value1=1234"
+        exit-code: 0
+        stdout:
+            json:
+                body.custom_value1: "1234"
+                body.name: myAgent
+                method: POST
+                path: /inventory/managedObjects

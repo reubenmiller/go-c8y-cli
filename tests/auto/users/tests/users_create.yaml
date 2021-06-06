@@ -1,0 +1,11 @@
+tests:
+    users_create_Create a user:
+        command: c8y users create --userName "testuser1" --email "testuser@no-reply.dummy.com" --password "a0)8k2kld9lm!"
+        exit-code: 0
+        stdout:
+            json:
+                body.email: testuser@no-reply.dummy.com
+                body.password: a0)8k2kld9lm!
+                body.userName: testuser1
+                method: POST
+                path: /user/$C8Y_TENANT/users

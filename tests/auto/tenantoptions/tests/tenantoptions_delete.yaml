@@ -1,0 +1,8 @@
+tests:
+    tenantOptions_delete_Get a tenant option:
+        command: c8y tenantoptions delete --category "c8y_cli_tests" --key "option3"
+        exit-code: 0
+        stdout:
+            json:
+                method: DELETE
+                path: /tenant/options/c8y_cli_tests/option3

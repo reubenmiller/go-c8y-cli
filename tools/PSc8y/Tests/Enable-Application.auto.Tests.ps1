@@ -6,7 +6,7 @@ Describe -Name "Enable-Application" {
     }
 
     It -Skip "Enable an application of a tenant" {
-        $Response = PSc8y\Enable-Application -Tenant mycompany -Application myMicroservice
+        $Response = PSc8y\Enable-Application -Tenant t12345 -Application myMicroservice
         $LASTEXITCODE | Should -Be 0
         $Response | Should -Not -BeNullOrEmpty
     }

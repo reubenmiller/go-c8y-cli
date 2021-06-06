@@ -1,0 +1,20 @@
+tests:
+    alarms_list_Get alarms with the severity set to MAJOR:
+        command: c8y alarms list --severity MAJOR --pageSize 100
+        exit-code: 0
+        stdout:
+            json:
+                method: GET
+                path: /alarm/alarms
+            contains:
+                - severity=MAJOR
+    alarms_list_Get collection of active alarms which occurred in the last 10 minutes:
+        command: c8y alarms list --dateFrom "-10m" --status ACTIVE
+        exit-code: 0
+        stdout:
+            json:
+                method: GET
+                path: /alarm/alarms
+            contains:
+                - dateFrom=
+                - status=ACTIVE

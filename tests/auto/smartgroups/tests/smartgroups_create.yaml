@@ -1,0 +1,29 @@
+tests:
+    smartgroups_create_Create a smart group which is not visible in the UI:
+        command: c8y smartgroups create --name mySmartGroup --query "type eq 'IS*'" --invisible
+        exit-code: 0
+        stdout:
+            json:
+                body.c8y_DeviceQueryString: type eq 'IS*'
+                body.c8y_IsDynamicGroup.invisible: '{}'
+                body.name: mySmartGroup
+                method: POST
+                path: /inventory/managedObjects
+    smartgroups_create_Create smart group (without a filter):
+        command: c8y smartgroups create --name mySmartGroup --query "name eq 'my*'"
+        exit-code: 0
+        stdout:
+            json:
+                body.c8y_DeviceQueryString: name eq 'my*'
+                body.name: mySmartGroup
+                method: POST
+                path: /inventory/managedObjects
+    smartgroups_create_Create smart group with a device filter (filter by type and has a serial number):
+        command: c8y smartgroups create --name mySmartGroup --query "type eq 'IS*' and has(c8y_Hardware.serialNumber)"
+        exit-code: 0
+        stdout:
+            json:
+                body.c8y_DeviceQueryString: type eq 'IS*' and has(c8y_Hardware.serialNumber)
+                body.name: mySmartGroup
+                method: POST
+                path: /inventory/managedObjects

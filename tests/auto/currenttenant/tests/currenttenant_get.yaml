@@ -1,0 +1,8 @@
+tests:
+    currenttenant_get_Get the current tenant (based on your current credentials):
+        command: c8y currenttenant get
+        exit-code: 0
+        stdout:
+            json:
+                method: GET
+                path: /tenant/currentTenant

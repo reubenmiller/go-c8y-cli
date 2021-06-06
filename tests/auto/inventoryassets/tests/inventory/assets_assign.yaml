@@ -1,0 +1,9 @@
+tests:
+    inventory/assets_assign_Create group hierarchy (parent group -> child group):
+        command: c8y inventory assets assign --group 12345 --newChildGroup 43234
+        exit-code: 0
+        stdout:
+            json:
+                body.managedObject.id: "43234"
+                method: POST
+                path: /inventory/managedObjects/12345/childAssets

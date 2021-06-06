@@ -1,0 +1,8 @@
+tests:
+    events_downloadBinary_Download a binary related to an event:
+        command: c8y events downloadBinary --id 12345 --outputFileRaw ./eventbinary.txt
+        exit-code: 0
+        stdout:
+            json:
+                method: GET
+                path: /event/events/12345/binaries

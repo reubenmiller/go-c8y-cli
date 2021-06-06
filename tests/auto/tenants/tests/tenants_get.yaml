@@ -1,0 +1,8 @@
+tests:
+    tenants_get_Get a tenant by name (from the management tenant):
+        command: c8y tenants get --id "mycompany"
+        exit-code: 0
+        stdout:
+            json:
+                method: GET
+                path: /tenant/tenants/mycompany

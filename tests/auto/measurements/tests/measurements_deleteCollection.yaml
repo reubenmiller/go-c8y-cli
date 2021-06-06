@@ -1,0 +1,10 @@
+tests:
+    measurements_deleteCollection_Delete measurement collection for a device:
+        command: c8y measurements deleteCollection --device 12345
+        exit-code: 0
+        stdout:
+            json:
+                method: DELETE
+                path: /measurement/measurements
+            contains:
+                - source=12345

@@ -11,7 +11,7 @@ Enable/subscribe an application to a tenant
 https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/tenants_enableApplication
 
 .EXAMPLE
-PS> Enable-Application -Tenant mycompany -Application myMicroservice
+PS> Enable-Application -Tenant t12345 -Application myMicroservice
 
 Enable an application of a tenant
 

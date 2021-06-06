@@ -1,0 +1,8 @@
+tests:
+    userRoles_list_Get a list of roles:
+        command: c8y userroles list --pageSize 100
+        exit-code: 0
+        stdout:
+            json:
+                method: GET
+                path: /user/roles

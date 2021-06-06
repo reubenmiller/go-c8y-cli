@@ -1,0 +1,20 @@
+tests:
+    events_deleteCollection_Remove events from a device:
+        command: c8y events deleteCollection --device 12345
+        exit-code: 0
+        stdout:
+            json:
+                method: DELETE
+                path: /event/events
+            contains:
+                - source=12345
+    events_deleteCollection_Remove events with type 'my_CustomType' that were created in the last 10 days:
+        command: c8y events deleteCollection --type my_CustomType --dateFrom "-10d"
+        exit-code: 0
+        stdout:
+            json:
+                method: DELETE
+                path: /event/events
+            contains:
+                - type=my_CustomType
+                - dateFrom=

@@ -1,0 +1,8 @@
+tests:
+    devices_getSupportedMeasurements_Get the supported measurements of a device by name:
+        command: c8y devices getSupportedMeasurements --device 12345
+        exit-code: 0
+        stdout:
+            json:
+                method: GET
+                path: /inventory/managedObjects/12345/supportedMeasurements

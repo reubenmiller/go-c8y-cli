@@ -1,0 +1,8 @@
+tests:
+    devicegroups_unassignDevice_Unassign a child device from its parent device:
+        command: c8y devicegroups unassignDevice --group 12345 --childDevice 22553
+        exit-code: 0
+        stdout:
+            json:
+                method: DELETE
+                path: /inventory/managedObjects/12345/childAssets/22553

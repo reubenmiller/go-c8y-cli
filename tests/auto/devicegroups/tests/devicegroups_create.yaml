@@ -1,0 +1,18 @@
+tests:
+    devicegroups_create_Create device group:
+        command: c8y devicegroups create --name mygroup
+        exit-code: 0
+        stdout:
+            json:
+                body.name: mygroup
+                method: POST
+                path: /inventory/managedObjects
+    devicegroups_create_Create device group with custom properties:
+        command: c8y devicegroups create --name mygroup --data "custom_value1=1234"
+        exit-code: 0
+        stdout:
+            json:
+                body.custom_value1: "1234"
+                body.name: mygroup
+                method: POST
+                path: /inventory/managedObjects

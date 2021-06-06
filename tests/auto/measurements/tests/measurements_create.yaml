@@ -1,0 +1,14 @@
+tests:
+    measurements_create_Create measurement:
+        command: 'c8y measurements create --device 12345 --time "0s" --type "myType" --data "{\"c8y_Winding\":{ \"temperature\":{\"value\": 1.2345,\"unit\":\"°C\"}}}"'
+        exit-code: 0
+        stdout:
+            json:
+                body.c8y_Winding.temperature.unit: °C
+                body.c8y_Winding.temperature.value: "1.2345"
+                body.source.id: "12345"
+                body.type: myType
+                method: POST
+                path: /measurement/measurements
+            contains:
+                - '"time":'

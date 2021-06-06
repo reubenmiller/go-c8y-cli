@@ -1,0 +1,15 @@
+tests:
+    binaries_create_Upload a config file and make it globally accessible for all users:
+        command: c8y binaries create --file "./testdata/myConfig.json" --type c8y_upload --data "c8y_Global={}"
+        exit-code: 0
+        stdout:
+            json:
+                method: POST
+                path: /inventory/binaries
+    binaries_create_Upload a log file:
+        command: c8y binaries create --file ./testdata/myfile.log
+        exit-code: 0
+        stdout:
+            json:
+                method: POST
+                path: /inventory/binaries

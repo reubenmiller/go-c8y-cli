@@ -1,0 +1,15 @@
+tests:
+    userreferences_deleteUserFromGroup_Delete a user from a user group:
+        command: c8y userreferences deleteUserFromGroup --group 1 --user peterpi@example.com
+        exit-code: 0
+        stdout:
+            json:
+                method: DELETE
+                path: /user/$C8Y_TENANT/groups/1/users/peterpi@example.com
+    userreferences_deleteUserFromGroup_Delete a user from a user group (using pipeline):
+        command: $TEST_SHELL -c 'cat ./testdata/c8y.users.get.json | c8y userreferences deleteUserFromGroup --group 1'
+        exit-code: 0
+        stdout:
+            json:
+                method: DELETE
+                path: r//user/$C8Y_TENANT/groups/1/users/peterpi@example.com
