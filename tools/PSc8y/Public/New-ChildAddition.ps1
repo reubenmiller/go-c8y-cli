@@ -1,19 +1,19 @@
 ﻿# Code generated from specification version 1.0.0: DO NOT EDIT
-Function Update-DataBrokerConnector {
+Function New-ChildAddition {
 <#
 .SYNOPSIS
-Update data broker
+Create child addition
 
 .DESCRIPTION
-Update an existing data broker connector
+Create a new managed object as a child addition to another existing managed object
 
 .LINK
-https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/databroker_update
+https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/inventory_additions_create
 
 .EXAMPLE
-PS> Update-DataBroker -Id 12345 -Status SUSPENDED
+PS> Add-ChildAddition -Id $software.id -NewChild $version.id
 
-Change the status of a specific data broker connector by given connector id
+Add a related managed object as a child to an existing managed object
 
 
 #>
@@ -22,21 +22,20 @@ Change the status of a specific data broker connector by given connector id
     [Alias()]
     [OutputType([object])]
     Param(
-        # Data broker connector id (required)
+        # Managed object id where the child addition will be added to (required)
         [Parameter(Mandatory = $true,
                    ValueFromPipeline=$true,
                    ValueFromPipelineByPropertyName=$true)]
         [object[]]
         $Id,
 
-        # DataBroker status [SUSPENDED].
+        # 
         [Parameter()]
-        [ValidateSet('SUSPENDED')]
-        [string]
-        $Status
+        [switch]
+        $Global
     )
     DynamicParam {
-        Get-ClientCommonParameters -Type "Update", "Template"
+        Get-ClientCommonParameters -Type "Create", "Template"
     }
 
     Begin {
@@ -46,11 +45,11 @@ Change the status of a specific data broker connector by given connector id
             Use-CallerPreference -Cmdlet $PSCmdlet -SessionState $ExecutionContext.SessionState
         }
 
-        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "databroker update"
+        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "inventory additions create"
         $ClientOptions = Get-ClientOutputOption $PSBoundParameters
         $TypeOptions = @{
-            Type = "application/vnd.com.nsn.cumulocity.databrokerConnector+json"
-            ItemType = ""
+            Type = "application/json"
+            ItemType = "application/vnd.com.nsn.cumulocity.managedObject+json"
             BoundParameters = $PSBoundParameters
         }
     }
@@ -60,13 +59,13 @@ Change the status of a specific data broker connector by given connector id
         if ($ClientOptions.ConvertToPS) {
             $Id `
             | Group-ClientRequests `
-            | c8y databroker update $c8yargs `
+            | c8y inventory additions create $c8yargs `
             | ConvertFrom-ClientOutput @TypeOptions
         }
         else {
             $Id `
             | Group-ClientRequests `
-            | c8y databroker update $c8yargs
+            | c8y inventory additions create $c8yargs
         }
         
     }

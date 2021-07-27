@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"github.com/MakeNowJust/heredoc/v2"
+	"github.com/reubenmiller/go-c8y-cli/pkg/c8yfetcher"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmd/subcommand"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmdutil"
@@ -23,18 +24,18 @@ type CreateCmd struct {
 	factory *cmdutil.Factory
 }
 
-// NewCreateCmd creates a command to Create audit record
+// NewCreateCmd creates a command to Create child addition
 func NewCreateCmd(f *cmdutil.Factory) *CreateCmd {
 	ccmd := &CreateCmd{
 		factory: f,
 	}
 	cmd := &cobra.Command{
 		Use:   "create",
-		Short: "Create audit record",
-		Long:  `Create a new audit record for a given action`,
+		Short: "Create child addition",
+		Long:  `Create a new managed object as a child addition to another existing managed object`,
 		Example: heredoc.Doc(`
-$ c8y auditrecords create --type "ManagedObject" --time "0s" --text "Managed Object updated: my_Prop: value" --source 12345 --activity "Managed Object updated" --severity "information"
-Create an audit record for a custom managed object update
+$ c8y inventory additions create --id 12345 --data ""
+Add a related managed object as a child to an existing managed object
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
 			return f.CreateModeEnabled()
@@ -44,19 +45,11 @@ Create an audit record for a custom managed object update
 
 	cmd.SilenceUsage = true
 
-	cmd.Flags().String("type", "", "Identifies the type of this audit record.")
-	cmd.Flags().String("time", "", "Time of the audit record. Defaults to current timestamp.")
-	cmd.Flags().String("text", "", "Text description of the audit record.")
-	cmd.Flags().String("source", "", "An optional ManagedObject that the audit record originated from (accepts pipeline)")
-	cmd.Flags().String("activity", "", "The activity that was carried out.")
-	cmd.Flags().String("severity", "", "The severity of action: critical, major, minor, warning or information.")
-	cmd.Flags().String("user", "", "The user responsible for the audited action.")
-	cmd.Flags().String("application", "", "The application used to carry out the audited action.")
+	cmd.Flags().StringSlice("id", []string{""}, "Managed object id where the child addition will be added to (required) (accepts pipeline)")
+	cmd.Flags().Bool("global", false, "")
 
 	completion.WithOptions(
 		cmd,
-		completion.WithValidateSet("type", "Alarm", "Application", "BulkOperation", "CepModule", "Connector", "Event", "Group", "Inventory", "InventoryRole", "Operation", "Option", "Report", "SingleSignOn", "SmartRule", "SYSTEM", "Tenant", "TenantAuthConfig", "TrustedCertificates", "UserAuthentication"),
-		completion.WithValidateSet("severity", "critical", "major", "minor", "warning", "information"),
 	)
 
 	flags.WithOptions(
@@ -64,7 +57,8 @@ Create an audit record for a custom managed object update
 		flags.WithProcessingMode(),
 		flags.WithData(),
 		f.WithTemplateFlag(cmd),
-		flags.WithExtendedPipelineSupport("source", "source.id", false, "id"),
+		flags.WithExtendedPipelineSupport("id", "id", true),
+		flags.WithCollectionProperty("managedObject"),
 	)
 
 	// Required flags
@@ -137,32 +131,22 @@ func (n *CreateCmd) RunE(cmd *cobra.Command, args []string) error {
 		cmd,
 		body,
 		inputIterators,
-		flags.WithOverrideValue("source", "source.id"),
 		flags.WithDataFlagValue(),
-		flags.WithStringValue("type", "type"),
-		flags.WithRelativeTimestamp("time", "time", ""),
-		flags.WithStringValue("text", "text"),
-		flags.WithStringValue("source", "source.id"),
-		flags.WithStringValue("activity", "activity"),
-		flags.WithStringValue("severity", "severity"),
-		flags.WithStringValue("user", "user"),
-		flags.WithStringValue("application", "application"),
-		flags.WithDefaultTemplateString(`
-{time: _.Now('0s')}`),
+		flags.WithBoolValue("global", "global", ""),
 		cmdutil.WithTemplateValue(cfg),
 		flags.WithTemplateVariablesValue(),
-		flags.WithRequiredProperties("activity", "source.id", "text", "type"),
 	)
 	if err != nil {
 		return cmderrors.NewUserError(err)
 	}
 
 	// path parameters
-	path := flags.NewStringTemplate("/audit/auditRecords")
+	path := flags.NewStringTemplate("inventory/managedObjects/{id}/childAdditions")
 	err = flags.WithPathParameters(
 		cmd,
 		path,
 		inputIterators,
+		c8yfetcher.WithIDSlice(args, "id", "id"),
 	)
 	if err != nil {
 		return err

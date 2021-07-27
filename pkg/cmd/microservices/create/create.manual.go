@@ -73,7 +73,9 @@ Create or update a microservice using an explicit name
 
 	flags.WithOptions(
 		cmd,
+		flags.WithProcessingMode(),
 		flags.WithData(),
+		f.WithTemplateFlag(cmd),
 	)
 
 	// Required flags

@@ -49,9 +49,9 @@ Create bulk operation for a group (using pipeline)
 	cmd.SilenceUsage = true
 
 	cmd.Flags().StringSlice("group", []string{""}, "Identifies the target group on which this operation should be performed. (accepts pipeline)")
-	cmd.Flags().String("startDate", "300s", "Time when operations should be created. Defaults to 300s")
-	cmd.Flags().Float32("creationRampSec", 0, "Delay between every operation creation. (required)")
-	cmd.Flags().String("operation", "", "Operation prototype to send to each device in the group (required)")
+	cmd.Flags().String("startDate", "", "Time when operations should be created. Defaults to 300s")
+	cmd.Flags().Float32("creationRampSec", 0, "Delay between every operation creation.")
+	cmd.Flags().String("operation", "", "Operation prototype to send to each device in the group")
 
 	completion.WithOptions(
 		cmd,
@@ -67,8 +67,6 @@ Create bulk operation for a group (using pipeline)
 	)
 
 	// Required flags
-	_ = cmd.MarkFlagRequired("creationRampSec")
-	_ = cmd.MarkFlagRequired("operation")
 
 	ccmd.SubCommand = subcommand.NewSubCommand(cmd)
 
@@ -143,6 +141,8 @@ func (n *CreateCmd) RunE(cmd *cobra.Command, args []string) error {
 		flags.WithRelativeTimestamp("startDate", "startDate", ""),
 		flags.WithFloatValue("creationRampSec", "creationRamp"),
 		flags.WithDataValue("operation", "operationPrototype"),
+		flags.WithDefaultTemplateString(`
+{startDate: _.Now('300s'), creationRamp: 1.000}`),
 		cmdutil.WithTemplateValue(cfg),
 		flags.WithTemplateVariablesValue(),
 		flags.WithRequiredProperties("groupId", "startDate", "creationRamp", "operationPrototype"),

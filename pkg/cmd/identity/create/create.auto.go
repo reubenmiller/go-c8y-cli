@@ -49,7 +49,7 @@ Create an external identity by using the .name property of the device (via the i
 	cmd.SilenceUsage = true
 
 	cmd.Flags().StringSlice("device", []string{""}, "The ManagedObject linked to the external ID. (required) (accepts pipeline)")
-	cmd.Flags().String("type", "c8y_Serial", "The type of the external identifier as string, e.g. 'com_cumulocity_model_idtype_SerialNumber'.")
+	cmd.Flags().String("type", "", "The type of the external identifier as string, e.g. 'com_cumulocity_model_idtype_SerialNumber'.")
 	cmd.Flags().String("name", "", "The identifier used in the external system that Cumulocity interfaces with.")
 
 	completion.WithOptions(
@@ -60,6 +60,7 @@ Create an external identity by using the .name property of the device (via the i
 	flags.WithOptions(
 		cmd,
 		flags.WithProcessingMode(),
+		flags.WithData(),
 		f.WithTemplateFlag(cmd),
 		flags.WithExtendedPipelineSupport("device", "device", true, "deviceId", "source.id", "managedObject.id", "id"),
 	)
@@ -137,6 +138,8 @@ func (n *CreateCmd) RunE(cmd *cobra.Command, args []string) error {
 		flags.WithDataFlagValue(),
 		flags.WithStringValue("type", "type"),
 		flags.WithStringValue("name", "externalId"),
+		flags.WithDefaultTemplateString(`
+{type: 'c8y_Serial'}`),
 		cmdutil.WithTemplateValue(cfg),
 		flags.WithTemplateVariablesValue(),
 		flags.WithRequiredProperties("type", "externalId"),

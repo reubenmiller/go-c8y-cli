@@ -29,8 +29,8 @@ Update bulk operation wait period between the creation of each operation to 1.5 
         [object[]]
         $Id,
 
-        # Delay between every operation creation. (required)
-        [Parameter(Mandatory = $true)]
+        # Delay between every operation creation.
+        [Parameter()]
         [float]
         $CreationRampSec
     )

@@ -60,8 +60,8 @@ Update the status of all active alarms on a device to ACKNOWLEDGED (using pipeli
         [string]
         $DateTo,
 
-        # New status to be applied to all of the matching alarms (required)
-        [Parameter(Mandatory = $true)]
+        # New status to be applied to all of the matching alarms
+        [Parameter()]
         [ValidateSet('ACTIVE','ACKNOWLEDGED','CLEARED')]
         [string]
         $NewStatus

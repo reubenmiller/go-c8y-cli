@@ -180,6 +180,64 @@
           "description": "Child managed object id"
         }
       ]
+    },
+    {
+      "name": "createChildAddition",
+      "method": "POST",
+      "path": "inventory/managedObjects/{id}/childAdditions",
+      "accept": "application/json",
+      "collectionType": "application/vnd.com.nsn.cumulocity.managedObject+json",
+      "description": "Create child addition",
+      "descriptionLong": "Create a new managed object as a child addition to another existing managed object",
+      "collectionProperty": "managedObject",
+      "alias": {
+        "go": "create",
+        "powershell": "New-ChildAddition"
+      },
+      "examples": {
+        "powershell": [
+          {
+            "description": "Add a related managed object as a child to an existing managed object",
+            "beforeEach": [
+              "$software = PSc8y\\New-ManagedObject -Name softwarePackage1",
+              "$version = PSc8y\\New-ManagedObject -Name softwareVersion1"
+            ],
+            "command": "Add-ChildAddition -Id $software.id -NewChild $version.id",
+            "afterEach": [
+              "PSc8y\\Remove-ManagedObject -Id $software.id",
+              "PSc8y\\Remove-ManagedObject -Id $version.id"
+            ]
+          }
+        ],
+        "go": [
+          {
+            "description": "Add a related managed object as a child to an existing managed object",
+            "command": "c8y inventory additions create --id 12345 --data \"\""
+          }
+        ]
+      },
+      "pathParameters": [
+        {
+          "name": "id",
+          "type": "[]id",
+          "property": "id",
+          "required": true,
+          "pipeline": true,
+          "description": "Managed object id where the child addition will be added to",
+          "position": 0
+        }
+      ],
+      "body": [
+        {
+          "name": "global",
+          "type": "boolean"
+        },
+        {
+          "name": "data",
+          "type": "json",
+          "description": "Additional properties of the inventory."
+        }
+      ]
     }
   ]
 }

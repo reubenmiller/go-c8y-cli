@@ -193,21 +193,21 @@
           "name": "startDate",
           "type": "datetime",
           "required": false,
-          "default": "300s",
+          "default": "",
           "description": "Time when operations should be created. Defaults to 300s"
         },
         {
           "name": "creationRampSec",
           "property": "creationRamp",
           "type": "float",
-          "required": true,
+          "required": false,
           "description": "Delay between every operation creation."
         },
         {
           "name": "operation",
           "property": "operationPrototype",
           "type": "json_custom",
-          "required": true,
+          "required": false,
           "description": "Operation prototype to send to each device in the group"
         },
         {
@@ -216,6 +216,11 @@
           "description": "Additional properties describing the bulk operation which will be performed on the device group."
         }
       ],
+      "bodyTemplate": {
+        "type": "jsonnet",
+        "applyLast": false,
+        "template": "{startDate: _.Now('300s'), creationRamp: 1.000}"
+      },
       "bodyRequiredKeys": [
         "groupId",
         "startDate",
@@ -261,7 +266,7 @@
           "name": "creationRampSec",
           "property": "creationRamp",
           "type": "float",
-          "required": true,
+          "required": false,
           "description": "Delay between every operation creation."
         },
         {
@@ -269,6 +274,9 @@
           "type": "json",
           "description": "Additional properties to update on the bulk operation."
         }
+      ],
+      "bodyRequiredKeys": [
+        "creationRamp"
       ],
       "pathParameters": [
         {

@@ -41,20 +41,41 @@
         {
           "name": "type",
           "type": "string",
-          "required": true,
+          "required": false,
+          "validationSet": [
+            "Alarm",
+            "Application",
+            "BulkOperation",
+            "CepModule",
+            "Connector",
+            "Event",
+            "Group",
+            "Inventory",
+            "InventoryRole",
+            "Operation",
+            "Option",
+            "Report",
+            "SingleSignOn",
+            "SmartRule",
+            "SYSTEM",
+            "Tenant",
+            "TenantAuthConfig",
+            "TrustedCertificates",
+            "UserAuthentication"
+          ],
           "description": "Identifies the type of this audit record."
         },
         {
           "name": "time",
           "type": "datetime",
           "required": false,
-          "default": "0s",
+          "default": "",
           "description": "Time of the audit record. Defaults to current timestamp."
         },
         {
           "name": "text",
           "type": "string",
-          "required": true,
+          "required": false,
           "description": "Text description of the audit record."
         },
         {
@@ -65,19 +86,19 @@
           "pipelineAliases": [
             "id"
           ],
-          "required": true,
+          "required": false,
           "description": "An optional ManagedObject that the audit record originated from"
         },
         {
           "name": "activity",
           "type": "string",
-          "required": true,
+          "required": false,
           "description": "The activity that was carried out."
         },
         {
           "name": "severity",
           "type": "string",
-          "required": true,
+          "required": false,
           "validationSet": [
             "critical",
             "major",
@@ -105,6 +126,17 @@
           "required": false,
           "description": "Additional properties of the audit record."
         }
+      ],
+      "bodyTemplate": {
+        "type": "jsonnet",
+        "applyLast": false,
+        "template": "{time: _.Now('0s')}"
+      },
+      "bodyRequiredKeys": [
+        "activity",
+        "source.id",
+        "text",
+        "type"
       ]
     },
     {

@@ -46,7 +46,7 @@ Create measurement
 	cmd.SilenceUsage = true
 
 	cmd.Flags().StringSlice("device", []string{""}, "The ManagedObject which is the source of this measurement. (accepts pipeline)")
-	cmd.Flags().String("time", "0s", "Time of the measurement. Defaults to current timestamp.")
+	cmd.Flags().String("time", "", "Time of the measurement. Defaults to current timestamp.")
 	cmd.Flags().String("type", "", "The most specific type of this entire measurement.")
 
 	completion.WithOptions(
@@ -136,6 +136,8 @@ func (n *CreateCmd) RunE(cmd *cobra.Command, args []string) error {
 		c8yfetcher.WithDeviceByNameFirstMatch(client, args, "device", "source.id"),
 		flags.WithRelativeTimestamp("time", "time", ""),
 		flags.WithStringValue("type", "type"),
+		flags.WithDefaultTemplateString(`
+{time: _.Now('0s')}`),
 		cmdutil.WithTemplateValue(cfg),
 		flags.WithTemplateVariablesValue(),
 		flags.WithRequiredProperties("type", "time", "source.id"),

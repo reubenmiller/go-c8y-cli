@@ -44,8 +44,8 @@ Create a new tenant (from the management tenant)
 
 	cmd.SilenceUsage = true
 
-	cmd.Flags().String("company", "", "Company name. Maximum 256 characters (required)")
-	cmd.Flags().String("domain", "", "Domain name to be used for the tenant. Maximum 256 characters (required) (accepts pipeline)")
+	cmd.Flags().String("company", "", "Company name. Maximum 256 characters")
+	cmd.Flags().String("domain", "", "Domain name to be used for the tenant. Maximum 256 characters (accepts pipeline)")
 	cmd.Flags().String("adminName", "", "Username of the tenant administrator")
 	cmd.Flags().String("adminPass", "", "Password of the tenant administrator")
 	cmd.Flags().String("contactName", "", "A contact name, for example an administrator, of the tenant")
@@ -61,11 +61,10 @@ Create a new tenant (from the management tenant)
 		flags.WithProcessingMode(),
 		flags.WithData(),
 		f.WithTemplateFlag(cmd),
-		flags.WithExtendedPipelineSupport("domain", "domain", true, "id"),
+		flags.WithExtendedPipelineSupport("domain", "domain", false, "id"),
 	)
 
 	// Required flags
-	_ = cmd.MarkFlagRequired("company")
 
 	ccmd.SubCommand = subcommand.NewSubCommand(cmd)
 
@@ -146,6 +145,7 @@ func (n *CreateCmd) RunE(cmd *cobra.Command, args []string) error {
 		flags.WithStringValue("tenantId", "tenantId"),
 		cmdutil.WithTemplateValue(cfg),
 		flags.WithTemplateVariablesValue(),
+		flags.WithRequiredProperties("company", "domain"),
 	)
 	if err != nil {
 		return cmderrors.NewUserError(err)

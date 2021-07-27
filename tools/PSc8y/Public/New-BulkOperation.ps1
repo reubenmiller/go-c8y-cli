@@ -38,13 +38,13 @@ Create bulk operation for a group (using pipeline)
         [string]
         $StartDate,
 
-        # Delay between every operation creation. (required)
-        [Parameter(Mandatory = $true)]
+        # Delay between every operation creation.
+        [Parameter()]
         [float]
         $CreationRampSec,
 
-        # Operation prototype to send to each device in the group (required)
-        [Parameter(Mandatory = $true)]
+        # Operation prototype to send to each device in the group
+        [Parameter()]
         [object]
         $Operation
     )
