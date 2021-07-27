@@ -132,9 +132,6 @@ test_powershell:				## Run powershell tests
 test_powershell_sessions:		## Run powershell tests which interfere with the session variable
 	pwsh -ExecutionPolicy bypass -NonInteractive -File tools/PSc8y/test.parallel.ps1 -ThrottleLimit 1 -TestFileFilter "Set-Session|Get-SessionHomePath|Login|DisableCommands|BulkOperation|activitylog"
 
-test_bash:
-	./tools/shell/tests/test.sh
-
 test_cli: test_cli_auto test_cli_manual
 
 test_cli_auto:						## Run tests on the cli examples
