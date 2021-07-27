@@ -5,6 +5,7 @@ SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 cd "$SCRIPT_DIR"
 
 mo_id=$( c8y agents create --template "{name: 'agent_' + _.Char(10)}" --select id --output csv )
+export C8Y_SETTINGS_DEFAULTS_DRY=false
 
 TASK_PID=""
 cleanup () {

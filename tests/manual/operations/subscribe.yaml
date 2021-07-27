@@ -2,8 +2,3 @@ tests:
     It watches operations for a period of time:
         command: manual/operations/subscribe.operations.duration.sh
         exit-code: 0
-        stdout:
-            line-count: 2
-            json:
-                deviceName: r/^agent_\w+$
-                description: Test operation
