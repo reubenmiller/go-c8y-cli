@@ -1,0 +1,10 @@
+tests:
+    It updates a retention rule using just a template:
+        command: >
+          c8y retentionrules update --id 12345 --template "{dataType: 'ALARM'}" --dry
+        exit-code: 0
+        stdout:
+            json:
+                method: PUT
+                path: /retention/retentions/12345
+                body.dataType: "ALARM"

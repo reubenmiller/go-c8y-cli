@@ -1,0 +1,41 @@
+tests:
+    It accepts timestamps via the template:
+        command: >
+          c8y auditrecords create --type Alarm --activity "Action 1" --severity "" --text "Custom record" --source 12345 --template "{time: '2020-01-02T10:01:33Z'}" --dry
+        exit-code: 0
+        stdout:
+            json:
+                method: POST
+                path: /audit/auditRecords
+                body.type: "Alarm"
+                body.time: "2020-01-02T10:01:33Z"
+                body.source.id: "12345"
+                body.text: "Custom record"
+                body.activity: "Action 1"
+    
+    It creates an audit log just from a template:
+        command: >
+          c8y auditrecords create --template "{type: 'Alarm', activity: 'text value', text: 'Custom record', source: {id: '12345'}, time: '2020-01-02T10:01:33Z'}" --dry
+        exit-code: 0
+        stdout:
+            json:
+                method: POST
+                path: /audit/auditRecords
+                body.type: "Alarm"
+                body.time: "2020-01-02T10:01:33Z"
+                body.source.id: "12345"
+                body.text: Custom record
+    
+    Explicit time argument overwrites template value:
+        command: >
+          c8y auditrecords create --type Alarm --text "Custom record" --activity "Changing value" --source 12345 --time "2021-01-02T10:01:33Z" --template "{time: '2020-01-02T10:01:33Z'}" --dry
+        exit-code: 0
+        stdout:
+            json:
+                method: POST
+                path: /audit/auditRecords
+                body.type: "Alarm"
+                body.time: "2021-01-02T10:01:33Z"
+                body.source.id: "12345"
+                body.text: "Custom record"
+                body.activity: "Changing value"

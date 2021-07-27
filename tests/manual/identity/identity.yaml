@@ -1,0 +1,12 @@
+tests:
+    It creates an external identity using a template:
+        skip: false
+        command: >
+          c8y identity create --device "12345" --template "{type: 'abcID', externalId: 'one1'}" --dry
+        exit-code: 0
+        stdout:
+            json:
+                method: POST
+                path: /identity/globalIds/12345/externalIds
+                body.type: "abcID"
+                body.externalId: "one1"

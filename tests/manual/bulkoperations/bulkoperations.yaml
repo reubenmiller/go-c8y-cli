@@ -1,0 +1,22 @@
+tests:
+    It updates a bulk operation via a template:
+        command: >
+          c8y bulkoperations update --id 12345 --template "{creationRamp: 1.2}" --dry
+        exit-code: 0
+        stdout:
+            json:
+                method: PUT
+                path: /devicecontrol/bulkoperations/12345
+                body.creationRamp: "1.2"
+
+    Explicit time argument overwrites template value:
+        command: >
+          c8y bulkoperations create --group 12345 --template "{startDate: '2020-01-02T10:01:33Z', creationRamp: 1.2, operationPrototype: {c8y_Restart:{}}}" --dry
+        exit-code: 0
+        stdout:
+            json:
+                method: POST
+                path: /devicecontrol/bulkoperations
+                body.groupId: "12345"
+                body.creationRamp: "1.2"
+                body.operationPrototype.c8y_Restart: "{}"

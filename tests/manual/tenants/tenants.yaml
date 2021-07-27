@@ -1,0 +1,11 @@
+tests:
+    It creates a tenant using just a template:
+        command: >
+          c8y tenants create --template "{company: 'ABC Con', domain: 'abc.con.iot'}" --dry
+        exit-code: 0
+        stdout:
+            json:
+                method: POST
+                path: /tenant/tenants
+                body.domain: "abc.con.iot"
+                body.company: "ABC Con"

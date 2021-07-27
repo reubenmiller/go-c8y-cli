@@ -135,10 +135,16 @@ test_powershell_sessions:		## Run powershell tests which interfere with the sess
 test_bash:
 	./tools/shell/tests/test.sh
 
-test_cli:						## Run tests on the cli examples
+test_cli: test_cli_auto test_cli_manual
+
+test_cli_auto:						## Run tests on the cli examples
 	./tests/scripts/setup.sh
 	command -v commander || go get github.com/commander-cli/commander/v2/cmd/commander
-	./tests/run.sh
+	./tests/run-auto.sh
+
+test_cli_manual:						## Run tests on the cli examples
+	command -v commander || go get github.com/commander-cli/commander/v2/cmd/commander
+	./tests/run-manual.sh
 
 test_installation:				## Test installation of linux packages
 	chmod +x ./tools/integration-tests/run.sh

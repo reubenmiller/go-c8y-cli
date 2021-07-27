@@ -1,0 +1,38 @@
+tests:
+    It accepts timestamps via the template:
+        command: >
+          c8y alarms create --device 12345 --type c8y_TestAlarm --text "Test alarm" --severity MAJOR --template "{time: '2020-01-02T10:01:33Z'}" --dry
+        exit-code: 0
+        stdout:
+            json:
+                method: POST
+                path: /alarm/alarms
+                body.type: "c8y_TestAlarm"
+                body.time: "2020-01-02T10:01:33Z"
+                body.severity: "MAJOR"
+                body.text: "Test alarm"
+                body.source.id: "12345"
+    
+    Explicit time argument overwrites template value:
+        command: >
+          c8y alarms create --device 12345 --time "2021-01-02T10:01:33Z" --type c8y_TestAlarm --text "Test alarm" --severity MAJOR --template "{time: '2020-01-02T10:01:33Z'}" --dry
+        exit-code: 0
+        stdout:
+            json:
+                method: POST
+                path: /alarm/alarms
+                body.type: "c8y_TestAlarm"
+                body.time: "2021-01-02T10:01:33Z"
+                body.severity: "MAJOR"
+                body.text: "Test alarm"
+                body.source.id: "12345"
+
+    It updates a collection of alarms using a template:
+        command: >
+          c8y alarms updateCollection --device 12345 --template "{status: 'ACTIVE'}" --dry
+        exit-code: 0
+        stdout:
+            json:
+                method: PUT
+                path: /alarm/alarms
+                body.status: "ACTIVE"
