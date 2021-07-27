@@ -195,7 +195,7 @@ endpoints:
       - name: time
         type: datetime
         required: false
-        default: "0s"
+        default: ""
         description: Time of the event. Defaults to current timestamp.
 
       - name: type
@@ -211,7 +211,10 @@ endpoints:
       - name: data
         type: json
         description: Additional properties of the event.
-
+    bodyTemplate:
+      type: jsonnet
+      applyLast: false
+      template: "{time: _.Now('0s')}"
     bodyRequiredKeys:
       - "type"
       - "text"

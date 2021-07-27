@@ -133,7 +133,7 @@ endpoints:
       - name: time
         type: datetime
         required: false
-        default: "0s"
+        default: ""
         description: Time of the alarm. Defaults to current timestamp.
 
       - name: text
@@ -155,7 +155,10 @@ endpoints:
       - name: data
         type: json
         description: Additional properties of the alarm.
-      
+    bodyTemplate:
+      type: jsonnet
+      applyLast: false
+      template: "{time: _.Now('0s')}"
     bodyRequiredKeys:
       - "type"
       - "text"
@@ -202,9 +205,14 @@ endpoints:
       - name: newStatus
         type: string
         description: New status to be applied to all of the matching alarms
-        required: true
+        required: false
         property: status
         validationSet: [ACTIVE, ACKNOWLEDGED, CLEARED]
+      - name: data
+        type: json
+        description: Additional properties of the alarm.
+    bodyRequiredKeys:
+      - status
 
     queryParameters:
       - name: device

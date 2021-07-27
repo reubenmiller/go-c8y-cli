@@ -62,13 +62,13 @@ endpoints:
 
       - name: name
         type: string
-        required: true
+        required: false
         description: Name of microservice (or id if the microservice already exists)
 
       # TODO: Change to optional switch. When not set, then set to the value of name with a "-key" postfix
       - name: key
         type: string
-        required: true
+        required: false
         description: Shared secret of microservice
 
       - name: type
@@ -94,6 +94,9 @@ endpoints:
         type: string
         required: false
         description: URL to application base directory hosted on an external server. Required when application type is HOSTED
+    bodyRequiredKeys:
+      - name
+      - key
 
   - name: getMicroservice
     description: Get microservice
