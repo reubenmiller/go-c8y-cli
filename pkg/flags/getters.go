@@ -490,6 +490,11 @@ func WithIntValue(opts ...string) GetOption {
 		}
 
 		value, err := cmd.Flags().GetInt(src)
+
+		// Note: treat 0 values as non existant
+		if value == 0 && !cmd.Flags().Changed(src) {
+			return "", "", nil
+		}
 		return dst, value, err
 	}
 }
@@ -503,6 +508,11 @@ func WithFloatValue(opts ...string) GetOption {
 			if inputIterators.PipeOptions.Name == src {
 				return WithPipelineIterator(inputIterators.PipeOptions)(cmd, inputIterators)
 			}
+		}
+
+		// Note: only return if value has changed
+		if !cmd.Flags().Changed(src) {
+			return "", "", nil
 		}
 
 		value, err := cmd.Flags().GetFloat32(src)
