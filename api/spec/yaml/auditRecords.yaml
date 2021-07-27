@@ -22,13 +22,13 @@ endpoints:
         - description: Create an audit record for a custom managed object update
           beforeEach:
             - $Device = New-TestDevice
-          command: 'New-AuditRecord -Type "ManagedObject" -Time "0s" -Text "Managed Object updated: my_Prop: value" -Source $Device.id -Activity "Managed Object updated" -Severity "information"'
+          command: 'New-AuditRecord -Type "Inventory" -Time "0s" -Text "Managed Object updated: my_Prop: value" -Source $Device.id -Activity "Managed Object updated" -Severity "information"'
           afterEach:
             - Remove-ManagedObject -Id $Device.id
 
       go:
         - description: Create an audit record for a custom managed object update
-          command: 'c8y auditrecords create --type "ManagedObject" --time "0s" --text "Managed Object updated: my_Prop: value" --source 12345 --activity "Managed Object updated" --severity "information"'
+          command: 'c8y auditrecords create --type "Inventory" --time "0s" --text "Managed Object updated: my_Prop: value" --source 12345 --activity "Managed Object updated" --severity "information"'
     body:
       - name: type
         type: string
@@ -184,7 +184,7 @@ endpoints:
         - description: Get an audit record by id
           beforeEach:
             - $Device = New-TestDevice
-            - '$Record = New-AuditRecord -Type "ManagedObject" -Time "0s" -Text "Managed Object updated: my_Prop: value" -Source $Device.id -Activity "Managed Object updated" -Severity "information"'
+            - '$Record = New-AuditRecord -Type "Inventory" -Time "0s" -Text "Managed Object updated: my_Prop: value" -Source $Device.id -Activity "Managed Object updated" -Severity "information"'
           command: Get-AuditRecord -Id $Record.id
           afterEach:
             - Remove-ManagedObject -Id $Device.id
@@ -215,7 +215,7 @@ endpoints:
         - description: Delete audit records from a device
           beforeEach:
             - $Device = New-TestDevice
-            - '$Record = New-AuditRecord -Type "ManagedObject" -Time "0s" -Text "Managed Object updated: my_Prop: value" -Source $Device.id -Activity "Managed Object updated" -Severity "information"'
+            - '$Record = New-AuditRecord -Type "Inventory" -Time "0s" -Text "Managed Object updated: my_Prop: value" -Source $Device.id -Activity "Managed Object updated" -Severity "information"'
           command: Remove-AuditRecordCollection -Source $Device.id
           afterEach:
             - Remove-ManagedObject -Id $Device.id

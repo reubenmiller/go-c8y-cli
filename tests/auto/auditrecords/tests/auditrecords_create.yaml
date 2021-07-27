@@ -1,6 +1,6 @@
 tests:
     auditRecords_create_Create an audit record for a custom managed object update:
-        command: 'c8y auditrecords create --type "ManagedObject" --time "0s" --text "Managed Object updated: my_Prop: value" --source 12345 --activity "Managed Object updated" --severity "information"'
+        command: 'c8y auditrecords create --type "Inventory" --time "0s" --text "Managed Object updated: my_Prop: value" --source 12345 --activity "Managed Object updated" --severity "information"'
         exit-code: 0
         stdout:
             json:
@@ -8,7 +8,7 @@ tests:
                 body.severity: information
                 body.source.id: "12345"
                 body.text: 'Managed Object updated: my_Prop: value'
-                body.type: ManagedObject
+                body.type: Inventory
                 method: POST
                 path: /audit/auditRecords
             contains:

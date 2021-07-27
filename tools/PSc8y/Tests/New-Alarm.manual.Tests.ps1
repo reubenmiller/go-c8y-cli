@@ -15,8 +15,7 @@ Describe -Name "New-Alarm" {
         $Body.type | Should -BeExactly "c8y_TestAlarm"
         $Body.text | Should -BeExactly "Test alarm"
         $Body.severity | Should -BeExactly "MAJOR"
-        $Request 
-        $Body.time | Should -BeExactly "2021-07-12T17:35:12Z"
+        $Request | Should -BeLike '*"time":"2021-07-12T17:35:12Z"*'
     }
 
     AfterEach {
