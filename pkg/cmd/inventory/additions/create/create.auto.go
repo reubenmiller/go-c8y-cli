@@ -34,8 +34,8 @@ func NewCreateCmd(f *cmdutil.Factory) *CreateCmd {
 		Short: "Create child addition",
 		Long:  `Create a new managed object as a child addition to another existing managed object`,
 		Example: heredoc.Doc(`
-$ c8y inventory additions create --id 12345 --data ""
-Add a related managed object as a child to an existing managed object
+$ c8y inventory additions create --id 12345 --data "custom.value=test" --global
+Create a child addition and link it to an existing managed object
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
 			return f.CreateModeEnabled()
@@ -46,7 +46,7 @@ Add a related managed object as a child to an existing managed object
 	cmd.SilenceUsage = true
 
 	cmd.Flags().StringSlice("id", []string{""}, "Managed object id where the child addition will be added to (required) (accepts pipeline)")
-	cmd.Flags().Bool("global", false, "")
+	cmd.Flags().Bool("global", false, "Enable global access to the managed object")
 
 	completion.WithOptions(
 		cmd,
@@ -58,7 +58,6 @@ Add a related managed object as a child to an existing managed object
 		flags.WithData(),
 		f.WithTemplateFlag(cmd),
 		flags.WithExtendedPipelineSupport("id", "id", true),
-		flags.WithCollectionProperty("managedObject"),
 	)
 
 	// Required flags
@@ -108,6 +107,7 @@ func (n *CreateCmd) RunE(cmd *cobra.Command, args []string) error {
 		headers,
 		inputIterators,
 		flags.WithCustomStringSlice(func() ([]string, error) { return cfg.GetHeader(), nil }, "header"),
+		flags.WithStaticStringValue("Content-Type", "application/vnd.com.nsn.cumulocity.managedObject+json"),
 		flags.WithProcessingModeValue(),
 	)
 	if err != nil {
@@ -132,7 +132,7 @@ func (n *CreateCmd) RunE(cmd *cobra.Command, args []string) error {
 		body,
 		inputIterators,
 		flags.WithDataFlagValue(),
-		flags.WithBoolValue("global", "global", ""),
+		flags.WithOptionalFragment("global", "c8y_Global", ""),
 		cmdutil.WithTemplateValue(cfg),
 		flags.WithTemplateVariablesValue(),
 	)

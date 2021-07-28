@@ -186,10 +186,10 @@
       "method": "POST",
       "path": "inventory/managedObjects/{id}/childAdditions",
       "accept": "application/json",
+      "contentType": "application/vnd.com.nsn.cumulocity.managedObject+json",
       "collectionType": "application/vnd.com.nsn.cumulocity.managedObject+json",
       "description": "Create child addition",
       "descriptionLong": "Create a new managed object as a child addition to another existing managed object",
-      "collectionProperty": "managedObject",
       "alias": {
         "go": "create",
         "powershell": "New-ChildAddition"
@@ -197,22 +197,27 @@
       "examples": {
         "powershell": [
           {
-            "description": "Add a related managed object as a child to an existing managed object",
+            "description": "Create a child addition and link it to an existing managed object",
             "beforeEach": [
-              "$software = PSc8y\\New-ManagedObject -Name softwarePackage1",
-              "$version = PSc8y\\New-ManagedObject -Name softwareVersion1"
+              "$software = PSc8y\\New-ManagedObject -Name softwarePackage1"
             ],
-            "command": "Add-ChildAddition -Id $software.id -NewChild $version.id",
+            "command": "New-ChildAddition -Id $software.id -Data \"custom.value=test\" -Global",
             "afterEach": [
-              "PSc8y\\Remove-ManagedObject -Id $software.id",
-              "PSc8y\\Remove-ManagedObject -Id $version.id"
+              "PSc8y\\Remove-ManagedObject -Id $software.id"
             ]
           }
         ],
         "go": [
           {
-            "description": "Add a related managed object as a child to an existing managed object",
-            "command": "c8y inventory additions create --id 12345 --data \"\""
+            "description": "Create a child addition and link it to an existing managed object",
+            "command": "c8y inventory additions create --id 12345 --data \"custom.value=test\" --global",
+            "assertStdOut": {
+              "json": {
+                "path": "r//inventory/managedObjects/\\d+/childAdditions$",
+                "body.custom.value": "test",
+                "body.c8y_Global": "{}"
+              }
+            }
           }
         ]
       },
@@ -230,7 +235,9 @@
       "body": [
         {
           "name": "global",
-          "type": "boolean"
+          "type": "optional_fragment",
+          "property": "c8y_Global",
+          "description": "Enable global access to the managed object"
         },
         {
           "name": "data",

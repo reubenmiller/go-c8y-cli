@@ -159,7 +159,7 @@ func CreateFakeCommand(parentCmd string, endpoint *models.EndPoint) *cobra.Comma
 		loggerS.Debugf("Adding parameter. name=%s", parameter.Name)
 		if strings.Contains(parameter.Type, "[]") {
 			cmd.Flags().StringSlice(parameter.Name, nil, "")
-		} else if parameter.Type == "boolean" {
+		} else if parameter.Type == "boolean" || parameter.Type == "optional_fragment" {
 			cmd.Flags().Bool(parameter.Name, false, "")
 		} else {
 			cmd.Flags().String(parameter.Name, "", "")

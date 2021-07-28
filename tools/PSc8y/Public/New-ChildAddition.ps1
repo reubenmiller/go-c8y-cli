@@ -11,9 +11,9 @@ Create a new managed object as a child addition to another existing managed obje
 https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/inventory_additions_create
 
 .EXAMPLE
-PS> Add-ChildAddition -Id $software.id -NewChild $version.id
+PS> New-ChildAddition -Id $software.id -Data "custom.value=test" -Global
 
-Add a related managed object as a child to an existing managed object
+Create a child addition and link it to an existing managed object
 
 
 #>
@@ -29,7 +29,7 @@ Add a related managed object as a child to an existing managed object
         [object[]]
         $Id,
 
-        # 
+        # Enable global access to the managed object
         [Parameter()]
         [switch]
         $Global

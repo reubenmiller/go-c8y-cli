@@ -3,12 +3,11 @@
 Describe -Name "New-ChildAddition" {
     BeforeEach {
         $software = PSc8y\New-ManagedObject -Name softwarePackage1
-        $version = PSc8y\New-ManagedObject -Name softwareVersion1
 
     }
 
-    It "Add a related managed object as a child to an existing managed object" {
-        $Response = PSc8y\Add-ChildAddition -Id $software.id -NewChild $version.id
+    It "Create a child addition and link it to an existing managed object" {
+        $Response = PSc8y\New-ChildAddition -Id $software.id -Data "custom.value=test" -Global
         $LASTEXITCODE | Should -Be 0
         $Response | Should -Not -BeNullOrEmpty
     }
@@ -16,7 +15,6 @@ Describe -Name "New-ChildAddition" {
 
     AfterEach {
         PSc8y\Remove-ManagedObject -Id $software.id
-        PSc8y\Remove-ManagedObject -Id $version.id
 
     }
 }
