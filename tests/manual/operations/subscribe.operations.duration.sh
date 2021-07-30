@@ -26,4 +26,4 @@ TASK_PID="$!"
 # starttime=$( date +%s )
 values=$( c8y operations subscribe --device $mo_id --duration 10s || true )
 line_count=$( echo "$values" | grep "^{" | wc -l )
-[[ $line_count -gt 1 ]] || exit 2
+[[ $line_count -gt 0 ]] || exit 2
