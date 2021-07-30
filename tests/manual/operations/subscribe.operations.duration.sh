@@ -26,6 +26,7 @@ nohup ./create.operations.sh $mo_id 60 >/dev/null 2>&1 &
 TASK_PID="$!"
 debug "TASK_PID: $TASK_PID"
 
+sleep 10
 values=$( c8y operations subscribe --device $mo_id --duration 10s || true )
 item_count=$( echo "$values" | grep "^{" | wc -l )
 
