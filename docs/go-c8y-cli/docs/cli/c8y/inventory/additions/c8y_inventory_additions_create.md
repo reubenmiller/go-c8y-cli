@@ -1,25 +1,22 @@
 ---
-category: identity
-title: c8y identity create
+category: additions
+title: c8y inventory additions create
 ---
-Create external id
+Create child addition
 
 ### Synopsis
 
-Create a new external id for an existing managed object
+Create a new managed object as a child addition to another existing managed object
 
 ```
-c8y identity create [flags]
+c8y inventory additions create [flags]
 ```
 
 ### Examples
 
 ```
-$ c8y identity create --device 1234 --type test --name myserialnumber
-Create external identity
-
-$ c8y devices list | c8y identity create --type c8y_Serial --template "{ externalId: input.value.name }"
-Create an external identity by using the .name property of the device (via the input template variable)
+$ c8y inventory additions create --id 12345 --data "custom.value=test" --global
+Create a child addition and link it to an existing managed object
         
 ```
 
@@ -27,13 +24,12 @@ Create an external identity by using the .name property of the device (via the i
 
 ```
   -d, --data string             static data to be applied to body. accepts json or shorthande json, i.e. --data 'value1=1,my.nested.value=100'
-      --device strings          The ManagedObject linked to the external ID. (required) (accepts pipeline)
+      --global                  Enable global access to the managed object
   -h, --help                    help for create
-      --name string             The identifier used in the external system that Cumulocity interfaces with.
+      --id strings              Managed object id where the child addition will be added to (required) (accepts pipeline)
       --processingMode string   Cumulocity processing mode
       --template string         Body template
       --templateVars string     Body template variables
-      --type string             The type of the external identifier as string, e.g. 'com_cumulocity_model_idtype_SerialNumber'.
 ```
 
 ### Options inherited from parent commands

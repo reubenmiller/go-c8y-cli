@@ -27,7 +27,7 @@ Change the status of a specific data broker connector by given connector id
   -h, --help                    help for update
       --id strings              Data broker connector id (required) (accepts pipeline)
       --processingMode string   Cumulocity processing mode
-      --status string           DataBroker status [SUSPENDED]. (required)
+      --status string           DataBroker status [SUSPENDED].
       --template string         Body template
       --templateVars string     Body template variables
 ```

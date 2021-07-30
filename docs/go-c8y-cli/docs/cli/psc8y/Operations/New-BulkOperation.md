@@ -20,8 +20,8 @@ Create bulk operation
 New-BulkOperation
 	[[-Group] <Object[]>]
 	[[-StartDate] <String>]
-	[-CreationRampSec] <Single>
-	[-Operation] <Object>
+	[[-CreationRampSec] <Single>]
+	[[-Operation] <Object>]
 	[-Data <Object>]
 	[-NoAccept]
 	[-ProcessingMode <String>]
@@ -122,14 +122,13 @@ Accept wildcard characters: False
 
 ### -CreationRampSec
 Delay between every operation creation.
-(required)
 
 ```yaml
 Type: Single
 Parameter Sets: (All)
 Aliases:
 
-Required: True
+Required: False
 Position: 3
 Default value: 0
 Accept pipeline input: False
@@ -137,14 +136,14 @@ Accept wildcard characters: False
 ```
 
 ### -Operation
-Operation prototype to send to each device in the group (required)
+Operation prototype to send to each device in the group
 
 ```yaml
 Type: Object
 Parameter Sets: (All)
 Aliases:
 
-Required: True
+Required: False
 Position: 4
 Default value: None
 Accept pipeline input: False

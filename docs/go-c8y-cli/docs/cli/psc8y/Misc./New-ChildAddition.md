@@ -1,30 +1,25 @@
 ---
-category: Tenants
+category: Misc.
 external help file: PSc8y-help.xml
-id: New-Tenant
+id: New-ChildAddition
 Module Name: PSc8y
-online version: https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/tenants_create
+online version: https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/inventory_additions_create
 schema: 2.0.0
-slug: /docs/cli/psc8y/Tenants/new-tenant
-title: New-Tenant
+slug: /docs/cli/psc8y/Misc./new-childaddition
+title: New-ChildAddition
 ---
 
 
 
 ## SYNOPSIS
-Create tenant
+Create child addition
 
 ## SYNTAX
 
 ```
-New-Tenant
-	[[-Company] <String>]
-	[[-Domain] <Object[]>]
-	[[-AdminName] <String>]
-	[[-AdminPass] <String>]
-	[[-ContactName] <String>]
-	[[-ContactPhone] <String>]
-	[[-TenantId] <String>]
+New-ChildAddition
+	[-Id] <Object[]>
+	[-Global]
 	[-Data <Object>]
 	[-NoAccept]
 	[-ProcessingMode <String>]
@@ -72,124 +67,45 @@ New-Tenant
 ```
 
 ## DESCRIPTION
-Create a new tenant
+Create a new managed object as a child addition to another existing managed object
 
 ## EXAMPLES
 
 ### EXAMPLE 1
 ```
-New-Tenant -Company "mycompany" -Domain "mycompany" -AdminName "admin" -AdminPass "mys3curep9d8"
+New-ChildAddition -Id $software.id -Data "custom.value=test" -Global
 ```
 
-Create a new tenant (from the management tenant)
+Create a child addition and link it to an existing managed object
 
 ## PARAMETERS
 
-### -Company
-Company name.
-Maximum 256 characters
-
-```yaml
-Type: String
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: 1
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
-### -Domain
-Domain name to be used for the tenant.
-Maximum 256 characters
+### -Id
+Managed object id where the child addition will be added to (required)
 
 ```yaml
 Type: Object[]
 Parameter Sets: (All)
 Aliases:
 
-Required: False
-Position: 2
+Required: True
+Position: 1
 Default value: None
 Accept pipeline input: True (ByPropertyName, ByValue)
 Accept wildcard characters: False
 ```
 
-### -AdminName
-Username of the tenant administrator
+### -Global
+Enable global access to the managed object
 
 ```yaml
-Type: String
+Type: SwitchParameter
 Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: 3
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
-### -AdminPass
-Password of the tenant administrator
-
-```yaml
-Type: String
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: 4
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
-### -ContactName
-A contact name, for example an administrator, of the tenant
-
-```yaml
-Type: String
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: 5
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
-### -ContactPhone
-An international contact phone number
-
-```yaml
-Type: String
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: 6
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
-### -TenantId
-The tenant ID.
-This should be left bank unless you know what you are doing.
-Will be auto-generated if not present.
-
-```yaml
-Type: String
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: 7
-Default value: None
+Position: Named
+Default value: False
 Accept pipeline input: False
 Accept wildcard characters: False
 ```
@@ -878,5 +794,5 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 
 ## RELATED LINKS
 
-[https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/tenants_create](https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/tenants_create)
+[https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/inventory_additions_create](https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/inventory_additions_create)
 

@@ -23,7 +23,7 @@ Update an bulk operation
 ### Options
 
 ```
-      --creationRampSec float32   Delay between every operation creation. (required)
+      --creationRampSec float32   Delay between every operation creation.
   -d, --data string               static data to be applied to body. accepts json or shorthande json, i.e. --data 'value1=1,my.nested.value=100'
   -h, --help                      help for update
       --id strings                Bulk Operation id (required) (accepts pipeline)

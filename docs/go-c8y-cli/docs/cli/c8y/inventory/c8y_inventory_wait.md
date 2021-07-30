@@ -1,39 +1,48 @@
 ---
-category: identity
-title: c8y identity create
+category: inventory
+title: c8y inventory wait
 ---
-Create external id
+Wait for managed object
 
 ### Synopsis
 
-Create a new external id for an existing managed object
+Wait for an managed object fragment by polling until a condition is met or a timeout is reached
 
 ```
-c8y identity create [flags]
+c8y inventory wait [flags]
 ```
 
 ### Examples
 
 ```
-$ c8y identity create --device 1234 --type test --name myserialnumber
-Create external identity
+$ c8y inventory wait --id 1234 --fragment "c8y_Mobile.iccd"
+# Wait for the managed object to have a non-null c8y_Mobile.iccd fragment
 
-$ c8y devices list | c8y identity create --type c8y_Serial --template "{ externalId: input.value.name }"
-Create an external identity by using the .name property of the device (via the input template variable)
-        
+$ c8y inventory wait --id 1234 --fragment '!c8y_Mobile'
+# Wait for the managed object to not have a c8y_Mobile fragment
+
+$ c8y inventory wait --id 1234 --fragment 'name=^\d+-\w+$'
+# Wait for the managed object name fragment to match the regular expression '^\d+-\w+'
+
+$ c8y inventory wait --id 1234 --fragment 'name=^$' --fragment c8y_IsDevice
+# Wait for the managed object name fragment to match the regular expression '^\d+-\w+'
+
+$ c8y inventory wait --id 1234 --duration 1m --interval 10s
+# Wait for the operation to be set to SUCCESSFUL and give up after 1 minute
+
+$ c8y inventory list --device 1111 | c8y operations wait --status "FAILED" --status "SUCCESSFUL"
+# Wait for operation to be set to either FAILED or SUCCESSFUL
+
 ```
 
 ### Options
 
 ```
-  -d, --data string             static data to be applied to body. accepts json or shorthande json, i.e. --data 'value1=1,my.nested.value=100'
-      --device strings          The ManagedObject linked to the external ID. (required) (accepts pipeline)
-  -h, --help                    help for create
-      --name string             The identifier used in the external system that Cumulocity interfaces with.
-      --processingMode string   Cumulocity processing mode
-      --template string         Body template
-      --templateVars string     Body template variables
-      --type string             The type of the external identifier as string, e.g. 'com_cumulocity_model_idtype_SerialNumber'.
+      --duration string     Timeout duration. i.e. 30s or 1m (1 minute) (default "30s")
+      --fragments strings   Fragments to wait for. If multiple values are given, then it will be applied as an OR operation
+  -h, --help                help for wait
+      --id string           Inventory id (required) (accepts pipeline)
+      --interval string     Interval to check on the status, i.e. 10s or 1min (default "5s")
 ```
 
 ### Options inherited from parent commands
