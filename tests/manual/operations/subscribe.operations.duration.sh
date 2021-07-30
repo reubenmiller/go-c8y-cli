@@ -22,8 +22,10 @@ cleanup () {
 }
 trap cleanup EXIT
 
+chmod +x ./create.operations.sh
 nohup ./create.operations.sh $mo_id 60 >/dev/null 2>&1 &
 TASK_PID="$!"
+disown $TASK_PID
 debug "TASK_PID: $TASK_PID"
 
 # sleep 10
@@ -32,7 +34,7 @@ item_count=$( echo "$values" | grep "^{" | wc -l )
 
 # result:
 debug "line_count: $item_count"
-echo "{\"itemCount\":\"$item_count\"}"
+echo "{\"itemCount\":\"$item_count\",\"deviceId\":\"$mo_id\",\"taskId\":\"$TASK_PID\"}"
 
 # error is 100 + actual line count (to make debugging easier)
 [[ $item_count -gt 0 ]] || exit $(( 100 + $item_count ))
