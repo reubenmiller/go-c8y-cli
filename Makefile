@@ -132,13 +132,17 @@ test_powershell:				## Run powershell tests
 test_powershell_sessions:		## Run powershell tests which interfere with the session variable
 	pwsh -ExecutionPolicy bypass -NonInteractive -File tools/PSc8y/test.parallel.ps1 -ThrottleLimit 1 -TestFileFilter "Set-Session|Get-SessionHomePath|Login|DisableCommands|BulkOperation|activitylog"
 
-test_bash:
-	./tools/shell/tests/test.sh
+test_cli: test_cli_auto test_cli_manual
 
-test_cli:						## Run tests on the cli examples
+test_cli_dependencies:										## Install cli dependencies
+	command -v commander || go get github.com/commander-cli/commander/v2/cmd/commander@v2.5.0-alpha2
+
+test_cli_auto: test_cli_dependencies						## Run tests on the cli examples
 	./tests/scripts/setup.sh
-	command -v commander || go get github.com/commander-cli/commander/v2/cmd/commander
-	./tests/run.sh
+	./tests/run-auto.sh
+
+test_cli_manual: test_cli_dependencies						## Run tests on the cli examples
+	./tests/run-manual.sh
 
 test_installation:				## Test installation of linux packages
 	chmod +x ./tools/integration-tests/run.sh

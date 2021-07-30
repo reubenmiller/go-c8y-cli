@@ -99,7 +99,6 @@
         {
           "name": "maximumAge",
           "type": "integer",
-          "default": "365",
           "required": false,
           "description": "Maximum age of document in days."
         },
@@ -116,6 +115,11 @@
           "description": "Data"
         }
       ],
+      "bodyTemplate": {
+        "type": "jsonnet",
+        "applyLast": false,
+        "template": "{maximumAge: 365}"
+      },
       "bodyRequiredKeys": [
         "maximumAge",
         "dataType"
@@ -268,7 +272,7 @@
             "OPERATION",
             "*"
           ],
-          "required": true,
+          "required": false,
           "description": "RetentionRule will be applied to this type of documents, possible values [ALARM, AUDIT, EVENT, MEASUREMENT, OPERATION, *]."
         },
         {

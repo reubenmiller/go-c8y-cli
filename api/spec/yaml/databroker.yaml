@@ -84,10 +84,12 @@ endpoints:
       - name: status
         type: string
         validationSet: [SUSPENDED]
-        required: true
+        required: false
         description: DataBroker status [SUSPENDED].
 
       - name: data
         type: json
         required: false
         description: Data
+    bodyRequiredKeys:
+      - status

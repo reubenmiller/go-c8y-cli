@@ -177,7 +177,6 @@ endpoints:
       - name: type
         type: string
         required: false
-        default: c8y_Serial
         description: The type of the external identifier as string, e.g. 'com_cumulocity_model_idtype_SerialNumber'.
 
       - name: name
@@ -185,8 +184,14 @@ endpoints:
         type: string
         required: false
         description: The identifier used in the external system that Cumulocity interfaces with.
-    bodyTemplateOptions:
-      enabled: true
+
+      - name: data
+        type: json
+        description: Additional properties
+    bodyTemplate:
+      type: jsonnet
+      applyLast: false
+      template: "{type: 'c8y_Serial'}"
     bodyRequiredKeys:
       - "type"
       - "externalId"

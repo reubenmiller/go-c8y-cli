@@ -46,7 +46,7 @@ Update an bulk operation
 	cmd.SilenceUsage = true
 
 	cmd.Flags().StringSlice("id", []string{""}, "Bulk Operation id (required) (accepts pipeline)")
-	cmd.Flags().Float32("creationRampSec", 0, "Delay between every operation creation. (required)")
+	cmd.Flags().Float32("creationRampSec", 0, "Delay between every operation creation.")
 
 	completion.WithOptions(
 		cmd,
@@ -61,7 +61,6 @@ Update an bulk operation
 	)
 
 	// Required flags
-	_ = cmd.MarkFlagRequired("creationRampSec")
 
 	ccmd.SubCommand = subcommand.NewSubCommand(cmd)
 
@@ -135,6 +134,7 @@ func (n *UpdateCmd) RunE(cmd *cobra.Command, args []string) error {
 		flags.WithFloatValue("creationRampSec", "creationRamp"),
 		cmdutil.WithTemplateValue(cfg),
 		flags.WithTemplateVariablesValue(),
+		flags.WithRequiredProperties("creationRamp"),
 	)
 	if err != nil {
 		return cmderrors.NewUserError(err)

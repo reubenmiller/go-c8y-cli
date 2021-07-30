@@ -47,7 +47,7 @@ Create a new alarm for device
 
 	cmd.Flags().StringSlice("device", []string{""}, "The ManagedObject that the alarm originated from (accepts pipeline)")
 	cmd.Flags().String("type", "", "Identifies the type of this alarm, e.g. 'com_cumulocity_events_TamperEvent'.")
-	cmd.Flags().String("time", "0s", "Time of the alarm. Defaults to current timestamp.")
+	cmd.Flags().String("time", "", "Time of the alarm. Defaults to current timestamp.")
 	cmd.Flags().String("text", "", "Text description of the alarm.")
 	cmd.Flags().String("severity", "", "The severity of the alarm: CRITICAL, MAJOR, MINOR or WARNING. Must be upper-case.")
 	cmd.Flags().String("status", "", "The status of the alarm: ACTIVE, ACKNOWLEDGED or CLEARED. If status was not appeared, new alarm will have status ACTIVE. Must be upper-case.")
@@ -144,6 +144,8 @@ func (n *CreateCmd) RunE(cmd *cobra.Command, args []string) error {
 		flags.WithStringValue("text", "text"),
 		flags.WithStringValue("severity", "severity"),
 		flags.WithStringValue("status", "status"),
+		flags.WithDefaultTemplateString(`
+{time: _.Now('0s')}`),
 		cmdutil.WithTemplateValue(cfg),
 		flags.WithTemplateVariablesValue(),
 		flags.WithRequiredProperties("type", "text", "time", "severity", "source.id"),

@@ -18,8 +18,8 @@ Create tenant
 
 ```
 New-Tenant
-	[-Company] <String>
-	[-Domain] <Object[]>
+	[[-Company] <String>]
+	[[-Domain] <Object[]>]
 	[[-AdminName] <String>]
 	[[-AdminPass] <String>]
 	[[-ContactName] <String>]
@@ -87,14 +87,14 @@ Create a new tenant (from the management tenant)
 
 ### -Company
 Company name.
-Maximum 256 characters (required)
+Maximum 256 characters
 
 ```yaml
 Type: String
 Parameter Sets: (All)
 Aliases:
 
-Required: True
+Required: False
 Position: 1
 Default value: None
 Accept pipeline input: False
@@ -103,14 +103,14 @@ Accept wildcard characters: False
 
 ### -Domain
 Domain name to be used for the tenant.
-Maximum 256 characters (required)
+Maximum 256 characters
 
 ```yaml
 Type: Object[]
 Parameter Sets: (All)
 Aliases:
 
-Required: True
+Required: False
 Position: 2
 Default value: None
 Accept pipeline input: True (ByPropertyName, ByValue)

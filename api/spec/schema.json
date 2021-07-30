@@ -71,6 +71,7 @@
       "enum": [
         "application",
         "boolean",
+        "optional_fragment",
         "integer",
         "file",
         "float",

@@ -32,7 +32,7 @@ Create a new alarm for device
       --template string         Body template
       --templateVars string     Body template variables
       --text string             Text description of the alarm.
-      --time string             Time of the alarm. Defaults to current timestamp. (default "0s")
+      --time string             Time of the alarm. Defaults to current timestamp.
       --type string             Identifies the type of this alarm, e.g. 'com_cumulocity_events_TamperEvent'.
 ```
 

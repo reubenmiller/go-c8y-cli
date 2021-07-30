@@ -343,6 +343,10 @@
         }
     }
 
+    if ($Specification.contentType) {
+        $null = $RestHeaderBuilderOptions.AppendLine("flags.WithStaticStringValue(`"Content-Type`", `"$($Specification.contentType)`"),")
+    }
+
     if ($Specification.addAccept -and $Specification.accept) {
         $null = $RestHeaderBuilderOptions.AppendLine("flags.WithStaticStringValue(`"Accept`", `"$($Specification.accept)`"),")
     }
@@ -980,7 +984,7 @@ Function Get-C8yGoArgs {
             }
         }
 
-        "boolean" {
+        {$_ -in "boolean", "optional_fragment"} {
             if (!$Default) {
                 $Default = "false"
             }

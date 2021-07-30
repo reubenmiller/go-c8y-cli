@@ -46,7 +46,7 @@ Approve a new device request
 	cmd.SilenceUsage = true
 
 	cmd.Flags().StringSlice("id", []string{""}, "Device identifier (required) (accepts pipeline)")
-	cmd.Flags().String("status", "ACCEPTED", "Status of registration")
+	cmd.Flags().String("status", "", "Status of registration")
 
 	completion.WithOptions(
 		cmd,
@@ -133,6 +133,8 @@ func (n *ApproveCmd) RunE(cmd *cobra.Command, args []string) error {
 		inputIterators,
 		flags.WithDataFlagValue(),
 		flags.WithStringValue("status", "status"),
+		flags.WithDefaultTemplateString(`
+{status: 'ACCEPTED'}`),
 		cmdutil.WithTemplateValue(cfg),
 		flags.WithTemplateVariablesValue(),
 	)

@@ -49,7 +49,7 @@ Create a retention rule
 	cmd.Flags().String("fragmentType", "", "RetentionRule will be applied to documents with fragmentType.")
 	cmd.Flags().String("type", "", "RetentionRule will be applied to documents with type.")
 	cmd.Flags().String("source", "", "RetentionRule will be applied to documents with source.")
-	cmd.Flags().Int("maximumAge", 365, "Maximum age of document in days.")
+	cmd.Flags().Int("maximumAge", 0, "Maximum age of document in days.")
 	cmd.Flags().Bool("editable", false, "Whether the rule is editable. Can be updated only by management tenant.")
 
 	completion.WithOptions(
@@ -143,6 +143,8 @@ func (n *CreateCmd) RunE(cmd *cobra.Command, args []string) error {
 		flags.WithStringValue("source", "source"),
 		flags.WithIntValue("maximumAge", "maximumAge"),
 		flags.WithBoolValue("editable", "editable", ""),
+		flags.WithDefaultTemplateString(`
+{maximumAge: 365}`),
 		cmdutil.WithTemplateValue(cfg),
 		flags.WithTemplateVariablesValue(),
 		flags.WithRequiredProperties("maximumAge", "dataType"),

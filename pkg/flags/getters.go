@@ -257,19 +257,22 @@ func WithDefaultBoolValue(opts ...string) GetOption {
 	}
 }
 
-// WithOptionalJSONFragment adds fragment if the boolean value is true a boolean value from cli arguments to a query parameter
-func WithOptionalJSONFragment(val string, opts ...string) GetOption {
+// WithOptionalFragment adds fragment if the boolean value is true a boolean value from cli arguments to a query parameter
+func WithOptionalFragment(opts ...string) GetOption {
 	return func(cmd *cobra.Command, inputIterators *RequestInputIterators) (string, interface{}, error) {
 		src, dst, format := UnpackGetterOptions("", opts...)
-		if cmd.Flags().Changed(src) {
-			value, err := cmd.Flags().GetBool(src)
-
-			if format != "" {
-				return dst, applyFormatter(format, value), err
-			}
-			return dst, value, err
+		value, err := cmd.Flags().GetBool(src)
+		if err != nil {
+			return "", "", err
 		}
-		return "", false, nil
+		if value {
+			if format == "" {
+				return dst, struct{}{}, err
+			}
+
+			return dst, format, err
+		}
+		return "", "", err
 	}
 }
 
@@ -490,6 +493,11 @@ func WithIntValue(opts ...string) GetOption {
 		}
 
 		value, err := cmd.Flags().GetInt(src)
+
+		// Note: treat 0 values as non existant
+		if value == 0 && !cmd.Flags().Changed(src) {
+			return "", "", nil
+		}
 		return dst, value, err
 	}
 }
@@ -503,6 +511,11 @@ func WithFloatValue(opts ...string) GetOption {
 			if inputIterators.PipeOptions.Name == src {
 				return WithPipelineIterator(inputIterators.PipeOptions)(cmd, inputIterators)
 			}
+		}
+
+		// Note: only return if value has changed
+		if !cmd.Flags().Changed(src) {
+			return "", "", nil
 		}
 
 		value, err := cmd.Flags().GetFloat32(src)

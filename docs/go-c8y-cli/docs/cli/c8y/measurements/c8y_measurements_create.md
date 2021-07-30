@@ -29,7 +29,7 @@ Create measurement
       --processingMode string   Cumulocity processing mode
       --template string         Body template
       --templateVars string     Body template variables
-      --time string             Time of the measurement. Defaults to current timestamp. (default "0s")
+      --time string             Time of the measurement. Defaults to current timestamp.
       --type string             The most specific type of this entire measurement.
 ```
 

@@ -84,13 +84,13 @@
         {
           "name": "name",
           "type": "string",
-          "required": true,
+          "required": false,
           "description": "Name of microservice (or id if the microservice already exists)"
         },
         {
           "name": "key",
           "type": "string",
-          "required": true,
+          "required": false,
           "description": "Shared secret of microservice"
         },
         {
@@ -125,6 +125,10 @@
           "required": false,
           "description": "URL to application base directory hosted on an external server. Required when application type is HOSTED"
         }
+      ],
+      "bodyRequiredKeys": [
+        "name",
+        "key"
       ]
     },
     {

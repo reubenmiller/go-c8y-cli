@@ -192,6 +192,7 @@ FunctionsToExport = @(
 	'New-AuditRecord',
 	'New-Binary',
 	'New-BulkOperation',
+	'New-ChildAddition',
 	'New-Device',
 	'New-DeviceGroup',
 	'New-Event',

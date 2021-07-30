@@ -64,6 +64,7 @@
         "[]userself" { "object[]"; break }
         "application" { "object[]"; break }
         "boolean" { "switch"; break }
+        "optional_fragment" { "switch"; break }
         "datefrom" { "string"; break }
         "datetime" { "string"; break }
         "dateto" { "string"; break }

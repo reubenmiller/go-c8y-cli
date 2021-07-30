@@ -11,7 +11,7 @@ Create a new audit record for a given action
 https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/auditrecords_create
 
 .EXAMPLE
-PS> New-AuditRecord -Type "ManagedObject" -Time "0s" -Text "Managed Object updated: my_Prop: value" -Source $Device.id -Activity "Managed Object updated" -Severity "information"
+PS> New-AuditRecord -Type "Inventory" -Time "0s" -Text "Managed Object updated: my_Prop: value" -Source $Device.id -Activity "Managed Object updated" -Severity "information"
 
 Create an audit record for a custom managed object update
 
@@ -22,8 +22,9 @@ Create an audit record for a custom managed object update
     [Alias()]
     [OutputType([object])]
     Param(
-        # Identifies the type of this audit record. (required)
-        [Parameter(Mandatory = $true)]
+        # Identifies the type of this audit record.
+        [Parameter()]
+        [ValidateSet('Alarm','Application','BulkOperation','CepModule','Connector','Event','Group','Inventory','InventoryRole','Operation','Option','Report','SingleSignOn','SmartRule','SYSTEM','Tenant','TenantAuthConfig','TrustedCertificates','UserAuthentication')]
         [string]
         $Type,
 
@@ -32,25 +33,24 @@ Create an audit record for a custom managed object update
         [string]
         $Time,
 
-        # Text description of the audit record. (required)
-        [Parameter(Mandatory = $true)]
+        # Text description of the audit record.
+        [Parameter()]
         [string]
         $Text,
 
-        # An optional ManagedObject that the audit record originated from (required)
-        [Parameter(Mandatory = $true,
-                   ValueFromPipeline=$true,
+        # An optional ManagedObject that the audit record originated from
+        [Parameter(ValueFromPipeline=$true,
                    ValueFromPipelineByPropertyName=$true)]
         [object[]]
         $Source,
 
-        # The activity that was carried out. (required)
-        [Parameter(Mandatory = $true)]
+        # The activity that was carried out.
+        [Parameter()]
         [string]
         $Activity,
 
-        # The severity of action: critical, major, minor, warning or information. (required)
-        [Parameter(Mandatory = $true)]
+        # The severity of action: critical, major, minor, warning or information.
+        [Parameter()]
         [ValidateSet('critical','major','minor','warning','information')]
         [string]
         $Severity,

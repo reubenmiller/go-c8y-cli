@@ -15,7 +15,7 @@ c8y auditrecords create [flags]
 ### Examples
 
 ```
-$ c8y auditrecords create --type "ManagedObject" --time "0s" --text "Managed Object updated: my_Prop: value" --source 12345 --activity "Managed Object updated" --severity "information"
+$ c8y auditrecords create --type "Inventory" --time "0s" --text "Managed Object updated: my_Prop: value" --source 12345 --activity "Managed Object updated" --severity "information"
 Create an audit record for a custom managed object update
         
 ```
@@ -23,18 +23,18 @@ Create an audit record for a custom managed object update
 ### Options
 
 ```
-      --activity string         The activity that was carried out. (required)
+      --activity string         The activity that was carried out.
       --application string      The application used to carry out the audited action.
   -d, --data string             static data to be applied to body. accepts json or shorthande json, i.e. --data 'value1=1,my.nested.value=100'
   -h, --help                    help for create
       --processingMode string   Cumulocity processing mode
-      --severity string         The severity of action: critical, major, minor, warning or information. (required)
-      --source string           An optional ManagedObject that the audit record originated from (required) (accepts pipeline)
+      --severity string         The severity of action: critical, major, minor, warning or information.
+      --source string           An optional ManagedObject that the audit record originated from (accepts pipeline)
       --template string         Body template
       --templateVars string     Body template variables
-      --text string             Text description of the audit record. (required)
-      --time string             Time of the audit record. Defaults to current timestamp. (default "0s")
-      --type string             Identifies the type of this audit record. (required)
+      --text string             Text description of the audit record.
+      --time string             Time of the audit record. Defaults to current timestamp.
+      --type string             Identifies the type of this audit record.
       --user string             The user responsible for the audited action.
 ```
 

@@ -1,0 +1,9 @@
+config:
+  inherit-env: true
+  env:
+    C8Y_SETTINGS_CI: true
+    C8Y_SETTINGS_DEFAULTS_DRYFORMAT: json
+    C8Y_SETTINGS_ACTIVITYLOG_ENABLED: false
+    C8Y_SETTINGS_DEFAULTS_COMPACT: true
+    C8Y_SETTINGS_DEFAULTS_NOCOLOR: true
+    TEST_SHELL: bash

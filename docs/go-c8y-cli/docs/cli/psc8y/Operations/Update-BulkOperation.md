@@ -19,7 +19,7 @@ Update bulk operation
 ```
 Update-BulkOperation
 	[-Id] <Object[]>
-	[-CreationRampSec] <Single>
+	[[-CreationRampSec] <Single>]
 	[-Data <Object>]
 	[-NoAccept]
 	[-ProcessingMode <String>]
@@ -98,14 +98,13 @@ Accept wildcard characters: False
 
 ### -CreationRampSec
 Delay between every operation creation.
-(required)
 
 ```yaml
 Type: Single
 Parameter Sets: (All)
 Aliases:
 
-Required: True
+Required: False
 Position: 2
 Default value: 0
 Accept pipeline input: False

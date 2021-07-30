@@ -65,13 +65,13 @@
         {
           "name": "company",
           "type": "string",
-          "required": true,
+          "required": false,
           "description": "Company name. Maximum 256 characters"
         },
         {
           "name": "domain",
           "type": "string",
-          "required": true,
+          "required": false,
           "pipeline": true,
           "description": "Domain name to be used for the tenant. Maximum 256 characters"
         },
@@ -113,6 +113,10 @@
           "required": false,
           "description": "A set of custom properties of the tenant"
         }
+      ],
+      "bodyRequiredKeys": [
+        "company",
+        "domain"
       ]
     },
     {

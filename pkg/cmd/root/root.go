@@ -40,6 +40,7 @@ import (
 	inventoryAssetsCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/inventory/assets"
 	inventoryFindCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/inventory/find"
 	inventorySubscribeCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/inventory/subscribe"
+	inventoryWaitCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/inventory/wait"
 	measurementsCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/measurements"
 	measurementsSubscribeCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/measurements/subscribe"
 	microservicesCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/microservices"
@@ -305,6 +306,7 @@ func NewCmdRoot(f *cmdutil.Factory, version, buildDate string) *CmdRoot {
 	inventory.AddCommand(inventorySubscribeCmd.NewCmdSubscribe(f).GetCommand())
 	inventory.AddCommand(inventoryAdditionsCmd.NewSubCommand(f).GetCommand())
 	inventory.AddCommand(inventoryAssetsCmd.NewSubCommand(f).GetCommand())
+	inventory.AddCommand(inventoryWaitCmd.NewCmdWait(f).GetCommand())
 	cmd.AddCommand(inventory)
 
 	// applications

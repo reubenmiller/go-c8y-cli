@@ -26,13 +26,13 @@ Create bulk operation for a group (using pipeline)
 ### Options
 
 ```
-      --creationRampSec float32   Delay between every operation creation. (required)
+      --creationRampSec float32   Delay between every operation creation.
   -d, --data string               static data to be applied to body. accepts json or shorthande json, i.e. --data 'value1=1,my.nested.value=100'
       --group strings             Identifies the target group on which this operation should be performed. (accepts pipeline)
   -h, --help                      help for create
-      --operation string          Operation prototype to send to each device in the group (required)
+      --operation string          Operation prototype to send to each device in the group
       --processingMode string     Cumulocity processing mode
-      --startDate string          Time when operations should be created. Defaults to 300s (default "300s")
+      --startDate string          Time when operations should be created. Defaults to 300s
       --template string           Body template
       --templateVars string       Body template variables
 ```

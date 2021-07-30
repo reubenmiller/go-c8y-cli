@@ -53,6 +53,8 @@ Pass external json data into the template, and reference it via the "input.value
 	cmdutil.DisableEncryptionCheck(cmd)
 	cmd.SilenceUsage = true
 
+	cmd.Flags().String("input", "", "input (accepts pipeline)")
+
 	flags.WithOptions(
 		cmd,
 		flags.WithData(),
@@ -92,6 +94,7 @@ func (n *CmdExecute) newTemplate(cmd *cobra.Command, args []string) error {
 		cmd,
 		body,
 		inputIterators,
+		flags.WithOverrideValue("input", "input"),
 		flags.WithDataFlagValue(),
 		cmdutil.WithTemplateValue(cfg),
 		flags.WithTemplateVariablesValue(),

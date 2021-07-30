@@ -33,7 +33,7 @@ Create a new event for a device (using pipeline)
       --template string         Body template
       --templateVars string     Body template variables
       --text string             Text description of the event.
-      --time string             Time of the event. Defaults to current timestamp. (default "0s")
+      --time string             Time of the event. Defaults to current timestamp.
       --type string             Identifies the type of this event.
 ```
 

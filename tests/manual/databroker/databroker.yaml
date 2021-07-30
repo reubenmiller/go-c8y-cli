@@ -1,0 +1,11 @@
+tests:
+    It updates an existing databroker connection using a template:
+        skip: false
+        command: >
+          c8y databroker update --id "12345" --template "{status: 'SUSPENDED'}" --dry
+        exit-code: 0
+        stdout:
+            json:
+                method: PUT
+                path: /databroker/connectors/12345
+                body.status: "SUSPENDED"

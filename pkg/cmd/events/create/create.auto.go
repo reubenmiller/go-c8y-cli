@@ -49,7 +49,7 @@ Create a new event for a device (using pipeline)
 	cmd.SilenceUsage = true
 
 	cmd.Flags().StringSlice("device", []string{""}, "The ManagedObject which is the source of this event. (accepts pipeline)")
-	cmd.Flags().String("time", "0s", "Time of the event. Defaults to current timestamp.")
+	cmd.Flags().String("time", "", "Time of the event. Defaults to current timestamp.")
 	cmd.Flags().String("type", "", "Identifies the type of this event.")
 	cmd.Flags().String("text", "", "Text description of the event.")
 
@@ -141,6 +141,8 @@ func (n *CreateCmd) RunE(cmd *cobra.Command, args []string) error {
 		flags.WithRelativeTimestamp("time", "time", ""),
 		flags.WithStringValue("type", "type"),
 		flags.WithStringValue("text", "text"),
+		flags.WithDefaultTemplateString(`
+{time: _.Now('0s')}`),
 		cmdutil.WithTemplateValue(cfg),
 		flags.WithTemplateVariablesValue(),
 		flags.WithRequiredProperties("type", "text", "time", "source.id"),

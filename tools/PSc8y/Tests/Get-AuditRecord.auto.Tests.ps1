@@ -3,7 +3,7 @@
 Describe -Name "Get-AuditRecord" {
     BeforeEach {
         $Device = New-TestDevice
-        $Record = New-AuditRecord -Type "ManagedObject" -Time "0s" -Text "Managed Object updated: my_Prop: value" -Source $Device.id -Activity "Managed Object updated" -Severity "information"
+        $Record = New-AuditRecord -Type "Inventory" -Time "0s" -Text "Managed Object updated: my_Prop: value" -Source $Device.id -Activity "Managed Object updated" -Severity "information"
 
     }
 

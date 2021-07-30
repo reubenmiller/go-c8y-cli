@@ -46,7 +46,7 @@ Change the status of a specific data broker connector by given connector id
 	cmd.SilenceUsage = true
 
 	cmd.Flags().StringSlice("id", []string{""}, "Data broker connector id (required) (accepts pipeline)")
-	cmd.Flags().String("status", "", "DataBroker status [SUSPENDED]. (required)")
+	cmd.Flags().String("status", "", "DataBroker status [SUSPENDED].")
 
 	completion.WithOptions(
 		cmd,
@@ -62,7 +62,6 @@ Change the status of a specific data broker connector by given connector id
 	)
 
 	// Required flags
-	_ = cmd.MarkFlagRequired("status")
 
 	ccmd.SubCommand = subcommand.NewSubCommand(cmd)
 
@@ -136,6 +135,7 @@ func (n *UpdateCmd) RunE(cmd *cobra.Command, args []string) error {
 		flags.WithStringValue("status", "status"),
 		cmdutil.WithTemplateValue(cfg),
 		flags.WithTemplateVariablesValue(),
+		flags.WithRequiredProperties("status"),
 	)
 	if err != nil {
 		return cmderrors.NewUserError(err)

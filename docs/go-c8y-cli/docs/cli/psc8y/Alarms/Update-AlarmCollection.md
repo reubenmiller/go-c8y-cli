@@ -24,7 +24,7 @@ Update-AlarmCollection
 	[-Resolved]
 	[[-DateFrom] <String>]
 	[[-DateTo] <String>]
-	[-NewStatus] <String>
+	[[-NewStatus] <String>]
 	[-Data <Object>]
 	[-NoAccept]
 	[-ProcessingMode <String>]
@@ -187,14 +187,14 @@ Accept wildcard characters: False
 ```
 
 ### -NewStatus
-New status to be applied to all of the matching alarms (required)
+New status to be applied to all of the matching alarms
 
 ```yaml
 Type: String
 Parameter Sets: (All)
 Aliases:
 
-Required: True
+Required: False
 Position: 6
 Default value: None
 Accept pipeline input: False

@@ -36,6 +36,9 @@
         # Boolean
         "boolean" = "flags.WithBoolValue(`"${prop}`", `"${queryParam}`", `"$FixedValue`"),"
 
+        # Optional fragment (if flag is true)
+        "optional_fragment" = "flags.WithOptionalFragment(`"${prop}`", `"${queryParam}`", `"$FixedValue`"),"
+
         # relative datetime
         "datetime" = "flags.WithRelativeTimestamp(`"${prop}`", `"${queryParam}`", `"$FixedValue`"),"
 

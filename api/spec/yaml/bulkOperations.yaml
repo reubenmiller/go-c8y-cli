@@ -142,25 +142,28 @@ endpoints:
       - name: startDate
         type: datetime
         required: false
-        default: "300s"
+        default: ""
         description: Time when operations should be created. Defaults to 300s
 
       - name: creationRampSec
         property: creationRamp
         type: float
-        required: true
+        required: false
         description: Delay between every operation creation.
 
       - name: operation
         property: operationPrototype
         type: json_custom
-        required: true
+        required: false
         description: Operation prototype to send to each device in the group
 
       - name: data
         type: json
         description: Additional properties describing the bulk operation which will be performed on the device group.
-      
+    bodyTemplate:
+      type: jsonnet
+      applyLast: false
+      template: "{startDate: _.Now('300s'), creationRamp: 1.000}" 
     bodyRequiredKeys:
       - groupId
       - startDate
@@ -193,13 +196,14 @@ endpoints:
       - name: creationRampSec
         property: creationRamp
         type: float
-        required: true
+        required: false
         description: Delay between every operation creation.
 
       - name: data
         type: json
         description: Additional properties to update on the bulk operation.
-
+    bodyRequiredKeys:
+      - creationRamp
     pathParameters:
       # Note: id is actually an integer but it should be handled as a string because it is being applied to a path parameter (and piped input are strings)
       - name: id

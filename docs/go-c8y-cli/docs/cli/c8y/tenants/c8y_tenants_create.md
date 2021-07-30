@@ -25,11 +25,11 @@ Create a new tenant (from the management tenant)
 ```
       --adminName string        Username of the tenant administrator
       --adminPass string        Password of the tenant administrator
-      --company string          Company name. Maximum 256 characters (required)
+      --company string          Company name. Maximum 256 characters
       --contactName string      A contact name, for example an administrator, of the tenant
       --contactPhone string     An international contact phone number
   -d, --data string             static data to be applied to body. accepts json or shorthande json, i.e. --data 'value1=1,my.nested.value=100'
-      --domain string           Domain name to be used for the tenant. Maximum 256 characters (required) (accepts pipeline)
+      --domain string           Domain name to be used for the tenant. Maximum 256 characters (accepts pipeline)
   -h, --help                    help for create
       --processingMode string   Cumulocity processing mode
       --template string         Body template

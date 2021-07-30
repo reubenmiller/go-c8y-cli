@@ -18,12 +18,12 @@ Create audit record
 
 ```
 New-AuditRecord
-	[-Type] <String>
+	[[-Type] <String>]
 	[[-Time] <String>]
-	[-Text] <String>
-	[-Source] <Object[]>
-	[-Activity] <String>
-	[-Severity] <String>
+	[[-Text] <String>]
+	[[-Source] <Object[]>]
+	[[-Activity] <String>]
+	[[-Severity] <String>]
 	[[-User] <String>]
 	[[-Application] <String>]
 	[-Data <Object>]
@@ -79,7 +79,7 @@ Create a new audit record for a given action
 
 ### EXAMPLE 1
 ```
-New-AuditRecord -Type "ManagedObject" -Time "0s" -Text "Managed Object updated: my_Prop: value" -Source $Device.id -Activity "Managed Object updated" -Severity "information"
+New-AuditRecord -Type "Inventory" -Time "0s" -Text "Managed Object updated: my_Prop: value" -Source $Device.id -Activity "Managed Object updated" -Severity "information"
 ```
 
 Create an audit record for a custom managed object update
@@ -88,14 +88,13 @@ Create an audit record for a custom managed object update
 
 ### -Type
 Identifies the type of this audit record.
-(required)
 
 ```yaml
 Type: String
 Parameter Sets: (All)
 Aliases:
 
-Required: True
+Required: False
 Position: 1
 Default value: None
 Accept pipeline input: False
@@ -120,14 +119,13 @@ Accept wildcard characters: False
 
 ### -Text
 Text description of the audit record.
-(required)
 
 ```yaml
 Type: String
 Parameter Sets: (All)
 Aliases:
 
-Required: True
+Required: False
 Position: 3
 Default value: None
 Accept pipeline input: False
@@ -135,14 +133,14 @@ Accept wildcard characters: False
 ```
 
 ### -Source
-An optional ManagedObject that the audit record originated from (required)
+An optional ManagedObject that the audit record originated from
 
 ```yaml
 Type: Object[]
 Parameter Sets: (All)
 Aliases:
 
-Required: True
+Required: False
 Position: 4
 Default value: None
 Accept pipeline input: True (ByPropertyName, ByValue)
@@ -151,14 +149,13 @@ Accept wildcard characters: False
 
 ### -Activity
 The activity that was carried out.
-(required)
 
 ```yaml
 Type: String
 Parameter Sets: (All)
 Aliases:
 
-Required: True
+Required: False
 Position: 5
 Default value: None
 Accept pipeline input: False
@@ -167,14 +164,13 @@ Accept wildcard characters: False
 
 ### -Severity
 The severity of action: critical, major, minor, warning or information.
-(required)
 
 ```yaml
 Type: String
 Parameter Sets: (All)
 Aliases:
 
-Required: True
+Required: False
 Position: 6
 Default value: None
 Accept pipeline input: False

@@ -74,7 +74,6 @@ endpoints:
 
       - name: maximumAge
         type: integer
-        default: '365'
         required: false
         description: Maximum age of document in days.
 
@@ -87,7 +86,10 @@ endpoints:
         type: json
         required: false
         description: Data
-
+    bodyTemplate:
+      type: jsonnet
+      applyLast: false
+      template: "{maximumAge: 365}" 
     bodyRequiredKeys:
       - maximumAge
       - dataType
@@ -192,7 +194,7 @@ endpoints:
       - name: dataType
         type: string
         validationSet: [ALARM, AUDIT, EVENT, MEASUREMENT, OPERATION, '*']
-        required: true
+        required: false
         description: RetentionRule will be applied to this type of documents, possible values [ALARM, AUDIT, EVENT, MEASUREMENT, OPERATION, *].
 
       - name: fragmentType

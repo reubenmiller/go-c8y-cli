@@ -47,7 +47,7 @@ Update a retention rule
 	cmd.SilenceUsage = true
 
 	cmd.Flags().StringSlice("id", []string{""}, "Retention rule id (required) (accepts pipeline)")
-	cmd.Flags().String("dataType", "", "RetentionRule will be applied to this type of documents, possible values [ALARM, AUDIT, EVENT, MEASUREMENT, OPERATION, *]. (required)")
+	cmd.Flags().String("dataType", "", "RetentionRule will be applied to this type of documents, possible values [ALARM, AUDIT, EVENT, MEASUREMENT, OPERATION, *].")
 	cmd.Flags().String("fragmentType", "", "RetentionRule will be applied to documents with fragmentType.")
 	cmd.Flags().String("type", "", "RetentionRule will be applied to documents with type.")
 	cmd.Flags().String("source", "", "RetentionRule will be applied to documents with source.")
@@ -68,7 +68,6 @@ Update a retention rule
 	)
 
 	// Required flags
-	_ = cmd.MarkFlagRequired("dataType")
 
 	ccmd.SubCommand = subcommand.NewSubCommand(cmd)
 

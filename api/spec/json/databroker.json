@@ -113,7 +113,7 @@
           "validationSet": [
             "SUSPENDED"
           ],
-          "required": true,
+          "required": false,
           "description": "DataBroker status [SUSPENDED]."
         },
         {
@@ -122,6 +122,9 @@
           "required": false,
           "description": "Data"
         }
+      ],
+      "bodyRequiredKeys": [
+        "status"
       ]
     }
   ]

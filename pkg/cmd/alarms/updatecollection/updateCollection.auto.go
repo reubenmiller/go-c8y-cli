@@ -51,7 +51,7 @@ Update the status of all active alarms on a device to ACKNOWLEDGED
 	cmd.Flags().Bool("resolved", false, "When set to true only resolved alarms will be removed (the one with status CLEARED), false means alarms with status ACTIVE or ACKNOWLEDGED.")
 	cmd.Flags().String("dateFrom", "", "Start date or date and time of alarm occurrence.")
 	cmd.Flags().String("dateTo", "", "End date or date and time of alarm occurrence.")
-	cmd.Flags().String("newStatus", "", "New status to be applied to all of the matching alarms (required)")
+	cmd.Flags().String("newStatus", "", "New status to be applied to all of the matching alarms")
 
 	completion.WithOptions(
 		cmd,
@@ -64,13 +64,13 @@ Update the status of all active alarms on a device to ACKNOWLEDGED
 	flags.WithOptions(
 		cmd,
 		flags.WithProcessingMode(),
-
+		flags.WithData(),
+		f.WithTemplateFlag(cmd),
 		flags.WithExtendedPipelineSupport("device", "source", false, "deviceId", "source.id", "managedObject.id", "id"),
 		flags.WithCollectionProperty("alarms"),
 	)
 
 	// Required flags
-	_ = cmd.MarkFlagRequired("newStatus")
 
 	ccmd.SubCommand = subcommand.NewSubCommand(cmd)
 
@@ -150,6 +150,7 @@ func (n *UpdateCollectionCmd) RunE(cmd *cobra.Command, args []string) error {
 		flags.WithStringValue("newStatus", "status"),
 		cmdutil.WithTemplateValue(cfg),
 		flags.WithTemplateVariablesValue(),
+		flags.WithRequiredProperties("status"),
 	)
 	if err != nil {
 		return cmderrors.NewUserError(err)

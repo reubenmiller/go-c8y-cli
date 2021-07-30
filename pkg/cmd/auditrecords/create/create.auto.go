@@ -33,7 +33,7 @@ func NewCreateCmd(f *cmdutil.Factory) *CreateCmd {
 		Short: "Create audit record",
 		Long:  `Create a new audit record for a given action`,
 		Example: heredoc.Doc(`
-$ c8y auditrecords create --type "ManagedObject" --time "0s" --text "Managed Object updated: my_Prop: value" --source 12345 --activity "Managed Object updated" --severity "information"
+$ c8y auditrecords create --type "Inventory" --time "0s" --text "Managed Object updated: my_Prop: value" --source 12345 --activity "Managed Object updated" --severity "information"
 Create an audit record for a custom managed object update
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
@@ -44,17 +44,18 @@ Create an audit record for a custom managed object update
 
 	cmd.SilenceUsage = true
 
-	cmd.Flags().String("type", "", "Identifies the type of this audit record. (required)")
-	cmd.Flags().String("time", "0s", "Time of the audit record. Defaults to current timestamp.")
-	cmd.Flags().String("text", "", "Text description of the audit record. (required)")
-	cmd.Flags().String("source", "", "An optional ManagedObject that the audit record originated from (required) (accepts pipeline)")
-	cmd.Flags().String("activity", "", "The activity that was carried out. (required)")
-	cmd.Flags().String("severity", "", "The severity of action: critical, major, minor, warning or information. (required)")
+	cmd.Flags().String("type", "", "Identifies the type of this audit record.")
+	cmd.Flags().String("time", "", "Time of the audit record. Defaults to current timestamp.")
+	cmd.Flags().String("text", "", "Text description of the audit record.")
+	cmd.Flags().String("source", "", "An optional ManagedObject that the audit record originated from (accepts pipeline)")
+	cmd.Flags().String("activity", "", "The activity that was carried out.")
+	cmd.Flags().String("severity", "", "The severity of action: critical, major, minor, warning or information.")
 	cmd.Flags().String("user", "", "The user responsible for the audited action.")
 	cmd.Flags().String("application", "", "The application used to carry out the audited action.")
 
 	completion.WithOptions(
 		cmd,
+		completion.WithValidateSet("type", "Alarm", "Application", "BulkOperation", "CepModule", "Connector", "Event", "Group", "Inventory", "InventoryRole", "Operation", "Option", "Report", "SingleSignOn", "SmartRule", "SYSTEM", "Tenant", "TenantAuthConfig", "TrustedCertificates", "UserAuthentication"),
 		completion.WithValidateSet("severity", "critical", "major", "minor", "warning", "information"),
 	)
 
@@ -63,14 +64,10 @@ Create an audit record for a custom managed object update
 		flags.WithProcessingMode(),
 		flags.WithData(),
 		f.WithTemplateFlag(cmd),
-		flags.WithExtendedPipelineSupport("source", "source.id", true, "id"),
+		flags.WithExtendedPipelineSupport("source", "source.id", false, "id"),
 	)
 
 	// Required flags
-	_ = cmd.MarkFlagRequired("type")
-	_ = cmd.MarkFlagRequired("text")
-	_ = cmd.MarkFlagRequired("activity")
-	_ = cmd.MarkFlagRequired("severity")
 
 	ccmd.SubCommand = subcommand.NewSubCommand(cmd)
 
@@ -150,8 +147,11 @@ func (n *CreateCmd) RunE(cmd *cobra.Command, args []string) error {
 		flags.WithStringValue("severity", "severity"),
 		flags.WithStringValue("user", "user"),
 		flags.WithStringValue("application", "application"),
+		flags.WithDefaultTemplateString(`
+{time: _.Now('0s')}`),
 		cmdutil.WithTemplateValue(cfg),
 		flags.WithTemplateVariablesValue(),
+		flags.WithRequiredProperties("activity", "source.id", "text", "type"),
 	)
 	if err != nil {
 		return cmderrors.NewUserError(err)

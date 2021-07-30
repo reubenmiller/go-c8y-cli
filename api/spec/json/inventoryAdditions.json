@@ -180,6 +180,71 @@
           "description": "Child managed object id"
         }
       ]
+    },
+    {
+      "name": "createChildAddition",
+      "method": "POST",
+      "path": "inventory/managedObjects/{id}/childAdditions",
+      "accept": "application/json",
+      "contentType": "application/vnd.com.nsn.cumulocity.managedObject+json",
+      "collectionType": "application/vnd.com.nsn.cumulocity.managedObject+json",
+      "description": "Create child addition",
+      "descriptionLong": "Create a new managed object as a child addition to another existing managed object",
+      "alias": {
+        "go": "create",
+        "powershell": "New-ChildAddition"
+      },
+      "examples": {
+        "powershell": [
+          {
+            "description": "Create a child addition and link it to an existing managed object",
+            "beforeEach": [
+              "$software = PSc8y\\New-ManagedObject -Name softwarePackage1"
+            ],
+            "command": "New-ChildAddition -Id $software.id -Data \"custom.value=test\" -Global",
+            "afterEach": [
+              "PSc8y\\Remove-ManagedObject -Id $software.id"
+            ]
+          }
+        ],
+        "go": [
+          {
+            "description": "Create a child addition and link it to an existing managed object",
+            "command": "c8y inventory additions create --id 12345 --data \"custom.value=test\" --global",
+            "assertStdOut": {
+              "json": {
+                "path": "r//inventory/managedObjects/\\d+/childAdditions$",
+                "body.custom.value": "test",
+                "body.c8y_Global": "{}"
+              }
+            }
+          }
+        ]
+      },
+      "pathParameters": [
+        {
+          "name": "id",
+          "type": "[]id",
+          "property": "id",
+          "required": true,
+          "pipeline": true,
+          "description": "Managed object id where the child addition will be added to",
+          "position": 0
+        }
+      ],
+      "body": [
+        {
+          "name": "global",
+          "type": "optional_fragment",
+          "property": "c8y_Global",
+          "description": "Enable global access to the managed object"
+        },
+        {
+          "name": "data",
+          "type": "json",
+          "description": "Additional properties of the inventory."
+        }
+      ]
     }
   ]
 }

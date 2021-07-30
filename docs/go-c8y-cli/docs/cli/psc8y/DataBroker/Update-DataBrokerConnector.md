@@ -19,7 +19,7 @@ Update data broker
 ```
 Update-DataBrokerConnector
 	[-Id] <Object[]>
-	[-Status] <String>
+	[[-Status] <String>]
 	[-Data <Object>]
 	[-NoAccept]
 	[-ProcessingMode <String>]
@@ -97,14 +97,13 @@ Accept wildcard characters: False
 
 ### -Status
 DataBroker status [SUSPENDED].
-(required)
 
 ```yaml
 Type: String
 Parameter Sets: (All)
 Aliases:
 
-Required: True
+Required: False
 Position: 2
 Default value: None
 Accept pipeline input: False

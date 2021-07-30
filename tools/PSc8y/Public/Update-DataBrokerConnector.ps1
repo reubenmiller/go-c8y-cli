@@ -29,8 +29,8 @@ Change the status of a specific data broker connector by given connector id
         [object[]]
         $Id,
 
-        # DataBroker status [SUSPENDED]. (required)
-        [Parameter(Mandatory = $true)]
+        # DataBroker status [SUSPENDED].
+        [Parameter()]
         [ValidateSet('SUSPENDED')]
         [string]
         $Status

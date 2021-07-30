@@ -19,7 +19,7 @@ Update retention rule
 ```
 Update-RetentionRule
 	[-Id] <Object[]>
-	[-DataType] <String>
+	[[-DataType] <String>]
 	[[-FragmentType] <String>]
 	[[-Type] <String>]
 	[[-Source] <String>]
@@ -110,14 +110,13 @@ Accept wildcard characters: False
 
 ### -DataType
 RetentionRule will be applied to this type of documents, possible values [ALARM, AUDIT, EVENT, MEASUREMENT, OPERATION, *].
-(required)
 
 ```yaml
 Type: String
 Parameter Sets: (All)
 Aliases:
 
-Required: True
+Required: False
 Position: 2
 Default value: None
 Accept pipeline input: False

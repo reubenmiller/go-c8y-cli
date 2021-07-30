@@ -1,0 +1,11 @@
+tests:
+    It creates a child addition with global access:
+        command: >
+          c8y inventory additions create --id 12345 --data "custom.value=test" --global --dry
+        exit-code: 0
+        stdout:
+            json:
+                method: POST
+                path: r//inventory/managedObjects/\d+/childAdditions$
+                body.custom.value: "test"
+                body.c8y_Global: '{}'

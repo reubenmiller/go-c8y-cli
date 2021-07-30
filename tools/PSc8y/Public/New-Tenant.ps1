@@ -22,14 +22,13 @@ Create a new tenant (from the management tenant)
     [Alias()]
     [OutputType([object])]
     Param(
-        # Company name. Maximum 256 characters (required)
-        [Parameter(Mandatory = $true)]
+        # Company name. Maximum 256 characters
+        [Parameter()]
         [string]
         $Company,
 
-        # Domain name to be used for the tenant. Maximum 256 characters (required)
-        [Parameter(Mandatory = $true,
-                   ValueFromPipeline=$true,
+        # Domain name to be used for the tenant. Maximum 256 characters
+        [Parameter(ValueFromPipeline=$true,
                    ValueFromPipelineByPropertyName=$true)]
         [object[]]
         $Domain,

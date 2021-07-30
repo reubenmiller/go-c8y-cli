@@ -363,7 +363,7 @@
           "name": "time",
           "type": "datetime",
           "required": false,
-          "default": "0s",
+          "default": "",
           "description": "Time of the measurement. Defaults to current timestamp."
         },
         {
@@ -378,6 +378,11 @@
           "description": "List of measurement fragments."
         }
       ],
+      "bodyTemplate": {
+        "type": "jsonnet",
+        "applyLast": false,
+        "template": "{time: _.Now('0s')}"
+      },
       "bodyRequiredKeys": [
         "type",
         "time",

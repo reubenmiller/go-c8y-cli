@@ -26,13 +26,14 @@ Create an external identity by using the .name property of the device (via the i
 ### Options
 
 ```
+  -d, --data string             static data to be applied to body. accepts json or shorthande json, i.e. --data 'value1=1,my.nested.value=100'
       --device strings          The ManagedObject linked to the external ID. (required) (accepts pipeline)
   -h, --help                    help for create
       --name string             The identifier used in the external system that Cumulocity interfaces with.
       --processingMode string   Cumulocity processing mode
       --template string         Body template
       --templateVars string     Body template variables
-      --type string             The type of the external identifier as string, e.g. 'com_cumulocity_model_idtype_SerialNumber'. (default "c8y_Serial")
+      --type string             The type of the external identifier as string, e.g. 'com_cumulocity_model_idtype_SerialNumber'.
 ```
 
 ### Options inherited from parent commands
