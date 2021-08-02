@@ -15,7 +15,7 @@ const isI18nStaging = process.env.I18N_STAGING === 'true';
 
 const allDocHomesPaths = [
   '/docs/',
-  '/docs/next/',
+  '/docs/master/',
 ];
 
 const baseUrl = process.env.BASE_URL || '/';
@@ -225,13 +225,13 @@ const baseUrl = process.env.BASE_URL || '/';
         docs: {
           sidebarPath: require.resolve('./sidebars.js'),
           editUrl:
-            'https://github.com/reubenmiller/go-c8y-cli/edit/next/docs/go-c8y-cli/',
+            'https://github.com/reubenmiller/go-c8y-cli/edit/master/docs/go-c8y-cli/',
         },
         blog: {
           showReadingTime: true,
           // Please change this to your repo.
           editUrl:
-            'https://github.com/reubenmiller/go-c8y-cli/edit/next/docs/go-c8y-cli/',
+            'https://github.com/reubenmiller/go-c8y-cli/edit/master/docs/go-c8y-cli/',
         },
       },
     ],
