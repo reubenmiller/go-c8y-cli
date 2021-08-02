@@ -88,7 +88,7 @@ nfpms:
     license: MIT
     maintainer: Reuben Miller <reuben.d.miller@gmail.com>
     homepage: http://goc8ycli.netlify.app
-    bindir: /usr/local
+    bindir: /usr/local/bin
     description: Cumulocity's unofficial command line tool
     section: utils
     priority: optional
