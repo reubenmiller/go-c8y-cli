@@ -1,14 +1,18 @@
 package flags
 
 import (
+	"context"
 	"fmt"
+	"mime"
 	"net/http"
+	"path/filepath"
 	"strings"
 
 	"github.com/reubenmiller/go-c8y-cli/pkg/c8ydata"
 	"github.com/reubenmiller/go-c8y-cli/pkg/iterator"
 	"github.com/reubenmiller/go-c8y-cli/pkg/jsonUtilities"
 	"github.com/reubenmiller/go-c8y-cli/pkg/mapbuilder"
+	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
 )
 
@@ -650,6 +654,40 @@ func WithDataValueAdvanced(stripCumulocityKeys bool, raw bool, opts ...string) G
 			c8ydata.RemoveCumulocityProperties(data, true)
 		}
 		return dst, data, err
+	}
+}
+
+// WithBinaryUploadURL uploads an inventory binary and returns the URL to it
+func WithBinaryUploadURL(client *c8y.Client, opts ...string) GetOption {
+	return func(cmd *cobra.Command, inputIterators *RequestInputIterators) (string, interface{}, error) {
+
+		src, dst, _ := UnpackGetterOptions("%s", opts...)
+
+		if !cmd.Flags().Changed(src) {
+			return "", "", nil
+		}
+
+		value, err := cmd.Flags().GetString(src)
+		if err != nil {
+			return dst, value, err
+		}
+
+		// binary properties
+		binaryProps := make(map[string]interface{})
+		binaryProps["c8y_Global"] = map[string]interface{}{}
+		binaryProps["name"] = filepath.Base(value)
+		mimeType := mime.TypeByExtension(filepath.Ext(value))
+		if mimeType == "" {
+			mimeType = "application/octet-stream"
+		}
+		binaryProps["type"] = mimeType
+		mo, _, err := client.Inventory.CreateBinary(context.Background(), value, binaryProps)
+
+		if err != nil {
+			return "", nil, err
+		}
+
+		return dst, mo.Self, err
 	}
 }
 

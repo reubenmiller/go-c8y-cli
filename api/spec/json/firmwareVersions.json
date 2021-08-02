@@ -1,0 +1,346 @@
+{
+  "information": {
+    "name": "firmware/versions",
+    "description": "Cumulocity firmware version management",
+    "descriptionLong": "REST endpoint to interact with Cumulocity firmware versions",
+    "link": "https://cumulocity.com/guides/reference/inventory/"
+  },
+  "endpoints": [
+    {
+      "name": "getFirmwareVersionCollection",
+      "method": "GET",
+      "description": "Get firmware package version collection",
+      "descriptionLong": "Get a collection of firmware package versions (managedObjects) based on filter parameters",
+      "path": "inventory/managedObjects?query=$filter=((not(has(c8y_Patch))) and (bygroupid({firmwareId}))) $orderby=creationTime.date desc,creationTime desc",
+      "accept": "application/vnd.com.nsn.cumulocity.managedObjectCollection+json",
+      "collectionType": "application/vnd.com.nsn.cumulocity.managedObject+json",
+      "collectionProperty": "managedObjects",
+      "alias": {
+        "go": "list",
+        "powershell": "Get-FirmwareVersionCollection"
+      },
+      "examples": {
+        "powershell": [
+          {
+            "description": "Get a list of firmware package versions",
+            "command": "Get-FirmwareVersionCollection"
+          }
+        ],
+        "go": [
+          {
+            "description": "Get a list of firmware package versions",
+            "command": "c8y firmware versions list"
+          }
+        ]
+      },
+      "pathParameters": [
+        {
+          "name": "firmwareId",
+          "type": "[]firmware",
+          "required": true,
+          "pipeline": true,
+          "pipelineAliases": [
+            "additionParents.references.0.managedObject.id",
+            "id"
+          ],
+          "description": "Firmware package id"
+        }
+      ],
+      "queryParameters": [
+        {
+          "name": "withParents",
+          "type": "booleanDefault",
+          "description": "Include parent references",
+          "default": "true"
+        }
+      ]
+    },
+    {
+      "name": "getFirmwarePackageVersionCollection",
+      "skip": true,
+      "method": "GET",
+      "description": "Get firmware package version collection",
+      "descriptionLong": "Get a collection of firmware package versions (managedObjects) based on filter parameters",
+      "path": "inventory/managedObjects",
+      "accept": "application/vnd.com.nsn.cumulocity.managedObjectCollection+json",
+      "collectionType": "application/vnd.com.nsn.cumulocity.managedObject+json",
+      "collectionProperty": "managedObjects",
+      "alias": {
+        "go": "list",
+        "powershell": "Get-FirmwareVersionCollection"
+      },
+      "examples": {
+        "powershell": [
+          {
+            "description": "Get a list of firmware package versions",
+            "command": "Get-FirmwareVersionCollection"
+          }
+        ],
+        "go": [
+          {
+            "description": "Get a list of firmware package versions",
+            "command": "c8y firmware versions list"
+          }
+        ]
+      },
+      "queryParameters": [
+        {
+          "name": "type",
+          "type": "string",
+          "default": "c8y_FirmwareBinary",
+          "validationSet": [
+            "c8y_FirmwareBinary"
+          ],
+          "static": true,
+          "description": "Firmware version type"
+        },
+        {
+          "name": "withParents",
+          "type": "booleanDefault",
+          "description": "Include parent references",
+          "default": "true"
+        }
+      ]
+    },
+    {
+      "name": "newFirmwareVersion",
+      "method": "POST",
+      "path": "inventory/managedObjects/{firmwareId}/childAdditions",
+      "accept": "application/vnd.com.nsn.cumulocity.inventory+json",
+      "contentType": "application/vnd.com.nsn.cumulocity.managedObject+json",
+      "description": "Create firmware package version",
+      "descriptionLong": "Create a new firmware package (managedObject)",
+      "alias": {
+        "go": "create",
+        "powershell": "New-FirmwareVersion"
+      },
+      "examples": {
+        "powershell": [
+          {
+            "description": "Create a new version to an existing firmware package",
+            "beforeEach": [
+              "$type = New-RandomString -Prefix \"customType_\""
+            ],
+            "command": "New-ManagedObject -Name \"python3-requests\" -Description \"python requests library\" -Data @{$type=@{}}",
+            "afterEach": [
+              "Get-ManagedObjectCollection -FragmentType $type | Remove-ManagedObject"
+            ]
+          }
+        ],
+        "go": [
+          {
+            "description": "Create a new version to an existing firmware package",
+            "command": "c8y firmware create --name \"python3-requests\" --description \"python requests library\""
+          }
+        ]
+      },
+      "pathParameters": [
+        {
+          "name": "firmwareId",
+          "type": "[]firmware",
+          "pipeline": true,
+          "required": false,
+          "pipelineAliases": [
+            "additionParents.references.0.managedObject.id",
+            "id"
+          ],
+          "description": "Firmware package id where the version will be added to"
+        }
+      ],
+      "body": [
+        {
+          "name": "version",
+          "type": "string",
+          "required": false,
+          "description": "Firmware package version name, i.e. 1.0.0",
+          "property": "c8y_Firmware.version"
+        },
+        {
+          "name": "url",
+          "type": "string",
+          "required": false,
+          "description": "URL to the firmware package",
+          "property": "c8y_Firmware.url"
+        },
+        {
+          "name": "data",
+          "type": "json",
+          "description": "Additional properties of the firmware package."
+        }
+      ],
+      "bodyTemplate": {
+        "type": "jsonnet",
+        "applyLast": false,
+        "template": "{type: 'c8y_FirmwareBinary', c8y_Global:{}}"
+      },
+      "bodyRequiredKeys": [
+        "type"
+      ]
+    },
+    {
+      "name": "deleteFirmwareVersion",
+      "description": "Delete firmware package version",
+      "descriptionLong": "Delete an existing firmware package version",
+      "method": "DELETE",
+      "path": "inventory/managedObjects/{id}",
+      "accept": "",
+      "alias": {
+        "go": "delete",
+        "powershell": "Remove-FirmwareVersion"
+      },
+      "examples": {
+        "powershell": [
+          {
+            "description": "Delete a firmware package",
+            "beforeEach": [
+              "$mo = PSc8y\\New-ManagedObject -Name \"testMO\""
+            ],
+            "command": "Remove-Firmware -Id $mo.id",
+            "afterEach": [
+              "Remove-ManagedObject -Id $mo.id -ErrorAction SilentlyContinue"
+            ]
+          },
+          {
+            "description": "Delete a firmware package (using pipeline)",
+            "beforeEach": [
+              "$mo = PSc8y\\New-ManagedObject -Name \"testMO\""
+            ],
+            "command": "Get-ManagedObject -Id $mo.id | Remove-Firmware",
+            "afterEach": [
+              "Remove-ManagedObject -Id $mo.id -ErrorAction SilentlyContinue"
+            ]
+          },
+          {
+            "description": "Delete a firmware package and all related versions",
+            "beforeEach": [
+              "$Device = PSc8y\\New-TestDevice",
+              "$ChildDevice = PSc8y\\New-TestDevice",
+              "PSc8y\\Add-ChildDeviceToDevice -Device $Device.id -NewChild $ChildDevice.id"
+            ],
+            "command": "Get-ManagedObject -Id $Device.id | Remove-Firmware -Cascade",
+            "afterEach": [
+              "Remove-ManagedObject -Id $Device.id -ErrorAction SilentlyContinue",
+              "Remove-ManagedObject -Id $ChildDevice.id -ErrorAction SilentlyContinue"
+            ]
+          }
+        ],
+        "go": [
+          {
+            "description": "Delete a firmware package and all related versions",
+            "command": "c8y firmware versions delete --id 12345"
+          },
+          {
+            "description": "Delete a firmware package (but keep any child binaries)",
+            "command": "c8y firmware versions delete --id 12345 --forceCascade=false"
+          }
+        ]
+      },
+      "pathParameters": [
+        {
+          "name": "id",
+          "type": "[]firmwareversion",
+          "pipeline": true,
+          "required": true,
+          "description": "Firmware Package version (managedObject) id"
+        },
+        {
+          "name": "firmwareId",
+          "type": "[]firmware",
+          "required": false,
+          "description": "Firmware package id (used to help completion be more accurate)"
+        }
+      ],
+      "queryParameters": [
+        {
+          "name": "forceCascade",
+          "type": "booleanDefault",
+          "default": "true",
+          "description": "Remove version and any related binaries"
+        }
+      ]
+    },
+    {
+      "name": "newFirmwareVersionPatch",
+      "method": "POST",
+      "path": "inventory/managedObjects/{firmwareId}/childAdditions",
+      "accept": "application/vnd.com.nsn.cumulocity.inventory+json",
+      "contentType": "application/vnd.com.nsn.cumulocity.managedObject+json",
+      "description": "Create firmware package version patch",
+      "descriptionLong": "Create a new firmware package (managedObject)",
+      "alias": {
+        "go": "createPatch",
+        "powershell": "New-FirmwareVersionPatch"
+      },
+      "examples": {
+        "powershell": [
+          {
+            "description": "Create a new version to an existing firmware package",
+            "beforeEach": [
+              "$type = New-RandomString -Prefix \"customType_\""
+            ],
+            "command": "New-ManagedObject -Name \"python3-requests\" -Description \"python requests library\" -Data @{$type=@{}}",
+            "afterEach": [
+              "Get-ManagedObjectCollection -FragmentType $type | Remove-ManagedObject"
+            ]
+          }
+        ],
+        "go": [
+          {
+            "description": "Create a new version to an existing firmware package",
+            "command": "c8y firmware create --name \"python3-requests\" --description \"python requests library\""
+          }
+        ]
+      },
+      "pathParameters": [
+        {
+          "name": "firmwareId",
+          "type": "[]firmwareversion",
+          "pipeline": true,
+          "required": false,
+          "pipelineAliases": [
+            "additionParents.references.0.managedObject.id",
+            "id"
+          ],
+          "description": "Firmware package id where the version will be added to"
+        }
+      ],
+      "body": [
+        {
+          "name": "version",
+          "type": "string",
+          "required": false,
+          "description": "Patch version, i.e. 1.0.0",
+          "property": "c8y_Firmware.version"
+        },
+        {
+          "name": "url",
+          "type": "string",
+          "required": false,
+          "description": "URL to the firmware patch",
+          "property": "c8y_Firmware.url"
+        },
+        {
+          "name": "dependencyVersion",
+          "type": "string",
+          "required": false,
+          "description": "Existing firmware version that the patch is dependent on",
+          "property": "c8y_Patch.dependency"
+        },
+        {
+          "name": "data",
+          "type": "json",
+          "description": "Additional properties of the firmware package."
+        }
+      ],
+      "bodyTemplate": {
+        "type": "jsonnet",
+        "applyLast": false,
+        "template": "{type: 'c8y_FirmwareBinary', c8y_Global:{}}"
+      },
+      "bodyRequiredKeys": [
+        "type",
+        "c8y_Patch.dependency"
+      ]
+    }
+  ]
+}

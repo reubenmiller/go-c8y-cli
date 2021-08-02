@@ -57,6 +57,11 @@
         "[]role" { "object[]"; break }
         "[]roleself" { "object[]"; break }
         "[]string" { "string[]"; break }
+        "[]configuration" { "object[]"; break }
+        "[]software" { "object[]"; break }
+        "[]softwareversion" { "object[]"; break }
+        "[]firmware" { "object[]"; break }
+        "[]firmwareversion" { "object[]"; break }
         "[]stringcsv" { "string[]"; break }
         "[]tenant" { "object[]"; break }
         "[]user" { "object[]"; break }
@@ -64,6 +69,7 @@
         "[]userself" { "object[]"; break }
         "application" { "object[]"; break }
         "boolean" { "switch"; break }
+        "booleanDefault" { "switch"; break }
         "optional_fragment" { "switch"; break }
         "datefrom" { "string"; break }
         "datetime" { "string"; break }
@@ -73,6 +79,7 @@
         "float" { "float"; break }
         "fileContents" { "string"; break }
         "attachment" { "string"; break }
+        "binaryUploadURL" { "string"; break }
         "id" { "object[]"; break }
         "integer" { "long"; break }
         "json" { "object"; break }

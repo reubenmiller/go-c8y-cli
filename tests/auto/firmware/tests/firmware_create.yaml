@@ -1,0 +1,10 @@
+tests:
+    firmware_create_Create a firmware package:
+        command: c8y firmware create --name "python3-requests" --description "python requests library"
+        exit-code: 0
+        stdout:
+            json:
+                body.description: python requests library
+                body.name: python3-requests
+                method: POST
+                path: /inventory/managedObjects

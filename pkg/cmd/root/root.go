@@ -22,18 +22,22 @@ import (
 	binariesCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/binaries"
 	bulkoperationsCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/bulkoperations"
 	completionCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/completion"
+	configurationCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/configuration"
 	currentapplicationCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/currentapplication"
 	currenttenantCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/currenttenant"
 	currentuserCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/currentuser"
 	databrokerCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/databroker"
 	devicegroupsCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/devicegroups"
 	devicegroupsListCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/devicegroups/list"
+	deviceprofilesCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/deviceprofiles"
 	deviceregistrationCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/deviceregistration"
 	devicesCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/devices"
 	devicesListCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/devices/list"
 	eventsCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/events"
 	eventsSubscribeCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/events/subscribe"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmd/factory"
+	firmwareCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/firmware"
+	firmwareVersionsCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/firmware/versions"
 	identityCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/identity"
 	inventoryCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/inventory"
 	inventoryAdditionsCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/inventory/additions"
@@ -55,6 +59,8 @@ import (
 	settingsCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/settings"
 	smartgroupsCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/smartgroups"
 	smartgroupsListCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/smartgroups/list"
+	softwareCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/software"
+	softwareVersionsCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/software/versions"
 	systemoptionsCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/systemoptions"
 	templateCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/template"
 	tenantoptionsCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/tenantoptions"
@@ -256,6 +262,7 @@ func NewCmdRoot(f *cmdutil.Factory, version, buildDate string) *CmdRoot {
 		currenttenantCmd.NewSubCommand(f).GetCommand(),
 		currentuserCmd.NewSubCommand(f).GetCommand(),
 		activityLogCmd.NewSubCommand(f).GetCommand(),
+		configurationCmd.NewSubCommand(f).GetCommand(),
 	}
 
 	cmd.AddCommand(commands...)
@@ -308,6 +315,20 @@ func NewCmdRoot(f *cmdutil.Factory, version, buildDate string) *CmdRoot {
 	inventory.AddCommand(inventoryAssetsCmd.NewSubCommand(f).GetCommand())
 	inventory.AddCommand(inventoryWaitCmd.NewCmdWait(f).GetCommand())
 	cmd.AddCommand(inventory)
+
+	// software
+	software := softwareCmd.NewSubCommand(f).GetCommand()
+	software.AddCommand(softwareVersionsCmd.NewSubCommand(f).GetCommand())
+	cmd.AddCommand(software)
+
+	// firmware
+	firmware := firmwareCmd.NewSubCommand(f).GetCommand()
+	firmware.AddCommand(firmwareVersionsCmd.NewSubCommand(f).GetCommand())
+	cmd.AddCommand(firmware)
+
+	// deviceprofilesCmd
+	deviceprofiles := deviceprofilesCmd.NewSubCommand(f).GetCommand()
+	cmd.AddCommand(deviceprofiles)
 
 	// applications
 	applications := applicationsCmd.NewSubCommand(f).GetCommand()

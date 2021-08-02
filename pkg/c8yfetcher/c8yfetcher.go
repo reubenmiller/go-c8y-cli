@@ -594,6 +594,54 @@ func WithSmartGroupByNameFirstMatch(client *c8y.Client, args []string, opts ...s
 	}
 }
 
+// WithSoftwareByNameFirstMatch add reference by name matching for software via cli args. Only the first match will be used
+func WithSoftwareByNameFirstMatch(client *c8y.Client, args []string, opts ...string) flags.GetOption {
+	return func(cmd *cobra.Command, inputIterators *flags.RequestInputIterators) (string, interface{}, error) {
+		opt := WithReferenceByNameFirstMatch(client, NewSoftwareFetcher(client), args, opts...)
+		return opt(cmd, inputIterators)
+	}
+}
+
+// WithSoftwareVersionByNameFirstMatch add reference by name matching for software version via cli args. Only the first match will be used
+func WithSoftwareVersionByNameFirstMatch(client *c8y.Client, args []string, opts ...string) flags.GetOption {
+	return func(cmd *cobra.Command, inputIterators *flags.RequestInputIterators) (string, interface{}, error) {
+		opt := WithReferenceByNameFirstMatch(client, NewSoftwareVersionFetcher(client), args, opts...)
+		return opt(cmd, inputIterators)
+	}
+}
+
+// WithFirmwareByNameFirstMatch add reference by name matching for firmware via cli args. Only the first match will be used
+func WithFirmwareByNameFirstMatch(client *c8y.Client, args []string, opts ...string) flags.GetOption {
+	return func(cmd *cobra.Command, inputIterators *flags.RequestInputIterators) (string, interface{}, error) {
+		opt := WithReferenceByNameFirstMatch(client, NewFirmwareFetcher(client), args, opts...)
+		return opt(cmd, inputIterators)
+	}
+}
+
+// WithFirmwareVersionByNameFirstMatch add reference by name matching for firmware version via cli args. Only the first match will be used
+func WithFirmwareVersionByNameFirstMatch(client *c8y.Client, args []string, opts ...string) flags.GetOption {
+	return func(cmd *cobra.Command, inputIterators *flags.RequestInputIterators) (string, interface{}, error) {
+		opt := WithReferenceByNameFirstMatch(client, NewFirmwareVersionFetcher(client), args, opts...)
+		return opt(cmd, inputIterators)
+	}
+}
+
+// WithConfigurationByNameFirstMatch add reference by name matching for configuration via cli args. Only the first match will be used
+func WithConfigurationByNameFirstMatch(client *c8y.Client, args []string, opts ...string) flags.GetOption {
+	return func(cmd *cobra.Command, inputIterators *flags.RequestInputIterators) (string, interface{}, error) {
+		opt := WithReferenceByNameFirstMatch(client, NewConfigurationFetcher(client), args, opts...)
+		return opt(cmd, inputIterators)
+	}
+}
+
+// WithDeviceProfileByNameFirstMatch add reference by name matching for device profile via cli args. Only the first match will be used
+func WithDeviceProfileByNameFirstMatch(client *c8y.Client, args []string, opts ...string) flags.GetOption {
+	return func(cmd *cobra.Command, inputIterators *flags.RequestInputIterators) (string, interface{}, error) {
+		opt := WithReferenceByNameFirstMatch(client, NewDeviceProfileFetcher(client), args, opts...)
+		return opt(cmd, inputIterators)
+	}
+}
+
 // WithUserByNameFirstMatch add reference by name matching for users via cli args. Only the first match will be used
 func WithUserByNameFirstMatch(client *c8y.Client, args []string, opts ...string) flags.GetOption {
 	return func(cmd *cobra.Command, inputIterators *flags.RequestInputIterators) (string, interface{}, error) {

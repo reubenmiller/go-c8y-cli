@@ -6,7 +6,6 @@ require (
 	github.com/araddon/dateparse v0.0.0-20210207001429-0eec95c9db7e
 	github.com/charmbracelet/glamour v0.3.0
 	github.com/cli/safeexec v1.0.0
-	github.com/commander-cli/commander/v2 v2.5.0-alpha2 // indirect
 	github.com/cpuguy83/go-md2man/v2 v2.0.0
 	github.com/fatih/color v1.10.0
 	github.com/google/go-jsonnet v0.17.0
@@ -28,20 +27,18 @@ require (
 	github.com/pquerna/otp v1.3.0
 	github.com/reubenmiller/go-c8y v0.8.1-0.20210414154325-2335ac7abff4
 	github.com/sethvargo/go-password v0.2.0
-	github.com/spf13/cobra v1.1.3
+	github.com/spf13/cobra v1.2.1
 	github.com/spf13/pflag v1.0.5
-	github.com/spf13/viper v1.7.1
+	github.com/spf13/viper v1.8.1
 	github.com/stretchr/testify v1.7.0
 	github.com/thedevsaddam/gojsonq v2.3.0+incompatible
 	github.com/tidwall/gjson v1.7.1
 	github.com/tidwall/pretty v1.1.0
 	github.com/tidwall/sjson v1.1.5
 	github.com/vbauerster/mpb/v6 v6.0.2
-	go.uber.org/multierr v1.6.0 // indirect
-	go.uber.org/zap v1.16.0
+	go.uber.org/zap v1.17.0
 	golang.org/x/crypto v0.0.0-20210322153248-0c34fe9e7dc2
 	golang.org/x/term v0.0.0-20210406210042-72f3dc4e9b72
-	golang.org/x/text v0.3.4 // indirect
 	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b
 	moul.io/http2curl v1.0.0
 )

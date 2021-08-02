@@ -1,0 +1,285 @@
+{
+  "information": {
+    "name": "deviceprofiles",
+    "description": "Cumulocity device profile management",
+    "descriptionLong": "Commands to managed Cumulocity device profiles",
+    "link": "https://cumulocity.com/guides/users-guide/device-management/#managing-device-profiles"
+  },
+  "endpoints": [
+    {
+      "name": "getDeviceProfileCollection",
+      "method": "GET",
+      "description": "Get device profile collection",
+      "descriptionLong": "Get a collection of device profiles (managedObjects) based on filter parameters",
+      "path": "inventory/managedObjects?query=$filter=((type eq 'c8y_Profile') and (name eq '{name}')) $orderby=name asc",
+      "accept": "application/vnd.com.nsn.cumulocity.managedObjectCollection+json",
+      "collectionType": "application/vnd.com.nsn.cumulocity.managedObject+json",
+      "collectionProperty": "managedObjects",
+      "alias": {
+        "go": "list",
+        "powershell": "Get-DeviceProfileCollection"
+      },
+      "examples": {
+        "powershell": [
+          {
+            "description": "Get a list of device profiles",
+            "command": "Get-DeviceProfileCollection"
+          }
+        ],
+        "go": [
+          {
+            "description": "Get a list of device profiles",
+            "command": "c8y deviceprofiles list"
+          }
+        ]
+      },
+      "pathParameters": [
+        {
+          "name": "name",
+          "type": "string",
+          "default": "**",
+          "description": "DeviceProfile name filter"
+        }
+      ]
+    },
+    {
+      "name": "newDeviceProfile",
+      "method": "POST",
+      "path": "inventory/managedObjects",
+      "accept": "application/vnd.com.nsn.cumulocity.inventory+json",
+      "description": "Create device profile",
+      "descriptionLong": "Create a new device profile (managedObject)",
+      "alias": {
+        "go": "create",
+        "powershell": "New-DeviceProfile"
+      },
+      "examples": {
+        "powershell": [
+          {
+            "description": "Create a managed object",
+            "beforeEach": [
+              "$type = New-RandomString -Prefix \"customType_\""
+            ],
+            "command": "New-ManagedObject -Name \"python3-requests\" -Description \"python requests library\" -Data @{$type=@{}}",
+            "afterEach": [
+              "Get-ManagedObjectCollection -FragmentType $type | Remove-ManagedObject"
+            ]
+          }
+        ],
+        "go": [
+          {
+            "description": "Create a device profile",
+            "command": "c8y deviceprofiles create --name \"python3-requests\" --description \"python requests library\""
+          }
+        ]
+      },
+      "body": [
+        {
+          "name": "name",
+          "type": "string",
+          "pipeline": true,
+          "required": false,
+          "description": "name",
+          "pipelineAliases": [
+            "name"
+          ]
+        },
+        {
+          "name": "deviceType",
+          "type": "string",
+          "property": "c8y_Filter.type",
+          "required": false,
+          "description": "Device type filter. Only allow device profile to be applied to devices of this type"
+        },
+        {
+          "name": "data",
+          "type": "json",
+          "description": "Additional properties of the device profile."
+        }
+      ],
+      "bodyTemplate": {
+        "type": "jsonnet",
+        "applyLast": false,
+        "template": "{type: 'c8y_Profile', c8y_DeviceProfile:{}, c8y_Filter:{}}"
+      },
+      "bodyRequiredKeys": [
+        "type",
+        "name"
+      ]
+    },
+    {
+      "name": "getDeviceProfile",
+      "description": "Get device profile",
+      "descriptionLong": "Get an existing device profile (managedObject)",
+      "method": "GET",
+      "path": "inventory/managedObjects/{id}",
+      "accept": "application/vnd.com.nsn.cumulocity.inventory+json",
+      "alias": {
+        "go": "get",
+        "powershell": "Get-DeviceProfile"
+      },
+      "examples": {
+        "powershell": [
+          {
+            "description": "Get a device profile",
+            "beforeEach": [
+              "$mo = PSc8y\\New-ManagedObject -Name \"testMO\""
+            ],
+            "command": "Get-DeviceProfile -Id $mo.id",
+            "afterEach": [
+              "Remove-ManagedObject -Id $mo.id"
+            ]
+          },
+          {
+            "description": "Get a device profile (using pipeline)",
+            "beforeEach": [
+              "$mo = PSc8y\\New-ManagedObject -Name \"testMO\""
+            ],
+            "command": "Get-ManagedObject -Id $mo.id | Get-DeviceProfile",
+            "afterEach": [
+              "Remove-ManagedObject -Id $mo.id"
+            ]
+          }
+        ],
+        "go": [
+          {
+            "description": "Get a device profile",
+            "command": "c8y deviceprofiles get --id 12345"
+          }
+        ]
+      },
+      "pathParameters": [
+        {
+          "name": "id",
+          "type": "[]deviceprofile",
+          "pipeline": true,
+          "required": true,
+          "description": "DeviceProfile (managedObject) id"
+        }
+      ]
+    },
+    {
+      "name": "updateDeviceProfile",
+      "method": "PUT",
+      "path": "inventory/managedObjects/{id}",
+      "accept": "application/vnd.com.nsn.cumulocity.inventory+json",
+      "description": "Update device profile",
+      "descriptionLong": "Update an existing device profile (managedObject)",
+      "alias": {
+        "go": "update",
+        "powershell": "Update-DeviceProfile"
+      },
+      "examples": {
+        "powershell": [
+          {
+            "description": "Update a device profile",
+            "beforeEach": [
+              "$mo = PSc8y\\New-ManagedObject -Name \"testMO\""
+            ],
+            "command": "Update-DeviceProfile -Id $mo.id -Data @{ com_my_props = @{ value = 1 } }",
+            "afterEach": [
+              "Remove-ManagedObject -Id $mo.id"
+            ]
+          },
+          {
+            "description": "Update a device profile (using pipeline)",
+            "beforeEach": [
+              "$mo = PSc8y\\New-ManagedObject -Name \"testMO\""
+            ],
+            "command": "Get-ManagedObject -Id $mo.id | Update-DeviceProfile -Data @{ com_my_props = @{ value = 1 } }",
+            "afterEach": [
+              "Remove-ManagedObject -Id $mo.id"
+            ]
+          }
+        ],
+        "go": [
+          {
+            "description": "Update a device profile",
+            "command": "c8y deviceprofiles update --id 12345 --newName \"my_custom_name\" --data \"{\\\"com_my_props\\\":{},\\\"value\\\":1}\""
+          }
+        ]
+      },
+      "body": [
+        {
+          "name": "newName",
+          "property": "name",
+          "type": "string",
+          "required": false,
+          "description": "New device profile name"
+        },
+        {
+          "name": "deviceType",
+          "type": "string",
+          "property": "c8y_Filter.type",
+          "required": false,
+          "description": "Device type filter. Only allow device profile to be applied to devices of this type"
+        },
+        {
+          "name": "data",
+          "type": "json",
+          "description": "Additional properties of the device profile."
+        }
+      ],
+      "pathParameters": [
+        {
+          "name": "id",
+          "type": "[]deviceprofile",
+          "pipeline": true,
+          "description": "Device profile (managedObject) id",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "deleteDeviceProfile",
+      "description": "Delete device profile",
+      "descriptionLong": "Delete an existing device profile",
+      "method": "DELETE",
+      "path": "inventory/managedObjects/{id}",
+      "accept": "",
+      "alias": {
+        "go": "delete",
+        "powershell": "Remove-DeviceProfile"
+      },
+      "examples": {
+        "powershell": [
+          {
+            "description": "Delete a device profile",
+            "beforeEach": [
+              "$mo = PSc8y\\New-ManagedObject -Name \"testMO\""
+            ],
+            "command": "Remove-DeviceProfile -Id $mo.id",
+            "afterEach": [
+              "Remove-ManagedObject -Id $mo.id -ErrorAction SilentlyContinue"
+            ]
+          },
+          {
+            "description": "Delete a device profile (using pipeline)",
+            "beforeEach": [
+              "$mo = PSc8y\\New-ManagedObject -Name \"testMO\""
+            ],
+            "command": "Get-ManagedObject -Id $mo.id | Remove-DeviceProfile",
+            "afterEach": [
+              "Remove-ManagedObject -Id $mo.id -ErrorAction SilentlyContinue"
+            ]
+          }
+        ],
+        "go": [
+          {
+            "description": "Delete a device profile",
+            "command": "c8y deviceprofiles delete --id 12345"
+          }
+        ]
+      },
+      "pathParameters": [
+        {
+          "name": "id",
+          "type": "[]deviceprofile",
+          "pipeline": true,
+          "required": true,
+          "description": "DeviceProfile Package (managedObject) id"
+        }
+      ]
+    }
+  ]
+}

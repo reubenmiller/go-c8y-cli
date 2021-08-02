@@ -1,0 +1,8 @@
+tests:
+    firmware_get_Get a firmware package:
+        command: c8y firmware get --id 12345
+        exit-code: 0
+        stdout:
+            json:
+                method: GET
+                path: /inventory/managedObjects/12345

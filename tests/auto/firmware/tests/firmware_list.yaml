@@ -1,0 +1,8 @@
+tests:
+    firmware_list_Get a list of firmware packages:
+        command: c8y firmware list
+        exit-code: 0
+        stdout:
+            json:
+                method: GET
+                path: /inventory/managedObjects?query=$filter=((type eq 'c8y_Firmware') and ((name eq '{name}') or (description eq '{description}') or (c8y_Filter.type eq '{deviceType}'))) $orderby=name asc

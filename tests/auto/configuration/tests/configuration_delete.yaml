@@ -1,0 +1,17 @@
+tests:
+    configuration_delete_Delete a configuration package (and any related binaries):
+        command: c8y configuration delete --id 12345
+        exit-code: 0
+        stdout:
+            json:
+                method: DELETE
+                path: /inventory/managedObjects/12345
+    configuration_delete_Delete a configuration package but keep any related binaries:
+        command: c8y configuration delete --id 12345 --forceCascade=false
+        exit-code: 0
+        stdout:
+            json:
+                method: DELETE
+                path: /inventory/managedObjects/12345
+            contains:
+                - forceCascade=false

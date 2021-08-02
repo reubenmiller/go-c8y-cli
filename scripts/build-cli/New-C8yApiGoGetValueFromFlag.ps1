@@ -36,6 +36,9 @@
         # Boolean
         "boolean" = "flags.WithBoolValue(`"${prop}`", `"${queryParam}`", `"$FixedValue`"),"
 
+        # Boolean (default, always set the value regardless if )
+        "booleanDefault" = "flags.WithDefaultBoolValue(`"${prop}`", `"${queryParam}`", `"$FixedValue`"),"
+
         # Optional fragment (if flag is true)
         "optional_fragment" = "flags.WithOptionalFragment(`"${prop}`", `"${queryParam}`", `"$FixedValue`"),"
 
@@ -63,6 +66,9 @@
         # json_custom: Only supported for use with the body
         "json_custom" = "flags.WithDataValue(`"${prop}`", `"${queryParam}`"),"
 
+        # binaryUploadURL: uploads a binary and returns the URL 
+        "binaryUploadURL" = "flags.WithBinaryUploadURL(client, `"${prop}`", `"${queryParam}`"),"
+
         # json - don't do anything because it should be manually set
         "json" = ""
 
@@ -83,6 +89,24 @@
 
         # id array
         "[]id" = "c8yfetcher.WithIDSlice(args, `"${prop}`", `"${queryParam}`"),"
+
+        # software array
+        "[]software" = "c8yfetcher.WithSoftwareByNameFirstMatch(client, args, `"${prop}`", `"${queryParam}`"),"
+        
+        # software version array
+        "[]softwareversion" = "c8yfetcher.WithSoftwareVersionByNameFirstMatch(client, args, `"${prop}`", `"${queryParam}`"),"
+
+        # firmware array
+        "[]firmware" = "c8yfetcher.WithFirmwareByNameFirstMatch(client, args, `"${prop}`", `"${queryParam}`"),"
+
+        # firmware version array
+        "[]firmwareversion" = "c8yfetcher.WithFirmwareVersionByNameFirstMatch(client, args, `"${prop}`", `"${queryParam}`"),"
+
+        # configuration array
+        "[]configuration" = "c8yfetcher.WithConfigurationByNameFirstMatch(client, args, `"${prop}`", `"${queryParam}`"),"
+        
+        # deviceprofile array
+        "[]deviceprofile" = "c8yfetcher.WithDeviceProfileByNameFirstMatch(client, args, `"${prop}`", `"${queryParam}`"),"
         
         # device array
         "[]device" = "c8yfetcher.WithDeviceByNameFirstMatch(client, args, `"${prop}`", `"${queryParam}`"),"
