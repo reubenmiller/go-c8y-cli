@@ -132,7 +132,7 @@ The following is an example of such a template:
 {
     name: "my device",
     type: var("type", "defaultType"),
-    var("fragment", "c8y_Default"): {},
+    [var("fragment", "c8y_Default")]: {},
     c8y_IsDevice: {},
 }
 ```
