@@ -605,7 +605,11 @@ func WithSoftwareByNameFirstMatch(client *c8y.Client, args []string, opts ...str
 // WithSoftwareVersionByNameFirstMatch add reference by name matching for software version via cli args. Only the first match will be used
 func WithSoftwareVersionByNameFirstMatch(client *c8y.Client, args []string, opts ...string) flags.GetOption {
 	return func(cmd *cobra.Command, inputIterators *flags.RequestInputIterators) (string, interface{}, error) {
-		opt := WithReferenceByNameFirstMatch(client, NewSoftwareVersionFetcher(client), args, opts...)
+		software := ""
+		if v, err := cmd.Flags().GetStringSlice("softwareId"); err == nil && len(v) > 0 {
+			software = v[0]
+		}
+		opt := WithReferenceByNameFirstMatch(client, NewSoftwareVersionFetcher(client, software), args, opts...)
 		return opt(cmd, inputIterators)
 	}
 }
