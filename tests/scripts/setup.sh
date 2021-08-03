@@ -15,6 +15,7 @@ setup () {
     create_user "benhologram@example.com"
     create_user "tomwillow@example.com"
 
+    create_agent "device01"
     create_smartgroup "my smartgroup"
 
     create_app "my-example-app"
@@ -45,6 +46,13 @@ create_smartgroup () {
         c8y smartgroups create \
             --name "$name" \
             --query "name eq '*'"
+}
+
+create_agent () {
+    local name="$1"
+    c8y agents get --id "$name" --silentStatusCodes 404 ||
+        c8y agents create \
+            --name "$name"
 }
 
 setup
