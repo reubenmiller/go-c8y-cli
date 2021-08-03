@@ -15,6 +15,7 @@ setup () {
     create_user "benhologram@example.com"
     create_user "tomwillow@example.com"
 
+    create_agent "agent01"
     create_agent "device01"
     create_smartgroup "my smartgroup"
 
