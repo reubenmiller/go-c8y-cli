@@ -6,13 +6,18 @@ Describe -Name "Remove-Device" {
 
     }
 
-    It "Remove device by id" {
+    It -Skip "Remove device by id" {
         $Response = PSc8y\Remove-Device -Id $device.id
         $LASTEXITCODE | Should -Be 0
     }
 
-    It "Remove device by name" {
+    It -Skip "Remove device by name" {
         $Response = PSc8y\Remove-Device -Id $device.name
+        $LASTEXITCODE | Should -Be 0
+    }
+
+    It -Skip "Delete device and related device user/credentials" {
+        $Response = PSc8y\Remove-Device -Id "device01" -WithDeviceUser
         $LASTEXITCODE | Should -Be 0
     }
 

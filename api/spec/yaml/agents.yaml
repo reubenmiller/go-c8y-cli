@@ -119,10 +119,29 @@ endpoints:
           beforeEach:
             - $agent = PSc8y\New-TestAgent
           command: Remove-Agent -Id $agent.name
+        
+        - description: Delete agent and related device user/credentials
+          # Skipping as it requires a real device with credentials
+          skipTest: true
+          command: Remove-Agent -Id "agent01" -WithDeviceUser
 
       go:
         - description: Get agent by id
           command: c8y agents delete --id 12345
+        
+        - description: Get agent by name
+          command: c8y agents delete --id agent01
+          assertStdOut:
+            json:
+              path: r//inventory/managedObjects/\d+$
+
+        - description: Delete agent and related device user/credentials
+          command: c8y agents delete --id 12345 --withDeviceUser
+          assertStdOut:
+            json:
+              method: DELETE
+              path: /inventory/managedObjects/12345
+              query: withDeviceUser=true
 
     pathParameters:
       - name: id
@@ -130,6 +149,17 @@ endpoints:
         pipeline: true
         required: true
         description: Agent ID
+
+    queryParameters:
+      - name: withDeviceUser
+        type: boolean
+        description: Delete associated device owner
+        position: 11
+
+      - name: cascade
+        type: boolean
+        description: Remove all child devices and child assets will be deleted recursively. By default, the delete operation is propagated to the subgroups only if the deleted object is a group
+        position: 20
 
   - name: createAgent
     description: 'Create agent'

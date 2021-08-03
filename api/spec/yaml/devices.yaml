@@ -119,9 +119,28 @@ endpoints:
             - $device = PSc8y\New-TestDevice
           command: Remove-Device -Id $device.name
 
+        - description: Delete device and related device user/credentials
+          # Skipping as it requires a real device with credentials
+          skipTest: true
+          command: Remove-Device -Id "device01" -WithDeviceUser
+
       go:
         - description: Get device by id
           command: c8y devices delete --id 12345
+
+        - description: Get device by name
+          command: c8y devices delete --id device01
+          assertStdOut:
+            json:
+              path: r//inventory/managedObjects/\d+$
+
+        - description: Delete device and related device user/credentials
+          command: c8y devices delete --id 12345 --withDeviceUser
+          assertStdOut:
+            json:
+              method: DELETE
+              path: /inventory/managedObjects/12345
+              query: withDeviceUser=true
 
     pathParameters:
       - name: id
@@ -132,6 +151,11 @@ endpoints:
         position: 10
 
     queryParameters:
+      - name: withDeviceUser
+        type: boolean
+        description: Delete associated device owner
+        position: 11
+
       - name: cascade
         type: boolean
         description: Remove all child devices and child assets will be deleted recursively. By default, the delete operation is propagated to the subgroups only if the deleted object is a group

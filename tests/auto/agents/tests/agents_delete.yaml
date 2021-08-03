@@ -1,4 +1,14 @@
 tests:
+    agents_delete_Delete agent and related device user/credentials:
+        command: c8y agents delete --id 12345 --withDeviceUser
+        exit-code: 0
+        stdout:
+            json:
+                method: DELETE
+                path: /inventory/managedObjects/12345
+                query: withDeviceUser=true
+            contains:
+                - withDeviceUser=true
     agents_delete_Get agent by id:
         command: c8y agents delete --id 12345
         exit-code: 0
@@ -6,3 +16,10 @@ tests:
             json:
                 method: DELETE
                 path: /inventory/managedObjects/12345
+    agents_delete_Get agent by name:
+        command: c8y agents delete --id agent01
+        exit-code: 0
+        stdout:
+            json:
+                method: DELETE
+                path: r//inventory/managedObjects/\d+$

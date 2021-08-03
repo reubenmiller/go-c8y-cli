@@ -21,6 +21,11 @@ PS> Remove-Device -Id $device.name
 
 Remove device by name
 
+.EXAMPLE
+PS> Remove-Device -Id "device01" -WithDeviceUser
+
+Delete device and related device user/credentials
+
 
 #>
     [cmdletbinding(PositionalBinding=$true,
@@ -34,6 +39,11 @@ Remove device by name
                    ValueFromPipelineByPropertyName=$true)]
         [object[]]
         $Id,
+
+        # Delete associated device owner
+        [Parameter()]
+        [switch]
+        $WithDeviceUser,
 
         # Remove all child devices and child assets will be deleted recursively. By default, the delete operation is propagated to the subgroups only if the deleted object is a group
         [Parameter()]
