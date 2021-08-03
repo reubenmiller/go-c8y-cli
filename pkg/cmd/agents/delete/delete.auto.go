@@ -38,6 +38,12 @@ func NewDeleteCmd(f *cmdutil.Factory) *DeleteCmd {
 		Example: heredoc.Doc(`
 $ c8y agents delete --id 12345
 Get agent by id
+
+$ c8y agents delete --id agent01
+Get agent by name
+
+$ c8y agents delete --id 12345 --withDeviceUser
+Delete agent and related device user/credentials
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
 			return f.DeleteModeEnabled()
@@ -48,6 +54,8 @@ Get agent by id
 	cmd.SilenceUsage = true
 
 	cmd.Flags().StringSlice("id", []string{""}, "Agent ID (required) (accepts pipeline)")
+	cmd.Flags().Bool("withDeviceUser", false, "Delete associated device owner")
+	cmd.Flags().Bool("cascade", false, "Remove all child devices and child assets will be deleted recursively. By default, the delete operation is propagated to the subgroups only if the deleted object is a group")
 
 	completion.WithOptions(
 		cmd,
@@ -90,6 +98,8 @@ func (n *DeleteCmd) RunE(cmd *cobra.Command, args []string) error {
 		query,
 		inputIterators,
 		flags.WithCustomStringSlice(func() ([]string, error) { return cfg.GetQueryParameters(), nil }, "custom"),
+		flags.WithBoolValue("withDeviceUser", "withDeviceUser", ""),
+		flags.WithBoolValue("cascade", "cascade", ""),
 	)
 	if err != nil {
 		return cmderrors.NewUserError(err)

@@ -22,6 +22,11 @@ PS> Remove-Agent -Id $agent.name
 
 Remove agent by name
 
+.EXAMPLE
+PS> Remove-Agent -Id "agent01" -WithDeviceUser
+
+Delete agent and related device user/credentials
+
 
 #>
     [cmdletbinding(PositionalBinding=$true,
@@ -29,12 +34,22 @@ Remove agent by name
     [Alias()]
     [OutputType([object])]
     Param(
+        # Delete associated device owner
+        [Parameter()]
+        [switch]
+        $WithDeviceUser,
+
         # Agent ID (required)
         [Parameter(Mandatory = $true,
                    ValueFromPipeline=$true,
                    ValueFromPipelineByPropertyName=$true)]
         [object[]]
-        $Id
+        $Id,
+
+        # Remove all child devices and child assets will be deleted recursively. By default, the delete operation is propagated to the subgroups only if the deleted object is a group
+        [Parameter()]
+        [switch]
+        $Cascade
     )
     DynamicParam {
         Get-ClientCommonParameters -Type "Delete"

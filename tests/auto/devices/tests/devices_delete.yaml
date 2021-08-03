@@ -1,4 +1,14 @@
 tests:
+    devices_delete_Delete device and related device user/credentials:
+        command: c8y devices delete --id 12345 --withDeviceUser
+        exit-code: 0
+        stdout:
+            json:
+                method: DELETE
+                path: /inventory/managedObjects/12345
+                query: withDeviceUser=true
+            contains:
+                - withDeviceUser=true
     devices_delete_Get device by id:
         command: c8y devices delete --id 12345
         exit-code: 0
@@ -6,3 +16,10 @@ tests:
             json:
                 method: DELETE
                 path: /inventory/managedObjects/12345
+    devices_delete_Get device by name:
+        command: c8y devices delete --id device01
+        exit-code: 0
+        stdout:
+            json:
+                method: DELETE
+                path: r//inventory/managedObjects/\d+$
