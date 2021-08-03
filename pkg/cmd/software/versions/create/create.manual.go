@@ -1,7 +1,7 @@
-// Code generated from specification version 1.0.0: DO NOT EDIT
 package create
 
 import (
+	"context"
 	"io"
 	"net/http"
 
@@ -32,11 +32,14 @@ func NewCreateCmd(f *cmdutil.Factory) *CreateCmd {
 	cmd := &cobra.Command{
 		Use:   "create",
 		Short: "Create software package version",
-		Long:  `Create a new software package (managedObject)`,
+		Long:  `Create a new software package version (managedObject)`,
 		Example: heredoc.Doc(`
-$ c8y software create --name "python3-requests" --description "python requests library"
-Create a new version to an existing software package
-        `),
+			$ c8y software create --version "1.0.0" --file "./python3.deb"
+			Create a new version using a binary file. The binary will be uploaded to Cumulocity
+
+			$ c8y software create --version "1.0.0" --url "https://"
+			Create a new version with an external URL
+			`),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
 			return f.CreateModeEnabled()
 		},
@@ -97,12 +100,6 @@ func (n *CreateCmd) RunE(cmd *cobra.Command, args []string) error {
 		return cmderrors.NewUserError(err)
 	}
 
-	queryValue, err := query.GetQueryUnescape(true)
-
-	if err != nil {
-		return cmderrors.NewSystemError("Invalid query parameter")
-	}
-
 	// headers
 	headers := http.Header{}
 	err = flags.WithHeaders(
@@ -137,7 +134,7 @@ func (n *CreateCmd) RunE(cmd *cobra.Command, args []string) error {
 		flags.WithDataFlagValue(),
 		flags.WithStringValue("version", "c8y_Software.version"),
 		flags.WithStringValue("url", "c8y_Software.url"),
-		flags.WithBinaryUploadURL(client, "file", "c8y_Software.url"),
+		// flags.WithBinaryUploadURL(client, "file", "c8y_Software.url"),
 		flags.WithDefaultTemplateString(`
 {type: 'c8y_SoftwareBinary', c8y_Global:{}}`),
 		cmdutil.WithTemplateValue(cfg),
@@ -149,7 +146,7 @@ func (n *CreateCmd) RunE(cmd *cobra.Command, args []string) error {
 	}
 
 	// path parameters
-	path := flags.NewStringTemplate("inventory/managedObjects/{softwareId}/childAdditions")
+	path := flags.NewStringTemplate("{softwareId}")
 	err = flags.WithPathParameters(
 		cmd,
 		path,
@@ -160,16 +157,47 @@ func (n *CreateCmd) RunE(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	req := c8y.RequestOptions{
-		Method:       "POST",
-		Path:         path.GetTemplate(),
-		Query:        queryValue,
-		Body:         body,
-		FormData:     formData,
-		Header:       headers,
-		IgnoreAccept: cfg.IgnoreAcceptHeader(),
-		DryRun:       cfg.ShouldUseDryRun(cmd.CommandPath()),
+	commonOptions, err := cfg.GetOutputCommonOptions(cmd)
+	if err != nil {
+		return err
 	}
 
-	return n.factory.RunWithWorkers(client, cmd, &req, inputIterators)
+	var filename string
+	filename, err = cmd.Flags().GetString("file")
+	if err != nil {
+		return err
+	}
+
+	handler, _ := n.factory.GetRequestHandler()
+	var resp *c8y.Response
+	var respErr error
+	bounded := inputIterators.Total > 0
+	for {
+		softwareID, _, err := path.Execute(false)
+		if err != nil {
+			if err == io.EOF {
+				break
+			}
+			return err
+		}
+		if filename == "" {
+			_, resp, respErr = client.Inventory.CreateChildAddition(context.Background(), softwareID, body)
+		} else {
+			_, resp, respErr = client.Inventory.CreateChildAdditionWithBinary(
+				context.Background(), softwareID, filename, func(binaryURL string) interface{} {
+					_ = body.Set("c8y_Software.url", binaryURL)
+					return body
+				})
+		}
+
+		if _, err := handler.ProcessResponse(resp, respErr, commonOptions); err != nil {
+			return err
+		}
+
+		if !bounded {
+			break
+		}
+	}
+
+	return nil
 }

@@ -78,6 +78,7 @@ endpoints:
 
 
   - name: newFirmwareVersion
+    skip: true
     method: POST
     path: inventory/managedObjects/{firmwareId}/childAdditions
     accept: application/vnd.com.nsn.cumulocity.inventory+json

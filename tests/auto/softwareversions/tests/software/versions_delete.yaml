@@ -1,0 +1,17 @@
+tests:
+    software/versions_delete_Delete a software package (but keep any child binaries):
+        command: c8y software versions delete --id 12345 --forceCascade=false
+        exit-code: 0
+        stdout:
+            json:
+                method: DELETE
+                path: /inventory/managedObjects/12345
+            contains:
+                - forceCascade=false
+    software/versions_delete_Delete a software package and all related versions:
+        command: c8y software versions delete --id 12345
+        exit-code: 0
+        stdout:
+            json:
+                method: DELETE
+                path: /inventory/managedObjects/12345

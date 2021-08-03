@@ -1,7 +1,7 @@
-// Code generated from specification version 1.0.0: DO NOT EDIT
 package create
 
 import (
+	"context"
 	"io"
 	"net/http"
 
@@ -32,11 +32,14 @@ func NewCreateCmd(f *cmdutil.Factory) *CreateCmd {
 	cmd := &cobra.Command{
 		Use:   "create",
 		Short: "Create firmware package version",
-		Long:  `Create a new firmware package (managedObject)`,
+		Long:  `Create a new firmware package version (managedObject)`,
 		Example: heredoc.Doc(`
-$ c8y firmware create --name "python3-requests" --description "python requests library"
-Create a new version to an existing firmware package
-        `),
+			$ c8y firmware create --version "1.0.0" --file "./python3.deb"
+			Create a new version using a binary file. The binary will be uploaded to Cumulocity
+
+			$ c8y firmware create --version "1.0.0" --url "https://blob.azure.com/device-firmare/1.0.0/image.mender"
+			Create a new version with an external URL
+			`),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
 			return f.CreateModeEnabled()
 		},
@@ -46,8 +49,9 @@ Create a new version to an existing firmware package
 	cmd.SilenceUsage = true
 
 	cmd.Flags().StringSlice("firmwareId", []string{""}, "Firmware package id where the version will be added to (accepts pipeline)")
-	cmd.Flags().String("version", "", "Firmware package version name, i.e. 1.0.0")
+	cmd.Flags().String("version", "", "Version name, i.e. 1.0.0")
 	cmd.Flags().String("url", "", "URL to the firmware package")
+	cmd.Flags().String("file", "", "File to be uploaded")
 
 	completion.WithOptions(
 		cmd,
@@ -96,12 +100,6 @@ func (n *CreateCmd) RunE(cmd *cobra.Command, args []string) error {
 		return cmderrors.NewUserError(err)
 	}
 
-	queryValue, err := query.GetQueryUnescape(true)
-
-	if err != nil {
-		return cmderrors.NewSystemError("Invalid query parameter")
-	}
-
 	// headers
 	headers := http.Header{}
 	err = flags.WithHeaders(
@@ -147,7 +145,7 @@ func (n *CreateCmd) RunE(cmd *cobra.Command, args []string) error {
 	}
 
 	// path parameters
-	path := flags.NewStringTemplate("inventory/managedObjects/{firmwareId}/childAdditions")
+	path := flags.NewStringTemplate("{firmwareId}")
 	err = flags.WithPathParameters(
 		cmd,
 		path,
@@ -158,16 +156,47 @@ func (n *CreateCmd) RunE(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	req := c8y.RequestOptions{
-		Method:       "POST",
-		Path:         path.GetTemplate(),
-		Query:        queryValue,
-		Body:         body,
-		FormData:     formData,
-		Header:       headers,
-		IgnoreAccept: cfg.IgnoreAcceptHeader(),
-		DryRun:       cfg.ShouldUseDryRun(cmd.CommandPath()),
+	commonOptions, err := cfg.GetOutputCommonOptions(cmd)
+	if err != nil {
+		return err
 	}
 
-	return n.factory.RunWithWorkers(client, cmd, &req, inputIterators)
+	var filename string
+	filename, err = cmd.Flags().GetString("file")
+	if err != nil {
+		return err
+	}
+
+	handler, _ := n.factory.GetRequestHandler()
+	var resp *c8y.Response
+	var respErr error
+	bounded := inputIterators.Total > 0
+	for {
+		firmwareID, _, err := path.Execute(false)
+		if err != nil {
+			if err == io.EOF {
+				break
+			}
+			return err
+		}
+		if filename == "" {
+			_, resp, respErr = client.Inventory.CreateChildAddition(context.Background(), firmwareID, body)
+		} else {
+			_, resp, respErr = client.Inventory.CreateChildAdditionWithBinary(
+				context.Background(), firmwareID, filename, func(binaryURL string) interface{} {
+					_ = body.Set("c8y_Firmware.url", binaryURL)
+					return body
+				})
+		}
+
+		if _, err := handler.ProcessResponse(resp, respErr, commonOptions); err != nil {
+			return err
+		}
+
+		if !bounded {
+			break
+		}
+	}
+
+	return nil
 }
