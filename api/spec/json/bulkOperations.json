@@ -32,6 +32,16 @@
               "Get-BulkOperationCollection | Remove-BulkOperation",
               "Remove-DeviceGroup -Id $Group.id -Cascade"
             ]
+          },
+          {
+            "description": "Get a list of bulk operations created in the last 1 day",
+            "skipTest": true,
+            "command": "Get-BulkOperationCollection -DateFrom -1d"
+          },
+          {
+            "description": "Get a list of bulk operations in the general status SCHEDULED or EXECUTING",
+            "skipTest": true,
+            "command": "Get-BulkOperationCollection -Status SCHEDULED, EXECUTING"
           }
         ],
         "go": [

@@ -15,6 +15,16 @@ PS> Get-BulkOperationCollection
 
 Get a list of bulk operations
 
+.EXAMPLE
+PS> Get-BulkOperationCollection -DateFrom -1d
+
+Get a list of bulk operations created in the last 1 day
+
+.EXAMPLE
+PS> Get-BulkOperationCollection -Status SCHEDULED, EXECUTING
+
+Get a list of bulk operations in the general status SCHEDULED or EXECUTING
+
 
 #>
     [cmdletbinding(PositionalBinding=$true,
