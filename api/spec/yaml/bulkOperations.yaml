@@ -32,11 +32,37 @@ endpoints:
       go:
         - description: Get a list of bulk operations
           command: c8y bulkoperations list
+        
+        - description: Get a list of bulk operations created in the last 1 day
+          command: c8y bulkoperations list --dateFrom -1d
+          assertStdOut:
+            json:
+              query: r/dateFrom=\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.*$
+        
+        - description: Get a list of bulk operations in the general status SCHEDULED or EXECUTING
+          command: c8y bulkoperations list --status SCHEDULED --status EXECUTING
+          assertStdOut:
+            json:
+              query: generalStatus=SCHEDULED&generalStatus=EXECUTING
 
     queryParameters:
       - name: withDeleted
         type: boolean
         description: Include CANCELLED bulk operations
+
+      - name: dateFrom
+        type: datetime
+        description: Start date or date and time of the bulk operation
+
+      - name: dateTo
+        type: datetime
+        description: End date or date and time of the bulk operation
+
+      - name: status
+        property: generalStatus
+        type: '[]string'
+        description: Operation status, can be one of SUCCESSFUL, FAILED, EXECUTING or PENDING.
+        validationSet: [CANCELED, SCHEDULED, EXECUTING, EXECUTING_WITH_ERROR, FAILED]
 
   - name: getBulkOperation
     description: Get bulk operation

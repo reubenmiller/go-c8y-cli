@@ -25,7 +25,23 @@ Get a list of bulk operations
         # Include CANCELLED bulk operations
         [Parameter()]
         [switch]
-        $WithDeleted
+        $WithDeleted,
+
+        # Start date or date and time of the bulk operation
+        [Parameter()]
+        [string]
+        $DateFrom,
+
+        # End date or date and time of the bulk operation
+        [Parameter()]
+        [string]
+        $DateTo,
+
+        # Operation status, can be one of SUCCESSFUL, FAILED, EXECUTING or PENDING.
+        [Parameter()]
+        [ValidateSet('CANCELED','SCHEDULED','EXECUTING','EXECUTING_WITH_ERROR','FAILED')]
+        [string[]]
+        $Status
     )
     DynamicParam {
         Get-ClientCommonParameters -Type "Get", "Collection"
