@@ -6,3 +6,24 @@ tests:
             json:
                 method: GET
                 path: /devicecontrol/bulkoperations
+    bulkOperations_list_Get a list of bulk operations created in the last 1 day:
+        command: c8y bulkoperations list --dateFrom -1d
+        exit-code: 0
+        stdout:
+            json:
+                method: GET
+                path: /devicecontrol/bulkoperations
+                query: r/dateFrom=\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.*$
+            contains:
+                - dateFrom=
+    bulkOperations_list_Get a list of bulk operations in the general status SCHEDULED or EXECUTING:
+        command: c8y bulkoperations list --status SCHEDULED --status EXECUTING
+        exit-code: 0
+        stdout:
+            json:
+                method: GET
+                path: /devicecontrol/bulkoperations
+                query: generalStatus=SCHEDULED&generalStatus=EXECUTING
+            contains:
+                - generalStatus=SCHEDULED
+                - generalStatus=EXECUTING

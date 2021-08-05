@@ -36,6 +36,12 @@ func NewListCmd(f *cmdutil.Factory) *ListCmd {
 		Example: heredoc.Doc(`
 $ c8y bulkoperations list
 Get a list of bulk operations
+
+$ c8y bulkoperations list --dateFrom -1d
+Get a list of bulk operations created in the last 1 day
+
+$ c8y bulkoperations list --status SCHEDULED --status EXECUTING
+Get a list of bulk operations in the general status SCHEDULED or EXECUTING
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
 			return nil
@@ -46,9 +52,13 @@ Get a list of bulk operations
 	cmd.SilenceUsage = true
 
 	cmd.Flags().Bool("withDeleted", false, "Include CANCELLED bulk operations")
+	cmd.Flags().String("dateFrom", "", "Start date or date and time of the bulk operation")
+	cmd.Flags().String("dateTo", "", "End date or date and time of the bulk operation")
+	cmd.Flags().StringSlice("status", []string{""}, "Operation status, can be one of SUCCESSFUL, FAILED, EXECUTING or PENDING.")
 
 	completion.WithOptions(
 		cmd,
+		completion.WithValidateSet("status", "CANCELED", "SCHEDULED", "EXECUTING", "EXECUTING_WITH_ERROR", "FAILED"),
 	)
 
 	flags.WithOptions(
@@ -88,6 +98,9 @@ func (n *ListCmd) RunE(cmd *cobra.Command, args []string) error {
 		inputIterators,
 		flags.WithCustomStringSlice(func() ([]string, error) { return cfg.GetQueryParameters(), nil }, "custom"),
 		flags.WithBoolValue("withDeleted", "withDeleted", ""),
+		flags.WithEncodedRelativeTimestamp("dateFrom", "dateFrom", ""),
+		flags.WithEncodedRelativeTimestamp("dateTo", "dateTo", ""),
+		flags.WithStringSliceValues("status", "generalStatus", ""),
 	)
 	if err != nil {
 		return cmderrors.NewUserError(err)

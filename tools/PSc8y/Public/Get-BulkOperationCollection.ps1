@@ -15,6 +15,16 @@ PS> Get-BulkOperationCollection
 
 Get a list of bulk operations
 
+.EXAMPLE
+PS> Get-BulkOperationCollection -DateFrom -1d
+
+Get a list of bulk operations created in the last 1 day
+
+.EXAMPLE
+PS> Get-BulkOperationCollection -Status SCHEDULED, EXECUTING
+
+Get a list of bulk operations in the general status SCHEDULED or EXECUTING
+
 
 #>
     [cmdletbinding(PositionalBinding=$true,
@@ -25,7 +35,23 @@ Get a list of bulk operations
         # Include CANCELLED bulk operations
         [Parameter()]
         [switch]
-        $WithDeleted
+        $WithDeleted,
+
+        # Start date or date and time of the bulk operation
+        [Parameter()]
+        [string]
+        $DateFrom,
+
+        # End date or date and time of the bulk operation
+        [Parameter()]
+        [string]
+        $DateTo,
+
+        # Operation status, can be one of SUCCESSFUL, FAILED, EXECUTING or PENDING.
+        [Parameter()]
+        [ValidateSet('CANCELED','SCHEDULED','EXECUTING','EXECUTING_WITH_ERROR','FAILED')]
+        [string[]]
+        $Status
     )
     DynamicParam {
         Get-ClientCommonParameters -Type "Get", "Collection"
