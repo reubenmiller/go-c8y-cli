@@ -1,0 +1,9 @@
+tests:
+    deviceprofiles_create_Create a device profile:
+        command: c8y deviceprofiles create --name "python3-requests"
+        exit-code: 0
+        stdout:
+            json:
+                body.name: python3-requests
+                method: POST
+                path: /inventory/managedObjects

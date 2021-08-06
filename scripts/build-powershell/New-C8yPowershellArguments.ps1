@@ -62,6 +62,7 @@
         "[]softwareversion" { "object[]"; break }
         "[]firmware" { "object[]"; break }
         "[]firmwareversion" { "object[]"; break }
+        "[]firmwareversionpatch" { "object[]"; break }
         "[]stringcsv" { "string[]"; break }
         "[]tenant" { "object[]"; break }
         "[]user" { "object[]"; break }

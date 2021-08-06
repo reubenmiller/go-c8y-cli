@@ -94,6 +94,7 @@
         "[]deviceprofile",
         "[]firmware",
         "[]firmwareversion",
+        "[]firmwareversionpatch",
         "[]software",
         "[]softwareversion",
         "[]string",

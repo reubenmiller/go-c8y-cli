@@ -47,13 +47,13 @@ endpoints:
         - description: Create a managed object
           beforeEach:
             - $type = New-RandomString -Prefix "customType_"
-          command: New-ManagedObject -Name "python3-requests" -Description "python requests library" -Data @{$type=@{}}
+          command: New-ManagedObject -Name "python3-requests" -Data @{$type=@{}}
           afterEach:
             - Get-ManagedObjectCollection -FragmentType $type | Remove-ManagedObject
 
       go:
         - description: Create a device profile
-          command: c8y deviceprofiles create --name "python3-requests" --description "python requests library"
+          command: c8y deviceprofiles create --name "python3-requests"
     body:
       - name: name
         type: string

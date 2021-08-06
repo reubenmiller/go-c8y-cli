@@ -1,6 +1,6 @@
 ﻿. $PSScriptRoot/imports.ps1
 
-Describe -Name "Remove-FirmwareVersion" {
+Describe -Name "Remove-FirmwareVersionPatch" {
     BeforeEach {
         $mo = PSc8y\New-ManagedObject -Name "testMO"
         $Device = PSc8y\New-TestDevice
@@ -9,18 +9,18 @@ Describe -Name "Remove-FirmwareVersion" {
 
     }
 
-    It "Delete a firmware package" {
-        $Response = PSc8y\Remove-Firmware -Id $mo.id
+    It "Delete a firmware package version patch" {
+        $Response = PSc8y\Remove-FirmwareVersionPatch -Id $mo.id
         $LASTEXITCODE | Should -Be 0
     }
 
-    It "Delete a firmware package (using pipeline)" {
-        $Response = PSc8y\Get-ManagedObject -Id $mo.id | Remove-Firmware
+    It "Delete a firmware package version patch (using pipeline)" {
+        $Response = PSc8y\Get-ManagedObject -Id $mo.id | Remove-FirmwareVersionPatch
         $LASTEXITCODE | Should -Be 0
     }
 
-    It "Delete a firmware package and all related versions" {
-        $Response = PSc8y\Get-ManagedObject -Id $Device.id | Remove-Firmware -ForceCascade
+    It "Delete a firmware package version patch and related binary" {
+        $Response = PSc8y\Get-ManagedObject -Id $Device.id | Remove-FirmwareVersionPatch -ForceCascade
         $LASTEXITCODE | Should -Be 0
     }
 

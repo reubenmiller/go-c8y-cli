@@ -1,8 +1,8 @@
 package versions
 
 import (
-	cmdCreatePatch "github.com/reubenmiller/go-c8y-cli/pkg/cmd/firmware/versions/createpatch"
 	cmdDelete "github.com/reubenmiller/go-c8y-cli/pkg/cmd/firmware/versions/delete"
+	cmdGet "github.com/reubenmiller/go-c8y-cli/pkg/cmd/firmware/versions/get"
 	cmdList "github.com/reubenmiller/go-c8y-cli/pkg/cmd/firmware/versions/list"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmd/subcommand"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmdutil"
@@ -24,8 +24,8 @@ func NewSubCommand(f *cmdutil.Factory) *SubCmdVersions {
 
 	// Subcommands
 	cmd.AddCommand(cmdList.NewListCmd(f).GetCommand())
+	cmd.AddCommand(cmdGet.NewGetCmd(f).GetCommand())
 	cmd.AddCommand(cmdDelete.NewDeleteCmd(f).GetCommand())
-	cmd.AddCommand(cmdCreatePatch.NewCreatePatchCmd(f).GetCommand())
 
 	ccmd.SubCommand = subcommand.NewSubCommand(cmd)
 

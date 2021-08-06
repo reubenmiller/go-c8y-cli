@@ -1,29 +1,29 @@
 ﻿# Code generated from specification version 1.0.0: DO NOT EDIT
-Function Remove-FirmwareVersion {
+Function Remove-FirmwareVersionPatch {
 <#
 .SYNOPSIS
-Delete firmware package version
+Delete firmware package version patch
 
 .DESCRIPTION
-Delete an existing firmware package version
+Delete an existing firmware package version patch
 
 .LINK
-https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/firmware_versions_delete
+https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/firmware_versions_patches_delete
 
 .EXAMPLE
-PS> Remove-Firmware -Id $mo.id
+PS> Remove-FirmwareVersionPatch -Id $mo.id
 
-Delete a firmware package
-
-.EXAMPLE
-PS> Get-ManagedObject -Id $mo.id | Remove-Firmware
-
-Delete a firmware package (using pipeline)
+Delete a firmware package version patch
 
 .EXAMPLE
-PS> Get-ManagedObject -Id $Device.id | Remove-Firmware -ForceCascade
+PS> Get-ManagedObject -Id $mo.id | Remove-FirmwareVersionPatch
 
-Delete a firmware package and all related versions
+Delete a firmware package version patch (using pipeline)
+
+.EXAMPLE
+PS> Get-ManagedObject -Id $Device.id | Remove-FirmwareVersionPatch -ForceCascade
+
+Delete a firmware package version patch and related binary
 
 
 #>
@@ -32,7 +32,7 @@ Delete a firmware package and all related versions
     [Alias()]
     [OutputType([object])]
     Param(
-        # Firmware Package version (managedObject) id (required)
+        # Firmware Package version patch (managedObject) id (required)
         [Parameter(Mandatory = $true,
                    ValueFromPipeline=$true,
                    ValueFromPipelineByPropertyName=$true)]
@@ -60,7 +60,7 @@ Delete a firmware package and all related versions
             Use-CallerPreference -Cmdlet $PSCmdlet -SessionState $ExecutionContext.SessionState
         }
 
-        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "firmware versions delete"
+        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "firmware versions patches delete"
         $ClientOptions = Get-ClientOutputOption $PSBoundParameters
         $TypeOptions = @{
             Type = ""
@@ -74,13 +74,13 @@ Delete a firmware package and all related versions
         if ($ClientOptions.ConvertToPS) {
             $Id `
             | Group-ClientRequests `
-            | c8y firmware versions delete $c8yargs `
+            | c8y firmware versions patches delete $c8yargs `
             | ConvertFrom-ClientOutput @TypeOptions
         }
         else {
             $Id `
             | Group-ClientRequests `
-            | c8y firmware versions delete $c8yargs
+            | c8y firmware versions patches delete $c8yargs
         }
         
     }

@@ -625,7 +625,23 @@ func WithFirmwareByNameFirstMatch(client *c8y.Client, args []string, opts ...str
 // WithFirmwareVersionByNameFirstMatch add reference by name matching for firmware version via cli args. Only the first match will be used
 func WithFirmwareVersionByNameFirstMatch(client *c8y.Client, args []string, opts ...string) flags.GetOption {
 	return func(cmd *cobra.Command, inputIterators *flags.RequestInputIterators) (string, interface{}, error) {
-		opt := WithReferenceByNameFirstMatch(client, NewFirmwareVersionFetcher(client), args, opts...)
+		firmware := ""
+		if v, err := cmd.Flags().GetStringSlice("firmwareId"); err == nil && len(v) > 0 {
+			firmware = v[0]
+		}
+		opt := WithReferenceByNameFirstMatch(client, NewFirmwareVersionFetcher(client, firmware, false), args, opts...)
+		return opt(cmd, inputIterators)
+	}
+}
+
+// WithFirmwareVersionPatchByNameFirstMatch add reference by name matching for firmware version via cli args. Only the first match will be used
+func WithFirmwareVersionPatchByNameFirstMatch(client *c8y.Client, args []string, opts ...string) flags.GetOption {
+	return func(cmd *cobra.Command, inputIterators *flags.RequestInputIterators) (string, interface{}, error) {
+		firmware := ""
+		if v, err := cmd.Flags().GetStringSlice("firmwareId"); err == nil && len(v) > 0 {
+			firmware = v[0]
+		}
+		opt := WithReferenceByNameFirstMatch(client, NewFirmwareVersionFetcher(client, firmware, true), args, opts...)
 		return opt(cmd, inputIterators)
 	}
 }

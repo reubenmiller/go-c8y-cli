@@ -1,0 +1,17 @@
+tests:
+    firmware/versions/patches_delete_Delete a firmware package version patch (but keep the related binary):
+        command: c8y firmware versions patches delete --id 12345 --forceCascade=false
+        exit-code: 0
+        stdout:
+            json:
+                method: DELETE
+                path: /inventory/managedObjects/12345
+            contains:
+                - forceCascade=false
+    firmware/versions/patches_delete_Delete a firmware package version patch and related binary:
+        command: c8y firmware versions patches delete --id 12345
+        exit-code: 0
+        stdout:
+            json:
+                method: DELETE
+                path: /inventory/managedObjects/12345

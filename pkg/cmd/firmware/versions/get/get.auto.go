@@ -1,7 +1,8 @@
 // Code generated from specification version 1.0.0: DO NOT EDIT
-package createpatch
+package get
 
 import (
+	"fmt"
 	"io"
 	"net/http"
 
@@ -17,50 +18,48 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// CreatePatchCmd command
-type CreatePatchCmd struct {
+// GetCmd command
+type GetCmd struct {
 	*subcommand.SubCommand
 
 	factory *cmdutil.Factory
 }
 
-// NewCreatePatchCmd creates a command to Create firmware package version patch
-func NewCreatePatchCmd(f *cmdutil.Factory) *CreatePatchCmd {
-	ccmd := &CreatePatchCmd{
+// NewGetCmd creates a command to Get firmware package version
+func NewGetCmd(f *cmdutil.Factory) *GetCmd {
+	ccmd := &GetCmd{
 		factory: f,
 	}
 	cmd := &cobra.Command{
-		Use:   "createPatch",
-		Short: "Create firmware package version patch",
-		Long:  `Create a new firmware package (managedObject)`,
+		Use:   "get",
+		Short: "Get firmware package version",
+		Long:  `Get an existing firmware package version`,
 		Example: heredoc.Doc(`
-$ c8y firmware create --name "python3-requests" --description "python requests library"
-Create a new version to an existing firmware package
+$ c8y firmware versions get --firmwareId 11111 --id 1.0.0
+Get a firmware package version using name
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
-			return f.CreateModeEnabled()
+			return nil
 		},
 		RunE: ccmd.RunE,
 	}
 
 	cmd.SilenceUsage = true
 
-	cmd.Flags().StringSlice("firmwareId", []string{""}, "Firmware package id where the version will be added to (accepts pipeline)")
-	cmd.Flags().String("version", "", "Patch version, i.e. 1.0.0")
-	cmd.Flags().String("url", "", "URL to the firmware patch")
-	cmd.Flags().String("dependencyVersion", "", "Existing firmware version that the patch is dependent on")
+	cmd.Flags().StringSlice("id", []string{""}, "Firmware Package version (managedObject) id (required) (accepts pipeline)")
+	cmd.Flags().StringSlice("firmwareId", []string{""}, "Firmware package id (used to help completion be more accurate)")
+	cmd.Flags().Bool("withParents", false, "Include parent references")
 
 	completion.WithOptions(
 		cmd,
-		completion.WithFirmwareVersion("firmwareId", "firmwareId", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
+		completion.WithFirmwareVersion("id", "firmwareId", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
+		completion.WithFirmware("firmwareId", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
 	)
 
 	flags.WithOptions(
 		cmd,
-		flags.WithProcessingMode(),
-		flags.WithData(),
-		f.WithTemplateFlag(cmd),
-		flags.WithExtendedPipelineSupport("firmwareId", "firmwareId", false, "additionParents.references.0.managedObject.id", "id"),
+
+		flags.WithExtendedPipelineSupport("id", "id", true),
 	)
 
 	// Required flags
@@ -71,7 +70,7 @@ Create a new version to an existing firmware package
 }
 
 // RunE executes the command
-func (n *CreatePatchCmd) RunE(cmd *cobra.Command, args []string) error {
+func (n *GetCmd) RunE(cmd *cobra.Command, args []string) error {
 	cfg, err := n.factory.Config()
 	if err != nil {
 		return err
@@ -92,10 +91,16 @@ func (n *CreatePatchCmd) RunE(cmd *cobra.Command, args []string) error {
 		query,
 		inputIterators,
 		flags.WithCustomStringSlice(func() ([]string, error) { return cfg.GetQueryParameters(), nil }, "custom"),
+		flags.WithBoolValue("withParents", "withParents", ""),
 	)
 	if err != nil {
 		return cmderrors.NewUserError(err)
 	}
+	commonOptions, err := cfg.GetOutputCommonOptions(cmd)
+	if err != nil {
+		return cmderrors.NewUserError(fmt.Sprintf("Failed to get common options. err=%s", err))
+	}
+	commonOptions.AddQueryParameters(query)
 
 	queryValue, err := query.GetQueryUnescape(true)
 
@@ -110,8 +115,6 @@ func (n *CreatePatchCmd) RunE(cmd *cobra.Command, args []string) error {
 		headers,
 		inputIterators,
 		flags.WithCustomStringSlice(func() ([]string, error) { return cfg.GetHeader(), nil }, "header"),
-		flags.WithStaticStringValue("Content-Type", "application/vnd.com.nsn.cumulocity.managedObject+json"),
-		flags.WithProcessingModeValue(),
 	)
 	if err != nil {
 		return cmderrors.NewUserError(err)
@@ -134,34 +137,26 @@ func (n *CreatePatchCmd) RunE(cmd *cobra.Command, args []string) error {
 		cmd,
 		body,
 		inputIterators,
-		flags.WithDataFlagValue(),
-		flags.WithStringValue("version", "c8y_Firmware.version"),
-		flags.WithStringValue("url", "c8y_Firmware.url"),
-		flags.WithStringValue("dependencyVersion", "c8y_Patch.dependency"),
-		flags.WithDefaultTemplateString(`
-{type: 'c8y_FirmwareBinary', c8y_Global:{}}`),
-		cmdutil.WithTemplateValue(cfg),
-		flags.WithTemplateVariablesValue(),
-		flags.WithRequiredProperties("type", "c8y_Patch.dependency"),
 	)
 	if err != nil {
 		return cmderrors.NewUserError(err)
 	}
 
 	// path parameters
-	path := flags.NewStringTemplate("inventory/managedObjects/{firmwareId}/childAdditions")
+	path := flags.NewStringTemplate("inventory/managedObjects/{id}")
 	err = flags.WithPathParameters(
 		cmd,
 		path,
 		inputIterators,
-		c8yfetcher.WithFirmwareVersionByNameFirstMatch(client, args, "firmwareId", "firmwareId"),
+		c8yfetcher.WithFirmwareVersionByNameFirstMatch(client, args, "id", "id"),
+		c8yfetcher.WithFirmwareByNameFirstMatch(client, args, "firmwareId", "firmwareId"),
 	)
 	if err != nil {
 		return err
 	}
 
 	req := c8y.RequestOptions{
-		Method:       "POST",
+		Method:       "GET",
 		Path:         path.GetTemplate(),
 		Query:        queryValue,
 		Body:         body,

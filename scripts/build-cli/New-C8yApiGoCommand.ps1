@@ -104,7 +104,7 @@
                 }
             }
 
-            if ($iArg.Type -notmatch "device\b|agent\b|group|devicegroup|self|application|software\b|softwareversion\b|firmware\b|firmwareversion\b|configuration\b|deviceprofile\b|microservice|\[\]id|\[\]devicerequest") {
+            if ($iArg.Type -notmatch "device\b|agent\b|group|devicegroup|self|application|software\b|softwareversion\b|firmware\b|firmwareversion\b|firmwareversionpatch\b|configuration\b|deviceprofile\b|microservice|\[\]id|\[\]devicerequest") {
                 if ($RESTMethod -match "POST") {
                     # Add override capability to piped arguments, so the user can still override piped data with the argument
                     [void] $RESTBodyBuilderOptions.AppendLine("flags.WithOverrideValue(`"$($iarg.Name)`", `"$PipelineVariableProperty`"),")
@@ -170,6 +170,7 @@
             "(\[\])?softwareversion$" { [void] $CompletionBuilderOptions.AppendLine("completion.WithSoftwareVersion(`"$($iArg.Name)`", `"softwareId`", func() (*c8y.Client, error) { return ccmd.factory.Client()}),") }
             "(\[\])?firmware$" { [void] $CompletionBuilderOptions.AppendLine("completion.WithFirmware(`"$($iArg.Name)`", func() (*c8y.Client, error) { return ccmd.factory.Client()}),") }
             "(\[\])?firmwareversion$" { [void] $CompletionBuilderOptions.AppendLine("completion.WithFirmwareVersion(`"$($iArg.Name)`", `"firmwareId`", func() (*c8y.Client, error) { return ccmd.factory.Client()}),") }
+            "(\[\])?firmwareversionpatch$" { [void] $CompletionBuilderOptions.AppendLine("completion.WithFirmwareVersionPatch(`"$($iArg.Name)`", `"firmwareId`", func() (*c8y.Client, error) { return ccmd.factory.Client()}),") }
             "(\[\])?configuration$" { [void] $CompletionBuilderOptions.AppendLine("completion.WithConfiguration(`"$($iArg.Name)`", func() (*c8y.Client, error) { return ccmd.factory.Client()}),") }
             "(\[\])?deviceprofile$" { [void] $CompletionBuilderOptions.AppendLine("completion.WithDeviceProfile(`"$($iArg.Name)`", func() (*c8y.Client, error) { return ccmd.factory.Client()}),") }
         }
@@ -778,7 +779,7 @@ Function Get-C8yGoArgs {
         }
 
         # Management repository types
-        { $_ -in "[]software", "[]softwareversion", "[]firmware", "[]firmwareversion", "[]configuration", "[]deviceprofile" } {
+        { $_ -in "[]software", "[]softwareversion", "[]firmware", "[]firmwareversion", "[]firmwareversionpatch", "[]configuration", "[]deviceprofile" } {
             $SetFlag = if ($UseOption) {
                 "cmd.Flags().StringSliceP(`"${Name}`", []string{`"${Default}`"}, `"${OptionName}`", `"${Description}`")"
             } else {

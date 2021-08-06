@@ -1,0 +1,11 @@
+tests:
+    deviceprofiles_update_Update a device profile:
+        command: c8y deviceprofiles update --id 12345 --newName "my_custom_name" --data "{\"com_my_props\":{},\"value\":1}"
+        exit-code: 0
+        stdout:
+            json:
+                body.com_my_props: '{}'
+                body.name: my_custom_name
+                body.value: "1"
+                method: PUT
+                path: /inventory/managedObjects/12345

@@ -1,11 +1,12 @@
 // Code generated from specification version 1.0.0: DO NOT EDIT
-package create
+package delete
 
 import (
 	"io"
 	"net/http"
 
 	"github.com/MakeNowJust/heredoc/v2"
+	"github.com/reubenmiller/go-c8y-cli/pkg/c8yfetcher"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmd/subcommand"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmdutil"
@@ -16,47 +17,52 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// CreateCmd command
-type CreateCmd struct {
+// DeleteCmd command
+type DeleteCmd struct {
 	*subcommand.SubCommand
 
 	factory *cmdutil.Factory
 }
 
-// NewCreateCmd creates a command to Create device profile
-func NewCreateCmd(f *cmdutil.Factory) *CreateCmd {
-	ccmd := &CreateCmd{
+// NewDeleteCmd creates a command to Delete firmware package version patch
+func NewDeleteCmd(f *cmdutil.Factory) *DeleteCmd {
+	ccmd := &DeleteCmd{
 		factory: f,
 	}
 	cmd := &cobra.Command{
-		Use:   "create",
-		Short: "Create device profile",
-		Long:  `Create a new device profile (managedObject)`,
+		Use:   "delete",
+		Short: "Delete firmware package version patch",
+		Long:  `Delete an existing firmware package version patch`,
 		Example: heredoc.Doc(`
-$ c8y deviceprofiles create --name "python3-requests"
-Create a device profile
+$ c8y firmware versions patches delete --id 12345
+Delete a firmware package version patch and related binary
+
+$ c8y firmware versions patches delete --id 12345 --forceCascade=false
+Delete a firmware package version patch (but keep the related binary)
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
-			return f.CreateModeEnabled()
+			return f.DeleteModeEnabled()
 		},
 		RunE: ccmd.RunE,
 	}
 
 	cmd.SilenceUsage = true
 
-	cmd.Flags().String("name", "", "name (accepts pipeline)")
-	cmd.Flags().String("deviceType", "", "Device type filter. Only allow device profile to be applied to devices of this type")
+	cmd.Flags().StringSlice("id", []string{""}, "Firmware Package version patch (managedObject) id (required) (accepts pipeline)")
+	cmd.Flags().StringSlice("firmwareId", []string{""}, "Firmware package id (used to help completion be more accurate)")
+	cmd.Flags().Bool("forceCascade", true, "Remove version and any related binaries")
 
 	completion.WithOptions(
 		cmd,
+		completion.WithFirmwareVersionPatch("id", "firmwareId", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
+		completion.WithFirmware("firmwareId", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
 	)
 
 	flags.WithOptions(
 		cmd,
 		flags.WithProcessingMode(),
-		flags.WithData(),
-		f.WithTemplateFlag(cmd),
-		flags.WithExtendedPipelineSupport("name", "name", false, "name"),
+
+		flags.WithExtendedPipelineSupport("id", "id", true),
 	)
 
 	// Required flags
@@ -67,7 +73,7 @@ Create a device profile
 }
 
 // RunE executes the command
-func (n *CreateCmd) RunE(cmd *cobra.Command, args []string) error {
+func (n *DeleteCmd) RunE(cmd *cobra.Command, args []string) error {
 	cfg, err := n.factory.Config()
 	if err != nil {
 		return err
@@ -88,6 +94,7 @@ func (n *CreateCmd) RunE(cmd *cobra.Command, args []string) error {
 		query,
 		inputIterators,
 		flags.WithCustomStringSlice(func() ([]string, error) { return cfg.GetQueryParameters(), nil }, "custom"),
+		flags.WithDefaultBoolValue("forceCascade", "forceCascade", ""),
 	)
 	if err != nil {
 		return cmderrors.NewUserError(err)
@@ -129,33 +136,26 @@ func (n *CreateCmd) RunE(cmd *cobra.Command, args []string) error {
 		cmd,
 		body,
 		inputIterators,
-		flags.WithOverrideValue("name", "name"),
-		flags.WithDataFlagValue(),
-		flags.WithStringValue("name", "name"),
-		flags.WithStringValue("deviceType", "c8y_Filter.type"),
-		flags.WithDefaultTemplateString(`
-{type: 'c8y_Profile', c8y_DeviceProfile:{}, c8y_Filter:{}}`),
-		cmdutil.WithTemplateValue(cfg),
-		flags.WithTemplateVariablesValue(),
-		flags.WithRequiredProperties("type", "name"),
 	)
 	if err != nil {
 		return cmderrors.NewUserError(err)
 	}
 
 	// path parameters
-	path := flags.NewStringTemplate("inventory/managedObjects")
+	path := flags.NewStringTemplate("inventory/managedObjects/{id}")
 	err = flags.WithPathParameters(
 		cmd,
 		path,
 		inputIterators,
+		c8yfetcher.WithFirmwareVersionPatchByNameFirstMatch(client, args, "id", "id"),
+		c8yfetcher.WithFirmwareByNameFirstMatch(client, args, "firmwareId", "firmwareId"),
 	)
 	if err != nil {
 		return err
 	}
 
 	req := c8y.RequestOptions{
-		Method:       "POST",
+		Method:       "DELETE",
 		Path:         path.GetTemplate(),
 		Query:        queryValue,
 		Body:         body,

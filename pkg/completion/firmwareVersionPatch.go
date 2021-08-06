@@ -9,8 +9,8 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// WithFirmwareVersion firmware version completion (requires category)
-func WithFirmwareVersion(flagVersion string, flagNameFirmware string, clientFunc func() (*c8y.Client, error)) Option {
+// WithFirmwareVersionPatch firmware version completion (requires category)
+func WithFirmwareVersionPatch(flagVersion string, flagNameFirmware string, clientFunc func() (*c8y.Client, error)) Option {
 	return func(cmd *cobra.Command) *cobra.Command {
 		_ = cmd.RegisterFlagCompletionFunc(flagVersion, func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 			client, err := clientFunc()
@@ -53,7 +53,7 @@ func WithFirmwareVersion(flagVersion string, flagNameFirmware string, clientFunc
 					)
 					if err == nil && len(packages.ManagedObjects) > 0 {
 						opt.Query = fmt.Sprintf(
-							"(type eq '%s') and (not(has(c8y_Patch))) and (c8y_Firmware.version eq '%v') and (bygroupid(%s))",
+							"(type eq '%s') and (has(c8y_Patch)) and (c8y_Firmware.version eq '%v') and (bygroupid(%s))",
 							versionType, versionPattern, packages.ManagedObjects[0].ID)
 					}
 				}
@@ -71,8 +71,12 @@ func WithFirmwareVersion(flagVersion string, flagNameFirmware string, clientFunc
 
 			for i, item := range items.ManagedObjects {
 				version := ""
+				dependency := ""
 				if v := items.Items[i].Get("c8y_Firmware.version"); v.Exists() {
 					version = v.String()
+				}
+				if v := items.Items[i].Get("c8y_Patch.dependency"); v.Exists() {
+					dependency = v.String()
 				}
 				if version == "" {
 					continue
@@ -83,7 +87,7 @@ func WithFirmwareVersion(flagVersion string, flagNameFirmware string, clientFunc
 					if v := items.Items[i].Get("additionParents.references.0.managedObject.name"); v.Exists() {
 						versionParent = v.String()
 					}
-					values = append(values, fmt.Sprintf("%s\t%s | id: %s", version, versionParent, item.ID))
+					values = append(values, fmt.Sprintf("%s\t%s (dependency: %s) | id: %s", version, versionParent, dependency, item.ID))
 				}
 			}
 
