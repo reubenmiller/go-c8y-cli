@@ -3,17 +3,18 @@
 Describe -Name "Get-FirmwareVersion" {
     BeforeEach {
         $mo = PSc8y\New-ManagedObject -Name "testMO"
+        $mo = PSc8y\New-FirmwareVersion -FirmwareId 12345 -Version "1.0.0" -Url "test.com/file.mender"
 
     }
 
     It "Get a firmware package" {
-        $Response = PSc8y\Get-Firmware -Id $mo.id
+        $Response = PSc8y\Get-FirmwareVersion -FirmwareId 12345 -Id $mo.id
         $LASTEXITCODE | Should -Be 0
         $Response | Should -Not -BeNullOrEmpty
     }
 
     It "Get a firmware package (using pipeline)" {
-        $Response = PSc8y\Get-ManagedObject -Id $mo.id | Get-Firmware
+        $Response = PSc8y\Get-ManagedObject -Id $mo.id | Get-FirmwareVersion
         $LASTEXITCODE | Should -Be 0
         $Response | Should -Not -BeNullOrEmpty
     }

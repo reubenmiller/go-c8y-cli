@@ -34,7 +34,7 @@ func NewDeleteCmd(f *cmdutil.Factory) *DeleteCmd {
 		Short: "Delete software package version",
 		Long:  `Delete an existing software package version`,
 		Example: heredoc.Doc(`
-$ c8y software versions delete --id 12345
+$ c8y software versions delete --id 22222
 Delete a software package and all related versions
 
 $ c8y software versions delete --id 12345 --forceCascade=false

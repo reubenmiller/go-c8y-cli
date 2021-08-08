@@ -6,8 +6,8 @@ Describe -Name "New-Software" {
 
     }
 
-    It "Create a managed object" {
-        $Response = PSc8y\New-ManagedObject -Name "python3-requests" -Description "python requests library" -Data @{$type=@{}}
+    It "Create a software package" {
+        $Response = PSc8y\New-Software -Name "python3-requests" -Description "python requests library" -Data @{$type=@{}}
         $LASTEXITCODE | Should -Be 0
         $Response | Should -Not -BeNullOrEmpty
     }

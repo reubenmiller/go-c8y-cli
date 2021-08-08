@@ -634,8 +634,8 @@ func WithFirmwareVersionByNameFirstMatch(client *c8y.Client, args []string, opts
 	}
 }
 
-// WithFirmwareVersionPatchByNameFirstMatch add reference by name matching for firmware version via cli args. Only the first match will be used
-func WithFirmwareVersionPatchByNameFirstMatch(client *c8y.Client, args []string, opts ...string) flags.GetOption {
+// WithFirmwarePatchByNameFirstMatch add reference by name matching for firmware version via cli args. Only the first match will be used
+func WithFirmwarePatchByNameFirstMatch(client *c8y.Client, args []string, opts ...string) flags.GetOption {
 	return func(cmd *cobra.Command, inputIterators *flags.RequestInputIterators) (string, interface{}, error) {
 		firmware := ""
 		if v, err := cmd.Flags().GetStringSlice("firmwareId"); err == nil && len(v) > 0 {

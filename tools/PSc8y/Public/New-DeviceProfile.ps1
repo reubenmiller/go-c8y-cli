@@ -11,9 +11,9 @@ Create a new device profile (managedObject)
 https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/deviceprofiles_create
 
 .EXAMPLE
-PS> New-ManagedObject -Name "python3-requests" -Data @{$type=@{}}
+PS> New-DeviceProfile -Name "python3-requests" -Data @{$type=@{}}
 
-Create a managed object
+Create a new device profile
 
 
 #>

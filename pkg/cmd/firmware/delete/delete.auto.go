@@ -35,10 +35,10 @@ func NewDeleteCmd(f *cmdutil.Factory) *DeleteCmd {
 		Long:  `Delete an existing firmware package`,
 		Example: heredoc.Doc(`
 $ c8y firmware delete --id 12345
-Delete a firmware package
-
-$ c8y firmware delete --id 12345 --cascade
 Delete a firmware package and all related versions
+
+$ c8y firmware delete --id 12345 --forceCascade=false
+Delete a firmware package but keep the binaries
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
 			return f.DeleteModeEnabled()
@@ -49,17 +49,18 @@ Delete a firmware package and all related versions
 	cmd.SilenceUsage = true
 
 	cmd.Flags().StringSlice("id", []string{""}, "Firmware Package (managedObject) id (required) (accepts pipeline)")
-	cmd.Flags().Bool("cascade", false, "Remove all versions recursively")
+	cmd.Flags().Bool("forceCascade", true, "Remove version and any related binaries")
 
 	completion.WithOptions(
 		cmd,
+		completion.WithFirmware("id", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
 	)
 
 	flags.WithOptions(
 		cmd,
 		flags.WithProcessingMode(),
 
-		flags.WithExtendedPipelineSupport("id", "id", true),
+		flags.WithExtendedPipelineSupport("id", "id", true, "additionParents.references.0.managedObject.id", "id"),
 	)
 
 	// Required flags
@@ -91,7 +92,7 @@ func (n *DeleteCmd) RunE(cmd *cobra.Command, args []string) error {
 		query,
 		inputIterators,
 		flags.WithCustomStringSlice(func() ([]string, error) { return cfg.GetQueryParameters(), nil }, "custom"),
-		flags.WithBoolValue("cascade", "cascade", ""),
+		flags.WithDefaultBoolValue("forceCascade", "forceCascade", ""),
 	)
 	if err != nil {
 		return cmderrors.NewUserError(err)
@@ -144,7 +145,7 @@ func (n *DeleteCmd) RunE(cmd *cobra.Command, args []string) error {
 		cmd,
 		path,
 		inputIterators,
-		c8yfetcher.WithIDSlice(args, "id", "id"),
+		c8yfetcher.WithFirmwareByNameFirstMatch(client, args, "id", "id"),
 	)
 	if err != nil {
 		return err

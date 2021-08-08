@@ -35,8 +35,14 @@ func NewListCmd(f *cmdutil.Factory) *ListCmd {
 		Short: "Get firmware package version collection",
 		Long:  `Get a collection of firmware package versions (managedObjects) based on filter parameters`,
 		Example: heredoc.Doc(`
-$ c8y firmware versions list
+$ c8y firmware versions list --firmwareId 12345
 Get a list of firmware package versions
+
+$ c8y firmware list | c8y firmware versions list
+Get a list of firmware and their versions (using pipeline)
+
+$ c8y firmware versions get --id 12345 | c8y firmware versions list
+Get all versions of a firmware using an existing version object
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
 			return nil

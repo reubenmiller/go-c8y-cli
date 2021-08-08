@@ -9,8 +9,8 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// WithFirmwareVersionPatch firmware version completion (requires category)
-func WithFirmwareVersionPatch(flagVersion string, flagNameFirmware string, clientFunc func() (*c8y.Client, error)) Option {
+// WithFirmwarePatch firmware version completion (requires category)
+func WithFirmwarePatch(flagVersion string, flagNameFirmware string, clientFunc func() (*c8y.Client, error)) Option {
 	return func(cmd *cobra.Command) *cobra.Command {
 		_ = cmd.RegisterFlagCompletionFunc(flagVersion, func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 			client, err := clientFunc()

@@ -11,19 +11,14 @@ Delete an existing firmware package version
 https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/firmware_versions_delete
 
 .EXAMPLE
-PS> Remove-Firmware -Id $mo.id
+PS> Remove-FirmwareVersion -Id $mo.id
 
-Delete a firmware package
+Delete a firmware version and all related versions
 
 .EXAMPLE
-PS> Get-ManagedObject -Id $mo.id | Remove-Firmware
+PS> Get-ManagedObject -Id $mo.id | Remove-FirmwareVersion
 
 Delete a firmware package (using pipeline)
-
-.EXAMPLE
-PS> Get-ManagedObject -Id $Device.id | Remove-Firmware -ForceCascade
-
-Delete a firmware package and all related versions
 
 
 #>

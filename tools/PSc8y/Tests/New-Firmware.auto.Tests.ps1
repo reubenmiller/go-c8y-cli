@@ -7,7 +7,7 @@ Describe -Name "New-Firmware" {
     }
 
     It "Create a firmware package" {
-        $Response = PSc8y\New-ManagedObject -Name "python3-requests" -Description "python requests library" -Data @{$type=@{}}
+        $Response = PSc8y\New-Firmware -Name "python3-requests" -Description "python requests library" -Data @{$type=@{}}
         $LASTEXITCODE | Should -Be 0
         $Response | Should -Not -BeNullOrEmpty
     }

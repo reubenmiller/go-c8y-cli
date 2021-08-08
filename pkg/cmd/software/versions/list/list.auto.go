@@ -35,8 +35,11 @@ func NewListCmd(f *cmdutil.Factory) *ListCmd {
 		Short: "Get software package version collection",
 		Long:  `Get a collection of software package versions (managedObjects) based on filter parameters`,
 		Example: heredoc.Doc(`
-$ c8y software versions list
+$ c8y software versions list --softwareId 12345
 Get a list of software package versions
+
+$ c8y software list | c8y software versions list
+Get a list of software package versions from multiple software packages
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
 			return nil
@@ -47,13 +50,11 @@ Get a list of software package versions
 	cmd.SilenceUsage = true
 
 	cmd.Flags().StringSlice("softwareId", []string{""}, "Software package id (accepts pipeline)")
-	cmd.Flags().String("type", "c8y_SoftwareBinary", "Software version type")
 	cmd.Flags().Bool("withParents", true, "Include parent references")
 
 	completion.WithOptions(
 		cmd,
 		completion.WithSoftware("softwareId", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
-		completion.WithValidateSet("type", "c8y_SoftwareBinary"),
 	)
 
 	flags.WithOptions(
@@ -92,7 +93,6 @@ func (n *ListCmd) RunE(cmd *cobra.Command, args []string) error {
 		query,
 		inputIterators,
 		flags.WithCustomStringSlice(func() ([]string, error) { return cfg.GetQueryParameters(), nil }, "custom"),
-		flags.WithStringValue("type", "type"),
 		flags.WithDefaultBoolValue("withParents", "withParents", ""),
 	)
 	if err != nil {

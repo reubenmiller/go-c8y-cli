@@ -36,6 +36,9 @@ func NewListCmd(f *cmdutil.Factory) *ListCmd {
 		Example: heredoc.Doc(`
 $ c8y software list
 Get a list of software packages
+
+$ c8y software list --name "python3*"
+Get a list of software packages starting with "python3"
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
 			return nil
@@ -140,7 +143,7 @@ func (n *ListCmd) RunE(cmd *cobra.Command, args []string) error {
 	}
 
 	// path parameters
-	path := flags.NewStringTemplate("inventory/managedObjects?query=$filter=((type%20eq%20'c8y_Software')%20and%20((name%20eq%20'{name}')%20or%20(description%20eq%20'{description}')%20or%20(c8y_Filter.type%20eq%20'{deviceType}')))%20$orderby=name%20asc")
+	path := flags.NewStringTemplate("inventory/managedObjects?query=$filter=((type%20eq%20'c8y_Software')%20and%20((name%20eq%20'{name}')%20or%20(not(has(description))%20or%20description%20eq%20'{description}')%20or%20(c8y_Filter.type%20eq%20'{deviceType}')))%20$orderby=name%20asc")
 	err = flags.WithPathParameters(
 		cmd,
 		path,

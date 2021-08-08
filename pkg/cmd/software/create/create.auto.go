@@ -35,6 +35,9 @@ func NewCreateCmd(f *cmdutil.Factory) *CreateCmd {
 		Example: heredoc.Doc(`
 $ c8y software create --name "python3-requests" --description "python requests library"
 Create a software package
+
+$ c8y software create --name "python3-requests" | c8y software versions create --version "1.0.0" --file "python3-requests.deb"
+Create a software package and create a new version
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
 			return f.CreateModeEnabled()

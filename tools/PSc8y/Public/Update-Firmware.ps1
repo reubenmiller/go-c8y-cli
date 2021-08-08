@@ -13,7 +13,7 @@ https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/firmware_update
 .EXAMPLE
 PS> Update-Firmware -Id $mo.id -Data @{ com_my_props = @{ value = 1 } }
 
-Update a firmware package
+Update a firmware package name and add custom add custom properties
 
 .EXAMPLE
 PS> Get-ManagedObject -Id $mo.id | Update-Firmware -Data @{ com_my_props = @{ value = 1 } }

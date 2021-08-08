@@ -2,7 +2,7 @@
 
 Describe -Name "Get-Firmware" {
     BeforeEach {
-        $mo = PSc8y\New-ManagedObject -Name "testMO"
+        $mo = PSc8y\New-Firmware -Name "package1"
 
     }
 

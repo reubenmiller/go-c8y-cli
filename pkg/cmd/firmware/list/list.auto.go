@@ -140,7 +140,7 @@ func (n *ListCmd) RunE(cmd *cobra.Command, args []string) error {
 	}
 
 	// path parameters
-	path := flags.NewStringTemplate("inventory/managedObjects?query=$filter=((type%20eq%20'c8y_Firmware')%20and%20((name%20eq%20'{name}')%20or%20(description%20eq%20'{description}')%20or%20(c8y_Filter.type%20eq%20'{deviceType}')))%20$orderby=name%20asc")
+	path := flags.NewStringTemplate("inventory/managedObjects?query=$filter=((type%20eq%20'c8y_Firmware')%20and%20((name%20eq%20'{name}')%20and%20((not(has(description)))%20or%20description%20eq%20'{description}')%20and%20(not(has(c8y_Filter.type))%20or%20c8y_Filter.type%20eq%20'{deviceType}')))%20$orderby=name%20asc")
 	err = flags.WithPathParameters(
 		cmd,
 		path,

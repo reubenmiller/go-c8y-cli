@@ -132,14 +132,13 @@ func (n *CreateCmd) RunE(cmd *cobra.Command, args []string) error {
 		body,
 		inputIterators,
 		flags.WithDataFlagValue(),
-		flags.WithStringValue("version", "c8y_Software.version"),
+		flags.WithVersion("file", "version", "c8y_Software.version"),
 		flags.WithStringValue("url", "c8y_Software.url"),
-		// flags.WithBinaryUploadURL(client, "file", "c8y_Software.url"),
 		flags.WithDefaultTemplateString(`
 {type: 'c8y_SoftwareBinary', c8y_Global:{}}`),
 		cmdutil.WithTemplateValue(cfg),
 		flags.WithTemplateVariablesValue(),
-		flags.WithRequiredProperties("type"),
+		flags.WithRequiredProperties("type", "c8y_Software.version"),
 	)
 	if err != nil {
 		return cmderrors.NewUserError(err)

@@ -11,7 +11,7 @@ Create a new firmware package (managedObject)
 https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/firmware_create
 
 .EXAMPLE
-PS> New-ManagedObject -Name "python3-requests" -Description "python requests library" -Data @{$type=@{}}
+PS> New-Firmware -Name "python3-requests" -Description "python requests library" -Data @{$type=@{}}
 
 Create a firmware package
 

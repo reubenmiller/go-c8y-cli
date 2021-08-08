@@ -9,9 +9,9 @@ tests:
             contains:
                 - forceCascade=false
     software/versions_delete_Delete a software package and all related versions:
-        command: c8y software versions delete --id 12345
+        command: c8y software versions delete --id 22222
         exit-code: 0
         stdout:
             json:
                 method: DELETE
-                path: /inventory/managedObjects/12345
+                path: /inventory/managedObjects/22222

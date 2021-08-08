@@ -6,8 +6,8 @@ Describe -Name "New-DeviceProfile" {
 
     }
 
-    It "Create a managed object" {
-        $Response = PSc8y\New-ManagedObject -Name "python3-requests" -Data @{$type=@{}}
+    It "Create a new device profile" {
+        $Response = PSc8y\New-DeviceProfile -Name "python3-requests" -Data @{$type=@{}}
         $LASTEXITCODE | Should -Be 0
         $Response | Should -Not -BeNullOrEmpty
     }

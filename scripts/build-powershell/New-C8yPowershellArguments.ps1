@@ -52,6 +52,7 @@
         "[]agent" { "object[]"; break }
         "[]device" { "object[]"; break }
         "[]devicegroup" { "object[]"; break }
+        "[]deviceprofile" { "object[]"; break }
         "[]id" { "object[]"; break }
         "[]smartgroup" { "object[]"; break }
         "[]role" { "object[]"; break }
@@ -62,7 +63,7 @@
         "[]softwareversion" { "object[]"; break }
         "[]firmware" { "object[]"; break }
         "[]firmwareversion" { "object[]"; break }
-        "[]firmwareversionpatch" { "object[]"; break }
+        "[]firmwarepatch" { "object[]"; break }
         "[]stringcsv" { "string[]"; break }
         "[]tenant" { "object[]"; break }
         "[]user" { "object[]"; break }

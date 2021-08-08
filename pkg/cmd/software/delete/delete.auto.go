@@ -35,10 +35,10 @@ func NewDeleteCmd(f *cmdutil.Factory) *DeleteCmd {
 		Long:  `Delete an existing software package`,
 		Example: heredoc.Doc(`
 $ c8y software delete --id 12345
-Delete a software package
-
-$ c8y software delete --id 12345 --cascade
 Delete a software package and all related versions
+
+$ c8y software delete --id 12345 --forceCascade=false
+Delete a software package but keep all related versions
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
 			return f.DeleteModeEnabled()
@@ -49,7 +49,7 @@ Delete a software package and all related versions
 	cmd.SilenceUsage = true
 
 	cmd.Flags().StringSlice("id", []string{""}, "Software Package (managedObject) id (required) (accepts pipeline)")
-	cmd.Flags().Bool("cascade", false, "Remove all versions recursively")
+	cmd.Flags().Bool("forceCascade", true, "Remove version and any related binaries")
 
 	completion.WithOptions(
 		cmd,
@@ -92,7 +92,7 @@ func (n *DeleteCmd) RunE(cmd *cobra.Command, args []string) error {
 		query,
 		inputIterators,
 		flags.WithCustomStringSlice(func() ([]string, error) { return cfg.GetQueryParameters(), nil }, "custom"),
-		flags.WithBoolValue("cascade", "cascade", ""),
+		flags.WithDefaultBoolValue("forceCascade", "forceCascade", ""),
 	)
 	if err != nil {
 		return cmderrors.NewUserError(err)

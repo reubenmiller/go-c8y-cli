@@ -11,9 +11,9 @@ Create a new software package (managedObject)
 https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/software_create
 
 .EXAMPLE
-PS> New-ManagedObject -Name "python3-requests" -Description "python requests library" -Data @{$type=@{}}
+PS> New-Software -Name "python3-requests" -Description "python requests library" -Data @{$type=@{}}
 
-Create a managed object
+Create a software package
 
 
 #>

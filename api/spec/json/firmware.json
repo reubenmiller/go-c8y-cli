@@ -11,7 +11,7 @@
       "method": "GET",
       "description": "Get firmware collection",
       "descriptionLong": "Get a collection of firmware packages (managedObjects) based on filter parameters",
-      "path": "inventory/managedObjects?query=$filter=((type eq 'c8y_Firmware') and ((name eq '{name}') or (description eq '{description}') or (c8y_Filter.type eq '{deviceType}'))) $orderby=name asc",
+      "path": "inventory/managedObjects?query=$filter=((type eq 'c8y_Firmware') and ((name eq '{name}') and ((not(has(description))) or description eq '{description}') and (not(has(c8y_Filter.type)) or c8y_Filter.type eq '{deviceType}'))) $orderby=name asc",
       "accept": "application/vnd.com.nsn.cumulocity.managedObjectCollection+json",
       "collectionType": "application/vnd.com.nsn.cumulocity.managedObject+json",
       "collectionProperty": "managedObjects",
@@ -72,7 +72,7 @@
             "beforeEach": [
               "$type = New-RandomString -Prefix \"customType_\""
             ],
-            "command": "New-ManagedObject -Name \"python3-requests\" -Description \"python requests library\" -Data @{$type=@{}}",
+            "command": "New-Firmware -Name \"python3-requests\" -Description \"python requests library\" -Data @{$type=@{}}",
             "afterEach": [
               "Get-ManagedObjectCollection -FragmentType $type | Remove-ManagedObject"
             ]
@@ -141,7 +141,7 @@
           {
             "description": "Get a firmware package",
             "beforeEach": [
-              "$mo = PSc8y\\New-ManagedObject -Name \"testMO\""
+              "$mo = PSc8y\\New-Firmware -Name \"package1\""
             ],
             "command": "Get-Firmware -Id $mo.id",
             "afterEach": [
@@ -151,7 +151,7 @@
           {
             "description": "Get a firmware package (using pipeline)",
             "beforeEach": [
-              "$mo = PSc8y\\New-ManagedObject -Name \"testMO\""
+              "$mo = PSc8y\\New-Firmware -Name \"package1\""
             ],
             "command": "Get-ManagedObject -Id $mo.id | Get-Firmware",
             "afterEach": [
@@ -163,16 +163,24 @@
           {
             "description": "Get a firmware package",
             "command": "c8y firmware get --id 12345"
+          },
+          {
+            "description": "Get a firmware package (using pipeline)",
+            "command": "echo '12345' | c8y firmware get"
           }
         ]
       },
       "pathParameters": [
         {
           "name": "id",
-          "type": "[]id",
-          "pipeline": true,
+          "type": "[]firmware",
+          "description": "Firmware package (managedObject) id",
           "required": true,
-          "description": "Firmware package (managedObject) id"
+          "pipeline": true,
+          "pipelineAliases": [
+            "additionParents.references.0.managedObject.id",
+            "id"
+          ]
         }
       ]
     },
@@ -190,9 +198,9 @@
       "examples": {
         "powershell": [
           {
-            "description": "Update a firmware package",
+            "description": "Update a firmware package name and add custom add custom properties",
             "beforeEach": [
-              "$mo = PSc8y\\New-ManagedObject -Name \"testMO\""
+              "$mo = PSc8y\\New-Firmware -Name \"package1\""
             ],
             "command": "Update-Firmware -Id $mo.id -Data @{ com_my_props = @{ value = 1 } }",
             "afterEach": [
@@ -202,7 +210,7 @@
           {
             "description": "Update a firmware package (using pipeline)",
             "beforeEach": [
-              "$mo = PSc8y\\New-ManagedObject -Name \"testMO\""
+              "$mo = PSc8y\\New-Firmware -Name \"package1\""
             ],
             "command": "Get-ManagedObject -Id $mo.id | Update-Firmware -Data @{ com_my_props = @{ value = 1 } }",
             "afterEach": [
@@ -212,8 +220,12 @@
         ],
         "go": [
           {
-            "description": "Update a firmware package",
+            "description": "Update a firmware package name and add custom add custom properties",
             "command": "c8y firmware update --id 12345 --newName \"my_custom_name\" --data \"{\\\"com_my_props\\\":{},\\\"value\\\":1}\""
+          },
+          {
+            "description": "Update a firmware package name (using pipeline)",
+            "command": "echo '12345' | c8y firmware update --newName \"my_custom_name\""
           }
         ]
       },
@@ -247,10 +259,14 @@
       "pathParameters": [
         {
           "name": "id",
-          "type": "[]id",
-          "pipeline": true,
+          "type": "[]firmware",
           "description": "Firmware package (managedObject) id",
-          "required": true
+          "required": true,
+          "pipeline": true,
+          "pipelineAliases": [
+            "additionParents.references.0.managedObject.id",
+            "id"
+          ]
         }
       ]
     },
@@ -268,9 +284,9 @@
       "examples": {
         "powershell": [
           {
-            "description": "Delete a firmware package",
+            "description": "Delete a firmware package and all related versions",
             "beforeEach": [
-              "$mo = PSc8y\\New-ManagedObject -Name \"testMO\""
+              "$mo = PSc8y\\New-Firmware -Name \"firmware1\""
             ],
             "command": "Remove-Firmware -Id $mo.id",
             "afterEach": [
@@ -280,7 +296,7 @@
           {
             "description": "Delete a firmware package (using pipeline)",
             "beforeEach": [
-              "$mo = PSc8y\\New-ManagedObject -Name \"testMO\""
+              "$mo = PSc8y\\New-Firmware -Name \"firmware1\""
             ],
             "command": "Get-ManagedObject -Id $mo.id | Remove-Firmware",
             "afterEach": [
@@ -288,44 +304,46 @@
             ]
           },
           {
-            "description": "Delete a firmware package and all related versions",
+            "description": "Delete a firmware package but keep the binaries",
             "beforeEach": [
-              "$Device = PSc8y\\New-TestDevice",
-              "$ChildDevice = PSc8y\\New-TestDevice",
-              "PSc8y\\Add-ChildDeviceToDevice -Device $Device.id -NewChild $ChildDevice.id"
+              "$mo = PSc8y\\New-Firmware -Name \"firmware1\""
             ],
-            "command": "Get-ManagedObject -Id $Device.id | Remove-Firmware -Cascade",
+            "command": "Get-ManagedObject -Id $Device.id | Remove-Firmware -ForceCascade:$false",
             "afterEach": [
-              "Remove-ManagedObject -Id $Device.id -ErrorAction SilentlyContinue",
-              "Remove-ManagedObject -Id $ChildDevice.id -ErrorAction SilentlyContinue"
+              "Remove-ManagedObject -Id $Device.id -ErrorAction SilentlyContinue"
             ]
           }
         ],
         "go": [
           {
-            "description": "Delete a firmware package",
+            "description": "Delete a firmware package and all related versions",
             "command": "c8y firmware delete --id 12345"
           },
           {
-            "description": "Delete a firmware package and all related versions",
-            "command": "c8y firmware delete --id 12345 --cascade"
+            "description": "Delete a firmware package but keep the binaries",
+            "command": "c8y firmware delete --id 12345 --forceCascade=false"
           }
         ]
       },
       "pathParameters": [
         {
           "name": "id",
-          "type": "[]id",
+          "type": "[]firmware",
           "pipeline": true,
           "required": true,
+          "pipelineAliases": [
+            "additionParents.references.0.managedObject.id",
+            "id"
+          ],
           "description": "Firmware Package (managedObject) id"
         }
       ],
       "queryParameters": [
         {
-          "name": "cascade",
-          "type": "boolean",
-          "description": "Remove all versions recursively"
+          "name": "forceCascade",
+          "type": "booleanDefault",
+          "default": "true",
+          "description": "Remove version and any related binaries"
         }
       ]
     }

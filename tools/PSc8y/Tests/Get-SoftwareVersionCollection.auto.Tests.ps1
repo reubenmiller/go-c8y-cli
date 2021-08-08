@@ -6,7 +6,7 @@ Describe -Name "Get-SoftwareVersionCollection" {
     }
 
     It "Get a list of software package versions" {
-        $Response = PSc8y\Get-SoftwareVersionCollection
+        $Response = PSc8y\Get-SoftwareVersionCollection -SoftwareId 12345
         $LASTEXITCODE | Should -Be 0
         $Response | Should -Not -BeNullOrEmpty
     }

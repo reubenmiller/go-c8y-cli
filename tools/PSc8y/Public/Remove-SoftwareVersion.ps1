@@ -11,17 +11,17 @@ Delete an existing software package version
 https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/software_versions_delete
 
 .EXAMPLE
-PS> Remove-Software -Id $mo.id
+PS> Remove-SoftwareVersion -Id $mo.id
 
 Delete a software package
 
 .EXAMPLE
-PS> Get-ManagedObject -Id $mo.id | Remove-Software
+PS> Get-ManagedObject -Id $mo.id | Remove-SoftwareVersion
 
 Delete a software package (using pipeline)
 
 .EXAMPLE
-PS> Get-ManagedObject -Id $Device.id | Remove-Software -Cascade
+PS> Get-ManagedObject -Id $Device.id | Remove-SoftwareVersion -ForceCascade:$false
 
 Delete a software package and all related versions
 

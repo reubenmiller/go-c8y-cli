@@ -31,7 +31,7 @@ Delete a device profile (using pipeline)
         [Parameter(Mandatory = $true,
                    ValueFromPipeline=$true,
                    ValueFromPipelineByPropertyName=$true)]
-        []
+        [object[]]
         $Id
     )
     DynamicParam {

@@ -35,7 +35,10 @@ func NewUpdateCmd(f *cmdutil.Factory) *UpdateCmd {
 		Long:  `Update an existing firmware package (managedObject)`,
 		Example: heredoc.Doc(`
 $ c8y firmware update --id 12345 --newName "my_custom_name" --data "{\"com_my_props\":{},\"value\":1}"
-Update a firmware package
+Update a firmware package name and add custom add custom properties
+
+$ echo '12345' | c8y firmware update --newName "my_custom_name"
+Update a firmware package name (using pipeline)
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
 			return f.UpdateModeEnabled()
@@ -52,6 +55,7 @@ Update a firmware package
 
 	completion.WithOptions(
 		cmd,
+		completion.WithFirmware("id", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
 	)
 
 	flags.WithOptions(
@@ -59,7 +63,7 @@ Update a firmware package
 		flags.WithProcessingMode(),
 		flags.WithData(),
 		f.WithTemplateFlag(cmd),
-		flags.WithExtendedPipelineSupport("id", "id", true),
+		flags.WithExtendedPipelineSupport("id", "id", true, "additionParents.references.0.managedObject.id", "id"),
 	)
 
 	// Required flags
@@ -149,7 +153,7 @@ func (n *UpdateCmd) RunE(cmd *cobra.Command, args []string) error {
 		cmd,
 		path,
 		inputIterators,
-		c8yfetcher.WithIDSlice(args, "id", "id"),
+		c8yfetcher.WithFirmwareByNameFirstMatch(client, args, "id", "id"),
 	)
 	if err != nil {
 		return err

@@ -23,13 +23,17 @@
         "powershell": [
           {
             "description": "Get a list of software package versions",
-            "command": "Get-SoftwareVersionCollection"
+            "command": "Get-SoftwareVersionCollection -SoftwareId 12345"
           }
         ],
         "go": [
           {
             "description": "Get a list of software package versions",
-            "command": "c8y software versions list"
+            "command": "c8y software versions list --softwareId 12345"
+          },
+          {
+            "description": "Get a list of software package versions from multiple software packages",
+            "command": "c8y software list | c8y software versions list"
           }
         ]
       },
@@ -48,103 +52,11 @@
       ],
       "queryParameters": [
         {
-          "name": "type",
-          "type": "string",
-          "default": "c8y_SoftwareBinary",
-          "validationSet": [
-            "c8y_SoftwareBinary"
-          ],
-          "static": true,
-          "description": "Software version type"
-        },
-        {
           "name": "withParents",
           "type": "booleanDefault",
           "description": "Include parent references",
           "default": "true"
         }
-      ]
-    },
-    {
-      "name": "newSoftwareVersion",
-      "skip": true,
-      "method": "POST",
-      "path": "inventory/managedObjects/{softwareId}/childAdditions",
-      "accept": "application/vnd.com.nsn.cumulocity.inventory+json",
-      "contentType": "application/vnd.com.nsn.cumulocity.managedObject+json",
-      "description": "Create software package version",
-      "descriptionLong": "Create a new software package (managedObject)",
-      "alias": {
-        "go": "create",
-        "powershell": "New-SoftwareVersion"
-      },
-      "examples": {
-        "powershell": [
-          {
-            "description": "Create a new version to an existing software package",
-            "beforeEach": [
-              "$type = New-RandomString -Prefix \"customType_\""
-            ],
-            "command": "New-ManagedObject -Name \"python3-requests\" -Description \"python requests library\" -Data @{$type=@{}}",
-            "afterEach": [
-              "Get-ManagedObjectCollection -FragmentType $type | Remove-ManagedObject"
-            ]
-          }
-        ],
-        "go": [
-          {
-            "description": "Create a new version to an existing software package",
-            "command": "c8y software create --name \"python3-requests\" --description \"python requests library\""
-          }
-        ]
-      },
-      "pathParameters": [
-        {
-          "name": "softwareId",
-          "type": "[]software",
-          "required": false,
-          "description": "Software package id where the version will be added to",
-          "pipeline": true,
-          "pipelineAliases": [
-            "additionParents.references.0.managedObject.id",
-            "id"
-          ]
-        }
-      ],
-      "body": [
-        {
-          "name": "version",
-          "type": "string",
-          "required": false,
-          "description": "Software package version name, i.e. 1.0.0",
-          "property": "c8y_Software.version"
-        },
-        {
-          "name": "url",
-          "type": "string",
-          "required": false,
-          "description": "URL to the software package",
-          "property": "c8y_Software.url"
-        },
-        {
-          "name": "file",
-          "type": "binaryUploadURL",
-          "description": "File to be uploaded",
-          "property": "c8y_Software.url"
-        },
-        {
-          "name": "data",
-          "type": "json",
-          "description": "Additional properties of the software package."
-        }
-      ],
-      "bodyTemplate": {
-        "type": "jsonnet",
-        "applyLast": false,
-        "template": "{type: 'c8y_SoftwareBinary', c8y_Global:{}}"
-      },
-      "bodyRequiredKeys": [
-        "type"
       ]
     },
     {
@@ -165,7 +77,7 @@
             "beforeEach": [
               "$mo = PSc8y\\New-ManagedObject -Name \"testMO\""
             ],
-            "command": "Remove-Software -Id $mo.id",
+            "command": "Remove-SoftwareVersion -Id $mo.id",
             "afterEach": [
               "Remove-ManagedObject -Id $mo.id -ErrorAction SilentlyContinue"
             ]
@@ -175,7 +87,7 @@
             "beforeEach": [
               "$mo = PSc8y\\New-ManagedObject -Name \"testMO\""
             ],
-            "command": "Get-ManagedObject -Id $mo.id | Remove-Software",
+            "command": "Get-ManagedObject -Id $mo.id | Remove-SoftwareVersion",
             "afterEach": [
               "Remove-ManagedObject -Id $mo.id -ErrorAction SilentlyContinue"
             ]
@@ -183,11 +95,9 @@
           {
             "description": "Delete a software package and all related versions",
             "beforeEach": [
-              "$Device = PSc8y\\New-TestDevice",
-              "$ChildDevice = PSc8y\\New-TestDevice",
-              "PSc8y\\Add-ChildDeviceToDevice -Device $Device.id -NewChild $ChildDevice.id"
+              "$Device = PSc8y\\New-TestDevice"
             ],
-            "command": "Get-ManagedObject -Id $Device.id | Remove-Software -Cascade",
+            "command": "Get-ManagedObject -Id $Device.id | Remove-SoftwareVersion -ForceCascade:$false",
             "afterEach": [
               "Remove-ManagedObject -Id $Device.id -ErrorAction SilentlyContinue",
               "Remove-ManagedObject -Id $ChildDevice.id -ErrorAction SilentlyContinue"
@@ -197,7 +107,7 @@
         "go": [
           {
             "description": "Delete a software package and all related versions",
-            "command": "c8y software versions delete --id 12345"
+            "command": "c8y software versions delete --id 22222"
           },
           {
             "description": "Delete a software package (but keep any child binaries)",

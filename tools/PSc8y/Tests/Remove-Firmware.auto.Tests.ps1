@@ -2,14 +2,11 @@
 
 Describe -Name "Remove-Firmware" {
     BeforeEach {
-        $mo = PSc8y\New-ManagedObject -Name "testMO"
-        $Device = PSc8y\New-TestDevice
-        $ChildDevice = PSc8y\New-TestDevice
-        PSc8y\Add-ChildDeviceToDevice -Device $Device.id -NewChild $ChildDevice.id
+        $mo = PSc8y\New-Firmware -Name "firmware1"
 
     }
 
-    It "Delete a firmware package" {
+    It "Delete a firmware package and all related versions" {
         $Response = PSc8y\Remove-Firmware -Id $mo.id
         $LASTEXITCODE | Should -Be 0
     }
@@ -19,8 +16,8 @@ Describe -Name "Remove-Firmware" {
         $LASTEXITCODE | Should -Be 0
     }
 
-    It "Delete a firmware package and all related versions" {
-        $Response = PSc8y\Get-ManagedObject -Id $Device.id | Remove-Firmware -Cascade
+    It "Delete a firmware package but keep the binaries" {
+        $Response = PSc8y\Get-ManagedObject -Id $Device.id | Remove-Firmware -ForceCascade:$false
         $LASTEXITCODE | Should -Be 0
     }
 
@@ -28,7 +25,6 @@ Describe -Name "Remove-Firmware" {
     AfterEach {
         Remove-ManagedObject -Id $mo.id -ErrorAction SilentlyContinue
         Remove-ManagedObject -Id $Device.id -ErrorAction SilentlyContinue
-        Remove-ManagedObject -Id $ChildDevice.id -ErrorAction SilentlyContinue
 
     }
 }

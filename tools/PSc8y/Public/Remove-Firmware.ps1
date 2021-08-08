@@ -13,7 +13,7 @@ https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/firmware_delete
 .EXAMPLE
 PS> Remove-Firmware -Id $mo.id
 
-Delete a firmware package
+Delete a firmware package and all related versions
 
 .EXAMPLE
 PS> Get-ManagedObject -Id $mo.id | Remove-Firmware
@@ -21,9 +21,9 @@ PS> Get-ManagedObject -Id $mo.id | Remove-Firmware
 Delete a firmware package (using pipeline)
 
 .EXAMPLE
-PS> Get-ManagedObject -Id $Device.id | Remove-Firmware -Cascade
+PS> Get-ManagedObject -Id $Device.id | Remove-Firmware -ForceCascade:$false
 
-Delete a firmware package and all related versions
+Delete a firmware package but keep the binaries
 
 
 #>
@@ -39,10 +39,10 @@ Delete a firmware package and all related versions
         [object[]]
         $Id,
 
-        # Remove all versions recursively
+        # Remove version and any related binaries
         [Parameter()]
         [switch]
-        $Cascade
+        $ForceCascade
     )
     DynamicParam {
         Get-ClientCommonParameters -Type "Delete"

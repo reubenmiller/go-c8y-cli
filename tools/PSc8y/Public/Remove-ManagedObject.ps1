@@ -39,10 +39,20 @@ Delete a managed object and all child devices
         [object[]]
         $Id,
 
-        # Remove all child devices and child assets will be deleted recursively. By default, the delete operation is propagated to the subgroups only if the deleted object is a group
+        # When set to true and the managed object is a device or group, all the hierarchy will be deleted.
         [Parameter()]
         [switch]
-        $Cascade
+        $Cascade,
+
+        # When set to true all the hierarchy will be deleted without checking the type of managed object. It takes precedence over the parameter cascade.
+        [Parameter()]
+        [switch]
+        $ForceCascade,
+
+        # When set to true and the managed object is a device, it deletes the associated device user (credentials).
+        [Parameter()]
+        [switch]
+        $WithDeviceUser
     )
     DynamicParam {
         Get-ClientCommonParameters -Type "Delete"

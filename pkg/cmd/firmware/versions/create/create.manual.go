@@ -49,7 +49,7 @@ func NewCreateCmd(f *cmdutil.Factory) *CreateCmd {
 	cmd.SilenceUsage = true
 
 	cmd.Flags().StringSlice("firmwareId", []string{""}, "Firmware package id where the version will be added to (accepts pipeline)")
-	cmd.Flags().String("version", "", "Version name, i.e. 1.0.0")
+	cmd.Flags().String("version", "", "Version name, i.e. 1.0.0. If left blank than the version")
 	cmd.Flags().String("url", "", "URL to the firmware package")
 	cmd.Flags().String("file", "", "File to be uploaded")
 
@@ -132,13 +132,13 @@ func (n *CreateCmd) RunE(cmd *cobra.Command, args []string) error {
 		body,
 		inputIterators,
 		flags.WithDataFlagValue(),
-		flags.WithStringValue("version", "c8y_Firmware.version"),
+		flags.WithVersion("file", "version", "c8y_Firmware.version"),
 		flags.WithStringValue("url", "c8y_Firmware.url"),
 		flags.WithDefaultTemplateString(`
 {type: 'c8y_FirmwareBinary', c8y_Global:{}}`),
 		cmdutil.WithTemplateValue(cfg),
 		flags.WithTemplateVariablesValue(),
-		flags.WithRequiredProperties("type"),
+		flags.WithRequiredProperties("type", "c8y_Firmware.version"),
 	)
 	if err != nil {
 		return cmderrors.NewUserError(err)

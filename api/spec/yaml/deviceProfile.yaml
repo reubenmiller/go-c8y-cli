@@ -44,10 +44,10 @@ endpoints:
         powershell: New-DeviceProfile
     examples:
       powershell:
-        - description: Create a managed object
+        - description: Create a new device profile
           beforeEach:
             - $type = New-RandomString -Prefix "customType_"
-          command: New-ManagedObject -Name "python3-requests" -Data @{$type=@{}}
+          command: New-DeviceProfile -Name "python3-requests" -Data @{$type=@{}}
           afterEach:
             - Get-ManagedObjectCollection -FragmentType $type | Remove-ManagedObject
 

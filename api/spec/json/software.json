@@ -11,7 +11,7 @@
       "method": "GET",
       "description": "Get software collection",
       "descriptionLong": "Get a collection of software packages (managedObjects) based on filter parameters",
-      "path": "inventory/managedObjects?query=$filter=((type eq 'c8y_Software') and ((name eq '{name}') or (description eq '{description}') or (c8y_Filter.type eq '{deviceType}'))) $orderby=name asc",
+      "path": "inventory/managedObjects?query=$filter=((type eq 'c8y_Software') and ((name eq '{name}') or (not(has(description)) or description eq '{description}') or (c8y_Filter.type eq '{deviceType}'))) $orderby=name asc",
       "accept": "application/vnd.com.nsn.cumulocity.managedObjectCollection+json",
       "collectionType": "application/vnd.com.nsn.cumulocity.managedObject+json",
       "collectionProperty": "managedObjects",
@@ -30,6 +30,10 @@
           {
             "description": "Get a list of software packages",
             "command": "c8y software list"
+          },
+          {
+            "description": "Get a list of software packages starting with \"python3\"",
+            "command": "c8y software list --name \"python3*\""
           }
         ]
       },
@@ -55,54 +59,6 @@
       ]
     },
     {
-      "name": "findSoftwareCollection",
-      "method": "GET",
-      "skip": true,
-      "description": "Find software collection",
-      "descriptionLong": "Get a collection of software items based on the Cumulocity query language",
-      "path": "inventory/managedObjects",
-      "accept": "application/vnd.com.nsn.cumulocity.managedObjectCollection+json",
-      "collectionType": "application/vnd.com.nsn.cumulocity.managedObject+json",
-      "collectionProperty": "managedObjects",
-      "alias": {
-        "go": "find",
-        "powershell": "Find-SoftwareCollection"
-      },
-      "examples": {
-        "powershell": [
-          {
-            "description": "Find software packages which names start with python3",
-            "beforeEach": [
-              "$Device = New-TestDevice -Name \"python3*\""
-            ],
-            "command": "Find-SoftwareCollection -Name \"python3*\"",
-            "afterEach": [
-              "Remove-ManagedObject -Id $Device.id"
-            ]
-          }
-        ],
-        "go": [
-          {
-            "description": "Find software packages which names start with python3",
-            "command": "c8y software find --name \"python3*\""
-          }
-        ]
-      },
-      "queryParameters": [
-        {
-          "name": "name",
-          "type": "string",
-          "required": true,
-          "description": "ManagedObject query."
-        },
-        {
-          "name": "withParents",
-          "type": "boolean",
-          "description": "include a flat list of all parents and grandparents of the given object"
-        }
-      ]
-    },
-    {
       "name": "newSoftware",
       "method": "POST",
       "path": "inventory/managedObjects",
@@ -116,11 +72,11 @@
       "examples": {
         "powershell": [
           {
-            "description": "Create a managed object",
+            "description": "Create a software package",
             "beforeEach": [
               "$type = New-RandomString -Prefix \"customType_\""
             ],
-            "command": "New-ManagedObject -Name \"python3-requests\" -Description \"python requests library\" -Data @{$type=@{}}",
+            "command": "New-Software -Name \"python3-requests\" -Description \"python requests library\" -Data @{$type=@{}}",
             "afterEach": [
               "Get-ManagedObjectCollection -FragmentType $type | Remove-ManagedObject"
             ]
@@ -130,6 +86,10 @@
           {
             "description": "Create a software package",
             "command": "c8y software create --name \"python3-requests\" --description \"python requests library\""
+          },
+          {
+            "description": "Create a software package and create a new version",
+            "command": "c8y software create --name \"python3-requests\" | c8y software versions create --version \"1.0.0\" --file \"python3-requests.deb\""
           }
         ]
       },
@@ -316,11 +276,11 @@
       "examples": {
         "powershell": [
           {
-            "description": "Delete a software package",
+            "description": "Delete a software package and all related versions",
             "beforeEach": [
-              "$mo = PSc8y\\New-ManagedObject -Name \"testMO\""
+              "$mo = PSc8y\\New-Software -Name \"python3-requests\""
             ],
-            "command": "Remove-Software -Id $mo.id",
+            "command": "Get-ManagedObject -Id $mo.id | Remove-Software -ForceCascade:$false",
             "afterEach": [
               "Remove-ManagedObject -Id $mo.id -ErrorAction SilentlyContinue"
             ]
@@ -334,29 +294,16 @@
             "afterEach": [
               "Remove-ManagedObject -Id $mo.id -ErrorAction SilentlyContinue"
             ]
-          },
-          {
-            "description": "Delete a software package and all related versions",
-            "beforeEach": [
-              "$Device = PSc8y\\New-TestDevice",
-              "$ChildDevice = PSc8y\\New-TestDevice",
-              "PSc8y\\Add-ChildDeviceToDevice -Device $Device.id -NewChild $ChildDevice.id"
-            ],
-            "command": "Get-ManagedObject -Id $Device.id | Remove-Software -Cascade",
-            "afterEach": [
-              "Remove-ManagedObject -Id $Device.id -ErrorAction SilentlyContinue",
-              "Remove-ManagedObject -Id $ChildDevice.id -ErrorAction SilentlyContinue"
-            ]
           }
         ],
         "go": [
           {
-            "description": "Delete a software package",
+            "description": "Delete a software package and all related versions",
             "command": "c8y software delete --id 12345"
           },
           {
-            "description": "Delete a software package and all related versions",
-            "command": "c8y software delete --id 12345 --cascade"
+            "description": "Delete a software package but keep all related versions",
+            "command": "c8y software delete --id 12345 --forceCascade=false"
           }
         ]
       },
@@ -371,9 +318,10 @@
       ],
       "queryParameters": [
         {
-          "name": "cascade",
-          "type": "boolean",
-          "description": "Remove all versions recursively"
+          "name": "forceCascade",
+          "type": "booleanDefault",
+          "default": "true",
+          "description": "Remove version and any related binaries"
         }
       ]
     }

@@ -1,0 +1,12 @@
+tests:
+    It creates a patch using an external URL:
+        command: ./manual/firmware/versions/crud.sh iot-linux 1.0.0 1.0.1 https://example.com/binary/10001
+
+        exit-code: 0
+        stdout:
+            json:
+                type: c8y_FirmwareBinary
+                c8y_Patch.dependency: "1.0.0"
+                c8y_Firmware.version: "1.0.1"
+                c8y_Firmware.url: https://example.com/binary/10001
+                c8y_Global: '{}'

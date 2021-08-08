@@ -8,7 +8,7 @@ Delete firmware package version patch
 Delete an existing firmware package version patch
 
 .LINK
-https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/firmware_versions_patches_delete
+https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/firmware_patches_delete
 
 .EXAMPLE
 PS> Remove-FirmwareVersionPatch -Id $mo.id
@@ -60,7 +60,7 @@ Delete a firmware package version patch and related binary
             Use-CallerPreference -Cmdlet $PSCmdlet -SessionState $ExecutionContext.SessionState
         }
 
-        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "firmware versions patches delete"
+        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "firmware patches delete"
         $ClientOptions = Get-ClientOutputOption $PSBoundParameters
         $TypeOptions = @{
             Type = ""
@@ -74,13 +74,13 @@ Delete a firmware package version patch and related binary
         if ($ClientOptions.ConvertToPS) {
             $Id `
             | Group-ClientRequests `
-            | c8y firmware versions patches delete $c8yargs `
+            | c8y firmware patches delete $c8yargs `
             | ConvertFrom-ClientOutput @TypeOptions
         }
         else {
             $Id `
             | Group-ClientRequests `
-            | c8y firmware versions patches delete $c8yargs
+            | c8y firmware patches delete $c8yargs
         }
         
     }

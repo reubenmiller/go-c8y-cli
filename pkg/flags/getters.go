@@ -304,6 +304,34 @@ func WithStringValue(opts ...string) GetOption {
 	}
 }
 
+func WithVersion(fallbackSrc string, opts ...string) GetOption {
+	return func(cmd *cobra.Command, inputIterators *RequestInputIterators) (string, interface{}, error) {
+
+		src, dst, format := UnpackGetterOptions("%s", opts...)
+
+		if inputIterators != nil && inputIterators.PipeOptions != nil {
+			if inputIterators.PipeOptions.Name == src {
+				return WithPipelineIterator(inputIterators.PipeOptions)(cmd, inputIterators)
+			}
+		}
+
+		value, err := cmd.Flags().GetString(src)
+		if err != nil {
+			return dst, value, err
+		}
+		if value == "" {
+			if v, _ := cmd.Flags().GetString(fallbackSrc); v != "" {
+				value = c8ydata.ExtractVersion(v)
+			}
+		}
+		if value == "" {
+			dst = ""
+		}
+
+		return dst, applyFormatter(format, value), err
+	}
+}
+
 // WithStaticStringValue add a fixed string value
 func WithStaticStringValue(opts ...string) GetOption {
 	return func(cmd *cobra.Command, inputIterators *RequestInputIterators) (string, interface{}, error) {

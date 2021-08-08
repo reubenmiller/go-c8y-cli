@@ -1,4 +1,4 @@
-package createpatch
+package create
 
 import (
 	"context"
@@ -31,11 +31,14 @@ func NewCreatePatchCmd(f *cmdutil.Factory) *CreateCmd {
 	}
 	cmd := &cobra.Command{
 		Use:   "create",
-		Short: "Create firmware package version patch",
-		Long:  `Create a new firmware package (managedObject)`,
+		Short: "Create firmware patch",
+		Long:  `Create a new firmware patch (managedObject)`,
 		Example: heredoc.Doc(`
-$ c8y firmware create --name "python3-requests" --description "python requests library"
-Create a new version to an existing firmware package
+			$ c8y firmware patches create --firmwareId "UBUNTU_20_04" --version "20.4.1" --dependencyVersion "20.4.0" --url "https://example.com/binary/12345
+			Create a new patch (with external URL) to an existing firmware version
+
+			$ c8y firmware patches create --firmwareId custom\ firmware\ 1 --dependencyVersion 2.2.0 --version 2.2.1 --file ./install.ps1
+			Create a new patch (storing the file in Cumulocity) to an existing firmware version
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
 			return f.CreateModeEnabled()
@@ -135,25 +138,26 @@ func (n *CreateCmd) RunE(cmd *cobra.Command, args []string) error {
 		body,
 		inputIterators,
 		flags.WithDataFlagValue(),
-		flags.WithStringValue("version", "c8y_Firmware.version"),
+		flags.WithVersion("file", "version", "c8y_Firmware.version"),
 		flags.WithStringValue("url", "c8y_Firmware.url"),
 		flags.WithStringValue("dependencyVersion", "c8y_Patch.dependency"),
 		flags.WithDefaultTemplateString(`
 {type: 'c8y_FirmwareBinary', c8y_Global:{}}`),
 		cmdutil.WithTemplateValue(cfg),
 		flags.WithTemplateVariablesValue(),
-		flags.WithRequiredProperties("type", "c8y_Patch.dependency"),
+		flags.WithRequiredProperties("type", "c8y_Firmware.version", "c8y_Patch.dependency"),
 	)
 	if err != nil {
 		return cmderrors.NewUserError(err)
 	}
 
 	// path parameters
-	path := flags.NewStringTemplate("inventory/managedObjects/{firmwareId}/childAdditions")
+	path := flags.NewStringTemplate("{firmwareId}")
 	err = flags.WithPathParameters(
 		cmd,
 		path,
 		inputIterators,
+		c8yfetcher.WithFirmwareByNameFirstMatch(client, args, "firmwareId", "firmwareId"),
 		c8yfetcher.WithFirmwareVersionByNameFirstMatch(client, args, "dependencyVersion", "dependencyVersion"),
 	)
 	if err != nil {
@@ -176,6 +180,7 @@ func (n *CreateCmd) RunE(cmd *cobra.Command, args []string) error {
 	var respErr error
 	bounded := inputIterators.Total > 0
 	for {
+
 		firmwareID, _, err := path.Execute(false)
 		if err != nil {
 			if err == io.EOF {

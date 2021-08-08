@@ -3,6 +3,7 @@ package c8ydata
 import (
 	"testing"
 
+	"github.com/reubenmiller/go-c8y-cli/pkg/assert"
 	"github.com/reubenmiller/go-c8y-cli/pkg/jsonUtilities"
 )
 
@@ -57,5 +58,21 @@ func Test_RemoveCumulocityPropertiesWithID(t *testing.T) {
 
 	if _, ok := data["id"]; !ok {
 		t.Errorf("%s field should exist. wanted=exists, got=not-exists", "id")
+	}
+}
+
+func TestExtractVersion(t *testing.T) {
+	lines := []string{
+		"python3-requests-0.12.3.deb",
+		"python3-requests-0.12.3-1.deb",
+		"python3-requests",
+	}
+	exp := []string{
+		"0.12.3",
+		"0.12.3-1",
+		"",
+	}
+	for i, line := range lines {
+		assert.True(t, ExtractVersion(line) == exp[i])
 	}
 }

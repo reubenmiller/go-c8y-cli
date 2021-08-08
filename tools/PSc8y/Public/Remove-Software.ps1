@@ -11,19 +11,14 @@ Delete an existing software package
 https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/software_delete
 
 .EXAMPLE
-PS> Remove-Software -Id $mo.id
+PS> Get-ManagedObject -Id $mo.id | Remove-Software -ForceCascade:$false
 
-Delete a software package
+Delete a software package and all related versions
 
 .EXAMPLE
 PS> Get-ManagedObject -Id $mo.id | Remove-Software
 
 Delete a software package (using pipeline)
-
-.EXAMPLE
-PS> Get-ManagedObject -Id $Device.id | Remove-Software -Cascade
-
-Delete a software package and all related versions
 
 
 #>
@@ -39,10 +34,10 @@ Delete a software package and all related versions
         [object[]]
         $Id,
 
-        # Remove all versions recursively
+        # Remove version and any related binaries
         [Parameter()]
         [switch]
-        $Cascade
+        $ForceCascade
     )
     DynamicParam {
         Get-ClientCommonParameters -Type "Delete"

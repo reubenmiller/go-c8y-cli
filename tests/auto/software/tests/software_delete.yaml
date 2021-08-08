@@ -1,17 +1,17 @@
 tests:
-    software_delete_Delete a software package:
+    software_delete_Delete a software package and all related versions:
         command: c8y software delete --id 12345
         exit-code: 0
         stdout:
             json:
                 method: DELETE
                 path: /inventory/managedObjects/12345
-    software_delete_Delete a software package and all related versions:
-        command: c8y software delete --id 12345 --cascade
+    software_delete_Delete a software package but keep all related versions:
+        command: c8y software delete --id 12345 --forceCascade=false
         exit-code: 0
         stdout:
             json:
                 method: DELETE
                 path: /inventory/managedObjects/12345
             contains:
-                - cascade=true
+                - forceCascade=false

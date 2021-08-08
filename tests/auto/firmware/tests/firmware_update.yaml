@@ -1,5 +1,13 @@
 tests:
-    firmware_update_Update a firmware package:
+    firmware_update_Update a firmware package name (using pipeline):
+        command: $TEST_SHELL -c 'echo '12345' | c8y firmware update --newName "my_custom_name"'
+        exit-code: 0
+        stdout:
+            json:
+                body.name: my_custom_name
+                method: PUT
+                path: /inventory/managedObjects/{id}
+    firmware_update_Update a firmware package name and add custom add custom properties:
         command: c8y firmware update --id 12345 --newName "my_custom_name" --data "{\"com_my_props\":{},\"value\":1}"
         exit-code: 0
         stdout:

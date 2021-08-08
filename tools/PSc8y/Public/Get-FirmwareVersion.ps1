@@ -11,12 +11,12 @@ Get an existing firmware package version
 https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/firmware_versions_get
 
 .EXAMPLE
-PS> Get-Firmware -Id $mo.id
+PS> Get-FirmwareVersion -FirmwareId 12345 -Id $mo.id
 
 Get a firmware package
 
 .EXAMPLE
-PS> Get-ManagedObject -Id $mo.id | Get-Firmware
+PS> Get-ManagedObject -Id $mo.id | Get-FirmwareVersion
 
 Get a firmware package (using pipeline)
 

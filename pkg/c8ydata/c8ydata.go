@@ -1,6 +1,9 @@
 package c8ydata
 
-import "strings"
+import (
+	"regexp"
+	"strings"
+)
 
 // CumulocityProperties contain a map of the static properties which are generally read-only and only
 // controlled internally by Cumulocity or by other API calls
@@ -35,4 +38,17 @@ func IsID(v string) bool {
 	isNotDigit := func(c rune) bool { return c < '0' || c > '9' }
 	value := strings.TrimSpace(v)
 	return strings.IndexFunc(value, isNotDigit) <= -1
+}
+
+// ExtractVersion extracts a version from a string
+func ExtractVersion(s string) string {
+
+	pattern := regexp.MustCompile(`v?(\d+\.\d+\.\d+(\-\d+)?(-SNAPSHOT)?)`)
+	subpatterns := pattern.FindStringSubmatch(s)
+
+	if len(subpatterns) == 0 {
+		return ""
+	}
+
+	return subpatterns[1]
 }

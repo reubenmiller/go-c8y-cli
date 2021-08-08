@@ -37,6 +37,9 @@ func NewGetCmd(f *cmdutil.Factory) *GetCmd {
 		Example: heredoc.Doc(`
 $ c8y firmware get --id 12345
 Get a firmware package
+
+$ echo '12345' | c8y firmware get
+Get a firmware package (using pipeline)
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
 			return nil
@@ -50,12 +53,13 @@ Get a firmware package
 
 	completion.WithOptions(
 		cmd,
+		completion.WithFirmware("id", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
 	)
 
 	flags.WithOptions(
 		cmd,
 
-		flags.WithExtendedPipelineSupport("id", "id", true),
+		flags.WithExtendedPipelineSupport("id", "id", true, "additionParents.references.0.managedObject.id", "id"),
 	)
 
 	// Required flags
@@ -143,7 +147,7 @@ func (n *GetCmd) RunE(cmd *cobra.Command, args []string) error {
 		cmd,
 		path,
 		inputIterators,
-		c8yfetcher.WithIDSlice(args, "id", "id"),
+		c8yfetcher.WithFirmwareByNameFirstMatch(client, args, "id", "id"),
 	)
 	if err != nil {
 		return err

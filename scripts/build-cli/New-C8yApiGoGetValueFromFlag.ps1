@@ -103,7 +103,7 @@
         "[]firmwareversion" = "c8yfetcher.WithFirmwareVersionByNameFirstMatch(client, args, `"${prop}`", `"${queryParam}`"),"
 
         # firmware version patch array
-        "[]firmwareversionpatch" = "c8yfetcher.WithFirmwareVersionPatchByNameFirstMatch(client, args, `"${prop}`", `"${queryParam}`"),"
+        "[]firmwarepatch" = "c8yfetcher.WithFirmwarePatchByNameFirstMatch(client, args, `"${prop}`", `"${queryParam}`"),"
         
         # configuration array
         "[]configuration" = "c8yfetcher.WithConfigurationByNameFirstMatch(client, args, `"${prop}`", `"${queryParam}`"),"

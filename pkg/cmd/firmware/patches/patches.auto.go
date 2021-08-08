@@ -1,7 +1,9 @@
 package patches
 
 import (
-	cmdDelete "github.com/reubenmiller/go-c8y-cli/pkg/cmd/firmware/versions/patches/delete"
+	cmdDelete "github.com/reubenmiller/go-c8y-cli/pkg/cmd/firmware/patches/delete"
+	cmdGet "github.com/reubenmiller/go-c8y-cli/pkg/cmd/firmware/patches/get"
+	cmdList "github.com/reubenmiller/go-c8y-cli/pkg/cmd/firmware/patches/list"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmd/subcommand"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmdutil"
 	"github.com/spf13/cobra"
@@ -16,11 +18,13 @@ func NewSubCommand(f *cmdutil.Factory) *SubCmdPatches {
 
 	cmd := &cobra.Command{
 		Use:   "patches",
-		Short: "Cumulocity firmware version patch management",
-		Long:  `REST endpoint to interact with Cumulocity firmware versions patches`,
+		Short: "Cumulocity firmware patch management",
+		Long:  `REST endpoint to interact with Cumulocity firmware patches`,
 	}
 
 	// Subcommands
+	cmd.AddCommand(cmdList.NewListCmd(f).GetCommand())
+	cmd.AddCommand(cmdGet.NewGetCmd(f).GetCommand())
 	cmd.AddCommand(cmdDelete.NewDeleteCmd(f).GetCommand())
 
 	ccmd.SubCommand = subcommand.NewSubCommand(cmd)
