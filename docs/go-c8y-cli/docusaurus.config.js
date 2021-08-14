@@ -18,7 +18,7 @@ const allDocHomesPaths = [
   '/docs/master/',
 ];
 
-const baseUrl = `${process.env.BASE_URL || '/go-c8y-cli'}`.trimEnd('/') + '/';
+const baseUrl = `${process.env.BASE_URL || '/'}`.trimEnd('/') + '/';
 
 /** @type {import('@docusaurus/types').DocusaurusConfig} */
 (module.exports = {
