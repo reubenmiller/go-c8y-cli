@@ -8,6 +8,7 @@ mocks:
     c8y users list: cat ./testdata/c8y.users.list.json
     c8y users get --id peterpi@example.com: cat ./testdata/c8y.users.get.json
     c8y bulkoperations list --filter "status eq IN_PROGRESS": cat ./testdata/c8y.bulkoperations.list.in_progress.json
+    c8y software create --name "python3-requests": cat ./testdata/c8y.software.create.json
 
 files:
     myConfig.json: ./testdata/myConfig.json

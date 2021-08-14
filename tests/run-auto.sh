@@ -7,7 +7,7 @@ folder=$1
 shift
 
 export TEST_SHELL=bash
-commander test --config ./config.yaml $@ --dir auto/$folder
+commander test --config ./config.yaml "$@" --dir auto/$folder
 code=$?
 
 popd

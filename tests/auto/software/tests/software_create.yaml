@@ -9,10 +9,11 @@ tests:
                 method: POST
                 path: /inventory/managedObjects
     software_create_Create a software package and create a new version:
-        command: $TEST_SHELL -c 'c8y software create --name "python3-requests" | c8y software versions create --version "1.0.0" --file "python3-requests.deb"'
+        command: $TEST_SHELL -c 'cat ./testdata/c8y.software.create.json | c8y software versions create --version "1.0.0" --file "python3-requests.deb"'
         exit-code: 0
         stdout:
             json:
+                body.c8y_Software.version: 1.0.0
                 body.name: python3-requests
                 method: POST
                 path: /inventory/managedObjects

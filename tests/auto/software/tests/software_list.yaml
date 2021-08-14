@@ -5,11 +5,13 @@ tests:
         stdout:
             json:
                 method: GET
-                path: /inventory/managedObjects?query=$filter=((type eq 'c8y_Software') and ((name eq '{name}') or (not(has(description)) or description eq '{description}') or (c8y_Filter.type eq '{deviceType}'))) $orderby=name asc
+                path: /inventory/managedObjects
+                query: query=$filter=((type eq 'c8y_Software') and ((name eq '{name}') or (not(has(description)) or description eq '{description}') or (c8y_Filter.type eq '{deviceType}'))) $orderby=name asc
     software_list_Get a list of software packages starting with "python3":
         command: c8y software list --name "python3*"
         exit-code: 0
         stdout:
             json:
                 method: GET
-                path: /inventory/managedObjects?query=$filter=((type eq 'c8y_Software') and ((name eq 'python3*') or (not(has(description)) or description eq '{description}') or (c8y_Filter.type eq '{deviceType}'))) $orderby=name asc
+                path: /inventory/managedObjects
+                query: query=$filter=((type eq 'c8y_Software') and ((name eq 'python3*') or (not(has(description)) or description eq '{description}') or (c8y_Filter.type eq '{deviceType}'))) $orderby=name asc

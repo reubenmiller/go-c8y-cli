@@ -5,18 +5,21 @@ tests:
         stdout:
             json:
                 method: GET
-                path: /inventory/managedObjects?query=$filter=((not(has(c8y_Patch))) and (bygroupid({firmwareId}))) $orderby=creationTime.date desc,creationTime desc
+                path: /inventory/managedObjects
+                query: query=$filter=((not(has(c8y_Patch))) and (bygroupid({firmwareId}))) $orderby=creationTime.date desc,creationTime desc
     firmware/versions_list_Get a list of firmware package versions:
         command: c8y firmware versions list --firmwareId 12345
         exit-code: 0
         stdout:
             json:
                 method: GET
-                path: /inventory/managedObjects?query=$filter=((not(has(c8y_Patch))) and (bygroupid(12345))) $orderby=creationTime.date desc,creationTime desc
+                path: /inventory/managedObjects
+                query: query=$filter=((not(has(c8y_Patch))) and (bygroupid(12345))) $orderby=creationTime.date desc,creationTime desc
     firmware/versions_list_Get all versions of a firmware using an existing version object:
         command: $TEST_SHELL -c 'c8y firmware versions get --id 12345 | c8y firmware versions list'
         exit-code: 0
         stdout:
             json:
                 method: GET
-                path: /inventory/managedObjects?query=$filter=((not(has(c8y_Patch))) and (bygroupid({firmwareId}))) $orderby=creationTime.date desc,creationTime desc
+                path: /inventory/managedObjects
+                query: query=$filter=((not(has(c8y_Patch))) and (bygroupid({firmwareId}))) $orderby=creationTime.date desc,creationTime desc

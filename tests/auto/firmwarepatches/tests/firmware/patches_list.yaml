@@ -5,11 +5,13 @@ tests:
         stdout:
             json:
                 method: GET
-                path: /inventory/managedObjects?query=$filter=((has(c8y_Patch)) and (c8y_Patch.dependency eq '{dependency}') and (bygroupid(12345))) $orderby=creationTime.date desc,creationTime desc
+                path: /inventory/managedObjects
+                query: query=$filter=((has(c8y_Patch)) and (c8y_Patch.dependency eq '{dependency}') and (bygroupid(12345))) $orderby=creationTime.date desc,creationTime desc
     firmware/patches_list_Get a list of firmware patches where the dependency version starts with "1.":
         command: c8y firmware patches list --firmwareId 12345 --dependency '1.*'
         exit-code: 0
         stdout:
             json:
                 method: GET
-                path: /inventory/managedObjects?query=$filter=((has(c8y_Patch)) and (c8y_Patch.dependency eq '1.*') and (bygroupid(12345))) $orderby=creationTime.date desc,creationTime desc
+                path: /inventory/managedObjects
+                query: query=$filter=((has(c8y_Patch)) and (c8y_Patch.dependency eq '1.*') and (bygroupid(12345))) $orderby=creationTime.date desc,creationTime desc
