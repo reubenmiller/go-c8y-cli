@@ -11,7 +11,7 @@ import TabItem from '@theme/TabItem';
 
 It is recommended to install `go-c8y-cli` using a package manager as it makes it easier to update it in the future, and it will be available for all users.
 
-After the installation, follow the instructions to [setup your shell profile](shell-installation#setting-up-your-shell-profile).
+After the installation, follow the instructions to [setup your shell profile](/docs/installation/shell-installation#setting-up-your-shell-profile).
 
 ### Debian / Ubuntu (apt)
 
@@ -38,6 +38,8 @@ After the installation, follow the instructions to [setup your shell profile](sh
     sudo apt-get update
     sudo apt-get install go-c8y-cli
     ```
+
+3. Follow the instructions to [setup your shell profile](/docs/installation/shell-installation#setting-up-your-shell-profile)
 
 ### CentOS/RHEL/Fedora (dnf/yum)
 
@@ -68,6 +70,8 @@ After the installation, follow the instructions to [setup your shell profile](sh
     sudo dnf install go-c8y-cli
     ```
 
+3. Follow the instructions to [setup your shell profile](/docs/installation/shell-installation#setting-up-your-shell-profile)
+
 :::note
 You can install `go-c8y-cli` via `yum` by just replacing `dnf` with `yum` in the above commands.
 :::
@@ -95,6 +99,8 @@ You can install `go-c8y-cli` via `yum` by just replacing `dnf` with `yum` in the
     sudo apk update
     sudo apk add go-c8y-cli
     ```
+
+3. Follow the instructions to [setup your shell profile](/docs/installation/shell-installation#setting-up-your-shell-profile)
 
 :::note
 If you don't have `sudo` installed, then remove the `sudo` from the command, and run as root user.
@@ -125,6 +131,55 @@ If you don't have `sudo` installed, then remove the `sudo` from the command, and
     ```
     :::
 
+3. Add the following line to your preferred shell profile
+
+    <Tabs
+    groupId="shell-types"
+    defaultValue="bash"
+    values={[
+        { label: 'Bash', value: 'bash', },
+        { label: 'Zsh', value: 'zsh', },
+        { label: 'Fish', value: 'fish', },
+        { label: 'PowerShell', value: 'powershell', },
+    ]
+    }>
+    <TabItem value="bash">
+
+    ```bash title="file: ~/.bashrc"
+    source "$(brew --prefix)/etc/go-c8y-cli/shell/c8y.plugin.sh"
+    ```
+
+    </TabItem>
+    <TabItem value="zsh">
+
+    ```bash title="file: ~/.zshrc"
+    source "$(brew --prefix)/etc/go-c8y-cli/shell/c8y.plugin.zsh"
+    ```
+
+    </TabItem>
+    <TabItem value="fish">
+
+    ```bash title="file: ~/.config/fish/config.fish"
+    source "$(brew --prefix)/etc/go-c8y-cli/shell/c8y.plugin.fish"
+    ```
+
+    </TabItem>
+
+    <TabItem value="powershell">
+
+    ```powershell title="file: ~/.config/powershell/Microsoft.PowerShell_profile.ps1"
+    . "$(brew --prefix)/etc/go-c8y-cli/shell/c8y.plugin.ps1"
+    ```
+
+    </TabItem>
+
+    </Tabs>
+
+4. Restart your shell to reload your profile
+
+:::note
+You can also view the instructions on how to source the relevant plugin via the command `brew info go-c8y-cli`
+:::
 
 ### Manually (via script)
 
@@ -329,4 +384,4 @@ c8y devices list | jq -r ".id"
 
 ## Getting started
 
-After `go-c8y-cli` has been installed, follow the [Getting started](../gettingstarted) section for instructions how to use it.
+After `go-c8y-cli` has been installed, follow the [Getting started](/docs/gettingstarted/) section for instructions how to use it.
