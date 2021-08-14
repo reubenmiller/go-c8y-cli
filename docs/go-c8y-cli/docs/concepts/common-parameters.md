@@ -355,7 +355,7 @@ What If: Sending [POST] request to [https://example.com/inventory/managedObjects
 
 Dry run output format. i.e. json, dump, markdown or curl (default "markdown")
 
-See the [dry run](dryrun) concept page for more details and examples
+See the [dry run](/docs/concepts/dryrun) concept page for more details and examples
 
 ---
 
@@ -405,7 +405,7 @@ c8y applications list --pageSize 100 --filter "name like *cockpit*" --filter "ty
 | 8          | cockpit      | cockpit-application-key      | HOSTED      | MARKET       |
 ````
 
-See the [filtering](filtering) concept page for more details and examples
+See the [filtering](/docs/concepts/filtering) concept page for more details and examples
 
 ---
 
