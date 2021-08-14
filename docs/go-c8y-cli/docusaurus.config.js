@@ -18,7 +18,7 @@ const allDocHomesPaths = [
   '/docs/master/',
 ];
 
-const baseUrl = `${process.env.BASE_URL || '/'}`.trimEnd('/') + '/';
+const baseUrl = `${process.env.BASE_URL || '/'}`;
 
 /** @type {import('@docusaurus/types').DocusaurusConfig} */
 (module.exports = {
