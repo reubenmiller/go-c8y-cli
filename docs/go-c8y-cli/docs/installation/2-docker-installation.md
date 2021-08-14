@@ -37,7 +37,7 @@ It is recommended that you run these commands from your home folder, so that the
 
 ```bash
 cd ~
-docker run -it -v $PWD/.cumulocity:/sessions --rm ghcr.io/reubenmiller/c8y-shell:next
+docker run -it -v $PWD/.cumulocity:/sessions --rm ghcr.io/reubenmiller/c8y-shell
 ```
 
 </TabItem>
@@ -45,7 +45,7 @@ docker run -it -v $PWD/.cumulocity:/sessions --rm ghcr.io/reubenmiller/c8y-shell
 
 ```powershell
 cd $HOME
-docker run -it -v $PWD/.cumulocity:/sessions --rm ghcr.io/reubenmiller/c8y-pwsh:next
+docker run -it -v $PWD/.cumulocity:/sessions --rm ghcr.io/reubenmiller/c8y-pwsh
 ```
 
 </TabItem>
@@ -84,14 +84,14 @@ You can provide the session information via environment variables in a dotenv (.
     <TabItem value="bash">
 
     ```bash
-    docker run --rm -it --env-file=session.env ghcr.io/reubenmiller/c8y-shell:next
+    docker run --rm -it --env-file=session.env ghcr.io/reubenmiller/c8y-shell
     ```
 
     </TabItem>
     <TabItem value="powershell">
 
     ```powershell
-    docker run --rm -it --env-file=session.env ghcr.io/reubenmiller/c8y-shell:next
+    docker run --rm -it --env-file=session.env ghcr.io/reubenmiller/c8y-shell
     ```
 
     </TabItem>
@@ -188,7 +188,7 @@ If you have already activated a c8y session on a command console, you can re-use
         -e C8Y_TENANT=$C8Y_TENANT \
         -e C8Y_USER=$C8Y_USER \
         -e C8Y_PASSWORD=$C8Y_PASSWORD \
-        ghcr.io/reubenmiller/c8y-shell:next
+        ghcr.io/reubenmiller/c8y-shell
     ```
 
     </TabItem>
@@ -200,7 +200,7 @@ If you have already activated a c8y session on a command console, you can re-use
         -e C8Y_TENANT=$env:C8Y_TENANT `
         -e C8Y_USER=$env:C8Y_USER `
         -e C8Y_PASSWORD=$env:C8Y_PASSWORD `
-        ghcr.io/reubenmiller/c8y-shell:next
+        ghcr.io/reubenmiller/c8y-shell
     ```
 
     </TabItem>
@@ -215,7 +215,7 @@ You can also specify the version that you want to try out by replacing `latest` 
 
 ```bash
 # update to the latest image
-docker pull ghcr.io/reubenmiller/c8y-shell:next
+docker pull ghcr.io/reubenmiller/c8y-shell
 
 # use a known version
 docker pull ghcr.io/reubenmiller/c8y-shell:2.0.0
