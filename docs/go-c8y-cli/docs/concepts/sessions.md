@@ -36,7 +36,7 @@ Alternatively, VIM style shortcuts "j" (down) and "k" (up) keys can be also used
 :::
 
 :::caution
-`set-session` is not provided by `c8y` itself, and it is installed automatically for you if you following the [installation guide](../installation/shell-installation)
+`set-session` is not provided by `c8y` itself, and it is installed automatically for you if you following the [installation guide](/docs/installation/shell-installation)
 :::
 
 <CodeExample>
@@ -97,7 +97,7 @@ By default the tenant prefix will be used in the basic authentication, however i
 }
 ```
 
-All of the values in the sessions file, can also be overridden using environment variables. The   [configuration settings](../configuration/settings) pages details how to modify them.
+All of the values in the sessions file, can also be overridden using environment variables. The   [configuration settings](/docs/configuration/settings) pages details how to modify them.
 
 
 ### Continuous Integration usage (environment variables)

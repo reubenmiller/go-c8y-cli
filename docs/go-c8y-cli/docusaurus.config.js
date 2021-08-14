@@ -18,19 +18,20 @@ const allDocHomesPaths = [
   '/docs/master/',
 ];
 
-const baseUrl = process.env.BASE_URL || '/';
+const baseUrl = `${process.env.BASE_URL || '/go-c8y-cli'}`.trimEnd('/') + '/';
 
 /** @type {import('@docusaurus/types').DocusaurusConfig} */
 (module.exports = {
   title: 'Cumulocity IoT CLI',
   tagline: 'Unofficial Cumulocity IoT Command Line Interface',
-  url: 'https://reubenmiller.github.io/go-c8y-cli',
+  url: 'https://reubenmiller.github.io',
   baseUrl,
   onBrokenLinks: isDev ? 'warn' : 'throw',
   onBrokenMarkdownLinks: 'warn',
   favicon: 'img/favicon.ico',
   organizationName: 'reubenmiller',
   projectName: 'go-c8y-cli',
+  trailingSlash: true,
   i18n: {
     defaultLocale: 'en',
     locales: isDeployPreview
@@ -63,7 +64,6 @@ const baseUrl = process.env.BASE_URL || '/';
     //     ],
     //   },
     // ],
-    // require.resolve('docusaurus-lunr-search'),
     [
       '@docusaurus/plugin-ideal-image',
       {
@@ -137,12 +137,11 @@ const baseUrl = process.env.BASE_URL || '/';
     ],
   ],
   themeConfig: {
-    sidebarCollapsible: true,
     hideableSidebar: true,
     prism: {
       theme: require('prism-react-renderer/themes/github'),
       darkTheme: require('prism-react-renderer/themes/dracula'),
-      additionalLanguages: ['powershell', 'javascript', 'markdown', 'bash'],
+      additionalLanguages: ['powershell', 'bash', 'markdown'],
     },
     algolia: {
       apiKey: '0003d78113943b9fab3bc9b8319cee82',

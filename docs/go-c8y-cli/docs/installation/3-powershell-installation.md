@@ -49,7 +49,7 @@ title: PowerShell
     Try closing your console and re-opening it so you can be sure that your setup will work next time
     :::
 
-3. Now go to the [Getting started](../gettingstarted) section for instructions how to use it
+3. Now go to the [Getting started](/docs/gettingstarted/) section for instructions how to use it
 
 ## Alternative installation methods
 
@@ -97,7 +97,7 @@ If you still don't want to or can't install PowerShell 7 then install the native
     Import-Module PSc8y
     ```
 
-1. Now go to the [Getting started](../gettingstarted) section for instructions how to use it
+1. Now go to the [Getting started](/docs/gettingstarted/) section for instructions how to use it
 
 
 ### Updating PSc8y
