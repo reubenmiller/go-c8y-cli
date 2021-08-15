@@ -7,8 +7,20 @@ Describe -Name "Get-BulkOperationCollection" {
 
     }
 
-    It "Get a list of bulk operations" {
+    It -Skip "Get a list of bulk operations" {
         $Response = PSc8y\Get-BulkOperationCollection
+        $LASTEXITCODE | Should -Be 0
+        $Response | Should -Not -BeNullOrEmpty
+    }
+
+    It -Skip "Get a list of bulk operations created in the last 1 day" {
+        $Response = PSc8y\Get-BulkOperationCollection -DateFrom -1d
+        $LASTEXITCODE | Should -Be 0
+        $Response | Should -Not -BeNullOrEmpty
+    }
+
+    It -Skip "Get a list of bulk operations in the general status SCHEDULED or EXECUTING" {
+        $Response = PSc8y\Get-BulkOperationCollection -Status SCHEDULED, EXECUTING
         $LASTEXITCODE | Should -Be 0
         $Response | Should -Not -BeNullOrEmpty
     }

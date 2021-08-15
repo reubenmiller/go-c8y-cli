@@ -17,14 +17,23 @@ c8y bulkoperations list [flags]
 ```
 $ c8y bulkoperations list
 Get a list of bulk operations
+
+$ c8y bulkoperations list --dateFrom -1d
+Get a list of bulk operations created in the last 1 day
+
+$ c8y bulkoperations list --status SCHEDULED --status EXECUTING
+Get a list of bulk operations in the general status SCHEDULED or EXECUTING
         
 ```
 
 ### Options
 
 ```
-  -h, --help          help for list
-      --withDeleted   Include CANCELLED bulk operations
+      --dateFrom string   Start date or date and time of the bulk operation
+      --dateTo string     End date or date and time of the bulk operation
+  -h, --help              help for list
+      --status strings    Operation status, can be one of SUCCESSFUL, FAILED, EXECUTING or PENDING.
+      --withDeleted       Include CANCELLED bulk operations
 ```
 
 ### Options inherited from parent commands

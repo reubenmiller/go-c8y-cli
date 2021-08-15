@@ -19,6 +19,9 @@ Get bulk operation collection
 ```
 Get-BulkOperationCollection
 	[-WithDeleted]
+	[[-DateFrom] <String>]
+	[[-DateTo] <String>]
+	[[-Status] <String[]>]
 	[-PageSize <Int32>]
 	[-WithTotalPages]
 	[-CurrentPage <Int32>]
@@ -76,6 +79,20 @@ Get-BulkOperationCollection
 
 Get a list of bulk operations
 
+### EXAMPLE 2
+```
+Get-BulkOperationCollection -DateFrom -1d
+```
+
+Get a list of bulk operations created in the last 1 day
+
+### EXAMPLE 3
+```
+Get-BulkOperationCollection -Status SCHEDULED, EXECUTING
+```
+
+Get a list of bulk operations in the general status SCHEDULED or EXECUTING
+
 ## PARAMETERS
 
 ### -WithDeleted
@@ -89,6 +106,51 @@ Aliases:
 Required: False
 Position: Named
 Default value: False
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -DateFrom
+Start date or date and time of the bulk operation
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 1
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -DateTo
+End date or date and time of the bulk operation
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 2
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -Status
+Operation status, can be one of SUCCESSFUL, FAILED, EXECUTING or PENDING.
+
+```yaml
+Type: String[]
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 3
+Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
 ```

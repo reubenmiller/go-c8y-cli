@@ -42,7 +42,7 @@ set-session
 </CodeExample>
 
 :::info
-If you get an unknown command error when running `set-session`, it means you probably didn't install the the addons via the [installation guide](installation/shell-installation)
+If you get an unknown command error when running `set-session`, it means you probably didn't install the the addons via the [installation guide](/docs/installation/shell-installation)
 :::
 
 ```text title="Output"

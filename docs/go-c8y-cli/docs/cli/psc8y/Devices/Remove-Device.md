@@ -19,6 +19,7 @@ Delete device
 ```
 Remove-Device
 	[-Id] <Object[]>
+	[-WithDeviceUser]
 	[-Cascade]
 	[-NoAccept]
 	[-ProcessingMode <String>]
@@ -84,6 +85,13 @@ Remove-Device -Id $device.name
 
 Remove device by name
 
+### EXAMPLE 3
+```
+Remove-Device -Id "device01" -WithDeviceUser
+```
+
+Delete device and related device user/credentials
+
 ## PARAMETERS
 
 ### -Id
@@ -98,6 +106,21 @@ Required: True
 Position: 1
 Default value: None
 Accept pipeline input: True (ByPropertyName, ByValue)
+Accept wildcard characters: False
+```
+
+### -WithDeviceUser
+Delete associated device owner
+
+```yaml
+Type: SwitchParameter
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: False
+Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
