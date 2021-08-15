@@ -18,6 +18,25 @@ import (
 	"github.com/spf13/viper"
 )
 
+var EnvCumulocityHostNames = []string{
+	"C8Y_HOST",
+	"C8Y_BASEURL",
+	"C8Y_URL",
+}
+
+// GetHostFromEnvironment gets the first non-empty host environment variable value
+// as Cumulocity uses different environment variable names for different tooling
+func GetHostFromEnvironment() string {
+	var value = ""
+	for _, name := range EnvCumulocityHostNames {
+		value = os.Getenv(name)
+		if value != "" {
+			break
+		}
+	}
+	return value
+}
+
 func CreateCumulocityClient(f *cmdutil.Factory, sessionFile, username, password string, disableEncryptionCheck bool) func() (*c8y.Client, error) {
 	return func() (*c8y.Client, error) {
 		cfg, err := f.Config()
@@ -73,10 +92,11 @@ func CreateCumulocityClient(f *cmdutil.Factory, sessionFile, username, password 
 		}
 
 		c8yURL := cfg.GetHost()
-		if c8yURL == "" && os.Getenv("C8Y_HOST") != "" {
+		c8yURLFromEnv := GetHostFromEnvironment()
+		if c8yURL == "" && c8yURLFromEnv != "" {
 			// Get url from env variable if it is empty
-			log.Debugf("Using URL ")
-			c8yURL = os.Getenv("C8Y_HOST")
+			log.Debugf("Using URL from env variable. %s", c8yURLFromEnv)
+			c8yURL = c8yURLFromEnv
 		}
 
 		client := c8y.NewClient(
