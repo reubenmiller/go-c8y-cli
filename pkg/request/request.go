@@ -240,8 +240,8 @@ func (r *RequestHandler) PrintRequestDetails(w io.Writer, requestOptions *c8y.Re
 
 	details := &RequestDetails{
 		URL:         fullURL,
-		Host:        req.URL.Scheme + "://" + req.URL.Hostname(),
-		PathEncoded: strings.Replace(fullURL, req.URL.Scheme+"://"+req.URL.Hostname(), "", 1),
+		Host:        req.URL.Scheme + "://" + req.URL.Host, // Include host port number
+		PathEncoded: strings.Replace(fullURL, req.URL.Scheme+"://"+req.URL.Host, "", 1),
 		Method:      req.Method,
 		Headers:     headers,
 		Query:       tryUnescapeURL(req.URL.RawQuery),
