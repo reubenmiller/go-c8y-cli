@@ -18,6 +18,12 @@ c8y devices delete [flags]
 ```
 $ c8y devices delete --id 12345
 Get device by id
+
+$ c8y devices delete --id device01
+Get device by name
+
+$ c8y devices delete --id 12345 --withDeviceUser
+Delete device and related device user/credentials
         
 ```
 
@@ -28,6 +34,7 @@ Get device by id
   -h, --help                    help for delete
       --id strings              Device ID (required) (accepts pipeline)
       --processingMode string   Cumulocity processing mode
+      --withDeviceUser          Delete associated device owner
 ```
 
 ### Options inherited from parent commands

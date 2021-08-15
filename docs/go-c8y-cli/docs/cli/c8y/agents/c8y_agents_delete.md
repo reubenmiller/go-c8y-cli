@@ -19,15 +19,23 @@ c8y agents delete [flags]
 ```
 $ c8y agents delete --id 12345
 Get agent by id
+
+$ c8y agents delete --id agent01
+Get agent by name
+
+$ c8y agents delete --id 12345 --withDeviceUser
+Delete agent and related device user/credentials
         
 ```
 
 ### Options
 
 ```
+      --cascade                 Remove all child devices and child assets will be deleted recursively. By default, the delete operation is propagated to the subgroups only if the deleted object is a group
   -h, --help                    help for delete
       --id strings              Agent ID (required) (accepts pipeline)
       --processingMode string   Cumulocity processing mode
+      --withDeviceUser          Delete associated device owner
 ```
 
 ### Options inherited from parent commands

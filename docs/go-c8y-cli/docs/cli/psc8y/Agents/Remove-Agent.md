@@ -18,7 +18,9 @@ Delete agent
 
 ```
 Remove-Agent
+	[-WithDeviceUser]
 	[-Id] <Object[]>
+	[-Cascade]
 	[-NoAccept]
 	[-ProcessingMode <String>]
 	[-Force]
@@ -84,7 +86,29 @@ Remove-Agent -Id $agent.name
 
 Remove agent by name
 
+### EXAMPLE 3
+```
+Remove-Agent -Id "agent01" -WithDeviceUser
+```
+
+Delete agent and related device user/credentials
+
 ## PARAMETERS
+
+### -WithDeviceUser
+Delete associated device owner
+
+```yaml
+Type: SwitchParameter
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: False
+Accept pipeline input: False
+Accept wildcard characters: False
+```
 
 ### -Id
 Agent ID (required)
@@ -98,6 +122,22 @@ Required: True
 Position: 1
 Default value: None
 Accept pipeline input: True (ByPropertyName, ByValue)
+Accept wildcard characters: False
+```
+
+### -Cascade
+Remove all child devices and child assets will be deleted recursively.
+By default, the delete operation is propagated to the subgroups only if the deleted object is a group
+
+```yaml
+Type: SwitchParameter
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: False
+Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
