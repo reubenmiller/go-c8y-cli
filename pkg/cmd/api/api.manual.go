@@ -83,7 +83,8 @@ func NewSubCommand(f *cmdutil.Factory) *CmdAPI {
 		cmd,
 		flags.WithData(),
 		flags.WithTemplate(),
-		flags.WithExtendedPipelineSupport("url", "url", false, "self", "responseSelf"),
+		// Include device management url links (configuration dump, firmware and software)
+		flags.WithExtendedPipelineSupport("url", "url", false, "url", "c8y_Firmware.url", "c8y_Software.url", "self", "responseSelf"),
 	)
 
 	completion.WithOptions(
