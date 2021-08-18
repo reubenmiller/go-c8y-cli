@@ -1,0 +1,57 @@
+tests:
+    It sends an api request using a static URL and reference input in the body template:
+        command: >
+          echo "12345" | c8y api POST "/test/endpoint" --template "{value: input.value}" --dry
+        exit-code: 0
+        stdout:
+            json:
+                method: POST
+                path: /test/endpoint
+                body.value: "12345"
+    
+    It sends a POST request using a dynamic url:
+        command: >
+          echo "12345" | c8y api POST "/test/{url}/endpoint" --template "{value: input.value}" --dry
+        exit-code: 0
+        stdout:
+            json:
+                method: POST
+                path: /test/12345/endpoint
+                body.value: "12345"
+    
+    It sends a POST request using explicit url parameter:
+        command: >
+          echo "12345" | c8y api POST --url "/test/{url}/endpoint" --template "{value: input.value}" --dry
+        exit-code: 0
+        stdout:
+            json:
+                method: POST
+                path: /test/12345/endpoint
+                body.value: "12345"
+    
+    It sends a PUT request using piped json:
+        command: >
+          echo "{\"url\": \"12345\", \"name\":\"hello\"}" | c8y api --method PUT --url "/test/{url}/endpoint" --template "input.value" --dry
+        exit-code: 0
+        stdout:
+            json:
+                method: PUT
+                path: /test/12345/endpoint
+                body.name: "hello"
+                body.url: "12345"
+
+    It sends a custom create alarm command:
+        command: >
+          c8y api POST "alarm/alarms" --data "text=one,severity=MAJOR,type=test_Type,time=2019-01-01,source.id='12345'" --keepProperties --dry
+        exit-code: 0
+        stdout:
+            json:
+                method: POST
+                path: /alarm/alarms
+                body.text: "one"
+                body.severity: "MAJOR"
+                body.type: "test_Type"
+                body.time: "2019-01-01"
+                body.source.id: "12345"
+
+                
