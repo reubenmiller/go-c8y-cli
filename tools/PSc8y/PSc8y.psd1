@@ -153,6 +153,7 @@ FunctionsToExport = @(
 	'Get-FirmwarePatch',
 	'Get-FirmwarePatchCollection',
 	'Get-FirmwareVersion',
+	'Get-FirmwareVersionBinary',
 	'Get-FirmwareVersionCollection',
 	'Get-InventoryRole',
 	'Get-InventoryRoleCollection',

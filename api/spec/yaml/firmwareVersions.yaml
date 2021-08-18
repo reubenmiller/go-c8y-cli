@@ -145,3 +145,39 @@ endpoints:
         type: booleanDefault
         default: 'true'
         description: Remove version and any related binaries
+
+  - name: download
+    description: Download firmware version binary
+    descriptionLong: >
+      Download a binary stored in Cumulocity and display it on the console. For non text based binaries
+      or if the output should be saved to file, the output parameter should be used to write the file directly to a local
+      file.
+    method: GET
+    path: '{url}'
+    accept: '*/*'
+    alias:
+        go: download
+        powershell: Get-FirmwareVersionBinary
+    examples:
+      powershell:
+        - description: Get a binary and display the contents on the console
+          command: Get-Binary -Id $Binary.id
+          skipTest: true
+
+        - description: Get a binary and save it to a file
+          command: Get-Binary -Id $Binary.id -OutputFileRaw ./download-binary1.txt
+
+      go:
+        - description: Download Get a binary and display the contents on the console
+          command: c8y firmware versions download --url /inventory/binaries/12345
+
+        - description: Get a binary and save it to a file
+          command: c8y firmware versions get --id 12345 | c8y firmware versions download --outputFileRaw "./download-binary1.txt"
+    pathParameters:
+      - name: url
+        type: '[]string'
+        required: true
+        pipeline: true
+        description: Firmware url
+        pipelineAliases:
+          - "c8y_Firmware.url"

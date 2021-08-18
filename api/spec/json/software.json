@@ -89,7 +89,12 @@
           },
           {
             "description": "Create a software package and create a new version",
-            "command": "c8y software create --name \"python3-requests\" | c8y software versions create --version \"1.0.0\" --file \"python3-requests.deb\""
+            "command": "c8y software create --name \"python3-requests\" | c8y software versions create --version \"1.0.0\" --file \"python3-requests.deb\"",
+            "assertStdOut": {
+              "json": {
+                "body.c8y_Software.version": "1.0.0"
+              }
+            }
           }
         ]
       },

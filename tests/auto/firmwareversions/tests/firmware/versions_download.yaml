@@ -1,0 +1,15 @@
+tests:
+    firmware/versions_download_Download Get a binary and display the contents on the console:
+        command: c8y firmware versions download --url 12345
+        exit-code: 0
+        stdout:
+            json:
+                method: GET
+                path: /12345
+    firmware/versions_download_Get a binary and save it to a file:
+        command: c8y firmware versions download --url 12345 --outputFileRaw "./download-binary1.txt"
+        exit-code: 0
+        stdout:
+            json:
+                method: GET
+                path: /12345
