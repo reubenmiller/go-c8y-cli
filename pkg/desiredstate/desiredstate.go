@@ -46,7 +46,7 @@ func WaitFor(interval time.Duration, timeout time.Duration, predicate StateDefin
 	for {
 		select {
 		case <-timeoutCh:
-			return lastValue, cmderrors.NewUserErrorWithExitCode(cmderrors.ExitTimeout, fmt.Sprintf("Timeout after %d second/s", int64(timeout/time.Second)))
+			return lastValue, cmderrors.NewUserErrorWithExitCode(cmderrors.ExitTimeout, fmt.Sprintf("Timeout after %v", timeout))
 
 		case msg := <-valueCh:
 			if err, ok := msg.(error); ok {
