@@ -38,7 +38,7 @@ func NewCmdAssert(f *cmdutil.Factory) *CmdAssert {
 		Use:   "assert",
 		Short: "Assert existance of a managed object",
 		Long: heredoc.Doc(`
-			Assert that a managed objects exists or not and if it matches then pass input object
+			Assert that a managed objects exists or not and pass input untouched
 
 			If the assertion is true, then the input value (stdin or an explicit argument value) will be passed untouched to stdout.
 			This is useful if you want to filter a list of managed objects by whether they exist or not in the platform, and use the results
