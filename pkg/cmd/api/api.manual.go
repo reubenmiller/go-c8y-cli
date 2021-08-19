@@ -59,8 +59,8 @@ func NewSubCommand(f *cmdutil.Factory) *CmdAPI {
 			$ echo "12345" | c8y api PUT "/service/example" --template "{id: input.value}"
 			Send a PUT request to a fixed url, but use the piped input to build the request's body
 
-			$ echo "12345" | c8y api PUT "/service/example/{url}" --template "{id: input.value}"
-			Send a PUT request using the piped input in both the url and the request's body ('{url}' will be replaced with the current piped input line)
+			$ echo "12345" | c8y api PUT "/service/example/%s" --template "{id: input.value}"
+			Send a PUT request using the piped input in both the url and the request's body ('%s' will be replaced with the current piped input line)
 
 			$ echo "{\"url\": \"/service/custom/endpoint\",\"body\":{\"name\": \"peter\"}}" | c8y api POST --template "input.value.body"
 			Build a custom request using piped json. The input url property will be mapped to the --url flag, and use
@@ -70,7 +70,7 @@ func NewSubCommand(f *cmdutil.Factory) *CmdAPI {
 		RunE: ccmd.RunE,
 	}
 
-	cmd.Flags().String("url", "", "URL path (accepts pipeline)")
+	cmd.Flags().String("url", "", "URL path. Any reference to '%s' will be replaced with the current input value (accepts pipeline)")
 	cmd.Flags().StringVar(&ccmd.method, "method", "GET", "HTTP method")
 	cmd.Flags().String("file", "", "File to be uploaded as a binary")
 	cmd.Flags().String("accept", "", "accept (header)")
@@ -156,6 +156,9 @@ func (n *CmdAPI) RunE(cmd *cobra.Command, args []string) error {
 		if v, err := cmd.Flags().GetString("url"); err == nil {
 			urlTemplate = v
 		}
+	}
+	if !strings.Contains(urlTemplate, "{url}") && strings.Contains(urlTemplate, "%s") {
+		urlTemplate = strings.Replace(urlTemplate, "%s", "{url}", -1)
 	}
 
 	path := flags.NewStringTemplate(urlTemplate)

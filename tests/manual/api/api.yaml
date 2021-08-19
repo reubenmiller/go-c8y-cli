@@ -39,6 +39,28 @@ tests:
                 path: /test/12345/endpoint
                 body.name: "hello"
                 body.url: "12345"
+    
+    It sends a PUT request using piped json and a format style url template:
+        command: >
+          echo "{\"url\": \"12345\", \"name\":\"hello\"}" | c8y api --method PUT --url "/test/%s/endpoint" --template "input.value" --dry
+        exit-code: 0
+        stdout:
+            json:
+                method: PUT
+                path: /test/12345/endpoint
+                body.name: "hello"
+                body.url: "12345"
+    
+    It sends a PUT request using piped json and a format style url template with multiple substitutions:
+        command: >
+          echo "{\"url\": \"12345\", \"name\":\"hello\"}" | c8y api --method PUT --url "/test/%s/endpoint/%s" --template "input.value" --dry
+        exit-code: 0
+        stdout:
+            json:
+                method: PUT
+                path: /test/12345/endpoint/12345
+                body.name: "hello"
+                body.url: "12345"
 
     It sends a custom create alarm command:
         command: >
