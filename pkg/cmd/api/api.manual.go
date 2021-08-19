@@ -55,12 +55,22 @@ func NewSubCommand(f *cmdutil.Factory) *CmdAPI {
 
 			$ echo -e "/inventory/1111\n/inventory/2222" | c8y api --method PUT --template "{myScript: {lastUpdated: _.Now() }}"
 			Pipe a list of urls and execute HTTP PUT and use a template to generate the body
+
+			$ echo "12345" | c8y api PUT "/service/example" --template "{id: input.value}"
+			Send a PUT request to a fixed url, but use the piped input to build the request's body
+
+			$ echo "12345" | c8y api PUT "/service/example/%s" --template "{id: input.value}"
+			Send a PUT request using the piped input in both the url and the request's body ('%s' will be replaced with the current piped input line)
+
+			$ echo "{\"url\": \"/service/custom/endpoint\",\"body\":{\"name\": \"peter\"}}" | c8y api POST --template "input.value.body"
+			Build a custom request using piped json. The input url property will be mapped to the --url flag, and use
+			a template to also build the request's body from the piped input data.
 		`),
 		Args: cobra.MaximumNArgs(2),
 		RunE: ccmd.RunE,
 	}
 
-	cmd.Flags().String("url", "", "URL path (accepts pipeline)")
+	cmd.Flags().String("url", "", "URL path. Any reference to '%s' will be replaced with the current input value (accepts pipeline)")
 	cmd.Flags().StringVar(&ccmd.method, "method", "GET", "HTTP method")
 	cmd.Flags().String("file", "", "File to be uploaded as a binary")
 	cmd.Flags().String("accept", "", "accept (header)")
@@ -73,7 +83,8 @@ func NewSubCommand(f *cmdutil.Factory) *CmdAPI {
 		cmd,
 		flags.WithData(),
 		flags.WithTemplate(),
-		flags.WithExtendedPipelineSupport("url", "url", false, "self", "responseSelf"),
+		// Include device management url links (configuration dump, firmware and software)
+		flags.WithExtendedPipelineSupport("url", "url", false, "url", "c8y_Firmware.url", "c8y_Software.url", "self", "responseSelf"),
 	)
 
 	completion.WithOptions(
@@ -137,7 +148,20 @@ func (n *CmdAPI) RunE(cmd *cobra.Command, args []string) error {
 	}
 
 	// path parameters
-	path := flags.NewStringTemplate("{url}")
+	urlTemplate := "{url}"
+	if uri != "" {
+		urlTemplate = uri
+	}
+	if cmd.Flags().Changed("url") {
+		if v, err := cmd.Flags().GetString("url"); err == nil {
+			urlTemplate = v
+		}
+	}
+	if !strings.Contains(urlTemplate, "{url}") && strings.Contains(urlTemplate, "%s") {
+		urlTemplate = strings.Replace(urlTemplate, "%s", "{url}", -1)
+	}
+
+	path := flags.NewStringTemplate(urlTemplate)
 
 	// set a default uri to prevent unresolved template variables when
 	// stdin is not being used
