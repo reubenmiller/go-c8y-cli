@@ -3,6 +3,7 @@ package c8ywaiter
 import (
 	"context"
 	"fmt"
+	"net/http"
 	"regexp"
 	"strings"
 
@@ -90,4 +91,51 @@ func (s *InventoryState) Get() (interface{}, error) {
 		nil,
 	)
 	return item, err
+}
+
+// InventoryExistance inventory existance checker
+type InventoryExistance struct {
+	ID     string
+	Client *c8y.Client
+	Negate bool
+}
+
+type managedObjectResponse struct {
+	ManagedObject *c8y.ManagedObject
+	Response      *c8y.Response
+}
+
+// Check check if inventory managed object exists or not
+func (s *InventoryExistance) Check(m interface{}) (done bool, err error) {
+	if result, ok := m.(*managedObjectResponse); ok {
+		exists := result.Response.StatusCode >= 200 && result.Response.StatusCode <= 399
+		notFound := result.Response.StatusCode == http.StatusNotFound
+
+		if s.Negate {
+			// Check if error code is 404
+			done = notFound
+		} else {
+			done = exists
+		}
+
+		if done {
+			return done, nil
+		}
+	}
+	return
+}
+
+// Get get current managed object state
+func (s *InventoryExistance) Get() (interface{}, error) {
+	mo, resp, err := s.Client.Inventory.GetManagedObject(
+		context.Background(),
+		s.ID,
+		nil,
+	)
+
+	if resp != nil && resp.StatusCode == http.StatusNotFound {
+		// ignore not found errors, these are processed in the Check func
+		err = nil
+	}
+	return &managedObjectResponse{mo, resp}, err
 }
