@@ -37,6 +37,7 @@ import (
 	identityCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/identity"
 	inventoryCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/inventory"
 	inventoryAdditionsCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/inventory/additions"
+	inventoryAssertCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/inventory/assert"
 	inventoryAssetsCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/inventory/assets"
 	inventoryFindCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/inventory/find"
 	inventorySubscribeCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/inventory/subscribe"
@@ -307,6 +308,7 @@ func NewCmdRoot(f *cmdutil.Factory, version, buildDate string) *CmdRoot {
 	inventory.AddCommand(inventoryAdditionsCmd.NewSubCommand(f).GetCommand())
 	inventory.AddCommand(inventoryAssetsCmd.NewSubCommand(f).GetCommand())
 	inventory.AddCommand(inventoryWaitCmd.NewCmdWait(f).GetCommand())
+	inventory.AddCommand(inventoryAssertCmd.NewCmdAssert(f).GetCommand())
 	cmd.AddCommand(inventory)
 
 	// applications
