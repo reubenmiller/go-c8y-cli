@@ -15,12 +15,22 @@ type StateDefiner interface {
 }
 
 func WaitFor(interval time.Duration, timeout time.Duration, predicate StateDefiner) (interface{}, error) {
+	return wait(-1, interval, timeout, predicate)
+}
+
+// WaitForWithRetries wait for a predicate to be true and limiting the retries by an explict count
+func WaitForWithRetries(retries int64, interval time.Duration, timeout time.Duration, predicate StateDefiner) (interface{}, error) {
+	return wait(retries, interval, timeout, predicate)
+}
+
+func wait(retries int64, interval time.Duration, timeout time.Duration, predicate StateDefiner) (interface{}, error) {
 	valueCh := make(chan (interface{}))
+	var attemptCounter int64
 
 	if interval <= 0 {
 		interval = 1000 * time.Millisecond
 	}
-	if timeout <= 0 {
+	if timeout == 0 {
 		timeout = 300 * time.Second
 	}
 
@@ -28,7 +38,10 @@ func WaitFor(interval time.Duration, timeout time.Duration, predicate StateDefin
 	signalCh := make(chan os.Signal, 1)
 	signal.Notify(signalCh, os.Interrupt)
 
-	timeoutCh := time.After(timeout)
+	timeoutCh := make(<-chan time.Time)
+	if timeout > 0 {
+		timeoutCh = time.After(timeout)
+	}
 
 	go func() {
 		for {
@@ -49,6 +62,7 @@ func WaitFor(interval time.Duration, timeout time.Duration, predicate StateDefin
 			return lastValue, cmderrors.NewUserErrorWithExitCode(cmderrors.ExitTimeout, fmt.Sprintf("Timeout after %v", timeout))
 
 		case msg := <-valueCh:
+			attemptCounter++
 			if err, ok := msg.(error); ok {
 				return nil, err
 			}
@@ -58,6 +72,10 @@ func WaitFor(interval time.Duration, timeout time.Duration, predicate StateDefin
 			done, err := predicate.Check(msg)
 			if done {
 				return msg, err
+			}
+
+			if retries >= 0 && attemptCounter > retries {
+				return msg, cmderrors.NewUserErrorWithExitCode(cmderrors.ExitCancel, "Max retries exceeded")
 			}
 
 		case <-signalCh:
