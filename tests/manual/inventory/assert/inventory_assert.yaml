@@ -1,0 +1,32 @@
+tests:
+    It filters a single id that does not exist:
+        command: echo "1" | c8y inventory assert --not --exists
+        exit-code: 0
+        stdout:
+            exactly: '1'
+    
+    It filters multiple ids given in a list:
+        command: echo "1\n2" | c8y inventory assert --not --exists
+        exit-code: 0
+        stdout:
+            line-count: 2
+            lines:
+              1: '1'
+              2: '2'
+
+    It filters a list of json objects:
+        command: >
+          echo "{\"id\":\"1\"}" | c8y inventory assert --not --exists
+        exit-code: 0
+        stdout:
+            json:
+                id: '1'
+    
+    It asserts that a mo exists and passes it through untouched:
+        command: manual/inventory/assert/001_assert.sh
+        exit-code: 0
+    
+    It checks if a managed object exists, and then uses a downstream command to safely get a value:
+        command: >
+          echo "1" | c8y inventory assert --exists | c8y inventory get
+        exit-code: 0
