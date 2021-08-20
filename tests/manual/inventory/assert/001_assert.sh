@@ -7,7 +7,7 @@ cleanup () {
 }
 trap cleanup EXIT
 
-echo "$mo_id" | c8y inventory assert --exists | grep "^${mo_id}$"
+echo "$mo_id" | c8y inventory assert exists | grep "^${mo_id}$"
 
 # Combine with a c8y get Pipe json objects
-echo "$mo_id" | c8y inventory get | c8y inventory assert --exists --select id --output csv | grep "^${mo_id}$"
+echo "$mo_id" | c8y inventory get | c8y inventory assert exists --select id --output csv | grep "^${mo_id}$"

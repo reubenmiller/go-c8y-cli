@@ -1,4 +1,4 @@
-package assert
+package exists
 
 import (
 	"fmt"
@@ -19,23 +19,23 @@ import (
 	"github.com/spf13/cobra"
 )
 
-type CmdAssert struct {
+type CmdExists struct {
 	*subcommand.SubCommand
 
-	negate  bool
-	exists  bool
-	retries int64
+	strictMode bool
+	negate     bool
+	retries    int64
 
 	factory *cmdutil.Factory
 }
 
-func NewCmdAssert(f *cmdutil.Factory) *CmdAssert {
-	ccmd := &CmdAssert{
+func NewCmdExists(f *cmdutil.Factory) *CmdExists {
+	ccmd := &CmdExists{
 		factory: f,
 	}
 
 	cmd := &cobra.Command{
-		Use:   "assert",
+		Use:   "exists",
 		Short: "Assert existance of a managed object",
 		Long: heredoc.Doc(`
 			Assert that a managed objects exists or not and pass input untouched
@@ -43,15 +43,18 @@ func NewCmdAssert(f *cmdutil.Factory) *CmdAssert {
 			If the assertion is true, then the input value (stdin or an explicit argument value) will be passed untouched to stdout.
 			This is useful if you want to filter a list of managed objects by whether they exist or not in the platform, and use the results
 			in some downstream command (in the pipeline)
+
+			By default, a failed assertion will not set the exit code to a non-zero value. If you want a non-zero exit code
+			in such as case then use the --strict option.
 		`),
 		Example: heredoc.Doc(`
-			$ c8y inventory assert --exists --id 1234
+			$ c8y inventory assert exists --id 1234
 			# Assert the managed object exists
 
-			$ echo "1111" | c8y inventory assert --exists
+			$ echo "1111" | c8y inventory assert exists
 			# Pass the piped input only on if the ids exists as a managed object
 
-			$ echo -e "1111\n2222" | c8y inventory assert --not --exists
+			$ echo -e "1111\n2222" | c8y inventory assert exists--not
 			# Only select the managed object ids which do not exist
 		`),
 		RunE: ccmd.RunE,
@@ -62,9 +65,9 @@ func NewCmdAssert(f *cmdutil.Factory) *CmdAssert {
 	cmd.Flags().String("id", "", "Inventory id (required) (accepts pipeline)")
 	cmd.Flags().String("duration", "30s", "Timeout duration. i.e. 30s or 1m (1 minute)")
 	cmd.Flags().String("interval", "5s", "Interval to check on the status, i.e. 10s or 1min")
-	cmd.Flags().Int64Var(&ccmd.retries, "retries", 0, "Interval to check on the status, i.e. 10s or 1min")
+	cmd.Flags().Int64Var(&ccmd.retries, "retries", 0, "Number of retries before giving up per id")
+	cmd.Flags().BoolVar(&ccmd.strictMode, "strict", false, "Strict mode, fail if no match is found")
 	cmd.Flags().BoolVar(&ccmd.negate, "not", false, "Negate the match")
-	cmd.Flags().BoolVar(&ccmd.exists, "exists", true, "Assert the existance")
 	flags.WithOptions(
 		cmd,
 		flags.WithExtendedPipelineSupport("id", "id", true, "deviceId", "source.id", "managedObject.id", "id"),
@@ -79,7 +82,7 @@ func NewCmdAssert(f *cmdutil.Factory) *CmdAssert {
 	return ccmd
 }
 
-func (n *CmdAssert) RunE(cmd *cobra.Command, args []string) error {
+func (n *CmdExists) RunE(cmd *cobra.Command, args []string) error {
 	cfg, err := n.factory.Config()
 	if err != nil {
 		return err
@@ -158,14 +161,20 @@ func (n *CmdAssert) RunE(cmd *cobra.Command, args []string) error {
 			}
 		}
 
-		if err != nil && !strings.Contains(err.Error(), "Max retries exceeded") {
-			totalErrors++
-			cfg.Logger.Infof("%s", err)
-			lastErr = err
+		if err != nil {
+			if !strings.Contains(err.Error(), "Max retries exceeded") || n.strictMode {
+				totalErrors++
+				cfg.Logger.Infof("%s", err)
+				lastErr = err
+			}
 		}
 	}
 	if totalErrors > 0 {
-		return lastErr
+		if n.negate {
+			return cmderrors.NewAssertionError("Managed object does not exist", lastErr)
+		} else {
+			return cmderrors.NewAssertionError("Managed object exists", lastErr)
+		}
 	}
 	return nil
 }

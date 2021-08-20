@@ -58,6 +58,7 @@ const (
 	ExitTimeout             ExitCode = 106
 	ExitInvalidAlias        ExitCode = 107
 	ExitDecryption          ExitCode = 108
+	ExitAssertionError      ExitCode = 112
 )
 
 // CommandError is an error used to signal different error situations in command handling.
@@ -119,6 +120,11 @@ func NewUserErrorWithExitCode(exitCode ExitCode, a ...interface{}) CommandError 
 // NewSystemError creates a system error
 func NewSystemError(a ...interface{}) CommandError {
 	return CommandError{Message: fmt.Sprint(a...), ErrorType: ErrTypeCommand, ExitCode: ExitError, silent: false}
+}
+
+// NewAssertionError creates an assertion error
+func NewAssertionError(a ...interface{}) CommandError {
+	return CommandError{Message: fmt.Sprint(a...), ErrorType: ErrTypeCommand, ExitCode: ExitAssertionError, silent: false}
 }
 
 var httpStatusCodeToExitCode = map[int]ExitCode{

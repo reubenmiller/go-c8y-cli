@@ -308,7 +308,7 @@ func NewCmdRoot(f *cmdutil.Factory, version, buildDate string) *CmdRoot {
 	inventory.AddCommand(inventoryAdditionsCmd.NewSubCommand(f).GetCommand())
 	inventory.AddCommand(inventoryAssetsCmd.NewSubCommand(f).GetCommand())
 	inventory.AddCommand(inventoryWaitCmd.NewCmdWait(f).GetCommand())
-	inventory.AddCommand(inventoryAssertCmd.NewCmdAssert(f).GetCommand())
+	inventory.AddCommand(inventoryAssertCmd.NewSubCommand(f).GetCommand())
 	cmd.AddCommand(inventory)
 
 	// applications
