@@ -49,13 +49,18 @@ func NewCmdExists(f *cmdutil.Factory) *CmdExists {
 		`),
 		Example: heredoc.Doc(`
 			$ c8y inventory assert exists --id 1234
+			# => 1234 (if the ID exists)
+			# => <no response> (if the ID does not exist)
 			# Assert the managed object exists
-
+			
 			$ echo "1111" | c8y inventory assert exists
 			# Pass the piped input only on if the ids exists as a managed object
-
-			$ echo -e "1111\n2222" | c8y inventory assert exists--not
+			
+			$ echo -e "1111\n2222" | c8y inventory assert exists --not
 			# Only select the managed object ids which do not exist
+			
+			$ echo 1 | c8y inventory assert exists --strict
+			# Return non-zero exit code if a managed object id=1 does not exist
 		`),
 		RunE: ccmd.RunE,
 	}
