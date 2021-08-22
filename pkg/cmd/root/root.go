@@ -32,6 +32,7 @@ import (
 	devicesCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/devices"
 	devicesListCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/devices/list"
 	eventsCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/events"
+	eventsAssertCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/events/assert"
 	eventsSubscribeCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/events/subscribe"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmd/factory"
 	identityCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/identity"
@@ -269,6 +270,7 @@ func NewCmdRoot(f *cmdutil.Factory, version, buildDate string) *CmdRoot {
 
 	events := eventsCmd.NewSubCommand(f).GetCommand()
 	events.AddCommand(eventsSubscribeCmd.NewCmdSubscribe(f).GetCommand())
+	events.AddCommand(eventsAssertCmd.NewSubCommand(f).GetCommand())
 	cmd.AddCommand(events)
 
 	operations := operationsCmd.NewSubCommand(f).GetCommand()

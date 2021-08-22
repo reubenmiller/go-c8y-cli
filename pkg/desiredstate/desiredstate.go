@@ -10,6 +10,7 @@ import (
 )
 
 type StateDefiner interface {
+	SetValue(interface{}) error
 	Get() (interface{}, error)
 	Check(interface{}) (bool, error)
 }
@@ -75,7 +76,12 @@ func wait(retries int64, interval time.Duration, timeout time.Duration, predicat
 			}
 
 			if retries >= 0 && attemptCounter > retries {
-				return msg, cmderrors.NewUserErrorWithExitCode(cmderrors.ExitCancel, "Max retries exceeded")
+				// wrappedErr := fmt.Errorf("Max retries exceeded")
+				// if err != nil {
+				// 	wrappedErr = fmt.Errorf("%s: %w", wrappedErr, err)
+				// }
+				return msg, err
+				// return msg, cmderrors.NewErrorWithExitCode(cmderrors.ExitCancel, err)
 			}
 
 		case <-signalCh:

@@ -15,6 +15,13 @@ type OperationState struct {
 	Status []string
 }
 
+func (s *OperationState) SetValue(v interface{}) error {
+	if id, ok := v.(string); ok {
+		s.ID = id
+	}
+	return nil
+}
+
 // Check check if operation has reached its expected status
 func (s *OperationState) Check(m interface{}) (done bool, err error) {
 	if op, ok := m.(*c8y.Operation); ok {

@@ -1,8 +1,7 @@
 package assert
 
 import (
-	cmdExists "github.com/reubenmiller/go-c8y-cli/pkg/cmd/inventory/assert/exists"
-	cmdFragments "github.com/reubenmiller/go-c8y-cli/pkg/cmd/inventory/assert/fragments"
+	cmdCount "github.com/reubenmiller/go-c8y-cli/pkg/cmd/events/assert/count"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmd/subcommand"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmdutil"
 	"github.com/spf13/cobra"
@@ -17,13 +16,12 @@ func NewSubCommand(f *cmdutil.Factory) *SubCmdAssert {
 
 	cmd := &cobra.Command{
 		Use:   "assert",
-		Short: "Cumulocity inventory assertions",
-		Long:  `REST endpoint to interact with Cumulocity managed objects`,
+		Short: "Event assertions",
+		Long:  `Assertions related to Cumulocity events`,
 	}
 
 	// Subcommands
-	cmd.AddCommand(cmdExists.NewCmdExists(f).GetCommand())
-	cmd.AddCommand(cmdFragments.NewCmdFragments(f).GetCommand())
+	cmd.AddCommand(cmdCount.NewCmdCount(f).GetCommand())
 
 	ccmd.SubCommand = subcommand.NewSubCommand(cmd)
 

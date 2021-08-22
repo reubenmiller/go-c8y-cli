@@ -7,6 +7,7 @@ import (
 	"regexp"
 	"strings"
 
+	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/tidwall/gjson"
 )
@@ -43,15 +44,57 @@ func (s *InventoryState) ParseRawPattern(raw string) (pattern string, valuePatte
 	return
 }
 
+func (s *InventoryState) SetValue(v interface{}) error {
+	if id, ok := v.(string); ok {
+		s.ID = id
+	}
+	return nil
+}
+
+func (s *InventoryState) formatFragments() []string {
+	wanted := []string{}
+	for _, prop := range s.Fragments {
+		if strings.HasPrefix(prop, NegatePatternPrefix) {
+			wanted = append(wanted, strings.Replace(prop[1:], "=", "!=", 1))
+		} else {
+			wanted = append(wanted, prop)
+		}
+	}
+	return wanted
+}
+
 // Check check if inventory has the given fragments (or absence of fragments)
 func (s *InventoryState) Check(m interface{}) (done bool, err error) {
 	if mo, ok := m.(*c8y.ManagedObject); ok {
+
+		if mo == nil {
+			err := cmderrors.NewAssertionError(&cmderrors.AssertionError{
+				Type:    cmderrors.ManagedObjectFragments,
+				Wanted:  s.formatFragments(),
+				Got:     "",
+				Context: struct{ ID string }{ID: mo.ID},
+			})
+			return false, err
+		}
+
 		done := true
+		got := []string{}
 		for _, fragment := range s.Fragments {
 			pattern, valuePattern, negate := s.ParseRawPattern(fragment)
 
 			result := mo.Item.Get(pattern)
 			exists := result.Exists()
+
+			if exists && !negate {
+				if valuePattern == "" {
+					got = append(got, pattern)
+				}
+			}
+			if !exists && negate {
+				if valuePattern == "" {
+					got = append(got, pattern)
+				}
+			}
 
 			// check for existance
 			if exists == negate && valuePattern == "" {
@@ -69,6 +112,7 @@ func (s *InventoryState) Check(m interface{}) (done bool, err error) {
 				if err != nil {
 					return true, fmt.Errorf("Invalid regex value pattern. fragment=%s, pattern=%s, err=%s", fragment, valuePattern, err)
 				}
+				got = append(got, fmt.Sprintf("%s=%s", pattern, inputValue))
 				if match == negate {
 					done = false
 					break
@@ -78,6 +122,13 @@ func (s *InventoryState) Check(m interface{}) (done bool, err error) {
 
 		if done {
 			return done, nil
+		} else {
+			err = cmderrors.NewAssertionError(&cmderrors.AssertionError{
+				Type:    cmderrors.ManagedObjectFragments,
+				Wanted:  s.formatFragments(),
+				Got:     got,
+				Context: struct{ ID string }{ID: mo.ID},
+			})
 		}
 	}
 	return
@@ -108,14 +159,37 @@ type managedObjectResponse struct {
 // Check check if inventory managed object exists or not
 func (s *InventoryExistance) Check(m interface{}) (done bool, err error) {
 	if result, ok := m.(*managedObjectResponse); ok {
-		exists := result.Response.StatusCode >= 200 && result.Response.StatusCode <= 399
-		notFound := result.Response.StatusCode == http.StatusNotFound
+		var exists, notFound bool
+		var moID string
+
+		if result.Response != nil {
+			exists = result.Response.StatusCode >= 200 && result.Response.StatusCode <= 399
+			notFound = result.Response.StatusCode == http.StatusNotFound
+			urlParts := strings.Split(result.Response.Request.URL.Path, "/")
+			moID = urlParts[len(urlParts)-1]
+		}
 
 		if s.Negate {
 			// Check if error code is 404
 			done = notFound
+			if !done {
+				err = cmderrors.NewAssertionError(&cmderrors.AssertionError{
+					Type:    cmderrors.ManagedObject,
+					Wanted:  "NotFound",
+					Got:     "Found",
+					Context: struct{ ID string }{ID: moID},
+				})
+			}
 		} else {
 			done = exists
+			if !done {
+				err = cmderrors.NewAssertionError(&cmderrors.AssertionError{
+					Type:    cmderrors.ManagedObject,
+					Wanted:  "Found",
+					Got:     "NotFound",
+					Context: struct{ ID string }{ID: moID},
+				})
+			}
 		}
 
 		if done {
@@ -123,6 +197,13 @@ func (s *InventoryExistance) Check(m interface{}) (done bool, err error) {
 		}
 	}
 	return
+}
+
+func (s *InventoryExistance) SetValue(v interface{}) error {
+	if id, ok := v.(string); ok {
+		s.ID = id
+	}
+	return nil
 }
 
 // Get get current managed object state
