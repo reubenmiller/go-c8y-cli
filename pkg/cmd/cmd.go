@@ -140,16 +140,9 @@ func CheckCommandError(cmd *cobra.Command, f *cmdutil.Factory, err error) error 
 		}
 		if !cErr.IsSilent() && !strings.Contains(silentStatusCodes, fmt.Sprintf("%d", cErr.StatusCode)) {
 
-			wrappedErr := errors.Unwrap(cErr)
-
 			if !cErr.Processed {
-				if wrappedErr != nil {
-					logg.Errorf("%s", wrappedErr)
-					fmt.Fprintf(w, "%s\n", cErr.JSONString())
-				} else {
-					logg.Errorf("%s", cErr)
-					fmt.Fprintf(w, "%s\n", cErr.JSONString())
-				}
+				logg.Errorf("%s", cErr)
+				fmt.Fprintf(w, "%s\n", cErr.JSONString())
 			} else {
 				logg.Debugf("Error has already been logged. %s", cErr)
 			}

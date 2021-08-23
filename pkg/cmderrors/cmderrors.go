@@ -74,7 +74,7 @@ type CommandError struct {
 	ExitCode        ExitCode           `json:"exitCode,omitempty"`
 	URL             string             `json:"url,omitempty"`
 	CumulocityError *c8y.ErrorResponse `json:"c8yResponse,omitempty"`
-	Err             error              `json:"error, omitempty"`
+	Err             error              `json:"error,omitempty"`
 	Processed       bool               `json:"-"`
 }
 
@@ -155,9 +155,9 @@ type AssertionError struct {
 
 func (e *AssertionError) Error() string {
 	if e.Context != nil {
-		return fmt.Sprintf("assertionError: %s - wanted: %+v, got: %+v, context: %+v", e.Type, e.Wanted, e.Got, e.Context)
+		return fmt.Sprintf("%s - wanted: %+v, got: %+v, context: %+v", e.Type, e.Wanted, e.Got, e.Context)
 	}
-	return fmt.Sprintf("assertionError: %s - wanted: %+v, got: %+v", e.Type, e.Wanted, e.Got)
+	return fmt.Sprintf("%s - wanted: %+v, got: %+v", e.Type, e.Wanted, e.Got)
 }
 
 func (e *AssertionError) Unwrap() error {

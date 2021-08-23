@@ -122,7 +122,7 @@ func NewAssertCmdFactory(cmd *cobra.Command, f *cmdutil.Factory, h StateChecker)
 			if err != nil {
 				if !strings.Contains(err.Error(), "Max retries exceeded") || strictMode {
 					totalErrors++
-					cfg.Logger.Infof("%s", err)
+					_ = f.CheckPostCommandError(err)
 					lastErr = err
 				}
 			}
@@ -241,7 +241,7 @@ func NewAssertDeviceCmdFactory(cmd *cobra.Command, f *cmdutil.Factory, h StateCh
 			if err != nil {
 				if !errors.Is(err, cmderrors.ErrAssertion) || strictMode {
 					totalErrors++
-					cfg.Logger.Errorf("%s", err)
+					_ = f.CheckPostCommandError(err)
 					lastErr = err
 				}
 			}
