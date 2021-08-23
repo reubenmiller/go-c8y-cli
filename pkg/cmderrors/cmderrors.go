@@ -130,9 +130,10 @@ type AssertionErrorContext string
 var (
 	ManagedObject          AssertionErrorContext = "managedObject"
 	ManagedObjectFragments AssertionErrorContext = "managedObjectFragments"
-	Alarm                  AssertionErrorContext = "alarm"
+	AlarmCount             AssertionErrorContext = "alarmCount"
 	EventCount             AssertionErrorContext = "eventCount"
-	Operation              AssertionErrorContext = "operation"
+	MeasurementCount       AssertionErrorContext = "measurementCount"
+	OperationCount         AssertionErrorContext = "operationCount"
 )
 
 func NewAssertionError(e *AssertionError) error {

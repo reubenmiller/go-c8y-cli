@@ -307,6 +307,8 @@ github.com/reubenmiller/commander/v2 v2.5.0-alpha2 h1:+3KIvWmFOoZ1z6JUYuYjqXQXRE
 github.com/reubenmiller/commander/v2 v2.5.0-alpha2/go.mod h1:O5to37yYsCIcC1acFD4ZcTYo8wxnGU4WKhWlfwBRHII=
 github.com/reubenmiller/go-c8y v0.8.1-0.20210414154325-2335ac7abff4 h1:3vSyzMf+SHFHQuGFRIqobhvoY988gkxBY+AscmRPV7Q=
 github.com/reubenmiller/go-c8y v0.8.1-0.20210414154325-2335ac7abff4/go.mod h1:F7BxOnstMFuOofxtDnj9pQEv8ENKtkpS9tjLblZzHuo=
+github.com/reubenmiller/go-c8y v0.9.0-rc.4 h1:RCnHR/zmZlGDuI4wQHDJAAsqED0MP/+RtyyPBYeZwRg=
+github.com/reubenmiller/go-c8y v0.9.0-rc.4/go.mod h1:F7BxOnstMFuOofxtDnj9pQEv8ENKtkpS9tjLblZzHuo=
 github.com/rivo/uniseg v0.1.0/go.mod h1:J6wj4VEh+S6ZtnVlnTBMWIodfgj8LQOQFoIToxlJtxc=
 github.com/rivo/uniseg v0.2.0 h1:S1pD9weZBuJdFmowNwbpi7BJ8TNftyUImj/0WQi72jY=
 github.com/rivo/uniseg v0.2.0/go.mod h1:J6wj4VEh+S6ZtnVlnTBMWIodfgj8LQOQFoIToxlJtxc=
