@@ -213,8 +213,6 @@ func NewAssertDeviceCmdFactory(cmd *cobra.Command, f *cmdutil.Factory, h StateCh
 
 		totalErrors := 0
 		var lastErr error
-		var result interface{}
-
 		for {
 			itemID, input, inputErr := path.Execute(false)
 
@@ -227,21 +225,17 @@ func NewAssertDeviceCmdFactory(cmd *cobra.Command, f *cmdutil.Factory, h StateCh
 				return cmderrors.NewUserErrorWithExitCode(cmderrors.ExitAbortedWithErrors, msg)
 			}
 
-			if inputErr == nil {
-				// Skip checking if the input has errors
-				_ = state.SetValue(itemID)
-				result, err = desiredstate.WaitForWithRetries(retries, interval, duration, state)
-				if err == nil {
-					outValue := h.GetValue(result, input)
+			_ = state.SetValue(itemID)
+			result, err := desiredstate.WaitForWithRetries(retries, interval, duration, state)
 
-					if jsonUtilities.IsJSONObject(outValue) {
-						_ = f.WriteJSONToConsole(cfg, cmd, "", outValue)
-					} else {
-						fmt.Fprintf(consol, "%s\n", outValue)
-					}
+			if err == nil {
+				outValue := h.GetValue(result, input)
+
+				if jsonUtilities.IsJSONObject(outValue) {
+					_ = f.WriteJSONToConsole(cfg, cmd, "", outValue)
+				} else {
+					fmt.Fprintf(consol, "%s\n", outValue)
 				}
-			} else {
-				err = inputErr
 			}
 
 			if err != nil {

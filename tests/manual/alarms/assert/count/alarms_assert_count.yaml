@@ -1,0 +1,30 @@
+tests:
+    It returns an error when the device does not exist:
+        command: c8y alarms assert count --device 1
+        exit-code: 112
+        stderr:
+            line-count: 1
+            exactly: '1'
+    
+    It returns an error when the device does not exist via name lookup:
+        command: c8y alarms assert count --device unknown-device
+        exit-code: 112
+        stderr:
+            line-count: 1
+            exactly: 'unknown-device'
+    
+    It returns an error when the device does not exist (using pipeline):
+        command: >
+          echo "{\"id\":\"1\"}" | c8y alarms assert count --minimum 0
+        exit-code: 112
+        stderr:
+            line-count: 1
+            exactly: '1'
+
+    It supports dry run:
+        command: c8y alarms assert count --device 1 --minimum 0 --dry
+        exit-code: 0
+
+    It asserts that a mo exists and passes it through untouched:
+        command: manual/alarms/assert/count/001_assert.sh
+        exit-code: 0

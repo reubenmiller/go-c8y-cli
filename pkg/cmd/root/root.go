@@ -31,6 +31,7 @@ import (
 	devicegroupsListCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/devicegroups/list"
 	deviceregistrationCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/deviceregistration"
 	devicesCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/devices"
+	devicesAssertCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/devices/assert"
 	devicesListCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/devices/list"
 	eventsCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/events"
 	eventsAssertCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/events/assert"
@@ -291,7 +292,7 @@ func NewCmdRoot(f *cmdutil.Factory, version, buildDate string) *CmdRoot {
 	// devices
 	devices := devicesCmd.NewSubCommand(f).GetCommand()
 	devices.AddCommand(devicesListCmd.NewCmdDevicesList(f).GetCommand())
-	// devices.AddCommand(NewGetDeviceGroupCollectionCmd(f).GetCommand())
+	devices.AddCommand(devicesAssertCmd.NewSubCommand(f).GetCommand())
 	cmd.AddCommand(devices)
 
 	// devicegroups

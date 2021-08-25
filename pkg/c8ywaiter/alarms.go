@@ -116,6 +116,9 @@ func (s *AlarmCount) SetValue(v interface{}) error {
 
 // Get get current managed object state
 func (s *AlarmCount) Get() (interface{}, error) {
+	// if s.ID == "" {
+	// 	return nil, cmderrors.ErrNoMatchesFound
+	// }
 	mo, _, err := s.Client.Inventory.GetManagedObject(
 		context.Background(),
 		s.ID,
