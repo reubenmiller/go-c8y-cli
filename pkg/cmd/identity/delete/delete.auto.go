@@ -55,7 +55,7 @@ Delete external identity
 		cmd,
 		flags.WithProcessingMode(),
 
-		flags.WithExtendedPipelineSupport("name", "name", true, "id"),
+		flags.WithExtendedPipelineSupport("name", "name", true, "externalId", "name", "id"),
 	)
 
 	// Required flags
