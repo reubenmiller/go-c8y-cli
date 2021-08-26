@@ -222,21 +222,21 @@
         "go": [
           {
             "description": "Download Get a binary and display the contents on the console",
-            "command": "c8y firmware versions download --url 12345"
+            "command": "c8y firmware versions download --url /inventory/binaries/12345"
           },
           {
             "description": "Get a binary and save it to a file",
-            "command": "c8y firmware versions download --url 12345 --outputFileRaw \"./download-binary1.txt\""
+            "command": "c8y firmware versions get --id 12345 | c8y firmware versions download --outputFileRaw \"./download-binary1.txt\""
           }
         ]
       },
       "pathParameters": [
         {
           "name": "url",
-          "type": "string",
+          "type": "[]string",
           "required": true,
           "pipeline": true,
-          "description": "Inventory binary id",
+          "description": "Firmware url",
           "pipelineAliases": [
             "c8y_Firmware.url"
           ]

@@ -35,10 +35,10 @@ func NewDownloadCmd(f *cmdutil.Factory) *DownloadCmd {
 		Long: `Download a binary stored in Cumulocity and display it on the console. For non text based binaries or if the output should be saved to file, the output parameter should be used to write the file directly to a local file.
 `,
 		Example: heredoc.Doc(`
-$ c8y firmware versions download --url 12345
+$ c8y firmware versions download --url /inventory/binaries/12345
 Download Get a binary and display the contents on the console
 
-$ c8y firmware versions download --url 12345 --outputFileRaw "./download-binary1.txt"
+$ c8y firmware versions get --id 12345 | c8y firmware versions download --outputFileRaw "./download-binary1.txt"
 Get a binary and save it to a file
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
@@ -49,7 +49,7 @@ Get a binary and save it to a file
 
 	cmd.SilenceUsage = true
 
-	cmd.Flags().String("url", "", "Inventory binary id (required) (accepts pipeline)")
+	cmd.Flags().StringSlice("url", []string{""}, "Firmware url (required) (accepts pipeline)")
 
 	completion.WithOptions(
 		cmd,
@@ -146,7 +146,7 @@ func (n *DownloadCmd) RunE(cmd *cobra.Command, args []string) error {
 		cmd,
 		path,
 		inputIterators,
-		flags.WithStringValue("url", "url"),
+		flags.WithStringSliceValues("url", "url", ""),
 	)
 	if err != nil {
 		return err

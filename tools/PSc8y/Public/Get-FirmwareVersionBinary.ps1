@@ -28,11 +28,11 @@ Get a binary and save it to a file
     [Alias()]
     [OutputType([object])]
     Param(
-        # Inventory binary id (required)
+        # Firmware url (required)
         [Parameter(Mandatory = $true,
                    ValueFromPipeline=$true,
                    ValueFromPipelineByPropertyName=$true)]
-        [object[]]
+        [string[]]
         $Url
     )
     DynamicParam {
