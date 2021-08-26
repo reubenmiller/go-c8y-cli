@@ -247,8 +247,12 @@ func NewAssertDeviceCmdFactory(cmd *cobra.Command, f *cmdutil.Factory, h StateCh
 			if err != nil {
 				if !errors.Is(err, cmderrors.ErrAssertion) || strictMode {
 					totalErrors++
-					_ = f.CheckPostCommandError(err)
-					lastErr = err
+					lastErr = f.CheckPostCommandError(err)
+
+					// wrap error so it is not printed twice, and is still an assertion error
+					cErr := cmderrors.NewUserErrorWithExitCode(cmderrors.ExitAssertionError, lastErr)
+					cErr.Processed = true
+					lastErr = cErr
 				}
 			}
 		}
