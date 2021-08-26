@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -12,6 +13,7 @@ import (
 	"github.com/google/shlex"
 	"github.com/reubenmiller/go-c8y-cli/pkg/assert"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmd/root"
+	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/pkg/fakestdin"
 )
 
@@ -457,11 +459,30 @@ func Test_DebugStdinCommand(t *testing.T) {
 	cmd := setupTest()
 	stdin := fakestdin.NewStdIn()
 	defer stdin.Restore()
-	stdin.Write(`{"source":{"id":"1111"}}` + "\n")
+	stdin.Write(`1` + "\n")
+	// stdin.Write(`{"source":{"id":"1111"}}` + "\n")
 
 	cmdtext := `
-	alarms list --dry --dryFormat json
+	events assert count --device 637044 --minimum 3 --dry
 	`
 	cmdErr := ExecuteCmd(cmd, strings.TrimSpace(cmdtext))
+
+	// cmdErr = errors.New("example")
+	var e *cmderrors.CommandError
+
+	ismatch := false
+	if errors.As(cmdErr, &e) {
+		ismatch = true
+	}
+
+	if cErr, ok := cmdErr.(cmderrors.CommandError); ok {
+		// cErr.Unwrap()
+		ismatch = cErr.Error() != ""
+	}
+	// ismatch := errors.Is(cmdErr, cmderrors.CommandError{})
+
+	assert.True(t, ismatch)
+	// if cErr, ok := err.(cmderrors.CommandError); ok {
+	// }
 	assert.OK(t, cmdErr)
 }
