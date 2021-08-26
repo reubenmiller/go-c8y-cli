@@ -16,10 +16,14 @@ const (
 
 	// ErrTypeCommand command error. Local command error related to the usage of the tool etc.
 	ErrTypeCommand = "commandError"
+
+	// ErrTypeAssertion assertion error.
+	ErrTypeAssertion = "assertionError"
 )
 
 // ErrHelp help error text. This error will not be displayed to the user
 var ErrHelp = errors.New("help text: this is not an error")
+var ErrAssertion = errors.New("assertion error")
 
 type ExitCode int
 
@@ -58,6 +62,7 @@ const (
 	ExitTimeout             ExitCode = 106
 	ExitInvalidAlias        ExitCode = 107
 	ExitDecryption          ExitCode = 108
+	ExitAssertionError      ExitCode = 112
 )
 
 // CommandError is an error used to signal different error situations in command handling.
@@ -69,8 +74,12 @@ type CommandError struct {
 	ExitCode        ExitCode           `json:"exitCode,omitempty"`
 	URL             string             `json:"url,omitempty"`
 	CumulocityError *c8y.ErrorResponse `json:"c8yResponse,omitempty"`
-	err             error
-	Processed       bool `json:"-"`
+	Err             error              `json:"error,omitempty"`
+	Processed       bool               `json:"-"`
+}
+
+func (c CommandError) Unwrap() error {
+	return c.Err
 }
 
 func (c CommandError) Error() string {
@@ -78,10 +87,20 @@ func (c CommandError) Error() string {
 	if c.StatusCode > 0 {
 		details = fmt.Sprintf(" ::StatusCode=%d", c.StatusCode)
 	}
-	if c.err != nil {
-		details = fmt.Sprintf("%s", c.err)
+	if c.Err != nil {
+		details = fmt.Sprintf("%s", c.Err)
 	}
-	return strings.Join([]string{c.ErrorType + ":", c.Message, details}, " ")
+	message := strings.Builder{}
+	if c.ErrorType != "" {
+		message.WriteString(c.ErrorType + ":")
+	}
+	if c.Message != "" {
+		message.WriteString(" " + c.Message)
+	}
+	if details != "" {
+		message.WriteString(" " + details)
+	}
+	return message.String()
 }
 
 func (c CommandError) ShortError() string {
@@ -106,6 +125,47 @@ func (c CommandError) JSONString() string {
 	return string(out)
 }
 
+type AssertionErrorContext string
+
+var (
+	ManagedObject          AssertionErrorContext = "managedObject"
+	ManagedObjectFragments AssertionErrorContext = "managedObjectFragments"
+	AlarmCount             AssertionErrorContext = "alarmCount"
+	EventCount             AssertionErrorContext = "eventCount"
+	MeasurementCount       AssertionErrorContext = "measurementCount"
+	OperationCount         AssertionErrorContext = "operationCount"
+)
+
+func NewAssertionError(e *AssertionError) error {
+	return CommandError{
+		silent:    false,
+		Err:       e,
+		ErrorType: ErrTypeAssertion,
+		ExitCode:  ExitAssertionError,
+	}
+}
+
+type AssertionError struct {
+	Err     error                 `json:"err,omitempty"`
+	Type    AssertionErrorContext `json:"type,omitempty"`
+	Message string                `json:"message,omitempty"`
+	Context interface{}           `json:"context,omitempty"`
+	Wanted  interface{}           `json:"wanted,omitempty"`
+	Got     interface{}           `json:"got,omitempty"`
+}
+
+func (e *AssertionError) Error() string {
+	if e.Context != nil {
+		return fmt.Sprintf("%s - wanted: %+v, got: %+v, context: %+v", e.Type, e.Wanted, e.Got, e.Context)
+	}
+	return fmt.Sprintf("%s - wanted: %+v, got: %+v", e.Type, e.Wanted, e.Got)
+}
+
+func (e *AssertionError) Unwrap() error {
+	return ErrAssertion
+	// return e.Err
+}
+
 // NewUserError creates a new user error
 func NewUserError(a ...interface{}) CommandError {
 	return CommandError{Message: fmt.Sprint(a...), ErrorType: ErrTypeCommand, ExitCode: ExitUserError, silent: false}
@@ -116,10 +176,20 @@ func NewUserErrorWithExitCode(exitCode ExitCode, a ...interface{}) CommandError 
 	return CommandError{Message: fmt.Sprint(a...), ErrorType: ErrTypeCommand, ExitCode: exitCode, silent: false}
 }
 
+// NewUserErrorWithExitCode creates a user with a specific exit code
+func NewErrorWithExitCode(exitCode ExitCode, err error, a ...interface{}) CommandError {
+	return CommandError{Message: fmt.Sprint(a...), Err: err, ErrorType: ErrTypeCommand, ExitCode: exitCode, silent: false}
+}
+
 // NewSystemError creates a system error
 func NewSystemError(a ...interface{}) CommandError {
 	return CommandError{Message: fmt.Sprint(a...), ErrorType: ErrTypeCommand, ExitCode: ExitError, silent: false}
 }
+
+// NewAssertionError creates an assertion error
+// func NewAssertionError(err error, a ...interface{}) CommandError {
+// 	return CommandError{Message: fmt.Sprint(a...), err: err, ErrorType: ErrTypeAssertion, ExitCode: ExitAssertionError, silent: false}
+// }
 
 var httpStatusCodeToExitCode = map[int]ExitCode{
 	400: ExitBadRequest400,
@@ -150,7 +220,7 @@ func NewServerError(r *c8y.Response, err error) CommandError {
 		silent:     false,
 		ExitCode:   ExitUnknownError,
 		StatusCode: 0,
-		err:        err,
+		Err:        err,
 	}
 
 	if errors.Is(err, context.DeadlineExceeded) {

@@ -1,0 +1,13 @@
+tests:
+    It fails the negated assertion when using dry mode:
+        command:  c8y inventory assert fragments --id 1 --fragments name --dry
+        exit-code: 112
+
+    It returns an error if the fragment value does not match:
+        command: >
+            manual/inventory/assert/fragments/001_assert.sh
+        exit-code: 112
+        stderr:
+            contains:
+                - 'wanted: [name=example01]'
+                - 'got: [name=device01]'

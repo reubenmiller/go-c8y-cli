@@ -154,7 +154,7 @@ Describe -Name "c8y errors" {
 
             $output | Should -Not -BeNullOrEmpty
             $details = ConvertFrom-Json $output -Depth 100
-            $details | Should -MatchObject @{errorType="commandError"; exitCode = 106; message = "command timed out"}
+            $details | Should -MatchObject @{errorType="commandError"; exitCode = 106; message = "command timed out"; error=@{}}
         }
         
         It "return an error if required body properties are missing" {

@@ -477,14 +477,8 @@ github.com/prometheus/tsdb v0.7.1 h1:YZcsG11NqnK4czYLrWd9mpEuAJIHVQLwdrleYfszMAA
 github.com/prometheus/tsdb v0.7.1/go.mod h1:qhTCs0VvXwvX/y3TZrWD7rabWM+ijKTux40TwIPHuXU=
 github.com/reubenmiller/go-c8y v0.8.1-0.20210414154325-2335ac7abff4 h1:3vSyzMf+SHFHQuGFRIqobhvoY988gkxBY+AscmRPV7Q=
 github.com/reubenmiller/go-c8y v0.8.1-0.20210414154325-2335ac7abff4/go.mod h1:F7BxOnstMFuOofxtDnj9pQEv8ENKtkpS9tjLblZzHuo=
-github.com/reubenmiller/go-c8y v0.9.0-rc.0 h1:rOyP8FOtqQGTuuaSn03V0MFmRKGHcPKHFEv+4uJbmi8=
-github.com/reubenmiller/go-c8y v0.9.0-rc.0/go.mod h1:F7BxOnstMFuOofxtDnj9pQEv8ENKtkpS9tjLblZzHuo=
-github.com/reubenmiller/go-c8y v0.9.0-rc.1 h1:dvEU/SVAtYU74qXhMw4yYeydRFEPupst3/wMzcgHW+s=
-github.com/reubenmiller/go-c8y v0.9.0-rc.1/go.mod h1:F7BxOnstMFuOofxtDnj9pQEv8ENKtkpS9tjLblZzHuo=
-github.com/reubenmiller/go-c8y v0.9.0-rc.2 h1:JEkqqv/fBIYbRHSbdI6BQ3aEBh5wp/AJGY2Id7nJMQA=
-github.com/reubenmiller/go-c8y v0.9.0-rc.2/go.mod h1:F7BxOnstMFuOofxtDnj9pQEv8ENKtkpS9tjLblZzHuo=
-github.com/reubenmiller/go-c8y v0.9.0-rc.3 h1:HQYWbCzOG72AS9sL95orTJ5fLkiG78tcCO7acjDmw44=
-github.com/reubenmiller/go-c8y v0.9.0-rc.3/go.mod h1:F7BxOnstMFuOofxtDnj9pQEv8ENKtkpS9tjLblZzHuo=
+github.com/reubenmiller/go-c8y v0.9.0-rc.4 h1:RCnHR/zmZlGDuI4wQHDJAAsqED0MP/+RtyyPBYeZwRg=
+github.com/reubenmiller/go-c8y v0.9.0-rc.4/go.mod h1:F7BxOnstMFuOofxtDnj9pQEv8ENKtkpS9tjLblZzHuo=
 github.com/rivo/uniseg v0.1.0/go.mod h1:J6wj4VEh+S6ZtnVlnTBMWIodfgj8LQOQFoIToxlJtxc=
 github.com/rivo/uniseg v0.2.0 h1:S1pD9weZBuJdFmowNwbpi7BJ8TNftyUImj/0WQi72jY=
 github.com/rivo/uniseg v0.2.0/go.mod h1:J6wj4VEh+S6ZtnVlnTBMWIodfgj8LQOQFoIToxlJtxc=

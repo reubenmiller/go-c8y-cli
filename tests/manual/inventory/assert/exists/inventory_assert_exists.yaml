@@ -1,0 +1,54 @@
+tests:
+    It filters a single id that does not exist:
+        command:  c8y inventory assert exists --not --id 1
+        exit-code: 0
+        stdout:
+            exactly: '1'
+    
+    It fails the negated assertion when using dry mode:
+        command:  c8y inventory assert exists --not --id 1 --dry
+        exit-code: 112
+    
+    It fails the assertion when using dry mode:
+        command:  c8y inventory assert exists --id 1 --dry
+        exit-code: 112
+
+    It filters a single id that does not exist (using pipeline):
+        command: echo "1" | c8y inventory assert exists --not
+        exit-code: 0
+        stdout:
+            exactly: '1'
+    
+    It returns an error when a single id does not exist (single entry):
+        command: echo "1" | c8y inventory assert exists --strict
+        exit-code: 112
+    
+    It filters multiple ids given in a list:
+        command: echo "1\n2" | c8y inventory assert exists --not
+        exit-code: 0
+        stdout:
+            line-count: 2
+            lines:
+              1: '1'
+              2: '2'
+
+    It filters a list of json objects:
+        command: >
+          echo "{\"id\":\"1\"}" | c8y inventory assert exists --not
+        exit-code: 0
+        stdout:
+            json:
+                id: '1'
+    
+    It asserts that a mo exists and passes it through untouched:
+        command: manual/inventory/assert/exists/001_assert.sh
+        exit-code: 0
+
+    It return a non-zero exit code in strict mode when only 1 item does not exist:
+        command: manual/inventory/assert/exists/002_assert.sh
+        exit-code: 112
+    
+    It checks if a managed object exists, and then uses a downstream command to safely get a value:
+        command: >
+          echo "1" | c8y inventory assert exists | c8y inventory get
+        exit-code: 0

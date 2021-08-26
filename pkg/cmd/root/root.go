@@ -13,6 +13,7 @@ import (
 	agentsCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/agents"
 	agentsListCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/agents/list"
 	alarmsCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/alarms"
+	alarmsAssertCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/alarms/assert"
 	alarmsSubscribeCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/alarms/subscribe"
 	aliasCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/alias"
 	apiCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/api"
@@ -32,8 +33,10 @@ import (
 	deviceprofilesCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/deviceprofiles"
 	deviceregistrationCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/deviceregistration"
 	devicesCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/devices"
+	devicesAssertCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/devices/assert"
 	devicesListCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/devices/list"
 	eventsCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/events"
+	eventsAssertCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/events/assert"
 	eventsSubscribeCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/events/subscribe"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmd/factory"
 	firmwareCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/firmware"
@@ -44,16 +47,19 @@ import (
 	identityCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/identity"
 	inventoryCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/inventory"
 	inventoryAdditionsCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/inventory/additions"
+	inventoryAssertCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/inventory/assert"
 	inventoryAssetsCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/inventory/assets"
 	inventoryFindCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/inventory/find"
 	inventorySubscribeCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/inventory/subscribe"
 	inventoryWaitCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/inventory/wait"
 	measurementsCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/measurements"
+	measurementsAssertCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/measurements/assert"
 	measurementsSubscribeCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/measurements/subscribe"
 	microservicesCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/microservices"
 	microservicesCreateCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/microservices/create"
 	microservicesServiceUserCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/microservices/serviceuser"
 	operationsCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/operations"
+	operationsAssertCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/operations/assert"
 	operationsSubscribeCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/operations/subscribe"
 	operationsWaitCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/operations/wait"
 	realtimeCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/realtime"
@@ -275,25 +281,29 @@ func NewCmdRoot(f *cmdutil.Factory, version, buildDate string) *CmdRoot {
 	//
 	alarms := alarmsCmd.NewSubCommand(f).GetCommand()
 	alarms.AddCommand(alarmsSubscribeCmd.NewCmdSubscribe(f).GetCommand())
+	alarms.AddCommand(alarmsAssertCmd.NewSubCommand(f).GetCommand())
 	cmd.AddCommand(alarms)
 
 	events := eventsCmd.NewSubCommand(f).GetCommand()
 	events.AddCommand(eventsSubscribeCmd.NewCmdSubscribe(f).GetCommand())
+	events.AddCommand(eventsAssertCmd.NewSubCommand(f).GetCommand())
 	cmd.AddCommand(events)
 
 	operations := operationsCmd.NewSubCommand(f).GetCommand()
 	operations.AddCommand(operationsSubscribeCmd.NewCmdSubscribe(f).GetCommand())
 	operations.AddCommand(operationsWaitCmd.NewCmdWait(f).GetCommand())
+	operations.AddCommand(operationsAssertCmd.NewSubCommand(f).GetCommand())
 	cmd.AddCommand(operations)
 
 	measurements := measurementsCmd.NewSubCommand(f).GetCommand()
 	measurements.AddCommand(measurementsSubscribeCmd.NewCmdSubscribe(f).GetCommand())
+	measurements.AddCommand(measurementsAssertCmd.NewSubCommand(f).GetCommand())
 	cmd.AddCommand(measurements)
 
 	// devices
 	devices := devicesCmd.NewSubCommand(f).GetCommand()
 	devices.AddCommand(devicesListCmd.NewCmdDevicesList(f).GetCommand())
-	// devices.AddCommand(NewGetDeviceGroupCollectionCmd(f).GetCommand())
+	devices.AddCommand(devicesAssertCmd.NewSubCommand(f).GetCommand())
 	cmd.AddCommand(devices)
 
 	// devicegroups
@@ -318,6 +328,7 @@ func NewCmdRoot(f *cmdutil.Factory, version, buildDate string) *CmdRoot {
 	inventory.AddCommand(inventoryAdditionsCmd.NewSubCommand(f).GetCommand())
 	inventory.AddCommand(inventoryAssetsCmd.NewSubCommand(f).GetCommand())
 	inventory.AddCommand(inventoryWaitCmd.NewCmdWait(f).GetCommand())
+	inventory.AddCommand(inventoryAssertCmd.NewSubCommand(f).GetCommand())
 	cmd.AddCommand(inventory)
 
 	// software
