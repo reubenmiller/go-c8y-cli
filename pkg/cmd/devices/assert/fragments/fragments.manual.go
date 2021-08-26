@@ -42,8 +42,8 @@ func NewCmdFragments(f *cmdutil.Factory) *CmdFragments {
 
 	cmd := &cobra.Command{
 		Use:   "fragments",
-		Short: "Fragments for managed object",
-		Long:  `Fragments for an managed object fragment by polling until a condition is met or a timeout is reached`,
+		Short: "Assert fragments on a device",
+		Long:  `Assert fragments on a device by polling until a condition is met or a timeout is reached`,
 		Example: heredoc.Doc(`
 			$ c8y devices assert fragments --id 1234 --fragment "c8y_Mobile.iccd"
 			# Fragments for the managed object to have a non-null c8y_Mobile.iccd fragment
