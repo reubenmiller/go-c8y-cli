@@ -26,3 +26,5 @@ echo "$mo_id" | c8y operations assert count --minimum 1 | grep "^${mo_id}$"
 
 # case 3: Filter by type
 echo "$mo_id" | c8y operations assert count --fragmentType c8y_TestOperation --minimum 1 | grep "^${mo_id}$"
+
+echo "device_with_operations" | c8y operations assert count --fragmentType c8y_TestOperation --minimum 1 | grep "^device_with_operations$"
