@@ -44,6 +44,7 @@ endpoints:
         description: Configuration device type filter
 
   - name: newConfiguration
+    skip: true
     method: POST
     path: inventory/managedObjects
     accept: application/vnd.com.nsn.cumulocity.inventory+json
