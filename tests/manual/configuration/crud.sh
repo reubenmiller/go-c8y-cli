@@ -43,7 +43,7 @@ c8y configuration update --id "$NAME" --deviceType "myType" --select deviceType 
 c8y __complete configuration get --id "$NAME" | grep id:
 
 # list
-c8y configuration list --name "$NAME" --select "id,url" --output csv | grep "$CONFIG1_ID"
+c8y configuration list --name "$NAME" --select "id,url" --pageSize 100 --output csv | grep "$CONFIG1_ID"
 
 # delete
 c8y configuration get --id "$NAME" | c8y configuration delete

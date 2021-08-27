@@ -4,7 +4,7 @@ tests:
         exit-code: 0
 
     configuration_create_Create a configuration package:
-        command: c8y configuration create --name "agent config" --description "Default agent configuration" --configurationType "agentConfig"
+        command: c8y configuration create --name "agent config" --description "Default agent configuration" --configurationType "agentConfig" --dry
         exit-code: 0
         stdout:
             json:
