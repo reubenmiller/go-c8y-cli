@@ -1,0 +1,4 @@
+tests:
+    It can create/update/delete configuration:
+        command: ./manual/configuration/crud.sh
+        exit-code: 0
