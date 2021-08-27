@@ -2,3 +2,14 @@ tests:
     It can create/update/delete configuration:
         command: ./manual/configuration/crud.sh
         exit-code: 0
+
+    configuration_create_Create a configuration package:
+        command: c8y configuration create --name "agent config" --description "Default agent configuration" --configurationType "agentConfig"
+        exit-code: 0
+        stdout:
+            json:
+                body.configurationType: agentConfig
+                body.description: Default agent configuration
+                body.name: agent config
+                method: POST
+                path: /inventory/managedObjects

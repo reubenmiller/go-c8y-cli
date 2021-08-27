@@ -24,6 +24,7 @@ import (
 	bulkoperationsCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/bulkoperations"
 	completionCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/completion"
 	configurationCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/configuration"
+	configurationCreateCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/configuration/create"
 	currentapplicationCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/currentapplication"
 	currenttenantCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/currenttenant"
 	currentuserCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/currentuser"
@@ -272,7 +273,6 @@ func NewCmdRoot(f *cmdutil.Factory, version, buildDate string) *CmdRoot {
 		currenttenantCmd.NewSubCommand(f).GetCommand(),
 		currentuserCmd.NewSubCommand(f).GetCommand(),
 		activityLogCmd.NewSubCommand(f).GetCommand(),
-		configurationCmd.NewSubCommand(f).GetCommand(),
 	}
 
 	cmd.AddCommand(commands...)
@@ -330,6 +330,11 @@ func NewCmdRoot(f *cmdutil.Factory, version, buildDate string) *CmdRoot {
 	inventory.AddCommand(inventoryWaitCmd.NewCmdWait(f).GetCommand())
 	inventory.AddCommand(inventoryAssertCmd.NewSubCommand(f).GetCommand())
 	cmd.AddCommand(inventory)
+
+	// configuration
+	configuration := configurationCmd.NewSubCommand(f).GetCommand()
+	configuration.AddCommand(configurationCreateCmd.NewCreateCmd(f).GetCommand())
+	cmd.AddCommand(configuration)
 
 	// software
 	softwareVersions := softwareVersionsCmd.NewSubCommand(f).GetCommand()
