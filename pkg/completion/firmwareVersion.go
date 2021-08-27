@@ -40,7 +40,7 @@ func WithFirmwareVersion(flagVersion string, flagNameFirmware string, clientFunc
 				// Filter firmware versions by firmware
 				if c8ydata.IsID(firmwareName) {
 					opt.Query = fmt.Sprintf(
-						"(type eq '%s') and (not(has(c8y_Patch))) and (name eq '%v') and (bygroupid(%s))",
+						"(type eq '%s') and (not(has(c8y_Patch))) and (c8y_Firmware.version eq '%v') and (bygroupid(%s))",
 						versionType, versionPattern, firmwareName,
 					)
 				} else {
