@@ -9,7 +9,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// WithFirmwarePatch firmware version completion (requires category)
+// WithFirmwarePatch firmware patch version completion (requires category)
 func WithFirmwarePatch(flagVersion string, flagNameFirmware string, clientFunc func() (*c8y.Client, error)) Option {
 	return func(cmd *cobra.Command) *cobra.Command {
 		_ = cmd.RegisterFlagCompletionFunc(flagVersion, func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
@@ -25,7 +25,7 @@ func WithFirmwarePatch(flagVersion string, flagNameFirmware string, clientFunc f
 			versionPattern := "*" + toComplete + "*"
 			opt := &c8y.ManagedObjectOptions{
 				// Only filter by version name
-				Query:             fmt.Sprintf("(type eq '%s') and (not(has(c8y_Patch))) and (c8y_Firmware.version eq '%s')", versionType, versionPattern),
+				Query:             fmt.Sprintf("(type eq '%s') and has(c8y_Patch) and (c8y_Firmware.version eq '%s')", versionType, versionPattern),
 				WithParents:       true,
 				PaginationOptions: *c8y.NewPaginationOptions(100),
 			}
