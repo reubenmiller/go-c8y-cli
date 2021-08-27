@@ -626,6 +626,7 @@ func WithFirmwareByNameFirstMatch(client *c8y.Client, args []string, opts ...str
 func WithFirmwareVersionByNameFirstMatch(client *c8y.Client, args []string, opts ...string) flags.GetOption {
 	return func(cmd *cobra.Command, inputIterators *flags.RequestInputIterators) (string, interface{}, error) {
 		firmware := ""
+		// Note: Lookup of firmware does not work if "firmwareId" is piped input
 		if v, err := cmd.Flags().GetStringSlice("firmwareId"); err == nil && len(v) > 0 {
 			firmware = v[0]
 		}
@@ -638,6 +639,7 @@ func WithFirmwareVersionByNameFirstMatch(client *c8y.Client, args []string, opts
 func WithFirmwarePatchByNameFirstMatch(client *c8y.Client, args []string, opts ...string) flags.GetOption {
 	return func(cmd *cobra.Command, inputIterators *flags.RequestInputIterators) (string, interface{}, error) {
 		firmware := ""
+		// Note: Lookup of firmware does not work if "firmwareId" is piped input
 		if v, err := cmd.Flags().GetStringSlice("firmwareId"); err == nil && len(v) > 0 {
 			firmware = v[0]
 		}
