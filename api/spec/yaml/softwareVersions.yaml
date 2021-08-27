@@ -44,6 +44,54 @@ endpoints:
         type: booleanDefault
         description: Include parent references
         default: 'true'
+  
+  - name: getSoftwareVersion
+    description: Get software package version
+    descriptionLong: Get an existing software package version
+    method: GET
+    path: inventory/managedObjects/{id}
+    accept: 'application/vnd.com.nsn.cumulocity.managedObject+json'
+    alias:
+        go: get
+        powershell: Get-SoftwareVersion
+    examples:
+      powershell:
+        - description: Get a software package
+          beforeEach:
+            - $mo = PSc8y\New-ManagedObject -Name "testMO"
+          command: Get-SoftwareVersion -SoftwareId 12345 -Id $mo.id
+          afterEach:
+            - Remove-ManagedObject -Id $mo.id -ErrorAction SilentlyContinue
+
+        - description: Get a software package (using pipeline)
+          beforeEach:
+            - $mo = PSc8y\New-SoftwareVersion -SoftwareId 12345 -Version "1.0.0" -Url "test.com/file.mender"
+          command: Get-ManagedObject -Id $mo.id | Get-SoftwareVersion
+          afterEach:
+            - Remove-ManagedObject -Id $mo.id -ErrorAction SilentlyContinue
+
+      go:
+        - description: Get a software package version using name
+          command: c8y software versions get --softwareId 11111 --id 1.0.0
+
+    pathParameters:
+      - name: id
+        type: '[]softwareversion'
+        pipeline: true
+        required: true
+        description: Software Package version (managedObject) id
+
+      # Dummy value (to limit versions to the given package)
+      - name: softwareId
+        type: '[]software'
+        required: false
+        description: Software package id (used to help completion be more accurate)
+
+    queryParameters:
+      - name: withParents
+        type: boolean
+        description: Include parent references
+
 
   - name: deleteSoftwareVersion
     description: Delete software package version

@@ -177,6 +177,7 @@ FunctionsToExport = @(
 	'Get-SmartGroupCollection',
 	'Get-Software',
 	'Get-SoftwareCollection',
+	'Get-SoftwareVersion',
 	'Get-SoftwareVersionCollection',
 	'Get-SupportedMeasurements',
 	'Get-SupportedSeries',
