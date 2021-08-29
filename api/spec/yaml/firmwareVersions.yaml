@@ -26,12 +26,17 @@ endpoints:
       go:
         - description: Get a list of firmware package versions
           command: c8y firmware versions list --firmwareId 12345
+          assertStdOut:
+            json:
+              query: r/bygroupid\(12345\)
         
         - description: Get a list of firmware and their versions (using pipeline)
           command: c8y firmware list | c8y firmware versions list
+          skipTest: true
         
         - description: Get all versions of a firmware using an existing version object
           command: c8y firmware versions get --id 12345 | c8y firmware versions list
+          skipTest: true
 
     pathParameters:
       - name: firmwareId
@@ -77,6 +82,7 @@ endpoints:
       go:
         - description: Get a firmware package version using name
           command: c8y firmware versions get --firmwareId 11111 --id 1.0.0
+          skipTest: true
 
     pathParameters:
       - name: id
@@ -166,13 +172,16 @@ endpoints:
 
         - description: Get a binary and save it to a file
           command: Get-Binary -Id $Binary.id -OutputFileRaw ./download-binary1.txt
+          skipTest: true
 
       go:
         - description: Download Get a binary and display the contents on the console
           command: c8y firmware versions download --url /inventory/binaries/12345
+          skipTest: true
 
         - description: Get a binary and save it to a file
           command: c8y firmware versions get --id 12345 | c8y firmware versions download --outputFileRaw "./download-binary1.txt"
+          skipTest: true
     pathParameters:
       - name: url
         type: '[]string'

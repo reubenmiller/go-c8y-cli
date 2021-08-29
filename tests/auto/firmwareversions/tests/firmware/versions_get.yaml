@@ -2,6 +2,7 @@ tests:
     firmware/versions_get_Get a firmware package version using name:
         command: c8y firmware versions get --firmwareId 11111 --id 1.0.0
         exit-code: 0
+        skip: true
         stdout:
             json:
                 method: GET

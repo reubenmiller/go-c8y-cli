@@ -2,6 +2,7 @@ tests:
     firmware/versions_list_Get a list of firmware and their versions (using pipeline):
         command: $TEST_SHELL -c 'c8y firmware list | c8y firmware versions list'
         exit-code: 0
+        skip: true
         stdout:
             json:
                 method: GET
@@ -14,10 +15,11 @@ tests:
             json:
                 method: GET
                 path: /inventory/managedObjects
-                query: query=$filter=((not(has(c8y_Patch))) and (bygroupid(12345))) $orderby=creationTime.date desc,creationTime desc
+                query: r/bygroupid\(12345\)
     firmware/versions_list_Get all versions of a firmware using an existing version object:
         command: $TEST_SHELL -c 'c8y firmware versions get --id 12345 | c8y firmware versions list'
         exit-code: 0
+        skip: true
         stdout:
             json:
                 method: GET
