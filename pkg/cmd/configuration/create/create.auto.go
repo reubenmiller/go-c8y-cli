@@ -34,7 +34,7 @@ func NewCreateCmd(f *cmdutil.Factory) *CreateCmd {
 		Short: "Create configuration file",
 		Long:  `Create a new configuration file (managedObject)`,
 		Example: heredoc.Doc(`
-$ c8y configuration create --name "agent config" --description "Default agent configuration" --configurationType "agentConfig"
+$ c8y configuration create --name "agent config" --description "Default agent configuration" --configurationType "agentConfig" --url "https://test.com/content/raw/app.json"
 Create a configuration package
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {

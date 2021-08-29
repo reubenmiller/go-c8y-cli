@@ -29,7 +29,12 @@
         "go": [
           {
             "description": "Get a list of configuration files",
-            "command": "c8y configuration list"
+            "command": "c8y configuration list",
+            "assertStdOut": {
+              "json": {
+                "query": "r/type eq 'c8y_ConfigurationDump'"
+              }
+            }
           }
         ]
       },
@@ -82,7 +87,7 @@
         "go": [
           {
             "description": "Create a configuration package",
-            "command": "c8y configuration create --name \"agent config\" --description \"Default agent configuration\" --configurationType \"agentConfig\""
+            "command": "c8y configuration create --name \"agent config\" --description \"Default agent configuration\" --configurationType \"agentConfig\" --url \"https://test.com/content/raw/app.json\""
           }
         ]
       },

@@ -6,4 +6,4 @@ tests:
             json:
                 method: GET
                 path: /inventory/managedObjects
-                query: query=$filter=(type eq 'c8y_ConfigurationDump') $orderby=name asc
+                query: r/type eq 'c8y_ConfigurationDump'
