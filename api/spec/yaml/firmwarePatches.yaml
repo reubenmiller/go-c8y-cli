@@ -88,6 +88,7 @@ endpoints:
       go:
         - description: Get a firmware patch
           command: c8y firmware patches get --firmwareId 11111 --id 1.0.0
+          skipTest: true
 
     pathParameters:
       - name: id
