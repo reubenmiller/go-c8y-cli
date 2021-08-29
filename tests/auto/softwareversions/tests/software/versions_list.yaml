@@ -6,10 +6,11 @@ tests:
             json:
                 method: GET
                 path: /inventory/managedObjects
-                query: query=$filter=((not(has(c8y_Patch)))%20and%20(bygroupid(12345)))%20$orderby=creationTime.date%20desc,creationTime%20desc
+                query: r/bygroupid\(12345\)
     software/versions_list_Get a list of software package versions from multiple software packages:
         command: $TEST_SHELL -c 'c8y software list | c8y software versions list'
         exit-code: 0
+        skip: true
         stdout:
             json:
                 method: GET

@@ -29,11 +29,17 @@
         "go": [
           {
             "description": "Get a list of software package versions",
-            "command": "c8y software versions list --softwareId 12345"
+            "command": "c8y software versions list --softwareId 12345",
+            "assertStdOut": {
+              "json": {
+                "query": "r/bygroupid\\(12345\\)"
+              }
+            }
           },
           {
             "description": "Get a list of software package versions from multiple software packages",
-            "command": "c8y software list | c8y software versions list"
+            "command": "c8y software list | c8y software versions list",
+            "skipTest": true
           }
         ]
       },
@@ -96,7 +102,13 @@
         "go": [
           {
             "description": "Get a software package version using name",
-            "command": "c8y software versions get --softwareId 11111 --id 1.0.0"
+            "command": "c8y software versions get --softwareId 11111 --id 1.0.0",
+            "skipTest": true,
+            "assertStdOut": {
+              "json": {
+                "query": "r/type eq 'c8y_Firmware'"
+              }
+            }
           }
         ]
       },
