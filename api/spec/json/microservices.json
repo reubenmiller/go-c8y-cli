@@ -584,7 +584,8 @@
             "assertStdOut": {
               "json": {
                 "path": "/inventory/managedObjects",
-                "pathEncoded": "/inventory/managedObjects?type=c8y_Application_1"
+                "pathEncoded": "/inventory/managedObjects?type=c8y_Application_1",
+                "query": "type=c8y_Application_1"
               }
             }
           }

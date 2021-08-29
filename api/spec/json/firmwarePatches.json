@@ -33,11 +33,21 @@
         "go": [
           {
             "description": "Get a list of firmware patches",
-            "command": "c8y firmware patches list --firmwareId 12345"
+            "command": "c8y firmware patches list --firmwareId 12345",
+            "assertStdOut": {
+              "json": {
+                "query": "r/\\(c8y_Patch.dependency eq '\\*'\\) and \\(bygroupid\\(12345\\)\\)"
+              }
+            }
           },
           {
             "description": "Get a list of firmware patches where the dependency version starts with \"1.\"",
-            "command": "c8y firmware patches list --firmwareId 12345 --dependency '1.*'"
+            "command": "c8y firmware patches list --firmwareId 12345 --dependency '1.*'",
+            "assertStdOut": {
+              "json": {
+                "query": "r/\\(c8y_Patch.dependency eq '1\\.\\*'\\) and \\(bygroupid\\(12345\\)\\)"
+              }
+            }
           }
         ]
       },

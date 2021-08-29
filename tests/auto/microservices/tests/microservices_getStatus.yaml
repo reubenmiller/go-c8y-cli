@@ -16,4 +16,4 @@ tests:
                 method: GET
                 path: /inventory/managedObjects
                 pathEncoded: /inventory/managedObjects?type=c8y_Application_1
-                query: type=c8y_Application_{id}
+                query: type=c8y_Application_1

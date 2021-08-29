@@ -26,6 +26,9 @@ endpoints:
       go:
         - description: Get a list of device profiles
           command: c8y deviceprofiles list
+          assertStdOut:
+            json:
+              query: r/type eq 'c8y_Profile'
 
     pathParameters:
       - name: name
