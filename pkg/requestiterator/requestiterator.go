@@ -40,6 +40,7 @@ type RequestIterator struct {
 	Query          iterator.Iterator
 	InputIterators flags.RequestInputIterators
 	Body           interface{}
+	PostActions    []flags.Action
 	done           int32
 }
 

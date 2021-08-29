@@ -16,6 +16,10 @@ import (
 	"github.com/spf13/cobra"
 )
 
+type Action interface {
+	Run(interface{}) (interface{}, error)
+}
+
 // GetOption gets the value from a flag and returns the value which can be set accordingly
 type GetOption func(cmd *cobra.Command, inputIterators *RequestInputIterators) (name string, value interface{}, err error)
 
@@ -767,6 +771,7 @@ type PipelineOptions struct {
 	Validator   iterator.Validator  `json:"-"`
 	Formatter   func([]byte) []byte `json:"-"`
 	InputFilter func([]byte) bool   `json:"-"`
+	PostActions []Action            `json:"-"`
 }
 
 // WithPipelineIterator adds pipeline support from cli arguments

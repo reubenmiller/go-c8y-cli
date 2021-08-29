@@ -1,8 +1,11 @@
 package c8ydata
 
 import (
+	"context"
 	"regexp"
 	"strings"
+
+	"github.com/reubenmiller/go-c8y/pkg/c8y"
 )
 
 // CumulocityProperties contain a map of the static properties which are generally read-only and only
@@ -51,4 +54,27 @@ func ExtractVersion(s string) string {
 	}
 
 	return subpatterns[1]
+}
+
+// AddChildAddition adds a child addition relationship based ona c8y response
+type AddChildAddition struct {
+	Client      *c8y.Client
+	URLProperty string
+}
+
+func (a *AddChildAddition) Run(v interface{}) (resp interface{}, err error) {
+	if value, ok := v.(*c8y.Response); ok {
+		if value.JSON != nil {
+			moID := value.JSON.Get("id").String()
+			binaryURL := value.JSON.Get(a.URLProperty).String()
+
+			if moID != "" && strings.Contains(binaryURL, "/inventory/binaries/") {
+				parts := strings.Split(binaryURL, "/")
+				if moID != "" && len(parts) > 0 {
+					_, resp, err = a.Client.Inventory.AddChildAddition(context.Background(), moID, parts[len(parts)-1])
+				}
+			}
+		}
+	}
+	return
 }

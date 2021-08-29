@@ -51,14 +51,14 @@ func (r *RequestHandler) GetTimeoutContext() (context.Context, context.CancelFun
 	return context.WithTimeout(context.Background(), r.Config.RequestTimeout())
 }
 
-func (r *RequestHandler) ProcessRequestAndResponse(requests []c8y.RequestOptions, commonOptions config.CommonCommandOptions) error {
+func (r *RequestHandler) ProcessRequestAndResponse(requests []c8y.RequestOptions, commonOptions config.CommonCommandOptions) (*c8y.Response, error) {
 
 	if len(requests) > 1 {
-		return cmderrors.NewSystemError("Multiple request handling is currently not supported")
+		return nil, cmderrors.NewSystemError("Multiple request handling is currently not supported")
 	}
 
 	if len(requests) == 0 {
-		return cmderrors.NewSystemError("At least one request should be given")
+		return nil, cmderrors.NewSystemError("At least one request should be given")
 	}
 
 	req := requests[0]
@@ -113,18 +113,18 @@ func (r *RequestHandler) ProcessRequestAndResponse(requests []c8y.RequestOptions
 			// TODO: Optimize implementation for inventory managed object queries to use the following
 			r.Logger.Info("Using inventory optimized query")
 			if err := r.fetchAllInventoryQueryResults(req, resp, commonOptions); err != nil {
-				return err
+				return nil, err
 			}
 		} else {
 			if err := r.fetchAllResults(req, resp, commonOptions); err != nil {
-				return err
+				return nil, err
 			}
 		}
-		return nil
+		return resp, nil
 	}
 
 	_, err = r.ProcessResponse(resp, err, commonOptions)
-	return err
+	return resp, err
 }
 
 func isInventoryQuery(r *c8y.RequestOptions) bool {
