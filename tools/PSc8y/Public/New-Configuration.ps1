@@ -46,7 +46,12 @@ Create a new configuration file
         # Device type filter. Only allow configuration to be applied to devices of this type
         [Parameter()]
         [string]
-        $DeviceType
+        $DeviceType,
+
+        # File to upload
+        [Parameter()]
+        [string]
+        $File
     )
     DynamicParam {
         Get-ClientCommonParameters -Type "Create", "Template"

@@ -194,6 +194,27 @@
         ))
     }
 
+    # Post actions
+    $PostActionOptions = New-Object System.Text.StringBuilder
+    $PostActionsTotal = 0
+    foreach ($iArg in (Remove-SkippedParameters $ArgumentSources)) {
+        $URLProperty = $iArg.Name
+        if ($iArg.Property) {
+            $URLProperty = $iArg.Property
+        }
+        switch ($iArg.Type) {
+            "binaryUploadURL" {
+                $null = $PostActionOptions.AppendLine("&c8ydata.AddChildAddition{Client: client, URLProperty: `"$URLProperty`"},")
+                $PostActionsTotal++
+                break
+            }
+        }
+    }
+    if ($PostActionsTotal -gt 0) {
+        $null = $PostActionOptions.Insert(0, "inputIterators.PipeOptions.PostActions = []flags.Action{`n")
+        $null = $PostActionOptions.AppendLine("}")
+    }
+
     #
     # Body
     #
@@ -584,6 +605,7 @@ func (n *${NameCamel}Cmd) RunE(cmd *cobra.Command, args []string) error {
         IgnoreAccept: cfg.IgnoreAcceptHeader(),
         DryRun:       cfg.ShouldUseDryRun(cmd.CommandPath()),
     }
+    $PostActionOptions
 
     return n.factory.RunWithWorkers(client, cmd, &req, inputIterators)
 }

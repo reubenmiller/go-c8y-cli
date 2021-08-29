@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"github.com/MakeNowJust/heredoc/v2"
+	"github.com/reubenmiller/go-c8y-cli/pkg/c8ydata"
 	"github.com/reubenmiller/go-c8y-cli/pkg/c8yfetcher"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmd/subcommand"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
@@ -51,6 +52,7 @@ Update a configuration file
 	cmd.Flags().String("configurationType", "", "Configuration type")
 	cmd.Flags().String("url", "", "URL link to the configuration file")
 	cmd.Flags().String("deviceType", "", "Device type filter. Only allow configuration to be applied to devices of this type")
+	cmd.Flags().String("file", "", "File to be uploaded")
 
 	completion.WithOptions(
 		cmd,
@@ -141,6 +143,7 @@ func (n *UpdateCmd) RunE(cmd *cobra.Command, args []string) error {
 		flags.WithStringValue("configurationType", "configurationType"),
 		flags.WithStringValue("url", "url"),
 		flags.WithStringValue("deviceType", "deviceType"),
+		flags.WithBinaryUploadURL(client, "file", "url"),
 		cmdutil.WithTemplateValue(cfg),
 		flags.WithTemplateVariablesValue(),
 	)
@@ -169,6 +172,9 @@ func (n *UpdateCmd) RunE(cmd *cobra.Command, args []string) error {
 		Header:       headers,
 		IgnoreAccept: cfg.IgnoreAcceptHeader(),
 		DryRun:       cfg.ShouldUseDryRun(cmd.CommandPath()),
+	}
+	inputIterators.PipeOptions.PostActions = []flags.Action{
+		&c8ydata.AddChildAddition{Client: client, URLProperty: "url"},
 	}
 
 	return n.factory.RunWithWorkers(client, cmd, &req, inputIterators)

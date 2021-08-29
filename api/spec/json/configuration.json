@@ -56,7 +56,7 @@
     },
     {
       "name": "newConfiguration",
-      "skip": true,
+      "skip": false,
       "method": "POST",
       "path": "inventory/managedObjects",
       "accept": "application/vnd.com.nsn.cumulocity.inventory+json",
@@ -120,6 +120,13 @@
           "type": "string",
           "required": false,
           "description": "Device type filter. Only allow configuration to be applied to devices of this type"
+        },
+        {
+          "name": "file",
+          "type": "binaryUploadURL",
+          "property": "url",
+          "required": false,
+          "description": "File to upload"
         },
         {
           "name": "data",
@@ -261,6 +268,13 @@
           "type": "string",
           "required": false,
           "description": "Device type filter. Only allow configuration to be applied to devices of this type"
+        },
+        {
+          "name": "file",
+          "type": "binaryUploadURL",
+          "property": "url",
+          "required": false,
+          "description": "File to be uploaded"
         },
         {
           "name": "data",

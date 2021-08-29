@@ -2,11 +2,11 @@
 package create
 
 import (
-	"context"
 	"io"
 	"net/http"
 
 	"github.com/MakeNowJust/heredoc/v2"
+	"github.com/reubenmiller/go-c8y-cli/pkg/c8ydata"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmd/subcommand"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmdutil"
@@ -15,7 +15,6 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/pkg/mapbuilder"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
-	"github.com/tidwall/sjson"
 )
 
 // CreateCmd command
@@ -35,11 +34,8 @@ func NewCreateCmd(f *cmdutil.Factory) *CreateCmd {
 		Short: "Create configuration file",
 		Long:  `Create a new configuration file (managedObject)`,
 		Example: heredoc.Doc(`
-			$ c8y configuration create --name myExampleConfig01 --configurationType EXAMPLE --file myconfig.json
-			Create a configuration from a file
-
-			$ c8y configuration create --name "agent config" --description "Default agent configuration" --configurationType "agentConfig" --url "https://example.com/myfile.json"
-			Create a configuration using an external URL
+$ c8y configuration create --name "agent config" --description "Default agent configuration" --configurationType "agentConfig"
+Create a configuration package
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
 			return f.CreateModeEnabled()
@@ -54,7 +50,7 @@ func NewCreateCmd(f *cmdutil.Factory) *CreateCmd {
 	cmd.Flags().String("configurationType", "", "Configuration type")
 	cmd.Flags().String("url", "", "URL link to the configuration file")
 	cmd.Flags().String("deviceType", "", "Device type filter. Only allow configuration to be applied to devices of this type")
-	cmd.Flags().String("file", "", "File to be uploaded")
+	cmd.Flags().String("file", "", "File to upload")
 
 	completion.WithOptions(
 		cmd,
@@ -102,6 +98,12 @@ func (n *CreateCmd) RunE(cmd *cobra.Command, args []string) error {
 		return cmderrors.NewUserError(err)
 	}
 
+	queryValue, err := query.GetQueryUnescape(true)
+
+	if err != nil {
+		return cmderrors.NewSystemError("Invalid query parameter")
+	}
+
 	// headers
 	headers := http.Header{}
 	err = flags.WithHeaders(
@@ -139,58 +141,41 @@ func (n *CreateCmd) RunE(cmd *cobra.Command, args []string) error {
 		flags.WithStringValue("configurationType", "configurationType"),
 		flags.WithStringValue("url", "url"),
 		flags.WithStringValue("deviceType", "deviceType"),
+		flags.WithBinaryUploadURL(client, "file", "url"),
 		flags.WithDefaultTemplateString(`
 {type: 'c8y_ConfigurationDump', c8y_Global:{}}`),
 		cmdutil.WithTemplateValue(cfg),
 		flags.WithTemplateVariablesValue(),
-		flags.WithRequiredProperties("type", "name"),
+		flags.WithRequiredProperties("type", "name", "url"),
 	)
 	if err != nil {
 		return cmderrors.NewUserError(err)
 	}
 
-	commonOptions, err := cfg.GetOutputCommonOptions(cmd)
+	// path parameters
+	path := flags.NewStringTemplate("inventory/managedObjects")
+	err = flags.WithPathParameters(
+		cmd,
+		path,
+		inputIterators,
+	)
 	if err != nil {
 		return err
 	}
 
-	var filename string
-	filename, err = cmd.Flags().GetString("file")
-	if err != nil {
-		return err
+	req := c8y.RequestOptions{
+		Method:       "POST",
+		Path:         path.GetTemplate(),
+		Query:        queryValue,
+		Body:         body,
+		FormData:     formData,
+		Header:       headers,
+		IgnoreAccept: cfg.IgnoreAcceptHeader(),
+		DryRun:       cfg.ShouldUseDryRun(cmd.CommandPath()),
+	}
+	inputIterators.PipeOptions.PostActions = []flags.Action{
+		&c8ydata.AddChildAddition{Client: client, URLProperty: "url"},
 	}
 
-	handler, _ := n.factory.GetRequestHandler()
-	var resp *c8y.Response
-	var respErr error
-	bounded := inputIterators.Total > 0
-	for {
-		bodyJSON, err := body.MarshalJSON()
-		if err != nil {
-			if err == io.EOF {
-				break
-			}
-			return err
-		}
-
-		if filename != "" {
-			_, resp, respErr = client.Inventory.CreateWithBinary(context.Background(), filename, func(binaryURL string) interface{} {
-				// Merge url into body using bytes as the body has already been marshalled to JSON
-				bodyUpdated, _ := sjson.SetBytes(bodyJSON, "url", binaryURL)
-				return bodyUpdated
-			})
-		} else {
-			_, resp, respErr = client.Inventory.Create(context.Background(), bodyJSON)
-		}
-
-		if _, err := handler.ProcessResponse(resp, respErr, commonOptions); err != nil {
-			return err
-		}
-
-		if !bounded {
-			break
-		}
-	}
-
-	return nil
+	return n.factory.RunWithWorkers(client, cmd, &req, inputIterators)
 }

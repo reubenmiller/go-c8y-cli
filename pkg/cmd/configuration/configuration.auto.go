@@ -1,6 +1,7 @@
 package configuration
 
 import (
+	cmdCreate "github.com/reubenmiller/go-c8y-cli/pkg/cmd/configuration/create"
 	cmdDelete "github.com/reubenmiller/go-c8y-cli/pkg/cmd/configuration/delete"
 	cmdGet "github.com/reubenmiller/go-c8y-cli/pkg/cmd/configuration/get"
 	cmdList "github.com/reubenmiller/go-c8y-cli/pkg/cmd/configuration/list"
@@ -25,6 +26,7 @@ func NewSubCommand(f *cmdutil.Factory) *SubCmdConfiguration {
 
 	// Subcommands
 	cmd.AddCommand(cmdList.NewListCmd(f).GetCommand())
+	cmd.AddCommand(cmdCreate.NewCreateCmd(f).GetCommand())
 	cmd.AddCommand(cmdGet.NewGetCmd(f).GetCommand())
 	cmd.AddCommand(cmdUpdate.NewUpdateCmd(f).GetCommand())
 	cmd.AddCommand(cmdDelete.NewDeleteCmd(f).GetCommand())

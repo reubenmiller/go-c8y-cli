@@ -24,7 +24,6 @@ import (
 	bulkoperationsCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/bulkoperations"
 	completionCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/completion"
 	configurationCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/configuration"
-	configurationCreateCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/configuration/create"
 	currentapplicationCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/currentapplication"
 	currenttenantCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/currenttenant"
 	currentuserCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/currentuser"
@@ -333,7 +332,6 @@ func NewCmdRoot(f *cmdutil.Factory, version, buildDate string) *CmdRoot {
 
 	// configuration
 	configuration := configurationCmd.NewSubCommand(f).GetCommand()
-	configuration.AddCommand(configurationCreateCmd.NewCreateCmd(f).GetCommand())
 	cmd.AddCommand(configuration)
 
 	// software

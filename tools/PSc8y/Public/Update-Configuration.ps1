@@ -57,7 +57,12 @@ Update a configuration file (using pipeline)
         # Device type filter. Only allow configuration to be applied to devices of this type
         [Parameter()]
         [string]
-        $DeviceType
+        $DeviceType,
+
+        # File to be uploaded
+        [Parameter()]
+        [string]
+        $File
     )
     DynamicParam {
         Get-ClientCommonParameters -Type "Update", "Template"
