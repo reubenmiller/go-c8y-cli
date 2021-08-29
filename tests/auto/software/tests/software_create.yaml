@@ -11,6 +11,7 @@ tests:
     software_create_Create a software package and create a new version:
         command: $TEST_SHELL -c 'cat ./testdata/c8y.software.create.json | c8y software versions create --version "1.0.0" --file "python3-requests.deb"'
         exit-code: 0
+        skip: true
         stdout:
             json:
                 body.c8y_Software.version: 1.0.0

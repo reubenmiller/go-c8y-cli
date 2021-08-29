@@ -37,7 +37,7 @@ func NewUpdateCmd(f *cmdutil.Factory) *UpdateCmd {
 $ c8y firmware update --id 12345 --newName "my_custom_name" --data "{\"com_my_props\":{},\"value\":1}"
 Update a firmware package name and add custom add custom properties
 
-$ echo '12345' | c8y firmware update --newName "my_custom_name"
+$ echo "12345" | c8y firmware update --newName "my_custom_name"
 Update a firmware package name (using pipeline)
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {

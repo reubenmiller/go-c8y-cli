@@ -6,7 +6,7 @@ tests:
             json:
                 method: GET
                 path: /inventory/managedObjects
-                query: query=$filter=((type eq 'c8y_Software') and ((name eq '{name}') or (not(has(description)) or description eq '{description}') or (c8y_Filter.type eq '{deviceType}'))) $orderby=name asc
+                query: r/type eq 'c8y_Software'
     software_list_Get a list of software packages starting with "python3":
         command: c8y software list --name "python3*"
         exit-code: 0
@@ -14,4 +14,4 @@ tests:
             json:
                 method: GET
                 path: /inventory/managedObjects
-                query: query=$filter=((type eq 'c8y_Software') and ((name eq 'python3*') or (not(has(description)) or description eq '{description}') or (c8y_Filter.type eq '{deviceType}'))) $orderby=name asc
+                query: r/name eq 'python3\*'

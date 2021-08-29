@@ -26,6 +26,9 @@ endpoints:
       go:
         - description: Get a list of firmware packages
           command: c8y firmware list
+          assertStdOut:
+            json:
+              query: r/type eq 'c8y_Firmware'
 
     pathParameters:
       - name: name
@@ -126,7 +129,11 @@ endpoints:
           command: c8y firmware get --id 12345
         
         - description: Get a firmware package (using pipeline)
-          command: echo '12345' | c8y firmware get
+          command: echo 12345 | c8y firmware get
+          assertStdOut:
+            json:
+                method: GET
+                path: /inventory/managedObjects/12345
 
     pathParameters:
       - name: id
@@ -168,7 +175,11 @@ endpoints:
           command: 'c8y firmware update --id 12345 --newName "my_custom_name" --data "{\"com_my_props\":{},\"value\":1}"'
         
         - description: Update a firmware package name (using pipeline)
-          command: echo '12345' | c8y firmware update --newName "my_custom_name"
+          command: echo "12345" | c8y firmware update --newName "my_custom_name"
+          assertStdOut:
+            json:
+                method: PUT
+                path: /inventory/managedObjects/12345
 
     body:
       - name: newName

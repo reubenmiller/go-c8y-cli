@@ -29,11 +29,21 @@
         "go": [
           {
             "description": "Get a list of software packages",
-            "command": "c8y software list"
+            "command": "c8y software list",
+            "assertStdOut": {
+              "json": {
+                "query": "r/type eq 'c8y_Software'"
+              }
+            }
           },
           {
             "description": "Get a list of software packages starting with \"python3\"",
-            "command": "c8y software list --name \"python3*\""
+            "command": "c8y software list --name \"python3*\"",
+            "assertStdOut": {
+              "json": {
+                "query": "r/name eq 'python3\\*'"
+              }
+            }
           }
         ]
       },
@@ -89,6 +99,7 @@
           },
           {
             "description": "Create a software package and create a new version",
+            "skipTest": true,
             "command": "c8y software create --name \"python3-requests\" | c8y software versions create --version \"1.0.0\" --file \"python3-requests.deb\"",
             "assertStdOut": {
               "json": {

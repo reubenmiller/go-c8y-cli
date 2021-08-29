@@ -7,9 +7,9 @@ tests:
                 method: GET
                 path: /inventory/managedObjects/12345
     firmware_get_Get a firmware package (using pipeline):
-        command: $TEST_SHELL -c 'echo '12345' | c8y firmware get'
+        command: $TEST_SHELL -c 'echo 12345 | c8y firmware get'
         exit-code: 0
         stdout:
             json:
                 method: GET
-                path: /inventory/managedObjects/{id}
+                path: /inventory/managedObjects/12345

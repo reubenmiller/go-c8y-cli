@@ -38,7 +38,7 @@ func NewGetCmd(f *cmdutil.Factory) *GetCmd {
 $ c8y firmware get --id 12345
 Get a firmware package
 
-$ echo '12345' | c8y firmware get
+$ echo 12345 | c8y firmware get
 Get a firmware package (using pipeline)
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {

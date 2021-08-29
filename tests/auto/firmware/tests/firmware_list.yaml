@@ -6,4 +6,4 @@ tests:
             json:
                 method: GET
                 path: /inventory/managedObjects
-                query: query=$filter=((type eq 'c8y_Firmware') and ((name eq '{name}') and ((not(has(description))) or description eq '{description}') and (not(has(c8y_Filter.type)) or c8y_Filter.type eq '{deviceType}'))) $orderby=name asc
+                query: r/type eq 'c8y_Firmware'
