@@ -27,7 +27,7 @@ package_file=$(mktemp /tmp/package-XXXXXX.json)
 echo "dummy file" > "$package_file"
 trap "rm -f $package_file" EXIT
 
-CONFIG2=$( c8y configuration create --name "$NAME" --file "$package_file" --select "id,url" --output csv )
+CONFIG2=$( c8y configuration create --name "${NAME}_2" --file "$package_file" --select "id,url" --output csv )
 echo "$CONFIG2" | grep "^[0-9]\+,.*/inventory/binaries/[0-9]\+$"
 
 # download
@@ -37,6 +37,14 @@ echo "$CONFIG2" | c8y configuration get | c8y api | grep "^dummy file$"
 # update configuration
 c8y configuration update --id "$NAME" --description "Example description" --select description --output csv | grep "^Example description$"
 c8y configuration update --id "$NAME" --deviceType "myType" --select deviceType --output csv | grep "^myType$"
+
+# Update configuration binary
+package_file2=$(mktemp /tmp/package-XXXXXX.json)
+echo "dummy file 2" > "$package_file2"
+trap "rm -f $package_file2" EXIT
+CONFIG2_ID=$( echo "$CONFIG2" | cut -d, -f1 )
+echo "$CONFIG2" | c8y configuration update --file $package_file2 --select id --output csv | grep "^$CONFIG2_ID$"
+echo "$CONFIG2" | c8y configuration get | c8y api | grep "^dummy file 2$"
 
 
 # completion
