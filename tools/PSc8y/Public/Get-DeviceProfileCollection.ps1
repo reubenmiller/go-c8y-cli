@@ -23,8 +23,9 @@ Get a list of device profiles
     [OutputType([object])]
     Param(
         # DeviceProfile name filter
-        [Parameter()]
-        [string]
+        [Parameter(ValueFromPipeline=$true,
+                   ValueFromPipelineByPropertyName=$true)]
+        [object[]]
         $Name
     )
     DynamicParam {
@@ -50,12 +51,17 @@ Get a list of device profiles
     Process {
 
         if ($ClientOptions.ConvertToPS) {
-            c8y deviceprofiles list $c8yargs `
+            $Name `
+            | Group-ClientRequests `
+            | c8y deviceprofiles list $c8yargs `
             | ConvertFrom-ClientOutput @TypeOptions
         }
         else {
-            c8y deviceprofiles list $c8yargs
+            $Name `
+            | Group-ClientRequests `
+            | c8y deviceprofiles list $c8yargs
         }
+        
     }
 
     End {}

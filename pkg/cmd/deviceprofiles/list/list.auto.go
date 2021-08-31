@@ -45,7 +45,7 @@ Get a list of device profiles
 
 	cmd.SilenceUsage = true
 
-	cmd.Flags().String("name", "**", "DeviceProfile name filter")
+	cmd.Flags().String("name", "**", "DeviceProfile name filter (accepts pipeline)")
 
 	completion.WithOptions(
 		cmd,
@@ -54,7 +54,7 @@ Get a list of device profiles
 	flags.WithOptions(
 		cmd,
 
-		flags.WithExtendedPipelineSupport("", "", false),
+		flags.WithExtendedPipelineSupport("name", "name", false, "id"),
 		flags.WithCollectionProperty("managedObjects"),
 	)
 

@@ -34,6 +34,7 @@ endpoints:
       - name: name
         type: string
         default: '**'
+        pipeline: true
         description: DeviceProfile name filter
 
   - name: newDeviceProfile
