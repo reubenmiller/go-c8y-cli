@@ -4,7 +4,7 @@
 Create a new Cumulocity Session
 
 .DESCRIPTION
-Create a new Cumulocity session which can be used by the cmdlets. The new session will be automatically activated.
+Create a new Cumulocity session which can be used by the cmdlets
 
 .LINK
 c8y sessions create
@@ -68,10 +68,14 @@ None
     
     Process {
         $Path = c8y sessions create $c8yargs
-    
-        Set-Session -File $Path
+        $code = $LASTEXITCODE
 
-        # Test the login
-        Invoke-ClientLogin
+        if ($code -ne 0) {
+            Write-Warning "user cancelled create session"
+            return
+        }
+
+        Write-Host "Created session file. Please use Set-Session to activate it" -ForegroundColor Green
+        $Path
     }
 }

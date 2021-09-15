@@ -1,7 +1,7 @@
 FROM mcr.microsoft.com/powershell:7.1.1-ubuntu-18.04
 
 RUN apt-get update \
-    && apt-get install -y vim git \
+    && apt-get install -y vim git jq \
     && rm -rf /var/lib/apt/lists/* \
     && git clone https://github.com/reubenmiller/go-c8y-cli-addons.git /root/.go-c8y-cli
 

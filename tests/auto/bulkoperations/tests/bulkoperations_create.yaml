@@ -12,7 +12,7 @@ tests:
             contains:
                 - '"startDate":'
     bulkOperations_create_Create bulk operation for a group (using pipeline):
-        command: $TEST_SHELL -c 'c8y devicegroups get --id 12345 | c8y bulkoperations create --startDate "10s" --creationRampSec 15 --operation "c8y_Restart={}"'
+        command: $TEST_SHELL -c 'cat ./testdata/c8y.devicegroups.get.json | c8y bulkoperations create --startDate "10s" --creationRampSec 15 --operation "c8y_Restart={}"'
         exit-code: 0
         stdout:
             json:

@@ -22,12 +22,11 @@ Get-AlarmCollection
 	[[-DateFrom] <String>]
 	[[-DateTo] <String>]
 	[[-Type] <String>]
-	[[-FragmentType] <String>]
 	[[-Status] <String>]
 	[[-Severity] <String>]
 	[-Resolved]
-	[-WithAssets]
-	[-WithDevices]
+	[-WithSourceAssets]
+	[-WithSourceDevices]
 	[-PageSize <Int32>]
 	[-WithTotalPages]
 	[-CurrentPage <Int32>]
@@ -161,21 +160,6 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -FragmentType
-Alarm fragment type.
-
-```yaml
-Type: String
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: 5
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
 ### -Status
 Comma separated alarm statuses, for example ACTIVE,CLEARED.
 
@@ -185,7 +169,7 @@ Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: 6
+Position: 5
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
@@ -200,7 +184,7 @@ Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: 7
+Position: 6
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
@@ -221,8 +205,9 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -WithAssets
-Include assets
+### -WithSourceAssets
+When set to true also alarms for related source devices will be included in the request.
+When this parameter is provided a source must be specified.
 
 ```yaml
 Type: SwitchParameter
@@ -236,8 +221,9 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -WithDevices
-Include devices
+### -WithSourceDevices
+When set to true also alarms for related source devices will be removed.
+When this parameter is provided also source must be defined.
 
 ```yaml
 Type: SwitchParameter

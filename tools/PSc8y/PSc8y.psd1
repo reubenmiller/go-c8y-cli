@@ -341,7 +341,6 @@ FunctionsToExport = @(
 	'Group-ClientRequests',
 	'Install-ClientBinary',
 	'Invoke-ClientIterator',
-	'Invoke-ClientLogin',
 	'Invoke-ClientRequest',
 	'Invoke-NativeCumulocityRequest',
 	'Invoke-Template',

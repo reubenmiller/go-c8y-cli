@@ -20,7 +20,7 @@ Describe -Tag "Session" -Name "Login and Session Tests" {
     It -Skip "Login using OAUTH2 strategy without a session file" {
         # session
         $env:C8Y_SESSION = ""
-        c8y sessions login
+        c8y sessions set --session "my-session"
         
         $resp = c8y devices list --verbose --dry --session "my-session"
         $LASTEXITCODE | Should -BeExactly 0
@@ -90,7 +90,7 @@ Describe -Tag "Session" -Name "Login and Session Tests" {
         $SessionBefore | ConvertTo-Json | Out-File $SessionFile
 
         # Start login
-        c8y sessions login
+        c8y sessions set --session $SessionFile
         $LASTEXITCODE | Should -BeExactly 0
         
         $SessionAfterLogin = Get-Content $SessionFile | ConvertFrom-Json
@@ -99,7 +99,6 @@ Describe -Tag "Session" -Name "Login and Session Tests" {
         $SessionAfterLogin.tenant | Should -Match "^t\d+$"
         $SessionAfterLogin.username | Should -BeExactly $SessionBefore.username
         $SessionAfterLogin.password | Should -Not -Be $passwordText
-        $SessionAfterLogin.credential | Should -Not -BeNullOrEmpty
 
         # Only if OAUTH2 is being used
         if ($SessionAfterLogin.token) {

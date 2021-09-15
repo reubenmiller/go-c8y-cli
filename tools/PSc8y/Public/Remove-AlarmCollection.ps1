@@ -53,11 +53,6 @@ Remove alarms on the device which are active and created in the last 10 minutes 
         [string]
         $Type,
 
-        # Alarm fragment type.
-        [Parameter()]
-        [string]
-        $FragmentType,
-
         # Comma separated alarm statuses, for example ACTIVE,CLEARED.
         [Parameter()]
         [ValidateSet('ACTIVE','ACKNOWLEDGED','CLEARED')]

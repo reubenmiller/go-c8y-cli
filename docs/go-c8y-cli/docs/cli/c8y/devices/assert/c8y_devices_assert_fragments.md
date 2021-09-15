@@ -1,41 +1,50 @@
 ---
-category: alarms
-title: c8y alarms list
+category: assert
+title: c8y devices assert fragments
 ---
-Get alarm collection
+Assert fragments on a device
 
 ### Synopsis
 
-Get a collection of alarms based on filter parameters
+Assert fragments on a device by polling until a condition is met or a timeout is reached
 
 ```
-c8y alarms list [flags]
+c8y devices assert fragments [flags]
 ```
 
 ### Examples
 
 ```
-$ c8y alarms list --severity MAJOR --pageSize 100
-Get alarms with the severity set to MAJOR
+$ c8y devices assert fragments --id 1234 --fragment "c8y_Mobile.iccd"
+# Fragments for the managed object to have a non-null c8y_Mobile.iccd fragment
 
-$ c8y alarms list --dateFrom "-10m" --status ACTIVE
-Get collection of active alarms which occurred in the last 10 minutes
-        
+$ c8y devices assert fragments --id 1234 --fragment '!c8y_Mobile'
+# Fragments for the managed object to not have a c8y_Mobile fragment
+
+$ c8y devices assert fragments --id 1234 --fragment 'name=^\d+-\w+$'
+# Fragments for the managed object name fragment to match the regular expression '^\d+-\w+'
+
+$ c8y devices assert fragments --id 1234 --fragment 'name=^$' --fragment c8y_IsDevice
+# Fragments for the managed object name fragment to match the regular expression '^\d+-\w+'
+
+$ c8y devices assert fragments --id 1234 --duration 1m --interval 10s
+# Fragments for the operation to be set to SUCCESSFUL and give up after 1 minute
+
+$ c8y devices list --device 1111 | c8y operations fragments --status "FAILED" --status "SUCCESSFUL"
+# Fragments for operation to be set to either FAILED or SUCCESSFUL
+
 ```
 
 ### Options
 
 ```
-      --dateFrom string     Start date or date and time of alarm occurrence.
-      --dateTo string       End date or date and time of alarm occurrence.
-      --device strings      Source device id. (accepts pipeline)
-  -h, --help                help for list
-      --resolved            When set to true only resolved alarms will be removed (the one with status CLEARED), false means alarms with status ACTIVE or ACKNOWLEDGED.
-      --severity string     Alarm severity, for example CRITICAL, MAJOR, MINOR or WARNING.
-      --status string       Comma separated alarm statuses, for example ACTIVE,CLEARED.
-      --type string         Alarm type.
-      --withSourceAssets    When set to true also alarms for related source devices will be included in the request. When this parameter is provided a source must be specified.
-      --withSourceDevices   When set to true also alarms for related source devices will be removed. When this parameter is provided also source must be defined.
+      --device strings      The ManagedObject which is the source of this event. (accepts pipeline)
+      --duration string     Timeout duration. i.e. 30s or 1m (1 minute) (default "30s")
+      --fragments strings   Fragments to fragments for. If multiple values are given, then it will be applied as an OR operation
+  -h, --help                help for fragments
+      --interval string     Interval to check on the status, i.e. 10s or 1min (default "5s")
+      --retries int         Number of retries before giving up per id
+      --strict              Strict mode, fail if no match is found
 ```
 
 ### Options inherited from parent commands

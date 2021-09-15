@@ -16,7 +16,7 @@ title: PowerShell
 2. Install go-c8y-cli binary
 
     ```sh
-    $HOME/.go-c8y-cli/install.ps1
+    & "$HOME/.go-c8y-cli/install.ps1"
     ```
 
     :::tip
