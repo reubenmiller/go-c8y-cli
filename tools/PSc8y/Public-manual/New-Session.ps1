@@ -75,7 +75,7 @@ None
             return
         }
 
-        Write-Host "Created session file. Please use Set-Session to activate it" -BackgroundColor Green
+        Write-Host "Created session file. Please use Set-Session to activate it" -ForegroundColor Green
         $Path
     }
 }
