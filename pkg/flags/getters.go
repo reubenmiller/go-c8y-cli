@@ -180,7 +180,6 @@ func WithBody(cmd *cobra.Command, body *mapbuilder.MapBuilder, inputIterators *R
 			if v != nil {
 				if name != "" {
 					err = body.Set(name, v)
-					return err
 				} else {
 					body.SetOptionalMap(v)
 				}
