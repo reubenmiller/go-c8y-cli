@@ -505,10 +505,14 @@ func (c *Config) ReadKeyFile() error {
 	}
 
 	// init key file
-	passphrase, err := c.prompter.PasswordWithConfirm("new encryption passphrase", "Creating a encryption key for sessions")
+	passphrase := os.Getenv(EnvPassphrase)
 
-	if err != nil {
-		return err
+	if passphrase == "" {
+		// prompt for passphrase
+		passphrase, err = c.prompter.PasswordWithConfirm("new encryption passphrase", "Creating a encryption key for sessions")
+		if err != nil {
+			return err
+		}
 	}
 
 	c.Passphrase = passphrase
