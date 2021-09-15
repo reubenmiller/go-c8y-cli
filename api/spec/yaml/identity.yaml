@@ -112,9 +112,18 @@ endpoints:
             - Remove-ManagedObject -Id $Device.id
           command: Remove-ExternalId -Type "my_SerialNumber" -Name "myserialnumber2"
 
+        - description: Delete a specific external identity type (via pipeline)
+          command: Get-DeviceCollection | Get-ExternalIdCollection -Filter 'type eq c8y_Serial' | Remove-ExternalId -Type c8y_Serial
+          skipTest: true
+
       go:
         - description: Delete external identity
           command: c8y identity delete --type test --name myserialnumber
+
+        - description: Delete a specific external identity type (via pipeline)
+          command: c8y devices list | c8y identity list --filter 'type eq c8y_Serial' | c8y identity delete --type c8y_Serial
+          skipTest: true
+
     pathParameters:
       - name: type
         type: string
