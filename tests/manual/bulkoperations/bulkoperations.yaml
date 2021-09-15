@@ -8,6 +8,18 @@ tests:
                 method: PUT
                 path: /devicecontrol/bulkoperations/12345
                 body.creationRamp: "1.2"
+    
+    It uses default values:
+        command: >
+            c8y bulkoperations create --group 1234 --operation "{}" --dry
+        exit-code: 0
+        stdout:
+            json:
+                method: POST
+                path: /devicecontrol/bulkoperations
+                body.creationRamp: "1"
+                body.groupId: '1234'
+                body.startDate: r/\d+
 
     Explicit time argument overwrites template value:
         command: >
