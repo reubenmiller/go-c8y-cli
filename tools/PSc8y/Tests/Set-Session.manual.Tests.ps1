@@ -11,6 +11,7 @@ Describe -Tag "Session" -Name "Set-Session" {
     BeforeEach {
         $tmpdir = New-TemporaryDirectory
         $env:C8Y_SESSION_HOME = $tmpdir
+        $env:C8Y_HOME = $tmpdir
         $settingsFile = "$tmpdir/settings.json"
     }
 
@@ -21,15 +22,18 @@ Describe -Tag "Session" -Name "Set-Session" {
 
         $Session = @{
             "host" = "https://example.com"
-            "settings.default.pageSize" = 44
+            "settings.defaults.pageSize" = 44
         }
         $Session | ConvertTo-Json | Out-File "$tmpdir/my-session.json"
 
-        $resp = c8y devices list --verbose --dry --session "my-session" 2>&1
+        $resp = c8y devices list --session "my-session.json" --dry --dryFormat json | ConvertFrom-Json
         $LASTEXITCODE | Should -BeExactly 0
 
-        $resp -like "*https://example.com/inventory/managedObjects*" | Should -HaveCount 1
-        $resp -like "*settings.default.pageSize: 44" | Should -HaveCount 1
+        $resp.host | Should -BeExactly $Session.host
+        $resp.query | Should -BeLike "*pageSize=44*"
+
+        $settings = c8y settings list --session "my-session.json" | ConvertFrom-Json
+        $settings.defaults.pageSize | Should -BeExactly 44
     }
 
     It "Loads a common preferences from the session folder automatically" {
@@ -39,17 +43,16 @@ Describe -Tag "Session" -Name "Set-Session" {
             "settings.includeAll.pageSize" = 123
         }
         $Settings | ConvertTo-Json | Out-File $settingsFile
-
-        $resp = c8y version -v 2>&1
+        
+        $session_settings = c8y settings list | ConvertFrom-Json
         $LASTEXITCODE | Should -BeExactly 0
-
-        $resp -like "*settings.includeAll.pageSize: 123" | Should -HaveCount 1
+        $session_settings.includeAll.pageSize | Should -BeExactly 123
     }
 
     It "Session settings override common preferences" {
         # settings
         $Settings = @{
-            "settings.default.pageSize" = 120
+            "settings.defaults.pageSize" = 120
             "settings.includeAll.delayMS" = 23
         }
         $Settings | ConvertTo-Json | Out-File $settingsFile
@@ -57,30 +60,28 @@ Describe -Tag "Session" -Name "Set-Session" {
         # session
         $env:C8Y_SESSION = "$tmpdir/my-session.json"
         $Session = @{
-            "settings.default.pageSize" = 99
+            "settings.defaults.pageSize" = 99
         }
         $Session | ConvertTo-Json | Out-File $env:C8Y_SESSION
 
-        $resp = c8y version -v 2>&1
+        $session_settings = c8y settings list | ConvertFrom-Json
         $LASTEXITCODE | Should -BeExactly 0
-
-        $resp -like "*settings.default.pageSize: 99" | Should -HaveCount 1
-        $resp -like "*settings.includeAll.delayMS: 23" | Should -HaveCount 1
+        $session_settings.defaults.pageSize | Should -BeExactly 99
+        $session_settings.includeAll.delayMS | Should -BeExactly 23
     }
 
     It "Session settings without preferences" {
         # session
         $env:C8Y_SESSION = "$tmpdir/my-session2.json"
         $Session = @{
-            "settings.default.pageSize" = 24
+            "settings.defaults.pageSize" = 24
         }
         $Session | ConvertTo-Json | Out-File $env:C8Y_SESSION
 
-        $resp = c8y version -v 2>&1
+        $session_settings = c8y settings list | ConvertFrom-Json
         $LASTEXITCODE | Should -BeExactly 0
-
-        $resp -like "*settings.default.pageSize: 24" | Should -HaveCount 1
-        $resp -like "*settings.includeAll.pageSize: 2000" | Should -HaveCount 1
+        $session_settings.defaults.pageSize | Should -BeExactly 24
+        $session_settings.includeAll.pageSize | Should -BeExactly 2000
     }
 
     It "Loads a yaml session the current directory called session.yaml" {
@@ -89,13 +90,15 @@ Describe -Tag "Session" -Name "Set-Session" {
         $env:C8Y_SESSION = ""
         @"
 settings:
-    default:
+    defaults:
         pageSize: 110
 settings.includeAll.pagesize: 202
 "@ | Out-File $sessionFile
 
-        $resp = c8y version --verbose 2>&1
+        $session_settings = c8y settings list | ConvertFrom-Json
         $LASTEXITCODE | Should -BeExactly 0
+        $session_settings.defaults.pageSize | Should -BeExactly 110
+        $session_settings.includeAll.pageSize | Should -BeExactly 202
 
         $resp -like "*settings.default.pageSize: 110" | Should -HaveCount 1
         $resp -like "*settings.includeAll.pageSize: 202" | Should -HaveCount 1

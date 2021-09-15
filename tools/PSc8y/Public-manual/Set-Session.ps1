@@ -41,40 +41,39 @@ Set a session interactively but only includes session where the details includes
 .OUTPUTS
 String
 #>
-    [CmdletBinding(
-        DefaultParameterSetName = "ByInteraction"
-    )]
+    [cmdletbinding()]
     Param(
-        # SessionFilter list of sessions. Multiple search terms can be provided. A string "Contains" operation
-        # is done to match any of the session fields (except password)
         [Parameter(
-            ParameterSetName = "ByInteraction",
             Position = 0
         )]
         [string[]] $SessionFilter,
 
-        # Session
-        [Parameter(
-            ParameterSetName = "ByFile",
-            Position = 0
-        )]
-        [string] $Session
+        # Two Factor Authentication code
+        [string] $TfaCode,
+
+        # Clear existing token (if present)
+        [switch] $Clear
     )
 
+    DynamicParam {
+        Get-ClientCommonParameters -Type Get
+    }
+
+    Begin {
+        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "sessions set"
+    }
+
     Process {
-        $c8yargs = New-Object System.Collections.ArrayList
         if ($SessionFilter -gt 0) {
             $SearchTerms = $SessionFilter -join " "
             $null = $c8yargs.AddRange(@("--sessionFilter", "$SearchTerms"))
         }
 
-        if ($Session) {
-            [void] $c8yargs.AddRange(@("--session", $Session))
-        }
+        $null = $c8yargs.AddRange(@("--shell", "powershell"))
 
-        $envvars = c8y sessions set --noColor=false $c8yargs
+        $envvars = c8y sessions set $c8yargs
+
         if ($LASTEXITCODE -ne 0) {
-            Write-Warning "User cancelled set-session. Current session was not changed"
             return
         }
 
