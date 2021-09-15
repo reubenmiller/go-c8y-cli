@@ -64,10 +64,6 @@ endpoints:
         type: string
         description: Alarm type.
 
-      - name: fragmentType
-        type: string
-        description: Alarm fragment type.
-
       - name: status
         type: string
         description: Comma separated alarm statuses, for example ACTIVE,CLEARED.
@@ -393,10 +389,6 @@ endpoints:
       - name: type
         type: string
         description: 'Alarm type.'
-
-      - name: fragmentType
-        type: string
-        description: Alarm fragment type.
 
       - name: status
         type: string

@@ -53,11 +53,6 @@ Get active alarms from a device (using pipeline)
         [string]
         $Type,
 
-        # Alarm fragment type.
-        [Parameter()]
-        [string]
-        $FragmentType,
-
         # Comma separated alarm statuses, for example ACTIVE,CLEARED.
         [Parameter()]
         [ValidateSet('ACTIVE','ACKNOWLEDGED','CLEARED')]

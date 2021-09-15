@@ -53,7 +53,6 @@ Get collection of active alarms which occurred in the last 10 minutes
 	cmd.Flags().String("dateFrom", "", "Start date or date and time of alarm occurrence.")
 	cmd.Flags().String("dateTo", "", "End date or date and time of alarm occurrence.")
 	cmd.Flags().String("type", "", "Alarm type.")
-	cmd.Flags().String("fragmentType", "", "Alarm fragment type.")
 	cmd.Flags().String("status", "", "Comma separated alarm statuses, for example ACTIVE,CLEARED.")
 	cmd.Flags().String("severity", "", "Alarm severity, for example CRITICAL, MAJOR, MINOR or WARNING.")
 	cmd.Flags().Bool("resolved", false, "When set to true only resolved alarms will be removed (the one with status CLEARED), false means alarms with status ACTIVE or ACKNOWLEDGED.")
@@ -107,7 +106,6 @@ func (n *ListCmd) RunE(cmd *cobra.Command, args []string) error {
 		flags.WithEncodedRelativeTimestamp("dateFrom", "dateFrom", ""),
 		flags.WithEncodedRelativeTimestamp("dateTo", "dateTo", ""),
 		flags.WithStringValue("type", "type"),
-		flags.WithStringValue("fragmentType", "fragmentType"),
 		flags.WithStringValue("status", "status"),
 		flags.WithStringValue("severity", "severity"),
 		flags.WithBoolValue("resolved", "resolved", ""),
