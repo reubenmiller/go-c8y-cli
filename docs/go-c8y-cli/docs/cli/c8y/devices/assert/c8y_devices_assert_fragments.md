@@ -1,35 +1,50 @@
 ---
-category: identity
-title: c8y identity delete
+category: assert
+title: c8y devices assert fragments
 ---
-Delete external id
+Assert fragments on a device
 
 ### Synopsis
 
-Delete an existing external id. This does not delete the device managed object
+Assert fragments on a device by polling until a condition is met or a timeout is reached
 
 ```
-c8y identity delete [flags]
+c8y devices assert fragments [flags]
 ```
 
 ### Examples
 
 ```
-$ c8y identity delete --type test --name myserialnumber
-Delete external identity
+$ c8y devices assert fragments --id 1234 --fragment "c8y_Mobile.iccd"
+# Fragments for the managed object to have a non-null c8y_Mobile.iccd fragment
 
-$ c8y devices list | c8y identity list --filter 'type eq c8y_Serial' | c8y identity delete --type c8y_Serial
-Delete a specific external identity type (via pipeline)
-        
+$ c8y devices assert fragments --id 1234 --fragment '!c8y_Mobile'
+# Fragments for the managed object to not have a c8y_Mobile fragment
+
+$ c8y devices assert fragments --id 1234 --fragment 'name=^\d+-\w+$'
+# Fragments for the managed object name fragment to match the regular expression '^\d+-\w+'
+
+$ c8y devices assert fragments --id 1234 --fragment 'name=^$' --fragment c8y_IsDevice
+# Fragments for the managed object name fragment to match the regular expression '^\d+-\w+'
+
+$ c8y devices assert fragments --id 1234 --duration 1m --interval 10s
+# Fragments for the operation to be set to SUCCESSFUL and give up after 1 minute
+
+$ c8y devices list --device 1111 | c8y operations fragments --status "FAILED" --status "SUCCESSFUL"
+# Fragments for operation to be set to either FAILED or SUCCESSFUL
+
 ```
 
 ### Options
 
 ```
-  -h, --help                    help for delete
-      --name string             External identity id/name (required) (accepts pipeline)
-      --processingMode string   Cumulocity processing mode
-      --type string             External identity type (default "c8y_Serial")
+      --device strings      The ManagedObject which is the source of this event. (accepts pipeline)
+      --duration string     Timeout duration. i.e. 30s or 1m (1 minute) (default "30s")
+      --fragments strings   Fragments to fragments for. If multiple values are given, then it will be applied as an OR operation
+  -h, --help                help for fragments
+      --interval string     Interval to check on the status, i.e. 10s or 1min (default "5s")
+      --retries int         Number of retries before giving up per id
+      --strict              Strict mode, fail if no match is found
 ```
 
 ### Options inherited from parent commands

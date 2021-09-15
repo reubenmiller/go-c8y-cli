@@ -1,35 +1,17 @@
 ---
-category: identity
-title: c8y identity delete
+category: assert
+title: c8y inventory assert
 ---
-Delete external id
+Cumulocity inventory assertions
 
 ### Synopsis
 
-Delete an existing external id. This does not delete the device managed object
-
-```
-c8y identity delete [flags]
-```
-
-### Examples
-
-```
-$ c8y identity delete --type test --name myserialnumber
-Delete external identity
-
-$ c8y devices list | c8y identity list --filter 'type eq c8y_Serial' | c8y identity delete --type c8y_Serial
-Delete a specific external identity type (via pipeline)
-        
-```
+REST endpoint to interact with Cumulocity managed objects
 
 ### Options
 
 ```
-  -h, --help                    help for delete
-      --name string             External identity id/name (required) (accepts pipeline)
-      --processingMode string   Cumulocity processing mode
-      --type string             External identity type (default "c8y_Serial")
+  -h, --help   help for assert
 ```
 
 ### Options inherited from parent commands
