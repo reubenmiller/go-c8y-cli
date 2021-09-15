@@ -29,8 +29,7 @@ New-Session
 ```
 
 ## DESCRIPTION
-Create a new Cumulocity session which can be used by the cmdlets.
-The new session will be automatically activated.
+Create a new Cumulocity session which can be used by the cmdlets
 
 ## EXAMPLES
 

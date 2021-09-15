@@ -22,7 +22,6 @@ Remove-AlarmCollection
 	[[-DateFrom] <String>]
 	[[-DateTo] <String>]
 	[[-Type] <String>]
-	[[-FragmentType] <String>]
 	[[-Status] <String>]
 	[[-Severity] <String>]
 	[-Resolved]
@@ -159,21 +158,6 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -FragmentType
-Alarm fragment type.
-
-```yaml
-Type: String
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: 5
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
 ### -Status
 Comma separated alarm statuses, for example ACTIVE,CLEARED.
 
@@ -183,7 +167,7 @@ Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: 6
+Position: 5
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
@@ -198,7 +182,7 @@ Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: 7
+Position: 6
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False

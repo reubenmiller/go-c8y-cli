@@ -1,41 +1,54 @@
 ---
-category: alarms
-title: c8y alarms list
+category: assert
+title: c8y inventory assert exists
 ---
-Get alarm collection
+Assert existance of a managed object
 
 ### Synopsis
 
-Get a collection of alarms based on filter parameters
+Assert that a managed objects exists or not and pass input untouched
+
+If the assertion is true, then the input value (stdin or an explicit argument value) will be passed untouched to stdout.
+This is useful if you want to filter a list of managed objects by whether they exist or not in the platform, and use the results
+in some downstream command (in the pipeline)
+
+By default, a failed assertion will not set the exit code to a non-zero value. If you want a non-zero exit code
+in such as case then use the --strict option.
+
 
 ```
-c8y alarms list [flags]
+c8y inventory assert exists [flags]
 ```
 
 ### Examples
 
 ```
-$ c8y alarms list --severity MAJOR --pageSize 100
-Get alarms with the severity set to MAJOR
+$ c8y inventory assert exists --id 1234
+# => 1234 (if the ID exists)
+# => <no response> (if the ID does not exist)
+# Assert the managed object exists
 
-$ c8y alarms list --dateFrom "-10m" --status ACTIVE
-Get collection of active alarms which occurred in the last 10 minutes
-        
+$ echo "1111" | c8y inventory assert exists
+# Pass the piped input only on if the ids exists as a managed object
+
+$ echo -e "1111\n2222" | c8y inventory assert exists --not
+# Only select the managed object ids which do not exist
+
+$ echo 1 | c8y inventory assert exists --strict
+# Return non-zero exit code if a managed object id=1 does not exist
+
 ```
 
 ### Options
 
 ```
-      --dateFrom string     Start date or date and time of alarm occurrence.
-      --dateTo string       End date or date and time of alarm occurrence.
-      --device strings      Source device id. (accepts pipeline)
-  -h, --help                help for list
-      --resolved            When set to true only resolved alarms will be removed (the one with status CLEARED), false means alarms with status ACTIVE or ACKNOWLEDGED.
-      --severity string     Alarm severity, for example CRITICAL, MAJOR, MINOR or WARNING.
-      --status string       Comma separated alarm statuses, for example ACTIVE,CLEARED.
-      --type string         Alarm type.
-      --withSourceAssets    When set to true also alarms for related source devices will be included in the request. When this parameter is provided a source must be specified.
-      --withSourceDevices   When set to true also alarms for related source devices will be removed. When this parameter is provided also source must be defined.
+      --duration string   Timeout duration. i.e. 30s or 1m (1 minute) (default "30s")
+  -h, --help              help for exists
+      --id string         Inventory id (required) (accepts pipeline)
+      --interval string   Interval to check on the status, i.e. 10s or 1min (default "5s")
+      --not               Negate the match
+      --retries int       Number of retries before giving up per id
+      --strict            Strict mode, fail if no match is found
 ```
 
 ### Options inherited from parent commands

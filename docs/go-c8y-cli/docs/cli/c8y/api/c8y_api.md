@@ -30,6 +30,16 @@ Get items created via POST from the activity log and delete them
 $ echo -e "/inventory/1111\n/inventory/2222" | c8y api --method PUT --template "{myScript: {lastUpdated: _.Now() }}"
 Pipe a list of urls and execute HTTP PUT and use a template to generate the body
 
+$ echo "12345" | c8y api PUT "/service/example" --template "{id: input.value}"
+Send a PUT request to a fixed url, but use the piped input to build the request's body
+
+$ echo "12345" | c8y api PUT "/service/example/%s" --template "{id: input.value}"
+Send a PUT request using the piped input in both the url and the request's body ('%s' will be replaced with the current piped input line)
+
+$ echo "{\"url\": \"/service/custom/endpoint\",\"body\":{\"name\": \"peter\"}}" | c8y api POST --template "input.value.body"
+Build a custom request using piped json. The input url property will be mapped to the --url flag, and use
+a template to also build the request's body from the piped input data.
+
 ```
 
 ### Options
@@ -46,7 +56,7 @@ Pipe a list of urls and execute HTTP PUT and use a template to generate the body
       --method string         HTTP method (default "GET")
       --template string       Body template
       --templateVars string   Body template variables
-      --url string            URL path (accepts pipeline)
+      --url string            URL path. Any reference to '%s' will be replaced with the current input value (accepts pipeline)
 ```
 
 ### Options inherited from parent commands

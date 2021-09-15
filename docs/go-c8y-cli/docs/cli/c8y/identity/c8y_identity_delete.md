@@ -17,6 +17,9 @@ c8y identity delete [flags]
 ```
 $ c8y identity delete --type test --name myserialnumber
 Delete external identity
+
+$ c8y devices list | c8y identity list --filter 'type eq c8y_Serial' | c8y identity delete --type c8y_Serial
+Delete a specific external identity type (via pipeline)
         
 ```
 

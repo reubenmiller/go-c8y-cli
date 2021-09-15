@@ -1,41 +1,57 @@
 ---
-category: alarms
-title: c8y alarms list
+category: assert
+title: c8y events assert count
 ---
-Get alarm collection
+Assert event count
 
 ### Synopsis
 
-Get a collection of alarms based on filter parameters
+Assert that a device has a specific amount of events and pass the input untouched
+
+If the assertion is true, then the input value (stdin or an explicit argument value) will be passed untouched to stdout.
+This is useful if you want to filter a list of devices by whether by a specific entity count, and use the results
+in some downstream command (in the pipeline)
+
+By default, a failed assertion will not set the exit code to a non-zero value. If you want a non-zero exit code
+in such as case then use the --strict option.
+
 
 ```
-c8y alarms list [flags]
+c8y events assert count [flags]
 ```
 
 ### Examples
 
 ```
-$ c8y alarms list --severity MAJOR --pageSize 100
-Get alarms with the severity set to MAJOR
+$ c8y events assert count --device 1234 --minimum 1
+# => 1234 (if the ID exists)
+# => <no response> (if the ID does not exist)
+# Assert that a device exists, and has at least 1 event
 
-$ c8y alarms list --dateFrom "-10m" --status ACTIVE
-Get collection of active alarms which occurred in the last 10 minutes
-        
+$ c8y events assert count --device 1234 --minimum 5 --maximum 10 --dateFrom -1d --strict
+# Assert that the device with id=1111 should have between 5 and 10 events (inclusive) in the last day
+# Return an error if not
+
+$ c8y devices list | c8y events assert count --maximum 0 --dateFrom -7d
+# Find a list of devices which have not created any events in the last 7 days
+
 ```
 
 ### Options
 
 ```
-      --dateFrom string     Start date or date and time of alarm occurrence.
-      --dateTo string       End date or date and time of alarm occurrence.
-      --device strings      Source device id. (accepts pipeline)
-  -h, --help                help for list
-      --resolved            When set to true only resolved alarms will be removed (the one with status CLEARED), false means alarms with status ACTIVE or ACKNOWLEDGED.
-      --severity string     Alarm severity, for example CRITICAL, MAJOR, MINOR or WARNING.
-      --status string       Comma separated alarm statuses, for example ACTIVE,CLEARED.
-      --type string         Alarm type.
-      --withSourceAssets    When set to true also alarms for related source devices will be included in the request. When this parameter is provided a source must be specified.
-      --withSourceDevices   When set to true also alarms for related source devices will be removed. When this parameter is provided also source must be defined.
+      --dateFrom string       Start date or date and time of event occurrence.
+      --dateTo string         End date or date and time of event occurrence.
+      --device strings        The ManagedObject which is the source of this event. (accepts pipeline)
+      --duration string       Timeout duration. i.e. 30s or 1m (1 minute) (default "30s")
+      --fragmentType string   Fragment name from event.
+  -h, --help                  help for count
+      --interval string       Interval to check on the status, i.e. 10s or 1min (default "5s")
+      --maximum int           Maximum event count (inclusive). A value of -1 will disable this check (default -1)
+      --minimum int           Minimum event count (inclusive). A value of -1 will disable this check (default -1)
+      --retries int           Number of retries before giving up per id
+      --strict                Strict mode, fail if no match is found
+      --type string           Event type.
 ```
 
 ### Options inherited from parent commands
