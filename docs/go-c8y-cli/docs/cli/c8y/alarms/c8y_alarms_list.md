@@ -26,17 +26,16 @@ Get collection of active alarms which occurred in the last 10 minutes
 ### Options
 
 ```
-      --dateFrom string       Start date or date and time of alarm occurrence.
-      --dateTo string         End date or date and time of alarm occurrence.
-      --device strings        Source device id. (accepts pipeline)
-      --fragmentType string   Alarm fragment type.
-  -h, --help                  help for list
-      --resolved              When set to true only resolved alarms will be removed (the one with status CLEARED), false means alarms with status ACTIVE or ACKNOWLEDGED.
-      --severity string       Alarm severity, for example CRITICAL, MAJOR, MINOR or WARNING.
-      --status string         Comma separated alarm statuses, for example ACTIVE,CLEARED.
-      --type string           Alarm type.
-      --withAssets            Include assets
-      --withDevices           Include devices
+      --dateFrom string     Start date or date and time of alarm occurrence.
+      --dateTo string       End date or date and time of alarm occurrence.
+      --device strings      Source device id. (accepts pipeline)
+  -h, --help                help for list
+      --resolved            When set to true only resolved alarms will be removed (the one with status CLEARED), false means alarms with status ACTIVE or ACKNOWLEDGED.
+      --severity string     Alarm severity, for example CRITICAL, MAJOR, MINOR or WARNING.
+      --status string       Comma separated alarm statuses, for example ACTIVE,CLEARED.
+      --type string         Alarm type.
+      --withSourceAssets    When set to true also alarms for related source devices will be included in the request. When this parameter is provided a source must be specified.
+      --withSourceDevices   When set to true also alarms for related source devices will be removed. When this parameter is provided also source must be defined.
 ```
 
 ### Options inherited from parent commands

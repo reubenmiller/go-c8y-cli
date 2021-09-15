@@ -29,7 +29,6 @@ Remove alarms on the device which are active and created in the last 10 minutes
       --dateFrom string         Start date or date and time of alarm occurrence.
       --dateTo string           End date or date and time of alarm occurrence.
       --device strings          Source device id. (accepts pipeline)
-      --fragmentType string     Alarm fragment type.
   -h, --help                    help for deleteCollection
       --processingMode string   Cumulocity processing mode
       --resolved                When set to true only resolved alarms will be removed (the one with status CLEARED), false means alarms with status ACTIVE or ACKNOWLEDGED.
