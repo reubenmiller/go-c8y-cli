@@ -15,6 +15,11 @@ PS> Remove-ExternalId -Type "my_SerialNumber" -Name "myserialnumber2"
 
 Delete external identity
 
+.EXAMPLE
+PS> Get-DeviceCollection | Get-ExternalIdCollection -Filter 'type eq c8y_Serial' | Remove-ExternalId -Type c8y_Serial
+
+Delete a specific external identity type (via pipeline)
+
 
 #>
     [cmdletbinding(PositionalBinding=$true,
