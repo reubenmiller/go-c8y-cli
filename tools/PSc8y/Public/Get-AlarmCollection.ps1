@@ -70,15 +70,15 @@ Get active alarms from a device (using pipeline)
         [switch]
         $Resolved,
 
-        # Include assets
+        # When set to true also alarms for related source devices will be included in the request. When this parameter is provided a source must be specified.
         [Parameter()]
         [switch]
-        $WithAssets,
+        $WithSourceAssets,
 
-        # Include devices
+        # When set to true also alarms for related source devices will be removed. When this parameter is provided also source must be defined.
         [Parameter()]
         [switch]
-        $WithDevices
+        $WithSourceDevices
     )
     DynamicParam {
         Get-ClientCommonParameters -Type "Get", "Collection"

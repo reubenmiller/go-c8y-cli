@@ -56,8 +56,8 @@ Get collection of active alarms which occurred in the last 10 minutes
 	cmd.Flags().String("status", "", "Comma separated alarm statuses, for example ACTIVE,CLEARED.")
 	cmd.Flags().String("severity", "", "Alarm severity, for example CRITICAL, MAJOR, MINOR or WARNING.")
 	cmd.Flags().Bool("resolved", false, "When set to true only resolved alarms will be removed (the one with status CLEARED), false means alarms with status ACTIVE or ACKNOWLEDGED.")
-	cmd.Flags().Bool("withAssets", false, "Include assets")
-	cmd.Flags().Bool("withDevices", false, "Include devices")
+	cmd.Flags().Bool("withSourceAssets", false, "When set to true also alarms for related source devices will be included in the request. When this parameter is provided a source must be specified.")
+	cmd.Flags().Bool("withSourceDevices", false, "When set to true also alarms for related source devices will be removed. When this parameter is provided also source must be defined.")
 
 	completion.WithOptions(
 		cmd,
@@ -109,8 +109,8 @@ func (n *ListCmd) RunE(cmd *cobra.Command, args []string) error {
 		flags.WithStringValue("status", "status"),
 		flags.WithStringValue("severity", "severity"),
 		flags.WithBoolValue("resolved", "resolved", ""),
-		flags.WithBoolValue("withAssets", "withAssets", ""),
-		flags.WithBoolValue("withDevices", "withDevices", ""),
+		flags.WithBoolValue("withSourceAssets", "withSourceAssets", ""),
+		flags.WithBoolValue("withSourceDevices", "withSourceDevices", ""),
 	)
 	if err != nil {
 		return cmderrors.NewUserError(err)
