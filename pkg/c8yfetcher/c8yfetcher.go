@@ -233,6 +233,11 @@ func (i *EntityIterator) GetNext() (value []byte, input interface{}, err error) 
 	}
 	value, rawValue, err := i.valueIterator.GetNext()
 
+	if err == io.EOF && len(value) > 0 {
+		// ignore EOF if the value is not empty
+		err = nil
+	}
+
 	// override the value if it is not nil
 	if i.OverrideValue != nil && !reflect.ValueOf(i.OverrideValue).IsNil() {
 		overrideValue, _, overrideErr := i.OverrideValue.GetNext()

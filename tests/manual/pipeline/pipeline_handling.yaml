@@ -1,0 +1,10 @@
+tests:
+    It handles piped input without ending with newline:
+        command: |
+            echo -n '0' | c8y devices get --dry
+        exit-code: 0
+        stdout:
+            line-count: 1
+            json:
+                method: GET
+                path: /inventory/managedObjects/0
