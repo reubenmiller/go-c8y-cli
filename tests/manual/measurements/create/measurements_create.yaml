@@ -1,0 +1,23 @@
+tests:
+    It creates multiple measurements via pipeline but can override the device source id:
+        command: cat manual/measurements/create/measurements.list.jsonl | c8y measurements create --template input.value --dry --device 11111
+        exit-code: 0
+        stdout:
+            line-count: 2
+            json:
+                ..0.body.source.id: '11111'
+                ..0.body.BEARING_TEMPERATURE_1.Default.interval: '300'
+                ..1.body.source.id: '11111'
+                ..1.body.SUMP_OIL_TEMPERATURE.Default.interval: '300'
+    
+    It creates multiple measurements via pipeline but can override with multiple devices:
+        skip: false
+        command: cat manual/measurements/create/measurements.list.jsonl | c8y measurements create --template input.value --dry --device 11111,22222
+        exit-code: 0
+        stdout:
+            line-count: 2
+            json:
+                ..0.body.source.id: '11111'
+                ..0.body.BEARING_TEMPERATURE_1.Default.interval: '300'
+                ..1.body.source.id: '22222'
+                ..1.body.SUMP_OIL_TEMPERATURE.Default.interval: '300'

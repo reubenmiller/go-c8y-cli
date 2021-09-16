@@ -36,6 +36,9 @@ func NewCreateCmd(f *cmdutil.Factory) *CreateCmd {
 		Example: heredoc.Doc(`
 $ c8y measurements create --device 12345 --time "0s" --type "myType" --data "{\"c8y_Winding\":{ \"temperature\":{\"value\": 1.2345,\"unit\":\"°C\"}}}"
 Create measurement
+
+$ c8y measurements list --device 12345 --select '!id,**' | c8y measurements create --device 22222 --template input.value
+Copy measurements from one device to another
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
 			return f.CreateModeEnabled()
