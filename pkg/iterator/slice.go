@@ -40,3 +40,35 @@ func NewSliceIterator(values []string) *SliceIterator {
 		values: values,
 	}
 }
+
+// InfiniteSliceIterator is iterates over a given array and once the last element is return, it
+// sets the index back to the first element. It will continue indefinitely
+type InfiniteSliceIterator struct {
+	SliceIterator
+}
+
+// GetNext will count through the values and return them one by one
+func (i *InfiniteSliceIterator) GetNext() (line []byte, input interface{}, err error) {
+	nextIndex := atomic.AddInt64(&i.currentIndex, 1)
+
+	if len(i.values) == 0 {
+		return nil, nil, io.EOF
+	}
+
+	if nextIndex > int64(len(i.values)) {
+		// reset index (set to 1 as it is 1-based index)
+		atomic.StoreInt64(&i.currentIndex, 1)
+		nextIndex = 1
+	}
+	line = []byte(i.values[nextIndex-1])
+	return line, line, err
+}
+
+// NewInfiniteSliceIterator creates a repeater which returns the slice items and wraps around indefinitely
+func NewInfiniteSliceIterator(values []string) *InfiniteSliceIterator {
+	return &InfiniteSliceIterator{
+		SliceIterator: SliceIterator{
+			values: values,
+		},
+	}
+}

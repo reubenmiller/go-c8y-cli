@@ -1,0 +1,9 @@
+tests:
+    It provides a function to get an optional value:
+        command: |
+            echo '{"nestedProp":{"otherValue":1}}' | c8y devices update --id 0 --dry --template "_.Get('nestedProp', input.value, {dummy: 2})"
+        exit-code: 0
+        stdout:
+            line-count: 1
+            json:
+                ..0.body.nestedProp.otherValue: '1'

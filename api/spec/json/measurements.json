@@ -347,6 +347,11 @@
           {
             "description": "Create measurement",
             "command": "c8y measurements create --device 12345 --time \"0s\" --type \"myType\" --data \"{\\\"c8y_Winding\\\":{ \\\"temperature\\\":{\\\"value\\\": 1.2345,\\\"unit\\\":\\\"°C\\\"}}}\""
+          },
+          {
+            "description": "Copy measurements from one device to another",
+            "command": "c8y measurements list --device 12345 --select '!id,**' | c8y measurements create --device 22222 --template input.value",
+            "skipTest": true
           }
         ]
       },
