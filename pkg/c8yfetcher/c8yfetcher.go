@@ -235,7 +235,18 @@ func (i *EntityIterator) GetNext() (value []byte, input interface{}, err error) 
 
 	// override the value if it is not nil
 	if i.OverrideValue != nil && !reflect.ValueOf(i.OverrideValue).IsNil() {
-		value, _, err = i.OverrideValue.GetNext()
+		overrideValue, _, overrideErr := i.OverrideValue.GetNext()
+
+		if overrideErr != nil {
+			if i.valueIterator.IsBound() && overrideErr == io.EOF {
+				// ignore as the other iterator is bound, so let it control the loop
+			} else {
+				return overrideValue, rawValue, overrideErr
+			}
+		}
+		if len(overrideValue) > 0 {
+			value = overrideValue
+		}
 	}
 	if err != nil {
 		return value, rawValue, err
@@ -354,6 +365,13 @@ func WithReferenceByName(client *c8y.Client, fetcher EntityFetcher, args []strin
 			if err != nil || pipeIter == nil {
 				return "", nil, err
 			}
+
+			if pipeIter.IsBound() {
+				// Use infinite slice iterator so that the stdin can drive the iteration
+				// but only if the other pipe iterator is bound, otherwise it would create an infinite loop!
+				overrideValue = iterator.NewInfiniteSliceIterator(values)
+			}
+
 			minMatches := 0
 			if inputIterators.PipeOptions.Required {
 				minMatches = 1
