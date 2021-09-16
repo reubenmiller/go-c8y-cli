@@ -1,4 +1,13 @@
 tests:
+    measurements_create_Copy measurements from one device to another:
+        command: $TEST_SHELL -c 'c8y measurements list --device 12345 --select '!id,**' | c8y measurements create --device 22222 --template input.value'
+        exit-code: 0
+        skip: true
+        stdout:
+            json:
+                body.source.id: "22222"
+                method: POST
+                path: /measurement/measurements
     measurements_create_Create measurement:
         command: 'c8y measurements create --device 12345 --time "0s" --type "myType" --data "{\"c8y_Winding\":{ \"temperature\":{\"value\": 1.2345,\"unit\":\"°C\"}}}"'
         exit-code: 0
