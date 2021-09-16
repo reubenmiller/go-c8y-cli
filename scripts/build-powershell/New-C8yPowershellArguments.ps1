@@ -60,10 +60,15 @@
         "[]string" { "string[]"; break }
         "[]configuration" { "object[]"; break }
         "[]software" { "object[]"; break }
+        "softwareName" { "object[]"; break }
         "[]softwareversion" { "object[]"; break }
+        "softwareversionName" { "object[]"; break }
         "[]firmware" { "object[]"; break }
+        "firmwareName" { "object[]"; break }
         "[]firmwareversion" { "object[]"; break }
+        "firmwareversionName" { "object[]"; break }
         "[]firmwarepatch" { "object[]"; break }
+        "firmwarepatchName" { "object[]"; break }
         "[]stringcsv" { "string[]"; break }
         "[]tenant" { "object[]"; break }
         "[]user" { "object[]"; break }

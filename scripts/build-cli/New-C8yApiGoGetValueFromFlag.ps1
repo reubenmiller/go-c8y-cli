@@ -92,18 +92,33 @@
 
         # software array
         "[]software" = "c8yfetcher.WithSoftwareByNameFirstMatch(client, args, `"${prop}`", `"${queryParam}`"),"
+
+        # software name
+        "softwareName" = "flags.WithStringValue(`"${prop}`", `"${queryParam}`"),"
         
         # software version array
         "[]softwareversion" = "c8yfetcher.WithSoftwareVersionByNameFirstMatch(client, args, `"${prop}`", `"${queryParam}`"),"
 
+        # software version name
+        "softwareversionName" = "flags.WithStringValue(`"${prop}`", `"${queryParam}`"),"
+
         # firmware array
         "[]firmware" = "c8yfetcher.WithFirmwareByNameFirstMatch(client, args, `"${prop}`", `"${queryParam}`"),"
+
+        # firmware name
+        "firmwareName" = "flags.WithStringValue(`"${prop}`", `"${queryParam}`"),"
 
         # firmware version array
         "[]firmwareversion" = "c8yfetcher.WithFirmwareVersionByNameFirstMatch(client, args, `"${prop}`", `"${queryParam}`"),"
 
+        # firmware version name
+        "firmwareversionName" = "flags.WithStringValue(`"${prop}`", `"${queryParam}`"),"
+
         # firmware version patch array
         "[]firmwarepatch" = "c8yfetcher.WithFirmwarePatchByNameFirstMatch(client, args, `"${prop}`", `"${queryParam}`"),"
+
+        # firmware patch name
+        "firmwarepatchName" = "flags.WithStringValue(`"${prop}`", `"${queryParam}`"),"
         
         # configuration array
         "[]configuration" = "c8yfetcher.WithConfigurationByNameFirstMatch(client, args, `"${prop}`", `"${queryParam}`"),"
