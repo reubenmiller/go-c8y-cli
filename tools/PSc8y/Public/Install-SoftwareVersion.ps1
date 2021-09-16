@@ -11,14 +11,9 @@ Install software version on a device
 https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/software_versions_install
 
 .EXAMPLE
-PS> Get-SoftwareVersion -SoftwareId 12345 -Id $mo.id
+PS> Install-SoftwareVersion -Device $mo.id -Software go-c8y-cli -Version 1.0.0
 
 Get a software package
-
-.EXAMPLE
-PS> Get-ManagedObject -Id $mo.id | Get-SoftwareVersion
-
-Get a software package (using pipeline)
 
 
 #>

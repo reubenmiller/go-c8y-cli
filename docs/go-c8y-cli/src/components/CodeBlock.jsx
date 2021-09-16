@@ -68,6 +68,10 @@ const c8yCommands = {
     'c8y applications update': 'Update-Application',
     'c8y applications delete': 'Remove-Application',
 
+    // Software
+    'c8y software versions install': 'Install-SoftwareVersion',
+    'c8y software versions uninstall': 'Remove-SoftwareVersion',
+
     // binaries
     'c8y binaries get': 'Get-Binary',
 

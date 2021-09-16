@@ -2,28 +2,18 @@
 Function Remove-SoftwareVersion {
 <#
 .SYNOPSIS
-Delete software package version
+Uninstall software version on a device
 
 .DESCRIPTION
-Delete an existing software package version
+Uninstall software version on a device
 
 .LINK
-https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/software_versions_delete
+https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/software_versions_uninstall
 
 .EXAMPLE
-PS> Remove-SoftwareVersion -Id $mo.id
+PS> Remove-SoftwareVersion -Device $mo.id -Software go-c8y-cli -Version 1.0.0
 
-Delete a software package
-
-.EXAMPLE
-PS> Get-ManagedObject -Id $mo.id | Remove-SoftwareVersion
-
-Delete a software package (using pipeline)
-
-.EXAMPLE
-PS> Get-ManagedObject -Id $Device.id | Remove-SoftwareVersion -ForceCascade:$false
-
-Delete a software package and all related versions
+Uninstall a software package version
 
 
 #>
@@ -32,25 +22,30 @@ Delete a software package and all related versions
     [Alias()]
     [OutputType([object])]
     Param(
-        # Software Package version (managedObject) id (required)
-        [Parameter(Mandatory = $true,
-                   ValueFromPipeline=$true,
+        # Device or agent where the software should be installed
+        [Parameter(ValueFromPipeline=$true,
                    ValueFromPipelineByPropertyName=$true)]
         [object[]]
-        $Id,
+        $Device,
 
-        # Software package id (used to help completion be more accurate)
+        # Software name (required)
+        [Parameter(Mandatory = $true)]
+        [object[]]
+        $Software,
+
+        # Software version
         [Parameter()]
         [object[]]
-        $SoftwareId,
+        $Version,
 
-        # Remove version and any related binaries
+        # Software action
         [Parameter()]
-        [switch]
-        $ForceCascade
+        [ValidateSet('delete')]
+        [string]
+        $Delete
     )
     DynamicParam {
-        Get-ClientCommonParameters -Type "Delete"
+        Get-ClientCommonParameters -Type "Create", "Template"
     }
 
     Begin {
@@ -60,10 +55,10 @@ Delete a software package and all related versions
             Use-CallerPreference -Cmdlet $PSCmdlet -SessionState $ExecutionContext.SessionState
         }
 
-        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "software versions delete"
+        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "software versions uninstall"
         $ClientOptions = Get-ClientOutputOption $PSBoundParameters
         $TypeOptions = @{
-            Type = ""
+            Type = "application/vnd.com.nsn.cumulocity.managedObject+json"
             ItemType = ""
             BoundParameters = $PSBoundParameters
         }
@@ -72,15 +67,15 @@ Delete a software package and all related versions
     Process {
 
         if ($ClientOptions.ConvertToPS) {
-            $Id `
+            $Device `
             | Group-ClientRequests `
-            | c8y software versions delete $c8yargs `
+            | c8y software versions uninstall $c8yargs `
             | ConvertFrom-ClientOutput @TypeOptions
         }
         else {
-            $Id `
+            $Device `
             | Group-ClientRequests `
-            | c8y software versions delete $c8yargs
+            | c8y software versions uninstall $c8yargs
         }
         
     }

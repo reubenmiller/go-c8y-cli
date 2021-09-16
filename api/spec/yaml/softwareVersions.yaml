@@ -170,18 +170,8 @@ endpoints:
     examples:
       powershell:
         - description: Get a software package
-          beforeEach:
-            - $mo = PSc8y\New-ManagedObject -Name "testMO"
-          command: Get-SoftwareVersion -SoftwareId 12345 -Id $mo.id
-          afterEach:
-            - Remove-ManagedObject -Id $mo.id -ErrorAction SilentlyContinue
-
-        - description: Get a software package (using pipeline)
-          beforeEach:
-            - $mo = PSc8y\New-SoftwareVersion -SoftwareId 12345 -Version "1.0.0" -Url "test.com/file.mender"
-          command: Get-ManagedObject -Id $mo.id | Get-SoftwareVersion
-          afterEach:
-            - Remove-ManagedObject -Id $mo.id -ErrorAction SilentlyContinue
+          skipTest: true
+          command: Install-SoftwareVersion -Device $mo.id -Software go-c8y-cli -Version 1.0.0
 
       go:
         - description: Install a software package version
@@ -214,9 +204,60 @@ endpoints:
         default: 'install'
         validationSet:
           - install
-          # - delete
+
     bodyRequiredKeys:
       - "deviceId"
       - "c8y_SoftwareUpdate.0.name"
       - "c8y_SoftwareUpdate.0.version"
+      - "c8y_SoftwareUpdate.0.action"
+  
+  - name: uninstallSoftwareVersion
+    description: Uninstall software version on a device
+    descriptionLong: Uninstall software version on a device
+    method: POST
+    path: devicecontrol/operations
+    accept: 'application/vnd.com.nsn.cumulocity.managedObject+json'
+    alias:
+        go: uninstall
+        powershell: Remove-SoftwareVersion
+    examples:
+      powershell:
+        - description: Uninstall a software package version
+          skipTest: true
+          command: Remove-SoftwareVersion -Device $mo.id -Software go-c8y-cli -Version 1.0.0
+
+      go:
+        - description: Uninstall a software package version
+          command: c8y software versions uninstall --device 1234 --software go-c8y-cli --version 1.0.0
+
+    body:
+      - name: device
+        type: '[]device'
+        property: deviceId
+        description: Device or agent where the software should be installed
+        pipeline: true
+
+      - name: software
+        type: 'softwareName'
+        required: true
+        property: c8y_SoftwareUpdate.0.name
+        description: Software name
+
+      - name: version
+        type: 'softwareversionName'
+        required: false
+        property: c8y_SoftwareUpdate.0.version
+        description: Software version
+
+      - name: delete
+        type: string
+        static: true
+        description: Software action
+        property: 'c8y_SoftwareUpdate.0.action'
+        default: 'delete'
+        validationSet:
+          - delete
+    bodyRequiredKeys:
+      - "deviceId"
+      - "c8y_SoftwareUpdate.0.name"
       - "c8y_SoftwareUpdate.0.action"
