@@ -41,7 +41,13 @@ Get a software package (using pipeline)
         # Software version
         [Parameter()]
         [object[]]
-        $Version
+        $Version,
+
+        # Software action
+        [Parameter()]
+        [ValidateSet('install')]
+        [string]
+        $Install
     )
     DynamicParam {
         Get-ClientCommonParameters -Type "Create", "Template"

@@ -252,15 +252,7 @@
         "go": [
           {
             "description": "Install a software package version",
-            "command": "c8y software versions install --device 1234 --software go-c8y-cli --version 1.0.0",
-            "skipTest": true,
-            "assertStdOut": {
-              "json": {
-                "deviceId": "1234",
-                "c8y_Software.0.name": "go-c8y-cli",
-                "c8y_Software.0.version": "1.0.0"
-              }
-            }
+            "command": "c8y software versions install --device 1234 --software go-c8y-cli --version 1.0.0"
           }
         ]
       },
@@ -274,23 +266,36 @@
         },
         {
           "name": "software",
-          "type": "[]software",
+          "type": "softwareName",
           "required": true,
-          "property": "software",
+          "property": "c8y_SoftwareUpdate.0.name",
           "description": "Software name"
         },
         {
           "name": "version",
-          "type": "[]softwareversion",
-          "property": "version",
+          "type": "softwareversionName",
           "required": false,
+          "property": "c8y_SoftwareUpdate.0.version",
           "description": "Software version"
+        },
+        {
+          "name": "install",
+          "type": "string",
+          "static": true,
+          "description": "Software action",
+          "property": "c8y_SoftwareUpdate.0.action",
+          "default": "install",
+          "validationSet": [
+            "install"
+          ]
         }
       ],
-      "bodyTemplate": {
-        "type": "jsonnet",
-        "template": "{c8y_SoftwareUpdate:[{software: self.software, version: self.version, action: \"install\"}]}"
-      }
+      "bodyRequiredKeys": [
+        "deviceId",
+        "c8y_SoftwareUpdate.0.name",
+        "c8y_SoftwareUpdate.0.version",
+        "c8y_SoftwareUpdate.0.action"
+      ]
     }
   ]
 }

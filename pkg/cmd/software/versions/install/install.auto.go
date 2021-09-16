@@ -46,14 +46,16 @@ Install a software package version
 	cmd.SilenceUsage = true
 
 	cmd.Flags().StringSlice("device", []string{""}, "Device or agent where the software should be installed (accepts pipeline)")
-	cmd.Flags().StringSlice("software", []string{""}, "Software name (required)")
-	cmd.Flags().StringSlice("version", []string{""}, "Software version")
+	cmd.Flags().String("software", "", "Software name (required)")
+	cmd.Flags().String("version", "", "Software version")
+	cmd.Flags().String("install", "install", "Software action")
 
 	completion.WithOptions(
 		cmd,
 		completion.WithDevice("device", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
 		completion.WithSoftware("software", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
 		completion.WithSoftwareVersion("version", "softwareId", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
+		completion.WithValidateSet("install", "install"),
 	)
 
 	flags.WithOptions(
@@ -136,12 +138,12 @@ func (n *InstallCmd) RunE(cmd *cobra.Command, args []string) error {
 		inputIterators,
 		flags.WithDataFlagValue(),
 		c8yfetcher.WithDeviceByNameFirstMatch(client, args, "device", "deviceId"),
-		c8yfetcher.WithSoftwareByNameFirstMatch(client, args, "software", "software"),
-		c8yfetcher.WithSoftwareVersionByNameFirstMatch(client, args, "version", "version"),
-		flags.WithDefaultTemplateString(`
-{c8y_SoftwareUpdate:[{software: self.software, version: self.version, action: "install"}]}`),
+		flags.WithStringValue("software", "c8y_SoftwareUpdate.0.name"),
+		flags.WithStringValue("version", "c8y_SoftwareUpdate.0.version"),
+		flags.WithStringValue("install", "c8y_SoftwareUpdate.0.action"),
 		cmdutil.WithTemplateValue(cfg),
 		flags.WithTemplateVariablesValue(),
+		flags.WithRequiredProperties("deviceId", "c8y_SoftwareUpdate.0.name", "c8y_SoftwareUpdate.0.version", "c8y_SoftwareUpdate.0.action"),
 	)
 	if err != nil {
 		return cmderrors.NewUserError(err)
