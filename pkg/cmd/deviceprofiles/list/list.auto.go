@@ -54,7 +54,7 @@ Get a list of device profiles
 	flags.WithOptions(
 		cmd,
 
-		flags.WithExtendedPipelineSupport("name", "name", false, "id"),
+		flags.WithExtendedPipelineSupport("name", "name", false, "name"),
 		flags.WithCollectionProperty("managedObjects"),
 	)
 

@@ -4,12 +4,13 @@ tests:
         exit-code: 0
 
     configuration_create_Create a configuration package:
-        command: c8y configuration create --name "agent config" --description "Default agent configuration" --configurationType "agentConfig" --dry
+        command: c8y configuration create --name "agent config" --description "Default agent configuration" --configurationType "agentConfig" --file "manual/configuration/testconfig.ini" --dry
         exit-code: 0
         stdout:
             json:
                 body.configurationType: agentConfig
                 body.description: Default agent configuration
+                body.url: r/https://.*inventory/binaries/\d+
                 body.name: agent config
                 method: POST
                 path: /inventory/managedObjects

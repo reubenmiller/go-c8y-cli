@@ -35,7 +35,10 @@ endpoints:
         type: string
         default: '**'
         pipeline: true
+        required: false
         description: DeviceProfile name filter
+        pipelineAliases:
+          - "name"
 
   - name: newDeviceProfile
     method: POST

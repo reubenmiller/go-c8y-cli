@@ -54,18 +54,7 @@ func NewFlagWithPipeIterator(cmd *cobra.Command, pipeOpt *PipelineOptions, suppo
 		}
 	}
 
-	if cmd.Flags().Changed(pipeOpt.Name) {
-		items, err := cmd.Flags().GetStringSlice(pipeOpt.Name)
-
-		if err != nil {
-			// fallback to string
-			item, err := cmd.Flags().GetString(pipeOpt.Name)
-
-			if err != nil {
-				return nil, err
-			}
-			items = append(items, item)
-		}
+	if items, err := GetFlagStringValues(cmd, pipeOpt.Name); err == nil {
 		if len(items) == 0 {
 			if pipeOpt.Required {
 				return nil, &ParameterError{
@@ -99,6 +88,23 @@ func NewFlagWithPipeIterator(cmd *cobra.Command, pipeOpt *PipelineOptions, suppo
 		return nil, fmt.Errorf("no input detected")
 	}
 	return nil, nil
+}
+
+func GetFlagStringValues(cmd *cobra.Command, name string) ([]string, error) {
+	items, err := cmd.Flags().GetStringSlice(name)
+
+	if err != nil {
+		// fallback to string
+		item, strErr := cmd.Flags().GetString(name)
+
+		if strErr != nil {
+			return nil, strErr
+		}
+		if item != "" {
+			items = append(items, item)
+		}
+	}
+	return items, nil
 }
 
 // ErrInvalidIDFormat invalid ID foratm

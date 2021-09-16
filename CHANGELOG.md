@@ -44,6 +44,50 @@ None :)
     C8Y_SETTINGS_MODE_ENABLEUPDATE=false
     ```
 
+* List versions without their parent to list all versions no matter which parents? Is this dangerous?
+    * c8y software versions list (make --softwareId optional)
+    * c8y firmware versions list (make --firmwareId optional)
+    * c8y firmware patches list (make --firmwareId optional)
+
+* Download commands?:
+
+    Should configuration with external URLs be downloaded? Can it be trusted? There is currently a workaround
+
+        c8y firmware versions get --id 1 | c8y api
+
+        However you can control the output file dynamically. i.e. if you get a list of devices and pipe it, then it will all be overwritten in the same output file.
+
+        c8y firmware versions list --firmwareId 1234 | c8y api --outputFile myfile.json
+
+        * What name to use?
+            * Template string?
+            * Firmware name and version?
+            * Actual binary name from the url?
+                * i.e. if c8y binary, then lookup the binary managed object for the details?
+                * If external, then use the basename of the url path (converting unsupported chars)
+
+
+    * c8y firmware versions download --outputFile "%s"
+        - c8y binaries download --autoName
+    * c8y firmware patches download
+    * c8y software versions download
+    * c8y configuration download
+
+
+* Automatic tests for device management are currently broken (due to unsupported template strings in test framework)
+
+* Sort software versions by date? in reverse order, so that the user can always see the most up to date?
+
+* Create operations
+    * c8y software versions list -p 1 | c8y software versions install --device 12345
+    * c8y configuration list -p 1 | c8y software versions install --device 12345
+    * c8y firmware versions list -p 1 | c8y software versions install --device 12345
+
+    c8y software version install --softwareId 1234 --id 1.0.0 | c8y operations create --device device01 --template "c8y_Software: input.value.c8y_Software"
+    c8y devices list | c8y software version install --softwareId 1234 --id 1.0.0
+
+
+
 ~~not known~~
 
 ### Commands

@@ -6,6 +6,7 @@ require (
 	github.com/araddon/dateparse v0.0.0-20210207001429-0eec95c9db7e
 	github.com/charmbracelet/glamour v0.3.0
 	github.com/cli/safeexec v1.0.0
+	github.com/commander-cli/commander/v2 v2.5.0-alpha2 // indirect
 	github.com/cpuguy83/go-md2man/v2 v2.0.0
 	github.com/fatih/color v1.10.0
 	github.com/google/go-jsonnet v0.17.0

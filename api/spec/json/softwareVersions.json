@@ -214,6 +214,83 @@
           "description": "Remove version and any related binaries"
         }
       ]
+    },
+    {
+      "name": "installSoftwareVersion",
+      "description": "Install software version on a device",
+      "descriptionLong": "Install software version on a device",
+      "method": "POST",
+      "path": "devicecontrol/operations",
+      "accept": "application/vnd.com.nsn.cumulocity.managedObject+json",
+      "alias": {
+        "go": "install",
+        "powershell": "Install-SoftwareVersion"
+      },
+      "examples": {
+        "powershell": [
+          {
+            "description": "Get a software package",
+            "beforeEach": [
+              "$mo = PSc8y\\New-ManagedObject -Name \"testMO\""
+            ],
+            "command": "Get-SoftwareVersion -SoftwareId 12345 -Id $mo.id",
+            "afterEach": [
+              "Remove-ManagedObject -Id $mo.id -ErrorAction SilentlyContinue"
+            ]
+          },
+          {
+            "description": "Get a software package (using pipeline)",
+            "beforeEach": [
+              "$mo = PSc8y\\New-SoftwareVersion -SoftwareId 12345 -Version \"1.0.0\" -Url \"test.com/file.mender\""
+            ],
+            "command": "Get-ManagedObject -Id $mo.id | Get-SoftwareVersion",
+            "afterEach": [
+              "Remove-ManagedObject -Id $mo.id -ErrorAction SilentlyContinue"
+            ]
+          }
+        ],
+        "go": [
+          {
+            "description": "Install a software package version",
+            "command": "c8y software versions install --device 1234 --software go-c8y-cli --version 1.0.0",
+            "skipTest": true,
+            "assertStdOut": {
+              "json": {
+                "deviceId": "1234",
+                "c8y_Software.0.name": "go-c8y-cli",
+                "c8y_Software.0.version": "1.0.0"
+              }
+            }
+          }
+        ]
+      },
+      "body": [
+        {
+          "name": "device",
+          "type": "[]device",
+          "property": "deviceId",
+          "description": "Device or agent where the software should be installed",
+          "pipeline": true
+        },
+        {
+          "name": "software",
+          "type": "[]software",
+          "required": true,
+          "property": "software",
+          "description": "Software name"
+        },
+        {
+          "name": "version",
+          "type": "[]softwareversion",
+          "property": "version",
+          "required": false,
+          "description": "Software version"
+        }
+      ],
+      "bodyTemplate": {
+        "type": "jsonnet",
+        "template": "{c8y_SoftwareUpdate:[{software: self.software, version: self.version, action: \"install\"}]}"
+      }
     }
   ]
 }
