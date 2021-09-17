@@ -190,3 +190,52 @@ endpoints:
         description: Firmware url
         pipelineAliases:
           - "c8y_Firmware.url"
+
+  - name: installVersion
+    description: Install firmware version on a device
+    descriptionLong: Install firmware version on a device
+    method: POST
+    path: devicecontrol/operations
+    accept: 'application/vnd.com.nsn.cumulocity.managedObject+json'
+    alias:
+        go: install
+        powershell: Install-FirmwareVersion
+    examples:
+      powershell:
+        - description: Get a firmware version
+          skipTest: true
+          command: Install-FirmwareVersion -Device $mo.id -Firmware linux-iot -Version 1.0.0
+
+      go:
+        - description: Install a firmware version
+          command: c8y firmware versions install --device 1234 --firmware linux-iot --version 1.0.0
+
+    body:
+      - name: device
+        type: '[]device'
+        property: deviceId
+        description: Device or agent where the firmware should be installed
+        pipeline: true
+
+      - name: firmware
+        type: firmwareName
+        required: true
+        property: c8y_Firmware.name
+        description: Firmware name
+
+      - name: version
+        type: firmwareVersionName
+        required: false
+        property: c8y_Firmware.version
+        description: Firmware version
+      
+      - name: url
+        type: string
+        required: false
+        property: c8y_Firmware.url
+        description: Firmware url. TODO, not currently automatically added
+
+    bodyRequiredKeys:
+      - "deviceId"
+      - "c8y_Firmware.name"
+      - "c8y_Firmware.version"

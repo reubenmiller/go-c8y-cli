@@ -199,6 +199,7 @@ FunctionsToExport = @(
 	'Get-UserGroupCollection',
 	'Get-UserGroupMembershipCollection',
 	'Get-UserMembershipCollection',
+	'Install-FirmwareVersion',
 	'Install-SoftwareVersion',
 	'Invoke-UserLogout',
 	'New-Agent',
