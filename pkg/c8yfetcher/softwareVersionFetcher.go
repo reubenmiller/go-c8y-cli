@@ -19,9 +19,6 @@ func NewSoftwareVersionFetcher(client *c8y.Client, software string) *SoftwareVer
 				if IsID(software) {
 					return fmt.Sprintf("(type eq 'c8y_SoftwareBinary') and not(has(c8y_Patch)) and c8y_Software.version eq '%s' and (bygroupid(%s))", s, software)
 				}
-				if software != "" {
-
-				}
 				return fmt.Sprintf("(type eq 'c8y_SoftwareBinary') and not(has(c8y_Patch)) and c8y_Software.version eq '%s'", s)
 			},
 		},

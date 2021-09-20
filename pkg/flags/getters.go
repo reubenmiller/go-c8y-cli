@@ -156,7 +156,7 @@ func WithBody(cmd *cobra.Command, body *mapbuilder.MapBuilder, inputIterators *R
 		case string:
 			// only set non-empty values by default
 			if v != "" {
-				err = body.Set(name, value)
+				err = body.Set(name, v)
 			}
 
 		case Template:

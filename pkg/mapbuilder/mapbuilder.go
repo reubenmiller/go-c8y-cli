@@ -711,7 +711,7 @@ func (b *MapBuilder) SetPath(path string, value interface{}) error {
 		return err
 	}
 	b.BodyRaw = out
-	return err
+	return nil
 }
 
 func (b *MapBuilder) SetRawPath(path string, value []byte) error {

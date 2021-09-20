@@ -511,6 +511,43 @@ func WithSelfReferenceByName(client *c8y.Client, fetcher EntityFetcher, args []s
 	}
 }
 
+// WithManagedObjectPropertyFirstMatch add reference by name matching using a fetcher via cli args. Only the first match will be used
+func WithManagedObjectPropertyFirstMatch(client *c8y.Client, fetcher EntityFetcher, args []string, property string, opts ...string) flags.GetOption {
+	return func(cmd *cobra.Command, inputIterators *flags.RequestInputIterators) (string, interface{}, error) {
+		opt := WithReferenceByName(client, fetcher, args, opts...)
+		name, values, err := opt(cmd, inputIterators)
+
+		if name == "" {
+			return "", "", nil
+		}
+
+		switch v := values.(type) {
+		case []string:
+			if len(v) == 0 {
+				return name, nil, fmt.Errorf("reference by name: no matches found")
+			}
+
+			moID := NewIDValue(v[0]).GetID()
+			mo, _, err := client.Inventory.GetManagedObject(WithDisabledDryRunContext(client), moID, nil)
+
+			value := mo.Item.Get(property)
+			if !value.Exists() {
+				return name, "", nil
+			}
+
+			return name, value.Str, err
+		case iterator.Iterator:
+			// value will be evalulated later
+			return name, v, nil
+		default:
+			if err == nil {
+				err = fmt.Errorf("reference by name: invalid name lookup type. only strings are supported")
+			}
+			return "", "", err
+		}
+	}
+}
+
 // WithReferenceByNameFirstMatch add reference by name matching using a fetcher via cli args. Only the first match will be used
 func WithReferenceByNameFirstMatch(client *c8y.Client, fetcher EntityFetcher, args []string, opts ...string) flags.GetOption {
 	return func(cmd *cobra.Command, inputIterators *flags.RequestInputIterators) (string, interface{}, error) {
@@ -621,6 +658,18 @@ func WithSmartGroupByNameFirstMatch(client *c8y.Client, args []string, opts ...s
 func WithSoftwareByNameFirstMatch(client *c8y.Client, args []string, opts ...string) flags.GetOption {
 	return func(cmd *cobra.Command, inputIterators *flags.RequestInputIterators) (string, interface{}, error) {
 		opt := WithReferenceByNameFirstMatch(client, NewSoftwareFetcher(client), args, opts...)
+		return opt(cmd, inputIterators)
+	}
+}
+
+// WithSoftwareVersionUrl add software version url
+func WithSoftwareVersionUrlByNameFirstMatch(client *c8y.Client, args []string, opts ...string) flags.GetOption {
+	return func(cmd *cobra.Command, inputIterators *flags.RequestInputIterators) (string, interface{}, error) {
+		software := ""
+		if v, err := flags.GetFlagStringValues(cmd, "software"); err == nil && len(v) > 0 {
+			software = v[0]
+		}
+		opt := WithManagedObjectPropertyFirstMatch(client, NewSoftwareVersionFetcher(client, software), args, "c8y_Software.url", opts...)
 		return opt(cmd, inputIterators)
 	}
 }

@@ -195,6 +195,12 @@ endpoints:
         required: false
         property: c8y_SoftwareUpdate.0.version
         description: Software version
+      
+      - name: url
+        type: 'string'
+        required: false
+        property: c8y_SoftwareUpdate.0.url
+        description: Software url
 
       - name: install
         type: string
