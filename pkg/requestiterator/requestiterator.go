@@ -117,7 +117,8 @@ func (r *RequestIterator) GetNext() (*c8y.RequestOptions, interface{}, error) {
 			return nil, nil, err
 		}
 		inputLine = input
-		queryParts = append(queryParts, strings.ReplaceAll(string(q), " ", "+"))
+		// Override any existing query parts to prevent duplication
+		queryParts = append([]string{}, strings.ReplaceAll(string(q), " ", "+"))
 	}
 
 	if len(queryParts) > 0 {

@@ -50,3 +50,4 @@ share/**
 docs/go-c8y-cli/build
 docs/go-c8y-cli/i18n
 tools/docs/demos/*.asc
+pkg/cmd/__debug_bin
