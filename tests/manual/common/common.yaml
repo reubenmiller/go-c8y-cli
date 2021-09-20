@@ -1,0 +1,34 @@
+tests:
+  ? It does not duplicate query parameters when combining iterators with other query parameters
+  : command: >
+      c8y events list --device 1 --fragmentType test1 --dry
+    exit-code: 0
+    stdout:
+      json:
+        method: GET
+        path: /event/events
+        pathEncoded: /event/events?fragmentType=test1&source=1
+
+  ? It does not duplicate query parameters when only fixed query parameters are used
+  : command: >
+      c8y events list --fragmentType test1 --dry
+    exit-code: 0
+    stdout:
+      json:
+        method: GET
+        path: /event/events
+        pathEncoded: /event/events?fragmentType=test1
+
+  It supports adding common query parameters with fixed:
+    config:
+      env:
+        C8Y_SETTINGS_DEFAULTS_PAGESIZE: 21
+
+    command: >
+      c8y events list --fragmentType test1 --dry
+    exit-code: 0
+    stdout:
+      json:
+        method: GET
+        path: /event/events
+        pathEncoded: /event/events?fragmentType=test1&pageSize=21

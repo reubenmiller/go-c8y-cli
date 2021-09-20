@@ -87,7 +87,7 @@ You can install `go-c8y-cli` via `yum` by just replacing `dnf` with `yum` in the
 1. Configure the repository
 
     ```bash
-    sudo wget -O /etc/apk/keys/go-c8y-cli.pub https://reubenmiller.jfrog.io/artifactory/api/security/keypair/public/repositories/c8y-alpine
+    sudo wget -O /etc/apk/keys/rmiller-rsa-signing.rsa.pub https://reubenmiller.jfrog.io/artifactory/api/security/keypair/public/repositories/c8y-alpine
 
     # Add the repo
     sudo sh -c "echo 'https://reubenmiller.jfrog.io/artifactory/c8y-alpine/stable/main'" >> /etc/apk/repositories
