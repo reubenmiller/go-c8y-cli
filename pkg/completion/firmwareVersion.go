@@ -30,7 +30,7 @@ func WithFirmwareVersion(flagVersion string, flagNameFirmware string, clientFunc
 				PaginationOptions: *c8y.NewPaginationOptions(100),
 			}
 
-			firmwareNames, err := cmd.Flags().GetStringSlice(flagNameFirmware)
+			firmwareNames, err := GetFlagStringValues(cmd, flagNameFirmware)
 			firmwareName := ""
 			if len(firmwareNames) > 0 {
 				firmwareName = firmwareNames[0]

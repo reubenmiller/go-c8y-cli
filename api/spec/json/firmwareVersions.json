@@ -304,6 +304,9 @@
         {
           "name": "version",
           "type": "firmwareVersionName",
+          "dependsOn": [
+            "firmware"
+          ],
           "required": false,
           "property": "c8y_Firmware.version",
           "description": "Firmware version"

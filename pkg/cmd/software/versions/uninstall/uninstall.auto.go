@@ -48,14 +48,14 @@ Uninstall a software package version
 	cmd.Flags().StringSlice("device", []string{""}, "Device or agent where the software should be installed (accepts pipeline)")
 	cmd.Flags().String("software", "", "Software name (required)")
 	cmd.Flags().String("version", "", "Software version")
-	cmd.Flags().String("delete", "delete", "Software action")
+	cmd.Flags().String("action", "delete", "Software action")
 
 	completion.WithOptions(
 		cmd,
 		completion.WithDevice("device", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
 		completion.WithSoftware("software", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
-		completion.WithSoftwareVersion("version", "softwareId", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
-		completion.WithValidateSet("delete", "delete"),
+		completion.WithSoftwareVersion("version", "software", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
+		completion.WithValidateSet("action", "delete"),
 	)
 
 	flags.WithOptions(
@@ -140,7 +140,7 @@ func (n *UninstallCmd) RunE(cmd *cobra.Command, args []string) error {
 		c8yfetcher.WithDeviceByNameFirstMatch(client, args, "device", "deviceId"),
 		flags.WithStringValue("software", "c8y_SoftwareUpdate.0.name"),
 		flags.WithStringValue("version", "c8y_SoftwareUpdate.0.version"),
-		flags.WithStringValue("delete", "c8y_SoftwareUpdate.0.action"),
+		flags.WithStringValue("action", "c8y_SoftwareUpdate.0.action"),
 		cmdutil.WithTemplateValue(cfg),
 		flags.WithTemplateVariablesValue(),
 		flags.WithRequiredProperties("deviceId", "c8y_SoftwareUpdate.0.name", "c8y_SoftwareUpdate.0.action"),

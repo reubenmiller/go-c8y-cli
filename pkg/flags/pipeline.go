@@ -90,6 +90,7 @@ func NewFlagWithPipeIterator(cmd *cobra.Command, pipeOpt *PipelineOptions, suppo
 	return nil, nil
 }
 
+// GetFlagStringValues get string slice from either a string slice or string flag
 func GetFlagStringValues(cmd *cobra.Command, name string) ([]string, error) {
 	items, err := cmd.Flags().GetStringSlice(name)
 

@@ -47,12 +47,29 @@ c8y __complete software update --id "$NAME" | grep id:
 c8y __complete software delete --id "$NAME" | grep id:
 c8y __complete software versions list --softwareId "$NAME" | grep id:
 c8y __complete software versions delete --softwareId "$NAME" | grep id:
+c8y __complete software versions install --software "$NAME" | grep id:
+c8y __complete software versions install --software "$NAME" --version $VERSION | grep id:
 
 # list versions by pipeline
 c8y software get --id "$NAME" | c8y software versions list --select "id,c8y_Software.version" --output csv | grep "$ID,$VERSION"
 
 # list
 c8y software versions list --softwareId "$NAME" --select "id,c8y_Software.version" --output csv | grep "$ID,$VERSION"
+
+#
+# install via version id
+OPERATION=$( c8y software versions install --device 1 --version $ID --dry --dryFormat json )
+echo "$OPERATION" | c8y util show --select "body.deviceId" --output csv | grep "^1$"
+echo "$OPERATION" | c8y util show --select "body.c8y_SoftwareUpdate.0.name" --output csv | grep "^$NAME$"
+echo "$OPERATION" | c8y util show --select "body.c8y_SoftwareUpdate.0.version" --output csv | grep "^$VERSION$"
+echo "$OPERATION" | c8y util show --select "body.c8y_SoftwareUpdate.0.url" --output csv | grep "^https://test.com$"
+
+# install via version name
+OPERATION=$( c8y software versions install --device 1 --software "$NAME" --version "$VERSION" --dry --dryFormat json )
+echo "$OPERATION" | c8y util show --select "body.deviceId" --output csv | grep "^1$"
+echo "$OPERATION" | c8y util show --select "body.c8y_SoftwareUpdate.0.name" --output csv | grep "^$NAME$"
+echo "$OPERATION" | c8y util show --select "body.c8y_SoftwareUpdate.0.version" --output csv | grep "^$VERSION$"
+echo "$OPERATION" | c8y util show --select "body.c8y_SoftwareUpdate.0.url" --output csv | grep "^https://test.com$"
 
 # list versions and delete them
 c8y software versions list --softwareId "$ID" | c8y software versions delete

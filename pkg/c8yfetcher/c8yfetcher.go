@@ -662,6 +662,59 @@ func WithSoftwareByNameFirstMatch(client *c8y.Client, args []string, opts ...str
 	}
 }
 
+// WithSoftwareVersionData adds software information (name, version and url)
+func WithSoftwareVersionData(client *c8y.Client, flagSoftware, flagVersion string, args []string, opts ...string) flags.GetOption {
+	return func(cmd *cobra.Command, inputIterators *flags.RequestInputIterators) (string, interface{}, error) {
+		var err error
+		software := ""
+		if v, err := flags.GetFlagStringValues(cmd, flagSoftware); err == nil && len(v) > 0 {
+			software = v[0]
+		}
+
+		version := ""
+		if v, err := flags.GetFlagStringValues(cmd, flagVersion); err == nil && len(v) > 0 {
+			version = v[0]
+		}
+
+		_, dst, _ := flags.UnpackGetterOptions("", opts...)
+
+		output := map[string]string{}
+
+		// Check for explicit managed object id
+		if IsID(version) {
+			mo, _, err := client.Inventory.GetManagedObject(WithDisabledDryRunContext(client), version, &c8y.ManagedObjectOptions{
+				WithParents: true,
+			})
+
+			if err != nil {
+				return "", "", err
+			}
+
+			output["name"] = mo.Item.Get("additionParents.references.0.managedObject.name").String()
+			output["version"] = mo.Item.Get("c8y_Software.version").String()
+			output["url"] = mo.Item.Get("c8y_Software.url").String()
+
+			return dst, output, nil
+		}
+
+		// Lookup version (and software if not already resolved)
+		versionCol, _, err := client.Software.GetSoftwareVersionsByName(WithDisabledDryRunContext(client), software, version, true, c8y.NewPaginationOptions(5))
+		if err != nil {
+			return "", "", err
+		}
+
+		if len(versionCol.ManagedObjects) == 0 {
+			return "", "", cmderrors.NewNoMatchesFoundError(flagVersion)
+		}
+
+		output["version"] = versionCol.Items[0].Get("c8y_Software.version").String()
+		output["url"] = versionCol.Items[0].Get("c8y_Software.url").String()
+		output["name"] = versionCol.Items[0].Get("additionParents.references.0.managedObject.name").String()
+
+		return dst, output, err
+	}
+}
+
 // WithSoftwareVersionUrl add software version url
 func WithSoftwareVersionUrlByNameFirstMatch(client *c8y.Client, args []string, opts ...string) flags.GetOption {
 	return func(cmd *cobra.Command, inputIterators *flags.RequestInputIterators) (string, interface{}, error) {

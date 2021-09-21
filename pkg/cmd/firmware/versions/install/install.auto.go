@@ -54,7 +54,7 @@ Install a firmware version
 		cmd,
 		completion.WithDevice("device", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
 		completion.WithFirmware("firmware", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
-		completion.WithFirmwareVersion("version", "firmwareId", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
+		completion.WithFirmwareVersion("version", "firmware", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
 	)
 
 	flags.WithOptions(

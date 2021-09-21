@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/reubenmiller/go-c8y-cli/pkg/c8ydata"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
 )
@@ -19,48 +18,24 @@ func WithSoftwareVersion(flagVersion string, flagNameSoftware string, clientFunc
 			}
 
 			// query
-			versionType := "c8y_SoftwareBinary"
 			versionPattern := "*" + toComplete + "*"
-			opt := &c8y.ManagedObjectOptions{
-				// Only filter by version name
-				Query:             fmt.Sprintf("(type eq '%s') and (not(has(c8y_Patch))) and (c8y_Software.version eq '%s')", versionType, versionPattern),
-				WithParents:       true,
-				PaginationOptions: *c8y.NewPaginationOptions(100),
+
+			softwareNames, err := GetFlagStringValues(cmd, flagNameSoftware)
+			if err != nil {
+				return []string{err.Error()}, cobra.ShellCompDirectiveDefault
 			}
 
-			// opt.Query = strings.ReplaceAll(opt.Query, " ", "%20")
-
-			softwareNames, err := cmd.Flags().GetStringSlice(flagNameSoftware)
 			softwareName := ""
 			if len(softwareNames) > 0 {
 				softwareName = softwareNames[0]
 			}
 
-			if err == nil && softwareName != "" {
-				if c8ydata.IsID(softwareName) {
-					opt.Query = fmt.Sprintf(
-						"(type eq '%s') and (not(has(c8y_Patch))) and (c8y_Software.version eq '%v') and (bygroupid(%s))",
-						versionType, versionPattern, softwareName,
-					)
-				} else {
-					// Lookup by name
-					softwarePackages, _, err := client.Inventory.GetManagedObjects(
-						context.Background(),
-						&c8y.ManagedObjectOptions{
-							Query: fmt.Sprintf("(type eq '%s') and name eq '%s'", "c8y_Software", softwareName),
-						},
-					)
-					if err == nil && len(softwarePackages.ManagedObjects) > 0 {
-						opt.Query = fmt.Sprintf(
-							"(type eq '%s') and (not(has(c8y_Patch))) and (c8y_Software.version eq '%v') and (bygroupid(%s))",
-							versionType, versionPattern, softwarePackages.ManagedObjects[0].ID)
-					}
-				}
-			}
-
-			items, _, err := client.Inventory.GetManagedObjects(
+			items, _, err := client.Software.GetSoftwareVersionsByName(
 				context.Background(),
-				opt,
+				softwareName,
+				versionPattern,
+				true,
+				c8y.NewPaginationOptions(100),
 			)
 
 			if err != nil {
@@ -68,7 +43,7 @@ func WithSoftwareVersion(flagVersion string, flagNameSoftware string, clientFunc
 				return values, cobra.ShellCompDirectiveError
 			}
 			values := []string{}
-			// values = append(values, fmt.Sprintf("count: %v", len(items.ManagedObjects)))
+
 			for i, item := range items.ManagedObjects {
 				version := ""
 				if v := items.Items[i].Get("c8y_Software.version"); v.Exists() {

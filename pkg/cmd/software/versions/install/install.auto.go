@@ -48,14 +48,16 @@ Install a software package version
 	cmd.Flags().StringSlice("device", []string{""}, "Device or agent where the software should be installed (accepts pipeline)")
 	cmd.Flags().String("software", "", "Software name (required)")
 	cmd.Flags().String("version", "", "Software version")
-	cmd.Flags().String("install", "install", "Software action")
+	cmd.Flags().String("url", "", "Software url")
+	cmd.Flags().String("description", "Install software package", "Operation description")
+	cmd.Flags().String("action", "install", "Software action")
 
 	completion.WithOptions(
 		cmd,
 		completion.WithDevice("device", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
 		completion.WithSoftware("software", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
-		completion.WithSoftwareVersion("version", "softwareId", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
-		completion.WithValidateSet("install", "install"),
+		completion.WithSoftwareVersion("version", "software", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
+		completion.WithValidateSet("action", "install"),
 	)
 
 	flags.WithOptions(
@@ -138,10 +140,12 @@ func (n *InstallCmd) RunE(cmd *cobra.Command, args []string) error {
 		inputIterators,
 		flags.WithDataFlagValue(),
 		c8yfetcher.WithDeviceByNameFirstMatch(client, args, "device", "deviceId"),
-		c8yfetcher.WithSoftwareVersionUrlByNameFirstMatch(client, args, "version", "c8y_SoftwareUpdate.0.url"),
 		flags.WithStringValue("software", "c8y_SoftwareUpdate.0.name"),
 		flags.WithStringValue("version", "c8y_SoftwareUpdate.0.version"),
-		flags.WithStringValue("install", "c8y_SoftwareUpdate.0.action"),
+		flags.WithStringValue("url", "c8y_SoftwareUpdate.0.url"),
+		flags.WithStringValue("description", "description"),
+		c8yfetcher.WithSoftwareVersionData(client, "software", "version", args, "", "c8y_SoftwareUpdate.0"),
+		flags.WithStringValue("action", "c8y_SoftwareUpdate.0.action"),
 		cmdutil.WithTemplateValue(cfg),
 		flags.WithTemplateVariablesValue(),
 		flags.WithRequiredProperties("deviceId", "c8y_SoftwareUpdate.0.name", "c8y_SoftwareUpdate.0.version", "c8y_SoftwareUpdate.0.action"),

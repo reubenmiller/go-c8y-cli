@@ -42,7 +42,7 @@ Uninstall a software package version
         [Parameter()]
         [ValidateSet('delete')]
         [string]
-        $Delete
+        $Action
     )
     DynamicParam {
         Get-ClientCommonParameters -Type "Create", "Template"

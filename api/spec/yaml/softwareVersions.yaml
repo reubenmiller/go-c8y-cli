@@ -271,6 +271,8 @@ endpoints:
 
       - name: version
         type: 'softwareversionName'
+        dependsOn:
+          - "software"
         required: false
         property: c8y_SoftwareUpdate.0.version
         description: Software version

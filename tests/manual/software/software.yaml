@@ -1,4 +1,28 @@
 tests:
-    It can create/update/delete a software version:
-        command: ./manual/software/crud.sh
-        exit-code: 0
+  It can create/update/delete a software version:
+    command: ./manual/software/crud.sh
+    exit-code: 0
+
+  It installs a software version from an explicit software id:
+    skip: true
+    command: |
+      c8y software versions install --device 1 --version 12345 --dry
+    exit-code: 0
+    stdout:
+      json:
+        body.c8y_SoftwareUpdate.0.name: python3-requests
+        body.c8y_SoftwareUpdate.0.version: 1.0.0
+        body.c8y_SoftwareUpdate.0.url: r/.+
+        body.c8y_SoftwareUpdate.0.action: install
+
+  It installs a software version via software name and version:
+    skip: true
+    command: |
+      c8y software versions install --device 1 --software python3-requests --version 1.0.0 --dry
+    exit-code: 0
+    stdout:
+      json:
+        body.c8y_SoftwareUpdate.0.name: python3-requests
+        body.c8y_SoftwareUpdate.0.version: 1.0.0
+        body.c8y_SoftwareUpdate.0.url: r/.+
+        body.c8y_SoftwareUpdate.0.action: install

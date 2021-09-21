@@ -38,11 +38,21 @@ Get a software package
         [object[]]
         $Version,
 
+        # Software url
+        [Parameter()]
+        [string]
+        $Url,
+
+        # Operation description
+        [Parameter()]
+        [string]
+        $Description,
+
         # Software action
         [Parameter()]
         [ValidateSet('install')]
         [string]
-        $Install
+        $Action
     )
     DynamicParam {
         Get-ClientCommonParameters -Type "Create", "Template"

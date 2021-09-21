@@ -459,11 +459,11 @@ func Test_DebugStdinCommand(t *testing.T) {
 	cmd := setupTest()
 	stdin := fakestdin.NewStdIn()
 	defer stdin.Restore()
-	stdin.Write(`1` + "\n")
+	stdin.Write(`` + "\n")
 	// stdin.Write(`{"source":{"id":"1111"}}` + "\n")
 
 	cmdtext := `
-	measurements create --type c8y_TestMeasurement --time "-0s" --template "{c8y_Signal:{sensor01:{value:1.0,unit:'°C'}}}"
+	__complete software versions install --software linux-software-typea_JlHuAzug --version 0.8.6
 	`
 	cmdErr := ExecuteCmd(cmd, strings.TrimSpace(cmdtext))
 
