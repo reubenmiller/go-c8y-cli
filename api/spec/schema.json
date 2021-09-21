@@ -224,7 +224,7 @@
               "powershell": {
                 "type": "string",
                 "title": "Cmdlet name to be used for the PowerShell module",
-                "description": "The name should follow PowerShell's verb naming convension. See the following for more information: https://docs.microsoft.com/en-us/powershell/scripting/developer/cmdlet/approved-verbs-for-windows-powershell-commands?view=powershell-7"
+                "description": "The name should follow PowerShell's verb naming convention. See the following for more information: https://docs.microsoft.com/en-us/powershell/scripting/developer/cmdlet/approved-verbs-for-windows-powershell-commands?view=powershell-7"
               }
             },
             "required": [
