@@ -87,6 +87,8 @@ endpoints:
     pathParameters:
       - name: id
         type: '[]firmwareversion'
+        dependsOn:
+          - firmwareId
         pipeline: true
         required: true
         description: Firmware Package version (managedObject) id
@@ -136,6 +138,8 @@ endpoints:
     pathParameters:
       - name: id
         type: '[]firmwareversion'
+        dependsOn:
+          - firmwareId
         pipeline: true
         required: true
         description: Firmware Package version (managedObject) id

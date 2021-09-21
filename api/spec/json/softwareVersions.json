@@ -116,6 +116,9 @@
         {
           "name": "id",
           "type": "[]softwareversion",
+          "dependsOn": [
+            "softwareId"
+          ],
           "pipeline": true,
           "required": true,
           "description": "Software Package version (managedObject) id"
@@ -195,6 +198,9 @@
         {
           "name": "id",
           "type": "[]softwareversion",
+          "dependsOn": [
+            "softwareId"
+          ],
           "pipeline": true,
           "required": true,
           "description": "Software Package version (managedObject) id"
@@ -237,7 +243,8 @@
         "go": [
           {
             "description": "Install a software package version",
-            "command": "c8y software versions install --device 1234 --software go-c8y-cli --version 1.0.0"
+            "command": "c8y software versions install --device 1234 --software go-c8y-cli --version 1.0.0",
+            "skipTest": true
           }
         ]
       },
@@ -260,13 +267,37 @@
           "name": "version",
           "type": "softwareversionName",
           "required": false,
+          "dependsOn": [
+            "software"
+          ],
           "property": "c8y_SoftwareUpdate.0.version",
           "description": "Software version"
         },
         {
-          "name": "install",
+          "name": "url",
+          "type": "string",
+          "required": false,
+          "property": "c8y_SoftwareUpdate.0.url",
+          "description": "Software url"
+        },
+        {
+          "name": "description",
+          "type": "string",
+          "description": "Operation description",
+          "default": "Install software package"
+        },
+        {
+          "name": "softwareDetails",
+          "type": "softwareDetails",
+          "position": 98,
+          "property": "c8y_SoftwareUpdate.0",
+          "description": "Computed parameter which is filled in when the software details, name, version and url"
+        },
+        {
+          "name": "action",
           "type": "string",
           "static": true,
+          "position": 99,
           "description": "Software action",
           "property": "c8y_SoftwareUpdate.0.action",
           "default": "install",
@@ -331,7 +362,7 @@
           "description": "Software version"
         },
         {
-          "name": "delete",
+          "name": "action",
           "type": "string",
           "static": true,
           "description": "Software action",
