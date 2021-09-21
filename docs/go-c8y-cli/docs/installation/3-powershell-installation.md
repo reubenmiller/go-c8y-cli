@@ -33,6 +33,17 @@ title: PowerShell
     ```
     :::
 
+    :::tip
+    You can install go-c8y-cli into a shared folder (i.e. C:\tools\cumulocity)
+
+    ```powershell
+    .\install.ps1 -InstallPath C:\tools\cumulocity -UserHome C:\tools\cumulocity -SkipVersionCheck
+
+    # Or if you want to edit the global powershell profile for all users, but this requires administrator rights!
+    .\install.ps1 -InstallPath C:\tools\cumulocity -UserHome C:\tools\cumulocity -SkipVersionCheck -ProfilePath $PROFILE.AllUsersAllHosts
+    ```
+    :::
+
 3. Verify that the `c8y` binary is executable and can be found on the command line 
 
     ```bash
