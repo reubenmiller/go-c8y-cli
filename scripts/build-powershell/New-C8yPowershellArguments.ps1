@@ -47,6 +47,8 @@
         $null = $ParameterDefinition.Add("ValueFromPipelineByPropertyName=`$true")
     }
 
+    $Ignore = $false
+
     # Type Definition
     $DataType = switch ($Type) {
         "[]agent" { "object[]"; break }
@@ -99,6 +101,9 @@
         "[]devicerequest" { "object[]"; break }
         "strings" { "string"; break }
         "tenant" { "object"; break }
+
+        # Complex lookup types. These should not be visible in powershell
+        "softwareDetails" { $Ignore = $true; ""; break }
         default {
             Write-Error "Unsupported Type. $_"
         }
@@ -109,6 +114,6 @@
         Type = $DataType
         Definition = $ParameterDefinition
         Description = "$Description"
-
+        Ignore = $Ignore
     }
 }

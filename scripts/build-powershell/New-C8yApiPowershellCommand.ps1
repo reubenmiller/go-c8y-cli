@@ -180,6 +180,11 @@
         }
         $item = New-C8yPowershellArguments @ArgParams
 
+        if ($item.ignore) {
+            Write-Warning "Skipping special argument: $($item.Name)"
+            continue
+        }
+
         if ($ReadFromPipeline) {
             Write-Host "$NameCamel : $($item.Name), $($iArg.type)=>$($item.type)" -ForegroundColor Magenta
             if ($item.type -match "^(string|long)$") {

@@ -65,6 +65,14 @@
       "description": "Parameter name. It should start with a lower case character, and only include characters [a-zA-Z]",
       "pattern": "^[a-z][a-zA-Z]+$"
     },
+    "dependsOn": {
+      "type": "array",
+      "title": "Parameter is depend on the list of parameters for completions or other lookups",
+      "description": "Additional links to parameters which the current parameter is dependent on",
+      "items": {
+        "type": "string"
+      }
+    },
     "cliArgumentType": {
       "type": "string",
       "description": "CLI Argument type",
@@ -99,6 +107,7 @@
         "firmwareVersionName",
         "firmwarepatchName",
         "[]software",
+        "softwareDetails",
         "softwareName",
         "[]softwareversion",
         "softwareversionName",
@@ -332,6 +341,9 @@
                 "position": {
                   "$ref": "#/definitions/argumentPosition"
                 },
+                "dependsOn": {
+                  "$ref": "#/definitions/dependsOn"
+                },
                 "skip": {
                   "$ref": "#/definitions/skipParameter"
                 }
@@ -380,6 +392,9 @@
                     "type": "string"
                   }
                 },
+                "dependsOn": {
+                  "$ref": "#/definitions/dependsOn"
+                },
                 "skip": {
                   "$ref": "#/definitions/skipParameter"
                 }
@@ -427,6 +442,9 @@
                   "items": {
                     "type": "string"
                   }
+                },
+                "dependsOn": {
+                  "$ref": "#/definitions/dependsOn"
                 },
                 "skip": {
                   "$ref": "#/definitions/skipParameter"
@@ -532,6 +550,9 @@
                   "items": {
                     "type": "string"
                   }
+                },
+                "dependsOn": {
+                  "$ref": "#/definitions/dependsOn"
                 },
                 "skip": {
                   "$ref": "#/definitions/skipParameter"

@@ -93,6 +93,10 @@
         # software array
         "[]software" = "c8yfetcher.WithSoftwareByNameFirstMatch(client, args, `"${prop}`", `"${queryParam}`"),"
 
+        "softwareDetails" = @(
+            "c8yfetcher.WithSoftwareVersionData(client, `"software`", `"version`", args, `"`", `"${queryParam}`"),"
+        ) -join "`n"
+
         # software name
         "softwareName" = "flags.WithStringValue(`"${prop}`", `"${queryParam}`"),"
         
