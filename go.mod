@@ -6,7 +6,6 @@ require (
 	github.com/araddon/dateparse v0.0.0-20210207001429-0eec95c9db7e
 	github.com/charmbracelet/glamour v0.3.0
 	github.com/cli/safeexec v1.0.0
-	github.com/commander-cli/commander/v2 v2.5.0-alpha2 // indirect
 	github.com/cpuguy83/go-md2man/v2 v2.0.0
 	github.com/fatih/color v1.10.0
 	github.com/google/go-jsonnet v0.17.0
@@ -26,7 +25,7 @@ require (
 	github.com/olekukonko/ts v0.0.0-20171002115256-78ecb04241c0
 	github.com/pkg/errors v0.9.1
 	github.com/pquerna/otp v1.3.0
-	github.com/reubenmiller/go-c8y v0.9.0-rc.7
+	github.com/reubenmiller/go-c8y v0.9.0-rc.12
 	github.com/sethvargo/go-password v0.2.0
 	github.com/spf13/cobra v1.2.1
 	github.com/spf13/pflag v1.0.5
