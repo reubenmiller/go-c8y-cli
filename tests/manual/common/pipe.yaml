@@ -22,3 +22,15 @@ tests:
         path: /alarm/alarms/1
         method: PUT
         body.id: '2'
+  
+  ? It supports overriding the pipeline argument in stdin with plain string parameters
+  : command: >
+      echo "{\"name\":\"test02\"}" | c8y devices create --name test01 --dry --template input.value
+    exit-code: 0
+    stderr:
+      line-count: 0
+    stdout:
+      json:
+        path: /inventory/managedObjects
+        method: POST
+        body.name: 'test01'
