@@ -1,6 +1,7 @@
 package cmdutil
 
 import (
+	"bytes"
 	"errors"
 	"fmt"
 	"io/ioutil"
@@ -188,6 +189,20 @@ func (f *Factory) GetViewProperties(cfg *config.Config, cmd *cobra.Command, outp
 			log.Infof("Detected view: %s", strings.Join(props, ", "))
 			viewProperties = append(viewProperties, props...)
 		}
+	default:
+		// manual view
+		props, err := dataview.GetViewByName(view)
+		if err != nil || len(props) == 0 {
+			if err != nil {
+				cfg.Logger.Warnf("no matching view found. %s, name=%s", err, view)
+			} else {
+				cfg.Logger.Warnf("no matching view found. name=%s", view)
+			}
+			viewProperties = append(viewProperties, "**")
+		} else {
+			cfg.Logger.Infof("Detected view: %s", strings.Join(props, ", "))
+			viewProperties = append(viewProperties, props...)
+		}
 	}
 	return viewProperties, nil
 }
@@ -215,10 +230,15 @@ func (f *Factory) WriteJSONToConsole(cfg *config.Config, cmd *cobra.Command, pro
 		return filterErr
 	}
 
+	output = bytes.ReplaceAll(output, []byte("\\u003c"), []byte("<"))
+	output = bytes.ReplaceAll(output, []byte("\\u003e"), []byte(">"))
+	output = bytes.ReplaceAll(output, []byte("\\u0026"), []byte("&"))
+
 	jsonformatter.WithOutputFormatters(
 		consol,
 		output,
 		false,
+		jsonformatter.WithFileOutput(commonOptions.OutputFile != "", commonOptions.OutputFile, false),
 		jsonformatter.WithTrimSpace(true),
 		jsonformatter.WithJSONStreamOutput(true, consol.IsJSONStream(), consol.IsCSV()),
 		jsonformatter.WithSuffix(len(output) > 0, "\n"),
