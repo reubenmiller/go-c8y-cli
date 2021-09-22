@@ -44,6 +44,17 @@ None :)
     C8Y_SETTINGS_MODE_ENABLEUPDATE=false
     ```
 
+* software list does not filter by name
+    ```
+    c8y software list -p 100 --name "*python*" Does not filter by name
+    ```
+
+* Get firmware item fails with "not found"
+
+    ```
+    c8y firmware versions get --firmwareId cb3-c8y-emmc-buster-armhf-schindler.mender --id 3.0.1_2021-04-01-1901
+    ```
+
 * List versions without their parent to list all versions no matter which parents? Is this dangerous?
     * c8y software versions list (make --softwareId optional)
     * c8y firmware versions list (make --firmwareId optional)
@@ -76,15 +87,10 @@ None :)
 
 * Automatic tests for device management are currently broken (due to unsupported template strings in test framework)
 
-* Sort software versions by date? in reverse order, so that the user can always see the most up to date?
-
 * Create operations
-    * c8y software versions list -p 1 | c8y software versions install --device 12345
-    * c8y configuration list -p 1 | c8y software versions install --device 12345
-    * c8y firmware versions list -p 1 | c8y software versions install --device 12345
-
-    c8y software version install --softwareId 1234 --id 1.0.0 | c8y operations create --device device01 --template "c8y_Software: input.value.c8y_Software"
-    c8y devices list | c8y software version install --softwareId 1234 --id 1.0.0
+    * c8y devices list -p 1 | c8y software versions install --software python3-requests --version 0.22.0
+    * c8y devices list -p 1 | c8y firmware versions install --firmware iot-linux-1 --version 1.0.0
+    * c8y devices list -p 1 | c8y configuration install --configuration config-1
 
 
 
