@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"net/http"
+	"net/url"
 	"os"
 	"runtime"
 	"sort"
@@ -215,4 +216,16 @@ func GetCommandLineArgs() string {
 		buf.WriteByte(' ')
 	}
 	return buf.String()
+}
+
+// EscapeQuery escapes query parameters so they can be encoded into the URL without conflicting with special characters like "&"
+func EscapeQuery(v []byte) []byte {
+	q := string(v)
+	raw, err := url.QueryUnescape(q)
+
+	if err == nil {
+		q = raw
+	}
+
+	return []byte(url.QueryEscape(q))
 }

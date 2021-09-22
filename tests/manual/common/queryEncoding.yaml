@@ -1,0 +1,26 @@
+tests:
+  It encodes query parameters in custom inventory query:
+    command: |
+      c8y inventory find --query "name eq 'salt & pepper'" --verbose
+    exit-code: 0
+    stderr:
+      contains:
+        - name+eq+%27salt+%26+pepper%27
+  
+  It does not double encode query parameters:
+    command: |
+      c8y inventory find --query "name eq 'salt %26 pepper'" --verbose
+    exit-code: 0
+    stderr:
+      contains:
+        - name+eq+%27salt+%26+pepper%27
+  
+  It encodes query parameters in custom inventory query for complex characters:
+    command: |
+      c8y inventory find --query "name eq 'salt &[]()%$*?-'"
+    exit-code: 0
+  
+  It encodes query parameters in devices query:
+    command: |
+      c8y devices list --query "name eq 'salt & pepper'"
+    exit-code: 0
