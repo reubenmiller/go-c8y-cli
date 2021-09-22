@@ -1,0 +1,24 @@
+tests:
+  ? It supports piping json via stdin and using pipeline parameter with a fixed value
+  : command: >
+      echo "{\"other\":\"2\"}" | c8y alarms update --id 1 --dry --template input.value
+    exit-code: 0
+    stderr:
+      line-count: 0
+    stdout:
+      json:
+        path: /alarm/alarms/1
+        method: PUT
+        body.other: '2'
+
+  ? It supports overriding the pipeline argument in stdin with fixed parameters
+  : command: >
+      echo "{\"id\":\"2\"}" | c8y alarms update --id 1 --dry --template input.value
+    exit-code: 0
+    stderr:
+      line-count: 0
+    stdout:
+      json:
+        path: /alarm/alarms/1
+        method: PUT
+        body.id: '2'

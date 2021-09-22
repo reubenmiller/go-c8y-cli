@@ -310,8 +310,9 @@ func WithIDSlice(args []string, opts ...string) flags.GetOption {
 
 		values = ParseValues(append(values, args...))
 
+		var overrideValue iterator.Iterator
 		if len(values) > 0 {
-			return dst, iterator.NewSliceIterator(values), nil
+			overrideValue = iterator.NewSliceIterator(values)
 		}
 
 		if inputIterators != nil && inputIterators.PipeOptions.Name == src {
@@ -325,7 +326,15 @@ func WithIDSlice(args []string, opts ...string) flags.GetOption {
 			if err != nil || pipeIter == nil {
 				return "", nil, err
 			}
-			return inputIterators.PipeOptions.Property, pipeIter, nil
+
+			if pipeIter.IsBound() {
+				// Use infinite slice iterator so that the stdin can drive the iteration
+				// but only if the other pipe iterator is bound, otherwise it would create an infinite loop!
+				overrideValue = iterator.NewInfiniteSliceIterator(values)
+			}
+
+			iter := iterator.NewOverrideIterator(pipeIter, overrideValue)
+			return inputIterators.PipeOptions.Property, iter, nil
 		}
 
 		if len(values) == 0 {
