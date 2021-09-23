@@ -12,7 +12,7 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmdutil"
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/pkg/mapbuilder"
-	"github.com/reubenmiller/go-c8y-cli/pkg/utilities"
+	"github.com/reubenmiller/go-c8y-cli/pkg/url"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
 )
@@ -96,7 +96,7 @@ func (n *CmdFind) RunE(cmd *cobra.Command, args []string) error {
 			}
 
 			// Encode special characters
-			b = utilities.EscapeQuery(b)
+			b = url.EscapeQuery(b)
 
 			if n.orderBy != "" {
 				if !bytes.Contains(b, []byte("$orderby=")) {

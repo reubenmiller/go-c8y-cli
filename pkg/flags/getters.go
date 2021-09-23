@@ -8,6 +8,8 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/reubenmiller/go-c8y-cli/pkg/url"
+
 	"github.com/reubenmiller/go-c8y-cli/pkg/c8ydata"
 	"github.com/reubenmiller/go-c8y-cli/pkg/iterator"
 	"github.com/reubenmiller/go-c8y-cli/pkg/jsonUtilities"
@@ -76,7 +78,7 @@ func WithPathParameters(cmd *cobra.Command, path *StringTemplate, inputIterators
 			switch v := value.(type) {
 			case []string:
 				if len(v) > 0 {
-					path.SetVariable(name, strings.Join(v, ","))
+					path.SetVariable(name, url.EscapeQueryString(strings.Join(v, ",")))
 				}
 
 			case []int:
@@ -93,7 +95,7 @@ func WithPathParameters(cmd *cobra.Command, path *StringTemplate, inputIterators
 			default:
 				strValue := fmt.Sprintf("%v", value)
 				if strValue != "" {
-					path.SetVariable(name, fmt.Sprintf("%v", value))
+					path.SetVariable(name, url.EscapeQueryString(strValue))
 				}
 			}
 		}
