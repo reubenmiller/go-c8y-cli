@@ -17,49 +17,6 @@ None :)
 
 ## TODO (next branch)
 
-### Docs
-
-* [ ] Confirmation
-* [ ] Session encryption
-* [ ] Partial setting of sessions (i.e. bootstrap credentials with only the username/password set)
-* [x] Workers
-* [x] Views
-* [x] Activity Log
-* [x] Filtering
-* [x] Configuration (defaults, environment variables, arguments)
-* [x] Common Parameters
-* [x] Error handling
-* [x] Aliases
-
-### Naming Consistency
-
-### Bugs
-
-* updating mode does not take effect immediately if environment variables are already set.
-    * The setting read from the profile is overridden by locally assigned values
-
-    ``` 
-    C8Y_SETTINGS_MODE_ENABLECREATE=false
-    C8Y_SETTINGS_MODE_ENABLEDELETE=false
-    C8Y_SETTINGS_MODE_ENABLEUPDATE=false
-    ```
-
-* software list does not filter by name
-    ```
-    c8y software list -p 100 --name "*python*" Does not filter by name
-    ```
-
-* Get firmware item fails with "not found"
-
-    ```
-    c8y firmware versions get --firmwareId cb3-c8y-emmc-buster-armhf-schindler.mender --id 3.0.1_2021-04-01-1901
-    ```
-
-* List versions without their parent to list all versions no matter which parents? Is this dangerous?
-    * c8y software versions list (make --softwareId optional)
-    * c8y firmware versions list (make --firmwareId optional)
-    * c8y firmware patches list (make --firmwareId optional)
-
 * Download commands?:
 
     Should configuration with external URLs be downloaded? Can it be trusted? There is currently a workaround
@@ -84,15 +41,32 @@ None :)
     * c8y software versions download
     * c8y configuration download
 
+### Docs
 
-* Automatic tests for device management are currently broken (due to unsupported template strings in test framework)
+* [x] Confirmation
+* [x] Session encryption
+* [x] Partial setting of sessions (i.e. bootstrap credentials with only the username/password set)
+* [x] Workers
+* [x] Views
+* [x] Activity Log
+* [x] Filtering
+* [x] Configuration (defaults, environment variables, arguments)
+* [x] Common Parameters
+* [x] Error handling
+* [x] Aliases
 
-* Create operations
-    * c8y devices list -p 1 | c8y software versions install --software python3-requests --version 0.22.0
-    * c8y devices list -p 1 | c8y firmware versions install --firmware iot-linux-1 --version 1.0.0
-    * c8y devices list -p 1 | c8y configuration install --configuration config-1
+### Naming Consistency
 
+### Bugs
 
+* updating mode does not take effect immediately if environment variables are already set.
+    * The setting read from the profile is overridden by locally assigned values
+
+    ``` 
+    C8Y_SETTINGS_MODE_ENABLECREATE=false
+    C8Y_SETTINGS_MODE_ENABLEDELETE=false
+    C8Y_SETTINGS_MODE_ENABLEUPDATE=false
+    ```
 
 ~~not known~~
 
