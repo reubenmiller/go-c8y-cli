@@ -1,0 +1,9 @@
+tests:
+  configuration_list_Get a list of configuration files:
+    command: c8y configuration list --dry
+    exit-code: 0
+    stdout:
+      json:
+        method: GET
+        path: /inventory/managedObjects
+        query: r/type eq 'c8y_ConfigurationDump'

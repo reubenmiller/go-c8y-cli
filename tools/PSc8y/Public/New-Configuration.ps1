@@ -23,9 +23,8 @@ Create a new configuration file
     [OutputType([object])]
     Param(
         # name
-        [Parameter(ValueFromPipeline=$true,
-                   ValueFromPipelineByPropertyName=$true)]
-        [object[]]
+        [Parameter()]
+        [string]
         $Name,
 
         # Description of the configuration package
@@ -44,8 +43,9 @@ Create a new configuration file
         $Url,
 
         # Device type filter. Only allow configuration to be applied to devices of this type
-        [Parameter()]
-        [string]
+        [Parameter(ValueFromPipeline=$true,
+                   ValueFromPipelineByPropertyName=$true)]
+        [object[]]
         $DeviceType,
 
         # File to upload
@@ -76,13 +76,13 @@ Create a new configuration file
     Process {
 
         if ($ClientOptions.ConvertToPS) {
-            $Name `
+            $DeviceType `
             | Group-ClientRequests `
             | c8y configuration create $c8yargs `
             | ConvertFrom-ClientOutput @TypeOptions
         }
         else {
-            $Name `
+            $DeviceType `
             | Group-ClientRequests `
             | c8y configuration create $c8yargs
         }

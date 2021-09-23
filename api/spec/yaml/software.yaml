@@ -8,6 +8,8 @@ information:
 
 endpoints:
   - name: getSoftwareCollection
+    # Skipping as framework does not support optional sub query parameters
+    skip: true
     method: GET
     description: Get software collection
     descriptionLong: Get a collection of software packages (managedObjects) based on filter parameters

@@ -51,13 +51,11 @@ func NewCmdDevicesList(f *cmdutil.Factory) *CmdDevicesList {
 	cmd.Flags().Bool("agents", false, "Only include agents.")
 	cmd.Flags().String("fragmentType", "", "Filter by fragment type")
 	cmd.Flags().String("owner", "", "Filter by owner")
-	cmd.Flags().String("query", "", "Additional query filter (accepts pipeline)")
-	cmd.Flags().String("queryTemplate", "", "String template to be used when applying the given query. Use %s to reference the query/pipeline input")
-	cmd.Flags().String("orderBy", "name", "Order by. e.g. _id asc or name asc or creationTime.date desc")
 	cmd.Flags().Bool("withParents", false, "Include a flat list of all parents and grandparents of the given object")
 
 	flags.WithOptions(
 		cmd,
+		flags.WithCommonCumulocityQueryOptions(),
 		flags.WithExtendedPipelineSupport("query", "query", false, "c8y_DeviceQueryString"),
 	)
 

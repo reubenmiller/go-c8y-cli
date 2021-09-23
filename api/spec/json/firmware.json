@@ -9,6 +9,7 @@
     {
       "name": "getFirmwareCollection",
       "method": "GET",
+      "skip": true,
       "description": "Get firmware collection",
       "descriptionLong": "Get a collection of firmware packages (managedObjects) based on filter parameters",
       "path": "inventory/managedObjects?query=$filter=((type eq 'c8y_Firmware') and ((name eq '{name}') and ((not(has(description))) or description eq '{description}') and (not(has(c8y_Filter.type)) or c8y_Filter.type eq '{deviceType}'))) $orderby=name asc",

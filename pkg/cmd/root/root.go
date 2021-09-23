@@ -24,6 +24,7 @@ import (
 	bulkoperationsCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/bulkoperations"
 	completionCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/completion"
 	configurationCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/configuration"
+	configurationListCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/configuration/list"
 	currentapplicationCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/currentapplication"
 	currenttenantCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/currenttenant"
 	currentuserCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/currentuser"
@@ -40,6 +41,7 @@ import (
 	eventsSubscribeCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/events/subscribe"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmd/factory"
 	firmwareCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/firmware"
+	firmwareListCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/firmware/list"
 	firmwareVersionsPatchesCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/firmware/patches"
 	firmwarePatchesCreateCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/firmware/patches/create"
 	firmwareVersionsCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/firmware/versions"
@@ -69,6 +71,7 @@ import (
 	smartgroupsCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/smartgroups"
 	smartgroupsListCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/smartgroups/list"
 	softwareCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/software"
+	softwareListCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/software/list"
 	softwareVersionsCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/software/versions"
 	softwareVersionsCreateCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/software/versions/create"
 	systemoptionsCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/systemoptions"
@@ -332,12 +335,14 @@ func NewCmdRoot(f *cmdutil.Factory, version, buildDate string) *CmdRoot {
 
 	// configuration
 	configuration := configurationCmd.NewSubCommand(f).GetCommand()
+	configuration.AddCommand(configurationListCmd.NewListCmd(f).GetCommand())
 	cmd.AddCommand(configuration)
 
 	// software
 	softwareVersions := softwareVersionsCmd.NewSubCommand(f).GetCommand()
 	softwareVersions.AddCommand(softwareVersionsCreateCmd.NewCreateCmd(f).GetCommand())
 	software := softwareCmd.NewSubCommand(f).GetCommand()
+	software.AddCommand(softwareListCmd.NewListCmd(f).GetCommand())
 	software.AddCommand(softwareVersions)
 	cmd.AddCommand(software)
 
@@ -348,6 +353,7 @@ func NewCmdRoot(f *cmdutil.Factory, version, buildDate string) *CmdRoot {
 	firmwareVersions.AddCommand(firmwareVersionsCreateCmd.NewCreateCmd(f).GetCommand())
 
 	firmware := firmwareCmd.NewSubCommand(f).GetCommand()
+	firmware.AddCommand(firmwareListCmd.NewListCmd(f).GetCommand())
 	firmware.AddCommand(firmwareVersions)
 	firmware.AddCommand(firmwarePatches)
 	cmd.AddCommand(firmware)

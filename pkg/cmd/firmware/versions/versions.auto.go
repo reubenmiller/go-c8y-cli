@@ -2,7 +2,6 @@ package versions
 
 import (
 	cmdDelete "github.com/reubenmiller/go-c8y-cli/pkg/cmd/firmware/versions/delete"
-	cmdDownload "github.com/reubenmiller/go-c8y-cli/pkg/cmd/firmware/versions/download"
 	cmdGet "github.com/reubenmiller/go-c8y-cli/pkg/cmd/firmware/versions/get"
 	cmdInstall "github.com/reubenmiller/go-c8y-cli/pkg/cmd/firmware/versions/install"
 	cmdList "github.com/reubenmiller/go-c8y-cli/pkg/cmd/firmware/versions/list"
@@ -28,7 +27,6 @@ func NewSubCommand(f *cmdutil.Factory) *SubCmdVersions {
 	cmd.AddCommand(cmdList.NewListCmd(f).GetCommand())
 	cmd.AddCommand(cmdGet.NewGetCmd(f).GetCommand())
 	cmd.AddCommand(cmdDelete.NewDeleteCmd(f).GetCommand())
-	cmd.AddCommand(cmdDownload.NewDownloadCmd(f).GetCommand())
 	cmd.AddCommand(cmdInstall.NewInstallCmd(f).GetCommand())
 
 	ccmd.SubCommand = subcommand.NewSubCommand(cmd)

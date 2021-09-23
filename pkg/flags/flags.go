@@ -84,6 +84,17 @@ func WithData() Option {
 	}
 }
 
+// WithCommonCumulocityQueryOptions adds support for common query parameter options like query, orderBy etc.
+func WithCommonCumulocityQueryOptions() Option {
+	return func(cmd *cobra.Command) *cobra.Command {
+		cmd.Flags().String("query", "", "Additional query filter (accepts pipeline)")
+		cmd.Flags().String("queryTemplate", "", "String template to be used when applying the given query. Use %s to reference the query/pipeline input")
+		cmd.Flags().String("orderBy", "name", "Order by. e.g. _id asc or name asc or creationTime.date desc")
+
+		return cmd
+	}
+}
+
 // WithTemplate adds support for templates
 func WithTemplate() Option {
 	return func(cmd *cobra.Command) *cobra.Command {

@@ -8,6 +8,8 @@ information:
 
 endpoints:
   - name: getConfigurationCollection
+    # deprecated as framework does not support conditional subquery parameters
+    skip: true
     method: GET
     description: Get configuration collection
     descriptionLong: Get a collection of configuration (managedObjects) based on filter parameters
@@ -71,11 +73,8 @@ endpoints:
     body:
       - name: name
         type: string
-        pipeline: true
         required: false
         description: name
-        pipelineAliases:
-          - "name"
       
       - name: description
         type: string
@@ -96,6 +95,11 @@ endpoints:
         type: string
         required: false
         description: Device type filter. Only allow configuration to be applied to devices of this type
+        pipeline: true
+        pipelineAliases:
+          - "c8y_Filter.type"
+          - "deviceType"
+          - "type"
 
       - name: file
         type: binaryUploadURL

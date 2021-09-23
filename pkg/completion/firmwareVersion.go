@@ -25,7 +25,7 @@ func WithFirmwareVersion(flagVersion string, flagNameFirmware string, clientFunc
 			versionPattern := "*" + toComplete + "*"
 			opt := &c8y.ManagedObjectOptions{
 				// Only filter by version name
-				Query:             fmt.Sprintf("(type eq '%s') and (not(has(c8y_Patch))) and (c8y_Firmware.version eq '%s')", versionType, versionPattern),
+				Query:             fmt.Sprintf("$filter=(type eq '%s') and (not(has(c8y_Patch))) and (c8y_Firmware.version eq '%s') $orderby=c8y_Firmware.version,creationTime", versionType, versionPattern),
 				WithParents:       true,
 				PaginationOptions: *c8y.NewPaginationOptions(100),
 			}
@@ -40,7 +40,7 @@ func WithFirmwareVersion(flagVersion string, flagNameFirmware string, clientFunc
 				// Filter firmware versions by firmware
 				if c8ydata.IsID(firmwareName) {
 					opt.Query = fmt.Sprintf(
-						"(type eq '%s') and (not(has(c8y_Patch))) and (c8y_Firmware.version eq '%v') and (bygroupid(%s))",
+						"$filter=(type eq '%s') and (not(has(c8y_Patch))) and (c8y_Firmware.version eq '%v') and (bygroupid(%s)) $orderby=c8y_Firmware.version,creationTime",
 						versionType, versionPattern, firmwareName,
 					)
 				} else {
@@ -48,12 +48,12 @@ func WithFirmwareVersion(flagVersion string, flagNameFirmware string, clientFunc
 					packages, _, err := client.Inventory.GetManagedObjects(
 						context.Background(),
 						&c8y.ManagedObjectOptions{
-							Query: fmt.Sprintf("(type eq '%s') and name eq '%s'", "c8y_Firmware", firmwareName),
+							Query: fmt.Sprintf("$filter=(type eq '%s') and name eq '%s' $orderby=name,creationTime", "c8y_Firmware", firmwareName),
 						},
 					)
 					if err == nil && len(packages.ManagedObjects) > 0 {
 						opt.Query = fmt.Sprintf(
-							"(type eq '%s') and (not(has(c8y_Patch))) and (c8y_Firmware.version eq '%v') and (bygroupid(%s))",
+							"$filter=(type eq '%s') and (not(has(c8y_Patch))) and (c8y_Firmware.version eq '%v') and (bygroupid(%s)) $orderby=c8y_Firmware.version,creationTime",
 							versionType, versionPattern, packages.ManagedObjects[0].ID)
 					}
 				}

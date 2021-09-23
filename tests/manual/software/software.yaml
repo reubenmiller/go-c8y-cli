@@ -26,3 +26,12 @@ tests:
         body.c8y_SoftwareUpdate.0.version: 1.0.0
         body.c8y_SoftwareUpdate.0.url: r/.+
         body.c8y_SoftwareUpdate.0.action: install
+  
+  It filters by software name:
+    command: |
+      c8y software list --name "*python*" --dry
+    exit-code: 0
+    stdout:
+      json:
+        method: GET
+        query: r/.*name eq '\*python\*'.*

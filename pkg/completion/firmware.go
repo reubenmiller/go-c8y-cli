@@ -18,13 +18,10 @@ func WithFirmware(flagName string, clientFunc func() (*c8y.Client, error)) Optio
 			}
 
 			pattern := "*" + toComplete + "*"
-			opt := &c8y.ManagedObjectOptions{
-				Query:             fmt.Sprintf("(type eq '%s') and (name eq '%s')", "c8y_Firmware", pattern),
-				PaginationOptions: *c8y.NewPaginationOptions(100),
-			}
-			items, _, err := client.Inventory.GetManagedObjects(
+			items, _, err := client.Firmware.GetFirmwareByName(
 				context.Background(),
-				opt,
+				pattern,
+				c8y.NewPaginationOptions(100),
 			)
 
 			if err != nil {

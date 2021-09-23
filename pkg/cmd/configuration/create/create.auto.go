@@ -45,11 +45,11 @@ Create a configuration package
 
 	cmd.SilenceUsage = true
 
-	cmd.Flags().String("name", "", "name (accepts pipeline)")
+	cmd.Flags().String("name", "", "name")
 	cmd.Flags().String("description", "", "Description of the configuration package")
 	cmd.Flags().String("configurationType", "", "Configuration type")
 	cmd.Flags().String("url", "", "URL link to the configuration file")
-	cmd.Flags().String("deviceType", "", "Device type filter. Only allow configuration to be applied to devices of this type")
+	cmd.Flags().String("deviceType", "", "Device type filter. Only allow configuration to be applied to devices of this type (accepts pipeline)")
 	cmd.Flags().String("file", "", "File to upload")
 
 	completion.WithOptions(
@@ -61,7 +61,7 @@ Create a configuration package
 		flags.WithProcessingMode(),
 		flags.WithData(),
 		f.WithTemplateFlag(cmd),
-		flags.WithExtendedPipelineSupport("name", "name", false, "name"),
+		flags.WithExtendedPipelineSupport("deviceType", "deviceType", false, "c8y_Filter.type", "deviceType", "type"),
 	)
 
 	// Required flags
@@ -134,7 +134,7 @@ func (n *CreateCmd) RunE(cmd *cobra.Command, args []string) error {
 		cmd,
 		body,
 		inputIterators,
-		flags.WithOverrideValue("name", "name"),
+		flags.WithOverrideValue("deviceType", "deviceType"),
 		flags.WithDataFlagValue(),
 		flags.WithStringValue("name", "name"),
 		flags.WithStringValue("description", "description"),

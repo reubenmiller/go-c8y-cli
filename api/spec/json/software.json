@@ -8,6 +8,7 @@
   "endpoints": [
     {
       "name": "getSoftwareCollection",
+      "skip": true,
       "method": "GET",
       "description": "Get software collection",
       "descriptionLong": "Get a collection of software packages (managedObjects) based on filter parameters",

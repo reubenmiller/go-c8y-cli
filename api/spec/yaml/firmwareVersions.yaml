@@ -157,6 +157,8 @@ endpoints:
         description: Remove version and any related binaries
 
   - name: download
+    # Still not ready as the default file output should be automatically assigned
+    skip: true
     description: Download firmware version binary
     descriptionLong: >
       Download a binary stored in Cumulocity and display it on the console. For non text based binaries
