@@ -2,8 +2,8 @@
   "information": {
     "name": "software/versions",
     "description": "Cumulocity software version management",
-    "descriptionLong": "REST endpoint to interact with Cumulocity software versions",
-    "link": "https://cumulocity.com/guides/reference/inventory/"
+    "descriptionLong": "Software version management to create/list/delete versions",
+    "link": "https://cumulocity.com/guides/users-guide/device-management/#software-repo"
   },
   "endpoints": [
     {

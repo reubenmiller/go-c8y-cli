@@ -2,8 +2,8 @@
   "information": {
     "name": "firmware/versions",
     "description": "Cumulocity firmware version management",
-    "descriptionLong": "REST endpoint to interact with Cumulocity firmware versions",
-    "link": "https://cumulocity.com/guides/reference/inventory/"
+    "descriptionLong": "Firmware version management to create/list/delete versions",
+    "link": "https://cumulocity.com/guides/users-guide/device-management/#firmware-repo"
   },
   "endpoints": [
     {
