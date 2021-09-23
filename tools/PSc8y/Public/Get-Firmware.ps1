@@ -2,7 +2,7 @@
 Function Get-Firmware {
 <#
 .SYNOPSIS
-Get Firmware
+Get firmware
 
 .DESCRIPTION
 Get an existing firmware package (managedObject)

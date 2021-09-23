@@ -20,7 +20,7 @@ func NewSubCommand(f *cmdutil.Factory) *SubCmdConfiguration {
 	cmd := &cobra.Command{
 		Use:   "configuration",
 		Short: "Cumulocity configuration repository management",
-		Long:  `Managed configurations in the configuration repository`,
+		Long:  `Configuration management to create/list/delete configurations`,
 	}
 
 	// Subcommands

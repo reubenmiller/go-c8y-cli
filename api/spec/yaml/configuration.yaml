@@ -3,7 +3,7 @@
 information:
   name: configuration
   description: Cumulocity configuration repository management
-  descriptionLong: 'Managed configurations in the configuration repository'
+  descriptionLong: Configuration management to create/list/delete configurations
   link: https://cumulocity.com/guides/users-guide/device-management/#configuration-repository
 
 endpoints:
@@ -128,7 +128,7 @@ endpoints:
       - "url"
 
   - name: getConfiguration
-    description: Get Configuration
+    description: Get configuration
     descriptionLong: Get an existing configuration package (managedObject)
     method: GET
     path: inventory/managedObjects/{id}

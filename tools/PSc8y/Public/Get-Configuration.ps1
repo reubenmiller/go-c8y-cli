@@ -2,7 +2,7 @@
 Function Get-Configuration {
 <#
 .SYNOPSIS
-Get Configuration
+Get configuration
 
 .DESCRIPTION
 Get an existing configuration package (managedObject)

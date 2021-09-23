@@ -25,14 +25,14 @@ type GetCmd struct {
 	factory *cmdutil.Factory
 }
 
-// NewGetCmd creates a command to Get Firmware
+// NewGetCmd creates a command to Get firmware
 func NewGetCmd(f *cmdutil.Factory) *GetCmd {
 	ccmd := &GetCmd{
 		factory: f,
 	}
 	cmd := &cobra.Command{
 		Use:   "get",
-		Short: "Get Firmware",
+		Short: "Get firmware",
 		Long:  `Get an existing firmware package (managedObject)`,
 		Example: heredoc.Doc(`
 $ c8y firmware get --id 12345

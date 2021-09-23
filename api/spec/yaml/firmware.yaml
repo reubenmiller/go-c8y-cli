@@ -3,8 +3,8 @@
 information:
   name: firmware
   description: Cumulocity firmware management
-  descriptionLong: Firmware management commands to create/list/delete firmware packages, versions and patches
-  link: https://cumulocity.com/guides/reference/inventory/
+  descriptionLong: Firmware management to create/list/delete packages, versions and patches
+  link: https://cumulocity.com/guides/users-guide/device-management/#firmware-repo
 
 endpoints:
   - name: getFirmwareCollection
@@ -122,7 +122,7 @@ endpoints:
       - "name"
 
   - name: getFirmware
-    description: Get Firmware
+    description: Get firmware
     descriptionLong: Get an existing firmware package (managedObject)
     method: GET
     path: inventory/managedObjects/{id}

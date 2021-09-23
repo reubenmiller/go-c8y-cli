@@ -2,8 +2,8 @@
   "information": {
     "name": "software",
     "description": "Cumulocity software management",
-    "descriptionLong": "REST endpoint to interact with Cumulocity managed objects",
-    "link": "https://cumulocity.com/guides/reference/inventory/"
+    "descriptionLong": "Software management to create/list/delete packages and versions",
+    "link": "https://cumulocity.com/guides/users-guide/device-management/#software-repo"
   },
   "endpoints": [
     {
@@ -179,7 +179,7 @@
     },
     {
       "name": "getSoftware",
-      "description": "Get Software",
+      "description": "Get software",
       "descriptionLong": "Get an existing software package (managedObject)",
       "method": "GET",
       "path": "inventory/managedObjects/{id}",

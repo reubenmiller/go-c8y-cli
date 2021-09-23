@@ -2,7 +2,7 @@
 Function Get-Software {
 <#
 .SYNOPSIS
-Get Software
+Get software
 
 .DESCRIPTION
 Get an existing software package (managedObject)

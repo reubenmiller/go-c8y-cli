@@ -20,7 +20,7 @@ func NewSubCommand(f *cmdutil.Factory) *SubCmdSoftware {
 	cmd := &cobra.Command{
 		Use:   "software",
 		Short: "Cumulocity software management",
-		Long:  `REST endpoint to interact with Cumulocity managed objects`,
+		Long:  `Software management to create/list/delete packages and versions`,
 	}
 
 	// Subcommands
