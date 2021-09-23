@@ -33,8 +33,11 @@ func NewCreateCmd(f *cmdutil.Factory) *CreateCmd {
 		Short: "Create firmware package",
 		Long:  `Create a new firmware package (managedObject)`,
 		Example: heredoc.Doc(`
-$ c8y firmware create --name "python3-requests" --description "python requests library"
+$ c8y firmware create --name "iot-linux" --description "Linux image for IoT devices"
 Create a firmware package
+
+$ echo -e "c8y_Linux\nc8y_MacOS" | c8y firmware create --name "iot-linux" --description "Linux image for IoT devices"
+Create the same firmware package for multiple device types
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
 			return f.CreateModeEnabled()
@@ -44,9 +47,9 @@ Create a firmware package
 
 	cmd.SilenceUsage = true
 
-	cmd.Flags().String("name", "", "name (accepts pipeline)")
+	cmd.Flags().String("name", "", "name")
 	cmd.Flags().String("description", "", "Description of the firmware package")
-	cmd.Flags().String("deviceType", "", "Device type filter. Only allow firmware to be applied to devices of this type")
+	cmd.Flags().String("deviceType", "", "Device type filter. Only allow firmware to be applied to devices of this type (accepts pipeline)")
 
 	completion.WithOptions(
 		cmd,
@@ -57,7 +60,7 @@ Create a firmware package
 		flags.WithProcessingMode(),
 		flags.WithData(),
 		f.WithTemplateFlag(cmd),
-		flags.WithExtendedPipelineSupport("name", "name", false, "name"),
+		flags.WithExtendedPipelineSupport("deviceType", "c8y_Filter.type", false, "c8y_Filter.type", "deviceType", "type"),
 	)
 
 	// Required flags
@@ -130,7 +133,7 @@ func (n *CreateCmd) RunE(cmd *cobra.Command, args []string) error {
 		cmd,
 		body,
 		inputIterators,
-		flags.WithOverrideValue("name", "name"),
+		flags.WithOverrideValue("deviceType", "c8y_Filter.type"),
 		flags.WithDataFlagValue(),
 		flags.WithStringValue("name", "name"),
 		flags.WithStringValue("description", "description"),

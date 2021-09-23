@@ -11,7 +11,7 @@ Create a new firmware package (managedObject)
 https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/firmware_create
 
 .EXAMPLE
-PS> New-Firmware -Name "python3-requests" -Description "python requests library" -Data @{$type=@{}}
+PS> New-Firmware -Name "iot-linux" -Description "Linux image for IoT devices" -Data @{$type=@{}}
 
 Create a firmware package
 
@@ -23,9 +23,8 @@ Create a firmware package
     [OutputType([object])]
     Param(
         # name
-        [Parameter(ValueFromPipeline=$true,
-                   ValueFromPipelineByPropertyName=$true)]
-        [object[]]
+        [Parameter()]
+        [string]
         $Name,
 
         # Description of the firmware package
@@ -34,8 +33,9 @@ Create a firmware package
         $Description,
 
         # Device type filter. Only allow firmware to be applied to devices of this type
-        [Parameter()]
-        [string]
+        [Parameter(ValueFromPipeline=$true,
+                   ValueFromPipelineByPropertyName=$true)]
+        [object[]]
         $DeviceType
     )
     DynamicParam {
@@ -61,13 +61,13 @@ Create a firmware package
     Process {
 
         if ($ClientOptions.ConvertToPS) {
-            $Name `
+            $DeviceType `
             | Group-ClientRequests `
             | c8y firmware create $c8yargs `
             | ConvertFrom-ClientOutput @TypeOptions
         }
         else {
-            $Name `
+            $DeviceType `
             | Group-ClientRequests `
             | c8y firmware create $c8yargs
         }

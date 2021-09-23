@@ -99,6 +99,27 @@
             "command": "c8y software create --name \"python3-requests\" --description \"python requests library\""
           },
           {
+            "description": "Create a software package which is only applicable for a specific device type",
+            "command": "c8y software create --name \"python3-requests\" --description \"python requests library\" --deviceType \"c8y_Linux\""
+          },
+          {
+            "description": "Create the same software package for multiple device types",
+            "command": "echo -e \"c8y_Linux\\nc8y_MacOS\" | c8y software create --name \"python3-requests\" --description \"python requests library\"",
+            "assertStdOut": {
+              "line-count": 2,
+              "json": {
+                "..0.method": "POST",
+                "..0.body.name": "python3-requests",
+                "..0.body.description": "python requests library",
+                "..0.body.c8y_Filter.type": "c8y_Linux",
+                "..1.method": "POST",
+                "..1.body.name": "python3-requests",
+                "..1.body.description": "python requests library",
+                "..1.body.c8y_Filter.type": "c8y_MacOS"
+              }
+            }
+          },
+          {
             "description": "Create a software package and create a new version",
             "skipTest": true,
             "command": "c8y software create --name \"python3-requests\" | c8y software versions create --version \"1.0.0\" --file \"python3-requests.deb\"",
@@ -114,9 +135,9 @@
         {
           "name": "name",
           "type": "string",
-          "pipeline": true,
           "required": false,
           "description": "name",
+          "pipeline": false,
           "pipelineAliases": [
             "name"
           ]
@@ -132,7 +153,13 @@
           "type": "string",
           "property": "c8y_Filter.type",
           "required": false,
-          "description": "Device type filter. Only allow software to be applied to devices of this type"
+          "description": "Device type filter. Only allow software to be applied to devices of this type",
+          "pipeline": true,
+          "pipelineAliases": [
+            "c8y_Filter.type",
+            "deviceType",
+            "type"
+          ]
         },
         {
           "name": "data",

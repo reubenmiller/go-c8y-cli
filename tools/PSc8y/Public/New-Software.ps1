@@ -23,9 +23,8 @@ Create a software package
     [OutputType([object])]
     Param(
         # name
-        [Parameter(ValueFromPipeline=$true,
-                   ValueFromPipelineByPropertyName=$true)]
-        [object[]]
+        [Parameter()]
+        [string]
         $Name,
 
         # Description of the software package
@@ -34,8 +33,9 @@ Create a software package
         $Description,
 
         # Device type filter. Only allow software to be applied to devices of this type
-        [Parameter()]
-        [string]
+        [Parameter(ValueFromPipeline=$true,
+                   ValueFromPipelineByPropertyName=$true)]
+        [object[]]
         $DeviceType
     )
     DynamicParam {
@@ -61,13 +61,13 @@ Create a software package
     Process {
 
         if ($ClientOptions.ConvertToPS) {
-            $Name `
+            $DeviceType `
             | Group-ClientRequests `
             | c8y software create $c8yargs `
             | ConvertFrom-ClientOutput @TypeOptions
         }
         else {
-            $Name `
+            $DeviceType `
             | Group-ClientRequests `
             | c8y software create $c8yargs
         }

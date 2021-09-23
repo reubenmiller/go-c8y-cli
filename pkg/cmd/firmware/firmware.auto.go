@@ -20,7 +20,7 @@ func NewSubCommand(f *cmdutil.Factory) *SubCmdFirmware {
 	cmd := &cobra.Command{
 		Use:   "firmware",
 		Short: "Cumulocity firmware management",
-		Long:  `REST endpoint to interact with Cumulocity managed objects`,
+		Long:  `Firmware management commands to create/list/delete firmware packages, versions and patches`,
 	}
 
 	// Subcommands

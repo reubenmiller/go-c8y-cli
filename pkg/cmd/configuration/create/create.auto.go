@@ -36,6 +36,12 @@ func NewCreateCmd(f *cmdutil.Factory) *CreateCmd {
 		Example: heredoc.Doc(`
 $ c8y configuration create --name "agent config" --description "Default agent configuration" --configurationType "agentConfig" --url "https://test.com/content/raw/app.json"
 Create a configuration package
+
+$ echo -e "c8y_Linux\nc8y_MacOS\nc8y_Windows" | c8y configuration create --name "default-vpn-config" --configurationType "VPN_CONFIG" --file default.vpn
+Create multiple configurations using different device type filters (via pipeline)
+The stdin will be mapped to the deviceType property. This was you can easily make the same configuration
+available for multiple device types
+
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
 			return f.CreateModeEnabled()

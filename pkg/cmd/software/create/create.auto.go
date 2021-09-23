@@ -36,6 +36,12 @@ func NewCreateCmd(f *cmdutil.Factory) *CreateCmd {
 $ c8y software create --name "python3-requests" --description "python requests library"
 Create a software package
 
+$ c8y software create --name "python3-requests" --description "python requests library" --deviceType "c8y_Linux"
+Create a software package which is only applicable for a specific device type
+
+$ echo -e "c8y_Linux\nc8y_MacOS" | c8y software create --name "python3-requests" --description "python requests library"
+Create the same software package for multiple device types
+
 $ c8y software create --name "python3-requests" | c8y software versions create --version "1.0.0" --file "python3-requests.deb"
 Create a software package and create a new version
         `),
@@ -47,9 +53,9 @@ Create a software package and create a new version
 
 	cmd.SilenceUsage = true
 
-	cmd.Flags().String("name", "", "name (accepts pipeline)")
+	cmd.Flags().String("name", "", "name")
 	cmd.Flags().String("description", "", "Description of the software package")
-	cmd.Flags().String("deviceType", "", "Device type filter. Only allow software to be applied to devices of this type")
+	cmd.Flags().String("deviceType", "", "Device type filter. Only allow software to be applied to devices of this type (accepts pipeline)")
 
 	completion.WithOptions(
 		cmd,
@@ -60,7 +66,7 @@ Create a software package and create a new version
 		flags.WithProcessingMode(),
 		flags.WithData(),
 		f.WithTemplateFlag(cmd),
-		flags.WithExtendedPipelineSupport("name", "name", false, "name"),
+		flags.WithExtendedPipelineSupport("deviceType", "c8y_Filter.type", false, "c8y_Filter.type", "deviceType", "type"),
 	)
 
 	// Required flags
@@ -133,7 +139,7 @@ func (n *CreateCmd) RunE(cmd *cobra.Command, args []string) error {
 		cmd,
 		body,
 		inputIterators,
-		flags.WithOverrideValue("name", "name"),
+		flags.WithOverrideValue("deviceType", "c8y_Filter.type"),
 		flags.WithDataFlagValue(),
 		flags.WithStringValue("name", "name"),
 		flags.WithStringValue("description", "description"),

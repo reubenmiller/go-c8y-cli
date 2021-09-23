@@ -3,7 +3,7 @@
 information:
   name: firmware
   description: Cumulocity firmware management
-  descriptionLong: 'REST endpoint to interact with Cumulocity managed objects'
+  descriptionLong: Firmware management commands to create/list/delete firmware packages, versions and patches
   link: https://cumulocity.com/guides/reference/inventory/
 
 endpoints:
@@ -62,19 +62,34 @@ endpoints:
         - description: Create a firmware package
           beforeEach:
             - $type = New-RandomString -Prefix "customType_"
-          command: New-Firmware -Name "python3-requests" -Description "python requests library" -Data @{$type=@{}}
+          command: New-Firmware -Name "iot-linux" -Description "Linux image for IoT devices" -Data @{$type=@{}}
           afterEach:
             - Get-ManagedObjectCollection -FragmentType $type | Remove-ManagedObject
 
       go:
         - description: Create a firmware package
-          command: c8y firmware create --name "python3-requests" --description "python requests library"
+          command: c8y firmware create --name "iot-linux" --description "Linux image for IoT devices"
+        
+        - description: Create the same firmware package for multiple device types
+          command: echo -e "c8y_Linux\nc8y_MacOS" | c8y firmware create --name "iot-linux" --description "Linux image for IoT devices"
+          assertStdOut:
+            line-count: 2
+            json:
+              ..0.method: POST
+              ..0.body.name: iot-linux
+              ..0.body.description: Linux image for IoT devices
+              ..0.body.c8y_Filter.type: c8y_Linux
+              ..1.method: POST
+              ..1.body.name: iot-linux
+              ..1.body.description: Linux image for IoT devices
+              ..1.body.c8y_Filter.type: c8y_MacOS
+
     body:
       - name: name
         type: string
-        pipeline: true
         required: false
         description: name
+        pipeline: false
         pipelineAliases:
           - "name"
       
@@ -88,6 +103,11 @@ endpoints:
         property: c8y_Filter.type
         required: false
         description: Device type filter. Only allow firmware to be applied to devices of this type
+        pipeline: true
+        pipelineAliases:
+          - "c8y_Filter.type"
+          - "deviceType"
+          - "type"
 
       - name: data
         type: json
