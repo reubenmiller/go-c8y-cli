@@ -1,0 +1,340 @@
+{
+  "information": {
+    "name": "firmware/versions",
+    "description": "Cumulocity firmware version management",
+    "descriptionLong": "Firmware version management to create/list/delete versions",
+    "link": "https://cumulocity.com/guides/users-guide/device-management/#firmware-repo"
+  },
+  "endpoints": [
+    {
+      "name": "getFirmwareVersionCollection",
+      "method": "GET",
+      "description": "Get firmware package version collection",
+      "descriptionLong": "Get a collection of firmware package versions (managedObjects) based on filter parameters",
+      "path": "inventory/managedObjects?query=$filter=((not(has(c8y_Patch))) and (bygroupid({firmware}))) $orderby=creationTime.date desc,creationTime desc",
+      "accept": "application/vnd.com.nsn.cumulocity.managedObjectCollection+json",
+      "collectionType": "application/vnd.com.nsn.cumulocity.managedObject+json",
+      "collectionProperty": "managedObjects",
+      "alias": {
+        "go": "list",
+        "powershell": "Get-FirmwareVersionCollection"
+      },
+      "examples": {
+        "powershell": [
+          {
+            "description": "Get a list of firmware package versions",
+            "beforeEach": [
+              "$name = New-RandomString -Prefix \"firmware_\"",
+              "$firmware = New-Firmware -Name $name",
+              "$firmwareVersion = PSc8y\\New-FirmwareVersion -Firmware $firmware.id -Version \"1.0.0\" -Url \"https://blob.azure.com/device-firmare/1.0.0/image.mender\""
+            ],
+            "command": "Get-FirmwareVersionCollection -Firmware $firmware.id",
+            "afterEach": [
+              "Remove-Firmware -Id $firmware.id"
+            ]
+          }
+        ],
+        "go": [
+          {
+            "description": "Get a list of firmware package versions",
+            "command": "c8y firmware versions list --firmware 12345",
+            "assertStdOut": {
+              "json": {
+                "query": "r/bygroupid\\(12345\\)"
+              }
+            }
+          },
+          {
+            "description": "Get a list of firmware and their versions (using pipeline)",
+            "command": "c8y firmware list | c8y firmware versions list",
+            "skipTest": true
+          },
+          {
+            "description": "Get all versions of a firmware using an existing version object",
+            "command": "c8y firmware versions get --id 12345 | c8y firmware versions list",
+            "skipTest": true
+          }
+        ]
+      },
+      "pathParameters": [
+        {
+          "name": "firmware",
+          "type": "[]firmware",
+          "required": true,
+          "pipeline": true,
+          "pipelineAliases": [
+            "additionParents.references.0.managedObject.id",
+            "id"
+          ],
+          "description": "Firmware package id or name"
+        }
+      ],
+      "queryParameters": [
+        {
+          "name": "withParents",
+          "type": "booleanDefault",
+          "description": "Include parent references",
+          "default": "true"
+        }
+      ]
+    },
+    {
+      "name": "getFirmwareVersion",
+      "description": "Get firmware package version",
+      "descriptionLong": "Get an existing firmware package version",
+      "method": "GET",
+      "path": "inventory/managedObjects/{id}",
+      "accept": "application/vnd.com.nsn.cumulocity.managedObject+json",
+      "alias": {
+        "go": "get",
+        "powershell": "Get-FirmwareVersion"
+      },
+      "examples": {
+        "powershell": [
+          {
+            "description": "Get a firmware package",
+            "beforeEach": [
+              "$mo = PSc8y\\New-ManagedObject -Name \"testMO\""
+            ],
+            "command": "Get-FirmwareVersion -Id $mo.id",
+            "afterEach": [
+              "Remove-ManagedObject -Id $mo.id -ErrorAction SilentlyContinue"
+            ]
+          },
+          {
+            "description": "Get a firmware package (using pipeline)",
+            "command": "Get-ManagedObject -Id $mo.id | Get-FirmwareVersion",
+            "afterEach": [
+              "Remove-ManagedObject -Id $mo.id -ErrorAction SilentlyContinue"
+            ]
+          }
+        ],
+        "go": [
+          {
+            "description": "Get a firmware package version using name",
+            "command": "c8y firmware versions get --firmware 11111 --id 1.0.0",
+            "skipTest": true
+          },
+          {
+            "description": "Get a firmware package version using pipeline",
+            "command": "c8y firmware versions list --firmware 12345 | c8y firmware versions get --withParents",
+            "skipTest": true
+          }
+        ]
+      },
+      "pathParameters": [
+        {
+          "name": "id",
+          "type": "[]firmwareversion",
+          "dependsOn": [
+            "firmware"
+          ],
+          "pipeline": true,
+          "required": true,
+          "description": "Firmware Package version id or name"
+        },
+        {
+          "name": "firmware",
+          "type": "[]firmware",
+          "required": false,
+          "description": "Firmware package id or name (used to help completion be more accurate)"
+        }
+      ],
+      "queryParameters": [
+        {
+          "name": "withParents",
+          "type": "boolean",
+          "description": "Include parent references"
+        }
+      ]
+    },
+    {
+      "name": "deleteFirmwareVersion",
+      "description": "Delete firmware package version",
+      "descriptionLong": "Delete an existing firmware package version",
+      "method": "DELETE",
+      "path": "inventory/managedObjects/{id}",
+      "accept": "",
+      "alias": {
+        "go": "delete",
+        "powershell": "Remove-FirmwareVersion"
+      },
+      "examples": {
+        "powershell": [
+          {
+            "description": "Delete a firmware version and all related versions",
+            "beforeEach": [
+              "$mo = PSc8y\\New-ManagedObject -Name \"testMO\""
+            ],
+            "command": "Remove-FirmwareVersion -Id $mo.id",
+            "afterEach": [
+              "Remove-ManagedObject -Id $mo.id -ErrorAction SilentlyContinue"
+            ]
+          },
+          {
+            "description": "Delete a firmware package (using pipeline)",
+            "beforeEach": [
+              "$mo = PSc8y\\New-ManagedObject -Name \"testMO\""
+            ],
+            "command": "Get-ManagedObject -Id $mo.id | Remove-FirmwareVersion",
+            "afterEach": [
+              "Remove-ManagedObject -Id $mo.id -ErrorAction SilentlyContinue"
+            ]
+          }
+        ],
+        "go": [
+          {
+            "description": "Delete a firmware package and all related versions",
+            "command": "c8y firmware versions delete --id 12345"
+          },
+          {
+            "description": "Delete a firmware package (but keep any child binaries)",
+            "command": "c8y firmware versions delete --id 12345 --forceCascade=false"
+          }
+        ]
+      },
+      "pathParameters": [
+        {
+          "name": "id",
+          "type": "[]firmwareversion",
+          "dependsOn": [
+            "firmware"
+          ],
+          "pipeline": true,
+          "required": true,
+          "description": "Firmware Package version id or name"
+        },
+        {
+          "name": "firmware",
+          "type": "[]firmware",
+          "required": false,
+          "description": "Firmware package id or name (used to help completion be more accurate)"
+        }
+      ],
+      "queryParameters": [
+        {
+          "name": "forceCascade",
+          "type": "booleanDefault",
+          "default": "true",
+          "description": "Remove version and any related binaries"
+        }
+      ]
+    },
+    {
+      "name": "download",
+      "skip": true,
+      "description": "Download firmware version binary",
+      "descriptionLong": "Download a binary stored in Cumulocity and display it on the console. For non text based binaries or if the output should be saved to file, the output parameter should be used to write the file directly to a local file.\n",
+      "method": "GET",
+      "path": "{url}",
+      "accept": "*/*",
+      "alias": {
+        "go": "download",
+        "powershell": "Get-FirmwareVersionBinary"
+      },
+      "examples": {
+        "powershell": [
+          {
+            "description": "Get a binary and display the contents on the console",
+            "command": "Get-Binary -Id $Binary.id",
+            "skipTest": true
+          },
+          {
+            "description": "Get a binary and save it to a file",
+            "command": "Get-Binary -Id $Binary.id -OutputFileRaw ./download-binary1.txt",
+            "skipTest": true
+          }
+        ],
+        "go": [
+          {
+            "description": "Download Get a binary and display the contents on the console",
+            "command": "c8y firmware versions download --url /inventory/binaries/12345",
+            "skipTest": true
+          },
+          {
+            "description": "Get a binary and save it to a file",
+            "command": "c8y firmware versions get --id 12345 | c8y firmware versions download --outputFileRaw \"./download-binary1.txt\"",
+            "skipTest": true
+          }
+        ]
+      },
+      "pathParameters": [
+        {
+          "name": "url",
+          "type": "[]string",
+          "required": true,
+          "pipeline": true,
+          "description": "Firmware url",
+          "pipelineAliases": [
+            "c8y_Firmware.url"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "installVersion",
+      "description": "Install firmware version on a device",
+      "descriptionLong": "Install firmware version on a device",
+      "method": "POST",
+      "path": "devicecontrol/operations",
+      "accept": "application/vnd.com.nsn.cumulocity.managedObject+json",
+      "alias": {
+        "go": "install",
+        "powershell": "Install-FirmwareVersion"
+      },
+      "examples": {
+        "powershell": [
+          {
+            "description": "Get a firmware version",
+            "skipTest": true,
+            "command": "Install-FirmwareVersion -Device $mo.id -Firmware linux-iot -Version 1.0.0"
+          }
+        ],
+        "go": [
+          {
+            "description": "Install a firmware version",
+            "command": "c8y firmware versions install --device 1234 --firmware linux-iot --version 1.0.0"
+          }
+        ]
+      },
+      "body": [
+        {
+          "name": "device",
+          "type": "[]device",
+          "property": "deviceId",
+          "description": "Device or agent where the firmware should be installed",
+          "pipeline": true
+        },
+        {
+          "name": "firmware",
+          "type": "firmwareName",
+          "required": true,
+          "property": "c8y_Firmware.name",
+          "description": "Firmware name"
+        },
+        {
+          "name": "version",
+          "type": "firmwareVersionName",
+          "dependsOn": [
+            "firmware"
+          ],
+          "required": false,
+          "property": "c8y_Firmware.version",
+          "description": "Firmware version"
+        },
+        {
+          "name": "url",
+          "type": "string",
+          "required": false,
+          "property": "c8y_Firmware.url",
+          "description": "Firmware url. TODO, not currently automatically added"
+        }
+      ],
+      "bodyRequiredKeys": [
+        "deviceId",
+        "c8y_Firmware.name",
+        "c8y_Firmware.version"
+      ]
+    }
+  ]
+}

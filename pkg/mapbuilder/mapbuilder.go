@@ -17,16 +17,16 @@ import (
 	"github.com/google/go-jsonnet"
 	"github.com/google/go-jsonnet/ast"
 	"github.com/reubenmiller/go-c8y-cli/pkg/iterator"
+	"github.com/reubenmiller/go-c8y-cli/pkg/jsonUtilities"
 	"github.com/reubenmiller/go-c8y-cli/pkg/logger"
 	"github.com/reubenmiller/go-c8y-cli/pkg/randdata"
 	"github.com/reubenmiller/go-c8y-cli/pkg/timestamp"
 	"github.com/tidwall/gjson"
+	"github.com/tidwall/sjson"
 	"go.uber.org/zap/zapcore"
 )
 
 const (
-	// Separator character which is used when setting the path via a dot notation
-	Separator              = "."
 	timeFormatRFC3339Micro = "2006-01-02T15:04:05.999Z07:00"
 )
 
@@ -301,10 +301,10 @@ func NewInitializedMapBuilder() *MapBuilder {
 	return builder
 }
 
-// NewMapBuilderWithInit returns a new map builder seeding the builder with the give map
-func NewMapBuilderWithInit(body map[string]interface{}) *MapBuilder {
+// NewMapBuilderWithInit returns a new map builder seeding the builder with json
+func NewMapBuilderWithInit(body []byte) *MapBuilder {
 	return &MapBuilder{
-		body: body,
+		BodyRaw: body,
 	}
 }
 
@@ -322,11 +322,12 @@ func NewMapBuilderFromJsonnetSnippet(snippet string) (*MapBuilder, error) {
 
 // NewMapBuilderFromJSON returns a new mapper builder object created from json
 func NewMapBuilderFromJSON(data string) (*MapBuilder, error) {
+
 	body := make(map[string]interface{})
 	if err := json.Unmarshal([]byte(data), &body); err != nil {
 		return nil, err
 	}
-	return NewMapBuilderWithInit(body), nil
+	return NewMapBuilderWithInit([]byte(data)), nil
 }
 
 type IteratorReference struct {
@@ -337,7 +338,7 @@ type IteratorReference struct {
 // MapBuilder creates body builder
 type MapBuilder struct {
 	mu                    sync.Mutex
-	body                  map[string]interface{}
+	BodyRaw               []byte
 	bodyOptional          map[string]interface{}
 	bodyIterators         []IteratorReference
 	file                  string
@@ -372,7 +373,7 @@ func (b *MapBuilder) SetApplyTemplateOnMarshalPreference(value bool) *MapBuilder
 
 // SetEmptyMap sets the body to an empty map. It will override an existing body
 func (b *MapBuilder) SetEmptyMap() *MapBuilder {
-	b.body = make(map[string]interface{})
+	b.BodyRaw = []byte("{}")
 	return b
 }
 
@@ -507,18 +508,26 @@ func (b *MapBuilder) getTemplateVariablesJsonnet(existingJSON []byte, input []by
 // SetMap sets a new map to the body (if not nil). This will remove any existing values in the body
 func (b *MapBuilder) SetMap(body map[string]interface{}) {
 	if body != nil {
-		b.body = body
+		tempBody, err := json.Marshal(body)
+		if err == nil {
+			b.BodyRaw = tempBody
+		}
 	}
 }
 
 // ClearMap removed the existing map and sets it to nil.
 func (b *MapBuilder) ClearMap() {
-	b.body = nil
+	b.BodyRaw = []byte("{}")
 }
 
 // ApplyMap sets a new map to the body. This will remove any existing values in the body
 func (b *MapBuilder) ApplyMap(body map[string]interface{}) {
-	b.body = body
+	out, err := json.Marshal(body)
+	if err != nil {
+		Logger.Warningf("Failed to convert map to json. %s", err)
+	} else {
+		b.BodyRaw = out
+	}
 }
 
 // SetFile sets the body to the contents of the file path
@@ -533,7 +542,9 @@ func (b *MapBuilder) SetRaw(v string) {
 
 // GetMap returns the body as a map[string]interface{}
 func (b *MapBuilder) GetMap() map[string]interface{} {
-	return b.body
+	out := make(map[string]interface{})
+	_ = jsonUtilities.ParseJSON(string(b.BodyRaw), out)
+	return out
 }
 
 // GetFileContents returns the map contents as a file (only if a file is already set)
@@ -579,13 +590,13 @@ func (b *MapBuilder) GetBody() (interface{}, error) {
 
 // Get returns a value as an interface
 func (b *MapBuilder) Get(key string) interface{} {
-	return b.body[key]
+	return gjson.GetBytes(b.BodyRaw, key).Value()
 }
 
 // GetString the value as a string
 func (b *MapBuilder) GetString(key string) (string, bool) {
-	val, ok := b.body[key].(string)
-	return val, ok
+	val := gjson.GetBytes(b.BodyRaw, key)
+	return val.String(), val.Exists()
 }
 
 // SetRequiredKeys stores the list of keys which should be present when marshaling the map to json.
@@ -626,18 +637,7 @@ func (b *MapBuilder) MarshalJSONWithInput(input interface{}) (body []byte, err e
 
 // MarshalJSON returns the body as json
 func (b *MapBuilder) MarshalJSON() (body []byte, err error) {
-	if b.body == nil {
-		// should return empty object? or add as option?
-		body = []byte("{}")
-		return
-	}
-
-	// TODO: deep clone
-	// clone body to eliminate side-effects
-	bodyClone := NewInitializedMapBuilder()
-	for k, v := range b.body {
-		bodyClone.body[k] = v
-	}
+	body = []byte(b.BodyRaw)
 
 	for _, it := range b.bodyIterators {
 		value, input, itErr := it.Value.GetNext()
@@ -657,17 +657,19 @@ func (b *MapBuilder) MarshalJSON() (body []byte, err error) {
 			Logger.Debugf("setting externalInput: %s", b.externalInput)
 
 			// NOTE: Do not overwrite existing values if non empty
-			if !bodyClone.KeyExists(it.Path) && len(value) > 0 {
-				tempValue := make(map[string]interface{})
-				var bErr error
-				// Only set non-object values. Complex objects can be referred to via the input.value template variable
-				if jsonErr := json.Unmarshal(value, &tempValue); jsonErr != nil {
-					Logger.Debugf("Setting value: key=%s, value=%s", it.Path, value)
-					bErr = bodyClone.Set(it.Path, fmt.Sprintf("%s", value))
-				}
+			if len(value) > 0 {
+				if v := gjson.GetBytes(body, it.Path); !v.Exists() {
 
-				if bErr != nil {
-					break
+					// Only assign non-object and non-array values, as these types will be handled in the templating engine
+					valueObj := gjson.ParseBytes(value)
+					if !(valueObj.IsObject() || valueObj.IsArray()) {
+						bodyTemp, bErr := sjson.SetBytes(body, it.Path, value)
+						if bErr != nil {
+							Logger.Warningf("Could not set bytes. Ignoring value: path=%s, value=%s, err=%", it.Path, value, bErr)
+							continue
+						}
+						body = bodyTemp
+					}
 				}
 			}
 		}
@@ -675,17 +677,12 @@ func (b *MapBuilder) MarshalJSON() (body []byte, err error) {
 
 	// merge optional values, but prefer already set values
 	if b.bodyOptional != nil {
-		err = bodyClone.MergeMaps(b.bodyOptional)
-		if err != nil {
-			return
+		bodyTemp, bErr := b.MergeJSON(body, b.bodyOptional)
+		if bErr != nil {
+			return nil, bErr
+
 		}
-	}
-
-	Logger.Debugf("Body (pre marshalling). %v", bodyClone)
-
-	body, err = json.Marshal(bodyClone.body)
-	if err != nil {
-		return
+		body = bodyTemp
 	}
 
 	Logger.Debugf("Body (pre templating)\nbody:\t%s\n\texternalInput:\t%s", body, b.externalInput)
@@ -706,32 +703,7 @@ func (b *MapBuilder) MarshalJSON() (body []byte, err error) {
 
 // KeyExists return true if the given dot notation path exists or not
 func (b *MapBuilder) KeyExists(path string) bool {
-	if b.body == nil {
-		return false
-	}
-	exists := false
-	keys := strings.Split(path, Separator)
-	currentMap := b.body
-	lastIndex := len(keys) - 1
-	for i, key := range keys {
-		if key != "" {
-			if i != lastIndex {
-				if _, ok := currentMap[key]; !ok {
-					break
-				}
-				if v, ok := currentMap[key].(map[string]interface{}); ok {
-					currentMap = v
-				} else {
-					break
-				}
-			} else {
-				if _, ok := currentMap[key]; ok {
-					exists = true
-				}
-			}
-		}
-	}
-	return exists
+	return gjson.GetBytes(b.BodyRaw, path).Exists()
 }
 
 // SetOptionalMap set optional map values which can be overwritten by other values
@@ -739,12 +711,26 @@ func (b *MapBuilder) SetOptionalMap(value map[string]interface{}) {
 	b.bodyOptional = value
 }
 
+func (b *MapBuilder) SetPath(path string, value interface{}) error {
+	out, err := sjson.SetBytes(b.BodyRaw, path, value)
+	if err != nil {
+		return err
+	}
+	b.BodyRaw = out
+	return nil
+}
+
+func (b *MapBuilder) SetRawPath(path string, value []byte) error {
+	out, err := sjson.SetRawBytes(b.BodyRaw, path, value)
+	if err != nil {
+		return err
+	}
+	b.BodyRaw = out
+	return err
+}
+
 // Set sets a value to a give dot notation path
 func (b *MapBuilder) Set(path string, value interface{}) error {
-	if b.body == nil {
-		b.body = make(map[string]interface{})
-	}
-
 	// store iterators seprately so we can itercept the raw value which is otherwise lost during json marshalling
 	if it, ok := value.(iterator.Iterator); ok {
 		b.bodyIterators = append(b.bodyIterators, IteratorReference{path, it})
@@ -752,25 +738,9 @@ func (b *MapBuilder) Set(path string, value interface{}) error {
 		return nil
 	}
 
-	keys := strings.Split(path, Separator)
-
-	currentMap := b.body
-
-	lastIndex := len(keys) - 1
-
-	for i, key := range keys {
-		if key != "" {
-			if i != lastIndex {
-				if _, ok := currentMap[key]; !ok {
-					currentMap[key] = make(map[string]interface{})
-				}
-				currentMap = currentMap[key].(map[string]interface{})
-			} else {
-				currentMap[key] = value
-			}
-		}
+	if err := b.SetPath(path, value); err != nil {
+		return err
 	}
-
 	return nil
 }
 
@@ -782,12 +752,31 @@ func (b *MapBuilder) MergeMaps(maps ...map[string]interface{}) error {
 		return nil
 	}
 
-	if b.body != nil {
-		maps = append(maps, b.body)
+	temp, err := b.MergeJSON(b.BodyRaw, maps...)
+	if err != nil {
+		return err
 	}
 
-	b.body = mergeMaps(maps...)
+	b.BodyRaw = temp
 	return nil
+}
+
+func (b *MapBuilder) MergeJSON(existingJSON []byte, maps ...map[string]interface{}) ([]byte, error) {
+	if len(maps) == 0 {
+		return existingJSON, nil
+	}
+
+	if len(existingJSON) > 0 {
+		tempBody := make(map[string]interface{})
+		if err := jsonUtilities.ParseJSON(string(existingJSON), tempBody); err != nil {
+			return nil, err
+		}
+		maps = append(maps, tempBody)
+	}
+
+	tempOutput := mergeMaps(maps...)
+
+	return json.Marshal(tempOutput)
 }
 
 func mergeMaps(maps ...map[string]interface{}) map[string]interface{} {

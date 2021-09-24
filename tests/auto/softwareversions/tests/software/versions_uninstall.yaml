@@ -1,0 +1,11 @@
+tests:
+    software/versions_uninstall_Uninstall a software package version:
+        command: c8y software versions uninstall --device 1234 --software go-c8y-cli --version 1.0.0
+        exit-code: 0
+        stdout:
+            json:
+                body.c8y_SoftwareUpdate.0.name: go-c8y-cli
+                body.c8y_SoftwareUpdate.0.version: 1.0.0
+                body.deviceId: "1234"
+                method: POST
+                path: /devicecontrol/operations

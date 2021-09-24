@@ -36,6 +36,8 @@ type BatchOptions struct {
 	DelayBefore       time.Duration
 	AbortOnErrorCount int
 
+	PostActions []flags.Action
+
 	InputData []string
 
 	inputIndex int
@@ -77,7 +79,7 @@ func NewWorker(log *logger.Logger, cfg *config.Config, iostream *iostreams.IOStr
 	}, nil
 }
 
-type RequestHandler func(requests []c8y.RequestOptions, commonOptions config.CommonCommandOptions) error
+type RequestHandler func(requests []c8y.RequestOptions, commonOptions config.CommonCommandOptions) (*c8y.Response, error)
 
 type Worker struct {
 	config         *config.Config
@@ -136,6 +138,10 @@ func (w *Worker) ProcessRequestAndResponse(cmd *cobra.Command, r *c8y.RequestOpt
 	var err error
 	var pathIter iterator.Iterator
 
+	if inputIterators == nil {
+		return fmt.Errorf("Missing input iterators")
+	}
+
 	if inputIterators != nil && inputIterators.Total > 0 {
 		if inputIterators.Path != nil {
 			pathIter = inputIterators.Path
@@ -163,6 +169,9 @@ func (w *Worker) ProcessRequestAndResponse(cmd *cobra.Command, r *c8y.RequestOpt
 	if err != nil {
 		return err
 	}
+
+	// Configure post actions
+	batchOptions.PostActions = inputIterators.PipeOptions.PostActions
 
 	return w.runBatched(requestIter, commonOptions, *batchOptions)
 }
@@ -395,6 +404,7 @@ func (w *Worker) batchWorker(id int, jobs <-chan batchArgument, results chan<- e
 	for job := range jobs {
 		total++
 		workerStart := prog.StartJob(id, total)
+		var resp *c8y.Response
 
 		if job.batchOptions.DelayBefore > 0 {
 			w.logger.Infof("worker %d: sleeping %s before starting job", id, job.batchOptions.DelayBefore)
@@ -412,7 +422,22 @@ func (w *Worker) batchWorker(id int, jobs <-chan batchArgument, results chan<- e
 		w.logger.Infof("worker %d: started job %d", id, job.id)
 		startTime := time.Now().UnixNano()
 
-		err = w.requestHandler([]c8y.RequestOptions{job.request}, job.commonOptions)
+		resp, err = w.requestHandler([]c8y.RequestOptions{job.request}, job.commonOptions)
+
+		// Handle post request actions (only if original response was ok)
+		// and stop actions if an error is encountered
+		if err == nil {
+			for i, action := range job.batchOptions.PostActions {
+				w.logger.Debugf("Executing action: %d", i)
+				runOutput, runErr := action.Run(resp)
+				if runErr != nil {
+					err = runErr
+					w.logger.Warningf("Action failed. output=%#v, err=%s", runOutput, runErr)
+					break
+				}
+			}
+		}
+
 		elapsedMS := (time.Now().UnixNano() - startTime) / 1000.0 / 1000.0
 
 		w.logger.Infof("worker %d: finished job %d in %dms", id, job.id, elapsedMS)

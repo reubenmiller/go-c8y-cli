@@ -40,6 +40,7 @@ type RequestIterator struct {
 	Query          iterator.Iterator
 	InputIterators flags.RequestInputIterators
 	Body           interface{}
+	PostActions    []flags.Action
 	done           int32
 }
 
@@ -98,10 +99,15 @@ func (r *RequestIterator) GetNext() (*c8y.RequestOptions, interface{}, error) {
 		inputLine = input
 		req.Path = string(path)
 
-		if p, err := url.Parse(req.Path); err == nil {
-			req.Path = p.Path
-			if p.RawQuery != "" {
-				queryParts = append(queryParts, p.RawQuery)
+		if u, err := parseUrl(req.Path); err == nil {
+			if u.Host != "" {
+				r.Logger.Warningf("Parsing url in request. %s", u.Host)
+				// TODO: Check if this will break anything else
+				req.Host = u.Scheme + "://" + u.Host
+			}
+			req.Path = u.Path
+			if u.RawQuery != "" {
+				queryParts = append(queryParts, u.RawQuery)
 			}
 		}
 	}
@@ -175,4 +181,13 @@ func hasUnresolvedVariables(v []byte) bool {
 	left := bytes.Index(v, []byte("{"))
 	right := bytes.Index(v, []byte("}"))
 	return left > -1 && right > -1 && right > left
+}
+
+func parseUrl(s string) (*url.URL, error) {
+	// Default to https if a scheme is missing
+	rawURL := s
+	if p, err := url.Parse(s); err == nil && p.Host == "" && p.Scheme != "" {
+		rawURL = "https://" + s
+	}
+	return url.Parse(rawURL)
 }

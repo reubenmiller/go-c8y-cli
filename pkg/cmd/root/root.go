@@ -23,12 +23,15 @@ import (
 	binariesCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/binaries"
 	bulkoperationsCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/bulkoperations"
 	completionCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/completion"
+	configurationCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/configuration"
+	configurationListCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/configuration/list"
 	currentapplicationCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/currentapplication"
 	currenttenantCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/currenttenant"
 	currentuserCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/currentuser"
 	databrokerCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/databroker"
 	devicegroupsCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/devicegroups"
 	devicegroupsListCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/devicegroups/list"
+	deviceprofilesCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/deviceprofiles"
 	deviceregistrationCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/deviceregistration"
 	devicesCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/devices"
 	devicesAssertCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/devices/assert"
@@ -37,6 +40,12 @@ import (
 	eventsAssertCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/events/assert"
 	eventsSubscribeCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/events/subscribe"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmd/factory"
+	firmwareCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/firmware"
+	firmwareListCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/firmware/list"
+	firmwareVersionsPatchesCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/firmware/patches"
+	firmwarePatchesCreateCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/firmware/patches/create"
+	firmwareVersionsCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/firmware/versions"
+	firmwareVersionsCreateCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/firmware/versions/create"
 	identityCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/identity"
 	inventoryCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/inventory"
 	inventoryAdditionsCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/inventory/additions"
@@ -61,6 +70,10 @@ import (
 	settingsCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/settings"
 	smartgroupsCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/smartgroups"
 	smartgroupsListCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/smartgroups/list"
+	softwareCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/software"
+	softwareListCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/software/list"
+	softwareVersionsCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/software/versions"
+	softwareVersionsCreateCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/software/versions/create"
 	systemoptionsCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/systemoptions"
 	templateCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/template"
 	tenantoptionsCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/tenantoptions"
@@ -319,6 +332,35 @@ func NewCmdRoot(f *cmdutil.Factory, version, buildDate string) *CmdRoot {
 	inventory.AddCommand(inventoryWaitCmd.NewCmdWait(f).GetCommand())
 	inventory.AddCommand(inventoryAssertCmd.NewSubCommand(f).GetCommand())
 	cmd.AddCommand(inventory)
+
+	// configuration
+	configuration := configurationCmd.NewSubCommand(f).GetCommand()
+	configuration.AddCommand(configurationListCmd.NewListCmd(f).GetCommand())
+	cmd.AddCommand(configuration)
+
+	// software
+	softwareVersions := softwareVersionsCmd.NewSubCommand(f).GetCommand()
+	softwareVersions.AddCommand(softwareVersionsCreateCmd.NewCreateCmd(f).GetCommand())
+	software := softwareCmd.NewSubCommand(f).GetCommand()
+	software.AddCommand(softwareListCmd.NewListCmd(f).GetCommand())
+	software.AddCommand(softwareVersions)
+	cmd.AddCommand(software)
+
+	// firmware
+	firmwarePatches := firmwareVersionsPatchesCmd.NewSubCommand(f).GetCommand()
+	firmwarePatches.AddCommand(firmwarePatchesCreateCmd.NewCreatePatchCmd(f).GetCommand())
+	firmwareVersions := firmwareVersionsCmd.NewSubCommand(f).GetCommand()
+	firmwareVersions.AddCommand(firmwareVersionsCreateCmd.NewCreateCmd(f).GetCommand())
+
+	firmware := firmwareCmd.NewSubCommand(f).GetCommand()
+	firmware.AddCommand(firmwareListCmd.NewListCmd(f).GetCommand())
+	firmware.AddCommand(firmwareVersions)
+	firmware.AddCommand(firmwarePatches)
+	cmd.AddCommand(firmware)
+
+	// deviceprofilesCmd
+	deviceprofiles := deviceprofilesCmd.NewSubCommand(f).GetCommand()
+	cmd.AddCommand(deviceprofiles)
 
 	// applications
 	applications := applicationsCmd.NewSubCommand(f).GetCommand()

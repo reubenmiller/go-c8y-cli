@@ -20,6 +20,9 @@ setup () {
     create_smartgroup "my smartgroup"
 
     create_app "my-example-app"
+
+    create_firmware "iot-linux"
+    create_firmware_version "iot-linux" "1.0.0" "https://example.com"
 }
 
 create_user () {
@@ -54,6 +57,20 @@ create_agent () {
     c8y agents get --id "$name" --silentStatusCodes 404 ||
         c8y agents create \
             --name "$name"
+}
+
+create_firmware () {
+    local name="$1"
+    c8y firmware get --id "$name" --silentStatusCodes 404 ||
+        c8y firmware create --name "$name"
+}
+
+create_firmware_version () {
+    local name="$1"
+    local version="$2"
+    local url="$3"
+    c8y firmware versions get --firmware "$name" --id "$version" --silentStatusCodes 404 ||
+        c8y firmware versions create --firmware "$name" --version "$version" --url "$url"
 }
 
 setup

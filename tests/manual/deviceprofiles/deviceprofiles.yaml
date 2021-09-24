@@ -1,0 +1,4 @@
+tests:
+    It can create/update/delete a device profile:
+        command: ./manual/deviceprofiles/crud.sh
+        exit-code: 0

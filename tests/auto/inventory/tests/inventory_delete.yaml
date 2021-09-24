@@ -1,4 +1,22 @@
 tests:
+    inventory_delete_Delete a device and any related child assets, additions and/or devices:
+        command: c8y inventory delete --id 12345 --forceCascade
+        exit-code: 0
+        stdout:
+            json:
+                method: DELETE
+                path: /inventory/managedObjects/12345
+            contains:
+                - forceCascade=true
+    inventory_delete_Delete a device and its related device user:
+        command: c8y inventory delete --id 12345 --withDeviceUser
+        exit-code: 0
+        stdout:
+            json:
+                method: DELETE
+                path: /inventory/managedObjects/12345
+            contains:
+                - withDeviceUser=true
     inventory_delete_Delete a managed object:
         command: c8y inventory delete --id 12345 --cascade
         exit-code: 0

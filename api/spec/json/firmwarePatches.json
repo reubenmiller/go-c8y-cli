@@ -1,0 +1,239 @@
+{
+  "information": {
+    "name": "firmware/patches",
+    "description": "Cumulocity firmware patch management",
+    "descriptionLong": "Firmware patch management to create/list/delete patches",
+    "link": "https://cumulocity.com/guides/users-guide/device-management/#firmware-repo"
+  },
+  "endpoints": [
+    {
+      "name": "getFirmwarePatchCollection",
+      "method": "GET",
+      "description": "Get firmware patch collection",
+      "descriptionLong": "Get a collection of firmware patches (managedObjects) based on filter parameters",
+      "path": "inventory/managedObjects?query=$filter=((has(c8y_Patch)) and (c8y_Patch.dependency eq '{dependency}') and (bygroupid({firmware}))) $orderby=creationTime.date desc,creationTime desc",
+      "accept": "application/vnd.com.nsn.cumulocity.managedObjectCollection+json",
+      "collectionType": "application/vnd.com.nsn.cumulocity.managedObject+json",
+      "collectionProperty": "managedObjects",
+      "alias": {
+        "go": "list",
+        "powershell": "Get-FirmwarePatchCollection"
+      },
+      "examples": {
+        "powershell": [
+          {
+            "description": "Get a list of firmware patches related to a firmware package",
+            "command": "Get-FirmwarePatchCollection -Firmware 12345",
+            "skipTest": true
+          },
+          {
+            "description": "Get a list of firmware patches where the dependency version starts with \"1.\"",
+            "command": "Get-FirmwarePatchCollection -Firmware 12345 -Dependency '1.*'",
+            "skipTest": true
+          }
+        ],
+        "go": [
+          {
+            "description": "Get a list of firmware patches",
+            "command": "c8y firmware patches list --firmware 12345",
+            "assertStdOut": {
+              "json": {
+                "query": "r/\\(c8y_Patch.dependency eq '\\*'\\) and \\(bygroupid\\(12345\\)\\)"
+              }
+            }
+          },
+          {
+            "description": "Get a list of firmware patches where the dependency version starts with \"1.\"",
+            "command": "c8y firmware patches list --firmware 12345 --dependency '1.*'",
+            "assertStdOut": {
+              "json": {
+                "query": "r/\\(c8y_Patch.dependency eq '1\\.\\*'\\) and \\(bygroupid\\(12345\\)\\)"
+              }
+            }
+          }
+        ]
+      },
+      "pathParameters": [
+        {
+          "name": "firmware",
+          "type": "[]firmware",
+          "required": true,
+          "pipeline": true,
+          "pipelineAliases": [
+            "additionParents.references.0.managedObject.id",
+            "id"
+          ],
+          "description": "Firmware package id or name"
+        },
+        {
+          "name": "dependency",
+          "type": "string",
+          "default": "*",
+          "description": "Patch dependency version"
+        }
+      ],
+      "queryParameters": [
+        {
+          "name": "withParents",
+          "type": "booleanDefault",
+          "description": "Include parent references",
+          "default": "true"
+        }
+      ]
+    },
+    {
+      "name": "getFirmwarePatch",
+      "description": "Get firmware patch",
+      "descriptionLong": "Get an existing firmware patch",
+      "method": "GET",
+      "path": "inventory/managedObjects/{id}",
+      "accept": "application/vnd.com.nsn.cumulocity.managedObject+json",
+      "alias": {
+        "go": "get",
+        "powershell": "Get-FirmwarePatch"
+      },
+      "examples": {
+        "powershell": [
+          {
+            "description": "Get a firmware patch",
+            "beforeEach": [
+              "$mo = PSc8y\\New-ManagedObject -Name \"testMO\""
+            ],
+            "command": "Get-FirmwarePatch -Id $mo.id",
+            "afterEach": [
+              "Remove-ManagedObject -Id $mo.id -ErrorAction SilentlyContinue"
+            ]
+          },
+          {
+            "description": "Get a firmware package (using pipeline)",
+            "beforeEach": [
+              "$mo = PSc8y\\New-ManagedObject -Name \"testMO\""
+            ],
+            "command": "Get-ManagedObject -Id $mo.id | Get-FirmwarePatch",
+            "afterEach": [
+              "Remove-ManagedObject -Id $mo.id -ErrorAction SilentlyContinue"
+            ]
+          }
+        ],
+        "go": [
+          {
+            "description": "Get a firmware patch",
+            "command": "c8y firmware patches get --firmware 11111 --id 1.0.0",
+            "skipTest": true
+          }
+        ]
+      },
+      "pathParameters": [
+        {
+          "name": "id",
+          "type": "[]firmwarepatch",
+          "dependsOn": [
+            "firmware"
+          ],
+          "pipeline": true,
+          "required": true,
+          "description": "Firmware patch id or name"
+        },
+        {
+          "name": "firmware",
+          "type": "[]firmware",
+          "required": false,
+          "description": "Firmware package id or name (used to help completion be more accurate)"
+        }
+      ],
+      "queryParameters": [
+        {
+          "name": "withParents",
+          "type": "booleanDefault",
+          "description": "Include parent references",
+          "default": "true"
+        }
+      ]
+    },
+    {
+      "name": "deletePatch",
+      "description": "Delete firmware package version patch",
+      "descriptionLong": "Delete an existing firmware package version patch",
+      "method": "DELETE",
+      "path": "inventory/managedObjects/{id}",
+      "accept": "",
+      "alias": {
+        "go": "delete",
+        "powershell": "Remove-FirmwarePatch"
+      },
+      "examples": {
+        "powershell": [
+          {
+            "description": "Delete a firmware package version patch",
+            "beforeEach": [
+              "$mo = PSc8y\\New-ManagedObject -Name \"testMO\""
+            ],
+            "command": "Remove-FirmwarePatch -Id $mo.id",
+            "afterEach": [
+              "Remove-ManagedObject -Id $mo.id -ErrorAction SilentlyContinue"
+            ]
+          },
+          {
+            "description": "Delete a firmware patch (using pipeline)",
+            "beforeEach": [
+              "$mo = PSc8y\\New-ManagedObject -Name \"testMO\""
+            ],
+            "command": "Get-ManagedObject -Id $mo.id | Remove-FirmwarePatch",
+            "afterEach": [
+              "Remove-ManagedObject -Id $mo.id -ErrorAction SilentlyContinue"
+            ]
+          },
+          {
+            "description": "Delete a firmware patch and related binary",
+            "beforeEach": [
+              "$Device = PSc8y\\New-TestDevice",
+              "$ChildDevice = PSc8y\\New-TestDevice",
+              "PSc8y\\Add-ChildDeviceToDevice -Device $Device.id -NewChild $ChildDevice.id"
+            ],
+            "command": "Get-ManagedObject -Id $Device.id | Remove-FirmwarePatch -ForceCascade",
+            "afterEach": [
+              "Remove-ManagedObject -Id $Device.id -ErrorAction SilentlyContinue",
+              "Remove-ManagedObject -Id $ChildDevice.id -ErrorAction SilentlyContinue"
+            ]
+          }
+        ],
+        "go": [
+          {
+            "description": "Delete a firmware patch and related binary",
+            "command": "c8y firmware patches delete --id 12345"
+          },
+          {
+            "description": "Delete a firmware patch (but keep the related binary)",
+            "command": "c8y firmware patches delete --id 12345 --forceCascade=false"
+          }
+        ]
+      },
+      "pathParameters": [
+        {
+          "name": "id",
+          "type": "[]firmwarepatch",
+          "dependsOn": [
+            "firmware"
+          ],
+          "pipeline": true,
+          "required": true,
+          "description": "Firmware patch id or name"
+        },
+        {
+          "name": "firmware",
+          "type": "[]firmware",
+          "required": false,
+          "description": "Firmware id or name (used to help completion be more accurate)"
+        }
+      ],
+      "queryParameters": [
+        {
+          "name": "forceCascade",
+          "type": "booleanDefault",
+          "default": "true",
+          "description": "Remove version and any related binaries"
+        }
+      ]
+    }
+  ]
+}

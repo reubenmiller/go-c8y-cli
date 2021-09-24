@@ -7,7 +7,9 @@ func Password(total int) string {
 		total = 32
 	}
 	passwordGen, err := password.NewGenerator(&password.GeneratorInput{
-		Symbols: "!@#%^()[]*+-_;,.",
+		// Don't use "#" as it can cause problems if the user stores
+		// the password in a dotenv file
+		Symbols: "!@%^()[]*+-_;,.",
 	})
 
 	if err != nil {

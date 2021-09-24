@@ -82,10 +82,11 @@ See the [documentation website](https://goc8ycli.netlify.app/) for instructions 
 
 ### Pre-requisites
 
-1. Build the latest version
+1. Build the latest version and update auto generated tests
 
     ```sh
     make build
+    make generate_cli_tests
     ```
 
 1. Set the c8y session that you want to use for the tests

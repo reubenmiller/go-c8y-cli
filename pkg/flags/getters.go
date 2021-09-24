@@ -1,16 +1,26 @@
 package flags
 
 import (
+	"context"
 	"fmt"
+	"mime"
 	"net/http"
+	"path/filepath"
 	"strings"
+
+	"github.com/reubenmiller/go-c8y-cli/pkg/url"
 
 	"github.com/reubenmiller/go-c8y-cli/pkg/c8ydata"
 	"github.com/reubenmiller/go-c8y-cli/pkg/iterator"
 	"github.com/reubenmiller/go-c8y-cli/pkg/jsonUtilities"
 	"github.com/reubenmiller/go-c8y-cli/pkg/mapbuilder"
+	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
 )
+
+type Action interface {
+	Run(interface{}) (interface{}, error)
+}
 
 // GetOption gets the value from a flag and returns the value which can be set accordingly
 type GetOption func(cmd *cobra.Command, inputIterators *RequestInputIterators) (name string, value interface{}, err error)
@@ -68,7 +78,7 @@ func WithPathParameters(cmd *cobra.Command, path *StringTemplate, inputIterators
 			switch v := value.(type) {
 			case []string:
 				if len(v) > 0 {
-					path.SetVariable(name, strings.Join(v, ","))
+					path.SetVariable(name, url.EscapeQueryString(strings.Join(v, ",")))
 				}
 
 			case []int:
@@ -85,7 +95,7 @@ func WithPathParameters(cmd *cobra.Command, path *StringTemplate, inputIterators
 			default:
 				strValue := fmt.Sprintf("%v", value)
 				if strValue != "" {
-					path.SetVariable(name, fmt.Sprintf("%v", value))
+					path.SetVariable(name, url.EscapeQueryString(strValue))
 				}
 			}
 		}
@@ -148,7 +158,7 @@ func WithBody(cmd *cobra.Command, body *mapbuilder.MapBuilder, inputIterators *R
 		case string:
 			// only set non-empty values by default
 			if v != "" {
-				err = body.Set(name, value)
+				err = body.Set(name, v)
 			}
 
 		case Template:
@@ -295,6 +305,34 @@ func WithStringValue(opts ...string) GetOption {
 			// dont assign the value anywhere
 			dst = ""
 		}
+		return dst, applyFormatter(format, value), err
+	}
+}
+
+func WithVersion(fallbackSrc string, opts ...string) GetOption {
+	return func(cmd *cobra.Command, inputIterators *RequestInputIterators) (string, interface{}, error) {
+
+		src, dst, format := UnpackGetterOptions("%s", opts...)
+
+		if inputIterators != nil && inputIterators.PipeOptions != nil {
+			if inputIterators.PipeOptions.Name == src {
+				return WithPipelineIterator(inputIterators.PipeOptions)(cmd, inputIterators)
+			}
+		}
+
+		value, err := cmd.Flags().GetString(src)
+		if err != nil {
+			return dst, value, err
+		}
+		if value == "" {
+			if v, _ := cmd.Flags().GetString(fallbackSrc); v != "" {
+				value = c8ydata.ExtractVersion(v)
+			}
+		}
+		if value == "" {
+			dst = ""
+		}
+
 		return dst, applyFormatter(format, value), err
 	}
 }
@@ -652,6 +690,40 @@ func WithDataValueAdvanced(stripCumulocityKeys bool, raw bool, opts ...string) G
 	}
 }
 
+// WithBinaryUploadURL uploads an inventory binary and returns the URL to it
+func WithBinaryUploadURL(client *c8y.Client, opts ...string) GetOption {
+	return func(cmd *cobra.Command, inputIterators *RequestInputIterators) (string, interface{}, error) {
+
+		src, dst, _ := UnpackGetterOptions("%s", opts...)
+
+		if !cmd.Flags().Changed(src) {
+			return "", "", nil
+		}
+
+		value, err := cmd.Flags().GetString(src)
+		if err != nil {
+			return dst, value, err
+		}
+
+		// binary properties
+		binaryProps := make(map[string]interface{})
+		binaryProps["c8y_Global"] = map[string]interface{}{}
+		binaryProps["name"] = filepath.Base(value)
+		mimeType := mime.TypeByExtension(filepath.Ext(value))
+		if mimeType == "" {
+			mimeType = "application/octet-stream"
+		}
+		binaryProps["type"] = mimeType
+		mo, _, err := client.Inventory.CreateBinary(context.Background(), value, binaryProps)
+
+		if err != nil {
+			return "", nil, err
+		}
+
+		return dst, mo.Self, err
+	}
+}
+
 func WithDataFlagValue() GetOption {
 	return WithDataValueAdvanced(true, false, FlagDataName, "")
 }
@@ -700,6 +772,7 @@ type PipelineOptions struct {
 	Validator   iterator.Validator  `json:"-"`
 	Formatter   func([]byte) []byte `json:"-"`
 	InputFilter func([]byte) bool   `json:"-"`
+	PostActions []Action            `json:"-"`
 }
 
 // WithPipelineIterator adds pipeline support from cli arguments

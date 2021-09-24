@@ -1,0 +1,298 @@
+
+---
+information:
+  name: software/versions
+  description: Cumulocity software version management
+  descriptionLong: Software version management to create/list/delete versions
+  link: https://cumulocity.com/guides/users-guide/device-management/#software-repo
+
+endpoints:
+  - name: getSoftwareVersionCollection
+    method: GET
+    description: Get software package version collection
+    descriptionLong: Get a collection of software package versions (managedObjects) based on filter parameters
+    path: inventory/managedObjects?query=$filter=((not(has(c8y_Patch)))%20and%20(bygroupid({software})))%20$orderby=creationTime.date%20desc,creationTime%20desc
+    accept: application/vnd.com.nsn.cumulocity.managedObjectCollection+json
+    collectionType: application/vnd.com.nsn.cumulocity.managedObject+json
+    collectionProperty: managedObjects
+    alias:
+        go: list
+        powershell: Get-SoftwareVersionCollection
+    examples:
+      powershell:
+        - description: Get a list of software package versions
+          beforeEach:
+            - $software = PSc8y\New-Software -Name "testMO"
+            - $softwareVersion = PSc8y\New-SoftwareVersion -Software $software.id -Version "1.0.0" -Url "https://test.com/file.mender"
+          command: Get-SoftwareVersionCollection -Software $software.id
+          afterEach:
+            - Remove-Software -Id $software.id -ErrorAction SilentlyContinue
+
+      go:
+        - description: Get a list of software package versions
+          command: c8y software versions list --software 12345
+          assertStdOut:
+            json:
+              query: r/bygroupid\(12345\)
+
+        - description: Get a list of software package versions from multiple software packages
+          command: c8y software list | c8y software versions list
+          skipTest: true
+    pathParameters:
+      - name: software
+        type: '[]software'
+        pipeline: true
+        required: false
+        pipelineAliases:
+          - additionParents.references.0.managedObject.id
+          - id
+        description: Software package id or name
+
+    queryParameters:
+      - name: withParents
+        type: booleanDefault
+        description: Include parent references
+        default: 'true'
+  
+  - name: getSoftwareVersion
+    description: Get software package version
+    descriptionLong: Get an existing software package version
+    method: GET
+    path: inventory/managedObjects/{id}
+    accept: 'application/vnd.com.nsn.cumulocity.managedObject+json'
+    alias:
+        go: get
+        powershell: Get-SoftwareVersion
+    examples:
+      powershell:
+        - description: Get a software package version using name
+          beforeEach:
+            - $software = PSc8y\New-Software -Name "testMO"
+            - $softwareVersion = PSc8y\New-SoftwareVersion -Software $software.id -Version "1.0.0" -Url "https://test.com/file.mender"
+          command: Get-SoftwareVersion -Id $softwareVersion.id
+          afterEach:
+            - Remove-Software -Id $software.id -ErrorAction SilentlyContinue
+
+        - description: Get a software package version (using pipeline)
+          beforeEach:
+            - $software = PSc8y\New-Software -Name "testMO"
+            - $softwareVersion = PSc8y\New-SoftwareVersion -Software $software.id -Version "1.0.0" -Url "https://test.com/file.mender"
+          command: Get-ManagedObject -Id $softwareVersion.id | Get-SoftwareVersion
+          afterEach:
+            - Remove-Software -Id $software.id -ErrorAction SilentlyContinue
+
+      go:
+        - description: Get a software package version using name
+          command: c8y software versions get --software 11111 --id 1.0.0
+          skipTest: true
+          assertStdOut:
+            json:
+              query: r/type eq 'c8y_Firmware'
+
+    pathParameters:
+      - name: id
+        type: '[]softwareversion'
+        dependsOn:
+          - software
+        pipeline: true
+        required: true
+        description: Software Package version id or name
+
+      # Dummy value (to limit versions to the given package)
+      - name: software
+        type: '[]software'
+        required: false
+        description: Software package id (used to help completion be more accurate)
+
+    queryParameters:
+      - name: withParents
+        type: boolean
+        description: Include parent references
+
+
+  - name: deleteSoftwareVersion
+    description: Delete software package version
+    descriptionLong: Delete an existing software package version
+    method: DELETE
+    path: inventory/managedObjects/{id}
+    accept: ''
+    alias:
+        go: delete
+        powershell: Remove-SoftwareVersion
+    examples:
+      powershell:
+        - description: Delete a software package
+          beforeEach:
+            - $mo = PSc8y\New-ManagedObject -Name "testMO"
+          command: Remove-SoftwareVersion -Id $mo.id
+          afterEach:
+            - Remove-ManagedObject -Id $mo.id -ErrorAction SilentlyContinue
+
+        - description: Delete a software package (using pipeline)
+          beforeEach:
+            - $mo = PSc8y\New-ManagedObject -Name "testMO"
+          command: Get-ManagedObject -Id $mo.id | Remove-SoftwareVersion
+          afterEach:
+            - Remove-ManagedObject -Id $mo.id -ErrorAction SilentlyContinue
+
+        - description: Delete a software package and all related versions
+          beforeEach:
+            - $Device = PSc8y\New-TestDevice
+          command: Get-ManagedObject -Id $Device.id | Remove-SoftwareVersion -ForceCascade:$false
+          afterEach:
+            - Remove-ManagedObject -Id $Device.id -ErrorAction SilentlyContinue
+            - Remove-ManagedObject -Id $ChildDevice.id -ErrorAction SilentlyContinue
+
+      go:
+        - description: Delete a software package and all related versions
+          command: c8y software versions delete --id 22222
+
+        - description: Delete a software package (but keep any child binaries)
+          command: c8y software versions delete --id 12345 --forceCascade=false
+    pathParameters:
+      - name: id
+        type: '[]softwareversion'
+        dependsOn:
+          - software
+        pipeline: true
+        required: true
+        description: Software Package version id or name
+      # Dummy value (to limit versions to the given package)
+      - name: software
+        type: '[]software'
+        required: false
+        description: Software package id (used to help completion be more accurate)
+
+    queryParameters:
+      - name: forceCascade
+        type: booleanDefault
+        default: 'true'
+        description: Remove version and any related binaries
+
+  - name: installSoftwareVersion
+    description: Install software version on a device
+    descriptionLong: Install software version on a device
+    method: POST
+    path: devicecontrol/operations
+    accept: 'application/vnd.com.nsn.cumulocity.managedObject+json'
+    alias:
+        go: install
+        powershell: Install-SoftwareVersion
+    examples:
+      powershell:
+        - description: Get a software package
+          skipTest: true
+          command: Install-SoftwareVersion -Device $mo.id -Software go-c8y-cli -Version 1.0.0
+
+      go:
+        - description: Install a software package version
+          command: c8y software versions install --device 1234 --software go-c8y-cli --version 1.0.0
+          skipTest: true
+
+    body:
+      - name: device
+        type: '[]device'
+        property: deviceId
+        description: Device or agent where the software should be installed
+        pipeline: true
+
+      - name: software
+        type: 'softwareName'
+        required: true
+        property: c8y_SoftwareUpdate.0.name
+        description: Software name
+
+      - name: version
+        type: 'softwareversionName'
+        required: false
+        dependsOn:
+          - "software"
+        property: c8y_SoftwareUpdate.0.version
+        description: Software version id or name
+      
+      - name: url
+        type: 'string'
+        required: false
+        property: c8y_SoftwareUpdate.0.url
+        description: Software url
+
+      - name: description
+        type: string
+        description: Operation description
+        default: Install software package
+
+      # Special property. Should after name, version, url but before action
+      - name: softwareDetails
+        type: softwareDetails
+        position: 98
+        property: c8y_SoftwareUpdate.0
+        description: Computed parameter which is filled in when the software details, name, version and url
+      
+      - name: action
+        type: string
+        static: true
+        position: 99
+        description: Software action
+        property: 'c8y_SoftwareUpdate.0.action'
+        default: 'install'
+        validationSet:
+          - install
+
+    bodyRequiredKeys:
+      - "deviceId"
+      - "c8y_SoftwareUpdate.0.name"
+      - "c8y_SoftwareUpdate.0.version"
+      - "c8y_SoftwareUpdate.0.action"
+  
+  - name: uninstallSoftwareVersion
+    description: Uninstall software version on a device
+    descriptionLong: Uninstall software version on a device
+    method: POST
+    path: devicecontrol/operations
+    accept: 'application/vnd.com.nsn.cumulocity.managedObject+json'
+    alias:
+        go: uninstall
+        powershell: Remove-SoftwareVersion
+    examples:
+      powershell:
+        - description: Uninstall a software package version
+          skipTest: true
+          command: Remove-SoftwareVersion -Device $mo.id -Software go-c8y-cli -Version 1.0.0
+
+      go:
+        - description: Uninstall a software package version
+          command: c8y software versions uninstall --device 1234 --software go-c8y-cli --version 1.0.0
+
+    body:
+      - name: device
+        type: '[]device'
+        property: deviceId
+        description: Device or agent where the software should be installed
+        pipeline: true
+
+      - name: software
+        type: 'softwareName'
+        required: true
+        property: c8y_SoftwareUpdate.0.name
+        description: Software name
+
+      - name: version
+        type: 'softwareversionName'
+        dependsOn:
+          - "software"
+        required: false
+        property: c8y_SoftwareUpdate.0.version
+        description: Software version name or id
+
+      - name: action
+        type: string
+        static: true
+        description: Software action
+        property: 'c8y_SoftwareUpdate.0.action'
+        default: 'delete'
+        validationSet:
+          - delete
+    bodyRequiredKeys:
+      - "deviceId"
+      - "c8y_SoftwareUpdate.0.name"
+      - "c8y_SoftwareUpdate.0.action"

@@ -17,11 +17,35 @@ None :)
 
 ## TODO (next branch)
 
+* Download commands?:
+
+    Should configuration with external URLs be downloaded? Can it be trusted? There is currently a workaround
+
+        c8y firmware versions get --id 1 | c8y api
+
+        However you can control the output file dynamically. i.e. if you get a list of devices and pipe it, then it will all be overwritten in the same output file.
+
+        c8y firmware versions list --firmware 1234 | c8y api --outputFile myfile.json
+
+        * What name to use?
+            * Template string?
+            * Firmware name and version?
+            * Actual binary name from the url?
+                * i.e. if c8y binary, then lookup the binary managed object for the details?
+                * If external, then use the basename of the url path (converting unsupported chars)
+
+
+    * c8y firmware versions download --outputFile "%s"
+        - c8y binaries download --autoName
+    * c8y firmware patches download
+    * c8y software versions download
+    * c8y configuration download
+
 ### Docs
 
-* [ ] Confirmation
-* [ ] Session encryption
-* [ ] Partial setting of sessions (i.e. bootstrap credentials with only the username/password set)
+* [x] Confirmation
+* [x] Session encryption
+* [x] Partial setting of sessions (i.e. bootstrap credentials with only the username/password set)
 * [x] Workers
 * [x] Views
 * [x] Activity Log

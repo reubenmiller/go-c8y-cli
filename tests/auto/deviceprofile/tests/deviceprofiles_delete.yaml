@@ -1,0 +1,8 @@
+tests:
+    deviceprofiles_delete_Delete a device profile:
+        command: c8y deviceprofiles delete --id 12345
+        exit-code: 0
+        stdout:
+            json:
+                method: DELETE
+                path: /inventory/managedObjects/12345

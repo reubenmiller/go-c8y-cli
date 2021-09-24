@@ -24,3 +24,16 @@ tests:
     command: |
       c8y devices list --query "name eq 'salt & pepper'"
     exit-code: 0
+  
+  It encodes query parameters in devices query when using pipeline:
+    command: |
+      echo "name eq 'salt & pepper'" | c8y devices list --verbose
+    exit-code: 0
+    stderr:
+      contains:
+        - name+eq+'salt+%26+pepper'
+
+  It encodes query parameters in firmware list:
+    command: |
+      c8y firmware list --name "*&*"
+    exit-code: 0

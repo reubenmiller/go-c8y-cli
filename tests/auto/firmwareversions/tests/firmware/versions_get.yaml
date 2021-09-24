@@ -1,0 +1,17 @@
+tests:
+    firmware/versions_get_Get a firmware package version using name:
+        command: c8y firmware versions get --firmware 11111 --id 1.0.0
+        exit-code: 0
+        skip: true
+        stdout:
+            json:
+                method: GET
+                path: /inventory/managedObjects/1.0.0
+    firmware/versions_get_Get a firmware package version using pipeline:
+        command: $TEST_SHELL -c 'c8y firmware versions list --firmware 12345 | c8y firmware versions get --withParents'
+        exit-code: 0
+        skip: true
+        stdout:
+            json:
+                method: GET
+                path: /inventory/managedObjects/{id}

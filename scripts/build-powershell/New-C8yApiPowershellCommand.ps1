@@ -180,6 +180,11 @@
         }
         $item = New-C8yPowershellArguments @ArgParams
 
+        if ($item.ignore) {
+            Write-Warning "Skipping special argument: $($item.Name)"
+            continue
+        }
+
         if ($ReadFromPipeline) {
             Write-Host "$NameCamel : $($item.Name), $($iArg.type)=>$($item.type)" -ForegroundColor Magenta
             if ($item.type -match "^(string|long)$") {
@@ -319,10 +324,10 @@
                 if ($prop.Contains(".")) {
                     [array] $propParts = $prop -split "\."
 
-                    if ($propParts.Count -gt 2) {
-                        Write-Warning "TODO: handle nested properties with depth > 2"
-                        continue
-                    }
+                    # if ($propParts.Count -gt 2) {
+                    #     Write-Warning "TODO: handle nested properties with depth > 2"
+                    #     continue
+                    # }
                     $rootprop = $propParts[0]
                     $nestedprop = $propParts[1]
                     $null = $RESTBodyBuilder.AppendLine("`$body[`"$rootprop`"] = @{`"`" = `"$nestedprop`"}")

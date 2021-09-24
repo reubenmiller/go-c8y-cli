@@ -1,0 +1,47 @@
+version: '3'
+
+# go install github.com/go-task/task/v3/cmd/task@latest
+# zsh completions: https://github.com/sawadashota/go-task-completions
+
+tasks:
+
+
+  #
+  # Tests
+  #
+  install-test-dependencies:
+    desc: Install test dependencies
+    cmds:
+      - go get github.com/commander-cli/commander/v2/cmd/commander@v2.5.0-alpha2
+    status:
+      - command -v commander
+
+  test-cli:
+    desc: Test cli tests
+    deps: [test-cli-auto, test-cli-manual]
+
+  test-cli-manual:
+    desc: Run manual cli tests
+    summary: |
+      # Run manual cli tests
+
+      Usage:
+        task test-cli-manual -- [subcommand]
+
+      Example
+        task test-cli-manual -- configuration
+    deps: [install-test-dependencies]
+    vars:
+      FILTER: "*"
+    cmds:
+      - ./tests/run-manual.sh {{.CLI_ARGS}}
+  
+  test-cli-auto:
+    desc: Run auto generated cli tests
+    summary: |
+      Additional arguments can be run using
+      task test-cli-auto -- software 
+    deps: [install-test-dependencies]
+    cmds:
+      - ./tests/scripts/setup.sh
+      - ./tests/run-auto.sh {{.CLI_ARGS}}

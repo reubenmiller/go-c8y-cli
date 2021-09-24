@@ -1,0 +1,17 @@
+tests:
+    firmware/patches_list_Get a list of firmware patches:
+        command: c8y firmware patches list --firmware 12345
+        exit-code: 0
+        stdout:
+            json:
+                method: GET
+                path: /inventory/managedObjects
+                query: r/\(c8y_Patch.dependency eq '\*'\) and \(bygroupid\(12345\)\)
+    firmware/patches_list_Get a list of firmware patches where the dependency version starts with "1.":
+        command: c8y firmware patches list --firmware 12345 --dependency '1.*'
+        exit-code: 0
+        stdout:
+            json:
+                method: GET
+                path: /inventory/managedObjects
+                query: r/\(c8y_Patch.dependency eq '1\.\*'\) and \(bygroupid\(12345\)\)

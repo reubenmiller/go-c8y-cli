@@ -1,0 +1,26 @@
+tests:
+    configuration_create_Create a configuration package:
+        command: c8y configuration create --name "agent config" --description "Default agent configuration" --configurationType "agentConfig" --url "https://test.com/content/raw/app.json"
+        exit-code: 0
+        stdout:
+            json:
+                body.configurationType: agentConfig
+                body.description: Default agent configuration
+                body.name: agent config
+                body.url: https://test.com/content/raw/app.json
+                method: POST
+                path: /inventory/managedObjects
+    ? |
+        configuration_create_Create multiple configurations using different device type filters (via pipeline)
+        The stdin will be mapped to the deviceType property. This was you can easily make the same configuration
+        available for multiple device types
+    :   command: $TEST_SHELL -c 'echo -e "c8y_Linux\nc8y_MacOS\nc8y_Windows" | c8y configuration create --name "default-vpn-config" --configurationType "VPN_CONFIG" --file default.vpn'
+        exit-code: 0
+        skip: true
+        stdout:
+            json:
+                body.configurationType: VPN_CONFIG
+                body.name: default-vpn-config
+                body.url: default.vpn
+                method: POST
+                path: /inventory/managedObjects

@@ -1,0 +1,11 @@
+tests:
+    firmware/versions_install_Install a firmware version:
+        command: c8y firmware versions install --device 1234 --firmware linux-iot --version 1.0.0
+        exit-code: 0
+        stdout:
+            json:
+                body.c8y_Firmware.name: linux-iot
+                body.c8y_Firmware.version: 1.0.0
+                body.deviceId: "1234"
+                method: POST
+                path: /devicecontrol/operations

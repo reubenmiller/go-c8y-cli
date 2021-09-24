@@ -1,0 +1,47 @@
+tests:
+    software_create_Create a software package:
+        command: c8y software create --name "python3-requests" --description "python requests library"
+        exit-code: 0
+        stdout:
+            json:
+                body.description: python requests library
+                body.name: python3-requests
+                method: POST
+                path: /inventory/managedObjects
+    software_create_Create a software package and create a new version:
+        command: $TEST_SHELL -c 'cat ./testdata/c8y.software.create.json | c8y software versions create --version "1.0.0" --file "python3-requests.deb"'
+        exit-code: 0
+        skip: true
+        stdout:
+            json:
+                body.c8y_Software.version: 1.0.0
+                body.name: python3-requests
+                method: POST
+                path: /inventory/managedObjects
+    software_create_Create a software package which is only applicable for a specific device type:
+        command: c8y software create --name "python3-requests" --description "python requests library" --deviceType "c8y_Linux"
+        exit-code: 0
+        stdout:
+            json:
+                body.c8y_Filter.type: c8y_Linux
+                body.description: python requests library
+                body.name: python3-requests
+                method: POST
+                path: /inventory/managedObjects
+    software_create_Create the same software package for multiple device types:
+        command: $TEST_SHELL -c 'echo -e "c8y_Linux\nc8y_MacOS" | c8y software create --name "python3-requests" --description "python requests library"'
+        exit-code: 0
+        stdout:
+            json:
+                ..0.body.c8y_Filter.type: c8y_Linux
+                ..0.body.description: python requests library
+                ..0.body.name: python3-requests
+                ..0.method: POST
+                ..1.body.c8y_Filter.type: c8y_MacOS
+                ..1.body.description: python requests library
+                ..1.body.name: python3-requests
+                ..1.method: POST
+                body.description: python requests library
+                body.name: python3-requests
+                method: POST
+                path: /inventory/managedObjects

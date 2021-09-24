@@ -35,7 +35,7 @@
         }
         $ExampleText
     }
-    $RESTPath = $Specification.path
+    $RESTPath = $Specification.path -replace " ", "%20"
     $RESTMethod = $Specification.method
 
     #
@@ -104,7 +104,7 @@
                 }
             }
 
-            if ($iArg.Type -notmatch "device\b|agent\b|group|devicegroup|self|application|microservice|\[\]id|\[\]devicerequest") {
+            if ($iArg.Type -notmatch "device\b|agent\b|group|devicegroup|self|application|software\b|softwareName\b|softwareversion\b|softwareversionName\b|firmware\b|firmwareName\b|firmwareversion\b|firmwareversionName\b|firmwarepatch\b|firmwarepatchName\b|configuration\b|deviceprofile\b|microservice|\[\]id|\[\]devicerequest") {
                 if ($RESTMethod -match "POST") {
                     # Add override capability to piped arguments, so the user can still override piped data with the argument
                     [void] $RESTBodyBuilderOptions.AppendLine("flags.WithOverrideValue(`"$($iarg.Name)`", `"$PipelineVariableProperty`"),")
@@ -166,6 +166,13 @@
             "(\[\])?tenant$" { [void] $CompletionBuilderOptions.AppendLine("completion.WithTenantID(`"$($iArg.Name)`", func() (*c8y.Client, error) { return ccmd.factory.Client()}),") }
             "(\[\])?device$" { [void] $CompletionBuilderOptions.AppendLine("completion.WithDevice(`"$($iArg.Name)`", func() (*c8y.Client, error) { return ccmd.factory.Client()}),") }
             "(\[\])?agent$" { [void] $CompletionBuilderOptions.AppendLine("completion.WithAgent(`"$($iArg.Name)`", func() (*c8y.Client, error) { return ccmd.factory.Client()}),") }
+            "(\[\])?software(name)?$" { [void] $CompletionBuilderOptions.AppendLine("completion.WithSoftware(`"$($iArg.Name)`", func() (*c8y.Client, error) { return ccmd.factory.Client()}),") }
+            "(\[\])?softwareversion(name)?$" { [void] $CompletionBuilderOptions.AppendLine("completion.WithSoftwareVersion(`"$($iArg.Name)`", `"$($iArg.dependsOn | Select-Object -First 1)`", func() (*c8y.Client, error) { return ccmd.factory.Client()}),") }
+            "(\[\])?firmware(name)?$" { [void] $CompletionBuilderOptions.AppendLine("completion.WithFirmware(`"$($iArg.Name)`", func() (*c8y.Client, error) { return ccmd.factory.Client()}),") }
+            "(\[\])?firmwareversion(name)?$" { [void] $CompletionBuilderOptions.AppendLine("completion.WithFirmwareVersion(`"$($iArg.Name)`", `"$($iArg.dependsOn | Select-Object -First 1)`", func() (*c8y.Client, error) { return ccmd.factory.Client()}),") }
+            "(\[\])?firmwarepatch(name)?$" { [void] $CompletionBuilderOptions.AppendLine("completion.WithFirmwarePatch(`"$($iArg.Name)`", `"$($iArg.dependsOn | Select-Object -First 1)`", func() (*c8y.Client, error) { return ccmd.factory.Client()}),") }
+            "(\[\])?configuration$" { [void] $CompletionBuilderOptions.AppendLine("completion.WithConfiguration(`"$($iArg.Name)`", func() (*c8y.Client, error) { return ccmd.factory.Client()}),") }
+            "(\[\])?deviceprofile$" { [void] $CompletionBuilderOptions.AppendLine("completion.WithDeviceProfile(`"$($iArg.Name)`", func() (*c8y.Client, error) { return ccmd.factory.Client()}),") }
         }
 
         $ArgParams = @{
@@ -185,6 +192,27 @@
         Write-Warning ("Property is missing pipeline support. cmd={0}" -f @(
             $Specification.name
         ))
+    }
+
+    # Post actions
+    $PostActionOptions = New-Object System.Text.StringBuilder
+    $PostActionsTotal = 0
+    foreach ($iArg in (Remove-SkippedParameters $ArgumentSources)) {
+        $URLProperty = $iArg.Name
+        if ($iArg.Property) {
+            $URLProperty = $iArg.Property
+        }
+        switch ($iArg.Type) {
+            "binaryUploadURL" {
+                $null = $PostActionOptions.AppendLine("&c8ydata.AddChildAddition{Client: client, URLProperty: `"$URLProperty`"},")
+                $PostActionsTotal++
+                break
+            }
+        }
+    }
+    if ($PostActionsTotal -gt 0) {
+        $null = $PostActionOptions.Insert(0, "inputIterators.PipeOptions.PostActions = []flags.Action{`n")
+        $null = $PostActionOptions.AppendLine("}")
     }
 
     #
@@ -577,6 +605,7 @@ func (n *${NameCamel}Cmd) RunE(cmd *cobra.Command, args []string) error {
         IgnoreAccept: cfg.IgnoreAcceptHeader(),
         DryRun:       cfg.ShouldUseDryRun(cmd.CommandPath()),
     }
+    $PostActionOptions
 
     return n.factory.RunWithWorkers(client, cmd, &req, inputIterators)
 }
@@ -766,6 +795,43 @@ Function Get-C8yGoArgs {
                 "cmd.Flags().StringSlice(`"${Name}`", []string{`"${Default}`"}, `"${Description}`")"
             }
 
+            @{
+                SetFlag = $SetFlag
+            }
+        }
+
+        # Management repository types
+        { $_ -in "[]software", "[]softwareversion", "[]firmware", "[]firmwareversion", "[]firmwarepatch", "[]configuration", "[]deviceprofile" } {
+            $SetFlag = if ($UseOption) {
+                "cmd.Flags().StringSliceP(`"${Name}`", []string{`"${Default}`"}, `"${OptionName}`", `"${Description}`")"
+            } else {
+                "cmd.Flags().StringSlice(`"${Name}`", []string{`"${Default}`"}, `"${Description}`")"
+            }
+
+            @{
+                SetFlag = $SetFlag
+            }
+        }
+
+        # Management name lookup
+        { $_ -in "softwareName", "softwareversionName", "firmwareName", "firmwareversionName", "firmwarepatchName" } {
+            $SetFlag = if ($UseOption) {
+                "cmd.Flags().StringP(`"${Name}`", `"${Default}`", `"${OptionName}`", `"${Description}`")"
+            } else {
+                "cmd.Flags().String(`"${Name}`", `"${Default}`", `"${Description}`")"
+            }
+
+            @{
+                SetFlag = $SetFlag
+            }
+        }
+
+        "binaryUploadURL" {
+            $SetFlag = if ($UseOption) {
+                'cmd.Flags().StringP("{0}", "{1}", "{2}", "{3}")' -f $Name, $OptionName, $Default, $Description
+            } else {
+                'cmd.Flags().String("{0}", "{1}", "{2}")' -f $Name, $Default, $Description
+            }
             @{
                 SetFlag = $SetFlag
             }
@@ -984,7 +1050,7 @@ Function Get-C8yGoArgs {
             }
         }
 
-        {$_ -in "boolean", "optional_fragment"} {
+        {$_ -in "boolean", "booleanDefault", "optional_fragment"} {
             if (!$Default) {
                 $Default = "false"
             }

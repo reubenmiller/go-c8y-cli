@@ -1,0 +1,343 @@
+
+---
+information:
+  name: configuration
+  description: Cumulocity configuration repository management
+  descriptionLong: Configuration management to create/list/delete configurations
+  link: https://cumulocity.com/guides/users-guide/device-management/#configuration-repository
+
+endpoints:
+  - name: getConfigurationCollection
+    # deprecated as framework does not support conditional subquery parameters
+    skip: true
+    method: GET
+    description: Get configuration collection
+    descriptionLong: Get a collection of configuration (managedObjects) based on filter parameters
+    path: inventory/managedObjects?query=$filter=(type eq 'c8y_ConfigurationDump') $orderby=name asc
+    accept: application/vnd.com.nsn.cumulocity.managedObjectCollection+json
+    collectionType: application/vnd.com.nsn.cumulocity.managedObject+json
+    collectionProperty: managedObjects
+    alias:
+        go: list
+        powershell: Get-ConfigurationCollection
+    examples:
+      powershell:
+        - description: Get a list of configuration files
+          command: Get-ConfigurationCollection
+
+      go:
+        - description: Get a list of configuration files
+          command: c8y configuration list
+          assertStdOut:
+            json:
+              query: r/type eq 'c8y_ConfigurationDump'
+
+    pathParameters:
+      - name: name
+        type: string
+        default: '**'
+        description: Configuration name filter
+      
+      - name: description
+        type: string
+        default: '**'
+        description: Configuration description filter
+      
+      - name: deviceType
+        type: string
+        default: '**'
+        description: Configuration device type filter
+
+  - name: newConfiguration
+    skip: false
+    method: POST
+    path: inventory/managedObjects
+    accept: application/vnd.com.nsn.cumulocity.inventory+json
+    description: Create configuration file
+    descriptionLong: Create a new configuration file (managedObject)
+    alias:
+        go: create
+        powershell: New-Configuration
+    examples:
+      powershell:
+        - description: Create a new configuration file
+          beforeEach:
+            - $type = New-RandomString -Prefix "customType_"
+          command: New-Configuration -Name "agent config" -Description "Default agent configuration" -ConfigurationType "agentConfig" -Url "https://test.com/content/raw/app.json" -Data @{$type=@{}}
+          afterEach:
+            - Get-ManagedObjectCollection -FragmentType $type | Remove-ManagedObject
+
+      go:
+        - description: Create a configuration package
+          command: c8y configuration create --name "agent config" --description "Default agent configuration" --configurationType "agentConfig" --url "https://test.com/content/raw/app.json"
+
+        - description: |
+            Create multiple configurations using different device type filters (via pipeline)
+            The stdin will be mapped to the deviceType property. This was you can easily make the same configuration
+            available for multiple device types
+          skipTest: true
+          command: echo -e "c8y_Linux\nc8y_MacOS\nc8y_Windows" | c8y configuration create --name "default-vpn-config" --configurationType "VPN_CONFIG" --file default.vpn
+    body:
+      - name: name
+        type: string
+        required: false
+        description: name
+      
+      - name: description
+        type: string
+        required: false
+        description: Description of the configuration package
+      
+      - name: configurationType
+        type: string
+        required: false
+        description: Configuration type
+
+      - name: url
+        type: string
+        required: false
+        description: URL link to the configuration file
+
+      - name: deviceType
+        type: string
+        required: false
+        description: Device type filter. Only allow configuration to be applied to devices of this type
+        pipeline: true
+        pipelineAliases:
+          - "c8y_Filter.type"
+          - "deviceType"
+          - "type"
+
+      - name: file
+        type: binaryUploadURL
+        property: url
+        required: false
+        description: File to upload
+
+      - name: data
+        type: json
+        description: Additional properties of the configuration package.
+
+    bodyTemplate:
+      type: jsonnet
+      applyLast: false
+      template: "{type: 'c8y_ConfigurationDump', c8y_Global:{}}"
+    bodyRequiredKeys:
+      - "type"
+      - "name"
+      - "url"
+
+  - name: getConfiguration
+    description: Get configuration
+    descriptionLong: Get an existing configuration package (managedObject)
+    method: GET
+    path: inventory/managedObjects/{id}
+    accept: application/vnd.com.nsn.cumulocity.inventory+json
+    alias:
+        go: get
+        powershell: Get-Configuration
+    examples:
+      powershell:
+        - description: Get a configuration package
+          beforeEach:
+            - $mo = PSc8y\New-ManagedObject -Name "testMO"
+          command: Get-Configuration -Id $mo.id
+          afterEach:
+            - Remove-ManagedObject -Id $mo.id
+
+        - description: Get a configuration package (using pipeline)
+          beforeEach:
+            - $mo = PSc8y\New-ManagedObject -Name "testMO"
+          command: Get-ManagedObject -Id $mo.id | Get-Configuration
+          afterEach:
+            - Remove-ManagedObject -Id $mo.id
+
+      go:
+        - description: Get a configuration package
+          command: c8y configuration get --id 12345
+
+    pathParameters:
+      - name: id
+        type: '[]configuration'
+        pipeline: true
+        required: true
+        description: Configuration package (managedObject) id
+
+  - name: updateConfiguration
+    method: PUT
+    path: inventory/managedObjects/{id}
+    accept: application/vnd.com.nsn.cumulocity.inventory+json
+    description: Update configuration
+    descriptionLong: Update an existing configuration file (managedObject)
+    alias:
+        go: update
+        powershell: Update-Configuration
+    examples:
+      powershell:
+        - description: Update a configuration file
+          beforeEach:
+            - $mo = PSc8y\New-ManagedObject -Name "testMO"
+          command: Update-Configuration -Id $mo.id -Data @{ com_my_props = @{ value = 1 } }
+          afterEach:
+            - Remove-ManagedObject -Id $mo.id
+
+        - description: Update a configuration file (using pipeline)
+          beforeEach:
+            - $mo = PSc8y\New-ManagedObject -Name "testMO"
+          command: Get-ManagedObject -Id $mo.id | Update-Configuration -Data @{ com_my_props = @{ value = 1 } }
+          afterEach:
+            - Remove-ManagedObject -Id $mo.id
+
+      go:
+        - description: Update a configuration file
+          command: 'c8y configuration update --id 12345 --newName "my_custom_name" --data "{\"com_my_props\":{},\"value\":1}"'
+    body:
+      - name: newName
+        property: name
+        type: string
+        required: false
+        description: New configuration name
+      
+      - name: description
+        type: string
+        required: false
+        description: Description of the configuration package
+      
+      - name: configurationType
+        type: string
+        required: false
+        description: Configuration type
+
+      - name: url
+        type: string
+        required: false
+        description: URL link to the configuration file
+
+      - name: deviceType
+        type: string
+        required: false
+        description: Device type filter. Only allow configuration to be applied to devices of this type
+
+      - name: file
+        type: binaryUploadURL
+        property: url
+        required: false
+        description: File to be uploaded
+
+      - name: data
+        type: json
+        description: Additional properties of the configuration file.
+
+    pathParameters:
+      - name: id
+        type: '[]configuration'
+        required: true
+        pipeline: true
+        description: Configuration package (managedObject) id
+
+  - name: deleteConfiguration
+    description: Delete configuration file
+    descriptionLong: Delete an existing configuration file
+    method: DELETE
+    path: inventory/managedObjects/{id}
+    accept: ''
+    alias:
+        go: delete
+        powershell: Remove-Configuration
+    examples:
+      powershell:
+        - description: Delete a configuration package (and any related binaries)
+          beforeEach:
+            - $mo = PSc8y\New-ManagedObject -Name "testMO"
+          command: Remove-Configuration -Id $mo.id
+          afterEach:
+            - Remove-ManagedObject -Id $mo.id -ErrorAction SilentlyContinue
+
+        - description: Delete a configuration package (using pipeline)
+          beforeEach:
+            - $mo = PSc8y\New-ManagedObject -Name "testMO"
+          command: Get-ManagedObject -Id $mo.id | Remove-Configuration
+          afterEach:
+            - Remove-ManagedObject -Id $mo.id -ErrorAction SilentlyContinue
+
+        - description: Delete a configuration package but keep any related binaries
+          beforeEach:
+            - $Device = PSc8y\New-TestDevice
+            - $ChildDevice = PSc8y\New-TestDevice
+            - PSc8y\Add-ChildDeviceToDevice -Device $Device.id -NewChild $ChildDevice.id
+          command: Get-ManagedObject -Id $Device.id | Remove-Configuration -forceCascade:$false
+          afterEach:
+            - Remove-ManagedObject -Id $Device.id -ErrorAction SilentlyContinue
+            - Remove-ManagedObject -Id $ChildDevice.id -ErrorAction SilentlyContinue
+
+      go:
+        - description: Delete a configuration package (and any related binaries)
+          command: c8y configuration delete --id 12345
+
+        - description: Delete a configuration package but keep any related binaries
+          command: c8y configuration delete --id 12345 --forceCascade=false
+    pathParameters:
+      - name: id
+        type: '[]configuration'
+        pipeline: true
+        required: true
+        description: Configuration file (managedObject) id
+
+    queryParameters:
+      - name: forceCascade
+        type: booleanDefault
+        default: 'true'
+        description: Remove version and any related binaries
+
+  - name: installConfiguration
+    skip: true
+    method: POST
+    path: devicecontrol/operations
+    accept: application/vnd.com.nsn.cumulocity.operation+json
+    description: Apply the configuration to a device via an operation
+    descriptionLong: Create a new operation to apply a configuration to an agent or device
+    examples:
+      powershell:
+        - description: Create operation for a device
+          beforeEach:
+            - $device = New-TestAgent
+          command: 'New-Operation -Device $device.id -Description "Restart device" -Data @{ c8y_Restart = @{} }'
+          afterEach:
+            - Remove-ManagedObject -Id $device.id
+
+        - description: Create operation for a device (using pipeline)
+          beforeEach:
+            - $device = New-TestAgent
+          command: 'Get-Device $device.id | New-Operation -Description "Restart device" -Data @{ c8y_Restart = @{} }'
+          afterEach:
+            - Remove-ManagedObject -Id $device.id
+
+      go:
+        - description: Create operation for a device
+          command: c8y operations create --device 12345 --data "c8y_Restart={}"
+    alias:
+        go: install
+        powershell: Install-Configuration
+    body:
+      - name: device
+        type: '[]device'
+        property: deviceId
+        required: false
+        pipeline: true
+        description: Identifies the target device on which this operation should be performed.
+
+      - name: description
+        type: string
+        required: false
+        description: Text description of the operation.
+
+      - name: configurationId
+        type: '[]configuration'
+        required: false
+        description: Configuration file (managedObject) id
+
+      - name: data
+        type: json
+        description: Additional properties describing the operation which will be performed on the device.
+    bodyRequiredKeys:
+      - deviceId

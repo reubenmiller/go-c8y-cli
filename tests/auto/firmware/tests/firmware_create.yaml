@@ -1,0 +1,27 @@
+tests:
+    firmware_create_Create a firmware package:
+        command: c8y firmware create --name "iot-linux" --description "Linux image for IoT devices"
+        exit-code: 0
+        stdout:
+            json:
+                body.description: Linux image for IoT devices
+                body.name: iot-linux
+                method: POST
+                path: /inventory/managedObjects
+    firmware_create_Create the same firmware package for multiple device types:
+        command: $TEST_SHELL -c 'echo -e "c8y_Linux\nc8y_MacOS" | c8y firmware create --name "iot-linux" --description "Linux image for IoT devices"'
+        exit-code: 0
+        stdout:
+            json:
+                ..0.body.c8y_Filter.type: c8y_Linux
+                ..0.body.description: Linux image for IoT devices
+                ..0.body.name: iot-linux
+                ..0.method: POST
+                ..1.body.c8y_Filter.type: c8y_MacOS
+                ..1.body.description: Linux image for IoT devices
+                ..1.body.name: iot-linux
+                ..1.method: POST
+                body.description: Linux image for IoT devices
+                body.name: iot-linux
+                method: POST
+                path: /inventory/managedObjects

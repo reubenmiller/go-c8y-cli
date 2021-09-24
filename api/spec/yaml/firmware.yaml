@@ -1,0 +1,288 @@
+
+---
+information:
+  name: firmware
+  description: Cumulocity firmware management
+  descriptionLong: Firmware management to create/list/delete packages, versions and patches
+  link: https://cumulocity.com/guides/users-guide/device-management/#firmware-repo
+
+endpoints:
+  - name: getFirmwareCollection
+    method: GET
+    # deprecated as framework does not support conditional subquery parameters
+    skip: true
+    description: Get firmware collection
+    descriptionLong: Get a collection of firmware packages (managedObjects) based on filter parameters
+    path: inventory/managedObjects?query=$filter=((type eq 'c8y_Firmware') and ((name eq '{name}') and ((not(has(description))) or description eq '{description}') and (not(has(c8y_Filter.type)) or c8y_Filter.type eq '{deviceType}'))) $orderby=name asc
+    accept: application/vnd.com.nsn.cumulocity.managedObjectCollection+json
+    collectionType: application/vnd.com.nsn.cumulocity.managedObject+json
+    collectionProperty: managedObjects
+    alias:
+        go: list
+        powershell: Get-FirmwareCollection
+    examples:
+      powershell:
+        - description: Get a list of firmware packages
+          command: Get-FirmwareCollection
+
+      go:
+        - description: Get a list of firmware packages
+          command: c8y firmware list
+          assertStdOut:
+            json:
+              query: r/type eq 'c8y_Firmware'
+
+    pathParameters:
+      - name: name
+        type: string
+        default: '**'
+        description: Firmware name filter
+      
+      - name: description
+        type: string
+        default: '**'
+        description: Firmware description filter
+      
+      - name: deviceType
+        type: string
+        default: '**'
+        description: Firmware device type filter
+
+  - name: newFirmware
+    method: POST
+    path: inventory/managedObjects
+    accept: application/vnd.com.nsn.cumulocity.inventory+json
+    description: Create firmware package
+    descriptionLong: Create a new firmware package (managedObject)
+    alias:
+        go: create
+        powershell: New-Firmware
+    examples:
+      powershell:
+        - description: Create a firmware package
+          beforeEach:
+            - $type = New-RandomString -Prefix "customType_"
+          command: New-Firmware -Name "iot-linux" -Description "Linux image for IoT devices" -Data @{$type=@{}}
+          afterEach:
+            - Get-ManagedObjectCollection -FragmentType $type | Remove-ManagedObject
+
+      go:
+        - description: Create a firmware package
+          command: c8y firmware create --name "iot-linux" --description "Linux image for IoT devices"
+        
+        - description: Create the same firmware package for multiple device types
+          command: echo -e "c8y_Linux\nc8y_MacOS" | c8y firmware create --name "iot-linux" --description "Linux image for IoT devices"
+          assertStdOut:
+            line-count: 2
+            json:
+              ..0.method: POST
+              ..0.body.name: iot-linux
+              ..0.body.description: Linux image for IoT devices
+              ..0.body.c8y_Filter.type: c8y_Linux
+              ..1.method: POST
+              ..1.body.name: iot-linux
+              ..1.body.description: Linux image for IoT devices
+              ..1.body.c8y_Filter.type: c8y_MacOS
+
+    body:
+      - name: name
+        type: string
+        required: false
+        description: name
+        pipeline: false
+        pipelineAliases:
+          - "name"
+      
+      - name: description
+        type: string
+        required: false
+        description: Description of the firmware package
+
+      - name: deviceType
+        type: string
+        property: c8y_Filter.type
+        required: false
+        description: Device type filter. Only allow firmware to be applied to devices of this type
+        pipeline: true
+        pipelineAliases:
+          - "c8y_Filter.type"
+          - "deviceType"
+          - "type"
+
+      - name: data
+        type: json
+        description: Additional properties of the firmware package.
+
+    bodyTemplate:
+      type: jsonnet
+      applyLast: false
+      template: "{type: 'c8y_Firmware', c8y_Global:{}}"
+    bodyRequiredKeys:
+      - "type"
+      - "name"
+
+  - name: getFirmware
+    description: Get firmware
+    descriptionLong: Get an existing firmware package (managedObject)
+    method: GET
+    path: inventory/managedObjects/{id}
+    accept: application/vnd.com.nsn.cumulocity.inventory+json
+    alias:
+        go: get
+        powershell: Get-Firmware
+    examples:
+      powershell:
+        - description: Get a firmware package
+          beforeEach:
+            - $mo = PSc8y\New-Firmware -Name "package1"
+          command: Get-Firmware -Id $mo.id
+          afterEach:
+            - Remove-ManagedObject -Id $mo.id
+
+        - description: Get a firmware package (using pipeline)
+          beforeEach:
+            - $mo = PSc8y\New-Firmware -Name "package1"
+          command: Get-ManagedObject -Id $mo.id | Get-Firmware
+          afterEach:
+            - Remove-ManagedObject -Id $mo.id
+
+      go:
+        - description: Get a firmware package
+          command: c8y firmware get --id 12345
+        
+        - description: Get a firmware package (using pipeline)
+          command: echo 12345 | c8y firmware get
+          assertStdOut:
+            json:
+                method: GET
+                path: /inventory/managedObjects/12345
+
+    pathParameters:
+      - name: id
+        type: '[]firmware'
+        description: Firmware package (managedObject) id
+        required: true
+        pipeline: true
+        pipelineAliases:
+          - additionParents.references.0.managedObject.id
+          - id
+
+  - name: updateFirmware
+    method: PUT
+    path: inventory/managedObjects/{id}
+    accept: application/vnd.com.nsn.cumulocity.inventory+json
+    description: Update firmware
+    descriptionLong: Update an existing firmware package (managedObject)
+    alias:
+        go: update
+        powershell: Update-Firmware
+    examples:
+      powershell:
+        - description: Update a firmware package name and add custom add custom properties
+          beforeEach:
+            - $mo = PSc8y\New-Firmware -Name "package1"
+          command: Update-Firmware -Id $mo.id -Data @{ com_my_props = @{ value = 1 } }
+          afterEach:
+            - Remove-ManagedObject -Id $mo.id
+
+        - description: Update a firmware package (using pipeline)
+          beforeEach:
+            - $mo = PSc8y\New-Firmware -Name "package1"
+          command: Get-ManagedObject -Id $mo.id | Update-Firmware -Data @{ com_my_props = @{ value = 1 } }
+          afterEach:
+            - Remove-ManagedObject -Id $mo.id
+
+      go:
+        - description: Update a firmware package name and add custom add custom properties
+          command: 'c8y firmware update --id 12345 --newName "my_custom_name" --data "{\"com_my_props\":{},\"value\":1}"'
+        
+        - description: Update a firmware package name (using pipeline)
+          command: echo "12345" | c8y firmware update --newName "my_custom_name"
+          assertStdOut:
+            json:
+                method: PUT
+                path: /inventory/managedObjects/12345
+
+    body:
+      - name: newName
+        property: name
+        type: string
+        required: false
+        description: New firmware package name
+
+      - name: description
+        type: string
+        required: false
+        description: Description of the firmware package
+      
+      - name: deviceType
+        type: string
+        property: c8y_Filter.type
+        required: false
+        description: Device type filter. Only allow firmware to be applied to devices of this type
+
+      - name: data
+        type: json
+        description: Additional properties of the firmware package.
+
+    pathParameters:
+      - name: id
+        type: '[]firmware'
+        description: Firmware package (managedObject) id
+        required: true
+        pipeline: true
+        pipelineAliases:
+          - additionParents.references.0.managedObject.id
+          - id
+
+  - name: deleteFirmware
+    description: Delete firmware package
+    descriptionLong: Delete an existing firmware package
+    method: DELETE
+    path: inventory/managedObjects/{id}
+    accept: ''
+    alias:
+        go: delete
+        powershell: Remove-Firmware
+    examples:
+      powershell:
+        - description: Delete a firmware package and all related versions
+          beforeEach:
+            - $name = New-RandomString -Prefix "firmware1"
+            - $firmware = PSc8y\New-Firmware -Name $name
+          command: Remove-Firmware -Id $firmware.id
+
+        - description: Delete a firmware package (using pipeline)
+          beforeEach:
+            - $name = New-RandomString -Prefix "firmware1"
+            - $firmware = PSc8y\New-Firmware -Name $name
+          command: Get-ManagedObject -Id $firmware.id | Remove-Firmware
+
+        - description: Delete a firmware package but keep the binaries
+          beforeEach:
+            - $name = New-RandomString -Prefix "firmware1"
+            - $firmware = PSc8y\New-Firmware -Name $name
+          command: Get-ManagedObject -Id $firmware.id | Remove-Firmware -ForceCascade:$false
+
+      go:
+        - description: Delete a firmware package and all related versions
+          command: c8y firmware delete --id 12345
+
+        - description: Delete a firmware package but keep the binaries
+          command: c8y firmware delete --id 12345 --forceCascade=false
+
+    pathParameters:
+      - name: id
+        type: '[]firmware'
+        pipeline: true
+        required: true
+        pipelineAliases:
+          - additionParents.references.0.managedObject.id
+          - id
+        description: Firmware Package (managedObject) id
+
+    queryParameters:
+      - name: forceCascade
+        type: booleanDefault
+        default: 'true'
+        description: Remove version and any related binaries

@@ -7,6 +7,7 @@ tests:
                 method: GET
                 path: /inventory/managedObjects
                 pathEncoded: /inventory/managedObjects?type=c8y_Application_1234
+                query: type=c8y_Application_1234
     microservices_getStatus_Get microservice status (using pipeline):
         command: $TEST_SHELL -c 'cat ./testdata/c8y.microservices.list.json | c8y microservices getStatus'
         exit-code: 0
@@ -15,3 +16,4 @@ tests:
                 method: GET
                 path: /inventory/managedObjects
                 pathEncoded: /inventory/managedObjects?type=c8y_Application_1
+                query: type=c8y_Application_1

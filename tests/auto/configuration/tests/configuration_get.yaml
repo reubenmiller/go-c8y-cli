@@ -1,0 +1,8 @@
+tests:
+    configuration_get_Get a configuration package:
+        command: c8y configuration get --id 12345
+        exit-code: 0
+        stdout:
+            json:
+                method: GET
+                path: /inventory/managedObjects/12345

@@ -47,16 +47,30 @@
         $null = $ParameterDefinition.Add("ValueFromPipelineByPropertyName=`$true")
     }
 
+    $Ignore = $false
+
     # Type Definition
     $DataType = switch ($Type) {
         "[]agent" { "object[]"; break }
         "[]device" { "object[]"; break }
         "[]devicegroup" { "object[]"; break }
+        "[]deviceprofile" { "object[]"; break }
         "[]id" { "object[]"; break }
         "[]smartgroup" { "object[]"; break }
         "[]role" { "object[]"; break }
         "[]roleself" { "object[]"; break }
         "[]string" { "string[]"; break }
+        "[]configuration" { "object[]"; break }
+        "[]software" { "object[]"; break }
+        "softwareName" { "object[]"; break }
+        "[]softwareversion" { "object[]"; break }
+        "softwareversionName" { "object[]"; break }
+        "[]firmware" { "object[]"; break }
+        "firmwareName" { "object[]"; break }
+        "[]firmwareversion" { "object[]"; break }
+        "firmwareversionName" { "object[]"; break }
+        "[]firmwarepatch" { "object[]"; break }
+        "firmwarepatchName" { "object[]"; break }
         "[]stringcsv" { "string[]"; break }
         "[]tenant" { "object[]"; break }
         "[]user" { "object[]"; break }
@@ -64,6 +78,7 @@
         "[]userself" { "object[]"; break }
         "application" { "object[]"; break }
         "boolean" { "switch"; break }
+        "booleanDefault" { "switch"; break }
         "optional_fragment" { "switch"; break }
         "datefrom" { "string"; break }
         "datetime" { "string"; break }
@@ -73,6 +88,7 @@
         "float" { "float"; break }
         "fileContents" { "string"; break }
         "attachment" { "string"; break }
+        "binaryUploadURL" { "string"; break }
         "id" { "object[]"; break }
         "integer" { "long"; break }
         "json" { "object"; break }
@@ -85,6 +101,9 @@
         "[]devicerequest" { "object[]"; break }
         "strings" { "string"; break }
         "tenant" { "object"; break }
+
+        # Complex lookup types. These should not be visible in powershell
+        "softwareDetails" { $Ignore = $true; ""; break }
         default {
             Write-Error "Unsupported Type. $_"
         }
@@ -95,6 +114,6 @@
         Type = $DataType
         Definition = $ParameterDefinition
         Description = "$Description"
-
+        Ignore = $Ignore
     }
 }

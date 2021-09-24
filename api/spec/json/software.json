@@ -1,0 +1,373 @@
+{
+  "information": {
+    "name": "software",
+    "description": "Cumulocity software management",
+    "descriptionLong": "Software management to create/list/delete packages and versions",
+    "link": "https://cumulocity.com/guides/users-guide/device-management/#software-repo"
+  },
+  "endpoints": [
+    {
+      "name": "getSoftwareCollection",
+      "skip": true,
+      "method": "GET",
+      "description": "Get software collection",
+      "descriptionLong": "Get a collection of software packages (managedObjects) based on filter parameters",
+      "path": "inventory/managedObjects?query=$filter=((type eq 'c8y_Software') and ((name eq '{name}') or (not(has(description)) or description eq '{description}') or (c8y_Filter.type eq '{deviceType}'))) $orderby=name asc",
+      "accept": "application/vnd.com.nsn.cumulocity.managedObjectCollection+json",
+      "collectionType": "application/vnd.com.nsn.cumulocity.managedObject+json",
+      "collectionProperty": "managedObjects",
+      "alias": {
+        "go": "list",
+        "powershell": "Get-SoftwareCollection"
+      },
+      "examples": {
+        "powershell": [
+          {
+            "description": "Get a list of software packages",
+            "command": "Get-SoftwareCollection"
+          }
+        ],
+        "go": [
+          {
+            "description": "Get a list of software packages",
+            "command": "c8y software list",
+            "assertStdOut": {
+              "json": {
+                "query": "r/type eq 'c8y_Software'"
+              }
+            }
+          },
+          {
+            "description": "Get a list of software packages starting with \"python3\"",
+            "command": "c8y software list --name \"python3*\"",
+            "assertStdOut": {
+              "json": {
+                "query": "r/name eq 'python3\\*'"
+              }
+            }
+          }
+        ]
+      },
+      "pathParameters": [
+        {
+          "name": "name",
+          "type": "string",
+          "default": "**",
+          "description": "Software name filter"
+        },
+        {
+          "name": "description",
+          "type": "string",
+          "default": "**",
+          "description": "Software description filter"
+        },
+        {
+          "name": "deviceType",
+          "type": "string",
+          "default": "**",
+          "description": "Software device type filter"
+        }
+      ]
+    },
+    {
+      "name": "newSoftware",
+      "method": "POST",
+      "path": "inventory/managedObjects",
+      "accept": "application/vnd.com.nsn.cumulocity.inventory+json",
+      "description": "Create software package",
+      "descriptionLong": "Create a new software package (managedObject)",
+      "alias": {
+        "go": "create",
+        "powershell": "New-Software"
+      },
+      "examples": {
+        "powershell": [
+          {
+            "description": "Create a software package",
+            "beforeEach": [
+              "$type = New-RandomString -Prefix \"customType_\""
+            ],
+            "command": "New-Software -Name \"python3-requests\" -Description \"python requests library\" -Data @{$type=@{}}",
+            "afterEach": [
+              "Get-ManagedObjectCollection -FragmentType $type | Remove-ManagedObject"
+            ]
+          }
+        ],
+        "go": [
+          {
+            "description": "Create a software package",
+            "command": "c8y software create --name \"python3-requests\" --description \"python requests library\""
+          },
+          {
+            "description": "Create a software package which is only applicable for a specific device type",
+            "command": "c8y software create --name \"python3-requests\" --description \"python requests library\" --deviceType \"c8y_Linux\""
+          },
+          {
+            "description": "Create the same software package for multiple device types",
+            "command": "echo -e \"c8y_Linux\\nc8y_MacOS\" | c8y software create --name \"python3-requests\" --description \"python requests library\"",
+            "assertStdOut": {
+              "line-count": 2,
+              "json": {
+                "..0.method": "POST",
+                "..0.body.name": "python3-requests",
+                "..0.body.description": "python requests library",
+                "..0.body.c8y_Filter.type": "c8y_Linux",
+                "..1.method": "POST",
+                "..1.body.name": "python3-requests",
+                "..1.body.description": "python requests library",
+                "..1.body.c8y_Filter.type": "c8y_MacOS"
+              }
+            }
+          },
+          {
+            "description": "Create a software package and create a new version",
+            "skipTest": true,
+            "command": "c8y software create --name \"python3-requests\" | c8y software versions create --version \"1.0.0\" --file \"python3-requests.deb\"",
+            "assertStdOut": {
+              "json": {
+                "body.c8y_Software.version": "1.0.0"
+              }
+            }
+          }
+        ]
+      },
+      "body": [
+        {
+          "name": "name",
+          "type": "string",
+          "required": false,
+          "description": "name",
+          "pipeline": false,
+          "pipelineAliases": [
+            "name"
+          ]
+        },
+        {
+          "name": "description",
+          "type": "string",
+          "required": false,
+          "description": "Description of the software package"
+        },
+        {
+          "name": "deviceType",
+          "type": "string",
+          "property": "c8y_Filter.type",
+          "required": false,
+          "description": "Device type filter. Only allow software to be applied to devices of this type",
+          "pipeline": true,
+          "pipelineAliases": [
+            "c8y_Filter.type",
+            "deviceType",
+            "type"
+          ]
+        },
+        {
+          "name": "data",
+          "type": "json",
+          "description": "Additional properties of the software package."
+        }
+      ],
+      "bodyTemplate": {
+        "type": "jsonnet",
+        "applyLast": false,
+        "template": "{type: 'c8y_Software', c8y_Global:{}}"
+      },
+      "bodyRequiredKeys": [
+        "type",
+        "name"
+      ]
+    },
+    {
+      "name": "getSoftware",
+      "description": "Get software",
+      "descriptionLong": "Get an existing software package (managedObject)",
+      "method": "GET",
+      "path": "inventory/managedObjects/{id}",
+      "accept": "application/vnd.com.nsn.cumulocity.inventory+json",
+      "alias": {
+        "go": "get",
+        "powershell": "Get-Software"
+      },
+      "examples": {
+        "powershell": [
+          {
+            "description": "Get a software package",
+            "beforeEach": [
+              "$mo = PSc8y\\New-ManagedObject -Name \"testMO\""
+            ],
+            "command": "Get-Software -Id $mo.id",
+            "afterEach": [
+              "Remove-ManagedObject -Id $mo.id"
+            ]
+          },
+          {
+            "description": "Get a software package (using pipeline)",
+            "beforeEach": [
+              "$mo = PSc8y\\New-ManagedObject -Name \"testMO\""
+            ],
+            "command": "Get-ManagedObject -Id $mo.id | Get-Software",
+            "afterEach": [
+              "Remove-ManagedObject -Id $mo.id"
+            ]
+          }
+        ],
+        "go": [
+          {
+            "description": "Get a software package",
+            "command": "c8y software get --id 12345"
+          }
+        ]
+      },
+      "pathParameters": [
+        {
+          "name": "id",
+          "type": "[]software",
+          "pipeline": true,
+          "required": true,
+          "description": "Software package (managedObject) id"
+        }
+      ]
+    },
+    {
+      "name": "updateSoftware",
+      "method": "PUT",
+      "path": "inventory/managedObjects/{id}",
+      "accept": "application/vnd.com.nsn.cumulocity.inventory+json",
+      "description": "Update software",
+      "descriptionLong": "Update an existing software package (managedObject)",
+      "alias": {
+        "go": "update",
+        "powershell": "Update-Software"
+      },
+      "examples": {
+        "powershell": [
+          {
+            "description": "Update a software package",
+            "beforeEach": [
+              "$mo = PSc8y\\New-ManagedObject -Name \"testMO\""
+            ],
+            "command": "Update-Software -Id $mo.id -Data @{ com_my_props = @{ value = 1 } }",
+            "afterEach": [
+              "Remove-ManagedObject -Id $mo.id"
+            ]
+          },
+          {
+            "description": "Update a software package (using pipeline)",
+            "beforeEach": [
+              "$mo = PSc8y\\New-ManagedObject -Name \"testMO\""
+            ],
+            "command": "Get-ManagedObject -Id $mo.id | Update-Software -Data @{ com_my_props = @{ value = 1 } }",
+            "afterEach": [
+              "Remove-ManagedObject -Id $mo.id"
+            ]
+          }
+        ],
+        "go": [
+          {
+            "description": "Update a software package",
+            "command": "c8y software update --id 12345 --newName \"my_custom_name\" --data \"{\\\"com_my_props\\\":{},\\\"value\\\":1}\""
+          }
+        ]
+      },
+      "body": [
+        {
+          "name": "newName",
+          "property": "name",
+          "type": "string",
+          "required": false,
+          "description": "New software package name"
+        },
+        {
+          "name": "description",
+          "type": "string",
+          "required": false,
+          "description": "Description of the software package"
+        },
+        {
+          "name": "deviceType",
+          "type": "string",
+          "property": "c8y_Filter.type",
+          "required": false,
+          "description": "Device type filter. Only allow software to be applied to devices of this type"
+        },
+        {
+          "name": "data",
+          "type": "json",
+          "description": "Additional properties of the software package."
+        }
+      ],
+      "pathParameters": [
+        {
+          "name": "id",
+          "type": "[]software",
+          "pipeline": true,
+          "description": "Software package (managedObject) id",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "deleteSoftware",
+      "description": "Delete software package",
+      "descriptionLong": "Delete an existing software package",
+      "method": "DELETE",
+      "path": "inventory/managedObjects/{id}",
+      "accept": "",
+      "alias": {
+        "go": "delete",
+        "powershell": "Remove-Software"
+      },
+      "examples": {
+        "powershell": [
+          {
+            "description": "Delete a software package and all related versions",
+            "beforeEach": [
+              "$mo = PSc8y\\New-Software -Name \"python3-requests\""
+            ],
+            "command": "Get-ManagedObject -Id $mo.id | Remove-Software -ForceCascade:$false",
+            "afterEach": [
+              "Remove-ManagedObject -Id $mo.id -ErrorAction SilentlyContinue"
+            ]
+          },
+          {
+            "description": "Delete a software package (using pipeline)",
+            "beforeEach": [
+              "$mo = PSc8y\\New-ManagedObject -Name \"testMO\""
+            ],
+            "command": "Get-ManagedObject -Id $mo.id | Remove-Software",
+            "afterEach": [
+              "Remove-ManagedObject -Id $mo.id -ErrorAction SilentlyContinue"
+            ]
+          }
+        ],
+        "go": [
+          {
+            "description": "Delete a software package and all related versions",
+            "command": "c8y software delete --id 12345"
+          },
+          {
+            "description": "Delete a software package but keep all related versions",
+            "command": "c8y software delete --id 12345 --forceCascade=false"
+          }
+        ]
+      },
+      "pathParameters": [
+        {
+          "name": "id",
+          "type": "[]software",
+          "pipeline": true,
+          "required": true,
+          "description": "Software Package (managedObject) id"
+        }
+      ],
+      "queryParameters": [
+        {
+          "name": "forceCascade",
+          "type": "booleanDefault",
+          "default": "true",
+          "description": "Remove version and any related binaries"
+        }
+      ]
+    }
+  ]
+}

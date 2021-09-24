@@ -39,6 +39,12 @@ Delete a managed object
 
 $ c8y inventory delete --id 12345 --cascade
 Delete a managed object
+
+$ c8y inventory delete --id 12345 --withDeviceUser
+Delete a device and its related device user
+
+$ c8y inventory delete --id 12345 --forceCascade
+Delete a device and any related child assets, additions and/or devices
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
 			return f.DeleteModeEnabled()
@@ -49,7 +55,9 @@ Delete a managed object
 	cmd.SilenceUsage = true
 
 	cmd.Flags().StringSlice("id", []string{""}, "ManagedObject id (required) (accepts pipeline)")
-	cmd.Flags().Bool("cascade", false, "Remove all child devices and child assets will be deleted recursively. By default, the delete operation is propagated to the subgroups only if the deleted object is a group")
+	cmd.Flags().Bool("cascade", false, "When set to true and the managed object is a device or group, all the hierarchy will be deleted.")
+	cmd.Flags().Bool("forceCascade", false, "When set to true all the hierarchy will be deleted without checking the type of managed object. It takes precedence over the parameter cascade.")
+	cmd.Flags().Bool("withDeviceUser", false, "When set to true and the managed object is a device, it deletes the associated device user (credentials).")
 
 	completion.WithOptions(
 		cmd,
@@ -92,6 +100,8 @@ func (n *DeleteCmd) RunE(cmd *cobra.Command, args []string) error {
 		inputIterators,
 		flags.WithCustomStringSlice(func() ([]string, error) { return cfg.GetQueryParameters(), nil }, "custom"),
 		flags.WithBoolValue("cascade", "cascade", ""),
+		flags.WithBoolValue("forceCascade", "forceCascade", ""),
+		flags.WithBoolValue("withDeviceUser", "withDeviceUser", ""),
 	)
 	if err != nil {
 		return cmderrors.NewUserError(err)

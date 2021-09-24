@@ -348,6 +348,13 @@ endpoints:
 
         - description: Delete a managed object
           command: c8y inventory delete --id 12345 --cascade
+        
+        - description: Delete a device and its related device user
+          command: c8y inventory delete --id 12345 --withDeviceUser
+        
+        - description: Delete a device and any related child assets, additions and/or devices
+          command: c8y inventory delete --id 12345 --forceCascade
+
     pathParameters:
       - name: id
         type: '[]id'
@@ -358,4 +365,12 @@ endpoints:
     queryParameters:
       - name: cascade
         type: boolean
-        description: Remove all child devices and child assets will be deleted recursively. By default, the delete operation is propagated to the subgroups only if the deleted object is a group
+        description: When set to true and the managed object is a device or group, all the hierarchy will be deleted. 
+
+      - name: forceCascade
+        type: boolean
+        description: When set to true all the hierarchy will be deleted without checking the type of managed object. It takes precedence over the parameter cascade.
+      
+      - name: withDeviceUser
+        type: boolean
+        description: When set to true and the managed object is a device, it deletes the associated device user (credentials).

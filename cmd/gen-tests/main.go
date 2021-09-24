@@ -204,8 +204,20 @@ func buildAssertions(parentCmd string, endpoint *models.EndPoint, exampleIdx int
 		}
 	}
 
+	expectedPath := substituteVariables(cmd, endpoint)
+
 	if _, ok := assertions.JSON["path"]; !ok {
-		assertions.JSON["path"] = substituteVariables(cmd, endpoint)
+		if strings.Contains(expectedPath, "?") {
+			i := strings.Index(expectedPath, "?")
+			assertions.JSON["path"] = expectedPath[0:i]
+		} else {
+			assertions.JSON["path"] = expectedPath
+		}
+	}
+
+	if _, ok := assertions.JSON["query"]; !ok && strings.Contains(expectedPath, "?") {
+		i := strings.Index(expectedPath, "?")
+		assertions.JSON["query"] = strings.ReplaceAll(expectedPath[i+1:], " ", " ")
 	}
 
 	// Query parameters
