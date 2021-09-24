@@ -26,7 +26,7 @@ Upload a config file and make it globally accessible for all users
 ### Options
 
 ```
-  -d, --data string             static data to be applied to body. accepts json or shorthande json, i.e. --data 'value1=1,my.nested.value=100'
+  -d, --data string             static data to be applied to body. accepts json or shorthand json, i.e. --data 'value1=1,my.nested.value=100'
       --file string             File to be uploaded as a binary (required)
   -h, --help                    help for create
       --processingMode string   Cumulocity processing mode

@@ -20,16 +20,24 @@ Delete a managed object
 
 $ c8y inventory delete --id 12345 --cascade
 Delete a managed object
+
+$ c8y inventory delete --id 12345 --withDeviceUser
+Delete a device and its related device user
+
+$ c8y inventory delete --id 12345 --forceCascade
+Delete a device and any related child assets, additions and/or devices
         
 ```
 
 ### Options
 
 ```
-      --cascade                 Remove all child devices and child assets will be deleted recursively. By default, the delete operation is propagated to the subgroups only if the deleted object is a group
+      --cascade                 When set to true and the managed object is a device or group, all the hierarchy will be deleted.
+      --forceCascade            When set to true all the hierarchy will be deleted without checking the type of managed object. It takes precedence over the parameter cascade.
   -h, --help                    help for delete
       --id strings              ManagedObject id (required) (accepts pipeline)
       --processingMode string   Cumulocity processing mode
+      --withDeviceUser          When set to true and the managed object is a device, it deletes the associated device user (credentials).
 ```
 
 ### Options inherited from parent commands

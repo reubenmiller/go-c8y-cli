@@ -50,6 +50,13 @@ Function Get-Category {
         "session" { "Sessions" }
         "group" { "User Groups" }
         "-(client|custom)" { "Client Helpers" }
+        "configuration" { "Configuration" }
+        "firmwarePatch" { "FirmwarePatch" }
+        "firmwareVersion" { "FirmwareVersion" }
+        "firmware" { "Firmware" }
+        "softwareVersion" { "SoftwareVersion" }
+        "software" { "Software" }
+        "deviceprofiles" { "DeviceProfiles" }
         default { "Misc." }
     }
 }

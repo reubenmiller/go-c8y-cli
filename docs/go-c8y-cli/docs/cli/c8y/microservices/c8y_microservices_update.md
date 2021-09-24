@@ -26,7 +26,7 @@ Update microservice availability to MARKET
 ```
       --availability string     Access level for other tenants. Possible values are : MARKET, PRIVATE (default)
       --contextPath string      contextPath of the hosted application
-  -d, --data string             static data to be applied to body. accepts json or shorthande json, i.e. --data 'value1=1,my.nested.value=100'
+  -d, --data string             static data to be applied to body. accepts json or shorthand json, i.e. --data 'value1=1,my.nested.value=100'
   -h, --help                    help for update
       --id string               Microservice id (required) (accepts pipeline)
       --key string              Shared secret of microservice

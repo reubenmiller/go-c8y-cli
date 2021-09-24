@@ -28,7 +28,7 @@ Update a tenant by name (from the management tenant)
       --company string          Company name. Maximum 256 characters
       --contactName string      A contact name, for example an administrator, of the tenant
       --contactPhone string     An international contact phone number
-  -d, --data string             static data to be applied to body. accepts json or shorthande json, i.e. --data 'value1=1,my.nested.value=100'
+  -d, --data string             static data to be applied to body. accepts json or shorthand json, i.e. --data 'value1=1,my.nested.value=100'
       --domain string           Domain name to be used for the tenant. Maximum 256 characters
   -h, --help                    help for update
       --id string               Tenant id (accepts pipeline)

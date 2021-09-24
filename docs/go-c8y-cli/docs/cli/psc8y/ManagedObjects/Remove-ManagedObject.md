@@ -20,6 +20,8 @@ Delete managed object
 Remove-ManagedObject
 	[-Id] <Object[]>
 	[-Cascade]
+	[-ForceCascade]
+	[-WithDeviceUser]
 	[-NoAccept]
 	[-ProcessingMode <String>]
 	[-Force]
@@ -107,8 +109,38 @@ Accept wildcard characters: False
 ```
 
 ### -Cascade
-Remove all child devices and child assets will be deleted recursively.
-By default, the delete operation is propagated to the subgroups only if the deleted object is a group
+When set to true and the managed object is a device or group, all the hierarchy will be deleted.
+
+```yaml
+Type: SwitchParameter
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: False
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -ForceCascade
+When set to true all the hierarchy will be deleted without checking the type of managed object.
+It takes precedence over the parameter cascade.
+
+```yaml
+Type: SwitchParameter
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: False
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -WithDeviceUser
+When set to true and the managed object is a device, it deletes the associated device user (credentials).
 
 ```yaml
 Type: SwitchParameter

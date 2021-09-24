@@ -24,7 +24,7 @@ Update device group by id
 ### Options
 
 ```
-  -d, --data string             static data to be applied to body. accepts json or shorthande json, i.e. --data 'value1=1,my.nested.value=100'
+  -d, --data string             static data to be applied to body. accepts json or shorthand json, i.e. --data 'value1=1,my.nested.value=100'
   -h, --help                    help for update
       --id strings              Device group ID (required) (accepts pipeline)
       --name string             Device group name

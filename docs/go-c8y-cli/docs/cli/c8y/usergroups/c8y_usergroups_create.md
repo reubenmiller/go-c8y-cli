@@ -23,7 +23,7 @@ Create a user group
 ### Options
 
 ```
-  -d, --data string                static data to be applied to body. accepts json or shorthande json, i.e. --data 'value1=1,my.nested.value=100'
+  -d, --data string                static data to be applied to body. accepts json or shorthand json, i.e. --data 'value1=1,my.nested.value=100'
       --deviceProperties strings   List of device permissions
   -h, --help                       help for create
       --name string                Group name (accepts pipeline)

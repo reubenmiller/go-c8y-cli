@@ -26,7 +26,7 @@ Create a new event for a device (using pipeline)
 ### Options
 
 ```
-  -d, --data string             static data to be applied to body. accepts json or shorthande json, i.e. --data 'value1=1,my.nested.value=100'
+  -d, --data string             static data to be applied to body. accepts json or shorthand json, i.e. --data 'value1=1,my.nested.value=100'
       --device strings          The ManagedObject which is the source of this event. (accepts pipeline)
   -h, --help                    help for create
       --processingMode string   Cumulocity processing mode

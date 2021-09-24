@@ -23,7 +23,7 @@ Create operation for a device
 ### Options
 
 ```
-  -d, --data string             static data to be applied to body. accepts json or shorthande json, i.e. --data 'value1=1,my.nested.value=100'
+  -d, --data string             static data to be applied to body. accepts json or shorthand json, i.e. --data 'value1=1,my.nested.value=100'
       --description string      Text description of the operation.
       --device strings          Identifies the target device on which this operation should be performed. (accepts pipeline)
   -h, --help                    help for create

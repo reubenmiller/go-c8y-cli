@@ -25,7 +25,7 @@ Update custom properties of the current application (requires using application 
 ```
       --availability string        Application will be applied to this type of documents, possible values [ALARM, AUDIT, EVENT, MEASUREMENT, OPERATION, *].
       --contextPath string         contextPath of the hosted application
-  -d, --data string                static data to be applied to body. accepts json or shorthande json, i.e. --data 'value1=1,my.nested.value=100'
+  -d, --data string                static data to be applied to body. accepts json or shorthand json, i.e. --data 'value1=1,my.nested.value=100'
       --externalUrl string         URL to the external application
   -h, --help                       help for update
       --key string                 Shared secret of application
