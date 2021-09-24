@@ -248,24 +248,21 @@ endpoints:
       powershell:
         - description: Delete a firmware package and all related versions
           beforeEach:
-            - $mo = PSc8y\New-Firmware -Name "firmware1"
-          command: Remove-Firmware -Id $mo.id
-          afterEach:
-            - Remove-ManagedObject -Id $mo.id -ErrorAction SilentlyContinue
+            - $name = New-RandomString -Prefix "firmware1"
+            - $firmware = PSc8y\New-Firmware -Name $name
+          command: Remove-Firmware -Id $firmware.id
 
         - description: Delete a firmware package (using pipeline)
           beforeEach:
-            - $mo = PSc8y\New-Firmware -Name "firmware1"
-          command: Get-ManagedObject -Id $mo.id | Remove-Firmware
-          afterEach:
-            - Remove-ManagedObject -Id $mo.id -ErrorAction SilentlyContinue
+            - $name = New-RandomString -Prefix "firmware1"
+            - $firmware = PSc8y\New-Firmware -Name $name
+          command: Get-ManagedObject -Id $firmware.id | Remove-Firmware
 
         - description: Delete a firmware package but keep the binaries
           beforeEach:
-            - $mo = PSc8y\New-Firmware -Name "firmware1"
-          command: Get-ManagedObject -Id $Device.id | Remove-Firmware -ForceCascade:$false
-          afterEach:
-            - Remove-ManagedObject -Id $Device.id -ErrorAction SilentlyContinue
+            - $name = New-RandomString -Prefix "firmware1"
+            - $firmware = PSc8y\New-Firmware -Name $name
+          command: Get-ManagedObject -Id $firmware.id | Remove-Firmware -ForceCascade:$false
 
       go:
         - description: Delete a firmware package and all related versions

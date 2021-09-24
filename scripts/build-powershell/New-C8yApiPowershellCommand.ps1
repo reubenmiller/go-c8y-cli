@@ -324,10 +324,10 @@
                 if ($prop.Contains(".")) {
                     [array] $propParts = $prop -split "\."
 
-                    if ($propParts.Count -gt 2) {
-                        Write-Warning "TODO: handle nested properties with depth > 2"
-                        continue
-                    }
+                    # if ($propParts.Count -gt 2) {
+                    #     Write-Warning "TODO: handle nested properties with depth > 2"
+                    #     continue
+                    # }
                     $rootprop = $propParts[0]
                     $nestedprop = $propParts[1]
                     $null = $RESTBodyBuilder.AppendLine("`$body[`"$rootprop`"] = @{`"`" = `"$nestedprop`"}")

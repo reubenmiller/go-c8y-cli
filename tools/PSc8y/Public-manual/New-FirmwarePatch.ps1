@@ -1,5 +1,4 @@
-﻿# Code generated from specification version 1.0.0: DO NOT EDIT
-Function New-FirmwareVersionPatch {
+﻿Function New-FirmwarePatch {
 <#
 .SYNOPSIS
 Create firmware package version patch
@@ -8,12 +7,12 @@ Create firmware package version patch
 Create a new firmware package (managedObject)
 
 .LINK
-https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/firmware_versions_createPatch
+https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/firmware_patches_create
 
 .EXAMPLE
-PS> New-ManagedObject -Name "python3-requests" -Description "python requests library" -Data @{$type=@{}}
+PS> New-FirmwarePatch -Firmware "UBUNTU_20_04" -Version "20.4.1" -DependencyVersion "20.4.0" -Url "https://example.com/binary/12345
 
-Create a new version to an existing firmware package
+Create a new patch (with external URL) to an existing firmware version
 
 
 #>
@@ -26,7 +25,7 @@ Create a new version to an existing firmware package
         [Parameter(ValueFromPipeline=$true,
                    ValueFromPipelineByPropertyName=$true)]
         [object[]]
-        $FirmwareId,
+        $Firmware,
 
         # Patch version, i.e. 1.0.0
         [Parameter()]
@@ -37,6 +36,11 @@ Create a new version to an existing firmware package
         [Parameter()]
         [string]
         $Url,
+
+        # File to be uploaded
+        [Parameter()]
+        [string]
+        $File,
 
         # Existing firmware version that the patch is dependent on
         [Parameter()]
@@ -54,7 +58,7 @@ Create a new version to an existing firmware package
             Use-CallerPreference -Cmdlet $PSCmdlet -SessionState $ExecutionContext.SessionState
         }
 
-        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "firmware versions createPatch"
+        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "firmware patches create"
         $ClientOptions = Get-ClientOutputOption $PSBoundParameters
         $TypeOptions = @{
             Type = "application/vnd.com.nsn.cumulocity.inventory+json"
@@ -66,15 +70,15 @@ Create a new version to an existing firmware package
     Process {
 
         if ($ClientOptions.ConvertToPS) {
-            $FirmwareId `
+            $Firmware `
             | Group-ClientRequests `
-            | c8y firmware versions createPatch $c8yargs `
+            | c8y firmware patches create $c8yargs `
             | ConvertFrom-ClientOutput @TypeOptions
         }
         else {
-            $FirmwareId `
+            $Firmware `
             | Group-ClientRequests `
-            | c8y firmware versions createPatch $c8yargs
+            | c8y firmware patches create $c8yargs
         }
         
     }

@@ -21,7 +21,13 @@ endpoints:
     examples:
       powershell:
         - description: Get a list of firmware package versions
-          command: Get-FirmwareVersionCollection
+          beforeEach:
+            - $name = New-RandomString -Prefix "firmware_"
+            - $firmware = New-Firmware -Name $name
+            - $firmwareVersion = PSc8y\New-FirmwareVersion -Firmware $firmware.id -Version "1.0.0" -Url "https://blob.azure.com/device-firmare/1.0.0/image.mender"
+          command: Get-FirmwareVersionCollection -Firmware $firmware.id
+          afterEach:
+            - Remove-Firmware -Id $firmware.id
 
       go:
         - description: Get a list of firmware package versions
@@ -68,13 +74,11 @@ endpoints:
         - description: Get a firmware package
           beforeEach:
             - $mo = PSc8y\New-ManagedObject -Name "testMO"
-          command: Get-FirmwareVersion -Firmware 12345 -Id $mo.id
+          command: Get-FirmwareVersion -Id $mo.id
           afterEach:
             - Remove-ManagedObject -Id $mo.id -ErrorAction SilentlyContinue
 
         - description: Get a firmware package (using pipeline)
-          beforeEach:
-            - $mo = PSc8y\New-FirmwareVersion -Firmware 12345 -Version "1.0.0" -Url "test.com/file.mender"
           command: Get-ManagedObject -Id $mo.id | Get-FirmwareVersion
           afterEach:
             - Remove-ManagedObject -Id $mo.id -ErrorAction SilentlyContinue
@@ -82,6 +86,10 @@ endpoints:
       go:
         - description: Get a firmware package version using name
           command: c8y firmware versions get --firmware 11111 --id 1.0.0
+          skipTest: true
+        
+        - description: Get a firmware package version using pipeline
+          command: c8y firmware versions list --firmware 12345 | c8y firmware versions get --withParents
           skipTest: true
 
     pathParameters:

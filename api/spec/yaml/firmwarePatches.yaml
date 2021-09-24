@@ -22,9 +22,11 @@ endpoints:
       powershell:
         - description: Get a list of firmware patches related to a firmware package
           command: Get-FirmwarePatchCollection -Firmware 12345
+          skipTest: true
         
         - description: Get a list of firmware patches where the dependency version starts with "1."
           command: Get-FirmwarePatchCollection -Firmware 12345 -Dependency '1.*'
+          skipTest: true
 
       go:
         - description: Get a list of firmware patches

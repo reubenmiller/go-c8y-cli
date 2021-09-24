@@ -79,7 +79,7 @@
             "beforeEach": [
               "$type = New-RandomString -Prefix \"customType_\""
             ],
-            "command": "New-Configuration -Name \"agent config\" -Description \"Default agent configuration\" -ConfigurationType \"agentConfig\" -Data @{$type=@{}}",
+            "command": "New-Configuration -Name \"agent config\" -Description \"Default agent configuration\" -ConfigurationType \"agentConfig\" -Url \"https://test.com/content/raw/app.json\" -Data @{$type=@{}}",
             "afterEach": [
               "Get-ManagedObjectCollection -FragmentType $type | Remove-ManagedObject"
             ]

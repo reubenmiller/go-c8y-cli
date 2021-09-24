@@ -11,14 +11,14 @@ Get an existing software package version
 https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/software_versions_get
 
 .EXAMPLE
-PS> Get-SoftwareVersion -Software 12345 -Id $mo.id
+PS> Get-SoftwareVersion -Id $softwareVersion.id
 
-Get a software package
+Get a software package version using name
 
 .EXAMPLE
-PS> Get-ManagedObject -Id $mo.id | Get-SoftwareVersion
+PS> Get-ManagedObject -Id $softwareVersion.id | Get-SoftwareVersion
 
-Get a software package (using pipeline)
+Get a software package version (using pipeline)
 
 
 #>

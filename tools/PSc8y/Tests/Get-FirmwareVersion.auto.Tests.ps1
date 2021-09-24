@@ -3,12 +3,11 @@
 Describe -Name "Get-FirmwareVersion" {
     BeforeEach {
         $mo = PSc8y\New-ManagedObject -Name "testMO"
-        $mo = PSc8y\New-FirmwareVersion -Firmware 12345 -Version "1.0.0" -Url "test.com/file.mender"
 
     }
 
     It "Get a firmware package" {
-        $Response = PSc8y\Get-FirmwareVersion -Firmware 12345 -Id $mo.id
+        $Response = PSc8y\Get-FirmwareVersion -Id $mo.id
         $LASTEXITCODE | Should -Be 0
         $Response | Should -Not -BeNullOrEmpty
     }

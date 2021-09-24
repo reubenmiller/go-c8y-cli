@@ -7,7 +7,7 @@ Describe -Name "New-Configuration" {
     }
 
     It "Create a new configuration file" {
-        $Response = PSc8y\New-Configuration -Name "agent config" -Description "Default agent configuration" -ConfigurationType "agentConfig" -Data @{$type=@{}}
+        $Response = PSc8y\New-Configuration -Name "agent config" -Description "Default agent configuration" -ConfigurationType "agentConfig" -Url "https://test.com/content/raw/app.json" -Data @{$type=@{}}
         $LASTEXITCODE | Should -Be 0
         $Response | Should -Not -BeNullOrEmpty
     }

@@ -11,7 +11,7 @@ Create a new configuration file (managedObject)
 https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/configuration_create
 
 .EXAMPLE
-PS> New-Configuration -Name "agent config" -Description "Default agent configuration" -ConfigurationType "agentConfig" -Data @{$type=@{}}
+PS> New-Configuration -Name "agent config" -Description "Default agent configuration" -ConfigurationType "agentConfig" -Url "https://test.com/content/raw/app.json" -Data @{$type=@{}}
 
 Create a new configuration file
 

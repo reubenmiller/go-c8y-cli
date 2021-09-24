@@ -11,7 +11,7 @@ Get a collection of software package versions (managedObjects) based on filter p
 https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/software_versions_list
 
 .EXAMPLE
-PS> Get-SoftwareVersionCollection -Software 12345
+PS> Get-SoftwareVersionCollection -Software $software.id
 
 Get a list of software package versions
 

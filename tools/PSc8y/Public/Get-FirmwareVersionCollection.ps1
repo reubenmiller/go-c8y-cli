@@ -11,7 +11,7 @@ Get a collection of firmware package versions (managedObjects) based on filter p
 https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/firmware_versions_list
 
 .EXAMPLE
-PS> Get-FirmwareVersionCollection
+PS> Get-FirmwareVersionCollection -Firmware $firmware.id
 
 Get a list of firmware package versions
 

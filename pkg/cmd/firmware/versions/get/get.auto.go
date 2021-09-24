@@ -37,6 +37,9 @@ func NewGetCmd(f *cmdutil.Factory) *GetCmd {
 		Example: heredoc.Doc(`
 $ c8y firmware versions get --firmware 11111 --id 1.0.0
 Get a firmware package version using name
+
+$ c8y firmware versions list --firmware 12345 | c8y firmware versions get --withParents
+Get a firmware package version using pipeline
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
 			return nil

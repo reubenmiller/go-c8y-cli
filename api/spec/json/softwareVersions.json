@@ -23,7 +23,14 @@
         "powershell": [
           {
             "description": "Get a list of software package versions",
-            "command": "Get-SoftwareVersionCollection -Software 12345"
+            "beforeEach": [
+              "$software = PSc8y\\New-Software -Name \"testMO\"",
+              "$softwareVersion = PSc8y\\New-SoftwareVersion -Software $software.id -Version \"1.0.0\" -Url \"https://test.com/file.mender\""
+            ],
+            "command": "Get-SoftwareVersionCollection -Software $software.id",
+            "afterEach": [
+              "Remove-Software -Id $software.id -ErrorAction SilentlyContinue"
+            ]
           }
         ],
         "go": [
@@ -79,23 +86,25 @@
       "examples": {
         "powershell": [
           {
-            "description": "Get a software package",
+            "description": "Get a software package version using name",
             "beforeEach": [
-              "$mo = PSc8y\\New-ManagedObject -Name \"testMO\""
+              "$software = PSc8y\\New-Software -Name \"testMO\"",
+              "$softwareVersion = PSc8y\\New-SoftwareVersion -Software $software.id -Version \"1.0.0\" -Url \"https://test.com/file.mender\""
             ],
-            "command": "Get-SoftwareVersion -Software 12345 -Id $mo.id",
+            "command": "Get-SoftwareVersion -Id $softwareVersion.id",
             "afterEach": [
-              "Remove-ManagedObject -Id $mo.id -ErrorAction SilentlyContinue"
+              "Remove-Software -Id $software.id -ErrorAction SilentlyContinue"
             ]
           },
           {
-            "description": "Get a software package (using pipeline)",
+            "description": "Get a software package version (using pipeline)",
             "beforeEach": [
-              "$mo = PSc8y\\New-SoftwareVersion -Software 12345 -Version \"1.0.0\" -Url \"test.com/file.mender\""
+              "$software = PSc8y\\New-Software -Name \"testMO\"",
+              "$softwareVersion = PSc8y\\New-SoftwareVersion -Software $software.id -Version \"1.0.0\" -Url \"https://test.com/file.mender\""
             ],
-            "command": "Get-ManagedObject -Id $mo.id | Get-SoftwareVersion",
+            "command": "Get-ManagedObject -Id $softwareVersion.id | Get-SoftwareVersion",
             "afterEach": [
-              "Remove-ManagedObject -Id $mo.id -ErrorAction SilentlyContinue"
+              "Remove-Software -Id $software.id -ErrorAction SilentlyContinue"
             ]
           }
         ],

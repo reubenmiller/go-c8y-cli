@@ -1,19 +1,18 @@
-﻿# Code generated from specification version 1.0.0: DO NOT EDIT
-Function New-SoftwareVersion {
+﻿Function New-FirmwareVersion {
 <#
 .SYNOPSIS
-Create software package version
+Create firmware package version
 
 .DESCRIPTION
-Create a new software package (managedObject)
+Create a new firmware package (managedObject)
 
 .LINK
-https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/software_versions_create
+https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/firmware_versions_create
 
 .EXAMPLE
-PS> New-ManagedObject -Name "python3-requests" -Description "python requests library" -Data @{$type=@{}}
+PS> New-FirmwareVersion -Firmware 12345 -Version 1.0.0 -Url "https://blob.azure.com/device-firmare/1.0.0/image.mender"
 
-Create a new version to an existing software package
+Create a new version to an existing firmware package
 
 
 #>
@@ -22,18 +21,18 @@ Create a new version to an existing software package
     [Alias()]
     [OutputType([object])]
     Param(
-        # Software package id where the version will be added to
+        # Firmware package id where the version will be added to
         [Parameter(ValueFromPipeline=$true,
                    ValueFromPipelineByPropertyName=$true)]
         [object[]]
-        $SoftwareId,
+        $Firmware,
 
-        # Software package version name, i.e. 1.0.0
+        # Firmware package version name, i.e. 1.0.0
         [Parameter()]
         [string]
         $Version,
 
-        # URL to the software package
+        # URL to the firmware package
         [Parameter()]
         [string]
         $Url,
@@ -54,7 +53,7 @@ Create a new version to an existing software package
             Use-CallerPreference -Cmdlet $PSCmdlet -SessionState $ExecutionContext.SessionState
         }
 
-        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "software versions create"
+        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "firmware versions create"
         $ClientOptions = Get-ClientOutputOption $PSBoundParameters
         $TypeOptions = @{
             Type = "application/vnd.com.nsn.cumulocity.inventory+json"
@@ -66,15 +65,15 @@ Create a new version to an existing software package
     Process {
 
         if ($ClientOptions.ConvertToPS) {
-            $SoftwareId `
+            $Firmware `
             | Group-ClientRequests `
-            | c8y software versions create $c8yargs `
+            | c8y firmware versions create $c8yargs `
             | ConvertFrom-ClientOutput @TypeOptions
         }
         else {
-            $SoftwareId `
+            $Firmware `
             | Group-ClientRequests `
-            | c8y software versions create $c8yargs
+            | c8y firmware versions create $c8yargs
         }
         
     }
