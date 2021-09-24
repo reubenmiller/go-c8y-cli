@@ -659,11 +659,17 @@ func (b *MapBuilder) MarshalJSON() (body []byte, err error) {
 			// NOTE: Do not overwrite existing values if non empty
 			if len(value) > 0 {
 				if v := gjson.GetBytes(body, it.Path); !v.Exists() {
-					bodyTemp, bErr := sjson.SetBytes(body, it.Path, value)
-					if bErr != nil {
-						break
+
+					// Only assign non-object and non-array values, as these types will be handled in the templating engine
+					valueObj := gjson.ParseBytes(value)
+					if !(valueObj.IsObject() || valueObj.IsArray()) {
+						bodyTemp, bErr := sjson.SetBytes(body, it.Path, value)
+						if bErr != nil {
+							Logger.Warningf("Could not set bytes. Ignoring value: path=%s, value=%s, err=%", it.Path, value, bErr)
+							continue
+						}
+						body = bodyTemp
 					}
-					body = bodyTemp
 				}
 			}
 		}
