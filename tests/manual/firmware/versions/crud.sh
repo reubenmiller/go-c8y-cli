@@ -23,7 +23,7 @@ package_file=$(mktemp /tmp/package-XXXXXX-10.2.3.deb)
 echo "dummy file" > "$package_file"
 trap "rm -f $package_file" EXIT
 
-VERSION2_ID=$( c8y firmware versions create --firmwareId "$NAME" --file "$package_file" --select "id,c8y_Firmware.version" --output csv )
+VERSION2_ID=$( c8y firmware versions create --firmware "$NAME" --file "$package_file" --select "id,c8y_Firmware.version" --output csv )
 echo "$VERSION2_ID" | grep "^[0-9]\+,10.2.3$"
 
 # download
@@ -35,13 +35,13 @@ c8y firmware update --id "$NAME" --description "Example description" --select de
 
 # completion (firmware and version)
 c8y __complete firmware get --id "$NAME" | grep id:
-c8y __complete firmware versions get --firmwareId "$NAME" --id "$VERSION" | grep id:
+c8y __complete firmware versions get --firmware "$NAME" --id "$VERSION" | grep id:
 
 # list versions by pipeline
 c8y firmware get --id "$NAME" | c8y firmware versions list --select "id,c8y_Firmware.version" --output csv | grep "$ID,$VERSION"
 
 # list
-c8y firmware versions list --firmwareId "$NAME" --select "id,c8y_Firmware.version" --output csv | grep "$ID,$VERSION"
+c8y firmware versions list --firmware "$NAME" --select "id,c8y_Firmware.version" --output csv | grep "$ID,$VERSION"
 
 # get > delete
 c8y firmware versions get --id "$ID" | c8y firmware versions delete

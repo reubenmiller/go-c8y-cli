@@ -47,7 +47,7 @@ Install a software package version
 
 	cmd.Flags().StringSlice("device", []string{""}, "Device or agent where the software should be installed (accepts pipeline)")
 	cmd.Flags().String("software", "", "Software name (required)")
-	cmd.Flags().String("version", "", "Software version")
+	cmd.Flags().String("version", "", "Software version id or name")
 	cmd.Flags().String("url", "", "Software url")
 	cmd.Flags().String("description", "Install software package", "Operation description")
 	cmd.Flags().String("action", "install", "Software action")

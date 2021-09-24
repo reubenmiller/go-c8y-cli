@@ -22,12 +22,12 @@ Get a list of firmware package versions
     [Alias()]
     [OutputType([object])]
     Param(
-        # Firmware package id (required)
+        # Firmware package id or name (required)
         [Parameter(Mandatory = $true,
                    ValueFromPipeline=$true,
                    ValueFromPipelineByPropertyName=$true)]
         [object[]]
-        $FirmwareId,
+        $Firmware,
 
         # Include parent references
         [Parameter()]
@@ -57,13 +57,13 @@ Get a list of firmware package versions
     Process {
 
         if ($ClientOptions.ConvertToPS) {
-            $FirmwareId `
+            $Firmware `
             | Group-ClientRequests `
             | c8y firmware versions list $c8yargs `
             | ConvertFrom-ClientOutput @TypeOptions
         }
         else {
-            $FirmwareId `
+            $Firmware `
             | Group-ClientRequests `
             | c8y firmware versions list $c8yargs
         }

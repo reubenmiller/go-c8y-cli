@@ -47,7 +47,7 @@ Uninstall a software package version
 
 	cmd.Flags().StringSlice("device", []string{""}, "Device or agent where the software should be installed (accepts pipeline)")
 	cmd.Flags().String("software", "", "Software name (required)")
-	cmd.Flags().String("version", "", "Software version")
+	cmd.Flags().String("version", "", "Software version name or id")
 	cmd.Flags().String("action", "delete", "Software action")
 
 	completion.WithOptions(

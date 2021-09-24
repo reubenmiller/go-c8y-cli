@@ -35,7 +35,7 @@ func NewGetCmd(f *cmdutil.Factory) *GetCmd {
 		Short: "Get firmware patch",
 		Long:  `Get an existing firmware patch`,
 		Example: heredoc.Doc(`
-$ c8y firmware patches get --firmwareId 11111 --id 1.0.0
+$ c8y firmware patches get --firmware 11111 --id 1.0.0
 Get a firmware patch
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
@@ -46,14 +46,14 @@ Get a firmware patch
 
 	cmd.SilenceUsage = true
 
-	cmd.Flags().StringSlice("id", []string{""}, "Firmware Package version (managedObject) id (required) (accepts pipeline)")
-	cmd.Flags().StringSlice("firmwareId", []string{""}, "Firmware package id (used to help completion be more accurate)")
+	cmd.Flags().StringSlice("id", []string{""}, "Firmware patch id or name (required) (accepts pipeline)")
+	cmd.Flags().StringSlice("firmware", []string{""}, "Firmware package id or name (used to help completion be more accurate)")
 	cmd.Flags().Bool("withParents", true, "Include parent references")
 
 	completion.WithOptions(
 		cmd,
-		completion.WithFirmwarePatch("id", "firmwareId", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
-		completion.WithFirmware("firmwareId", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
+		completion.WithFirmwarePatch("id", "firmware", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
+		completion.WithFirmware("firmware", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
 	)
 
 	flags.WithOptions(
@@ -149,7 +149,7 @@ func (n *GetCmd) RunE(cmd *cobra.Command, args []string) error {
 		path,
 		inputIterators,
 		c8yfetcher.WithFirmwarePatchByNameFirstMatch(client, args, "id", "id"),
-		c8yfetcher.WithFirmwareByNameFirstMatch(client, args, "firmwareId", "firmwareId"),
+		c8yfetcher.WithFirmwareByNameFirstMatch(client, args, "firmware", "firmware"),
 	)
 	if err != nil {
 		return err

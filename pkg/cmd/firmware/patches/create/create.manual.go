@@ -34,10 +34,10 @@ func NewCreatePatchCmd(f *cmdutil.Factory) *CreateCmd {
 		Short: "Create firmware patch",
 		Long:  `Create a new firmware patch (managedObject)`,
 		Example: heredoc.Doc(`
-			$ c8y firmware patches create --firmwareId "UBUNTU_20_04" --version "20.4.1" --dependencyVersion "20.4.0" --url "https://example.com/binary/12345
+			$ c8y firmware patches create --firmware "UBUNTU_20_04" --version "20.4.1" --dependencyVersion "20.4.0" --url "https://example.com/binary/12345
 			Create a new patch (with external URL) to an existing firmware version
 
-			$ c8y firmware patches create --firmwareId custom\ firmware\ 1 --dependencyVersion 2.2.0 --version 2.2.1 --file ./install.ps1
+			$ c8y firmware patches create --firmware custom\ firmware\ 1 --dependencyVersion 2.2.0 --version 2.2.1 --file ./install.ps1
 			Create a new patch (storing the file in Cumulocity) to an existing firmware version
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
@@ -48,7 +48,7 @@ func NewCreatePatchCmd(f *cmdutil.Factory) *CreateCmd {
 
 	cmd.SilenceUsage = true
 
-	cmd.Flags().StringSlice("firmwareId", []string{""}, "Firmware package id where the version will be added to (accepts pipeline)")
+	cmd.Flags().StringSlice("firmware", []string{""}, "Firmware package id where the version will be added to (accepts pipeline)")
 	cmd.Flags().String("version", "", "Patch version, i.e. 1.0.0")
 	cmd.Flags().String("url", "", "URL to the firmware patch")
 	cmd.Flags().String("dependencyVersion", "", "Existing firmware version that the patch is dependent on")
@@ -56,8 +56,8 @@ func NewCreatePatchCmd(f *cmdutil.Factory) *CreateCmd {
 
 	completion.WithOptions(
 		cmd,
-		completion.WithFirmware("firmwareId", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
-		completion.WithFirmwareVersion("dependencyVersion", "firmwareId", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
+		completion.WithFirmware("firmware", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
+		completion.WithFirmwareVersion("dependencyVersion", "firmware", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
 	)
 
 	flags.WithOptions(
@@ -65,7 +65,7 @@ func NewCreatePatchCmd(f *cmdutil.Factory) *CreateCmd {
 		flags.WithProcessingMode(),
 		flags.WithData(),
 		f.WithTemplateFlag(cmd),
-		flags.WithExtendedPipelineSupport("firmwareId", "firmwareId", false, "additionParents.references.0.managedObject.id", "id"),
+		flags.WithExtendedPipelineSupport("firmware", "firmware", false, "additionParents.references.0.managedObject.id", "id"),
 	)
 
 	// Required flags
@@ -152,12 +152,12 @@ func (n *CreateCmd) RunE(cmd *cobra.Command, args []string) error {
 	}
 
 	// path parameters
-	path := flags.NewStringTemplate("{firmwareId}")
+	path := flags.NewStringTemplate("{firmware}")
 	err = flags.WithPathParameters(
 		cmd,
 		path,
 		inputIterators,
-		c8yfetcher.WithFirmwareByNameFirstMatch(client, args, "firmwareId", "firmwareId"),
+		c8yfetcher.WithFirmwareByNameFirstMatch(client, args, "firmware", "firmware"),
 	)
 	if err != nil {
 		return err

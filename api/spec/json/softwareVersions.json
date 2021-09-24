@@ -11,7 +11,7 @@
       "method": "GET",
       "description": "Get software package version collection",
       "descriptionLong": "Get a collection of software package versions (managedObjects) based on filter parameters",
-      "path": "inventory/managedObjects?query=$filter=((not(has(c8y_Patch)))%20and%20(bygroupid({softwareId})))%20$orderby=creationTime.date%20desc,creationTime%20desc",
+      "path": "inventory/managedObjects?query=$filter=((not(has(c8y_Patch)))%20and%20(bygroupid({software})))%20$orderby=creationTime.date%20desc,creationTime%20desc",
       "accept": "application/vnd.com.nsn.cumulocity.managedObjectCollection+json",
       "collectionType": "application/vnd.com.nsn.cumulocity.managedObject+json",
       "collectionProperty": "managedObjects",
@@ -23,13 +23,13 @@
         "powershell": [
           {
             "description": "Get a list of software package versions",
-            "command": "Get-SoftwareVersionCollection -SoftwareId 12345"
+            "command": "Get-SoftwareVersionCollection -Software 12345"
           }
         ],
         "go": [
           {
             "description": "Get a list of software package versions",
-            "command": "c8y software versions list --softwareId 12345",
+            "command": "c8y software versions list --software 12345",
             "assertStdOut": {
               "json": {
                 "query": "r/bygroupid\\(12345\\)"
@@ -45,7 +45,7 @@
       },
       "pathParameters": [
         {
-          "name": "softwareId",
+          "name": "software",
           "type": "[]software",
           "pipeline": true,
           "required": false,
@@ -53,7 +53,7 @@
             "additionParents.references.0.managedObject.id",
             "id"
           ],
-          "description": "Software package id"
+          "description": "Software package id or name"
         }
       ],
       "queryParameters": [
@@ -83,7 +83,7 @@
             "beforeEach": [
               "$mo = PSc8y\\New-ManagedObject -Name \"testMO\""
             ],
-            "command": "Get-SoftwareVersion -SoftwareId 12345 -Id $mo.id",
+            "command": "Get-SoftwareVersion -Software 12345 -Id $mo.id",
             "afterEach": [
               "Remove-ManagedObject -Id $mo.id -ErrorAction SilentlyContinue"
             ]
@@ -91,7 +91,7 @@
           {
             "description": "Get a software package (using pipeline)",
             "beforeEach": [
-              "$mo = PSc8y\\New-SoftwareVersion -SoftwareId 12345 -Version \"1.0.0\" -Url \"test.com/file.mender\""
+              "$mo = PSc8y\\New-SoftwareVersion -Software 12345 -Version \"1.0.0\" -Url \"test.com/file.mender\""
             ],
             "command": "Get-ManagedObject -Id $mo.id | Get-SoftwareVersion",
             "afterEach": [
@@ -102,7 +102,7 @@
         "go": [
           {
             "description": "Get a software package version using name",
-            "command": "c8y software versions get --softwareId 11111 --id 1.0.0",
+            "command": "c8y software versions get --software 11111 --id 1.0.0",
             "skipTest": true,
             "assertStdOut": {
               "json": {
@@ -117,14 +117,14 @@
           "name": "id",
           "type": "[]softwareversion",
           "dependsOn": [
-            "softwareId"
+            "software"
           ],
           "pipeline": true,
           "required": true,
-          "description": "Software Package version (managedObject) id"
+          "description": "Software Package version id or name"
         },
         {
-          "name": "softwareId",
+          "name": "software",
           "type": "[]software",
           "required": false,
           "description": "Software package id (used to help completion be more accurate)"
@@ -199,14 +199,14 @@
           "name": "id",
           "type": "[]softwareversion",
           "dependsOn": [
-            "softwareId"
+            "software"
           ],
           "pipeline": true,
           "required": true,
-          "description": "Software Package version (managedObject) id"
+          "description": "Software Package version id or name"
         },
         {
-          "name": "softwareId",
+          "name": "software",
           "type": "[]software",
           "required": false,
           "description": "Software package id (used to help completion be more accurate)"
@@ -271,7 +271,7 @@
             "software"
           ],
           "property": "c8y_SoftwareUpdate.0.version",
-          "description": "Software version"
+          "description": "Software version id or name"
         },
         {
           "name": "url",
@@ -362,7 +362,7 @@
           ],
           "required": false,
           "property": "c8y_SoftwareUpdate.0.version",
-          "description": "Software version"
+          "description": "Software version name or id"
         },
         {
           "name": "action",

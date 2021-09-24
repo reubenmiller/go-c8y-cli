@@ -33,7 +33,7 @@ Get a software package
         [object[]]
         $Software,
 
-        # Software version
+        # Software version id or name
         [Parameter()]
         [object[]]
         $Version,

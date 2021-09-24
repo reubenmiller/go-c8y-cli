@@ -32,17 +32,17 @@ Delete a firmware patch and related binary
     [Alias()]
     [OutputType([object])]
     Param(
-        # Firmware patch (managedObject) id (required)
+        # Firmware patch id or name (required)
         [Parameter(Mandatory = $true,
                    ValueFromPipeline=$true,
                    ValueFromPipelineByPropertyName=$true)]
         [object[]]
         $Id,
 
-        # Firmware id (used to help completion be more accurate)
+        # Firmware id or name (used to help completion be more accurate)
         [Parameter()]
         [object[]]
-        $FirmwareId,
+        $Firmware,
 
         # Remove version and any related binaries
         [Parameter()]

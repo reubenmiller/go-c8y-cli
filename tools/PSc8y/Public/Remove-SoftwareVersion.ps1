@@ -33,7 +33,7 @@ Uninstall a software package version
         [object[]]
         $Software,
 
-        # Software version
+        # Software version name or id
         [Parameter()]
         [object[]]
         $Version,

@@ -740,7 +740,7 @@ func WithSoftwareVersionUrlByNameFirstMatch(client *c8y.Client, args []string, o
 func WithSoftwareVersionByNameFirstMatch(client *c8y.Client, args []string, opts ...string) flags.GetOption {
 	return func(cmd *cobra.Command, inputIterators *flags.RequestInputIterators) (string, interface{}, error) {
 		software := ""
-		if v, err := cmd.Flags().GetStringSlice("softwareId"); err == nil && len(v) > 0 {
+		if v, err := cmd.Flags().GetStringSlice("software"); err == nil && len(v) > 0 {
 			software = v[0]
 		}
 		opt := WithReferenceByNameFirstMatch(client, NewSoftwareVersionFetcher(client, software), args, opts...)
@@ -760,8 +760,8 @@ func WithFirmwareByNameFirstMatch(client *c8y.Client, args []string, opts ...str
 func WithFirmwareVersionByNameFirstMatch(client *c8y.Client, args []string, opts ...string) flags.GetOption {
 	return func(cmd *cobra.Command, inputIterators *flags.RequestInputIterators) (string, interface{}, error) {
 		firmware := ""
-		// Note: Lookup of firmware does not work if "firmwareId" is piped input
-		if v, err := cmd.Flags().GetStringSlice("firmwareId"); err == nil && len(v) > 0 {
+		// Note: Lookup of firmware does not work if "firmware" is piped input
+		if v, err := cmd.Flags().GetStringSlice("firmware"); err == nil && len(v) > 0 {
 			firmware = v[0]
 		}
 		opt := WithReferenceByNameFirstMatch(client, NewFirmwareVersionFetcher(client, firmware, false), args, opts...)
@@ -773,8 +773,8 @@ func WithFirmwareVersionByNameFirstMatch(client *c8y.Client, args []string, opts
 func WithFirmwarePatchByNameFirstMatch(client *c8y.Client, args []string, opts ...string) flags.GetOption {
 	return func(cmd *cobra.Command, inputIterators *flags.RequestInputIterators) (string, interface{}, error) {
 		firmware := ""
-		// Note: Lookup of firmware does not work if "firmwareId" is piped input
-		if v, err := cmd.Flags().GetStringSlice("firmwareId"); err == nil && len(v) > 0 {
+		// Note: Lookup of firmware does not work if "firmware" is piped input
+		if v, err := cmd.Flags().GetStringSlice("firmware"); err == nil && len(v) > 0 {
 			firmware = v[0]
 		}
 		opt := WithReferenceByNameFirstMatch(client, NewFirmwareVersionFetcher(client, firmware, true), args, opts...)

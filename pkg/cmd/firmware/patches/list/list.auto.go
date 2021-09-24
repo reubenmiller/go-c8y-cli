@@ -35,10 +35,10 @@ func NewListCmd(f *cmdutil.Factory) *ListCmd {
 		Short: "Get firmware patch collection",
 		Long:  `Get a collection of firmware patches (managedObjects) based on filter parameters`,
 		Example: heredoc.Doc(`
-$ c8y firmware patches list --firmwareId 12345
+$ c8y firmware patches list --firmware 12345
 Get a list of firmware patches
 
-$ c8y firmware patches list --firmwareId 12345 --dependency '1.*'
+$ c8y firmware patches list --firmware 12345 --dependency '1.*'
 Get a list of firmware patches where the dependency version starts with "1."
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
@@ -49,19 +49,19 @@ Get a list of firmware patches where the dependency version starts with "1."
 
 	cmd.SilenceUsage = true
 
-	cmd.Flags().StringSlice("firmwareId", []string{""}, "Firmware package id (required) (accepts pipeline)")
+	cmd.Flags().StringSlice("firmware", []string{""}, "Firmware package id or name (required) (accepts pipeline)")
 	cmd.Flags().String("dependency", "*", "Patch dependency version")
 	cmd.Flags().Bool("withParents", true, "Include parent references")
 
 	completion.WithOptions(
 		cmd,
-		completion.WithFirmware("firmwareId", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
+		completion.WithFirmware("firmware", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
 	)
 
 	flags.WithOptions(
 		cmd,
 
-		flags.WithExtendedPipelineSupport("firmwareId", "firmwareId", true, "additionParents.references.0.managedObject.id", "id"),
+		flags.WithExtendedPipelineSupport("firmware", "firmware", true, "additionParents.references.0.managedObject.id", "id"),
 		flags.WithCollectionProperty("managedObjects"),
 	)
 
@@ -146,12 +146,12 @@ func (n *ListCmd) RunE(cmd *cobra.Command, args []string) error {
 	}
 
 	// path parameters
-	path := flags.NewStringTemplate("inventory/managedObjects?query=$filter=((has(c8y_Patch))%20and%20(c8y_Patch.dependency%20eq%20'{dependency}')%20and%20(bygroupid({firmwareId})))%20$orderby=creationTime.date%20desc,creationTime%20desc")
+	path := flags.NewStringTemplate("inventory/managedObjects?query=$filter=((has(c8y_Patch))%20and%20(c8y_Patch.dependency%20eq%20'{dependency}')%20and%20(bygroupid({firmware})))%20$orderby=creationTime.date%20desc,creationTime%20desc")
 	err = flags.WithPathParameters(
 		cmd,
 		path,
 		inputIterators,
-		c8yfetcher.WithFirmwareByNameFirstMatch(client, args, "firmwareId", "firmwareId"),
+		c8yfetcher.WithFirmwareByNameFirstMatch(client, args, "firmware", "firmware"),
 		flags.WithStringValue("dependency", "dependency"),
 	)
 	if err != nil {

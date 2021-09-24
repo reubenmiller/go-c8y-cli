@@ -27,17 +27,17 @@ Get a firmware package (using pipeline)
     [Alias()]
     [OutputType([object])]
     Param(
-        # Firmware Package version (managedObject) id (required)
+        # Firmware patch id or name (required)
         [Parameter(Mandatory = $true,
                    ValueFromPipeline=$true,
                    ValueFromPipelineByPropertyName=$true)]
         [object[]]
         $Id,
 
-        # Firmware package id (used to help completion be more accurate)
+        # Firmware package id or name (used to help completion be more accurate)
         [Parameter()]
         [object[]]
-        $FirmwareId,
+        $Firmware,
 
         # Include parent references
         [Parameter()]

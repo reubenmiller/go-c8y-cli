@@ -11,7 +11,7 @@ Get an existing firmware package version
 https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/firmware_versions_get
 
 .EXAMPLE
-PS> Get-FirmwareVersion -FirmwareId 12345 -Id $mo.id
+PS> Get-FirmwareVersion -Firmware 12345 -Id $mo.id
 
 Get a firmware package
 
@@ -27,17 +27,17 @@ Get a firmware package (using pipeline)
     [Alias()]
     [OutputType([object])]
     Param(
-        # Firmware Package version (managedObject) id (required)
+        # Firmware Package version id or name (required)
         [Parameter(Mandatory = $true,
                    ValueFromPipeline=$true,
                    ValueFromPipelineByPropertyName=$true)]
         [object[]]
         $Id,
 
-        # Firmware package id (used to help completion be more accurate)
+        # Firmware package id or name (used to help completion be more accurate)
         [Parameter()]
         [object[]]
-        $FirmwareId,
+        $Firmware,
 
         # Include parent references
         [Parameter()]

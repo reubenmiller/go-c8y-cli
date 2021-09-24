@@ -25,7 +25,7 @@ None :)
 
         However you can control the output file dynamically. i.e. if you get a list of devices and pipe it, then it will all be overwritten in the same output file.
 
-        c8y firmware versions list --firmwareId 1234 | c8y api --outputFile myfile.json
+        c8y firmware versions list --firmware 1234 | c8y api --outputFile myfile.json
 
         * What name to use?
             * Template string?

@@ -48,14 +48,14 @@ Delete a firmware patch (but keep the related binary)
 
 	cmd.SilenceUsage = true
 
-	cmd.Flags().StringSlice("id", []string{""}, "Firmware patch (managedObject) id (required) (accepts pipeline)")
-	cmd.Flags().StringSlice("firmwareId", []string{""}, "Firmware id (used to help completion be more accurate)")
+	cmd.Flags().StringSlice("id", []string{""}, "Firmware patch id or name (required) (accepts pipeline)")
+	cmd.Flags().StringSlice("firmware", []string{""}, "Firmware id or name (used to help completion be more accurate)")
 	cmd.Flags().Bool("forceCascade", true, "Remove version and any related binaries")
 
 	completion.WithOptions(
 		cmd,
-		completion.WithFirmwarePatch("id", "firmwareId", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
-		completion.WithFirmware("firmwareId", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
+		completion.WithFirmwarePatch("id", "firmware", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
+		completion.WithFirmware("firmware", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
 	)
 
 	flags.WithOptions(
@@ -148,7 +148,7 @@ func (n *DeleteCmd) RunE(cmd *cobra.Command, args []string) error {
 		path,
 		inputIterators,
 		c8yfetcher.WithFirmwarePatchByNameFirstMatch(client, args, "id", "id"),
-		c8yfetcher.WithFirmwareByNameFirstMatch(client, args, "firmwareId", "firmwareId"),
+		c8yfetcher.WithFirmwareByNameFirstMatch(client, args, "firmware", "firmware"),
 	)
 	if err != nil {
 		return err

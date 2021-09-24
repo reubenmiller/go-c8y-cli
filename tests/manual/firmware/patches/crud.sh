@@ -20,7 +20,7 @@ VERSION_ID=$( echo "$FIRMWARE_ID" | c8y firmware versions create --version "$VER
 
 # create patch with url
 PATCH1_ID=$( c8y firmware get --id $FIRMWARE_ID | c8y firmware patches create --version "$PATCH" --dependencyVersion "$VERSION" --url "https://test.com" --select id --output csv )
-# PATCH_ID=$( c8y firmware patches create --firmwareId $FIRMWARE_ID --dependencyVersion $VERSION_ID --version $PATCH )
+# PATCH_ID=$( c8y firmware patches create --firmware $FIRMWARE_ID --dependencyVersion $VERSION_ID --version $PATCH )
 
 
 #
@@ -30,7 +30,7 @@ package_file=$(mktemp /tmp/package-XXXXXX-10.2.3.deb)
 echo "dummy file" > "$package_file"
 trap "rm -f $package_file" EXIT
 
-PATCH2_ID=$( c8y firmware patches create --firmwareId "$FIRMWARE" --file "$package_file" --dependencyVersion "$VERSION" --select "id,c8y_Patch.dependency,c8y_Firmware.version" --output csv )
+PATCH2_ID=$( c8y firmware patches create --firmware "$FIRMWARE" --file "$package_file" --dependencyVersion "$VERSION" --select "id,c8y_Patch.dependency,c8y_Firmware.version" --output csv )
 echo "$PATCH2_ID" | grep "^[0-9]\+,$VERSION,10.2.3$"
 
 # download
@@ -39,15 +39,15 @@ echo "$PATCH2_ID" | c8y firmware patches get | c8y api | grep "^dummy file$"
 
 # completion (firmware and version)
 c8y __complete firmware patches get --id "$PATCH" | grep id:
-c8y __complete firmware patches get --firmwareId "$FIRMWARE" | grep id:
+c8y __complete firmware patches get --firmware "$FIRMWARE" | grep id:
 
 c8y __complete firmware patches delete --id "$PATCH" | grep id:
-c8y __complete firmware patches delete --firmwareId "$FIRMWARE" | grep id:
+c8y __complete firmware patches delete --firmware "$FIRMWARE" | grep id:
 
-c8y __complete firmware patches create --firmwareId "$FIRMWARE" | grep id:
+c8y __complete firmware patches create --firmware "$FIRMWARE" | grep id:
 c8y __complete firmware patches create --dependencyVersion "$VERSION" | grep id:
 
-c8y __complete firmware patches list --firmwareId "$FIRMWARE" | grep id:
+c8y __complete firmware patches list --firmware "$FIRMWARE" | grep id:
 
 
 # list patches by pipeline
@@ -57,10 +57,10 @@ c8y firmware get --id "$FIRMWARE" | c8y firmware patches list --select "id,c8y_F
 c8y firmware get --id "$FIRMWARE" | c8y firmware patches list --select "id,c8y_Firmware.version" --output csv | grep "$PATCH1_ID,$PATCH"
 
 # list
-c8y firmware patches list --firmwareId "$FIRMWARE" --select "id,c8y_Firmware.version" --output csv | grep "$PATCH1_ID,$PATCH"
+c8y firmware patches list --firmware "$FIRMWARE" --select "id,c8y_Firmware.version" --output csv | grep "$PATCH1_ID,$PATCH"
 
 # list with dependency filter
-c8y firmware patches list --firmwareId "$FIRMWARE" --dependency "$VERSION*" --select "id,c8y_Firmware.version" --output csv | grep "$PATCH1_ID,$PATCH"
+c8y firmware patches list --firmware "$FIRMWARE" --dependency "$VERSION*" --select "id,c8y_Firmware.version" --output csv | grep "$PATCH1_ID,$PATCH"
 
 # get > delete
 c8y firmware patches get --id "$PATCH1_ID" | c8y firmware patches delete

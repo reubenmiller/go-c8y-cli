@@ -35,7 +35,7 @@ func NewListCmd(f *cmdutil.Factory) *ListCmd {
 		Short: "Get software package version collection",
 		Long:  `Get a collection of software package versions (managedObjects) based on filter parameters`,
 		Example: heredoc.Doc(`
-$ c8y software versions list --softwareId 12345
+$ c8y software versions list --software 12345
 Get a list of software package versions
 
 $ c8y software list | c8y software versions list
@@ -49,18 +49,18 @@ Get a list of software package versions from multiple software packages
 
 	cmd.SilenceUsage = true
 
-	cmd.Flags().StringSlice("softwareId", []string{""}, "Software package id (accepts pipeline)")
+	cmd.Flags().StringSlice("software", []string{""}, "Software package id or name (accepts pipeline)")
 	cmd.Flags().Bool("withParents", true, "Include parent references")
 
 	completion.WithOptions(
 		cmd,
-		completion.WithSoftware("softwareId", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
+		completion.WithSoftware("software", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
 	)
 
 	flags.WithOptions(
 		cmd,
 
-		flags.WithExtendedPipelineSupport("softwareId", "softwareId", false, "additionParents.references.0.managedObject.id", "id"),
+		flags.WithExtendedPipelineSupport("software", "software", false, "additionParents.references.0.managedObject.id", "id"),
 		flags.WithCollectionProperty("managedObjects"),
 	)
 
@@ -145,12 +145,12 @@ func (n *ListCmd) RunE(cmd *cobra.Command, args []string) error {
 	}
 
 	// path parameters
-	path := flags.NewStringTemplate("inventory/managedObjects?query=$filter=((not(has(c8y_Patch)))%20and%20(bygroupid({softwareId})))%20$orderby=creationTime.date%20desc,creationTime%20desc")
+	path := flags.NewStringTemplate("inventory/managedObjects?query=$filter=((not(has(c8y_Patch)))%20and%20(bygroupid({software})))%20$orderby=creationTime.date%20desc,creationTime%20desc")
 	err = flags.WithPathParameters(
 		cmd,
 		path,
 		inputIterators,
-		c8yfetcher.WithSoftwareByNameFirstMatch(client, args, "softwareId", "softwareId"),
+		c8yfetcher.WithSoftwareByNameFirstMatch(client, args, "software", "software"),
 	)
 	if err != nil {
 		return err

@@ -7,9 +7,9 @@ tests:
             json:
                 method: GET
                 path: /inventory/managedObjects
-                query: query=$filter=((not(has(c8y_Patch))) and (bygroupid({firmwareId}))) $orderby=creationTime.date desc,creationTime desc
+                query: query=$filter=((not(has(c8y_Patch))) and (bygroupid({firmware}))) $orderby=creationTime.date desc,creationTime desc
     firmware/versions_list_Get a list of firmware package versions:
-        command: c8y firmware versions list --firmwareId 12345
+        command: c8y firmware versions list --firmware 12345
         exit-code: 0
         stdout:
             json:
@@ -24,4 +24,4 @@ tests:
             json:
                 method: GET
                 path: /inventory/managedObjects
-                query: query=$filter=((not(has(c8y_Patch))) and (bygroupid({firmwareId}))) $orderby=creationTime.date desc,creationTime desc
+                query: query=$filter=((not(has(c8y_Patch))) and (bygroupid({firmware}))) $orderby=creationTime.date desc,creationTime desc

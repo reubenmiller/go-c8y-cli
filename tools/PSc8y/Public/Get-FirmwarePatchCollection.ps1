@@ -11,12 +11,12 @@ Get a collection of firmware patches (managedObjects) based on filter parameters
 https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/firmware_patches_list
 
 .EXAMPLE
-PS> Get-FirmwarePatchCollection -FirmwareId 12345
+PS> Get-FirmwarePatchCollection -Firmware 12345
 
 Get a list of firmware patches related to a firmware package
 
 .EXAMPLE
-PS> Get-FirmwarePatchCollection -FirmwareId 12345 -Dependency '1.*'
+PS> Get-FirmwarePatchCollection -Firmware 12345 -Dependency '1.*'
 
 Get a list of firmware patches where the dependency version starts with "1."
 
@@ -27,12 +27,12 @@ Get a list of firmware patches where the dependency version starts with "1."
     [Alias()]
     [OutputType([object])]
     Param(
-        # Firmware package id (required)
+        # Firmware package id or name (required)
         [Parameter(Mandatory = $true,
                    ValueFromPipeline=$true,
                    ValueFromPipelineByPropertyName=$true)]
         [object[]]
-        $FirmwareId,
+        $Firmware,
 
         # Patch dependency version
         [Parameter()]
@@ -67,13 +67,13 @@ Get a list of firmware patches where the dependency version starts with "1."
     Process {
 
         if ($ClientOptions.ConvertToPS) {
-            $FirmwareId `
+            $Firmware `
             | Group-ClientRequests `
             | c8y firmware patches list $c8yargs `
             | ConvertFrom-ClientOutput @TypeOptions
         }
         else {
-            $FirmwareId `
+            $Firmware `
             | Group-ClientRequests `
             | c8y firmware patches list $c8yargs
         }

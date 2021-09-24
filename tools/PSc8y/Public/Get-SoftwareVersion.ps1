@@ -11,7 +11,7 @@ Get an existing software package version
 https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/software_versions_get
 
 .EXAMPLE
-PS> Get-SoftwareVersion -SoftwareId 12345 -Id $mo.id
+PS> Get-SoftwareVersion -Software 12345 -Id $mo.id
 
 Get a software package
 
@@ -27,7 +27,7 @@ Get a software package (using pipeline)
     [Alias()]
     [OutputType([object])]
     Param(
-        # Software Package version (managedObject) id (required)
+        # Software Package version id or name (required)
         [Parameter(Mandatory = $true,
                    ValueFromPipeline=$true,
                    ValueFromPipelineByPropertyName=$true)]
@@ -37,7 +37,7 @@ Get a software package (using pipeline)
         # Software package id (used to help completion be more accurate)
         [Parameter()]
         [object[]]
-        $SoftwareId,
+        $Software,
 
         # Include parent references
         [Parameter()]

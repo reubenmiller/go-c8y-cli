@@ -11,7 +11,7 @@
       "method": "GET",
       "description": "Get firmware package version collection",
       "descriptionLong": "Get a collection of firmware package versions (managedObjects) based on filter parameters",
-      "path": "inventory/managedObjects?query=$filter=((not(has(c8y_Patch))) and (bygroupid({firmwareId}))) $orderby=creationTime.date desc,creationTime desc",
+      "path": "inventory/managedObjects?query=$filter=((not(has(c8y_Patch))) and (bygroupid({firmware}))) $orderby=creationTime.date desc,creationTime desc",
       "accept": "application/vnd.com.nsn.cumulocity.managedObjectCollection+json",
       "collectionType": "application/vnd.com.nsn.cumulocity.managedObject+json",
       "collectionProperty": "managedObjects",
@@ -29,7 +29,7 @@
         "go": [
           {
             "description": "Get a list of firmware package versions",
-            "command": "c8y firmware versions list --firmwareId 12345",
+            "command": "c8y firmware versions list --firmware 12345",
             "assertStdOut": {
               "json": {
                 "query": "r/bygroupid\\(12345\\)"
@@ -50,7 +50,7 @@
       },
       "pathParameters": [
         {
-          "name": "firmwareId",
+          "name": "firmware",
           "type": "[]firmware",
           "required": true,
           "pipeline": true,
@@ -58,7 +58,7 @@
             "additionParents.references.0.managedObject.id",
             "id"
           ],
-          "description": "Firmware package id"
+          "description": "Firmware package id or name"
         }
       ],
       "queryParameters": [
@@ -88,7 +88,7 @@
             "beforeEach": [
               "$mo = PSc8y\\New-ManagedObject -Name \"testMO\""
             ],
-            "command": "Get-FirmwareVersion -FirmwareId 12345 -Id $mo.id",
+            "command": "Get-FirmwareVersion -Firmware 12345 -Id $mo.id",
             "afterEach": [
               "Remove-ManagedObject -Id $mo.id -ErrorAction SilentlyContinue"
             ]
@@ -96,7 +96,7 @@
           {
             "description": "Get a firmware package (using pipeline)",
             "beforeEach": [
-              "$mo = PSc8y\\New-FirmwareVersion -FirmwareId 12345 -Version \"1.0.0\" -Url \"test.com/file.mender\""
+              "$mo = PSc8y\\New-FirmwareVersion -Firmware 12345 -Version \"1.0.0\" -Url \"test.com/file.mender\""
             ],
             "command": "Get-ManagedObject -Id $mo.id | Get-FirmwareVersion",
             "afterEach": [
@@ -107,7 +107,7 @@
         "go": [
           {
             "description": "Get a firmware package version using name",
-            "command": "c8y firmware versions get --firmwareId 11111 --id 1.0.0",
+            "command": "c8y firmware versions get --firmware 11111 --id 1.0.0",
             "skipTest": true
           }
         ]
@@ -117,17 +117,17 @@
           "name": "id",
           "type": "[]firmwareversion",
           "dependsOn": [
-            "firmwareId"
+            "firmware"
           ],
           "pipeline": true,
           "required": true,
-          "description": "Firmware Package version (managedObject) id"
+          "description": "Firmware Package version id or name"
         },
         {
-          "name": "firmwareId",
+          "name": "firmware",
           "type": "[]firmware",
           "required": false,
-          "description": "Firmware package id (used to help completion be more accurate)"
+          "description": "Firmware package id or name (used to help completion be more accurate)"
         }
       ],
       "queryParameters": [
@@ -188,17 +188,17 @@
           "name": "id",
           "type": "[]firmwareversion",
           "dependsOn": [
-            "firmwareId"
+            "firmware"
           ],
           "pipeline": true,
           "required": true,
-          "description": "Firmware Package version (managedObject) id"
+          "description": "Firmware Package version id or name"
         },
         {
-          "name": "firmwareId",
+          "name": "firmware",
           "type": "[]firmware",
           "required": false,
-          "description": "Firmware package id (used to help completion be more accurate)"
+          "description": "Firmware package id or name (used to help completion be more accurate)"
         }
       ],
       "queryParameters": [

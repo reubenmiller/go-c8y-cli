@@ -48,14 +48,14 @@ Delete a software package (but keep any child binaries)
 
 	cmd.SilenceUsage = true
 
-	cmd.Flags().StringSlice("id", []string{""}, "Software Package version (managedObject) id (required) (accepts pipeline)")
-	cmd.Flags().StringSlice("softwareId", []string{""}, "Software package id (used to help completion be more accurate)")
+	cmd.Flags().StringSlice("id", []string{""}, "Software Package version id or name (required) (accepts pipeline)")
+	cmd.Flags().StringSlice("software", []string{""}, "Software package id (used to help completion be more accurate)")
 	cmd.Flags().Bool("forceCascade", true, "Remove version and any related binaries")
 
 	completion.WithOptions(
 		cmd,
-		completion.WithSoftwareVersion("id", "softwareId", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
-		completion.WithSoftware("softwareId", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
+		completion.WithSoftwareVersion("id", "software", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
+		completion.WithSoftware("software", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
 	)
 
 	flags.WithOptions(
@@ -148,7 +148,7 @@ func (n *DeleteCmd) RunE(cmd *cobra.Command, args []string) error {
 		path,
 		inputIterators,
 		c8yfetcher.WithSoftwareVersionByNameFirstMatch(client, args, "id", "id"),
-		c8yfetcher.WithSoftwareByNameFirstMatch(client, args, "softwareId", "softwareId"),
+		c8yfetcher.WithSoftwareByNameFirstMatch(client, args, "software", "software"),
 	)
 	if err != nil {
 		return err

@@ -31,11 +31,11 @@ package_file=$(mktemp /tmp/package-XXXXXX-10.2.3.deb)
 echo "dummy file" > "$package_file"
 trap "rm -f $package_file" EXIT
 
-VERSION2_ID=$( c8y software versions create --softwareId "$NAME" --file "$package_file" --select "id,c8y_Software.version" --output csv )
+VERSION2_ID=$( c8y software versions create --software "$NAME" --file "$package_file" --select "id,c8y_Software.version" --output csv )
 echo "$VERSION2_ID" | grep "^[0-9]\+,10.2.3$"
 
 # download
-c8y software versions list --softwareId "$NAME" | c8y api | grep "^dummy file$"
+c8y software versions list --software "$NAME" | c8y api | grep "^dummy file$"
 
 
 # update software
@@ -45,8 +45,8 @@ c8y software update --id "$NAME" --description "Example description" --select de
 c8y __complete software get --id "$NAME" | grep id:
 c8y __complete software update --id "$NAME" | grep id:
 c8y __complete software delete --id "$NAME" | grep id:
-c8y __complete software versions list --softwareId "$NAME" | grep id:
-c8y __complete software versions delete --softwareId "$NAME" | grep id:
+c8y __complete software versions list --software "$NAME" | grep id:
+c8y __complete software versions delete --software "$NAME" | grep id:
 c8y __complete software versions install --software "$NAME" | grep id:
 c8y __complete software versions install --software "$NAME" --version $VERSION | grep id:
 
@@ -54,7 +54,7 @@ c8y __complete software versions install --software "$NAME" --version $VERSION |
 c8y software get --id "$NAME" | c8y software versions list --select "id,c8y_Software.version" --output csv | grep "$ID,$VERSION"
 
 # list
-c8y software versions list --softwareId "$NAME" --select "id,c8y_Software.version" --output csv | grep "$ID,$VERSION"
+c8y software versions list --software "$NAME" --select "id,c8y_Software.version" --output csv | grep "$ID,$VERSION"
 
 #
 # install via version id
@@ -72,7 +72,7 @@ echo "$OPERATION" | c8y util show --select "body.c8y_SoftwareUpdate.0.version" -
 echo "$OPERATION" | c8y util show --select "body.c8y_SoftwareUpdate.0.url" --output csv | grep "^https://test.com$"
 
 # list versions and delete them
-c8y software versions list --softwareId "$ID" | c8y software versions delete
+c8y software versions list --software "$ID" | c8y software versions delete
 
 # delete parent
 c8y software get --id "$NAME" | c8y software delete

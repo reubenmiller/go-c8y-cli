@@ -11,7 +11,7 @@ Get a collection of software package versions (managedObjects) based on filter p
 https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/software_versions_list
 
 .EXAMPLE
-PS> Get-SoftwareVersionCollection -SoftwareId 12345
+PS> Get-SoftwareVersionCollection -Software 12345
 
 Get a list of software package versions
 
@@ -22,11 +22,11 @@ Get a list of software package versions
     [Alias()]
     [OutputType([object])]
     Param(
-        # Software package id
+        # Software package id or name
         [Parameter(ValueFromPipeline=$true,
                    ValueFromPipelineByPropertyName=$true)]
         [object[]]
-        $SoftwareId,
+        $Software,
 
         # Include parent references
         [Parameter()]
@@ -56,13 +56,13 @@ Get a list of software package versions
     Process {
 
         if ($ClientOptions.ConvertToPS) {
-            $SoftwareId `
+            $Software `
             | Group-ClientRequests `
             | c8y software versions list $c8yargs `
             | ConvertFrom-ClientOutput @TypeOptions
         }
         else {
-            $SoftwareId `
+            $Software `
             | Group-ClientRequests `
             | c8y software versions list $c8yargs
         }

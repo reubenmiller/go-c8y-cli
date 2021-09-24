@@ -9,7 +9,7 @@ FIRMWARE_PATCH=$3
 FIRMWARE_URL=$4
 
 resp=$( c8y firmware patches create \
-    --firmwareId "$FIRMWARE_ID" \
+    --firmware "$FIRMWARE_ID" \
     --dependencyVersion "$FIRMWARE_VERSION" \
     --version "$FIRMWARE_PATCH" \
     --url "$FIRMWARE_URL" )

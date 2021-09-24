@@ -48,14 +48,14 @@ func NewCreateCmd(f *cmdutil.Factory) *CreateCmd {
 
 	cmd.SilenceUsage = true
 
-	cmd.Flags().StringSlice("softwareId", []string{""}, "Software package id where the version will be added to (accepts pipeline)")
+	cmd.Flags().StringSlice("software", []string{""}, "Software package id where the version will be added to (accepts pipeline)")
 	cmd.Flags().String("version", "", "Software package version name, i.e. 1.0.0")
 	cmd.Flags().String("url", "", "URL to the software package")
 	cmd.Flags().String("file", "", "File to be uploaded")
 
 	completion.WithOptions(
 		cmd,
-		completion.WithSoftware("softwareId", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
+		completion.WithSoftware("software", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
 	)
 
 	flags.WithOptions(
@@ -63,7 +63,7 @@ func NewCreateCmd(f *cmdutil.Factory) *CreateCmd {
 		flags.WithProcessingMode(),
 		flags.WithData(),
 		f.WithTemplateFlag(cmd),
-		flags.WithExtendedPipelineSupport("softwareId", "softwareId", false, "additionParents.references.0.managedObject.id", "id"),
+		flags.WithExtendedPipelineSupport("software", "software", false, "additionParents.references.0.managedObject.id", "id"),
 	)
 
 	// Required flags
@@ -145,12 +145,12 @@ func (n *CreateCmd) RunE(cmd *cobra.Command, args []string) error {
 	}
 
 	// path parameters
-	path := flags.NewStringTemplate("{softwareId}")
+	path := flags.NewStringTemplate("{software}")
 	err = flags.WithPathParameters(
 		cmd,
 		path,
 		inputIterators,
-		c8yfetcher.WithSoftwareByNameFirstMatch(client, args, "softwareId", "softwareId"),
+		c8yfetcher.WithSoftwareByNameFirstMatch(client, args, "software", "software"),
 	)
 	if err != nil {
 		return err
