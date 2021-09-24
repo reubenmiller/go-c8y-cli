@@ -73,6 +73,4 @@ create_firmware_version () {
         c8y firmware versions create --firmware "$name" --version "$version" --url "$url"
 }
 
-if [[ $_ == $0 ]]; then
-    setup
-fi
+setup
