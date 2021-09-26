@@ -167,8 +167,10 @@ func (l *ActivityLogger) LogRequest(resp *http.Response, body *gjson.Result, res
 	l.mu.Lock()
 	defer l.mu.Unlock()
 	if resp.StatusCode >= 200 && resp.StatusCode <= 299 {
+		cacheTag := resp.Header.Get("ETag")
+		isCachedResponse := cacheTag != ""
 		fmt.Fprintf(l.w,
-			`{"time":"%s","ctx":"%s","type":"request","method":"%s","host":"%s","path":"%s","query":"%s","accept":"%s","processingMode":"%s","statusCode":%d,"responseTimeMS":%d,"responseSelf":"%s"}`+"\n",
+			`{"time":"%s","ctx":"%s","type":"request","method":"%s","host":"%s","path":"%s","query":"%s","accept":"%s","processingMode":"%s","statusCode":%d,"responseTimeMS":%d,"responseSelf":"%s","etag":"%s","cached":%v}`+"\n",
 			time.Now().Format(time.RFC3339Nano),
 			l.contextID,
 			resp.Request.Method,
@@ -180,6 +182,8 @@ func (l *ActivityLogger) LogRequest(resp *http.Response, body *gjson.Result, res
 			resp.StatusCode,
 			responseTime,
 			body.Get("self").Str,
+			cacheTag,
+			isCachedResponse,
 		)
 	} else {
 		errorResponse := body.Raw

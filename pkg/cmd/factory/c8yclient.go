@@ -58,10 +58,30 @@ func CreateCumulocityClient(f *cmdutil.Factory, sessionFile, username, password 
 
 		log.Debug("Creating c8y client")
 		configureProxySettings(cfg, log)
-		httpClient := newHTTPClient(cfg.IgnoreProxy())
+
+		httpClient := c8y.NewHTTPClient(
+			WithProxyDisabled(cfg.IgnoreProxy()),
+			c8y.WithInsecureSkipVerify(cfg.SkipSSLVerify()),
+		)
+
+		if cfg.CacheEnabled() && cfg.CacheTTL() > 0 {
+			cachableMethods := cfg.CacheMethods()
+			httpClient = c8y.NewCachedClient(
+				httpClient,
+				cfg.CacheDir(),
+				cfg.CacheTTL(),
+				func(r *http.Request) bool {
+					return strings.Contains(cachableMethods, r.Method)
+				},
+				c8y.KeyOptions{
+					ExcludeAuth: !cfg.CacheKeyIncludeAuth(),
+					ExcludeHost: !cfg.CacheKeyIncludeHost(),
+				},
+			)
+		}
 
 		if sessionFile != "" {
-			// cfg.Rea
+			// Do nothing
 		} else {
 			log.Info("Binding authorization environment variables")
 			if err := cfg.BindAuthorization(); err != nil {
@@ -188,27 +208,10 @@ func newWebsocketDialer(ignoreProxySettings bool) *websocket.Dialer {
 	return dialer
 }
 
-func newHTTPClient(ignoreProxySettings bool) *http.Client {
-	// Default client ignores self signed certificates (to enable compatibility to the edge which uses self signed certs)
-	defaultTransport := http.DefaultTransport.(*http.Transport)
-	tr := &http.Transport{
-		Proxy:                 defaultTransport.Proxy,
-		DialContext:           defaultTransport.DialContext,
-		MaxIdleConns:          defaultTransport.MaxIdleConns,
-		IdleConnTimeout:       defaultTransport.IdleConnTimeout,
-		ExpectContinueTimeout: defaultTransport.ExpectContinueTimeout,
-		TLSHandshakeTimeout:   defaultTransport.TLSHandshakeTimeout,
-		TLSClientConfig: &tls.Config{
-			InsecureSkipVerify: true,
-		},
-	}
-
-	if ignoreProxySettings {
-		tr.Proxy = nil
-	}
-
-	return &http.Client{
-		Transport: tr,
+func WithProxyDisabled(disable bool) c8y.ClientOption {
+	return func(tr http.RoundTripper) http.RoundTripper {
+		tr.(*http.Transport).Proxy = nil
+		return tr
 	}
 }
 

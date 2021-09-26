@@ -292,6 +292,42 @@ var updateSettingsOptions = map[string]argumentHandler{
 
 	// session
 	"session.defaultUsername": {"session.defaultUsername", "string", "settings.session.defaultUsername", []string{}, nil, cobra.ShellCompDirectiveDefault},
+
+	// cache
+	"defaults.cache": {"defaults.cache", "bool", config.SettingsDefaultsCacheEnabled, []string{
+		"true",
+		"false",
+	}, nil, cobra.ShellCompDirectiveNoFileComp},
+
+	"cache.path": {"cache.path", "string", "settings.cache.path", []string{}, nil, cobra.ShellCompDirectiveDefault},
+
+	"defaults.cacheTTL": {"defaults.cacheTTL", "string", config.SettingsDefaultsCacheTTL, []string{
+		"30s",
+		"60s",
+		"5m",
+		"30m",
+	}, nil, cobra.ShellCompDirectiveNoFileComp},
+
+	"cache.methods": {"cache.methods", "string", config.SettingsCacheMethods, []string{
+		"GET",
+		"GET PUT POST DELETE",
+	}, nil, cobra.ShellCompDirectiveNoFileComp},
+
+	"cache.keyhost": {"cache.keyhost", "bool", config.SettingsCacheKeyHost, []string{
+		"true",
+		"false",
+	}, nil, cobra.ShellCompDirectiveNoFileComp},
+
+	"cache.keyauth": {"cache.keyauth", "bool", config.SettingsCacheKeyAuth, []string{
+		"true",
+		"false",
+	}, nil, cobra.ShellCompDirectiveNoFileComp},
+
+	// insecure ssl
+	"defaults.insecure": {"defaults.insecure", "bool", config.SettingsDefaultsInsecure, []string{
+		"true",
+		"false",
+	}, nil, cobra.ShellCompDirectiveNoFileComp},
 }
 
 // NewCmdUpdate returns a new command used to update session settings

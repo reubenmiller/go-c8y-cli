@@ -101,6 +101,14 @@ Inherit common parameters to a custom function. This will add parameters such as
         New-DynamicParam -Name Compact -Alias "Compress" -Type "switch" -DPDictionary $Dictionary -HelpMessage "Compact instead of pretty-printed output when using json output. Pretty print is the default if output is the terminal"
         New-DynamicParam -Name NoColor -Type "switch" -DPDictionary $Dictionary -HelpMessage "Don't use colors when displaying log entries on the console"
         
+        # Cache
+        New-DynamicParam -Name Cache -Type "switch" -DPDictionary $Dictionary -HelpMessage "Enable cached responses"
+        New-DynamicParam -Name NoCache -Type "switch" -DPDictionary $Dictionary -HelpMessage "Force disabling of cached responses (overwrites cache setting)"
+        New-DynamicParam -Name CacheTTL -Type "string" -DPDictionary $Dictionary -HelpMessage "Cache time-to-live (TTL) as a duration, i.e. 60s, 2m"
+        
+        # SSL Verify
+        New-DynamicParam -Name Insecure -Type "switch" -DPDictionary $Dictionary -HelpMessage "Allow insecure server connections when using SSL"
+        
         # Help
         New-DynamicParam -Name Help -Type "switch" -DPDictionary $Dictionary -HelpMessage "Show command help"
         New-DynamicParam -Name Examples -Type "switch" -DPDictionary $Dictionary -HelpMessage "Show examples for the current command"

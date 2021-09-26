@@ -255,6 +255,29 @@ const (
 
 	// SettingsLoginType preferred login type, i.e. BASIC, OAUTH_INTERNAL etc.
 	SettingsLoginType = "settings.login.type"
+
+	// Cache settings
+	// SettingsDefaultsCacheEnabled enable caching
+	SettingsDefaultsCacheEnabled = "settings.defaults.cache"
+	SettingsDefaultsNoCache      = "settings.defaults.noCache"
+
+	// SettingsDefaultsCacheTTL Cache time-to-live setting as a duration
+	SettingsDefaultsCacheTTL = "settings.defaults.cacheTTL"
+
+	// SettingsCacheDir Cache directory
+	SettingsCacheDir = "settings.cache.path"
+
+	// SettingsCacheMethods HTTP methods which should be cached
+	SettingsCacheMethods = "settings.cache.methods"
+
+	// SettingsCacheKeyHost include host in cache key generation
+	SettingsCacheKeyHost = "settings.cache.keyhost"
+
+	// SettingsCacheKeyAuth include authorization header in cache key generation
+	SettingsCacheKeyAuth = "settings.cache.keyauth"
+
+	// SettingsDefaultsInsecure allow insecure SSL connections
+	SettingsDefaultsInsecure = "settings.defaults.insecure"
 )
 
 var (
@@ -321,6 +344,13 @@ func WithBindEnv(name string, defaultValue interface{}) func(*Config) error {
 	}
 }
 
+func WithDefault(name string, defaultValue interface{}) func(*Config) error {
+	return func(c *Config) error {
+		c.viper.SetDefault(name, defaultValue)
+		return nil
+	}
+}
+
 func (c *Config) WithOptions(opts ...Option) error {
 	for _, opt := range opts {
 		err := opt(c)
@@ -366,6 +396,11 @@ func (c *Config) bindSettings() {
 		WithBindEnv(SettingsViewColumnPadding, 15),
 
 		WithBindEnv(SettingsLoggerHideSensitive, false),
+
+		WithBindEnv(SettingsCacheMethods, "GET"),
+		WithBindEnv(SettingsCacheKeyHost, true),
+		WithBindEnv(SettingsCacheKeyAuth, true),
+		WithDefault(SettingsCacheDir, filepath.Join(os.TempDir(), "go-c8y-cli-cache")),
 	)
 
 	if err != nil {
@@ -1213,6 +1248,41 @@ func (c *Config) GetSilentExit() bool {
 // GetLoginType get the preferred login type
 func (c *Config) GetLoginType() string {
 	return c.viper.GetString(SettingsLoginType)
+}
+
+// CacheEnabled shows if caching is enabled or not
+func (c *Config) CacheEnabled() bool {
+	return c.viper.GetBool(SettingsDefaultsCacheEnabled) && !c.viper.GetBool(SettingsDefaultsNoCache)
+}
+
+// CacheTTL cache time-to-live. After the duration then the cache will no longer be used.
+func (c *Config) CacheTTL() time.Duration {
+	return c.getDuration(SettingsDefaultsCacheTTL)
+}
+
+// CacheDir get the cache directory
+func (c *Config) CacheDir() string {
+	return c.viper.GetString(SettingsCacheDir)
+}
+
+// CacheMethods HTTP methods which should be cached
+func (c *Config) CacheMethods() string {
+	return c.viper.GetString(SettingsCacheMethods)
+}
+
+// CacheKeyIncludeHost include full host name in cache key generation
+func (c *Config) CacheKeyIncludeHost() bool {
+	return c.viper.GetBool(SettingsCacheKeyHost)
+}
+
+// CacheKeyIncludeAuth include authorization cache key generation
+func (c *Config) CacheKeyIncludeAuth() bool {
+	return c.viper.GetBool(SettingsCacheKeyAuth)
+}
+
+// SkipSSLVerify skip SSL verify
+func (c *Config) SkipSSLVerify() bool {
+	return c.viper.GetBool(SettingsDefaultsInsecure)
 }
 
 // GetJSONSelect get json properties to be selected from the output. Only the given properties will be returned
