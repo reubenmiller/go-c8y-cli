@@ -102,7 +102,7 @@ c8y cache renew
 Alternatively you can always just increase the time-to-live (TTL) cache to a value which should cover all of the cached items.
 
 ```sh
-c8y devices list --cache --cacheTTL 30d
+c8y devices list --cache --cacheTTL 720h
 ```
 
 ## Deleting cache
