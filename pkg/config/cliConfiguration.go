@@ -368,7 +368,6 @@ func (c *Config) bindSettings() {
 	c.viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
 	c.viper.SetEnvPrefix(EnvSettingsPrefix)
 	err := c.WithOptions(
-		WithBindEnv(SettingsCacheMode, nil),
 		WithBindEnv(SettingEncryptionCachePassphrase, true),
 		WithBindEnv(SettingsMaxWorkers, 50),
 		WithBindEnv(SettingsWorkers, 1),
@@ -404,7 +403,8 @@ func (c *Config) bindSettings() {
 		WithBindEnv(SettingsCacheMethods, "GET"),
 		WithBindEnv(SettingsCacheKeyHost, true),
 		WithBindEnv(SettingsCacheKeyAuth, true),
-		WithDefault(SettingsCacheDir, filepath.Join(os.TempDir(), "go-c8y-cli-cache")),
+		WithBindEnv(SettingsCacheMode, nil),
+		WithBindEnv(SettingsCacheDir, filepath.Join(os.TempDir(), "go-c8y-cli-cache")),
 	)
 
 	if err != nil {
