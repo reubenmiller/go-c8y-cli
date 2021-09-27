@@ -19,6 +19,8 @@ Assertions related to Cumulocity alarms
 ```
       --abortOnErrors int          Abort batch when reaching specified number of errors (default 10)
       --allowEmptyPipe             Don't fail when piped input is empty (stdin)
+      --cache                      Enable cached responses
+      --cacheTTL string            Cache time-to-live (TTL) as a duration, i.e. 60s, 2m (default "60s")
   -c, --compact                    Compact instead of pretty-printed output when using json output. Pretty print is the default if output is the terminal
       --confirm                    Prompt for confirmation
       --confirmText string         Custom confirmation text
@@ -35,9 +37,11 @@ Assertions related to Cumulocity alarms
   -f, --force                      Do not prompt for confirmation. Ignored when using --confirm
   -H, --header strings             custom headers. i.e. --header "Accept: value, AnotherHeader: myvalue"
       --includeAll                 Include all results by iterating through each page
+  -k, --insecure                   Allow insecure server connections when using SSL
   -l, --logMessage string          Add custom message to the activity log
       --maxJobs int                Maximum number of jobs. 0 = unlimited (use with caution!)
       --noAccept                   Ignore Accept header will remove the Accept header from requests, however PUT and POST requests will only see the effect
+      --noCache                    Force disabling of cached responses (overwrites cache setting)
   -M, --noColor                    Don't use colors when displaying log entries on the console
       --noLog                      Disables the activity log for the current command
       --noProxy                    Ignore the proxy settings

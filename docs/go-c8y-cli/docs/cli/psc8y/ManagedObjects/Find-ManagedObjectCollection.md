@@ -44,6 +44,10 @@ Find-ManagedObjectCollection
 	[-Flatten]
 	[-Compact]
 	[-NoColor]
+	[-Cache]
+	[-NoCache]
+	[-CacheTTL <String>]
+	[-Insecure]
 	[-Help]
 	[-Examples]
 	[-Confirm]
@@ -194,6 +198,37 @@ Return output as PowerShell PSCustomObjects
 
 ```yaml
 Type: SwitchParameter
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -Cache
+Enable cached responses
+
+```yaml
+Type: SwitchParameter
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -CacheTTL
+Cache time-to-live (TTL) as a duration, i.e.
+60s, 2m
+
+```yaml
+Type: String
 Parameter Sets: (All)
 Aliases:
 
@@ -441,6 +476,21 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
+### -Insecure
+Allow insecure server connections when using SSL
+
+```yaml
+Type: SwitchParameter
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
 ### -LogMessage
 Add custom message to the activity log
 
@@ -462,6 +512,21 @@ Maximum number of jobs.
 
 ```yaml
 Type: Int32
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -NoCache
+Force disabling of cached responses (overwrites cache setting)
+
+```yaml
+Type: SwitchParameter
 Parameter Sets: (All)
 Aliases:
 

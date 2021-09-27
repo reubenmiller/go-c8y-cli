@@ -47,6 +47,10 @@ Update-Configuration
 	[-Flatten]
 	[-Compact]
 	[-NoColor]
+	[-Cache]
+	[-NoCache]
+	[-CacheTTL <String>]
+	[-Insecure]
 	[-Help]
 	[-Examples]
 	[-Confirm]
@@ -233,6 +237,37 @@ Return output as PowerShell PSCustomObjects
 
 ```yaml
 Type: SwitchParameter
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -Cache
+Enable cached responses
+
+```yaml
+Type: SwitchParameter
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -CacheTTL
+Cache time-to-live (TTL) as a duration, i.e.
+60s, 2m
+
+```yaml
+Type: String
 Parameter Sets: (All)
 Aliases:
 
@@ -483,6 +518,21 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
+### -Insecure
+Allow insecure server connections when using SSL
+
+```yaml
+Type: SwitchParameter
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
 ### -LogMessage
 Add custom message to the activity log
 
@@ -516,6 +566,21 @@ Accept wildcard characters: False
 
 ### -NoAccept
 Ignore Accept header will remove the Accept header from requests, however PUT and POST requests will only see the effect
+
+```yaml
+Type: SwitchParameter
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -NoCache
+Force disabling of cached responses (overwrites cache setting)
 
 ```yaml
 Type: SwitchParameter
