@@ -1,0 +1,25 @@
+tests:
+  It deletes existing cache folder:
+    config:
+      env:
+        C8Y_SETTINGS_DEFAULTS_CACHE: true
+    command: |
+      c8y devices list -p 1
+      c8y cache delete
+    exit-code: 0
+    stderr:
+      contains:
+        - "Deleted cache"
+
+  It does nothing if the cache folder does not exist:
+    config:
+      env:
+        C8Y_SETTINGS_DEFAULTS_CACHE: true
+        C8Y_SETTINGS_CACHE_PATH: /tmp/go-c8y-cli-cache-empty
+    command: |
+      rm -Rf /tmp/go-c8y-cli-cache-empty
+      c8y cache delete
+    exit-code: 0
+    stderr:
+      contains:
+        - "Nothing to delete"

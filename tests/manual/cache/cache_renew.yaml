@@ -1,0 +1,17 @@
+tests:
+  It renews cached items:
+    config:
+      env:
+        C8Y_SETTINGS_DEFAULTS_CACHE: true
+        C8Y_SETTINGS_CACHE_PATH: /tmp/go-c8y-cli-cache-test-08
+    command: |
+      c8y devices list -p 1 --output json -c
+      c8y cache renew
+      c8y cache delete
+      c8y cache renew
+    exit-code: 0
+    stderr:
+      lines:
+        1: ✓ Renewed cache /tmp/go-c8y-cli-cache-test-08
+        2: ✓ Deleted cache. /tmp/go-c8y-cli-cache-test-08
+        3: ✓ Nothing to renew. /tmp/go-c8y-cli-cache-test-08
