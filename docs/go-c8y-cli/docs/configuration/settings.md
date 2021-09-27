@@ -321,8 +321,10 @@ Space separated list of HTTP methods which should be cached. By default only `GE
 
 <CodeExample>
 
+```bash
 # Enable more http methods to be cached
 c8y settings update cache.methods "GET PUT POST"
+```
 
 </CodeExample>
 
