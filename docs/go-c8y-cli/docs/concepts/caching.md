@@ -232,9 +232,11 @@ c8y devices list --noCache
 
 Caching can be helpful in scripts to reduce the amount of code to write an efficient script, as you don't need to save the whole command response to variables, you can just reuse the same command with the `--cache` parameter and let go-c8y-cli look after it for you.
 
-### Retrieving list of devices
+### Getting complete operations overview for multiple devices
 
+Below is a small script to get the an overview of the completed operations for a list of devices. It excepts an input file to contain a list of device ids or names, and prints out the total number of SUCCESSFUL and FAILED operations for the device.
 
+By using cache, the `c8y devices get` command can be repeated without worrying about spamming the server with duplicated requests.
 
 ```sh title="./operation-summary.sh"
 #!/bin/bash
@@ -268,7 +270,7 @@ done <"$input_file"
 c8y cache delete --age 2h
 ```
 
-
+Below shows the script being used, and some example output:
 
 ```sh title="usage"
 echo -e "agent01\nagent01\nagent01" > devices.list
