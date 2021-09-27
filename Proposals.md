@@ -3,6 +3,17 @@
 
 ## current todo
 
+### Caching
+
+* [x] Add cache management commands 
+  * [x] c8y cache delete
+  * [x] c8y cache renew
+* [x] Add global parameter to support cache and cacheTTL
+* [x] Option to cache specific api requests (i.e. GET, PUT, POST, DELETE)
+* [x] Settings management (c8y settings update )
+* [ ] Preload cache, how to calculate cache file location?
+* [x] Add powershell global parameters
+
 ## Bugs
 
 * Subscription tests are flakey

@@ -463,7 +463,7 @@ func Test_DebugStdinCommand(t *testing.T) {
 	// stdin.Write(`{"source":{"id":"1111"}}` + "\n")
 
 	cmdtext := `
-	__complete software versions install --software linux-software-typea_JlHuAzug --version 0.8.6
+	cache clean --dry --age 1s
 	`
 	cmdErr := ExecuteCmd(cmd, strings.TrimSpace(cmdtext))
 

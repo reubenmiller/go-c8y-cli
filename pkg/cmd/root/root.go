@@ -22,6 +22,7 @@ import (
 	auditrecordsCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/auditrecords"
 	binariesCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/binaries"
 	bulkoperationsCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/bulkoperations"
+	cacheCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/cache"
 	completionCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/completion"
 	configurationCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/configuration"
 	configurationListCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/configuration/list"
@@ -226,6 +227,14 @@ func NewCmdRoot(f *cmdutil.Factory, version, buildDate string) *CmdRoot {
 	cmd.PersistentFlags().Bool("confirm", false, "Prompt for confirmation")
 	cmd.PersistentFlags().String("confirmText", "", "Custom confirmation text")
 
+	// caching
+	cmd.PersistentFlags().Bool("cache", false, "Enable cached responses")
+	cmd.PersistentFlags().Bool("noCache", false, "Force disabling of cached responses (overwrites cache setting)")
+	cmd.PersistentFlags().String("cacheTTL", "60s", "Cache time-to-live (TTL) as a duration, i.e. 60s, 2m")
+
+	// ssl settings
+	cmd.PersistentFlags().BoolP("insecure", "k", false, "Allow insecure server connections when using SSL")
+
 	completion.WithOptions(
 		cmd,
 		completion.WithValidateSet("dryFormat", "json", "dump", "curl", "markdown"),
@@ -270,6 +279,7 @@ func NewCmdRoot(f *cmdutil.Factory, version, buildDate string) *CmdRoot {
 		completionCmd.NewCmdCompletion().GetCommand(),
 		templateCmd.NewSubCommand(f).GetCommand(),
 		utilCmd.NewSubCommand(f).GetCommand(),
+		cacheCmd.NewSubCommand(f).GetCommand(),
 		settingsCmd.NewSubCommand(f).GetCommand(),
 		realtimeCmd.NewSubCommand(f).GetCommand(),
 		currenttenantCmd.NewSubCommand(f).GetCommand(),

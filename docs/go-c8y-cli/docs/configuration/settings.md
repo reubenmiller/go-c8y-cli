@@ -48,6 +48,8 @@ c8y settings list --select "**" --output json
   },
   "defaults": {
     "abortonerrors": 10,
+    "cache": false,
+    "cachettl": "60s",
     "compact": false,
     "confirm": false,
     "confirmtext": "",
@@ -287,6 +289,54 @@ c8y settings update activitylog.path '$C8Y_HOME/activityLog'
 
 :::tip
 `$C8Y_HOME` is a special go-c8y-cli variable that can be used to reference your c8y home folder, so you will need to make sure you use single quotes when setting it via the command line so it does not get expanded to a shell variable.
+:::
+
+### defaults.cache: boolean
+
+Enable caching. Defaults to `false`.
+
+Caching can be turned on for individual commands by using the `--cache` global parameter.
+
+When the setting is activated, then all requests which match the `cache.methods` settings will be cached. Users can opt out of caching for individual commands by using the `--noCache` global parameter.
+
+### defaults.cacheTTL: string
+
+Cache time-to-live (TTL) settings to control the maximum age that a cached response. If the cached response is older than the TTL settings, then the cached item will be ignored.
+
+### cache.keyauth: boolean
+
+Include the request's Authorization header value when generating the cache key. Defaults to `true`.
+
+This can be useful if you want to share caching across multiple users. Normally the authorization header is used in the cache key generation, so the cached item will be a different file key for multiple users
+
+### cache.keyhost: boolean
+
+Include the host name when generating the cache key. Defaults to `true`.
+
+This can be useful when setting up a mock system where you want to fake server response by using cached response regardless of the server. This is a more advanced settings, so just ignore it if you don't understand it.
+
+### cache.methods: string
+
+Space separated list of HTTP methods which should be cached. By default only `GET` is configured.
+
+<CodeExample>
+
+# Enable more http methods to be cached
+c8y settings update cache.methods "GET PUT POST"
+
+</CodeExample>
+
+### cache.path: string
+
+Location of the cache directory. If the path does not exist it was be created when the first cached item is created.
+
+Defaults to:
+
+* Linux/MacOS: `{tmp}/go-c8y-cli-cache`, where `{tmp}` is set to `$TMPDIR` if not empty otherwise `/tmp`
+* Windows: `{tmp}/go-c8y-cli-cache`, where `{tmp}` is set to the first non-empty value of `%TMP%`, `%TEMP%`, `%USERPROFILE%`
+
+:::note
+If go-c8y-cli is being by multiple users on the same computer/server and you need to prevent users from accessing the local cached files, then you should change the default location of the cache, and apply the appropriate folder permissions to prevent other users from accessing the response from other users.
 :::
 
 ### ci: boolean
