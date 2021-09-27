@@ -73,9 +73,10 @@ func CreateCumulocityClient(f *cmdutil.Factory, sessionFile, username, password 
 				func(r *http.Request) bool {
 					return strings.Contains(cachableMethods, r.Method)
 				},
-				c8y.KeyOptions{
+				c8y.CacheOptions{
 					ExcludeAuth: !cfg.CacheKeyIncludeAuth(),
 					ExcludeHost: !cfg.CacheKeyIncludeHost(),
+					Mode:        cfg.CacheMode(),
 				},
 			)
 		}

@@ -25,7 +25,7 @@ require (
 	github.com/olekukonko/ts v0.0.0-20171002115256-78ecb04241c0
 	github.com/pkg/errors v0.9.1
 	github.com/pquerna/otp v1.3.0
-	github.com/reubenmiller/go-c8y v0.9.1-rc.5
+	github.com/reubenmiller/go-c8y v0.9.1-rc.6
 	github.com/sethvargo/go-password v0.2.0
 	github.com/spf13/cobra v1.2.1
 	github.com/spf13/pflag v1.0.5

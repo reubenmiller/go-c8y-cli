@@ -273,6 +273,9 @@ const (
 	// SettingsCacheKeyHost include host in cache key generation
 	SettingsCacheKeyHost = "settings.cache.keyhost"
 
+	// SettingsCacheMode cache mode. Only used for testing purposes
+	SettingsCacheMode = "settings.cache.mode"
+
 	// SettingsCacheKeyAuth include authorization header in cache key generation
 	SettingsCacheKeyAuth = "settings.cache.keyauth"
 
@@ -365,6 +368,7 @@ func (c *Config) bindSettings() {
 	c.viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
 	c.viper.SetEnvPrefix(EnvSettingsPrefix)
 	err := c.WithOptions(
+		WithBindEnv(SettingsCacheMode, nil),
 		WithBindEnv(SettingEncryptionCachePassphrase, true),
 		WithBindEnv(SettingsMaxWorkers, 50),
 		WithBindEnv(SettingsWorkers, 1),
@@ -843,7 +847,9 @@ func (c *Config) CachePassphraseVariables() bool {
 
 func (c *Config) bindEnv(name string, defaultValue interface{}) error {
 	err := c.viper.BindEnv(name)
-	c.viper.SetDefault(name, defaultValue)
+	if defaultValue != nil {
+		c.viper.SetDefault(name, defaultValue)
+	}
 	return err
 }
 
@@ -1268,6 +1274,15 @@ func (c *Config) CacheDir() string {
 // CacheMethods HTTP methods which should be cached
 func (c *Config) CacheMethods() string {
 	return c.viper.GetString(SettingsCacheMethods)
+}
+
+// CacheMode caching mode which controls
+func (c *Config) CacheMode() c8y.StoreMode {
+	rawValue := c.viper.GetString(SettingsCacheMode)
+	if strings.EqualFold(rawValue, "storeonly") {
+		return c8y.StoreModeWrite
+	}
+	return c8y.StoreModeReadWrite
 }
 
 // CacheKeyIncludeHost include full host name in cache key generation
