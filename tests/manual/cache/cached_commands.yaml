@@ -1,0 +1,136 @@
+tests:
+  It does not use cache by default:
+    config:
+      env:
+        C8Y_SETTINGS_DEFAULTS_VERBOSE: true
+    command: |
+      c8y devices list -p 1
+      c8y devices list -p 1
+    exit-code: 0
+    stderr:
+      not-contains:
+        - "Using cached response"
+
+  It allows single commands to be cached:
+    config:
+      env:
+        C8Y_SETTINGS_CACHE_PATH: /tmp/go-c8y-cli-cache-test-01
+        C8Y_SETTINGS_DEFAULTS_VERBOSE: true
+    command: |
+      c8y devices list --cache
+      c8y devices list --cache
+    exit-code: 0
+    stderr:
+      contains:
+        - "Using cached response"
+
+  It enables caching by defaults using env variables:
+    config:
+      env:
+        C8Y_SETTINGS_DEFAULTS_CACHE: true
+        C8Y_SETTINGS_DEFAULTS_VERBOSE: true
+        C8Y_SETTINGS_CACHE_PATH: /tmp/go-c8y-cli-cache-test-02
+    command: |
+      c8y cache delete
+      c8y devices list
+      c8y devices list
+    exit-code: 0
+    stderr:
+      contains:
+        - "Using cached response"
+
+  It disables caches for single commands:
+    config:
+      env:
+        C8Y_SETTINGS_DEFAULTS_CACHE: true
+        C8Y_SETTINGS_DEFAULTS_VERBOSE: true
+        C8Y_SETTINGS_CACHE_PATH: /tmp/go-c8y-cli-cache-test-03
+    command: |
+      c8y cache delete
+      c8y devices list
+      c8y devices list --noCache
+    exit-code: 0
+    stderr:
+      not-contains:
+        - "Using cached response"
+
+  It includes caching information in the response headers:
+    config:
+      env:
+        C8Y_SETTINGS_DEFAULTS_CACHE: true
+        C8Y_SETTINGS_DEFAULTS_DEBUG: true
+        C8Y_SETTINGS_CACHE_PATH: /tmp/go-c8y-cli-cache-test-04
+    command: |
+      c8y cache delete
+      c8y devices list -p 1
+      c8y devices list -p 1
+    exit-code: 0
+    stderr:
+      contains:
+        - "Last-Modified:"
+        - "Etag:"
+
+  It only caches commands which are the same:
+    config:
+      env:
+        C8Y_SETTINGS_DEFAULTS_CACHE: true
+        C8Y_SETTINGS_DEFAULTS_VERBOSE: true
+        C8Y_SETTINGS_CACHE_PATH: /tmp/go-c8y-cli-cache-test-05
+    command: |
+      c8y cache delete
+      c8y devices list -p 1
+      c8y devices list -p 2
+    exit-code: 0
+    stderr:
+      not-contains:
+        - "Last-Modified:"
+        - "Etag:"
+
+  It does not cache PUT or POST requests by default:
+    config:
+      env:
+        C8Y_SETTINGS_DEFAULTS_CACHE: true
+        C8Y_SETTINGS_DEFAULTS_DEBUG: true
+        C8Y_SETTINGS_CACHE_PATH: /tmp/go-c8y-cli-cache-test-06
+    command: |
+      c8y cache delete
+      c8y inventory create --name cached-device | c8y inventory update  --data "some.value=1" | c8y inventory update --data "some.value=1"
+      c8y inventory create --name cached-device
+      c8y inventory find --query "name eq 'cached-device'" | c8y inventory delete
+    exit-code: 0
+    stderr:
+      not-contains:
+        - "Last-Modified:"
+        - "Etag:"
+
+  It can cache PUT requests:
+    config:
+      env:
+        C8Y_SETTINGS_DEFAULTS_CACHE: true
+        C8Y_SETTINGS_DEFAULTS_DEBUG: true
+        C8Y_SETTINGS_CACHE_METHODS: "GET PUT POST"
+        C8Y_SETTINGS_CACHE_PATH: /tmp/go-c8y-cli-cache-test-07
+    command: |
+      c8y cache delete
+      c8y inventory create --name cached-device --noCache | c8y inventory update --data "some.value=1" | c8y inventory update  --data "some.value=1"
+    exit-code: 0
+    stderr:
+      contains:
+        - "Last-Modified:"
+        - "Etag:"
+
+  It can cache POST requests:
+    config:
+      env:
+        C8Y_SETTINGS_DEFAULTS_CACHE: true
+        C8Y_SETTINGS_DEFAULTS_DEBUG: true
+        C8Y_SETTINGS_CACHE_METHODS: "GET PUT POST"
+        C8Y_SETTINGS_CACHE_PATH: /tmp/go-c8y-cli-cache-test-07
+    command: |
+      c8y cache delete
+      c8y inventory create --name cached-device | c8y inventory create --name cached-device | c8y inventory delete
+    exit-code: 0
+    stderr:
+      contains:
+        - "Last-Modified:"
+        - "Etag:"
