@@ -1,0 +1,130 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/reubenmiller/commander/feat/handle-nested-files/schema.json
+config:
+  env:
+    C8Y_SETTINGS_DEFAULTS_CACHE: true
+    C8Y_SETTINGS_CACHE_METHODS: GET POST PUT
+    C8Y_SETTINGS_DEFAULTS_CACHETTL: 100h
+tests:
+  It returns just the id:
+    command: |
+      c8y applications get --id cockpit --select id --output csv
+    exit-code: 0
+    stdout:
+      match-pattern: ^\d+$
+
+  It returns just the name using wildcard:
+    command: |
+      c8y applications get --id cockpit --select "nam*" --output csv
+    exit-code: 0
+    stdout:
+      exactly: cockpit
+
+  It returns id and name:
+    command: |
+      c8y applications get --id cockpit --select "id,name" --output csv
+    exit-code: 0
+    stdout:
+      match-pattern: ^\d+,cockpit$
+  
+  It includes empty values for non-existent values:
+    command: |
+      echo "1\n2" | c8y devices create --data "type=select_test01,text=value" > /dev/null
+      echo 3 | c8y devices create --data "type=select_test01" > /dev/null
+
+      c8y devices list --type select_test01 --select "name,id,text,type" --output csv
+    exit-code: 0
+    stdout:
+      lines:
+        1: r/^1,\d+,value,select_test01$
+        2: r/^2,\d+,value,select_test01$
+        3: r/^3,\d+,,select_test01$
+
+  It includes empty values for non-existent values in the last field:
+    command: |
+      c8y devices list --type select_test01 --select "name,id,type,nonexistent" --output csv
+    stdout:
+      lines:
+        1: r/^\d,\d+,select_test01,$
+        2: r/^\d,\d+,select_test01,$
+        3: r/^\d,\d+,select_test01,$
+
+  It includes multiple lines for a list of inputs:
+    command: |
+      c8y applications list --pageSize 2 --select "id,name" --output csv
+    stdout:
+      line-count: 2
+      lines:
+        1: r/^\d+,\w+$
+        2: r/^\d+,\w+$
+
+  It returns output which can be read via csv (without headers):
+    command: |
+      c8y applications get --id cockpit --select "id,name,doesnotexist" --output csv
+    stdout:
+      line-count: 1
+      match-pattern: '^\d+,cockpit,$'
+
+  It returns just the id using wildcards:
+    command: |
+      c8y applications get --id cockpit --select "id*" --output csv
+    stdout:
+      match-pattern: ^\d+$
+  
+  It returns json lines:
+    command: |
+      c8y applications get --id cockpit --select "id*"
+    stdout:
+      match-pattern: ^{"id":"\d+"}$
+  
+  It returns json lines with multiple properties:
+    command: |
+      c8y applications get --id cockpit --select "id,name"
+    stdout:
+      match-pattern: ^{"id":"\d+","name":"cockpit"}$
+
+  It includes empty objects in the response:
+    command: |
+      c8y devices list -p 1 --select "**" --output "json" --compact
+    stdout:
+      json:
+        c8y_IsDevice: '{}'
+  
+  It returns csv ignoring the aliases when no header options is provided:
+    command: |
+      c8y applications get --id cockpit --select "appId:id,appName:name" --output csv
+    stdout:
+      line-count: 1
+      match-pattern: ^\d+,cockpit$
+  
+  It returns csv with custom column headers based on aliases:
+    command: |
+      c8y applications get --id cockpit --select "appId:id,appName:name" --output csvheader
+    stdout:
+      line-count: 2
+      lines:
+        1: appId,appName
+        2: r/^\d+,cockpit$
+
+  It filters and selects a subset of properties:
+    command: |
+      c8y applications list --pageSize 100 --filter "name like cockpi*" --select id,name --compact
+    stdout:
+      line-count: 1
+      json:
+        id: r/^\d+$
+        name: cockpit
+
+  It devices that do not match the filter are ignored:
+    command: |
+      c8y devices list | c8y devices get --filter "name like asdf*" --select id,name,self --workers 5
+    stdout:
+      line-count: 0
+    
+  It select properties and csv output:
+    command: |
+      c8y applications list --select 'app Name:id,id:id' -p 2 --compact
+    stdout:
+      line-count: 2
+      lines:
+        1: r/{"app Name":".+","id":"\d+"}
+        2: r/{"app Name":".+","id":"\d+"}

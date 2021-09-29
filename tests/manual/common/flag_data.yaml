@@ -1,0 +1,14 @@
+tests:
+  It sets nested json objects via dot notation:
+    command: |
+      c8y devices create --name test --data "my.nested.value=1" --dry --dryFormat json
+    exit-code: 0
+    stdout:
+      match-pattern: '{"c8y_IsDevice":{},"my":{"nested":{"value":1}},"name":"test"}'
+      json:
+        method: POST
+        path: /inventory/managedObjects
+        body.name: test
+        body.c8y_IsDevice: '{}'
+        body.my.nested.value: '1'
+  

@@ -1,0 +1,85 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/reubenmiller/commander/feat/handle-nested-files/schema.json
+config:
+  env:
+    C8Y_SETTINGS_DEFAULTS_CACHE: true
+    C8Y_SETTINGS_CACHE_METHODS: GET POST PUT
+    C8Y_SETTINGS_DEFAULTS_CACHETTL: 100h
+tests:
+  It returns json lines using custom properties names:
+    command: |
+      c8y applications get --id cockpit --select "appId:id,appName:name"
+    exit-code: 0
+    stdout:
+      match-pattern: ^{"appId":"\d+","appName":"cockpit"}$
+
+  It returns json lines using custom properties names for nested values:
+    command: |
+      c8y applications get --id cockpit --select "appId:id,tenantId:owner.**.id,tenantDetails:owner.**"
+    stdout:
+      json:
+        appId: r/^\d+$
+        tenantId: management
+        tenantDetails.self: r/^\w+://.+management$
+        tenantDetails.tenant.id: management
+  
+  It adds nested objects under a property name when using globstar **:
+    command: |
+      c8y devices list --select "id:id,links:**.self" --pageSize 1
+    stdout:
+      json:
+        id: r/\d+$
+        links.deviceParents.self: r/.+
+        links.assetParents.self: r/.+
+        links.childDevices.self: r/.+
+
+  It maps nested properties to a new name:
+    command: |
+      echo 1 | c8y devices create --type "select_test03" --template "{c8y_Details: {name: 'two', data: {name: 'one'}}}" > /dev/null
+
+      c8y devices list --type select_test03 --select "id:id,details:c8y_Details.**" -p 1
+    stdout:
+      json:
+        id: r/\d+$
+        details.data.name: r/.+
+  
+  It maps nested properties mixing wildcards and globstar:
+    command: |
+      echo 1 | c8y devices create --type "select_test03" --template "{c8y_Details: {name: 'two', data: {name: 'one'}}}" > /dev/null
+
+      c8y devices list --type select_test03 --select "id:id,details:c8y_Detail*.**" -p 1
+    stdout:
+      json:
+        id: r/\d+$
+        details.data.name: r/.+
+  
+  It maps properties to a new property name including the root property:
+    command: |
+      echo 1 | c8y devices create --type "select_test03" --template "{c8y_Details: {name: 'two', data: {name: 'one'}}}" > /dev/null
+
+      c8y devices list --type select_test03 --select "id:id,details:**.c8y_Details.**" -p 1
+    stdout:
+      json:
+        id: r/^\d+$
+        details.c8y_Details.data.name: r/.+
+  
+  It maps nested properties and only literals to a new property name:
+    command: |
+      echo 1 | c8y devices create --type "select_test03" --template "{c8y_Details: {name: 'two', data: {name: 'one'}}}" > /dev/null
+      c8y devices list --type select_test03 --select "id:id,details:c8y_Details.*" -p 1
+    stdout:
+      match-pattern: '{"details":{"name":"two"},"id":"\d+"}'
+
+  It handles duplicates keys by returning both of the matches:
+    command: |
+      echo 1 | c8y devices create --type select_test02 --template "{value: 1, Value: 2}" > /dev/null
+      c8y devices list --type select_test02 --select "value,Value" --output json --compact -p 1
+    stdout:
+      exactly: '{"Value":2,"value":1}'
+  
+  It handles duplicates keys by returning both of the matches using aliases:
+    command: |
+      echo 1 | c8y devices create --template "{value: 1, Value: 2}"
+      c8y devices list --select "value:Value" --output json
+    stdout:
+      json:
+        value: '1'
