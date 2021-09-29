@@ -71,15 +71,13 @@ tests:
 
   It handles duplicates keys by returning both of the matches:
     command: |
-      echo 1 | c8y devices create --type select_test02 --template "{value: 1, Value: 2}" > /dev/null
-      c8y devices list --type select_test02 --select "value,Value" --output json --compact -p 1
+      c8y template execute --template "{value: 1, Value: 2}" --select "value,Value" --output json --compact -p 1
     stdout:
       exactly: '{"Value":2,"value":1}'
   
   It handles duplicates keys by returning both of the matches using aliases:
     command: |
-      echo 1 | c8y devices create --template "{value: 1, Value: 2}"
-      c8y devices list --select "value:Value" --output json
+      c8y template execute --template "{value: 1, Value: 2}" --select "value:Value" --output json
     stdout:
       json:
         value: '1'
