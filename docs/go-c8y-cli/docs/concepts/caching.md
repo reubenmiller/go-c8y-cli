@@ -324,7 +324,7 @@ export C8Y_SETTINGS_DEFAULTS_CACHE="true"
 export C8Y_SETTINGS_CACHE_METHODS="GET POST"
 
 # Use a really large TTL, as we want to prevent creating it for a long time
-export C8Y_SETTINGS_DEFAULTS_CACHETTL="100d"
+export C8Y_SETTINGS_DEFAULTS_CACHETTL="1000h"
 
 #
 # Copy the measurements from source => target device
