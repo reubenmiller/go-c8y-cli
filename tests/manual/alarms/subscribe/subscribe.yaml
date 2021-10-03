@@ -1,4 +1,4 @@
 tests:
-    It watches alarms for a time period:
-        command: ./manual/alarms/subscribe//001_subscribe.sh
-        exit-code: 0
+  It watches alarms for a time period:
+    command: ./manual/alarms/subscribe//001_subscribe.sh
+    exit-code: 0
