@@ -120,3 +120,9 @@ tests:
           }
         }
 
+  It handles large json values:
+    config:
+      timeout: 30s
+    command: |
+      c8y inventory create --template ./manual/template/large_template.jsonnet --select id --output csv --dry
+    exit-code: 0
