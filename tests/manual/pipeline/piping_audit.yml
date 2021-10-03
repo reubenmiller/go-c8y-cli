@@ -1,0 +1,36 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/reubenmiller/commander/feat/handle-nested-files/schema.json
+
+tests:
+  It does not send a request when piping empty results (empty pipe):
+    command: |
+      c8y alarms list --device 0 | c8y auditrecords list --dry --dryFormat json
+    exit-code: 0
+    stdout:
+      match-pattern: ^$
+
+  It does not send a request when piping empty results (no pipeline):
+    command: |
+      c8y auditrecords list --dry --dryFormat json |
+        c8y util show --select pathEncoded
+    exit-code: 0
+    stdout:
+      exactly: |
+        {"pathEncoded":"/audit/auditRecords"}
+
+  It does not send a request when piping an empty string:
+    command: |
+      echo -n "" |
+        c8y auditrecords list --dry --dryFormat json
+    exit-code: 0
+    stdout:
+      match-pattern: ^$
+
+  It accepts json pipeline:
+    command: |
+      c8y template execute --template "{source:{id:'1111'}}" |
+        c8y auditrecords list --dry --dryFormat json |
+        c8y util show --select pathEncoded
+    exit-code: 0
+    stdout:
+      exactly: |
+        {"pathEncoded":"/audit/auditRecords?source=1111"}

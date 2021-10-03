@@ -394,7 +394,7 @@ tests:
   It filters by string length - equal to (match):
     command: |
       cat manual/common/filter/input.jsonl |
-        c8y util show --filter "name leneq 10" --select id
+        c8y util show --filter "name leneq 8" --select id
     exit-code: 0
     stdout:
       line-count: 2
@@ -405,7 +405,7 @@ tests:
   It filters by string length - equal to (no match):
     command: |
       cat manual/common/filter/input.jsonl |
-        c8y util show --filter "name leneq 11" --select id
+        c8y util show --filter "name leneq 9" --select id
     exit-code: 0
     stdout:
       line-count: 0
@@ -416,7 +416,7 @@ tests:
   It filters by string length - greater than (match):
     command: |
       cat manual/common/filter/input.jsonl |
-        c8y util show --filter "name lengt 9" --select id
+        c8y util show --filter "name lengt 7" --select id
     exit-code: 0
     stdout:
       line-count: 2
@@ -427,7 +427,7 @@ tests:
   It filters by string length - greater than (no match):
     command: |
       cat manual/common/filter/input.jsonl |
-        c8y util show --filter "name lengt 10" --select id
+        c8y util show --filter "name lengt 8" --select id
     exit-code: 0
     stdout:
       line-count: 0
@@ -438,7 +438,7 @@ tests:
   It filters by string length - greater than or equal to (match):
     command: |
       cat manual/common/filter/input.jsonl |
-        c8y util show --filter "name lengte 10" --select id
+        c8y util show --filter "name lengte 8" --select id
     exit-code: 0
     stdout:
       line-count: 2
@@ -449,7 +449,7 @@ tests:
   It filters by string length - greater than or equal to (no match):
     command: |
       cat manual/common/filter/input.jsonl |
-        c8y util show --filter "name lengte 11" --select id
+        c8y util show --filter "name lengte 9" --select id
     exit-code: 0
     stdout:
       line-count: 0
@@ -460,7 +460,7 @@ tests:
   It filters by string length - less than (match):
     command: |
       cat manual/common/filter/input.jsonl |
-        c8y util show --filter "name lenlt 11" --select id
+        c8y util show --filter "name lenlt 9" --select id
     exit-code: 0
     stdout:
       line-count: 2

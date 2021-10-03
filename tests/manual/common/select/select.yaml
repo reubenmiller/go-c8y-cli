@@ -28,25 +28,24 @@ tests:
   
   It includes empty values for non-existent values:
     command: |
-      echo "1\n2" | c8y devices create --data "type=select_test01,text=value" > /dev/null
-      echo 3 | c8y devices create --data "type=select_test01" > /dev/null
-
-      c8y devices list --type select_test01 --select "name,id,text,type" --output csv
+      cat manual/common/select/deviceset01.jsonl |
+        c8y util show --select "name,id,text,type" --output csv
     exit-code: 0
     stdout:
-      lines:
-        1: r/^1,\d+,value,select_test01$
-        2: r/^2,\d+,value,select_test01$
-        3: r/^3,\d+,,select_test01$
+      exactly: |
+        iot-device-BAA,1,value,select_test01
+        iot-device-BAB,2,value,select_test01
+        iot-device-BAC,3,,select_test01
 
   It includes empty values for non-existent values in the last field:
     command: |
-      c8y devices list --type select_test01 --select "name,id,type,nonexistent" --output csv
+      cat manual/common/select/deviceset01.jsonl |
+        c8y util show --select "name,id,type,nonexistent" --output csv
     stdout:
-      lines:
-        1: r/^\d,\d+,select_test01,$
-        2: r/^\d,\d+,select_test01,$
-        3: r/^\d,\d+,select_test01,$
+      exactly: |
+        iot-device-BAA,1,select_test01,
+        iot-device-BAB,2,select_test01,
+        iot-device-BAC,3,select_test01,
 
   It includes multiple lines for a list of inputs:
     command: |

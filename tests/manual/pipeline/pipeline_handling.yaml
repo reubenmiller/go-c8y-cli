@@ -1,10 +1,56 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/reubenmiller/commander/feat/handle-nested-files/schema.json
+
 tests:
-    It handles piped input without ending with newline:
-        command: |
-            echo -n '0' | c8y devices get --dry
-        exit-code: 0
-        stdout:
-            line-count: 1
-            json:
-                method: GET
-                path: /inventory/managedObjects/0
+  It handles piped input without ending with newline:
+    command: |
+      echo -n '0' | c8y devices get --dry
+    exit-code: 0
+    stdout:
+      line-count: 1
+      json:
+        method: GET
+        path: /inventory/managedObjects/0
+
+  It supports pipe by id in get commands:
+    command: |
+      echo "1\n2" |
+        c8y events get --dry --dryFormat json |
+        c8y util show --select method,pathEncoded
+    exit-code: 0
+    stdout:
+      exactly: |
+        {"method":"GET","pathEncoded":"/event/events/1"}
+        {"method":"GET","pathEncoded":"/event/events/2"}
+
+  It supports pipe by id in update commands:
+    command: |
+      echo "1\n2" |
+        c8y events update --dry --dryFormat json |
+        c8y util show --select method,pathEncoded
+    exit-code: 0
+    stdout:
+      exactly: |
+        {"method":"PUT","pathEncoded":"/event/events/1"}
+        {"method":"PUT","pathEncoded":"/event/events/2"}
+
+  It supports pipe by id in delete commands:
+    command: |
+      echo "1\n2" |
+        c8y events delete --dry --dryFormat json |
+        c8y util show --select method,pathEncoded
+    exit-code: 0
+    stdout:
+      exactly: |
+        {"method":"DELETE","pathEncoded":"/event/events/1"}
+        {"method":"DELETE","pathEncoded":"/event/events/2"}
+
+  It supports pipe by id in create commands:
+    command: |
+      echo "1\n2" |
+        c8y events create --template "{type: 'c8y_Event', text: 'custom info ' + input.index}" --dry --dryFormat json |
+        c8y util show --select 'method,pathEncoded,body,!body.time'
+    exit-code: 0
+    stdout:
+      exactly: |
+        {"body":{"source":{"id":"1"},"text":"custom info 1","type":"c8y_Event"},"method":"POST","pathEncoded":"/event/events"}
+        {"body":{"source":{"id":"2"},"text":"custom info 2","type":"c8y_Event"},"method":"POST","pathEncoded":"/event/events"}

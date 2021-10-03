@@ -1,9 +1,122 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/reubenmiller/commander/feat/handle-nested-files/schema.json
+
 tests:
-    It provides a function to get an optional value:
-        command: |
-            echo '{"nestedProp":{"otherValue":1}}' | c8y devices update --id 0 --dry --template "_.Get('nestedProp', input.value, {dummy: 2})"
-        exit-code: 0
-        stdout:
-            line-count: 1
-            json:
-                ..0.body.nestedProp.otherValue: '1'
+  It preserves double quotes in bash/zsh:
+    command: |
+      c8y template execute --template "{\"email\": \"he llo@ex ample.com\"}"
+    exit-code: 0
+    stdout:
+      exactly: |
+        {"email":"he llo@ex ample.com"}
+
+  It provides relative time functions:
+    command: |
+      c8y template execute --template "{now: _.Now(), randomNow: _.Now('-' + _.Int(10,60) + 'd'), nowRelative: _.Now('-1h'), nowNano: _.NowNano(), nowNanoRelative: _.NowNano('-10d')}"
+    exit-code: 0
+    stdout:
+      json:
+        now: r/.+
+        randomNow: r/.+
+        nowRelative: r/.+
+        nowNano: r/.+
+        nowNanoRelative: r/.+
+
+  It provides random number generators:
+    command: |
+      c8y template execute --template "{int: _.Int(), int2: _.Int(-20), int3: _.Int(-50,-59), float: _.Float(), float2: _.Float(10), float3: _.Float(40, 45)}"    exit-code: 0
+    stdout:
+      json:
+        int: r/\d+
+        int2: r/-?\d+
+        int3: r/-\d+
+        float: r/\d+\.\d+
+        float2: r/\d+\.\d+
+        float3: r/\d+\.\d+
+
+  It combines explicit arguments with data and templates parameters:
+    command: |
+      echo "{\"self\":\"https://example.com\"}" |
+        c8y operations create \
+          --device "12345" \
+          --data 'other="1"' \
+          --template "{c8y_DownloadConfigFile: {url: input.value['self']}}" \
+          --debug \
+          --dry \
+          --dryFormat json |
+        c8y util show --select body --compact=false --output json
+    stdout:
+      exactly: |
+        {
+          "body": {
+            "c8y_DownloadConfigFile": {
+              "url": "https://example.com"
+            },
+            "deviceId": "12345",
+            "other": "1"
+          }
+        }
+  
+  It uses piped input inside the template:
+    command: |
+      c8y template execute --template "{deviceId: '1111'}" |
+        c8y util show --select "tempID:deviceId" |
+
+        c8y operations create \
+          --template "{deviceId: input.value.tempID}" \
+          --dry \
+          --dryFormat json |
+        c8y util show --select body --compact=false --output json
+    stdout:
+      exactly: |
+        {
+          "body": {
+            "deviceId": "1111"
+          }
+        }
+  
+  It provides a function to get the path and query from a full url:
+    command: |
+      echo "https://example.com/test/me?value=test&value=1" |
+        c8y template execute --template "{input:: input.value, name: _.GetURLPath(input.value)}"
+    stdout:
+      exactly: |
+        {"name":"/test/me?value=test&value=1"}
+  
+  It provides a function to get the scheme and hostname from a full url:
+    command: |
+      echo "https://example.com/test/me?value=test&value=1" |
+        c8y template execute --template "{input:: input.value, name: _.GetURLHost(input.value)}"
+    stdout:
+      exactly: |
+        {"name":"https://example.com"}
+
+  It provides a function to get an optional value:
+    command: |
+      c8y template execute --template "{nestedProp:{othervalue: 1}}" |
+        c8y devices update --id 0 --dry --dryFormat json --template "_.Get('nestedProp', input.value, {dummy: 2})" |
+        c8y util show --select body --compact=false
+    stdout:
+      exactly: |
+        {
+          "body": {
+            "nestedProp": {
+              "othervalue": 1
+            }
+          }
+        }
+  
+  It provides a function to get an optional value and returns a default value if not present:
+    command: |
+      c8y template execute --template "{nestedProp:{othervalue: 1}}" |
+        c8y devices update --id 0 --dry --dryFormat json --template "_.Get('nestedProp2', input.value, {dummy: 2})" |
+        c8y util show --select body --compact=false
+    stdout:
+      exactly: |
+        {
+          "body": {
+            "nestedProp2": {
+              "dummy": 2
+            }
+          }
+        }
+

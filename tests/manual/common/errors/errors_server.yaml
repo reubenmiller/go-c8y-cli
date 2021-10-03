@@ -1,0 +1,75 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/reubenmiller/commander/feat/handle-nested-files/schema.json
+
+config:
+  env:
+    C8Y_SETTINGS_DEFAULTS_CACHE: true
+    C8Y_SETTINGS_DEFAULTS_CACHETTL: 100h
+
+tests:
+  It returns an empty response for server errors:
+    command: |
+      echo 0 | c8y events get
+    exit-code: 4
+    stdout:
+      match-pattern: ^$
+
+  It prints errors on stderr and exit code when a single error:
+    command: |
+      c8y devices create --name device01 > /dev/null
+      echo "device01\n0" | c8y devices get --select name
+    exit-code: 4
+    stderr:
+      contains:
+        - "404"
+    stdout:
+      line-count: 1
+      exactly: |
+        {"name":"device01"}
+
+  It silences errors and exit code for specific status codes on stderr:
+    command: |
+      c8y devices create --name device01 > /dev/null
+      echo "device01\n0" | c8y devices get --select name --silentStatusCodes 404 --silentExit
+    exit-code: 0
+    stderr:
+      match-pattern: '^$'
+    stdout:
+      line-count: 1
+      exactly: |
+        {"name":"device01"}
+  
+  It silences errors for specific status codes on stderr for multiple errors:
+    command: |
+      c8y devices create --name device01 > /dev/null
+      echo "device01\n0\n0" | c8y devices get --select name
+    exit-code: 104
+    stderr:
+      # match-pattern: '^$'
+      contains:
+        - "completed with 2 errors"
+        - "404"
+    stdout:
+      line-count: 1
+      exactly: |
+        {"name":"device01"}
+  
+  It supports ternary operations on the exit code:
+    skip: true
+    command: |
+      # check if device exists by name if not create it
+      c8y devices get --id "iotDeviceAZ01" --silentStatusCodes 404 || c8y devices create --name "iotDeviceAZ01" --select name
+
+      # run the command again, this time the name should exist so it should not be created
+      c8y devices get --id "iotDeviceAZ01" --silentStatusCodes 404 --select name || exit 1
+
+      # cleanup devices
+      c8y devices list --name iotDeviceAZ01 | c8y devices delete
+
+    exit-code: 0
+    stderr:
+      match-pattern: ^$
+    stdout:
+      # line-count: 2
+      exactly: |
+        {"name":"iotDeviceAZ01"}
+      # {"name":"iotDeviceAZ01"}

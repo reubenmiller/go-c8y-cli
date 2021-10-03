@@ -1,0 +1,29 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/reubenmiller/commander/feat/handle-nested-files/schema.json
+#
+# Piping to commands with optional body
+#
+config:
+  env:
+    C8Y_SETTINGS_DEFAULTS_CACHE: true
+    C8Y_SETTINGS_DEFAULTS_CACHETTL: 100h
+    C8Y_SETTINGS_DEFAULTS_DRYFORMAT: json
+
+tests:
+  It supports piping ids to a query parameter:
+    command: |
+      echo "1\n2" | c8y events deleteCollection --dry |
+        c8y util show --select method,pathEncoded
+    exit-code: 0
+    stdout:
+      exactly: |
+        {"method":"DELETE","pathEncoded":"/event/events?source=1"}
+        {"method":"DELETE","pathEncoded":"/event/events?source=2"}
+  
+  It supports query parameter without piping:
+    command: |
+      c8y events deleteCollection --dry |
+        c8y util show --select method,pathEncoded
+    exit-code: 0
+    stdout:
+      exactly: |
+        {"method":"DELETE","pathEncoded":"/event/events"}

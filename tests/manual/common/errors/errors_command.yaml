@@ -1,0 +1,95 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/reubenmiller/commander/feat/handle-nested-files/schema.json
+
+config:
+  env:
+    C8Y_SETTINGS_DEFAULTS_CACHE: true
+    C8Y_SETTINGS_DEFAULTS_CACHETTL: 100h
+
+tests:
+  It returns an empty response for command errors:
+    command: |
+      c8y events get --iiiiid 0
+    exit-code: 100
+    stderr:
+      contains:
+        - "unknown flag: --iiiiid"
+    stdout:
+      match-pattern: ^$
+  
+  It returns writes errors to stderr:
+    command: |
+      c8y events get --iiiiid 0
+    exit-code: 100
+    stderr:
+      match-pattern: |
+        ERROR\s+commandError: unknown flag: --iiiiid
+    stdout:
+      match-pattern: ^$
+
+  It returns errors as json on stdout:
+    command: |
+      c8y events get --withError --iiiiid 0
+    exit-code: 100
+    stderr:
+      match-pattern: "ERROR\\s+commandError: unknown flag: --iiiiid"
+    stdout:
+      exactly: |
+        {"errorType":"commandError","message":"unknown flag: --iiiiid"}
+
+  It silences specific status codes as the user knows that error might not occur and is ok with it:
+    command: |
+      c8y events get --id 0 --silentStatusCodes 404
+    exit-code: 4
+    stderr:
+      match-pattern: ^$
+    stdout:
+      match-pattern: ^$
+
+  It silences specific status codes also when reference by name is being used:
+    command: |
+      c8y devices get --id myNonExistentDevice --silentStatusCodes 404
+    exit-code: 4
+    stderr:
+      match-pattern: ^$
+    stdout:
+      match-pattern: ^$
+
+  It returns a timeout error:
+    config:
+      retries: 3
+    command: |
+      c8y devices list --timeout "1ms" --withError --noCache
+    exit-code: 106
+    stderr:
+      contains:
+        - ERROR
+        - commandError
+    stdout:
+      exactly: |
+        {"errorType":"commandError","message":"command timed out","exitCode":106,"error":{}}
+
+  It return an error if required body properties are missing:
+    config:
+      retries: 3
+    command: |
+      c8y events create --device 12345 --type c8y_TestAlarm
+    exit-code: 101
+    stderr:
+      contains:
+        - "Body is missing required properties: text"
+    stdout:
+      match-pattern: ^$
+
+  It handles multiple errors in pipeline:
+    command: |
+      echo "0\n0" |
+      c8y events create --type "c8y_TestAlarm"
+    exit-code: 104
+    stderr:
+      line-count: 3
+      lines:
+        1: "r/Body is missing required properties: text"
+        2: "r/Body is missing required properties: text"
+        3: "r/jobs completed with 2 errors"
+    stdout:
+      match-pattern: ^$

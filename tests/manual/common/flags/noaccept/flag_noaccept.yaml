@@ -1,0 +1,17 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/reubenmiller/commander/feat/handle-nested-files/schema.json
+
+config:
+  env:
+    C8Y_SETTINGS_LOGGER_HIDESENSITIVE: true
+    C8Y_SETTINGS_DEFAULTS_DRYFORMAT: markdown
+tests:
+  It should exclude the Accept header return an object when using POST:
+    command: |
+      c8y devices create --name dummy --dry --noAccept |
+        c8y util show --select path,headers,method
+    exit-code: 0
+    stdout:
+      not-contains:
+        - 'Accept:'
+      exactly: |
+        {"headers":{"Authorization":"Basic  {base64 tenant/username:password}","Content-Type":"application/json"},"method":"POST","path":"/inventory/managedObjects"}

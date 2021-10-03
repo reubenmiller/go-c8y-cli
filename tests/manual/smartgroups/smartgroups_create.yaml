@@ -1,0 +1,62 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/reubenmiller/commander/feat/handle-nested-files/schema.json
+config:
+  env:
+    C8Y_SETTINGS_DEFAULTS_CACHE: true
+    C8Y_SETTINGS_DEFAULTS_DRY: true
+    C8Y_SETTINGS_DEFAULTS_DRYFORMAT: json
+    C8Y_SETTINGS_DEFAULTS_COMPACT: false
+
+tests:
+  It creates a smart group:
+    command: |
+      c8y smartgroups create --name my_devices --query "name eq 'my_devices'" |
+        c8y util show --select path,body --compact=false
+    exit-code: 0
+    stdout:
+      exactly: |
+        {
+          "body": {
+            "c8y_DeviceQueryString": "name eq 'my_devices'",
+            "c8y_IsDynamicGroup": {},
+            "name": "my_devices",
+            "type": "c8y_DynamicGroup"
+          },
+          "path": "/inventory/managedObjects"
+        }
+  
+  It creates a smart group via pipeline:
+    command: |
+      echo "name eq 'my_devices'" |
+        c8y smartgroups create --name my_devices |
+        c8y util show --select path,body --compact=false
+    exit-code: 0
+    stdout:
+      exactly: |
+        {
+          "body": {
+            "c8y_DeviceQueryString": "name eq 'my_devices'",
+            "c8y_IsDynamicGroup": {},
+            "name": "my_devices",
+            "type": "c8y_DynamicGroup"
+          },
+          "path": "/inventory/managedObjects"
+        }
+  
+  It creates a smart group via pipeline but overriding query:
+    command: |
+      echo "name eq 'my_devices'" |
+        c8y smartgroups create --name my_devices --query "has(c8y_IsDevice)" |
+        c8y util show --select path,body --compact=false
+    exit-code: 0
+    stdout:
+      exactly: |
+        {
+          "body": {
+            "c8y_DeviceQueryString": "has(c8y_IsDevice)",
+            "c8y_IsDynamicGroup": {},
+            "name": "my_devices",
+            "type": "c8y_DynamicGroup"
+          },
+          "path": "/inventory/managedObjects"
+        }
+

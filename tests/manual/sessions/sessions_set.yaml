@@ -1,0 +1,19 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/reubenmiller/commander/feat/handle-nested-files/schema.json
+
+config:
+  env:
+    C8Y_SETTINGS_DEFAULTS_CACHE: true
+    C8Y_SETTINGS_DEFAULTS_CACHETTL: 100h
+
+tests:
+  It clears session even if passphrase is invalid:
+    config:
+      env:
+        C8Y_SESSION: ''
+        C8Y_HOST: 'https://dummy.c8y.io'
+        C8Y_USERNAME: 'dummyUser'
+        C8Y_PASSWORD: 'asdfasdfasdf'
+        C8Y_PASSPHRASE: wrong_passphrase
+    command: |
+      c8y sessions clear
+    exit-code: 0

@@ -1,0 +1,14 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/reubenmiller/commander/feat/handle-nested-files/schema.json
+
+config:
+  env:
+    C8Y_SETTINGS_DEFAULTS_DRYFORMAT: markdown
+tests:
+  It flattens the output json:
+    command: |
+      cat ./manual/common/flags/flatten/input_application.json |
+        c8y util show --flatten
+    exit-code: 0
+    stdout:
+      exactly: |
+        {"id":"1","name":"cockpit","owner.tenant.id":"t12345"}
