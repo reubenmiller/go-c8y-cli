@@ -13,8 +13,9 @@ func MatchWithWildcards(s, pattern string) (bool, error) {
 	// convert wildcards to a regex
 	pattern = strings.ReplaceAll(pattern, "*", ".*")
 
-	// case insensitive matching and whole string matching
-	pattern = "(?i)^" + pattern + "$"
+	// case-insensitive matching, multi-line matching and . matches \n
+	// and whole string matching
+	pattern = "(?ims)^" + pattern + "$"
 
 	r, err := regexp.Compile(pattern)
 
@@ -26,8 +27,8 @@ func MatchWithWildcards(s, pattern string) (bool, error) {
 }
 
 func MatchWithRegex(s, pattern string) (bool, error) {
-	// case-insensitive matching
-	pattern = "(?i)" + pattern
+	// case-insensitive matching, multi-line matching and . matches \n
+	pattern = "(?ims)" + pattern
 
 	r, err := regexp.Compile(pattern)
 
