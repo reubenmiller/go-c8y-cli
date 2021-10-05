@@ -1,0 +1,63 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/reubenmiller/commander/feat/handle-nested-files/schema.json
+config:
+  env:
+    C8Y_SETTINGS_DEFAULTS_OUTPUT: json
+
+
+tests:
+  It does not colorize json when being assigned piped to another command:
+    command: |
+      cat manual/common/output/input.jsonl |
+        c8y util show --select id,name --output json --noColor
+      
+      cat manual/common/output/input.jsonl |
+        c8y util show --select id,name --output json --noColor=true
+      
+      cat manual/common/output/input.jsonl |
+        c8y util show --select id,name --output json | xargs
+      
+      output=$(cat manual/common/output/input.jsonl |
+        c8y util show --select id,name --output json)
+      echo "$output"
+    exit-code: 0
+    stdout:
+      not-contains:
+        - "\x1b["
+  
+  It does not print json in color when assigning to a variable:
+    command: |
+      output=$(cat manual/common/output/input.jsonl |
+        c8y util show --select id,name --output json)
+      echo "$output"
+    exit-code: 0
+    stdout:
+      not-contains:
+        - "\x1b["
+  
+  It prints json in color assigning to a variable and forced:
+    command: |
+      output=$(cat manual/common/output/input.jsonl |
+        c8y util show --select id,name --output json --noColor=false)
+      echo "$output"
+    exit-code: 0
+    stdout:
+      contains:
+        - "\x1b["
+
+  It should not print json in color when using pretty print and no color:
+    command: |
+      cat manual/common/output/input.jsonl |
+        c8y util show --select id,name --noColor=true --compact=false
+    exit-code: 0
+    stdout:
+      not-contains:
+        - "\x1b["
+  
+  It does not print in color when csv is being used:
+    command: |
+      cat manual/common/output/input.jsonl |
+        c8y util show --select id,name --output csv --compact=false
+    exit-code: 0
+    stdout:
+      not-contains:
+        - "\x1b["

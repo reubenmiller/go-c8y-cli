@@ -17,7 +17,7 @@ main.exe
 jfrog
 *.log
 !tests/testdata/*.log
-output
+/output
 pkg/powershell/powershell.todo.txt
 pkg/powershell/c8y.exe
 cmd/c8y/c8y.exe
@@ -51,3 +51,4 @@ docs/go-c8y-cli/build
 docs/go-c8y-cli/i18n
 tools/docs/demos/*.asc
 pkg/cmd/__debug_bin
+tools/shell/completion/output/
