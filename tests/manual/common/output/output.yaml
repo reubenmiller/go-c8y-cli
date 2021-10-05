@@ -43,6 +43,10 @@ tests:
         2: '{"id":"2","name":"device02"}'
 
   It display output as a table:
+    config:
+      env:
+        C8Y_SETTINGS_VIEWS_COLUMNMAXWIDTH: 80
+        C8Y_SETTINGS_VIEWS_COLUMNPADDING: 5
     command: |
       cat manual/common/output/input.jsonl |
         c8y util show --select id,name --output table
