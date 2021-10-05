@@ -43,6 +43,6 @@ require (
 	moul.io/http2curl v1.0.0
 )
 
-replace github.com/commander-cli/commander/v2 => github.com/reubenmiller/commander/v2 v2.5.0-alpha2
+replace github.com/commander-cli/commander/v2 => github.com/reubenmiller/commander/v2 v2.5.0-alpha3
 
 go 1.16

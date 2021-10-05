@@ -135,7 +135,7 @@ test_powershell_sessions:		## Run powershell tests which interfere with the sess
 test_cli: test_cli_auto test_cli_manual
 
 test_cli_dependencies:										## Install cli dependencies
-	command -v commander || go get github.com/commander-cli/commander/v2/cmd/commander@v2.5.0-alpha2
+	command -v commander || go get github.com/commander-cli/commander/v2/cmd/commander@v2.5.0-alpha3
 
 test_cli_auto: test_cli_dependencies						## Run tests on the cli examples
 	./tests/scripts/setup.sh
