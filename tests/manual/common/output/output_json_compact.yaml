@@ -1,0 +1,88 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/reubenmiller/commander/feat/handle-nested-files/schema.json
+config:
+  env:
+    C8Y_SETTINGS_DEFAULTS_OUTPUT: json
+
+tests:
+  It prints compact json when being assigned to a variable:
+    command: |
+      cat manual/common/output/input.jsonl |
+        c8y util show --select id,name --compact
+      
+      cat manual/common/output/input.jsonl |
+        c8y util show --select id,name --compact=true
+      
+      cat manual/common/output/input.jsonl |
+        c8y util show --select id,name | jq . -c
+      
+      output=$(cat manual/common/output/input.jsonl |
+        c8y util show --select id,name)
+      echo "$output"
+    exit-code: 0
+    stdout:
+      exactly: |
+        {"id":"1","name":"device01"}
+        {"id":"2","name":"device02"}
+        {"id":"1","name":"device01"}
+        {"id":"2","name":"device02"}
+        {"id":"1","name":"device01"}
+        {"id":"2","name":"device02"}
+        {"id":"1","name":"device01"}
+        {"id":"2","name":"device02"}
+
+  It print pretty json when not using compact:
+    command: |
+      cat manual/common/output/input.jsonl |
+        c8y util show --select id,name --compact=false
+    exit-code: 0
+    stdout:
+      exactly: |
+        {
+          "id": "1",
+          "name": "device01"
+        }
+        {
+          "id": "2",
+          "name": "device02"
+        }
+
+  It only returns properties for given fields and prints compact json:
+    command: |
+      cat manual/common/output/input.jsonl |
+        c8y util show --select id,name
+    exit-code: 0
+    stdout:
+      exactly: |
+        {"id":"1","name":"device01"}
+        {"id":"2","name":"device02"}
+
+  It ignores compact setting when csv is being used:
+    command: |
+      cat manual/common/output/input.jsonl |
+        c8y util show --select id,name --output csv --compact=false
+    exit-code: 0
+    stdout:
+      exactly: |
+        1,device01
+        2,device02
+
+  It prints the raw json output in compact json:
+    command: |
+      c8y devices list --type "SomeThingThatDoesNotExist" --pageSize 1 --compact --raw
+    exit-code: 0
+    stdout:
+      match-pattern: '{"managedObjects":\[\],"next":".+","statistics":{"currentPage":1,"pageSize":1}}'
+  
+  It prints the raw json in pretty print:
+    command: |
+      c8y devices list --type "SomeThingThatDoesNotExist" --pageSize 1 --select managedObjects,statistics --compact=false --raw
+    exit-code: 0
+    stdout:
+      exactly: |
+        {
+          "managedObjects": [],
+          "statistics": {
+            "currentPage": 1,
+            "pageSize": 1
+          }
+        }
