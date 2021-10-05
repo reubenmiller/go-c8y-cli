@@ -47,6 +47,7 @@ tests:
       env:
         C8Y_SETTINGS_VIEWS_COLUMNMAXWIDTH: 80
         C8Y_SETTINGS_VIEWS_COLUMNPADDING: 5
+        C8Y_SETTINGS_VIEWS_COLUMNMINWIDTH: 5
     command: |
       cat manual/common/output/input.jsonl |
         c8y util show --select id,name --output table
