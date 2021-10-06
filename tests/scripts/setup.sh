@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e
+
 BIN_DIR="./output"
 
 export C8Y_SETTINGS_DEFAULTS_FORCE=true
@@ -20,6 +22,7 @@ setup () {
     create_smartgroup "my smartgroup"
 
     create_app "my-example-app"
+    create_service_user "technician"
 
     create_firmware "iot-linux"
     create_firmware_version "iot-linux" "1.0.0" "https://example.com"
@@ -42,6 +45,16 @@ create_app () {
             --type HOSTED \
             --key "$name-key" \
             --contextPath "$name"
+}
+
+create_service_user () {
+    local appname="$1"
+
+    local tenant=$(c8y currenttenant get --select name -o csv)
+    c8y microservices get --id "$appname" --silentStatusCodes 404 ||
+        c8y microservices serviceusers create \
+            --name "$appname" \
+            --tenants "$tenant"
 }
 
 create_smartgroup () {

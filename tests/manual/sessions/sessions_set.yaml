@@ -4,6 +4,7 @@ config:
   env:
     C8Y_SETTINGS_DEFAULTS_CACHE: true
     C8Y_SETTINGS_DEFAULTS_CACHETTL: 100h
+    C8Y_SETTINGS_DEFAULTS_DRYFORMAT: json
 
 tests:
   It clears session even if passphrase is invalid:
@@ -17,3 +18,167 @@ tests:
     command: |
       c8y sessions clear
     exit-code: 0
+
+  It logs in using BASIC_AUTHORIZATION if the environment variables are set:
+    config:
+      env:
+        C8Y_SESSION: ''
+        C8Y_HOST: '$C8Y_HOST'
+        C8Y_TENANT: '$C8Y_TENANT'
+        C8Y_USER: '$C8Y_USER'
+        C8Y_USERNAME: ''
+        C8Y_PASSWORD: '$C8Y_PASSWORD'
+    command: |
+      c8y devices list -p 1 --select id
+    exit-code: 0
+  
+  It logs in via environment variables without C8Y_TENANT set:
+    config:
+      env:
+        C8Y_SESSION: ''
+        C8Y_HOST: '$C8Y_HOST'
+        C8Y_USER: ''
+        C8Y_TENANT: ''
+        C8Y_USERNAME: '$C8Y_USERNAME'
+        C8Y_PASSWORD: '$C8Y_PASSWORD'
+    command: |
+      c8y devices list -p 1 --select id
+    exit-code: 0
+
+  It returns an error when the password is incorrect:
+    config:
+      env:
+        C8Y_SESSION: ''
+        C8Y_HOST: '$C8Y_HOST'
+        C8Y_USER: ''
+        C8Y_TENANT: ''
+        C8Y_USERNAME: '$C8Y_USERNAME'
+        C8Y_PASSWORD: 'dummyP4s4wird'
+    command: |
+      c8y devices list -p 1 --select id
+    exit-code: 1
+
+  It saves tenant name in the session file:
+    config:
+      env:
+        C8Y_SESSION_HOME: /tmp
+        C8Y_SESSION: '/tmp/session01.json'
+        C8Y_PASSPHRASE: 'TestPassword'
+    command: |
+      passwordText=$( c8y sessions decryptText --text $C8Y_PASSWORD --passphrase $C8Y_PASSPHRASE )
+      c8y template execute --template "{host: '$C8Y_HOST', username: '$C8Y_USERNAME', password: '$passwordText', settings: {encryption:{enabled:true}}}" > /tmp/session01.json
+
+      # c8y settings update encryption.enabled true
+      c8y sessions set --session /tmp/session01.json > /dev/null
+
+      cat /tmp/session01.json
+      rm -f /tmp/session01.json
+    exit-code: 0
+    stdout:
+      json:
+        $schema: r/https://.+
+        token: r/.*
+        host: $C8Y_HOST
+        tenant: r/t[0-9]+$
+        username: r/$C8Y_USERNAME
+        password: r/^{encrypted}.+$
+
+  It loads a session from a folder by name:
+    config:
+      env:
+        C8Y_SESSION: ''
+        C8Y_SESSION_HOME: '/tmp/.cumulocity'
+        C8Y_HOME: '/tmp/.cumulocity'
+    command: |
+      mkdir -p /tmp/.cumulocity
+      eval $(c8y sessions clear --shell bash)
+      
+      c8y template execute --template "{host: 'https://example.com', 'settings.defaults.pageSize': 44}" > /tmp/.cumulocity/mysession.json
+
+      c8y inventory list --session mysession.json --dry |
+        c8y util show --select host,method,pathEncoded
+      
+      c8y settings list --session "mysession.json" --select defaults.pageSize
+    exit-code: 0
+    stdout:
+      exactly: |
+        {"host":"https://example.com","method":"GET","pathEncoded":"/inventory/managedObjects?pageSize=44"}
+        {"defaults":{"pagesize":44}}
+
+  It loads a common preferences from the session folder automatically:
+    config:
+      env:
+        C8Y_SESSION: ''
+        C8Y_SESSION_HOME: '/tmp/.cumulocity'
+        C8Y_HOME: '/tmp/.cumulocity'
+    command: |
+      mkdir -p "$C8Y_HOME"
+      eval $(c8y sessions clear --shell bash)
+      
+      c8y template execute --template "{'settings.includeAll.pageSize': 123}" > "$C8Y_HOME/settings.json"
+      c8y settings list --select "includeAll.pageSize"
+    exit-code: 0
+    stdout:
+      exactly: |
+        {"includeall":{"pagesize":123}}
+  
+  It supports overriding common settings with session settings:
+    config:
+      env:
+        C8Y_SESSION: '/tmp/.cumulocity/mysession.json'
+        C8Y_SESSION_HOME: '/tmp/.cumulocity'
+        C8Y_HOME: '/tmp/.cumulocity'
+    command: |
+      mkdir -p "$C8Y_HOME"
+      
+      c8y template execute --template "{'settings.includeAll.delayMS': 23, settings:{defaults:{pageSize: 120}}}" > "$C8Y_HOME/settings.json"
+      c8y template execute --template "{'settings.defaults.pageSize': 99}" > "$C8Y_SESSION"
+
+      c8y settings list --select "includeAll.delayMS,defaults.pageSize"
+    exit-code: 0
+    stdout:
+      exactly: |
+        {"defaults":{"pagesize":99},"includeall":{"delayms":23}}
+
+  It uses default values when no global settings.json file exists:
+    config:
+      env:
+        C8Y_SESSION: '/tmp/.cumulocity/mysession.json'
+        C8Y_SESSION_HOME: '/tmp/.cumulocity'
+        C8Y_HOME: '/tmp/.cumulocity'
+    command: |
+      mkdir -p "$C8Y_HOME"
+      rm -f "$C8Y_HOME/settings.json"
+
+      c8y template execute --template "{'settings.defaults.pageSize': 24}" > "$C8Y_SESSION"
+
+      c8y settings list --select "includeAll.pageSize,defaults.pageSize"
+    exit-code: 0
+    stdout:
+      exactly: |
+        {"defaults":{"pagesize":24},"includeall":{"pagesize":2000}}
+
+  It loads a yaml session the current directory called session.yaml:
+    config:
+      env:
+        C8Y_SESSION: '/tmp/.cumulocity/mysession.yaml'
+        C8Y_SESSION_HOME: '/tmp/.cumulocity'
+        C8Y_HOME: '/tmp/.cumulocity'
+    command: |
+      mkdir -p "$C8Y_HOME"
+      rm -f "$C8Y_SESSION"
+      rm -f "$C8Y_HOME/settings.json"
+
+      cat <<EOT > "$C8Y_SESSION"
+      settings:
+        defaults:
+          pageSize: 110
+      settings.includeAll.pagesize: 202
+
+      EOT
+
+      c8y settings list --select "includeAll.pageSize,defaults.pageSize"
+    exit-code: 0
+    stdout:
+      exactly: |
+        {"defaults":{"pagesize":110},"includeall":{"pagesize":202}}
