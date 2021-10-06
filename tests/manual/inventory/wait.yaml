@@ -1,15 +1,21 @@
-tests:
-    It waits a fragment to exist:
-        command: ./manual/inventory/001_wait.sh
-        exit-code: 0
-        # line-count: 1
-        stdout:
-            json:
-                myTemp: "1"
+# yaml-language-server: $schema=https://raw.githubusercontent.com/reubenmiller/commander/feat/handle-nested-files/schema.json
 
-    It waits a fragment to be removed:
-        command: ./manual/inventory/002_wait.sh
-        exit-code: 0
-        stdout:
-            line-count: 1
-            exactly: '{}'
+config:
+  retries: 2
+  interval: 2s
+
+tests:
+  It waits a fragment to exist:
+    command: ./manual/inventory/001_wait.sh
+    exit-code: 0
+    # line-count: 1
+    stdout:
+      json:
+        myTemp: "1"
+
+  It waits a fragment to be removed:
+    command: ./manual/inventory/002_wait.sh
+    exit-code: 0
+    stdout:
+      line-count: 1
+      exactly: "{}"

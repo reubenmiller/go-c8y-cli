@@ -1,0 +1,65 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/reubenmiller/commander/feat/handle-nested-files/schema.json
+
+config:
+  env:
+    C8Y_SETTINGS_DEFAULTS_DRY: true
+    C8Y_SETTINGS_DEFAULTS_DRYFORMAT: json
+    C8Y_SETTINGS_DEFAULTS_WITHERROR: true
+
+tests:
+  It accepts piped devices when creating alarms:
+    command: |
+      cat manual/common/pipe/device01.json |
+        c8y alarms create \
+          --severity CRITICAL \
+          --text "my alarm" \
+          --type "myType" |
+        c8y util show method,path,body
+    exit-code: 0
+    stdout:
+      json:
+        method: POST
+        path: /alarm/alarms
+        body.source.id: "11111"
+        body.severity: CRITICAL
+        body.text: my alarm
+        body.type: myType
+        body.time: r/^.+$
+
+  It can duplicate alarms on the same device (changing type):
+    command: |
+      cat manual/common/pipe/alarms.jsonl |
+        c8y util show --select "status,text,time,type,severity,source.*" |
+        c8y alarms create \
+          --type "myType2" \
+          --template "input.value" |
+        c8y util show method,path,body
+    exit-code: 0
+    stdout:
+      json:
+        ..0.method: POST
+        ..0.path: /alarm/alarms
+        ..0.body.source.id: "11111"
+        ..0.body.severity: CRITICAL
+        ..0.body.text: my alarm
+        ..0.body.type: myType2
+        ..0.body.time: r/^.+$
+
+  It can Copy an alarm from one source to another:
+    command: |
+      cat manual/common/pipe/alarms.jsonl |
+        c8y util show --select "status,text,time,type,severity,source.*" |
+        c8y alarms create \
+          --device "22222" \
+          --template "input.value" |
+        c8y util show method,path,body
+    exit-code: 0
+    stdout:
+      json:
+        ..0.method: POST
+        ..0.path: /alarm/alarms
+        ..0.body.source.id: "22222"
+        ..0.body.severity: CRITICAL
+        ..0.body.text: my alarm
+        ..0.body.type: myType
+        ..0.body.time: r/^.+$
