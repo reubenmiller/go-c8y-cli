@@ -76,7 +76,7 @@ func BuildCumulocityQuery(cmd *cobra.Command, fixedParts []string, orderBy strin
 		}
 
 		if len(b) > 0 {
-			queryParts = append(queryParts, "("+string(b)+")")
+			queryParts = append(queryParts, string(b))
 		}
 
 		if v, err := cmd.Flags().GetString("queryTemplate"); err == nil && v != "" {
