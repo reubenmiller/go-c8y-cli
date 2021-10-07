@@ -17,6 +17,9 @@ setup () {
     create_user "benhologram@example.com"
     create_user "tomwillow@example.com"
 
+    create_usergroup "powerusers"
+    create_usergroup "control-center"
+
     create_agent "agent01"
     create_agent "device01"
     create_smartgroup "my smartgroup"
@@ -35,6 +38,13 @@ create_user () {
         --email $username \
         --userName $username \
         --template "{password: _.Password()}"
+}
+
+create_usergroup () {
+    local name="$1"
+    
+    c8y usergroups get --id $name --silentStatusCodes 404 || c8y usergroups create \
+        --name "$name"
 }
 
 create_app () {
