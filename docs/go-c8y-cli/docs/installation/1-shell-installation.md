@@ -284,7 +284,7 @@ source "$HOME/.go-c8y-cli/shell/c8y.plugin.sh"
 <TabItem value="zsh">
 
 ```bash title="file: ~/.zshrc"
-source "/etc/go-c8y-cli/shell/c8y.plugin.zsh
+source "/etc/go-c8y-cli/shell/c8y.plugin.zsh"
 
 # or if you installed it via the script
 source "$HOME/.go-c8y-cli/shell/c8y.plugin.zsh"
