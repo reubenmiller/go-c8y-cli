@@ -1,0 +1,63 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/reubenmiller/commander/feat/handle-nested-files/schema.json
+
+tests:
+  It times out waiting for an operation to complete:
+    config:
+      timeout: 10s
+    command: |
+      c8y operations create --device agent01 --data "c8y_Restart={}" |
+        c8y operations wait --duration 5s
+    exit-code: 106
+    stderr:
+      contains:
+        - Timeout
+    stdout:
+      json:
+        id: r/^\d+$
+        status: PENDING
+        c8y_Restart: '{}'
+
+  It waits for a successful operation (using pipeline):
+    config:
+      timeout: 10s
+    command: |
+      c8y operations create --device agent01 --data "c8y_Restart={}" |
+        c8y operations update --status SUCCESSFUL |
+        c8y operations wait --duration 30s
+    exit-code: 0
+    stdout:
+      json:
+        id: r/^\d+$
+        status: SUCCESSFUL
+        c8y_Restart: '{}'
+
+  It waits for a failed operation (using pipeline):
+    config:
+      timeout: 10s
+    command: |
+      c8y operations create --device agent01 --data "c8y_Restart={}" |
+        c8y operations update --status FAILED --failureReason "some error" |
+        c8y operations wait --duration 30s
+    exit-code: 100
+    stderr:
+      contains:
+        - 'Failure reason: some error'
+        - wanted=SUCCESSFUL, got=FAILED
+    stdout:
+      json:
+        id: r/^\d+$
+        status: FAILED
+        c8y_Restart: '{}'
+
+  It fails fast when an invalid operation is provided:
+    config:
+      timeout: 5s
+    command: |
+      echo "asdf8229d" |
+        c8y operations wait --duration 10s
+    exit-code: 100
+    stderr:
+      contains:
+        - 'No operation for'
+    stdout:
+      match-pattern: ^$
