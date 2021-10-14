@@ -23,27 +23,6 @@ Describe -Name "Get-Pagination" {
         $cliOutputFile = New-TemporaryFile
     }
 
-    It "Get all of the alarms using IncludeAll and custom include all page size" {
-        $env:C8Y_SETTINGS_INCLUDEALL_PAGESIZE = "10"
-
-        $Response = PSc8y\Get-AlarmCollection `
-            -Device $Device.id `
-            -IncludeAll `
-            -Debug 2> $cliOutputFile
-        $C8Y_SETTINGS_INCLUDEALL_PAGESIZE = ""
-
-        $LASTEXITCODE | Should -Be 0
-        $Response | Should -Not -BeNullOrEmpty
-        $Response | Should -HaveCount 20
-
-        $VerboseOutput = Get-Content $cliOutputFile
-
-        ($VerboseOutput -match "pageSize=10") | Should -Not -BeNullOrEmpty
-
-        # 2 because the first result does not have the "fetching next page"
-        ($VerboseOutput -match "Fetching next page").Count | Should -BeExactly 2
-    }
-
     It "Get all of the alarms using IncludeAll and uneven custom include size" {
         $env:C8Y_SETTINGS_INCLUDEALL_PAGESIZE = "12"
 
@@ -65,38 +44,6 @@ Describe -Name "Get-Pagination" {
         # as the first has 12 results, and the second result set has less than the requested
         # page size, so it should not try to fetch another page
         ($VerboseOutput -match "Fetching next page").Count | Should -BeExactly 1
-    }
-
-    It "Using include All with Dry" {
-        $env:C8Y_SETTINGS_INCLUDEALL_PAGESIZE = ""
-
-        $output = PSc8y\Get-DeviceCollection `
-            -IncludeAll `
-            -Dry `
-            -DryFormat json
-
-        $LASTEXITCODE | Should -Be 0
-        $output | Should -Not -BeNullOrEmpty
-        $requests = $output | ConvertFrom-Json
-
-        $requests[0].query | Should -Match "pageSize=2000"
-    }
-
-    It "Set default pagesize using environment setting" {
-        $env:C8Y_SETTINGS_DEFAULTS_PAGESIZE = "10"
-
-        $output = PSc8y\Get-AlarmCollection `
-            -Device $Device.id `
-            -Dry `
-            -DryFormat json
-
-        $LASTEXITCODE | Should -Be 0
-        $C8Y_SETTINGS_DEFAULTS_PAGESIZE = ""
-        $output | Should -Not -BeNullOrEmpty
-        $requests = $output | ConvertFrom-Json
-
-        $requests | Should -HaveCount 1
-        $requests[0].query | Should -Match "pageSize=10"
     }
 
     It "All collection commands support paging parameters" {

@@ -52,24 +52,19 @@ tests:
       line-count: 1
       exactly: |
         {"name":"device01"}
-  
+
   It supports ternary operations on the exit code:
-    skip: true
+    config:
+      env:
+        C8Y_SETTINGS_DEFAULTS_CACHE: false
     command: |
-      # check if device exists by name if not create it
-      c8y devices get --id "iotDeviceAZ01" --silentStatusCodes 404 || c8y devices create --name "iotDeviceAZ01" --select name
-
-      # run the command again, this time the name should exist so it should not be created
-      c8y devices get --id "iotDeviceAZ01" --silentStatusCodes 404 --select name || exit 1
-
-      # cleanup devices
-      c8y devices list --name iotDeviceAZ01 | c8y devices delete
-
+      ./manual/common/errors/test_ternary_operators.sh
     exit-code: 0
-    stderr:
-      match-pattern: ^$
-    stdout:
-      # line-count: 2
-      exactly: |
-        {"name":"iotDeviceAZ01"}
-      # {"name":"iotDeviceAZ01"}
+
+  It deletes multiple ids but don't care if they don't exist:
+    config:
+      env:
+        C8Y_SETTINGS_DEFAULTS_CACHE: false
+    command: |
+      ./manual/common/errors/test_delete.sh
+    exit-code: 0
