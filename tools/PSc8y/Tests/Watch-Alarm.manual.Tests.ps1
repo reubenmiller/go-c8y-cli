@@ -1,6 +1,6 @@
 ﻿. $PSScriptRoot/imports.ps1
 
-Describe -Name "Watch-Alarm" {
+Describe -Name "Watch-Alarm" -Skip {
     BeforeEach {
         $Device = New-TestDevice
         Start-Sleep -Seconds 5

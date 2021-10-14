@@ -1,6 +1,6 @@
 ﻿. $PSScriptRoot/imports.ps1
 
-Describe -Name "Watch-ManagedObject" {
+Describe -Name "Watch-ManagedObject" -Skip {
     BeforeEach {
         $Device = New-TestDevice
         Start-Sleep -Seconds 5

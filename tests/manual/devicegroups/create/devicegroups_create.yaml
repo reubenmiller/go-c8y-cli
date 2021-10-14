@@ -1,0 +1,69 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/reubenmiller/commander/feat/handle-nested-files/schema.json
+
+config:
+  env:
+    C8Y_SETTINGS_DEFAULTS_CACHE: true
+    C8Y_SETTINGS_CACHE_METHODS: GET POST PUT
+    C8Y_SETTINGS_DEFAULTS_CACHETTL: 100h
+    C8Y_SETTINGS_DEFAULTS_DRY: true
+    C8Y_SETTINGS_DEFAULTS_DRYFORMAT: json
+
+tests:
+  It creates a device group:
+    command: |
+      c8y devicegroups create \
+        --name "My Custom Group" |
+      c8y util show --select method,pathEncoded,body --compact=false
+    exit-code: 0
+    stdout:
+      exactly: |
+        {
+          "body": {
+            "c8y_IsDeviceGroup": {},
+            "name": "My Custom Group",
+            "type": "c8y_DeviceGroup"
+          },
+          "method": "POST",
+          "pathEncoded": "/inventory/managedObjects"
+        }
+
+  It creates a device sub group:
+    command: |
+      c8y devicegroups create \
+        --name "My Custom Sub Group" \
+        --type "c8y_DeviceSubGroup" |
+      c8y util show --select method,pathEncoded,body --compact=false
+    exit-code: 0
+    stdout:
+      exactly: |
+        {
+          "body": {
+            "c8y_IsDeviceGroup": {},
+            "name": "My Custom Sub Group",
+            "type": "c8y_DeviceSubGroup"
+          },
+          "method": "POST",
+          "pathEncoded": "/inventory/managedObjects"
+        }
+  
+  It creates a device group with a custom type:
+    command: |
+      c8y devicegroups create \
+        --name "My Custom Group" \
+        --data "type=c8y_MyCustomGroup,myValue.value1=true" |
+      c8y util show --select method,pathEncoded,body --compact=false
+    exit-code: 0
+    stdout:
+      exactly: |
+        {
+          "body": {
+            "c8y_IsDeviceGroup": {},
+            "myValue": {
+              "value1": true
+            },
+            "name": "My Custom Group",
+            "type": "c8y_MyCustomGroup"
+          },
+          "method": "POST",
+          "pathEncoded": "/inventory/managedObjects"
+        }

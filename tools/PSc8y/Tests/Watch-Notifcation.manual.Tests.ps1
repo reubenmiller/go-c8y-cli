@@ -1,6 +1,6 @@
 ﻿. $PSScriptRoot/imports.ps1
 
-Describe -Name "Watch-Notifcation" {
+Describe -Name "Watch-Notifcation" -Skip {
     BeforeEach {
         $Device = New-TestDevice
         Start-Sleep -Seconds 5

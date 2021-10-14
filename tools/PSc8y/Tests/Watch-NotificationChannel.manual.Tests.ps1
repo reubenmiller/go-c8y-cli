@@ -1,6 +1,6 @@
 ﻿. $PSScriptRoot/imports.ps1
 
-Describe -Name "Watch-NotificationChannel" {
+Describe -Name "Watch-NotificationChannel" -Skip {
     BeforeEach {
         $Device = New-TestAgent
         Start-Sleep -Seconds 5

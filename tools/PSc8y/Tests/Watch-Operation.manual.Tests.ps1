@@ -1,6 +1,6 @@
 ﻿. $PSScriptRoot/imports.ps1
 
-Describe -Name "Watch-Operation" {
+Describe -Name "Watch-Operation" -Skip {
     BeforeEach {
         $Device = New-TestAgent
         Start-Sleep -Seconds 5

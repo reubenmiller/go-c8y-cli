@@ -1,0 +1,19 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/reubenmiller/commander/feat/handle-nested-files/schema.json
+config:
+  env:
+    C8Y_SETTINGS_DEFAULTS_CACHE: true
+    C8Y_SETTINGS_CACHE_METHODS: GET POST PUT
+    C8Y_SETTINGS_DEFAULTS_CACHETTL: 100h
+
+tests:
+  It adds a user to a user group using pipeline:
+    command: |
+      c8y users get --id peterpi@example.com |
+        c8y userreferences addUserToGroup --group "22222" --dry |
+        c8y util show --select method,pathEncoded,body
+    exit-code: 0
+    stdout:
+      json:
+        body.user.self: r/https://.+/user/$C8Y_TENANT/users/peterpi@example.com
+        method: POST
+        pathEncoded: r//user/$C8Y_TENANT/groups/22222/users

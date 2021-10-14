@@ -126,3 +126,85 @@ tests:
     command: |
       c8y inventory create --template ./manual/template/large_template.jsonnet --select id --output csv --dry
     exit-code: 0
+
+  It throws an error if no template is provided with stdin:
+    command: |
+      echo "{test: 1}" | c8y template execute
+    exit-code: 100
+    stdout:
+      match-pattern: ^$
+  
+  It throws an error if no template is provided with no stdin:
+    command: |
+      c8y template execute
+    exit-code: 100
+    stdout:
+      match-pattern: ^$
+
+  It executes a jsonnet template from a string:
+    command: |
+      TEMPLATE=$(cat <<-END
+        {
+          name: 'testName',
+          value: 1 + 2,
+        }
+      END
+      )
+      c8y template execute --template "$TEMPLATE" -o json --compact=false
+    exit-code: 0
+    stdout:
+      exactly: |
+        {
+          "name": "testName",
+          "value": 3
+        }
+  
+  It executes a jsonnet template with input values:
+    command: |
+      TEMPLATE=$(cat <<-END
+        {
+          name: var('name', 'testName'),
+          value: 1 + 2,
+        }
+      END
+      )
+      c8y template execute \
+        --template "$TEMPLATE" \
+        --templateVars "name=myName2" \
+        --output json --compact=false
+    exit-code: 0
+    stdout:
+      exactly: |
+        {
+          "name": "myName2",
+          "value": 3
+        }
+  
+  It executes a jsonnet template using pipeline input:
+    command: |
+      TEMPLATE=$(cat <<-END
+        {
+          type: self.name + '_' + _.Int(100, 100),
+          value: 1 + 2,
+        } + input.value
+      END
+      )
+
+      echo "{\"name\":\"name\"}\n{\"name\":\"name2\"}" |
+      c8y template execute \
+        --template "$TEMPLATE" \
+        --templateVars "name=myName2" \
+        --output json --compact=false
+    exit-code: 0
+    stdout:
+      exactly: |
+        {
+          "name": "name",
+          "type": "name_100",
+          "value": 3
+        }
+        {
+          "name": "name2",
+          "type": "name2_100",
+          "value": 3
+        }

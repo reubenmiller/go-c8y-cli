@@ -1,6 +1,6 @@
 ﻿. $PSScriptRoot/imports.ps1
 
-Describe -Name "Watch-Event" {
+Describe -Name "Watch-Event" -Skip {
     BeforeEach {
         $Device = New-TestDevice
         Start-Sleep -Seconds 5

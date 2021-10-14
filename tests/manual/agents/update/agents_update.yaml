@@ -1,0 +1,24 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/reubenmiller/commander/feat/handle-nested-files/schema.json
+
+config:
+  env:
+    C8Y_SETTINGS_DEFAULTS_CACHE: true
+    C8Y_SETTINGS_CACHE_METHODS: GET POST PUT
+    C8Y_SETTINGS_DEFAULTS_CACHETTL: 100h
+    C8Y_SETTINGS_DEFAULTS_DRY: true
+
+tests:
+  It updates device by id:
+    command: |
+      c8y agents update --id 12345 --newName "MyNewName" |
+        c8y util show --select method,pathEncoded,body --compact=false
+    exit-code: 0
+    stdout:
+      exactly: |
+        {
+          "body": {
+            "name": "MyNewName"
+          },
+          "method": "PUT",
+          "pathEncoded": "/inventory/managedObjects/12345"
+        }
