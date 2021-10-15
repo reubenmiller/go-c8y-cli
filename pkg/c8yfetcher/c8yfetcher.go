@@ -672,7 +672,7 @@ func WithSoftwareByNameFirstMatch(client *c8y.Client, args []string, opts ...str
 }
 
 // WithSoftwareVersionData adds software information (name, version and url)
-func WithSoftwareVersionData(client *c8y.Client, flagSoftware, flagVersion string, args []string, opts ...string) flags.GetOption {
+func WithSoftwareVersionData(client *c8y.Client, flagSoftware, flagVersion, flagURL string, args []string, opts ...string) flags.GetOption {
 	return func(cmd *cobra.Command, inputIterators *flags.RequestInputIterators) (string, interface{}, error) {
 		var err error
 		software := ""
@@ -685,9 +685,22 @@ func WithSoftwareVersionData(client *c8y.Client, flagSoftware, flagVersion strin
 			version = v[0]
 		}
 
+		url := ""
+		if v, err := flags.GetFlagStringValues(cmd, flagURL); err == nil && len(v) > 0 {
+			url = v[0]
+		}
+
 		_, dst, _ := flags.UnpackGetterOptions("", opts...)
 
 		output := map[string]string{}
+
+		// If version is empty, then pass the values as is
+		if version == "" {
+			output["name"] = software
+			output["version"] = version
+			output["url"] = url
+			return dst, output, nil
+		}
 
 		// Check for explicit managed object id
 		if IsID(version) {

@@ -94,7 +94,7 @@
         "[]software" = "c8yfetcher.WithSoftwareByNameFirstMatch(client, args, `"${prop}`", `"${queryParam}`"),"
 
         "softwareDetails" = @(
-            "c8yfetcher.WithSoftwareVersionData(client, `"software`", `"version`", args, `"`", `"${queryParam}`"),"
+            "c8yfetcher.WithSoftwareVersionData(client, `"software`", `"version`", `"url`", args, `"`", `"${queryParam}`"),"
         ) -join "`n"
 
         # software name
