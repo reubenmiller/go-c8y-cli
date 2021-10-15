@@ -1,0 +1,61 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/reubenmiller/commander/feat/handle-nested-files/schema.json
+
+config:
+  env:
+    C8Y_SETTINGS_DEFAULTS_CACHE: true
+    C8Y_SETTINGS_CACHE_METHODS: GET POST PUT
+    C8Y_SETTINGS_DEFAULTS_CACHETTL: 100h
+    C8Y_SETTINGS_DEFAULTS_DRY: true
+
+tests:
+  It creates an operation to update software without a version:
+    command: |
+      c8y software versions install --device 1 --software "myapp" --description "Installing software" |
+        c8y util show --select method,pathEncoded,body --compact=false
+    exit-code: 0
+    stdout:
+      exactly: |
+        {
+          "body": {
+            "c8y_SoftwareUpdate": [
+              {
+                "action": "install",
+                "name": "myapp",
+                "url": "",
+                "version": ""
+              }
+            ],
+            "description": "Installing software",
+            "deviceId": "1"
+          },
+          "method": "POST",
+          "pathEncoded": "/devicecontrol/operations"
+        }
+  
+  It creates an operation to update software without a version but a custom url:
+    command: |
+      c8y software versions install \
+        --device 1 \
+        --software "myapp" \
+        --description "Installing software" \
+        --url "https://test.com/binary/package.zip" |
+        c8y util show --select method,pathEncoded,body --compact=false
+    exit-code: 0
+    stdout:
+      exactly: |
+        {
+          "body": {
+            "c8y_SoftwareUpdate": [
+              {
+                "action": "install",
+                "name": "myapp",
+                "url": "https://test.com/binary/package.zip",
+                "version": ""
+              }
+            ],
+            "description": "Installing software",
+            "deviceId": "1"
+          },
+          "method": "POST",
+          "pathEncoded": "/devicecontrol/operations"
+        }
