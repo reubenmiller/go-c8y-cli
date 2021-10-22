@@ -313,6 +313,11 @@
           "validationSet": [
             "install"
           ]
+        },
+        {
+          "name": "data",
+          "type": "json",
+          "description": "Additional properties describing the operation which will be performed on the device."
         }
       ],
       "bodyRequiredKeys": [
@@ -383,6 +388,11 @@
           "validationSet": [
             "delete"
           ]
+        },
+        {
+          "name": "data",
+          "type": "json",
+          "description": "Additional properties describing the operation which will be performed on the device."
         }
       ],
       "bodyRequiredKeys": [

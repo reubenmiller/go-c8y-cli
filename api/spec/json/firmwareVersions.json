@@ -328,6 +328,11 @@
           "required": false,
           "property": "c8y_Firmware.url",
           "description": "Firmware url. TODO, not currently automatically added"
+        },
+        {
+          "name": "data",
+          "type": "json",
+          "description": "Additional properties describing the operation which will be performed on the device."
         }
       ],
       "bodyRequiredKeys": [

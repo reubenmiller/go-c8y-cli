@@ -238,6 +238,10 @@ endpoints:
         validationSet:
           - install
 
+      - name: data
+        type: json
+        description: Additional properties describing the operation which will be performed on the device.
+
     bodyRequiredKeys:
       - "deviceId"
       - "c8y_SoftwareUpdate.0.name"
@@ -292,6 +296,10 @@ endpoints:
         default: 'delete'
         validationSet:
           - delete
+
+      - name: data
+        type: json
+        description: Additional properties describing the operation which will be performed on the device.
     bodyRequiredKeys:
       - "deviceId"
       - "c8y_SoftwareUpdate.0.name"

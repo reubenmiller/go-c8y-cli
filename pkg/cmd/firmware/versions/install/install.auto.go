@@ -60,7 +60,8 @@ Install a firmware version
 	flags.WithOptions(
 		cmd,
 		flags.WithProcessingMode(),
-
+		flags.WithData(),
+		f.WithTemplateFlag(cmd),
 		flags.WithExtendedPipelineSupport("device", "deviceId", false, "deviceId", "source.id", "managedObject.id", "id"),
 	)
 
