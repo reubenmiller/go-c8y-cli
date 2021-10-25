@@ -47,13 +47,13 @@ cleanup () {
 
 test01 () {
     # Watch for a time period
-    start_task "seq 1 10 | c8y $SUBCOMMAND create --device $mo_id --template $TEMPLATE --delay 2s --force"
+    start_task "seq 1 10 | c8y measurements create --device $mo_id --template $TEMPLATE --delay 2s --force"
 
-    values=$( c8y $SUBCOMMAND subscribe --device "$mo_id" --duration 10s || true )
+    values=$( c8y $SUBCOMMAND subscribe --channel "/measurements/$mo_id" --duration 10s || true )
     item_count=$( echo "$values" | c8y util show --select id -o csv | wc -l )
 
     # result:
-    c8y template execute --template "{itemCount: '$item_count', deviceId: '$mo_id', taskId: '${TASK_PID}'}"
+    c8y template execute --template "{itemCount: '$item_count', id: '$mo_id', taskId: '${TASK_PID}'}"
 
     # error is 100 + actual line count (to make debugging easier)
     [[ $item_count -gt 0 ]] || exit $(( 100 + $item_count ))
@@ -62,13 +62,13 @@ test01 () {
 test02 () {
     # Watch for a number of objects
     # subscribe to count
-    start_task "seq 1 10 | c8y $SUBCOMMAND create --device $mo_id --template $TEMPLATE --delay 2s --force"
+    start_task "seq 1 10 | c8y measurements create --device $mo_id --template $TEMPLATE --delay 2s --force"
 
-    values=$( c8y $SUBCOMMAND subscribe --device "$mo_id" --count 2 || true )
+    values=$( c8y $SUBCOMMAND subscribe --channel "/measurements/$mo_id" --count 2 || true )
     item_count=$( echo "$values" | c8y util show --select id -o csv | wc -l )
 
     # result:
-    c8y template execute --template "{itemCount: '$item_count', deviceId: '$mo_id', taskId: '${TASK_PID}'}"
+    c8y template execute --template "{itemCount: '$item_count', id: '$mo_id', taskId: '${TASK_PID}'}"
 
     # error is 100 + actual line count (to make debugging easier)
     [[ "$item_count" -eq 2 ]] || exit $(( 100 + $item_count ))
@@ -77,13 +77,13 @@ test02 () {
 test03 () {
     # Watch for a number of objects
     # subscribe to count
-    start_task "seq 1 10 | c8y $SUBCOMMAND create --device $mo_id --template $TEMPLATE --delay 2s --force"
+    start_task "seq 1 10 | c8y measurements create --device $mo_id --template $TEMPLATE --delay 2s --force"
 
-    values=$( c8y $SUBCOMMAND subscribe --count 2 || true )
+    values=$( c8y $SUBCOMMAND subscribe --channel "/measurements/*" --count 2 || true )
     item_count=$( echo "$values" | c8y util show --select id -o csv | wc -l )
 
     # result:
-    c8y template execute --template "{itemCount: '$item_count', deviceId: '$mo_id', taskId: '${TASK_PID}'}"
+    c8y template execute --template "{itemCount: '$item_count', id: '$mo_id', taskId: '${TASK_PID}'}"
 
     # error is 100 + actual line count (to make debugging easier)
     [[ "$item_count" -eq 2 ]] || exit $(( 100 + $item_count ))
