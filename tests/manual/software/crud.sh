@@ -71,6 +71,14 @@ echo "$OPERATION" | c8y util show --select "body.c8y_SoftwareUpdate.0.name" --ou
 echo "$OPERATION" | c8y util show --select "body.c8y_SoftwareUpdate.0.version" --output csv | grep "^$VERSION$"
 echo "$OPERATION" | c8y util show --select "body.c8y_SoftwareUpdate.0.url" --output csv | grep "^https://test.com$"
 
+# install via piped device
+OPERATION=$( echo '{"id": "1"}' | c8y software versions install --software "$NAME" --version "$VERSION" --dry --dryFormat json --template "{extra: 'stuff'}" )
+echo "$OPERATION" | c8y util show --select "body.deviceId" --output csv | grep "^1$"
+echo "$OPERATION" | c8y util show --select "body.c8y_SoftwareUpdate.0.name" --output csv | grep "^$NAME$"
+echo "$OPERATION" | c8y util show --select "body.c8y_SoftwareUpdate.0.version" --output csv | grep "^$VERSION$"
+echo "$OPERATION" | c8y util show --select "body.c8y_SoftwareUpdate.0.url" --output csv | grep "^https://test.com$"
+echo "$OPERATION" | c8y util show --select "body.extra" --output csv | grep "^stuff$"
+
 # list versions and delete them
 c8y software versions list --software "$ID" | c8y software versions delete
 
