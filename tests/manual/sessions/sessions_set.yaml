@@ -39,7 +39,7 @@ tests:
         C8Y_HOST: '$C8Y_HOST'
         C8Y_USER: ''
         C8Y_TENANT: ''
-        C8Y_USERNAME: '$C8Y_USERNAME'
+        C8Y_USERNAME: '$C8Y_USER'
         C8Y_PASSWORD: '$C8Y_PASSWORD'
     command: |
       c8y devices list -p 1 --select id
@@ -52,7 +52,7 @@ tests:
         C8Y_HOST: '$C8Y_HOST'
         C8Y_USER: ''
         C8Y_TENANT: ''
-        C8Y_USERNAME: '$C8Y_USERNAME'
+        C8Y_USERNAME: '$C8Y_USER'
         C8Y_PASSWORD: 'dummyP4s4wird'
     command: |
       c8y devices list -p 1 --select id
@@ -66,7 +66,7 @@ tests:
         C8Y_PASSPHRASE: 'TestPassword'
     command: |
       passwordText=$( c8y sessions decryptText --text $C8Y_PASSWORD --passphrase $C8Y_PASSPHRASE )
-      c8y template execute --template "{host: '$C8Y_HOST', username: '$C8Y_USERNAME', password: '$passwordText', settings: {encryption:{enabled:true}}}" > /tmp/session01.json
+      c8y template execute --template "{host: '$C8Y_HOST', username: '$C8Y_USER', password: '$passwordText', settings: {encryption:{enabled:true}}}" > /tmp/session01.json
 
       # c8y settings update encryption.enabled true
       c8y sessions set --session /tmp/session01.json > /dev/null
@@ -80,7 +80,7 @@ tests:
         token: r/.*
         host: $C8Y_HOST
         tenant: r/t[0-9]+$
-        username: r/$C8Y_USERNAME
+        username: r/$C8Y_USER
         password: r/^{encrypted}.+$
 
   It loads a session from a folder by name:

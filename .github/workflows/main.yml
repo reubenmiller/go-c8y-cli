@@ -65,6 +65,7 @@ jobs:
       C8Y_HOST: ${{ secrets.C8Y_HOST }}
       C8Y_TENANT: ${{ secrets.C8Y_TENANT }}
       C8Y_USER: ${{ secrets.C8Y_USER }}
+      C8Y_USERNAME: ${{ secrets.C8Y_USER }}
       C8Y_PASSWORD: ${{ secrets.C8Y_PASSWORD }}
 
       # Max timeout for each request (in milliseconds)
@@ -99,7 +100,7 @@ jobs:
         c8y currentuser get --select id
         make test_cli
       shell: bash
-      timeout-minutes: 10
+      timeout-minutes: 20
 
   test-pwsh:
     runs-on: ${{ matrix.os }}
