@@ -34,11 +34,11 @@ func NewCreateCmd(f *cmdutil.Factory) *CreateCmd {
 		Short: "Create firmware package version",
 		Long:  `Create a new firmware package version (managedObject)`,
 		Example: heredoc.Doc(`
-			$ c8y firmware create --version "1.0.0" --file "./python3.deb"
-			Create a new version using a binary file. The binary will be uploaded to Cumulocity
+			$ c8y firmware versions create --firmware "linux-os1" --version "1.0.0" --file "./python3.deb"
+			Create a new version using a binary file and link it to the existing "linux-os1" firmware. The binary will be uploaded to Cumulocity
 
-			$ c8y firmware create --version "1.0.0" --url "https://blob.azure.com/device-firmare/1.0.0/image.mender"
-			Create a new version with an external URL
+			$ c8y firmware versions create --firmware "linux-os1" --version "1.0.0" --url "https://blob.azure.com/device-firmare/1.0.0/image.mender"
+			Create a new version with an external URL and link it to the existing "linux-os1" firmware
 			`),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
 			return f.CreateModeEnabled()
