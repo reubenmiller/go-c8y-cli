@@ -24,11 +24,14 @@ Install a software package version
 
 ```
       --action string           Software action (default "install")
+  -d, --data string             static data to be applied to body. accepts json or shorthand json, i.e. --data 'value1=1,my.nested.value=100'
       --description string      Operation description (default "Install software package")
       --device strings          Device or agent where the software should be installed (accepts pipeline)
   -h, --help                    help for install
       --processingMode string   Cumulocity processing mode
       --software string         Software name (required)
+      --template string         Body template
+      --templateVars string     Body template variables
       --url string              Software url
       --version string          Software version id or name
 ```
