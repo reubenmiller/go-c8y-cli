@@ -24,9 +24,17 @@ After the installation, follow the instructions to [setup your shell profile](/d
 1. Configure the repository
 
     ```bash
-    sudo sh -c "curl https://reubenmiller.jfrog.io/artifactory/api/security/keypair/public/repositories/c8y-debian | apt-key add -"
-    sudo sh -c "echo 'deb https://reubenmiller.jfrog.io/artifactory/c8y-debian stable main' >> /etc/apt/sources.list"
+    curl https://reubenmiller.github.io/c8y-debian/PUBLIC.KEY | sudo apt-key add -
+    sudo sh -c "echo 'deb http:// stable main' >> /etc/apt/sources.list"
     ```
+
+    :::caution
+    The Debian/Ubuntu repository has been renamed due to an issue with the previous repository hosting service (reported on 2022-01-10).
+
+    The repository was renamed from `http://reubenmiller.jfrog.io/artifactory/c8y-debian` to `http://reubenmiller.github.io/c8y-debian`.
+
+    Please remove the old repository from your `/etc/apt/sources.list` file.
+    :::
 
     :::note
     The distribution is set to `stable` so that the same string can be used in all Debian based operating systems (i.e. Debian, Ubuntu etc.)
