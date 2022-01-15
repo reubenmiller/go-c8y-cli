@@ -6,6 +6,7 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/reubenmiller/go-c8y-cli/pkg/timestamp"
 	"github.com/spf13/cobra"
 )
 
@@ -14,6 +15,12 @@ var ErrInvalidDuration = errors.New("invalid duration")
 
 // GetDuration get duration with an option of assuming the string is referring to seconds
 func GetDuration(v string, inferUnit bool, unit time.Duration) (time.Duration, error) {
+
+	// Accept more duration formations like "30d" which is not natively supported by go
+	if d, err := timestamp.ParseDuration(v); err == nil {
+		return d, nil
+	}
+
 	d, err := time.ParseDuration(v)
 	if err == nil {
 		return d, nil

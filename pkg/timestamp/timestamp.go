@@ -26,6 +26,12 @@ func GetTimestampUsingOffset(now time.Time, offsetDuration string) (*time.Time, 
 	return &another, nil
 }
 
+// ParseDuration converts a duration string representation to a time.Duration
+// The duration is in reference to now.
+func ParseDuration(duration string) (time.Duration, error) {
+	return tparse.AbsoluteDuration(time.Now(), duration)
+}
+
 func FormatC8yTimestamp(timestamp time.Time, encode bool) string {
 	if encode {
 		return EncodeC8yTimestamp(timestamp.Format(time.RFC3339Nano))
