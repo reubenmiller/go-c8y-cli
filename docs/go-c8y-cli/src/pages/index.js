@@ -108,9 +108,8 @@ export default function Home() {
         <main style={mainStyle}>
           <section>
             <Video
-              videoSrcURL="https://asciinema.org/a/413796/embed?speed=1.0&autoplay=false&size=small&rows=30"
+              videoSrcURL="https://asciinema.org/a/413796/iframe?speed=1.0&autoplay=false&fontSize=small&rows=30"
               videoTitle="go-c8y-cli demo"
-              width="90%"
               height="600px"
               ></Video>
           </section>

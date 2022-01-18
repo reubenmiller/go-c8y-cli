@@ -26,7 +26,7 @@ The demo scripts are used to run multiple command and simulate typing before the
     import Video from '@site/src/components/video';
 
     <Video
-    videoSrcURL="https://asciinema.org/a/414235/embed?speed=1.0&autoplay=false&size=small&rows=30"
+    videoSrcURL="https://asciinema.org/a/414235/iframe?speed=1.0&autoplay=false&size=small&rows=30"
     videoTitle="Activitylog example"
     width="90%"
     height="600px"

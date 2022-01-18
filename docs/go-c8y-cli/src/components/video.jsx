@@ -23,7 +23,11 @@ const Video = ({ videoSrcURL, videoTitle, width, height, ...props }) => (
       webkitallowfullscreen="true"
       mozallowfullscreen="true"
       allowFullScreen
-      style={{ width, height, overflow: 'hidden', margin: 0, border: 0, display: 'inline-block', float: 'none' }}
+      style={{
+        width: width || '35%',
+        minWidth: "640px",
+        maxWidth: "1280px",
+        height, overflow: 'hidden', margin: 0, border: 0, display: 'inline-block', float: 'none' }}
       {...props}
     />
   </div>

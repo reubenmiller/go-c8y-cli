@@ -9,7 +9,7 @@ import Video from '@site/src/components/video';
 ## Demo
 
 <Video
-  videoSrcURL="https://asciinema.org/a/414288/embed?speed=1.0&autoplay=false&size=small&rows=25"
+  videoSrcURL="https://asciinema.org/a/414288/iframe?speed=1.0&autoplay=false&size=small&rows=25"
   videoTitle="Select example"
   width="90%"
   height="500px"

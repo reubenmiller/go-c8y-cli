@@ -15,10 +15,10 @@ c8y software versions create [flags]
 ### Examples
 
 ```
-$ c8y software create --version "1.0.0" --file "./python3.deb"
+$ c8y software versions create --software "my-app" --version "1.0.0" --file "./python3.deb"
 Create a new version using a binary file. The binary will be uploaded to Cumulocity
 
-$ c8y software create --version "1.0.0" --url "https://"
+$ c8y software versions create --software "my-app" --version "1.0.0" --url "https://"
 Create a new version with an external URL
 
 ```

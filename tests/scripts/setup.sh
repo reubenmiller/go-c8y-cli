@@ -29,6 +29,8 @@ setup () {
 
     create_firmware "iot-linux"
     create_firmware_version "iot-linux" "1.0.0" "https://example.com"
+
+    create_device_profile "profile01"
 }
 
 create_user () {
@@ -94,6 +96,12 @@ create_firmware_version () {
     local url="$3"
     c8y firmware versions get --firmware "$name" --id "$version" --silentStatusCodes 404 ||
         c8y firmware versions create --firmware "$name" --version "$version" --url "$url"
+}
+
+create_device_profile () {
+    local name="$1"
+    c8y deviceprofiles get --id "$name" --silentStatusCodes 404 ||
+        c8y deviceprofiles create --name "$name"
 }
 
 setup

@@ -23,10 +23,13 @@ Install a firmware version
 ### Options
 
 ```
+  -d, --data string             static data to be applied to body. accepts json or shorthand json, i.e. --data 'value1=1,my.nested.value=100'
       --device strings          Device or agent where the firmware should be installed (accepts pipeline)
       --firmware string         Firmware name (required)
   -h, --help                    help for install
       --processingMode string   Cumulocity processing mode
+      --template string         Body template
+      --templateVars string     Body template variables
       --url string              Firmware url. TODO, not currently automatically added
       --version string          Firmware version
 ```

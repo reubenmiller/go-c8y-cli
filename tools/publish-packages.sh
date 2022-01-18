@@ -101,7 +101,7 @@ publish_all_alpine_packages () {
 publish_rpm_package () {
     local file="$1"
     local arch="$2"
-    local DISTRIBUTIONS="cosmic eoan disco groovy focal stable oldstable testing sid unstable buster bullseye stretch jessie bionic trusty precise xenial hirsute impish kali-rolling"
+    local DISTRIBUTIONS="stable"
     local TARGET_PROPS="$(echo "$DISTRIBUTIONS" | sed 's/ /,/g')"
     jfrog rt upload \
         --url "$JFROG_URL/$RPM_REPO" \

@@ -1,0 +1,15 @@
+name: publish-linux-packages
+
+on:
+  release:
+    types: [released]
+
+jobs:
+  publish_to_repo:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger publish to apt/apk/rpm repositories
+        run: |
+          gh workflow run publish.yml -R reubenmiller/go-c8y-cli-repo
+        env:
+          GITHUB_TOKEN: ${{ secrets.CR_PAT }}
