@@ -490,6 +490,37 @@ func WithStringSliceValues(opts ...string) GetOption {
 			}
 		}
 
+		var overrideValue iterator.Iterator
+		if len(nonEmptyValues) > 0 {
+			overrideValue = iterator.NewSliceIterator(nonEmptyValues)
+		}
+
+		if inputIterators != nil && inputIterators.PipeOptions.Name == src {
+			hasPipeSupport := inputIterators.PipeOptions.Name == src
+			pipeIter, err := NewFlagWithPipeIterator(cmd, inputIterators.PipeOptions, hasPipeSupport)
+
+			if err == iterator.ErrEmptyPipeInput && !inputIterators.PipeOptions.EmptyPipe {
+				return inputIterators.PipeOptions.Property, nil, err
+			}
+
+			if err != nil || pipeIter == nil {
+				return "", nil, err
+			}
+
+			if pipeIter.IsBound() {
+				// Use infinite slice iterator so that the stdin can drive the iteration
+				// but only if the other pipe iterator is bound, otherwise it would create an infinite loop!
+				overrideValue = iterator.NewInfiniteSliceIterator(nonEmptyValues)
+			}
+
+			iter := iterator.NewOverrideIterator(pipeIter, overrideValue)
+			return inputIterators.PipeOptions.Property, iter, nil
+		}
+
+		if len(nonEmptyValues) == 0 {
+			return "", nonEmptyValues, nil
+		}
+
 		return dst, nonEmptyValues, err
 	}
 }
