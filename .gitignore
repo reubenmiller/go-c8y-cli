@@ -52,3 +52,5 @@ docs/go-c8y-cli/i18n
 tools/docs/demos/*.asc
 pkg/cmd/__debug_bin
 tools/shell/completion/output/
+.env
+*.env

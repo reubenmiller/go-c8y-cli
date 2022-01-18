@@ -52,7 +52,7 @@ Describe -Name "c8y select global parameter" {
         $LASTEXITCODE | Should -Be 0
         $output | Should -Not -BeNullOrEmpty
         $output | Should -HaveCount 2
-        $output | Should -MatchExactly "^\d+,\w+$"
+        $output | Should -MatchExactly "^\d+,[\-\w]+$"
     }
 
     It "returns output which can be read via csv (without headers)" {
@@ -82,7 +82,7 @@ Describe -Name "c8y select global parameter" {
         $LASTEXITCODE | Should -Be 0
         $json = $output | ConvertFrom-Json
         $json."id" | Should -MatchExactly "^\d+$"
-        $json."name" | Should -MatchExactly "^\w+$"
+        $json."name" | Should -MatchExactly "^[\-\w]+$"
     }
 
     It "includes empty objects in the response" {

@@ -13,6 +13,12 @@ It is recommended to install `go-c8y-cli` using a package manager as it makes it
 
 After the installation, follow the instructions to [setup your shell profile](/docs/installation/shell-installation#setting-up-your-shell-profile).
 
+:::warning WARNING 2022-01-10
+The Linux repositories (Debian/Ubuntu/CentOs/RHEL/Fedora/Alpine) have been moved due to an issue with the previous hosting service.
+
+The instructions have been updated to reflect the new url. Please remove any existing settings containing the string `https://reubenmiller.jfrog.io/artifactory` from your repository configuration and then repeat the installation instructions.
+:::
+
 ### Debian / Ubuntu (apt)
 
 1. Install the apt dependencies
@@ -21,25 +27,38 @@ After the installation, follow the instructions to [setup your shell profile](/d
     sudo apt-get install -y curl gnupg2 apt-transport-https
     ```
 
-1. Configure the repository
+    :::note
+    The command requires you to already have `sudo` installed. Most installations will have sudo by default so you don't need to do anything, however if you don't have it, install it via apt when running as a root user.
+    :::
+
+2. Configure the repository
+
+    **Debian >=9 and Ubuntu >= 16.04**
 
     ```bash
-    sudo sh -c "curl https://reubenmiller.jfrog.io/artifactory/api/security/keypair/public/repositories/c8y-debian | apt-key add -"
-    sudo sh -c "echo 'deb https://reubenmiller.jfrog.io/artifactory/c8y-debian stable main' >> /etc/apt/sources.list"
+    curl https://reubenmiller.github.io/go-c8y-cli-repo/debian/PUBLIC.KEY | gpg --dearmor | sudo tee /usr/share/keyrings/go-c8y-cli-archive-keyring.gpg >/dev/null
+    sudo sh -c "echo 'deb [signed-by=/usr/share/keyrings/go-c8y-cli-archive-keyring.gpg] http://reubenmiller.github.io/go-c8y-cli-repo/debian stable main' >> /etc/apt/sources.list"
     ```
 
     :::note
-    The distribution is set to `stable` so that the same string can be used in all Debian based operating systems (i.e. Debian, Ubuntu etc.)
+    This step does not make use of `apt-key` as it has been deprecated. The gpg key is stored in an individual store only related to the go-c8y-cli repository, and it is linked via the apt.source settings using the `signed-by` property.
     :::
 
-2. Update the repo then install/update `go-c8y-cli`
+    **Debian <=8 and Ubuntu <= 14.04**
+
+    ```bash
+    curl https://reubenmiller.github.io/go-c8y-cli-repo/debian/PUBLIC.KEY | sudo apt-key add -
+    sudo sh -c "echo 'deb https://reubenmiller.github.io/go-c8y-cli-repo/debian stable main' >> /etc/apt/sources.list"
+    ```
+
+3. Update the repo then install/update `go-c8y-cli`
 
     ```bash
     sudo apt-get update
     sudo apt-get install go-c8y-cli
     ```
 
-3. Follow the instructions to [setup your shell profile](/docs/installation/shell-installation#setting-up-your-shell-profile)
+4. Follow the instructions to [setup your shell profile](/docs/installation/shell-installation#setting-up-your-shell-profile)
 
 ### CentOS/RHEL/Fedora (dnf/yum)
 
@@ -48,19 +67,18 @@ After the installation, follow the instructions to [setup your shell profile](/d
     Create a new file using your editor of choice (vi, vim, nano etc.)
 
     ```sh
-    sudo vi /etc/yum.repos.d/artifactory.repo
+    sudo vi /etc/yum.repos.d/go-c8y-cli.repo
     ```
 
     Then add the following contents to it and save the file.
 
-    ```text title="/etc/yum.repos.d/artifactory.repo"
-    [Artifactory]
-    name=Artifactory
-    baseurl=https://reubenmiller.jfrog.io/artifactory/c8y-rpm
+    ```text title="/etc/yum.repos.d/go-c8y-cli.repo"
+    [go-c8y-cli]
+    name=go-c8y-cli packages
+    baseurl=https://reubenmiller.github.io/go-c8y-cli-repo/rpm/stable
     enabled=1
-    gpgcheck=0
-    gpgkey=https://reubenmiller.jfrog.io/artifactory/c8y-rpm/repodata/repomd.xml.key
-    repo_gpgcheck=1
+    gpgcheck=1
+    gpgkey=https://reubenmiller.github.io/go-c8y-cli-repo/rpm/PUBLIC.KEY
     ```
 
 2. Update the repo then install/update `go-c8y-cli`
@@ -78,33 +96,34 @@ You can install `go-c8y-cli` via `yum` by just replacing `dnf` with `yum` in the
 
 ### Alpine (apk)
 
+:::note
+The following commands require sudo. If you don't have `sudo` installed, then remove the `sudo` from the command, and run as root user.
+:::
+
 1. Install the apk dependencies
 
     ```bash
     sudo apk add wget
     ```
 
-1. Configure the repository
+2. Configure the repository
 
     ```bash
-    sudo wget -O /etc/apk/keys/rmiller-rsa-signing.rsa.pub https://reubenmiller.jfrog.io/artifactory/api/security/keypair/public/repositories/c8y-alpine
+    sudo wget -O /etc/apk/keys/reuben.d.miller\@gmail.com-61e3680b.rsa.pub https://reubenmiller.github.io/go-c8y-cli-repo/alpine/PUBLIC.KEY
 
     # Add the repo
-    sudo sh -c "echo 'https://reubenmiller.jfrog.io/artifactory/c8y-alpine/stable/main'" >> /etc/apk/repositories
+    sudo sh -c "echo 'https://reubenmiller.github.io/go-c8y-cli-repo/alpine/stable/main'" >> /etc/apk/repositories
     ```
 
-2. Update the repo then install/update `go-c8y-cli`
+3. Update the repo then install/update `go-c8y-cli`
 
     ```bash
     sudo apk update
     sudo apk add go-c8y-cli
     ```
 
-3. Follow the instructions to [setup your shell profile](/docs/installation/shell-installation#setting-up-your-shell-profile)
+4. Follow the instructions to [setup your shell profile](/docs/installation/shell-installation#setting-up-your-shell-profile)
 
-:::note
-If you don't have `sudo` installed, then remove the `sudo` from the command, and run as root user.
-:::
 
 ### MacOS/Linux (Homebrew)
 
