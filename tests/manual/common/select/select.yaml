@@ -53,8 +53,8 @@ tests:
     stdout:
       line-count: 2
       lines:
-        1: r/^\d+,\w+$
-        2: r/^\d+,\w+$
+        1: r/^\d+,[\-\w]+$
+        2: r/^\d+,[\-\w]+$
 
   It returns output which can be read via csv (without headers):
     command: |
