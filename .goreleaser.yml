@@ -157,6 +157,7 @@ brews:
     # IDs of the archives to use.
     ids:
       - homebrew
+      - nix
 
     # GOARM to specify which 32-bit arm version to use if there are multiple versions
     # from the build section. Brew formulas support atm only one 32-bit version.
