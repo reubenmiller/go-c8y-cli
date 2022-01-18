@@ -26,25 +26,40 @@ builds:
   - <<: *build_defaults
     id: linux
     goos: [linux]
-    goarch: [386, arm, amd64, arm64]
+    goarch: ["386", arm, amd64, arm64]
     goarm:
-    - 5
-    - 6
-    - 7
+    - "5"
+    - "6"
+    - "7"
     env:
       - CGO_ENABLED=0
 
   - <<: *build_defaults
     id: windows
     goos: [windows]
-    goarch: [386, amd64]
+    goarch: ["386", amd64]
 
 archives:
   - id: nix
-    builds: [macos, linux]
+    builds: [linux]
     <<: &archive_defaults
       name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}{{ if .Arm }}v{{ .Arm }}{{ end }}"
-    wrap_in_directory: true
+    wrap_in_directory: "true"
+    format: tar.gz
+    files:
+      - LICENSE
+      - ./share/man/man1/c8y*.1
+      - .go-c8y-cli/README.md
+      - .go-c8y-cli/install.*
+      - .go-c8y-cli/settings.*
+      - .go-c8y-cli/shell
+      - .go-c8y-cli/templates
+      - .go-c8y-cli/views
+
+  - id: homebrew
+    builds: [macos]
+    <<: *archive_defaults
+    wrap_in_directory: "true"
     replacements:
       darwin: macOS
     format: tar.gz
@@ -61,7 +76,7 @@ archives:
   - id: windows
     builds: [windows]
     <<: *archive_defaults
-    wrap_in_directory: false
+    wrap_in_directory: "false"
     format: zip
     files:
       - LICENSE
@@ -140,13 +155,13 @@ brews:
     name: go-c8y-cli
 
     # IDs of the archives to use.
-    # ids:
-    # - c8y
+    ids:
+      - homebrew
 
     # GOARM to specify which 32-bit arm version to use if there are multiple versions
     # from the build section. Brew formulas support atm only one 32-bit version.
     # Default is 6 for all artifacts or each id if there a multiple versions.
-    goarm: 6
+    goarm: "6"
 
     # GitHub/GitLab repository to push the formula to
     tap:
