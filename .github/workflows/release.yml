@@ -31,7 +31,13 @@ jobs:
           GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
           HOMEBREW_TAP_GITHUB_TOKEN: ${{secrets.HOMEBREW_TAP_GITHUB_TOKEN}}
 
+      # Skip publishing to jfrog as linux packages hosting has been moved
+      # to a custom github repo: reubenmiller/go-c8y-cli-repo
+      # Depending on how stable the new setup is, this task could be removed in the future
+      # The publishing of the current released package is done via a different github action
+      # "publish-linux-packages" once the release has been officially approved.
       - name: Publish Linux Packages
+        if: ${{ false }}
         run: make publish-linux-packages
         env:
           JFROG_APIKEY: ${{ secrets.JFROG_APIKEY }}
