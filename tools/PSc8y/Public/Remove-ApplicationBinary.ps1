@@ -39,7 +39,7 @@ Remove all application binaries (except for the active one) for an application (
                    ValueFromPipeline=$true,
                    ValueFromPipelineByPropertyName=$true)]
         [Alias("id")]
-        [string[]]
+        [object[]]
         $BinaryId
     )
     DynamicParam {
