@@ -292,8 +292,12 @@
         ],
         "go": [
           {
-            "description": "Install a firmware version",
+            "description": "Install a firmware version (lookup url automatically).\nIf the firmware/version exists in the firmware repository, then it will add the url automatically\n",
             "command": "c8y firmware versions install --device 1234 --firmware linux-iot --version 1.0.0"
+          },
+          {
+            "description": "Install a firmware version with an explicit url",
+            "command": "c8y firmware versions install --device 1234 --firmware linux-iot --version 1.0.0 --url \"https://my.blobstore.com/linux-iot.tar.gz\""
           }
         ]
       },
@@ -327,7 +331,19 @@
           "type": "string",
           "required": false,
           "property": "c8y_Firmware.url",
-          "description": "Firmware url. TODO, not currently automatically added"
+          "description": "Firmware url. Leave blank to automatically set it if a matching firmware/version is found in the c8y firmware repository"
+        },
+        {
+          "name": "firmwareDetails",
+          "type": "firmwareDetails",
+          "position": 98,
+          "property": "c8y_Firmware",
+          "description": "Computed parameter which is filled in when the firmware details, name, version and url"
+        },
+        {
+          "name": "description",
+          "type": "string",
+          "description": "Operation description"
         },
         {
           "name": "data",
@@ -339,7 +355,11 @@
         "deviceId",
         "c8y_Firmware.name",
         "c8y_Firmware.version"
-      ]
+      ],
+      "bodyTemplate": {
+        "type": "jsonnet",
+        "template": "{\n  _version:: if std.objectHas(self.c8y_Firmware, 'version') then self.c8y_Firmware.version else '',\n  description:\n    ('Update firmware to: \"%s\"' % self.c8y_Firmware.name)\n    + (if self._version != \"\" then \" (%s)\" % self._version else \"\")\n}\n"
+      }
     }
   ]
 }

@@ -35,7 +35,12 @@ func NewInstallCmd(f *cmdutil.Factory) *InstallCmd {
 		Long:  `Install firmware version on a device`,
 		Example: heredoc.Doc(`
 $ c8y firmware versions install --device 1234 --firmware linux-iot --version 1.0.0
-Install a firmware version
+Install a firmware version (lookup url automatically).
+If the firmware/version exists in the firmware repository, then it will add the url automatically
+
+
+$ c8y firmware versions install --device 1234 --firmware linux-iot --version 1.0.0 --url "https://my.blobstore.com/linux-iot.tar.gz"
+Install a firmware version with an explicit url
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
 			return f.CreateModeEnabled()
@@ -48,7 +53,8 @@ Install a firmware version
 	cmd.Flags().StringSlice("device", []string{""}, "Device or agent where the firmware should be installed (accepts pipeline)")
 	cmd.Flags().String("firmware", "", "Firmware name (required)")
 	cmd.Flags().String("version", "", "Firmware version")
-	cmd.Flags().String("url", "", "Firmware url. TODO, not currently automatically added")
+	cmd.Flags().String("url", "", "Firmware url. Leave blank to automatically set it if a matching firmware/version is found in the c8y firmware repository")
+	cmd.Flags().String("description", "", "Operation description")
 
 	completion.WithOptions(
 		cmd,
@@ -141,6 +147,16 @@ func (n *InstallCmd) RunE(cmd *cobra.Command, args []string) error {
 		flags.WithStringValue("firmware", "c8y_Firmware.name"),
 		flags.WithStringValue("version", "c8y_Firmware.version"),
 		flags.WithStringValue("url", "c8y_Firmware.url"),
+		c8yfetcher.WithFirmwareVersionData(client, "firmware", "version", "url", args, "", "c8y_Firmware"),
+		flags.WithStringValue("description", "description"),
+		flags.WithDefaultTemplateString(`
+{
+  _version:: if std.objectHas(self.c8y_Firmware, 'version') then self.c8y_Firmware.version else '',
+  description:
+    ('Update firmware to: "%s"' % self.c8y_Firmware.name)
+    + (if self._version != "" then " (%s)" % self._version else "")
+}
+`),
 		cmdutil.WithTemplateValue(cfg),
 		flags.WithTemplateVariablesValue(),
 		flags.WithRequiredProperties("deviceId", "c8y_Firmware.name", "c8y_Firmware.version"),

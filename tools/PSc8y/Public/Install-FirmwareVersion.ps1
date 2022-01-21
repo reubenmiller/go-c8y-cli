@@ -38,10 +38,15 @@ Get a firmware version
         [object[]]
         $Version,
 
-        # Firmware url. TODO, not currently automatically added
+        # Firmware url. Leave blank to automatically set it if a matching firmware/version is found in the c8y firmware repository
         [Parameter()]
         [string]
-        $Url
+        $Url,
+
+        # Operation description
+        [Parameter()]
+        [string]
+        $Description
     )
     DynamicParam {
         Get-ClientCommonParameters -Type "Create", "Template"

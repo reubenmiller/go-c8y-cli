@@ -24,6 +24,9 @@ setup () {
     create_firmware "iot-linux"
     create_firmware_version "iot-linux" "1.0.0" "https://example.com"
 
+    create_software "my-app"
+    create_software_version "my-app" "1.2.3" "https://example.com/debian/my-app-1.2.3.deb"
+
     create_device_profile "profile01"
 }
 
@@ -73,6 +76,20 @@ create_firmware_version () {
     local url="$3"
     c8y firmware versions get --firmware "$name" --id "$version" --silentStatusCodes 404 ||
         c8y firmware versions create --firmware "$name" --version "$version" --url "$url"
+}
+
+create_software () {
+    local name="$1"
+    c8y software get --id "$name" --silentStatusCodes 404 ||
+        c8y software create --name "$name"
+}
+
+create_software_version () {
+    local name="$1"
+    local version="$2"
+    local url="$3"
+    c8y software versions get --software "$name" --id "$version" --silentStatusCodes 404 ||
+        c8y software versions create --software "$name" --version "$version" --url "$url"
 }
 
 create_device_profile () {

@@ -118,6 +118,10 @@
         # firmware version name
         "firmwareversionName" = "flags.WithStringValue(`"${prop}`", `"${queryParam}`"),"
 
+        "firmwareDetails" = @(
+            "c8yfetcher.WithFirmwareVersionData(client, `"firmware`", `"version`", `"url`", args, `"`", `"${queryParam}`"),"
+        ) -join "`n"
+
         # firmware version patch array
         "[]firmwarepatch" = "c8yfetcher.WithFirmwarePatchByNameFirstMatch(client, args, `"${prop}`", `"${queryParam}`"),"
 

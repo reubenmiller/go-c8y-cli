@@ -36,6 +36,12 @@ func NewInstallCmd(f *cmdutil.Factory) *InstallCmd {
 		Example: heredoc.Doc(`
 $ c8y software versions install --device 1234 --software go-c8y-cli --version 1.0.0
 Install a software package version
+If the software/version exists in the software repository, then it will add the url automatically
+
+
+$ c8y software versions install --device 1234 --software go-c8y-cli --version 1.0.0 --url "https://mybloblstore/go-c8y-cli.deb"
+Install a software package version with an explicit url
+
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
 			return f.CreateModeEnabled()
@@ -48,7 +54,7 @@ Install a software package version
 	cmd.Flags().StringSlice("device", []string{""}, "Device or agent where the software should be installed (accepts pipeline)")
 	cmd.Flags().String("software", "", "Software name (required)")
 	cmd.Flags().String("version", "", "Software version id or name")
-	cmd.Flags().String("url", "", "Software url")
+	cmd.Flags().String("url", "", "Software url. Leave blank to automatically set it if a matching firmware/version is found in the c8y firmware repository")
 	cmd.Flags().String("description", "Install software package", "Operation description")
 	cmd.Flags().String("action", "install", "Software action")
 

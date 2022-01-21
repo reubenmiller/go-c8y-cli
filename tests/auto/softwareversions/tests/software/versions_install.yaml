@@ -1,11 +1,26 @@
 tests:
-    software/versions_install_Install a software package version:
-        command: c8y software versions install --device 1234 --software go-c8y-cli --version 1.0.0
+    ? |
+        software/versions_install_Install a software package version
+        If the software/version exists in the software repository, then it will add the url automatically
+    :   command: c8y software versions install --device 1234 --software go-c8y-cli --version 1.0.0
         exit-code: 0
         skip: true
         stdout:
             json:
                 body.c8y_SoftwareUpdate.0.name: go-c8y-cli
+                body.c8y_SoftwareUpdate.0.version: 1.0.0
+                body.deviceId: "1234"
+                method: POST
+                path: /devicecontrol/operations
+    ? |
+        software/versions_install_Install a software package version with an explicit url
+    :   command: c8y software versions install --device 1234 --software go-c8y-cli --version 1.0.0 --url "https://mybloblstore/go-c8y-cli.deb"
+        exit-code: 0
+        skip: true
+        stdout:
+            json:
+                body.c8y_SoftwareUpdate.0.name: go-c8y-cli
+                body.c8y_SoftwareUpdate.0.url: https://mybloblstore/go-c8y-cli.deb
                 body.c8y_SoftwareUpdate.0.version: 1.0.0
                 body.deviceId: "1234"
                 method: POST

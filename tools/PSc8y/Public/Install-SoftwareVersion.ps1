@@ -38,7 +38,7 @@ Get a software package
         [object[]]
         $Version,
 
-        # Software url
+        # Software url. Leave blank to automatically set it if a matching firmware/version is found in the c8y firmware repository
         [Parameter()]
         [string]
         $Url,
