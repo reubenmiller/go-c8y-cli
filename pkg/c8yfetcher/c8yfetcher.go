@@ -695,7 +695,7 @@ func WithSoftwareVersionData(client *c8y.Client, flagSoftware, flagVersion, flag
 		output := map[string]string{}
 
 		// If version is empty, then pass the values as is
-		if version == "" {
+		if version == "" || (software != "" && version != "" && url != "") {
 			output["name"] = software
 			output["version"] = version
 			output["url"] = url
@@ -779,6 +779,72 @@ func WithFirmwareVersionByNameFirstMatch(client *c8y.Client, args []string, opts
 		}
 		opt := WithReferenceByNameFirstMatch(client, NewFirmwareVersionFetcher(client, firmware, false), args, opts...)
 		return opt(cmd, inputIterators)
+	}
+}
+
+// WithFirmwareVersionData adds firmware information (name, version and url)
+func WithFirmwareVersionData(client *c8y.Client, flagFirmware, flagVersion, flagURL string, args []string, opts ...string) flags.GetOption {
+	return func(cmd *cobra.Command, inputIterators *flags.RequestInputIterators) (string, interface{}, error) {
+		var err error
+		firmware := ""
+		if v, err := flags.GetFlagStringValues(cmd, flagFirmware); err == nil && len(v) > 0 {
+			firmware = v[0]
+		}
+
+		version := ""
+		if v, err := flags.GetFlagStringValues(cmd, flagVersion); err == nil && len(v) > 0 {
+			version = v[0]
+		}
+
+		url := ""
+		if v, err := flags.GetFlagStringValues(cmd, flagURL); err == nil && len(v) > 0 {
+			url = v[0]
+		}
+
+		_, dst, _ := flags.UnpackGetterOptions("", opts...)
+
+		output := map[string]string{}
+
+		// If version is empty, or all values are provided, then pass the values as is
+		if version == "" || (firmware != "" && version != "" && url != "") {
+			output["name"] = firmware
+			output["version"] = version
+			output["url"] = url
+			return dst, output, nil
+		}
+
+		// Check for explicit managed object id
+		if IsID(version) {
+			mo, _, err := client.Inventory.GetManagedObject(WithDisabledDryRunContext(client), version, &c8y.ManagedObjectOptions{
+				WithParents: true,
+			})
+
+			if err != nil {
+				return "", "", err
+			}
+
+			output["name"] = mo.Item.Get("additionParents.references.0.managedObject.name").String()
+			output["version"] = mo.Item.Get("c8y_Firmware.version").String()
+			output["url"] = mo.Item.Get("c8y_Firmware.url").String()
+
+			return dst, output, nil
+		}
+
+		// Lookup version (and software if not already resolved)
+		versionCol, _, err := client.Firmware.GetFirmwareVersionsByName(WithDisabledDryRunContext(client), firmware, version, true, c8y.NewPaginationOptions(5))
+		if err != nil {
+			return "", "", err
+		}
+
+		if len(versionCol.ManagedObjects) == 0 {
+			return "", "", cmderrors.NewNoMatchesFoundError(flagVersion)
+		}
+
+		output["version"] = versionCol.Items[0].Get("c8y_Firmware.version").String()
+		output["url"] = versionCol.Items[0].Get("c8y_Firmware.url").String()
+		output["name"] = versionCol.Items[0].Get("additionParents.references.0.managedObject.name").String()
+
+		return dst, output, err
 	}
 }
 

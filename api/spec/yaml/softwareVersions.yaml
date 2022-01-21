@@ -185,8 +185,15 @@ endpoints:
           command: Install-SoftwareVersion -Device $mo.id -Software go-c8y-cli -Version 1.0.0
 
       go:
-        - description: Install a software package version
+        - description: |
+            Install a software package version
+            If the software/version exists in the software repository, then it will add the url automatically
           command: c8y software versions install --device 1234 --software go-c8y-cli --version 1.0.0
+          skipTest: true
+
+        - description: |
+            Install a software package version with an explicit url
+          command: c8y software versions install --device 1234 --software go-c8y-cli --version 1.0.0 --url "https://mybloblstore/go-c8y-cli.deb"
           skipTest: true
 
     body:
@@ -214,7 +221,8 @@ endpoints:
         type: 'string'
         required: false
         property: c8y_SoftwareUpdate.0.url
-        description: Software url
+        description: Software url. Leave blank to automatically set it if a matching firmware/version is found in the c8y firmware repository
+
 
       - name: description
         type: string
