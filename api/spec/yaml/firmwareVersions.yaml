@@ -225,6 +225,7 @@ endpoints:
             Install a firmware version (lookup url automatically).
             If the firmware/version exists in the firmware repository, then it will add the url automatically
           command: c8y firmware versions install --device 1234 --firmware linux-iot --version 1.0.0
+          skipTest: true
 
         - description: Install a firmware version with an explicit url
           command: c8y firmware versions install --device 1234 --firmware linux-iot --version 1.0.0 --url "https://my.blobstore.com/linux-iot.tar.gz"

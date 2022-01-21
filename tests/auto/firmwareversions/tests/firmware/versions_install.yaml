@@ -4,6 +4,7 @@ tests:
         If the firmware/version exists in the firmware repository, then it will add the url automatically
     :   command: c8y firmware versions install --device 1234 --firmware linux-iot --version 1.0.0
         exit-code: 0
+        skip: true
         stdout:
             json:
                 body.c8y_Firmware.name: linux-iot
