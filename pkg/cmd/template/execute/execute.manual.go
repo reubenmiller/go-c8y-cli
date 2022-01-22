@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"io"
+	"strconv"
 
 	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmd/subcommand"
@@ -71,6 +72,21 @@ Pass external json data into the template, and reference it via the "input.value
 	return ccmd
 }
 
+func formatOutput(response []byte) []byte {
+	// Strip trailing newline (if present)
+	if bytes.HasSuffix(response, []byte("\n")) {
+		response = response[:len(response)-1]
+	}
+
+	// Unquote string to convert any escape sequences to their representation
+	if bytes.HasPrefix(response, []byte("\"")) && bytes.HasSuffix(response, []byte("\"")) {
+		if out, err := strconv.Unquote(string(response)); err == nil {
+			response = []byte(out)
+		}
+	}
+	return response
+}
+
 func (n *CmdExecute) newTemplate(cmd *cobra.Command, args []string) error {
 	cfg, err := n.factory.Config()
 	if err != nil {
@@ -127,7 +143,8 @@ func (n *CmdExecute) newTemplate(cmd *cobra.Command, args []string) error {
 				return err
 			}
 		} else {
-			fmt.Printf("%s%s", bytes.TrimSpace(responseText), outputEnding)
+			cfg.Logger.Debugf("Processing non-json output")
+			fmt.Printf("%s%s", formatOutput(responseText), outputEnding)
 		}
 
 		if !bounded {

@@ -396,10 +396,15 @@ func (b *MapBuilder) ApplyTemplates(existingJSON []byte, input []byte, appendTem
 		templates = append(templates, strings.TrimSpace(template))
 	}
 
-	if appendTemplates {
-		templates = append([]string{string(existingJSON)}, templates...)
-	} else {
-		templates = append(templates, string(existingJSON))
+	// Only merge in existing JSON if it is not just an empty object
+	// as the other templates might not be objects which can be merged together in jsonne
+	// e.g. "_.Int(1) + {}"  will cause an error
+	if !bytes.Equal(existingJSON, []byte("{}")) {
+		if appendTemplates {
+			templates = append([]string{string(existingJSON)}, templates...)
+		} else {
+			templates = append(templates, string(existingJSON))
+		}
 	}
 
 	var mergedJSON string
