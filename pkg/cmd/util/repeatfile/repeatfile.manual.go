@@ -62,7 +62,7 @@ func NewCmdRepeatFile(f *cmdutil.Factory) *CmdRepeatFile {
 
 			$ c8y util repeatfile *.list --randomSkip 0.5
 			Loop over the files matching the "*.list" in the current directory (uses shell expansion), but randomly
-			skip lines at a propability of 50 percent.
+			skip lines at a probability of 50 percent.
 		`),
 		Args: cobra.MinimumNArgs(1),
 		ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
