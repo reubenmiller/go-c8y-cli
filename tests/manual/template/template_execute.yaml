@@ -7,3 +7,45 @@ tests:
             line-count: 1
             json:
                 ..0.body.nestedProp.otherValue: '1'
+
+    It produces non-json output - integer:
+        command: |
+            c8y template execute --template "_.Int(10, 10)"
+        exit-code: 0
+        stdout:
+            exactly: |
+                10
+
+    It produces non-json output - boolean:
+        command: |
+            c8y template execute --template "true"
+        exit-code: 0
+        stdout:
+            exactly: |
+                true
+    
+    It produces non-json output - string:
+        command: |
+            c8y template execute --template "'device äöüß\n \u0031😀'"
+        exit-code: 0
+        stdout:
+            exactly: |
+                device äöüß
+                 1😀
+
+    It produces non-json output - ini output:
+        command: |
+            c8y template execute --template "std.manifestIni({sections: {main: {one:1,two:'2'}}})"
+        exit-code: 0
+        stdout:
+            exactly: |
+                [main]
+                one = 1
+                two = 2
+    
+    It produces non-json output - timestamp function:
+        command: |
+            c8y template execute --template "_.Now('-30d')"
+        exit-code: 0
+        stdout:
+            match-pattern: ^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?(Z|\+.+)$
