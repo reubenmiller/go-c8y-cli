@@ -10,7 +10,7 @@ Describe -Name "c8y util" {
             $output = c8y util repeat
             $LASTEXITCODE | Should -Be 0
             $output | Should -HaveCount 1
-            $output | Should -BeExactly ""
+            $output | Should -BeExactly " "
         }
 
         It "repeats piped input" {

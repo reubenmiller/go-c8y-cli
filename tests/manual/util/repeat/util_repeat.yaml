@@ -1,0 +1,96 @@
+tests:
+    It accepts output from other c8y util repeat calls:
+        command: |
+            echo "device" | c8y util repeat 2 | c8y util repeat 3 --format "%s_%s"
+        exit-code: 0
+        stdout:
+            exactly: |
+                device_1
+                device_2
+                device_3
+                device_1
+                device_2
+                device_3
+    
+    It repeats text x number of times via flags:
+        command: |
+            c8y util repeat 5 --input "my name"
+        exit-code: 0
+        stdout:
+            exactly: |
+                my name
+                my name
+                my name
+                my name
+                my name
+    
+    It repeats text x number of times via pipeline:
+        command: |
+            echo "my name" | c8y util repeat 4
+        exit-code: 0
+        stdout:
+            exactly: |
+                my name
+                my name
+                my name
+                my name
+    
+    It repeats n times with offset:
+        command: |
+            echo "device" | c8y util repeat 2 --offset 100 --format "%s %05s"
+        exit-code: 0
+        stdout:
+            exactly: |
+                device 00101
+                device 00102
+
+    It repeats n times with a format:
+        command: |
+            echo "my name" | c8y util repeat 2 --format "my prefix - %s"
+        exit-code: 0
+        stdout:
+            exactly: |
+                my prefix - my name
+                my prefix - my name
+    
+    It repeats downstream commands without any input:
+        command: |
+            c8y util repeat 3 | c8y api /service/my-app/health --dry |
+                c8y util show --select path -o csv
+        exit-code: 0
+        stdout:
+            exactly: |
+                /service/my-app/health
+                /service/my-app/health
+                /service/my-app/health
+
+    It repeats indefinitely and control output via head:
+        command: |
+            c8y util repeat --infinite |
+                head -n 4 |
+                c8y api /service/my-app/health --dry |
+                c8y util show --select path -o csv
+        exit-code: 0
+        stdout:
+            exactly: |
+                /service/my-app/health
+                /service/my-app/health
+                /service/my-app/health
+                /service/my-app/health
+
+    It repeats output from other commands and pipes it downstream:
+        command: |
+            c8y devices get --id device01 |
+                c8y util repeat 5 |
+                c8y events create --text "test event" --type "myType" --delay 10ms --dry --dryFormat json |
+                c8y util show --select path,body.type,body.text -o csv
+
+        exit-code: 0
+        stdout:
+            exactly: |
+                /event/events,myType,test event
+                /event/events,myType,test event
+                /event/events,myType,test event
+                /event/events,myType,test event
+                /event/events,myType,test event
+    

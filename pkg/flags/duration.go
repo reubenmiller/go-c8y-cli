@@ -3,6 +3,7 @@ package flags
 import (
 	"errors"
 	"fmt"
+	"math/rand"
 	"strconv"
 	"time"
 
@@ -48,4 +49,31 @@ func GetDurationFlag(cmd *cobra.Command, name string, inferUnit bool, unit time.
 		return time.Duration(0), err
 	}
 	return GetDuration(rawValue, inferUnit, unit)
+}
+
+type DurationGenerator func(time.Duration) time.Duration
+
+// GetDurationGenerator returns a random duration generator func. The generator will return a random duration between the given min or max
+func GetDurationGenerator(cmd *cobra.Command, minFlag, maxFlag string, inferUnit bool, unit time.Duration) (DurationGenerator, error) {
+	minDuration, err := GetDurationFlag(cmd, minFlag, inferUnit, unit)
+	if err != nil {
+		return nil, err
+	}
+	maxDuration, err := GetDurationFlag(cmd, maxFlag, inferUnit, unit)
+	if err != nil {
+		return nil, err
+	}
+	min := int64(minDuration)
+	max := int64(maxDuration)
+
+	generator := func(fixed time.Duration) (delay time.Duration) {
+		if max > 0 && max > min {
+			delay = time.Duration(rand.Int63n(max-min) + min)
+		}
+		if delay <= 0 {
+			delay = fixed
+		}
+		return
+	}
+	return generator, nil
 }
