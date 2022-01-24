@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/MakeNowJust/heredoc/v2"
+	"github.com/reubenmiller/go-c8y-cli/pkg/c8ybinary"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmd/subcommand"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmdutil"
@@ -259,8 +260,14 @@ func (n *CmdAPI) RunE(cmd *cobra.Command, args []string) error {
 			req.Body = body
 		}
 
+		// TODO: Add prepare request
+		req.PrepareRequest = c8ybinary.AddProgress(cmd, "file", n.factory.IOStreams.ProgressIndicator())
+
 		// get file info
 		// form data
+		// BUG: Format data needs to be lazily loaded via the iterator so it can be re-read
+		// for each request
+		//
 		formData := make(map[string]io.Reader)
 		err = flags.WithFormDataOptions(
 			cmd,
@@ -271,6 +278,7 @@ func (n *CmdAPI) RunE(cmd *cobra.Command, args []string) error {
 		if err != nil {
 			return cmderrors.NewUserError(err)
 		}
+
 		req.FormData = formData
 	}
 

@@ -3,6 +3,7 @@ package config
 import (
 	"errors"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"os"
 	"path"
@@ -25,6 +26,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
+	"github.com/vbauerster/mpb/v6"
 )
 
 var (
@@ -1013,6 +1015,18 @@ func (c *Config) CompactJSON() bool {
 // ShowProgress show progress bar
 func (c *Config) ShowProgress() bool {
 	return c.viper.GetBool(SettingsShowProgress)
+}
+
+func (c *Config) GetProgressBar(w io.Writer, enable bool) (progress *mpb.Progress) {
+	// if c.ShowProgress() && enable {
+	// if enable {
+	if true {
+		progress = mpb.New(
+			mpb.WithOutput(w),
+			mpb.WithRefreshRate(180*time.Millisecond),
+		)
+	}
+	return
 }
 
 // DisableColor don't print console output in color

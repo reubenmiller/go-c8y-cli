@@ -463,7 +463,7 @@ func Test_DebugStdinCommand(t *testing.T) {
 	// stdin.Write(`{"source":{"id":"1111"}}` + "\n")
 
 	cmdtext := `
-	cache clean --dry --age 1s
+	binaries create --file /workspaces/go-c8y-cli/gentoo_root.img --progress
 	`
 	cmdErr := ExecuteCmd(cmd, strings.TrimSpace(cmdtext))
 

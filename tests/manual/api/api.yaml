@@ -76,4 +76,8 @@ tests:
                 body.time: "2019-01-01"
                 body.source.id: "12345"
 
+    TODO - It can upload files with a progress beforeEach:
+        command: |
+          c8y util repeat 2 | c8y api --method POST --file /workspaces/go-c8y-cli/gentoo_root.img --url "/inventory/binaries"
+        exit-code: 0
                 

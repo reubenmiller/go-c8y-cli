@@ -25,9 +25,10 @@ require (
 	github.com/olekukonko/ts v0.0.0-20171002115256-78ecb04241c0
 	github.com/pkg/errors v0.9.1
 	github.com/pquerna/otp v1.3.0
-	github.com/reubenmiller/go-c8y v0.9.1-rc.6
+	github.com/reubenmiller/go-c8y v0.9.1-rc.8
 	github.com/sergi/go-diff v1.2.0 // indirect
 	github.com/sethvargo/go-password v0.2.0
+	github.com/smartystreets/goconvey v1.6.4 // indirect
 	github.com/spf13/cobra v1.3.0
 	github.com/spf13/pflag v1.0.5
 	github.com/spf13/viper v1.10.1
@@ -40,7 +41,6 @@ require (
 	go.uber.org/zap v1.20.0
 	golang.org/x/crypto v0.0.0-20220112180741-5e0467b6c7ce
 	golang.org/x/term v0.0.0-20210927222741-03fcf44c2211
-	gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c // indirect
 	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b
 	moul.io/http2curl v1.0.0
 )

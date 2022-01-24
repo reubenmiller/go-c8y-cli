@@ -215,6 +215,9 @@
         $null = $PostActionOptions.AppendLine("}")
     }
 
+    # Prepare Request
+    $PrepareRequest = New-Object System.Text.StringBuilder
+
     #
     # Body
     #
@@ -237,6 +240,13 @@
         }
 
         foreach ($iArg in (Remove-SkippedParameters $Specification.body)) {
+
+            if ($Specification.method -match "POST|PUT" -and $PrepareRequest.Length -eq 0) {
+                if ( $iArg.type -eq "file" ) {
+                    $PrepareRequest = "PrepareRequest: c8ybinary.AddProgress(cmd, `"$($iArg.name)`", cfg.GetProgressBar(n.factory.IOStreams.ErrOut, n.factory.IOStreams.IsStderrTTY())),"
+                }
+            }
+
             $code = New-C8yApiGoGetValueFromFlag -Parameters $iArg -SetterType "body"
             if ($code) {
                 switch -Regex ($code) {
@@ -604,6 +614,7 @@ func (n *${NameCamel}Cmd) RunE(cmd *cobra.Command, args []string) error {
         Header:       headers,
         IgnoreAccept: cfg.IgnoreAcceptHeader(),
         DryRun:       cfg.ShouldUseDryRun(cmd.CommandPath()),
+        $PrepareRequest
     }
     $PostActionOptions
 
