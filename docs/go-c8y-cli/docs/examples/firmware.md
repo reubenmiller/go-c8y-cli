@@ -5,12 +5,12 @@ title: Firmware
 import CodeExample from '@site/src/components/CodeExample';
 import Video from '@site/src/components/video';
 
-## Firmware
+## Bash/zsh only
 
-### Download the binaries for all versions for a specific version
+### Download the binaries for all versions for a specific firmware
 
+The binaries related to all versions of a specific firmware can be downloaded using a short bash snippet
 
-<CodeExample transform="false">
 
 ```bash
 while read -r line;
@@ -26,8 +26,6 @@ done < <(
         -o csv
 )
 ```
-
-</CodeExample>
 
 
 ### Download all of the binaries for all firmware and versions
