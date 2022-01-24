@@ -22,6 +22,7 @@ Install-FirmwareVersion
 	[-Firmware] <Object[]>
 	[[-Version] <Object[]>]
 	[[-Url] <String>]
+	[[-Description] <String>]
 	[-Data <Object>]
 	[-NoAccept]
 	[-ProcessingMode <String>]
@@ -133,7 +134,7 @@ Accept wildcard characters: False
 
 ### -Url
 Firmware url.
-TODO, not currently automatically added
+Leave blank to automatically set it if a matching firmware/version is found in the c8y firmware repository
 
 ```yaml
 Type: String
@@ -142,6 +143,21 @@ Aliases:
 
 Required: False
 Position: 4
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -Description
+Operation description
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 5
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False

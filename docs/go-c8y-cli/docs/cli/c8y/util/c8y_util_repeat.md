@@ -15,7 +15,7 @@ c8y util repeat [flags]
 ### Examples
 
 ```
-$ c8y util repeat --input "my name" 5
+$ c8y util repeat 5 --input "my name"
 Repeat input value "my name" 5 times
 
 $ echo "my name" | c8y util repeat 2 --format "my prefix - %s"
@@ -28,7 +28,10 @@ Repeat input value "device" 2 times (using pipeline)
 	=> device 00101
 	=> device 00102
 
-$ c8y util repeat 2 | c8y util repeat 3 --format "device%s_%s"
+$ c8y util repeat --infinite | c8y api --url "/service/report-agent/health" --raw --delay 1s
+Use repeat to create an infinite loop, to check the health of a microservice waiting 1 seconds after each request
+
+$ echo "device" | c8y util repeat 2 | c8y util repeat 3 --format "%s_%s"
 Combine two calls to iterator over 3 devices twice. This can then be used to input into other c8y commands
 	=> device_1
 	=> device_2
@@ -37,10 +40,10 @@ Combine two calls to iterator over 3 devices twice. This can then be used to inp
 	=> device_2
 	=> device_3
 
-$ c8y devices get --id 1235 | c8y util repeat 5 | c8y events create --text "test event" --type "myType" --dry --delay 1000
+$ c8y devices get --id 1235 | c8y util repeat 5 | c8y events create --text "test event" --type "myType" --dry --delay 1000ms
 Get a device, then repeat it 5 times in order to create 5 events for it (delaying 1000 ms between each event creation)
 
-$ c8y devices get --id 1234 | c8y util repeat 5 --randomDelayMin 1000 --randomDelayMax 10000 -v | c8y events create --text "test event" --type "myType"
+$ c8y devices get --id 1234 | c8y util repeat 5 --randomDelayMin 1000ms --randomDelayMax 10000ms -v | c8y events create --text "test event" --type "myType"
 Create 10 events for the same device and use a random delay between 1000ms and 10000ms between the creation of each event
 
 ```
@@ -48,17 +51,18 @@ Create 10 events for the same device and use a random delay between 1000ms and 1
 ### Options
 
 ```
-      --first int            only include first x lines. 0 = all lines
-      --format string        format string to be applied to each input line (default "%s")
-  -h, --help                 help for repeat
-      --input string         input value to be repeated (required) (accepts pipeline)
-      --offset int           offset the output index counter. default = 0.
-      --randomDelayMax int   random maximum delay in milliseconds, must be larger than randomDelayMin. -1 = disabled. (default -1)
-      --randomDelayMin int   random minimum delay in milliseconds, must be less than randomDelayMax. -1 = disabled (default -1)
-      --randomSkip float32   randomly skip line based on a percentage, probability as a float: 0 to 1, 1 = always skip, 0 = never skip, -1 = disabled (default -1)
-      --skip int             skip first x input lines
-      --times int            number of times to repeat the input (default 1)
-      --useLineCount         Use line count for the index instead of repeat counter
+      --first int               only include first x lines. 0 = all lines
+      --format string           format string to be applied to each input line (default "%s")
+  -h, --help                    help for repeat
+      --infinite                Repeat infinitely. You will need to ctrl-c it to stop it
+      --input string            input value to be repeated (required) (accepts pipeline)
+      --offset int              offset the output index counter. default = 0.
+      --randomDelayMax string   random maximum delay after each request, i.e. 5ms, 1.2s. It must be larger than randomDelayMin. 0 = disabled. (default "0ms")
+      --randomDelayMin string   random minimum delay after each request, i.e. 5ms, 1.2s. It must be less than randomDelayMax. 0 = disabled (default "0ms")
+      --randomSkip float32      randomly skip line based on a percentage, probability as a float: 0 to 1, 1 = always skip, 0 = never skip, -1 = disabled (default -1)
+      --skip int                skip first x input lines
+      --times int               number of times to repeat the input (default 1)
+      --useLineCount            Use line count for the index instead of repeat counter
 ```
 
 ### Options inherited from parent commands
@@ -111,7 +115,7 @@ Create 10 events for the same device and use a random delay between 1000ms and 1
   -v, --verbose                    Verbose logging
       --view string                Use views when displaying data on the terminal. Disable using --view off (default "auto")
       --withError                  Errors will be printed on stdout instead of stderr
-  -t, --withTotalPages             Request Cumulocity to include the total pages in the response statitics under .statistics.totalPages
+  -t, --withTotalPages             Request Cumulocity to include the total pages in the response statistics under .statistics.totalPages
       --workers int                Number of workers (default 1)
 ```
 
