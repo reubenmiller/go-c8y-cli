@@ -17,6 +17,12 @@ c8y software versions install [flags]
 ```
 $ c8y software versions install --device 1234 --software go-c8y-cli --version 1.0.0
 Install a software package version
+If the software/version exists in the software repository, then it will add the url automatically
+
+
+$ c8y software versions install --device 1234 --software go-c8y-cli --version 1.0.0 --url "https://mybloblstore/go-c8y-cli.deb"
+Install a software package version with an explicit url
+
         
 ```
 
@@ -32,7 +38,7 @@ Install a software package version
       --software string         Software name (required)
       --template string         Body template
       --templateVars string     Body template variables
-      --url string              Software url
+      --url string              Software url. Leave blank to automatically set it if a matching firmware/version is found in the c8y firmware repository
       --version string          Software version id or name
 ```
 
@@ -86,7 +92,7 @@ Install a software package version
   -v, --verbose                    Verbose logging
       --view string                Use views when displaying data on the terminal. Disable using --view off (default "auto")
       --withError                  Errors will be printed on stdout instead of stderr
-  -t, --withTotalPages             Request Cumulocity to include the total pages in the response statitics under .statistics.totalPages
+  -t, --withTotalPages             Request Cumulocity to include the total pages in the response statistics under .statistics.totalPages
       --workers int                Number of workers (default 1)
 ```
 

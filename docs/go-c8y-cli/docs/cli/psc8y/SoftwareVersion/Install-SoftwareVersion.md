@@ -134,7 +134,8 @@ Accept wildcard characters: False
 ```
 
 ### -Url
-Software url
+Software url.
+Leave blank to automatically set it if a matching firmware/version is found in the c8y firmware repository
 
 ```yaml
 Type: String

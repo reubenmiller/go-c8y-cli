@@ -19,7 +19,7 @@ Delete application binary
 ```
 Remove-ApplicationBinary
 	[-Application] <Object[]>
-	[-BinaryId] <String[]>
+	[-BinaryId] <Object[]>
 	[-NoAccept]
 	[-ProcessingMode <String>]
 	[-Force]
@@ -108,7 +108,7 @@ Accept wildcard characters: False
 Application binary id (required)
 
 ```yaml
-Type: String[]
+Type: Object[]
 Parameter Sets: (All)
 Aliases: id
 

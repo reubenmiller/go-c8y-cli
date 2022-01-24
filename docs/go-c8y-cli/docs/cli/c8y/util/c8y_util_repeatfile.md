@@ -1,17 +1,57 @@
 ---
-category: inventory
-title: c8y inventory
+category: util
+title: c8y util repeatfile
 ---
-Cumulocity managed objects
+Repeat file contents
 
 ### Synopsis
 
-REST endpoint to interact with Cumulocity managed objects
+Generic utility to repeat each line in a list of files
+
+The command will read the list of files and iterate through each one printing out
+each line once. The process is repeated N times (as defined by the --times flag)
+
+Processing order:
+
+	=> File 1: Print lines 1 -> last
+	=> File 2: Print lines 1 -> last
+	=> File M: Print lines 1 -> last
+	=> Repeat process X times
+
+
+```
+c8y util repeatfile <FILE> [...FILE] [flags]
+```
+
+### Examples
+
+```
+$ c8y util repeatfile myfile.txt
+Repeat each line of the file contents
+
+$ c8y util repeatfile myfile.txt --times 2
+Loop over the file twice. The file contents will be printed from first list to last line, then read again.
+
+$ c8y util repeatfile myfile.txt --infinite --delay 500ms
+Loop over the file contents forever and delaying 500ms after each line is printed
+
+$ c8y util repeatfile *.list --randomSkip 0.5
+Loop over the files matching the "*.list" in the current directory (uses shell expansion), but randomly
+skip lines at a probability of 50 percent.
+
+```
 
 ### Options
 
 ```
-  -h, --help   help for inventory
+      --first int               only include first x lines. 0 = all lines
+      --format string           format string to be applied to each input line (default "%s")
+  -h, --help                    help for repeatfile
+      --infinite                Repeat forever. You will need to ctrl-c it to stop it
+      --randomDelayMax string   random maximum delay after each request, i.e. 5ms, 1.2s. It must be larger than randomDelayMin. 0 = disabled. (default "0ms")
+      --randomDelayMin string   random minimum delay after each request, i.e. 5ms, 1.2s. It must be less than randomDelayMax. 0 = disabled (default "0ms")
+      --randomSkip float32      randomly skip line based on a percentage, probability as a float: 0 to 1, 1 = always skip, 0 = never skip, -1 = disabled (default -1)
+      --times int               number of times to repeat the input (default 1)
 ```
 
 ### Options inherited from parent commands

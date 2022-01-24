@@ -23,13 +23,14 @@ Get a list of configuration files
 ### Options
 
 ```
-      --description string     Configuration description filter
-      --deviceType string      Configuration device type filter
-  -h, --help                   help for list
-      --name string            Configuration name filter
-      --orderBy string         Order by. e.g. _id asc or name asc or creationTime.date desc (default "name")
-      --query string           Additional query filter (accepts pipeline)
-      --queryTemplate string   String template to be used when applying the given query. Use %s to reference the query/pipeline input
+      --configurationType string   Configuration type filter
+      --description string         Configuration description filter
+      --deviceType string          Configuration device type filter
+  -h, --help                       help for list
+      --name string                Configuration name filter
+      --orderBy string             Order by. e.g. _id asc or name asc or creationTime.date desc (default "name")
+      --query string               Additional query filter (accepts pipeline)
+      --queryTemplate string       String template to be used when applying the given query. Use %s to reference the query/pipeline input
 ```
 
 ### Options inherited from parent commands
@@ -82,7 +83,7 @@ Get a list of configuration files
   -v, --verbose                    Verbose logging
       --view string                Use views when displaying data on the terminal. Disable using --view off (default "auto")
       --withError                  Errors will be printed on stdout instead of stderr
-  -t, --withTotalPages             Request Cumulocity to include the total pages in the response statitics under .statistics.totalPages
+  -t, --withTotalPages             Request Cumulocity to include the total pages in the response statistics under .statistics.totalPages
       --workers int                Number of workers (default 1)
 ```
 
