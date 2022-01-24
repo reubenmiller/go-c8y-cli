@@ -55,7 +55,7 @@ func NewCmdRepeatFile(f *cmdutil.Factory) *CmdRepeatFile {
 			Repeat each line of the file contents
 
 			$ c8y util repeatfile myfile.txt --times 2
-			Loop over the file twice. The file contents will be outputed from first list to last line, then read again.
+			Loop over the file twice. The file contents will be printed from first list to last line, then read again.
 
 			$ c8y util repeatfile myfile.txt --infinite --delay 500ms
 			Loop over the file contents forever and delaying 500ms after each line is printed
