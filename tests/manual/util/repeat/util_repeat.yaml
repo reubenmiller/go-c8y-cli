@@ -118,3 +118,12 @@ tests:
                 test
                 test
     
+    It does not crash when random min and max are equal:
+        command: |
+            echo "test" | c8y util repeat 2 --randomDelayMin 50ms --randomDelayMax 50ms
+        exit-code: 0
+        stdout:
+            exactly: |
+                test
+                test
+    
