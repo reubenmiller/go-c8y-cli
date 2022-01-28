@@ -67,8 +67,10 @@ func GetDurationGenerator(cmd *cobra.Command, minFlag, maxFlag string, inferUnit
 	max := int64(maxDuration)
 
 	generator := func(fixed time.Duration) (delay time.Duration) {
-		if max > 0 && max > min {
+		if max > 0 && max >= min {
 			delay = time.Duration(rand.Int63n(max-min) + min)
+		} else if min > 0 {
+			delay = time.Duration(min)
 		}
 		if delay <= 0 {
 			delay = fixed

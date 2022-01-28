@@ -93,4 +93,28 @@ tests:
                 /event/events,myType,test event
                 /event/events,myType,test event
                 /event/events,myType,test event
+
+    It uses a random max wait duration after each request:
+        command: |
+            echo "test" | c8y util repeat 5 --randomDelayMax 10ms
+        exit-code: 0
+        stdout:
+            exactly: |
+                test
+                test
+                test
+                test
+                test
+
+    It uses a random min wait duration after each request:
+        command: |
+            echo "test" | c8y util repeat 5 --randomDelayMin 50ms
+        exit-code: 0
+        stdout:
+            exactly: |
+                test
+                test
+                test
+                test
+                test
     
