@@ -2,7 +2,7 @@
 import React from 'react';
 import { LiveProvider, LiveEditor, LiveError, LivePreview } from 'react-live';
 import { mdx } from '@mdx-js/react';
-import useThemeContext from '@theme/hooks/useThemeContext';
+import { useColorMode } from '@docusaurus/theme-common';
 import lightTheme from 'prism-react-renderer/themes/github';
 import darkTheme from 'prism-react-renderer/themes/dracula';
 import Code from '@docusaurus/theme-classic/lib-next/theme/CodeBlock';
@@ -152,7 +152,7 @@ function transformToPowerShell(code = '') {
 
 
 export default ({ children, className = 'bash', live = false, render = false, transform = false }) => {
-    const { isDarkTheme } = useThemeContext();
+    const { isDarkTheme } = useColorMode();
     if (live) {
         return (
             <div style={{ marginTop: '40px' }}>
