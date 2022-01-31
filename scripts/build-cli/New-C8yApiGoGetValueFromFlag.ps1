@@ -45,6 +45,9 @@
         # relative datetime
         "datetime" = "flags.WithRelativeTimestamp(`"${prop}`", `"${queryParam}`", `"$FixedValue`"),"
 
+        # relative date
+        "date" = "flags.WithRelativeDate(false, `"${prop}`", `"${queryParam}`", `"$FixedValue`"),"
+
         # string array/slice
         "[]string" = "flags.WithStringSliceValues(`"${prop}`", `"${queryParam}`", `"$FixedValue`"),"
 

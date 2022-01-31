@@ -82,6 +82,7 @@
         "optional_fragment" { "switch"; break }
         "datefrom" { "string"; break }
         "datetime" { "string"; break }
+        "date" { "string"; break }
         "dateto" { "string"; break }
         "directory" { "string"; break }
         "file" { "string"; break }

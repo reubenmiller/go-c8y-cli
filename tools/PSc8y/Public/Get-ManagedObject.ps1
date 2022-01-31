@@ -39,10 +39,20 @@ Get a managed object with parent references
         [object[]]
         $Id,
 
+        # Don't include the child devices names in the response. This can improve the API response because the names don't need to be retrieved
+        [Parameter()]
+        [switch]
+        $SkipChildrenNames,
+
         # include a flat list of all parents and grandparents of the given object
         [Parameter()]
         [switch]
-        $WithParents
+        $WithParents,
+
+        # Determines if children with ID and name should be returned when fetching the managed object. Set it to false to improve query performance.
+        [Parameter()]
+        [switch]
+        $WithChildren
     )
     DynamicParam {
         Get-ClientCommonParameters -Type "Get"

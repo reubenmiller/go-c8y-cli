@@ -1,0 +1,40 @@
+tests:
+    alarms_count_Get number of active alarms which occurred in the last 10 minutes:
+        command: c8y alarms count --dateFrom "-10m" --status ACTIVE
+        exit-code: 0
+        stdout:
+            json:
+                method: GET
+                path: /alarm/alarms/count
+            contains:
+                - dateFrom=
+                - status=ACTIVE
+    alarms_count_Get number of active alarms which occurred in the last 10 minutes on a device:
+        command: c8y alarms count --dateFrom "-10m" --status ACTIVE --device 12345
+        exit-code: 0
+        stdout:
+            json:
+                method: GET
+                path: /alarm/alarms/count
+            contains:
+                - source=12345
+                - dateFrom=
+                - status=ACTIVE
+    alarms_count_Get number of active alarms with the severity set to MAJOR:
+        command: c8y alarms count --severity MAJOR
+        exit-code: 0
+        stdout:
+            json:
+                method: GET
+                path: /alarm/alarms/count
+            contains:
+                - severity=MAJOR
+    alarms_count_Get number of alarms from a list of devices using pipeline:
+        command: $TEST_SHELL -c 'c8y devices list --type linuxA | c8y alarms count --dateFrom "-10m"'
+        exit-code: 0
+        stdout:
+            json:
+                method: GET
+                path: /alarm/alarms/count
+            contains:
+                - dateFrom=

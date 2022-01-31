@@ -48,6 +48,21 @@ Get events from a device (using pipeline)
         [string]
         $FragmentType,
 
+        # Allows filtering events by the fragment's value, but only when provided together with fragmentType.
+        [Parameter()]
+        [string]
+        $FragmentValue,
+
+        # Start date or date and time of the event's creation (set by the platform during creation).
+        [Parameter()]
+        [string]
+        $CreatedFrom,
+
+        # End date or date and time of the event's creation (set by the platform during creation).
+        [Parameter()]
+        [string]
+        $CreatedTo,
+
         # Start date or date and time of event occurrence.
         [Parameter()]
         [string]
@@ -58,10 +73,30 @@ Get events from a device (using pipeline)
         [string]
         $DateTo,
 
+        # Start date or date and time of the last update made.
+        [Parameter()]
+        [string]
+        $LastUpdatedFrom,
+
+        # End date or date and time of the last update made.
+        [Parameter()]
+        [string]
+        $LastUpdatedTo,
+
         # Return the newest instead of the oldest events. Must be used with dateFrom and dateTo parameters
         [Parameter()]
         [switch]
-        $Revert
+        $Revert,
+
+        # When set to true also events for related source assets will be included in the request. When this parameter is provided a source must be specified.
+        [Parameter()]
+        [switch]
+        $WithSourceAssets,
+
+        # When set to true also events for related source devices will be included in the request. When this parameter is provided a source must be specified.
+        [Parameter()]
+        [switch]
+        $WithSourceDevices
     )
     DynamicParam {
         Get-ClientCommonParameters -Type "Get", "Collection"

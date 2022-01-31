@@ -37,9 +37,61 @@
           {
             "description": "Get a list of binaries",
             "command": "c8y binaries list --pageSize 100"
+          },
+          {
+            "description": "Get a list of binaries with the type package_debian",
+            "command": "c8y binaries list --type package_debian"
           }
         ]
-      }
+      },
+      "queryParameters": [
+        {
+          "name": "ids",
+          "type": "[]stringcsv",
+          "property": "ids",
+          "description": "List of ids."
+        },
+        {
+          "name": "type",
+          "type": "string",
+          "pipeline": true,
+          "pipelineAliases": [
+            "type"
+          ],
+          "required": false,
+          "description": "ManagedObject type."
+        },
+        {
+          "name": "fragmentType",
+          "type": "string",
+          "description": "ManagedObject fragment type."
+        },
+        {
+          "name": "owner",
+          "type": "string",
+          "description": "List of managed objects that are owned by the given username."
+        },
+        {
+          "name": "text",
+          "type": "string",
+          "description": "managed objects containing a text value starting with the given text (placeholder {text}). Text value is any alphanumeric string starting with a latin letter (A-Z or a-z)."
+        },
+        {
+          "name": "childAdditionId",
+          "type": "string",
+          "description": "Search for a specific child addition and list all the groups to which it belongs."
+        },
+        {
+          "name": "childAssetId",
+          "type": "string",
+          "description": "Search for a specific child asset and list all the groups to which it belongs."
+        },
+        {
+          "name": "childDeviceId",
+          "type": "[]device",
+          "description": "Search for a specific child device and list all the groups to which it belongs."
+        }
+      ]
     },
     {
       "name": "download",

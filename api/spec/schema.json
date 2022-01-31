@@ -87,6 +87,7 @@
         "fileContents",
         "attachment",
         "binaryUploadURL",
+        "date",
         "datetime",
         "json",
         "json_custom",

@@ -18,3 +18,13 @@ tests:
             contains:
                 - dateFrom=
                 - status=ACTIVE
+    alarms_list_Get collection of active and acknowledged alarms in the last 1d:
+        command: c8y alarms list --dateFrom "-1d" --status ACTIVE --status ACKNOWLEDGED
+        exit-code: 0
+        stdout:
+            json:
+                method: GET
+                path: /alarm/alarms
+            contains:
+                - dateFrom=
+                - status=ACTIVE,ACKNOWLEDGED

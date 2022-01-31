@@ -1,6 +1,7 @@
 package inventory
 
 import (
+	cmdCount "github.com/reubenmiller/go-c8y-cli/pkg/cmd/inventory/count"
 	cmdCreate "github.com/reubenmiller/go-c8y-cli/pkg/cmd/inventory/create"
 	cmdDelete "github.com/reubenmiller/go-c8y-cli/pkg/cmd/inventory/delete"
 	cmdFindByText "github.com/reubenmiller/go-c8y-cli/pkg/cmd/inventory/findbytext"
@@ -27,6 +28,7 @@ func NewSubCommand(f *cmdutil.Factory) *SubCmdInventory {
 
 	// Subcommands
 	cmd.AddCommand(cmdList.NewListCmd(f).GetCommand())
+	cmd.AddCommand(cmdCount.NewCountCmd(f).GetCommand())
 	cmd.AddCommand(cmdFindByText.NewFindByTextCmd(f).GetCommand())
 	cmd.AddCommand(cmdCreate.NewCreateCmd(f).GetCommand())
 	cmd.AddCommand(cmdGet.NewGetCmd(f).GetCommand())

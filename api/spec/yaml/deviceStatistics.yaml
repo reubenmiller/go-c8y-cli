@@ -1,0 +1,63 @@
+
+---
+
+information:
+  name: devices/statistics
+  description: Cumulocity device statistics (for a single tenant) statistics
+  descriptionLong: |
+    Device statistics are collected for each inventory object with at least one measurement, event or alarm. There are no additional checks if the inventory object is marked as device using the c8y_IsDevice fragment. When the first measurement, event or alarm is created for a specific inventory object, Cumulocity IoT is always considering this as a device and starts counting.
+
+    Device statistics are counted with daily and monthly rate. All requests are considered when counting device statistics, no matter which processing mode is used.
+  link: https://cumulocity.com/api/latest/#tag/Device-statistics
+
+endpoints:
+
+  - name: listStatisticsCollection
+    description: Retrieve device statistics
+    descriptionLong: |
+      Retrieve device statistics from a specific tenant (by a given ID). Either daily or monthly.
+    method: GET
+    path: /tenant/statistics/device/{tenant}/{type}/{date}
+    collectionProperty: statistics
+    alias:
+        go: list
+        powershell: Get-DeviceStatisticsCollection
+    examples:
+      powershell:
+        - description: Get device statistics
+          command: Get-DeviceStatisticsCollection
+      go:
+        - description: Get device statistics for all devices in the current tenant
+          command: c8y devices statistics list
+          assertStdOut:
+            json:
+              path: r//tenant/statistics/device/t\d+/daily/\d{4}-\d{2}-\d{2}$
+
+    pathParameters:
+      - name: date
+        type: date
+        default: "-1d"
+        description: Date of the queried day. When type is set to monthly then will be ignored.
+
+      - name: type
+        type: string
+        required: true
+        default: daily
+        description: Aggregation type. e.g. daily or monthly
+        validationSet:
+          - daily
+          - monthly
+
+      - name: tenant
+        type: tenant
+        required: false
+        position: 99
+        description: Tenant id. Defaults to current tenant (based on credentials)
+
+    queryParameters:
+      - name: device
+        property: deviceId
+        type: '[]device'
+        description: The ID of the device to search for.
+        pipeline: true
+        required: false

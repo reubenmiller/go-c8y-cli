@@ -1,6 +1,7 @@
 package alarms
 
 import (
+	cmdCount "github.com/reubenmiller/go-c8y-cli/pkg/cmd/alarms/count"
 	cmdCreate "github.com/reubenmiller/go-c8y-cli/pkg/cmd/alarms/create"
 	cmdDeleteCollection "github.com/reubenmiller/go-c8y-cli/pkg/cmd/alarms/deletecollection"
 	cmdGet "github.com/reubenmiller/go-c8y-cli/pkg/cmd/alarms/get"
@@ -27,6 +28,7 @@ func NewSubCommand(f *cmdutil.Factory) *SubCmdAlarms {
 
 	// Subcommands
 	cmd.AddCommand(cmdList.NewListCmd(f).GetCommand())
+	cmd.AddCommand(cmdCount.NewCountCmd(f).GetCommand())
 	cmd.AddCommand(cmdCreate.NewCreateCmd(f).GetCommand())
 	cmd.AddCommand(cmdUpdateCollection.NewUpdateCollectionCmd(f).GetCommand())
 	cmd.AddCommand(cmdGet.NewGetCmd(f).GetCommand())

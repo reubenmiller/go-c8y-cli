@@ -1,0 +1,15 @@
+tests:
+    devices/user_get_Get device user by id:
+        command: c8y devices user get --id 12345
+        exit-code: 0
+        stdout:
+            json:
+                method: GET
+                path: /inventory/managedObjects/12345/user
+    devices/user_get_Get device user by name:
+        command: c8y devices user get --id device01
+        exit-code: 0
+        stdout:
+            json:
+                method: GET
+                path: r//inventory/managedObjects/\d+/user

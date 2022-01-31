@@ -6,3 +6,12 @@ tests:
             json:
                 method: GET
                 path: /inventory/binaries
+    binaries_list_Get a list of binaries with the type package_debian:
+        command: c8y binaries list --type package_debian
+        exit-code: 0
+        stdout:
+            json:
+                method: GET
+                path: /inventory/binaries
+            contains:
+                - type=package_debian

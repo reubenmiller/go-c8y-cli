@@ -720,7 +720,7 @@ Function Get-C8yGoArgs {
             }
         }
 
-        { @("datefrom", "dateto", "datetime") -contains $_ } {
+        { @("datefrom", "dateto", "datetime", "date") -contains $_ } {
             $SetFlag = if ($UseOption) {
                 'cmd.Flags().StringP("{0}", "{1}", "{2}", "{3}")' -f $Name, $OptionName, $Default, $Description
             } else {

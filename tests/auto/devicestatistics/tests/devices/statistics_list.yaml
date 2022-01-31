@@ -1,0 +1,8 @@
+tests:
+    devices/statistics_list_Get device statistics for all devices in the current tenant:
+        command: c8y devices statistics list
+        exit-code: 0
+        stdout:
+            json:
+                method: GET
+                path: r//tenant/statistics/device/t\d+/daily/\d{4}-\d{2}-\d{2}$

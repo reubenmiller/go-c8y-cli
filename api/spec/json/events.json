@@ -85,6 +85,21 @@
           "description": "Fragment name from event."
         },
         {
+          "name": "fragmentValue",
+          "type": "string",
+          "description": "Allows filtering events by the fragment's value, but only when provided together with fragmentType."
+        },
+        {
+          "name": "createdFrom",
+          "type": "datetime",
+          "description": "Start date or date and time of the event's creation (set by the platform during creation)."
+        },
+        {
+          "name": "createdTo",
+          "type": "datetime",
+          "description": "End date or date and time of the event's creation (set by the platform during creation)."
+        },
+        {
           "name": "dateFrom",
           "type": "datetime",
           "description": "Start date or date and time of event occurrence."
@@ -95,9 +110,29 @@
           "description": "End date or date and time of event occurrence."
         },
         {
+          "name": "lastUpdatedFrom",
+          "type": "datetime",
+          "description": "Start date or date and time of the last update made."
+        },
+        {
+          "name": "lastUpdatedTo",
+          "type": "datetime",
+          "description": "End date or date and time of the last update made."
+        },
+        {
           "name": "revert",
           "type": "boolean",
           "description": "Return the newest instead of the oldest events. Must be used with dateFrom and dateTo parameters"
+        },
+        {
+          "name": "withSourceAssets",
+          "type": "boolean",
+          "description": "When set to true also events for related source assets will be included in the request. When this parameter is provided a source must be specified."
+        },
+        {
+          "name": "withSourceDevices",
+          "type": "boolean",
+          "description": "When set to true also events for related source devices will be included in the request. When this parameter is provided a source must be specified."
         }
       ]
     },
@@ -151,6 +186,16 @@
           "name": "fragmentType",
           "type": "string",
           "description": "Fragment name from event."
+        },
+        {
+          "name": "createdFrom",
+          "type": "datetime",
+          "description": "Start date or date and time of the event's creation (set by the platform during creation)."
+        },
+        {
+          "name": "createdTo",
+          "type": "datetime",
+          "description": "End date or date and time of the event's creation (set by the platform during creation)."
         },
         {
           "name": "dateFrom",

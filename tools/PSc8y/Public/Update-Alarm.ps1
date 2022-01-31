@@ -42,7 +42,7 @@ Update severity of an existing alarm to CRITICAL
         # Comma separated alarm statuses, for example ACTIVE,CLEARED.
         [Parameter()]
         [ValidateSet('ACTIVE','ACKNOWLEDGED','CLEARED')]
-        [string]
+        [string[]]
         $Status,
 
         # Alarm severity, for example CRITICAL, MAJOR, MINOR or WARNING.

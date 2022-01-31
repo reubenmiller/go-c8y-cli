@@ -1,0 +1,8 @@
+tests:
+    inventory_count_Get count of managed objects:
+        command: c8y inventory count
+        exit-code: 0
+        stdout:
+            json:
+                method: GET
+                path: /inventory/managedObjects/count

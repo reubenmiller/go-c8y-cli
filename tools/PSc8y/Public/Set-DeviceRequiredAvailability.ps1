@@ -8,10 +8,10 @@ Set required availability
 Set the required availability of a device. Devices that have not sent any message in the response interval are considered unavailable. Response interval can have value between -32768 and 32767 and any values out of range will be shrink to range borders. Such devices are marked as unavailable (see below) and an unavailability alarm is raised. Devices with a response interval of zero minutes are considered to be under maintenance. No alarm is raised while a device is under maintenance. Devices that do not contain 'c8y_RequiredAvailability' are not monitored.
 
 .LINK
-https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/devices_setRequiredAvailability
+https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/devices_availability_set
 
 .EXAMPLE
-PS> Set-DeviceRequiredAvailability -Device $device.id -Interval 10
+PS> Set-DeviceRequiredAvailability -Id $device.id -Interval 10
 
 Set the required availability of a device by name to 10 minutes
 
@@ -32,7 +32,7 @@ Set the required availability of a device (using pipeline)
                    ValueFromPipeline=$true,
                    ValueFromPipelineByPropertyName=$true)]
         [object[]]
-        $Device,
+        $Id,
 
         # Interval in minutes (required)
         [Parameter(Mandatory = $true)]
@@ -50,7 +50,7 @@ Set the required availability of a device (using pipeline)
             Use-CallerPreference -Cmdlet $PSCmdlet -SessionState $ExecutionContext.SessionState
         }
 
-        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "devices setRequiredAvailability"
+        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "devices availability set"
         $ClientOptions = Get-ClientOutputOption $PSBoundParameters
         $TypeOptions = @{
             Type = "application/vnd.com.nsn.cumulocity.inventory+json"
@@ -62,15 +62,15 @@ Set the required availability of a device (using pipeline)
     Process {
 
         if ($ClientOptions.ConvertToPS) {
-            $Device `
+            $Id `
             | Group-ClientRequests `
-            | c8y devices setRequiredAvailability $c8yargs `
+            | c8y devices availability set $c8yargs `
             | ConvertFrom-ClientOutput @TypeOptions
         }
         else {
-            $Device `
+            $Id `
             | Group-ClientRequests `
-            | c8y devices setRequiredAvailability $c8yargs
+            | c8y devices availability set $c8yargs
         }
         
     }
