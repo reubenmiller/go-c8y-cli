@@ -62,6 +62,24 @@ endpoints:
       - name: dateTo
         type: datetime
         description: End date or date and time of alarm occurrence.
+      
+      # API Version >= 10.11
+      # createFrom, createdTo, lastUpdateFrom, lastUpdatedTo
+      # - name: createdFrom
+      #   type: datetime
+      #   description: Start date or date and time of the alarm creation. Version >= 10.11
+
+      # - name: createdTo
+      #   type: datetime
+      #   description: End date or date and time of the alarm creation. Version >= 10.11
+
+      # - name: lastUpdatedFrom
+      #   type: datetime
+      #   description: Start date or date and time of the last update made. Version >= 10.11
+
+      # - name: lastUpdatedTo
+      #   type: datetime
+      #   description: End date or date and time of the last update made. Version >= 10.11
 
       - name: type
         type: string
@@ -299,6 +317,17 @@ endpoints:
         required: false
         property: status
         validationSet: [ACTIVE, ACKNOWLEDGED, CLEARED]
+      
+      # API Version >= 10.11
+      # createFrom, createdTo
+      # - name: createdFrom
+      #   type: datetime
+      #   description: Start date or date and time of the alarm creation. Version >= 10.11
+
+      # - name: createdTo
+      #   type: datetime
+      #   description: End date or date and time of the alarm creation. Version >= 10.11
+
       - name: data
         type: json
         description: Additional properties of the alarm.
@@ -480,6 +509,16 @@ endpoints:
       - name: dateTo
         type: datetime
         description: 'End date or date and time of alarm occurrence.'
+      
+      # API Version >= 10.11
+      # createFrom, createdTo
+      # - name: createdFrom
+      #   type: datetime
+      #   description: Start date or date and time of the alarm creation. Version >= 10.11
+
+      # - name: createdTo
+      #   type: datetime
+      #   description: End date or date and time of the alarm creation. Version >= 10.11
 
       - name: type
         type: string

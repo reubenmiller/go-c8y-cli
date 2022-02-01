@@ -27,7 +27,32 @@ Get applications
                    ValueFromPipelineByPropertyName=$true)]
         [ValidateSet('APAMA_CEP_RULE','EXTERNAL','HOSTED','MICROSERVICE')]
         [object[]]
-        $Type
+        $Type,
+
+        # The name of the application.
+        [Parameter()]
+        [string]
+        $Name,
+
+        # The ID of the tenant that owns the applications.
+        [Parameter()]
+        [string]
+        $Owner,
+
+        # The ID of a tenant that is subscribed to the applications but doesn't own them.
+        [Parameter()]
+        [string]
+        $ProvidedFor,
+
+        # The ID of a tenant that is subscribed to the applications.
+        [Parameter()]
+        [string]
+        $Subscriber,
+
+        # The ID of a user that has access to the applications.
+        [Parameter()]
+        [object[]]
+        $User
     )
     DynamicParam {
         Get-ClientCommonParameters -Type "Get", "Collection"

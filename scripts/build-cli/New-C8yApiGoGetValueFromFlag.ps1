@@ -78,8 +78,14 @@
         # tenant
         "tenant" = "flags.WithStringDefaultValue(client.TenantName, `"${prop}`", `"${queryParam}`"),"
 
+        # tenantname (optional)
+        "tenantname" = "flags.WithStringValue(`"${prop}`", `"${queryParam}`"),"
+
         # application
         "application" = "c8yfetcher.WithApplicationByNameFirstMatch(client, args, `"${prop}`", `"${queryParam}`"),"
+
+        # applicationname
+        "applicationname" = "flags.WithStringValue(`"${prop}`", `"${queryParam}`"),"
 
         # microservice
         "microservice" = "c8yfetcher.WithMicroserviceByNameFirstMatch(client, args, `"${prop}`", `"${queryParam}`"),"

@@ -30,6 +30,18 @@
           {
             "description": "Get microservices",
             "command": "c8y microservices list --pageSize 100"
+          },
+          {
+            "description": "Get a microservice by name",
+            "command": "c8y microservices list --name cockpit"
+          },
+          {
+            "description": "Check if a user has access to the device-simulator microservice",
+            "command": "c8y microservices list --name device-simulator --user myuser"
+          },
+          {
+            "description": "List all microservices owned by specific tenant",
+            "command": "c8y microservices list --owner t12345"
           }
         ]
       },
@@ -43,6 +55,32 @@
           ],
           "static": true,
           "description": "Application type"
+        },
+        {
+          "name": "name",
+          "type": "applicationname",
+          "description": "The name of the application."
+        },
+        {
+          "name": "owner",
+          "type": "tenantname",
+          "description": "The ID of the tenant that owns the applications."
+        },
+        {
+          "name": "providedFor",
+          "type": "tenantname",
+          "description": "The ID of a tenant that is subscribed to the applications but doesn't own them."
+        },
+        {
+          "name": "subscriber",
+          "type": "tenantname",
+          "description": "The ID of a tenant that is subscribed to the applications."
+        },
+        {
+          "name": "user",
+          "type": "[]user",
+          "description": "The ID of a user that has access to the applications.",
+          "pipeline": true
         }
       ]
     },

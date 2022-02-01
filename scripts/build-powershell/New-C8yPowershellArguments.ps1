@@ -77,6 +77,7 @@
         "[]usergroup" { "object[]"; break }
         "[]userself" { "object[]"; break }
         "application" { "object[]"; break }
+        "applicationname" { "string"; break }
         "boolean" { "switch"; break }
         "booleanDefault" { "switch"; break }
         "optional_fragment" { "switch"; break }
@@ -102,6 +103,7 @@
         "[]devicerequest" { "object[]"; break }
         "strings" { "string"; break }
         "tenant" { "object"; break }
+        "tenantname" { "string"; break }
 
         # Complex lookup types. These should not be visible in powershell
         "softwareDetails" { $Ignore = $true; ""; break }

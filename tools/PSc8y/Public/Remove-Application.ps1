@@ -5,7 +5,10 @@ Function Remove-Application {
 Delete application
 
 .DESCRIPTION
-The application can only be removed when its availability is PRIVATE or in other case when it has no subscriptions.
+The application can only be removed when its availability is PRIVATE or in other case when it has no subscriptions
+
+Delete an application (by a given ID). This method is not supported by microservice applications.
+
 
 .LINK
 https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/applications_delete
@@ -32,7 +35,12 @@ Delete an application by name
                    ValueFromPipeline=$true,
                    ValueFromPipelineByPropertyName=$true)]
         [object[]]
-        $Id
+        $Id,
+
+        # Force deletion by unsubscribing all tenants from the application first and then deleting the application itself.
+        [Parameter()]
+        [switch]
+        $Force
     )
     DynamicParam {
         Get-ClientCommonParameters -Type "Delete"

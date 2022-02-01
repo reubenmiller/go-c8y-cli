@@ -78,6 +78,7 @@
       "description": "CLI Argument type",
       "enum": [
         "application",
+        "applicationname",
         "boolean",
         "booleanDefault",
         "optional_fragment",
@@ -96,6 +97,7 @@
         "string",
         "source",
         "tenant",
+        "tenantname",
         "[]devicerequest",
         "[]id",
         "[]agent",

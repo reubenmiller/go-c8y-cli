@@ -32,7 +32,10 @@ func NewDeleteCmd(f *cmdutil.Factory) *DeleteCmd {
 	cmd := &cobra.Command{
 		Use:   "delete",
 		Short: "Delete application",
-		Long:  `The application can only be removed when its availability is PRIVATE or in other case when it has no subscriptions.`,
+		Long: `The application can only be removed when its availability is PRIVATE or in other case when it has no subscriptions
+
+Delete an application (by a given ID). This method is not supported by microservice applications.
+`,
 		Example: heredoc.Doc(`
 $ c8y applications delete --id 12345
 Delete an application by id
@@ -49,6 +52,7 @@ Delete an application by name
 	cmd.SilenceUsage = true
 
 	cmd.Flags().String("id", "", "Application id (required) (accepts pipeline)")
+	cmd.Flags().Bool("force", false, "Force deletion by unsubscribing all tenants from the application first and then deleting the application itself.")
 
 	completion.WithOptions(
 		cmd,
@@ -91,6 +95,7 @@ func (n *DeleteCmd) RunE(cmd *cobra.Command, args []string) error {
 		query,
 		inputIterators,
 		flags.WithCustomStringSlice(func() ([]string, error) { return cfg.GetQueryParameters(), nil }, "custom"),
+		flags.WithBoolValue("force", "force", ""),
 	)
 	if err != nil {
 		return cmderrors.NewUserError(err)
