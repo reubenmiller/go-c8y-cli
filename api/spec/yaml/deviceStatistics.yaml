@@ -27,11 +27,30 @@ endpoints:
         - description: Get device statistics
           command: Get-DeviceStatisticsCollection
       go:
-        - description: Get device statistics for all devices in the current tenant
+        - description: Get daily (default) device statistics for all devices in the current tenant
           command: c8y devices statistics list
           assertStdOut:
             json:
               path: r//tenant/statistics/device/t\d+/daily/\d{4}-\d{2}-\d{2}$
+        
+        - description: Get daily device statistics for all devices in the current tenant 7 days ago
+          command: c8y devices statistics list --date "-7d" --type daily
+          assertStdOut:
+            json:
+              path: r//tenant/statistics/device/t\d+/daily/\d{4}-\d{2}-\d{2}$
+        
+        - description: Get daily device statistics for all devices in the current tenant 30 days ago
+          command: c8y devices statistics list --date "-30d" --device 12345
+          assertStdOut:
+            json:
+              path: r//tenant/statistics/device/t\d+/daily/\d{4}-\d{2}-\d{2}$
+              pathEncoded: r//tenant/statistics/device/t\d+/daily/\d{4}-\d{2}-\d{2}\?deviceId=12345$
+        
+        - description: Get monthly device statistics for all devices for a specific month (day is ignored)
+          command: c8y devices statistics list --date 2022-01-01 --type monthly
+          assertStdOut:
+            json:
+              path: r//tenant/statistics/device/t\d+/monthly/2022-01-01$
 
     pathParameters:
       - name: date

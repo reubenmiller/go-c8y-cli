@@ -23,28 +23,23 @@ Get a list of binaries
     [Alias()]
     [OutputType([object])]
     Param(
-        # List of ids.
+        # The managed object IDs to search for.
         [Parameter()]
         [string[]]
         $Ids,
 
-        # ManagedObject type.
+        # The type of managed object to search for.
         [Parameter(ValueFromPipeline=$true,
                    ValueFromPipelineByPropertyName=$true)]
         [object[]]
         $Type,
 
-        # ManagedObject fragment type.
-        [Parameter()]
-        [string]
-        $FragmentType,
-
-        # List of managed objects that are owned by the given username.
+        # Username of the owner of the managed objects.
         [Parameter()]
         [string]
         $Owner,
 
-        # managed objects containing a text value starting with the given text (placeholder {text}). Text value is any alphanumeric string starting with a latin letter (A-Z or a-z).
+        # Search for managed objects where any property value is equal to the given one. Only string values are supported.
         [Parameter()]
         [string]
         $Text,

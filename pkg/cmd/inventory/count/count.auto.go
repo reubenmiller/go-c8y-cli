@@ -37,6 +37,18 @@ func NewCountCmd(f *cmdutil.Factory) *CountCmd {
 		Example: heredoc.Doc(`
 $ c8y inventory count
 Get count of managed objects
+
+$ c8y inventory count --text myname
+Get count of managed objects matching text (using Cumulocity text search algorithm)
+
+$ c8y inventory count --type "c8y_Sensor"
+Get count of managed objects with a specific type value
+
+$ c8y inventory count --type "c8y_Sensor" --owner "device_mylinuxbox01"
+Get count of managed objects with a specific type value and owner
+
+$ c8y inventory count --fragmentType "c8y_IsDevice"
+Get total number of devices
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
 			return nil

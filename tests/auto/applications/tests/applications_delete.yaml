@@ -13,3 +13,12 @@ tests:
             json:
                 method: DELETE
                 path: r//application/applications/\d+$
+    applications_delete_Unsubscribe and application then delete it:
+        command: c8y applications delete --id 12345 --unsubscribeAll
+        exit-code: 0
+        stdout:
+            json:
+                method: DELETE
+                path: /application/applications/12345
+            contains:
+                - force=true

@@ -28,12 +28,12 @@ func NewSubCommand(f *cmdutil.Factory) *SubCmdAlarms {
 
 	// Subcommands
 	cmd.AddCommand(cmdList.NewListCmd(f).GetCommand())
-	cmd.AddCommand(cmdCount.NewCountCmd(f).GetCommand())
 	cmd.AddCommand(cmdCreate.NewCreateCmd(f).GetCommand())
 	cmd.AddCommand(cmdUpdateCollection.NewUpdateCollectionCmd(f).GetCommand())
 	cmd.AddCommand(cmdGet.NewGetCmd(f).GetCommand())
 	cmd.AddCommand(cmdUpdate.NewUpdateCmd(f).GetCommand())
 	cmd.AddCommand(cmdDeleteCollection.NewDeleteCollectionCmd(f).GetCommand())
+	cmd.AddCommand(cmdCount.NewCountCmd(f).GetCommand())
 
 	ccmd.SubCommand = subcommand.NewSubCommand(cmd)
 

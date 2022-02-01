@@ -37,7 +37,16 @@ func NewListCmd(f *cmdutil.Factory) *ListCmd {
 `,
 		Example: heredoc.Doc(`
 $ c8y devices statistics list
-Get device statistics for all devices in the current tenant
+Get daily (default) device statistics for all devices in the current tenant
+
+$ c8y devices statistics list --date "-7d" --type daily
+Get daily device statistics for all devices in the current tenant 7 days ago
+
+$ c8y devices statistics list --date "-30d" --device 12345
+Get daily device statistics for all devices in the current tenant 30 days ago
+
+$ c8y devices statistics list --date 2022-01-01 --type monthly
+Get monthly device statistics for all devices for a specific month (day is ignored)
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
 			return nil

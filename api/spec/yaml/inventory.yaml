@@ -119,7 +119,18 @@ endpoints:
       go:
         - description: Get count of managed objects
           command: c8y inventory count
+        
+        - description: Get count of managed objects matching text (using Cumulocity text search algorithm)
+          command: c8y inventory count --text myname
+        
+        - description: Get count of managed objects with a specific type value
+          command: c8y inventory count --type "c8y_Sensor"
 
+        - description: Get count of managed objects with a specific type value and owner
+          command: c8y inventory count --type "c8y_Sensor" --owner "device_mylinuxbox01"
+        
+        - description: Get total number of devices
+          command: c8y inventory count --fragmentType "c8y_IsDevice"
 
     queryParameters:
       - name: ids

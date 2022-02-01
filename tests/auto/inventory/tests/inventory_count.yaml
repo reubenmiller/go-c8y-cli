@@ -6,3 +6,40 @@ tests:
             json:
                 method: GET
                 path: /inventory/managedObjects/count
+    inventory_count_Get count of managed objects matching text (using Cumulocity text search algorithm):
+        command: c8y inventory count --text myname
+        exit-code: 0
+        stdout:
+            json:
+                method: GET
+                path: /inventory/managedObjects/count
+            contains:
+                - text=myname
+    inventory_count_Get count of managed objects with a specific type value:
+        command: c8y inventory count --type "c8y_Sensor"
+        exit-code: 0
+        stdout:
+            json:
+                method: GET
+                path: /inventory/managedObjects/count
+            contains:
+                - type=c8y_Sensor
+    inventory_count_Get count of managed objects with a specific type value and owner:
+        command: c8y inventory count --type "c8y_Sensor" --owner "device_mylinuxbox01"
+        exit-code: 0
+        stdout:
+            json:
+                method: GET
+                path: /inventory/managedObjects/count
+            contains:
+                - type=c8y_Sensor
+                - owner=device_mylinuxbox01
+    inventory_count_Get total number of devices:
+        command: c8y inventory count --fragmentType "c8y_IsDevice"
+        exit-code: 0
+        stdout:
+            json:
+                method: GET
+                path: /inventory/managedObjects/count
+            contains:
+                - fragmentType=c8y_IsDevice

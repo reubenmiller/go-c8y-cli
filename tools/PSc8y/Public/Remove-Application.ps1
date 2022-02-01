@@ -40,7 +40,7 @@ Delete an application by name
         # Force deletion by unsubscribing all tenants from the application first and then deleting the application itself.
         [Parameter()]
         [switch]
-        $Force
+        $UnsubscribeAll
     )
     DynamicParam {
         Get-ClientCommonParameters -Type "Delete"

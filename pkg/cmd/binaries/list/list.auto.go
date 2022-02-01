@@ -50,11 +50,10 @@ Get a list of binaries with the type package_debian
 
 	cmd.SilenceUsage = true
 
-	cmd.Flags().StringSlice("ids", []string{""}, "List of ids.")
-	cmd.Flags().String("type", "", "ManagedObject type. (accepts pipeline)")
-	cmd.Flags().String("fragmentType", "", "ManagedObject fragment type.")
-	cmd.Flags().String("owner", "", "List of managed objects that are owned by the given username.")
-	cmd.Flags().String("text", "", "managed objects containing a text value starting with the given text (placeholder {text}). Text value is any alphanumeric string starting with a latin letter (A-Z or a-z).")
+	cmd.Flags().StringSlice("ids", []string{""}, "The managed object IDs to search for.")
+	cmd.Flags().String("type", "", "The type of managed object to search for. (accepts pipeline)")
+	cmd.Flags().String("owner", "", "Username of the owner of the managed objects.")
+	cmd.Flags().String("text", "", "Search for managed objects where any property value is equal to the given one. Only string values are supported.")
 	cmd.Flags().String("childAdditionId", "", "Search for a specific child addition and list all the groups to which it belongs.")
 	cmd.Flags().String("childAssetId", "", "Search for a specific child asset and list all the groups to which it belongs.")
 	cmd.Flags().StringSlice("childDeviceId", []string{""}, "Search for a specific child device and list all the groups to which it belongs.")
@@ -102,7 +101,6 @@ func (n *ListCmd) RunE(cmd *cobra.Command, args []string) error {
 		flags.WithCustomStringSlice(func() ([]string, error) { return cfg.GetQueryParameters(), nil }, "custom"),
 		flags.WithStringSliceCSV("ids", "ids", ""),
 		flags.WithStringValue("type", "type"),
-		flags.WithStringValue("fragmentType", "fragmentType"),
 		flags.WithStringValue("owner", "owner"),
 		flags.WithStringValue("text", "text"),
 		flags.WithStringValue("childAdditionId", "childAdditionId"),

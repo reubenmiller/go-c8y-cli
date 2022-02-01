@@ -42,6 +42,9 @@ Delete an application by id
 
 $ c8y applications delete --id my-example-app
 Delete an application by name
+
+$ c8y applications delete --id 12345 --unsubscribeAll
+Unsubscribe and application then delete it
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
 			return f.DeleteModeEnabled()
@@ -52,7 +55,7 @@ Delete an application by name
 	cmd.SilenceUsage = true
 
 	cmd.Flags().String("id", "", "Application id (required) (accepts pipeline)")
-	cmd.Flags().Bool("force", false, "Force deletion by unsubscribing all tenants from the application first and then deleting the application itself.")
+	cmd.Flags().Bool("unsubscribeAll", false, "Force deletion by unsubscribing all tenants from the application first and then deleting the application itself.")
 
 	completion.WithOptions(
 		cmd,
@@ -95,7 +98,7 @@ func (n *DeleteCmd) RunE(cmd *cobra.Command, args []string) error {
 		query,
 		inputIterators,
 		flags.WithCustomStringSlice(func() ([]string, error) { return cfg.GetQueryParameters(), nil }, "custom"),
-		flags.WithBoolValue("force", "force", ""),
+		flags.WithBoolValue("unsubscribeAll", "force", ""),
 	)
 	if err != nil {
 		return cmderrors.NewUserError(err)

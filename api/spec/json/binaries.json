@@ -49,7 +49,7 @@
           "name": "ids",
           "type": "[]stringcsv",
           "property": "ids",
-          "description": "List of ids."
+          "description": "The managed object IDs to search for."
         },
         {
           "name": "type",
@@ -59,22 +59,17 @@
             "type"
           ],
           "required": false,
-          "description": "ManagedObject type."
-        },
-        {
-          "name": "fragmentType",
-          "type": "string",
-          "description": "ManagedObject fragment type."
+          "description": "The type of managed object to search for."
         },
         {
           "name": "owner",
           "type": "string",
-          "description": "List of managed objects that are owned by the given username."
+          "description": "Username of the owner of the managed objects."
         },
         {
           "name": "text",
           "type": "string",
-          "description": "managed objects containing a text value starting with the given text (placeholder {text}). Text value is any alphanumeric string starting with a latin letter (A-Z or a-z)."
+          "description": "Search for managed objects where any property value is equal to the given one. Only string values are supported."
         },
         {
           "name": "childAdditionId",
