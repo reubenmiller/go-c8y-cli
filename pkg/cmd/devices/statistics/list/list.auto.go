@@ -57,7 +57,7 @@ Get monthly device statistics for all devices for a specific month (day is ignor
 	cmd.SilenceUsage = true
 
 	cmd.Flags().String("date", "-1d", "Date of the queried day. When type is set to monthly then will be ignored.")
-	cmd.Flags().String("type", "daily", "Aggregation type. e.g. daily or monthly (required)")
+	cmd.Flags().String("type", "daily", "Aggregation type. e.g. daily or monthly")
 	cmd.Flags().String("tenant", "", "Tenant id. Defaults to current tenant (based on credentials)")
 	cmd.Flags().StringSlice("device", []string{""}, "The ID of the device to search for. (accepts pipeline)")
 
@@ -76,7 +76,6 @@ Get monthly device statistics for all devices for a specific month (day is ignor
 	)
 
 	// Required flags
-	_ = cmd.MarkFlagRequired("type")
 
 	ccmd.SubCommand = subcommand.NewSubCommand(cmd)
 

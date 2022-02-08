@@ -28,8 +28,8 @@ Get device statistics
         [string]
         $Date,
 
-        # Aggregation type. e.g. daily or monthly (required)
-        [Parameter(Mandatory = $true)]
+        # Aggregation type. e.g. daily or monthly
+        [Parameter()]
         [ValidateSet('daily','monthly')]
         [string]
         $Type,

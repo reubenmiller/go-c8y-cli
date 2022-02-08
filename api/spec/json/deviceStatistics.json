@@ -74,7 +74,7 @@
         {
           "name": "type",
           "type": "string",
-          "required": true,
+          "required": false,
           "default": "daily",
           "description": "Aggregation type. e.g. daily or monthly",
           "validationSet": [
