@@ -1,36 +1,49 @@
 ---
 category: inventory
-title: c8y inventory get
+title: c8y inventory count
 ---
-Get managed objects
+Get managed object count
 
 ### Synopsis
 
-Get an existing managed object
+Retrieve the total number of managed objects (e.g. devices, assets, etc.) registered in your tenant, or a subset based on queries.
 
 ```
-c8y inventory get [flags]
+c8y inventory count [flags]
 ```
 
 ### Examples
 
 ```
-$ c8y inventory get --id 12345
-Get a managed object
+$ c8y inventory count
+Get count of managed objects
 
-$ c8y inventory get --id 12345 --withParents
-Get a managed object with parent references
+$ c8y inventory count --text myname
+Get count of managed objects matching text (using Cumulocity text search algorithm)
+
+$ c8y inventory count --type "c8y_Sensor"
+Get count of managed objects with a specific type value
+
+$ c8y inventory count --type "c8y_Sensor" --owner "device_mylinuxbox01"
+Get count of managed objects with a specific type value and owner
+
+$ c8y inventory count --fragmentType "c8y_IsDevice"
+Get total number of devices
         
 ```
 
 ### Options
 
 ```
-  -h, --help                help for get
-      --id strings          ManagedObject id (required) (accepts pipeline)
-      --skipChildrenNames   Don't include the child devices names in the response. This can improve the API response because the names don't need to be retrieved
-      --withChildren        Determines if children with ID and name should be returned when fetching the managed object. Set it to false to improve query performance.
-      --withParents         include a flat list of all parents and grandparents of the given object
+      --childAdditionId string   Search for a specific child addition and list all the groups to which it belongs.
+      --childAssetId string      Search for a specific child asset and list all the groups to which it belongs.
+      --childDeviceId strings    Search for a specific child device and list all the groups to which it belongs.
+      --fragmentType string      ManagedObject fragment type.
+  -h, --help                     help for count
+      --ids strings              List of ids.
+      --owner string             List of managed objects that are owned by the given username.
+      --text string              managed objects containing a text value starting with the given text (placeholder {text}). Text value is any alphanumeric string starting with a latin letter (A-Z or a-z).
+      --type string              ManagedObject type. (accepts pipeline)
 ```
 
 ### Options inherited from parent commands

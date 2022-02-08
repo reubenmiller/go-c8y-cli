@@ -22,7 +22,7 @@ Remove-AlarmCollection
 	[[-DateFrom] <String>]
 	[[-DateTo] <String>]
 	[[-Type] <String>]
-	[[-Status] <String>]
+	[[-Status] <String[]>]
 	[[-Severity] <String>]
 	[-Resolved]
 	[-WithSourceAssets]
@@ -166,7 +166,7 @@ Accept wildcard characters: False
 Comma separated alarm statuses, for example ACTIVE,CLEARED.
 
 ```yaml
-Type: String
+Type: String[]
 Parameter Sets: (All)
 Aliases:
 

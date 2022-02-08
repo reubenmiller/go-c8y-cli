@@ -1,36 +1,38 @@
 ---
-category: inventory
-title: c8y inventory get
+category: availability
+title: c8y devices availability set
 ---
-Get managed objects
+Set required availability
 
 ### Synopsis
 
-Get an existing managed object
+Set the required availability of a device. Devices that have not sent any message in the response interval are considered unavailable. Response interval can have value between -32768 and 32767 and any values out of range will be shrink to range borders. Such devices are marked as unavailable (see below) and an unavailability alarm is raised. Devices with a response interval of zero minutes are considered to be under maintenance. No alarm is raised while a device is under maintenance. Devices that do not contain 'c8y_RequiredAvailability' are not monitored.
 
 ```
-c8y inventory get [flags]
+c8y devices availability set [flags]
 ```
 
 ### Examples
 
 ```
-$ c8y inventory get --id 12345
-Get a managed object
+$ c8y devices availability set --id 12345 --interval 10
+Set the required availability of a device by name to 10 minutes
 
-$ c8y inventory get --id 12345 --withParents
-Get a managed object with parent references
+$ c8y devices get --id device01 --dry=false | c8y devices availability set --interval 10
+Set the required availability for a device using pipeline
+
+$ c8y devices list | c8y devices availability set --interval 10
+Set the required availability for a list of devices using pipeline
         
 ```
 
 ### Options
 
 ```
-  -h, --help                help for get
-      --id strings          ManagedObject id (required) (accepts pipeline)
-      --skipChildrenNames   Don't include the child devices names in the response. This can improve the API response because the names don't need to be retrieved
-      --withChildren        Determines if children with ID and name should be returned when fetching the managed object. Set it to false to improve query performance.
-      --withParents         include a flat list of all parents and grandparents of the given object
+  -h, --help                    help for set
+      --id strings              Device ID (required) (accepts pipeline)
+      --interval int            Interval in minutes (required)
+      --processingMode string   Cumulocity processing mode
 ```
 
 ### Options inherited from parent commands

@@ -32,13 +32,20 @@ Get managed objects which have the same type as the managed object id=1234. pipe
 ### Options
 
 ```
-      --fragmentType string   ManagedObject fragment type.
-  -h, --help                  help for list
-      --ids strings           List of ids.
-      --skipChildrenNames     Don't include the child devices names in the response. This can improve the API response because the names don't need to be retrieved
-      --text string           managed objects containing a text value starting with the given text (placeholder {text}). Text value is any alphanumeric string starting with a latin letter (A-Z or a-z).
-      --type string           ManagedObject type. (accepts pipeline)
-      --withParents           include a flat list of all parents and grandparents of the given object
+      --childAdditionId string   Search for a specific child addition and list all the groups to which it belongs.
+      --childAssetId string      Search for a specific child asset and list all the groups to which it belongs.
+      --childDeviceId strings    Search for a specific child device and list all the groups to which it belongs.
+      --fragmentType string      ManagedObject fragment type.
+  -h, --help                     help for list
+      --ids strings              List of ids.
+      --onlyRoots true           When set to true it returns managed objects which don't have any parent. If the current user doesn't have access to the parent, this is also root for the user
+      --owner string             List of managed objects that are owned by the given username.
+      --skipChildrenNames        Don't include the child devices names in the response. This can improve the API response because the names don't need to be retrieved
+      --text string              managed objects containing a text value starting with the given text (placeholder {text}). Text value is any alphanumeric string starting with a latin letter (A-Z or a-z).
+      --type string              ManagedObject type. (accepts pipeline)
+      --withChildren             Determines if children with ID and name should be returned when fetching the managed object. Set it to false to improve query performance.
+      --withGroups               When set to true it returns additional information about the groups to which the searched managed object belongs. This results in setting the assetParents property with additional information about the groups.
+      --withParents              include a flat list of all parents and grandparents of the given object
 ```
 
 ### Options inherited from parent commands

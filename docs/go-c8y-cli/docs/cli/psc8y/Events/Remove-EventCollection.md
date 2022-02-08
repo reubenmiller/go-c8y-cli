@@ -21,6 +21,8 @@ Remove-EventCollection
 	[[-Device] <Object[]>]
 	[[-Type] <String>]
 	[[-FragmentType] <String>]
+	[[-CreatedFrom] <String>]
+	[[-CreatedTo] <String>]
 	[[-DateFrom] <String>]
 	[[-DateTo] <String>]
 	[-Revert]
@@ -137,6 +139,36 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
+### -CreatedFrom
+Start date or date and time of the event's creation (set by the platform during creation).
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 4
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -CreatedTo
+End date or date and time of the event's creation (set by the platform during creation).
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 5
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
 ### -DateFrom
 Start date or date and time of event occurrence.
 
@@ -146,7 +178,7 @@ Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: 4
+Position: 6
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
@@ -161,7 +193,7 @@ Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: 5
+Position: 7
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False

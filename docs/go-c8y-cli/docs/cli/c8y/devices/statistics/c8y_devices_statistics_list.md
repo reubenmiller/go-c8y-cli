@@ -1,36 +1,43 @@
 ---
-category: inventory
-title: c8y inventory get
+category: statistics
+title: c8y devices statistics list
 ---
-Get managed objects
+Retrieve device statistics
 
 ### Synopsis
 
-Get an existing managed object
+Retrieve device statistics from a specific tenant (by a given ID). Either daily or monthly.
+
 
 ```
-c8y inventory get [flags]
+c8y devices statistics list [flags]
 ```
 
 ### Examples
 
 ```
-$ c8y inventory get --id 12345
-Get a managed object
+$ c8y devices statistics list
+Get daily (default) device statistics for all devices in the current tenant
 
-$ c8y inventory get --id 12345 --withParents
-Get a managed object with parent references
+$ c8y devices statistics list --date "-7d" --type daily
+Get daily device statistics for all devices in the current tenant 7 days ago
+
+$ c8y devices statistics list --date "-30d" --device 12345
+Get daily device statistics for all devices in the current tenant 30 days ago
+
+$ c8y devices statistics list --date 2022-01-01 --type monthly
+Get monthly device statistics for all devices for a specific month (day is ignored)
         
 ```
 
 ### Options
 
 ```
-  -h, --help                help for get
-      --id strings          ManagedObject id (required) (accepts pipeline)
-      --skipChildrenNames   Don't include the child devices names in the response. This can improve the API response because the names don't need to be retrieved
-      --withChildren        Determines if children with ID and name should be returned when fetching the managed object. Set it to false to improve query performance.
-      --withParents         include a flat list of all parents and grandparents of the given object
+      --date string      Date of the queried day. When type is set to monthly then will be ignored. (default "-1d")
+      --device strings   The ID of the device to search for. (accepts pipeline)
+  -h, --help             help for list
+      --tenant string    Tenant id. Defaults to current tenant (based on credentials)
+      --type string      Aggregation type. e.g. daily or monthly (default "daily")
 ```
 
 ### Options inherited from parent commands

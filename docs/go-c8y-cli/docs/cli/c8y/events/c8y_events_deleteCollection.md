@@ -26,6 +26,8 @@ Remove events from a device
 ### Options
 
 ```
+      --createdFrom string      Start date or date and time of the event's creation (set by the platform during creation).
+      --createdTo string        End date or date and time of the event's creation (set by the platform during creation).
       --dateFrom string         Start date or date and time of event occurrence.
       --dateTo string           End date or date and time of event occurrence.
       --device strings          Device ID (accepts pipeline)

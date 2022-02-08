@@ -1,35 +1,24 @@
 ---
-category: Binaries
+category: Devices
 external help file: PSc8y-help.xml
-id: Get-BinaryCollection
+id: Get-DeviceUser
 Module Name: PSc8y
-online version: https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/binaries_list
+online version: https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/devices_user_get
 schema: 2.0.0
-slug: /docs/cli/psc8y/Binaries/get-binarycollection
-title: Get-BinaryCollection
+slug: /docs/cli/psc8y/Devices/get-deviceuser
+title: Get-DeviceUser
 ---
 
 
 
 ## SYNOPSIS
-Get binary collection
+Get device user
 
 ## SYNTAX
 
 ```
-Get-BinaryCollection
-	[[-Ids] <String[]>]
-	[[-Type] <Object[]>]
-	[[-Owner] <String>]
-	[[-Text] <String>]
-	[[-ChildAdditionId] <String>]
-	[[-ChildAssetId] <String>]
-	[[-ChildDeviceId] <Object[]>]
-	[-PageSize <Int32>]
-	[-WithTotalPages]
-	[-CurrentPage <Int32>]
-	[-TotalPages <Int32>]
-	[-IncludeAll]
+Get-DeviceUser
+	[-Id] <Object[]>
 	[-Raw]
 	[-OutputFile <String>]
 	[-OutputFileRaw <String>]
@@ -75,123 +64,38 @@ Get-BinaryCollection
 ```
 
 ## DESCRIPTION
-Get a collection of inventory binaries.
-The results include the meta information about binary and not the binary itself.
+Retrieve the device owner's username and state (enabled or disabled) of a specific managed object
 
 ## EXAMPLES
 
 ### EXAMPLE 1
 ```
-Get-BinaryCollection -PageSize 100
+Get-DeviceUser -Id $device.id
 ```
 
-Get a list of binaries
+Get device user by id
+
+### EXAMPLE 2
+```
+Get-DeviceUser -Id $device.name
+```
+
+Get device user by name
 
 ## PARAMETERS
 
-### -Ids
-The managed object IDs to search for.
+### -Id
+Device ID (required)
 
 ```yaml
-Type: String[]
+Type: Object[]
 Parameter Sets: (All)
 Aliases:
 
-Required: False
+Required: True
 Position: 1
 Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
-### -Type
-The type of managed object to search for.
-
-```yaml
-Type: Object[]
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: 2
-Default value: None
 Accept pipeline input: True (ByPropertyName, ByValue)
-Accept wildcard characters: False
-```
-
-### -Owner
-Username of the owner of the managed objects.
-
-```yaml
-Type: String
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: 3
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
-### -Text
-Search for managed objects where any property value is equal to the given one.
-Only string values are supported.
-
-```yaml
-Type: String
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: 4
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
-### -ChildAdditionId
-Search for a specific child addition and list all the groups to which it belongs.
-
-```yaml
-Type: String
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: 5
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
-### -ChildAssetId
-Search for a specific child asset and list all the groups to which it belongs.
-
-```yaml
-Type: String
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: 6
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
-### -ChildDeviceId
-Search for a specific child device and list all the groups to which it belongs.
-
-```yaml
-Type: Object[]
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: 7
-Default value: None
-Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
@@ -307,21 +211,6 @@ Custom confirmation text
 
 ```yaml
 Type: String
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: Named
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
-### -CurrentPage
-Current page which should be returned
-
-```yaml
-Type: Int32
 Parameter Sets: (All)
 Aliases:
 
@@ -493,21 +382,6 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -IncludeAll
-Include all results by iterating through each page
-
-```yaml
-Type: SwitchParameter
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: Named
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
 ### -Insecure
 Allow insecure server connections when using SSL
 
@@ -650,21 +524,6 @@ Save raw response to file (before select/view)
 
 ```yaml
 Type: String
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: Named
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
-### -PageSize
-Maximum results per page
-
-```yaml
-Type: Int32
 Parameter Sets: (All)
 Aliases:
 
@@ -834,21 +693,6 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -TotalPages
-Total number of pages to get
-
-```yaml
-Type: Int32
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: Named
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
 ### -View
 Use views when displaying data on the terminal.
 Disable using --view off
@@ -867,21 +711,6 @@ Accept wildcard characters: False
 
 ### -WithError
 Errors will be printed on stdout instead of stderr
-
-```yaml
-Type: SwitchParameter
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: Named
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
-### -WithTotalPages
-Request Cumulocity to include the total pages in the response statitics under .statistics.totalPages
 
 ```yaml
 Type: SwitchParameter
@@ -922,5 +751,5 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 
 ## RELATED LINKS
 
-[https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/binaries_list](https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/binaries_list)
+[https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/devices_user_get](https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/devices_user_get)
 

@@ -20,6 +20,9 @@ Get alarms with the severity set to MAJOR
 
 $ c8y alarms list --dateFrom "-10m" --status ACTIVE
 Get collection of active alarms which occurred in the last 10 minutes
+
+$ c8y alarms list --dateFrom "-1d" --status ACTIVE --status ACKNOWLEDGED
+Get collection of active and acknowledged alarms in the last 1d
         
 ```
 
@@ -32,7 +35,7 @@ Get collection of active alarms which occurred in the last 10 minutes
   -h, --help                help for list
       --resolved            When set to true only resolved alarms will be removed (the one with status CLEARED), false means alarms with status ACTIVE or ACKNOWLEDGED.
       --severity string     Alarm severity, for example CRITICAL, MAJOR, MINOR or WARNING.
-      --status string       Comma separated alarm statuses, for example ACTIVE,CLEARED.
+      --status strings      Comma separated alarm statuses, for example ACTIVE,CLEARED.
       --type string         Alarm type.
       --withSourceAssets    When set to true also alarms for related source devices will be included in the request. When this parameter is provided a source must be specified.
       --withSourceDevices   When set to true also alarms for related source devices will be removed. When this parameter is provided also source must be defined.

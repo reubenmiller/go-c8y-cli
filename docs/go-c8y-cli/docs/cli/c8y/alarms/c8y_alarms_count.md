@@ -1,36 +1,47 @@
 ---
-category: inventory
-title: c8y inventory get
+category: alarms
+title: c8y alarms count
 ---
-Get managed objects
+Retrieve the total number of alarms
 
 ### Synopsis
 
-Get an existing managed object
+Count the total number of active alarms on your tenant
 
 ```
-c8y inventory get [flags]
+c8y alarms count [flags]
 ```
 
 ### Examples
 
 ```
-$ c8y inventory get --id 12345
-Get a managed object
+$ c8y alarms count --severity MAJOR
+Get number of active alarms with the severity set to MAJOR
 
-$ c8y inventory get --id 12345 --withParents
-Get a managed object with parent references
+$ c8y alarms count --dateFrom "-10m" --status ACTIVE
+Get number of active alarms which occurred in the last 10 minutes
+
+$ c8y alarms count --dateFrom "-10m" --status ACTIVE --device 12345
+Get number of active alarms which occurred in the last 10 minutes on a device
+
+$ c8y devices list --type linuxA | c8y alarms count --dateFrom "-10m"
+Get number of alarms from a list of devices using pipeline
         
 ```
 
 ### Options
 
 ```
-  -h, --help                help for get
-      --id strings          ManagedObject id (required) (accepts pipeline)
-      --skipChildrenNames   Don't include the child devices names in the response. This can improve the API response because the names don't need to be retrieved
-      --withChildren        Determines if children with ID and name should be returned when fetching the managed object. Set it to false to improve query performance.
-      --withParents         include a flat list of all parents and grandparents of the given object
+      --dateFrom string     Start date or date and time of alarm occurrence.
+      --dateTo string       End date or date and time of alarm occurrence.
+      --device strings      Source device id. (accepts pipeline)
+  -h, --help                help for count
+      --resolved            When set to true only resolved alarms will be removed (the one with status CLEARED), false means alarms with status ACTIVE or ACKNOWLEDGED.
+      --severity string     Alarm severity, for example CRITICAL, MAJOR, MINOR or WARNING.
+      --status strings      Comma separated alarm statuses, for example ACTIVE,CLEARED.
+      --type string         Alarm type.
+      --withSourceAssets    When set to true also alarms for related source devices will be included in the request. When this parameter is provided a source must be specified.
+      --withSourceDevices   When set to true also alarms for related source devices will be removed. When this parameter is provided also source must be defined.
 ```
 
 ### Options inherited from parent commands

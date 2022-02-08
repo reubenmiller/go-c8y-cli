@@ -1,35 +1,31 @@
 ---
-category: Binaries
+category: Devices
 external help file: PSc8y-help.xml
-id: Get-BinaryCollection
+id: Update-DeviceUser
 Module Name: PSc8y
-online version: https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/binaries_list
+online version: https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/devices_user_update
 schema: 2.0.0
-slug: /docs/cli/psc8y/Binaries/get-binarycollection
-title: Get-BinaryCollection
+slug: /docs/cli/psc8y/Devices/update-deviceuser
+title: Update-DeviceUser
 ---
 
 
 
 ## SYNOPSIS
-Get binary collection
+Update device user
 
 ## SYNTAX
 
 ```
-Get-BinaryCollection
-	[[-Ids] <String[]>]
-	[[-Type] <Object[]>]
-	[[-Owner] <String>]
-	[[-Text] <String>]
-	[[-ChildAdditionId] <String>]
-	[[-ChildAssetId] <String>]
-	[[-ChildDeviceId] <Object[]>]
-	[-PageSize <Int32>]
-	[-WithTotalPages]
-	[-CurrentPage <Int32>]
-	[-TotalPages <Int32>]
-	[-IncludeAll]
+Update-DeviceUser
+	[-Id] <Object[]>
+	[-Enabled]
+	[-Data <Object>]
+	[-NoAccept]
+	[-ProcessingMode <String>]
+	[-Force]
+	[-Template <String>]
+	[-TemplateVars <String>]
 	[-Raw]
 	[-OutputFile <String>]
 	[-OutputFileRaw <String>]
@@ -75,122 +71,52 @@ Get-BinaryCollection
 ```
 
 ## DESCRIPTION
-Get a collection of inventory binaries.
-The results include the meta information about binary and not the binary itself.
+Update the device owner's state (enabled or disabled) of a specific managed object
 
 ## EXAMPLES
 
 ### EXAMPLE 1
 ```
-Get-BinaryCollection -PageSize 100
+Update-DeviceUser -Id $device.id -Enabled
 ```
 
-Get a list of binaries
+Enable a device user
+
+### EXAMPLE 2
+```
+Update-DeviceUser -Id $device.name -Enabled:$false
+```
+
+Disable a device user
 
 ## PARAMETERS
 
-### -Ids
-The managed object IDs to search for.
-
-```yaml
-Type: String[]
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: 1
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
-### -Type
-The type of managed object to search for.
+### -Id
+Device ID (required)
 
 ```yaml
 Type: Object[]
 Parameter Sets: (All)
 Aliases:
 
-Required: False
-Position: 2
+Required: True
+Position: 1
 Default value: None
 Accept pipeline input: True (ByPropertyName, ByValue)
 Accept wildcard characters: False
 ```
 
-### -Owner
-Username of the owner of the managed objects.
+### -Enabled
+Specifies if the device's owner is enabled or not.
 
 ```yaml
-Type: String
+Type: SwitchParameter
 Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: 3
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
-### -Text
-Search for managed objects where any property value is equal to the given one.
-Only string values are supported.
-
-```yaml
-Type: String
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: 4
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
-### -ChildAdditionId
-Search for a specific child addition and list all the groups to which it belongs.
-
-```yaml
-Type: String
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: 5
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
-### -ChildAssetId
-Search for a specific child asset and list all the groups to which it belongs.
-
-```yaml
-Type: String
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: 6
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
-### -ChildDeviceId
-Search for a specific child device and list all the groups to which it belongs.
-
-```yaml
-Type: Object[]
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: 7
-Default value: None
+Position: Named
+Default value: False
 Accept pipeline input: False
 Accept wildcard characters: False
 ```
@@ -317,11 +243,13 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -CurrentPage
-Current page which should be returned
+### -CustomQueryParam
+add custom URL query parameters.
+i.e.
+--customQueryParam 'withCustomOption=true,myOtherOption=myvalue'
 
 ```yaml
-Type: Int32
+Type: String[]
 Parameter Sets: (All)
 Aliases:
 
@@ -332,13 +260,13 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -CustomQueryParam
-add custom URL query parameters.
-i.e.
---customQueryParam 'withCustomOption=true,myOtherOption=myvalue'
+### -Data
+static data to be applied to body.
+accepts json or shorthande json, i.e.
+--data 'value1=1,my.nested.value=100'
 
 ```yaml
-Type: String[]
+Type: Object
 Parameter Sets: (All)
 Aliases:
 
@@ -461,6 +389,22 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
+### -Force
+Do not prompt for confirmation.
+Ignored when using --confirm
+
+```yaml
+Type: SwitchParameter
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
 ### -Header
 custom headers.
 i.e.
@@ -480,21 +424,6 @@ Accept wildcard characters: False
 
 ### -Help
 Show command help
-
-```yaml
-Type: SwitchParameter
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: Named
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
-### -IncludeAll
-Include all results by iterating through each page
 
 ```yaml
 Type: SwitchParameter
@@ -544,6 +473,21 @@ Maximum number of jobs.
 
 ```yaml
 Type: Int32
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -NoAccept
+Ignore Accept header will remove the Accept header from requests, however PUT and POST requests will only see the effect
+
+```yaml
+Type: SwitchParameter
 Parameter Sets: (All)
 Aliases:
 
@@ -660,11 +604,11 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -PageSize
-Maximum results per page
+### -ProcessingMode
+Cumulocity processing mode
 
 ```yaml
-Type: Int32
+Type: String
 Parameter Sets: (All)
 Aliases:
 
@@ -817,10 +761,8 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -Timeout
-Request timeout.
-It accepts a duration, i.e.
-1ms, 0.5s, 1m etc.
+### -Template
+Body template
 
 ```yaml
 Type: String
@@ -834,11 +776,28 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -TotalPages
-Total number of pages to get
+### -TemplateVars
+Body template variables
 
 ```yaml
-Type: Int32
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -Timeout
+Request timeout.
+It accepts a duration, i.e.
+1ms, 0.5s, 1m etc.
+
+```yaml
+Type: String
 Parameter Sets: (All)
 Aliases:
 
@@ -880,21 +839,6 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -WithTotalPages
-Request Cumulocity to include the total pages in the response statitics under .statistics.totalPages
-
-```yaml
-Type: SwitchParameter
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: Named
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
 ### -Workers
 Number of workers
 
@@ -922,5 +866,5 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 
 ## RELATED LINKS
 
-[https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/binaries_list](https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/binaries_list)
+[https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/devices_user_update](https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/devices_user_update)
 

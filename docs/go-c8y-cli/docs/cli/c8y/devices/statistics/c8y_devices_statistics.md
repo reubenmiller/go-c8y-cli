@@ -1,36 +1,20 @@
 ---
-category: inventory
-title: c8y inventory get
+category: statistics
+title: c8y devices statistics
 ---
-Get managed objects
+Cumulocity device statistics (for a single tenant) statistics
 
 ### Synopsis
 
-Get an existing managed object
+Device statistics are collected for each inventory object with at least one measurement, event or alarm. There are no additional checks if the inventory object is marked as device using the c8y_IsDevice fragment. When the first measurement, event or alarm is created for a specific inventory object, Cumulocity IoT is always considering this as a device and starts counting.
 
-```
-c8y inventory get [flags]
-```
+Device statistics are counted with daily and monthly rate. All requests are considered when counting device statistics, no matter which processing mode is used.
 
-### Examples
-
-```
-$ c8y inventory get --id 12345
-Get a managed object
-
-$ c8y inventory get --id 12345 --withParents
-Get a managed object with parent references
-        
-```
 
 ### Options
 
 ```
-  -h, --help                help for get
-      --id strings          ManagedObject id (required) (accepts pipeline)
-      --skipChildrenNames   Don't include the child devices names in the response. This can improve the API response because the names don't need to be retrieved
-      --withChildren        Determines if children with ID and name should be returned when fetching the managed object. Set it to false to improve query performance.
-      --withParents         include a flat list of all parents and grandparents of the given object
+  -h, --help   help for statistics
 ```
 
 ### Options inherited from parent commands

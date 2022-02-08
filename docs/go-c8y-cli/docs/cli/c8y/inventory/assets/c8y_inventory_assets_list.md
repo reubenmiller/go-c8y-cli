@@ -26,8 +26,9 @@ Get a list of the child devices using pipeline
 ### Options
 
 ```
-  -h, --help         help for list
-      --id strings   Managed object. (required) (accepts pipeline)
+  -h, --help           help for list
+      --id strings     Managed object. (required) (accepts pipeline)
+      --withChildren   Determines if children with ID and name should be returned when fetching the managed object. Set it to false to improve query performance.
 ```
 
 ### Options inherited from parent commands

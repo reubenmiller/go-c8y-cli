@@ -1,36 +1,36 @@
 ---
-category: inventory
-title: c8y inventory get
+category: availability
+title: c8y devices availability get
 ---
-Get managed objects
+Get device availability
 
 ### Synopsis
 
-Get an existing managed object
+Retrieve the date when a specific managed object (by a given ID) sent the last message to Cumulocity IoT.
 
 ```
-c8y inventory get [flags]
+c8y devices availability get [flags]
 ```
 
 ### Examples
 
 ```
-$ c8y inventory get --id 12345
-Get a managed object
+$ c8y devices availability get --id 12345
+Get a device's availability by id
 
-$ c8y inventory get --id 12345 --withParents
-Get a managed object with parent references
+$ c8y devices availability get --id device01
+Get a device's availability by name
+
+$ c8y devices get --id device01 --dry=false | c8y devices availability get
+Get a device's availability using a pipeline
         
 ```
 
 ### Options
 
 ```
-  -h, --help                help for get
-      --id strings          ManagedObject id (required) (accepts pipeline)
-      --skipChildrenNames   Don't include the child devices names in the response. This can improve the API response because the names don't need to be retrieved
-      --withChildren        Determines if children with ID and name should be returned when fetching the managed object. Set it to false to improve query performance.
-      --withParents         include a flat list of all parents and grandparents of the given object
+  -h, --help         help for get
+      --id strings   Device. (required) (accepts pipeline)
 ```
 
 ### Options inherited from parent commands

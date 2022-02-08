@@ -33,7 +33,7 @@ Remove alarms on the device which are active and created in the last 10 minutes
       --processingMode string   Cumulocity processing mode
       --resolved                When set to true only resolved alarms will be removed (the one with status CLEARED), false means alarms with status ACTIVE or ACKNOWLEDGED.
       --severity string         Alarm severity, for example CRITICAL, MAJOR, MINOR or WARNING.
-      --status string           Comma separated alarm statuses, for example ACTIVE,CLEARED.
+      --status strings          Comma separated alarm statuses, for example ACTIVE,CLEARED.
       --type string             Alarm type.
       --withSourceAssets        When set to true also alarms for related source assets will be removed. When this parameter is provided also source must be defined.
       --withSourceDevices       When set to true also alarms for related source devices will be removed. When this parameter is provided also source must be defined.

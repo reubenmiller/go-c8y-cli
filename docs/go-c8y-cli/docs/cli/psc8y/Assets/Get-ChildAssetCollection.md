@@ -19,6 +19,7 @@ Get child asset collection
 ```
 Get-ChildAssetCollection
 	[-Id] <Object[]>
+	[-WithChildren]
 	[-PageSize <Int32>]
 	[-WithTotalPages]
 	[-CurrentPage <Int32>]
@@ -95,6 +96,22 @@ Required: True
 Position: 1
 Default value: None
 Accept pipeline input: True (ByPropertyName, ByValue)
+Accept wildcard characters: False
+```
+
+### -WithChildren
+Determines if children with ID and name should be returned when fetching the managed object.
+Set it to false to improve query performance.
+
+```yaml
+Type: SwitchParameter
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: False
+Accept pipeline input: False
 Accept wildcard characters: False
 ```
 

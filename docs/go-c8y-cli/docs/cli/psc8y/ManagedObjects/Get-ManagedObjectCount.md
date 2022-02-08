@@ -1,35 +1,31 @@
 ---
-category: Binaries
+category: ManagedObjects
 external help file: PSc8y-help.xml
-id: Get-BinaryCollection
+id: Get-ManagedObjectCount
 Module Name: PSc8y
-online version: https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/binaries_list
+online version: https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/inventory_count
 schema: 2.0.0
-slug: /docs/cli/psc8y/Binaries/get-binarycollection
-title: Get-BinaryCollection
+slug: /docs/cli/psc8y/ManagedObjects/get-managedobjectcount
+title: Get-ManagedObjectCount
 ---
 
 
 
 ## SYNOPSIS
-Get binary collection
+Get managed object count
 
 ## SYNTAX
 
 ```
-Get-BinaryCollection
+Get-ManagedObjectCount
 	[[-Ids] <String[]>]
 	[[-Type] <Object[]>]
+	[[-FragmentType] <String>]
 	[[-Owner] <String>]
 	[[-Text] <String>]
 	[[-ChildAdditionId] <String>]
 	[[-ChildAssetId] <String>]
 	[[-ChildDeviceId] <Object[]>]
-	[-PageSize <Int32>]
-	[-WithTotalPages]
-	[-CurrentPage <Int32>]
-	[-TotalPages <Int32>]
-	[-IncludeAll]
 	[-Raw]
 	[-OutputFile <String>]
 	[-OutputFileRaw <String>]
@@ -75,22 +71,22 @@ Get-BinaryCollection
 ```
 
 ## DESCRIPTION
-Get a collection of inventory binaries.
-The results include the meta information about binary and not the binary itself.
+Retrieve the total number of managed objects (e.g.
+devices, assets, etc.) registered in your tenant, or a subset based on queries.
 
 ## EXAMPLES
 
 ### EXAMPLE 1
 ```
-Get-BinaryCollection -PageSize 100
+Get-ManagedObjectCount
 ```
 
-Get a list of binaries
+Get count of managed objects
 
 ## PARAMETERS
 
 ### -Ids
-The managed object IDs to search for.
+List of ids.
 
 ```yaml
 Type: String[]
@@ -105,7 +101,7 @@ Accept wildcard characters: False
 ```
 
 ### -Type
-The type of managed object to search for.
+ManagedObject type.
 
 ```yaml
 Type: Object[]
@@ -119,8 +115,8 @@ Accept pipeline input: True (ByPropertyName, ByValue)
 Accept wildcard characters: False
 ```
 
-### -Owner
-Username of the owner of the managed objects.
+### -FragmentType
+ManagedObject fragment type.
 
 ```yaml
 Type: String
@@ -134,9 +130,8 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -Text
-Search for managed objects where any property value is equal to the given one.
-Only string values are supported.
+### -Owner
+List of managed objects that are owned by the given username.
 
 ```yaml
 Type: String
@@ -145,6 +140,22 @@ Aliases:
 
 Required: False
 Position: 4
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -Text
+managed objects containing a text value starting with the given text (placeholder {text}).
+Text value is any alphanumeric string starting with a latin letter (A-Z or a-z).
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 5
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
@@ -159,7 +170,7 @@ Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: 5
+Position: 6
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
@@ -174,7 +185,7 @@ Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: 6
+Position: 7
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
@@ -189,7 +200,7 @@ Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: 7
+Position: 8
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
@@ -307,21 +318,6 @@ Custom confirmation text
 
 ```yaml
 Type: String
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: Named
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
-### -CurrentPage
-Current page which should be returned
-
-```yaml
-Type: Int32
 Parameter Sets: (All)
 Aliases:
 
@@ -493,21 +489,6 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -IncludeAll
-Include all results by iterating through each page
-
-```yaml
-Type: SwitchParameter
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: Named
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
 ### -Insecure
 Allow insecure server connections when using SSL
 
@@ -650,21 +631,6 @@ Save raw response to file (before select/view)
 
 ```yaml
 Type: String
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: Named
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
-### -PageSize
-Maximum results per page
-
-```yaml
-Type: Int32
 Parameter Sets: (All)
 Aliases:
 
@@ -834,21 +800,6 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -TotalPages
-Total number of pages to get
-
-```yaml
-Type: Int32
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: Named
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
 ### -View
 Use views when displaying data on the terminal.
 Disable using --view off
@@ -867,21 +818,6 @@ Accept wildcard characters: False
 
 ### -WithError
 Errors will be printed on stdout instead of stderr
-
-```yaml
-Type: SwitchParameter
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: Named
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
-### -WithTotalPages
-Request Cumulocity to include the total pages in the response statitics under .statistics.totalPages
 
 ```yaml
 Type: SwitchParameter
@@ -922,5 +858,5 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 
 ## RELATED LINKS
 
-[https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/binaries_list](https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/binaries_list)
+[https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/inventory_count](https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/inventory_count)
 

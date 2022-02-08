@@ -1,36 +1,35 @@
 ---
-category: inventory
-title: c8y inventory get
+category: user
+title: c8y devices user update
 ---
-Get managed objects
+Update device user
 
 ### Synopsis
 
-Get an existing managed object
+Update the device owner's state (enabled or disabled) of a specific managed object
 
 ```
-c8y inventory get [flags]
+c8y devices user update [flags]
 ```
 
 ### Examples
 
 ```
-$ c8y inventory get --id 12345
-Get a managed object
+$ c8y devices user update --id 12345 --enabled
+Enable a device user
 
-$ c8y inventory get --id 12345 --withParents
-Get a managed object with parent references
+$ c8y devices user update --id device01 --enabled=false
+Disable a device user
         
 ```
 
 ### Options
 
 ```
-  -h, --help                help for get
-      --id strings          ManagedObject id (required) (accepts pipeline)
-      --skipChildrenNames   Don't include the child devices names in the response. This can improve the API response because the names don't need to be retrieved
-      --withChildren        Determines if children with ID and name should be returned when fetching the managed object. Set it to false to improve query performance.
-      --withParents         include a flat list of all parents and grandparents of the given object
+      --enabled                 Specifies if the device's owner is enabled or not.
+  -h, --help                    help for update
+      --id strings              Device ID (required) (accepts pipeline)
+      --processingMode string   Cumulocity processing mode
 ```
 
 ### Options inherited from parent commands

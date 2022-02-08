@@ -1,36 +1,17 @@
 ---
-category: inventory
-title: c8y inventory get
+category: user
+title: c8y devices user
 ---
-Get managed objects
+Cumulocity device user management
 
 ### Synopsis
 
-Get an existing managed object
-
-```
-c8y inventory get [flags]
-```
-
-### Examples
-
-```
-$ c8y inventory get --id 12345
-Get a managed object
-
-$ c8y inventory get --id 12345 --withParents
-Get a managed object with parent references
-        
-```
+Managed the device user related to a device
 
 ### Options
 
 ```
-  -h, --help                help for get
-      --id strings          ManagedObject id (required) (accepts pipeline)
-      --skipChildrenNames   Don't include the child devices names in the response. This can improve the API response because the names don't need to be retrieved
-      --withChildren        Determines if children with ID and name should be returned when fetching the managed object. Set it to false to improve query performance.
-      --withParents         include a flat list of all parents and grandparents of the given object
+  -h, --help   help for user
 ```
 
 ### Options inherited from parent commands
