@@ -80,9 +80,39 @@
           "description": "ManagedObject fragment type."
         },
         {
+          "name": "owner",
+          "type": "string",
+          "description": "List of managed objects that are owned by the given username."
+        },
+        {
           "name": "text",
           "type": "string",
           "description": "managed objects containing a text value starting with the given text (placeholder {text}). Text value is any alphanumeric string starting with a latin letter (A-Z or a-z)."
+        },
+        {
+          "name": "onlyRoots",
+          "type": "boolean",
+          "description": "When set to `true` it returns managed objects which don't have any parent. If the current user doesn't have access to the parent, this is also root for the user"
+        },
+        {
+          "name": "childAdditionId",
+          "type": "string",
+          "description": "Search for a specific child addition and list all the groups to which it belongs."
+        },
+        {
+          "name": "childAssetId",
+          "type": "string",
+          "description": "Search for a specific child asset and list all the groups to which it belongs."
+        },
+        {
+          "name": "childDeviceId",
+          "type": "[]device",
+          "description": "Search for a specific child device and list all the groups to which it belongs."
+        },
+        {
+          "name": "skipChildrenNames",
+          "type": "boolean",
+          "description": "Don't include the child devices names in the response. This can improve the API response because the names don't need to be retrieved"
         },
         {
           "name": "withParents",
@@ -90,9 +120,104 @@
           "description": "include a flat list of all parents and grandparents of the given object"
         },
         {
-          "name": "skipChildrenNames",
+          "name": "withChildren",
           "type": "boolean",
-          "description": "Don't include the child devices names in the response. This can improve the API response because the names don't need to be retrieved"
+          "description": "Determines if children with ID and name should be returned when fetching the managed object. Set it to false to improve query performance."
+        },
+        {
+          "name": "withGroups",
+          "type": "boolean",
+          "description": "When set to true it returns additional information about the groups to which the searched managed object belongs. This results in setting the assetParents property with additional information about the groups."
+        }
+      ]
+    },
+    {
+      "name": "count",
+      "description": "Get managed object count",
+      "descriptionLong": "Retrieve the total number of managed objects (e.g. devices, assets, etc.) registered in your tenant, or a subset based on queries.",
+      "method": "GET",
+      "path": "inventory/managedObjects/count",
+      "accept": "application/vnd.com.nsn.cumulocity.managedobjectuser+json",
+      "alias": {
+        "go": "count",
+        "powershell": "Get-ManagedObjectCount"
+      },
+      "examples": {
+        "powershell": [
+          {
+            "description": "Get count of managed objects",
+            "command": "Get-ManagedObjectCount"
+          }
+        ],
+        "go": [
+          {
+            "description": "Get count of managed objects",
+            "command": "c8y inventory count"
+          },
+          {
+            "description": "Get count of managed objects matching text (using Cumulocity text search algorithm)",
+            "command": "c8y inventory count --text myname"
+          },
+          {
+            "description": "Get count of managed objects with a specific type value",
+            "command": "c8y inventory count --type \"c8y_Sensor\""
+          },
+          {
+            "description": "Get count of managed objects with a specific type value and owner",
+            "command": "c8y inventory count --type \"c8y_Sensor\" --owner \"device_mylinuxbox01\""
+          },
+          {
+            "description": "Get total number of devices",
+            "command": "c8y inventory count --fragmentType \"c8y_IsDevice\""
+          }
+        ]
+      },
+      "queryParameters": [
+        {
+          "name": "ids",
+          "type": "[]stringcsv",
+          "property": "ids",
+          "description": "List of ids."
+        },
+        {
+          "name": "type",
+          "type": "string",
+          "pipeline": true,
+          "pipelineAliases": [
+            "type"
+          ],
+          "required": false,
+          "description": "ManagedObject type."
+        },
+        {
+          "name": "fragmentType",
+          "type": "string",
+          "description": "ManagedObject fragment type."
+        },
+        {
+          "name": "owner",
+          "type": "string",
+          "description": "List of managed objects that are owned by the given username."
+        },
+        {
+          "name": "text",
+          "type": "string",
+          "description": "managed objects containing a text value starting with the given text (placeholder {text}). Text value is any alphanumeric string starting with a latin letter (A-Z or a-z)."
+        },
+        {
+          "name": "childAdditionId",
+          "type": "string",
+          "description": "Search for a specific child addition and list all the groups to which it belongs."
+        },
+        {
+          "name": "childAssetId",
+          "type": "string",
+          "description": "Search for a specific child asset and list all the groups to which it belongs."
+        },
+        {
+          "name": "childDeviceId",
+          "type": "[]device",
+          "description": "Search for a specific child device and list all the groups to which it belongs."
         }
       ]
     },
@@ -346,9 +471,19 @@
       ],
       "queryParameters": [
         {
+          "name": "skipChildrenNames",
+          "type": "boolean",
+          "description": "Don't include the child devices names in the response. This can improve the API response because the names don't need to be retrieved"
+        },
+        {
           "name": "withParents",
           "type": "boolean",
           "description": "include a flat list of all parents and grandparents of the given object"
+        },
+        {
+          "name": "withChildren",
+          "type": "boolean",
+          "description": "Determines if children with ID and name should be returned when fetching the managed object. Set it to false to improve query performance."
         }
       ]
     },

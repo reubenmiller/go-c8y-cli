@@ -32,7 +32,12 @@ Get a list of the child devices of an existing device (using pipeline)
                    ValueFromPipeline=$true,
                    ValueFromPipelineByPropertyName=$true)]
         [object[]]
-        $Device
+        $Device,
+
+        # Determines if children with ID and name should be returned when fetching the managed object. Set it to false to improve query performance.
+        [Parameter()]
+        [switch]
+        $WithChildren
     )
     DynamicParam {
         Get-ClientCommonParameters -Type "Get", "Collection"

@@ -40,6 +40,9 @@ Get alarms with the severity set to MAJOR
 
 $ c8y alarms list --dateFrom "-10m" --status ACTIVE
 Get collection of active alarms which occurred in the last 10 minutes
+
+$ c8y alarms list --dateFrom "-1d" --status ACTIVE --status ACKNOWLEDGED
+Get collection of active and acknowledged alarms in the last 1d
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
 			return nil
@@ -53,7 +56,7 @@ Get collection of active alarms which occurred in the last 10 minutes
 	cmd.Flags().String("dateFrom", "", "Start date or date and time of alarm occurrence.")
 	cmd.Flags().String("dateTo", "", "End date or date and time of alarm occurrence.")
 	cmd.Flags().String("type", "", "Alarm type.")
-	cmd.Flags().String("status", "", "Comma separated alarm statuses, for example ACTIVE,CLEARED.")
+	cmd.Flags().StringSlice("status", []string{""}, "Comma separated alarm statuses, for example ACTIVE,CLEARED.")
 	cmd.Flags().String("severity", "", "Alarm severity, for example CRITICAL, MAJOR, MINOR or WARNING.")
 	cmd.Flags().Bool("resolved", false, "When set to true only resolved alarms will be removed (the one with status CLEARED), false means alarms with status ACTIVE or ACKNOWLEDGED.")
 	cmd.Flags().Bool("withSourceAssets", false, "When set to true also alarms for related source devices will be included in the request. When this parameter is provided a source must be specified.")
@@ -106,7 +109,7 @@ func (n *ListCmd) RunE(cmd *cobra.Command, args []string) error {
 		flags.WithEncodedRelativeTimestamp("dateFrom", "dateFrom", ""),
 		flags.WithEncodedRelativeTimestamp("dateTo", "dateTo", ""),
 		flags.WithStringValue("type", "type"),
-		flags.WithStringValue("status", "status"),
+		flags.WithStringSliceCSV("status", "status", ""),
 		flags.WithStringValue("severity", "severity"),
 		flags.WithBoolValue("resolved", "resolved", ""),
 		flags.WithBoolValue("withSourceAssets", "withSourceAssets", ""),

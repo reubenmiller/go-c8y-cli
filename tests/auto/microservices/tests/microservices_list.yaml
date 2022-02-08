@@ -1,4 +1,23 @@
 tests:
+    microservices_list_Check if a user has access to the device-simulator microservice:
+        command: c8y microservices list --name device-simulator --user myuser
+        exit-code: 0
+        stdout:
+            json:
+                method: GET
+                path: /application/applications
+            contains:
+                - name=device-simulator
+                - user=myuser
+    microservices_list_Get a microservice by name:
+        command: c8y microservices list --name cockpit
+        exit-code: 0
+        stdout:
+            json:
+                method: GET
+                path: /application/applications
+            contains:
+                - name=cockpit
     microservices_list_Get microservices:
         command: c8y microservices list --pageSize 100
         exit-code: 0
@@ -6,3 +25,12 @@ tests:
             json:
                 method: GET
                 path: /application/applications
+    microservices_list_List all microservices owned by specific tenant:
+        command: c8y microservices list --owner t12345
+        exit-code: 0
+        stdout:
+            json:
+                method: GET
+                path: /application/applications
+            contains:
+                - owner=t12345

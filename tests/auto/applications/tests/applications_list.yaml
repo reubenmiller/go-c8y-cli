@@ -1,4 +1,23 @@
 tests:
+    applications_list_Check if a user has access to the cockpit application:
+        command: c8y applications list --name cockpit --user myuser
+        exit-code: 0
+        stdout:
+            json:
+                method: GET
+                path: /application/applications
+            contains:
+                - name=cockpit
+                - user=myuser
+    applications_list_Get an application by name:
+        command: c8y applications list --name cockpit
+        exit-code: 0
+        stdout:
+            json:
+                method: GET
+                path: /application/applications
+            contains:
+                - name=cockpit
     applications_list_Get applications:
         command: c8y applications list --pageSize 100
         exit-code: 0

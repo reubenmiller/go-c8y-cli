@@ -641,6 +641,31 @@ func WithEncodedRelativeTimestamp(opts ...string) GetOption {
 	}
 }
 
+// WithRelativeDate adds a date (only, no time) (string) value from cli arguments
+func WithRelativeDate(encode bool, opts ...string) GetOption {
+	return func(cmd *cobra.Command, inputIterators *RequestInputIterators) (string, interface{}, error) {
+		src, dst, _ := UnpackGetterOptions("", opts...)
+		value, err := cmd.Flags().GetString(src)
+
+		if err != nil {
+			return dst, value, err
+		}
+
+		value, err = cmd.Flags().GetString(src)
+		if err != nil {
+			return dst, value, err
+		}
+
+		// ignore empty values
+		if value == "" {
+			return "", value, err
+		}
+
+		// mark iterator as unbound, so it will not increment the input iterators
+		return dst, iterator.NewRelativeDateIterator(value, encode, "2006-01-02"), err
+	}
+}
+
 func applyFormatter(format string, value interface{}) string {
 	if strings.Contains(format, "%") {
 		return fmt.Sprintf(format, value)

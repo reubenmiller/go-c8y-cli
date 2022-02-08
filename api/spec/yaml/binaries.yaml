@@ -33,6 +33,43 @@ endpoints:
       go:
         - description: Get a list of binaries
           command: c8y binaries list --pageSize 100
+        
+        - description: Get a list of binaries with the type package_debian
+          command: c8y binaries list --type package_debian
+
+    queryParameters:
+      - name: ids
+        type: '[]stringcsv'
+        property: ids
+        description: The managed object IDs to search for.
+
+      - name: type
+        type: string
+        pipeline: true
+        pipelineAliases:
+          - "type"
+        required: false
+        description: The type of managed object to search for.
+
+      - name: owner
+        type: string
+        description: Username of the owner of the managed objects.
+
+      - name: text
+        type: string
+        description: Search for managed objects where any property value is equal to the given one. Only string values are supported.
+
+      - name: childAdditionId
+        type: string
+        description: Search for a specific child addition and list all the groups to which it belongs.
+      
+      - name: childAssetId
+        type: string
+        description: Search for a specific child asset and list all the groups to which it belongs.
+
+      - name: childDeviceId
+        type: '[]device'
+        description: Search for a specific child device and list all the groups to which it belongs.
 
   - name: download
     description: Download binary

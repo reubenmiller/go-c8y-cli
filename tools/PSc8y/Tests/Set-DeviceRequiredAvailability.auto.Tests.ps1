@@ -7,7 +7,7 @@ Describe -Name "Set-DeviceRequiredAvailability" {
     }
 
     It "Set the required availability of a device by name to 10 minutes" {
-        $Response = PSc8y\Set-DeviceRequiredAvailability -Device $device.id -Interval 10
+        $Response = PSc8y\Set-DeviceRequiredAvailability -Id $device.id -Interval 10
         $LASTEXITCODE | Should -Be 0
         $Response | Should -Not -BeNullOrEmpty
     }

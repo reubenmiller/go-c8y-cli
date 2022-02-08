@@ -9,3 +9,11 @@ func NewRelativeTimeIterator(relative string, encode bool) *FuncIterator {
 	}
 	return NewFuncIterator(next, 0)
 }
+
+// NewRelativeDateIterator returns a relative date iterator which can generate dates based on time.Now when the value is retrieved
+func NewRelativeDateIterator(relative string, encode bool, layout string) *FuncIterator {
+	next := func(i int64) (string, error) {
+		return timestamp.TryGetDate(relative, encode, layout)
+	}
+	return NewFuncIterator(next, 0)
+}

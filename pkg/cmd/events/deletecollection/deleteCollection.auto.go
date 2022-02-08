@@ -51,6 +51,8 @@ Remove events from a device
 	cmd.Flags().StringSlice("device", []string{""}, "Device ID (accepts pipeline)")
 	cmd.Flags().String("type", "", "Event type.")
 	cmd.Flags().String("fragmentType", "", "Fragment name from event.")
+	cmd.Flags().String("createdFrom", "", "Start date or date and time of the event's creation (set by the platform during creation).")
+	cmd.Flags().String("createdTo", "", "End date or date and time of the event's creation (set by the platform during creation).")
 	cmd.Flags().String("dateFrom", "", "Start date or date and time of event occurrence.")
 	cmd.Flags().String("dateTo", "", "End date or date and time of event occurrence.")
 	cmd.Flags().Bool("revert", false, "Return the newest instead of the oldest events. Must be used with dateFrom and dateTo parameters")
@@ -99,6 +101,8 @@ func (n *DeleteCollectionCmd) RunE(cmd *cobra.Command, args []string) error {
 		c8yfetcher.WithDeviceByNameFirstMatch(client, args, "device", "source"),
 		flags.WithStringValue("type", "type"),
 		flags.WithStringValue("fragmentType", "fragmentType"),
+		flags.WithEncodedRelativeTimestamp("createdFrom", "createdFrom", ""),
+		flags.WithEncodedRelativeTimestamp("createdTo", "createdTo", ""),
 		flags.WithEncodedRelativeTimestamp("dateFrom", "dateFrom", ""),
 		flags.WithEncodedRelativeTimestamp("dateTo", "dateTo", ""),
 		flags.WithBoolValue("revert", "revert", ""),

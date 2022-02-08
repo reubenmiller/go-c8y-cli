@@ -1,0 +1,99 @@
+---
+information:
+  name: devices/user
+  description: Cumulocity device user management
+  descriptionLong: Managed the device user related to a device
+  link: https://cumulocity.com/guides/reference/inventory/
+
+endpoints:
+  - name: getDeviceUser
+    description: Get device user
+    descriptionLong: Retrieve the device owner's username and state (enabled or disabled) of a specific managed object
+    method: GET
+    path: inventory/managedObjects/{id}/user
+    accept: application/vnd.com.nsn.cumulocity.managedobjectuser+json
+    alias:
+        go: get
+        powershell: Get-DeviceUser
+    examples:
+      powershell:
+        - description: Get device user by id
+          beforeEach:
+            - $device = PSc8y\New-TestDevice
+          command: Get-DeviceUser -Id $device.id
+          afterEach:
+            - Remove-ManagedObject -Id $device.id
+
+        - description: Get device user by name
+          beforeEach:
+            - $device = PSc8y\New-TestDevice
+          command: Get-DeviceUser -Id $device.name
+          afterEach:
+            - Remove-ManagedObject -Id $device.id
+
+      go:
+        - description: Get device user by id
+          command: c8y devices user get --id 12345
+
+        - description: Get device user by name
+          command: c8y devices user get --id device01
+          assertStdOut:
+            json:
+                method: GET
+                path: r//inventory/managedObjects/\d+/user
+
+    pathParameters:
+      - name: id
+        type: '[]device'
+        pipeline: true
+        required: true
+        description: Device ID
+
+  - name: updateDeviceUser
+    description: Update device user
+    descriptionLong: Update the device owner's state (enabled or disabled) of a specific managed object
+    method: PUT
+    path: inventory/managedObjects/{id}/user
+    accept: application/vnd.com.nsn.cumulocity.managedobjectuser+json
+    alias:
+        go: update
+        powershell: Update-DeviceUser
+    examples:
+      powershell:
+        - description: Enable a device user
+          beforeEach:
+            - $device = PSc8y\Get-Device -Id "mobile-device01"
+          command: Update-DeviceUser -Id $device.id -Enabled
+
+        - description: Disable a device user
+          beforeEach:
+            - |
+              $device = PSc8y\Get-Device -Id "mobile-device01"
+          command: Update-DeviceUser -Id $device.name -Enabled:$false
+
+      go:
+        - description: Enable a device user
+          command: c8y devices user update --id 12345 --enabled
+
+        - description: Disable a device user
+          command: c8y devices user update --id device01 --enabled=false
+          assertStdOut:
+            json:
+                body.enabled: false
+                method: PUT
+                path: r//inventory/managedObjects/\d+/user
+
+    pathParameters:
+      - name: id
+        type: '[]device'
+        pipeline: true
+        required: true
+        description: Device ID
+
+    body:
+      - name: enabled
+        type: boolean
+        description: Specifies if the device's owner is enabled or not.
+    
+    bodyRequiredKeys:
+      - enabled
