@@ -73,17 +73,13 @@ endpoints:
       powershell:
         - description: Get a device's availability by id
           beforeEach:
-            - $Device = PSc8y\New-TestDevice
+            - $Device = PSc8y\Get-Device -Id "mobile-device01"
           command: Get-DeviceAvailability -Id $Device.id
-          afterEach:
-            - PSc8y\Remove-ManagedObject -Id $Device.id
 
         - description: Get a device's availability by name
           beforeEach:
-            - $Device = PSc8y\New-TestDevice
+            - $Device = PSc8y\Get-Device -Id "mobile-device01"
           command: Get-DeviceAvailability -Id $Device.name
-          afterEach:
-            - PSc8y\Remove-ManagedObject -Id $Group.id
 
       go:
         - description: Get a device's availability by id

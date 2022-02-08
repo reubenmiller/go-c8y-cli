@@ -11,14 +11,14 @@ Update the device owner's state (enabled or disabled) of a specific managed obje
 https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/devices_user_update
 
 .EXAMPLE
-PS> Update-DeviceUser -Id $device.id
+PS> Update-DeviceUser -Id $device.id -Enabled
 
-Get device user by id
+Enable a device user
 
 .EXAMPLE
-PS> Update-DeviceUser -Id $device.name -Enabled
+PS> Update-DeviceUser -Id $device.name -Enabled:$false
 
-Get device user by name
+Disable a device user
 
 
 #>

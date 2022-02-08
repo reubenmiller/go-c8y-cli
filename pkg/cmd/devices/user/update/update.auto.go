@@ -35,7 +35,7 @@ func NewUpdateCmd(f *cmdutil.Factory) *UpdateCmd {
 		Long:  `Update the device owner's state (enabled or disabled) of a specific managed object`,
 		Example: heredoc.Doc(`
 $ c8y devices user update --id 12345 --enabled
-Enable a device user by name
+Enable a device user
 
 $ c8y devices user update --id device01 --enabled=false
 Disable a device user

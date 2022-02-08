@@ -2,25 +2,24 @@
 
 Describe -Name "Update-DeviceUser" {
     BeforeEach {
-        $device = PSc8y\New-TestDevice
+        $device = PSc8y\Get-Device -Id "mobile-device01"
 
     }
 
-    It "Get device user by id" {
-        $Response = PSc8y\Update-DeviceUser -Id $device.id
+    It "Enable a device user" {
+        $Response = PSc8y\Update-DeviceUser -Id $device.id -Enabled
         $LASTEXITCODE | Should -Be 0
         $Response | Should -Not -BeNullOrEmpty
     }
 
-    It "Get device user by name" {
-        $Response = PSc8y\Update-DeviceUser -Id $device.name -Enabled
+    It "Disable a device user" {
+        $Response = PSc8y\Update-DeviceUser -Id $device.name -Enabled:$false
         $LASTEXITCODE | Should -Be 0
         $Response | Should -Not -BeNullOrEmpty
     }
 
 
     AfterEach {
-        Remove-ManagedObject -Id $device.id
 
     }
 }

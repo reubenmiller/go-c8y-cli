@@ -2,7 +2,7 @@
 
 Describe -Name "Get-DeviceAvailability" {
     BeforeEach {
-        $Device = PSc8y\New-TestDevice
+        $Device = PSc8y\Get-Device -Id "mobile-device01"
 
     }
 
@@ -18,8 +18,6 @@ Describe -Name "Get-DeviceAvailability" {
 
 
     AfterEach {
-        PSc8y\Remove-ManagedObject -Id $Device.id
-        PSc8y\Remove-ManagedObject -Id $Group.id
 
     }
 }

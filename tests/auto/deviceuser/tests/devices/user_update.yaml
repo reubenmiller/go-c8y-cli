@@ -7,7 +7,7 @@ tests:
                 body.enabled: "false"
                 method: PUT
                 path: r//inventory/managedObjects/\d+/user
-    devices/user_update_Enable a device user by name:
+    devices/user_update_Enable a device user:
         command: c8y devices user update --id 12345 --enabled
         exit-code: 0
         stdout:

@@ -60,22 +60,19 @@ endpoints:
         powershell: Update-DeviceUser
     examples:
       powershell:
-        - description: Get device user by id
+        - description: Enable a device user
           beforeEach:
-            - $device = PSc8y\New-TestDevice
-          command: Update-DeviceUser -Id $device.id
-          afterEach:
-            - Remove-ManagedObject -Id $device.id
+            - $device = PSc8y\Get-Device -Id "mobile-device01"
+          command: Update-DeviceUser -Id $device.id -Enabled
 
-        - description: Get device user by name
+        - description: Disable a device user
           beforeEach:
-            - $device = PSc8y\New-TestDevice
-          command: Update-DeviceUser -Id $device.name -Enabled
-          afterEach:
-            - Remove-ManagedObject -Id $device.id
+            - |
+              $device = PSc8y\Get-Device -Id "mobile-device01"
+          command: Update-DeviceUser -Id $device.name -Enabled:$false
 
       go:
-        - description: Enable a device user by name
+        - description: Enable a device user
           command: c8y devices user update --id 12345 --enabled
 
         - description: Disable a device user
