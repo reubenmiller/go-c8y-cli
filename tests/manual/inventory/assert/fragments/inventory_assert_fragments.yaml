@@ -1,6 +1,6 @@
 tests:
-    It fails the negated assertion when using dry mode:
-        command:  c8y inventory assert fragments --id 1 --fragments name --dry
+    It fails the negated assertion when using dry mode (strict mode):
+        command:  c8y inventory assert fragments --id 1 --fragments name --strict --dry
         exit-code: 112
 
     It returns an error if the fragment value does not match:
