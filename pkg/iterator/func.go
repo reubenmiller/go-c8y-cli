@@ -7,9 +7,9 @@ import (
 
 // FuncIterator is generic iterator which executes a function on every iteration
 type FuncIterator struct {
-	next         func(int64) (string, error)
+	currentIndex int64 // access atomically (must be defined at the top)
 	endIndex     int64
-	currentIndex int64
+	next         func(int64) (string, error)
 }
 
 // GetNext will count through the values and return them one by one

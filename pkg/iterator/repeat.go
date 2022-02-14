@@ -7,9 +7,9 @@ import (
 
 // RepeatIterator is an empty iterator that always returns no value
 type RepeatIterator struct {
-	value        string
+	currentIndex int64 // access atomically (must be defined at the top)
 	endIndex     int64
-	currentIndex int64
+	value        string
 }
 
 // GetNext will count through the values and return them one by one

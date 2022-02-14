@@ -7,8 +7,8 @@ import (
 
 // SliceIterator is iterates over a given array
 type SliceIterator struct {
+	currentIndex int64 // access atomically (must be defined at the top)
 	values       []string
-	currentIndex int64
 }
 
 // GetNext will count through the values and return them one by one
