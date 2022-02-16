@@ -30,10 +30,10 @@ The `filter` parameter uses a query language which supports the following operat
 |lengte|match length greater than or equal to value of (string/array/map)|`--filter "name lengte 10"` or `--filter "childAdditions.references lengte 1"`|
 |lenlt|match length less than value of (string/array/map)|`--filter "name lenlt 10"` or `--filter "childAdditions.references lenlt 1"`|
 |lenlte|match length less than or equal to value of (string/array/map)|`--filter "name lenlte 10"` or `--filter "childAdditions.references lenlte 1"`|
-|datelt|match date less than (older) to value of (datetime|relative)|`--filter "creationTime datelt 2022-01-02T12:00"`|
-|datelte (or 'olderthan')|match date less than (older) or equal to value of (datetime|relative)|`--filter "creationTime datelte 2022-01-02T12:00"`|
-|dategt|match date greater than (newer) to value of (datetime|relative)|`--filter "creationTime dategt 2022-01-02T12:00"`|
-|dategte (or 'newerthan')|match date greater than (newer) or equal to value of (datetime|relative)|`--filter "creationTime dategte 2022-01-02T12:00"`|
+|datelt|match date less than (older) to value of (datetime/relative)|`--filter "creationTime datelt 2022-01-02T12:00"`|
+|datelte (or 'olderthan')|match date less than (older) or equal to value of (datetime/relative)|`--filter "creationTime datelte 2022-01-02T12:00"`|
+|dategt|match date greater than (newer) to value of (datetime/relative)|`--filter "creationTime dategt 2022-01-02T12:00"`|
+|dategte (or 'newerthan')|match date greater than (newer) or equal to value of (datetime/relative)|`--filter "creationTime dategte 2022-01-02T12:00"`|
 
 ## Examples
 
