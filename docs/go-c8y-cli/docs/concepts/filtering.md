@@ -60,22 +60,6 @@ c8y applications list --pageSize 100 --filter "name like co*"
 ```
 
 
-### Filtering application with name that start with "co*"
-
-<CodeExample>
-
-```bash
-c8y inventory list --pageSize 100 --filter "lastUpdated newerthan -10d"
-```
-
-</CodeExample>
-
-```csv title="output"
-| id         | name         | key                          | type        | availability |
-|------------|--------------|------------------------------|-------------|--------------|
-| 8          | cockpit      | cockpit-application-key      | HOSTED      | MARKET       |
-```
-
 ### Filtering list of inventory (client side) by lastUpdated date between a given range
 
 A date string can be used and it will be converted to your local timezone. i.e. "2022-01-18" -> "2022-01-18T00:00:00Z" when running on a machine using UTC time.
@@ -112,9 +96,9 @@ c8y inventory list \
 | 2759       | 2022-01-18T14:55:29.349Z      |
 ```
 
-### Filtering list of inventory (client side) by creationTime date using relative timestamp
+### Filtering list of inventory (client side) by creationTime date using a relative timestamp
 
-A date string can be used and it will be converted to your local timezone. i.e. "2022-01-18" -> "2022-01-18T00:00:00Z" when running on a machine using UTC time.
+Filter a list of inventory items and filter the managed objects which were created in the last 2 hours.
 
 <CodeExample>
 
