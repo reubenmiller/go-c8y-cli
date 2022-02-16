@@ -78,6 +78,9 @@ func (f *JSONFilters) AddRawFilters(rawFilters []string) error {
 				// use int (required by jsonq in some cases, i.e. array length operators like leneq etc.)
 				f.Add(strings.TrimSpace(parts[0]), operator, int(v))
 			}
+		} else if v, err := strconv.ParseBool(value); err == nil {
+			// Check boolean values
+			f.Add(strings.TrimSpace(parts[0]), operator, bool(v))
 		} else {
 			f.Add(strings.TrimSpace(parts[0]), operator, value)
 		}
