@@ -14,6 +14,7 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/pkg/logger"
 	"github.com/reubenmiller/go-c8y-cli/pkg/matcher"
 	"github.com/reubenmiller/go-c8y-cli/pkg/sortorder"
+	"github.com/reubenmiller/go-c8y-cli/pkg/timestamp"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/thedevsaddam/gojsonq"
 	"github.com/tidwall/gjson"
@@ -50,7 +51,7 @@ func (f *JSONFilters) AddSelectors(props ...string) {
 // AddRawFilters add list of raw filters
 func (f *JSONFilters) AddRawFilters(rawFilters []string) error {
 	for _, item := range rawFilters {
-		sepPattern := regexp.MustCompile(`(\s+[\-]?(like|match|notlike|notmatch|eq|neq|lt|lte|gt|gte|notIn|in|startsWith|endsWth|contains|len[n]?eq|lengt[e]?|lenlt[e]?)\s+|(!?=|[<>]=?))`)
+		sepPattern := regexp.MustCompile(`(\s+[\-]?(like|match|notlike|notmatch|newerthan|olderthan|datelte|datelt|dategt|dategte|eq|neq|lt|lte|gt|gte|notIn|in|startsWith|endsWith|contains|len[n]?eq|lengt[e]?|lenlt[e]?)\s+|(!?=|[<>]=?))`)
 
 		parts := sepPattern.Split(item, 2)
 
@@ -322,6 +323,15 @@ func (f JSONFilters) filterJSON(jsonValue string, property string, showHeaders b
 	jq.Macro("-notmatch", matchWithRegexNegated)
 	jq.Macro("notmatch", matchWithRegexNegated)
 
+	// date filters
+	jq.Macro("datelt", dateOlderThan)
+	jq.Macro("datelte", dateOlderThanEqual)
+	jq.Macro("olderthan", dateOlderThanEqual)
+
+	jq.Macro("dategt", dateNewerThan)
+	jq.Macro("dategte", dateNewerThanEqual)
+	jq.Macro("newerthan", dateNewerThanEqual)
+
 	for _, query := range f.Filters {
 		Logger.Debugf("filtering data: %s %s %s", query.Property, query.Operation, query.Value)
 		jq.Where(query.Property, query.Operation, query.Value)
@@ -513,6 +523,90 @@ func convertToCSV(flatMap map[string]interface{}, keys []string) string {
 		}
 	}
 	return buf.String()
+}
+
+func dateNewerThan(x, y interface{}) (bool, error) {
+	rawDateA, okx := x.(string)
+	rawDateB, oky := y.(string)
+	if !okx || !oky {
+		return false, fmt.Errorf("wildcard matching only supports strings")
+	}
+
+	var err error
+	dateA, err := timestamp.ParseTimestamp(rawDateA)
+	if err != nil {
+		return false, fmt.Errorf("only date strings are supported. %w", err)
+	}
+
+	dateB, err := timestamp.ParseTimestamp(rawDateB)
+	if err != nil {
+		return false, fmt.Errorf("only date strings are supported. %w", err)
+	}
+
+	return dateB.UnixNano() < dateA.UnixNano(), nil
+}
+
+func dateNewerThanEqual(x, y interface{}) (bool, error) {
+	rawDateA, okx := x.(string)
+	rawDateB, oky := y.(string)
+	if !okx || !oky {
+		return false, fmt.Errorf("wildcard matching only supports strings")
+	}
+
+	var err error
+	dateA, err := timestamp.ParseTimestamp(rawDateA)
+	if err != nil {
+		return false, fmt.Errorf("only date strings are supported. %w", err)
+	}
+
+	dateB, err := timestamp.ParseTimestamp(rawDateB)
+	if err != nil {
+		return false, fmt.Errorf("only date strings are supported. %w", err)
+	}
+
+	return dateB.UnixNano() <= dateA.UnixNano(), nil
+}
+
+func dateOlderThan(x, y interface{}) (bool, error) {
+	rawDateA, okx := x.(string)
+	rawDateB, oky := y.(string)
+	if !okx || !oky {
+		return false, fmt.Errorf("wildcard matching only supports strings")
+	}
+
+	var err error
+	dateA, err := timestamp.ParseTimestamp(rawDateA)
+	if err != nil {
+		return false, fmt.Errorf("only date strings are supported. %w", err)
+	}
+
+	dateB, err := timestamp.ParseTimestamp(rawDateB)
+	if err != nil {
+		return false, fmt.Errorf("only date strings are supported. %w", err)
+	}
+
+	return dateB.UnixNano() > dateA.UnixNano(), nil
+}
+
+func dateOlderThanEqual(x, y interface{}) (bool, error) {
+	rawDateA, okx := x.(string)
+	rawDateB, oky := y.(string)
+	if !okx || !oky {
+		return false, fmt.Errorf("wildcard matching only supports strings")
+	}
+
+	var err error
+	dateA, err := timestamp.ParseTimestamp(rawDateA)
+	if err != nil {
+		return false, fmt.Errorf("only date strings are supported. %w", err)
+	}
+
+	dateB, err := timestamp.ParseTimestamp(rawDateB)
+	if err != nil {
+		return false, fmt.Errorf("only date strings are supported. %w", err)
+	}
+
+	return dateB.UnixNano() >= dateA.UnixNano(), nil
 }
 
 func matchWithWildcards(x, y interface{}) (bool, error) {
