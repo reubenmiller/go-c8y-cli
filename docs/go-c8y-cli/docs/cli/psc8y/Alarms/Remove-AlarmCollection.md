@@ -21,6 +21,8 @@ Remove-AlarmCollection
 	[[-Device] <Object[]>]
 	[[-DateFrom] <String>]
 	[[-DateTo] <String>]
+	[[-CreatedFrom] <String>]
+	[[-CreatedTo] <String>]
 	[[-Type] <String>]
 	[[-Status] <String[]>]
 	[[-Severity] <String>]
@@ -147,6 +149,38 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
+### -CreatedFrom
+Start date or date and time of the alarm creation.
+Version \>= 10.11
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 4
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -CreatedTo
+End date or date and time of the alarm creation.
+Version \>= 10.11
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 5
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
 ### -Type
 Alarm type.
 
@@ -156,7 +190,7 @@ Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: 4
+Position: 6
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
@@ -171,7 +205,7 @@ Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: 5
+Position: 7
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
@@ -186,7 +220,7 @@ Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: 6
+Position: 8
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False

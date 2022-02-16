@@ -26,6 +26,8 @@ Remove alarms on the device which are active and created in the last 10 minutes
 ### Options
 
 ```
+      --createdFrom string      Start date or date and time of the alarm creation. Version >= 10.11
+      --createdTo string        End date or date and time of the alarm creation. Version >= 10.11
       --dateFrom string         Start date or date and time of alarm occurrence.
       --dateTo string           End date or date and time of alarm occurrence.
       --device strings          Source device id. (accepts pipeline)
