@@ -132,6 +132,12 @@ endpoints:
       go:
         - description: Create a user
           command: c8y users create --userName "testuser1" --email "testuser@no-reply.dummy.com" --password "a0)8k2kld9lm!"
+
+        - description: Create a user using a template
+          command: |
+            c8y users create --template "{email: 'test@me.com', userName: $.email, firstName: 'Peter'}" --sendPasswordResetEmail
+          skipTest: true
+
     pathParameters:
       - name: tenant
         type: tenant
@@ -187,8 +193,9 @@ endpoints:
         required: false
         description: 'Custom properties to be added to the user'
 
-    bodyTemplateOptions:
-      enabled: true
+      - name: data
+        type: json
+        description: Custom properties
 
     bodyRequiredKeys:
       - "userName"
@@ -312,6 +319,12 @@ endpoints:
       go:
         - description: Update a user
           command: c8y users update --id "myuser" --firstName "Simon"
+
+        - description: Update the email field in each user to match the id (if the id includes the @ sign)
+          command: |
+            c8y users list --filter "id like *@*" | c8y users update --template "{email: input.value.id}"
+          skipTest: true
+
     pathParameters:
       - name: id
         type: '[]user'
@@ -324,6 +337,7 @@ endpoints:
         required: false
         position: 99
         description: Tenant
+
     body:
       - name: firstName
         type: string
@@ -367,6 +381,11 @@ endpoints:
         type: json_custom
         required: false
         description: 'Custom properties to be added to the user'
+
+      - name: data
+        type: json
+        description: Custom properties
+
 
   - name: resetUserPassword
     description: Reset user password

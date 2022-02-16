@@ -176,6 +176,11 @@
           {
             "description": "Create a user",
             "command": "c8y users create --userName \"testuser1\" --email \"testuser@no-reply.dummy.com\" --password \"a0)8k2kld9lm!\""
+          },
+          {
+            "description": "Create a user using a template",
+            "command": "c8y users create --template \"{email: 'test@me.com', userName: $.email, firstName: 'Peter'}\" --sendPasswordResetEmail\n",
+            "skipTest": true
           }
         ]
       },
@@ -246,11 +251,13 @@
           "type": "json_custom",
           "required": false,
           "description": "Custom properties to be added to the user"
+        },
+        {
+          "name": "data",
+          "type": "json",
+          "description": "Custom properties"
         }
       ],
-      "bodyTemplateOptions": {
-        "enabled": true
-      },
       "bodyRequiredKeys": [
         "userName"
       ]
@@ -424,6 +431,11 @@
           {
             "description": "Update a user",
             "command": "c8y users update --id \"myuser\" --firstName \"Simon\""
+          },
+          {
+            "description": "Update the email field in each user to match the id (if the id includes the @ sign)",
+            "command": "c8y users list --filter \"id like *@*\" | c8y users update --template \"{email: input.value.id}\"\n",
+            "skipTest": true
           }
         ]
       },
@@ -495,6 +507,11 @@
           "type": "json_custom",
           "required": false,
           "description": "Custom properties to be added to the user"
+        },
+        {
+          "name": "data",
+          "type": "json",
+          "description": "Custom properties"
         }
       ]
     },
