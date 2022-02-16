@@ -121,7 +121,7 @@ A date string can be used and it will be converted to your local timezone. i.e. 
 ```bash
 c8y inventory list \
     --pageSize 2000 \
-    --filter "creationTime newerthan -2h" \   
+    --filter "creationTime newerthan -2h" \
     --select id,creationTime
 ```
 
