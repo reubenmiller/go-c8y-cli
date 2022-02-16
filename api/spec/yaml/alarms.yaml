@@ -90,22 +90,21 @@ endpoints:
         description: When set to true also alarms for related source devices will be removed. When this parameter is provided also source must be defined.
 
       # API Version >= 10.11
-      # createFrom, createdTo, lastUpdateFrom, lastUpdatedTo
-      # - name: createdFrom
-      #   type: datetime
-      #   description: Start date or date and time of the alarm creation. Version >= 10.11
+      - name: createdFrom
+        type: datetime
+        description: Start date or date and time of the alarm creation. Version >= 10.11
 
-      # - name: createdTo
-      #   type: datetime
-      #   description: End date or date and time of the alarm creation. Version >= 10.11
+      - name: createdTo
+        type: datetime
+        description: End date or date and time of the alarm creation. Version >= 10.11
 
-      # - name: lastUpdatedFrom
-      #   type: datetime
-      #   description: Start date or date and time of the last update made. Version >= 10.11
+      - name: lastUpdatedFrom
+        type: datetime
+        description: Start date or date and time of the last update made. Version >= 10.11
 
-      # - name: lastUpdatedTo
-      #   type: datetime
-      #   description: End date or date and time of the last update made. Version >= 10.11
+      - name: lastUpdatedTo
+        type: datetime
+        description: End date or date and time of the last update made. Version >= 10.11
 
   - name: newAlarm
     method: POST
@@ -228,13 +227,13 @@ endpoints:
       
       # API Version >= 10.11
       # createFrom, createdTo
-      # - name: createdFrom
-      #   type: datetime
-      #   description: Start date or date and time of the alarm creation. Version >= 10.11
+      - name: createdFrom
+        type: datetime
+        description: Start date or date and time of the alarm creation. Version >= 10.11
 
-      # - name: createdTo
-      #   type: datetime
-      #   description: End date or date and time of the alarm creation. Version >= 10.11
+      - name: createdTo
+        type: datetime
+        description: End date or date and time of the alarm creation. Version >= 10.11
 
       - name: data
         type: json
@@ -420,13 +419,13 @@ endpoints:
       
       # API Version >= 10.11
       # createFrom, createdTo
-      # - name: createdFrom
-      #   type: datetime
-      #   description: Start date or date and time of the alarm creation. Version >= 10.11
+      - name: createdFrom
+        type: datetime
+        description: Start date or date and time of the alarm creation. Version >= 10.11
 
-      # - name: createdTo
-      #   type: datetime
-      #   description: End date or date and time of the alarm creation. Version >= 10.11
+      - name: createdTo
+        type: datetime
+        description: End date or date and time of the alarm creation. Version >= 10.11
 
       - name: type
         type: string

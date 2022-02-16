@@ -51,6 +51,8 @@ Remove alarms on the device which are active and created in the last 10 minutes
 	cmd.Flags().StringSlice("device", []string{""}, "Source device id. (accepts pipeline)")
 	cmd.Flags().String("dateFrom", "", "Start date or date and time of alarm occurrence.")
 	cmd.Flags().String("dateTo", "", "End date or date and time of alarm occurrence.")
+	cmd.Flags().String("createdFrom", "", "Start date or date and time of the alarm creation. Version >= 10.11")
+	cmd.Flags().String("createdTo", "", "End date or date and time of the alarm creation. Version >= 10.11")
 	cmd.Flags().String("type", "", "Alarm type.")
 	cmd.Flags().StringSlice("status", []string{""}, "Comma separated alarm statuses, for example ACTIVE,CLEARED.")
 	cmd.Flags().String("severity", "", "Alarm severity, for example CRITICAL, MAJOR, MINOR or WARNING.")
@@ -104,6 +106,8 @@ func (n *DeleteCollectionCmd) RunE(cmd *cobra.Command, args []string) error {
 		c8yfetcher.WithDeviceByNameFirstMatch(client, args, "device", "source"),
 		flags.WithEncodedRelativeTimestamp("dateFrom", "dateFrom", ""),
 		flags.WithEncodedRelativeTimestamp("dateTo", "dateTo", ""),
+		flags.WithEncodedRelativeTimestamp("createdFrom", "createdFrom", ""),
+		flags.WithEncodedRelativeTimestamp("createdTo", "createdTo", ""),
 		flags.WithStringValue("type", "type"),
 		flags.WithStringSliceCSV("status", "status", ""),
 		flags.WithStringValue("severity", "severity"),

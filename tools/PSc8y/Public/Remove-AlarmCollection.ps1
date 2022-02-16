@@ -48,6 +48,16 @@ Remove alarms on the device which are active and created in the last 10 minutes 
         [string]
         $DateTo,
 
+        # Start date or date and time of the alarm creation. Version >= 10.11
+        [Parameter()]
+        [string]
+        $CreatedFrom,
+
+        # End date or date and time of the alarm creation. Version >= 10.11
+        [Parameter()]
+        [string]
+        $CreatedTo,
+
         # Alarm type.
         [Parameter()]
         [string]

@@ -13,6 +13,6 @@ c8y inventory wait \
     --id $mo_id \
     --fragments '!myCustom.value' \
     --interval 500ms \
-    --duration 5s \
+    --duration 10s \
     --select "myCustom.**" \
     --output json
