@@ -121,6 +121,26 @@
           "name": "withSourceDevices",
           "type": "boolean",
           "description": "When set to true also alarms for related source devices will be removed. When this parameter is provided also source must be defined."
+        },
+        {
+          "name": "createdFrom",
+          "type": "datetime",
+          "description": "Start date or date and time of the alarm creation. Version >= 10.11"
+        },
+        {
+          "name": "createdTo",
+          "type": "datetime",
+          "description": "End date or date and time of the alarm creation. Version >= 10.11"
+        },
+        {
+          "name": "lastUpdatedFrom",
+          "type": "datetime",
+          "description": "Start date or date and time of the last update made. Version >= 10.11"
+        },
+        {
+          "name": "lastUpdatedTo",
+          "type": "datetime",
+          "description": "End date or date and time of the last update made. Version >= 10.11"
         }
       ]
     },
@@ -295,6 +315,16 @@
             "ACKNOWLEDGED",
             "CLEARED"
           ]
+        },
+        {
+          "name": "createdFrom",
+          "type": "datetime",
+          "description": "Start date or date and time of the alarm creation. Version >= 10.11"
+        },
+        {
+          "name": "createdTo",
+          "type": "datetime",
+          "description": "End date or date and time of the alarm creation. Version >= 10.11"
         },
         {
           "name": "data",
@@ -562,6 +592,16 @@
           "name": "dateTo",
           "type": "datetime",
           "description": "End date or date and time of alarm occurrence."
+        },
+        {
+          "name": "createdFrom",
+          "type": "datetime",
+          "description": "Start date or date and time of the alarm creation. Version >= 10.11"
+        },
+        {
+          "name": "createdTo",
+          "type": "datetime",
+          "description": "End date or date and time of the alarm creation. Version >= 10.11"
         },
         {
           "name": "type",

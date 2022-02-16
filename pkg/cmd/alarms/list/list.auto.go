@@ -61,6 +61,10 @@ Get collection of active and acknowledged alarms in the last 1d
 	cmd.Flags().Bool("resolved", false, "When set to true only resolved alarms will be removed (the one with status CLEARED), false means alarms with status ACTIVE or ACKNOWLEDGED.")
 	cmd.Flags().Bool("withSourceAssets", false, "When set to true also alarms for related source devices will be included in the request. When this parameter is provided a source must be specified.")
 	cmd.Flags().Bool("withSourceDevices", false, "When set to true also alarms for related source devices will be removed. When this parameter is provided also source must be defined.")
+	cmd.Flags().String("createdFrom", "", "Start date or date and time of the alarm creation. Version >= 10.11")
+	cmd.Flags().String("createdTo", "", "End date or date and time of the alarm creation. Version >= 10.11")
+	cmd.Flags().String("lastUpdatedFrom", "", "Start date or date and time of the last update made. Version >= 10.11")
+	cmd.Flags().String("lastUpdatedTo", "", "End date or date and time of the last update made. Version >= 10.11")
 
 	completion.WithOptions(
 		cmd,
@@ -114,6 +118,10 @@ func (n *ListCmd) RunE(cmd *cobra.Command, args []string) error {
 		flags.WithBoolValue("resolved", "resolved", ""),
 		flags.WithBoolValue("withSourceAssets", "withSourceAssets", ""),
 		flags.WithBoolValue("withSourceDevices", "withSourceDevices", ""),
+		flags.WithEncodedRelativeTimestamp("createdFrom", "createdFrom", ""),
+		flags.WithEncodedRelativeTimestamp("createdTo", "createdTo", ""),
+		flags.WithEncodedRelativeTimestamp("lastUpdatedFrom", "lastUpdatedFrom", ""),
+		flags.WithEncodedRelativeTimestamp("lastUpdatedTo", "lastUpdatedTo", ""),
 	)
 	if err != nil {
 		return cmderrors.NewUserError(err)

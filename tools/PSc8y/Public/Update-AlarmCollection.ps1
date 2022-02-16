@@ -64,7 +64,17 @@ Update the status of all active alarms on a device to ACKNOWLEDGED (using pipeli
         [Parameter()]
         [ValidateSet('ACTIVE','ACKNOWLEDGED','CLEARED')]
         [string]
-        $NewStatus
+        $NewStatus,
+
+        # Start date or date and time of the alarm creation. Version >= 10.11
+        [Parameter()]
+        [string]
+        $CreatedFrom,
+
+        # End date or date and time of the alarm creation. Version >= 10.11
+        [Parameter()]
+        [string]
+        $CreatedTo
     )
     DynamicParam {
         Get-ClientCommonParameters -Type "Update", "Template"
