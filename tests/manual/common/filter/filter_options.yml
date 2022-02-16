@@ -4,8 +4,6 @@ config:
     C8Y_SETTINGS_DEFAULTS_CACHE: true
     C8Y_SETTINGS_CACHE_METHODS: GET POST PUT
     C8Y_SETTINGS_DEFAULTS_CACHETTL: 100h
-    C8Y_SETTINGS_DEFAULTS_OUTPUT: csv
-
 
 tests:
   It can filter properties with newline characters using wildcards:
@@ -23,3 +21,19 @@ tests:
     stdout:
       exactly: |
         {"failureReason":"Some complex\nreason\nwith\nmultiple lines","id":"1"}
+
+  It can filter boolean properties:
+    command: |
+      c8y util repeat 2 | c8y template execute --template "{value: if input.index == 1 then true else false}" | c8y util show --filter "value eq true" -o json
+    exit-code: 0
+    stdout:
+      exactly: |
+        {"value":true}
+
+  It can filter boolean properties (false):
+    command: |
+      c8y util repeat 2 | c8y template execute --template "{value: if input.index == 1 then true else false}" | c8y util show --filter "value = false" -o json
+    exit-code: 0
+    stdout:
+      exactly: |
+        {"value":false}
