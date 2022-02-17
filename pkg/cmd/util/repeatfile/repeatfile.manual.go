@@ -121,8 +121,8 @@ func (n *CmdRepeatFile) newTemplate(cmd *cobra.Command, args []string) error {
 	files = append(files, args...)
 	hasInvalidPaths := false
 	for _, file := range args {
-		if _, err := os.Stat(file); os.IsNotExist(err) {
-			cfg.Logger.Errorf("file does not exist. path=%s", file)
+		if _, err := os.Stat(file); err != nil {
+			cfg.Logger.Errorf("file does not exist. path=%s. error=%s", file, err)
 			hasInvalidPaths = true
 		}
 	}
