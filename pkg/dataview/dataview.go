@@ -73,7 +73,7 @@ func (v *DataView) LoadDefinitions() error {
 	definitions := make([]Definition, 0)
 	v.Logger.Debugf("Looking for definitions in: %v", v.Paths)
 	for _, path := range v.Paths {
-		v.Logger.Debugf("Looking for definitions in: %s", path)
+		v.Logger.Debugf("Current view path: %s", path)
 
 		if stat, err := os.Stat(path); err != nil || !(err == nil && stat.IsDir()) {
 			v.Logger.Debugf("Skipping view path because it does not exist. path=%s, error=%s", path, err)
