@@ -98,18 +98,6 @@ endpoints:
         type: boolean
         description: if set to 'true', then each of returned users will contain additional field 'subusersCount' - number of direct subusers (users with corresponding 'owner').
 
-      - name: withApps
-        type: boolean
-        description: Include applications related to the user
-
-      - name: withGroups
-        type: boolean
-        description: Include group information
-
-      - name: withRoles
-        type: boolean
-        description: Include role information
-
 
   - name: newUser
     description: Create user
