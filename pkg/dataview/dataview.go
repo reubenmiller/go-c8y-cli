@@ -75,14 +75,14 @@ func (v *DataView) LoadDefinitions() error {
 	for _, path := range v.Paths {
 		v.Logger.Debugf("Current view path: %s", path)
 
-		if stat, err := os.Stat(path); err != nil || !(err == nil && stat.IsDir()) {
-			if err == nil && stat != nil && !stat.IsDir() {
-				v.Logger.Debugf("Skipping view path because it is not a folder. path=%s", path)
-			} else {
-				v.Logger.Debugf("Skipping view path because it does not exist. path=%s, error=%s", path, err)
-			}
+		if stat, err := os.Stat(path); err != nil {
+			v.Logger.Debugf("Skipping view path because it does not exist. path=%s, error=%s", path, err)
+			continue
+		} else if !stat.IsDir() {
+			v.Logger.Debugf("Skipping view path because it is not a folder. path=%s", path)
 			continue
 		}
+
 		err := filepath.WalkDir(path, func(path string, d fs.DirEntry, err error) error {
 			if err != nil {
 				// do not block walking folder
