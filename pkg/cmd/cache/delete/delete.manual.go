@@ -63,7 +63,7 @@ func (n *CmdDelete) RunE(cmd *cobra.Command, args []string) error {
 
 	cacheDir := cfg.CacheDir()
 
-	if _, err := os.Stat(cacheDir); err != nil {
+	if _, err := os.Stat(cacheDir); os.IsNotExist(err) {
 		_, bErr := fmt.Fprintf(n.factory.IOStreams.ErrOut, "%s Nothing to delete. %s\n", cs.SuccessIconWithColor(cs.Green), cacheDir)
 		return bErr
 	}
