@@ -47,21 +47,6 @@ Get a list of users
         [switch]
         $WithSubusersCount,
 
-        # Include applications related to the user
-        [Parameter()]
-        [switch]
-        $WithApps,
-
-        # Include group information
-        [Parameter()]
-        [switch]
-        $WithGroups,
-
-        # Include role information
-        [Parameter()]
-        [switch]
-        $WithRoles,
-
         # Tenant
         [Parameter()]
         [object]
