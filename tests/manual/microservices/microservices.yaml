@@ -11,3 +11,15 @@ tests:
                 body.type: "MICROSERVICE"
                 body.name: "my-app"
                 body.key: "my-app-key"
+
+    It creates a microservice placeholder via manifest file:
+        command: |
+          c8y microservices create --name "helloworld2" --file "manual/microservices/cumulocity.json" --template "{key: $.name}" --dry=false -f -o json
+          c8y microservices delete --id "helloworld2" 2>/dev/null || true
+        exit-code: 0
+        stdout:
+            json:
+                name: helloworld2
+                key: helloworld2
+                type: "MICROSERVICE"
+                requiredRoles.0: ROLE_ALARM_READ

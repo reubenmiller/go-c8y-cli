@@ -1,0 +1,30 @@
+{
+    "apiVersion": "v1",
+    "name": "helloworld",
+    "version": "1.0.0",
+    "provider": {
+        "name": "New Company Ltd.",
+        "domain": "http://new-company.com",
+        "support": "support@new-company.com"
+    },
+    "isolation": "PER_TENANT",
+    "requiredRoles": [
+        "ROLE_ALARM_READ"
+    ],
+    "livenessProbe": {
+        "httpGet": {
+            "path": "/health"
+        },
+        "initialDelaySeconds": 60,
+        "periodSeconds": 10
+    },
+    "readinessProbe": {
+        "httpGet": {
+            "path": "/health",
+            "port": 80
+
+        },
+        "initialDelaySeconds": 20,
+        "periodSeconds": 10
+    }
+}
