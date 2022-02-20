@@ -9,7 +9,8 @@
     },
     "isolation": "PER_TENANT",
     "requiredRoles": [
-        "ROLE_ALARM_READ"
+        "ROLE_ALARM_READ",
+        "ROLE_ALARM_ADMIN"
     ],
     "livenessProbe": {
         "httpGet": {
