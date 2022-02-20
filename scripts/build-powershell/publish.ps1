@@ -19,7 +19,7 @@ try {
 	Get-Module -Name PowerShellGet -ListAvailable
 
 	$Versions = Get-Module -Name PowerShellGet | Select-Object -ExpandProperty Version
-	Write-Host ("Current loaded version: " -f ($Versions -join ","))
+	Write-Host ("Current loaded version: {0}" -f ($Versions -join ","))
 }
 
 
@@ -49,7 +49,16 @@ try {
 		NuGetApiKey = $env:NUGET_API_KEY
 		Verbose = $true
 	}
-	Publish-Module @publishParams
+	try {
+		Publish-Module @publishParams
+	} catch {
+		# Ignore already published versions incase if there is a problem when publishing to PSGallery (it happens from time to time)
+		if ($_.Exception.Message -like "current version '*' is already available") {
+			Write-Warning ("Version has already been published. {0}" -f $_.Exception)
+		} else {
+			throw
+		}
+	}
 
 } catch {
 	Write-Error -Message $_.Exception.Message
