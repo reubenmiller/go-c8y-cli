@@ -6,6 +6,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"os"
 	"path/filepath"
 	"regexp"
 	"strings"
@@ -198,6 +199,10 @@ func (n *CmdCreate) RunE(cmd *cobra.Command, args []string) error {
 	}
 
 	skipUpload := n.skipUpload
+
+	if _, err := os.Stat(n.file); err != nil {
+		return cmderrors.NewUserError(fmt.Sprintf("could not read manifest file. %s. error=%s", n.file, err))
+	}
 
 	// Only upload zip files
 	if !strings.HasSuffix(n.file, ".zip") {

@@ -36,3 +36,11 @@ tests:
                 key: helloworld3
                 type: "MICROSERVICE"
                 requiredRoles.0: ROLE_ALARM_READ
+
+    It throws an error if the file does not exist:
+        command: |
+          c8y microservices create --file "does-not-exist.zip" --skipUpload -o json
+        exit-code: 101
+        stderr:
+            contains:
+              - could not read manifest file
