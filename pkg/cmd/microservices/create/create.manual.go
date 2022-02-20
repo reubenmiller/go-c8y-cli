@@ -1,10 +1,11 @@
 package create
 
 import (
+	"archive/zip"
+	"bytes"
 	"context"
-	"errors"
+	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -17,10 +18,11 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmdutil"
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/pkg/jsonUtilities"
-	"github.com/reubenmiller/go-c8y-cli/pkg/zipUtilities"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
 )
+
+const CumulocityManifestFile = "cumulocity.json"
 
 type CmdCreate struct {
 	*subcommand.SubCommand
@@ -198,6 +200,10 @@ func (n *CmdCreate) RunE(cmd *cobra.Command, args []string) error {
 
 	skipUpload := n.skipUpload
 
+	if _, err := os.Stat(n.file); err != nil {
+		return cmderrors.NewUserError(fmt.Sprintf("could not read manifest file. %s. error=%s", n.file, err))
+	}
+
 	// Only upload zip files
 	if !strings.HasSuffix(n.file, ".zip") {
 		log.Info("Skipping microservice binary upload")
@@ -223,8 +229,7 @@ func (n *CmdCreate) RunE(cmd *cobra.Command, args []string) error {
 		//
 		var requiredRoles []string
 		requiredRoles = make([]string, 0)
-		var manifestContents map[string]interface{}
-		// manifestContents = make(map[string]interface{})
+		manifestContents := make(map[string]interface{})
 
 		var manifestFile string
 
@@ -232,18 +237,19 @@ func (n *CmdCreate) RunE(cmd *cobra.Command, args []string) error {
 			// user provided just a manifest file
 			manifestFile = n.file
 		} else if strings.HasSuffix(n.file, ".zip") {
-			if val, err := GetManifestFile(n.file); err != nil {
-				log.Warningf("failed to get manifest file from microservice. %s", err)
-			} else {
-				manifestFile = val
+			// Try loading manifest file directly from the zip (without unzipping it)
+			if err := GetManifestContents(n.file, manifestContents); err != nil {
+				return cmderrors.NewUserError(fmt.Sprintf("could not find manifest file. Expected %s to contain %s. %s", n.file, CumulocityManifestFile, err))
 			}
 		}
 
-		if v, err := jsonUtilities.DecodeJSONFile(manifestFile); err == nil {
-			manifestContents = v
-		} else {
-			log.Warningf("failed to decode manifest file. file=%s, err=%s", manifestFile, err)
-			return cmderrors.NewUserError(fmt.Sprintf("invalid manifest file. Only json files are accepted. %s", strings.TrimSpace(err.Error())))
+		if manifestFile != "" {
+			if v, err := jsonUtilities.DecodeJSONFile(manifestFile); err == nil {
+				manifestContents = v
+			} else {
+				log.Warningf("failed to decode manifest file. file=%s, err=%s", manifestFile, err)
+				return cmderrors.NewUserError(fmt.Sprintf("invalid manifest file. Only json files are accepted. %s", strings.TrimSpace(err.Error())))
+			}
 		}
 
 		if roles, ok := manifestContents["requiredRoles"].([]interface{}); ok {
@@ -297,20 +303,34 @@ func (n *CmdCreate) RunE(cmd *cobra.Command, args []string) error {
 	return err
 }
 
-// GetManifestFile extracts the Cumulocity microservice manifest file from a given zip file
-func GetManifestFile(zipFilename string) (string, error) {
-	tempDir, err := ioutil.TempDir(os.TempDir(), "c8ygo-")
-
+func GetManifestContents(zipFilename string, contents map[string]interface{}) error {
+	reader, err := zip.OpenReader(zipFilename)
 	if err != nil {
-		return "", fmt.Errorf("cannot create temporary file. %s", err)
+		return err
 	}
 
-	files, err := zipUtilities.UnzipFile(zipFilename, tempDir, []string{"Cumulocity.json"})
-	if err != nil {
-		return "", err
+	defer reader.Close()
+
+	for _, file := range reader.File {
+		// check if the file matches the name for application portfolio xml
+		if strings.EqualFold(file.Name, CumulocityManifestFile) {
+			rc, err := file.Open()
+			if err != nil {
+				return err
+			}
+
+			buf := new(bytes.Buffer)
+			if _, err := buf.ReadFrom(rc); err != nil {
+				return err
+			}
+
+			defer rc.Close()
+
+			// Unmarshal bytes
+			if err := json.Unmarshal(buf.Bytes(), &contents); err != nil {
+				return err
+			}
+		}
 	}
-	if len(files) == 0 {
-		return "", errors.New("missing Cumulocity.json file")
-	}
-	return files[0], err
+	return nil
 }
