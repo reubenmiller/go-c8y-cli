@@ -14,12 +14,25 @@ tests:
 
     It creates a microservice placeholder via manifest file:
         command: |
-          c8y microservices create --name "helloworld2" --file "manual/microservices/cumulocity.json" --template "{key: $.name}" --dry=false -f -o json
+          c8y microservices create --name "helloworld2" --file "manual/microservices/cumulocity.json" -o json
           c8y microservices delete --id "helloworld2" 2>/dev/null || true
         exit-code: 0
         stdout:
             json:
                 name: helloworld2
                 key: helloworld2
+                type: "MICROSERVICE"
+                requiredRoles.0: ROLE_ALARM_READ
+                requiredRoles.1: ROLE_ALARM_ADMIN
+
+    It creates a microservice placeholder via zip file:
+        command: |
+          c8y microservices create --file "manual/microservices/helloworld3-0.0.1-SNAPSHOT.zip" --skipUpload -o json
+          c8y microservices delete --id "helloworld3" 2>/dev/null || true
+        exit-code: 0
+        stdout:
+            json:
+                name: helloworld3
+                key: helloworld3
                 type: "MICROSERVICE"
                 requiredRoles.0: ROLE_ALARM_READ
