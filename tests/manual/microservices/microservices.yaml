@@ -1,17 +1,4 @@
 tests:
-    It creates a microservice using a template:
-        skip: true
-        command: >
-          c8y microservices create --name "my-app" --file "myfile.json" --template "{key: 'my-app-key'}" --dry
-        exit-code: 0
-        stdout:
-            json:
-                method: POST
-                path: /application/applications
-                body.type: "MICROSERVICE"
-                body.name: "my-app"
-                body.key: "my-app-key"
-
     It creates a microservice placeholder via manifest file:
         command: |
           c8y microservices create --name "helloworld2" --file "manual/microservices/cumulocity.json" -o json
