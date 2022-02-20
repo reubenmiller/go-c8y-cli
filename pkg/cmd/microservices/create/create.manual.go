@@ -233,14 +233,16 @@ func (n *CmdCreate) RunE(cmd *cobra.Command, args []string) error {
 
 		var manifestFile string
 
-		if strings.HasSuffix(n.file, ".json") {
-			// user provided just a manifest file
-			manifestFile = n.file
-		} else if strings.HasSuffix(n.file, ".zip") {
+		if strings.HasSuffix(n.file, ".zip") {
 			// Try loading manifest file directly from the zip (without unzipping it)
+			log.Infof("Trying to detect manifest from a zip file. path=%s", n.file)
 			if err := GetManifestContents(n.file, manifestContents); err != nil {
 				return cmderrors.NewUserError(fmt.Sprintf("could not find manifest file. Expected %s to contain %s. %s", n.file, CumulocityManifestFile, err))
 			}
+		} else if n.file != "" {
+			// Assume json (regardless of file type)
+			log.Infof("Assuming file is json (regardless of file extension). path=%s", n.file)
+			manifestFile = n.file
 		}
 
 		if manifestFile != "" {
@@ -248,7 +250,7 @@ func (n *CmdCreate) RunE(cmd *cobra.Command, args []string) error {
 				manifestContents = v
 			} else {
 				log.Warningf("failed to decode manifest file. file=%s, err=%s", manifestFile, err)
-				return cmderrors.NewUserError(fmt.Sprintf("invalid manifest file. Only json files are accepted. %s", strings.TrimSpace(err.Error())))
+				return cmderrors.NewUserError(fmt.Sprintf("invalid manifest file. Only json or zip files are accepted. %s", strings.TrimSpace(err.Error())))
 			}
 		}
 
