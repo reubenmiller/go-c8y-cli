@@ -79,6 +79,7 @@
       "enum": [
         "application",
         "applicationname",
+        "hostedapplication",
         "boolean",
         "booleanDefault",
         "optional_fragment",

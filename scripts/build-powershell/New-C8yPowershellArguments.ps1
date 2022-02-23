@@ -78,6 +78,7 @@
         "[]userself" { "object[]"; break }
         "application" { "object[]"; break }
         "applicationname" { "string"; break }
+        "hostedapplication" { "object[]"; break }
         "boolean" { "switch"; break }
         "booleanDefault" { "switch"; break }
         "optional_fragment" { "switch"; break }
