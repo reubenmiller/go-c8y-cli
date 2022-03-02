@@ -145,9 +145,7 @@ RUN sed -iE 's/plugins=(\(.*\))/plugins=(\1 c8y)/' /home/$USERNAME/.zshrc \
 
 # CI/CD tools
 RUN  cd /tmp \
-    && curl -sfL https://install.goreleaser.com/github.com/goreleaser/goreleaser.sh | sh \
-    && chmod a+x /tmp/bin/* \
-    && sudo mv /tmp/bin/* /usr/local/bin/ \
+    && go install github.com/goreleaser/goreleaser@latest \
     && curl -fL https://getcli.jfrog.io | sh \
     && chmod a+x jfrog \
     && sudo mv jfrog /usr/local/bin/
