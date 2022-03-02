@@ -31,3 +31,14 @@ tests:
         stderr:
             contains:
               - could not read manifest file
+    
+    It reads the application name from a manifest file:
+        command: |
+          c8y microservices create --file cumulocity.app.json --skipUpload -o json
+        exit-code: 0
+        stdout:
+            json:
+                name: balancer
+                key: balancer
+                type: "MICROSERVICE"
+                contextPath: balancer
