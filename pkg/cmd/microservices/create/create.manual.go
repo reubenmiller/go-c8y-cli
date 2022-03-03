@@ -118,7 +118,7 @@ func (n *CmdCreate) getApplicationDetails(log *logger.Logger) (*Application, err
 		// Try loading manifest file directly from the zip (without unzipping it)
 		log.Infof("Trying to detect manifest from a zip file. path=%s", n.file)
 		if err := GetManifestContents(n.file, &app.Manifest); err != nil {
-			return nil, cmderrors.NewUserError(fmt.Sprintf("could not find manifest file. Expected %s to contain %s. %s", n.file, CumulocityManifestFile, err))
+			log.Infof("Could not find manifest file. Expected %s to contain %s. %s", n.file, CumulocityManifestFile, err)
 		}
 	} else if n.file != "" {
 		// Assume json (regardless of file type)
@@ -130,7 +130,7 @@ func (n *CmdCreate) getApplicationDetails(log *logger.Logger) (*Application, err
 		byteValue, _ := ioutil.ReadAll(jsonFile)
 
 		if err := json.Unmarshal(byteValue, &app.Manifest); err != nil {
-			return nil, cmderrors.NewUserError(fmt.Sprintf("invalid manifest file. Only json or zip files are accepted. %s", strings.TrimSpace(err.Error())))
+			log.Infof("invalid manifest file. Only json or zip files are accepted. %s", strings.TrimSpace(err.Error()))
 		}
 	}
 
@@ -143,7 +143,7 @@ func (n *CmdCreate) getApplicationDetails(log *logger.Logger) (*Application, err
 		app.Name = app.Manifest.Name
 	}
 
-	if !strings.EqualFold(fileExt, ".json") {
+	if !strings.EqualFold(fileExt, ".json") && strings.EqualFold(fileExt, ".zip") {
 		app.Name = appNameFromFile
 	}
 

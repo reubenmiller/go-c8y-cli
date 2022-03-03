@@ -34,7 +34,7 @@ tests:
     
     It reads the application name from a manifest file:
         command: |
-          c8y microservices create --file cumulocity.app.json --skipUpload -o json
+          c8y microservices create --file manual/microservices/cumulocity.app.json --skipUpload -o json
         exit-code: 0
         stdout:
             json:
@@ -42,3 +42,14 @@ tests:
                 key: balancer
                 type: "MICROSERVICE"
                 contextPath: balancer
+
+    It reads the application name from a manifest file using bash substituion:
+        command: |
+          bash -c "c8y microservices create --file <(printf '{\"name\":\"dummyapp-02\"}') --skipUpload -o json -c"
+        exit-code: 0
+        stdout:
+            json:
+                name: dummyapp-02
+                key: dummyapp-02
+                type: "MICROSERVICE"
+                contextPath: dummyapp-02
