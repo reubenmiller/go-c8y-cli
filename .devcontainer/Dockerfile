@@ -117,6 +117,8 @@ RUN echo "Installing shells" \
 # AsciiCinema configuration
 RUN chown -R $USER_UID:$USER_GID /home/$USERNAME \
     && mkdir -p /home/$USERNAME/.config/asciinema \
+    # Change default shell
+    && chsh -s /bin/zsh $USERNAME
 COPY tools/asciinema/config /home/$USERNAME/.config/asciinema/
 
 # Install powershell dependencies
@@ -135,8 +137,11 @@ RUN curl -sSfL https://raw.githubusercontent.com/robbyrussell/oh-my-zsh/master/t
 COPY tools/shell/.zshrc /home/$USERNAME/.zshrc
 COPY tools/shell/c8y.plugin.zsh /home/$USERNAME/.oh-my-zsh/custom/plugins/c8y/
 COPY tools/shell/c8y.plugin.fish /home/$USERNAME/
-RUN sed -iE 's/plugins=(\(.*\))/plugins=(\1 c8y)/' /home/$USERNAME/.zshrc \
+RUN sed -iE 's/plugins=(\(.*\))/plugins=(\1 c8y task)/' /home/$USERNAME/.zshrc \
     && echo "autoload -U compinit; compinit -i" >> /home/$USERNAME/.zshrc \
+    #
+    # taskfile completion
+    && git clone https://github.com/sawadashota/go-task-completions.git /home/$USERNAME/.oh-my-zsh/custom/plugins/task \
     #
     # fish config
     && sudo mkdir -p /home/$USERNAME/.config/fish/
@@ -145,6 +150,7 @@ RUN sed -iE 's/plugins=(\(.*\))/plugins=(\1 c8y)/' /home/$USERNAME/.zshrc \
 
 # CI/CD tools
 RUN  cd /tmp \
+    && command -v task || go install github.com/go-task/task/v3/cmd/task@latest \
     && go install github.com/goreleaser/goreleaser@latest \
     && curl -fL https://getcli.jfrog.io | sh \
     && chmod a+x jfrog \
