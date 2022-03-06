@@ -561,7 +561,7 @@
       "pathParameters": [
         {
           "name": "id",
-          "type": "application",
+          "type": "hostedapplication",
           "pipeline": true,
           "required": true,
           "description": "Application id"
@@ -616,7 +616,7 @@
       "pathParameters": [
         {
           "name": "application",
-          "type": "application",
+          "type": "hostedapplication",
           "pipeline": false,
           "required": true,
           "description": "Application id"

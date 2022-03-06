@@ -60,7 +60,7 @@ func NewCmdCreateHostedApplication(f *cmdutil.Factory) *CmdCreateHostedApplicati
 
 	cmd.SilenceUsage = true
 
-	cmd.Flags().StringVar(&ccmd.file, "file", "", "File or Folder of the web application. It should contains a index.html file in the root folder/ or zip file")
+	cmd.Flags().StringVar(&ccmd.file, "file", "", "File or Folder of the web application. It should contain a index.html file in the root folder/ or zip file")
 	cmd.Flags().StringVar(&ccmd.name, "name", "", "Name of application")
 	cmd.Flags().StringVar(&ccmd.key, "key", "", "Shared secret of application. Defaults to the name")
 	cmd.Flags().StringVar(&ccmd.availability, "availability", "", "Access level for other tenants. Possible values are : MARKET, PRIVATE (default)")

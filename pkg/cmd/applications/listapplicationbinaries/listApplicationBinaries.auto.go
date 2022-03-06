@@ -51,7 +51,7 @@ List all of the binaries related to a Hosted (web) application
 
 	completion.WithOptions(
 		cmd,
-		completion.WithApplication("id", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
+		completion.WithHostedApplication("id", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
 	)
 
 	flags.WithOptions(
@@ -146,7 +146,7 @@ func (n *ListApplicationBinariesCmd) RunE(cmd *cobra.Command, args []string) err
 		cmd,
 		path,
 		inputIterators,
-		c8yfetcher.WithApplicationByNameFirstMatch(client, args, "id", "id"),
+		c8yfetcher.WithHostedApplicationByNameFirstMatch(client, args, "id", "id"),
 	)
 	if err != nil {
 		return err

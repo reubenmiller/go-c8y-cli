@@ -631,6 +631,14 @@ func WithApplicationByNameFirstMatch(client *c8y.Client, args []string, opts ...
 	}
 }
 
+// WithHostedApplicationByNameFirstMatch add reference by name matching for hosted (web) applications via cli args. Only the first match will be used
+func WithHostedApplicationByNameFirstMatch(client *c8y.Client, args []string, opts ...string) flags.GetOption {
+	return func(cmd *cobra.Command, inputIterators *flags.RequestInputIterators) (string, interface{}, error) {
+		opt := WithReferenceByNameFirstMatch(client, NewHostedApplicationFetcher(client), args, opts...)
+		return opt(cmd, inputIterators)
+	}
+}
+
 // WithMicroserviceByNameFirstMatch add reference by name matching for microservices via cli args. Only the first match will be used
 func WithMicroserviceByNameFirstMatch(client *c8y.Client, args []string, opts ...string) flags.GetOption {
 	return func(cmd *cobra.Command, inputIterators *flags.RequestInputIterators) (string, interface{}, error) {

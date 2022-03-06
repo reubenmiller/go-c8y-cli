@@ -420,7 +420,7 @@ endpoints:
           command: c8y applications listApplicationBinaries --id 12345
     pathParameters:
       - name: id
-        type: application
+        type: hostedapplication
         pipeline: true
         required: true
         description: Application id
@@ -461,7 +461,7 @@ endpoints:
           command: c8y applications deleteApplicationBinary --application 12345 --binaryId 9876
     pathParameters:
       - name: application
-        type: application
+        type: hostedapplication
         pipeline: false
         required: true
         description: Application id

@@ -13,6 +13,22 @@ tests:
         command:  c8y devices assert exists --device 1 --strict --dry
         exit-code: 112
 
+    It accepts multiple ids using comma separated values:
+        command: |
+            c8y inventory assert exists --id 1,2 --strict --dry --dryFormat json \
+            | c8y util show --select path
+        exit-code: 0
+        stderr:
+            line-count: 2
+            contains:
+                - "assertionError: managedObject - wanted: Found, got: NotFound, context: {ID:1}"
+                - "assertionError: managedObject - wanted: Found, got: NotFound, context: {ID:2}"
+        stdout:
+            line-count: 2
+            json:
+                ..0.path: /inventory/managedObjects/1
+                ..1.path: /inventory/managedObjects/2
+
     It filters a single id that does not exist (using pipeline):
         command: echo "1" | c8y devices assert exists --not
         exit-code: 0
