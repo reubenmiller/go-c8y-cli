@@ -23,7 +23,7 @@ type StateChecker interface {
 }
 
 func NewAssertCmdFactory(cmd *cobra.Command, f *cmdutil.Factory, h StateChecker) *cobra.Command {
-	cmd.Flags().String("id", "", "Inventory id (required) (accepts pipeline)")
+	cmd.Flags().StringSlice("id", []string{""}, "Inventory id (required) (accepts pipeline)")
 	cmd.Flags().String("duration", "30s", "Timeout duration. i.e. 30s or 1m (1 minute)")
 	cmd.Flags().String("interval", "5s", "Interval to check on the status, i.e. 10s or 1min")
 	cmd.Flags().Int64("retries", 0, "Number of retries before giving up per id")
@@ -83,7 +83,7 @@ func NewAssertCmdFactory(cmd *cobra.Command, f *cmdutil.Factory, h StateChecker)
 			cmd,
 			path,
 			inputIterators,
-			flags.WithStringValue("id", "id"),
+			c8yfetcher.WithIDSlice(args, "id", "id"),
 		)
 		if err != nil {
 			return err

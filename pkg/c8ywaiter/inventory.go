@@ -66,15 +66,18 @@ func (s *InventoryState) formatFragments() []string {
 // Check check if inventory has the given fragments (or absence of fragments)
 func (s *InventoryState) Check(m interface{}) (done bool, err error) {
 	if mo, ok := m.(*c8y.ManagedObject); ok {
+		moId := s.ID
 
 		if mo == nil {
 			err := cmderrors.NewAssertionError(&cmderrors.AssertionError{
 				Type:    cmderrors.ManagedObjectFragments,
 				Wanted:  s.formatFragments(),
 				Got:     "",
-				Context: struct{ ID string }{ID: mo.ID},
+				Context: struct{ ID string }{ID: moId},
 			})
 			return false, err
+		} else if mo.ID != "" {
+			moId = mo.ID
 		}
 
 		done := true
@@ -127,7 +130,7 @@ func (s *InventoryState) Check(m interface{}) (done bool, err error) {
 				Type:    cmderrors.ManagedObjectFragments,
 				Wanted:  s.formatFragments(),
 				Got:     got,
-				Context: struct{ ID string }{ID: mo.ID},
+				Context: struct{ ID string }{ID: moId},
 			})
 		}
 	}
@@ -160,7 +163,7 @@ type managedObjectResponse struct {
 func (s *InventoryExistance) Check(m interface{}) (done bool, err error) {
 	if result, ok := m.(*managedObjectResponse); ok {
 		var exists, notFound bool
-		var moID string
+		moID := s.ID
 
 		if result.Response != nil {
 			exists = result.Response.StatusCode >= 200 && result.Response.StatusCode <= 399
