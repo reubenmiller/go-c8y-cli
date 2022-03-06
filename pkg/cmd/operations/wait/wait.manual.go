@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/MakeNowJust/heredoc/v2"
+	"github.com/reubenmiller/go-c8y-cli/pkg/c8yfetcher"
 	"github.com/reubenmiller/go-c8y-cli/pkg/c8ywaiter"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmd/subcommand"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
@@ -49,7 +50,7 @@ func NewCmdWait(f *cmdutil.Factory) *CmdWait {
 
 	cmd.SilenceUsage = true
 
-	cmd.Flags().String("id", "", "Operation id (required) (accepts pipeline)")
+	cmd.Flags().StringSlice("id", []string{""}, "Operation id (required) (accepts pipeline)")
 	cmd.Flags().StringSliceVar(&ccmd.ExpectedStatus, "status", []string{"SUCCESSFUL"}, "Status to wait for. If multiple values are given, then it will be applied as an OR operation")
 	cmd.Flags().String("duration", "30s", "Timeout duration. i.e. 30s or 1m (1 minute)")
 	flags.WithOptions(
@@ -93,7 +94,7 @@ func (n *CmdWait) RunE(cmd *cobra.Command, args []string) error {
 		cmd,
 		path,
 		inputIterators,
-		flags.WithStringValue("id", "id"),
+		c8yfetcher.WithIDSlice(args, "id", "id"),
 	)
 	if err != nil {
 		return err
