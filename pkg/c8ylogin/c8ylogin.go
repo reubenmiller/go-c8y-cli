@@ -323,7 +323,6 @@ func (lh *LoginHandler) login() {
 								lh.C8Yclient.TFACode = input
 
 								if err := lh.C8Yclient.LoginUsingOAuth2(ctx, option.InitRequest); err != nil {
-									lh.Logger.Errorf("OAuth2 failed. %s", err)
 									return err
 								}
 								lh.TFACode = input
