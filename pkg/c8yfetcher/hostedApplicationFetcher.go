@@ -66,6 +66,18 @@ func (f *HostedApplicationFetcher) getByName(name string) ([]fetcherResultSet, e
 
 	for i, app := range col.Applications {
 		if app.Type == "HOSTED" && pattern.MatchString(app.Name) {
+
+			// Ignore applications which don't match the owner
+			// so that it can overwrite existing applications such as cockpit and devicemanagement.
+			// Otherwise it will always match the in-built apps
+			if f.client.TenantName != "" {
+				if app.Owner != nil && app.Owner.Tenant != nil && app.Owner.Tenant.ID != "" {
+					if app.Owner.Tenant.ID != f.client.TenantName {
+						continue
+					}
+				}
+			}
+
 			results = append(results, fetcherResultSet{
 				ID:    app.ID,
 				Name:  app.Name,
