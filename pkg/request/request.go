@@ -211,7 +211,7 @@ func (r *RequestHandler) PrintRequestDetails(w io.Writer, requestOptions *c8y.Re
 	isJSON := true
 
 	var err error
-	if req.Body != nil && (req.Method == http.MethodPost || req.Method == http.MethodPut || req.Method == http.MethodPatch) {
+	if req.Body != nil && (req.Method == http.MethodPost || req.Method == http.MethodPut || req.Method == http.MethodPatch || req.Method == http.MethodDelete) {
 		var buf bytes.Buffer
 		bodyCopy := io.TeeReader(req.Body, &buf)
 		req.Body = ioutil.NopCloser(&buf)
@@ -335,7 +335,7 @@ func tryUnescapeURL(v string) string {
 }
 
 func (r *RequestHandler) GetCurlCommands(req *http.Request) (shell string, pwsh string, err error) {
-	if !strings.Contains("POST PUT", req.Method) {
+	if !strings.Contains("POST PUT DELETE", req.Method) {
 		req.Body = nil
 	}
 	var command *http2curl.CurlCommand

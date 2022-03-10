@@ -240,7 +240,7 @@ func (n *CmdAPI) RunE(cmd *cobra.Command, args []string) error {
 		ResponseData: nil,
 	}
 
-	if method == "PUT" || method == "POST" {
+	if method == "PUT" || method == "POST" || method == "DELETE" {
 		body := mapbuilder.NewInitializedMapBuilder()
 		err = flags.WithBody(
 			cmd,
