@@ -573,6 +573,52 @@
       ]
     },
     {
+      "name": "revokeUserTOTPSecret",
+      "description": "Revoke a user's TOTP (TFA) secret",
+      "descriptionLong": "Revoke/delete a user's TOTP (TFA) secret to force them to setup TFA again.\n\nThis is required when the user loses their TFA configuration, or it is compromised.\n",
+      "method": "DELETE",
+      "path": "user/{tenant}/users/{id}/totpSecret/revoke",
+      "accept": "",
+      "alias": {
+        "go": "revokeTOTPSecret",
+        "powershell": "Remove-UserTOTPSecret"
+      },
+      "examples": {
+        "powershell": [
+          {
+            "description": "Revoke a user's TOTP (TFA) secret",
+            "skipTest": true,
+            "beforeEach": [
+              "$User = PSc8y\\New-TestUser"
+            ],
+            "command": "Remove-UserTFA -Id $User.id"
+          }
+        ],
+        "go": [
+          {
+            "description": "Revoke a user's TOTP (TFA) secret",
+            "command": "c8y users revokeTOTPSecret --id \"myuser\""
+          }
+        ]
+      },
+      "pathParameters": [
+        {
+          "name": "tenant",
+          "type": "tenant",
+          "required": false,
+          "position": 99,
+          "description": "Tenant"
+        },
+        {
+          "name": "id",
+          "type": "[]user",
+          "required": true,
+          "pipeline": true,
+          "description": "User id"
+        }
+      ]
+    },
+    {
       "name": "getUserMembershipCollection",
       "description": "get user membership collection",
       "descriptionLong": "Get information about all groups that a user is a member of",

@@ -274,6 +274,7 @@ FunctionsToExport = @(
 	'Remove-User',
 	'Remove-UserFromGroup',
 	'Remove-UserGroup',
+	'Remove-UserTOTPSecret',
 	'Request-DeviceCredentials',
 	'Reset-UserPassword',
 	'Set-DeviceRequiredAvailability',
