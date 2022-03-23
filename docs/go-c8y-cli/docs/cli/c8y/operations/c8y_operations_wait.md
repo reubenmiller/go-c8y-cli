@@ -31,7 +31,7 @@ $ c8y operations list --device 1111 | c8y operations wait --status "FAILED" --st
 ```
       --duration string   Timeout duration. i.e. 30s or 1m (1 minute) (default "30s")
   -h, --help              help for wait
-      --id string         Operation id (required) (accepts pipeline)
+      --id strings        Operation id (required) (accepts pipeline)
       --status strings    Status to wait for. If multiple values are given, then it will be applied as an OR operation (default [SUCCESSFUL])
 ```
 
