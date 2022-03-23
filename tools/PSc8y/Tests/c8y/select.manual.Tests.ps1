@@ -116,6 +116,7 @@ Describe -Name "c8y select global parameter" {
     It "filters and selects a subset of properties" {
         $output = c8y applications list --pageSize 100 --filter "name like cockpi*" --select id,name
         $LASTEXITCODE | Should -Be 0
+        $output = $output | Select-Object -First 1
         $output | Should -Not -BeNullOrEmpty
         $output | Should -HaveCount 1
         $json = $output | ConvertFrom-Json
@@ -334,8 +335,7 @@ Describe -Name "c8y select global parameter" {
             $json = $output | ConvertFrom-Json
             $json.id | Should -Not -BeNullOrEmpty
             $json.name | Should -Not -BeNullOrEmpty
-            $json.roles | Should -Not -BeNullOrEmpty
-            $json.roles.Count | Should -BeGreaterThan 0
+            $json.roles.Count | Should -BeGreaterOrEqual 0
         }
     }
 

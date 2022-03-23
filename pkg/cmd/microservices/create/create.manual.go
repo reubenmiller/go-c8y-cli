@@ -130,7 +130,7 @@ func (n *CmdCreate) getApplicationDetails(log *logger.Logger) (*Application, err
 		byteValue, _ := ioutil.ReadAll(jsonFile)
 
 		if err := json.Unmarshal(byteValue, &app.Manifest); err != nil {
-			log.Infof("invalid manifest file. Only json or zip files are accepted. %s", strings.TrimSpace(err.Error()))
+			log.Warnf("invalid manifest file. Only json or zip files are accepted. %s", strings.TrimSpace(err.Error()))
 		}
 	}
 
