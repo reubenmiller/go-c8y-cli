@@ -73,7 +73,7 @@ func NewCmdCreateHostedApplication(f *cmdutil.Factory) *CmdCreateHostedApplicati
 	flags.WithOptions(
 		cmd,
 		flags.WithData(),
-		flags.WithTemplate(),
+		f.WithTemplateFlag(cmd),
 	)
 
 	// Required flags
