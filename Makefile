@@ -100,7 +100,7 @@ build_cli:						## Generate the cli code and build the binaries
 	pwsh -File scripts/build-cli/build.ps1;
 
 build_cli_fast:					## Only build the linux version of the c8y binary
-	pwsh -File ./scripts/build-cli/build-binary.ps1 -OutputDir ./tools/PSc8y/dist/PSc8y/Dependencies -Target "linux:amd64"
+	pwsh -File ./scripts/build-cli/build-binary.ps1 -OutputDir ./tools/PSc8y/dist/PSc8y/Dependencies -Target "linux:$(dpkg --print-architecture)"
 	cp ./tools/PSc8y/dist/PSc8y/Dependencies/c8y.linux /workspaces/go-c8y-cli/tools/PSc8y/Dependencies/c8y.linux
 
 build_powershell:				## Build the powershell module

@@ -8,21 +8,23 @@ Param(
     [switch] $CompressOnly,
 
     # Build targets
-    [ValidateSet("linux:amd64", "windows:amd64", "darwin:amd64", "linux:arm")]
+    [ValidateSet("linux:amd64", "windows:amd64", "darwin:amd64", "darwin:arm64", "linux:arm", "linux:arm64")]
     [string[]] $Target,
 
     # Build binaries for all
     [switch] $All
 )
 
+$arch = "$(dpkg --print-architecture)"
+
 if ($null -eq $Target) {
     $Target = @()
     if ($IsLinux) {
-        $Target += "linux:amd64"
+        $Target += "linux:$arch"
     } elseif ($IsMacOS) {
-        $Target += "darwin:amd64"
+        $Target += "darwin:$arch"
     } else {
-        $Target += "windows:amd64"
+        $Target += "windows:$arch"
     }
 }
 
@@ -78,6 +80,22 @@ if ($All -or $Target.Contains("linux:arm")) {
     $env:CGO_ENABLED = "0"
 
     $OutputPath = Join-Path -Path $OutputDir -ChildPath "${name}.arm"
+
+    & go build $LDFlags -o "$OutputPath" "$c8yBinary"
+
+    if ($LASTEXITCODE -ne 0) {
+        Write-Error "Failed to build project"
+        return
+    }
+}
+
+if ($All -or $Target.Contains("linux:arm64")) {
+    Write-Host "Building the c8y binary [linux (arm64)]"
+    $env:GOARCH = "arm64"
+    $env:GOOS = "linux"
+    $env:CGO_ENABLED = "0"
+
+    $OutputPath = Join-Path -Path $OutputDir -ChildPath "${name}.linux"
 
     & go build $LDFlags -o "$OutputPath" "$c8yBinary"
 
