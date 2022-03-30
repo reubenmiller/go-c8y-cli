@@ -8,10 +8,10 @@ release:
 before:
   hooks:
     - go mod tidy
-    - make generate_go_code
-    - make manpages
-    - make build_completions
-    - make checkout_addons
+    - task generate_go_code
+    - task manpages
+    - task build_completions
+    - task checkout_addons
 
 builds:
   - <<: &build_defaults

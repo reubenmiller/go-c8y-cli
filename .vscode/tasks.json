@@ -6,25 +6,7 @@
         {
             "label": "Build",
             "type": "shell",
-            "command": "make build",
-            "group": {
-                "kind": "build",
-                "isDefault": true
-            },
-            "presentation": {
-                "echo": true,
-                "reveal": "never",
-                "focus": false,
-                "panel": "dedicated",
-                "showReuseMessage": true,
-                "clear": true
-            },
-            "problemMatcher": []
-        },
-        {
-            "label": "Build (fast)",
-            "type": "shell",
-            "command": "make build_cli_fast",
+            "command": "task build",
             "group": {
                 "kind": "build",
                 "isDefault": true
