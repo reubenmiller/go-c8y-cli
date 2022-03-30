@@ -12,8 +12,8 @@ Param(
 )
 
 if ($All) {
-    goreleaser build --output "$OutputDir/" --skip-validate --rm-dist
+    goreleaser build --output "$OutputDir/" --skip-validate --rm-dist --snapshot
 } else {
     # Build for the current environment
-    goreleaser build --output "$OutputDir/c8y.linux" --skip-validate --rm-dist --single-target --id linux
+    goreleaser build --output "$OutputDir/c8y.linux" --skip-validate --rm-dist --snapshot --single-target --id linux
 }
