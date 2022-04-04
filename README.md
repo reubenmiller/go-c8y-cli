@@ -109,7 +109,7 @@ See the [documentation website](https://goc8ycli.netlify.app/) for instructions 
 The examples included in the API specification can be validated by running the follow make task.
 
 ```sh
-task test_cli
+task test-cli
 ```
 
 ### Run all tests
