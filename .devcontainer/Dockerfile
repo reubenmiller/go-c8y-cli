@@ -151,8 +151,8 @@ RUN sed -iE 's/plugins=(\(.*\))/plugins=(\1 c8y task)/' /home/$USERNAME/.zshrc \
 RUN  cd /tmp \
     && command -v task || go install github.com/go-task/task/v3/cmd/task@latest \
     && go install github.com/goreleaser/goreleaser@latest \
-    && curl -fL https://getcli.jfrog.io | sh \
-    && chmod a+x jfrog \
+    && curl -fL https://getcli.jfrog.io | sudo sh \
+    && sudo chmod a+x jfrog \
     && sudo mv jfrog /usr/local/bin/
 
 # Update this to "on" or "off" as appropriate
