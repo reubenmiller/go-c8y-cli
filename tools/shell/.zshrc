@@ -6,6 +6,7 @@ ZSH_THEME="robbyrussell"
 plugins=(
     git
     c8y
+    task
 )
 
 source $ZSH/oh-my-zsh.sh

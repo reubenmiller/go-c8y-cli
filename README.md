@@ -42,6 +42,9 @@ See the [documentation website](https://goc8ycli.netlify.app/) for instructions 
 
     ```sh
     task init_setup
+    
+    # reload your shell
+    zsh
     ```
 
 3. Add or edit a command specification (`.yaml` file) in `api/spec/yaml/`. The specifications are used to auto generate the go code

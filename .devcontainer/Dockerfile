@@ -136,8 +136,7 @@ RUN curl -sSfL https://raw.githubusercontent.com/robbyrussell/oh-my-zsh/master/t
 COPY tools/shell/.zshrc /home/$USERNAME/.zshrc
 COPY tools/shell/c8y.plugin.zsh /home/$USERNAME/.oh-my-zsh/custom/plugins/c8y/
 COPY tools/shell/c8y.plugin.fish /home/$USERNAME/
-RUN sed -iE 's/plugins=(\(.*\))/plugins=(\1 c8y task)/' /home/$USERNAME/.zshrc \
-    && echo "autoload -U compinit; compinit -i" >> /home/$USERNAME/.zshrc \
+RUN echo "autoload -U compinit; compinit -i" | sudo tee -a /home/$USERNAME/.zshrc \
     #
     # taskfile completion
     && git clone https://github.com/sawadashota/go-task-completions.git /home/$USERNAME/.oh-my-zsh/custom/plugins/task \
