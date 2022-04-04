@@ -82,6 +82,8 @@ tasks:
     desc: Run github pages locally
     cmds:
       - cd docs/go-c8y-cli && npm start
+    deps:
+      - build_gh_pages
 
   build_gh_pages:
     desc: build github pages
