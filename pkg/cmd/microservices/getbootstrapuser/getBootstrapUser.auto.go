@@ -33,7 +33,8 @@ func NewGetBootstrapUserCmd(f *cmdutil.Factory) *GetBootstrapUserCmd {
 	cmd := &cobra.Command{
 		Use:   "getBootstrapUser",
 		Short: "Get microservice bootstrap user",
-		Long: `Get the bootstrap user associated to a microservice. The bootstrap user is required when running a microservice locally (i.e. during development)
+		Long: `Get the bootstrap user associated to a microservice. The bootstrap user is required when running
+a microservice locally (i.e. during development)
 `,
 		Example: heredoc.Doc(`
 $ c8y microservices getBootstrapUser --id 12345

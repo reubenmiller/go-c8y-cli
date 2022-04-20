@@ -5,7 +5,8 @@ Function Get-MicroserviceBootstrapUser {
 Get microservice bootstrap user
 
 .DESCRIPTION
-Get the bootstrap user associated to a microservice. The bootstrap user is required when running a microservice locally (i.e. during development)
+Get the bootstrap user associated to a microservice. The bootstrap user is required when running
+a microservice locally (i.e. during development)
 
 
 .LINK

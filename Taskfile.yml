@@ -24,6 +24,7 @@ tasks:
   init_setup:
     desc: Initialize setup
     cmds:
+      - ./scripts/setup.sh
       - pwsh -File ./scripts/build-powershell/install.ps1
     deps:
       - install_c8y
@@ -108,7 +109,7 @@ tasks:
   update_spec:
     desc: Update json specifications
     cmds:
-      - pwsh -File scripts/generate-spec.ps1
+      - ./scripts/generate-spec.sh
     sources:
       - api/spec/yaml/*.yaml
     generates:
