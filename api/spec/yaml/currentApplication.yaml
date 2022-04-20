@@ -10,9 +10,8 @@ information:
 endpoints:
   - name: getCurrentApplication
     description: 'Get current application'
-    descriptionLong: >
-      Getting the current application only works when using bootstrap credentials from
-      an application (not user credentials)
+    descriptionLong: |
+      Getting the current application only works when using bootstrap credentials from an application (not user credentials)
     method: GET
     path: /application/currentApplication
     accept: application/vnd.com.nsn.cumulocity.application+json

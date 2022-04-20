@@ -362,7 +362,7 @@
     {
       "name": "newMicroserviceBinary",
       "description": "Create microservice binary",
-      "descriptionLong": "Create/upload a new microservice binary. For the applications of type 'MICROSERVICE' to be available for Cumulocity platform users, a binary zip file must be uploaded.\nFor the microservice application, the zip file must consist of    * cumulocity.json - file describing the deployment\n    * image.tar - executable docker image\n\nFor the web application, the zip file must include index.html in the root directory.\n",
+      "descriptionLong": "Create/upload a new microservice binary.\nFor the applications of type 'MICROSERVICE' to be available for Cumulocity platform users, a binary zip file must be uploaded.\n\nFor the microservice application, the zip file must consist of\n    * cumulocity.json - file describing the deployment\n    * image.tar - executable docker image\n\nFor the web application, the zip file must include index.html in the root directory.\n",
       "method": "POST",
       "path": "/application/applications/{id}/binaries",
       "accept": "application/vnd.com.nsn.cumulocity.managedObject+json",
@@ -414,7 +414,7 @@
     {
       "name": "getMicroserviceBootstrapUser",
       "description": "Get microservice bootstrap user",
-      "descriptionLong": "Get the bootstrap user associated to a microservice. The bootstrap user is required when running a microservice locally (i.e. during development)\n",
+      "descriptionLong": "Get the bootstrap user associated to a microservice. The bootstrap user is required when running\na microservice locally (i.e. during development)\n",
       "method": "GET",
       "path": "/application/applications/{id}/bootstrapUser",
       "accept": "application/vnd.com.nsn.cumulocity.bootstrapuser+json",

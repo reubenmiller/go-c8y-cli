@@ -8,7 +8,7 @@ information:
 endpoints:
   - name: getDeviceGroup
     description: Get device group
-    descriptionLong: >
+    descriptionLong: |
       Get a device group
     method: GET
     path: inventory/managedObjects/{id}
@@ -45,7 +45,7 @@ endpoints:
 
   - name: updateDeviceGroup
     description: Update device group
-    descriptionLong: >
+    descriptionLong: |
       Update properties of an existing device group, for example name or any other custom properties.
     method: PUT
     path: inventory/managedObjects/{id}
@@ -99,7 +99,7 @@ endpoints:
 
   - name: deleteDeviceGroup
     description: Delete device group
-    descriptionLong: >
+    descriptionLong: |
       Delete an existing device group, and optionally all of it's children
     method: DELETE
     path: inventory/managedObjects/{id}
@@ -139,7 +139,7 @@ endpoints:
 
   - name: createDeviceGroup
     description: 'Create device group'
-    descriptionLong: >
+    descriptionLong: |
       Create a new device group to logically group one or more devices
     method: POST
     path: inventory/managedObjects

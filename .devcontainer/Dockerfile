@@ -33,7 +33,8 @@ RUN /tmp/install/install-powershell.sh \
     #
     # Extra tooling
     && apt-get -y install make nodejs unzip lolcat boxes figlet randtype \
-    && npm install -g yamljs svg-term-cli \
+    && go install github.com/mikefarah/yq/v4@latest \
+    && npm install -g svg-term-cli \
     #
     # Build Go tools w/module support
     && mkdir -p /tmp/gotools \
