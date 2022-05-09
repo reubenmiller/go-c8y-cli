@@ -31,8 +31,13 @@ import (
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/tidwall/gjson"
 	"github.com/tidwall/pretty"
-	"moul.io/http2curl"
+	"moul.io/http2curl/v2"
 )
+
+// Check if method supports a body with the request
+func RequestSupportsBody(method string) bool {
+	return c8y.RequestSupportsBody(method)
+}
 
 type RequestHandler struct {
 	Console *console.Console
@@ -76,7 +81,7 @@ func (r *RequestHandler) ProcessRequestAndResponse(requests []c8y.RequestOptions
 	// enable return of would-be request
 	req.DryRunResponse = true
 
-	if !(req.Method == http.MethodPost || req.Method == http.MethodPut) {
+	if !RequestSupportsBody(req.Method) {
 		req.Body = nil
 	}
 
@@ -211,7 +216,7 @@ func (r *RequestHandler) PrintRequestDetails(w io.Writer, requestOptions *c8y.Re
 	isJSON := true
 
 	var err error
-	if req.Body != nil && (req.Method == http.MethodPost || req.Method == http.MethodPut || req.Method == http.MethodPatch) {
+	if req.Body != nil && RequestSupportsBody(req.Method) {
 		var buf bytes.Buffer
 		bodyCopy := io.TeeReader(req.Body, &buf)
 		req.Body = ioutil.NopCloser(&buf)
@@ -335,7 +340,7 @@ func tryUnescapeURL(v string) string {
 }
 
 func (r *RequestHandler) GetCurlCommands(req *http.Request) (shell string, pwsh string, err error) {
-	if !strings.Contains("POST PUT", req.Method) {
+	if !strings.Contains("POST PUT DELETE", req.Method) {
 		req.Body = nil
 	}
 	var command *http2curl.CurlCommand
