@@ -84,6 +84,9 @@
         # application
         "application" = "c8yfetcher.WithApplicationByNameFirstMatch(client, args, `"${prop}`", `"${queryParam}`"),"
 
+        # hostedapplication (web app)
+        "hostedapplication" = "c8yfetcher.WithHostedApplicationByNameFirstMatch(client, args, `"${prop}`", `"${queryParam}`"),"
+
         # applicationname
         "applicationname" = "flags.WithStringValue(`"${prop}`", `"${queryParam}`"),"
 

@@ -31,3 +31,56 @@ tests:
         stderr:
             contains:
               - could not read manifest file
+    
+    It reads the application name from a manifest file:
+        command: |
+          c8y microservices create --file manual/microservices/cumulocity.app.json --skipUpload -o json
+        exit-code: 0
+        stdout:
+            json:
+                name: balancer
+                key: balancer
+                type: "MICROSERVICE"
+                contextPath: balancer
+
+    It reads the application name from a manifest file using bash substituion:
+        command: |
+          bash -c "c8y microservices create --file <(printf '{\"name\":\"dummyapp-02\"}') --skipUpload -o json -c"
+        exit-code: 0
+        stdout:
+            json:
+                name: dummyapp-02
+                key: dummyapp-02
+                type: "MICROSERVICE"
+                contextPath: dummyapp-02
+
+    It creates a placeholder from a cumulocity.json file:
+      command: |
+        c8y microservices create --file manual/microservices/cumulocity1A.json
+        c8y microservices delete --id loader 2>&1 >/dev/null
+      stdout:
+        json:
+          name: loader
+          requiredRoles.0: ROLE_INVENTORY_READ
+          requiredRoles.1: ROLE_INVENTORY_ADMIN
+
+    It updates the required roles of an existing application from a cumulocity.json file:
+      command: |
+        c8y microservices create --file manual/microservices/cumulocity1B.json
+        c8y microservices delete --id loader 2>&1 >/dev/null
+      stdout:
+        json:
+          name: loader
+          requiredRoles.0: ROLE_INVENTORY_READ
+          requiredRoles.1: ROLE_INVENTORY_ADMIN
+          requiredRoles.2: ROLE_ALARM_READ
+
+    It can create a seconds application from a cumulocity.json by overriding a custom application name:
+      command: |
+        c8y microservices create --file manual/microservices/cumulocity1A.json --name loader-dev
+        c8y microservices delete --id loader-dev 2>&1 >/dev/null
+      stdout:
+        json:
+          name: loader-dev
+          requiredRoles.0: ROLE_INVENTORY_READ
+          requiredRoles.1: ROLE_INVENTORY_ADMIN

@@ -1,8 +1,7 @@
 // Code generated from specification version 1.0.0: DO NOT EDIT
-package listapplicationbinaries
+package revoketotpsecret
 
 import (
-	"fmt"
 	"io"
 	"net/http"
 
@@ -18,47 +17,51 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// ListApplicationBinariesCmd command
-type ListApplicationBinariesCmd struct {
+// RevokeTOTPSecretCmd command
+type RevokeTOTPSecretCmd struct {
 	*subcommand.SubCommand
 
 	factory *cmdutil.Factory
 }
 
-// NewListApplicationBinariesCmd creates a command to Get application binaries
-func NewListApplicationBinariesCmd(f *cmdutil.Factory) *ListApplicationBinariesCmd {
-	ccmd := &ListApplicationBinariesCmd{
+// NewRevokeTOTPSecretCmd creates a command to Revoke a user's TOTP (TFA) secret
+func NewRevokeTOTPSecretCmd(f *cmdutil.Factory) *RevokeTOTPSecretCmd {
+	ccmd := &RevokeTOTPSecretCmd{
 		factory: f,
 	}
 	cmd := &cobra.Command{
-		Use:   "listApplicationBinaries",
-		Short: "Get application binaries",
-		Long: `A list of all binaries related to the given application will be returned
+		Use:   "revokeTOTPSecret",
+		Short: "Revoke a user's TOTP (TFA) secret",
+		Long: `Revoke/delete a user's TOTP (TFA) secret to force them to setup TFA again.
+
+This is required when the user loses their TFA configuration, or it is compromised.
 `,
 		Example: heredoc.Doc(`
-$ c8y applications listApplicationBinaries --id 12345
-List all of the binaries related to a Hosted (web) application
+$ c8y users revokeTOTPSecret --id "myuser"
+Revoke a user's TOTP (TFA) secret
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
-			return nil
+			return f.DeleteModeEnabled()
 		},
 		RunE: ccmd.RunE,
 	}
 
 	cmd.SilenceUsage = true
 
-	cmd.Flags().String("id", "", "Application id (required) (accepts pipeline)")
+	cmd.Flags().String("tenant", "", "Tenant")
+	cmd.Flags().StringSlice("id", []string{""}, "User id (required) (accepts pipeline)")
 
 	completion.WithOptions(
 		cmd,
-		completion.WithHostedApplication("id", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
+		completion.WithTenantID("tenant", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
+		completion.WithUser("id", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
 	)
 
 	flags.WithOptions(
 		cmd,
+		flags.WithProcessingMode(),
 
 		flags.WithExtendedPipelineSupport("id", "id", true),
-		flags.WithCollectionProperty("attachments"),
 	)
 
 	// Required flags
@@ -69,7 +72,7 @@ List all of the binaries related to a Hosted (web) application
 }
 
 // RunE executes the command
-func (n *ListApplicationBinariesCmd) RunE(cmd *cobra.Command, args []string) error {
+func (n *RevokeTOTPSecretCmd) RunE(cmd *cobra.Command, args []string) error {
 	cfg, err := n.factory.Config()
 	if err != nil {
 		return err
@@ -94,11 +97,6 @@ func (n *ListApplicationBinariesCmd) RunE(cmd *cobra.Command, args []string) err
 	if err != nil {
 		return cmderrors.NewUserError(err)
 	}
-	commonOptions, err := cfg.GetOutputCommonOptions(cmd)
-	if err != nil {
-		return cmderrors.NewUserError(fmt.Sprintf("Failed to get common options. err=%s", err))
-	}
-	commonOptions.AddQueryParameters(query)
 
 	queryValue, err := query.GetQueryUnescape(true)
 
@@ -113,6 +111,7 @@ func (n *ListApplicationBinariesCmd) RunE(cmd *cobra.Command, args []string) err
 		headers,
 		inputIterators,
 		flags.WithCustomStringSlice(func() ([]string, error) { return cfg.GetHeader(), nil }, "header"),
+		flags.WithProcessingModeValue(),
 	)
 	if err != nil {
 		return cmderrors.NewUserError(err)
@@ -141,19 +140,20 @@ func (n *ListApplicationBinariesCmd) RunE(cmd *cobra.Command, args []string) err
 	}
 
 	// path parameters
-	path := flags.NewStringTemplate("/application/applications/{id}/binaries")
+	path := flags.NewStringTemplate("user/{tenant}/users/{id}/totpSecret/revoke")
 	err = flags.WithPathParameters(
 		cmd,
 		path,
 		inputIterators,
-		c8yfetcher.WithHostedApplicationByNameFirstMatch(client, args, "id", "id"),
+		flags.WithStringDefaultValue(client.TenantName, "tenant", "tenant"),
+		c8yfetcher.WithUserByNameFirstMatch(client, args, "id", "id"),
 	)
 	if err != nil {
 		return err
 	}
 
 	req := c8y.RequestOptions{
-		Method:       "GET",
+		Method:       "DELETE",
 		Path:         path.GetTemplate(),
 		Query:        queryValue,
 		Body:         body,

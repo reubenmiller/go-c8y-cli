@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/MakeNowJust/heredoc/v2"
+	"github.com/reubenmiller/go-c8y-cli/pkg/c8yfetcher"
 	"github.com/reubenmiller/go-c8y-cli/pkg/c8ywaiter"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmd/subcommand"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
@@ -35,30 +36,24 @@ func NewCmdWait(f *cmdutil.Factory) *CmdWait {
 		Short: "Wait for managed object",
 		Long:  `Wait for an managed object fragment by polling until a condition is met or a timeout is reached`,
 		Example: heredoc.Doc(`
-			$ c8y inventory wait --id 1234 --fragment "c8y_Mobile.iccd"
+			$ c8y inventory wait --id 1234 --fragments "c8y_Mobile.iccd"
 			# Wait for the managed object to have a non-null c8y_Mobile.iccd fragment
 
-			$ c8y inventory wait --id 1234 --fragment '!c8y_Mobile'
+			$ c8y inventory wait --id 1234 --fragments '!c8y_Mobile'
 			# Wait for the managed object to not have a c8y_Mobile fragment
 
-			$ c8y inventory wait --id 1234 --fragment 'name=^\d+-\w+$'
-			# Wait for the managed object name fragment to match the regular expression '^\d+-\w+'
+			$ c8y inventory wait --id 1234 --fragments 'name=^\d+-\w+$'
+			# Wait for the managed object name fragment to match the regular expression '^\d+-\w+$'
 
-			$ c8y inventory wait --id 1234 --fragment 'name=^$' --fragment c8y_IsDevice
-			# Wait for the managed object name fragment to match the regular expression '^\d+-\w+'
-
-			$ c8y inventory wait --id 1234 --duration 1m --interval 10s
-			# Wait for the operation to be set to SUCCESSFUL and give up after 1 minute
-
-			$ c8y inventory list --device 1111 | c8y operations wait --status "FAILED" --status "SUCCESSFUL"
-			# Wait for operation to be set to either FAILED or SUCCESSFUL
+			$ c8y inventory wait --id 1234 --fragments 'name=^\d+$' --fragments c8y_IsDevice
+			# Wait for the managed object name fragment to match the regular expression '^\d+$' and have the c8y_IsDevice fragment
 		`),
 		RunE: ccmd.RunE,
 	}
 
 	cmd.SilenceUsage = true
 
-	cmd.Flags().String("id", "", "Inventory id (required) (accepts pipeline)")
+	cmd.Flags().StringSlice("id", []string{""}, "Inventory id (required) (accepts pipeline)")
 	cmd.Flags().StringSliceVar(&ccmd.ExpectedFragments, "fragments", nil, "Fragments to wait for. If multiple values are given, then it will be applied as an OR operation")
 	cmd.Flags().String("duration", "30s", "Timeout duration. i.e. 30s or 1m (1 minute)")
 	cmd.Flags().String("interval", "5s", "Interval to check on the status, i.e. 10s or 1min")
@@ -107,7 +102,7 @@ func (n *CmdWait) RunE(cmd *cobra.Command, args []string) error {
 		cmd,
 		path,
 		inputIterators,
-		flags.WithStringValue("id", "id"),
+		c8yfetcher.WithIDSlice(args, "id", "id"),
 	)
 	if err != nil {
 		return err

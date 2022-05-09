@@ -1,20 +1,11 @@
 tests:
-    It fails the negated assertion when using dry mode (strict mode):
-        command:  c8y inventory assert fragments --id 1 --fragments name --strict --dry
+    It fails the assertion when using dry mode (strict mode):
+        command:  c8y devices assert fragments --device 1 --fragments name --strict --dry
         exit-code: 112
-
-    It returns an error if the fragment value does not match:
-        command: >
-            manual/inventory/assert/fragments/001_assert.sh
-        exit-code: 112
-        stderr:
-            contains:
-                - 'wanted: [name=example01]'
-                - 'got: [name=device01]'
 
     It accepts multiple ids using comma separated values:
         command: |
-            c8y inventory assert fragments --id 1,2 --fragments name --strict --dry --dryFormat json \
+            c8y devices assert fragments --device 1,2 --fragments name --strict --dry --dryFormat json \
             | c8y util show --select path
         exit-code: 0
         stderr:

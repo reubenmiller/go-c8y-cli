@@ -41,7 +41,7 @@ $ c8y inventory list --device 1111 | c8y operations fragments --status "FAILED" 
       --duration string     Timeout duration. i.e. 30s or 1m (1 minute) (default "30s")
       --fragments strings   Fragments to fragments for. If multiple values are given, then it will be applied as an OR operation
   -h, --help                help for fragments
-      --id string           Inventory id (required) (accepts pipeline)
+      --id strings          Inventory id (required) (accepts pipeline)
       --interval string     Interval to check on the status, i.e. 10s or 1min (default "5s")
       --retries int         Number of retries before giving up per id
       --strict              Strict mode, fail if no match is found

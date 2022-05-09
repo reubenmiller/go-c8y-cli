@@ -425,6 +425,42 @@ endpoints:
         required: false
         description: 'New user password. Min: 6, max: 32 characters. Only Latin1 chars allowed'
 
+  - name: revokeUserTOTPSecret
+    description: Revoke a user's TOTP (TFA) secret
+    descriptionLong: |
+      Revoke/delete a user's TOTP (TFA) secret to force them to setup TFA again.
+
+      This is required when the user loses their TFA configuration, or it is compromised.
+    method: DELETE
+    path: user/{tenant}/users/{id}/totpSecret/revoke
+    accept: ''
+    alias:
+        go: revokeTOTPSecret
+        powershell: Remove-UserTOTPSecret
+    examples:
+      powershell:
+        - description: Revoke a user's TOTP (TFA) secret
+          # Skip test as it requires TFA to be configured before it can be deleted
+          skipTest: true
+          beforeEach:
+            - $User = PSc8y\New-TestUser
+          command: Remove-UserTFA -Id $User.id
+      go:
+        - description: Revoke a user's TOTP (TFA) secret
+          command: c8y users revokeTOTPSecret --id "myuser"
+    pathParameters:
+      - name: tenant
+        type: tenant
+        required: false
+        position: 99
+        description: Tenant
+
+      - name: id
+        type: '[]user'
+        required: true
+        pipeline: true
+        description: User id
+
   #
   # Groups References
   # https://cumulocity.com/guides/reference/users/#group-reference-collection

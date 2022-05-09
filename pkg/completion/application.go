@@ -68,6 +68,16 @@ func WithHostedApplication(flagName string, clientFunc func() (*c8y.Client, erro
 				if !strings.EqualFold(item.Type, "HOSTED") {
 					continue
 				}
+
+				// Ignore if not hosted in the current application
+				if client.TenantName != "" {
+					if item.Owner != nil && item.Owner.Tenant != nil && item.Owner.Tenant.ID != "" {
+						if item.Owner.Tenant.ID != client.TenantName {
+							continue
+						}
+					}
+				}
+
 				if toComplete == "" || MatchString(pattern, item.Name) || MatchString(pattern, item.ID) {
 					values = append(values, fmt.Sprintf("%s\t%s | id: %s", item.Name, item.Type, item.ID))
 				}

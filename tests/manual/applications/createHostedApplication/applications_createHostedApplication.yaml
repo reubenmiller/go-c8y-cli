@@ -1,0 +1,20 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/reubenmiller/commander/feat/handle-nested-files/schema.json
+config:
+  env:
+    C8Y_SETTINGS_DEFAULTS_DRY: true
+    C8Y_SETTINGS_DEFAULTS_OUTPUT: json
+
+tests:
+    Create hosted (web) application overriding an existing application:
+        command: |
+          c8y applications createHostedApplication --name devicemanagement --dry
+        exit-code: 0
+        stdout:
+            json:
+                method: POST
+                path: /application/applications
+                body.name: devicemanagement
+                body.contextPath: devicemanagement
+                body.key: devicemanagement-application-key
+                body.type: HOSTED
+                body.resourcesUrl: /

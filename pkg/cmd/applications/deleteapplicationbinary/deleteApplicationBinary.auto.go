@@ -52,7 +52,7 @@ Remove an application binary related to a Hosted (web) application
 
 	completion.WithOptions(
 		cmd,
-		completion.WithApplication("application", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
+		completion.WithHostedApplication("application", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
 	)
 
 	flags.WithOptions(
@@ -144,7 +144,7 @@ func (n *DeleteApplicationBinaryCmd) RunE(cmd *cobra.Command, args []string) err
 		cmd,
 		path,
 		inputIterators,
-		c8yfetcher.WithApplicationByNameFirstMatch(client, args, "application", "application"),
+		c8yfetcher.WithHostedApplicationByNameFirstMatch(client, args, "application", "application"),
 		c8yfetcher.WithIDSlice(args, "binaryId", "binaryId"),
 	)
 	if err != nil {
