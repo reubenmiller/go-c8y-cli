@@ -23,8 +23,9 @@ Get a list of the child additions of an existing managed object
 ### Options
 
 ```
-  -h, --help         help for list
-      --id strings   Managed object id. (required) (accepts pipeline)
+  -h, --help           help for list
+      --id strings     Managed object id. (required) (accepts pipeline)
+      --withChildren   Determines if children with ID and name should be returned when fetching the managed object. Set it to false to improve query performance.
 ```
 
 ### Options inherited from parent commands

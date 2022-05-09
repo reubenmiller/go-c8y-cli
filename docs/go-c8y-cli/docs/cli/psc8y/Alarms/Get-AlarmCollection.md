@@ -22,11 +22,15 @@ Get-AlarmCollection
 	[[-DateFrom] <String>]
 	[[-DateTo] <String>]
 	[[-Type] <String>]
-	[[-Status] <String>]
+	[[-Status] <String[]>]
 	[[-Severity] <String>]
 	[-Resolved]
 	[-WithSourceAssets]
 	[-WithSourceDevices]
+	[[-CreatedFrom] <String>]
+	[[-CreatedTo] <String>]
+	[[-LastUpdatedFrom] <String>]
+	[[-LastUpdatedTo] <String>]
 	[-PageSize <Int32>]
 	[-WithTotalPages]
 	[-CurrentPage <Int32>]
@@ -168,7 +172,7 @@ Accept wildcard characters: False
 Comma separated alarm statuses, for example ACTIVE,CLEARED.
 
 ```yaml
-Type: String
+Type: String[]
 Parameter Sets: (All)
 Aliases:
 
@@ -237,6 +241,70 @@ Aliases:
 Required: False
 Position: Named
 Default value: False
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -CreatedFrom
+Start date or date and time of the alarm creation.
+Version \>= 10.11
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 7
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -CreatedTo
+End date or date and time of the alarm creation.
+Version \>= 10.11
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 8
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -LastUpdatedFrom
+Start date or date and time of the last update made.
+Version \>= 10.11
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 9
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -LastUpdatedTo
+End date or date and time of the last update made.
+Version \>= 10.11
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 10
+Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
 ```

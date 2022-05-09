@@ -43,6 +43,16 @@ Remove events from a device
         [string]
         $FragmentType,
 
+        # Start date or date and time of the event's creation (set by the platform during creation).
+        [Parameter()]
+        [string]
+        $CreatedFrom,
+
+        # End date or date and time of the event's creation (set by the platform during creation).
+        [Parameter()]
+        [string]
+        $CreatedTo,
+
         # Start date or date and time of event occurrence.
         [Parameter()]
         [string]

@@ -6,7 +6,10 @@ Delete application
 
 ### Synopsis
 
-The application can only be removed when its availability is PRIVATE or in other case when it has no subscriptions.
+The application can only be removed when its availability is PRIVATE or in other case when it has no subscriptions
+
+Delete an application (by a given ID). This method is not supported by microservice applications.
+
 
 ```
 c8y applications delete [flags]
@@ -20,6 +23,9 @@ Delete an application by id
 
 $ c8y applications delete --id my-example-app
 Delete an application by name
+
+$ c8y applications delete --id 12345 --unsubscribeAll
+Unsubscribe and application then delete it
         
 ```
 
@@ -29,6 +35,7 @@ Delete an application by name
   -h, --help                    help for delete
       --id string               Application id (required) (accepts pipeline)
       --processingMode string   Cumulocity processing mode
+      --unsubscribeAll          Force deletion by unsubscribing all tenants from the application first and then deleting the application itself.
 ```
 
 ### Options inherited from parent commands

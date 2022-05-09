@@ -3,7 +3,7 @@ category: Devices
 external help file: PSc8y-help.xml
 id: Set-DeviceRequiredAvailability
 Module Name: PSc8y
-online version: https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/devices_setRequiredAvailability
+online version: https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/devices_availability_set
 schema: 2.0.0
 slug: /docs/cli/psc8y/Devices/set-devicerequiredavailability
 title: Set-DeviceRequiredAvailability
@@ -18,7 +18,7 @@ Set required availability
 
 ```
 Set-DeviceRequiredAvailability
-	[-Device] <Object[]>
+	[-Id] <Object[]>
 	[-Interval] <Int64>
 	[-Data <Object>]
 	[-NoAccept]
@@ -83,7 +83,7 @@ Devices that do not contain 'c8y_RequiredAvailability' are not monitored.
 
 ### EXAMPLE 1
 ```
-Set-DeviceRequiredAvailability -Device $device.id -Interval 10
+Set-DeviceRequiredAvailability -Id $device.id -Interval 10
 ```
 
 Set the required availability of a device by name to 10 minutes
@@ -97,7 +97,7 @@ Set the required availability of a device (using pipeline)
 
 ## PARAMETERS
 
-### -Device
+### -Id
 Device ID (required)
 
 ```yaml
@@ -872,5 +872,5 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 
 ## RELATED LINKS
 
-[https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/devices_setRequiredAvailability](https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/devices_setRequiredAvailability)
+[https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/devices_availability_set](https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/devices_availability_set)
 

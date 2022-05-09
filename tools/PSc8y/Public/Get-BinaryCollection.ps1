@@ -23,7 +23,41 @@ Get a list of binaries
     [Alias()]
     [OutputType([object])]
     Param(
+        # The managed object IDs to search for.
+        [Parameter()]
+        [string[]]
+        $Ids,
 
+        # The type of managed object to search for.
+        [Parameter(ValueFromPipeline=$true,
+                   ValueFromPipelineByPropertyName=$true)]
+        [object[]]
+        $Type,
+
+        # Username of the owner of the managed objects.
+        [Parameter()]
+        [string]
+        $Owner,
+
+        # Search for managed objects where any property value is equal to the given one. Only string values are supported.
+        [Parameter()]
+        [string]
+        $Text,
+
+        # Search for a specific child addition and list all the groups to which it belongs.
+        [Parameter()]
+        [string]
+        $ChildAdditionId,
+
+        # Search for a specific child asset and list all the groups to which it belongs.
+        [Parameter()]
+        [string]
+        $ChildAssetId,
+
+        # Search for a specific child device and list all the groups to which it belongs.
+        [Parameter()]
+        [object[]]
+        $ChildDeviceId
     )
     DynamicParam {
         Get-ClientCommonParameters -Type "Get", "Collection"
@@ -48,12 +82,17 @@ Get a list of binaries
     Process {
 
         if ($ClientOptions.ConvertToPS) {
-            c8y binaries list $c8yargs `
+            $Type `
+            | Group-ClientRequests `
+            | c8y binaries list $c8yargs `
             | ConvertFrom-ClientOutput @TypeOptions
         }
         else {
-            c8y binaries list $c8yargs
+            $Type `
+            | Group-ClientRequests `
+            | c8y binaries list $c8yargs
         }
+        
     }
 
     End {}

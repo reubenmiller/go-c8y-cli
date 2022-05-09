@@ -30,6 +30,14 @@
           {
             "description": "Get applications",
             "command": "c8y applications list --pageSize 100"
+          },
+          {
+            "description": "Get an application by name",
+            "command": "c8y applications list --name cockpit"
+          },
+          {
+            "description": "Check if a user has access to the cockpit application",
+            "command": "c8y applications list --name cockpit --user myuser"
           }
         ]
       },
@@ -45,6 +53,31 @@
             "MICROSERVICE"
           ],
           "description": "Application type"
+        },
+        {
+          "name": "name",
+          "type": "applicationname",
+          "description": "The name of the application."
+        },
+        {
+          "name": "owner",
+          "type": "tenantname",
+          "description": "The ID of the tenant that owns the applications."
+        },
+        {
+          "name": "providedFor",
+          "type": "tenantname",
+          "description": "The ID of a tenant that is subscribed to the applications but doesn't own them."
+        },
+        {
+          "name": "subscriber",
+          "type": "tenantname",
+          "description": "The ID of a tenant that is subscribed to the applications."
+        },
+        {
+          "name": "user",
+          "type": "[]user",
+          "description": "The ID of a user that has access to the applications."
         }
       ]
     },
@@ -260,7 +293,7 @@
     {
       "name": "deleteApplication",
       "description": "Delete application",
-      "descriptionLong": "The application can only be removed when its availability is PRIVATE or in other case when it has no subscriptions.",
+      "descriptionLong": "The application can only be removed when its availability is PRIVATE or in other case when it has no subscriptions\n\nDelete an application (by a given ID). This method is not supported by microservice applications.\n",
       "method": "DELETE",
       "path": "/application/applications/{id}",
       "alias": {
@@ -297,6 +330,10 @@
                 "path": "r//application/applications/\\d+$"
               }
             }
+          },
+          {
+            "description": "Unsubscribe and application then delete it",
+            "command": "c8y applications delete --id 12345 --unsubscribeAll"
           }
         ]
       },
@@ -307,6 +344,14 @@
           "pipeline": true,
           "required": true,
           "description": "Application id"
+        }
+      ],
+      "queryParameters": [
+        {
+          "name": "unsubscribeAll",
+          "property": "force",
+          "type": "boolean",
+          "description": "Force deletion by unsubscribing all tenants from the application first and then deleting the application itself."
         }
       ]
     },
@@ -516,7 +561,7 @@
       "pathParameters": [
         {
           "name": "id",
-          "type": "application",
+          "type": "hostedapplication",
           "pipeline": true,
           "required": true,
           "description": "Application id"
@@ -571,7 +616,7 @@
       "pathParameters": [
         {
           "name": "application",
-          "type": "application",
+          "type": "hostedapplication",
           "pipeline": false,
           "required": true,
           "description": "Application id"

@@ -44,7 +44,7 @@ $ echo 1 | c8y inventory assert exists --strict
 ```
       --duration string   Timeout duration. i.e. 30s or 1m (1 minute) (default "30s")
   -h, --help              help for exists
-      --id string         Inventory id (required) (accepts pipeline)
+      --id strings        Inventory id (required) (accepts pipeline)
       --interval string   Interval to check on the status, i.e. 10s or 1min (default "5s")
       --not               Negate the match
       --retries int       Number of retries before giving up per id

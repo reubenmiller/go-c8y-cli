@@ -7,3 +7,11 @@ tests:
                 body.firstName: Simon
                 method: PUT
                 path: /user/$C8Y_TENANT/users/myuser
+    users_update_Update the email field in each user to match the id (if the id includes the @ sign):
+        command: '$TEST_SHELL -c ''c8y users list --filter "id like *@*" | c8y users update --template "{email: input.value.id}"'''
+        exit-code: 0
+        skip: true
+        stdout:
+            json:
+                method: PUT
+                path: /user/$C8Y_TENANT/users/{id}

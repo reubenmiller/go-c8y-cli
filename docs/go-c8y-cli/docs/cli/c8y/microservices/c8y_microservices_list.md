@@ -18,14 +18,28 @@ c8y microservices list [flags]
 ```
 $ c8y microservices list --pageSize 100
 Get microservices
+
+$ c8y microservices list --name cockpit
+Get a microservice by name
+
+$ c8y microservices list --name device-simulator --user myuser
+Check if a user has access to the device-simulator microservice
+
+$ c8y microservices list --owner t12345
+List all microservices owned by specific tenant
         
 ```
 
 ### Options
 
 ```
-  -h, --help          help for list
-      --type string   Application type (default "MICROSERVICE")
+  -h, --help                 help for list
+      --name string          The name of the application.
+      --owner string         The ID of the tenant that owns the applications.
+      --providedFor string   The ID of a tenant that is subscribed to the applications but doesn't own them.
+      --subscriber string    The ID of a tenant that is subscribed to the applications.
+      --type string          Application type (default "MICROSERVICE")
+      --user strings         The ID of a user that has access to the applications. (accepts pipeline)
 ```
 
 ### Options inherited from parent commands

@@ -29,9 +29,6 @@ Get a list of users
       --owner string        exact username
       --tenant string       Tenant
       --username string     prefix or full username
-      --withApps            Include applications related to the user
-      --withGroups          Include group information
-      --withRoles           Include role information
       --withSubusersCount   if set to 'true', then each of returned users will contain additional field 'subusersCount' - number of direct subusers (users with corresponding 'owner').
 ```
 

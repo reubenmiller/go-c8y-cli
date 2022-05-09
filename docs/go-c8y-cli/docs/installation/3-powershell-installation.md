@@ -6,7 +6,7 @@ title: PowerShell
 1. Clone the addons repository containing the install script, views and some example templates.
 
     ```sh
-    git clone https://github.com/reubenmiller/go-c8y-cli-addons.git $HOME/.go-c8y-cli
+    git clone https://github.com/reubenmiller/go-c8y-cli-addons.git "$HOME/.go-c8y-cli"
     ```
 
     :::info
@@ -61,6 +61,19 @@ title: PowerShell
     :::
 
 3. Now go to the [Getting started](/docs/gettingstarted/) section for instructions how to use it
+
+
+### Updating c8y
+
+If you installed the native c8y binary for powershell using the instructions above, then you can update to the latest version by running:
+
+```bash
+update-c8y
+```
+
+:::tip
+The `update-c8y` function is included in the addons file, `$HOME/.go-c8y-cli/shell/c8y.plugin.ps1`, which should have been added to your `$PROFILE` file during the installation.
+:::
 
 ## Alternative installation methods
 

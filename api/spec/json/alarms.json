@@ -48,6 +48,10 @@
           {
             "description": "Get collection of active alarms which occurred in the last 10 minutes",
             "command": "c8y alarms list --dateFrom \"-10m\" --status ACTIVE"
+          },
+          {
+            "description": "Get collection of active and acknowledged alarms in the last 1d",
+            "command": "c8y alarms list --dateFrom \"-1d\" --status ACTIVE --status ACKNOWLEDGED"
           }
         ]
       },
@@ -84,7 +88,7 @@
         },
         {
           "name": "status",
-          "type": "string",
+          "type": "[]stringcsv",
           "description": "Comma separated alarm statuses, for example ACTIVE,CLEARED.",
           "validationSet": [
             "ACTIVE",
@@ -117,6 +121,26 @@
           "name": "withSourceDevices",
           "type": "boolean",
           "description": "When set to true also alarms for related source devices will be removed. When this parameter is provided also source must be defined."
+        },
+        {
+          "name": "createdFrom",
+          "type": "datetime",
+          "description": "Start date or date and time of the alarm creation. Version >= 10.11"
+        },
+        {
+          "name": "createdTo",
+          "type": "datetime",
+          "description": "End date or date and time of the alarm creation. Version >= 10.11"
+        },
+        {
+          "name": "lastUpdatedFrom",
+          "type": "datetime",
+          "description": "Start date or date and time of the last update made. Version >= 10.11"
+        },
+        {
+          "name": "lastUpdatedTo",
+          "type": "datetime",
+          "description": "End date or date and time of the last update made. Version >= 10.11"
         }
       ]
     },
@@ -293,6 +317,16 @@
           ]
         },
         {
+          "name": "createdFrom",
+          "type": "datetime",
+          "description": "Start date or date and time of the alarm creation. Version >= 10.11"
+        },
+        {
+          "name": "createdTo",
+          "type": "datetime",
+          "description": "End date or date and time of the alarm creation. Version >= 10.11"
+        },
+        {
           "name": "data",
           "type": "json",
           "description": "Additional properties of the alarm."
@@ -445,7 +479,7 @@
           "name": "status",
           "type": "string",
           "required": false,
-          "description": "Comma separated alarm statuses, for example ACTIVE,CLEARED.",
+          "description": "The status of the alarm. If not specified, a new alarm will be created as ACTIVE.",
           "validationSet": [
             "ACTIVE",
             "ACKNOWLEDGED",
@@ -560,13 +594,23 @@
           "description": "End date or date and time of alarm occurrence."
         },
         {
+          "name": "createdFrom",
+          "type": "datetime",
+          "description": "Start date or date and time of the alarm creation. Version >= 10.11"
+        },
+        {
+          "name": "createdTo",
+          "type": "datetime",
+          "description": "End date or date and time of the alarm creation. Version >= 10.11"
+        },
+        {
           "name": "type",
           "type": "string",
           "description": "Alarm type."
         },
         {
           "name": "status",
-          "type": "string",
+          "type": "[]stringcsv",
           "description": "Comma separated alarm statuses, for example ACTIVE,CLEARED.",
           "validationSet": [
             "ACTIVE",
@@ -594,6 +638,137 @@
           "name": "withSourceAssets",
           "type": "boolean",
           "description": "When set to true also alarms for related source assets will be removed. When this parameter is provided also source must be defined."
+        },
+        {
+          "name": "withSourceDevices",
+          "type": "boolean",
+          "description": "When set to true also alarms for related source devices will be removed. When this parameter is provided also source must be defined."
+        }
+      ]
+    },
+    {
+      "name": "getAlarmCount",
+      "method": "GET",
+      "description": "Retrieve the total number of alarms",
+      "descriptionLong": "Count the total number of active alarms on your tenant",
+      "examples": {
+        "powershell": [
+          {
+            "description": "Get number of active alarms with the severity set to MAJOR",
+            "command": "Get-AlarmCount -Severity MAJOR"
+          },
+          {
+            "description": "Get number of active alarms which occurred in the last 10 minutes",
+            "beforeEach": [
+              "$Device = New-TestDevice",
+              "$Alarm = PSc8y\\New-Alarm -Device $Device.id -Type c8y_TestAlarm -Time \"-0s\" -Text \"Test alarm\" -Severity MAJOR"
+            ],
+            "command": "Get-AlarmCount -DateFrom \"-10m\" -Status ACTIVE",
+            "afterEach": [
+              "PSc8y\\Remove-ManagedObject -Id $Device.id"
+            ]
+          },
+          {
+            "description": "Get number of active alarms which occurred in the last 10 minutes on a device",
+            "beforeEach": [
+              "$Device = New-TestDevice",
+              "$Alarm = PSc8y\\New-Alarm -Device $Device.id -Type c8y_TestAlarm -Time \"-0s\" -Text \"Test alarm\" -Severity MAJOR"
+            ],
+            "command": "Get-AlarmCount -DateFrom \"-10m\" -Status ACTIVE -Device $Device.name",
+            "afterEach": [
+              "PSc8y\\Remove-ManagedObject -Id $Device.id"
+            ]
+          },
+          {
+            "description": "Get number of alarms from a list of devices using pipeline",
+            "beforeEach": [
+              "$Device = New-TestDevice",
+              "$Alarm = PSc8y\\New-Alarm -Device $Device.id -Type c8y_TestAlarm -Time \"-0s\" -Text \"Test alarm\" -Severity MAJOR"
+            ],
+            "command": "Get-Device -Id $Device.id | Get-AlarmCount -DateFrom \"-10m\"",
+            "afterEach": [
+              "PSc8y\\Remove-ManagedObject -Id $Device.id"
+            ]
+          }
+        ],
+        "go": [
+          {
+            "description": "Get number of active alarms with the severity set to MAJOR",
+            "command": "c8y alarms count --severity MAJOR"
+          },
+          {
+            "description": "Get number of active alarms which occurred in the last 10 minutes",
+            "command": "c8y alarms count --dateFrom \"-10m\" --status ACTIVE"
+          },
+          {
+            "description": "Get number of active alarms which occurred in the last 10 minutes on a device",
+            "command": "c8y alarms count --dateFrom \"-10m\" --status ACTIVE --device 12345"
+          },
+          {
+            "description": "Get number of alarms from a list of devices using pipeline",
+            "command": "c8y devices list --type linuxA | c8y alarms count --dateFrom \"-10m\""
+          }
+        ]
+      },
+      "path": "alarm/alarms/count",
+      "accept": "text/plain",
+      "alias": {
+        "go": "count",
+        "powershell": "Get-AlarmCount"
+      },
+      "queryParameters": [
+        {
+          "name": "device",
+          "type": "[]device",
+          "pipeline": true,
+          "property": "source",
+          "description": "Source device id."
+        },
+        {
+          "name": "dateFrom",
+          "type": "datetime",
+          "description": "Start date or date and time of alarm occurrence."
+        },
+        {
+          "name": "dateTo",
+          "type": "datetime",
+          "description": "End date or date and time of alarm occurrence."
+        },
+        {
+          "name": "type",
+          "type": "string",
+          "description": "Alarm type."
+        },
+        {
+          "name": "status",
+          "type": "[]stringcsv",
+          "description": "Comma separated alarm statuses, for example ACTIVE,CLEARED.",
+          "validationSet": [
+            "ACTIVE",
+            "ACKNOWLEDGED",
+            "CLEARED"
+          ]
+        },
+        {
+          "name": "severity",
+          "type": "string",
+          "description": "Alarm severity, for example CRITICAL, MAJOR, MINOR or WARNING.",
+          "validationSet": [
+            "CRITICAL",
+            "MAJOR",
+            "MINOR",
+            "WARNING"
+          ]
+        },
+        {
+          "name": "resolved",
+          "type": "boolean",
+          "description": "When set to true only resolved alarms will be removed (the one with status CLEARED), false means alarms with status ACTIVE or ACKNOWLEDGED."
+        },
+        {
+          "name": "withSourceAssets",
+          "type": "boolean",
+          "description": "When set to true also alarms for related source devices will be included in the request. When this parameter is provided a source must be specified."
         },
         {
           "name": "withSourceDevices",

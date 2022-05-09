@@ -15,7 +15,7 @@ func ResolvePaths(sourceDirs []string, pattern string, extensions []string, igno
 
 	for _, sourceDir := range sourceDirs {
 
-		if stat, err := os.Stat(sourceDir); os.IsNotExist(err) || !stat.IsDir() {
+		if stat, err := os.Stat(sourceDir); err != nil || !stat.IsDir() {
 			continue
 		}
 

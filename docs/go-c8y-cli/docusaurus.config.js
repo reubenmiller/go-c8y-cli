@@ -6,7 +6,6 @@ const isDev = process.env.NODE_ENV === 'development';
 const isDeployPreview =
   process.env.NETLIFY && process.env.CONTEXT === 'deploy-preview';
 
-const isBootstrapPreset = process.env.DOCUSAURUS_PRESET === 'bootstrap';
 
 // Special deployment for staging locales until they get enough translations
 // https://app.netlify.com/sites/docusaurus-i18n-staging
@@ -144,18 +143,19 @@ const baseUrl = `${process.env.BASE_URL || '/'}`;
       additionalLanguages: ['powershell', 'bash', 'markdown'],
     },
     algolia: {
-      apiKey: '0003d78113943b9fab3bc9b8319cee82',
+      apiKey: 'f4645553f294c1bacaef04baf61633f0',
       indexName: 'goc8ycli',
       contextualSearch: false,
       searchParameters: {
         facetFilters: [],
         // facetFilters: ["type:lvl1","type:lvl0"],
       },
+      appId: 'SKDHZQ8T6H',
     },
-    googleAnalytics: {
-      trackingID: 'UA-155263011-1',
-      anonymizeIP: true,
-    },
+    // googleAnalytics: {
+    //   trackingID: 'UA-155263011-1',
+    //   anonymizeIP: true,
+    // },
     announcementBar: {
       id: 'v2-major-release',
       content:
@@ -216,15 +216,17 @@ const baseUrl = `${process.env.BASE_URL || '/'}`;
   ],
   presets: [
     [
-      isBootstrapPreset
-        ? '@docusaurus/preset-bootstrap'
-        : '@docusaurus/preset-classic',
+      '@docusaurus/preset-classic',
       {
         debug: true,
         docs: {
           sidebarPath: require.resolve('./sidebars.js'),
           editUrl:
             'https://github.com/reubenmiller/go-c8y-cli/edit/master/docs/go-c8y-cli/',
+        },
+        googleAnalytics: {
+          trackingID: 'UA-155263011-1',
+          anonymizeIP: true,
         },
         blog: {
           showReadingTime: true,

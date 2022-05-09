@@ -21,9 +21,16 @@ Get-ManagedObjectCollection
 	[[-Ids] <String[]>]
 	[[-Type] <Object[]>]
 	[[-FragmentType] <String>]
+	[[-Owner] <String>]
 	[[-Text] <String>]
-	[-WithParents]
+	[-OnlyRoots]
+	[[-ChildAdditionId] <String>]
+	[[-ChildAssetId] <String>]
+	[[-ChildDeviceId] <Object[]>]
 	[-SkipChildrenNames]
+	[-WithParents]
+	[-WithChildren]
+	[-WithGroups]
 	[-PageSize <Int32>]
 	[-WithTotalPages]
 	[-CurrentPage <Int32>]
@@ -139,6 +146,21 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
+### -Owner
+List of managed objects that are owned by the given username.
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 4
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
 ### -Text
 managed objects containing a text value starting with the given text (placeholder {text}).
 Text value is any alphanumeric string starting with a latin letter (A-Z or a-z).
@@ -149,8 +171,85 @@ Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: 4
+Position: 5
 Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -OnlyRoots
+When set to `true` it returns managed objects which don't have any parent.
+If the current user doesn't have access to the parent, this is also root for the user
+
+```yaml
+Type: SwitchParameter
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: False
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -ChildAdditionId
+Search for a specific child addition and list all the groups to which it belongs.
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 6
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -ChildAssetId
+Search for a specific child asset and list all the groups to which it belongs.
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 7
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -ChildDeviceId
+Search for a specific child device and list all the groups to which it belongs.
+
+```yaml
+Type: Object[]
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 8
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -SkipChildrenNames
+Don't include the child devices names in the response.
+This can improve the API response because the names don't need to be retrieved
+
+```yaml
+Type: SwitchParameter
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: False
 Accept pipeline input: False
 Accept wildcard characters: False
 ```
@@ -170,9 +269,25 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -SkipChildrenNames
-Don't include the child devices names in the response.
-This can improve the API response because the names don't need to be retrieved
+### -WithChildren
+Determines if children with ID and name should be returned when fetching the managed object.
+Set it to false to improve query performance.
+
+```yaml
+Type: SwitchParameter
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: False
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -WithGroups
+When set to true it returns additional information about the groups to which the searched managed object belongs.
+This results in setting the assetParents property with additional information about the groups.
 
 ```yaml
 Type: SwitchParameter

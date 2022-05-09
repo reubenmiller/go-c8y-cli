@@ -59,7 +59,10 @@ The following shows an example of a view definition.
     "definitions": [
         {
             "name": "device/agent",
-            "priority": 500,
+            "priority": 400,
+            "contentType": "",
+            "self": "",
+            "type": "",
             "fragments": ["c8y_IsDevice"],
             "columns": [
                 "id",
@@ -84,17 +87,18 @@ The first response item is used in the view detection. If the response contains 
 
 A view definition supports matching by the following criteria:
 
-* `Content-Type` value from the response header (supports regex)
-* `.self` value of first entry (supports regex)
-* `.type` value of first entry (supports regex)
-* List of fragments (all fragments must exist)
+
+* `contentType` - `Content-Type` value from the response header (supports regex)
+* `self` - `.self` value of first entry (supports regex)
+* `type` - `.type` value of first entry (supports regex)
+* `fragments` - List of fragments (all fragments must exist)
 
 :::note
 The matching criteria can be combined to provide more precise matching.
 ::: 
 
 :::note
-If two definitions match on the same data, then the view with the lowest `priority` number will be chosen.
+If two or more definitions match on the same data, then the view with the lowest `priority` number will be chosen.
 :::
 
 ## Tab completion
@@ -177,7 +181,7 @@ The following view is used to display smartgroup information. It combines both `
     "definitions": [
         {
             "name": "smartgroup",
-            "priority": 500,
+            "priority": 400,
             "type": "c8y_DynamicGroup",
             "fragments": ["c8y_IsDynamicGroup"],
             "columns": [

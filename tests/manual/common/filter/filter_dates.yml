@@ -1,0 +1,145 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/reubenmiller/commander/feat/handle-nested-files/schema.json
+config:
+  env:
+    C8Y_SETTINGS_DEFAULTS_CACHE: true
+    C8Y_SETTINGS_CACHE_METHODS: GET POST PUT
+    C8Y_SETTINGS_DEFAULTS_CACHETTL: 100h
+    C8Y_SETTINGS_DEFAULTS_OUTPUT: json
+
+tests:
+  It can filter dates which are newer than a reference dategt - match:
+    command: |
+      echo "2020-01-01T12:15:02Z\n2020-01-01T12:15:01Z" |
+        c8y template execute --template "{value: input.value}" |
+        c8y util show --filter "value dategt 2020-01-01T12:15:00Z" --select value
+    exit-code: 0
+    stdout:
+      exactly: |
+        {"value":"2020-01-01T12:15:02Z"}
+        {"value":"2020-01-01T12:15:01Z"}
+  
+  It can filter dates which are newer than a reference dategt - no match:
+    command: |
+      echo "2020-01-01T12:15:02Z\n2020-01-01T12:15:01Z" |
+        c8y template execute --template "{value: input.value}" |
+        c8y util show --filter "value dategt 2020-01-01T12:15:01Z" --select value
+    exit-code: 0
+    stdout:
+      exactly: |
+        {"value":"2020-01-01T12:15:02Z"}
+
+  It can filter dates which are newer than a reference dategt - relative match:
+    command: |
+      c8y template execute --template "{value: _.Now('-1d') }" |
+        c8y util show --filter "value dategt -25h"
+    exit-code: 0
+    stdout:
+      line-count: 1
+
+  It can filter dates which are newer than a reference dategte - match:
+    command: |
+      echo "2020-01-01T12:15:02Z\n2020-01-01T12:15:01Z" |
+        c8y template execute --template "{value: input.value}" |
+        c8y util show --filter "value dategte 2020-01-01T12:15:01Z" --select value
+    exit-code: 0
+    stdout:
+      exactly: |
+        {"value":"2020-01-01T12:15:02Z"}
+        {"value":"2020-01-01T12:15:01Z"}
+  
+  It can filter dates which are newer than a reference dategte - no match:
+    command: |
+      echo "2020-01-01T12:15:02Z\n2020-01-01T12:15:01Z" |
+        c8y template execute --template "{value: input.value}" |
+        c8y util show --filter "value dategte 2020-01-01T12:15:02Z" --select value
+    exit-code: 0
+    stdout:
+      exactly: |
+        {"value":"2020-01-01T12:15:02Z"}
+
+  It can filter dates which are newer than a reference newerthan (datelte alias) - no match:
+    command: |
+      echo "2020-01-01T12:15:02Z\n2020-01-01T12:15:01Z" |
+        c8y template execute --template "{value: input.value}" |
+        c8y util show --filter "value newerthan 2020-01-01T12:15:02Z" --select value
+    exit-code: 0
+    stdout:
+      exactly: |
+        {"value":"2020-01-01T12:15:02Z"}
+
+
+  It can filter dates which are older than a reference datelt - match:
+    command: |
+      echo "2020-01-01T12:17:02Z\n2020-01-01T12:15:00Z" |
+        c8y template execute --template "{value: input.value}" |
+        c8y util show --filter "value datelt 2020-01-01T12:18:00Z" --select value
+    exit-code: 0
+    stdout:
+      exactly: |
+        {"value":"2020-01-01T12:17:02Z"}
+        {"value":"2020-01-01T12:15:00Z"}
+
+  It can filter dates which are older than a reference datelt - no match:
+    command: |
+      echo "2020-01-01T12:17:02Z\n2020-01-01T12:15:00Z" |
+        c8y template execute --template "{value: input.value}" |
+        c8y util show --filter "value datelt 2020-01-01T12:16:00Z" --select value
+    exit-code: 0
+    stdout:
+      exactly: |
+        {"value":"2020-01-01T12:15:00Z"}
+
+  It can filter dates which are older than a reference datelt - relative:
+    command: |
+      c8y template execute --template "{value: _.Now('-1d') }" |
+        c8y util show --filter "value datelt -23h"
+    exit-code: 0
+    stdout:
+      line-count: 1
+
+  It can filter dates which are older than a reference datelte - match:
+    command: |
+      echo "2020-01-01T12:17:02Z\n2020-01-01T12:15:00Z" |
+        c8y template execute --template "{value: input.value}" |
+        c8y util show --filter "value datelte 2020-01-01T12:17:02Z" --select value
+    exit-code: 0
+    stdout:
+      exactly: |
+        {"value":"2020-01-01T12:17:02Z"}
+        {"value":"2020-01-01T12:15:00Z"}
+
+  It can filter dates which are older than a reference olderthan (datelte alias) - match:
+    command: |
+      echo "2020-01-01T12:17:02Z\n2020-01-01T12:15:00Z" |
+        c8y template execute --template "{value: input.value}" |
+        c8y util show --filter "value olderthan 2020-01-01T12:17:02Z" --select value
+    exit-code: 0
+    stdout:
+      exactly: |
+        {"value":"2020-01-01T12:17:02Z"}
+        {"value":"2020-01-01T12:15:00Z"}
+
+  It can filter dates which are older than a reference datelte - no match:
+    command: |
+      echo "2020-01-01T12:17:02Z\n2020-01-01T12:15:00Z" |
+        c8y template execute --template "{value: input.value}" |
+        c8y util show --filter "value datelte 2020-01-01T12:15:00Z" --select value
+    exit-code: 0
+    stdout:
+      exactly: |
+        {"value":"2020-01-01T12:15:00Z"}
+
+
+  It can filter by dates across timezones:
+    command: |
+      # match
+      c8y template execute --template "{value: '2020-01-01T14:15:01Z'}" |
+        c8y util show --filter "value dategt 2020-01-01T10:15:00+02:00"
+
+      # no match
+      c8y template execute --template "{value: '2020-01-01T14:15:01Z'}" |
+        c8y util show --filter "value dategt 2020-01-01T16:15:01+02:00"
+    exit-code: 0
+    stdout:
+      exactly: |
+        {"value":"2020-01-01T14:15:01Z"}

@@ -15,23 +15,17 @@ c8y inventory wait [flags]
 ### Examples
 
 ```
-$ c8y inventory wait --id 1234 --fragment "c8y_Mobile.iccd"
+$ c8y inventory wait --id 1234 --fragments "c8y_Mobile.iccd"
 # Wait for the managed object to have a non-null c8y_Mobile.iccd fragment
 
-$ c8y inventory wait --id 1234 --fragment '!c8y_Mobile'
+$ c8y inventory wait --id 1234 --fragments '!c8y_Mobile'
 # Wait for the managed object to not have a c8y_Mobile fragment
 
-$ c8y inventory wait --id 1234 --fragment 'name=^\d+-\w+$'
-# Wait for the managed object name fragment to match the regular expression '^\d+-\w+'
+$ c8y inventory wait --id 1234 --fragments 'name=^\d+-\w+$'
+# Wait for the managed object name fragment to match the regular expression '^\d+-\w+$'
 
-$ c8y inventory wait --id 1234 --fragment 'name=^$' --fragment c8y_IsDevice
-# Wait for the managed object name fragment to match the regular expression '^\d+-\w+'
-
-$ c8y inventory wait --id 1234 --duration 1m --interval 10s
-# Wait for the operation to be set to SUCCESSFUL and give up after 1 minute
-
-$ c8y inventory list --device 1111 | c8y operations wait --status "FAILED" --status "SUCCESSFUL"
-# Wait for operation to be set to either FAILED or SUCCESSFUL
+$ c8y inventory wait --id 1234 --fragments 'name=^\d+$' --fragments c8y_IsDevice
+# Wait for the managed object name fragment to match the regular expression '^\d+$' and have the c8y_IsDevice fragment
 
 ```
 
@@ -41,7 +35,7 @@ $ c8y inventory list --device 1111 | c8y operations wait --status "FAILED" --sta
       --duration string     Timeout duration. i.e. 30s or 1m (1 minute) (default "30s")
       --fragments strings   Fragments to wait for. If multiple values are given, then it will be applied as an OR operation
   -h, --help                help for wait
-      --id string           Inventory id (required) (accepts pipeline)
+      --id strings          Inventory id (required) (accepts pipeline)
       --interval string     Interval to check on the status, i.e. 10s or 1min (default "5s")
 ```
 

@@ -39,7 +39,7 @@ Update severity of an existing alarm to CRITICAL
         [object[]]
         $Id,
 
-        # Comma separated alarm statuses, for example ACTIVE,CLEARED.
+        # The status of the alarm. If not specified, a new alarm will be created as ACTIVE.
         [Parameter()]
         [ValidateSet('ACTIVE','ACKNOWLEDGED','CLEARED')]
         [string]

@@ -1,0 +1,20 @@
+tests:
+    It fails the assertion when using dry mode (strict mode):
+        command:  c8y devices assert fragments --device 1 --fragments name --strict --dry
+        exit-code: 112
+
+    It accepts multiple ids using comma separated values:
+        command: |
+            c8y devices assert fragments --device 1,2 --fragments name --strict --dry --dryFormat json \
+            | c8y util show --select path
+        exit-code: 0
+        stderr:
+            line-count: 2
+            contains:
+                - "assertionError: managedObjectFragments - wanted: [name], got: [], context: {ID:1}"
+                - "assertionError: managedObjectFragments - wanted: [name], got: [], context: {ID:2}"
+        stdout:
+            line-count: 2
+            json:
+                ..0.path: /inventory/managedObjects/1
+                ..1.path: /inventory/managedObjects/2

@@ -21,9 +21,16 @@ Get-EventCollection
 	[[-Device] <Object[]>]
 	[[-Type] <String>]
 	[[-FragmentType] <String>]
+	[[-FragmentValue] <String>]
+	[[-CreatedFrom] <String>]
+	[[-CreatedTo] <String>]
 	[[-DateFrom] <String>]
 	[[-DateTo] <String>]
+	[[-LastUpdatedFrom] <String>]
+	[[-LastUpdatedTo] <String>]
 	[-Revert]
+	[-WithSourceAssets]
+	[-WithSourceDevices]
 	[-PageSize <Int32>]
 	[-WithTotalPages]
 	[-CurrentPage <Int32>]
@@ -146,6 +153,51 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
+### -FragmentValue
+Allows filtering events by the fragment's value, but only when provided together with fragmentType.
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 4
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -CreatedFrom
+Start date or date and time of the event's creation (set by the platform during creation).
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 5
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -CreatedTo
+End date or date and time of the event's creation (set by the platform during creation).
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 6
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
 ### -DateFrom
 Start date or date and time of event occurrence.
 
@@ -155,7 +207,7 @@ Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: 4
+Position: 7
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
@@ -170,7 +222,37 @@ Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: 5
+Position: 8
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -LastUpdatedFrom
+Start date or date and time of the last update made.
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 9
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -LastUpdatedTo
+End date or date and time of the last update made.
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 10
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
@@ -179,6 +261,38 @@ Accept wildcard characters: False
 ### -Revert
 Return the newest instead of the oldest events.
 Must be used with dateFrom and dateTo parameters
+
+```yaml
+Type: SwitchParameter
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: False
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -WithSourceAssets
+When set to true also events for related source assets will be included in the request.
+When this parameter is provided a source must be specified.
+
+```yaml
+Type: SwitchParameter
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: False
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -WithSourceDevices
+When set to true also events for related source devices will be included in the request.
+When this parameter is provided a source must be specified.
 
 ```yaml
 Type: SwitchParameter

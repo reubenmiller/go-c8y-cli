@@ -10,7 +10,6 @@ import (
 	cmdGetSupportedSeries "github.com/reubenmiller/go-c8y-cli/pkg/cmd/devices/getsupportedseries"
 	cmdListAssets "github.com/reubenmiller/go-c8y-cli/pkg/cmd/devices/listassets"
 	cmdListChildren "github.com/reubenmiller/go-c8y-cli/pkg/cmd/devices/listchildren"
-	cmdSetRequiredAvailability "github.com/reubenmiller/go-c8y-cli/pkg/cmd/devices/setrequiredavailability"
 	cmdUnassignChild "github.com/reubenmiller/go-c8y-cli/pkg/cmd/devices/unassignchild"
 	cmdUpdate "github.com/reubenmiller/go-c8y-cli/pkg/cmd/devices/update"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmd/subcommand"
@@ -38,7 +37,6 @@ func NewSubCommand(f *cmdutil.Factory) *SubCmdDevices {
 	cmd.AddCommand(cmdCreate.NewCreateCmd(f).GetCommand())
 	cmd.AddCommand(cmdGetSupportedMeasurements.NewGetSupportedMeasurementsCmd(f).GetCommand())
 	cmd.AddCommand(cmdGetSupportedSeries.NewGetSupportedSeriesCmd(f).GetCommand())
-	cmd.AddCommand(cmdSetRequiredAvailability.NewSetRequiredAvailabilityCmd(f).GetCommand())
 	cmd.AddCommand(cmdAssignChild.NewAssignChildCmd(f).GetCommand())
 	cmd.AddCommand(cmdUnassignChild.NewUnassignChildCmd(f).GetCommand())
 	cmd.AddCommand(cmdListChildren.NewListChildrenCmd(f).GetCommand())

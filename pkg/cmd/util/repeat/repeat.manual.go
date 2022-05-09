@@ -71,6 +71,12 @@ func NewCmdRepeat(f *cmdutil.Factory) *CmdRepeat {
 
 			$ c8y devices get --id 1234 | c8y util repeat 5 --randomDelayMin 1000ms --randomDelayMax 10000ms -v | c8y events create --text "test event" --type "myType"
 			Create 10 events for the same device and use a random delay between 1000ms and 10000ms between the creation of each event
+
+			$ echo "test" | c8y util repeat 5 --randomDelayMax 10000ms -v
+			Print "test" 5 times waiting between 0s and 10s after each line
+
+			$ echo "test" | c8y util repeat 5 --randomDelayMin 5s -v
+			Print "test" 5 times waiting exactly 5 seconds after each line
 		`),
 		Args: cobra.MaximumNArgs(1),
 		RunE: ccmd.newTemplate,
@@ -82,7 +88,7 @@ func NewCmdRepeat(f *cmdutil.Factory) *CmdRepeat {
 	cmd.Flags().Int64Var(&ccmd.first, "first", 0, "only include first x lines. 0 = all lines")
 	cmd.Flags().Int64Var(&ccmd.offset, "offset", 0, "offset the output index counter. default = 0.")
 	cmd.Flags().String("randomDelayMin", "0ms", "random minimum delay after each request, i.e. 5ms, 1.2s. It must be less than randomDelayMax. 0 = disabled")
-	cmd.Flags().String("randomDelayMax", "0ms", "random maximum delay after each request, i.e. 5ms, 1.2s. It must be larger than randomDelayMin. 0 = disabled.")
+	cmd.Flags().String("randomDelayMax", "0ms", "random maximum delay after each request, i.e. 5ms, 1.2s. It must be >= randomDelayMin. 0 = disabled.")
 	cmd.Flags().Float32Var(&ccmd.randomSkip, "randomSkip", -1, "randomly skip line based on a percentage, probability as a float: 0 to 1, 1 = always skip, 0 = never skip, -1 = disabled")
 	cmd.Flags().Int64Var(&ccmd.times, "times", 1, "number of times to repeat the input")
 	cmd.Flags().BoolVar(&ccmd.useTotalCount, "useLineCount", false, "Use line count for the index instead of repeat counter")

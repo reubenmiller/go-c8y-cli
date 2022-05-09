@@ -1,8 +1,10 @@
 package create
 
 import (
+	"archive/zip"
+	"bytes"
 	"context"
-	"errors"
+	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -17,11 +19,24 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmdutil"
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
-	"github.com/reubenmiller/go-c8y-cli/pkg/jsonUtilities"
-	"github.com/reubenmiller/go-c8y-cli/pkg/zipUtilities"
+	"github.com/reubenmiller/go-c8y-cli/pkg/logger"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
 )
+
+const CumulocityManifestFile = "cumulocity.json"
+
+type Application struct {
+	c8y.Application
+	Manifest Manifest
+}
+
+type Manifest struct {
+	Name          string   `json:"name"`
+	Version       string   `json:"version"`
+	RequiredRoles []string `json:"requiredRoles"`
+	Roles         []string `json:"roles"`
+}
 
 type CmdCreate struct {
 	*subcommand.SubCommand
@@ -87,19 +102,52 @@ Create or update a microservice using an explicit name
 	return ccmd
 }
 
-func (n *CmdCreate) getApplicationDetails() *c8y.Application {
+func (n *CmdCreate) getApplicationDetails(log *logger.Logger) (*Application, error) {
 
-	app := c8y.Application{}
+	app := Application{}
 
 	// set default name to the file name
 	baseFileName := filepath.Base(n.file)
-	baseFileName = baseFileName[0 : len(baseFileName)-len(filepath.Ext(baseFileName))]
+	fileExt := filepath.Ext(baseFileName)
+	baseFileName = baseFileName[0 : len(baseFileName)-len(fileExt)]
 	versionRegex := regexp.MustCompile(`(-v?\d+\.\d+\.\d+(-SNAPSHOT)?)?$`)
 	appNameFromFile := versionRegex.ReplaceAllString(baseFileName, "")
 
 	// Set application properties
 
-	app.Name = appNameFromFile
+	if strings.HasSuffix(n.file, ".zip") {
+		// Try loading manifest file directly from the zip (without unzipping it)
+		log.Infof("Trying to detect manifest from a zip file. path=%s", n.file)
+		if err := GetManifestContents(n.file, &app.Manifest); err != nil {
+			log.Infof("Could not find manifest file. Expected %s to contain %s. %s", n.file, CumulocityManifestFile, err)
+		}
+	} else if n.file != "" {
+		// Assume json (regardless of file type)
+		log.Infof("Assuming file is json (regardless of file extension). path=%s", n.file)
+		jsonFile, err := os.Open(n.file)
+		if err != nil {
+			return nil, err
+		}
+		byteValue, _ := ioutil.ReadAll(jsonFile)
+
+		if err := json.Unmarshal(byteValue, &app.Manifest); err != nil {
+			log.Warnf("invalid manifest file. Only json or zip files are accepted. %s", strings.TrimSpace(err.Error()))
+		}
+	}
+
+	// Set application name using the following preferences (first match wins)
+	// 1. Explicit name
+	// 2. Name from file (if the given file is not a json file) - as this allows
+	//    overriding the app name by just changing the file name (and not requiring to edit it)
+	// 3. Name from manifest file
+	if app.Manifest.Name != "" {
+		app.Name = app.Manifest.Name
+	}
+
+	if !strings.EqualFold(fileExt, ".json") && strings.EqualFold(fileExt, ".zip") {
+		app.Name = appNameFromFile
+	}
+
 	if n.name != "" {
 		app.Name = n.name
 	}
@@ -124,7 +172,7 @@ func (n *CmdCreate) getApplicationDetails() *c8y.Application {
 	if n.resourceURL != "" {
 		app.ResourcesURL = n.resourceURL
 	}
-	return &app
+	return &app, nil
 }
 
 func (n *CmdCreate) RunE(cmd *cobra.Command, args []string) error {
@@ -146,7 +194,11 @@ func (n *CmdCreate) RunE(cmd *cobra.Command, args []string) error {
 	var applicationName string
 
 	dryRun := cfg.ShouldUseDryRun(cmd.CommandPath())
-	applicationDetails := n.getApplicationDetails()
+	applicationDetails, err := n.getApplicationDetails(log)
+
+	if err != nil {
+		return err
+	}
 
 	if applicationDetails != nil {
 		applicationName = applicationDetails.Name
@@ -182,7 +234,7 @@ func (n *CmdCreate) RunE(cmd *cobra.Command, args []string) error {
 	if applicationID == "" {
 		// Create the application
 		log.Info("Creating new application")
-		application, response, err = client.Application.Create(context.Background(), applicationDetails)
+		application, response, err = client.Application.Create(context.Background(), &applicationDetails.Application)
 
 		if err != nil {
 			return fmt.Errorf("failed to create microservice. %s", err)
@@ -198,6 +250,10 @@ func (n *CmdCreate) RunE(cmd *cobra.Command, args []string) error {
 	}
 
 	skipUpload := n.skipUpload
+
+	if _, err := os.Stat(n.file); err != nil {
+		return cmderrors.NewUserError(fmt.Sprintf("could not read manifest file. %s. error=%s", n.file, err))
+	}
 
 	// Only upload zip files
 	if !strings.HasSuffix(n.file, ".zip") {
@@ -232,46 +288,11 @@ func (n *CmdCreate) RunE(cmd *cobra.Command, args []string) error {
 		// because the zip file is not being uploaded because the app
 		// will be hosted outside of the platform
 		//
-		var requiredRoles []string
-		requiredRoles = make([]string, 0)
-		var manifestContents map[string]interface{}
-		// manifestContents = make(map[string]interface{})
-
-		var manifestFile string
-
-		if strings.HasSuffix(n.file, ".json") {
-			// user provided just a manifest file
-			manifestFile = n.file
-		} else if strings.HasSuffix(n.file, ".zip") {
-			if val, err := GetManifestFile(n.file); err != nil {
-				log.Warningf("failed to get manifest file from microservice. %s", err)
-			} else {
-				manifestFile = val
-			}
-		}
-
-		if v, err := jsonUtilities.DecodeJSONFile(manifestFile); err == nil {
-			manifestContents = v
-		} else {
-			log.Warningf("failed to decode manifest file. file=%s, err=%s", manifestFile, err)
-			return cmderrors.NewUserError(fmt.Sprintf("invalid manifest file. Only json files are accepted. %s", strings.TrimSpace(err.Error())))
-		}
-
-		if roles, ok := manifestContents["requiredRoles"].([]interface{}); ok {
-			for _, val := range roles {
-				if role, typeOk := val.(string); typeOk {
-					requiredRoles = append(requiredRoles, role)
-				}
-			}
-		} else {
-			log.Warningf("Failed to read requiredRoles. contents=%v, type=%T", manifestContents, roles)
-		}
-
 		// Read the Cumulocity.json file, and upload
-		log.Infof("updating application details [id=%s], requiredRoles=%s", application.ID, strings.Join(requiredRoles, ","))
+		log.Infof("updating application details [id=%s], requiredRoles=%s", application.ID, strings.Join(applicationDetails.Manifest.RequiredRoles, ","))
 		if !dryRun {
 			_, response, err = client.Application.Update(context.Background(), application.ID, &c8y.Application{
-				RequiredRoles: requiredRoles,
+				RequiredRoles: applicationDetails.Manifest.RequiredRoles,
 			})
 			if err != nil {
 				return err
@@ -308,20 +329,34 @@ func (n *CmdCreate) RunE(cmd *cobra.Command, args []string) error {
 	return err
 }
 
-// GetManifestFile extracts the Cumulocity microservice manifest file from a given zip file
-func GetManifestFile(zipFilename string) (string, error) {
-	tempDir, err := ioutil.TempDir(os.TempDir(), "c8ygo-")
-
+func GetManifestContents(zipFilename string, contents interface{}) error {
+	reader, err := zip.OpenReader(zipFilename)
 	if err != nil {
-		return "", fmt.Errorf("cannot create temporary file. %s", err)
+		return err
 	}
 
-	files, err := zipUtilities.UnzipFile(zipFilename, tempDir, []string{"Cumulocity.json"})
-	if err != nil {
-		return "", err
+	defer reader.Close()
+
+	for _, file := range reader.File {
+		// check if the file matches the name for application portfolio xml
+		if strings.EqualFold(file.Name, CumulocityManifestFile) {
+			rc, err := file.Open()
+			if err != nil {
+				return err
+			}
+
+			buf := new(bytes.Buffer)
+			if _, err := buf.ReadFrom(rc); err != nil {
+				return err
+			}
+
+			defer rc.Close()
+
+			// Unmarshal bytes
+			if err := json.Unmarshal(buf.Bytes(), &contents); err != nil {
+				return err
+			}
+		}
 	}
-	if len(files) == 0 {
-		return "", errors.New("missing Cumulocity.json file")
-	}
-	return files[0], err
+	return nil
 }

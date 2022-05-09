@@ -36,6 +36,10 @@ func NewUpdateCmd(f *cmdutil.Factory) *UpdateCmd {
 		Example: heredoc.Doc(`
 $ c8y users update --id "myuser" --firstName "Simon"
 Update a user
+
+$ c8y users list --filter "id like *@*" | c8y users update --template "{email: input.value.id}"
+
+Update the email field in each user to match the id (if the id includes the @ sign)
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
 			return f.UpdateModeEnabled()
@@ -66,7 +70,8 @@ Update a user
 	flags.WithOptions(
 		cmd,
 		flags.WithProcessingMode(),
-
+		flags.WithData(),
+		f.WithTemplateFlag(cmd),
 		flags.WithExtendedPipelineSupport("id", "id", true),
 	)
 

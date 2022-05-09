@@ -21,8 +21,10 @@ Remove-AlarmCollection
 	[[-Device] <Object[]>]
 	[[-DateFrom] <String>]
 	[[-DateTo] <String>]
+	[[-CreatedFrom] <String>]
+	[[-CreatedTo] <String>]
 	[[-Type] <String>]
-	[[-Status] <String>]
+	[[-Status] <String[]>]
 	[[-Severity] <String>]
 	[-Resolved]
 	[-WithSourceAssets]
@@ -147,8 +149,9 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -Type
-Alarm type.
+### -CreatedFrom
+Start date or date and time of the alarm creation.
+Version \>= 10.11
 
 ```yaml
 Type: String
@@ -162,8 +165,9 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -Status
-Comma separated alarm statuses, for example ACTIVE,CLEARED.
+### -CreatedTo
+End date or date and time of the alarm creation.
+Version \>= 10.11
 
 ```yaml
 Type: String
@@ -172,6 +176,36 @@ Aliases:
 
 Required: False
 Position: 5
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -Type
+Alarm type.
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 6
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -Status
+Comma separated alarm statuses, for example ACTIVE,CLEARED.
+
+```yaml
+Type: String[]
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 7
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
@@ -186,7 +220,7 @@ Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: 6
+Position: 8
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False

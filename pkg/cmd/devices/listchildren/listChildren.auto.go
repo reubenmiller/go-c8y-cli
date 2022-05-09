@@ -47,6 +47,7 @@ Get a list of the child devices of an existing device
 	cmd.SilenceUsage = true
 
 	cmd.Flags().StringSlice("device", []string{""}, "Device. (required) (accepts pipeline)")
+	cmd.Flags().Bool("withChildren", false, "Determines if children with ID and name should be returned when fetching the managed object. Set it to false to improve query performance.")
 
 	completion.WithOptions(
 		cmd,
@@ -146,6 +147,7 @@ func (n *ListChildrenCmd) RunE(cmd *cobra.Command, args []string) error {
 		path,
 		inputIterators,
 		c8yfetcher.WithDeviceByNameFirstMatch(client, args, "device", "device"),
+		flags.WithBoolValue("withChildren", "withChildren", ""),
 	)
 	if err != nil {
 		return err

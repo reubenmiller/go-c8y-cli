@@ -31,7 +31,7 @@ Update severity of an existing alarm to CRITICAL
       --id strings              Alarm id (required) (accepts pipeline)
       --processingMode string   Cumulocity processing mode
       --severity string         Alarm severity, for example CRITICAL, MAJOR, MINOR or WARNING.
-      --status string           Comma separated alarm statuses, for example ACTIVE,CLEARED.
+      --status string           The status of the alarm. If not specified, a new alarm will be created as ACTIVE.
       --template string         Body template
       --templateVars string     Body template variables
       --text string             Text description of the alarm.

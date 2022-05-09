@@ -61,6 +61,11 @@
             "id"
           ],
           "description": "Managed object."
+        },
+        {
+          "name": "withChildren",
+          "type": "boolean",
+          "description": "Determines if children with ID and name should be returned when fetching the managed object. Set it to false to improve query performance."
         }
       ]
     },

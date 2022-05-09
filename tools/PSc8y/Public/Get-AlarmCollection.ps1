@@ -56,7 +56,7 @@ Get active alarms from a device (using pipeline)
         # Comma separated alarm statuses, for example ACTIVE,CLEARED.
         [Parameter()]
         [ValidateSet('ACTIVE','ACKNOWLEDGED','CLEARED')]
-        [string]
+        [string[]]
         $Status,
 
         # Alarm severity, for example CRITICAL, MAJOR, MINOR or WARNING.
@@ -78,7 +78,27 @@ Get active alarms from a device (using pipeline)
         # When set to true also alarms for related source devices will be removed. When this parameter is provided also source must be defined.
         [Parameter()]
         [switch]
-        $WithSourceDevices
+        $WithSourceDevices,
+
+        # Start date or date and time of the alarm creation. Version >= 10.11
+        [Parameter()]
+        [string]
+        $CreatedFrom,
+
+        # End date or date and time of the alarm creation. Version >= 10.11
+        [Parameter()]
+        [string]
+        $CreatedTo,
+
+        # Start date or date and time of the last update made. Version >= 10.11
+        [Parameter()]
+        [string]
+        $LastUpdatedFrom,
+
+        # End date or date and time of the last update made. Version >= 10.11
+        [Parameter()]
+        [string]
+        $LastUpdatedTo
     )
     DynamicParam {
         Get-ClientCommonParameters -Type "Get", "Collection"

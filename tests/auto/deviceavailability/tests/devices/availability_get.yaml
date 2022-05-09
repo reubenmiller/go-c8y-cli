@@ -1,0 +1,22 @@
+tests:
+    devices/availability_get_Get a device's availability by id:
+        command: c8y devices availability get --id 12345
+        exit-code: 0
+        stdout:
+            json:
+                method: GET
+                path: /inventory/managedObjects/12345/availability
+    devices/availability_get_Get a device's availability by name:
+        command: c8y devices availability get --id device01
+        exit-code: 0
+        stdout:
+            json:
+                method: GET
+                path: r//inventory/managedObjects/\d+/availability
+    devices/availability_get_Get a device's availability using a pipeline:
+        command: $TEST_SHELL -c 'c8y devices get --id device01 --dry=false | c8y devices availability get'
+        exit-code: 0
+        stdout:
+            json:
+                method: GET
+                path: r//inventory/managedObjects/\d+/availability

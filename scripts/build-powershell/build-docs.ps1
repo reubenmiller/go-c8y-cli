@@ -42,6 +42,7 @@ Function Get-Category {
         "retention" { "RetentionRules" }
         "(tenant|system)Option" { "TenantOption" }
         "tenant" { "Tenants" }
+        "tenantname" { "Tenants" }
         "application" { "Applications" }
         "externalid" { "ExternalIdentity" }
         "microservice" { "Microservices" }
