@@ -76,4 +76,22 @@ tests:
                 body.time: "2019-01-01"
                 body.source.id: "12345"
 
+    It supports DELETE with a body:
+        command: >
+          c8y api --method delete --url "/inventory" --template "{value: 'one'}" --dry
+        exit-code: 0
+        stdout:
+            json:
+                method: DELETE
+                path: /inventory
+                body.value: one
+    
+    It supports PATCH commands:
+        command: >
+          c8y api --method patch --url "/inventory" --dry
+        exit-code: 0
+        stdout:
+            json:
+                method: PATCH
+                path: /inventory
                 
