@@ -14,6 +14,7 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/pkg/iterator"
 	"github.com/reubenmiller/go-c8y-cli/pkg/logger"
 	"github.com/reubenmiller/go-c8y-cli/pkg/mapbuilder"
+	"github.com/reubenmiller/go-c8y-cli/pkg/request"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 )
 
@@ -134,7 +135,7 @@ func (r *RequestIterator) GetNext() (*c8y.RequestOptions, interface{}, error) {
 	r.Logger.Debugf("Input line: %s", inputLine)
 
 	// apply body iterator
-	if r.Body != nil && !reflect.ValueOf(r.Body).IsNil() && (strings.EqualFold(req.Method, "POST") || strings.EqualFold(req.Method, "PUT")) {
+	if r.Body != nil && !reflect.ValueOf(r.Body).IsNil() && request.RequestSupportsBody(req.Method) {
 		// iterator body. Any validation will be run here
 		switch v := r.Body.(type) {
 		case flags.RawString:
