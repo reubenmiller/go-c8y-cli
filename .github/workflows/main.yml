@@ -104,7 +104,6 @@ jobs:
     - name: Test c8y examples
       if: ${{ true }}
       run: |
-        mv /home/runner/.local/bin/c8y.linux /home/runner/.local/bin/c8y
         chmod +x /home/runner/.local/bin/c8y
         echo "/home/runner/.local/bin" >> $GITHUB_PATH
         c8y version
