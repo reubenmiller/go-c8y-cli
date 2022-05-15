@@ -215,7 +215,7 @@ tasks:
   install-test-dependencies:
     desc: Install test dependencies
     cmds:
-      - go get github.com/commander-cli/commander/v2/cmd/commander@v2.5.0-alpha3
+      - go install go install github.com/reubenmiller/commander/v3/cmd/commander
     status:
       - command -v commander
 
