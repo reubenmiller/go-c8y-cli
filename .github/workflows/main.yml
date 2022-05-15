@@ -49,17 +49,17 @@ jobs:
     - uses: actions/upload-artifact@v2
       with:
         name: c8y.windows.amd64
-        path: tools/PSc8y/Dependencies/c8y.windows*
+        path: dist/windows_windows_amd64_v1/bin/c8y
 
     - uses: actions/upload-artifact@v2
       with:
         name: c8y.linux.amd64
-        path: tools/PSc8y/Dependencies/c8y.linux*
+        path: dist/linux_linux_amd64_v1/bin/c8y
 
     - uses: actions/upload-artifact@v2
       with:
         name: c8y.macos.amd64
-        path: tools/PSc8y/Dependencies/c8y.macos*
+        path: dist/macos_darwin_arm64/bin/c8y
 
     - uses: actions/upload-artifact@v2
       with:

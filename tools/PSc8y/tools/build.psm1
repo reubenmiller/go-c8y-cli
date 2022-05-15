@@ -161,10 +161,10 @@ function Publish-ModuleArtifacts {
     }
 
     Write-Verbose "Creating directory [$ArtifactRoot]"
-    New-Item -Path $ArtifactRoot -ItemType Directory | Out-Null
-
+    $null = New-Item -Path $ArtifactRoot -ItemType Directory -Force
+    
     # Copy the module into the dist folder
-    Copy-Item -Path "$ModuleRoot\Dependencies\" -Filter "c8y*" -Destination "$ArtifactRoot\$ModuleName\Dependencies" -Recurse
+    $null = New-Item -Path "$ArtifactRoot\$ModuleName\Dependencies" -ItemType Directory
     Copy-Item -Path "$ModuleRoot\format-data" -Destination "$ArtifactRoot\$ModuleName\" -Recurse
     Copy-Item -Path "$ModuleRoot\Templates" -Destination "$ArtifactRoot\$ModuleName\" -Recurse
     Copy-Item -Path "$ModuleRoot\$ModuleName.psd1" -Destination "$ArtifactRoot\$ModuleName\" -Recurse

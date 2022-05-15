@@ -15,6 +15,12 @@ Returns the fullname of the path to the Cumulocity binary
     [OutputType([String])]
     Param()
 
+    if ($script:C8Y_BINARY)
+    {
+        Resolve-Path $script:C8Y_BINARY
+        return
+    }
+
     if ($IsLinux) {
         Resolve-Path (Join-Path $script:Dependencies "c8y.linux")
     } elseif ($IsMacOS) {

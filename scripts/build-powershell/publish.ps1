@@ -33,14 +33,7 @@ try {
 	#
 	$ArtifactFolder = Export-ProductionModule
 	$DependenciesDir = "$ArtifactFolder/Dependencies/"
-	& $PSScriptRoot/../build-cli/build-binary.ps1 -OutputDir $DependenciesDir -All
-
-	[array] $c8ybinaries = Get-ChildItem -Path $DependenciesDir -Filter "*c8y*"
-
-	if ($c8ybinaries.Count -lt 4) {
-		Write-Error "Failed to find all 4 c8y binaries"
-		Exit 1
-	}
+	$null = New-Item "$DependenciesDir" -ItemType Directory
 
 	Write-Host "Publishing module from folder [$ArtifactFolder]"
 	## Publish module to PowerShell Gallery
