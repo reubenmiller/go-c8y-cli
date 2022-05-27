@@ -17,12 +17,6 @@ if ($All) {
 
     # Copy commonly used binaries to the output directory
     # Note: This might be removed in the future to make the distribution size of the PowerShell module smaller
-    Get-Item .
-    Get-ChildItem "dist/linux_linux_amd64_v1" -Recurse
-
-    Write-Host "OutputDir: $OutputDir"
-    Get-Item $OutputDir
-
     Copy-Item "dist/macos_darwin_amd64_v1/bin/c8y*" "$OutputDir/"
     Copy-Item "dist/linux_linux_amd64_v1/bin/c8y*" "$OutputDir/"
     Copy-Item "dist/windows_windows_amd64_v1/bin/c8y*" "$OutputDir/"
