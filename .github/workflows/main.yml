@@ -59,7 +59,7 @@ jobs:
     - uses: actions/upload-artifact@v2
       with:
         name: c8y.macos.amd64
-        path: dist/macos_darwin_arm64/bin/c8y
+        path: dist/macos_darwin_amd64_v1/bin/c8y
 
     - uses: actions/upload-artifact@v2
       with:

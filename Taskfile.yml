@@ -11,6 +11,8 @@ env:
   C8Y_SETTINGS_CI: true
   GITHUB_TOKEN: ""
 
+dotenv: ['.env', '{{.ENV}}/.env.', '{{.HOME}}/.env']
+
 tasks:
 
   # ---------------------------------------------------------------

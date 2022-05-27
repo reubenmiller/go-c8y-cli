@@ -7,78 +7,93 @@ Import/Download the Cumulocity Binary
 Get the full path to the Cumulocity Binary which is compatible with the current Operating system
 
 .EXAMPLE
-Get-ClientBinary
+Import-ClientBinary
 
-Returns the fullname of the path to the Cumulocity binary
+Download the client binary corresponding to your current platform
 #>
     [cmdletbinding()]
     [OutputType([String])]
     Param(
-        [switch] $All,
-
         # Version. Defaults to the module's version
-        [string] $Version
+        [string] $Version,
+
+        [ValidateSet("macOS", "windows", "linux")]
+        [string] $Platform,
+
+        [ValidateSet("amd64", "386", "arm64", "armv5")]
+        [string] $Arch
     )
 
-    $Platform = ""
-    $Arch = ""
-    $BinaryName = ""
-    $FileExtension = ""
-
-    if ([string]::IsNullOrWhiteSpace($Version))
-    {
+    # Version
+    if ([string]::IsNullOrWhiteSpace($Version)) {
         $Version = "" + $MyInvocation.MyCommand.ScriptBlock.Module.Version
 
-        if ($Version -eq "0.0")
-        {
+        if ($Version -eq "0.0") {
             $ModuleDefinition = Join-Path $MyInvocation.MyCommand.ScriptBlock.Module.ModuleBase "PSc8y.psd1"
             $RawVersion = Get-Content $ModuleDefinition | Where-Object { $_ -like "ModuleVersion*=*" } | Select-Object -First 1
-            if ($RawVersion -match "'(\S+)'")
-            {
+            if ($RawVersion -match "'(\S+)'") {
                 $Version = $Matches[1]
             }
         }
     }
 
-    if ($IsLinux) {
-        $Arch = switch -regex (uname -m) {
-            "^armv8l|armv8b|arm64|aarch64$" { "arm64" }
-            "^arm$" { "armv5" }
-            "^x86_64$" { "amd64" }
-            "^i386$" { "386" }
+    # Platform
+    if ([string]::IsNullOrWhiteSpace($Platform)) {
+        if ($IsLinux) {
+            $Platform = "linux"
         }
-
-        $Platform = "linux"
-        $BinaryName = "c8y.linux"
-        $FileExtension = "tar.gz"
-    }
-    elseif ($IsMacOS) {
-        $Arch = switch -regex (uname -m) {
-            "^armv8l|armv8b|arm64|aarch64$" { "arm64" }
-            "^x86_64$" { "amd64" }
-            "^i386$" { "386" }
+        elseif ($IsMacOS) {
+            $Platform = "macOS"
         }
-
-        $Platform = "macOS"
-        $BinaryName = "c8y.macos"
-        $FileExtension = "tar.gz"
-    }
-    else {
-        # Windows
-        $Arch = switch ($Env:PROCESSOR_ARCHITECTURE) {
-            "amd64" { "amd64" }
-            "x86" { "386" }
-            "x64" { "amd64" }
-            # "arm64" {"arm64"}
+        else {
+            $Platform = "windows"
         }
-        $Platform = "windows"
-        $BinaryName = "c8y.windows.exe"
-        $FileExtension = "zip"
     }
 
+    # Architecture
+    if ([string]::IsNullOrWhiteSpace($Arch)) {
+        switch ($Platform) {
+            "windows" {
+                $Arch = switch ($Env:PROCESSOR_ARCHITECTURE) {
+                    "amd64" { "amd64" }
+                    "x86" { "386" }
+                    "x64" { "amd64" }
+                }
+            }
+
+            "macOS" {
+                $Arch = switch -regex (uname -m) {
+                    "^armv8l|armv8b|arm64|aarch64$" { "arm64" }
+                    "^x86_64$" { "amd64" }
+                    "^i386$" { "386" }
+                }
+            }
+
+            "linux" {
+                $Arch = switch -regex (uname -m) {
+                    "^armv8l|armv8b|arm64|aarch64$" { "arm64" }
+                    "^arm$" { "armv5" }
+                    "^x86_64$" { "amd64" }
+                    "^i386$" { "386" }
+                }
+            }
+        }
+    }
+
+    switch ($Platform) {
+        "windows" {
+            $FileExtension = "zip"
+            $BinaryExtension = ".exe"
+        }
+        default {
+            $FileExtension = "tar.gz"
+            $BinaryExtension = ""
+        }
+    }
+
+    $BinaryName = "c8y_${Version}_${Platform}_${Arch}$BinaryExtension"
     $TargetFile = "c8y_${Version}_${Platform}_${Arch}.${FileExtension}"
     $LocalBinary = Join-Path $script:Dependencies $BinaryName
-    $script:C8Y_BINARY = $LocalBinary
     $DownloadUrl = "https://github.com/reubenmiller/go-c8y-cli/releases/download/v$Version/$TargetFile"
 
     if (-Not (Test-Path $script:Dependencies)) {
@@ -88,6 +103,7 @@ Returns the fullname of the path to the Cumulocity binary
     try {
         if (-Not (Test-Path $LocalBinary)) {
             $TempFile = New-TemporaryFile
+
             Invoke-RestMethod -Uri $DownloadUrl -OutFile $TempFile
 
             Write-Verbose "Downloading binary from $DownloadUrl to $TempFile"
@@ -113,6 +129,9 @@ Returns the fullname of the path to the Cumulocity binary
         if ($IsMacOS -or $IsLinux) {
             chmod +x $LocalBinary
         }
+
+        $env:C8Y_BINARY = $LocalBinary
+        Resolve-Path $LocalBinary
     }
     catch {
         Write-error "Failed to download c8y binary. url=$DownloadUrl, error=$_"
