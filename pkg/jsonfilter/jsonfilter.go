@@ -9,6 +9,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/hashicorp/go-version"
 	glob "github.com/obeattie/ohmyglob"
 	"github.com/reubenmiller/go-c8y-cli/pkg/flatten"
 	"github.com/reubenmiller/go-c8y-cli/pkg/logger"
@@ -51,7 +52,7 @@ func (f *JSONFilters) AddSelectors(props ...string) {
 // AddRawFilters add list of raw filters
 func (f *JSONFilters) AddRawFilters(rawFilters []string) error {
 	for _, item := range rawFilters {
-		sepPattern := regexp.MustCompile(`(\s+[\-]?(like|match|notlike|notmatch|newerthan|olderthan|datelte|datelt|dategt|dategte|eq|neq|lt|lte|gt|gte|notIn|in|startsWith|endsWith|contains|len[n]?eq|lengt[e]?|lenlt[e]?)\s+|(!?=|[<>]=?))`)
+		sepPattern := regexp.MustCompile(`(\s+[\-]?(like|match|notlike|notmatch|newerthan|olderthan|datelte|datelt|dategt|dategte|version|eq|neq|lt|lte|gt|gte|notIn|in|startsWith|endsWith|contains|len[n]?eq|lengt[e]?|lenlt[e]?)\s+|(!?=|[<>]=?))`)
 
 		parts := sepPattern.Split(item, 2)
 
@@ -331,6 +332,9 @@ func (f JSONFilters) filterJSON(jsonValue string, property string, showHeaders b
 	jq.Macro("dategt", dateNewerThan)
 	jq.Macro("dategte", dateNewerThanEqual)
 	jq.Macro("newerthan", dateNewerThanEqual)
+
+	// Version filters
+	jq.Macro("version", matchVersionConstraint)
 
 	for _, query := range f.Filters {
 		Logger.Debugf("filtering data: %s %s %s", query.Property, query.Operation, query.Value)
@@ -649,4 +653,25 @@ func matchWithRegexNegated(x, y interface{}) (bool, error) {
 
 	match, err := matcher.MatchWithRegex(xs, pattern)
 	return !match, err
+}
+
+func matchVersionConstraint(x, y interface{}) (bool, error) {
+	xs, okx := x.(string)
+	ys, oky := y.(string)
+	if !okx || !oky {
+		return false, fmt.Errorf("version matching only supports strings")
+	}
+
+	currentVersion, err := version.NewVersion(xs)
+	if err != nil {
+		// Treat invalid versions as 0.0.0
+		currentVersion = version.Must(version.NewVersion("0.0.0"))
+	}
+
+	constraint, err := version.NewConstraint(strings.ReplaceAll(ys, ",", ", "))
+	if err != nil {
+		return false, fmt.Errorf("Invalid version constraint. %w", err)
+	}
+
+	return constraint.Check(currentVersion), nil
 }

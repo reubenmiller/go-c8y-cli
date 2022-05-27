@@ -211,7 +211,7 @@ func NewCmdRoot(f *cmdutil.Factory, version, buildDate string) *CmdRoot {
 	cmd.PersistentFlags().Bool("silentExit", false, "Silent status codes do not affect the exit code")
 
 	cmd.PersistentFlags().Bool("flatten", false, "flatten json output by replacing nested json properties with properties where their names are represented by dot notation")
-	cmd.PersistentFlags().StringSlice("filter", nil, "Apply a client side filter to response before returning it to the user")
+	cmd.PersistentFlags().StringArray("filter", nil, "Apply a client side filter to response before returning it to the user")
 	cmd.PersistentFlags().StringArray("select", nil, "Comma separated list of properties to return. wildcards and globstar accepted, i.e. --select 'id,name,type,**.serialNumber'")
 	cmd.PersistentFlags().String("view", defaultView, "Use views when displaying data on the terminal. Disable using --view off")
 	cmd.PersistentFlags().String("timeout", "60s", "Request timeout duration, i.e. 60s, 2m")
