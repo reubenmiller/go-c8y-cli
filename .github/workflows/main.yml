@@ -49,17 +49,17 @@ jobs:
     - uses: actions/upload-artifact@v2
       with:
         name: c8y.windows.amd64
-        path: dist/windows_windows_amd64_v1/bin/c8y
+        path: dist/windows_windows_amd64_v1/bin/c8y*
 
     - uses: actions/upload-artifact@v2
       with:
         name: c8y.linux.amd64
-        path: dist/linux_linux_amd64_v1/bin/c8y
+        path: dist/linux_linux_amd64_v1/bin/c8y*
 
     - uses: actions/upload-artifact@v2
       with:
         name: c8y.macos.amd64
-        path: dist/macos_darwin_amd64_v1/bin/c8y
+        path: dist/macos_darwin_amd64_v1/bin/c8y*
 
     - uses: actions/upload-artifact@v2
       with:
@@ -104,6 +104,7 @@ jobs:
     - name: Test c8y examples
       if: ${{ true }}
       run: |
+        mv /home/runner/.local/bin/c8y* /home/runner/.local/bin/c8y || true
         chmod +x /home/runner/.local/bin/c8y
         echo "/home/runner/.local/bin" >> $GITHUB_PATH
         c8y version
