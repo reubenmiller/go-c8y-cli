@@ -149,8 +149,8 @@ RUN echo "autoload -U compinit; compinit -i" | sudo tee -a /home/$USERNAME/.zshr
 
 # CI/CD tools
 RUN  cd /tmp \
-    && command -v task || go install github.com/go-task/task/v3/cmd/task@latest \
-    && go install github.com/goreleaser/goreleaser@latest \
+    && command -v task || sudo go install github.com/go-task/task/v3/cmd/task@latest \
+    && sudo go install github.com/goreleaser/goreleaser@latest \
     && curl -fL https://getcli.jfrog.io | sudo sh \
     && sudo chmod a+x jfrog \
     && sudo mv jfrog /usr/local/bin/
