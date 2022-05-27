@@ -148,9 +148,9 @@ RUN echo "autoload -U compinit; compinit -i" | sudo tee -a /home/$USERNAME/.zshr
     # && echo "source ~/c8y.plugin.fish" >> /home/$USERNAME/.config/fish/config.fish
 
 # CI/CD tools
-RUN  cd /tmp \
-    && command -v task || sudo go install github.com/go-task/task/v3/cmd/task@latest \
-    && sudo go install github.com/goreleaser/goreleaser@latest \
+RUN cd /tmp \
+    && command -v task || sudo /usr/local/go/bin/go install github.com/go-task/task/v3/cmd/task@latest \
+    && sudo /usr/local/go/bin/go install github.com/goreleaser/goreleaser@latest \
     && curl -fL https://getcli.jfrog.io | sudo sh \
     && sudo chmod a+x jfrog \
     && sudo mv jfrog /usr/local/bin/
