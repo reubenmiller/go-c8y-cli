@@ -5,7 +5,8 @@ Function Update-TenantOptionEditable {
 Update tenant option edit setting
 
 .DESCRIPTION
-Update read-only setting of an existing tenant option Required role:: ROLE_OPTION_MANAGEMENT_ADMIN, Required tenant management Example Request:: Update access.control.allow.origin option.
+Update read-only setting of an existing tenant option
+Required role:: ROLE_OPTION_MANAGEMENT_ADMIN, Required tenant management Example Request:: Update access.control.allow.origin option.
 
 
 .LINK

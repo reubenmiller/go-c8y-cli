@@ -41,7 +41,10 @@ See the [documentation website](https://goc8ycli.netlify.app/) for instructions 
 3. Run initial setup tasks so that you can run c8y inside the dev container
 
     ```sh
-    make init_setup
+    task init_setup
+    
+    # reload your shell
+    zsh
     ```
 
 3. Add or edit a command specification (`.yaml` file) in `api/spec/yaml/`. The specifications are used to auto generate the go code
@@ -49,7 +52,7 @@ See the [documentation website](https://goc8ycli.netlify.app/) for instructions 
 4. Run the code generation and build the go binary
 
     ```sh
-    make build
+    task build
     ```
 
 5. Try out the newly built binary (it should already be added to your)
@@ -72,13 +75,13 @@ See the [documentation website](https://goc8ycli.netlify.app/) for instructions 
 1. Update the auto generated cli docs (if you have changed something)
 
     ```sh
-    make docs
+    task docs
     ```
 
 2. Launch the documentation preview
 
     ```sh
-    make gh_pages
+    task gh_pages
     ```
 
 3. View the documentation in the [browser](http:/localhost:3000)
@@ -91,8 +94,8 @@ See the [documentation website](https://goc8ycli.netlify.app/) for instructions 
 1. Build the latest version and update auto generated tests
 
     ```sh
-    make build
-    make generate_cli_tests
+    task build
+    task generate_cli_tests
     ```
 
 1. Set the c8y session that you want to use for the tests
@@ -106,17 +109,17 @@ See the [documentation website](https://goc8ycli.netlify.app/) for instructions 
 The examples included in the API specification can be validated by running the follow make task.
 
 ```sh
-make test_cli
+task test-cli
 ```
 
 ### Run all tests
 
 ```sh
-make TEST_THROTTLE_LIMIT=1 test_powershell
+task TEST_THROTTLE_LIMIT=1 test_powershell
 ```
 
 #### Running a test on a single
 
 ```sh
-make TEST_FILE_FILTER=ClientRequest test_powershell
+task TEST_FILE_FILTER=ClientRequest test_powershell
 ```

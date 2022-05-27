@@ -33,6 +33,7 @@ func NewDeleteApplicationBinaryCmd(f *cmdutil.Factory) *DeleteApplicationBinaryC
 		Use:   "deleteApplicationBinary",
 		Short: "Delete application binary",
 		Long: `Remove an application binaries related to the given application
+
 The active version can not be deleted and the server will throw an error if you try.
 `,
 		Example: heredoc.Doc(`

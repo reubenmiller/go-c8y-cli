@@ -413,7 +413,7 @@ endpoints:
 
   - name: updateEventBinary
     description: Update event binary
-    descriptionLong: >
+    descriptionLong: |
       Update an existing event binary
     method: PUT
     path: event/events/{id}/binaries
@@ -455,7 +455,7 @@ endpoints:
 
   - name: deleteEventBinary
     description: Delete event binary
-    descriptionLong: >
+    descriptionLong: |
       Delete a binary which has been attached to an event
     method: DELETE
     path: event/events/{id}/binaries

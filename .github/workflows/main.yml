@@ -21,10 +21,10 @@ jobs:
     steps:
     - uses: actions/checkout@v2
 
-    - name: Set up Go 1.16
+    - name: Set up Go 1.18
       uses: actions/setup-go@v2
       with:
-        go-version: 1.16
+        go-version: 1.18
     - name: Use Node.js 14
       uses: actions/setup-node@v1
       with:
@@ -33,24 +33,33 @@ jobs:
     - name: install tooling
       run: go install golang.org/x/tools/cmd/goimports@latest
 
+    - name: Install GoReleaser
+      uses: goreleaser/goreleaser-action@v2
+      with:
+        version: latest
+        install-only: true
+
+    - name: Install Task
+      uses: arduino/setup-task@v1
+
     - name: Build cli
-      run: make build
+      run: task build
       shell: bash
 
     - uses: actions/upload-artifact@v2
       with:
         name: c8y.windows.amd64
-        path: tools/PSc8y/Dependencies/c8y.windows*
+        path: dist/windows_windows_amd64_v1/bin/c8y*
 
     - uses: actions/upload-artifact@v2
       with:
         name: c8y.linux.amd64
-        path: tools/PSc8y/Dependencies/c8y.linux*
+        path: dist/linux_linux_amd64_v1/bin/c8y*
 
     - uses: actions/upload-artifact@v2
       with:
         name: c8y.macos.amd64
-        path: tools/PSc8y/Dependencies/c8y.macos*
+        path: dist/macos_darwin_amd64_v1/bin/c8y*
 
     - uses: actions/upload-artifact@v2
       with:
@@ -78,10 +87,13 @@ jobs:
     steps:
     - uses: actions/checkout@v2
 
-    - name: Set up Go 1.16
+    - name: Set up Go 1.18
       uses: actions/setup-go@v2
       with:
-        go-version: 1.16
+        go-version: 1.18
+
+    - name: Install Task
+      uses: arduino/setup-task@v1
 
     - uses: actions/download-artifact@v2
       id: download
@@ -92,12 +104,12 @@ jobs:
     - name: Test c8y examples
       if: ${{ true }}
       run: |
-        mv /home/runner/.local/bin/c8y.linux /home/runner/.local/bin/c8y
+        mv /home/runner/.local/bin/c8y* /home/runner/.local/bin/c8y || true
         chmod +x /home/runner/.local/bin/c8y
         echo "/home/runner/.local/bin" >> $GITHUB_PATH
         c8y version
         c8y currentuser get --select id
-        make test_cli
+        task test-cli
       shell: bash
       timeout-minutes: 10
 
@@ -122,18 +134,21 @@ jobs:
     steps:
     - uses: actions/checkout@v2
 
-    - name: Set up Go 1.16
+    - name: Set up Go 1.18
       uses: actions/setup-go@v2
       with:
-        go-version: 1.16
+        go-version: 1.18
+    
+    - name: Install Task
+      uses: arduino/setup-task@v1
 
     - name: Build powershell module
-      run: make build
+      run: task build
       shell: bash
 
     - name: Test powershell module
       if: ${{ true }}
-      run: make test
+      run: task test
       shell: bash
       timeout-minutes: 30
 

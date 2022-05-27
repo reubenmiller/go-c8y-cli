@@ -195,7 +195,7 @@
     {
       "name": "copyApplication",
       "description": "Copy application",
-      "descriptionLong": "A POST request to the 'clone' resource creates a new application based on an already existing one.\nThe properties are copied to the newly created application. For name, key and context path a 'clone' prefix is added in order to be unique.\nIf the target application is hosted and has an active version, the new application will have the active version with the same content.\nThe response contains a representation of the newly created application.\nRequired role ROLE_APPLICATION_MANAGEMENT_ADMIN\n",
+      "descriptionLong": "A POST request to the 'clone' resource creates a new application based on an already existing one.\n\nThe properties are copied to the newly created application. For name, key and context path a 'clone' prefix is added in order to be unique.\n\nIf the target application is hosted and has an active version, the new application will have the active version with the same content.\n\nThe response contains a representation of the newly created application.\n\nRequired role ROLE_APPLICATION_MANAGEMENT_ADMIN\n",
       "method": "POST",
       "path": "/application/applications/{id}/clone",
       "accept": "application/vnd.com.nsn.cumulocity.application+json",
@@ -463,7 +463,7 @@
     {
       "name": "newApplicationBinary",
       "description": "New application binary",
-      "descriptionLong": "For the applications of type microservice and web application to be available for Cumulocity platform users, a binary zip file must be uploaded.\nFor the microservice application, the zip file must consist of    * cumulocity.json - file describing the deployment\n    * image.tar - executable docker image\n\nFor the web application, the zip file must include index.html in the root directory.\n",
+      "descriptionLong": "For the applications of type microservice and web application to be available for Cumulocity platform users, a binary zip file must be uploaded.\n\nFor the microservice application, the zip file must consist of\n    * cumulocity.json - file describing the deployment\n    * image.tar - executable docker image\n\nFor the web application, the zip file must include index.html in the root directory.\n",
       "method": "POST",
       "path": "/application/applications/{id}/binaries",
       "accept": "application/vnd.com.nsn.cumulocity.managedObject+json",
@@ -572,7 +572,7 @@
       "name": "deleteApplicationBinary",
       "skip": false,
       "description": "Delete application binary",
-      "descriptionLong": "Remove an application binaries related to the given application\nThe active version can not be deleted and the server will throw an error if you try.\n",
+      "descriptionLong": "Remove an application binaries related to the given application\n\nThe active version can not be deleted and the server will throw an error if you try.\n",
       "method": "DELETE",
       "path": "/application/applications/{application}/binaries/{binaryId}",
       "alias": {

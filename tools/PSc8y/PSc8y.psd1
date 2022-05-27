@@ -343,6 +343,7 @@ FunctionsToExport = @(
 	'Get-SessionCollection',
 	'Get-SessionHomePath',
 	'Group-ClientRequests',
+	'Import-ClientBinary',
 	'Install-ClientBinary',
 	'Invoke-ClientIterator',
 	'Invoke-ClientRequest',

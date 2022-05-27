@@ -3,16 +3,221 @@ version: '3'
 # go install github.com/go-task/task/v3/cmd/task@latest
 # zsh completions: https://github.com/sawadashota/go-task-completions
 
+vars:
+  VERSION:
+    sh: git describe | sed "s/^v\?\([0-9]\{1,\}\.[0-9]\{1,\}\.[0-9]\{1,\}\).*/\1/"
+
+env:
+  C8Y_SETTINGS_CI: true
+  GITHUB_TOKEN: ""
+
+dotenv: ['.env', '{{.ENV}}/.env.', '{{.HOME}}/.env']
+
 tasks:
 
+  # ---------------------------------------------------------------
+  # Helpers
+  # ---------------------------------------------------------------
+  show-version:
+    desc: Show version
+    cmds:
+      - echo VERSION={{.VERSION}}
 
-  #
+  init_setup:
+    desc: Initialize setup
+    cmds:
+      - ./scripts/setup.sh
+      - pwsh -File ./scripts/build-powershell/install.ps1
+    deps:
+      - install_c8y
+  
+  install_c8y:
+    desc: Install c8y in dev environment
+    deps:
+      - build
+    cmds:
+      - |
+        if [ ! -f /usr/local/bin/c8y ]; then \
+          sudo ln -s "$(pwd)/tools/PSc8y/Dependencies/c8y.linux" /usr/local/bin/c8y; \
+        fi
+        cp ./tools/shell/c8y.plugin.sh ~/
+        echo "source ~/c8y.plugin.sh"  >> ~/.bashrc
+
+        echo Installed c8y successfully
+
+
+  # ---------------------------------------------------------------
+  # Docs
+  # ---------------------------------------------------------------
+  docs:
+    desc: Update all docs
+    deps:
+      - docs-powershell
+      - docs-c8y
+  
+  docs-powershell:
+    desc: Update the powershell docs
+    cmds:
+      - pwsh -File ./scripts/build-powershell/build-docs.ps1 -Recreate -OutputFolder "docs/go-c8y-cli/docs/cli/psc8y"
+    deps:
+      - build
+  
+  docs-c8y:
+    desc: create c8y documentation
+    cmds:
+      - go run ./cmd/gen-docs --website --doc-path "docs/go-c8y-cli/docs/cli/c8y"
+
+  manpages:
+    desc: create c8y man packages
+    cmds:
+      - go run ./cmd/gen-docs --man-page --doc-path "./share/man/man1/"
+
+
+  # ---------------------------------------------------------------
+  # Github pages
+  # ---------------------------------------------------------------
+  gh_pages_install:
+    desc: Install github pages dependencies for viewing docs locally
+    cmds:
+      - cd docs/go-c8y-cli && npm install
+
+  gh_pages:
+    desc: Run github pages locally
+    cmds:
+      - cd docs/go-c8y-cli && npm start
+    deps:
+      - build_gh_pages
+
+  build_gh_pages:
+    desc: build github pages
+    dir: docs/go-c8y-cli
+    cmds:
+      - npm install
+      - npm run write-translations
+      - npm run build
+
+  gh_pages_prod:
+    desc: build/serve github pages (production)
+    dir: docs/go-c8y-cli
+    cmds:
+      - npm run serve
+    deps:
+      - build_gh_pages
+
+
+  # ---------------------------------------------------------------
+  # Spec and code generation
+  # ---------------------------------------------------------------
+  update_spec:
+    desc: Update json specifications
+    cmds:
+      - ./scripts/generate-spec.sh
+    sources:
+      - api/spec/yaml/*.yaml
+    generates:
+      - api/spec/json/*.json
+  
+  generate_go_code:
+    desc: Generate go code from specifications
+    cmds:
+      - pwsh -File scripts/build-cli/build.ps1 -SkipBuildBinary
+    deps: [update_spec]
+    sources:
+      - api/spec/json/*.json
+      - scripts/**/*.ps1
+    generates:
+      - pkg/cmd/**/*.auto.go
+
+  generate_cli_tests:
+    desc: Generate CLI tests from the examples in the api specs
+    cmds:
+      - chmod +x ./scripts/build-cli-tests.sh
+      - ./scripts/build-cli-tests.sh
+    sources:
+      - cmd/gen-tests/main.go
+      - api/spec/yaml/*.yaml
+    generates:
+      - tests/auto/**/tests/*.yaml
+
+  # ---------------------------------------------------------------
+  # Linting
+  # ---------------------------------------------------------------
+  lint:
+    desc: Lint
+    cmds:
+      - golangci-lint run
+
+  # ---------------------------------------------------------------
+  # Build
+  # ---------------------------------------------------------------
+  build:
+    desc: Build
+    cmds:
+      - task: update_spec
+      - task: build_cli
+      - task: build_powershell
+      - task: generate_cli_tests
+
+  build_cli:
+    desc: Generate the cli code and build the binaries
+    cmds:
+      - pwsh -File scripts/build-cli/build.ps1
+    sources:
+      - api/spec/json/*.json
+      - scripts/**/*.ps1
+    generates:
+      - pkg/cmd/**/*.auto.go
+
+  build_powershell:
+    desc: Build the powershell module
+    cmds:
+      - pwsh -File scripts/build-powershell/build.ps1
+    sources:
+      - api/spec/json/*.json
+      - scripts/**/*.ps1
+    generates:
+      - tools/PSc8y/**/*.ps1
+
+  build_completions:
+    desc: Build completions
+    env:
+      OUTPUT_DIR: ./output
+    cmds:
+      - ./tools/shell/completion/build_completions.sh
+
+  checkout_addons:
+    desc: Checkout the go-c8y-cli-addons repository
+    env:
+      OUTPUT_DIR: ./output
+    cmds:
+      - ./tools/shell/addons/checkout_addons.sh
+
+  # ---------------------------------------------------------------
   # Tests
-  #
+  # ---------------------------------------------------------------
+  test:
+    desc: Run all tests
+    deps:
+      - test_powershell
+      - test_powershell_sessions
+
+  test_powershell:
+    desc: Run powershell tests
+    vars:
+      TEST_THROTTLE_LIMIT: 10
+      TEST_FILE_FILTER: .+
+    cmds:
+      - pwsh -ExecutionPolicy bypass -NonInteractive -File tools/PSc8y/test.parallel.ps1 -ThrottleLimit {{.TEST_THROTTLE_LIMIT}} -TestFileFilter "{{.TEST_FILE_FILTER}}" -TestFileExclude "Set-Session|Get-SessionHomePath|Login|DisableCommands|BulkOperation|activitylog|Invoke-UserLogout"
+
+  test_powershell_sessions:
+    desc: Run powershell tests which interfere with the session variable
+    cmds:
+      - pwsh -ExecutionPolicy bypass -NonInteractive -File tools/PSc8y/test.parallel.ps1 -ThrottleLimit 1 -TestFileFilter "Set-Session|Get-SessionHomePath|Login|DisableCommands|BulkOperation|activitylog|Invoke-UserLogout"
+
   install-test-dependencies:
     desc: Install test dependencies
     cmds:
-      - go get github.com/commander-cli/commander/v2/cmd/commander@v2.5.0-alpha3
+      - go install github.com/reubenmiller/commander/v3/cmd/commander@v3.0.2
     status:
       - command -v commander
 
@@ -45,3 +250,73 @@ tasks:
     cmds:
       - ./tests/scripts/setup.sh
       - ./tests/run-auto.sh {{.CLI_ARGS}}
+
+  test_installation:
+    desc: Test installation of linux packages
+    cmds:
+      - chmod +x ./tools/integration-tests/run.sh
+      - sudo ./tools/integration-tests/run.sh
+
+  # ---------------------------------------------------------------
+  # Publish
+  # ---------------------------------------------------------------
+  publish:
+    desc: Publish powershell module
+    cmds:
+      - pwsh -File ./scripts/build-powershell/publish.ps1
+
+  publish-docker:
+    desc: Publish docker c8y cli images
+    env:
+      CR_PAT: cr_pat
+      VERSION: VERSION
+    cmds:
+      - chmod +x ./scripts/publish-docker.sh
+      - sudo ./scripts/publish-docker.sh
+    deps:
+      - show-version
+      - build
+      - build-docker
+
+  publish-local-snapshot:
+    desc: Publish local snapshot release
+    cmds:
+      - goreleaser --snapshot --skip-publish --rm-dist
+
+  publish-release:
+    desc: Publish release
+    cmds:
+      - goreleaser --rm-dist
+
+  publish-linux-packages:
+    desc: Publish linux packages (apk,deb,rpm)
+    summary: |
+      Publishing requires the JFROG_APIKEY to be set
+    cmds:
+      - chmod +x ./tools/publish-packages.sh
+      - ./tools/publish-packages.sh ./dist
+
+  # ---------------------------------------------------------------
+  # Docker examples
+  # ---------------------------------------------------------------
+  run-docker-shell:
+    desc: Run shell docker image
+    cmds:
+      - |
+        sudo docker run -it --rm \
+          -e C8Y_HOST=$C8Y_HOST \
+          -e C8Y_TENANT=$C8Y_TENANT \
+          -e C8Y_USER=$C8Y_USER \
+          -e C8Y_PASSWORD=$C8Y_PASSWORD \
+          c8y-shell
+
+  run-docker-pwsh:
+    desc: Run pwsh docker image
+    cmds:
+      - |
+        sudo docker run -it --rm \
+          -e C8Y_HOST=$C8Y_HOST \
+          -e C8Y_TENANT=$C8Y_TENANT \
+          -e C8Y_USER=$C8Y_USER \
+          -e C8Y_PASSWORD=$C8Y_PASSWORD \
+          c8y-pwsh

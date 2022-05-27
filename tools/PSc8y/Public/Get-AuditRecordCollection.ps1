@@ -5,7 +5,9 @@ Function Get-AuditRecordCollection {
 Get audit record collection
 
 .DESCRIPTION
-Audit records contain information about modifications to other Cumulocity entities. For example the audit records contain each operation state transition, so they can be used to check when an operation transitioned from PENDING -> EXECUTING -> SUCCESSFUL.
+Audit records contain information about modifications to other Cumulocity entities.
+
+For example the audit records contain each operation state transition, so they can be used to check when an operation transitioned from PENDING -> EXECUTING -> SUCCESSFUL.
 
 
 .LINK

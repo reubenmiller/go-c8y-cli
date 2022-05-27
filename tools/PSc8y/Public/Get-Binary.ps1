@@ -5,7 +5,9 @@ Function Get-Binary {
 Download binary
 
 .DESCRIPTION
-Download a binary stored in Cumulocity and display it on the console. For non text based binaries or if the output should be saved to file, the output parameter should be used to write the file directly to a local file.
+Download a binary stored in Cumulocity and display it on the console. 
+
+For non text based binaries or if the output should be saved to file, the output parameter should be used to write the file directly to a local file.
 
 
 .LINK

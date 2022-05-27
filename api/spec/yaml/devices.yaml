@@ -98,9 +98,8 @@ endpoints:
 
   - name: deleteDevice
     description: Delete device
-    descriptionLong: >
-      Delete an existing device by id or name. Deleting the object will remove all of its
-      data (i.e. alarms, events, operations and measurements)
+    descriptionLong: |
+      Delete an existing device by id or name. Deleting the object will remove all of its data (i.e. alarms, events, operations and measurements)
     method: DELETE
     path: inventory/managedObjects/{id}
     accept: ''
@@ -163,7 +162,7 @@ endpoints:
 
   - name: createDevice
     description: Create device
-    descriptionLong: >
+    descriptionLong: |
       Create a device (managed object) with the special c8y_IsDevice fragment.
     method: POST
     path: inventory/managedObjects
@@ -228,7 +227,7 @@ endpoints:
 
   - name: getSupportedMeasurements
     description: Get supported measurements
-    descriptionLong: >
+    descriptionLong: |
       Returns a list of fragments (valueFragmentTypes) related to the device
     method: GET
     path: inventory/managedObjects/{device}/supportedMeasurements
@@ -268,7 +267,7 @@ endpoints:
 
   - name: getSupportedSeries
     description: Get supported measurement series
-    descriptionLong: >
+    descriptionLong: |
       Get supported measurement series/s of a device
     method: GET
     path: inventory/managedObjects/{device}/supportedSeries
