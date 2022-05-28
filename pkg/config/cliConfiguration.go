@@ -408,6 +408,8 @@ func (c *Config) bindSettings() {
 		WithBindEnv(SettingsCacheKeyAuth, true),
 		WithBindEnv(SettingsCacheMode, nil),
 		WithBindEnv(SettingsCacheDir, filepath.Join(os.TempDir(), "go-c8y-cli-cache")),
+
+		WithBindEnv(SettingsBrowser, ""),
 	)
 
 	if err != nil {
@@ -836,6 +838,11 @@ func (c *Config) IsEncryptionEnabled() bool {
 // GetString returns a string from the configuration
 func (c *Config) GetString(key string) string {
 	return c.viper.GetString(key)
+}
+
+// GetStringSlice returns a slice of strings
+func (c *Config) GetStringSlice(key string) []string {
+	return c.viper.GetStringSlice(key)
 }
 
 // GetDefaultUsername returns the default username

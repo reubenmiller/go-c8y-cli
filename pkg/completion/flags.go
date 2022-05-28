@@ -28,6 +28,15 @@ func WithValidateSet(flagName string, values ...string) Option {
 	}
 }
 
+func WithCustomValidateSet(flagName string, customFunc func() []string) Option {
+	return func(cmd *cobra.Command) *cobra.Command {
+		_ = cmd.RegisterFlagCompletionFunc(flagName, func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+			return customFunc(), cobra.ShellCompDirectiveDefault
+		})
+		return cmd
+	}
+}
+
 // WithLazyRequired marks a flag as required but does not enforce it.
 func WithLazyRequired(flagName string, values ...string) Option {
 	return func(cmd *cobra.Command) *cobra.Command {

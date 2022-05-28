@@ -1,0 +1,32 @@
+tests:
+    It opens a web browser to the url for a specific device via pipeline:
+        command: >
+          echo "12345" | c8y applications open --application devicemanagement --page control --noBrowser
+        exit-code: 0
+        stdout:
+            contains:
+              - /apps/devicemanagement/index.html#/device/12345/control
+
+    It opens a web browser to the cockpit application:
+        command: >
+          c8y applications open --application cockpit --noBrowser
+        exit-code: 0
+        stdout:
+            contains:
+              - /apps/cockpit/index.html
+
+    It opens a web browser to the administration application:
+        command: >
+          c8y applications open --application administration --noBrowser
+        exit-code: 0
+        stdout:
+            contains:
+              - /apps/administration/index.html
+
+    It opens a web browser to a custom path:
+        command: >
+          echo "12345" | c8y applications open --application devicemanagement --path "/apps/{application}/index.html#/device/{device}/custom_page" --noBrowser
+        exit-code: 0
+        stdout:
+            contains:
+              - /apps/devicemanagement/index.html#/device/12345/custom_page

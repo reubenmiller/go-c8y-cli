@@ -3,11 +3,12 @@ package open
 import (
 	"fmt"
 	"io"
+	"net/url"
+	"strings"
 
 	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/reubenmiller/go-c8y-cli/pkg/c8yfetcher"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmd/subcommand"
-	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmdutil"
 	"github.com/reubenmiller/go-c8y-cli/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
@@ -18,6 +19,11 @@ import (
 // OpenCmd command
 type OpenCmd struct {
 	*subcommand.SubCommand
+
+	application string
+	page        string
+	path        string
+	noBrowser   bool
 
 	factory *cmdutil.Factory
 }
@@ -37,6 +43,9 @@ Open the cockpit application in a local web browser
 
 $ c8y devices list | c8y applications open --application devicemanagement --page control
 Open a multiple web browser tabs in the devicemanagement application, one for each device found
+
+$ c8y devicegroups list | c8y applications open --path "/apps/cockpit/index.html#/group/{device}/subassets"
+Open a multiple web browser tabs for a list of device groups in the cockpit application
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
 			return nil
@@ -46,15 +55,47 @@ Open a multiple web browser tabs in the devicemanagement application, one for ea
 
 	cmd.SilenceUsage = true
 
-	cmd.Flags().String("application", "devicemanagement", "Application name, defaults to")
-	cmd.Flags().StringSlice("device", []string{""}, "The ManagedObject which is the source of this event. (accepts pipeline)")
-	cmd.Flags().String("page", "device-info", "Device management page to open. Only valid for a specific device")
-	cmd.Flags().String("path", "", "Custom path template which can reference values such as: {application}, {device}, {page}")
+	cmd.Flags().StringVar(&ccmd.application, "application", "devicemanagement", "Application name")
+	cmd.Flags().StringSlice("device", []string{""}, "Device to be opened up to. Only valid if the template references {device}. (accepts pipeline)")
+	cmd.Flags().StringVar(&ccmd.page, "page", "device-info", "Device management page to open. Only valid for a specific device")
+	cmd.Flags().StringVar(&ccmd.path, "path", "", "Custom path template which can reference values such as: {application}, {device}, {page}")
+	cmd.Flags().BoolVar(&ccmd.noBrowser, "noBrowser", false, "Print destination URL instead of opening the browser")
 
 	completion.WithOptions(
 		cmd,
-		completion.WithHostedApplication("application", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
-		completion.WithValidateSet("page", "device-info", "measurements", "alarms", "control", "availability", "events", "identity"),
+		completion.WithApplication("application", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
+		completion.WithCustomValidateSet("page", func() []string {
+			cfg, err := ccmd.factory.Config()
+			if err != nil {
+				return []string{}
+			}
+
+			// Allow user to override the suggested pages
+			pages := cfg.GetStringSlice(fmt.Sprintf("settings.application.%s.pages", ccmd.application))
+
+			if len(pages) > 0 {
+				return pages
+			}
+
+			// Use default values
+			return []string{
+				"alarms",
+				"availability",
+				"control",
+				"device-configuration",
+				"device-info",
+				"device-profile",
+				"events",
+				"firmware",
+				"identity",
+				"logs",
+				"measurements",
+				"remote_access",
+				"shell",
+				"software",
+			}
+		}),
+		completion.WithDevice("device", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
 	)
 
 	flags.WithOptions(
@@ -86,46 +127,19 @@ func (n *OpenCmd) RunE(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	// query parameters
-	query := flags.NewQueryTemplate()
-	err = flags.WithQueryParameters(
-		cmd,
-		query,
-		inputIterators,
-		flags.WithCustomStringSlice(func() ([]string, error) { return cfg.GetQueryParameters(), nil }, "custom"),
-	)
-	if err != nil {
-		return cmderrors.NewUserError(err)
-	}
-
-	commonOptions, err := cfg.GetOutputCommonOptions(cmd)
-	if err != nil {
-		return cmderrors.NewUserError(fmt.Sprintf("Failed to get common options. err=%s", err))
-	}
-	commonOptions.AddQueryParameters(query)
-
-	application, err := cmd.Flags().GetString("application")
-	if err != nil {
-		return err
-	}
-
 	pathTemplate := ""
-	switch application {
+	switch n.application {
 	case "devicemanagement":
-		pathTemplate = "/app/{application}/index.html#/device/{device}/{page}"
+		pathTemplate = "/apps/{application}/index.html#/device/{device}/{page}"
 
 	case "cockpit":
 		fallthrough
 	case "administration":
-		pathTemplate = "/app/{application}/index.html"
+		pathTemplate = "/apps/{application}/index.html"
 	}
 
-	if cmd.Flags().Changed("page") {
-		customPath, err := cmd.Flags().GetString("page")
-		if err != nil {
-			return err
-		}
-		pathTemplate = customPath
+	if n.path != "" {
+		pathTemplate = n.path
 	}
 
 	// path parameters
@@ -142,9 +156,9 @@ func (n *OpenCmd) RunE(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	bounded := path.IsBound()
+	bounded := inputIterators.Total > 0
 	for {
-		url, _, err := path.GetNext()
+		currentPath, _, err := path.GetNext()
 		if err != nil {
 			if err == io.EOF {
 				break
@@ -152,16 +166,19 @@ func (n *OpenCmd) RunE(cmd *cobra.Command, args []string) error {
 			return err
 		}
 
-		req, err := client.NewRequest("GET", string(url), "", nil)
+		currentURL, err := url.Parse(strings.TrimSuffix(client.BaseURL.String(), "/") + "/" + strings.TrimPrefix(string(currentPath), "/"))
 
 		if err != nil {
 			return err
 		}
 
-		if cfg.DryRun() {
-			fmt.Fprintf(n.factory.IOStreams.Out, "open %s in browser", req.URL.String())
+		if n.noBrowser {
+			fmt.Fprintf(n.factory.IOStreams.Out, "%s\n", currentURL.String())
+		} else if cfg.DryRun() {
+			fmt.Fprintf(n.factory.IOStreams.Out, "WHATIF: open %s in default browser\n", currentURL.String())
 		} else {
-			if err := n.factory.Browser.Browse(req.URL.String()); err != nil {
+			cfg.Logger.Infof("Opening web app: %s", currentURL.String())
+			if err := n.factory.Browser.Browse(currentURL.String()); err != nil {
 				return err
 			}
 		}
