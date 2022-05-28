@@ -21,7 +21,7 @@ func New(appVersion string, buildBranch string, configFunc func() (*config.Confi
 		c8yExecutable = exe
 	}
 
-	return &cmdutil.Factory{
+	f := &cmdutil.Factory{
 		IOStreams:      io,
 		Config:         configFunc,
 		Client:         clientFunc,
@@ -33,4 +33,26 @@ func New(appVersion string, buildBranch string, configFunc func() (*config.Confi
 		BuildVersion:   appVersion,
 		BuildBranch:    buildBranch,
 	}
+	f.Browser = browser(f)
+	return f
+}
+
+func browser(f *cmdutil.Factory) cmdutil.Browser {
+	io := f.IOStreams
+	return cmdutil.NewBrowser(browserLauncher(f), io.Out, io.ErrOut)
+}
+
+// Browser precedence
+// 1. browser from config
+// 2. BROWSER
+func browserLauncher(f *cmdutil.Factory) string {
+	cfg, err := f.Config()
+	if err == nil {
+
+		if cfgBrowser := cfg.Browser(); cfgBrowser != "" {
+			return cfgBrowser
+		}
+	}
+
+	return os.Getenv("BROWSER")
 }
