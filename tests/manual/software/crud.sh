@@ -8,7 +8,7 @@ NAME=${1:-""}
 VERSION=${2:-0.8.6}
 
 if [[ -z "$NAME" ]]; then
-    NAME=$( c8y template execute --template "{name: 'linux-software-typea_' + _.Char(8)}" --select name --output csv )
+    NAME=$( c8y template execute --template "{name: 'linux software-typea_' + _.Char(8)}" --select name --output csv )
 fi
 
 echo "Using software name: $NAME"
