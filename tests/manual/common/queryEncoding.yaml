@@ -31,7 +31,7 @@ tests:
     exit-code: 0
     stderr:
       contains:
-        - name+eq+'salt+%26+pepper'
+        - name+eq+%27salt+%26+pepper%27
 
   It encodes query parameters in firmware list:
     command: |
