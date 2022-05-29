@@ -15,4 +15,4 @@ tests:
     exit-code: 0
     stdout:
       exactly: |
-        /inventory/managedObjects?q=%24filter%3Dtype+eq+%27type1%27+$orderby=name
+        /inventory/managedObjects?q=%24filter%3Dtype+eq+%27type1%27+%24orderby%3Dname
