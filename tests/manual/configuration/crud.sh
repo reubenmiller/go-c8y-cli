@@ -7,7 +7,7 @@ export C8Y_SETTINGS_DEFAULTS_DRY=false
 NAME=${1:-""}
 
 if [[ -z "$NAME" ]]; then
-    NAME=$( c8y template execute --template "{name: 'linux-configuration-typea_' + _.Char(8)}" --select name --output csv )
+    NAME=$( c8y template execute --template "{name: 'linux configuration-typea_' + _.Char(8)}" --select name --output csv )
 fi
 
 echo "Using configuration name: $NAME"
