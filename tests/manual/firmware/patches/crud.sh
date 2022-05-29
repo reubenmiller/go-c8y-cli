@@ -9,7 +9,7 @@ VERSION=${2:-0.8.0}
 PATCH=${2:-0.8.1}
 
 if [[ -z "$FIRMWARE" ]]; then
-    FIRMWARE=$( c8y template execute --template "{name: 'linux-firmware-typea_' + _.Char(8)}" --select name --output csv )
+    FIRMWARE=$( c8y template execute --template "{name: 'linux firmware-typea_' + _.Char(8)}" --select name --output csv )
 fi
 
 echo "Using firmware name: $FIRMWARE"
