@@ -1,32 +1,53 @@
+config:
+  env:
+    C8Y_HOST: https://c8y.example.com/
+
 tests:
     It opens a web browser to the url for a specific device via pipeline:
         command: >
           echo "12345" | c8y applications open --application devicemanagement --page control --noBrowser
         exit-code: 0
         stdout:
-            contains:
-              - /apps/devicemanagement/index.html#/device/12345/control
+            exactly: https://c8y.example.com/apps/devicemanagement/index.html#/device/12345/control
 
     It opens a web browser to the cockpit application:
         command: >
           c8y applications open --application cockpit --noBrowser
         exit-code: 0
         stdout:
-            contains:
-              - /apps/cockpit/index.html
+            exactly: https://c8y.example.com/apps/cockpit/index.html
 
     It opens a web browser to the administration application:
         command: >
           c8y applications open --application administration --noBrowser
         exit-code: 0
         stdout:
-            contains:
-              - /apps/administration/index.html
+            exactly: https://c8y.example.com/apps/administration/index.html
 
     It opens a web browser to a custom path:
         command: >
           echo "12345" | c8y applications open --application devicemanagement --path "/apps/{application}/index.html#/device/{device}/custom_page" --noBrowser
         exit-code: 0
         stdout:
-            contains:
-              - /apps/devicemanagement/index.html#/device/12345/custom_page
+            exactly: https://c8y.example.com/apps/devicemanagement/index.html#/device/12345/custom_page
+
+    It opens a devicemanagment page without a device:
+        command: >
+          c8y applications open --application devicemanagement --noBrowser
+        exit-code: 0
+        stdout:
+            exactly: https://c8y.example.com/apps/devicemanagement/index.html#/
+
+    It opens a devicemanagment on a custom page without a device:
+        command: >
+          c8y applications open --application devicemanagement --page device --noBrowser
+        exit-code: 0
+        stdout:
+            exactly: https://c8y.example.com/apps/devicemanagement/index.html#/device
+
+    It opens a devicemanagment page with a device and custom page:
+        command: >
+          echo "12345" | c8y applications open --application devicemanagement --page control --noBrowser
+        exit-code: 0
+        stdout:
+            exactly: https://c8y.example.com/apps/devicemanagement/index.html#/device/12345/control

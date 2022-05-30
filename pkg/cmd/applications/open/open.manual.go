@@ -57,13 +57,13 @@ Open a multiple web browser tabs for a list of device groups in the cockpit appl
 
 	cmd.Flags().StringVar(&ccmd.application, "application", "devicemanagement", "Application name")
 	cmd.Flags().StringSlice("device", []string{""}, "Device to be opened up to. Only valid if the template references {device}. (accepts pipeline)")
-	cmd.Flags().StringVar(&ccmd.page, "page", "device-info", "Device management page to open. Only valid for a specific device")
+	cmd.Flags().StringVar(&ccmd.page, "page", "", "Device management page to open. Only valid for a specific device")
 	cmd.Flags().StringVar(&ccmd.path, "path", "", "Custom path template which can reference values such as: {application}, {device}, {page}")
 	cmd.Flags().BoolVar(&ccmd.noBrowser, "noBrowser", false, "Print destination URL instead of opening the browser")
 
 	completion.WithOptions(
 		cmd,
-		completion.WithApplication("application", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
+		completion.WithApplicationContext("application", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
 		completion.WithCustomValidateSet("page", func() []string {
 			cfg, err := ccmd.factory.Config()
 			if err != nil {
@@ -127,23 +127,11 @@ func (n *OpenCmd) RunE(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	pathTemplate := ""
-	switch n.application {
-	case "devicemanagement":
-		pathTemplate = "/apps/{application}/index.html#/device/{device}/{page}"
+	// path parameters: Use placeholder and set template later
+	path := flags.NewStringTemplate("")
+	path.SetAllowEmptyValues(true)
+	path.SetVariable("page", "")
 
-	case "cockpit":
-		fallthrough
-	case "administration":
-		pathTemplate = "/apps/{application}/index.html"
-	}
-
-	if n.path != "" {
-		pathTemplate = n.path
-	}
-
-	// path parameters
-	path := flags.NewStringTemplate(pathTemplate)
 	err = flags.WithPathParameters(
 		cmd,
 		path,
@@ -157,6 +145,27 @@ func (n *OpenCmd) RunE(cmd *cobra.Command, args []string) error {
 	}
 
 	bounded := inputIterators.Total > 0
+
+	// Update template based on application
+	pathTemplate := ""
+	switch {
+	case strings.Contains(n.application, "devicemanagement"):
+		if bounded {
+			pathTemplate = "/apps/{application}/index.html#/device/{device}/{page}"
+		} else {
+			pathTemplate = "/apps/{application}/index.html#/{page}"
+		}
+
+	case strings.Contains(n.application, "cockpit"), strings.Contains(n.application, "administration"):
+		pathTemplate = "/apps/{application}/index.html"
+	}
+
+	if n.path != "" {
+		pathTemplate = n.path
+	}
+
+	path.SetTemplate(pathTemplate)
+
 	for {
 		currentPath, _, err := path.GetNext()
 		if err != nil {
