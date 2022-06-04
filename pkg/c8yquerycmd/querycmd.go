@@ -15,7 +15,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func NewInventoryQueryRunner(cmd *cobra.Command, args []string, f *cmdutil.Factory, opts ...flags.C8YQueryOption) func() error {
+func NewInventoryQueryRunner(cmd *cobra.Command, args []string, f *cmdutil.Factory, opts ...flags.GetOption) func() error {
 	return func() error {
 		cfg, err := f.Config()
 		if err != nil {
@@ -35,6 +35,7 @@ func NewInventoryQueryRunner(cmd *cobra.Command, args []string, f *cmdutil.Facto
 
 		c8yQueryParts, err := flags.WithC8YQueryOptions(
 			cmd,
+			inputIterators,
 			opts...,
 		)
 

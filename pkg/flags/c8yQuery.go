@@ -3,63 +3,48 @@ package flags
 import (
 	"bytes"
 	"fmt"
+	"io"
 	"net/url"
 	"strings"
 
+	"github.com/reubenmiller/go-c8y-cli/pkg/iterator"
 	"github.com/spf13/cobra"
 )
 
-// C8YQueryOption adds values to the query parameter based on the command arguments set
-type C8YQueryOption func(cmd *cobra.Command) (string, error)
-
 // WithC8YQueryOptions applies given options to a URL Query parameters
-func WithC8YQueryOptions(cmd *cobra.Command, opts ...C8YQueryOption) ([]string, error) {
+func WithC8YQueryOptions(cmd *cobra.Command, inputIterators *RequestInputIterators, opts ...GetOption) ([]string, error) {
 	queryParts := make([]string, 0)
 	for _, opt := range opts {
-		v, err := opt(cmd)
+		name, value, err := opt(cmd, inputIterators)
+
 		if err != nil {
 			return queryParts, err
 		}
-		if v != "" {
-			queryParts = append(queryParts, v)
+
+		// use the name as an indicator of an empty value
+		if name == "" {
+			continue
+		}
+
+		switch v := value.(type) {
+		case string:
+			if v != "" {
+				queryParts = append(queryParts, v)
+			}
+		case iterator.Iterator:
+			nextvalue, _, err := v.GetNext()
+			if err != nil && err != io.EOF {
+				return queryParts, err
+			}
+			if len(nextvalue) > 0 {
+				queryParts = append(queryParts, string(nextvalue))
+			}
+		}
+		if err != nil {
+			return queryParts, err
 		}
 	}
 	return queryParts, nil
-}
-
-// WithC8YQueryFormat adds support for a format string
-func WithC8YQueryFormat(name, format string) C8YQueryOption {
-	return func(cmd *cobra.Command) (string, error) {
-		if v, err := cmd.Flags().GetString(name); err == nil {
-			if v != "" {
-				return fmt.Sprintf(format, v), nil
-			}
-		} else {
-			return "", ErrFlagDoesNotExist
-		}
-		return "", nil
-	}
-}
-
-// WithC8YQueryBool adds support for a fixed string based on a boolean argument
-func WithC8YQueryBool(name, value string) C8YQueryOption {
-	return func(cmd *cobra.Command) (string, error) {
-		if v, err := cmd.Flags().GetBool(name); err == nil {
-			if v {
-				return value, nil
-			}
-		} else {
-			return "", ErrFlagDoesNotExist
-		}
-		return "", nil
-	}
-}
-
-// WithC8YQueryFixedString returns a fixed string value
-func WithC8YQueryFixedString(value string) C8YQueryOption {
-	return func(cmd *cobra.Command) (string, error) {
-		return value, nil
-	}
 }
 
 func BuildCumulocityQuery(cmd *cobra.Command, fixedParts []string, orderBy string) func([]byte) []byte {

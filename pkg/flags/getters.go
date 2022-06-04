@@ -309,6 +309,30 @@ func WithStringValue(opts ...string) GetOption {
 	}
 }
 
+// WithOptionalStringValue adds a string value from cli arguments if the value is defined
+func WithOptionalStringValue(opts ...string) GetOption {
+	return func(cmd *cobra.Command, inputIterators *RequestInputIterators) (string, interface{}, error) {
+
+		src, dst, format := UnpackGetterOptions("%s", opts...)
+
+		if inputIterators != nil && inputIterators.PipeOptions != nil {
+			if inputIterators.PipeOptions.Name == src {
+				return WithPipelineIterator(inputIterators.PipeOptions)(cmd, inputIterators)
+			}
+		}
+
+		value, err := cmd.Flags().GetString(src)
+		if err != nil {
+			return dst, value, err
+		}
+		if value == "" {
+			// dont assign the value anywhere
+			dst = ""
+		}
+		return dst, applyFormatter(format, value), err
+	}
+}
+
 func WithVersion(fallbackSrc string, opts ...string) GetOption {
 	return func(cmd *cobra.Command, inputIterators *RequestInputIterators) (string, interface{}, error) {
 
@@ -594,7 +618,7 @@ func WithFloatValue(opts ...string) GetOption {
 // WithRelativeTimestamp adds a timestamp (string) value from cli arguments
 func WithRelativeTimestamp(opts ...string) GetOption {
 	return func(cmd *cobra.Command, inputIterators *RequestInputIterators) (string, interface{}, error) {
-		src, dst, _ := UnpackGetterOptions("", opts...)
+		src, dst, format := UnpackGetterOptions("", opts...)
 		value, err := cmd.Flags().GetString(src)
 
 		if err != nil {
@@ -612,14 +636,14 @@ func WithRelativeTimestamp(opts ...string) GetOption {
 		}
 
 		// mark iterator as unbound, so it will not increment the input iterators
-		return dst, iterator.NewRelativeTimeIterator(value, false), err
+		return dst, iterator.NewRelativeTimeIterator(value, false, format), err
 	}
 }
 
 // WithEncodedRelativeTimestamp adds a encoded timestamp (string) value from cli arguments
 func WithEncodedRelativeTimestamp(opts ...string) GetOption {
 	return func(cmd *cobra.Command, inputIterators *RequestInputIterators) (string, interface{}, error) {
-		src, dst, _ := UnpackGetterOptions("", opts...)
+		src, dst, format := UnpackGetterOptions("", opts...)
 		value, err := cmd.Flags().GetString(src)
 
 		if err != nil {
@@ -637,7 +661,7 @@ func WithEncodedRelativeTimestamp(opts ...string) GetOption {
 		}
 
 		// mark iterator as unbound, so it will not increment the input iterators
-		return dst, iterator.NewRelativeTimeIterator(value, true), err
+		return dst, iterator.NewRelativeTimeIterator(value, true, format), err
 	}
 }
 

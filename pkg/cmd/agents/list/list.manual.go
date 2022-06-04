@@ -90,11 +90,12 @@ func (n *CmdAgentList) RunE(cmd *cobra.Command, args []string) error {
 
 	c8yQueryParts, err := flags.WithC8YQueryOptions(
 		cmd,
-		flags.WithC8YQueryFixedString("(has(com_cumulocity_model_Agent))"),
-		flags.WithC8YQueryFormat("name", "(name eq '%s')"),
-		flags.WithC8YQueryFormat("type", "(type eq '%s')"),
-		flags.WithC8YQueryFormat("fragmentType", "has(%s)"),
-		flags.WithC8YQueryFormat("owner", "(owner eq '%s')"),
+		inputIterators,
+		flags.WithStaticStringValue("agent", "(has(com_cumulocity_model_Agent))"),
+		flags.WithStringValue("name", "name", "(name eq '%s')"),
+		flags.WithStringValue("type", "type", "(type eq '%s')"),
+		flags.WithStringValue("fragmentType", "fragmentType", "has(%s)"),
+		flags.WithStringValue("owner", "owner", "(owner eq '%s')"),
 	)
 
 	if err != nil {

@@ -4,6 +4,16 @@ set -ex
 
 export C8Y_SETTINGS_DEFAULTS_DRY=false
 
+createdir () {
+    # Cross-platform compatible
+    local name="${1:-"c8y-temp"}"
+    tmpdir=$(mktemp -d 2>/dev/null || mktemp -d -t "$name")
+    echo "$tmpdir"
+}
+
+export TEMP_DIR=$(createdir)
+trap "rm -Rf $TEMP_DIR" EXIT
+
 FIRMWARE=${1:-""}
 VERSION=${2:-0.8.0}
 PATCH=${2:-0.8.1}
@@ -26,9 +36,8 @@ PATCH1_ID=$( c8y firmware get --id $FIRMWARE_ID | c8y firmware patches create --
 #
 # create patch from file (get details from package name)
 #
-package_file=$(mktemp /tmp/package-XXXXXX-10.2.3.deb)
+package_file="$TEMP_DIR/package-XXXXXX-10.2.3.deb"
 echo "dummy file" > "$package_file"
-trap "rm -f $package_file" EXIT
 
 PATCH2_ID=$( c8y firmware patches create --firmware "$FIRMWARE" --file "$package_file" --dependencyVersion "$VERSION" --select "id,c8y_Patch.dependency,c8y_Firmware.version" --output csv )
 echo "$PATCH2_ID" | grep "^[0-9]\+,$VERSION,10.2.3$"

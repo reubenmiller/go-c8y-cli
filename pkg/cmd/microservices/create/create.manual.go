@@ -209,7 +209,7 @@ func (n *CmdCreate) RunE(cmd *cobra.Command, args []string) error {
 
 	if applicationName != "" {
 
-		refs, err := c8yfetcher.FindMicroservices(client, []string{applicationName}, true)
+		refs, err := c8yfetcher.FindMicroservices(client, []string{applicationName}, true, "")
 
 		if err != nil {
 			return cmderrors.NewUserError(err)

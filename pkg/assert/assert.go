@@ -22,6 +22,12 @@ func EqualJSON(t *testing.T, got []byte, want string) {
 	}
 }
 
+func Equal[T comparable](t *testing.T, wanted T, got T) {
+	if wanted != got {
+		t.Errorf(`Error. wanted=%v, got=%v`, wanted, got)
+	}
+}
+
 func OK(t *testing.T, err error) {
 	if err != nil {
 		t.Errorf(`Error. wanted=nil, got=%s`, err)
