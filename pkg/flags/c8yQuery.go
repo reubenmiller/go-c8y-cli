@@ -60,13 +60,16 @@ func BuildCumulocityQuery(cmd *cobra.Command, fixedParts []string, orderBy strin
 			existingOrderBy = []byte(orderBy)
 		}
 
-		if len(b) > 0 {
-			queryParts = append(queryParts, string(b))
-		}
-
-		if v, err := cmd.Flags().GetString("queryTemplate"); err == nil && v != "" {
-			for i := range queryParts {
-				queryParts[i] = fmt.Sprintf(v, queryParts[i])
+		if tmpl, err := cmd.Flags().GetString("queryTemplate"); err == nil && tmpl != "" {
+			if len(b) > 0 {
+				queryParts = append(queryParts, fmt.Sprintf(tmpl, b))
+			} else {
+				queryParts = append(queryParts, tmpl)
+			}
+		} else {
+			if len(b) > 0 {
+				// Template is not defined so use value as is
+				queryParts = append(queryParts, string(b))
 			}
 		}
 
@@ -82,25 +85,5 @@ func BuildCumulocityQuery(cmd *cobra.Command, fixedParts []string, orderBy strin
 			outputQuery = append(outputQuery, []byte(fmt.Sprintf(" $orderby=%s", existingOrderBy))...)
 		}
 		return outputQuery
-		// if len(query) == 0 {
-		// 	return []byte(fmt.Sprintf("$filter=%s $orderby=%s", query, orderBy))
-		// }
-		// return []byte(fmt.Sprintf("$filter=%s $orderby=%s", query, orderBy))
 	}
 }
-
-// flags.WithCustomStringValue(func(b []byte) []byte {
-
-// 	queryParts := c8yQueryParts[:]
-// 	queryParts = append(queryParts, "("+string(b)+")")
-
-// 	if v, err := cmd.Flags().GetString("queryTemplate"); err == nil && v != "" {
-// 		for i := range queryParts {
-// 			queryParts[i] = fmt.Sprintf(v, queryParts[i])
-// 		}
-// 	}
-// 	query := strings.Join(queryParts, " and ")
-// 	return []byte(fmt.Sprintf("$filter=(%s) $orderby=%s", query, orderBy))
-// }, func() string {
-// 	return "q"
-// }, "query")

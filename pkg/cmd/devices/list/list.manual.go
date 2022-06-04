@@ -106,11 +106,11 @@ func (n *CmdDevicesList) RunE(cmd *cobra.Command, args []string) error {
 	c8yQueryParts, err := flags.WithC8YQueryOptions(
 		cmd,
 		inputIterators,
-		c8yfetcher.WithDeviceGroupByNameFirstMatch(client, args, "group", "group", "bygroupid(%s)"),
 		flags.WithStringValue("name", "name", "(name eq '%s')"),
 		flags.WithStringValue("type", "type", "(type eq '%s')"),
 		flags.WithStringValue("fragmentType", "fragmentType", "has(%s)"),
 		flags.WithStringValue("owner", "owner", "(owner eq '%s')"),
+		c8yfetcher.WithDeviceGroupByNameFirstMatch(client, args, "group", "group", "bygroupid(%s)"),
 		flags.WithStringValue("availability", "availability", "(c8y_Availability.status eq '%s')"),
 		flags.WithRelativeTimestamp("lastMessageDateTo", "lastMessageDateTo", "(c8y_Availability.lastMessage le '%s')"),
 		flags.WithRelativeTimestamp("lastMessageDateFrom", "lastMessageDateFrom", "(c8y_Availability.lastMessage ge '%s')"),
