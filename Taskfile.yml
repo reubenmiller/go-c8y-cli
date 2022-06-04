@@ -150,6 +150,11 @@ tasks:
   # ---------------------------------------------------------------
   # Build
   # ---------------------------------------------------------------
+  build-fast:
+    desc: Build Fast
+    cmds:
+      - go build -o .bin/c8y cmd/c8y/main.go
+
   build:
     desc: Build
     cmds:
