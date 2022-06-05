@@ -4,9 +4,27 @@
     "version": "2.0.0",
     "tasks": [
         {
-            "label": "Build",
+            "label": "Build (incl. generate)",
             "type": "shell",
             "command": "task build",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "presentation": {
+                "echo": true,
+                "reveal": "never",
+                "focus": false,
+                "panel": "dedicated",
+                "showReuseMessage": true,
+                "clear": true
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "Build-fast (w/o generate)",
+            "type": "shell",
+            "command": "task build-fast",
             "group": {
                 "kind": "build",
                 "isDefault": true
