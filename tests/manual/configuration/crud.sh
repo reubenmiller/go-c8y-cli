@@ -4,6 +4,16 @@ set -ex
 
 export C8Y_SETTINGS_DEFAULTS_DRY=false
 
+createdir () {
+    # Cross-platform compatible
+    local name="${1:-"c8y-temp"}"
+    tmpdir=$(mktemp -d 2>/dev/null || mktemp -d -t "$name")
+    echo "$tmpdir"
+}
+
+export TEMP_DIR=$(createdir)
+trap "rm -Rf $TEMP_DIR" EXIT
+
 NAME=${1:-""}
 
 if [[ -z "$NAME" ]]; then
@@ -23,9 +33,8 @@ echo "$CONFIG1" | c8y util show --select description -o csv | grep "My custom co
 #
 # create from file
 #
-package_file=$(mktemp /tmp/package-XXXXXX.json)
+package_file="$TEMP_DIR/package-1.json"
 echo "dummy file" > "$package_file"
-trap "rm -f $package_file" EXIT
 
 CONFIG2=$( c8y configuration create --name "${NAME}_2" --file "$package_file" --select "id,url" --output csv )
 echo "$CONFIG2" | grep "^[0-9]\+,.*/inventory/binaries/[0-9]\+$"
@@ -39,9 +48,8 @@ c8y configuration update --id "$NAME" --description "Example description" --sele
 c8y configuration update --id "$NAME" --deviceType "myType" --select deviceType --output csv | grep "^myType$"
 
 # Update configuration binary
-package_file2=$(mktemp /tmp/package-XXXXXX.json)
+package_file2="$TEMP_DIR/package-2.json"
 echo "dummy file 2" > "$package_file2"
-trap "rm -f $package_file2" EXIT
 CONFIG2_ID=$( echo "$CONFIG2" | cut -d, -f1 )
 echo "$CONFIG2" | c8y configuration update --file $package_file2 --select id --output csv | grep "^$CONFIG2_ID$"
 echo "$CONFIG2" | c8y configuration get | c8y api | grep "^dummy file 2$"

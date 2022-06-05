@@ -150,6 +150,11 @@ tasks:
   # ---------------------------------------------------------------
   # Build
   # ---------------------------------------------------------------
+  build-fast:
+    desc: Build Fast
+    cmds:
+      - go build -o .bin/c8y cmd/c8y/main.go
+
   build:
     desc: Build
     cmds:
@@ -175,6 +180,11 @@ tasks:
     sources:
       - api/spec/json/*.json
       - scripts/**/*.ps1
+      - tools/PSc8y/Public-manual/*.ps1
+      - tools/PSc8y/Private/*.ps1
+      - tools/PSc8y/completions/*.ps1
+      - tools/PSc8y/utilities/*.ps1
+      - tools/PSc8y/tools/*.ps1
     generates:
       - tools/PSc8y/**/*.ps1
 

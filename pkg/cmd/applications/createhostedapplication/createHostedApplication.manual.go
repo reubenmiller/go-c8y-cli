@@ -189,7 +189,7 @@ func (n *CmdCreateHostedApplication) RunE(cmd *cobra.Command, args []string) err
 	// TODO: Use the default name value from n.Name rather then reading it from the args again.
 	log.Infof("application name: %s", appDetails.Name)
 	if appDetails.Name != "" {
-		refs, err := c8yfetcher.FindHostedApplications(client, []string{appDetails.Name}, true)
+		refs, err := c8yfetcher.FindHostedApplications(client, []string{appDetails.Name}, true, "")
 
 		if err != nil {
 			return fmt.Errorf("Failed to find hosted application. %s", err)

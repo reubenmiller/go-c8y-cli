@@ -16,3 +16,24 @@ tests:
     stdout:
       exactly: |
         /inventory/managedObjects?q=%24filter%3Dtype+eq+%27type1%27+%24orderby%3Dname
+  
+  It can build an inventory query via piped input and optional value:
+    command: |
+      echo "type1" | c8y devices list --queryTemplate "type eq '%s'" --agents --dry |
+        c8y util show --select pathEncoded
+    exit-code: 0
+    stdout:
+      exactly: |
+        /inventory/managedObjects?q=%24filter%3Dhas%28com_cumulocity_model_Agent%29+and+type+eq+%27type1%27+%24orderby%3Dname
+
+  It filters devices by availability:
+    command: |
+      c8y devices list --group 12345 --availability AVAILABLE --lastMessageDateTo -10d --lastMessageDateFrom -5d --dry |
+        c8y util show --select query
+    exit-code: 0
+    stdout:
+      contains:
+        - bygroupid(12345)
+        - c8y_Availability.status eq 'AVAILABLE'
+        - c8y_Availability.lastMessage le '
+        - c8y_Availability.lastMessage ge '

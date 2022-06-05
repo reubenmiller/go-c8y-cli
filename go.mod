@@ -45,6 +45,8 @@ require (
 
 require github.com/hashicorp/go-version v1.5.0
 
+require github.com/cli/browser v1.1.0
+
 require (
 	github.com/VividCortex/ewma v1.2.0 // indirect
 	github.com/acarl005/stripansi v0.0.0-20180116102854-5a71ef0e047d // indirect

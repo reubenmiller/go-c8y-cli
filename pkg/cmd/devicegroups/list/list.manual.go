@@ -90,12 +90,13 @@ func (n *CmdList) getDeviceGroupCollection(cmd *cobra.Command, args []string) er
 
 	c8yQueryParts, err := flags.WithC8YQueryOptions(
 		cmd,
-		flags.WithC8YQueryFixedString("(has(c8y_IsDeviceGroup))"),
-		flags.WithC8YQueryFormat("name", "(name eq '%s')"),
-		flags.WithC8YQueryFormat("type", "(type eq '%s')"),
-		flags.WithC8YQueryFormat("fragmentType", "has(%s)"),
-		flags.WithC8YQueryFormat("owner", "(owner eq '%s')"),
-		flags.WithC8YQueryBool("excludeRootGroup", "not(type eq 'c8y_DeviceGroup')"),
+		inputIterators,
+		flags.WithStaticStringValue("devicegroup", "(has(c8y_IsDeviceGroup))"),
+		flags.WithStringValue("name", "name", "(name eq '%s')"),
+		flags.WithStringValue("type", "type", "(type eq '%s')"),
+		flags.WithStringValue("fragmentType", "fragmentType", "has(%s)"),
+		flags.WithStringValue("owner", "owner", "(owner eq '%s')"),
+		flags.WithBoolValue("excludeRootGroup", "excludeRootGroup", "not(type eq 'c8y_DeviceGroup')"),
 	)
 
 	if err != nil {
@@ -155,7 +156,7 @@ func (n *CmdList) getDeviceGroupCollection(cmd *cobra.Command, args []string) er
 	formData := make(map[string]io.Reader)
 
 	// body
-	body := mapbuilder.NewInitializedMapBuilder()
+	body := mapbuilder.NewInitializedMapBuilder(false)
 
 	// path parameters
 	path := flags.NewStringTemplate("inventory/managedObjects")

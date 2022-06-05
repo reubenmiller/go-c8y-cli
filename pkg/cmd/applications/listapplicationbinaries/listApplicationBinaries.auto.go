@@ -130,7 +130,7 @@ func (n *ListApplicationBinariesCmd) RunE(cmd *cobra.Command, args []string) err
 	}
 
 	// body
-	body := mapbuilder.NewInitializedMapBuilder()
+	body := mapbuilder.NewInitializedMapBuilder(false)
 	err = flags.WithBody(
 		cmd,
 		body,

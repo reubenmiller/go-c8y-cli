@@ -86,6 +86,16 @@ tests:
                 path: /inventory
                 body.value: one
     
+    It supports DELETE without a body:
+        command: >
+          c8y api --method delete --url "/inventory" --dry --dryFormat markdown
+        exit-code: 0
+        stdout:
+            contains:
+              - DELETE /inventory
+            not-contains:
+              - Body
+    
     It supports PATCH commands:
         command: >
           c8y api --method patch --url "/inventory" --dry

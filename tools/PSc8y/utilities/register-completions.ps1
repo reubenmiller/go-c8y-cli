@@ -57,10 +57,17 @@ $CommandsWithUserId = @(
 )
 Register-ArgumentCompleter -CommandName $CommandsWithUserId -ParameterName Id -ScriptBlock $script:CompleteUser
 
+$CommandsWithUserTOTPSecretId = @(
+    "Remove-UserTOTPSecret"
+)
+Register-ArgumentCompleter -CommandName $CommandsWithUserTOTPSecretId -ParameterName Id -ScriptBlock $script:CompleteUser
+
 $CommandsWithUser = @(
     "Add-RoleToUser",
     "Add-UserToGroup",
+    "Get-ApplicationCollection",
     "Get-AuditRecordCollection",
+    "Get-MicroserviceCollection",
     "Get-RoleReferenceCollectionFromUser",
     "New-AuditRecord",
     "Remove-RoleFromUser",
@@ -70,10 +77,47 @@ Register-ArgumentCompleter -CommandName $CommandsWithUser -ParameterName User -S
 
 $CommandsWithDeviceGroupId = @(
     "Get-DeviceGroup",
+    "Get-DeviceGroupChildAssetCollection",
     "Remove-DeviceGroup",
     "Update-DeviceGroup"
 )
 Register-ArgumentCompleter -CommandName $CommandsWithDeviceGroupId -ParameterName Id -ScriptBlock $script:CompleteDeviceGroup
+
+$CommandsWithNewChildGroup = @(
+    "Add-AssetToGroup",
+    "Add-ChildGroupToGroup"
+)
+Register-ArgumentCompleter -CommandName $CommandsWithNewChildGroup -ParameterName NewChildGroup -ScriptBlock $script:CompleteDeviceGroup
+
+$CommandsWithRemoveGroupFromGroupId = @(
+    "Remove-GroupFromGroup"
+)
+Register-ArgumentCompleter -CommandName $CommandsWithRemoveGroupFromGroupId -ParameterName Id -ScriptBlock $script:CompleteDeviceGroup
+
+$CommandsWithRemoveGroupFromGroupChild = @(
+    "Remove-GroupFromGroup"
+)
+Register-ArgumentCompleter -CommandName $CommandsWithRemoveGroupFromGroupChild -ParameterName Child -ScriptBlock $script:CompleteDeviceGroup
+
+$CommandsWithAssetToGroupGroup = @(
+    "Add-AssetToGroup"
+)
+Register-ArgumentCompleter -CommandName $CommandsWithAssetToGroupGroup -ParameterName Group -ScriptBlock $script:CompleteDeviceGroup
+
+$CommandsWithChildGroupToGroupGroup = @(
+    "Add-ChildGroupToGroup"
+)
+Register-ArgumentCompleter -CommandName $CommandsWithChildGroupToGroupGroup -ParameterName Group -ScriptBlock $script:CompleteDeviceGroup
+
+$CommandsWithDeviceToGroupGroup = @(
+    "Add-DeviceToGroup"
+)
+Register-ArgumentCompleter -CommandName $CommandsWithDeviceToGroupGroup -ParameterName Group -ScriptBlock $script:CompleteDeviceGroup
+
+$CommandsWithDeviceFromGroupGroup = @(
+    "Remove-DeviceFromGroup"
+)
+Register-ArgumentCompleter -CommandName $CommandsWithDeviceFromGroupGroup -ParameterName Group -ScriptBlock $script:CompleteDeviceGroup
 
 $CommandsWithMeasurementValueFragmentType = @(
     "Get-MeasurementCollection"
@@ -103,17 +147,16 @@ Register-ArgumentCompleter -CommandName $CommandsWithAddRoleToGroupGroup -Parame
 $CommandsWithAssetToGroupGroup = @(
     "Add-AssetToGroup"
 )
-Register-ArgumentCompleter -CommandName $CommandsWithAssetToGroupGroup -ParameterName *Group* -ScriptBlock $script:CompleteDeviceGroup
+Register-ArgumentCompleter -CommandName $CommandsWithAssetToGroupGroup -ParameterName Group -ScriptBlock $script:CompleteDeviceGroup
 
 $CommandsWithDevice = @(
-    "Add-AssetToGroup",
     "Add-ChildDeviceToDevice",
-    "Add-DeviceToGroup",
     "Get-AlarmCollection",
-    "Get-ChildAssetCollection",
+    "Get-AlarmCount",
     "Get-ChildDeviceCollection",
     "Get-ChildDeviceReference",
     "Get-DeviceParent",
+    "Get-DeviceStatisticsCollection",
     "Get-EventCollection",
     "Get-ExternalIdCollection",
     "Get-MeasurementCollection",
@@ -121,26 +164,24 @@ $CommandsWithDevice = @(
     "Get-OperationCollection",
     "Get-SupportedMeasurements",
     "Get-SupportedSeries",
-    "Get-UserCollection",
+    "Install-FirmwareVersion",
+    "Install-SoftwareVersion",
     "New-Alarm",
     "New-Event",
     "New-ExternalId",
     "New-Measurement",
     "New-Operation",
     "New-TestAlarm",
-    "New-TestDeviceGroup",
     "New-TestEvent",
     "New-TestMeasurement",
     "New-TestOperation",
     "Open-Website",
     "Remove-AlarmCollection",
-    "Remove-AssetFromGroup",
     "Remove-ChildDeviceFromDevice",
-    "Remove-DeviceFromGroup",
     "Remove-EventCollection",
     "Remove-MeasurementCollection",
     "Remove-OperationCollection",
-    "Set-DeviceRequiredAvailability",
+    "Remove-SoftwareVersion",
     "Update-AlarmCollection",
     "Watch-Alarm",
     "Watch-Event",
@@ -149,15 +190,30 @@ $CommandsWithDevice = @(
     "Watch-NotificationChannel",
     "Watch-Operation"
 )
-Register-ArgumentCompleter -CommandName $CommandsWithDevice -ParameterName *Device* -ScriptBlock $CompleteDevice
+Register-ArgumentCompleter -CommandName $CommandsWithDevice -ParameterName Device -ScriptBlock $script:CompleteDevice
+
+$CommandsWithDeviceRequiredAvailabilityId = @(
+    "Set-DeviceRequiredAvailability"
+)
+Register-ArgumentCompleter -CommandName $CommandsWithDeviceRequiredAvailabilityId -ParameterName Id -ScriptBlock $script:CompleteDevice
+
+$CommandsWithNewChildDevice = @(
+    "Add-AssetToGroup",
+    "Add-DeviceToGroup"
+)
+Register-ArgumentCompleter -CommandName $CommandsWithNewChildDevice -ParameterName NewChildDevice -ScriptBlock $script:CompleteDevice
+
+$CommandsWithChildDevice = @(
+    "Remove-ChildDeviceFromDevice",
+    "Remove-DeviceFromGroup"
+)
+Register-ArgumentCompleter -CommandName $CommandsWithChildDevice -ParameterName ChildDevice -ScriptBlock $script:CompleteDevice
 
 $CommandsWithAgent = @(
-    "Get-DeviceCollection",
     "Get-OperationCollection",
-    "New-TestDevice",
     "Remove-OperationCollection"
 )
-Register-ArgumentCompleter -CommandName $CommandsWithAgent -ParameterName *Agent* -ScriptBlock $CompleteAgent
+Register-ArgumentCompleter -CommandName $CommandsWithAgent -ParameterName Agent -ScriptBlock $script:CompleteAgent
 
 $CommandsWithTenant = @(
     "Add-RoleToGroup",
@@ -168,6 +224,7 @@ $CommandsWithTenant = @(
     "Enable-Application",
     "Enable-Microservice",
     "Get-ApplicationReferenceCollection",
+    "Get-DeviceStatisticsCollection",
     "Get-RoleReferenceCollectionFromGroup",
     "Get-RoleReferenceCollectionFromUser",
     "Get-User",
@@ -186,6 +243,7 @@ $CommandsWithTenant = @(
     "Remove-User",
     "Remove-UserFromGroup",
     "Remove-UserGroup",
+    "Remove-UserTOTPSecret",
     "Reset-UserPassword",
     "Update-User",
     "Update-UserGroup"

@@ -281,6 +281,9 @@ const (
 
 	// SettingsDefaultsInsecure allow insecure SSL connections
 	SettingsDefaultsInsecure = "settings.defaults.insecure"
+
+	// SettingsBrowser default browser
+	SettingsBrowser = "settings.browser"
 )
 
 var (
@@ -405,6 +408,8 @@ func (c *Config) bindSettings() {
 		WithBindEnv(SettingsCacheKeyAuth, true),
 		WithBindEnv(SettingsCacheMode, nil),
 		WithBindEnv(SettingsCacheDir, filepath.Join(os.TempDir(), "go-c8y-cli-cache")),
+
+		WithBindEnv(SettingsBrowser, ""),
 	)
 
 	if err != nil {
@@ -833,6 +838,11 @@ func (c *Config) IsEncryptionEnabled() bool {
 // GetString returns a string from the configuration
 func (c *Config) GetString(key string) string {
 	return c.viper.GetString(key)
+}
+
+// GetStringSlice returns a slice of strings
+func (c *Config) GetStringSlice(key string) []string {
+	return c.viper.GetStringSlice(key)
 }
 
 // GetDefaultUsername returns the default username
@@ -1298,6 +1308,11 @@ func (c *Config) CacheKeyIncludeAuth() bool {
 // SkipSSLVerify skip SSL verify
 func (c *Config) SkipSSLVerify() bool {
 	return c.viper.GetBool(SettingsDefaultsInsecure)
+}
+
+// Browser get default web browser
+func (c *Config) Browser() string {
+	return c.viper.GetString(SettingsBrowser)
 }
 
 // GetJSONSelect get json properties to be selected from the output. Only the given properties will be returned

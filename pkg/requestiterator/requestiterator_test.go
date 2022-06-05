@@ -13,7 +13,7 @@ func Test_RequestIteratorWithBodyIterator(t *testing.T) {
 	var err error
 	pathIter := iterator.NewRepeatIterator("root/subpath", 0)
 	valueIter := iterator.NewSliceIterator([]string{"1", "2"})
-	body := mapbuilder.NewInitializedMapBuilder()
+	body := mapbuilder.NewInitializedMapBuilder(true)
 	err = body.Set("nested.value", valueIter)
 	assert.OK(t, err)
 	options := &c8y.RequestOptions{

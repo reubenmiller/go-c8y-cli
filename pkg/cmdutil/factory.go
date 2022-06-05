@@ -26,8 +26,13 @@ import (
 	"github.com/tidwall/gjson"
 )
 
+type Browser interface {
+	Browse(string) error
+}
+
 type Factory struct {
 	IOStreams      *iostreams.IOStreams
+	Browser        Browser
 	Client         func() (*c8y.Client, error)
 	Config         func() (*config.Config, error)
 	Logger         func() (*logger.Logger, error)

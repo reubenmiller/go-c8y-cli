@@ -17,6 +17,9 @@ foreach ($iFile in $SpecFiles) {
     New-C8yPowershellApi $iFile.FullName -OutputDir "$BaseDir/Public"
 }
 
+Write-Verbose "Building completions"
+Import-Module "$PSScriptRoot/../../tools/PSc8y/tools/build.completions.ps1" -Force
+
 #
 # Build the c8y cli binaries for each environment
 #

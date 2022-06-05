@@ -293,11 +293,14 @@ func NewMapBuilder() *MapBuilder {
 }
 
 // NewInitializedMapBuilder creates a new map builder with the map set to an empty map
-func NewInitializedMapBuilder() *MapBuilder {
+func NewInitializedMapBuilder(initBody bool) *MapBuilder {
 	builder := NewMapBuilder()
 	builder.templates = make([]string, 0)
 	builder.autoApplyTemplate = true
-	builder.SetEmptyMap()
+
+	if initBody {
+		builder.SetEmptyMap()
+	}
 	return builder
 }
 
@@ -351,6 +354,38 @@ type MapBuilder struct {
 	autoApplyTemplate bool
 	templates         []string
 	externalInput     []byte
+}
+
+func (b *MapBuilder) HasChanged() bool {
+	if len(b.templateVariables) > 0 {
+		return true
+	}
+
+	if len(b.templates) > 0 {
+		return true
+	}
+
+	if b.file != "" {
+		return true
+	}
+
+	if b.HasRaw() {
+		if b.raw != "" {
+			return true
+		}
+	}
+
+	if len(b.BodyRaw) > 0 {
+		return true
+		// if !bytes.Equal(b.BodyRaw, []byte("{}")) {
+		// }
+	}
+
+	if len(b.bodyOptional) > 0 {
+		return true
+	}
+
+	return false
 }
 
 // AppendTemplate appends a templates to be merged in with the body
@@ -642,6 +677,9 @@ func (b *MapBuilder) MarshalJSONWithInput(input interface{}) (body []byte, err e
 
 // MarshalJSON returns the body as json
 func (b *MapBuilder) MarshalJSON() (body []byte, err error) {
+	if !b.HasChanged() {
+		return nil, nil
+	}
 	body = []byte(b.BodyRaw)
 
 	for _, it := range b.bodyIterators {

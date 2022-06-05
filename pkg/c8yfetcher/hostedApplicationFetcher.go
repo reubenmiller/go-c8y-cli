@@ -93,10 +93,10 @@ func (f *HostedApplicationFetcher) getByName(name string) ([]fetcherResultSet, e
 // FindHostedApplications returns hosted applications given either an id or search text
 // @values: An array of ids, or names (with wildcards)
 // @lookupID: Lookup the data if an id is given. If a non-id text is given, the result will always be looked up.
-func FindHostedApplications(client *c8y.Client, values []string, lookupID bool) ([]entityReference, error) {
+func FindHostedApplications(client *c8y.Client, values []string, lookupID bool, format string) ([]entityReference, error) {
 	f := NewHostedApplicationFetcher(client)
 
-	formattedValues, err := lookupEntity(f, values, lookupID)
+	formattedValues, err := lookupEntity(f, values, lookupID, format)
 
 	if err != nil {
 		return nil, err

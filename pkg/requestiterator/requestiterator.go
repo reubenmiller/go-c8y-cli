@@ -160,16 +160,20 @@ func (r *RequestIterator) GetNext() (*c8y.RequestOptions, interface{}, error) {
 					return nil, nil, err
 				}
 
-				// TODO: Find more efficient way rather than converting to and from json
-				bodyValue := make(map[string]interface{})
+				if len(bodyContents) > 0 {
+					// TODO: Find more efficient way rather than converting to and from json
+					bodyValue := make(map[string]interface{})
 
-				// Note: UnmarshalJSON does not support large numbers by default, so
-				// 		 c8y.DecodeJSONBytes should be used instead!
-				if err := c8y.DecodeJSONBytes(bodyContents, &bodyValue); err != nil {
-					r.setDone()
-					return nil, nil, err
+					// Note: UnmarshalJSON does not support large numbers by default, so
+					// 		 c8y.DecodeJSONBytes should be used instead!
+					if err := c8y.DecodeJSONBytes(bodyContents, &bodyValue); err != nil {
+						r.setDone()
+						return nil, nil, err
+					}
+					req.Body = bodyValue
+				} else {
+					req.Body = nil
 				}
-				req.Body = bodyValue
 			}
 		default:
 			req.Body = v

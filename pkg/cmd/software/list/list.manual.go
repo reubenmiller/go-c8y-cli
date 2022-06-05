@@ -41,10 +41,10 @@ Get a list of software packages starting with "python3"
 				cmd,
 				args,
 				ccmd.factory,
-				flags.WithC8YQueryFixedString("(type eq 'c8y_Software')"),
-				flags.WithC8YQueryFormat("name", "(name eq '%s')"),
-				flags.WithC8YQueryFormat("deviceType", "(c8y_Filter.type eq '%s')"),
-				flags.WithC8YQueryFormat("description", "(description eq '%s')"),
+				flags.WithStaticStringValue("dummy", "(type eq 'c8y_Software')"),
+				flags.WithStringValue("name", "name", "(name eq '%s')"),
+				flags.WithStringValue("deviceType", "deviceType", "(c8y_Filter.type eq '%s')"),
+				flags.WithStringValue("description", "description", "(description eq '%s')"),
 			)
 			return handler()
 		},
