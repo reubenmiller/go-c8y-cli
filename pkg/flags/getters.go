@@ -309,30 +309,6 @@ func WithStringValue(opts ...string) GetOption {
 	}
 }
 
-// WithOptionalStringValue adds a string value from cli arguments if the value is defined
-func WithOptionalStringValue(opts ...string) GetOption {
-	return func(cmd *cobra.Command, inputIterators *RequestInputIterators) (string, interface{}, error) {
-
-		src, dst, format := UnpackGetterOptions("%s", opts...)
-
-		if inputIterators != nil && inputIterators.PipeOptions != nil {
-			if inputIterators.PipeOptions.Name == src {
-				return WithPipelineIterator(inputIterators.PipeOptions)(cmd, inputIterators)
-			}
-		}
-
-		value, err := cmd.Flags().GetString(src)
-		if err != nil {
-			return dst, value, err
-		}
-		if value == "" {
-			// dont assign the value anywhere
-			dst = ""
-		}
-		return dst, applyFormatter(format, value), err
-	}
-}
-
 func WithVersion(fallbackSrc string, opts ...string) GetOption {
 	return func(cmd *cobra.Command, inputIterators *RequestInputIterators) (string, interface{}, error) {
 
@@ -668,7 +644,7 @@ func WithEncodedRelativeTimestamp(opts ...string) GetOption {
 // WithRelativeDate adds a date (only, no time) (string) value from cli arguments
 func WithRelativeDate(encode bool, opts ...string) GetOption {
 	return func(cmd *cobra.Command, inputIterators *RequestInputIterators) (string, interface{}, error) {
-		src, dst, _ := UnpackGetterOptions("", opts...)
+		src, dst, format := UnpackGetterOptions("", opts...)
 		value, err := cmd.Flags().GetString(src)
 
 		if err != nil {
@@ -686,7 +662,7 @@ func WithRelativeDate(encode bool, opts ...string) GetOption {
 		}
 
 		// mark iterator as unbound, so it will not increment the input iterators
-		return dst, iterator.NewRelativeDateIterator(value, encode, "2006-01-02"), err
+		return dst, iterator.NewRelativeDateIterator(value, encode, "2006-01-02", format), err
 	}
 }
 
