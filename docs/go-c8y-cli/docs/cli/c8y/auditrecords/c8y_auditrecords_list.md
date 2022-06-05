@@ -6,7 +6,9 @@ Get audit record collection
 
 ### Synopsis
 
-Audit records contain information about modifications to other Cumulocity entities. For example the audit records contain each operation state transition, so they can be used to check when an operation transitioned from PENDING -> EXECUTING -> SUCCESSFUL.
+Audit records contain information about modifications to other Cumulocity entities.
+
+For example the audit records contain each operation state transition, so they can be used to check when an operation transitioned from PENDING -> EXECUTING -> SUCCESSFUL.
 
 
 ```
@@ -52,7 +54,7 @@ Get a list of audit records
       --dry                        Dry run. Don't send any data to the server
       --dryFormat string           Dry run output format. i.e. json, dump, markdown or curl (default "markdown")
       --examples                   Show examples for the current command
-      --filter strings             Apply a client side filter to response before returning it to the user
+      --filter stringArray         Apply a client side filter to response before returning it to the user
       --flatten                    flatten json output by replacing nested json properties with properties where their names are represented by dot notation
   -f, --force                      Do not prompt for confirmation. Ignored when using --confirm
   -H, --header strings             custom headers. i.e. --header "Accept: value, AnotherHeader: myvalue"

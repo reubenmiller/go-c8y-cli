@@ -6,7 +6,9 @@ Download binary
 
 ### Synopsis
 
-Download a binary stored in Cumulocity and display it on the console. For non text based binaries or if the output should be saved to file, the output parameter should be used to write the file directly to a local file.
+Download a binary stored in Cumulocity and display it on the console. 
+
+For non text based binaries or if the output should be saved to file, the output parameter should be used to write the file directly to a local file.
 
 
 ```
@@ -49,7 +51,7 @@ Get a binary and save it to a file
       --dry                        Dry run. Don't send any data to the server
       --dryFormat string           Dry run output format. i.e. json, dump, markdown or curl (default "markdown")
       --examples                   Show examples for the current command
-      --filter strings             Apply a client side filter to response before returning it to the user
+      --filter stringArray         Apply a client side filter to response before returning it to the user
       --flatten                    flatten json output by replacing nested json properties with properties where their names are represented by dot notation
   -f, --force                      Do not prompt for confirmation. Ignored when using --confirm
   -H, --header strings             custom headers. i.e. --header "Accept: value, AnotherHeader: myvalue"

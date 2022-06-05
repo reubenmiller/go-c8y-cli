@@ -1,12 +1,12 @@
 ---
 category: Sessions
 external help file: PSc8y-help.xml
-id: Clear-Session
+id: clear-session
 Module Name: PSc8y
 online version:
 schema: 2.0.0
 slug: /docs/cli/psc8y/Sessions/clear-session
-title: Clear-Session
+title: clear-session
 ---
 
 
@@ -17,7 +17,7 @@ Clear the active Cumulocity Session
 ## SYNTAX
 
 ```
-Clear-Session
+clear-session
 	[<CommonParameters>]
 ```
 

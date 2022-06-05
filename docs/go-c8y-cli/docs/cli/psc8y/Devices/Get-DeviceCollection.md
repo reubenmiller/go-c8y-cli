@@ -22,7 +22,12 @@ Get-DeviceCollection
 	[[-Type] <String>]
 	[[-FragmentType] <String>]
 	[[-Owner] <String>]
+	[[-Availability] <String>]
+	[[-LastMessageDateFrom] <String>]
+	[[-LastMessageDateTo] <String>]
+	[[-Group] <String>]
 	[[-Query] <String>]
+	[[-QueryTemplate] <String>]
 	[[-OrderBy] <String>]
 	[-Agents]
 	[-WithParents]
@@ -164,6 +169,66 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
+### -Availability
+Availability.
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 5
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -LastMessageDateFrom
+LastMessageDateFrom - c8y_Availability.lastMessage filter
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 6
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -LastMessageDateTo
+LastMessageDateTo - c8y_Availability.lastMessage filter
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 7
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -Group
+Group.
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 8
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
 ### -Query
 Query.
 
@@ -173,7 +238,22 @@ Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: 5
+Position: 9
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -QueryTemplate
+QueryTemplate.
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 10
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
@@ -190,7 +270,7 @@ Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: 6
+Position: 11
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False

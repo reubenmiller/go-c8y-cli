@@ -69,6 +69,7 @@ Remove-ApplicationBinary
 
 ## DESCRIPTION
 Remove an application binaries related to the given application
+
 The active version can not be deleted and the server will throw an error if you try.
 
 ## EXAMPLES

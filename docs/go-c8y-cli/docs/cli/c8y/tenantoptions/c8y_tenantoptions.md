@@ -6,11 +6,11 @@ Cumulocity tenantOptions
 
 ### Synopsis
 
-<
 REST endpoint to interact with Cumulocity tenantOptions
 Options are category-key-value tuples, storing tenant configuration. Some categories of options allow creation of new one, other are limited to predefined set of keys.
 
 Any option of any tenant can be defined as "non-editable" by "management" tenant. Afterwards, any PUT or DELETE requests made on that option by the owner tenant, will result in 403 error (Unauthorized).
+
 
 ### Options
 
@@ -36,7 +36,7 @@ Any option of any tenant can be defined as "non-editable" by "management" tenant
       --dry                        Dry run. Don't send any data to the server
       --dryFormat string           Dry run output format. i.e. json, dump, markdown or curl (default "markdown")
       --examples                   Show examples for the current command
-      --filter strings             Apply a client side filter to response before returning it to the user
+      --filter stringArray         Apply a client side filter to response before returning it to the user
       --flatten                    flatten json output by replacing nested json properties with properties where their names are represented by dot notation
   -f, --force                      Do not prompt for confirmation. Ignored when using --confirm
   -H, --header strings             custom headers. i.e. --header "Accept: value, AnotherHeader: myvalue"
