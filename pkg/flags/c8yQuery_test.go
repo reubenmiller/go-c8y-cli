@@ -37,5 +37,5 @@ func Test_RelativeTimeIteratorWithFormatter(t *testing.T) {
 	assert.OK(t, err)
 
 	output := strings.Join(c8yQueryParts, " and ")
-	assert.Equal(t, "(has(com_cumulocity_model_Agent)) and (name eq 'value1') and has(value2)", output)
+	assert.Equal(t, output, "(has(com_cumulocity_model_Agent)) and (name eq 'value1') and has(value2)")
 }
