@@ -1,0 +1,77 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/reubenmiller/commander/feat/handle-nested-files/schema.json
+
+config:
+  env:
+    C8Y_SETTINGS_DEFAULTS_CACHE: true
+    C8Y_SETTINGS_CACHE_METHODS: GET POST PUT
+    C8Y_SETTINGS_DEFAULTS_CACHETTL: 100h
+    C8Y_SETTINGS_DEFAULTS_DRY: true
+    C8Y_SETTINGS_DEFAULTS_DRYFORMAT: json
+
+tests:
+  It creates an operation with nested values:
+    command: |
+      c8y operations create \
+        --device 1234 \
+        --description "Restart device" \
+        --data manual/operations/create/nested.json |
+      c8y util show --select method,pathEncoded,body --compact=false
+    exit-code: 0
+    stdout:
+      exactly: |
+        {
+          "body": {
+            "c8y_Nested": {
+              "type1": {
+                "names": {
+                  "sorted": {
+                    "values": [1, 2, 3]
+                  }
+                }
+              }
+            },
+            "description": "Restart device",
+            "deviceId": "1234"
+          },
+          "method": "POST",
+          "pathEncoded": "/devicecontrol/operations"
+        }
+
+  It creates an operation using the device's name:
+    command: |
+      c8y operations create \
+        --device "agent01" \
+        --description "Restart device" \
+        --data "{\"c8y_Restart\":{}}" |
+      c8y util show --select method,pathEncoded,body --compact=false
+    exit-code: 0
+    stdout:
+      json:
+        method: "POST"
+        pathEncoded: "/devicecontrol/operations"
+        body.c8y_Restart: '{}'
+        body.deviceId: r/^\d+$
+        body.description: Restart device
+
+  It overrides piped input with explicit device:
+    command: |
+      c8y template execute --template "{deviceId: '12345', c8y_Restart: {}}" |
+      c8y operations create \
+        --device "12345" \
+        --template "{v: input.value}" |
+      c8y util show --select method,pathEncoded,body --compact=false
+    exit-code: 0
+    stdout:
+      exactly: |
+        {
+          "body": {
+            "deviceId": "12345",
+            "v": {
+              "c8y_Restart": {},
+              "deviceId": "12345"
+            }
+          },
+          "method": "POST",
+          "pathEncoded": "/devicecontrol/operations"
+        }
+

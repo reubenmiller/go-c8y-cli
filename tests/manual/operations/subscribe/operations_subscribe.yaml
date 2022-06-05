@@ -1,0 +1,12 @@
+tests:
+  It watches operations for a time period:
+    command: ./manual/operations/subscribe/subscribe_tests.sh operations 1
+    exit-code: 0
+  
+  It watches operations for a specific count:
+    command: ./manual/operations/subscribe/subscribe_tests.sh operations 2
+    exit-code: 0
+  
+  It watches for all devices and stop after receiving x messages:
+    command: ./manual/operations/subscribe/subscribe_tests.sh operations 3
+    exit-code: 0

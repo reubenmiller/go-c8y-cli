@@ -1,0 +1,19 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/reubenmiller/commander/feat/handle-nested-files/schema.json
+# Merge function
+tests:
+
+  It processes json line input:
+    command: |
+      c8y template execute --template "{id: '1', name: 'device01'}" |
+      c8y util show --select id,name --output csv
+    exit-code: 0
+    stdout:
+      exactly: 1,device01
+
+  It ignores/filters out non json input:
+    command: |
+      echo 'non value' |
+      c8y util show --select id,name --output csv
+    exit-code: 0
+    stdout:
+      match-pattern: '^$'

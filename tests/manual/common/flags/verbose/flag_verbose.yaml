@@ -1,0 +1,13 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/reubenmiller/commander/feat/handle-nested-files/schema.json
+
+config:
+  env:
+    C8Y_SETTINGS_LOGGER_HIDESENSITIVE: true
+tests:
+  It should exclude the Accept header return an object when using POST:
+    command: |
+      c8y inventory list --pageSize 1 --verbose
+    exit-code: 0
+    stderr:
+      contains:
+        - 'Sending request: GET https://{host}/inventory/managedObjects?pageSize=1'

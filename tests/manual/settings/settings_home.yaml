@@ -1,0 +1,15 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/reubenmiller/commander/feat/handle-nested-files/schema.json
+config:
+  env:
+    C8Y_SETTINGS_DEFAULTS_CACHE: true
+
+tests:
+  It gets session home folder:
+    config:
+      env:
+        C8Y_SESSION_HOME: /tmp/example-session-home
+    command: |
+      c8y settings list --select session.home --output csv
+    exit-code: 0
+    stdout:
+      exactly: /tmp/example-session-home

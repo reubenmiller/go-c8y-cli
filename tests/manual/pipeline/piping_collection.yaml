@@ -1,0 +1,185 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/reubenmiller/commander/feat/handle-nested-files/schema.json
+#
+# Piping to collection commands
+#
+config:
+  env:
+    C8Y_SETTINGS_DEFAULTS_CACHE: true
+    C8Y_SETTINGS_DEFAULTS_CACHETTL: 100h
+    C8Y_SETTINGS_DEFAULTS_DRYFORMAT: json
+
+tests:
+  It ignores output when piping an empty empty results:
+    command: |
+      c8y alarms list --device 0 | c8y alarms get --dry
+    exit-code: 0
+    stdout:
+      match-pattern: ^$
+    stderr:
+      match-pattern: ^$
+
+  It ignores pipeline input if it is a single newline char:
+    # pwsh equivalent: "" | c8y alarms list --dry
+    command: |
+      echo "" | c8y alarms list --dry |
+        c8y util show --select method,path
+    exit-code: 0
+    stdout:
+      exactly: |
+        {"method":"GET","path":"/alarm/alarms"}
+
+  It sends a command and ignores pipeline if it does not include a newline char:
+    # pwsh equivalent: $null | c8y alarms list --dry
+    command: |
+      printf "" | c8y alarms list --dry
+    exit-code: 0
+    stdout:
+      match-pattern: ^$
+    stderr:
+      match-pattern: ^$
+
+  It ignores output when piping an empty string:
+    command: |
+      printf "" | c8y alarms list --dry
+    exit-code: 0
+    stdout:
+      match-pattern: ^$
+    stderr:
+      match-pattern: ^$
+  
+  It does not enforce argument mapping when receiving empty json input:
+    command: |
+      echo "{}" | c8y alarms list --dry |
+        c8y util show --select method,pathEncoded
+    exit-code: 0
+    stdout:
+      exactly: |
+        {"method":"GET","pathEncoded":"/alarm/alarms"}
+  
+  It fails on required parameters when piping in json input and arguments are still missing:
+    command: |
+      echo "{}" | c8y devices create --dry
+    exit-code: 101
+    stderr:
+      contains:
+        - "Body is missing required properties: name"
+    stdout:
+      match-pattern: ^$
+
+  It accepts json pipeline:
+    command: |
+      c8y template execute --template "{source:{id:'1111'}}" |
+        c8y alarms list --dry |
+        c8y util show --select method,pathEncoded
+    exit-code: 0
+    stdout:
+      exactly: |
+        {"method":"GET","pathEncoded":"/alarm/alarms?source=1111"}
+  
+  It supports pipe by id to query parameters:
+    command: |
+      echo "1\n2" |
+        c8y events list --dry |
+        c8y util show --select method,pathEncoded
+    exit-code: 0
+    stdout:
+      exactly: |
+        {"method":"GET","pathEncoded":"/event/events?source=1"}
+        {"method":"GET","pathEncoded":"/event/events?source=2"}
+
+  It does not send requests when piping empty strings:
+    command: |
+      printf "" |
+        c8y events list --dry
+    exit-code: 0
+    stdout:
+      match-pattern: ^$
+
+  It supports pipe by id object to query parameters:
+    command: |
+      echo "{\"id\":\"1\"}\n{\"id\":\"2\"}" |
+        c8y events list --dry |
+        c8y util show --select method,pathEncoded
+    exit-code: 0
+    stdout:
+      exactly: |
+        {"method":"GET","pathEncoded":"/event/events?source=1"}
+        {"method":"GET","pathEncoded":"/event/events?source=2"}
+  
+  It supports pipe by json object using deviceId rather than id to query parameters:
+    command: |
+      echo "{\"id\":\"3\",\"deviceId\":\"1\"}\n{\"id\":\"4\",\"deviceId\":\"2\"}" |
+        c8y events list --dry |
+        c8y util show --select method,pathEncoded
+    exit-code: 0
+    stdout:
+      exactly: |
+        {"method":"GET","pathEncoded":"/event/events?source=1"}
+        {"method":"GET","pathEncoded":"/event/events?source=2"}
+  
+  It supports pipe by json object using source.id rather than id to query parameters:
+    command: |
+      echo "{\"id\":\"3\",\"source\":{\"id\":\"1\"}}\n{\"id\":\"4\",\"source\":{\"id\":\"2\"}}" |
+        c8y events list --dry |
+        c8y util show --select method,pathEncoded
+    exit-code: 0
+    stdout:
+      exactly: |
+        {"method":"GET","pathEncoded":"/event/events?source=1"}
+        {"method":"GET","pathEncoded":"/event/events?source=2"}
+  
+  It supports pipe by name which do not match to query parameters ignoring names that does not exist:
+    command: |
+      echo "pipeNameDoesNotExist1\npipeNameDoesNotExist2\npipeNameDoesNotExist3" |
+        c8y events list --dry --abortOnErrors 5 --verbose
+    exit-code: 104
+    stderr:
+      contains:
+        - /inventory/managedObjects
+        - pipeNameDoesNotExist1
+        - pipeNameDoesNotExist2
+        - pipeNameDoesNotExist3
+    stdout:
+      match-pattern: ^$
+  
+  It supports pipe by name which do not match to query parameters aborts after specified number of errors:
+    command: |
+      echo "pipeNameDoesNotExist1\npipeNameDoesNotExist2\npipeNameDoesNotExist3" |
+        c8y events list --dry --abortOnErrors 1 --verbose
+    exit-code: 103
+    stderr:
+      contains:
+        - /inventory/managedObjects
+        - pipeNameDoesNotExist1
+        # optional because Abort is not instantaneous, so lookups can be sent out
+        # - pipeNameDoesNotExist2
+      not-contains:
+        - pipeNameDoesNotExist3
+    stdout:
+      match-pattern: ^$
+  
+  It supports Pipe by id and name to query parameters. Invalid reference by names should be skipped or should throw an error:
+    command: |
+      echo "1\npipeNameDoesNotExist1" |
+        c8y events list --dry --verbose
+    exit-code: 4
+    stderr:
+      contains:
+        - /inventory/managedObjects
+        - name+eq+%27pipeNameDoesNotExist1%27
+      not-contains:
+        - name+eq+%271%27
+    stdout:
+      line-count: 1
+      contains:
+        - '"method":"GET"'
+        - '"pathEncoded":"/event/events?source=1"'
+  
+  It supporting get results without piped variable:
+    command: |
+        c8y events list --dry |
+          c8y util show --select method,pathEncoded
+    exit-code: 0
+    stdout:
+      exactly: |
+        {"method":"GET","pathEncoded":"/event/events"}

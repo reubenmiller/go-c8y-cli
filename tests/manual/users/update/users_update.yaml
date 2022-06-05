@@ -1,12 +1,65 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/reubenmiller/commander/feat/handle-nested-files/schema.json
+
+config:
+  env:
+    C8Y_SETTINGS_DEFAULTS_CACHE: true
+    C8Y_SETTINGS_CACHE_METHODS: GET POST PUT
+    C8Y_SETTINGS_DEFAULTS_CACHETTL: 100h
+    C8Y_SETTINGS_DEFAULTS_DRY: false
+    C8Y_SETTINGS_DEFAULTS_DRYFORMAT: json
 
 tests:
-    Update the email field using a template:
-        command: |
-          c8y template execute --template "{id: 'test@me.com'}" | c8y users update --template "{email: input.value.id}" --data "firstName=Peter" --dry
-        exit-code: 0
-        stdout:
-            json:
-                method: PUT
-                path: /user/$C8Y_TENANT/users/test@me.com
-                body.email: test@me.com
-                body.firstName: Peter
+  It updates custom properties for a user:
+    command: |
+      c8y users update --id "peterpi@example.com" --customProperties "language=fr"
+    exit-code: 0
+    stdout:
+      json:
+        customProperties.language: fr
+  
+  It updates a user via pipeline:
+    command: |
+      echo "peterpi@example.com" | c8y users update --customProperties "language=de"
+    exit-code: 0
+    stdout:
+      json:
+        customProperties.language: de
+  
+  It disables an existing user:
+    command: |
+      c8y users update --id "peterpi@example.com" --enabled=false --dry |
+        c8y util show --select method,body --compact=false
+    exit-code: 0
+    stdout:
+      exactly: |
+        {
+          "body": {
+            "enabled": false
+          },
+          "method": "PUT"
+        }
+
+  It enables an existing user:
+    command: |
+      c8y users update --id "peterpi@example.com" --enabled --dry |
+        c8y util show --select method,body --compact=false
+    exit-code: 0
+    stdout:
+      exactly: |
+        {
+          "body": {
+            "enabled": true
+          },
+          "method": "PUT"
+        }
+
+  Update the email field using a template:
+    command: |
+      c8y template execute --template "{id: 'test@me.com'}" | c8y users update --template "{email: input.value.id}" --data "firstName=Peter" --dry
+    exit-code: 0
+    stdout:
+      json:
+        method: PUT
+        path: /user/$C8Y_TENANT/users/test@me.com
+        body.email: test@me.com
+        body.firstName: Peter

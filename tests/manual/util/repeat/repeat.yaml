@@ -1,0 +1,173 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/reubenmiller/commander/feat/handle-nested-files/schema.json
+# Merge function
+tests:
+
+  It outputs at least 1 line when no input is given:
+    command: |
+     c8y util repeat
+    exit-code: 0
+    stdout:
+      line-count: 0
+  
+  It repeats piped input:
+    command: |
+      echo 1 | c8y util repeat 5
+    exit-code: 0
+    stdout:
+      line-count: 5
+      exactly: |
+        1
+        1
+        1
+        1
+        1
+
+  It uses a default format string which includes the input:
+    command: |
+      echo 1 | c8y util repeat 2
+    exit-code: 0
+    stdout:
+      line-count: 2
+      exactly: |
+        1
+        1
+
+  It uses a custom format string:
+    command: |
+      echo 1 | c8y util repeat --times 2 --format "device%s"
+    exit-code: 0
+    stdout:
+      line-count: 2
+      exactly: |
+        device1
+        device1
+
+  It uses a custom format string with the modulus row index (single stdin):
+    command: |
+      echo 1 | c8y util repeat --times 2 --format "device%s-%s"
+    exit-code: 0
+    stdout:
+      line-count: 2
+      exactly: |
+        device1-1
+        device1-2
+
+  It uses a custom format string with the modulus row index (multiple stdin):
+    command: |
+      echo "one\ntwo" | c8y util repeat --times 2 --format "device%s-%s"
+    exit-code: 0
+    stdout:
+      line-count: 4
+      exactly: |
+        deviceone-1
+        deviceone-2
+        devicetwo-1
+        devicetwo-2
+
+  It uses a custom format string with the current line count (single stdin):
+    command: |
+      echo "1" | c8y util repeat --times 2 --format "device%s-%s" --useLineCount
+    exit-code: 0
+    stdout:
+      line-count: 2
+      exactly: |
+        device1-1
+        device1-2
+  
+  It uses a custom format string with the current line count (multiple stdin):
+    command: |
+      echo "one\ntwo" | c8y util repeat --times 2 --format "device%s-%s" --useLineCount
+    exit-code: 0
+    stdout:
+      line-count: 4
+      exactly: |
+        deviceone-1
+        deviceone-2
+        devicetwo-3
+        devicetwo-4
+  
+  It skips n lines:
+    command: |
+      echo "1\n2\n3\n4\n5\n6\n7\n8\n9\n10\n" | c8y util repeat --skip 1
+    exit-code: 0
+    stdout:
+      line-count: 9
+      exactly: |
+        2
+        3
+        4
+        5
+        6
+        7
+        8
+        9
+        10
+
+  It prints first n lines:
+    command: |
+      echo "1\n2\n3\n4\n5\n6\n7\n8\n9\n10\n" | c8y util repeat --first 5
+    exit-code: 0
+    stdout:
+      line-count: 5
+      exactly: |
+        1
+        2
+        3
+        4
+        5
+
+  It prints first n lines after skipping first n lines:
+    command: |
+      echo "1\n2\n3\n4\n5\n6\n7\n8\n9\n10\n" | c8y util repeat --first 5 --skip 2
+    exit-code: 0
+    stdout:
+      line-count: 5
+      exactly: |
+        3
+        4
+        5
+        6
+        7
+
+  It prints first n lines after skipping first n lines when number is less than number of lines:
+    command: |
+      echo "1\n2\n3\n4\n5\n6\n7\n8\n9\n10\n" | c8y util repeat --first 100 --skip 2
+    exit-code: 0
+    stdout:
+      exactly: |
+        3
+        4
+        5
+        6
+        7
+        8
+        9
+        10
+
+  It combines multiple commands using line numbers:
+    command: |
+      echo "device" |
+        c8y util repeat --format "%s" --times 5 |
+        c8y util repeat --format "%s-%03s" --useLineCount
+    exit-code: 0
+    stdout:
+      exactly: |
+        device-001
+        device-002
+        device-003
+        device-004
+        device-005
+
+  It combines multiple commands:
+    command: |
+      echo "device" |
+        c8y util repeat --format "%s" --times 5 |
+        c8y util repeat --format "%s-%03s"
+    exit-code: 0
+    stdout:
+      exactly: |
+        device-001
+        device-001
+        device-001
+        device-001
+        device-001

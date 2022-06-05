@@ -1,0 +1,26 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/reubenmiller/commander/feat/handle-nested-files/schema.json
+
+tests:
+  It creates bash completions:
+    command: |
+      c8y completion bash
+    exit-code: 0
+    stdout:
+      contains:
+        - "# bash completion"
+
+  It creates zsh completions:
+    command: |
+      c8y completion zsh
+    exit-code: 0
+    stdout:
+      contains:
+        - "# zsh completion"
+
+  It creates powershell completions:
+    command: |
+      c8y completion powershell
+    exit-code: 0
+    stdout:
+      contains:
+        - "# powershell completion"

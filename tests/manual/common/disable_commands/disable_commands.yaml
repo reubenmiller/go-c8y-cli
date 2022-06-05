@@ -1,0 +1,114 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/reubenmiller/commander/feat/handle-nested-files/schema.json
+
+config:
+  env:
+    C8Y_SETTINGS_DEFAULTS_CACHE: true
+    C8Y_SETTINGS_DEFAULTS_CACHETTL: 100h
+    C8Y_SETTINGS_DEFAULTS_DRYFORMAT: json
+    C8Y_SETTINGS_CI: false
+    C8Y_SETTINGS_MODE_ENABLECREATE: false
+    C8Y_SETTINGS_MODE_ENABLEUPDATE: false
+    C8Y_SETTINGS_MODE_ENABLEDELETE: false
+
+tests:
+  It disables create commands:
+    config:
+      env:
+        C8Y_SETTINGS_CI: false
+        C8Y_SETTINGS_MODE_ENABLECREATE: false
+        C8Y_SETTINGS_MODE_ENABLEUPDATE: false
+        C8Y_SETTINGS_MODE_ENABLEDELETE: false
+    command: |
+      c8y inventory create --name "asset-data01" --dry
+    exit-code: 100
+    stdout:
+      match-pattern: ^$
+
+  It enables create commands:
+    config:
+      env:
+        C8Y_SETTINGS_CI: false
+        C8Y_SETTINGS_MODE_ENABLECREATE: true
+        C8Y_SETTINGS_MODE_ENABLEUPDATE: false
+        C8Y_SETTINGS_MODE_ENABLEDELETE: false
+    command: |
+      c8y inventory create --name "asset-data01" --dry |
+        c8y util show --select body
+    exit-code: 0
+    stdout:
+      exactly: |
+        {"body":{"name":"asset-data01"}}
+
+  It disables update commands:
+    config:
+      env:
+        C8Y_SETTINGS_CI: false
+        C8Y_SETTINGS_MODE_ENABLECREATE: true
+        C8Y_SETTINGS_MODE_ENABLEUPDATE: false
+        C8Y_SETTINGS_MODE_ENABLEDELETE: false
+    command: |
+      c8y inventory update --id 0 --newName "asset-data01" --dry
+    exit-code: 100
+    stdout:
+      match-pattern: ^$
+
+  It enables update commands:
+    config:
+      env:
+        C8Y_SETTINGS_CI: false
+        C8Y_SETTINGS_MODE_ENABLECREATE: false
+        C8Y_SETTINGS_MODE_ENABLEUPDATE: true
+        C8Y_SETTINGS_MODE_ENABLEDELETE: false
+    command: |
+      c8y inventory update --id 0 --newName "asset-data01" --dry |
+        c8y util show --select body
+    exit-code: 0
+    stdout:
+      exactly: |
+        {"body":{"name":"asset-data01"}}
+
+  It disables delete commands:
+    config:
+      env:
+        C8Y_SETTINGS_CI: false
+        C8Y_SETTINGS_MODE_ENABLECREATE: false
+        C8Y_SETTINGS_MODE_ENABLEUPDATE: false
+        C8Y_SETTINGS_MODE_ENABLEDELETE: false
+    command: |
+      c8y inventory delete --id 0 --dry
+    exit-code: 100
+    stdout:
+      match-pattern: ^$
+
+  It enables delete commands:
+    config:
+      env:
+        C8Y_SETTINGS_CI: false
+        C8Y_SETTINGS_MODE_ENABLECREATE: false
+        C8Y_SETTINGS_MODE_ENABLEUPDATE: false
+        C8Y_SETTINGS_MODE_ENABLEDELETE: true
+    command: |
+      c8y inventory delete --id 0 --dry |
+        c8y util show --select path
+    exit-code: 0
+    stdout:
+      exactly: |
+        {"path":"/inventory/managedObjects/0"}
+
+  It supports CI mode which enables create/update/delete and overrides other settings:
+    config:
+      env:
+        C8Y_SETTINGS_CI: true
+        C8Y_SETTINGS_MODE_ENABLECREATE: false
+        C8Y_SETTINGS_MODE_ENABLEUPDATE: false
+        C8Y_SETTINGS_MODE_ENABLEDELETE: false
+    command: |
+      c8y inventory create --name "asset-data02" --dry | c8y util show --select body
+      c8y inventory update --id 0 --newName "asset-data01" --dry | c8y util show --select body
+      c8y inventory delete --id 0 --dry | c8y util show --select path
+    exit-code: 0
+    stdout:
+      exactly: |
+        {"body":{"name":"asset-data02"}}
+        {"body":{"name":"asset-data01"}}
+        {"path":"/inventory/managedObjects/0"}

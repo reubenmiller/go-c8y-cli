@@ -121,17 +121,6 @@ Describe -Tag "Session" -Name "sessions-set" {
         $LASTEXITCODE | Should -BeExactly 108
     }
 
-    It "clears session even if passphrase is invalid" {
-        # session
-        $env:C8Y_SESSION = $null
-        $env:C8Y_HOST = $c8yhost
-        $env:C8Y_USERNAME = $input02.userName
-        $env:C8Y_PASSWORD = $encrypted02
-        $env:C8Y_PASSPHRASE = "wrong_passphrase"
-
-        c8y sessions clear
-        $LASTEXITCODE | Should -BeExactly 0
-    }
 
     It "combines session configuration from environment and file" {
         # session

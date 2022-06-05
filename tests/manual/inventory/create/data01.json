@@ -1,0 +1,9 @@
+{
+    "name": "testMO",
+    "type": "exampleType",
+    "c8y_SoftwareList": [
+        { "name": "app1", "version": "1.0.0", "url": "https://example.com/myfile1.deb"},
+        { "name": "app2", "version": "9", "url": "https://example.com/myfile1.deb"},
+        { "name": "app3 test", "version": "1.1.1", "url": "https://example.com/myfile1.deb"}
+    ]
+}

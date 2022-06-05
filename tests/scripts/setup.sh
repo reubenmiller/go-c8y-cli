@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e
+
 BIN_DIR="./output"
 
 export C8Y_SETTINGS_DEFAULTS_FORCE=true
@@ -15,11 +17,15 @@ setup () {
     create_user "benhologram@example.com"
     create_user "tomwillow@example.com"
 
+    create_usergroup "powerusers"
+    create_usergroup "control-center"
+
     create_agent "agent01"
     create_agent "device01"
     create_smartgroup "my smartgroup"
 
     create_app "my-example-app"
+    create_service_user "technician"
 
     create_firmware "iot-linux"
     create_firmware_version "iot-linux" "1.0.0" "https://example.com"
@@ -41,6 +47,13 @@ create_user () {
         --template "{password: _.Password()}"
 }
 
+create_usergroup () {
+    local name="$1"
+    
+    c8y usergroups get --id $name --silentStatusCodes 404 || c8y usergroups create \
+        --name "$name"
+}
+
 create_app () {
     local name="$1"
     c8y applications get --id "$name" --silentStatusCodes 404 ||
@@ -49,6 +62,16 @@ create_app () {
             --type HOSTED \
             --key "$name-key" \
             --contextPath "$name"
+}
+
+create_service_user () {
+    local appname="$1"
+
+    local tenant=$(c8y currenttenant get --select name -o csv)
+    c8y microservices get --id "$appname" --silentStatusCodes 404 ||
+        c8y microservices serviceusers create \
+            --name "$appname" \
+            --tenants "$tenant"
 }
 
 create_smartgroup () {
@@ -104,8 +127,8 @@ create_device_and_user () {
     local name="$1"
     local extType="c8y_Serial"
 
-    c8y deviceregistration register --id "$name"
-    c8y deviceregistration getCredentials --id "$name" --sessionUsername "$DEVICE_BOOTSTRAP_USER" --sessionPassword "$DEVICE_BOOTSTRAP_PASSWORD"
+    c8y deviceregistration register --id "$name" || true
+    c8y deviceregistration getCredentials --id "$name" --sessionUsername "$DEVICE_BOOTSTRAP_USER" --sessionPassword "$DEVICE_BOOTSTRAP_PASSWORD" || true
     c8y deviceregistration approve --id "$name"
     
     creds=$(

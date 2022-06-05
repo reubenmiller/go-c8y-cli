@@ -1,0 +1,70 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/reubenmiller/commander/feat/handle-nested-files/schema.json
+# Merge function
+tests:
+
+  It merges values array values:
+    command: |
+      c8y template execute --template "{nestedProp: {inputList:['existingValue'], othervalue: 'somevalue'}}" |
+      c8y template execute --template "_.Merge('nestedProp', input.value, {inputList+: ['newValue']})" --compact=false
+
+    exit-code: 0
+    stdout:
+      exactly: |
+        {
+          "nestedProp": {
+            "inputList": ["existingValue", "newValue"],
+            "othervalue": "somevalue"
+          }
+        }
+  
+  It merges values array values with any empty initial value:
+    command: |
+      c8y template execute --template "{}" |
+      c8y template execute --template "_.Merge('nestedProp', input.value, {inputList+: ['newValue']})" --compact=false
+
+    exit-code: 0
+    stdout:
+      exactly: |
+        {
+          "nestedProp": {
+            "inputList": ["newValue"]
+          }
+        }
+
+  It merges arrays when array is immediate key:
+    command: |
+      c8y template execute --template "{c8y_SupportedOperations:[]}" |
+      c8y template execute --template "_.Merge('c8y_SupportedOperations', input.value, ['newValue'])" --compact=false
+
+    exit-code: 0
+    stdout:
+      exactly: |
+        {
+          "c8y_SupportedOperations": ["newValue"]
+        }
+  
+  It merges an array when existing value does not exist:
+    command: |
+      c8y template execute --template "{}" |
+      c8y template execute --template "_.Merge('c8y_SupportedOperations', input.value, ['newValue'])" --compact=false
+
+    exit-code: 0
+    stdout:
+      exactly: |
+        {
+          "c8y_SupportedOperations": ["newValue"]
+        }
+  
+  It removes a nested fragment:
+    command: |
+      c8y template execute --template "{c8y_Model:{serialNumber:'123456789', otherValue: 'example'}}" |
+      c8y template execute --template "_.Merge('c8y_Model', input.value, {otherValue:: null})" --compact=false
+
+    exit-code: 0
+    stdout:
+      exactly: |
+        {
+          "c8y_Model": {
+            "serialNumber": "123456789"
+          }
+        }

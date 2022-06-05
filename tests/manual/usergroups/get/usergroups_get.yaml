@@ -1,0 +1,18 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/reubenmiller/commander/feat/handle-nested-files/schema.json
+config:
+  env:
+    C8Y_SETTINGS_DEFAULTS_CACHE: true
+    C8Y_SETTINGS_CACHE_METHODS: GET POST PUT
+    C8Y_SETTINGS_DEFAULTS_CACHETTL: 100h
+
+tests:
+  It gets a user group via piped input:
+    command: |
+      echo "powerusers\ncontrol-center" |
+        c8y usergroups get --select name -o csv
+    exit-code: 0
+    stdout:
+      line-count: 2
+      contains:
+        - powerusers
+        - control-center

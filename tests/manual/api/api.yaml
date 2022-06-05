@@ -1,107 +1,180 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/reubenmiller/commander/feat/handle-nested-files/schema.json
+config:
+  env:
+    C8Y_SETTINGS_DEFAULTS_DRY: true
+    C8Y_SETTINGS_DEFAULTS_DRYFORMAT: json
+
 tests:
-    It sends an api request using a static URL and reference input in the body template:
-        command: >
-          echo "12345" | c8y api POST "/test/endpoint" --template "{value: input.value}" --dry
-        exit-code: 0
-        stdout:
-            json:
-                method: POST
-                path: /test/endpoint
-                body.value: "12345"
-    
-    It sends a POST request using a dynamic url:
-        command: >
-          echo "12345" | c8y api POST "/test/{url}/endpoint" --template "{value: input.value}" --dry
-        exit-code: 0
-        stdout:
-            json:
-                method: POST
-                path: /test/12345/endpoint
-                body.value: "12345"
-    
-    It sends a POST request using explicit url parameter:
-        command: >
-          echo "12345" | c8y api POST --url "/test/{url}/endpoint" --template "{value: input.value}" --dry
-        exit-code: 0
-        stdout:
-            json:
-                method: POST
-                path: /test/12345/endpoint
-                body.value: "12345"
-    
-    It sends a PUT request using piped json:
-        command: >
-          echo "{\"url\": \"12345\", \"name\":\"hello\"}" | c8y api --method PUT --url "/test/{url}/endpoint" --template "input.value" --dry
-        exit-code: 0
-        stdout:
-            json:
-                method: PUT
-                path: /test/12345/endpoint
-                body.name: "hello"
-                body.url: "12345"
-    
-    It sends a PUT request using piped json and a format style url template:
-        command: >
-          echo "{\"url\": \"12345\", \"name\":\"hello\"}" | c8y api --method PUT --url "/test/%s/endpoint" --template "input.value" --dry
-        exit-code: 0
-        stdout:
-            json:
-                method: PUT
-                path: /test/12345/endpoint
-                body.name: "hello"
-                body.url: "12345"
-    
-    It sends a PUT request using piped json and a format style url template with multiple substitutions:
-        command: >
-          echo "{\"url\": \"12345\", \"name\":\"hello\"}" | c8y api --method PUT --url "/test/%s/endpoint/%s" --template "input.value" --dry
-        exit-code: 0
-        stdout:
-            json:
-                method: PUT
-                path: /test/12345/endpoint/12345
-                body.name: "hello"
-                body.url: "12345"
+  ? It sends an api request using a static URL and reference input in the body template
+  : command: >
+      echo "12345" | c8y api POST "/test/endpoint" --template "{value: input.value}" --dry
+    exit-code: 0
+    stdout:
+      json:
+        method: POST
+        path: /test/endpoint
+        body.value: "12345"
 
-    It sends a custom create alarm command:
-        command: >
-          c8y api POST "alarm/alarms" --data "text=one,severity=MAJOR,type=test_Type,time=2019-01-01,source.id='12345'" --keepProperties --dry
-        exit-code: 0
-        stdout:
-            json:
-                method: POST
-                path: /alarm/alarms
-                body.text: "one"
-                body.severity: "MAJOR"
-                body.type: "test_Type"
-                body.time: "2019-01-01"
-                body.source.id: "12345"
+  It sends a POST request using a dynamic url:
+    command: >
+      echo "12345" | c8y api POST "/test/{url}/endpoint" --template "{value: input.value}" --dry
+    exit-code: 0
+    stdout:
+      json:
+        method: POST
+        path: /test/12345/endpoint
+        body.value: "12345"
 
-    It supports DELETE with a body:
-        command: >
-          c8y api --method delete --url "/inventory" --template "{value: 'one'}" --dry
-        exit-code: 0
-        stdout:
-            json:
-                method: DELETE
-                path: /inventory
-                body.value: one
-    
-    It supports DELETE without a body:
-        command: >
-          c8y api --method delete --url "/inventory" --dry --dryFormat markdown
-        exit-code: 0
-        stdout:
-            contains:
-              - DELETE /inventory
-            not-contains:
-              - Body
-    
-    It supports PATCH commands:
-        command: >
-          c8y api --method patch --url "/inventory" --dry
-        exit-code: 0
-        stdout:
-            json:
-                method: PATCH
-                path: /inventory
-                
+  It sends a POST request using explicit url parameter:
+    command: >
+      echo "12345" | c8y api POST --url "/test/{url}/endpoint" --template "{value: input.value}" --dry
+    exit-code: 0
+    stdout:
+      json:
+        method: POST
+        path: /test/12345/endpoint
+        body.value: "12345"
+
+  It sends a PUT request using piped json:
+    command: >
+      echo "{\"url\": \"12345\", \"name\":\"hello\"}" | c8y api --method PUT --url "/test/{url}/endpoint" --template "input.value" --dry
+    exit-code: 0
+    stdout:
+      json:
+        method: PUT
+        path: /test/12345/endpoint
+        body.name: "hello"
+        body.url: "12345"
+
+  It sends a PUT request using piped json and a format style url template:
+    command: >
+      echo "{\"url\": \"12345\", \"name\":\"hello\"}" | c8y api --method PUT --url "/test/%s/endpoint" --template "input.value" --dry
+    exit-code: 0
+    stdout:
+      json:
+        method: PUT
+        path: /test/12345/endpoint
+        body.name: "hello"
+        body.url: "12345"
+
+  ? It sends a PUT request using piped json and a format style url template with multiple substitutions
+  : command: >
+      echo "{\"url\": \"12345\", \"name\":\"hello\"}" | c8y api --method PUT --url "/test/%s/endpoint/%s" --template "input.value" --dry
+    exit-code: 0
+    stdout:
+      json:
+        method: PUT
+        path: /test/12345/endpoint/12345
+        body.name: "hello"
+        body.url: "12345"
+
+  It sends a custom create alarm command:
+    command: >
+      c8y api POST "alarm/alarms" --data "text=one,severity=MAJOR,type=test_Type,time=2019-01-01,source.id='12345'" --keepProperties --dry
+    exit-code: 0
+    stdout:
+      json:
+        method: POST
+        path: /alarm/alarms
+        body.text: "one"
+        body.severity: "MAJOR"
+        body.type: "test_Type"
+        body.time: "2019-01-01"
+        body.source.id: "12345"
+
+  It allows non-json bodies:
+    command: |
+      c8y api POST /myvalue --data "myvalue,41,outputtext" --contentType "text/plain"
+    stdout:
+      json:
+        method: POST
+        headers.Content-Type: text/plain
+        path: /myvalue
+        body: myvalue,41,outputtext
+  
+  It allows shorthand json bodies:
+    command: |
+      c8y api POST /myvalue --data "myvalue=1"
+    stdout:
+      json:
+        method: POST
+        path: /myvalue
+        body.myvalue: '1'
+  
+  It accepts paths via pipeline:
+    command: |
+      echo "/inventory/managedObjects?pageSize=1&withTotalPages=true\n/application/applications?pageSize=2" |
+        c8y api --compact |
+        c8y util show --select path,query
+    stdout:
+      lines:
+        1: '{"path":"/inventory/managedObjects","query":"pageSize=1&withTotalPages=true"}'
+        2: '{"path":"/application/applications","query":"pageSize=2"}'
+
+  It adds custom query parameters to an outgoing request:
+    command: |
+      echo "/inventory/managedObjects?pageSize=1" |
+        c8y api --customQueryParam "myValue=2"
+    stdout:
+      json:
+        method: GET
+        path: /inventory/managedObjects
+        query: myValue=2&pageSize=1
+
+  It accepts positional arguments for method and path (not using pipeline):
+    command: |
+      c8y api GET "/alarm/alarms?pageSize=10&status=ACTIVE"
+    stdout:
+      json:
+        method: GET
+        path: /alarm/alarms
+        query: pageSize=10&status=ACTIVE
+
+  It accepts positional arguments for path and defaults to GET (not using pipeline):
+    command: |
+      c8y api "/alarm/alarms"
+    stdout:
+      not-contains:
+        - query
+      json:
+        method: GET
+        path: /alarm/alarms
+
+  It accepts positional path argument and explicit method:
+    command: |
+      c8y api "/alarm/alarms" --method post
+    stdout:
+      not-contains:
+        - query
+      json:
+        method: POST
+        path: /alarm/alarms
+  It supports DELETE with a body:
+      command: >
+        c8y api --method delete --url "/inventory" --template "{value: 'one'}" --dry
+      exit-code: 0
+      stdout:
+          json:
+              method: DELETE
+              path: /inventory
+              body.value: one
+  
+  It supports DELETE without a body:
+      command: >
+        c8y api --method delete --url "/inventory" --dry --dryFormat markdown
+      exit-code: 0
+      stdout:
+          contains:
+            - DELETE /inventory
+          not-contains:
+            - Body
+  
+  It supports PATCH commands:
+      command: >
+        c8y api --method patch --url "/inventory" --dry
+      exit-code: 0
+      stdout:
+          json:
+              method: PATCH
+              path: /inventory
+              

@@ -1,51 +1,261 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/reubenmiller/commander/feat/handle-nested-files/schema.json
+
 tests:
-    It provides a function to get an optional value:
-        command: |
-            echo '{"nestedProp":{"otherValue":1}}' | c8y devices update --id 0 --dry --template "_.Get('nestedProp', input.value, {dummy: 2})"
-        exit-code: 0
-        stdout:
-            line-count: 1
-            json:
-                ..0.body.nestedProp.otherValue: '1'
+  It preserves double quotes in bash/zsh:
+    command: |
+      c8y template execute --template "{\"email\": \"he llo@ex ample.com\"}"
+    exit-code: 0
+    stdout:
+      exactly: |
+        {"email":"he llo@ex ample.com"}
 
-    It produces non-json output - integer:
-        command: |
-            c8y template execute --template "_.Int(10, 10)"
-        exit-code: 0
-        stdout:
-            exactly: |
-                10
+  It provides relative time functions:
+    command: |
+      c8y template execute --template "{now: _.Now(), randomNow: _.Now('-' + _.Int(10,60) + 'd'), nowRelative: _.Now('-1h'), nowNano: _.NowNano(), nowNanoRelative: _.NowNano('-10d')}"
+    exit-code: 0
+    stdout:
+      json:
+        now: r/.+
+        randomNow: r/.+
+        nowRelative: r/.+
+        nowNano: r/.+
+        nowNanoRelative: r/.+
 
-    It produces non-json output - boolean:
-        command: |
-            c8y template execute --template "true"
-        exit-code: 0
-        stdout:
-            exactly: |
-                true
-    
-    It produces non-json output - string:
-        command: |
-            c8y template execute --template "'device äöüß\n \u0031😀'"
-        exit-code: 0
-        stdout:
-            exactly: |
-                device äöüß
-                 1😀
+  It provides random number generators:
+    command: |
+      c8y template execute --template "{int: _.Int(), int2: _.Int(-20), int3: _.Int(-50,-59), float: _.Float(), float2: _.Float(10), float3: _.Float(40, 45)}"    exit-code: 0
+    stdout:
+      json:
+        int: r/\d+
+        int2: r/-?\d+
+        int3: r/-\d+
+        float: r/\d+\.\d+
+        float2: r/\d+\.\d+
+        float3: r/\d+\.\d+
 
-    It produces non-json output - ini output:
-        command: |
-            c8y template execute --template "std.manifestIni({sections: {main: {one:1,two:'2'}}})"
-        exit-code: 0
-        stdout:
-            exactly: |
-                [main]
-                one = 1
-                two = 2
-    
-    It produces non-json output - timestamp function:
-        command: |
-            c8y template execute --template "_.Now('-30d')"
-        exit-code: 0
-        stdout:
-            match-pattern: ^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?(Z|\+.+)$
+  It combines explicit arguments with data and templates parameters:
+    command: |
+      echo "{\"self\":\"https://example.com\"}" |
+        c8y operations create \
+          --device "12345" \
+          --data 'other="1"' \
+          --template "{c8y_DownloadConfigFile: {url: input.value['self']}}" \
+          --debug \
+          --dry \
+          --dryFormat json |
+        c8y util show --select body --compact=false --output json
+    stdout:
+      exactly: |
+        {
+          "body": {
+            "c8y_DownloadConfigFile": {
+              "url": "https://example.com"
+            },
+            "deviceId": "12345",
+            "other": "1"
+          }
+        }
+  
+  It uses piped input inside the template:
+    command: |
+      c8y template execute --template "{deviceId: '1111'}" |
+        c8y util show --select "tempID:deviceId" |
+
+        c8y operations create \
+          --template "{deviceId: input.value.tempID}" \
+          --dry \
+          --dryFormat json |
+        c8y util show --select body --compact=false --output json
+    stdout:
+      exactly: |
+        {
+          "body": {
+            "deviceId": "1111"
+          }
+        }
+  
+  It provides a function to get the path and query from a full url:
+    command: |
+      echo "https://example.com/test/me?value=test&value=1" |
+        c8y template execute --template "{input:: input.value, name: _.GetURLPath(input.value)}"
+    stdout:
+      exactly: |
+        {"name":"/test/me?value=test&value=1"}
+  
+  It provides a function to get the scheme and hostname from a full url:
+    command: |
+      echo "https://example.com/test/me?value=test&value=1" |
+        c8y template execute --template "{input:: input.value, name: _.GetURLHost(input.value)}"
+    stdout:
+      exactly: |
+        {"name":"https://example.com"}
+
+  It provides a function to get an optional value:
+    command: |
+      c8y template execute --template "{nestedProp:{othervalue: 1}}" |
+        c8y devices update --id 0 --dry --dryFormat json --template "_.Get('nestedProp', input.value, {dummy: 2})" |
+        c8y util show --select body --compact=false
+    stdout:
+      exactly: |
+        {
+          "body": {
+            "nestedProp": {
+              "othervalue": 1
+            }
+          }
+        }
+  
+  It provides a function to get an optional value - test:
+      command: |
+          echo '{"nestedProp":{"otherValue":1}}' | c8y devices update --id 0 --dry --template "_.Get('nestedProp', input.value, {dummy: 2})"
+      exit-code: 0
+      stdout:
+          line-count: 1
+          json:
+              ..0.body.nestedProp.otherValue: '1'
+
+  It provides a function to get an optional value and returns a default value if not present:
+    command: |
+      c8y template execute --template "{nestedProp:{othervalue: 1}}" |
+        c8y devices update --id 0 --dry --dryFormat json --template "_.Get('nestedProp2', input.value, {dummy: 2})" |
+        c8y util show --select body --compact=false
+    stdout:
+      exactly: |
+        {
+          "body": {
+            "nestedProp2": {
+              "dummy": 2
+            }
+          }
+        }
+
+  It handles large json values:
+    config:
+      timeout: 30s
+    command: |
+      c8y inventory create --template ./manual/template/large_template.jsonnet --select id --output csv --dry
+    exit-code: 0
+
+  It throws an error if no template is provided with stdin:
+    command: |
+      echo "{test: 1}" | c8y template execute
+    exit-code: 100
+    stdout:
+      match-pattern: ^$
+  
+  It throws an error if no template is provided with no stdin:
+    command: |
+      c8y template execute
+    exit-code: 100
+    stdout:
+      match-pattern: ^$
+
+  It executes a jsonnet template from a string:
+    command: |
+      TEMPLATE=$(cat <<-END
+        {
+          name: 'testName',
+          value: 1 + 2,
+        }
+      END
+      )
+      c8y template execute --template "$TEMPLATE" -o json --compact=false
+    exit-code: 0
+    stdout:
+      exactly: |
+        {
+          "name": "testName",
+          "value": 3
+        }
+  
+  It executes a jsonnet template with input values:
+    command: |
+      TEMPLATE=$(cat <<-END
+        {
+          name: var('name', 'testName'),
+          value: 1 + 2,
+        }
+      END
+      )
+      c8y template execute \
+        --template "$TEMPLATE" \
+        --templateVars "name=myName2" \
+        --output json --compact=false
+    exit-code: 0
+    stdout:
+      exactly: |
+        {
+          "name": "myName2",
+          "value": 3
+        }
+  
+  It executes a jsonnet template using pipeline input:
+    command: |
+      TEMPLATE=$(cat <<-END
+        {
+          type: self.name + '_' + _.Int(100, 100),
+          value: 1 + 2,
+        } + input.value
+      END
+      )
+
+      echo "{\"name\":\"name\"}\n{\"name\":\"name2\"}" |
+      c8y template execute \
+        --template "$TEMPLATE" \
+        --templateVars "name=myName2" \
+        --output json --compact=false
+    exit-code: 0
+    stdout:
+      exactly: |
+        {
+          "name": "name",
+          "type": "name_100",
+          "value": 3
+        }
+        {
+          "name": "name2",
+          "type": "name2_100",
+          "value": 3
+        }
+
+  It produces non-json output - integer:
+      command: |
+          c8y template execute --template "_.Int(10, 10)"
+      exit-code: 0
+      stdout:
+          exactly: |
+              10
+
+  It produces non-json output - boolean:
+      command: |
+          c8y template execute --template "true"
+      exit-code: 0
+      stdout:
+          exactly: |
+              true
+  
+  It produces non-json output - string:
+      command: |
+          c8y template execute --template "'device äöüß\n \u0031😀'"
+      exit-code: 0
+      stdout:
+          exactly: |
+              device äöüß
+               1😀
+
+  It produces non-json output - ini output:
+      command: |
+          c8y template execute --template "std.manifestIni({sections: {main: {one:1,two:'2'}}})"
+      exit-code: 0
+      stdout:
+          exactly: |
+              [main]
+              one = 1
+              two = 2
+  
+  It produces non-json output - timestamp function:
+      command: |
+          c8y template execute --template "_.Now('-30d')"
+      exit-code: 0
+      stdout:
+          match-pattern: ^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?(Z|\+.+)$
