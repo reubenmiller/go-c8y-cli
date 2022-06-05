@@ -33,7 +33,9 @@ try {
 	#
 	$ArtifactFolder = Export-ProductionModule
 	$DependenciesDir = "$ArtifactFolder/Dependencies/"
-	$null = New-Item "$DependenciesDir" -ItemType Directory
+	if (-Not (Test-Path $DependenciesDir)) {
+		$null = New-Item "$DependenciesDir" -ItemType Directory
+	}
 
 	Write-Host "Publishing module from folder [$ArtifactFolder]"
 	## Publish module to PowerShell Gallery
