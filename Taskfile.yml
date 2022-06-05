@@ -180,6 +180,11 @@ tasks:
     sources:
       - api/spec/json/*.json
       - scripts/**/*.ps1
+      - tools/PSc8y/Public-manual/*.ps1
+      - tools/PSc8y/Private/*.ps1
+      - tools/PSc8y/completions/*.ps1
+      - tools/PSc8y/utilities/*.ps1
+      - tools/PSc8y/tools/*.ps1
     generates:
       - tools/PSc8y/**/*.ps1
 
