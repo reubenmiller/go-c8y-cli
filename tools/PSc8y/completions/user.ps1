@@ -6,7 +6,7 @@ $script:CompleteUser = {
         $searchFor = $wordToComplete
     }
 
-    Get-UserCollection -PageSize 1000 -WarningAction SilentlyContinue `
+    Get-UserCollection -PageSize 1000 -WarningAction SilentlyContinue -AsPSObject `
     | Where-Object { $_.id -like "$searchFor*" -or $_.email -like "$searchFor*" } `
     | ForEach-Object {
         [System.Management.Automation.CompletionResult]::new(
