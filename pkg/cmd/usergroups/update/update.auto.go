@@ -36,6 +36,10 @@ func NewUpdateCmd(f *cmdutil.Factory) *UpdateCmd {
 		Example: heredoc.Doc(`
 $ c8y usergroups update --id 12345 --name "customGroup2"
 Update a user group
+
+$ c8y usergroups update --id 12345 --name "customGroup2" --template "{example: 'value'}"
+
+Update a user group with custom properties
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
 			return f.UpdateModeEnabled()
@@ -58,7 +62,8 @@ Update a user group
 	flags.WithOptions(
 		cmd,
 		flags.WithProcessingMode(),
-
+		flags.WithData(),
+		f.WithTemplateFlag(cmd),
 		flags.WithExtendedPipelineSupport("id", "id", true),
 	)
 

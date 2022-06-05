@@ -205,6 +205,14 @@ endpoints:
       go:
         - description: Update a user group
           command: c8y usergroups update --id 12345 --name "customGroup2"
+        
+        - description: Update a user group with custom properties
+          command: |
+            c8y usergroups update --id 12345 --name "customGroup2" --template "{example: 'value'}"
+          assertStdOut:
+            json:
+              body.example: value
+
     pathParameters:
       - name: tenant
         type: tenant
@@ -220,3 +228,7 @@ endpoints:
       - name: name
         type: string
         description: name
+
+      - name: data
+        type: json
+        description: Additional properties.
