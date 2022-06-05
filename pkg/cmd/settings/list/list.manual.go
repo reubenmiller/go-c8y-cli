@@ -65,7 +65,7 @@ func (n *CmdList) listSettings(cmd *cobra.Command, args []string) error {
 		}
 	}
 
-	allSettings := mapbuilder.NewInitializedMapBuilder()
+	allSettings := mapbuilder.NewInitializedMapBuilder(true)
 	allSettings.ApplyMap(settings)
 
 	// add additional settings

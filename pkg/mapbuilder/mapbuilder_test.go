@@ -9,7 +9,7 @@ import (
 )
 
 func Test_BodyWithLargeNumbersWithoutTemplates(t *testing.T) {
-	body := NewInitializedMapBuilder()
+	body := NewInitializedMapBuilder(true)
 
 	input := []byte(`{"value":19.1010101E19}`)
 	data := map[string]interface{}{}
@@ -22,7 +22,7 @@ func Test_BodyWithLargeNumbersWithoutTemplates(t *testing.T) {
 func Test_BodyWithLargeNumbersWithTemplates(t *testing.T) {
 	t.Skip("Large numbers are not supported in templates as jsonnet converts them to integer notation")
 
-	body := NewInitializedMapBuilder()
+	body := NewInitializedMapBuilder(true)
 	input := []byte(`{"value":19.1010101E19}`)
 	data := map[string]interface{}{}
 	err := c8y.DecodeJSONBytes(input, &data)

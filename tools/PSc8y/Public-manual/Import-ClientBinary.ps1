@@ -17,12 +17,23 @@ Download the client binary corresponding to your current platform
         # Version. Defaults to the module's version
         [string] $Version,
 
+        # OS Platform. If left blank it will be auto detected
         [ValidateSet("macOS", "windows", "linux")]
         [string] $Platform,
 
+        # CPU Architecture. If left blank it will be auto detected
         [ValidateSet("amd64", "386", "arm64", "armv5")]
-        [string] $Arch
+        [string] $Arch,
+
+        # Force redownloading of the binary
+        [switch] $Force
     )
+
+    if (-Not $Force) {
+        if (-Not [string]::IsNullOrWhiteSpace($env:C8Y_BINARY) -and (Test-Path $env:C8Y_BINARY)) {
+            return $env:C8Y_BINARY
+        }
+    }
 
     # Version
     if ([string]::IsNullOrWhiteSpace($Version)) {

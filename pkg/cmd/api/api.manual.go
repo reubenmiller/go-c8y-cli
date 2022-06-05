@@ -260,7 +260,7 @@ func (n *CmdAPI) RunE(cmd *cobra.Command, args []string) error {
 	}
 
 	if request.RequestSupportsBody(method) {
-		body := mapbuilder.NewInitializedMapBuilder()
+		body := mapbuilder.NewInitializedMapBuilder(!strings.EqualFold(method, "DELETE"))
 		err = flags.WithBody(
 			cmd,
 			body,

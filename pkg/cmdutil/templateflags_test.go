@@ -33,7 +33,7 @@ func Test_WithTemplateValue(t *testing.T) {
 	cmdErr := cmd.Execute()
 	assert.OK(t, cmdErr)
 
-	body := mapbuilder.NewInitializedMapBuilder()
+	body := mapbuilder.NewInitializedMapBuilder(true)
 	err := flags.WithBody(
 		cmd,
 		body,

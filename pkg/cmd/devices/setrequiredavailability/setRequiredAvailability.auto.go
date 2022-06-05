@@ -126,7 +126,7 @@ func (n *SetRequiredAvailabilityCmd) RunE(cmd *cobra.Command, args []string) err
 	}
 
 	// body
-	body := mapbuilder.NewInitializedMapBuilder()
+	body := mapbuilder.NewInitializedMapBuilder(true)
 	err = flags.WithBody(
 		cmd,
 		body,

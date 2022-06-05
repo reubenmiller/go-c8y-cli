@@ -82,7 +82,7 @@ func WithRequestOptions(cmd *cobra.Command, args []string, req *c8y.RequestOptio
 
 	//
 	// body
-	body := mapbuilder.NewInitializedMapBuilder()
+	body := mapbuilder.NewInitializedMapBuilder(true)
 	err = WithBody(
 		cmd,
 		body,
