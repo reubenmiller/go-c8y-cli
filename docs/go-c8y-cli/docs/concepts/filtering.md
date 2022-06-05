@@ -34,6 +34,7 @@ The `filter` parameter uses a query language which supports the following operat
 |datelte (or 'olderthan')|match date less than (older) or equal to value of (datetime/relative)|`--filter "creationTime datelte 2022-01-02T12:00"`|
 |dategt|match date greater than (newer) to value of (datetime/relative)|`--filter "creationTime dategt 2022-01-02T12:00"`|
 |dategte (or 'newerthan')|match date greater than (newer) or equal to value of (datetime/relative)|`--filter "creationTime dategte 2022-01-02T12:00"`|
+|version|match a version or version range|`--filter "c8y_Firmware.version version >1.0.1, <=2.0.0"`|
 
 ## Examples
 
@@ -118,3 +119,38 @@ c8y inventory list \
 | 53791      | 2022-02-16T18:49:35.689Z      |
 | 55624      | 2022-02-16T18:59:43.222Z      |
 ```
+
+### Filtering by a version
+
+The version filter allows easy version filtering which is not normally possible with string comparisons.
+
+<CodeExample>
+
+```bash
+c8y devices list --pageSize 100 --filter "c8y_Firmware.version version >=1.10.0" -o json -c
+```
+
+</CodeExample>
+
+```csv title="output"
+{"id": "11111", "c8y_Firmware": {"version": "1.10.0+deb10"}}
+{"id": "22222", "c8y_Firmware": {"version": "1.11.1"}}
+```
+
+Alternatively you can apply version constraints (min and max versions) by using a comma separator.
+
+<CodeExample>
+
+```bash
+c8y devices list --pageSize 100 --filter "c8y_Firmware.version version >=1.10.0, <1.11.0" -o json -c
+```
+
+</CodeExample>
+
+```csv title="output"
+{"id": "11111", "c8y_Firmware": {"version": "1.10.0+deb10"}}
+```
+
+:::note
+If the version is an empty string or invalid version, it is treated as "0.0.0". This can be filtered out using ">0.0.0"
+:::

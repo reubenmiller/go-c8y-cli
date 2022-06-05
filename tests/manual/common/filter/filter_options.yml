@@ -37,3 +37,45 @@ tests:
     stdout:
       exactly: |
         {"value":false}
+  
+  It filters for a minimum version:
+    command: |
+      c8y util repeat 2 | c8y template execute --template "{value: if input.index == 1 then '1.10.3+deb10' else '2.0.0'}" | c8y util show --filter "value version >=1.10.3+deb10" -o json
+    exit-code: 0
+    stdout:
+      exactly: |
+        {"value":"1.10.3+deb10"}
+        {"value":"2.0.0"}
+  
+  It filters for a maximum version:
+    command: |
+      c8y util repeat 2 | c8y template execute --template "{value: if input.index == 1 then '1.10.3+deb10' else '2.0.0'}" | c8y util show --filter "value version <1.99" -o json
+    exit-code: 0
+    stdout:
+      exactly: |
+        {"value":"1.10.3+deb10"}
+  
+  It filters a version based on a given range:
+    command: |
+      c8y util repeat 2 | c8y template execute --template "{value: if input.index == 1 then '1.10.3+deb10' else '2.0.0'}" | c8y util show --filter "value version >=1.10.3+deb11, < 2.0.0" -o json
+    exit-code: 0
+    stdout:
+      exactly: |
+        {"value":"1.10.3+deb10"}
+  
+  It treats empty versions as 0.0.0:
+    command: |
+      c8y util repeat 2 | c8y template execute --template "{value: if input.index == 1 then '2.0.0' else ''}" | c8y util show --filter "value version >0" -o json
+    exit-code: 0
+    stdout:
+      exactly: |
+        {"value":"2.0.0"}
+  
+  It treats empty versions as 0.0.0 and includes them:
+    command: |
+      c8y util repeat 2 | c8y template execute --template "{value: if input.index == 1 then '2.0.0' else ''}" | c8y util show --filter "value version >=0" -o json
+    exit-code: 0
+    stdout:
+      exactly: |
+        {"value":"2.0.0"}
+        {"value":""}

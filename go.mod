@@ -44,6 +44,8 @@ require (
 	moul.io/http2curl/v2 v2.3.0
 )
 
+require github.com/hashicorp/go-version v1.5.0
+
 require github.com/cli/browser v1.1.0
 
 require (
