@@ -1,0 +1,12 @@
+tests:
+  It watches managed objects for a time period:
+    command: ./manual/realtime/subscribeAll/subscribe_tests.sh realtime 1
+    exit-code: 0
+  
+  It watches managed objects for a specific count:
+    command: ./manual/realtime/subscribeAll/subscribe_tests.sh realtime 2
+    exit-code: 0
+  
+  It watches for all devices and stop after receiving x messages:
+    command: ./manual/realtime/subscribeAll/subscribe_tests.sh realtime 3
+    exit-code: 0

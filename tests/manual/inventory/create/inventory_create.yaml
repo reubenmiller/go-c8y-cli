@@ -1,0 +1,98 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/reubenmiller/commander/feat/handle-nested-files/schema.json
+
+config:
+  env:
+    C8Y_SETTINGS_DEFAULTS_CACHE: true
+    C8Y_SETTINGS_CACHE_METHODS: GET POST PUT
+    C8Y_SETTINGS_DEFAULTS_CACHETTL: 100h
+    C8Y_SETTINGS_DEFAULTS_DRYFORMAT: json
+
+tests:
+  It creates a managed object with json in exponential notation:
+    command: |
+      output=$(
+        c8y inventory create --data "{\"c8y_Kpi\": {\"max\": 19.1010101E19}}"
+      )
+      echo "$output" | c8y inventory delete >/dev/null
+      echo "$output" | c8y util show --select c8y_Kpi -o json --compact=false
+    exit-code: 0
+    stdout:
+      exactly: |
+        {
+          "c8y_Kpi": {
+            "max": 191010101000000000000
+          }
+        }
+
+  It creates a managed object with escaped double quotes:
+    command: |
+      output=$(
+        c8y inventory create \
+          --data '{"c8y_Kpi": {"description": "some \"value\" ok"}}'
+      )
+      echo "$output" | c8y inventory delete >/dev/null
+      echo "$output" | c8y util show --select c8y_Kpi -o json --compact=false
+
+    exit-code: 0
+    stdout:
+      exactly: |
+        {
+          "c8y_Kpi": {
+            "description": "some \"value\" ok"
+          }
+        }
+
+  It creates a managed object from a json file:
+    command: |
+      output=$(
+        c8y inventory create --data manual/inventory/create/data01.json
+      )
+      echo "$output" | c8y inventory delete
+      echo "$output" | c8y util show --select name,type,c8y_SoftwareList -o json --compact=false
+
+    exit-code: 0
+    stdout:
+      exactly: |
+        {
+          "c8y_SoftwareList": [
+            {
+              "name": "app1",
+              "url": "https://example.com/myfile1.deb",
+              "version": "1.0.0"
+            },
+            {
+              "name": "app2",
+              "url": "https://example.com/myfile1.deb",
+              "version": "9"
+            },
+            {
+              "name": "app3 test",
+              "url": "https://example.com/myfile1.deb",
+              "version": "1.1.1"
+            }
+          ],
+          "name": "testMO",
+          "type": "exampleType"
+        }
+
+  It throws an error if the json file contains invalid json:
+    command: |
+      c8y inventory create --data manual/inventory/create/data_invalid01.json
+    exit-code: 101
+    stderr:
+      not-contains:
+        - panic
+
+  It allows settings the processes mode when creating a managed object:
+    command: |
+      c8y inventory create --data "{}" --processingMode PERSISTENT -o json --dry | c8y util show --select headers.X-Cumulocity-Processing-Mode --output csv
+      c8y inventory create --data "{}" --processingMode QUIESCENT -o json --dry | c8y util show --select headers.X-Cumulocity-Processing-Mode --output csv
+      c8y inventory create --data "{}" --processingMode TRANSIENT -o json --dry | c8y util show --select headers.X-Cumulocity-Processing-Mode --output csv
+      c8y inventory create --data "{}" --processingMode CEP -o json --dry | c8y util show --select headers.X-Cumulocity-Processing-Mode --output csv
+    exit-code: 0
+    stdout:
+      exactly: |
+        PERSISTENT
+        QUIESCENT
+        TRANSIENT
+        CEP

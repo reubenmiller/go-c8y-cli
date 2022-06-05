@@ -1,0 +1,27 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/reubenmiller/commander/feat/handle-nested-files/schema.json
+config:
+  env:
+    C8Y_SETTINGS_DEFAULTS_OUTPUT: json
+
+tests:
+  #
+  # Object with number like keys
+  #
+  It Objects with numbers as keys should not be converted to an array:
+    config:
+      timeout: 10s
+    command: |
+      echo '{"c8y_Dashboard":{"15426326034650895":{"name":"test"}}}' | c8y util show -v --select "**"
+    exit-code: 0
+    stdout:
+      json:
+        c8y_Dashboard.15426326034650895.name: test
+
+  ? It Objects with numbers as keys should not be converted to an array when using wildcard selection
+  : config:
+      timeout: 10s
+    command: |
+      echo '{"c8y_Dashboard":{"15426326034650895":{"name":"test"}}}' | c8y util show -v --select "c8y_Dashboard.*15426326034650895.**"
+    stdout:
+      json:
+        c8y_Dashboard.15426326034650895.name: test

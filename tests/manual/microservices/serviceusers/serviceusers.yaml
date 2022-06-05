@@ -1,0 +1,27 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/reubenmiller/commander/feat/handle-nested-files/schema.json
+config:
+  env:
+    C8Y_SETTINGS_DEFAULTS_CACHE: true
+    C8Y_SETTINGS_CACHE_METHODS: GET POST PUT
+    C8Y_SETTINGS_DEFAULTS_OUTPUT: json
+
+tests:
+  It gets a microservice service user:
+    command: |
+      c8y microservices serviceusers get --id technician
+    exit-code: 0
+    stdout:
+      json:
+        name: r/.+
+        password: r/.+
+        tenant: r/.+
+
+  It gets a microservice service user using pipeline:
+    command: |
+      c8y microservices get --id technician | c8y microservices serviceusers get
+    exit-code: 0
+    stdout:
+      json:
+        name: r/.+
+        password: r/.+
+        tenant: r/.+

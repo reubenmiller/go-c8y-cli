@@ -1,0 +1,32 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/reubenmiller/commander/feat/handle-nested-files/schema.json
+
+config:
+  env:
+    C8Y_SETTINGS_DEFAULTS_CACHE: true
+    C8Y_SETTINGS_DEFAULTS_CACHETTL: 100h
+
+tests:
+  It returns a server error on ErrorVariable:
+    command: |
+      c8y inventory get --id 0 --verbose
+    exit-code: 4
+    stderr:
+      match-pattern: "serverError.+404"
+  
+  It redirects errors to response using shell redirection:
+    command: |
+      c8y inventory get --id 0 2>&1
+    exit-code: 4
+    stdout:
+      contains:
+        - No managedObject for id
+  
+  It redirects errors to response:
+    command: |
+      c8y inventory get --id 0 --withError
+    exit-code: 4
+    stdout:
+      match-pattern: "serverError.+404"
+      json:
+        message: r/.+
+        c8yResponse.error: r/.+

@@ -1,0 +1,49 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/reubenmiller/commander/feat/handle-nested-files/schema.json
+#
+# Piping to device commands
+#
+config:
+  env:
+    C8Y_SETTINGS_DEFAULTS_CACHE: true
+    C8Y_SETTINGS_CACHE_METHODS: GET PUT POST
+    C8Y_SETTINGS_DEFAULTS_CACHETTL: 100h
+    C8Y_SETTINGS_DEFAULTS_DRYFORMAT: json
+
+tests:
+  It supports piping strings to template:
+    command: |
+      echo "11\n12" |
+        c8y devices create --template "{ jobIndex: input.index, jobValue: input.value }" --dry |
+        c8y util show --select method,pathEncoded,body
+    exit-code: 0
+    stdout:
+      exactly: |
+        {"body":{"c8y_IsDevice":{},"jobIndex":1,"jobValue":"11","name":"11"},"method":"POST","pathEncoded":"/inventory/managedObjects"}
+        {"body":{"c8y_IsDevice":{},"jobIndex":2,"jobValue":"12","name":"12"},"method":"POST","pathEncoded":"/inventory/managedObjects"}
+
+  It supports piping json to template:
+    command: |
+      echo "{\"name\":\"myDevice01\"}\n{\"name\":\"myDevice02\"}" |
+        c8y devices create --template "{ jobIndex: input.index, name: input.value.name }" --dry |
+        c8y util show --select method,pathEncoded,body
+    exit-code: 0
+    stdout:
+      exactly: |
+        {"body":{"c8y_IsDevice":{},"jobIndex":1,"name":"myDevice01"},"method":"POST","pathEncoded":"/inventory/managedObjects"}
+        {"body":{"c8y_IsDevice":{},"jobIndex":2,"name":"myDevice02"},"method":"POST","pathEncoded":"/inventory/managedObjects"}
+
+  It supports templates referencing input values - ids => get => update:
+    command: |
+      c8y devices create --name "iot-linux-AAA" --template "{type: 'customType1'}" > /dev/null
+      c8y devices create --name "iot-linux-AAB" --template "{type: 'customType2'}" > /dev/null
+
+      echo "iot-linux-AAA\niot-linux-AAB" |
+      c8y devices get |
+      c8y devices update --template "{name: input.value.name, type: input.value.type + 'Suffix', index: input.index }" --dry |
+      c8y util show --select method,body
+
+    exit-code: 0
+    stdout:
+      exactly: |
+        {"body":{"index":1,"name":"iot-linux-AAA","type":"customType1Suffix"},"method":"PUT"}
+        {"body":{"index":2,"name":"iot-linux-AAB","type":"customType2Suffix"},"method":"PUT"}

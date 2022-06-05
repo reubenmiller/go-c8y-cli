@@ -1,0 +1,12 @@
+tests:
+  It watches alarms for a time period:
+    command: ./manual/alarms/subscribe/subscribe_tests.sh alarms 1
+    exit-code: 0
+  
+  It watches alarms for a specific count:
+    command: ./manual/alarms/subscribe/subscribe_tests.sh alarms 2
+    exit-code: 0
+  
+  It watches for all devices and stop after receiving x messages:
+    command: ./manual/alarms/subscribe/subscribe_tests.sh alarms 3
+    exit-code: 0

@@ -20,6 +20,7 @@ import (
 	applicationsCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/applications"
 	applicationsCreateHostedCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/applications/createhostedapplication"
 	applicationsOpenCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/applications/open"
+	assertCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/assert"
 	auditrecordsCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/auditrecords"
 	binariesCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/binaries"
 	bulkoperationsCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/bulkoperations"
@@ -262,6 +263,7 @@ func NewCmdRoot(f *cmdutil.Factory, version, buildDate string) *CmdRoot {
 
 	// Child commands
 	commands := []*cobra.Command{
+		assertCmd.NewSubCommand(f).GetCommand(),
 		auditrecordsCmd.NewSubCommand(f).GetCommand(),
 		binariesCmd.NewSubCommand(f).GetCommand(),
 		bulkoperationsCmd.NewSubCommand(f).GetCommand(),

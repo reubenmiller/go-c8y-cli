@@ -1,0 +1,15 @@
+{
+    "c8y_Nested": {
+        "type1": {
+            "names": {
+                "sorted": {
+                    "values": [
+                        1,
+                        2,
+                        3
+                    ]
+                }
+            }
+        }
+    }
+}
