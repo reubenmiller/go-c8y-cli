@@ -57,8 +57,8 @@ func NewCmdText(f *cmdutil.Factory) *CmdText {
 
 	cmd.Flags().String("input", "", "input value to be repeated (required) (accepts pipeline)")
 	cmd.Flags().StringVar(&ccmd.schema, "schema", "", "Match against a json schema")
-	cmd.Flags().StringVar(&ccmd.exact, "exact", "", "Match exact text")
-	cmd.Flags().StringVar(&ccmd.regex, "regex", "", "Match against regular expression")
+	cmd.Flags().StringVar(&ccmd.exact, "exact", "", "Match exact text (case sensitive)")
+	cmd.Flags().StringVar(&ccmd.regex, "regex", "", "Match against a regular expression (case sensitive)")
 	cmd.Flags().BoolVar(&ccmd.strictMode, "strict", false, "Strict mode, fail if no match is found")
 
 	cmdutil.DisableEncryptionCheck(cmd)
@@ -163,6 +163,8 @@ func (n *CmdText) RunE(cmd *cobra.Command, args []string) error {
 				} else {
 					fmt.Fprintf(consol, "%s\n", input)
 				}
+			} else {
+				err = fmt.Errorf("%w. input does not match json schema. got=%s, wanted=%s", cmderrors.ErrAssertion, input, n.schema)
 			}
 		}
 
@@ -170,15 +172,20 @@ func (n *CmdText) RunE(cmd *cobra.Command, args []string) error {
 		if pattern != nil {
 			if err == nil {
 				if !pattern.Match(input) {
-					err = fmt.Errorf("match pattern. got=%s, wanted=%s", input, n.regex)
+					err = fmt.Errorf("%w. input does not match pattern. got=%s, wanted=%s", cmderrors.ErrAssertion, input, n.regex)
+				} else {
+					fmt.Fprintf(consol, "%s\n", input)
 				}
 			}
 		}
 
+		// exact match
 		if err == nil {
 			if n.exact != "" {
 				if !bytes.Equal(input, []byte(n.exact)) {
-					err = fmt.Errorf("input does not match. got=%s, wanted=%s", input, n.exact)
+					err = fmt.Errorf("%w. input does not match. got=%s, wanted=%s", cmderrors.ErrAssertion, input, n.exact)
+				} else {
+					fmt.Fprintf(consol, "%s\n", input)
 				}
 			}
 		}
@@ -191,9 +198,6 @@ func (n *CmdText) RunE(cmd *cobra.Command, args []string) error {
 				// wrap error so it is not printed twice, and is still an assertion error
 				cErr := cmderrors.NewUserErrorWithExitCode(cmderrors.ExitAssertionError, lastErr)
 				cErr.Processed = true
-				lastErr = cErr
-			} else {
-				cErr := cmderrors.NewUserErrorWithExitCode(cmderrors.ExitAssertionError, err)
 				lastErr = cErr
 			}
 		}

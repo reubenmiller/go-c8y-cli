@@ -18,7 +18,7 @@ tests:
 
   It matches input against a json schema (no match):
     command: |
-      echo '{"name":"device01"}' | c8y assert text --schema '{
+      echo '{"name":"device01"}' | c8y assert text --strict --schema '{
         "properties": {
           "name": {"type": "number"}
         }
@@ -32,7 +32,7 @@ tests:
 
   It matches input against a exact text (no match):
     command: |
-      echo '{"name":"device01"}' | c8y assert text --exact '{"name":"device02"}'
+      echo '{"name":"device01"}' | c8y assert text --exact '{"name":"device02"}' --strict
     exit-code: 112
 
   It matches input against a regex pattern (match):
@@ -42,10 +42,10 @@ tests:
 
   It matches input against a regex pattern is case sensitive (no match):
     command: |
-      echo '{"name":"device01"}' | c8y assert text --regex '\{"name":"Device\d+"\}'
+      echo '{"name":"device01"}' | c8y assert text --regex '\{"name":"Device\d+"\}' --strict
     exit-code: 112
 
   It matches input against a regex pattern (no match):
     command: |
-      echo '{"name":"device01"}' | c8y assert text --regex '{"name":"\d+"}'
+      echo '{"name":"device01"}' | c8y assert text --regex '{"name":"\d+"}' --strict
     exit-code: 112
