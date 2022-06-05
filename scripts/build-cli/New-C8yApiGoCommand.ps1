@@ -574,7 +574,7 @@ func (n *${NameCamel}Cmd) RunE(cmd *cobra.Command, args []string) error {
     
 
     // body
-    body := mapbuilder.NewInitializedMapBuilder()
+    body := mapbuilder.NewInitializedMapBuilder($(($RESTMethod -match "PUT|POST").ToString().ToLower()))
     err = flags.WithBody(
         cmd,
         body,
