@@ -31,7 +31,7 @@ Update severity of an existing alarm to CRITICAL
       --id strings              Alarm id (required) (accepts pipeline)
       --processingMode string   Cumulocity processing mode
       --severity string         Alarm severity, for example CRITICAL, MAJOR, MINOR or WARNING.
-      --status string           Comma separated alarm statuses, for example ACTIVE,CLEARED.
+      --status string           The status of the alarm. If not specified, a new alarm will be created as ACTIVE.
       --template string         Body template
       --templateVars string     Body template variables
       --text string             Text description of the alarm.
@@ -87,7 +87,7 @@ Update severity of an existing alarm to CRITICAL
   -v, --verbose                    Verbose logging
       --view string                Use views when displaying data on the terminal. Disable using --view off (default "auto")
       --withError                  Errors will be printed on stdout instead of stderr
-  -t, --withTotalPages             Request Cumulocity to include the total pages in the response statitics under .statistics.totalPages
+  -t, --withTotalPages             Request Cumulocity to include the total pages in the response statistics under .statistics.totalPages
       --workers int                Number of workers (default 1)
 ```
 

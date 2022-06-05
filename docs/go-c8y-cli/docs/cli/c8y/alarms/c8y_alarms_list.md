@@ -20,22 +20,29 @@ Get alarms with the severity set to MAJOR
 
 $ c8y alarms list --dateFrom "-10m" --status ACTIVE
 Get collection of active alarms which occurred in the last 10 minutes
+
+$ c8y alarms list --dateFrom "-1d" --status ACTIVE --status ACKNOWLEDGED
+Get collection of active and acknowledged alarms in the last 1d
         
 ```
 
 ### Options
 
 ```
-      --dateFrom string     Start date or date and time of alarm occurrence.
-      --dateTo string       End date or date and time of alarm occurrence.
-      --device strings      Source device id. (accepts pipeline)
-  -h, --help                help for list
-      --resolved            When set to true only resolved alarms will be removed (the one with status CLEARED), false means alarms with status ACTIVE or ACKNOWLEDGED.
-      --severity string     Alarm severity, for example CRITICAL, MAJOR, MINOR or WARNING.
-      --status string       Comma separated alarm statuses, for example ACTIVE,CLEARED.
-      --type string         Alarm type.
-      --withSourceAssets    When set to true also alarms for related source devices will be included in the request. When this parameter is provided a source must be specified.
-      --withSourceDevices   When set to true also alarms for related source devices will be removed. When this parameter is provided also source must be defined.
+      --createdFrom string       Start date or date and time of the alarm creation. Version >= 10.11
+      --createdTo string         End date or date and time of the alarm creation. Version >= 10.11
+      --dateFrom string          Start date or date and time of alarm occurrence.
+      --dateTo string            End date or date and time of alarm occurrence.
+      --device strings           Source device id. (accepts pipeline)
+  -h, --help                     help for list
+      --lastUpdatedFrom string   Start date or date and time of the last update made. Version >= 10.11
+      --lastUpdatedTo string     End date or date and time of the last update made. Version >= 10.11
+      --resolved                 When set to true only resolved alarms will be removed (the one with status CLEARED), false means alarms with status ACTIVE or ACKNOWLEDGED.
+      --severity string          Alarm severity, for example CRITICAL, MAJOR, MINOR or WARNING.
+      --status strings           Comma separated alarm statuses, for example ACTIVE,CLEARED.
+      --type string              Alarm type.
+      --withSourceAssets         When set to true also alarms for related source devices will be included in the request. When this parameter is provided a source must be specified.
+      --withSourceDevices        When set to true also alarms for related source devices will be removed. When this parameter is provided also source must be defined.
 ```
 
 ### Options inherited from parent commands
@@ -88,7 +95,7 @@ Get collection of active alarms which occurred in the last 10 minutes
   -v, --verbose                    Verbose logging
       --view string                Use views when displaying data on the terminal. Disable using --view off (default "auto")
       --withError                  Errors will be printed on stdout instead of stderr
-  -t, --withTotalPages             Request Cumulocity to include the total pages in the response statitics under .statistics.totalPages
+  -t, --withTotalPages             Request Cumulocity to include the total pages in the response statistics under .statistics.totalPages
       --workers int                Number of workers (default 1)
 ```
 

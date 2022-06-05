@@ -293,11 +293,14 @@ func NewMapBuilder() *MapBuilder {
 }
 
 // NewInitializedMapBuilder creates a new map builder with the map set to an empty map
-func NewInitializedMapBuilder() *MapBuilder {
+func NewInitializedMapBuilder(initBody bool) *MapBuilder {
 	builder := NewMapBuilder()
 	builder.templates = make([]string, 0)
 	builder.autoApplyTemplate = true
-	builder.SetEmptyMap()
+
+	if initBody {
+		builder.SetEmptyMap()
+	}
 	return builder
 }
 
@@ -353,6 +356,38 @@ type MapBuilder struct {
 	externalInput     []byte
 }
 
+func (b *MapBuilder) HasChanged() bool {
+	if len(b.templateVariables) > 0 {
+		return true
+	}
+
+	if len(b.templates) > 0 {
+		return true
+	}
+
+	if b.file != "" {
+		return true
+	}
+
+	if b.HasRaw() {
+		if b.raw != "" {
+			return true
+		}
+	}
+
+	if len(b.BodyRaw) > 0 {
+		return true
+		// if !bytes.Equal(b.BodyRaw, []byte("{}")) {
+		// }
+	}
+
+	if len(b.bodyOptional) > 0 {
+		return true
+	}
+
+	return false
+}
+
 // AppendTemplate appends a templates to be merged in with the body
 func (b *MapBuilder) AppendTemplate(template string) *MapBuilder {
 	b.templates = append(b.templates, template)
@@ -396,10 +431,15 @@ func (b *MapBuilder) ApplyTemplates(existingJSON []byte, input []byte, appendTem
 		templates = append(templates, strings.TrimSpace(template))
 	}
 
-	if appendTemplates {
-		templates = append([]string{string(existingJSON)}, templates...)
-	} else {
-		templates = append(templates, string(existingJSON))
+	// Only merge in existing JSON if it is not just an empty object
+	// as the other templates might not be objects which can be merged together in jsonne
+	// e.g. "_.Int(1) + {}"  will cause an error
+	if !bytes.Equal(existingJSON, []byte("{}")) {
+		if appendTemplates {
+			templates = append([]string{string(existingJSON)}, templates...)
+		} else {
+			templates = append(templates, string(existingJSON))
+		}
 	}
 
 	var mergedJSON string
@@ -637,6 +677,9 @@ func (b *MapBuilder) MarshalJSONWithInput(input interface{}) (body []byte, err e
 
 // MarshalJSON returns the body as json
 func (b *MapBuilder) MarshalJSON() (body []byte, err error) {
+	if !b.HasChanged() {
+		return nil, nil
+	}
 	body = []byte(b.BodyRaw)
 
 	for _, it := range b.bodyIterators {

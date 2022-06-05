@@ -18,13 +18,23 @@ c8y binaries list [flags]
 ```
 $ c8y binaries list --pageSize 100
 Get a list of binaries
+
+$ c8y binaries list --type package_debian
+Get a list of binaries with the type package_debian
         
 ```
 
 ### Options
 
 ```
-  -h, --help   help for list
+      --childAdditionId string   Search for a specific child addition and list all the groups to which it belongs.
+      --childAssetId string      Search for a specific child asset and list all the groups to which it belongs.
+      --childDeviceId strings    Search for a specific child device and list all the groups to which it belongs.
+  -h, --help                     help for list
+      --ids strings              The managed object IDs to search for.
+      --owner string             Username of the owner of the managed objects.
+      --text string              Search for managed objects where any property value is equal to the given one. Only string values are supported.
+      --type string              The type of managed object to search for. (accepts pipeline)
 ```
 
 ### Options inherited from parent commands
@@ -77,7 +87,7 @@ Get a list of binaries
   -v, --verbose                    Verbose logging
       --view string                Use views when displaying data on the terminal. Disable using --view off (default "auto")
       --withError                  Errors will be printed on stdout instead of stderr
-  -t, --withTotalPages             Request Cumulocity to include the total pages in the response statitics under .statistics.totalPages
+  -t, --withTotalPages             Request Cumulocity to include the total pages in the response statistics under .statistics.totalPages
       --workers int                Number of workers (default 1)
 ```
 

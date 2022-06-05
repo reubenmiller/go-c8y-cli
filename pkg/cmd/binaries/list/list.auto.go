@@ -7,6 +7,7 @@ import (
 	"net/http"
 
 	"github.com/MakeNowJust/heredoc/v2"
+	"github.com/reubenmiller/go-c8y-cli/pkg/c8yfetcher"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmd/subcommand"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmdutil"
@@ -37,6 +38,9 @@ func NewListCmd(f *cmdutil.Factory) *ListCmd {
 		Example: heredoc.Doc(`
 $ c8y binaries list --pageSize 100
 Get a list of binaries
+
+$ c8y binaries list --type package_debian
+Get a list of binaries with the type package_debian
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
 			return nil
@@ -46,14 +50,23 @@ Get a list of binaries
 
 	cmd.SilenceUsage = true
 
+	cmd.Flags().StringSlice("ids", []string{""}, "The managed object IDs to search for.")
+	cmd.Flags().String("type", "", "The type of managed object to search for. (accepts pipeline)")
+	cmd.Flags().String("owner", "", "Username of the owner of the managed objects.")
+	cmd.Flags().String("text", "", "Search for managed objects where any property value is equal to the given one. Only string values are supported.")
+	cmd.Flags().String("childAdditionId", "", "Search for a specific child addition and list all the groups to which it belongs.")
+	cmd.Flags().String("childAssetId", "", "Search for a specific child asset and list all the groups to which it belongs.")
+	cmd.Flags().StringSlice("childDeviceId", []string{""}, "Search for a specific child device and list all the groups to which it belongs.")
+
 	completion.WithOptions(
 		cmd,
+		completion.WithDevice("childDeviceId", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
 	)
 
 	flags.WithOptions(
 		cmd,
 
-		flags.WithExtendedPipelineSupport("", "", false),
+		flags.WithExtendedPipelineSupport("type", "type", false, "type"),
 		flags.WithCollectionProperty("managedObjects"),
 	)
 
@@ -86,6 +99,13 @@ func (n *ListCmd) RunE(cmd *cobra.Command, args []string) error {
 		query,
 		inputIterators,
 		flags.WithCustomStringSlice(func() ([]string, error) { return cfg.GetQueryParameters(), nil }, "custom"),
+		flags.WithStringSliceCSV("ids", "ids", ""),
+		flags.WithStringValue("type", "type"),
+		flags.WithStringValue("owner", "owner"),
+		flags.WithStringValue("text", "text"),
+		flags.WithStringValue("childAdditionId", "childAdditionId"),
+		flags.WithStringValue("childAssetId", "childAssetId"),
+		c8yfetcher.WithDeviceByNameFirstMatch(client, args, "childDeviceId", "childDeviceId"),
 	)
 	if err != nil {
 		return cmderrors.NewUserError(err)
@@ -126,7 +146,7 @@ func (n *ListCmd) RunE(cmd *cobra.Command, args []string) error {
 	}
 
 	// body
-	body := mapbuilder.NewInitializedMapBuilder()
+	body := mapbuilder.NewInitializedMapBuilder(false)
 	err = flags.WithBody(
 		cmd,
 		body,

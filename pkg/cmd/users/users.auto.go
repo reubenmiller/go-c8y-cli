@@ -11,6 +11,7 @@ import (
 	cmdListInventoryRoles "github.com/reubenmiller/go-c8y-cli/pkg/cmd/users/listinventoryroles"
 	cmdListUserMembership "github.com/reubenmiller/go-c8y-cli/pkg/cmd/users/listusermembership"
 	cmdResetUserPassword "github.com/reubenmiller/go-c8y-cli/pkg/cmd/users/resetuserpassword"
+	cmdRevokeTOTPSecret "github.com/reubenmiller/go-c8y-cli/pkg/cmd/users/revoketotpsecret"
 	cmdUpdate "github.com/reubenmiller/go-c8y-cli/pkg/cmd/users/update"
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmdutil"
 	"github.com/spf13/cobra"
@@ -39,6 +40,7 @@ func NewSubCommand(f *cmdutil.Factory) *SubCmdUsers {
 	cmd.AddCommand(cmdDelete.NewDeleteCmd(f).GetCommand())
 	cmd.AddCommand(cmdUpdate.NewUpdateCmd(f).GetCommand())
 	cmd.AddCommand(cmdResetUserPassword.NewResetUserPasswordCmd(f).GetCommand())
+	cmd.AddCommand(cmdRevokeTOTPSecret.NewRevokeTOTPSecretCmd(f).GetCommand())
 	cmd.AddCommand(cmdListUserMembership.NewListUserMembershipCmd(f).GetCommand())
 
 	ccmd.SubCommand = subcommand.NewSubCommand(cmd)

@@ -14,10 +14,13 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Set up Go 1.16
+      - name: Set up Go 1.18
         uses: actions/setup-go@v2
         with:
-          go-version: 1.16
+          go-version: 1.18
+      
+      - name: Install Task
+        uses: arduino/setup-task@v1
 
       - name: install tooling
         run: go install golang.org/x/tools/cmd/goimports@latest
@@ -38,7 +41,7 @@ jobs:
       # "publish-linux-packages" once the release has been officially approved.
       - name: Publish Linux Packages
         if: ${{ false }}
-        run: make publish-linux-packages
+        run: task publish-linux-packages
         env:
           JFROG_APIKEY: ${{ secrets.JFROG_APIKEY }}
 
@@ -49,13 +52,16 @@ jobs:
     steps:
     - uses: actions/checkout@v2
 
-    - name: Set up Go 1.16
+    - name: Set up Go 1.18
       uses: actions/setup-go@v2
       with:
-        go-version: 1.16
+        go-version: 1.18
+
+    - name: Install Task
+      uses: arduino/setup-task@v1
 
     - name: Build Powershell Module
-      run: make build_powershell
+      run: task build_powershell
 
     - uses: actions/upload-artifact@v2
       with:
@@ -65,7 +71,7 @@ jobs:
           tools/PSc8y/Dependencies/*
 
     - name: Publish Powershell Module (PSc8y)
-      run: make publish
+      run: task publish
 
   publish-docker-latest:
     runs-on: ubuntu-latest
@@ -82,13 +88,16 @@ jobs:
       with:
         node-version: 14
 
-    - name: Set up Go 1.16
+    - name: Set up Go 1.18
       uses: actions/setup-go@v2
       with:
-        go-version: 1.16
-    
+        go-version: 1.18
+
+    - name: Install Task
+      uses: arduino/setup-task@v1
+
     - name: install tooling
       run: go install golang.org/x/tools/cmd/goimports@latest
 
     - name: publish docker images
-      run: make VERSION=${GITHUB_REF} publish-docker
+      run: task VERSION=${GITHUB_REF} publish-docker

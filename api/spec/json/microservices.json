@@ -30,6 +30,18 @@
           {
             "description": "Get microservices",
             "command": "c8y microservices list --pageSize 100"
+          },
+          {
+            "description": "Get a microservice by name",
+            "command": "c8y microservices list --name cockpit"
+          },
+          {
+            "description": "Check if a user has access to the device-simulator microservice",
+            "command": "c8y microservices list --name device-simulator --user myuser"
+          },
+          {
+            "description": "List all microservices owned by specific tenant",
+            "command": "c8y microservices list --owner t12345"
           }
         ]
       },
@@ -43,6 +55,32 @@
           ],
           "static": true,
           "description": "Application type"
+        },
+        {
+          "name": "name",
+          "type": "applicationname",
+          "description": "The name of the application."
+        },
+        {
+          "name": "owner",
+          "type": "tenantname",
+          "description": "The ID of the tenant that owns the applications."
+        },
+        {
+          "name": "providedFor",
+          "type": "tenantname",
+          "description": "The ID of a tenant that is subscribed to the applications but doesn't own them."
+        },
+        {
+          "name": "subscriber",
+          "type": "tenantname",
+          "description": "The ID of a tenant that is subscribed to the applications."
+        },
+        {
+          "name": "user",
+          "type": "[]user",
+          "description": "The ID of a user that has access to the applications.",
+          "pipeline": true
         }
       ]
     },
@@ -324,7 +362,7 @@
     {
       "name": "newMicroserviceBinary",
       "description": "Create microservice binary",
-      "descriptionLong": "Create/upload a new microservice binary. For the applications of type 'MICROSERVICE' to be available for Cumulocity platform users, a binary zip file must be uploaded.\nFor the microservice application, the zip file must consist of    * cumulocity.json - file describing the deployment\n    * image.tar - executable docker image\n\nFor the web application, the zip file must include index.html in the root directory.\n",
+      "descriptionLong": "Create/upload a new microservice binary.\nFor the applications of type 'MICROSERVICE' to be available for Cumulocity platform users, a binary zip file must be uploaded.\n\nFor the microservice application, the zip file must consist of\n    * cumulocity.json - file describing the deployment\n    * image.tar - executable docker image\n\nFor the web application, the zip file must include index.html in the root directory.\n",
       "method": "POST",
       "path": "/application/applications/{id}/binaries",
       "accept": "application/vnd.com.nsn.cumulocity.managedObject+json",
@@ -376,7 +414,7 @@
     {
       "name": "getMicroserviceBootstrapUser",
       "description": "Get microservice bootstrap user",
-      "descriptionLong": "Get the bootstrap user associated to a microservice. The bootstrap user is required when running a microservice locally (i.e. during development)\n",
+      "descriptionLong": "Get the bootstrap user associated to a microservice. The bootstrap user is required when running\na microservice locally (i.e. during development)\n",
       "method": "GET",
       "path": "/application/applications/{id}/bootstrapUser",
       "accept": "application/vnd.com.nsn.cumulocity.bootstrapuser+json",

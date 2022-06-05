@@ -1,0 +1,12 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/reubenmiller/commander/feat/handle-nested-files/schema.json
+
+tests:
+  It does not include a body when deleting a collection:
+    command: |
+      c8y events deleteCollection --dateFrom -1min --dry --dryFormat markdown
+    exit-code: 0
+    stdout:
+      contains:
+        - DELETE /event/events
+      not-contains:
+        - Body

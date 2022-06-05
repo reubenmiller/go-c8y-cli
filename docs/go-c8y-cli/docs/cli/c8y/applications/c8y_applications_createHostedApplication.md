@@ -32,7 +32,7 @@ Create/update hosted web application but don't activate it, so the current versi
       --availability string   Access level for other tenants. Possible values are : MARKET, PRIVATE (default)
       --contextPath string    contextPath of the hosted application
   -d, --data string           static data to be applied to body. accepts json or shorthand json, i.e. --data 'value1=1,my.nested.value=100'
-      --file string           File or Folder of the web application. It should contains a index.html file in the root folder/ or zip file
+      --file string           File or Folder of the web application. It should contain a index.html file in the root folder/ or zip file
   -h, --help                  help for createHostedApplication
       --key string            Shared secret of application. Defaults to the name
       --name string           Name of application
@@ -93,7 +93,7 @@ Create/update hosted web application but don't activate it, so the current versi
   -v, --verbose                    Verbose logging
       --view string                Use views when displaying data on the terminal. Disable using --view off (default "auto")
       --withError                  Errors will be printed on stdout instead of stderr
-  -t, --withTotalPages             Request Cumulocity to include the total pages in the response statitics under .statistics.totalPages
+  -t, --withTotalPages             Request Cumulocity to include the total pages in the response statistics under .statistics.totalPages
       --workers int                Number of workers (default 1)
 ```
 

@@ -7,4 +7,4 @@ cleanup () {
 }
 trap cleanup EXIT
 
-echo "$mo_id" | c8y inventory assert fragments --fragments "name=example01"
+echo "$mo_id" | c8y inventory assert fragments --fragments "name=example01" --strict

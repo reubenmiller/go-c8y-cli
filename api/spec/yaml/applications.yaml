@@ -28,12 +28,39 @@ endpoints:
         - description: Get applications
           command: c8y applications list --pageSize 100
 
+        - description: Get an application by name
+          command: c8y applications list --name cockpit
+        
+        - description: Check if a user has access to the cockpit application
+          command: c8y applications list --name cockpit --user myuser
+
     queryParameters:
       - name: type
         pipeline: true
         type: string
         validationSet: [APAMA_CEP_RULE, EXTERNAL, HOSTED, MICROSERVICE]
         description: Application type
+
+      - name: name
+        type: applicationname
+        description: The name of the application.
+      
+      - name: owner
+        type: tenantname
+        description: The ID of the tenant that owns the applications.
+      
+      - name: providedFor
+        type: tenantname
+        description: The ID of a tenant that is subscribed to the applications but doesn't own them.
+      
+      - name: subscriber
+        type: tenantname
+        description: The ID of a tenant that is subscribed to the applications.
+
+      - name: user
+        type: '[]user'
+        description: The ID of a user that has access to the applications.
+
 
   - name: newApplication
     description: Create application
@@ -118,7 +145,7 @@ endpoints:
 
   - name: copyApplication
     description: 'Copy application'
-    descriptionLong: >
+    descriptionLong: |
       A POST request to the 'clone' resource creates a new application based on an already existing one.
 
       The properties are copied to the newly created application. For name, key and context path a 'clone' prefix is added in order to be unique.
@@ -192,7 +219,11 @@ endpoints:
 
   - name: deleteApplication
     description: Delete application
-    descriptionLong: 'The application can only be removed when its availability is PRIVATE or in other case when it has no subscriptions.'
+    descriptionLong: |
+      The application can only be removed when its availability is PRIVATE or in other case when it has no subscriptions
+
+      Delete an application (by a given ID). This method is not supported by microservice applications.
+
     method: DELETE
     path: /application/applications/{id}
     alias:
@@ -218,12 +249,22 @@ endpoints:
           assertStdOut:
             json:
               path: r//application/applications/\d+$
+
+        - description: Unsubscribe and application then delete it
+          command: c8y applications delete --id 12345 --unsubscribeAll
+
     pathParameters:
       - name: id
         type: application
         pipeline: true
         required: true
         description: Application id
+    
+    queryParameters:
+      - name: unsubscribeAll
+        property: force
+        type: boolean
+        description: Force deletion by unsubscribing all tenants from the application first and then deleting the application itself.
 
   - name: updateApplication
     description: 'Update application details'
@@ -303,7 +344,7 @@ endpoints:
 
   - name: newApplicationBinary
     description: New application binary
-    descriptionLong: >
+    descriptionLong: |
       For the applications of type microservice and web application to be available for Cumulocity platform users, a binary zip file must be uploaded.
 
       For the microservice application, the zip file must consist of
@@ -347,7 +388,7 @@ endpoints:
 
   - name: getApplicationBinaryCollection
     description: Get application binaries
-    descriptionLong: >
+    descriptionLong: |
       A list of all binaries related to the given application will be returned
     method: GET
     path: /application/applications/{id}/binaries
@@ -379,7 +420,7 @@ endpoints:
           command: c8y applications listApplicationBinaries --id 12345
     pathParameters:
       - name: id
-        type: application
+        type: hostedapplication
         pipeline: true
         required: true
         description: Application id
@@ -387,7 +428,7 @@ endpoints:
   - name: deleteApplicationBinary
     skip: false
     description: Delete application binary
-    descriptionLong: >
+    descriptionLong: |
       Remove an application binaries related to the given application
 
       The active version can not be deleted and the server will throw an error if you try.
@@ -420,14 +461,14 @@ endpoints:
           command: c8y applications deleteApplicationBinary --application 12345 --binaryId 9876
     pathParameters:
       - name: application
-        type: application
+        type: hostedapplication
         pipeline: false
         required: true
         description: Application id
       
       - name: binaryId
         alias: id
-        type: '[]string'
+        type: '[]id'
         pipeline: true
         required: true
         description: Application binary id

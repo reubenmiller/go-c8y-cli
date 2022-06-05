@@ -1,0 +1,42 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/reubenmiller/commander/feat/handle-nested-files/schema.json
+config:
+  env:
+    C8Y_SETTINGS_DEFAULTS_DRY: true
+    C8Y_SETTINGS_DEFAULTS_OUTPUT: json
+
+tests:
+    Delete application binary:
+        command: |
+          c8y applications deleteApplicationBinary --application 12345 --binaryId 1111 --dry
+        exit-code: 0
+        stdout:
+            json:
+                method: DELETE
+                path: /application/applications/12345/binaries/1111
+
+    Delete application binary (using pipeline):
+        command: |
+          echo "1111" | c8y applications deleteApplicationBinary --application 12345
+        exit-code: 0
+        stdout:
+            json:
+                method: DELETE
+                path: /application/applications/12345/binaries/1111
+
+    Delete application binary with application name lookup (using pipeline):
+        command: |
+          c8y template execute --template "{id: '1111'}" | c8y applications deleteApplicationBinary --application "my-example-app" --dry
+        exit-code: 0
+        stdout:
+            json:
+                method: DELETE
+                path: r//application/applications/\d+/binaries/1111
+
+    Delete application binaries piping property alias (using pipeline):
+        command: |
+          c8y template execute --template "{binaryId: '1111', id: '2222'}" | c8y applications deleteApplicationBinary --application 12345 --dry
+        exit-code: 0
+        stdout:
+            json:
+                method: DELETE
+                path: /application/applications/12345/binaries/2222

@@ -129,21 +129,6 @@
           "name": "withSubusersCount",
           "type": "boolean",
           "description": "if set to 'true', then each of returned users will contain additional field 'subusersCount' - number of direct subusers (users with corresponding 'owner')."
-        },
-        {
-          "name": "withApps",
-          "type": "boolean",
-          "description": "Include applications related to the user"
-        },
-        {
-          "name": "withGroups",
-          "type": "boolean",
-          "description": "Include group information"
-        },
-        {
-          "name": "withRoles",
-          "type": "boolean",
-          "description": "Include role information"
         }
       ]
     },
@@ -176,6 +161,11 @@
           {
             "description": "Create a user",
             "command": "c8y users create --userName \"testuser1\" --email \"testuser@no-reply.dummy.com\" --password \"a0)8k2kld9lm!\""
+          },
+          {
+            "description": "Create a user using a template",
+            "command": "c8y users create --template \"{email: 'test@me.com', userName: $.email, firstName: 'Peter'}\" --sendPasswordResetEmail\n",
+            "skipTest": true
           }
         ]
       },
@@ -246,11 +236,13 @@
           "type": "json_custom",
           "required": false,
           "description": "Custom properties to be added to the user"
+        },
+        {
+          "name": "data",
+          "type": "json",
+          "description": "Custom properties"
         }
       ],
-      "bodyTemplateOptions": {
-        "enabled": true
-      },
       "bodyRequiredKeys": [
         "userName"
       ]
@@ -424,6 +416,11 @@
           {
             "description": "Update a user",
             "command": "c8y users update --id \"myuser\" --firstName \"Simon\""
+          },
+          {
+            "description": "Update the email field in each user to match the id (if the id includes the @ sign)",
+            "command": "c8y users list --filter \"id like *@*\" | c8y users update --template \"{email: input.value.id}\"\n",
+            "skipTest": true
           }
         ]
       },
@@ -495,6 +492,11 @@
           "type": "json_custom",
           "required": false,
           "description": "Custom properties to be added to the user"
+        },
+        {
+          "name": "data",
+          "type": "json",
+          "description": "Custom properties"
         }
       ]
     },
@@ -567,6 +569,52 @@
           "property": "password",
           "required": false,
           "description": "New user password. Min: 6, max: 32 characters. Only Latin1 chars allowed"
+        }
+      ]
+    },
+    {
+      "name": "revokeUserTOTPSecret",
+      "description": "Revoke a user's TOTP (TFA) secret",
+      "descriptionLong": "Revoke/delete a user's TOTP (TFA) secret to force them to setup TFA again.\n\nThis is required when the user loses their TFA configuration, or it is compromised.\n",
+      "method": "DELETE",
+      "path": "user/{tenant}/users/{id}/totpSecret/revoke",
+      "accept": "",
+      "alias": {
+        "go": "revokeTOTPSecret",
+        "powershell": "Remove-UserTOTPSecret"
+      },
+      "examples": {
+        "powershell": [
+          {
+            "description": "Revoke a user's TOTP (TFA) secret",
+            "skipTest": true,
+            "beforeEach": [
+              "$User = PSc8y\\New-TestUser"
+            ],
+            "command": "Remove-UserTFA -Id $User.id"
+          }
+        ],
+        "go": [
+          {
+            "description": "Revoke a user's TOTP (TFA) secret",
+            "command": "c8y users revokeTOTPSecret --id \"myuser\""
+          }
+        ]
+      },
+      "pathParameters": [
+        {
+          "name": "tenant",
+          "type": "tenant",
+          "required": false,
+          "position": 99,
+          "description": "Tenant"
+        },
+        {
+          "name": "id",
+          "type": "[]user",
+          "required": true,
+          "pipeline": true,
+          "description": "User id"
         }
       ]
     },

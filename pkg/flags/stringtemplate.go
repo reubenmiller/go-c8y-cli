@@ -13,6 +13,7 @@ import (
 type StringTemplate struct {
 	template          string
 	templateVariables map[string]interface{}
+	allowEmptyValues  bool
 }
 
 // NewStringTemplate returns a new string template
@@ -24,9 +25,18 @@ func NewStringTemplate(template string) *StringTemplate {
 	}
 }
 
+// SetTemplate updates the string template
+func (b *StringTemplate) SetTemplate(template string) {
+	b.template = template
+}
+
 // SetVariable sets a give path variable which will be evalulated when fetching the next value
 func (b *StringTemplate) SetVariable(name string, value interface{}) {
 	b.templateVariables[name] = value
+}
+
+func (b *StringTemplate) SetAllowEmptyValues(value bool) {
+	b.allowEmptyValues = value
 }
 
 // GetTemplate return the string template
@@ -87,7 +97,7 @@ func (b *StringTemplate) Execute(ignoreIterators bool, template ...string) (outp
 		default:
 			currentValue = fmt.Sprintf("%v", v)
 		}
-		if currentValue != "" {
+		if b.allowEmptyValues || currentValue != "" {
 			output = strings.ReplaceAll(output, "{"+key+"}", currentValue)
 		}
 	}

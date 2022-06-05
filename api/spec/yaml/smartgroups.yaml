@@ -111,7 +111,7 @@ endpoints:
 
   - name: deleteSmartGroup
     description: Delete smart group
-    descriptionLong: >
+    descriptionLong: |
       Delete an existing smart group by id or name. Deleting a smart group will not affect any of the devices related to it.
     method: DELETE
     path: inventory/managedObjects/{id}
@@ -145,7 +145,7 @@ endpoints:
 
   - name: createSmartGroup
     description: Create smart group
-    descriptionLong: >
+    descriptionLong: |
       Create a smart group (managed object) which groups devices by an inventory query.
     method: POST
     path: inventory/managedObjects

@@ -23,6 +23,8 @@ Update the status of all active alarms on a device to ACKNOWLEDGED
 ### Options
 
 ```
+      --createdFrom string      Start date or date and time of the alarm creation. Version >= 10.11
+      --createdTo string        End date or date and time of the alarm creation. Version >= 10.11
   -d, --data string             static data to be applied to body. accepts json or shorthand json, i.e. --data 'value1=1,my.nested.value=100'
       --dateFrom string         Start date or date and time of alarm occurrence.
       --dateTo string           End date or date and time of alarm occurrence.
@@ -87,7 +89,7 @@ Update the status of all active alarms on a device to ACKNOWLEDGED
   -v, --verbose                    Verbose logging
       --view string                Use views when displaying data on the terminal. Disable using --view off (default "auto")
       --withError                  Errors will be printed on stdout instead of stderr
-  -t, --withTotalPages             Request Cumulocity to include the total pages in the response statitics under .statistics.totalPages
+  -t, --withTotalPages             Request Cumulocity to include the total pages in the response statistics under .statistics.totalPages
       --workers int                Number of workers (default 1)
 ```
 

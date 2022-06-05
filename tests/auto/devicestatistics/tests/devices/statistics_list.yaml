@@ -1,0 +1,32 @@
+tests:
+    devices/statistics_list_Get daily (default) device statistics for all devices in the current tenant:
+        command: c8y devices statistics list
+        exit-code: 0
+        stdout:
+            json:
+                method: GET
+                path: r//tenant/statistics/device/t\d+/daily/\d{4}-\d{2}-\d{2}$
+    devices/statistics_list_Get daily device statistics for all devices in the current tenant 7 days ago:
+        command: c8y devices statistics list --date "-7d" --type daily
+        exit-code: 0
+        stdout:
+            json:
+                method: GET
+                path: r//tenant/statistics/device/t\d+/daily/\d{4}-\d{2}-\d{2}$
+    devices/statistics_list_Get daily device statistics for all devices in the current tenant 30 days ago:
+        command: c8y devices statistics list --date "-30d" --device 12345
+        exit-code: 0
+        stdout:
+            json:
+                method: GET
+                path: r//tenant/statistics/device/t\d+/daily/\d{4}-\d{2}-\d{2}$
+                pathEncoded: r//tenant/statistics/device/t\d+/daily/\d{4}-\d{2}-\d{2}\?deviceId=12345$
+            contains:
+                - deviceId=12345
+    devices/statistics_list_Get monthly device statistics for all devices for a specific month (day is ignored):
+        command: c8y devices statistics list --date 2022-01-01 --type monthly
+        exit-code: 0
+        stdout:
+            json:
+                method: GET
+                path: r//tenant/statistics/device/t\d+/monthly/2022-01-01$

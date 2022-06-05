@@ -43,9 +43,7 @@
 		},
 		"powershell.pester.useLegacyCodeLens": false,
 		"extensions.ignoreRecommendations": true,
-		"go.testEnvVars": {
-			"C8Y_SESSION": ""
-		},
+		"go.testEnvFile": "${workspaceFolder}/.env",
 		"go.delveConfig": {
 			"dlvLoadConfig": {
 				"maxStringLen": 1024,

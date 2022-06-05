@@ -32,7 +32,9 @@ func NewListCmd(f *cmdutil.Factory) *ListCmd {
 	cmd := &cobra.Command{
 		Use:   "list",
 		Short: "Get audit record collection",
-		Long: `Audit records contain information about modifications to other Cumulocity entities. For example the audit records contain each operation state transition, so they can be used to check when an operation transitioned from PENDING -> EXECUTING -> SUCCESSFUL.
+		Long: `Audit records contain information about modifications to other Cumulocity entities.
+
+For example the audit records contain each operation state transition, so they can be used to check when an operation transitioned from PENDING -> EXECUTING -> SUCCESSFUL.
 `,
 		Example: heredoc.Doc(`
 $ c8y auditrecords list --pageSize 100
@@ -141,7 +143,7 @@ func (n *ListCmd) RunE(cmd *cobra.Command, args []string) error {
 	}
 
 	// body
-	body := mapbuilder.NewInitializedMapBuilder()
+	body := mapbuilder.NewInitializedMapBuilder(false)
 	err = flags.WithBody(
 		cmd,
 		body,

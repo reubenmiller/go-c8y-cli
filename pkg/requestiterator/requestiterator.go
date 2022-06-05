@@ -14,6 +14,7 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/pkg/iterator"
 	"github.com/reubenmiller/go-c8y-cli/pkg/logger"
 	"github.com/reubenmiller/go-c8y-cli/pkg/mapbuilder"
+	"github.com/reubenmiller/go-c8y-cli/pkg/request"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 )
 
@@ -134,7 +135,7 @@ func (r *RequestIterator) GetNext() (*c8y.RequestOptions, interface{}, error) {
 	r.Logger.Debugf("Input line: %s", inputLine)
 
 	// apply body iterator
-	if r.Body != nil && !reflect.ValueOf(r.Body).IsNil() && (strings.EqualFold(req.Method, "POST") || strings.EqualFold(req.Method, "PUT")) {
+	if r.Body != nil && !reflect.ValueOf(r.Body).IsNil() && request.RequestSupportsBody(req.Method) {
 		// iterator body. Any validation will be run here
 		switch v := r.Body.(type) {
 		case flags.RawString:
@@ -159,16 +160,20 @@ func (r *RequestIterator) GetNext() (*c8y.RequestOptions, interface{}, error) {
 					return nil, nil, err
 				}
 
-				// TODO: Find more efficient way rather than converting to and from json
-				bodyValue := make(map[string]interface{})
+				if len(bodyContents) > 0 {
+					// TODO: Find more efficient way rather than converting to and from json
+					bodyValue := make(map[string]interface{})
 
-				// Note: UnmarshalJSON does not support large numbers by default, so
-				// 		 c8y.DecodeJSONBytes should be used instead!
-				if err := c8y.DecodeJSONBytes(bodyContents, &bodyValue); err != nil {
-					r.setDone()
-					return nil, nil, err
+					// Note: UnmarshalJSON does not support large numbers by default, so
+					// 		 c8y.DecodeJSONBytes should be used instead!
+					if err := c8y.DecodeJSONBytes(bodyContents, &bodyValue); err != nil {
+						r.setDone()
+						return nil, nil, err
+					}
+					req.Body = bodyValue
+				} else {
+					req.Body = nil
 				}
-				req.Body = bodyValue
 			}
 		default:
 			req.Body = v

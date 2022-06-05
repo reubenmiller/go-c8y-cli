@@ -61,3 +61,14 @@ tests:
         - 'No operation for'
     stdout:
       match-pattern: ^$
+
+  It accepts multiple ids provided as arguments:
+    command: |
+      c8y operations wait --id 1,2 --dry --dryFormat json \
+      | c8y util show --select path
+    exit-code: 0
+    stdout:
+      line-count: 2
+      json:
+        ..0.path: /devicecontrol/operations/1
+        ..1.path: /devicecontrol/operations/2

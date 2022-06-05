@@ -51,9 +51,6 @@ Get a list of users
 	cmd.Flags().String("owner", "", "exact username")
 	cmd.Flags().Bool("onlyDevices", false, "If set to 'true', result will contain only users created during bootstrap process (starting with 'device_'). If flag is absent (or false) the result will not contain 'device_' users.")
 	cmd.Flags().Bool("withSubusersCount", false, "if set to 'true', then each of returned users will contain additional field 'subusersCount' - number of direct subusers (users with corresponding 'owner').")
-	cmd.Flags().Bool("withApps", false, "Include applications related to the user")
-	cmd.Flags().Bool("withGroups", false, "Include group information")
-	cmd.Flags().Bool("withRoles", false, "Include role information")
 
 	completion.WithOptions(
 		cmd,
@@ -101,9 +98,6 @@ func (n *ListCmd) RunE(cmd *cobra.Command, args []string) error {
 		flags.WithStringValue("owner", "owner"),
 		flags.WithBoolValue("onlyDevices", "onlyDevices", ""),
 		flags.WithBoolValue("withSubusersCount", "withSubusersCount", ""),
-		flags.WithBoolValue("withApps", "withApps", ""),
-		flags.WithBoolValue("withGroups", "withGroups", ""),
-		flags.WithBoolValue("withRoles", "withRoles", ""),
 	)
 	if err != nil {
 		return cmderrors.NewUserError(err)
@@ -144,7 +138,7 @@ func (n *ListCmd) RunE(cmd *cobra.Command, args []string) error {
 	}
 
 	// body
-	body := mapbuilder.NewInitializedMapBuilder()
+	body := mapbuilder.NewInitializedMapBuilder(false)
 	err = flags.WithBody(
 		cmd,
 		body,

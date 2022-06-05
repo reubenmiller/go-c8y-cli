@@ -47,6 +47,7 @@ Get a list of the child additions of an existing managed object
 	cmd.SilenceUsage = true
 
 	cmd.Flags().StringSlice("id", []string{""}, "Managed object id. (required) (accepts pipeline)")
+	cmd.Flags().Bool("withChildren", false, "Determines if children with ID and name should be returned when fetching the managed object. Set it to false to improve query performance.")
 
 	completion.WithOptions(
 		cmd,
@@ -128,7 +129,7 @@ func (n *ListCmd) RunE(cmd *cobra.Command, args []string) error {
 	}
 
 	// body
-	body := mapbuilder.NewInitializedMapBuilder()
+	body := mapbuilder.NewInitializedMapBuilder(false)
 	err = flags.WithBody(
 		cmd,
 		body,
@@ -145,6 +146,7 @@ func (n *ListCmd) RunE(cmd *cobra.Command, args []string) error {
 		path,
 		inputIterators,
 		c8yfetcher.WithIDSlice(args, "id", "id"),
+		flags.WithBoolValue("withChildren", "withChildren", ""),
 	)
 	if err != nil {
 		return err

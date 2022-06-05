@@ -6,7 +6,7 @@ $script:CompleteDevice = {
         $searchFor = $wordToComplete
     }
 
-    Get-DeviceCollection -Name "$searchFor*" -PageSize 100 -WarningAction SilentlyContinue `
+    Get-DeviceCollection -Name "$searchFor*" -PageSize 100 -WarningAction SilentlyContinue -AsPSObject `
     | Where-Object { $_.name -like "$searchFor*" } `
     | Sort-Object { $_.name } `
     | ForEach-Object {

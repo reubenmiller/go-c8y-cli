@@ -9,3 +9,13 @@ tests:
                 body.userName: testuser1
                 method: POST
                 path: /user/$C8Y_TENANT/users
+    users_create_Create a user using a template:
+        command: |
+            c8y users create --template "{email: 'test@me.com', userName: $.email, firstName: 'Peter'}" --sendPasswordResetEmail
+        exit-code: 0
+        skip: true
+        stdout:
+            json:
+                body.sendPasswordResetEmail: "true"
+                method: POST
+                path: /user/$C8Y_TENANT/users

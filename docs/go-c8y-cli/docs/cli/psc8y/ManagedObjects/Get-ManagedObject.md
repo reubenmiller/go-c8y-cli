@@ -19,7 +19,9 @@ Get managed objects
 ```
 Get-ManagedObject
 	[-Id] <Object[]>
+	[-SkipChildrenNames]
 	[-WithParents]
+	[-WithChildren]
 	[-Raw]
 	[-OutputFile <String>]
 	[-OutputFileRaw <String>]
@@ -107,8 +109,40 @@ Accept pipeline input: True (ByPropertyName, ByValue)
 Accept wildcard characters: False
 ```
 
+### -SkipChildrenNames
+Don't include the child devices names in the response.
+This can improve the API response because the names don't need to be retrieved
+
+```yaml
+Type: SwitchParameter
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: False
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
 ### -WithParents
 include a flat list of all parents and grandparents of the given object
+
+```yaml
+Type: SwitchParameter
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: False
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -WithChildren
+Determines if children with ID and name should be returned when fetching the managed object.
+Set it to false to improve query performance.
 
 ```yaml
 Type: SwitchParameter

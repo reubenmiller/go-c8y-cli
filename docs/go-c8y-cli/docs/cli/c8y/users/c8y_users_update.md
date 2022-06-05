@@ -17,6 +17,10 @@ c8y users update [flags]
 ```
 $ c8y users update --id "myuser" --firstName "Simon"
 Update a user
+
+$ c8y users list --filter "id like *@*" | c8y users update --template "{email: input.value.id}"
+
+Update the email field in each user to match the id (if the id includes the @ sign)
         
 ```
 
@@ -24,6 +28,7 @@ Update a user
 
 ```
       --customProperties string   Custom properties to be added to the user
+  -d, --data string               static data to be applied to body. accepts json or shorthand json, i.e. --data 'value1=1,my.nested.value=100'
       --email string              User email address
       --enabled                   User activation status (true/false)
       --firstName string          User first name
@@ -34,6 +39,8 @@ Update a user
       --phone string              User phone number. Format: '+[country code][number]', has to be a valid MSISDN
       --processingMode string     Cumulocity processing mode
       --sendPasswordResetEmail    Send password reset email to the user instead of setting a password
+      --template string           Body template
+      --templateVars string       Body template variables
       --tenant string             Tenant
 ```
 
@@ -87,7 +94,7 @@ Update a user
   -v, --verbose                    Verbose logging
       --view string                Use views when displaying data on the terminal. Disable using --view off (default "auto")
       --withError                  Errors will be printed on stdout instead of stderr
-  -t, --withTotalPages             Request Cumulocity to include the total pages in the response statitics under .statistics.totalPages
+  -t, --withTotalPages             Request Cumulocity to include the total pages in the response statistics under .statistics.totalPages
       --workers int                Number of workers (default 1)
 ```
 

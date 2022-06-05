@@ -32,7 +32,9 @@ func NewDeleteCollectionCmd(f *cmdutil.Factory) *DeleteCollectionCmd {
 	cmd := &cobra.Command{
 		Use:   "deleteCollection",
 		Short: "Delete operation collection",
-		Long: `Delete a collection of operations using a set of filter criteria. Be careful when deleting operations. Where possible update operations to FAILED (with a failure reason) instead of deleting them as it is easier to track.
+		Long: `Delete a collection of operations using a set of filter criteria. Be careful when deleting operations.
+
+Where possible update operations to FAILED (with a failure reason) instead of deleting them as it is easier to track.
 `,
 		Example: heredoc.Doc(`
 $ c8y operations deleteCollection --device 12345 --status PENDING
@@ -136,7 +138,7 @@ func (n *DeleteCollectionCmd) RunE(cmd *cobra.Command, args []string) error {
 	}
 
 	// body
-	body := mapbuilder.NewInitializedMapBuilder()
+	body := mapbuilder.NewInitializedMapBuilder(false)
 	err = flags.WithBody(
 		cmd,
 		body,

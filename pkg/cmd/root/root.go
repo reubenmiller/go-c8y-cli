@@ -19,6 +19,7 @@ import (
 	apiCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/api"
 	applicationsCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/applications"
 	applicationsCreateHostedCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/applications/createhostedapplication"
+	applicationsOpenCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/applications/open"
 	assertCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/assert"
 	auditrecordsCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/auditrecords"
 	binariesCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/binaries"
@@ -37,7 +38,10 @@ import (
 	deviceregistrationCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/deviceregistration"
 	devicesCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/devices"
 	devicesAssertCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/devices/assert"
+	devicesAvailabilityCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/devices/availability"
 	devicesListCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/devices/list"
+	deviceStatisticsCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/devices/statistics"
+	deviceUserCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/devices/user"
 	eventsCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/events"
 	eventsAssertCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/events/assert"
 	eventsSubscribeCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/events/subscribe"
@@ -174,7 +178,7 @@ func NewCmdRoot(f *cmdutil.Factory, version, buildDate string) *CmdRoot {
 	cmd.PersistentFlags().Int64(flags.FlagCurrentPage, 0, "Current page which should be returned")
 	cmd.PersistentFlags().Int64("totalPages", 0, "Total number of pages to get")
 	cmd.PersistentFlags().Bool("includeAll", false, "Include all results by iterating through each page")
-	cmd.PersistentFlags().BoolP(flags.FlagWithTotalPages, "t", false, "Request Cumulocity to include the total pages in the response statitics under .statistics.totalPages")
+	cmd.PersistentFlags().BoolP(flags.FlagWithTotalPages, "t", false, "Request Cumulocity to include the total pages in the response statistics under .statistics.totalPages")
 	cmd.PersistentFlags().BoolP("compact", "c", !isTerm, "Compact instead of pretty-printed output when using json output. Pretty print is the default if output is the terminal")
 	cmd.PersistentFlags().Bool("noAccept", false, "Ignore Accept header will remove the Accept header from requests, however PUT and POST requests will only see the effect")
 	cmd.PersistentFlags().Bool("dry", false, "Dry run. Don't send any data to the server")
@@ -318,6 +322,9 @@ func NewCmdRoot(f *cmdutil.Factory, version, buildDate string) *CmdRoot {
 	devices := devicesCmd.NewSubCommand(f).GetCommand()
 	devices.AddCommand(devicesListCmd.NewCmdDevicesList(f).GetCommand())
 	devices.AddCommand(devicesAssertCmd.NewSubCommand(f).GetCommand())
+	devices.AddCommand(devicesAvailabilityCmd.NewSubCommand(f).GetCommand())
+	devices.AddCommand(deviceStatisticsCmd.NewSubCommand(f).GetCommand())
+	devices.AddCommand(deviceUserCmd.NewSubCommand(f).GetCommand())
 	cmd.AddCommand(devices)
 
 	// devicegroups
@@ -377,6 +384,7 @@ func NewCmdRoot(f *cmdutil.Factory, version, buildDate string) *CmdRoot {
 	// applications
 	applications := applicationsCmd.NewSubCommand(f).GetCommand()
 	applications.AddCommand(applicationsCreateHostedCmd.NewCmdCreateHostedApplication(f).GetCommand())
+	applications.AddCommand(applicationsOpenCmd.NewOpenCmd(f).GetCommand())
 	cmd.AddCommand(applications)
 
 	// smart groups

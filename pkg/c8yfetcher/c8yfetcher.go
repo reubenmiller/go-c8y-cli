@@ -88,14 +88,21 @@ func (i *idValue) GetName() string {
 	return ""
 }
 
+func applyFormatter(value string, format string) string {
+	if format != "" {
+		value = fmt.Sprintf(format, value)
+	}
+	return value
+}
+
 type EntityFetcher interface {
 	getByID(string) ([]fetcherResultSet, error)
 	getByName(string) ([]fetcherResultSet, error)
 	IsID(string) bool
 }
 
-func lookupIDByName(fetch EntityFetcher, name string, getID bool) ([]entityReference, error) {
-	results, err := lookupEntity(fetch, []string{name}, getID)
+func lookupIDByName(fetch EntityFetcher, name string, getID bool, format string) ([]entityReference, error) {
+	results, err := lookupEntity(fetch, []string{name}, getID, format)
 
 	filteredResults := make([]entityReference, 0)
 	for _, item := range results {
@@ -106,7 +113,7 @@ func lookupIDByName(fetch EntityFetcher, name string, getID bool) ([]entityRefer
 	return filteredResults, err
 }
 
-func lookupEntity(fetch EntityFetcher, values []string, getID bool) ([]entityReference, error) {
+func lookupEntity(fetch EntityFetcher, values []string, getID bool, format string) ([]entityReference, error) {
 	ids, names := parseAndSanitizeIDs(fetch.IsID, values)
 
 	entities := make([]entityReference, 0)
@@ -123,7 +130,7 @@ func lookupEntity(fetch EntityFetcher, values []string, getID bool) ([]entityRef
 						}
 					}
 					entities = append(entities, entityReference{
-						ID:   id,
+						ID:   applyFormatter(id, format),
 						Name: resultSet.Name,
 						Data: resultSet,
 					})
@@ -132,7 +139,7 @@ func lookupEntity(fetch EntityFetcher, values []string, getID bool) ([]entityRef
 			// TODO: Handle error
 		} else {
 			entities = append(entities, entityReference{
-				ID: id,
+				ID: applyFormatter(id, format),
 			})
 		}
 
@@ -143,7 +150,7 @@ func lookupEntity(fetch EntityFetcher, values []string, getID bool) ([]entityRef
 		if v, err := fetch.getByName(name); err == nil {
 			for _, resultSet := range v {
 				entities = append(entities, entityReference{
-					ID:   resultSet.ID,
+					ID:   applyFormatter(resultSet.ID, format),
 					Name: resultSet.Name,
 					Data: resultSet,
 				})
@@ -203,10 +210,11 @@ type EntityIterator struct {
 	UseSelfLink    bool
 	MinimumMatches int
 	OverrideValue  iterator.Iterator
+	Format         string
 }
 
 // NewReferenceByNameIterator create a new iterator which can look up values by their id or names
-func NewReferenceByNameIterator(fetcher EntityFetcher, c8yClient *c8y.Client, valueIterator iterator.Iterator, minimumMatches int, overrideValue iterator.Iterator) *EntityIterator {
+func NewReferenceByNameIterator(fetcher EntityFetcher, c8yClient *c8y.Client, valueIterator iterator.Iterator, minimumMatches int, overrideValue iterator.Iterator, format string) *EntityIterator {
 	return &EntityIterator{
 		Fetcher:        fetcher,
 		Client:         c8yClient,
@@ -214,6 +222,7 @@ func NewReferenceByNameIterator(fetcher EntityFetcher, c8yClient *c8y.Client, va
 		GetID:          false,
 		MinimumMatches: minimumMatches,
 		OverrideValue:  overrideValue,
+		Format:         format,
 	}
 }
 
@@ -261,7 +270,7 @@ func (i *EntityIterator) GetNext() (value []byte, input interface{}, err error) 
 
 	if len(value) != 0 {
 		// only lookup if value is not empty
-		refs, err = lookupIDByName(i.Fetcher, string(value), i.GetID)
+		refs, err = lookupIDByName(i.Fetcher, string(value), i.GetID, i.Format)
 		if err != nil {
 			return nil, rawValue, err
 		}
@@ -288,6 +297,9 @@ func (i *EntityIterator) GetNext() (value []byte, input interface{}, err error) 
 	returnValue := refs[0].ID
 	if i.UseSelfLink && refs[0].Data.Self != "" {
 		returnValue = refs[0].Data.Self
+	}
+	if i.Format != "" {
+		returnValue = fmt.Sprintf(i.Format, returnValue)
 	}
 	return []byte(returnValue), rawValue, nil
 }
@@ -349,7 +361,7 @@ func WithIDSlice(args []string, opts ...string) flags.GetOption {
 func WithReferenceByName(client *c8y.Client, fetcher EntityFetcher, args []string, opts ...string) flags.GetOption {
 	return func(cmd *cobra.Command, inputIterators *flags.RequestInputIterators) (string, interface{}, error) {
 
-		src, dst, _ := flags.UnpackGetterOptions("", opts...)
+		src, dst, format := flags.UnpackGetterOptions("", opts...)
 
 		// check for arguments which could override the value
 		values, err := cmd.Flags().GetStringSlice(src)
@@ -365,7 +377,7 @@ func WithReferenceByName(client *c8y.Client, fetcher EntityFetcher, args []strin
 
 		var overrideValue iterator.Iterator
 		if len(values) > 0 {
-			overrideValue = iterator.NewSliceIterator(values)
+			overrideValue = iterator.NewSliceIterator(values, format)
 		}
 
 		if inputIterators != nil && inputIterators.PipeOptions.Name == src {
@@ -390,7 +402,7 @@ func WithReferenceByName(client *c8y.Client, fetcher EntityFetcher, args []strin
 			if inputIterators.PipeOptions.Required {
 				minMatches = 1
 			}
-			iter := NewReferenceByNameIterator(fetcher, client, pipeIter, minMatches, overrideValue)
+			iter := NewReferenceByNameIterator(fetcher, client, pipeIter, minMatches, overrideValue, format)
 			return inputIterators.PipeOptions.Property, iter, nil
 		}
 
@@ -398,7 +410,7 @@ func WithReferenceByName(client *c8y.Client, fetcher EntityFetcher, args []strin
 			return "", values, nil
 		}
 
-		formattedValues, err := lookupEntity(fetcher, values, false)
+		formattedValues, err := lookupEntity(fetcher, values, false, format)
 
 		if err != nil {
 			return dst, values, fmt.Errorf("failed to lookup by name. %w", err)
@@ -435,7 +447,7 @@ func WithReferenceByName(client *c8y.Client, fetcher EntityFetcher, args []strin
 func WithSelfReferenceByName(client *c8y.Client, fetcher EntityFetcher, args []string, opts ...string) flags.GetOption {
 	return func(cmd *cobra.Command, inputIterators *flags.RequestInputIterators) (string, interface{}, error) {
 
-		src, dst, _ := flags.UnpackGetterOptions("", opts...)
+		src, dst, format := flags.UnpackGetterOptions("", opts...)
 
 		// check for arguments which could override the value
 		values, err := cmd.Flags().GetStringSlice(src)
@@ -469,7 +481,7 @@ func WithSelfReferenceByName(client *c8y.Client, fetcher EntityFetcher, args []s
 			if inputIterators.PipeOptions.Required {
 				minMatches = 1
 			}
-			iter := NewReferenceByNameIterator(fetcher, client, pipeIter, minMatches, overrideValue)
+			iter := NewReferenceByNameIterator(fetcher, client, pipeIter, minMatches, overrideValue, format)
 			iter.UseSelfLink = true
 			iter.GetID = true
 			return inputIterators.PipeOptions.Property, iter, nil
@@ -479,7 +491,7 @@ func WithSelfReferenceByName(client *c8y.Client, fetcher EntityFetcher, args []s
 			return "", values, nil
 		}
 
-		formattedValues, err := lookupEntity(fetcher, values, true)
+		formattedValues, err := lookupEntity(fetcher, values, true, format)
 
 		if err != nil {
 			return dst, values, fmt.Errorf("failed to lookup by name. %w", err)
@@ -631,6 +643,14 @@ func WithApplicationByNameFirstMatch(client *c8y.Client, args []string, opts ...
 	}
 }
 
+// WithHostedApplicationByNameFirstMatch add reference by name matching for hosted (web) applications via cli args. Only the first match will be used
+func WithHostedApplicationByNameFirstMatch(client *c8y.Client, args []string, opts ...string) flags.GetOption {
+	return func(cmd *cobra.Command, inputIterators *flags.RequestInputIterators) (string, interface{}, error) {
+		opt := WithReferenceByNameFirstMatch(client, NewHostedApplicationFetcher(client), args, opts...)
+		return opt(cmd, inputIterators)
+	}
+}
+
 // WithMicroserviceByNameFirstMatch add reference by name matching for microservices via cli args. Only the first match will be used
 func WithMicroserviceByNameFirstMatch(client *c8y.Client, args []string, opts ...string) flags.GetOption {
 	return func(cmd *cobra.Command, inputIterators *flags.RequestInputIterators) (string, interface{}, error) {
@@ -695,7 +715,7 @@ func WithSoftwareVersionData(client *c8y.Client, flagSoftware, flagVersion, flag
 		output := map[string]string{}
 
 		// If version is empty, then pass the values as is
-		if version == "" {
+		if version == "" || (software != "" && version != "" && url != "") {
 			output["name"] = software
 			output["version"] = version
 			output["url"] = url
@@ -779,6 +799,72 @@ func WithFirmwareVersionByNameFirstMatch(client *c8y.Client, args []string, opts
 		}
 		opt := WithReferenceByNameFirstMatch(client, NewFirmwareVersionFetcher(client, firmware, false), args, opts...)
 		return opt(cmd, inputIterators)
+	}
+}
+
+// WithFirmwareVersionData adds firmware information (name, version and url)
+func WithFirmwareVersionData(client *c8y.Client, flagFirmware, flagVersion, flagURL string, args []string, opts ...string) flags.GetOption {
+	return func(cmd *cobra.Command, inputIterators *flags.RequestInputIterators) (string, interface{}, error) {
+		var err error
+		firmware := ""
+		if v, err := flags.GetFlagStringValues(cmd, flagFirmware); err == nil && len(v) > 0 {
+			firmware = v[0]
+		}
+
+		version := ""
+		if v, err := flags.GetFlagStringValues(cmd, flagVersion); err == nil && len(v) > 0 {
+			version = v[0]
+		}
+
+		url := ""
+		if v, err := flags.GetFlagStringValues(cmd, flagURL); err == nil && len(v) > 0 {
+			url = v[0]
+		}
+
+		_, dst, _ := flags.UnpackGetterOptions("", opts...)
+
+		output := map[string]string{}
+
+		// If version is empty, or all values are provided, then pass the values as is
+		if version == "" || (firmware != "" && version != "" && url != "") {
+			output["name"] = firmware
+			output["version"] = version
+			output["url"] = url
+			return dst, output, nil
+		}
+
+		// Check for explicit managed object id
+		if IsID(version) {
+			mo, _, err := client.Inventory.GetManagedObject(WithDisabledDryRunContext(client), version, &c8y.ManagedObjectOptions{
+				WithParents: true,
+			})
+
+			if err != nil {
+				return "", "", err
+			}
+
+			output["name"] = mo.Item.Get("additionParents.references.0.managedObject.name").String()
+			output["version"] = mo.Item.Get("c8y_Firmware.version").String()
+			output["url"] = mo.Item.Get("c8y_Firmware.url").String()
+
+			return dst, output, nil
+		}
+
+		// Lookup version (and software if not already resolved)
+		versionCol, _, err := client.Firmware.GetFirmwareVersionsByName(WithDisabledDryRunContext(client), firmware, version, true, c8y.NewPaginationOptions(5))
+		if err != nil {
+			return "", "", err
+		}
+
+		if len(versionCol.ManagedObjects) == 0 {
+			return "", "", cmderrors.NewNoMatchesFoundError(flagVersion)
+		}
+
+		output["version"] = versionCol.Items[0].Get("c8y_Firmware.version").String()
+		output["url"] = versionCol.Items[0].Get("c8y_Firmware.url").String()
+		output["name"] = versionCol.Items[0].Get("additionParents.references.0.managedObject.name").String()
+
+		return dst, output, err
 	}
 }
 

@@ -23,9 +23,6 @@ Get-UserCollection
 	[[-Owner] <String>]
 	[-OnlyDevices]
 	[-WithSubusersCount]
-	[-WithApps]
-	[-WithGroups]
-	[-WithRoles]
 	[[-Tenant] <Object>]
 	[-PageSize <Int32>]
 	[-WithTotalPages]
@@ -153,51 +150,6 @@ Accept wildcard characters: False
 
 ### -WithSubusersCount
 if set to 'true', then each of returned users will contain additional field 'subusersCount' - number of direct subusers (users with corresponding 'owner').
-
-```yaml
-Type: SwitchParameter
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: Named
-Default value: False
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
-### -WithApps
-Include applications related to the user
-
-```yaml
-Type: SwitchParameter
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: Named
-Default value: False
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
-### -WithGroups
-Include group information
-
-```yaml
-Type: SwitchParameter
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: Named
-Default value: False
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
-### -WithRoles
-Include role information
 
 ```yaml
 Type: SwitchParameter

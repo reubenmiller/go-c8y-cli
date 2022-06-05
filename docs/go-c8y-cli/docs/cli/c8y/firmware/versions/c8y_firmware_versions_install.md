@@ -16,7 +16,12 @@ c8y firmware versions install [flags]
 
 ```
 $ c8y firmware versions install --device 1234 --firmware linux-iot --version 1.0.0
-Install a firmware version
+Install a firmware version (lookup url automatically).
+If the firmware/version exists in the firmware repository, then it will add the url automatically
+
+
+$ c8y firmware versions install --device 1234 --firmware linux-iot --version 1.0.0 --url "https://my.blobstore.com/linux-iot.tar.gz"
+Install a firmware version with an explicit url
         
 ```
 
@@ -24,13 +29,14 @@ Install a firmware version
 
 ```
   -d, --data string             static data to be applied to body. accepts json or shorthand json, i.e. --data 'value1=1,my.nested.value=100'
+      --description string      Operation description
       --device strings          Device or agent where the firmware should be installed (accepts pipeline)
       --firmware string         Firmware name (required)
   -h, --help                    help for install
       --processingMode string   Cumulocity processing mode
       --template string         Body template
       --templateVars string     Body template variables
-      --url string              Firmware url. TODO, not currently automatically added
+      --url string              Firmware url. Leave blank to automatically set it if a matching firmware/version is found in the c8y firmware repository
       --version string          Firmware version
 ```
 
@@ -84,7 +90,7 @@ Install a firmware version
   -v, --verbose                    Verbose logging
       --view string                Use views when displaying data on the terminal. Disable using --view off (default "auto")
       --withError                  Errors will be printed on stdout instead of stderr
-  -t, --withTotalPages             Request Cumulocity to include the total pages in the response statitics under .statistics.totalPages
+  -t, --withTotalPages             Request Cumulocity to include the total pages in the response statistics under .statistics.totalPages
       --workers int                Number of workers (default 1)
 ```
 

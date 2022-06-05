@@ -29,9 +29,6 @@ Get a list of users
       --owner string        exact username
       --tenant string       Tenant
       --username string     prefix or full username
-      --withApps            Include applications related to the user
-      --withGroups          Include group information
-      --withRoles           Include role information
       --withSubusersCount   if set to 'true', then each of returned users will contain additional field 'subusersCount' - number of direct subusers (users with corresponding 'owner').
 ```
 
@@ -85,7 +82,7 @@ Get a list of users
   -v, --verbose                    Verbose logging
       --view string                Use views when displaying data on the terminal. Disable using --view off (default "auto")
       --withError                  Errors will be printed on stdout instead of stderr
-  -t, --withTotalPages             Request Cumulocity to include the total pages in the response statitics under .statistics.totalPages
+  -t, --withTotalPages             Request Cumulocity to include the total pages in the response statistics under .statistics.totalPages
       --workers int                Number of workers (default 1)
 ```
 

@@ -149,3 +149,32 @@ tests:
       json:
         method: POST
         path: /alarm/alarms
+  It supports DELETE with a body:
+      command: >
+        c8y api --method delete --url "/inventory" --template "{value: 'one'}" --dry
+      exit-code: 0
+      stdout:
+          json:
+              method: DELETE
+              path: /inventory
+              body.value: one
+  
+  It supports DELETE without a body:
+      command: >
+        c8y api --method delete --url "/inventory" --dry --dryFormat markdown
+      exit-code: 0
+      stdout:
+          contains:
+            - DELETE /inventory
+          not-contains:
+            - Body
+  
+  It supports PATCH commands:
+      command: >
+        c8y api --method patch --url "/inventory" --dry
+      exit-code: 0
+      stdout:
+          json:
+              method: PATCH
+              path: /inventory
+              

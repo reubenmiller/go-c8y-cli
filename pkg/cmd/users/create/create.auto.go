@@ -35,6 +35,10 @@ func NewCreateCmd(f *cmdutil.Factory) *CreateCmd {
 		Example: heredoc.Doc(`
 $ c8y users create --userName "testuser1" --email "testuser@no-reply.dummy.com" --password "a0)8k2kld9lm!"
 Create a user
+
+$ c8y users create --template "{email: 'test@me.com', userName: $.email, firstName: 'Peter'}" --sendPasswordResetEmail
+
+Create a user using a template
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
 			return f.CreateModeEnabled()
@@ -64,6 +68,7 @@ Create a user
 	flags.WithOptions(
 		cmd,
 		flags.WithProcessingMode(),
+		flags.WithData(),
 		f.WithTemplateFlag(cmd),
 		flags.WithExtendedPipelineSupport("userName", "userName", false, "id"),
 	)
@@ -133,7 +138,7 @@ func (n *CreateCmd) RunE(cmd *cobra.Command, args []string) error {
 	}
 
 	// body
-	body := mapbuilder.NewInitializedMapBuilder()
+	body := mapbuilder.NewInitializedMapBuilder(true)
 	err = flags.WithBody(
 		cmd,
 		body,

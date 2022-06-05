@@ -4,9 +4,9 @@
     "version": "2.0.0",
     "tasks": [
         {
-            "label": "Build",
+            "label": "Build (incl. generate)",
             "type": "shell",
-            "command": "make build",
+            "command": "task build",
             "group": {
                 "kind": "build",
                 "isDefault": true
@@ -22,9 +22,9 @@
             "problemMatcher": []
         },
         {
-            "label": "Build (fast)",
+            "label": "Build-fast (w/o generate)",
             "type": "shell",
-            "command": "make build_cli_fast",
+            "command": "task build-fast",
             "group": {
                 "kind": "build",
                 "isDefault": true

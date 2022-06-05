@@ -17,14 +17,25 @@ c8y applications list [flags]
 ```
 $ c8y applications list --pageSize 100
 Get applications
+
+$ c8y applications list --name cockpit
+Get an application by name
+
+$ c8y applications list --name cockpit --user myuser
+Check if a user has access to the cockpit application
         
 ```
 
 ### Options
 
 ```
-  -h, --help          help for list
-      --type string   Application type (accepts pipeline)
+  -h, --help                 help for list
+      --name string          The name of the application.
+      --owner string         The ID of the tenant that owns the applications.
+      --providedFor string   The ID of a tenant that is subscribed to the applications but doesn't own them.
+      --subscriber string    The ID of a tenant that is subscribed to the applications.
+      --type string          Application type (accepts pipeline)
+      --user strings         The ID of a user that has access to the applications.
 ```
 
 ### Options inherited from parent commands
@@ -77,7 +88,7 @@ Get applications
   -v, --verbose                    Verbose logging
       --view string                Use views when displaying data on the terminal. Disable using --view off (default "auto")
       --withError                  Errors will be printed on stdout instead of stderr
-  -t, --withTotalPages             Request Cumulocity to include the total pages in the response statitics under .statistics.totalPages
+  -t, --withTotalPages             Request Cumulocity to include the total pages in the response statistics under .statistics.totalPages
       --workers int                Number of workers (default 1)
 ```
 

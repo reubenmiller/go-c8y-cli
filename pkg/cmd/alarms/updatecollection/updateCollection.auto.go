@@ -52,6 +52,8 @@ Update the status of all active alarms on a device to ACKNOWLEDGED
 	cmd.Flags().String("dateFrom", "", "Start date or date and time of alarm occurrence.")
 	cmd.Flags().String("dateTo", "", "End date or date and time of alarm occurrence.")
 	cmd.Flags().String("newStatus", "", "New status to be applied to all of the matching alarms")
+	cmd.Flags().String("createdFrom", "", "Start date or date and time of the alarm creation. Version >= 10.11")
+	cmd.Flags().String("createdTo", "", "End date or date and time of the alarm creation. Version >= 10.11")
 
 	completion.WithOptions(
 		cmd,
@@ -141,13 +143,15 @@ func (n *UpdateCollectionCmd) RunE(cmd *cobra.Command, args []string) error {
 	}
 
 	// body
-	body := mapbuilder.NewInitializedMapBuilder()
+	body := mapbuilder.NewInitializedMapBuilder(true)
 	err = flags.WithBody(
 		cmd,
 		body,
 		inputIterators,
 		flags.WithDataFlagValue(),
 		flags.WithStringValue("newStatus", "status"),
+		flags.WithRelativeTimestamp("createdFrom", "createdFrom", ""),
+		flags.WithRelativeTimestamp("createdTo", "createdTo", ""),
 		cmdutil.WithTemplateValue(cfg),
 		flags.WithTemplateVariablesValue(),
 		flags.WithRequiredProperties("status"),

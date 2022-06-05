@@ -6,7 +6,7 @@ $script:CompleteUserGroup = {
         $searchFor = $wordToComplete
     }
 
-    Get-UserGroupCollection -PageSize 100 -WarningAction SilentlyContinue `
+    Get-UserGroupCollection -PageSize 100 -WarningAction SilentlyContinue -AsPSObject `
     | Where-Object { $_.id -like "$searchFor*" -or $_.name -like "$searchFor*" } `
     | ForEach-Object {
         $value = $_.name

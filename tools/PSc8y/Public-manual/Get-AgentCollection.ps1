@@ -49,10 +49,41 @@ Get a list of agents which have been updated more recently than 2020-01-01
         [string]
         $Owner,
 
+        # Availability.
+        [Parameter(Mandatory = $false)]
+        [ValidateSet("AVAILABLE", "UNAVAILABLE", "MAINTENANCE")]
+        [string]
+        $Availability,
+
+        # LastMessageDateFrom - c8y_Availability.lastMessage filter
+        [Parameter(Mandatory = $false)]
+        [string]
+        $LastMessageDateFrom,
+
+        # LastMessageDateTo - c8y_Availability.lastMessage filter
+        [Parameter(Mandatory = $false)]
+        [string]
+        $LastMessageDateTo,
+
+        # Group.
+        [Parameter(Mandatory = $false)]
+        [string]
+        $Group,
+
         # Query.
         [Parameter(Mandatory = $false)]
         [string]
         $Query,
+
+        # QueryTemplate.
+        [Parameter(Mandatory = $false)]
+        [string]
+        $QueryTemplate,
+
+        # Order results by a specific field. i.e. "name", "_id desc" or "creationTime.date asc".
+        [Parameter(Mandatory = $false)]
+        [string]
+        $OrderBy,
 
         # include a flat list of all parents and grandparents of the given object
         [Parameter()]

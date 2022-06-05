@@ -6,6 +6,7 @@ Delete application binary
 
 .DESCRIPTION
 Remove an application binaries related to the given application
+
 The active version can not be deleted and the server will throw an error if you try.
 
 
@@ -39,7 +40,7 @@ Remove all application binaries (except for the active one) for an application (
                    ValueFromPipeline=$true,
                    ValueFromPipelineByPropertyName=$true)]
         [Alias("id")]
-        [string[]]
+        [object[]]
         $BinaryId
     )
     DynamicParam {

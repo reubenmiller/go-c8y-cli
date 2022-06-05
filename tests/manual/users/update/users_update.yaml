@@ -52,3 +52,14 @@ tests:
           },
           "method": "PUT"
         }
+
+  Update the email field using a template:
+    command: |
+      c8y template execute --template "{id: 'test@me.com'}" | c8y users update --template "{email: input.value.id}" --data "firstName=Peter" --dry
+    exit-code: 0
+    stdout:
+      json:
+        method: PUT
+        path: /user/$C8Y_TENANT/users/test@me.com
+        body.email: test@me.com
+        body.firstName: Peter

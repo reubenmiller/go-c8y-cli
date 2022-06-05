@@ -25,6 +25,8 @@ Update-AlarmCollection
 	[[-DateFrom] <String>]
 	[[-DateTo] <String>]
 	[[-NewStatus] <String>]
+	[[-CreatedFrom] <String>]
+	[[-CreatedTo] <String>]
 	[-Data <Object>]
 	[-NoAccept]
 	[-ProcessingMode <String>]
@@ -200,6 +202,38 @@ Aliases:
 
 Required: False
 Position: 6
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -CreatedFrom
+Start date or date and time of the alarm creation.
+Version \>= 10.11
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 7
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -CreatedTo
+End date or date and time of the alarm creation.
+Version \>= 10.11
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 8
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False

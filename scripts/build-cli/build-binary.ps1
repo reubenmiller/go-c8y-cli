@@ -7,127 +7,23 @@ Param(
 
     [switch] $CompressOnly,
 
-    # Build targets
-    [ValidateSet("linux:amd64", "windows:amd64", "darwin:amd64", "linux:arm")]
-    [string[]] $Target,
-
     # Build binaries for all
     [switch] $All
 )
 
-if ($null -eq $Target) {
-    $Target = @()
-    if ($IsLinux) {
-        $Target += "linux:amd64"
-    } elseif ($IsMacOS) {
-        $Target += "darwin:amd64"
-    } else {
-        $Target += "windows:amd64"
-    }
-}
+if ($All) {
+    $env:BINARY_INCLUDE_VERSION = "true"
+    goreleaser build --skip-validate --rm-dist --snapshot
 
-# Create output folder if it does not exist
-if (!(Test-Path $OutputDir -PathType Container)) {
-    Write-Verbose "Creating output folder [$OutputDir]"
-    $null = New-Item -ItemType Directory $OutputDir
-}
-$OutputDir = Resolve-path $OutputDir
-
-Write-Host "Building the c8y binary"
-$c8yBinary = Resolve-Path "$PSScriptRoot/../../cmd/c8y/main.go"
-
-$Version = & git describe --tags
-if (!$Version) {
-    $Version = "0.0.0"
-    Write-Warning "No tag found, so using default version number: $Version"
-}
-$Branch = & git rev-parse --abbrev-ref HEAD
-$VersionNoPrefix = $Version -replace "^v", ""
-$LDFlags = "-ldflags=`"-s -w -X github.com/reubenmiller/go-c8y-cli/pkg/cmd.buildVersion=$VersionNoPrefix -X github.com/reubenmiller/go-c8y-cli/pkg/cmd.buildBranch=$Branch`""
-
-$name = "c8y"
-
-if ($All -or $Target.Contains("darwin:amd64")) {
-    Write-Host "Building the c8y binary [MacOS]"
-    $env:GOARCH = "amd64"
-    $env:GOOS = "darwin"
-    $OutputPath = Join-Path -Path $OutputDir -ChildPath "${name}.macos"
-    & go build $LDFlags -o "$OutputPath" "$c8yBinary"
-
-    if ($LASTEXITCODE -ne 0) {
-        Write-Error "Failed to build project"
-        return
-    }
-
-    if (Get-Command "chmod" -ErrorAction SilentlyContinue) {
-        chmod +x "$OutputPath"
-    }
-
-    # Compress-Archive -Path $OutputPath -DestinationPath "$OutputDir/c8y.macos.zip" -CompressionLevel Optimal -Force
-
-    if ($CompressOnly -and (Test-Path $OutputPath)) {
-        Remove-Item $OutputPath
-    }
-}
-
-if ($All -or $Target.Contains("linux:arm")) {
-    Write-Host "Building the c8y binary [linux (arm)]"
-    $env:GOARCH = "arm"
-    $env:GOARM = "5"
-    $env:GOOS = "linux"
-    $env:CGO_ENABLED = "0"
-
-    $OutputPath = Join-Path -Path $OutputDir -ChildPath "${name}.arm"
-
-    & go build $LDFlags -o "$OutputPath" "$c8yBinary"
-
-    if ($LASTEXITCODE -ne 0) {
-        Write-Error "Failed to build project"
-        return
-    }
-}
-
-if ($All -or $Target.Contains("linux:amd64")) {
-    Write-Host "Building the c8y binary [Linux]"
-    $env:GOARCH = "amd64"
-    $env:GOOS = "linux"
-    $env:CGO_ENABLED = "0"
-    
-    $OutputPath = Join-Path -Path $OutputDir -ChildPath "${name}.linux"
-    & go build $LDFlags -o "$OutputPath" "$c8yBinary"
-
-    if ($LASTEXITCODE -ne 0) {
-        Write-Error "Failed to build project"
-        return
-    }
-
-    if (Get-Command "chmod" -ErrorAction SilentlyContinue) {
-        chmod +x "$OutputPath"
-    }
-
-    # Compress-Archive -Path $OutputPath -DestinationPath "$OutputDir/c8y.linux.zip" -Force
-
-    if ($CompressOnly -and (Test-Path $OutputPath)) {
-        Remove-Item $OutputPath
-    }
-}
-
-# windows
-if ($All -or $Target.Contains("windows:amd64")) {
-    Write-Host "Building the c8y binary [Windows]"
-    $env:GOARCH = "amd64"
-    $env:GOOS = "windows"
-    $OutputPath = Join-Path -Path $OutputDir -ChildPath "${name}.windows.exe"
-    & go build $LDFlags -o "$OutputPath" "$c8yBinary"
-
-    if ($LASTEXITCODE -ne 0) {
-        Write-Error "Failed to build project"
-        return
-    }
-
-    # Compress-Archive -Path $OutputPath -DestinationPath "$OutputDir/c8y.windows.zip" -Force
-
-    if ($CompressOnly -and (Test-Path $OutputPath)) {
-        Remove-Item $OutputPath
-    }
+    # Copy commonly used binaries to the output directory
+    # Note: This might be removed in the future to make the distribution size of the PowerShell module smaller
+    Copy-Item "dist/macos_darwin_amd64_v1/bin/c8y*" "$OutputDir/"
+    Copy-Item "dist/linux_linux_amd64_v1/bin/c8y*" "$OutputDir/"
+    Copy-Item "dist/windows_windows_amd64_v1/bin/c8y*" "$OutputDir/"
+    # goreleaser build --output "$OutputDir/c8y.macos" --skip-validate --rm-dist --snapshot --single-target --id macos
+    # goreleaser build --output "$OutputDir/c8y.windows" --skip-validate --rm-dist --snapshot --single-target --id windows
+    # goreleaser build --output "$OutputDir/c8y.linux" --skip-validate --rm-dist --snapshot --single-target --id linux
+} else {
+    # Build for the current environment
+    goreleaser build --output "$OutputDir/c8y.linux" --skip-validate --rm-dist --snapshot --single-target --id linux
 }

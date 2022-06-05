@@ -26,13 +26,20 @@ Get events from a device
 ### Options
 
 ```
-      --dateFrom string       Start date or date and time of event occurrence.
-      --dateTo string         End date or date and time of event occurrence.
-      --device strings        Device ID (accepts pipeline)
-      --fragmentType string   Fragment name from event.
-  -h, --help                  help for list
-      --revert                Return the newest instead of the oldest events. Must be used with dateFrom and dateTo parameters
-      --type string           Event type.
+      --createdFrom string       Start date or date and time of the event's creation (set by the platform during creation).
+      --createdTo string         End date or date and time of the event's creation (set by the platform during creation).
+      --dateFrom string          Start date or date and time of event occurrence.
+      --dateTo string            End date or date and time of event occurrence.
+      --device strings           Device ID (accepts pipeline)
+      --fragmentType string      Fragment name from event.
+      --fragmentValue string     Allows filtering events by the fragment's value, but only when provided together with fragmentType.
+  -h, --help                     help for list
+      --lastUpdatedFrom string   Start date or date and time of the last update made.
+      --lastUpdatedTo string     End date or date and time of the last update made.
+      --revert                   Return the newest instead of the oldest events. Must be used with dateFrom and dateTo parameters
+      --type string              Event type.
+      --withSourceAssets         When set to true also events for related source assets will be included in the request. When this parameter is provided a source must be specified.
+      --withSourceDevices        When set to true also events for related source devices will be included in the request. When this parameter is provided a source must be specified.
 ```
 
 ### Options inherited from parent commands
@@ -85,7 +92,7 @@ Get events from a device
   -v, --verbose                    Verbose logging
       --view string                Use views when displaying data on the terminal. Disable using --view off (default "auto")
       --withError                  Errors will be printed on stdout instead of stderr
-  -t, --withTotalPages             Request Cumulocity to include the total pages in the response statitics under .statistics.totalPages
+  -t, --withTotalPages             Request Cumulocity to include the total pages in the response statistics under .statistics.totalPages
       --workers int                Number of workers (default 1)
 ```
 

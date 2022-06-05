@@ -26,9 +26,11 @@ Get a managed object with parent references
 ### Options
 
 ```
-  -h, --help          help for get
-      --id strings    ManagedObject id (required) (accepts pipeline)
-      --withParents   include a flat list of all parents and grandparents of the given object
+  -h, --help                help for get
+      --id strings          ManagedObject id (required) (accepts pipeline)
+      --skipChildrenNames   Don't include the child devices names in the response. This can improve the API response because the names don't need to be retrieved
+      --withChildren        Determines if children with ID and name should be returned when fetching the managed object. Set it to false to improve query performance.
+      --withParents         include a flat list of all parents and grandparents of the given object
 ```
 
 ### Options inherited from parent commands
@@ -81,7 +83,7 @@ Get a managed object with parent references
   -v, --verbose                    Verbose logging
       --view string                Use views when displaying data on the terminal. Disable using --view off (default "auto")
       --withError                  Errors will be printed on stdout instead of stderr
-  -t, --withTotalPages             Request Cumulocity to include the total pages in the response statitics under .statistics.totalPages
+  -t, --withTotalPages             Request Cumulocity to include the total pages in the response statistics under .statistics.totalPages
       --workers int                Number of workers (default 1)
 ```
 

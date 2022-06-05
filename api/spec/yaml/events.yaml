@@ -66,6 +66,18 @@ endpoints:
         type: string
         description: Fragment name from event.
 
+      - name: fragmentValue
+        type: string
+        description: Allows filtering events by the fragment's value, but only when provided together with fragmentType.
+
+      - name: createdFrom
+        type: datetime
+        description: Start date or date and time of the event's creation (set by the platform during creation).
+
+      - name: createdTo
+        type: datetime
+        description: End date or date and time of the event's creation (set by the platform during creation).
+      
       - name: dateFrom
         type: datetime
         description: Start date or date and time of event occurrence.
@@ -73,10 +85,26 @@ endpoints:
       - name: dateTo
         type: datetime
         description: End date or date and time of event occurrence.
+      
+      - name: lastUpdatedFrom
+        type: datetime
+        description: Start date or date and time of the last update made.
+
+      - name: lastUpdatedTo
+        type: datetime
+        description: End date or date and time of the last update made.
 
       - name: revert
         type: boolean
         description: Return the newest instead of the oldest events. Must be used with dateFrom and dateTo parameters
+      
+      - name: withSourceAssets
+        type: boolean
+        description: When set to true also events for related source assets will be included in the request. When this parameter is provided a source must be specified.
+
+      - name: withSourceDevices
+        type: boolean
+        description: When set to true also events for related source devices will be included in the request. When this parameter is provided a source must be specified.
 
   - name: deleteEventCollection
     description: Delete event collection
@@ -115,6 +143,14 @@ endpoints:
       - name: fragmentType
         type: string
         description: Fragment name from event.
+
+      - name: createdFrom
+        type: datetime
+        description: Start date or date and time of the event's creation (set by the platform during creation).
+
+      - name: createdTo
+        type: datetime
+        description: End date or date and time of the event's creation (set by the platform during creation).
 
       - name: dateFrom
         type: datetime
@@ -377,7 +413,7 @@ endpoints:
 
   - name: updateEventBinary
     description: Update event binary
-    descriptionLong: >
+    descriptionLong: |
       Update an existing event binary
     method: PUT
     path: event/events/{id}/binaries
@@ -419,7 +455,7 @@ endpoints:
 
   - name: deleteEventBinary
     description: Delete event binary
-    descriptionLong: >
+    descriptionLong: |
       Delete a binary which has been attached to an event
     method: DELETE
     path: event/events/{id}/binaries

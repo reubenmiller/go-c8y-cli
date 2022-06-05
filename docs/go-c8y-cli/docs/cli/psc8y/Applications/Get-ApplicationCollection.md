@@ -19,6 +19,11 @@ Get application collection
 ```
 Get-ApplicationCollection
 	[[-Type] <Object[]>]
+	[[-Name] <String>]
+	[[-Owner] <String>]
+	[[-ProvidedFor] <String>]
+	[[-Subscriber] <String>]
+	[[-User] <Object[]>]
 	[-PageSize <Int32>]
 	[-WithTotalPages]
 	[-CurrentPage <Int32>]
@@ -94,6 +99,81 @@ Required: False
 Position: 1
 Default value: None
 Accept pipeline input: True (ByPropertyName, ByValue)
+Accept wildcard characters: False
+```
+
+### -Name
+The name of the application.
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 2
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -Owner
+The ID of the tenant that owns the applications.
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 3
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -ProvidedFor
+The ID of a tenant that is subscribed to the applications but doesn't own them.
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 4
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -Subscriber
+The ID of a tenant that is subscribed to the applications.
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 5
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -User
+The ID of a user that has access to the applications.
+
+```yaml
+Type: Object[]
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 6
+Default value: None
+Accept pipeline input: False
 Accept wildcard characters: False
 ```
 

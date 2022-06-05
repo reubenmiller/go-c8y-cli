@@ -23,8 +23,13 @@ func WithTenantID(flagName string, clientFunc func() (*c8y.Client, error)) Optio
 			)
 
 			if err != nil {
-				values := []string{fmt.Sprintf("unknown. %s", err)}
-				return values, cobra.ShellCompDirectiveError
+				// Hide error, and just use the current tenant id
+				values := make([]string, 0)
+				if client.TenantName != "" {
+					values = append(values, client.TenantName+"\tcurrent tenant")
+				}
+				// values = append(values, fmt.Sprintf("error\t%s", err))
+				return values, cobra.ShellCompDirectiveDefault
 			}
 			values := []string{client.TenantName + "\tcurrent tenant"}
 			for _, tenant := range tenants.Tenants {

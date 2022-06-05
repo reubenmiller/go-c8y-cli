@@ -54,3 +54,5 @@ pkg/cmd/__debug_bin
 tools/shell/completion/output/
 .env
 *.env
+.task/checksum
+.bin/

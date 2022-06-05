@@ -95,6 +95,7 @@ $results = $Tests | ForEach-Object -ThrottleLimit:$ThrottleLimit -Parallel {
 
     # Disable activity logging by default
     $Env:C8Y_SETTINGS_ACTIVITYLOG_ENABLED = "false"
+    $Env:C8Y_SETTINGS_DEFAULTS_DRYFORMAT = "json"
 
     $result = Invoke-Pester -Configuration:$PesterConfig
     

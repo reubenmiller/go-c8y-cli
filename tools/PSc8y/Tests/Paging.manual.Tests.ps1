@@ -49,7 +49,8 @@ Describe -Name "Get-Pagination" {
     It "All collection commands support paging parameters" {
         $ExcludeCmdlets = @(
             "Get-SessionCollection",
-            "Get-CurrentTenantApplicationCollection"
+            "Get-CurrentTenantApplicationCollection",
+            "Get-DeviceStatisticsCollection"
         )
         $cmdlets = Get-Command -Module PSc8y -Name "Get-*Collection*" |
             Where-Object {

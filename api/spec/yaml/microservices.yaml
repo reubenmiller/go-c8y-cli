@@ -10,7 +10,7 @@ information:
 endpoints:
   - name: getMicroserviceCollection
     description: Get microservice collection
-    descriptionLong: >
+    descriptionLong: |
       Get a collection of microservices in the current tenant
     method: GET
     path: /application/applications
@@ -28,6 +28,15 @@ endpoints:
       go:
         - description: Get microservices
           command: c8y microservices list --pageSize 100
+        
+        - description: Get a microservice by name
+          command: c8y microservices list --name cockpit
+        
+        - description: Check if a user has access to the device-simulator microservice
+          command: c8y microservices list --name device-simulator --user myuser
+        
+        - description: List all microservices owned by specific tenant
+          command: c8y microservices list --owner t12345
     queryParameters:
       - name: type
         type: string
@@ -35,6 +44,27 @@ endpoints:
         validationSet: [MICROSERVICE]
         static: true
         description: Application type
+
+      - name: name
+        type: applicationname
+        description: The name of the application.
+      
+      - name: owner
+        type: tenantname
+        description: The ID of the tenant that owns the applications.
+      
+      - name: providedFor
+        type: tenantname
+        description: The ID of a tenant that is subscribed to the applications but doesn't own them.
+      
+      - name: subscriber
+        type: tenantname
+        description: The ID of a tenant that is subscribed to the applications.
+
+      - name: user
+        type: '[]user'
+        description: The ID of a user that has access to the applications.
+        pipeline: true
 
   - name: newMicroservice
     skip: true
@@ -174,7 +204,7 @@ endpoints:
 
   - name: updateMicroservice
     description: Update microservice details
-    descriptionLong: >
+    descriptionLong: |
       Update details of an existing microservice, i.e. availability, context path etc.
     method: PUT
     path: /application/applications/{id}
@@ -232,7 +262,7 @@ endpoints:
 
   - name: newMicroserviceBinary
     description: Create microservice binary
-    descriptionLong: >
+    descriptionLong: |
       Create/upload a new microservice binary.
       For the applications of type 'MICROSERVICE' to be available for Cumulocity platform users, a binary zip file must be uploaded.
 
@@ -276,7 +306,7 @@ endpoints:
 
   - name: getMicroserviceBootstrapUser
     description: Get microservice bootstrap user
-    descriptionLong: >
+    descriptionLong: |
       Get the bootstrap user associated to a microservice. The bootstrap user is required when running
       a microservice locally (i.e. during development)
     method: GET
@@ -313,7 +343,7 @@ endpoints:
 
   - name: enableMicroservice
     description: subscribe to microservice
-    descriptionLong: >
+    descriptionLong: |
       Enabling (subscribing) a microservice will activate the application in the tenant
     method: POST
     path: /tenant/tenants/{tenant}/applications
@@ -356,7 +386,7 @@ endpoints:
 
   - name: disableMicroservice
     description: unsubscribe microservice
-    descriptionLong: >
+    descriptionLong: |
       Disable (unsubscribe) a microservice from the current tenant
     method: DELETE
     path: /tenant/tenants/{tenant}/applications/{id}
@@ -398,7 +428,7 @@ endpoints:
   - name: getStatus
     skip: false
     description: Get microservice status
-    descriptionLong: >
+    descriptionLong: |
       Get the status of a microservice which is stored as a managed object
     method: GET
     path: /inventory/managedObjects?type=c8y_Application_{id}
@@ -442,7 +472,7 @@ endpoints:
     # Currently a bug when parsing the output
     skip: true
     description: Get microservice logs
-    descriptionLong: >
+    descriptionLong: |
       Get logs of a microservice in the current tenant
     method: GET
     path: /application/applications/{id}/logs/{instance}

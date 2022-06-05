@@ -1,0 +1,13 @@
+
+tests:
+    Create a users using a template:
+        command: |
+          c8y users create --template "{email: 'test@me.com', userName: $.email}" --data "firstName=Peter" --dry
+        exit-code: 0
+        stdout:
+            json:
+                method: POST
+                path: /user/$C8Y_TENANT/users
+                body.userName: test@me.com
+                body.email: test@me.com
+                body.firstName: Peter

@@ -45,6 +45,9 @@
         # relative datetime
         "datetime" = "flags.WithRelativeTimestamp(`"${prop}`", `"${queryParam}`", `"$FixedValue`"),"
 
+        # relative date
+        "date" = "flags.WithRelativeDate(false, `"${prop}`", `"${queryParam}`", `"$FixedValue`"),"
+
         # string array/slice
         "[]string" = "flags.WithStringSliceValues(`"${prop}`", `"${queryParam}`", `"$FixedValue`"),"
 
@@ -75,8 +78,17 @@
         # tenant
         "tenant" = "flags.WithStringDefaultValue(client.TenantName, `"${prop}`", `"${queryParam}`"),"
 
+        # tenantname (optional)
+        "tenantname" = "flags.WithStringValue(`"${prop}`", `"${queryParam}`"),"
+
         # application
         "application" = "c8yfetcher.WithApplicationByNameFirstMatch(client, args, `"${prop}`", `"${queryParam}`"),"
+
+        # hostedapplication (web app)
+        "hostedapplication" = "c8yfetcher.WithHostedApplicationByNameFirstMatch(client, args, `"${prop}`", `"${queryParam}`"),"
+
+        # applicationname
+        "applicationname" = "flags.WithStringValue(`"${prop}`", `"${queryParam}`"),"
 
         # microservice
         "microservice" = "c8yfetcher.WithMicroserviceByNameFirstMatch(client, args, `"${prop}`", `"${queryParam}`"),"
@@ -117,6 +129,10 @@
 
         # firmware version name
         "firmwareversionName" = "flags.WithStringValue(`"${prop}`", `"${queryParam}`"),"
+
+        "firmwareDetails" = @(
+            "c8yfetcher.WithFirmwareVersionData(client, `"firmware`", `"version`", `"url`", args, `"`", `"${queryParam}`"),"
+        ) -join "`n"
 
         # firmware version patch array
         "[]firmwarepatch" = "c8yfetcher.WithFirmwarePatchByNameFirstMatch(client, args, `"${prop}`", `"${queryParam}`"),"

@@ -2,7 +2,7 @@
   "information": {
     "name": "tenantOptions",
     "description": "Cumulocity tenantOptions",
-    "descriptionLong": "<\nREST endpoint to interact with Cumulocity tenantOptions\nOptions are category-key-value tuples, storing tenant configuration. Some categories of options allow creation of new one, other are limited to predefined set of keys.\n\nAny option of any tenant can be defined as \"non-editable\" by \"management\" tenant. Afterwards, any PUT or DELETE requests made on that option by the owner tenant, will result in 403 error (Unauthorized).",
+    "descriptionLong": "REST endpoint to interact with Cumulocity tenantOptions\nOptions are category-key-value tuples, storing tenant configuration. Some categories of options allow creation of new one, other are limited to predefined set of keys.\n\nAny option of any tenant can be defined as \"non-editable\" by \"management\" tenant. Afterwards, any PUT or DELETE requests made on that option by the owner tenant, will result in 403 error (Unauthorized).\n",
     "link": "https://cumulocity.com/guides/reference/tenants/#tenants"
   },
   "endpoints": [
@@ -344,7 +344,7 @@
     {
       "name": "updateTenantOptionEditable",
       "description": "Update tenant option edit setting",
-      "descriptionLong": "Update read-only setting of an existing tenant option Required role:: ROLE_OPTION_MANAGEMENT_ADMIN, Required tenant management Example Request:: Update access.control.allow.origin option.\n",
+      "descriptionLong": "Update read-only setting of an existing tenant option\nRequired role:: ROLE_OPTION_MANAGEMENT_ADMIN, Required tenant management Example Request:: Update access.control.allow.origin option.\n",
       "method": "PUT",
       "path": "/tenant/options/{category}/{key}/editable",
       "accept": "application/vnd.com.nsn.cumulocity.option+json",

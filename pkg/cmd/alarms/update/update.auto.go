@@ -49,7 +49,7 @@ Update severity of an existing alarm to CRITICAL
 	cmd.SilenceUsage = true
 
 	cmd.Flags().StringSlice("id", []string{""}, "Alarm id (required) (accepts pipeline)")
-	cmd.Flags().String("status", "", "Comma separated alarm statuses, for example ACTIVE,CLEARED.")
+	cmd.Flags().String("status", "", "The status of the alarm. If not specified, a new alarm will be created as ACTIVE.")
 	cmd.Flags().String("severity", "", "Alarm severity, for example CRITICAL, MAJOR, MINOR or WARNING.")
 	cmd.Flags().String("text", "", "Text description of the alarm.")
 
@@ -132,7 +132,7 @@ func (n *UpdateCmd) RunE(cmd *cobra.Command, args []string) error {
 	}
 
 	// body
-	body := mapbuilder.NewInitializedMapBuilder()
+	body := mapbuilder.NewInitializedMapBuilder(true)
 	err = flags.WithBody(
 		cmd,
 		body,

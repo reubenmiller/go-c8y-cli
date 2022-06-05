@@ -43,20 +43,55 @@ Get a list of managed objects by id
         [string]
         $FragmentType,
 
+        # List of managed objects that are owned by the given username.
+        [Parameter()]
+        [string]
+        $Owner,
+
         # managed objects containing a text value starting with the given text (placeholder {text}). Text value is any alphanumeric string starting with a latin letter (A-Z or a-z).
         [Parameter()]
         [string]
         $Text,
+
+        # When set to `true` it returns managed objects which don't have any parent. If the current user doesn't have access to the parent, this is also root for the user
+        [Parameter()]
+        [switch]
+        $OnlyRoots,
+
+        # Search for a specific child addition and list all the groups to which it belongs.
+        [Parameter()]
+        [string]
+        $ChildAdditionId,
+
+        # Search for a specific child asset and list all the groups to which it belongs.
+        [Parameter()]
+        [string]
+        $ChildAssetId,
+
+        # Search for a specific child device and list all the groups to which it belongs.
+        [Parameter()]
+        [object[]]
+        $ChildDeviceId,
+
+        # Don't include the child devices names in the response. This can improve the API response because the names don't need to be retrieved
+        [Parameter()]
+        [switch]
+        $SkipChildrenNames,
 
         # include a flat list of all parents and grandparents of the given object
         [Parameter()]
         [switch]
         $WithParents,
 
-        # Don't include the child devices names in the response. This can improve the API response because the names don't need to be retrieved
+        # Determines if children with ID and name should be returned when fetching the managed object. Set it to false to improve query performance.
         [Parameter()]
         [switch]
-        $SkipChildrenNames
+        $WithChildren,
+
+        # When set to true it returns additional information about the groups to which the searched managed object belongs. This results in setting the assetParents property with additional information about the groups.
+        [Parameter()]
+        [switch]
+        $WithGroups
     )
     DynamicParam {
         Get-ClientCommonParameters -Type "Get", "Collection"

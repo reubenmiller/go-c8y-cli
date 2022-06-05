@@ -18,6 +18,13 @@ Get binary collection
 
 ```
 Get-BinaryCollection
+	[[-Ids] <String[]>]
+	[[-Type] <Object[]>]
+	[[-Owner] <String>]
+	[[-Text] <String>]
+	[[-ChildAdditionId] <String>]
+	[[-ChildAssetId] <String>]
+	[[-ChildDeviceId] <Object[]>]
 	[-PageSize <Int32>]
 	[-WithTotalPages]
 	[-CurrentPage <Int32>]
@@ -81,6 +88,112 @@ Get-BinaryCollection -PageSize 100
 Get a list of binaries
 
 ## PARAMETERS
+
+### -Ids
+The managed object IDs to search for.
+
+```yaml
+Type: String[]
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 1
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -Type
+The type of managed object to search for.
+
+```yaml
+Type: Object[]
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 2
+Default value: None
+Accept pipeline input: True (ByPropertyName, ByValue)
+Accept wildcard characters: False
+```
+
+### -Owner
+Username of the owner of the managed objects.
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 3
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -Text
+Search for managed objects where any property value is equal to the given one.
+Only string values are supported.
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 4
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -ChildAdditionId
+Search for a specific child addition and list all the groups to which it belongs.
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 5
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -ChildAssetId
+Search for a specific child asset and list all the groups to which it belongs.
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 6
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -ChildDeviceId
+Search for a specific child device and list all the groups to which it belongs.
+
+```yaml
+Type: Object[]
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 7
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
 
 ### -AbortOnErrors
 Abort batch when reaching specified number of errors

@@ -116,7 +116,8 @@ Accept wildcard characters: False
 ```
 
 ### -Status
-Comma separated alarm statuses, for example ACTIVE,CLEARED.
+The status of the alarm.
+If not specified, a new alarm will be created as ACTIVE.
 
 ```yaml
 Type: String

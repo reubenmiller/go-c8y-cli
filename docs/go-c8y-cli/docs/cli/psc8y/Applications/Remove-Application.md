@@ -19,6 +19,7 @@ Delete application
 ```
 Remove-Application
 	[-Id] <Object[]>
+	[-UnsubscribeAll]
 	[-NoAccept]
 	[-ProcessingMode <String>]
 	[-Force]
@@ -67,7 +68,10 @@ Remove-Application
 ```
 
 ## DESCRIPTION
-The application can only be removed when its availability is PRIVATE or in other case when it has no subscriptions.
+The application can only be removed when its availability is PRIVATE or in other case when it has no subscriptions
+
+Delete an application (by a given ID).
+This method is not supported by microservice applications.
 
 ## EXAMPLES
 
@@ -99,6 +103,21 @@ Required: True
 Position: 1
 Default value: None
 Accept pipeline input: True (ByPropertyName, ByValue)
+Accept wildcard characters: False
+```
+
+### -UnsubscribeAll
+Force deletion by unsubscribing all tenants from the application first and then deleting the application itself.
+
+```yaml
+Type: SwitchParameter
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: False
+Accept pipeline input: False
 Accept wildcard characters: False
 ```
 

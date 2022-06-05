@@ -1,7 +1,6 @@
 package repeat
 
 import (
-	"bytes"
 	"fmt"
 	"io"
 	"math/rand"
@@ -21,16 +20,15 @@ import (
 type CmdRepeat struct {
 	*subcommand.SubCommand
 
-	useTotalCount  bool
-	format         string
-	times          int64
-	skip           int64
-	first          int64
-	offset         int64
-	randomDelayMin int64
-	randomDelayMax int64
-	randomSkip     float32
-	factory        *cmdutil.Factory
+	useTotalCount bool
+	infinite      bool
+	format        string
+	times         int64
+	skip          int64
+	first         int64
+	offset        int64
+	randomSkip    float32
+	factory       *cmdutil.Factory
 }
 
 func NewCmdRepeat(f *cmdutil.Factory) *CmdRepeat {
@@ -43,7 +41,7 @@ func NewCmdRepeat(f *cmdutil.Factory) *CmdRepeat {
 		Short: "Repeat input",
 		Long:  `Generic utility to repeat input values x times`,
 		Example: heredoc.Doc(`
-			$ c8y util repeat --input "my name" 5
+			$ c8y util repeat 5 --input "my name"
 			Repeat input value "my name" 5 times
 
 			$ echo "my name" | c8y util repeat 2 --format "my prefix - %s"
@@ -56,7 +54,10 @@ func NewCmdRepeat(f *cmdutil.Factory) *CmdRepeat {
 				=> device 00101
 				=> device 00102
 
-			$ c8y util repeat 2 | c8y util repeat 3 --format "device%s_%s"
+			$ c8y util repeat --infinite | c8y api --url "/service/report-agent/health" --raw --delay 1s
+			Use repeat to create an infinite loop, to check the health of a microservice waiting 1 seconds after each request
+
+			$ echo "device" | c8y util repeat 2 | c8y util repeat 3 --format "%s_%s"
 			Combine two calls to iterator over 3 devices twice. This can then be used to input into other c8y commands
 				=> device_1
 				=> device_2
@@ -65,11 +66,17 @@ func NewCmdRepeat(f *cmdutil.Factory) *CmdRepeat {
 				=> device_2
 				=> device_3
 			
-			$ c8y devices get --id 1235 | c8y util repeat 5 | c8y events create --text "test event" --type "myType" --dry --delay 1000
+			$ c8y devices get --id 1235 | c8y util repeat 5 | c8y events create --text "test event" --type "myType" --dry --delay 1000ms
 			Get a device, then repeat it 5 times in order to create 5 events for it (delaying 1000 ms between each event creation)
 
-			$ c8y devices get --id 1234 | c8y util repeat 5 --randomDelayMin 1000 --randomDelayMax 10000 -v | c8y events create --text "test event" --type "myType"
+			$ c8y devices get --id 1234 | c8y util repeat 5 --randomDelayMin 1000ms --randomDelayMax 10000ms -v | c8y events create --text "test event" --type "myType"
 			Create 10 events for the same device and use a random delay between 1000ms and 10000ms between the creation of each event
+
+			$ echo "test" | c8y util repeat 5 --randomDelayMax 10000ms -v
+			Print "test" 5 times waiting between 0s and 10s after each line
+
+			$ echo "test" | c8y util repeat 5 --randomDelayMin 5s -v
+			Print "test" 5 times waiting exactly 5 seconds after each line
 		`),
 		Args: cobra.MaximumNArgs(1),
 		RunE: ccmd.newTemplate,
@@ -80,11 +87,12 @@ func NewCmdRepeat(f *cmdutil.Factory) *CmdRepeat {
 	cmd.Flags().Int64Var(&ccmd.skip, "skip", 0, "skip first x input lines")
 	cmd.Flags().Int64Var(&ccmd.first, "first", 0, "only include first x lines. 0 = all lines")
 	cmd.Flags().Int64Var(&ccmd.offset, "offset", 0, "offset the output index counter. default = 0.")
-	cmd.Flags().Int64Var(&ccmd.randomDelayMin, "randomDelayMin", -1, "random minimum delay in milliseconds, must be less than randomDelayMax. -1 = disabled")
-	cmd.Flags().Int64Var(&ccmd.randomDelayMax, "randomDelayMax", -1, "random maximum delay in milliseconds, must be larger than randomDelayMin. -1 = disabled.")
+	cmd.Flags().String("randomDelayMin", "0ms", "random minimum delay after each request, i.e. 5ms, 1.2s. It must be less than randomDelayMax. 0 = disabled")
+	cmd.Flags().String("randomDelayMax", "0ms", "random maximum delay after each request, i.e. 5ms, 1.2s. It must be >= randomDelayMin. 0 = disabled.")
 	cmd.Flags().Float32Var(&ccmd.randomSkip, "randomSkip", -1, "randomly skip line based on a percentage, probability as a float: 0 to 1, 1 = always skip, 0 = never skip, -1 = disabled")
 	cmd.Flags().Int64Var(&ccmd.times, "times", 1, "number of times to repeat the input")
 	cmd.Flags().BoolVar(&ccmd.useTotalCount, "useLineCount", false, "Use line count for the index instead of repeat counter")
+	cmd.Flags().BoolVar(&ccmd.infinite, "infinite", false, "Repeat infinitely. You will need to ctrl-c it to stop it")
 
 	cmdutil.DisableEncryptionCheck(cmd)
 	cmd.SilenceUsage = true
@@ -98,14 +106,6 @@ func NewCmdRepeat(f *cmdutil.Factory) *CmdRepeat {
 	ccmd.SubCommand = subcommand.NewSubCommand(cmd)
 
 	return ccmd
-}
-
-func getRandomDelayMS(minMS, maxMS int64) time.Duration {
-	randomDelay := time.Duration(0)
-	if maxMS > 0 && maxMS > minMS {
-		randomDelay = time.Duration(rand.Int63n(maxMS-minMS) + minMS)
-	}
-	return randomDelay * time.Millisecond
 }
 
 func (n *CmdRepeat) newTemplate(cmd *cobra.Command, args []string) error {
@@ -146,6 +146,12 @@ func (n *CmdRepeat) newTemplate(cmd *cobra.Command, args []string) error {
 	default:
 		// use a single input iterator
 		iter = iterator.NewRepeatIterator("", 1)
+	}
+
+	// Random delay generator
+	randomDelayFunc, err := flags.GetDurationGenerator(cmd, "randomDelayMin", "randomDelayMax", true, time.Millisecond)
+	if err != nil {
+		return err
 	}
 
 	delayBefore := cfg.WorkerDelayBefore()
@@ -209,11 +215,14 @@ func (n *CmdRepeat) newTemplate(cmd *cobra.Command, args []string) error {
 		}
 
 		outputEnding := "\n"
-		// if len(responseText) > 0 {
-		// 	outputEnding = "\n"
-		// }
 
-		for i := int64(0); i < times; i++ {
+		// Using space if no value is provided so the piped data does not get ignored
+		// by downstream commands
+		if len(responseText) == 0 {
+			outputEnding = " " + outputEnding
+		}
+
+		for i := int64(0); i < times || n.infinite; i++ {
 			line := ""
 
 			if includeRowNum {
@@ -221,9 +230,9 @@ func (n *CmdRepeat) newTemplate(cmd *cobra.Command, args []string) error {
 				if n.useTotalCount {
 					index = outputCount
 				}
-				line = fmt.Sprintf(formatString, bytes.TrimSpace(responseText), fmt.Sprintf("%d", index+n.offset)) + outputEnding
+				line = fmt.Sprintf(formatString, responseText, fmt.Sprintf("%d", index+n.offset)) + outputEnding
 			} else {
-				line = fmt.Sprintf(formatString, bytes.TrimSpace(responseText)) + outputEnding
+				line = fmt.Sprintf(formatString, responseText) + outputEnding
 			}
 
 			if delayBefore > 0 {
@@ -232,12 +241,10 @@ func (n *CmdRepeat) newTemplate(cmd *cobra.Command, args []string) error {
 
 			fmt.Print(line)
 
-			randomDelay := getRandomDelayMS(n.randomDelayMin, n.randomDelayMax)
-			if randomDelay > 0 {
-				cfg.Logger.Infof("Waiting %d ms before printnig next value", randomDelay/time.Millisecond)
-				time.Sleep(randomDelay)
-			} else if delay > 0 {
-				time.Sleep(delay)
+			currentDelay := randomDelayFunc(delay)
+			if currentDelay > 0 {
+				cfg.Logger.Infof("Waiting %v before printing next value", currentDelay)
+				time.Sleep(currentDelay)
 			}
 			outputCount++
 		}

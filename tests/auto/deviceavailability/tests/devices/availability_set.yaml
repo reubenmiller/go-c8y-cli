@@ -1,0 +1,24 @@
+tests:
+    devices/availability_set_Set the required availability for a device using pipeline:
+        command: $TEST_SHELL -c 'c8y devices get --id device01 --dry=false | c8y devices availability set --interval 10'
+        exit-code: 0
+        stdout:
+            json:
+                body.c8y_RequiredAvailability.responseInterval: "10"
+                method: PUT
+                path: r//inventory/managedObjects/\d+$
+    devices/availability_set_Set the required availability for a list of devices using pipeline:
+        command: $TEST_SHELL -c 'cat ./testdata/c8y.devices.list.json | c8y devices availability set --interval 10'
+        exit-code: 0
+        skip: true
+        stdout:
+            json:
+                method: PUT
+                path: /inventory/managedObjects/{id}
+    devices/availability_set_Set the required availability of a device by name to 10 minutes:
+        command: c8y devices availability set --id 12345 --interval 10
+        exit-code: 0
+        stdout:
+            json:
+                method: PUT
+                path: /inventory/managedObjects/12345

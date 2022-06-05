@@ -1,0 +1,81 @@
+tests:
+    It iterates over file contents line by line:
+        command: |
+            echo "device01\ndevice02" > /tmp/util_repeatfile01.txt
+            c8y util repeatfile /tmp/util_repeatfile01.txt
+        exit-code: 0
+        stdout:
+            exactly: |
+                device01
+                device02
+    
+    It iterates over file contents line by line x times:
+        command: |
+            echo "device01\ndevice02" > /tmp/util_repeatfile02.txt
+            c8y util repeatfile /tmp/util_repeatfile02.txt --times 2
+        exit-code: 0
+        stdout:
+            exactly: |
+                device01
+                device02
+                device01
+                device02
+
+    It iterates over file contents until first x lines are met:
+        command: |
+            echo "device01\ndevice02" > /tmp/util_repeatfile03.txt
+            c8y util repeatfile /tmp/util_repeatfile03.txt --infinite --first 5
+        exit-code: 0
+        stdout:
+            exactly: |
+                device01
+                device02
+                device01
+                device02
+                device01
+
+    It iterates over file contents randomly skipping lines:
+        command: |
+            echo "device01" > /tmp/util_repeatfile04.txt
+            c8y util repeatfile /tmp/util_repeatfile04.txt --times 10 --randomSkip 0.5
+        exit-code: 0
+        stdout:
+            # Let's assume at least 1 line will match be skipped and not all will be skipped
+            line-count-min: 1
+            line-count-max: 9
+    
+    It iterates over file contents and applies a format string to each line:
+        command: |
+            echo "device01\ndevice02" > /tmp/util_repeatfile05.txt
+            c8y util repeatfile /tmp/util_repeatfile05.txt --times 2 --format "something %s---"
+        exit-code: 0
+        stdout:
+            exactly: |
+                something device01---
+                something device02---
+                something device01---
+                something device02---
+
+    It iterates over file contents and applies a format string to each line with line numbers:
+        command: |
+            echo "device01\ndevice02" > /tmp/util_repeatfile06.txt
+            c8y util repeatfile /tmp/util_repeatfile06.txt --times 2 --format "something %s---%s"
+        exit-code: 0
+        stdout:
+            exactly: |
+                something device01---1
+                something device02---2
+                something device01---3
+                something device02---4
+
+    It iterates over file contents and applies a format string to each line with line numbers prefix:
+        command: |
+            echo "device01\ndevice02" > /tmp/util_repeatfile06.txt
+            c8y util repeatfile /tmp/util_repeatfile06.txt --times 2 --format "%[2]s: something %[1]s"
+        exit-code: 0
+        stdout:
+            exactly: |
+                1: something device01
+                2: something device02
+                3: something device01
+                4: something device02

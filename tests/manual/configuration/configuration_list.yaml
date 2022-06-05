@@ -7,3 +7,12 @@ tests:
         method: GET
         path: /inventory/managedObjects
         query: r/type eq 'c8y_ConfigurationDump'
+
+  configuration_list_Get a list of configuration files filtering by configurationType:
+    command: c8y configuration list --configurationType "AGENT" --dry
+    exit-code: 0
+    stdout:
+      json:
+        method: GET
+        path: /inventory/managedObjects
+        query: r/\(type eq 'c8y_ConfigurationDump'\) and \(configurationType eq 'AGENT'\)

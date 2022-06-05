@@ -26,6 +26,8 @@ Remove events from a device
 ### Options
 
 ```
+      --createdFrom string      Start date or date and time of the event's creation (set by the platform during creation).
+      --createdTo string        End date or date and time of the event's creation (set by the platform during creation).
       --dateFrom string         Start date or date and time of event occurrence.
       --dateTo string           End date or date and time of event occurrence.
       --device strings          Device ID (accepts pipeline)
@@ -86,7 +88,7 @@ Remove events from a device
   -v, --verbose                    Verbose logging
       --view string                Use views when displaying data on the terminal. Disable using --view off (default "auto")
       --withError                  Errors will be printed on stdout instead of stderr
-  -t, --withTotalPages             Request Cumulocity to include the total pages in the response statitics under .statistics.totalPages
+  -t, --withTotalPages             Request Cumulocity to include the total pages in the response statistics under .statistics.totalPages
       --workers int                Number of workers (default 1)
 ```
 

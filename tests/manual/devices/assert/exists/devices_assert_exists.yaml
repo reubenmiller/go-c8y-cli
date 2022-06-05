@@ -1,0 +1,92 @@
+tests:
+    It filters a single id that does not exist:
+        command:  c8y devices assert exists --not --device 1
+        exit-code: 0
+        stdout:
+            exactly: '1'
+    
+    It fails the negated assertion when using dry mode:
+        command:  c8y devices assert exists --not --device 1 --strict --dry
+        exit-code: 112
+    
+    It fails the assertion when using dry mode:
+        command:  c8y devices assert exists --device 1 --strict --dry
+        exit-code: 112
+
+    It accepts multiple ids using comma separated values:
+        command: |
+            c8y inventory assert exists --id 1,2 --strict --dry --dryFormat json \
+            | c8y util show --select path
+        exit-code: 0
+        stderr:
+            line-count: 2
+            contains:
+                - "assertionError: managedObject - wanted: Found, got: NotFound, context: {ID:1}"
+                - "assertionError: managedObject - wanted: Found, got: NotFound, context: {ID:2}"
+        stdout:
+            line-count: 2
+            json:
+                ..0.path: /inventory/managedObjects/1
+                ..1.path: /inventory/managedObjects/2
+
+    It filters a single id that does not exist (using pipeline):
+        command: echo "1" | c8y devices assert exists --not
+        exit-code: 0
+        stdout:
+            exactly: '1'
+    
+    It returns an error when a single id does not exist (single entry):
+        command: echo "1" | c8y devices assert exists --strict
+        exit-code: 112
+    
+    It filters multiple ids given in a list:
+        command: echo "1\n2" | c8y devices assert exists --not
+        exit-code: 0
+        stdout:
+            line-count: 2
+            lines:
+              1: '1'
+              2: '2'
+
+    It filters a list of json objects:
+        command: >
+          echo "{\"id\":\"1\"}" | c8y devices assert exists --not
+        exit-code: 0
+        stdout:
+            json:
+                id: '1'
+    
+    It asserts that a mo exists and passes it through untouched:
+        command: manual/inventory/assert/exists/001_assert.sh
+        exit-code: 0
+
+    It return a non-zero exit code in strict mode when only 1 item does not exist:
+        command: manual/inventory/assert/exists/002_assert.sh
+        exit-code: 112
+    
+    It checks if a managed object exists, and then uses a downstream command to safely get a value:
+        command: >
+          echo "1" | c8y devices assert exists | c8y inventory get
+        exit-code: 0
+
+    It fails if an object exists but was expecting to not exist:
+        command: >
+          c8y inventory list --pageSize 1 | c8y devices assert exists --not --strict
+        exit-code: 112
+
+    It does not write to stderr when not using strict mode:
+        command: >
+          echo "0" | c8y devices assert exists
+        exit-code: 0
+        stderr:
+            not-contains:
+                - assertionError
+    
+    It writes errors to stderr when using strict mode:
+        command: >
+          echo "0" | c8y devices assert exists --strict
+        exit-code: 112
+        stderr:
+            line-count: 1
+            contains:
+                - 'assertionError: managedObject - wanted: Found, got: NotFound, context'

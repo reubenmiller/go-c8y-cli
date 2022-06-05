@@ -33,9 +33,13 @@ func NewCopyCmd(f *cmdutil.Factory) *CopyCmd {
 		Use:   "copy",
 		Short: "Copy application",
 		Long: `A POST request to the 'clone' resource creates a new application based on an already existing one.
+
 The properties are copied to the newly created application. For name, key and context path a 'clone' prefix is added in order to be unique.
+
 If the target application is hosted and has an active version, the new application will have the active version with the same content.
+
 The response contains a representation of the newly created application.
+
 Required role ROLE_APPLICATION_MANAGEMENT_ADMIN
 `,
 		Example: heredoc.Doc(`
@@ -129,7 +133,7 @@ func (n *CopyCmd) RunE(cmd *cobra.Command, args []string) error {
 	}
 
 	// body
-	body := mapbuilder.NewInitializedMapBuilder()
+	body := mapbuilder.NewInitializedMapBuilder(true)
 	err = flags.WithBody(
 		cmd,
 		body,

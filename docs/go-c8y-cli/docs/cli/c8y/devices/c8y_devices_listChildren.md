@@ -25,6 +25,7 @@ Get a list of the child devices of an existing device
 ```
       --device strings   Device. (required) (accepts pipeline)
   -h, --help             help for listChildren
+      --withChildren     Determines if children with ID and name should be returned when fetching the managed object. Set it to false to improve query performance.
 ```
 
 ### Options inherited from parent commands
@@ -77,7 +78,7 @@ Get a list of the child devices of an existing device
   -v, --verbose                    Verbose logging
       --view string                Use views when displaying data on the terminal. Disable using --view off (default "auto")
       --withError                  Errors will be printed on stdout instead of stderr
-  -t, --withTotalPages             Request Cumulocity to include the total pages in the response statitics under .statistics.totalPages
+  -t, --withTotalPages             Request Cumulocity to include the total pages in the response statistics under .statistics.totalPages
       --workers int                Number of workers (default 1)
 ```
 

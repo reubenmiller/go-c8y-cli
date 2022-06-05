@@ -251,8 +251,13 @@
         ],
         "go": [
           {
-            "description": "Install a software package version",
+            "description": "Install a software package version\nIf the software/version exists in the software repository, then it will add the url automatically\n",
             "command": "c8y software versions install --device 1234 --software go-c8y-cli --version 1.0.0",
+            "skipTest": true
+          },
+          {
+            "description": "Install a software package version with an explicit url\n",
+            "command": "c8y software versions install --device 1234 --software go-c8y-cli --version 1.0.0 --url \"https://mybloblstore/go-c8y-cli.deb\"",
             "skipTest": true
           }
         ]
@@ -287,7 +292,7 @@
           "type": "string",
           "required": false,
           "property": "c8y_SoftwareUpdate.0.url",
-          "description": "Software url"
+          "description": "Software url. Leave blank to automatically set it if a matching firmware/version is found in the c8y firmware repository"
         },
         {
           "name": "description",

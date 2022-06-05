@@ -130,7 +130,7 @@ func (n *GetSupportedMeasurementsCmd) RunE(cmd *cobra.Command, args []string) er
 	}
 
 	// body
-	body := mapbuilder.NewInitializedMapBuilder()
+	body := mapbuilder.NewInitializedMapBuilder(false)
 	err = flags.WithBody(
 		cmd,
 		body,

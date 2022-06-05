@@ -38,10 +38,11 @@ Get a list of configuration files
 				cmd,
 				args,
 				ccmd.factory,
-				flags.WithC8YQueryFixedString("(type eq 'c8y_ConfigurationDump')"),
-				flags.WithC8YQueryFormat("name", "(name eq '%s')"),
-				flags.WithC8YQueryFormat("deviceType", "(c8y_Filter.type eq '%s')"),
-				flags.WithC8YQueryFormat("description", "(description eq '%s')"),
+				flags.WithStaticStringValue("config", "(type eq 'c8y_ConfigurationDump')"),
+				flags.WithStringValue("name", "name", "(name eq '%s')"),
+				flags.WithStringValue("configurationType", "configurationType", "(configurationType eq '%s')"),
+				flags.WithStringValue("deviceType", "deviceType", "(c8y_Filter.type eq '%s')"),
+				flags.WithStringValue("description", "description", "(description eq '%s')"),
 			)
 			return handler()
 		},
@@ -50,6 +51,7 @@ Get a list of configuration files
 	cmd.SilenceUsage = true
 
 	cmd.Flags().String("name", "", "Configuration name filter")
+	cmd.Flags().String("configurationType", "", "Configuration type filter")
 	cmd.Flags().String("description", "", "Configuration description filter")
 	cmd.Flags().String("deviceType", "", "Configuration device type filter")
 

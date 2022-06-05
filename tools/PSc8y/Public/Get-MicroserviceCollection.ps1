@@ -27,7 +27,33 @@ Get microservices
         [Parameter()]
         [ValidateSet('MICROSERVICE')]
         [string]
-        $Type
+        $Type,
+
+        # The name of the application.
+        [Parameter()]
+        [string]
+        $Name,
+
+        # The ID of the tenant that owns the applications.
+        [Parameter()]
+        [string]
+        $Owner,
+
+        # The ID of a tenant that is subscribed to the applications but doesn't own them.
+        [Parameter()]
+        [string]
+        $ProvidedFor,
+
+        # The ID of a tenant that is subscribed to the applications.
+        [Parameter()]
+        [string]
+        $Subscriber,
+
+        # The ID of a user that has access to the applications.
+        [Parameter(ValueFromPipeline=$true,
+                   ValueFromPipelineByPropertyName=$true)]
+        [object[]]
+        $User
     )
     DynamicParam {
         Get-ClientCommonParameters -Type "Get", "Collection"
@@ -52,12 +78,17 @@ Get microservices
     Process {
 
         if ($ClientOptions.ConvertToPS) {
-            c8y microservices list $c8yargs `
+            $User `
+            | Group-ClientRequests `
+            | c8y microservices list $c8yargs `
             | ConvertFrom-ClientOutput @TypeOptions
         }
         else {
-            c8y microservices list $c8yargs
+            $User `
+            | Group-ClientRequests `
+            | c8y microservices list $c8yargs
         }
+        
     }
 
     End {}

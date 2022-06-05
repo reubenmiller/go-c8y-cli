@@ -52,9 +52,16 @@ Get events from a device
 	cmd.Flags().StringSlice("device", []string{""}, "Device ID (accepts pipeline)")
 	cmd.Flags().String("type", "", "Event type.")
 	cmd.Flags().String("fragmentType", "", "Fragment name from event.")
+	cmd.Flags().String("fragmentValue", "", "Allows filtering events by the fragment's value, but only when provided together with fragmentType.")
+	cmd.Flags().String("createdFrom", "", "Start date or date and time of the event's creation (set by the platform during creation).")
+	cmd.Flags().String("createdTo", "", "End date or date and time of the event's creation (set by the platform during creation).")
 	cmd.Flags().String("dateFrom", "", "Start date or date and time of event occurrence.")
 	cmd.Flags().String("dateTo", "", "End date or date and time of event occurrence.")
+	cmd.Flags().String("lastUpdatedFrom", "", "Start date or date and time of the last update made.")
+	cmd.Flags().String("lastUpdatedTo", "", "End date or date and time of the last update made.")
 	cmd.Flags().Bool("revert", false, "Return the newest instead of the oldest events. Must be used with dateFrom and dateTo parameters")
+	cmd.Flags().Bool("withSourceAssets", false, "When set to true also events for related source assets will be included in the request. When this parameter is provided a source must be specified.")
+	cmd.Flags().Bool("withSourceDevices", false, "When set to true also events for related source devices will be included in the request. When this parameter is provided a source must be specified.")
 
 	completion.WithOptions(
 		cmd,
@@ -100,9 +107,16 @@ func (n *ListCmd) RunE(cmd *cobra.Command, args []string) error {
 		c8yfetcher.WithDeviceByNameFirstMatch(client, args, "device", "source"),
 		flags.WithStringValue("type", "type"),
 		flags.WithStringValue("fragmentType", "fragmentType"),
+		flags.WithStringValue("fragmentValue", "fragmentValue"),
+		flags.WithEncodedRelativeTimestamp("createdFrom", "createdFrom", ""),
+		flags.WithEncodedRelativeTimestamp("createdTo", "createdTo", ""),
 		flags.WithEncodedRelativeTimestamp("dateFrom", "dateFrom", ""),
 		flags.WithEncodedRelativeTimestamp("dateTo", "dateTo", ""),
+		flags.WithEncodedRelativeTimestamp("lastUpdatedFrom", "lastUpdatedFrom", ""),
+		flags.WithEncodedRelativeTimestamp("lastUpdatedTo", "lastUpdatedTo", ""),
 		flags.WithBoolValue("revert", "revert", ""),
+		flags.WithBoolValue("withSourceAssets", "withSourceAssets", ""),
+		flags.WithBoolValue("withSourceDevices", "withSourceDevices", ""),
 	)
 	if err != nil {
 		return cmderrors.NewUserError(err)
@@ -143,7 +157,7 @@ func (n *ListCmd) RunE(cmd *cobra.Command, args []string) error {
 	}
 
 	// body
-	body := mapbuilder.NewInitializedMapBuilder()
+	body := mapbuilder.NewInitializedMapBuilder(false)
 	err = flags.WithBody(
 		cmd,
 		body,

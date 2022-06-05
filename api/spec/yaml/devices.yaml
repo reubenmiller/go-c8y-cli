@@ -98,9 +98,8 @@ endpoints:
 
   - name: deleteDevice
     description: Delete device
-    descriptionLong: >
-      Delete an existing device by id or name. Deleting the object will remove all of its
-      data (i.e. alarms, events, operations and measurements)
+    descriptionLong: |
+      Delete an existing device by id or name. Deleting the object will remove all of its data (i.e. alarms, events, operations and measurements)
     method: DELETE
     path: inventory/managedObjects/{id}
     accept: ''
@@ -163,7 +162,7 @@ endpoints:
 
   - name: createDevice
     description: Create device
-    descriptionLong: >
+    descriptionLong: |
       Create a device (managed object) with the special c8y_IsDevice fragment.
     method: POST
     path: inventory/managedObjects
@@ -228,7 +227,7 @@ endpoints:
 
   - name: getSupportedMeasurements
     description: Get supported measurements
-    descriptionLong: >
+    descriptionLong: |
       Returns a list of fragments (valueFragmentTypes) related to the device
     method: GET
     path: inventory/managedObjects/{device}/supportedMeasurements
@@ -268,7 +267,7 @@ endpoints:
 
   - name: getSupportedSeries
     description: Get supported measurement series
-    descriptionLong: >
+    descriptionLong: |
       Get supported measurement series/s of a device
     method: GET
     path: inventory/managedObjects/{device}/supportedSeries
@@ -305,48 +304,6 @@ endpoints:
         pipeline: true
         required: true
         description: Device ID
-
-  - name: setDeviceRequiredAvailability
-    description: Set required availability
-    descriptionLong: "Set the required availability of a device. Devices that have not sent any message in the response interval are considered unavailable. Response interval can have value between -32768 and 32767 and any values out of range will be shrink to range borders. Such devices are marked as unavailable (see below) and an unavailability alarm is raised. Devices with a response interval of zero minutes are considered to be under maintenance. No alarm is raised while a device is under maintenance. Devices that do not contain 'c8y_RequiredAvailability' are not monitored."
-    method: PUT
-    path: inventory/managedObjects/{device}
-    accept: application/vnd.com.nsn.cumulocity.inventory+json
-    alias:
-        go: setRequiredAvailability
-        powershell: Set-DeviceRequiredAvailability
-    examples:
-      powershell:
-        - description: Set the required availability of a device by name to 10 minutes
-          beforeEach:
-            - $device = PSc8y\New-TestDevice
-          command: Set-DeviceRequiredAvailability -Device $device.id -Interval 10
-          afterEach:
-            - Remove-ManagedObject -Id $device.id
-
-        - description: Set the required availability of a device (using pipeline)
-          beforeEach:
-            - $device = PSc8y\New-TestDevice
-          command: Get-ManagedObject -Id $device.id | PSc8y\Set-DeviceRequiredAvailability -Interval 10
-          afterEach:
-            - Remove-ManagedObject -Id $device.id
-
-      go:
-        - description: Set the required availability of a device by name to 10 minutes
-          command: c8y devices setRequiredAvailability --device 12345 --interval 10
-
-    pathParameters:
-      - name: device
-        type: '[]device'
-        pipeline: true
-        required: true
-        description: Device ID
-    body:
-      - name: interval
-        type: integer
-        required: true
-        property: c8y_RequiredAvailability.responseInterval
-        description: Interval in minutes
 
   - name: newManagedObjectChildDevice
     method: POST
@@ -474,6 +431,10 @@ endpoints:
         pipeline: true
         required: true
         description: Device.
+
+      - name: withChildren
+        type: boolean
+        description: Determines if children with ID and name should be returned when fetching the managed object. Set it to false to improve query performance.
 
   - name: getManagedObjectChildDeviceReference
     description: Get child device reference

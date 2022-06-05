@@ -17,6 +17,10 @@ c8y users create [flags]
 ```
 $ c8y users create --userName "testuser1" --email "testuser@no-reply.dummy.com" --password "a0)8k2kld9lm!"
 Create a user
+
+$ c8y users create --template "{email: 'test@me.com', userName: $.email, firstName: 'Peter'}" --sendPasswordResetEmail
+
+Create a user using a template
         
 ```
 
@@ -24,6 +28,7 @@ Create a user
 
 ```
       --customProperties string   Custom properties to be added to the user
+  -d, --data string               static data to be applied to body. accepts json or shorthand json, i.e. --data 'value1=1,my.nested.value=100'
       --email string              User email address
       --enabled                   User activation status (true/false)
       --firstName string          User first name
@@ -89,7 +94,7 @@ Create a user
   -v, --verbose                    Verbose logging
       --view string                Use views when displaying data on the terminal. Disable using --view off (default "auto")
       --withError                  Errors will be printed on stdout instead of stderr
-  -t, --withTotalPages             Request Cumulocity to include the total pages in the response statitics under .statistics.totalPages
+  -t, --withTotalPages             Request Cumulocity to include the total pages in the response statistics under .statistics.totalPages
       --workers int                Number of workers (default 1)
 ```
 

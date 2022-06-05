@@ -6,7 +6,7 @@ $script:CompleteTenantOptionCategory = {
         $searchFor = $wordToComplete
     }
 
-    Get-TenantOptionCollection -PageSize 100 -WarningAction SilentlyContinue `
+    Get-TenantOptionCollection -PageSize 100 -WarningAction SilentlyContinue -AsPSObject `
     | Where-Object { $_.category -like "$searchFor*" } `
     | Select-Object -Unique -ExpandProperty category `
     | ForEach-Object {
@@ -27,7 +27,7 @@ $script:CompleteTenantOptionKey = {
         $searchFor = $wordToComplete
     }
 
-    $options = Get-TenantOptionForCategory -Category $fakeBoundParameters["category"] -PageSize 100 -WarningAction SilentlyContinue
+    $options = Get-TenantOptionForCategory -Category $fakeBoundParameters["category"] -PageSize 100 -WarningAction SilentlyContinue -AsPSObject
     
     if ($options -is [hashtable]) {
         $keys = $options.keys

@@ -8,14 +8,14 @@ release:
 before:
   hooks:
     - go mod tidy
-    - make generate_go_code
-    - make manpages
-    - make build_completions
-    - make checkout_addons
+    - task generate_go_code
+    - task manpages
+    - task build_completions
+    - task checkout_addons
 
 builds:
   - <<: &build_defaults
-      binary: bin/c8y
+      binary: 'bin/{{ if index .Env "BINARY_INCLUDE_VERSION" }}{{ .ProjectName }}_{{ .RawVersion }}_{{ if eq .Os "darwin" }}macOS{{ else }}{{ .Os }}{{ end }}_{{ .Arch }}{{ else }}{{ .ProjectName }}{{ end }}'
       main: ./cmd/c8y/main.go
       ldflags:
         - -s -w -X github.com/reubenmiller/go-c8y-cli/pkg/cmd.buildVersion={{.Version}} -X github.com/reubenmiller/go-c8y-cli/pkg/cmd.buildBranch={{.Branch}}
@@ -157,6 +157,7 @@ brews:
     # IDs of the archives to use.
     ids:
       - homebrew
+      - nix
 
     # GOARM to specify which 32-bit arm version to use if there are multiple versions
     # from the build section. Brew formulas support atm only one 32-bit version.

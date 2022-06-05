@@ -44,7 +44,7 @@ $ echo 1 | c8y inventory assert exists --strict
 ```
       --duration string   Timeout duration. i.e. 30s or 1m (1 minute) (default "30s")
   -h, --help              help for exists
-      --id string         Inventory id (required) (accepts pipeline)
+      --id strings        Inventory id (required) (accepts pipeline)
       --interval string   Interval to check on the status, i.e. 10s or 1min (default "5s")
       --not               Negate the match
       --retries int       Number of retries before giving up per id
@@ -101,7 +101,7 @@ $ echo 1 | c8y inventory assert exists --strict
   -v, --verbose                    Verbose logging
       --view string                Use views when displaying data on the terminal. Disable using --view off (default "auto")
       --withError                  Errors will be printed on stdout instead of stderr
-  -t, --withTotalPages             Request Cumulocity to include the total pages in the response statitics under .statistics.totalPages
+  -t, --withTotalPages             Request Cumulocity to include the total pages in the response statistics under .statistics.totalPages
       --workers int                Number of workers (default 1)
 ```
 

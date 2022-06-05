@@ -43,6 +43,38 @@ func WithApplication(flagName string, clientFunc func() (*c8y.Client, error)) Op
 	}
 }
 
+// WithApplicationContext application context completion
+func WithApplicationContext(flagName string, clientFunc func() (*c8y.Client, error)) Option {
+	return func(cmd *cobra.Command) *cobra.Command {
+		_ = cmd.RegisterFlagCompletionFunc(flagName, func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+			client, err := clientFunc()
+			if err != nil {
+				return []string{err.Error()}, cobra.ShellCompDirectiveDefault
+			}
+			items, _, err := client.Application.GetApplications(
+				context.Background(),
+				&c8y.ApplicationOptions{
+					PaginationOptions: *c8y.NewPaginationOptions(2000),
+				},
+			)
+
+			if err != nil {
+				values := []string{fmt.Sprintf("error. %s", err)}
+				return values, cobra.ShellCompDirectiveError
+			}
+			values := []string{}
+			pattern := "*" + toComplete + "*"
+			for _, item := range items.Applications {
+				if toComplete == "" || MatchString(pattern, item.ContextPath) || MatchString(pattern, item.Name) || MatchString(pattern, item.ID) {
+					values = append(values, fmt.Sprintf("%s\t%s | type: %s  id: %s", item.ContextPath, item.Name, item.Type, item.ID))
+				}
+			}
+			return values, cobra.ShellCompDirectiveNoFileComp
+		})
+		return cmd
+	}
+}
+
 // WithHostedApplication hosted application completion
 func WithHostedApplication(flagName string, clientFunc func() (*c8y.Client, error)) Option {
 	return func(cmd *cobra.Command) *cobra.Command {
@@ -68,6 +100,16 @@ func WithHostedApplication(flagName string, clientFunc func() (*c8y.Client, erro
 				if !strings.EqualFold(item.Type, "HOSTED") {
 					continue
 				}
+
+				// Ignore if not hosted in the current application
+				if client.TenantName != "" {
+					if item.Owner != nil && item.Owner.Tenant != nil && item.Owner.Tenant.ID != "" {
+						if item.Owner.Tenant.ID != client.TenantName {
+							continue
+						}
+					}
+				}
+
 				if toComplete == "" || MatchString(pattern, item.Name) || MatchString(pattern, item.ID) {
 					values = append(values, fmt.Sprintf("%s\t%s | id: %s", item.Name, item.Type, item.ID))
 				}

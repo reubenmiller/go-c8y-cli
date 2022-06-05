@@ -104,7 +104,7 @@
                 }
             }
 
-            if ($iArg.Type -notmatch "device\b|agent\b|group|devicegroup|self|application|software\b|softwareName\b|softwareversion\b|softwareversionName\b|firmware\b|firmwareName\b|firmwareversion\b|firmwareversionName\b|firmwarepatch\b|firmwarepatchName\b|configuration\b|deviceprofile\b|microservice|\[\]id|\[\]devicerequest") {
+            if ($iArg.Type -notmatch "device\b|agent\b|group|devicegroup|self|application|hostedapplication|software\b|softwareName\b|softwareversion\b|softwareversionName\b|firmware\b|firmwareName\b|firmwareversion\b|firmwareversionName\b|firmwarepatch\b|firmwarepatchName\b|configuration\b|deviceprofile\b|microservice|\[\]id|\[\]devicerequest") {
                 if ($RESTMethod -match "POST") {
                     # Add override capability to piped arguments, so the user can still override piped data with the argument
                     [void] $RESTBodyBuilderOptions.AppendLine("flags.WithOverrideValue(`"$($iarg.Name)`", `"$PipelineVariableProperty`"),")
@@ -154,7 +154,8 @@
         # Add Completions based on type
         $ArgType = $iArg.type
         switch -Regex ($ArgType) {
-            "application" { [void] $CompletionBuilderOptions.AppendLine("completion.WithApplication(`"$($iArg.Name)`", func() (*c8y.Client, error) { return ccmd.factory.Client()}),") }
+            "^application|applicationname" { [void] $CompletionBuilderOptions.AppendLine("completion.WithApplication(`"$($iArg.Name)`", func() (*c8y.Client, error) { return ccmd.factory.Client()}),") }
+            "hostedapplication" { [void] $CompletionBuilderOptions.AppendLine("completion.WithHostedApplication(`"$($iArg.Name)`", func() (*c8y.Client, error) { return ccmd.factory.Client()}),") }
             "microservice\b" { [void] $CompletionBuilderOptions.AppendLine("completion.WithMicroservice(`"$($iArg.Name)`", func() (*c8y.Client, error) { return ccmd.factory.Client()}),") }
             "microserviceinstance" { [void] $CompletionBuilderOptions.AppendLine("completion.WithMicroserviceInstance(`"$($iArg.Name)`", `"id`", func() (*c8y.Client, error) { return ccmd.factory.Client()}),") }
             "role" { [void] $CompletionBuilderOptions.AppendLine("completion.WithUserRole(`"$($iArg.Name)`", func() (*c8y.Client, error) { return ccmd.factory.Client()}),") }
@@ -164,6 +165,7 @@
             "(\[\])?devicegroup$" { [void] $CompletionBuilderOptions.AppendLine("completion.WithDeviceGroup(`"$($iArg.Name)`", func() (*c8y.Client, error) { return ccmd.factory.Client()}),") }
             "(\[\])?smartgroup$" { [void] $CompletionBuilderOptions.AppendLine("completion.WithSmartGroup(`"$($iArg.Name)`", func() (*c8y.Client, error) { return ccmd.factory.Client()}),") }
             "(\[\])?tenant$" { [void] $CompletionBuilderOptions.AppendLine("completion.WithTenantID(`"$($iArg.Name)`", func() (*c8y.Client, error) { return ccmd.factory.Client()}),") }
+            "(\[\])?tenantname$" { [void] $CompletionBuilderOptions.AppendLine("completion.WithTenantID(`"$($iArg.Name)`", func() (*c8y.Client, error) { return ccmd.factory.Client()}),") }
             "(\[\])?device$" { [void] $CompletionBuilderOptions.AppendLine("completion.WithDevice(`"$($iArg.Name)`", func() (*c8y.Client, error) { return ccmd.factory.Client()}),") }
             "(\[\])?agent$" { [void] $CompletionBuilderOptions.AppendLine("completion.WithAgent(`"$($iArg.Name)`", func() (*c8y.Client, error) { return ccmd.factory.Client()}),") }
             "(\[\])?software(name)?$" { [void] $CompletionBuilderOptions.AppendLine("completion.WithSoftware(`"$($iArg.Name)`", func() (*c8y.Client, error) { return ccmd.factory.Client()}),") }
@@ -572,7 +574,7 @@ func (n *${NameCamel}Cmd) RunE(cmd *cobra.Command, args []string) error {
     
 
     // body
-    body := mapbuilder.NewInitializedMapBuilder()
+    body := mapbuilder.NewInitializedMapBuilder($(($RESTMethod -match "PUT|POST").ToString().ToLower()))
     err = flags.WithBody(
         cmd,
         body,
@@ -720,7 +722,7 @@ Function Get-C8yGoArgs {
             }
         }
 
-        { @("datefrom", "dateto", "datetime") -contains $_ } {
+        { @("datefrom", "dateto", "datetime", "date") -contains $_ } {
             $SetFlag = if ($UseOption) {
                 'cmd.Flags().StringP("{0}", "{1}", "{2}", "{3}")' -f $Name, $OptionName, $Default, $Description
             } else {
@@ -909,7 +911,7 @@ Function Get-C8yGoArgs {
             }
         }
 
-        "application" {
+        {$_ -in "application", "applicationname", "hostedapplication"} {
             $SetFlag = if ($UseOption) {
                 'cmd.Flags().StringP("{0}", "{1}", "{2}", "{3}")' -f $Name, $OptionName, $Default, $Description
             } else {
@@ -1002,7 +1004,7 @@ Function Get-C8yGoArgs {
             }
         }
 
-        "tenant" {
+        {$_ -in "tenant", "tenantname"}  {
             $SetFlag = if ($UseOption) {
                 'cmd.Flags().StringP("{0}", "{1}", "{2}", "{3}")' -f $Name, $OptionName, $Default, $Description
             } else {

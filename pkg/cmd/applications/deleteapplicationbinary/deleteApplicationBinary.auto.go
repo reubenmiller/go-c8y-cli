@@ -33,6 +33,7 @@ func NewDeleteApplicationBinaryCmd(f *cmdutil.Factory) *DeleteApplicationBinaryC
 		Use:   "deleteApplicationBinary",
 		Short: "Delete application binary",
 		Long: `Remove an application binaries related to the given application
+
 The active version can not be deleted and the server will throw an error if you try.
 `,
 		Example: heredoc.Doc(`
@@ -52,7 +53,7 @@ Remove an application binary related to a Hosted (web) application
 
 	completion.WithOptions(
 		cmd,
-		completion.WithApplication("application", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
+		completion.WithHostedApplication("application", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
 	)
 
 	flags.WithOptions(
@@ -128,7 +129,7 @@ func (n *DeleteApplicationBinaryCmd) RunE(cmd *cobra.Command, args []string) err
 	}
 
 	// body
-	body := mapbuilder.NewInitializedMapBuilder()
+	body := mapbuilder.NewInitializedMapBuilder(false)
 	err = flags.WithBody(
 		cmd,
 		body,
@@ -144,8 +145,8 @@ func (n *DeleteApplicationBinaryCmd) RunE(cmd *cobra.Command, args []string) err
 		cmd,
 		path,
 		inputIterators,
-		c8yfetcher.WithApplicationByNameFirstMatch(client, args, "application", "application"),
-		flags.WithStringSliceValues("binaryId", "binaryId", ""),
+		c8yfetcher.WithHostedApplicationByNameFirstMatch(client, args, "application", "application"),
+		c8yfetcher.WithIDSlice(args, "binaryId", "binaryId"),
 	)
 	if err != nil {
 		return err

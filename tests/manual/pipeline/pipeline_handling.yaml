@@ -54,3 +54,13 @@ tests:
       exactly: |
         {"body":{"source":{"id":"1"},"text":"custom info 1","type":"c8y_Event"},"method":"POST","pathEncoded":"/event/events"}
         {"body":{"source":{"id":"2"},"text":"custom info 2","type":"c8y_Event"},"method":"POST","pathEncoded":"/event/events"}
+
+  It handles piped input without ending with newline:
+    command: |
+      printf "0" | c8y devices get --dry
+    exit-code: 0
+    stdout:
+      line-count: 1
+      json:
+        method: GET
+        path: /inventory/managedObjects/0

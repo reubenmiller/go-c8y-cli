@@ -1,6 +1,7 @@
 package api
 
 import (
+	"fmt"
 	"io"
 	"net/http"
 	"net/url"
@@ -28,7 +29,15 @@ type CmdAPI struct {
 	keepProperties bool
 }
 
-var allowedMethods = []string{"GET", "POST", "PUT", "DELETE", "PATCH"}
+var allowedMethods = []string{
+	http.MethodDelete,
+	http.MethodGet,
+	http.MethodHead,
+	http.MethodPatch,
+	http.MethodPost,
+	http.MethodPut,
+	http.MethodOptions,
+}
 
 func NewSubCommand(f *cmdutil.Factory) *CmdAPI {
 	ccmd := &CmdAPI{
@@ -82,14 +91,14 @@ func NewSubCommand(f *cmdutil.Factory) *CmdAPI {
 	flags.WithOptions(
 		cmd,
 		flags.WithData(),
-		flags.WithTemplate(),
+		f.WithTemplateFlag(cmd),
 		// Include device management url links (configuration dump, firmware and software)
 		flags.WithExtendedPipelineSupport("url", "url", false, "url", "c8y_Firmware.url", "c8y_Software.url", "self", "responseSelf"),
 	)
 
 	completion.WithOptions(
 		cmd,
-		completion.WithValidateSet("method", "GET", "POST", "DELETE", "PUT"),
+		completion.WithValidateSet("method", allowedMethods...),
 	)
 
 	ccmd.SubCommand = subcommand.NewSubCommand(cmd)
@@ -181,21 +190,31 @@ func (n *CmdAPI) RunE(cmd *cobra.Command, args []string) error {
 
 	method = strings.ToUpper(method)
 
-	if !(method == "GET" || method == "POST" || method == "PUT" || method == "DELETE") {
-		return cmderrors.NewUserError("Invalid method. Only GET, PUT, POST and DELETE are accepted")
+	validMethod := false
+	for _, m := range allowedMethods {
+		if strings.EqualFold(m, method) {
+			validMethod = true
+			break
+		}
 	}
 
-	if method == "PUT" {
+	if !validMethod {
+		return cmderrors.NewUserError(fmt.Sprintf("Invalid method. Only %s are accepted", strings.Join(allowedMethods, ", ")))
+	}
+
+	if strings.EqualFold(method, http.MethodPut) {
 		if err := n.factory.UpdateModeEnabled(); err != nil {
 			return err
 		}
 	}
-	if method == "POST" {
+
+	if strings.EqualFold(method, http.MethodPost) {
 		if err := n.factory.CreateModeEnabled(); err != nil {
 			return err
 		}
 	}
-	if method == "DELETE" {
+
+	if strings.EqualFold(method, http.MethodDelete) {
 		if err := n.factory.DeleteModeEnabled(); err != nil {
 			return err
 		}
@@ -240,8 +259,8 @@ func (n *CmdAPI) RunE(cmd *cobra.Command, args []string) error {
 		ResponseData: nil,
 	}
 
-	if method == "PUT" || method == "POST" {
-		body := mapbuilder.NewInitializedMapBuilder()
+	if request.RequestSupportsBody(method) {
+		body := mapbuilder.NewInitializedMapBuilder(!strings.EqualFold(method, "DELETE"))
 		err = flags.WithBody(
 			cmd,
 			body,

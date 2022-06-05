@@ -6,7 +6,7 @@ $script:CompleteTenant = {
         $searchFor = $wordToComplete
     }
 
-    Get-TenantCollection -PageSize 100 -WarningAction SilentlyContinue `
+    Get-TenantCollection -PageSize 100 -WarningAction SilentlyContinue -AsPSObject `
     | Where-Object { $_.id -like "$searchFor*" } `
     | ForEach-Object {
         $id = $_.id

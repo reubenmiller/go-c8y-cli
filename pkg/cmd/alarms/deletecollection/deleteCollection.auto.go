@@ -51,8 +51,10 @@ Remove alarms on the device which are active and created in the last 10 minutes
 	cmd.Flags().StringSlice("device", []string{""}, "Source device id. (accepts pipeline)")
 	cmd.Flags().String("dateFrom", "", "Start date or date and time of alarm occurrence.")
 	cmd.Flags().String("dateTo", "", "End date or date and time of alarm occurrence.")
+	cmd.Flags().String("createdFrom", "", "Start date or date and time of the alarm creation. Version >= 10.11")
+	cmd.Flags().String("createdTo", "", "End date or date and time of the alarm creation. Version >= 10.11")
 	cmd.Flags().String("type", "", "Alarm type.")
-	cmd.Flags().String("status", "", "Comma separated alarm statuses, for example ACTIVE,CLEARED.")
+	cmd.Flags().StringSlice("status", []string{""}, "Comma separated alarm statuses, for example ACTIVE,CLEARED.")
 	cmd.Flags().String("severity", "", "Alarm severity, for example CRITICAL, MAJOR, MINOR or WARNING.")
 	cmd.Flags().Bool("resolved", false, "When set to true only resolved alarms will be removed (the one with status CLEARED), false means alarms with status ACTIVE or ACKNOWLEDGED.")
 	cmd.Flags().Bool("withSourceAssets", false, "When set to true also alarms for related source assets will be removed. When this parameter is provided also source must be defined.")
@@ -104,8 +106,10 @@ func (n *DeleteCollectionCmd) RunE(cmd *cobra.Command, args []string) error {
 		c8yfetcher.WithDeviceByNameFirstMatch(client, args, "device", "source"),
 		flags.WithEncodedRelativeTimestamp("dateFrom", "dateFrom", ""),
 		flags.WithEncodedRelativeTimestamp("dateTo", "dateTo", ""),
+		flags.WithEncodedRelativeTimestamp("createdFrom", "createdFrom", ""),
+		flags.WithEncodedRelativeTimestamp("createdTo", "createdTo", ""),
 		flags.WithStringValue("type", "type"),
-		flags.WithStringValue("status", "status"),
+		flags.WithStringSliceCSV("status", "status", ""),
 		flags.WithStringValue("severity", "severity"),
 		flags.WithBoolValue("resolved", "resolved", ""),
 		flags.WithBoolValue("withSourceAssets", "withSourceAssets", ""),
@@ -146,7 +150,7 @@ func (n *DeleteCollectionCmd) RunE(cmd *cobra.Command, args []string) error {
 	}
 
 	// body
-	body := mapbuilder.NewInitializedMapBuilder()
+	body := mapbuilder.NewInitializedMapBuilder(false)
 	err = flags.WithBody(
 		cmd,
 		body,

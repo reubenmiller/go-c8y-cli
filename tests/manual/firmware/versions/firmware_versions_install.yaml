@@ -1,0 +1,97 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/reubenmiller/commander/feat/handle-nested-files/schema.json
+
+config:
+  env:
+    C8Y_SETTINGS_DEFAULTS_CACHE: true
+    C8Y_SETTINGS_CACHE_METHODS: GET POST PUT
+    C8Y_SETTINGS_DEFAULTS_CACHETTL: 100h
+    C8Y_SETTINGS_DEFAULTS_DRY: true
+
+tests:
+  It creates an operation to update firmware with name and version:
+    command: |
+      c8y firmware versions install --device 1 --firmware "iot-linux" --version "1.0.0" |
+        c8y util show --select method,pathEncoded,body --compact=false
+    exit-code: 0
+    stdout:
+      exactly: |
+        {
+          "body": {
+            "c8y_Firmware": {
+              "name": "iot-linux",
+              "url": "https://example.com",
+              "version": "1.0.0"
+            },
+            "description": "Update firmware to: \"iot-linux\" (1.0.0)",
+            "deviceId": "1"
+          },
+          "method": "POST",
+          "pathEncoded": "/devicecontrol/operations"
+        }
+  
+  It creates an operation to update firmware with name and version but overriding url:
+    command: |
+      c8y firmware versions install --device 1 --firmware "iot-linux" --version "1.0.0" --url "http://custom.com" |
+        c8y util show --select method,pathEncoded,body --compact=false
+    exit-code: 0
+    stdout:
+      exactly: |
+        {
+          "body": {
+            "c8y_Firmware": {
+              "name": "iot-linux",
+              "url": "http://custom.com",
+              "version": "1.0.0"
+            },
+            "description": "Update firmware to: \"iot-linux\" (1.0.0)",
+            "deviceId": "1"
+          },
+          "method": "POST",
+          "pathEncoded": "/devicecontrol/operations"
+        }
+  
+  It creates an operation to update firmware with name:
+    command: |
+      c8y firmware versions install --device 1 --firmware "iot-linux" |
+        c8y util show --select method,pathEncoded,body --compact=false
+    exit-code: 0
+    stdout:
+      exactly: |
+        {
+          "body": {
+            "c8y_Firmware": {
+              "name": "iot-linux",
+              "url": "",
+              "version": ""
+            },
+            "description": "Update firmware to: \"iot-linux\"",
+            "deviceId": "1"
+          },
+          "method": "POST",
+          "pathEncoded": "/devicecontrol/operations"
+        }
+  
+  It creates an operation to update firmware without a version but a custom url:
+    command: |
+      c8y firmware versions install \
+        --device 1 \
+        --firmware "custom-firmware" \
+        --description "Installing custom firmware" \
+        --url "https://test.com/binary/package.zip" |
+        c8y util show --select method,pathEncoded,body --compact=false
+    exit-code: 0
+    stdout:
+      exactly: |
+        {
+          "body": {
+            "c8y_Firmware": {
+              "name": "custom-firmware",
+              "url": "https://test.com/binary/package.zip",
+              "version": ""
+            },
+            "description": "Installing custom firmware",
+            "deviceId": "1"
+          },
+          "method": "POST",
+          "pathEncoded": "/devicecontrol/operations"
+        }

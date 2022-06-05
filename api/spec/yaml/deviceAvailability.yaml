@@ -1,0 +1,107 @@
+---
+information:
+  name: devices/availability
+  description: Cumulocity device availability
+  descriptionLong: 'REST endpoint to interact with Cumulocity devices'
+  link: https://cumulocity.com/guides/reference/inventory/
+
+endpoints:
+
+  - name: setDeviceRequiredAvailability
+    description: Set required availability
+    descriptionLong: "Set the required availability of a device. Devices that have not sent any message in the response interval are considered unavailable. Response interval can have value between -32768 and 32767 and any values out of range will be shrink to range borders. Such devices are marked as unavailable (see below) and an unavailability alarm is raised. Devices with a response interval of zero minutes are considered to be under maintenance. No alarm is raised while a device is under maintenance. Devices that do not contain 'c8y_RequiredAvailability' are not monitored."
+    method: PUT
+    path: inventory/managedObjects/{id}
+    accept: application/vnd.com.nsn.cumulocity.inventory+json
+    alias:
+        go: set
+        powershell: Set-DeviceRequiredAvailability
+    examples:
+      powershell:
+        - description: Set the required availability of a device by name to 10 minutes
+          beforeEach:
+            - $device = PSc8y\New-TestDevice
+          command: Set-DeviceRequiredAvailability -Id $device.id -Interval 10
+          afterEach:
+            - Remove-ManagedObject -Id $device.id
+
+        - description: Set the required availability of a device (using pipeline)
+          beforeEach:
+            - $device = PSc8y\New-TestDevice
+          command: Get-ManagedObject -Id $device.id | PSc8y\Set-DeviceRequiredAvailability -Interval 10
+          afterEach:
+            - Remove-ManagedObject -Id $device.id
+
+      go:
+        - description: Set the required availability of a device by name to 10 minutes
+          command: c8y devices availability set --id 12345 --interval 10
+        
+        - description: Set the required availability for a device using pipeline
+          command: c8y devices get --id device01 --dry=false | c8y devices availability set --interval 10
+          assertStdOut:
+            json:
+              method: PUT
+              body.c8y_RequiredAvailability.responseInterval: "10"
+              path: r//inventory/managedObjects/\d+$
+        
+        - description: Set the required availability for a list of devices using pipeline
+          command: c8y devices list | c8y devices availability set --interval 10
+          skipTest: true
+
+    pathParameters:
+      - name: id
+        type: '[]device'
+        pipeline: true
+        required: true
+        description: Device ID
+    body:
+      - name: interval
+        type: integer
+        required: true
+        property: c8y_RequiredAvailability.responseInterval
+        description: Interval in minutes
+
+  - name: getDeviceAvailability
+    method: GET
+    description: Get device availability
+    descriptionLong: Retrieve the date when a specific managed object (by a given ID) sent the last message to Cumulocity IoT.
+    path: inventory/managedObjects/{id}/availability
+    alias:
+        go: get
+        powershell: Get-DeviceAvailability
+    examples:
+      powershell:
+        - description: Get a device's availability by id
+          beforeEach:
+            - $Device = PSc8y\Get-Device -Id "mobile-device01"
+          command: Get-DeviceAvailability -Id $Device.id
+
+        - description: Get a device's availability by name
+          beforeEach:
+            - $Device = PSc8y\Get-Device -Id "mobile-device01"
+          command: Get-DeviceAvailability -Id $Device.name
+
+      go:
+        - description: Get a device's availability by id
+          command: c8y devices availability get --id 12345
+        
+        - description: Get a device's availability by name
+          command: c8y devices availability get --id device01
+          assertStdOut:
+            json:
+                method: GET
+                path: r//inventory/managedObjects/\d+/availability
+        
+        - description: Get a device's availability using a pipeline
+          command: c8y devices get --id device01 --dry=false | c8y devices availability get
+          assertStdOut:
+            json:
+                method: GET
+                path: r//inventory/managedObjects/\d+/availability
+
+    pathParameters:
+      - name: id
+        type: '[]device'
+        pipeline: true
+        required: true
+        description: Device.

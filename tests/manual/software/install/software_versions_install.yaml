@@ -59,3 +59,60 @@ tests:
           "method": "POST",
           "pathEncoded": "/devicecontrol/operations"
         }
+
+  It creates an operation to update software with a version where url is automatically added:
+    command: |
+      c8y software versions install \
+        --device 1 \
+        --software "my-app" \
+        --version "1.2.3" \
+        --description "Installing software" \
+        | c8y util show --select method,pathEncoded,body --compact=false
+    exit-code: 0
+    stdout:
+      exactly: |
+        {
+          "body": {
+            "c8y_SoftwareUpdate": [
+              {
+                "action": "install",
+                "name": "my-app",
+                "url": "https://example.com/debian/my-app-1.2.3.deb",
+                "version": "1.2.3"
+              }
+            ],
+            "description": "Installing software",
+            "deviceId": "1"
+          },
+          "method": "POST",
+          "pathEncoded": "/devicecontrol/operations"
+        }
+
+  It creates an operation to update software with a version but a custom url:
+    command: |
+      c8y software versions install \
+        --device 1 \
+        --software "my-app" \
+        --version "1.2.3" \
+        --description "Installing software" \
+        --url "https://test.com/binary/package.zip" |
+        c8y util show --select method,pathEncoded,body --compact=false
+    exit-code: 0
+    stdout:
+      exactly: |
+        {
+          "body": {
+            "c8y_SoftwareUpdate": [
+              {
+                "action": "install",
+                "name": "my-app",
+                "url": "https://test.com/binary/package.zip",
+                "version": "1.2.3"
+              }
+            ],
+            "description": "Installing software",
+            "deviceId": "1"
+          },
+          "method": "POST",
+          "pathEncoded": "/devicecontrol/operations"
+        }

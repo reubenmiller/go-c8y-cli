@@ -33,7 +33,9 @@ func NewGetCmd(f *cmdutil.Factory) *GetCmd {
 	cmd := &cobra.Command{
 		Use:   "get",
 		Short: "Download binary",
-		Long: `Download a binary stored in Cumulocity and display it on the console. For non text based binaries or if the output should be saved to file, the output parameter should be used to write the file directly to a local file.
+		Long: `Download a binary stored in Cumulocity and display it on the console. 
+
+For non text based binaries or if the output should be saved to file, the output parameter should be used to write the file directly to a local file.
 `,
 		Example: heredoc.Doc(`
 $ c8y binaries get --id 12345
@@ -131,7 +133,7 @@ func (n *GetCmd) RunE(cmd *cobra.Command, args []string) error {
 	}
 
 	// body
-	body := mapbuilder.NewInitializedMapBuilder()
+	body := mapbuilder.NewInitializedMapBuilder(false)
 	err = flags.WithBody(
 		cmd,
 		body,

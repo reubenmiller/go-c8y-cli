@@ -19,3 +19,21 @@ tests:
     stdout:
       line-count: 1
       exactly: "{}"
+
+  It waits a fragment to be removed:
+      command: ./manual/inventory/002_wait.sh
+      exit-code: 0
+      stdout:
+          line-count: 1
+          exactly: '{}'
+
+  It accepts multiple ids provided as arguments:
+      command: |
+          c8y inventory wait --id 1,2 --dry --dryFormat json \
+          | c8y util show --select path
+      exit-code: 0
+      stdout:
+          line-count: 2
+          json:
+              ..0.path: /inventory/managedObjects/1
+              ..1.path: /inventory/managedObjects/2

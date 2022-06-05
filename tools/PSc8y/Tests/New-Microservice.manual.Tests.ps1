@@ -128,9 +128,9 @@ Invalid json example
             if ($App.id) {
                 $AppList.Add($App.id)
             }
-            $App | Should -BeNullOrEmpty
+            $App | Should -Not -BeNullOrEmpty
 
-            $LASTEXITCODE | Should -Not -Be 0
+            $LASTEXITCODE | Should -Be 0
             $ErrorResponse | Select-Object -Last 1 | Should -BeLike "*invalid manifest*"
         }
 

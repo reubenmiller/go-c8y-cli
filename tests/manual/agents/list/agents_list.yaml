@@ -16,3 +16,27 @@ tests:
     stdout:
       exactly: |
         {"method":"GET","pathEncoded":"/inventory/managedObjects?q=$filter=%28has%28com_cumulocity_model_Agent%29%29+and+%28name+eq+%27%2AMy+Custom+Agent%2A%27%29+$orderby=name","query":"q=$filter=(has(com_cumulocity_model_Agent)) and (name eq '*My Custom Agent*') $orderby=name"}
+    C8Y_SETTINGS_DEFAULTS_OUTPUT: csv
+
+
+tests:
+  It can build an inventory query via piped input:
+    command: |
+      echo "type1" | c8y agents list --queryTemplate "type eq '%s'" --dry |
+        c8y util show --select pathEncoded
+    exit-code: 0
+    stdout:
+      exactly: |
+        /inventory/managedObjects?q=%24filter%3D%28has%28com_cumulocity_model_Agent%29%29+and+type+eq+%27type1%27+%24orderby%3Dname
+
+  It filters agents by availability:
+    command: |
+      c8y agents list --group 12345 --availability AVAILABLE --lastMessageDateTo -10d --lastMessageDateFrom -5d --dry |
+        c8y util show --select query
+    exit-code: 0
+    stdout:
+      contains:
+        - bygroupid(12345)
+        - c8y_Availability.status eq 'AVAILABLE'
+        - c8y_Availability.lastMessage le '
+        - c8y_Availability.lastMessage ge '

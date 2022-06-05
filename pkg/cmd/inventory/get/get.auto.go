@@ -50,7 +50,9 @@ Get a managed object with parent references
 	cmd.SilenceUsage = true
 
 	cmd.Flags().StringSlice("id", []string{""}, "ManagedObject id (required) (accepts pipeline)")
+	cmd.Flags().Bool("skipChildrenNames", false, "Don't include the child devices names in the response. This can improve the API response because the names don't need to be retrieved")
 	cmd.Flags().Bool("withParents", false, "include a flat list of all parents and grandparents of the given object")
+	cmd.Flags().Bool("withChildren", false, "Determines if children with ID and name should be returned when fetching the managed object. Set it to false to improve query performance.")
 
 	completion.WithOptions(
 		cmd,
@@ -91,7 +93,9 @@ func (n *GetCmd) RunE(cmd *cobra.Command, args []string) error {
 		query,
 		inputIterators,
 		flags.WithCustomStringSlice(func() ([]string, error) { return cfg.GetQueryParameters(), nil }, "custom"),
+		flags.WithBoolValue("skipChildrenNames", "skipChildrenNames", ""),
 		flags.WithBoolValue("withParents", "withParents", ""),
+		flags.WithBoolValue("withChildren", "withChildren", ""),
 	)
 	if err != nil {
 		return cmderrors.NewUserError(err)
@@ -132,7 +136,7 @@ func (n *GetCmd) RunE(cmd *cobra.Command, args []string) error {
 	}
 
 	// body
-	body := mapbuilder.NewInitializedMapBuilder()
+	body := mapbuilder.NewInitializedMapBuilder(false)
 	err = flags.WithBody(
 		cmd,
 		body,

@@ -33,7 +33,9 @@ func NewCreateBinaryCmd(f *cmdutil.Factory) *CreateBinaryCmd {
 		Use:   "createBinary",
 		Short: "New application binary",
 		Long: `For the applications of type microservice and web application to be available for Cumulocity platform users, a binary zip file must be uploaded.
-For the microservice application, the zip file must consist of    * cumulocity.json - file describing the deployment
+
+For the microservice application, the zip file must consist of
+    * cumulocity.json - file describing the deployment
     * image.tar - executable docker image
 
 For the web application, the zip file must include index.html in the root directory.
@@ -132,7 +134,7 @@ func (n *CreateBinaryCmd) RunE(cmd *cobra.Command, args []string) error {
 	}
 
 	// body
-	body := mapbuilder.NewInitializedMapBuilder()
+	body := mapbuilder.NewInitializedMapBuilder(true)
 	err = flags.WithBody(
 		cmd,
 		body,
