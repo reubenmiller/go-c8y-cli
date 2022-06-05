@@ -14,4 +14,4 @@ tests:
     stdout:
       json:
         branch: r/.+
-        version: r/^\d+\.\d+\.\d+(-\d+(-g\w+)?)?$
+        version: r/^\d+\.\d+\.\d+(-\w+(-\w+)?)?$
