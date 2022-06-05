@@ -107,7 +107,7 @@ func NewInventoryQueryRunner(cmd *cobra.Command, args []string, f *cmdutil.Facto
 		}
 
 		// body
-		body := mapbuilder.NewInitializedMapBuilder()
+		body := mapbuilder.NewInitializedMapBuilder(true)
 		err = flags.WithBody(
 			cmd,
 			body,

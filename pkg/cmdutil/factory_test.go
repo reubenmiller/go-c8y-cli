@@ -63,7 +63,7 @@ func Test_Body(t *testing.T) {
 	assert.OK(t, cmdErr)
 
 	inputIterators, _ := NewRequestInputIterators(cmd, nil)
-	body := mapbuilder.NewInitializedMapBuilder()
+	body := mapbuilder.NewInitializedMapBuilder(true)
 	err := flags.WithBody(
 		cmd,
 		body,

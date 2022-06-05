@@ -169,7 +169,7 @@ func (n *ListCmd) RunE(cmd *cobra.Command, args []string) error {
 	formData := make(map[string]io.Reader)
 
 	// body
-	body := mapbuilder.NewInitializedMapBuilder()
+	body := mapbuilder.NewInitializedMapBuilder(false)
 
 	// path parameters
 	path := flags.NewStringTemplate("inventory/managedObjects")
