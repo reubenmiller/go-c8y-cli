@@ -29,7 +29,7 @@ tests:
     stdout:
       json:
         method: GET
-        pathEncoded: /event/events?dateFrom=2021-04-19T22:57:38.41129191%2B02:00
+        pathEncoded: /event/events?dateFrom=2021-04-19T22%3A57%3A38.41129191%2B02%3A00
   
   It does not encode the plus sign when using inside a jsonnet template:
     command: |

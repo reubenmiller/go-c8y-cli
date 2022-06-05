@@ -11,19 +11,19 @@ tests:
   It finds agents by name:
     command: |
       c8y agents list --name "*My Custom Agent*" |
-        c8y util show --select method,pathEncoded,query
+        c8y util show --select method,path,query --output json
     exit-code: 0
     stdout:
       exactly: |
-        {"method":"GET","pathEncoded":"/inventory/managedObjects?q=$filter=%28has%28com_cumulocity_model_Agent%29%29+and+%28name+eq+%27%2AMy+Custom+Agent%2A%27%29+$orderby=name","query":"q=$filter=(has(com_cumulocity_model_Agent)) and (name eq '*My Custom Agent*') $orderby=name"}
-    C8Y_SETTINGS_DEFAULTS_OUTPUT: csv
+        {"method":"GET","path":"/inventory/managedObjects","query":"q=$filter=(has(com_cumulocity_model_Agent)) and (name eq '*My Custom Agent*') $orderby=name"}
+    config:
+      env:
+        C8Y_SETTINGS_DEFAULTS_OUTPUT: csv
 
-
-tests:
   It can build an inventory query via piped input:
     command: |
       echo "type1" | c8y agents list --queryTemplate "type eq '%s'" --dry |
-        c8y util show --select pathEncoded
+        c8y util show --select pathEncoded --output csv
     exit-code: 0
     stdout:
       exactly: |

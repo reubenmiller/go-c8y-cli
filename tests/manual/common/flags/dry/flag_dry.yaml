@@ -39,7 +39,7 @@ tests:
       env:
         C8Y_SETTINGS_LOGGER_HIDESENSITIVE: true
     command: |
-       c8y devices create --name test01 --data "test=1" --dry |
+       c8y devices create --name test01 --data "test=1" --sessionUsername dummyUser --sessionPassword dummy --dry |
         c8y util show --select headers,path
     exit-code: 0
     stdout:
@@ -52,7 +52,7 @@ tests:
         C8Y_HOST: https://example.c8y.io
         C8Y_SETTINGS_LOGGER_HIDESENSITIVE: true
     command: |
-      c8y inventory create --name test01 --dry --dryFormat markdown --compact=false
+      c8y inventory create --name test01 --dry --dryFormat markdown --compact=false --sessionUsername dummyUser --sessionPassword dummy
     exit-code: 0
     stdout:
       exactly: |

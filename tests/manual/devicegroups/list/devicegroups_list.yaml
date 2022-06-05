@@ -6,16 +6,17 @@ config:
     C8Y_SETTINGS_CACHE_METHODS: GET POST PUT
     C8Y_SETTINGS_DEFAULTS_CACHETTL: 100h
     C8Y_SETTINGS_DEFAULTS_DRY: true
+    C8Y_SETTINGS_DEFAULTS_DRYFORMAT: json
 
 tests:
   It finds device groups by name:
     command: |
       c8y devicegroups list --name "*My Custom Group*" |
-        c8y util show --select method,pathEncoded,query
+        c8y util show --select method,path,query
     exit-code: 0
     stdout:
       exactly: |
-        {"method":"GET","pathEncoded":"/inventory/managedObjects?query=$filter=%28has%28c8y_IsDeviceGroup%29%29+and+%28name+eq+%27%2AMy+Custom+Group%2A%27%29+$orderby=name&withChildren=false","query":"query=$filter=(has(c8y_IsDeviceGroup)) and (name eq '*My Custom Group*') $orderby=name&withChildren=false"}
+        {"method":"GET","path":"/inventory/managedObjects","query":"query=$filter=(has(c8y_IsDeviceGroup)) and (name eq '*My Custom Group*') $orderby=name&withChildren=false"}
 
   It finds sub (nested) device groups:
     command: |
@@ -23,11 +24,11 @@ tests:
         --name "*My Custom Group*" \
         --excludeRootGroup \
         --pageSize 5 |
-      c8y util show --select method,pathEncoded,query
+      c8y util show --select method,path,query
     exit-code: 0
     stdout:
       exactly: |
-        {"method":"GET","pathEncoded":"/inventory/managedObjects?query=$filter=%28has%28c8y_IsDeviceGroup%29%29+and+%28name+eq+%27%2AMy+Custom+Group%2A%27%29+and+not%28type+eq+%27c8y_DeviceGroup%27%29+$orderby=name&withChildren=false","query":"query=$filter=(has(c8y_IsDeviceGroup)) and (name eq '*My Custom Group*') and not(type eq 'c8y_DeviceGroup') $orderby=name&withChildren=false"}
+        {"method":"GET","path":"/inventory/managedObjects","query":"query=$filter=(has(c8y_IsDeviceGroup)) and (name eq '*My Custom Group*') and not(type eq 'c8y_DeviceGroup') $orderby=name&withChildren=false"}
 
   It finds root device groups:
     command: |
@@ -35,8 +36,8 @@ tests:
         --name "*My Custom Group*" \
         --type "c8y_DeviceGroup" \
         --pageSize 5 |
-      c8y util show --select method,pathEncoded,query
+      c8y util show --select method,path,query
     exit-code: 0
     stdout:
       exactly: |
-        {"method":"GET","pathEncoded":"/inventory/managedObjects?query=$filter=%28has%28c8y_IsDeviceGroup%29%29+and+%28name+eq+%27%2AMy+Custom+Group%2A%27%29+and+%28type+eq+%27c8y_DeviceGroup%27%29+$orderby=name&withChildren=false","query":"query=$filter=(has(c8y_IsDeviceGroup)) and (name eq '*My Custom Group*') and (type eq 'c8y_DeviceGroup') $orderby=name&withChildren=false"}
+        {"method":"GET","path":"/inventory/managedObjects","query":"query=$filter=(has(c8y_IsDeviceGroup)) and (name eq '*My Custom Group*') and (type eq 'c8y_DeviceGroup') $orderby=name&withChildren=false"}

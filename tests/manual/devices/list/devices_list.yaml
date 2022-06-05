@@ -10,22 +10,22 @@ tests:
   It can build an inventory query via piped input:
     command: |
       echo "type1" | c8y devices list --queryTemplate "type eq '%s'" --dry |
-        c8y util show --select pathEncoded --output csv
+        c8y util show --select query --output csv
     exit-code: 0
     stdout:
       exactly: |
-        /inventory/managedObjects?q=$filter=type+eq+'type1'+$orderby=name
+        q=$filter=type eq 'type1' $orderby=name
 
   It finds devices by name:
     command: |
       c8y devices list --name "*My Custom Device*" --pageSize 5 --dry |
-        c8y util show --select method,pathEncoded,body,query --compact=false
+        c8y util show --select method,path,body,query --compact=false
     exit-code: 0
     stdout:
       exactly: |
         {
           "method": "GET",
-          "pathEncoded": "/inventory/managedObjects?q=$filter=%28name+eq+%27%2AMy+Custom+Device%2A%27%29+$orderby=name",
+          "path": "/inventory/managedObjects",
           "query": "q=$filter=(name eq '*My Custom Device*') $orderby=name"
         }
 
@@ -38,7 +38,7 @@ tests:
       exactly: |
         {
           "method": "GET",
-          "pathEncoded": "/inventory/managedObjects?q=$filter=%28name+eq+%27%2AMy+Custom+Device%2A%27%29+$orderby=creationTime+desc",
+          "pathEncoded": "/inventory/managedObjects?q=%24filter%3D%28name+eq+%27%2AMy+Custom+Device%2A%27%29+%24orderby%3DcreationTime+desc",
           "query": "q=$filter=(name eq '*My Custom Device*') $orderby=creationTime desc"
         }
 
@@ -51,7 +51,7 @@ tests:
       exactly: |
         {
           "method": "GET",
-          "pathEncoded": "/inventory/managedObjects?q=$filter=%28name+eq+%27%2AMy+Custom+Device%2A%27%29+$orderby=creationTime+asc",
+          "pathEncoded": "/inventory/managedObjects?q=%24filter%3D%28name+eq+%27%2AMy+Custom+Device%2A%27%29+%24orderby%3DcreationTime+asc",
           "query": "q=$filter=(name eq '*My Custom Device*') $orderby=creationTime asc"
         }
 
@@ -67,16 +67,15 @@ tests:
           "pathEncoded": "/inventory/managedObjects?pageSize=2000&q=%24filter%3D%28_id+gt+%270%27%29+%24orderby%3D_id+asc",
           "query": "pageSize=2000&q=$filter=(_id gt '0') $orderby=_id asc"
         }
-        /inventory/managedObjects?q=%24filter%3Dtype+eq+%27type1%27+%24orderby%3Dname
   
   It can build an inventory query via piped input and optional value:
     command: |
       echo "type1" | c8y devices list --queryTemplate "type eq '%s'" --agents --dry |
-        c8y util show --select pathEncoded
+        c8y util show --select query -o csv
     exit-code: 0
     stdout:
       exactly: |
-        /inventory/managedObjects?q=%24filter%3Dhas%28com_cumulocity_model_Agent%29+and+type+eq+%27type1%27+%24orderby%3Dname
+        q=$filter=has(com_cumulocity_model_Agent) and type eq 'type1' $orderby=name
 
   It filters devices by availability:
     command: |

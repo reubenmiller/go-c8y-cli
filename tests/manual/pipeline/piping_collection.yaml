@@ -31,7 +31,7 @@ tests:
   It sends a command and ignores pipeline if it does not include a newline char:
     # pwsh equivalent: $null | c8y alarms list --dry
     command: |
-      echo -n "" | c8y alarms list --dry
+      printf "" | c8y alarms list --dry
     exit-code: 0
     stdout:
       match-pattern: ^$
@@ -40,7 +40,7 @@ tests:
 
   It ignores output when piping an empty string:
     command: |
-      echo -n "" | c8y alarms list --dry
+      printf "" | c8y alarms list --dry
     exit-code: 0
     stdout:
       match-pattern: ^$
@@ -89,7 +89,7 @@ tests:
 
   It does not send requests when piping empty strings:
     command: |
-      echo -n "" |
+      printf "" |
         c8y events list --dry
     exit-code: 0
     stdout:

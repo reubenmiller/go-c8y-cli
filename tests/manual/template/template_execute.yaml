@@ -105,6 +105,15 @@ tests:
           }
         }
   
+  It provides a function to get an optional value - test:
+      command: |
+          echo '{"nestedProp":{"otherValue":1}}' | c8y devices update --id 0 --dry --template "_.Get('nestedProp', input.value, {dummy: 2})"
+      exit-code: 0
+      stdout:
+          line-count: 1
+          json:
+              ..0.body.nestedProp.otherValue: '1'
+
   It provides a function to get an optional value and returns a default value if not present:
     command: |
       c8y template execute --template "{nestedProp:{othervalue: 1}}" |
@@ -209,15 +218,6 @@ tests:
           "value": 3
         }
 
-  It provides a function to get an optional value:
-      command: |
-          echo '{"nestedProp":{"otherValue":1}}' | c8y devices update --id 0 --dry --template "_.Get('nestedProp', input.value, {dummy: 2})"
-      exit-code: 0
-      stdout:
-          line-count: 1
-          json:
-              ..0.body.nestedProp.otherValue: '1'
-
   It produces non-json output - integer:
       command: |
           c8y template execute --template "_.Int(10, 10)"
@@ -241,7 +241,7 @@ tests:
       stdout:
           exactly: |
               device äöüß
-                1😀
+               1😀
 
   It produces non-json output - ini output:
       command: |

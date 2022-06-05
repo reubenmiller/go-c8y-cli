@@ -8,10 +8,12 @@ tests:
   It should exclude the Accept header return an object when using POST:
     command: |
       c8y devices create --name dummy --dry --noAccept |
-        c8y util show --select path,headers,method
+        c8y util show --select path,headers,method --output json
     exit-code: 0
     stdout:
       not-contains:
-        - 'Accept:'
-      exactly: |
-        {"headers":{"Authorization":"Basic  {base64 tenant/username:password}","Content-Type":"application/json"},"method":"POST","path":"/inventory/managedObjects"}
+        - 'Accept'
+      json:
+        headers.Content-Type: application/json
+        path: /inventory/managedObjects
+        method: POST

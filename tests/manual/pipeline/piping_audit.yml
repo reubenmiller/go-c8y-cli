@@ -19,7 +19,7 @@ tests:
 
   It does not send a request when piping an empty string:
     command: |
-      echo -n "" |
+      printf "" |
         c8y auditrecords list --dry --dryFormat json
     exit-code: 0
     stdout:

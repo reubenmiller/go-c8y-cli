@@ -127,8 +127,8 @@ create_device_and_user () {
     local name="$1"
     local extType="c8y_Serial"
 
-    c8y deviceregistration register --id "$name"
-    c8y deviceregistration getCredentials --id "$name" --sessionUsername "$DEVICE_BOOTSTRAP_USER" --sessionPassword "$DEVICE_BOOTSTRAP_PASSWORD"
+    c8y deviceregistration register --id "$name" || true
+    c8y deviceregistration getCredentials --id "$name" --sessionUsername "$DEVICE_BOOTSTRAP_USER" --sessionPassword "$DEVICE_BOOTSTRAP_PASSWORD" || true
     c8y deviceregistration approve --id "$name"
     
     creds=$(

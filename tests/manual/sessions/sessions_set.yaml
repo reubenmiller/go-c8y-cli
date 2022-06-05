@@ -52,6 +52,7 @@ tests:
         C8Y_HOST: '$C8Y_HOST'
         C8Y_USER: ''
         C8Y_TENANT: ''
+        C8Y_TOKEN: ''
         C8Y_USERNAME: '$C8Y_USER'
         C8Y_PASSWORD: 'dummyP4s4wird'
     command: |

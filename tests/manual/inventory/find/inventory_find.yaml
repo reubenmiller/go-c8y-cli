@@ -10,48 +10,48 @@ tests:
   It finds all devices with their names starting with 'roomUpperFloor_':
     command: |
       c8y inventory find --query "name eq 'roomUpperFloor_*'" --dry |
-        c8y util show --select method,pathEncoded
+        c8y util show --select method,query
     exit-code: 0
     stdout:
       exactly: |
-        {"method":"GET","pathEncoded":"/inventory/managedObjects?query=$filter=name+eq+%27roomUpperFloor_*%27"}
+        {"method":"GET","query":"query=$filter=name eq 'roomUpperFloor_*'"}
 
   It finds all devices by piping query text:
     command: |
       echo "name eq '*a*'" |
         c8y inventory find --orderBy "_id desc" --onlyDevices --dry |
-        c8y util show --select method,pathEncoded
+        c8y util show --select method,query
     exit-code: 0
     stdout:
       exactly: |
-        {"method":"GET","pathEncoded":"/inventory/managedObjects?q=$filter=name+eq+%27*a*%27+$orderby=_id+desc"}
+        {"method":"GET","query":"q=$filter=name eq '*a*' $orderby=_id desc"}
 
   It finds matching devices by piping an object:
     command: |
       c8y template execute --template "{c8y_DeviceQueryString: 'name eq \'*a*\''}" |
         c8y inventory find --orderBy "_id desc" --onlyDevices --dry |
-        c8y util show --select method,pathEncoded
+        c8y util show --select method,query
     exit-code: 0
     stdout:
       exactly: |
-        {"method":"GET","pathEncoded":"/inventory/managedObjects?q=$filter=name+eq+%27*a*%27+$orderby=_id+desc"}
+        {"method":"GET","query":"q=$filter=name eq '*a*' $orderby=_id desc"}
 
   It finds inventory managed objects using a template query:
     command: |
       c8y template execute --template "{c8y_DeviceQueryString: 'name eq \'*a*\''}" |
         c8y inventory find --queryTemplate "not(%s)" --orderBy "_id desc" --onlyDevices --dry |
-        c8y util show --select method,pathEncoded
+        c8y util show --select method,query
     exit-code: 0
     stdout:
       exactly: |
-        {"method":"GET","pathEncoded":"/inventory/managedObjects?q=$filter=not%28name+eq+%27*a*%27%29+$orderby=_id+desc"}
+        {"method":"GET","query":"q=$filter=not(name eq '*a*') $orderby=_id desc"}
 
   It handles empty device query string:
     command: |
       c8y template execute --template "{c8y_DeviceQueryString: ''}" |
         c8y inventory find --orderBy "_id desc" --dry |
-        c8y util show --select method,pathEncoded
+        c8y util show --select method,query
     exit-code: 0
     stdout:
       exactly: |
-        {"method":"GET","pathEncoded":"/inventory/managedObjects?query=$filter=+$orderby=_id+desc"}
+        {"method":"GET","query":"query=$filter= $orderby=_id desc"}
