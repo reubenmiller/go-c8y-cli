@@ -152,8 +152,13 @@ tasks:
   # ---------------------------------------------------------------
   build-fast:
     desc: Build Fast
+    vars:
+      GIT_VERSION:
+        sh: git describe --abbrev=1 --tags
+      GIT_BRANCH:
+        sh: git rev-parse --abbrev-ref HEAD
     cmds:
-      - go build -o .bin/c8y cmd/c8y/main.go
+      - go build -o .bin/c8y -ldflags="-s -w -X 'github.com/reubenmiller/go-c8y-cli/pkg/cmd.buildVersion={{trimPrefix "v" .GIT_VERSION}}' -X 'github.com/reubenmiller/go-c8y-cli/pkg/cmd.buildBranch={{.GIT_BRANCH}}'" cmd/c8y/main.go
 
   build:
     desc: Build
