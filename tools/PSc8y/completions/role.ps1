@@ -6,7 +6,7 @@ $script:CompleteRole = {
         $searchFor = $wordToComplete
     }
 
-    Get-RoleCollection -PageSize 100 `
+    Get-RoleCollection -PageSize 100 -AsPSObject `
     | Select-Object -ExpandProperty id `
     | Where-Object { $_ -like "$searchFor*" } `
     | ForEach-Object {

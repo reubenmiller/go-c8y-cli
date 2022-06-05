@@ -4,6 +4,16 @@ set -e
 
 export C8Y_SETTINGS_DEFAULTS_DRY=false
 
+createdir () {
+    # Cross-platform compatible
+    local name="${1:-"c8y-temp"}"
+    tmpdir=$(mktemp -d 2>/dev/null || mktemp -d -t "$name")
+    echo "$tmpdir"
+}
+
+export TEMP_DIR=$(createdir)
+trap "rm -Rf $TEMP_DIR" EXIT
+
 NAME=${1:-""}
 VERSION=${2:-0.8.6}
 
@@ -19,9 +29,8 @@ ID=$( c8y firmware create --name "$NAME" | c8y firmware versions create --versio
 #
 # create version by file (get details from package name)
 #
-package_file=$(mktemp /tmp/package-XXXXXX-10.2.3.deb)
+package_file="$TEMP_DIR/package-XXXXXX-10.2.3.deb"
 echo "dummy file" > "$package_file"
-trap "rm -f $package_file" EXIT
 
 VERSION2_ID=$( c8y firmware versions create --firmware "$NAME" --file "$package_file" --select "id,c8y_Firmware.version" --output csv )
 echo "$VERSION2_ID" | grep "^[0-9]\+,10.2.3$"

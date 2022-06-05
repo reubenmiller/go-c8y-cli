@@ -12,7 +12,7 @@ $script:CompleteMeasurementFragmentType = {
 
     $device = $fakeBoundParameters["Device"]
 
-    Get-SupportedMeasurements -Device:$device -WarningAction SilentlyContinue `
+    Get-SupportedMeasurements -Device:$device -WarningAction SilentlyContinue -AsPSObject `
     | Where-Object { $_ -like "$searchFor*" } `
     | Sort-Object { $_ } `
     | ForEach-Object {
@@ -40,7 +40,7 @@ $script:CompleteMeasurementSeries = {
     $device = $fakeBoundParameters["Device"]
     $valueFragmentType = $fakeBoundParameters["valueFragmentType"]
     
-    Get-SupportedSeries -Device:$device -WarningAction SilentlyContinue `
+    Get-SupportedSeries -Device:$device -WarningAction SilentlyContinue -AsPSObject `
     | Where-Object { $_ -like "$valueFragmentType.*" } `
     | Where-Object { $_ -like "*.$searchFor*" } `
     | ForEach-Object { "$_".Split(".")[-1] } `
@@ -69,7 +69,7 @@ $script:CompleteMeasurementFullSeries = {
 
     $device = $fakeBoundParameters["Device"]
     
-    Get-SupportedSeries -Device:$device -WarningAction SilentlyContinue `
+    Get-SupportedSeries -Device:$device -WarningAction SilentlyContinue -AsPSObject `
     | Where-Object { $_ -like "$searchFor*" } `
     | Sort-Object { $_ } `
     | ForEach-Object {

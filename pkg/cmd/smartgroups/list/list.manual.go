@@ -102,13 +102,14 @@ func (n *ListCmd) RunE(cmd *cobra.Command, args []string) error {
 
 	c8yQueryParts, err := flags.WithC8YQueryOptions(
 		cmd,
-		flags.WithC8YQueryFixedString("(type eq 'c8y_DynamicGroup')"),
-		flags.WithC8YQueryFormat("name", "(name eq '%s')"),
-		flags.WithC8YQueryFormat("deviceQuery", "(c8y_DeviceQueryString eq '%s')"),
-		flags.WithC8YQueryFormat("fragmentType", "has(%s)"),
-		flags.WithC8YQueryFormat("owner", "(owner eq '%s')"),
-		flags.WithC8YQueryBool("onlyInvisible", "has(c8y_IsDynamicGroup.invisible)"),
-		flags.WithC8YQueryBool("onlyVisible", "not(has(c8y_IsDynamicGroup.invisible))"),
+		inputIterators,
+		flags.WithStaticStringValue("smartgroup", "(type eq 'c8y_DynamicGroup')"),
+		flags.WithStringValue("name", "name", "(name eq '%s')"),
+		flags.WithStringValue("deviceQuery", "deviceQuery", "(c8y_DeviceQueryString eq '%s')"),
+		flags.WithStringValue("fragmentType", "fragmentType", "has(%s)"),
+		flags.WithStringValue("owner", "owner", "(owner eq '%s')"),
+		flags.WithBoolValue("onlyInvisible", "onlyInvisible", "has(c8y_IsDynamicGroup.invisible)"),
+		flags.WithBoolValue("onlyVisible", "onlyVisible", "not(has(c8y_IsDynamicGroup.invisible))"),
 	)
 
 	if err != nil {
