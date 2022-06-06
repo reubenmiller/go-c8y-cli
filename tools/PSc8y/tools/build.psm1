@@ -75,7 +75,11 @@ Function Get-GitVersion {
         }
     }
 
-    $parts = $Version -split "-", 2
+    if ($version -notmatch "^v?\d+") {
+        $version = "0.0.0"
+    }
+
+    $parts = $version -split "-", 2
 
     [pscustomobject]@{
         Version = $parts[0] -replace "^v", ""

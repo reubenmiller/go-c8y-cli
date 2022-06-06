@@ -23,6 +23,12 @@ try {
 	Write-Host ("Current loaded version: {0}" -f ($Versions -join ","))
 }
 
+#
+# Slim down folder by only leaving amd64 and macOs arm64 binaries
+Get-ChildItem "$ArtifactFolder/Dependencies" | Where-Object {
+	$_.Name -notmatch "amd64|macOS_arm64"
+} | Remove-Item
+
 try {
 	Write-Host "Publishing module from folder [$ArtifactFolder]"
 	## Publish module to PowerShell Gallery

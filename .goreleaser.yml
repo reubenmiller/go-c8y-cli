@@ -244,9 +244,7 @@ brews:
 
 
 dockers:
-  # You can have multiple Docker images.
-  - 
-    # ID of the image, needed if you want to filter by it later on (e.g. on custom publishers).
+  -
     id: c8y-shell
     goos: linux
     goarch: amd64
@@ -261,8 +259,6 @@ dockers:
     - "reubenmiller/{{.ProjectName}}-shell:{{ .Tag }}"
     - "ghcr.io/reubenmiller/{{.ProjectName}}-shell:{{ .Tag }}"
     - "ghcr.io/reubenmiller/{{.ProjectName}}-shell:latest"
-
-    skip_push: false
 
     dockerfile: docker/shell.dockerfile
     use: docker
@@ -293,8 +289,6 @@ dockers:
     - "ghcr.io/reubenmiller/{{.ProjectName}}-pwsh:{{ .Tag }}"
     - "ghcr.io/reubenmiller/{{.ProjectName}}-pwsh:latest"
 
-    skip_push: false
-
     dockerfile: docker/pwsh2.dockerfile
     use: docker
 
@@ -310,4 +304,3 @@ dockers:
     extra_files:
     - docker/profile.ps1
     - output_pwsh/PSc8y
-    # - output_pwsh/PSc8y.zip

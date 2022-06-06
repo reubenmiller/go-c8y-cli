@@ -192,9 +192,9 @@ tasks:
     desc: Build the powershell module
     cmds:
       - pwsh -File scripts/build-powershell/build.ps1
+      - rm -Rf output_pwsh
       - mkdir -p output_pwsh
-      - cp -R tools/PSc8y/dist/PSc8y output_pwsh/PSc8y
-      - cp tools/PSc8y/dist/PSc8y.zip output_pwsh/
+      - cp -R tools/PSc8y/dist/PSc8y output_pwsh/
     sources:
       - api/spec/json/*.json
       - scripts/**/*.ps1
