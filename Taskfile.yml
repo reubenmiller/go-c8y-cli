@@ -121,8 +121,8 @@ tasks:
   generate_go_code:
     desc: Generate go code from specifications
     cmds:
-      - pwsh -File scripts/build-cli/build.ps1 -SkipBuildBinary
-    deps: [update_spec]
+      - task: update_spec
+      - pwsh -File scripts/build-cli/build.ps1
     sources:
       - api/spec/json/*.json
       - scripts/**/*.ps1
@@ -169,25 +169,32 @@ tasks:
   build:
     desc: Build
     cmds:
-      - task: update_spec
-      - task: build_cli
-      - task: build_powershell
-      - task: generate_cli_tests
-
-  build_cli:
-    desc: Generate the cli code and build the binaries
+      - goreleaser build --rm-dist
+  
+  build-snapshot:
+    desc: Build Snapshot
     cmds:
-      - pwsh -File scripts/build-cli/build.ps1
-    sources:
-      - api/spec/json/*.json
-      - scripts/**/*.ps1
-    generates:
-      - pkg/cmd/**/*.auto.go
+      - goreleaser build --rm-dist --snapshot
+
+  generate:
+    desc: Generate the cli code
+    cmds:
+      - go mod tidy
+      - task: update_spec
+      - task: generate_go_code
+      - task: generate_cli_tests
+      - task: build_powershell
+      - task: manpages
+      - task: build_completions
+      - task: checkout_addons
 
   build_powershell:
     desc: Build the powershell module
     cmds:
       - pwsh -File scripts/build-powershell/build.ps1
+      - mkdir -p output_pwsh
+      - cp -R tools/PSc8y/dist/PSc8y output_pwsh/PSc8y
+      - cp tools/PSc8y/dist/PSc8y.zip output_pwsh/
     sources:
       - api/spec/json/*.json
       - scripts/**/*.ps1
@@ -198,6 +205,8 @@ tasks:
       - tools/PSc8y/tools/*.ps1
     generates:
       - tools/PSc8y/**/*.ps1
+      - output_pwsh/PSc8y
+      - output_pwsh/PSc8y.zip
 
   build_completions:
     desc: Build completions
@@ -205,16 +214,6 @@ tasks:
       OUTPUT_DIR: ./output
     cmds:
       - ./tools/shell/completion/build_completions.sh
-
-  build-docker:
-    desc: Build docker images
-    vars:
-      DOCKER_BUILD_ARGS: ""
-    cmds:
-      - cp .bin/c8y ./docker/c8y.linux
-      - sudo docker build ./docker --file ./docker/shell.dockerfile {{.DOCKER_BUILD_ARGS}} --build-arg C8Y_VERSION={{.VERSION}} --tag c8y-shell
-      - sudo docker build ./docker --file ./docker/pwsh.dockerfile {{.DOCKER_BUILD_ARGS}} --tag c8y-pwsh
-      - rm ./docker/c8y.linux
 
   checkout_addons:
     desc: Checkout the go-c8y-cli-addons repository
@@ -228,7 +227,7 @@ tasks:
   # ---------------------------------------------------------------
   test:
     desc: Run all tests
-    cmd:
+    cmds:
       - task: test_powershell
       - task: test_powershell_sessions
 
@@ -289,37 +288,17 @@ tasks:
       - sudo ./tools/integration-tests/run.sh
 
   # ---------------------------------------------------------------
-  # Publish
+  # Release/Publish
   # ---------------------------------------------------------------
-  publish:
-    desc: Publish powershell module
-    cmds:
-      - pwsh -File ./scripts/build-powershell/publish.ps1
-
-  publish-docker:
-    desc: Publish docker c8y cli images
-    env:
-      CR_PAT: ""
-      VERSION: "{{.VERSION}}"
-    cmds:
-      - task: show-version
-      - task: build-fast
-      - task: build-docker
-        vars:
-          GOOS: linux
-          GOARCH: amd64
-      - chmod +x ./scripts/publish-docker.sh
-      - sudo -E ./scripts/publish-docker.sh
-
-  publish-local-snapshot:
-    desc: Publish local snapshot release
-    cmds:
-      - goreleaser --snapshot --skip-publish --rm-dist
-
-  publish-release:
+  release:
     desc: Publish release
     cmds:
-      - goreleaser --rm-dist
+      - goreleaser release --rm-dist --auto-snapshot
+
+  publish-powershell:
+    desc: Publish powershell module
+    cmds:
+      - pwsh -File ./scripts/build-powershell/publish.ps1 -ArtifactFolder output_pwsh/PSc8y
 
   publish-linux-packages:
     desc: Publish linux packages (apk,deb,rpm)
@@ -334,22 +313,26 @@ tasks:
   # ---------------------------------------------------------------
   run-docker-shell:
     desc: Run shell docker image
+    interactive: true
     cmds:
       - |
-        sudo docker run -it --rm \
+        docker run -it --rm \
           -e C8Y_HOST=$C8Y_HOST \
           -e C8Y_TENANT=$C8Y_TENANT \
+          -e C8Y_TOKEN=$C8Y_TOKEN \
           -e C8Y_USER=$C8Y_USER \
           -e C8Y_PASSWORD=$C8Y_PASSWORD \
-          c8y-shell
+          reubenmiller/c8y-shell
 
   run-docker-pwsh:
     desc: Run pwsh docker image
+    interactive: true
     cmds:
       - |
-        sudo docker run -it --rm \
+        docker run -it --rm \
           -e C8Y_HOST=$C8Y_HOST \
           -e C8Y_TENANT=$C8Y_TENANT \
+          -e C8Y_TOKEN=$C8Y_TOKEN \
           -e C8Y_USER=$C8Y_USER \
           -e C8Y_PASSWORD=$C8Y_PASSWORD \
-          c8y-pwsh
+          reubenmiller/c8y-pwsh

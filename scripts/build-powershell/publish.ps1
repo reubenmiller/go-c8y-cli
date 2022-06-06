@@ -1,8 +1,9 @@
 ﻿[cmdletbinding()]
-Param()
+Param(
+	[Parameter(Mandatory=$true)]
+	[string] $ArtifactFolder
+)
 $ErrorActionPreference = 'Stop'
-
-Import-Module "$PSScriptRoot/../../tools/PSc8y/tools/build.psm1" -Force
 
 # PowerShellGet 2.2.3 required to run correctly on MacOS
 try {
@@ -22,21 +23,7 @@ try {
 	Write-Host ("Current loaded version: {0}" -f ($Versions -join ","))
 }
 
-
-if ($env:APPVEYOR) {
-	& $PSScriptRoot/wait-for-jobs.ps1
-}
-
 try {
-	#
-	# Build binaries
-	#
-	$ArtifactFolder = Export-ProductionModule
-	$DependenciesDir = "$ArtifactFolder/Dependencies/"
-	if (-Not (Test-Path $DependenciesDir)) {
-		$null = New-Item "$DependenciesDir" -ItemType Directory
-	}
-
 	Write-Host "Publishing module from folder [$ArtifactFolder]"
 	## Publish module to PowerShell Gallery
 	$publishParams = @{

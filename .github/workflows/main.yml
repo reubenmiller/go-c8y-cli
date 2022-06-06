@@ -43,28 +43,32 @@ jobs:
       uses: arduino/setup-task@v1
 
     - name: Build cli
-      run: task build
+      run: task build_powershell build
       shell: bash
 
     - uses: actions/upload-artifact@v2
       with:
         name: c8y.windows.amd64
         path: dist/windows_windows_amd64_v1/bin/c8y*
+        if-no-files-found: error
 
     - uses: actions/upload-artifact@v2
       with:
         name: c8y.linux.amd64
         path: dist/linux_linux_amd64_v1/bin/c8y*
+        if-no-files-found: error
 
     - uses: actions/upload-artifact@v2
       with:
         name: c8y.macos.amd64
         path: dist/macos_darwin_amd64_v1/bin/c8y*
+        if-no-files-found: error
 
     - uses: actions/upload-artifact@v2
       with:
         name: PSc8y Module
-        path: tools/PSc8y/dist/PSc8y.zip
+        path: output_pwsh/PSc8y/
+        if-no-files-found: error
 
   test-examples:
     runs-on: ${{ matrix.os }}
@@ -144,12 +148,12 @@ jobs:
       uses: arduino/setup-task@v1
 
     - name: Build powershell module
-      run: task build
+      run: task build_powershell build
       shell: bash
 
     - name: Test powershell module
       if: ${{ true }}
-      run: task test
+      run: task test_powershell test_powershell_sessions
       shell: bash
       timeout-minutes: 30
 

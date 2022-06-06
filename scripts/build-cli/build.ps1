@@ -1,8 +1,5 @@
 ﻿[cmdletbinding()]
-Param(
-    # Skip building the go binary. Only generate the go code
-    [switch] $SkipBuildBinary
-)
+Param()
 
 # Import functions
 . $PSScriptRoot/New-C8yApi.ps1
@@ -25,12 +22,6 @@ Write-Host "`nUse the following import statements in the root cmd`n"
 $ImportStatements
 
 
-#
-# Build binary
-#
-if (-not $SkipBuildBinary) {
-    $OutputDir = "$PSScriptRoot/../../output"
-    & "$PSScriptRoot/build-binary.ps1" -OutputDir $OutputDir
-    $OutputDir = Resolve-Path $OutputDir   
-    Write-Host "Build successful! $OutputDir"
-}
+$OutputDir = "$PSScriptRoot/../../output"
+$OutputDir = Resolve-Path $OutputDir
+Write-Host "Build successful! $OutputDir"

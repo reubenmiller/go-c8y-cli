@@ -44,6 +44,7 @@ node_modules
 
 # release binaries and docs
 dist/**
+output_pwsh/**
 share/**
 .go-c8y-cli
 **/.docusaurus/**
