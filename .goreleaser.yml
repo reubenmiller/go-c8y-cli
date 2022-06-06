@@ -255,10 +255,8 @@ dockers:
 
     # Templates of the Docker image names.
     image_templates:
-    - "reubenmiller/{{.ProjectName}}-shell:latest"
-    - "reubenmiller/{{.ProjectName}}-shell:{{ .Tag }}"
-    - "ghcr.io/reubenmiller/{{.ProjectName}}-shell:{{ .Tag }}"
     - "ghcr.io/reubenmiller/{{.ProjectName}}-shell:latest"
+    - "ghcr.io/reubenmiller/{{.ProjectName}}-shell:{{ .Tag }}"
 
     dockerfile: docker/shell.dockerfile
     use: docker
@@ -284,10 +282,8 @@ dockers:
 
     # Templates of the Docker image names.
     image_templates:
-    - "reubenmiller/{{.ProjectName}}-pwsh:latest"
-    - "reubenmiller/{{.ProjectName}}-pwsh:{{ .Tag }}"
-    - "ghcr.io/reubenmiller/{{.ProjectName}}-pwsh:{{ .Tag }}"
     - "ghcr.io/reubenmiller/{{.ProjectName}}-pwsh:latest"
+    - "ghcr.io/reubenmiller/{{.ProjectName}}-pwsh:{{ .Tag }}"
 
     dockerfile: docker/pwsh2.dockerfile
     use: docker
