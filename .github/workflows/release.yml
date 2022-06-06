@@ -79,6 +79,7 @@ jobs:
     if: "true"
     env:
       CR_PAT: ${{ secrets.CR_PAT }}
+      VERSION: ${{ github.ref_name }}
 
     steps:
     - uses: actions/checkout@v2 # Checking out the repo
@@ -100,4 +101,4 @@ jobs:
       run: go install golang.org/x/tools/cmd/goimports@latest
 
     - name: publish docker images
-      run: task VERSION=${GITHUB_REF} publish-docker
+      run: task publish-docker
