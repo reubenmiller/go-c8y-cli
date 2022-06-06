@@ -21,7 +21,4 @@ $ImportStatements = foreach ($iFile in $SpecFiles) {
 Write-Host "`nUse the following import statements in the root cmd`n"
 $ImportStatements
 
-
-$OutputDir = "$PSScriptRoot/../../output"
-$OutputDir = Resolve-Path $OutputDir
-Write-Host "Build successful! $OutputDir"
+Write-Host "Build successful!"
