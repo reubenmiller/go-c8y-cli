@@ -293,6 +293,7 @@ tasks:
   release:
     desc: Publish release
     cmds:
+      - git status
       - goreleaser release --rm-dist --auto-snapshot
 
   publish-powershell:
