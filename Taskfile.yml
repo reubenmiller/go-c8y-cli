@@ -153,12 +153,19 @@ tasks:
   build-fast:
     desc: Build Fast
     vars:
+      OUTPUT: .bin/c8y
       GIT_VERSION:
         sh: git describe --abbrev=1 --tags
       GIT_BRANCH:
         sh: git rev-parse --abbrev-ref HEAD
+      GOOS: "{{.GOOS}}"
+      GOARCH: "{{.GOARCH}}"
+    env:
+      GOOS: "{{.GOOS | default OS}}"
+      GOARCH: "{{.GOARCH | default ARCH}}"
     cmds:
-      - go build -o .bin/c8y -ldflags="-s -w -X 'github.com/reubenmiller/go-c8y-cli/pkg/cmd.buildVersion={{trimPrefix "v" .GIT_VERSION}}' -X 'github.com/reubenmiller/go-c8y-cli/pkg/cmd.buildBranch={{.GIT_BRANCH}}'" cmd/c8y/main.go
+      - echo "GOOS=$GOOS, GOARCH=$GOARCH"
+      - go build -o {{.OUTPUT}} -ldflags="-s -w -X 'github.com/reubenmiller/go-c8y-cli/pkg/cmd.buildVersion={{trimPrefix "v" .GIT_VERSION}}' -X 'github.com/reubenmiller/go-c8y-cli/pkg/cmd.buildBranch={{.GIT_BRANCH}}'" cmd/c8y/main.go
 
   build:
     desc: Build
@@ -199,6 +206,16 @@ tasks:
       OUTPUT_DIR: ./output
     cmds:
       - ./tools/shell/completion/build_completions.sh
+
+  build-docker:
+    desc: Build docker images
+    vars:
+      DOCKER_BUILD_ARGS: ""
+    cmds:
+      - cp .bin/c8y ./docker/c8y.linux
+      - sudo docker build ./docker --file ./docker/shell.dockerfile {{.DOCKER_BUILD_ARGS}} --build-arg C8Y_VERSION={{.VERSION}} --tag c8y-shell
+      - sudo docker build ./docker --file ./docker/pwsh.dockerfile {{.DOCKER_BUILD_ARGS}} --tag c8y-pwsh
+      - rm ./docker/c8y.linux
 
   checkout_addons:
     desc: Checkout the go-c8y-cli-addons repository
@@ -283,14 +300,17 @@ tasks:
   publish-docker:
     desc: Publish docker c8y cli images
     env:
-      CR_PAT: cr_pat
-      VERSION: VERSION
+      CR_PAT: ""
+      VERSION: "{{.VERSION}}"
     cmds:
       - chmod +x ./scripts/publish-docker.sh
-      - sudo ./scripts/publish-docker.sh
+      - sudo -E ./scripts/publish-docker.sh
     deps:
       - show-version
-      - build
+      - task: build-fast
+        vars:
+          GOOS: linux
+          GOARCH: amd64
       - build-docker
 
   publish-local-snapshot:

@@ -56,3 +56,4 @@ tools/shell/completion/output/
 *.env
 .task/checksum
 .bin/
+docker/c8y.linux
