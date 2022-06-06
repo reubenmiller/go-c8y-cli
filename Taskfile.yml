@@ -4,8 +4,9 @@ version: '3'
 # zsh completions: https://github.com/sawadashota/go-task-completions
 
 vars:
-  VERSION:
+  TAG:
     sh: git describe | sed "s/^v\?\([0-9]\{1,\}\.[0-9]\{1,\}\.[0-9]\{1,\}\).*/\1/"
+  VERSION: "{{base .TAG}}"
 
 env:
   C8Y_SETTINGS_CI: true
@@ -154,8 +155,6 @@ tasks:
     desc: Build Fast
     vars:
       OUTPUT: .bin/c8y
-      GIT_VERSION:
-        sh: git describe --abbrev=1 --tags
       GIT_BRANCH:
         sh: git rev-parse --abbrev-ref HEAD
       GOOS: "{{.GOOS}}"
@@ -165,7 +164,7 @@ tasks:
       GOARCH: "{{.GOARCH | default ARCH}}"
     cmds:
       - echo "GOOS=$GOOS, GOARCH=$GOARCH"
-      - go build -o {{.OUTPUT}} -ldflags="-s -w -X 'github.com/reubenmiller/go-c8y-cli/pkg/cmd.buildVersion={{trimPrefix "v" .GIT_VERSION}}' -X 'github.com/reubenmiller/go-c8y-cli/pkg/cmd.buildBranch={{.GIT_BRANCH}}'" cmd/c8y/main.go
+      - go build -o {{.OUTPUT}} -ldflags="-s -w -X 'github.com/reubenmiller/go-c8y-cli/pkg/cmd.buildVersion={{trimPrefix "v" .VERSION}}' -X 'github.com/reubenmiller/go-c8y-cli/pkg/cmd.buildBranch={{.GIT_BRANCH}}'" cmd/c8y/main.go
 
   build:
     desc: Build
@@ -229,9 +228,9 @@ tasks:
   # ---------------------------------------------------------------
   test:
     desc: Run all tests
-    deps:
-      - test_powershell
-      - test_powershell_sessions
+    cmd:
+      - task: test_powershell
+      - task: test_powershell_sessions
 
   test_powershell:
     desc: Run powershell tests
@@ -303,15 +302,15 @@ tasks:
       CR_PAT: ""
       VERSION: "{{.VERSION}}"
     cmds:
+      - task: build-docker
+        vars:
+          GOOS: linux
+          GOARCH: amd64
       - chmod +x ./scripts/publish-docker.sh
       - sudo -E ./scripts/publish-docker.sh
     deps:
       - show-version
-      - task: build-fast
-        vars:
-          GOOS: linux
-          GOARCH: amd64
-      - build-docker
+      - build-fast
 
   publish-local-snapshot:
     desc: Publish local snapshot release
