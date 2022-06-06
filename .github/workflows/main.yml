@@ -43,7 +43,7 @@ jobs:
       uses: arduino/setup-task@v1
 
     - name: Build cli
-      run: task build_powershell build
+      run: task build_powershell build-snapshot
       shell: bash
 
     - uses: actions/upload-artifact@v2
@@ -148,7 +148,7 @@ jobs:
       uses: arduino/setup-task@v1
 
     - name: Build powershell module
-      run: task build_powershell build
+      run: task build_powershell build-snapshot
       shell: bash
 
     - name: Test powershell module

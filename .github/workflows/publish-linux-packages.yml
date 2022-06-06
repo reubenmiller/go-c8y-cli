@@ -48,7 +48,7 @@ jobs:
       with:
         name: ReleaseArtifacts
         path: |
-          output_pwsh/PSc8y.zip
+          output_pwsh/PSc8y/
 
     - name: Publish Powershell Module (PSc8y)
       run: task publish-powershell

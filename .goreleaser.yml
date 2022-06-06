@@ -274,7 +274,7 @@ dockers:
     - "--label=org.opencontainers.image.title={{.ProjectName}}"
     - "--label=org.opencontainers.image.revision={{.FullCommit}}"
     - "--label=org.opencontainers.image.version={{.Version}}"
-    - "--platform=linux/arm64"
+    - "--platform=linux/amd64"
 
   - 
     # ID of the image, needed if you want to filter by it later on (e.g. on custom publishers).
@@ -305,7 +305,7 @@ dockers:
     - "--label=org.opencontainers.image.title={{.ProjectName}}"
     - "--label=org.opencontainers.image.revision={{.FullCommit}}"
     - "--label=org.opencontainers.image.version={{.Version}}"
-    - "--platform=linux/arm64"
+    - "--platform=linux/amd64"
 
     extra_files:
     - docker/profile.ps1
