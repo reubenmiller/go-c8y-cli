@@ -302,15 +302,14 @@ tasks:
       CR_PAT: ""
       VERSION: "{{.VERSION}}"
     cmds:
+      - task: show-version
+      - task: build-fast
       - task: build-docker
         vars:
           GOOS: linux
           GOARCH: amd64
       - chmod +x ./scripts/publish-docker.sh
       - sudo -E ./scripts/publish-docker.sh
-    deps:
-      - show-version
-      - build-fast
 
   publish-local-snapshot:
     desc: Publish local snapshot release
