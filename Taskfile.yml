@@ -214,6 +214,15 @@ tasks:
       OUTPUT_DIR: ./output
     cmds:
       - ./tools/shell/completion/build_completions.sh
+  
+  build_powershell_completions:
+    desc: Build powershell completions
+    summary: |
+      Do not trigger when building in CI/CD as it needs a already build module to work.
+      The file should be run manually in development and the output should then be committed
+      so it is included in the next build.
+    cmds:
+      -  pwsh -File tools/PSc8y/tools/build.completions.ps1
 
   checkout_addons:
     desc: Checkout the go-c8y-cli-addons repository
