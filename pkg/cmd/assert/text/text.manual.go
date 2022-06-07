@@ -136,6 +136,14 @@ func (n *CmdText) RunE(cmd *cobra.Command, args []string) error {
 		}
 	}
 
+	writeOutput := func(isJSON bool, output []byte) {
+		if isJSON {
+			_ = n.factory.WriteJSONToConsole(cfg, cmd, "", output)
+		} else {
+			fmt.Fprintf(consol, "%s\n", output)
+		}
+	}
+
 	totalErrors := 0
 	var lastErr error
 	for {
@@ -151,6 +159,8 @@ func (n *CmdText) RunE(cmd *cobra.Command, args []string) error {
 			return cmderrors.NewUserErrorWithExitCode(cmderrors.ExitAbortedWithErrors, msg)
 		}
 
+		isJSON := jsonUtilities.IsJSONObject(input)
+
 		// schema match
 		if schema != nil {
 			var val interface{}
@@ -158,11 +168,7 @@ func (n *CmdText) RunE(cmd *cobra.Command, args []string) error {
 			err = schema.Validate(val)
 
 			if err == nil {
-				if jsonUtilities.IsJSONObject(input) {
-					_ = n.factory.WriteJSONToConsole(cfg, cmd, "", input)
-				} else {
-					fmt.Fprintf(consol, "%s\n", input)
-				}
+				writeOutput(isJSON, input)
 			} else {
 				err = fmt.Errorf("%w. input does not match json schema. got=%s, wanted=%s", cmderrors.ErrAssertion, input, n.schema)
 			}
@@ -174,7 +180,7 @@ func (n *CmdText) RunE(cmd *cobra.Command, args []string) error {
 				if !pattern.Match(input) {
 					err = fmt.Errorf("%w. input does not match pattern. got=%s, wanted=%s", cmderrors.ErrAssertion, input, n.regex)
 				} else {
-					fmt.Fprintf(consol, "%s\n", input)
+					writeOutput(isJSON, input)
 				}
 			}
 		}
@@ -185,7 +191,7 @@ func (n *CmdText) RunE(cmd *cobra.Command, args []string) error {
 				if !bytes.Equal(input, []byte(n.exact)) {
 					err = fmt.Errorf("%w. input does not match. got=%s, wanted=%s", cmderrors.ErrAssertion, input, n.exact)
 				} else {
-					fmt.Fprintf(consol, "%s\n", input)
+					writeOutput(isJSON, input)
 				}
 			}
 		}
