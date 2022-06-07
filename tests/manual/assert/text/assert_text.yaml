@@ -29,6 +29,9 @@ tests:
     command: |
       echo '{"name":"device01"}' | c8y assert text --exact '{"name":"device01"}'
     exit-code: 0
+    stdout:
+      exactly: |
+        {"name":"device01"}
 
   It matches input against a exact text (no match):
     command: |
@@ -39,6 +42,19 @@ tests:
     command: |
       echo '{"name":"device01"}' | c8y assert text --regex '\{"name":"device\d+"\}'
     exit-code: 0
+    stdout:
+      exactly: |
+        {"name":"device01"}
+
+  It matches json input against a regex pattern with table output (match):
+    command: |
+      echo '{"name":"device01"}\n{"name":"agent02"}' | c8y assert text --regex "device" -o table
+    exit-code: 0
+    stdout:
+      # first two lines are headers
+      line-count: 3
+      contains:
+        - device01
 
   It matches input against a regex pattern is case sensitive (no match):
     command: |
