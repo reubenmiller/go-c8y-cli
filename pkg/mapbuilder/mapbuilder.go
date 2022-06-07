@@ -349,6 +349,11 @@ type MapBuilder struct {
 	TemplateIterator      iterator.Iterator
 	TemplateIteratorNames []string
 
+	// Array output settings
+	ArraySize   int
+	ArrayPrefix string
+	ArraySuffix string
+
 	templateVariables map[string]interface{}
 	requiredKeys      []string
 	autoApplyTemplate bool
@@ -675,8 +680,49 @@ func (b *MapBuilder) MarshalJSONWithInput(input interface{}) (body []byte, err e
 	return b.MarshalJSON()
 }
 
-// MarshalJSON returns the body as json
 func (b *MapBuilder) MarshalJSON() (body []byte, err error) {
+	if b.ArraySize > 0 {
+		return b.MarshalJSONArray()
+	}
+	return b.MarshalJSONObject()
+}
+
+func (b *MapBuilder) MarshalJSONArray() ([]byte, error) {
+	out := make([]byte, 0)
+	out = append(out, b.ArrayPrefix...)
+	var outErr error
+	for i := 0; i < b.ArraySize; i++ {
+
+		line, err := b.MarshalJSONObject()
+
+		if line == nil && err == io.EOF {
+			if i == 0 {
+				outErr = io.EOF
+			}
+			break
+		}
+
+		if line != nil {
+			if i > 0 {
+				out = append(out, ',')
+			}
+			out = append(out, line...)
+		}
+
+		if err == io.EOF {
+			outErr = err
+			break
+		}
+		if err != nil {
+			return nil, err
+		}
+	}
+	out = append(out, b.ArraySuffix...)
+	return out, outErr
+}
+
+// MarshalJSON returns the body as json
+func (b *MapBuilder) MarshalJSONObject() (body []byte, err error) {
 	if !b.HasChanged() {
 		return nil, nil
 	}

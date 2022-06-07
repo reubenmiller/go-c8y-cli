@@ -62,6 +62,7 @@ import (
 	inventoryWaitCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/inventory/wait"
 	measurementsCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/measurements"
 	measurementsAssertCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/measurements/assert"
+	measurementsCreateBulkCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/measurements/createBulk"
 	measurementsSubscribeCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/measurements/subscribe"
 	microservicesCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/microservices"
 	microservicesCreateCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/microservices/create"
@@ -316,6 +317,7 @@ func NewCmdRoot(f *cmdutil.Factory, version, buildDate string) *CmdRoot {
 	measurements := measurementsCmd.NewSubCommand(f).GetCommand()
 	measurements.AddCommand(measurementsSubscribeCmd.NewCmdSubscribe(f).GetCommand())
 	measurements.AddCommand(measurementsAssertCmd.NewSubCommand(f).GetCommand())
+	measurements.AddCommand(measurementsCreateBulkCmd.NewCreateBulkCmd(f).GetCommand())
 	cmd.AddCommand(measurements)
 
 	// devices
