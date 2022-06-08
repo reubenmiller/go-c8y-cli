@@ -695,7 +695,7 @@ func (b *MapBuilder) MarshalJSONArray() ([]byte, error) {
 
 		line, err := b.MarshalJSONObject()
 
-		if line == nil && err == io.EOF {
+		if err == io.EOF {
 			if i == 0 {
 				outErr = io.EOF
 			}
