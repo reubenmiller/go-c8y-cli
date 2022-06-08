@@ -61,9 +61,6 @@ func NewCmdFind(f *cmdutil.Factory) *CmdFind {
 		flags.WithExtendedPipelineSupport("query", "query", true, "c8y_DeviceQueryString"),
 	)
 
-	// Required flags
-	_ = cmd.MarkFlagRequired("query")
-
 	ccmd.SubCommand = subcommand.NewSubCommand(cmd)
 
 	return ccmd
