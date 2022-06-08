@@ -46,10 +46,7 @@ Encrypt the text "Hello World", the text will be encrypted using the given passp
 	cmd.Flags().String("text", "", "Encrypted text. (required)")
 	cmd.Flags().StringVar(&ccmd.passphrase, "passphrase", "", "Passphrase use for encoding your files")
 
-	// Required flags
-	_ = cmd.MarkFlagRequired("text")
-
-	ccmd.SubCommand = subcommand.NewSubCommand(cmd)
+	ccmd.SubCommand = subcommand.NewSubCommand(cmd).SetRequiredFlags("text")
 
 	return ccmd
 }

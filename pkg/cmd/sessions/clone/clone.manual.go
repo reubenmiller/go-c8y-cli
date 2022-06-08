@@ -67,10 +67,9 @@ func NewCmdCloneSession(f *cmdutil.Factory) *CmdClone {
 			"dev\tDevelopment mode (no restrictions)",
 		),
 	)
-	_ = cmd.MarkFlagRequired("newName")
 	cmd.SilenceUsage = true
 
-	ccmd.SubCommand = subcommand.NewSubCommand(cmd)
+	ccmd.SubCommand = subcommand.NewSubCommand(cmd).SetRequiredFlags("newName")
 
 	return ccmd
 }

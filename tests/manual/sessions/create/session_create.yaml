@@ -1,0 +1,10 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/reubenmiller/commander/feat/handle-nested-files/schema.json
+
+tests:
+  It prints an error if the host is missing in non-interactive mode:
+    command: |
+      c8y sessions create < /dev/null
+    exit-code: 100
+    stderr:
+      contains:
+        - 'commandError: Missing required parameter. host'

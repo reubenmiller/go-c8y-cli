@@ -145,11 +145,6 @@ func NewCmdRoot(f *cmdutil.Factory, version, buildDate string) *CmdRoot {
 			$ c8y devices list --type "myDevice" | c8y devices update --data "myValue=1"
 			$ c8y operations list --device myDeviceName
 		`),
-		Annotations: map[string]string{
-			"help:feedback": heredoc.Doc(`
-				Open an issue using 'c8y issue create -R github.com/cli/cli'
-			`),
-		},
 		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
 			disableEncryptionCheck := !cmdutil.IsConfigEncryptionCheckEnabled(cmd)
 			if err := ccmd.Configure(disableEncryptionCheck); err != nil {

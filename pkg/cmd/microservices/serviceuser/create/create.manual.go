@@ -53,10 +53,7 @@ Create new application service user
 		flags.WithData(),
 	)
 
-	// Required flags
-	_ = cmd.MarkFlagRequired("name")
-
-	ccmd.SubCommand = subcommand.NewSubCommand(cmd)
+	ccmd.SubCommand = subcommand.NewSubCommand(cmd).SetRequiredFlags("name")
 
 	return ccmd
 }
