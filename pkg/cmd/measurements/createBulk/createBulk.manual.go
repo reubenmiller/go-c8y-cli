@@ -42,7 +42,7 @@ func NewCreateBulkCmd(f *cmdutil.Factory) *CreateBulkCmd {
 			* The template is applied to each piped measurement before being grouped
 		`),
 		Example: heredoc.Doc(`
-$ c8y measurements list -p 100 --device 11111  | c8y measurements createBulk --device 22222 --batchSize 10
+$ c8y measurements list -p 1000 --device 11111  | c8y measurements createBulk --device 22222 --batchSize 100
 Copy measurements from one device to another, but create measurement in batches of 100
 
 $ c8y measurements list -p 20 --valueFragmentType c8y_Temperature --valueFragmentSeries T \
@@ -157,7 +157,7 @@ func (n *CreateBulkCmd) RunE(cmd *cobra.Command, args []string) error {
 		c8yfetcher.WithDeviceByNameFirstMatch(client, args, "device", "source.id"),
 		flags.WithRelativeTimestamp("time", "time", ""),
 		flags.WithStringValue("type", "type"),
-		flags.WithDefaultTemplateString(`input.value + {time: _.Now('0s'), id:: '', 'self':: ''}`),
+		flags.WithDefaultTemplateString(`{time: _.Now('0s')} + (if std.isObject(input.value) then input.value else {source:{id:input.value}}) + {id:: '', 'self':: ''}`),
 		cmdutil.WithTemplateValue(cfg),
 		flags.WithTemplateVariablesValue(),
 		flags.WithRequiredProperties("type", "time", "source.id"),

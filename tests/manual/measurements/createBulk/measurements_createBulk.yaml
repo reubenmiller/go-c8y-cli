@@ -9,7 +9,7 @@ config:
 
 tests:
     ? It creates multiple measurements using bulk API via pipeline but can override the device source id
-    : command: cat manual/measurements/create/measurements.list.jsonl | c8y measurements createBulk --dry --device 11111 --batchSize 10 --type customTypeP
+    : command: cat manual/measurements/createBulk/measurements.list.jsonl | c8y measurements createBulk --dry --device 11111 --batchSize 10 --type customTypeP
       exit-code: 0
       stdout:
           line-count: 1
@@ -20,3 +20,71 @@ tests:
               ..0.body.measurements.1.source.id: "11111"
               ..0.body.measurements.1.SUMP_OIL_TEMPERATURE.Default.interval: "300"
               ..0.body.measurements.1.type: "customTypeP"
+    
+    ? It handles uneven batch sizes and uses original
+    : command: cat manual/measurements/createBulk/measurements.list.large.jsonl | c8y measurements createBulk --dry --device 11111 --batchSize 5 --data type=customTypeP |
+        c8y util show --select "body.measurements.**.time" --flatten --output json --compact=false
+      exit-code: 0
+      stdout:
+          exactly: |
+            {
+              "body.measurements.0.time": "2021-08-25T00:00:01.000+02:00",
+              "body.measurements.1.time": "2021-08-25T00:00:02.000+02:00",
+              "body.measurements.2.time": "2021-08-25T00:00:03.000+02:00",
+              "body.measurements.3.time": "2021-08-25T00:00:04.000+02:00",
+              "body.measurements.4.time": "2021-08-25T00:00:05.000+02:00"
+            }
+            {
+              "body.measurements.0.time": "2021-08-25T00:00:06.000+02:00",
+              "body.measurements.1.time": "2021-08-25T00:00:07.000+02:00",
+              "body.measurements.2.time": "2021-08-25T00:00:08.000+02:00",
+              "body.measurements.3.time": "2021-08-25T00:00:09.000+02:00"
+            }
+    
+    ? It can create a single measurement without using the pipeline
+    : command: |
+        c8y measurements createBulk --device 11111 --template "{c8y_Temperature+:{T+:{value: 100}}}" --type "exampleA" --time "2022-01-01T00:00:00Z" --dry --dryFormat json |
+          c8y util show --select headers.Content-Type,path,body --compact=false -o json
+      exit-code: 0
+      stdout:
+          exactly: |
+            {
+              "body": {
+                "measurements": [
+                  {
+                    "c8y_Temperature": {
+                      "T": {
+                        "value": 100
+                      }
+                    },
+                    "source": {
+                      "id": "11111"
+                    },
+                    "time": "2022-01-01T00:00:00Z",
+                    "type": "exampleA"
+                  }
+                ]
+              },
+              "headers": {
+                "Content-Type": "application/vnd.com.nsn.cumulocity.measurementcollection+json"
+              },
+              "path": "/measurement/measurements"
+            }
+
+    ? It uses time from piped input if an override is not defined
+    : command: |
+        echo "{\"time\":\"2022-01-01T00:00:00Z\"}" | c8y measurements createBulk --device 11111 --template "{c8y_Temperature+:{T+:{value: 100}}}" --type "exampleA" --dry --dryFormat json |
+          c8y util show --select "body.measurements.**.time" --output csv
+      exit-code: 0
+      stdout:
+          exactly: |
+            2022-01-01T00:00:00Z
+    
+    ? It can override the timestamp of the piped input
+    : command: |
+        echo "{\"time\":\"2022-01-01T00:00:00Z\"}" | c8y measurements createBulk --time "2023-01-01T00:00:00Z" --device 11111 --template "{c8y_Temperature+:{T+:{value: 100}}}" --type "exampleA" --dry --dryFormat json |
+          c8y util show --select "body.measurements.**.time" --output csv
+      exit-code: 0
+      stdout:
+          exactly: |
+            2023-01-01T00:00:00Z
