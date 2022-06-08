@@ -42,14 +42,14 @@ func NewCreateBulkCmd(f *cmdutil.Factory) *CreateBulkCmd {
 			* The template is applied to each piped measurement before being grouped
 		`),
 		Example: heredoc.Doc(`
-$ c8y measurements list -p 1000 --device 11111  | c8y measurements createBulk --device 22222 --batchSize 100
-Copy measurements from one device to another, but create measurement in batches of 100
+			$ c8y measurements list -p 1000 --device 11111  | c8y measurements createBulk --device 22222 --batchSize 100
+			Copy measurements from one device to another, but create measurement in batches of 100
 
-$ c8y measurements list -p 20 --valueFragmentType c8y_Temperature --valueFragmentSeries T \
-	| c8y measurements createBulk \
-		--type testme \
-		--template "{c8y_Temperature+:{T+:{value: input.value.c8y_Temperature.T.value + 100}}}"
-Copy measurements from one device to another modifying the measurements slightly but adding 100 to the value
+			$ c8y measurements list -p 20 --valueFragmentType c8y_Temperature --valueFragmentSeries T \
+				| c8y measurements createBulk \
+					--type testme \
+					--template "{c8y_Temperature+:{T+:{value: input.value.c8y_Temperature.T.value + 100}}}"
+			Copy measurements from one device to another modifying the measurements slightly but adding 100 to the value
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
 			return f.CreateModeEnabled()
