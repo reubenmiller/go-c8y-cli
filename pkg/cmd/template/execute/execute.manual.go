@@ -63,11 +63,8 @@ Pass external json data into the template, and reference it via the "input.value
 		flags.WithExtendedPipelineSupport("input", "input", false),
 	)
 
-	// Required flags
-	_ = cmd.MarkFlagRequired(flags.FlagDataTemplateName)
-
 	cmdutil.DisableAuthCheck(cmd)
-	ccmd.SubCommand = subcommand.NewSubCommand(cmd)
+	ccmd.SubCommand = subcommand.NewSubCommand(cmd).SetRequiredFlags(flags.FlagDataTemplateName)
 
 	return ccmd
 }

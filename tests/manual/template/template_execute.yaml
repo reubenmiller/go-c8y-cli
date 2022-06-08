@@ -259,3 +259,11 @@ tests:
       exit-code: 0
       stdout:
           match-pattern: ^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?(Z|\+.+)$
+
+  It throws an error if the template flag is not provided:
+    command: |
+      c8y template execute
+    exit-code: 100
+    stderr:
+      contains:
+        - 'commandError: Missing required parameter. template'

@@ -17,6 +17,7 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/pkg/config"
 	"github.com/reubenmiller/go-c8y-cli/pkg/fileutilities"
+	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/pkg/logger"
 	"github.com/reubenmiller/go-c8y-cli/pkg/prompt"
 	"github.com/spf13/cobra"
@@ -121,7 +122,6 @@ $ c8y sessions create --type prod --host "https://mytenant.eu-latest.cumulocity.
 	cmd.Flags().BoolVar(&ccmd.encrypt, "encrypt", false, "Encrypt passwords and tokens (occurs when logging in)")
 
 	// Required flags
-	_ = cmd.MarkFlagRequired("host")
 	completion.WithOptions(cmd,
 		completion.WithLazyRequired("type"),
 		completion.WithValidateSet(
@@ -138,6 +138,9 @@ $ c8y sessions create --type prod --host "https://mytenant.eu-latest.cumulocity.
 }
 
 func (n *CmdCreate) promptArgs(cmd *cobra.Command, args []string) error {
+	if !n.factory.IOStreams.CanPrompt() {
+		return nil
+	}
 	cfg, err := n.factory.Config()
 	if err != nil {
 		return err
@@ -147,6 +150,15 @@ func (n *CmdCreate) promptArgs(cmd *cobra.Command, args []string) error {
 		return err
 	}
 	prompter := prompt.NewPrompt(log)
+
+	if !cmd.Flags().Changed("host") {
+		v, err := prompter.Input("Enter host", "", true, false)
+
+		if err != nil {
+			return err
+		}
+		n.host = strings.TrimSpace(v)
+	}
 
 	if !cmd.Flags().Changed("username") {
 		v, err := prompter.Username("Enter username", " "+cfg.GetDefaultUsername())
@@ -169,6 +181,22 @@ func (n *CmdCreate) promptArgs(cmd *cobra.Command, args []string) error {
 }
 
 func (n *CmdCreate) RunE(cmd *cobra.Command, args []string) error {
+	// Validate required parameters here as the user could have entered them
+	// via the prompt
+	if n.host == "" {
+		return &flags.ParameterError{
+			Name: "host",
+			Err:  flags.ErrParameterMissing,
+		}
+	}
+
+	if n.username == "" {
+		return &flags.ParameterError{
+			Name: "username",
+			Err:  flags.ErrParameterMissing,
+		}
+	}
+
 	cfg, err := n.factory.Config()
 	if err != nil {
 		return err

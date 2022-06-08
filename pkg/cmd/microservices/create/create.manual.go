@@ -93,10 +93,7 @@ Create or update a microservice using an explicit name
 		f.WithTemplateFlag(cmd),
 	)
 
-	// Required flags
-	_ = cmd.MarkFlagRequired("file")
-
-	ccmd.SubCommand = subcommand.NewSubCommand(cmd)
+	ccmd.SubCommand = subcommand.NewSubCommand(cmd).SetRequiredFlags("file")
 
 	return ccmd
 }
