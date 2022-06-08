@@ -49,10 +49,7 @@ Password: {encrypted}ec5b837a03408ffb731307584eac40ac047989a002951e4b7139fa60189
 	cmd.Flags().StringVar(&ccmd.passphrase, "passphrase", "", "Passphrase use for encrypting the text")
 	cmd.Flags().BoolVar(&ccmd.raw, "raw", false, "Only return the encrypted text and nothing else")
 
-	// Required flags
-	_ = cmd.MarkFlagRequired("text")
-
-	ccmd.SubCommand = subcommand.NewSubCommand(cmd)
+	ccmd.SubCommand = subcommand.NewSubCommand(cmd).SetRequiredFlags("text")
 
 	return ccmd
 }

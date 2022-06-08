@@ -67,8 +67,6 @@ func NewCmdSet(f *cmdutil.Factory) *CmdSet {
 	cmd.Flags().StringVar(&ccmd.Shell, "shell", defaultShell, "Shell type to return the environment variables")
 	cmd.Flags().BoolVar(&ccmd.ClearToken, "clear", false, "Clear any existing tokens")
 
-	_ = cmd.MarkFlagRequired("shell")
-
 	completion.WithOptions(
 		cmd,
 		completion.WithValidateSet("shell", "auto", "bash", "zsh", "fish", "powershell"),
