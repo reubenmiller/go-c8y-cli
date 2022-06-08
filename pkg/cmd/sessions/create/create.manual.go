@@ -177,6 +177,18 @@ func (n *CmdCreate) promptArgs(cmd *cobra.Command, args []string) error {
 		n.password = password
 	}
 
+	if !cmd.Flags().Changed("type") {
+		mode, err := prompt.Select("Select mode", []string{
+			"dev\tDevelopment mode (no restrictions)",
+			"qual\tQA mode (delete disabled)",
+			"prod\tProduction mode (read only)",
+		}, "dev")
+		if err != nil {
+			return err
+		}
+		n.sessionType = mode
+	}
+
 	return nil
 }
 

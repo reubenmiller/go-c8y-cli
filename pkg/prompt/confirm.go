@@ -171,3 +171,33 @@ func Confirm(prefix, label string, target, defaultValue string, force bool) (Con
 		Message: message,
 	}
 }
+
+func Select(message string, options []string, defaultOption string) (string, error) {
+	descriptions := make(map[string]string, 0)
+	for _, opt := range options {
+		name, desc, _ := strings.Cut(opt, "\t")
+		descriptions[name] = desc
+	}
+
+	prompter := &survey.Select{
+		Message: message,
+		Options: options,
+		Default: defaultOption,
+		Description: func(value string, index int) string {
+			if desc, ok := descriptions[value]; ok {
+				return desc
+			}
+			return ""
+		},
+	}
+
+	response := ""
+	err := survey.AskOne(prompter, &response, survey.WithValidator(survey.Required))
+
+	if err != nil {
+		return "", err
+	}
+
+	value, _, _ := strings.Cut(response, "\t")
+	return value, err
+}
