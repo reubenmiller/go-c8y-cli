@@ -36,7 +36,7 @@ func NewCreateBulkCmd(f *cmdutil.Factory) *CreateBulkCmd {
 		Long: heredoc.Doc(`
 			Create new measurements using bulk api
 
-			Collects inputs and groups them into batches and send them to the server.
+			It collects inputs and groups them into batches and send them to the server.
 
 			Notes:
 			* The template is applied to each piped measurement before being grouped
