@@ -54,7 +54,7 @@ func (n *CmdVersion) RunE(cmd *cobra.Command, args []string) error {
 		info, ok := debug.ReadBuildInfo()
 		if ok {
 			release.Version = info.Main.Version
-			release.Branch = ""
+			release.Branch = "(unknown)"
 
 		}
 	}
