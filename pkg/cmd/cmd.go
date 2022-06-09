@@ -30,6 +30,8 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"go.uber.org/zap/zapcore"
+
+	_ "embed"
 )
 
 // Logger is used to record the log messages which should be visible to the user when using the verbose flag
@@ -37,7 +39,12 @@ var Logger *logger.Logger
 
 // Build data
 // These variables should be set using the -ldflags "-X github.com/reubenmiller/go-c8y-cli/pkg/cmd.version=1.0.0" when running go build
+//go:generate bash scripts/get_version.sh
+//go:embed version.txt
 var buildVersion string
+
+//go:generate bash scripts/get_branch.sh
+//go:embed branch.txt
 var buildBranch string
 
 const (
