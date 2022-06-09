@@ -1,11 +1,11 @@
 ---
-category: Misc.
+category: Misc
 external help file: PSc8y-help.xml
 id: Add-ChildAddition
 Module Name: PSc8y
 online version: https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/inventory_additions_assign
 schema: 2.0.0
-slug: /docs/cli/psc8y/Misc./add-childaddition
+slug: /docs/cli/psc8y/Misc/add-childaddition
 title: Add-ChildAddition
 ---
 

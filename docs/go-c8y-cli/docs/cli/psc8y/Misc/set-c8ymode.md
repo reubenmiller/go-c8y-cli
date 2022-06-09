@@ -1,11 +1,11 @@
 ---
-category: Misc.
+category: Misc
 external help file: PSc8y-help.xml
 id: set-c8ymode
 Module Name: PSc8y
 online version:
 schema: 2.0.0
-slug: /docs/cli/psc8y/Misc./set-c8ymode
+slug: /docs/cli/psc8y/Misc/set-c8ymode
 title: set-c8ymode
 ---
 

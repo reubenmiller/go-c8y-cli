@@ -1,11 +1,11 @@
 ---
-category: Misc.
+category: Misc
 external help file: PSc8y-help.xml
 id: Expand-Id
 Module Name: PSc8y
 online version:
 schema: 2.0.0
-slug: /docs/cli/psc8y/Misc./expand-id
+slug: /docs/cli/psc8y/Misc/expand-id
 title: Expand-Id
 ---
 

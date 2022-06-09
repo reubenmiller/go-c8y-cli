@@ -1,11 +1,11 @@
 ---
-category: Misc.
+category: Misc
 external help file: PSc8y-help.xml
 id: Register-Alias
 Module Name: PSc8y
 online version:
 schema: 2.0.0
-slug: /docs/cli/psc8y/Misc./register-alias
+slug: /docs/cli/psc8y/Misc/register-alias
 title: Register-Alias
 ---
 

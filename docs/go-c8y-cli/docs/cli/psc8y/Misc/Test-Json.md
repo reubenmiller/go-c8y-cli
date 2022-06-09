@@ -1,11 +1,11 @@
 ---
-category: Misc.
+category: Misc
 external help file: PSc8y-help.xml
 id: Test-Json
 Module Name: PSc8y
 online version: https://go.microsoft.com/fwlink/?LinkID=2096609
 schema: 2.0.0
-slug: /docs/cli/psc8y/Misc./test-json
+slug: /docs/cli/psc8y/Misc/test-json
 title: Test-Json
 ---
 

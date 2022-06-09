@@ -59,12 +59,12 @@ tasks:
   docs-powershell:
     desc: Update the powershell docs
     cmds:
-      - pwsh -File ./scripts/build-powershell/build-docs.ps1 -Recreate -OutputFolder "docs/goc8ycli/docs/cli/psc8y"
+      - pwsh -File ./scripts/build-powershell/build-docs.ps1 -Recreate -OutputFolder "docs/go-c8y-cli/docs/cli/psc8y"
   
   docs-c8y:
     desc: create c8y documentation
     cmds:
-      - go run ./cmd/gen-docs --website --doc-path "docs/goc8ycli/docs/cli/c8y"
+      - go run ./cmd/gen-docs --website --doc-path "docs/go-c8y-cli/docs/cli/c8y"
 
   manpages:
     desc: create c8y man packages
@@ -78,18 +78,18 @@ tasks:
   gh_pages_install:
     desc: Install github pages dependencies for viewing docs locally
     cmds:
-      - cd docs/goc8ycli && npm install
+      - cd docs/go-c8y-cli && npm install
 
   gh_pages:
     desc: Run github pages locally
     cmds:
-      - cd docs/goc8ycli && npm start
+      - cd docs/go-c8y-cli && npm start
     deps:
       - build_gh_pages
 
   build_gh_pages:
     desc: build github pages
-    dir: docs/goc8ycli
+    dir: docs/go-c8y-cli
     cmds:
       - npm install
       - npm run write-translations
@@ -97,7 +97,7 @@ tasks:
 
   gh_pages_prod:
     desc: build/serve github pages (production)
-    dir: docs/goc8ycli
+    dir: docs/go-c8y-cli
     cmds:
       - npm run serve
     deps:

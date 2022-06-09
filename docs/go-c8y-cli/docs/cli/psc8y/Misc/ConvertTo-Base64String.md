@@ -1,11 +1,11 @@
 ---
-category: Misc.
+category: Misc
 external help file: PSc8y-help.xml
 id: ConvertTo-Base64String
 Module Name: PSc8y
 online version:
 schema: 2.0.0
-slug: /docs/cli/psc8y/Misc./convertto-base64string
+slug: /docs/cli/psc8y/Misc/convertto-base64string
 title: ConvertTo-Base64String
 ---
 
