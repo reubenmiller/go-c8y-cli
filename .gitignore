@@ -58,5 +58,3 @@ tools/shell/completion/output/
 .task/checksum
 .bin/
 docker/c8y.linux
-branch.txt
-version.txt
