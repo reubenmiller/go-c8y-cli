@@ -12,6 +12,7 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/pkg/iterator"
+	"github.com/reubenmiller/go-c8y-cli/pkg/jsonUtilities"
 	"github.com/reubenmiller/go-c8y-cli/pkg/logger"
 	"github.com/reubenmiller/go-c8y-cli/pkg/mapbuilder"
 	"github.com/reubenmiller/go-c8y-cli/pkg/request"
@@ -162,15 +163,24 @@ func (r *RequestIterator) GetNext() (*c8y.RequestOptions, interface{}, error) {
 
 				if len(bodyContents) > 0 {
 					// TODO: Find more efficient way rather than converting to and from json
-					bodyValue := make(map[string]interface{})
-
 					// Note: UnmarshalJSON does not support large numbers by default, so
 					// 		 c8y.DecodeJSONBytes should be used instead!
-					if err := c8y.DecodeJSONBytes(bodyContents, &bodyValue); err != nil {
-						r.setDone()
-						return nil, nil, err
+					if jsonUtilities.IsJSONArray(bodyContents) {
+						bodyValue := make([]interface{}, 0)
+						if err := c8y.DecodeJSONBytes(bodyContents, &bodyValue); err != nil {
+							r.setDone()
+							return nil, nil, err
+						}
+						req.Body = bodyValue
+					} else {
+						// JSON Object
+						bodyValue := make(map[string]interface{})
+						if err := c8y.DecodeJSONBytes(bodyContents, &bodyValue); err != nil {
+							r.setDone()
+							return nil, nil, err
+						}
+						req.Body = bodyValue
 					}
-					req.Body = bodyValue
 				} else {
 					req.Body = nil
 				}
