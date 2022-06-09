@@ -48,8 +48,8 @@ output_pwsh/**
 share/**
 .go-c8y-cli
 **/.docusaurus/**
-docs/go-c8y-cli/build
-docs/go-c8y-cli/i18n
+docs/goc8ycli/build
+docs/goc8ycli/i18n
 tools/docs/demos/*.asc
 pkg/cmd/__debug_bin
 tools/shell/completion/output/

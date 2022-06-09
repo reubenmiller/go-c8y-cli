@@ -222,7 +222,7 @@ const baseUrl = `${process.env.BASE_URL || '/'}`;
         docs: {
           sidebarPath: require.resolve('./sidebars.js'),
           editUrl:
-            'https://github.com/reubenmiller/go-c8y-cli/edit/master/docs/go-c8y-cli/',
+            'https://github.com/reubenmiller/go-c8y-cli/edit/master/docs/goc8ycli/',
         },
         googleAnalytics: {
           trackingID: 'UA-155263011-1',
@@ -232,7 +232,7 @@ const baseUrl = `${process.env.BASE_URL || '/'}`;
           showReadingTime: true,
           // Please change this to your repo.
           editUrl:
-            'https://github.com/reubenmiller/go-c8y-cli/edit/master/docs/go-c8y-cli/',
+            'https://github.com/reubenmiller/go-c8y-cli/edit/master/docs/goc8ycli/',
         },
       },
     ],
