@@ -54,9 +54,17 @@ func (n *CmdVersion) RunE(cmd *cobra.Command, args []string) error {
 		info, ok := debug.ReadBuildInfo()
 		if ok {
 			release.Version = info.Main.Version
-			release.Branch = info.Main.Sum
-		}
 
+			branch := ""
+			for _, prop := range info.Settings {
+				branch += " :" + prop.Key + "=" + prop.Value
+				// if strings.EqualFold(prop.Key, "vcs.revision") {
+
+				// }
+			}
+			release.Branch = branch
+
+		}
 	}
 
 	responseText, err := json.Marshal(release)
