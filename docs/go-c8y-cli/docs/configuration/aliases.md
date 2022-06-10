@@ -26,7 +26,6 @@ Native shell aliases can also be used, however they will only be available in th
 
 Using aliases have the current limitations but maybe lifted in future versions:
 
-* c8y aliases do not support tab completion
 * c8y aliases using argument references (i.e. `$1`) are always mandatory and cannot be given a default value
 
 ## Examples

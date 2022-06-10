@@ -53,22 +53,50 @@ func init() {
 
 // Execute runs the root command
 func MainRun() {
-	cmd, err := Initialize()
+	rootCmd, err := Initialize()
 	if err != nil {
 		os.Exit(int(cmderrors.ExitError))
 	}
 
 	// Expand any aliases
-	expandedArgs, err := setArgs(cmd.Command)
+	expandedArgs, err := setArgs(rootCmd.Command)
 	if err != nil {
 		Logger.Errorf("Could not expand aliases. %s", err)
 		os.Exit(int(cmderrors.ExitInvalidAlias))
 	}
-	Logger.Debugf("Expanded args: %v", expandedArgs)
-	cmd.SetArgs(expandedArgs)
 
-	if err := cmd.Execute(); err != nil {
-		err = CheckCommandError(cmd.Command, cmd.Factory, err)
+	// Completions for aliases
+	rootCmd.ValidArgsFunction = func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+
+		v := viper.GetViper()
+		aliases := v.GetStringMapString(config.SettingsCommonAliases)
+		for key, value := range v.GetStringMapString(config.SettingsAliases) {
+			aliases[key] = value
+		}
+
+		var results []string
+		for aliasName, aliasValue := range aliases {
+			if strings.HasPrefix(aliasName, toComplete) {
+				var s string
+				if strings.HasPrefix(aliasValue, "!") {
+					s = fmt.Sprintf("%s\tShell alias", aliasName)
+				} else {
+					if len(aliasValue) > 80 {
+						aliasValue = aliasValue[:80] + "..."
+					}
+					s = fmt.Sprintf("%s\tAlias for %s", aliasName, aliasValue)
+				}
+				results = append(results, s)
+			}
+		}
+		return results, cobra.ShellCompDirectiveNoFileComp
+	}
+
+	Logger.Debugf("Expanded args: %v", expandedArgs)
+	rootCmd.SetArgs(expandedArgs)
+
+	if err := rootCmd.Execute(); err != nil {
+		err = CheckCommandError(rootCmd.Command, rootCmd.Factory, err)
 
 		// Help is not really error, just a way to exit early
 		// after displaying help to ther user
