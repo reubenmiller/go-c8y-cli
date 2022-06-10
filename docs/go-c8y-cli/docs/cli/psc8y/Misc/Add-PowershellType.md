@@ -1,53 +1,70 @@
 ---
-category: Misc.
+category: Misc
 external help file: PSc8y-help.xml
-id: ConvertTo-Base64String
+id: Add-PowershellType
 Module Name: PSc8y
 online version:
 schema: 2.0.0
-slug: /docs/cli/psc8y/Misc./convertto-base64string
-title: ConvertTo-Base64String
+slug: /docs/cli/psc8y/Misc/add-powershelltype
+title: Add-PowershellType
 ---
 
 
 
 ## SYNOPSIS
-Convert a UTF8 string to a base64 encoded string
+Add a powershell type name to a powershell object
 
 ## SYNTAX
 
 ```
-ConvertTo-Base64String
-	[-InputObject] <String[]>
+Add-PowershellType
+	-InputObject <Object[]>
+	[-Type] <String>
 	[<CommonParameters>]
 ```
 
 ## DESCRIPTION
-Convert a UTF8 string to a base64 encoded string
+This allows a custom type name to be given to powershell objects, so that the view formatting can be used (i.e.
+.ps1xml)
 
 ## EXAMPLES
 
 ### EXAMPLE 1
 ```
-ConvertTo-Base64String tenant/username:password
+$data | Add-PowershellType -Type "customType1"
 ```
 
-Encode a string to base64 encoded string
+Add a type `customType1` to the input object
 
 ## PARAMETERS
 
 ### -InputObject
-UTF8 encoded string
+Object to add the type name to
 
 ```yaml
-Type: String[]
+Type: Object[]
 Parameter Sets: (All)
 Aliases:
 
 Required: True
-Position: 1
+Position: Named
 Default value: None
 Accept pipeline input: True (ByPropertyName, ByValue)
+Accept wildcard characters: False
+```
+
+### -Type
+Type name to assign to the input objects
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: True
+Position: 2
+Default value: None
+Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
@@ -56,8 +73,10 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 
 ## INPUTS
 
+### Object[]
 ## OUTPUTS
 
+### Object[]
 ## NOTES
 
 ## RELATED LINKS

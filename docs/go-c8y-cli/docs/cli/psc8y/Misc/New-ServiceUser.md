@@ -1,11 +1,11 @@
 ---
-category: Misc.
+category: Misc
 external help file: PSc8y-help.xml
 id: New-ServiceUser
 Module Name: PSc8y
 online version:
 schema: 2.0.0
-slug: /docs/cli/psc8y/Misc./new-serviceuser
+slug: /docs/cli/psc8y/Misc/new-serviceuser
 title: New-ServiceUser
 ---
 

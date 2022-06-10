@@ -1,11 +1,11 @@
 ---
-category: Misc.
+category: Misc
 external help file: PSc8y-help.xml
 id: ConvertTo-NestedJson
 Module Name: PSc8y
 online version: https://go.microsoft.com/fwlink/?LinkID=2096925
 schema: 2.0.0
-slug: /docs/cli/psc8y/Misc./convertto-nestedjson
+slug: /docs/cli/psc8y/Misc/convertto-nestedjson
 title: ConvertTo-NestedJson
 ---
 

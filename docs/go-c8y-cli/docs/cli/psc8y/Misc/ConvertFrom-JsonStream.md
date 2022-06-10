@@ -1,11 +1,11 @@
 ---
-category: Misc.
+category: Misc
 external help file: PSc8y-help.xml
 id: ConvertFrom-JsonStream
 Module Name: PSc8y
 online version:
 schema: 2.0.0
-slug: /docs/cli/psc8y/Misc./convertfrom-jsonstream
+slug: /docs/cli/psc8y/Misc/convertfrom-jsonstream
 title: ConvertFrom-JsonStream
 ---
 

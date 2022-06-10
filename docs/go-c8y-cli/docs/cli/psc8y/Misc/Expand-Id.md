@@ -1,45 +1,51 @@
 ---
-category: Misc.
+category: Misc
 external help file: PSc8y-help.xml
-id: Add-PowershellType
+id: Expand-Id
 Module Name: PSc8y
 online version:
 schema: 2.0.0
-slug: /docs/cli/psc8y/Misc./add-powershelltype
-title: Add-PowershellType
+slug: /docs/cli/psc8y/Misc/expand-id
+title: Expand-Id
 ---
 
 
 
 ## SYNOPSIS
-Add a powershell type name to a powershell object
+Expand a list of ids.
 
 ## SYNTAX
 
 ```
-Add-PowershellType
-	-InputObject <Object[]>
-	[-Type] <String>
+Expand-Id
+	[-InputObject] <Object[]>
+	[-Strict]
 	[<CommonParameters>]
 ```
 
 ## DESCRIPTION
-This allows a custom type name to be given to powershell objects, so that the view formatting can be used (i.e.
-.ps1xml)
+Expand the list of objects and only return the ids instead of the full objects.
 
 ## EXAMPLES
 
 ### EXAMPLE 1
 ```
-$data | Add-PowershellType -Type "customType1"
+Expand-Id 12345
 ```
 
-Add a type `customType1` to the input object
+Normalize a list of ids
+
+### EXAMPLE 2
+```
+"12345", "56789" | Expand-Id
+```
+
+Normalize a list of ids
 
 ## PARAMETERS
 
 ### -InputObject
-Object to add the type name to
+List of ids
 
 ```yaml
 Type: Object[]
@@ -47,23 +53,23 @@ Parameter Sets: (All)
 Aliases:
 
 Required: True
-Position: Named
+Position: 1
 Default value: None
-Accept pipeline input: True (ByPropertyName, ByValue)
+Accept pipeline input: True (ByValue)
 Accept wildcard characters: False
 ```
 
-### -Type
-Type name to assign to the input objects
+### -Strict
+Exclude all non-id like values
 
 ```yaml
-Type: String
+Type: SwitchParameter
 Parameter Sets: (All)
 Aliases:
 
-Required: True
-Position: 2
-Default value: None
+Required: False
+Position: Named
+Default value: False
 Accept pipeline input: False
 Accept wildcard characters: False
 ```
@@ -73,10 +79,8 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 
 ## INPUTS
 
-### Object[]
 ## OUTPUTS
 
-### Object[]
 ## NOTES
 
 ## RELATED LINKS
