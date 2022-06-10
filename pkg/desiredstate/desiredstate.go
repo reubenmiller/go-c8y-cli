@@ -6,7 +6,7 @@ import (
 	"os/signal"
 	"time"
 
-	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmderrors"
 )
 
 type StateDefiner interface {

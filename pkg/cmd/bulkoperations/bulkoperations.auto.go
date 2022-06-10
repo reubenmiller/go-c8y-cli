@@ -1,14 +1,14 @@
 package bulkoperations
 
 import (
-	cmdCreate "github.com/reubenmiller/go-c8y-cli/pkg/cmd/bulkoperations/create"
-	cmdDelete "github.com/reubenmiller/go-c8y-cli/pkg/cmd/bulkoperations/delete"
-	cmdGet "github.com/reubenmiller/go-c8y-cli/pkg/cmd/bulkoperations/get"
-	cmdList "github.com/reubenmiller/go-c8y-cli/pkg/cmd/bulkoperations/list"
-	cmdListOperations "github.com/reubenmiller/go-c8y-cli/pkg/cmd/bulkoperations/listoperations"
-	cmdUpdate "github.com/reubenmiller/go-c8y-cli/pkg/cmd/bulkoperations/update"
-	"github.com/reubenmiller/go-c8y-cli/pkg/cmd/subcommand"
-	"github.com/reubenmiller/go-c8y-cli/pkg/cmdutil"
+	cmdCreate "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/bulkoperations/create"
+	cmdDelete "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/bulkoperations/delete"
+	cmdGet "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/bulkoperations/get"
+	cmdList "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/bulkoperations/list"
+	cmdListOperations "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/bulkoperations/listoperations"
+	cmdUpdate "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/bulkoperations/update"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/subcommand"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
 	"github.com/spf13/cobra"
 )
 

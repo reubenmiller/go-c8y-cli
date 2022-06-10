@@ -7,7 +7,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/reubenmiller/go-c8y-cli/pkg/timestamp"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/timestamp"
 	"github.com/spf13/cobra"
 )
 

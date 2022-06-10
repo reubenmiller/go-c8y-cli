@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"strings"
 
-	"github.com/reubenmiller/go-c8y-cli/pkg/completion"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/completion"
 	"github.com/spf13/cobra"
 )
 

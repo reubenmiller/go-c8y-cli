@@ -5,7 +5,7 @@ import (
 	"io"
 	"net/url"
 
-	"github.com/reubenmiller/go-c8y-cli/pkg/iterator"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/iterator"
 )
 
 // QueryTemplate is an iterator that can be used to construct HTTP request queries

@@ -4,8 +4,8 @@ import (
 	"fmt"
 
 	"github.com/howeyc/gopass"
-	"github.com/reubenmiller/go-c8y-cli/pkg/cmd/subcommand"
-	"github.com/reubenmiller/go-c8y-cli/pkg/cmdutil"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/subcommand"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
 	"github.com/spf13/cobra"
 )
 

@@ -9,8 +9,8 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/reubenmiller/go-c8y-cli/pkg/config"
-	"github.com/reubenmiller/go-c8y-cli/pkg/iostreams"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/config"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/iostreams"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 )
 

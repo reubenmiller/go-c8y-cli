@@ -1,4 +1,4 @@
-module github.com/reubenmiller/go-c8y-cli
+module github.com/reubenmiller/go-c8y-cli/v2
 
 require (
 	github.com/AlecAivazis/survey/v2 v2.3.5

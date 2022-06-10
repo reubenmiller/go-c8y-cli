@@ -1,13 +1,13 @@
 package retentionrules
 
 import (
-	cmdCreate "github.com/reubenmiller/go-c8y-cli/pkg/cmd/retentionrules/create"
-	cmdDelete "github.com/reubenmiller/go-c8y-cli/pkg/cmd/retentionrules/delete"
-	cmdGet "github.com/reubenmiller/go-c8y-cli/pkg/cmd/retentionrules/get"
-	cmdList "github.com/reubenmiller/go-c8y-cli/pkg/cmd/retentionrules/list"
-	cmdUpdate "github.com/reubenmiller/go-c8y-cli/pkg/cmd/retentionrules/update"
-	"github.com/reubenmiller/go-c8y-cli/pkg/cmd/subcommand"
-	"github.com/reubenmiller/go-c8y-cli/pkg/cmdutil"
+	cmdCreate "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/retentionrules/create"
+	cmdDelete "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/retentionrules/delete"
+	cmdGet "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/retentionrules/get"
+	cmdList "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/retentionrules/list"
+	cmdUpdate "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/retentionrules/update"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/subcommand"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
 	"github.com/spf13/cobra"
 )
 

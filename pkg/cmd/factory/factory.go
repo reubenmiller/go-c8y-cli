@@ -3,13 +3,13 @@ package factory
 import (
 	"os"
 
-	"github.com/reubenmiller/go-c8y-cli/pkg/activitylogger"
-	"github.com/reubenmiller/go-c8y-cli/pkg/cmdutil"
-	"github.com/reubenmiller/go-c8y-cli/pkg/config"
-	"github.com/reubenmiller/go-c8y-cli/pkg/console"
-	"github.com/reubenmiller/go-c8y-cli/pkg/dataview"
-	"github.com/reubenmiller/go-c8y-cli/pkg/iostreams"
-	"github.com/reubenmiller/go-c8y-cli/pkg/logger"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/activitylogger"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/config"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/console"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/dataview"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/iostreams"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/logger"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 )
 

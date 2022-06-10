@@ -417,7 +417,7 @@ PrivateData = @{
 
         # ReleaseNotes of this module
         ReleaseNotes = @(
-			'Release notes can be found here: https://github.com/reubenmiller/go-c8y-cli/blob/master/CHANGELOG.md'
+			'Release notes can be found here: https://github.com/reubenmiller/go-c8y-cli/releases'
 		)
 
         # External dependent modules of this module

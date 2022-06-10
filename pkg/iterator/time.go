@@ -3,7 +3,7 @@ package iterator
 import (
 	"fmt"
 
-	"github.com/reubenmiller/go-c8y-cli/pkg/timestamp"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/timestamp"
 )
 
 // NewRelativeTimeIterator returns a relative time iterator which can generate timestamps based on time.Now when the value is retrieved

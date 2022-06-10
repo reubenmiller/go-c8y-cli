@@ -11,10 +11,10 @@ import (
 	"testing"
 
 	"github.com/google/shlex"
-	"github.com/reubenmiller/go-c8y-cli/pkg/assert"
-	"github.com/reubenmiller/go-c8y-cli/pkg/cmd/root"
-	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
-	"github.com/reubenmiller/go-c8y-cli/pkg/fakestdin"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/assert"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/root"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmderrors"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/fakestdin"
 )
 
 func setupTest() *root.CmdRoot {

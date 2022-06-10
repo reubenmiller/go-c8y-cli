@@ -8,12 +8,12 @@ import (
 
 	"github.com/fatih/color"
 	"github.com/manifoldco/promptui"
-	"github.com/reubenmiller/go-c8y-cli/pkg/c8ysession"
-	createCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/sessions/create"
-	"github.com/reubenmiller/go-c8y-cli/pkg/config"
-	"github.com/reubenmiller/go-c8y-cli/pkg/iostreams"
-	"github.com/reubenmiller/go-c8y-cli/pkg/logger"
-	"github.com/reubenmiller/go-c8y-cli/pkg/utilities/bellskipper"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/c8ysession"
+	createCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/sessions/create"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/config"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/iostreams"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/logger"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/utilities/bellskipper"
 )
 
 const (

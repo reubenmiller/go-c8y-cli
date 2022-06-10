@@ -7,9 +7,9 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/reubenmiller/go-c8y-cli/pkg/config"
-	"github.com/reubenmiller/go-c8y-cli/pkg/jsonUtilities"
-	"github.com/reubenmiller/go-c8y-cli/pkg/tableviewer"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/config"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/jsonUtilities"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/tableviewer"
 	"github.com/tidwall/pretty"
 )
 

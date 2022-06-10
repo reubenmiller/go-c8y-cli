@@ -1,9 +1,9 @@
 package assert
 
 import (
-	cmdText "github.com/reubenmiller/go-c8y-cli/pkg/cmd/assert/text"
-	"github.com/reubenmiller/go-c8y-cli/pkg/cmd/subcommand"
-	"github.com/reubenmiller/go-c8y-cli/pkg/cmdutil"
+	cmdText "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/assert/text"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/subcommand"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
 	"github.com/spf13/cobra"
 )
 

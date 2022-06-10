@@ -1,11 +1,11 @@
 package userreferences
 
 import (
-	"github.com/reubenmiller/go-c8y-cli/pkg/cmd/subcommand"
-	cmdAddUserToGroup "github.com/reubenmiller/go-c8y-cli/pkg/cmd/userreferences/addusertogroup"
-	cmdDeleteUserFromGroup "github.com/reubenmiller/go-c8y-cli/pkg/cmd/userreferences/deleteuserfromgroup"
-	cmdListGroupMembership "github.com/reubenmiller/go-c8y-cli/pkg/cmd/userreferences/listgroupmembership"
-	"github.com/reubenmiller/go-c8y-cli/pkg/cmdutil"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/subcommand"
+	cmdAddUserToGroup "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/userreferences/addusertogroup"
+	cmdDeleteUserFromGroup "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/userreferences/deleteuserfromgroup"
+	cmdListGroupMembership "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/userreferences/listgroupmembership"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
 	"github.com/spf13/cobra"
 )
 

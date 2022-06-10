@@ -10,7 +10,7 @@ import (
 
 	"errors"
 
-	"github.com/reubenmiller/go-c8y-cli/pkg/jsonUtilities"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/jsonUtilities"
 	"github.com/tidwall/gjson"
 )
 

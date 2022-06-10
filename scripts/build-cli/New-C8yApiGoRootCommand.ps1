@@ -39,7 +39,7 @@
         $GoCmdNameCamel = $GoCmdName[0].ToString().ToUpperInvariant() + $GoCmdName.Substring(1)
         $ImportAlias = "cmd" + $GoCmdNameCamel
 
-        $null = $GoImports.AppendLine("$ImportAlias `"github.com/reubenmiller/go-c8y-cli/pkg/cmd/$Name/$GoCmdNameLower`"")
+        $null = $GoImports.AppendLine("$ImportAlias `"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/$Name/$GoCmdNameLower`"")
         $null = $SubcommandsCode.AppendLine("    cmd.AddCommand(${ImportAlias}.New${GoCmdNameCamel}Cmd(f).GetCommand())")
     }
 
@@ -52,8 +52,8 @@ package $BaseNameLowercase
 
 import (
     "github.com/spf13/cobra"
-    "github.com/reubenmiller/go-c8y-cli/pkg/cmd/subcommand"
-    "github.com/reubenmiller/go-c8y-cli/pkg/cmdutil"
+    "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/subcommand"
+    "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
     $GoImports
 )
 

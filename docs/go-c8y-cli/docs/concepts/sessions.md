@@ -227,7 +227,7 @@ Remove-Item ~/.cumulocity/.key
 
 ```json
 {
-    "$schema": "https://raw.githubusercontent.com/reubenmiller/go-c8y-cli/master/tools/schema/session.schema.json",
+    "$schema": "https://raw.githubusercontent.com/reubenmiller/go-c8y-cli/v2/tools/schema/session.schema.json",
     "host": "https://example.cumulocity.com",
     "tenant": "t12345",
     "username": "myuser@iot-user.com",

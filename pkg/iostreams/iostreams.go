@@ -14,7 +14,7 @@ import (
 	"github.com/mattn/go-colorable"
 	"github.com/mattn/go-isatty"
 	"github.com/muesli/termenv"
-	"github.com/reubenmiller/go-c8y-cli/pkg/logger"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/logger"
 	"golang.org/x/term"
 )
 

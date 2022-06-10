@@ -1,16 +1,16 @@
 package tenantoptions
 
 import (
-	"github.com/reubenmiller/go-c8y-cli/pkg/cmd/subcommand"
-	cmdCreate "github.com/reubenmiller/go-c8y-cli/pkg/cmd/tenantoptions/create"
-	cmdDelete "github.com/reubenmiller/go-c8y-cli/pkg/cmd/tenantoptions/delete"
-	cmdGet "github.com/reubenmiller/go-c8y-cli/pkg/cmd/tenantoptions/get"
-	cmdGetForCategory "github.com/reubenmiller/go-c8y-cli/pkg/cmd/tenantoptions/getforcategory"
-	cmdList "github.com/reubenmiller/go-c8y-cli/pkg/cmd/tenantoptions/list"
-	cmdUpdate "github.com/reubenmiller/go-c8y-cli/pkg/cmd/tenantoptions/update"
-	cmdUpdateBulk "github.com/reubenmiller/go-c8y-cli/pkg/cmd/tenantoptions/updatebulk"
-	cmdUpdateEdit "github.com/reubenmiller/go-c8y-cli/pkg/cmd/tenantoptions/updateedit"
-	"github.com/reubenmiller/go-c8y-cli/pkg/cmdutil"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/subcommand"
+	cmdCreate "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/tenantoptions/create"
+	cmdDelete "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/tenantoptions/delete"
+	cmdGet "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/tenantoptions/get"
+	cmdGetForCategory "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/tenantoptions/getforcategory"
+	cmdList "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/tenantoptions/list"
+	cmdUpdate "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/tenantoptions/update"
+	cmdUpdateBulk "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/tenantoptions/updatebulk"
+	cmdUpdateEdit "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/tenantoptions/updateedit"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
 	"github.com/spf13/cobra"
 )
 

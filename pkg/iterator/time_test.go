@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/reubenmiller/go-c8y-cli/pkg/assert"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/assert"
 )
 
 func Test_RelativeTimeIterator(t *testing.T) {

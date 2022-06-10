@@ -9,13 +9,13 @@ import (
 	"strings"
 	"sync/atomic"
 
-	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
-	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
-	"github.com/reubenmiller/go-c8y-cli/pkg/iterator"
-	"github.com/reubenmiller/go-c8y-cli/pkg/jsonUtilities"
-	"github.com/reubenmiller/go-c8y-cli/pkg/logger"
-	"github.com/reubenmiller/go-c8y-cli/pkg/mapbuilder"
-	"github.com/reubenmiller/go-c8y-cli/pkg/request"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmderrors"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flags"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/iterator"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/jsonUtilities"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/logger"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/mapbuilder"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/request"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 )
 

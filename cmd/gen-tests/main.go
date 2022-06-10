@@ -14,9 +14,9 @@ import (
 	"go.uber.org/zap/zapcore"
 
 	"github.com/google/shlex"
-	"github.com/reubenmiller/go-c8y-cli/internal/integration/models"
-	"github.com/reubenmiller/go-c8y-cli/pkg/flatten"
-	"github.com/reubenmiller/go-c8y-cli/pkg/jsonUtilities"
+	"github.com/reubenmiller/go-c8y-cli/v2/internal/integration/models"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flatten"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/jsonUtilities"
 	"gopkg.in/yaml.v3"
 )
 

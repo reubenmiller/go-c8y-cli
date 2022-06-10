@@ -6,7 +6,7 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/reubenmiller/go-c8y-cli/pkg/iterator"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/iterator"
 )
 
 // StringTemplate is a template which can input parameters which will be ev

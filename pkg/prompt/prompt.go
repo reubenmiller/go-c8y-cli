@@ -8,8 +8,8 @@ import (
 	"time"
 
 	"github.com/manifoldco/promptui"
-	"github.com/reubenmiller/go-c8y-cli/pkg/encrypt"
-	"github.com/reubenmiller/go-c8y-cli/pkg/logger"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/encrypt"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/logger"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 )
 

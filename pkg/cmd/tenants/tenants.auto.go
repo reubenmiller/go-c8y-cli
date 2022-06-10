@@ -1,16 +1,16 @@
 package tenants
 
 import (
-	"github.com/reubenmiller/go-c8y-cli/pkg/cmd/subcommand"
-	cmdCreate "github.com/reubenmiller/go-c8y-cli/pkg/cmd/tenants/create"
-	cmdDelete "github.com/reubenmiller/go-c8y-cli/pkg/cmd/tenants/delete"
-	cmdDisableApplication "github.com/reubenmiller/go-c8y-cli/pkg/cmd/tenants/disableapplication"
-	cmdEnableApplication "github.com/reubenmiller/go-c8y-cli/pkg/cmd/tenants/enableapplication"
-	cmdGet "github.com/reubenmiller/go-c8y-cli/pkg/cmd/tenants/get"
-	cmdList "github.com/reubenmiller/go-c8y-cli/pkg/cmd/tenants/list"
-	cmdListReferences "github.com/reubenmiller/go-c8y-cli/pkg/cmd/tenants/listreferences"
-	cmdUpdate "github.com/reubenmiller/go-c8y-cli/pkg/cmd/tenants/update"
-	"github.com/reubenmiller/go-c8y-cli/pkg/cmdutil"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/subcommand"
+	cmdCreate "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/tenants/create"
+	cmdDelete "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/tenants/delete"
+	cmdDisableApplication "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/tenants/disableapplication"
+	cmdEnableApplication "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/tenants/enableapplication"
+	cmdGet "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/tenants/get"
+	cmdList "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/tenants/list"
+	cmdListReferences "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/tenants/listreferences"
+	cmdUpdate "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/tenants/update"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
 	"github.com/spf13/cobra"
 )
 

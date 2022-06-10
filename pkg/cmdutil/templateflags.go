@@ -9,9 +9,9 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/reubenmiller/go-c8y-cli/pkg/config"
-	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
-	"github.com/reubenmiller/go-c8y-cli/pkg/pathresolver"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/config"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flags"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/pathresolver"
 	"github.com/spf13/cobra"
 )
 

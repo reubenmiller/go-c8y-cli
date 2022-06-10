@@ -1,19 +1,19 @@
 package users
 
 import (
-	"github.com/reubenmiller/go-c8y-cli/pkg/cmd/subcommand"
-	cmdCreate "github.com/reubenmiller/go-c8y-cli/pkg/cmd/users/create"
-	cmdDelete "github.com/reubenmiller/go-c8y-cli/pkg/cmd/users/delete"
-	cmdGet "github.com/reubenmiller/go-c8y-cli/pkg/cmd/users/get"
-	cmdGetInventoryRole "github.com/reubenmiller/go-c8y-cli/pkg/cmd/users/getinventoryrole"
-	cmdGetUserByName "github.com/reubenmiller/go-c8y-cli/pkg/cmd/users/getuserbyname"
-	cmdList "github.com/reubenmiller/go-c8y-cli/pkg/cmd/users/list"
-	cmdListInventoryRoles "github.com/reubenmiller/go-c8y-cli/pkg/cmd/users/listinventoryroles"
-	cmdListUserMembership "github.com/reubenmiller/go-c8y-cli/pkg/cmd/users/listusermembership"
-	cmdResetUserPassword "github.com/reubenmiller/go-c8y-cli/pkg/cmd/users/resetuserpassword"
-	cmdRevokeTOTPSecret "github.com/reubenmiller/go-c8y-cli/pkg/cmd/users/revoketotpsecret"
-	cmdUpdate "github.com/reubenmiller/go-c8y-cli/pkg/cmd/users/update"
-	"github.com/reubenmiller/go-c8y-cli/pkg/cmdutil"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/subcommand"
+	cmdCreate "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/users/create"
+	cmdDelete "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/users/delete"
+	cmdGet "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/users/get"
+	cmdGetInventoryRole "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/users/getinventoryrole"
+	cmdGetUserByName "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/users/getuserbyname"
+	cmdList "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/users/list"
+	cmdListInventoryRoles "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/users/listinventoryroles"
+	cmdListUserMembership "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/users/listusermembership"
+	cmdResetUserPassword "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/users/resetuserpassword"
+	cmdRevokeTOTPSecret "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/users/revoketotpsecret"
+	cmdUpdate "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/users/update"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
 	"github.com/spf13/cobra"
 )
 

@@ -11,15 +11,15 @@ import (
 
 	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/pkg/errors"
-	"github.com/reubenmiller/go-c8y-cli/pkg/c8ysession"
-	"github.com/reubenmiller/go-c8y-cli/pkg/cmd/subcommand"
-	"github.com/reubenmiller/go-c8y-cli/pkg/cmdutil"
-	"github.com/reubenmiller/go-c8y-cli/pkg/completion"
-	"github.com/reubenmiller/go-c8y-cli/pkg/config"
-	"github.com/reubenmiller/go-c8y-cli/pkg/fileutilities"
-	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
-	"github.com/reubenmiller/go-c8y-cli/pkg/logger"
-	"github.com/reubenmiller/go-c8y-cli/pkg/prompt"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/c8ysession"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/subcommand"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/completion"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/config"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/fileutilities"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flags"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/logger"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/prompt"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -218,7 +218,7 @@ func (n *CmdCreate) RunE(cmd *cobra.Command, args []string) error {
 		return err
 	}
 	session := &c8ysession.CumulocitySession{
-		Schema:          "https://raw.githubusercontent.com/reubenmiller/go-c8y-cli/master/tools/schema/session.schema.json",
+		Schema:          "https://raw.githubusercontent.com/reubenmiller/go-c8y-cli/v2/tools/schema/session.schema.json",
 		Host:            n.host,
 		Tenant:          n.tenant,
 		Username:        n.username,

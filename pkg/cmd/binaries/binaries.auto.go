@@ -1,13 +1,13 @@
 package binaries
 
 import (
-	cmdCreate "github.com/reubenmiller/go-c8y-cli/pkg/cmd/binaries/create"
-	cmdDelete "github.com/reubenmiller/go-c8y-cli/pkg/cmd/binaries/delete"
-	cmdGet "github.com/reubenmiller/go-c8y-cli/pkg/cmd/binaries/get"
-	cmdList "github.com/reubenmiller/go-c8y-cli/pkg/cmd/binaries/list"
-	cmdUpdate "github.com/reubenmiller/go-c8y-cli/pkg/cmd/binaries/update"
-	"github.com/reubenmiller/go-c8y-cli/pkg/cmd/subcommand"
-	"github.com/reubenmiller/go-c8y-cli/pkg/cmdutil"
+	cmdCreate "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/binaries/create"
+	cmdDelete "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/binaries/delete"
+	cmdGet "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/binaries/get"
+	cmdList "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/binaries/list"
+	cmdUpdate "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/binaries/update"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/subcommand"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
 	"github.com/spf13/cobra"
 )
 

@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/reubenmiller/go-c8y-cli/pkg/c8ydata"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/c8ydata"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
 	"github.com/tidwall/gjson"

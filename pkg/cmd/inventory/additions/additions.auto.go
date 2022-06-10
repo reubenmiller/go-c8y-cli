@@ -1,12 +1,12 @@
 package additions
 
 import (
-	cmdAssign "github.com/reubenmiller/go-c8y-cli/pkg/cmd/inventory/additions/assign"
-	cmdCreate "github.com/reubenmiller/go-c8y-cli/pkg/cmd/inventory/additions/create"
-	cmdList "github.com/reubenmiller/go-c8y-cli/pkg/cmd/inventory/additions/list"
-	cmdUnassign "github.com/reubenmiller/go-c8y-cli/pkg/cmd/inventory/additions/unassign"
-	"github.com/reubenmiller/go-c8y-cli/pkg/cmd/subcommand"
-	"github.com/reubenmiller/go-c8y-cli/pkg/cmdutil"
+	cmdAssign "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/inventory/additions/assign"
+	cmdCreate "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/inventory/additions/create"
+	cmdList "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/inventory/additions/list"
+	cmdUnassign "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/inventory/additions/unassign"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/subcommand"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
 	"github.com/spf13/cobra"
 )
 

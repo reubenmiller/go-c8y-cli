@@ -1,17 +1,17 @@
 package microservices
 
 import (
-	cmdCreateBinary "github.com/reubenmiller/go-c8y-cli/pkg/cmd/microservices/createbinary"
-	cmdDelete "github.com/reubenmiller/go-c8y-cli/pkg/cmd/microservices/delete"
-	cmdDisable "github.com/reubenmiller/go-c8y-cli/pkg/cmd/microservices/disable"
-	cmdEnable "github.com/reubenmiller/go-c8y-cli/pkg/cmd/microservices/enable"
-	cmdGet "github.com/reubenmiller/go-c8y-cli/pkg/cmd/microservices/get"
-	cmdGetBootstrapUser "github.com/reubenmiller/go-c8y-cli/pkg/cmd/microservices/getbootstrapuser"
-	cmdGetStatus "github.com/reubenmiller/go-c8y-cli/pkg/cmd/microservices/getstatus"
-	cmdList "github.com/reubenmiller/go-c8y-cli/pkg/cmd/microservices/list"
-	cmdUpdate "github.com/reubenmiller/go-c8y-cli/pkg/cmd/microservices/update"
-	"github.com/reubenmiller/go-c8y-cli/pkg/cmd/subcommand"
-	"github.com/reubenmiller/go-c8y-cli/pkg/cmdutil"
+	cmdCreateBinary "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/microservices/createbinary"
+	cmdDelete "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/microservices/delete"
+	cmdDisable "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/microservices/disable"
+	cmdEnable "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/microservices/enable"
+	cmdGet "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/microservices/get"
+	cmdGetBootstrapUser "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/microservices/getbootstrapuser"
+	cmdGetStatus "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/microservices/getstatus"
+	cmdList "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/microservices/list"
+	cmdUpdate "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/microservices/update"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/subcommand"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
 	"github.com/spf13/cobra"
 )
 

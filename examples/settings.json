@@ -1,5 +1,5 @@
 {
-    "$schema": "https://raw.githubusercontent.com/reubenmiller/go-c8y-cli/master/tools/schema/session.schema.json",
+    "$schema": "https://raw.githubusercontent.com/reubenmiller/go-c8y-cli/v2/tools/schema/session.schema.json",
     "settings": {
         "activitylog": {
             "path": "~/.cumulocity/activityLog"

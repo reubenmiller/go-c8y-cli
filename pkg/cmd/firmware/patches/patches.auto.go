@@ -1,11 +1,11 @@
 package patches
 
 import (
-	cmdDelete "github.com/reubenmiller/go-c8y-cli/pkg/cmd/firmware/patches/delete"
-	cmdGet "github.com/reubenmiller/go-c8y-cli/pkg/cmd/firmware/patches/get"
-	cmdList "github.com/reubenmiller/go-c8y-cli/pkg/cmd/firmware/patches/list"
-	"github.com/reubenmiller/go-c8y-cli/pkg/cmd/subcommand"
-	"github.com/reubenmiller/go-c8y-cli/pkg/cmdutil"
+	cmdDelete "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/firmware/patches/delete"
+	cmdGet "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/firmware/patches/get"
+	cmdList "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/firmware/patches/list"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/subcommand"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
 	"github.com/spf13/cobra"
 )
 

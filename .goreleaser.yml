@@ -10,7 +10,7 @@ builds:
       binary: 'bin/{{ if index .Env "BINARY_INCLUDE_VERSION" }}{{ .ProjectName }}_{{ .RawVersion }}_{{ if eq .Os "darwin" }}macOS{{ else }}{{ .Os }}{{ end }}_{{ .Arch }}{{ else }}{{ .ProjectName }}{{ end }}'
       main: ./cmd/c8y/main.go
       ldflags:
-        - -s -w -X github.com/reubenmiller/go-c8y-cli/pkg/cmd.buildVersion={{.Version}} -X github.com/reubenmiller/go-c8y-cli/pkg/cmd.buildBranch={{.Branch}}
+        - -s -w -X github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd.buildVersion={{.Version}} -X github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd.buildBranch={{.Branch}}
       hooks:
         post:
           - echo "Copying binaries for PowerShell Module"

@@ -12,15 +12,15 @@ import (
 	"time"
 
 	"github.com/mitchellh/go-homedir"
-	"github.com/reubenmiller/go-c8y-cli/pkg/c8ydefaults"
-	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
-	"github.com/reubenmiller/go-c8y-cli/pkg/encrypt"
-	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
-	"github.com/reubenmiller/go-c8y-cli/pkg/jsonfilter"
-	"github.com/reubenmiller/go-c8y-cli/pkg/logger"
-	"github.com/reubenmiller/go-c8y-cli/pkg/pathresolver"
-	"github.com/reubenmiller/go-c8y-cli/pkg/prompt"
-	"github.com/reubenmiller/go-c8y-cli/pkg/totp"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/c8ydefaults"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmderrors"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/encrypt"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flags"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/jsonfilter"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/logger"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/pathresolver"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/prompt"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/totp"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
@@ -751,7 +751,7 @@ func (c *Config) WritePersistentConfig() error {
 	if file == "" {
 		return fmt.Errorf("No config is being used")
 	}
-	c.Persistent.Set("$schema", "https://raw.githubusercontent.com/reubenmiller/go-c8y-cli/master/tools/schema/session.schema.json")
+	c.Persistent.Set("$schema", "https://raw.githubusercontent.com/reubenmiller/go-c8y-cli/v2/tools/schema/session.schema.json")
 
 	err := c.SetEncryptedString("password", "")
 	if err != nil {

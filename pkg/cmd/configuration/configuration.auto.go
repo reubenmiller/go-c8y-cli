@@ -1,12 +1,12 @@
 package configuration
 
 import (
-	cmdCreate "github.com/reubenmiller/go-c8y-cli/pkg/cmd/configuration/create"
-	cmdDelete "github.com/reubenmiller/go-c8y-cli/pkg/cmd/configuration/delete"
-	cmdGet "github.com/reubenmiller/go-c8y-cli/pkg/cmd/configuration/get"
-	cmdUpdate "github.com/reubenmiller/go-c8y-cli/pkg/cmd/configuration/update"
-	"github.com/reubenmiller/go-c8y-cli/pkg/cmd/subcommand"
-	"github.com/reubenmiller/go-c8y-cli/pkg/cmdutil"
+	cmdCreate "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/configuration/create"
+	cmdDelete "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/configuration/delete"
+	cmdGet "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/configuration/get"
+	cmdUpdate "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/configuration/update"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/subcommand"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
 	"github.com/spf13/cobra"
 )
 

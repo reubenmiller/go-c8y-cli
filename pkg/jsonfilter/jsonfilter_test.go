@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	glob "github.com/obeattie/ohmyglob"
-	"github.com/reubenmiller/go-c8y-cli/pkg/assert"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/assert"
 )
 
 func Test_SimpleGlobMatch(t *testing.T) {

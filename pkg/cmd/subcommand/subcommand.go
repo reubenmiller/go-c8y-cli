@@ -1,8 +1,8 @@
 package subcommand
 
 import (
-	"github.com/reubenmiller/go-c8y-cli/pkg/completion"
-	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/completion"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flags"
 	"github.com/spf13/cobra"
 )
 

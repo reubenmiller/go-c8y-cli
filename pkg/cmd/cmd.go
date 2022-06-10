@@ -13,19 +13,19 @@ import (
 	"time"
 
 	"github.com/cli/safeexec"
-	"github.com/reubenmiller/go-c8y-cli/internal/run"
-	"github.com/reubenmiller/go-c8y-cli/pkg/activitylogger"
-	"github.com/reubenmiller/go-c8y-cli/pkg/cmd/alias/expand"
-	"github.com/reubenmiller/go-c8y-cli/pkg/cmd/factory"
-	"github.com/reubenmiller/go-c8y-cli/pkg/cmd/root"
-	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
-	"github.com/reubenmiller/go-c8y-cli/pkg/cmdutil"
-	"github.com/reubenmiller/go-c8y-cli/pkg/config"
-	"github.com/reubenmiller/go-c8y-cli/pkg/console"
-	"github.com/reubenmiller/go-c8y-cli/pkg/dataview"
-	"github.com/reubenmiller/go-c8y-cli/pkg/encrypt"
-	"github.com/reubenmiller/go-c8y-cli/pkg/iterator"
-	"github.com/reubenmiller/go-c8y-cli/pkg/logger"
+	"github.com/reubenmiller/go-c8y-cli/v2/internal/run"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/activitylogger"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/alias/expand"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/factory"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/root"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmderrors"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/config"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/console"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/dataview"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/encrypt"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/iterator"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/logger"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -36,7 +36,7 @@ import (
 var Logger *logger.Logger
 
 // Build data
-// These variables should be set using the -ldflags "-X github.com/reubenmiller/go-c8y-cli/pkg/cmd.version=1.0.0" when running go build
+// These variables should be set using the -ldflags "-X github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd.version=1.0.0" when running go build
 var buildVersion string
 var buildBranch string
 

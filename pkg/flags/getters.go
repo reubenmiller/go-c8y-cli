@@ -8,12 +8,12 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/reubenmiller/go-c8y-cli/pkg/url"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/url"
 
-	"github.com/reubenmiller/go-c8y-cli/pkg/c8ydata"
-	"github.com/reubenmiller/go-c8y-cli/pkg/iterator"
-	"github.com/reubenmiller/go-c8y-cli/pkg/jsonUtilities"
-	"github.com/reubenmiller/go-c8y-cli/pkg/mapbuilder"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/c8ydata"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/iterator"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/jsonUtilities"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/mapbuilder"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
 )

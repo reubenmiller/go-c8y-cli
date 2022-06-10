@@ -162,7 +162,7 @@ tasks:
       GOARCH: "{{.GOARCH | default ARCH}}"
     cmds:
       - echo "GOOS=$GOOS, GOARCH=$GOARCH"
-      - go build -o {{.OUTPUT}} -ldflags="-s -w -X 'github.com/reubenmiller/go-c8y-cli/pkg/cmd.buildVersion={{trimPrefix "v" .VERSION}}' -X 'github.com/reubenmiller/go-c8y-cli/pkg/cmd.buildBranch={{.GIT_BRANCH}}'" cmd/c8y/main.go
+      - go build -o {{.OUTPUT}} -ldflags="-s -w -X 'github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd.buildVersion={{trimPrefix "v" .VERSION}}' -X 'github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd.buildBranch={{.GIT_BRANCH}}'" cmd/c8y/main.go
 
   build:
     desc: Build

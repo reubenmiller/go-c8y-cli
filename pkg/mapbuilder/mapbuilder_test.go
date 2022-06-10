@@ -3,8 +3,8 @@ package mapbuilder
 import (
 	"testing"
 
-	"github.com/reubenmiller/go-c8y-cli/pkg/assert"
-	"github.com/reubenmiller/go-c8y-cli/pkg/iterator"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/assert"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/iterator"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 )
 

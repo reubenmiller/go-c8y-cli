@@ -1,11 +1,11 @@
 package util
 
 import (
-	"github.com/reubenmiller/go-c8y-cli/pkg/cmd/subcommand"
-	cmdRepeat "github.com/reubenmiller/go-c8y-cli/pkg/cmd/util/repeat"
-	cmdRepeatFile "github.com/reubenmiller/go-c8y-cli/pkg/cmd/util/repeatfile"
-	cmdShow "github.com/reubenmiller/go-c8y-cli/pkg/cmd/util/show"
-	"github.com/reubenmiller/go-c8y-cli/pkg/cmdutil"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/subcommand"
+	cmdRepeat "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/util/repeat"
+	cmdRepeatFile "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/util/repeatfile"
+	cmdShow "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/util/show"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
 	"github.com/spf13/cobra"
 )
 

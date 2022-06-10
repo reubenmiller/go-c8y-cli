@@ -15,7 +15,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/reubenmiller/go-c8y-cli/pkg/fileutilities"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/fileutilities"
 	"github.com/spf13/cobra"
 	"github.com/tidwall/gjson"
 )

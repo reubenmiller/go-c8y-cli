@@ -1,15 +1,15 @@
 package userroles
 
 import (
-	"github.com/reubenmiller/go-c8y-cli/pkg/cmd/subcommand"
-	cmdAddRoleToGroup "github.com/reubenmiller/go-c8y-cli/pkg/cmd/userroles/addroletogroup"
-	cmdAddRoleToUser "github.com/reubenmiller/go-c8y-cli/pkg/cmd/userroles/addroletouser"
-	cmdDeleteRoleFromGroup "github.com/reubenmiller/go-c8y-cli/pkg/cmd/userroles/deleterolefromgroup"
-	cmdDeleteRoleFromUser "github.com/reubenmiller/go-c8y-cli/pkg/cmd/userroles/deleterolefromuser"
-	cmdGetRoleReferenceCollectionFromGroup "github.com/reubenmiller/go-c8y-cli/pkg/cmd/userroles/getrolereferencecollectionfromgroup"
-	cmdGetRoleReferenceCollectionFromUser "github.com/reubenmiller/go-c8y-cli/pkg/cmd/userroles/getrolereferencecollectionfromuser"
-	cmdList "github.com/reubenmiller/go-c8y-cli/pkg/cmd/userroles/list"
-	"github.com/reubenmiller/go-c8y-cli/pkg/cmdutil"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/subcommand"
+	cmdAddRoleToGroup "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/userroles/addroletogroup"
+	cmdAddRoleToUser "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/userroles/addroletouser"
+	cmdDeleteRoleFromGroup "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/userroles/deleterolefromgroup"
+	cmdDeleteRoleFromUser "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/userroles/deleterolefromuser"
+	cmdGetRoleReferenceCollectionFromGroup "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/userroles/getrolereferencecollectionfromgroup"
+	cmdGetRoleReferenceCollectionFromUser "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/userroles/getrolereferencecollectionfromuser"
+	cmdList "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/userroles/list"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
 	"github.com/spf13/cobra"
 )
 
