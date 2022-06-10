@@ -1,27 +1,31 @@
 ---
-category: Misc.
+category: Misc
 external help file: PSc8y-help.xml
-id: Watch-NotificationChannel
+id: New-ChildAddition
 Module Name: PSc8y
-online version:
+online version: https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/inventory_additions_create
 schema: 2.0.0
-slug: /docs/cli/psc8y/Misc./watch-notificationchannel
-title: Watch-NotificationChannel
+slug: /docs/cli/psc8y/Misc/new-childaddition
+title: New-ChildAddition
 ---
 
 
 
 ## SYNOPSIS
-Watch realtime device notifications
+Create child addition
 
 ## SYNTAX
 
 ```
-Watch-NotificationChannel
-	[[-Device] <Object>]
-	[[-Duration] <String>]
-	[[-Count] <Int32>]
-	[[-ActionTypes] <String[]>]
+New-ChildAddition
+	[-Id] <Object[]>
+	[-Global]
+	[-Data <Object>]
+	[-NoAccept]
+	[-ProcessingMode <String>]
+	[-Force]
+	[-Template <String>]
+	[-TemplateVars <String>]
 	[-Raw]
 	[-OutputFile <String>]
 	[-OutputFileRaw <String>]
@@ -67,77 +71,45 @@ Watch-NotificationChannel
 ```
 
 ## DESCRIPTION
-Watch realtime device notifications
+Create a new managed object as a child addition to another existing managed object
 
 ## EXAMPLES
 
 ### EXAMPLE 1
 ```
-Function Watch-NotificationChannel -Device 12345 -Duration 90s
-Watch all types of notifications for a device for 90 seconds
+New-ChildAddition -Id $software.id -Data "custom.value=test" -Global
 ```
+
+Create a child addition and link it to an existing managed object
 
 ## PARAMETERS
 
-### -Device
-Device ID
+### -Id
+Managed object id where the child addition will be added to (required)
 
 ```yaml
-Type: Object
+Type: Object[]
 Parameter Sets: (All)
 Aliases:
 
-Required: False
+Required: True
 Position: 1
 Default value: None
 Accept pipeline input: True (ByPropertyName, ByValue)
 Accept wildcard characters: False
 ```
 
-### -Duration
-Duration to subscribe for.
-It accepts a duration, i.e.
-1ms, 0.5s, 1m etc.
+### -Global
+Enable global access to the managed object
 
 ```yaml
-Type: String
+Type: SwitchParameter
 Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: 2
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
-### -Count
-End date or date and time of notification occurrence.
-
-```yaml
-Type: Int32
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: 3
-Default value: 0
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
-### -ActionTypes
-Filter by realtime action types, i.e.
-CREATE,UPDATE,DELETE
-
-```yaml
-Type: String[]
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: 4
-Default value: None
+Position: Named
+Default value: False
 Accept pipeline input: False
 Accept wildcard characters: False
 ```
@@ -281,6 +253,23 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
+### -Data
+static data to be applied to body.
+accepts json or shorthande json, i.e.
+--data 'value1=1,my.nested.value=100'
+
+```yaml
+Type: Object
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
 ### -Delay
 delay after each request.
 It accepts a duration, i.e.
@@ -393,6 +382,22 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
+### -Force
+Do not prompt for confirmation.
+Ignored when using --confirm
+
+```yaml
+Type: SwitchParameter
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
 ### -Header
 custom headers.
 i.e.
@@ -461,6 +466,21 @@ Maximum number of jobs.
 
 ```yaml
 Type: Int32
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -NoAccept
+Ignore Accept header will remove the Accept header from requests, however PUT and POST requests will only see the effect
+
+```yaml
+Type: SwitchParameter
 Parameter Sets: (All)
 Aliases:
 
@@ -564,6 +584,21 @@ Accept wildcard characters: False
 
 ### -OutputFileRaw
 Save raw response to file (before select/view)
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -ProcessingMode
+Cumulocity processing mode
 
 ```yaml
 Type: String
@@ -719,6 +754,36 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
+### -Template
+Body template
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -TemplateVars
+Body template variables
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
 ### -Timeout
 Request timeout.
 It accepts a duration, i.e.
@@ -794,5 +859,5 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 
 ## RELATED LINKS
 
-[https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/realtime_subscribeall](https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/realtime_subscribeall)
+[https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/inventory_additions_create](https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/inventory_additions_create)
 

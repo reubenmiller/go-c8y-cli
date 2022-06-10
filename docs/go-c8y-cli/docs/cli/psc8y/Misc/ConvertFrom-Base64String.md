@@ -1,54 +1,60 @@
 ---
-category: Misc.
+category: Misc
 external help file: PSc8y-help.xml
-id: set-c8ymode
+id: ConvertFrom-Base64String
 Module Name: PSc8y
 online version:
 schema: 2.0.0
-slug: /docs/cli/psc8y/Misc./set-c8ymode
-title: set-c8ymode
+slug: /docs/cli/psc8y/Misc/convertfrom-base64string
+title: ConvertFrom-Base64String
 ---
 
 
 
 ## SYNOPSIS
-Set cli mode temporarily
+Convert a base64 encoded string to UTF8
 
 ## SYNTAX
 
 ```
-set-c8ymode
-	[-Mode] <String>
+ConvertFrom-Base64String
+	[-InputObject] <String[]>
 	[<CommonParameters>]
 ```
 
 ## DESCRIPTION
-{{ Fill in the Description }}
+Convert a base64 encoded string to UTF8
 
 ## EXAMPLES
 
 ### EXAMPLE 1
 ```
-Set-c8yMode -Mode dev
+ConvertFrom-Base64String ZWFzdGVyZWdn
 ```
 
-Enable development mode (all command enabled) temporarily.
-The active session file will not be updated
+Convert the base64 to utf8
+
+### EXAMPLE 2
+```
+ConvertFrom-Base64String "Authorization: Basic s7sd81kkzyzldjkzkhejhug3kh"
+```
+
+Convert the base64 to utf8
 
 ## PARAMETERS
 
-### -Mode
-Mode
+### -InputObject
+Base64 encoded string
 
 ```yaml
-Type: String
+Type: String[]
 Parameter Sets: (All)
 Aliases:
 
 Required: True
 Position: 1
 Default value: None
-Accept pipeline input: False
+Accept pipeline input: True (ByPropertyName, ByValue)
 Accept wildcard characters: False
 ```
 
@@ -60,5 +66,7 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 ## OUTPUTS
 
 ## NOTES
+If the the string has spaces in it, then only the last part of the string (with no spaces in it) will be used.
+This makes it easier when trying decode the basic auth string
 
 ## RELATED LINKS

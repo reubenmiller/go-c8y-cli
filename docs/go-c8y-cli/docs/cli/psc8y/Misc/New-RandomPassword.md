@@ -1,11 +1,11 @@
 ---
-category: Misc.
+category: Misc
 external help file: PSc8y-help.xml
 id: New-RandomPassword
 Module Name: PSc8y
 online version: http://blog.simonw.se/powershell-generating-random-password-for-active-directory/
 schema: 2.0.0
-slug: /docs/cli/psc8y/Misc./new-randompassword
+slug: /docs/cli/psc8y/Misc/new-randompassword
 title: New-RandomPassword
 ---
 

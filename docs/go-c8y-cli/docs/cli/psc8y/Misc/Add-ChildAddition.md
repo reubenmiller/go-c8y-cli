@@ -1,29 +1,31 @@
 ---
-category: Misc.
+category: Misc
 external help file: PSc8y-help.xml
-id: Get-ServiceUser
+id: Add-ChildAddition
 Module Name: PSc8y
-online version:
+online version: https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/inventory_additions_assign
 schema: 2.0.0
-slug: /docs/cli/psc8y/Misc./get-serviceuser
-title: Get-ServiceUser
+slug: /docs/cli/psc8y/Misc/add-childaddition
+title: Add-ChildAddition
 ---
 
 
 
 ## SYNOPSIS
-Get service user
+Assign child addition
 
 ## SYNTAX
 
 ```
-Get-ServiceUser
+Add-ChildAddition
 	[-Id] <Object[]>
-	[-PageSize <Int32>]
-	[-WithTotalPages]
-	[-CurrentPage <Int32>]
-	[-TotalPages <Int32>]
-	[-IncludeAll]
+	[-NewChild] <Object[]>
+	[-Data <Object>]
+	[-NoAccept]
+	[-ProcessingMode <String>]
+	[-Force]
+	[-Template <String>]
+	[-TemplateVars <String>]
 	[-Raw]
 	[-OutputFile <String>]
 	[-OutputFileRaw <String>]
@@ -69,21 +71,21 @@ Get-ServiceUser
 ```
 
 ## DESCRIPTION
-Get the service user associated to a microservice
+Add an existing managed object as a child addition to another existing managed object
 
 ## EXAMPLES
 
 ### EXAMPLE 1
 ```
-Get-ServiceUser -Id $App.name
+Add-ChildAddition -Id $software.id -NewChild $version.id
 ```
 
-Get application service user
+Add a related managed object as a child to an existing managed object
 
 ## PARAMETERS
 
 ### -Id
-Microservice id (required)
+Managed object id where the child addition will be added to (required)
 
 ```yaml
 Type: Object[]
@@ -92,6 +94,21 @@ Aliases:
 
 Required: True
 Position: 1
+Default value: None
+Accept pipeline input: True (ByPropertyName, ByValue)
+Accept wildcard characters: False
+```
+
+### -NewChild
+New managed object that will be added as a child addition (required)
+
+```yaml
+Type: Object[]
+Parameter Sets: (All)
+Aliases:
+
+Required: True
+Position: 2
 Default value: None
 Accept pipeline input: True (ByPropertyName, ByValue)
 Accept wildcard characters: False
@@ -219,11 +236,13 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -CurrentPage
-Current page which should be returned
+### -CustomQueryParam
+add custom URL query parameters.
+i.e.
+--customQueryParam 'withCustomOption=true,myOtherOption=myvalue'
 
 ```yaml
-Type: Int32
+Type: String[]
 Parameter Sets: (All)
 Aliases:
 
@@ -234,13 +253,13 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -CustomQueryParam
-add custom URL query parameters.
-i.e.
---customQueryParam 'withCustomOption=true,myOtherOption=myvalue'
+### -Data
+static data to be applied to body.
+accepts json or shorthande json, i.e.
+--data 'value1=1,my.nested.value=100'
 
 ```yaml
-Type: String[]
+Type: Object
 Parameter Sets: (All)
 Aliases:
 
@@ -363,6 +382,22 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
+### -Force
+Do not prompt for confirmation.
+Ignored when using --confirm
+
+```yaml
+Type: SwitchParameter
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
 ### -Header
 custom headers.
 i.e.
@@ -382,21 +417,6 @@ Accept wildcard characters: False
 
 ### -Help
 Show command help
-
-```yaml
-Type: SwitchParameter
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: Named
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
-### -IncludeAll
-Include all results by iterating through each page
 
 ```yaml
 Type: SwitchParameter
@@ -446,6 +466,21 @@ Maximum number of jobs.
 
 ```yaml
 Type: Int32
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -NoAccept
+Ignore Accept header will remove the Accept header from requests, however PUT and POST requests will only see the effect
+
+```yaml
+Type: SwitchParameter
 Parameter Sets: (All)
 Aliases:
 
@@ -562,11 +597,11 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -PageSize
-Maximum results per page
+### -ProcessingMode
+Cumulocity processing mode
 
 ```yaml
-Type: Int32
+Type: String
 Parameter Sets: (All)
 Aliases:
 
@@ -719,10 +754,8 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -Timeout
-Request timeout.
-It accepts a duration, i.e.
-1ms, 0.5s, 1m etc.
+### -Template
+Body template
 
 ```yaml
 Type: String
@@ -736,11 +769,28 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -TotalPages
-Total number of pages to get
+### -TemplateVars
+Body template variables
 
 ```yaml
-Type: Int32
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -Timeout
+Request timeout.
+It accepts a duration, i.e.
+1ms, 0.5s, 1m etc.
+
+```yaml
+Type: String
 Parameter Sets: (All)
 Aliases:
 
@@ -782,21 +832,6 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -WithTotalPages
-Request Cumulocity to include the total pages in the response statitics under .statistics.totalPages
-
-```yaml
-Type: SwitchParameter
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: Named
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
 ### -Workers
 Number of workers
 
@@ -824,5 +859,5 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 
 ## RELATED LINKS
 
-[https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/microservices_serviceusers_get](https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/microservices_serviceusers_get)
+[https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/inventory_additions_assign](https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/inventory_additions_assign)
 

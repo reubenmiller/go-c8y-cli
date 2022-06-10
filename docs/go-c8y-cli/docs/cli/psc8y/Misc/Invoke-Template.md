@@ -1,11 +1,11 @@
 ---
-category: Misc.
+category: Misc
 external help file: PSc8y-help.xml
 id: Invoke-Template
 Module Name: PSc8y
 online version:
 schema: 2.0.0
-slug: /docs/cli/psc8y/Misc./invoke-template
+slug: /docs/cli/psc8y/Misc/invoke-template
 title: Invoke-Template
 ---
 

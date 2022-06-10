@@ -58,7 +58,7 @@ Function Get-Category {
         "softwareVersion" { "SoftwareVersion" }
         "software" { "Software" }
         "deviceprofiles" { "DeviceProfiles" }
-        default { "Misc." }
+        default { "Misc" }
     }
 }
 

@@ -1,75 +1,80 @@
 ---
-category: Misc.
+category: Misc
 external help file: PSc8y-help.xml
-id: Expand-Id
+id: New-RandomString
 Module Name: PSc8y
 online version:
 schema: 2.0.0
-slug: /docs/cli/psc8y/Misc./expand-id
-title: Expand-Id
+slug: /docs/cli/psc8y/Misc/new-randomstring
+title: New-RandomString
 ---
 
 
 
 ## SYNOPSIS
-Expand a list of ids.
+Create a random string
 
 ## SYNTAX
 
 ```
-Expand-Id
-	[-InputObject] <Object[]>
-	[-Strict]
+New-RandomString
+	[[-Prefix] <String>]
+	[[-Postfix] <String>]
 	[<CommonParameters>]
 ```
 
 ## DESCRIPTION
-Expand the list of objects and only return the ids instead of the full objects.
+Helper utility to quickly create a randomized string which can be used
+when adding unique names to devices or another other properties
+
+Note: It should not be used for encryption!
 
 ## EXAMPLES
 
 ### EXAMPLE 1
 ```
-Expand-Id 12345
+New-RandomString -Prefix "hello_"
 ```
 
-Normalize a list of ids
+Create a random string with the "hello" prefix.
+i.e `hello_jta6fzwvo7`
 
 ### EXAMPLE 2
 ```
-"12345", "56789" | Expand-Id
+New-RandomString -Postfix "_device"
 ```
 
-Normalize a list of ids
+Create a random string which ends with "_device", i.e.
+`1qs7mc2o3t_device`
 
 ## PARAMETERS
 
-### -InputObject
-List of ids
+### -Prefix
+Prefix to be added before the random string
 
 ```yaml
-Type: Object[]
-Parameter Sets: (All)
-Aliases:
-
-Required: True
-Position: 1
-Default value: None
-Accept pipeline input: True (ByValue)
-Accept wildcard characters: False
-```
-
-### -Strict
-Exclude all non-id like values
-
-```yaml
-Type: SwitchParameter
+Type: String
 Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: Named
-Default value: False
+Position: 1
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -Postfix
+Postfix to be added after the random string
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 2
+Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
 ```
