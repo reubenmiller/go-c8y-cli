@@ -224,6 +224,8 @@ $CommandsWithTenant = @(
     "Enable-Application",
     "Enable-Microservice",
     "Get-ApplicationReferenceCollection",
+    "Get-DeviceCertificate",
+    "Get-DeviceCertificateCollection",
     "Get-DeviceStatisticsCollection",
     "Get-RoleReferenceCollectionFromGroup",
     "Get-RoleReferenceCollectionFromUser",
@@ -235,9 +237,11 @@ $CommandsWithTenant = @(
     "Get-UserGroupCollection",
     "Get-UserGroupMembershipCollection",
     "Get-UserMembershipCollection",
+    "New-DeviceCertificate",
     "New-Session",
     "New-User",
     "New-UserGroup",
+    "Remove-DeviceCertificate",
     "Remove-RoleFromGroup",
     "Remove-RoleFromUser",
     "Remove-User",
@@ -245,6 +249,7 @@ $CommandsWithTenant = @(
     "Remove-UserGroup",
     "Remove-UserTOTPSecret",
     "Reset-UserPassword",
+    "Update-DeviceCertificate",
     "Update-User",
     "Update-UserGroup"
 )
@@ -262,5 +267,12 @@ $CommandsWithRoles = @(
     "New-ServiceUser"
 )
 Register-ArgumentCompleter -CommandName $CommandsWithRoles -ParameterName Roles -ScriptBlock $script:CompleteRole
+
+$CommandsWithDeviceCertificateId = @(
+    "Get-DeviceCertificate",
+    "Remove-DeviceCertificate",
+    "Update-DeviceCertificate"
+)
+Register-ArgumentCompleter -CommandName $CommandsWithDeviceCertificateId -ParameterName Id -ScriptBlock $script:CompleteDeviceCertificate
 
 

@@ -36,6 +36,8 @@ setup () {
     create_device_profile "profile01"
 
     create_device_and_user "mobile-device01"
+
+    create_devicecert "MyCert"
 }
 
 create_user () {
@@ -151,6 +153,13 @@ create_device_and_user () {
     fi
 
     c8y devices availability set --id "$name" --interval 15
+}
+
+create_devicecert () {
+    local name="$1"
+
+    c8y devicemanagement certificates get --id "$name" --silentStatusCodes 404 ||
+        c8y devicemanagement certificates create --name "$name" --file tests/testdata/trustedcert.pem
 }
 
 setup

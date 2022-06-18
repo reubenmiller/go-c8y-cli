@@ -1,0 +1,15 @@
+tests:
+    devicemanagement/certificates_get_Get trusted device certificate by id/fingerprint:
+        command: c8y devicemanagement certificates get --id abcedef0123456789abcedef0123456789
+        exit-code: 0
+        stdout:
+            json:
+                method: GET
+                path: /tenant/tenants/$C8Y_TENANT/trusted-certificates/abcedef0123456789abcedef0123456789
+    devicemanagement/certificates_get_Get trusted device certificate by name:
+        command: c8y devicemanagement certificates get --id MyCert
+        exit-code: 0
+        stdout:
+            json:
+                method: GET
+                path: r//tenant/tenants/t\d+/trusted-certificates/\w+$

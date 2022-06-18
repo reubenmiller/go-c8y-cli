@@ -459,11 +459,11 @@ func Test_DebugStdinCommand(t *testing.T) {
 	cmd := setupTest()
 	stdin := fakestdin.NewStdIn()
 	defer stdin.Restore()
-	// stdin.Write(`` + "\n")
+	stdin.Write(`` + "\n")
 	// stdin.Write(`{"source":{"id":"1111"}}` + "\n")
 
 	cmdtext := `
-	events deleteCollection --type my_CustomType --dateFrom "-10d" --dry
+	devicemanagement certificates get --id tedge04
 	`
 	cmdErr := ExecuteCmd(cmd, strings.TrimSpace(cmdtext))
 

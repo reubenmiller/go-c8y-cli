@@ -1,0 +1,17 @@
+tests:
+    devicemanagement/certificates_update_Update device certificate by id/fingerprint:
+        command: c8y devicemanagement certificates update --id abcedef0123456789abcedef0123456789 --status DISABLED
+        exit-code: 0
+        stdout:
+            json:
+                body.status: DISABLED
+                method: PUT
+                path: /tenant/tenants/$C8Y_TENANT/trusted-certificates/abcedef0123456789abcedef0123456789
+    devicemanagement/certificates_update_Update device certificate by name:
+        command: c8y devicemanagement certificates update --id MyCert --status DISABLED
+        exit-code: 0
+        stdout:
+            json:
+                body.status: DISABLED
+                method: PUT
+                path: r//tenant/tenants/t\d+/trusted-certificates/4fd8df0378f2cafd5e322c1aaa8b87300704e9a5

@@ -118,6 +118,12 @@
         # software version name
         "softwareversionName" = "flags.WithStringValue(`"${prop}`", `"${queryParam}`"),"
 
+        # Certificate file
+        "certificatefile" = "flags.WithCertificateFile(`"${prop}`", `"${queryParam}`"),"
+
+        # Certificate file
+        "[]certificate" = "c8yfetcher.WithCertificateByNameFirstMatch(client, args, `"${prop}`", `"${queryParam}`"),"
+
         # firmware array
         "[]firmware" = "c8yfetcher.WithFirmwareByNameFirstMatch(client, args, `"${prop}`", `"${queryParam}`"),"
 

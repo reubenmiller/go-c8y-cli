@@ -6,7 +6,7 @@
         {
             "label": "Build (incl. generate)",
             "type": "shell",
-            "command": "task build",
+            "command": "task build-snapshot",
             "group": {
                 "kind": "build",
                 "isDefault": true

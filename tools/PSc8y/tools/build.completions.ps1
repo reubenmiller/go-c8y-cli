@@ -11,6 +11,10 @@ param(
     $OutputFile = "$PSScriptRoot/../utilities/register-completions.ps1"
 )
 
+# Force importing the module again
+Get-Module -Name $ModuleName | Remove-Module
+Import-Module "$PSScriptRoot/../dist/PSc8y" -Force
+
 [array]$Completions = @(
     # Tenant Option
     @{ name = "*TenantOption*"; ParameterName = "Category"; completion = '$script:CompleteTenantOptionCategory' }
@@ -72,6 +76,9 @@ param(
     # Role
     @{ name = "*"; ParameterName = "Role"; completion = '$script:CompleteRole' }
     @{ name = "*"; ParameterName = "Roles"; completion = '$script:CompleteRole' }
+    
+    # Device certificates
+    @{ name = "*-DeviceCertificate"; ParameterName = "Id"; completion = '$script:CompleteDeviceCertificate' }
 )
 
 # build a hashtable of command names and parameters to make it quicker to lookup

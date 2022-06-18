@@ -1,0 +1,10 @@
+tests:
+    Create new trusted device certificate:
+        command: c8y devicemanagement certificates create --name "MyCert" --file "manual/devicemanagement/certificates/trustedcert.pem" --dry
+        exit-code: 0
+        stdout:
+            json:
+                body.certInPemFormat: r/.{256,}
+                body.name: MyCert
+                method: POST
+                path: /tenant/tenants/$C8Y_TENANT/trusted-certificates

@@ -1,0 +1,8 @@
+tests:
+    devicemanagement/certificates_list_Get list of trusted device certificates:
+        command: c8y devicemanagement certificates list
+        exit-code: 0
+        stdout:
+            json:
+                method: GET
+                path: /tenant/tenants/$C8Y_TENANT/trusted-certificates
