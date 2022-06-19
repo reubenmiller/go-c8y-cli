@@ -9,13 +9,13 @@ $script:CompleteDeviceCertificate = {
     Get-DeviceCertificateCollection -PageSize 100 -WarningAction SilentlyContinue -AsPSObject `
     | Where-Object { $_.fingerprint -like "$searchFor*" -or $_.name -like "$searchFor*" } `
     | ForEach-Object {
-        $value = $_.name
+        $value = $_.fingerprint
         $details = ("{0} ({1})" -f $_.fingerprint, $_.name)
         [System.Management.Automation.CompletionResult]::new(
-            $_.id,
+            $value,
             $details,
             'ParameterValue',
-            $_.id
+            $value
         )
     }
 }
