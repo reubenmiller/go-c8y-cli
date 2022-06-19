@@ -119,8 +119,10 @@ tasks:
   generate_go_code:
     desc: Generate go code from specifications
     cmds:
-      - task: update_spec
       - pwsh -File scripts/build-cli/build.ps1
+    deps:
+      # Use deps so that the source/generates works properly
+      - update_spec
     sources:
       - api/spec/json/*.json
       - scripts/**/*.ps1
