@@ -5,7 +5,7 @@ Describe -Name "New-DeviceCertificate" {
 
     }
 
-    It "Upload a trusted device certificate" {
+    It -Skip "Upload a trusted device certificate" {
         $Response = PSc8y\New-DeviceCertificate -Name "MyCert" -File "./cert.pem"
         $LASTEXITCODE | Should -Be 0
         $Response | Should -Not -BeNullOrEmpty

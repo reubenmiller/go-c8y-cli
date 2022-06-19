@@ -5,7 +5,7 @@ Describe -Name "Remove-DeviceCertificate" {
 
     }
 
-    It "Remove trusted device certificate by id/fingerprint" {
+    It -Skip "Remove trusted device certificate by id/fingerprint" {
         $Response = PSc8y\Remove-DeviceCertificate -Id abcedef0123456789abcedef0123456789
         $LASTEXITCODE | Should -Be 0
     }

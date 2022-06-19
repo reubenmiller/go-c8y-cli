@@ -1,4 +1,12 @@
 tests:
+    ? devicemanagement/certificates_create_Copy device certificates from one Cumulocity tenant to another (tenants must not be hosted on the same instance!)
+    :   command: $TEST_SHELL -c 'c8y devicemanagement certificates list | c8y devicemanagement certificates create --template input.value --session c8y.Q.instance'
+        exit-code: 0
+        skip: true
+        stdout:
+            json:
+                method: POST
+                path: /tenant/tenants/$C8Y_TENANT/trusted-certificates
     devicemanagement/certificates_create_Upload a trusted device certificate:
         command: c8y devicemanagement certificates create --name "MyCert" --file "trustedcert.pem"
         exit-code: 0

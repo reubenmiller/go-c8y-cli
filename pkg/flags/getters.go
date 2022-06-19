@@ -5,6 +5,7 @@ import (
 	"crypto/x509"
 	"encoding/base64"
 	"encoding/pem"
+	"errors"
 	"fmt"
 	"log"
 	"mime"
@@ -682,10 +683,28 @@ func WithCertificateFile(opts ...string) GetOption {
 			return dst, value, err
 		}
 
+		if value == "" {
+			return "", nil, nil
+		}
+
+		// Detect if a pem value or file is being passed
+		if pemRaw, pemErr := base64.StdEncoding.DecodeString(value); pemErr == nil {
+			_, certErr := x509.ParseCertificate([]byte(pemRaw))
+
+			if certErr == nil {
+				// Value is already set to the contents of the certificate
+				return dst, value, nil
+			}
+		}
+
+		if _, err := os.Stat(value); errors.Is(err, os.ErrNotExist) {
+			return "", nil, fmt.Errorf("flag: %s. %w", src, err)
+		}
+
 		r, err := os.ReadFile(value)
 
 		if err != nil {
-			return "", nil, err
+			return "", nil, fmt.Errorf("flag: %s. %w", src, err)
 		}
 
 		block, _ := pem.Decode(r)

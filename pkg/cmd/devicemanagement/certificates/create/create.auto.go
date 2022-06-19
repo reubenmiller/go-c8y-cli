@@ -36,6 +36,9 @@ func NewCreateCmd(f *cmdutil.Factory) *CreateCmd {
 		Example: heredoc.Doc(`
 $ c8y devicemanagement certificates create --name "MyCert" --file "trustedcert.pem"
 Upload a trusted device certificate
+
+$ c8y devicemanagement certificates list | c8y devicemanagement certificates create --template input.value --session c8y.Q.instance
+Copy device certificates from one Cumulocity tenant to another (tenants must not be hosted on the same instance!)
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
 			return f.CreateModeEnabled()
@@ -48,7 +51,7 @@ Upload a trusted device certificate
 	cmd.Flags().String("tenant", "", "Tenant id (required)")
 	cmd.Flags().String("name", "", "Certificate name (accepts pipeline)")
 	cmd.Flags().String("status", "ENABLED", "Status (required)")
-	cmd.Flags().String("file", "", "Status")
+	cmd.Flags().String("file", "", "Certificate file (in PEM format with header/footer)")
 	cmd.Flags().Bool("autoRegistrationEnabled", false, "Enable auto registration")
 
 	completion.WithOptions(

@@ -15,9 +15,10 @@ func NewSubCommand(f *cmdutil.Factory) *SubCmdDeviceManagement {
 	ccmd := &SubCmdDeviceManagement{}
 
 	cmd := &cobra.Command{
-		Use:   "devicemanagement",
-		Short: "Cumulocity Device management",
-		Long:  ``,
+		Use:     "devicemanagement",
+		Short:   "Cumulocity Device management",
+		Aliases: []string{"dm"},
+		Long:    `Device Management commands`,
 	}
 
 	// Subcommands

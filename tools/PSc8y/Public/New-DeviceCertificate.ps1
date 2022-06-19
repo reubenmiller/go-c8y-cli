@@ -40,7 +40,7 @@ Upload a trusted device certificate
         [string]
         $Status,
 
-        # Status
+        # Certificate file (in PEM format with header/footer)
         [Parameter()]
         [string]
         $File,

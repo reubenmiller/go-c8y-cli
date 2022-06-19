@@ -3,7 +3,7 @@
     "name": "devicemanagement/certificates",
     "description": "Device Certificate management",
     "descriptionLong": "Manage the trusted certificates which are used by devices.",
-    "link": ""
+    "link": "https://cumulocity.com/guides/users-guide/device-management/#trusted-certificates"
   },
   "endpoints": [
     {
@@ -57,7 +57,8 @@
         "powershell": [
           {
             "description": "Get trusted device certificate by id/fingerprint",
-            "command": "Get-DeviceCertificate -Id"
+            "command": "Get-DeviceCertificate -Id abcedef0123456789abcedef0123456789",
+            "skipTest": true
           }
         ],
         "go": [
@@ -113,11 +114,13 @@
         "powershell": [
           {
             "description": "Update device certificate by id/fingerprint",
-            "command": "Update-DeviceCertificate -Id abcedef0123456789abcedef0123456789 -Status DISABLED"
+            "command": "Update-DeviceCertificate -Id abcedef0123456789abcedef0123456789 -Status DISABLED",
+            "skipTest": true
           },
           {
             "description": "Update device certificate by name",
-            "command": "Update-DeviceCertificate -Id \"MyCert\" -Status DISABLED"
+            "command": "Update-DeviceCertificate -Id \"MyCert\" -Status DISABLED",
+            "skipTest": true
           }
         ],
         "go": [
@@ -199,7 +202,8 @@
         "powershell": [
           {
             "description": "Remove trusted device certificate by id/fingerprint",
-            "command": "Remove-DeviceCertificate -Id abcedef0123456789abcedef0123456789"
+            "command": "Remove-DeviceCertificate -Id abcedef0123456789abcedef0123456789",
+            "skipTest": true
           }
         ],
         "go": [
@@ -255,13 +259,19 @@
         "powershell": [
           {
             "description": "Upload a trusted device certificate",
-            "command": "New-DeviceCertificate -Name \"MyCert\" -File \"./cert.pem\""
+            "command": "New-DeviceCertificate -Name \"MyCert\" -File \"./cert.pem\"",
+            "skipTest": true
           }
         ],
         "go": [
           {
             "description": "Upload a trusted device certificate",
             "command": "c8y devicemanagement certificates create --name \"MyCert\" --file \"trustedcert.pem\"",
+            "skipTest": true
+          },
+          {
+            "description": "Copy device certificates from one Cumulocity tenant to another (tenants must not be hosted on the same instance!)",
+            "command": "c8y devicemanagement certificates list | c8y devicemanagement certificates create --template input.value --session c8y.Q.instance",
             "skipTest": true
           }
         ]
@@ -299,7 +309,7 @@
         },
         {
           "name": "file",
-          "description": "Status",
+          "description": "Certificate file (in PEM format with header/footer)",
           "type": "certificatefile",
           "property": "certInPemFormat"
         },

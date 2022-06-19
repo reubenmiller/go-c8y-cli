@@ -11,7 +11,7 @@ Get a trusted device certificate
 https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/devicemanagement_certificates_get
 
 .EXAMPLE
-PS> Get-DeviceCertificate -Id
+PS> Get-DeviceCertificate -Id abcedef0123456789abcedef0123456789
 
 Get trusted device certificate by id/fingerprint
 

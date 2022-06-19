@@ -5,8 +5,8 @@ Describe -Name "Get-DeviceCertificate" {
 
     }
 
-    It "Get trusted device certificate by id/fingerprint" {
-        $Response = PSc8y\Get-DeviceCertificate -Id
+    It -Skip "Get trusted device certificate by id/fingerprint" {
+        $Response = PSc8y\Get-DeviceCertificate -Id abcedef0123456789abcedef0123456789
         $LASTEXITCODE | Should -Be 0
         $Response | Should -Not -BeNullOrEmpty
     }

@@ -1,10 +1,46 @@
 tests:
-    Create new trusted device certificate:
-        command: c8y devicemanagement certificates create --name "MyCert" --file "manual/devicemanagement/certificates/trustedcert.pem" --dry
-        exit-code: 0
-        stdout:
-            json:
-                body.certInPemFormat: r/.{256,}
-                body.name: MyCert
-                method: POST
-                path: /tenant/tenants/$C8Y_TENANT/trusted-certificates
+  Create new trusted device certificate:
+    command: c8y devicemanagement certificates create --name "MyOwnCert" --file "manual/devicemanagement/certificates/trustedcert.pem" --dry
+    exit-code: 0
+    stdout:
+      json:
+        body.certInPemFormat: r/.{256,}
+        body.name: MyOwnCert
+        method: POST
+        path: /tenant/tenants/$C8Y_TENANT/trusted-certificates
+    
+  Copy existing certificates:
+    command: |
+      cat manual/devicemanagement/certificates/certificates_list.json |
+        c8y devicemanagement certificates create --template input.value --dry
+    exit-code: 0
+    stdout:
+      json:
+        body.certInPemFormat: MIIBoDCCAUagAwIBAgIISOLoBRYAHmwwCgYIKoZIzj0EAwIwPDEQMA4GA1UEAwwHdGVkZ2UwNDESMBAGA1UECgwJVGhpbiBFZGdlMRQwEgYDVQQLDAtUZXN0IERldmljZTAeFw0yMjA2MTcxMzQ3MzNaFw0yMzA2MTcxMzQ3MzNaMDwxEDAOBgNVBAMMB3RlZGdlMDQxEjAQBgNVBAoMCVRoaW4gRWRnZTEUMBIGA1UECwwLVGVzdCBEZXZpY2UwWTATBgcqhkjOPQIBBggqhkjOPQMBBwNCAASw2fovoPAzOtH8qH0KiAycbssZkuW0kRBXxLzp2XlBX7RFuXz9iATdANGIbhruG9AfwFu5Bm+5YDGEMfF9q/TWozIwMDAdBgNVHQ4EFgQUbB4AFgXo4kirlR9b4UVQ0DhcLC0wDwYDVR0TAQH/BAUwAwEB/zAKBggqhkjOPQQDAgNIADBFAiAwByF4Si/A6aUzmKdq5Ehj6ViAXrMtqN4MquxCZt5w6gIhAMNRdQZTFFocbI+Ybok+Gb35043kXLtQK7YgbQB/mYre
+        body.name: MyCert
+        method: POST
+        path: /tenant/tenants/$C8Y_TENANT/trusted-certificates
+
+  Copy existing certificate but overwrite name:
+    command: |
+      cat manual/devicemanagement/certificates/certificates_list.json |
+        c8y devicemanagement certificates create --name "Copied cert" --template input.value --dry
+    exit-code: 0
+    stdout:
+      json:
+        body.certInPemFormat: MIIBoDCCAUagAwIBAgIISOLoBRYAHmwwCgYIKoZIzj0EAwIwPDEQMA4GA1UEAwwHdGVkZ2UwNDESMBAGA1UECgwJVGhpbiBFZGdlMRQwEgYDVQQLDAtUZXN0IERldmljZTAeFw0yMjA2MTcxMzQ3MzNaFw0yMzA2MTcxMzQ3MzNaMDwxEDAOBgNVBAMMB3RlZGdlMDQxEjAQBgNVBAoMCVRoaW4gRWRnZTEUMBIGA1UECwwLVGVzdCBEZXZpY2UwWTATBgcqhkjOPQIBBggqhkjOPQMBBwNCAASw2fovoPAzOtH8qH0KiAycbssZkuW0kRBXxLzp2XlBX7RFuXz9iATdANGIbhruG9AfwFu5Bm+5YDGEMfF9q/TWozIwMDAdBgNVHQ4EFgQUbB4AFgXo4kirlR9b4UVQ0DhcLC0wDwYDVR0TAQH/BAUwAwEB/zAKBggqhkjOPQQDAgNIADBFAiAwByF4Si/A6aUzmKdq5Ehj6ViAXrMtqN4MquxCZt5w6gIhAMNRdQZTFFocbI+Ybok+Gb35043kXLtQK7YgbQB/mYre
+        body.name: Copied cert
+        method: POST
+        path: /tenant/tenants/$C8Y_TENANT/trusted-certificates
+
+  Copy existing certificate but overwrite file:
+    command: |
+      cat manual/devicemanagement/certificates/certificates_list.json |
+        c8y devicemanagement certificates create --template input.value --file "manual/devicemanagement/certificates/trustedcert.pem" --dry
+    exit-code: 0
+    stdout:
+      json:
+        body.certInPemFormat: MIIBoTCCAUegAwIBAgIJAM8wtTHqatq4MAoGCCqGSM49BAMCMDwxEDAOBgNVBAMMB3RlZGdlMDQxEjAQBgNVBAoMCVRoaW4gRWRnZTEUMBIGA1UECwwLVGVzdCBEZXZpY2UwHhcNMjIwNjE4MDgzNDU5WhcNMjMwNjE4MDgzNDU5WjA8MRAwDgYDVQQDDAd0ZWRnZTA0MRIwEAYDVQQKDAlUaGluIEVkZ2UxFDASBgNVBAsMC1Rlc3QgRGV2aWNlMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEFMUs3ArUHUXv9c9hHK8u+vMsaT/jSyJw28HcE1wmcC8Hjj+axkcvYo3ppl52LceCtbtIJ2yLyGqTIkY2rn13q6MyMDAwHQYDVR0OBBYEFLjaauoxtTDPuSj6gmcg284CXS8rMA8GA1UdEwEB/wQFMAMBAf8wCgYIKoZIzj0EAwIDSAAwRQIgCJxir9JtcwQ8QDacjYz989BQK3lQ3xFRIbqZ6+B39ZMCIQDnTi8824HSF/YGM6VcWuXAHtViv72WIKmXnJ9ygRZdsw==
+        body.name: MyCert
+        method: POST
+        path: /tenant/tenants/$C8Y_TENANT/trusted-certificates
