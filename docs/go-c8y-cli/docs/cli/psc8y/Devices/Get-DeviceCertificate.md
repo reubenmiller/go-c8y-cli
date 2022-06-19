@@ -1,30 +1,25 @@
 ---
-category: Role
+category: Devices
 external help file: PSc8y-help.xml
-id: Get-RoleReferenceCollectionFromUser
+id: Get-DeviceCertificate
 Module Name: PSc8y
-online version: https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/userroles_getRoleReferenceCollectionFromUser
+online version: https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/devicemanagement_certificates_get
 schema: 2.0.0
-slug: /docs/cli/psc8y/Role/get-rolereferencecollectionfromuser
-title: Get-RoleReferenceCollectionFromUser
+slug: /docs/cli/psc8y/Devices/get-devicecertificate
+title: Get-DeviceCertificate
 ---
 
 
 
 ## SYNOPSIS
-Get role references from user
+Get trusted device certificate
 
 ## SYNTAX
 
 ```
-Get-RoleReferenceCollectionFromUser
-	[-User] <Object[]>
+Get-DeviceCertificate
+	[[-Id] <Object[]>]
 	[[-Tenant] <Object>]
-	[-PageSize <Int32>]
-	[-WithTotalPages]
-	[-CurrentPage <Int32>]
-	[-TotalPages <Int32>]
-	[-IncludeAll]
 	[-Raw]
 	[-OutputFile <String>]
 	[-OutputFileRaw <String>]
@@ -70,28 +65,28 @@ Get-RoleReferenceCollectionFromUser
 ```
 
 ## DESCRIPTION
-Get collection of user role references from a user
+Get a trusted device certificate
 
 ## EXAMPLES
 
 ### EXAMPLE 1
 ```
-Get-RoleReferenceCollectionFromUser -User $User.id
+Get-DeviceCertificate -Id abcedef0123456789abcedef0123456789
 ```
 
-Get a list of role references for a user
+Get trusted device certificate by id/fingerprint
 
 ## PARAMETERS
 
-### -User
-User (required)
+### -Id
+Certificate fingerprint or name
 
 ```yaml
 Type: Object[]
 Parameter Sets: (All)
 Aliases:
 
-Required: True
+Required: False
 Position: 1
 Default value: None
 Accept pipeline input: True (ByPropertyName, ByValue)
@@ -99,7 +94,7 @@ Accept wildcard characters: False
 ```
 
 ### -Tenant
-Tenant
+Tenant id
 
 ```yaml
 Type: Object
@@ -225,21 +220,6 @@ Custom confirmation text
 
 ```yaml
 Type: String
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: Named
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
-### -CurrentPage
-Current page which should be returned
-
-```yaml
-Type: Int32
 Parameter Sets: (All)
 Aliases:
 
@@ -411,21 +391,6 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -IncludeAll
-Include all results by iterating through each page
-
-```yaml
-Type: SwitchParameter
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: Named
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
 ### -Insecure
 Allow insecure server connections when using SSL
 
@@ -568,21 +533,6 @@ Save raw response to file (before select/view)
 
 ```yaml
 Type: String
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: Named
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
-### -PageSize
-Maximum results per page
-
-```yaml
-Type: Int32
 Parameter Sets: (All)
 Aliases:
 
@@ -752,21 +702,6 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -TotalPages
-Total number of pages to get
-
-```yaml
-Type: Int32
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: Named
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
 ### -View
 Use views when displaying data on the terminal.
 Disable using --view off
@@ -785,21 +720,6 @@ Accept wildcard characters: False
 
 ### -WithError
 Errors will be printed on stdout instead of stderr
-
-```yaml
-Type: SwitchParameter
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: Named
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
-### -WithTotalPages
-Request Cumulocity to include the total pages in the response statistics under .statistics.totalPages
 
 ```yaml
 Type: SwitchParameter
@@ -840,5 +760,5 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 
 ## RELATED LINKS
 
-[https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/userroles_getRoleReferenceCollectionFromUser](https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/userroles_getRoleReferenceCollectionFromUser)
+[https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/devicemanagement_certificates_get](https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/devicemanagement_certificates_get)
 

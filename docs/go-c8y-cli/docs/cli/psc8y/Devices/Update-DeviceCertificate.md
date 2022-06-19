@@ -1,30 +1,34 @@
 ---
-category: Role
+category: Devices
 external help file: PSc8y-help.xml
-id: Get-RoleReferenceCollectionFromUser
+id: Update-DeviceCertificate
 Module Name: PSc8y
-online version: https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/userroles_getRoleReferenceCollectionFromUser
+online version: https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/devicemanagement_certificates_update
 schema: 2.0.0
-slug: /docs/cli/psc8y/Role/get-rolereferencecollectionfromuser
-title: Get-RoleReferenceCollectionFromUser
+slug: /docs/cli/psc8y/Devices/update-devicecertificate
+title: Update-DeviceCertificate
 ---
 
 
 
 ## SYNOPSIS
-Get role references from user
+Update trusted device certificate
 
 ## SYNTAX
 
 ```
-Get-RoleReferenceCollectionFromUser
-	[-User] <Object[]>
+Update-DeviceCertificate
+	[[-Id] <Object[]>]
 	[[-Tenant] <Object>]
-	[-PageSize <Int32>]
-	[-WithTotalPages]
-	[-CurrentPage <Int32>]
-	[-TotalPages <Int32>]
-	[-IncludeAll]
+	[[-Name] <String>]
+	[[-Status] <String>]
+	[-AutoRegistrationEnabled]
+	[-Data <Object>]
+	[-NoAccept]
+	[-ProcessingMode <String>]
+	[-Force]
+	[-Template <String>]
+	[-TemplateVars <String>]
 	[-Raw]
 	[-OutputFile <String>]
 	[-OutputFileRaw <String>]
@@ -70,28 +74,35 @@ Get-RoleReferenceCollectionFromUser
 ```
 
 ## DESCRIPTION
-Get collection of user role references from a user
+Update settings of an existing trusted device certificate
 
 ## EXAMPLES
 
 ### EXAMPLE 1
 ```
-Get-RoleReferenceCollectionFromUser -User $User.id
+Update-DeviceCertificate -Id abcedef0123456789abcedef0123456789 -Status DISABLED
 ```
 
-Get a list of role references for a user
+Update device certificate by id/fingerprint
+
+### EXAMPLE 2
+```
+Update-DeviceCertificate -Id "MyCert" -Status DISABLED
+```
+
+Update device certificate by name
 
 ## PARAMETERS
 
-### -User
-User (required)
+### -Id
+Certificate fingerprint or name
 
 ```yaml
 Type: Object[]
 Parameter Sets: (All)
 Aliases:
 
-Required: True
+Required: False
 Position: 1
 Default value: None
 Accept pipeline input: True (ByPropertyName, ByValue)
@@ -99,7 +110,7 @@ Accept wildcard characters: False
 ```
 
 ### -Tenant
-Tenant
+Tenant id
 
 ```yaml
 Type: Object
@@ -109,6 +120,51 @@ Aliases:
 Required: False
 Position: 2
 Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -Name
+Certificate name
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 3
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -Status
+Status
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 4
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -AutoRegistrationEnabled
+Enable auto registration
+
+```yaml
+Type: SwitchParameter
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: False
 Accept pipeline input: False
 Accept wildcard characters: False
 ```
@@ -235,11 +291,13 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -CurrentPage
-Current page which should be returned
+### -CustomQueryParam
+add custom URL query parameters.
+i.e.
+--customQueryParam 'withCustomOption=true,myOtherOption=myvalue'
 
 ```yaml
-Type: Int32
+Type: String[]
 Parameter Sets: (All)
 Aliases:
 
@@ -250,13 +308,13 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -CustomQueryParam
-add custom URL query parameters.
-i.e.
---customQueryParam 'withCustomOption=true,myOtherOption=myvalue'
+### -Data
+static data to be applied to body.
+accepts json or shorthande json, i.e.
+--data 'value1=1,my.nested.value=100'
 
 ```yaml
-Type: String[]
+Type: Object
 Parameter Sets: (All)
 Aliases:
 
@@ -379,6 +437,22 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
+### -Force
+Do not prompt for confirmation.
+Ignored when using --confirm
+
+```yaml
+Type: SwitchParameter
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
 ### -Header
 custom headers.
 i.e.
@@ -398,21 +472,6 @@ Accept wildcard characters: False
 
 ### -Help
 Show command help
-
-```yaml
-Type: SwitchParameter
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: Named
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
-### -IncludeAll
-Include all results by iterating through each page
 
 ```yaml
 Type: SwitchParameter
@@ -462,6 +521,21 @@ Maximum number of jobs.
 
 ```yaml
 Type: Int32
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -NoAccept
+Ignore Accept header will remove the Accept header from requests, however PUT and POST requests will only see the effect
+
+```yaml
+Type: SwitchParameter
 Parameter Sets: (All)
 Aliases:
 
@@ -578,11 +652,11 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -PageSize
-Maximum results per page
+### -ProcessingMode
+Cumulocity processing mode
 
 ```yaml
-Type: Int32
+Type: String
 Parameter Sets: (All)
 Aliases:
 
@@ -735,10 +809,8 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -Timeout
-Request timeout.
-It accepts a duration, i.e.
-1ms, 0.5s, 1m etc.
+### -Template
+Body template
 
 ```yaml
 Type: String
@@ -752,11 +824,28 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -TotalPages
-Total number of pages to get
+### -TemplateVars
+Body template variables
 
 ```yaml
-Type: Int32
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -Timeout
+Request timeout.
+It accepts a duration, i.e.
+1ms, 0.5s, 1m etc.
+
+```yaml
+Type: String
 Parameter Sets: (All)
 Aliases:
 
@@ -798,21 +887,6 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -WithTotalPages
-Request Cumulocity to include the total pages in the response statistics under .statistics.totalPages
-
-```yaml
-Type: SwitchParameter
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: Named
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
 ### -Workers
 Number of workers
 
@@ -840,5 +914,5 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 
 ## RELATED LINKS
 
-[https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/userroles_getRoleReferenceCollectionFromUser](https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/userroles_getRoleReferenceCollectionFromUser)
+[https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/devicemanagement_certificates_update](https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/devicemanagement_certificates_update)
 

@@ -22,6 +22,11 @@ Get-DeviceStatisticsCollection
 	[[-Type] <String>]
 	[[-Device] <Object[]>]
 	[[-Tenant] <Object>]
+	[-PageSize <Int32>]
+	[-WithTotalPages]
+	[-CurrentPage <Int32>]
+	[-TotalPages <Int32>]
+	[-IncludeAll]
 	[-Raw]
 	[-OutputFile <String>]
 	[-OutputFileRaw <String>]
@@ -267,6 +272,21 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
+### -CurrentPage
+Current page which should be returned
+
+```yaml
+Type: Int32
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
 ### -CustomQueryParam
 add custom URL query parameters.
 i.e.
@@ -428,6 +448,21 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
+### -IncludeAll
+Include all results by iterating through each page
+
+```yaml
+Type: SwitchParameter
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
 ### -Insecure
 Allow insecure server connections when using SSL
 
@@ -570,6 +605,21 @@ Save raw response to file (before select/view)
 
 ```yaml
 Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -PageSize
+Maximum results per page
+
+```yaml
+Type: Int32
 Parameter Sets: (All)
 Aliases:
 
@@ -739,6 +789,21 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
+### -TotalPages
+Total number of pages to get
+
+```yaml
+Type: Int32
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
 ### -View
 Use views when displaying data on the terminal.
 Disable using --view off
@@ -757,6 +822,21 @@ Accept wildcard characters: False
 
 ### -WithError
 Errors will be printed on stdout instead of stderr
+
+```yaml
+Type: SwitchParameter
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -WithTotalPages
+Request Cumulocity to include the total pages in the response statistics under .statistics.totalPages
 
 ```yaml
 Type: SwitchParameter

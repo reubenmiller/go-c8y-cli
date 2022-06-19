@@ -1,30 +1,28 @@
 ---
-category: Role
+category: Devices
 external help file: PSc8y-help.xml
-id: Get-RoleReferenceCollectionFromUser
+id: Remove-DeviceCertificate
 Module Name: PSc8y
-online version: https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/userroles_getRoleReferenceCollectionFromUser
+online version: https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/devicemanagement_certificates_delete
 schema: 2.0.0
-slug: /docs/cli/psc8y/Role/get-rolereferencecollectionfromuser
-title: Get-RoleReferenceCollectionFromUser
+slug: /docs/cli/psc8y/Devices/remove-devicecertificate
+title: Remove-DeviceCertificate
 ---
 
 
 
 ## SYNOPSIS
-Get role references from user
+Delete device certificate
 
 ## SYNTAX
 
 ```
-Get-RoleReferenceCollectionFromUser
-	[-User] <Object[]>
+Remove-DeviceCertificate
+	[[-Id] <Object[]>]
 	[[-Tenant] <Object>]
-	[-PageSize <Int32>]
-	[-WithTotalPages]
-	[-CurrentPage <Int32>]
-	[-TotalPages <Int32>]
-	[-IncludeAll]
+	[-NoAccept]
+	[-ProcessingMode <String>]
+	[-Force]
 	[-Raw]
 	[-OutputFile <String>]
 	[-OutputFileRaw <String>]
@@ -70,28 +68,29 @@ Get-RoleReferenceCollectionFromUser
 ```
 
 ## DESCRIPTION
-Get collection of user role references from a user
+Remove a trusted device certificate.
+All devices connected to the platform will no longer be able to communicate.
 
 ## EXAMPLES
 
 ### EXAMPLE 1
 ```
-Get-RoleReferenceCollectionFromUser -User $User.id
+Remove-DeviceCertificate -Id abcedef0123456789abcedef0123456789
 ```
 
-Get a list of role references for a user
+Remove trusted device certificate by id/fingerprint
 
 ## PARAMETERS
 
-### -User
-User (required)
+### -Id
+Certificate fingerprint or name
 
 ```yaml
 Type: Object[]
 Parameter Sets: (All)
 Aliases:
 
-Required: True
+Required: False
 Position: 1
 Default value: None
 Accept pipeline input: True (ByPropertyName, ByValue)
@@ -99,7 +98,7 @@ Accept wildcard characters: False
 ```
 
 ### -Tenant
-Tenant
+Tenant id
 
 ```yaml
 Type: Object
@@ -225,21 +224,6 @@ Custom confirmation text
 
 ```yaml
 Type: String
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: Named
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
-### -CurrentPage
-Current page which should be returned
-
-```yaml
-Type: Int32
 Parameter Sets: (All)
 Aliases:
 
@@ -379,6 +363,22 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
+### -Force
+Do not prompt for confirmation.
+Ignored when using --confirm
+
+```yaml
+Type: SwitchParameter
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
 ### -Header
 custom headers.
 i.e.
@@ -398,21 +398,6 @@ Accept wildcard characters: False
 
 ### -Help
 Show command help
-
-```yaml
-Type: SwitchParameter
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: Named
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
-### -IncludeAll
-Include all results by iterating through each page
 
 ```yaml
 Type: SwitchParameter
@@ -462,6 +447,21 @@ Maximum number of jobs.
 
 ```yaml
 Type: Int32
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -NoAccept
+Ignore Accept header will remove the Accept header from requests, however PUT and POST requests will only see the effect
+
+```yaml
+Type: SwitchParameter
 Parameter Sets: (All)
 Aliases:
 
@@ -578,11 +578,11 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -PageSize
-Maximum results per page
+### -ProcessingMode
+Cumulocity processing mode
 
 ```yaml
-Type: Int32
+Type: String
 Parameter Sets: (All)
 Aliases:
 
@@ -752,21 +752,6 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -TotalPages
-Total number of pages to get
-
-```yaml
-Type: Int32
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: Named
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
 ### -View
 Use views when displaying data on the terminal.
 Disable using --view off
@@ -785,21 +770,6 @@ Accept wildcard characters: False
 
 ### -WithError
 Errors will be printed on stdout instead of stderr
-
-```yaml
-Type: SwitchParameter
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: Named
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
-### -WithTotalPages
-Request Cumulocity to include the total pages in the response statistics under .statistics.totalPages
 
 ```yaml
 Type: SwitchParameter
@@ -840,5 +810,5 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 
 ## RELATED LINKS
 
-[https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/userroles_getRoleReferenceCollectionFromUser](https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/userroles_getRoleReferenceCollectionFromUser)
+[https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/devicemanagement_certificates_delete](https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/devicemanagement_certificates_delete)
 

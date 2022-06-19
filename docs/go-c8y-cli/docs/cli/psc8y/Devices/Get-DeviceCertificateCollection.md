@@ -1,24 +1,23 @@
 ---
-category: Role
+category: Devices
 external help file: PSc8y-help.xml
-id: Get-RoleReferenceCollectionFromUser
+id: Get-DeviceCertificateCollection
 Module Name: PSc8y
-online version: https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/userroles_getRoleReferenceCollectionFromUser
+online version: https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/devicemanagement_certificates_list
 schema: 2.0.0
-slug: /docs/cli/psc8y/Role/get-rolereferencecollectionfromuser
-title: Get-RoleReferenceCollectionFromUser
+slug: /docs/cli/psc8y/Devices/get-devicecertificatecollection
+title: Get-DeviceCertificateCollection
 ---
 
 
 
 ## SYNOPSIS
-Get role references from user
+List device certificates
 
 ## SYNTAX
 
 ```
-Get-RoleReferenceCollectionFromUser
-	[-User] <Object[]>
+Get-DeviceCertificateCollection
 	[[-Tenant] <Object>]
 	[-PageSize <Int32>]
 	[-WithTotalPages]
@@ -70,36 +69,21 @@ Get-RoleReferenceCollectionFromUser
 ```
 
 ## DESCRIPTION
-Get collection of user role references from a user
+List the trusted device certificates
 
 ## EXAMPLES
 
 ### EXAMPLE 1
 ```
-Get-RoleReferenceCollectionFromUser -User $User.id
+Get-DeviceCertificateCollection
 ```
 
-Get a list of role references for a user
+Get list of trusted device certificates
 
 ## PARAMETERS
 
-### -User
-User (required)
-
-```yaml
-Type: Object[]
-Parameter Sets: (All)
-Aliases:
-
-Required: True
-Position: 1
-Default value: None
-Accept pipeline input: True (ByPropertyName, ByValue)
-Accept wildcard characters: False
-```
-
 ### -Tenant
-Tenant
+Tenant id
 
 ```yaml
 Type: Object
@@ -107,9 +91,9 @@ Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: 2
+Position: 1
 Default value: None
-Accept pipeline input: False
+Accept pipeline input: True (ByPropertyName, ByValue)
 Accept wildcard characters: False
 ```
 
@@ -840,5 +824,5 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 
 ## RELATED LINKS
 
-[https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/userroles_getRoleReferenceCollectionFromUser](https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/userroles_getRoleReferenceCollectionFromUser)
+[https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/devicemanagement_certificates_list](https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/devicemanagement_certificates_list)
 
