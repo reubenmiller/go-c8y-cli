@@ -49,8 +49,8 @@ Get trusted device certificate by name
 
 	cmd.SilenceUsage = true
 
-	cmd.Flags().StringSlice("id", []string{""}, "Certificate fingerprint or name (required) (accepts pipeline)")
-	cmd.Flags().String("tenant", "", "Tenant id (required)")
+	cmd.Flags().StringSlice("id", []string{""}, "Certificate fingerprint or name (accepts pipeline)")
+	cmd.Flags().String("tenant", "", "Tenant id")
 
 	completion.WithOptions(
 		cmd,
@@ -61,11 +61,10 @@ Get trusted device certificate by name
 	flags.WithOptions(
 		cmd,
 
-		flags.WithExtendedPipelineSupport("id", "id", true, "fingerprint", "name", "id"),
+		flags.WithExtendedPipelineSupport("id", "id", false, "fingerprint", "name", "id"),
 	)
 
 	// Required flags
-	_ = cmd.MarkFlagRequired("tenant")
 
 	ccmd.SubCommand = subcommand.NewSubCommand(cmd)
 

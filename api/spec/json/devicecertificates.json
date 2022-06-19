@@ -12,7 +12,8 @@
       "descriptionLong": "List the trusted device certificates\n",
       "method": "GET",
       "path": "tenant/tenants/{tenant}/trusted-certificates",
-      "accept": "application/json",
+      "accept": "application/vnd.com.nsn.cumulocity.customTrustedCertificateCollection+json",
+      "collectionType": "application/json",
       "collectionProperty": "certificates",
       "alias": {
         "go": "list",
@@ -37,7 +38,7 @@
           "name": "tenant",
           "type": "tenant",
           "pipeline": true,
-          "required": true,
+          "required": false,
           "description": "Tenant id"
         }
       ]
@@ -82,7 +83,7 @@
           "name": "id",
           "type": "[]certificate",
           "pipeline": true,
-          "required": true,
+          "required": false,
           "description": "Certificate fingerprint or name",
           "pipelineAliases": [
             "fingerprint",
@@ -94,7 +95,7 @@
           "name": "tenant",
           "type": "tenant",
           "pipeline": false,
-          "required": true,
+          "required": false,
           "description": "Tenant id"
         }
       ]
@@ -144,7 +145,7 @@
           "name": "id",
           "type": "[]certificate",
           "pipeline": true,
-          "required": true,
+          "required": false,
           "description": "Certificate fingerprint or name",
           "pipelineAliases": [
             "fingerprint",
@@ -155,7 +156,7 @@
         {
           "name": "tenant",
           "type": "tenant",
-          "required": true,
+          "required": false,
           "description": "Tenant id"
         }
       ],
@@ -227,7 +228,7 @@
           "name": "id",
           "type": "[]certificate",
           "pipeline": true,
-          "required": true,
+          "required": false,
           "description": "Certificate fingerprint or name",
           "pipelineAliases": [
             "fingerprint",
@@ -239,7 +240,7 @@
           "name": "tenant",
           "type": "tenant",
           "pipeline": false,
-          "required": true,
+          "required": false,
           "description": "Tenant id"
         }
       ]
@@ -281,7 +282,7 @@
           "name": "tenant",
           "type": "tenant",
           "pipeline": false,
-          "required": true,
+          "required": false,
           "description": "Tenant id"
         }
       ],
@@ -300,7 +301,7 @@
           "name": "status",
           "description": "Status",
           "type": "string",
-          "required": true,
+          "required": false,
           "default": "ENABLED",
           "validationSet": [
             "ENABLED",
@@ -327,7 +328,8 @@
       ],
       "bodyRequiredKeys": [
         "name",
-        "certInPemFormat"
+        "certInPemFormat",
+        "status"
       ]
     }
   ]

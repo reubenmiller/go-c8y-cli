@@ -48,9 +48,9 @@ Copy device certificates from one Cumulocity tenant to another (tenants must not
 
 	cmd.SilenceUsage = true
 
-	cmd.Flags().String("tenant", "", "Tenant id (required)")
+	cmd.Flags().String("tenant", "", "Tenant id")
 	cmd.Flags().String("name", "", "Certificate name (accepts pipeline)")
-	cmd.Flags().String("status", "ENABLED", "Status (required)")
+	cmd.Flags().String("status", "ENABLED", "Status")
 	cmd.Flags().String("file", "", "Certificate file (in PEM format with header/footer)")
 	cmd.Flags().Bool("autoRegistrationEnabled", false, "Enable auto registration")
 
@@ -69,8 +69,6 @@ Copy device certificates from one Cumulocity tenant to another (tenants must not
 	)
 
 	// Required flags
-	_ = cmd.MarkFlagRequired("tenant")
-	_ = cmd.MarkFlagRequired("status")
 
 	ccmd.SubCommand = subcommand.NewSubCommand(cmd)
 
@@ -148,7 +146,7 @@ func (n *CreateCmd) RunE(cmd *cobra.Command, args []string) error {
 		flags.WithBoolValue("autoRegistrationEnabled", "autoRegistrationEnabled", ""),
 		cmdutil.WithTemplateValue(cfg),
 		flags.WithTemplateVariablesValue(),
-		flags.WithRequiredProperties("name", "certInPemFormat"),
+		flags.WithRequiredProperties("name", "certInPemFormat", "status"),
 	)
 	if err != nil {
 		return cmderrors.NewUserError(err)

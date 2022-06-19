@@ -13,7 +13,8 @@ endpoints:
       List the trusted device certificates
     method: GET
     path: tenant/tenants/{tenant}/trusted-certificates
-    accept: 'application/json'
+    accept: application/vnd.com.nsn.cumulocity.customTrustedCertificateCollection+json
+    collectionType: application/json
     collectionProperty: certificates
     alias:
         go: list
@@ -31,7 +32,7 @@ endpoints:
       - name: tenant
         type: tenant
         pipeline: true
-        required: true
+        required: false
         description: Tenant id
 
   - name: getCertificate
@@ -63,7 +64,7 @@ endpoints:
       - name: id
         type: '[]certificate'
         pipeline: true
-        required: true
+        required: false
         description: Certificate fingerprint or name
         pipelineAliases:
           - "fingerprint"
@@ -73,7 +74,7 @@ endpoints:
       - name: tenant
         type: tenant
         pipeline: false
-        required: true
+        required: false
         description: Tenant id
 
   - name: updateCertificate
@@ -109,7 +110,7 @@ endpoints:
       - name: id
         type: '[]certificate'
         pipeline: true
-        required: true
+        required: false
         description: Certificate fingerprint or name
         pipelineAliases:
           - "fingerprint"
@@ -118,7 +119,7 @@ endpoints:
 
       - name: tenant
         type: tenant
-        required: true
+        required: false
         description: Tenant id
 
     body:
@@ -172,7 +173,7 @@ endpoints:
       - name: id
         type: '[]certificate'
         pipeline: true
-        required: true
+        required: false
         description: Certificate fingerprint or name
         pipelineAliases:
           - "fingerprint"
@@ -182,7 +183,7 @@ endpoints:
       - name: tenant
         type: tenant
         pipeline: false
-        required: true
+        required: false
         description: Tenant id
 
   - name: createCertificate
@@ -214,7 +215,7 @@ endpoints:
       - name: tenant
         type: tenant
         pipeline: false
-        required: true
+        required: false
         description: Tenant id
 
     body:
@@ -229,7 +230,7 @@ endpoints:
       - name: status
         description: Status
         type: string
-        required: true
+        required: false
         default: ENABLED
         validationSet:
           - ENABLED
@@ -252,3 +253,4 @@ endpoints:
     bodyRequiredKeys:
       - name
       - certInPemFormat
+      - status

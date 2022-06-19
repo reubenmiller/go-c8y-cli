@@ -23,8 +23,8 @@ Upload a trusted device certificate
     [Alias()]
     [OutputType([object])]
     Param(
-        # Tenant id (required)
-        [Parameter(Mandatory = $true)]
+        # Tenant id
+        [Parameter()]
         [object]
         $Tenant,
 
@@ -34,8 +34,8 @@ Upload a trusted device certificate
         [object[]]
         $Name,
 
-        # Status (required)
-        [Parameter(Mandatory = $true)]
+        # Status
+        [Parameter()]
         [ValidateSet('ENABLED','DISABLED')]
         [string]
         $Status,

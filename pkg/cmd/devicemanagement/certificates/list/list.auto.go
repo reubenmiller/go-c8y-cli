@@ -46,7 +46,7 @@ Get list of trusted device certificates
 
 	cmd.SilenceUsage = true
 
-	cmd.Flags().String("tenant", "", "Tenant id (required) (accepts pipeline)")
+	cmd.Flags().String("tenant", "", "Tenant id (accepts pipeline)")
 
 	completion.WithOptions(
 		cmd,
@@ -56,7 +56,7 @@ Get list of trusted device certificates
 	flags.WithOptions(
 		cmd,
 
-		flags.WithExtendedPipelineSupport("tenant", "tenant", true, "id"),
+		flags.WithExtendedPipelineSupport("tenant", "tenant", false, "id"),
 		flags.WithCollectionProperty("certificates"),
 	)
 

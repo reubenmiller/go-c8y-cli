@@ -27,15 +27,14 @@ Update device certificate by name
     [Alias()]
     [OutputType([object])]
     Param(
-        # Certificate fingerprint or name (required)
-        [Parameter(Mandatory = $true,
-                   ValueFromPipeline=$true,
+        # Certificate fingerprint or name
+        [Parameter(ValueFromPipeline=$true,
                    ValueFromPipelineByPropertyName=$true)]
         [object[]]
         $Id,
 
-        # Tenant id (required)
-        [Parameter(Mandatory = $true)]
+        # Tenant id
+        [Parameter()]
         [object]
         $Tenant,
 

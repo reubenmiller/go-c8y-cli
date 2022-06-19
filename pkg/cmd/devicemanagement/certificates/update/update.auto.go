@@ -48,8 +48,8 @@ Update device certificate by name
 
 	cmd.SilenceUsage = true
 
-	cmd.Flags().StringSlice("id", []string{""}, "Certificate fingerprint or name (required) (accepts pipeline)")
-	cmd.Flags().String("tenant", "", "Tenant id (required)")
+	cmd.Flags().StringSlice("id", []string{""}, "Certificate fingerprint or name (accepts pipeline)")
+	cmd.Flags().String("tenant", "", "Tenant id")
 	cmd.Flags().String("name", "", "Certificate name")
 	cmd.Flags().String("status", "", "Status")
 	cmd.Flags().Bool("autoRegistrationEnabled", false, "Enable auto registration")
@@ -66,11 +66,10 @@ Update device certificate by name
 		flags.WithProcessingMode(),
 		flags.WithData(),
 		f.WithTemplateFlag(cmd),
-		flags.WithExtendedPipelineSupport("id", "id", true, "fingerprint", "name", "id"),
+		flags.WithExtendedPipelineSupport("id", "id", false, "fingerprint", "name", "id"),
 	)
 
 	// Required flags
-	_ = cmd.MarkFlagRequired("tenant")
 
 	ccmd.SubCommand = subcommand.NewSubCommand(cmd)
 

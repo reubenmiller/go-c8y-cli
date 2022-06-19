@@ -23,15 +23,14 @@ Get list of trusted device certificates
     [Alias()]
     [OutputType([object])]
     Param(
-        # Tenant id (required)
-        [Parameter(Mandatory = $true,
-                   ValueFromPipeline=$true,
+        # Tenant id
+        [Parameter(ValueFromPipeline=$true,
                    ValueFromPipelineByPropertyName=$true)]
         [object]
         $Tenant
     )
     DynamicParam {
-        Get-ClientCommonParameters -Type "Get"
+        Get-ClientCommonParameters -Type "Get", "Collection"
     }
 
     Begin {
@@ -44,8 +43,8 @@ Get list of trusted device certificates
         $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "devicemanagement certificates list"
         $ClientOptions = Get-ClientOutputOption $PSBoundParameters
         $TypeOptions = @{
-            Type = "application/json"
-            ItemType = ""
+            Type = "application/vnd.com.nsn.cumulocity.customTrustedCertificateCollection+json"
+            ItemType = "application/json"
             BoundParameters = $PSBoundParameters
         }
     }
