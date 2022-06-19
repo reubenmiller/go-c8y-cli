@@ -12,6 +12,7 @@
       "descriptionLong": "Retrieve device statistics from a specific tenant (by a given ID). Either daily or monthly.\n",
       "method": "GET",
       "path": "/tenant/statistics/device/{tenant}/{type}/{date}",
+      "accept": "application/vnd.com.nsn.cumulocity.tenantusagestatisticscollection+json",
       "collectionProperty": "statistics",
       "alias": {
         "go": "list",
