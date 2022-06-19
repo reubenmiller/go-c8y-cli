@@ -2,9 +2,15 @@ package flags
 
 import (
 	"context"
+	"crypto/x509"
+	"encoding/base64"
+	"encoding/pem"
+	"errors"
 	"fmt"
+	"log"
 	"mime"
 	"net/http"
+	"os"
 	"path/filepath"
 	"strings"
 
@@ -663,6 +669,58 @@ func WithRelativeDate(encode bool, opts ...string) GetOption {
 
 		// mark iterator as unbound, so it will not increment the input iterators
 		return dst, iterator.NewRelativeDateIterator(value, encode, "2006-01-02", format), err
+	}
+}
+
+// WithCertificateFile adds a PEM certificate file contents
+func WithCertificateFile(opts ...string) GetOption {
+	return func(cmd *cobra.Command, inputIterators *RequestInputIterators) (string, interface{}, error) {
+		src, dst, _ := UnpackGetterOptions("%s", opts...)
+
+		value, err := cmd.Flags().GetString(src)
+
+		if err != nil {
+			return dst, value, err
+		}
+
+		if value == "" {
+			return "", nil, nil
+		}
+
+		// Detect if a pem value or file is being passed
+		if pemRaw, pemErr := base64.StdEncoding.DecodeString(value); pemErr == nil {
+			_, certErr := x509.ParseCertificate([]byte(pemRaw))
+
+			if certErr == nil {
+				// Value is already set to the contents of the certificate
+				return dst, value, nil
+			}
+		}
+
+		if _, err := os.Stat(value); errors.Is(err, os.ErrNotExist) {
+			return "", nil, fmt.Errorf("flag: %s. %w", src, err)
+		}
+
+		r, err := os.ReadFile(value)
+
+		if err != nil {
+			return "", nil, fmt.Errorf("flag: %s. %w", src, err)
+		}
+
+		block, _ := pem.Decode(r)
+
+		if block == nil || block.Type != "CERTIFICATE" {
+			return "", nil, fmt.Errorf("failed to decode PEM block containing certificate")
+		}
+
+		_, err = x509.ParseCertificate(block.Bytes)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		value = base64.StdEncoding.EncodeToString(block.Bytes)
+
+		return dst, value, err
 	}
 }
 

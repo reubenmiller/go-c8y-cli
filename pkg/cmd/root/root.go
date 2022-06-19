@@ -34,6 +34,7 @@ import (
 	databrokerCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/databroker"
 	devicegroupsCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/devicegroups"
 	devicegroupsListCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/devicegroups/list"
+	deviceManagementCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/devicemanagement"
 	deviceprofilesCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/deviceprofiles"
 	deviceregistrationCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/deviceregistration"
 	devicesCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/devices"
@@ -314,6 +315,10 @@ func NewCmdRoot(f *cmdutil.Factory, version, buildDate string) *CmdRoot {
 	measurements.AddCommand(measurementsAssertCmd.NewSubCommand(f).GetCommand())
 	measurements.AddCommand(measurementsCreateBulkCmd.NewCreateBulkCmd(f).GetCommand())
 	cmd.AddCommand(measurements)
+
+	// device management
+	devicemanagement := deviceManagementCmd.NewSubCommand(f).GetCommand()
+	cmd.AddCommand(devicemanagement)
 
 	// devices
 	devices := devicesCmd.NewSubCommand(f).GetCommand()

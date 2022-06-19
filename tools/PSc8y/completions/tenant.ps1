@@ -6,6 +6,15 @@ $script:CompleteTenant = {
         $searchFor = $wordToComplete
     }
 
+    if ($env:C8Y_TENANT) {
+        [System.Management.Automation.CompletionResult]::new(
+            $env:C8Y_TENANT,
+            "(Current tenant)",
+            'ParameterValue',
+            $env:C8Y_TENANT
+        )
+    }
+
     Get-TenantCollection -PageSize 100 -WarningAction SilentlyContinue -AsPSObject `
     | Where-Object { $_.id -like "$searchFor*" } `
     | ForEach-Object {

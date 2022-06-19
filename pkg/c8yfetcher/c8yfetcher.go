@@ -936,3 +936,11 @@ func WithUserGroupByNameFirstMatch(client *c8y.Client, args []string, opts ...st
 		return opt(cmd, inputIterators)
 	}
 }
+
+// WithCertificateByNameFirstMatch add reference by name matching for trusted device certificate via cli args. Only the first match will be used
+func WithCertificateByNameFirstMatch(client *c8y.Client, args []string, opts ...string) flags.GetOption {
+	return func(cmd *cobra.Command, inputIterators *flags.RequestInputIterators) (string, interface{}, error) {
+		opt := WithReferenceByNameFirstMatch(client, NewDeviceCertificateFetcher(client), args, opts...)
+		return opt(cmd, inputIterators)
+	}
+}

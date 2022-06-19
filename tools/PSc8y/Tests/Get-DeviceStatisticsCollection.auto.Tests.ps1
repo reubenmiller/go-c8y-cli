@@ -8,6 +8,7 @@ Describe -Name "Get-DeviceStatisticsCollection" {
     It "Get device statistics" {
         $Response = PSc8y\Get-DeviceStatisticsCollection
         $LASTEXITCODE | Should -Be 0
+        $Response | Should -Not -BeNullOrEmpty
     }
 
 

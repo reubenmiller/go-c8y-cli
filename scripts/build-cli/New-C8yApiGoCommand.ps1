@@ -175,6 +175,7 @@
             "(\[\])?firmwarepatch(name)?$" { [void] $CompletionBuilderOptions.AppendLine("completion.WithFirmwarePatch(`"$($iArg.Name)`", `"$($iArg.dependsOn | Select-Object -First 1)`", func() (*c8y.Client, error) { return ccmd.factory.Client()}),") }
             "(\[\])?configuration$" { [void] $CompletionBuilderOptions.AppendLine("completion.WithConfiguration(`"$($iArg.Name)`", func() (*c8y.Client, error) { return ccmd.factory.Client()}),") }
             "(\[\])?deviceprofile$" { [void] $CompletionBuilderOptions.AppendLine("completion.WithDeviceProfile(`"$($iArg.Name)`", func() (*c8y.Client, error) { return ccmd.factory.Client()}),") }
+            "(\[\])?certificate$" { [void] $CompletionBuilderOptions.AppendLine("completion.WithDeviceCertificate(`"$($iArg.Name)`", func() (*c8y.Client, error) { return ccmd.factory.Client()}),") }
         }
 
         $ArgParams = @{
@@ -1086,6 +1087,29 @@ Function Get-C8yGoArgs {
                 "cmd.Flags().StringSlice(`"${Name}`", []string{`"${Default}`"}, `"${Description}`")"
             }
 
+            @{
+                SetFlag = $SetFlag
+            }
+        }
+
+        # Trusted device certficates
+        "[]certificate" {
+            $SetFlag = if ($UseOption) {
+                "cmd.Flags().StringSlice(`"${Name}`", `"${OptionName}`", []string{`"${Default}`"}, `"${Description}`")"
+            } else {
+                "cmd.Flags().StringSlice(`"${Name}`", []string{`"${Default}`"}, `"${Description}`")"
+            }
+            @{
+                SetFlag = $SetFlag
+            }
+        }
+
+        "certificatefile" {
+            $SetFlag = if ($UseOption) {
+                "cmd.Flags().String(`"${Name}`", `"${OptionName}`", `"${Default}`", `"${Description}`")"
+            } else {
+                "cmd.Flags().String(`"${Name}`", `"${Default}`", `"${Description}`")"
+            }
             @{
                 SetFlag = $SetFlag
             }

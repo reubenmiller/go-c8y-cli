@@ -1,0 +1,256 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/reubenmiller/go-c8y-cli/v2/api/spec/schema.json
+---
+information:
+  name: devicemanagement/certificates
+  description: Device Certificate management
+  descriptionLong: Manage the trusted certificates which are used by devices.
+  link: 'https://cumulocity.com/guides/users-guide/device-management/#trusted-certificates'
+
+endpoints:
+  - name: listCertificate
+    description: 'List device certificates'
+    descriptionLong: |
+      List the trusted device certificates
+    method: GET
+    path: tenant/tenants/{tenant}/trusted-certificates
+    accept: application/vnd.com.nsn.cumulocity.customTrustedCertificateCollection+json
+    collectionType: application/json
+    collectionProperty: certificates
+    alias:
+        go: list
+        powershell: Get-DeviceCertificateCollection
+    examples:
+      powershell:
+        - description: Get list of trusted device certificates
+          command: Get-DeviceCertificateCollection
+
+      go:
+        - description: Get list of trusted device certificates
+          command: c8y devicemanagement certificates list
+
+    pathParameters:
+      - name: tenant
+        type: tenant
+        pipeline: true
+        required: false
+        description: Tenant id
+
+  - name: getCertificate
+    description: 'Get trusted device certificate'
+    descriptionLong: Get a trusted device certificate
+    method: GET
+    path: tenant/tenants/{tenant}/trusted-certificates/{id}
+    accept: application/json
+    alias:
+        go: get
+        powershell: Get-DeviceCertificate
+    examples:
+      powershell:
+        - description: Get trusted device certificate by id/fingerprint
+          command: Get-DeviceCertificate -Id abcedef0123456789abcedef0123456789
+          skipTest: true
+
+      go:
+        - description: Get trusted device certificate by id/fingerprint
+          command: c8y devicemanagement certificates get --id abcedef0123456789abcedef0123456789
+        
+        - description: Get trusted device certificate by name
+          command: c8y devicemanagement certificates get --id MyCert
+          assertStdOut:
+            json:
+              path: r//tenant/tenants/t\d+/trusted-certificates/\w+$
+
+    pathParameters:
+      - name: id
+        type: '[]certificate'
+        pipeline: true
+        required: false
+        description: Certificate fingerprint or name
+        pipelineAliases:
+          - "fingerprint"
+          - "name"
+          - "id"
+      
+      - name: tenant
+        type: tenant
+        pipeline: false
+        required: false
+        description: Tenant id
+
+  - name: updateCertificate
+    description: 'Update trusted device certificate'
+    descriptionLong: Update settings of an existing trusted device certificate
+    method: PUT
+    path: tenant/tenants/{tenant}/trusted-certificates/{id}
+    accept: application/json
+    alias:
+        go: update
+        powershell: Update-DeviceCertificate
+    examples:
+      powershell:
+        - description: Update device certificate by id/fingerprint
+          command: Update-DeviceCertificate -Id abcedef0123456789abcedef0123456789 -Status DISABLED
+          skipTest: true
+
+        - description: Update device certificate by name
+          command: Update-DeviceCertificate -Id "MyCert" -Status DISABLED
+          skipTest: true
+
+      go:
+        - description: Update device certificate by id/fingerprint
+          command: c8y devicemanagement certificates update --id abcedef0123456789abcedef0123456789 --status DISABLED
+        
+        - description: Update device certificate by name
+          command: c8y devicemanagement certificates update --id MyCert --status DISABLED
+          assertStdOut:
+            json:
+              path: r//tenant/tenants/t\d+/trusted-certificates/4fd8df0378f2cafd5e322c1aaa8b87300704e9a5
+
+    pathParameters:
+      - name: id
+        type: '[]certificate'
+        pipeline: true
+        required: false
+        description: Certificate fingerprint or name
+        pipelineAliases:
+          - "fingerprint"
+          - "name"
+          - "id"
+
+      - name: tenant
+        type: tenant
+        required: false
+        description: Tenant id
+
+    body:
+      - name: name
+        type: string
+        required: false
+        description: Certificate name
+
+      - name: status
+        description: Status
+        type: string
+        validationSet:
+          - ENABLED
+          - DISABLED
+      
+      - name: autoRegistrationEnabled
+        description: Enable auto registration
+        type: boolean
+
+      - name: data
+        type: json
+        description: Custom properties.
+
+  - name: deleteCertificate
+    description: 'Delete device certificate'
+    descriptionLong: |
+      Remove a trusted device certificate. All devices connected to the platform will no longer be able to communicate.
+    method: DELETE
+    path: tenant/tenants/{tenant}/trusted-certificates/{id}
+    accept: ''
+    alias:
+        go: delete
+        powershell: Remove-DeviceCertificate
+    examples:
+      powershell:
+        - description: Remove trusted device certificate by id/fingerprint
+          command: Remove-DeviceCertificate -Id abcedef0123456789abcedef0123456789
+          skipTest: true
+
+      go:
+        - description: Remove trusted device certificate by id/fingerprint
+          command: c8y devicemanagement certificates delete --id abcedef0123456789abcedef0123456789
+        
+        - description: Remove trusted device certificate by name
+          command: c8y devicemanagement certificates delete --id MyCert
+          assertStdOut:
+            json:
+              path: r//tenant/tenants/t\d+/trusted-certificates/\w+$
+
+    pathParameters:
+      - name: id
+        type: '[]certificate'
+        pipeline: true
+        required: false
+        description: Certificate fingerprint or name
+        pipelineAliases:
+          - "fingerprint"
+          - "name"
+          - "id"
+      
+      - name: tenant
+        type: tenant
+        pipeline: false
+        required: false
+        description: Tenant id
+
+  - name: createCertificate
+    description: 'Upload trusted device certificate'
+    descriptionLong: |
+      Upload a trusted device certificate which will enable communication to Cumulocity using the certificate (or a cert which is trusted by the certificate)
+    method: POST
+    path: tenant/tenants/{tenant}/trusted-certificates
+    accept: application/json
+    alias:
+        go: create
+        powershell: New-DeviceCertificate
+    examples:
+      powershell:
+        - description: Upload a trusted device certificate
+          command: New-DeviceCertificate -Name "MyCert" -File "./cert.pem"
+          skipTest: true
+
+      go:
+        - description: Upload a trusted device certificate
+          command: c8y devicemanagement certificates create --name "MyCert" --file "trustedcert.pem"
+          skipTest: true
+        
+        - description: Copy device certificates from one Cumulocity tenant to another (tenants must not be hosted on the same instance!)
+          command: c8y devicemanagement certificates list | c8y devicemanagement certificates create --template input.value --session c8y.Q.instance
+          skipTest: true
+
+    pathParameters:
+      - name: tenant
+        type: tenant
+        pipeline: false
+        required: false
+        description: Tenant id
+
+    body:
+      - name: name
+        type: string
+        pipeline: true
+        required: false
+        description: Certificate name
+        pipelineAliases:
+          - "name"
+
+      - name: status
+        description: Status
+        type: string
+        required: false
+        default: ENABLED
+        validationSet:
+          - ENABLED
+          - DISABLED
+      
+      - name: file
+        description: Certificate file (in PEM format with header/footer)
+        type: certificatefile
+        property: certInPemFormat
+      
+      - name: autoRegistrationEnabled
+        description: Enable auto registration
+        type: boolean
+        default: "false"
+
+      - name: data
+        type: json
+        description: Custom properties.
+
+    bodyRequiredKeys:
+      - name
+      - certInPemFormat
+      - status

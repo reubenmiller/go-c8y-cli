@@ -213,7 +213,6 @@ endpoints:
     statusCodes:
       "200": if the process has completed, all alarms have been updated
       "202": if process continues in background
-    collectionProperty: alarms
     alias:
         go: updateCollection
         powershell: Update-AlarmCollection

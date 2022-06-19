@@ -46,7 +46,7 @@ Get device statistics
         $Tenant
     )
     DynamicParam {
-        Get-ClientCommonParameters -Type "Get"
+        Get-ClientCommonParameters -Type "Get", "Collection"
     }
 
     Begin {
@@ -59,7 +59,7 @@ Get device statistics
         $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "devices statistics list"
         $ClientOptions = Get-ClientOutputOption $PSBoundParameters
         $TypeOptions = @{
-            Type = ""
+            Type = "application/vnd.com.nsn.cumulocity.tenantusagestatisticscollection+json"
             ItemType = ""
             BoundParameters = $PSBoundParameters
         }
