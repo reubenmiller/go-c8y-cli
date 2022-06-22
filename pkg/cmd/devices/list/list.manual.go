@@ -40,6 +40,12 @@ func NewCmdDevicesList(f *cmdutil.Factory) *CmdDevicesList {
 		$ c8y devices list --query "name eq '*sensor*' and creationTime.date gt '2021-04-02T00:00:00'"
 		Get devices which names containing 'sensor' and were created after 2021-04-02
 
+		$ c8y devices list --creationTimeDateFrom -7d
+		Get devices which where registered longer than 7 days ago
+
+		$ c8y devices list --creationTimeDateTo -1d
+		Get devices which where registered in the last day
+
 		$ echo -e "c8y_MacOS\nc8y_Linux" | c8y devices list --queryTemplate "type eq '%s'"
 		Get devices with type 'c8y_MacOS' then devices with type 'c8y_Linux' (using pipeline)
 		`),
