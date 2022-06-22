@@ -53,6 +53,8 @@ func NewCmdAgentList(f *cmdutil.Factory) *CmdAgentList {
 	cmd.Flags().String("availability", "", "Filter by c8y_Availability.status")
 	cmd.Flags().String("lastMessageDateTo", "", "Filter c8y_Availability.lastMessage to a specific date")
 	cmd.Flags().String("lastMessageDateFrom", "", "Filter c8y_Availability.lastMessage from a specific date")
+	cmd.Flags().String("creationTimeDateTo", "", "Filter creationTime.date to a specific date")
+	cmd.Flags().String("creationTimeDateFrom", "", "Filter creationTime.date from a specific date")
 	cmd.Flags().String("group", "", "Filter by group inclusion")
 	cmd.Flags().Bool("withParents", false, "Include a flat list of all parents and grandparents of the given object")
 
@@ -105,6 +107,8 @@ func (n *CmdAgentList) RunE(cmd *cobra.Command, args []string) error {
 		flags.WithStringValue("availability", "availability", "(c8y_Availability.status eq '%s')"),
 		flags.WithRelativeTimestamp("lastMessageDateTo", "lastMessageDateTo", "(c8y_Availability.lastMessage le '%s')"),
 		flags.WithRelativeTimestamp("lastMessageDateFrom", "lastMessageDateFrom", "(c8y_Availability.lastMessage ge '%s')"),
+		flags.WithRelativeTimestamp("creationTimeDateTo", "creationTimeDateTo", "creationTime.date le '%s'"),
+		flags.WithRelativeTimestamp("creationTimeDateFrom", "creationTimeDateFrom", "creationTime.date ge '%s'"),
 	)
 
 	if err != nil {
