@@ -88,3 +88,21 @@ tests:
         - c8y_Availability.status eq 'AVAILABLE'
         - c8y_Availability.lastMessage le '
         - c8y_Availability.lastMessage ge '
+
+  It filters devices by creationTime to:
+    command: |
+      c8y devices list --creationTimeDateTo -10d --dry |
+        c8y util show --select query
+    exit-code: 0
+    stdout:
+      contains:
+        - creationTime.date le '
+  
+  It filters devices by creationTime from:
+    command: |
+      c8y devices list --creationTimeDateFrom -5d --dry |
+        c8y util show --select query
+    exit-code: 0
+    stdout:
+      contains:
+        - creationTime.date ge '

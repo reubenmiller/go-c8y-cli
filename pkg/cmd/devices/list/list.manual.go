@@ -40,6 +40,12 @@ func NewCmdDevicesList(f *cmdutil.Factory) *CmdDevicesList {
 		$ c8y devices list --query "name eq '*sensor*' and creationTime.date gt '2021-04-02T00:00:00'"
 		Get devices which names containing 'sensor' and were created after 2021-04-02
 
+		$ c8y devices list --creationTimeDateFrom -7d
+		Get devices which where registered longer than 7 days ago
+
+		$ c8y devices list --creationTimeDateTo -1d
+		Get devices which where registered in the last day
+
 		$ echo -e "c8y_MacOS\nc8y_Linux" | c8y devices list --queryTemplate "type eq '%s'"
 		Get devices with type 'c8y_MacOS' then devices with type 'c8y_Linux' (using pipeline)
 		`),
@@ -56,6 +62,8 @@ func NewCmdDevicesList(f *cmdutil.Factory) *CmdDevicesList {
 	cmd.Flags().String("availability", "", "Filter by c8y_Availability.status")
 	cmd.Flags().String("lastMessageDateTo", "", "Filter c8y_Availability.lastMessage to a specific date")
 	cmd.Flags().String("lastMessageDateFrom", "", "Filter c8y_Availability.lastMessage from a specific date")
+	cmd.Flags().String("creationTimeDateTo", "", "Filter creationTime.date to a specific date")
+	cmd.Flags().String("creationTimeDateFrom", "", "Filter creationTime.date from a specific date")
 	cmd.Flags().String("group", "", "Filter by group inclusion")
 	cmd.Flags().Bool("withParents", false, "Include a flat list of all parents and grandparents of the given object")
 
@@ -114,6 +122,8 @@ func (n *CmdDevicesList) RunE(cmd *cobra.Command, args []string) error {
 		flags.WithStringValue("availability", "availability", "(c8y_Availability.status eq '%s')"),
 		flags.WithRelativeTimestamp("lastMessageDateTo", "lastMessageDateTo", "(c8y_Availability.lastMessage le '%s')"),
 		flags.WithRelativeTimestamp("lastMessageDateFrom", "lastMessageDateFrom", "(c8y_Availability.lastMessage ge '%s')"),
+		flags.WithRelativeTimestamp("creationTimeDateTo", "creationTimeDateTo", "creationTime.date le '%s'"),
+		flags.WithRelativeTimestamp("creationTimeDateFrom", "creationTimeDateFrom", "creationTime.date ge '%s'"),
 		flags.WithDefaultBoolValue("agents", "agents", "has(com_cumulocity_model_Agent)"),
 	)
 

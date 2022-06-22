@@ -40,3 +40,21 @@ tests:
         - c8y_Availability.status eq 'AVAILABLE'
         - c8y_Availability.lastMessage le '
         - c8y_Availability.lastMessage ge '
+
+  It filters agents by creationTime to:
+    command: |
+      c8y agents list --creationTimeDateTo -10d --dry |
+        c8y util show --select query
+    exit-code: 0
+    stdout:
+      contains:
+        - creationTime.date le '
+  
+  It filters agents by creationTime from:
+    command: |
+      c8y agents list --creationTimeDateFrom -5d --dry |
+        c8y util show --select query
+    exit-code: 0
+    stdout:
+      contains:
+        - creationTime.date ge '
