@@ -923,6 +923,10 @@ func (r *RequestHandler) saveResponseToFile(resp *c8y.Response, filename string,
 
 	var out *os.File
 	var err error
+	dirPath := path.Dir(filename)
+	if err := os.MkdirAll(dirPath, os.ModePerm); err != nil {
+		return "", fmt.Errorf("could not create directory. dir=%s,  err=%w", dirPath, err)
+	}
 	if append {
 		out, err = os.OpenFile(filename, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 	} else {
