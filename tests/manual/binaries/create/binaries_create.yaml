@@ -1,0 +1,74 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/reubenmiller/commander/feat/handle-nested-files/schema.json
+
+config:
+  env:
+    C8Y_SETTINGS_DEFAULTS_CACHE: true
+    C8Y_SETTINGS_CACHE_METHODS: GET POST PUT
+    C8Y_SETTINGS_DEFAULTS_CACHETTL: 100h
+    C8Y_SETTINGS_DEFAULTS_DRY: true
+    C8Y_SETTINGS_DEFAULTS_DRYFORMAT: json
+
+tests:
+  It creates a binary and uses the basename of the file:
+    command: |
+      c8y binaries create --file manual/binaries/create/data.csv --dry --dryFormat markdown --data c8y_IsGlobal={}
+    exit-code: 0
+    stdout:
+      contains:
+        - |
+          Content-Disposition: form-data; name="file"; filename="data.csv"
+          Content-Type: application/octet-stream
+
+          index,name
+          0,Peter
+          1,Pi
+        
+        - |
+            Content-Disposition: form-data; name="object"
+
+            {"c8y_IsGlobal":{},"name":"data.csv","type":"text/csv; charset=utf-8"}
+  
+  It creates a binary with a manual name and type:
+    command: |
+      c8y binaries create --file manual/binaries/create/data.csv --name myCustomName.json --type application/json --dry --dryFormat markdown
+    exit-code: 0
+    stdout:
+      contains:
+        - |
+          Content-Disposition: form-data; name="file"; filename="myCustomName.json"
+          Content-Type: application/octet-stream
+
+          index,name
+          0,Peter
+          1,Pi
+        
+        - |
+          Content-Disposition: form-data; name="object"
+
+          {"name":"myCustomName.json","type":"application/json"}
+
+  It adds custom fields to the binary using a template:
+    command: |
+      c8y binaries create --file manual/binaries/create/data.csv --name override --data one=2 --template "{nested:{value:true}}" --dry --dryFormat markdown
+    exit-code: 0
+    stdout:
+      contains:
+        - |
+          Content-Disposition: form-data; name="file"; filename="override"
+          Content-Type: application/octet-stream
+
+          index,name
+          0,Peter
+          1,Pi
+        
+        - |
+          Content-Disposition: form-data; name="object"
+
+          {
+             "name": "override",
+             "nested": {
+                "value": true
+             },
+             "one": 2,
+             "type": "text/csv; charset=utf-8"
+          }
