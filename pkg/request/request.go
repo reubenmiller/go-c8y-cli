@@ -938,14 +938,19 @@ func (r *RequestHandler) saveResponseToFile(resp *c8y.Response, filename string,
 	}
 	defer out.Close()
 
+	if append && newline {
+		if fs, err := out.Stat(); err == nil {
+			if fs.Size() > 0 {
+				// add newline when appending so that content is separated (only if file is not empty)
+				fmt.Fprintf(out, "\n")
+			}
+		}
+	}
+
 	// Writer the body to file
 	r.Logger.Printf("header: %v", resp.Header)
 	_, err = io.Copy(out, resp.Body)
 
-	if newline {
-		// add trailing newline so that json lines are separated by lines
-		fmt.Fprintf(out, "\n")
-	}
 	if err != nil {
 		return "", fmt.Errorf("failed to copy file contents to file. %s", err)
 	}
