@@ -1,4 +1,4 @@
-
+# yaml-language-server: $schema=https://raw.githubusercontent.com/reubenmiller/go-c8y-cli/v2/api/spec/schema.json
 ---
 
 information:
@@ -160,6 +160,10 @@ endpoints:
         type: file
         required: true
         description: File to be uploaded as a binary
+
+      - name: name
+        type: string
+        description: Set the name of the binary file. This will be the name of the file when it is downloaded in the UI
 
       - name: type
         type: string

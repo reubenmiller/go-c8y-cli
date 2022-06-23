@@ -47,6 +47,8 @@ Add a binary to an event
 
 	cmd.Flags().StringSlice("id", []string{""}, "Event id (required) (accepts pipeline)")
 	cmd.Flags().String("file", "", "File to be uploaded as a binary (required)")
+	cmd.Flags().String("name", "", "Set the name of the binary file. This will be the name of the file when it is downloaded in the UI")
+	cmd.Flags().String("type", "", "Custom type. If left blank, the MIME type will be detected from the file extension")
 
 	completion.WithOptions(
 		cmd,
@@ -132,6 +134,8 @@ func (n *CreateBinaryCmd) RunE(cmd *cobra.Command, args []string) error {
 		body,
 		inputIterators,
 		flags.WithDataFlagValue(),
+		flags.WithStringValue("name", "name"),
+		flags.WithStringValue("type", "type"),
 		cmdutil.WithTemplateValue(cfg),
 		flags.WithTemplateVariablesValue(),
 	)

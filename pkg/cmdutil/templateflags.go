@@ -152,8 +152,11 @@ func (f *Factory) WithTemplateFlag(cmd *cobra.Command) flags.Option {
 
 // WithTemplateValue get the template value using the path resolver controlled by the configuration
 func WithTemplateValue(cfg *config.Config) flags.GetOption {
-	resolve := &TemplatePathResolver{
+	return flags.WithTemplateValue(flags.FlagDataTemplateName, NewTemplateResolver(cfg))
+}
+
+func NewTemplateResolver(cfg *config.Config) *TemplatePathResolver {
+	return &TemplatePathResolver{
 		Paths: cfg.GetTemplatePaths(),
 	}
-	return flags.WithTemplateValue(flags.FlagDataTemplateName, resolve)
 }
