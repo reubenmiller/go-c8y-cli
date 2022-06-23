@@ -1,0 +1,11 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/reubenmiller/commander/feat/handle-nested-files/schema.json
+
+config:
+  env:
+    C8Y_SETTINGS_LOGGER_HIDESENSITIVE: true
+    C8Y_SETTINGS_DEFAULTS_DRYFORMAT: markdown
+tests:
+  It should support template expansion when downloading binaries:
+    command: |
+      ./manual/flags/outputFileRaw/tests.sh
+    exit-code: 0
