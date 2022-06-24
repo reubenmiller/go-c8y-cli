@@ -6,3 +6,13 @@ tests:
             json:
                 method: POST
                 path: /event/events/12345/binaries
+    events_createBinary_Add a binary to an event using a custom name:
+        command: |
+            c8y events createBinary --id 12345 --file ./testdata/myfile.log --name "myfile-2022-03-31.log"
+        exit-code: 0
+        skip: true
+        stdout:
+            json:
+                body.name: myfile-2022-03-31.log
+                method: POST
+                path: /event/events/12345/binaries

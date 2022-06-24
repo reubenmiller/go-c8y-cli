@@ -6,3 +6,11 @@ tests:
             json:
                 method: GET
                 path: /event/events/12345/binaries
+    events_downloadBinary_Download a list of event binaries and use a template name to save each binary individually:
+        command: $TEST_SHELL -c 'c8y events list --fragmentType "c8y_IsBinary" | c8y events downloadBinary --outputFileRaw "./output/binary-{id}-{filename}" > /dev/null'
+        exit-code: 0
+        skip: true
+        stdout:
+            json:
+                method: GET
+                path: /event/events/{id}/binaries
