@@ -542,7 +542,7 @@
           {
             "description": "Add a binary to an event using a custom name",
             "skipTest": true,
-            "command": "c8y events createBinary --id 12345 --file \"./myfile-2022-03-31.log\"\n"
+            "command": "c8y events createBinary --id 12345 --file ./myfile.log --name \"myfile-2022-03-31.log\"\n"
           }
         ]
       },
@@ -566,12 +566,6 @@
           "name": "name",
           "type": "string",
           "description": "Set the name of the binary file. This will be the name of the file when it is downloaded in the UI"
-        },
-        {
-          "name": "type",
-          "type": "string",
-          "required": false,
-          "description": "Not used"
         }
       ]
     },

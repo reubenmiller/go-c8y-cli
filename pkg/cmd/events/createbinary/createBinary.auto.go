@@ -37,7 +37,7 @@ func NewCreateBinaryCmd(f *cmdutil.Factory) *CreateBinaryCmd {
 $ c8y events createBinary --id 12345 --file ./myfile.log
 Add a binary to an event
 
-$ c8y events createBinary --id 12345 --file "./myfile-2022-03-31.log"
+$ c8y events createBinary --id 12345 --file ./myfile.log --name "myfile-2022-03-31.log"
 
 Add a binary to an event using a custom name
         `),
@@ -52,7 +52,6 @@ Add a binary to an event using a custom name
 	cmd.Flags().StringSlice("id", []string{""}, "Event id (required) (accepts pipeline)")
 	cmd.Flags().String("file", "", "File to be uploaded as a binary (required)")
 	cmd.Flags().String("name", "", "Set the name of the binary file. This will be the name of the file when it is downloaded in the UI")
-	cmd.Flags().String("type", "", "Not used")
 
 	completion.WithOptions(
 		cmd,
@@ -139,7 +138,6 @@ func (n *CreateBinaryCmd) RunE(cmd *cobra.Command, args []string) error {
 		inputIterators,
 		flags.WithDataFlagValue(),
 		flags.WithStringValue("name", "name"),
-		flags.WithStringValue("type", "type"),
 		cmdutil.WithTemplateValue(cfg),
 		flags.WithTemplateVariablesValue(),
 	)
