@@ -12,13 +12,25 @@ createdir () {
 }
 
 export TEMP_DIR=$(createdir)
-trap "rm -Rf $TEMP_DIR" EXIT
+
+IDS=()
+
+cleanup () {
+    exit_status=$?
+    for i in "${IDS[@]}"; do
+        c8y binaries delete --id "$i" || true
+    done
+    exit "$exit_status"
+}
+trap cleanup EXIT
+
 
 create_inventory_binary () {
     local name="$1"
     local binary_id=
     echo "Dummy content" > "$TEMP_DIR/binary.txt"
     binary_id=$(c8y binaries create --file "$TEMP_DIR/binary.txt" --name "$name" --select id -o csv)
+    IDS+=("$binary_id")
     echo "$binary_id"    
 }
 

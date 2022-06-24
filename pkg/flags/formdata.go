@@ -100,6 +100,9 @@ func WithStringFormValue(opts ...string) GetOption {
 	return func(cmd *cobra.Command, inputIterators *RequestInputIterators) (string, interface{}, error) {
 		src, dst, _ := UnpackGetterOptions("%s", opts...)
 
+		if cmd.Flag(src) == nil {
+			return "", nil, nil
+		}
 		if !cmd.Flags().Changed(src) {
 			return "", nil, nil
 		}

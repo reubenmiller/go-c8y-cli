@@ -72,3 +72,7 @@ tests:
              "one": 2,
              "type": "text/csv; charset=utf-8"
           }
+
+  Creating and updating binaries are kept in their original form:
+    command: ./manual/binaries/create/tests.sh
+    exit-code: 0

@@ -152,6 +152,11 @@ endpoints:
         
         - description: Upload a config file and make it globally accessible for all users
           command: c8y binaries create --file "myConfig.json" --type c8y_upload --data "c8y_Global={}"
+        
+        - description: Upload a file with a custom name and custom meta information
+          skipTest: true
+          command: |
+            c8y binaries create --file "myConfig.json" --file "device01-myConfig.json" --type c8y_upload --template "{collectedAt: _.Now('-5min')}"
 
     bodyContent:
       type: formdata
@@ -207,10 +212,13 @@ endpoints:
         required: true
         pipeline: true
         description: Inventory binary id
-
+    bodyTemplate:
+        type: none
+    bodyContent:
+        type: binary
     body:
       - name: file
-        type: file
+        type: fileContents
         required: true
         description: File to be uploaded as a binary
 

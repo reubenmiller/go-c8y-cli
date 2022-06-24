@@ -120,7 +120,6 @@ func (n *UpdateCmd) RunE(cmd *cobra.Command, args []string) error {
 		cmd,
 		formData,
 		inputIterators,
-		flags.WithFormDataFileAndInfoWithTemplateSupport(cmdutil.NewTemplateResolver(cfg), "file", "data")...,
 	)
 	if err != nil {
 		return cmderrors.NewUserError(err)
@@ -132,9 +131,7 @@ func (n *UpdateCmd) RunE(cmd *cobra.Command, args []string) error {
 		cmd,
 		body,
 		inputIterators,
-		flags.WithDataFlagValue(),
-		cmdutil.WithTemplateValue(cfg),
-		flags.WithTemplateVariablesValue(),
+		flags.WithFilePath("file", "file", ""),
 	)
 	if err != nil {
 		return cmderrors.NewUserError(err)
@@ -156,7 +153,7 @@ func (n *UpdateCmd) RunE(cmd *cobra.Command, args []string) error {
 		Method:       "PUT",
 		Path:         path.GetTemplate(),
 		Query:        queryValue,
-		Body:         body,
+		Body:         body.GetFileContents(),
 		FormData:     formData,
 		Header:       headers,
 		IgnoreAccept: cfg.IgnoreAcceptHeader(),

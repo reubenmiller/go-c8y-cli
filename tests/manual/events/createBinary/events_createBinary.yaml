@@ -34,3 +34,7 @@ tests:
 
           [agent]
           disabled = False
+
+  Creating and updating binaries are kept in their original form:
+    command: ./manual/events/createBinary/tests.sh
+    exit-code: 0
