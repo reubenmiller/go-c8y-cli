@@ -245,11 +245,17 @@ tasks:
     vars:
       TEST_THROTTLE_LIMIT: 10
       TEST_FILE_FILTER: .+
+    env:
+      C8Y_BINARY:
+        sh: "$(pwd)/.bin/c8y"
     cmds:
       - pwsh -ExecutionPolicy bypass -NonInteractive -File tools/PSc8y/test.parallel.ps1 -ThrottleLimit {{.TEST_THROTTLE_LIMIT}} -TestFileFilter "{{.TEST_FILE_FILTER}}" -TestFileExclude "sessions-set|Set-Session|Get-SessionHomePath|Login|DisableCommands|BulkOperation|activitylog|Invoke-UserLogout"
 
   test_powershell_sessions:
     desc: Run powershell tests which interfere with the session variable
+    env:
+      C8Y_BINARY:
+        sh: "$(pwd)/.bin/c8y"
     cmds:
       - pwsh -ExecutionPolicy bypass -NonInteractive -File tools/PSc8y/test.parallel.ps1 -ThrottleLimit 1 -TestFileFilter "sessions-set|Set-Session|Get-SessionHomePath|Login|DisableCommands|BulkOperation|activitylog|Invoke-UserLogout"
 
