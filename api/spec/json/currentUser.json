@@ -115,7 +115,7 @@
         "powershell": [
           {
             "description": "Log out the current user",
-            "command": "Invoke-UserLogout"
+            "command": "Invoke-UserLogout -Dry"
           }
         ],
         "go": [

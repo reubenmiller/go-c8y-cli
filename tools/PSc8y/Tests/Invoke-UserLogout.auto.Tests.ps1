@@ -6,7 +6,7 @@ Describe -Name "Invoke-UserLogout" {
     }
 
     It "Log out the current user" {
-        $Response = PSc8y\Invoke-UserLogout
+        $Response = PSc8y\Invoke-UserLogout -Dry
         $LASTEXITCODE | Should -Be 0
     }
 

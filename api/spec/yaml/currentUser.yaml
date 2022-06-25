@@ -86,7 +86,7 @@ endpoints:
     examples:
       powershell:
         - description: Log out the current user
-          command: Invoke-UserLogout
+          command: Invoke-UserLogout -Dry
       go:
         - description: Log out the current user
           command: c8y currentuser logout
