@@ -1,0 +1,15 @@
+[tool.poetry]
+name = "go-c8y-cli-integration"
+version = "0.0.1"
+description = "go-c8y-cli integration tests"
+authors = ["reubenmiller <reuben.d.miller@gmail.com>"]
+
+[tool.poetry.dependencies]
+python = "^3.9"
+pytest-c8y = {url = "https://github.com/reubenmiller/pytest-c8y/releases/download/v0.0.2/pytest_c8y-0.0.2-py3-none-any.whl"}
+
+[tool.poetry.dev-dependencies]
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
