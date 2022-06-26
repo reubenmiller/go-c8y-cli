@@ -76,7 +76,7 @@ This will invalidate the token associated with the user when using OAUTH_INTERNA
 
 ### EXAMPLE 1
 ```
-Invoke-UserLogout
+Invoke-UserLogout -Dry
 ```
 
 Log out the current user

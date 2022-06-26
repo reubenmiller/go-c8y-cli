@@ -20,6 +20,7 @@ Create event binary
 New-EventBinary
 	[-Id] <Object[]>
 	[-File] <String>
+	[[-Name] <String>]
 	[-Data <Object>]
 	[-NoAccept]
 	[-ProcessingMode <String>]
@@ -109,6 +110,22 @@ Aliases:
 
 Required: True
 Position: 2
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -Name
+Set the name of the binary file.
+This will be the name of the file when it is downloaded in the UI
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 3
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
