@@ -36,6 +36,10 @@ func NewCreateBinaryCmd(f *cmdutil.Factory) *CreateBinaryCmd {
 		Example: heredoc.Doc(`
 $ c8y events createBinary --id 12345 --file ./myfile.log
 Add a binary to an event
+
+$ c8y events createBinary --id 12345 --file ./myfile.log --name "myfile-2022-03-31.log"
+
+Add a binary to an event using a custom name
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
 			return f.CreateModeEnabled()
@@ -47,6 +51,7 @@ Add a binary to an event
 
 	cmd.Flags().StringSlice("id", []string{""}, "Event id (required) (accepts pipeline)")
 	cmd.Flags().String("file", "", "File to be uploaded as a binary (required)")
+	cmd.Flags().String("name", "", "Set the name of the binary file. This will be the name of the file when it is downloaded in the UI")
 
 	completion.WithOptions(
 		cmd,
@@ -132,6 +137,7 @@ func (n *CreateBinaryCmd) RunE(cmd *cobra.Command, args []string) error {
 		body,
 		inputIterators,
 		flags.WithDataFlagValue(),
+		flags.WithStringValue("name", "name"),
 		cmdutil.WithTemplateValue(cfg),
 		flags.WithTemplateVariablesValue(),
 	)

@@ -7,10 +7,12 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
+	"mime"
 	"net/http"
 	"net/http/httputil"
 	"net/url"
 	"os"
+	"path"
 	"path/filepath"
 	"regexp"
 	"sort"
@@ -669,7 +671,7 @@ func (r *RequestHandler) ProcessResponse(resp *c8y.Response, respError error, co
 	// write response to file instead of to stdout
 	if resp != nil && respError == nil && commonOptions.OutputFileRaw != "" {
 		if resp.StatusCode != 0 {
-			// check if it is a dummy reseponse (i.e. no status code)
+			// check if it is a dummy response (i.e. no status code)
 			newline := strings.Contains(strings.ToLower(resp.Header.Get("Content-Type")), "json")
 			fullFilePath, err := r.saveResponseToFile(resp, commonOptions.OutputFileRaw, false, newline)
 
@@ -885,8 +887,46 @@ func (r *RequestHandler) guessDataProperty(resp *c8y.Response) string {
 // if filename
 func (r *RequestHandler) saveResponseToFile(resp *c8y.Response, filename string, append bool, newline bool) (string, error) {
 
+	// Support simple variable substitution to be able to set the output file name dynamically to download a collection of files
+	if strings.Contains(filename, "{") && strings.Contains(filename, "}") {
+		if strings.Contains(filename, "{filename}") {
+			if _, params, err := mime.ParseMediaType(resp.Header.Get("Content-Disposition")); err == nil {
+				if name, ok := params["filename"]; ok {
+					filename = strings.ReplaceAll(filename, "{filename}", name)
+				}
+			}
+		}
+
+		if strings.Contains(filename, "{basename}") {
+			if resp.Request != nil {
+				filename = strings.ReplaceAll(filename, "{basename}", path.Base(resp.Request.URL.Path))
+			}
+		}
+
+		if strings.Contains(filename, "{id}") {
+			if resp.Request != nil {
+				r.Logger.Infof("Request: %s", resp.Request.URL.Path)
+
+				urlParts := strings.Split(resp.Request.URL.Path, "/")
+				for _, part := range urlParts {
+					if part != "" && c8y.IsID(part) {
+						r.Logger.Debugf("Found id like value. Substituting {id} for %s", part)
+						filename = strings.ReplaceAll(filename, "{id}", part)
+						break
+					}
+				}
+			} else {
+				r.Logger.Infof("Request is nill")
+			}
+		}
+	}
+
 	var out *os.File
 	var err error
+	dirPath := path.Dir(filename)
+	if err := os.MkdirAll(dirPath, os.ModePerm); err != nil {
+		return "", fmt.Errorf("could not create directory. dir=%s,  err=%w", dirPath, err)
+	}
 	if append {
 		out, err = os.OpenFile(filename, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 	} else {
@@ -898,14 +938,19 @@ func (r *RequestHandler) saveResponseToFile(resp *c8y.Response, filename string,
 	}
 	defer out.Close()
 
+	if append && newline {
+		if fs, err := out.Stat(); err == nil {
+			if fs.Size() > 0 {
+				// add newline when appending so that content is separated (only if file is not empty)
+				fmt.Fprintf(out, "\n")
+			}
+		}
+	}
+
 	// Writer the body to file
 	r.Logger.Printf("header: %v", resp.Header)
 	_, err = io.Copy(out, resp.Body)
 
-	if newline {
-		// add trailing newline so that json lines are seperated by lines
-		fmt.Fprintf(out, "\n")
-	}
 	if err != nil {
 		return "", fmt.Errorf("failed to copy file contents to file. %s", err)
 	}

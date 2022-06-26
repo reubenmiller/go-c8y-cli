@@ -1,3 +1,4 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/reubenmiller/go-c8y-cli/v2/api/spec/schema.json
 
 ---
 information:
@@ -343,7 +344,15 @@ endpoints:
   #
   - name: getEventBinary
     description: Get event binary
-    descriptionLong: Get the binary associated with an event
+    descriptionLong: |
+      Get the binary associated with an event
+
+      When downloading a binary it is useful to use the outputFileRaw global parameter and to use one of the following references:
+
+      * {filename} - Filename found in the Content-Disposition response header
+      * {id} - An id like value found in the request path (/event/events/12345/binaries => 12345)
+      * {basename} - The last path section of the request path (/some/nested/url/withafilename.json => withafilename.json)
+
     method: GET
     path: event/events/{id}/binaries
     accept: '*/*'
@@ -367,6 +376,11 @@ endpoints:
       go:
         - description: Download a binary related to an event
           command: c8y events downloadBinary --id 12345 --outputFileRaw ./eventbinary.txt
+        
+        - description: Download a list of event binaries and use a template name to save each binary individually
+          command: c8y events list --fragmentType "c8y_IsBinary" | c8y events downloadBinary --outputFileRaw "./output/binary-{id}-{filename}" > /dev/null
+          skipTest: true
+
     pathParameters:
       - name: id
         type: '[]id'
@@ -398,6 +412,12 @@ endpoints:
       go:
         - description: Add a binary to an event
           command: c8y events createBinary --id 12345 --file ./myfile.log
+        
+        - description: Add a binary to an event using a custom name
+          skipTest: true
+          command: |
+            c8y events createBinary --id 12345 --file ./myfile.log --name "myfile-2022-03-31.log"
+
     pathParameters:
       - name: id
         type: '[]id'
@@ -410,6 +430,11 @@ endpoints:
         type: attachment
         required: true
         description: File to be uploaded as a binary
+
+      - name: name
+        type: string
+        description: Set the name of the binary file. This will be the name of the file when it is downloaded in the UI
+
 
   - name: updateEventBinary
     description: Update event binary

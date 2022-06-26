@@ -32,6 +32,11 @@ Upload a config file and make it globally accessible for all users
         [string]
         $File,
 
+        # Set the name of the binary file. This will be the name of the file when it is downloaded in the UI
+        [Parameter()]
+        [string]
+        $Name,
+
         # Custom type. If left blank, the MIME type will be detected from the file extension
         [Parameter()]
         [string]

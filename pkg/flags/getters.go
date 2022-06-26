@@ -303,6 +303,10 @@ func WithStringValue(opts ...string) GetOption {
 			}
 		}
 
+		if cmd.Flag(src) == nil {
+			return "", nil, nil
+		}
+
 		value, err := cmd.Flags().GetString(src)
 		if err != nil {
 			return dst, value, err

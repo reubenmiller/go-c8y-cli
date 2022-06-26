@@ -1,0 +1,75 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/reubenmiller/commander/feat/handle-nested-files/schema.json
+
+config:
+  env:
+    C8Y_SETTINGS_ACTIVITYLOG_ENABLED: true
+    C8Y_SETTINGS_ACTIVITYLOG_METHODFILTER: ""
+    C8Y_SETTINGS_ACTIVITYLOG_PATH: /tmp/activitylog-tests-nolog/
+    # C8Y_SETTINGS_DEFAULTS_OUTPUT: csv
+
+tests:
+  It logs commands and requests:
+    command: |
+      rm -Rf "$C8Y_SETTINGS_ACTIVITYLOG_PATH"
+      mkdir -p "$C8Y_SETTINGS_ACTIVITYLOG_PATH"
+
+      c8y inventory create --name "myLoggedDevice" | c8y inventory delete
+      c8y activitylog list --select method,statusCode -o csv
+    config:
+      env:
+        C8Y_SETTINGS_ACTIVITYLOG_ENABLED: true
+    exit-code: 0
+    stdout:
+      exactly: |
+        POST,201
+        DELETE,204
+  
+  It skips logging of individual commands via noLog flag:
+    command: |
+      rm -Rf "$C8Y_SETTINGS_ACTIVITYLOG_PATH"
+      mkdir -p "$C8Y_SETTINGS_ACTIVITYLOG_PATH"
+
+      c8y inventory create --name "myLoggedDevice" --noLog | c8y inventory delete
+      c8y activitylog list --select method,statusCode -o csv
+    config:
+      env:
+        C8Y_SETTINGS_ACTIVITYLOG_ENABLED: true
+    exit-code: 0
+    stdout:
+      exactly: |
+        DELETE,204
+  
+  It skips logging when disabled:
+    command: |
+      rm -Rf "$C8Y_SETTINGS_ACTIVITYLOG_PATH"
+      mkdir -p "$C8Y_SETTINGS_ACTIVITYLOG_PATH"
+
+      c8y inventory create --name "myLoggedDevice" --noLog | c8y inventory delete
+
+      ls "$C8Y_SETTINGS_ACTIVITYLOG_PATH/" | wc -l
+    config:
+      env:
+        C8Y_SETTINGS_ACTIVITYLOG_ENABLED: false
+    exit-code: 0
+    stdout:
+      exactly: "0"
+
+  It skips specific rest request methods:
+    command: |
+      rm -Rf "$C8Y_SETTINGS_ACTIVITYLOG_PATH"
+      mkdir -p "$C8Y_SETTINGS_ACTIVITYLOG_PATH"
+
+      c8y inventory create --name "myLoggedDevice" \
+        | c8y inventory update --newName "myUpdatedLoggedDevice" \
+        | c8y inventory delete
+
+      c8y activitylog list --select method,statusCode -o csv
+    config:
+      env:
+        C8Y_SETTINGS_ACTIVITYLOG_ENABLED: true
+        C8Y_SETTINGS_ACTIVITYLOG_METHODFILTER: "POST PUT"
+    exit-code: 0
+    stdout:
+      exactly: |
+        POST,201
+        PUT,200

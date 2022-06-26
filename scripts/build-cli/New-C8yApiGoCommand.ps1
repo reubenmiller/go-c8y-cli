@@ -185,6 +185,7 @@
             Description = $iArg.description
             Default = $iArg.default
             Required = $iArg.required
+            Hidden = $iArg.hidden
             Pipeline = $iArg.pipeline
         }
         $arg = Get-C8yGoArgs @ArgParams
@@ -508,6 +509,7 @@ $($Examples -join "`n`n")
 
     // Required flags
     $($CommandArgs.Required -join "`n	")
+    $($CommandArgs.Hidden -join "`n	")
 
     ccmd.SubCommand = subcommand.NewSubCommand(cmd)
 
@@ -663,6 +665,8 @@ Function Get-C8yGoArgs {
         [string] $Type,
 
         [string] $Required,
+
+        [string] $Hidden,
 
         [string] $OptionName,
 
@@ -1124,6 +1128,10 @@ Function Get-C8yGoArgs {
     if ($Required -match "true|yes" -and $Pipeline -notmatch "true") {
         $Entry | Add-Member -MemberType NoteProperty -Name "Required" -Value "_ = cmd.MarkFlagRequired(`"${Name}`")"
         # $Entry.Required = "cmd.MarkFlagRequired(`"${Name}`")"
+    }
+
+    if ($Hidden -match "true|yes" -and $Pipeline -notmatch "true") {
+        $Entry | Add-Member -MemberType NoteProperty -Name "Hidden" -Value "_ = cmd.Flags().MarkHidden(`"${Name}`")"
     }
 
     $Entry

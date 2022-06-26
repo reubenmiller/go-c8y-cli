@@ -112,14 +112,8 @@ The examples included in the API specification can be validated by running the f
 task test-cli
 ```
 
-### Run all tests
+### Run powershell tests
 
 ```sh
-task TEST_THROTTLE_LIMIT=1 test_powershell
-```
-
-#### Running a test on a single
-
-```sh
-task TEST_FILE_FILTER=ClientRequest test_powershell
+task test-powershell
 ```

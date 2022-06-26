@@ -5,6 +5,11 @@ Param(
 	[switch] $SkipSessionTest
 )
 
+# Enable quick exit when running multiple tests
+if ($env:SKIP_IMPORT -eq "true") {
+	return
+}
+
 if (Get-Module PSc8y) {
 	Remove-Module PSc8y -Force
 }

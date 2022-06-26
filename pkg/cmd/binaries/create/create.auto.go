@@ -38,6 +38,10 @@ Upload a log file
 
 $ c8y binaries create --file "myConfig.json" --type c8y_upload --data "c8y_Global={}"
 Upload a config file and make it globally accessible for all users
+
+$ c8y binaries create --file "myConfig.json" --file "device01-myConfig.json" --type c8y_upload --template "{collectedAt: _.Now('-5min')}"
+
+Upload a file with a custom name and custom meta information
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
 			return f.CreateModeEnabled()
@@ -48,6 +52,7 @@ Upload a config file and make it globally accessible for all users
 	cmd.SilenceUsage = true
 
 	cmd.Flags().String("file", "", "File to be uploaded as a binary (required)")
+	cmd.Flags().String("name", "", "Set the name of the binary file. This will be the name of the file when it is downloaded in the UI")
 	cmd.Flags().String("type", "", "Custom type. If left blank, the MIME type will be detected from the file extension")
 
 	completion.WithOptions(
@@ -122,7 +127,7 @@ func (n *CreateCmd) RunE(cmd *cobra.Command, args []string) error {
 		cmd,
 		formData,
 		inputIterators,
-		flags.WithFormDataFileAndInfo("file", "data")...,
+		flags.WithFormDataFileAndInfoWithTemplateSupport(cmdutil.NewTemplateResolver(cfg), "file", "data")...,
 	)
 	if err != nil {
 		return cmderrors.NewUserError(err)
@@ -134,6 +139,7 @@ func (n *CreateCmd) RunE(cmd *cobra.Command, args []string) error {
 		cmd,
 		body,
 		inputIterators,
+		flags.WithStringValue("name", "name"),
 		flags.WithStringValue("type", "type"),
 		cmdutil.WithTemplateValue(cfg),
 		flags.WithTemplateVariablesValue(),
