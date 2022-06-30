@@ -73,3 +73,64 @@ tests:
           "name": "test01"
         }
         ```
+
+  It should support dry run on create commands when create is disabled:
+    config:
+      env:
+        C8Y_SETTINGS_CI: false
+        C8Y_SETTINGS_MODE_ENABLECREATE: false
+    command: |
+      c8y inventory create --dry --dryFormat json |
+        c8y util show --select path --output csv
+    exit-code: 0
+    stdout:
+      exactly: /inventory/managedObjects
+
+  It should support dry run on update commands when update is disabled:
+    config:
+      env:
+        C8Y_SETTINGS_CI: false
+        C8Y_SETTINGS_MODE_ENABLEUPDATE: false
+    command: |
+      c8y inventory update --id 1234 --dry --dryFormat json |
+        c8y util show --select path --output csv
+    exit-code: 0
+    stdout:
+      exactly: /inventory/managedObjects/1234
+
+  It should support dry run on delete commands when delete is disabled:
+    config:
+      env:
+        C8Y_SETTINGS_CI: false
+        C8Y_SETTINGS_MODE_ENABLEDELETE: false
+    command: |
+      c8y inventory delete --id 1234 --dry --dryFormat json |
+        c8y util show --select path --output csv
+    exit-code: 0
+    stdout:
+      exactly: /inventory/managedObjects/1234
+
+  It should support dry run on delete commands when delete is disabled using environment variables:
+    config:
+      env:
+        C8Y_SETTINGS_CI: false
+        C8Y_SETTINGS_DEFAULTS_DRY: true
+        C8Y_SETTINGS_DEFAULTS_DRYFORMAT: json
+        C8Y_SETTINGS_MODE_ENABLEDELETE: false
+    command: |
+      c8y inventory delete --id 1234 |
+        c8y util show --select path --output csv
+    exit-code: 0
+    stdout:
+      exactly: /inventory/managedObjects/1234
+
+  It should support use dry flag over environment values:
+    config:
+      env:
+        C8Y_SETTINGS_CI: false
+        C8Y_SETTINGS_DEFAULTS_DRY: true
+        C8Y_SETTINGS_DEFAULTS_DRYFORMAT: json
+        C8Y_SETTINGS_MODE_ENABLEDELETE: false
+    command: |
+      c8y inventory create --dry=false
+    exit-code: 100

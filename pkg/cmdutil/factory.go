@@ -53,6 +53,14 @@ func (f *Factory) CreateModeEnabled() error {
 	if err != nil {
 		return err
 	}
+
+	cfg.WithOptions(
+		config.WithBindEnv(config.SettingsDryRun, false),
+	)
+
+	if cfg.DryRun() {
+		return nil
+	}
 	return mode.ValidateCreateMode(cfg)
 }
 
@@ -62,6 +70,14 @@ func (f *Factory) UpdateModeEnabled() error {
 	if err != nil {
 		return err
 	}
+
+	cfg.WithOptions(
+		config.WithBindEnv(config.SettingsDryRun, false),
+	)
+
+	if cfg.DryRun() {
+		return nil
+	}
 	return mode.ValidateUpdateMode(cfg)
 }
 
@@ -70,6 +86,14 @@ func (f *Factory) DeleteModeEnabled() error {
 	cfg, err := f.Config()
 	if err != nil {
 		return err
+	}
+
+	cfg.WithOptions(
+		config.WithBindEnv(config.SettingsDryRun, false),
+	)
+
+	if cfg.DryRun() {
+		return nil
 	}
 	return mode.ValidateDeleteMode(cfg)
 }
