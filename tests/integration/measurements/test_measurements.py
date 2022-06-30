@@ -19,51 +19,53 @@ def test_measurement(device01: Device):
 
     assert output.exit_code == 0
 
-def test_measurement_subscribe_duration(device_with_measurements: Device):
-    output = command.execute(
-        command.prepare(
-            f"""
-            c8y measurements subscribe --device device01 --duration 10s
-            """,
-            device01=device_with_measurements.id
+class TestSubscribe:
+
+    def test_measurement_subscribe_duration(self, device_with_measurements: Device):
+        output = command.execute(
+            command.prepare(
+                f"""
+                c8y measurements subscribe --device device01 --duration 10s
+                """,
+                device01=device_with_measurements.id
+            )
         )
-    )
 
-    assert len(output.jsonlines) > 0
-    assert output.exit_code == 0
-    assert output.duration > 10
+        assert len(output.jsonlines) > 0
+        assert output.exit_code == 0
+        assert output.duration > 10
 
 
-def test_measurement_subscribe_count(device_with_measurements: Device):
-    """Subscribe to measurements and stop when 2 measurements have been received
-    """
-    output = command.execute(
-        command.prepare(
-            f"""
-            c8y measurements subscribe --device device01 --count 2
-            """,
-            device01=device_with_measurements.id
+    def test_measurement_subscribe_count(self, device_with_measurements: Device):
+        """Subscribe to measurements and stop when 2 measurements have been received
+        """
+        output = command.execute(
+            command.prepare(
+                f"""
+                c8y measurements subscribe --device device01 --count 2
+                """,
+                device01=device_with_measurements.id
+            )
         )
-    )
 
-    assert len(output.jsonlines) == 2
-    assert output.exit_code == 0
-    assert output.duration < 10
+        assert len(output.jsonlines) == 2
+        assert output.exit_code == 0
+        assert output.duration < 10
 
 
-def test_measurement_subscribe_all_count(device_with_measurements: Device):
-    output = command.execute(
-        command.prepare(
-            f"""
-            c8y measurements subscribe --count 2
-            """,
-            device01=device_with_measurements.id
+    def test_measurement_subscribe_all_count(self, device_with_measurements: Device):
+        output = command.execute(
+            command.prepare(
+                f"""
+                c8y measurements subscribe --count 2
+                """,
+                device01=device_with_measurements.id
+            )
         )
-    )
 
-    assert len(output.jsonlines) == 2
-    assert output.exit_code == 0
-    assert output.duration < 10
+        assert len(output.jsonlines) == 2
+        assert output.exit_code == 0
+        assert output.duration < 10
 
 
 
