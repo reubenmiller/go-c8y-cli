@@ -130,7 +130,7 @@ tests:
         C8Y_SETTINGS_CI: false
         C8Y_SETTINGS_DEFAULTS_DRY: true
         C8Y_SETTINGS_DEFAULTS_DRYFORMAT: json
-        C8Y_SETTINGS_MODE_ENABLEDELETE: false
+        C8Y_SETTINGS_MODE_ENABLEUPDATE: false
     command: |
       c8y inventory update --id 0 --dry=false --force
-    exit-code: 4
+    exit-code: 100
