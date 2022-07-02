@@ -17,6 +17,10 @@ c8y events createBinary [flags]
 ```
 $ c8y events createBinary --id 12345 --file ./myfile.log
 Add a binary to an event
+
+$ c8y events createBinary --id 12345 --file ./myfile.log --name "myfile-2022-03-31.log"
+
+Add a binary to an event using a custom name
         
 ```
 
@@ -26,6 +30,7 @@ Add a binary to an event
       --file string             File to be uploaded as a binary (required)
   -h, --help                    help for createBinary
       --id strings              Event id (required) (accepts pipeline)
+      --name string             Set the name of the binary file. This will be the name of the file when it is downloaded in the UI
       --processingMode string   Cumulocity processing mode
 ```
 
