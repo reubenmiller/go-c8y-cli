@@ -19,7 +19,7 @@ tests:
         C8Y_SETTINGS_MODE_ENABLEUPDATE: false
         C8Y_SETTINGS_MODE_ENABLEDELETE: false
     command: |
-      c8y inventory create --name "asset-data01" --dry
+      c8y inventory create --name "asset-data01"
     exit-code: 100
     stdout:
       match-pattern: ^$
@@ -47,7 +47,7 @@ tests:
         C8Y_SETTINGS_MODE_ENABLEUPDATE: false
         C8Y_SETTINGS_MODE_ENABLEDELETE: false
     command: |
-      c8y inventory update --id 0 --newName "asset-data01" --dry
+      c8y inventory update --id 0 --newName "asset-data01"
     exit-code: 100
     stdout:
       match-pattern: ^$
@@ -75,7 +75,7 @@ tests:
         C8Y_SETTINGS_MODE_ENABLEUPDATE: false
         C8Y_SETTINGS_MODE_ENABLEDELETE: false
     command: |
-      c8y inventory delete --id 0 --dry
+      c8y inventory delete --id 0
     exit-code: 100
     stdout:
       match-pattern: ^$

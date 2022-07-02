@@ -133,4 +133,4 @@ tests:
         C8Y_SETTINGS_MODE_ENABLEDELETE: false
     command: |
       c8y inventory create --dry=false
-    exit-code: 100
+    exit-code: 101
