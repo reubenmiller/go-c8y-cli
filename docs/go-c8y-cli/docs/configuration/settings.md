@@ -150,7 +150,7 @@ Global settings can be controlled by creating a `settings.json` file in the `$C8
 
 ```json title="file: ~/.cumulocity/settings.json"
 {
-  "$schema": "https://raw.githubusercontent.com/exampleuser/go-c8y-cli/master/tools/schema/session.schema.json",
+  "$schema": "https://raw.githubusercontent.com/exampleuser/go-c8y-cli/v2/tools/schema/session.schema.json",
   "settings": {
       "storage": {
         "storepassword": false,
@@ -169,7 +169,7 @@ Below shows an example of a session (json) file with a `settings` section, where
 
 ```json title="file: ~/.cumulocity/my-session01.json"
 {
-  "$schema": "https://raw.githubusercontent.com/exampleuser/go-c8y-cli/master/tools/schema/session.schema.json",
+  "$schema": "https://raw.githubusercontent.com/exampleuser/go-c8y-cli/v2/tools/schema/session.schema.json",
   "host": "https://example.zz-latest.cumulocity.com",
   "tenant": "t12345",
   "username": "hans@example.com",

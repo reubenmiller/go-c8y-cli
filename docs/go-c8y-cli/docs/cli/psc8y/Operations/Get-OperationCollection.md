@@ -920,7 +920,7 @@ Accept wildcard characters: False
 ```
 
 ### -WithTotalPages
-Request Cumulocity to include the total pages in the response statitics under .statistics.totalPages
+Request Cumulocity to include the total pages in the response statistics under .statistics.totalPages
 
 ```yaml
 Type: SwitchParameter

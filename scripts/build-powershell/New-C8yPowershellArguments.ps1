@@ -105,6 +105,8 @@
         "strings" { "string"; break }
         "tenant" { "object"; break }
         "tenantname" { "string"; break }
+        "[]certificate" { "object[]"; break }
+        "certificatefile" { "string"; break }
 
         # Complex lookup types. These should not be visible in powershell
         "softwareDetails" { $Ignore = $true; ""; break }

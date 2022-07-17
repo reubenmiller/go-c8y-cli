@@ -7,15 +7,15 @@ import (
 	"net/url"
 	"strings"
 
-	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
-	"github.com/reubenmiller/go-c8y-cli/pkg/cmdutil"
-	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
-	"github.com/reubenmiller/go-c8y-cli/pkg/mapbuilder"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmderrors"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flags"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/mapbuilder"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
 )
 
-func NewInventoryQueryRunner(cmd *cobra.Command, args []string, f *cmdutil.Factory, opts ...flags.C8YQueryOption) func() error {
+func NewInventoryQueryRunner(cmd *cobra.Command, args []string, f *cmdutil.Factory, opts ...flags.GetOption) func() error {
 	return func() error {
 		cfg, err := f.Config()
 		if err != nil {
@@ -35,6 +35,7 @@ func NewInventoryQueryRunner(cmd *cobra.Command, args []string, f *cmdutil.Facto
 
 		c8yQueryParts, err := flags.WithC8YQueryOptions(
 			cmd,
+			inputIterators,
 			opts...,
 		)
 
@@ -106,7 +107,7 @@ func NewInventoryQueryRunner(cmd *cobra.Command, args []string, f *cmdutil.Facto
 		}
 
 		// body
-		body := mapbuilder.NewInitializedMapBuilder()
+		body := mapbuilder.NewInitializedMapBuilder(true)
 		err = flags.WithBody(
 			cmd,
 			body,

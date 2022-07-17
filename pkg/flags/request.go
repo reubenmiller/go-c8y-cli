@@ -4,7 +4,7 @@ import (
 	"io"
 	"net/http"
 
-	"github.com/reubenmiller/go-c8y-cli/pkg/mapbuilder"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/mapbuilder"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
 )
@@ -82,7 +82,7 @@ func WithRequestOptions(cmd *cobra.Command, args []string, req *c8y.RequestOptio
 
 	//
 	// body
-	body := mapbuilder.NewInitializedMapBuilder()
+	body := mapbuilder.NewInitializedMapBuilder(true)
 	err = WithBody(
 		cmd,
 		body,

@@ -8,26 +8,31 @@ import (
 	"log"
 	"strings"
 
-	"github.com/reubenmiller/go-c8y-cli/pkg/activitylogger"
-	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
-	"github.com/reubenmiller/go-c8y-cli/pkg/config"
-	"github.com/reubenmiller/go-c8y-cli/pkg/console"
-	"github.com/reubenmiller/go-c8y-cli/pkg/dataview"
-	"github.com/reubenmiller/go-c8y-cli/pkg/encrypt"
-	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
-	"github.com/reubenmiller/go-c8y-cli/pkg/iostreams"
-	"github.com/reubenmiller/go-c8y-cli/pkg/jsonformatter"
-	"github.com/reubenmiller/go-c8y-cli/pkg/logger"
-	"github.com/reubenmiller/go-c8y-cli/pkg/mode"
-	"github.com/reubenmiller/go-c8y-cli/pkg/request"
-	"github.com/reubenmiller/go-c8y-cli/pkg/worker"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/activitylogger"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmderrors"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/config"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/console"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/dataview"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/encrypt"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flags"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/iostreams"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/jsonformatter"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/logger"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/mode"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/request"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/worker"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
 	"github.com/tidwall/gjson"
 )
 
+type Browser interface {
+	Browse(string) error
+}
+
 type Factory struct {
 	IOStreams      *iostreams.IOStreams
+	Browser        Browser
 	Client         func() (*c8y.Client, error)
 	Config         func() (*config.Config, error)
 	Logger         func() (*logger.Logger, error)
@@ -48,6 +53,14 @@ func (f *Factory) CreateModeEnabled() error {
 	if err != nil {
 		return err
 	}
+
+	cfg.WithOptions(
+		config.WithBindEnv(config.SettingsDryRun, false),
+	)
+
+	if cfg.DryRun() {
+		return nil
+	}
 	return mode.ValidateCreateMode(cfg)
 }
 
@@ -57,6 +70,14 @@ func (f *Factory) UpdateModeEnabled() error {
 	if err != nil {
 		return err
 	}
+
+	cfg.WithOptions(
+		config.WithBindEnv(config.SettingsDryRun, false),
+	)
+
+	if cfg.DryRun() {
+		return nil
+	}
 	return mode.ValidateUpdateMode(cfg)
 }
 
@@ -65,6 +86,14 @@ func (f *Factory) DeleteModeEnabled() error {
 	cfg, err := f.Config()
 	if err != nil {
 		return err
+	}
+
+	cfg.WithOptions(
+		config.WithBindEnv(config.SettingsDryRun, false),
+	)
+
+	if cfg.DryRun() {
+		return nil
 	}
 	return mode.ValidateDeleteMode(cfg)
 }

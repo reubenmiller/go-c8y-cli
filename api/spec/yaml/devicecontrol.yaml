@@ -172,9 +172,8 @@ endpoints:
 
   - name: updateOperation
     description: Update operation
-    descriptionLong: >
-      Update an operation. This is commonly used to change an operation's status. For example the operation can be set to FAILED
-      along with a failure reason.
+    descriptionLong: |
+      Update an operation. This is commonly used to change an operation's status. For example the operation can be set to FAILED along with a failure reason.
     examples:
       powershell:
         - description: Update an operation
@@ -224,10 +223,10 @@ endpoints:
 
   - name: deleteOperationCollection
     description: Delete operation collection
-    descriptionLong: >
-      Delete a collection of operations using a set of filter criteria. Be careful when deleting
-      operations. Where possible update operations to FAILED (with a failure reason) instead of
-      deleting them as it is easier to track.
+    descriptionLong: |
+      Delete a collection of operations using a set of filter criteria. Be careful when deleting operations.
+
+      Where possible update operations to FAILED (with a failure reason) instead of deleting them as it is easier to track.
     examples:
       powershell:
         - description: Remove all pending operations for a given device

@@ -4,7 +4,7 @@
 information:
   name: tenantOptions
   description: Cumulocity tenantOptions
-  descriptionLong: <
+  descriptionLong: |
     REST endpoint to interact with Cumulocity tenantOptions
     Options are category-key-value tuples, storing tenant configuration. Some categories of options allow creation of new one, other are limited to predefined set of keys.
 
@@ -253,7 +253,7 @@ endpoints:
 
   - name: updateTenantOptionEditable
     description: Update tenant option edit setting
-    descriptionLong: >
+    descriptionLong: |
       Update read-only setting of an existing tenant option
       Required role:: ROLE_OPTION_MANAGEMENT_ADMIN, Required tenant management Example Request:: Update access.control.allow.origin option.
     method: PUT

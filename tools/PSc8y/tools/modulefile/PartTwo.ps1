@@ -1,6 +1,11 @@
 
 #region imports
 
+# Download c8y binary from github (instead of packing it with the module)
+# This allows the module to be used on multiple platforms and CPU architectures without
+# increasing the module size
+Import-ClientBinary
+
 # Add alias to c8y binary
 Set-Alias -Name "c8y" -Value (Get-ClientBinary) -Scope "Global"
 
@@ -33,7 +38,7 @@ c8y completion powershell | Out-String | Invoke-Expression
 Register-ArgumentCompleter -CommandName "Set-Session" -ParameterName Session -ScriptBlock $script:CompletionSession
 
 # Set environment variables if a session is set via the C8Y_SESSION env variable
-$ExistingSession = Get-Session -WarningAction SilentlyContinue -ErrorAction SilentlyContinue
+$ExistingSession = Get-Session -WarningAction SilentlyContinue -ErrorAction SilentlyContinue 2> $null
 if ($ExistingSession) {
 
     # Display current session

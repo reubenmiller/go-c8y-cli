@@ -20,6 +20,10 @@ Upload a log file
 
 $ c8y binaries create --file "myConfig.json" --type c8y_upload --data "c8y_Global={}"
 Upload a config file and make it globally accessible for all users
+
+$ c8y binaries create --file "myConfig.json" --file "device01-myConfig.json" --type c8y_upload --template "{collectedAt: _.Now('-5min')}"
+
+Upload a file with a custom name and custom meta information
         
 ```
 
@@ -29,6 +33,7 @@ Upload a config file and make it globally accessible for all users
   -d, --data string             static data to be applied to body. accepts json or shorthand json, i.e. --data 'value1=1,my.nested.value=100'
       --file string             File to be uploaded as a binary (required)
   -h, --help                    help for create
+      --name string             Set the name of the binary file. This will be the name of the file when it is downloaded in the UI
       --processingMode string   Cumulocity processing mode
       --template string         Body template
       --templateVars string     Body template variables
@@ -53,7 +58,7 @@ Upload a config file and make it globally accessible for all users
       --dry                        Dry run. Don't send any data to the server
       --dryFormat string           Dry run output format. i.e. json, dump, markdown or curl (default "markdown")
       --examples                   Show examples for the current command
-      --filter strings             Apply a client side filter to response before returning it to the user
+      --filter stringArray         Apply a client side filter to response before returning it to the user
       --flatten                    flatten json output by replacing nested json properties with properties where their names are represented by dot notation
   -f, --force                      Do not prompt for confirmation. Ignored when using --confirm
   -H, --header strings             custom headers. i.e. --header "Accept: value, AnotherHeader: myvalue"

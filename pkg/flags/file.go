@@ -3,7 +3,7 @@ package flags
 import (
 	"fmt"
 
-	"github.com/reubenmiller/go-c8y-cli/pkg/iterator"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/iterator"
 	"github.com/spf13/cobra"
 )
 

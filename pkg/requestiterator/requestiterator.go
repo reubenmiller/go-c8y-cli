@@ -9,12 +9,13 @@ import (
 	"strings"
 	"sync/atomic"
 
-	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
-	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
-	"github.com/reubenmiller/go-c8y-cli/pkg/iterator"
-	"github.com/reubenmiller/go-c8y-cli/pkg/logger"
-	"github.com/reubenmiller/go-c8y-cli/pkg/mapbuilder"
-	"github.com/reubenmiller/go-c8y-cli/pkg/request"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmderrors"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flags"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/iterator"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/jsonUtilities"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/logger"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/mapbuilder"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/request"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 )
 
@@ -161,16 +162,29 @@ func (r *RequestIterator) GetNext() (*c8y.RequestOptions, interface{}, error) {
 					return nil, nil, err
 				}
 
-				// TODO: Find more efficient way rather than converting to and from json
-				bodyValue := make(map[string]interface{})
-
-				// Note: UnmarshalJSON does not support large numbers by default, so
-				// 		 c8y.DecodeJSONBytes should be used instead!
-				if err := c8y.DecodeJSONBytes(bodyContents, &bodyValue); err != nil {
-					r.setDone()
-					return nil, nil, err
+				if len(bodyContents) > 0 {
+					// TODO: Find more efficient way rather than converting to and from json
+					// Note: UnmarshalJSON does not support large numbers by default, so
+					// 		 c8y.DecodeJSONBytes should be used instead!
+					if jsonUtilities.IsJSONArray(bodyContents) {
+						bodyValue := make([]interface{}, 0)
+						if err := c8y.DecodeJSONBytes(bodyContents, &bodyValue); err != nil {
+							r.setDone()
+							return nil, nil, err
+						}
+						req.Body = bodyValue
+					} else {
+						// JSON Object
+						bodyValue := make(map[string]interface{})
+						if err := c8y.DecodeJSONBytes(bodyContents, &bodyValue); err != nil {
+							r.setDone()
+							return nil, nil, err
+						}
+						req.Body = bodyValue
+					}
+				} else {
+					req.Body = nil
 				}
-				req.Body = bodyValue
 			}
 		default:
 			req.Body = v

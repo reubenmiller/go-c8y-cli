@@ -4,8 +4,8 @@ import (
 	"fmt"
 
 	"github.com/howeyc/gopass"
-	"github.com/reubenmiller/go-c8y-cli/pkg/cmd/subcommand"
-	"github.com/reubenmiller/go-c8y-cli/pkg/cmdutil"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/subcommand"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
 	"github.com/spf13/cobra"
 )
 
@@ -46,10 +46,7 @@ Encrypt the text "Hello World", the text will be encrypted using the given passp
 	cmd.Flags().String("text", "", "Encrypted text. (required)")
 	cmd.Flags().StringVar(&ccmd.passphrase, "passphrase", "", "Passphrase use for encoding your files")
 
-	// Required flags
-	_ = cmd.MarkFlagRequired("text")
-
-	ccmd.SubCommand = subcommand.NewSubCommand(cmd)
+	ccmd.SubCommand = subcommand.NewSubCommand(cmd).SetRequiredFlags("text")
 
 	return ccmd
 }

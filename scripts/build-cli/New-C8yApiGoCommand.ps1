@@ -175,6 +175,7 @@
             "(\[\])?firmwarepatch(name)?$" { [void] $CompletionBuilderOptions.AppendLine("completion.WithFirmwarePatch(`"$($iArg.Name)`", `"$($iArg.dependsOn | Select-Object -First 1)`", func() (*c8y.Client, error) { return ccmd.factory.Client()}),") }
             "(\[\])?configuration$" { [void] $CompletionBuilderOptions.AppendLine("completion.WithConfiguration(`"$($iArg.Name)`", func() (*c8y.Client, error) { return ccmd.factory.Client()}),") }
             "(\[\])?deviceprofile$" { [void] $CompletionBuilderOptions.AppendLine("completion.WithDeviceProfile(`"$($iArg.Name)`", func() (*c8y.Client, error) { return ccmd.factory.Client()}),") }
+            "(\[\])?certificate$" { [void] $CompletionBuilderOptions.AppendLine("completion.WithDeviceCertificate(`"$($iArg.Name)`", func() (*c8y.Client, error) { return ccmd.factory.Client()}),") }
         }
 
         $ArgParams = @{
@@ -184,6 +185,7 @@
             Description = $iArg.description
             Default = $iArg.default
             Required = $iArg.required
+            Hidden = $iArg.hidden
             Pipeline = $iArg.pipeline
         }
         $arg = Get-C8yGoArgs @ArgParams
@@ -443,13 +445,13 @@ import (
 	"net/url"
 
     "github.com/MakeNowJust/heredoc/v2"
-    "github.com/reubenmiller/go-c8y-cli/pkg/c8yfetcher"
-    "github.com/reubenmiller/go-c8y-cli/pkg/cmd/subcommand"
-    "github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
-    "github.com/reubenmiller/go-c8y-cli/pkg/cmdutil"
-    "github.com/reubenmiller/go-c8y-cli/pkg/completion"
-    "github.com/reubenmiller/go-c8y-cli/pkg/flags"
-	"github.com/reubenmiller/go-c8y-cli/pkg/mapbuilder"
+    "github.com/reubenmiller/go-c8y-cli/v2/pkg/c8yfetcher"
+    "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/subcommand"
+    "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmderrors"
+    "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
+    "github.com/reubenmiller/go-c8y-cli/v2/pkg/completion"
+    "github.com/reubenmiller/go-c8y-cli/v2/pkg/flags"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/mapbuilder"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
 )
@@ -517,6 +519,7 @@ $($Examples -join "`n`n")
 
     // Required flags
     $($CommandArgs.Required -join "`n	")
+    $($CommandArgs.Hidden -join "`n	")
 
     ccmd.SubCommand = subcommand.NewSubCommand(cmd)
 
@@ -584,7 +587,7 @@ func (n *${NameCamel}Cmd) RunE(cmd *cobra.Command, args []string) error {
     
 
     // body
-    body := mapbuilder.NewInitializedMapBuilder()
+    body := mapbuilder.NewInitializedMapBuilder($(($RESTMethod -match "PUT|POST").ToString().ToLower()))
     err = flags.WithBody(
         cmd,
         body,
@@ -673,6 +676,8 @@ Function Get-C8yGoArgs {
         [string] $Type,
 
         [string] $Required,
+
+        [string] $Hidden,
 
         [string] $OptionName,
 
@@ -1102,6 +1107,29 @@ Function Get-C8yGoArgs {
             }
         }
 
+        # Trusted device certficates
+        "[]certificate" {
+            $SetFlag = if ($UseOption) {
+                "cmd.Flags().StringSlice(`"${Name}`", `"${OptionName}`", []string{`"${Default}`"}, `"${Description}`")"
+            } else {
+                "cmd.Flags().StringSlice(`"${Name}`", []string{`"${Default}`"}, `"${Description}`")"
+            }
+            @{
+                SetFlag = $SetFlag
+            }
+        }
+
+        "certificatefile" {
+            $SetFlag = if ($UseOption) {
+                "cmd.Flags().String(`"${Name}`", `"${OptionName}`", `"${Default}`", `"${Description}`")"
+            } else {
+                "cmd.Flags().String(`"${Name}`", `"${Default}`", `"${Description}`")"
+            }
+            @{
+                SetFlag = $SetFlag
+            }
+        }
+
         default {
             Write-Warning "Unknown flag type [$_]"
         }
@@ -1111,6 +1139,10 @@ Function Get-C8yGoArgs {
     if ($Required -match "true|yes" -and $Pipeline -notmatch "true") {
         $Entry | Add-Member -MemberType NoteProperty -Name "Required" -Value "_ = cmd.MarkFlagRequired(`"${Name}`")"
         # $Entry.Required = "cmd.MarkFlagRequired(`"${Name}`")"
+    }
+
+    if ($Hidden -match "true|yes" -and $Pipeline -notmatch "true") {
+        $Entry | Add-Member -MemberType NoteProperty -Name "Hidden" -Value "_ = cmd.Flags().MarkHidden(`"${Name}`")"
     }
 
     $Entry

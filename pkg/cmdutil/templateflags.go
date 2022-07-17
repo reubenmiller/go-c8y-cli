@@ -9,9 +9,9 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/reubenmiller/go-c8y-cli/pkg/config"
-	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
-	"github.com/reubenmiller/go-c8y-cli/pkg/pathresolver"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/config"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flags"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/pathresolver"
 	"github.com/spf13/cobra"
 )
 
@@ -152,8 +152,11 @@ func (f *Factory) WithTemplateFlag(cmd *cobra.Command) flags.Option {
 
 // WithTemplateValue get the template value using the path resolver controlled by the configuration
 func WithTemplateValue(cfg *config.Config) flags.GetOption {
-	resolve := &TemplatePathResolver{
+	return flags.WithTemplateValue(flags.FlagDataTemplateName, NewTemplateResolver(cfg))
+}
+
+func NewTemplateResolver(cfg *config.Config) *TemplatePathResolver {
+	return &TemplatePathResolver{
 		Paths: cfg.GetTemplatePaths(),
 	}
-	return flags.WithTemplateValue(flags.FlagDataTemplateName, resolve)
 }

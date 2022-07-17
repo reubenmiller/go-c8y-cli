@@ -2,10 +2,10 @@ package alias
 
 import (
 	"github.com/MakeNowJust/heredoc/v2"
-	deleteCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/alias/delete"
-	listCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/alias/list"
-	setCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/alias/set"
-	"github.com/reubenmiller/go-c8y-cli/pkg/cmdutil"
+	deleteCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/alias/delete"
+	listCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/alias/list"
+	setCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/alias/set"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
 
 	"github.com/spf13/cobra"
 )

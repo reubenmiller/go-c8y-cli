@@ -138,6 +138,8 @@ FunctionsToExport = @(
 	'Get-DataBrokerConnectorCollection',
 	'Get-Device',
 	'Get-DeviceAvailability',
+	'Get-DeviceCertificate',
+	'Get-DeviceCertificateCollection',
 	'Get-DeviceChildAssetCollection',
 	'Get-DeviceGroup',
 	'Get-DeviceGroupChildAssetCollection',
@@ -217,6 +219,7 @@ FunctionsToExport = @(
 	'New-ChildAddition',
 	'New-Configuration',
 	'New-Device',
+	'New-DeviceCertificate',
 	'New-DeviceGroup',
 	'New-DeviceProfile',
 	'New-Event',
@@ -246,6 +249,7 @@ FunctionsToExport = @(
 	'Remove-ChildDeviceFromDevice',
 	'Remove-Configuration',
 	'Remove-Device',
+	'Remove-DeviceCertificate',
 	'Remove-DeviceFromGroup',
 	'Remove-DeviceGroup',
 	'Remove-DeviceProfile',
@@ -289,6 +293,7 @@ FunctionsToExport = @(
 	'Update-CurrentUser',
 	'Update-DataBrokerConnector',
 	'Update-Device',
+	'Update-DeviceCertificate',
 	'Update-DeviceGroup',
 	'Update-DeviceProfile',
 	'Update-DeviceUser',
@@ -343,6 +348,7 @@ FunctionsToExport = @(
 	'Get-SessionCollection',
 	'Get-SessionHomePath',
 	'Group-ClientRequests',
+	'Import-ClientBinary',
 	'Install-ClientBinary',
 	'Invoke-ClientIterator',
 	'Invoke-ClientRequest',
@@ -416,7 +422,7 @@ PrivateData = @{
 
         # ReleaseNotes of this module
         ReleaseNotes = @(
-			'Release notes can be found here: https://github.com/reubenmiller/go-c8y-cli/blob/master/CHANGELOG.md'
+			'Release notes can be found here: https://github.com/reubenmiller/go-c8y-cli/releases'
 		)
 
         # External dependent modules of this module

@@ -1,10 +1,10 @@
 package assert
 
 import (
-	cmdExists "github.com/reubenmiller/go-c8y-cli/pkg/cmd/devices/assert/exists"
-	cmdFragments "github.com/reubenmiller/go-c8y-cli/pkg/cmd/devices/assert/fragments"
-	"github.com/reubenmiller/go-c8y-cli/pkg/cmd/subcommand"
-	"github.com/reubenmiller/go-c8y-cli/pkg/cmdutil"
+	cmdExists "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/devices/assert/exists"
+	cmdFragments "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/devices/assert/fragments"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/subcommand"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
 	"github.com/spf13/cobra"
 )
 

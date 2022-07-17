@@ -9,11 +9,11 @@ import (
 	"regexp"
 
 	"github.com/MakeNowJust/heredoc/v2"
-	"github.com/reubenmiller/go-c8y-cli/pkg/c8yfetcher"
-	"github.com/reubenmiller/go-c8y-cli/pkg/cmd/subcommand"
-	"github.com/reubenmiller/go-c8y-cli/pkg/cmdutil"
-	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
-	"github.com/reubenmiller/go-c8y-cli/pkg/zipUtilities"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/c8yfetcher"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/subcommand"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flags"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/zipUtilities"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
 )
@@ -189,7 +189,7 @@ func (n *CmdCreateHostedApplication) RunE(cmd *cobra.Command, args []string) err
 	// TODO: Use the default name value from n.Name rather then reading it from the args again.
 	log.Infof("application name: %s", appDetails.Name)
 	if appDetails.Name != "" {
-		refs, err := c8yfetcher.FindHostedApplications(client, []string{appDetails.Name}, true)
+		refs, err := c8yfetcher.FindHostedApplications(client, []string{appDetails.Name}, true, "")
 
 		if err != nil {
 			return fmt.Errorf("Failed to find hosted application. %s", err)

@@ -1,14 +1,14 @@
 package usergroups
 
 import (
-	"github.com/reubenmiller/go-c8y-cli/pkg/cmd/subcommand"
-	cmdCreate "github.com/reubenmiller/go-c8y-cli/pkg/cmd/usergroups/create"
-	cmdDelete "github.com/reubenmiller/go-c8y-cli/pkg/cmd/usergroups/delete"
-	cmdGet "github.com/reubenmiller/go-c8y-cli/pkg/cmd/usergroups/get"
-	cmdGetByName "github.com/reubenmiller/go-c8y-cli/pkg/cmd/usergroups/getbyname"
-	cmdList "github.com/reubenmiller/go-c8y-cli/pkg/cmd/usergroups/list"
-	cmdUpdate "github.com/reubenmiller/go-c8y-cli/pkg/cmd/usergroups/update"
-	"github.com/reubenmiller/go-c8y-cli/pkg/cmdutil"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/subcommand"
+	cmdCreate "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/usergroups/create"
+	cmdDelete "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/usergroups/delete"
+	cmdGet "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/usergroups/get"
+	cmdGetByName "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/usergroups/getbyname"
+	cmdList "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/usergroups/list"
+	cmdUpdate "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/usergroups/update"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
 	"github.com/spf13/cobra"
 )
 

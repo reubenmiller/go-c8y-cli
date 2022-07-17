@@ -21,6 +21,12 @@ Get a collection of devices of type "myType", and their names start with "sensor
 $ c8y devices list --query "name eq '*sensor*' and creationTime.date gt '2021-04-02T00:00:00'"
 Get devices which names containing 'sensor' and were created after 2021-04-02
 
+$ c8y devices list --creationTimeDateFrom -7d
+Get devices which where registered longer than 7 days ago
+
+$ c8y devices list --creationTimeDateTo -1d
+Get devices which where registered in the last day
+
 $ echo -e "c8y_MacOS\nc8y_Linux" | c8y devices list --queryTemplate "type eq '%s'"
 Get devices with type 'c8y_MacOS' then devices with type 'c8y_Linux' (using pipeline)
 
@@ -29,16 +35,22 @@ Get devices with type 'c8y_MacOS' then devices with type 'c8y_Linux' (using pipe
 ### Options
 
 ```
-      --agents                 Only include agents.
-      --fragmentType string    Filter by fragment type
-  -h, --help                   help for list
-      --name string            Filter by name
-      --orderBy string         Order by. e.g. _id asc or name asc or creationTime.date desc (default "name")
-      --owner string           Filter by owner
-      --query string           Additional query filter (accepts pipeline)
-      --queryTemplate string   String template to be used when applying the given query. Use %s to reference the query/pipeline input
-      --type string            Filter by type
-      --withParents            Include a flat list of all parents and grandparents of the given object
+      --agents                        Only include agents.
+      --availability string           Filter by c8y_Availability.status
+      --creationTimeDateFrom string   Filter creationTime.date from a specific date
+      --creationTimeDateTo string     Filter creationTime.date to a specific date
+      --fragmentType string           Filter by fragment type
+      --group string                  Filter by group inclusion
+  -h, --help                          help for list
+      --lastMessageDateFrom string    Filter c8y_Availability.lastMessage from a specific date
+      --lastMessageDateTo string      Filter c8y_Availability.lastMessage to a specific date
+      --name string                   Filter by name
+      --orderBy string                Order by. e.g. _id asc or name asc or creationTime.date desc (default "name")
+      --owner string                  Filter by owner
+      --query string                  Additional query filter (accepts pipeline)
+      --queryTemplate string          String template to be used when applying the given query. Use %s to reference the query/pipeline input
+      --type string                   Filter by type
+      --withParents                   Include a flat list of all parents and grandparents of the given object
 ```
 
 ### Options inherited from parent commands
@@ -59,7 +71,7 @@ Get devices with type 'c8y_MacOS' then devices with type 'c8y_Linux' (using pipe
       --dry                        Dry run. Don't send any data to the server
       --dryFormat string           Dry run output format. i.e. json, dump, markdown or curl (default "markdown")
       --examples                   Show examples for the current command
-      --filter strings             Apply a client side filter to response before returning it to the user
+      --filter stringArray         Apply a client side filter to response before returning it to the user
       --flatten                    flatten json output by replacing nested json properties with properties where their names are represented by dot notation
   -f, --force                      Do not prompt for confirmation. Ignored when using --confirm
   -H, --header strings             custom headers. i.e. --header "Accept: value, AnotherHeader: myvalue"

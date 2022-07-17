@@ -3,7 +3,7 @@
 # Licensed under the MIT License. See https://go.microsoft.com/fwlink/?linkid=2090316 for license information.
 #-------------------------------------------------------------------------------------------------------------
 
-FROM golang:1.16
+FROM golang:1.18
 
 # Avoid warnings by switching to noninteractive
 ENV DEBIAN_FRONTEND=noninteractive
@@ -16,9 +16,10 @@ ARG USERNAME=vscode
 ARG USER_UID=1000
 ARG USER_GID=$USER_UID
 
+COPY .devcontainer/install-powershell.sh /tmp/install/
+
 # Configure apt, install packages and tools
-RUN wget https://packages.microsoft.com/config/debian/10/packages-microsoft-prod.deb \
-    && dpkg -i packages-microsoft-prod.deb \
+RUN /tmp/install/install-powershell.sh \
     && curl -sL https://deb.nodesource.com/setup_14.x | bash - \
     #
     # Update and install packages
@@ -31,34 +32,33 @@ RUN wget https://packages.microsoft.com/config/debian/10/packages-microsoft-prod
     && apt-get -y install git openssh-client less iproute2 procps lsb-release gnupg \
     #
     # Extra tooling
-    && apt-get -y install make powershell nodejs unzip lolcat boxes figlet randtype \
-    && npm install -g yamljs svg-term-cli \
+    && apt-get -y install make nodejs unzip lolcat boxes figlet randtype \
+    && go install github.com/mikefarah/yq/v4@latest \
+    && npm install -g svg-term-cli \
     #
     # Build Go tools w/module support
     && mkdir -p /tmp/gotools \
     && cd /tmp/gotools \
-    && GOPATH=/tmp/gotools GO111MODULE=on go get -v golang.org/x/tools/gopls@latest 2>&1 \
-    && GOPATH=/tmp/gotools GO111MODULE=on go get -v \
-        honnef.co/go/tools/...@latest \
-        golang.org/x/tools/cmd/gorename@latest \
-        golang.org/x/tools/cmd/goimports@latest \
-        golang.org/x/tools/cmd/guru@latest \
-        golang.org/x/lint/golint@latest \
-        github.com/mdempsky/gocode@latest \
-        github.com/cweill/gotests/...@latest \
-        github.com/haya14busa/goplay/cmd/goplay@latest \
-        github.com/sqs/goreturns@latest \
-        github.com/josharian/impl@latest \
-        github.com/davidrjenni/reftools/cmd/fillstruct@latest \
-        github.com/uudashr/gopkgs/v2/cmd/gopkgs@latest  \
-        github.com/ramya-rao-a/go-outline@latest  \
-        github.com/acroca/go-symbols@latest  \
-        github.com/godoctor/godoctor@latest  \
-        github.com/rogpeppe/godef@latest  \
-        github.com/zmb3/gogetdoc@latest \
-        github.com/fatih/gomodifytags@latest  \
-        github.com/mgechev/revive@latest  \
-        github.com/go-delve/delve/cmd/dlv@latest 2>&1 \
+    && GOPATH=/tmp/gotools go install -v golang.org/x/tools/gopls@latest 2>&1 \
+    && GOPATH=/tmp/gotools go install -v honnef.co/go/tools/cmd/staticcheck@latest \
+    && GOPATH=/tmp/gotools go install -v golang.org/x/tools/cmd/gorename@latest \
+    && GOPATH=/tmp/gotools go install -v golang.org/x/tools/cmd/goimports@latest \
+    && GOPATH=/tmp/gotools go install -v golang.org/x/tools/cmd/guru@latest \
+    && GOPATH=/tmp/gotools go install -v golang.org/x/lint/golint@latest \
+    && GOPATH=/tmp/gotools go install -v github.com/mdempsky/gocode@latest \
+    && GOPATH=/tmp/gotools go install -v github.com/haya14busa/goplay/cmd/goplay@latest \
+    && GOPATH=/tmp/gotools go install -v github.com/sqs/goreturns@latest \
+    && GOPATH=/tmp/gotools go install -v github.com/josharian/impl@latest \
+    && GOPATH=/tmp/gotools go install -v github.com/davidrjenni/reftools/cmd/fillstruct@latest \
+    && GOPATH=/tmp/gotools go install -v github.com/uudashr/gopkgs/v2/cmd/gopkgs@latest  \
+    && GOPATH=/tmp/gotools go install -v github.com/ramya-rao-a/go-outline@latest  \
+    && GOPATH=/tmp/gotools go install -v github.com/acroca/go-symbols@latest  \
+    && GOPATH=/tmp/gotools go install -v github.com/godoctor/godoctor@latest  \
+    && GOPATH=/tmp/gotools go install -v github.com/rogpeppe/godef@latest  \
+    && GOPATH=/tmp/gotools go install -v github.com/zmb3/gogetdoc@latest \
+    && GOPATH=/tmp/gotools go install -v github.com/fatih/gomodifytags@latest  \
+    && GOPATH=/tmp/gotools go install -v github.com/mgechev/revive@latest  \
+    && GOPATH=/tmp/gotools go install -v github.com/go-delve/delve/cmd/dlv@latest 2>&1 \
     #
     # Install Go tools
     && mv /tmp/gotools/bin/* /usr/local/bin/ \
@@ -77,7 +77,7 @@ RUN wget https://packages.microsoft.com/config/debian/10/packages-microsoft-prod
     # Install Docker CE cli
     && apt-get install -y apt-transport-https ca-certificates curl gnupg-agent software-properties-common lsb-release \
     && curl -fsSL https://download.docker.com/linux/$(lsb_release -is | tr '[:upper:]' '[:lower:]')/gpg | apt-key add - 2>/dev/null \
-    && add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/$(lsb_release -is | tr '[:upper:]' '[:lower:]') $(lsb_release -cs) stable" \
+    && add-apt-repository "deb [arch=$(dpkg --print-architecture)] https://download.docker.com/linux/$(lsb_release -is | tr '[:upper:]' '[:lower:]') $(lsb_release -cs) stable" \
     && apt-get update \
     && apt-get install -y docker-ce-cli \
     #
@@ -137,8 +137,7 @@ RUN curl -sSfL https://raw.githubusercontent.com/robbyrussell/oh-my-zsh/master/t
 COPY tools/shell/.zshrc /home/$USERNAME/.zshrc
 COPY tools/shell/c8y.plugin.zsh /home/$USERNAME/.oh-my-zsh/custom/plugins/c8y/
 COPY tools/shell/c8y.plugin.fish /home/$USERNAME/
-RUN sed -iE 's/plugins=(\(.*\))/plugins=(\1 c8y task)/' /home/$USERNAME/.zshrc \
-    && echo "autoload -U compinit; compinit -i" >> /home/$USERNAME/.zshrc \
+RUN echo "autoload -U compinit; compinit -i" | sudo tee -a /home/$USERNAME/.zshrc \
     #
     # taskfile completion
     && git clone https://github.com/sawadashota/go-task-completions.git /home/$USERNAME/.oh-my-zsh/custom/plugins/task \
@@ -149,11 +148,13 @@ RUN sed -iE 's/plugins=(\(.*\))/plugins=(\1 c8y task)/' /home/$USERNAME/.zshrc \
     # && echo "source ~/c8y.plugin.fish" >> /home/$USERNAME/.config/fish/config.fish
 
 # CI/CD tools
-RUN  cd /tmp \
-    && command -v task || go install github.com/go-task/task/v3/cmd/task@latest \
-    && go install github.com/goreleaser/goreleaser@latest \
-    && curl -fL https://getcli.jfrog.io | sh \
-    && chmod a+x jfrog \
+RUN cd /tmp \
+    && command -v task || sudo /usr/local/go/bin/go install github.com/go-task/task/v3/cmd/task@latest \
+    && sudo cp /root/go/bin/task /usr/local/bin/ \
+    && sudo /usr/local/go/bin/go install github.com/goreleaser/goreleaser@latest \
+    && sudo cp /root/go/bin/goreleaser /usr/local/bin/ \
+    && curl -fL https://getcli.jfrog.io | sudo sh \
+    && sudo chmod a+x jfrog \
     && sudo mv jfrog /usr/local/bin/
 
 # Update this to "on" or "off" as appropriate

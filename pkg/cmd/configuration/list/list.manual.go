@@ -2,11 +2,11 @@ package list
 
 import (
 	"github.com/MakeNowJust/heredoc/v2"
-	"github.com/reubenmiller/go-c8y-cli/pkg/c8yquerycmd"
-	"github.com/reubenmiller/go-c8y-cli/pkg/cmd/subcommand"
-	"github.com/reubenmiller/go-c8y-cli/pkg/cmdutil"
-	"github.com/reubenmiller/go-c8y-cli/pkg/completion"
-	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/c8yquerycmd"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/subcommand"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/completion"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flags"
 	"github.com/spf13/cobra"
 )
 
@@ -38,11 +38,11 @@ Get a list of configuration files
 				cmd,
 				args,
 				ccmd.factory,
-				flags.WithC8YQueryFixedString("(type eq 'c8y_ConfigurationDump')"),
-				flags.WithC8YQueryFormat("name", "(name eq '%s')"),
-				flags.WithC8YQueryFormat("configurationType", "(configurationType eq '%s')"),
-				flags.WithC8YQueryFormat("deviceType", "(c8y_Filter.type eq '%s')"),
-				flags.WithC8YQueryFormat("description", "(description eq '%s')"),
+				flags.WithStaticStringValue("config", "(type eq 'c8y_ConfigurationDump')"),
+				flags.WithStringValue("name", "name", "(name eq '%s')"),
+				flags.WithStringValue("configurationType", "configurationType", "(configurationType eq '%s')"),
+				flags.WithStringValue("deviceType", "deviceType", "(c8y_Filter.type eq '%s')"),
+				flags.WithStringValue("description", "description", "(description eq '%s')"),
 			)
 			return handler()
 		},

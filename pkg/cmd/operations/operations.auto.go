@@ -1,13 +1,13 @@
 package operations
 
 import (
-	cmdCreate "github.com/reubenmiller/go-c8y-cli/pkg/cmd/operations/create"
-	cmdDeleteCollection "github.com/reubenmiller/go-c8y-cli/pkg/cmd/operations/deletecollection"
-	cmdGet "github.com/reubenmiller/go-c8y-cli/pkg/cmd/operations/get"
-	cmdList "github.com/reubenmiller/go-c8y-cli/pkg/cmd/operations/list"
-	cmdUpdate "github.com/reubenmiller/go-c8y-cli/pkg/cmd/operations/update"
-	"github.com/reubenmiller/go-c8y-cli/pkg/cmd/subcommand"
-	"github.com/reubenmiller/go-c8y-cli/pkg/cmdutil"
+	cmdCreate "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/operations/create"
+	cmdDeleteCollection "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/operations/deletecollection"
+	cmdGet "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/operations/get"
+	cmdList "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/operations/list"
+	cmdUpdate "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/operations/update"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/subcommand"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
 	"github.com/spf13/cobra"
 )
 

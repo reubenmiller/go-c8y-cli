@@ -1,8 +1,9 @@
 ﻿[cmdletbinding()]
-Param()
+Param(
+	[Parameter(Mandatory=$true)]
+	[string] $ArtifactFolder
+)
 $ErrorActionPreference = 'Stop'
-
-Import-Module "$PSScriptRoot/../../tools/PSc8y/tools/build.psm1" -Force
 
 # PowerShellGet 2.2.3 required to run correctly on MacOS
 try {
@@ -22,26 +23,13 @@ try {
 	Write-Host ("Current loaded version: {0}" -f ($Versions -join ","))
 }
 
-
-if ($env:APPVEYOR) {
-	& $PSScriptRoot/wait-for-jobs.ps1
-}
+#
+# Slim down folder by only leaving amd64 and macOs arm64 binaries
+Get-ChildItem "$ArtifactFolder/Dependencies" | Where-Object {
+	$_.Name -notmatch "amd64|macOS_arm64"
+} | Remove-Item
 
 try {
-	#
-	# Build binaries
-	#
-	$ArtifactFolder = Export-ProductionModule
-	$DependenciesDir = "$ArtifactFolder/Dependencies/"
-	& $PSScriptRoot/../build-cli/build-binary.ps1 -OutputDir $DependenciesDir -All
-
-	[array] $c8ybinaries = Get-ChildItem -Path $DependenciesDir -Filter "*c8y*"
-
-	if ($c8ybinaries.Count -lt 4) {
-		Write-Error "Failed to find all 4 c8y binaries"
-		Exit 1
-	}
-
 	Write-Host "Publishing module from folder [$ArtifactFolder]"
 	## Publish module to PowerShell Gallery
 	$publishParams = @{

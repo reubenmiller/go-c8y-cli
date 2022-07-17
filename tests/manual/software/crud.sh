@@ -4,11 +4,21 @@ set -ex
 
 export C8Y_SETTINGS_DEFAULTS_DRY=false
 
+createdir () {
+    # Cross-platform compatible
+    local name="${1:-"c8y-temp"}"
+    tmpdir=$(mktemp -d 2>/dev/null || mktemp -d -t "$name")
+    echo "$tmpdir"
+}
+
+export TEMP_DIR=$(createdir)
+trap "rm -Rf $TEMP_DIR" EXIT
+
 NAME=${1:-""}
 VERSION=${2:-0.8.6}
 
 if [[ -z "$NAME" ]]; then
-    NAME=$( c8y template execute --template "{name: 'linux-software-typea_' + _.Char(8)}" --select name --output csv )
+    NAME=$( c8y template execute --template "{name: 'linux software-typea_' + _.Char(8)}" --select name --output csv )
 fi
 
 echo "Using software name: $NAME"
@@ -27,9 +37,8 @@ c8y software update --id "$NAME" --description "New description" --select descri
 #
 # create version by file (get details from package name)
 #
-package_file=$(mktemp /tmp/package-XXXXXX-10.2.3.deb)
+package_file="$TEMP_DIR/package-XXXXXX-10.2.3.deb"
 echo "dummy file" > "$package_file"
-trap "rm -f $package_file" EXIT
 
 VERSION2_ID=$( c8y software versions create --software "$NAME" --file "$package_file" --select "id,c8y_Software.version" --output csv )
 echo "$VERSION2_ID" | grep "^[0-9]\+,10.2.3$"
@@ -70,6 +79,14 @@ echo "$OPERATION" | c8y util show --select "body.deviceId" --output csv | grep "
 echo "$OPERATION" | c8y util show --select "body.c8y_SoftwareUpdate.0.name" --output csv | grep "^$NAME$"
 echo "$OPERATION" | c8y util show --select "body.c8y_SoftwareUpdate.0.version" --output csv | grep "^$VERSION$"
 echo "$OPERATION" | c8y util show --select "body.c8y_SoftwareUpdate.0.url" --output csv | grep "^https://test.com$"
+
+# install via piped device
+OPERATION=$( echo '{"id": "1"}' | c8y software versions install --software "$NAME" --version "$VERSION" --dry --dryFormat json --template "{extra: 'stuff'}" )
+echo "$OPERATION" | c8y util show --select "body.deviceId" --output csv | grep "^1$"
+echo "$OPERATION" | c8y util show --select "body.c8y_SoftwareUpdate.0.name" --output csv | grep "^$NAME$"
+echo "$OPERATION" | c8y util show --select "body.c8y_SoftwareUpdate.0.version" --output csv | grep "^$VERSION$"
+echo "$OPERATION" | c8y util show --select "body.c8y_SoftwareUpdate.0.url" --output csv | grep "^https://test.com$"
+echo "$OPERATION" | c8y util show --select "body.extra" --output csv | grep "^stuff$"
 
 # list versions and delete them
 c8y software versions list --software "$ID" | c8y software versions delete

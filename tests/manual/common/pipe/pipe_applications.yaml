@@ -1,0 +1,99 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/reubenmiller/commander/feat/handle-nested-files/schema.json
+config:
+  env:
+    C8Y_SETTINGS_DEFAULTS_DRY: true
+    C8Y_SETTINGS_DEFAULTS_DRYFORMAT: json
+    C8Y_SETTINGS_DEFAULTS_WITHERROR: true
+tests:
+  It accepts simple arguments (no pipeline):
+    command: |
+      c8y applications create \
+        --name "mynewapp" \
+        --template "{key: self.name + '-key'}" \
+        --type MICROSERVICE |
+        c8y util show --select path,body
+    exit-code: 0
+    stdout:
+      exactly: |
+        {"body":{"key":"mynewapp-key","name":"mynewapp","type":"MICROSERVICE"},"path":"/application/applications"}
+
+  It overrides a piped value with an explicit argument:
+    command: |
+      echo "name01" |
+        c8y applications create \
+          --name "mynewapp" \
+          --template "{key: self.name + '-key'}" \
+          --type MICROSERVICE |
+        c8y util show --select path,body
+    exit-code: 0
+    stdout:
+      exactly: |
+        {"body":{"key":"mynewapp-key","name":"mynewapp","type":"MICROSERVICE"},"path":"/application/applications"}
+
+  It accepts json complex value (override using argument):
+    command: |
+      c8y template execute --template "{requiredRoles:['EXAMPLE_ROLE_1','EXAMPLE_ROLE_2']}" |
+        c8y applications create \
+          --name "mynewapp" \
+          --template "input.value + {key: self.name + '-key'}" \
+          --type MICROSERVICE |
+        c8y util show --select path,body
+    exit-code: 0
+    stdout:
+      exactly: |
+        {"body":{"key":"mynewapp-key","name":"mynewapp","requiredRoles":["EXAMPLE_ROLE_1","EXAMPLE_ROLE_2"],"type":"MICROSERVICE"},"path":"/application/applications"}
+
+  It accepts piped json lines from stdin:
+    command: |
+      cat manual/common/pipe/apps.jsonl |
+        c8y applications create \
+          --template "input.value" |
+        c8y util show --select path,body
+    exit-code: 0
+    stdout:
+      exactly: |
+        {"body":{"key":"my-app1-key","name":"my-app1","type":"MICROSERVICE"},"path":"/application/applications"}
+        {"body":{"key":"my-app2-key","name":"my-app2","type":"MICROSERVICE"},"path":"/application/applications"}
+        {"body":{"key":"my-app3-key","name":"my-app3","type":"MICROSERVICE"},"path":"/application/applications"}
+        {"body":{"key":"my-app4-key","name":"my-app4","type":"MICROSERVICE"},"path":"/application/applications"}
+
+  It accepts a file containing json lines as an argument:
+    command: |
+      c8y applications create --name manual/common/pipe/apps.jsonl \
+        --template "input.value" |
+      c8y util show --select path,body
+    exit-code: 0
+    stdout:
+      exactly: |
+        {"body":{"key":"my-app1-key","name":"my-app1","type":"MICROSERVICE"},"path":"/application/applications"}
+        {"body":{"key":"my-app2-key","name":"my-app2","type":"MICROSERVICE"},"path":"/application/applications"}
+        {"body":{"key":"my-app3-key","name":"my-app3","type":"MICROSERVICE"},"path":"/application/applications"}
+        {"body":{"key":"my-app4-key","name":"my-app4","type":"MICROSERVICE"},"path":"/application/applications"}
+
+  It accepts a file containing names as an argument:
+    command: |
+      c8y applications create \
+        --name manual/common/pipe/app_names.txt \
+        --template "{key: self.name + '-key', type: 'MICROSERVICE'}" |
+      c8y util show --select path,body
+    exit-code: 0
+    stdout:
+      exactly: |
+        {"body":{"key":"my-app1-key","name":"my-app1","type":"MICROSERVICE"},"path":"/application/applications"}
+        {"body":{"key":"my-app2-key","name":"my-app2","type":"MICROSERVICE"},"path":"/application/applications"}
+        {"body":{"key":"my-app3-key","name":"my-app3","type":"MICROSERVICE"},"path":"/application/applications"}
+        {"body":{"key":"my-app4-key","name":"my-app4","type":"MICROSERVICE"},"path":"/application/applications"}
+
+  It accepts piped data from other c8y commands:
+    config:
+      env:
+        C8Y_SETTINGS_DEFAULTS_DRY: false
+    command: |
+      c8y applications list --pageSize 1 |
+        c8y applications get |
+        c8y util show --select id,type
+    exit-code: 0
+    stdout:
+      json:
+        id: r/^\d+$
+        type: r/^\w+$

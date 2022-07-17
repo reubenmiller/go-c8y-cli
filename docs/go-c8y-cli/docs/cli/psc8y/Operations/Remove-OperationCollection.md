@@ -73,6 +73,7 @@ Remove-OperationCollection
 ## DESCRIPTION
 Delete a collection of operations using a set of filter criteria.
 Be careful when deleting operations.
+
 Where possible update operations to FAILED (with a failure reason) instead of deleting them as it is easier to track.
 
 ## EXAMPLES

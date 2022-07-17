@@ -13,19 +13,19 @@ import (
 	"time"
 
 	"github.com/cli/safeexec"
-	"github.com/reubenmiller/go-c8y-cli/internal/run"
-	"github.com/reubenmiller/go-c8y-cli/pkg/activitylogger"
-	"github.com/reubenmiller/go-c8y-cli/pkg/cmd/alias/expand"
-	"github.com/reubenmiller/go-c8y-cli/pkg/cmd/factory"
-	"github.com/reubenmiller/go-c8y-cli/pkg/cmd/root"
-	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
-	"github.com/reubenmiller/go-c8y-cli/pkg/cmdutil"
-	"github.com/reubenmiller/go-c8y-cli/pkg/config"
-	"github.com/reubenmiller/go-c8y-cli/pkg/console"
-	"github.com/reubenmiller/go-c8y-cli/pkg/dataview"
-	"github.com/reubenmiller/go-c8y-cli/pkg/encrypt"
-	"github.com/reubenmiller/go-c8y-cli/pkg/iterator"
-	"github.com/reubenmiller/go-c8y-cli/pkg/logger"
+	"github.com/reubenmiller/go-c8y-cli/v2/internal/run"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/activitylogger"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/alias/expand"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/factory"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/root"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmderrors"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/config"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/console"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/dataview"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/encrypt"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/iterator"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/logger"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -36,7 +36,7 @@ import (
 var Logger *logger.Logger
 
 // Build data
-// These variables should be set using the -ldflags "-X github.com/reubenmiller/go-c8y-cli/pkg/cmd.version=1.0.0" when running go build
+// These variables should be set using the -ldflags "-X github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd.version=1.0.0" when running go build
 var buildVersion string
 var buildBranch string
 
@@ -53,22 +53,50 @@ func init() {
 
 // Execute runs the root command
 func MainRun() {
-	cmd, err := Initialize()
+	rootCmd, err := Initialize()
 	if err != nil {
 		os.Exit(int(cmderrors.ExitError))
 	}
 
 	// Expand any aliases
-	expandedArgs, err := setArgs(cmd.Command)
+	expandedArgs, err := setArgs(rootCmd.Command)
 	if err != nil {
 		Logger.Errorf("Could not expand aliases. %s", err)
 		os.Exit(int(cmderrors.ExitInvalidAlias))
 	}
-	Logger.Debugf("Expanded args: %v", expandedArgs)
-	cmd.SetArgs(expandedArgs)
 
-	if err := cmd.Execute(); err != nil {
-		err = CheckCommandError(cmd.Command, cmd.Factory, err)
+	// Completions for aliases
+	rootCmd.ValidArgsFunction = func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+
+		v := viper.GetViper()
+		aliases := v.GetStringMapString(config.SettingsCommonAliases)
+		for key, value := range v.GetStringMapString(config.SettingsAliases) {
+			aliases[key] = value
+		}
+
+		var results []string
+		for aliasName, aliasValue := range aliases {
+			if strings.HasPrefix(aliasName, toComplete) {
+				var s string
+				if strings.HasPrefix(aliasValue, "!") {
+					s = fmt.Sprintf("%s\tShell alias", aliasName)
+				} else {
+					if len(aliasValue) > 80 {
+						aliasValue = aliasValue[:80] + "..."
+					}
+					s = fmt.Sprintf("%s\tAlias for %s", aliasName, aliasValue)
+				}
+				results = append(results, s)
+			}
+		}
+		return results, cobra.ShellCompDirectiveNoFileComp
+	}
+
+	Logger.Debugf("Expanded args: %v", expandedArgs)
+	rootCmd.SetArgs(expandedArgs)
+
+	if err := rootCmd.Execute(); err != nil {
+		err = CheckCommandError(rootCmd.Command, rootCmd.Factory, err)
 
 		// Help is not really error, just a way to exit early
 		// after displaying help to ther user

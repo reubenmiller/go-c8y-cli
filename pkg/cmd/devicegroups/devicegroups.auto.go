@@ -1,17 +1,17 @@
 package devicegroups
 
 import (
-	cmdAssignDevice "github.com/reubenmiller/go-c8y-cli/pkg/cmd/devicegroups/assigndevice"
-	cmdAssignGroup "github.com/reubenmiller/go-c8y-cli/pkg/cmd/devicegroups/assigngroup"
-	cmdCreate "github.com/reubenmiller/go-c8y-cli/pkg/cmd/devicegroups/create"
-	cmdDelete "github.com/reubenmiller/go-c8y-cli/pkg/cmd/devicegroups/delete"
-	cmdGet "github.com/reubenmiller/go-c8y-cli/pkg/cmd/devicegroups/get"
-	cmdListAssets "github.com/reubenmiller/go-c8y-cli/pkg/cmd/devicegroups/listassets"
-	cmdUnassignDevice "github.com/reubenmiller/go-c8y-cli/pkg/cmd/devicegroups/unassigndevice"
-	cmdUnassignGroup "github.com/reubenmiller/go-c8y-cli/pkg/cmd/devicegroups/unassigngroup"
-	cmdUpdate "github.com/reubenmiller/go-c8y-cli/pkg/cmd/devicegroups/update"
-	"github.com/reubenmiller/go-c8y-cli/pkg/cmd/subcommand"
-	"github.com/reubenmiller/go-c8y-cli/pkg/cmdutil"
+	cmdAssignDevice "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/devicegroups/assigndevice"
+	cmdAssignGroup "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/devicegroups/assigngroup"
+	cmdCreate "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/devicegroups/create"
+	cmdDelete "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/devicegroups/delete"
+	cmdGet "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/devicegroups/get"
+	cmdListAssets "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/devicegroups/listassets"
+	cmdUnassignDevice "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/devicegroups/unassigndevice"
+	cmdUnassignGroup "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/devicegroups/unassigngroup"
+	cmdUpdate "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/devicegroups/update"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/subcommand"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
 	"github.com/spf13/cobra"
 )
 

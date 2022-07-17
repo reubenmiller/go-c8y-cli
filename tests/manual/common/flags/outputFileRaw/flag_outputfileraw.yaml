@@ -1,0 +1,7 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/reubenmiller/commander/feat/handle-nested-files/schema.json
+
+tests:
+  It should support template expansion when downloading binaries:
+    command: |
+      ./manual/common/flags/outputFileRaw/tests.sh
+    exit-code: 0

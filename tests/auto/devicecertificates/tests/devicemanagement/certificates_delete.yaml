@@ -1,0 +1,15 @@
+tests:
+    devicemanagement/certificates_delete_Remove trusted device certificate by id/fingerprint:
+        command: c8y devicemanagement certificates delete --id abcedef0123456789abcedef0123456789
+        exit-code: 0
+        stdout:
+            json:
+                method: DELETE
+                path: /tenant/tenants/$C8Y_TENANT/trusted-certificates/abcedef0123456789abcedef0123456789
+    devicemanagement/certificates_delete_Remove trusted device certificate by name:
+        command: c8y devicemanagement certificates delete --id MyCert
+        exit-code: 0
+        stdout:
+            json:
+                method: DELETE
+                path: r//tenant/tenants/t\d+/trusted-certificates/\w+$

@@ -2,9 +2,10 @@ package version
 
 import (
 	"encoding/json"
+	"runtime/debug"
 
-	"github.com/reubenmiller/go-c8y-cli/pkg/cmd/subcommand"
-	"github.com/reubenmiller/go-c8y-cli/pkg/cmdutil"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/subcommand"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
 	"github.com/spf13/cobra"
 )
 
@@ -48,6 +49,16 @@ func (n *CmdVersion) RunE(cmd *cobra.Command, args []string) error {
 		Version: n.factory.BuildVersion,
 		Branch:  n.factory.BuildBranch,
 	}
+
+	if release.Version == "" {
+		info, ok := debug.ReadBuildInfo()
+		if ok {
+			release.Version = info.Main.Version
+			release.Branch = "(unknown)"
+
+		}
+	}
+
 	responseText, err := json.Marshal(release)
 	if err != nil {
 		return nil

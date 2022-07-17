@@ -1,6 +1,7 @@
 package iterator
 
 import (
+	"fmt"
 	"io"
 	"sync/atomic"
 )
@@ -9,6 +10,7 @@ import (
 type SliceIterator struct {
 	currentIndex int64 // access atomically (must be defined at the top)
 	values       []string
+	format       string
 }
 
 // GetNext will count through the values and return them one by one
@@ -18,7 +20,11 @@ func (i *SliceIterator) GetNext() (line []byte, input interface{}, err error) {
 	if nextIndex > int64(len(i.values)) {
 		err = io.EOF
 	} else {
-		line = []byte(i.values[nextIndex-1])
+		value := i.values[nextIndex-1]
+		if i.format != "" {
+			value = fmt.Sprintf(i.format, value)
+		}
+		line = []byte(value)
 	}
 	return line, line, err
 }
@@ -35,10 +41,14 @@ func (i *SliceIterator) IsBound() bool {
 
 // NewSliceIterator creates a repeater which returns the slice items
 // before returns io.EOF
-func NewSliceIterator(values []string) *SliceIterator {
-	return &SliceIterator{
+func NewSliceIterator(values []string, format ...string) *SliceIterator {
+	iter := &SliceIterator{
 		values: values,
 	}
+	if len(format) > 0 {
+		iter.format = format[0]
+	}
+	return iter
 }
 
 // InfiniteSliceIterator is iterates over a given array and once the last element is return, it

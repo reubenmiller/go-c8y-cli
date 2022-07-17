@@ -3,9 +3,9 @@ package requestiterator
 import (
 	"testing"
 
-	"github.com/reubenmiller/go-c8y-cli/pkg/assert"
-	"github.com/reubenmiller/go-c8y-cli/pkg/iterator"
-	"github.com/reubenmiller/go-c8y-cli/pkg/mapbuilder"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/assert"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/iterator"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/mapbuilder"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 )
 
@@ -13,7 +13,7 @@ func Test_RequestIteratorWithBodyIterator(t *testing.T) {
 	var err error
 	pathIter := iterator.NewRepeatIterator("root/subpath", 0)
 	valueIter := iterator.NewSliceIterator([]string{"1", "2"})
-	body := mapbuilder.NewInitializedMapBuilder()
+	body := mapbuilder.NewInitializedMapBuilder(true)
 	err = body.Set("nested.value", valueIter)
 	assert.OK(t, err)
 	options := &c8y.RequestOptions{

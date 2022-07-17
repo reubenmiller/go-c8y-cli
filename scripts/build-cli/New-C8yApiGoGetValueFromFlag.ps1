@@ -25,7 +25,7 @@
 
     $Definitions = @{
         # file (used in multipart/form-data uploads). It writes to the formData object instead of the body
-        "file" = "flags.WithFormDataFileAndInfo(`"${prop}`", `"data`")...,"
+        "file" = "flags.WithFormDataFileAndInfoWithTemplateSupport(cmdutil.NewTemplateResolver(cfg), `"${prop}`", `"data`")...,"
 
         # fileContents. File contents will be added to body
         "fileContents" = "flags.WithFilePath(`"${prop}`", `"${queryParam}`", `"$FixedValue`"),"
@@ -117,6 +117,12 @@
 
         # software version name
         "softwareversionName" = "flags.WithStringValue(`"${prop}`", `"${queryParam}`"),"
+
+        # Certificate file
+        "certificatefile" = "flags.WithCertificateFile(`"${prop}`", `"${queryParam}`"),"
+
+        # Certificate file
+        "[]certificate" = "c8yfetcher.WithCertificateByNameFirstMatch(client, args, `"${prop}`", `"${queryParam}`"),"
 
         # firmware array
         "[]firmware" = "c8yfetcher.WithFirmwareByNameFirstMatch(client, args, `"${prop}`", `"${queryParam}`"),"

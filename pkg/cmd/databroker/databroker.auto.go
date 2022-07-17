@@ -1,11 +1,11 @@
 package databroker
 
 import (
-	cmdGet "github.com/reubenmiller/go-c8y-cli/pkg/cmd/databroker/get"
-	cmdList "github.com/reubenmiller/go-c8y-cli/pkg/cmd/databroker/list"
-	cmdUpdate "github.com/reubenmiller/go-c8y-cli/pkg/cmd/databroker/update"
-	"github.com/reubenmiller/go-c8y-cli/pkg/cmd/subcommand"
-	"github.com/reubenmiller/go-c8y-cli/pkg/cmdutil"
+	cmdGet "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/databroker/get"
+	cmdList "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/databroker/list"
+	cmdUpdate "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/databroker/update"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/subcommand"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
 	"github.com/spf13/cobra"
 )
 

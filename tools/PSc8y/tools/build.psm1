@@ -75,7 +75,11 @@ Function Get-GitVersion {
         }
     }
 
-    $parts = $Version -split "-", 2
+    if ($version -notmatch "^v?\d+") {
+        $version = "0.0.0"
+    }
+
+    $parts = $version -split "-", 2
 
     [pscustomobject]@{
         Version = $parts[0] -replace "^v", ""
@@ -161,8 +165,8 @@ function Publish-ModuleArtifacts {
     }
 
     Write-Verbose "Creating directory [$ArtifactRoot]"
-    New-Item -Path $ArtifactRoot -ItemType Directory | Out-Null
-
+    $null = New-Item -Path $ArtifactRoot -ItemType Directory -Force
+    
     # Copy the module into the dist folder
     Copy-Item -Path "$ModuleRoot\Dependencies\" -Filter "c8y*" -Destination "$ArtifactRoot\$ModuleName\Dependencies" -Recurse
     Copy-Item -Path "$ModuleRoot\format-data" -Destination "$ArtifactRoot\$ModuleName\" -Recurse

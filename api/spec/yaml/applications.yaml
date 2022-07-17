@@ -145,7 +145,7 @@ endpoints:
 
   - name: copyApplication
     description: 'Copy application'
-    descriptionLong: >
+    descriptionLong: |
       A POST request to the 'clone' resource creates a new application based on an already existing one.
 
       The properties are copied to the newly created application. For name, key and context path a 'clone' prefix is added in order to be unique.
@@ -344,7 +344,7 @@ endpoints:
 
   - name: newApplicationBinary
     description: New application binary
-    descriptionLong: >
+    descriptionLong: |
       For the applications of type microservice and web application to be available for Cumulocity platform users, a binary zip file must be uploaded.
 
       For the microservice application, the zip file must consist of
@@ -388,7 +388,7 @@ endpoints:
 
   - name: getApplicationBinaryCollection
     description: Get application binaries
-    descriptionLong: >
+    descriptionLong: |
       A list of all binaries related to the given application will be returned
     method: GET
     path: /application/applications/{id}/binaries
@@ -428,7 +428,7 @@ endpoints:
   - name: deleteApplicationBinary
     skip: false
     description: Delete application binary
-    descriptionLong: >
+    descriptionLong: |
       Remove an application binaries related to the given application
 
       The active version can not be deleted and the server will throw an error if you try.

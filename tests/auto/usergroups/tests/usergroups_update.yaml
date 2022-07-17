@@ -7,3 +7,13 @@ tests:
                 body.name: customGroup2
                 method: PUT
                 path: /user/$C8Y_TENANT/groups/12345
+    userGroups_update_Update a user group with custom properties:
+        command: |
+            c8y usergroups update --id 12345 --name "customGroup2" --template "{example: 'value'}"
+        exit-code: 0
+        stdout:
+            json:
+                body.example: value
+                body.name: customGroup2
+                method: PUT
+                path: /user/$C8Y_TENANT/groups/12345

@@ -1,0 +1,194 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/reubenmiller/commander/feat/handle-nested-files/schema.json
+# Order of processing
+tests:
+
+  It explicit arguments override values from data and templates:
+    command: |
+      c8y template execute --template "{deviceId: 9999}" |
+      c8y operations create \
+        --device "1111" \
+        --data "deviceId=\"2222\"" \
+        --template "{deviceId: '3333'}" \
+        --dry \
+        --dryFormat json |
+      c8y util show --select body
+
+      echo "9999" |
+      c8y operations create \
+        --device "1111" \
+        --data "deviceId=\"2222\"" \
+        --template "{deviceId: '3333'}" \
+        --dry \
+        --dryFormat json |
+      c8y util show --select body
+    exit-code: 0
+    stdout:
+      exactly: |
+        {"body":{"deviceId":"1111"}}
+        {"body":{"deviceId":"1111"}}
+
+  It explicit arguments override values from template:
+    command: |
+      c8y template execute --template "{deviceId: 9999}" |
+      c8y operations create \
+        --device "1111" \
+        --template "{deviceId: '3333'}" \
+        --dry \
+        --dryFormat json |
+      c8y util show --select body
+
+      echo "9999" |
+      c8y operations create \
+        --device "1111" \
+        --template "{deviceId: '3333'}" \
+        --dry \
+        --dryFormat json |
+      c8y util show --select body
+    exit-code: 0
+    stdout:
+      exactly: |
+        {"body":{"deviceId":"1111"}}
+        {"body":{"deviceId":"1111"}}
+  
+  Piped arguments override data values:
+    command: |
+      c8y template execute --template "{deviceId: 9999}" |
+      c8y operations create \
+        --data 'deviceId=\"2222\"' \
+        --template "{deviceId: '3333'}" \
+        --dry \
+        --dryFormat json |
+      c8y util show --select body
+
+      echo "9999" |
+      c8y operations create \
+        --data 'deviceId=\"2222\"' \
+        --template "{deviceId: '3333'}" \
+        --dry \
+        --dryFormat json |
+      c8y util show --select body
+    exit-code: 0
+    stdout:
+      exactly: |
+        {"body":{"deviceId":"9999"}}
+        {"body":{"deviceId":"9999"}}
+  
+  Piped arguments override template variables:
+    command: |
+      c8y template execute --template "{deviceId: 9999}" |
+      c8y operations create \
+        --template "{deviceId: '3333'}" \
+        --dry \
+        --dryFormat json |
+      c8y util show --select body
+
+      echo "9999" |
+      c8y operations create \
+        --template "{deviceId: '3333'}" \
+        --dry \
+        --dryFormat json |
+      c8y util show --select body
+    exit-code: 0
+    stdout:
+      exactly: |
+        {"body":{"deviceId":"9999"}}
+        {"body":{"deviceId":"9999"}}
+  
+  It provides a generic way to remap pipes values to property that will not be picked up:
+    command: |
+      c8y template execute --template "{deviceId: 1111}" --select "tempID:deviceId" |
+      c8y operations create \
+        --template "{deviceId: '3333'}" \
+        --dry \
+        --dryFormat json |
+      c8y util show --select body
+
+      c8y template execute --template "{deviceId: 1111}" --select "tempID:deviceId" |
+      c8y operations create \
+        --template "{deviceId: '3333'}" \
+        --dry \
+        --dryFormat json |
+      c8y util show --select body
+    exit-code: 0
+    stdout:
+      exactly: |
+        {"body":{"deviceId":"3333"}}
+        {"body":{"deviceId":"3333"}}
+
+  It overrides a piped value with an explicit argument:
+    command: |
+      echo "name01" |
+        c8y applications create \
+          --name "mynewapp" \
+          --template "{key: self.name + '-key'}" \
+          --type "MICROSERVICE" \
+          --dry \
+          --dryFormat json |
+      c8y util show --select path,body --compact=false
+    exit-code: 0
+    stdout:
+      exactly: |
+        {
+          "body": {
+            "key": "mynewapp-key",
+            "name": "mynewapp",
+            "type": "MICROSERVICE"
+          },
+          "path": "/application/applications"
+        }
+
+  It provides piped strings to template:
+    command: |
+      echo "11\n12" |
+        c8y devices create \
+          --template "{ jobIndex: input.index, jobValue: input.value }" \
+          --dry \
+          --dryFormat json |
+      c8y util show --select method,path,body --compact=false
+    exit-code: 0
+    stdout:
+      exactly: |
+        {
+          "body": {
+            "c8y_IsDevice": {},
+            "jobIndex": 1,
+            "jobValue": "11",
+            "name": "11"
+          },
+          "method": "POST",
+          "path": "/inventory/managedObjects"
+        }
+        {
+          "body": {
+            "c8y_IsDevice": {},
+            "jobIndex": 2,
+            "jobValue": "12",
+            "name": "12"
+          },
+          "method": "POST",
+          "path": "/inventory/managedObjects"
+        }
+
+  It accepts json complex value (override using argument):
+    command: |
+      c8y template execute --template "{requiredRoles:['EXAMPLE_ROLE_1', 'EXAMPLE_ROLE_2']}" |
+        c8y applications create \
+          --dry \
+          --dryFormat json \
+          --name "mynewapp" \
+          --template "input.value + { key: self.name + '-key'}" \
+          --type MICROSERVICE |
+      c8y util show --select method,path,body --compact=false
+    exit-code: 0
+    stdout:
+      exactly: |
+        {
+          "body": {
+            "key": "mynewapp-key",
+            "name": "mynewapp",
+            "requiredRoles": ["EXAMPLE_ROLE_1", "EXAMPLE_ROLE_2"],
+            "type": "MICROSERVICE"
+          },
+          "method": "POST",
+          "path": "/application/applications"
+        }

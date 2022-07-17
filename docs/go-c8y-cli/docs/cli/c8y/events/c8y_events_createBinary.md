@@ -17,6 +17,10 @@ c8y events createBinary [flags]
 ```
 $ c8y events createBinary --id 12345 --file ./myfile.log
 Add a binary to an event
+
+$ c8y events createBinary --id 12345 --file ./myfile.log --name "myfile-2022-03-31.log"
+
+Add a binary to an event using a custom name
         
 ```
 
@@ -26,6 +30,7 @@ Add a binary to an event
       --file string             File to be uploaded as a binary (required)
   -h, --help                    help for createBinary
       --id strings              Event id (required) (accepts pipeline)
+      --name string             Set the name of the binary file. This will be the name of the file when it is downloaded in the UI
       --processingMode string   Cumulocity processing mode
 ```
 
@@ -47,7 +52,7 @@ Add a binary to an event
       --dry                        Dry run. Don't send any data to the server
       --dryFormat string           Dry run output format. i.e. json, dump, markdown or curl (default "markdown")
       --examples                   Show examples for the current command
-      --filter strings             Apply a client side filter to response before returning it to the user
+      --filter stringArray         Apply a client side filter to response before returning it to the user
       --flatten                    flatten json output by replacing nested json properties with properties where their names are represented by dot notation
   -f, --force                      Do not prompt for confirmation. Ignored when using --confirm
   -H, --header strings             custom headers. i.e. --header "Accept: value, AnotherHeader: myvalue"

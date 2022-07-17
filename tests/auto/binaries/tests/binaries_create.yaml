@@ -6,6 +6,15 @@ tests:
             json:
                 method: POST
                 path: /inventory/binaries
+    binaries_create_Upload a file with a custom name and custom meta information:
+        command: |
+            c8y binaries create --file "./testdata/myConfig.json" --file "device01-./testdata/myConfig.json" --type c8y_upload --template "{collectedAt: _.Now('-5min')}"
+        exit-code: 0
+        skip: true
+        stdout:
+            json:
+                method: POST
+                path: /inventory/binaries
     binaries_create_Upload a log file:
         command: c8y binaries create --file ./testdata/myfile.log
         exit-code: 0

@@ -2,10 +2,11 @@ package iterator
 
 import (
 	"encoding/json"
+	"strings"
 	"testing"
 	"time"
 
-	"github.com/reubenmiller/go-c8y-cli/pkg/assert"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/assert"
 )
 
 func Test_RelativeTimeIterator(t *testing.T) {
@@ -26,4 +27,23 @@ func Test_RelativeTimeIterator(t *testing.T) {
 
 	assert.OK(t, err1)
 	assert.OK(t, err2)
+}
+
+func Test_RelativeTimeIteratorWithFormatter(t *testing.T) {
+
+	iter := NewRelativeTimeIterator("0s", false, "value gt '%s'")
+
+	v1, _, err1 := iter.GetNext()
+	assert.OK(t, err1)
+
+	value := string(v1)
+
+	parts := strings.Split(value, " ")
+
+	if len(parts) != 3 {
+		t.Errorf("Format should have 3 parts")
+	}
+
+	assert.True(t, parts[0] == "value")
+	assert.True(t, parts[1] == "gt")
 }

@@ -1,0 +1,103 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/reubenmiller/commander/feat/handle-nested-files/schema.json
+config:
+  env:
+    C8Y_SETTINGS_DEFAULTS_OUTPUT: json
+    C8Y_SETTINGS_DEFAULTS_CACHE: true
+    C8Y_SETTINGS_CACHE_METHODS: GET POST PUT
+    C8Y_SETTINGS_DEFAULTS_CACHETTL: 100h
+tests:
+  It does not produce duplicate json keys:
+    command: |
+      c8y applications list --select "id,*" --pageSize 1
+    exit-code: 0
+    stdout:
+      json:
+        id: r/^\d+$
+
+  It does not match partial key names if no wildcards are used:
+    command: |
+      c8y applications list --select "nam" --pageSize 1
+    exit-code: 0
+    stdout:
+      exactly: '{}'
+
+  It should return no results when the select property does not match:
+    command: |
+      c8y applications list --select "asdfasdf" --pageSize 1
+    exit-code: 0
+    stdout:
+      exactly: '{}'
+  
+  It select a nested object by name only:
+    command: |
+      c8y applications list --select "id,owner" --pageSize 1 --type MICROSERVICE
+    exit-code: 0
+    stdout:
+      json:
+        id: r/^\d+$
+        owner.self: r/.+$
+        owner.tenant.id: r/.+$
+
+  It matches all nested properties when using globstar suffix:
+    command: |
+      c8y applications list --select "owner.tena***" --pageSize 1 --type MICROSERVICE
+    stdout:
+      line-count: 1
+      json:
+        owner.tenant.id: r/.+
+  
+  It matches all nested properties when using selecting the full object name:
+    command: |
+      c8y applications list --select "owner.tenant" --pageSize 1 --type MICROSERVICE
+    stdout:
+      line-count: 1
+      json:
+        owner.tenant.id: r/.+
+  
+  It matches all properties which end with the nested property structure using globstar prefix:
+    command: |
+      c8y applications list --select "**tenant.id" --pageSize 1 --type MICROSERVICE
+    stdout:
+      line-count: 1
+      json:
+        owner.tenant.id: r/.+
+  
+  It selects only select level properties:
+    command: |
+      c8y applications list --select "owner.*" --pageSize 1
+    stdout:
+      json:
+        owner.self: r/.+
+
+  
+  It selects only select level properties for single strings:
+    command: |
+      c8y applications list --select "self" --pageSize 1
+    stdout:
+      json:
+        self: r/http.+
+  
+  It returns only objects on the selected level with the self property (1 level):
+    command: |
+      c8y devices list --select "*.self" --pageSize 1
+    stdout:
+      # no globstar was used, so depth matching is explicit by number of dots
+      match-pattern: '{"additionParents":{"self":".+"},"assetParents":{"self":".+"},"childAdditions":{"self":".+"},"childAssets":{"self":".+"},"childDevices":{"self":".+"},"deviceParents":{"self":".+"}}'
+    
+  It returns only objects on the selected level with the self property (multi level):
+    command: |
+      c8y devices list --select "**.self" --pageSize 1
+    stdout:
+      # globstar was used, so matching can occur on any depth
+      match-pattern: '{"additionParents":{"self":".+"},"assetParents":{"self":".+"},"childAdditions":{"self":".+"},"childAssets":{"self":".+"},"childDevices":{"self":".+"},"deviceParents":{"self":".+"},"self":".+"}'
+
+  It selects arrays:
+    command: |
+      c8y applications list --type MICROSERVICE --pageSize 1 --select "id,name,roles"
+    stdout:
+      line-count: 1
+      json:
+        id: r/.+
+        name: r/.+
+        roles.#: r/.+
+  

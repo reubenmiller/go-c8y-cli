@@ -6,7 +6,7 @@ $script:CompleteAgent = {
         $searchFor = $wordToComplete
     }
 
-    Get-AgentCollection -Name "$searchFor*" -PageSize 100 -WarningAction SilentlyContinue `
+    Get-AgentCollection -Name "$searchFor*" -PageSize 100 -WarningAction SilentlyContinue -AsPSObject `
     | Where-Object { $_.name -like "$searchFor*" } `
     | Sort-Object { $_.name } `
     | ForEach-Object {

@@ -1,9 +1,9 @@
 package assert
 
 import (
-	cmdCount "github.com/reubenmiller/go-c8y-cli/pkg/cmd/measurements/assert/count"
-	"github.com/reubenmiller/go-c8y-cli/pkg/cmd/subcommand"
-	"github.com/reubenmiller/go-c8y-cli/pkg/cmdutil"
+	cmdCount "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/measurements/assert/count"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/subcommand"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
 	"github.com/spf13/cobra"
 )
 

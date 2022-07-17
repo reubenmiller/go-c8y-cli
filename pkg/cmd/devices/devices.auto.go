@@ -1,19 +1,19 @@
 package devices
 
 import (
-	cmdAssignChild "github.com/reubenmiller/go-c8y-cli/pkg/cmd/devices/assignchild"
-	cmdCreate "github.com/reubenmiller/go-c8y-cli/pkg/cmd/devices/create"
-	cmdDelete "github.com/reubenmiller/go-c8y-cli/pkg/cmd/devices/delete"
-	cmdGet "github.com/reubenmiller/go-c8y-cli/pkg/cmd/devices/get"
-	cmdGetChild "github.com/reubenmiller/go-c8y-cli/pkg/cmd/devices/getchild"
-	cmdGetSupportedMeasurements "github.com/reubenmiller/go-c8y-cli/pkg/cmd/devices/getsupportedmeasurements"
-	cmdGetSupportedSeries "github.com/reubenmiller/go-c8y-cli/pkg/cmd/devices/getsupportedseries"
-	cmdListAssets "github.com/reubenmiller/go-c8y-cli/pkg/cmd/devices/listassets"
-	cmdListChildren "github.com/reubenmiller/go-c8y-cli/pkg/cmd/devices/listchildren"
-	cmdUnassignChild "github.com/reubenmiller/go-c8y-cli/pkg/cmd/devices/unassignchild"
-	cmdUpdate "github.com/reubenmiller/go-c8y-cli/pkg/cmd/devices/update"
-	"github.com/reubenmiller/go-c8y-cli/pkg/cmd/subcommand"
-	"github.com/reubenmiller/go-c8y-cli/pkg/cmdutil"
+	cmdAssignChild "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/devices/assignchild"
+	cmdCreate "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/devices/create"
+	cmdDelete "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/devices/delete"
+	cmdGet "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/devices/get"
+	cmdGetChild "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/devices/getchild"
+	cmdGetSupportedMeasurements "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/devices/getsupportedmeasurements"
+	cmdGetSupportedSeries "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/devices/getsupportedseries"
+	cmdListAssets "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/devices/listassets"
+	cmdListChildren "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/devices/listchildren"
+	cmdUnassignChild "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/devices/unassignchild"
+	cmdUpdate "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/devices/update"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/subcommand"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
 	"github.com/spf13/cobra"
 )
 

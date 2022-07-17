@@ -6,7 +6,7 @@ $script:CompleteMicroservice = {
         $searchFor = $wordToComplete
     }
 
-    Get-ApplicationCollection -PageSize 100 -WarningAction SilentlyContinue `
+    Get-ApplicationCollection -PageSize 100 -WarningAction SilentlyContinue -AsPSObject `
     | Where-Object { $_.type -eq "MICROSERVICE" } `
     | Where-Object { $_.id -like "$searchFor*" -or $_.name -like "$searchFor*" } `
     | ForEach-Object {

@@ -5,7 +5,7 @@ import (
 	"path/filepath"
 
 	"github.com/mitchellh/go-homedir"
-	"github.com/reubenmiller/go-c8y-cli/pkg/fileutilities"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/fileutilities"
 )
 
 var (

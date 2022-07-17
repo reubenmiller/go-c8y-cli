@@ -5,20 +5,17 @@ release:
   draft: true # we only publish after the Windows MSI gets uploaded
   name_template: "Cumulocity CLI {{.Version}}"
 
-before:
-  hooks:
-    - go mod tidy
-    - make generate_go_code
-    - make manpages
-    - make build_completions
-    - make checkout_addons
-
 builds:
   - <<: &build_defaults
-      binary: bin/c8y
+      binary: 'bin/{{ if index .Env "BINARY_INCLUDE_VERSION" }}{{ .ProjectName }}_{{ .RawVersion }}_{{ if eq .Os "darwin" }}macOS{{ else }}{{ .Os }}{{ end }}_{{ .Arch }}{{ else }}{{ .ProjectName }}{{ end }}'
       main: ./cmd/c8y/main.go
       ldflags:
-        - -s -w -X github.com/reubenmiller/go-c8y-cli/pkg/cmd.buildVersion={{.Version}} -X github.com/reubenmiller/go-c8y-cli/pkg/cmd.buildBranch={{.Branch}}
+        - -s -w -X github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd.buildVersion={{.Version}} -X github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd.buildBranch={{.Branch}}
+      hooks:
+        post:
+          - echo "Copying binaries for PowerShell Module"
+          - cp "{{ .Path }}" output_pwsh/PSc8y/Dependencies/{{ .ProjectName }}_{{ .RawVersion }}_{{ if eq .Os "darwin" }}macOS{{ else }}{{ .Os }}{{ end }}_{{ .Arch }}{{ if eq .Os "windows" }}.exe{{ end }}
+
     id: macos
     goos: [darwin]
     goarch: [amd64, arm64]
@@ -244,3 +241,62 @@ brews:
       (zsh_completion/"_c8y").write output
       output = Utils.safe_popen_read({ "SHELL" => "fish" }, "#{bin}/c8y", "completion", "fish")
       (fish_completion/"c8y.fish").write output
+
+
+dockers:
+  -
+    id: c8y-shell
+    goos: linux
+    goarch: amd64
+    goarm: ''
+    goamd64: 'v1'
+    ids:
+    - linux
+
+    # Templates of the Docker image names.
+    image_templates:
+    - "ghcr.io/reubenmiller/{{.ProjectName}}-shell:latest"
+    - "ghcr.io/reubenmiller/{{.ProjectName}}-shell:{{ .Tag }}"
+
+    dockerfile: docker/shell.dockerfile
+    use: docker
+
+    # Template of the docker build flags.
+    build_flag_templates:
+    - "--pull"
+    - "--label=org.opencontainers.image.created={{.Date}}"
+    - "--label=org.opencontainers.image.title={{.ProjectName}}"
+    - "--label=org.opencontainers.image.revision={{.FullCommit}}"
+    - "--label=org.opencontainers.image.version={{.Version}}"
+    - "--platform=linux/amd64"
+
+  - 
+    # ID of the image, needed if you want to filter by it later on (e.g. on custom publishers).
+    id: c8y-pwsh
+    goos: linux
+    goarch: amd64
+    goarm: ''
+    goamd64: 'v1'
+    ids:
+    - linux
+
+    # Templates of the Docker image names.
+    image_templates:
+    - "ghcr.io/reubenmiller/{{.ProjectName}}-pwsh:latest"
+    - "ghcr.io/reubenmiller/{{.ProjectName}}-pwsh:{{ .Tag }}"
+
+    dockerfile: docker/pwsh2.dockerfile
+    use: docker
+
+    # Template of the docker build flags.
+    build_flag_templates:
+    - "--pull"
+    - "--label=org.opencontainers.image.created={{.Date}}"
+    - "--label=org.opencontainers.image.title={{.ProjectName}}"
+    - "--label=org.opencontainers.image.revision={{.FullCommit}}"
+    - "--label=org.opencontainers.image.version={{.Version}}"
+    - "--platform=linux/amd64"
+
+    extra_files:
+    - docker/profile.ps1
+    - output_pwsh/PSc8y

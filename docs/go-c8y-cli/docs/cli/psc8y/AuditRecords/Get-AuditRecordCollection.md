@@ -76,6 +76,7 @@ Get-AuditRecordCollection
 
 ## DESCRIPTION
 Audit records contain information about modifications to other Cumulocity entities.
+
 For example the audit records contain each operation state transition, so they can be used to check when an operation transitioned from PENDING -\> EXECUTING -\> SUCCESSFUL.
 
 ## EXAMPLES
@@ -898,7 +899,7 @@ Accept wildcard characters: False
 ```
 
 ### -WithTotalPages
-Request Cumulocity to include the total pages in the response statitics under .statistics.totalPages
+Request Cumulocity to include the total pages in the response statistics under .statistics.totalPages
 
 ```yaml
 Type: SwitchParameter

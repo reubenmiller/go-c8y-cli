@@ -1,13 +1,13 @@
 package versions
 
 import (
-	cmdDelete "github.com/reubenmiller/go-c8y-cli/pkg/cmd/software/versions/delete"
-	cmdGet "github.com/reubenmiller/go-c8y-cli/pkg/cmd/software/versions/get"
-	cmdInstall "github.com/reubenmiller/go-c8y-cli/pkg/cmd/software/versions/install"
-	cmdList "github.com/reubenmiller/go-c8y-cli/pkg/cmd/software/versions/list"
-	cmdUninstall "github.com/reubenmiller/go-c8y-cli/pkg/cmd/software/versions/uninstall"
-	"github.com/reubenmiller/go-c8y-cli/pkg/cmd/subcommand"
-	"github.com/reubenmiller/go-c8y-cli/pkg/cmdutil"
+	cmdDelete "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/software/versions/delete"
+	cmdGet "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/software/versions/get"
+	cmdInstall "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/software/versions/install"
+	cmdList "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/software/versions/list"
+	cmdUninstall "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/software/versions/uninstall"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/subcommand"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
 	"github.com/spf13/cobra"
 )
 

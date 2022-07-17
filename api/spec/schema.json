@@ -50,6 +50,11 @@
       "title": "Is Required",
       "description": "The parameter is required/mandatory and needs input from the user/pipeline in order to correctly use the command"
     },
+    "hiddenParameter": {
+      "type": "boolean",
+      "title": "Is Hidden",
+      "description": "The parameter should be hidden from docs and completions but is still parsed. This is used to deprecate a flag without breaking existing scripts"
+    },
     "defaultValue": {
       "type": "string",
       "title": "Default value",
@@ -84,6 +89,7 @@
         "booleanDefault",
         "optional_fragment",
         "integer",
+        "certificatefile",
         "file",
         "float",
         "fileContents",
@@ -102,6 +108,7 @@
         "[]devicerequest",
         "[]id",
         "[]agent",
+        "[]certificate",
         "[]configuration",
         "[]deviceprofile",
         "[]firmware",
@@ -343,6 +350,9 @@
                 "required": {
                   "$ref": "#/definitions/requiredParameter"
                 },
+                "hidden": {
+                  "$ref": "#/definitions/hiddenParameter"
+                },
                 "position": {
                   "$ref": "#/definitions/argumentPosition"
                 },
@@ -386,6 +396,9 @@
                 },
                 "required": {
                   "$ref": "#/definitions/requiredParameter"
+                },
+                "hidden": {
+                  "$ref": "#/definitions/hiddenParameter"
                 },
                 "position": {
                   "$ref": "#/definitions/argumentPosition"
@@ -437,6 +450,9 @@
                 },
                 "required": {
                   "$ref": "#/definitions/requiredParameter"
+                },
+                "hidden": {
+                  "$ref": "#/definitions/hiddenParameter"
                 },
                 "position": {
                   "$ref": "#/definitions/argumentPosition"
@@ -542,6 +558,9 @@
                 },
                 "required": {
                   "$ref": "#/definitions/requiredParameter"
+                },
+                "hidden": {
+                  "$ref": "#/definitions/hiddenParameter"
                 },
                 "default": {
                   "$ref": "#/definitions/defaultValue"

@@ -1,14 +1,14 @@
 package measurements
 
 import (
-	cmdCreate "github.com/reubenmiller/go-c8y-cli/pkg/cmd/measurements/create"
-	cmdDelete "github.com/reubenmiller/go-c8y-cli/pkg/cmd/measurements/delete"
-	cmdDeleteCollection "github.com/reubenmiller/go-c8y-cli/pkg/cmd/measurements/deletecollection"
-	cmdGet "github.com/reubenmiller/go-c8y-cli/pkg/cmd/measurements/get"
-	cmdGetSeries "github.com/reubenmiller/go-c8y-cli/pkg/cmd/measurements/getseries"
-	cmdList "github.com/reubenmiller/go-c8y-cli/pkg/cmd/measurements/list"
-	"github.com/reubenmiller/go-c8y-cli/pkg/cmd/subcommand"
-	"github.com/reubenmiller/go-c8y-cli/pkg/cmdutil"
+	cmdCreate "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/measurements/create"
+	cmdDelete "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/measurements/delete"
+	cmdDeleteCollection "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/measurements/deletecollection"
+	cmdGet "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/measurements/get"
+	cmdGetSeries "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/measurements/getseries"
+	cmdList "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/measurements/list"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/subcommand"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
 	"github.com/spf13/cobra"
 )
 

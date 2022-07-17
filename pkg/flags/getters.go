@@ -2,18 +2,24 @@ package flags
 
 import (
 	"context"
+	"crypto/x509"
+	"encoding/base64"
+	"encoding/pem"
+	"errors"
 	"fmt"
+	"log"
 	"mime"
 	"net/http"
+	"os"
 	"path/filepath"
 	"strings"
 
-	"github.com/reubenmiller/go-c8y-cli/pkg/url"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/url"
 
-	"github.com/reubenmiller/go-c8y-cli/pkg/c8ydata"
-	"github.com/reubenmiller/go-c8y-cli/pkg/iterator"
-	"github.com/reubenmiller/go-c8y-cli/pkg/jsonUtilities"
-	"github.com/reubenmiller/go-c8y-cli/pkg/mapbuilder"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/c8ydata"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/iterator"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/jsonUtilities"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/mapbuilder"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
 )
@@ -295,6 +301,10 @@ func WithStringValue(opts ...string) GetOption {
 			if inputIterators.PipeOptions.Name == src {
 				return WithPipelineIterator(inputIterators.PipeOptions)(cmd, inputIterators)
 			}
+		}
+
+		if cmd.Flag(src) == nil {
+			return "", nil, nil
 		}
 
 		value, err := cmd.Flags().GetString(src)
@@ -594,7 +604,7 @@ func WithFloatValue(opts ...string) GetOption {
 // WithRelativeTimestamp adds a timestamp (string) value from cli arguments
 func WithRelativeTimestamp(opts ...string) GetOption {
 	return func(cmd *cobra.Command, inputIterators *RequestInputIterators) (string, interface{}, error) {
-		src, dst, _ := UnpackGetterOptions("", opts...)
+		src, dst, format := UnpackGetterOptions("", opts...)
 		value, err := cmd.Flags().GetString(src)
 
 		if err != nil {
@@ -612,14 +622,14 @@ func WithRelativeTimestamp(opts ...string) GetOption {
 		}
 
 		// mark iterator as unbound, so it will not increment the input iterators
-		return dst, iterator.NewRelativeTimeIterator(value, false), err
+		return dst, iterator.NewRelativeTimeIterator(value, false, format), err
 	}
 }
 
 // WithEncodedRelativeTimestamp adds a encoded timestamp (string) value from cli arguments
 func WithEncodedRelativeTimestamp(opts ...string) GetOption {
 	return func(cmd *cobra.Command, inputIterators *RequestInputIterators) (string, interface{}, error) {
-		src, dst, _ := UnpackGetterOptions("", opts...)
+		src, dst, format := UnpackGetterOptions("", opts...)
 		value, err := cmd.Flags().GetString(src)
 
 		if err != nil {
@@ -637,14 +647,14 @@ func WithEncodedRelativeTimestamp(opts ...string) GetOption {
 		}
 
 		// mark iterator as unbound, so it will not increment the input iterators
-		return dst, iterator.NewRelativeTimeIterator(value, true), err
+		return dst, iterator.NewRelativeTimeIterator(value, true, format), err
 	}
 }
 
 // WithRelativeDate adds a date (only, no time) (string) value from cli arguments
 func WithRelativeDate(encode bool, opts ...string) GetOption {
 	return func(cmd *cobra.Command, inputIterators *RequestInputIterators) (string, interface{}, error) {
-		src, dst, _ := UnpackGetterOptions("", opts...)
+		src, dst, format := UnpackGetterOptions("", opts...)
 		value, err := cmd.Flags().GetString(src)
 
 		if err != nil {
@@ -662,7 +672,59 @@ func WithRelativeDate(encode bool, opts ...string) GetOption {
 		}
 
 		// mark iterator as unbound, so it will not increment the input iterators
-		return dst, iterator.NewRelativeDateIterator(value, encode, "2006-01-02"), err
+		return dst, iterator.NewRelativeDateIterator(value, encode, "2006-01-02", format), err
+	}
+}
+
+// WithCertificateFile adds a PEM certificate file contents
+func WithCertificateFile(opts ...string) GetOption {
+	return func(cmd *cobra.Command, inputIterators *RequestInputIterators) (string, interface{}, error) {
+		src, dst, _ := UnpackGetterOptions("%s", opts...)
+
+		value, err := cmd.Flags().GetString(src)
+
+		if err != nil {
+			return dst, value, err
+		}
+
+		if value == "" {
+			return "", nil, nil
+		}
+
+		// Detect if a pem value or file is being passed
+		if pemRaw, pemErr := base64.StdEncoding.DecodeString(value); pemErr == nil {
+			_, certErr := x509.ParseCertificate([]byte(pemRaw))
+
+			if certErr == nil {
+				// Value is already set to the contents of the certificate
+				return dst, value, nil
+			}
+		}
+
+		if _, err := os.Stat(value); errors.Is(err, os.ErrNotExist) {
+			return "", nil, fmt.Errorf("flag: %s. %w", src, err)
+		}
+
+		r, err := os.ReadFile(value)
+
+		if err != nil {
+			return "", nil, fmt.Errorf("flag: %s. %w", src, err)
+		}
+
+		block, _ := pem.Decode(r)
+
+		if block == nil || block.Type != "CERTIFICATE" {
+			return "", nil, fmt.Errorf("failed to decode PEM block containing certificate")
+		}
+
+		_, err = x509.ParseCertificate(block.Bytes)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		value = base64.StdEncoding.EncodeToString(block.Bytes)
+
+		return dst, value, err
 	}
 }
 

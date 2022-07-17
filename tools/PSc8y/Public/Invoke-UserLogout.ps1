@@ -11,7 +11,7 @@ Logout the current user. This will invalidate the token associated with the user
 https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/currentuser_logout
 
 .EXAMPLE
-PS> Invoke-UserLogout
+PS> Invoke-UserLogout -Dry
 
 Log out the current user
 

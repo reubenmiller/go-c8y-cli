@@ -11,8 +11,8 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/reubenmiller/go-c8y-cli/pkg/logger"
-	"github.com/reubenmiller/go-c8y-cli/pkg/matcher"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/logger"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/matcher"
 	"github.com/tidwall/gjson"
 )
 

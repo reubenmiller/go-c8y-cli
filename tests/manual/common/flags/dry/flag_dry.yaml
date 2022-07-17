@@ -1,0 +1,136 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/reubenmiller/commander/feat/handle-nested-files/schema.json
+
+config:
+  env:
+    C8Y_SETTINGS_DEFAULTS_DRYFORMAT: markdown
+tests:
+  It display multi-form data:
+    command: |
+      c8y binaries create --file=manual/common/flags/dry/input01.txt --dry --dryFormat json |
+        c8y util show --select body --output csv
+    exit-code: 0
+    stdout:
+      contains:
+        - "Content-Disposition: form-data"
+        - name=\"file\"
+        - filename=\"input01.txt\"
+        - äüText
+  
+  It shows the body contents:
+    command: |
+       c8y devices create --name test01 --dry |
+        c8y util show --select path,body
+    exit-code: 0
+    stdout:
+      exactly: |
+        {"body":{"c8y_IsDevice":{},"name":"test01"},"path":"/inventory/managedObjects"}
+  
+  It shows the body contents with a custom body:
+    command: |
+       c8y devices create --name test01 --data "test=1" --dry |
+        c8y util show --select path,body
+    exit-code: 0
+    stdout:
+      exactly: |
+        {"body":{"c8y_IsDevice":{},"name":"test01","test":1},"path":"/inventory/managedObjects"}
+  
+  It hides sensitive information:
+    config:
+      env:
+        C8Y_SETTINGS_LOGGER_HIDESENSITIVE: true
+    command: |
+       c8y devices create --name test01 --data "test=1" --sessionUsername dummyUser --sessionPassword dummy --dry |
+        c8y util show --select headers,path
+    exit-code: 0
+    stdout:
+      exactly: |
+        {"headers":{"Accept":"application/json","Authorization":"Basic  {base64 tenant/username:password}","Content-Type":"application/json"},"path":"/inventory/managedObjects"}
+
+  It show information about the request in markdown:
+    config:
+      env:
+        C8Y_HOST: https://example.c8y.io
+        C8Y_SETTINGS_LOGGER_HIDESENSITIVE: true
+    command: |
+      c8y inventory create --name test01 --dry --dryFormat markdown --compact=false --sessionUsername dummyUser --sessionPassword dummy
+    exit-code: 0
+    stdout:
+      exactly: |
+        What If: Sending [POST] request to [https://example.c8y.io/inventory/managedObjects]
+
+        ### POST /inventory/managedObjects
+
+        | header            | value
+        |-------------------|---------------------------
+        | Accept            | application/json 
+        | Authorization     | Basic  {base64 tenant/username:password} 
+        | Content-Type      | application/json 
+
+        #### Body
+
+        ```json
+        {
+          "name": "test01"
+        }
+        ```
+
+  It should support dry run on create commands when create is disabled:
+    config:
+      env:
+        C8Y_SETTINGS_CI: false
+        C8Y_SETTINGS_MODE_ENABLECREATE: false
+    command: |
+      c8y inventory create --dry --dryFormat json |
+        c8y util show --select path --output csv
+    exit-code: 0
+    stdout:
+      exactly: /inventory/managedObjects
+
+  It should support dry run on update commands when update is disabled:
+    config:
+      env:
+        C8Y_SETTINGS_CI: false
+        C8Y_SETTINGS_MODE_ENABLEUPDATE: false
+    command: |
+      c8y inventory update --id 1234 --dry --dryFormat json |
+        c8y util show --select path --output csv
+    exit-code: 0
+    stdout:
+      exactly: /inventory/managedObjects/1234
+
+  It should support dry run on delete commands when delete is disabled:
+    config:
+      env:
+        C8Y_SETTINGS_CI: false
+        C8Y_SETTINGS_MODE_ENABLEDELETE: false
+    command: |
+      c8y inventory delete --id 1234 --dry --dryFormat json |
+        c8y util show --select path --output csv
+    exit-code: 0
+    stdout:
+      exactly: /inventory/managedObjects/1234
+
+  It should support dry run on delete commands when delete is disabled using environment variables:
+    config:
+      env:
+        C8Y_SETTINGS_CI: false
+        C8Y_SETTINGS_DEFAULTS_DRY: true
+        C8Y_SETTINGS_DEFAULTS_DRYFORMAT: json
+        C8Y_SETTINGS_MODE_ENABLEDELETE: false
+    command: |
+      c8y inventory delete --id 1234 |
+        c8y util show --select path --output csv
+    exit-code: 0
+    stdout:
+      exactly: /inventory/managedObjects/1234
+
+  It should support use dry flag over environment values:
+    config:
+      env:
+        C8Y_SETTINGS_CI: false
+        C8Y_SETTINGS_DEFAULTS_DRY: true
+        C8Y_SETTINGS_DEFAULTS_DRYFORMAT: json
+        C8Y_SETTINGS_MODE_ENABLEUPDATE: false
+    command: |
+      c8y inventory update --id 0 --dry=false --force
+    exit-code: 100

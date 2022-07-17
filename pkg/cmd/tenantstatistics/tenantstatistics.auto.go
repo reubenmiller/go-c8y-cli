@@ -1,11 +1,11 @@
 package tenantstatistics
 
 import (
-	"github.com/reubenmiller/go-c8y-cli/pkg/cmd/subcommand"
-	cmdList "github.com/reubenmiller/go-c8y-cli/pkg/cmd/tenantstatistics/list"
-	cmdListSummaryAllTenants "github.com/reubenmiller/go-c8y-cli/pkg/cmd/tenantstatistics/listsummaryalltenants"
-	cmdListSummaryForTenant "github.com/reubenmiller/go-c8y-cli/pkg/cmd/tenantstatistics/listsummaryfortenant"
-	"github.com/reubenmiller/go-c8y-cli/pkg/cmdutil"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/subcommand"
+	cmdList "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/tenantstatistics/list"
+	cmdListSummaryAllTenants "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/tenantstatistics/listsummaryalltenants"
+	cmdListSummaryForTenant "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/tenantstatistics/listsummaryfortenant"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
 	"github.com/spf13/cobra"
 )
 

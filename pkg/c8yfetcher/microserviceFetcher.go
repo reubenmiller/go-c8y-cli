@@ -81,10 +81,10 @@ func (f *MicroserviceFetcher) getByName(name string) ([]fetcherResultSet, error)
 // findMicroservices returns microservices given either an id or search text
 // @values: An array of ids, or names (with wildcards)
 // @lookupID: Lookup the data if an id is given. If a non-id text is given, the result will always be looked up.
-func FindMicroservices(client *c8y.Client, values []string, lookupID bool) ([]entityReference, error) {
+func FindMicroservices(client *c8y.Client, values []string, lookupID bool, format string) ([]entityReference, error) {
 	f := NewMicroserviceFetcher(client)
 
-	formattedValues, err := lookupEntity(f, values, lookupID)
+	formattedValues, err := lookupEntity(f, values, lookupID, format)
 
 	if err != nil {
 		return nil, err

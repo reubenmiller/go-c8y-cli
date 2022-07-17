@@ -9,7 +9,8 @@ Describe -Name "Common parameters" {
             "Get-CurrentTenantApplicationCollection",
             "Group-ClientRequests",
             "ConvertFrom-ClientOutput",
-            "Install-ClientBinary"
+            "Install-ClientBinary",
+            "Import-ClientBinary"
         )
 
         $cmdlets = Get-Command -Module PSc8y -Name "*" |

@@ -1,0 +1,30 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/reubenmiller/commander/feat/handle-nested-files/schema.json
+config:
+  env:
+    C8Y_SETTINGS_DEFAULTS_DRY: true
+    C8Y_SETTINGS_DEFAULTS_DRYFORMAT: json
+    C8Y_SETTINGS_DEFAULTS_WITHERROR: true
+tests:
+  It accepts piped names:
+    command: |
+      echo "device01\ndevice02" |
+        c8y devices create \
+          --template "{jobInput: input.value}" |
+        c8y util show --select method,path,body
+    exit-code: 0
+    stdout:
+      exactly: |
+        {"body":{"c8y_IsDevice":{},"jobInput":"device01","name":"device01"},"method":"POST","path":"/inventory/managedObjects"}
+        {"body":{"c8y_IsDevice":{},"jobInput":"device02","name":"device02"},"method":"POST","path":"/inventory/managedObjects"}
+  
+  It accepts piped objects:
+    command: |
+      echo "{\"name\":\"device01\"}\n{\"name\":\"device02\"}" |
+        c8y devices create \
+          --template "{jobInput: input.value}" |
+        c8y util show --select method,path,body
+    exit-code: 0
+    stdout:
+      exactly: |
+        {"body":{"c8y_IsDevice":{},"jobInput":{"name":"device01"},"name":"device01"},"method":"POST","path":"/inventory/managedObjects"}
+        {"body":{"c8y_IsDevice":{},"jobInput":{"name":"device02"},"name":"device02"},"method":"POST","path":"/inventory/managedObjects"}

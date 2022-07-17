@@ -1,16 +1,16 @@
 package sessions
 
 import (
-	clearCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/sessions/clear"
-	cloneCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/sessions/clone"
-	createCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/sessions/create"
-	decryptCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/sessions/decrypttext"
-	encryptCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/sessions/encrypttext"
-	getCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/sessions/get"
-	listCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/sessions/list"
-	setCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/sessions/set"
-	"github.com/reubenmiller/go-c8y-cli/pkg/cmd/subcommand"
-	"github.com/reubenmiller/go-c8y-cli/pkg/cmdutil"
+	clearCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/sessions/clear"
+	cloneCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/sessions/clone"
+	createCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/sessions/create"
+	decryptCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/sessions/decrypttext"
+	encryptCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/sessions/encrypttext"
+	getCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/sessions/get"
+	listCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/sessions/list"
+	setCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/sessions/set"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/subcommand"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
 	"github.com/spf13/cobra"
 )
 

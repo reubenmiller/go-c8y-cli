@@ -32,7 +32,12 @@ Add a binary to an event
         # File to be uploaded as a binary (required)
         [Parameter(Mandatory = $true)]
         [string]
-        $File
+        $File,
+
+        # Set the name of the binary file. This will be the name of the file when it is downloaded in the UI
+        [Parameter()]
+        [string]
+        $Name
     )
     DynamicParam {
         Get-ClientCommonParameters -Type "Create", "Template"

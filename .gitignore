@@ -44,6 +44,7 @@ node_modules
 
 # release binaries and docs
 dist/**
+output_pwsh/**
 share/**
 .go-c8y-cli
 **/.docusaurus/**
@@ -54,3 +55,6 @@ pkg/cmd/__debug_bin
 tools/shell/completion/output/
 .env
 *.env
+.task/checksum
+.bin/
+docker/c8y.linux

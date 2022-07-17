@@ -1,0 +1,17 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/reubenmiller/commander/feat/handle-nested-files/schema.json
+
+config:
+  retries: 3
+
+tests:
+  It watches managed objects for a time period:
+    command: ./manual/realtime/subscribe/subscribe_tests.sh realtime 1
+    exit-code: 0
+  
+  It watches managed objects for a specific count:
+    command: ./manual/realtime/subscribe/subscribe_tests.sh realtime 2
+    exit-code: 0
+  
+  It watches for all devices and stop after receiving x messages:
+    command: ./manual/realtime/subscribe/subscribe_tests.sh realtime 3
+    exit-code: 0

@@ -3,7 +3,7 @@ package completion
 import (
 	"path/filepath"
 
-	"github.com/reubenmiller/go-c8y-cli/pkg/pathresolver"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/pathresolver"
 	"github.com/spf13/cobra"
 )
 

@@ -7,13 +7,13 @@ import (
 	"net/http"
 
 	"github.com/MakeNowJust/heredoc/v2"
-	"github.com/reubenmiller/go-c8y-cli/pkg/c8yfetcher"
-	"github.com/reubenmiller/go-c8y-cli/pkg/cmd/subcommand"
-	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
-	"github.com/reubenmiller/go-c8y-cli/pkg/cmdutil"
-	"github.com/reubenmiller/go-c8y-cli/pkg/completion"
-	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
-	"github.com/reubenmiller/go-c8y-cli/pkg/mapbuilder"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/c8yfetcher"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/subcommand"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmderrors"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/completion"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flags"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/mapbuilder"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
 )
@@ -33,10 +33,20 @@ func NewDownloadBinaryCmd(f *cmdutil.Factory) *DownloadBinaryCmd {
 	cmd := &cobra.Command{
 		Use:   "downloadBinary",
 		Short: "Get event binary",
-		Long:  `Get the binary associated with an event`,
+		Long: `Get the binary associated with an event
+
+When downloading a binary it is useful to use the outputFileRaw global parameter and to use one of the following references:
+
+* {filename} - Filename found in the Content-Disposition response header
+* {id} - An id like value found in the request path (/event/events/12345/binaries => 12345)
+* {basename} - The last path section of the request path (/some/nested/url/withafilename.json => withafilename.json)
+`,
 		Example: heredoc.Doc(`
 $ c8y events downloadBinary --id 12345 --outputFileRaw ./eventbinary.txt
 Download a binary related to an event
+
+$ c8y events list --fragmentType "c8y_IsBinary" | c8y events downloadBinary --outputFileRaw "./output/binary-{id}-{filename}" > /dev/null
+Download a list of event binaries and use a template name to save each binary individually
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
 			return nil
@@ -127,7 +137,7 @@ func (n *DownloadBinaryCmd) RunE(cmd *cobra.Command, args []string) error {
 	}
 
 	// body
-	body := mapbuilder.NewInitializedMapBuilder()
+	body := mapbuilder.NewInitializedMapBuilder(false)
 	err = flags.WithBody(
 		cmd,
 		body,

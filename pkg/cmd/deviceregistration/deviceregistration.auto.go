@@ -1,14 +1,14 @@
 package deviceregistration
 
 import (
-	cmdApprove "github.com/reubenmiller/go-c8y-cli/pkg/cmd/deviceregistration/approve"
-	cmdDelete "github.com/reubenmiller/go-c8y-cli/pkg/cmd/deviceregistration/delete"
-	cmdGet "github.com/reubenmiller/go-c8y-cli/pkg/cmd/deviceregistration/get"
-	cmdGetCredentials "github.com/reubenmiller/go-c8y-cli/pkg/cmd/deviceregistration/getcredentials"
-	cmdList "github.com/reubenmiller/go-c8y-cli/pkg/cmd/deviceregistration/list"
-	cmdRegister "github.com/reubenmiller/go-c8y-cli/pkg/cmd/deviceregistration/register"
-	"github.com/reubenmiller/go-c8y-cli/pkg/cmd/subcommand"
-	"github.com/reubenmiller/go-c8y-cli/pkg/cmdutil"
+	cmdApprove "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/deviceregistration/approve"
+	cmdDelete "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/deviceregistration/delete"
+	cmdGet "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/deviceregistration/get"
+	cmdGetCredentials "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/deviceregistration/getcredentials"
+	cmdList "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/deviceregistration/list"
+	cmdRegister "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/deviceregistration/register"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/subcommand"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
 	"github.com/spf13/cobra"
 )
 

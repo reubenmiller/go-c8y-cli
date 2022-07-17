@@ -1,0 +1,67 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/reubenmiller/commander/feat/handle-nested-files/schema.json
+
+config:
+  env:
+    C8Y_SETTINGS_DEFAULTS_CACHE: true
+    C8Y_SETTINGS_DEFAULTS_CACHETTL: 100h
+
+tests:
+  It matches input against a json schema (match):
+    command: |
+      echo '{"name":"device01"}' | c8y assert text --schema '{
+        "properties": {
+          "name": {"pattern": "device01"}
+        }
+      }
+      '
+    exit-code: 0
+
+  It matches input against a json schema (no match):
+    command: |
+      echo '{"name":"device01"}' | c8y assert text --strict --schema '{
+        "properties": {
+          "name": {"type": "number"}
+        }
+      }'
+    exit-code: 112
+
+  It matches input against a exact text (match):
+    command: |
+      echo '{"name":"device01"}' | c8y assert text --exact '{"name":"device01"}'
+    exit-code: 0
+    stdout:
+      exactly: |
+        {"name":"device01"}
+
+  It matches input against a exact text (no match):
+    command: |
+      echo '{"name":"device01"}' | c8y assert text --exact '{"name":"device02"}' --strict
+    exit-code: 112
+
+  It matches input against a regex pattern (match):
+    command: |
+      echo '{"name":"device01"}' | c8y assert text --regex '\{"name":"device\d+"\}'
+    exit-code: 0
+    stdout:
+      exactly: |
+        {"name":"device01"}
+
+  It matches json input against a regex pattern with table output (match):
+    command: |
+      echo '{"name":"device01"}\n{"name":"agent02"}' | c8y assert text --regex "device" -o table
+    exit-code: 0
+    stdout:
+      # first two lines are headers
+      line-count: 3
+      contains:
+        - device01
+
+  It matches input against a regex pattern is case sensitive (no match):
+    command: |
+      echo '{"name":"device01"}' | c8y assert text --regex '\{"name":"Device\d+"\}' --strict
+    exit-code: 112
+
+  It matches input against a regex pattern (no match):
+    command: |
+      echo '{"name":"device01"}' | c8y assert text --regex '{"name":"\d+"}' --strict
+    exit-code: 112

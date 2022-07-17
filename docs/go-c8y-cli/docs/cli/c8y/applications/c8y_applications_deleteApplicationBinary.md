@@ -7,6 +7,7 @@ Delete application binary
 ### Synopsis
 
 Remove an application binaries related to the given application
+
 The active version can not be deleted and the server will throw an error if you try.
 
 
@@ -49,7 +50,7 @@ Remove an application binary related to a Hosted (web) application
       --dry                        Dry run. Don't send any data to the server
       --dryFormat string           Dry run output format. i.e. json, dump, markdown or curl (default "markdown")
       --examples                   Show examples for the current command
-      --filter strings             Apply a client side filter to response before returning it to the user
+      --filter stringArray         Apply a client side filter to response before returning it to the user
       --flatten                    flatten json output by replacing nested json properties with properties where their names are represented by dot notation
   -f, --force                      Do not prompt for confirmation. Ignored when using --confirm
   -H, --header strings             custom headers. i.e. --header "Accept: value, AnotherHeader: myvalue"

@@ -1,12 +1,12 @@
 package assets
 
 import (
-	cmdAssign "github.com/reubenmiller/go-c8y-cli/pkg/cmd/inventory/assets/assign"
-	cmdGet "github.com/reubenmiller/go-c8y-cli/pkg/cmd/inventory/assets/get"
-	cmdList "github.com/reubenmiller/go-c8y-cli/pkg/cmd/inventory/assets/list"
-	cmdUnassign "github.com/reubenmiller/go-c8y-cli/pkg/cmd/inventory/assets/unassign"
-	"github.com/reubenmiller/go-c8y-cli/pkg/cmd/subcommand"
-	"github.com/reubenmiller/go-c8y-cli/pkg/cmdutil"
+	cmdAssign "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/inventory/assets/assign"
+	cmdGet "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/inventory/assets/get"
+	cmdList "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/inventory/assets/list"
+	cmdUnassign "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/inventory/assets/unassign"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/subcommand"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
 	"github.com/spf13/cobra"
 )
 

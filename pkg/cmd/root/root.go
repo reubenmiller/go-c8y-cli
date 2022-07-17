@@ -7,96 +7,100 @@ import (
 	"sync"
 
 	"github.com/MakeNowJust/heredoc/v2"
-	"github.com/reubenmiller/go-c8y-cli/pkg/activitylogger"
-	"github.com/reubenmiller/go-c8y-cli/pkg/c8ydefaults"
-	activityLogCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/activitylog"
-	agentsCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/agents"
-	agentsListCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/agents/list"
-	alarmsCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/alarms"
-	alarmsAssertCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/alarms/assert"
-	alarmsSubscribeCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/alarms/subscribe"
-	aliasCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/alias"
-	apiCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/api"
-	applicationsCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/applications"
-	applicationsCreateHostedCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/applications/createhostedapplication"
-	auditrecordsCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/auditrecords"
-	binariesCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/binaries"
-	bulkoperationsCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/bulkoperations"
-	cacheCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/cache"
-	completionCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/completion"
-	configurationCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/configuration"
-	configurationListCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/configuration/list"
-	currentapplicationCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/currentapplication"
-	currenttenantCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/currenttenant"
-	currentuserCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/currentuser"
-	databrokerCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/databroker"
-	devicegroupsCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/devicegroups"
-	devicegroupsListCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/devicegroups/list"
-	deviceprofilesCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/deviceprofiles"
-	deviceregistrationCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/deviceregistration"
-	devicesCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/devices"
-	devicesAssertCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/devices/assert"
-	devicesAvailabilityCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/devices/availability"
-	devicesListCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/devices/list"
-	deviceStatisticsCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/devices/statistics"
-	deviceUserCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/devices/user"
-	eventsCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/events"
-	eventsAssertCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/events/assert"
-	eventsSubscribeCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/events/subscribe"
-	"github.com/reubenmiller/go-c8y-cli/pkg/cmd/factory"
-	firmwareCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/firmware"
-	firmwareListCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/firmware/list"
-	firmwareVersionsPatchesCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/firmware/patches"
-	firmwarePatchesCreateCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/firmware/patches/create"
-	firmwareVersionsCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/firmware/versions"
-	firmwareVersionsCreateCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/firmware/versions/create"
-	identityCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/identity"
-	inventoryCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/inventory"
-	inventoryAdditionsCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/inventory/additions"
-	inventoryAssertCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/inventory/assert"
-	inventoryAssetsCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/inventory/assets"
-	inventoryFindCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/inventory/find"
-	inventorySubscribeCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/inventory/subscribe"
-	inventoryWaitCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/inventory/wait"
-	measurementsCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/measurements"
-	measurementsAssertCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/measurements/assert"
-	measurementsSubscribeCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/measurements/subscribe"
-	microservicesCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/microservices"
-	microservicesCreateCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/microservices/create"
-	microservicesServiceUserCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/microservices/serviceuser"
-	operationsCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/operations"
-	operationsAssertCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/operations/assert"
-	operationsSubscribeCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/operations/subscribe"
-	operationsWaitCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/operations/wait"
-	realtimeCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/realtime"
-	retentionrulesCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/retentionrules"
-	sessionsCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/sessions"
-	settingsCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/settings"
-	smartgroupsCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/smartgroups"
-	smartgroupsListCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/smartgroups/list"
-	softwareCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/software"
-	softwareListCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/software/list"
-	softwareVersionsCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/software/versions"
-	softwareVersionsCreateCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/software/versions/create"
-	systemoptionsCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/systemoptions"
-	templateCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/template"
-	tenantoptionsCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/tenantoptions"
-	tenantsCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/tenants"
-	tenantstatisticsCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/tenantstatistics"
-	usergroupsCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/usergroups"
-	userreferencesCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/userreferences"
-	userrolesCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/userroles"
-	usersCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/users"
-	utilCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/util"
-	versionCmd "github.com/reubenmiller/go-c8y-cli/pkg/cmd/version"
-	"github.com/reubenmiller/go-c8y-cli/pkg/cmderrors"
-	"github.com/reubenmiller/go-c8y-cli/pkg/cmdutil"
-	"github.com/reubenmiller/go-c8y-cli/pkg/completion"
-	"github.com/reubenmiller/go-c8y-cli/pkg/config"
-	"github.com/reubenmiller/go-c8y-cli/pkg/dataview"
-	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
-	"github.com/reubenmiller/go-c8y-cli/pkg/logger"
-	"github.com/reubenmiller/go-c8y-cli/pkg/utilities"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/activitylogger"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/c8ydefaults"
+	activityLogCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/activitylog"
+	agentsCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/agents"
+	agentsListCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/agents/list"
+	alarmsCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/alarms"
+	alarmsAssertCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/alarms/assert"
+	alarmsSubscribeCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/alarms/subscribe"
+	aliasCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/alias"
+	apiCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/api"
+	applicationsCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/applications"
+	applicationsCreateHostedCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/applications/createhostedapplication"
+	applicationsOpenCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/applications/open"
+	assertCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/assert"
+	auditrecordsCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/auditrecords"
+	binariesCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/binaries"
+	bulkoperationsCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/bulkoperations"
+	cacheCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/cache"
+	completionCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/completion"
+	configurationCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/configuration"
+	configurationListCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/configuration/list"
+	currentapplicationCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/currentapplication"
+	currenttenantCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/currenttenant"
+	currentuserCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/currentuser"
+	databrokerCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/databroker"
+	devicegroupsCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/devicegroups"
+	devicegroupsListCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/devicegroups/list"
+	deviceManagementCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/devicemanagement"
+	deviceprofilesCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/deviceprofiles"
+	deviceregistrationCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/deviceregistration"
+	devicesCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/devices"
+	devicesAssertCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/devices/assert"
+	devicesAvailabilityCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/devices/availability"
+	devicesListCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/devices/list"
+	deviceStatisticsCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/devices/statistics"
+	deviceUserCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/devices/user"
+	eventsCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/events"
+	eventsAssertCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/events/assert"
+	eventsSubscribeCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/events/subscribe"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/factory"
+	firmwareCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/firmware"
+	firmwareListCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/firmware/list"
+	firmwareVersionsPatchesCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/firmware/patches"
+	firmwarePatchesCreateCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/firmware/patches/create"
+	firmwareVersionsCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/firmware/versions"
+	firmwareVersionsCreateCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/firmware/versions/create"
+	identityCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/identity"
+	inventoryCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/inventory"
+	inventoryAdditionsCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/inventory/additions"
+	inventoryAssertCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/inventory/assert"
+	inventoryAssetsCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/inventory/assets"
+	inventoryFindCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/inventory/find"
+	inventorySubscribeCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/inventory/subscribe"
+	inventoryWaitCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/inventory/wait"
+	measurementsCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/measurements"
+	measurementsAssertCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/measurements/assert"
+	measurementsCreateBulkCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/measurements/createBulk"
+	measurementsSubscribeCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/measurements/subscribe"
+	microservicesCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/microservices"
+	microservicesCreateCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/microservices/create"
+	microservicesServiceUserCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/microservices/serviceuser"
+	operationsCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/operations"
+	operationsAssertCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/operations/assert"
+	operationsSubscribeCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/operations/subscribe"
+	operationsWaitCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/operations/wait"
+	realtimeCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/realtime"
+	retentionrulesCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/retentionrules"
+	sessionsCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/sessions"
+	settingsCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/settings"
+	smartgroupsCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/smartgroups"
+	smartgroupsListCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/smartgroups/list"
+	softwareCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/software"
+	softwareListCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/software/list"
+	softwareVersionsCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/software/versions"
+	softwareVersionsCreateCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/software/versions/create"
+	systemoptionsCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/systemoptions"
+	templateCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/template"
+	tenantoptionsCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/tenantoptions"
+	tenantsCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/tenants"
+	tenantstatisticsCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/tenantstatistics"
+	usergroupsCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/usergroups"
+	userreferencesCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/userreferences"
+	userrolesCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/userroles"
+	usersCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/users"
+	utilCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/util"
+	versionCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/version"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmderrors"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/completion"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/config"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/dataview"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flags"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/logger"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/utilities"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
 	"go.uber.org/zap/zapcore"
@@ -142,11 +146,6 @@ func NewCmdRoot(f *cmdutil.Factory, version, buildDate string) *CmdRoot {
 			$ c8y devices list --type "myDevice" | c8y devices update --data "myValue=1"
 			$ c8y operations list --device myDeviceName
 		`),
-		Annotations: map[string]string{
-			"help:feedback": heredoc.Doc(`
-				Open an issue using 'c8y issue create -R github.com/cli/cli'
-			`),
-		},
 		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
 			disableEncryptionCheck := !cmdutil.IsConfigEncryptionCheckEnabled(cmd)
 			if err := ccmd.Configure(disableEncryptionCheck); err != nil {
@@ -211,7 +210,7 @@ func NewCmdRoot(f *cmdutil.Factory, version, buildDate string) *CmdRoot {
 	cmd.PersistentFlags().Bool("silentExit", false, "Silent status codes do not affect the exit code")
 
 	cmd.PersistentFlags().Bool("flatten", false, "flatten json output by replacing nested json properties with properties where their names are represented by dot notation")
-	cmd.PersistentFlags().StringSlice("filter", nil, "Apply a client side filter to response before returning it to the user")
+	cmd.PersistentFlags().StringArray("filter", nil, "Apply a client side filter to response before returning it to the user")
 	cmd.PersistentFlags().StringArray("select", nil, "Comma separated list of properties to return. wildcards and globstar accepted, i.e. --select 'id,name,type,**.serialNumber'")
 	cmd.PersistentFlags().String("view", defaultView, "Use views when displaying data on the terminal. Disable using --view off")
 	cmd.PersistentFlags().String("timeout", "60s", "Request timeout duration, i.e. 60s, 2m")
@@ -261,6 +260,7 @@ func NewCmdRoot(f *cmdutil.Factory, version, buildDate string) *CmdRoot {
 
 	// Child commands
 	commands := []*cobra.Command{
+		assertCmd.NewSubCommand(f).GetCommand(),
 		auditrecordsCmd.NewSubCommand(f).GetCommand(),
 		binariesCmd.NewSubCommand(f).GetCommand(),
 		bulkoperationsCmd.NewSubCommand(f).GetCommand(),
@@ -313,7 +313,12 @@ func NewCmdRoot(f *cmdutil.Factory, version, buildDate string) *CmdRoot {
 	measurements := measurementsCmd.NewSubCommand(f).GetCommand()
 	measurements.AddCommand(measurementsSubscribeCmd.NewCmdSubscribe(f).GetCommand())
 	measurements.AddCommand(measurementsAssertCmd.NewSubCommand(f).GetCommand())
+	measurements.AddCommand(measurementsCreateBulkCmd.NewCreateBulkCmd(f).GetCommand())
 	cmd.AddCommand(measurements)
+
+	// device management
+	devicemanagement := deviceManagementCmd.NewSubCommand(f).GetCommand()
+	cmd.AddCommand(devicemanagement)
 
 	// devices
 	devices := devicesCmd.NewSubCommand(f).GetCommand()
@@ -381,6 +386,7 @@ func NewCmdRoot(f *cmdutil.Factory, version, buildDate string) *CmdRoot {
 	// applications
 	applications := applicationsCmd.NewSubCommand(f).GetCommand()
 	applications.AddCommand(applicationsCreateHostedCmd.NewCmdCreateHostedApplication(f).GetCommand())
+	applications.AddCommand(applicationsOpenCmd.NewOpenCmd(f).GetCommand())
 	cmd.AddCommand(applications)
 
 	// smart groups

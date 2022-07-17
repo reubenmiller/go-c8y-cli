@@ -3,7 +3,7 @@ package mode
 import (
 	"fmt"
 
-	"github.com/reubenmiller/go-c8y-cli/pkg/config"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/config"
 )
 
 func getValidationError(mode string, setting string) error {

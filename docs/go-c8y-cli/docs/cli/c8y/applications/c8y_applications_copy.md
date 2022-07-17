@@ -7,9 +7,13 @@ Copy application
 ### Synopsis
 
 A POST request to the 'clone' resource creates a new application based on an already existing one.
+
 The properties are copied to the newly created application. For name, key and context path a 'clone' prefix is added in order to be unique.
+
 If the target application is hosted and has an active version, the new application will have the active version with the same content.
+
 The response contains a representation of the newly created application.
+
 Required role ROLE_APPLICATION_MANAGEMENT_ADMIN
 
 
@@ -51,7 +55,7 @@ Copy an existing application
       --dry                        Dry run. Don't send any data to the server
       --dryFormat string           Dry run output format. i.e. json, dump, markdown or curl (default "markdown")
       --examples                   Show examples for the current command
-      --filter strings             Apply a client side filter to response before returning it to the user
+      --filter stringArray         Apply a client side filter to response before returning it to the user
       --flatten                    flatten json output by replacing nested json properties with properties where their names are represented by dot notation
   -f, --force                      Do not prompt for confirmation. Ignored when using --confirm
   -H, --header strings             custom headers. i.e. --header "Accept: value, AnotherHeader: myvalue"

@@ -1,0 +1,41 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/reubenmiller/commander/feat/handle-nested-files/schema.json
+
+tests:
+  It converts a relative date to a iso8601 formatted string:
+    command: |
+      c8y alarms list --dateFrom '-1d' --dry
+    exit-code: 0
+    stdout:
+      json:
+        method: GET
+        path: /alarm/alarms
+        query: r/^dateFrom=\d\d\d\d-\d\d-\d\dT\d\d:\d\d:\d\d\.\d+
+  
+  It does not encode the plus sign if used in the body:
+    command: |
+      c8y events create --device 1234 --type "myType" --text "example" --time "2021-04-19T22:57:38.41129191+02:00" --dry --dryFormat json
+    exit-code: 0
+    stdout:
+      json:
+        body.source.id: '1234'
+        body.type: myType
+        body.text: example
+        body.time: '2021-04-19T22:57:38.41129191+02:00'
+
+  It encodes the plus sign if used in query parameters:
+    command: |
+      c8y events list --dateFrom "2021-04-19T22:57:38.41129191+02:00" --dry --dryFormat json
+    exit-code: 0
+    stdout:
+      json:
+        method: GET
+        pathEncoded: /event/events?dateFrom=2021-04-19T22%3A57%3A38.41129191%2B02%3A00
+  
+  It does not encode the plus sign when using inside a jsonnet template:
+    command: |
+      c8y events create --device 1234 --type "myType" --text "example" --time "2021-04-19T22:57:38.41129191+02:00" --template "{mtime: _.NowNano('2022-04-19T22:57:38.41129191+02:00')}" --dry --dryFormat json
+    stdout:
+      json:
+        body.time: "2021-04-19T22:57:38.41129191+02:00"
+        body.mtime: "2022-04-19T22:57:38.41129191+02:00"
+  

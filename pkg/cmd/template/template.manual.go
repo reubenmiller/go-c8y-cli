@@ -1,9 +1,9 @@
 package template
 
 import (
-	"github.com/reubenmiller/go-c8y-cli/pkg/cmd/subcommand"
-	cmdExecute "github.com/reubenmiller/go-c8y-cli/pkg/cmd/template/execute"
-	"github.com/reubenmiller/go-c8y-cli/pkg/cmdutil"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/subcommand"
+	cmdExecute "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/template/execute"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
 	"github.com/spf13/cobra"
 )
 

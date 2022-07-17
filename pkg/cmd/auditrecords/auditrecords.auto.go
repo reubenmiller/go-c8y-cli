@@ -1,11 +1,11 @@
 package auditrecords
 
 import (
-	cmdCreate "github.com/reubenmiller/go-c8y-cli/pkg/cmd/auditrecords/create"
-	cmdGet "github.com/reubenmiller/go-c8y-cli/pkg/cmd/auditrecords/get"
-	cmdList "github.com/reubenmiller/go-c8y-cli/pkg/cmd/auditrecords/list"
-	"github.com/reubenmiller/go-c8y-cli/pkg/cmd/subcommand"
-	"github.com/reubenmiller/go-c8y-cli/pkg/cmdutil"
+	cmdCreate "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/auditrecords/create"
+	cmdGet "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/auditrecords/get"
+	cmdList "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/auditrecords/list"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/subcommand"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
 	"github.com/spf13/cobra"
 )
 

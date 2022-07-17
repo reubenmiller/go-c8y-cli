@@ -91,7 +91,7 @@
     {
       "name": "download",
       "description": "Download binary",
-      "descriptionLong": "Download a binary stored in Cumulocity and display it on the console. For non text based binaries or if the output should be saved to file, the output parameter should be used to write the file directly to a local file.\n",
+      "descriptionLong": "Download a binary stored in Cumulocity and display it on the console. \n\nFor non text based binaries or if the output should be saved to file, the output parameter should be used to write the file directly to a local file.\n",
       "method": "GET",
       "path": "/inventory/binaries/{id}",
       "accept": "*/*",
@@ -193,6 +193,11 @@
           {
             "description": "Upload a config file and make it globally accessible for all users",
             "command": "c8y binaries create --file \"myConfig.json\" --type c8y_upload --data \"c8y_Global={}\""
+          },
+          {
+            "description": "Upload a file with a custom name and custom meta information",
+            "skipTest": true,
+            "command": "c8y binaries create --file \"myConfig.json\" --file \"device01-myConfig.json\" --type c8y_upload --template \"{collectedAt: _.Now('-5min')}\"\n"
           }
         ]
       },
@@ -205,6 +210,11 @@
           "type": "file",
           "required": true,
           "description": "File to be uploaded as a binary"
+        },
+        {
+          "name": "name",
+          "type": "string",
+          "description": "Set the name of the binary file. This will be the name of the file when it is downloaded in the UI"
         },
         {
           "name": "type",
@@ -264,10 +274,16 @@
           "description": "Inventory binary id"
         }
       ],
+      "bodyTemplate": {
+        "type": "none"
+      },
+      "bodyContent": {
+        "type": "binary"
+      },
       "body": [
         {
           "name": "file",
-          "type": "file",
+          "type": "fileContents",
           "required": true,
           "description": "File to be uploaded as a binary"
         }

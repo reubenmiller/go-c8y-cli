@@ -1,0 +1,11 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/reubenmiller/commander/feat/handle-nested-files/schema.json
+
+tests:
+  It adds custom query parameters to an outgoing request:
+    command: |
+      c8y inventory list --customQueryParam "myValue: 1" --dry --dryFormat json
+    exit-code: 0
+    stdout:
+      json:
+        method: GET
+        pathEncoded: /inventory/managedObjects?myValue=1

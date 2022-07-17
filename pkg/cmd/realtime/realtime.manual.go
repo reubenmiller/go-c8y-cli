@@ -1,10 +1,10 @@
 package realtime
 
 import (
-	"github.com/reubenmiller/go-c8y-cli/pkg/cmd/realtime/subscribe"
-	"github.com/reubenmiller/go-c8y-cli/pkg/cmd/realtime/subscribeall"
-	"github.com/reubenmiller/go-c8y-cli/pkg/cmd/subcommand"
-	"github.com/reubenmiller/go-c8y-cli/pkg/cmdutil"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/realtime/subscribe"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/realtime/subscribeall"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/subcommand"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
 	"github.com/spf13/cobra"
 )
 

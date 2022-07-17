@@ -17,16 +17,23 @@ c8y usergroups update [flags]
 ```
 $ c8y usergroups update --id 12345 --name "customGroup2"
 Update a user group
+
+$ c8y usergroups update --id 12345 --name "customGroup2" --template "{example: 'value'}"
+
+Update a user group with custom properties
         
 ```
 
 ### Options
 
 ```
+  -d, --data string             static data to be applied to body. accepts json or shorthand json, i.e. --data 'value1=1,my.nested.value=100'
   -h, --help                    help for update
       --id strings              Group id (required) (accepts pipeline)
       --name string             name
       --processingMode string   Cumulocity processing mode
+      --template string         Body template
+      --templateVars string     Body template variables
       --tenant string           Tenant
 ```
 
@@ -48,7 +55,7 @@ Update a user group
       --dry                        Dry run. Don't send any data to the server
       --dryFormat string           Dry run output format. i.e. json, dump, markdown or curl (default "markdown")
       --examples                   Show examples for the current command
-      --filter strings             Apply a client side filter to response before returning it to the user
+      --filter stringArray         Apply a client side filter to response before returning it to the user
       --flatten                    flatten json output by replacing nested json properties with properties where their names are represented by dot notation
   -f, --force                      Do not prompt for confirmation. Ignored when using --confirm
   -H, --header strings             custom headers. i.e. --header "Accept: value, AnotherHeader: myvalue"

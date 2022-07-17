@@ -1,15 +1,15 @@
 package alarms
 
 import (
-	cmdCount "github.com/reubenmiller/go-c8y-cli/pkg/cmd/alarms/count"
-	cmdCreate "github.com/reubenmiller/go-c8y-cli/pkg/cmd/alarms/create"
-	cmdDeleteCollection "github.com/reubenmiller/go-c8y-cli/pkg/cmd/alarms/deletecollection"
-	cmdGet "github.com/reubenmiller/go-c8y-cli/pkg/cmd/alarms/get"
-	cmdList "github.com/reubenmiller/go-c8y-cli/pkg/cmd/alarms/list"
-	cmdUpdate "github.com/reubenmiller/go-c8y-cli/pkg/cmd/alarms/update"
-	cmdUpdateCollection "github.com/reubenmiller/go-c8y-cli/pkg/cmd/alarms/updatecollection"
-	"github.com/reubenmiller/go-c8y-cli/pkg/cmd/subcommand"
-	"github.com/reubenmiller/go-c8y-cli/pkg/cmdutil"
+	cmdCount "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/alarms/count"
+	cmdCreate "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/alarms/create"
+	cmdDeleteCollection "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/alarms/deletecollection"
+	cmdGet "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/alarms/get"
+	cmdList "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/alarms/list"
+	cmdUpdate "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/alarms/update"
+	cmdUpdateCollection "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/alarms/updatecollection"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/subcommand"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
 	"github.com/spf13/cobra"
 )
 

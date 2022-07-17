@@ -19,6 +19,7 @@ Create binary
 ```
 New-Binary
 	[-File] <String>
+	[[-Name] <String>]
 	[[-Type] <String>]
 	[-Data <Object>]
 	[-NoAccept]
@@ -106,6 +107,22 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
+### -Name
+Set the name of the binary file.
+This will be the name of the file when it is downloaded in the UI
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 2
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
 ### -Type
 Custom type.
 If left blank, the MIME type will be detected from the file extension
@@ -116,7 +133,7 @@ Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: 2
+Position: 3
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False

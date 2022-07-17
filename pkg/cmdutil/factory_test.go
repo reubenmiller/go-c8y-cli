@@ -5,10 +5,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/reubenmiller/go-c8y-cli/pkg/assert"
-	"github.com/reubenmiller/go-c8y-cli/pkg/flags"
-	"github.com/reubenmiller/go-c8y-cli/pkg/iterator"
-	"github.com/reubenmiller/go-c8y-cli/pkg/mapbuilder"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/assert"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flags"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/iterator"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/mapbuilder"
 	"github.com/tidwall/gjson"
 )
 
@@ -63,7 +63,7 @@ func Test_Body(t *testing.T) {
 	assert.OK(t, cmdErr)
 
 	inputIterators, _ := NewRequestInputIterators(cmd, nil)
-	body := mapbuilder.NewInitializedMapBuilder()
+	body := mapbuilder.NewInitializedMapBuilder(true)
 	err := flags.WithBody(
 		cmd,
 		body,

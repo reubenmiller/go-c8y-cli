@@ -16,11 +16,11 @@ import (
 
 	"github.com/google/go-jsonnet"
 	"github.com/google/go-jsonnet/ast"
-	"github.com/reubenmiller/go-c8y-cli/pkg/iterator"
-	"github.com/reubenmiller/go-c8y-cli/pkg/jsonUtilities"
-	"github.com/reubenmiller/go-c8y-cli/pkg/logger"
-	"github.com/reubenmiller/go-c8y-cli/pkg/randdata"
-	"github.com/reubenmiller/go-c8y-cli/pkg/timestamp"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/iterator"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/jsonUtilities"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/logger"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/randdata"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/timestamp"
 	"github.com/tidwall/gjson"
 	"github.com/tidwall/sjson"
 	"go.uber.org/zap/zapcore"
@@ -293,11 +293,14 @@ func NewMapBuilder() *MapBuilder {
 }
 
 // NewInitializedMapBuilder creates a new map builder with the map set to an empty map
-func NewInitializedMapBuilder() *MapBuilder {
+func NewInitializedMapBuilder(initBody bool) *MapBuilder {
 	builder := NewMapBuilder()
 	builder.templates = make([]string, 0)
 	builder.autoApplyTemplate = true
-	builder.SetEmptyMap()
+
+	if initBody {
+		builder.SetEmptyMap()
+	}
 	return builder
 }
 
@@ -346,11 +349,48 @@ type MapBuilder struct {
 	TemplateIterator      iterator.Iterator
 	TemplateIteratorNames []string
 
+	// Array output settings
+	ArraySize   int
+	ArrayPrefix string
+	ArraySuffix string
+
 	templateVariables map[string]interface{}
 	requiredKeys      []string
 	autoApplyTemplate bool
 	templates         []string
 	externalInput     []byte
+}
+
+func (b *MapBuilder) HasChanged() bool {
+	if len(b.templateVariables) > 0 {
+		return true
+	}
+
+	if len(b.templates) > 0 {
+		return true
+	}
+
+	if b.file != "" {
+		return true
+	}
+
+	if b.HasRaw() {
+		if b.raw != "" {
+			return true
+		}
+	}
+
+	if len(b.BodyRaw) > 0 {
+		return true
+		// if !bytes.Equal(b.BodyRaw, []byte("{}")) {
+		// }
+	}
+
+	if len(b.bodyOptional) > 0 {
+		return true
+	}
+
+	return false
 }
 
 // AppendTemplate appends a templates to be merged in with the body
@@ -640,8 +680,52 @@ func (b *MapBuilder) MarshalJSONWithInput(input interface{}) (body []byte, err e
 	return b.MarshalJSON()
 }
 
-// MarshalJSON returns the body as json
 func (b *MapBuilder) MarshalJSON() (body []byte, err error) {
+	if b.ArraySize > 0 {
+		return b.MarshalJSONArray()
+	}
+	return b.MarshalJSONObject()
+}
+
+func (b *MapBuilder) MarshalJSONArray() ([]byte, error) {
+	out := make([]byte, 0)
+	out = append(out, b.ArrayPrefix...)
+	var outErr error
+	for i := 0; i < b.ArraySize; i++ {
+
+		line, err := b.MarshalJSONObject()
+
+		if err == io.EOF {
+			if i == 0 {
+				outErr = io.EOF
+			}
+			break
+		}
+
+		if line != nil {
+			if i > 0 {
+				out = append(out, ',')
+			}
+			out = append(out, line...)
+		}
+
+		if err == io.EOF {
+			outErr = err
+			break
+		}
+		if err != nil {
+			return nil, err
+		}
+	}
+	out = append(out, b.ArraySuffix...)
+	return out, outErr
+}
+
+// MarshalJSON returns the body as json
+func (b *MapBuilder) MarshalJSONObject() (body []byte, err error) {
+	if !b.HasChanged() {
+		return nil, nil
+	}
 	body = []byte(b.BodyRaw)
 
 	for _, it := range b.bodyIterators {

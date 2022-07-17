@@ -1,17 +1,17 @@
 package applications
 
 import (
-	cmdCopy "github.com/reubenmiller/go-c8y-cli/pkg/cmd/applications/copy"
-	cmdCreate "github.com/reubenmiller/go-c8y-cli/pkg/cmd/applications/create"
-	cmdCreateBinary "github.com/reubenmiller/go-c8y-cli/pkg/cmd/applications/createbinary"
-	cmdDelete "github.com/reubenmiller/go-c8y-cli/pkg/cmd/applications/delete"
-	cmdDeleteApplicationBinary "github.com/reubenmiller/go-c8y-cli/pkg/cmd/applications/deleteapplicationbinary"
-	cmdGet "github.com/reubenmiller/go-c8y-cli/pkg/cmd/applications/get"
-	cmdList "github.com/reubenmiller/go-c8y-cli/pkg/cmd/applications/list"
-	cmdListApplicationBinaries "github.com/reubenmiller/go-c8y-cli/pkg/cmd/applications/listapplicationbinaries"
-	cmdUpdate "github.com/reubenmiller/go-c8y-cli/pkg/cmd/applications/update"
-	"github.com/reubenmiller/go-c8y-cli/pkg/cmd/subcommand"
-	"github.com/reubenmiller/go-c8y-cli/pkg/cmdutil"
+	cmdCopy "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/applications/copy"
+	cmdCreate "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/applications/create"
+	cmdCreateBinary "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/applications/createbinary"
+	cmdDelete "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/applications/delete"
+	cmdDeleteApplicationBinary "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/applications/deleteapplicationbinary"
+	cmdGet "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/applications/get"
+	cmdList "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/applications/list"
+	cmdListApplicationBinaries "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/applications/listapplicationbinaries"
+	cmdUpdate "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/applications/update"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/subcommand"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
 	"github.com/spf13/cobra"
 )
 

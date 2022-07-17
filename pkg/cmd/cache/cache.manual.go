@@ -1,10 +1,10 @@
 package cache
 
 import (
-	cmdDelete "github.com/reubenmiller/go-c8y-cli/pkg/cmd/cache/delete"
-	cmdRenew "github.com/reubenmiller/go-c8y-cli/pkg/cmd/cache/renew"
-	"github.com/reubenmiller/go-c8y-cli/pkg/cmd/subcommand"
-	"github.com/reubenmiller/go-c8y-cli/pkg/cmdutil"
+	cmdDelete "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/cache/delete"
+	cmdRenew "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/cache/renew"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/subcommand"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
 	"github.com/spf13/cobra"
 )
 

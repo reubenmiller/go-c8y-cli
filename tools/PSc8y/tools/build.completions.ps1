@@ -11,6 +11,10 @@ param(
     $OutputFile = "$PSScriptRoot/../utilities/register-completions.ps1"
 )
 
+# Force importing the module again
+Get-Module -Name $ModuleName | Remove-Module
+Import-Module "$PSScriptRoot/../dist/PSc8y" -Force
+
 [array]$Completions = @(
     # Tenant Option
     @{ name = "*TenantOption*"; ParameterName = "Category"; completion = '$script:CompleteTenantOptionCategory' }
@@ -30,10 +34,19 @@ param(
 
     # User
     @{ name = "*-User"; ParameterName = "Id"; completion = '$script:CompleteUser' }
+    @{ name = "*-UserTOTPSecret"; ParameterName = "Id"; completion = '$script:CompleteUser' }
     @{ name = "*"; ParameterName = "User"; completion = '$script:CompleteUser' }
 
     # DeviceGroup
     @{ name = "*-DeviceGroup*"; ParameterName = "Id"; completion = '$script:CompleteDeviceGroup' }
+    @{ name = "*"; ParameterName = "NewChildGroup"; completion = '$script:CompleteDeviceGroup' }
+    @{ name = "Remove-GroupFromGroup"; ParameterName = "Id"; completion = '$script:CompleteDeviceGroup' }
+    @{ name = "Remove-GroupFromGroup"; ParameterName = "Child"; completion = '$script:CompleteDeviceGroup' }
+    @{ name = "*AssetToGroup"; ParameterName = "Group"; completion = '$script:CompleteDeviceGroup' }
+    @{ name = "*ChildGroupToGroup"; ParameterName = "Group"; completion = '$script:CompleteDeviceGroup' }
+    @{ name = "*DeviceToGroup"; ParameterName = "Group"; completion = '$script:CompleteDeviceGroup' }
+    @{ name = "*DeviceFromGroup"; ParameterName = "Group"; completion = '$script:CompleteDeviceGroup' }
+    @{ name = "*GroupFromGroup"; ParameterName = "Group"; completion = '$script:CompleteDeviceGroup' }
 
     # Measurement
     @{ name = "*-Measurement*"; ParameterName = "ValueFragmentType"; completion = '$script:CompleteMeasurementFragmentType' }
@@ -45,13 +58,17 @@ param(
     @{ name = "Add-RoleToGroup"; ParameterName = "Group"; completion = '$script:CompleteUserGroup' }
 
     # Add
-    @{ name = "*AssetToGroup"; ParameterName = "*Group*"; completion = '$script:CompleteDeviceGroup' }
+    @{ name = "*AssetToGroup"; ParameterName = "Group"; completion = '$script:CompleteDeviceGroup' }
 
     # Device
-    @{ name = "*"; ParameterName = "*Device*"; completion = '$CompleteDevice' }
+    @{ name = "*"; ParameterName = "Device"; completion = '$script:CompleteDevice' }
+    @{ name = "*-DeviceRequiredAvailability"; ParameterName = "Id"; completion = '$script:CompleteDevice' }
+    @{ name = "*"; ParameterName = "NewChildDevice"; completion = '$script:CompleteDevice' }
+    @{ name = "*"; ParameterName = "ChildDevice"; completion = '$script:CompleteDevice' }
+
 
     # Agent
-    @{ name = "*"; ParameterName = "*Agent*"; completion = '$CompleteAgent' }
+    @{ name = "*"; ParameterName = "Agent"; completion = '$script:CompleteAgent' }
 
     # Tenant
     @{ name = "*"; ParameterName = "Tenant"; completion = '$script:CompleteTenant' }
@@ -59,6 +76,9 @@ param(
     # Role
     @{ name = "*"; ParameterName = "Role"; completion = '$script:CompleteRole' }
     @{ name = "*"; ParameterName = "Roles"; completion = '$script:CompleteRole' }
+    
+    # Device certificates
+    @{ name = "*-DeviceCertificate"; ParameterName = "Id"; completion = '$script:CompleteDeviceCertificate' }
 )
 
 # build a hashtable of command names and parameters to make it quicker to lookup

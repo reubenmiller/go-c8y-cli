@@ -150,7 +150,7 @@ The following commands require sudo. If you don't have `sudo` installed, then re
     ```
     :::
 
-3. Add the following line to your preferred shell profile
+3. Edit your preferred shell by executing snippet (it will import functions each time you load your shell)
 
     <Tabs
     groupId="shell-types"
@@ -164,30 +164,32 @@ The following commands require sudo. If you don't have `sudo` installed, then re
     }>
     <TabItem value="bash">
 
-    ```bash title="file: ~/.bashrc"
-    source "$(brew --prefix)/etc/go-c8y-cli/shell/c8y.plugin.sh"
+    ```bash
+    echo 'source "$(brew --prefix)/etc/go-c8y-cli/shell/c8y.plugin.sh"' >> ~/.bashrc
     ```
 
     </TabItem>
     <TabItem value="zsh">
 
-    ```bash title="file: ~/.zshrc"
-    source "$(brew --prefix)/etc/go-c8y-cli/shell/c8y.plugin.zsh"
+    ```bash
+    echo 'source "$(brew --prefix)/etc/go-c8y-cli/shell/c8y.plugin.zsh"' >> ~/.zshrc
     ```
 
     </TabItem>
     <TabItem value="fish">
 
-    ```bash title="file: ~/.config/fish/config.fish"
-    source "$(brew --prefix)/etc/go-c8y-cli/shell/c8y.plugin.fish"
+    ```bash
+    mkdir -p ~/.config/fish
+    echo 'source "$(brew --prefix)/etc/go-c8y-cli/shell/c8y.plugin.fish"' >> ~/.config/fish/config.fish
     ```
 
     </TabItem>
 
     <TabItem value="powershell">
 
-    ```powershell title="file: ~/.config/powershell/Microsoft.PowerShell_profile.ps1"
-    . "$(brew --prefix)/etc/go-c8y-cli/shell/c8y.plugin.ps1"
+    ```powershell
+    New-Item -type directory -path ~/.config/powershell -Force
+    '. "$(brew --prefix)/etc/go-c8y-cli/shell/c8y.plugin.ps1"' >> ~/.config/powershell/Microsoft.PowerShell_profile.ps1
     ```
 
     </TabItem>

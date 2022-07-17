@@ -8,8 +8,8 @@ import (
 	"time"
 
 	"github.com/manifoldco/promptui"
-	"github.com/reubenmiller/go-c8y-cli/pkg/encrypt"
-	"github.com/reubenmiller/go-c8y-cli/pkg/logger"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/encrypt"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/logger"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 )
 
@@ -75,7 +75,8 @@ type Validate func(string) error
 // Prompt used to provide various interactive prompts which can be used
 // within the cli
 type Prompt struct {
-	Logger *logger.Logger
+	Logger         *logger.Logger
+	ShowValueAfter bool
 }
 
 // NewPrompt returns a new Prompt which can be used to prompt the user for
@@ -134,7 +135,7 @@ func (p *Prompt) Password(label string, message string) (string, error) {
 	}
 	validate := func(input string) error {
 		if input == "" {
-			return fmt.Errorf("Empty password")
+			return fmt.Errorf("password is required")
 		}
 		return nil
 	}
@@ -180,8 +181,8 @@ func (p *Prompt) Username(label string, defaultValue string) (string, error) {
 		label = "Enter username/email"
 	}
 	validate := func(input string) error {
-		if input == "" {
-			return fmt.Errorf("Empty username")
+		if strings.TrimSpace(input) == "" {
+			return fmt.Errorf("value is required")
 		}
 		return nil
 	}
@@ -189,7 +190,7 @@ func (p *Prompt) Username(label string, defaultValue string) (string, error) {
 		Stdin:       os.Stdin,
 		Stdout:      os.Stderr,
 		Default:     defaultValue,
-		HideEntered: true,
+		HideEntered: false,
 		Label:       label,
 		Validate:    validate,
 	}
@@ -202,7 +203,7 @@ func (p *Prompt) TOTPCode(host, username string, code string, client *c8y.Client
 
 	validateTOTP := func(input string) error {
 		if len(strings.ReplaceAll(input, " ", "")) < 6 {
-			return fmt.Errorf("Missing TFA code")
+			return fmt.Errorf("missing TFA code")
 		}
 
 		ctx, cancel := context.WithTimeout(context.Background(), time.Duration(15000)*time.Millisecond)
@@ -230,5 +231,28 @@ func (p *Prompt) TOTPCode(host, username string, code string, client *c8y.Client
 		Validate:    validateTOTP,
 	}
 
+	return prompt.Run()
+}
+
+func (p *Prompt) Input(label string, defaultValue string, required bool, hideEntered bool) (string, error) {
+	if label == "" {
+		label = "Enter value"
+	}
+	validate := func(input string) error {
+		if required {
+			if input == "" {
+				return fmt.Errorf("value is required")
+			}
+		}
+		return nil
+	}
+	prompt := promptui.Prompt{
+		Stdin:       os.Stdin,
+		Stdout:      os.Stderr,
+		Default:     defaultValue,
+		HideEntered: hideEntered,
+		Label:       label,
+		Validate:    validate,
+	}
 	return prompt.Run()
 }
