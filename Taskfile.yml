@@ -35,7 +35,7 @@ tasks:
   install_c8y:
     desc: Install c8y in dev environment
     deps:
-      - build
+      - build-snapshot
     cmds:
       - |
         if [ ! -f /usr/local/bin/c8y ]; then \
