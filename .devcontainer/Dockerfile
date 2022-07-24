@@ -88,7 +88,7 @@ RUN /tmp/install/install-powershell.sh \
     # Install bash tools
     # https://github.com/bats-core/bats-core
     && npm install -g bats \
-    && apt-get install -y jq bash-completion asciinema \
+    && apt-get install -y vim jq bash-completion asciinema \
     #
     # Fish shell
     && apt-get install -y fish zsh \
