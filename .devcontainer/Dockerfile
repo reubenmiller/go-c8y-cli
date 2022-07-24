@@ -157,12 +157,16 @@ RUN cd /tmp \
     && sudo chmod a+x jfrog \
     && sudo mv jfrog /usr/local/bin/
 
+# Fix gopath permissions for non-root user
+RUN sudo chown -R "$USERNAME:$USERNAME" /go
+
 # Update this to "on" or "off" as appropriate
 ENV GO111MODULE=auto
 ENV LANG=C.UTF-8
 ENV LC_ALL=C.UTF-8
 
 # Change default location of cumulocity profiles
+ENV C8Y_HOME=/workspaces/go-c8y-cli/.go-c8y-cli
 ENV C8Y_SESSION_HOME=/workspaces/go-c8y-cli/.cumulocity
 
 # Switch back to dialog for any ad-hoc use of apt-get

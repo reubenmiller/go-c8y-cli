@@ -36,26 +36,42 @@ See the [documentation website](https://goc8ycli.netlify.app/) for instructions 
     git clone https://github.com/reubenmiller/go-c8y-cli.git
     ```
 
-2. Open the project in Microsoft VS Code (using Dev Containers - this requires Docker!)
-
-3. Run initial setup tasks so that you can run c8y inside the dev container
+2. Optional: If you have existing .cumulocity sessions folder, then you can copy the files into the local directory so that they are available for use during development
 
     ```sh
-    task init_setup
-    
+    cd go-c8y-cli
+
+    # bash/zsh
+    mkdir -p .cumulocity
+    cp -R ~/.cumulocity/ .cumulocity/
+    ```
+
+3. Open the project in Microsoft VS Code (using Dev Containers - this requires Docker!)
+
+    ```sh
+    code go-c8y-cli
+
+    # When prompted, build and open the dev container
+    ```
+
+4. Run initial setup tasks so that you can run c8y inside the dev container
+
+    ```sh
+    task init-setup
+    ```
+
+5. Add or edit a command specification (`.yaml` file) in `api/spec/yaml/`. The specifications are used to auto generate the go code
+
+6. Run the code generation and build the go binary
+
+    ```sh
+    task generate build-snapshot-single
+
     # reload your shell
     zsh
     ```
 
-3. Add or edit a command specification (`.yaml` file) in `api/spec/yaml/`. The specifications are used to auto generate the go code
-
-4. Run the code generation and build the go binary
-
-    ```sh
-    task build
-    ```
-
-5. Try out the newly built binary (it should already be added to your)
+7. Try out the newly built binary (it should already be added to your)
 
     **Shell**
 
@@ -66,6 +82,9 @@ See the [documentation website](https://goc8ycli.netlify.app/) for instructions 
     **PowerShell**
 
     ```powershell
+    task generate build-powershell
+
+    pwsh
     Import-Module ./tools/PSc8y/dist/PSc8y -Force
     Get-CurrentUser
     ```
@@ -81,7 +100,7 @@ See the [documentation website](https://goc8ycli.netlify.app/) for instructions 
 2. Launch the documentation preview
 
     ```sh
-    task gh_pages
+    task gh-pages
     ```
 
 3. View the documentation in the [browser](http:/localhost:3000)
@@ -95,7 +114,7 @@ See the [documentation website](https://goc8ycli.netlify.app/) for instructions 
 
     ```sh
     task build
-    task generate_cli_tests
+    task generate-cli-tests
     ```
 
 1. Set the c8y session that you want to use for the tests
