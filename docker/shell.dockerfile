@@ -4,8 +4,10 @@ ARG USERNAME=c8yuser
 ARG C8Y_VERSION=1.3.0
 
 RUN apk update \
-    && apk add curl unzip bash bash-completion zsh fish git vim jq \
+    && apk add curl unzip bash bash-completion zsh fish git vim jq sudo coreutils \
     && adduser -S $USERNAME \
+    && echo '%wheel ALL=(ALL) ALL' > /etc/sudoers.d/wheel \
+    && adduser $USERNAME wheel \
     && mkdir -p /sessions \
     && chown -R $USERNAME /sessions \
     && git clone https://github.com/reubenmiller/go-c8y-cli-addons.git /home/$USERNAME/.go-c8y-cli
