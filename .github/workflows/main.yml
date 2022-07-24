@@ -61,7 +61,7 @@ jobs:
     - uses: actions/upload-artifact@v2
       with:
         name: c8y.macos.amd64
-        path: dist/macos_darwin_amd64_v1/bin/c8y*
+        path: dist/macOS_darwin_amd64_v1/bin/c8y*
         if-no-files-found: error
 
     - uses: actions/upload-artifact@v2
