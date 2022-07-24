@@ -43,7 +43,7 @@ jobs:
       uses: arduino/setup-task@v1
 
     - name: Build cli
-      run: task build_powershell build-snapshot
+      run: task build-powershell build-snapshot
       shell: bash
 
     - uses: actions/upload-artifact@v2
@@ -61,7 +61,7 @@ jobs:
     - uses: actions/upload-artifact@v2
       with:
         name: c8y.macos.amd64
-        path: dist/macos_darwin_amd64_v1/bin/c8y*
+        path: dist/macOS_darwin_amd64_v1/bin/c8y*
         if-no-files-found: error
 
     - uses: actions/upload-artifact@v2
@@ -148,7 +148,7 @@ jobs:
       uses: arduino/setup-task@v1
 
     - name: Build powershell module
-      run: task build_powershell build-snapshot
+      run: task build-powershell build-snapshot
       shell: bash
 
     - name: Test powershell module
