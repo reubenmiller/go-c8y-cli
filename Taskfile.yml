@@ -188,6 +188,7 @@ tasks:
     desc: Build Snapshot (single) for the current operating system
     cmds:
       - goreleaser build --rm-dist --snapshot --single-target --id {{.OS_NAME}} {{.CLI_ARGS}}
+      - rm -f .bin/c8y
       - cp dist/{{.OS_NAME}}_{{OS}}_{{.ARCH_NAME}}/bin/c8y .bin/c8y
 
   generate:
