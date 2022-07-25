@@ -7,6 +7,8 @@ vars:
   TAG:
     sh: git describe | sed "s/^v\?\([0-9]\{1,\}\.[0-9]\{1,\}\.[0-9]\{1,\}\).*/\1/"
   VERSION: "{{base .TAG}}"
+  OS_NAME: '{{ if eq OS "darwin" }}macOS{{ else }}{{OS}}{{ end }}'
+  ARCH_NAME: '{{ARCH}}'
 
 env:
   C8Y_SETTINGS_CI: true
@@ -24,18 +26,24 @@ tasks:
     cmds:
       - echo VERSION={{.VERSION}}
 
-  init_setup:
+  show-vars:
+    desc: Show global variables
+    cmds:
+      - cmd: echo OS_NAME={{.OS_NAME}}
+        silent: true
+      - cmd: echo ARCH_NAME={{.ARCH_NAME}}
+        silent: true
+
+  init-setup:
     desc: Initialize setup
     cmds:
       - ./scripts/setup.sh
       - pwsh -File ./scripts/build-powershell/install.ps1
-    deps:
-      - install_c8y
   
-  install_c8y:
+  install-c8y:
     desc: Install c8y in dev environment
     deps:
-      - build
+      - build-snapshot
     cmds:
       - |
         if [ ! -f /usr/local/bin/c8y ]; then \
@@ -75,19 +83,19 @@ tasks:
   # ---------------------------------------------------------------
   # Github pages
   # ---------------------------------------------------------------
-  gh_pages_install:
+  gh-pages-install:
     desc: Install github pages dependencies for viewing docs locally
     cmds:
       - cd docs/go-c8y-cli && npm install
 
-  gh_pages:
+  gh-pages:
     desc: Run github pages locally
     cmds:
       - cd docs/go-c8y-cli && npm start
     deps:
-      - build_gh_pages
+      - build-gh-pages
 
-  build_gh_pages:
+  build-gh-pages:
     desc: build github pages
     dir: docs/go-c8y-cli
     cmds:
@@ -95,19 +103,19 @@ tasks:
       - npm run write-translations
       - npm run build
 
-  gh_pages_prod:
+  gh-pages-prod:
     desc: build/serve github pages (production)
     dir: docs/go-c8y-cli
     cmds:
       - npm run serve
     deps:
-      - build_gh_pages
+      - build-gh-pages
 
 
   # ---------------------------------------------------------------
   # Spec and code generation
   # ---------------------------------------------------------------
-  update_spec:
+  update-spec:
     desc: Update json specifications
     cmds:
       - ./scripts/generate-spec.sh
@@ -116,20 +124,20 @@ tasks:
     generates:
       - api/spec/json/*.json
   
-  generate_go_code:
+  generate-go-code:
     desc: Generate go code from specifications
     cmds:
       - pwsh -File scripts/build-cli/build.ps1
     deps:
       # Use deps so that the source/generates works properly
-      - update_spec
+      - update-spec
     sources:
       - api/spec/json/*.json
       - scripts/**/*.ps1
     generates:
       - pkg/cmd/**/*.auto.go
 
-  generate_cli_tests:
+  generate-cli-tests:
     desc: Generate CLI tests from the examples in the api specs
     cmds:
       - chmod +x ./scripts/build-cli-tests.sh
@@ -174,21 +182,27 @@ tasks:
   build-snapshot:
     desc: Build Snapshot
     cmds:
-      - goreleaser build --rm-dist --snapshot
+      - goreleaser build --rm-dist --snapshot {{.CLI_ARGS}}
+
+  build-snapshot-single:
+    desc: Build Snapshot (single) for the current operating system
+    cmds:
+      - goreleaser build --rm-dist --snapshot --single-target --id {{.OS_NAME}} {{.CLI_ARGS}}
+      - cp dist/{{.OS_NAME}}_{{OS}}_{{.ARCH_NAME}}/bin/c8y .bin/c8y
 
   generate:
     desc: Generate the cli code
     cmds:
       - go mod tidy
-      - task: update_spec
-      - task: generate_go_code
-      - task: generate_cli_tests
-      - task: build_powershell
+      - task: update-spec
+      - task: generate-go-code
+      - task: generate-cli-tests
+      - task: build-powershell
       - task: manpages
-      - task: build_completions
-      - task: checkout_addons
+      - task: build-completions
+      - task: checkout-addons
 
-  build_powershell:
+  build-powershell:
     desc: Build the powershell module
     cmds:
       - pwsh -File scripts/build-powershell/build.ps1
@@ -208,14 +222,14 @@ tasks:
       - output_pwsh/PSc8y
       - output_pwsh/PSc8y.zip
 
-  build_completions:
+  build-completions:
     desc: Build completions
     env:
       OUTPUT_DIR: ./output
     cmds:
       - ./tools/shell/completion/build_completions.sh
   
-  build_powershell_completions:
+  build-powershell-completions:
     desc: Build powershell completions
     summary: |
       Do not trigger when building in CI/CD as it needs a already build module to work.
@@ -224,7 +238,7 @@ tasks:
     cmds:
       -  pwsh -File tools/PSc8y/tools/build.completions.ps1
 
-  checkout_addons:
+  checkout-addons:
     desc: Checkout the go-c8y-cli-addons repository
     env:
       OUTPUT_DIR: ./output
@@ -276,7 +290,7 @@ tasks:
       - ./tests/scripts/setup.sh
       - ./tests/run-auto.sh {{.CLI_ARGS}}
 
-  test_installation:
+  test-installation:
     desc: Test installation of linux packages
     cmds:
       - chmod +x ./tools/integration-tests/run.sh

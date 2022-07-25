@@ -6,7 +6,7 @@
         {
             "label": "Build (incl. generate)",
             "type": "shell",
-            "command": "task build-snapshot",
+            "command": "task generate build-snapshot-single",
             "group": {
                 "kind": "build",
                 "isDefault": true
@@ -24,7 +24,7 @@
         {
             "label": "Build-fast (w/o generate)",
             "type": "shell",
-            "command": "task build-fast",
+            "command": "task build-snapshot-single",
             "group": {
                 "kind": "build",
                 "isDefault": true
