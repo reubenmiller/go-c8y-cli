@@ -77,6 +77,7 @@ func CreateCumulocityClient(f *cmdutil.Factory, sessionFile, username, password 
 					ExcludeAuth: !cfg.CacheKeyIncludeAuth(),
 					ExcludeHost: !cfg.CacheKeyIncludeHost(),
 					Mode:        cfg.CacheMode(),
+					BodyKeys:    cfg.CacheBodyKeys(),
 				},
 			)
 		}
