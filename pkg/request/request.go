@@ -96,6 +96,10 @@ func (r *RequestHandler) ProcessRequestAndResponse(requests []c8y.RequestOptions
 		})
 	defer cancel()
 	start := time.Now()
+
+	// TODO: Check if this is required
+	outData := make(map[string]interface{})
+	req.ResponseData = &outData
 	resp, err := r.Client.SendRequest(
 		ctx,
 		req,
@@ -107,7 +111,7 @@ func (r *RequestHandler) ProcessRequestAndResponse(requests []c8y.RequestOptions
 		r.Logger.Infof("Response time: %dms", durationMS)
 
 		if r.ActivityLogger != nil && resp != nil {
-			r.ActivityLogger.LogRequest(resp.Response, resp.JSON, durationMS)
+			r.ActivityLogger.LogRequest(resp.Response, resp.JSON(), durationMS)
 		}
 	}
 
@@ -361,7 +365,7 @@ func (r *RequestHandler) GetCurlCommands(req *http.Request) (shell string, pwsh 
 }
 
 func (r *RequestHandler) fetchAllResults(req c8y.RequestOptions, resp *c8y.Response, commonOptions config.CommonCommandOptions) error {
-	if req.DryRun || (resp != nil && resp.StatusCode == 0) {
+	if req.DryRun || (resp != nil && resp.StatusCode() == 0) {
 		return nil
 	}
 
@@ -411,7 +415,7 @@ func (r *RequestHandler) fetchAllResults(req c8y.RequestOptions, resp *c8y.Respo
 		if resp == nil || totalItems == 0 {
 			break
 		}
-		if v := resp.JSON.Get("next"); v.Exists() && v.String() != "" {
+		if v := resp.JSON("next"); v.Exists() && v.String() != "" {
 			nextURI = v.String()
 		} else {
 			break
@@ -441,7 +445,7 @@ func (r *RequestHandler) fetchAllResults(req c8y.RequestOptions, resp *c8y.Respo
 		if resp != nil {
 			durationMS := int64(time.Since(start) / time.Millisecond)
 			r.Logger.Infof("Response time: %dms", durationMS)
-			r.ActivityLogger.LogRequest(resp.Response, resp.JSON, durationMS)
+			r.ActivityLogger.LogRequest(resp.Response, resp.JSON(), durationMS)
 			totalItems, processErr = r.ProcessResponse(resp, err, commonOptions)
 
 			if processErr != nil {
@@ -472,7 +476,7 @@ func (r *RequestHandler) fetchAllResults(req c8y.RequestOptions, resp *c8y.Respo
 }
 
 func (r *RequestHandler) fetchAllInventoryQueryResults(req c8y.RequestOptions, resp *c8y.Response, commonOptions config.CommonCommandOptions) error {
-	if req.DryRun || (resp != nil && resp.StatusCode == 0) {
+	if req.DryRun || (resp != nil && resp.StatusCode() == 0) {
 		return nil
 	}
 
@@ -507,7 +511,7 @@ func (r *RequestHandler) fetchAllInventoryQueryResults(req c8y.RequestOptions, r
 	originalURI := ""
 	lastID := "0"
 
-	if v := resp.JSON.Get("self"); v.Exists() && v.String() != "" {
+	if v := resp.JSON("self"); v.Exists() && v.String() != "" {
 		originalURI = v.String()
 	}
 
@@ -528,7 +532,7 @@ func (r *RequestHandler) fetchAllInventoryQueryResults(req c8y.RequestOptions, r
 		}
 
 		// get last id of the result set
-		if v := resp.JSON.Get(dataProperty); v.Exists() && v.IsArray() {
+		if v := resp.JSON(dataProperty); v.Exists() && v.IsArray() {
 			items := v.Array()
 			if len(items) > 0 {
 				lastID = items[len(items)-1].Get("id").String()
@@ -562,7 +566,7 @@ func (r *RequestHandler) fetchAllInventoryQueryResults(req c8y.RequestOptions, r
 		if resp != nil {
 			durationMS := int64(time.Since(start) / time.Millisecond)
 			r.Logger.Infof("Response time: %dms", durationMS)
-			r.ActivityLogger.LogRequest(resp.Response, resp.JSON, durationMS)
+			r.ActivityLogger.LogRequest(resp.Response, resp.JSON(), durationMS)
 
 			totalItems, processErr = r.ProcessResponse(resp, err, commonOptions)
 
@@ -637,19 +641,19 @@ func optimizeManagedObjectsURL(u *url.URL, lastID string) *url.URL {
 }
 
 func (r *RequestHandler) ProcessResponse(resp *c8y.Response, respError error, commonOptions config.CommonCommandOptions) (int, error) {
-	if resp != nil && resp.StatusCode != 0 {
-		r.Logger.Infof("Response Content-Type: %s", resp.Header.Get("Content-Type"))
-		r.Logger.Debugf("Response Headers: %v", resp.Header)
+	if resp != nil && resp.StatusCode() != 0 {
+		r.Logger.Infof("Response Content-Type: %s", resp.Response.Header.Get("Content-Type"))
+		r.Logger.Debugf("Response Headers: %v", resp.Header())
 	}
 
 	// Display log output in special scenarios (i.e. Delete and no Accept header), so the user gets some feedback that it did something
-	if resp != nil && (resp.Request.Method == http.MethodDelete && resp.StatusCode == 204 || resp.Request.Header.Get("Accept") == "" && resp.Request.Method != http.MethodDelete && (resp.StatusCode == 201 || resp.StatusCode == 200)) {
+	if resp != nil && (resp.Response.Request.Method == http.MethodDelete && resp.StatusCode() == 204 || resp.Response.Request.Header.Get("Accept") == "" && resp.Response.Request.Method != http.MethodDelete && (resp.StatusCode() == 201 || resp.StatusCode() == 200)) {
 		if r.IsTerminal && !r.Config.ShowProgress() {
 			cs := r.IO.ColorScheme()
 
 			actionText := ""
 			actionColor := cs.Green
-			switch resp.Request.Method {
+			switch resp.Response.Request.Method {
 			case http.MethodDelete:
 				actionText = "Deleted"
 				actionColor = cs.Red
@@ -662,17 +666,17 @@ func (r *RequestHandler) ProcessResponse(resp *c8y.Response, respError error, co
 			case http.MethodPatch:
 				actionText = "Patched"
 			default:
-				actionText = resp.Request.Method
+				actionText = resp.Response.Request.Method
 			}
-			fmt.Fprintf(r.IO.ErrOut, "%s %s %s => %s\n", cs.SuccessIconWithColor(actionColor), actionText, resp.Request.URL.Path, resp.Status)
+			fmt.Fprintf(r.IO.ErrOut, "%s %s %s => %s\n", cs.SuccessIconWithColor(actionColor), actionText, resp.Response.Request.URL.Path, resp.Status())
 		}
 	}
 
 	// write response to file instead of to stdout
 	if resp != nil && respError == nil && commonOptions.OutputFileRaw != "" {
-		if resp.StatusCode != 0 {
+		if resp.StatusCode() != 0 {
 			// check if it is a dummy response (i.e. no status code)
-			newline := strings.Contains(strings.ToLower(resp.Header.Get("Content-Type")), "json")
+			newline := strings.Contains(strings.ToLower(resp.Response.Header.Get("Content-Type")), "json")
 			fullFilePath, err := r.saveResponseToFile(resp, commonOptions.OutputFileRaw, false, newline)
 
 			if err != nil {
@@ -683,23 +687,29 @@ func (r *RequestHandler) ProcessResponse(resp *c8y.Response, respError error, co
 		}
 	}
 
-	if resp != nil && respError == nil && (r.Config.IsResponseOutput() || resp.Header.Get("Content-Type") == "application/octet-stream") && resp.JSONData != nil {
+	if resp != nil && respError == nil && (r.Config.IsResponseOutput() || resp.Response.Header.Get("Content-Type") == "application/octet-stream") && len(resp.Body()) > 0 {
 		// estimate size based on utf8 encoding. 1 char is 1 byte
 		r.Logger.Debugf("Writing https response output")
-		r.Logger.Infof("Response Length: %0.1fKB", float64(len(*resp.JSONData)*1)/1024)
+
+		if resp.Response.ContentLength > -1 {
+			r.Logger.Infof("Response Length: %0.1fKB", float64(resp.Response.ContentLength)/1024)
+		} else {
+			r.Logger.Infof("Response Length: %0.1fKB", float64(len(resp.Body()))/1024)
+		}
+
 		outputEOL := ""
 		if r.IsTerminal {
 			outputEOL = "\n"
 		}
 		out := r.IO.Out
-		if encoding.IsUTF16(*resp.JSONData) {
-			if utf8, err := encoding.DecodeUTF16([]byte(*resp.JSONData)); err == nil {
+		if encoding.IsUTF16(resp.Body()) {
+			if utf8, err := encoding.DecodeUTF16(resp.Body()); err == nil {
 				fmt.Fprintf(out, "%s", utf8)
 			} else {
-				fmt.Fprintf(out, "%s", *resp.JSONData)
+				fmt.Fprintf(out, "%s", resp.Body())
 			}
 		} else {
-			fmt.Fprintf(out, "%s", *resp.JSONData)
+			fmt.Fprintf(out, "%s", resp.Body())
 		}
 		if outputEOL != "" {
 			fmt.Fprint(out, outputEOL)
@@ -713,12 +723,16 @@ func (r *RequestHandler) ProcessResponse(resp *c8y.Response, respError error, co
 
 	unfilteredSize := 0
 
-	if resp != nil && resp.JSONData != nil {
+	if resp != nil && len(resp.Body()) > 0 {
 		// estimate size based on utf8 encoding. 1 char is 1 byte
-		r.Logger.Printf("Response Length: %0.1fKB", float64(len(*resp.JSONData)*1)/1024)
+		if resp.Response.ContentLength > -1 {
+			r.Logger.Infof("Response Length: %0.1fKB", float64(resp.Response.ContentLength)/1024)
+		} else {
+			r.Logger.Infof("Response Length: %0.1fKB", float64(len(resp.Body()))/1024)
+		}
 
 		var responseText []byte
-		isJSONResponse := jsonUtilities.IsValidJSON([]byte(*resp.JSONData))
+		isJSONResponse := jsonUtilities.IsValidJSON(resp.Body())
 
 		dataProperty := ""
 		showRaw := r.Config.RawOutput() || r.Config.WithTotalPages()
@@ -730,7 +744,7 @@ func (r *RequestHandler) ProcessResponse(resp *c8y.Response, respError error, co
 			dataProperty = ""
 		}
 
-		if v := resp.JSON.Get(dataProperty); v.Exists() && v.IsArray() {
+		if v := resp.JSON(dataProperty); v.Exists() && v.IsArray() {
 			unfilteredSize = len(v.Array())
 			r.Logger.Infof("Unfiltered array size. len=%d", unfilteredSize)
 		}
@@ -748,11 +762,10 @@ func (r *RequestHandler) ProcessResponse(resp *c8y.Response, respError error, co
 
 			// Detect view (if no filters are given)
 			if len(commonOptions.Filters.Pluck) == 0 {
-				if resp.JSON != nil && r.DataView != nil {
-					inputData := resp.JSON
+				if len(resp.Body()) > 0 && r.DataView != nil {
+					inputData := resp.JSON()
 					if dataProperty != "" {
-						subpro := resp.JSON.Get(dataProperty)
-						inputData = &subpro
+						inputData = resp.JSON(dataProperty)
 					}
 
 					switch strings.ToLower(view) {
@@ -762,7 +775,7 @@ func (r *RequestHandler) ProcessResponse(resp *c8y.Response, respError error, co
 							commonOptions.Filters.Pluck = []string{"**"}
 						}
 					case config.ViewsAuto:
-						props, err := r.DataView.GetView(inputData, resp.Header.Get("Content-Type"))
+						props, err := r.DataView.GetView(&inputData, resp.Response.Header.Get("Content-Type"))
 
 						if err != nil || len(props) == 0 {
 							if err != nil {
@@ -794,7 +807,7 @@ func (r *RequestHandler) ProcessResponse(resp *c8y.Response, respError error, co
 				r.Logger.Debugf("using existing pluck values. %v", commonOptions.Filters.Pluck)
 			}
 
-			if filterOutput, filterErr := commonOptions.Filters.Apply(*resp.JSONData, dataProperty, false, r.Console.SetHeaderFromInput); filterErr != nil {
+			if filterOutput, filterErr := commonOptions.Filters.Apply(string(resp.Body()), dataProperty, false, r.Console.SetHeaderFromInput); filterErr != nil {
 				r.Logger.Warnf("filter error. %s", filterErr)
 				responseText = filterOutput
 			} else {
@@ -804,11 +817,11 @@ func (r *RequestHandler) ProcessResponse(resp *c8y.Response, respError error, co
 			emptyArray := []byte("[]\n")
 
 			if len(responseText) == len(emptyArray) && bytes.Equal(responseText, emptyArray) {
-				r.Logger.Info("No matching results found. Empty response will be ommitted")
+				r.Logger.Info("No matching results found. Empty response will be omitted")
 				responseText = []byte{}
 			}
 		} else {
-			responseText = []byte(*resp.JSONData)
+			responseText = resp.Body()
 		}
 
 		// replace special escaped unicode sequences
@@ -846,9 +859,9 @@ func (r *RequestHandler) guessDataProperty(resp *c8y.Response) string {
 	arrayPropertes := []string{}
 	totalKeys := 0
 
-	if v := resp.JSON.Get("id"); !v.Exists() {
+	if v := resp.JSON("id"); !v.Exists() {
 		// Find the property which is an array
-		resp.JSON.ForEach(func(key, value gjson.Result) bool {
+		resp.JSON().ForEach(func(key, value gjson.Result) bool {
 			totalKeys++
 			if value.IsArray() {
 				arrayPropertes = append(arrayPropertes, key.String())
@@ -890,7 +903,7 @@ func (r *RequestHandler) saveResponseToFile(resp *c8y.Response, filename string,
 	// Support simple variable substitution to be able to set the output file name dynamically to download a collection of files
 	if strings.Contains(filename, "{") && strings.Contains(filename, "}") {
 		if strings.Contains(filename, "{filename}") {
-			if _, params, err := mime.ParseMediaType(resp.Header.Get("Content-Disposition")); err == nil {
+			if _, params, err := mime.ParseMediaType(resp.Response.Header.Get("Content-Disposition")); err == nil {
 				if name, ok := params["filename"]; ok {
 					filename = strings.ReplaceAll(filename, "{filename}", name)
 				}
@@ -898,16 +911,16 @@ func (r *RequestHandler) saveResponseToFile(resp *c8y.Response, filename string,
 		}
 
 		if strings.Contains(filename, "{basename}") {
-			if resp.Request != nil {
-				filename = strings.ReplaceAll(filename, "{basename}", path.Base(resp.Request.URL.Path))
+			if resp.Response.Request != nil {
+				filename = strings.ReplaceAll(filename, "{basename}", path.Base(resp.Response.Request.URL.Path))
 			}
 		}
 
 		if strings.Contains(filename, "{id}") {
-			if resp.Request != nil {
-				r.Logger.Infof("Request: %s", resp.Request.URL.Path)
+			if resp.Response.Request != nil {
+				r.Logger.Infof("Request: %s", resp.Response.Request.URL.Path)
 
-				urlParts := strings.Split(resp.Request.URL.Path, "/")
+				urlParts := strings.Split(resp.Response.Request.URL.Path, "/")
 				for _, part := range urlParts {
 					if part != "" && c8y.IsID(part) {
 						r.Logger.Debugf("Found id like value. Substituting {id} for %s", part)
@@ -948,8 +961,9 @@ func (r *RequestHandler) saveResponseToFile(resp *c8y.Response, filename string,
 	}
 
 	// Writer the body to file
-	r.Logger.Printf("header: %v", resp.Header)
-	_, err = io.Copy(out, resp.Body)
+	r.Logger.Printf("header: %v", resp.Header())
+	fmt.Fprintf(out, "%s", resp.Body())
+	// _, err = io.Copy(out, resp.Body())
 
 	if err != nil {
 		return "", fmt.Errorf("failed to copy file contents to file. %s", err)

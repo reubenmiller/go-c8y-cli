@@ -238,7 +238,7 @@ func (n *CmdCreateHostedApplication) RunE(cmd *cobra.Command, args []string) err
 				// handle error
 				n.SubCommand.GetCommand().PrintErrf("failed to upload file. %s", err)
 			} else {
-				applicationBinaryID = resp.JSON.Get("id").String()
+				applicationBinaryID = resp.JSON("id").String()
 			}
 		}
 	}
@@ -260,7 +260,7 @@ func (n *CmdCreateHostedApplication) RunE(cmd *cobra.Command, args []string) err
 		)
 
 		if err != nil {
-			if resp != nil && resp.StatusCode == 409 {
+			if resp != nil && resp.StatusCode() == 409 {
 				log.Infof("application is already enabled")
 			} else {
 				return fmt.Errorf("failed to activate application. %s", err)

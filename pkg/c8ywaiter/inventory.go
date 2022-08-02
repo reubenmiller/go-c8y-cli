@@ -166,9 +166,9 @@ func (s *InventoryExistance) Check(m interface{}) (done bool, err error) {
 		moID := s.ID
 
 		if result.Response != nil {
-			exists = result.Response.StatusCode >= 200 && result.Response.StatusCode <= 399
-			notFound = result.Response.StatusCode == http.StatusNotFound
-			urlParts := strings.Split(result.Response.Request.URL.Path, "/")
+			exists = result.Response.StatusCode() >= 200 && result.Response.StatusCode() <= 399
+			notFound = result.Response.StatusCode() == http.StatusNotFound
+			urlParts := strings.Split(result.Response.Response.Request.URL.Path, "/")
 			moID = urlParts[len(urlParts)-1]
 		}
 
@@ -217,7 +217,7 @@ func (s *InventoryExistance) Get() (interface{}, error) {
 		nil,
 	)
 
-	if resp != nil && resp.StatusCode == http.StatusNotFound {
+	if resp != nil && resp.StatusCode() == http.StatusNotFound {
 		// ignore not found errors, these are processed in the Check func
 		err = nil
 	}

@@ -145,7 +145,7 @@ func (l *ActivityLogger) LogCustom(message string) {
 }
 
 // LogRequest writes a http response to the activity log
-func (l *ActivityLogger) LogRequest(resp *http.Response, body *gjson.Result, responseTime int64) {
+func (l *ActivityLogger) LogRequest(resp *http.Response, body gjson.Result, responseTime int64) {
 	if l.options.Disabled {
 		return
 	}

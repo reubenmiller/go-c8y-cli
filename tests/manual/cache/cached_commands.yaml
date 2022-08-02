@@ -86,11 +86,12 @@ tests:
         - "Last-Modified:"
         - "Etag:"
 
-  It does not cache PUT or POST requests by default:
+  It can limit caching of specific methods:
     config:
       env:
         C8Y_SETTINGS_DEFAULTS_CACHE: true
         C8Y_SETTINGS_DEFAULTS_DEBUG: true
+        C8Y_SETTINGS_CACHE_METHODS: "GET"
         C8Y_SETTINGS_CACHE_PATH: /tmp/go-c8y-cli-cache-test-06
     command: |
       c8y cache delete

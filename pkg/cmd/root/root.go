@@ -233,6 +233,7 @@ func NewCmdRoot(f *cmdutil.Factory, version, buildDate string) *CmdRoot {
 	cmd.PersistentFlags().Bool("cache", false, "Enable cached responses")
 	cmd.PersistentFlags().Bool("noCache", false, "Force disabling of cached responses (overwrites cache setting)")
 	cmd.PersistentFlags().String("cacheTTL", "60s", "Cache time-to-live (TTL) as a duration, i.e. 60s, 2m")
+	cmd.PersistentFlags().StringSlice("cacheBodyPaths", []string{}, "Cache should limit hashing of selected paths in the json body. Empty indicates all values")
 
 	// ssl settings
 	cmd.PersistentFlags().BoolP("insecure", "k", false, "Allow insecure server connections when using SSL")

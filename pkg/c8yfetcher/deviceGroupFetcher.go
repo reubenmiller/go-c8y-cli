@@ -33,7 +33,7 @@ func (f *DeviceGroupFetcher) getByID(id string) ([]fetcherResultSet, error) {
 	results[0] = fetcherResultSet{
 		ID:    mo.ID,
 		Name:  mo.Name,
-		Value: *resp.JSON,
+		Value: resp.JSON(),
 	}
 	return results, nil
 }

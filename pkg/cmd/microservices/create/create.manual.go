@@ -293,7 +293,7 @@ func (n *CmdCreate) RunE(cmd *cobra.Command, args []string) error {
 			_, resp, err := client.Tenant.AddApplicationReference(context.Background(), client.TenantName, application.Self)
 
 			if err != nil {
-				if resp != nil && resp.StatusCode == 409 {
+				if resp != nil && resp.StatusCode() == 409 {
 					log.Infof("microservice is already enabled")
 				} else {
 					return fmt.Errorf("Failed to subscribe to application. %s", err)

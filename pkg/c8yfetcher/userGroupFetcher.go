@@ -31,7 +31,7 @@ func (f *UserGroupFetcher) getByID(id string) ([]fetcherResultSet, error) {
 	results[0] = fetcherResultSet{
 		ID:    group.GetID(),
 		Name:  group.Name,
-		Value: *resp.JSON,
+		Value: resp.JSON(),
 	}
 	return results, nil
 }

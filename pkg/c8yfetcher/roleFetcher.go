@@ -45,7 +45,7 @@ func (f *RoleFetcher) getByID(id string) ([]fetcherResultSet, error) {
 		ID:    role.ID,
 		Name:  role.Name,
 		Self:  role.Self,
-		Value: *resp.JSON,
+		Value: resp.JSON(),
 	}
 	return results, nil
 }
