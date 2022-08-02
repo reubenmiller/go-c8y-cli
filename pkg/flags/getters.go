@@ -370,10 +370,11 @@ func WithCustomStringValue(transform func([]byte) []byte, targetFunc func() stri
 		}
 
 		if inputIterators != nil && inputIterators.PipeOptions != nil {
-			if transform != nil {
-				inputIterators.PipeOptions.Formatter = transform
-			}
 			if inputIterators.PipeOptions.Name == src {
+				if transform != nil {
+					inputIterators.PipeOptions.Formatter = transform
+				}
+
 				if dst != "" {
 					inputIterators.PipeOptions.Property = dst
 				}
