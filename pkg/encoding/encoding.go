@@ -75,6 +75,6 @@ func UTF16Bom(b []byte) int8 {
 	return 0
 }
 
-func IsUTF16(s string) bool {
+func IsUTF16(s []byte) bool {
 	return len(s) >= 2 && ((s[0] == 0xFE && s[1] == 0xFF) || (s[0] == 0xFF && s[1] == 0xFE)) && len(s)%2 == 0
 }

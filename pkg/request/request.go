@@ -96,6 +96,9 @@ func (r *RequestHandler) ProcessRequestAndResponse(requests []c8y.RequestOptions
 		})
 	defer cancel()
 	start := time.Now()
+
+	outData := make(map[string]interface{})
+	req.ResponseData = &outData
 	resp, err := r.Client.SendRequest(
 		ctx,
 		req,
@@ -639,7 +642,7 @@ func optimizeManagedObjectsURL(u *url.URL, lastID string) *url.URL {
 func (r *RequestHandler) ProcessResponse(resp *c8y.Response, respError error, commonOptions config.CommonCommandOptions) (int, error) {
 	if resp != nil && resp.StatusCode() != 0 {
 		r.Logger.Infof("Response Content-Type: %s", resp.Response.Header.Get("Content-Type"))
-		r.Logger.Debugf("Response Headers: %v", resp.Header)
+		r.Logger.Debugf("Response Headers: %v", resp.Header())
 	}
 
 	// Display log output in special scenarios (i.e. Delete and no Accept header), so the user gets some feedback that it did something
@@ -686,20 +689,26 @@ func (r *RequestHandler) ProcessResponse(resp *c8y.Response, respError error, co
 	if resp != nil && respError == nil && (r.Config.IsResponseOutput() || resp.Response.Header.Get("Content-Type") == "application/octet-stream") && len(resp.Body()) > 0 {
 		// estimate size based on utf8 encoding. 1 char is 1 byte
 		r.Logger.Debugf("Writing https response output")
-		r.Logger.Infof("Response Length: %0.1fKB", float64(len(resp.String())/1024))
+
+		if resp.Response.ContentLength > -1 {
+			r.Logger.Infof("Response Length: %0.1fKB", float64(resp.Response.ContentLength)/1024)
+		} else {
+			r.Logger.Infof("Response Length: %0.1fKB", float64(len(resp.Body()))/1024)
+		}
+
 		outputEOL := ""
 		if r.IsTerminal {
 			outputEOL = "\n"
 		}
 		out := r.IO.Out
-		if encoding.IsUTF16(resp.String()) {
-			if utf8, err := encoding.DecodeUTF16([]byte(resp.String())); err == nil {
+		if encoding.IsUTF16(resp.Body()) {
+			if utf8, err := encoding.DecodeUTF16(resp.Body()); err == nil {
 				fmt.Fprintf(out, "%s", utf8)
 			} else {
-				fmt.Fprintf(out, "%s", resp.String())
+				fmt.Fprintf(out, "%s", resp.Body())
 			}
 		} else {
-			fmt.Fprintf(out, "%s", resp.String())
+			fmt.Fprintf(out, "%s", resp.Body())
 		}
 		if outputEOL != "" {
 			fmt.Fprint(out, outputEOL)
@@ -715,7 +724,11 @@ func (r *RequestHandler) ProcessResponse(resp *c8y.Response, respError error, co
 
 	if resp != nil && len(resp.Body()) > 0 {
 		// estimate size based on utf8 encoding. 1 char is 1 byte
-		r.Logger.Printf("Response Length: %0.1fKB", float64(len(resp.Body()))/1024)
+		if resp.Response.ContentLength > -1 {
+			r.Logger.Infof("Response Length: %0.1fKB", float64(resp.Response.ContentLength)/1024)
+		} else {
+			r.Logger.Infof("Response Length: %0.1fKB", float64(len(resp.Body()))/1024)
+		}
 
 		var responseText []byte
 		isJSONResponse := jsonUtilities.IsValidJSON(resp.Body())
@@ -751,8 +764,7 @@ func (r *RequestHandler) ProcessResponse(resp *c8y.Response, respError error, co
 				if len(resp.Body()) > 0 && r.DataView != nil {
 					inputData := resp.JSON()
 					if dataProperty != "" {
-						subpro := resp.JSON(dataProperty)
-						inputData = subpro
+						inputData = resp.JSON(dataProperty)
 					}
 
 					switch strings.ToLower(view) {
@@ -794,7 +806,7 @@ func (r *RequestHandler) ProcessResponse(resp *c8y.Response, respError error, co
 				r.Logger.Debugf("using existing pluck values. %v", commonOptions.Filters.Pluck)
 			}
 
-			if filterOutput, filterErr := commonOptions.Filters.Apply(resp.String(), dataProperty, false, r.Console.SetHeaderFromInput); filterErr != nil {
+			if filterOutput, filterErr := commonOptions.Filters.Apply(string(resp.Body()), dataProperty, false, r.Console.SetHeaderFromInput); filterErr != nil {
 				r.Logger.Warnf("filter error. %s", filterErr)
 				responseText = filterOutput
 			} else {
@@ -804,7 +816,7 @@ func (r *RequestHandler) ProcessResponse(resp *c8y.Response, respError error, co
 			emptyArray := []byte("[]\n")
 
 			if len(responseText) == len(emptyArray) && bytes.Equal(responseText, emptyArray) {
-				r.Logger.Info("No matching results found. Empty response will be ommitted")
+				r.Logger.Info("No matching results found. Empty response will be omitted")
 				responseText = []byte{}
 			}
 		} else {
@@ -948,8 +960,9 @@ func (r *RequestHandler) saveResponseToFile(resp *c8y.Response, filename string,
 	}
 
 	// Writer the body to file
-	r.Logger.Printf("header: %v", resp.Header)
-	_, err = io.Copy(out, resp.RawBody())
+	r.Logger.Printf("header: %v", resp.Header())
+	fmt.Fprintf(out, "%s", resp.Body())
+	// _, err = io.Copy(out, resp.Body())
 
 	if err != nil {
 		return "", fmt.Errorf("failed to copy file contents to file. %s", err)
