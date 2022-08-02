@@ -56,6 +56,7 @@ import (
 	identityCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/identity"
 	inventoryCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/inventory"
 	inventoryAdditionsCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/inventory/additions"
+	inventoryAdditionsFindCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/inventory/additions/find"
 	inventoryAssertCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/inventory/assert"
 	inventoryAssetsCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/inventory/assets"
 	inventoryFindCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/inventory/find"
@@ -349,7 +350,11 @@ func NewCmdRoot(f *cmdutil.Factory, version, buildDate string) *CmdRoot {
 	inventory := inventoryCmd.NewSubCommand(f).GetCommand()
 	inventory.AddCommand(inventoryFindCmd.NewCmdFind(f).GetCommand())
 	inventory.AddCommand(inventorySubscribeCmd.NewCmdSubscribe(f).GetCommand())
-	inventory.AddCommand(inventoryAdditionsCmd.NewSubCommand(f).GetCommand())
+
+	childAdditions := inventoryAdditionsCmd.NewSubCommand(f).GetCommand()
+	childAdditions.AddCommand(inventoryAdditionsFindCmd.NewCmdFind(f).GetCommand())
+
+	inventory.AddCommand(childAdditions)
 	inventory.AddCommand(inventoryAssetsCmd.NewSubCommand(f).GetCommand())
 	inventory.AddCommand(inventoryWaitCmd.NewCmdWait(f).GetCommand())
 	inventory.AddCommand(inventoryAssertCmd.NewSubCommand(f).GetCommand())
