@@ -97,6 +97,7 @@ func (r *RequestHandler) ProcessRequestAndResponse(requests []c8y.RequestOptions
 	defer cancel()
 	start := time.Now()
 
+	// TODO: Check if this is required
 	outData := make(map[string]interface{})
 	req.ResponseData = &outData
 	resp, err := r.Client.SendRequest(
