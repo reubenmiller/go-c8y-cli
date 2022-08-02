@@ -33,14 +33,14 @@ func NewCmdFind(f *cmdutil.Factory) *CmdFind {
 
 	cmd := &cobra.Command{
 		Use:   "find",
-		Short: "Find child additions",
-		Long:  `Retrieve all child additions of a specific managed object by a given ID, or a subset based on queries.`,
+		Short: "Find child assets",
+		Long:  `Retrieve all child assets of a specific managed object by a given ID, or a subset based on queries.`,
 		Example: heredoc.Doc(`
-			$ c8y inventory additions find --id 12345 --query "name eq 'roomUpperFloor_*'"
-			Find child additions matching a specific name
+			$ c8y inventory assets find --id 12345 --query "name eq 'roomUpperFloor_*'"
+			Find child assets matching a specific name
 
-			$ c8y inventory list | c8y inventory additions find --query "name eq 'roomUpperFloor_*'"
-			Pipe a list of inventory items and find any child additions matching some criteria
+			$ c8y inventory list | c8y inventory assets find --query "name eq 'roomUpperFloor_*'"
+			Pipe a list of inventory items and find any child assets matching some criteria
 		`),
 		RunE: ccmd.RunE,
 	}
@@ -146,7 +146,7 @@ func (n *CmdFind) RunE(cmd *cobra.Command, args []string) error {
 	body := mapbuilder.NewInitializedMapBuilder(false)
 
 	// path parameters
-	path := flags.NewStringTemplate("inventory/managedObjects/{id}/childAdditions")
+	path := flags.NewStringTemplate("inventory/managedObjects/{id}/childAssets")
 	err = flags.WithPathParameters(
 		cmd,
 		path,
