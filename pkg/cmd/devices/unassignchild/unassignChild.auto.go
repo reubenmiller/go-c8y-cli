@@ -30,9 +30,12 @@ func NewUnassignChildCmd(f *cmdutil.Factory) *UnassignChildCmd {
 		factory: f,
 	}
 	cmd := &cobra.Command{
-		Use:   "unassignChild",
-		Short: "Delete child device reference",
-		Long:  `Delete child device reference`,
+		Use:        "unassignChild",
+		Short:      "Delete child device reference",
+		Long:       `Delete child device reference`,
+		Deprecated: "please use 'c8y devices children unassign' instead",
+		Hidden:     true,
+
 		Example: heredoc.Doc(`
 $ c8y devices unassignChild --device 12345 --childDevice 22553
 Unassign a child device from its parent device

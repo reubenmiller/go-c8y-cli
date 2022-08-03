@@ -1,5 +1,5 @@
 // Code generated from specification version 1.0.0: DO NOT EDIT
-package getchild
+package list
 
 import (
 	"fmt"
@@ -18,28 +18,25 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// GetChildCmd command
-type GetChildCmd struct {
+// ListCmd command
+type ListCmd struct {
 	*subcommand.SubCommand
 
 	factory *cmdutil.Factory
 }
 
-// NewGetChildCmd creates a command to Get child device reference
-func NewGetChildCmd(f *cmdutil.Factory) *GetChildCmd {
-	ccmd := &GetChildCmd{
+// NewListCmd creates a command to Get child device collection
+func NewListCmd(f *cmdutil.Factory) *ListCmd {
+	ccmd := &ListCmd{
 		factory: f,
 	}
 	cmd := &cobra.Command{
-		Use:        "getChild",
-		Short:      "Get child device reference",
-		Long:       `Get managed object child device reference`,
-		Deprecated: "please use 'c8y devices children get' instead",
-		Hidden:     true,
-
+		Use:   "list",
+		Short: "Get child device collection",
+		Long:  `Get a collection of managedObjects child references`,
 		Example: heredoc.Doc(`
-$ c8y devices getChild --device 12345 --reference 12345
-Get an existing child device reference
+$ c8y devices children list --device 12345
+Get a list of the child devices of an existing device
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
 			return nil
@@ -49,23 +46,22 @@ Get an existing child device reference
 
 	cmd.SilenceUsage = true
 
-	cmd.Flags().StringSlice("device", []string{""}, "ManagedObject id (required) (accepts pipeline)")
-	cmd.Flags().StringSlice("reference", []string{""}, "Device reference id (required)")
+	cmd.Flags().StringSlice("device", []string{""}, "Device. (required) (accepts pipeline)")
+	cmd.Flags().Bool("withChildren", false, "Determines if children with ID and name should be returned when fetching the managed object. Set it to false to improve query performance.")
 
 	completion.WithOptions(
 		cmd,
 		completion.WithDevice("device", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
-		completion.WithDevice("reference", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
 	)
 
 	flags.WithOptions(
 		cmd,
 
 		flags.WithExtendedPipelineSupport("device", "device", true, "deviceId", "source.id", "managedObject.id", "id"),
+		flags.WithCollectionProperty("references.#.managedObject"),
 	)
 
 	// Required flags
-	_ = cmd.MarkFlagRequired("reference")
 
 	ccmd.SubCommand = subcommand.NewSubCommand(cmd)
 
@@ -73,7 +69,7 @@ Get an existing child device reference
 }
 
 // RunE executes the command
-func (n *GetChildCmd) RunE(cmd *cobra.Command, args []string) error {
+func (n *ListCmd) RunE(cmd *cobra.Command, args []string) error {
 	cfg, err := n.factory.Config()
 	if err != nil {
 		return err
@@ -145,13 +141,13 @@ func (n *GetChildCmd) RunE(cmd *cobra.Command, args []string) error {
 	}
 
 	// path parameters
-	path := flags.NewStringTemplate("inventory/managedObjects/{device}/childDevices/{reference}")
+	path := flags.NewStringTemplate("inventory/managedObjects/{device}/childDevices")
 	err = flags.WithPathParameters(
 		cmd,
 		path,
 		inputIterators,
 		c8yfetcher.WithDeviceByNameFirstMatch(client, args, "device", "device"),
-		c8yfetcher.WithDeviceByNameFirstMatch(client, args, "reference", "reference"),
+		flags.WithBoolValue("withChildren", "withChildren", ""),
 	)
 	if err != nil {
 		return err

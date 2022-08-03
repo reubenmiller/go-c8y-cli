@@ -8,10 +8,10 @@ Get child device reference
 Get managed object child device reference
 
 .LINK
-https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/devices_getChild
+https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/devices_children_get
 
 .EXAMPLE
-PS> Get-ChildDeviceReference -Device $Agent.id -Reference $Ref.id
+PS> Get-ChildDeviceReference -Device $Agent.id -Child $Ref.id
 
 Get an existing child device reference
 
@@ -29,10 +29,10 @@ Get an existing child device reference
         [object[]]
         $Device,
 
-        # Device reference id (required)
+        # Child device id (required)
         [Parameter(Mandatory = $true)]
         [object[]]
-        $Reference
+        $Child
     )
     DynamicParam {
         Get-ClientCommonParameters -Type "Get"
@@ -45,7 +45,7 @@ Get an existing child device reference
             Use-CallerPreference -Cmdlet $PSCmdlet -SessionState $ExecutionContext.SessionState
         }
 
-        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "devices getChild"
+        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "devices children get"
         $ClientOptions = Get-ClientOutputOption $PSBoundParameters
         $TypeOptions = @{
             Type = "application/vnd.com.nsn.cumulocity.managedObjectReference+json"
@@ -59,13 +59,13 @@ Get an existing child device reference
         if ($ClientOptions.ConvertToPS) {
             $Device `
             | Group-ClientRequests `
-            | c8y devices getChild $c8yargs `
+            | c8y devices children get $c8yargs `
             | ConvertFrom-ClientOutput @TypeOptions
         }
         else {
             $Device `
             | Group-ClientRequests `
-            | c8y devices getChild $c8yargs
+            | c8y devices children get $c8yargs
         }
         
     }

@@ -1,8 +1,7 @@
 // Code generated from specification version 1.0.0: DO NOT EDIT
-package getchild
+package assign
 
 import (
-	"fmt"
 	"io"
 	"net/http"
 
@@ -18,54 +17,53 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// GetChildCmd command
-type GetChildCmd struct {
+// AssignCmd command
+type AssignCmd struct {
 	*subcommand.SubCommand
 
 	factory *cmdutil.Factory
 }
 
-// NewGetChildCmd creates a command to Get child device reference
-func NewGetChildCmd(f *cmdutil.Factory) *GetChildCmd {
-	ccmd := &GetChildCmd{
+// NewAssignCmd creates a command to Assign child device
+func NewAssignCmd(f *cmdutil.Factory) *AssignCmd {
+	ccmd := &AssignCmd{
 		factory: f,
 	}
 	cmd := &cobra.Command{
-		Use:        "getChild",
-		Short:      "Get child device reference",
-		Long:       `Get managed object child device reference`,
-		Deprecated: "please use 'c8y devices children get' instead",
-		Hidden:     true,
-
+		Use:   "assign",
+		Short: "Assign child device",
+		Long:  `Create a child device reference`,
 		Example: heredoc.Doc(`
-$ c8y devices getChild --device 12345 --reference 12345
-Get an existing child device reference
+$ c8y devices children assign --device 12345 --child 44235
+Assign a device as a child device to an existing device
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
-			return nil
+			return f.CreateModeEnabled()
 		},
 		RunE: ccmd.RunE,
 	}
 
 	cmd.SilenceUsage = true
 
-	cmd.Flags().StringSlice("device", []string{""}, "ManagedObject id (required) (accepts pipeline)")
-	cmd.Flags().StringSlice("reference", []string{""}, "Device reference id (required)")
+	cmd.Flags().StringSlice("device", []string{""}, "Device. (required)")
+	cmd.Flags().StringSlice("child", []string{""}, "New child device (required) (accepts pipeline)")
 
 	completion.WithOptions(
 		cmd,
 		completion.WithDevice("device", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
-		completion.WithDevice("reference", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
+		completion.WithDevice("child", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
 	)
 
 	flags.WithOptions(
 		cmd,
+		flags.WithProcessingMode(),
 
-		flags.WithExtendedPipelineSupport("device", "device", true, "deviceId", "source.id", "managedObject.id", "id"),
+		flags.WithExtendedPipelineSupport("child", "managedObject.id", true, "deviceId", "source.id", "managedObject.id", "id"),
+		flags.WithCollectionProperty("managedObject"),
 	)
 
 	// Required flags
-	_ = cmd.MarkFlagRequired("reference")
+	_ = cmd.MarkFlagRequired("device")
 
 	ccmd.SubCommand = subcommand.NewSubCommand(cmd)
 
@@ -73,7 +71,7 @@ Get an existing child device reference
 }
 
 // RunE executes the command
-func (n *GetChildCmd) RunE(cmd *cobra.Command, args []string) error {
+func (n *AssignCmd) RunE(cmd *cobra.Command, args []string) error {
 	cfg, err := n.factory.Config()
 	if err != nil {
 		return err
@@ -98,11 +96,6 @@ func (n *GetChildCmd) RunE(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return cmderrors.NewUserError(err)
 	}
-	commonOptions, err := cfg.GetOutputCommonOptions(cmd)
-	if err != nil {
-		return cmderrors.NewUserError(fmt.Sprintf("Failed to get common options. err=%s", err))
-	}
-	commonOptions.AddQueryParameters(query)
 
 	queryValue, err := query.GetQueryUnescape(true)
 
@@ -117,6 +110,7 @@ func (n *GetChildCmd) RunE(cmd *cobra.Command, args []string) error {
 		headers,
 		inputIterators,
 		flags.WithCustomStringSlice(func() ([]string, error) { return cfg.GetHeader(), nil }, "header"),
+		flags.WithProcessingModeValue(),
 	)
 	if err != nil {
 		return cmderrors.NewUserError(err)
@@ -134,31 +128,34 @@ func (n *GetChildCmd) RunE(cmd *cobra.Command, args []string) error {
 	}
 
 	// body
-	body := mapbuilder.NewInitializedMapBuilder(false)
+	body := mapbuilder.NewInitializedMapBuilder(true)
 	err = flags.WithBody(
 		cmd,
 		body,
 		inputIterators,
+		flags.WithDataFlagValue(),
+		c8yfetcher.WithDeviceByNameFirstMatch(client, args, "child", "managedObject.id"),
+		cmdutil.WithTemplateValue(cfg),
+		flags.WithTemplateVariablesValue(),
 	)
 	if err != nil {
 		return cmderrors.NewUserError(err)
 	}
 
 	// path parameters
-	path := flags.NewStringTemplate("inventory/managedObjects/{device}/childDevices/{reference}")
+	path := flags.NewStringTemplate("inventory/managedObjects/{device}/childDevices")
 	err = flags.WithPathParameters(
 		cmd,
 		path,
 		inputIterators,
 		c8yfetcher.WithDeviceByNameFirstMatch(client, args, "device", "device"),
-		c8yfetcher.WithDeviceByNameFirstMatch(client, args, "reference", "reference"),
 	)
 	if err != nil {
 		return err
 	}
 
 	req := c8y.RequestOptions{
-		Method:       "GET",
+		Method:       "POST",
 		Path:         path.GetTemplate(),
 		Query:        queryValue,
 		Body:         body,

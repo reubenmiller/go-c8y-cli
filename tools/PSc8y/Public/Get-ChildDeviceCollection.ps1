@@ -8,7 +8,7 @@ Get child device collection
 Get a collection of managedObjects child references
 
 .LINK
-https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/devices_listChildren
+https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/devices_children_list
 
 .EXAMPLE
 PS> Get-ChildDeviceCollection -Device $Device.id
@@ -50,7 +50,7 @@ Get a list of the child devices of an existing device (using pipeline)
             Use-CallerPreference -Cmdlet $PSCmdlet -SessionState $ExecutionContext.SessionState
         }
 
-        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "devices listChildren"
+        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "devices children list"
         $ClientOptions = Get-ClientOutputOption $PSBoundParameters
         $TypeOptions = @{
             Type = "application/vnd.com.nsn.cumulocity.managedObjectReferenceCollection+json"
@@ -64,13 +64,13 @@ Get a list of the child devices of an existing device (using pipeline)
         if ($ClientOptions.ConvertToPS) {
             $Device `
             | Group-ClientRequests `
-            | c8y devices listChildren $c8yargs `
+            | c8y devices children list $c8yargs `
             | ConvertFrom-ClientOutput @TypeOptions
         }
         else {
             $Device `
             | Group-ClientRequests `
-            | c8y devices listChildren $c8yargs
+            | c8y devices children list $c8yargs
         }
         
     }
