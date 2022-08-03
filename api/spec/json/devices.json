@@ -413,6 +413,9 @@
     },
     {
       "name": "newManagedObjectChildDevice",
+      "hidden": true,
+      "deprecated": "please use 'c8y devices children assign' instead",
+      "deprecatedAt": "2022-08-03",
       "method": "POST",
       "path": "inventory/managedObjects/{device}/childDevices",
       "accept": "application/vnd.com.nsn.cumulocity.managedObjectReference+json",
@@ -479,6 +482,9 @@
     },
     {
       "name": "deleteManagedObjectChildDeviceReference",
+      "hidden": true,
+      "deprecated": "please use 'c8y devices children unassign' instead",
+      "deprecatedAt": "2022-08-03",
       "description": "Delete child device reference",
       "descriptionLong": "Delete child device reference",
       "method": "DELETE",
@@ -529,6 +535,9 @@
     },
     {
       "name": "getManagedObjectChildDeviceCollection",
+      "hidden": true,
+      "deprecated": "please use 'c8y devices children list' instead",
+      "deprecatedAt": "2022-08-03",
       "method": "GET",
       "description": "Get child device collection",
       "descriptionLong": "Get a collection of managedObjects child references",
@@ -593,6 +602,9 @@
     },
     {
       "name": "getManagedObjectChildDeviceReference",
+      "hidden": true,
+      "deprecated": "please use 'c8y devices children get' instead",
+      "deprecatedAt": "2022-08-03",
       "description": "Get child device reference",
       "descriptionLong": "Get managed object child device reference",
       "method": "GET",
@@ -643,6 +655,9 @@
     },
     {
       "name": "listChildAssetCollection",
+      "hidden": true,
+      "deprecated": "please use 'c8y devices assets list' instead",
+      "deprecatedAt": "2022-08-03",
       "method": "GET",
       "description": "Get child asset collection",
       "descriptionLong": "Get a collection of managedObjects child references",

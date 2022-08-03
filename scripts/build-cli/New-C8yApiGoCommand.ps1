@@ -38,6 +38,19 @@
     $RESTPath = $Specification.path -replace " ", "%20"
     $RESTMethod = $Specification.method
 
+    $CommandOptions = New-Object System.Text.StringBuilder
+
+    if ($Specification.deprecated) {
+        $CommandOptions.AppendLine("`t`tDeprecated: `"$($Specification.deprecated)`",")
+    }
+    if ($Specification.hidden) {
+        $CommandOptions.AppendLine("`t`tHidden: true,")
+    }
+
+    if ($CommandOptions.Length -gt 0) {
+        $CommandOptions.Insert(0, "`n")
+    }
+
     #
     # Arguments
     #
@@ -461,7 +474,7 @@ func New${NameCamel}Cmd(f *cmdutil.Factory) *${NameCamel}Cmd {
 	cmd := &cobra.Command{
 		Use:   "$Use",
 		Short: "$Description",
-		Long:  ``$DescriptionLong``,
+		Long:  ``$DescriptionLong``,$CommandOptions
         Example: heredoc.Doc(``
 $($Examples -join "`n`n")
         ``),

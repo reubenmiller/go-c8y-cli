@@ -1,3 +1,4 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/reubenmiller/go-c8y-cli/v2/api/spec/schema.json
 ---
 information:
   name: devices
@@ -305,7 +306,11 @@ endpoints:
         required: true
         description: Device ID
 
+  # Deprecated commands. TODO: Remove in >=2.20.0
   - name: newManagedObjectChildDevice
+    hidden: true
+    deprecated: "please use 'c8y devices children assign' instead"
+    deprecatedAt: "2022-08-03"
     method: POST
     path: inventory/managedObjects/{device}/childDevices
     accept: application/vnd.com.nsn.cumulocity.managedObjectReference+json
@@ -354,6 +359,9 @@ endpoints:
 
 
   - name: deleteManagedObjectChildDeviceReference
+    hidden: true
+    deprecated: "please use 'c8y devices children unassign' instead"
+    deprecatedAt: "2022-08-03"
     description: Delete child device reference
     descriptionLong: Delete child device reference
     method: DELETE
@@ -390,6 +398,9 @@ endpoints:
         description: Child device reference
 
   - name: getManagedObjectChildDeviceCollection
+    hidden: true
+    deprecated: "please use 'c8y devices children list' instead"
+    deprecatedAt: "2022-08-03"
     method: GET
     description: Get child device collection
     descriptionLong: Get a collection of managedObjects child references
@@ -437,6 +448,9 @@ endpoints:
         description: Determines if children with ID and name should be returned when fetching the managed object. Set it to false to improve query performance.
 
   - name: getManagedObjectChildDeviceReference
+    hidden: true
+    deprecated: "please use 'c8y devices children get' instead"
+    deprecatedAt: "2022-08-03"
     description: Get child device reference
     descriptionLong: Get managed object child device reference
     method: GET
@@ -472,6 +486,9 @@ endpoints:
         description: Device reference id
 
   - name: listChildAssetCollection
+    hidden: true
+    deprecated: "please use 'c8y devices assets list' instead"
+    deprecatedAt: "2022-08-03"
     method: GET
     description: Get child asset collection
     descriptionLong: Get a collection of managedObjects child references

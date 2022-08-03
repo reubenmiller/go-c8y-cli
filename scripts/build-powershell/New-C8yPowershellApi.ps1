@@ -31,6 +31,12 @@
                     Write-Verbose ("Skipping [{0}]" -f $iSpec.name)
                     continue
                 }
+
+                if ($iSpec.hidden) {
+                    Write-Verbose ("Skipping hidden command [{0}]" -f $iSpec.name)
+                    continue
+                }
+
                 New-C8yApiPowershellCommand `
                     -Specification:$iSpec `
                     -Noun $Specification.information.name `
