@@ -2,6 +2,66 @@
   "$schema": "http://json-schema.org/draft-04/schema#",
   "type": "object",
   "definitions": {
+    "parameterDefinition": {
+      "type": "object",
+      "title": "Parameter definition",
+      "properties": {
+        "name": {
+          "$ref": "#/definitions/argumentName"
+        },
+        "type": {
+          "$ref": "#/definitions/cliArgumentType"
+        },
+        "property": {
+          "type": "string"
+        },
+        "children": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/parameterDefinition"
+          }
+        },
+        "pipeline": {
+          "type": "boolean"
+        },
+        "pipelineAliases": {
+          "$ref": "#/definitions/pipelineAliases"
+        },
+        "description": {
+          "type": "string"
+        },
+        "format": {
+          "type": "string"
+        },
+        "required": {
+          "$ref": "#/definitions/requiredParameter"
+        },
+        "hidden": {
+          "$ref": "#/definitions/hiddenParameter"
+        },
+        "position": {
+          "$ref": "#/definitions/argumentPosition"
+        },
+        "validationSet": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string"
+          }
+        },
+        "dependsOn": {
+          "$ref": "#/definitions/dependsOn"
+        },
+        "skip": {
+          "$ref": "#/definitions/skipParameter"
+        }
+      },
+      "required": [
+        "name",
+        "type",
+        "description"
+      ]
+    },
     "outputAssertion": {
       "type": "object",
       "properties": {
@@ -101,6 +161,7 @@
         "json_custom",
         "microservice",
         "microserviceinstance",
+        "queryExpression",
         "string",
         "source",
         "tenant",
@@ -232,7 +293,7 @@
           "deprecatedAt": {
             "type": "string",
             "title": "Deprecated At",
-            "format": "date-time",
+            "format": "date",
             "description": "Date when the command was deprecated"
           },
           "hidden": {
@@ -390,54 +451,7 @@
             "type": "array",
             "minItems": 1,
             "items": {
-              "type": "object",
-              "properties": {
-                "name": {
-                  "$ref": "#/definitions/argumentName"
-                },
-                "type": {
-                  "$ref": "#/definitions/cliArgumentType"
-                },
-                "property": {
-                  "type": "string"
-                },
-                "pipeline": {
-                  "type": "boolean"
-                },
-                "pipelineAliases": {
-                  "$ref": "#/definitions/pipelineAliases"
-                },
-                "description": {
-                  "type": "string"
-                },
-                "required": {
-                  "$ref": "#/definitions/requiredParameter"
-                },
-                "hidden": {
-                  "$ref": "#/definitions/hiddenParameter"
-                },
-                "position": {
-                  "$ref": "#/definitions/argumentPosition"
-                },
-                "validationSet": {
-                  "type": "array",
-                  "minItems": 1,
-                  "items": {
-                    "type": "string"
-                  }
-                },
-                "dependsOn": {
-                  "$ref": "#/definitions/dependsOn"
-                },
-                "skip": {
-                  "$ref": "#/definitions/skipParameter"
-                }
-              },
-              "required": [
-                "name",
-                "type",
-                "description"
-              ]
+              "$ref": "#/definitions/parameterDefinition"
             }
           },
           "pathParameters": {

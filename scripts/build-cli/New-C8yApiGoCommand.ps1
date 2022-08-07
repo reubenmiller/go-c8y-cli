@@ -63,7 +63,14 @@
 
     # Query parameters
     if ($Specification.queryParameters) {
-        $null = $ArgumentSources.AddRange(([array]$Specification.queryParameters))
+        foreach ($item in $Specification.queryParameters) {
+            if ($item.children) {
+                # Ignore the item, and only use the children to build the cli arguments
+                $ArgumentSources.AddRange(([array]$item.children))
+            } else {
+                $ArgumentSources.Add($item)
+            }
+        }
     }
 
     # Body parameters
@@ -355,12 +362,35 @@
     # Query parameters
     #
     $RESTQueryBuilderWithValues = New-Object System.Text.StringBuilder
+    $CumulocityQueryExpressionBuilder = New-Object System.Text.StringBuilder
     $RESTQueryBuilderPost = New-Object System.Text.StringBuilder
+
     if ($Specification.queryParameters) {
+        # TODO: Handle special case of an item with .children
         foreach ($Properties in (Remove-SkippedParameters $Specification.queryParameters)) {
-            $code = New-C8yApiGoGetValueFromFlag -Parameters $Properties -SetterType "query"
-            if ($code) {
-                $null = $RESTQueryBuilderWithValues.AppendLine($code)
+
+            if ($Properties.type -eq "queryExpression" -and $Properties.children) {
+
+                $null = $CumulocityQueryExpressionBuilder.AppendLine("		flags.WithCumulocityQuery(")
+                $null = $CumulocityQueryExpressionBuilder.AppendLine("			[]flags.GetOption{")
+                
+                foreach ($child in $Properties.children) {
+
+                    # Special case to handle Cumulocity query language builder
+                    $code = New-C8yApiGoGetValueFromFlag -Parameters $child -SetterType "query"
+                    if ($code) {
+                        $null = $CumulocityQueryExpressionBuilder.AppendLine($code)
+                    }
+                }
+                $null = $CumulocityQueryExpressionBuilder.AppendLine("			},")
+                $null = $CumulocityQueryExpressionBuilder.AppendLine("			`"$($Properties.property || $Properties.name)`",")
+                $null = $CumulocityQueryExpressionBuilder.AppendLine("		),")
+
+            } else {
+                $code = New-C8yApiGoGetValueFromFlag -Parameters $Properties -SetterType "query"
+                if ($code) {
+                    $null = $RESTQueryBuilderWithValues.AppendLine($code)
+                }
             }
         }
     }
@@ -552,6 +582,7 @@ func (n *${NameCamel}Cmd) RunE(cmd *cobra.Command, args []string) error {
         inputIterators,
         flags.WithCustomStringSlice(func() ([]string, error) { return cfg.GetQueryParameters(), nil }, "custom"),
         $RESTQueryBuilderWithValues
+        $CumulocityQueryExpressionBuilder
     )
     if err != nil {
 		return cmderrors.NewUserError(err)

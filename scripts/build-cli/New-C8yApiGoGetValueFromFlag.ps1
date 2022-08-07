@@ -23,6 +23,12 @@
 
     $FixedValue = $Parameters.value
 
+    $FormatValue = ""
+
+    if ($Parameters.format) {
+        $FormatValue = ", `"{0}`"" -f $Parameters.format
+    }
+
     $Definitions = @{
         # file (used in multipart/form-data uploads). It writes to the formData object instead of the body
         "file" = "flags.WithFormDataFileAndInfoWithTemplateSupport(cmdutil.NewTemplateResolver(cfg), `"${prop}`", `"data`")...,"
@@ -43,10 +49,10 @@
         "optional_fragment" = "flags.WithOptionalFragment(`"${prop}`", `"${queryParam}`", `"$FixedValue`"),"
 
         # relative datetime
-        "datetime" = "flags.WithRelativeTimestamp(`"${prop}`", `"${queryParam}`", `"$FixedValue`"),"
+        "datetime" = "flags.WithRelativeTimestamp(`"${prop}`", `"${queryParam}`"$FormatValue),"
 
         # relative date
-        "date" = "flags.WithRelativeDate(false, `"${prop}`", `"${queryParam}`", `"$FixedValue`"),"
+        "date" = "flags.WithRelativeDate(false, `"${prop}`", `"${queryParam}`"$FormatValue),"
 
         # string array/slice
         "[]string" = "flags.WithStringSliceValues(`"${prop}`", `"${queryParam}`", `"$FixedValue`"),"
@@ -55,7 +61,7 @@
         "[]stringcsv" = "flags.WithStringSliceCSV(`"${prop}`", `"${queryParam}`", `"$FixedValue`"),"
     
         # string
-        "string" = "flags.WithStringValue(`"${prop}`", `"${queryParam}`"),"
+        "string" = "flags.WithStringValue(`"${prop}`", `"${queryParam}`"$FormatValue),"
 
         # source (special value as powershell need to treat this field as an object)
         "source" = "flags.WithStringValue(`"${prop}`", `"${queryParam}`"),"
@@ -160,7 +166,7 @@
 
 
         # devicegroup array
-        "[]devicegroup" = "c8yfetcher.WithDeviceGroupByNameFirstMatch(client, args, `"${prop}`", `"${queryParam}`"),"
+        "[]devicegroup" = "c8yfetcher.WithDeviceGroupByNameFirstMatch(client, args, `"${prop}`", `"${queryParam}`"$FormatValue),"
         
         # smartgroup array
         "[]smartgroup" = "c8yfetcher.WithSmartGroupByNameFirstMatch(client, args, `"${prop}`", `"${queryParam}`"),"
@@ -193,7 +199,7 @@
 
     # Special type: encoded relative datetime when used as a query parameter
     if ($MatchingType -eq "datetime" -and $SetterType -eq "query") {
-        "flags.WithEncodedRelativeTimestamp(`"${prop}`", `"${queryParam}`", `"$FixedValue`"),"
+        "flags.WithEncodedRelativeTimestamp(`"${prop}`", `"${queryParam}`"$FormatValue),"
     } else {
         $Definitions[$MatchingType]
     }

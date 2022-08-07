@@ -14,6 +14,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/c8yquery"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/url"
 
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/c8ydata"
@@ -840,6 +841,44 @@ func WithBinaryUploadURL(client *c8y.Client, opts ...string) GetOption {
 		}
 
 		return dst, mo.Self, err
+	}
+}
+
+// WithCumulocityQuery build a Cumulocity Query Expression
+func WithCumulocityQuery(queryOptions []GetOption, opts ...string) GetOption {
+	return func(cmd *cobra.Command, inputIterators *RequestInputIterators) (string, interface{}, error) {
+
+		_, dst, _ := UnpackGetterOptions("%s", opts...)
+
+		queryIterator := c8yquery.NewCumulocityQueryIterator()
+
+		for _, currentOpt := range queryOptions {
+
+			iDst, iValue, iErr := currentOpt(cmd, inputIterators)
+
+			if inputIterators != nil && inputIterators.PipeOptions != nil {
+				if inputIterators.PipeOptions.Name == iDst {
+					iter, _, _ := WithPipelineIterator(inputIterators.PipeOptions)(cmd, inputIterators)
+					queryIterator.AddFilterPart(dst, iter)
+				}
+			}
+
+			if iErr != nil {
+				return "", nil, iErr
+			}
+
+			if iDst != "" {
+				queryIterator.AddFilterPart(iDst, iValue)
+			}
+		}
+
+		if v, err := cmd.Flags().GetString("orderBy"); err == nil {
+			if v != "" {
+				queryIterator.AddOrderPart(v)
+			}
+		}
+
+		return dst, queryIterator, nil
 	}
 }
 
