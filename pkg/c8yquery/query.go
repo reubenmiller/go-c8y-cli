@@ -47,14 +47,18 @@ func (i *CumulocityQueryIterator) GetNext() (line []byte, input interface{}, err
 		}
 	}
 
-	filter := url.QueryEscape(strings.Join(queryParts, i.FilterJoin))
-
-	orderBy := ""
-	if len(i.OrderBy) > 0 {
-		orderBy = "+$orderby=" + url.QueryEscape(strings.Join(i.OrderBy, " "))
+	parts := make([]string, 0)
+	if len(queryParts) > 0 {
+		parts = append(parts, "$filter="+url.QueryEscape(strings.Join(queryParts, i.FilterJoin)))
 	}
 
-	return []byte(fmt.Sprintf("$filter=%s%s", filter, orderBy)), "", nil
+	if len(i.OrderBy) == 0 {
+		i.OrderBy = append(i.OrderBy, "name")
+	}
+
+	parts = append(parts, "$orderby="+url.QueryEscape(strings.Join(i.OrderBy, " ")))
+
+	return []byte(strings.Join(parts, "+")), "", nil
 }
 
 func (i *CumulocityQueryIterator) IsBound() bool {
