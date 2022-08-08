@@ -1,4 +1,4 @@
-
+# yaml-language-server: $schema=../schema.json
 ---
 information:
   name: software
@@ -26,15 +26,11 @@ endpoints:
       go:
         - description: Get a list of software packages
           command: c8y software list
-          assertStdOut:
-            json:
-              query: r/type eq 'c8y_Software'
+          skipTest: true
         
         - description: Get a list of software packages starting with "python3"
           command: c8y software list --name "python3*"
-          assertStdOut:
-            json:
-              query: r/name eq 'python3\*'
+          skipTest: true
 
     queryParameters:
       - name: query

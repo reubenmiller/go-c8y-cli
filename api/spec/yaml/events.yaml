@@ -1,5 +1,4 @@
-# yaml-language-server: $schema=https://raw.githubusercontent.com/reubenmiller/go-c8y-cli/v2/api/spec/schema.json
-
+# yaml-language-server: $schema=../schema.json
 ---
 information:
   name: events

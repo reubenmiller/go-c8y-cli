@@ -18,6 +18,7 @@ tests:
     smartgroups_list_Get a list of smart groups with their names starting with 'myText', then get the devices from the smart groups:
         command: $TEST_SHELL -c 'c8y smartgroups list --name "myText*" | c8y devices list'
         exit-code: 0
+        skip: true
         stdout:
             json:
                 method: GET

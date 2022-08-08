@@ -1,4 +1,4 @@
-
+# yaml-language-server: $schema=../schema.json
 ---
 information:
   name: configuration
