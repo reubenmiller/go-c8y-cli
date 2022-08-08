@@ -7,4 +7,5 @@ tests:
                 method: GET
                 path: /inventory/managedObjects
             contains:
-                - name=MyGroup*
+                - name eq 'MyGroup*'
+                - (has(c8y_IsDeviceGroup))

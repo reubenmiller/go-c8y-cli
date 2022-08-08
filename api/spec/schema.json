@@ -97,6 +97,13 @@
         "line-count": {
           "type": "integer",
           "title": "Expected number of lines (exact match)"
+        },
+        "contains": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "title": "Output contains given values"
         }
       }
     },

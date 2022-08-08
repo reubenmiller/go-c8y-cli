@@ -34,23 +34,50 @@
         "go": [
           {
             "description": "Get a collection of devices of type \"myType\", and their names start with \"sensor\"",
-            "command": "c8y devices list --name \"sensor*\" --type myType"
+            "command": "c8y devices list --name \"sensor*\" --type myType",
+            "assertStdOut": {
+              "contains": [
+                "name eq 'sensor*'",
+                "type eq 'myType'"
+              ]
+            }
           },
           {
             "description": "Get devices which names containing 'sensor' and were created after 2021-04-02",
-            "command": "c8y devices list --query \"name eq '*sensor*' and creationTime.date gt '2021-04-02T00:00:00'\""
+            "command": "c8y devices list --query \"name eq '*sensor*' and creationTime.date gt '2021-04-02T00:00:00'\"",
+            "assertStdOut": {
+              "contains": [
+                "name eq '*sensor*' and creationTime.date gt '2021-04-02T00:00:00'"
+              ]
+            }
           },
           {
             "description": "Get devices which where registered longer than 7 days ago",
-            "command": "c8y devices list --creationTimeDateFrom -7d"
+            "command": "c8y devices list --creationTimeDateFrom -7d",
+            "assertStdOut": {
+              "contains": [
+                "(creationTime.date ge '"
+              ]
+            }
           },
           {
             "description": "Get devices which where registered in the last day",
-            "command": "c8y devices list --creationTimeDateTo -1d"
+            "command": "c8y devices list --creationTimeDateTo -1d",
+            "assertStdOut": {
+              "contains": [
+                "(creationTime.date ge '"
+              ]
+            }
           },
           {
             "description": "Get devices with type 'c8y_MacOS' then devices with type 'c8y_Linux' (using pipeline)",
-            "command": "echo -e \"c8y_MacOS\\nc8y_Linux\" | c8y devices list --queryTemplate \"type eq '%s'\""
+            "command": "echo -e \"c8y_MacOS\\nc8y_Linux\" | c8y devices list --queryTemplate \"type eq '%s'\"",
+            "assertStdOut": {
+              "contains": [
+                "type eq 'c8y_MacOS'",
+                "type eq 'c8y_Linux'"
+              ]
+            }
           }
         ]
       },

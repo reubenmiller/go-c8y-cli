@@ -210,6 +210,10 @@ func buildAssertions(parentCmd string, endpoint *models.EndPoint, exampleIdx int
 		for k, v := range endpoint.Examples.Go[exampleIdx].AssertStdout.JSON {
 			assertions.JSON[k] = v
 		}
+
+		if len(endpoint.Examples.Go[exampleIdx].AssertStdout.Contains) > 0 {
+			assertions.Contains = endpoint.Examples.Go[exampleIdx].AssertStdout.Contains
+		}
 	}
 
 	expectedPath := substituteVariables(cmd, endpoint)
@@ -228,22 +232,27 @@ func buildAssertions(parentCmd string, endpoint *models.EndPoint, exampleIdx int
 		assertions.JSON["query"] = strings.ReplaceAll(expectedPath[i+1:], " ", " ")
 	}
 
-	// Query parameters
-	for _, parameter := range endpoint.GetQueryParameters() {
-		value := getParameterValue(cmd, &parameter)
-		if value != "" {
-			if parameter.IsTypeDateTime() {
-				// for relative dates, just if parameter was defined, ignore the value
-				assertions.Contains = append(assertions.Contains, fmt.Sprintf("%s=", parameter.GetTargetProperty()))
-			} else {
-				switch parameter.Type {
-				case "[]string":
-					for _, v := range strings.Split(value, ",") {
-						assertions.Contains = append(assertions.Contains, fmt.Sprintf("%s=%s", parameter.GetTargetProperty(), v))
-					}
+	usesCustomContains := len(assertions.Contains) > 0
 
-				default:
-					assertions.Contains = append(assertions.Contains, fmt.Sprintf("%s=%s", parameter.GetTargetProperty(), value))
+	// Query parameters
+	if !usesCustomContains {
+
+		for _, parameter := range endpoint.GetQueryParameters() {
+			value := getParameterValue(cmd, &parameter)
+			if value != "" {
+				if parameter.IsTypeDateTime() {
+					// for relative dates, just if parameter was defined, ignore the value
+					assertions.Contains = append(assertions.Contains, fmt.Sprintf("%s=", parameter.GetTargetProperty()))
+				} else {
+					switch parameter.Type {
+					case "[]string":
+						for _, v := range strings.Split(value, ",") {
+							assertions.Contains = append(assertions.Contains, fmt.Sprintf("%s=%s", parameter.GetTargetProperty(), v))
+						}
+
+					default:
+						assertions.Contains = append(assertions.Contains, fmt.Sprintf("%s=%s", parameter.GetTargetProperty(), value))
+					}
 				}
 			}
 		}
