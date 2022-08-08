@@ -203,7 +203,8 @@
           },
           {
             "description": "List child additions of a device but filter the children using a custom query",
-            "command": "echo agentAdditionInfo01 | c8y devices additions list --query \"type eq 'custom*'\""
+            "command": "c8y devices additions list --device 12345 --query \"type eq 'custom*'\"",
+            "skipTest": true
           }
         ]
       },

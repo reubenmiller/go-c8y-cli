@@ -1,3 +1,8 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/reubenmiller/commander/feat/handle-nested-files/schema.json
+config:
+  env:
+    C8Y_SETTINGS_DEFAULTS_DRY: true
+    C8Y_SETTINGS_DEFAULTS_DRYFORMAT: json
 tests:
     smartgroups_list_Get a list of smart groups:
         command: c8y smartgroups list
@@ -9,20 +14,9 @@ tests:
     smartgroups_list_Get a list of smart groups with the names starting with 'myText':
         command: c8y smartgroups list --name "myText*"
         exit-code: 0
-        skip: true
         stdout:
             json:
                 method: GET
                 path: /inventory/managedObjects
             contains:
-                - name=myText*
-    smartgroups_list_Get a list of smart groups with their names starting with 'myText', then get the devices from the smart groups:
-        command: $TEST_SHELL -c 'c8y smartgroups list --name "myText*" | c8y devices list'
-        exit-code: 0
-        skip: true
-        stdout:
-            json:
-                method: GET
-                path: /inventory/managedObjects
-            contains:
-                - name=myText*
+                - name eq 'myText*'

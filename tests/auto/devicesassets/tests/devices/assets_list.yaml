@@ -12,4 +12,4 @@ tests:
         stdout:
             json:
                 method: GET
-                path: /inventory/managedObjects/{device}/childAssets
+                path: r//inventory/managedObjects/\d+/childAssets

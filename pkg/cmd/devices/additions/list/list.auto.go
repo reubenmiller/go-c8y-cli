@@ -38,7 +38,7 @@ func NewListCmd(f *cmdutil.Factory) *ListCmd {
 $ c8y devices additions list --device 12345
 Get a list of the child additions of an existing device
 
-$ echo agentAdditionInfo01 | c8y devices additions list --query "type eq 'custom*'"
+$ c8y devices additions list --device 12345 --query "type eq 'custom*'"
 List child additions of a device but filter the children using a custom query
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {

@@ -331,15 +331,18 @@
         "go": [
           {
             "description": "Get a list of managed objects",
-            "command": "c8y inventory find --query \"name eq 'roomUpperFloor_*'\""
+            "command": "c8y inventory find --query \"name eq 'roomUpperFloor_*'\"",
+            "skipTest": true
           },
           {
             "description": "Find devices which include myname in their names. query=$filter=name eq '*myname*'",
-            "command": "echo \"myname\" | c8y inventory find --queryTemplate \"name eq '*%s*'\" --onlyDevices"
+            "command": "echo \"myname\" | c8y inventory find --queryTemplate \"name eq '*%s*'\" --onlyDevices",
+            "skipTest": true
           },
           {
             "description": "Invert a given query received via piped input (stdin) by using a template",
-            "command": "echo \"name eq 'name'\" | c8y inventory find --queryTemplate 'not(%s)'"
+            "command": "echo \"name eq 'name'\" | c8y inventory find --queryTemplate 'not(%s)'",
+            "skipTest": true
           }
         ]
       },

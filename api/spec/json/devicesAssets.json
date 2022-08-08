@@ -203,7 +203,13 @@
           },
           {
             "description": "List child assets of a device but filter the children using a custom query",
-            "command": "echo agentAssetInfo01 | c8y devices assets list --query \"type eq 'custom*'\""
+            "command": "echo agentAssetInfo01 | c8y devices assets list --query \"type eq 'custom*'\"",
+            "assertStdOut": {
+              "json": {
+                "method": "GET",
+                "path": "r//inventory/managedObjects/\\d+/childAssets"
+              }
+            }
           }
         ]
       },

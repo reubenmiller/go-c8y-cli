@@ -2,6 +2,7 @@ tests:
     inventory_find_Find devices which include myname in their names. query=$filter=name eq '*myname*':
         command: $TEST_SHELL -c 'echo "myname" | c8y inventory find --queryTemplate "name eq '*%s*'" --onlyDevices'
         exit-code: 0
+        skip: true
         stdout:
             json:
                 method: GET
@@ -12,6 +13,7 @@ tests:
     inventory_find_Get a list of managed objects:
         command: c8y inventory find --query "name eq 'roomUpperFloor_*'"
         exit-code: 0
+        skip: true
         stdout:
             json:
                 method: GET
@@ -21,6 +23,7 @@ tests:
     inventory_find_Invert a given query received via piped input (stdin) by using a template:
         command: $TEST_SHELL -c 'echo "name eq 'name'" | c8y inventory find --queryTemplate 'not(%s)''
         exit-code: 0
+        skip: true
         stdout:
             json:
                 method: GET

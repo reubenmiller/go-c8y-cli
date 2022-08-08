@@ -48,9 +48,13 @@ func (i *CumulocityQueryIterator) GetNext() (line []byte, input interface{}, err
 	}
 
 	filter := url.QueryEscape(strings.Join(queryParts, i.FilterJoin))
-	orderBy := url.QueryEscape(strings.Join(i.OrderBy, " "))
 
-	return []byte(fmt.Sprintf("$filter=%s+$orderby=%s", filter, orderBy)), "", nil
+	orderBy := ""
+	if len(i.OrderBy) > 0 {
+		orderBy = "+$orderby=" + url.QueryEscape(strings.Join(i.OrderBy, " "))
+	}
+
+	return []byte(fmt.Sprintf("$filter=%s%s", filter, orderBy)), "", nil
 }
 
 func (i *CumulocityQueryIterator) IsBound() bool {

@@ -2,6 +2,7 @@ tests:
     agents_list_Find an agent by name, then find other agents which the same type:
         command: $TEST_SHELL -c 'c8y agents list --name "my example agent" --select type --output csv | c8y agents list --queryTemplate "type eq '%s'"'
         exit-code: 0
+        skip: true
         stdout:
             json:
                 method: GET
@@ -18,6 +19,7 @@ tests:
     agents_list_Get a collection of agents with type "myType", and their names start with "sensor":
         command: c8y agents list --name "sensor*" --type myType
         exit-code: 0
+        skip: true
         stdout:
             json:
                 method: GET
@@ -28,6 +30,7 @@ tests:
     agents_list_Get agents which where registered in the last day:
         command: c8y agents list --creationTimeDateTo -1d
         exit-code: 0
+        skip: true
         stdout:
             json:
                 method: GET
@@ -37,6 +40,7 @@ tests:
     agents_list_Get agents which where registered longer than 7 days ago:
         command: c8y agents list --creationTimeDateFrom -7d
         exit-code: 0
+        skip: true
         stdout:
             json:
                 method: GET

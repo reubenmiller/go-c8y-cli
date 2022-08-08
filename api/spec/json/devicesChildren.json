@@ -149,11 +149,23 @@
         "go": [
           {
             "description": "Get a list of the child devices of an existing device",
-            "command": "c8y devices children list --device agentParent01"
+            "command": "c8y devices children list --device agentParent01",
+            "assertStdOut": {
+              "json": {
+                "method": "GET",
+                "path": "r//inventory/managedObjects/\\d+/childDevices"
+              }
+            }
           },
           {
             "description": "Get a list of child devices which a specific type",
-            "command": "echo agentParent01 | c8y devices children list --query \"type eq 'custom*'\""
+            "command": "echo agentParent01 | c8y devices children list --query \"type eq 'custom*'\"",
+            "assertStdOut": {
+              "json": {
+                "method": "GET",
+                "path": "r//inventory/managedObjects/\\d+/childDevices"
+              }
+            }
           }
         ]
       },

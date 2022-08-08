@@ -29,18 +29,22 @@ endpoints:
       go:
         - description: Get a collection of agents with type "myType", and their names start with "sensor"
           command: c8y agents list --name "sensor*" --type myType
+          skipTest: true
 
         - description: Get a collection of agents with names starting with "sensor" using a piped inventory query (or could be piped from a file)
           command: echo "name eq 'sensor*'" | c8y agents list
 
         - description: Get agents which where registered longer than 7 days ago
           command: c8y agents list --creationTimeDateFrom -7d
+          skipTest: true
 
         - description: Get agents which where registered in the last day
           command: c8y agents list --creationTimeDateTo -1d
+          skipTest: true
 
         - description: Find an agent by name, then find other agents which the same type
           command: c8y agents list --name "my example agent" --select type --output csv | c8y agents list --queryTemplate "type eq '%s'"
+          skipTest: true
     
     queryParameters:
       - name: query

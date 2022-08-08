@@ -9,10 +9,9 @@ tests:
     devices/additions_list_List child additions of a device but filter the children using a custom query:
         command: c8y devices additions list --device 12345 --query "type eq 'custom*'"
         exit-code: 0
-        skip: true
         stdout:
             json:
                 method: GET
                 path: /inventory/managedObjects/12345/childAdditions
             contains:
-                - query=type eq 'custom*'
+                - type eq 'custom*'

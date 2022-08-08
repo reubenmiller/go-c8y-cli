@@ -337,7 +337,8 @@
           },
           {
             "description": "Get a list of smart groups with the names starting with 'myText'",
-            "command": "c8y smartgroups list --name \"myText*\""
+            "command": "c8y smartgroups list --name \"myText*\"",
+            "skipTest": true
           },
           {
             "description": "Get a list of smart groups with their names starting with 'myText', then get the devices from the smart groups",
