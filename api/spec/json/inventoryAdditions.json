@@ -68,6 +68,32 @@
           ],
           "required": true,
           "description": "Managed object id."
+        }
+      ],
+      "queryParameters": [
+        {
+          "name": "query",
+          "description": "Query expression group",
+          "property": "query",
+          "type": "queryExpression",
+          "children": [
+            {
+              "name": "query",
+              "type": "string",
+              "description": "Additional query filter",
+              "format": "(%s)"
+            },
+            {
+              "name": "queryTemplate",
+              "type": "string",
+              "description": "String template to be used when applying the given query. Use %s to reference the query/pipeline input"
+            },
+            {
+              "name": "orderBy",
+              "type": "string",
+              "description": "Order by. e.g. _id asc or name asc or creationTime.date desc"
+            }
+          ]
         },
         {
           "name": "withChildren",

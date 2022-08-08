@@ -1,0 +1,8 @@
+tests:
+    devices/additions_unassign_Unassign a child device from its parent device:
+        command: c8y devices additions unassign --device 12345 --child 22553
+        exit-code: 0
+        stdout:
+            json:
+                method: DELETE
+                path: /inventory/managedObjects/12345/childAdditions/22553

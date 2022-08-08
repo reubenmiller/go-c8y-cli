@@ -22,20 +22,7 @@ Get a list of configuration files
     [Alias()]
     [OutputType([object])]
     Param(
-        # Configuration name filter
-        [Parameter()]
-        [string]
-        $Name,
 
-        # Configuration description filter
-        [Parameter()]
-        [string]
-        $Description,
-
-        # Configuration device type filter
-        [Parameter()]
-        [string]
-        $DeviceType
     )
     DynamicParam {
         Get-ClientCommonParameters -Type "Get", "Collection"

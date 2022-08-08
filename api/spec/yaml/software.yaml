@@ -8,12 +8,10 @@ information:
 
 endpoints:
   - name: getSoftwareCollection
-    # Skipping as framework does not support optional sub query parameters
-    skip: true
     method: GET
     description: Get software collection
     descriptionLong: Get a collection of software packages (managedObjects) based on filter parameters
-    path: inventory/managedObjects?query=$filter=((type eq 'c8y_Software') and ((name eq '{name}') or (not(has(description)) or description eq '{description}') or (c8y_Filter.type eq '{deviceType}'))) $orderby=name asc
+    path: inventory/managedObjects
     accept: application/vnd.com.nsn.cumulocity.managedObjectCollection+json
     collectionType: application/vnd.com.nsn.cumulocity.managedObject+json
     collectionProperty: managedObjects
@@ -38,21 +36,47 @@ endpoints:
             json:
               query: r/name eq 'python3\*'
 
-    pathParameters:
-      - name: name
-        type: string
-        default: '**'
-        description: Software name filter
-      
-      - name: description
-        type: string
-        default: '**'
-        description: Software description filter
-      
-      - name: deviceType
-        type: string
-        default: '**'
-        description: Software device type filter
+    queryParameters:
+      - name: query
+        description: Query expression group
+        property: query
+        type: queryExpression
+        children:
+          - name: query
+            type: string
+            description: Additional query filter
+            format: (%s)
+            pipeline: true
+            pipelineAliases:
+              - c8y_DeviceQueryString
+          
+          - name: queryTemplate
+            type: string
+            description: String template to be used when applying the given query. Use %s to reference the query/pipeline input
+          
+          - name: orderBy
+            type: string
+            description: Order by. e.g. _id asc or name asc or creationTime.date desc
+          
+          - name: software
+            type: stringStatic
+            description: ""
+            value: "(type eq 'c8y_Software')"
+
+          - name: name
+            type: string
+            description: Filter by name
+            format: (name eq '%s')
+
+          - name: deviceType
+            type: string
+            description: Filter by deviceType
+            format: (c8y_Filter.type eq '%s')
+
+          - name: description
+            type: string
+            description: Filter by description
+            format: (description eq '%s')
 
   - name: newSoftware
     method: POST

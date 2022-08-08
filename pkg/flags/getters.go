@@ -856,13 +856,6 @@ func WithCumulocityQuery(queryOptions []GetOption, opts ...string) GetOption {
 
 			iDst, iValue, iErr := currentOpt(cmd, inputIterators)
 
-			if inputIterators != nil && inputIterators.PipeOptions != nil {
-				if inputIterators.PipeOptions.Name == iDst {
-					iter, _, _ := WithPipelineIterator(inputIterators.PipeOptions)(cmd, inputIterators)
-					queryIterator.AddFilterPart(dst, iter)
-				}
-			}
-
 			if iErr != nil {
 				return "", nil, iErr
 			}

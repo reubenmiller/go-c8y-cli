@@ -22,20 +22,7 @@ Get a list of software packages
     [Alias()]
     [OutputType([object])]
     Param(
-        # Software name filter
-        [Parameter()]
-        [string]
-        $Name,
 
-        # Software description filter
-        [Parameter()]
-        [string]
-        $Description,
-
-        # Software device type filter
-        [Parameter()]
-        [string]
-        $DeviceType
     )
     DynamicParam {
         Get-ClientCommonParameters -Type "Get", "Collection"

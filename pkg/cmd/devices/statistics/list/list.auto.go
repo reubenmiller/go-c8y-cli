@@ -161,7 +161,7 @@ func (n *ListCmd) RunE(cmd *cobra.Command, args []string) error {
 		cmd,
 		path,
 		inputIterators,
-		flags.WithRelativeDate(false, "date", "date", ""),
+		flags.WithRelativeDate(false, "date", "date"),
 		flags.WithStringValue("type", "type"),
 		flags.WithStringDefaultValue(client.TenantName, "tenant", "tenant"),
 	)

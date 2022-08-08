@@ -74,11 +74,13 @@ func NewGenerator(name string, mockConfig *models.MockConfiguration) (gen *Gener
 	}
 	contents, err := ioutil.ReadAll(f)
 	if err != nil {
+		loggerS.Fatalf("Failed to read spec file. file=%s err=%s", name, err)
 		return
 	}
 	spec := &models.Specification{}
 	err = yaml.Unmarshal(contents, spec)
 	if err != nil {
+		loggerS.Fatalf("Failed to marshal spec file. file=%s err=%s", name, err)
 		return
 	}
 
@@ -155,12 +157,18 @@ func CreateFakeCommand(parentCmd string, endpoint *models.EndPoint) *cobra.Comma
 	cmd := &cobra.Command{
 		Use: endpoint.Alias.Go,
 	}
+
+	// Add global commands, don't need all of them just the ones used in the examples
+	cmd.PersistentFlags().StringArray("select", nil, "Comma separated list of properties to return. wildcards and globstar accepted, i.e. --select 'id,name,type,**.serialNumber'")
+	cmd.PersistentFlags().String("output", "o", "Output format i.e. table, json, csv, csvheader")
+
 	for _, parameter := range endpoint.GetAllParameters() {
 		loggerS.Debugf("Adding parameter. name=%s", parameter.Name)
 		if strings.Contains(parameter.Type, "[]") {
 			cmd.Flags().StringSlice(parameter.Name, nil, "")
-		} else if parameter.Type == "boolean" || parameter.Type == "optional_fragment" {
-			cmd.Flags().Bool(parameter.Name, false, "")
+		} else if parameter.Type == "boolean" || parameter.Type == "optional_fragment" || parameter.Type == "booleanDefault" {
+			defaultValue := parameter.Default == "true"
+			cmd.Flags().Bool(parameter.Name, defaultValue, "")
 		} else {
 			cmd.Flags().String(parameter.Name, "", "")
 		}
@@ -221,7 +229,7 @@ func buildAssertions(parentCmd string, endpoint *models.EndPoint, exampleIdx int
 	}
 
 	// Query parameters
-	for _, parameter := range endpoint.QueryParameters {
+	for _, parameter := range endpoint.GetQueryParameters() {
 		value := getParameterValue(cmd, &parameter)
 		if value != "" {
 			if parameter.IsTypeDateTime() {
@@ -334,7 +342,7 @@ func getParameterValue(cmd *cobra.Command, parameter *models.Parameter) (value s
 		if err == nil {
 			value = v
 		}
-	case "boolean":
+	case "boolean", "booleanDefault", "optional_fragment":
 		v, err := cmd.Flags().GetBool(parameter.Name)
 		if err == nil {
 			if parameter.Value != "" {

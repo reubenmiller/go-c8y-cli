@@ -66,9 +66,11 @@
         foreach ($item in $Specification.queryParameters) {
             if ($item.children) {
                 # Ignore the item, and only use the children to build the cli arguments
-                $ArgumentSources.AddRange(([array]$item.children))
+                $null = $ArgumentSources.AddRange(([array]$item.children | Where-Object {
+                    $_.type -ne "stringStatic"
+                }))
             } else {
-                $ArgumentSources.Add($item)
+                $null = $ArgumentSources.Add($item)
             }
         }
     }
@@ -375,6 +377,11 @@
                 $null = $CumulocityQueryExpressionBuilder.AppendLine("			[]flags.GetOption{")
                 
                 foreach ($child in $Properties.children) {
+
+                    # Ignore special in-built values as these are handled separately
+                    if ($child.name -in @("queryTemplate", "orderBy")) {
+                        continue
+                    }
 
                     # Special case to handle Cumulocity query language builder
                     $code = New-C8yApiGoGetValueFromFlag -Parameters $child -SetterType "query"
@@ -994,6 +1001,18 @@ Function Get-C8yGoArgs {
         }
 
         "string" {
+            $SetFlag = if ($UseOption) {
+                'cmd.Flags().StringP("{0}", "{1}", "{2}", "{3}")' -f $Name, $OptionName, $Default, $Description
+            } else {
+                'cmd.Flags().String("{0}", "{1}", "{2}")' -f $Name, $Default, $Description
+            }
+
+            @{
+                SetFlag = $SetFlag
+            }
+        }
+
+        "stringStatic" {
             $SetFlag = if ($UseOption) {
                 'cmd.Flags().StringP("{0}", "{1}", "{2}", "{3}")' -f $Name, $OptionName, $Default, $Description
             } else {

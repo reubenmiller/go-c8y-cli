@@ -63,6 +63,9 @@
         # string
         "string" = "flags.WithStringValue(`"${prop}`", `"${queryParam}`"$FormatValue),"
 
+        # stringStatic
+        "stringStatic" = "flags.WithStaticStringValue(`"${prop}`", `"$FixedValue`"),"
+
         # source (special value as powershell need to treat this field as an object)
         "source" = "flags.WithStringValue(`"${prop}`", `"${queryParam}`"),"
 

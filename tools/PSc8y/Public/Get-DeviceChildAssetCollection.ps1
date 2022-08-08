@@ -11,14 +11,15 @@ Get a collection of managedObjects child references
 https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/devices_assets_list
 
 .EXAMPLE
-PS> Get-DeviceChildAssetCollection -Device $Group.id
+PS> Get-DeviceChildAssetCollection -Device agentAssetInfo01
 
 Get a list of the child assets of an existing device
 
 .EXAMPLE
-PS> Get-DeviceChildAssetCollection -Device $Group.id
+PS> "agentAssetInfo01" | Get-DeviceChildAssetCollection -Query "type eq 'custom*'"
 
-Get a list of the child assets of an existing group
+
+List child assets of a device but filter the children using a custom query
 
 
 #>
@@ -32,7 +33,12 @@ Get a list of the child assets of an existing group
                    ValueFromPipeline=$true,
                    ValueFromPipelineByPropertyName=$true)]
         [object[]]
-        $Device
+        $Device,
+
+        # Determines if children with ID and name should be returned when fetching the managed object.
+        [Parameter()]
+        [switch]
+        $WithChildren
     )
     DynamicParam {
         Get-ClientCommonParameters -Type "Get", "Collection"

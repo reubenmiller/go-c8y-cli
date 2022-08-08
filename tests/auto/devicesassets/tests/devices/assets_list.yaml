@@ -6,3 +6,10 @@ tests:
             json:
                 method: GET
                 path: /inventory/managedObjects/12345/childAssets
+    devices/assets_list_List child assets of a device but filter the children using a custom query:
+        command: $TEST_SHELL -c 'echo agentAssetInfo01 | c8y devices assets list --query "type eq 'custom*'"'
+        exit-code: 0
+        stdout:
+            json:
+                method: GET
+                path: /inventory/managedObjects/{device}/childAssets

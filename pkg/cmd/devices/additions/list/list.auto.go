@@ -1,7 +1,7 @@
-package find
+// Code generated from specification version 1.0.0: DO NOT EDIT
+package list
 
 import (
-	"bytes"
 	"fmt"
 	"io"
 	"net/http"
@@ -11,61 +11,71 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/subcommand"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/mapbuilder"
-	"github.com/reubenmiller/go-c8y-cli/v2/pkg/url"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
 )
 
-type CmdFind struct {
+// ListCmd command
+type ListCmd struct {
 	*subcommand.SubCommand
 
-	queryTemplate string
-	orderBy       string
-	factory       *cmdutil.Factory
+	factory *cmdutil.Factory
 }
 
-func NewCmdFind(f *cmdutil.Factory) *CmdFind {
-	ccmd := &CmdFind{
+// NewListCmd creates a command to Get child addition collection
+func NewListCmd(f *cmdutil.Factory) *ListCmd {
+	ccmd := &ListCmd{
 		factory: f,
 	}
-
 	cmd := &cobra.Command{
-		Use:   "find",
-		Short: "Find child assets",
-		Long:  `Retrieve all child assets of a specific managed object by a given ID, or a subset based on queries.`,
+		Use:   "list",
+		Short: "Get child addition collection",
+		Long:  `Get a collection of managedObjects child references`,
 		Example: heredoc.Doc(`
-			$ c8y inventory assets find --id 12345 --query "name eq 'roomUpperFloor_*'"
-			Find child assets matching a specific name
+$ c8y devices additions list --device 12345
+Get a list of the child additions of an existing device
 
-			$ c8y inventory list | c8y inventory assets find --query "name eq 'roomUpperFloor_*'"
-			Pipe a list of inventory items and find any child assets matching some criteria
-		`),
+$ echo agentAdditionInfo01 | c8y devices additions list --query "type eq 'custom*'"
+List child additions of a device but filter the children using a custom query
+        `),
+		PreRunE: func(cmd *cobra.Command, args []string) error {
+			return nil
+		},
 		RunE: ccmd.RunE,
 	}
 
 	cmd.SilenceUsage = true
 
-	cmd.Flags().StringSlice("id", []string{""}, "ManagedObject id (required) (accepts pipeline)")
-	cmd.Flags().String("query", "", "Use query language to perform operations and/or filter the results. Details about the properties and supported operations can be found in Query language")
-	cmd.Flags().StringVar(&ccmd.queryTemplate, "queryTemplate", "", "String template to be used when applying the given query. Use %s to reference the query/pipeline input")
-	cmd.Flags().StringVar(&ccmd.orderBy, "orderBy", "", "Order the results by the given parameter. i.e. 'id asc' or 'name desc'")
+	cmd.Flags().StringSlice("device", []string{""}, "Device. (required) (accepts pipeline)")
+	cmd.Flags().String("query", "", "Additional query filter")
+	cmd.Flags().String("queryTemplate", "", "String template to be used when applying the given query. Use %s to reference the query/pipeline input")
+	cmd.Flags().String("orderBy", "", "Order by. e.g. _id asc or name asc or creationTime.date desc")
 	cmd.Flags().Bool("withChildren", false, "Determines if children with ID and name should be returned when fetching the managed object.")
-	cmd.Flags().Bool("withChildrenCount", false, "When set to true, the returned result will contain the total number of children in the respective objects (childAdditions, childAssets and childDevices)")
+
+	completion.WithOptions(
+		cmd,
+		completion.WithDevice("device", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
+	)
 
 	flags.WithOptions(
 		cmd,
-		flags.WithExtendedPipelineSupport("id", "id", true, "deviceId", "source.id", "managedObject.id", "id"),
+
+		flags.WithExtendedPipelineSupport("device", "device", true, "deviceId", "source.id", "managedObject.id", "id"),
 		flags.WithCollectionProperty("references.#.managedObject"),
 	)
+
+	// Required flags
 
 	ccmd.SubCommand = subcommand.NewSubCommand(cmd)
 
 	return ccmd
 }
 
-func (n *CmdFind) RunE(cmd *cobra.Command, args []string) error {
+// RunE executes the command
+func (n *ListCmd) RunE(cmd *cobra.Command, args []string) error {
 	cfg, err := n.factory.Config()
 	if err != nil {
 		return err
@@ -86,39 +96,22 @@ func (n *CmdFind) RunE(cmd *cobra.Command, args []string) error {
 		query,
 		inputIterators,
 		flags.WithCustomStringSlice(func() ([]string, error) { return cfg.GetQueryParameters(), nil }, "custom"),
-		flags.WithCustomStringValue(func(b []byte) []byte {
-			if n.queryTemplate != "" {
-				b = []byte(fmt.Sprintf(n.queryTemplate, b))
-			}
+		flags.WithBoolValue("withChildren", "withChildren", ""),
 
-			// Encode special characters
-			b = url.EscapeQuery(b)
-
-			if n.orderBy != "" {
-				if !bytes.Contains(b, []byte("$orderby=")) {
-					b = append(b, []byte(" $orderby="+n.orderBy)...)
-				}
-			}
-
-			if len(b) != 0 && !bytes.HasPrefix(b, []byte("$filter")) {
-				b = append([]byte("$filter="), b...)
-			}
-			return b
-		}, func() string {
-			return "query"
-		}, "query"),
-		flags.WithBoolValue("withChildren", "withChildren"),
-		flags.WithBoolValue("withChildrenCount", "withChildrenCount"),
+		flags.WithCumulocityQuery(
+			[]flags.GetOption{
+				flags.WithStringValue("query", "query", "(%s)"),
+			},
+			"query",
+		),
 	)
 	if err != nil {
 		return cmderrors.NewUserError(err)
 	}
-
 	commonOptions, err := cfg.GetOutputCommonOptions(cmd)
 	if err != nil {
-		return err
+		return cmderrors.NewUserError(fmt.Sprintf("Failed to get common options. err=%s", err))
 	}
-
 	commonOptions.AddQueryParameters(query)
 
 	queryValue, err := query.GetQueryUnescape(true)
@@ -141,17 +134,33 @@ func (n *CmdFind) RunE(cmd *cobra.Command, args []string) error {
 
 	// form data
 	formData := make(map[string]io.Reader)
+	err = flags.WithFormDataOptions(
+		cmd,
+		formData,
+		inputIterators,
+	)
+	if err != nil {
+		return cmderrors.NewUserError(err)
+	}
 
 	// body
 	body := mapbuilder.NewInitializedMapBuilder(false)
+	err = flags.WithBody(
+		cmd,
+		body,
+		inputIterators,
+	)
+	if err != nil {
+		return cmderrors.NewUserError(err)
+	}
 
 	// path parameters
-	path := flags.NewStringTemplate("inventory/managedObjects/{id}/childAssets")
+	path := flags.NewStringTemplate("inventory/managedObjects/{device}/childAdditions")
 	err = flags.WithPathParameters(
 		cmd,
 		path,
 		inputIterators,
-		c8yfetcher.WithIDSlice(args, "id", "id"),
+		c8yfetcher.WithDeviceByNameFirstMatch(client, args, "device", "device"),
 	)
 	if err != nil {
 		return err

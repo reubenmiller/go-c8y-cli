@@ -11,14 +11,15 @@ Get a collection of managedObjects child references
 https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/devices_children_list
 
 .EXAMPLE
-PS> Get-ChildDeviceCollection -Device $Device.id
+PS> Get-ChildDeviceCollection -Device agentParent01
 
 Get a list of the child devices of an existing device
 
 .EXAMPLE
-PS> Get-ManagedObject -Id $Device.id | Get-ChildDeviceCollection
+PS> "agentParent01" | Get-ChildDeviceCollection -Query "type eq 'custom*'"
 
-Get a list of the child devices of an existing device (using pipeline)
+
+Get a list of child devices which a specific type
 
 
 #>

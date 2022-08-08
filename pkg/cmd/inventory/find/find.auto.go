@@ -1,7 +1,7 @@
+// Code generated from specification version 1.0.0: DO NOT EDIT
 package find
 
 import (
-	"bytes"
 	"fmt"
 	"io"
 	"net/http"
@@ -10,63 +10,73 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/subcommand"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/mapbuilder"
-	"github.com/reubenmiller/go-c8y-cli/v2/pkg/url"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
 )
 
-type CmdFind struct {
+// FindCmd command
+type FindCmd struct {
 	*subcommand.SubCommand
 
-	onlyDevices   bool
-	queryTemplate string
-	orderBy       string
-	factory       *cmdutil.Factory
+	factory *cmdutil.Factory
 }
 
-func NewCmdFind(f *cmdutil.Factory) *CmdFind {
-	ccmd := &CmdFind{
+// NewFindCmd creates a command to Find managed object collection
+func NewFindCmd(f *cmdutil.Factory) *FindCmd {
+	ccmd := &FindCmd{
 		factory: f,
 	}
-
 	cmd := &cobra.Command{
 		Use:   "find",
 		Short: "Find managed object collection",
-		Long:  `Get a collection of managedObjects based on Cumulocity query language`,
+		Long:  `Get a collection of managedObjects based on the Cumulocity query language`,
 		Example: heredoc.Doc(`
-			$ c8y inventory find --query "name eq 'roomUpperFloor_*'"
-			Get a list of managed objects
+$ c8y inventory find --query "name eq 'roomUpperFloor_*'"
+Get a list of managed objects
 
-			$ echo "myname" | c8y inventory find --queryTemplate 'name eq '*%s*' --onlyDevices
-			Find devices which include myname in their names. query=$filter=name eq '*myname*'
+$ echo "myname" | c8y inventory find --queryTemplate "name eq '*%s*'" --onlyDevices
+Find devices which include myname in their names. query=$filter=name eq '*myname*'
 
-			$ echo "name eq 'name'" | c8y inventory find --queryTemplate 'not(%s)'
-			Invert a given query received via piped input (stdin) by using a template
-		`),
+$ echo "name eq 'name'" | c8y inventory find --queryTemplate 'not(%s)'
+Invert a given query received via piped input (stdin) by using a template
+        `),
+		PreRunE: func(cmd *cobra.Command, args []string) error {
+			return nil
+		},
 		RunE: ccmd.RunE,
 	}
 
 	cmd.SilenceUsage = true
 
-	cmd.Flags().String("query", "", "ManagedObject query. (required) (accepts pipeline)")
-	cmd.Flags().StringVar(&ccmd.queryTemplate, "queryTemplate", "", "String template to be used when applying the given query. Use %s to reference the query/pipeline input")
-	cmd.Flags().StringVar(&ccmd.orderBy, "orderBy", "", "Order the results by the given parameter. i.e. 'id asc' or 'name desc'")
+	cmd.Flags().String("query", "", "ManagedObject query (required) (accepts pipeline)")
+	cmd.Flags().String("queryTemplate", "", "String template to be used when applying the given query. Use %s to reference the query/pipeline input")
+	cmd.Flags().String("orderBy", "", "Order by. e.g. _id asc or name asc or creationTime.date desc")
+	cmd.Flags().Bool("onlyDevices", false, "Only include devices")
 	cmd.Flags().Bool("withParents", false, "include a flat list of all parents and grandparents of the given object")
-	cmd.Flags().BoolVar(&ccmd.onlyDevices, "onlyDevices", false, "Only include devices in the query")
+
+	completion.WithOptions(
+		cmd,
+	)
 
 	flags.WithOptions(
 		cmd,
+
 		flags.WithExtendedPipelineSupport("query", "query", true, "c8y_DeviceQueryString"),
+		flags.WithCollectionProperty("managedObjects"),
 	)
+
+	// Required flags
 
 	ccmd.SubCommand = subcommand.NewSubCommand(cmd)
 
 	return ccmd
 }
 
-func (n *CmdFind) RunE(cmd *cobra.Command, args []string) error {
+// RunE executes the command
+func (n *FindCmd) RunE(cmd *cobra.Command, args []string) error {
 	cfg, err := n.factory.Config()
 	if err != nil {
 		return err
@@ -87,42 +97,23 @@ func (n *CmdFind) RunE(cmd *cobra.Command, args []string) error {
 		query,
 		inputIterators,
 		flags.WithCustomStringSlice(func() ([]string, error) { return cfg.GetQueryParameters(), nil }, "custom"),
-		flags.WithCustomStringValue(func(b []byte) []byte {
-			if n.queryTemplate != "" {
-				b = []byte(fmt.Sprintf(n.queryTemplate, b))
-			}
+		flags.WithBoolValue("withParents", "withParents", ""),
 
-			// Encode special characters
-			b = url.EscapeQuery(b)
-
-			if n.orderBy != "" {
-				if !bytes.Contains(b, []byte("$orderby=")) {
-					b = append(b, []byte(" $orderby="+n.orderBy)...)
-				}
-			}
-
-			if len(b) != 0 && !bytes.HasPrefix(b, []byte("$filter")) {
-				b = append([]byte("$filter="), b...)
-			}
-			return b
-		}, func() string {
-			if n.onlyDevices {
-				return "q"
-			}
-			return "query"
-		}, "query"),
-		flags.WithBoolValue("withParents", "withParents"),
+		flags.WithCumulocityQuery(
+			[]flags.GetOption{
+				flags.WithStringValue("query", "query", "(%s)"),
+				flags.WithDefaultBoolValue("onlyDevices", "onlyDevices", "has(c8y_IsDevice)"),
+			},
+			"query",
+		),
 	)
 	if err != nil {
 		return cmderrors.NewUserError(err)
 	}
-
 	commonOptions, err := cfg.GetOutputCommonOptions(cmd)
 	if err != nil {
-		return err
+		return cmderrors.NewUserError(fmt.Sprintf("Failed to get common options. err=%s", err))
 	}
-
-	commonOptions.ResultProperty = "managedObjects"
 	commonOptions.AddQueryParameters(query)
 
 	queryValue, err := query.GetQueryUnescape(true)
@@ -145,12 +136,36 @@ func (n *CmdFind) RunE(cmd *cobra.Command, args []string) error {
 
 	// form data
 	formData := make(map[string]io.Reader)
+	err = flags.WithFormDataOptions(
+		cmd,
+		formData,
+		inputIterators,
+	)
+	if err != nil {
+		return cmderrors.NewUserError(err)
+	}
 
 	// body
 	body := mapbuilder.NewInitializedMapBuilder(false)
+	err = flags.WithBody(
+		cmd,
+		body,
+		inputIterators,
+	)
+	if err != nil {
+		return cmderrors.NewUserError(err)
+	}
 
 	// path parameters
 	path := flags.NewStringTemplate("inventory/managedObjects")
+	err = flags.WithPathParameters(
+		cmd,
+		path,
+		inputIterators,
+	)
+	if err != nil {
+		return err
+	}
 
 	req := c8y.RequestOptions{
 		Method:       "GET",

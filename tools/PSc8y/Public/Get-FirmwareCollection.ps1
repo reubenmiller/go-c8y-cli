@@ -22,20 +22,7 @@ Get a list of firmware packages
     [Alias()]
     [OutputType([object])]
     Param(
-        # Firmware name filter
-        [Parameter()]
-        [string]
-        $Name,
 
-        # Firmware description filter
-        [Parameter()]
-        [string]
-        $Description,
-
-        # Firmware device type filter
-        [Parameter()]
-        [string]
-        $DeviceType
     )
     DynamicParam {
         Get-ClientCommonParameters -Type "Get", "Collection"

@@ -137,7 +137,7 @@ func (n *CreateCmd) RunE(cmd *cobra.Command, args []string) error {
 		inputIterators,
 		flags.WithDataFlagValue(),
 		c8yfetcher.WithDeviceByNameFirstMatch(client, args, "device", "source.id"),
-		flags.WithRelativeTimestamp("time", "time", ""),
+		flags.WithRelativeTimestamp("time", "time"),
 		flags.WithStringValue("type", "type"),
 		flags.WithDefaultTemplateString(`
 {time: _.Now('0s')}`),

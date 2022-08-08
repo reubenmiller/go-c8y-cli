@@ -24,6 +24,9 @@ setup () {
     create_agent "device01"
     create_smartgroup "my smartgroup"
 
+    create_child_device "agentParent01" "child"
+    create_device_with_assets "agentAssetInfo01" "childAsset"
+
     create_app "my-example-app"
     create_service_user "technician"
 
@@ -89,6 +92,39 @@ create_agent () {
     c8y agents get --id "$name" --silentStatusCodes 404 ||
         c8y agents create \
             --name "$name"
+}
+
+create_mo_with_name () {
+    local name="$1"
+
+    existing_mo=$(c8y inventory find --query "name eq '$name'")
+
+    if [[ -n "$existing_mo" ]]; then
+        echo "$existing_mo"
+        return
+    fi
+
+    c8y inventory create --name "$name"
+}
+
+create_child_device () {
+    local parentName=$1
+    local childNamePrefix=$2
+    local parent=
+
+    parent=$(create_agent "$parentName" | c8y util show --select id --output csv )
+    create_agent "${childNamePrefix}01" | c8y inventory update --data 'type=customdevice' | c8y devices children assign --device "$parent" --silentStatusCodes 409 --silentExit
+    create_agent "${childNamePrefix}02" | c8y inventory update --data 'type=customdevice' | c8y devices children assign --device "$parent" --silentStatusCodes 409 --silentExit
+}
+
+create_device_with_assets () {
+    local parentName=$1
+    local childNamePrefix=$2
+    local parent=
+
+    parent=$(create_agent "$parentName" | c8y util show --select id --output csv )
+    create_mo_with_name "${childNamePrefix}01" | c8y inventory update --data 'type=custominfo' | c8y devices assets assign --device "$parent" --silentStatusCodes 409 --silentExit
+    create_mo_with_name "${childNamePrefix}02" | c8y inventory update --data 'type=custominfo' | c8y devices assets assign --device "$parent" --silentStatusCodes 409 --silentExit
 }
 
 create_firmware () {

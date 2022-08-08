@@ -163,6 +163,7 @@
         "microserviceinstance",
         "queryExpression",
         "string",
+        "stringStatic",
         "source",
         "tenant",
         "tenantname",

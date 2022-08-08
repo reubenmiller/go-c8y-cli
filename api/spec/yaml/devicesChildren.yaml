@@ -1,4 +1,4 @@
-# yaml-language-server: $schema=https://raw.githubusercontent.com/reubenmiller/go-c8y-cli/v2/api/spec/schema.json
+# yaml-language-server: $schema=../schema.json
 ---
 information:
   name: devices/children
@@ -104,28 +104,18 @@ endpoints:
     examples:
       powershell:
         - description: Get a list of the child devices of an existing device
-          beforeEach:
-            - $Device = PSc8y\New-TestDevice
-            - $ChildDevice = PSc8y\New-TestDevice
-            - PSc8y\Add-ChildDeviceToDevice -Device $Device.id -NewChild $ChildDevice.id
-          command: Get-ChildDeviceCollection -Device $Device.id
-          afterEach:
-            - PSc8y\Remove-ManagedObject -Id $Device.id
-            - PSc8y\Remove-ManagedObject -Id $ChildDevice.id
-
-        - description: Get a list of the child devices of an existing device (using pipeline)
-          beforeEach:
-            - $Device = PSc8y\New-TestDevice
-            - $ChildDevice = PSc8y\New-TestDevice
-            - PSc8y\Add-ChildDeviceToDevice -Device $Device.id -NewChild $ChildDevice.id
-          command: Get-ManagedObject -Id $Device.id | Get-ChildDeviceCollection
-          afterEach:
-            - PSc8y\Remove-ManagedObject -Id $Device.id
-            - PSc8y\Remove-ManagedObject -Id $ChildDevice.id
+          command: Get-ChildDeviceCollection -Device agentParent01
+        
+        - description: Get a list of child devices which a specific type
+          command: |
+            "agentParent01" | Get-ChildDeviceCollection -Query "type eq 'custom*'"
 
       go:
         - description: Get a list of the child devices of an existing device
-          command: c8y devices children list --device 12345
+          command: c8y devices children list --device agentParent01
+
+        - description: Get a list of child devices which a specific type
+          command: echo agentParent01 | c8y devices children list --query "type eq 'custom*'"
     pathParameters:
       - name: device
         type: "[]device"
@@ -133,6 +123,25 @@ endpoints:
         required: true
         description: Device.
 
+    queryParameters:
+      - name: query
+        description: Query expression group
+        property: query
+        type: queryExpression
+        children:
+          - name: query
+            type: string
+            description: Additional query filter
+            format: (%s)
+          
+          - name: queryTemplate
+            type: string
+            description: String template to be used when applying the given query. Use %s to reference the query/pipeline input
+          
+          - name: orderBy
+            type: string
+            description: Order by. e.g. _id asc or name asc or creationTime.date desc
+      
       - name: withChildren
         type: boolean
         description: Determines if children with ID and name should be returned when fetching the managed object. Set it to false to improve query performance.

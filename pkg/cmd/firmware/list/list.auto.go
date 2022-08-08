@@ -1,16 +1,16 @@
+// Code generated from specification version 1.0.0: DO NOT EDIT
 package list
 
 import (
 	"fmt"
 	"io"
 	"net/http"
-	"net/url"
-	"strings"
 
 	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/subcommand"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/mapbuilder"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
@@ -24,24 +24,18 @@ type ListCmd struct {
 	factory *cmdutil.Factory
 }
 
-// NewListCmd creates a command to List smart group collection
+// NewListCmd creates a command to Get firmware collection
 func NewListCmd(f *cmdutil.Factory) *ListCmd {
 	ccmd := &ListCmd{
 		factory: f,
 	}
 	cmd := &cobra.Command{
 		Use:   "list",
-		Short: "List smart group collection",
-		Long:  `Get a collection of smart groups based on filter parameters`,
+		Short: "Get firmware collection",
+		Long:  `Get a collection of firmware packages (managedObjects) based on filter parameters`,
 		Example: heredoc.Doc(`
-			$ c8y smartgroups list
-			Get a list of smart groups
-
-			$ c8y smartgroups list --name "myText*"
-			Get a list of smart groups with the names starting with 'myText'
-
-			$ c8y smartgroups list --name "myText*" | c8y devices list
-			Get a list of smart groups with their names starting with "myText", then get the devices from the smart groups
+$ c8y firmware list
+Get a list of firmware packages
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
 			return nil
@@ -51,23 +45,26 @@ func NewListCmd(f *cmdutil.Factory) *ListCmd {
 
 	cmd.SilenceUsage = true
 
-	cmd.Flags().String("name", "", "Filter by name")
-	cmd.Flags().String("fragmentType", "", "Filter by fragment type")
-	cmd.Flags().String("owner", "", "Filter by owner")
-	cmd.Flags().String("deviceQuery", "", "Filter by device query")
 	cmd.Flags().String("query", "", "Additional query filter (accepts pipeline)")
 	cmd.Flags().String("queryTemplate", "", "String template to be used when applying the given query. Use %s to reference the query/pipeline input")
-	cmd.Flags().String("orderBy", "name", "Order by. e.g. _id asc or name asc or creationTime.date desc")
-	cmd.Flags().Bool("onlyInvisible", false, "Only include invisible smart groups")
-	cmd.Flags().Bool("onlyVisible", false, "Only include visible smart groups")
-	cmd.Flags().Bool("withParents", false, "Include a flat list of all parents and grandparents of the given object")
+	cmd.Flags().String("orderBy", "", "Order by. e.g. _id asc or name asc or creationTime.date desc")
+	cmd.Flags().String("name", "", "Filter by name")
+	cmd.Flags().String("deviceType", "", "Filter by deviceType")
+	cmd.Flags().String("description", "", "Filter by description")
+
+	completion.WithOptions(
+		cmd,
+	)
 
 	flags.WithOptions(
 		cmd,
+
 		flags.WithExtendedPipelineSupport("query", "query", false, "c8y_DeviceQueryString"),
+		flags.WithCollectionProperty("managedObjects"),
 	)
 
 	// Required flags
+
 	ccmd.SubCommand = subcommand.NewSubCommand(cmd)
 
 	return ccmd
@@ -83,7 +80,6 @@ func (n *ListCmd) RunE(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return err
 	}
-
 	inputIterators, err := cmdutil.NewRequestInputIterators(cmd, cfg)
 	if err != nil {
 		return err
@@ -91,61 +87,31 @@ func (n *ListCmd) RunE(cmd *cobra.Command, args []string) error {
 
 	// query parameters
 	query := flags.NewQueryTemplate()
-
-	commonOptions, err := cfg.GetOutputCommonOptions(cmd)
-	if err != nil {
-		return err
-	}
-
-	commonOptions.ResultProperty = "managedObjects"
-	commonOptions.AddQueryParameters(query)
-
-	c8yQueryParts, err := flags.WithC8YQueryOptions(
-		cmd,
-		inputIterators,
-		flags.WithStaticStringValue("smartgroup", "(type eq 'c8y_DynamicGroup')"),
-		flags.WithStringValue("name", "name", "(name eq '%s')"),
-		flags.WithStringValue("deviceQuery", "deviceQuery", "(c8y_DeviceQueryString eq '%s')"),
-		flags.WithStringValue("fragmentType", "fragmentType", "has(%s)"),
-		flags.WithStringValue("owner", "owner", "(owner eq '%s')"),
-		flags.WithBoolValue("onlyInvisible", "onlyInvisible", "has(c8y_IsDynamicGroup.invisible)"),
-		flags.WithBoolValue("onlyVisible", "onlyVisible", "not(has(c8y_IsDynamicGroup.invisible))"),
-	)
-
-	if err != nil {
-		return err
-	}
-
-	// Compile query
-	// replace all spaces with "+" due to url encoding
-	filter := url.QueryEscape(strings.Join(c8yQueryParts, " and "))
-	orderBy := "name"
-
-	if v, err := cmd.Flags().GetString("orderBy"); err == nil {
-		if v != "" {
-			orderBy = url.QueryEscape(v)
-		}
-	}
-
-	// q will automatically add a fragmentType=c8y_IsDevice to the query
-	query.SetVariable("query", fmt.Sprintf("$filter=%s+$orderby=%s", filter, orderBy))
-
 	err = flags.WithQueryParameters(
 		cmd,
 		query,
 		inputIterators,
-		flags.WithBoolValue("withParents", "withParents"),
 		flags.WithCustomStringSlice(func() ([]string, error) { return cfg.GetQueryParameters(), nil }, "custom"),
-		flags.WithCustomStringValue(
-			flags.BuildCumulocityQuery(cmd, c8yQueryParts, orderBy),
-			func() string { return "query" },
+
+		flags.WithCumulocityQuery(
+			[]flags.GetOption{
+				flags.WithStringValue("query", "query", "(%s)"),
+				flags.WithStaticStringValue("firmware", "(type eq 'c8y_Firmware')"),
+				flags.WithStringValue("name", "name", "(name eq '%s')"),
+				flags.WithStringValue("deviceType", "deviceType", "(c8y_Filter.type eq '%s')"),
+				flags.WithStringValue("description", "description", "(description eq '%s')"),
+			},
 			"query",
 		),
 	)
-
 	if err != nil {
-		return nil
+		return cmderrors.NewUserError(err)
 	}
+	commonOptions, err := cfg.GetOutputCommonOptions(cmd)
+	if err != nil {
+		return cmderrors.NewUserError(fmt.Sprintf("Failed to get common options. err=%s", err))
+	}
+	commonOptions.AddQueryParameters(query)
 
 	queryValue, err := query.GetQueryUnescape(true)
 
@@ -167,12 +133,36 @@ func (n *ListCmd) RunE(cmd *cobra.Command, args []string) error {
 
 	// form data
 	formData := make(map[string]io.Reader)
+	err = flags.WithFormDataOptions(
+		cmd,
+		formData,
+		inputIterators,
+	)
+	if err != nil {
+		return cmderrors.NewUserError(err)
+	}
 
 	// body
 	body := mapbuilder.NewInitializedMapBuilder(false)
+	err = flags.WithBody(
+		cmd,
+		body,
+		inputIterators,
+	)
+	if err != nil {
+		return cmderrors.NewUserError(err)
+	}
 
 	// path parameters
 	path := flags.NewStringTemplate("inventory/managedObjects")
+	err = flags.WithPathParameters(
+		cmd,
+		path,
+		inputIterators,
+	)
+	if err != nil {
+		return err
+	}
 
 	req := c8y.RequestOptions{
 		Method:       "GET",
@@ -181,8 +171,8 @@ func (n *ListCmd) RunE(cmd *cobra.Command, args []string) error {
 		Body:         body,
 		FormData:     formData,
 		Header:       headers,
-		DryRun:       cfg.ShouldUseDryRun(cmd.CommandPath()),
 		IgnoreAccept: cfg.IgnoreAcceptHeader(),
+		DryRun:       cfg.ShouldUseDryRun(cmd.CommandPath()),
 	}
 
 	return n.factory.RunWithWorkers(client, cmd, &req, inputIterators)

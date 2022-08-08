@@ -37,6 +37,9 @@ func NewListCmd(f *cmdutil.Factory) *ListCmd {
 		Example: heredoc.Doc(`
 $ c8y devices assets list --device 12345
 Get a list of the child assets of an existing device
+
+$ echo agentAssetInfo01 | c8y devices assets list --query "type eq 'custom*'"
+List child assets of a device but filter the children using a custom query
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
 			return nil
@@ -47,6 +50,10 @@ Get a list of the child assets of an existing device
 	cmd.SilenceUsage = true
 
 	cmd.Flags().StringSlice("device", []string{""}, "Device. (required) (accepts pipeline)")
+	cmd.Flags().String("query", "", "Additional query filter")
+	cmd.Flags().String("queryTemplate", "", "String template to be used when applying the given query. Use %s to reference the query/pipeline input")
+	cmd.Flags().String("orderBy", "", "Order by. e.g. _id asc or name asc or creationTime.date desc")
+	cmd.Flags().Bool("withChildren", false, "Determines if children with ID and name should be returned when fetching the managed object.")
 
 	completion.WithOptions(
 		cmd,
@@ -89,6 +96,14 @@ func (n *ListCmd) RunE(cmd *cobra.Command, args []string) error {
 		query,
 		inputIterators,
 		flags.WithCustomStringSlice(func() ([]string, error) { return cfg.GetQueryParameters(), nil }, "custom"),
+		flags.WithBoolValue("withChildren", "withChildren", ""),
+
+		flags.WithCumulocityQuery(
+			[]flags.GetOption{
+				flags.WithStringValue("query", "query", "(%s)"),
+			},
+			"query",
+		),
 	)
 	if err != nil {
 		return cmderrors.NewUserError(err)
