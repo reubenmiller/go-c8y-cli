@@ -128,6 +128,9 @@
           "description": "Name of the logger: Qualified name of package or class"
         }
       ],
+      "bodyRequiredKeys": [
+        "configuredLogLevel"
+      ],
       "body": [
         {
           "name": "logLevel",

@@ -107,6 +107,9 @@ endpoints:
         required: true
         description: 'Name of the logger: Qualified name of package or class'
     
+    bodyRequiredKeys:
+      - "configuredLogLevel"
+
     body:
       - name: logLevel
         type: string

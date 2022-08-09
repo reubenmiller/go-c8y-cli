@@ -144,6 +144,7 @@ func (n *SetCmd) RunE(cmd *cobra.Command, args []string) error {
 		flags.WithStringValue("logLevel", "configuredLogLevel"),
 		cmdutil.WithTemplateValue(cfg),
 		flags.WithTemplateVariablesValue(),
+		flags.WithRequiredProperties("configuredLogLevel"),
 	)
 	if err != nil {
 		return cmderrors.NewUserError(err)
