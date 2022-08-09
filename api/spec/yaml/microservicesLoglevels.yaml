@@ -1,0 +1,170 @@
+
+---
+
+information:
+  name: microservices/loglevels
+  description: Cumulocity microservice log levels
+  descriptionLong: |
+    Manage log levels of microservices.
+    Loggers define the log levels based on the qualified name of the Java class.
+    (This only works for Spring Boot microservices based on Cumulocity Java Microservice SDK)
+  link: https://cumulocity.com/guides/reference/applications/
+
+endpoints:
+  - name: list
+    description: List log levels of microservice
+    descriptionLong: |
+      List all log levels of microservice.
+      (This only works for Spring Boot microservices based on Cumulocity Java Microservice SDK)
+    method: GET
+    path: /service/{name}/loggers
+    accept: application/json
+    collectionProperty: loggers
+    alias:
+        go: list
+        powershell: Get-MicroserviceLogLevelCollection
+    examples:
+      powershell:
+        - description: List log levels of microservice
+          command: Get-MicroserviceLogLevelCollection -Name my-microservice
+
+      go:
+        - description: List log levels of microservice
+          command: c8y microservices loglevels list --name my-microservice
+
+    pathParameters:
+      - name: name
+        type: microservicename
+        required: true
+        description: Microservice name
+
+  - name: get
+    description: Get log level of microservice
+    descriptionLong: |
+      Get configured log level for a package (incl. subpackages), or a specific class.
+      (This only works for Spring Boot microservices based on Cumulocity Java Microservice SDK)
+    method: GET
+    path: /service/{name}/loggers/{loggerName}
+    accept: application/json
+    alias:
+        go: get
+        powershell: Get-MicroserviceLogLevel
+    examples:
+      powershell:
+        - description: Get log level of microservice for a package
+          command: Get-MicroserviceLogLevel -Name my-microservice -LoggerName org.example
+
+      go:
+        - description: Get log level of microservice for a package
+          command: c8y microservices loglevels get --name my-microservice --loggerName org.example
+
+        - description: Get log level of microservice for a specific class
+          command: c8y microservices loglevels get --name my-microservice --loggerName org.example.microservice.ClassName
+
+    pathParameters:
+      - name: name
+        type: microservicename
+        required: true
+        description: Microservice name
+
+      - name: loggerName
+        type: string
+        required: true
+        description: 'Name of the logger: Qualified name of package or class'
+
+  - name: set
+    description: Set log level of microservice
+    descriptionLong: |
+      Set configured log level for a package (incl. subpackages), or a specific class.
+      (This only works for Spring Boot microservices based on Cumulocity Java Microservice SDK)
+    method: POST
+    path: /service/{name}/loggers/{loggerName}
+    accept: application/json
+
+    alias:
+        go: set
+        powershell: Set-MicroserviceLogLevel
+    examples:
+      powershell:
+        - description: Set log level of microservice
+          command: Set-MicroserviceLogLevel -Name my-microservice -LoggerName org.example.microservice -LogLevel DEBUG
+
+      go:
+        - description: Set log level of microservice for a package
+          command: c8y microservices loglevels set --name my-microservice --loggerName org.example --logLevel DEBUG
+
+        - description: Set log level of microservice for a specific class
+          command: c8y microservices loglevels set --name my-microservice --loggerName org.example.microservice.ClassName --logLevel TRACE
+
+    pathParameters:
+      - name: name
+        type: microservicename
+        required: true
+        description: Microservice name
+
+      - name: loggerName
+        type: string
+        required: true
+        description: 'Name of the logger: Qualified name of package or class'
+    
+    body:
+      - name: logLevel
+        type: string
+        property: configuredLogLevel
+        required: true
+        validationSet:
+          - "TRACE"
+          - "DEBUG"
+          - "INFO"
+          - "WARN"
+          - "ERROR"
+          - "OFF"
+        
+        description: 'Log level: TRACE | DEBUG | INFO | WARN | ERROR | OFF'
+  
+  - name: delete
+    description: Delete configured log level of microservice
+    descriptionLong: |
+      Delete configured log level for a package (incl. subpackages), or a specific class.
+      This resets its value to the default log level.
+      (This only works for Spring Boot microservices based on Cumulocity Java Microservice SDK)
+    method: POST
+    path: /service/{name}/loggers/{loggerName}
+    accept: application/json
+
+    alias:
+        go: delete
+        powershell: Remove-MicroserviceLogLevel
+    examples:
+      powershell:
+        - description: Delete configured log level of microservice
+          command: Remove-MicroserviceLogLevel -Name my-microservice -LoggerName org.example.microservice
+
+      go:
+        - description: Delete configured log level of microservice for a package
+          command: c8y microservices loglevels delete --name my-microservice --loggerName org.example
+
+        - description: Delete configured log level of microservice for a specific class
+          command: c8y microservices loglevels delete --name my-microservice --loggerName org.example.microservice.ClassName
+
+    pathParameters:
+      - name: name
+        type: microservicename
+        required: true
+        description: Microservice name
+
+      - name: loggerName
+        type: string
+        required: true
+        description: 'Name of the logger: Qualified name of package or class'
+    
+    bodyTemplate:
+      type: jsonnet
+      template: |
+        {"configuredLogLevel":null}
+
+    body:
+      - name: logLevel
+        type: string
+        description: Hidden property as it is hardcoded within the bodyTemplate
+        hidden: true
