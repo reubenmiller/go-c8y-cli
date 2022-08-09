@@ -106,3 +106,14 @@ tests:
     stdout:
       contains:
         - creationTime.date ge '
+
+  devices_list_Get devices with type 'c8y_MacOS' then devices with type 'c8y_Linux' (using pipeline):
+    command: |
+      printf "c8y_MacOS\nc8y_Linux\n" \
+      | c8y devices list --queryTemplate "type eq '%s'" --dry \
+      | c8y util show --select pathEncoded -o csv
+    exit-code: 0
+    stdout:
+        exactly: |
+          /inventory/managedObjects?q=%24filter%3Dtype+eq+%27c8y_MacOS%27+%24orderby%3Dname
+          /inventory/managedObjects?q=%24filter%3Dtype+eq+%27c8y_Linux%27+%24orderby%3Dname

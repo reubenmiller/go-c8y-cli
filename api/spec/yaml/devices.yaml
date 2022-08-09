@@ -56,14 +56,11 @@ endpoints:
           command: c8y devices list --creationTimeDateTo -1d
           assertStdOut:
             contains:
-              - (creationTime.date ge '
+              - (creationTime.date le '
 
         - description: Get devices with type 'c8y_MacOS' then devices with type 'c8y_Linux' (using pipeline)
           command: echo -e "c8y_MacOS\nc8y_Linux" | c8y devices list --queryTemplate "type eq '%s'"
-          assertStdOut:
-            contains:
-              - type eq 'c8y_MacOS'
-              - type eq 'c8y_Linux'
+          skipTest: true
     
     queryParameters:
       - name: query
