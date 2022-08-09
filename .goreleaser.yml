@@ -14,9 +14,9 @@ builds:
       hooks:
         post:
           - echo "Copying binaries for PowerShell Module"
-          - cp "{{ .Path }}" output_pwsh/PSc8y/Dependencies/{{ .ProjectName }}_{{ .RawVersion }}_{{ if eq .Os "darwin" }}macOS{{ else }}{{ .Os }}{{ end }}_{{ .Arch }}{{ if eq .Os "windows" }}.exe{{ end }}
+          - bash -c 'test -d output_pwsh && cp "{{ .Path }}" output_pwsh/PSc8y/Dependencies/{{ .ProjectName }}_{{ .RawVersion }}_{{ if eq .Os "darwin" }}macOS{{ else }}{{ .Os }}{{ end }}_{{ .Arch }}{{ if eq .Os "windows" }}.exe{{ end }} || echo "Skipped pwsh output"'
 
-    id: macos
+    id: macOS
     goos: [darwin]
     goarch: [amd64, arm64]
 

@@ -37,6 +37,14 @@ func GetHostFromEnvironment() string {
 	return value
 }
 
+// WithCompression sets the compression option for the http client
+func WithCompression(enable bool) c8y.ClientOption {
+	return func(tr http.RoundTripper) http.RoundTripper {
+		tr.(*http.Transport).DisableCompression = !enable
+		return tr
+	}
+}
+
 func CreateCumulocityClient(f *cmdutil.Factory, sessionFile, username, password string, disableEncryptionCheck bool) func() (*c8y.Client, error) {
 	return func() (*c8y.Client, error) {
 		cfg, err := f.Config()
@@ -62,7 +70,13 @@ func CreateCumulocityClient(f *cmdutil.Factory, sessionFile, username, password 
 		httpClient := c8y.NewHTTPClient(
 			WithProxyDisabled(cfg.IgnoreProxy()),
 			c8y.WithInsecureSkipVerify(cfg.SkipSSLVerify()),
+			WithCompression(false),
 		)
+
+		cacheBodyPaths := cfg.CacheBodyKeys()
+		if len(cacheBodyPaths) > 0 {
+			log.Infof("Caching of body only includes paths: %s", strings.Join(cacheBodyPaths, ", "))
+		}
 
 		if cfg.CacheEnabled() && cfg.CacheTTL() > 0 {
 			cachableMethods := cfg.CacheMethods()
@@ -77,6 +91,7 @@ func CreateCumulocityClient(f *cmdutil.Factory, sessionFile, username, password 
 					ExcludeAuth: !cfg.CacheKeyIncludeAuth(),
 					ExcludeHost: !cfg.CacheKeyIncludeHost(),
 					Mode:        cfg.CacheMode(),
+					BodyKeys:    cacheBodyPaths,
 				},
 			)
 		}

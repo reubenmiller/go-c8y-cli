@@ -1,0 +1,4 @@
+tests:
+  It limits body caching to specific paths:
+    command: ./manual/cache/cacheBodyPaths.sh
+    exit-code: 0

@@ -19,6 +19,9 @@ $script:CompletionDefinitions = @( Get-ChildItem -Path "$ModuleRoot\completions\
 $script:UtilitiesDefinitions = @( Get-ChildItem -Path "$ModuleRoot\utilities\*.ps1" -ErrorAction SilentlyContinue )
 
 function New-ModulePSMFile {
+    [cmdletbinding()]
+    Param()
+
     $moduleFile = New-Item -Path $ArtifactRoot\$ModuleName\$ModuleName.psm1 -ItemType File -Force
 
     # Add the first part of the distributed .psm1 file from template.
@@ -26,27 +29,37 @@ function New-ModulePSMFile {
 
     # Add a region and write out the private functions.
     "`n#region Private Functions" | Out-File -FilePath $moduleFile -Append
-    Get-Content $PrivateFunctions | Out-String | Out-File -FilePath $moduleFile -Append
+    $PrivateFunctions | ForEach-Object {
+        Get-Content $_ | Out-String | Out-File -FilePath $moduleFile -Append
+    }
     "#endregion`n" | Out-File -FilePath $moduleFile -Append
 
     # Add a region and write out the public functions
     "#region Public Functions" | Out-File -FilePath $moduleFile -Append
-    Get-Content $PublicFunctions | Out-String | Out-File -FilePath $moduleFile -Append
+    $PublicFunctions | ForEach-Object {
+        Get-Content $_ | Out-String | Out-File -FilePath $moduleFile -Append
+    }
     "#endregion`n" | Out-File -FilePath $moduleFile -Append
 
     # Add a region for Enums
     "#region Enums" | Out-File -FilePath $moduleFile -Append
-    Get-Content $EnumDefinitions | Out-String | Out-File -FilePath $moduleFile -Append
+    $EnumDefinitions | ForEach-Object {
+        Get-Content $_ | Out-String | Out-File -FilePath $moduleFile -Append
+    }
     "#endregion`n" | Out-File -FilePath $moduleFile -Append
 
     # Add a region for Completions
     "#region Completions" | Out-File -FilePath $moduleFile -Append
-    Get-Content $CompletionDefinitions | Out-String | Out-File -FilePath $moduleFile -Append
+    $CompletionDefinitions | ForEach-Object {
+        Get-Content $_ | Out-String | Out-File -FilePath $moduleFile -Append
+    }
     "#endregion`n" | Out-File -FilePath $moduleFile -Append
 
     # Add a region for Utilities
     "#region Utilities" | Out-File -FilePath $moduleFile -Append
-    Get-Content $UtilitiesDefinitions | Out-String | Out-File -FilePath $moduleFile -Append
+    $UtilitiesDefinitions | ForEach-Object {
+        Get-Content $_ | Out-String | Out-File -FilePath $moduleFile -Append
+    }
     "#endregion`n" | Out-File -FilePath $moduleFile -Append
 
     # Build a string to export only /public/psmexports functions from the PSModule.psm1 file.
@@ -66,6 +79,7 @@ function New-ModulePSMFile {
 }
 
 Function Get-GitVersion {
+    [cmdletbinding()]
     Param()
     $version = git describe
 
@@ -89,12 +103,14 @@ Function Get-GitVersion {
 }
 
 function Update-ModuleManifestFunctions {
+    [cmdletbinding()]
+    Param()
     # Update the psd1 file with the /public/psgetfunctions
     # Update-ModuleManifest is not used because a) it is not availabe for ps version <5.0 and b) it is destructive.
     # First a helper method removes the functions and replaces with the standard FunctionsToExport = @()
     # then this string is replaced by another string built from /public/psgetfunctions
 
-    $ManifestFile = "$ModuleRoot\$ModuleName.psd1"
+    $ManifestFile = "$ModuleRoot/$ModuleName.psd1"
 
     # Call helper function to replace with an empty FunctionsToExport = @()
     Remove-ModuleManifestFunctions -Path $ManifestFile
@@ -118,6 +134,7 @@ function Update-ModuleManifestFunctions {
 }
 
 Function Set-ModuleManifestVersion {
+    [cmdletbinding()]
     Param(
         [Parameter(
             Mandatory = $true
@@ -127,14 +144,25 @@ Function Set-ModuleManifestVersion {
 
     # Update version info from the git tag
     $VersionInfo = Get-GitVersion
+
+    if (Get-Command chmod) {
+        chmod a+rw $Path
+    }
+
+    Write-Verbose "Updating version to $($VersionInfo.Version) to module [$($Path)]"
     Update-ModuleManifest -Path $Path -ModuleVersion $VersionInfo.Version
 
     if ($VersionInfo.IsPrerelease) {
+        Write-Verbose "Updating prerelease version to $($VersionInfo.PreRelease) to module [$($Path)]"
         Update-ModuleManifest -Path $Path -Prerelease $VersionInfo.PreRelease
     }
 }
 
-function Remove-ModuleManifestFunctions ($Path) {
+function Remove-ModuleManifestFunctions {
+    [cmdletbinding()]
+    Param(
+        [string] $Path
+    )
     # Utility method to remove the list of functions from a manifest. This is specific to this modules manifest and
     # assumes the next item in the manifest file after the functions is a comment containing 'VariablesToExport'.
 
@@ -152,6 +180,8 @@ function Remove-ModuleManifestFunctions ($Path) {
 }
 
 function Publish-ModuleArtifacts {
+    [cmdletbinding()]
+    Param()
 
     if (Test-Path -Path $ArtifactRoot) {
         # Note: Remove-item fails in DevContainer for some unknown reason,
@@ -168,16 +198,16 @@ function Publish-ModuleArtifacts {
     $null = New-Item -Path $ArtifactRoot -ItemType Directory -Force
     
     # Copy the module into the dist folder
-    Copy-Item -Path "$ModuleRoot\Dependencies\" -Filter "c8y*" -Destination "$ArtifactRoot\$ModuleName\Dependencies" -Recurse
-    Copy-Item -Path "$ModuleRoot\format-data" -Destination "$ArtifactRoot\$ModuleName\" -Recurse
-    Copy-Item -Path "$ModuleRoot\Templates" -Destination "$ArtifactRoot\$ModuleName\" -Recurse
-    Copy-Item -Path "$ModuleRoot\$ModuleName.psd1" -Destination "$ArtifactRoot\$ModuleName\" -Recurse
+    Copy-Item -Path "$ModuleRoot/Dependencies/" -Filter "c8y*" -Destination "$ArtifactRoot/$ModuleName/Dependencies" -Recurse
+    Copy-Item -Path "$ModuleRoot/format-data" -Destination "$ArtifactRoot/$ModuleName/" -Recurse
+    Copy-Item -Path "$ModuleRoot/Templates" -Destination "$ArtifactRoot/$ModuleName/" -Recurse
+    Copy-Item -Path "$ModuleRoot/$ModuleName.psd1" -Destination "$ArtifactRoot/$ModuleName/"
 
     # Construct the distributed .psm1 file.
     New-ModulePSMFile
 
     # Update version
-    Set-ModuleManifestVersion -Path "$ArtifactRoot\$ModuleName\$ModuleName.psd1"
+    Set-ModuleManifestVersion -Path "$ArtifactRoot/$ModuleName/$ModuleName.psd1"
 
     # Package the module in /dist
     $zipFileName = "$ModuleName.zip"
@@ -199,6 +229,9 @@ function Publish-ModuleArtifacts {
 }
 
 function Export-ProductionModule {
+    [cmdletbinding()]
+    Param()
+
     Update-ModuleManifestFunctions
     Publish-ModuleArtifacts
 

@@ -396,7 +396,7 @@ func (lh *LoginHandler) verify() {
 	lh.do(func() error {
 		tenant, resp, err := lh.C8Yclient.Tenant.GetCurrentTenant(context.Background())
 
-		if resp != nil && resp.StatusCode == http.StatusUnauthorized {
+		if resp != nil && resp.StatusCode() == http.StatusUnauthorized {
 
 			if v, ok := err.(*c8y.ErrorResponse); ok {
 				lh.Logger.Infof("error message from server. %s", v.Message)
@@ -473,15 +473,15 @@ func (lh *LoginHandler) setupTFA() error {
 		return err
 	}
 
-	lh.Logger.Infof("secret-raw: %s", *resp.JSONData)
+	lh.Logger.Infof("secret-raw: %s", resp.String())
 
 	secretQRURL := ""
-	if v := resp.JSON.Get("secretQrUrl"); v.Exists() {
+	if v := resp.JSON("secretQrUrl"); v.Exists() {
 		secretQRURL = v.String()
 	}
 
 	// Display TOTP secret
-	if v := resp.JSON.Get("rawSecret"); v.Exists() {
+	if v := resp.JSON("rawSecret"); v.Exists() {
 		totpURL := fmt.Sprintf("otpauth://totp/%s?secret=%s&issuer=%s", lh.C8Yclient.Username, v.String(), lh.C8Yclient.BaseURL.Host)
 		qrterminal.GenerateWithConfig(totpURL, qrterminal.Config{
 			Level:     qrterminal.M,
