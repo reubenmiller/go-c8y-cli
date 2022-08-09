@@ -34,7 +34,7 @@ tests:
     exit-code: 0
     stdout:
       exactly: |
-        {"method":"GET","query":"q=$filter=name eq '*a*' $orderby=_id desc"}
+        {"method":"GET","query":"q=$filter=name eq '*a*' and has(c8y_IsDevice) $orderby=_id desc"}
 
   It finds inventory managed objects using a template query:
     command: |
@@ -49,7 +49,7 @@ tests:
   It handles empty device query string:
     command: |
       c8y template execute --template "{c8y_DeviceQueryString: ''}" |
-        c8y inventory find --orderBy "_id desc" --dry |
+        c8y inventory find --orderBy "_id desc" --dry --dryFormat json |
         c8y util show --select method,query
     exit-code: 0
     stdout:

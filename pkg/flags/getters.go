@@ -852,6 +852,10 @@ func WithCumulocityQuery(queryOptions []GetOption, opts ...string) GetOption {
 
 		queryIterator := c8yquery.NewCumulocityQueryIterator()
 
+		if templateValue, templateErr := cmd.Flags().GetString("queryTemplate"); templateErr == nil && templateValue != "" {
+			queryIterator.QueryTemplate = templateValue
+		}
+
 		for _, currentOpt := range queryOptions {
 
 			iDst, iValue, iErr := currentOpt(cmd, inputIterators)

@@ -1,3 +1,7 @@
+config:
+    env:
+         C8Y_SETTINGS_DEFAULTS_DRY: true
+         C8Y_SETTINGS_DEFAULTS_DRYFORMAT: json
 tests:
     devices/additions_list_Get a list of the child additions of an existing device:
         command: c8y devices additions list --device 12345

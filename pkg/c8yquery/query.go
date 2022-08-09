@@ -16,25 +16,45 @@ type QueryPart struct {
 }
 
 type CumulocityQueryIterator struct {
-	Filter     []QueryPart
-	FilterJoin string
-	OrderBy    []string
+	Filter        []QueryPart
+	FilterJoin    string
+	OrderBy       []string
+	QueryTemplate string
 }
 
 func NewCumulocityQueryIterator() *CumulocityQueryIterator {
 	return &CumulocityQueryIterator{
-		FilterJoin: " and ",
+		FilterJoin:    " and ",
+		QueryTemplate: "%s",
 	}
 }
 
+func UnescapeValue(format, value string) string {
+	v, err := url.QueryUnescape(fmt.Sprintf(format, value))
+
+	if err != nil {
+		return value
+	}
+	return v
+}
+
 func (i *CumulocityQueryIterator) GetNext() (line []byte, input interface{}, err error) {
+
+	if len(i.Filter) == 0 && len(i.OrderBy) == 0 {
+		return []byte{}, "", nil
+	}
+
 	queryParts := make([]string, 0)
 	for _, part := range i.Filter {
+		format := "%s"
+		if part.Name == "query" {
+			format = i.QueryTemplate
+		}
 
 		switch value := part.Value.(type) {
 		case string:
 			if value != "" {
-				queryParts = append(queryParts, value)
+				queryParts = append(queryParts, UnescapeValue(format, value))
 			}
 		case iterator.Iterator:
 			line, _, err := value.GetNext()
@@ -42,21 +62,17 @@ func (i *CumulocityQueryIterator) GetNext() (line []byte, input interface{}, err
 				return nil, nil, err
 			}
 			if len(line) > 0 {
-				queryParts = append(queryParts, string(line))
+				queryParts = append(queryParts, UnescapeValue(format, string(line)))
 			}
 		}
 	}
 
 	parts := make([]string, 0)
-	if len(queryParts) > 0 {
-		parts = append(parts, "$filter="+url.QueryEscape(strings.Join(queryParts, i.FilterJoin)))
-	}
+	parts = append(parts, "$filter="+url.QueryEscape(strings.Join(queryParts, i.FilterJoin)))
 
-	if len(i.OrderBy) == 0 {
-		i.OrderBy = append(i.OrderBy, "name")
+	if len(i.OrderBy) > 0 {
+		parts = append(parts, "$orderby="+url.QueryEscape(strings.Join(i.OrderBy, " ")))
 	}
-
-	parts = append(parts, "$orderby="+url.QueryEscape(strings.Join(i.OrderBy, " ")))
 
 	return []byte(strings.Join(parts, "+")), "", nil
 }

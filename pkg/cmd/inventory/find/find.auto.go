@@ -37,8 +37,8 @@ func NewFindCmd(f *cmdutil.Factory) *FindCmd {
 $ c8y inventory find --query "name eq 'roomUpperFloor_*'"
 Get a list of managed objects
 
-$ echo "myname" | c8y inventory find --queryTemplate "name eq '*%s*'" --onlyDevices
-Find devices which include myname in their names. query=$filter=name eq '*myname*'
+$ echo "myname" | c8y inventory find --queryTemplate "name eq '*%s*'"
+Find managed objects which include myname in their names. query=$filter=name eq '*myname*'
 
 $ echo "name eq 'name'" | c8y inventory find --queryTemplate 'not(%s)'
 Invert a given query received via piped input (stdin) by using a template
@@ -54,7 +54,7 @@ Invert a given query received via piped input (stdin) by using a template
 	cmd.Flags().String("query", "", "ManagedObject query (required) (accepts pipeline)")
 	cmd.Flags().String("queryTemplate", "", "String template to be used when applying the given query. Use %s to reference the query/pipeline input")
 	cmd.Flags().String("orderBy", "", "Order by. e.g. _id asc or name asc or creationTime.date desc")
-	cmd.Flags().Bool("onlyDevices", false, "Only include devices")
+	cmd.Flags().Bool("onlyDevices", false, "Only include devices (deprecated)")
 	cmd.Flags().Bool("withParents", false, "include a flat list of all parents and grandparents of the given object")
 
 	completion.WithOptions(
@@ -69,6 +69,8 @@ Invert a given query received via piped input (stdin) by using a template
 	)
 
 	// Required flags
+
+	_ = cmd.Flags().MarkHidden("onlyDevices")
 
 	ccmd.SubCommand = subcommand.NewSubCommand(cmd)
 

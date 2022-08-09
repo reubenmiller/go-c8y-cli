@@ -75,7 +75,7 @@ tests:
     exit-code: 0
     stdout:
       exactly: |
-        q=$filter=has(com_cumulocity_model_Agent) and type eq 'type1' $orderby=name
+        q=$filter=type eq 'type1' and has(com_cumulocity_model_Agent) $orderby=name
 
   It filters devices by availability:
     command: |

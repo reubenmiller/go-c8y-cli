@@ -60,7 +60,7 @@ Get devices with type 'c8y_MacOS' then devices with type 'c8y_Linux' (using pipe
 
 	cmd.Flags().String("query", "", "Additional query filter (accepts pipeline)")
 	cmd.Flags().String("queryTemplate", "", "String template to be used when applying the given query. Use %s to reference the query/pipeline input")
-	cmd.Flags().String("orderBy", "", "Order by. e.g. _id asc or name asc or creationTime.date desc")
+	cmd.Flags().String("orderBy", "name", "Order by. e.g. _id asc or name asc or creationTime.date desc")
 	cmd.Flags().String("name", "", "Filter by name")
 	cmd.Flags().String("type", "", "Filter by type")
 	cmd.Flags().Bool("agents", false, "Only include agents")

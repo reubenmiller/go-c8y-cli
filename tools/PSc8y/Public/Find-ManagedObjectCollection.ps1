@@ -13,7 +13,7 @@ https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/inventory_find
 .EXAMPLE
 PS> Find-ManagedObjectCollection -Query "name eq 'roomUpperFloor_*'"
 
-Find all devices with their names starting with 'roomUpperFloor_'
+Find all managed objects with their names starting with 'roomUpperFloor_'
 
 
 #>

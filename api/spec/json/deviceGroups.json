@@ -58,6 +58,7 @@
             {
               "name": "orderBy",
               "type": "string",
+              "default": "name",
               "description": "Order by. e.g. _id asc or name asc or creationTime.date desc"
             },
             {
@@ -115,7 +116,8 @@
         },
         {
           "name": "withChildren",
-          "type": "boolean",
+          "type": "booleanDefault",
+          "default": "false",
           "description": "Include names of child assets (only use where necessary as it is slow for large groups)"
         }
       ]

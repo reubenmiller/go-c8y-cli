@@ -463,7 +463,7 @@ func Test_DebugStdinCommand(t *testing.T) {
 	// stdin.Write(`{"source":{"id":"1111"}}` + "\n")
 
 	cmdtext := `
-	devicemanagement certificates get --id tedge04
+	inventory find --query "name eq '*'" --queryTemplate "not(%s)" --dry
 	`
 	cmdErr := ExecuteCmd(cmd, strings.TrimSpace(cmdtext))
 

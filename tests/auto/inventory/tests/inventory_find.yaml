@@ -1,6 +1,6 @@
 tests:
-    inventory_find_Find devices which include myname in their names. query=$filter=name eq '*myname*':
-        command: $TEST_SHELL -c 'echo "myname" | c8y inventory find --queryTemplate "name eq '*%s*'" --onlyDevices'
+    inventory_find_Find managed objects which include myname in their names. query=$filter=name eq '*myname*':
+        command: $TEST_SHELL -c 'echo "myname" | c8y inventory find --queryTemplate "name eq '*%s*'"'
         exit-code: 0
         skip: true
         stdout:
@@ -9,7 +9,6 @@ tests:
                 path: /inventory/managedObjects
             contains:
                 - queryTemplate=name eq '*%s*'
-                - onlyDevices=has(c8y_IsDevice)
     inventory_find_Get a list of managed objects:
         command: c8y inventory find --query "name eq 'roomUpperFloor_*'"
         exit-code: 0

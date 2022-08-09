@@ -6,7 +6,7 @@ Describe -Name "Find-ManagedObjectCollection" {
 
     }
 
-    It "Find all devices with their names starting with 'roomUpperFloor_'" {
+    It "Find all managed objects with their names starting with 'roomUpperFloor_'" {
         $Response = PSc8y\Find-ManagedObjectCollection -Query "name eq 'roomUpperFloor_*'"
         $LASTEXITCODE | Should -Be 0
         $Response | Should -Not -BeNullOrEmpty

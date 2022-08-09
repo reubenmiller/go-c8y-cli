@@ -318,7 +318,7 @@
       "examples": {
         "powershell": [
           {
-            "description": "Find all devices with their names starting with 'roomUpperFloor_'",
+            "description": "Find all managed objects with their names starting with 'roomUpperFloor_'",
             "beforeEach": [
               "$Device = New-TestDevice -Name \"roomUpperFloor_\""
             ],
@@ -335,8 +335,8 @@
             "skipTest": true
           },
           {
-            "description": "Find devices which include myname in their names. query=$filter=name eq '*myname*'",
-            "command": "echo \"myname\" | c8y inventory find --queryTemplate \"name eq '*%s*'\" --onlyDevices",
+            "description": "Find managed objects which include myname in their names. query=$filter=name eq '*myname*'",
+            "command": "echo \"myname\" | c8y inventory find --queryTemplate \"name eq '*%s*'\"",
             "skipTest": true
           },
           {
@@ -377,7 +377,8 @@
             {
               "name": "onlyDevices",
               "type": "booleanDefault",
-              "description": "Only include devices",
+              "hidden": true,
+              "description": "Only include devices (deprecated)",
               "value": "has(c8y_IsDevice)"
             }
           ]
