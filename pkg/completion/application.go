@@ -182,7 +182,7 @@ func WithMicroserviceLoggers(flagName string, flagNameMicroserviceName string, c
 
 			pattern := "*" + toComplete + "*"
 
-			resp.JSON.Get("loggers").ForEach(func(key, value gjson.Result) bool {
+			resp.JSON("loggers").ForEach(func(key, value gjson.Result) bool {
 				if toComplete == "" || MatchString(pattern, key.String()) {
 					values = append(values, key.String())
 				}
