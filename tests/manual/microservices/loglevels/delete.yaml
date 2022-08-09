@@ -1,6 +1,6 @@
 # yaml-language-server: $schema=https://raw.githubusercontent.com/reubenmiller/commander/feat/handle-nested-files/schema.json
 tests:
-    microservices_setLogLevel_Clear log level of microservice for a specific class:
+    Delete configured log level of microservice for a specific class:
         command: | 
           c8y microservices loglevels delete --name my-microservice --loggerName org.example.microservice.ClassName --dry --dryFormat json \
           | c8y util show --select body.configuredLogLevel,method,path -o json -c
