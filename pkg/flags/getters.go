@@ -55,7 +55,7 @@ func WithQueryParameters(cmd *cobra.Command, query *QueryTemplate, inputIterator
 		case map[string]string:
 			for key, val := range v {
 				if val != "" {
-					query.SetVariable(key, val)
+					query.SetVariable(key, url.EscapeQueryString(val))
 				}
 			}
 		default:
@@ -416,7 +416,7 @@ func WithCustomStringSlice(valuesFunc func() ([]string, error), opts ...string) 
 
 		outputValues := make(map[string]string)
 		for _, v := range values {
-			parts := strings.SplitN(v, ":", 2)
+			parts := strings.Split(v, ":")
 			if len(parts) != 2 {
 				parts = strings.SplitN(v, "=", 2)
 				if len(parts) != 2 {
