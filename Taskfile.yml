@@ -253,8 +253,7 @@ tasks:
   test-powershell:
     desc: Run powershell tests
     cmds:
-      - export C8Y_BINARY=$(which c8y)
-      - pwsh -ExecutionPolicy bypass -NonInteractive -File tools/PSc8y/test.ps1
+      - env C8Y_BINARY=$(which c8y) pwsh -ExecutionPolicy bypass -NonInteractive -File tools/PSc8y/test.ps1
 
   install-test-dependencies:
     desc: Install test dependencies
