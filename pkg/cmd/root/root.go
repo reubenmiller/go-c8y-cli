@@ -67,6 +67,7 @@ import (
 	measurementsSubscribeCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/measurements/subscribe"
 	microservicesCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/microservices"
 	microservicesCreateCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/microservices/create"
+	microservicesLogLevelsCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/microservices/loglevels"
 	microservicesServiceUserCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/microservices/serviceuser"
 	operationsCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/operations"
 	operationsAssertCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/operations/assert"
@@ -343,6 +344,7 @@ func NewCmdRoot(f *cmdutil.Factory, version, buildDate string) *CmdRoot {
 	microservices := microservicesCmd.NewSubCommand(f).GetCommand()
 	microservices.AddCommand(microservicesCreateCmd.NewCmdCreate(f).GetCommand())
 	microservices.AddCommand(microservicesServiceUserCmd.NewSubCommand(f).GetCommand())
+	microservices.AddCommand(microservicesLogLevelsCmd.NewSubCommand(f).GetCommand())
 	cmd.AddCommand(microservices)
 
 	// inventory
