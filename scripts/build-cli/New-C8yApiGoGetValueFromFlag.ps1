@@ -105,6 +105,9 @@
         # microservice instance
         "microserviceinstance" = "flags.WithStringValue(`"${prop}`", `"${queryParam}`"),"
 
+        # microservice name
+        "microservicename" = "flags.WithStringValue(`"${prop}`", `"${queryParam}`"),"
+
         # devicerequest array
         "[]devicerequest" = "c8yfetcher.WithIDSlice(args, `"${prop}`", `"${queryParam}`"),"
 

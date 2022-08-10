@@ -170,6 +170,7 @@
         "json",
         "json_custom",
         "microservice",
+        "microservicename",
         "microserviceinstance",
         "queryExpression",
         "string",

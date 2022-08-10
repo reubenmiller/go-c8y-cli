@@ -98,6 +98,7 @@
         "json_custom" { "object"; break }
         "microservice" { "object[]"; break }
         "microserviceinstance" { "string"; break }
+        "microservicename" { "object[]"; break }
         "set" { "object[]"; break }
         "source" { "object"; break }
         "string" { "string"; break }

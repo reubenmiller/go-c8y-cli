@@ -1,0 +1,17 @@
+tests:
+    microservices/loglevels_set_Set log level of microservice for a package:
+        command: c8y microservices loglevels set --name my-microservice --loggerName org.example --logLevel DEBUG
+        exit-code: 0
+        stdout:
+            json:
+                body.configuredLogLevel: DEBUG
+                method: POST
+                path: /service/my-microservice/loggers/org.example
+    microservices/loglevels_set_Set log level of microservice for a specific class:
+        command: c8y microservices loglevels set --name my-microservice --loggerName org.example.microservice.ClassName --logLevel TRACE
+        exit-code: 0
+        stdout:
+            json:
+                body.configuredLogLevel: TRACE
+                method: POST
+                path: /service/my-microservice/loggers/org.example.microservice.ClassName
