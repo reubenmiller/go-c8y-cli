@@ -107,7 +107,8 @@ Describe -Name "Common parameters" {
             "Remove-AlarmCollection",
             "Remove-EventCollection",
             "Remove-OperationCollection",
-            "Remove-ChildDeviceFromDevice"
+            "Remove-ChildDeviceFromDevice",
+            "Add-ChildAdditionToDevice"
         )
         $cmdlets = Get-Command -Module PSc8y -Name "*" -CommandType Function |
             Where-Object {

@@ -49,7 +49,7 @@
             }
             @{
                 Command = $iExample.command
-                Description = $iExample.description
+                Description = $iExample.description -replace "`"", "`'"
                 BeforeEach = $iExample.beforeEach
                 AfterEach = $iExample.afterEach
             }

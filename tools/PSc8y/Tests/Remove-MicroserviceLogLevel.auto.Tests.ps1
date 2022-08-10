@@ -5,7 +5,7 @@ Describe -Name "Remove-MicroserviceLogLevel" {
 
     }
 
-    It "Delete configured log level of microservice" {
+    It -Skip "Delete configured log level of microservice" {
         $Response = PSc8y\Remove-MicroserviceLogLevel -Name my-microservice -LoggerName org.example.microservice
         $LASTEXITCODE | Should -Be 0
         $Response | Should -Not -BeNullOrEmpty

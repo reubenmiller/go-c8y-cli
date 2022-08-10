@@ -36,7 +36,7 @@ func NewListCmd(f *cmdutil.Factory) *ListCmd {
 		Long:  `Get a collection of device groups based on filter parameters`,
 		Example: heredoc.Doc(`
 $ c8y devicegroups list --name "MyGroup*"
-Get a collection of device groups with names that start with "MyGroup"
+Get a collection of device groups with names that start with 'MyGroup'
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
 			return nil

@@ -143,7 +143,7 @@
           },
           {
             "description": "Get a list of child devices which a specific type",
-            "command": "\"agentParent01\" | Get-ChildDeviceCollection -Query \"type eq 'custom*'\"\n"
+            "command": "Get-Device -Name \"agentParent01\" | Get-ChildDeviceCollection -Query \"type eq 'custom*'\"\n"
           }
         ],
         "go": [

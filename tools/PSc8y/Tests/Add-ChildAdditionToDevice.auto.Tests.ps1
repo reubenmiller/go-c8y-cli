@@ -8,7 +8,7 @@ Describe -Name "Add-ChildAdditionToDevice" {
     }
 
     It "Assign a managed object as a child addition to an existing device" {
-        $Response = PSc8y\Add-ChildDeviceToDevice -Device $Device.id -Child $ChildDevice.id
+        $Response = PSc8y\Add-ChildAdditionToDevice -Device $Device.id -Child $ChildDevice.id
         $LASTEXITCODE | Should -Be 0
         $Response | Should -Not -BeNullOrEmpty
     }

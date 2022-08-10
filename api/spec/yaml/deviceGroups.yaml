@@ -19,10 +19,10 @@ endpoints:
         powershell: Get-DeviceGroupCollection
     examples:
       powershell:
-        - description: Get a collection of device groups with names that start with "MyGroup"
+        - description: Get a collection of device groups with names that start with 'MyGroup'
           command: Get-DeviceGroupCollection -Name "MyGroup*"
       go:
-        - description: Get a collection of device groups with names that start with "MyGroup"
+        - description: Get a collection of device groups with names that start with 'MyGroup'
           command: c8y devicegroups list --name "MyGroup*"
           assertStdOut:
             contains:

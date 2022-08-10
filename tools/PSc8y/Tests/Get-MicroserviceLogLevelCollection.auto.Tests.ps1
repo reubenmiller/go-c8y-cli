@@ -5,7 +5,7 @@ Describe -Name "Get-MicroserviceLogLevelCollection" {
 
     }
 
-    It "List log levels of microservice" {
+    It -Skip "List log levels of microservice" {
         $Response = PSc8y\Get-MicroserviceLogLevelCollection -Name my-microservice
         $LASTEXITCODE | Should -Be 0
         $Response | Should -Not -BeNullOrEmpty

@@ -12,7 +12,7 @@ Describe -Name "Get-ChildDeviceCollection" {
     }
 
     It "Get a list of child devices which a specific type" {
-        $Response = PSc8y\"agentParent01" | Get-ChildDeviceCollection -Query "type eq 'custom*'"
+        $Response = PSc8y\Get-Device -Name "agentParent01" | Get-ChildDeviceCollection -Query "type eq 'custom*'"
 
         $LASTEXITCODE | Should -Be 0
         $Response | Should -Not -BeNullOrEmpty

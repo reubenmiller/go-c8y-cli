@@ -14,6 +14,8 @@ if (Get-Module PSc8y) {
 	Remove-Module PSc8y -Force
 }
 
+# Check if local binary is available
+
 Write-Verbose "PSScriptRoot: $PSScriptRoot";
 #Import-Module Pester -MinimumVersion "5.0.0" -MaximumVersion "5.100.0"
 $modulepath = Resolve-Path "$PSScriptRoot/../dist/PSc8y/PSc8y.psd1"

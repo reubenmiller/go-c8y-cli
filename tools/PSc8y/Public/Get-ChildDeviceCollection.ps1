@@ -16,7 +16,7 @@ PS> Get-ChildDeviceCollection -Device agentParent01
 Get a list of the child devices of an existing device
 
 .EXAMPLE
-PS> "agentParent01" | Get-ChildDeviceCollection -Query "type eq 'custom*'"
+PS> Get-Device -Name "agentParent01" | Get-ChildDeviceCollection -Query "type eq 'custom*'"
 
 
 Get a list of child devices which a specific type

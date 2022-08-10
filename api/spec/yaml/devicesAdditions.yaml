@@ -24,7 +24,7 @@ endpoints:
           beforeEach:
             - $Device = PSc8y\New-TestDevice
             - $ChildDevice = PSc8y\New-TestDevice
-          command: Add-ChildDeviceToDevice -Device $Device.id -Child $ChildDevice.id
+          command: Add-ChildAdditionToDevice -Device $Device.id -Child $ChildDevice.id
           afterEach:
             - PSc8y\Remove-ManagedObject -Id $ChildDevice.id
             - PSc8y\Remove-ManagedObject -Id $Device.id
@@ -69,7 +69,7 @@ endpoints:
           beforeEach:
             - $Device = PSc8y\New-TestDevice
             - $ChildDevice = PSc8y\New-TestDevice
-            - PSc8y\Add-ChildDeviceToDevice -Device $Device.id -NewChild $ChildDevice.id
+            - PSc8y\Add-ChildDeviceToDevice -Device $Device.id -Child $ChildDevice.id
           command: Remove-ChildDeviceFromDevice -Device $Device.id -ChildDevice $ChildDevice.id
           afterEach:
             - PSc8y\Remove-ManagedObject -Id $ChildDevice.id
@@ -105,7 +105,7 @@ endpoints:
           beforeEach:
             - $Agent = New-TestAgent
             - $Device = New-TestDevice
-            - $Ref = Add-ChildDeviceToDevice -Device $Agent.id -NewChild $Device.id
+            - $Ref = Add-ChildDeviceToDevice -Device $Agent.id -Child $Device.id
           command: Get-ChildDeviceReference -Device $Agent.id -Child $Ref.id
           afterEach:
             - Remove-ManagedObject -Id $Device.id

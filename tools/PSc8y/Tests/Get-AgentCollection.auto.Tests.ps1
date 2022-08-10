@@ -6,7 +6,7 @@ Describe -Name "Get-AgentCollection" {
 
     }
 
-    It -Skip "Get a collection of agents with type "myType", and their names start with "sensor"" {
+    It -Skip "Get a collection of agents with type 'myType', and their names start with 'sensor'" {
         $Response = PSc8y\Get-AgentCollection -Name "sensor*" -Type myType
         $LASTEXITCODE | Should -Be 0
         $Response | Should -Not -BeNullOrEmpty

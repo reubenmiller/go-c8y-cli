@@ -6,7 +6,7 @@ Describe -Name "Get-DeviceCollection" {
 
     }
 
-    It -Skip "c8y devices list --name "sensor*" --type myType" {
+    It -Skip "c8y devices list --name 'sensor*' --type myType" {
         $Response = PSc8y\Get-DeviceCollection -Name "sensor*" -Type myType
         $LASTEXITCODE | Should -Be 0
         $Response | Should -Not -BeNullOrEmpty

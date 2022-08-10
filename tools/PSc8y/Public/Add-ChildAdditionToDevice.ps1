@@ -11,7 +11,7 @@ Create a child addition reference to an existing device
 https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/devices_additions_assign
 
 .EXAMPLE
-PS> Add-ChildDeviceToDevice -Device $Device.id -Child $ChildDevice.id
+PS> Add-ChildAdditionToDevice -Device $Device.id -Child $ChildDevice.id
 
 Assign a managed object as a child addition to an existing device
 

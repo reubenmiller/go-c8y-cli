@@ -13,7 +13,7 @@ https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/devicegroups_list
 .EXAMPLE
 PS> Get-DeviceGroupCollection -Name "MyGroup*"
 
-Get a collection of device groups with names that start with "MyGroup"
+Get a collection of device groups with names that start with 'MyGroup'
 
 
 #>
