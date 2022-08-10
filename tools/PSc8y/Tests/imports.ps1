@@ -10,6 +10,8 @@ if ($env:SKIP_IMPORT -eq "true") {
 	return
 }
 
+$PSModuleAutoloadingPreference = “none”
+
 if (Get-Module PSc8y) {
 	Remove-Module PSc8y -Force
 }
