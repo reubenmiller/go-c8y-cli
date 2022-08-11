@@ -22,9 +22,8 @@ Find all managed objects with their names starting with 'roomUpperFloor_'
     [Alias()]
     [OutputType([object])]
     Param(
-        # ManagedObject query (required)
-        [Parameter(Mandatory = $true,
-                   ValueFromPipeline=$true,
+        # ManagedObject query
+        [Parameter(ValueFromPipeline=$true,
                    ValueFromPipelineByPropertyName=$true)]
         [object[]]
         $Query,
@@ -38,6 +37,62 @@ Find all managed objects with their names starting with 'roomUpperFloor_'
         [Parameter()]
         [string]
         $OrderBy,
+
+        # Filter by name
+        [Parameter()]
+        [string]
+        $Name,
+
+        # Filter by type
+        [Parameter()]
+        [string]
+        $Type,
+
+        # Only include agents
+        [Parameter()]
+        [switch]
+        $Agents,
+
+        # Filter by fragment type
+        [Parameter()]
+        [string]
+        $FragmentType,
+
+        # Filter by owner
+        [Parameter()]
+        [string]
+        $Owner,
+
+        # Filter by c8y_Availability.status
+        [Parameter()]
+        [ValidateSet('AVAILABLE','UNAVAILABLE','MAINTENANCE')]
+        [string]
+        $Availability,
+
+        # Filter c8y_Availability.lastMessage to a specific date
+        [Parameter()]
+        [string]
+        $LastMessageDateTo,
+
+        # Filter c8y_Availability.lastMessage from a specific date
+        [Parameter()]
+        [string]
+        $LastMessageDateFrom,
+
+        # Filter creationTime.date to a specific date
+        [Parameter()]
+        [string]
+        $CreationTimeDateTo,
+
+        # Filter creationTime.date from a specific date
+        [Parameter()]
+        [string]
+        $CreationTimeDateFrom,
+
+        # Filter by group inclusion
+        [Parameter()]
+        [object[]]
+        $Group,
 
         # Only include devices (deprecated)
         [Parameter()]

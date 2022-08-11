@@ -7,6 +7,7 @@ import (
 	"net/http"
 
 	"github.com/MakeNowJust/heredoc/v2"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/c8yfetcher"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/subcommand"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
@@ -51,20 +52,33 @@ Invert a given query received via piped input (stdin) by using a template
 
 	cmd.SilenceUsage = true
 
-	cmd.Flags().String("query", "", "ManagedObject query (required) (accepts pipeline)")
+	cmd.Flags().String("query", "", "ManagedObject query (accepts pipeline)")
 	cmd.Flags().String("queryTemplate", "", "String template to be used when applying the given query. Use %s to reference the query/pipeline input")
 	cmd.Flags().String("orderBy", "", "Order by. e.g. _id asc or name asc or creationTime.date desc")
+	cmd.Flags().String("name", "", "Filter by name")
+	cmd.Flags().String("type", "", "Filter by type")
+	cmd.Flags().Bool("agents", false, "Only include agents")
+	cmd.Flags().String("fragmentType", "", "Filter by fragment type")
+	cmd.Flags().String("owner", "", "Filter by owner")
+	cmd.Flags().String("availability", "", "Filter by c8y_Availability.status")
+	cmd.Flags().String("lastMessageDateTo", "", "Filter c8y_Availability.lastMessage to a specific date")
+	cmd.Flags().String("lastMessageDateFrom", "", "Filter c8y_Availability.lastMessage from a specific date")
+	cmd.Flags().String("creationTimeDateTo", "", "Filter creationTime.date to a specific date")
+	cmd.Flags().String("creationTimeDateFrom", "", "Filter creationTime.date from a specific date")
+	cmd.Flags().StringSlice("group", []string{""}, "Filter by group inclusion")
 	cmd.Flags().Bool("onlyDevices", false, "Only include devices (deprecated)")
 	cmd.Flags().Bool("withParents", false, "include a flat list of all parents and grandparents of the given object")
 
 	completion.WithOptions(
 		cmd,
+		completion.WithValidateSet("availability", "AVAILABLE", "UNAVAILABLE", "MAINTENANCE"),
+		completion.WithDeviceGroup("group", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
 	)
 
 	flags.WithOptions(
 		cmd,
 
-		flags.WithExtendedPipelineSupport("query", "query", true, "c8y_DeviceQueryString"),
+		flags.WithExtendedPipelineSupport("query", "query", false, "c8y_DeviceQueryString"),
 		flags.WithCollectionProperty("managedObjects"),
 	)
 
@@ -104,6 +118,17 @@ func (n *FindCmd) RunE(cmd *cobra.Command, args []string) error {
 		flags.WithCumulocityQuery(
 			[]flags.GetOption{
 				flags.WithStringValue("query", "query", "(%s)"),
+				flags.WithStringValue("name", "name", "(name eq '%s')"),
+				flags.WithStringValue("type", "type", "(type eq '%s')"),
+				flags.WithDefaultBoolValue("agents", "agents", "has(com_cumulocity_model_Agent)"),
+				flags.WithStringValue("fragmentType", "fragmentType", "has(%s)"),
+				flags.WithStringValue("owner", "owner", "(owner eq '%s')"),
+				flags.WithStringValue("availability", "availability", "(c8y_Availability.status eq '%s')"),
+				flags.WithEncodedRelativeTimestamp("lastMessageDateTo", "lastMessageDateTo", "(c8y_Availability.lastMessage le '%s')"),
+				flags.WithEncodedRelativeTimestamp("lastMessageDateFrom", "lastMessageDateFrom", "(c8y_Availability.lastMessage ge '%s')"),
+				flags.WithEncodedRelativeTimestamp("creationTimeDateTo", "creationTimeDateTo", "(creationTime.date le '%s')"),
+				flags.WithEncodedRelativeTimestamp("creationTimeDateFrom", "creationTimeDateFrom", "(creationTime.date ge '%s')"),
+				c8yfetcher.WithDeviceGroupByNameFirstMatch(client, args, "group", "group", "bygroupid(%s)"),
 				flags.WithDefaultBoolValue("onlyDevices", "onlyDevices", "has(c8y_IsDevice)"),
 			},
 			"query",

@@ -303,7 +303,7 @@
       ]
     },
     {
-      "name": "queryManagedObjectCollection",
+      "name": "findManagedObjectCollection",
       "method": "GET",
       "description": "Find managed object collection",
       "descriptionLong": "Get a collection of managedObjects based on the Cumulocity query language",
@@ -358,7 +358,7 @@
               "type": "string",
               "description": "ManagedObject query",
               "format": "(%s)",
-              "required": true,
+              "required": false,
               "pipeline": true,
               "pipelineAliases": [
                 "c8y_DeviceQueryString"
@@ -373,6 +373,77 @@
               "name": "orderBy",
               "type": "string",
               "description": "Order by. e.g. _id asc or name asc or creationTime.date desc"
+            },
+            {
+              "name": "name",
+              "type": "string",
+              "description": "Filter by name",
+              "format": "(name eq '%s')"
+            },
+            {
+              "name": "type",
+              "type": "string",
+              "description": "Filter by type",
+              "format": "(type eq '%s')"
+            },
+            {
+              "name": "agents",
+              "type": "booleanDefault",
+              "description": "Only include agents",
+              "value": "has(com_cumulocity_model_Agent)"
+            },
+            {
+              "name": "fragmentType",
+              "type": "string",
+              "description": "Filter by fragment type",
+              "format": "has(%s)"
+            },
+            {
+              "name": "owner",
+              "type": "string",
+              "description": "Filter by owner",
+              "format": "(owner eq '%s')"
+            },
+            {
+              "name": "availability",
+              "type": "string",
+              "description": "Filter by c8y_Availability.status",
+              "format": "(c8y_Availability.status eq '%s')",
+              "validationSet": [
+                "AVAILABLE",
+                "UNAVAILABLE",
+                "MAINTENANCE"
+              ]
+            },
+            {
+              "name": "lastMessageDateTo",
+              "type": "datetime",
+              "description": "Filter c8y_Availability.lastMessage to a specific date",
+              "format": "(c8y_Availability.lastMessage le '%s')"
+            },
+            {
+              "name": "lastMessageDateFrom",
+              "type": "datetime",
+              "description": "Filter c8y_Availability.lastMessage from a specific date",
+              "format": "(c8y_Availability.lastMessage ge '%s')"
+            },
+            {
+              "name": "creationTimeDateTo",
+              "type": "datetime",
+              "description": "Filter creationTime.date to a specific date",
+              "format": "(creationTime.date le '%s')"
+            },
+            {
+              "name": "creationTimeDateFrom",
+              "type": "datetime",
+              "description": "Filter creationTime.date from a specific date",
+              "format": "(creationTime.date ge '%s')"
+            },
+            {
+              "name": "group",
+              "type": "[]devicegroup",
+              "description": "Filter by group inclusion",
+              "format": "bygroupid(%s)"
             },
             {
               "name": "onlyDevices",
