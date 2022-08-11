@@ -264,7 +264,9 @@ tasks:
 
   test-cli:
     desc: Test cli tests
-    deps: [test-cli-auto, test-cli-manual]
+    cmds:
+      - task: test-cli-auto
+      - task: test-cli-manual
 
   test-cli-manual:
     desc: Run manual cli tests
