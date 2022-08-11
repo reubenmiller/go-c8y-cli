@@ -91,22 +91,22 @@ create_smartgroup () {
 
 create_agent () {
     local name="$1"
-    c8y agents get --id "$name" --silentStatusCodes 404 ||
-        c8y agents create \
+    c8y agents get -n --id "$name" --silentStatusCodes 404 ||
+        c8y agents create -n \
             --name "$name"
 }
 
 create_mo_with_name () {
     local name="$1"
 
-    existing_mo=$(c8y inventory find --query "name eq '$name'")
+    existing_mo=$(c8y inventory find -n --query "name eq '$name'")
 
     if [[ -n "$existing_mo" ]]; then
         echo "$existing_mo"
         return
     fi
 
-    c8y inventory create --name "$name"
+    c8y inventory create -n --name "$name"
 }
 
 create_child_device () {
