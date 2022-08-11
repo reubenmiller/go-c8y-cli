@@ -193,7 +193,7 @@
           },
           {
             "description": "List child assets of a device but filter the children using a custom query",
-            "command": "\"agentAssetInfo01\" | Get-DeviceChildAssetCollection -Query \"type eq 'custom*'\"\n"
+            "command": "Get-Device -Id \"agentAssetInfo01\" | Get-DeviceChildAssetCollection -Query \"type eq 'custom*'\"\n"
           }
         ],
         "go": [

@@ -16,7 +16,7 @@ PS> Get-DeviceChildAssetCollection -Device agentAssetInfo01
 Get a list of the child assets of an existing device
 
 .EXAMPLE
-PS> "agentAssetInfo01" | Get-DeviceChildAssetCollection -Query "type eq 'custom*'"
+PS> Get-Device -Id "agentAssetInfo01" | Get-DeviceChildAssetCollection -Query "type eq 'custom*'"
 
 
 List child assets of a device but filter the children using a custom query
