@@ -291,7 +291,7 @@ tasks:
       task test-cli-auto -- software 
     deps: [install-test-dependencies]
     cmds:
-      - ./tests/scripts/setup.sh
+      - ./tests/scripts/setup.sh || true
       - ./tests/run-auto.sh {{.CLI_ARGS}}
 
   test-installation:
