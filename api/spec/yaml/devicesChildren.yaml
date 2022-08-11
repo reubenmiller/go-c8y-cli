@@ -108,7 +108,7 @@ endpoints:
         
         - description: Get a list of child devices which a specific type
           command: |
-            Get-Device -Name "agentParent01" | Get-ChildDeviceCollection -Query "type eq 'custom*'"
+            Get-Device -Id "agentParent01" | Get-ChildDeviceCollection -Query "type eq 'custom*'"
 
       go:
         - description: Get a list of the child devices of an existing device

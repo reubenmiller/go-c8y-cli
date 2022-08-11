@@ -143,7 +143,7 @@ endpoints:
 
         - description: List child additions of a device but filter the children using a custom query
           command: |
-            "agentAdditionInfo01" | Get-DeviceChildAdditionCollection -Query "type eq 'custom*'"
+            Get-Device -Id "agentAdditionInfo01" | Get-DeviceChildAdditionCollection -Query "type eq 'custom*'"
 
       go:
         - description: Get a list of the child additions of an existing device
