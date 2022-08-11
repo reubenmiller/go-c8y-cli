@@ -83,6 +83,7 @@ Find an agent by name, then find other agents which the same type
 		cmd,
 
 		flags.WithExtendedPipelineSupport("query", "query", false, "c8y_DeviceQueryString"),
+		flags.WithCollectionProperty("managedObjects"),
 	)
 
 	// Required flags

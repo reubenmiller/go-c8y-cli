@@ -84,6 +84,7 @@ Get devices with type 'c8y_MacOS' then devices with type 'c8y_Linux' (using pipe
 		cmd,
 
 		flags.WithExtendedPipelineSupport("query", "query", false, "c8y_DeviceQueryString"),
+		flags.WithCollectionProperty("managedObjects"),
 	)
 
 	// Required flags

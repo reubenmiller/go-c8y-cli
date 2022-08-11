@@ -67,6 +67,7 @@ Get a collection of device groups with names that start with 'parent'
 		cmd,
 
 		flags.WithExtendedPipelineSupport("query", "query", false, "c8y_DeviceQueryString"),
+		flags.WithCollectionProperty("managedObjects"),
 	)
 
 	// Required flags

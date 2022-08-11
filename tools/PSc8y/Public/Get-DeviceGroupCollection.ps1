@@ -79,7 +79,7 @@ Get a collection of device groups with names that start with 'parent'
         $WithChildren
     )
     DynamicParam {
-        Get-ClientCommonParameters -Type "Get"
+        Get-ClientCommonParameters -Type "Get", "Collection"
     }
 
     Begin {
@@ -92,8 +92,8 @@ Get a collection of device groups with names that start with 'parent'
         $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "devicegroups list"
         $ClientOptions = Get-ClientOutputOption $PSBoundParameters
         $TypeOptions = @{
-            Type = "application/vnd.com.nsn.cumulocity.customDeviceGroup+json"
-            ItemType = ""
+            Type = "application/vnd.com.nsn.cumulocity.managedobjectcollection+json"
+            ItemType = "application/vnd.com.nsn.cumulocity.customDeviceGroup+json"
             BoundParameters = $PSBoundParameters
         }
     }

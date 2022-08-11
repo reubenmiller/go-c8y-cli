@@ -95,7 +95,7 @@ Get a collection of agents with type "myType", and their names start with "senso
         $WithParents
     )
     DynamicParam {
-        Get-ClientCommonParameters -Type "Get"
+        Get-ClientCommonParameters -Type "Get", "Collection"
     }
 
     Begin {
@@ -108,8 +108,8 @@ Get a collection of agents with type "myType", and their names start with "senso
         $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "agents list"
         $ClientOptions = Get-ClientOutputOption $PSBoundParameters
         $TypeOptions = @{
-            Type = "application/vnd.com.nsn.cumulocity.customAgent+json"
-            ItemType = ""
+            Type = "application/vnd.com.nsn.cumulocity.managedobjectcollection+json"
+            ItemType = "application/vnd.com.nsn.cumulocity.customAgent+json"
             BoundParameters = $PSBoundParameters
         }
     }

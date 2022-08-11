@@ -12,7 +12,9 @@
       "descriptionLong": "Get a collection of agents based on filter parameters",
       "method": "GET",
       "path": "inventory/managedObjects",
-      "accept": "application/vnd.com.nsn.cumulocity.customAgent+json",
+      "accept": "application/vnd.com.nsn.cumulocity.managedobjectcollection+json",
+      "collectionType": "application/vnd.com.nsn.cumulocity.customAgent+json",
+      "collectionProperty": "managedObjects",
       "alias": {
         "go": "list",
         "powershell": "Get-AgentCollection"

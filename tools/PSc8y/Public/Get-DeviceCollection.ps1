@@ -100,7 +100,7 @@ c8y devices list --name "sensor*" --type myType
         $WithParents
     )
     DynamicParam {
-        Get-ClientCommonParameters -Type "Get"
+        Get-ClientCommonParameters -Type "Get", "Collection"
     }
 
     Begin {
@@ -113,8 +113,8 @@ c8y devices list --name "sensor*" --type myType
         $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "devices list"
         $ClientOptions = Get-ClientOutputOption $PSBoundParameters
         $TypeOptions = @{
-            Type = "application/vnd.com.nsn.cumulocity.customDevice+json"
-            ItemType = ""
+            Type = "application/vnd.com.nsn.cumulocity.managedobjectcollection+json"
+            ItemType = "application/vnd.com.nsn.cumulocity.customDevice+json"
             BoundParameters = $PSBoundParameters
         }
     }
