@@ -123,7 +123,16 @@
     }
 
     if ($Specification.queryParameters) {
-        $null = $ArgumentSources.AddRange(([array]$Specification.queryParameters))
+        foreach ($item in $Specification.queryParameters) {
+            if ($item.children) {
+                # Ignore the item, and only use the children to build the cli arguments
+                $null = $ArgumentSources.AddRange(([array]$item.children | Where-Object {
+                    $_.type -ne "stringStatic"
+                }))
+            } else {
+                $null = $ArgumentSources.Add($item)
+            }
+        }
     }
 
     if ($Specification.body) {
