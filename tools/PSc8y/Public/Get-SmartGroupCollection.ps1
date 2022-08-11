@@ -27,6 +27,52 @@ Get a list of smart groups with the names starting with 'myText'
     [Alias()]
     [OutputType([object])]
     Param(
+        # Additional query filter
+        [Parameter(ValueFromPipeline=$true,
+                   ValueFromPipelineByPropertyName=$true)]
+        [object[]]
+        $Query,
+
+        # String template to be used when applying the given query. Use %s to reference the query/pipeline input
+        [Parameter()]
+        [string]
+        $QueryTemplate,
+
+        # Order by. e.g. _id asc or name asc or creationTime.date desc
+        [Parameter()]
+        [string]
+        $OrderBy,
+
+        # Filter by name
+        [Parameter()]
+        [string]
+        $Name,
+
+        # Filter by device query
+        [Parameter()]
+        [string]
+        $DeviceQuery,
+
+        # Filter by fragment type
+        [Parameter()]
+        [string]
+        $FragmentType,
+
+        # Filter by owner
+        [Parameter()]
+        [string]
+        $Owner,
+
+        # Only include invisible smart groups
+        [Parameter()]
+        [switch]
+        $OnlyInvisible,
+
+        # Only include visible smart groups
+        [Parameter()]
+        [switch]
+        $OnlyVisible,
+
         # Include a flat list of all parents and grandparents of the given object
         [Parameter()]
         [switch]
@@ -55,12 +101,17 @@ Get a list of smart groups with the names starting with 'myText'
     Process {
 
         if ($ClientOptions.ConvertToPS) {
-            c8y smartgroups list $c8yargs `
+            $Query `
+            | Group-ClientRequests `
+            | c8y smartgroups list $c8yargs `
             | ConvertFrom-ClientOutput @TypeOptions
         }
         else {
-            c8y smartgroups list $c8yargs
+            $Query `
+            | Group-ClientRequests `
+            | c8y smartgroups list $c8yargs
         }
+        
     }
 
     End {}

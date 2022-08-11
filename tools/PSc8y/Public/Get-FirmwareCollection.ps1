@@ -22,7 +22,36 @@ Get a list of firmware packages
     [Alias()]
     [OutputType([object])]
     Param(
+        # Additional query filter
+        [Parameter(ValueFromPipeline=$true,
+                   ValueFromPipelineByPropertyName=$true)]
+        [object[]]
+        $Query,
 
+        # String template to be used when applying the given query. Use %s to reference the query/pipeline input
+        [Parameter()]
+        [string]
+        $QueryTemplate,
+
+        # Order by. e.g. _id asc or name asc or creationTime.date desc
+        [Parameter()]
+        [string]
+        $OrderBy,
+
+        # Filter by name
+        [Parameter()]
+        [string]
+        $Name,
+
+        # Filter by deviceType
+        [Parameter()]
+        [string]
+        $DeviceType,
+
+        # Filter by description
+        [Parameter()]
+        [string]
+        $Description
     )
     DynamicParam {
         Get-ClientCommonParameters -Type "Get", "Collection"
@@ -47,12 +76,17 @@ Get a list of firmware packages
     Process {
 
         if ($ClientOptions.ConvertToPS) {
-            c8y firmware list $c8yargs `
+            $Query `
+            | Group-ClientRequests `
+            | c8y firmware list $c8yargs `
             | ConvertFrom-ClientOutput @TypeOptions
         }
         else {
-            c8y firmware list $c8yargs
+            $Query `
+            | Group-ClientRequests `
+            | c8y firmware list $c8yargs
         }
+        
     }
 
     End {}

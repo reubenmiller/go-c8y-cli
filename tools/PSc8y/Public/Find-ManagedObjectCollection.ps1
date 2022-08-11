@@ -22,6 +22,28 @@ Find all managed objects with their names starting with 'roomUpperFloor_'
     [Alias()]
     [OutputType([object])]
     Param(
+        # ManagedObject query (required)
+        [Parameter(Mandatory = $true,
+                   ValueFromPipeline=$true,
+                   ValueFromPipelineByPropertyName=$true)]
+        [object[]]
+        $Query,
+
+        # String template to be used when applying the given query. Use %s to reference the query/pipeline input
+        [Parameter()]
+        [string]
+        $QueryTemplate,
+
+        # Order by. e.g. _id asc or name asc or creationTime.date desc
+        [Parameter()]
+        [string]
+        $OrderBy,
+
+        # Only include devices (deprecated)
+        [Parameter()]
+        [switch]
+        $OnlyDevices,
+
         # include a flat list of all parents and grandparents of the given object
         [Parameter()]
         [switch]
@@ -50,12 +72,17 @@ Find all managed objects with their names starting with 'roomUpperFloor_'
     Process {
 
         if ($ClientOptions.ConvertToPS) {
-            c8y inventory find $c8yargs `
+            $Query `
+            | Group-ClientRequests `
+            | c8y inventory find $c8yargs `
             | ConvertFrom-ClientOutput @TypeOptions
         }
         else {
-            c8y inventory find $c8yargs
+            $Query `
+            | Group-ClientRequests `
+            | c8y inventory find $c8yargs
         }
+        
     }
 
     End {}

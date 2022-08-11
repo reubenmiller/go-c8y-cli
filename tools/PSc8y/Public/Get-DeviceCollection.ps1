@@ -22,6 +22,78 @@ c8y devices list --name "sensor*" --type myType
     [Alias()]
     [OutputType([object])]
     Param(
+        # Additional query filter
+        [Parameter(ValueFromPipeline=$true,
+                   ValueFromPipelineByPropertyName=$true)]
+        [object[]]
+        $Query,
+
+        # String template to be used when applying the given query. Use %s to reference the query/pipeline input
+        [Parameter()]
+        [string]
+        $QueryTemplate,
+
+        # Order by. e.g. _id asc or name asc or creationTime.date desc
+        [Parameter()]
+        [string]
+        $OrderBy,
+
+        # Filter by name
+        [Parameter()]
+        [string]
+        $Name,
+
+        # Filter by type
+        [Parameter()]
+        [string]
+        $Type,
+
+        # Only include agents
+        [Parameter()]
+        [switch]
+        $Agents,
+
+        # Filter by fragment type
+        [Parameter()]
+        [string]
+        $FragmentType,
+
+        # Filter by owner
+        [Parameter()]
+        [string]
+        $Owner,
+
+        # Filter by c8y_Availability.status
+        [Parameter()]
+        [ValidateSet('AVAILABLE','UNAVAILABLE','MAINTENANCE')]
+        [string]
+        $Availability,
+
+        # Filter c8y_Availability.lastMessage to a specific date
+        [Parameter()]
+        [string]
+        $LastMessageDateTo,
+
+        # Filter c8y_Availability.lastMessage from a specific date
+        [Parameter()]
+        [string]
+        $LastMessageDateFrom,
+
+        # Filter creationTime.date to a specific date
+        [Parameter()]
+        [string]
+        $CreationTimeDateTo,
+
+        # Filter creationTime.date from a specific date
+        [Parameter()]
+        [string]
+        $CreationTimeDateFrom,
+
+        # Filter by group inclusion
+        [Parameter()]
+        [object[]]
+        $Group,
+
         # Include a flat list of all parents and grandparents of the given object
         [Parameter()]
         [switch]
@@ -50,12 +122,17 @@ c8y devices list --name "sensor*" --type myType
     Process {
 
         if ($ClientOptions.ConvertToPS) {
-            c8y devices list $c8yargs `
+            $Query `
+            | Group-ClientRequests `
+            | c8y devices list $c8yargs `
             | ConvertFrom-ClientOutput @TypeOptions
         }
         else {
-            c8y devices list $c8yargs
+            $Query `
+            | Group-ClientRequests `
+            | c8y devices list $c8yargs
         }
+        
     }
 
     End {}

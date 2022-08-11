@@ -26,6 +26,7 @@ setup () {
 
     create_child_device "agentParent01" "child"
     create_device_with_assets "agentAssetInfo01" "childAsset"
+    create_device_with_additions "agentAdditionInfo01" "childAddition"
 
     create_app "my-example-app"
     create_service_user "technician"
@@ -125,6 +126,16 @@ create_device_with_assets () {
     parent=$(create_agent "$parentName" | c8y util show --select id --output csv )
     create_mo_with_name "${childNamePrefix}01" | c8y inventory update --data 'type=custominfo' | c8y devices assets assign --device "$parent" --silentStatusCodes 409 --silentExit
     create_mo_with_name "${childNamePrefix}02" | c8y inventory update --data 'type=custominfo' | c8y devices assets assign --device "$parent" --silentStatusCodes 409 --silentExit
+}
+
+create_device_with_additions () {
+    local parentName=$1
+    local childNamePrefix=$2
+    local parent=
+
+    parent=$(create_agent "$parentName" | c8y util show --select id --output csv )
+    create_mo_with_name "${childNamePrefix}01" | c8y inventory update --data 'type=custominfo' | c8y devices additions assign --device "$parent" --silentStatusCodes 409 --silentExit
+    create_mo_with_name "${childNamePrefix}02" | c8y inventory update --data 'type=custominfo' | c8y devices additions assign --device "$parent" --silentStatusCodes 409 --silentExit
 }
 
 create_firmware () {

@@ -16,7 +16,7 @@ PS> Get-DeviceChildAdditionCollection -Device agentAdditionInfo01
 Get a list of the child additions of an existing device
 
 .EXAMPLE
-PS> "agentAdditionInfo01" | Get-DeviceChildAdditionCollection -Query "type eq 'custom*'"
+PS> Get-Device -Id "agentAdditionInfo01" | Get-DeviceChildAdditionCollection -Query "type eq 'custom*'"
 
 
 List child additions of a device but filter the children using a custom query
@@ -34,6 +34,21 @@ List child additions of a device but filter the children using a custom query
                    ValueFromPipelineByPropertyName=$true)]
         [object[]]
         $Device,
+
+        # Additional query filter
+        [Parameter()]
+        [string]
+        $Query,
+
+        # String template to be used when applying the given query. Use %s to reference the query/pipeline input
+        [Parameter()]
+        [string]
+        $QueryTemplate,
+
+        # Order by. e.g. _id asc or name asc or creationTime.date desc
+        [Parameter()]
+        [string]
+        $OrderBy,
 
         # Determines if children with ID and name should be returned when fetching the managed object.
         [Parameter()]

@@ -16,7 +16,7 @@ PS> Get-ChildDeviceCollection -Device agentParent01
 Get a list of the child devices of an existing device
 
 .EXAMPLE
-PS> Get-Device -Name "agentParent01" | Get-ChildDeviceCollection -Query "type eq 'custom*'"
+PS> Get-Device -Id "agentParent01" | Get-ChildDeviceCollection -Query "type eq 'custom*'"
 
 
 Get a list of child devices which a specific type
@@ -34,6 +34,21 @@ Get a list of child devices which a specific type
                    ValueFromPipelineByPropertyName=$true)]
         [object[]]
         $Device,
+
+        # Additional query filter
+        [Parameter()]
+        [string]
+        $Query,
+
+        # String template to be used when applying the given query. Use %s to reference the query/pipeline input
+        [Parameter()]
+        [string]
+        $QueryTemplate,
+
+        # Order by. e.g. _id asc or name asc or creationTime.date desc
+        [Parameter()]
+        [string]
+        $OrderBy,
 
         # Determines if children with ID and name should be returned when fetching the managed object. Set it to false to improve query performance.
         [Parameter()]
