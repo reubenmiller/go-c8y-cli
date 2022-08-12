@@ -31,9 +31,12 @@ func NewListAssetsCmd(f *cmdutil.Factory) *ListAssetsCmd {
 		factory: f,
 	}
 	cmd := &cobra.Command{
-		Use:   "listAssets",
-		Short: "Get child asset collection",
-		Long:  `Get a collection of managedObjects child references`,
+		Use:        "listAssets",
+		Short:      "Get child asset collection",
+		Long:       `Get a collection of managedObjects child references`,
+		Deprecated: "please use 'c8y devices assets list' instead",
+		Hidden:     true,
+
 		Example: heredoc.Doc(`
 $ c8y devices listAssets --id 12345
 Get a list of the child devices of an existing device

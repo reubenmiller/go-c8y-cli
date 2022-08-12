@@ -38,6 +38,19 @@
     $RESTPath = $Specification.path -replace " ", "%20"
     $RESTMethod = $Specification.method
 
+    $CommandOptions = New-Object System.Text.StringBuilder
+
+    if ($Specification.deprecated) {
+        $CommandOptions.AppendLine("`t`tDeprecated: `"$($Specification.deprecated)`",")
+    }
+    if ($Specification.hidden) {
+        $CommandOptions.AppendLine("`t`tHidden: true,")
+    }
+
+    if ($CommandOptions.Length -gt 0) {
+        $CommandOptions.Insert(0, "`n")
+    }
+
     #
     # Arguments
     #
@@ -50,7 +63,16 @@
 
     # Query parameters
     if ($Specification.queryParameters) {
-        $null = $ArgumentSources.AddRange(([array]$Specification.queryParameters))
+        foreach ($item in $Specification.queryParameters) {
+            if ($item.children) {
+                # Ignore the item, and only use the children to build the cli arguments
+                $null = $ArgumentSources.AddRange(([array]$item.children | Where-Object {
+                    $_.type -ne "stringStatic"
+                }))
+            } else {
+                $null = $ArgumentSources.Add($item)
+            }
+        }
     }
 
     # Body parameters
@@ -353,12 +375,40 @@
     # Query parameters
     #
     $RESTQueryBuilderWithValues = New-Object System.Text.StringBuilder
+    $CumulocityQueryExpressionBuilder = New-Object System.Text.StringBuilder
     $RESTQueryBuilderPost = New-Object System.Text.StringBuilder
+
     if ($Specification.queryParameters) {
+        # TODO: Handle special case of an item with .children
         foreach ($Properties in (Remove-SkippedParameters $Specification.queryParameters)) {
-            $code = New-C8yApiGoGetValueFromFlag -Parameters $Properties -SetterType "query"
-            if ($code) {
-                $null = $RESTQueryBuilderWithValues.AppendLine($code)
+
+            if ($Properties.type -eq "queryExpression" -and $Properties.children) {
+
+                $null = $CumulocityQueryExpressionBuilder.AppendLine("		flags.WithCumulocityQuery(")
+                $null = $CumulocityQueryExpressionBuilder.AppendLine("			[]flags.GetOption{")
+                
+                foreach ($child in $Properties.children) {
+
+                    # Ignore special in-built values as these are handled separately
+                    if ($child.name -in @("queryTemplate", "orderBy")) {
+                        continue
+                    }
+
+                    # Special case to handle Cumulocity query language builder
+                    $code = New-C8yApiGoGetValueFromFlag -Parameters $child -SetterType "query"
+                    if ($code) {
+                        $null = $CumulocityQueryExpressionBuilder.AppendLine($code)
+                    }
+                }
+                $null = $CumulocityQueryExpressionBuilder.AppendLine("			},")
+                $null = $CumulocityQueryExpressionBuilder.AppendLine("			`"$($Properties.property || $Properties.name)`",")
+                $null = $CumulocityQueryExpressionBuilder.AppendLine("		),")
+
+            } else {
+                $code = New-C8yApiGoGetValueFromFlag -Parameters $Properties -SetterType "query"
+                if ($code) {
+                    $null = $RESTQueryBuilderWithValues.AppendLine($code)
+                }
             }
         }
     }
@@ -472,7 +522,7 @@ func New${NameCamel}Cmd(f *cmdutil.Factory) *${NameCamel}Cmd {
 	cmd := &cobra.Command{
 		Use:   "$Use",
 		Short: "$Description",
-		Long:  ``$DescriptionLong``,
+		Long:  ``$DescriptionLong``,$CommandOptions
         Example: heredoc.Doc(``
 $($Examples -join "`n`n")
         ``),
@@ -550,6 +600,7 @@ func (n *${NameCamel}Cmd) RunE(cmd *cobra.Command, args []string) error {
         inputIterators,
         flags.WithCustomStringSlice(func() ([]string, error) { return cfg.GetQueryParameters(), nil }, "custom"),
         $RESTQueryBuilderWithValues
+        $CumulocityQueryExpressionBuilder
     )
     if err != nil {
 		return cmderrors.NewUserError(err)
@@ -972,6 +1023,18 @@ Function Get-C8yGoArgs {
         }
 
         "string" {
+            $SetFlag = if ($UseOption) {
+                'cmd.Flags().StringP("{0}", "{1}", "{2}", "{3}")' -f $Name, $OptionName, $Default, $Description
+            } else {
+                'cmd.Flags().String("{0}", "{1}", "{2}")' -f $Name, $Default, $Description
+            }
+
+            @{
+                SetFlag = $SetFlag
+            }
+        }
+
+        "stringStatic" {
             $SetFlag = if ($UseOption) {
                 'cmd.Flags().StringP("{0}", "{1}", "{2}", "{3}")' -f $Name, $OptionName, $Default, $Description
             } else {

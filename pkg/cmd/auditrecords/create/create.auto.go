@@ -140,7 +140,7 @@ func (n *CreateCmd) RunE(cmd *cobra.Command, args []string) error {
 		flags.WithOverrideValue("source", "source.id"),
 		flags.WithDataFlagValue(),
 		flags.WithStringValue("type", "type"),
-		flags.WithRelativeTimestamp("time", "time", ""),
+		flags.WithRelativeTimestamp("time", "time"),
 		flags.WithStringValue("text", "text"),
 		flags.WithStringValue("source", "source.id"),
 		flags.WithStringValue("activity", "activity"),

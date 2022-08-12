@@ -4,12 +4,12 @@ Describe -Name "Get-ChildDeviceReference" {
     BeforeEach {
         $Agent = New-TestAgent
         $Device = New-TestDevice
-        $Ref = Add-ChildDeviceToDevice -Device $Agent.id -NewChild $Device.id
+        $Ref = Add-ChildDeviceToDevice -Device $Agent.id -Child $Device.id
 
     }
 
     It "Get an existing child device reference" {
-        $Response = PSc8y\Get-ChildDeviceReference -Device $Agent.id -Reference $Ref.id
+        $Response = PSc8y\Get-ChildDeviceReference -Device $Agent.id -Child $Ref.id
         $LASTEXITCODE | Should -Be 0
         $Response | Should -Not -BeNullOrEmpty
     }

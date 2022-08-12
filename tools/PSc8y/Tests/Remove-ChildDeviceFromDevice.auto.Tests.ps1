@@ -4,12 +4,12 @@ Describe -Name "Remove-ChildDeviceFromDevice" {
     BeforeEach {
         $Device = PSc8y\New-TestDevice
         $ChildDevice = PSc8y\New-TestDevice
-        PSc8y\Add-ChildDeviceToDevice -Device $Device.id -NewChild $ChildDevice.id
+        PSc8y\Add-ChildDeviceToDevice -Device $Device.id -Child $ChildDevice.id
 
     }
 
     It "Unassign a child device from its parent device" {
-        $Response = PSc8y\Remove-ChildDeviceFromDevice -Device $Device.id -ChildDevice $ChildDevice.id
+        $Response = PSc8y\Remove-ChildDeviceFromDevice -Device $Device.id -Child $ChildDevice.id
         $LASTEXITCODE | Should -Be 0
     }
 

@@ -1,0 +1,11 @@
+tests:
+    devicegroups_list_Get a collection of device groups with names that start with 'parent':
+        command: c8y devicegroups list --name "parent*"
+        exit-code: 0
+        stdout:
+            json:
+                method: GET
+                path: /inventory/managedObjects
+            contains:
+                - name eq 'parent*'
+                - (has(c8y_IsDeviceGroup))

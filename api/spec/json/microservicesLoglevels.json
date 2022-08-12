@@ -22,7 +22,8 @@
         "powershell": [
           {
             "description": "List log levels of microservice",
-            "command": "Get-MicroserviceLogLevelCollection -Name my-microservice"
+            "command": "Get-MicroserviceLogLevelCollection -Name my-microservice",
+            "skipTest": true
           }
         ],
         "go": [
@@ -56,7 +57,8 @@
         "powershell": [
           {
             "description": "Get log level of microservice for a package",
-            "command": "Get-MicroserviceLogLevel -Name my-microservice -LoggerName org.example"
+            "command": "Get-MicroserviceLogLevel -Name my-microservice -LoggerName org.example",
+            "skipTest": true
           }
         ],
         "go": [
@@ -100,7 +102,8 @@
         "powershell": [
           {
             "description": "Set log level of microservice",
-            "command": "Set-MicroserviceLogLevel -Name my-microservice -LoggerName org.example.microservice -LogLevel DEBUG"
+            "command": "Set-MicroserviceLogLevel -Name my-microservice -LoggerName org.example.microservice -LogLevel DEBUG",
+            "skipTest": true
           }
         ],
         "go": [
@@ -164,7 +167,8 @@
         "powershell": [
           {
             "description": "Delete configured log level of microservice",
-            "command": "Remove-MicroserviceLogLevel -Name my-microservice -LoggerName org.example.microservice"
+            "command": "Remove-MicroserviceLogLevel -Name my-microservice -LoggerName org.example.microservice",
+            "skipTest": true
           }
         ],
         "go": [

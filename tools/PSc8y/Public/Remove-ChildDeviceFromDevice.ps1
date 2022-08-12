@@ -8,10 +8,10 @@ Delete child device reference
 Delete child device reference
 
 .LINK
-https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/devices_unassignChild
+https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/devices_children_unassign
 
 .EXAMPLE
-PS> Remove-ChildDeviceFromDevice -Device $Device.id -ChildDevice $ChildDevice.id
+PS> Remove-ChildDeviceFromDevice -Device $Device.id -Child $ChildDevice.id
 
 Unassign a child device from its parent device
 
@@ -27,12 +27,12 @@ Unassign a child device from its parent device
         [object[]]
         $Device,
 
-        # Child device reference (required)
+        # Child device (required)
         [Parameter(Mandatory = $true,
                    ValueFromPipeline=$true,
                    ValueFromPipelineByPropertyName=$true)]
         [object[]]
-        $ChildDevice
+        $Child
     )
     DynamicParam {
         Get-ClientCommonParameters -Type "Delete"
@@ -45,7 +45,7 @@ Unassign a child device from its parent device
             Use-CallerPreference -Cmdlet $PSCmdlet -SessionState $ExecutionContext.SessionState
         }
 
-        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "devices unassignChild"
+        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "devices children unassign"
         $ClientOptions = Get-ClientOutputOption $PSBoundParameters
         $TypeOptions = @{
             Type = ""
@@ -57,15 +57,15 @@ Unassign a child device from its parent device
     Process {
 
         if ($ClientOptions.ConvertToPS) {
-            $ChildDevice `
+            $Child `
             | Group-ClientRequests `
-            | c8y devices unassignChild $c8yargs `
+            | c8y devices children unassign $c8yargs `
             | ConvertFrom-ClientOutput @TypeOptions
         }
         else {
-            $ChildDevice `
+            $Child `
             | Group-ClientRequests `
-            | c8y devices unassignChild $c8yargs
+            | c8y devices children unassign $c8yargs
         }
         
     }

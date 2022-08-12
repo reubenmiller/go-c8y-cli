@@ -253,7 +253,7 @@ tasks:
   test-powershell:
     desc: Run powershell tests
     cmds:
-      - pwsh -ExecutionPolicy bypass -NonInteractive -File tools/PSc8y/test.ps1
+      - env C8Y_BINARY=$(which c8y) pwsh -ExecutionPolicy bypass -NonInteractive -File tools/PSc8y/test.ps1
 
   install-test-dependencies:
     desc: Install test dependencies
@@ -264,7 +264,9 @@ tasks:
 
   test-cli:
     desc: Test cli tests
-    deps: [test-cli-auto, test-cli-manual]
+    cmds:
+      - task: test-cli-auto
+      - task: test-cli-manual
 
   test-cli-manual:
     desc: Run manual cli tests

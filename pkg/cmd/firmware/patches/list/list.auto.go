@@ -39,7 +39,7 @@ $ c8y firmware patches list --firmware 12345
 Get a list of firmware patches
 
 $ c8y firmware patches list --firmware 12345 --dependency '1.*'
-Get a list of firmware patches where the dependency version starts with "1."
+Get a list of firmware patches where the dependency version starts with '1.'
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
 			return nil

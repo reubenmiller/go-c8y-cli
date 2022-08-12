@@ -8,17 +8,18 @@ Get child asset collection
 Get a collection of managedObjects child references
 
 .LINK
-https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/devices_listAssets
+https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/devices_assets_list
 
 .EXAMPLE
-PS> Get-DeviceChildAssetCollection -Id $Group.id
+PS> Get-DeviceChildAssetCollection -Device agentAssetInfo01
 
 Get a list of the child assets of an existing device
 
 .EXAMPLE
-PS> Get-DeviceChildAssetCollection -Id $Group.id
+PS> Get-Device -Id "agentAssetInfo01" | Get-DeviceChildAssetCollection -Query "type eq 'custom*'"
 
-Get a list of the child assets of an existing group
+
+List child assets of a device but filter the children using a custom query
 
 
 #>
@@ -32,7 +33,27 @@ Get a list of the child assets of an existing group
                    ValueFromPipeline=$true,
                    ValueFromPipelineByPropertyName=$true)]
         [object[]]
-        $Id
+        $Device,
+
+        # Additional query filter
+        [Parameter()]
+        [string]
+        $Query,
+
+        # String template to be used when applying the given query. Use %s to reference the query/pipeline input
+        [Parameter()]
+        [string]
+        $QueryTemplate,
+
+        # Order by. e.g. _id asc or name asc or creationTime.date desc
+        [Parameter()]
+        [string]
+        $OrderBy,
+
+        # Determines if children with ID and name should be returned when fetching the managed object.
+        [Parameter()]
+        [switch]
+        $WithChildren
     )
     DynamicParam {
         Get-ClientCommonParameters -Type "Get", "Collection"
@@ -45,7 +66,7 @@ Get a list of the child assets of an existing group
             Use-CallerPreference -Cmdlet $PSCmdlet -SessionState $ExecutionContext.SessionState
         }
 
-        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "devices listAssets"
+        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "devices assets list"
         $ClientOptions = Get-ClientOutputOption $PSBoundParameters
         $TypeOptions = @{
             Type = "application/vnd.com.nsn.cumulocity.managedObjectReferenceCollection+json"
@@ -57,15 +78,15 @@ Get a list of the child assets of an existing group
     Process {
 
         if ($ClientOptions.ConvertToPS) {
-            $Id `
+            $Device `
             | Group-ClientRequests `
-            | c8y devices listAssets $c8yargs `
+            | c8y devices assets list $c8yargs `
             | ConvertFrom-ClientOutput @TypeOptions
         }
         else {
-            $Id `
+            $Device `
             | Group-ClientRequests `
-            | c8y devices listAssets $c8yargs
+            | c8y devices assets list $c8yargs
         }
         
     }

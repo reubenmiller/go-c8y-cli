@@ -100,8 +100,8 @@ func (n *ListCmd) RunE(cmd *cobra.Command, args []string) error {
 		flags.WithStringValue("type", "type"),
 		flags.WithStringValue("user", "user"),
 		flags.WithStringValue("application", "application"),
-		flags.WithEncodedRelativeTimestamp("dateFrom", "dateFrom", ""),
-		flags.WithEncodedRelativeTimestamp("dateTo", "dateTo", ""),
+		flags.WithEncodedRelativeTimestamp("dateFrom", "dateFrom"),
+		flags.WithEncodedRelativeTimestamp("dateTo", "dateTo"),
 		flags.WithBoolValue("revert", "revert", ""),
 	)
 	if err != nil {

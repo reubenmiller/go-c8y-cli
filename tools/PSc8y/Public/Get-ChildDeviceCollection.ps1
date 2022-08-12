@@ -8,17 +8,18 @@ Get child device collection
 Get a collection of managedObjects child references
 
 .LINK
-https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/devices_listChildren
+https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/devices_children_list
 
 .EXAMPLE
-PS> Get-ChildDeviceCollection -Device $Device.id
+PS> Get-ChildDeviceCollection -Device agentParent01
 
 Get a list of the child devices of an existing device
 
 .EXAMPLE
-PS> Get-ManagedObject -Id $Device.id | Get-ChildDeviceCollection
+PS> Get-Device -Id "agentParent01" | Get-ChildDeviceCollection -Query "type eq 'custom*'"
 
-Get a list of the child devices of an existing device (using pipeline)
+
+Get a list of child devices which a specific type
 
 
 #>
@@ -33,6 +34,21 @@ Get a list of the child devices of an existing device (using pipeline)
                    ValueFromPipelineByPropertyName=$true)]
         [object[]]
         $Device,
+
+        # Additional query filter
+        [Parameter()]
+        [string]
+        $Query,
+
+        # String template to be used when applying the given query. Use %s to reference the query/pipeline input
+        [Parameter()]
+        [string]
+        $QueryTemplate,
+
+        # Order by. e.g. _id asc or name asc or creationTime.date desc
+        [Parameter()]
+        [string]
+        $OrderBy,
 
         # Determines if children with ID and name should be returned when fetching the managed object. Set it to false to improve query performance.
         [Parameter()]
@@ -50,7 +66,7 @@ Get a list of the child devices of an existing device (using pipeline)
             Use-CallerPreference -Cmdlet $PSCmdlet -SessionState $ExecutionContext.SessionState
         }
 
-        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "devices listChildren"
+        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "devices children list"
         $ClientOptions = Get-ClientOutputOption $PSBoundParameters
         $TypeOptions = @{
             Type = "application/vnd.com.nsn.cumulocity.managedObjectReferenceCollection+json"
@@ -64,13 +80,13 @@ Get a list of the child devices of an existing device (using pipeline)
         if ($ClientOptions.ConvertToPS) {
             $Device `
             | Group-ClientRequests `
-            | c8y devices listChildren $c8yargs `
+            | c8y devices children list $c8yargs `
             | ConvertFrom-ClientOutput @TypeOptions
         }
         else {
             $Device `
             | Group-ClientRequests `
-            | c8y devices listChildren $c8yargs
+            | c8y devices children list $c8yargs
         }
         
     }

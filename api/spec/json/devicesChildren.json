@@ -1,0 +1,264 @@
+{
+  "information": {
+    "name": "devices/children",
+    "description": "Cumulocity device children",
+    "descriptionLong": "Managed device children",
+    "link": "https://cumulocity.com/guides/reference/inventory/"
+  },
+  "endpoints": [
+    {
+      "name": "newManagedObjectChildDevice",
+      "method": "POST",
+      "path": "inventory/managedObjects/{device}/childDevices",
+      "accept": "application/vnd.com.nsn.cumulocity.managedObjectReference+json",
+      "collectionType": "application/vnd.com.nsn.cumulocity.managedObject+json",
+      "description": "Assign child device",
+      "descriptionLong": "Create a child device reference",
+      "collectionProperty": "managedObject",
+      "alias": {
+        "go": "assign",
+        "powershell": "Add-ChildDeviceToDevice"
+      },
+      "examples": {
+        "powershell": [
+          {
+            "description": "Assign a device as a child device to an existing device",
+            "beforeEach": [
+              "$Device = PSc8y\\New-TestDevice",
+              "$ChildDevice = PSc8y\\New-TestDevice"
+            ],
+            "command": "Add-ChildDeviceToDevice -Device $Device.id -Child $ChildDevice.id",
+            "afterEach": [
+              "PSc8y\\Remove-ManagedObject -Id $ChildDevice.id",
+              "PSc8y\\Remove-ManagedObject -Id $Device.id"
+            ]
+          },
+          {
+            "description": "Assign a device as a child device to an existing device (using pipeline)",
+            "beforeEach": [
+              "$Device = PSc8y\\New-TestDevice",
+              "$ChildDevice = PSc8y\\New-TestDevice"
+            ],
+            "command": "Get-ManagedObject -Id $ChildDevice.id | Add-ChildDeviceToDevice -Device $Device.id",
+            "afterEach": [
+              "PSc8y\\Remove-ManagedObject -Id $Device.id",
+              "PSc8y\\Remove-ManagedObject -Id $ChildDevice.id"
+            ]
+          }
+        ],
+        "go": [
+          {
+            "description": "Assign a device as a child device to an existing device",
+            "command": "c8y devices children assign --device 12345 --child 44235"
+          }
+        ]
+      },
+      "pathParameters": [
+        {
+          "name": "device",
+          "type": "[]device",
+          "required": true,
+          "description": "Device."
+        }
+      ],
+      "body": [
+        {
+          "name": "child",
+          "type": "[]device",
+          "required": true,
+          "pipeline": true,
+          "property": "managedObject.id",
+          "description": "New child device"
+        }
+      ]
+    },
+    {
+      "name": "deleteManagedObjectChildDeviceReference",
+      "description": "Delete child device reference",
+      "descriptionLong": "Delete child device reference",
+      "method": "DELETE",
+      "path": "inventory/managedObjects/{device}/childDevices/{child}",
+      "accept": "",
+      "alias": {
+        "go": "unassign",
+        "powershell": "Remove-ChildDeviceFromDevice"
+      },
+      "examples": {
+        "powershell": [
+          {
+            "description": "Unassign a child device from its parent device",
+            "beforeEach": [
+              "$Device = PSc8y\\New-TestDevice",
+              "$ChildDevice = PSc8y\\New-TestDevice",
+              "PSc8y\\Add-ChildDeviceToDevice -Device $Device.id -Child $ChildDevice.id"
+            ],
+            "command": "Remove-ChildDeviceFromDevice -Device $Device.id -Child $ChildDevice.id",
+            "afterEach": [
+              "PSc8y\\Remove-ManagedObject -Id $ChildDevice.id",
+              "PSc8y\\Remove-ManagedObject -Id $Device.id"
+            ]
+          }
+        ],
+        "go": [
+          {
+            "description": "Unassign a child device from its parent device",
+            "command": "c8y devices children unassign --device 12345 --child 22553"
+          }
+        ]
+      },
+      "pathParameters": [
+        {
+          "name": "device",
+          "type": "[]device",
+          "required": true,
+          "description": "ManagedObject id"
+        },
+        {
+          "name": "child",
+          "type": "[]device",
+          "required": true,
+          "pipeline": true,
+          "description": "Child device"
+        }
+      ]
+    },
+    {
+      "name": "getManagedObjectChildDeviceCollection",
+      "method": "GET",
+      "description": "Get child device collection",
+      "descriptionLong": "Get a collection of managedObjects child references",
+      "path": "inventory/managedObjects/{device}/childDevices",
+      "accept": "application/vnd.com.nsn.cumulocity.managedObjectReferenceCollection+json",
+      "collectionType": "application/vnd.com.nsn.cumulocity.managedObject+json",
+      "collectionProperty": "references.#.managedObject",
+      "alias": {
+        "go": "list",
+        "powershell": "Get-ChildDeviceCollection"
+      },
+      "examples": {
+        "powershell": [
+          {
+            "description": "Get a list of the child devices of an existing device",
+            "command": "Get-ChildDeviceCollection -Device agentParent01"
+          },
+          {
+            "description": "Get a list of child devices which a specific type",
+            "command": "Get-Device -Id \"agentParent01\" | Get-ChildDeviceCollection -Query \"type eq 'custom*'\"\n"
+          }
+        ],
+        "go": [
+          {
+            "description": "Get a list of the child devices of an existing device",
+            "command": "c8y devices children list --device agentParent01",
+            "assertStdOut": {
+              "json": {
+                "method": "GET",
+                "path": "r//inventory/managedObjects/\\d+/childDevices"
+              }
+            }
+          },
+          {
+            "description": "Get a list of child devices which a specific type",
+            "command": "echo agentParent01 | c8y devices children list --query \"type eq 'custom*'\"",
+            "assertStdOut": {
+              "json": {
+                "method": "GET",
+                "path": "r//inventory/managedObjects/\\d+/childDevices"
+              }
+            }
+          }
+        ]
+      },
+      "pathParameters": [
+        {
+          "name": "device",
+          "type": "[]device",
+          "pipeline": true,
+          "required": true,
+          "description": "Device."
+        }
+      ],
+      "queryParameters": [
+        {
+          "name": "query",
+          "description": "Query expression group",
+          "property": "query",
+          "type": "queryExpression",
+          "children": [
+            {
+              "name": "query",
+              "type": "string",
+              "description": "Additional query filter",
+              "format": "(%s)"
+            },
+            {
+              "name": "queryTemplate",
+              "type": "string",
+              "description": "String template to be used when applying the given query. Use %s to reference the query/pipeline input"
+            },
+            {
+              "name": "orderBy",
+              "type": "string",
+              "description": "Order by. e.g. _id asc or name asc or creationTime.date desc"
+            }
+          ]
+        },
+        {
+          "name": "withChildren",
+          "type": "boolean",
+          "description": "Determines if children with ID and name should be returned when fetching the managed object. Set it to false to improve query performance."
+        }
+      ]
+    },
+    {
+      "name": "getManagedObjectChildDeviceReference",
+      "description": "Get child device reference",
+      "descriptionLong": "Get managed object child device reference",
+      "method": "GET",
+      "path": "inventory/managedObjects/{device}/childDevices/{child}",
+      "accept": "application/vnd.com.nsn.cumulocity.managedObjectReference+json",
+      "alias": {
+        "go": "get",
+        "powershell": "Get-ChildDeviceReference"
+      },
+      "examples": {
+        "powershell": [
+          {
+            "description": "Get an existing child device reference",
+            "beforeEach": [
+              "$Agent = New-TestAgent",
+              "$Device = New-TestDevice",
+              "$Ref = Add-ChildDeviceToDevice -Device $Agent.id -Child $Device.id"
+            ],
+            "command": "Get-ChildDeviceReference -Device $Agent.id -Child $Ref.id",
+            "afterEach": [
+              "Remove-ManagedObject -Id $Device.id",
+              "Remove-ManagedObject -Id $Agent.id"
+            ]
+          }
+        ],
+        "go": [
+          {
+            "description": "Get an existing child device reference",
+            "command": "c8y devices children get --device 12345 --child 12345"
+          }
+        ]
+      },
+      "pathParameters": [
+        {
+          "name": "device",
+          "type": "[]device",
+          "pipeline": true,
+          "required": true,
+          "description": "ManagedObject id"
+        },
+        {
+          "name": "child",
+          "type": "[]device",
+          "required": true,
+          "description": "Child device id"
+        }
+      ]
+    }
+  ]
+}

@@ -27,7 +27,7 @@
             "skipTest": true
           },
           {
-            "description": "Get a list of firmware patches where the dependency version starts with \"1.\"",
+            "description": "Get a list of firmware patches where the dependency version starts with '1.'",
             "command": "Get-FirmwarePatchCollection -Firmware 12345 -Dependency '1.*'",
             "skipTest": true
           }
@@ -43,7 +43,7 @@
             }
           },
           {
-            "description": "Get a list of firmware patches where the dependency version starts with \"1.\"",
+            "description": "Get a list of firmware patches where the dependency version starts with '1.'",
             "command": "c8y firmware patches list --firmware 12345 --dependency '1.*'",
             "assertStdOut": {
               "json": {
@@ -188,7 +188,7 @@
             "beforeEach": [
               "$Device = PSc8y\\New-TestDevice",
               "$ChildDevice = PSc8y\\New-TestDevice",
-              "PSc8y\\Add-ChildDeviceToDevice -Device $Device.id -NewChild $ChildDevice.id"
+              "PSc8y\\Add-ChildDeviceToDevice -Device $Device.id -Child $ChildDevice.id"
             ],
             "command": "Get-ManagedObject -Id $Device.id | Remove-FirmwarePatch -ForceCascade",
             "afterEach": [

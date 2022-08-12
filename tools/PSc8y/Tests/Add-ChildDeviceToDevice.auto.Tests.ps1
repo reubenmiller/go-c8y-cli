@@ -8,7 +8,7 @@ Describe -Name "Add-ChildDeviceToDevice" {
     }
 
     It "Assign a device as a child device to an existing device" {
-        $Response = PSc8y\Add-ChildDeviceToDevice -Device $Device.id -NewChild $ChildDevice.id
+        $Response = PSc8y\Add-ChildDeviceToDevice -Device $Device.id -Child $ChildDevice.id
         $LASTEXITCODE | Should -Be 0
         $Response | Should -Not -BeNullOrEmpty
     }

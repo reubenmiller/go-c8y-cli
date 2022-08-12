@@ -100,8 +100,8 @@ func (n *ListOperationsCmd) RunE(cmd *cobra.Command, args []string) error {
 		inputIterators,
 		flags.WithCustomStringSlice(func() ([]string, error) { return cfg.GetQueryParameters(), nil }, "custom"),
 		c8yfetcher.WithIDSlice(args, "id", "bulkOperationId"),
-		flags.WithEncodedRelativeTimestamp("dateFrom", "dateFrom", ""),
-		flags.WithEncodedRelativeTimestamp("dateTo", "dateTo", ""),
+		flags.WithEncodedRelativeTimestamp("dateFrom", "dateFrom"),
+		flags.WithEncodedRelativeTimestamp("dateTo", "dateTo"),
 		flags.WithStringValue("status", "status"),
 		flags.WithBoolValue("revert", "revert", ""),
 	)

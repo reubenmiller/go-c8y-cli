@@ -1,4 +1,4 @@
-
+# yaml-language-server: $schema=../schema.json
 ---
 information:
   name: operations
@@ -35,7 +35,7 @@ endpoints:
           beforeEach:
             - $Agent = New-TestAgent
             - $Device = New-TestDevice
-            - Add-ChildDeviceToDevice -Device $Agent.id -NewChild $Device.id
+            - Add-ChildDeviceToDevice -Device $Agent.id -Child $Device.id
             - $Operation2 = PSc8y\New-TestOperation -Device $Device.id
           command: Get-OperationCollection -Device $Device.id -Status PENDING
           afterEach:

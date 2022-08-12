@@ -29,6 +29,21 @@ Get a list of the child assets of an existing device
         [object[]]
         $Id,
 
+        # Additional query filter
+        [Parameter()]
+        [string]
+        $Query,
+
+        # String template to be used when applying the given query. Use %s to reference the query/pipeline input
+        [Parameter()]
+        [string]
+        $QueryTemplate,
+
+        # Order by. e.g. _id asc or name asc or creationTime.date desc
+        [Parameter()]
+        [string]
+        $OrderBy,
+
         # Determines if children with ID and name should be returned when fetching the managed object. Set it to false to improve query performance.
         [Parameter()]
         [switch]

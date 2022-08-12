@@ -1,0 +1,15 @@
+tests:
+    devices/children_list_Get a list of child devices which a specific type:
+        command: $TEST_SHELL -c 'echo agentParent01 | c8y devices children list --query "type eq 'custom*'"'
+        exit-code: 0
+        stdout:
+            json:
+                method: GET
+                path: r//inventory/managedObjects/\d+/childDevices
+    devices/children_list_Get a list of the child devices of an existing device:
+        command: c8y devices children list --device agentParent01
+        exit-code: 0
+        stdout:
+            json:
+                method: GET
+                path: r//inventory/managedObjects/\d+/childDevices

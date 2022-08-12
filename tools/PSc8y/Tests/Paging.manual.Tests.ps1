@@ -50,7 +50,8 @@ Describe -Name "Get-Pagination" {
         $ExcludeCmdlets = @(
             "Get-SessionCollection",
             "Get-CurrentTenantApplicationCollection",
-            "Get-DeviceStatisticsCollection"
+            "Get-DeviceStatisticsCollection",
+            "Get-MicroserviceLogLevelCollection"
         )
         $cmdlets = Get-Command -Module PSc8y -Name "Get-*Collection*" |
             Where-Object {

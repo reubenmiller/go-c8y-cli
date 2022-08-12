@@ -177,4 +177,11 @@ tests:
           json:
               method: PATCH
               path: /inventory
-              
+
+  It encoded dates in query parameters:
+      command: |
+        c8y api --method GET --url /measurement/measurements --customQueryParam "dateFrom=2022-08-10T14:59:29.561+02:00" --dry=false
+      exit-code: 0
+      stdout:
+        not-contains:
+          - is not a valid date

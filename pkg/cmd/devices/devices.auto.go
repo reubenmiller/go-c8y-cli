@@ -8,6 +8,7 @@ import (
 	cmdGetChild "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/devices/getchild"
 	cmdGetSupportedMeasurements "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/devices/getsupportedmeasurements"
 	cmdGetSupportedSeries "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/devices/getsupportedseries"
+	cmdList "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/devices/list"
 	cmdListAssets "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/devices/listassets"
 	cmdListChildren "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/devices/listchildren"
 	cmdUnassignChild "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/devices/unassignchild"
@@ -31,6 +32,7 @@ func NewSubCommand(f *cmdutil.Factory) *SubCmdDevices {
 	}
 
 	// Subcommands
+	cmd.AddCommand(cmdList.NewListCmd(f).GetCommand())
 	cmd.AddCommand(cmdGet.NewGetCmd(f).GetCommand())
 	cmd.AddCommand(cmdUpdate.NewUpdateCmd(f).GetCommand())
 	cmd.AddCommand(cmdDelete.NewDeleteCmd(f).GetCommand())

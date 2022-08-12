@@ -31,9 +31,12 @@ func NewListChildrenCmd(f *cmdutil.Factory) *ListChildrenCmd {
 		factory: f,
 	}
 	cmd := &cobra.Command{
-		Use:   "listChildren",
-		Short: "Get child device collection",
-		Long:  `Get a collection of managedObjects child references`,
+		Use:        "listChildren",
+		Short:      "Get child device collection",
+		Long:       `Get a collection of managedObjects child references`,
+		Deprecated: "please use 'c8y devices children list' instead",
+		Hidden:     true,
+
 		Example: heredoc.Doc(`
 $ c8y devices listChildren --device 12345
 Get a list of the child devices of an existing device

@@ -14,6 +14,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/c8yquery"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/url"
 
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/c8ydata"
@@ -54,7 +55,7 @@ func WithQueryParameters(cmd *cobra.Command, query *QueryTemplate, inputIterator
 		case map[string]string:
 			for key, val := range v {
 				if val != "" {
-					query.SetVariable(key, val)
+					query.SetVariable(key, url.EscapeQueryString(val))
 				}
 			}
 		default:
@@ -370,10 +371,11 @@ func WithCustomStringValue(transform func([]byte) []byte, targetFunc func() stri
 		}
 
 		if inputIterators != nil && inputIterators.PipeOptions != nil {
-			if transform != nil {
-				inputIterators.PipeOptions.Formatter = transform
-			}
 			if inputIterators.PipeOptions.Name == src {
+				if transform != nil {
+					inputIterators.PipeOptions.Formatter = transform
+				}
+
 				if dst != "" {
 					inputIterators.PipeOptions.Property = dst
 				}
@@ -414,7 +416,7 @@ func WithCustomStringSlice(valuesFunc func() ([]string, error), opts ...string) 
 
 		outputValues := make(map[string]string)
 		for _, v := range values {
-			parts := strings.SplitN(v, ":", 2)
+			parts := strings.Split(v, ":")
 			if len(parts) != 2 {
 				parts = strings.SplitN(v, "=", 2)
 				if len(parts) != 2 {
@@ -839,6 +841,41 @@ func WithBinaryUploadURL(client *c8y.Client, opts ...string) GetOption {
 		}
 
 		return dst, mo.Self, err
+	}
+}
+
+// WithCumulocityQuery build a Cumulocity Query Expression
+func WithCumulocityQuery(queryOptions []GetOption, opts ...string) GetOption {
+	return func(cmd *cobra.Command, inputIterators *RequestInputIterators) (string, interface{}, error) {
+
+		_, dst, _ := UnpackGetterOptions("%s", opts...)
+
+		queryIterator := c8yquery.NewCumulocityQueryIterator()
+
+		if templateValue, templateErr := cmd.Flags().GetString("queryTemplate"); templateErr == nil && templateValue != "" {
+			queryIterator.QueryTemplate = templateValue
+		}
+
+		for _, currentOpt := range queryOptions {
+
+			iDst, iValue, iErr := currentOpt(cmd, inputIterators)
+
+			if iErr != nil {
+				return "", nil, iErr
+			}
+
+			if iDst != "" {
+				queryIterator.AddFilterPart(iDst, iValue)
+			}
+		}
+
+		if v, err := cmd.Flags().GetString("orderBy"); err == nil {
+			if v != "" {
+				queryIterator.AddOrderPart(v)
+			}
+		}
+
+		return dst, queryIterator, nil
 	}
 }
 

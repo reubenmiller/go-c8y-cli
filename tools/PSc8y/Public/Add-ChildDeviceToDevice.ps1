@@ -8,10 +8,10 @@ Assign child device
 Create a child device reference
 
 .LINK
-https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/devices_assignChild
+https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/devices_children_assign
 
 .EXAMPLE
-PS> Add-ChildDeviceToDevice -Device $Device.id -NewChild $ChildDevice.id
+PS> Add-ChildDeviceToDevice -Device $Device.id -Child $ChildDevice.id
 
 Assign a device as a child device to an existing device
 
@@ -37,7 +37,7 @@ Assign a device as a child device to an existing device (using pipeline)
                    ValueFromPipeline=$true,
                    ValueFromPipelineByPropertyName=$true)]
         [object[]]
-        $NewChild
+        $Child
     )
     DynamicParam {
         Get-ClientCommonParameters -Type "Create", "Template"
@@ -50,7 +50,7 @@ Assign a device as a child device to an existing device (using pipeline)
             Use-CallerPreference -Cmdlet $PSCmdlet -SessionState $ExecutionContext.SessionState
         }
 
-        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "devices assignChild"
+        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "devices children assign"
         $ClientOptions = Get-ClientOutputOption $PSBoundParameters
         $TypeOptions = @{
             Type = "application/vnd.com.nsn.cumulocity.managedObjectReference+json"
@@ -62,15 +62,15 @@ Assign a device as a child device to an existing device (using pipeline)
     Process {
 
         if ($ClientOptions.ConvertToPS) {
-            $NewChild `
+            $Child `
             | Group-ClientRequests `
-            | c8y devices assignChild $c8yargs `
+            | c8y devices children assign $c8yargs `
             | ConvertFrom-ClientOutput @TypeOptions
         }
         else {
-            $NewChild `
+            $Child `
             | Group-ClientRequests `
-            | c8y devices assignChild $c8yargs
+            | c8y devices children assign $c8yargs
         }
         
     }

@@ -109,6 +109,12 @@
         "[]certificate" { "object[]"; break }
         "certificatefile" { "string"; break }
 
+        # stringStatic
+        "stringStatic" { $Ignore = $true; ""; break }
+
+        # queryExpression
+        "queryExpression" { $Ignore = $true; ""; break }
+
         # Complex lookup types. These should not be visible in powershell
         "softwareDetails" { $Ignore = $true; ""; break }
         "firmwareDetails" { $Ignore = $true; ""; break }

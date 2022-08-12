@@ -5,7 +5,7 @@ Describe -Name "Get-OperationCollection" {
         $Agent = New-TestAgent
         $Operation1 = PSc8y\New-TestOperation -Device $Agent.id
         $Device = New-TestDevice
-        Add-ChildDeviceToDevice -Device $Agent.id -NewChild $Device.id
+        Add-ChildDeviceToDevice -Device $Agent.id -Child $Device.id
         $Operation2 = PSc8y\New-TestOperation -Device $Device.id
         $Agent2 = New-TestAgent
         $Operation3 = PSc8y\New-TestOperation -Device $Agent2.id

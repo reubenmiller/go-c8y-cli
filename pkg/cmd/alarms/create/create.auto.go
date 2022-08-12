@@ -140,7 +140,7 @@ func (n *CreateCmd) RunE(cmd *cobra.Command, args []string) error {
 		flags.WithDataFlagValue(),
 		c8yfetcher.WithDeviceByNameFirstMatch(client, args, "device", "source.id"),
 		flags.WithStringValue("type", "type"),
-		flags.WithRelativeTimestamp("time", "time", ""),
+		flags.WithRelativeTimestamp("time", "time"),
 		flags.WithStringValue("text", "text"),
 		flags.WithStringValue("severity", "severity"),
 		flags.WithStringValue("status", "status"),
