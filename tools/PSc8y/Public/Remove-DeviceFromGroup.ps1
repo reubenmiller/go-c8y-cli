@@ -8,10 +8,10 @@ Unassign device from group
 Unassign/delete a device from a group
 
 .LINK
-https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/devicegroups_unassignDevice
+https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/devicegroups_devices_unassign
 
 .EXAMPLE
-PS> Remove-DeviceFromGroup -Group $Group.id -ChildDevice $ChildDevice.id
+PS> Remove-DeviceFromGroup -Group $Group.id -Child $ChildDevice.id
 
 Unassign a child device from its parent asset
 
@@ -22,7 +22,7 @@ Unassign a child device from its parent asset
     [Alias()]
     [OutputType([object])]
     Param(
-        # Asset id (required)
+        # Device group (required)
         [Parameter(Mandatory = $true)]
         [object[]]
         $Group,
@@ -32,7 +32,7 @@ Unassign a child device from its parent asset
                    ValueFromPipeline=$true,
                    ValueFromPipelineByPropertyName=$true)]
         [object[]]
-        $ChildDevice
+        $Child
     )
     DynamicParam {
         Get-ClientCommonParameters -Type "Delete"
@@ -45,7 +45,7 @@ Unassign a child device from its parent asset
             Use-CallerPreference -Cmdlet $PSCmdlet -SessionState $ExecutionContext.SessionState
         }
 
-        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "devicegroups unassignDevice"
+        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "devicegroups devices unassign"
         $ClientOptions = Get-ClientOutputOption $PSBoundParameters
         $TypeOptions = @{
             Type = ""
@@ -57,15 +57,15 @@ Unassign a child device from its parent asset
     Process {
 
         if ($ClientOptions.ConvertToPS) {
-            $ChildDevice `
+            $Child `
             | Group-ClientRequests `
-            | c8y devicegroups unassignDevice $c8yargs `
+            | c8y devicegroups devices unassign $c8yargs `
             | ConvertFrom-ClientOutput @TypeOptions
         }
         else {
-            $ChildDevice `
+            $Child `
             | Group-ClientRequests `
-            | c8y devicegroups unassignDevice $c8yargs
+            | c8y devicegroups devices unassign $c8yargs
         }
         
     }

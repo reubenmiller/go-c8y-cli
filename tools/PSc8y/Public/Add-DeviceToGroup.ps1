@@ -8,15 +8,15 @@ Assign device to group
 Assigns a device to a group. The device will be a childAsset of the group
 
 .LINK
-https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/devicegroups_assignDevice
+https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/devicegroups_devices_assign
 
 .EXAMPLE
-PS> Add-DeviceToGroup -Group $Group.id -NewChildDevice $Device.id
+PS> Add-DeviceToGroup -Group $Group.id -Child $Device.id
 
 Add a device to a group
 
 .EXAMPLE
-PS> Add-DeviceToGroup -Group $Group -NewChildDevice $Device
+PS> Add-DeviceToGroup -Group $Group -Child $Device
 
 Add a device to a group by passing device and groups instead of an id or name
 
@@ -34,7 +34,7 @@ to filter for a collection of devices and assign the results to a single group.
     [Alias()]
     [OutputType([object])]
     Param(
-        # Group (required)
+        # Device group (required)
         [Parameter(Mandatory = $true)]
         [object[]]
         $Group,
@@ -44,7 +44,7 @@ to filter for a collection of devices and assign the results to a single group.
                    ValueFromPipeline=$true,
                    ValueFromPipelineByPropertyName=$true)]
         [object[]]
-        $NewChildDevice
+        $Child
     )
     DynamicParam {
         Get-ClientCommonParameters -Type "Create", "Template"
@@ -57,7 +57,7 @@ to filter for a collection of devices and assign the results to a single group.
             Use-CallerPreference -Cmdlet $PSCmdlet -SessionState $ExecutionContext.SessionState
         }
 
-        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "devicegroups assignDevice"
+        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "devicegroups devices assign"
         $ClientOptions = Get-ClientOutputOption $PSBoundParameters
         $TypeOptions = @{
             Type = "application/vnd.com.nsn.cumulocity.managedObjectReference+json"
@@ -69,15 +69,15 @@ to filter for a collection of devices and assign the results to a single group.
     Process {
 
         if ($ClientOptions.ConvertToPS) {
-            $NewChildDevice `
+            $Child `
             | Group-ClientRequests `
-            | c8y devicegroups assignDevice $c8yargs `
+            | c8y devicegroups devices assign $c8yargs `
             | ConvertFrom-ClientOutput @TypeOptions
         }
         else {
-            $NewChildDevice `
+            $Child `
             | Group-ClientRequests `
-            | c8y devicegroups assignDevice $c8yargs
+            | c8y devicegroups devices assign $c8yargs
         }
         
     }

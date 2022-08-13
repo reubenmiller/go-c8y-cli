@@ -1,15 +1,15 @@
 ﻿. $PSScriptRoot/imports.ps1
 
-Describe -Name "Get-ChildAssetReference" {
+Describe -Name "Get-ChildAsset" {
     BeforeEach {
         $Agent = New-TestAgent
         $Device = New-TestDevice
-        $Ref = Add-AssetToGroup -Group $Agent.id -NewChildDevice $Device.id
+        $Ref = Add-AssetToGroup -Group $Agent.id -ChildDevice $Device.id
 
     }
 
     It "Get an existing child asset reference" {
-        $Response = PSc8y\Get-ChildAssetReference -Asset $Agent.id -Reference $Ref.id
+        $Response = PSc8y\Get-ChildAsset -Asset $Agent.id -Reference $Ref.id
         $LASTEXITCODE | Should -Be 0
         $Response | Should -Not -BeNullOrEmpty
     }

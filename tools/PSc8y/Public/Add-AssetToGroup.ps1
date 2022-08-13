@@ -11,7 +11,7 @@ Assigns a group or device to an existing group and marks them as assets
 https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/inventory_assets_assign
 
 .EXAMPLE
-PS> Add-AssetToGroup -Group $Group1.id -NewChildGroup $Group2.id
+PS> Add-AssetToGroup -Group $Group1.id -ChildGroup $Group2.id
 
 Create group hierarchy (parent group -> child group)
 
@@ -22,21 +22,23 @@ Create group hierarchy (parent group -> child group)
     [Alias()]
     [OutputType([object])]
     Param(
-        # Group (required)
-        [Parameter(Mandatory = $true)]
+        # Managed object id (required)
+        [Parameter(Mandatory = $true,
+                   ValueFromPipeline=$true,
+                   ValueFromPipelineByPropertyName=$true)]
         [object[]]
-        $Group,
+        $Id,
 
         # New child device to be added to the group as an asset
         [Parameter(ValueFromPipeline=$true,
                    ValueFromPipelineByPropertyName=$true)]
         [object[]]
-        $NewChildDevice,
+        $ChildDevice,
 
         # New child device group to be added to the group as an asset
         [Parameter()]
         [object[]]
-        $NewChildGroup
+        $ChildGroup
     )
     DynamicParam {
         Get-ClientCommonParameters -Type "Create", "Template"
@@ -61,13 +63,13 @@ Create group hierarchy (parent group -> child group)
     Process {
 
         if ($ClientOptions.ConvertToPS) {
-            $NewChildDevice `
+            $ChildDevice `
             | Group-ClientRequests `
             | c8y inventory assets assign $c8yargs `
             | ConvertFrom-ClientOutput @TypeOptions
         }
         else {
-            $NewChildDevice `
+            $ChildDevice `
             | Group-ClientRequests `
             | c8y inventory assets assign $c8yargs
         }

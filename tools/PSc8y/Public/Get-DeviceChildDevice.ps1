@@ -1,19 +1,19 @@
 ﻿# Code generated from specification version 1.0.0: DO NOT EDIT
-Function Get-ChildAssetReference {
+Function Get-DeviceChildDevice {
 <#
 .SYNOPSIS
-Get child asset reference
+Get child device reference
 
 .DESCRIPTION
-Get managed object child asset reference
+Get managed object child device reference
 
 .LINK
-https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/inventory_assets_get
+https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/devices_children_get
 
 .EXAMPLE
-PS> Get-ChildAssetReference -Asset $Agent.id -Reference $Ref.id
+PS> Get-DeviceChildDevice -Device $Agent.id -Child $Ref.id
 
-Get an existing child asset reference
+Get an existing child device reference
 
 
 #>
@@ -22,17 +22,17 @@ Get an existing child asset reference
     [Alias()]
     [OutputType([object])]
     Param(
-        # Asset id (required)
+        # ManagedObject id (required)
         [Parameter(Mandatory = $true,
                    ValueFromPipeline=$true,
                    ValueFromPipelineByPropertyName=$true)]
         [object[]]
-        $Asset,
+        $Device,
 
-        # Asset reference id (required)
+        # Child device id (required)
         [Parameter(Mandatory = $true)]
         [object[]]
-        $Reference
+        $Child
     )
     DynamicParam {
         Get-ClientCommonParameters -Type "Get"
@@ -45,7 +45,7 @@ Get an existing child asset reference
             Use-CallerPreference -Cmdlet $PSCmdlet -SessionState $ExecutionContext.SessionState
         }
 
-        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "inventory assets get"
+        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "devices children get"
         $ClientOptions = Get-ClientOutputOption $PSBoundParameters
         $TypeOptions = @{
             Type = "application/vnd.com.nsn.cumulocity.managedObjectReference+json"
@@ -57,15 +57,15 @@ Get an existing child asset reference
     Process {
 
         if ($ClientOptions.ConvertToPS) {
-            $Asset `
+            $Device `
             | Group-ClientRequests `
-            | c8y inventory assets get $c8yargs `
+            | c8y devices children get $c8yargs `
             | ConvertFrom-ClientOutput @TypeOptions
         }
         else {
-            $Asset `
+            $Device `
             | Group-ClientRequests `
-            | c8y inventory assets get $c8yargs
+            | c8y devices children get $c8yargs
         }
         
     }

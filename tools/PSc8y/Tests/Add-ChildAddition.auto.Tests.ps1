@@ -8,7 +8,7 @@ Describe -Name "Add-ChildAddition" {
     }
 
     It "Add a related managed object as a child to an existing managed object" {
-        $Response = PSc8y\Add-ChildAddition -Id $software.id -NewChild $version.id
+        $Response = PSc8y\Add-ChildAddition -Id $software.id -Child $version.id
         $LASTEXITCODE | Should -Be 0
         $Response | Should -Not -BeNullOrEmpty
     }

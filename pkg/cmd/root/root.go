@@ -31,6 +31,9 @@ import (
 	currentuserCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/currentuser"
 	databrokerCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/databroker"
 	devicegroupsCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/devicegroups"
+	devicegroupsAdditionsCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/devicegroups/additions"
+	devicegroupsAssetsCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/devicegroups/assets"
+	devicegroupsDevicesCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/devicegroups/devices"
 	deviceManagementCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/devicemanagement"
 	deviceprofilesCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/deviceprofiles"
 	deviceregistrationCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/deviceregistration"
@@ -330,6 +333,9 @@ func NewCmdRoot(f *cmdutil.Factory, version, buildDate string) *CmdRoot {
 
 	// devicegroups
 	devicegroups := devicegroupsCmd.NewSubCommand(f).GetCommand()
+	devicegroups.AddCommand(devicegroupsAdditionsCmd.NewSubCommand(f).GetCommand())
+	devicegroups.AddCommand(devicegroupsAssetsCmd.NewSubCommand(f).GetCommand())
+	devicegroups.AddCommand(devicegroupsDevicesCmd.NewSubCommand(f).GetCommand())
 	cmd.AddCommand(devicegroups)
 
 	agents := agentsCmd.NewSubCommand(f).GetCommand()

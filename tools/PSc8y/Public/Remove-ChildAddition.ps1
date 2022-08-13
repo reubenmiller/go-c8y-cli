@@ -11,7 +11,7 @@ Unassign/delete a child addition from an existing managed object
 https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/inventory_additions_unassign
 
 .EXAMPLE
-PS> Remove-ChildAddition -Id $software.id -ChildId $version.id
+PS> Remove-ChildAddition -Id $software.id -Child $version.id
 
 Unassign a child addition from its parent managed object
 
@@ -34,7 +34,7 @@ Unassign a child addition from its parent managed object
                    ValueFromPipeline=$true,
                    ValueFromPipelineByPropertyName=$true)]
         [object[]]
-        $ChildId
+        $Child
     )
     DynamicParam {
         Get-ClientCommonParameters -Type "Delete"
@@ -59,13 +59,13 @@ Unassign a child addition from its parent managed object
     Process {
 
         if ($ClientOptions.ConvertToPS) {
-            $ChildId `
+            $Child `
             | Group-ClientRequests `
             | c8y inventory additions unassign $c8yargs `
             | ConvertFrom-ClientOutput @TypeOptions
         }
         else {
-            $ChildId `
+            $Child `
             | Group-ClientRequests `
             | c8y inventory additions unassign $c8yargs
         }

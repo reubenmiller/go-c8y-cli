@@ -11,7 +11,7 @@ Add an existing managed object as a child addition to another existing managed o
 https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/inventory_additions_assign
 
 .EXAMPLE
-PS> Add-ChildAddition -Id $software.id -NewChild $version.id
+PS> Add-ChildAddition -Id $software.id -Child $version.id
 
 Add a related managed object as a child to an existing managed object
 
@@ -34,7 +34,7 @@ Add a related managed object as a child to an existing managed object
                    ValueFromPipeline=$true,
                    ValueFromPipelineByPropertyName=$true)]
         [object[]]
-        $NewChild
+        $Child
     )
     DynamicParam {
         Get-ClientCommonParameters -Type "Create", "Template"
@@ -59,13 +59,13 @@ Add a related managed object as a child to an existing managed object
     Process {
 
         if ($ClientOptions.ConvertToPS) {
-            $NewChild `
+            $Child `
             | Group-ClientRequests `
             | c8y inventory additions assign $c8yargs `
             | ConvertFrom-ClientOutput @TypeOptions
         }
         else {
-            $NewChild `
+            $Child `
             | Group-ClientRequests `
             | c8y inventory additions assign $c8yargs
         }

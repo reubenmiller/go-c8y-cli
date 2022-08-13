@@ -35,7 +35,7 @@ func NewGetCmd(f *cmdutil.Factory) *GetCmd {
 		Short: "Get child asset reference",
 		Long:  `Get managed object child asset reference`,
 		Example: heredoc.Doc(`
-$ c8y inventory assets get --asset 12345 --reference 12345
+$ c8y inventory assets get --id 12345 --child 12345
 Get an existing child asset reference
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
@@ -46,23 +46,21 @@ Get an existing child asset reference
 
 	cmd.SilenceUsage = true
 
-	cmd.Flags().StringSlice("asset", []string{""}, "Asset id (required) (accepts pipeline)")
-	cmd.Flags().StringSlice("reference", []string{""}, "Asset reference id (required)")
+	cmd.Flags().StringSlice("id", []string{""}, "Managed object id (required) (accepts pipeline)")
+	cmd.Flags().StringSlice("child", []string{""}, "Child managed object id (required)")
 
 	completion.WithOptions(
 		cmd,
-		completion.WithDevice("asset", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
-		completion.WithDevice("reference", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
 	)
 
 	flags.WithOptions(
 		cmd,
 
-		flags.WithExtendedPipelineSupport("asset", "asset", true, "deviceId", "source.id", "managedObject.id", "id"),
+		flags.WithExtendedPipelineSupport("id", "id", true, "deviceId", "source.id", "managedObject.id", "id"),
 	)
 
 	// Required flags
-	_ = cmd.MarkFlagRequired("reference")
+	_ = cmd.MarkFlagRequired("child")
 
 	ccmd.SubCommand = subcommand.NewSubCommand(cmd)
 
@@ -142,13 +140,13 @@ func (n *GetCmd) RunE(cmd *cobra.Command, args []string) error {
 	}
 
 	// path parameters
-	path := flags.NewStringTemplate("inventory/managedObjects/{asset}/childAssets/{reference}")
+	path := flags.NewStringTemplate("inventory/managedObjects/{id}/childAssets/{child}")
 	err = flags.WithPathParameters(
 		cmd,
 		path,
 		inputIterators,
-		c8yfetcher.WithDeviceByNameFirstMatch(client, args, "asset", "asset"),
-		c8yfetcher.WithDeviceByNameFirstMatch(client, args, "reference", "reference"),
+		c8yfetcher.WithIDSlice(args, "id", "id"),
+		c8yfetcher.WithIDSlice(args, "child", "child"),
 	)
 	if err != nil {
 		return err

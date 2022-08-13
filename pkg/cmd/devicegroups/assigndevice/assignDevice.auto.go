@@ -30,9 +30,12 @@ func NewAssignDeviceCmd(f *cmdutil.Factory) *AssignDeviceCmd {
 		factory: f,
 	}
 	cmd := &cobra.Command{
-		Use:   "assignDevice",
-		Short: "Assign device to group",
-		Long:  `Assigns a device to a group. The device will be a childAsset of the group`,
+		Use:        "assignDevice",
+		Short:      "Assign device to group",
+		Long:       `Assigns a device to a group. The device will be a childAsset of the group`,
+		Deprecated: "please use 'c8y devicegroups devices assign' instead",
+		Hidden:     true,
+
 		Example: heredoc.Doc(`
 $ c8y devicegroups assignDevice --group 12345 --newChildDevice 43234
 Add a device to a group
