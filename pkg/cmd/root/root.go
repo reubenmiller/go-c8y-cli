@@ -150,6 +150,10 @@ func NewCmdRoot(f *cmdutil.Factory, version, buildDate string) *CmdRoot {
 			if err := ccmd.Configure(disableEncryptionCheck); err != nil {
 				return err
 			}
+			if notice := flags.GetDeprecationNoticeFromAnnotation(cmd); notice != "" {
+				// Command "listAssets" is deprecated,
+				fmt.Fprintf(f.IOStreams.ErrOut, "Command \"%s\" is deprecated, %s\n", cmd.CommandPath(), notice)
+			}
 			return ccmd.checkSessionExists(cmd, args)
 		},
 	}
