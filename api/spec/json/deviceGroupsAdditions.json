@@ -1,0 +1,253 @@
+{
+  "information": {
+    "name": "devicegroups/additions",
+    "description": "Cumulocity device groups additions",
+    "descriptionLong": "Manage child additions in devicegroups",
+    "link": "https://cumulocity.com/guides/reference/inventory/"
+  },
+  "endpoints": [
+    {
+      "name": "assignAddition",
+      "description": "Assign asset to group",
+      "descriptionLong": "Assigns an asset to a group. The device will be a childAddition of the group",
+      "method": "POST",
+      "path": "inventory/managedObjects/{id}/childAdditions",
+      "accept": "application/vnd.com.nsn.cumulocity.managedObjectReference+json",
+      "collectionType": "application/vnd.com.nsn.cumulocity.managedObject+json",
+      "collectionProperty": "managedObject",
+      "alias": {
+        "go": "assign",
+        "powershell": "Add-AdditionToDeviceGroup"
+      },
+      "examples": {
+        "powershell": [
+          {
+            "description": "Add a device to a group",
+            "command": "Add-AdditionToDeviceGroup -Group $Group.id -Child $Device.id",
+            "skipTest": true
+          },
+          {
+            "description": "Add a device to a group by passing device and groups instead of an id or name",
+            "command": "Add-AdditionToDeviceGroup -Group $Group -Child $Device",
+            "skipTest": true
+          },
+          {
+            "description": "Add multiple devices to a group. Alternatively `Get-DeviceCollection` can be used\nto filter for a collection of devices and assign the results to a single group.\n",
+            "command": "Get-Device $Device1.name, $Device2.name | Add-AdditionToDeviceGroup -Group $Group.id",
+            "skipTest": true
+          }
+        ],
+        "go": [
+          {
+            "description": "Add a device to a group",
+            "command": "c8y devicegroups additions assign --group 12345 --child 43234"
+          },
+          {
+            "description": "Add multiple devices to a group",
+            "command": "c8y devicegroups additions assign --group 12345 --child 43234,99292,12222"
+          },
+          {
+            "description": "Add multiple devices to a group (using pipeline)",
+            "command": "c8y devices list | c8y devicegroups additions assign --group 12345",
+            "skipTest": true
+          }
+        ]
+      },
+      "pathParameters": [
+        {
+          "name": "group",
+          "type": "[]devicegroup",
+          "property": "id",
+          "required": true,
+          "description": "Group"
+        }
+      ],
+      "body": [
+        {
+          "name": "child",
+          "type": "[]id",
+          "required": true,
+          "pipeline": true,
+          "pipelineAliases": [
+            "deviceId",
+            "source.id",
+            "managedObject.id",
+            "id"
+          ],
+          "property": "managedObject.id",
+          "description": "New device to be added to the group as an child asset"
+        }
+      ]
+    },
+    {
+      "name": "unassignAddition",
+      "description": "Unassign asset from group",
+      "descriptionLong": "Unassign/delete an asset from a group",
+      "method": "DELETE",
+      "path": "inventory/managedObjects/{group}/childAdditions/{child}",
+      "accept": "",
+      "skip": false,
+      "alias": {
+        "go": "unassign",
+        "powershell": "Remove-AdditionFromDeviceGroup"
+      },
+      "examples": {
+        "powershell": [
+          {
+            "description": "Unassign a child device from its parent asset",
+            "beforeEach": [
+              "$Group = PSc8y\\New-TestDeviceGroup",
+              "$ChildDevice = PSc8y\\New-TestDevice",
+              "PSc8y\\Add-AdditionToDeviceGroup -Group $Group.id -Child $ChildDevice.id"
+            ],
+            "command": "Remove-AdditionFromDeviceGroup -Group $Group.id -ChildDevice $ChildDevice.id",
+            "afterEach": [
+              "PSc8y\\Remove-ManagedObject -Id $ChildDevice.id",
+              "PSc8y\\Remove-ManagedObject -Id $Group.id"
+            ]
+          }
+        ],
+        "go": [
+          {
+            "description": "Unassign a child device from its parent device",
+            "command": "c8y devicegroups additions unassign --group 12345 --child 22553"
+          }
+        ]
+      },
+      "pathParameters": [
+        {
+          "name": "group",
+          "type": "[]devicegroup",
+          "required": true,
+          "description": "Device group"
+        },
+        {
+          "name": "child",
+          "type": "[]device",
+          "property": "child",
+          "pipeline": true,
+          "pipelineAliases": [
+            "deviceId",
+            "source.id",
+            "managedObject.id",
+            "id"
+          ],
+          "required": true,
+          "description": "Managed object id"
+        }
+      ]
+    },
+    {
+      "name": "getChildAddition",
+      "description": "Get child device reference",
+      "descriptionLong": "Get managed object child device reference",
+      "method": "GET",
+      "path": "inventory/managedObjects/{group}/childAdditions/{child}",
+      "accept": "application/vnd.com.nsn.cumulocity.managedObjectReference+json",
+      "alias": {
+        "go": "get",
+        "powershell": "Get-DeviceGroupChildAddition"
+      },
+      "examples": {
+        "powershell": [
+          {
+            "description": "Get an existing child addition reference",
+            "command": "Get-DeviceGroupChildAddition -Group $Agent.id -Child $Ref.id",
+            "skipTest": true
+          }
+        ],
+        "go": [
+          {
+            "description": "Get an existing child addition reference",
+            "command": "c8y devicegroups additions get --group 12345 --child 12345"
+          }
+        ]
+      },
+      "pathParameters": [
+        {
+          "name": "group",
+          "type": "[]devicegroup",
+          "pipeline": true,
+          "required": true,
+          "description": "Device group"
+        },
+        {
+          "name": "child",
+          "type": "[]id",
+          "property": "child",
+          "required": true,
+          "description": "Managed object id"
+        }
+      ]
+    },
+    {
+      "name": "listChildAdditions",
+      "description": "Get child additions collection",
+      "descriptionLong": "Get a collection of managedObjects child additions",
+      "method": "GET",
+      "path": "inventory/managedObjects/{group}/childAdditions",
+      "accept": "application/vnd.com.nsn.cumulocity.managedObjectReferenceCollection+json",
+      "collectionType": "application/vnd.com.nsn.cumulocity.managedObject+json",
+      "collectionProperty": "references.#.managedObject",
+      "alias": {
+        "go": "list",
+        "powershell": "Get-DeviceGroupChildAdditionCollection"
+      },
+      "examples": {
+        "powershell": [
+          {
+            "description": "Get a list of the child additions of an existing device",
+            "command": "Get-DeviceGroupChildAdditionCollection -Id $Group.id",
+            "skipTest": true
+          }
+        ],
+        "go": [
+          {
+            "description": "Get a list of the child devices of an existing device",
+            "command": "c8y devicegroups additions list --group 12345"
+          }
+        ]
+      },
+      "pathParameters": [
+        {
+          "name": "group",
+          "type": "[]devicegroup",
+          "pipeline": true,
+          "required": true,
+          "description": "Device group"
+        }
+      ],
+      "queryParameters": [
+        {
+          "name": "query",
+          "description": "Query expression group",
+          "property": "query",
+          "type": "queryExpression",
+          "children": [
+            {
+              "name": "query",
+              "type": "string",
+              "description": "Additional query filter",
+              "format": "(%s)"
+            },
+            {
+              "name": "queryTemplate",
+              "type": "string",
+              "description": "String template to be used when applying the given query. Use %s to reference the query/pipeline input"
+            },
+            {
+              "name": "orderBy",
+              "type": "string",
+              "description": "Order by. e.g. _id asc or name asc or creationTime.date desc"
+            }
+          ]
+        },
+        {
+          "name": "withChildren",
+          "type": "boolean",
+          "description": "Determines if children with ID and name should be returned when fetching the managed object."
+        }
+      ]
+    }
+  ]
+}

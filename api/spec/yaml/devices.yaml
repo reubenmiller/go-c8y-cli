@@ -28,12 +28,6 @@ endpoints:
           afterEach:
             - Remove-ManagedObject -Id $device.id
 
-      #   - description: Get device by name
-      #     beforeEach:
-      #       - $device = PSc8y\New-TestDevice
-      #     command: Get-Device -Id $device.name
-      #     afterEach:
-      #       - Remove-ManagedObject -Id $device.id
       go:
         - description: Get a collection of devices of type "myType", and their names start with "sensor"
           command: c8y devices list --name "sensor*" --type myType

@@ -96,13 +96,13 @@
       ]
     },
     {
-      "name": "newManagedObjectChildAsset",
+      "name": "assignAsset",
+      "description": "Assign child asset",
+      "descriptionLong": "Assigns a group or device to an existing group and marks them as assets",
       "method": "POST",
       "path": "inventory/managedObjects/{id}/childAssets",
       "accept": "application/vnd.com.nsn.cumulocity.managedObjectReference+json",
       "collectionType": "application/vnd.com.nsn.cumulocity.managedObject+json",
-      "description": "Assign child asset",
-      "descriptionLong": "Assigns a group or device to an existing group and marks them as assets",
       "collectionProperty": "managedObject",
       "alias": {
         "go": "assign",
@@ -116,7 +116,7 @@
               "$Group1 = PSc8y\\New-TestDeviceGroup",
               "$Group2 = PSc8y\\New-TestDeviceGroup"
             ],
-            "command": "Add-AssetToGroup -Group $Group1.id -NewChildGroup $Group2.id",
+            "command": "Add-AssetToGroup -Group $Group1.id -ChildGroup $Group2.id",
             "afterEach": [
               "PSc8y\\Remove-ManagedObject -Id $Group2.id",
               "PSc8y\\Remove-ManagedObject -Id $Group1.id"
@@ -126,22 +126,22 @@
         "go": [
           {
             "description": "Create group hierarchy (parent group -> child group)",
-            "command": "c8y inventory assets assign --group 12345 --newChildGroup 43234"
+            "command": "c8y inventory assets assign --group 12345 --childGroup 43234"
           }
         ]
       },
       "pathParameters": [
         {
-          "name": "group",
-          "type": "[]devicegroup",
+          "name": "id",
+          "type": "[]id",
           "property": "id",
           "required": true,
-          "description": "Group"
+          "description": "Managed object id"
         }
       ],
       "body": [
         {
-          "name": "newChildDevice",
+          "name": "childDevice",
           "type": "[]device",
           "pipeline": true,
           "required": false,
@@ -149,7 +149,7 @@
           "description": "New child device to be added to the group as an asset"
         },
         {
-          "name": "newChildGroup",
+          "name": "childGroup",
           "type": "[]devicegroup",
           "required": false,
           "property": "managedObject.id",
@@ -161,15 +161,15 @@
       ]
     },
     {
-      "name": "getManagedObjectChildAssetReference",
+      "name": "getChildAsset",
       "description": "Get child asset reference",
       "descriptionLong": "Get managed object child asset reference",
       "method": "GET",
-      "path": "inventory/managedObjects/{asset}/childAssets/{reference}",
+      "path": "inventory/managedObjects/{id}/childAssets/{child}",
       "accept": "application/vnd.com.nsn.cumulocity.managedObjectReference+json",
       "alias": {
         "go": "get",
-        "powershell": "Get-ChildAssetReference"
+        "powershell": "Get-ChildAsset"
       },
       "examples": {
         "powershell": [
@@ -178,9 +178,9 @@
             "beforeEach": [
               "$Agent = New-TestAgent",
               "$Device = New-TestDevice",
-              "$Ref = Add-AssetToGroup -Group $Agent.id -NewChildDevice $Device.id"
+              "$Ref = Add-AssetToGroup -Group $Agent.id -ChildDevice $Device.id"
             ],
-            "command": "Get-ChildAssetReference -Asset $Agent.id -Reference $Ref.id",
+            "command": "Get-ChildAsset -Asset $Agent.id -Reference $Ref.id",
             "afterEach": [
               "Remove-ManagedObject -Id $Device.id",
               "Remove-ManagedObject -Id $Agent.id"
@@ -190,23 +190,29 @@
         "go": [
           {
             "description": "Get an existing child asset reference",
-            "command": "c8y inventory assets get --asset 12345 --reference 12345"
+            "command": "c8y inventory assets get --id 12345 --child 12345"
           }
         ]
       },
       "pathParameters": [
         {
-          "name": "asset",
-          "type": "[]device",
+          "name": "id",
+          "type": "[]id",
           "pipeline": true,
+          "pipelineAliases": [
+            "deviceId",
+            "source.id",
+            "managedObject.id",
+            "id"
+          ],
           "required": true,
-          "description": "Asset id"
+          "description": "Managed object id"
         },
         {
-          "name": "reference",
-          "type": "[]device",
+          "name": "child",
+          "type": "[]id",
           "required": true,
-          "description": "Asset reference id"
+          "description": "Child managed object id"
         }
       ]
     },
@@ -215,7 +221,7 @@
       "description": "Unassign asset from managed object",
       "descriptionLong": "Unassign/delete an asset from an existing managed object",
       "method": "DELETE",
-      "path": "inventory/managedObjects/{id}/childAssets/{reference}",
+      "path": "inventory/managedObjects/{id}/childAssets/{child}",
       "accept": "",
       "alias": {
         "go": "unassign",
@@ -228,7 +234,7 @@
             "beforeEach": [
               "$Group = PSc8y\\New-TestDeviceGroup",
               "$ChildDevice = PSc8y\\New-TestDevice",
-              "PSc8y\\Add-AssetToGroup -Group $Group.id -NewChildDevice $ChildDevice.id"
+              "PSc8y\\Add-AssetToGroup -Group $Group.id -ChildDevice $ChildDevice.id"
             ],
             "command": "Remove-Asset -Id $Group.id -Child $ChildDevice.id",
             "afterEach": [
@@ -254,10 +260,15 @@
         {
           "name": "child",
           "type": "string",
-          "property": "reference",
-          "pipeline": true,
           "required": false,
-          "description": "Child id"
+          "description": "Child id",
+          "pipeline": true,
+          "pipelineAliases": [
+            "deviceId",
+            "source.id",
+            "managedObject.id",
+            "id"
+          ]
         }
       ]
     }

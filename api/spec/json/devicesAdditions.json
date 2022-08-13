@@ -131,7 +131,7 @@
       "accept": "application/vnd.com.nsn.cumulocity.managedObjectReference+json",
       "alias": {
         "go": "get",
-        "powershell": "Get-ChildDeviceReference"
+        "powershell": "Get-DeviceChildAddition"
       },
       "examples": {
         "powershell": [
@@ -140,9 +140,9 @@
             "beforeEach": [
               "$Agent = New-TestAgent",
               "$Device = New-TestDevice",
-              "$Ref = Add-ChildDeviceToDevice -Device $Agent.id -Child $Device.id"
+              "$Ref = Add-ChildAdditionToDevice -Device $Agent.id -Child $Device.id"
             ],
-            "command": "Get-ChildDeviceReference -Device $Agent.id -Child $Ref.id",
+            "command": "Get-DeviceChildAddition -Device $Agent.id -Child $Ref.id",
             "afterEach": [
               "Remove-ManagedObject -Id $Device.id",
               "Remove-ManagedObject -Id $Agent.id"
