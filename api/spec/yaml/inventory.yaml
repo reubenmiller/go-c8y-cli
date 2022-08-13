@@ -442,6 +442,10 @@ endpoints:
         pipeline: true
         required: true
         description: ManagedObject id
+        pipelineAliases:
+          - "deviceId"
+          - "source.id"
+          - "managedObject.id"
 
     queryParameters:
       - name: skipChildrenNames
@@ -501,6 +505,10 @@ endpoints:
         pipeline: true
         description: ManagedObject id
         required: true
+        pipelineAliases:
+          - "deviceId"
+          - "source.id"
+          - "managedObject.id"
 
   - name: deleteManagedObject
     description: Delete managed object
@@ -556,6 +564,10 @@ endpoints:
         pipeline: true
         required: true
         description: ManagedObject id
+        pipelineAliases:
+          - "deviceId"
+          - "source.id"
+          - "managedObject.id"
 
     queryParameters:
       - name: cascade
