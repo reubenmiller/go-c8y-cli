@@ -92,12 +92,14 @@ FormatsToProcess = @(
 # Functions to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no functions to export.
 FunctionsToExport = @(
 	'Add-AdditionToDeviceGroup',
-	'Add-AssetToGroup',
 	'Add-ChildAddition',
 	'Add-ChildAdditionToDevice',
+	'Add-ChildAdditionToDeviceGroup',
+	'Add-ChildAssetToDeviceGroup',
+	'Add-ChildAssetToManagedObject',
 	'Add-ChildDeviceToDevice',
+	'Add-ChildDeviceToGroup',
 	'Add-ChildGroupToGroup',
-	'Add-DeviceToGroup',
 	'Add-RoleToGroup',
 	'Add-RoleToUser',
 	'Add-UserToGroup',

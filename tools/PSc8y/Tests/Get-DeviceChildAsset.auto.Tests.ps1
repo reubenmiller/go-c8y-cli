@@ -4,7 +4,7 @@ Describe -Name "Get-DeviceChildAsset" {
     BeforeEach {
         $Agent = New-TestAgent
         $Device = New-TestDevice
-        $Ref = Add-ChildDeviceToDevice -Device $Agent.id -Child $Device.id
+        $Ref = Add-ChildAssetToManagedObject -Id $agent.id -ChildDevice $Device.id
 
     }
 

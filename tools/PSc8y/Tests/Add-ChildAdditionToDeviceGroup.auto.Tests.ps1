@@ -1,18 +1,18 @@
 ﻿. $PSScriptRoot/imports.ps1
 
-Describe -Name "Add-DeviceToGroup" {
+Describe -Name "Add-ChildAdditionToDeviceGroup" {
     BeforeEach {
 
     }
 
     It -Skip "Add a device to a group" {
-        $Response = PSc8y\Add-DeviceToGroup -Group $Group.id -Child $Device.id
+        $Response = PSc8y\Add-ChildAdditionToDeviceGroup -Group $Group.id -Child $Device.id
         $LASTEXITCODE | Should -Be 0
         $Response | Should -Not -BeNullOrEmpty
     }
 
     It -Skip "Add a device to a group by passing device and groups instead of an id or name" {
-        $Response = PSc8y\Add-DeviceToGroup -Group $Group -Child $Device
+        $Response = PSc8y\Add-ChildAdditionToDeviceGroup -Group $Group -Child $Device
         $LASTEXITCODE | Should -Be 0
         $Response | Should -Not -BeNullOrEmpty
     }
@@ -20,7 +20,7 @@ Describe -Name "Add-DeviceToGroup" {
     It -Skip "Add multiple devices to a group. Alternatively `Get-DeviceCollection` can be used
 to filter for a collection of devices and assign the results to a single group.
 " {
-        $Response = PSc8y\Get-Device $Device1.name, $Device2.name | Add-DeviceToGroup -Group $Group.id
+        $Response = PSc8y\Get-Device $Device1.name, $Device2.name | Add-AdditionToDeviceGroup -Group $Group.id
         $LASTEXITCODE | Should -Be 0
         $Response | Should -Not -BeNullOrEmpty
     }

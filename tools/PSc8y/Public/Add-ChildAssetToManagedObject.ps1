@@ -1,5 +1,5 @@
 ﻿# Code generated from specification version 1.0.0: DO NOT EDIT
-Function Add-AssetToGroup {
+Function Add-ChildAssetToManagedObject {
 <#
 .SYNOPSIS
 Assign child asset
@@ -11,7 +11,7 @@ Assigns a group or device to an existing group and marks them as assets
 https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/inventory_assets_assign
 
 .EXAMPLE
-PS> Add-AssetToGroup -Group $Group1.id -ChildGroup $Group2.id
+PS> Add-ChildAssetToManagedObject -Id $Group1.id -ChildGroup $Group2.id
 
 Create group hierarchy (parent group -> child group)
 

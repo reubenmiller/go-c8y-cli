@@ -4,7 +4,7 @@ Describe -Name "Get-ChildAddition" {
     BeforeEach {
         $Agent = New-TestAgent
         $Device = New-TestDevice
-        $Ref = Add-AssetToGroup -Group $Agent.id -ChildDevice $Device.id
+        $Ref = Add-AdditionToDeviceGroup -Group $Agent.id -Child $Device.id
 
     }
 

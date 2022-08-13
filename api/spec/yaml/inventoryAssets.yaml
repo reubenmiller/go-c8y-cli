@@ -84,14 +84,14 @@ endpoints:
     collectionProperty: managedObject
     alias:
         go: assign
-        powershell: Add-AssetToGroup
+        powershell: Add-ChildAssetToManagedObject
     examples:
         powershell:
           - description: Create group hierarchy (parent group -> child group)
             beforeEach:
               - $Group1 = PSc8y\New-TestDeviceGroup
               - $Group2 = PSc8y\New-TestDeviceGroup
-            command: Add-AssetToGroup -Group $Group1.id -ChildGroup $Group2.id
+            command: Add-ChildAssetToManagedObject -Id $Group1.id -ChildGroup $Group2.id
             afterEach:
               - PSc8y\Remove-ManagedObject -Id $Group2.id
               - PSc8y\Remove-ManagedObject -Id $Group1.id
@@ -136,8 +136,8 @@ endpoints:
             beforeEach:
               - $Agent = New-TestAgent
               - $Device = New-TestDevice
-              - $Ref = Add-AssetToGroup -Group $Agent.id -ChildDevice $Device.id
-            command: Get-ChildAsset -Asset $Agent.id -Reference $Ref.id
+              - $Ref = Add-ChildAssetToDeviceGroup -Group $Agent.id -Child $Device.id
+            command: Get-ChildAsset -Id $Agent.id -Child $Ref.id
             afterEach:
               - Remove-ManagedObject -Id $Device.id
               - Remove-ManagedObject -Id $Agent.id
@@ -176,7 +176,7 @@ endpoints:
           beforeEach:
             - $Group = PSc8y\New-TestDeviceGroup
             - $ChildDevice = PSc8y\New-TestDevice
-            - PSc8y\Add-AssetToGroup -Group $Group.id -ChildDevice $ChildDevice.id
+            - PSc8y\Add-ChildAssetToDeviceGroup -Group $Group.id -Child $ChildDevice.id
           command: Remove-Asset -Id $Group.id -Child $ChildDevice.id
           afterEach:
             - PSc8y\Remove-ManagedObject -Id $ChildDevice.id

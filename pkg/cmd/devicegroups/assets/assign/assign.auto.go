@@ -42,6 +42,9 @@ Add multiple devices to a group
 
 $ c8y devices list | c8y devicegroups assets assign --group 12345
 Add multiple devices to a group (using pipeline)
+
+$ c8y devices get --id device01 | c8y devicegroups assets assign --group 12345
+Add device by name (using pipeline)
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
 			return f.CreateModeEnabled()

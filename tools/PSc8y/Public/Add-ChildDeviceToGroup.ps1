@@ -1,19 +1,31 @@
 ﻿# Code generated from specification version 1.0.0: DO NOT EDIT
-Function Remove-AdditionFromDeviceGroup {
+Function Add-ChildDeviceToGroup {
 <#
 .SYNOPSIS
-Unassign asset from group
+Assign device to group
 
 .DESCRIPTION
-Unassign/delete an asset from a group
+Assigns a device to a group. The device will be a childAsset of the group
 
 .LINK
-https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/devicegroups_additions_unassign
+https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/devicegroups_devices_assign
 
 .EXAMPLE
-PS> Remove-AdditionFromDeviceGroup -Group $Group.id -Child $ChildDevice.id
+PS> Add-ChildDeviceToGroup -Group $Group.id -Child $Device.id
 
-Unassign a child addition from its parent asset
+Add a device to a group
+
+.EXAMPLE
+PS> Add-ChildDeviceToGroup -Group $Group -Child $Device
+
+Add a device to a group by passing device and groups instead of an id or name
+
+.EXAMPLE
+PS> Get-Device $Device1.name, $Device2.name | Add-ChildDeviceToGroup -Group $Group.id
+
+Add multiple devices to a group. Alternatively `Get-DeviceCollection` can be used
+to filter for a collection of devices and assign the results to a single group.
+
 
 
 #>
@@ -27,7 +39,7 @@ Unassign a child addition from its parent asset
         [object[]]
         $Group,
 
-        # Managed object id (required)
+        # New device to be added to the group as an child asset (required)
         [Parameter(Mandatory = $true,
                    ValueFromPipeline=$true,
                    ValueFromPipelineByPropertyName=$true)]
@@ -35,7 +47,7 @@ Unassign a child addition from its parent asset
         $Child
     )
     DynamicParam {
-        Get-ClientCommonParameters -Type "Delete"
+        Get-ClientCommonParameters -Type "Create", "Template"
     }
 
     Begin {
@@ -45,11 +57,11 @@ Unassign a child addition from its parent asset
             Use-CallerPreference -Cmdlet $PSCmdlet -SessionState $ExecutionContext.SessionState
         }
 
-        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "devicegroups additions unassign"
+        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "devicegroups devices assign"
         $ClientOptions = Get-ClientOutputOption $PSBoundParameters
         $TypeOptions = @{
-            Type = ""
-            ItemType = ""
+            Type = "application/vnd.com.nsn.cumulocity.managedObjectReference+json"
+            ItemType = "application/vnd.com.nsn.cumulocity.managedObject+json"
             BoundParameters = $PSBoundParameters
         }
     }
@@ -59,13 +71,13 @@ Unassign a child addition from its parent asset
         if ($ClientOptions.ConvertToPS) {
             $Child `
             | Group-ClientRequests `
-            | c8y devicegroups additions unassign $c8yargs `
+            | c8y devicegroups devices assign $c8yargs `
             | ConvertFrom-ClientOutput @TypeOptions
         }
         else {
             $Child `
             | Group-ClientRequests `
-            | c8y devicegroups additions unassign $c8yargs
+            | c8y devicegroups devices assign $c8yargs
         }
         
     }

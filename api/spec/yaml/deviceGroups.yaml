@@ -302,14 +302,15 @@ endpoints:
     collectionProperty: managedObject
     alias:
         go: assignDevice
-        powershell: Add-DeviceToGroup
+        powershell: Add-ChildDeviceToGroup
     examples:
         powershell:
           - description: Add a device to a group
             beforeEach:
               - $Device = PSc8y\New-TestDevice
               - $Group = PSc8y\New-TestDeviceGroup
-            command: Add-DeviceToGroup -Group $Group.id -NewChildDevice $Device.id
+            command: Add-ChildDeviceToGroup -Group $Group.id -NewChildDevice $Device.id
+            skipTest: true
             afterEach:
               - PSc8y\Remove-ManagedObject -Id $Device.id
               - PSc8y\Remove-ManagedObject -Id $Group.id
@@ -318,7 +319,8 @@ endpoints:
             beforeEach:
               - $Device = PSc8y\New-TestDevice
               - $Group = PSc8y\New-TestDeviceGroup
-            command: Add-DeviceToGroup -Group $Group -NewChildDevice $Device
+            command: Add-ChildDeviceToGroup -Group $Group -NewChildDevice $Device
+            skipTest: true
             afterEach:
               - PSc8y\Remove-ManagedObject -Id $Device.id
               - PSc8y\Remove-ManagedObject -Id $Group.id
@@ -330,7 +332,8 @@ endpoints:
               - $Device1 = PSc8y\New-TestDevice
               - $Device2 = PSc8y\New-TestDevice
               - $Group = PSc8y\New-TestDeviceGroup
-            command: Get-Device $Device1.name, $Device2.name | Add-DeviceToGroup -Group $Group.id
+            command: Get-Device $Device1.name, $Device2.name | Add-ChildDeviceToGroup -Group $Group.id
+            skipTest: true
             afterEach:
               - PSc8y\Remove-ManagedObject -Id $Device1.id
               - PSc8y\Remove-ManagedObject -Id $Device2.id
@@ -377,6 +380,7 @@ endpoints:
               - $Group = PSc8y\New-TestDeviceGroup
               - $ChildGroup1 = PSc8y\New-TestDeviceGroup
             command: Add-ChildGroupToGroup -Group $Group.id -NewChildGroup $ChildGroup1.id
+            skipTest: true
             afterEach:
               - PSc8y\Remove-ManagedObject -Id $ChildGroup1.id
               - PSc8y\Remove-ManagedObject -Id $Group.id
@@ -389,6 +393,7 @@ endpoints:
               - $SubGroup1 = PSc8y\New-TestDeviceGroup -Type SubGroup
               - $SubGroup2 = PSc8y\New-TestDeviceGroup -Type SubGroup
             command: Get-DeviceGroup $SubGroup1.name, $SubGroup2.name | Add-ChildGroupToGroup -Group $CustomGroup.id
+            skipTest: true
             afterEach:
               - PSc8y\Remove-ManagedObject -Id $SubGroup1.id
               - PSc8y\Remove-ManagedObject -Id $SubGroup2.id
@@ -433,7 +438,7 @@ endpoints:
           beforeEach:
             - $Group = PSc8y\New-TestDeviceGroup
             - $ChildDevice = PSc8y\New-TestDevice
-            - PSc8y\Add-AssetToGroup -Group $Group.id -NewChildDevice $ChildDevice.id
+            - PSc8y\Add-ChildAssetToDeviceGroup -Group $Group.id -NewChildDevice $ChildDevice.id
           command: Remove-DeviceFromGroup -Group $Group.id -ChildDevice $ChildDevice.id
           afterEach:
             - PSc8y\Remove-ManagedObject -Id $ChildDevice.id
@@ -473,7 +478,7 @@ endpoints:
           beforeEach:
             - $Group = PSc8y\New-TestDeviceGroup
             - $ChildGroup = PSc8y\New-TestDevice
-            - PSc8y\Add-AssetToGroup -Group $Group.id -NewChildGroup $ChildGroup.id
+            - PSc8y\Add-ChildAssetToDeviceGroup -Group $Group.id -NewChildGroup $ChildGroup.id
           command: Remove-GroupFromGroup -Id $Group.id -Child $ChildGroup.id
           afterEach:
             - PSc8y\Remove-ManagedObject -Id $ChildGroup.id
@@ -515,7 +520,7 @@ endpoints:
           beforeEach:
             - $Device = PSc8y\New-TestDevice
             - $ChildDevice = PSc8y\New-TestDevice
-            - PSc8y\Add-AssetToGroup -Group $Device.id -NewChildDevice $ChildDevice.id
+            - PSc8y\Add-ChildAssetToDeviceGroup -Group $Device.id -NewChildDevice $ChildDevice.id
           command: Get-DeviceGroupChildAssetCollection -Id $Group.id
           afterEach:
             - PSc8y\Remove-ManagedObject -Id $ChildDevice.id
@@ -525,7 +530,7 @@ endpoints:
           beforeEach:
             - $Group = PSc8y\New-TestDeviceGroup
             - $ChildGroup = PSc8y\New-TestDeviceGroup
-            - PSc8y\Add-AssetToGroup -Group $Group.id -NewChildGroup $ChildGroup.id
+            - PSc8y\Add-ChildAssetToDeviceGroup -Group $Group.id -NewChildGroup $ChildGroup.id
           command: Get-DeviceGroupChildAssetCollection -Id $Group.id
           afterEach:
             - PSc8y\Remove-ManagedObject -Id $ChildGroup.id

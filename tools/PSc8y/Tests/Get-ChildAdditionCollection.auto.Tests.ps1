@@ -4,7 +4,7 @@ Describe -Name "Get-ChildAdditionCollection" {
     BeforeEach {
         $software = PSc8y\New-ManagedObject -Name softwarePackage1
         $version = PSc8y\New-ManagedObject -Name softwareVersion1
-        PSc8y\Add-ChildAddition -Id $software.id -NewChild $version.id
+        PSc8y\Add-ChildAddition -Id $software.id -Child $version.id
 
     }
 

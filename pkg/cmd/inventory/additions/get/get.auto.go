@@ -140,7 +140,7 @@ func (n *GetCmd) RunE(cmd *cobra.Command, args []string) error {
 	}
 
 	// path parameters
-	path := flags.NewStringTemplate("inventory/managedObjects/{id}/childAddition/{child}")
+	path := flags.NewStringTemplate("inventory/managedObjects/{id}/childAdditions/{child}")
 	err = flags.WithPathParameters(
 		cmd,
 		path,

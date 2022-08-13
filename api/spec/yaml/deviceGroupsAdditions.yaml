@@ -17,15 +17,15 @@ endpoints:
     collectionProperty: managedObject
     alias:
         go: assign
-        powershell: Add-AdditionToDeviceGroup
+        powershell: Add-ChildAdditionToDeviceGroup
     examples:
         powershell:
           - description: Add a device to a group
-            command: Add-AdditionToDeviceGroup -Group $Group.id -Child $Device.id
+            command: Add-ChildAdditionToDeviceGroup -Group $Group.id -Child $Device.id
             skipTest: true
           
           - description: Add a device to a group by passing device and groups instead of an id or name
-            command: Add-AdditionToDeviceGroup -Group $Group -Child $Device
+            command: Add-ChildAdditionToDeviceGroup -Group $Group -Child $Device
             skipTest: true
 
           - description: |
@@ -75,12 +75,12 @@ endpoints:
         powershell: Remove-AdditionFromDeviceGroup
     examples:
       powershell:
-        - description: Unassign a child device from its parent asset
+        - description: Unassign a child addition from its parent asset
           beforeEach:
             - $Group = PSc8y\New-TestDeviceGroup
             - $ChildDevice = PSc8y\New-TestDevice
             - PSc8y\Add-AdditionToDeviceGroup -Group $Group.id -Child $ChildDevice.id
-          command: Remove-AdditionFromDeviceGroup -Group $Group.id -ChildDevice $ChildDevice.id
+          command: Remove-AdditionFromDeviceGroup -Group $Group.id -Child $ChildDevice.id
           afterEach:
             - PSc8y\Remove-ManagedObject -Id $ChildDevice.id
             - PSc8y\Remove-ManagedObject -Id $Group.id

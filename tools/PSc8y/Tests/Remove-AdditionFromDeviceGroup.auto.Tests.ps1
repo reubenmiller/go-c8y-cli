@@ -8,8 +8,8 @@ Describe -Name "Remove-AdditionFromDeviceGroup" {
 
     }
 
-    It "Unassign a child device from its parent asset" {
-        $Response = PSc8y\Remove-AdditionFromDeviceGroup -Group $Group.id -ChildDevice $ChildDevice.id
+    It "Unassign a child addition from its parent asset" {
+        $Response = PSc8y\Remove-AdditionFromDeviceGroup -Group $Group.id -Child $ChildDevice.id
         $LASTEXITCODE | Should -Be 0
     }
 

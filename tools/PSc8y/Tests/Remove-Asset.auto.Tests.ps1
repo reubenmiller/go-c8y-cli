@@ -4,7 +4,7 @@ Describe -Name "Remove-Asset" {
     BeforeEach {
         $Group = PSc8y\New-TestDeviceGroup
         $ChildDevice = PSc8y\New-TestDevice
-        PSc8y\Add-AssetToGroup -Group $Group.id -ChildDevice $ChildDevice.id
+        PSc8y\Add-ChildAssetToDeviceGroup -Group $Group.id -Child $ChildDevice.id
 
     }
 

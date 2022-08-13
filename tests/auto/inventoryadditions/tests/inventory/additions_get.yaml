@@ -5,4 +5,4 @@ tests:
         stdout:
             json:
                 method: GET
-                path: /inventory/managedObjects/12345/childAddition/12345
+                path: /inventory/managedObjects/12345/childAdditions/12345

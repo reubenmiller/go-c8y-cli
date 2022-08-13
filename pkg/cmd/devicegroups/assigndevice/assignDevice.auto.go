@@ -30,11 +30,10 @@ func NewAssignDeviceCmd(f *cmdutil.Factory) *AssignDeviceCmd {
 		factory: f,
 	}
 	cmd := &cobra.Command{
-		Use:        "assignDevice",
-		Short:      "Assign device to group",
-		Long:       `Assigns a device to a group. The device will be a childAsset of the group`,
-		Deprecated: "please use 'c8y devicegroups devices assign' instead",
-		Hidden:     true,
+		Use:    "assignDevice",
+		Short:  "Assign device to group",
+		Long:   `Assigns a device to a group. The device will be a childAsset of the group`,
+		Hidden: true,
 
 		Example: heredoc.Doc(`
 $ c8y devicegroups assignDevice --group 12345 --newChildDevice 43234
@@ -66,6 +65,7 @@ Add multiple devices to a group
 
 		flags.WithExtendedPipelineSupport("newChildDevice", "managedObject.id", true, "deviceId", "source.id", "managedObject.id", "id"),
 		flags.WithCollectionProperty("managedObject"),
+		flags.WithDeprecationNotice("please use 'c8y devicegroups devices assign' instead"),
 	)
 
 	// Required flags

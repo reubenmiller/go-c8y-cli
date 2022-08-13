@@ -24,7 +24,7 @@ endpoints:
           beforeEach:
             - $software = PSc8y\New-ManagedObject -Name softwarePackage1
             - $version = PSc8y\New-ManagedObject -Name softwareVersion1
-            - PSc8y\Add-ChildAddition -Id $software.id -NewChild $version.id
+            - PSc8y\Add-ChildAddition -Id $software.id -Child $version.id
           command: Get-ChildAdditionCollection -Id $software.id
           afterEach:
             - PSc8y\Remove-ManagedObject -Id $software.id
@@ -34,7 +34,7 @@ endpoints:
           beforeEach:
             - $software = PSc8y\New-ManagedObject -Name softwarePackage1
             - $version = PSc8y\New-ManagedObject -Name softwareVersion1
-            - PSc8y\Add-ChildAddition -Id $software.id -NewChild $version.id
+            - PSc8y\Add-ChildAddition -Id $software.id -Child $version.id
           command: Get-ManagedObject -Id $software.id | Get-ChildAdditionCollection
           afterEach:
             - PSc8y\Remove-ManagedObject -Id $software.id
@@ -219,7 +219,7 @@ endpoints:
     description: Get child addition
     descriptionLong: Get managed object child addition
     method: GET
-    path: inventory/managedObjects/{id}/childAddition/{child}
+    path: inventory/managedObjects/{id}/childAdditions/{child}
     accept: application/vnd.com.nsn.cumulocity.managedObjectReference+json
     alias:
         go: get
@@ -230,7 +230,7 @@ endpoints:
             beforeEach:
               - $Agent = New-TestAgent
               - $Device = New-TestDevice
-              - $Ref = Add-AssetToGroup -Group $Agent.id -ChildDevice $Device.id
+              - $Ref = Add-AdditionToDeviceGroup -Group $Agent.id -Child $Device.id
             command: Get-ChildAddition -Id $Agent.id -Child $Ref.id
             afterEach:
               - Remove-ManagedObject -Id $Device.id

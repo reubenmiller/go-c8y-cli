@@ -1,6 +1,6 @@
 ﻿. $PSScriptRoot/imports.ps1
 
-Describe -Name "Add-AssetToGroup" {
+Describe -Name "Add-ChildAssetToManagedObject" {
     BeforeEach {
         $Group1 = PSc8y\New-TestDeviceGroup
         $Group2 = PSc8y\New-TestDeviceGroup
@@ -8,7 +8,7 @@ Describe -Name "Add-AssetToGroup" {
     }
 
     It "Create group hierarchy (parent group -> child group)" {
-        $Response = PSc8y\Add-AssetToGroup -Group $Group1.id -ChildGroup $Group2.id
+        $Response = PSc8y\Add-ChildAssetToManagedObject -Id $Group1.id -ChildGroup $Group2.id
         $LASTEXITCODE | Should -Be 0
         $Response | Should -Not -BeNullOrEmpty
     }

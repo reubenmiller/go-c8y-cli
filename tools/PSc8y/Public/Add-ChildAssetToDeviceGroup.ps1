@@ -1,27 +1,27 @@
 ﻿# Code generated from specification version 1.0.0: DO NOT EDIT
-Function Add-DeviceToGroup {
+Function Add-ChildAssetToDeviceGroup {
 <#
 .SYNOPSIS
-Assign device to group
+Assign asset to group
 
 .DESCRIPTION
-Assigns a device to a group. The device will be a childAsset of the group
+Assigns an asset to a group. The device will be a childAsset of the group
 
 .LINK
-https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/devicegroups_devices_assign
+https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/devicegroups_assets_assign
 
 .EXAMPLE
-PS> Add-DeviceToGroup -Group $Group.id -Child $Device.id
+PS> Add-ChildAssetToDeviceGroup -Group $Group.id -Child $Device.id
 
 Add a device to a group
 
 .EXAMPLE
-PS> Add-DeviceToGroup -Group $Group -Child $Device
+PS> Add-ChildAssetToDeviceGroup -Group $Group -Child $Device
 
 Add a device to a group by passing device and groups instead of an id or name
 
 .EXAMPLE
-PS> Get-Device $Device1.name, $Device2.name | Add-DeviceToGroup -Group $Group.id
+PS> Get-Device $Device1.name, $Device2.name | Add-ChildAssetToDeviceGroup -Group $Group.id
 
 Add multiple devices to a group. Alternatively `Get-DeviceCollection` can be used
 to filter for a collection of devices and assign the results to a single group.
@@ -34,7 +34,7 @@ to filter for a collection of devices and assign the results to a single group.
     [Alias()]
     [OutputType([object])]
     Param(
-        # Device group (required)
+        # Group (required)
         [Parameter(Mandatory = $true)]
         [object[]]
         $Group,
@@ -57,7 +57,7 @@ to filter for a collection of devices and assign the results to a single group.
             Use-CallerPreference -Cmdlet $PSCmdlet -SessionState $ExecutionContext.SessionState
         }
 
-        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "devicegroups devices assign"
+        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "devicegroups assets assign"
         $ClientOptions = Get-ClientOutputOption $PSBoundParameters
         $TypeOptions = @{
             Type = "application/vnd.com.nsn.cumulocity.managedObjectReference+json"
@@ -71,13 +71,13 @@ to filter for a collection of devices and assign the results to a single group.
         if ($ClientOptions.ConvertToPS) {
             $Child `
             | Group-ClientRequests `
-            | c8y devicegroups devices assign $c8yargs `
+            | c8y devicegroups assets assign $c8yargs `
             | ConvertFrom-ClientOutput @TypeOptions
         }
         else {
             $Child `
             | Group-ClientRequests `
-            | c8y devicegroups devices assign $c8yargs
+            | c8y devicegroups assets assign $c8yargs
         }
         
     }

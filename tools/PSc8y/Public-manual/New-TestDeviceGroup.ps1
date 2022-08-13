@@ -77,7 +77,8 @@ Create a test device group with 10 newly created devices
         if ($TotalDevices -gt 0) {
             for ($i = 0; $i -lt $TotalDevices; $i++) {
                 $iDevice = PSc8y\New-TestAgent -Force -AsPSObject
-                $null = PSc8y\Add-AssetToGroup -Group $Group.id -ChildDevice $iDevice.id -Force
+                
+                $null = PSc8y\Add-ChildAssetToDeviceGroup -Group $Group.id -Child $iDevice.id -Force
             }
         }
 
