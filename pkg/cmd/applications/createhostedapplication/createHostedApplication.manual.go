@@ -310,30 +310,32 @@ func (n *CmdCreateHostedApplication) RunE(cmd *cobra.Command, args []string) err
 
 	// App activation (only if a new version was uploaded)
 	if !skipUpload && !n.skipActivation {
-		log.Infof("Activating application")
+		if !dryRun {
+			log.Infof("Activating application")
 
-		if applicationBinaryID == "" {
-			return fmt.Errorf("failed to activate new application version because binary id is empty")
-		}
-
-		_, resp, err := client.Application.Update(
-			context.Background(),
-			applicationID,
-			&c8y.Application{
-				ActiveVersionID: applicationBinaryID,
-			},
-		)
-
-		if err != nil {
-			if resp != nil && resp.StatusCode() == 409 {
-				log.Infof("application is already enabled")
-			} else {
-				return fmt.Errorf("failed to activate application. %s", err)
+			if applicationBinaryID == "" {
+				return fmt.Errorf("failed to activate new application version because binary id is empty")
 			}
-		}
 
-		// use the updated application json
-		response = resp
+			_, resp, err := client.Application.Update(
+				context.Background(),
+				applicationID,
+				&c8y.Application{
+					ActiveVersionID: applicationBinaryID,
+				},
+			)
+
+			if err != nil {
+				if resp != nil && resp.StatusCode() == 409 {
+					log.Infof("application is already enabled")
+				} else {
+					return fmt.Errorf("failed to activate application. %s", err)
+				}
+			}
+
+			// use the updated application json
+			response = resp
+		}
 	}
 
 	commonOptions, err := cfg.GetOutputCommonOptions(cmd)
