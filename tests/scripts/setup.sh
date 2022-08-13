@@ -206,8 +206,8 @@ create_device_and_user () {
 create_devicecert () {
     local name="$1"
 
-    c8y devicemanagement certificates get --id "$name" --silentStatusCodes 404 ||
-        c8y devicemanagement certificates create --name "$name" --file tests/testdata/trustedcert.pem
+    c8y devicemanagement certificates get -n --id "$name" --silentStatusCodes 404 ||
+        c8y devicemanagement certificates create -n --name "$name" --file tests/testdata/trustedcert.pem
 }
 
 setup

@@ -18,3 +18,31 @@ tests:
                 body.key: devicemanagement-application-key
                 body.type: HOSTED
                 body.resourcesUrl: /
+
+    Create hosted (web) application from folder:
+        command: |
+          c8y applications createHostedApplication --name devicemanagement --file "./manual/applications/createHostedApplication/simple-helloworld" --dry --skipUpload
+        exit-code: 0
+        stdout:
+            json:
+                method: POST
+                path: /application/applications
+                body.name: devicemanagement
+                body.contextPath: custom-app
+                body.key: custom-app-key
+                body.type: HOSTED
+                body.resourcesUrl: /
+
+    Create hosted (web) application from zip file:
+        command: |
+          c8y applications createHostedApplication --file "./manual/applications/createHostedApplication/app.zip" --dry --skipUpload
+        exit-code: 0
+        stdout:
+            json:
+                method: POST
+                path: /application/applications
+                body.name: custom-app
+                body.contextPath: custom-app
+                body.key: custom-app-key
+                body.type: HOSTED
+                body.resourcesUrl: /
