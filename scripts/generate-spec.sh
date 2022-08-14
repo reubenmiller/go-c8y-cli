@@ -14,6 +14,10 @@ echo "Converting yaml specs to json"
 SOURCE_FILES="$SCRIPT_DIR/../api/spec/yaml/*yaml"
 DEST_BASE="$SCRIPT_DIR/../api/spec/json"
 
+# Delete any existing specs (as they will be re-generated)
+# This ensures there are no orphaned specs if the yaml is deleted and not the json spec
+rm -f "$DEST_BASE"/*.json
+
 for filepath in $SOURCE_FILES ; do
     name=$(basename "$filepath")
     dest="$DEST_BASE/${name%.*}.json"
