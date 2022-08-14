@@ -121,6 +121,7 @@ tasks:
       - ./scripts/generate-spec.sh
     sources:
       - api/spec/yaml/*.yaml
+      - ./scripts/generate-spec.sh
     generates:
       - api/spec/json/*.json
   

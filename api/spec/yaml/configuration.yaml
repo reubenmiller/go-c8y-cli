@@ -293,7 +293,7 @@ endpoints:
           beforeEach:
             - $Device = PSc8y\New-TestDevice
             - $ChildDevice = PSc8y\New-TestDevice
-            - PSc8y\Add-ChildDeviceToDevice -Device $Device.id -Child $ChildDevice.id
+            - PSc8y\Add-ManagedObjectChild -ChildType device -Id $Device.id -Child $ChildDevice.id
           command: Get-ManagedObject -Id $Device.id | Remove-Configuration -forceCascade:$false
           afterEach:
             - Remove-ManagedObject -Id $Device.id -ErrorAction SilentlyContinue

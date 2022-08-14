@@ -1,9 +1,0 @@
-tests:
-    devices/assets_assign_Assign a managed object as a child asset to an existing device:
-        command: c8y devices assets assign --device 12345 --child 44235
-        exit-code: 0
-        stdout:
-            json:
-                body.managedObject.id: "44235"
-                method: POST
-                path: /inventory/managedObjects/12345/childAssets

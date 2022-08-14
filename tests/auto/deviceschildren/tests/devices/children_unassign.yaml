@@ -1,6 +1,13 @@
 tests:
-    devices/children_unassign_Unassign a child device from its parent device:
-        command: c8y devices children unassign --device 12345 --child 22553
+    devices/children_unassign_Unassign a child addition from a managed object:
+        command: c8y inventory children unassign --id 12345 --child 22553 --childType addition
+        exit-code: 0
+        stdout:
+            json:
+                method: DELETE
+                path: /inventory/managedObjects/12345/childAdditions/22553
+    devices/children_unassign_Unassign a child device from a managed object:
+        command: c8y inventory children unassign --id 12345 --child 22553 --childType device
         exit-code: 0
         stdout:
             json:

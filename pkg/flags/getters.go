@@ -887,6 +887,41 @@ func WithDataValue(opts ...string) GetOption {
 	return WithDataValueAdvanced(true, false, opts...)
 }
 
+func WithInventoryChildType(opts ...string) GetOption {
+	return func(cmd *cobra.Command, inputIterators *RequestInputIterators) (string, interface{}, error) {
+
+		src, dst, format := UnpackGetterOptions("%s", opts...)
+		value, err := cmd.Flags().GetString(src)
+		if err != nil {
+			return "", nil, err
+		}
+
+		value = strings.ToLower(applyFormatter(format, value))
+
+		validValues := []string{
+			"asset",
+			"device",
+			"addition",
+		}
+
+		isValid := false
+		for _, iValue := range validValues {
+			if iValue == value {
+				isValid = true
+				break
+			}
+		}
+
+		if !isValid {
+			return "", nil, fmt.Errorf("invalid value. %s only accepts %s", src, strings.Join(validValues, ","))
+		}
+
+		formattedValue := "child" + strings.ToUpper(value[0:1]) + value[1:] + "s"
+
+		return dst, formattedValue, nil
+	}
+}
+
 type DefaultTemplateString string
 type RequiredTemplateString string
 

@@ -2,6 +2,7 @@ package children
 
 import (
 	cmdAssign "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/devices/children/assign"
+	cmdCreate "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/devices/children/create"
 	cmdGet "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/devices/children/get"
 	cmdList "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/devices/children/list"
 	cmdUnassign "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/devices/children/unassign"
@@ -19,14 +20,15 @@ func NewSubCommand(f *cmdutil.Factory) *SubCmdChildren {
 
 	cmd := &cobra.Command{
 		Use:   "children",
-		Short: "Cumulocity device children",
-		Long:  `Managed device children`,
+		Short: "Cumulocity managed object child references",
+		Long:  `Manage child entities (assets, additions and device) for devices`,
 	}
 
 	// Subcommands
+	cmd.AddCommand(cmdList.NewListCmd(f).GetCommand())
 	cmd.AddCommand(cmdAssign.NewAssignCmd(f).GetCommand())
 	cmd.AddCommand(cmdUnassign.NewUnassignCmd(f).GetCommand())
-	cmd.AddCommand(cmdList.NewListCmd(f).GetCommand())
+	cmd.AddCommand(cmdCreate.NewCreateCmd(f).GetCommand())
 	cmd.AddCommand(cmdGet.NewGetCmd(f).GetCommand())
 
 	ccmd.SubCommand = subcommand.NewSubCommand(cmd)

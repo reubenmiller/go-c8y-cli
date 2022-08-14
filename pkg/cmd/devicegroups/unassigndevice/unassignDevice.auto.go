@@ -30,9 +30,11 @@ func NewUnassignDeviceCmd(f *cmdutil.Factory) *UnassignDeviceCmd {
 		factory: f,
 	}
 	cmd := &cobra.Command{
-		Use:   "unassignDevice",
-		Short: "Unassign device from group",
-		Long:  `Unassign/delete a device from a group`,
+		Use:    "unassignDevice",
+		Short:  "Unassign device from group",
+		Long:   `Unassign/delete a device from a group`,
+		Hidden: true,
+
 		Example: heredoc.Doc(`
 $ c8y devicegroups unassignDevice --group 12345 --childDevice 22553
 Unassign a child device from its parent device
@@ -59,6 +61,8 @@ Unassign a child device from its parent device
 		flags.WithProcessingMode(),
 
 		flags.WithExtendedPipelineSupport("childDevice", "reference", true, "deviceId", "source.id", "managedObject.id", "id"),
+
+		flags.WithDeprecationNotice("please use 'c8y devicegroups devices unassign' instead"),
 	)
 
 	// Required flags

@@ -21,7 +21,9 @@
         [Parameter(
             Mandatory = $true
         )]
-        [string] $OutFolder
+        [string] $OutFolder,
+
+        [switch] $Deprecated
     )
 
     $Template = Get-Content $TemplateFile -Raw
@@ -137,7 +139,11 @@
 
     $OutFile = Join-Path -Path $OutFolder -ChildPath "${Name}.auto.Tests.ps1"
 
-    # Write to file with BOM (to help with encoding in powershell)
-    $Encoding = New-Object System.Text.UTF8Encoding $true
-	[System.IO.File]::WriteAllLines($OutFile, $Template, $Encoding)
+    if ($Deprecated) {
+        Remove-Item -Path $OutFile -ErrorAction SilentlyContinue
+    } else {
+        # Write to file with BOM (to help with encoding in powershell)
+        $Encoding = New-Object System.Text.UTF8Encoding $true
+        [System.IO.File]::WriteAllLines($OutFile, $Template, $Encoding)
+    }
 }

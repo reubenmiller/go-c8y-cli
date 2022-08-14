@@ -296,41 +296,25 @@ endpoints:
     collectionType: application/vnd.com.nsn.cumulocity.managedObject+json
     description: 'Assign device to group'
     descriptionLong: 'Assigns a device to a group. The device will be a childAsset of the group'
+    hidden: true
+    deprecated: "please use 'c8y devicegroups devices assign' instead"
+    deprecatedAt: "2022-08-13"
     collectionProperty: managedObject
     alias:
         go: assignDevice
-        powershell: Add-DeviceToGroup
+        powershell: Add-ChildDeviceToGroup
+    powershell:
+      deprecated: true
     examples:
         powershell:
           - description: Add a device to a group
             beforeEach:
               - $Device = PSc8y\New-TestDevice
               - $Group = PSc8y\New-TestDeviceGroup
-            command: Add-DeviceToGroup -Group $Group.id -NewChildDevice $Device.id
+            command: Add-ChildDeviceToGroup -Group $Group.id -NewChildDevice $Device.id
+            skipTest: true
             afterEach:
               - PSc8y\Remove-ManagedObject -Id $Device.id
-              - PSc8y\Remove-ManagedObject -Id $Group.id
-          
-          - description: Add a device to a group by passing device and groups instead of an id or name
-            beforeEach:
-              - $Device = PSc8y\New-TestDevice
-              - $Group = PSc8y\New-TestDeviceGroup
-            command: Add-DeviceToGroup -Group $Group -NewChildDevice $Device
-            afterEach:
-              - PSc8y\Remove-ManagedObject -Id $Device.id
-              - PSc8y\Remove-ManagedObject -Id $Group.id
-
-          - description: |
-              Add multiple devices to a group. Alternatively `Get-DeviceCollection` can be used
-              to filter for a collection of devices and assign the results to a single group.
-            beforeEach:
-              - $Device1 = PSc8y\New-TestDevice
-              - $Device2 = PSc8y\New-TestDevice
-              - $Group = PSc8y\New-TestDeviceGroup
-            command: Get-Device $Device1.name, $Device2.name | Add-DeviceToGroup -Group $Group.id
-            afterEach:
-              - PSc8y\Remove-ManagedObject -Id $Device1.id
-              - PSc8y\Remove-ManagedObject -Id $Device2.id
               - PSc8y\Remove-ManagedObject -Id $Group.id
         go:
           - description: Add a device to a group
@@ -360,10 +344,15 @@ endpoints:
     collectionType: application/vnd.com.nsn.cumulocity.managedObject+json
     description: Assign child group
     descriptionLong: 'Assigns a group to a group. The group will be a childAsset of the group'
+    hidden: true
+    deprecated: "please use 'c8y devicegroups children unassign' instead"
+    deprecatedAt: "2022-08-13"
     collectionProperty: managedObject
     alias:
         go: assignGroup
         powershell: Add-ChildGroupToGroup
+    powershell:
+      deprecated: true
     examples:
         powershell:
           - description: Add a group to a group as a child
@@ -371,6 +360,7 @@ endpoints:
               - $Group = PSc8y\New-TestDeviceGroup
               - $ChildGroup1 = PSc8y\New-TestDeviceGroup
             command: Add-ChildGroupToGroup -Group $Group.id -NewChildGroup $ChildGroup1.id
+            skipTest: true
             afterEach:
               - PSc8y\Remove-ManagedObject -Id $ChildGroup1.id
               - PSc8y\Remove-ManagedObject -Id $Group.id
@@ -383,6 +373,7 @@ endpoints:
               - $SubGroup1 = PSc8y\New-TestDeviceGroup -Type SubGroup
               - $SubGroup2 = PSc8y\New-TestDeviceGroup -Type SubGroup
             command: Get-DeviceGroup $SubGroup1.name, $SubGroup2.name | Add-ChildGroupToGroup -Group $CustomGroup.id
+            skipTest: true
             afterEach:
               - PSc8y\Remove-ManagedObject -Id $SubGroup1.id
               - PSc8y\Remove-ManagedObject -Id $SubGroup2.id
@@ -411,6 +402,9 @@ endpoints:
   - name: deleteDeviceFromGroup
     description: Unassign device from group
     descriptionLong: Unassign/delete a device from a group
+    hidden: true
+    deprecated: "please use 'c8y devicegroups devices unassign' instead"
+    deprecatedAt: "2022-08-13"
     method: DELETE
     path: inventory/managedObjects/{group}/childAssets/{reference}
     accept: ''
@@ -418,13 +412,15 @@ endpoints:
     alias:
         go: unassignDevice
         powershell: Remove-DeviceFromGroup
+    powershell:
+      deprecated: true
     examples:
       powershell:
         - description: Unassign a child device from its parent asset
           beforeEach:
             - $Group = PSc8y\New-TestDeviceGroup
             - $ChildDevice = PSc8y\New-TestDevice
-            - PSc8y\Add-AssetToGroup -Group $Group.id -NewChildDevice $ChildDevice.id
+            - PSc8y\Add-ManagedObjectChild -ChildType asset -Id $Group.id -Child $ChildDevice.id
           command: Remove-DeviceFromGroup -Group $Group.id -ChildDevice $ChildDevice.id
           afterEach:
             - PSc8y\Remove-ManagedObject -Id $ChildDevice.id
@@ -449,19 +445,24 @@ endpoints:
   - name: deleteManagedObjectChildGroup
     description: Delete child group reference
     descriptionLong: Delete child group reference
+    hidden: true
+    deprecated: "please use 'c8y devicegroups children unassign' instead"
+    deprecatedAt: "2022-08-13"
     method: DELETE
     path: inventory/managedObjects/{id}/childAssets/{child}
     accept: ''
     alias:
         go: unassignGroup
         powershell: Remove-GroupFromGroup
+    powershell:
+      deprecated: true
     examples:
       powershell:
         - description: Unassign a child group from its parent
           beforeEach:
             - $Group = PSc8y\New-TestDeviceGroup
             - $ChildGroup = PSc8y\New-TestDevice
-            - PSc8y\Add-AssetToGroup -Group $Group.id -NewChildGroup $ChildGroup.id
+            - PSc8y\Add-ManagedObjectChild -ChildType asset -Id $Group.id -Child $ChildGroup.id
           command: Remove-GroupFromGroup -Id $Group.id -Child $ChildGroup.id
           afterEach:
             - PSc8y\Remove-ManagedObject -Id $ChildGroup.id
@@ -485,6 +486,9 @@ endpoints:
 
   - name: listChildAssetCollection
     method: GET
+    hidden: true
+    deprecated: "please use 'c8y devicegroups children list' instead"
+    deprecatedAt: "2022-08-13"
     description: Get child asset collection
     descriptionLong: Get a collection of managedObjects child references
     path: inventory/managedObjects/{id}/childAssets
@@ -494,13 +498,15 @@ endpoints:
     alias:
         go: listAssets
         powershell: Get-DeviceGroupChildAssetCollection
+    powershell:
+      deprecated: true
     examples:
       powershell:
         - description: Get a list of the child assets of an existing device
           beforeEach:
             - $Device = PSc8y\New-TestDevice
             - $ChildDevice = PSc8y\New-TestDevice
-            - PSc8y\Add-AssetToGroup -Group $Device.id -NewChildDevice $ChildDevice.id
+            - PSc8y\Add-ManagedObjectChild -ChildType asset -Id $Device.id -Child $ChildDevice.id
           command: Get-DeviceGroupChildAssetCollection -Id $Group.id
           afterEach:
             - PSc8y\Remove-ManagedObject -Id $ChildDevice.id
@@ -510,7 +516,7 @@ endpoints:
           beforeEach:
             - $Group = PSc8y\New-TestDeviceGroup
             - $ChildGroup = PSc8y\New-TestDeviceGroup
-            - PSc8y\Add-AssetToGroup -Group $Group.id -NewChildGroup $ChildGroup.id
+            - PSc8y\Add-ManagedObjectChild -ChildType asset -Id $Group.id -Child $ChildGroup.id
           command: Get-DeviceGroupChildAssetCollection -Id $Group.id
           afterEach:
             - PSc8y\Remove-ManagedObject -Id $ChildGroup.id

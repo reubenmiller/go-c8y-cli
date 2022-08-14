@@ -23,6 +23,7 @@ const (
 	AnnotationValueFromPipeline       = "valueFromPipeline"
 	AnnotationValueFromPipelineData   = "valueFromPipeline.data"
 	AnnotationValueCollectionProperty = "collectionProperty"
+	AnnotationValueDeprecated         = "deprecatedNotice"
 )
 
 // Option adds flags to a given command
@@ -150,6 +151,31 @@ func WithCollectionProperty(property string) Option {
 		cmd.Annotations[AnnotationValueCollectionProperty] = property
 		return cmd
 	}
+}
+
+// WithDeprecationNotice marks a commands as being deprecated
+func WithDeprecationNotice(message string) Option {
+	return func(cmd *cobra.Command) *cobra.Command {
+		if cmd.Annotations == nil {
+			cmd.Annotations = map[string]string{}
+		}
+		cmd.Annotations[AnnotationValueDeprecated] = message
+		return cmd
+	}
+}
+
+// GetDeprecationNoticeFromAnnotation returns the deprecated notice if present
+func GetDeprecationNoticeFromAnnotation(cmd *cobra.Command) (value string) {
+	if cmd == nil {
+		return
+	}
+	if cmd.Annotations == nil {
+		return
+	}
+	if v, ok := cmd.Annotations[AnnotationValueDeprecated]; ok {
+		value = v
+	}
+	return
 }
 
 // GetPipeOptionsFromAnnotation returns the pipeline options stored in the annotations

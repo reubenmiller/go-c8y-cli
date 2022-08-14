@@ -67,7 +67,7 @@ Delete a device and any related child assets, additions and/or devices
 		cmd,
 		flags.WithProcessingMode(),
 
-		flags.WithExtendedPipelineSupport("id", "id", true),
+		flags.WithExtendedPipelineSupport("id", "id", true, "deviceId", "source.id", "managedObject.id"),
 	)
 
 	// Required flags

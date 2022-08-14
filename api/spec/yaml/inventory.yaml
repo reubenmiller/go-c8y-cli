@@ -442,6 +442,10 @@ endpoints:
         pipeline: true
         required: true
         description: ManagedObject id
+        pipelineAliases:
+          - "deviceId"
+          - "source.id"
+          - "managedObject.id"
 
     queryParameters:
       - name: skipChildrenNames
@@ -501,6 +505,10 @@ endpoints:
         pipeline: true
         description: ManagedObject id
         required: true
+        pipelineAliases:
+          - "deviceId"
+          - "source.id"
+          - "managedObject.id"
 
   - name: deleteManagedObject
     description: Delete managed object
@@ -531,7 +539,7 @@ endpoints:
           beforeEach:
             - $Device = PSc8y\New-TestDevice
             - $ChildDevice = PSc8y\New-TestDevice
-            - PSc8y\Add-ChildDeviceToDevice -Device $Device.id -Child $ChildDevice.id
+            - PSc8y\Add-ManagedObjectChild -ChildType device -Id $Device.id -Child $ChildDevice.id
           command: Get-ManagedObject -Id $Device.id | Remove-ManagedObject -Cascade
           afterEach:
             - Remove-ManagedObject -Id $Device.id -ErrorAction SilentlyContinue
@@ -556,6 +564,10 @@ endpoints:
         pipeline: true
         required: true
         description: ManagedObject id
+        pipelineAliases:
+          - "deviceId"
+          - "source.id"
+          - "managedObject.id"
 
     queryParameters:
       - name: cascade

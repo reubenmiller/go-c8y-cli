@@ -60,6 +60,9 @@
         # string array/slice as a comma separated string
         "[]stringcsv" = "flags.WithStringSliceCSV(`"${prop}`", `"${queryParam}`", `"$FixedValue`"),"
     
+        # inventoryChildType
+        "inventoryChildType" = "flags.WithInventoryChildType(`"${prop}`", `"${queryParam}`"$FormatValue),"
+
         # string
         "string" = "flags.WithStringValue(`"${prop}`", `"${queryParam}`"$FormatValue),"
 
