@@ -8,10 +8,14 @@ fi
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 pushd "$SCRIPT_DIR"
 
-folder=$1
-shift
+folder=
+if [ $# -gt 0 ]; then
+    folder=$1
+    shift
+fi
 
 export TEST_SHELL=bash
+echo "Checking commander help"
 commander test --config ./config.yaml "$@" --dir auto/$folder
 code=$?
 
