@@ -8,7 +8,7 @@ Get child collection
 Get a collection of managedObjects child
 
 .LINK
-https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/devices_children2_list
+https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/devices_children_list
 
 .EXAMPLE
 PS> Get-DeviceChildCollection -Id 12345 -ChildType childAdditions
@@ -71,7 +71,7 @@ Get a list of the child additions of an existing managed object (using pipeline)
             Use-CallerPreference -Cmdlet $PSCmdlet -SessionState $ExecutionContext.SessionState
         }
 
-        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "devices children2 list"
+        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "devices children list"
         $ClientOptions = Get-ClientOutputOption $PSBoundParameters
         $TypeOptions = @{
             Type = "application/vnd.com.nsn.cumulocity.managedObjectReferenceCollection+json"
@@ -85,13 +85,13 @@ Get a list of the child additions of an existing managed object (using pipeline)
         if ($ClientOptions.ConvertToPS) {
             $Id `
             | Group-ClientRequests `
-            | c8y devices children2 list $c8yargs `
+            | c8y devices children list $c8yargs `
             | ConvertFrom-ClientOutput @TypeOptions
         }
         else {
             $Id `
             | Group-ClientRequests `
-            | c8y devices children2 list $c8yargs
+            | c8y devices children list $c8yargs
         }
         
     }

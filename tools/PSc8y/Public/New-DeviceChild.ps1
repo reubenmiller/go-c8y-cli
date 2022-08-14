@@ -8,7 +8,7 @@ Create child
 Create a new managed object and assign it to an existing managed object as a child
 
 .LINK
-https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/devices_children2_create
+https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/devices_children_create
 
 .EXAMPLE
 PS> New-DeviceChild -Id $software.id -Data "custom.value=test" -Global -ChildType childAdditions
@@ -51,7 +51,7 @@ Create a child addition and link it to an existing managed object
             Use-CallerPreference -Cmdlet $PSCmdlet -SessionState $ExecutionContext.SessionState
         }
 
-        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "devices children2 create"
+        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "devices children create"
         $ClientOptions = Get-ClientOutputOption $PSBoundParameters
         $TypeOptions = @{
             Type = "application/json"
@@ -65,13 +65,13 @@ Create a child addition and link it to an existing managed object
         if ($ClientOptions.ConvertToPS) {
             $Id `
             | Group-ClientRequests `
-            | c8y devices children2 create $c8yargs `
+            | c8y devices children create $c8yargs `
             | ConvertFrom-ClientOutput @TypeOptions
         }
         else {
             $Id `
             | Group-ClientRequests `
-            | c8y devices children2 create $c8yargs
+            | c8y devices children create $c8yargs
         }
         
     }

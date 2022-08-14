@@ -8,7 +8,7 @@ Assign child
 Assign an existing managed object as a child to an existing managed object
 
 .LINK
-https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/devices_children2_assign
+https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/devices_children_assign
 
 .EXAMPLE
 PS> Add-DeviceChild -Id $software.id -Child $version.id -ChildType childAdditions
@@ -53,7 +53,7 @@ Add a related managed object as a child addition to an existing managed object
             Use-CallerPreference -Cmdlet $PSCmdlet -SessionState $ExecutionContext.SessionState
         }
 
-        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "devices children2 assign"
+        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "devices children assign"
         $ClientOptions = Get-ClientOutputOption $PSBoundParameters
         $TypeOptions = @{
             Type = "application/vnd.com.nsn.cumulocity.managedObjectReference+json"
@@ -67,13 +67,13 @@ Add a related managed object as a child addition to an existing managed object
         if ($ClientOptions.ConvertToPS) {
             $Child `
             | Group-ClientRequests `
-            | c8y devices children2 assign $c8yargs `
+            | c8y devices children assign $c8yargs `
             | ConvertFrom-ClientOutput @TypeOptions
         }
         else {
             $Child `
             | Group-ClientRequests `
-            | c8y devices children2 assign $c8yargs
+            | c8y devices children assign $c8yargs
         }
         
     }

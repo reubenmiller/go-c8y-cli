@@ -5,7 +5,7 @@ Describe -Name "Add-DeviceChild" {
 
     }
 
-    It "Add a related managed object as a child addition to an existing managed object" {
+    It -Skip "Add a related managed object as a child addition to an existing managed object" {
         $Response = PSc8y\Add-DeviceChild -Id $software.id -Child $version.id -ChildType childAdditions
         $LASTEXITCODE | Should -Be 0
         $Response | Should -Not -BeNullOrEmpty

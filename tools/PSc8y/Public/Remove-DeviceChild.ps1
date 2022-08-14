@@ -8,7 +8,7 @@ Unassign child
 Unassign/delete an managed object as a child to an existing managed object
 
 .LINK
-https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/devices_children2_unassign
+https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/devices_children_unassign
 
 .EXAMPLE
 PS> Remove-DeviceChild -Id $software.id -Child $version.id -ChildType childAdditions
@@ -53,7 +53,7 @@ Unassign a child addition from its parent managed object
             Use-CallerPreference -Cmdlet $PSCmdlet -SessionState $ExecutionContext.SessionState
         }
 
-        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "devices children2 unassign"
+        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "devices children unassign"
         $ClientOptions = Get-ClientOutputOption $PSBoundParameters
         $TypeOptions = @{
             Type = ""
@@ -67,13 +67,13 @@ Unassign a child addition from its parent managed object
         if ($ClientOptions.ConvertToPS) {
             $Child `
             | Group-ClientRequests `
-            | c8y devices children2 unassign $c8yargs `
+            | c8y devices children unassign $c8yargs `
             | ConvertFrom-ClientOutput @TypeOptions
         }
         else {
             $Child `
             | Group-ClientRequests `
-            | c8y devices children2 unassign $c8yargs
+            | c8y devices children unassign $c8yargs
         }
         
     }

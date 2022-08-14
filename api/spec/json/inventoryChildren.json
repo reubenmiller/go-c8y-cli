@@ -23,11 +23,13 @@
         "powershell": [
           {
             "description": "Get a list of the child additions of an existing managed object",
-            "command": "Get-ManagedObjectChildCollection -Id 12345 -ChildType childAdditions"
+            "command": "Get-ManagedObjectChildCollection -Id 12345 -ChildType childAdditions",
+            "skipTest": true
           },
           {
             "description": "Get a list of the child additions of an existing managed object (using pipeline)",
-            "command": "Get-ManagedObject -Id 12345 | Get-ManagedObjectChildCollection -ChildType childAdditions"
+            "command": "Get-ManagedObject -Id 12345 | Get-ManagedObjectChildCollection -ChildType childAdditions",
+            "skipTest": true
           }
         ],
         "go": [
@@ -116,7 +118,8 @@
         "powershell": [
           {
             "description": "Add a related managed object as a child addition to an existing managed object",
-            "command": "Add-ManagedObjectChild -Id $software.id -Child $version.id -ChildType childAdditions"
+            "command": "Add-ManagedObjectChild -Id $software.id -Child $version.id -ChildType childAdditions",
+            "skipTest": true
           }
         ],
         "go": [
@@ -180,7 +183,8 @@
         "powershell": [
           {
             "description": "Unassign a child addition from its parent managed object",
-            "command": "Remove-ManagedObjectChild -Id $software.id -Child $version.id -ChildType childAdditions"
+            "command": "Remove-ManagedObjectChild -Id $software.id -Child $version.id -ChildType childAdditions",
+            "skipTest": true
           }
         ],
         "go": [
@@ -244,7 +248,8 @@
         "powershell": [
           {
             "description": "Create a child addition and link it to an existing managed object",
-            "command": "New-ManagedObjectChild -Id $software.id -Data \"custom.value=test\" -Global -ChildType childAdditions"
+            "command": "New-ManagedObjectChild -Id $software.id -Data \"custom.value=test\" -Global -ChildType childAdditions",
+            "skipTest": true
           }
         ],
         "go": [
@@ -318,7 +323,8 @@
         "powershell": [
           {
             "description": "Get an existing child managed object",
-            "command": "Get-ManagedObjectChild -Id $Agent.id -Child $Ref.id -ChildType childAdditions"
+            "command": "Get-ManagedObjectChild -Id $Agent.id -Child $Ref.id -ChildType childAdditions",
+            "skipTest": true
           }
         ],
         "go": [
