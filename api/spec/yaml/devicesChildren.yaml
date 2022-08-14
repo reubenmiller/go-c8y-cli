@@ -237,6 +237,7 @@ endpoints:
     method: GET
     path: inventory/managedObjects/{id}/{childType}/{child}
     accept: application/vnd.com.nsn.cumulocity.managedObjectReference+json
+    collectionProperty: managedObject
     alias:
         go: get
         powershell: Get-DeviceChild
