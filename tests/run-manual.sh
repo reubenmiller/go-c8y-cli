@@ -15,8 +15,6 @@ if [ $# -gt 0 ]; then
 fi
 
 export TEST_SHELL=bash
-echo "Checking commander help"
-commander test --help
 commander test --config ./config.manual.yaml $@ --dir manual/$folder
 code=$?
 
