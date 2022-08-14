@@ -416,34 +416,6 @@
               "PSc8y\\Remove-ManagedObject -Id $Device.id",
               "PSc8y\\Remove-ManagedObject -Id $Group.id"
             ]
-          },
-          {
-            "description": "Add a device to a group by passing device and groups instead of an id or name",
-            "beforeEach": [
-              "$Device = PSc8y\\New-TestDevice",
-              "$Group = PSc8y\\New-TestDeviceGroup"
-            ],
-            "command": "Add-ChildDeviceToGroup -Group $Group -NewChildDevice $Device",
-            "skipTest": true,
-            "afterEach": [
-              "PSc8y\\Remove-ManagedObject -Id $Device.id",
-              "PSc8y\\Remove-ManagedObject -Id $Group.id"
-            ]
-          },
-          {
-            "description": "Add multiple devices to a group. Alternatively `Get-DeviceCollection` can be used\nto filter for a collection of devices and assign the results to a single group.\n",
-            "beforeEach": [
-              "$Device1 = PSc8y\\New-TestDevice",
-              "$Device2 = PSc8y\\New-TestDevice",
-              "$Group = PSc8y\\New-TestDeviceGroup"
-            ],
-            "command": "Get-Device $Device1.name, $Device2.name | Add-ChildDeviceToGroup -Group $Group.id",
-            "skipTest": true,
-            "afterEach": [
-              "PSc8y\\Remove-ManagedObject -Id $Device1.id",
-              "PSc8y\\Remove-ManagedObject -Id $Device2.id",
-              "PSc8y\\Remove-ManagedObject -Id $Group.id"
-            ]
           }
         ],
         "go": [

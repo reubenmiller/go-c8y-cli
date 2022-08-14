@@ -614,27 +614,8 @@
         "powershell": [
           {
             "description": "Assign a device as a child device to an existing device",
-            "beforeEach": [
-              "$Device = PSc8y\\New-TestDevice",
-              "$ChildDevice = PSc8y\\New-TestDevice"
-            ],
             "command": "Add-ChildDeviceToDevice -Device $Device.id -Child $ChildDevice.id",
-            "afterEach": [
-              "PSc8y\\Remove-ManagedObject -Id $ChildDevice.id",
-              "PSc8y\\Remove-ManagedObject -Id $Device.id"
-            ]
-          },
-          {
-            "description": "Assign a device as a child device to an existing device (using pipeline)",
-            "beforeEach": [
-              "$Device = PSc8y\\New-TestDevice",
-              "$ChildDevice = PSc8y\\New-TestDevice"
-            ],
-            "command": "Get-ManagedObject -Id $ChildDevice.id | Add-ChildDeviceToDevice -Device $Device.id",
-            "afterEach": [
-              "PSc8y\\Remove-ManagedObject -Id $Device.id",
-              "PSc8y\\Remove-ManagedObject -Id $ChildDevice.id"
-            ]
+            "skipTest": true
           }
         ],
         "go": [

@@ -5,7 +5,7 @@ Describe -Name "Remove-DeviceGroupChild" {
 
     }
 
-    It "Unassign a child addition from its parent managed object" {
+    It -Skip "Unassign a child addition from its parent managed object" {
         $Response = PSc8y\Remove-DeviceGroupChild -Id $software.id -Child $version.id -ChildType childAdditions
         $LASTEXITCODE | Should -Be 0
     }
