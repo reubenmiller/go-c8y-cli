@@ -282,6 +282,7 @@ endpoints:
           
           - name: orderBy
             type: string
+            default: name
             description: Order by. e.g. _id asc or name asc or creationTime.date desc
           
           - name: smartgroup

@@ -64,7 +64,8 @@
             {
               "name": "orderBy",
               "type": "string",
-              "description": "Order by. e.g. _id asc or name asc or creationTime.date desc"
+              "description": "Order by. e.g. _id asc or name asc or creationTime.date desc",
+              "default": "name"
             },
             {
               "name": "software",

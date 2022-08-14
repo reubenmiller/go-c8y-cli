@@ -47,7 +47,7 @@ Get a list of firmware packages
 
 	cmd.Flags().String("query", "", "Additional query filter (accepts pipeline)")
 	cmd.Flags().String("queryTemplate", "", "String template to be used when applying the given query. Use %s to reference the query/pipeline input")
-	cmd.Flags().String("orderBy", "", "Order by. e.g. _id asc or name asc or creationTime.date desc")
+	cmd.Flags().String("orderBy", "name", "Order by. e.g. _id asc or name asc or creationTime.date desc")
 	cmd.Flags().String("name", "", "Filter by name")
 	cmd.Flags().String("deviceType", "", "Filter by deviceType")
 	cmd.Flags().String("description", "", "Filter by description")
