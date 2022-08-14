@@ -5,7 +5,7 @@ set -e
 BIN_DIR="./output"
 
 export C8Y_SETTINGS_DEFAULTS_FORCE=true
-export C8Y_SETTINGS_DEFAULTS_VERBOSE=true
+export C8Y_SETTINGS_DEFAULTS_VERBOSE=false
 
 if ! command -v c8y; then
     echo "could not find c8y in path. PATH=$PATH"
@@ -115,8 +115,8 @@ create_child_device () {
     local parent=
 
     parent=$(create_agent "$parentName" | c8y util show --select id --output csv )
-    create_agent "${childNamePrefix}01" | c8y inventory update --data 'type=customdevice' | c8y devices children assign --device "$parent" --silentStatusCodes 409 --silentExit
-    create_agent "${childNamePrefix}02" | c8y inventory update --data 'type=customdevice' | c8y devices children assign --device "$parent" --silentStatusCodes 409 --silentExit
+    create_agent "${childNamePrefix}01" | c8y inventory update --data 'type=customdevice' | c8y devices children assign --childType device --id "$parent" --silentStatusCodes 409 --silentExit
+    create_agent "${childNamePrefix}02" | c8y inventory update --data 'type=customdevice' | c8y devices children assign --childType device --id "$parent" --silentStatusCodes 409 --silentExit
 }
 
 create_device_with_assets () {
@@ -125,8 +125,8 @@ create_device_with_assets () {
     local parent=
 
     parent=$(create_agent "$parentName" | c8y util show --select id --output csv )
-    create_mo_with_name "${childNamePrefix}01" | c8y inventory update --data 'type=custominfo' | c8y devices assets assign --device "$parent" --silentStatusCodes 409 --silentExit
-    create_mo_with_name "${childNamePrefix}02" | c8y inventory update --data 'type=custominfo' | c8y devices assets assign --device "$parent" --silentStatusCodes 409 --silentExit
+    create_mo_with_name "${childNamePrefix}01" | c8y inventory update --data 'type=custominfo' | c8y devices children assign --childType asset --id "$parent" --silentStatusCodes 409 --silentExit
+    create_mo_with_name "${childNamePrefix}02" | c8y inventory update --data 'type=custominfo' | c8y devices children assign --childType asset --id "$parent" --silentStatusCodes 409 --silentExit
 }
 
 create_device_with_additions () {
@@ -135,8 +135,8 @@ create_device_with_additions () {
     local parent=
 
     parent=$(create_agent "$parentName" | c8y util show --select id --output csv )
-    create_mo_with_name "${childNamePrefix}01" | c8y inventory update --data 'type=custominfo' | c8y devices additions assign --device "$parent" --silentStatusCodes 409 --silentExit
-    create_mo_with_name "${childNamePrefix}02" | c8y inventory update --data 'type=custominfo' | c8y devices additions assign --device "$parent" --silentStatusCodes 409 --silentExit
+    create_mo_with_name "${childNamePrefix}01" | c8y inventory update --data 'type=custominfo' | c8y devices children assign --childType addition --id "$parent" --silentStatusCodes 409 --silentExit
+    create_mo_with_name "${childNamePrefix}02" | c8y inventory update --data 'type=custominfo' | c8y devices children assign --childType addition --id "$parent" --silentStatusCodes 409 --silentExit
 }
 
 create_firmware () {

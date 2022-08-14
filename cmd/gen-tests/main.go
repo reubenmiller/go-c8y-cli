@@ -403,6 +403,12 @@ func substituteVariables(cmd *cobra.Command, endpoint *models.EndPoint) (out str
 		for _, parameter := range endpoint.PathParameters {
 			value := getParameterValue(cmd, &parameter)
 			if value != "" {
+
+				if parameter.Type == "inventoryChildType" {
+					// TODO: find better way to generate derivative values
+					value = "child" + strings.ToUpper(value[0:1]) + strings.ToLower(value[1:]) + "s"
+				}
+
 				out = strings.Replace(out, "{"+parameter.GetTargetProperty()+"}", value, -1)
 			}
 		}

@@ -1,0 +1,8 @@
+tests:
+    devicegroups/children_get_Get an existing child addition reference:
+        command: c8y inventory children get --id 12345 --child 12345 --childType addition
+        exit-code: 0
+        stdout:
+            json:
+                method: GET
+                path: /inventory/managedObjects/12345/childAdditions/12345

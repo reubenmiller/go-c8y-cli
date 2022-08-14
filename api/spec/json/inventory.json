@@ -577,7 +577,12 @@
           "type": "[]id",
           "pipeline": true,
           "required": true,
-          "description": "ManagedObject id"
+          "description": "ManagedObject id",
+          "pipelineAliases": [
+            "deviceId",
+            "source.id",
+            "managedObject.id"
+          ]
         }
       ],
       "queryParameters": [
@@ -659,7 +664,12 @@
           "type": "[]id",
           "pipeline": true,
           "description": "ManagedObject id",
-          "required": true
+          "required": true,
+          "pipelineAliases": [
+            "deviceId",
+            "source.id",
+            "managedObject.id"
+          ]
         }
       ]
     },
@@ -701,7 +711,7 @@
             "beforeEach": [
               "$Device = PSc8y\\New-TestDevice",
               "$ChildDevice = PSc8y\\New-TestDevice",
-              "PSc8y\\Add-ChildDeviceToDevice -Device $Device.id -Child $ChildDevice.id"
+              "PSc8y\\Add-ManagedObjectChild -ChildType device -Id $Device.id -Child $ChildDevice.id"
             ],
             "command": "Get-ManagedObject -Id $Device.id | Remove-ManagedObject -Cascade",
             "afterEach": [
@@ -735,7 +745,12 @@
           "type": "[]id",
           "pipeline": true,
           "required": true,
-          "description": "ManagedObject id"
+          "description": "ManagedObject id",
+          "pipelineAliases": [
+            "deviceId",
+            "source.id",
+            "managedObject.id"
+          ]
         }
       ],
       "queryParameters": [

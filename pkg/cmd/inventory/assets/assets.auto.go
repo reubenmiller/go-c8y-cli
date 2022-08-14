@@ -18,9 +18,10 @@ func NewSubCommand(f *cmdutil.Factory) *SubCmdAssets {
 	ccmd := &SubCmdAssets{}
 
 	cmd := &cobra.Command{
-		Use:   "assets",
-		Short: "Cumulocity inventory assets",
-		Long:  `REST endpoint to interact with Cumulocity managed objects`,
+		Use:    "assets",
+		Short:  "Cumulocity inventory assets",
+		Long:   `REST endpoint to interact with Cumulocity managed objects`,
+		Hidden: true,
 	}
 
 	// Subcommands

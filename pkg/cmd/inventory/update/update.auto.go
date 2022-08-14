@@ -57,7 +57,7 @@ Update a managed object
 		flags.WithProcessingMode(),
 		flags.WithData(),
 		f.WithTemplateFlag(cmd),
-		flags.WithExtendedPipelineSupport("id", "id", true),
+		flags.WithExtendedPipelineSupport("id", "id", true, "deviceId", "source.id", "managedObject.id"),
 	)
 
 	// Required flags

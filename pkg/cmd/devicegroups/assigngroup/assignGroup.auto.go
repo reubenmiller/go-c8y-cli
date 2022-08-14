@@ -30,9 +30,11 @@ func NewAssignGroupCmd(f *cmdutil.Factory) *AssignGroupCmd {
 		factory: f,
 	}
 	cmd := &cobra.Command{
-		Use:   "assignGroup",
-		Short: "Assign child group",
-		Long:  `Assigns a group to a group. The group will be a childAsset of the group`,
+		Use:    "assignGroup",
+		Short:  "Assign child group",
+		Long:   `Assigns a group to a group. The group will be a childAsset of the group`,
+		Hidden: true,
+
 		Example: heredoc.Doc(`
 $ c8y devicegroups assignGroup --group 12345 --newChildGroup 43234
 Add a group to a group
@@ -63,6 +65,7 @@ Add multiple groups to a group
 
 		flags.WithExtendedPipelineSupport("newChildGroup", "managedObject.id", true, "id"),
 		flags.WithCollectionProperty("managedObject"),
+		flags.WithDeprecationNotice("please use 'c8y devicegroups children unassign' instead"),
 	)
 
 	// Required flags

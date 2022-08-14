@@ -31,13 +31,13 @@ import (
 	currentuserCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/currentuser"
 	databrokerCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/databroker"
 	devicegroupsCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/devicegroups"
+	devicegroupsChildrenCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/devicegroups/children"
+	devicegroupsDevicesCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/devicegroups/devices"
 	deviceManagementCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/devicemanagement"
 	deviceprofilesCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/deviceprofiles"
 	deviceregistrationCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/deviceregistration"
 	devicesCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/devices"
-	devicesAdditionsCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/devices/additions"
 	devicesAssertCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/devices/assert"
-	devicesAssetsCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/devices/assets"
 	devicesAvailabilityCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/devices/availability"
 	devicesChildrenCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/devices/children"
 	deviceStatisticsCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/devices/statistics"
@@ -56,6 +56,7 @@ import (
 	inventoryAdditionsCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/inventory/additions"
 	inventoryAssertCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/inventory/assert"
 	inventoryAssetsCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/inventory/assets"
+	inventoryChildrenCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/inventory/children"
 	inventorySubscribeCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/inventory/subscribe"
 	inventoryWaitCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/inventory/wait"
 	measurementsCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/measurements"
@@ -146,6 +147,10 @@ func NewCmdRoot(f *cmdutil.Factory, version, buildDate string) *CmdRoot {
 			disableEncryptionCheck := !cmdutil.IsConfigEncryptionCheckEnabled(cmd)
 			if err := ccmd.Configure(disableEncryptionCheck); err != nil {
 				return err
+			}
+			if notice := flags.GetDeprecationNoticeFromAnnotation(cmd); notice != "" {
+				// Command "listAssets" is deprecated,
+				fmt.Fprintf(f.IOStreams.ErrOut, "Command \"%s\" is deprecated, %s\n", cmd.CommandPath(), notice)
 			}
 			return ccmd.checkSessionExists(cmd, args)
 		},
@@ -319,8 +324,6 @@ func NewCmdRoot(f *cmdutil.Factory, version, buildDate string) *CmdRoot {
 
 	// devices
 	devices := devicesCmd.NewSubCommand(f).GetCommand()
-	devices.AddCommand(devicesAssetsCmd.NewSubCommand(f).GetCommand())
-	devices.AddCommand(devicesAdditionsCmd.NewSubCommand(f).GetCommand())
 	devices.AddCommand(devicesChildrenCmd.NewSubCommand(f).GetCommand())
 	devices.AddCommand(devicesAssertCmd.NewSubCommand(f).GetCommand())
 	devices.AddCommand(devicesAvailabilityCmd.NewSubCommand(f).GetCommand())
@@ -330,6 +333,8 @@ func NewCmdRoot(f *cmdutil.Factory, version, buildDate string) *CmdRoot {
 
 	// devicegroups
 	devicegroups := devicegroupsCmd.NewSubCommand(f).GetCommand()
+	devicegroups.AddCommand(devicegroupsChildrenCmd.NewSubCommand(f).GetCommand())
+	devicegroups.AddCommand(devicegroupsDevicesCmd.NewSubCommand(f).GetCommand())
 	cmd.AddCommand(devicegroups)
 
 	agents := agentsCmd.NewSubCommand(f).GetCommand()
@@ -346,6 +351,7 @@ func NewCmdRoot(f *cmdutil.Factory, version, buildDate string) *CmdRoot {
 	inventory := inventoryCmd.NewSubCommand(f).GetCommand()
 	inventory.AddCommand(inventorySubscribeCmd.NewCmdSubscribe(f).GetCommand())
 
+	inventory.AddCommand(inventoryChildrenCmd.NewSubCommand(f).GetCommand())
 	inventory.AddCommand(inventoryAdditionsCmd.NewSubCommand(f).GetCommand())
 	inventory.AddCommand(inventoryAssetsCmd.NewSubCommand(f).GetCommand())
 

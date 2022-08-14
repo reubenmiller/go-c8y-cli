@@ -4,7 +4,7 @@ config:
          C8Y_SETTINGS_DEFAULTS_DRYFORMAT: json
 tests:
     devices_get_Get device by id:
-        command: c8y devices children list --device 12345
+        command: c8y devices children list --childType device --id 12345
         exit-code: 0
         stdout:
             json:

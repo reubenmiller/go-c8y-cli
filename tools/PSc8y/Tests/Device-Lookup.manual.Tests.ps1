@@ -9,7 +9,7 @@ Describe -Name "Device lookup up manual tests" {
     }
 
     It "Add a device to a group using ids should only result in 1 API call (and Force=True)" {
-        $output = $( $Response = PSc8y\Add-DeviceToGroup -Group $Group.id -NewChildDevice $Device.id -Verbose -Force ) 2>&1
+        $output = $( $Response = PSc8y\Add-ManagedObjectChild -ChildType asset -Id $Group.id -Child $Device.id -Verbose -Force ) 2>&1
         $LASTEXITCODE | Should -Be 0
         $Response | Should -Not -BeNullOrEmpty
 
@@ -21,15 +21,15 @@ Describe -Name "Device lookup up manual tests" {
     }
 
     It "Add a device to a group using names should only cause 1 lookup per name" {
-        $output = $( $Response = PSc8y\Add-DeviceToGroup -Group $Group.name -NewChildDevice $Device.name -Verbose -Force ) 2>&1
+        $output = $( $Response = PSc8y\Add-DeviceGroupChild -ChildType asset -Id $Group.name -Child $Device.id -Verbose -Force ) 2>&1
         $LASTEXITCODE | Should -Be 0
         $Response | Should -Not -BeNullOrEmpty
 
-        $output | Should -ContainRequest "GET" -Total 2
+        $output | Should -ContainRequest "GET" -Total 1
         $output | Should -ContainRequest "PUT" -Total 0
         $output | Should -ContainRequest "DELETE" -Total 0
         $output | Should -ContainRequest "POST" -Total 1
-        $output | Should -ContainRequest "GET /inventory/managedObjects" -Total 2
+        $output | Should -ContainRequest "GET /inventory/managedObjects" -Total 1
         $output | Should -ContainRequest "POST /inventory/managedObjects/$($Group.id)/childAssets" -Total 1
     }
 

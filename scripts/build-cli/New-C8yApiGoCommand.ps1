@@ -40,9 +40,6 @@
 
     $CommandOptions = New-Object System.Text.StringBuilder
 
-    if ($Specification.deprecated) {
-        $CommandOptions.AppendLine("`t`tDeprecated: `"$($Specification.deprecated)`",")
-    }
     if ($Specification.hidden) {
         $CommandOptions.AppendLine("`t`tHidden: true,")
     }
@@ -96,9 +93,14 @@
     $PipelineVariableProperty = ""
     $PipelineVariableAliases = ""
     $collectionProperty = ""
+    $DeprecationNotice = ""
 
     if ($Specification.collectionProperty) {
         $collectionProperty = $Specification.collectionProperty
+    }
+
+    if ($Specification.deprecated) {
+        $DeprecationNotice = $Specification.deprecated
     }
 
     # Body init
@@ -566,6 +568,11 @@ $($Examples -join "`n`n")
                 "flags.WithCollectionProperty(`"$collectionProperty`"),"
             }
         )
+        $(
+            if ($DeprecationNotice) {
+                "flags.WithDeprecationNotice(`"$DeprecationNotice`"),"
+            }
+        )
 	)
 
     // Required flags
@@ -1017,6 +1024,18 @@ Function Get-C8yGoArgs {
             } else {
                 'cmd.Flags().String("{0}", "{1}", "{2}")' -f $Name, $Default, $Description
             }
+            @{
+                SetFlag = $SetFlag
+            }
+        }
+
+        "inventoryChildType" {
+            $SetFlag = if ($UseOption) {
+                'cmd.Flags().StringP("{0}", "{1}", "{2}", "{3}")' -f $Name, $OptionName, $Default, $Description
+            } else {
+                'cmd.Flags().String("{0}", "{1}", "{2}")' -f $Name, $Default, $Description
+            }
+
             @{
                 SetFlag = $SetFlag
             }

@@ -25,18 +25,18 @@ type GetCmd struct {
 	factory *cmdutil.Factory
 }
 
-// NewGetCmd creates a command to Get child device reference
+// NewGetCmd creates a command to Get child
 func NewGetCmd(f *cmdutil.Factory) *GetCmd {
 	ccmd := &GetCmd{
 		factory: f,
 	}
 	cmd := &cobra.Command{
 		Use:   "get",
-		Short: "Get child device reference",
-		Long:  `Get managed object child device reference`,
+		Short: "Get child",
+		Long:  `Get managed object child`,
 		Example: heredoc.Doc(`
-$ c8y devices children get --device 12345 --child 12345
-Get an existing child device reference
+$ c8y inventory children get --id 12345 --child 12345 --childType addition
+Get an existing child addition reference
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
 			return nil
@@ -46,22 +46,25 @@ Get an existing child device reference
 
 	cmd.SilenceUsage = true
 
-	cmd.Flags().StringSlice("device", []string{""}, "ManagedObject id (required) (accepts pipeline)")
-	cmd.Flags().StringSlice("child", []string{""}, "Child device id (required)")
+	cmd.Flags().StringSlice("id", []string{""}, "Managed object id (required) (accepts pipeline)")
+	cmd.Flags().String("childType", "", "Child relationship type (required)")
+	cmd.Flags().StringSlice("child", []string{""}, "Child managed object id (required)")
 
 	completion.WithOptions(
 		cmd,
-		completion.WithDevice("device", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
+		completion.WithDevice("id", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
+		completion.WithValidateSet("childType", "addition", "asset", "device"),
 		completion.WithDevice("child", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
 	)
 
 	flags.WithOptions(
 		cmd,
 
-		flags.WithExtendedPipelineSupport("device", "device", true, "deviceId", "source.id", "managedObject.id", "id"),
+		flags.WithExtendedPipelineSupport("id", "id", true, "deviceId", "source.id", "managedObject.id", "id"),
 	)
 
 	// Required flags
+	_ = cmd.MarkFlagRequired("childType")
 	_ = cmd.MarkFlagRequired("child")
 
 	ccmd.SubCommand = subcommand.NewSubCommand(cmd)
@@ -142,12 +145,13 @@ func (n *GetCmd) RunE(cmd *cobra.Command, args []string) error {
 	}
 
 	// path parameters
-	path := flags.NewStringTemplate("inventory/managedObjects/{device}/childDevices/{child}")
+	path := flags.NewStringTemplate("inventory/managedObjects/{id}/{childType}/{child}")
 	err = flags.WithPathParameters(
 		cmd,
 		path,
 		inputIterators,
-		c8yfetcher.WithDeviceByNameFirstMatch(client, args, "device", "device"),
+		c8yfetcher.WithDeviceByNameFirstMatch(client, args, "id", "id"),
+		flags.WithInventoryChildType("childType", "childType"),
 		c8yfetcher.WithDeviceByNameFirstMatch(client, args, "child", "child"),
 	)
 	if err != nil {

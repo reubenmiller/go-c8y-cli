@@ -1,0 +1,275 @@
+# yaml-language-server: $schema=../schema.json
+---
+information:
+  name: devicegroups/children
+  description: Cumulocity managed object child references
+  descriptionLong: Manage child entities (assets, additions and device) for device groups
+  link: https://cumulocity.com/guides/reference/inventory/
+
+endpoints:
+  - name: listChildCollection
+    method: GET
+    description: Get child collection
+    descriptionLong: Get a collection of managedObjects child
+    path: inventory/managedObjects/{id}/{childType}
+    accept: application/vnd.com.nsn.cumulocity.managedObjectReferenceCollection+json
+    collectionType: application/vnd.com.nsn.cumulocity.managedObject+json
+    collectionProperty: 'references.#.managedObject'
+    alias:
+        go: list
+        powershell: Get-DeviceGroupChildCollection
+    examples:
+      powershell:
+        - description: Get a list of the child additions of an existing managed object
+          command: Get-DeviceGroupChildCollection -Id 12345 -ChildType addition
+          skipTest: true
+
+        - description: Get a list of the child additions of an existing managed object (using pipeline)
+          command: Get-ManagedObject -Id 12345 | Get-DeviceGroupChildCollection -ChildType addition
+          skipTest: true
+
+      go:
+        - description: Get a list of the child additions of an existing managed object
+          command: c8y inventory children list --id 12345 --childType addition
+
+        - description: Get a list of the child devices of an existing managed object
+          command: c8y inventory children list --id 12345 --childType device
+    pathParameters:
+      - name: id
+        type: '[]devicegroup'
+        pipeline: true
+        pipelineAliases:
+          - "deviceId"
+          - "source.id"
+          - "managedObject.id"
+          - "id"
+        required: true
+        description: Managed object id.
+      
+      - name: childType
+        type: inventoryChildType
+        description: Child relationship type
+        required: true
+        validationSet:
+          - addition
+          - asset
+          - device
+
+    queryParameters:
+      - name: query
+        description: Query expression group
+        property: query
+        type: queryExpression
+        children:
+          - name: query
+            type: string
+            description: Additional query filter
+            format: (%s)
+          
+          - name: queryTemplate
+            type: string
+            description: String template to be used when applying the given query. Use %s to reference the query/pipeline input
+          
+          - name: orderBy
+            type: string
+            description: Order by. e.g. _id asc or name asc or creationTime.date desc
+
+      - name: withChildren
+        type: boolean
+        description: Determines if children with ID and name should be returned when fetching the managed object. Set it to false to improve query performance.
+
+  - name: assignChild
+    method: POST
+    path: inventory/managedObjects/{id}/{childType}
+    accept: application/vnd.com.nsn.cumulocity.managedObjectReference+json
+    collectionType: application/vnd.com.nsn.cumulocity.managedObject+json
+    description: Assign child
+    descriptionLong: Assign an existing managed object as a child to an existing managed object
+    collectionProperty: managedObject
+    alias:
+        go: assign
+        powershell: Add-DeviceGroupChild
+    examples:
+        powershell:
+          - description: Add a related managed object as a child addition to an existing managed object
+            command: Add-DeviceGroupChild -Id $software.id -Child $version.id -ChildType addition
+            skipTest: true
+        go:
+          - description: Add a related managed object as a child to an existing managed object
+            command: c8y inventory children assign --id 12345 --child 6789 --childType addition
+    pathParameters:
+      - name: id
+        type: '[]devicegroup'
+        property: id
+        required: true
+        description: Managed object id where the child will be assigned to
+        position: 0
+      
+      - name: childType
+        type: inventoryChildType
+        description: Child relationship type
+        required: true
+        validationSet:
+          - addition
+          - asset
+          - device
+    body:
+      - name: child
+        type: 'string'
+        position: 1
+        pipeline: true
+        pipelineAliases:
+          - "deviceId"
+          - "source.id"
+          - "managedObject.id"
+          - "id"
+        required: true
+        property: 'managedObject.id'
+        description: Managed object that will be assigned as a child
+  
+  - name: unassignChild
+    description: Unassign child
+    descriptionLong: Unassign/delete an managed object as a child to an existing managed object
+    method: DELETE
+    path: inventory/managedObjects/{id}/{childType}/{child}
+    accept: ''
+    alias:
+        go: unassign
+        powershell: Remove-DeviceGroupChild
+    examples:
+      powershell:
+        - description: Unassign a child addition from its parent managed object
+          command: Remove-DeviceGroupChild -Id $software.id -Child $version.id -ChildType addition
+          skipTest: true
+
+      go:
+        - description: Unassign a child addition from a managed object
+          command: c8y inventory children unassign --id 12345 --child 22553 --childType addition
+
+        - description: Unassign a child device from a managed object
+          command: c8y inventory children unassign --id 12345 --child 22553 --childType device
+    pathParameters:
+      - name: id
+        type: '[]devicegroup'
+        required: true
+        description: Managed object id
+      
+      - name: childType
+        type: inventoryChildType
+        description: Child relationship type
+        required: true
+        validationSet:
+          - addition
+          - asset
+          - device
+
+      - name: child
+        type: 'string'
+        required: true
+        pipeline: true
+        pipelineAliases:
+          - "deviceId"
+          - "source.id"
+          - "managedObject.id"
+          - "id"
+        description: Child managed object id
+
+  - name: createChild
+    method: POST
+    path: inventory/managedObjects/{id}/{childType}
+    accept: application/json
+    contentType: application/vnd.com.nsn.cumulocity.managedObject+json
+    collectionType: application/vnd.com.nsn.cumulocity.managedObject+json
+    description: Create child
+    descriptionLong: Create a new managed object and assign it to an existing managed object as a child
+    alias:
+        go: create
+        powershell: New-DeviceGroupChild
+    examples:
+        powershell:
+          - description: Create a child addition and link it to an existing managed object
+            command: New-DeviceGroupChild -Id $software.id -Data "custom.value=test" -Global -ChildType addition
+            skipTest: true
+        go:
+          - description: Create a child addition and link it to an existing managed object
+            command: c8y inventory children create --id 12345 --data "custom.value=test" --global --childType addition
+            assertStdOut:
+              json:
+                path: r//inventory/managedObjects/\d+/childAdditions$
+                body.custom.value: "test"
+                body.c8y_Global: '{}'
+
+    pathParameters:
+      - name: id
+        type: '[]devicegroup'
+        property: id
+        required: true
+        pipeline: true
+        pipelineAliases:
+          - "deviceId"
+          - "source.id"
+          - "managedObject.id"
+          - "id"
+        description: Managed object id where the child addition will be added to
+        position: 0
+
+      - name: childType
+        type: inventoryChildType
+        description: Child relationship type
+        required: true
+        validationSet:
+          - addition
+          - asset
+          - device
+    body:
+      - name: global
+        type: optional_fragment
+        property: c8y_Global
+        description: Enable global access to the managed object
+
+      - name: data
+        type: json
+        description: Additional properties of the inventory.
+
+  - name: getChild
+    description: Get child
+    descriptionLong: Get managed object child
+    method: GET
+    path: inventory/managedObjects/{id}/{childType}/{child}
+    accept: application/vnd.com.nsn.cumulocity.managedObjectReference+json
+    alias:
+        go: get
+        powershell: Get-DeviceGroupChild
+    examples:
+        powershell:
+          - description: Get an existing child managed object
+            command: Get-DeviceGroupChild -Id $Agent.id -Child $Ref.id -ChildType addition
+            skipTest: true
+        go:
+          - description: Get an existing child addition reference
+            command: c8y inventory children get --id 12345 --child 12345 --childType addition
+    pathParameters:
+      - name: id
+        type: '[]devicegroup'
+        pipeline: true
+        pipelineAliases:
+          - "deviceId"
+          - "source.id"
+          - "managedObject.id"
+          - "id"
+        required: true
+        description: Managed object id
+      
+      - name: childType
+        type: inventoryChildType
+        description: Child relationship type
+        required: true
+        validationSet:
+          - addition
+          - asset
+          - device
+
+      - name: child
+        type: '[]devicegroup'
+        required: true
+        description: Child managed object id

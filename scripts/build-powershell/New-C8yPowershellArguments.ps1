@@ -101,6 +101,7 @@
         "microservicename" { "object[]"; break }
         "set" { "object[]"; break }
         "source" { "object"; break }
+        "inventoryChildType" { "string"; break }
         "string" { "string"; break }
         "[]devicerequest" { "object[]"; break }
         "strings" { "string"; break }

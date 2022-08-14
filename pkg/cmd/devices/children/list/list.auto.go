@@ -25,21 +25,21 @@ type ListCmd struct {
 	factory *cmdutil.Factory
 }
 
-// NewListCmd creates a command to Get child device collection
+// NewListCmd creates a command to Get child collection
 func NewListCmd(f *cmdutil.Factory) *ListCmd {
 	ccmd := &ListCmd{
 		factory: f,
 	}
 	cmd := &cobra.Command{
 		Use:   "list",
-		Short: "Get child device collection",
-		Long:  `Get a collection of managedObjects child references`,
+		Short: "Get child collection",
+		Long:  `Get a collection of managedObjects child`,
 		Example: heredoc.Doc(`
-$ c8y devices children list --device agentParent01
-Get a list of the child devices of an existing device
+$ c8y inventory children list --id 12345 --childType addition
+Get a list of the child additions of an existing managed object
 
-$ echo agentParent01 | c8y devices children list --query "type eq 'custom*'"
-Get a list of child devices which a specific type
+$ c8y inventory children list --id 12345 --childType device
+Get a list of the child devices of an existing managed object
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
 			return nil
@@ -49,7 +49,8 @@ Get a list of child devices which a specific type
 
 	cmd.SilenceUsage = true
 
-	cmd.Flags().StringSlice("device", []string{""}, "Device. (required) (accepts pipeline)")
+	cmd.Flags().StringSlice("id", []string{""}, "Managed object id. (required) (accepts pipeline)")
+	cmd.Flags().String("childType", "", "Child relationship type (required)")
 	cmd.Flags().String("query", "", "Additional query filter")
 	cmd.Flags().String("queryTemplate", "", "String template to be used when applying the given query. Use %s to reference the query/pipeline input")
 	cmd.Flags().String("orderBy", "", "Order by. e.g. _id asc or name asc or creationTime.date desc")
@@ -57,17 +58,19 @@ Get a list of child devices which a specific type
 
 	completion.WithOptions(
 		cmd,
-		completion.WithDevice("device", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
+		completion.WithDevice("id", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
+		completion.WithValidateSet("childType", "addition", "asset", "device"),
 	)
 
 	flags.WithOptions(
 		cmd,
 
-		flags.WithExtendedPipelineSupport("device", "device", true, "deviceId", "source.id", "managedObject.id", "id"),
+		flags.WithExtendedPipelineSupport("id", "id", true, "deviceId", "source.id", "managedObject.id", "id"),
 		flags.WithCollectionProperty("references.#.managedObject"),
 	)
 
 	// Required flags
+	_ = cmd.MarkFlagRequired("childType")
 
 	ccmd.SubCommand = subcommand.NewSubCommand(cmd)
 
@@ -155,12 +158,13 @@ func (n *ListCmd) RunE(cmd *cobra.Command, args []string) error {
 	}
 
 	// path parameters
-	path := flags.NewStringTemplate("inventory/managedObjects/{device}/childDevices")
+	path := flags.NewStringTemplate("inventory/managedObjects/{id}/{childType}")
 	err = flags.WithPathParameters(
 		cmd,
 		path,
 		inputIterators,
-		c8yfetcher.WithDeviceByNameFirstMatch(client, args, "device", "device"),
+		c8yfetcher.WithDeviceByNameFirstMatch(client, args, "id", "id"),
+		flags.WithInventoryChildType("childType", "childType"),
 	)
 	if err != nil {
 		return err

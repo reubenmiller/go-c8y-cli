@@ -41,7 +41,7 @@
             "beforeEach": [
               "$Agent = New-TestAgent",
               "$Device = New-TestDevice",
-              "Add-ChildDeviceToDevice -Device $Agent.id -Child $Device.id",
+              "Add-ManagedObjectChild -ChildType device -Id $Agent.id -Child $Device.id",
               "$Operation2 = PSc8y\\New-TestOperation -Device $Device.id"
             ],
             "command": "Get-OperationCollection -Device $Device.id -Status PENDING",

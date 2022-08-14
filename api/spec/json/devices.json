@@ -607,31 +607,15 @@
         "go": "assignChild",
         "powershell": "Add-ChildDeviceToDevice"
       },
+      "powershell": {
+        "deprecated": true
+      },
       "examples": {
         "powershell": [
           {
             "description": "Assign a device as a child device to an existing device",
-            "beforeEach": [
-              "$Device = PSc8y\\New-TestDevice",
-              "$ChildDevice = PSc8y\\New-TestDevice"
-            ],
             "command": "Add-ChildDeviceToDevice -Device $Device.id -Child $ChildDevice.id",
-            "afterEach": [
-              "PSc8y\\Remove-ManagedObject -Id $ChildDevice.id",
-              "PSc8y\\Remove-ManagedObject -Id $Device.id"
-            ]
-          },
-          {
-            "description": "Assign a device as a child device to an existing device (using pipeline)",
-            "beforeEach": [
-              "$Device = PSc8y\\New-TestDevice",
-              "$ChildDevice = PSc8y\\New-TestDevice"
-            ],
-            "command": "Get-ManagedObject -Id $ChildDevice.id | Add-ChildDeviceToDevice -Device $Device.id",
-            "afterEach": [
-              "PSc8y\\Remove-ManagedObject -Id $Device.id",
-              "PSc8y\\Remove-ManagedObject -Id $ChildDevice.id"
-            ]
+            "skipTest": true
           }
         ],
         "go": [
@@ -673,6 +657,9 @@
       "alias": {
         "go": "unassignChild",
         "powershell": "Remove-ChildDeviceFromDevice"
+      },
+      "powershell": {
+        "deprecated": true
       },
       "examples": {
         "powershell": [
@@ -728,6 +715,9 @@
       "alias": {
         "go": "listChildren",
         "powershell": "Get-ChildDeviceCollection"
+      },
+      "powershell": {
+        "deprecated": true
       },
       "examples": {
         "powershell": [
@@ -794,6 +784,9 @@
         "go": "getChild",
         "powershell": "Get-ChildDeviceReference"
       },
+      "powershell": {
+        "deprecated": true
+      },
       "examples": {
         "powershell": [
           {
@@ -849,6 +842,9 @@
         "go": "listAssets",
         "powershell": "Get-DeviceChildAssetCollection"
       },
+      "powershell": {
+        "deprecated": true
+      },
       "examples": {
         "powershell": [
           {
@@ -856,9 +852,10 @@
             "beforeEach": [
               "$Device = PSc8y\\New-TestDevice",
               "$ChildDevice = PSc8y\\New-TestDevice",
-              "PSc8y\\Add-AssetToGroup -Group $Device.id -NewChildDevice $ChildDevice.id"
+              "PSc8y\\Add-ManagedObjectChild -ChildType asset -Id $Device.id -Child $ChildDevice.id"
             ],
             "command": "Get-DeviceChildAssetCollection -Id $Group.id",
+            "skipTest": true,
             "afterEach": [
               "PSc8y\\Remove-ManagedObject -Id $ChildDevice.id",
               "PSc8y\\Remove-ManagedObject -Id $Device.id"
@@ -869,9 +866,10 @@
             "beforeEach": [
               "$Group = PSc8y\\New-TestDeviceGroup",
               "$ChildGroup = PSc8y\\New-TestDeviceGroup",
-              "PSc8y\\Add-AssetToGroup -Group $Group.id -NewChildGroup $ChildGroup.id"
+              "PSc8y\\Add-ManagedObjectChild -ChildType asset -Id $Group.id -Child $ChildGroup.id"
             ],
             "command": "Get-DeviceChildAssetCollection -Id $Group.id",
+            "skipTest": true,
             "afterEach": [
               "PSc8y\\Remove-ManagedObject -Id $ChildGroup.id",
               "PSc8y\\Remove-ManagedObject -Id $Group.id"
