@@ -11,7 +11,7 @@ Unassign/delete an managed object as a child to an existing managed object
 https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/devices_children_unassign
 
 .EXAMPLE
-PS> Remove-DeviceChild -Id $software.id -Child $version.id -ChildType childAdditions
+PS> Remove-DeviceChild -Id $software.id -Child $version.id -ChildType addition
 
 Unassign a child addition from its parent managed object
 
@@ -31,7 +31,7 @@ Unassign a child addition from its parent managed object
 
         # Child relationship type (required)
         [Parameter(Mandatory = $true)]
-        [ValidateSet('childAdditions','childAssets','childDevices')]
+        [ValidateSet('addition','asset','device')]
         [string]
         $ChildType,
 

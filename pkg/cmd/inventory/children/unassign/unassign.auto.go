@@ -34,10 +34,10 @@ func NewUnassignCmd(f *cmdutil.Factory) *UnassignCmd {
 		Short: "Unassign child",
 		Long:  `Unassign/delete an managed object as a child to an existing managed object`,
 		Example: heredoc.Doc(`
-$ c8y inventory children unassign --id 12345 --child 22553 --childType childAdditions
+$ c8y inventory children unassign --id 12345 --child 22553 --childType addition
 Unassign a child addition from a managed object
 
-$ c8y inventory children unassign --id 12345 --child 22553 --childType childDevices
+$ c8y inventory children unassign --id 12345 --child 22553 --childType device
 Unassign a child device from a managed object
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
@@ -54,7 +54,7 @@ Unassign a child device from a managed object
 
 	completion.WithOptions(
 		cmd,
-		completion.WithValidateSet("childType", "childAdditions", "childAssets", "childDevices"),
+		completion.WithValidateSet("childType", "addition", "asset", "device"),
 	)
 
 	flags.WithOptions(
@@ -148,7 +148,7 @@ func (n *UnassignCmd) RunE(cmd *cobra.Command, args []string) error {
 		path,
 		inputIterators,
 		c8yfetcher.WithIDSlice(args, "id", "id"),
-		flags.WithStringValue("childType", "childType"),
+		flags.WithInventoryChildType("childType", "childType"),
 		flags.WithStringValue("child", "child"),
 	)
 	if err != nil {

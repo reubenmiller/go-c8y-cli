@@ -35,10 +35,10 @@ func NewListCmd(f *cmdutil.Factory) *ListCmd {
 		Short: "Get child collection",
 		Long:  `Get a collection of managedObjects child`,
 		Example: heredoc.Doc(`
-$ c8y inventory children list --id 12345 --childType childAdditions
+$ c8y inventory children list --id 12345 --childType addition
 Get a list of the child additions of an existing managed object
 
-$ c8y inventory children list --id 12345 --childType childDevices
+$ c8y inventory children list --id 12345 --childType device
 Get a list of the child devices of an existing managed object
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
@@ -59,7 +59,7 @@ Get a list of the child devices of an existing managed object
 	completion.WithOptions(
 		cmd,
 		completion.WithDevice("id", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
-		completion.WithValidateSet("childType", "childAdditions", "childAssets", "childDevices"),
+		completion.WithValidateSet("childType", "addition", "asset", "device"),
 	)
 
 	flags.WithOptions(
@@ -164,7 +164,7 @@ func (n *ListCmd) RunE(cmd *cobra.Command, args []string) error {
 		path,
 		inputIterators,
 		c8yfetcher.WithDeviceByNameFirstMatch(client, args, "id", "id"),
-		flags.WithStringValue("childType", "childType"),
+		flags.WithInventoryChildType("childType", "childType"),
 	)
 	if err != nil {
 		return err

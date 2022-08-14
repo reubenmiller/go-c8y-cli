@@ -9,7 +9,7 @@ Describe -Name "Device lookup up manual tests" {
     }
 
     It "Add a device to a group using ids should only result in 1 API call (and Force=True)" {
-        $output = $( $Response = PSc8y\Add-ManagedObjectChild -ChildType childAssets -Id $Group.id -Child $Device.id -Verbose -Force ) 2>&1
+        $output = $( $Response = PSc8y\Add-ManagedObjectChild -ChildType asset -Id $Group.id -Child $Device.id -Verbose -Force ) 2>&1
         $LASTEXITCODE | Should -Be 0
         $Response | Should -Not -BeNullOrEmpty
 
@@ -21,7 +21,7 @@ Describe -Name "Device lookup up manual tests" {
     }
 
     It "Add a device to a group using names should only cause 1 lookup per name" {
-        $output = $( $Response = PSc8y\Add-DeviceGroupChild -ChildType childAssets -Id $Group.name -Child $Device.id -Verbose -Force ) 2>&1
+        $output = $( $Response = PSc8y\Add-DeviceGroupChild -ChildType asset -Id $Group.name -Child $Device.id -Verbose -Force ) 2>&1
         $LASTEXITCODE | Should -Be 0
         $Response | Should -Not -BeNullOrEmpty
 

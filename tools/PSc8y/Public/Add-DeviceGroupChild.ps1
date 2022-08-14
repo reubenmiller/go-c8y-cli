@@ -11,7 +11,7 @@ Assign an existing managed object as a child to an existing managed object
 https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/devicegroups_children_assign
 
 .EXAMPLE
-PS> Add-DeviceGroupChild -Id $software.id -Child $version.id -ChildType childAdditions
+PS> Add-DeviceGroupChild -Id $software.id -Child $version.id -ChildType addition
 
 Add a related managed object as a child addition to an existing managed object
 
@@ -38,7 +38,7 @@ Add a related managed object as a child addition to an existing managed object
 
         # Child relationship type (required)
         [Parameter(Mandatory = $true)]
-        [ValidateSet('childAdditions','childAssets','childDevices')]
+        [ValidateSet('addition','asset','device')]
         [string]
         $ChildType
     )

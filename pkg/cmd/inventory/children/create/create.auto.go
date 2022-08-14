@@ -34,7 +34,7 @@ func NewCreateCmd(f *cmdutil.Factory) *CreateCmd {
 		Short: "Create child",
 		Long:  `Create a new managed object and assign it to an existing managed object as a child`,
 		Example: heredoc.Doc(`
-$ c8y inventory children create --id 12345 --data "custom.value=test" --global --childType childAdditions
+$ c8y inventory children create --id 12345 --data "custom.value=test" --global --childType addition
 Create a child addition and link it to an existing managed object
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
@@ -51,7 +51,7 @@ Create a child addition and link it to an existing managed object
 
 	completion.WithOptions(
 		cmd,
-		completion.WithValidateSet("childType", "childAdditions", "childAssets", "childDevices"),
+		completion.WithValidateSet("childType", "addition", "asset", "device"),
 	)
 
 	flags.WithOptions(
@@ -150,7 +150,7 @@ func (n *CreateCmd) RunE(cmd *cobra.Command, args []string) error {
 		path,
 		inputIterators,
 		c8yfetcher.WithIDSlice(args, "id", "id"),
-		flags.WithStringValue("childType", "childType"),
+		flags.WithInventoryChildType("childType", "childType"),
 	)
 	if err != nil {
 		return err

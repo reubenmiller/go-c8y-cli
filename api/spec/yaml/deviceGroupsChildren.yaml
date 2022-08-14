@@ -21,19 +21,19 @@ endpoints:
     examples:
       powershell:
         - description: Get a list of the child additions of an existing managed object
-          command: Get-DeviceGroupChildCollection -Id 12345 -ChildType childAdditions
+          command: Get-DeviceGroupChildCollection -Id 12345 -ChildType addition
           skipTest: true
 
         - description: Get a list of the child additions of an existing managed object (using pipeline)
-          command: Get-ManagedObject -Id 12345 | Get-DeviceGroupChildCollection -ChildType childAdditions
+          command: Get-ManagedObject -Id 12345 | Get-DeviceGroupChildCollection -ChildType addition
           skipTest: true
 
       go:
         - description: Get a list of the child additions of an existing managed object
-          command: c8y inventory children list --id 12345 --childType childAdditions
+          command: c8y inventory children list --id 12345 --childType addition
 
         - description: Get a list of the child devices of an existing managed object
-          command: c8y inventory children list --id 12345 --childType childDevices
+          command: c8y inventory children list --id 12345 --childType device
     pathParameters:
       - name: id
         type: '[]devicegroup'
@@ -47,13 +47,13 @@ endpoints:
         description: Managed object id.
       
       - name: childType
-        type: string
+        type: inventoryChildType
         description: Child relationship type
         required: true
         validationSet:
-          - childAdditions
-          - childAssets
-          - childDevices
+          - addition
+          - asset
+          - device
 
     queryParameters:
       - name: query
@@ -92,11 +92,11 @@ endpoints:
     examples:
         powershell:
           - description: Add a related managed object as a child addition to an existing managed object
-            command: Add-DeviceGroupChild -Id $software.id -Child $version.id -ChildType childAdditions
+            command: Add-DeviceGroupChild -Id $software.id -Child $version.id -ChildType addition
             skipTest: true
         go:
           - description: Add a related managed object as a child to an existing managed object
-            command: c8y inventory children assign --id 12345 --child 6789 --childType childAdditions
+            command: c8y inventory children assign --id 12345 --child 6789 --childType addition
     pathParameters:
       - name: id
         type: '[]devicegroup'
@@ -106,13 +106,13 @@ endpoints:
         position: 0
       
       - name: childType
-        type: string
+        type: inventoryChildType
         description: Child relationship type
         required: true
         validationSet:
-          - childAdditions
-          - childAssets
-          - childDevices
+          - addition
+          - asset
+          - device
     body:
       - name: child
         type: 'string'
@@ -139,15 +139,15 @@ endpoints:
     examples:
       powershell:
         - description: Unassign a child addition from its parent managed object
-          command: Remove-DeviceGroupChild -Id $software.id -Child $version.id -ChildType childAdditions
+          command: Remove-DeviceGroupChild -Id $software.id -Child $version.id -ChildType addition
           skipTest: true
 
       go:
         - description: Unassign a child addition from a managed object
-          command: c8y inventory children unassign --id 12345 --child 22553 --childType childAdditions
+          command: c8y inventory children unassign --id 12345 --child 22553 --childType addition
 
         - description: Unassign a child device from a managed object
-          command: c8y inventory children unassign --id 12345 --child 22553 --childType childDevices
+          command: c8y inventory children unassign --id 12345 --child 22553 --childType device
     pathParameters:
       - name: id
         type: '[]devicegroup'
@@ -155,13 +155,13 @@ endpoints:
         description: Managed object id
       
       - name: childType
-        type: string
+        type: inventoryChildType
         description: Child relationship type
         required: true
         validationSet:
-          - childAdditions
-          - childAssets
-          - childDevices
+          - addition
+          - asset
+          - device
 
       - name: child
         type: 'string'
@@ -188,11 +188,11 @@ endpoints:
     examples:
         powershell:
           - description: Create a child addition and link it to an existing managed object
-            command: New-DeviceGroupChild -Id $software.id -Data "custom.value=test" -Global -ChildType childAdditions
+            command: New-DeviceGroupChild -Id $software.id -Data "custom.value=test" -Global -ChildType addition
             skipTest: true
         go:
           - description: Create a child addition and link it to an existing managed object
-            command: c8y inventory children create --id 12345 --data "custom.value=test" --global --childType childAdditions
+            command: c8y inventory children create --id 12345 --data "custom.value=test" --global --childType addition
             assertStdOut:
               json:
                 path: r//inventory/managedObjects/\d+/childAdditions$
@@ -214,13 +214,13 @@ endpoints:
         position: 0
 
       - name: childType
-        type: string
+        type: inventoryChildType
         description: Child relationship type
         required: true
         validationSet:
-          - childAdditions
-          - childAssets
-          - childDevices
+          - addition
+          - asset
+          - device
     body:
       - name: global
         type: optional_fragment
@@ -243,11 +243,11 @@ endpoints:
     examples:
         powershell:
           - description: Get an existing child managed object
-            command: Get-DeviceGroupChild -Id $Agent.id -Child $Ref.id -ChildType childAdditions
+            command: Get-DeviceGroupChild -Id $Agent.id -Child $Ref.id -ChildType addition
             skipTest: true
         go:
           - description: Get an existing child addition reference
-            command: c8y inventory children get --id 12345 --child 12345 --childType childAdditions
+            command: c8y inventory children get --id 12345 --child 12345 --childType addition
     pathParameters:
       - name: id
         type: '[]devicegroup'
@@ -261,13 +261,13 @@ endpoints:
         description: Managed object id
       
       - name: childType
-        type: string
+        type: inventoryChildType
         description: Child relationship type
         required: true
         validationSet:
-          - childAdditions
-          - childAssets
-          - childDevices
+          - addition
+          - asset
+          - device
 
       - name: child
         type: '[]devicegroup'

@@ -34,7 +34,7 @@ func NewAssignCmd(f *cmdutil.Factory) *AssignCmd {
 		Short: "Assign child",
 		Long:  `Assign an existing managed object as a child to an existing managed object`,
 		Example: heredoc.Doc(`
-$ c8y inventory children assign --id 12345 --child 6789 --childType childAdditions
+$ c8y inventory children assign --id 12345 --child 6789 --childType addition
 Add a related managed object as a child to an existing managed object
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
@@ -51,7 +51,7 @@ Add a related managed object as a child to an existing managed object
 
 	completion.WithOptions(
 		cmd,
-		completion.WithValidateSet("childType", "childAdditions", "childAssets", "childDevices"),
+		completion.WithValidateSet("childType", "addition", "asset", "device"),
 	)
 
 	flags.WithOptions(
@@ -151,7 +151,7 @@ func (n *AssignCmd) RunE(cmd *cobra.Command, args []string) error {
 		path,
 		inputIterators,
 		c8yfetcher.WithIDSlice(args, "id", "id"),
-		flags.WithStringValue("childType", "childType"),
+		flags.WithInventoryChildType("childType", "childType"),
 	)
 	if err != nil {
 		return err

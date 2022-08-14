@@ -175,6 +175,7 @@
         "queryExpression",
         "string",
         "stringStatic",
+        "inventoryChildType",
         "source",
         "tenant",
         "tenantname",

@@ -6,7 +6,7 @@ Describe -Name "Get-DeviceGroupChild" {
     }
 
     It -Skip "Get an existing child managed object" {
-        $Response = PSc8y\Get-DeviceGroupChild -Id $Agent.id -Child $Ref.id -ChildType childAdditions
+        $Response = PSc8y\Get-DeviceGroupChild -Id $Agent.id -Child $Ref.id -ChildType addition
         $LASTEXITCODE | Should -Be 0
         $Response | Should -Not -BeNullOrEmpty
     }

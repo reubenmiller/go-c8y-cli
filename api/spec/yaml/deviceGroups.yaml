@@ -420,7 +420,7 @@ endpoints:
           beforeEach:
             - $Group = PSc8y\New-TestDeviceGroup
             - $ChildDevice = PSc8y\New-TestDevice
-            - PSc8y\Add-ManagedObjectChild -ChildType childAssets -Id $Group.id -Child $ChildDevice.id
+            - PSc8y\Add-ManagedObjectChild -ChildType asset -Id $Group.id -Child $ChildDevice.id
           command: Remove-DeviceFromGroup -Group $Group.id -ChildDevice $ChildDevice.id
           afterEach:
             - PSc8y\Remove-ManagedObject -Id $ChildDevice.id
@@ -462,7 +462,7 @@ endpoints:
           beforeEach:
             - $Group = PSc8y\New-TestDeviceGroup
             - $ChildGroup = PSc8y\New-TestDevice
-            - PSc8y\Add-ManagedObjectChild -ChildType childAssets -Id $Group.id -Child $ChildGroup.id
+            - PSc8y\Add-ManagedObjectChild -ChildType asset -Id $Group.id -Child $ChildGroup.id
           command: Remove-GroupFromGroup -Id $Group.id -Child $ChildGroup.id
           afterEach:
             - PSc8y\Remove-ManagedObject -Id $ChildGroup.id
@@ -506,7 +506,7 @@ endpoints:
           beforeEach:
             - $Device = PSc8y\New-TestDevice
             - $ChildDevice = PSc8y\New-TestDevice
-            - PSc8y\Add-ManagedObjectChild -ChildType childAssets -Id $Device.id -Child $ChildDevice.id
+            - PSc8y\Add-ManagedObjectChild -ChildType asset -Id $Device.id -Child $ChildDevice.id
           command: Get-DeviceGroupChildAssetCollection -Id $Group.id
           afterEach:
             - PSc8y\Remove-ManagedObject -Id $ChildDevice.id
@@ -516,7 +516,7 @@ endpoints:
           beforeEach:
             - $Group = PSc8y\New-TestDeviceGroup
             - $ChildGroup = PSc8y\New-TestDeviceGroup
-            - PSc8y\Add-ManagedObjectChild -ChildType childAssets -Id $Group.id -Child $ChildGroup.id
+            - PSc8y\Add-ManagedObjectChild -ChildType asset -Id $Group.id -Child $ChildGroup.id
           command: Get-DeviceGroupChildAssetCollection -Id $Group.id
           afterEach:
             - PSc8y\Remove-ManagedObject -Id $ChildGroup.id

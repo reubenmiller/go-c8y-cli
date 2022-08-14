@@ -11,7 +11,7 @@ Get managed object child
 https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/inventory_children_get
 
 .EXAMPLE
-PS> Get-ManagedObjectChild -Id $Agent.id -Child $Ref.id -ChildType childAdditions
+PS> Get-ManagedObjectChild -Id $Agent.id -Child $Ref.id -ChildType addition
 
 Get an existing child managed object
 
@@ -31,7 +31,7 @@ Get an existing child managed object
 
         # Child relationship type (required)
         [Parameter(Mandatory = $true)]
-        [ValidateSet('childAdditions','childAssets','childDevices')]
+        [ValidateSet('addition','asset','device')]
         [string]
         $ChildType,
 

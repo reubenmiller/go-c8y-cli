@@ -852,7 +852,7 @@
             "beforeEach": [
               "$Device = PSc8y\\New-TestDevice",
               "$ChildDevice = PSc8y\\New-TestDevice",
-              "PSc8y\\Add-ManagedObjectChild -ChildType childAssets -Id $Device.id -Child $ChildDevice.id"
+              "PSc8y\\Add-ManagedObjectChild -ChildType asset -Id $Device.id -Child $ChildDevice.id"
             ],
             "command": "Get-DeviceChildAssetCollection -Id $Group.id",
             "skipTest": true,
@@ -866,7 +866,7 @@
             "beforeEach": [
               "$Group = PSc8y\\New-TestDeviceGroup",
               "$ChildGroup = PSc8y\\New-TestDeviceGroup",
-              "PSc8y\\Add-ManagedObjectChild -ChildType childAssets -Id $Group.id -Child $ChildGroup.id"
+              "PSc8y\\Add-ManagedObjectChild -ChildType asset -Id $Group.id -Child $ChildGroup.id"
             ],
             "command": "Get-DeviceChildAssetCollection -Id $Group.id",
             "skipTest": true,

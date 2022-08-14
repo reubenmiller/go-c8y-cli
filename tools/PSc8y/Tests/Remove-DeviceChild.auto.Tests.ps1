@@ -6,7 +6,7 @@ Describe -Name "Remove-DeviceChild" {
     }
 
     It -Skip "Unassign a child addition from its parent managed object" {
-        $Response = PSc8y\Remove-DeviceChild -Id $software.id -Child $version.id -ChildType childAdditions
+        $Response = PSc8y\Remove-DeviceChild -Id $software.id -Child $version.id -ChildType addition
         $LASTEXITCODE | Should -Be 0
     }
 

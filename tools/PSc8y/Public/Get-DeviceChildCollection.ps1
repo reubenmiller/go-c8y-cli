@@ -11,12 +11,12 @@ Get a collection of managedObjects child
 https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/devices_children_list
 
 .EXAMPLE
-PS> Get-DeviceChildCollection -Id 12345 -ChildType childAdditions
+PS> Get-DeviceChildCollection -Id 12345 -ChildType addition
 
 Get a list of the child additions of an existing managed object
 
 .EXAMPLE
-PS> Get-ManagedObject -Id 12345 | Get-DeviceChildCollection -ChildType childAdditions
+PS> Get-ManagedObject -Id 12345 | Get-DeviceChildCollection -ChildType addition
 
 Get a list of the child additions of an existing managed object (using pipeline)
 
@@ -36,7 +36,7 @@ Get a list of the child additions of an existing managed object (using pipeline)
 
         # Child relationship type (required)
         [Parameter(Mandatory = $true)]
-        [ValidateSet('childAdditions','childAssets','childDevices')]
+        [ValidateSet('addition','asset','device')]
         [string]
         $ChildType,
 

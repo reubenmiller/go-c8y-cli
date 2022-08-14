@@ -1,6 +1,6 @@
 tests:
     devicegroups/children_create_Create a child addition and link it to an existing managed object:
-        command: c8y inventory children create --id 12345 --data "custom.value=test" --global --childType childAdditions
+        command: c8y inventory children create --id 12345 --data "custom.value=test" --global --childType addition
         exit-code: 0
         stdout:
             json:

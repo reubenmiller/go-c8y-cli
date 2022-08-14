@@ -1,6 +1,6 @@
 tests:
     inventory/children_get_Get an existing child addition reference:
-        command: c8y inventory children get --id 12345 --child 12345 --childType childAdditions
+        command: c8y inventory children get --id 12345 --child 12345 --childType addition
         exit-code: 0
         stdout:
             json:

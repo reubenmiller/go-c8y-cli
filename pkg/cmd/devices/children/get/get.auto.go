@@ -35,7 +35,7 @@ func NewGetCmd(f *cmdutil.Factory) *GetCmd {
 		Short: "Get child",
 		Long:  `Get managed object child`,
 		Example: heredoc.Doc(`
-$ c8y inventory children get --id 12345 --child 12345 --childType childAdditions
+$ c8y inventory children get --id 12345 --child 12345 --childType addition
 Get an existing child addition reference
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
@@ -53,7 +53,7 @@ Get an existing child addition reference
 	completion.WithOptions(
 		cmd,
 		completion.WithDevice("id", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
-		completion.WithValidateSet("childType", "childAdditions", "childAssets", "childDevices"),
+		completion.WithValidateSet("childType", "addition", "asset", "device"),
 		completion.WithDevice("child", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
 	)
 
@@ -151,7 +151,7 @@ func (n *GetCmd) RunE(cmd *cobra.Command, args []string) error {
 		path,
 		inputIterators,
 		c8yfetcher.WithDeviceByNameFirstMatch(client, args, "id", "id"),
-		flags.WithStringValue("childType", "childType"),
+		flags.WithInventoryChildType("childType", "childType"),
 		c8yfetcher.WithDeviceByNameFirstMatch(client, args, "child", "child"),
 	)
 	if err != nil {

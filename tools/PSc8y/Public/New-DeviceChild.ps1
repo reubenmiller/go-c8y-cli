@@ -11,7 +11,7 @@ Create a new managed object and assign it to an existing managed object as a chi
 https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/devices_children_create
 
 .EXAMPLE
-PS> New-DeviceChild -Id $software.id -Data "custom.value=test" -Global -ChildType childAdditions
+PS> New-DeviceChild -Id $software.id -Data "custom.value=test" -Global -ChildType addition
 
 Create a child addition and link it to an existing managed object
 
@@ -31,7 +31,7 @@ Create a child addition and link it to an existing managed object
 
         # Child relationship type (required)
         [Parameter(Mandatory = $true)]
-        [ValidateSet('childAdditions','childAssets','childDevices')]
+        [ValidateSet('addition','asset','device')]
         [string]
         $ChildType,
 

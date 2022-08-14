@@ -6,7 +6,7 @@ information:
   descriptionLong: 'REST endpoint to interact with Cumulocity managed objects'
   link: https://cumulocity.com/guides/reference/inventory/
   deprecatedAt: "2022-08-14"
-  deprecated: "please use 'c8y inventory children [command] --childType childAssets'"
+  deprecated: "please use 'c8y inventory children [command] --childType asset'"
   hidden: true
 
 endpoints:
@@ -145,7 +145,7 @@ endpoints:
             beforeEach:
               - $Agent = New-TestAgent
               - $Device = New-TestDevice
-              - $Ref = Add-ManagedObjectChild -ChildType childAssets -Id $Agent.id -Child $Device.id
+              - $Ref = Add-ManagedObjectChild -ChildType asset -Id $Agent.id -Child $Device.id
             command: Get-ChildAsset -Id $Agent.id -Child $Ref.id
             afterEach:
               - Remove-ManagedObject -Id $Device.id
@@ -187,7 +187,7 @@ endpoints:
           beforeEach:
             - $Group = PSc8y\New-TestDeviceGroup
             - $ChildDevice = PSc8y\New-TestDevice
-            - PSc8y\Add-ManagedObjectChild -ChildType childAssets -Id $Group.id -Child $ChildDevice.id
+            - PSc8y\Add-ManagedObjectChild -ChildType asset -Id $Group.id -Child $ChildDevice.id
           command: Remove-Asset -Id $Group.id -Child $ChildDevice.id
           afterEach:
             - PSc8y\Remove-ManagedObject -Id $ChildDevice.id
