@@ -261,7 +261,7 @@ tasks:
     cmds:
       - go install github.com/reubenmiller/commander/v3/cmd/commander@v3.0.2
     status:
-      - command -v commander
+      - command -v commander && commander test --help
 
   test-cli:
     desc: Test cli tests

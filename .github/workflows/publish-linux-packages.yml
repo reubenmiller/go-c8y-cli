@@ -27,7 +27,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.CR_PAT }}
 
   publish-nuget:
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-latest
     env:
       NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
     steps:
