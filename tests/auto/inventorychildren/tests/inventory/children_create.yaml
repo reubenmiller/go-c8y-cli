@@ -1,0 +1,10 @@
+tests:
+    inventory/children_create_Create a child addition and link it to an existing managed object:
+        command: c8y inventory children create --id 12345 --data "custom.value=test" --global --childType childAdditions
+        exit-code: 0
+        stdout:
+            json:
+                body.c8y_Global: '{}'
+                body.custom.value: test
+                method: POST
+                path: r//inventory/managedObjects/\d+/childAdditions$

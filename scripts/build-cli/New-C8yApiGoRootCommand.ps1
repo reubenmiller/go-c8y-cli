@@ -21,10 +21,12 @@
     $NameCamel = $BaseNameLowercase[0].ToString().ToUpperInvariant() + $BaseNameLowercase.Substring(1)
     $Description = $Specification.information.description
     $DescriptionLong = $Specification.information.descriptionLong
+    $Hidden = $Specification.information.hidden
 
     $SubcommandsCode = New-Object System.Text.StringBuilder
     $RootImportCode = New-Object System.Text.StringBuilder
     $GoImports = New-Object System.Text.StringBuilder
+    $CommandOptions =  New-Object System.Text.StringBuilder
 
     $File = Join-Path -Path $OutputDir -ChildPath ("{0}.auto.go" -f $BaseNameLowercase)
 
@@ -47,6 +49,11 @@
     $null = $RootImportCode.AppendLine("    // ${Name} commands")
     $null = $RootImportCode.AppendLine("    rootCmd.AddCommand(New${NameCamel}RootCmd(f).GetCommand())")
 
+    
+    if ($Hidden) {
+        $null = $CommandOptions.AppendLine("		Hidden: true,")
+    }
+
     $Template = @"
 package $BaseNameLowercase
 
@@ -67,7 +74,11 @@ func NewSubCommand(f *cmdutil.Factory) *SubCmd${NameCamel} {
     cmd := &cobra.Command{
         Use:   "${BaseNameLowercase}",
         Short: "${Description}",
-        Long:  ``${DescriptionLong}``,
+        Long:  ``${DescriptionLong}``,$(
+            if ($CommandOptions) {
+                "`n" + $CommandOptions
+            }
+        )
     }
 
     // Subcommands

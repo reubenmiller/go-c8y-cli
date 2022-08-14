@@ -34,7 +34,7 @@ func NewAssignCmd(f *cmdutil.Factory) *AssignCmd {
 		Short: "Assign child asset",
 		Long:  `Assigns a group or device to an existing group and marks them as assets`,
 		Example: heredoc.Doc(`
-$ c8y inventory assets assign --group 12345 --childGroup 43234
+$ c8y inventory assets assign --id 12345 --childGroup 43234
 Create group hierarchy (parent group -> child group)
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {

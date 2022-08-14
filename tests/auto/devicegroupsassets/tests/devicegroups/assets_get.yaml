@@ -1,8 +1,0 @@
-tests:
-    devicegroups/assets_get_Get an existing child asset reference:
-        command: c8y devicegroups assets get --group 12345 --child 12345
-        exit-code: 0
-        stdout:
-            json:
-                method: GET
-                path: /inventory/managedObjects/12345/childAssets/12345

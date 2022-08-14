@@ -19,9 +19,10 @@ func NewSubCommand(f *cmdutil.Factory) *SubCmdAdditions {
 	ccmd := &SubCmdAdditions{}
 
 	cmd := &cobra.Command{
-		Use:   "additions",
-		Short: "Cumulocity managed object additions",
-		Long:  `Managed additions to managed objects`,
+		Use:    "additions",
+		Short:  "Cumulocity managed object additions",
+		Long:   `Managed additions to managed objects`,
+		Hidden: true,
 	}
 
 	// Subcommands

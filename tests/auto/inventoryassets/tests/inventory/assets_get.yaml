@@ -1,0 +1,8 @@
+tests:
+    inventory/assets_get_Get an existing child asset reference:
+        command: c8y inventory assets get --id 12345 --child 12345
+        exit-code: 0
+        stdout:
+            json:
+                method: GET
+                path: /inventory/managedObjects/12345/childAssets/12345

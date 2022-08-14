@@ -607,6 +607,9 @@
         "go": "assignChild",
         "powershell": "Add-ChildDeviceToDevice"
       },
+      "powershell": {
+        "deprecated": true
+      },
       "examples": {
         "powershell": [
           {
@@ -674,6 +677,9 @@
         "go": "unassignChild",
         "powershell": "Remove-ChildDeviceFromDevice"
       },
+      "powershell": {
+        "deprecated": true
+      },
       "examples": {
         "powershell": [
           {
@@ -728,6 +734,9 @@
       "alias": {
         "go": "listChildren",
         "powershell": "Get-ChildDeviceCollection"
+      },
+      "powershell": {
+        "deprecated": true
       },
       "examples": {
         "powershell": [
@@ -794,6 +803,9 @@
         "go": "getChild",
         "powershell": "Get-ChildDeviceReference"
       },
+      "powershell": {
+        "deprecated": true
+      },
       "examples": {
         "powershell": [
           {
@@ -849,6 +861,9 @@
         "go": "listAssets",
         "powershell": "Get-DeviceChildAssetCollection"
       },
+      "powershell": {
+        "deprecated": true
+      },
       "examples": {
         "powershell": [
           {
@@ -856,7 +871,7 @@
             "beforeEach": [
               "$Device = PSc8y\\New-TestDevice",
               "$ChildDevice = PSc8y\\New-TestDevice",
-              "PSc8y\\Add-ChildAssetToDeviceGroup -Id $Device.id -NewChildDevice $ChildDevice.id"
+              "PSc8y\\Add-ManagedObjectChild -ChildType childAssets -Id $Device.id -Child $ChildDevice.id"
             ],
             "command": "Get-DeviceChildAssetCollection -Id $Group.id",
             "skipTest": true,
@@ -870,7 +885,7 @@
             "beforeEach": [
               "$Group = PSc8y\\New-TestDeviceGroup",
               "$ChildGroup = PSc8y\\New-TestDeviceGroup",
-              "PSc8y\\Add-ChildAssetToDeviceGroup -Id $Group.id -NewChildGroup $ChildGroup.id"
+              "PSc8y\\Add-ManagedObjectChild -ChildType childAssets -Id $Group.id -Child $ChildGroup.id"
             ],
             "command": "Get-DeviceChildAssetCollection -Id $Group.id",
             "skipTest": true,

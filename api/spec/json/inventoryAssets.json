@@ -3,7 +3,10 @@
     "name": "inventory/assets",
     "description": "Cumulocity inventory assets",
     "descriptionLong": "REST endpoint to interact with Cumulocity managed objects",
-    "link": "https://cumulocity.com/guides/reference/inventory/"
+    "link": "https://cumulocity.com/guides/reference/inventory/",
+    "deprecatedAt": "2022-08-14",
+    "deprecated": "please use 'c8y inventory children [command] --childType childAssets'",
+    "hidden": true
   },
   "endpoints": [
     {
@@ -18,6 +21,9 @@
       "alias": {
         "go": "list",
         "powershell": "Get-ChildAssetCollection"
+      },
+      "powershell": {
+        "deprecated": true
       },
       "examples": {
         "powershell": [
@@ -108,6 +114,9 @@
         "go": "assign",
         "powershell": "Add-ChildAssetToManagedObject"
       },
+      "powershell": {
+        "deprecated": true
+      },
       "examples": {
         "powershell": [
           {
@@ -126,7 +135,7 @@
         "go": [
           {
             "description": "Create group hierarchy (parent group -> child group)",
-            "command": "c8y inventory assets assign --group 12345 --childGroup 43234"
+            "command": "c8y inventory assets assign --id 12345 --childGroup 43234"
           }
         ]
       },
@@ -171,6 +180,9 @@
         "go": "get",
         "powershell": "Get-ChildAsset"
       },
+      "powershell": {
+        "deprecated": true
+      },
       "examples": {
         "powershell": [
           {
@@ -178,7 +190,7 @@
             "beforeEach": [
               "$Agent = New-TestAgent",
               "$Device = New-TestDevice",
-              "$Ref = Add-ChildAssetToDeviceGroup -Group $Agent.id -Child $Device.id"
+              "$Ref = Add-ManagedObjectChild -ChildType childAssets -Id $Agent.id -Child $Device.id"
             ],
             "command": "Get-ChildAsset -Id $Agent.id -Child $Ref.id",
             "afterEach": [
@@ -227,6 +239,9 @@
         "go": "unassign",
         "powershell": "Remove-Asset"
       },
+      "powershell": {
+        "deprecated": true
+      },
       "examples": {
         "powershell": [
           {
@@ -234,7 +249,7 @@
             "beforeEach": [
               "$Group = PSc8y\\New-TestDeviceGroup",
               "$ChildDevice = PSc8y\\New-TestDevice",
-              "PSc8y\\Add-ChildAssetToDeviceGroup -Group $Group.id -Child $ChildDevice.id"
+              "PSc8y\\Add-ManagedObjectChild -ChildType childAssets -Id $Group.id -Child $ChildDevice.id"
             ],
             "command": "Remove-Asset -Id $Group.id -Child $ChildDevice.id",
             "afterEach": [

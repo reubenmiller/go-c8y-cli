@@ -9,8 +9,8 @@ Describe -Name "Get-AssetParent" {
             $SubGroup02 = New-TestDeviceGroup -Name "group02" -Type SubGroup
             
             # Add child relationships: rootgroup -> group01 -> group02
-            Add-ChildAssetToDeviceGroup -Group $RootGroup.id -Child $SubGroup01.id
-            Add-ChildAssetToDeviceGroup -Group $SubGroup01.id -Child $SubGroup02.id
+            Add-ManagedObjectChild -ChildType childAssets -Id $RootGroup.id -Child $SubGroup01.id
+            Add-ManagedObjectChild -ChildType childAssets -Id $SubGroup01.id -Child $SubGroup02.id
         }
 
         It "Should return nothing if the asset has no parent" {

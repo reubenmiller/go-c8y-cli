@@ -458,6 +458,8 @@ endpoints:
     alias:
         go: assignChild
         powershell: Add-ChildDeviceToDevice
+    powershell:
+      deprecated: true
     examples:
       powershell:
         - description: Assign a device as a child device to an existing device
@@ -507,6 +509,8 @@ endpoints:
     alias:
         go: unassignChild
         powershell: Remove-ChildDeviceFromDevice
+    powershell:
+      deprecated: true
     examples:
       powershell:
         - description: Unassign a child device from its parent device
@@ -548,6 +552,8 @@ endpoints:
     alias:
         go: listChildren
         powershell: Get-ChildDeviceCollection
+    powershell:
+      deprecated: true
     examples:
       powershell:
         - description: Get a list of the child devices of an existing device
@@ -596,6 +602,8 @@ endpoints:
     alias:
         go: getChild
         powershell: Get-ChildDeviceReference
+    powershell:
+      deprecated: true
     examples:
         powershell:
           - description: Get an existing child device reference
@@ -636,13 +644,15 @@ endpoints:
     alias:
         go: listAssets
         powershell: Get-DeviceChildAssetCollection
+    powershell:
+      deprecated: true
     examples:
       powershell:
         - description: Get a list of the child assets of an existing device
           beforeEach:
             - $Device = PSc8y\New-TestDevice
             - $ChildDevice = PSc8y\New-TestDevice
-            - PSc8y\Add-ChildAssetToDeviceGroup -Id $Device.id -NewChildDevice $ChildDevice.id
+            - PSc8y\Add-ManagedObjectChild -ChildType childAssets -Id $Device.id -Child $ChildDevice.id
           command: Get-DeviceChildAssetCollection -Id $Group.id
           skipTest: true
           afterEach:
@@ -653,7 +663,7 @@ endpoints:
           beforeEach:
             - $Group = PSc8y\New-TestDeviceGroup
             - $ChildGroup = PSc8y\New-TestDeviceGroup
-            - PSc8y\Add-ChildAssetToDeviceGroup -Id $Group.id -NewChildGroup $ChildGroup.id
+            - PSc8y\Add-ManagedObjectChild -ChildType childAssets -Id $Group.id -Child $ChildGroup.id
           command: Get-DeviceChildAssetCollection -Id $Group.id
           skipTest: true
           afterEach:

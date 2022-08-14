@@ -242,6 +242,22 @@
         "link": {
           "type": "string",
           "title": "Link to Cumulocity documentation"
+        },
+        "deprecated": {
+          "type": "string",
+          "title": "Deprecation message to be displayed to the user",
+          "description": "The command will still visible to the user but always generate a warning"
+        },
+        "deprecatedAt": {
+          "type": "string",
+          "title": "Deprecated At",
+          "format": "date",
+          "description": "Date when the command was deprecated"
+        },
+        "hidden": {
+          "type": "boolean",
+          "title": "Command should be hidden",
+          "description": "The command will still work but it will not be visible in the documentation and completions"
         }
       },
       "required": [
@@ -332,6 +348,18 @@
               "go",
               "powershell"
             ]
+          },
+          "powershell": {
+            "type": "object",
+            "title": "Powershell specific options",
+            "description": "Options related to powershell commands",
+            "properties": {
+              "deprecated": {
+                "type": "boolean",
+                "title": "Deprecated",
+                "description": "The command is no longer used"
+              }
+            }
           },
           "examples": {
             "type": "object",

@@ -5,6 +5,9 @@ information:
   description: Cumulocity managed object additions
   descriptionLong: Managed additions to managed objects
   link: https://cumulocity.com/guides/reference/inventory/
+  deprecatedAt: "2022-08-14"
+  deprecated: "please use 'c8y inventory children [command] --childType childAdditions'"
+  hidden: true
 
 endpoints:
   - name: listChildAdditionCollection
@@ -18,6 +21,8 @@ endpoints:
     alias:
         go: list
         powershell: Get-ChildAdditionCollection
+    powershell:
+      deprecated: true
     examples:
       powershell:
         - description: Get a list of the child additions of an existing managed object
@@ -89,6 +94,8 @@ endpoints:
     alias:
         go: assign
         powershell: Add-ChildAddition
+    powershell:
+      deprecated: true
     examples:
         powershell:
           - description: Add a related managed object as a child to an existing managed object
@@ -132,6 +139,8 @@ endpoints:
     alias:
         go: unassign
         powershell: Remove-ChildAddition
+    powershell:
+      deprecated: true
     examples:
       powershell:
         - description: Unassign a child addition from its parent managed object
@@ -175,6 +184,8 @@ endpoints:
     alias:
         go: create
         powershell: New-ChildAddition
+    powershell:
+      deprecated: true
     examples:
         powershell:
           - description: Create a child addition and link it to an existing managed object
@@ -224,6 +235,8 @@ endpoints:
     alias:
         go: get
         powershell: Get-ChildAddition
+    powershell:
+      deprecated: true
     examples:
         powershell:
           - description: Get an existing child addition
