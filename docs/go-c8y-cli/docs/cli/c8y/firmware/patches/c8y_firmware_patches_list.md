@@ -19,7 +19,7 @@ $ c8y firmware patches list --firmware 12345
 Get a list of firmware patches
 
 $ c8y firmware patches list --firmware 12345 --dependency '1.*'
-Get a list of firmware patches where the dependency version starts with "1."
+Get a list of firmware patches where the dependency version starts with '1.'
         
 ```
 
@@ -38,6 +38,7 @@ Get a list of firmware patches where the dependency version starts with "1."
       --abortOnErrors int          Abort batch when reaching specified number of errors (default 10)
       --allowEmptyPipe             Don't fail when piped input is empty (stdin)
       --cache                      Enable cached responses
+      --cacheBodyPaths strings     Cache should limit hashing of selected paths in the json body. Empty indicates all values
       --cacheTTL string            Cache time-to-live (TTL) as a duration, i.e. 60s, 2m (default "60s")
   -c, --compact                    Compact instead of pretty-printed output when using json output. Pretty print is the default if output is the terminal
       --confirm                    Prompt for confirmation

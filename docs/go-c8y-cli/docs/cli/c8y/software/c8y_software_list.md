@@ -26,10 +26,10 @@ Get a list of software packages starting with "python3"
 ### Options
 
 ```
-      --description string     Software description filter
-      --deviceType string      Software device type filter
+      --description string     Filter by description
+      --deviceType string      Filter by deviceType
   -h, --help                   help for list
-      --name string            Software name filter
+      --name string            Filter by name
       --orderBy string         Order by. e.g. _id asc or name asc or creationTime.date desc (default "name")
       --query string           Additional query filter (accepts pipeline)
       --queryTemplate string   String template to be used when applying the given query. Use %s to reference the query/pipeline input
@@ -41,6 +41,7 @@ Get a list of software packages starting with "python3"
       --abortOnErrors int          Abort batch when reaching specified number of errors (default 10)
       --allowEmptyPipe             Don't fail when piped input is empty (stdin)
       --cache                      Enable cached responses
+      --cacheBodyPaths strings     Cache should limit hashing of selected paths in the json body. Empty indicates all values
       --cacheTTL string            Cache time-to-live (TTL) as a duration, i.e. 60s, 2m (default "60s")
   -c, --compact                    Compact instead of pretty-printed output when using json output. Pretty print is the default if output is the terminal
       --confirm                    Prompt for confirmation

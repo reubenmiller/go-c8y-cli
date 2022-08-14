@@ -15,19 +15,20 @@ c8y devicegroups list [flags]
 ### Examples
 
 ```
-c8y devicesgroups list --name "MyGroup*"
-
-Get a collection of device groups with names that start with "MyGroup"
-
+$ c8y devicegroups list --name "parent*"
+Get a collection of device groups with names that start with 'parent'
+        
 ```
 
 ### Options
 
 ```
-      --excludeRootGroup       Exclude root groups from the list
+      --excludeRootGroup       Filter by group inclusion
       --fragmentType string    Filter by fragment type
+      --group strings          Filter by group inclusion
   -h, --help                   help for list
       --name string            Filter by name
+      --orderBy string         Order by. e.g. _id asc or name asc or creationTime.date desc (default "name")
       --owner string           Filter by owner
       --query string           Additional query filter (accepts pipeline)
       --queryTemplate string   String template to be used when applying the given query. Use %s to reference the query/pipeline input
@@ -42,6 +43,7 @@ Get a collection of device groups with names that start with "MyGroup"
       --abortOnErrors int          Abort batch when reaching specified number of errors (default 10)
       --allowEmptyPipe             Don't fail when piped input is empty (stdin)
       --cache                      Enable cached responses
+      --cacheBodyPaths strings     Cache should limit hashing of selected paths in the json body. Empty indicates all values
       --cacheTTL string            Cache time-to-live (TTL) as a duration, i.e. 60s, 2m (default "60s")
   -c, --compact                    Compact instead of pretty-printed output when using json output. Pretty print is the default if output is the terminal
       --confirm                    Prompt for confirmation

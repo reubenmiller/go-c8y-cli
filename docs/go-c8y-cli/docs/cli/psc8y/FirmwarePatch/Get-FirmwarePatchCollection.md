@@ -87,7 +87,7 @@ Get a list of firmware patches related to a firmware package
 Get-FirmwarePatchCollection -Firmware 12345 -Dependency '1.*'
 ```
 
-Get a list of firmware patches where the dependency version starts with "1."
+Get a list of firmware patches where the dependency version starts with '1.'
 
 ## PARAMETERS
 

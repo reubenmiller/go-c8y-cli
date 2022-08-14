@@ -3,7 +3,7 @@ category: Agents
 external help file: PSc8y-help.xml
 id: Get-AgentCollection
 Module Name: PSc8y
-online version:
+online version: https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/agents_list
 schema: 2.0.0
 slug: /docs/cli/psc8y/Agents/get-agentcollection
 title: Get-AgentCollection
@@ -12,23 +12,25 @@ title: Get-AgentCollection
 
 
 ## SYNOPSIS
-Get a collection of agents
+Get agent collection
 
 ## SYNTAX
 
 ```
 Get-AgentCollection
+	[[-Query] <Object[]>]
+	[[-QueryTemplate] <String>]
+	[[-OrderBy] <String>]
 	[[-Name] <String>]
 	[[-Type] <String>]
 	[[-FragmentType] <String>]
 	[[-Owner] <String>]
 	[[-Availability] <String>]
-	[[-LastMessageDateFrom] <String>]
 	[[-LastMessageDateTo] <String>]
-	[[-Group] <String>]
-	[[-Query] <String>]
-	[[-QueryTemplate] <String>]
-	[[-OrderBy] <String>]
+	[[-LastMessageDateFrom] <String>]
+	[[-CreationTimeDateTo] <String>]
+	[[-CreationTimeDateFrom] <String>]
+	[[-Group] <Object[]>]
 	[-WithParents]
 	[-PageSize <Int32>]
 	[-WithTotalPages]
@@ -80,51 +82,37 @@ Get-AgentCollection
 ```
 
 ## DESCRIPTION
-Get a collection of agent in the current tenant
+Get a collection of agents based on filter parameters
 
 ## EXAMPLES
 
 ### EXAMPLE 1
 ```
-Get-AgentCollection -Name *sensor*
+Get-AgentCollection -Name "sensor*" -Type myType
 ```
 
-Get all agents with "sensor" in their name
-
-### EXAMPLE 2
-```
-Get-AgentCollection -Name *sensor* -Type *c8y_* -PageSize 100
-```
-
-Get the first 100 agents with "sensor" in their name and has a type matching "c8y_"
-
-### EXAMPLE 3
-```
-Get-AgentCollection -Query "lastUpdated.date gt '2020-01-01T00:00:00Z'"
-```
-
-Get a list of agents which have been updated more recently than 2020-01-01
+Get a collection of agents with type "myType", and their names start with "sensor"
 
 ## PARAMETERS
 
-### -Name
-Agent name.
-Wildcards accepted
+### -Query
+Additional query filter
 
 ```yaml
-Type: String
+Type: Object[]
 Parameter Sets: (All)
 Aliases:
 
 Required: False
 Position: 1
 Default value: None
-Accept pipeline input: False
+Accept pipeline input: True (ByPropertyName, ByValue)
 Accept wildcard characters: False
 ```
 
-### -Type
-Agent type.
+### -QueryTemplate
+String template to be used when applying the given query.
+Use %s to reference the query/pipeline input
 
 ```yaml
 Type: String
@@ -138,8 +126,10 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -FragmentType
-Agent fragment type.
+### -OrderBy
+Order by.
+e.g.
+_id asc or name asc or creationTime.date desc
 
 ```yaml
 Type: String
@@ -153,8 +143,8 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -Owner
-Agent owner.
+### -Name
+Filter by name
 
 ```yaml
 Type: String
@@ -168,8 +158,8 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -Availability
-Availability.
+### -Type
+Filter by type
 
 ```yaml
 Type: String
@@ -183,8 +173,8 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -LastMessageDateFrom
-LastMessageDateFrom - c8y_Availability.lastMessage filter
+### -FragmentType
+Filter by fragment type
 
 ```yaml
 Type: String
@@ -198,8 +188,8 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -LastMessageDateTo
-LastMessageDateTo - c8y_Availability.lastMessage filter
+### -Owner
+Filter by owner
 
 ```yaml
 Type: String
@@ -213,8 +203,8 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -Group
-Group.
+### -Availability
+Filter by c8y_Availability.status
 
 ```yaml
 Type: String
@@ -228,8 +218,8 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -Query
-Query.
+### -LastMessageDateTo
+Filter c8y_Availability.lastMessage to a specific date
 
 ```yaml
 Type: String
@@ -243,8 +233,8 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -QueryTemplate
-QueryTemplate.
+### -LastMessageDateFrom
+Filter c8y_Availability.lastMessage from a specific date
 
 ```yaml
 Type: String
@@ -258,10 +248,8 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -OrderBy
-Order results by a specific field.
-i.e.
-"name", "_id desc" or "creationTime.date asc".
+### -CreationTimeDateTo
+Filter creationTime.date to a specific date
 
 ```yaml
 Type: String
@@ -275,8 +263,38 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
+### -CreationTimeDateFrom
+Filter creationTime.date from a specific date
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 12
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -Group
+Filter by group inclusion
+
+```yaml
+Type: Object[]
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 13
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
 ### -WithParents
-include a flat list of all parents and grandparents of the given object
+Include a flat list of all parents and grandparents of the given object
 
 ```yaml
 Type: SwitchParameter

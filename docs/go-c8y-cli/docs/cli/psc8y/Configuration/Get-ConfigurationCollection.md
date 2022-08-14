@@ -18,9 +18,13 @@ Get configuration collection
 
 ```
 Get-ConfigurationCollection
+	[[-Query] <Object[]>]
+	[[-QueryTemplate] <String>]
+	[[-OrderBy] <String>]
+	[[-ConfigurationType] <String>]
 	[[-Name] <String>]
-	[[-Description] <String>]
 	[[-DeviceType] <String>]
+	[[-Description] <String>]
 	[-PageSize <Int32>]
 	[-WithTotalPages]
 	[-CurrentPage <Int32>]
@@ -84,23 +88,24 @@ Get a list of configuration files
 
 ## PARAMETERS
 
-### -Name
-Configuration name filter
+### -Query
+Additional query filter
 
 ```yaml
-Type: String
+Type: Object[]
 Parameter Sets: (All)
 Aliases:
 
 Required: False
 Position: 1
 Default value: None
-Accept pipeline input: False
+Accept pipeline input: True (ByPropertyName, ByValue)
 Accept wildcard characters: False
 ```
 
-### -Description
-Configuration description filter
+### -QueryTemplate
+String template to be used when applying the given query.
+Use %s to reference the query/pipeline input
 
 ```yaml
 Type: String
@@ -114,8 +119,10 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -DeviceType
-Configuration device type filter
+### -OrderBy
+Order by.
+e.g.
+_id asc or name asc or creationTime.date desc
 
 ```yaml
 Type: String
@@ -124,6 +131,66 @@ Aliases:
 
 Required: False
 Position: 3
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -ConfigurationType
+Filter by configurationType
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 4
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -Name
+Filter by name
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 5
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -DeviceType
+Filter by deviceType
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 6
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -Description
+Filter by description
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 7
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
