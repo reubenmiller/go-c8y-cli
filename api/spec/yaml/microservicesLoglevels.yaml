@@ -111,12 +111,12 @@ endpoints:
         description: 'Name of the logger: Qualified name of package or class'
     
     bodyRequiredKeys:
-      - "configuredLogLevel"
+      - "configuredLevel"
 
     body:
       - name: logLevel
         type: string
-        property: configuredLogLevel
+        property: configuredLevel
         required: true
         validationSet:
           - "TRACE"
@@ -168,7 +168,7 @@ endpoints:
     bodyTemplate:
       type: jsonnet
       template: |
-        {"configuredLogLevel":null}
+        {"configuredLevel":null}
 
     body:
       - name: logLevel

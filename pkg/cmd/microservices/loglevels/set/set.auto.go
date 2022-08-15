@@ -141,10 +141,10 @@ func (n *SetCmd) RunE(cmd *cobra.Command, args []string) error {
 		body,
 		inputIterators,
 		flags.WithDataFlagValue(),
-		flags.WithStringValue("logLevel", "configuredLogLevel"),
+		flags.WithStringValue("logLevel", "configuredLevel"),
 		cmdutil.WithTemplateValue(cfg),
 		flags.WithTemplateVariablesValue(),
-		flags.WithRequiredProperties("configuredLogLevel"),
+		flags.WithRequiredProperties("configuredLevel"),
 	)
 	if err != nil {
 		return cmderrors.NewUserError(err)
