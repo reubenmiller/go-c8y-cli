@@ -89,7 +89,7 @@
               "name": "query",
               "type": "string",
               "description": "Additional query filter",
-              "format": "(%s)",
+              "format": "%s",
               "pipeline": true,
               "pipelineAliases": [
                 "c8y_DeviceQueryString"
