@@ -3,6 +3,7 @@ package iterator
 import (
 	"bufio"
 	"bytes"
+	"fmt"
 	"io"
 	"os"
 	"sync"
@@ -44,6 +45,7 @@ type FileContentsIterator struct {
 	mu     sync.Mutex
 	fp     *os.File
 	reader *bufio.Reader
+	format string
 }
 
 // GetNext returns the next line in the buffer
@@ -56,6 +58,9 @@ func (i *FileContentsIterator) GetNext() (line []byte, input interface{}, err er
 		i.fp.Close()
 	}
 	value := bytes.TrimRight(line, "\n")
+	if i.format != "" {
+		value = []byte(fmt.Sprintf(i.format, value))
+	}
 	return value, value, err
 }
 
@@ -70,14 +75,21 @@ func (i *FileContentsIterator) IsBound() bool {
 }
 
 // NewFileContentsIterator returns a file contents iterator
-func NewFileContentsIterator(path string) (Iterator, error) {
+func NewFileContentsIterator(path string, format ...string) (Iterator, error) {
 	fp, err := os.Open(path)
 	if err != nil {
 		return nil, err
 	}
+
 	reader := bufio.NewReader(fp)
-	return &FileContentsIterator{
+	iter := FileContentsIterator{
 		fp:     fp,
 		reader: reader,
-	}, nil
+	}
+
+	if len(format) > 0 {
+		iter.format = format[0]
+	}
+
+	return &iter, nil
 }

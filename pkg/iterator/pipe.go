@@ -3,6 +3,7 @@ package iterator
 import (
 	"bufio"
 	"bytes"
+	"fmt"
 	"io"
 	"os"
 	"strings"
@@ -38,6 +39,12 @@ func DummyFormatter(v []byte) []byte {
 	return v
 }
 
+func NewStringFormatter(format string) Formatter {
+	return func(b []byte) []byte {
+		return []byte(fmt.Sprintf(format, b))
+	}
+}
+
 // PipeOptions additional options on how to interpret the piped data
 type PipeOptions struct {
 	// Property name if the input data is json
@@ -51,6 +58,9 @@ type PipeOptions struct {
 
 	// Formatter
 	Formatter Formatter
+
+	// Format simple custom format string
+	Format string
 }
 
 // PipeIterator is a thread safe iterator to retrieve the input values from piped standard input
@@ -84,6 +94,11 @@ func (i *PipeIterator) GetNext() (line []byte, input interface{}, err error) {
 	}
 
 	formatter := DummyFormatter
+
+	if i.opts.Format != "" {
+		formatter = NewStringFormatter(i.opts.Format)
+	}
+
 	if i.opts != nil && i.opts.Formatter != nil {
 		formatter = i.opts.Formatter
 	}

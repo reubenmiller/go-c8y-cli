@@ -300,6 +300,7 @@ func WithStringValue(opts ...string) GetOption {
 
 		if inputIterators != nil && inputIterators.PipeOptions != nil {
 			if inputIterators.PipeOptions.Name == src {
+				inputIterators.PipeOptions.Format = format
 				return WithPipelineIterator(inputIterators.PipeOptions)(cmd, inputIterators)
 			}
 		}
@@ -327,6 +328,7 @@ func WithVersion(fallbackSrc string, opts ...string) GetOption {
 
 		if inputIterators != nil && inputIterators.PipeOptions != nil {
 			if inputIterators.PipeOptions.Name == src {
+				inputIterators.PipeOptions.Format = format
 				return WithPipelineIterator(inputIterators.PipeOptions)(cmd, inputIterators)
 			}
 		}
@@ -379,6 +381,7 @@ func WithCustomStringValue(transform func([]byte) []byte, targetFunc func() stri
 				if dst != "" {
 					inputIterators.PipeOptions.Property = dst
 				}
+				inputIterators.PipeOptions.Format = format
 				return WithPipelineIterator(inputIterators.PipeOptions)(cmd, inputIterators)
 			}
 		}
@@ -564,10 +567,11 @@ func WithStringSliceCSV(opts ...string) GetOption {
 // WithIntValue adds a integer (int) value from cli arguments
 func WithIntValue(opts ...string) GetOption {
 	return func(cmd *cobra.Command, inputIterators *RequestInputIterators) (string, interface{}, error) {
-		src, dst, _ := UnpackGetterOptions("", opts...)
+		src, dst, format := UnpackGetterOptions("", opts...)
 
 		if inputIterators != nil {
 			if inputIterators.PipeOptions.Name == src {
+				inputIterators.PipeOptions.Format = format
 				return WithPipelineIterator(inputIterators.PipeOptions)(cmd, inputIterators)
 			}
 		}
@@ -585,10 +589,11 @@ func WithIntValue(opts ...string) GetOption {
 // WithFloatValue adds a float (float32) value from cli arguments
 func WithFloatValue(opts ...string) GetOption {
 	return func(cmd *cobra.Command, inputIterators *RequestInputIterators) (string, interface{}, error) {
-		src, dst, _ := UnpackGetterOptions("", opts...)
+		src, dst, format := UnpackGetterOptions("", opts...)
 
 		if inputIterators != nil {
 			if inputIterators.PipeOptions.Name == src {
+				inputIterators.PipeOptions.Format = format
 				return WithPipelineIterator(inputIterators.PipeOptions)(cmd, inputIterators)
 			}
 		}
@@ -961,6 +966,7 @@ type PipelineOptions struct {
 	IsID        bool                `json:"isID"`
 	Validator   iterator.Validator  `json:"-"`
 	Formatter   func([]byte) []byte `json:"-"`
+	Format      string              `json:"-"`
 	InputFilter func([]byte) bool   `json:"-"`
 	PostActions []Action            `json:"-"`
 }
