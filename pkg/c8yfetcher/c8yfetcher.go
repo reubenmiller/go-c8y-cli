@@ -269,8 +269,8 @@ func (i *EntityIterator) GetNext() (value []byte, input interface{}, err error) 
 	refs := []entityReference{}
 
 	if len(value) != 0 {
-		// only lookup if value is not empty
-		refs, err = lookupIDByName(i.Fetcher, string(value), i.GetID, i.Format)
+		// only lookup if value is not empty. Formatting is done later
+		refs, err = lookupIDByName(i.Fetcher, string(value), i.GetID, "")
 		if err != nil {
 			return nil, rawValue, err
 		}
