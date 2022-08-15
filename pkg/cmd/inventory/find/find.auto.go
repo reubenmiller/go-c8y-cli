@@ -39,7 +39,7 @@ $ c8y inventory find --query "name eq 'roomUpperFloor_*'"
 Get a list of managed objects
 
 $ echo "myname" | c8y inventory find --queryTemplate "name eq '*%s*'"
-Find managed objects which include myname in their names. query=$filter=name eq '*myname*'
+Find managed objects which include myname in their names.
 
 $ echo "name eq 'name'" | c8y inventory find --queryTemplate 'not(%s)'
 Invert a given query received via piped input (stdin) by using a template
@@ -117,7 +117,7 @@ func (n *FindCmd) RunE(cmd *cobra.Command, args []string) error {
 
 		flags.WithCumulocityQuery(
 			[]flags.GetOption{
-				flags.WithStringValue("query", "query", "(%s)"),
+				flags.WithStringValue("query", "query", "%s"),
 				flags.WithStringValue("name", "name", "(name eq '%s')"),
 				flags.WithStringValue("type", "type", "(type eq '%s')"),
 				flags.WithDefaultBoolValue("agents", "agents", "has(com_cumulocity_model_Agent)"),

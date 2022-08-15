@@ -22,7 +22,22 @@ Get a list of device profiles
     [Alias()]
     [OutputType([object])]
     Param(
-        # DeviceProfile name filter
+        # Additional query filter
+        [Parameter()]
+        [string]
+        $Query,
+
+        # String template to be used when applying the given query. Use %s to reference the query/pipeline input
+        [Parameter()]
+        [string]
+        $QueryTemplate,
+
+        # Order by. e.g. _id asc or name asc or creationTime.date desc
+        [Parameter()]
+        [string]
+        $OrderBy,
+
+        # Filter by name
         [Parameter(ValueFromPipeline=$true,
                    ValueFromPipelineByPropertyName=$true)]
         [object[]]

@@ -1,5 +1,5 @@
 tests:
-    inventory_find_Find managed objects which include myname in their names. query=$filter=name eq '*myname*':
+    inventory_find_Find managed objects which include myname in their names.:
         command: $TEST_SHELL -c 'echo "myname" | c8y inventory find --queryTemplate "name eq '*%s*'"'
         exit-code: 0
         skip: true

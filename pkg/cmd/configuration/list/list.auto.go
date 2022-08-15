@@ -96,7 +96,7 @@ func (n *ListCmd) RunE(cmd *cobra.Command, args []string) error {
 
 		flags.WithCumulocityQuery(
 			[]flags.GetOption{
-				flags.WithStringValue("query", "query", "(%s)"),
+				flags.WithStringValue("query", "query", "%s"),
 				flags.WithStaticStringValue("configuration", "(type eq 'c8y_ConfigurationDump')"),
 				flags.WithStringValue("configurationType", "configurationType", "(configurationType eq '%s')"),
 				flags.WithStringValue("name", "name", "(name eq '%s')"),
@@ -156,7 +156,7 @@ func (n *ListCmd) RunE(cmd *cobra.Command, args []string) error {
 	}
 
 	// path parameters
-	path := flags.NewStringTemplate("inventory/managedObjects?query=$filter=(type%20eq%20'c8y_ConfigurationDump')%20$orderby=name%20asc")
+	path := flags.NewStringTemplate("inventory/managedObjects")
 	err = flags.WithPathParameters(
 		cmd,
 		path,

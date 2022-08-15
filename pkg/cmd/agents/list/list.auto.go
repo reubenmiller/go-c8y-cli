@@ -119,7 +119,7 @@ func (n *ListCmd) RunE(cmd *cobra.Command, args []string) error {
 
 		flags.WithCumulocityQuery(
 			[]flags.GetOption{
-				flags.WithStringValue("query", "query", "(%s)"),
+				flags.WithStringValue("query", "query", "%s"),
 				flags.WithStaticStringValue("agent", "(has(com_cumulocity_model_Agent))"),
 				flags.WithStringValue("name", "name", "(name eq '%s')"),
 				flags.WithStringValue("type", "type", "(type eq '%s')"),

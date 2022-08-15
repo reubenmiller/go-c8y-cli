@@ -95,7 +95,7 @@ func (n *ListCmd) RunE(cmd *cobra.Command, args []string) error {
 
 		flags.WithCumulocityQuery(
 			[]flags.GetOption{
-				flags.WithStringValue("query", "query", "(%s)"),
+				flags.WithStringValue("query", "query", "%s"),
 				flags.WithStaticStringValue("firmware", "(type eq 'c8y_Firmware')"),
 				flags.WithStringValue("name", "name", "(name eq '%s')"),
 				flags.WithStringValue("deviceType", "deviceType", "(c8y_Filter.type eq '%s')"),
