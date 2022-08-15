@@ -19,7 +19,7 @@ $ c8y inventory find --query "name eq 'roomUpperFloor_*'"
 Get a list of managed objects
 
 $ echo "myname" | c8y inventory find --queryTemplate "name eq '*%s*'"
-Find managed objects which include myname in their names. query=$filter=name eq '*myname*'
+Find managed objects which include myname in their names.
 
 $ echo "name eq 'name'" | c8y inventory find --queryTemplate 'not(%s)'
 Invert a given query received via piped input (stdin) by using a template

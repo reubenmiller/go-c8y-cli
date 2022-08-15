@@ -26,9 +26,14 @@ Get a list of software package versions from multiple software packages
 ### Options
 
 ```
-  -h, --help               help for list
-      --software strings   Software package id or name (accepts pipeline)
-      --withParents        Include parent references (default true)
+  -h, --help                   help for list
+      --orderBy string         Order by. e.g. _id asc or name asc or creationTime.date desc (default "creationTime.date desc,creationTime desc")
+      --query string           Additional query filter
+      --queryTemplate string   String template to be used when applying the given query. Use %s to reference the query/pipeline input
+      --software strings       Software package id or name (accepts pipeline)
+      --url string             Filter by url
+      --version string         Filter by version
+      --withParents            Include parent references (default true)
 ```
 
 ### Options inherited from parent commands

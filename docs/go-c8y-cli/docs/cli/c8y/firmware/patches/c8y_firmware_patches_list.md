@@ -26,10 +26,15 @@ Get a list of firmware patches where the dependency version starts with '1.'
 ### Options
 
 ```
-      --dependency string   Patch dependency version (default "*")
-      --firmware strings    Firmware package id or name (required) (accepts pipeline)
-  -h, --help                help for list
-      --withParents         Include parent references (default true)
+      --dependency string      Patch dependency version
+      --firmware strings       Firmware package id or name (required) (accepts pipeline)
+  -h, --help                   help for list
+      --orderBy string         Order by. e.g. _id asc or name asc or creationTime.date desc (default "creationTime.date desc")
+      --query string           Additional query filter
+      --queryTemplate string   String template to be used when applying the given query. Use %s to reference the query/pipeline input
+      --url string             Filter by url
+      --version string         Patch version
+      --withParents            Include parent references (default true)
 ```
 
 ### Options inherited from parent commands

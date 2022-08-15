@@ -23,8 +23,11 @@ Get a list of device profiles
 ### Options
 
 ```
-  -h, --help          help for list
-      --name string   DeviceProfile name filter (accepts pipeline) (default "**")
+  -h, --help                   help for list
+      --name string            Filter by name (accepts pipeline)
+      --orderBy string         Order by. e.g. _id asc or name asc or creationTime.date desc (default "creationTime.date desc,creationTime desc")
+      --query string           Additional query filter
+      --queryTemplate string   String template to be used when applying the given query. Use %s to reference the query/pipeline input
 ```
 
 ### Options inherited from parent commands
