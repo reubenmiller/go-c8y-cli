@@ -5,7 +5,7 @@ import { mdx } from '@mdx-js/react';
 import { useColorMode } from '@docusaurus/theme-common';
 import lightTheme from 'prism-react-renderer/themes/github';
 import darkTheme from 'prism-react-renderer/themes/dracula';
-import Code from '@docusaurus/theme-classic/lib-next/theme/CodeBlock';
+import Code from '@docusaurus/theme-classic/lib/theme/CodeBlock';
 
 
 const c8yCommands = {
