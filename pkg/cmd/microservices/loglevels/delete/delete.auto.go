@@ -143,7 +143,7 @@ func (n *DeleteCmd) RunE(cmd *cobra.Command, args []string) error {
 		flags.WithDataFlagValue(),
 		flags.WithStringValue("logLevel", "logLevel"),
 		flags.WithDefaultTemplateString(`
-{"configuredLogLevel":null}
+{"configuredLevel":null}
 `),
 		cmdutil.WithTemplateValue(cfg),
 		flags.WithTemplateVariablesValue(),
