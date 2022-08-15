@@ -132,13 +132,13 @@
         }
       ],
       "bodyRequiredKeys": [
-        "configuredLogLevel"
+        "configuredLevel"
       ],
       "body": [
         {
           "name": "logLevel",
           "type": "string",
-          "property": "configuredLogLevel",
+          "property": "configuredLevel",
           "required": true,
           "validationSet": [
             "TRACE",
@@ -198,7 +198,7 @@
       ],
       "bodyTemplate": {
         "type": "jsonnet",
-        "template": "{\"configuredLogLevel\":null}\n"
+        "template": "{\"configuredLevel\":null}\n"
       },
       "body": [
         {
