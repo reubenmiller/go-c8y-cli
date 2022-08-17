@@ -33,7 +33,7 @@ func (f *MicroserviceFetcher) getByID(id string) ([]fetcherResultSet, error) {
 	results[0] = fetcherResultSet{
 		ID:    app.ID,
 		Name:  app.Name,
-		Value: *resp.JSON,
+		Value: resp.JSON(),
 	}
 	return results, nil
 }

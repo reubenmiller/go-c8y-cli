@@ -136,7 +136,11 @@ const baseUrl = `${process.env.BASE_URL || '/'}`;
     ],
   ],
   themeConfig: {
-    hideableSidebar: true,
+    docs: {
+      sidebar: {
+        hideable: true
+      },
+    },
     prism: {
       theme: require('prism-react-renderer/themes/github'),
       darkTheme: require('prism-react-renderer/themes/dracula'),

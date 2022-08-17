@@ -11,7 +11,6 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/c8ydefaults"
 	activityLogCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/activitylog"
 	agentsCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/agents"
-	agentsListCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/agents/list"
 	alarmsCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/alarms"
 	alarmsAssertCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/alarms/assert"
 	alarmsSubscribeCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/alarms/subscribe"
@@ -27,20 +26,19 @@ import (
 	cacheCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/cache"
 	completionCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/completion"
 	configurationCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/configuration"
-	configurationListCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/configuration/list"
 	currentapplicationCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/currentapplication"
 	currenttenantCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/currenttenant"
 	currentuserCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/currentuser"
 	databrokerCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/databroker"
 	devicegroupsCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/devicegroups"
-	devicegroupsListCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/devicegroups/list"
+	devicegroupsChildrenCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/devicegroups/children"
 	deviceManagementCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/devicemanagement"
 	deviceprofilesCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/deviceprofiles"
 	deviceregistrationCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/deviceregistration"
 	devicesCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/devices"
 	devicesAssertCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/devices/assert"
 	devicesAvailabilityCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/devices/availability"
-	devicesListCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/devices/list"
+	devicesChildrenCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/devices/children"
 	deviceStatisticsCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/devices/statistics"
 	deviceUserCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/devices/user"
 	eventsCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/events"
@@ -48,7 +46,6 @@ import (
 	eventsSubscribeCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/events/subscribe"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/factory"
 	firmwareCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/firmware"
-	firmwareListCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/firmware/list"
 	firmwareVersionsPatchesCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/firmware/patches"
 	firmwarePatchesCreateCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/firmware/patches/create"
 	firmwareVersionsCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/firmware/versions"
@@ -58,7 +55,7 @@ import (
 	inventoryAdditionsCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/inventory/additions"
 	inventoryAssertCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/inventory/assert"
 	inventoryAssetsCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/inventory/assets"
-	inventoryFindCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/inventory/find"
+	inventoryChildrenCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/inventory/children"
 	inventorySubscribeCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/inventory/subscribe"
 	inventoryWaitCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/inventory/wait"
 	measurementsCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/measurements"
@@ -67,6 +64,7 @@ import (
 	measurementsSubscribeCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/measurements/subscribe"
 	microservicesCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/microservices"
 	microservicesCreateCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/microservices/create"
+	microservicesLogLevelsCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/microservices/loglevels"
 	microservicesServiceUserCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/microservices/serviceuser"
 	operationsCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/operations"
 	operationsAssertCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/operations/assert"
@@ -77,9 +75,7 @@ import (
 	sessionsCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/sessions"
 	settingsCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/settings"
 	smartgroupsCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/smartgroups"
-	smartgroupsListCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/smartgroups/list"
 	softwareCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/software"
-	softwareListCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/software/list"
 	softwareVersionsCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/software/versions"
 	softwareVersionsCreateCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/software/versions/create"
 	systemoptionsCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/systemoptions"
@@ -150,6 +146,10 @@ func NewCmdRoot(f *cmdutil.Factory, version, buildDate string) *CmdRoot {
 			disableEncryptionCheck := !cmdutil.IsConfigEncryptionCheckEnabled(cmd)
 			if err := ccmd.Configure(disableEncryptionCheck); err != nil {
 				return err
+			}
+			if notice := flags.GetDeprecationNoticeFromAnnotation(cmd); notice != "" {
+				// Command "listAssets" is deprecated,
+				fmt.Fprintf(f.IOStreams.ErrOut, "Command \"%s\" is deprecated, %s\n", cmd.CommandPath(), notice)
 			}
 			return ccmd.checkSessionExists(cmd, args)
 		},
@@ -233,6 +233,7 @@ func NewCmdRoot(f *cmdutil.Factory, version, buildDate string) *CmdRoot {
 	cmd.PersistentFlags().Bool("cache", false, "Enable cached responses")
 	cmd.PersistentFlags().Bool("noCache", false, "Force disabling of cached responses (overwrites cache setting)")
 	cmd.PersistentFlags().String("cacheTTL", "60s", "Cache time-to-live (TTL) as a duration, i.e. 60s, 2m")
+	cmd.PersistentFlags().StringSlice("cacheBodyPaths", []string{}, "Cache should limit hashing of selected paths in the json body. Empty indicates all values")
 
 	// ssl settings
 	cmd.PersistentFlags().BoolP("insecure", "k", false, "Allow insecure server connections when using SSL")
@@ -322,7 +323,7 @@ func NewCmdRoot(f *cmdutil.Factory, version, buildDate string) *CmdRoot {
 
 	// devices
 	devices := devicesCmd.NewSubCommand(f).GetCommand()
-	devices.AddCommand(devicesListCmd.NewCmdDevicesList(f).GetCommand())
+	devices.AddCommand(devicesChildrenCmd.NewSubCommand(f).GetCommand())
 	devices.AddCommand(devicesAssertCmd.NewSubCommand(f).GetCommand())
 	devices.AddCommand(devicesAvailabilityCmd.NewSubCommand(f).GetCommand())
 	devices.AddCommand(deviceStatisticsCmd.NewSubCommand(f).GetCommand())
@@ -331,39 +332,39 @@ func NewCmdRoot(f *cmdutil.Factory, version, buildDate string) *CmdRoot {
 
 	// devicegroups
 	devicegroups := devicegroupsCmd.NewSubCommand(f).GetCommand()
-	devicegroups.AddCommand(devicegroupsListCmd.NewCmdList(f).GetCommand())
+	devicegroups.AddCommand(devicegroupsChildrenCmd.NewSubCommand(f).GetCommand())
 	cmd.AddCommand(devicegroups)
 
 	agents := agentsCmd.NewSubCommand(f).GetCommand()
-	agents.AddCommand(agentsListCmd.NewCmdAgentList(f).GetCommand())
 	cmd.AddCommand(agents)
 
 	// microservices
 	microservices := microservicesCmd.NewSubCommand(f).GetCommand()
 	microservices.AddCommand(microservicesCreateCmd.NewCmdCreate(f).GetCommand())
 	microservices.AddCommand(microservicesServiceUserCmd.NewSubCommand(f).GetCommand())
+	microservices.AddCommand(microservicesLogLevelsCmd.NewSubCommand(f).GetCommand())
 	cmd.AddCommand(microservices)
 
 	// inventory
 	inventory := inventoryCmd.NewSubCommand(f).GetCommand()
-	inventory.AddCommand(inventoryFindCmd.NewCmdFind(f).GetCommand())
 	inventory.AddCommand(inventorySubscribeCmd.NewCmdSubscribe(f).GetCommand())
+
+	inventory.AddCommand(inventoryChildrenCmd.NewSubCommand(f).GetCommand())
 	inventory.AddCommand(inventoryAdditionsCmd.NewSubCommand(f).GetCommand())
 	inventory.AddCommand(inventoryAssetsCmd.NewSubCommand(f).GetCommand())
+
 	inventory.AddCommand(inventoryWaitCmd.NewCmdWait(f).GetCommand())
 	inventory.AddCommand(inventoryAssertCmd.NewSubCommand(f).GetCommand())
 	cmd.AddCommand(inventory)
 
 	// configuration
 	configuration := configurationCmd.NewSubCommand(f).GetCommand()
-	configuration.AddCommand(configurationListCmd.NewListCmd(f).GetCommand())
 	cmd.AddCommand(configuration)
 
 	// software
 	softwareVersions := softwareVersionsCmd.NewSubCommand(f).GetCommand()
 	softwareVersions.AddCommand(softwareVersionsCreateCmd.NewCreateCmd(f).GetCommand())
 	software := softwareCmd.NewSubCommand(f).GetCommand()
-	software.AddCommand(softwareListCmd.NewListCmd(f).GetCommand())
 	software.AddCommand(softwareVersions)
 	cmd.AddCommand(software)
 
@@ -374,7 +375,6 @@ func NewCmdRoot(f *cmdutil.Factory, version, buildDate string) *CmdRoot {
 	firmwareVersions.AddCommand(firmwareVersionsCreateCmd.NewCreateCmd(f).GetCommand())
 
 	firmware := firmwareCmd.NewSubCommand(f).GetCommand()
-	firmware.AddCommand(firmwareListCmd.NewListCmd(f).GetCommand())
 	firmware.AddCommand(firmwareVersions)
 	firmware.AddCommand(firmwarePatches)
 	cmd.AddCommand(firmware)
@@ -391,7 +391,6 @@ func NewCmdRoot(f *cmdutil.Factory, version, buildDate string) *CmdRoot {
 
 	// smart groups
 	smartgroups := smartgroupsCmd.NewSubCommand(f).GetCommand()
-	smartgroups.AddCommand(smartgroupsListCmd.NewListCmd(f).GetCommand())
 	cmd.AddCommand(smartgroups)
 
 	// Manual commands

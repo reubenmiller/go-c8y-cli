@@ -14,6 +14,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/c8yquery"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/url"
 
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/c8ydata"
@@ -54,7 +55,7 @@ func WithQueryParameters(cmd *cobra.Command, query *QueryTemplate, inputIterator
 		case map[string]string:
 			for key, val := range v {
 				if val != "" {
-					query.SetVariable(key, val)
+					query.SetVariable(key, url.EscapeQueryString(val))
 				}
 			}
 		default:
@@ -299,6 +300,7 @@ func WithStringValue(opts ...string) GetOption {
 
 		if inputIterators != nil && inputIterators.PipeOptions != nil {
 			if inputIterators.PipeOptions.Name == src {
+				inputIterators.PipeOptions.Format = format
 				return WithPipelineIterator(inputIterators.PipeOptions)(cmd, inputIterators)
 			}
 		}
@@ -326,6 +328,7 @@ func WithVersion(fallbackSrc string, opts ...string) GetOption {
 
 		if inputIterators != nil && inputIterators.PipeOptions != nil {
 			if inputIterators.PipeOptions.Name == src {
+				inputIterators.PipeOptions.Format = format
 				return WithPipelineIterator(inputIterators.PipeOptions)(cmd, inputIterators)
 			}
 		}
@@ -370,13 +373,15 @@ func WithCustomStringValue(transform func([]byte) []byte, targetFunc func() stri
 		}
 
 		if inputIterators != nil && inputIterators.PipeOptions != nil {
-			if transform != nil {
-				inputIterators.PipeOptions.Formatter = transform
-			}
 			if inputIterators.PipeOptions.Name == src {
+				if transform != nil {
+					inputIterators.PipeOptions.Formatter = transform
+				}
+
 				if dst != "" {
 					inputIterators.PipeOptions.Property = dst
 				}
+				inputIterators.PipeOptions.Format = format
 				return WithPipelineIterator(inputIterators.PipeOptions)(cmd, inputIterators)
 			}
 		}
@@ -414,7 +419,7 @@ func WithCustomStringSlice(valuesFunc func() ([]string, error), opts ...string) 
 
 		outputValues := make(map[string]string)
 		for _, v := range values {
-			parts := strings.SplitN(v, ":", 2)
+			parts := strings.Split(v, ":")
 			if len(parts) != 2 {
 				parts = strings.SplitN(v, "=", 2)
 				if len(parts) != 2 {
@@ -562,10 +567,11 @@ func WithStringSliceCSV(opts ...string) GetOption {
 // WithIntValue adds a integer (int) value from cli arguments
 func WithIntValue(opts ...string) GetOption {
 	return func(cmd *cobra.Command, inputIterators *RequestInputIterators) (string, interface{}, error) {
-		src, dst, _ := UnpackGetterOptions("", opts...)
+		src, dst, format := UnpackGetterOptions("", opts...)
 
 		if inputIterators != nil {
 			if inputIterators.PipeOptions.Name == src {
+				inputIterators.PipeOptions.Format = format
 				return WithPipelineIterator(inputIterators.PipeOptions)(cmd, inputIterators)
 			}
 		}
@@ -583,10 +589,11 @@ func WithIntValue(opts ...string) GetOption {
 // WithFloatValue adds a float (float32) value from cli arguments
 func WithFloatValue(opts ...string) GetOption {
 	return func(cmd *cobra.Command, inputIterators *RequestInputIterators) (string, interface{}, error) {
-		src, dst, _ := UnpackGetterOptions("", opts...)
+		src, dst, format := UnpackGetterOptions("", opts...)
 
 		if inputIterators != nil {
 			if inputIterators.PipeOptions.Name == src {
+				inputIterators.PipeOptions.Format = format
 				return WithPipelineIterator(inputIterators.PipeOptions)(cmd, inputIterators)
 			}
 		}
@@ -842,12 +849,82 @@ func WithBinaryUploadURL(client *c8y.Client, opts ...string) GetOption {
 	}
 }
 
+// WithCumulocityQuery build a Cumulocity Query Expression
+func WithCumulocityQuery(queryOptions []GetOption, opts ...string) GetOption {
+	return func(cmd *cobra.Command, inputIterators *RequestInputIterators) (string, interface{}, error) {
+
+		_, dst, _ := UnpackGetterOptions("%s", opts...)
+
+		queryIterator := c8yquery.NewCumulocityQueryIterator()
+
+		if templateValue, templateErr := cmd.Flags().GetString("queryTemplate"); templateErr == nil && templateValue != "" {
+			queryIterator.QueryTemplate = templateValue
+		}
+
+		for _, currentOpt := range queryOptions {
+
+			iDst, iValue, iErr := currentOpt(cmd, inputIterators)
+
+			if iErr != nil {
+				return "", nil, iErr
+			}
+
+			if iDst != "" {
+				queryIterator.AddFilterPart(iDst, iValue)
+			}
+		}
+
+		if v, err := cmd.Flags().GetString("orderBy"); err == nil {
+			if v != "" {
+				queryIterator.AddOrderPart(v)
+			}
+		}
+
+		return dst, queryIterator, nil
+	}
+}
+
 func WithDataFlagValue() GetOption {
 	return WithDataValueAdvanced(true, false, FlagDataName, "")
 }
 
 func WithDataValue(opts ...string) GetOption {
 	return WithDataValueAdvanced(true, false, opts...)
+}
+
+func WithInventoryChildType(opts ...string) GetOption {
+	return func(cmd *cobra.Command, inputIterators *RequestInputIterators) (string, interface{}, error) {
+
+		src, dst, format := UnpackGetterOptions("%s", opts...)
+		value, err := cmd.Flags().GetString(src)
+		if err != nil {
+			return "", nil, err
+		}
+
+		value = strings.ToLower(applyFormatter(format, value))
+
+		validValues := []string{
+			"asset",
+			"device",
+			"addition",
+		}
+
+		isValid := false
+		for _, iValue := range validValues {
+			if iValue == value {
+				isValid = true
+				break
+			}
+		}
+
+		if !isValid {
+			return "", nil, fmt.Errorf("invalid value. %s only accepts %s", src, strings.Join(validValues, ","))
+		}
+
+		formattedValue := "child" + strings.ToUpper(value[0:1]) + value[1:] + "s"
+
+		return dst, formattedValue, nil
+	}
 }
 
 type DefaultTemplateString string
@@ -889,6 +966,7 @@ type PipelineOptions struct {
 	IsID        bool                `json:"isID"`
 	Validator   iterator.Validator  `json:"-"`
 	Formatter   func([]byte) []byte `json:"-"`
+	Format      string              `json:"-"`
 	InputFilter func([]byte) bool   `json:"-"`
 	PostActions []Action            `json:"-"`
 }

@@ -281,6 +281,9 @@ const (
 	// SettingsCacheKeyAuth include authorization header in cache key generation
 	SettingsCacheKeyAuth = "settings.cache.keyauth"
 
+	// SettingsCacheBodyPaths include only specific json body paths in cache hashing calculation
+	SettingsCacheBodyPaths = "settings.defaults.cacheBodyPaths"
+
 	// SettingsDefaultsInsecure allow insecure SSL connections
 	SettingsDefaultsInsecure = "settings.defaults.insecure"
 
@@ -405,9 +408,10 @@ func (c *Config) bindSettings() {
 
 		WithBindEnv(SettingsLoggerHideSensitive, false),
 
-		WithBindEnv(SettingsCacheMethods, "GET"),
+		WithBindEnv(SettingsCacheMethods, "GET PUT POST DELETE"),
 		WithBindEnv(SettingsCacheKeyHost, true),
 		WithBindEnv(SettingsCacheKeyAuth, true),
+		WithBindEnv(SettingsCacheBodyPaths, ""),
 		WithBindEnv(SettingsCacheMode, nil),
 		WithBindEnv(SettingsCacheDir, filepath.Join(os.TempDir(), "go-c8y-cli-cache")),
 
@@ -1317,6 +1321,10 @@ func (c *Config) CacheKeyIncludeHost() bool {
 // CacheKeyIncludeAuth include authorization cache key generation
 func (c *Config) CacheKeyIncludeAuth() bool {
 	return c.viper.GetBool(SettingsCacheKeyAuth)
+}
+
+func (c *Config) CacheBodyKeys() []string {
+	return c.viper.GetStringSlice(SettingsCacheBodyPaths)
 }
 
 // SkipSSLVerify skip SSL verify

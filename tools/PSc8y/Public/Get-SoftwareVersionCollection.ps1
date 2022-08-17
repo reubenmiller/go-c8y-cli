@@ -22,11 +22,36 @@ Get a list of software package versions
     [Alias()]
     [OutputType([object])]
     Param(
+        # Additional query filter
+        [Parameter()]
+        [string]
+        $Query,
+
+        # String template to be used when applying the given query. Use %s to reference the query/pipeline input
+        [Parameter()]
+        [string]
+        $QueryTemplate,
+
+        # Order by. e.g. _id asc or name asc or creationTime.date desc
+        [Parameter()]
+        [string]
+        $OrderBy,
+
         # Software package id or name
         [Parameter(ValueFromPipeline=$true,
                    ValueFromPipelineByPropertyName=$true)]
         [object[]]
         $Software,
+
+        # Filter by version
+        [Parameter()]
+        [string]
+        $Version,
+
+        # Filter by url
+        [Parameter()]
+        [string]
+        $Url,
 
         # Include parent references
         [Parameter()]

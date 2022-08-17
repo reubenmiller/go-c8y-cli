@@ -2,7 +2,7 @@
 export ZSH=~/.oh-my-zsh
 export LANG=C.UTF-8
 export LC_ALL=C.UTF-8
-export PATH=.bin:$PATH
+export PATH=$PWD/.bin:$PATH
 
 ZSH_THEME="robbyrussell"
 

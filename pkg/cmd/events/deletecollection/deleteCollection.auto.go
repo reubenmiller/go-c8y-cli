@@ -101,10 +101,10 @@ func (n *DeleteCollectionCmd) RunE(cmd *cobra.Command, args []string) error {
 		c8yfetcher.WithDeviceByNameFirstMatch(client, args, "device", "source"),
 		flags.WithStringValue("type", "type"),
 		flags.WithStringValue("fragmentType", "fragmentType"),
-		flags.WithEncodedRelativeTimestamp("createdFrom", "createdFrom", ""),
-		flags.WithEncodedRelativeTimestamp("createdTo", "createdTo", ""),
-		flags.WithEncodedRelativeTimestamp("dateFrom", "dateFrom", ""),
-		flags.WithEncodedRelativeTimestamp("dateTo", "dateTo", ""),
+		flags.WithEncodedRelativeTimestamp("createdFrom", "createdFrom"),
+		flags.WithEncodedRelativeTimestamp("createdTo", "createdTo"),
+		flags.WithEncodedRelativeTimestamp("dateFrom", "dateFrom"),
+		flags.WithEncodedRelativeTimestamp("dateTo", "dateTo"),
 		flags.WithBoolValue("revert", "revert", ""),
 	)
 	if err != nil {

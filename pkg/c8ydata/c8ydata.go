@@ -64,9 +64,9 @@ type AddChildAddition struct {
 
 func (a *AddChildAddition) Run(v interface{}) (resp interface{}, err error) {
 	if value, ok := v.(*c8y.Response); ok {
-		if value.JSON != nil {
-			moID := value.JSON.Get("id").String()
-			binaryURL := value.JSON.Get(a.URLProperty).String()
+		if len(value.Body()) > 0 {
+			moID := value.JSON("id").String()
+			binaryURL := value.JSON(a.URLProperty).String()
 
 			if moID != "" && strings.Contains(binaryURL, "/inventory/binaries/") {
 				parts := strings.Split(binaryURL, "/")

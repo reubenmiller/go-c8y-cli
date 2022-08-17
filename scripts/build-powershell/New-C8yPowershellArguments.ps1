@@ -98,8 +98,10 @@
         "json_custom" { "object"; break }
         "microservice" { "object[]"; break }
         "microserviceinstance" { "string"; break }
+        "microservicename" { "object[]"; break }
         "set" { "object[]"; break }
         "source" { "object"; break }
+        "inventoryChildType" { "string"; break }
         "string" { "string"; break }
         "[]devicerequest" { "object[]"; break }
         "strings" { "string"; break }
@@ -107,6 +109,12 @@
         "tenantname" { "string"; break }
         "[]certificate" { "object[]"; break }
         "certificatefile" { "string"; break }
+
+        # stringStatic
+        "stringStatic" { $Ignore = $true; ""; break }
+
+        # queryExpression
+        "queryExpression" { $Ignore = $true; ""; break }
 
         # Complex lookup types. These should not be visible in powershell
         "softwareDetails" { $Ignore = $true; ""; break }

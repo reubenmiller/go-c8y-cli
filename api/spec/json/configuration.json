@@ -8,11 +8,10 @@
   "endpoints": [
     {
       "name": "getConfigurationCollection",
-      "skip": true,
       "method": "GET",
       "description": "Get configuration collection",
       "descriptionLong": "Get a collection of configuration (managedObjects) based on filter parameters",
-      "path": "inventory/managedObjects?query=$filter=(type eq 'c8y_ConfigurationDump') $orderby=name asc",
+      "path": "inventory/managedObjects",
       "accept": "application/vnd.com.nsn.cumulocity.managedObjectCollection+json",
       "collectionType": "application/vnd.com.nsn.cumulocity.managedObject+json",
       "collectionProperty": "managedObjects",
@@ -39,24 +38,65 @@
           }
         ]
       },
-      "pathParameters": [
+      "queryParameters": [
         {
-          "name": "name",
-          "type": "string",
-          "default": "**",
-          "description": "Configuration name filter"
-        },
-        {
-          "name": "description",
-          "type": "string",
-          "default": "**",
-          "description": "Configuration description filter"
-        },
-        {
-          "name": "deviceType",
-          "type": "string",
-          "default": "**",
-          "description": "Configuration device type filter"
+          "name": "query",
+          "description": "Query expression group",
+          "property": "query",
+          "type": "queryExpression",
+          "children": [
+            {
+              "name": "query",
+              "type": "string",
+              "description": "Additional query filter",
+              "format": "%s",
+              "pipeline": true,
+              "pipelineAliases": [
+                "c8y_DeviceQueryString"
+              ]
+            },
+            {
+              "name": "queryTemplate",
+              "type": "string",
+              "description": "String template to be used when applying the given query. Use %s to reference the query/pipeline input"
+            },
+            {
+              "name": "orderBy",
+              "type": "string",
+              "default": "name",
+              "description": "Order by. e.g. _id asc or name asc or creationTime.date desc"
+            },
+            {
+              "name": "configuration",
+              "type": "stringStatic",
+              "description": "",
+              "value": "(type eq 'c8y_ConfigurationDump')"
+            },
+            {
+              "name": "configurationType",
+              "type": "string",
+              "description": "Filter by configurationType",
+              "format": "(configurationType eq '%s')"
+            },
+            {
+              "name": "name",
+              "type": "string",
+              "description": "Filter by name",
+              "format": "(name eq '%s')"
+            },
+            {
+              "name": "deviceType",
+              "type": "string",
+              "description": "Filter by deviceType",
+              "format": "(c8y_Filter.type eq '%s')"
+            },
+            {
+              "name": "description",
+              "type": "string",
+              "description": "Filter by description",
+              "format": "(description eq '%s')"
+            }
+          ]
         }
       ]
     },
@@ -343,7 +383,7 @@
             "beforeEach": [
               "$Device = PSc8y\\New-TestDevice",
               "$ChildDevice = PSc8y\\New-TestDevice",
-              "PSc8y\\Add-ChildDeviceToDevice -Device $Device.id -NewChild $ChildDevice.id"
+              "PSc8y\\Add-ManagedObjectChild -ChildType device -Id $Device.id -Child $ChildDevice.id"
             ],
             "command": "Get-ManagedObject -Id $Device.id | Remove-Configuration -forceCascade:$false",
             "afterEach": [

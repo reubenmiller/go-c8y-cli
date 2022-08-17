@@ -104,8 +104,8 @@ func (n *UpdateCollectionCmd) RunE(cmd *cobra.Command, args []string) error {
 		flags.WithStringValue("status", "status"),
 		flags.WithStringValue("severity", "severity"),
 		flags.WithBoolValue("resolved", "resolved", ""),
-		flags.WithEncodedRelativeTimestamp("dateFrom", "dateFrom", ""),
-		flags.WithEncodedRelativeTimestamp("dateTo", "dateTo", ""),
+		flags.WithEncodedRelativeTimestamp("dateFrom", "dateFrom"),
+		flags.WithEncodedRelativeTimestamp("dateTo", "dateTo"),
 	)
 	if err != nil {
 		return cmderrors.NewUserError(err)
@@ -149,8 +149,8 @@ func (n *UpdateCollectionCmd) RunE(cmd *cobra.Command, args []string) error {
 		inputIterators,
 		flags.WithDataFlagValue(),
 		flags.WithStringValue("newStatus", "status"),
-		flags.WithRelativeTimestamp("createdFrom", "createdFrom", ""),
-		flags.WithRelativeTimestamp("createdTo", "createdTo", ""),
+		flags.WithRelativeTimestamp("createdFrom", "createdFrom"),
+		flags.WithRelativeTimestamp("createdTo", "createdTo"),
 		cmdutil.WithTemplateValue(cfg),
 		flags.WithTemplateVariablesValue(),
 		flags.WithRequiredProperties("status"),

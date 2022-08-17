@@ -73,6 +73,9 @@ if ($null -ne $Tag -or $null -ne $ExcludeTag) {
 
 . ./Tests/imports.ps1
 
+$ModulePath = (Get-Module PSc8y).Path
+Write-Host "Module path: $ModulePath"
+
 # Disable activity logging by default
 $Env:C8Y_SETTINGS_ACTIVITYLOG_ENABLED = "false"
 $Env:C8Y_SETTINGS_DEFAULTS_DRYFORMAT = "json"

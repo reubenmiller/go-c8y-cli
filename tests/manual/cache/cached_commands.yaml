@@ -1,3 +1,4 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/reubenmiller/commander/feat/handle-nested-files/schema.json
 tests:
   It does not use cache by default:
     config:
@@ -86,11 +87,12 @@ tests:
         - "Last-Modified:"
         - "Etag:"
 
-  It does not cache PUT or POST requests by default:
+  It can limit caching of specific methods:
     config:
       env:
         C8Y_SETTINGS_DEFAULTS_CACHE: true
         C8Y_SETTINGS_DEFAULTS_DEBUG: true
+        C8Y_SETTINGS_CACHE_METHODS: "GET"
         C8Y_SETTINGS_CACHE_PATH: /tmp/go-c8y-cli-cache-test-06
     command: |
       c8y cache delete
@@ -134,3 +136,17 @@ tests:
       contains:
         - "Last-Modified:"
         - "Etag:"
+
+  It does not cache response with a status code above or equal to 300:
+    config:
+      env:
+        C8Y_SETTINGS_CACHE_PATH: /tmp/go-c8y-cli-cache-test-08
+        C8Y_SETTINGS_DEFAULTS_VERBOSE: true
+        C8Y_SETTINGS_DEFAULTS_CACHETTL: 30s
+    command: |
+      c8y devices get --id 1 --cache
+      c8y devices get --id 1 --cache
+    exit-code: 4
+    stderr:
+      not-contains:
+        - "Using cached response"

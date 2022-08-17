@@ -114,16 +114,13 @@ Create a new managed object but add a custom accept header value
 
     Process {
 
-        if ($Method) {
-            $null = $c8yargs.Add($Method)
-        }
-
         if ($null -ne $QueryParameters) {
             $queryparams = New-Object System.Collections.ArrayList
             foreach ($key in $QueryParameters.Keys) {
                 $value = $QueryParameters[$key]
                 if ($value) {
-                    $null = $queryparams.Add("${key}=${value}")
+                    $null = $c8yargs.AddRange(@("--customQueryParam", "${key}=${value}"))
+                    # $null = $queryparams.Add("${key}=${value}")
                 }
             }
 
@@ -137,6 +134,10 @@ Create a new managed object but add a custom accept header value
                     $Uri = $Uri + "?" + $str
                 }
             }
+        }
+
+        if ($Method) {
+            $null = $c8yargs.Add($Method)
         }
 
         $null = $c8yargs.Add($Uri)

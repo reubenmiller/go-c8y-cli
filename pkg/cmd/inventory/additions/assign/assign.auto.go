@@ -34,7 +34,7 @@ func NewAssignCmd(f *cmdutil.Factory) *AssignCmd {
 		Short: "Assign child addition",
 		Long:  `Add an existing managed object as a child addition to another existing managed object`,
 		Example: heredoc.Doc(`
-$ c8y inventory additions assign --id 12345 --newChild 6789
+$ c8y inventory additions assign --id 12345 --child 6789
 Add a related managed object as a child to an existing managed object
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
@@ -46,7 +46,7 @@ Add a related managed object as a child to an existing managed object
 	cmd.SilenceUsage = true
 
 	cmd.Flags().StringSlice("id", []string{""}, "Managed object id where the child addition will be added to (required)")
-	cmd.Flags().String("newChild", "", "New managed object that will be added as a child addition (required) (accepts pipeline)")
+	cmd.Flags().String("child", "", "New managed object that will be added as a child addition (required) (accepts pipeline)")
 
 	completion.WithOptions(
 		cmd,
@@ -56,7 +56,7 @@ Add a related managed object as a child to an existing managed object
 		cmd,
 		flags.WithProcessingMode(),
 
-		flags.WithExtendedPipelineSupport("newChild", "managedObject.id", true, "id"),
+		flags.WithExtendedPipelineSupport("child", "managedObject.id", true, "deviceId", "source.id", "managedObject.id", "id"),
 		flags.WithCollectionProperty("managedObject"),
 	)
 
@@ -131,9 +131,9 @@ func (n *AssignCmd) RunE(cmd *cobra.Command, args []string) error {
 		cmd,
 		body,
 		inputIterators,
-		flags.WithOverrideValue("newChild", "managedObject.id"),
+		flags.WithOverrideValue("child", "managedObject.id"),
 		flags.WithDataFlagValue(),
-		flags.WithStringValue("newChild", "managedObject.id"),
+		flags.WithStringValue("child", "managedObject.id"),
 		cmdutil.WithTemplateValue(cfg),
 		flags.WithTemplateVariablesValue(),
 	)

@@ -31,9 +31,11 @@ func NewGetChildCmd(f *cmdutil.Factory) *GetChildCmd {
 		factory: f,
 	}
 	cmd := &cobra.Command{
-		Use:   "getChild",
-		Short: "Get child device reference",
-		Long:  `Get managed object child device reference`,
+		Use:    "getChild",
+		Short:  "Get child device reference",
+		Long:   `Get managed object child device reference`,
+		Hidden: true,
+
 		Example: heredoc.Doc(`
 $ c8y devices getChild --device 12345 --reference 12345
 Get an existing child device reference
@@ -59,6 +61,8 @@ Get an existing child device reference
 		cmd,
 
 		flags.WithExtendedPipelineSupport("device", "device", true, "deviceId", "source.id", "managedObject.id", "id"),
+
+		flags.WithDeprecationNotice("please use 'c8y devices children get --childType device' instead"),
 	)
 
 	// Required flags

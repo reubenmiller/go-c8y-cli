@@ -36,7 +36,7 @@ Describe -Name "Expand-Device" {
     }
 
     It "Expand device from Get-DeviceCollection" {
-        $Result = Get-DeviceCollection $Device.name | PSc8y\Expand-Device
+        $Result = Get-DeviceCollection -Query "_id eq '$($Device.id)'" | PSc8y\Expand-Device
         $Result.id | Should -BeExactly $Device.id
     }
 

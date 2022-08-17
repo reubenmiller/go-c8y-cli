@@ -4,7 +4,7 @@
     "version": "2.0.0",
     "tasks": [
         {
-            "label": "Build (incl. generate)",
+            "label": "Generate and Build",
             "type": "shell",
             "command": "task generate build-snapshot-single",
             "group": {
@@ -22,7 +22,7 @@
             "problemMatcher": []
         },
         {
-            "label": "Build-fast (w/o generate)",
+            "label": "Build",
             "type": "shell",
             "command": "task build-snapshot-single",
             "group": {

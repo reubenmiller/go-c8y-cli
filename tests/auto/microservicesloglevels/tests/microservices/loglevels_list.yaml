@@ -1,0 +1,8 @@
+tests:
+    microservices/loglevels_list_List log levels of microservice:
+        command: c8y microservices loglevels list --name my-microservice
+        exit-code: 0
+        stdout:
+            json:
+                method: GET
+                path: /service/my-microservice/loggers

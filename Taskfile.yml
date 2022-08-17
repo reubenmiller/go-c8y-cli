@@ -8,7 +8,7 @@ vars:
     sh: git describe | sed "s/^v\?\([0-9]\{1,\}\.[0-9]\{1,\}\.[0-9]\{1,\}\).*/\1/"
   VERSION: "{{base .TAG}}"
   OS_NAME: '{{ if eq OS "darwin" }}macOS{{ else }}{{OS}}{{ end }}'
-  ARCH_NAME: '{{ARCH}}'
+  ARCH_NAME: '{{ if eq ARCH "amd64" }}amd64_v1{{ else }}{{ARCH}}{{ end }}'
 
 env:
   C8Y_SETTINGS_CI: true
@@ -67,7 +67,7 @@ tasks:
   docs-powershell:
     desc: Update the powershell docs
     cmds:
-      - pwsh -File ./scripts/build-powershell/build-docs.ps1 -Recreate -OutputFolder "docs/go-c8y-cli/docs/cli/psc8y"
+      - env C8Y_BINARY=$(which c8y) pwsh -File ./scripts/build-powershell/build-docs.ps1 -Recreate -OutputFolder "docs/go-c8y-cli/docs/cli/psc8y"
   
   docs-c8y:
     desc: create c8y documentation
@@ -121,6 +121,7 @@ tasks:
       - ./scripts/generate-spec.sh
     sources:
       - api/spec/yaml/*.yaml
+      - ./scripts/generate-spec.sh
     generates:
       - api/spec/json/*.json
   
@@ -189,6 +190,7 @@ tasks:
     cmds:
       - goreleaser build --rm-dist --snapshot --single-target --id {{.OS_NAME}} {{.CLI_ARGS}}
       - rm -f .bin/c8y
+      - mkdir -p .bin
       - cp dist/{{.OS_NAME}}_{{OS}}_{{.ARCH_NAME}}/bin/c8y .bin/c8y
 
   generate:
@@ -252,18 +254,20 @@ tasks:
   test-powershell:
     desc: Run powershell tests
     cmds:
-      - pwsh -ExecutionPolicy bypass -NonInteractive -File tools/PSc8y/test.ps1
+      - env C8Y_BINARY=$(which c8y) pwsh -ExecutionPolicy bypass -NonInteractive -File tools/PSc8y/test.ps1
 
   install-test-dependencies:
     desc: Install test dependencies
     cmds:
       - go install github.com/reubenmiller/commander/v3/cmd/commander@v3.0.2
     status:
-      - command -v commander
+      - command -v commander && commander test --help
 
   test-cli:
     desc: Test cli tests
-    deps: [test-cli-auto, test-cli-manual]
+    cmds:
+      - task: test-cli-auto
+      - task: test-cli-manual
 
   test-cli-manual:
     desc: Run manual cli tests

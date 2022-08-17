@@ -18,7 +18,12 @@ Get firmware package version collection
 
 ```
 Get-FirmwareVersionCollection
+	[[-Query] <String>]
+	[[-QueryTemplate] <String>]
+	[[-OrderBy] <String>]
 	[-Firmware] <Object[]>
+	[[-Version] <String>]
+	[[-Url] <String>]
 	[-WithParents]
 	[-PageSize <Int32>]
 	[-WithTotalPages]
@@ -83,6 +88,54 @@ Get a list of firmware package versions
 
 ## PARAMETERS
 
+### -Query
+Additional query filter
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 1
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -QueryTemplate
+String template to be used when applying the given query.
+Use %s to reference the query/pipeline input
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 2
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -OrderBy
+Order by.
+e.g.
+_id asc or name asc or creationTime.date desc
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 3
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
 ### -Firmware
 Firmware package id or name (required)
 
@@ -92,9 +145,39 @@ Parameter Sets: (All)
 Aliases:
 
 Required: True
-Position: 1
+Position: 4
 Default value: None
 Accept pipeline input: True (ByPropertyName, ByValue)
+Accept wildcard characters: False
+```
+
+### -Version
+Filter by version
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 5
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -Url
+Filter by url
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 6
+Default value: None
+Accept pipeline input: False
 Accept wildcard characters: False
 ```
 

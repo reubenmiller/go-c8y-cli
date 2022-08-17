@@ -18,6 +18,9 @@ Get device profile collection
 
 ```
 Get-DeviceProfileCollection
+	[[-Query] <String>]
+	[[-QueryTemplate] <String>]
+	[[-OrderBy] <String>]
 	[[-Name] <Object[]>]
 	[-PageSize <Int32>]
 	[-WithTotalPages]
@@ -82,8 +85,56 @@ Get a list of device profiles
 
 ## PARAMETERS
 
+### -Query
+Additional query filter
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 1
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -QueryTemplate
+String template to be used when applying the given query.
+Use %s to reference the query/pipeline input
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 2
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -OrderBy
+Order by.
+e.g.
+_id asc or name asc or creationTime.date desc
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 3
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
 ### -Name
-DeviceProfile name filter
+Filter by name
 
 ```yaml
 Type: Object[]
@@ -91,7 +142,7 @@ Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: 1
+Position: 4
 Default value: None
 Accept pipeline input: True (ByPropertyName, ByValue)
 Accept wildcard characters: False

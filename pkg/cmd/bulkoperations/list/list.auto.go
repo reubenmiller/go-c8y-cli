@@ -98,8 +98,8 @@ func (n *ListCmd) RunE(cmd *cobra.Command, args []string) error {
 		inputIterators,
 		flags.WithCustomStringSlice(func() ([]string, error) { return cfg.GetQueryParameters(), nil }, "custom"),
 		flags.WithBoolValue("withDeleted", "withDeleted", ""),
-		flags.WithEncodedRelativeTimestamp("dateFrom", "dateFrom", ""),
-		flags.WithEncodedRelativeTimestamp("dateTo", "dateTo", ""),
+		flags.WithEncodedRelativeTimestamp("dateFrom", "dateFrom"),
+		flags.WithEncodedRelativeTimestamp("dateTo", "dateTo"),
 		flags.WithStringSliceValues("status", "generalStatus", ""),
 	)
 	if err != nil {

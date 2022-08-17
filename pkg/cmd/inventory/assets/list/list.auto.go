@@ -50,6 +50,9 @@ Get a list of the child devices using pipeline
 	cmd.SilenceUsage = true
 
 	cmd.Flags().StringSlice("id", []string{""}, "Managed object. (required) (accepts pipeline)")
+	cmd.Flags().String("query", "", "Additional query filter")
+	cmd.Flags().String("queryTemplate", "", "String template to be used when applying the given query. Use %s to reference the query/pipeline input")
+	cmd.Flags().String("orderBy", "", "Order by. e.g. _id asc or name asc or creationTime.date desc")
 	cmd.Flags().Bool("withChildren", false, "Determines if children with ID and name should be returned when fetching the managed object. Set it to false to improve query performance.")
 
 	completion.WithOptions(
@@ -92,6 +95,14 @@ func (n *ListCmd) RunE(cmd *cobra.Command, args []string) error {
 		query,
 		inputIterators,
 		flags.WithCustomStringSlice(func() ([]string, error) { return cfg.GetQueryParameters(), nil }, "custom"),
+		flags.WithBoolValue("withChildren", "withChildren", ""),
+
+		flags.WithCumulocityQuery(
+			[]flags.GetOption{
+				flags.WithStringValue("query", "query", "%s"),
+			},
+			"query",
+		),
 	)
 	if err != nil {
 		return cmderrors.NewUserError(err)
@@ -149,7 +160,6 @@ func (n *ListCmd) RunE(cmd *cobra.Command, args []string) error {
 		path,
 		inputIterators,
 		c8yfetcher.WithIDSlice(args, "id", "id"),
-		flags.WithBoolValue("withChildren", "withChildren", ""),
 	)
 	if err != nil {
 		return err

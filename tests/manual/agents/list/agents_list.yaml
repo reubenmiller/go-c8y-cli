@@ -27,7 +27,7 @@ tests:
     exit-code: 0
     stdout:
       exactly: |
-        /inventory/managedObjects?q=%24filter%3D%28has%28com_cumulocity_model_Agent%29%29+and+type+eq+%27type1%27+%24orderby%3Dname
+        /inventory/managedObjects?q=%24filter%3Dtype+eq+%27type1%27+and+%28has%28com_cumulocity_model_Agent%29%29+%24orderby%3Dname
 
   It filters agents by availability:
     command: |

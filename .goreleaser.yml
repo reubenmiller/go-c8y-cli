@@ -54,7 +54,7 @@ archives:
       - .go-c8y-cli/views
 
   - id: homebrew
-    builds: [macos]
+    builds: [macOS]
     <<: *archive_defaults
     wrap_in_directory: "true"
     replacements:
@@ -85,7 +85,7 @@ archives:
       - .go-c8y-cli/views
   
   - id: plainBinaries
-    builds: [macos, linux, windows]
+    builds: [macOS, linux, windows]
     # Don't include the binary in the filename so it is easier to download the latest
     <<: &archive_defaults
       name_template: "{{ .ProjectName }}_{{ .Os }}_{{ .Arch }}{{ if .Arm }}v{{ .Arm }}{{ end }}"

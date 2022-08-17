@@ -30,9 +30,11 @@ func NewAssignChildCmd(f *cmdutil.Factory) *AssignChildCmd {
 		factory: f,
 	}
 	cmd := &cobra.Command{
-		Use:   "assignChild",
-		Short: "Assign child device",
-		Long:  `Create a child device reference`,
+		Use:    "assignChild",
+		Short:  "Assign child device",
+		Long:   `Create a child device reference`,
+		Hidden: true,
+
 		Example: heredoc.Doc(`
 $ c8y devices assignChild --device 12345 --newChild 44235
 Assign a device as a child device to an existing device
@@ -60,6 +62,7 @@ Assign a device as a child device to an existing device
 
 		flags.WithExtendedPipelineSupport("newChild", "managedObject.id", true, "deviceId", "source.id", "managedObject.id", "id"),
 		flags.WithCollectionProperty("managedObject"),
+		flags.WithDeprecationNotice("please use 'c8y devices children assign --childType device' instead"),
 	)
 
 	// Required flags

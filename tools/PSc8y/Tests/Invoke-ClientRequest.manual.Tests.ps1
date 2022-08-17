@@ -72,7 +72,8 @@ Describe -Name "Invoke-ClientRequest" {
 
     It "return the raw response when a non-json accept header is used" {
         $testMeasurement = New-TestDevice | New-Measurement -Template "test.measurement.jsonnet"
-        $Response = Invoke-ClientRequest -Uri "/measurement/measurements" -Method "get" -Accept "text/csv"
+        $dateFrom = c8y template execute --template "_.Now('-6h')"
+        $Response = Invoke-ClientRequest -Uri "/measurement/measurements" -QueryParameters @{dateFrom = $dateFrom} -Method "get" -Accept "text/csv"
         $LASTEXITCODE | Should -Be 0
         $Response | Should -Not -BeNullOrEmpty
         Remove-Device $testMeasurement.source.id

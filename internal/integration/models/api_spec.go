@@ -34,7 +34,13 @@ type EndPoint struct {
 func (p *EndPoint) GetAllParameters() []Parameter {
 	parameters := make([]Parameter, 0)
 	if len(p.QueryParameters) > 0 {
-		parameters = append(parameters, p.QueryParameters...)
+		for _, param := range p.QueryParameters {
+			if len(param.Children) > 0 {
+				parameters = append(parameters, param.Children...)
+			} else {
+				parameters = append(parameters, param)
+			}
+		}
 	}
 	if len(p.PathParameters) > 0 {
 		parameters = append(parameters, p.PathParameters...)
@@ -44,6 +50,20 @@ func (p *EndPoint) GetAllParameters() []Parameter {
 	}
 	if len(p.Body) > 0 {
 		parameters = append(parameters, p.Body...)
+	}
+	return parameters
+}
+
+func (p *EndPoint) GetQueryParameters() []Parameter {
+	parameters := make([]Parameter, 0)
+	if len(p.QueryParameters) > 0 {
+		for _, param := range p.QueryParameters {
+			if len(param.Children) > 0 {
+				parameters = append(parameters, param.Children...)
+			} else {
+				parameters = append(parameters, param)
+			}
+		}
 	}
 	return parameters
 }
@@ -73,18 +93,20 @@ type BodyContent struct {
 }
 
 type Parameter struct {
-	Name            string   `yaml:"name,omitempty"`
-	Type            string   `yaml:"type,omitempty"`
-	Value           string   `yaml:"value,omitempty"`
-	Property        string   `yaml:"property,omitempty"`
-	Pipeline        *bool    `yaml:"pipeline,omitempty"`
-	PipelineAliases []string `yaml:"pipelineAliases,omitempty"`
-	Required        *bool    `yaml:"required,omitempty"`
-	Description     string   `yaml:"description,omitempty"`
-	Default         string   `yaml:"default,omitempty"`
-	Position        *int     `yaml:"position,omitempty"`
-	ValidationSet   []string `yaml:"validationSet,omitempty"`
-	Skip            *bool    `yaml:"skip,omitempty"`
+	Name            string      `yaml:"name,omitempty"`
+	Type            string      `yaml:"type,omitempty"`
+	Value           string      `yaml:"value,omitempty"`
+	Format          string      `yaml:"format,omitempty"`
+	Property        string      `yaml:"property,omitempty"`
+	Pipeline        *bool       `yaml:"pipeline,omitempty"`
+	PipelineAliases []string    `yaml:"pipelineAliases,omitempty"`
+	Required        *bool       `yaml:"required,omitempty"`
+	Description     string      `yaml:"description,omitempty"`
+	Default         string      `yaml:"default,omitempty"`
+	Position        *int        `yaml:"position,omitempty"`
+	ValidationSet   []string    `yaml:"validationSet,omitempty"`
+	Skip            *bool       `yaml:"skip,omitempty"`
+	Children        []Parameter `yaml:"children,omitempty"`
 }
 
 func (p *Parameter) GetTargetProperty() string {

@@ -3,7 +3,7 @@ category: Devices
 external help file: PSc8y-help.xml
 id: Get-DeviceGroupCollection
 Module Name: PSc8y
-online version:
+online version: https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/devicegroups_list
 schema: 2.0.0
 slug: /docs/cli/psc8y/Devices/get-devicegroupcollection
 title: Get-DeviceGroupCollection
@@ -12,19 +12,23 @@ title: Get-DeviceGroupCollection
 
 
 ## SYNOPSIS
-Get a collection of device groups
+Get device group collection
 
 ## SYNTAX
 
 ```
 Get-DeviceGroupCollection
+	[[-QueryTemplate] <String>]
+	[[-OrderBy] <String>]
+	[[-Query] <Object[]>]
 	[[-Name] <String>]
 	[[-Type] <String>]
 	[[-FragmentType] <String>]
 	[[-Owner] <String>]
-	[[-Query] <String>]
 	[-ExcludeRootGroup]
+	[[-Group] <Object[]>]
 	[-WithParents]
+	[-WithChildren]
 	[-PageSize <Int32>]
 	[-WithTotalPages]
 	[-CurrentPage <Int32>]
@@ -75,30 +79,22 @@ Get-DeviceGroupCollection
 ```
 
 ## DESCRIPTION
-Get a collection of device groups.
-Device groups are used to arrange devices together.
+Get a collection of device groups based on filter parameters
 
 ## EXAMPLES
 
 ### EXAMPLE 1
 ```
-Get-DeviceGroupCollection -Name *Room*
+Get-DeviceGroupCollection -Name "parent*"
 ```
 
-Get all device groups with "Room" in their name
-
-### EXAMPLE 2
-```
-Get-DeviceGroupCollection -Query "creationTime.date gt '2020-01-01T00:00:00Z'"
-```
-
-Get a list of devices groups which have been created more recently than 2020-01-01
+Get a collection of device groups with names that start with 'parent'
 
 ## PARAMETERS
 
-### -Name
-Device group name.
-Wildcards accepted
+### -QueryTemplate
+String template to be used when applying the given query.
+Use %s to reference the query/pipeline input
 
 ```yaml
 Type: String
@@ -112,8 +108,10 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -Type
-Device group type.
+### -OrderBy
+Order by.
+e.g.
+_id asc or name asc or creationTime.date desc
 
 ```yaml
 Type: String
@@ -127,23 +125,23 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -FragmentType
-Device group fragment type.
+### -Query
+Additional query filter
 
 ```yaml
-Type: String
+Type: Object[]
 Parameter Sets: (All)
 Aliases:
 
 Required: False
 Position: 3
 Default value: None
-Accept pipeline input: False
+Accept pipeline input: True (ByPropertyName, ByValue)
 Accept wildcard characters: False
 ```
 
-### -Owner
-Device group owner.
+### -Name
+Filter by name
 
 ```yaml
 Type: String
@@ -157,8 +155,8 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -Query
-Query.
+### -Type
+Filter by type
 
 ```yaml
 Type: String
@@ -172,8 +170,38 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
+### -FragmentType
+Filter by fragment type
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 6
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -Owner
+Filter by owner
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 7
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
 ### -ExcludeRootGroup
-Exclude root groups from the list
+Filter by group inclusion
 
 ```yaml
 Type: SwitchParameter
@@ -187,8 +215,38 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
+### -Group
+Filter by group inclusion
+
+```yaml
+Type: Object[]
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 8
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
 ### -WithParents
 Include a flat list of all parents and grandparents of the given object
+
+```yaml
+Type: SwitchParameter
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: False
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -WithChildren
+Include names of child assets (only use where necessary as it is slow for large groups)
 
 ```yaml
 Type: SwitchParameter

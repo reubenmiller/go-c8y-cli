@@ -23,6 +23,12 @@
 
     $FixedValue = $Parameters.value
 
+    $FormatValue = ""
+
+    if ($Parameters.format) {
+        $FormatValue = ", `"{0}`"" -f $Parameters.format
+    }
+
     $Definitions = @{
         # file (used in multipart/form-data uploads). It writes to the formData object instead of the body
         "file" = "flags.WithFormDataFileAndInfoWithTemplateSupport(cmdutil.NewTemplateResolver(cfg), `"${prop}`", `"data`")...,"
@@ -43,10 +49,10 @@
         "optional_fragment" = "flags.WithOptionalFragment(`"${prop}`", `"${queryParam}`", `"$FixedValue`"),"
 
         # relative datetime
-        "datetime" = "flags.WithRelativeTimestamp(`"${prop}`", `"${queryParam}`", `"$FixedValue`"),"
+        "datetime" = "flags.WithRelativeTimestamp(`"${prop}`", `"${queryParam}`"$FormatValue),"
 
         # relative date
-        "date" = "flags.WithRelativeDate(false, `"${prop}`", `"${queryParam}`", `"$FixedValue`"),"
+        "date" = "flags.WithRelativeDate(false, `"${prop}`", `"${queryParam}`"$FormatValue),"
 
         # string array/slice
         "[]string" = "flags.WithStringSliceValues(`"${prop}`", `"${queryParam}`", `"$FixedValue`"),"
@@ -54,69 +60,78 @@
         # string array/slice as a comma separated string
         "[]stringcsv" = "flags.WithStringSliceCSV(`"${prop}`", `"${queryParam}`", `"$FixedValue`"),"
     
+        # inventoryChildType
+        "inventoryChildType" = "flags.WithInventoryChildType(`"${prop}`", `"${queryParam}`"$FormatValue),"
+
         # string
-        "string" = "flags.WithStringValue(`"${prop}`", `"${queryParam}`"),"
+        "string" = "flags.WithStringValue(`"${prop}`", `"${queryParam}`"$FormatValue),"
+
+        # stringStatic
+        "stringStatic" = "flags.WithStaticStringValue(`"${prop}`", `"$FixedValue`"),"
 
         # source (special value as powershell need to treat this field as an object)
-        "source" = "flags.WithStringValue(`"${prop}`", `"${queryParam}`"),"
+        "source" = "flags.WithStringValue(`"${prop}`", `"${queryParam}`"$FormatValue),"
 
         # integer
-        "integer" = "flags.WithIntValue(`"${prop}`", `"${queryParam}`"),"
+        "integer" = "flags.WithIntValue(`"${prop}`", `"${queryParam}`"$FormatValue),"
 
         # float
-        "float" = "flags.WithFloatValue(`"${prop}`", `"${queryParam}`"),"
+        "float" = "flags.WithFloatValue(`"${prop}`", `"${queryParam}`"$FormatValue),"
 
         # json_custom: Only supported for use with the body
-        "json_custom" = "flags.WithDataValue(`"${prop}`", `"${queryParam}`"),"
+        "json_custom" = "flags.WithDataValue(`"${prop}`", `"${queryParam}`"$FormatValue),"
 
         # binaryUploadURL: uploads a binary and returns the URL 
-        "binaryUploadURL" = "flags.WithBinaryUploadURL(client, `"${prop}`", `"${queryParam}`"),"
+        "binaryUploadURL" = "flags.WithBinaryUploadURL(client, `"${prop}`", `"${queryParam}`"$FormatValue),"
 
         # json - don't do anything because it should be manually set
         "json" = ""
 
         # tenant
-        "tenant" = "flags.WithStringDefaultValue(client.TenantName, `"${prop}`", `"${queryParam}`"),"
+        "tenant" = "flags.WithStringDefaultValue(client.TenantName, `"${prop}`", `"${queryParam}`"$FormatValue),"
 
         # tenantname (optional)
-        "tenantname" = "flags.WithStringValue(`"${prop}`", `"${queryParam}`"),"
+        "tenantname" = "flags.WithStringValue(`"${prop}`", `"${queryParam}`"$FormatValue),"
 
         # application
-        "application" = "c8yfetcher.WithApplicationByNameFirstMatch(client, args, `"${prop}`", `"${queryParam}`"),"
+        "application" = "c8yfetcher.WithApplicationByNameFirstMatch(client, args, `"${prop}`", `"${queryParam}`"$FormatValue),"
 
         # hostedapplication (web app)
-        "hostedapplication" = "c8yfetcher.WithHostedApplicationByNameFirstMatch(client, args, `"${prop}`", `"${queryParam}`"),"
+        "hostedapplication" = "c8yfetcher.WithHostedApplicationByNameFirstMatch(client, args, `"${prop}`", `"${queryParam}`"$FormatValue),"
 
         # applicationname
-        "applicationname" = "flags.WithStringValue(`"${prop}`", `"${queryParam}`"),"
+        "applicationname" = "flags.WithStringValue(`"${prop}`", `"${queryParam}`"$FormatValue),"
 
         # microservice
-        "microservice" = "c8yfetcher.WithMicroserviceByNameFirstMatch(client, args, `"${prop}`", `"${queryParam}`"),"
+        "microservice" = "c8yfetcher.WithMicroserviceByNameFirstMatch(client, args, `"${prop}`", `"${queryParam}`"$FormatValue),"
 
         # microservice instance
-        "microserviceinstance" = "flags.WithStringValue(`"${prop}`", `"${queryParam}`"),"
+        "microserviceinstance" = "flags.WithStringValue(`"${prop}`", `"${queryParam}`"$FormatValue),"
+
+        # microservice name
+        "microservicename" = "flags.WithStringValue(`"${prop}`", `"${queryParam}`"$FormatValue),"
 
         # devicerequest array
-        "[]devicerequest" = "c8yfetcher.WithIDSlice(args, `"${prop}`", `"${queryParam}`"),"
+        "[]devicerequest" = "c8yfetcher.WithIDSlice(args, `"${prop}`", `"${queryParam}`"$FormatValue),"
 
         # id array
-        "[]id" = "c8yfetcher.WithIDSlice(args, `"${prop}`", `"${queryParam}`"),"
+        "[]id" = "c8yfetcher.WithIDSlice(args, `"${prop}`", `"${queryParam}`"$FormatValue),"
 
         # software array
-        "[]software" = "c8yfetcher.WithSoftwareByNameFirstMatch(client, args, `"${prop}`", `"${queryParam}`"),"
+        "[]software" = "c8yfetcher.WithSoftwareByNameFirstMatch(client, args, `"${prop}`", `"${queryParam}`"$FormatValue),"
 
         "softwareDetails" = @(
-            "c8yfetcher.WithSoftwareVersionData(client, `"software`", `"version`", `"url`", args, `"`", `"${queryParam}`"),"
+            "c8yfetcher.WithSoftwareVersionData(client, `"software`", `"version`", `"url`", args, `"`", `"${queryParam}`"$FormatValue),"
         ) -join "`n"
 
         # software name
-        "softwareName" = "flags.WithStringValue(`"${prop}`", `"${queryParam}`"),"
+        "softwareName" = "flags.WithStringValue(`"${prop}`", `"${queryParam}`"$FormatValue),"
         
         # software version array
-        "[]softwareversion" = "c8yfetcher.WithSoftwareVersionByNameFirstMatch(client, args, `"${prop}`", `"${queryParam}`"),"
+        "[]softwareversion" = "c8yfetcher.WithSoftwareVersionByNameFirstMatch(client, args, `"${prop}`", `"${queryParam}`"$FormatValue),"
 
         # software version name
-        "softwareversionName" = "flags.WithStringValue(`"${prop}`", `"${queryParam}`"),"
+        "softwareversionName" = "flags.WithStringValue(`"${prop}`", `"${queryParam}`"$FormatValue),"
 
         # Certificate file
         "certificatefile" = "flags.WithCertificateFile(`"${prop}`", `"${queryParam}`"),"
@@ -125,16 +140,16 @@
         "[]certificate" = "c8yfetcher.WithCertificateByNameFirstMatch(client, args, `"${prop}`", `"${queryParam}`"),"
 
         # firmware array
-        "[]firmware" = "c8yfetcher.WithFirmwareByNameFirstMatch(client, args, `"${prop}`", `"${queryParam}`"),"
+        "[]firmware" = "c8yfetcher.WithFirmwareByNameFirstMatch(client, args, `"${prop}`", `"${queryParam}`"$FormatValue),"
 
         # firmware name
-        "firmwareName" = "flags.WithStringValue(`"${prop}`", `"${queryParam}`"),"
+        "firmwareName" = "flags.WithStringValue(`"${prop}`", `"${queryParam}`"$FormatValue),"
 
         # firmware version array
-        "[]firmwareversion" = "c8yfetcher.WithFirmwareVersionByNameFirstMatch(client, args, `"${prop}`", `"${queryParam}`"),"
+        "[]firmwareversion" = "c8yfetcher.WithFirmwareVersionByNameFirstMatch(client, args, `"${prop}`", `"${queryParam}`"$FormatValue),"
 
         # firmware version name
-        "firmwareversionName" = "flags.WithStringValue(`"${prop}`", `"${queryParam}`"),"
+        "firmwareversionName" = "flags.WithStringValue(`"${prop}`", `"${queryParam}`"$FormatValue),"
 
         "firmwareDetails" = @(
             "c8yfetcher.WithFirmwareVersionData(client, `"firmware`", `"version`", `"url`", args, `"`", `"${queryParam}`"),"
@@ -153,33 +168,33 @@
         "[]deviceprofile" = "c8yfetcher.WithDeviceProfileByNameFirstMatch(client, args, `"${prop}`", `"${queryParam}`"),"
         
         # device array
-        "[]device" = "c8yfetcher.WithDeviceByNameFirstMatch(client, args, `"${prop}`", `"${queryParam}`"),"
+        "[]device" = "c8yfetcher.WithDeviceByNameFirstMatch(client, args, `"${prop}`", `"${queryParam}`"$FormatValue),"
 
         # agent array
-        "[]agent" = "c8yfetcher.WithAgentByNameFirstMatch(client, args, `"${prop}`", `"${queryParam}`"),"
+        "[]agent" = "c8yfetcher.WithAgentByNameFirstMatch(client, args, `"${prop}`", `"${queryParam}`"$FormatValue),"
 
 
         # devicegroup array
-        "[]devicegroup" = "c8yfetcher.WithDeviceGroupByNameFirstMatch(client, args, `"${prop}`", `"${queryParam}`"),"
+        "[]devicegroup" = "c8yfetcher.WithDeviceGroupByNameFirstMatch(client, args, `"${prop}`", `"${queryParam}`"$FormatValue),"
         
         # smartgroup array
-        "[]smartgroup" = "c8yfetcher.WithSmartGroupByNameFirstMatch(client, args, `"${prop}`", `"${queryParam}`"),"
+        "[]smartgroup" = "c8yfetcher.WithSmartGroupByNameFirstMatch(client, args, `"${prop}`", `"${queryParam}`"$FormatValue),"
         
         # user array
-        "[]user" = "c8yfetcher.WithUserByNameFirstMatch(client, args, `"${prop}`", `"${queryParam}`"),"
+        "[]user" = "c8yfetcher.WithUserByNameFirstMatch(client, args, `"${prop}`", `"${queryParam}`"$FormatValue),"
 
         # user self url array
-        "[]userself" = "c8yfetcher.WithUserSelfByNameFirstMatch(client, args, `"${prop}`", `"${queryParam}`"),"
+        "[]userself" = "c8yfetcher.WithUserSelfByNameFirstMatch(client, args, `"${prop}`", `"${queryParam}`"$FormatValue),"
         
         
         # role self url array
-        "[]roleself" = "c8yfetcher.WithRoleSelfByNameFirstMatch(client, args, `"${prop}`", `"${queryParam}`"),"
+        "[]roleself" = "c8yfetcher.WithRoleSelfByNameFirstMatch(client, args, `"${prop}`", `"${queryParam}`"$FormatValue),"
         
         # role array
-        "[]role" = "c8yfetcher.WithRoleByNameFirstMatch(client, args, `"${prop}`", `"${queryParam}`"),"
+        "[]role" = "c8yfetcher.WithRoleByNameFirstMatch(client, args, `"${prop}`", `"${queryParam}`"$FormatValue),"
         
         # user group array
-        "[]usergroup" = "c8yfetcher.WithUserGroupByNameFirstMatch(client, args, `"${prop}`", `"${queryParam}`"),"
+        "[]usergroup" = "c8yfetcher.WithUserGroupByNameFirstMatch(client, args, `"${prop}`", `"${queryParam}`"$FormatValue),"
     }
 
 
@@ -193,7 +208,7 @@
 
     # Special type: encoded relative datetime when used as a query parameter
     if ($MatchingType -eq "datetime" -and $SetterType -eq "query") {
-        "flags.WithEncodedRelativeTimestamp(`"${prop}`", `"${queryParam}`", `"$FixedValue`"),"
+        "flags.WithEncodedRelativeTimestamp(`"${prop}`", `"${queryParam}`"$FormatValue),"
     } else {
         $Definitions[$MatchingType]
     }
