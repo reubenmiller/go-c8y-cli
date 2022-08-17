@@ -11,7 +11,7 @@
       "method": "GET",
       "description": "Get configuration collection",
       "descriptionLong": "Get a collection of configuration (managedObjects) based on filter parameters",
-      "path": "inventory/managedObjects?query=$filter=(type eq 'c8y_ConfigurationDump') $orderby=name asc",
+      "path": "inventory/managedObjects",
       "accept": "application/vnd.com.nsn.cumulocity.managedObjectCollection+json",
       "collectionType": "application/vnd.com.nsn.cumulocity.managedObject+json",
       "collectionProperty": "managedObjects",
@@ -49,7 +49,7 @@
               "name": "query",
               "type": "string",
               "description": "Additional query filter",
-              "format": "(%s)",
+              "format": "%s",
               "pipeline": true,
               "pipelineAliases": [
                 "c8y_DeviceQueryString"
@@ -63,6 +63,7 @@
             {
               "name": "orderBy",
               "type": "string",
+              "default": "name",
               "description": "Order by. e.g. _id asc or name asc or creationTime.date desc"
             },
             {

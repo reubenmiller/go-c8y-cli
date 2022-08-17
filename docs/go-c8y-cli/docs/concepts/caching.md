@@ -13,7 +13,7 @@ The responses from large requests can be cached so that when the same request is
 
 The caching works be intercepting every HTTP request and writing the HTTP response to file using a unique hash based on the URL, path, authorization header and body (if set).
 
-The commands can be cached via control via global parameters `cache`, `noCache` and `cacheTTL`
+The commands can be cached via control via global parameters `cache`, `noCache`, `cacheTTL` and `cacheBodyPaths`.
 
 ```sh
 c8y devices list --type "c8y_Linux" --cache
@@ -23,17 +23,18 @@ c8y devices list --type "c8y_Linux" --cache
 # => A cached response is used as the same command is being used within the cache TTL
 
 echo agent01 | c8y util repeat 2 | c8y devices get --cache --cacheTTL 60s -v
-# => Control time-to-live for single commands 
+# => Control time-to-live for single commands
 ```
 
 
 ## Configuration
 
-Caching is disabled by default, and only set for `GET` https methods. However these defaults can be changed to suite your
+Caching is disabled by default. The cache default settings can be changed to suite your requirements:
 
 * Enabled/Disabled
 * Time-to-Live (TTL)
 * Cache key generation (include auth/host etc.)
+* Cache body paths (limit json body caching detection to specific fields)
 
 
 ### defaults.cache: boolean
@@ -47,6 +48,12 @@ When the setting is activated, then all requests which match the `cache.methods`
 ### defaults.cacheTTL: string
 
 Cache time-to-live (TTL) settings to control the maximum age that a cached response. If the cached response is older than the TTL settings, then the cached item will be ignored.
+
+### defaults.cacheBodyPaths: string
+
+Limit cache detection of json based bodies to specific keys. Dot notation can be used to specify nested properties. Multiple values are accepted by providing a csv list, e.g. `name,type,c8y_Hardware.serialNumber`.
+
+Often this is used if you are using randomized data generation (e.g. from templates) so conventional caching will not work. Instead you can limit which body properties are used to determine if the request/body has already been sent to the server, the name works well if you are already using unique names.
 
 ### cache.keyauth: boolean
 
@@ -62,13 +69,13 @@ This can be useful when setting up a mock system where you want to fake server r
 
 ### cache.methods: string
 
-Space separated list of HTTP methods which should be cached. By default only `GET` is configured.
+Space separated list of HTTP methods which should be cached. By default `GET PUT POST DELETE` is configured.
 
 <CodeExample>
 
 ```bash
-# Enable more http methods to be cached
-c8y settings update cache.methods "GET PUT POST"
+# Limit caching to only GET commands
+c8y settings update cache.methods "GET"
 ```
 
 </CodeExample>
@@ -320,9 +327,6 @@ target_device=$2
 # Enable caching by default for all commands
 export C8Y_SETTINGS_DEFAULTS_CACHE="true"
 
-# Enable caching of POST commands as well as GET
-export C8Y_SETTINGS_CACHE_METHODS="GET POST"
-
 # Use a really large TTL, as we want to prevent creating it for a long time
 export C8Y_SETTINGS_DEFAULTS_CACHETTL="1000h"
 
@@ -336,4 +340,23 @@ c8y measurements list \
 | c8y measurements create \
     --device "$target_device" \
     --template input.value \
+```
+
+### Using cache to prevent creating duplicate devices with randomized data
+
+Similar to the previous example, the create (POST) command is used to deduplicate when creating a large set of devices.
+
+A lot of things can happen when creating devices; for example you could have connection problems, or just manually cancel the command mid-way through and want to re-run the script without re-creating the already processed devices.
+
+To highlight the usefulness of this feature, the example uses a template to give the device a randomly generated serial number. Without `cacheBodyPaths` the response would never be cached as the `c8y_Hardware.serialNumber` is randomly generated for each request. However in this example we are treating the `name` property as a unique device name, so we limit the scope of the cache detection to only use the `name` property in the json body (along with the other normal cached properties: headers, host, method, path etc.).
+
+```sh title="./create_devices.sh"
+#!/bin/bash
+#
+# Create a large amount of devices (for testing)
+# If a device with the same .name property was already created on the current machine then the cached response will be returned
+c8y util repeat 2000 --format "test_%s%s" \
+| c8y devices create \
+  --template "{c8y_Hardware: {serialNumber: _.Hex(32)}}" \
+  --cache --cacheTTL 1000h --cacheBodyPaths name
 ```

@@ -335,7 +335,7 @@
             "skipTest": true
           },
           {
-            "description": "Find managed objects which include myname in their names. query=$filter=name eq '*myname*'",
+            "description": "Find managed objects which include myname in their names.",
             "command": "echo \"myname\" | c8y inventory find --queryTemplate \"name eq '*%s*'\"",
             "skipTest": true
           },
@@ -357,7 +357,7 @@
               "name": "query",
               "type": "string",
               "description": "ManagedObject query",
-              "format": "(%s)",
+              "format": "%s",
               "required": false,
               "pipeline": true,
               "pipelineAliases": [

@@ -50,7 +50,7 @@ Get a list of software packages starting with "python3"
 
 	cmd.Flags().String("query", "", "Additional query filter (accepts pipeline)")
 	cmd.Flags().String("queryTemplate", "", "String template to be used when applying the given query. Use %s to reference the query/pipeline input")
-	cmd.Flags().String("orderBy", "", "Order by. e.g. _id asc or name asc or creationTime.date desc")
+	cmd.Flags().String("orderBy", "name", "Order by. e.g. _id asc or name asc or creationTime.date desc")
 	cmd.Flags().String("name", "", "Filter by name")
 	cmd.Flags().String("deviceType", "", "Filter by deviceType")
 	cmd.Flags().String("description", "", "Filter by description")
@@ -98,7 +98,7 @@ func (n *ListCmd) RunE(cmd *cobra.Command, args []string) error {
 
 		flags.WithCumulocityQuery(
 			[]flags.GetOption{
-				flags.WithStringValue("query", "query", "(%s)"),
+				flags.WithStringValue("query", "query", "%s"),
 				flags.WithStaticStringValue("software", "(type eq 'c8y_Software')"),
 				flags.WithStringValue("name", "name", "(name eq '%s')"),
 				flags.WithStringValue("deviceType", "deviceType", "(c8y_Filter.type eq '%s')"),

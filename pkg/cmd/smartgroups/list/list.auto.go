@@ -53,7 +53,7 @@ Get a list of smart groups with their names starting with 'myText', then get the
 
 	cmd.Flags().String("query", "", "Additional query filter (accepts pipeline)")
 	cmd.Flags().String("queryTemplate", "", "String template to be used when applying the given query. Use %s to reference the query/pipeline input")
-	cmd.Flags().String("orderBy", "", "Order by. e.g. _id asc or name asc or creationTime.date desc")
+	cmd.Flags().String("orderBy", "name", "Order by. e.g. _id asc or name asc or creationTime.date desc")
 	cmd.Flags().String("name", "", "Filter by name")
 	cmd.Flags().String("deviceQuery", "", "Filter by device query")
 	cmd.Flags().String("fragmentType", "", "Filter by fragment type")
@@ -106,7 +106,7 @@ func (n *ListCmd) RunE(cmd *cobra.Command, args []string) error {
 
 		flags.WithCumulocityQuery(
 			[]flags.GetOption{
-				flags.WithStringValue("query", "query", "(%s)"),
+				flags.WithStringValue("query", "query", "%s"),
 				flags.WithStaticStringValue("smartgroup", "(type eq 'c8y_DynamicGroup')"),
 				flags.WithStringValue("name", "name", "(name eq '%s')"),
 				flags.WithStringValue("deviceQuery", "deviceQuery", "(c8y_DeviceQueryString eq '%s')"),

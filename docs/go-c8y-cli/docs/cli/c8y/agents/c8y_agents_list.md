@@ -29,7 +29,7 @@ Get agents which where registered in the last day
 
 $ c8y agents list --name "my example agent" --select type --output csv | c8y agents list --queryTemplate "type eq '%s'"
 Find an agent by name, then find other agents which the same type
-
+        
 ```
 
 ### Options
@@ -39,7 +39,7 @@ Find an agent by name, then find other agents which the same type
       --creationTimeDateFrom string   Filter creationTime.date from a specific date
       --creationTimeDateTo string     Filter creationTime.date to a specific date
       --fragmentType string           Filter by fragment type
-      --group string                  Filter by group inclusion
+      --group strings                 Filter by group inclusion
   -h, --help                          help for list
       --lastMessageDateFrom string    Filter c8y_Availability.lastMessage from a specific date
       --lastMessageDateTo string      Filter c8y_Availability.lastMessage to a specific date
@@ -58,6 +58,7 @@ Find an agent by name, then find other agents which the same type
       --abortOnErrors int          Abort batch when reaching specified number of errors (default 10)
       --allowEmptyPipe             Don't fail when piped input is empty (stdin)
       --cache                      Enable cached responses
+      --cacheBodyPaths strings     Cache should limit hashing of selected paths in the json body. Empty indicates all values
       --cacheTTL string            Cache time-to-live (TTL) as a duration, i.e. 60s, 2m (default "60s")
   -c, --compact                    Compact instead of pretty-printed output when using json output. Pretty print is the default if output is the terminal
       --confirm                    Prompt for confirmation

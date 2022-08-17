@@ -22,8 +22,8 @@ $ c8y smartgroups list --name "myText*"
 Get a list of smart groups with the names starting with 'myText'
 
 $ c8y smartgroups list --name "myText*" | c8y devices list
-Get a list of smart groups with their names starting with "myText", then get the devices from the smart groups
-     
+Get a list of smart groups with their names starting with 'myText', then get the devices from the smart groups
+        
 ```
 
 ### Options
@@ -48,6 +48,7 @@ Get a list of smart groups with their names starting with "myText", then get the
       --abortOnErrors int          Abort batch when reaching specified number of errors (default 10)
       --allowEmptyPipe             Don't fail when piped input is empty (stdin)
       --cache                      Enable cached responses
+      --cacheBodyPaths strings     Cache should limit hashing of selected paths in the json body. Empty indicates all values
       --cacheTTL string            Cache time-to-live (TTL) as a duration, i.e. 60s, 2m (default "60s")
   -c, --compact                    Compact instead of pretty-printed output when using json output. Pretty print is the default if output is the terminal
       --confirm                    Prompt for confirmation

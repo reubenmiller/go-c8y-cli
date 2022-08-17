@@ -3,7 +3,7 @@ category: User Groups
 external help file: PSc8y-help.xml
 id: Get-SmartGroupCollection
 Module Name: PSc8y
-online version:
+online version: https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/smartgroups_list
 schema: 2.0.0
 slug: /docs/cli/psc8y/User Groups/get-smartgroupcollection
 title: Get-SmartGroupCollection
@@ -18,13 +18,13 @@ List smart group collection
 
 ```
 Get-SmartGroupCollection
-	[[-Name] <String>]
-	[[-FragmentType] <String>]
-	[[-Owner] <String>]
-	[[-DeviceQuery] <String>]
 	[[-Query] <Object[]>]
 	[[-QueryTemplate] <String>]
 	[[-OrderBy] <String>]
+	[[-Name] <String>]
+	[[-DeviceQuery] <String>]
+	[[-FragmentType] <String>]
+	[[-Owner] <String>]
 	[-OnlyInvisible]
 	[-OnlyVisible]
 	[-WithParents]
@@ -98,68 +98,8 @@ Get a list of smart groups with the names starting with 'myText'
 
 ## PARAMETERS
 
-### -Name
-Filter by name
-
-```yaml
-Type: String
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: 1
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
-### -FragmentType
-Filter by fragment type
-
-```yaml
-Type: String
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: 2
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
-### -Owner
-Filter by owner
-
-```yaml
-Type: String
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: 3
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
-### -DeviceQuery
-Filter by device query
-
-```yaml
-Type: String
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: 4
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
 ### -Query
-Filter by owner
+Additional query filter
 
 ```yaml
 Type: Object[]
@@ -167,7 +107,7 @@ Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: 5
+Position: 1
 Default value: None
 Accept pipeline input: True (ByPropertyName, ByValue)
 Accept wildcard characters: False
@@ -183,7 +123,7 @@ Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: 6
+Position: 2
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
@@ -193,6 +133,66 @@ Accept wildcard characters: False
 Order by.
 e.g.
 _id asc or name asc or creationTime.date desc
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 3
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -Name
+Filter by name
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 4
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -DeviceQuery
+Filter by device query
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 5
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -FragmentType
+Filter by fragment type
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 6
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -Owner
+Filter by owner
 
 ```yaml
 Type: String

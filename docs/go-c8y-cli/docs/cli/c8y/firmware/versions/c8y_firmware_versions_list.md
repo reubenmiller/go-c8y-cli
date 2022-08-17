@@ -29,9 +29,14 @@ Get all versions of a firmware using an existing version object
 ### Options
 
 ```
-      --firmware strings   Firmware package id or name (required) (accepts pipeline)
-  -h, --help               help for list
-      --withParents        Include parent references (default true)
+      --firmware strings       Firmware package id or name (required) (accepts pipeline)
+  -h, --help                   help for list
+      --orderBy string         Order by. e.g. _id asc or name asc or creationTime.date desc (default "creationTime.date desc")
+      --query string           Additional query filter
+      --queryTemplate string   String template to be used when applying the given query. Use %s to reference the query/pipeline input
+      --url string             Filter by url
+      --version string         Filter by version
+      --withParents            Include parent references (default true)
 ```
 
 ### Options inherited from parent commands
@@ -40,6 +45,7 @@ Get all versions of a firmware using an existing version object
       --abortOnErrors int          Abort batch when reaching specified number of errors (default 10)
       --allowEmptyPipe             Don't fail when piped input is empty (stdin)
       --cache                      Enable cached responses
+      --cacheBodyPaths strings     Cache should limit hashing of selected paths in the json body. Empty indicates all values
       --cacheTTL string            Cache time-to-live (TTL) as a duration, i.e. 60s, 2m (default "60s")
   -c, --compact                    Compact instead of pretty-printed output when using json output. Pretty print is the default if output is the terminal
       --confirm                    Prompt for confirmation

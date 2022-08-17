@@ -39,6 +39,7 @@ func NewFlagWithPipeIterator(cmd *cobra.Command, pipeOpt *PipelineOptions, suppo
 			Validator:  nil,
 			AllowEmpty: !pipeOpt.Required,
 			Formatter:  pipeOpt.Formatter,
+			Format:     pipeOpt.Format,
 		}
 		lineFilter := FilterJsonLines
 		if pipeOpt.InputFilter != nil {
@@ -81,7 +82,7 @@ func NewFlagWithPipeIterator(cmd *cobra.Command, pipeOpt *PipelineOptions, suppo
 			}
 
 			// return array of results
-			return iterator.NewSliceIterator(items), nil
+			return iterator.NewSliceIterator(items, pipeOpt.Format), nil
 		}
 	}
 	if pipeOpt.Required {

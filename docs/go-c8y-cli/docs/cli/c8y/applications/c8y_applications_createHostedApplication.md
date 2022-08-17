@@ -8,6 +8,9 @@ Create hosted application
 
 Create a new hosted web application or update the binary of an existing hosted application
 
+If the zip file or folder contains a 'cumulocity.json' manifest file, then the key will be automatically read from it.
+
+
 ```
 c8y applications createHostedApplication [flags]
 ```
@@ -34,7 +37,7 @@ Create/update hosted web application but don't activate it, so the current versi
   -d, --data string           static data to be applied to body. accepts json or shorthand json, i.e. --data 'value1=1,my.nested.value=100'
       --file string           File or Folder of the web application. It should contain a index.html file in the root folder/ or zip file
   -h, --help                  help for createHostedApplication
-      --key string            Shared secret of application. Defaults to the name
+      --key string            Shared secret of application. Defaults to the value inside the cumulocity.json file (if present)
       --name string           Name of application
       --resourcesUrl string   URL to application base directory hosted on an external server. Required when application type is HOSTED (default "/")
       --skipActivation        Don't activate to the application after it has been created and uploaded
@@ -49,6 +52,7 @@ Create/update hosted web application but don't activate it, so the current versi
       --abortOnErrors int          Abort batch when reaching specified number of errors (default 10)
       --allowEmptyPipe             Don't fail when piped input is empty (stdin)
       --cache                      Enable cached responses
+      --cacheBodyPaths strings     Cache should limit hashing of selected paths in the json body. Empty indicates all values
       --cacheTTL string            Cache time-to-live (TTL) as a duration, i.e. 60s, 2m (default "60s")
   -c, --compact                    Compact instead of pretty-printed output when using json output. Pretty print is the default if output is the terminal
       --confirm                    Prompt for confirmation

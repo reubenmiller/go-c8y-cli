@@ -47,7 +47,7 @@ Get a list of configuration files
 
 	cmd.Flags().String("query", "", "Additional query filter (accepts pipeline)")
 	cmd.Flags().String("queryTemplate", "", "String template to be used when applying the given query. Use %s to reference the query/pipeline input")
-	cmd.Flags().String("orderBy", "", "Order by. e.g. _id asc or name asc or creationTime.date desc")
+	cmd.Flags().String("orderBy", "name", "Order by. e.g. _id asc or name asc or creationTime.date desc")
 	cmd.Flags().String("configurationType", "", "Filter by configurationType")
 	cmd.Flags().String("name", "", "Filter by name")
 	cmd.Flags().String("deviceType", "", "Filter by deviceType")
@@ -96,7 +96,7 @@ func (n *ListCmd) RunE(cmd *cobra.Command, args []string) error {
 
 		flags.WithCumulocityQuery(
 			[]flags.GetOption{
-				flags.WithStringValue("query", "query", "(%s)"),
+				flags.WithStringValue("query", "query", "%s"),
 				flags.WithStaticStringValue("configuration", "(type eq 'c8y_ConfigurationDump')"),
 				flags.WithStringValue("configurationType", "configurationType", "(configurationType eq '%s')"),
 				flags.WithStringValue("name", "name", "(name eq '%s')"),
@@ -156,7 +156,7 @@ func (n *ListCmd) RunE(cmd *cobra.Command, args []string) error {
 	}
 
 	// path parameters
-	path := flags.NewStringTemplate("inventory/managedObjects?query=$filter=(type%20eq%20'c8y_ConfigurationDump')%20$orderby=name%20asc")
+	path := flags.NewStringTemplate("inventory/managedObjects")
 	err = flags.WithPathParameters(
 		cmd,
 		path,

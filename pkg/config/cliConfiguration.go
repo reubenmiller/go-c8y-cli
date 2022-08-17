@@ -406,7 +406,7 @@ func (c *Config) bindSettings() {
 
 		WithBindEnv(SettingsLoggerHideSensitive, false),
 
-		WithBindEnv(SettingsCacheMethods, "GET PUT POST"),
+		WithBindEnv(SettingsCacheMethods, "GET PUT POST DELETE"),
 		WithBindEnv(SettingsCacheKeyHost, true),
 		WithBindEnv(SettingsCacheKeyAuth, true),
 		WithBindEnv(SettingsCacheBodyPaths, ""),

@@ -27,6 +27,21 @@ Get a list of firmware patches where the dependency version starts with '1.'
     [Alias()]
     [OutputType([object])]
     Param(
+        # Additional query filter
+        [Parameter()]
+        [string]
+        $Query,
+
+        # String template to be used when applying the given query. Use %s to reference the query/pipeline input
+        [Parameter()]
+        [string]
+        $QueryTemplate,
+
+        # Order by. e.g. _id asc or name asc or creationTime.date desc
+        [Parameter()]
+        [string]
+        $OrderBy,
+
         # Firmware package id or name (required)
         [Parameter(Mandatory = $true,
                    ValueFromPipeline=$true,
@@ -38,6 +53,16 @@ Get a list of firmware patches where the dependency version starts with '1.'
         [Parameter()]
         [string]
         $Dependency,
+
+        # Patch version
+        [Parameter()]
+        [string]
+        $Version,
+
+        # Filter by url
+        [Parameter()]
+        [string]
+        $Url,
 
         # Include parent references
         [Parameter()]

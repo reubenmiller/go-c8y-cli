@@ -67,7 +67,7 @@ tasks:
   docs-powershell:
     desc: Update the powershell docs
     cmds:
-      - pwsh -File ./scripts/build-powershell/build-docs.ps1 -Recreate -OutputFolder "docs/go-c8y-cli/docs/cli/psc8y"
+      - env C8Y_BINARY=$(which c8y) pwsh -File ./scripts/build-powershell/build-docs.ps1 -Recreate -OutputFolder "docs/go-c8y-cli/docs/cli/psc8y"
   
   docs-c8y:
     desc: create c8y documentation

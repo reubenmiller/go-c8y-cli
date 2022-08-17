@@ -358,7 +358,7 @@
               "name": "query",
               "type": "string",
               "description": "Additional query filter",
-              "format": "(%s)",
+              "format": "%s",
               "pipeline": true,
               "pipelineAliases": [
                 "c8y_DeviceQueryString"
@@ -372,6 +372,7 @@
             {
               "name": "orderBy",
               "type": "string",
+              "default": "name",
               "description": "Order by. e.g. _id asc or name asc or creationTime.date desc"
             },
             {

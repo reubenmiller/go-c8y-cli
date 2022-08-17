@@ -11,7 +11,7 @@ endpoints:
     method: GET
     description: Get device profile collection
     descriptionLong: Get a collection of device profiles (managedObjects) based on filter parameters
-    path: inventory/managedObjects?query=$filter=((type eq 'c8y_Profile') and (name eq '{name}')) $orderby=name asc
+    path: inventory/managedObjects
     accept: application/vnd.com.nsn.cumulocity.managedObjectCollection+json
     collectionType: application/vnd.com.nsn.cumulocity.managedObject+json
     collectionProperty: managedObjects
@@ -29,16 +29,40 @@ endpoints:
           assertStdOut:
             json:
               query: r/type eq 'c8y_Profile'
+    
+    queryParameters:
+      - name: query
+        description: Query expression group
+        property: query
+        type: queryExpression
+        children:
+          - name: query
+            type: string
+            description: Additional query filter
+            format: "%s"
+          
+          - name: queryTemplate
+            type: string
+            description: String template to be used when applying the given query. Use %s to reference the query/pipeline input
+          
+          - name: orderBy
+            type: string
+            description: Order by. e.g. _id asc or name asc or creationTime.date desc
+            default: creationTime.date desc,creationTime desc
 
-    pathParameters:
-      - name: name
-        type: string
-        default: '**'
-        pipeline: true
-        required: false
-        description: DeviceProfile name filter
-        pipelineAliases:
-          - "name"
+          - name: deviceProfileType
+            type: stringStatic
+            description: ""
+            value: "type eq 'c8y_Profile'"
+
+          - name: name
+            type: string
+            description: Filter by name
+            pipeline: true
+            format: (name eq '%s')
+            pipelineAliases:
+              - "c8y_Software.name"
+              - "name"
 
   - name: newDeviceProfile
     method: POST

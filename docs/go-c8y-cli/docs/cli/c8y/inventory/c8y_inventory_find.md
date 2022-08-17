@@ -6,7 +6,7 @@ Find managed object collection
 
 ### Synopsis
 
-Get a collection of managedObjects based on Cumulocity query language
+Get a collection of managedObjects based on the Cumulocity query language
 
 ```
 c8y inventory find [flags]
@@ -18,23 +18,33 @@ c8y inventory find [flags]
 $ c8y inventory find --query "name eq 'roomUpperFloor_*'"
 Get a list of managed objects
 
-$ echo "myname" | c8y inventory find --queryTemplate 'name eq '*%s*' --onlyDevices
-Find devices which include myname in their names. query=$filter=name eq '*myname*'
+$ echo "myname" | c8y inventory find --queryTemplate "name eq '*%s*'"
+Find managed objects which include myname in their names.
 
 $ echo "name eq 'name'" | c8y inventory find --queryTemplate 'not(%s)'
 Invert a given query received via piped input (stdin) by using a template
-
+        
 ```
 
 ### Options
 
 ```
-  -h, --help                   help for find
-      --onlyDevices            Only include devices in the query
-      --orderBy string         Order the results by the given parameter. i.e. 'id asc' or 'name desc'
-      --query string           ManagedObject query. (required) (accepts pipeline)
-      --queryTemplate string   String template to be used when applying the given query. Use %s to reference the query/pipeline input
-      --withParents            include a flat list of all parents and grandparents of the given object
+      --agents                        Only include agents
+      --availability string           Filter by c8y_Availability.status
+      --creationTimeDateFrom string   Filter creationTime.date from a specific date
+      --creationTimeDateTo string     Filter creationTime.date to a specific date
+      --fragmentType string           Filter by fragment type
+      --group strings                 Filter by group inclusion
+  -h, --help                          help for find
+      --lastMessageDateFrom string    Filter c8y_Availability.lastMessage from a specific date
+      --lastMessageDateTo string      Filter c8y_Availability.lastMessage to a specific date
+      --name string                   Filter by name
+      --orderBy string                Order by. e.g. _id asc or name asc or creationTime.date desc
+      --owner string                  Filter by owner
+      --query string                  ManagedObject query (accepts pipeline)
+      --queryTemplate string          String template to be used when applying the given query. Use %s to reference the query/pipeline input
+      --type string                   Filter by type
+      --withParents                   include a flat list of all parents and grandparents of the given object
 ```
 
 ### Options inherited from parent commands
@@ -43,6 +53,7 @@ Invert a given query received via piped input (stdin) by using a template
       --abortOnErrors int          Abort batch when reaching specified number of errors (default 10)
       --allowEmptyPipe             Don't fail when piped input is empty (stdin)
       --cache                      Enable cached responses
+      --cacheBodyPaths strings     Cache should limit hashing of selected paths in the json body. Empty indicates all values
       --cacheTTL string            Cache time-to-live (TTL) as a duration, i.e. 60s, 2m (default "60s")
   -c, --compact                    Compact instead of pretty-printed output when using json output. Pretty print is the default if output is the terminal
       --confirm                    Prompt for confirmation
