@@ -65,7 +65,7 @@ Add multiple groups to a group
 
 		flags.WithExtendedPipelineSupport("newChildGroup", "managedObject.id", true, "id"),
 		flags.WithCollectionProperty("managedObject"),
-		flags.WithDeprecationNotice("please use 'c8y devicegroups children unassign' instead"),
+		flags.WithDeprecationNotice("please use 'c8y devicegroups children unassign --childType asset' instead"),
 	)
 
 	// Required flags

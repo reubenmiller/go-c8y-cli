@@ -446,7 +446,7 @@ endpoints:
   # Deprecated commands. TODO: Remove in >=2.20.0
   - name: newManagedObjectChildDevice
     hidden: true
-    deprecated: "please use 'c8y devices children assign' instead"
+    deprecated: "please use 'c8y devices children assign --childType device' instead"
     deprecatedAt: "2022-08-03"
     method: POST
     path: inventory/managedObjects/{device}/childDevices
@@ -485,7 +485,7 @@ endpoints:
 
   - name: deleteManagedObjectChildDeviceReference
     hidden: true
-    deprecated: "please use 'c8y devices children unassign' instead"
+    deprecated: "please use 'c8y devices children unassign --childType device' instead"
     deprecatedAt: "2022-08-03"
     description: Delete child device reference
     descriptionLong: Delete child device reference
@@ -526,7 +526,7 @@ endpoints:
 
   - name: getManagedObjectChildDeviceCollection
     hidden: true
-    deprecated: "please use 'c8y devices children list' instead"
+    deprecated: "please use 'c8y devices children list --childType device' instead"
     deprecatedAt: "2022-08-03"
     method: GET
     description: Get child device collection
@@ -578,7 +578,7 @@ endpoints:
 
   - name: getManagedObjectChildDeviceReference
     hidden: true
-    deprecated: "please use 'c8y devices children get' instead"
+    deprecated: "please use 'c8y devices children get --childType device' instead"
     deprecatedAt: "2022-08-03"
     description: Get child device reference
     descriptionLong: Get managed object child device reference
@@ -618,7 +618,7 @@ endpoints:
 
   - name: listChildAssetCollection
     hidden: true
-    deprecated: "please use 'c8y devices assets list' instead"
+    deprecated: "please use 'c8y devices children list --childType asset' instead"
     deprecatedAt: "2022-08-03"
     method: GET
     description: Get child asset collection

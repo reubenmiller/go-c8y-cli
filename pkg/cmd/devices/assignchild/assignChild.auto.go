@@ -62,7 +62,7 @@ Assign a device as a child device to an existing device
 
 		flags.WithExtendedPipelineSupport("newChild", "managedObject.id", true, "deviceId", "source.id", "managedObject.id", "id"),
 		flags.WithCollectionProperty("managedObject"),
-		flags.WithDeprecationNotice("please use 'c8y devices children assign' instead"),
+		flags.WithDeprecationNotice("please use 'c8y devices children assign --childType device' instead"),
 	)
 
 	// Required flags

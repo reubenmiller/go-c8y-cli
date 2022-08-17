@@ -62,7 +62,7 @@ Unassign a child device from its parent device
 
 		flags.WithExtendedPipelineSupport("childDevice", "childDevice", true, "deviceId", "source.id", "managedObject.id", "id"),
 
-		flags.WithDeprecationNotice("please use 'c8y devices children unassign' instead"),
+		flags.WithDeprecationNotice("please use 'c8y devices children unassign --childType device' instead"),
 	)
 
 	// Required flags

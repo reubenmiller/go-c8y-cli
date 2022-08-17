@@ -65,7 +65,7 @@ Add multiple devices to a group
 
 		flags.WithExtendedPipelineSupport("newChildDevice", "managedObject.id", true, "deviceId", "source.id", "managedObject.id", "id"),
 		flags.WithCollectionProperty("managedObject"),
-		flags.WithDeprecationNotice("please use 'c8y devicegroups devices assign' instead"),
+		flags.WithDeprecationNotice("please use 'c8y devicegroups children assign --childType asset' instead"),
 	)
 
 	// Required flags

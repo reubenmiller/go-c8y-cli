@@ -61,7 +61,7 @@ Get a list of the child devices of an existing device
 
 		flags.WithExtendedPipelineSupport("device", "device", true, "deviceId", "source.id", "managedObject.id", "id"),
 		flags.WithCollectionProperty("references.#.managedObject"),
-		flags.WithDeprecationNotice("please use 'c8y devices children list' instead"),
+		flags.WithDeprecationNotice("please use 'c8y devices children list --childType device' instead"),
 	)
 
 	// Required flags
