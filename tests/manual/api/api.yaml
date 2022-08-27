@@ -185,3 +185,8 @@ tests:
       stdout:
         not-contains:
           - is not a valid date
+
+  It creates an inventory via custom command:
+      command: |
+        c8y api POST /inventory/managedObjects --data name=test --select id,name --dry=false | c8y inventory delete
+      exit-code: 0

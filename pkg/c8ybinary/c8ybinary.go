@@ -87,6 +87,10 @@ func AddProgress(cmd *cobra.Command, fileFlag string, progress *mpb.Progress) fu
 			return r, nil
 		}
 
+		if filename == "" {
+			return r, nil
+		}
+
 		var size int64
 		fileInfo, err := os.Stat(filename)
 		if err != nil {
