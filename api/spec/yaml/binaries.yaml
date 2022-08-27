@@ -215,10 +215,10 @@ endpoints:
     bodyTemplate:
         type: none
     bodyContent:
-        type: formdata
+        type: binary
     body:
       - name: file
-        type: file
+        type: fileContents
         required: true
         description: File to be uploaded as a binary
 

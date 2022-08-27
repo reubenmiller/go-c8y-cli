@@ -278,11 +278,13 @@
             }
         }
 
+        $HasProgress = $false
         foreach ($iArg in (Remove-SkippedParameters $Specification.body)) {
 
-            if ($Specification.method -match "POST|PUT" -and $PrepareRequest.Length -eq 0) {
-                if ( $iArg.type -eq "file" ) {
-                    $PrepareRequest = "PrepareRequest: c8ybinary.AddProgress(cmd, `"$($iArg.name)`", cfg.GetProgressBar(n.factory.IOStreams.ErrOut, n.factory.IOStreams.IsStderrTTY())),"
+            if ($Specification.method -match "POST|PUT" -and -Not $HasProgress) {
+                if ($iArg.type -in @("file", "fileContents", "attachment")) {
+                    $HasProgress = $true
+                    $null = $PrepareRequest.Append("PrepareRequest: c8ybinary.AddProgress(cmd, `"$($iArg.name)`", cfg.GetProgressBar(n.factory.IOStreams.ErrOut, n.factory.IOStreams.IsStderrTTY())),")
                 }
             }
 
@@ -721,12 +723,12 @@ Remove skipped parameters. These are parameter which should not be used when gen
         [object[]] $CommandParameters
     )
 
-    $CommandParameters | Where-Object {
+    [array]($CommandParameters | Where-Object {
         if ($_.skip -eq $true) {
             Write-Verbose ("Skipping parameter [{0}] as it is marked as skip" -f $_.name)
         }
         $_.skip -ne $true
-    }
+    })
 }
 
 Function Get-C8yGoArgs {

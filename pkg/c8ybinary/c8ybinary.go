@@ -106,7 +106,6 @@ func AddProgress(cmd *cobra.Command, fileFlag string, progress *mpb.Progress) fu
 
 		proxyReader := bar.ProxyReader(r.Body)
 		r.Body = proxyReader
-		defer proxyReader.Close()
 
 		return r, nil
 	}
