@@ -17,6 +17,8 @@ import (
 	"github.com/vbauerster/mpb/v6/decor"
 )
 
+const BarFiller = "━━━  "
+
 func CreateBinaryWithProgress(ctx context.Context, client *c8y.Client, path string, filename string, properties interface{}, progress *mpb.Progress) (*c8y.Response, error) {
 	file, err := os.Open(filename)
 	if err != nil {
@@ -52,7 +54,8 @@ func CreateBinaryWithProgress(ctx context.Context, client *c8y.Client, path stri
 			}
 			basename := filepath.Base(filename)
 			size = fileInfo.Size()
-			bar := progress.AddBar(size,
+			bar := progress.Add(size,
+				mpb.NewBarFiller(BarFiller),
 				mpb.PrependDecorators(
 					decor.Name("elapsed", decor.WC{W: len("elapsed") + 1, C: decor.DidentRight}),
 					decor.Elapsed(decor.ET_STYLE_MMSS, decor.WC{W: 8, C: decor.DidentRight}),
@@ -89,9 +92,11 @@ func AddProgress(cmd *cobra.Command, fileFlag string, progress *mpb.Progress) fu
 		if err != nil {
 			return r, err
 		}
+
 		basename := filepath.Base(filename)
 		size = fileInfo.Size()
-		bar := progress.AddBar(size,
+		bar := progress.Add(size,
+			mpb.NewBarFiller(BarFiller),
 			mpb.PrependDecorators(
 				decor.Name("elapsed", decor.WC{W: len("elapsed") + 1, C: decor.DidentRight}),
 				decor.Elapsed(decor.ET_STYLE_MMSS, decor.WC{W: 8, C: decor.DidentRight}),
@@ -99,7 +104,6 @@ func AddProgress(cmd *cobra.Command, fileFlag string, progress *mpb.Progress) fu
 			),
 			mpb.AppendDecorators(
 				decor.Percentage(decor.WC{W: 6, C: decor.DidentRight}),
-				// decor.Percentage(decor.WCSyncSpace),
 				decor.CountersKibiByte("% .2f / % .2f"),
 			),
 		)
@@ -123,7 +127,8 @@ func CreateProxyReader(progress *mpb.Progress) func(response *http.Response) io.
 			}
 		}
 
-		bar := progress.AddBar(size,
+		bar := progress.Add(size,
+			mpb.NewBarFiller(BarFiller),
 			mpb.PrependDecorators(
 				decor.Name("elapsed", decor.WC{W: len("elapsed") + 1, C: decor.DidentRight}),
 				decor.Elapsed(decor.ET_STYLE_MMSS, decor.WC{W: 8, C: decor.DidentRight}),
