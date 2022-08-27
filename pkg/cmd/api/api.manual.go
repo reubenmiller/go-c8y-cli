@@ -297,7 +297,6 @@ func (n *CmdAPI) RunE(cmd *cobra.Command, args []string) error {
 		if err != nil {
 			return cmderrors.NewUserError(err)
 		}
-
 		req.FormData = formData
 	}
 
