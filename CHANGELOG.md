@@ -17,11 +17,6 @@ None :)
 
 ## TODO (next branch)
 
-* Upload (POST) progress bar
-    * Create a common progress bar helper which can be reused. .Wait should only be called once on it.
-
-* Support configuration install command to send an operation to a device with a reference configuration by name
-
 * Download commands?:
 
     Should configuration with external URLs be downloaded? Can it be trusted? There is currently a workaround

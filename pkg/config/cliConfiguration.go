@@ -1032,9 +1032,7 @@ func (c *Config) ShowProgress() bool {
 }
 
 func (c *Config) GetProgressBar(w io.Writer, enable bool) (progress *mpb.Progress) {
-	// if c.ShowProgress() && enable {
-	// if enable {
-	if true {
+	if enable {
 		progress = mpb.New(
 			mpb.WithOutput(w),
 			mpb.WithRefreshRate(180*time.Millisecond),
