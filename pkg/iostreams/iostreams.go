@@ -232,7 +232,7 @@ func System(colorDisabled bool, colorForced bool) *IOStreams {
 		is256enabled: Is256ColorSupported(),
 	}
 
-	if stdoutIsTTY && stderrIsTTY {
+	if stderrIsTTY {
 		io.progressIndicatorEnabled = true
 	}
 

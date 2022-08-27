@@ -21,6 +21,7 @@ import (
 
 	"github.com/fatih/color"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/activitylogger"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/c8ybinary"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/config"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/console"
@@ -93,6 +94,16 @@ func (r *RequestHandler) ProcessRequestAndResponse(requests []c8y.RequestOptions
 		c8y.GetContextCommonOptionsKey(),
 		c8y.CommonOptions{
 			DryRun: req.DryRun,
+			OnResponse: func(response *http.Response) io.Reader {
+				// Add progress bar for binary downloads
+				prog := r.IO.ProgressIndicator()
+				if prog != nil && response.Header.Get("Content-Disposition") != "" {
+					if !strings.Contains(response.Header.Get("Content-Type"), "json") && response.ContentLength > 0 {
+						return c8ybinary.CreateProxyReader(prog)(response)
+					}
+				}
+				return response.Body
+			},
 		})
 	defer cancel()
 	start := time.Now()
@@ -963,7 +974,6 @@ func (r *RequestHandler) saveResponseToFile(resp *c8y.Response, filename string,
 	// Writer the body to file
 	r.Logger.Printf("header: %v", resp.Header())
 	fmt.Fprintf(out, "%s", resp.Body())
-	// _, err = io.Copy(out, resp.Body())
 
 	if err != nil {
 		return "", fmt.Errorf("failed to copy file contents to file. %s", err)

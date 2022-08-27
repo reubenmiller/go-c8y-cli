@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"mime"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -72,8 +73,6 @@ func CreateBinaryWithProgress(ctx context.Context, client *c8y.Client, path stri
 	})
 }
 
-// 		PrepareRequest: c8ybinary.AddProgress(cmd, "file", cfg.GetProgressBar(n.factory.IOStreams.ErrOut, n.factory.IOStreams.IsStderrTTY())),
-
 func AddProgress(cmd *cobra.Command, fileFlag string, progress *mpb.Progress) func(r *http.Request) (*http.Request, error) {
 	return func(r *http.Request) (*http.Request, error) {
 		if r.Body == nil || progress == nil {
@@ -110,5 +109,35 @@ func AddProgress(cmd *cobra.Command, fileFlag string, progress *mpb.Progress) fu
 		defer proxyReader.Close()
 
 		return r, nil
+	}
+}
+
+func CreateProxyReader(progress *mpb.Progress) func(response *http.Response) io.Reader {
+	return func(r *http.Response) io.Reader {
+		size := int64(r.ContentLength)
+		basename := "download"
+
+		_, params, err := mime.ParseMediaType(r.Header.Get("Content-Disposition"))
+		if err == nil {
+			if filename, ok := params["filename"]; ok {
+				basename = filename
+			}
+		}
+
+		bar := progress.AddBar(size,
+			mpb.PrependDecorators(
+				decor.Name("elapsed", decor.WC{W: len("elapsed") + 1, C: decor.DidentRight}),
+				decor.Elapsed(decor.ET_STYLE_MMSS, decor.WC{W: 8, C: decor.DidentRight}),
+				decor.Name(basename, decor.WC{W: len(basename) + 1, C: decor.DidentRight}),
+			),
+			mpb.AppendDecorators(
+				decor.Percentage(decor.WC{W: 6, C: decor.DidentRight}),
+				decor.CountersKibiByte("% .2f / % .2f"),
+			),
+		)
+
+		proxyReader := bar.ProxyReader(r.Body)
+		r.Body = proxyReader
+		return proxyReader
 	}
 }
