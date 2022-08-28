@@ -437,8 +437,8 @@ github.com/prometheus/procfs v0.0.8/go.mod h1:7Qr8sr6344vo1JqZ6HhLceV9o3AJ1Ff+Gx
 github.com/prometheus/procfs v0.1.3/go.mod h1:lV6e/gmhEcM9IjHGsFOCxxuZ+z1YqCvr4OA4YeYWdaU=
 github.com/prometheus/procfs v0.6.0/go.mod h1:cz+aTbrPOrUb4q7XlbU9ygM+/jj0fzG6c1xBZuNvfVA=
 github.com/prometheus/procfs v0.7.3/go.mod h1:cz+aTbrPOrUb4q7XlbU9ygM+/jj0fzG6c1xBZuNvfVA=
-github.com/reubenmiller/go-c8y v0.10.0-rc.8 h1:BTB1me3gUv6mjl9tqMxASlljsAXlAeyIP0OC56iMFi0=
-github.com/reubenmiller/go-c8y v0.10.0-rc.8/go.mod h1:aSU0AZdT/IWCn87wMveejGvwQE3FbnAkh5LEs/78xj8=
+github.com/reubenmiller/go-c8y v0.10.0-rc.13 h1:Wz7LPtwDroQldoSa7QEjPkHpFlEnyCFEnrg+R7yYYJ4=
+github.com/reubenmiller/go-c8y v0.10.0-rc.13/go.mod h1:aSU0AZdT/IWCn87wMveejGvwQE3FbnAkh5LEs/78xj8=
 github.com/rivo/uniseg v0.1.0/go.mod h1:J6wj4VEh+S6ZtnVlnTBMWIodfgj8LQOQFoIToxlJtxc=
 github.com/rivo/uniseg v0.2.0 h1:S1pD9weZBuJdFmowNwbpi7BJ8TNftyUImj/0WQi72jY=
 github.com/rivo/uniseg v0.2.0/go.mod h1:J6wj4VEh+S6ZtnVlnTBMWIodfgj8LQOQFoIToxlJtxc=
