@@ -17,7 +17,9 @@ import (
 	"github.com/vbauerster/mpb/v6/decor"
 )
 
-const BarFiller = "━━━  "
+const BarFiller = "[━━ ]"
+
+// const BarFiller = "[██-]"
 
 func CreateBinaryWithProgress(ctx context.Context, client *c8y.Client, path string, filename string, properties interface{}, progress *mpb.Progress) (*c8y.Response, error) {
 	file, err := os.Open(filename)
@@ -67,7 +69,7 @@ func CreateBinaryWithProgress(ctx context.Context, client *c8y.Client, path stri
 				),
 			)
 
-			proxyReader := bar.ProxyReader(r.Body)
+			proxyReader := c8y.NewProxyReader(bar.ProxyReader(r.Body))
 			r.Body = proxyReader
 			defer proxyReader.Close()
 
@@ -112,7 +114,7 @@ func AddProgress(cmd *cobra.Command, fileFlag string, progress *mpb.Progress) fu
 			),
 		)
 
-		proxyReader := bar.ProxyReader(r.Body)
+		proxyReader := c8y.NewProxyReader(bar.ProxyReader(r.Body))
 		r.Body = proxyReader
 
 		return r, nil
@@ -144,7 +146,7 @@ func CreateProxyReader(progress *mpb.Progress) func(response *http.Response) io.
 			),
 		)
 
-		proxyReader := bar.ProxyReader(r.Body)
+		proxyReader := c8y.NewProxyReader(bar.ProxyReader(r.Body))
 		r.Body = proxyReader
 		return proxyReader
 	}
