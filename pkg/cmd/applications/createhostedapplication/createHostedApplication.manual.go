@@ -16,6 +16,7 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/c8yfetcher"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/subcommand"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/logger"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/zipUtilities"
@@ -93,6 +94,11 @@ func NewCmdCreateHostedApplication(f *cmdutil.Factory) *CmdCreateHostedApplicati
 
 	cmd.Flags().BoolVar(&ccmd.skipActivation, "skipActivation", false, "Don't activate to the application after it has been created and uploaded")
 	cmd.Flags().BoolVar(&ccmd.skipUpload, "skipUpload", false, "Don't uploaded the web app binary. Only the application placeholder will be created")
+
+	completion.WithOptions(
+		cmd,
+		completion.WithValidateSet("availability", "MARKET", "PRIVATE"),
+	)
 
 	flags.WithOptions(
 		cmd,
