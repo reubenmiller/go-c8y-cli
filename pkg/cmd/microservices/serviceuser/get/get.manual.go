@@ -9,6 +9,7 @@ import (
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/subcommand"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flags"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 	"github.com/spf13/cobra"
@@ -44,6 +45,11 @@ Get application service user by app name
 	cmd.SilenceUsage = true
 
 	cmd.Flags().String("id", "", "Microservice id (required)")
+
+	completion.WithOptions(
+		cmd,
+		completion.WithMicroservice("id", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
+	)
 
 	flags.WithOptions(
 		cmd,
