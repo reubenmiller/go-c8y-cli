@@ -232,6 +232,10 @@ const baseUrl = `${process.env.BASE_URL || '/'}`;
           trackingID: 'UA-155263011-1',
           anonymizeIP: true,
         },
+        gtag: {
+          trackingID: 'G-64LM52SE7T',
+          anonymizeIP: true,
+        },
         blog: {
           showReadingTime: true,
           // Please change this to your repo.
