@@ -83,6 +83,7 @@ Inherit common parameters to a custom function. This will add parameters such as
         New-DynamicParam -Name Proxy -Type "switch" -DPDictionary $Dictionary -HelpMessage "Proxy setting, i.e. http://10.0.0.1:8080"
         New-DynamicParam -Name NoProxy -Type "switch" -DPDictionary $Dictionary -HelpMessage "Ignore the proxy settings"
         New-DynamicParam -Name Timeout -Type "string" -DPDictionary $Dictionary -HelpMessage "Request timeout. It accepts a duration, i.e. 1ms, 0.5s, 1m etc."
+        New-DynamicParam -Name NoProgress -Type "switch" -DPDictionary $Dictionary -HelpMessage "Disable progress bars"
         
         # Session
         New-DynamicParam -Name Session -Type "string" -DPDictionary $Dictionary -HelpMessage "Session configuration"
