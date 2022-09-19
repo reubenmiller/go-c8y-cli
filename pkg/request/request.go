@@ -843,6 +843,10 @@ func (r *RequestHandler) ProcessResponse(resp *c8y.Response, respError error, co
 		responseText = bytes.ReplaceAll(responseText, []byte("\\u003e"), []byte(">"))
 		responseText = bytes.ReplaceAll(responseText, []byte("\\u0026"), []byte("&"))
 
+		// Wait for progress bar to finish before printing to console
+		// to prevent overriding the output
+		r.IO.WaitForProgressIndicator()
+
 		consol := r.Console
 		if respError == nil {
 			jsonformatter.WithOutputFormatters(
