@@ -279,9 +279,7 @@ func (n *CmdAPI) RunE(cmd *cobra.Command, args []string) error {
 			req.Body = body
 		}
 
-		// TODO: Add prepare request
-		req.PrepareRequest = c8ybinary.AddProgress(cmd, "file", n.factory.IOStreams.ProgressIndicator())
-
+		req.PrepareRequest = c8ybinary.AddProgress(cmd, "file", cfg.GetProgressBar(n.factory.IOStreams.ErrOut, n.factory.IOStreams.IsStderrTTY()))
 		// get file info
 		// form data
 		// BUG: Format data needs to be lazily loaded via the iterator so it can be re-read

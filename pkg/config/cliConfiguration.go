@@ -120,6 +120,9 @@ const (
 	// SettingsShowProgress show progress bar
 	SettingsShowProgress = "settings.defaults.progress"
 
+	// SettingsDisableColor don't print progress bar
+	SettingsDisableProgress = "settings.defaults.noProgress"
+
 	// SettingsDisableColor don't print console output in color
 	SettingsDisableColor = "settings.defaults.noColor"
 
@@ -1028,17 +1031,22 @@ func (c *Config) CompactJSON() bool {
 
 // ShowProgress show progress bar
 func (c *Config) ShowProgress() bool {
-	return c.viper.GetBool(SettingsShowProgress)
+	return c.viper.GetBool(SettingsShowProgress) && !c.DisableProgress()
 }
 
 func (c *Config) GetProgressBar(w io.Writer, enable bool) (progress *mpb.Progress) {
-	if enable {
+	if enable && !c.DisableProgress() {
 		progress = mpb.New(
 			mpb.WithOutput(w),
 			mpb.WithRefreshRate(180*time.Millisecond),
 		)
 	}
 	return
+}
+
+// DisableProgress don't print progress bar
+func (c *Config) DisableProgress() bool {
+	return c.viper.GetBool(SettingsDisableProgress)
 }
 
 // DisableColor don't print console output in color

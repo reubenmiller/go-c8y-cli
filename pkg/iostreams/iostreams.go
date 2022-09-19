@@ -49,6 +49,11 @@ type IOStreams struct {
 	progress *mpb.Progress
 }
 
+func (s *IOStreams) SetProgress(v bool) {
+	s.progressIndicatorEnabled = v
+	s.progress = nil
+}
+
 func (s *IOStreams) SetColor(v bool) {
 	s.colorEnabled = v
 }
