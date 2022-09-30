@@ -296,7 +296,7 @@
                         break
                     }
 
-                    "^(flags\.|c8yfetcher\.|With)" {
+                    "^(flags\.|c8yfetcher\.|With|c8ybinary\.)" {
                         $null = $RESTBodyBuilderOptions.AppendLine($code)
                         break
                     }
@@ -510,6 +510,7 @@ import (
 	"net/url"
 
     "github.com/MakeNowJust/heredoc/v2"
+    "github.com/reubenmiller/go-c8y-cli/v2/pkg/c8ybinary"
     "github.com/reubenmiller/go-c8y-cli/v2/pkg/c8yfetcher"
     "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/subcommand"
     "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmderrors"
