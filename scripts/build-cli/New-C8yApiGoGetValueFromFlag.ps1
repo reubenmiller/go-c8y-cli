@@ -82,7 +82,7 @@
         "json_custom" = "flags.WithDataValue(`"${prop}`", `"${queryParam}`"$FormatValue),"
 
         # binaryUploadURL: uploads a binary and returns the URL 
-        "binaryUploadURL" = "flags.WithBinaryUploadURL(client, `"${prop}`", `"${queryParam}`"$FormatValue),"
+        "binaryUploadURL" = "c8ybinary.WithBinaryUploadURL(client, n.factory.IOStreams.ProgressIndicator(), `"${prop}`", `"${queryParam}`"$FormatValue),"
 
         # json - don't do anything because it should be manually set
         "json" = ""

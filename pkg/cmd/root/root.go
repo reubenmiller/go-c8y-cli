@@ -185,6 +185,7 @@ func NewCmdRoot(f *cmdutil.Factory, version, buildDate string) *CmdRoot {
 	cmd.PersistentFlags().BoolP("raw", "r", false, "Show raw response. This mode will force output=json and view=off")
 	cmd.PersistentFlags().String("proxy", "", "Proxy setting, i.e. http://10.0.0.1:8080")
 	cmd.PersistentFlags().Bool("noProxy", false, "Ignore the proxy settings")
+	cmd.PersistentFlags().Bool("noProgress", false, "Disable progress bars")
 	cmd.PersistentFlags().Bool("withError", false, "Errors will be printed on stdout instead of stderr")
 	cmd.PersistentFlags().StringSliceP("header", "H", nil, `custom headers. i.e. --header "Accept: value, AnotherHeader: myvalue"`)
 	cmd.PersistentFlags().StringSlice("customQueryParam", nil, `add custom URL query parameters. i.e. --customQueryParam 'withCustomOption=true,myOtherOption=myvalue'`)
@@ -436,6 +437,11 @@ func (c *CmdRoot) Configure(disableEncryptionCheck bool) error {
 		if _, err := cfg.ReadConfigFiles(nil); err != nil {
 			log.Infof("Failed to read configuration. Trying to proceed anyway. %s", err)
 		}
+	}
+
+	if cfg.DisableProgress() {
+		log.Debugf("Disabling progress bars")
+		c.Factory.IOStreams.SetProgress(false)
 	}
 
 	//

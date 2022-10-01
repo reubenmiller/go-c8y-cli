@@ -13,9 +13,11 @@ import (
 	"strings"
 
 	"github.com/MakeNowJust/heredoc/v2"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/c8ybinary"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/c8yfetcher"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/subcommand"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/completion"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/flags"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/logger"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/zipUtilities"
@@ -93,6 +95,11 @@ func NewCmdCreateHostedApplication(f *cmdutil.Factory) *CmdCreateHostedApplicati
 
 	cmd.Flags().BoolVar(&ccmd.skipActivation, "skipActivation", false, "Don't activate to the application after it has been created and uploaded")
 	cmd.Flags().BoolVar(&ccmd.skipUpload, "skipUpload", false, "Don't uploaded the web app binary. Only the application placeholder will be created")
+
+	completion.WithOptions(
+		cmd,
+		completion.WithValidateSet("availability", "MARKET", "PRIVATE"),
+	)
 
 	flags.WithOptions(
 		cmd,
@@ -297,7 +304,16 @@ func (n *CmdCreateHostedApplication) RunE(cmd *cobra.Command, args []string) err
 			}
 
 			log.Infof("uploading binary [app=%s]", application.ID)
-			resp, err := client.Application.CreateBinary(context.Background(), zipfile, application.ID)
+			progress := n.factory.IOStreams.ProgressIndicator()
+			resp, err := c8ybinary.CreateBinaryWithProgress(
+				context.Background(),
+				client,
+				"/application/applications/"+application.ID+"/binaries",
+				zipfile,
+				nil,
+				progress,
+			)
+			n.factory.IOStreams.WaitForProgressIndicator()
 
 			if err != nil {
 				// handle error

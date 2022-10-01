@@ -110,7 +110,7 @@ Describe -Name "New-HostedApplication" {
             $webResponse | Out-String | Should -BeLike "*Hi there. This is a test web application*"
         }
 
-        It -Tag "TODO" "Uploads new applicaiton but does not activate it" {
+        It -Tag "TODO" "Uploads new application but does not activate it" {
             $application = Get-Application -Id $AppName
             $application | Should -Not -BeNullOrEmpty
             $application.name | Should -BeExactly $AppName

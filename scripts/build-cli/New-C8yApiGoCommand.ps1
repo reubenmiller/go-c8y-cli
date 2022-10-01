@@ -254,6 +254,9 @@
         $null = $PostActionOptions.AppendLine("}")
     }
 
+    # Prepare Request
+    $PrepareRequest = New-Object System.Text.StringBuilder
+
     #
     # Body
     #
@@ -275,7 +278,16 @@
             }
         }
 
+        $HasProgress = $false
         foreach ($iArg in (Remove-SkippedParameters $Specification.body)) {
+
+            if ($Specification.method -match "POST|PUT" -and -Not $HasProgress) {
+                if ($iArg.type -in @("file", "fileContents", "attachment")) {
+                    $HasProgress = $true
+                    $null = $PrepareRequest.Append("PrepareRequest: c8ybinary.AddProgress(cmd, `"$($iArg.name)`", cfg.GetProgressBar(n.factory.IOStreams.ErrOut, n.factory.IOStreams.IsStderrTTY())),")
+                }
+            }
+
             $code = New-C8yApiGoGetValueFromFlag -Parameters $iArg -SetterType "body"
             if ($code) {
                 switch -Regex ($code) {
@@ -284,7 +296,7 @@
                         break
                     }
 
-                    "^(flags\.|c8yfetcher\.|With)" {
+                    "^(flags\.|c8yfetcher\.|With|c8ybinary\.)" {
                         $null = $RESTBodyBuilderOptions.AppendLine($code)
                         break
                     }
@@ -498,6 +510,7 @@ import (
 	"net/url"
 
     "github.com/MakeNowJust/heredoc/v2"
+    "github.com/reubenmiller/go-c8y-cli/v2/pkg/c8ybinary"
     "github.com/reubenmiller/go-c8y-cli/v2/pkg/c8yfetcher"
     "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/subcommand"
     "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmderrors"
@@ -678,6 +691,7 @@ func (n *${NameCamel}Cmd) RunE(cmd *cobra.Command, args []string) error {
         Header:       headers,
         IgnoreAccept: cfg.IgnoreAcceptHeader(),
         DryRun:       cfg.ShouldUseDryRun(cmd.CommandPath()),
+        $PrepareRequest
     }
     $PostActionOptions
 
@@ -710,12 +724,12 @@ Remove skipped parameters. These are parameter which should not be used when gen
         [object[]] $CommandParameters
     )
 
-    $CommandParameters | Where-Object {
+    [array]($CommandParameters | Where-Object {
         if ($_.skip -eq $true) {
             Write-Verbose ("Skipping parameter [{0}] as it is marked as skip" -f $_.name)
         }
         $_.skip -ne $true
-    }
+    })
 }
 
 Function Get-C8yGoArgs {

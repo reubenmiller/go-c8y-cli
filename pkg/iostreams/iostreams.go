@@ -9,12 +9,14 @@ import (
 	"os/exec"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/cli/safeexec"
 	"github.com/mattn/go-colorable"
 	"github.com/mattn/go-isatty"
 	"github.com/muesli/termenv"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/logger"
+	"github.com/vbauerster/mpb/v6"
 	"golang.org/x/term"
 )
 
@@ -43,6 +45,13 @@ type IOStreams struct {
 	neverPrompt bool
 
 	TempFileOverride *os.File
+
+	progress *mpb.Progress
+}
+
+func (s *IOStreams) SetProgress(v bool) {
+	s.progressIndicatorEnabled = v
+	s.progress = nil
 }
 
 func (s *IOStreams) SetColor(v bool) {
@@ -197,6 +206,24 @@ func (s *IOStreams) TempFile(dir, pattern string) (*os.File, error) {
 	return ioutil.TempFile(dir, pattern)
 }
 
+func (s *IOStreams) ProgressIndicator() *mpb.Progress {
+	if s.progressIndicatorEnabled {
+		if s.progress == nil {
+			s.progress = mpb.New(
+				mpb.WithOutput(s.ErrOut),
+				mpb.WithRefreshRate(180*time.Millisecond),
+			)
+		}
+	}
+	return s.progress
+}
+
+func (s *IOStreams) WaitForProgressIndicator() {
+	if s.progress != nil {
+		s.progress.Wait()
+	}
+}
+
 func System(colorDisabled bool, colorForced bool) *IOStreams {
 	stdoutIsTTY := isTerminal(os.Stdout)
 	stderrIsTTY := isTerminal(os.Stderr)
@@ -210,7 +237,7 @@ func System(colorDisabled bool, colorForced bool) *IOStreams {
 		is256enabled: Is256ColorSupported(),
 	}
 
-	if stdoutIsTTY && stderrIsTTY {
+	if stderrIsTTY {
 		io.progressIndicatorEnabled = true
 	}
 
