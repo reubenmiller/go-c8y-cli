@@ -17,7 +17,8 @@
         "powershell": [
           {
             "description": "Create a new token which is valid for 30 minutes",
-            "command": "New-Notification2Token -Name testSubscription -Subscriber testSubscriber -ExpiresInMinutes 30"
+            "command": "New-Notification2Token -Name testSubscription -Subscriber testSubscriber -ExpiresInMinutes 30",
+            "skipTest": true
           }
         ],
         "go": [
@@ -88,7 +89,8 @@
         "powershell": [
           {
             "description": "Unsubscribe a subscriber using its token",
-            "command": "Unregister-Notification2Subscriber -Token \"eyJhbGciOiJSUzI1NiJ9\""
+            "command": "Unregister-Notification2Subscriber -Token \"eyJhbGciOiJSUzI1NiJ9\"",
+            "skipTest": true
           }
         ],
         "go": [

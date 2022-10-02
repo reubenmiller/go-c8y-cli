@@ -5,7 +5,7 @@ Describe -Name "Get-Notification2SubscriptionCollection" {
 
     }
 
-    It "Get existing subscriptions" {
+    It -Skip "Get existing subscriptions" {
         $Response = PSc8y\Get-Notification2SubscriptionCollection
         $LASTEXITCODE | Should -Be 0
         $Response | Should -Not -BeNullOrEmpty

@@ -20,6 +20,7 @@ endpoints:
       powershell:
         - description: Create a new token which is valid for 30 minutes
           command: New-Notification2Token -Name testSubscription -Subscriber testSubscriber -ExpiresInMinutes 30
+          skipTest: true
       go:
         - description: Create a new token for a subscription which is valid for 1 day
           command: c8y notification2 tokens create --name testSubscription --subscriber testSubscriber --expiresInMinutes 1440
@@ -79,6 +80,7 @@ endpoints:
       powershell:
         - description: Unsubscribe a subscriber using its token
           command: Unregister-Notification2Subscriber -Token "eyJhbGciOiJSUzI1NiJ9"
+          skipTest: true
       go:
         - description: Unsubscribe a subscriber using its token
           command: c8y notification2 tokens unsubscribe --token "eyJhbGciOiJSUzI1NiJ9"

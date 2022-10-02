@@ -15,6 +15,7 @@ endpoints:
       powershell:
         - description: Get existing subscriptions
           command: Get-Notification2SubscriptionCollection
+          skipTest: true
 
       go:
         - description: Get existing subscriptions
@@ -57,6 +58,7 @@ endpoints:
       powershell:
         - description: Create a new subscription to operations for a specific device
           command: New-Notification2Subscription -Name deviceSub -Device 12345 -Context mo -ApiFilter operations
+          skipTest: true
       go:
         - description: Create a new subscription to operations for a specific device
           command: c8y notification2 subscriptions create --name deviceSub --device 12345 --context mo --apiFilter operations --apiFilter alarms
@@ -138,6 +140,7 @@ endpoints:
       powershell:
         - description: Get an existing subscription
           command: Get-Notification2Subscription -Id 12345
+          skipTest: true
 
       go:
         - description: Get an existing subscription
@@ -199,6 +202,7 @@ endpoints:
       powershell:
         - description: Delete a subscription
           command: Delete-Notification2Subscription -Id 12345
+          skipTest: true
       go:
         - description: Delete a subscription
           command: c8y notification2 subscriptions delete --id 12345

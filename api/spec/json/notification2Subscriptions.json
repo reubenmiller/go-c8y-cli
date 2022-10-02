@@ -15,7 +15,8 @@
         "powershell": [
           {
             "description": "Get existing subscriptions",
-            "command": "Get-Notification2SubscriptionCollection"
+            "command": "Get-Notification2SubscriptionCollection",
+            "skipTest": true
           }
         ],
         "go": [
@@ -71,7 +72,8 @@
         "powershell": [
           {
             "description": "Create a new subscription to operations for a specific device",
-            "command": "New-Notification2Subscription -Name deviceSub -Device 12345 -Context mo -ApiFilter operations"
+            "command": "New-Notification2Subscription -Name deviceSub -Device 12345 -Context mo -ApiFilter operations",
+            "skipTest": true
           }
         ],
         "go": [
@@ -175,7 +177,8 @@
         "powershell": [
           {
             "description": "Get an existing subscription",
-            "command": "Get-Notification2Subscription -Id 12345"
+            "command": "Get-Notification2Subscription -Id 12345",
+            "skipTest": true
           }
         ],
         "go": [
@@ -264,7 +267,8 @@
         "powershell": [
           {
             "description": "Delete a subscription",
-            "command": "Delete-Notification2Subscription -Id 12345"
+            "command": "Delete-Notification2Subscription -Id 12345",
+            "skipTest": true
           }
         ],
         "go": [
