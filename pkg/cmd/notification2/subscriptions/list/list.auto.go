@@ -1,11 +1,13 @@
 // Code generated from specification version 1.0.0: DO NOT EDIT
-package logout
+package list
 
 import (
+	"fmt"
 	"io"
 	"net/http"
 
 	"github.com/MakeNowJust/heredoc/v2"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/c8yfetcher"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/subcommand"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
@@ -16,43 +18,54 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// LogoutCmd command
-type LogoutCmd struct {
+// ListCmd command
+type ListCmd struct {
 	*subcommand.SubCommand
 
 	factory *cmdutil.Factory
 }
 
-// NewLogoutCmd creates a command to Logout current user
-func NewLogoutCmd(f *cmdutil.Factory) *LogoutCmd {
-	ccmd := &LogoutCmd{
+// NewListCmd creates a command to Get subscription collection
+func NewListCmd(f *cmdutil.Factory) *ListCmd {
+	ccmd := &ListCmd{
 		factory: f,
 	}
 	cmd := &cobra.Command{
-		Use:   "logout",
-		Short: "Logout current user",
-		Long:  `Logout the current user. This will invalidate the token associated with the user when using OAUTH_INTERNAL`,
+		Use:   "list",
+		Short: "Get subscription collection",
+		Long:  `Retrieve all subscriptions on your tenant, or a specific subset based on queries.`,
 		Example: heredoc.Doc(`
-$ c8y currentuser logout
-Log out the current user
+$ c8y notification2 subscriptions list
+Get existing subscriptions
+
+$ c8y notification2 subscriptions list --context mo
+Get all subscriptions for the managed object scope
+
+$ c8y notification2 subscriptions list --device 12345
+Get all subscriptions related to a specific source
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
-			return f.CreateModeEnabled()
+			return nil
 		},
 		RunE: ccmd.RunE,
 	}
 
 	cmd.SilenceUsage = true
 
+	cmd.Flags().StringSlice("device", []string{""}, "The managed object ID to which the subscription is associated. (accepts pipeline)")
+	cmd.Flags().String("context", "", "The context to which the subscription is associated.")
+
 	completion.WithOptions(
 		cmd,
+		completion.WithDevice("device", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
+		completion.WithValidateSet("context", "mo", "tenant"),
 	)
 
 	flags.WithOptions(
 		cmd,
-		flags.WithProcessingMode(),
 
-		flags.WithExtendedPipelineSupport("", "", false),
+		flags.WithExtendedPipelineSupport("device", "source", false, "deviceId", "source.id", "managedObject.id", "id"),
+		flags.WithCollectionProperty("subscriptions"),
 	)
 
 	// Required flags
@@ -63,7 +76,7 @@ Log out the current user
 }
 
 // RunE executes the command
-func (n *LogoutCmd) RunE(cmd *cobra.Command, args []string) error {
+func (n *ListCmd) RunE(cmd *cobra.Command, args []string) error {
 	cfg, err := n.factory.Config()
 	if err != nil {
 		return err
@@ -84,10 +97,17 @@ func (n *LogoutCmd) RunE(cmd *cobra.Command, args []string) error {
 		query,
 		inputIterators,
 		flags.WithCustomStringSlice(func() ([]string, error) { return cfg.GetQueryParameters(), nil }, "custom"),
+		c8yfetcher.WithDeviceByNameFirstMatch(client, args, "device", "source"),
+		flags.WithStringValue("context", "context"),
 	)
 	if err != nil {
 		return cmderrors.NewUserError(err)
 	}
+	commonOptions, err := cfg.GetOutputCommonOptions(cmd)
+	if err != nil {
+		return cmderrors.NewUserError(fmt.Sprintf("Failed to get common options. err=%s", err))
+	}
+	commonOptions.AddQueryParameters(query)
 
 	queryValue, err := query.GetQueryUnescape(true)
 
@@ -102,7 +122,6 @@ func (n *LogoutCmd) RunE(cmd *cobra.Command, args []string) error {
 		headers,
 		inputIterators,
 		flags.WithCustomStringSlice(func() ([]string, error) { return cfg.GetHeader(), nil }, "header"),
-		flags.WithProcessingModeValue(),
 	)
 	if err != nil {
 		return cmderrors.NewUserError(err)
@@ -131,7 +150,7 @@ func (n *LogoutCmd) RunE(cmd *cobra.Command, args []string) error {
 	}
 
 	// path parameters
-	path := flags.NewStringTemplate("/user/logout")
+	path := flags.NewStringTemplate("notification2/subscriptions")
 	err = flags.WithPathParameters(
 		cmd,
 		path,
@@ -142,7 +161,7 @@ func (n *LogoutCmd) RunE(cmd *cobra.Command, args []string) error {
 	}
 
 	req := c8y.RequestOptions{
-		Method:       "POST",
+		Method:       "GET",
 		Path:         path.GetTemplate(),
 		Query:        queryValue,
 		Body:         body,

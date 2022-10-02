@@ -1,0 +1,19 @@
+tests:
+    notification2/tokens_create_Create a new token for a subscription which is valid for 1 day:
+        command: c8y notification2 tokens create --name testSubscription --subscriber testSubscriber --expiresInMinutes 1440
+        exit-code: 0
+        stdout:
+            json:
+                body.subscriber: testSubscriber
+                body.subscription: testSubscription
+                method: POST
+                path: /notification2/token
+    notification2/tokens_create_Create a new token which is valid for 30 minutes:
+        command: c8y notification2 tokens create --name testSubscription --subscriber testSubscriber --expiresInMinutes 30
+        exit-code: 0
+        stdout:
+            json:
+                body.subscriber: testSubscriber
+                body.subscription: testSubscription
+                method: POST
+                path: /notification2/token

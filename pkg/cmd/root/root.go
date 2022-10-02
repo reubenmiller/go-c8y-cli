@@ -66,6 +66,10 @@ import (
 	microservicesCreateCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/microservices/create"
 	microservicesLogLevelsCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/microservices/loglevels"
 	microservicesServiceUserCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/microservices/serviceuser"
+	notification2Cmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/notification2"
+	notification2SubscriptionsCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/notification2/subscriptions"
+	notification2SubscriptionsSubscribeCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/notification2/subscriptions/subscribe"
+	notification2TokensCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/notification2/tokens"
 	operationsCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/operations"
 	operationsAssertCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/operations/assert"
 	operationsSubscribeCmd "github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/operations/subscribe"
@@ -357,6 +361,14 @@ func NewCmdRoot(f *cmdutil.Factory, version, buildDate string) *CmdRoot {
 	inventory.AddCommand(inventoryWaitCmd.NewCmdWait(f).GetCommand())
 	inventory.AddCommand(inventoryAssertCmd.NewSubCommand(f).GetCommand())
 	cmd.AddCommand(inventory)
+
+	// notifications2
+	notification2 := notification2Cmd.NewSubCommand(f).GetCommand()
+	subscriptions := notification2SubscriptionsCmd.NewSubCommand(f).GetCommand()
+	subscriptions.AddCommand(notification2SubscriptionsSubscribeCmd.NewSubscribeCmd(f).GetCommand())
+	notification2.AddCommand(subscriptions)
+	notification2.AddCommand(notification2TokensCmd.NewSubCommand(f).GetCommand())
+	cmd.AddCommand(notification2)
 
 	// configuration
 	configuration := configurationCmd.NewSubCommand(f).GetCommand()

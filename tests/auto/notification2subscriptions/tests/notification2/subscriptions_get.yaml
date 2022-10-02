@@ -1,0 +1,15 @@
+tests:
+    notification2/subscriptions_get_Get an existing subscription:
+        command: c8y notification2 subscriptions get --id 12345
+        exit-code: 0
+        stdout:
+            json:
+                method: GET
+                path: /notification2/subscriptions/12345
+    notification2/subscriptions_get_Get an existing subscription (using pipeline):
+        command: $TEST_SHELL -c 'echo 12345 | c8y notification2 subscriptions get'
+        exit-code: 0
+        stdout:
+            json:
+                method: GET
+                path: /notification2/subscriptions/12345

@@ -177,6 +177,8 @@
         "stringStatic",
         "inventoryChildType",
         "source",
+        "subscriptionId",
+        "subscriptionName",
         "tenant",
         "tenantname",
         "[]devicerequest",
@@ -270,6 +272,7 @@
     },
     "endpoints": {
       "type": "array",
+      "minItems": 0,
       "items": {
         "type": "object",
         "properties": {
