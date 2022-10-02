@@ -24,6 +24,7 @@ type SubscribeCmd struct {
 	Subscription     string
 	Consumer         string
 	Subscriber       string
+	ActionTypes      []string
 	ExpiresInMinutes int64
 	Duration         time.Time
 
@@ -45,6 +46,9 @@ func NewSubscribeCmd(f *cmdutil.Factory) *SubscribeCmd {
 			$ c8y notification2 subscriptions subscribe --name registration
 			Start listening to a subscription name registration
 
+			$ c8y notification2 subscriptions subscribe --name registration --actionTypes CREATE --actionTypes UPDATE
+			Start listening to a subscription name registration but only include CREATE and UPDATE action types (ignoring DELETE)
+
 			$ c8y notification2 subscriptions subscribe --name registration --duration 10min
 			Subscribe to a subscription for 10mins then exit
 
@@ -65,22 +69,24 @@ func NewSubscribeCmd(f *cmdutil.Factory) *SubscribeCmd {
 
 	cmd.Flags().StringVar(&ccmd.Subscription, "name", "", "The subscription name. Each subscription is identified by a unique name within a specific context")
 	cmd.Flags().StringVar(&ccmd.Token, "token", "", "Token for the subscription. If not provided, then a token will be created")
-	cmd.Flags().StringVar(&ccmd.Subscriber, "subscriber", "goc8ycli", "The subscriber name which the client wishes to be identified with")
+	cmd.Flags().StringVar(&ccmd.Subscriber, "subscriber", "goc8ycli", "The subscriber name which the client wishes to be identified with. Defaults to goc8ycli")
 	cmd.Flags().StringVar(&ccmd.Consumer, "consumer", "", "Consumer name. Required for shared subscriptions")
+	cmd.Flags().StringSliceVar(&ccmd.ActionTypes, "actionTypes", []string{}, "Only listen for specific action types, CREATE, UPDATE or DELETE (client side filtering)")
 	cmd.Flags().String("duration", "", "Subscription duration")
 	cmd.Flags().Int64Var(&ccmd.ExpiresInMinutes, "expiresInMinutes", 1440, "Token expiration duration")
 
 	completion.WithOptions(
 		cmd,
 		completion.WithNotification2SubscriptionName("name", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
+		completion.WithValidateSet("actionTypes", "CREATE", "UPDATE", "DELETE"),
 	)
 
 	flags.WithOptions(
 		cmd,
-		// flags.WithExtendedPipelineSupport("device", "source.id", false, "deviceId", "source.id", "managedObject.id", "id"),
 	)
 
 	// Required flags
+	_ = cmd.MarkFlagRequired("name")
 
 	ccmd.SubCommand = subcommand.NewSubCommand(cmd)
 
@@ -137,13 +143,30 @@ func (n *SubscribeCmd) RunE(cmd *cobra.Command, args []string) error {
 		}()
 	}
 
+	var isMatch bool
+	var msgAction string
 	for {
 		select {
 		case msg := <-messagesCh:
-			cfg.Logger.Infof("Received message: %s", msg.Payload)
+			cfg.Logger.Infof("Received message: (action=%s, description=%s) %s", msg.Action, msg.Description, msg.Payload)
 
-			if err := n.factory.WriteJSONToConsole(cfg, cmd, "", msg.Payload); err != nil {
-				cfg.Logger.Warnf("Could not process line. only json lines are accepted. %s", err)
+			if len(n.ActionTypes) == 0 {
+				isMatch = true
+			} else {
+				isMatch = false
+				msgAction = string(msg.Action)
+				for _, item := range n.ActionTypes {
+					if item == msgAction {
+						isMatch = true
+						break
+					}
+				}
+			}
+
+			if isMatch {
+				if err := n.factory.WriteJSONToConsole(cfg, cmd, "", msg.Payload); err != nil {
+					cfg.Logger.Warnf("Could not process line. only json lines are accepted. %s", err)
+				}
 			}
 
 			if err := realtime.SendMessageAck(msg.Identifier); err != nil {
