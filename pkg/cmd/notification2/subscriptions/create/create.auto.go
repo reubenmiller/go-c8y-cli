@@ -6,8 +6,7 @@ import (
 	"net/http"
 
 	"github.com/MakeNowJust/heredoc/v2"
-	"github.com/reubenmiller/go-c8y-cli/v2/pkg/c8ybinary"
-	"github.com/reubenmiller/go-c8y-cli/v2/pkg/c8ydata"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/c8yfetcher"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/subcommand"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
@@ -25,24 +24,26 @@ type CreateCmd struct {
 	factory *cmdutil.Factory
 }
 
-// NewCreateCmd creates a command to Create configuration file
+// NewCreateCmd creates a command to Create subscription
 func NewCreateCmd(f *cmdutil.Factory) *CreateCmd {
 	ccmd := &CreateCmd{
 		factory: f,
 	}
 	cmd := &cobra.Command{
 		Use:   "create",
-		Short: "Create configuration file",
-		Long:  `Create a new configuration file (managedObject)`,
+		Short: "Create subscription",
+		Long:  `Create a subscription`,
 		Example: heredoc.Doc(`
-$ c8y configuration create --name "agent config" --description "Default agent configuration" --configurationType "agentConfig" --url "https://test.com/content/raw/app.json"
-Create a configuration package
+$ c8y notification2 subscriptions create --name deviceSub --device 12345 --context mo --apiFilter operations --apiFilter alarms
+Create a new subscription to operations for a specific device
 
-$ echo -e "c8y_Linux\nc8y_MacOS\nc8y_Windows" | c8y configuration create --name "default-vpn-config" --configurationType "VPN_CONFIG" --file default.vpn
-Create multiple configurations using different device type filters (via pipeline)
-The stdin will be mapped to the deviceType property. This was you can easily make the same configuration
-available for multiple device types
+$ echo -e "1111\n2222" | c8y notification2 subscriptions create --name devicegroup --context mo --apiFilter operations
 
+Create a subscription which groups all devices in a single subscription name
+
+$ c8y devices list | c8y notification2 subscriptions create --name devicegroup --context mo --apiFilter operations
+
+Create a subscription which groups all devices in a single subscription name
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
 			return f.CreateModeEnabled()
@@ -52,15 +53,19 @@ available for multiple device types
 
 	cmd.SilenceUsage = true
 
-	cmd.Flags().String("name", "", "name")
-	cmd.Flags().String("description", "", "Description of the configuration package")
-	cmd.Flags().String("configurationType", "", "Configuration type")
-	cmd.Flags().String("url", "", "URL link to the configuration file")
-	cmd.Flags().String("deviceType", "", "Device type filter. Only allow configuration to be applied to devices of this type (accepts pipeline)")
-	cmd.Flags().String("file", "", "File to upload")
+	cmd.Flags().StringSlice("device", []string{""}, "The managed object to which the subscription is associated. (accepts pipeline)")
+	cmd.Flags().String("name", "", "The subscription name. Each subscription is identified by a unique name within a specific context.")
+	cmd.Flags().String("context", "", "The context to which the subscription is associated.")
+	cmd.Flags().StringSlice("fragmentsToCopy", []string{""}, "Transforms the data to only include specified custom fragments. Each custom fragment is identified by a unique name. If nothing is specified here, the data is forwarded as-is.")
+	cmd.Flags().StringSlice("apiFilter", []string{""}, "Filter notifications by api")
+	cmd.Flags().String("typeFilter", "", "The data needs to have the specified value in its type property to meet the filter criteria.")
 
 	completion.WithOptions(
 		cmd,
+		completion.WithDevice("device", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
+		completion.WithNotification2SubscriptionName("name", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
+		completion.WithValidateSet("context", "mo", "tenant"),
+		completion.WithValidateSet("apiFilter", "alarms", "events", "managedobjects", "measurements", "operations", "*"),
 	)
 
 	flags.WithOptions(
@@ -68,7 +73,7 @@ available for multiple device types
 		flags.WithProcessingMode(),
 		flags.WithData(),
 		f.WithTemplateFlag(cmd),
-		flags.WithExtendedPipelineSupport("deviceType", "deviceType", false, "c8y_Filter.type", "deviceType", "type"),
+		flags.WithExtendedPipelineSupport("device", "source.id", false, "deviceId", "source.id", "managedObject.id", "id"),
 	)
 
 	// Required flags
@@ -141,26 +146,23 @@ func (n *CreateCmd) RunE(cmd *cobra.Command, args []string) error {
 		cmd,
 		body,
 		inputIterators,
-		flags.WithOverrideValue("deviceType", "deviceType"),
 		flags.WithDataFlagValue(),
-		flags.WithStringValue("name", "name"),
-		flags.WithStringValue("description", "description"),
-		flags.WithStringValue("configurationType", "configurationType"),
-		flags.WithStringValue("url", "url"),
-		flags.WithStringValue("deviceType", "deviceType"),
-		c8ybinary.WithBinaryUploadURL(client, n.factory.IOStreams.ProgressIndicator(), "file", "url"),
-		flags.WithDefaultTemplateString(`
-{type: 'c8y_ConfigurationDump', c8y_Global:{}}`),
+		c8yfetcher.WithDeviceByNameFirstMatch(client, args, "device", "source.id"),
+		flags.WithStringValue("name", "subscription"),
+		flags.WithStringValue("context", "context"),
+		flags.WithStringSliceValues("fragmentsToCopy", "fragmentsToCopy", ""),
+		flags.WithStringSliceValues("apiFilter", "subscriptionFilter.apis", ""),
+		flags.WithStringValue("typeFilter", "subscriptionFilter.typeFilter"),
 		cmdutil.WithTemplateValue(cfg),
 		flags.WithTemplateVariablesValue(),
-		flags.WithRequiredProperties("type", "name", "url"),
+		flags.WithRequiredProperties("context", "subscription"),
 	)
 	if err != nil {
 		return cmderrors.NewUserError(err)
 	}
 
 	// path parameters
-	path := flags.NewStringTemplate("inventory/managedObjects")
+	path := flags.NewStringTemplate("notification2/subscriptions")
 	err = flags.WithPathParameters(
 		cmd,
 		path,
@@ -179,9 +181,6 @@ func (n *CreateCmd) RunE(cmd *cobra.Command, args []string) error {
 		Header:       headers,
 		IgnoreAccept: cfg.IgnoreAcceptHeader(),
 		DryRun:       cfg.ShouldUseDryRun(cmd.CommandPath()),
-	}
-	inputIterators.PipeOptions.PostActions = []flags.Action{
-		&c8ydata.AddChildAddition{Client: client, URLProperty: "url"},
 	}
 
 	return n.factory.RunWithWorkers(client, cmd, &req, inputIterators)

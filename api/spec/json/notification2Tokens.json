@@ -1,0 +1,116 @@
+{
+  "information": {
+    "name": "notification2/tokens",
+    "description": "Cumulocity notification2 tokens",
+    "descriptionLong": "In order to receive subscribed notifications, a consumer application or microservice\nmust obtain an authorization token that provides proof that the holder is allowed to\nreceive subscribed notifications.\n",
+    "link": "https://cumulocity.com/guides/reference/notifications/"
+  },
+  "endpoints": [
+    {
+      "name": "newToken",
+      "method": "POST",
+      "path": "notification2/token",
+      "accept": "application/json",
+      "description": "Create a token",
+      "descriptionLong": "Create a token to use for subscribing to notifications",
+      "examples": {
+        "powershell": [
+          {
+            "description": "Create a new token which is valid for 30 minutes",
+            "command": "New-Notification2Token -Name testSubscription -Subscriber testSubscriber -ExpiresInMinutes 30"
+          }
+        ],
+        "go": [
+          {
+            "description": "Create a new token for a subscription which is valid for 1 day",
+            "command": "c8y notification2 tokens create --name testSubscription --subscriber testSubscriber --expiresInMinutes 1440"
+          },
+          {
+            "description": "Create a new token which is valid for 30 minutes",
+            "command": "c8y notification2 tokens create --name testSubscription --subscriber testSubscriber --expiresInMinutes 30"
+          }
+        ]
+      },
+      "alias": {
+        "go": "create",
+        "powershell": "New-Notification2Token"
+      },
+      "body": [
+        {
+          "name": "subscriber",
+          "type": "string",
+          "pipeline": true,
+          "description": "The subscriber name which the client wishes to be identified with."
+        },
+        {
+          "name": "name",
+          "type": "subscriptionName",
+          "property": "subscription",
+          "required": false,
+          "description": "The subscription name. This value must match the same that was used when the subscription was created."
+        },
+        {
+          "name": "expiresInMinutes",
+          "type": "integer",
+          "required": false,
+          "default": "1440",
+          "description": "The token expiration duration."
+        },
+        {
+          "name": "shared",
+          "type": "string",
+          "validationSet": [
+            "true",
+            "false"
+          ],
+          "required": false,
+          "description": "Subscription is shared amongst multiple subscribers"
+        },
+        {
+          "name": "data",
+          "type": "json",
+          "description": "Additional properties."
+        }
+      ],
+      "bodyRequiredKeys": [
+        "subscriber",
+        "subscription"
+      ]
+    },
+    {
+      "name": "unsubscribeToken",
+      "method": "POST",
+      "path": "notification2/unsubscribe",
+      "accept": "application/json",
+      "description": "Unsubscribe via a token",
+      "descriptionLong": "Unsubscribe a notification subscriber using the notification token\nOnce a subscription is made, notifications will be kept until they are consumed by all subscribers who have previously connected to the subscription.\n\nFor non-volatile subscriptions, this can result in notifications remaining in storage if never consumed by the application.\nThey will be deleted if a tenant is deleted. It can take up considerable space in permanent storage for high-frequency notification sources.\nTherefore, we recommend you to unsubscribe a subscriber that will never run again.\n",
+      "examples": {
+        "powershell": [
+          {
+            "description": "Unsubscribe a subscriber using its token",
+            "command": "Unregister-Notification2Subscriber -Token \"eyJhbGciOiJSUzI1NiJ9\""
+          }
+        ],
+        "go": [
+          {
+            "description": "Unsubscribe a subscriber using its token",
+            "command": "c8y notification2 tokens unsubscribe --token \"eyJhbGciOiJSUzI1NiJ9\""
+          }
+        ]
+      },
+      "alias": {
+        "go": "unsubscribe",
+        "powershell": "Unregister-Notification2Subscriber"
+      },
+      "queryParameters": [
+        {
+          "name": "token",
+          "type": "string",
+          "required": true,
+          "pipeline": true,
+          "description": "Subscriptions associated with this token will be removed"
+        }
+      ]
+    }
+  ]
+}

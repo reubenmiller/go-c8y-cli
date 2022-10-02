@@ -1,13 +1,11 @@
 // Code generated from specification version 1.0.0: DO NOT EDIT
-package create
+package unsubscribe
 
 import (
 	"io"
 	"net/http"
 
 	"github.com/MakeNowJust/heredoc/v2"
-	"github.com/reubenmiller/go-c8y-cli/v2/pkg/c8ybinary"
-	"github.com/reubenmiller/go-c8y-cli/v2/pkg/c8ydata"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/subcommand"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
@@ -18,31 +16,31 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// CreateCmd command
-type CreateCmd struct {
+// UnsubscribeCmd command
+type UnsubscribeCmd struct {
 	*subcommand.SubCommand
 
 	factory *cmdutil.Factory
 }
 
-// NewCreateCmd creates a command to Create configuration file
-func NewCreateCmd(f *cmdutil.Factory) *CreateCmd {
-	ccmd := &CreateCmd{
+// NewUnsubscribeCmd creates a command to Unsubscribe via a token
+func NewUnsubscribeCmd(f *cmdutil.Factory) *UnsubscribeCmd {
+	ccmd := &UnsubscribeCmd{
 		factory: f,
 	}
 	cmd := &cobra.Command{
-		Use:   "create",
-		Short: "Create configuration file",
-		Long:  `Create a new configuration file (managedObject)`,
+		Use:   "unsubscribe",
+		Short: "Unsubscribe via a token",
+		Long: `Unsubscribe a notification subscriber using the notification token
+Once a subscription is made, notifications will be kept until they are consumed by all subscribers who have previously connected to the subscription.
+
+For non-volatile subscriptions, this can result in notifications remaining in storage if never consumed by the application.
+They will be deleted if a tenant is deleted. It can take up considerable space in permanent storage for high-frequency notification sources.
+Therefore, we recommend you to unsubscribe a subscriber that will never run again.
+`,
 		Example: heredoc.Doc(`
-$ c8y configuration create --name "agent config" --description "Default agent configuration" --configurationType "agentConfig" --url "https://test.com/content/raw/app.json"
-Create a configuration package
-
-$ echo -e "c8y_Linux\nc8y_MacOS\nc8y_Windows" | c8y configuration create --name "default-vpn-config" --configurationType "VPN_CONFIG" --file default.vpn
-Create multiple configurations using different device type filters (via pipeline)
-The stdin will be mapped to the deviceType property. This was you can easily make the same configuration
-available for multiple device types
-
+$ c8y notification2 tokens unsubscribe --token "eyJhbGciOiJSUzI1NiJ9"
+Unsubscribe a subscriber using its token
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
 			return f.CreateModeEnabled()
@@ -52,12 +50,7 @@ available for multiple device types
 
 	cmd.SilenceUsage = true
 
-	cmd.Flags().String("name", "", "name")
-	cmd.Flags().String("description", "", "Description of the configuration package")
-	cmd.Flags().String("configurationType", "", "Configuration type")
-	cmd.Flags().String("url", "", "URL link to the configuration file")
-	cmd.Flags().String("deviceType", "", "Device type filter. Only allow configuration to be applied to devices of this type (accepts pipeline)")
-	cmd.Flags().String("file", "", "File to upload")
+	cmd.Flags().String("token", "", "Subscriptions associated with this token will be removed (required) (accepts pipeline)")
 
 	completion.WithOptions(
 		cmd,
@@ -66,9 +59,8 @@ available for multiple device types
 	flags.WithOptions(
 		cmd,
 		flags.WithProcessingMode(),
-		flags.WithData(),
-		f.WithTemplateFlag(cmd),
-		flags.WithExtendedPipelineSupport("deviceType", "deviceType", false, "c8y_Filter.type", "deviceType", "type"),
+
+		flags.WithExtendedPipelineSupport("token", "token", true, "id"),
 	)
 
 	// Required flags
@@ -79,7 +71,7 @@ available for multiple device types
 }
 
 // RunE executes the command
-func (n *CreateCmd) RunE(cmd *cobra.Command, args []string) error {
+func (n *UnsubscribeCmd) RunE(cmd *cobra.Command, args []string) error {
 	cfg, err := n.factory.Config()
 	if err != nil {
 		return err
@@ -100,6 +92,7 @@ func (n *CreateCmd) RunE(cmd *cobra.Command, args []string) error {
 		query,
 		inputIterators,
 		flags.WithCustomStringSlice(func() ([]string, error) { return cfg.GetQueryParameters(), nil }, "custom"),
+		flags.WithStringValue("token", "token"),
 	)
 	if err != nil {
 		return cmderrors.NewUserError(err)
@@ -136,31 +129,18 @@ func (n *CreateCmd) RunE(cmd *cobra.Command, args []string) error {
 	}
 
 	// body
-	body := mapbuilder.NewInitializedMapBuilder(true)
+	body := mapbuilder.NewInitializedMapBuilder(false)
 	err = flags.WithBody(
 		cmd,
 		body,
 		inputIterators,
-		flags.WithOverrideValue("deviceType", "deviceType"),
-		flags.WithDataFlagValue(),
-		flags.WithStringValue("name", "name"),
-		flags.WithStringValue("description", "description"),
-		flags.WithStringValue("configurationType", "configurationType"),
-		flags.WithStringValue("url", "url"),
-		flags.WithStringValue("deviceType", "deviceType"),
-		c8ybinary.WithBinaryUploadURL(client, n.factory.IOStreams.ProgressIndicator(), "file", "url"),
-		flags.WithDefaultTemplateString(`
-{type: 'c8y_ConfigurationDump', c8y_Global:{}}`),
-		cmdutil.WithTemplateValue(cfg),
-		flags.WithTemplateVariablesValue(),
-		flags.WithRequiredProperties("type", "name", "url"),
 	)
 	if err != nil {
 		return cmderrors.NewUserError(err)
 	}
 
 	// path parameters
-	path := flags.NewStringTemplate("inventory/managedObjects")
+	path := flags.NewStringTemplate("notification2/unsubscribe")
 	err = flags.WithPathParameters(
 		cmd,
 		path,
@@ -179,9 +159,6 @@ func (n *CreateCmd) RunE(cmd *cobra.Command, args []string) error {
 		Header:       headers,
 		IgnoreAccept: cfg.IgnoreAcceptHeader(),
 		DryRun:       cfg.ShouldUseDryRun(cmd.CommandPath()),
-	}
-	inputIterators.PipeOptions.PostActions = []flags.Action{
-		&c8ydata.AddChildAddition{Client: client, URLProperty: "url"},
 	}
 
 	return n.factory.RunWithWorkers(client, cmd, &req, inputIterators)

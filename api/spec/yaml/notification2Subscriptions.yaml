@@ -1,0 +1,225 @@
+# yaml-language-server: $schema=../schema.json
+---
+information:
+  name: notification2/subscriptions
+  description: Cumulocity notification2 subscriptions
+  descriptionLong: Methods to create, retrieve and delete notification subscriptions
+  link: https://cumulocity.com/guides/reference/notifications/
+
+endpoints:
+  - name: listSubscriptions
+    method: GET
+    description: Get subscription collection
+    descriptionLong: Retrieve all subscriptions on your tenant, or a specific subset based on queries.
+    examples:
+      powershell:
+        - description: Get existing subscriptions
+          command: Get-Notification2SubscriptionCollection
+
+      go:
+        - description: Get existing subscriptions
+          command: c8y notification2 subscriptions list
+        
+        - description: Get all subscriptions for the managed object scope
+          command: c8y notification2 subscriptions list --context mo
+        
+        - description: Get all subscriptions related to a specific source
+          command: c8y notification2 subscriptions list --device 12345
+
+    path: notification2/subscriptions
+    accept: application/vnd.com.nsn.cumulocity.subscriptioncollection+json
+    collectionType: application/vnd.com.nsn.cumulocity.subscription+json
+    collectionProperty: subscriptions
+    alias:
+        go: list
+        powershell: Get-Notification2SubscriptionCollection
+    queryParameters:
+      - name: device
+        type: '[]device'
+        pipeline: true
+        property: source
+        description: The managed object ID to which the subscription is associated.
+
+      - name: context
+        type: string
+        validationSet:
+          - "mo"
+          - "tenant"
+        description: The context to which the subscription is associated.
+
+  - name: createSubscription
+    method: POST
+    path: notification2/subscriptions
+    accept: application/vnd.com.nsn.cumulocity.subscriptioncollection+json
+    description: 'Create subscription'
+    descriptionLong: Create a subscription
+    examples:
+      powershell:
+        - description: Create a new subscription to operations for a specific device
+          command: New-Notification2Subscription -Name deviceSub -Device 12345 -Context mo -ApiFilter operations
+      go:
+        - description: Create a new subscription to operations for a specific device
+          command: c8y notification2 subscriptions create --name deviceSub --device 12345 --context mo --apiFilter operations --apiFilter alarms
+          assertStdOut:
+            json:
+              method: POST
+              path: /notification2/subscriptions
+              body.subscriptionFilter.apis.0: operations
+              body.subscriptionFilter.apis.1: alarms
+              body.source.id: "12345"
+              body.context: "mo"
+        
+        - description: Create a subscription which groups all devices in a single subscription name
+          skipTest: true
+          command: |
+            echo -e "1111\n2222" | c8y notification2 subscriptions create --name devicegroup --context mo --apiFilter operations
+        
+        - description: Create a subscription which groups all devices in a single subscription name
+          skipTest: true
+          command: |
+            c8y devices list | c8y notification2 subscriptions create --name devicegroup --context mo --apiFilter operations
+    alias:
+        go: create
+        powershell: New-Notification2Subscription
+    body:
+      - name: device
+        type: '[]device'
+        pipeline: true
+        property: source.id
+        description: The managed object to which the subscription is associated.
+
+      - name: name
+        property: subscription
+        type: subscriptionName
+        description: The subscription name. Each subscription is identified by a unique name within a specific context.
+
+      - name: context
+        type: string
+        validationSet:
+          - "mo"
+          - "tenant"
+        description: The context to which the subscription is associated.
+
+      - name: fragmentsToCopy
+        type: '[]string'
+        description: Transforms the data to only include specified custom fragments. Each custom fragment is identified by a unique name. If nothing is specified here, the data is forwarded as-is.
+
+      - name: apiFilter
+        type: '[]string'
+        property: subscriptionFilter.apis
+        validationSet:
+          - "alarms"
+          - "events"
+          - "managedobjects"
+          - "measurements"
+          - "operations"
+          - "*"
+        description: Filter notifications by api
+
+      - name: typeFilter
+        type: string
+        property: subscriptionFilter.typeFilter
+        description: The data needs to have the specified value in its type property to meet the filter criteria.
+
+      - name: data
+        type: json
+        description: Additional properties
+    bodyRequiredKeys:
+      - "context"
+      - "subscription"
+
+  - name: getSubscription
+    description: Get subscription
+    descriptionLong: Get a subscription by id
+    method: GET
+    path: notification2/subscriptions/{id}
+    accept: application/vnd.com.nsn.cumulocity.subscriptioncollection+json
+    examples:
+      powershell:
+        - description: Get an existing subscription
+          command: Get-Notification2Subscription -Id 12345
+
+      go:
+        - description: Get an existing subscription
+          command: c8y notification2 subscriptions get --id 12345
+
+        - description: Get an existing subscription (using pipeline)
+          command: echo 12345 | c8y notification2 subscriptions get
+          assertStdOut:
+            json:
+                method: GET
+                path: /notification2/subscriptions/12345
+    alias:
+        go: get
+        powershell: Get-Notification2Subscription
+    pathParameters:
+      - name: id
+        type: subscriptionId
+        pipeline: true
+        description: Unique identifier of the notification subscription.
+        required: true
+
+  - name: deleteBySource
+    method: DELETE
+    path: notification2/subscriptions
+    accept: ''
+    description: Delete subscription by source
+    descriptionLong: Delete an existing subscription associated to a managed object
+    examples:
+      powershell:
+        - description: Delete a subscription associated with a device
+          command: Delete-Notification2SubscriptionBySource -Device 12345
+      go:
+        - description: Delete a subscription associated with a device
+          command: c8y notification2 subscriptions deleteBySource --device 12345
+    alias:
+        go: deleteBySource
+        powershell: Delete-Notification2SubscriptionBySource
+    queryParameters:
+      - name: device
+        type: '[]device'
+        pipeline: true
+        property: source
+        description: The managed object to which the subscription is associated.
+
+      - name: context
+        type: string
+        validationSet:
+          - "mo"
+          - "tenant"
+        description: The context to which the subscription is associated.
+
+  - name: deleteById
+    method: DELETE
+    path: notification2/subscriptions/{id}
+    accept: ''
+    description: Delete subscription
+    descriptionLong: Remove a specific subscription by a given ID
+    examples:
+      powershell:
+        - description: Delete a subscription
+          command: Delete-Notification2Subscription -Id 12345
+      go:
+        - description: Delete a subscription
+          command: c8y notification2 subscriptions delete --id 12345
+
+        - description: Delete a subscription (using pipeline)
+          command: echo 12345 | c8y notification2 subscriptions delete
+          assertStdOut:
+            json:
+                method: DELETE
+                path: /notification2/subscriptions/12345
+
+        - description: Delete all subscriptions which share the same subscription name (using client side filtering)
+          command: c8y notification2 subscriptions list --filter "subscription like mysub" -p 100 | c8y notification2 subscriptions delete
+          skipTest: true
+    alias:
+        go: delete
+        powershell: Delete-Notification2Subscription
+
+    pathParameters:
+      - name: id
+        type: subscriptionId
+        pipeline: true
+        description: Unique identifier of the notification subscription.
+        required: true

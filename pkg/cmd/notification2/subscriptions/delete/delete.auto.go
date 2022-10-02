@@ -1,13 +1,11 @@
 // Code generated from specification version 1.0.0: DO NOT EDIT
-package create
+package delete
 
 import (
 	"io"
 	"net/http"
 
 	"github.com/MakeNowJust/heredoc/v2"
-	"github.com/reubenmiller/go-c8y-cli/v2/pkg/c8ybinary"
-	"github.com/reubenmiller/go-c8y-cli/v2/pkg/c8ydata"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/subcommand"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
@@ -18,57 +16,52 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// CreateCmd command
-type CreateCmd struct {
+// DeleteCmd command
+type DeleteCmd struct {
 	*subcommand.SubCommand
 
 	factory *cmdutil.Factory
 }
 
-// NewCreateCmd creates a command to Create configuration file
-func NewCreateCmd(f *cmdutil.Factory) *CreateCmd {
-	ccmd := &CreateCmd{
+// NewDeleteCmd creates a command to Delete subscription
+func NewDeleteCmd(f *cmdutil.Factory) *DeleteCmd {
+	ccmd := &DeleteCmd{
 		factory: f,
 	}
 	cmd := &cobra.Command{
-		Use:   "create",
-		Short: "Create configuration file",
-		Long:  `Create a new configuration file (managedObject)`,
+		Use:   "delete",
+		Short: "Delete subscription",
+		Long:  `Remove a specific subscription by a given ID`,
 		Example: heredoc.Doc(`
-$ c8y configuration create --name "agent config" --description "Default agent configuration" --configurationType "agentConfig" --url "https://test.com/content/raw/app.json"
-Create a configuration package
+$ c8y notification2 subscriptions delete --id 12345
+Delete a subscription
 
-$ echo -e "c8y_Linux\nc8y_MacOS\nc8y_Windows" | c8y configuration create --name "default-vpn-config" --configurationType "VPN_CONFIG" --file default.vpn
-Create multiple configurations using different device type filters (via pipeline)
-The stdin will be mapped to the deviceType property. This was you can easily make the same configuration
-available for multiple device types
+$ echo 12345 | c8y notification2 subscriptions delete
+Delete a subscription (using pipeline)
 
+$ c8y notification2 subscriptions list --filter "subscription like mysub" -p 100 | c8y notification2 subscriptions delete
+Delete all subscriptions which share the same subscription name (using client side filtering)
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
-			return f.CreateModeEnabled()
+			return f.DeleteModeEnabled()
 		},
 		RunE: ccmd.RunE,
 	}
 
 	cmd.SilenceUsage = true
 
-	cmd.Flags().String("name", "", "name")
-	cmd.Flags().String("description", "", "Description of the configuration package")
-	cmd.Flags().String("configurationType", "", "Configuration type")
-	cmd.Flags().String("url", "", "URL link to the configuration file")
-	cmd.Flags().String("deviceType", "", "Device type filter. Only allow configuration to be applied to devices of this type (accepts pipeline)")
-	cmd.Flags().String("file", "", "File to upload")
+	cmd.Flags().String("id", "", "Unique identifier of the notification subscription. (required) (accepts pipeline)")
 
 	completion.WithOptions(
 		cmd,
+		completion.WithNotification2SubscriptionId("id", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
 	)
 
 	flags.WithOptions(
 		cmd,
 		flags.WithProcessingMode(),
-		flags.WithData(),
-		f.WithTemplateFlag(cmd),
-		flags.WithExtendedPipelineSupport("deviceType", "deviceType", false, "c8y_Filter.type", "deviceType", "type"),
+
+		flags.WithExtendedPipelineSupport("id", "id", true),
 	)
 
 	// Required flags
@@ -79,7 +72,7 @@ available for multiple device types
 }
 
 // RunE executes the command
-func (n *CreateCmd) RunE(cmd *cobra.Command, args []string) error {
+func (n *DeleteCmd) RunE(cmd *cobra.Command, args []string) error {
 	cfg, err := n.factory.Config()
 	if err != nil {
 		return err
@@ -136,42 +129,30 @@ func (n *CreateCmd) RunE(cmd *cobra.Command, args []string) error {
 	}
 
 	// body
-	body := mapbuilder.NewInitializedMapBuilder(true)
+	body := mapbuilder.NewInitializedMapBuilder(false)
 	err = flags.WithBody(
 		cmd,
 		body,
 		inputIterators,
-		flags.WithOverrideValue("deviceType", "deviceType"),
-		flags.WithDataFlagValue(),
-		flags.WithStringValue("name", "name"),
-		flags.WithStringValue("description", "description"),
-		flags.WithStringValue("configurationType", "configurationType"),
-		flags.WithStringValue("url", "url"),
-		flags.WithStringValue("deviceType", "deviceType"),
-		c8ybinary.WithBinaryUploadURL(client, n.factory.IOStreams.ProgressIndicator(), "file", "url"),
-		flags.WithDefaultTemplateString(`
-{type: 'c8y_ConfigurationDump', c8y_Global:{}}`),
-		cmdutil.WithTemplateValue(cfg),
-		flags.WithTemplateVariablesValue(),
-		flags.WithRequiredProperties("type", "name", "url"),
 	)
 	if err != nil {
 		return cmderrors.NewUserError(err)
 	}
 
 	// path parameters
-	path := flags.NewStringTemplate("inventory/managedObjects")
+	path := flags.NewStringTemplate("notification2/subscriptions/{id}")
 	err = flags.WithPathParameters(
 		cmd,
 		path,
 		inputIterators,
+		flags.WithStringValue("id", "id"),
 	)
 	if err != nil {
 		return err
 	}
 
 	req := c8y.RequestOptions{
-		Method:       "POST",
+		Method:       "DELETE",
 		Path:         path.GetTemplate(),
 		Query:        queryValue,
 		Body:         body,
@@ -179,9 +160,6 @@ func (n *CreateCmd) RunE(cmd *cobra.Command, args []string) error {
 		Header:       headers,
 		IgnoreAccept: cfg.IgnoreAcceptHeader(),
 		DryRun:       cfg.ShouldUseDryRun(cmd.CommandPath()),
-	}
-	inputIterators.PipeOptions.PostActions = []flags.Action{
-		&c8ydata.AddChildAddition{Client: client, URLProperty: "url"},
 	}
 
 	return n.factory.RunWithWorkers(client, cmd, &req, inputIterators)

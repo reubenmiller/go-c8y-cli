@@ -326,11 +326,21 @@ func formatJsonAssertion(jsonAssertion map[string]string, propType string, prop 
 		}
 		return
 	}
-	for _, value := range values {
-		// Apply GJSON query in the format of:
-		// ..#(body.managedObject.id="12222").body.managedObject.id: "12222"
-		query := fmt.Sprintf(`..#(%[1]s="%[2]s").%[1]s`, prop, value)
-		jsonAssertion[query] = value
+
+	containsBodyAssertionAlready := false
+	for key := range jsonAssertion {
+		if strings.HasPrefix(key, "body.") {
+			containsBodyAssertionAlready = true
+			break
+		}
+	}
+	if !containsBodyAssertionAlready {
+		for _, value := range values {
+			// Apply GJSON query in the format of:
+			// ..#(body.managedObject.id="12222").body.managedObject.id: "12222"
+			query := fmt.Sprintf(`..#(%[1]s="%[2]s").%[1]s`, prop, value)
+			jsonAssertion[query] = value
+		}
 	}
 }
 

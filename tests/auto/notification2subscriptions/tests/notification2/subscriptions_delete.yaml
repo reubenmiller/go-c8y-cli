@@ -1,0 +1,23 @@
+tests:
+    notification2/subscriptions_delete_Delete a subscription:
+        command: c8y notification2 subscriptions delete --id 12345
+        exit-code: 0
+        stdout:
+            json:
+                method: DELETE
+                path: /notification2/subscriptions/12345
+    notification2/subscriptions_delete_Delete a subscription (using pipeline):
+        command: $TEST_SHELL -c 'echo 12345 | c8y notification2 subscriptions delete'
+        exit-code: 0
+        stdout:
+            json:
+                method: DELETE
+                path: /notification2/subscriptions/12345
+    notification2/subscriptions_delete_Delete all subscriptions which share the same subscription name (using client side filtering):
+        command: $TEST_SHELL -c 'c8y notification2 subscriptions list --filter "subscription like mysub" -p 100 | c8y notification2 subscriptions delete'
+        exit-code: 0
+        skip: true
+        stdout:
+            json:
+                method: DELETE
+                path: /notification2/subscriptions/{id}

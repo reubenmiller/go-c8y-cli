@@ -93,6 +93,10 @@
         # tenantname (optional)
         "tenantname" = "flags.WithStringValue(`"${prop}`", `"${queryParam}`"$FormatValue),"
 
+        # Notifiation2
+        "subscriptionName" = "flags.WithStringValue(`"${prop}`", `"${queryParam}`"$FormatValue),"
+        "subscriptionId" = "flags.WithStringValue(`"${prop}`", `"${queryParam}`"$FormatValue),"
+
         # application
         "application" = "c8yfetcher.WithApplicationByNameFirstMatch(client, args, `"${prop}`", `"${queryParam}`"$FormatValue),"
 

@@ -6,8 +6,6 @@ import (
 	"net/http"
 
 	"github.com/MakeNowJust/heredoc/v2"
-	"github.com/reubenmiller/go-c8y-cli/v2/pkg/c8ybinary"
-	"github.com/reubenmiller/go-c8y-cli/v2/pkg/c8ydata"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmd/subcommand"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmderrors"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/cmdutil"
@@ -25,24 +23,21 @@ type CreateCmd struct {
 	factory *cmdutil.Factory
 }
 
-// NewCreateCmd creates a command to Create configuration file
+// NewCreateCmd creates a command to Create a token
 func NewCreateCmd(f *cmdutil.Factory) *CreateCmd {
 	ccmd := &CreateCmd{
 		factory: f,
 	}
 	cmd := &cobra.Command{
 		Use:   "create",
-		Short: "Create configuration file",
-		Long:  `Create a new configuration file (managedObject)`,
+		Short: "Create a token",
+		Long:  `Create a token to use for subscribing to notifications`,
 		Example: heredoc.Doc(`
-$ c8y configuration create --name "agent config" --description "Default agent configuration" --configurationType "agentConfig" --url "https://test.com/content/raw/app.json"
-Create a configuration package
+$ c8y notification2 tokens create --name testSubscription --subscriber testSubscriber --expiresInMinutes 1440
+Create a new token for a subscription which is valid for 1 day
 
-$ echo -e "c8y_Linux\nc8y_MacOS\nc8y_Windows" | c8y configuration create --name "default-vpn-config" --configurationType "VPN_CONFIG" --file default.vpn
-Create multiple configurations using different device type filters (via pipeline)
-The stdin will be mapped to the deviceType property. This was you can easily make the same configuration
-available for multiple device types
-
+$ c8y notification2 tokens create --name testSubscription --subscriber testSubscriber --expiresInMinutes 30
+Create a new token which is valid for 30 minutes
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
 			return f.CreateModeEnabled()
@@ -52,15 +47,15 @@ available for multiple device types
 
 	cmd.SilenceUsage = true
 
-	cmd.Flags().String("name", "", "name")
-	cmd.Flags().String("description", "", "Description of the configuration package")
-	cmd.Flags().String("configurationType", "", "Configuration type")
-	cmd.Flags().String("url", "", "URL link to the configuration file")
-	cmd.Flags().String("deviceType", "", "Device type filter. Only allow configuration to be applied to devices of this type (accepts pipeline)")
-	cmd.Flags().String("file", "", "File to upload")
+	cmd.Flags().String("subscriber", "", "The subscriber name which the client wishes to be identified with. (accepts pipeline)")
+	cmd.Flags().String("name", "", "The subscription name. This value must match the same that was used when the subscription was created.")
+	cmd.Flags().Int("expiresInMinutes", 1440, "The token expiration duration.")
+	cmd.Flags().String("shared", "", "Subscription is shared amongst multiple subscribers")
 
 	completion.WithOptions(
 		cmd,
+		completion.WithNotification2SubscriptionName("name", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
+		completion.WithValidateSet("shared", "true", "false"),
 	)
 
 	flags.WithOptions(
@@ -68,7 +63,7 @@ available for multiple device types
 		flags.WithProcessingMode(),
 		flags.WithData(),
 		f.WithTemplateFlag(cmd),
-		flags.WithExtendedPipelineSupport("deviceType", "deviceType", false, "c8y_Filter.type", "deviceType", "type"),
+		flags.WithExtendedPipelineSupport("subscriber", "subscriber", false, "id"),
 	)
 
 	// Required flags
@@ -141,26 +136,22 @@ func (n *CreateCmd) RunE(cmd *cobra.Command, args []string) error {
 		cmd,
 		body,
 		inputIterators,
-		flags.WithOverrideValue("deviceType", "deviceType"),
+		flags.WithOverrideValue("subscriber", "subscriber"),
 		flags.WithDataFlagValue(),
-		flags.WithStringValue("name", "name"),
-		flags.WithStringValue("description", "description"),
-		flags.WithStringValue("configurationType", "configurationType"),
-		flags.WithStringValue("url", "url"),
-		flags.WithStringValue("deviceType", "deviceType"),
-		c8ybinary.WithBinaryUploadURL(client, n.factory.IOStreams.ProgressIndicator(), "file", "url"),
-		flags.WithDefaultTemplateString(`
-{type: 'c8y_ConfigurationDump', c8y_Global:{}}`),
+		flags.WithStringValue("subscriber", "subscriber"),
+		flags.WithStringValue("name", "subscription"),
+		flags.WithIntValue("expiresInMinutes", "expiresInMinutes"),
+		flags.WithStringValue("shared", "shared"),
 		cmdutil.WithTemplateValue(cfg),
 		flags.WithTemplateVariablesValue(),
-		flags.WithRequiredProperties("type", "name", "url"),
+		flags.WithRequiredProperties("subscriber", "subscription"),
 	)
 	if err != nil {
 		return cmderrors.NewUserError(err)
 	}
 
 	// path parameters
-	path := flags.NewStringTemplate("inventory/managedObjects")
+	path := flags.NewStringTemplate("notification2/token")
 	err = flags.WithPathParameters(
 		cmd,
 		path,
@@ -179,9 +170,6 @@ func (n *CreateCmd) RunE(cmd *cobra.Command, args []string) error {
 		Header:       headers,
 		IgnoreAccept: cfg.IgnoreAcceptHeader(),
 		DryRun:       cfg.ShouldUseDryRun(cmd.CommandPath()),
-	}
-	inputIterators.PipeOptions.PostActions = []flags.Action{
-		&c8ydata.AddChildAddition{Client: client, URLProperty: "url"},
 	}
 
 	return n.factory.RunWithWorkers(client, cmd, &req, inputIterators)

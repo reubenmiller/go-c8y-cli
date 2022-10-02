@@ -1,7 +1,8 @@
 // Code generated from specification version 1.0.0: DO NOT EDIT
-package logout
+package get
 
 import (
+	"fmt"
 	"io"
 	"net/http"
 
@@ -16,43 +17,48 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// LogoutCmd command
-type LogoutCmd struct {
+// GetCmd command
+type GetCmd struct {
 	*subcommand.SubCommand
 
 	factory *cmdutil.Factory
 }
 
-// NewLogoutCmd creates a command to Logout current user
-func NewLogoutCmd(f *cmdutil.Factory) *LogoutCmd {
-	ccmd := &LogoutCmd{
+// NewGetCmd creates a command to Get subscription
+func NewGetCmd(f *cmdutil.Factory) *GetCmd {
+	ccmd := &GetCmd{
 		factory: f,
 	}
 	cmd := &cobra.Command{
-		Use:   "logout",
-		Short: "Logout current user",
-		Long:  `Logout the current user. This will invalidate the token associated with the user when using OAUTH_INTERNAL`,
+		Use:   "get",
+		Short: "Get subscription",
+		Long:  `Get a subscription by id`,
 		Example: heredoc.Doc(`
-$ c8y currentuser logout
-Log out the current user
+$ c8y notification2 subscriptions get --id 12345
+Get an existing subscription
+
+$ echo 12345 | c8y notification2 subscriptions get
+Get an existing subscription (using pipeline)
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
-			return f.CreateModeEnabled()
+			return nil
 		},
 		RunE: ccmd.RunE,
 	}
 
 	cmd.SilenceUsage = true
 
+	cmd.Flags().String("id", "", "Unique identifier of the notification subscription. (required) (accepts pipeline)")
+
 	completion.WithOptions(
 		cmd,
+		completion.WithNotification2SubscriptionId("id", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
 	)
 
 	flags.WithOptions(
 		cmd,
-		flags.WithProcessingMode(),
 
-		flags.WithExtendedPipelineSupport("", "", false),
+		flags.WithExtendedPipelineSupport("id", "id", true),
 	)
 
 	// Required flags
@@ -63,7 +69,7 @@ Log out the current user
 }
 
 // RunE executes the command
-func (n *LogoutCmd) RunE(cmd *cobra.Command, args []string) error {
+func (n *GetCmd) RunE(cmd *cobra.Command, args []string) error {
 	cfg, err := n.factory.Config()
 	if err != nil {
 		return err
@@ -88,6 +94,11 @@ func (n *LogoutCmd) RunE(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return cmderrors.NewUserError(err)
 	}
+	commonOptions, err := cfg.GetOutputCommonOptions(cmd)
+	if err != nil {
+		return cmderrors.NewUserError(fmt.Sprintf("Failed to get common options. err=%s", err))
+	}
+	commonOptions.AddQueryParameters(query)
 
 	queryValue, err := query.GetQueryUnescape(true)
 
@@ -102,7 +113,6 @@ func (n *LogoutCmd) RunE(cmd *cobra.Command, args []string) error {
 		headers,
 		inputIterators,
 		flags.WithCustomStringSlice(func() ([]string, error) { return cfg.GetHeader(), nil }, "header"),
-		flags.WithProcessingModeValue(),
 	)
 	if err != nil {
 		return cmderrors.NewUserError(err)
@@ -131,18 +141,19 @@ func (n *LogoutCmd) RunE(cmd *cobra.Command, args []string) error {
 	}
 
 	// path parameters
-	path := flags.NewStringTemplate("/user/logout")
+	path := flags.NewStringTemplate("notification2/subscriptions/{id}")
 	err = flags.WithPathParameters(
 		cmd,
 		path,
 		inputIterators,
+		flags.WithStringValue("id", "id"),
 	)
 	if err != nil {
 		return err
 	}
 
 	req := c8y.RequestOptions{
-		Method:       "POST",
+		Method:       "GET",
 		Path:         path.GetTemplate(),
 		Query:        queryValue,
 		Body:         body,

@@ -74,7 +74,11 @@
 
     # Body parameters
     if ($Specification.body) {
-        $null = $ArgumentSources.AddRange(([array]$Specification.body))
+        $values = [array]$Specification.body
+        $null = $ArgumentSources.AddRange(@($values | ForEach-Object {
+            $_ | Add-Member -MemberType NoteProperty -Name "ArgSource" -Value "body"
+            $_
+        }))
     }
 
     # Header parameters
@@ -129,7 +133,7 @@
             }
 
             if ($iArg.Type -notmatch "device\b|agent\b|group|devicegroup|self|application|hostedapplication|software\b|softwareName\b|softwareversion\b|softwareversionName\b|firmware\b|firmwareName\b|firmwareversion\b|firmwareversionName\b|firmwarepatch\b|firmwarepatchName\b|configuration\b|deviceprofile\b|microservice|\[\]id|\[\]devicerequest") {
-                if ($RESTMethod -match "POST") {
+                if ($RESTMethod -match "POST" -and $iArg.ArgSource -eq "body") {
                     # Add override capability to piped arguments, so the user can still override piped data with the argument
                     [void] $RESTBodyBuilderOptions.AppendLine("flags.WithOverrideValue(`"$($iarg.Name)`", `"$PipelineVariableProperty`"),")
                 }
@@ -211,6 +215,8 @@
             "(\[\])?configuration$" { [void] $CompletionBuilderOptions.AppendLine("completion.WithConfiguration(`"$($iArg.Name)`", func() (*c8y.Client, error) { return ccmd.factory.Client()}),") }
             "(\[\])?deviceprofile$" { [void] $CompletionBuilderOptions.AppendLine("completion.WithDeviceProfile(`"$($iArg.Name)`", func() (*c8y.Client, error) { return ccmd.factory.Client()}),") }
             "(\[\])?certificate$" { [void] $CompletionBuilderOptions.AppendLine("completion.WithDeviceCertificate(`"$($iArg.Name)`", func() (*c8y.Client, error) { return ccmd.factory.Client()}),") }
+            "subscriptionName$" { [void] $CompletionBuilderOptions.AppendLine("completion.WithNotification2SubscriptionName(`"$($iArg.Name)`", func() (*c8y.Client, error) { return ccmd.factory.Client()}),") }
+            "subscriptionId$" { [void] $CompletionBuilderOptions.AppendLine("completion.WithNotification2SubscriptionId(`"$($iArg.Name)`", func() (*c8y.Client, error) { return ccmd.factory.Client()}),") }
         }
 
         $ArgParams = @{
@@ -659,7 +665,7 @@ func (n *${NameCamel}Cmd) RunE(cmd *cobra.Command, args []string) error {
     
 
     // body
-    body := mapbuilder.NewInitializedMapBuilder($(($RESTMethod -match "PUT|POST").ToString().ToLower()))
+    body := mapbuilder.NewInitializedMapBuilder($(($RESTMethod -match "PUT|POST" -and $Specification.body).ToString().ToLower()))
     err = flags.WithBody(
         cmd,
         body,
@@ -1056,6 +1062,18 @@ Function Get-C8yGoArgs {
         }
 
         "string" {
+            $SetFlag = if ($UseOption) {
+                'cmd.Flags().StringP("{0}", "{1}", "{2}", "{3}")' -f $Name, $OptionName, $Default, $Description
+            } else {
+                'cmd.Flags().String("{0}", "{1}", "{2}")' -f $Name, $Default, $Description
+            }
+
+            @{
+                SetFlag = $SetFlag
+            }
+        }
+
+        { $_ -in "subscriptionName", "subscriptionId" } {
             $SetFlag = if ($UseOption) {
                 'cmd.Flags().StringP("{0}", "{1}", "{2}", "{3}")' -f $Name, $OptionName, $Default, $Description
             } else {
