@@ -1,0 +1,15 @@
+tests:
+    devices/services_list_Get a list of the child additions of an existing managed object:
+        command: c8y devices services list --device 12345
+        exit-code: 0
+        stdout:
+            json:
+                method: GET
+                path: /inventory/managedObjects/12345/childAdditions
+    devices/services_list_Get a list of the child devices of an existing managed object:
+        command: c8y devices services list --device 12345
+        exit-code: 0
+        stdout:
+            json:
+                method: GET
+                path: /inventory/managedObjects/12345/childAdditions

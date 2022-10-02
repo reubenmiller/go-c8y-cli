@@ -1,0 +1,12 @@
+tests:
+    devices/services_create_Create a child addition and link it to an existing managed object:
+        command: c8y devices services create --device 12345 --name ntp --status up
+        exit-code: 0
+        stdout:
+            json:
+                body.c8y_Global: '{}'
+                body.custom.value: test
+                body.name: ntp
+                body.status: up
+                method: POST
+                path: r//inventory/managedObjects/\d+/childAdditions$

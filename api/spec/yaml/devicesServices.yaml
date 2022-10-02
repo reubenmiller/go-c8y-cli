@@ -1,0 +1,221 @@
+# yaml-language-server: $schema=../schema.json
+---
+information:
+  name: devices/services
+  description: Cumulocity device services
+  descriptionLong: Managed device services (introduced in 10.14)
+  link: https://cumulocity.com/guides/10.14.0/reference/device-management-library/#services
+
+endpoints:
+  - name: listServices
+    method: GET
+    description: Get a device's services collection
+    descriptionLong: Get a collection of services of a device
+    path: inventory/managedObjects/{device}/childAdditions
+    accept: application/vnd.com.nsn.cumulocity.managedObjectReferenceCollection+json
+    collectionType: application/vnd.com.nsn.cumulocity.managedObject+json
+    collectionProperty: 'references.#.managedObject'
+    alias:
+        go: list
+        powershell: Get-DeviceServiceCollection
+    examples:
+      powershell:
+        - description: Get a list of the child additions of an existing managed object
+          command: Get-DeviceServiceCollection -Device 12345
+          skipTest: true
+
+        - description: Get a list of the child additions of an existing managed object (using pipeline)
+          command: Get-Device -Id 12345 | Get-DeviceServiceCollection
+          skipTest: true
+
+      go:
+        - description: Get services for a specific devices
+          command: c8y devices services list --device 12345
+
+        - description: Get services matching a specific name for a device
+          command: c8y devices get --id 12345 | c8y devices services list --name ntp
+          skipTest: true
+        
+        - description: Get services which are currently down
+          command: c8y devices services list --device 12345 --status down
+          skipTest: true
+
+    pathParameters:
+      - name: device
+        type: '[]device'
+        pipeline: true
+        pipelineAliases:
+          - "deviceId"
+          - "source.id"
+          - "managedObject.id"
+          - "id"
+        required: true
+        description: Managed object id.
+
+    queryParameters:
+      - name: query
+        description: Query expression group
+        property: query
+        type: queryExpression
+        children:
+          - name: type
+            type: stringStatic
+            description: ""
+            value: "(type eq 'c8y_Service')"
+
+          - name: query
+            type: string
+            description: Additional query filter
+            format: "%s"
+
+          - name: serviceType
+            type: string
+            description: Filter by service type e.g. systemd
+            format: "(serviceType eq '%s')"
+
+          - name: name
+            type: string
+            description: Filter by name
+            format: "(name eq '%s')"
+
+          - name: status
+            type: string
+            description: Filter by service status
+            validationSet:
+              - up
+              - down
+              - unknown
+            format: "(status eq '%s')"
+          
+          - name: orderBy
+            type: string
+            description: Order by. e.g. _id asc or name asc or creationTime.date desc
+
+  - name: createService
+    method: POST
+    path: inventory/managedObjects/{id}/childAdditions
+    accept: application/json
+    contentType: application/vnd.com.nsn.cumulocity.managedObject+json
+    collectionType: application/vnd.com.nsn.cumulocity.managedObject+json
+    description: Create service
+    descriptionLong: Create a new service which is attached to the given device
+    alias:
+        go: create
+        powershell: New-DeviceService
+    examples:
+        powershell:
+          - description: Create a child addition and link it to an existing managed object
+            command: New-DeviceService -Id $software.id -Data "custom.value=test" -Global -ChildType addition
+            skipTest: true
+        go:
+          - description: Create a child addition and link it to an existing managed object
+            command: c8y devices services create --device 12345 --name ntp --status up --serviceType systemd
+            assertStdOut:
+              json:
+                path: r//inventory/managedObjects/\d+/childAdditions$
+                body.name: ntp
+                body.status: up
+                body.serviceType: systemd
+
+    pathParameters:
+      - name: device
+        type: '[]device'
+        property: id
+        required: true
+        pipeline: true
+        pipelineAliases:
+          - "deviceId"
+          - "source.id"
+          - "managedObject.id"
+          - "id"
+        description: Managed object id where the child addition will be added to
+        position: 0
+
+    body:
+      - name: name
+        type: string
+        description: Service name
+      
+      - name: serviceType
+        type: string
+        description: Service type, e.g. systemd
+
+      - name: status
+        type: string
+        description: Service status
+        validationSet:
+          - up
+          - down
+          - unknown
+    
+      - name: type
+        type: stringStatic
+        description: type
+        value: c8y_Service
+
+      - name: data
+        type: json
+        description: Additional properties of the inventory.
+    
+    bodyRequiredKeys:
+      - name
+      - status
+      - type
+      - serviceType
+
+  - name: update
+    method: PUT
+    path: inventory/managedObjects/{id}
+    accept: application/json
+    contentType: application/vnd.com.nsn.cumulocity.managedObject+json
+    collectionType: application/vnd.com.nsn.cumulocity.managedObject+json
+    description: Update service status
+    descriptionLong: Update service status
+    alias:
+        go: update
+        powershell: Update-DeviceService
+    examples:
+        powershell:
+          - description: Update service status
+            command: Update-DeviceService -Id 12345 -Status up
+            skipTest: true
+        go:
+          - description: Update service status
+            command: c8y devices services update --id 12345 --status up
+          
+          - description: Update service status
+            command: c8y devices services --device 12345 --name ntp | c8y devices services update --status up
+            skipTest: true
+
+    pathParameters:
+      - name: id
+        type: '[]id'
+        property: id
+        required: true
+        pipeline: true
+        pipelineAliases:
+          - "managedObject.id"
+          - "id"
+        description: Service id
+        position: 0
+
+    body:
+      - name: name
+        type: string
+        description: Service name
+      
+      - name: serviceType
+        type: string
+        description: Service type, e.g. systemd
+
+      - name: status
+        type: string
+        description: Service status
+        validationSet:
+          - up
+          - down
+          - unknown
+
+      - name: data
+        type: json
+        description: Additional properties.
