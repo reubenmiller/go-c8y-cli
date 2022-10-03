@@ -37,8 +37,8 @@ func NewGetCmd(f *cmdutil.Factory) *GetCmd {
 	}
 	cmd := &cobra.Command{
 		Use:   "get",
-		Short: "Get addition parent",
-		Long:  `Get addition parent`,
+		Short: "Get managed object parent",
+		Long:  `Get managed object parent for relationship types (e.g. addition, asset, device)`,
 		Example: heredoc.Doc(`
 			$ c8y inventory parents get --id 12345 --type addition
 			Get parent of the child addition
