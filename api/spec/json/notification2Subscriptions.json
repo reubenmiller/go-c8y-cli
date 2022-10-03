@@ -223,7 +223,7 @@
         "powershell": [
           {
             "description": "Delete a subscription associated with a device",
-            "command": "Delete-Notification2SubscriptionBySource -Device 12345"
+            "command": "Remove-Notification2SubscriptionBySource -Device 12345"
           }
         ],
         "go": [
@@ -235,7 +235,7 @@
       },
       "alias": {
         "go": "deleteBySource",
-        "powershell": "Delete-Notification2SubscriptionBySource"
+        "powershell": "Remove-Notification2SubscriptionBySource"
       },
       "queryParameters": [
         {
@@ -267,7 +267,7 @@
         "powershell": [
           {
             "description": "Delete a subscription",
-            "command": "Delete-Notification2Subscription -Id 12345",
+            "command": "Remove-Notification2Subscription -Id 12345",
             "skipTest": true
           }
         ],
@@ -295,7 +295,7 @@
       },
       "alias": {
         "go": "delete",
-        "powershell": "Delete-Notification2Subscription"
+        "powershell": "Remove-Notification2Subscription"
       },
       "pathParameters": [
         {
