@@ -27,6 +27,7 @@ Function ConvertFrom-ClientOutput {
         $Depth = if ($BoundParameters.ContainsKey("Depth")) { $BoundParameters["Depth"] } else { 100 }
         $AsHashTable = if ($BoundParameters.ContainsKey("AsHashTable")) { $BoundParameters["AsHashTable"] } else { $false }
         $Raw = $BoundParameters["WithTotalPages"] `
+            -or $BoundParameters["WithTotalElements"] `
             -or $BoundParameters["Raw"]
         
         $UseNativeOutput = $BoundParameters["AsJSON"] `

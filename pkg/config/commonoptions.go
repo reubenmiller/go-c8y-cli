@@ -8,16 +8,17 @@ import (
 // CommonCommandOptions control the handling of the response which are available for all commands
 // which interact with the server
 type CommonCommandOptions struct {
-	ConfirmText    string
-	OutputFile     string
-	OutputFileRaw  string
-	Filters        *jsonfilter.JSONFilters
-	ResultProperty string
-	IncludeAll     bool
-	WithTotalPages bool
-	PageSize       int
-	CurrentPage    int64
-	TotalPages     int64
+	ConfirmText       string
+	OutputFile        string
+	OutputFileRaw     string
+	Filters           *jsonfilter.JSONFilters
+	ResultProperty    string
+	IncludeAll        bool
+	WithTotalPages    bool
+	WithTotalElements bool
+	PageSize          int
+	CurrentPage       int64
+	TotalPages        int64
 }
 
 // AddQueryParameters adds the common query parameters to the given query values
@@ -36,5 +37,9 @@ func (options CommonCommandOptions) AddQueryParameters(query *flags.QueryTemplat
 
 	if options.WithTotalPages {
 		query.SetVariable(flags.FlagWithTotalPages, "true")
+	}
+
+	if options.WithTotalElements {
+		query.SetVariable(flags.FlagWithTotalElements, "true")
 	}
 }

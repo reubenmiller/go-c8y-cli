@@ -64,6 +64,7 @@ Describe -Name "Get-Pagination" {
             $icmdlet | Should -HaveParameter "IncludeAll"
             $icmdlet | Should -HaveParameter "PageSize"
             $icmdlet | Should -HaveParameter "WithTotalPages"
+            $icmdlet | Should -HaveParameter "WithTotalElements"
             $icmdlet | Should -HaveParameter "Raw"
         }
     }
