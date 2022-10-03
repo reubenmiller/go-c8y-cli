@@ -781,6 +781,18 @@ func WithSoftwareVersionByNameFirstMatch(client *c8y.Client, args []string, opts
 	}
 }
 
+// WithSoftwareVersionByNameFirstMatch add reference by name matching for software version via cli args. Only the first match will be used
+func WithDeviceServiceByNameFirstMatch(client *c8y.Client, args []string, opts ...string) flags.GetOption {
+	return func(cmd *cobra.Command, inputIterators *flags.RequestInputIterators) (string, interface{}, error) {
+		device := ""
+		if v, err := cmd.Flags().GetStringSlice("device"); err == nil && len(v) > 0 {
+			device = v[0]
+		}
+		opt := WithReferenceByNameFirstMatch(client, NewDeviceServiceFetcher(client, device), args, opts...)
+		return opt(cmd, inputIterators)
+	}
+}
+
 // WithFirmwareByNameFirstMatch add reference by name matching for firmware via cli args. Only the first match will be used
 func WithFirmwareByNameFirstMatch(client *c8y.Client, args []string, opts ...string) flags.GetOption {
 	return func(cmd *cobra.Command, inputIterators *flags.RequestInputIterators) (string, interface{}, error) {

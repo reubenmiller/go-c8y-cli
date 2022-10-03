@@ -1,0 +1,26 @@
+tests:
+    devices/services_find_Find all services (from any device):
+        command: c8y devices services find
+        exit-code: 0
+        stdout:
+            json:
+                method: GET
+                path: /inventory/managedObjects
+    devices/services_find_Find any ntp services which are currently down:
+        command: c8y devices services find --name ntp --status down
+        exit-code: 0
+        stdout:
+            json:
+                method: GET
+                path: /inventory/managedObjects
+            contains:
+                - (name eq 'ntp') and (status eq 'down')
+    devices/services_find_Find any services which are currently down:
+        command: c8y devices services find --status down
+        exit-code: 0
+        stdout:
+            json:
+                method: GET
+                path: /inventory/managedObjects
+            contains:
+                - status eq 'down'

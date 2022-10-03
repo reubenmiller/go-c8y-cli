@@ -1,0 +1,9 @@
+tests:
+    devices/services_update_Update service status:
+        command: $TEST_SHELL -c 'c8y devices services list --device 12345 --name ntp | c8y devices services update --status up'
+        exit-code: 0
+        skip: true
+        stdout:
+            json:
+                method: PUT
+                path: /inventory/managedObjects/{id}
