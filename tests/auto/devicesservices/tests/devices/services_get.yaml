@@ -1,0 +1,24 @@
+tests:
+    devices/services_get_Get service by id:
+        command: c8y devices services get --id 22222
+        exit-code: 0
+        stdout:
+            json:
+                method: GET
+                path: /inventory/managedObjects/22222
+    devices/services_get_Get service by name:
+        command: c8y devices services get --device 11111 --id ntp
+        exit-code: 0
+        skip: true
+        stdout:
+            json:
+                method: GET
+                path: /inventory/managedObjects/ntp
+    devices/services_get_Get service status (using pipeline):
+        command: $TEST_SHELL -c 'c8y devices services list --device 12345 --name ntp | c8y devices services get'
+        exit-code: 0
+        skip: true
+        stdout:
+            json:
+                method: GET
+                path: /inventory/managedObjects/{id}

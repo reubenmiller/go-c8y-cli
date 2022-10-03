@@ -134,6 +134,8 @@
         # software version array
         "[]softwareversion" = "c8yfetcher.WithSoftwareVersionByNameFirstMatch(client, args, `"${prop}`", `"${queryParam}`"$FormatValue),"
 
+        "[]deviceservice" = "c8yfetcher.WithDeviceServiceByNameFirstMatch(client, args, `"${prop}`", `"${queryParam}`"$FormatValue),"
+
         # software version name
         "softwareversionName" = "flags.WithStringValue(`"${prop}`", `"${queryParam}`"$FormatValue),"
 

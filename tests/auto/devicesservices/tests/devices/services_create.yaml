@@ -1,0 +1,11 @@
+tests:
+    devices/services_create_Create a new service for a device (as a child addition):
+        command: c8y devices services create --device 12345 --name ntp --status up --serviceType systemd
+        exit-code: 0
+        stdout:
+            json:
+                body.name: ntp
+                body.serviceType: systemd
+                body.status: up
+                method: POST
+                path: r//inventory/managedObjects/\d+/childAdditions$

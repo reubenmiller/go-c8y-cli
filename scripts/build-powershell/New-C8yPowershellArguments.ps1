@@ -67,6 +67,7 @@
         "[]smartgroup" { "object[]"; break }
         "[]software" { "object[]"; break }
         "[]softwareversion" { "object[]"; break }
+        "[]deviceservice" { "object[]"; break }
         "[]string" { "string[]"; break }
         "[]stringcsv" { "string[]"; break }
         "[]tenant" { "object[]"; break }
