@@ -358,6 +358,7 @@ FunctionsToExport = @(
 	'Get-ClientSetting',
 	'Get-DeviceBootstrapCredential',
 	'Get-DeviceParent',
+	'Get-ManagedObjectParent',
 	'Get-ServiceUser',
 	'Get-Session',
 	'Get-SessionCollection',
