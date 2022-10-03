@@ -5,13 +5,13 @@ Describe -Name "Get-DeviceServiceCollection" {
 
     }
 
-    It -Skip "Get a list of the child additions of an existing managed object" {
-        $Response = PSc8y\Get-DeviceServiceCollection -Id 12345
+    It -Skip "Get services for a specific device" {
+        $Response = PSc8y\Get-DeviceServiceCollection -Device 12345
         $LASTEXITCODE | Should -Be 0
         $Response | Should -Not -BeNullOrEmpty
     }
 
-    It -Skip "Get a list of the child additions of an existing managed object (using pipeline)" {
+    It -Skip "Get services for a specific device (using pipeline)" {
         $Response = PSc8y\Get-Device -Id 12345 | Get-DeviceServiceCollection
         $LASTEXITCODE | Should -Be 0
         $Response | Should -Not -BeNullOrEmpty

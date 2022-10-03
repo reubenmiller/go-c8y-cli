@@ -5,7 +5,7 @@ Describe -Name "New-DeviceService" {
 
     }
 
-    It -Skip "Create a child addition and link it to an existing managed object" {
+    It -Skip "Create a new service for a device (as a child addition)" {
         $Response = PSc8y\New-DeviceService -Id $software.id -Data "custom.value=test" -Global -ChildType addition
         $LASTEXITCODE | Should -Be 0
         $Response | Should -Not -BeNullOrEmpty

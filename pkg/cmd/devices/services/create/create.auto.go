@@ -24,18 +24,18 @@ type CreateCmd struct {
 	factory *cmdutil.Factory
 }
 
-// NewCreateCmd creates a command to Create child
+// NewCreateCmd creates a command to Create service
 func NewCreateCmd(f *cmdutil.Factory) *CreateCmd {
 	ccmd := &CreateCmd{
 		factory: f,
 	}
 	cmd := &cobra.Command{
 		Use:   "create",
-		Short: "Create child",
-		Long:  `Create a new managed object and assign it to an existing managed object as a child`,
+		Short: "Create service",
+		Long:  `Create a new service which is attached to the given device`,
 		Example: heredoc.Doc(`
-$ c8y devices services create --device 12345 --name ntp --status up
-Create a child addition and link it to an existing managed object
+$ c8y devices services create --device 12345 --name ntp --status up --serviceType systemd
+Create a new service for a device (as a child addition)
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
 			return f.CreateModeEnabled()
@@ -45,7 +45,7 @@ Create a child addition and link it to an existing managed object
 
 	cmd.SilenceUsage = true
 
-	cmd.Flags().StringSlice("device", []string{""}, "Managed object id where the child addition will be added to (required) (accepts pipeline)")
+	cmd.Flags().StringSlice("device", []string{""}, "Device id (required) (accepts pipeline)")
 	cmd.Flags().String("name", "", "Service name")
 	cmd.Flags().String("serviceType", "", "Service type, e.g. systemd")
 	cmd.Flags().String("status", "", "Service status")

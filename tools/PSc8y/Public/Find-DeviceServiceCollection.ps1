@@ -1,24 +1,19 @@
 ﻿# Code generated from specification version 1.0.0: DO NOT EDIT
-Function Get-DeviceServiceCollection {
+Function Find-DeviceServiceCollection {
 <#
 .SYNOPSIS
-Get device services collection
+Find services
 
 .DESCRIPTION
-Get a collection of services of a device
+Find services of any device
 
 .LINK
-https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/devices_services_list
+https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/devices_services_find
 
 .EXAMPLE
-PS> Get-DeviceServiceCollection -Device 12345
+PS> Find-DeviceServiceCollection
 
-Get services for a specific device
-
-.EXAMPLE
-PS> Get-Device -Id 12345 | Get-DeviceServiceCollection
-
-Get services for a specific device (using pipeline)
+Find all services (from any device)
 
 
 #>
@@ -27,13 +22,6 @@ Get services for a specific device (using pipeline)
     [Alias()]
     [OutputType([object])]
     Param(
-        # Device id (required for name lookup) (required)
-        [Parameter(Mandatory = $true,
-                   ValueFromPipeline=$true,
-                   ValueFromPipelineByPropertyName=$true)]
-        [object[]]
-        $Device,
-
         # Additional query filter
         [Parameter()]
         [string]
@@ -49,7 +37,7 @@ Get services for a specific device (using pipeline)
         [string]
         $Name,
 
-        # Filter by service status
+        # Filter by service status (custom values allowed)
         [Parameter()]
         [ValidateSet('up','down','unknown')]
         [string]
@@ -58,7 +46,12 @@ Get services for a specific device (using pipeline)
         # Order by. e.g. _id asc or name asc or creationTime.date desc
         [Parameter()]
         [string]
-        $OrderBy
+        $OrderBy,
+
+        # Include a flat list of all parents and grandparents of the given object
+        [Parameter()]
+        [switch]
+        $WithParents
     )
     DynamicParam {
         Get-ClientCommonParameters -Type "Get", "Collection"
@@ -71,7 +64,7 @@ Get services for a specific device (using pipeline)
             Use-CallerPreference -Cmdlet $PSCmdlet -SessionState $ExecutionContext.SessionState
         }
 
-        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "devices services list"
+        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "devices services find"
         $ClientOptions = Get-ClientOutputOption $PSBoundParameters
         $TypeOptions = @{
             Type = "application/vnd.com.nsn.cumulocity.managedObjectReferenceCollection+json"
@@ -83,17 +76,12 @@ Get services for a specific device (using pipeline)
     Process {
 
         if ($ClientOptions.ConvertToPS) {
-            $Device `
-            | Group-ClientRequests `
-            | c8y devices services list $c8yargs `
+            c8y devices services find $c8yargs `
             | ConvertFrom-ClientOutput @TypeOptions
         }
         else {
-            $Device `
-            | Group-ClientRequests `
-            | c8y devices services list $c8yargs
+            c8y devices services find $c8yargs
         }
-        
     }
 
     End {}

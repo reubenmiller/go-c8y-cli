@@ -132,7 +132,7 @@
                 }
             }
 
-            if ($iArg.Type -notmatch "device\b|agent\b|group|devicegroup|self|application|hostedapplication|software\b|softwareName\b|softwareversion\b|softwareversionName\b|firmware\b|firmwareName\b|firmwareversion\b|firmwareversionName\b|firmwarepatch\b|firmwarepatchName\b|configuration\b|deviceprofile\b|microservice|\[\]id|\[\]devicerequest") {
+            if ($iArg.Type -notmatch "device\b|agent\b|group|devicegroup|self|application|hostedapplication|software\b|softwareName\b|deviceservice\b|softwareversion\b|softwareversionName\b|firmware\b|firmwareName\b|firmwareversion\b|firmwareversionName\b|firmwarepatch\b|firmwarepatchName\b|configuration\b|deviceprofile\b|microservice|\[\]id|\[\]devicerequest") {
                 if ($RESTMethod -match "POST" -and $iArg.ArgSource -eq "body") {
                     # Add override capability to piped arguments, so the user can still override piped data with the argument
                     [void] $RESTBodyBuilderOptions.AppendLine("flags.WithOverrideValue(`"$($iarg.Name)`", `"$PipelineVariableProperty`"),")
@@ -214,6 +214,7 @@
             "(\[\])?firmwarepatch(name)?$" { [void] $CompletionBuilderOptions.AppendLine("completion.WithFirmwarePatch(`"$($iArg.Name)`", `"$($iArg.dependsOn | Select-Object -First 1)`", func() (*c8y.Client, error) { return ccmd.factory.Client()}),") }
             "(\[\])?configuration$" { [void] $CompletionBuilderOptions.AppendLine("completion.WithConfiguration(`"$($iArg.Name)`", func() (*c8y.Client, error) { return ccmd.factory.Client()}),") }
             "(\[\])?deviceprofile$" { [void] $CompletionBuilderOptions.AppendLine("completion.WithDeviceProfile(`"$($iArg.Name)`", func() (*c8y.Client, error) { return ccmd.factory.Client()}),") }
+            "(\[\])?deviceservice$" { [void] $CompletionBuilderOptions.AppendLine("completion.WithDeviceService(`"$($iArg.Name)`", `"$($iArg.dependsOn | Select-Object -First 1)`", func() (*c8y.Client, error) { return ccmd.factory.Client()}),") }
             "(\[\])?certificate$" { [void] $CompletionBuilderOptions.AppendLine("completion.WithDeviceCertificate(`"$($iArg.Name)`", func() (*c8y.Client, error) { return ccmd.factory.Client()}),") }
             "subscriptionName$" { [void] $CompletionBuilderOptions.AppendLine("completion.WithNotification2SubscriptionName(`"$($iArg.Name)`", func() (*c8y.Client, error) { return ccmd.factory.Client()}),") }
             "subscriptionId$" { [void] $CompletionBuilderOptions.AppendLine("completion.WithNotification2SubscriptionId(`"$($iArg.Name)`", func() (*c8y.Client, error) { return ccmd.factory.Client()}),") }
@@ -898,6 +899,19 @@ Function Get-C8yGoArgs {
 
         # Management repository types
         { $_ -in "[]software", "[]softwareversion", "[]firmware", "[]firmwareversion", "[]firmwarepatch", "[]configuration", "[]deviceprofile" } {
+            $SetFlag = if ($UseOption) {
+                "cmd.Flags().StringSliceP(`"${Name}`", []string{`"${Default}`"}, `"${OptionName}`", `"${Description}`")"
+            } else {
+                "cmd.Flags().StringSlice(`"${Name}`", []string{`"${Default}`"}, `"${Description}`")"
+            }
+
+            @{
+                SetFlag = $SetFlag
+            }
+        }
+
+        # Device extensions
+        { $_ -in @("[]deviceservice") } {
             $SetFlag = if ($UseOption) {
                 "cmd.Flags().StringSliceP(`"${Name}`", []string{`"${Default}`"}, `"${OptionName}`", `"${Description}`")"
             } else {

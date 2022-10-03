@@ -1,5 +1,5 @@
 // Code generated from specification version 1.0.0: DO NOT EDIT
-package update
+package delete
 
 import (
 	"io"
@@ -17,31 +17,34 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// UpdateCmd command
-type UpdateCmd struct {
+// DeleteCmd command
+type DeleteCmd struct {
 	*subcommand.SubCommand
 
 	factory *cmdutil.Factory
 }
 
-// NewUpdateCmd creates a command to Update service status
-func NewUpdateCmd(f *cmdutil.Factory) *UpdateCmd {
-	ccmd := &UpdateCmd{
+// NewDeleteCmd creates a command to Delete service
+func NewDeleteCmd(f *cmdutil.Factory) *DeleteCmd {
+	ccmd := &DeleteCmd{
 		factory: f,
 	}
 	cmd := &cobra.Command{
-		Use:   "update",
-		Short: "Update service status",
-		Long:  `Update service status`,
+		Use:   "delete",
+		Short: "Delete service",
+		Long:  `Delete an existing service`,
 		Example: heredoc.Doc(`
-$ c8y devices services update --id 12345 --status up
-Update service status
+$ c8y devices services delete --id 22222
+Remove service
 
-$ c8y devices services list --device 12345 --name ntp | c8y devices services update --status up
-Update service status
+$ c8y devices services delete --device 11111 --id ntp
+Remove service by name
+
+$ c8y devices services list --device 12345 | c8y devices services delete
+Get service status (using pipeline)
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
-			return f.UpdateModeEnabled()
+			return f.DeleteModeEnabled()
 		},
 		RunE: ccmd.RunE,
 	}
@@ -49,23 +52,18 @@ Update service status
 	cmd.SilenceUsage = true
 
 	cmd.Flags().StringSlice("device", []string{""}, "Device id (required for name lookup)")
-	cmd.Flags().StringSlice("id", []string{""}, "Service id (required) (accepts pipeline)")
-	cmd.Flags().String("name", "", "Service name")
-	cmd.Flags().String("serviceType", "", "Service type, e.g. systemd")
-	cmd.Flags().String("status", "", "Service status")
+	cmd.Flags().StringSlice("id", []string{""}, "Service id or name (required) (accepts pipeline)")
 
 	completion.WithOptions(
 		cmd,
 		completion.WithDevice("device", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
 		completion.WithDeviceService("id", "device", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
-		completion.WithValidateSet("status", "up", "down", "unknown"),
 	)
 
 	flags.WithOptions(
 		cmd,
 		flags.WithProcessingMode(),
-		flags.WithData(),
-		f.WithTemplateFlag(cmd),
+
 		flags.WithExtendedPipelineSupport("id", "id", true, "managedObject.id", "id"),
 	)
 
@@ -77,7 +75,7 @@ Update service status
 }
 
 // RunE executes the command
-func (n *UpdateCmd) RunE(cmd *cobra.Command, args []string) error {
+func (n *DeleteCmd) RunE(cmd *cobra.Command, args []string) error {
 	cfg, err := n.factory.Config()
 	if err != nil {
 		return err
@@ -135,17 +133,11 @@ func (n *UpdateCmd) RunE(cmd *cobra.Command, args []string) error {
 	}
 
 	// body
-	body := mapbuilder.NewInitializedMapBuilder(true)
+	body := mapbuilder.NewInitializedMapBuilder(false)
 	err = flags.WithBody(
 		cmd,
 		body,
 		inputIterators,
-		flags.WithDataFlagValue(),
-		flags.WithStringValue("name", "name"),
-		flags.WithStringValue("serviceType", "serviceType"),
-		flags.WithStringValue("status", "status"),
-		cmdutil.WithTemplateValue(cfg),
-		flags.WithTemplateVariablesValue(),
 	)
 	if err != nil {
 		return cmderrors.NewUserError(err)
@@ -165,7 +157,7 @@ func (n *UpdateCmd) RunE(cmd *cobra.Command, args []string) error {
 	}
 
 	req := c8y.RequestOptions{
-		Method:       "PUT",
+		Method:       "DELETE",
 		Path:         path.GetTemplate(),
 		Query:        queryValue,
 		Body:         body,

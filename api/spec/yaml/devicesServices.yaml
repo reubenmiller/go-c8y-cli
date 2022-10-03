@@ -7,9 +7,84 @@ information:
   link: https://cumulocity.com/guides/10.14.0/reference/device-management-library/#services
 
 endpoints:
+  - name: findServices
+    method: GET
+    description: Find services
+    descriptionLong: Find services of any device
+    path: inventory/managedObjects
+    accept: application/vnd.com.nsn.cumulocity.managedObjectReferenceCollection+json
+    collectionType: application/vnd.com.nsn.cumulocity.managedObject+json
+    collectionProperty: 'managedObjects'
+    alias:
+        go: find
+        powershell: Find-DeviceServiceCollection
+    examples:
+      powershell:
+        - description: Find all services (from any device)
+          command: Find-DeviceServiceCollection
+          skipTest: true
+
+      go:
+        - description: Find all services (from any device)
+          command: c8y devices services find
+
+        - description: Find any services which are currently down
+          command: c8y devices services find --status down
+          assertStdOut:
+            contains:
+              - status eq 'down'
+
+        - description: Find any ntp services which are currently down
+          command: c8y devices services find --name ntp --status down
+          assertStdOut:
+            contains:
+              - (name eq 'ntp') and (status eq 'down')
+
+    queryParameters:
+      - name: query
+        description: Query expression group
+        property: query
+        type: queryExpression
+        children:
+          - name: type
+            type: stringStatic
+            description: ""
+            value: "(type eq 'c8y_Service')"
+
+          - name: query
+            type: string
+            description: Additional query filter
+            format: "%s"
+
+          - name: serviceType
+            type: string
+            description: Filter by service type e.g. systemd
+            format: "(serviceType eq '%s')"
+
+          - name: name
+            type: string
+            description: Filter by name
+            format: "(name eq '%s')"
+
+          - name: status
+            type: string
+            description: Filter by service status (custom values allowed)
+            validationSet:
+              - up
+              - down
+              - unknown
+            format: "(status eq '%s')"
+          
+          - name: orderBy
+            type: string
+            description: Order by. e.g. _id asc or name asc or creationTime.date desc
+      - name: withParents
+        type: boolean
+        description: Include a flat list of all parents and grandparents of the given object
+
   - name: listServices
     method: GET
-    description: Get a device's services collection
+    description: Get device services collection
     descriptionLong: Get a collection of services of a device
     path: inventory/managedObjects/{device}/childAdditions
     accept: application/vnd.com.nsn.cumulocity.managedObjectReferenceCollection+json
@@ -20,23 +95,23 @@ endpoints:
         powershell: Get-DeviceServiceCollection
     examples:
       powershell:
-        - description: Get a list of the child additions of an existing managed object
+        - description: Get services for a specific device
           command: Get-DeviceServiceCollection -Device 12345
           skipTest: true
 
-        - description: Get a list of the child additions of an existing managed object (using pipeline)
+        - description: Get services for a specific device (using pipeline)
           command: Get-Device -Id 12345 | Get-DeviceServiceCollection
           skipTest: true
 
       go:
-        - description: Get services for a specific devices
+        - description: Get services for a specific device
           command: c8y devices services list --device 12345
 
-        - description: Get services matching a specific name for a device
+        - description: Get services for a specific device (using pipeline)
           command: c8y devices get --id 12345 | c8y devices services list --name ntp
           skipTest: true
         
-        - description: Get services which are currently down
+        - description: Get services which are currently down for a device
           command: c8y devices services list --device 12345 --status down
           skipTest: true
 
@@ -50,7 +125,7 @@ endpoints:
           - "managedObject.id"
           - "id"
         required: true
-        description: Managed object id.
+        description: Device id (required for name lookup)
 
     queryParameters:
       - name: query
@@ -104,11 +179,11 @@ endpoints:
         powershell: New-DeviceService
     examples:
         powershell:
-          - description: Create a child addition and link it to an existing managed object
+          - description: Create a new service for a device (as a child addition)
             command: New-DeviceService -Id $software.id -Data "custom.value=test" -Global -ChildType addition
             skipTest: true
         go:
-          - description: Create a child addition and link it to an existing managed object
+          - description: Create a new service for a device (as a child addition)
             command: c8y devices services create --device 12345 --name ntp --status up --serviceType systemd
             assertStdOut:
               json:
@@ -128,7 +203,7 @@ endpoints:
           - "source.id"
           - "managedObject.id"
           - "id"
-        description: Managed object id where the child addition will be added to
+        description: Device id
         position: 0
 
     body:
@@ -163,6 +238,52 @@ endpoints:
       - type
       - serviceType
 
+  - name: get
+    method: GET
+    path: inventory/managedObjects/{id}
+    accept: application/json
+    contentType: application/vnd.com.nsn.cumulocity.managedObject+json
+    collectionType: application/vnd.com.nsn.cumulocity.managedObject+json
+    description: Get service
+    descriptionLong: Get an existing service
+    alias:
+        go: get
+        powershell: Get-DeviceService
+    examples:
+        powershell:
+          - description: Get service status
+            command: Get-DeviceService -Id 12345
+            skipTest: true
+        go:
+          - description: Get service by id
+            command: c8y devices services get --id 22222
+
+          - description: Get service by name
+            command: c8y devices services get --device 11111 --id ntp
+            skipTest: true
+          
+          - description: Get service status (using pipeline)
+            command: c8y devices services list --device 12345 --name ntp | c8y devices services get
+            skipTest: true
+
+    pathParameters:
+      - name: device
+        type: '[]device'
+        description: Device id (required for name lookup)
+
+      - name: id
+        type: '[]deviceservice'
+        property: id
+        required: true
+        pipeline: true
+        pipelineAliases:
+          - "managedObject.id"
+          - "id"
+        description: Service id or name
+        dependsOn:
+          - device
+        position: 0
+
   - name: update
     method: PUT
     path: inventory/managedObjects/{id}
@@ -184,12 +305,16 @@ endpoints:
             command: c8y devices services update --id 12345 --status up
           
           - description: Update service status
-            command: c8y devices services --device 12345 --name ntp | c8y devices services update --status up
+            command: c8y devices services list --device 12345 --name ntp | c8y devices services update --status up
             skipTest: true
 
     pathParameters:
+      - name: device
+        type: '[]device'
+        description: Device id (required for name lookup)
+
       - name: id
-        type: '[]id'
+        type: '[]deviceservice'
         property: id
         required: true
         pipeline: true
@@ -197,6 +322,8 @@ endpoints:
           - "managedObject.id"
           - "id"
         description: Service id
+        dependsOn:
+          - device
         position: 0
 
     body:
@@ -219,3 +346,49 @@ endpoints:
       - name: data
         type: json
         description: Additional properties.
+
+  - name: delete
+    method: DELETE
+    path: inventory/managedObjects/{id}
+    accept: application/json
+    contentType: application/vnd.com.nsn.cumulocity.managedObject+json
+    collectionType: application/vnd.com.nsn.cumulocity.managedObject+json
+    description: Delete service
+    descriptionLong: Delete an existing service
+    alias:
+        go: delete
+        powershell: Remove-DeviceService
+    examples:
+        powershell:
+          - description: Remove service
+            command: Remove-DeviceService -Id 12345
+            skipTest: true
+        go:
+          - description: Remove service
+            command: c8y devices services delete --id 22222
+
+          - description: Remove service by name
+            command: c8y devices services delete --device 11111 --id ntp
+            skipTest: true
+          
+          - description: Get service status (using pipeline)
+            command: c8y devices services list --device 12345 | c8y devices services delete
+            skipTest: true
+
+    pathParameters:
+      - name: device
+        type: '[]device'
+        description: Device id (required for name lookup)
+
+      - name: id
+        type: '[]deviceservice'
+        property: id
+        required: true
+        pipeline: true
+        pipelineAliases:
+          - "managedObject.id"
+          - "id"
+        description: Service id or name
+        dependsOn:
+          - device
+        position: 0

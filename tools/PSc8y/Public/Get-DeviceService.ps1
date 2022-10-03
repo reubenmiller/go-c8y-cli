@@ -1,19 +1,19 @@
 ﻿# Code generated from specification version 1.0.0: DO NOT EDIT
-Function Update-DeviceService {
+Function Get-DeviceService {
 <#
 .SYNOPSIS
-Update service status
+Get service
 
 .DESCRIPTION
-Update service status
+Get an existing service
 
 .LINK
-https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/devices_services_update
+https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/devices_services_get
 
 .EXAMPLE
-PS> Update-DeviceService -Id 12345 -Status up
+PS> Get-DeviceService -Id 12345
 
-Update service status
+Get service status
 
 
 #>
@@ -22,7 +22,7 @@ Update service status
     [Alias()]
     [OutputType([object])]
     Param(
-        # Service id (required)
+        # Service id or name (required)
         [Parameter(Mandatory = $true,
                    ValueFromPipeline=$true,
                    ValueFromPipelineByPropertyName=$true)]
@@ -32,26 +32,10 @@ Update service status
         # Device id (required for name lookup)
         [Parameter()]
         [object[]]
-        $Device,
-
-        # Service name
-        [Parameter()]
-        [string]
-        $Name,
-
-        # Service type, e.g. systemd
-        [Parameter()]
-        [string]
-        $ServiceType,
-
-        # Service status
-        [Parameter()]
-        [ValidateSet('up','down','unknown')]
-        [string]
-        $Status
+        $Device
     )
     DynamicParam {
-        Get-ClientCommonParameters -Type "Update", "Template"
+        Get-ClientCommonParameters -Type "Get"
     }
 
     Begin {
@@ -61,7 +45,7 @@ Update service status
             Use-CallerPreference -Cmdlet $PSCmdlet -SessionState $ExecutionContext.SessionState
         }
 
-        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "devices services update"
+        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "devices services get"
         $ClientOptions = Get-ClientOutputOption $PSBoundParameters
         $TypeOptions = @{
             Type = "application/json"
@@ -75,13 +59,13 @@ Update service status
         if ($ClientOptions.ConvertToPS) {
             $Id `
             | Group-ClientRequests `
-            | c8y devices services update $c8yargs `
+            | c8y devices services get $c8yargs `
             | ConvertFrom-ClientOutput @TypeOptions
         }
         else {
             $Id `
             | Group-ClientRequests `
-            | c8y devices services update $c8yargs
+            | c8y devices services get $c8yargs
         }
         
     }

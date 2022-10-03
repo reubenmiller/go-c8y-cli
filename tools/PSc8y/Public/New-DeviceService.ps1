@@ -2,10 +2,10 @@
 Function New-DeviceService {
 <#
 .SYNOPSIS
-Create child
+Create service
 
 .DESCRIPTION
-Create a new managed object and assign it to an existing managed object as a child
+Create a new service which is attached to the given device
 
 .LINK
 https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/devices_services_create
@@ -13,7 +13,7 @@ https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/devices_services_create
 .EXAMPLE
 PS> New-DeviceService -Id $software.id -Data "custom.value=test" -Global -ChildType addition
 
-Create a child addition and link it to an existing managed object
+Create a new service for a device (as a child addition)
 
 
 #>
@@ -22,7 +22,7 @@ Create a child addition and link it to an existing managed object
     [Alias()]
     [OutputType([object])]
     Param(
-        # Managed object id where the child addition will be added to (required)
+        # Device id (required)
         [Parameter(Mandatory = $true,
                    ValueFromPipeline=$true,
                    ValueFromPipelineByPropertyName=$true)]

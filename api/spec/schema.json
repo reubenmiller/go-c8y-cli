@@ -182,6 +182,7 @@
         "tenant",
         "tenantname",
         "[]devicerequest",
+        "[]deviceservice",
         "[]id",
         "[]agent",
         "[]certificate",

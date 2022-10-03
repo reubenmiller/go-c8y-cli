@@ -1,7 +1,8 @@
 // Code generated from specification version 1.0.0: DO NOT EDIT
-package update
+package get
 
 import (
+	"fmt"
 	"io"
 	"net/http"
 
@@ -17,31 +18,34 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// UpdateCmd command
-type UpdateCmd struct {
+// GetCmd command
+type GetCmd struct {
 	*subcommand.SubCommand
 
 	factory *cmdutil.Factory
 }
 
-// NewUpdateCmd creates a command to Update service status
-func NewUpdateCmd(f *cmdutil.Factory) *UpdateCmd {
-	ccmd := &UpdateCmd{
+// NewGetCmd creates a command to Get service
+func NewGetCmd(f *cmdutil.Factory) *GetCmd {
+	ccmd := &GetCmd{
 		factory: f,
 	}
 	cmd := &cobra.Command{
-		Use:   "update",
-		Short: "Update service status",
-		Long:  `Update service status`,
+		Use:   "get",
+		Short: "Get service",
+		Long:  `Get an existing service`,
 		Example: heredoc.Doc(`
-$ c8y devices services update --id 12345 --status up
-Update service status
+$ c8y devices services get --id 22222
+Get service by id
 
-$ c8y devices services list --device 12345 --name ntp | c8y devices services update --status up
-Update service status
+$ c8y devices services get --device 11111 --id ntp
+Get service by name
+
+$ c8y devices services list --device 12345 --name ntp | c8y devices services get
+Get service status (using pipeline)
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
-			return f.UpdateModeEnabled()
+			return nil
 		},
 		RunE: ccmd.RunE,
 	}
@@ -49,23 +53,17 @@ Update service status
 	cmd.SilenceUsage = true
 
 	cmd.Flags().StringSlice("device", []string{""}, "Device id (required for name lookup)")
-	cmd.Flags().StringSlice("id", []string{""}, "Service id (required) (accepts pipeline)")
-	cmd.Flags().String("name", "", "Service name")
-	cmd.Flags().String("serviceType", "", "Service type, e.g. systemd")
-	cmd.Flags().String("status", "", "Service status")
+	cmd.Flags().StringSlice("id", []string{""}, "Service id or name (required) (accepts pipeline)")
 
 	completion.WithOptions(
 		cmd,
 		completion.WithDevice("device", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
 		completion.WithDeviceService("id", "device", func() (*c8y.Client, error) { return ccmd.factory.Client() }),
-		completion.WithValidateSet("status", "up", "down", "unknown"),
 	)
 
 	flags.WithOptions(
 		cmd,
-		flags.WithProcessingMode(),
-		flags.WithData(),
-		f.WithTemplateFlag(cmd),
+
 		flags.WithExtendedPipelineSupport("id", "id", true, "managedObject.id", "id"),
 	)
 
@@ -77,7 +75,7 @@ Update service status
 }
 
 // RunE executes the command
-func (n *UpdateCmd) RunE(cmd *cobra.Command, args []string) error {
+func (n *GetCmd) RunE(cmd *cobra.Command, args []string) error {
 	cfg, err := n.factory.Config()
 	if err != nil {
 		return err
@@ -102,6 +100,11 @@ func (n *UpdateCmd) RunE(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return cmderrors.NewUserError(err)
 	}
+	commonOptions, err := cfg.GetOutputCommonOptions(cmd)
+	if err != nil {
+		return cmderrors.NewUserError(fmt.Sprintf("Failed to get common options. err=%s", err))
+	}
+	commonOptions.AddQueryParameters(query)
 
 	queryValue, err := query.GetQueryUnescape(true)
 
@@ -117,7 +120,6 @@ func (n *UpdateCmd) RunE(cmd *cobra.Command, args []string) error {
 		inputIterators,
 		flags.WithCustomStringSlice(func() ([]string, error) { return cfg.GetHeader(), nil }, "header"),
 		flags.WithStaticStringValue("Content-Type", "application/vnd.com.nsn.cumulocity.managedObject+json"),
-		flags.WithProcessingModeValue(),
 	)
 	if err != nil {
 		return cmderrors.NewUserError(err)
@@ -135,17 +137,11 @@ func (n *UpdateCmd) RunE(cmd *cobra.Command, args []string) error {
 	}
 
 	// body
-	body := mapbuilder.NewInitializedMapBuilder(true)
+	body := mapbuilder.NewInitializedMapBuilder(false)
 	err = flags.WithBody(
 		cmd,
 		body,
 		inputIterators,
-		flags.WithDataFlagValue(),
-		flags.WithStringValue("name", "name"),
-		flags.WithStringValue("serviceType", "serviceType"),
-		flags.WithStringValue("status", "status"),
-		cmdutil.WithTemplateValue(cfg),
-		flags.WithTemplateVariablesValue(),
 	)
 	if err != nil {
 		return cmderrors.NewUserError(err)
@@ -165,7 +161,7 @@ func (n *UpdateCmd) RunE(cmd *cobra.Command, args []string) error {
 	}
 
 	req := c8y.RequestOptions{
-		Method:       "PUT",
+		Method:       "GET",
 		Path:         path.GetTemplate(),
 		Query:        queryValue,
 		Body:         body,

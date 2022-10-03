@@ -36,10 +36,13 @@ func NewListCmd(f *cmdutil.Factory) *ListCmd {
 		Long:  `Get a collection of services of a device`,
 		Example: heredoc.Doc(`
 $ c8y devices services list --device 12345
-Get a list of the child additions of an existing managed object
+Get services for a specific device
 
-$ c8y devices services list --device 12345
-Get a list of the child devices of an existing managed object
+$ c8y devices get --id 12345 | c8y devices services list --name ntp
+Get services for a specific device (using pipeline)
+
+$ c8y devices services list --device 12345 --status down
+Get services which are currently down for a device
         `),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
 			return nil
@@ -49,7 +52,7 @@ Get a list of the child devices of an existing managed object
 
 	cmd.SilenceUsage = true
 
-	cmd.Flags().StringSlice("device", []string{""}, "Managed object id. (required) (accepts pipeline)")
+	cmd.Flags().StringSlice("device", []string{""}, "Device id (required for name lookup) (required) (accepts pipeline)")
 	cmd.Flags().String("query", "", "Additional query filter")
 	cmd.Flags().String("serviceType", "", "Filter by service type e.g. systemd")
 	cmd.Flags().String("name", "", "Filter by name")
