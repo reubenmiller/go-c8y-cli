@@ -1,9 +1,13 @@
 tests:
     inventory/parents_get_Get addition parent:
-        command: c8y inventory parents get --id 12345
+        command: c8y inventory parents get --id 12345 --type addition --dry
         exit-code: 0
         stdout:
             json:
                 method: GET
                 path: /inventory/managedObjects/12345
                 query: withParents=true
+
+    It gets parents from a given managed object:
+        command: ./manual/inventory/parents/001_parents.sh
+        exit-code: 0
