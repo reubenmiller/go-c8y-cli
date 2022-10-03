@@ -27,6 +27,7 @@ Get-ConfigurationCollection
 	[[-Description] <String>]
 	[-PageSize <Int32>]
 	[-WithTotalPages]
+	[-WithTotalElements]
 	[-CurrentPage <Int32>]
 	[-TotalPages <Int32>]
 	[-IncludeAll]
@@ -36,6 +37,7 @@ Get-ConfigurationCollection
 	[-Proxy]
 	[-NoProxy]
 	[-Timeout <String>]
+	[-NoProgress]
 	[-Session <String>]
 	[-SessionUsername <String>]
 	[-SessionPassword <String>]
@@ -600,6 +602,21 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
+### -NoProgress
+Disable progress bars
+
+```yaml
+Type: SwitchParameter
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
 ### -NoProxy
 Ignore the proxy settings
 
@@ -868,6 +885,21 @@ Accept wildcard characters: False
 
 ### -WithError
 Errors will be printed on stdout instead of stderr
+
+```yaml
+Type: SwitchParameter
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -WithTotalElements
+Request Cumulocity to include the total elements in the response statistics under .statistics.totalElements (introduced in 10.13)
 
 ```yaml
 Type: SwitchParameter

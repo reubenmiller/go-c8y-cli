@@ -63,6 +63,7 @@ Remove an application binary related to a Hosted (web) application
       --noCache                    Force disabling of cached responses (overwrites cache setting)
   -M, --noColor                    Don't use colors when displaying log entries on the console
       --noLog                      Disables the activity log for the current command
+      --noProgress                 Disable progress bars
       --noProxy                    Ignore the proxy settings
   -n, --nullInput                  Don't read the input (stdin). Useful if using in shell for/while loops
   -o, --output string              Output format i.e. table, json, csv, csvheader (default "table")
@@ -83,6 +84,7 @@ Remove an application binary related to a Hosted (web) application
   -v, --verbose                    Verbose logging
       --view string                Use views when displaying data on the terminal. Disable using --view off (default "auto")
       --withError                  Errors will be printed on stdout instead of stderr
+      --withTotalElements          Request Cumulocity to include the total elements in the response statistics under .statistics.totalElements (introduced in 10.13)
   -t, --withTotalPages             Request Cumulocity to include the total pages in the response statistics under .statistics.totalPages
       --workers int                Number of workers (default 1)
 ```

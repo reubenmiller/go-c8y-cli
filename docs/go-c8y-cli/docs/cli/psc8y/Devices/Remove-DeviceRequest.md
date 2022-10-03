@@ -28,6 +28,7 @@ Remove-DeviceRequest
 	[-Proxy]
 	[-NoProxy]
 	[-Timeout <String>]
+	[-NoProgress]
 	[-Session <String>]
 	[-SessionUsername <String>]
 	[-SessionPassword <String>]
@@ -487,6 +488,21 @@ Accept wildcard characters: False
 
 ### -NoLog
 Disables the activity log for the current command
+
+```yaml
+Type: SwitchParameter
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -NoProgress
+Disable progress bars
 
 ```yaml
 Type: SwitchParameter
