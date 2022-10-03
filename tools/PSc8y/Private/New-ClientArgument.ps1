@@ -118,7 +118,7 @@ Function New-ClientArgument {
             $null = $c8yargs.Add("--verbose")
         }
 
-        if ($Parameters["WithTotalPages"]) {
+        if ($Parameters["WithTotalPages"] -or $Parameters["WithTotalElements"]) {
             $null = $c8yargs.Add("--raw")
         }
 

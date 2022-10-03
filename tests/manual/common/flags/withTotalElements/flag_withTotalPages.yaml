@@ -1,0 +1,13 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/reubenmiller/commander/feat/handle-nested-files/schema.json
+
+config:
+  env:
+    C8Y_SETTINGS_LOGGER_HIDESENSITIVE: true
+tests:
+  It should support total element statistics:
+    command: |
+      c8y devices list --withTotalElements --dry --dryFormat json
+    exit-code: 0
+    stdout:
+      contains:
+        - withTotalElements=true

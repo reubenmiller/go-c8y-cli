@@ -14,6 +14,7 @@ const (
 	FlagDataTemplateVariablesName = "templateVars"
 	FlagProcessingModeName        = "processingMode"
 	FlagWithTotalPages            = "withTotalPages"
+	FlagWithTotalElements         = "withTotalElements"
 	FlagPageSize                  = "pageSize"
 	FlagCurrentPage               = "currentPage"
 	FlagNullInput                 = "nullInput"

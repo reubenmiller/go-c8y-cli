@@ -113,6 +113,10 @@
                         <Width>15</Width>
                     </TableColumnHeader>
                     <TableColumnHeader>
+                        <label>totalElements</label>
+                        <Width>15</Width>
+                    </TableColumnHeader>
+                    <TableColumnHeader>
                         <Width>150</Width>
                     </TableColumnHeader>
                 </TableHeaders>
@@ -128,6 +132,9 @@
                             </TableColumnItem>
                             <TableColumnItem>
                                 <scriptblock>$_.statistics.totalPages</scriptblock>
+                            </TableColumnItem>
+                            <TableColumnItem>
+                                <scriptblock>$_.statistics.totalElements</scriptblock>
                             </TableColumnItem>
                             <TableColumnItem>
                                 <PropertyName>applications</PropertyName>

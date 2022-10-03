@@ -87,6 +87,9 @@ const (
 	// SettingsWithTotalPages include the total pages statistics under statistics.totalPages
 	SettingsWithTotalPages = "settings.defaults.withTotalPages"
 
+	// SettingsWithTotalElements include the total pages statistics under statistics.totalPages
+	SettingsWithTotalElements = "settings.defaults.withTotalElements"
+
 	// SettingsRawOutput include the raw (original) output instead of only returning the nested array property
 	SettingsRawOutput = "settings.defaults.raw"
 
@@ -950,6 +953,11 @@ func (c *Config) WithTotalPages() bool {
 	return c.viper.GetBool(SettingsWithTotalPages)
 }
 
+// WithTotalElements return total of all elements
+func (c *Config) WithTotalElements() bool {
+	return c.viper.GetBool(SettingsWithTotalElements)
+}
+
 // RawOutput return raw (original) response
 func (c *Config) RawOutput() bool {
 	return c.viper.GetBool(SettingsRawOutput)
@@ -1388,6 +1396,7 @@ func (c *Config) GetOutputCommonOptions(cmd *cobra.Command) (CommonCommandOption
 	}
 
 	options.WithTotalPages = c.WithTotalPages()
+	options.WithTotalElements = c.WithTotalElements()
 
 	options.IncludeAll = c.IncludeAll()
 

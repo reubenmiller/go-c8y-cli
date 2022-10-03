@@ -746,7 +746,7 @@ func (r *RequestHandler) ProcessResponse(resp *c8y.Response, respError error, co
 		isJSONResponse := jsonUtilities.IsValidJSON(resp.Body())
 
 		dataProperty := ""
-		showRaw := r.Config.RawOutput() || r.Config.WithTotalPages()
+		showRaw := r.Config.RawOutput() || r.Config.WithTotalPages() || r.Config.WithTotalElements()
 
 		dataProperty = commonOptions.ResultProperty
 		if dataProperty == "" {

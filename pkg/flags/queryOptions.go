@@ -17,3 +17,7 @@ func WithPageSize() GetOption {
 func WithTotalPages() GetOption {
 	return WithStringValue(FlagWithTotalPages, FlagWithTotalPages)
 }
+
+func WithTotalElements() GetOption {
+	return WithStringValue(FlagWithTotalElements, FlagWithTotalElements)
+}

@@ -45,6 +45,7 @@ Inherit common parameters to a custom function. This will add parameters such as
                 "Collection" {
                     New-DynamicParam -Name "PageSize" -Type "int" -DPDictionary $Dictionary -HelpMessage "Maximum results per page"
                     New-DynamicParam -Name "WithTotalPages" -Type "switch" -DPDictionary $Dictionary -HelpMessage "Request Cumulocity to include the total pages in the response statistics under .statistics.totalPages"
+                    New-DynamicParam -Name "WithTotalElements" -Type "switch" -DPDictionary $Dictionary -HelpMessage "Request Cumulocity to include the total elements in the response statistics under .statistics.totalElements (introduced in 10.13)"
                     New-DynamicParam -Name "CurrentPage" -Type "int" -DPDictionary $Dictionary -HelpMessage "Current page which should be returned"
                     New-DynamicParam -Name "TotalPages" -Type "int" -DPDictionary $Dictionary -HelpMessage "Total number of pages to get"
                     New-DynamicParam -Name "IncludeAll" -Type "switch" -DPDictionary $Dictionary -HelpMessage "Include all results by iterating through each page"

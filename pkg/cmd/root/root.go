@@ -182,6 +182,7 @@ func NewCmdRoot(f *cmdutil.Factory, version, buildDate string) *CmdRoot {
 	cmd.PersistentFlags().Int64("totalPages", 0, "Total number of pages to get")
 	cmd.PersistentFlags().Bool("includeAll", false, "Include all results by iterating through each page")
 	cmd.PersistentFlags().BoolP(flags.FlagWithTotalPages, "t", false, "Request Cumulocity to include the total pages in the response statistics under .statistics.totalPages")
+	cmd.PersistentFlags().Bool(flags.FlagWithTotalElements, false, "Request Cumulocity to include the total elements in the response statistics under .statistics.totalElements (introduced in 10.13)")
 	cmd.PersistentFlags().BoolP("compact", "c", !isTerm, "Compact instead of pretty-printed output when using json output. Pretty print is the default if output is the terminal")
 	cmd.PersistentFlags().Bool("noAccept", false, "Ignore Accept header will remove the Accept header from requests, however PUT and POST requests will only see the effect")
 	cmd.PersistentFlags().Bool("dry", false, "Dry run. Don't send any data to the server")
