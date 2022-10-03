@@ -107,6 +107,7 @@ FunctionsToExport = @(
 	'Enable-Microservice',
 	'Find-ByTextManagedObjectCollection',
 	'Find-ManagedObjectCollection',
+	'Get-AdditionParent',
 	'Get-Agent',
 	'Get-AgentCollection',
 	'Get-Alarm',

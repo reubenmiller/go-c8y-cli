@@ -1,0 +1,9 @@
+tests:
+    inventory/parents_get_Get addition parent:
+        command: c8y inventory parents get --id 12345
+        exit-code: 0
+        stdout:
+            json:
+                method: GET
+                path: /inventory/managedObjects/12345
+                query: withParents=true
