@@ -171,13 +171,13 @@ endpoints:
     examples:
       powershell:
         - description: Delete a subscription associated with a device
-          command: Delete-Notification2SubscriptionBySource -Device 12345
+          command: Remove-Notification2SubscriptionBySource -Device 12345
       go:
         - description: Delete a subscription associated with a device
           command: c8y notification2 subscriptions deleteBySource --device 12345
     alias:
         go: deleteBySource
-        powershell: Delete-Notification2SubscriptionBySource
+        powershell: Remove-Notification2SubscriptionBySource
     queryParameters:
       - name: device
         type: '[]device'
@@ -201,7 +201,7 @@ endpoints:
     examples:
       powershell:
         - description: Delete a subscription
-          command: Delete-Notification2Subscription -Id 12345
+          command: Remove-Notification2Subscription -Id 12345
           skipTest: true
       go:
         - description: Delete a subscription
@@ -219,7 +219,7 @@ endpoints:
           skipTest: true
     alias:
         go: delete
-        powershell: Delete-Notification2Subscription
+        powershell: Remove-Notification2Subscription
 
     pathParameters:
       - name: id

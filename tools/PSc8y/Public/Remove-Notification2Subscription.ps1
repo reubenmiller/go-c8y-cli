@@ -1,19 +1,19 @@
 ﻿# Code generated from specification version 1.0.0: DO NOT EDIT
-Function Delete-Notification2SubscriptionBySource {
+Function Remove-Notification2Subscription {
 <#
 .SYNOPSIS
-Delete subscription by source
+Delete subscription
 
 .DESCRIPTION
-Delete an existing subscription associated to a managed object
+Remove a specific subscription by a given ID
 
 .LINK
-https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/notification2_subscriptions_deleteBySource
+https://reubenmiller.github.io/go-c8y-cli/docs/cli/c8y/notification2_subscriptions_delete
 
 .EXAMPLE
-PS> Delete-Notification2SubscriptionBySource -Device 12345
+PS> Remove-Notification2Subscription -Id 12345
 
-Delete a subscription associated with a device
+Delete a subscription
 
 
 #>
@@ -22,17 +22,12 @@ Delete a subscription associated with a device
     [Alias()]
     [OutputType([object])]
     Param(
-        # The managed object to which the subscription is associated.
-        [Parameter(ValueFromPipeline=$true,
+        # Unique identifier of the notification subscription. (required)
+        [Parameter(Mandatory = $true,
+                   ValueFromPipeline=$true,
                    ValueFromPipelineByPropertyName=$true)]
         [object[]]
-        $Device,
-
-        # The context to which the subscription is associated.
-        [Parameter()]
-        [ValidateSet('mo','tenant')]
-        [string]
-        $Context
+        $Id
     )
     DynamicParam {
         Get-ClientCommonParameters -Type "Delete"
@@ -45,7 +40,7 @@ Delete a subscription associated with a device
             Use-CallerPreference -Cmdlet $PSCmdlet -SessionState $ExecutionContext.SessionState
         }
 
-        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "notification2 subscriptions deleteBySource"
+        $c8yargs = New-ClientArgument -Parameters $PSBoundParameters -Command "notification2 subscriptions delete"
         $ClientOptions = Get-ClientOutputOption $PSBoundParameters
         $TypeOptions = @{
             Type = ""
@@ -57,15 +52,15 @@ Delete a subscription associated with a device
     Process {
 
         if ($ClientOptions.ConvertToPS) {
-            $Device `
+            $Id `
             | Group-ClientRequests `
-            | c8y notification2 subscriptions deleteBySource $c8yargs `
+            | c8y notification2 subscriptions delete $c8yargs `
             | ConvertFrom-ClientOutput @TypeOptions
         }
         else {
-            $Device `
+            $Id `
             | Group-ClientRequests `
-            | c8y notification2 subscriptions deleteBySource $c8yargs
+            | c8y notification2 subscriptions delete $c8yargs
         }
         
     }
