@@ -75,6 +75,11 @@ func (n *GetRoleReferenceCollectionFromUserCmd) RunE(cmd *cobra.Command, args []
 	if err != nil {
 		return err
 	}
+	// Runtime flag options
+	flags.WithOptions(
+		cmd,
+		flags.WithRuntimePipelineProperty(),
+	)
 	client, err := n.factory.Client()
 	if err != nil {
 		return err
