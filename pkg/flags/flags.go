@@ -6,6 +6,7 @@ import (
 
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/completion"
 	"github.com/spf13/cobra"
+	"github.com/spf13/pflag"
 )
 
 const (
@@ -132,6 +133,52 @@ func WithExtendedPipelineSupport(name string, property string, required bool, al
 		}
 		if required && name == "id" {
 			options.IsID = true
+		}
+		data, err := json.Marshal(options)
+		if err != nil {
+			panic(err)
+		}
+
+		cmd.Annotations[AnnotationValueFromPipelineData] = string(data)
+		return cmd
+	}
+}
+
+func WithRuntimePipelineProperty() Option {
+	return func(cmd *cobra.Command) *cobra.Command {
+		name := ""
+		alias := ""
+		cmd.Flags().Visit(func(f *pflag.Flag) {
+			if f.Changed {
+				value := f.Value.String()
+				if strings.HasPrefix(value, "-") {
+					name = f.Name
+					if strings.HasPrefix(value, "-.") {
+						alias = value[2:]
+					} else {
+						alias = f.Name
+					}
+				}
+			}
+		})
+
+		if name == "" {
+			return cmd
+		}
+
+		if cmd.Annotations == nil {
+			cmd.Annotations = map[string]string{}
+		}
+		cmd.Annotations[AnnotationValueFromPipeline] = name
+
+		options := &PipelineOptions{
+			Name:     name,
+			Property: name,
+			Aliases: []string{
+				name, alias,
+			},
+			Required: true,
+			IsID:     true,
 		}
 		data, err := json.Marshal(options)
 		if err != nil {

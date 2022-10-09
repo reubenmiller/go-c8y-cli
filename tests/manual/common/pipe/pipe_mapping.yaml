@@ -1,0 +1,47 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/reubenmiller/commander/feat/handle-nested-files/schema.json
+config:
+  env:
+    C8Y_SETTINGS_DEFAULTS_DRY: true
+    C8Y_SETTINGS_DEFAULTS_DRYFORMAT: json
+    C8Y_SETTINGS_DEFAULTS_WITHERROR: true
+tests:
+  It can map piped text to any given flag:
+    command: |
+      echo "t11111\nt22222" |
+        c8y applications list --providedFor - |
+        c8y util show --select method,pathEncoded
+    exit-code: 0
+    stdout:
+      exactly: |
+        {"method":"GET","pathEncoded":"/application/applications?providedFor=t11111"}
+        {"method":"GET","pathEncoded":"/application/applications?providedFor=t22222"}
+  
+  It can map piped text to any fetcher enabled flags:
+    command: |
+      echo "testuser" |
+        c8y applications list --user - |
+        c8y util show --select method,pathEncoded
+    exit-code: 0
+    stdout:
+      exactly: |
+        {"method":"GET","pathEncoded":"/application/applications?user=testuser"}
+
+  It supports users assigned mapping via json property:
+    command: |
+      c8y template execute --template "{providedFor: 't12345'}" |
+        c8y applications list --providedFor - |
+        c8y util show --select method,pathEncoded
+    exit-code: 0
+    stdout:
+      exactly: |
+        {"method":"GET","pathEncoded":"/application/applications?providedFor=t12345"}
+
+  It supports users assigned mapping via custom json property:
+    command: |
+      c8y template execute --template "{tenant: 't12345'}" |
+        c8y applications list --providedFor -.tenant |
+        c8y util show --select method,pathEncoded
+    exit-code: 0
+    stdout:
+      exactly: |
+        {"method":"GET","pathEncoded":"/application/applications?providedFor=t12345"}
