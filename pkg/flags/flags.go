@@ -20,6 +20,8 @@ const (
 	FlagCurrentPage               = "currentPage"
 	FlagNullInput                 = "nullInput"
 	FlagAllowEmptyPipe            = "allowEmptyPipe"
+	FlagReadFromPipeText          = "-"
+	FlagReadFromPipeJSON          = "-."
 )
 const (
 	AnnotationValueFromPipeline       = "valueFromPipeline"
@@ -150,13 +152,28 @@ func WithRuntimePipelineProperty() Option {
 		alias := ""
 		cmd.Flags().Visit(func(f *pflag.Flag) {
 			if f.Changed {
-				value := f.Value.String()
-				if strings.HasPrefix(value, "-") {
-					name = f.Name
-					if strings.HasPrefix(value, "-.") {
-						alias = value[2:]
-					} else {
+				switch v := f.Value.(type) {
+				case pflag.SliceValue:
+					values := v.GetSlice()
+
+					// Get first value if multiple values are provided
+					if len(values) > 0 {
+						if values[0] == FlagReadFromPipeText {
+							name = f.Name
+							alias = f.Name
+						} else if strings.HasPrefix(values[0], FlagReadFromPipeJSON) {
+							name = f.Name
+							alias = values[0][len(FlagReadFromPipeJSON):]
+						}
+					}
+
+				case pflag.Value:
+					if v.String() == FlagReadFromPipeText {
+						name = f.Name
 						alias = f.Name
+					} else if strings.HasPrefix(v.String(), FlagReadFromPipeJSON) {
+						name = f.Name
+						alias = v.String()[len(FlagReadFromPipeJSON):]
 					}
 				}
 			}

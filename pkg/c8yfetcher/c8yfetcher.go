@@ -34,8 +34,8 @@ func ParseValues(values []string) (ids []string) {
 		parts := strings.Split(value, ",")
 
 		for _, part := range parts {
-			// Only add uint looking values
-			if part != "" {
+			// Only add uint looking values, and filter out custom pipeline mapped flags
+			if part != "" && part != flags.FlagReadFromPipeText && !strings.HasPrefix(part, flags.FlagReadFromPipeJSON) {
 				ids = append(ids, strings.TrimSpace(part))
 			}
 		}
