@@ -59,6 +59,7 @@ Get a user group
 		cmd,
 
 		flags.WithExtendedPipelineSupport("id", "id", false),
+		flags.WithPipelineAliases("tenant", "tenant", "owner.tenant.id"),
 	)
 
 	// Required flags

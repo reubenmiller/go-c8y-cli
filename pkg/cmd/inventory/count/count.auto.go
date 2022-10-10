@@ -76,6 +76,7 @@ Get total number of devices
 		cmd,
 
 		flags.WithExtendedPipelineSupport("type", "type", false, "type"),
+		flags.WithPipelineAliases("childDeviceId", "deviceId", "source.id", "managedObject.id", "id"),
 	)
 
 	// Required flags

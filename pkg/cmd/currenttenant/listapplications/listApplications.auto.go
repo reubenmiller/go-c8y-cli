@@ -53,6 +53,7 @@ Get a list of applications in the current tenant
 		cmd,
 
 		flags.WithExtendedPipelineSupport("", "", false),
+
 		flags.WithCollectionProperty("applications.references.#.application"),
 	)
 

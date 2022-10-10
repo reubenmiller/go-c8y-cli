@@ -60,6 +60,7 @@ Create group hierarchy (parent group -> child group)
 		flags.WithProcessingMode(),
 
 		flags.WithExtendedPipelineSupport("childDevice", "managedObject.id", false, "deviceId", "source.id", "managedObject.id", "id"),
+		flags.WithPipelineAliases("childDevice", "deviceId", "source.id", "managedObject.id", "id", "source.id", "managedObject.id", "id"), flags.WithPipelineAliases("childGroup", "deviceId", "source.id", "managedObject.id", "id", "source.id", "managedObject.id", "id"),
 		flags.WithCollectionProperty("managedObject"),
 	)
 

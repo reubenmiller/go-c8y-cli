@@ -53,6 +53,7 @@ Get a list of roles
 		cmd,
 
 		flags.WithExtendedPipelineSupport("", "", false),
+
 		flags.WithCollectionProperty("roles"),
 	)
 

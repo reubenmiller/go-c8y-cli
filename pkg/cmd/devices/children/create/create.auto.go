@@ -61,6 +61,7 @@ Create a child addition and link it to an existing managed object
 		flags.WithData(),
 		f.WithTemplateFlag(cmd),
 		flags.WithExtendedPipelineSupport("id", "id", true, "deviceId", "source.id", "managedObject.id", "id"),
+		flags.WithPipelineAliases("id", "deviceId", "source.id", "managedObject.id", "id"),
 	)
 
 	// Required flags

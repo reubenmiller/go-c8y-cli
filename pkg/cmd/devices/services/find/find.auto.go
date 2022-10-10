@@ -67,6 +67,7 @@ Find any ntp services which are currently down
 		cmd,
 
 		flags.WithExtendedPipelineSupport("", "", false),
+
 		flags.WithCollectionProperty("managedObjects"),
 	)
 

@@ -56,6 +56,7 @@ Get a list of referenced applications on a given tenant (from management tenant)
 		cmd,
 
 		flags.WithExtendedPipelineSupport("tenant", "tenant", false, "id"),
+		flags.WithPipelineAliases("tenant", "tenant", "owner.tenant.id"),
 		flags.WithCollectionProperty("references"),
 	)
 

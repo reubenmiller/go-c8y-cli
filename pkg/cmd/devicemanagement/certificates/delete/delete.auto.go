@@ -63,6 +63,7 @@ Remove trusted device certificate by name
 		flags.WithProcessingMode(),
 
 		flags.WithExtendedPipelineSupport("id", "id", false, "fingerprint", "name", "id"),
+		flags.WithPipelineAliases("tenant", "tenant", "owner.tenant.id"),
 	)
 
 	// Required flags

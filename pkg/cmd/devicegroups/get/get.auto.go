@@ -58,6 +58,7 @@ Get device group by id
 		cmd,
 
 		flags.WithExtendedPipelineSupport("id", "id", true),
+		flags.WithPipelineAliases("id", "source.id", "managedObject.id", "id"),
 	)
 
 	// Required flags

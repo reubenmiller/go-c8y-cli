@@ -59,6 +59,7 @@ Delete a user group
 		flags.WithProcessingMode(),
 
 		flags.WithExtendedPipelineSupport("id", "id", true),
+		flags.WithPipelineAliases("tenant", "tenant", "owner.tenant.id"),
 	)
 
 	// Required flags

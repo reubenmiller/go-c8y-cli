@@ -70,6 +70,7 @@ Get a list of smart groups with their names starting with 'myText', then get the
 		cmd,
 
 		flags.WithExtendedPipelineSupport("query", "query", false, "c8y_DeviceQueryString"),
+
 		flags.WithCollectionProperty("managedObjects"),
 	)
 

@@ -59,6 +59,7 @@ Enable an application of a tenant by name
 		flags.WithProcessingMode(),
 
 		flags.WithExtendedPipelineSupport("application", "application.id", true, "id"),
+		flags.WithPipelineAliases("tenant", "tenant", "owner.tenant.id"),
 	)
 
 	// Required flags

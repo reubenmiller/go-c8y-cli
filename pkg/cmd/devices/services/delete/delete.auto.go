@@ -65,6 +65,7 @@ Get service status (using pipeline)
 		flags.WithProcessingMode(),
 
 		flags.WithExtendedPipelineSupport("id", "id", true, "managedObject.id", "id"),
+		flags.WithPipelineAliases("device", "deviceId", "source.id", "managedObject.id", "id"),
 	)
 
 	// Required flags

@@ -59,6 +59,7 @@ Update device by id
 		flags.WithData(),
 		f.WithTemplateFlag(cmd),
 		flags.WithExtendedPipelineSupport("id", "id", true, "deviceId", "source.id", "managedObject.id", "id"),
+		flags.WithPipelineAliases("id", "deviceId", "source.id", "managedObject.id", "id"),
 	)
 
 	// Required flags

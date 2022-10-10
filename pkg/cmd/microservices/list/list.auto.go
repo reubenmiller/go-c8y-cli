@@ -77,6 +77,7 @@ List all microservices owned by specific tenant
 		cmd,
 
 		flags.WithExtendedPipelineSupport("user", "user", false, "id"),
+		flags.WithPipelineAliases("owner", "tenant", "owner.tenant.id", "tenant", "owner.tenant.id", "tenant", "owner.tenant.id"), flags.WithPipelineAliases("providedFor", "tenant", "owner.tenant.id", "tenant", "owner.tenant.id", "tenant", "owner.tenant.id"), flags.WithPipelineAliases("subscriber", "tenant", "owner.tenant.id", "tenant", "owner.tenant.id", "tenant", "owner.tenant.id"),
 		flags.WithCollectionProperty("applications"),
 	)
 

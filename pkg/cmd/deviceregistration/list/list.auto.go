@@ -53,6 +53,7 @@ Get a list of new device requests
 		cmd,
 
 		flags.WithExtendedPipelineSupport("", "", false),
+
 		flags.WithCollectionProperty("newDeviceRequests"),
 	)
 

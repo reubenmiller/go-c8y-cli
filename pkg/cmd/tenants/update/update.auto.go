@@ -63,6 +63,7 @@ Update a tenant by name (from the management tenant)
 		flags.WithData(),
 		f.WithTemplateFlag(cmd),
 		flags.WithExtendedPipelineSupport("id", "id", false),
+		flags.WithPipelineAliases("id", "tenant", "owner.tenant.id"),
 	)
 
 	// Required flags

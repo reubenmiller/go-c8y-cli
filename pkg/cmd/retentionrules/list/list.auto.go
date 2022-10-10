@@ -54,6 +54,7 @@ Get a list of retention rules
 		cmd,
 
 		flags.WithExtendedPipelineSupport("", "", false),
+
 		flags.WithCollectionProperty("retentionRules"),
 	)
 

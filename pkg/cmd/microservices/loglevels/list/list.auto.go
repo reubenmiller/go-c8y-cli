@@ -58,6 +58,7 @@ List log levels of microservice
 		cmd,
 
 		flags.WithExtendedPipelineSupport("", "", false),
+
 		flags.WithCollectionProperty("loggers"),
 	)
 

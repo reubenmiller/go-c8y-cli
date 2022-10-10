@@ -60,6 +60,7 @@ Get smart group by name
 		cmd,
 
 		flags.WithExtendedPipelineSupport("id", "id", true),
+		flags.WithPipelineAliases("id", "managedObject.id"),
 	)
 
 	// Required flags

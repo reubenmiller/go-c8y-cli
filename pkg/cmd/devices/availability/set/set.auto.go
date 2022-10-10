@@ -64,6 +64,7 @@ Set the required availability for a list of devices using pipeline
 		flags.WithProcessingMode(),
 
 		flags.WithExtendedPipelineSupport("id", "id", true, "deviceId", "source.id", "managedObject.id", "id"),
+		flags.WithPipelineAliases("id", "deviceId", "source.id", "managedObject.id", "id"),
 	)
 
 	// Required flags

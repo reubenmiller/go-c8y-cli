@@ -57,6 +57,7 @@ Get a user by name
 		cmd,
 
 		flags.WithExtendedPipelineSupport("name", "name", true, "id"),
+		flags.WithPipelineAliases("tenant", "tenant", "owner.tenant.id"),
 	)
 
 	// Required flags

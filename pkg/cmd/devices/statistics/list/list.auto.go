@@ -72,6 +72,7 @@ Get monthly device statistics for all devices for a specific month (day is ignor
 		cmd,
 
 		flags.WithExtendedPipelineSupport("device", "deviceId", false, "deviceId", "source.id", "managedObject.id", "id"),
+		flags.WithPipelineAliases("date", "time", "creationTime", "creationTime", "lastUpdated", "tenant", "owner.tenant.id", "deviceId", "source.id", "managedObject.id", "id"), flags.WithPipelineAliases("tenant", "time", "creationTime", "creationTime", "lastUpdated", "tenant", "owner.tenant.id", "deviceId", "source.id", "managedObject.id", "id"), flags.WithPipelineAliases("device", "time", "creationTime", "creationTime", "lastUpdated", "tenant", "owner.tenant.id", "deviceId", "source.id", "managedObject.id", "id"),
 		flags.WithCollectionProperty("statistics"),
 	)
 

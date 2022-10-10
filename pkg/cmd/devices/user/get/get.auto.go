@@ -60,6 +60,7 @@ Get device user by name
 		cmd,
 
 		flags.WithExtendedPipelineSupport("id", "id", true, "deviceId", "source.id", "managedObject.id", "id"),
+		flags.WithPipelineAliases("id", "deviceId", "source.id", "managedObject.id", "id"),
 	)
 
 	// Required flags

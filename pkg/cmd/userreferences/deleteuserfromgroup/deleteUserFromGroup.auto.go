@@ -64,6 +64,7 @@ Delete a user from a user group (using pipeline)
 		flags.WithProcessingMode(),
 
 		flags.WithExtendedPipelineSupport("user", "user", true, "id"),
+		flags.WithPipelineAliases("tenant", "tenant", "owner.tenant.id"),
 	)
 
 	// Required flags

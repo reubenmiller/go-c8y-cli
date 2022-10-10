@@ -65,6 +65,7 @@ Get a list of bulk operations in the general status SCHEDULED or EXECUTING
 		cmd,
 
 		flags.WithExtendedPipelineSupport("", "", false),
+		flags.WithPipelineAliases("dateFrom", "time", "creationTime", "creationTime", "lastUpdated", "time", "creationTime", "creationTime", "lastUpdated"), flags.WithPipelineAliases("dateTo", "time", "creationTime", "creationTime", "lastUpdated", "time", "creationTime", "creationTime", "lastUpdated"),
 		flags.WithCollectionProperty("bulkOperations"),
 	)
 

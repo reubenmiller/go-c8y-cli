@@ -59,6 +59,7 @@ Delete a subscription associated with a device
 		flags.WithProcessingMode(),
 
 		flags.WithExtendedPipelineSupport("device", "source", false, "deviceId", "source.id", "managedObject.id", "id"),
+		flags.WithPipelineAliases("device", "deviceId", "source.id", "managedObject.id", "id"),
 	)
 
 	// Required flags

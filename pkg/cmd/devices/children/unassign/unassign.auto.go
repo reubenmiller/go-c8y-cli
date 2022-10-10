@@ -63,6 +63,7 @@ Unassign a child device from a managed object
 		flags.WithProcessingMode(),
 
 		flags.WithExtendedPipelineSupport("child", "child", true, "deviceId", "source.id", "managedObject.id", "id"),
+		flags.WithPipelineAliases("id", "deviceId", "source.id", "managedObject.id", "id"),
 	)
 
 	// Required flags

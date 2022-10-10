@@ -61,6 +61,7 @@ Get a list of configuration files
 		cmd,
 
 		flags.WithExtendedPipelineSupport("query", "query", false, "c8y_DeviceQueryString"),
+
 		flags.WithCollectionProperty("managedObjects"),
 	)
 

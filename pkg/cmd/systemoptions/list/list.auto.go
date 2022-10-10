@@ -53,6 +53,7 @@ Get a list of system options
 		cmd,
 
 		flags.WithExtendedPipelineSupport("", "", false),
+
 		flags.WithCollectionProperty("options"),
 	)
 

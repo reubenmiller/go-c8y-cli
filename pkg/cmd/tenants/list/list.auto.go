@@ -53,6 +53,7 @@ Get a list of tenants
 		cmd,
 
 		flags.WithExtendedPipelineSupport("", "", false),
+
 		flags.WithCollectionProperty("tenants"),
 	)
 

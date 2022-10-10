@@ -60,6 +60,7 @@ Update smart group by id
 		flags.WithData(),
 		f.WithTemplateFlag(cmd),
 		flags.WithExtendedPipelineSupport("id", "id", true),
+		flags.WithPipelineAliases("id", "managedObject.id"),
 	)
 
 	// Required flags

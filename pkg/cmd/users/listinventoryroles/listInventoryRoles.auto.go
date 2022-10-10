@@ -53,6 +53,7 @@ Get list of inventory roles
 		cmd,
 
 		flags.WithExtendedPipelineSupport("", "", false),
+
 		flags.WithCollectionProperty("roles"),
 	)
 

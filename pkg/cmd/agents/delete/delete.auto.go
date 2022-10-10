@@ -67,6 +67,7 @@ Delete agent and related device user/credentials
 		flags.WithProcessingMode(),
 
 		flags.WithExtendedPipelineSupport("id", "id", true),
+		flags.WithPipelineAliases("id", "deviceId", "source.id", "managedObject.id", "id"),
 	)
 
 	// Required flags

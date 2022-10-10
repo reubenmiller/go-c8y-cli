@@ -64,6 +64,7 @@ Get a list of audit records
 		cmd,
 
 		flags.WithExtendedPipelineSupport("source", "source", false, "id", "source.id", "managedObject.id"),
+		flags.WithPipelineAliases("source", "id", "source.id", "managedObject.id", "deviceId", "time", "creationTime", "creationTime", "lastUpdated", "time", "creationTime", "creationTime", "lastUpdated"), flags.WithPipelineAliases("dateFrom", "id", "source.id", "managedObject.id", "deviceId", "time", "creationTime", "creationTime", "lastUpdated", "time", "creationTime", "creationTime", "lastUpdated"), flags.WithPipelineAliases("dateTo", "id", "source.id", "managedObject.id", "deviceId", "time", "creationTime", "creationTime", "lastUpdated", "time", "creationTime", "creationTime", "lastUpdated"),
 		flags.WithCollectionProperty("auditRecords"),
 	)
 

@@ -53,6 +53,7 @@ Get a list of tenant options
 		cmd,
 
 		flags.WithExtendedPipelineSupport("", "", false),
+
 		flags.WithCollectionProperty("options"),
 	)
 

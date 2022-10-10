@@ -56,6 +56,7 @@ Get a tenant by name (from the management tenant)
 		cmd,
 
 		flags.WithExtendedPipelineSupport("id", "id", false),
+		flags.WithPipelineAliases("id", "tenant", "owner.tenant.id"),
 	)
 
 	// Required flags

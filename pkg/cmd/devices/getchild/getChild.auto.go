@@ -61,6 +61,7 @@ Get an existing child device reference
 		cmd,
 
 		flags.WithExtendedPipelineSupport("device", "device", true, "deviceId", "source.id", "managedObject.id", "id"),
+		flags.WithPipelineAliases("device", "deviceId", "source.id", "managedObject.id", "id", "deviceId", "source.id", "managedObject.id", "id"), flags.WithPipelineAliases("reference", "deviceId", "source.id", "managedObject.id", "id", "deviceId", "source.id", "managedObject.id", "id"),
 
 		flags.WithDeprecationNotice("please use 'c8y devices children get --childType device' instead"),
 	)

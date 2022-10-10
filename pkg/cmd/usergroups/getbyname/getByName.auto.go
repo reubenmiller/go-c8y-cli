@@ -57,6 +57,7 @@ Get user group by its name
 		cmd,
 
 		flags.WithExtendedPipelineSupport("name", "name", false, "name"),
+		flags.WithPipelineAliases("tenant", "tenant", "owner.tenant.id"),
 	)
 
 	// Required flags

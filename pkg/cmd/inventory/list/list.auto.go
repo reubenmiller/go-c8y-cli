@@ -78,6 +78,7 @@ Get managed objects which have the same type as the managed object id=1234. pipe
 		cmd,
 
 		flags.WithExtendedPipelineSupport("type", "type", false, "type"),
+		flags.WithPipelineAliases("childDeviceId", "deviceId", "source.id", "managedObject.id", "id"),
 		flags.WithCollectionProperty("managedObjects"),
 	)
 

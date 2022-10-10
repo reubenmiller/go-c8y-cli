@@ -61,6 +61,7 @@ Get a list of users
 		cmd,
 
 		flags.WithExtendedPipelineSupport("", "", false),
+		flags.WithPipelineAliases("tenant", "tenant", "owner.tenant.id"),
 		flags.WithCollectionProperty("users"),
 	)
 

@@ -62,6 +62,7 @@ List users in user groups (using pipeline)
 		cmd,
 
 		flags.WithExtendedPipelineSupport("id", "id", true),
+		flags.WithPipelineAliases("tenant", "tenant", "owner.tenant.id"),
 		flags.WithCollectionProperty("references.#.user"),
 	)
 

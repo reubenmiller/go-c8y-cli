@@ -65,6 +65,7 @@ Get all subscriptions related to a specific source
 		cmd,
 
 		flags.WithExtendedPipelineSupport("device", "source", false, "deviceId", "source.id", "managedObject.id", "id"),
+		flags.WithPipelineAliases("device", "deviceId", "source.id", "managedObject.id", "id"),
 		flags.WithCollectionProperty("subscriptions"),
 	)
 

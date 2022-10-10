@@ -58,6 +58,7 @@ Get a list of device profiles
 		cmd,
 
 		flags.WithExtendedPipelineSupport("name", "name", false, "c8y_Software.name", "name"),
+
 		flags.WithCollectionProperty("managedObjects"),
 	)
 

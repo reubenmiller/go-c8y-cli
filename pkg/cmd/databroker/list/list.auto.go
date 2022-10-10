@@ -53,6 +53,7 @@ Get a list of data broker connectors
 		cmd,
 
 		flags.WithExtendedPipelineSupport("", "", false),
+
 		flags.WithCollectionProperty("connectors"),
 	)
 

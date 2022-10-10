@@ -60,6 +60,7 @@ Get a list of firmware packages
 		cmd,
 
 		flags.WithExtendedPipelineSupport("query", "query", false, "c8y_DeviceQueryString"),
+
 		flags.WithCollectionProperty("managedObjects"),
 	)
 
