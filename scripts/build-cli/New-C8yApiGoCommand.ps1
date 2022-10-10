@@ -584,6 +584,14 @@ $($Examples -join "`n`n")
             }   
         )
         $(
+            foreach ($item in $CommandArgs) {
+                if ($item.PipelineAliases) {
+                    $aliases = ($CommandArgs.PipelineAliases | ForEach-Object { "`"$_`""` }) -join ", "
+                    "flags.WithPipelineAliases(`"$($item.Name)`", $aliases),"
+                }
+            }
+        )
+        $(
             if ($collectionProperty) {
                 "flags.WithCollectionProperty(`"$collectionProperty`"),"
             }
@@ -830,6 +838,7 @@ Function Get-C8yGoArgs {
             }
             @{
                 SetFlag = $SetFlag
+                PipelineAliases = @("time", "creationTime", "creationTime", "lastUpdated")
             }
         }
 
@@ -841,6 +850,7 @@ Function Get-C8yGoArgs {
             }
             @{
                 SetFlag = $SetFlag
+                PipelineAliases = @("id", "source.id", "managedObject.id", "deviceId")
             }
         }
 
@@ -887,6 +897,7 @@ Function Get-C8yGoArgs {
 
             @{
                 SetFlag = $SetFlag
+                PipelineAliases = @("deviceId", "source.id", "managedObject.id", "id")
             }
         }
 
@@ -899,6 +910,7 @@ Function Get-C8yGoArgs {
 
             @{
                 SetFlag = $SetFlag
+                PipelineAliases = @("deviceId", "source.id", "managedObject.id", "id")
             }
         }
 
@@ -961,6 +973,7 @@ Function Get-C8yGoArgs {
 
             @{
                 SetFlag = $SetFlag
+                PipelineAliases = @("source.id", "managedObject.id", "id")
             }
         }
 
@@ -985,6 +998,7 @@ Function Get-C8yGoArgs {
 
             @{
                 SetFlag = $SetFlag
+                PipelineAliases = @("managedObject.id")
             }
         }
 
@@ -1173,6 +1187,7 @@ Function Get-C8yGoArgs {
 
             @{
                 SetFlag = $SetFlag
+                PipelineAliases = @("tenant", "owner.tenant.id")
             }
         }
 
@@ -1288,6 +1303,8 @@ Function Get-C8yGoArgs {
     if ($Hidden -match "true|yes" -and $Pipeline -notmatch "true") {
         $Entry | Add-Member -MemberType NoteProperty -Name "Hidden" -Value "_ = cmd.Flags().MarkHidden(`"${Name}`")"
     }
+
+    $Entry.Name = $Name
 
     $Entry
 }

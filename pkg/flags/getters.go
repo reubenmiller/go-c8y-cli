@@ -12,6 +12,7 @@ import (
 	"strings"
 
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/c8yquery"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/timestamp"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/url"
 
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/c8ydata"
@@ -465,6 +466,13 @@ func WithStringDefaultValue(defaultValue string, opts ...string) GetOption {
 
 		src, dst, format := UnpackGetterOptions("%s", opts...)
 
+		if inputIterators != nil && inputIterators.PipeOptions != nil {
+			if inputIterators.PipeOptions.Name == src {
+				inputIterators.PipeOptions.Format = format
+				return WithPipelineIterator(inputIterators.PipeOptions)(cmd, inputIterators)
+			}
+		}
+
 		if !cmd.Flags().Changed(src) {
 			if defaultValue != "" {
 				return dst, defaultValue, nil
@@ -610,6 +618,25 @@ func WithRelativeTimestamp(opts ...string) GetOption {
 		src, dst, format := UnpackGetterOptions("", opts...)
 		value, err := cmd.Flags().GetString(src)
 
+		if inputIterators != nil {
+			if inputIterators.PipeOptions.Name == src {
+				inputIterators.PipeOptions.Format = format
+				inputIterators.PipeOptions.Formatter = func(b []byte) []byte {
+					if datetime, err := timestamp.TryGetTimestamp(string(b), false); err == nil {
+						if format != "" {
+							return []byte(fmt.Sprintf(format, datetime))
+						}
+						return []byte(datetime)
+					}
+					if format != "" {
+						return []byte(fmt.Sprintf(format, b))
+					}
+					return b
+				}
+				return WithPipelineIterator(inputIterators.PipeOptions)(cmd, inputIterators)
+			}
+		}
+
 		if err != nil {
 			return dst, value, err
 		}
@@ -635,6 +662,25 @@ func WithEncodedRelativeTimestamp(opts ...string) GetOption {
 		src, dst, format := UnpackGetterOptions("", opts...)
 		value, err := cmd.Flags().GetString(src)
 
+		if inputIterators != nil {
+			if inputIterators.PipeOptions.Name == src {
+				inputIterators.PipeOptions.Format = format
+				inputIterators.PipeOptions.Formatter = func(b []byte) []byte {
+					if datetime, err := timestamp.TryGetTimestamp(string(b), true); err == nil {
+						if format != "" {
+							return []byte(fmt.Sprintf(format, datetime))
+						}
+						return []byte(datetime)
+					}
+					if format != "" {
+						return []byte(fmt.Sprintf(format, b))
+					}
+					return b
+				}
+				return WithPipelineIterator(inputIterators.PipeOptions)(cmd, inputIterators)
+			}
+		}
+
 		if err != nil {
 			return dst, value, err
 		}
@@ -659,6 +705,25 @@ func WithRelativeDate(encode bool, opts ...string) GetOption {
 	return func(cmd *cobra.Command, inputIterators *RequestInputIterators) (string, interface{}, error) {
 		src, dst, format := UnpackGetterOptions("", opts...)
 		value, err := cmd.Flags().GetString(src)
+
+		if inputIterators != nil {
+			if inputIterators.PipeOptions.Name == src {
+				inputIterators.PipeOptions.Format = format
+				inputIterators.PipeOptions.Formatter = func(b []byte) []byte {
+					if datetime, err := timestamp.TryGetDate(string(b), encode, format); err == nil {
+						if format != "" {
+							return []byte(fmt.Sprintf(format, datetime))
+						}
+						return []byte(datetime)
+					}
+					if format != "" {
+						return []byte(fmt.Sprintf(format, b))
+					}
+					return b
+				}
+				return WithPipelineIterator(inputIterators.PipeOptions)(cmd, inputIterators)
+			}
+		}
 
 		if err != nil {
 			return dst, value, err

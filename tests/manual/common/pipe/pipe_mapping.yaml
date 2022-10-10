@@ -45,3 +45,45 @@ tests:
     stdout:
       exactly: |
         {"method":"GET","pathEncoded":"/application/applications?providedFor=t12345"}
+
+  It supports flags with default values:
+    command: |
+      echo "t12345" |
+        c8y users list --tenant - --dry |
+        c8y util show --select method,pathEncoded
+    exit-code: 0
+    stdout:
+      exactly: |
+        {"method":"GET","pathEncoded":"/user/t12345/users"}
+
+  It supports flags with relative timestamps in query parameters:
+    command: |
+      echo "10m" |
+        c8y devices list --creationTimeDateFrom - --dry --dryFormat json |
+        c8y util show --select method,query
+    exit-code: 0
+    stdout:
+      json:
+        query: r/.*creationTime.date ge '\d{4}-\d{2}-\d{2}.*
+        method: GET
+
+  It supports flags with relative timestamps in the body:
+    command: |
+      echo "10m" |
+        c8y alarms create --type demo01 --device 1234 --status ACKNOWLEDGED --severity MAJOR --text Alarm1 --time - --dry --dryFormat json |
+        c8y util show --select body
+    exit-code: 0
+    stdout:
+      json:
+        body.time: r/\d{4}-\d{2}-\d{2}
+
+  It supports flags with relative dates in the path:
+    command: |
+        echo -7d |
+          c8y devices statistics list --date - --dry --dryFormat json |
+          c8y util show --select method,pathEncoded -o json
+    exit-code: 0
+    stdout:
+      json:
+        method: GET
+        pathEncoded: r//tenant/statistics/device/t\d+/daily/\d{4}-\d{2}-\d{2}$

@@ -37,7 +37,7 @@
         {
           "name": "tenant",
           "type": "tenant",
-          "pipeline": true,
+          "pipeline": false,
           "required": false,
           "description": "Tenant id"
         }

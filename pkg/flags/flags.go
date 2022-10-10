@@ -24,6 +24,7 @@ const (
 	FlagReadFromPipeJSON          = "-."
 )
 const (
+	AnnotationValuePipelineAlias      = "pipelineAliases"
 	AnnotationValueFromPipeline       = "valueFromPipeline"
 	AnnotationValueFromPipelineData   = "valueFromPipeline.data"
 	AnnotationValueCollectionProperty = "collectionProperty"
@@ -188,12 +189,20 @@ func WithRuntimePipelineProperty() Option {
 		}
 		cmd.Annotations[AnnotationValueFromPipeline] = name
 
+		aliases := []string{name}
+
+		if alias != "" {
+			aliases = append(aliases, alias)
+		}
+
+		if aliasValue, ok := cmd.Annotations[AnnotationValuePipelineAlias+"."+name]; ok {
+			aliases = append(aliases, strings.Split(aliasValue, ",")...)
+		}
+
 		options := &PipelineOptions{
 			Name:     name,
 			Property: name,
-			Aliases: []string{
-				name, alias,
-			},
+			Aliases:  aliases,
 			Required: true,
 			IsID:     true,
 		}
@@ -203,6 +212,17 @@ func WithRuntimePipelineProperty() Option {
 		}
 
 		cmd.Annotations[AnnotationValueFromPipelineData] = string(data)
+		return cmd
+	}
+}
+
+// WithPipelineAliases adds a list of aliases for a flag if it is selected to be sourced from the pipeline
+func WithPipelineAliases(property string, aliases ...string) Option {
+	return func(cmd *cobra.Command) *cobra.Command {
+		if cmd.Annotations == nil {
+			cmd.Annotations = map[string]string{}
+		}
+		cmd.Annotations[AnnotationValuePipelineAlias+"."+property] = strings.Join(aliases, ",")
 		return cmd
 	}
 }
