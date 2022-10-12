@@ -209,8 +209,6 @@ If the piped input is compressed JSON, then `c8y` will try to pick the correct p
 Custom piped input to flag mapping is not supported in PSc8y (PowerShell) cmdlets as PowerShell does not support this.
 :::
 
-<CodeExample>
-
 ```bash
 # Pick plain text input
 echo "t12345" | c8y applications list --providedFor -
@@ -221,17 +219,9 @@ echo "{\"tenant\":\"t12345\"}" | c8y applications list --providedFor -.name,.ten
 # => GET /application/applications?providedFor=t12345
 ```
 
-```powershell
-# Not supported in PowerShell due to limitations in PowerShell itself
-```
-
-</CodeExample>
-
 ### Find any events leading up to an alarm
 
 Image if there is a specific alarm and you would like to retrieve events leading up to the time of alarm. First you query for the alarm, and then pipe the value to the events command, and pipe the alarm's timestamp to the `dateFrom` flag.
-
-<CodeExample>
 
 ```bash
 c8y alarms list --type myCriticalAlarm --pageSize 1 \
@@ -243,13 +233,9 @@ c8y alarms list --type myCriticalAlarm --pageSize 1 --device 12345 \
 | c8y events list --dateTo -.time --device 12345
 ```
 
-</CodeExample>
-
 ### Find devices by name
 
 Map the piped input to the `--name` flag, which simplifies the command usage without having to explicitly pipe the whole inventory query (as `--query` is consumes the piped input by default).
-
-<CodeExample>
 
 ```bash
 echo -e "linuxdevice01\nlinuxdevice02" | c8y devices list --name -
@@ -257,15 +243,11 @@ echo -e "linuxdevice01\nlinuxdevice02" | c8y devices list --name -
 # => GET /inventory/managedObjects?q=$filter=(name eq 'linuxdevice02') $orderby=name
 ```
 
-</CodeExample>
-
 ### Assign multiple groups to the same user
 
 `c8y userreferences addUserToGroup` normally accepts piped input via the `--user` flag, which results in add a single group to multiple users.
 
 However if you would like to assign multiple groups to a single user, then the piped input can be assigned to the `--group` flag using the example below.
-
-<CodeExample>
 
 ```bash
 # Add assign multiple groups to a single user
@@ -274,9 +256,6 @@ echo -e "admins\nbusiness" | c8y userreferences addUserToGroup --user myuser@exa
 # Or assign multiple users to a single group
 echo -e "user01\nuser02" | c8y userreferences addUserToGroup --group admins
 ```
-
-</CodeExample>
-
 
 ## Examples
 
