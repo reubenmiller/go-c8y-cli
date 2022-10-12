@@ -311,7 +311,7 @@ func WithStringValue(opts ...string) GetOption {
 			return dst, value, err
 		}
 		if value == "" {
-			// dont assign the value anywhere
+			// don't assign the value anywhere
 			dst = ""
 		}
 		return dst, applyFormatter(format, value), err
@@ -388,7 +388,7 @@ func WithCustomStringValue(transform func([]byte) []byte, targetFunc func() stri
 			return dst, value, err
 		}
 		if value == "" {
-			// dont assign the value anywhere
+			// don't assign the value anywhere
 			dst = ""
 		}
 		outputValue := applyFormatter(format, value)
@@ -410,7 +410,7 @@ func WithCustomStringSlice(valuesFunc func() ([]string, error), opts ...string) 
 			return dst, values, err
 		}
 		if len(values) == 0 {
-			// dont assign the value anywhere
+			// don't assign the value anywhere
 			dst = ""
 		}
 
@@ -447,7 +447,7 @@ func WithOverrideValue(opts ...string) GetOption {
 			err = nil
 		}
 		if value == "" {
-			// dont assign the value anywhere
+			// don't assign the value anywhere
 			dst = ""
 		}
 
