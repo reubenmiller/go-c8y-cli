@@ -192,7 +192,12 @@ func WithRuntimePipelineProperty() Option {
 		aliases := []string{name}
 
 		if alias != "" {
-			aliases = append(aliases, alias)
+			for _, a := range strings.Split(alias, ",") {
+				a = strings.TrimLeft(a, ".")
+				if a != "" {
+					aliases = append(aliases, a)
+				}
+			}
 		}
 
 		if aliasValue, ok := cmd.Annotations[AnnotationValuePipelineAlias+"."+name]; ok {
