@@ -36,7 +36,7 @@ func NewFlagWithPipeIterator(cmd *cobra.Command, pipeOpt *PipelineOptions, suppo
 		}
 		iterOpts := &iterator.PipeOptions{
 			Properties: sourceProperties,
-			Validator:  nil,
+			Validator:  pipeOpt.Validator,
 			AllowEmpty: !pipeOpt.Required,
 			Formatter:  pipeOpt.Formatter,
 			Format:     pipeOpt.Format,
