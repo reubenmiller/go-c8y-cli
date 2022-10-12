@@ -928,29 +928,57 @@ func WithInventoryChildType(opts ...string) GetOption {
 			return "", nil, err
 		}
 
-		value = strings.ToLower(applyFormatter(format, value))
+		validator := func(input string) error {
+			v := strings.ToLower(applyFormatter(format, input))
 
-		validValues := []string{
-			"asset",
-			"device",
-			"addition",
+			validValues := []string{
+				"asset",
+				"device",
+				"addition",
+			}
+
+			isValid := false
+			for _, iValue := range validValues {
+				if iValue == v {
+					isValid = true
+					break
+				}
+			}
+			if !isValid {
+				return fmt.Errorf("invalid value. %s only accepts %s", src, strings.Join(validValues, ","))
+			}
+			return nil
 		}
 
-		isValid := false
-		for _, iValue := range validValues {
-			if iValue == value {
-				isValid = true
-				break
+		formatter := func(input string) string {
+			v := strings.ToLower(applyFormatter(format, input))
+			output := "child" + strings.ToUpper(v[0:1]) + v[1:] + "s"
+			return output
+
+		}
+
+		if inputIterators != nil && inputIterators.PipeOptions != nil {
+			if inputIterators.PipeOptions.Name == src {
+				inputIterators.PipeOptions.Validator = func(b []byte) error {
+					return validator(string(b))
+				}
+				inputIterators.PipeOptions.Formatter = func(b []byte) []byte {
+					return []byte(formatter(string(b)))
+				}
+
+				if dst != "" {
+					inputIterators.PipeOptions.Property = dst
+				}
+				inputIterators.PipeOptions.Format = format
+				return WithPipelineIterator(inputIterators.PipeOptions)(cmd, inputIterators)
 			}
 		}
 
-		if !isValid {
-			return "", nil, fmt.Errorf("invalid value. %s only accepts %s", src, strings.Join(validValues, ","))
+		if err := validator(value); err != nil {
+			return "", nil, err
 		}
 
-		formattedValue := "child" + strings.ToUpper(value[0:1]) + value[1:] + "s"
-
-		return dst, formattedValue, nil
+		return dst, formatter(value), nil
 	}
 }
 

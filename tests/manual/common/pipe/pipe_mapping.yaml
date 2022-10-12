@@ -87,3 +87,24 @@ tests:
       json:
         method: GET
         pathEncoded: r//tenant/statistics/device/t\d+/daily/\d{4}-\d{2}-\d{2}$
+
+  It supports flags multiple mappings:
+    command: |
+        c8y template execute --template "{one: 'myname'}" |
+          c8y devices list --name -.id,.one --dry --dryFormat json |
+          c8y util show --select method,path,query -o json
+    exit-code: 0
+    stdout:
+      exactly: |
+        {"method":"GET","path":"/inventory/managedObjects","query":"q=$filter=(name eq 'myname') $orderby=name"}
+
+  It supports flag mapping to children childType:
+    command: |
+        c8y template execute --template "{type: 'device'}" |
+          c8y devices children list --id 12345 --childType -.type --dry --dryFormat json |
+          c8y util show --select method,path -o json
+    exit-code: 0
+    stdout:
+      json:
+        method: GET
+        path: /inventory/managedObjects/12345/childDevices

@@ -230,8 +230,8 @@
             Hidden = $iArg.hidden
             Pipeline = $iArg.pipeline
         }
-        $arg = Get-C8yGoArgs @ArgParams
-        $null = $CommandArgs.Add($arg)
+        $CurrentArg = Get-C8yGoArgs @ArgParams
+        $null = $CommandArgs.Add($CurrentArg)
     }
 
     if (!$PipelineVariableName -and $ArgumentSources.Count -gt 0) {
@@ -585,9 +585,21 @@ $($Examples -join "`n`n")
         )
         $(
             foreach ($item in $CommandArgs) {
+                $iAliases = $item.PipelineAliases
+                if (!$iAliases) {
+                    $iAliases = @($item.Name)
+                }
                 if ($item.PipelineAliases) {
-                    $aliases = ($CommandArgs.PipelineAliases | ForEach-Object { "`"$_`""` }) -join ", "
-                    "flags.WithPipelineAliases(`"$($item.Name)`", $aliases),"
+                    $usedAliases = @{}
+                    $sourceAliases = ($item.PipelineAliases | ForEach-Object {
+                        if (!$usedAliases.ContainsKey($_)) {
+                            "`"$_`""`
+                        }
+                        $usedAliases[$_] = $true
+                    } | Where-Object { $_ }) -join ", "
+                    if ($sourceAliases) {
+                        "flags.WithPipelineAliases(`"$($item.Name)`", $sourceAliases),`n"
+                    }
                 }
             }
         )
@@ -1011,6 +1023,7 @@ Function Get-C8yGoArgs {
 
             @{
                 SetFlag = $SetFlag
+                PipelineAliases = @("self", "id")
             }
         }
 
@@ -1023,6 +1036,7 @@ Function Get-C8yGoArgs {
 
             @{
                 SetFlag = $SetFlag
+                PipelineAliases = @("id")
             }
         }
 
@@ -1035,6 +1049,7 @@ Function Get-C8yGoArgs {
 
             @{
                 SetFlag = $SetFlag
+                PipelineAliases = @("id")
             }
         }
 
@@ -1046,6 +1061,7 @@ Function Get-C8yGoArgs {
             }
             @{
                 SetFlag = $SetFlag
+                PipelineAliases = @("id")
             }
         }
 
@@ -1057,6 +1073,7 @@ Function Get-C8yGoArgs {
             }
             @{
                 SetFlag = $SetFlag
+                PipelineAliases = @("id")
             }
         }
 
@@ -1068,6 +1085,7 @@ Function Get-C8yGoArgs {
             }
             @{
                 SetFlag = $SetFlag
+                PipelineAliases = @("id")
             }
         }
 
@@ -1079,6 +1097,7 @@ Function Get-C8yGoArgs {
             }
             @{
                 SetFlag = $SetFlag
+                PipelineAliases = @("name")
             }
         }
 
