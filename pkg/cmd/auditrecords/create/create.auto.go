@@ -65,7 +65,7 @@ Create an audit record for a custom managed object update
 		flags.WithData(),
 		f.WithTemplateFlag(cmd),
 		flags.WithExtendedPipelineSupport("source", "source.id", false, "id"),
-		flags.WithPipelineAliases("time", "time", "creationTime", "creationTime", "lastUpdated"),
+		flags.WithPipelineAliases("time", "time", "creationTime", "lastUpdated"),
 	)
 
 	// Required flags

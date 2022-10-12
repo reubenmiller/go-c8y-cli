@@ -70,6 +70,7 @@ Get services which are currently down for a device
 
 		flags.WithExtendedPipelineSupport("device", "device", true, "deviceId", "source.id", "managedObject.id", "id"),
 		flags.WithPipelineAliases("device", "deviceId", "source.id", "managedObject.id", "id"),
+
 		flags.WithCollectionProperty("references.#.managedObject"),
 	)
 

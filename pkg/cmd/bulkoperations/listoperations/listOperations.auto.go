@@ -67,7 +67,9 @@ Check all bulk operations if they have any related operations still in executing
 		cmd,
 
 		flags.WithExtendedPipelineSupport("id", "bulkOperationId", true, "id", "bulkOperationId"),
-		flags.WithPipelineAliases("dateFrom", "time", "creationTime", "creationTime", "lastUpdated", "time", "creationTime", "creationTime", "lastUpdated"), flags.WithPipelineAliases("dateTo", "time", "creationTime", "creationTime", "lastUpdated", "time", "creationTime", "creationTime", "lastUpdated"),
+		flags.WithPipelineAliases("dateFrom", "time", "creationTime", "lastUpdated"),
+		flags.WithPipelineAliases("dateTo", "time", "creationTime", "lastUpdated"),
+
 		flags.WithCollectionProperty("operations"),
 	)
 

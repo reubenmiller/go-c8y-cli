@@ -57,6 +57,7 @@ Get a list of user groups for the current tenant
 
 		flags.WithExtendedPipelineSupport("", "", false),
 		flags.WithPipelineAliases("tenant", "tenant", "owner.tenant.id"),
+
 		flags.WithCollectionProperty("groups"),
 	)
 

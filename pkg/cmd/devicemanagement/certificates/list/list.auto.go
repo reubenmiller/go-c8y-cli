@@ -58,6 +58,7 @@ Get list of trusted device certificates
 
 		flags.WithExtendedPipelineSupport("", "", false),
 		flags.WithPipelineAliases("tenant", "tenant", "owner.tenant.id"),
+
 		flags.WithCollectionProperty("certificates"),
 	)
 

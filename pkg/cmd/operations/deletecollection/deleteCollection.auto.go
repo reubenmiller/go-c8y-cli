@@ -66,7 +66,10 @@ Remove all pending operations for a given device
 		flags.WithProcessingMode(),
 
 		flags.WithExtendedPipelineSupport("device", "deviceId", false, "deviceId", "source.id", "managedObject.id", "id"),
-		flags.WithPipelineAliases("agent", "deviceId", "source.id", "managedObject.id", "id", "deviceId", "source.id", "managedObject.id", "id", "time", "creationTime", "creationTime", "lastUpdated", "time", "creationTime", "creationTime", "lastUpdated"), flags.WithPipelineAliases("device", "deviceId", "source.id", "managedObject.id", "id", "deviceId", "source.id", "managedObject.id", "id", "time", "creationTime", "creationTime", "lastUpdated", "time", "creationTime", "creationTime", "lastUpdated"), flags.WithPipelineAliases("dateFrom", "deviceId", "source.id", "managedObject.id", "id", "deviceId", "source.id", "managedObject.id", "id", "time", "creationTime", "creationTime", "lastUpdated", "time", "creationTime", "creationTime", "lastUpdated"), flags.WithPipelineAliases("dateTo", "deviceId", "source.id", "managedObject.id", "id", "deviceId", "source.id", "managedObject.id", "id", "time", "creationTime", "creationTime", "lastUpdated", "time", "creationTime", "creationTime", "lastUpdated"),
+		flags.WithPipelineAliases("agent", "deviceId", "source.id", "managedObject.id", "id"),
+		flags.WithPipelineAliases("device", "deviceId", "source.id", "managedObject.id", "id"),
+		flags.WithPipelineAliases("dateFrom", "time", "creationTime", "lastUpdated"),
+		flags.WithPipelineAliases("dateTo", "time", "creationTime", "lastUpdated"),
 	)
 
 	// Required flags

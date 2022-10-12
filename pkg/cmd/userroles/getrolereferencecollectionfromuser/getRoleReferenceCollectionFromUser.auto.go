@@ -60,6 +60,7 @@ Get a list of role references for a user
 
 		flags.WithExtendedPipelineSupport("user", "user", true, "id"),
 		flags.WithPipelineAliases("tenant", "tenant", "owner.tenant.id"),
+
 		flags.WithCollectionProperty("references"),
 	)
 

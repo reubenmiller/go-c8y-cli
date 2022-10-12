@@ -59,6 +59,7 @@ Get the supported measurements of a device by name
 
 		flags.WithExtendedPipelineSupport("device", "device", true, "deviceId", "source.id", "managedObject.id", "id"),
 		flags.WithPipelineAliases("device", "deviceId", "source.id", "managedObject.id", "id"),
+
 		flags.WithCollectionProperty("-"),
 	)
 

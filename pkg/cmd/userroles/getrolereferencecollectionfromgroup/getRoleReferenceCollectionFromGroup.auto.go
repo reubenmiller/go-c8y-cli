@@ -60,6 +60,8 @@ Get a list of role references for a user group
 
 		flags.WithExtendedPipelineSupport("group", "group", true, "id"),
 		flags.WithPipelineAliases("tenant", "tenant", "owner.tenant.id"),
+		flags.WithPipelineAliases("group", "id"),
+
 		flags.WithCollectionProperty("references"),
 	)
 

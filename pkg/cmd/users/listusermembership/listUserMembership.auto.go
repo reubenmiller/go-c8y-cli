@@ -60,6 +60,7 @@ Get a list of groups that a user belongs to
 
 		flags.WithExtendedPipelineSupport("id", "id", true),
 		flags.WithPipelineAliases("tenant", "tenant", "owner.tenant.id"),
+
 		flags.WithCollectionProperty("references.#.group"),
 	)
 

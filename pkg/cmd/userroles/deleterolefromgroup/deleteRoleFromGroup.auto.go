@@ -61,6 +61,8 @@ Remove a role from the given user group
 		flags.WithProcessingMode(),
 
 		flags.WithExtendedPipelineSupport("role", "role", true, "id"),
+		flags.WithPipelineAliases("group", "id"),
+		flags.WithPipelineAliases("role", "id"),
 		flags.WithPipelineAliases("tenant", "tenant", "owner.tenant.id"),
 	)
 

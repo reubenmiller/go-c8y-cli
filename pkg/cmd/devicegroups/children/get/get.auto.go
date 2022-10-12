@@ -61,7 +61,9 @@ Get an existing child addition reference
 		cmd,
 
 		flags.WithExtendedPipelineSupport("id", "id", true, "deviceId", "source.id", "managedObject.id", "id"),
-		flags.WithPipelineAliases("id", "source.id", "managedObject.id", "id", "source.id", "managedObject.id", "id"), flags.WithPipelineAliases("child", "source.id", "managedObject.id", "id", "source.id", "managedObject.id", "id"),
+		flags.WithPipelineAliases("id", "source.id", "managedObject.id", "id"),
+		flags.WithPipelineAliases("child", "source.id", "managedObject.id", "id"),
+
 		flags.WithCollectionProperty("managedObject"),
 	)
 

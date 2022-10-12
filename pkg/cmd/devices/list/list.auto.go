@@ -84,7 +84,12 @@ Get devices with type 'c8y_MacOS' then devices with type 'c8y_Linux' (using pipe
 		cmd,
 
 		flags.WithExtendedPipelineSupport("query", "query", false, "c8y_DeviceQueryString"),
-		flags.WithPipelineAliases("lastMessageDateTo", "time", "creationTime", "creationTime", "lastUpdated", "time", "creationTime", "creationTime", "lastUpdated", "time", "creationTime", "creationTime", "lastUpdated", "time", "creationTime", "creationTime", "lastUpdated", "source.id", "managedObject.id", "id"), flags.WithPipelineAliases("lastMessageDateFrom", "time", "creationTime", "creationTime", "lastUpdated", "time", "creationTime", "creationTime", "lastUpdated", "time", "creationTime", "creationTime", "lastUpdated", "time", "creationTime", "creationTime", "lastUpdated", "source.id", "managedObject.id", "id"), flags.WithPipelineAliases("creationTimeDateTo", "time", "creationTime", "creationTime", "lastUpdated", "time", "creationTime", "creationTime", "lastUpdated", "time", "creationTime", "creationTime", "lastUpdated", "time", "creationTime", "creationTime", "lastUpdated", "source.id", "managedObject.id", "id"), flags.WithPipelineAliases("creationTimeDateFrom", "time", "creationTime", "creationTime", "lastUpdated", "time", "creationTime", "creationTime", "lastUpdated", "time", "creationTime", "creationTime", "lastUpdated", "time", "creationTime", "creationTime", "lastUpdated", "source.id", "managedObject.id", "id"), flags.WithPipelineAliases("group", "time", "creationTime", "creationTime", "lastUpdated", "time", "creationTime", "creationTime", "lastUpdated", "time", "creationTime", "creationTime", "lastUpdated", "time", "creationTime", "creationTime", "lastUpdated", "source.id", "managedObject.id", "id"),
+		flags.WithPipelineAliases("lastMessageDateTo", "time", "creationTime", "lastUpdated"),
+		flags.WithPipelineAliases("lastMessageDateFrom", "time", "creationTime", "lastUpdated"),
+		flags.WithPipelineAliases("creationTimeDateTo", "time", "creationTime", "lastUpdated"),
+		flags.WithPipelineAliases("creationTimeDateFrom", "time", "creationTime", "lastUpdated"),
+		flags.WithPipelineAliases("group", "source.id", "managedObject.id", "id"),
+
 		flags.WithCollectionProperty("managedObjects"),
 	)
 

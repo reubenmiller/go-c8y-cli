@@ -64,7 +64,8 @@ Create bulk operation for a group (using pipeline)
 		flags.WithData(),
 		f.WithTemplateFlag(cmd),
 		flags.WithExtendedPipelineSupport("group", "groupId", false, "id"),
-		flags.WithPipelineAliases("group", "source.id", "managedObject.id", "id", "time", "creationTime", "creationTime", "lastUpdated"), flags.WithPipelineAliases("startDate", "source.id", "managedObject.id", "id", "time", "creationTime", "creationTime", "lastUpdated"),
+		flags.WithPipelineAliases("group", "source.id", "managedObject.id", "id"),
+		flags.WithPipelineAliases("startDate", "time", "creationTime", "lastUpdated"),
 	)
 
 	// Required flags

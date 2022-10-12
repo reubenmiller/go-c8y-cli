@@ -62,6 +62,7 @@ Add a role (ROLE_ALARM_READ) to a user
 
 		flags.WithExtendedPipelineSupport("role", "role.self", false, "self", "id"),
 		flags.WithPipelineAliases("tenant", "tenant", "owner.tenant.id"),
+		flags.WithPipelineAliases("role", "self", "id"),
 	)
 
 	// Required flags

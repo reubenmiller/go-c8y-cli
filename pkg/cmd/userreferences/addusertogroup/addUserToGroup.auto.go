@@ -67,6 +67,7 @@ Add a list of users to business and admins group (using pipeline)
 		flags.WithProcessingMode(),
 
 		flags.WithExtendedPipelineSupport("user", "user.self", true, "user.id", "id", "self"),
+		flags.WithPipelineAliases("group", "id"),
 		flags.WithPipelineAliases("tenant", "tenant", "owner.tenant.id"),
 	)
 

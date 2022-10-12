@@ -73,7 +73,10 @@ Check if a user has access to the cockpit application
 		cmd,
 
 		flags.WithExtendedPipelineSupport("type", "type", false, "id"),
-		flags.WithPipelineAliases("owner", "tenant", "owner.tenant.id", "tenant", "owner.tenant.id", "tenant", "owner.tenant.id"), flags.WithPipelineAliases("providedFor", "tenant", "owner.tenant.id", "tenant", "owner.tenant.id", "tenant", "owner.tenant.id"), flags.WithPipelineAliases("subscriber", "tenant", "owner.tenant.id", "tenant", "owner.tenant.id", "tenant", "owner.tenant.id"),
+		flags.WithPipelineAliases("owner", "tenant", "owner.tenant.id"),
+		flags.WithPipelineAliases("providedFor", "tenant", "owner.tenant.id"),
+		flags.WithPipelineAliases("subscriber", "tenant", "owner.tenant.id"),
+
 		flags.WithCollectionProperty("applications"),
 	)
 

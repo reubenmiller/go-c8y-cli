@@ -63,7 +63,8 @@ Copy measurements from one device to another
 		flags.WithData(),
 		f.WithTemplateFlag(cmd),
 		flags.WithExtendedPipelineSupport("device", "source.id", false, "deviceId", "source.id", "managedObject.id", "id"),
-		flags.WithPipelineAliases("device", "deviceId", "source.id", "managedObject.id", "id", "time", "creationTime", "creationTime", "lastUpdated"), flags.WithPipelineAliases("time", "deviceId", "source.id", "managedObject.id", "id", "time", "creationTime", "creationTime", "lastUpdated"),
+		flags.WithPipelineAliases("device", "deviceId", "source.id", "managedObject.id", "id"),
+		flags.WithPipelineAliases("time", "time", "creationTime", "lastUpdated"),
 	)
 
 	// Required flags

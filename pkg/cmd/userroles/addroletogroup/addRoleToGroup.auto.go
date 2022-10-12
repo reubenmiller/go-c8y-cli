@@ -62,6 +62,8 @@ Add a role to the admin group
 
 		flags.WithExtendedPipelineSupport("role", "role.self", true, "self", "id"),
 		flags.WithPipelineAliases("tenant", "tenant", "owner.tenant.id"),
+		flags.WithPipelineAliases("group", "id"),
+		flags.WithPipelineAliases("role", "self", "id"),
 	)
 
 	// Required flags

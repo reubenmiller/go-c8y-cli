@@ -72,7 +72,11 @@ Remove alarms on the device which are active and created in the last 10 minutes
 		flags.WithProcessingMode(),
 
 		flags.WithExtendedPipelineSupport("device", "source", false, "deviceId", "source.id", "managedObject.id", "id"),
-		flags.WithPipelineAliases("device", "deviceId", "source.id", "managedObject.id", "id", "time", "creationTime", "creationTime", "lastUpdated", "time", "creationTime", "creationTime", "lastUpdated", "time", "creationTime", "creationTime", "lastUpdated", "time", "creationTime", "creationTime", "lastUpdated"), flags.WithPipelineAliases("dateFrom", "deviceId", "source.id", "managedObject.id", "id", "time", "creationTime", "creationTime", "lastUpdated", "time", "creationTime", "creationTime", "lastUpdated", "time", "creationTime", "creationTime", "lastUpdated", "time", "creationTime", "creationTime", "lastUpdated"), flags.WithPipelineAliases("dateTo", "deviceId", "source.id", "managedObject.id", "id", "time", "creationTime", "creationTime", "lastUpdated", "time", "creationTime", "creationTime", "lastUpdated", "time", "creationTime", "creationTime", "lastUpdated", "time", "creationTime", "creationTime", "lastUpdated"), flags.WithPipelineAliases("createdFrom", "deviceId", "source.id", "managedObject.id", "id", "time", "creationTime", "creationTime", "lastUpdated", "time", "creationTime", "creationTime", "lastUpdated", "time", "creationTime", "creationTime", "lastUpdated", "time", "creationTime", "creationTime", "lastUpdated"), flags.WithPipelineAliases("createdTo", "deviceId", "source.id", "managedObject.id", "id", "time", "creationTime", "creationTime", "lastUpdated", "time", "creationTime", "creationTime", "lastUpdated", "time", "creationTime", "creationTime", "lastUpdated", "time", "creationTime", "creationTime", "lastUpdated"),
+		flags.WithPipelineAliases("device", "deviceId", "source.id", "managedObject.id", "id"),
+		flags.WithPipelineAliases("dateFrom", "time", "creationTime", "lastUpdated"),
+		flags.WithPipelineAliases("dateTo", "time", "creationTime", "lastUpdated"),
+		flags.WithPipelineAliases("createdFrom", "time", "creationTime", "lastUpdated"),
+		flags.WithPipelineAliases("createdTo", "time", "creationTime", "lastUpdated"),
 	)
 
 	// Required flags

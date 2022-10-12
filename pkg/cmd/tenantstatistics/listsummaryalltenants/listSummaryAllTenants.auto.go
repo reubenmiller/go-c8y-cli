@@ -62,7 +62,8 @@ Get tenant summary statistics collection for the last 10 days, only return until
 		cmd,
 
 		flags.WithExtendedPipelineSupport("", "", false),
-		flags.WithPipelineAliases("dateFrom", "time", "creationTime", "creationTime", "lastUpdated", "time", "creationTime", "creationTime", "lastUpdated"), flags.WithPipelineAliases("dateTo", "time", "creationTime", "creationTime", "lastUpdated", "time", "creationTime", "creationTime", "lastUpdated"),
+		flags.WithPipelineAliases("dateFrom", "time", "creationTime", "lastUpdated"),
+		flags.WithPipelineAliases("dateTo", "time", "creationTime", "lastUpdated"),
 	)
 
 	// Required flags

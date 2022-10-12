@@ -60,6 +60,7 @@ Get a user group
 
 		flags.WithExtendedPipelineSupport("id", "id", false),
 		flags.WithPipelineAliases("tenant", "tenant", "owner.tenant.id"),
+		flags.WithPipelineAliases("id", "id"),
 	)
 
 	// Required flags
