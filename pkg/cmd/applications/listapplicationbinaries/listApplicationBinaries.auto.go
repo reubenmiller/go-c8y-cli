@@ -58,6 +58,7 @@ List all of the binaries related to a Hosted (web) application
 		cmd,
 
 		flags.WithExtendedPipelineSupport("id", "id", true),
+		flags.WithPipelineAliases("id", "id"),
 
 		flags.WithCollectionProperty("attachments"),
 	)
