@@ -61,6 +61,9 @@ Assign a device as a child device to an existing device
 		flags.WithProcessingMode(),
 
 		flags.WithExtendedPipelineSupport("newChild", "managedObject.id", true, "deviceId", "source.id", "managedObject.id", "id"),
+		flags.WithPipelineAliases("device", "deviceId", "source.id", "managedObject.id", "id"),
+		flags.WithPipelineAliases("newChild", "deviceId", "source.id", "managedObject.id", "id"),
+
 		flags.WithCollectionProperty("managedObject"),
 		flags.WithDeprecationNotice("please use 'c8y devices children assign --childType device' instead"),
 	)
@@ -79,6 +82,11 @@ func (n *AssignChildCmd) RunE(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return err
 	}
+	// Runtime flag options
+	flags.WithOptions(
+		cmd,
+		flags.WithRuntimePipelineProperty(),
+	)
 	client, err := n.factory.Client()
 	if err != nil {
 		return err

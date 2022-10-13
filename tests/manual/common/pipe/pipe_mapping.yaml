@@ -1,0 +1,110 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/reubenmiller/commander/feat/handle-nested-files/schema.json
+config:
+  env:
+    C8Y_SETTINGS_DEFAULTS_DRY: true
+    C8Y_SETTINGS_DEFAULTS_DRYFORMAT: json
+    C8Y_SETTINGS_DEFAULTS_WITHERROR: true
+tests:
+  It can map piped text to any given flag:
+    command: |
+      echo "t11111\nt22222" |
+        c8y applications list --providedFor - |
+        c8y util show --select method,pathEncoded
+    exit-code: 0
+    stdout:
+      exactly: |
+        {"method":"GET","pathEncoded":"/application/applications?providedFor=t11111"}
+        {"method":"GET","pathEncoded":"/application/applications?providedFor=t22222"}
+  
+  It can map piped text to any fetcher enabled flags:
+    command: |
+      echo "testuser" |
+        c8y applications list --user - |
+        c8y util show --select method,pathEncoded
+    exit-code: 0
+    stdout:
+      exactly: |
+        {"method":"GET","pathEncoded":"/application/applications?user=testuser"}
+
+  It supports users assigned mapping via json property:
+    command: |
+      c8y template execute --template "{providedFor: 't12345'}" |
+        c8y applications list --providedFor - |
+        c8y util show --select method,pathEncoded
+    exit-code: 0
+    stdout:
+      exactly: |
+        {"method":"GET","pathEncoded":"/application/applications?providedFor=t12345"}
+
+  It supports users assigned mapping via custom json property:
+    command: |
+      c8y template execute --template "{tenant: 't12345'}" |
+        c8y applications list --providedFor -.tenant |
+        c8y util show --select method,pathEncoded
+    exit-code: 0
+    stdout:
+      exactly: |
+        {"method":"GET","pathEncoded":"/application/applications?providedFor=t12345"}
+
+  It supports flags with default values:
+    command: |
+      echo "t12345" |
+        c8y users list --tenant - --dry |
+        c8y util show --select method,pathEncoded
+    exit-code: 0
+    stdout:
+      exactly: |
+        {"method":"GET","pathEncoded":"/user/t12345/users"}
+
+  It supports flags with relative timestamps in query parameters:
+    command: |
+      echo "10m" |
+        c8y devices list --creationTimeDateFrom - --dry --dryFormat json |
+        c8y util show --select method,query
+    exit-code: 0
+    stdout:
+      json:
+        query: r/.*creationTime.date ge '\d{4}-\d{2}-\d{2}.*
+        method: GET
+
+  It supports flags with relative timestamps in the body:
+    command: |
+      echo "10m" |
+        c8y alarms create --type demo01 --device 1234 --status ACKNOWLEDGED --severity MAJOR --text Alarm1 --time - --dry --dryFormat json |
+        c8y util show --select body
+    exit-code: 0
+    stdout:
+      json:
+        body.time: r/\d{4}-\d{2}-\d{2}
+
+  It supports flags with relative dates in the path:
+    command: |
+        echo -7d |
+          c8y devices statistics list --date - --dry --dryFormat json |
+          c8y util show --select method,pathEncoded -o json
+    exit-code: 0
+    stdout:
+      json:
+        method: GET
+        pathEncoded: r//tenant/statistics/device/t\d+/daily/\d{4}-\d{2}-\d{2}$
+
+  It supports flags multiple mappings:
+    command: |
+        c8y template execute --template "{one: 'myname'}" |
+          c8y devices list --name -.id,.one --dry --dryFormat json |
+          c8y util show --select method,path,query -o json
+    exit-code: 0
+    stdout:
+      exactly: |
+        {"method":"GET","path":"/inventory/managedObjects","query":"q=$filter=(name eq 'myname') $orderby=name"}
+
+  It supports flag mapping to children childType:
+    command: |
+        c8y template execute --template "{type: 'device'}" |
+          c8y devices children list --id 12345 --childType -.type --dry --dryFormat json |
+          c8y util show --select method,path -o json
+    exit-code: 0
+    stdout:
+      json:
+        method: GET
+        path: /inventory/managedObjects/12345/childDevices

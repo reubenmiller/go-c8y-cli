@@ -59,6 +59,8 @@ Get a list of role references for a user
 		cmd,
 
 		flags.WithExtendedPipelineSupport("user", "user", true, "id"),
+		flags.WithPipelineAliases("tenant", "tenant", "owner.tenant.id"),
+
 		flags.WithCollectionProperty("references"),
 	)
 
@@ -75,6 +77,11 @@ func (n *GetRoleReferenceCollectionFromUserCmd) RunE(cmd *cobra.Command, args []
 	if err != nil {
 		return err
 	}
+	// Runtime flag options
+	flags.WithOptions(
+		cmd,
+		flags.WithRuntimePipelineProperty(),
+	)
 	client, err := n.factory.Client()
 	if err != nil {
 		return err

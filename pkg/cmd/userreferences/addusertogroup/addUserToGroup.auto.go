@@ -67,6 +67,8 @@ Add a list of users to business and admins group (using pipeline)
 		flags.WithProcessingMode(),
 
 		flags.WithExtendedPipelineSupport("user", "user.self", true, "user.id", "id", "self"),
+		flags.WithPipelineAliases("group", "id"),
+		flags.WithPipelineAliases("tenant", "tenant", "owner.tenant.id"),
 	)
 
 	// Required flags
@@ -83,6 +85,11 @@ func (n *AddUserToGroupCmd) RunE(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return err
 	}
+	// Runtime flag options
+	flags.WithOptions(
+		cmd,
+		flags.WithRuntimePipelineProperty(),
+	)
 	client, err := n.factory.Client()
 	if err != nil {
 		return err

@@ -63,6 +63,7 @@ Remove trusted device certificate by name
 		flags.WithProcessingMode(),
 
 		flags.WithExtendedPipelineSupport("id", "id", false, "fingerprint", "name", "id"),
+		flags.WithPipelineAliases("tenant", "tenant", "owner.tenant.id"),
 	)
 
 	// Required flags
@@ -78,6 +79,11 @@ func (n *DeleteCmd) RunE(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return err
 	}
+	// Runtime flag options
+	flags.WithOptions(
+		cmd,
+		flags.WithRuntimePipelineProperty(),
+	)
 	client, err := n.factory.Client()
 	if err != nil {
 		return err

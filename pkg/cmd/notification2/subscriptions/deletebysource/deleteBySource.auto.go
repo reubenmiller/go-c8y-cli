@@ -59,6 +59,7 @@ Delete a subscription associated with a device
 		flags.WithProcessingMode(),
 
 		flags.WithExtendedPipelineSupport("device", "source", false, "deviceId", "source.id", "managedObject.id", "id"),
+		flags.WithPipelineAliases("device", "deviceId", "source.id", "managedObject.id", "id"),
 	)
 
 	// Required flags
@@ -74,6 +75,11 @@ func (n *DeleteBySourceCmd) RunE(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return err
 	}
+	// Runtime flag options
+	flags.WithOptions(
+		cmd,
+		flags.WithRuntimePipelineProperty(),
+	)
 	client, err := n.factory.Client()
 	if err != nil {
 		return err

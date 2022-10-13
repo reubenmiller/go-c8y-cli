@@ -63,6 +63,7 @@ Unassign a child device from a managed object
 		flags.WithProcessingMode(),
 
 		flags.WithExtendedPipelineSupport("child", "child", true, "deviceId", "source.id", "managedObject.id", "id"),
+		flags.WithPipelineAliases("id", "source.id", "managedObject.id", "id"),
 	)
 
 	// Required flags
@@ -80,6 +81,11 @@ func (n *UnassignCmd) RunE(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return err
 	}
+	// Runtime flag options
+	flags.WithOptions(
+		cmd,
+		flags.WithRuntimePipelineProperty(),
+	)
 	client, err := n.factory.Client()
 	if err != nil {
 		return err

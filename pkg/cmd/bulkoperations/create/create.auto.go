@@ -64,6 +64,8 @@ Create bulk operation for a group (using pipeline)
 		flags.WithData(),
 		f.WithTemplateFlag(cmd),
 		flags.WithExtendedPipelineSupport("group", "groupId", false, "id"),
+		flags.WithPipelineAliases("group", "source.id", "managedObject.id", "id"),
+		flags.WithPipelineAliases("startDate", "time", "creationTime", "lastUpdated"),
 	)
 
 	// Required flags
@@ -79,6 +81,11 @@ func (n *CreateCmd) RunE(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return err
 	}
+	// Runtime flag options
+	flags.WithOptions(
+		cmd,
+		flags.WithRuntimePipelineProperty(),
+	)
 	client, err := n.factory.Client()
 	if err != nil {
 		return err

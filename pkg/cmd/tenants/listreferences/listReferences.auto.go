@@ -56,6 +56,8 @@ Get a list of referenced applications on a given tenant (from management tenant)
 		cmd,
 
 		flags.WithExtendedPipelineSupport("tenant", "tenant", false, "id"),
+		flags.WithPipelineAliases("tenant", "tenant", "owner.tenant.id"),
+
 		flags.WithCollectionProperty("references"),
 	)
 
@@ -72,6 +74,11 @@ func (n *ListReferencesCmd) RunE(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return err
 	}
+	// Runtime flag options
+	flags.WithOptions(
+		cmd,
+		flags.WithRuntimePipelineProperty(),
+	)
 	client, err := n.factory.Client()
 	if err != nil {
 		return err

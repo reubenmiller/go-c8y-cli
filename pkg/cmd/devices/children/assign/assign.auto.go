@@ -60,6 +60,8 @@ Add a related managed object as a child to an existing managed object
 		flags.WithProcessingMode(),
 
 		flags.WithExtendedPipelineSupport("child", "managedObject.id", true, "deviceId", "source.id", "managedObject.id", "id"),
+		flags.WithPipelineAliases("id", "deviceId", "source.id", "managedObject.id", "id"),
+
 		flags.WithCollectionProperty("managedObject"),
 	)
 
@@ -78,6 +80,11 @@ func (n *AssignCmd) RunE(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return err
 	}
+	// Runtime flag options
+	flags.WithOptions(
+		cmd,
+		flags.WithRuntimePipelineProperty(),
+	)
 	client, err := n.factory.Client()
 	if err != nil {
 		return err

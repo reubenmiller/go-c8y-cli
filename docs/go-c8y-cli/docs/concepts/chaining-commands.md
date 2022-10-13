@@ -193,6 +193,70 @@ Get-OperationCollection -Status PENDING -DateFrom "-14d" -WithTotalPages -PageSi
 
 </CodeExample>
 
+## Piping to non-default flags (not supported in PSc8y)
+
+:::note
+Custom pipeline mapping is supported from `c8y` ≥ 2.17.0
+:::
+
+Most commands have a default flag which is marked as the default consumer of piped input. For most cases this is ok, however there are special cases where you might what to map the piped input to another flag.
+
+The default pipeline variable can be changed by using the `-` (dash) character on the desired flag. The `-` value will be substituted with the piped input (standard input) line by line.
+
+If the piped input is compressed JSON, then `c8y` will try to pick the correct property by a default list of properties defined internally on the command. If inbuilt properties do not match your use-case then you can specify a single or list of properties using the syntax `-.prop1,.prop2`, then `c8y` will take the value form the first matching property.
+
+:::warning Not supported in PowerShell
+Custom piped input to flag mapping is not supported in PSc8y (PowerShell) cmdlets as PowerShell does not support this.
+:::
+
+```bash
+# Pick plain text input
+echo "t12345" | c8y applications list --providedFor -
+# => GET /application/applications?providedFor=t12345
+
+# Pick providerFor value from json input from either from .name or .tenant properties
+echo "{\"tenant\":\"t12345\"}" | c8y applications list --providedFor -.name,.tenant
+# => GET /application/applications?providedFor=t12345
+```
+
+### Find any events leading up to an alarm
+
+Image if there is a specific alarm and you would like to retrieve events leading up to the time of alarm. First you query for the alarm, and then pipe the value to the events command, and pipe the alarm's timestamp to the `dateFrom` flag.
+
+```bash
+c8y alarms list --type myCriticalAlarm --pageSize 1 \
+| c8y events list --dateTo -.time
+
+# If you want to limit to a single device,
+# then you need to provide device in both commands
+c8y alarms list --type myCriticalAlarm --pageSize 1 --device 12345 \
+| c8y events list --dateTo -.time --device 12345
+```
+
+### Find devices by name
+
+Map the piped input to the `--name` flag, which simplifies the command usage without having to explicitly pipe the whole inventory query (as `--query` is consumes the piped input by default).
+
+```bash
+echo -e "linuxdevice01\nlinuxdevice02" | c8y devices list --name -
+# => GET /inventory/managedObjects?q=$filter=(name eq 'linuxdevice01') $orderby=name
+# => GET /inventory/managedObjects?q=$filter=(name eq 'linuxdevice02') $orderby=name
+```
+
+### Assign multiple groups to the same user
+
+`c8y userreferences addUserToGroup` normally accepts piped input via the `--user` flag, which results in add a single group to multiple users.
+
+However if you would like to assign multiple groups to a single user, then the piped input can be assigned to the `--group` flag using the example below.
+
+```bash
+# Add assign multiple groups to a single user
+echo -e "admins\nbusiness" | c8y userreferences addUserToGroup --user myuser@example.com --group -
+
+# Or assign multiple users to a single group
+echo -e "user01\nuser02" | c8y userreferences addUserToGroup --group admins
+```
+
 ## Examples
 
 ### Piping ids

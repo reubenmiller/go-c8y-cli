@@ -54,6 +54,7 @@ Get a list of retention rules
 		cmd,
 
 		flags.WithExtendedPipelineSupport("", "", false),
+
 		flags.WithCollectionProperty("retentionRules"),
 	)
 
@@ -70,6 +71,11 @@ func (n *ListCmd) RunE(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return err
 	}
+	// Runtime flag options
+	flags.WithOptions(
+		cmd,
+		flags.WithRuntimePipelineProperty(),
+	)
 	client, err := n.factory.Client()
 	if err != nil {
 		return err

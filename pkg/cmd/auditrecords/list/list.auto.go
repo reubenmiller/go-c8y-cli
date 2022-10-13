@@ -64,6 +64,10 @@ Get a list of audit records
 		cmd,
 
 		flags.WithExtendedPipelineSupport("source", "source", false, "id", "source.id", "managedObject.id"),
+		flags.WithPipelineAliases("source", "id", "source.id", "managedObject.id", "deviceId"),
+		flags.WithPipelineAliases("dateFrom", "time", "creationTime", "lastUpdated"),
+		flags.WithPipelineAliases("dateTo", "time", "creationTime", "lastUpdated"),
+
 		flags.WithCollectionProperty("auditRecords"),
 	)
 
@@ -80,6 +84,11 @@ func (n *ListCmd) RunE(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return err
 	}
+	// Runtime flag options
+	flags.WithOptions(
+		cmd,
+		flags.WithRuntimePipelineProperty(),
+	)
 	client, err := n.factory.Client()
 	if err != nil {
 		return err

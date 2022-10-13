@@ -59,6 +59,7 @@ Disable an application of a tenant by name
 		flags.WithProcessingMode(),
 
 		flags.WithExtendedPipelineSupport("application", "application", true, "id"),
+		flags.WithPipelineAliases("tenant", "tenant", "owner.tenant.id"),
 	)
 
 	// Required flags
@@ -74,6 +75,11 @@ func (n *DisableApplicationCmd) RunE(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return err
 	}
+	// Runtime flag options
+	flags.WithOptions(
+		cmd,
+		flags.WithRuntimePipelineProperty(),
+	)
 	client, err := n.factory.Client()
 	if err != nil {
 		return err

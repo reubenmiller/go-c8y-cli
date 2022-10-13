@@ -6,6 +6,7 @@ import (
 
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/completion"
 	"github.com/spf13/cobra"
+	"github.com/spf13/pflag"
 )
 
 const (
@@ -19,8 +20,11 @@ const (
 	FlagCurrentPage               = "currentPage"
 	FlagNullInput                 = "nullInput"
 	FlagAllowEmptyPipe            = "allowEmptyPipe"
+	FlagReadFromPipeText          = "-"
+	FlagReadFromPipeJSON          = "-."
 )
 const (
+	AnnotationValuePipelineAlias      = "pipelineAliases"
 	AnnotationValueFromPipeline       = "valueFromPipeline"
 	AnnotationValueFromPipelineData   = "valueFromPipeline.data"
 	AnnotationValueCollectionProperty = "collectionProperty"
@@ -139,6 +143,91 @@ func WithExtendedPipelineSupport(name string, property string, required bool, al
 		}
 
 		cmd.Annotations[AnnotationValueFromPipelineData] = string(data)
+		return cmd
+	}
+}
+
+func WithRuntimePipelineProperty() Option {
+	return func(cmd *cobra.Command) *cobra.Command {
+		name := ""
+		alias := ""
+		cmd.Flags().Visit(func(f *pflag.Flag) {
+			if f.Changed {
+				switch v := f.Value.(type) {
+				case pflag.SliceValue:
+					values := v.GetSlice()
+
+					// Get first value if multiple values are provided
+					if len(values) > 0 {
+						if values[0] == FlagReadFromPipeText {
+							name = f.Name
+							alias = f.Name
+						} else if strings.HasPrefix(values[0], FlagReadFromPipeJSON) {
+							name = f.Name
+							alias = values[0][len(FlagReadFromPipeJSON):]
+						}
+					}
+
+				case pflag.Value:
+					if v.String() == FlagReadFromPipeText {
+						name = f.Name
+						alias = f.Name
+					} else if strings.HasPrefix(v.String(), FlagReadFromPipeJSON) {
+						name = f.Name
+						alias = v.String()[len(FlagReadFromPipeJSON):]
+					}
+				}
+			}
+		})
+
+		if name == "" {
+			return cmd
+		}
+
+		if cmd.Annotations == nil {
+			cmd.Annotations = map[string]string{}
+		}
+		cmd.Annotations[AnnotationValueFromPipeline] = name
+
+		aliases := []string{name}
+
+		if alias != "" {
+			for _, a := range strings.Split(alias, ",") {
+				a = strings.TrimLeft(a, ".")
+				if a != "" {
+					aliases = append(aliases, a)
+				}
+			}
+		}
+
+		if aliasValue, ok := cmd.Annotations[AnnotationValuePipelineAlias+"."+name]; ok {
+			aliases = append(aliases, strings.Split(aliasValue, ",")...)
+		}
+
+		options := &PipelineOptions{
+			Name:     name,
+			Property: name,
+			Aliases:  aliases,
+			Required: true,
+			IsID:     true,
+		}
+		data, err := json.Marshal(options)
+		if err != nil {
+			panic(err)
+		}
+
+		cmd.Annotations[AnnotationValueFromPipelineData] = string(data)
+		return cmd
+	}
+}
+
+// WithPipelineAliases adds a list of aliases for a flag if it is selected to be sourced from the pipeline
+func WithPipelineAliases(property string, aliases ...string) Option {
+	return func(cmd *cobra.Command) *cobra.Command {
+		if cmd.Annotations == nil {
+			cmd.Annotations = map[string]string{}
+		}
+		cmd.Annotations[AnnotationValuePipelineAlias+"."+property] = strings.Join(aliases, ",")
 		return cmd
 	}
 }

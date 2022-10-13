@@ -61,6 +61,7 @@ Get microservice status (using pipeline)
 		cmd,
 
 		flags.WithExtendedPipelineSupport("id", "id", true),
+
 		flags.WithCollectionProperty("managedObjects"),
 	)
 
@@ -77,6 +78,11 @@ func (n *GetStatusCmd) RunE(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return err
 	}
+	// Runtime flag options
+	flags.WithOptions(
+		cmd,
+		flags.WithRuntimePipelineProperty(),
+	)
 	client, err := n.factory.Client()
 	if err != nil {
 		return err

@@ -61,6 +61,7 @@ Create a child addition and link it to an existing managed object
 		flags.WithData(),
 		f.WithTemplateFlag(cmd),
 		flags.WithExtendedPipelineSupport("id", "id", true, "deviceId", "source.id", "managedObject.id", "id"),
+		flags.WithPipelineAliases("id", "deviceId", "source.id", "managedObject.id", "id"),
 	)
 
 	// Required flags
@@ -77,6 +78,11 @@ func (n *CreateCmd) RunE(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return err
 	}
+	// Runtime flag options
+	flags.WithOptions(
+		cmd,
+		flags.WithRuntimePipelineProperty(),
+	)
 	client, err := n.factory.Client()
 	if err != nil {
 		return err

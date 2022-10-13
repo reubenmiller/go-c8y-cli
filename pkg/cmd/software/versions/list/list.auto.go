@@ -66,6 +66,7 @@ Get a list of software package versions from multiple software packages
 		cmd,
 
 		flags.WithExtendedPipelineSupport("software", "software", false, "additionParents.references.0.managedObject.id", "id"),
+
 		flags.WithCollectionProperty("managedObjects"),
 	)
 
@@ -82,6 +83,11 @@ func (n *ListCmd) RunE(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return err
 	}
+	// Runtime flag options
+	flags.WithOptions(
+		cmd,
+		flags.WithRuntimePipelineProperty(),
+	)
 	client, err := n.factory.Client()
 	if err != nil {
 		return err

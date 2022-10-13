@@ -24,8 +24,7 @@ Get list of trusted device certificates
     [OutputType([object])]
     Param(
         # Tenant id
-        [Parameter(ValueFromPipeline=$true,
-                   ValueFromPipelineByPropertyName=$true)]
+        [Parameter()]
         [object]
         $Tenant
     )
@@ -52,17 +51,12 @@ Get list of trusted device certificates
     Process {
 
         if ($ClientOptions.ConvertToPS) {
-            $Tenant `
-            | Group-ClientRequests `
-            | c8y devicemanagement certificates list $c8yargs `
+            c8y devicemanagement certificates list $c8yargs `
             | ConvertFrom-ClientOutput @TypeOptions
         }
         else {
-            $Tenant `
-            | Group-ClientRequests `
-            | c8y devicemanagement certificates list $c8yargs
+            c8y devicemanagement certificates list $c8yargs
         }
-        
     }
 
     End {}

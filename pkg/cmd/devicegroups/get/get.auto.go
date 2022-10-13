@@ -58,6 +58,7 @@ Get device group by id
 		cmd,
 
 		flags.WithExtendedPipelineSupport("id", "id", true),
+		flags.WithPipelineAliases("id", "source.id", "managedObject.id", "id"),
 	)
 
 	// Required flags
@@ -73,6 +74,11 @@ func (n *GetCmd) RunE(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return err
 	}
+	// Runtime flag options
+	flags.WithOptions(
+		cmd,
+		flags.WithRuntimePipelineProperty(),
+	)
 	client, err := n.factory.Client()
 	if err != nil {
 		return err

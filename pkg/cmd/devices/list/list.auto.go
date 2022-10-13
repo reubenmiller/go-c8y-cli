@@ -84,6 +84,12 @@ Get devices with type 'c8y_MacOS' then devices with type 'c8y_Linux' (using pipe
 		cmd,
 
 		flags.WithExtendedPipelineSupport("query", "query", false, "c8y_DeviceQueryString"),
+		flags.WithPipelineAliases("lastMessageDateTo", "time", "creationTime", "lastUpdated"),
+		flags.WithPipelineAliases("lastMessageDateFrom", "time", "creationTime", "lastUpdated"),
+		flags.WithPipelineAliases("creationTimeDateTo", "time", "creationTime", "lastUpdated"),
+		flags.WithPipelineAliases("creationTimeDateFrom", "time", "creationTime", "lastUpdated"),
+		flags.WithPipelineAliases("group", "source.id", "managedObject.id", "id"),
+
 		flags.WithCollectionProperty("managedObjects"),
 	)
 
@@ -100,6 +106,11 @@ func (n *ListCmd) RunE(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return err
 	}
+	// Runtime flag options
+	flags.WithOptions(
+		cmd,
+		flags.WithRuntimePipelineProperty(),
+	)
 	client, err := n.factory.Client()
 	if err != nil {
 		return err

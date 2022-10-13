@@ -64,6 +64,9 @@ Add multiple devices to a group
 		flags.WithProcessingMode(),
 
 		flags.WithExtendedPipelineSupport("newChildDevice", "managedObject.id", true, "deviceId", "source.id", "managedObject.id", "id"),
+		flags.WithPipelineAliases("group", "source.id", "managedObject.id", "id"),
+		flags.WithPipelineAliases("newChildDevice", "deviceId", "source.id", "managedObject.id", "id"),
+
 		flags.WithCollectionProperty("managedObject"),
 		flags.WithDeprecationNotice("please use 'c8y devicegroups children assign --childType asset' instead"),
 	)
@@ -82,6 +85,11 @@ func (n *AssignDeviceCmd) RunE(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return err
 	}
+	// Runtime flag options
+	flags.WithOptions(
+		cmd,
+		flags.WithRuntimePipelineProperty(),
+	)
 	client, err := n.factory.Client()
 	if err != nil {
 		return err

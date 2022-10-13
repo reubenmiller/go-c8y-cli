@@ -77,6 +77,14 @@ Get collection of active and acknowledged alarms in the last 1d
 		cmd,
 
 		flags.WithExtendedPipelineSupport("device", "source", false, "deviceId", "source.id", "managedObject.id", "id"),
+		flags.WithPipelineAliases("device", "deviceId", "source.id", "managedObject.id", "id"),
+		flags.WithPipelineAliases("dateFrom", "time", "creationTime", "lastUpdated"),
+		flags.WithPipelineAliases("dateTo", "time", "creationTime", "lastUpdated"),
+		flags.WithPipelineAliases("createdFrom", "time", "creationTime", "lastUpdated"),
+		flags.WithPipelineAliases("createdTo", "time", "creationTime", "lastUpdated"),
+		flags.WithPipelineAliases("lastUpdatedFrom", "time", "creationTime", "lastUpdated"),
+		flags.WithPipelineAliases("lastUpdatedTo", "time", "creationTime", "lastUpdated"),
+
 		flags.WithCollectionProperty("alarms"),
 	)
 
@@ -93,6 +101,11 @@ func (n *ListCmd) RunE(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return err
 	}
+	// Runtime flag options
+	flags.WithOptions(
+		cmd,
+		flags.WithRuntimePipelineProperty(),
+	)
 	client, err := n.factory.Client()
 	if err != nil {
 		return err

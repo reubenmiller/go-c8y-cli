@@ -60,6 +60,9 @@ Create group hierarchy (parent group -> child group)
 		flags.WithProcessingMode(),
 
 		flags.WithExtendedPipelineSupport("childDevice", "managedObject.id", false, "deviceId", "source.id", "managedObject.id", "id"),
+		flags.WithPipelineAliases("childDevice", "deviceId", "source.id", "managedObject.id", "id"),
+		flags.WithPipelineAliases("childGroup", "source.id", "managedObject.id", "id"),
+
 		flags.WithCollectionProperty("managedObject"),
 	)
 
@@ -77,6 +80,11 @@ func (n *AssignCmd) RunE(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return err
 	}
+	// Runtime flag options
+	flags.WithOptions(
+		cmd,
+		flags.WithRuntimePipelineProperty(),
+	)
 	client, err := n.factory.Client()
 	if err != nil {
 		return err

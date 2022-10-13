@@ -5,6 +5,7 @@ import (
 	"regexp"
 	"strings"
 
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/timestamp"
 	"github.com/reubenmiller/go-c8y/pkg/c8y"
 )
 
@@ -75,6 +76,17 @@ func (a *AddChildAddition) Run(v interface{}) (resp interface{}, err error) {
 				}
 			}
 		}
+	}
+	return
+}
+
+type TransformRelativeTimestamp struct {
+	Encode bool
+}
+
+func (t *TransformRelativeTimestamp) Run(v interface{}) (resp interface{}, err error) {
+	if value, ok := v.(string); ok {
+		return timestamp.TryGetTimestamp(value, t.Encode)
 	}
 	return
 }

@@ -70,6 +70,7 @@ Get a list of smart groups with their names starting with 'myText', then get the
 		cmd,
 
 		flags.WithExtendedPipelineSupport("query", "query", false, "c8y_DeviceQueryString"),
+
 		flags.WithCollectionProperty("managedObjects"),
 	)
 
@@ -86,6 +87,11 @@ func (n *ListCmd) RunE(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return err
 	}
+	// Runtime flag options
+	flags.WithOptions(
+		cmd,
+		flags.WithRuntimePipelineProperty(),
+	)
 	client, err := n.factory.Client()
 	if err != nil {
 		return err

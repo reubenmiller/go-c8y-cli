@@ -61,6 +61,8 @@ Unassign a child device from its parent device
 		flags.WithProcessingMode(),
 
 		flags.WithExtendedPipelineSupport("childDevice", "childDevice", true, "deviceId", "source.id", "managedObject.id", "id"),
+		flags.WithPipelineAliases("device", "deviceId", "source.id", "managedObject.id", "id"),
+		flags.WithPipelineAliases("childDevice", "deviceId", "source.id", "managedObject.id", "id"),
 
 		flags.WithDeprecationNotice("please use 'c8y devices children unassign --childType device' instead"),
 	)
@@ -79,6 +81,11 @@ func (n *UnassignChildCmd) RunE(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return err
 	}
+	// Runtime flag options
+	flags.WithOptions(
+		cmd,
+		flags.WithRuntimePipelineProperty(),
+	)
 	client, err := n.factory.Client()
 	if err != nil {
 		return err

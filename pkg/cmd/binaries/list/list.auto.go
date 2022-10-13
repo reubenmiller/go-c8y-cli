@@ -67,6 +67,8 @@ Get a list of binaries with the type package_debian
 		cmd,
 
 		flags.WithExtendedPipelineSupport("type", "type", false, "type"),
+		flags.WithPipelineAliases("childDeviceId", "deviceId", "source.id", "managedObject.id", "id"),
+
 		flags.WithCollectionProperty("managedObjects"),
 	)
 
@@ -83,6 +85,11 @@ func (n *ListCmd) RunE(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return err
 	}
+	// Runtime flag options
+	flags.WithOptions(
+		cmd,
+		flags.WithRuntimePipelineProperty(),
+	)
 	client, err := n.factory.Client()
 	if err != nil {
 		return err

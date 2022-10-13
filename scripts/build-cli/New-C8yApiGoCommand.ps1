@@ -230,8 +230,8 @@
             Hidden = $iArg.hidden
             Pipeline = $iArg.pipeline
         }
-        $arg = Get-C8yGoArgs @ArgParams
-        $null = $CommandArgs.Add($arg)
+        $CurrentArg = Get-C8yGoArgs @ArgParams
+        $null = $CommandArgs.Add($CurrentArg)
     }
 
     if (!$PipelineVariableName -and $ArgumentSources.Count -gt 0) {
@@ -584,6 +584,26 @@ $($Examples -join "`n`n")
             }   
         )
         $(
+            foreach ($item in $CommandArgs) {
+                $iAliases = $item.PipelineAliases
+                if (!$iAliases) {
+                    $iAliases = @($item.Name)
+                }
+                if ($item.PipelineAliases) {
+                    $usedAliases = @{}
+                    $sourceAliases = ($item.PipelineAliases | ForEach-Object {
+                        if (!$usedAliases.ContainsKey($_)) {
+                            "`"$_`""`
+                        }
+                        $usedAliases[$_] = $true
+                    } | Where-Object { $_ }) -join ", "
+                    if ($sourceAliases) {
+                        "flags.WithPipelineAliases(`"$($item.Name)`", $sourceAliases),`n"
+                    }
+                }
+            }
+        )
+        $(
             if ($collectionProperty) {
                 "flags.WithCollectionProperty(`"$collectionProperty`"),"
             }
@@ -610,6 +630,11 @@ func (n *${NameCamel}Cmd) RunE(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return err
 	}
+    // Runtime flag options
+    flags.WithOptions(
+		cmd,
+		flags.WithRuntimePipelineProperty(),
+	)
     client, err := n.factory.Client()
 	if err != nil {
 		return err
@@ -825,6 +850,7 @@ Function Get-C8yGoArgs {
             }
             @{
                 SetFlag = $SetFlag
+                PipelineAliases = @("time", "creationTime", "creationTime", "lastUpdated")
             }
         }
 
@@ -836,6 +862,7 @@ Function Get-C8yGoArgs {
             }
             @{
                 SetFlag = $SetFlag
+                PipelineAliases = @("id", "source.id", "managedObject.id", "deviceId")
             }
         }
 
@@ -882,6 +909,7 @@ Function Get-C8yGoArgs {
 
             @{
                 SetFlag = $SetFlag
+                PipelineAliases = @("deviceId", "source.id", "managedObject.id", "id")
             }
         }
 
@@ -894,6 +922,7 @@ Function Get-C8yGoArgs {
 
             @{
                 SetFlag = $SetFlag
+                PipelineAliases = @("deviceId", "source.id", "managedObject.id", "id")
             }
         }
 
@@ -956,6 +985,7 @@ Function Get-C8yGoArgs {
 
             @{
                 SetFlag = $SetFlag
+                PipelineAliases = @("source.id", "managedObject.id", "id")
             }
         }
 
@@ -980,6 +1010,7 @@ Function Get-C8yGoArgs {
 
             @{
                 SetFlag = $SetFlag
+                PipelineAliases = @("managedObject.id")
             }
         }
 
@@ -992,6 +1023,7 @@ Function Get-C8yGoArgs {
 
             @{
                 SetFlag = $SetFlag
+                PipelineAliases = @("self", "id")
             }
         }
 
@@ -1004,6 +1036,7 @@ Function Get-C8yGoArgs {
 
             @{
                 SetFlag = $SetFlag
+                PipelineAliases = @("id")
             }
         }
 
@@ -1016,6 +1049,7 @@ Function Get-C8yGoArgs {
 
             @{
                 SetFlag = $SetFlag
+                PipelineAliases = @("id")
             }
         }
 
@@ -1027,6 +1061,7 @@ Function Get-C8yGoArgs {
             }
             @{
                 SetFlag = $SetFlag
+                PipelineAliases = @("id")
             }
         }
 
@@ -1038,6 +1073,7 @@ Function Get-C8yGoArgs {
             }
             @{
                 SetFlag = $SetFlag
+                PipelineAliases = @("id")
             }
         }
 
@@ -1049,6 +1085,7 @@ Function Get-C8yGoArgs {
             }
             @{
                 SetFlag = $SetFlag
+                PipelineAliases = @("id")
             }
         }
 
@@ -1060,6 +1097,7 @@ Function Get-C8yGoArgs {
             }
             @{
                 SetFlag = $SetFlag
+                PipelineAliases = @("name")
             }
         }
 
@@ -1168,6 +1206,7 @@ Function Get-C8yGoArgs {
 
             @{
                 SetFlag = $SetFlag
+                PipelineAliases = @("tenant", "owner.tenant.id")
             }
         }
 
@@ -1283,6 +1322,8 @@ Function Get-C8yGoArgs {
     if ($Hidden -match "true|yes" -and $Pipeline -notmatch "true") {
         $Entry | Add-Member -MemberType NoteProperty -Name "Hidden" -Value "_ = cmd.Flags().MarkHidden(`"${Name}`")"
     }
+
+    $Entry.Name = $Name
 
     $Entry
 }

@@ -61,6 +61,8 @@ Get an existing child device reference
 		cmd,
 
 		flags.WithExtendedPipelineSupport("device", "device", true, "deviceId", "source.id", "managedObject.id", "id"),
+		flags.WithPipelineAliases("device", "deviceId", "source.id", "managedObject.id", "id"),
+		flags.WithPipelineAliases("reference", "deviceId", "source.id", "managedObject.id", "id"),
 
 		flags.WithDeprecationNotice("please use 'c8y devices children get --childType device' instead"),
 	)
@@ -79,6 +81,11 @@ func (n *GetChildCmd) RunE(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return err
 	}
+	// Runtime flag options
+	flags.WithOptions(
+		cmd,
+		flags.WithRuntimePipelineProperty(),
+	)
 	client, err := n.factory.Client()
 	if err != nil {
 		return err

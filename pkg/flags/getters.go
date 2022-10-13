@@ -12,6 +12,7 @@ import (
 	"strings"
 
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/c8yquery"
+	"github.com/reubenmiller/go-c8y-cli/v2/pkg/timestamp"
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/url"
 
 	"github.com/reubenmiller/go-c8y-cli/v2/pkg/c8ydata"
@@ -310,7 +311,7 @@ func WithStringValue(opts ...string) GetOption {
 			return dst, value, err
 		}
 		if value == "" {
-			// dont assign the value anywhere
+			// don't assign the value anywhere
 			dst = ""
 		}
 		return dst, applyFormatter(format, value), err
@@ -387,7 +388,7 @@ func WithCustomStringValue(transform func([]byte) []byte, targetFunc func() stri
 			return dst, value, err
 		}
 		if value == "" {
-			// dont assign the value anywhere
+			// don't assign the value anywhere
 			dst = ""
 		}
 		outputValue := applyFormatter(format, value)
@@ -409,7 +410,7 @@ func WithCustomStringSlice(valuesFunc func() ([]string, error), opts ...string) 
 			return dst, values, err
 		}
 		if len(values) == 0 {
-			// dont assign the value anywhere
+			// don't assign the value anywhere
 			dst = ""
 		}
 
@@ -446,7 +447,7 @@ func WithOverrideValue(opts ...string) GetOption {
 			err = nil
 		}
 		if value == "" {
-			// dont assign the value anywhere
+			// don't assign the value anywhere
 			dst = ""
 		}
 
@@ -464,6 +465,13 @@ func WithStringDefaultValue(defaultValue string, opts ...string) GetOption {
 	return func(cmd *cobra.Command, inputIterators *RequestInputIterators) (string, interface{}, error) {
 
 		src, dst, format := UnpackGetterOptions("%s", opts...)
+
+		if inputIterators != nil && inputIterators.PipeOptions != nil {
+			if inputIterators.PipeOptions.Name == src {
+				inputIterators.PipeOptions.Format = format
+				return WithPipelineIterator(inputIterators.PipeOptions)(cmd, inputIterators)
+			}
+		}
 
 		if !cmd.Flags().Changed(src) {
 			if defaultValue != "" {
@@ -610,6 +618,25 @@ func WithRelativeTimestamp(opts ...string) GetOption {
 		src, dst, format := UnpackGetterOptions("", opts...)
 		value, err := cmd.Flags().GetString(src)
 
+		if inputIterators != nil {
+			if inputIterators.PipeOptions.Name == src {
+				inputIterators.PipeOptions.Format = format
+				inputIterators.PipeOptions.Formatter = func(b []byte) []byte {
+					if datetime, err := timestamp.TryGetTimestamp(string(b), false); err == nil {
+						if format != "" {
+							return []byte(fmt.Sprintf(format, datetime))
+						}
+						return []byte(datetime)
+					}
+					if format != "" {
+						return []byte(fmt.Sprintf(format, b))
+					}
+					return b
+				}
+				return WithPipelineIterator(inputIterators.PipeOptions)(cmd, inputIterators)
+			}
+		}
+
 		if err != nil {
 			return dst, value, err
 		}
@@ -635,6 +662,25 @@ func WithEncodedRelativeTimestamp(opts ...string) GetOption {
 		src, dst, format := UnpackGetterOptions("", opts...)
 		value, err := cmd.Flags().GetString(src)
 
+		if inputIterators != nil {
+			if inputIterators.PipeOptions.Name == src {
+				inputIterators.PipeOptions.Format = format
+				inputIterators.PipeOptions.Formatter = func(b []byte) []byte {
+					if datetime, err := timestamp.TryGetTimestamp(string(b), true); err == nil {
+						if format != "" {
+							return []byte(fmt.Sprintf(format, datetime))
+						}
+						return []byte(datetime)
+					}
+					if format != "" {
+						return []byte(fmt.Sprintf(format, b))
+					}
+					return b
+				}
+				return WithPipelineIterator(inputIterators.PipeOptions)(cmd, inputIterators)
+			}
+		}
+
 		if err != nil {
 			return dst, value, err
 		}
@@ -659,6 +705,25 @@ func WithRelativeDate(encode bool, opts ...string) GetOption {
 	return func(cmd *cobra.Command, inputIterators *RequestInputIterators) (string, interface{}, error) {
 		src, dst, format := UnpackGetterOptions("", opts...)
 		value, err := cmd.Flags().GetString(src)
+
+		if inputIterators != nil {
+			if inputIterators.PipeOptions.Name == src {
+				inputIterators.PipeOptions.Format = format
+				inputIterators.PipeOptions.Formatter = func(b []byte) []byte {
+					if datetime, err := timestamp.TryGetDate(string(b), encode, format); err == nil {
+						if format != "" {
+							return []byte(fmt.Sprintf(format, datetime))
+						}
+						return []byte(datetime)
+					}
+					if format != "" {
+						return []byte(fmt.Sprintf(format, b))
+					}
+					return b
+				}
+				return WithPipelineIterator(inputIterators.PipeOptions)(cmd, inputIterators)
+			}
+		}
 
 		if err != nil {
 			return dst, value, err
@@ -863,29 +928,57 @@ func WithInventoryChildType(opts ...string) GetOption {
 			return "", nil, err
 		}
 
-		value = strings.ToLower(applyFormatter(format, value))
+		validator := func(input string) error {
+			v := strings.ToLower(applyFormatter(format, input))
 
-		validValues := []string{
-			"asset",
-			"device",
-			"addition",
+			validValues := []string{
+				"asset",
+				"device",
+				"addition",
+			}
+
+			isValid := false
+			for _, iValue := range validValues {
+				if iValue == v {
+					isValid = true
+					break
+				}
+			}
+			if !isValid {
+				return fmt.Errorf("invalid value. %s only accepts %s", src, strings.Join(validValues, ","))
+			}
+			return nil
 		}
 
-		isValid := false
-		for _, iValue := range validValues {
-			if iValue == value {
-				isValid = true
-				break
+		formatter := func(input string) string {
+			v := strings.ToLower(applyFormatter(format, input))
+			output := "child" + strings.ToUpper(v[0:1]) + v[1:] + "s"
+			return output
+
+		}
+
+		if inputIterators != nil && inputIterators.PipeOptions != nil {
+			if inputIterators.PipeOptions.Name == src {
+				inputIterators.PipeOptions.Validator = func(b []byte) error {
+					return validator(string(b))
+				}
+				inputIterators.PipeOptions.Formatter = func(b []byte) []byte {
+					return []byte(formatter(string(b)))
+				}
+
+				if dst != "" {
+					inputIterators.PipeOptions.Property = dst
+				}
+				inputIterators.PipeOptions.Format = format
+				return WithPipelineIterator(inputIterators.PipeOptions)(cmd, inputIterators)
 			}
 		}
 
-		if !isValid {
-			return "", nil, fmt.Errorf("invalid value. %s only accepts %s", src, strings.Join(validValues, ","))
+		if err := validator(value); err != nil {
+			return "", nil, err
 		}
 
-		formattedValue := "child" + strings.ToUpper(value[0:1]) + value[1:] + "s"
-
-		return dst, formattedValue, nil
+		return dst, formatter(value), nil
 	}
 }
 

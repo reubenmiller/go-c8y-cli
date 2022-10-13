@@ -67,6 +67,7 @@ Find any ntp services which are currently down
 		cmd,
 
 		flags.WithExtendedPipelineSupport("", "", false),
+
 		flags.WithCollectionProperty("managedObjects"),
 	)
 
@@ -83,6 +84,11 @@ func (n *FindCmd) RunE(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return err
 	}
+	// Runtime flag options
+	flags.WithOptions(
+		cmd,
+		flags.WithRuntimePipelineProperty(),
+	)
 	client, err := n.factory.Client()
 	if err != nil {
 		return err

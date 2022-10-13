@@ -72,6 +72,10 @@ Get monthly device statistics for all devices for a specific month (day is ignor
 		cmd,
 
 		flags.WithExtendedPipelineSupport("device", "deviceId", false, "deviceId", "source.id", "managedObject.id", "id"),
+		flags.WithPipelineAliases("date", "time", "creationTime", "lastUpdated"),
+		flags.WithPipelineAliases("tenant", "tenant", "owner.tenant.id"),
+		flags.WithPipelineAliases("device", "deviceId", "source.id", "managedObject.id", "id"),
+
 		flags.WithCollectionProperty("statistics"),
 	)
 
@@ -88,6 +92,11 @@ func (n *ListCmd) RunE(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return err
 	}
+	// Runtime flag options
+	flags.WithOptions(
+		cmd,
+		flags.WithRuntimePipelineProperty(),
+	)
 	client, err := n.factory.Client()
 	if err != nil {
 		return err

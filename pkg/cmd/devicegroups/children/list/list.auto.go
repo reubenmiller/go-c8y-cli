@@ -66,6 +66,8 @@ Get a list of the child devices of an existing managed object
 		cmd,
 
 		flags.WithExtendedPipelineSupport("id", "id", true, "deviceId", "source.id", "managedObject.id", "id"),
+		flags.WithPipelineAliases("id", "source.id", "managedObject.id", "id"),
+
 		flags.WithCollectionProperty("references.#.managedObject"),
 	)
 
@@ -83,6 +85,11 @@ func (n *ListCmd) RunE(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return err
 	}
+	// Runtime flag options
+	flags.WithOptions(
+		cmd,
+		flags.WithRuntimePipelineProperty(),
+	)
 	client, err := n.factory.Client()
 	if err != nil {
 		return err
