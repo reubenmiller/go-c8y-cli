@@ -25,7 +25,7 @@ Get list of trusted device certificates
 
 ```
   -h, --help            help for list
-      --tenant string   Tenant id (accepts pipeline)
+      --tenant string   Tenant id
 ```
 
 ### Options inherited from parent commands
