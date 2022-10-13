@@ -63,6 +63,7 @@ Get log level of microservice for a specific class
 		cmd,
 
 		flags.WithExtendedPipelineSupport("", "", false),
+		flags.WithPipelineAliases("name", "name"),
 	)
 
 	// Required flags

@@ -60,6 +60,7 @@ Disable an application of a tenant by name
 
 		flags.WithExtendedPipelineSupport("application", "application", true, "id"),
 		flags.WithPipelineAliases("tenant", "tenant", "owner.tenant.id"),
+		flags.WithPipelineAliases("application", "id"),
 	)
 
 	// Required flags

@@ -64,6 +64,7 @@ Update microservice availability to MARKET
 		flags.WithData(),
 		f.WithTemplateFlag(cmd),
 		flags.WithExtendedPipelineSupport("id", "id", true),
+		flags.WithPipelineAliases("id", "id"),
 	)
 
 	// Required flags

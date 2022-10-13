@@ -67,6 +67,7 @@ Unsubscribe and application then delete it
 		flags.WithProcessingMode(),
 
 		flags.WithExtendedPipelineSupport("id", "id", true),
+		flags.WithPipelineAliases("id", "id"),
 	)
 
 	// Required flags

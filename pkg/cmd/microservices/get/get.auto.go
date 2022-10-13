@@ -57,6 +57,7 @@ Get an application
 		cmd,
 
 		flags.WithExtendedPipelineSupport("id", "id", true),
+		flags.WithPipelineAliases("id", "id"),
 	)
 
 	// Required flags

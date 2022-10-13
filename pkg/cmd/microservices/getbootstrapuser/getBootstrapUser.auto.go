@@ -62,6 +62,7 @@ Get application bootstrap user by app name
 		cmd,
 
 		flags.WithExtendedPipelineSupport("id", "id", true),
+		flags.WithPipelineAliases("id", "id"),
 	)
 
 	// Required flags

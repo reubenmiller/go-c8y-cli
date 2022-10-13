@@ -60,6 +60,7 @@ Delete a microservice by name
 		flags.WithProcessingMode(),
 
 		flags.WithExtendedPipelineSupport("id", "id", true),
+		flags.WithPipelineAliases("id", "id"),
 	)
 
 	// Required flags

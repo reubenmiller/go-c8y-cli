@@ -65,6 +65,7 @@ Set log level of microservice for a specific class
 		flags.WithProcessingMode(),
 
 		flags.WithExtendedPipelineSupport("", "", false),
+		flags.WithPipelineAliases("name", "name"),
 	)
 
 	// Required flags
