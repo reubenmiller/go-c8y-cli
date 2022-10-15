@@ -59,3 +59,53 @@ tests:
         - inventory list --fragmentType c8y_IsDevice
         - customlist2
         - inventory list --type linux
+
+  It supports tab completion for flags:
+    config:
+      env:
+        C8Y_SESSION: '/tmp/.cumulocity-alias/mysession.yaml'
+        C8Y_SESSION_HOME: '/tmp/.cumulocity-alias'
+        C8Y_HOME: '/tmp/.cumulocity-alias'
+    command: |
+      mkdir -p "$C8Y_HOME"
+      rm -f "$C8Y_SESSION"
+      rm -f "$C8Y_HOME/settings.json"
+
+      cat <<EOT > "$C8Y_SESSION"
+      settings:
+        aliases:
+          customlist1: inventory list --fragmentType c8y_IsDevice
+      EOT
+
+      c8y __complete customlist1 --
+    exit-code: 0
+    stdout:
+      not-contains:
+        - --fragmentType
+      contains:
+        - --owner
+        - --text
+        - --type
+
+  It throws an error when positional arguments are missing even when using extra flags:
+    config:
+      env:
+        C8Y_SESSION: '/tmp/.cumulocity-alias/mysession.yaml'
+        C8Y_SESSION_HOME: '/tmp/.cumulocity-alias'
+        C8Y_HOME: '/tmp/.cumulocity-alias'
+    command: |
+      mkdir -p "$C8Y_HOME"
+      rm -f "$C8Y_SESSION"
+      rm -f "$C8Y_HOME/settings.json"
+
+      cat <<EOT > "$C8Y_SESSION"
+      settings:
+        aliases:
+          customlist1: inventory list --fragmentType "\$1"
+      EOT
+
+      c8y customlist1 --dry --withChildren=true -p 1
+    exit-code: 107
+    stderr:
+      contains:
+        - inventory list --fragmentType "$1" --dry --withChildren=true -p 1
