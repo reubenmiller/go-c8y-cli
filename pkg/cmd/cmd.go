@@ -49,6 +49,9 @@ func init() {
 
 	// set seed for random generation
 	rand.Seed(time.Now().UTC().UnixNano())
+
+	// Enable case insensitive matches
+	cobra.EnableCaseInsensitive = true
 }
 
 // Execute runs the root command
