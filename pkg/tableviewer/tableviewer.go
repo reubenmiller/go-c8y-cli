@@ -49,7 +49,7 @@ func (v *TableView) getValue(value gjson.Result) []string {
 			if v.EnableTruncate {
 				columnValue = columnValue[0:columnWidth-1] + TextEllipsis
 			} else if v.EnableWrap {
-				columnValue = WrapLine(columnValue, columnWidth, TextEllipsis)
+				columnValue = WrapLine(columnValue, columnWidth, "")
 			}
 		}
 		row = append(row, columnValue)
@@ -261,10 +261,17 @@ func (v *TableView) Render(jsonData []byte, withHeader bool) {
 		table.SetBorder(false)
 		table.SetCenterSeparator("")
 		table.SetColumnSeparator("")
-		table.SetRowSeparator("")
+		table.SetRowLine(false)
+		table.SetRowSeparator("-")
 		table.SetTablePadding(" ")
 		table.SetNoWhiteSpace(true)
 	}
+
+	// Enable row separator when wrapping cells to make it easier to read
+	table.SetRowSeparator("-")
+	table.SetAutoWrapText(v.EnableWrap)
+	table.SetRowLine(v.EnableWrap)
+
 	table.AppendBulk(data)
 	table.Render()
 }
