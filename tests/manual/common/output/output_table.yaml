@@ -6,7 +6,9 @@ tests:
         c8y util show --select name,subtype --output table
     config:
       env:
-        C8Y_SETTINGS_DEFAULTS_OUTPUT: json
+        C8Y_SETTINGS_VIEWS_COLUMNMAXWIDTH: 80
+        C8Y_SETTINGS_VIEWS_COLUMNPADDING: 5
+        C8Y_SETTINGS_VIEWS_COLUMNMINWIDTH: 5
         C8Y_SETTINGS_VIEWS_COLUMNTRUNCATE: "false"
         C8Y_SETTINGS_VIEWS_COLUMNWRAP: "true"
     exit-code: 0
