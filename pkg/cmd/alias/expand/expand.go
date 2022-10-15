@@ -21,6 +21,21 @@ func ExpandAlias(aliases map[string]string, args []string, findShFunc func() (st
 		// the command is lacking a subcommand
 		return
 	}
+
+	aliasName := args[1]
+
+	// Check if command is being called with completion, if so
+	// alias name is offset by 1
+	isCompletion := false
+	completionCmd := ""
+	if len(args) > 2 {
+		if strings.HasSuffix(args[1], "__complete") {
+			completionCmd = args[1]
+			aliasName = args[2]
+			isCompletion = true
+		}
+	}
+
 	expanded = args[1:]
 
 	normalizedAliases := map[string]string{}
@@ -28,7 +43,7 @@ func ExpandAlias(aliases map[string]string, args []string, findShFunc func() (st
 		normalizedAliases[strings.ToLower(k)] = v
 	}
 
-	expansion, ok := normalizedAliases[strings.ToLower(args[1])]
+	expansion, ok := normalizedAliases[strings.ToLower(aliasName)]
 	if !ok {
 		return
 	}
@@ -75,6 +90,11 @@ func ExpandAlias(aliases map[string]string, args []string, findShFunc func() (st
 	}
 
 	expanded = append(newArgs, extraArgs...)
+
+	// Prepend completion command if the user called for completion
+	if isCompletion {
+		expanded = append([]string{completionCmd}, expanded...)
+	}
 	return
 }
 
