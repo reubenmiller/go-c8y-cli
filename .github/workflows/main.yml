@@ -100,7 +100,7 @@ jobs:
     - name: Install Task
       uses: arduino/setup-task@v1
 
-    - uses: actions/download-artifact@v2
+    - uses: actions/download-artifact@v3
       id: download
       with:
         name: c8y.linux.amd64
@@ -174,7 +174,7 @@ jobs:
         os: [macos-latest, windows-latest, ubuntu-latest]
     steps:
       - name: Get test results
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v3
         with:
           name: test-results-${{ matrix.os }}
           path: test-results-${{ matrix.os }}
