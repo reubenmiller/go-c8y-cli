@@ -33,11 +33,21 @@ type TableOptions struct {
 	// MinColumnWidth minimum column width
 	MinColumnWidth int
 
+	// MinEmptyValueColumnWidth minimum column width to use when the value is empty
+	// If set to 0, then the MinColumnWidth will be used
+	MinEmptyValueColumnWidth int
+
 	// MaxColumnWidth maximum column width
 	MaxColumnWidth int
 
 	// ColumnPadding column padding
 	ColumnPadding int
+
+	// Enable truncating of table values
+	EnableTruncate bool
+
+	// Force wrapping of column values when they are too long
+	EnableWrap bool
 }
 
 // NewConsole create a new console writter
@@ -45,20 +55,29 @@ func NewConsole(w io.Writer, tableOptions *TableOptions, header func([]string) [
 	minColumnWidth := 2
 	maxColumnWidth := 80
 	columnPadding := 15
+	enableTruncate := true
+	enableWrap := false
+	minEmptyWidth := 0
 	if tableOptions != nil {
 		minColumnWidth = tableOptions.MinColumnWidth
 		maxColumnWidth = tableOptions.MaxColumnWidth
 		columnPadding = tableOptions.ColumnPadding
+		enableTruncate = tableOptions.EnableTruncate
+		enableWrap = tableOptions.EnableWrap
+		minEmptyWidth = tableOptions.MinEmptyValueColumnWidth
 	}
 	return &Console{
 		out:    w,
 		header: header,
 		TableViewer: &tableviewer.TableView{
-			Out:            w,
-			MinColumnWidth: minColumnWidth,
-			MaxColumnWidth: maxColumnWidth,
-			ColumnPadding:  columnPadding,
-			EnableColor:    false,
+			Out:                      w,
+			MinColumnWidth:           minColumnWidth,
+			MaxColumnWidth:           maxColumnWidth,
+			ColumnPadding:            columnPadding,
+			MinEmptyValueColumnWidth: minEmptyWidth,
+			EnableColor:              false,
+			EnableTruncate:           enableTruncate,
+			EnableWrap:               enableWrap,
 		},
 		Format: config.OutputTable,
 	}

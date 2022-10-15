@@ -317,9 +317,12 @@ func Initialize() (*root.CmdRoot, error) {
 	rootCmd := root.NewCmdRoot(cmdFactory, buildVersion, "")
 
 	tableOptions := &console.TableOptions{
-		MinColumnWidth: configHandler.ViewColumnMinWidth(),
-		MaxColumnWidth: configHandler.ViewColumnMaxWidth(),
-		ColumnPadding:  configHandler.ViewColumnPadding(),
+		MinColumnWidth:           configHandler.ViewColumnMinWidth(),
+		MaxColumnWidth:           configHandler.ViewColumnMaxWidth(),
+		MinEmptyValueColumnWidth: configHandler.ViewColumnEmptyValueMinWidth(),
+		ColumnPadding:            configHandler.ViewColumnPadding(),
+		EnableTruncate:           configHandler.ViewColumnEnableTruncate(),
+		EnableWrap:               configHandler.ViewColumnEnableWrap(),
 	}
 	consoleHandler = console.NewConsole(rootCmd.OutOrStdout(), tableOptions, func(s []string) []byte {
 		return getOutputHeaders(consoleHandler, configHandler, s)

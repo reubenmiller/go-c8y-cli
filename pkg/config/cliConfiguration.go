@@ -246,11 +246,20 @@ const (
 	// SettingsViewMinColumnWidth minimum column width in characters
 	SettingsViewMinColumnWidth = "settings.views.columnMinWidth"
 
+	// SettingsViewEmptyValueMinColumnWidth minimum column width in characters when a value is empty
+	SettingsViewEmptyValueMinColumnWidth = "settings.views.columnMinWidthEmptyValue"
+
 	// SettingsViewMaxColumnWidth maximum column width in characters
 	SettingsViewMaxColumnWidth = "settings.views.columnMaxWidth"
 
 	// SettingsViewColumnPadding column padding
 	SettingsViewColumnPadding = "settings.views.columnPadding"
+
+	// SettingsViewColumnTruncate column enable truncation
+	SettingsViewColumnTruncate = "settings.views.columnTruncate"
+
+	// SettingsViewColumnWrap column force column wrapping when value is too long
+	SettingsViewColumnWrap = "settings.views.columnWrap"
 
 	// SettingsLoggerHideSensitive hide sensitive information in log entries
 	SettingsLoggerHideSensitive = "settings.logger.hideSensitive"
@@ -409,8 +418,11 @@ func (c *Config) bindSettings() {
 		WithBindEnv(SettingsViewsCustomPaths, ""),
 
 		WithBindEnv(SettingsViewMinColumnWidth, 2),
+		WithBindEnv(SettingsViewEmptyValueMinColumnWidth, 15),
 		WithBindEnv(SettingsViewMaxColumnWidth, 80),
 		WithBindEnv(SettingsViewColumnPadding, 15),
+		WithBindEnv(SettingsViewColumnTruncate, true),
+		WithBindEnv(SettingsViewColumnWrap, true),
 
 		WithBindEnv(SettingsLoggerHideSensitive, false),
 
@@ -1115,6 +1127,11 @@ func (c *Config) ViewColumnMinWidth() int {
 	return c.viper.GetInt(SettingsViewMinColumnWidth)
 }
 
+// ViewColumnEmptyValueMinWidth minimum column width in characters
+func (c *Config) ViewColumnEmptyValueMinWidth() int {
+	return c.viper.GetInt(SettingsViewEmptyValueMinColumnWidth)
+}
+
 // ViewColumnMinWidth maximum column width in characters
 func (c *Config) ViewColumnMaxWidth() int {
 	return c.viper.GetInt(SettingsViewMaxColumnWidth)
@@ -1123,6 +1140,16 @@ func (c *Config) ViewColumnMaxWidth() int {
 // ViewColumnPadding column padding
 func (c *Config) ViewColumnPadding() int {
 	return c.viper.GetInt(SettingsViewColumnPadding)
+}
+
+// ViewColumnEnableTruncate enable truncation of column value if it is too long
+func (c *Config) ViewColumnEnableTruncate() bool {
+	return c.viper.GetBool(SettingsViewColumnTruncate)
+}
+
+// ViewColumnEnableWrap force column wrapping when truncation is not enabled
+func (c *Config) ViewColumnEnableWrap() bool {
+	return c.viper.GetBool(SettingsViewColumnWrap)
 }
 
 // RequestTimeout timeout to use when sending requests
