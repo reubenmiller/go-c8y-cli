@@ -463,6 +463,6 @@ It is recommended to only use this setting in your session file if you want a cu
 
 ### views.rowmode: string
 
-Row rendering mode. Accepts either `wrap` or `truncate`. If niether value is set, then no wrapping or truncation will be performed.
+Row rendering mode. Accepts `truncate`, `wrap` or `overflow`. `truncated` is the default setting, however if there is an invalid settings, then `overflow` will be used.
 
 In `wrap` mode, row separators will also be included to better visually delimit the table cells.
