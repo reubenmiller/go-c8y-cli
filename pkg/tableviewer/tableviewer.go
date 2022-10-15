@@ -20,6 +20,11 @@ func init() {
 	Logger = log.New(io.Discard, "tableviewer", 0)
 }
 
+const (
+	RowModeTruncate = "truncate"
+	RowModeWrap     = "wrap"
+)
+
 // TableView renders a table in the terminal
 type TableView struct {
 	Out                      io.Writer
@@ -32,8 +37,7 @@ type TableView struct {
 	Data                     gjson.Result
 	TableData                [][]string
 	EnableColor              bool
-	EnableTruncate           bool
-	EnableWrap               bool
+	RowMode                  string
 }
 
 func (v *TableView) getValue(value gjson.Result) []string {
@@ -46,9 +50,9 @@ func (v *TableView) getValue(value gjson.Result) []string {
 			columnWidth = v.ColumnWidths[i]
 		}
 		if columnWidth != 0 && len(columnValue) > columnWidth {
-			if v.EnableTruncate {
+			if v.RowMode == RowModeTruncate {
 				columnValue = columnValue[0:columnWidth-1] + TextEllipsis
-			} else if v.EnableWrap {
+			} else if v.RowMode == RowModeWrap {
 				columnValue = WrapLine(columnValue, columnWidth, "")
 			}
 		}
@@ -247,14 +251,16 @@ func (v *TableView) Render(jsonData []byte, withHeader bool) {
 	table.SetHeaderAlignment(tablewriter.ALIGN_LEFT)
 	table.SetAlignment(tablewriter.ALIGN_LEFT)
 
+	wrapEnabled := v.RowMode == RowModeWrap
+
 	if isMarkdown {
 		table.SetBorders(tablewriter.Border{Left: true, Top: false, Right: true, Bottom: false})
 		table.SetCenterSeparator("|")
 		table.SetAutoFormatHeaders(false)
 		table.SetAutoWrapText(true)
 	} else {
-		table.SetAutoWrapText(v.EnableWrap)
-		table.SetReflowDuringAutoWrap(v.EnableWrap)
+		table.SetAutoWrapText(wrapEnabled)
+		table.SetReflowDuringAutoWrap(wrapEnabled)
 		table.SetAutoFormatHeaders(false)
 
 		table.SetHeaderLine(false)
@@ -269,8 +275,8 @@ func (v *TableView) Render(jsonData []byte, withHeader bool) {
 
 	// Enable row separator when wrapping cells to make it easier to read
 	table.SetRowSeparator("-")
-	table.SetAutoWrapText(!v.EnableTruncate && v.EnableWrap)
-	table.SetRowLine(!v.EnableTruncate && v.EnableWrap)
+	table.SetAutoWrapText(wrapEnabled)
+	table.SetRowLine(wrapEnabled)
 
 	table.AppendBulk(data)
 	table.Render()

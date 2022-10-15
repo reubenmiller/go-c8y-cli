@@ -324,8 +324,7 @@ func Initialize() (*root.CmdRoot, error) {
 		MaxColumnWidth:           configHandler.ViewColumnMaxWidth(),
 		MinEmptyValueColumnWidth: configHandler.ViewColumnEmptyValueMinWidth(),
 		ColumnPadding:            configHandler.ViewColumnPadding(),
-		EnableTruncate:           configHandler.ViewColumnEnableTruncate(),
-		EnableWrap:               configHandler.ViewColumnEnableWrap(),
+		RowMode:                  configHandler.ViewRowMode(),
 	}
 	consoleHandler = console.NewConsole(rootCmd.OutOrStdout(), tableOptions, func(s []string) []byte {
 		return getOutputHeaders(consoleHandler, configHandler, s)

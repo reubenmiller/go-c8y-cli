@@ -43,28 +43,23 @@ type TableOptions struct {
 	// ColumnPadding column padding
 	ColumnPadding int
 
-	// Enable truncating of table values
-	EnableTruncate bool
-
-	// Force wrapping of column values when they are too long
-	EnableWrap bool
+	// Row mode (truncate or wrap)
+	RowMode string
 }
 
-// NewConsole create a new console writter
+// NewConsole create a new console writer
 func NewConsole(w io.Writer, tableOptions *TableOptions, header func([]string) []byte) *Console {
 	minColumnWidth := 2
 	maxColumnWidth := 80
 	columnPadding := 15
-	enableTruncate := true
-	enableWrap := false
 	minEmptyWidth := 0
+	rowMode := ""
 	if tableOptions != nil {
 		minColumnWidth = tableOptions.MinColumnWidth
 		maxColumnWidth = tableOptions.MaxColumnWidth
 		columnPadding = tableOptions.ColumnPadding
-		enableTruncate = tableOptions.EnableTruncate
-		enableWrap = tableOptions.EnableWrap
 		minEmptyWidth = tableOptions.MinEmptyValueColumnWidth
+		rowMode = tableOptions.RowMode
 	}
 	return &Console{
 		out:    w,
@@ -76,8 +71,7 @@ func NewConsole(w io.Writer, tableOptions *TableOptions, header func([]string) [
 			ColumnPadding:            columnPadding,
 			MinEmptyValueColumnWidth: minEmptyWidth,
 			EnableColor:              false,
-			EnableTruncate:           enableTruncate,
-			EnableWrap:               enableWrap,
+			RowMode:                  rowMode,
 		},
 		Format: config.OutputTable,
 	}

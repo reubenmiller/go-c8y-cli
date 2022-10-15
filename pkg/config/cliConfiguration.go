@@ -255,11 +255,8 @@ const (
 	// SettingsViewColumnPadding column padding
 	SettingsViewColumnPadding = "settings.views.columnPadding"
 
-	// SettingsViewColumnTruncate column enable truncation
-	SettingsViewColumnTruncate = "settings.views.columnTruncate"
-
-	// SettingsViewColumnWrap column force column wrapping when value is too long
-	SettingsViewColumnWrap = "settings.views.columnWrap"
+	// SettingsViewRowMode controls row rendering, e.g. wrapping or truncation
+	SettingsViewRowMode = "settings.views.rowMode"
 
 	// SettingsLoggerHideSensitive hide sensitive information in log entries
 	SettingsLoggerHideSensitive = "settings.logger.hideSensitive"
@@ -421,8 +418,7 @@ func (c *Config) bindSettings() {
 		WithBindEnv(SettingsViewEmptyValueMinColumnWidth, 15),
 		WithBindEnv(SettingsViewMaxColumnWidth, 80),
 		WithBindEnv(SettingsViewColumnPadding, 15),
-		WithBindEnv(SettingsViewColumnTruncate, true),
-		WithBindEnv(SettingsViewColumnWrap, true),
+		WithBindEnv(SettingsViewRowMode, "truncate"),
 
 		WithBindEnv(SettingsLoggerHideSensitive, false),
 
@@ -1142,14 +1138,9 @@ func (c *Config) ViewColumnPadding() int {
 	return c.viper.GetInt(SettingsViewColumnPadding)
 }
 
-// ViewColumnEnableTruncate enable truncation of column value if it is too long
-func (c *Config) ViewColumnEnableTruncate() bool {
-	return c.viper.GetBool(SettingsViewColumnTruncate)
-}
-
-// ViewColumnEnableWrap force column wrapping when truncation is not enabled
-func (c *Config) ViewColumnEnableWrap() bool {
-	return c.viper.GetBool(SettingsViewColumnWrap)
+// ViewRowMode get view row rendering mode (truncation or wrapping)
+func (c *Config) ViewRowMode() string {
+	return strings.ToLower(c.viper.GetString(SettingsViewRowMode))
 }
 
 // RequestTimeout timeout to use when sending requests

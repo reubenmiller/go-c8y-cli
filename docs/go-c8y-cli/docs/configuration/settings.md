@@ -124,7 +124,8 @@ c8y settings list --select "**" --output json
     "columnminwidth": 5,
     "columnpadding": 5,
     "commonpaths": ["/home/exampleuser/.go-c8y-cli/views/default"],
-    "custompaths": ["$C8Y_HOME/views"]
+    "custompaths": ["$C8Y_HOME/views"],
+    "rowmode": "truncate"
   }
 }
 ```
@@ -455,3 +456,9 @@ Array of directories where view files should be search for
 :::note
 It is recommended to only use this setting in your session file if you want a custom view which is only valid for a single tenant.
 :::
+
+### views.rowmode: string
+
+Row rendering mode. Accepts either `wrap` or `truncate`. If niether value is set, then no wrapping or truncation will be performed.
+
+In `wrap` mode, row separators will also be included to better visually delimit the table cells.
