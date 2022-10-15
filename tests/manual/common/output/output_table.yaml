@@ -1,0 +1,26 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/reubenmiller/commander/feat/handle-nested-files/schema.json
+tests:
+  It wraps columns values which are longer than the width:
+    command: |
+      cat manual/common/output/table_test.jsonl |
+        c8y util show --select name,subtype --output table
+    config:
+      env:
+        C8Y_SETTINGS_VIEWS_COLUMNMAXWIDTH: 80
+        C8Y_SETTINGS_VIEWS_COLUMNPADDING: 5
+        C8Y_SETTINGS_VIEWS_COLUMNMINWIDTH: 5
+        C8Y_SETTINGS_VIEWS_ROWMODE: "wrap"
+    exit-code: 0
+    stdout:
+      exactly: |
+        | name       | subtype              |
+        |------------|----------------------|
+        | ms01       |                      |
+        |------------|----------------------|
+        | ms02       | linux123 4567891     |
+        |            | 23456789123456789123 |
+        |            | 456789123456789linux |
+        |            | 123                  |
+        |------------|----------------------|
+        | ms03       |                      |
+        |------------|----------------------|

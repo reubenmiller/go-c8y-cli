@@ -246,11 +246,17 @@ const (
 	// SettingsViewMinColumnWidth minimum column width in characters
 	SettingsViewMinColumnWidth = "settings.views.columnMinWidth"
 
+	// SettingsViewEmptyValueMinColumnWidth minimum column width in characters when a value is empty
+	SettingsViewEmptyValueMinColumnWidth = "settings.views.columnMinWidthEmptyValue"
+
 	// SettingsViewMaxColumnWidth maximum column width in characters
 	SettingsViewMaxColumnWidth = "settings.views.columnMaxWidth"
 
 	// SettingsViewColumnPadding column padding
 	SettingsViewColumnPadding = "settings.views.columnPadding"
+
+	// SettingsViewRowMode controls row rendering, e.g. wrapping or truncation
+	SettingsViewRowMode = "settings.views.rowMode"
 
 	// SettingsLoggerHideSensitive hide sensitive information in log entries
 	SettingsLoggerHideSensitive = "settings.logger.hideSensitive"
@@ -409,8 +415,10 @@ func (c *Config) bindSettings() {
 		WithBindEnv(SettingsViewsCustomPaths, ""),
 
 		WithBindEnv(SettingsViewMinColumnWidth, 2),
+		WithBindEnv(SettingsViewEmptyValueMinColumnWidth, 15),
 		WithBindEnv(SettingsViewMaxColumnWidth, 80),
 		WithBindEnv(SettingsViewColumnPadding, 15),
+		WithBindEnv(SettingsViewRowMode, "truncate"),
 
 		WithBindEnv(SettingsLoggerHideSensitive, false),
 
@@ -1115,6 +1123,11 @@ func (c *Config) ViewColumnMinWidth() int {
 	return c.viper.GetInt(SettingsViewMinColumnWidth)
 }
 
+// ViewColumnEmptyValueMinWidth minimum column width in characters
+func (c *Config) ViewColumnEmptyValueMinWidth() int {
+	return c.viper.GetInt(SettingsViewEmptyValueMinColumnWidth)
+}
+
 // ViewColumnMinWidth maximum column width in characters
 func (c *Config) ViewColumnMaxWidth() int {
 	return c.viper.GetInt(SettingsViewMaxColumnWidth)
@@ -1123,6 +1136,11 @@ func (c *Config) ViewColumnMaxWidth() int {
 // ViewColumnPadding column padding
 func (c *Config) ViewColumnPadding() int {
 	return c.viper.GetInt(SettingsViewColumnPadding)
+}
+
+// ViewRowMode get view row rendering mode (truncation or wrapping)
+func (c *Config) ViewRowMode() string {
+	return strings.ToLower(c.viper.GetString(SettingsViewRowMode))
 }
 
 // RequestTimeout timeout to use when sending requests

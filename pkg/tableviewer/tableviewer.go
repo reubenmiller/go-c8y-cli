@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
 	"strings"
+	"unicode"
 
 	"github.com/olekukonko/tablewriter"
 	"github.com/olekukonko/ts"
@@ -13,21 +14,31 @@ import (
 
 var Logger *log.Logger
 
+var TextEllipsis = "…"
+
 func init() {
 	Logger = log.New(io.Discard, "tableviewer", 0)
 }
 
+const (
+	RowModeTruncate = "truncate"
+	RowModeWrap     = "wrap"
+	RowModeOverflow = "overflow" // default
+)
+
 // TableView renders a table in the terminal
 type TableView struct {
-	Out            io.Writer
-	Columns        []string
-	ColumnWidths   []int
-	MinColumnWidth int
-	MaxColumnWidth int
-	ColumnPadding  int
-	Data           gjson.Result
-	TableData      [][]string
-	EnableColor    bool
+	Out                      io.Writer
+	Columns                  []string
+	ColumnWidths             []int
+	MinColumnWidth           int
+	MinEmptyValueColumnWidth int
+	MaxColumnWidth           int
+	ColumnPadding            int
+	Data                     gjson.Result
+	TableData                [][]string
+	EnableColor              bool
+	RowMode                  string
 }
 
 func (v *TableView) getValue(value gjson.Result) []string {
@@ -39,10 +50,11 @@ func (v *TableView) getValue(value gjson.Result) []string {
 		if i < len(v.ColumnWidths) {
 			columnWidth = v.ColumnWidths[i]
 		}
-		enableTruncate := true
 		if columnWidth != 0 && len(columnValue) > columnWidth {
-			if enableTruncate {
-				columnValue = columnValue[0:columnWidth-1] + "…"
+			if v.RowMode == RowModeTruncate {
+				columnValue = columnValue[0:columnWidth-1] + TextEllipsis
+			} else if v.RowMode == RowModeWrap {
+				columnValue = WrapLine(columnValue, columnWidth, "")
 			}
 		}
 		row = append(row, columnValue)
@@ -56,7 +68,7 @@ func (v *TableView) getWidth(defaultWidth int) int {
 	if err != nil {
 		return defaultWidth
 	}
-	return termSize.Col()
+	return termSize.Col() - 1
 }
 
 var TABLE_MAX_WIDTH = 120
@@ -77,31 +89,46 @@ func (v *TableView) calculateColumnWidths(minWidth int, row []string) {
 	if len(v.ColumnWidths) == 0 {
 		maxTableWidth := v.getWidth(TABLE_MAX_WIDTH)
 		v.ColumnWidths = make([]int, 0)
-		columnSeperatorWidth := 3
+		columnSeparatorWidth := 3
 		tableEndBuffer := 3
 		usedWith := 0
+		curMinWidth := 0
 		columns := []string{}
 
 		// only include columns if they fit in the view
 		for i, columnValue := range row {
+			curMinWidth = minWidth
+			if columnValue == "" && v.MinEmptyValueColumnWidth > 0 {
+				curMinWidth = v.MinEmptyValueColumnWidth
+			}
+
+			Logger.Printf("iColumn: name=%s, cellWidth=%d, min=%d, col=%d",
+				v.Columns[i],
+				tablewriter.DisplayWidth(columnValue)+v.ColumnPadding,
+				curMinWidth+v.ColumnPadding,
+				tablewriter.DisplayWidth(v.Columns[i]),
+			)
+
 			_, colWidth := minmax([]int{
 				// only pad value (not column widths)
 				tablewriter.DisplayWidth(columnValue) + v.ColumnPadding,
-				minWidth + v.ColumnPadding,
+				curMinWidth + v.ColumnPadding,
 				tablewriter.DisplayWidth(v.Columns[i]),
 			})
 
-			if usedWith+colWidth+columnSeperatorWidth > maxTableWidth {
-				leftOver := maxTableWidth - usedWith - columnSeperatorWidth - tableEndBuffer
+			// TODO: When the column value is empty, then use a dedicate empty width value instead
+			// of the minimum width value
+			if usedWith+colWidth+columnSeparatorWidth > maxTableWidth {
+				leftOver := maxTableWidth - usedWith - columnSeparatorWidth - tableEndBuffer
 				Logger.Printf("Left over: %d", leftOver)
-				if leftOver > minWidth {
+				if leftOver > curMinWidth {
 					v.ColumnWidths = append(v.ColumnWidths, leftOver)
 					columns = append(columns, v.Columns[i])
 				}
 				break
 			}
 			v.ColumnWidths = append(v.ColumnWidths, colWidth)
-			usedWith += colWidth + 3 // overhead
+			usedWith += colWidth + columnSeparatorWidth // overhead
 			if i < len(v.ColumnWidths) {
 				columns = append(columns, v.Columns[i])
 			}
@@ -154,6 +181,42 @@ func (v *TableView) TransformData(j []byte, property string) [][]string {
 	return data
 }
 
+func WrapLine(line string, width int, wrapPrefix string) string {
+	if len(line) <= width {
+		return line
+	}
+	name := strings.Builder{}
+	lineWidth := 0
+	for _, c := range line {
+		if unicode.IsSpace(c) {
+			// table writer will split on whitespace
+			lineWidth = -1
+		}
+		if lineWidth >= width {
+			name.WriteRune('\n')
+			if wrapPrefix != "" {
+				name.WriteString(wrapPrefix)
+				lineWidth = 1
+			} else {
+				lineWidth = 0
+			}
+
+		}
+		name.WriteRune(c)
+		lineWidth++
+	}
+	return name.String()
+}
+
+func (v *TableView) GetHeaders() (headers []string) {
+	for i, col := range v.Columns {
+		if i < len(v.ColumnWidths) {
+			headers = append(headers, WrapLine(col, v.ColumnWidths[i], ""))
+		}
+	}
+	return headers
+}
+
 // Render writes the json data to console in the form of a table
 func (v *TableView) Render(jsonData []byte, withHeader bool) {
 	data := v.TransformData(jsonData, "")
@@ -165,7 +228,7 @@ func (v *TableView) Render(jsonData []byte, withHeader bool) {
 
 	isMarkdown := true
 	if withHeader {
-		table.SetHeader(v.Columns)
+		table.SetHeader(v.GetHeaders())
 		if !isMarkdown {
 			table.Append(v.getHeaderRow())
 		}
@@ -176,7 +239,7 @@ func (v *TableView) Render(jsonData []byte, withHeader bool) {
 	for i, width := range v.ColumnWidths {
 		headerColors = append(headerColors, tablewriter.Colors{tablewriter.Bold, tablewriter.FgCyanColor})
 		table.SetColMinWidth(i, width)
-		if width > maxWidth {
+		if width >= maxWidth {
 			maxWidth = width
 		}
 	}
@@ -189,24 +252,33 @@ func (v *TableView) Render(jsonData []byte, withHeader bool) {
 	table.SetHeaderAlignment(tablewriter.ALIGN_LEFT)
 	table.SetAlignment(tablewriter.ALIGN_LEFT)
 
+	wrapEnabled := v.RowMode == RowModeWrap
+
 	if isMarkdown {
 		table.SetBorders(tablewriter.Border{Left: true, Top: false, Right: true, Bottom: false})
 		table.SetCenterSeparator("|")
 		table.SetAutoFormatHeaders(false)
 		table.SetAutoWrapText(true)
 	} else {
-		table.SetAutoWrapText(true)
-		table.SetReflowDuringAutoWrap(true)
+		table.SetAutoWrapText(wrapEnabled)
+		table.SetReflowDuringAutoWrap(wrapEnabled)
 		table.SetAutoFormatHeaders(false)
 
 		table.SetHeaderLine(false)
 		table.SetBorder(false)
 		table.SetCenterSeparator("")
 		table.SetColumnSeparator("")
-		table.SetRowSeparator("")
+		table.SetRowLine(false)
+		table.SetRowSeparator("-")
 		table.SetTablePadding(" ")
 		table.SetNoWhiteSpace(true)
 	}
+
+	// Enable row separator when wrapping cells to make it easier to read
+	table.SetRowSeparator("-")
+	table.SetAutoWrapText(wrapEnabled)
+	table.SetRowLine(wrapEnabled)
+
 	table.AppendBulk(data)
 	table.Render()
 }
